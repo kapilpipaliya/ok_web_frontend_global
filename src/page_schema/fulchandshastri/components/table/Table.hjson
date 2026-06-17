@@ -1,0 +1,6342 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        dynamicComponent: TomSelect
+        fns:
+          '''
+
+const isNestedLinesTable = () => args.contextData.props?.nestedLinesMode === true;
+
+const getRowExpansionConfigs = () => {
+  if (isNestedLinesTable()) return [];
+  const tableConfig = args.fns.evaluateConfig?.() || {};
+  const rawExpansion = tableConfig.rowExpansion;
+  if (Array.isArray(rawExpansion)) {
+    return rawExpansion.filter((cfg) => cfg && typeof cfg === 'object');
+  }
+  if (rawExpansion && typeof rawExpansion === 'object') return [rawExpansion];
+  return [];
+};
+
+// rowExpansion.expansionPanelHeight; optional expansionPanelMaxHeight caps height. Default 280 when unset.
+const parsePositiveNumber = (rawValue) => {
+  if (typeof rawValue === 'number' && !Number.isNaN(rawValue) && rawValue > 0) return rawValue;
+  if (typeof rawValue === 'string' && rawValue.trim() !== '') {
+    const parsedNumber = parseFloat(String(rawValue).replace(/px$/i, '').trim());
+    if (!Number.isNaN(parsedNumber) && parsedNumber > 0) return parsedNumber;
+  }
+  return null;
+};
+
+const getExpansionPanelHeight = (rowExpansions) => {
+  const list = Array.isArray(rowExpansions) ? rowExpansions : [];
+  if (list.length === 0) return 280;
+  let totalHeight = 0;
+  for (let i = 0; i < list.length; i++) {
+    const rowExpansion = list[i];
+    if (!rowExpansion || typeof rowExpansion !== 'object') continue;
+    let panelHeightPx = parsePositiveNumber(rowExpansion.expansionPanelHeight);
+    if (panelHeightPx == null) panelHeightPx = 280;
+    const maxPanelHeightPx = parsePositiveNumber(rowExpansion.expansionPanelMaxHeight);
+    if (maxPanelHeightPx != null && panelHeightPx > maxPanelHeightPx) panelHeightPx = maxPanelHeightPx;
+    totalHeight += panelHeightPx;
+  }
+  return totalHeight > 0 ? totalHeight : 280;
+};
+
+const shouldExpandOneRowAtATime = (rowExpansion) => {
+  if (!rowExpansion || typeof rowExpansion !== 'object') return false;
+  if (rowExpansion.expandOneRowAtATime === true) return true;
+  const accordionMaxWidthPx = rowExpansion.expandAccordionMaxWidth;
+  if (
+    typeof accordionMaxWidthPx === 'number' &&
+    accordionMaxWidthPx > 0 &&
+    typeof window !== 'undefined' &&
+    window.innerWidth <= accordionMaxWidthPx
+  ) {
+    return true;
+  }
+  return false;
+};
+
+/** Structural columns use renderer only; data columns use dataType + renderer. */
+const STRUCTURAL_COLUMN_RENDERERS = ["rowNumber", "expand", "iconAction", "actions"];
+
+const getColumnRenderer = (col) => col?.renderer || "text";
+
+const getColumnDataType = (col) => col?.dataType || "text";
+
+const isStructuralColumn = (col) =>
+  STRUCTURAL_COLUMN_RENDERERS.includes(getColumnRenderer(col));
+
+/** Filter UI kind: text | select | checkbox | date | badge */
+const getColumnFilterKind = (col) => {
+  if (col?.filterType) return col.filterType;
+  const renderer = getColumnRenderer(col);
+  if (renderer === "badge") return "badge";
+  const dataType = getColumnDataType(col);
+  // Relation columns show a related label (name, email); filter by substring on that label.
+  if (dataType === "relation" && col.selectConfig?.labelField) return "text";
+  if (dataType === "relation" || dataType === "select") return "select";
+  if (dataType === "boolean") return "checkbox";
+  if (dataType === "date") return "date";
+  return "text";
+};
+
+const getColumns = () => {
+  if (isNestedLinesTable()) {
+    return args.contextData.props?.nestedTableColumns || [];
+  }
+  // Do not pass contextData.props here: merged props often include columns: [] which
+  // would override loadFromSetting config (empty array is !== undefined).
+  const base = args.fns.prop('columns') || [];
+  const groupBy = getGroupByConfig();
+  if (groupBy) return [{ key: '__expand', renderer: 'expand', width: '32px', label: '' }, ...base];
+  if (getRowExpansionConfigs().length > 0) return [{ key: '__expand', renderer: 'expand', width: '32px', label: '' }, ...base];
+  return base;
+};
+
+const getRowHeight = () => {
+  if (isNestedLinesTable()) return args.contextData.props?.nestedRowHeight ?? 36;
+  return args.fns.prop('rowHeight', args.contextData.props) || 36;
+};
+const getTitle = () => {
+  if (args.fns.isEmbeddedMode?.() === true && args.contextData.props?.hidePageChrome !== false) return "";
+  if (isNestedLinesTable()) return args.contextData.props?.nestedTableTitle ?? '';
+  return args.fns.prop('title', args.contextData.props);
+};
+const getSubtitle = () => {
+  if (args.fns.isEmbeddedMode?.() === true && args.contextData.props?.hidePageChrome !== false) return "";
+  if (isNestedLinesTable()) return args.contextData.props?.nestedTableSubtitle ?? '';
+  return args.fns.prop('subtitle', args.contextData.props);
+};
+const getSearchPlaceholder = () => args.fns.prop('searchPlaceholder', args.contextData.props) || "Search...";
+const getAdditionalFilters = () => args.fns.prop('additionalFilters', args.contextData.props) || [];
+const getCustomActions = () => args.fns.prop('customActions', args.contextData.props) || [];
+const getBatchActions = () => args.fns.prop('batchActions', args.contextData.props) || [];
+const getShowRowNumber = () => {
+  if (isNestedLinesTable()) return args.contextData.props?.showRowNumber !== false;
+  // When loadFromSetting (DynamicPage), do not pass contextData.props: Table ComponentVariant
+  // defValue is showRowNumber: false, so merged props would override saved config (same as getColumns).
+  const loadFromSetting = args.fns.getLoadFromSetting?.() === true;
+  if (loadFromSetting) {
+    return args.fns.prop('showRowNumber') || false;
+  }
+  return args.fns.prop('showRowNumber', args.contextData.props) || false;
+};
+const getHideColumns = () => args.fns.prop('hideColumns', args.contextData.props) || [];
+
+const getUniqueKeys = () => args.fns.prop('uniqueKeys', args.contextData.props) || [];
+const getShowAddButton = () => {
+  if (isNestedLinesTable()) return args.contextData.props?.showAddButton ?? false;
+  return args.fns.prop('showAddButton', args.contextData.props) ?? true;
+};
+const getShowSelection = () => {
+  if (isNestedLinesTable()) return args.contextData.props?.showSelection ?? false;
+  return args.fns.prop('showSelection', args.contextData.props);
+};
+const DEFAULT_ACTION_META = {
+  edit: { icon: "carbon:edit", variant: "ghost", title: "Edit", ariaLabel: "Edit" },
+  delete: { icon: "carbon:trash-can", variant: "danger", title: "Delete", ariaLabel: "Delete" }
+};
+
+const getActionHandlers = () => {
+  const handlers = args.fns.prop("actionHandlers", args.contextData.props);
+  return handlers && typeof handlers === "object" ? handlers : {};
+};
+
+const normalizeAction = (action, index) => {
+  if (!action || typeof action !== "object") return null;
+  const type = action.type || "custom";
+  const key = action.key || type || `action_${index ?? 0}`;
+  const meta = DEFAULT_ACTION_META[type] || {};
+  const group =
+    action.group === "secondary" || action.display === "menu" ? "secondary" : "primary";
+  return {
+    key,
+    type,
+    group,
+    label: action.label,
+    icon: action.icon ?? meta.icon,
+    variant: action.variant ?? meta.variant ?? "ghost",
+    title: action.title ?? action.label ?? meta.title,
+    ariaLabel: action.ariaLabel ?? action.title ?? action.label ?? meta.ariaLabel ?? key,
+    confirm: action.confirm,
+    visible: action.visible,
+    disabled: action.disabled,
+    disabledReason: action.disabledReason,
+    reasonCode: action.reasonCode,
+    reasonVariant: action.reasonVariant,
+    loadingIcon: action.loadingIcon,
+    onClick: action.onClick,
+    href: action.href,
+    target: action.target,
+    rel: action.rel
+  };
+};
+
+/** Row actions from settings `actions` array; handlers merged from props `actionHandlers`. */
+const getActions = () => {
+  const configured = args.fns.prop("actions", args.contextData.props);
+  if (!Array.isArray(configured)) return [];
+  const handlers = getActionHandlers();
+  const out = [];
+  for (let i = 0; i < configured.length; i++) {
+    const normalized = normalizeAction(configured[i], i);
+    if (!normalized) continue;
+    if (!normalized.onClick && typeof handlers[normalized.key] === "function") {
+      normalized.onClick = handlers[normalized.key];
+    }
+    out.push(normalized);
+  }
+  return out;
+};
+
+/** Actions column when `actions.length > 0`, or explicit `showActionsColumn` override. */
+const getShowActionsColumn = () => {
+  if (isNestedLinesTable()) return false;
+  const configured = args.fns.prop("showActionsColumn", args.contextData.props);
+  if (configured !== undefined) return configured === true;
+  return getActions().length > 0;
+};
+
+/** Context for action predicates and confirm.message: `({ row, action, graph, ... }) => …` */
+const buildActionContext = (action, row) => ({
+  row,
+  action,
+  graph: args.graph,
+  tableStateVertexId,
+  getSelectedRows: () => getSelectedRows(),
+  getDisplayData: () => getDisplayData()
+});
+
+const invokeActionPredicate = (fn, action, row, label) => {
+  if (typeof fn !== "function") return undefined;
+  try {
+    return fn(buildActionContext(action, row));
+  } catch (e) {
+    console.error(`${label}:`, e);
+    return undefined;
+  }
+};
+
+/** `visible`: boolean | `({ row, action, … }) => boolean` — false hides; omitted => shown. */
+const isActionVisible = (action, row) => {
+  if (!action) return false;
+  if (action.type === "edit" && !args.fns.getFormConfig?.()) return false;
+  if (action.visible === false) return false;
+  if (action.visible === true) return true;
+  if (typeof action.visible === "function") {
+    const result = invokeActionPredicate(action.visible, action, row, "isActionVisible");
+    if (result === false) return false;
+    return true;
+  }
+  return true;
+};
+
+/** `disabled`: boolean | `({ row, action, … }) => boolean` — true disables; omitted => enabled. */
+const isActionDisabled = (action, row) => {
+  if (!action) return true;
+  if (action.disabled === true) return true;
+  if (action.disabled === false) return false;
+  if (typeof action.disabled === "function") {
+    return invokeActionPredicate(action.disabled, action, row, "isActionDisabled") === true;
+  }
+  return false;
+};
+
+/** `disabledReason`: string | `({ row, action, … }) => string` for automatic tooltips when disabled. */
+const resolveActionReason = (action, row, reasonKey) => {
+  if (!action || !reasonKey) return "";
+  const raw = action[reasonKey];
+  if (raw == null || raw === "") return "";
+  if (typeof raw === "string") return raw;
+  if (typeof raw === "function") {
+    const result = invokeActionPredicate(raw, action, row, reasonKey);
+    return result != null && String(result).trim() !== "" ? String(result) : "";
+  }
+  return "";
+};
+
+const resolveActionReasonCode = (action, row) => {
+  if (!action) return "";
+  const raw = action.reasonCode;
+  if (raw == null || raw === "") return "";
+  if (typeof raw === "string") return String(raw).trim();
+  if (typeof raw === "function") {
+    const result = invokeActionPredicate(raw, action, row, "reasonCode");
+    return result != null && String(result).trim() !== "" ? String(result).trim() : "";
+  }
+  return "";
+};
+
+/** Table/settings map: reason code → display string (localization). */
+const getActionReasonCodeMap = () => {
+  const fromProps = args.fns.prop("reasonCodeMap", args.contextData.props);
+  if (fromProps && typeof fromProps === "object" && !Array.isArray(fromProps)) return fromProps;
+  const config = args.fns.evaluateConfig?.() || {};
+  const fromConfig = config.reasonCodeMap;
+  if (fromConfig && typeof fromConfig === "object" && !Array.isArray(fromConfig)) return fromConfig;
+  return {};
+};
+
+const localizeReasonCode = (code) => {
+  if (!code) return "";
+  const mapped = getActionReasonCodeMap()[code];
+  return typeof mapped === "string" && mapped.trim() !== "" ? mapped.trim() : "";
+};
+
+/** Explicit reason text, else `reasonCodeMap[reasonCode]`. */
+const resolveActionReasonText = (action, row, reasonKey) => {
+  const explicit = resolveActionReason(action, row, reasonKey);
+  if (explicit) return explicit;
+  return localizeReasonCode(resolveActionReasonCode(action, row));
+};
+
+const hasDisabledReasonHint = (action, row) =>
+  resolveActionReason(action, row, "disabledReason") !== "" ||
+  resolveActionReasonCode(action, row) !== "";
+
+const filterVisibleActionsForRow = (actions, row) => {
+  if (!Array.isArray(actions)) return [];
+  const out = [];
+  for (let i = 0; i < actions.length; i++) {
+    if (isActionVisible(actions[i], row)) out.push(actions[i]);
+  }
+  return out;
+};
+
+const REASON_VARIANTS = ["info", "warning", "danger"];
+
+const normalizeReasonVariant = (value) => {
+  const v = value != null ? String(value).toLowerCase() : "";
+  return REASON_VARIANTS.includes(v) ? v : "info";
+};
+
+/** `reasonVariant`: "info" | "warning" | "danger" | `({ row, action }) => variant` */
+const resolveActionReasonVariant = (action, row) => {
+  if (!action) return "info";
+  const raw = action.reasonVariant;
+  if (typeof raw === "function") {
+    return normalizeReasonVariant(invokeActionPredicate(raw, action, row, "reasonVariant"));
+  }
+  return normalizeReasonVariant(raw);
+};
+
+/** Active reason metadata for tooltips, telemetry, and `data-reason-*` hooks. */
+const getActionReasonState = (action, row) => {
+  const fallbackTitle = action?.title || action?.label || action?.ariaLabel || action?.key || "";
+  if (!action) {
+    return { text: "", code: "", variant: "info", active: false, kind: null };
+  }
+  if (isActionDisabled(action, row) && hasDisabledReasonHint(action, row)) {
+    const code = resolveActionReasonCode(action, row);
+    const text = resolveActionReasonText(action, row, "disabledReason");
+    return {
+      text,
+      code,
+      variant: resolveActionReasonVariant(action, row),
+      active: true,
+      kind: "disabled"
+    };
+  }
+  return { text: fallbackTitle, code: "", variant: "info", active: false, kind: null };
+};
+
+const getActionTooltip = (action, row) => getActionReasonState(action, row).text;
+
+/** Spread onto action controls for popovers, i18n, analytics, audit. */
+const getActionReasonDataAttrs = (action, row) => {
+  const state = getActionReasonState(action, row);
+  if (!state.active) return {};
+  const attrs = {
+    "data-reason-active": "true",
+    "data-reason-variant": state.variant,
+    "data-reason-kind": state.kind
+  };
+  if (state.code) attrs["data-reason-code"] = state.code;
+  return attrs;
+};
+
+/** `href`: string | `({ row, action, … }) => string` — link for IconButton / open in new tab. */
+const getActionHref = (action, row) => {
+  if (!action) return undefined;
+  const raw = action.href;
+  if (raw == null || raw === "") return undefined;
+  if (typeof raw === "string") return String(raw);
+  if (typeof raw === "function") {
+    const result = invokeActionPredicate(raw, action, row, "getActionHref");
+    return result != null && result !== "" ? String(result) : undefined;
+  }
+  return undefined;
+};
+
+const getPrimaryActionsForRow = (row) =>
+  filterVisibleActionsForRow(getActions(), row).filter((a) => a.group !== "secondary");
+
+const getSecondaryActionsForRow = (row) =>
+  filterVisibleActionsForRow(getActions(), row).filter((a) => a.group === "secondary");
+
+const hasSecondaryActionsForRow = (row) => getSecondaryActionsForRow(row).length > 0;
+
+/** Per-row async loading: runningAction[rowId][actionKey] */
+const [runningAction, setRunningAction] = args.createSignal({});
+
+const isActionRunning = (action, row) => {
+  const rowId = row?.id != null ? String(row.id) : "";
+  const key = action?.key;
+  if (!rowId || !key) return false;
+  return runningAction()[rowId]?.[key] === true;
+};
+
+const setActionRunning = (action, row, running) => {
+  const rowId = row?.id != null ? String(row.id) : "";
+  const key = action?.key;
+  if (!rowId || !key) return;
+  setRunningAction((prev) => {
+    const next = { ...prev };
+    const rowMap = { ...(next[rowId] || {}) };
+    if (running) rowMap[key] = true;
+    else delete rowMap[key];
+    if (Object.keys(rowMap).length === 0) delete next[rowId];
+    else next[rowId] = rowMap;
+    return next;
+  });
+};
+
+const confirmRowAction = async (confirmCfg, action, row) => {
+  const title = confirmCfg?.title || "Confirm";
+  const message =
+    typeof confirmCfg?.message === "function"
+      ? confirmCfg.message(buildActionContext(action, row))
+      : confirmCfg?.message ?? "";
+  const rbConfirm = args.contextData?.confirmContext?.rbConfirm || args.fns?.rbConfirm;
+  if (rbConfirm) {
+    return rbConfirm({
+      title,
+      message,
+      confirmText: confirmCfg?.confirmText || "Confirm",
+      cancelText: confirmCfg?.cancelText || "Cancel",
+      variant: confirmCfg?.variant || (confirmCfg?.danger !== false && title.toLowerCase().includes("delete") ? "danger" : "default")
+    });
+  }
+  return confirm(message ? `${title}\n\n${message}` : title);
+};
+
+const runRowAction = async (action, row) => {
+  if (!action || !isActionVisible(action, row) || isActionDisabled(action, row)) return;
+  if (isActionRunning(action, row)) return;
+
+  if (action.confirm) {
+    const ok = await confirmRowAction(action.confirm, action, row);
+    if (!ok) return;
+  }
+
+  setActionRunning(action, row, true);
+  try {
+    if (typeof action.onClick === "function") {
+      await action.onClick(row);
+      return;
+    }
+    if (action.type === "edit") {
+      const onEdit = getOnEdit();
+      if (typeof onEdit === "function") {
+        await onEdit(row);
+        return;
+      }
+      await handleEdit(row);
+      return;
+    }
+    if (action.type === "delete") {
+      const handlers = getActionHandlers();
+      const deleteHandler = handlers[action.key] || handlers.delete;
+      if (typeof deleteHandler === "function") {
+        await deleteHandler(row);
+        return;
+      }
+      await handleDelete(row, { skipConfirm: !!action.confirm, confirm: action.confirm });
+      return;
+    }
+    args.showErrorToast?.("Action handler not configured");
+  } catch (error) {
+    console.error("runRowAction:", error);
+    args.showErrorToast?.(error?.message || "Action failed");
+    throw error;
+  } finally {
+    setActionRunning(action, row, false);
+  }
+};
+
+/** Bulk row actions (e.g. batch toolbar); skips hidden/disabled rows per action rules. */
+const runBulkAction = async (action, rows) => {
+  if (!action || !Array.isArray(rows) || rows.length === 0) return;
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    if (!isActionVisible(action, row) || isActionDisabled(action, row)) continue;
+    await runRowAction(action, row);
+  }
+};
+const getResizableColumns = () => args.fns.prop('resizableColumns', args.contextData.props) ?? true;
+const getHideExportButtons = () => {
+  if (isNestedLinesTable()) return true;
+  return args.fns.prop('hideExportButtons', args.contextData.props) ?? false;
+};
+const getHideImportButtons = () => {
+  if (isNestedLinesTable()) return true;
+  return args.fns.prop('hideImportButtons', args.contextData.props) ?? false;
+};
+const getHideSettingsButton = () => {
+  if (isNestedLinesTable()) return true;
+  return args.fns.prop('hideSettingsButton', args.contextData.props) ?? false;
+};
+const getIcon = () => {
+  if (isNestedLinesTable()) {
+    const showNestedIcon = args.contextData.props?.nestedShowIcon === true;
+    if (!showNestedIcon) return undefined;
+    return args.contextData.props?.nestedIcon || args.fns.prop('icon', args.contextData.props);
+  }
+  return args.fns.prop('icon', args.contextData.props);
+};
+const getLabel = () => args.fns.prop('label', args.contextData.props);
+const getAddButtonLabel = () => {
+  const label = getLabel();
+  return label ? `Add new ${label}` : "Add New Item";
+};
+const getOnEdit = () => args.fns.prop('onEdit', args.contextData.props);
+const getOnAfterAdd = () => args.fns.prop('onAfterAdd', args.contextData.props);
+const getOnAfterEdit = () => args.fns.prop('onAfterEdit', args.contextData.props);
+const getOnAdd = () => args.fns.prop('onAdd', args.contextData.props);
+const getOnAfterDelete = () => args.fns.prop('onAfterDelete', args.contextData.props);
+const getRowClickable = () => args.fns.prop('rowClickable', args.contextData.props) === true;
+const getOnRowClick = () => args.fns.prop('onRowClick', args.contextData.props);
+const getSelectionMode = () => {
+  const mode = args.fns.prop('selectionMode', args.contextData.props);
+  return mode === 'single' ? 'single' : 'multiple';
+};
+const getOnSelectionChange = () => args.fns.prop('onSelectionChange', args.contextData.props);
+const getInitialSelectedRowIds = () => {
+  const raw = args.fns.prop('initialSelectedRowIds', args.contextData.props);
+  return Array.isArray(raw) ? raw.map((id) => String(id)).filter(Boolean) : [];
+};
+
+const notifySelectionChange = () => {
+  const onSelectionChange = getOnSelectionChange();
+  if (typeof onSelectionChange !== 'function') return;
+  const selectedIds = getSelectedRows();
+  const displayed = getDisplayData() || [];
+  const selectedItems = [];
+  selectedIds.forEach((rowElementId) => {
+    const rowData = displayed.find((row) => row?.id === rowElementId);
+    const graphVertex = args.graph?.vertexes?.[rowElementId];
+    if (graphVertex) {
+      selectedItems.push({
+        id: graphVertex.id,
+        row: rowData,
+        vertex: graphVertex
+      });
+    }
+  });
+  onSelectionChange(selectedIds, selectedItems, args);
+};
+
+const propsTableStateVertexId = args.contextData.props?.tableStateVertexId;
+let tableStateVertexId = propsTableStateVertexId;
+let ownTableStateVertex = false;
+if (!tableStateVertexId) {
+  tableStateVertexId = args.generateNewVertexId(args.graph, args.setGraph);
+  ownTableStateVertex = true;
+  args.addNewVertex(0, {
+    id: tableStateVertexId,
+    L: ["TableUiState"],
+    P: {
+      data: [],
+      filteredData: [],
+      collapsedKeys: [],
+      expansionOpen: [],
+      expansionRows: [],
+      expansionLoading: [],
+      // Parent id → child line-item vertex ids (from main fetch); resolve bodies via args.graph.vertexes[id].
+      expansionPrefetchIdsByParentId: null,
+      activeRowId: null,
+      searchTerm: "",
+      columnFilters: {},
+      sortConfig: { column: null, direction: null },
+      isModalOpen: false,
+      modalMode: "add", // "add" or "edit"
+      editingRow: null,
+      formData: null,
+      isImportModalOpen: false,
+      importData: "",
+      columnWidths: {},
+      isResizing: false,
+      iconActionActiveKey: null,
+      selectionAnchorIndex: null
+    },
+    IN: {},
+    OUT: {}
+  }, args.graph, args.setGraph);
+}
+
+const patchTableP = (partial) => {
+  args.mergeVertexProperties(0, tableStateVertexId, args.graph, args.setGraph, partial);
+};
+const tableP = () => args.graph.vertexes[tableStateVertexId]?.P;
+
+/** TableUiState: P.data / P.filteredData are string[] vertex ids only. Resolve bodies via args.graph.vertexes[id]. */
+const normalizeRowIds = (entries) => {
+  const seen = new Set();
+  const out = [];
+  if (!Array.isArray(entries)) return out;
+  for (let i = 0; i < entries.length; i++) {
+    const id = entries[i];
+    if (typeof id !== 'string' || id === '') continue;
+    if (!seen.has(id)) {
+      seen.add(id);
+      out.push(id);
+    }
+  }
+  return out;
+};
+
+const rowIdsFromVertices = (rows) => {
+  const raw = [];
+  if (!Array.isArray(rows)) return normalizeRowIds(raw);
+  for (let i = 0; i < rows.length; i++) {
+    const r = rows[i];
+    if (r?.id != null && r.id !== '') raw.push(String(r.id));
+  }
+  return normalizeRowIds(raw);
+};
+
+const vertexFromRowId = (id) => {
+  if (typeof id !== 'string' || id === '') return null;
+  return args.graph?.vertexes?.[id] || null;
+};
+
+const verticesFromRowIds = (ids) => {
+  const normalized = normalizeRowIds(ids);
+  const out = [];
+  for (let i = 0; i < normalized.length; i++) {
+    const vx = vertexFromRowId(normalized[i]);
+    if (vx) out.push(vx);
+  }
+  return out;
+};
+
+const resolvedFilteredVertices = () => verticesFromRowIds(tableP()?.filteredData ?? []);
+
+const getGroupByConfig = () => args.fns.prop('groupBy', args.contextData.props) || null;
+const toggleExpanded = (key) => {
+  const sk = String(key);
+  const p = tableP();
+  const cur = Array.isArray(p?.collapsedKeys) ? p.collapsedKeys : [];
+  const idx = cur.indexOf(sk);
+  const next = idx >= 0 ? cur.filter((k) => k !== sk) : [...cur, sk];
+  patchTableP({ collapsedKeys: next });
+};
+
+const isExpansionOpen = (rowId) => {
+  const open = tableP()?.expansionOpen;
+  return Array.isArray(open) && open.includes(String(rowId));
+};
+
+const buildExpansionPrefetchIdMapFromGraph = (relatedVertexIds, rowExpansion, parentRows) => {
+  if (!rowExpansion || !rowExpansion.childVertexLabel || !Array.isArray(relatedVertexIds)) return null;
+  const childLabel = rowExpansion.childVertexLabel;
+  const filterKey = rowExpansion.childParentFilterKey || 'orderId';
+  const idField = rowExpansion.parentIdField || 'id';
+  const idsByParentKey = {};
+  for (const lineItemVertexId of relatedVertexIds) {
+    if (lineItemVertexId == null || lineItemVertexId === '') continue;
+    const lineItemVertex = args.graph?.vertexes?.[lineItemVertexId];
+    if (!lineItemVertex?.L?.includes(childLabel)) continue;
+    const parentFilterValue = lineItemVertex.P?.[filterKey];
+    if (parentFilterValue == null) continue;
+    const parentKey = String(parentFilterValue);
+    if (!idsByParentKey[parentKey]) idsByParentKey[parentKey] = [];
+    if (!idsByParentKey[parentKey].includes(lineItemVertexId)) idsByParentKey[parentKey].push(lineItemVertexId);
+  }
+  if (Array.isArray(parentRows)) {
+    for (const row of parentRows) {
+      const parentVal =
+        typeof rowExpansion.getNestedParentFilterValue === 'function'
+          ? rowExpansion.getNestedParentFilterValue(row)
+          : (row.P?.[idField] ?? row[idField] ?? row.id);
+      if (parentVal == null) continue;
+      const parentKey = String(parentVal);
+      if (idsByParentKey[parentKey] === undefined) idsByParentKey[parentKey] = [];
+    }
+  }
+  return idsByParentKey;
+};
+
+const lineItemVerticesFromIds = (ids) => {
+  if (!Array.isArray(ids)) return [];
+  const out = [];
+  for (const vertexId of ids) {
+    const vertex = args.graph?.vertexes?.[vertexId];
+    if (vertex) out.push(vertex);
+  }
+  return out;
+};
+
+const getNestedSortValue = (row, columnKey, nestedColumns) => {
+  const nestedColumn = Array.isArray(nestedColumns) ? nestedColumns.find((column) => column.key === columnKey) : null;
+  if (nestedColumn?.valueAccessor) return nestedColumn.valueAccessor(row);
+  return row?.P?.[columnKey];
+};
+
+const sortExpansionPrefetchRows = (rows, nestedSort, nestedColumns) => {
+  if (!Array.isArray(rows) || rows.length < 2) return rows ? rows.slice() : [];
+  if (!nestedSort?.column) return rows.slice();
+  const sortColumnKey = nestedSort.column;
+  const directionSign = nestedSort.direction === 'desc' ? -1 : 1;
+  const sorted = rows.slice();
+  sorted.sort((a, b) => {
+    const aVal = getNestedSortValue(a, sortColumnKey, nestedColumns);
+    const bVal = getNestedSortValue(b, sortColumnKey, nestedColumns);
+    if (aVal === bVal) return 0;
+    const comparison = aVal > bVal ? 1 : -1;
+    return comparison * directionSign;
+  });
+  return sorted;
+};
+
+const clearExpansionStoresForDataReload = () => {
+  patchTableP({ expansionOpen: [], expansionRows: [], expansionLoading: [] });
+};
+
+const toggleRowExpansion = async (row) => {
+  const rowExpansions = getRowExpansionConfigs();
+  if (!Array.isArray(rowExpansions) || rowExpansions.length === 0 || !row?.id) return;
+  const id = String(row.id);
+  let p0 = tableP();
+  let open = Array.isArray(p0?.expansionOpen) ? [...p0.expansionOpen] : [];
+  const oidx = open.indexOf(id);
+  if (oidx >= 0) {
+    open.splice(oidx, 1);
+    patchTableP({ expansionOpen: open });
+    return;
+  }
+  if (shouldExpandOneRowAtATime(rowExpansions[0])) {
+    open = [];
+  }
+  open.push(id);
+  patchTableP({ expansionOpen: open });
+  p0 = tableP();
+  for (let idx = 0; idx < rowExpansions.length; idx++) {
+    const rowExpansion = rowExpansions[idx];
+    if (!rowExpansion?.childVertexLabel) continue;
+    const expansionKey = "exp_" + idx;
+    const idField = rowExpansion.parentIdField || 'id';
+    const parentVal =
+      typeof rowExpansion.getNestedParentFilterValue === 'function'
+        ? rowExpansion.getNestedParentFilterValue(row)
+        : (row.P?.[idField] ?? row[idField] ?? row.id);
+    const loadingKey = id + "::" + expansionKey;
+    const prefetchMap = p0?.expansionPrefetchIdsByParentId;
+    if (prefetchMap != null) {
+      const bucketIds = prefetchMap[String(parentVal)] ?? [];
+      const rows = lineItemVerticesFromIds(bucketIds);
+      const sortedRows = sortExpansionPrefetchRows(rows, rowExpansion.nestedSort, rowExpansion.nestedColumns);
+      const erList = Array.isArray(p0?.expansionRows) ? p0.expansionRows.filter((e) => !(e && e.id === id && String(e.key || "") === expansionKey)) : [];
+      erList.push({ id, key: expansionKey, rows: sortedRows });
+      patchTableP({ expansionRows: erList });
+      continue;
+    }
+    const erArr = Array.isArray(p0?.expansionRows) ? p0.expansionRows : [];
+    const existing = erArr.find((e) => e && e.id === id && String(e.key || "") === expansionKey);
+    const skipFetch = existing?.rows != null && rowExpansion.refetchOnExpand !== true;
+    if (skipFetch) continue;
+    let loading = Array.isArray(p0?.expansionLoading) ? [...p0.expansionLoading] : [];
+    if (!loading.includes(loadingKey)) loading.push(loadingKey);
+    patchTableP({ expansionLoading: loading });
+    try {
+      const childLabel = rowExpansion.childVertexLabel;
+      const filterKey = rowExpansion.childParentFilterKey || 'orderId';
+      const filters = { [filterKey]: parentVal };
+      const sort = rowExpansion.nestedSort || null;
+      const hooks = rowExpansion.nestedHooks;
+      const fetchFn = args.fns.fetchUserContentRows;
+      const fetchedRows = typeof fetchFn === 'function' ? await fetchFn({
+        tableVertexLabel: childLabel,
+        filters,
+        sort,
+        hooks
+      }) : [];
+      const p1 = tableP();
+      const erPrev = Array.isArray(p1?.expansionRows) ? [...p1.expansionRows] : [];
+      const loadPrev = Array.isArray(p1?.expansionLoading) ? p1.expansionLoading : [];
+      const erNext = erPrev.filter((e) => !(e && e.id === id && String(e.key || "") === expansionKey));
+      erNext.push({ id, key: expansionKey, rows: Array.isArray(fetchedRows) ? fetchedRows : [] });
+      const loadNext = loadPrev.filter((lid) => lid !== loadingKey);
+      patchTableP({ expansionRows: erNext, expansionLoading: loadNext });
+    } catch (e) {
+      const p1 = tableP();
+      const loadPrev = Array.isArray(p1?.expansionLoading) ? p1.expansionLoading : [];
+      patchTableP({ expansionLoading: loadPrev.filter((lid) => lid !== loadingKey) });
+    }
+  }
+};
+
+// Cache row objects by id so same row keeps same ref; cells then don't re-render when only expand/collapse changes
+let displayRowCache = {};
+const buildDisplayData = (filtered, groupByKey, collapsedList) => {
+  if (!filtered || filtered.length === 0) return [];
+  const collapsed = Array.isArray(collapsedList) ? collapsedList : [];
+  const getKey = (row) => {
+    const val = row?.P?.[groupByKey] ?? row?.[groupByKey];
+    return val != null ? String(val) : '';
+  };
+  const groups = new Map();
+  const keyOrder = [];
+  for (const row of filtered) {
+    const k = getKey(row);
+    if (!groups.has(k)) {
+      groups.set(k, []);
+      keyOrder.push(k);
+    }
+    groups.get(k).push(row);
+  }
+  const result = [];
+  const usedIds = new Set();
+  for (const key of keyOrder) {
+    const rows = groups.get(key) || [];
+    const first = rows[0];
+    const parentId = 'group-' + key;
+    usedIds.add(parentId);
+    let parentRow = displayRowCache[parentId];
+    if (parentRow) {
+      parentRow._isParent = true;
+      parentRow._parentKey = key;
+      parentRow.P = first?.P ? { ...first.P } : { [groupByKey]: key };
+    } else {
+      parentRow = { id: parentId, _isParent: true, _parentKey: key, P: first?.P ? { ...first.P } : { [groupByKey]: key } };
+      displayRowCache[parentId] = parentRow;
+    }
+    result.push(parentRow);
+    if (!collapsed.includes(key)) {
+      for (const r of rows) {
+        const id = r?.id ?? r?.P?.id;
+        const rowId = id != null ? String(id) : 'row-' + key + '-' + result.length;
+        usedIds.add(rowId);
+        let childRow = displayRowCache[rowId];
+        if (childRow) {
+          Object.assign(childRow, { ...r, _isParent: false, _parentKey: key });
+        } else {
+          childRow = { ...r, _isParent: false, _parentKey: key };
+          displayRowCache[rowId] = childRow;
+        }
+        result.push(childRow);
+      }
+    }
+  }
+  Object.keys(displayRowCache).forEach(k => { if (!usedIds.has(k)) delete displayRowCache[k]; });
+  return result;
+};
+const getDisplayData = () => {
+  const g = getGroupByConfig();
+  const filtered = verticesFromRowIds(tableP()?.filteredData ?? []);
+  if (!g) return filtered;
+  const key = typeof g === 'string' ? g : (g.key || '');
+  if (!key) return filtered;
+  return buildDisplayData(filtered, key, tableP()?.collapsedKeys ?? []);
+};
+
+/** Row ids currently shown in the table body (excludes group-by parent rows). */
+const getSelectableVisibleRowIds = () => {
+  const displayed = getDisplayData();
+  if (!Array.isArray(displayed) || displayed.length === 0) return [];
+  const ids = [];
+  for (let i = 0; i < displayed.length; i++) {
+    const row = displayed[i];
+    if (!row || row._isParent === true) continue;
+    const id = row.id;
+    if (id != null && id !== "") ids.push(String(id));
+  }
+  return ids;
+};
+
+let lastNestedLinesSyncKey = "";
+const syncNestedLinesTableData = () => {
+  if (!isNestedLinesTable()) return;
+  const getRows = args.contextData.props?.getNestedLineRows;
+  const rows = typeof getRows === "function" ? getRows() : [];
+  const ids = rowIdsFromVertices(rows);
+  const syncKey = ids.join("\0");
+  if (syncKey === lastNestedLinesSyncKey) return;
+  lastNestedLinesSyncKey = syncKey;
+  patchTableP({ data: ids });
+  const config = args.fns.evaluateConfig?.() || {};
+  const enableLocalFilters = config?.enableLocalFilters === true;
+  const enableLocalSort = config?.enableLocalSort === true;
+  if (enableLocalFilters || enableLocalSort) {
+    applyLocalFilters();
+  } else {
+    patchTableP({ filteredData: ids });
+  }
+};
+
+// Get selected rows functions from props (always provided by parent)
+const getSelectedRows = () => {
+  const propFn = args.contextData.props?.getSelectedRows;
+  if (!propFn) {
+    console.warn("getSelectedRows not provided to Table component");
+    return new Set();
+  }
+  return propFn();
+};
+
+// Selection filtered to current display data - avoids stale selection (e.g. after move or category switch)
+const getEffectiveSelectedRows = () => {
+  const selected = getSelectedRows();
+  const displayed = getDisplayData();
+  const currentIds = new Set((displayed || []).map(r => r?.id).filter(Boolean));
+  if (currentIds.size === 0) return new Set();
+  return new Set([...selected].filter(id => currentIds.has(id)));
+};
+const setSelectedRows = (newSelected) => {
+  const propFn = args.contextData.props?.setSelectedRows;
+  if (!propFn) {
+    console.warn("setSelectedRows not provided to Table component");
+    return;
+  }
+  propFn(newSelected);
+};
+const clearSelectedRows = () => {
+  const propFn = args.contextData.props?.clearSelectedRows;
+  if (!propFn) {
+    console.warn("clearSelectedRows not provided to Table component");
+    return;
+  }
+  propFn();
+};
+const setIsResizing = (v) => patchTableP({ isResizing: v });
+let iconActionResetTimer = null;
+const iconActionActiveKey = () => tableP()?.iconActionActiveKey ?? null;
+const setIconActionActiveKey = (v) => patchTableP({ iconActionActiveKey: v });
+const activeRowId = () => tableP()?.activeRowId ?? null;
+const getIconActionRowKey = (row, rowIndex) => {
+  if (!row && rowIndex == null) return null;
+  const id = row?.id ?? row?.P?.id;
+  if (id != null) return String(id);
+  if (rowIndex != null && rowIndex >= 0) return "idx-" + rowIndex;
+  return null;
+};
+const writeTextToClipboard = async (text) => {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    await navigator.clipboard.writeText(text);
+  } else {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.left = "-9999px";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    document.body.removeChild(ta);
+  }
+};
+const scheduleIconActionReset = (ms) => {
+  if (iconActionResetTimer) clearTimeout(iconActionResetTimer);
+  if (ms == null || ms <= 0) return;
+  iconActionResetTimer = setTimeout(() => {
+    setIconActionActiveKey(null);
+    iconActionResetTimer = null;
+  }, ms);
+};
+const handleIconAction = async (column, row, rowIndex) => {
+  const cfg = column.iconAction || {};
+  const action = cfg.action || "clipboard";
+  const rowKey = getIconActionRowKey(row, rowIndex);
+  const stateKey = column.key + ":" + (rowKey != null ? rowKey : "idx-" + rowIndex);
+  const getPayloadText = () => {
+    if (typeof cfg.textAccessor === "function") return cfg.textAccessor(row);
+    return getCellValue(row, column);
+  };
+  try {
+    if (action === "clipboard") {
+      const text = getPayloadText();
+      if ((text === null || text === undefined || text === "") && !cfg.allowEmpty) return;
+      await writeTextToClipboard(String(text));
+      if (cfg.showFeedback !== false) {
+        setIconActionActiveKey(stateKey);
+        scheduleIconActionReset(cfg.activeDurationMs ?? 3000);
+      }
+      return;
+    }
+    if (action === "openUrl") {
+      const url = getPayloadText();
+      if (!url) return;
+      const w = typeof window !== "undefined" ? window : null;
+      if (w) w.open(String(url), cfg.openUrlTarget || "_blank", cfg.openUrlWindowFeatures || "noopener,noreferrer");
+      if (cfg.activeDurationMs) {
+        setIconActionActiveKey(stateKey);
+        scheduleIconActionReset(cfg.activeDurationMs);
+      }
+      return;
+    }
+    if (action === "custom" && typeof cfg.onClick === "function") {
+      await cfg.onClick(row, column, rowIndex, {
+        getPayloadText,
+        copyToClipboard: writeTextToClipboard,
+        setFeedbackActive: () => {
+          setIconActionActiveKey(stateKey);
+          scheduleIconActionReset(cfg.activeDurationMs ?? 3000);
+        },
+        clearFeedback: () => {
+          if (iconActionResetTimer) clearTimeout(iconActionResetTimer);
+          iconActionResetTimer = null;
+          setIconActionActiveKey(null);
+        }
+      });
+      return;
+    }
+  } catch (e) {
+    console.warn("iconAction failed", e);
+  }
+};
+const pollRef = { id: null };
+const rowRefs = {};
+const setRowRef = (index, el) => {
+  if (el) rowRefs[index] = el;
+  else delete rowRefs[index];
+};
+const getRowRef = (index) => rowRefs[index];
+
+// Initialize from query parameters
+const initializeFromQueryParams = () => {
+  const searchParams = args.searchParams || {};
+  if (searchParams.search) {
+    patchTableP({ searchTerm: searchParams.search });
+  }
+  if (searchParams.filters) {
+    try {
+      const filters = JSON.parse(searchParams.filters);
+      args.setGraph("vertexes", tableStateVertexId, "P", { columnFilters: filters });
+      // Apply filters after restoring from URL
+      // Use setTimeout to ensure store update is complete
+      setTimeout(() => {
+        applyLocalFilters();
+      }, 0);
+    } catch (e) {
+      console.error("Error parsing filters from query:", e);
+    }
+  }
+  if (searchParams.sort) {
+    try {
+      const sort = JSON.parse(searchParams.sort);
+      patchTableP({ sortConfig: sort });
+    } catch (e) {
+      console.error("Error parsing sort from query:", e);
+    }
+  }
+};
+
+// Update query parameters
+const updateQueryParams = () => {
+  const params = {};
+  // Handle searchTerm
+  const st = tableP()?.searchTerm ?? "";
+  if (st) {
+    params.search = st;
+  } else {
+    // Clear search param if searchTerm is empty
+    params.search = undefined;
+  }
+  // Handle filters
+  const cf = tableP()?.columnFilters ?? {};
+  const filters = Object.keys(cf).length > 0 ? JSON.stringify(cf) : null;
+  if (filters) {
+    params.filters = filters;
+  } else {
+    // Clear filters param if no filters
+    params.filters = undefined;
+  }
+  // Handle sort
+  const sc = tableP()?.sortConfig ?? { column: null, direction: null };
+  const sort = sc.column ? JSON.stringify(sc) : null;
+  if (sort) {
+    params.sort = sort;
+  } else {
+    // Clear sort param if no sort
+    params.sort = undefined;
+  }
+  args.setSearchParams?.(params, { replace: true });
+};
+
+
+
+// Apply local filters (for table header row filters)
+const applyLocalFilters = () => {
+  const dataSource = verticesFromRowIds(tableP()?.data ?? []);
+  let filtered = [...dataSource];
+
+  // Apply search term
+  const st = tableP()?.searchTerm ?? "";
+  if (st) {
+    const term = st.toLowerCase();
+    const columns = getColumns().filter(col => !shouldHideColumn(col));
+
+    filtered = filtered.filter(row => {
+      // Only check values for visible columns, not keys
+      for (const col of columns) {
+        // Skip special/row number columns
+        if (isStructuralColumn(col)) {
+          continue;
+        }
+        const cellValue = getCellValue(row, col);
+        if (
+          cellValue !== null &&
+          cellValue !== undefined &&
+          String(cellValue).toLowerCase().includes(term)
+        ) {
+          return true;
+        }
+      }
+      return false;
+    });
+  }
+
+  // Apply column filters
+  const columns = getColumns();
+  filtered = filtered.filter(row => {
+    for (const col of columns) {
+      const filterValue = (tableP()?.columnFilters ?? {})[col.key];
+      if (filterValue !== undefined && filterValue !== null && filterValue !== "") {
+        // Skip rowNumber filter - it's calculated, not a property
+        if (isStructuralColumn(col)) {
+          continue;
+        }
+        const cellValue = getCellValue(row, col);
+        if (getColumnFilterKind(col) === "text") {
+          // Support both single value and array (for multiple select filters)
+          if (Array.isArray(filterValue)) {
+            if (filterValue.length === 0) {
+              return true; // No filter applied
+            }
+            // Check if cell value matches any of the selected filter values
+            const cellValueStr = String(cellValue || "").toLowerCase();
+            const matches = filterValue.some(fv => 
+              cellValueStr.includes(String(fv).toLowerCase())
+            );
+            if (!matches) {
+              return false;
+            }
+          } else {
+            // Single value filter
+            if (!String(cellValue || "").toLowerCase().includes(String(filterValue).toLowerCase())) {
+              return false;
+            }
+          }
+        } else if (getColumnFilterKind(col) === "select") {
+          // Support both single value and array (multiple select)
+          if (Array.isArray(filterValue)) {
+            if (filterValue.length === 0 || !filterValue.includes(cellValue)) {
+              return false;
+            }
+          } else {
+            if (cellValue !== filterValue) {
+              return false;
+            }
+          }
+        } else if (getColumnFilterKind(col) === "checkbox") {
+          if (cellValue !== filterValue) {
+            return false;
+          }
+        } else if (getColumnFilterKind(col) === "date") {
+          // Date filtering logic
+          const filterDate = new Date(filterValue);
+          const cellDate = new Date(cellValue);
+          if (isNaN(filterDate.getTime()) || isNaN(cellDate.getTime())) {
+            return false;
+          }
+          // Simple date comparison - can be enhanced
+          if (Math.abs(cellDate - filterDate) > 86400000) { // More than 1 day difference
+            return false;
+          }
+        } else if (getColumnFilterKind(col) === "badge") {
+          // Badge columns: partial match on raw value or display label (e.g. "Act" matches "Active")
+          const cellVal = cellValue != null ? String(cellValue) : "";
+          const cellKey = col.badgeKeyCase === "lower" ? cellVal.toLowerCase() : cellVal;
+          const cellLabel = (col.badgeToneMap && col.badgeToneMap[cellValue] && Array.isArray(col.badgeToneMap[cellValue])) ? col.badgeToneMap[cellValue][0] : cellVal;
+          const cellLabelNorm = col.badgeKeyCase === "lower" ? String(cellLabel).toLowerCase() : cellLabel;
+          const matchOne = (fv) => {
+            const fk = col.badgeKeyCase === "lower" ? String(fv).toLowerCase() : String(fv);
+            if (!fk) return true;
+            return cellKey.includes(fk) || cellLabelNorm.includes(fk);
+          };
+          if (Array.isArray(filterValue)) {
+            if (filterValue.length === 0) return true;
+            if (!filterValue.some(matchOne)) return false;
+          } else {
+            if (!matchOne(filterValue)) return false;
+          }
+        }
+      }
+    }
+    return true;
+  });
+
+  // Apply sorting
+  const sortCfg = tableP()?.sortConfig ?? { column: null, direction: null };
+  if (sortCfg.column) {
+    const sortColumn = columns.find(col => col.key === sortCfg.column);
+    if (sortColumn) {
+      filtered.sort((a, b) => {
+        const aVal = getCellValue(a, sortColumn);
+        const bVal = getCellValue(b, sortColumn);
+        if (aVal === bVal) return 0;
+        const comparison = aVal > bVal ? 1 : -1;
+        return sortCfg.direction === "asc" ? comparison : -comparison;
+      });
+    }
+  }
+
+  patchTableP({ filteredData: normalizeRowIds(filtered.map((row) => String(row.id))) });
+};
+
+// Update category contentCount based on fetched data length when local filters are enabled
+const updateCategoryCountFromFetchedData = (fetchedData, categoryItem) => {
+  // Use the category item passed from fetchData, not the currently selected item
+  // This ensures we update the count for the category that was actually fetched
+  if (!categoryItem) return;
+  
+  const config = args.fns.evaluateConfig?.() || {};
+  const sidebarConfig = config?.sidebar;
+  if (!sidebarConfig) return;
+  
+  const rootKeys = sidebarConfig.rootKeys || {};
+  const rootKey = rootKeys.key;
+  
+  const tableLabel = args.fns.getTableVertexLabel?.();
+  const uncategorizedVertexId = tableLabel ? '_' + tableLabel + '_uncategorized' : null;
+  const isSyntheticUncat =
+    uncategorizedVertexId &&
+    (categoryItem.id === uncategorizedVertexId || categoryItem.P?.key === uncategorizedVertexId);
+  const isUncategorized = categoryItem.P?.key === rootKey || isSyntheticUncat;
+  if (isUncategorized && !uncategorizedVertexId) return;
+  const categoryId = isUncategorized ? uncategorizedVertexId : categoryItem.id;
+  
+  if (!categoryId) return;
+  
+  let currentCount = 0;
+  if (isUncategorized) {
+    const uncategorizedVertex = args.graph?.vertexes?.[uncategorizedVertexId];
+    currentCount = uncategorizedVertex?.P?.contentCount ?? 0;
+  } else {
+    const categoryVertex = args.graph?.vertexes?.[categoryId];
+    currentCount = categoryVertex?.P?.contentCount ?? 0;
+  }
+  
+  const fetchedLength = fetchedData?.length ?? 0;
+  if (currentCount !== fetchedLength) {
+    if (isUncategorized) {
+      const uncategorizedVertex = args.graph?.vertexes?.[uncategorizedVertexId];
+      if (uncategorizedVertex) {
+        args.mergeVertexProperties(0, uncategorizedVertexId, args.graph, args.setGraph, {
+          contentCount: fetchedLength
+        });
+      }
+    } else {
+      const categoryVertex = args.graph?.vertexes?.[categoryId];
+      if (categoryVertex) {
+        args.mergeVertexProperties(0, categoryId, args.graph, args.setGraph, {
+          contentCount: fetchedLength
+        });
+      }
+    }
+  }
+};
+
+const debouncedSetSearchTerm = args.debounce(value => {
+  patchTableP({ searchTerm: value });
+  
+  // Check if local filters are enabled
+  const config = args.fns.evaluateConfig?.() || {};
+  const enableLocalFilters = config?.enableLocalFilters === true;
+  
+  if (enableLocalFilters) {
+    // Apply local filters only
+    applyLocalFilters();
+  } else {
+    // Server-side search - trigger search
+    handleSearch();
+  }
+  updateQueryParams();
+}, 500);
+
+// Get cell value from row
+const getCellValue = (row, column) => {
+  if (column.valueAccessor) {
+    return column.valueAccessor(row);
+  }
+  if (getColumnDataType(column) === "relation" && column.selectConfig?.relationshipType && column.selectConfig?.labelField) {
+    const sc = column.selectConfig;
+    const rel = sc.relationshipType;
+    const lf = sc.labelField;
+    const vxMap = args.graph?.vertexes ?? {};
+    const edgesMap = args.graph?.edges ?? {};
+    let tid = null;
+    if (row.OUT && rel) {
+      const outArr = row.OUT[rel];
+      if (Array.isArray(outArr) && outArr.length > 0) {
+        const ed = edgesMap[outArr[0]];
+        if (ed && ed.E != null) tid = ed.E;
+      }
+    }
+    const resolveLabelFromVertexId = (vertexId) => {
+      if (vertexId == null || String(vertexId).trim() === "") return "";
+      const node = vxMap[String(vertexId).trim()];
+      const lab = node?.P?.[lf];
+      return lab != null && String(lab).trim() !== "" ? String(lab).trim() : "";
+    };
+    if (tid != null) {
+      return resolveLabelFromVertexId(tid);
+    }
+    return "";
+  }
+  if (column.key.includes(".")) {
+    const keys = column.key.split(".");
+    let value = row;
+    for (const key of keys) {
+      value = value?.[key];
+      if (value === undefined) return null;
+    }
+    return value;
+  }
+  if (row.P) {
+    return row.P[column.key];
+  }
+  return row[column.key];
+};
+
+// Render cell content from column renderer (+ dataType for value semantics)
+const renderCellContent = (row, column, rowIndex) => {
+  const renderer = getColumnRenderer(column);
+  const dataType = getColumnDataType(column);
+
+  if (renderer === 'expand') {
+    const gb = getGroupByConfig();
+    if (gb) {
+      const parentKey = row._parentKey;
+      const isParent = row._isParent === true;
+      const p = tableP();
+      const ck = Array.isArray(p?.collapsedKeys) ? p.collapsedKeys : [];
+      const isExpanded = parentKey != null && !ck.includes(String(parentKey));
+      return { type: 'expand', isParent, isExpanded, parentKey, onToggle: () => toggleExpanded(parentKey) };
+    }
+    const rowExpansions = getRowExpansionConfigs();
+    if (Array.isArray(rowExpansions) && rowExpansions.length > 0 && row?.id) {
+      const rowId = String(row.id);
+      return {
+        type: 'expand',
+        isParent: true,
+        isExpanded: isExpansionOpen(rowId),
+        parentKey: rowId,
+        onToggle: () => toggleRowExpansion(row)
+      };
+    }
+    return { type: 'expand', isParent: false, isExpanded: false, parentKey: null, onToggle: () => {} };
+  }
+  const value = getCellValue(row, column);
+
+  if (renderer === "rowNumber") {
+    return rowIndex + 1;
+  }
+
+  if (column.render) {
+    return column.render(value, row, column);
+  }
+
+  if (dataType === "boolean" || renderer === "checkbox") {
+    return value ? "✓" : "";
+  }
+
+  if (renderer === "image" || renderer === "imagePreview") {
+    const imageUrl = value || column.defaultImage;
+    return imageUrl ? { type: "image", url: imageUrl, alt: column.alt || "" } : "";
+  }
+
+  if (renderer === "youtubeLink") {
+    const videoId = value || column.videoIdAccessor?.(row);
+    if (!videoId) return "";
+    return { type: "youtubeLink", videoId };
+  }
+
+  if (renderer === "downloadLink") {
+    const url = value || column.urlAccessor?.(row);
+    const icon = column.icon || "carbon:download";
+    if (!url) return "";
+    return { type: "downloadLink", url, icon };
+  }
+
+  if (renderer === "iconAction") {
+    const cfg = column.iconAction || {};
+    const action = cfg.action || "clipboard";
+    const payload = typeof cfg.textAccessor === "function" ? cfg.textAccessor(row) : (value ?? getCellValue(row, column));
+    if ((action === "clipboard" || action === "openUrl") && (payload === null || payload === undefined || payload === "") && !cfg.allowEmpty) {
+      return "";
+    }
+    if (action === "custom" && typeof cfg.onClick !== "function") {
+      return "";
+    }
+    return { type: "iconAction", actionColumn: column };
+  }
+
+  if (renderer === "duration") {
+    if (!value) return "";
+    const seconds = typeof value === "number" ? value : parseInt(value);
+    if (isNaN(seconds)) return value;
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    if (hours > 0) {
+      return `${hours}:${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+    }
+    return `${minutes}:${String(secs).padStart(2, "0")}`;
+  }
+
+  if (renderer === "date" || (dataType === "date" && renderer === "text")) {
+    if (!value) return "";
+    const date = new Date(value);
+    if (isNaN(date.getTime())) return value;
+    return date.toLocaleDateString();
+  }
+
+  if (renderer === "isoDateTime") {
+    if (!value) return "";
+    const date = new Date(value);
+    if (isNaN(date.getTime())) return value;
+    return date.toLocaleString();
+  }
+
+  if (renderer === "join") {
+    if (!value || !Array.isArray(value)) return "";
+    const separator = column.separator || ", ";
+    const displayKey = column.displayKey || "name";
+    return value.map(item => {
+      if (typeof item === "string") return item;
+      if (item.P) return item.P[displayKey] || item.P.name || "";
+      return item[displayKey] || item.name || "";
+    }).join(separator);
+  }
+
+  if (renderer === "actions") {
+    return { type: "actions", row, column };
+  }
+
+  if (renderer === "badge") {
+    const map = column.badgeToneMap || {};
+    const v = (value || "").toString();
+    const key = (column.badgeKeyCase === "lower" ? v.toLowerCase() : v);
+    const entry = map[key];
+    const [text, tone] = Array.isArray(entry) ? entry : [v || "", "neutral"];
+    return { type: "badge", text, tone };
+  }
+
+  if (renderer === "link") {
+    const text = value != null ? String(value) : "";
+    const href =
+      dataType === "email" && text
+        ? `mailto:${text.trim()}`
+        : typeof column.hrefAccessor === "function"
+          ? column.hrefAccessor(row)
+          : text;
+    if (!href && !text) return "";
+    return { type: "textLink", text: text || href, href: href || text, title: text || column.label };
+  }
+
+  if (renderer === "currency") {
+    const n = typeof value === "number" ? value : parseFloat(value);
+    if (value == null || value === "" || Number.isNaN(n)) return value != null ? String(value) : "";
+    const currency = column.currency || "USD";
+    try {
+      return new Intl.NumberFormat(undefined, { style: "currency", currency }).format(n);
+    } catch {
+      return String(n);
+    }
+  }
+
+  // Default: return as string
+  return value !== null && value !== undefined ? String(value) : "";
+};
+
+// Handle sort
+const handleSort = (column) => {
+  // Don't allow sorting for rowNumber columns
+  if (getColumnRenderer(column) === "rowNumber" || getColumnRenderer(column) === "iconAction") return;
+  if (column.sortable === false) return;
+
+  const sortConfig = tableP()?.sortConfig ?? { column: null, direction: null };
+  // If clicking the same column that's already sorted
+  if (sortConfig.column === column.key) {
+    // If currently ascending, switch to descending
+    if (sortConfig.direction === "asc") {
+      patchTableP({ sortConfig: { column: column.key, direction: "desc" } });
+    } 
+    // If currently descending, clear the sort
+    else if (sortConfig.direction === "desc") {
+      patchTableP({ sortConfig: { column: null, direction: null } });
+    }
+  } else {
+    // New column, start with ascending
+    patchTableP({ sortConfig: { column: column.key, direction: "asc" } });
+  }
+
+  // Check if local sort is enabled
+  const config = args.fns.evaluateConfig?.() || {};
+  const enableLocalSort = config?.enableLocalSort === true;
+  
+  if (enableLocalSort) {
+    // Apply local sort only
+    applyLocalFilters();
+  } else {
+    // Server-side sort - trigger search
+    handleSearch();
+  }
+  updateQueryParams();
+};
+
+// Get unique values for a column
+const getUniqueColumnValues = (column) => {
+  const allData = verticesFromRowIds(tableP()?.data ?? []);
+  const uniqueValues = new Set();
+
+  allData.forEach(row => {
+    const value = getCellValue(row, column);
+    if (value !== null && value !== undefined && value !== "") {
+      uniqueValues.add(String(value));
+    }
+  });
+
+  return Array.from(uniqueValues).sort();
+};
+
+// Common function to create select filter component props
+const getSelectFilterProps = (columnKey, filterValue, options) => {
+  // Normalize filterValue to array for multiple select
+  // Ensure values match option values exactly
+  // If "_All_VALUES_" is present, don't include it in the display value
+  let normalizedValue = Array.isArray(filterValue) 
+    ? filterValue.filter(v => v !== null && v !== undefined && v !== "" && v !== "_All_VALUES_")
+    : (filterValue && filterValue !== "_All_VALUES_" ? [filterValue] : []);
+  
+  // If filter is cleared (undefined), pass empty array to clear TomSelect
+  // TomSelect needs empty array for multiple mode to show as cleared
+  const displayValue = filterValue === undefined ? [] : normalizedValue;
+  
+  // Check if filter is currently empty
+  const isFilterEmpty = filterValue === undefined || 
+    (Array.isArray(filterValue) && filterValue.length === 0) ||
+    filterValue === null || filterValue === "";
+
+  return {
+    componentName: "TomSelect",
+    value: displayValue,
+    onChange: (newValue) => {
+      // If "All" is selected
+      if (Array.isArray(newValue) && newValue.includes("_All_VALUES_")) {
+        // clear all filters
+        handleColumnFilterChange(columnKey, ["_All_VALUES_"]);
+      } else {
+        handleColumnFilterChange(columnKey, newValue);
+      }
+    },
+    options: options,
+    search: options.length > 10, // Enable search if many options
+    multiple: true
+  };
+};
+
+// Handle column filter change
+const handleColumnFilterChange = (columnKey, value) => {
+  let filterValue;
+  if (Array.isArray(value)) {
+    // If "_All_VALUES_" is selected, clear all filters for this column
+    if (value.includes("_All_VALUES_")) {
+      filterValue = undefined;
+    } else {
+      // Remove "_All_VALUES_" if present and filter out empty values
+      const filtered = value.filter(v => v !== "_All_VALUES_" && v !== "" && v !== null && v !== undefined);
+      filterValue = filtered.length === 0 ? undefined : filtered;
+    }
+  } else {
+    // Single value - clear if "All" or empty
+    filterValue = value === "_All_VALUES_" || value === "" || value === null || value === undefined ? undefined : value;
+  }
+
+  args.setGraph(
+    "vertexes",
+    tableStateVertexId,
+    "P",
+    "columnFilters",
+    columnKey,
+    filterValue === undefined ? undefined : JSON.parse(JSON.stringify(filterValue)),
+  );
+
+  // Check if local filters are enabled
+  const config = args.fns.evaluateConfig?.() || {};
+  const enableLocalFilters = config?.enableLocalFilters === true;
+  
+  if (enableLocalFilters) {
+    // Apply local filters only
+    applyLocalFilters();
+  } else {
+    // Server-side filters - trigger search
+    handleSearch();
+  }
+  updateQueryParams();
+};
+
+// Background poll: fetch only queued row ids and merge updates (no full reload, no loader)
+const pollQueuedRows = async () => {
+  const config = args.fns.evaluateConfig?.() || {};
+  const intervalMs = config?.refetchIntervalWhenQueued;
+  const ids = normalizeRowIds(tableP()?.data ?? []);
+  const queuedIds = [];
+  for (let i = 0; i < ids.length; i++) {
+    const vx = vertexFromRowId(ids[i]);
+    if (vx?.P?.syncStatus === 'queued') queuedIds.push(ids[i]);
+  }
+  if (queuedIds.length === 0 || !intervalMs) return;
+  const refresh = args.fns.refreshQueuedRows;
+  if (!refresh || typeof refresh !== 'function') return;
+  try {
+    const result = await refresh(queuedIds);
+    const updated = result?.data;
+    if (Array.isArray(updated) && updated.length > 0) {
+      applyLocalFilters();
+      const dataIds = normalizeRowIds(tableP()?.data ?? []);
+      const stillQueued = dataIds.some((id) => vertexFromRowId(id)?.P?.syncStatus === 'queued');
+      if (stillQueued && pollRef.id === null) {
+        pollRef.id = setTimeout(() => {
+          pollRef.id = null;
+          pollQueuedRows();
+        }, intervalMs);
+      }
+    } else {
+      if (pollRef.id === null) {
+        pollRef.id = setTimeout(() => {
+          pollRef.id = null;
+          pollQueuedRows();
+        }, intervalMs);
+      }
+    }
+  } catch (e) {
+    console.error("pollQueuedRows:", e);
+    if (pollRef.id === null) {
+      pollRef.id = setTimeout(() => {
+        pollRef.id = null;
+        pollQueuedRows();
+      }, intervalMs);
+    }
+  }
+};
+
+// Start background poll when any row has syncStatus 'queued'. Pass optional data array to check; if omitted, uses current data().
+const startPollIfQueued = (dataToCheck) => {
+  const rows =
+    dataToCheck !== undefined ? dataToCheck : verticesFromRowIds(tableP()?.data ?? []);
+  if (pollRef.id) {
+    clearTimeout(pollRef.id);
+    pollRef.id = null;
+  }
+  const config = args.fns.evaluateConfig?.() || {};
+  const intervalMs = config?.refetchIntervalWhenQueued;
+  const refresh = args.fns.refreshQueuedRows;
+  const hasQueued = Array.isArray(rows) && rows.some(r => (r.P?.syncStatus) === 'queued');
+  if (intervalMs && refresh && typeof refresh === 'function' && hasQueued) {
+    pollRef.id = setTimeout(() => {
+      pollRef.id = null;
+      pollQueuedRows();
+    }, intervalMs);
+  }
+};
+
+// Handle search
+const handleSearch = () => {
+  if (isNestedLinesTable()) {
+    syncNestedLinesTableData();
+    return;
+  }
+  const config = args.fns.evaluateConfig?.() || {};
+  const enableLocalFilters = config?.enableLocalFilters === true;
+  const enableLocalSort = config?.enableLocalSort === true;
+  
+  // If local filters/sort are enabled, fetch all data and apply locally
+  // Otherwise, pass filters/sort to server
+  args.fns.fetchData(
+    enableLocalFilters ? undefined : (tableP()?.searchTerm ?? ""), 
+    enableLocalFilters ? undefined : (tableP()?.columnFilters ?? {}), 
+    enableLocalSort ? undefined : (tableP()?.sortConfig ?? { column: null, direction: null }), 
+    (fetchedRows, categoryItem, relatedVertexIds) => {
+      clearExpansionStoresForDataReload();
+      const rowExpansionRaw = (args.fns.evaluateConfig?.() || {}).rowExpansion;
+      const rowExpansion = Array.isArray(rowExpansionRaw) ? rowExpansionRaw.find((cfg) => cfg?.childVertexLabel) : rowExpansionRaw;
+      if (rowExpansion && rowExpansion.childVertexLabel && Array.isArray(relatedVertexIds)) {
+        patchTableP({
+          expansionPrefetchIdsByParentId: buildExpansionPrefetchIdMapFromGraph(relatedVertexIds, rowExpansion, fetchedRows)
+        });
+      } else {
+        patchTableP({ expansionPrefetchIdsByParentId: null });
+      }
+      const contentRowIds = rowIdsFromVertices(fetchedRows);
+      patchTableP({ data: contentRowIds });
+      
+      // Update category count with fetched data length if local filters are enabled
+      // Pass the categoryItem that was used for fetching, not the currently selected item
+      if (enableLocalFilters) {
+        updateCategoryCountFromFetchedData(fetchedRows, categoryItem);
+      }
+      
+      // Always apply local filters if enabled, or if server didn't filter
+      if (enableLocalFilters || enableLocalSort) {
+        applyLocalFilters();
+      } else {
+        patchTableP({ filteredData: contentRowIds });
+      }
+      
+      startPollIfQueued(fetchedRows);
+    }
+  );
+};
+
+// Handle row selection (using vertex IDs)
+const toggleRowSelection = (vertexId) => {
+  const rowElementId = vertexId != null ? String(vertexId).trim() : "";
+  if (!rowElementId) return;
+  const currentSelected = getSelectedRows();
+  let newSelected;
+  if (getSelectionMode() === 'single') {
+    if (currentSelected.has(rowElementId) && currentSelected.size === 1) {
+      newSelected = new Set();
+    } else {
+      newSelected = new Set([rowElementId]);
+    }
+  } else {
+    newSelected = new Set(currentSelected);
+    if (newSelected.has(rowElementId)) {
+      newSelected.delete(rowElementId);
+    } else {
+      newSelected.add(rowElementId);
+    }
+  }
+  setSelectedRows(newSelected);
+  notifySelectionChange();
+};
+
+const selectAllRows = () => {
+  const displayed = getDisplayData();
+  if (getSelectionMode() === 'single') {
+    const firstRow = (displayed || []).find((row) => row?.id != null);
+    setSelectedRows(firstRow?.id ? new Set([String(firstRow.id)]) : new Set());
+  } else {
+    const allVertexIds = new Set(
+      (displayed || []).map((row) => row.id).filter((id) => id !== undefined && id !== null)
+    );
+    setSelectedRows(allVertexIds);
+  }
+  notifySelectionChange();
+};
+
+const clearSelection = () => {
+  clearSelectedRows();
+  notifySelectionChange();
+};
+
+const applyInitialSelectedRowIds = () => {
+  const initialIds = getInitialSelectedRowIds();
+  if (initialIds.length === 0) {
+    clearSelectedRows();
+    return;
+  }
+  if (getSelectionMode() === 'single') {
+    setSelectedRows(new Set([initialIds[initialIds.length - 1]]));
+  } else {
+    setSelectedRows(new Set(initialIds));
+  }
+};
+
+const [initialSelectionAppliedKey, setInitialSelectionAppliedKey] = args.createSignal("");
+args.createEffect(() => {
+  const initialIds = getInitialSelectedRowIds();
+  const nextKey = initialIds.join("|");
+  if (initialSelectionAppliedKey() === nextKey) return;
+  setInitialSelectionAppliedKey(nextKey);
+  applyInitialSelectedRowIds();
+  if (initialIds.length > 0) {
+    notifySelectionChange();
+  }
+});
+
+// Shift+Arrow: anchor index for range selection (null when not extending)
+const selectionAnchorIndex = () => tableP()?.selectionAnchorIndex ?? null;
+const setSelectionAnchorIndex = (v) => patchTableP({ selectionAnchorIndex: v });
+const clearSelectionAnchor = () => patchTableP({ selectionAnchorIndex: null });
+const selectRange = (fromIndex, toIndex) => {
+  const displayed = getDisplayData();
+  if (!displayed || displayed.length === 0) return;
+  const lo = Math.max(0, Math.min(fromIndex, toIndex));
+  const hi = Math.min(displayed.length - 1, Math.max(fromIndex, toIndex));
+  const ids = [];
+  for (let i = lo; i <= hi; i++) {
+    const r = displayed[i];
+    if (r?.id) ids.push(r.id);
+  }
+  setSelectedRows(new Set(ids));
+  notifySelectionChange();
+};
+const handleShiftArrow = (currentIndex, nextIndex) => {
+  if (!getShowSelection()) return;
+  let anchor = selectionAnchorIndex();
+  if (anchor == null) {
+    anchor = currentIndex;
+    setSelectionAnchorIndex(anchor);
+  }
+  selectRange(anchor, nextIndex);
+  patchTableP({ activeRowId: getDisplayData()?.[nextIndex]?.id ?? null });
+};
+
+const getActiveRowIndex = () => {
+  const id = activeRowId();
+  if (id == null) return -1;
+  const displayed = getDisplayData();
+  const idx = (displayed && displayed.findIndex((r) => r && r.id === id)) ?? -1;
+  return idx >= 0 ? idx : -1;
+};
+
+// Handle add/edit
+const handleAdd = async () => {
+  const onAdd = getOnAdd();
+  
+  // If onAdd function is provided, call it instead of opening modal
+  if (onAdd && typeof onAdd === 'function') {
+    try {
+      await onAdd();
+      return;
+    } catch (error) {
+      console.error("Error in onAdd function:", error);
+      args.showErrorToast?.(error?.message || "Failed to execute add action");
+      return;
+    }
+  }
+  
+  // Default behavior: open add modal
+  patchTableP({ modalMode: "add", editingRow: null, formData: null, isModalOpen: true });
+};
+
+const handleEdit = async (row) => {
+  const onEdit = getOnEdit();
+  
+  // If onEdit function is provided, call it instead of opening modal
+  if (onEdit && typeof onEdit === 'function') {
+    try {
+      await onEdit(row, args);
+      return;
+    } catch (error) {
+      console.error("Error in onEdit function:", error);
+      args.showErrorToast?.(error?.message || "Failed to execute edit action");
+      return;
+    }
+  }
+  
+  // Default behavior: open edit modal
+  patchTableP({ modalMode: "edit", editingRow: row, formData: row, isModalOpen: true });
+};
+
+const handleViewRow = (row) => {
+  patchTableP({ modalMode: "view", editingRow: row, formData: row, isModalOpen: true });
+};
+
+const handleSave = async (formDataToSave) => {
+  const formConfig = args.fns.getFormConfig();
+  if (!formConfig?.saveFunction) {
+    args.showErrorToast?.("Save function not configured");
+    return;
+  }
+
+  try {
+    args.mergeVertexProperties(0, args.fns.pageStateVertexId, args.graph, args.setGraph, { loading: true });
+    const mode = tableP()?.modalMode ?? "add";
+    const originalRow = tableP()?.editingRow ?? null;
+    const result = await formConfig.saveFunction({
+      mode,
+      data: formDataToSave,
+      originalRow
+    });
+
+    if (result?.success) {
+      args.showSuccessToast?.(
+        mode === "add" ? "Item added successfully" : "Item updated successfully"
+      );
+      patchTableP({ isModalOpen: false });
+      // Optimistic update: state is ids only; graph is merged by DynamicPage save
+      if (mode === "add") {
+        const newId = result.data?.id != null ? String(result.data.id) : null;
+        if (newId) {
+          patchTableP({ data: normalizeRowIds([...(tableP()?.data ?? []), newId]) });
+        }
+        
+        // Check if onAfterAdd function is provided
+        const onAfterAdd = getOnAfterAdd();
+        if (onAfterAdd && typeof onAfterAdd === 'function') {
+          try {
+            await onAfterAdd(result, args);
+          } catch (error) {
+            console.error("Error in onAfterAdd function:", error);
+            args.showErrorToast?.(error?.message || "Failed to execute after add action");
+          }
+        }
+      } else {
+        // (add or any edit save for a row not yet listed): append id so the table refreshes without a full reload.
+        const rowId = result.data?.id != null ? String(result.data.id) : null;
+        if (rowId) {
+          const cur = normalizeRowIds(tableP()?.data ?? []);
+          if (!cur.includes(rowId)) {
+            patchTableP({ data: normalizeRowIds([...cur, rowId]) });
+          }
+        }
+        // Check if onAfterEdit function is provided
+        const onAfterEdit = getOnAfterEdit();
+        if (onAfterEdit && typeof onAfterEdit === 'function') {
+          try {
+            await onAfterEdit(result, args);
+          } catch (error) {
+            console.error("Error in onAfterEdit function:", error);
+            args.showErrorToast?.(error?.message || "Failed to execute after edit action");
+          }
+        }
+      }
+      applyLocalFilters();
+      startPollIfQueued();
+      return true;
+    } else {
+      const errorMsg = result?.message || result?.error || "Failed to save";
+      args.showErrorToast?.(errorMsg);
+      return false;
+    }
+  } catch (error) {
+    console.error("Error saving:", error);
+    const errorMsg = error?.message || error?.error || "Failed to save item";
+    args.showErrorToast?.(errorMsg);
+    return false;
+  } finally {
+    args.mergeVertexProperties(0, args.fns.pageStateVertexId, args.graph, args.setGraph, { loading: false });
+  }
+};
+
+// Built-in delete: actionHandlers[key] or default mutateUserContent via formConfig.saveFunction.
+const handleDelete = async (row, options = {}) => {
+  const handlers = getActionHandlers();
+  const deleteHandler = handlers[options?.actionKey] || handlers.delete;
+
+  if (deleteHandler && typeof deleteHandler === "function") {
+    try {
+      await deleteHandler(row);
+      return;
+    } catch (error) {
+      console.error("Error in delete handler:", error);
+      args.showErrorToast?.(error?.message || "Failed to execute delete action");
+      return;
+    }
+  }
+
+  const formConfig = args.fns.getFormConfig();
+  if (!formConfig?.saveFunction) {
+    args.showErrorToast?.("Delete function not configured");
+    return;
+  }
+
+  if (!options.skipConfirm) {
+    const confirmCfg = options.confirm || {
+      title: "Delete Item",
+      message: "Are you sure you want to delete this item? This action cannot be undone.",
+      confirmText: "Delete",
+      cancelText: "Cancel",
+      variant: "danger"
+    };
+    const confirmed = await confirmRowAction(
+      confirmCfg,
+      { key: options?.actionKey || "delete", type: "delete" },
+      row
+    );
+    if (!confirmed) return;
+  }
+
+  try {
+    args.mergeVertexProperties(0, args.fns.pageStateVertexId, args.graph, args.setGraph, { loading: true });
+    // For delete, pass the row as vertex in the new data format
+    const deleteData = {
+      vertex: row,
+      relationships: {}
+    };
+    const result = await formConfig.saveFunction({
+      mode: "delete",
+      data: deleteData,
+      originalRow: row
+    });
+
+    if (result?.success) {
+      const label = getLabel();
+      args.showSuccessToast?.(label ? `${label} deleted successfully` : "Item deleted successfully");
+      const rid = String(row?.id ?? "");
+      const updated = normalizeRowIds(tableP()?.data ?? []).filter((id) => id !== rid);
+      patchTableP({ data: updated });
+      applyLocalFilters();
+      
+      // Check if onAfterDelete function is provided
+      const onAfterDelete = getOnAfterDelete();
+      if (onAfterDelete && typeof onAfterDelete === 'function') {
+        try {
+          await onAfterDelete(result, row, args);
+        } catch (error) {
+          console.error("Error in onAfterDelete function:", error);
+          args.showErrorToast?.(error?.message || "Failed to execute after delete action");
+        }
+      }
+    } else {
+      const errorMsg = result?.message || result?.error || "Failed to delete";
+      args.showErrorToast?.(errorMsg);
+    }
+  } catch (error) {
+    console.error("Error deleting:", error);
+    const errorMsg = error?.message || error?.error || "Failed to delete item";
+    args.showErrorToast?.(errorMsg);
+  } finally {
+    args.mergeVertexProperties(0, args.fns.pageStateVertexId, args.graph, args.setGraph, { loading: false });
+  }
+};
+
+
+
+
+
+// Check if column should be hidden
+const shouldHideColumn = (column) => {
+  const hideColumns = getHideColumns();
+  if (typeof hideColumns === "function") {
+    return hideColumns(column);
+  }
+  return hideColumns.includes(column.key);
+};
+
+// Get column width (from state, config, or defaults)
+const getColumnWidth = (columnKey) => {
+  const storedWidth = (tableP()?.columnWidths ?? {})[columnKey];
+  if (storedWidth) {
+    return storedWidth;
+  }
+  const configWidths = args.fns.prop('columnWidths', args.contextData.props);
+  if (configWidths && configWidths[columnKey]) {
+    return configWidths[columnKey];
+  }
+  if (columnKey === "__selection" || columnKey === "__rowNumber") {
+    return "36px";
+  }
+  if (columnKey === "__actions") {
+    return "120px";
+  }
+  const columns = getColumns();
+  const column = columns.find(col => col.key === columnKey);
+  return column?.width || "100px";
+};
+
+// Get grid template columns
+const getGridTemplateColumns = () => {
+  const columns = getColumns();
+  const showRowNumber = getShowRowNumber();
+  const showSelection = getShowSelection();
+  let template = "";
+
+  // Add selection column if enabled
+  if (showSelection) {
+    template += `${getColumnWidth("__selection")} `;
+  }
+
+  if (getShowActionsColumn()) {
+    template += `${getColumnWidth("__actions")} `;
+  }
+
+  if (showRowNumber) {
+    template += `${getColumnWidth("__rowNumber")} `;
+  }
+
+  columns.forEach(col => {
+    if (!shouldHideColumn(col)) {
+      template += `${getColumnWidth(col.key)} `;
+    }
+  });
+
+  return template.trim();
+};
+
+// Create resize handler for a column
+const createResizeHandler = (columnKey) => {
+  return (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Get current width
+    const currentWidth = getColumnWidth(columnKey);
+    let startWidth = 50;
+    if (currentWidth && currentWidth !== "1fr") {
+      const match = currentWidth.match(/(\d+)px/);
+      if (match) {
+        startWidth = parseInt(match[1]);
+      }
+    }
+
+    const startX = e.clientX || e.touches?.[0]?.clientX || 0;
+
+    const minWidth = (columnKey === "__selection" || columnKey === "__rowNumber") ? 36 : 50;
+    const handleMouseMove = (moveEvent) => {
+      const clientX = moveEvent.clientX || moveEvent.touches?.[0]?.clientX || startX;
+      const deltaX = clientX - startX;
+      const newWidth = Math.max(minWidth, startWidth + deltaX);
+      args.setGraph("vertexes", tableStateVertexId, "P", "columnWidths", columnKey, `${newWidth}px`);
+    };
+
+    const handleMouseUp = () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener('touchmove', handleMouseMove);
+      document.removeEventListener('touchend', handleMouseUp);
+      setIsResizing(false);
+      // Prevent the click from this gesture from bubbling and triggering column sort
+      const preventResizeClick = (clickEvent) => {
+        clickEvent.preventDefault();
+        clickEvent.stopPropagation();
+        document.removeEventListener('click', preventResizeClick, true);
+      };
+      document.addEventListener('click', preventResizeClick, true);
+    };
+
+    setIsResizing(true);
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener('touchmove', handleMouseMove);
+    document.addEventListener('touchend', handleMouseUp);
+  };
+};
+// Watch for sidebar selection changes and refresh table
+const selectedSidebarItem = args.fns.selectedSidebarItem;
+args.createEffect(() => {
+  const item = selectedSidebarItem?.();
+  patchTableP({ activeRowId: null });
+  // When sidebar selection changes, refresh table data
+  if (item) {
+    handleSearch();
+  }
+});
+
+// React to parent's rowsToRemove signal (parent-owned state, no reload after move-to-category)
+const rowsToRemove = args.contextData.props?.rowsToRemove;
+const setRowsToRemove = args.contextData.props?.setRowsToRemove;
+if (rowsToRemove && setRowsToRemove) {
+  args.createEffect(() => {
+    const idsToRemove = rowsToRemove?.();
+    if (!idsToRemove || !Array.isArray(idsToRemove) || idsToRemove.length === 0) return;
+    const idSet = new Set(idsToRemove.map((x) => String(x)));
+    const updated = normalizeRowIds(tableP()?.data ?? []).filter((id) => !idSet.has(id));
+    patchTableP({ data: updated });
+    applyLocalFilters();
+    setRowsToRemove(null);
+  });
+}
+
+// Drag and drop functionality using @atlaskit/pragmatic-drag-and-drop
+const tableDraggableCleanups = new Map();
+const tableDraggableElements = new Map(); // Store elements by rowId
+
+// Read current rowId from element's data attribute (row re-renders update it when sidebar/data changes)
+const getRowIdFromElement = (element) => {
+  const id = element?.getAttribute?.('data-row-id');
+  return id != null && id !== '' ? id : undefined;
+};
+
+// Helper to check if a row can be dragged
+const canDragRow = (rowId) => {
+  if (!rowId) return false;
+  const selected = getEffectiveSelectedRows();
+  if (!selected.has(rowId)) return false;
+  return selected.size > 0;
+};
+
+// Initialize draggable for table row - rowId read from element data-row-id
+const initTableDraggable = (element) => {
+  if (!element || !args.draggable) return;
+  
+  // Clean up existing draggable for this element if any
+  const existingCleanup = tableDraggableCleanups.get(element);
+  if (existingCleanup) {
+    existingCleanup();
+  }
+  
+  const cleanup = args.draggable({
+    element,
+    getInitialData: () => {
+      const currentRowId = getRowIdFromElement(element);
+      if (!currentRowId || !canDragRow(currentRowId)) {
+        return { type: 'table-items', itemIds: [], count: 0 };
+      }
+      
+      const selected = getEffectiveSelectedRows();
+      const itemIds = Array.from(selected).filter(id => id !== undefined && id !== null);
+      
+      return {
+        type: 'table-items',
+        itemIds,
+        count: itemIds.length
+      };
+    },
+    onGenerateDragPreview: ({ nativeSetDragImage }) => {
+      // Provide a stable custom preview (pragmatic disables default preview in some setups)
+      if (!args.setCustomNativeDragPreview || !nativeSetDragImage) return;
+      const currentRowId = getRowIdFromElement(element);
+      if (!currentRowId || !canDragRow(currentRowId)) return;
+
+      const selected = getEffectiveSelectedRows();
+      const count = selected.size;
+
+      if (!count) return;
+
+      return args.setCustomNativeDragPreview({
+        nativeSetDragImage,
+        getOffset: args.pointerOutsideOfPreview
+          ? args.pointerOutsideOfPreview({ x: "8px", y: "8px" })
+          : undefined,
+        render: ({ container }) => {
+          container.style.boxSizing = "border-box";
+          container.style.display = "flex";
+          container.style.alignItems = "center";
+          container.style.gap = "10px";
+          container.style.padding = "10px 12px";
+          container.style.borderRadius = "10px";
+          container.style.border = `1px solid ${args.theme?.var?.color?.border ?? "rgba(0,0,0,0.2)"}`;
+          container.style.background = `${args.theme?.var?.color?.background_light_200 ?? "#fff"}`;
+          container.style.color = `${args.theme?.var?.color?.text ?? "#111"}`;
+          container.style.boxShadow = "0 10px 28px rgba(0,0,0,0.18)";
+          container.style.pointerEvents = "none";
+          container.style.fontSize = "14px";
+          container.style.fontWeight = "600";
+          container.style.maxWidth = "320px";
+
+          const badge = document.createElement("div");
+          badge.style.flex = "0 0 auto";
+          badge.style.padding = "2px 8px";
+          badge.style.borderRadius = "9999px";
+          badge.style.background = `${args.theme?.var?.color?.primary ?? "#4f46e5"}`;
+          badge.style.color = `${args.theme?.var?.color?.primary_text ?? "#fff"}`;
+          badge.style.fontSize = "12px";
+          badge.style.fontWeight = "700";
+          badge.textContent = String(count);
+
+          const text = document.createElement("div");
+          text.style.minWidth = "0";
+          text.style.whiteSpace = "nowrap";
+          text.style.overflow = "hidden";
+          text.style.textOverflow = "ellipsis";
+          text.textContent = count === 1 ? "Move 1 item" : `Move ${count} items`;
+
+          container.appendChild(badge);
+          container.appendChild(text);
+        }
+      });
+    },
+    onDragStart: () => {
+      const currentRowId = getRowIdFromElement(element);
+      if (!currentRowId || !canDragRow(currentRowId)) return;
+      if (element) element.style.opacity = "0.5";
+    },
+    onDrop: () => {
+      if (element) element.style.opacity = "1";
+    }
+  });
+  
+  tableDraggableCleanups.set(element, cleanup);
+  const rowId = getRowIdFromElement(element);
+  if (rowId) tableDraggableElements.set(rowId, element);
+  return cleanup;
+};
+
+// Cleanup table draggable for a specific element
+const cleanupTableDraggable = (element) => {
+  if (element) {
+    const cleanup = tableDraggableCleanups.get(element);
+    if (cleanup) {
+      cleanup();
+      tableDraggableCleanups.delete(element);
+    }
+    // Remove from elements map
+    tableDraggableElements.forEach((el, rowId) => {
+      if (el === element) {
+        tableDraggableElements.delete(rowId);
+      }
+    });
+  } else {
+    // Cleanup all draggables
+    tableDraggableCleanups.forEach((cleanup) => cleanup());
+    tableDraggableCleanups.clear();
+    tableDraggableElements.clear();
+  }
+};
+
+const getSelectedItems = () => {
+  const selected = getEffectiveSelectedRows();
+  const filteredRows = resolvedFilteredVertices();
+  const selectedIds = Array.from(selected);
+  return filteredRows.filter((row) => row?.id != null && selectedIds.includes(row.id));
+};
+
+const hasActiveFilters = () => {
+  const filters = tableP()?.columnFilters ?? {};
+  const keys = Object.keys(filters);
+  for (const k of keys) {
+    const v = filters[k];
+    if (v !== undefined && v !== null && v !== "") {
+      if (Array.isArray(v)) {
+        if (v.length > 0 && !(v.length === 1 && v[0] === "_All_VALUES_")) return true;
+      } else return true;
+    }
+  }
+  return false;
+};
+
+// --- Table scroll layout (wide columns + virtualization) ---
+// - Body scrolls in one viewport-sized box (40wrap): overflow:auto so vertical and horizontal scrollbars stay visible.
+// - Header/filter strips wrap the same grid width; overflow-x:hidden hides scrollbars there; scrollLeft is synced from body on scroll.
+// - tableBodyVScrollEl and tableBodyHScrollEl both point at 40wrap after mount (same element for VirtualList + scrollLeft sync).
+const [tableBodyVScrollEl, setTableBodyVScrollEl] = args.createSignal(null);
+let tableHeaderHScrollEl = null;
+let tableFilterHScrollEl = null;
+let tableBodyHScrollEl = null;
+
+const syncTableHorizontalScroll = (sourceEl) => {
+  if (!sourceEl) return;
+  const sl = sourceEl.scrollLeft;
+  // Copy scrollLeft to the other strips; skip sourceEl so we do not fight the user's scroll or loop.
+  if (tableHeaderHScrollEl && tableHeaderHScrollEl !== sourceEl && tableHeaderHScrollEl.scrollLeft !== sl) {
+    tableHeaderHScrollEl.scrollLeft = sl;
+  }
+  if (tableFilterHScrollEl && tableFilterHScrollEl !== sourceEl && tableFilterHScrollEl.scrollLeft !== sl) {
+    tableFilterHScrollEl.scrollLeft = sl;
+  }
+  if (tableBodyHScrollEl && tableBodyHScrollEl !== sourceEl && tableBodyHScrollEl.scrollLeft !== sl) {
+    tableBodyHScrollEl.scrollLeft = sl;
+  }
+};
+
+const handleTableHorizontalScroll = (e) => {
+  syncTableHorizontalScroll(e.currentTarget);
+};
+
+// Approximate min width of the table grid so the body horizontal scroll region gets scrollWidth.
+const getTableBodyMinWidthPx = () => {
+  const template = getGridTemplateColumns();
+  const parts = template.trim().split(/\s+/).filter(Boolean);
+  let sum = 0;
+  for (const p of parts) {
+    const px = p.match(/^(\d+(?:\.\d+)?)px$/i);
+    if (px) {
+      sum += parseFloat(px[1]);
+      continue;
+    }
+    if (/\d*\.?\d+fr/.test(p)) {
+      sum += 120;
+      continue;
+    }
+    if (/minmax/i.test(p)) {
+      sum += 80;
+      continue;
+    }
+    sum += 100;
+  }
+  return Math.max(sum, 200);
+};
+
+return {
+  tableStateVertexId,
+  isEmbeddedMode: () => {
+    const mode = args.contextData.props?.mode || args.contextData.props?.tableMode;
+    return mode === "embedded" || args.contextData.props?.embeddedMode === true;
+  },
+  getTableMode: () => {
+    if (args.fns.isEmbeddedMode?.()) return "embedded";
+    return "standalone";
+  },
+  getColumns,
+  getRowHeight,
+  getTitle,
+  getSubtitle,
+  getSearchPlaceholder,
+  getAdditionalFilters,
+  getCustomActions,
+  getBatchActions,
+  getShowRowNumber,
+  getHideColumns,
+  getShowAddButton,
+  getShowSelection,
+  getResizableColumns,
+  getHideExportButtons,
+  getHideImportButtons,
+  getHideSettingsButton,
+  getIcon,
+  hasActiveFilters,
+  getLabel,
+  getAddButtonLabel,
+  getOnEdit,
+  getOnAfterAdd,
+  getOnAfterEdit,
+  getOnAdd,
+  getShowActionsColumn,
+  getColumnRenderer,
+  getColumnDataType,
+  getColumnFilterKind,
+  isStructuralColumn,
+  getActions,
+  getActionHandlers,
+  isActionVisible,
+  isActionDisabled,
+  resolveActionReason,
+  resolveActionReasonCode,
+  resolveActionReasonText,
+  getActionReasonCodeMap,
+  localizeReasonCode,
+  resolveActionReasonVariant,
+  getActionReasonState,
+  getActionTooltip,
+  getActionReasonDataAttrs,
+  getActionHref,
+  getPrimaryActionsForRow,
+  getSecondaryActionsForRow,
+  hasSecondaryActionsForRow,
+  isActionRunning,
+  runRowAction,
+  runBulkAction,
+  confirmRowAction,
+  getOnAfterDelete,
+  getUsePolarisUI: () => {
+    if (isNestedLinesTable()) return args.contextData.props?.usePolarisUI === true;
+    return args.fns.getUsePolarisUI?.() === true;
+  },
+  getColumnWidth,
+  createResizeHandler,
+  debouncedSetSearchTerm,
+  getSelectedRows,
+  getEffectiveSelectedRows,
+  setSelectedRows,
+  clearSelectedRows,
+  initializeFromQueryParams,
+  updateQueryParams,
+  applyLocalFilters,
+  getCellValue,
+  getUniqueColumnValues,
+  handleSort,
+  handleColumnFilterChange,
+  handleSearch,
+  toggleRowSelection,
+  selectAllRows,
+  clearSelection,
+  clearSelectionAnchor,
+  handleShiftArrow,
+  activeRowId,
+  activeRowIndex: getActiveRowIndex,
+  setActiveRowIndex: (rowIndex) => patchTableP({ activeRowId: getDisplayData()?.[rowIndex]?.id ?? null }),
+  handleAdd,
+  handleEdit,
+  handleViewRow,
+  getRowClickable,
+  getOnRowClick,
+  getSelectionMode,
+  getOnSelectionChange,
+  getInitialSelectedRowIds,
+  notifySelectionChange,
+  applyInitialSelectedRowIds,
+  shouldHideColumn,
+  getGridTemplateColumns,
+  renderCellContent,
+  handleSave,
+  handleDelete,
+  initTableDraggable,
+  cleanupTableDraggable,
+  getSelectedItems,
+  resolveFilteredVerticesForExport: resolvedFilteredVertices,
+  getSelectFilterProps,
+  setRowRef,
+  getRowRef,
+  getDisplayData,
+  getSelectableVisibleRowIds,
+  syncNestedLinesTableData,
+  getGroupByConfig,
+  getRowExpansionConfigs,
+  getExpansionPanelHeight,
+  toggleRowExpansion,
+  isExpansionOpen,
+  isNestedLinesTable,
+  toggleExpanded,
+  setCollapsedKeys: (key, val) => {
+    const sk = String(key);
+    const p = tableP();
+    const cur = Array.isArray(p?.collapsedKeys) ? [...p.collapsedKeys] : [];
+    if (val === undefined || val === false) {
+      patchTableP({ collapsedKeys: cur.filter((k) => k !== sk) });
+    } else {
+      if (!cur.includes(sk)) cur.push(sk);
+      patchTableP({ collapsedKeys: cur });
+    }
+  },
+  iconActionActiveKey,
+  handleIconAction,
+  getIconActionRowKey,
+  setTableBodyVScrollEl,
+  getTableBodyVScrollEl: () => tableBodyVScrollEl(),
+  setTableHeaderHScrollEl: (el) => {
+    tableHeaderHScrollEl = el;
+  },
+  setTableFilterHScrollEl: (el) => {
+    tableFilterHScrollEl = el;
+  },
+  setTableBodyHScrollEl: (el) => {
+    tableBodyHScrollEl = el;
+  },
+  handleTableHorizontalScroll,
+  getScrollContainerElementForVirtualList: () => tableBodyVScrollEl(),
+  getTableBodyMinWidthPx
+};
+'''
+        key: Table
+        props:
+          '''return {
+  onMount: async () => {
+    if (args.fns.isNestedLinesTable?.()) {
+      args.fns.syncNestedLinesTableData?.();
+      if (typeof args.createEffect === "function") {
+        args.createEffect(() => {
+          const getRows = args.contextData.props?.getNestedLineRows;
+          const getLoading = args.contextData.props?.getNestedLinesLoading;
+          if (typeof getRows === "function") getRows();
+          if (typeof getLoading === "function") getLoading();
+          args.fns.syncNestedLinesTableData?.();
+        });
+      }
+      return;
+    }
+    args.fns.initializeFromQueryParams();
+    // If sidebar is configured, don't fetch on mount
+    const hasSidebar = args.fns.hasSidebar?.();
+    if (!hasSidebar) {
+      args.fns.handleSearch();
+    }
+  },
+  onCleanup: () => {
+    args.deleteVertex(0, args.fns.tableStateVertexId, args.graph, args.setGraph);
+  }
+}'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''
+return args.contextData.props?.nestedLinesMode === true
+  ? `._id {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  min-height: 0;
+  height: ${
+    (() => {
+      const rawHeight = args.contextData.props?.nestedLinesContainerHeight;
+      if (typeof rawHeight === "number" && !Number.isNaN(rawHeight) && rawHeight > 0) return `${rawHeight}px`;
+      if (typeof rawHeight === "string" && rawHeight.trim() !== "") return rawHeight;
+      return "280px";
+    })()
+  };
+  max-height: ${
+    (() => {
+      const rawMaxHeight = args.contextData.props?.nestedLinesContainerMaxHeight;
+      if (typeof rawMaxHeight === "number" && !Number.isNaN(rawMaxHeight) && rawMaxHeight > 0) return `${rawMaxHeight}px`;
+      if (typeof rawMaxHeight === "string" && rawMaxHeight.trim() !== "") return rawMaxHeight;
+      return "100%";
+    })()
+  };
+}`
+  : args.fns.isEmbeddedMode?.() === true
+  ? `._id {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 280px;
+  min-height: 0;
+}`
+  : `._id {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 48px);
+  /* min-height:0 lets flex children (e.g. table body) shrink so overflow/scroll works */
+  min-height: 0;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        slotName: header
+        displayOrder: 1
+        componentName: Slot
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.sm};
+  display: flex;
+  flex-direction: column;
+  gap: ${args.theme.var.spacing.sm};
+  /* Toolbar keeps natural height; flex row below (table) gets remaining space */
+  flex-shrink: 0;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  hide: args.fns.isEmbeddedMode?.() === true && args.contextData.props?.hidePageChrome !== false
+};
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: ${args.theme.var.spacing.md};
+  flex-wrap: wrap;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.sm};
+  font-size: ${args.theme.var.fontSize.xl};
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const title = args.fns.getTitle();
+const displayTitle = title;
+return {
+  as: "div",
+  hide: !displayTitle
+};
+'''
+      }
+    }
+    {
+      id: "7a"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const icon = args.fns.getIcon();
+return {
+  as: "icon",
+  icon: icon,
+  width: 24,
+  height: 24,
+  hide: !icon
+};
+'''
+      }
+    }
+    {
+      id: "7b"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  margin: 0;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const title = args.fns.getTitle();
+const displayTitle = title;
+return {
+  as: "span",
+  text: displayTitle,
+  hide: !displayTitle
+};
+'''
+      }
+    }
+    {
+      id: "7c"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  hide: true
+};
+'''
+      }
+    }
+    {
+      id: "7d"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  margin: 0;
+  font-size: ${args.theme.var.fontSize.sm};
+  line-height: 1.5;
+  color: ${args.theme.var.color.text_dark_400};
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const subtitle = args.fns.getSubtitle?.();
+const displaySubtitle =
+  subtitle != null && String(subtitle).trim() !== "" ? String(subtitle).trim() : "";
+return {
+  as: "p",
+  text: displaySubtitle,
+  hide: displaySubtitle === ""
+};
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.sm};
+  flex-wrap: wrap;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const customActions = args.fns.getCustomActions?.() || [];
+const hasCustomActions = Array.isArray(customActions) ? customActions.length > 0 : !!customActions;
+return {
+  as: "div",
+  hide: !hasCustomActions
+};
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        slotName: customActions
+        displayOrder: 1
+        componentName: Slot
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.sm};
+  flex-wrap: wrap;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        slotName: additionalFilters
+        displayOrder: 1
+        componentName: Slot
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.sm};
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const showAddButton = args.fns.getShowAddButton();
+const formConfig = args.fns.getFormConfig();
+
+return {
+  as: "div",
+  hide: !showAddButton || !formConfig
+};
+'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "primary",
+  onClick: args.fns.handleAdd,
+  text: "Add",
+  leftIcon: "carbon:add",
+  hide: args.fns.getUsePolarisUI?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "11_polaris"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "s-button",
+  "attr:variant": "primary",
+  "attr:icon": "plus",
+  text: "Add",
+  onClick: args.fns.handleAdd,
+  hide: args.fns.getUsePolarisUI?.() !== true
+};
+'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.sm};
+}`;
+'''
+        displayOrder: 6
+        componentName: Html
+        props:
+          '''
+const hasImport = !!args.fns.getImportFunction();
+const hasExport = !!args.fns.getExportFunction();
+const hideImportButtons = args.fns.getHideImportButtons();
+const hideExportButtons = args.fns.getHideExportButtons();
+
+return {
+  as: "div",
+  hide: (!hasImport && !hasExport) || (hideImportButtons && hideExportButtons)
+};
+'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "secondary",
+  onClick: () => args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { isImportModalOpen: true }),
+  text: "Import",
+  leftIcon: "carbon:upload",
+  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
+  hide: !args.fns.getImportFunction() || args.fns.getHideImportButtons() || args.fns.getUsePolarisUI?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "14_polaris"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "s-button",
+  "attr:variant": "secondary",
+  "attr:icon": "upload",
+  text: "Import",
+  onClick: () => args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { isImportModalOpen: true }),
+  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
+  hide: !args.fns.getImportFunction() || args.fns.getHideImportButtons() || args.fns.getUsePolarisUI?.() !== true
+};
+'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "secondary",
+  onClick: args.fns.handleExport,
+  text: "Export All",
+  leftIcon: "carbon:download",
+  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
+  hide: !args.fns.getExportFunction() || args.fns.getHideExportButtons() || args.fns.getUsePolarisUI?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "13_polaris"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "s-button",
+  "attr:variant": "secondary",
+  "attr:icon": "download",
+  text: "Export All",
+  onClick: args.fns.handleExport,
+  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
+  hide: !args.fns.getExportFunction() || args.fns.getHideExportButtons() || args.fns.getUsePolarisUI?.() !== true
+};
+'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "secondary",
+  onClick: () => args.fns.handleExport(args.fns.resolveFilteredVerticesForExport?.() ?? []),
+  text: "Export Filtered",
+  leftIcon: "carbon:filter",
+  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
+  hide: !args.fns.getExportFunction() || args.fns.getHideExportButtons() || args.fns.getUsePolarisUI?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "15_polaris"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "s-button",
+  "attr:variant": "secondary",
+  "attr:icon": "filter",
+  text: "Export Filtered",
+  onClick: () => args.fns.handleExport(args.fns.resolveFilteredVerticesForExport?.() ?? []),
+  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
+  hide: !args.fns.getExportFunction() || args.fns.getHideExportButtons() || args.fns.getUsePolarisUI?.() !== true
+};
+'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.sm};
+  flex: 1;
+  min-width: 200px;
+}`;
+'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: TextInput
+        props:
+          '''
+return {
+  placeholder: args.fns.getSearchPlaceholder(),
+  value: args.graph.vertexes[args.fns.tableStateVertexId]?.P?.searchTerm ?? "",
+  onInput: (e) => {
+    args.fns.debouncedSetSearchTerm(e.target.value);
+  },
+  leftIcon: "carbon:search",
+  hide: args.fns.getUsePolarisUI?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "19_polaris"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  flex: 1;
+  min-width: 0;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "s-search-field",
+  label: "Search",
+  "attr:labelAccessibilityVisibility": "exclusive",
+  placeholder: args.fns.getSearchPlaceholder(),
+  value: args.graph.vertexes[args.fns.tableStateVertexId]?.P?.searchTerm ?? "",
+  onInput: (e) => args.fns.debouncedSetSearchTerm(e?.target?.value ?? ''),
+  hide: args.fns.getUsePolarisUI?.() !== true
+};
+'''
+      }
+    }
+    {
+      id: "20"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "primary",
+  onClick: args.fns.handleSearch,
+  text: "Search",
+  leftIcon: "carbon:search",
+  hide: true,
+  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true
+};
+'''
+      }
+    }
+    {
+      id: "21"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "secondary",
+  onClick: args.fns.handleOpenSettings,
+  text: "Settings",
+  leftIcon: "carbon:settings",
+  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
+  hide: !args.fns.getSettingsFunction() || args.fns.getHideSettingsButton() || args.fns.getUsePolarisUI?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "21_polaris"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''
+return {
+  as: "s-button",
+  "attr:variant": "secondary",
+  "attr:icon": "settings",
+  text: "Settings",
+  onClick: args.fns.handleOpenSettings,
+  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
+  hide: !args.fns.getSettingsFunction() || args.fns.getHideSettingsButton() || args.fns.getUsePolarisUI?.() !== true
+};
+'''
+      }
+    }
+    {
+      id: "22"
+      L: Attr
+      P: {
+        css:
+          '''
+const isResizing = args.graph.vertexes[args.fns.tableStateVertexId]?.P?.isResizing === true;
+
+return [`._id {
+  display: flex;
+  flex-direction: column;
+  /* flex-basis:0 so this column fills remaining height under toolbar; min-height:0 enables overflow in children */
+  flex: 1 1 0;
+  min-height: 0;
+  width: 100%;
+  overflow: hidden;
+  user-select: ${isResizing ? "none" : "auto"};
+}`];
+'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "22h"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  flex-shrink: 0;
+  min-width: 0;
+  width: 100%;
+  /* No native horizontal scrollbar; scrollLeft is synced from body (40wrap) on scroll */
+  overflow-x: hidden;
+  overflow-y: hidden;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  ref: (el) => {
+    args.fns.setTableHeaderHScrollEl(el);
+  }
+};
+'''
+      }
+    }
+    {
+      id: "22f"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  flex-shrink: 0;
+  min-width: 0;
+  width: 100%;
+  /* Same as header strip: hidden overflow + scrollLeft sync from body */
+  overflow-x: hidden;
+  overflow-y: hidden;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  ref: (el) => {
+    args.fns.setTableFilterHScrollEl(el);
+  }
+};
+'''
+      }
+    }
+    {
+      id: "23"
+      L: Attr
+      P: {
+        css:
+          '''
+const usePolaris = args.fns.getUsePolarisUI?.() === true
+return `._id {
+  display: grid;
+  grid-template-columns: ${args.fns.getGridTemplateColumns()};
+  min-width: min-content;
+  width: 100%;
+  background: ${usePolaris ? "#f7f7f7" : args.theme.var.color.background_light_100};
+  border-top: 1px solid ${args.theme.var.color.border};
+  border-bottom: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "24"
+      L: Attr
+      P: {
+        css:
+          '''
+const showSelection = args.fns.getShowSelection();
+
+return `._id {
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  font-weight: 600;
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.text};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}`;
+'''
+        displayOrder: 0.5
+        componentName: Html
+        props:
+          '''
+const showSelection = args.fns.getShowSelection();
+const selectionMode = args.fns.getSelectionMode?.();
+
+return {
+  as: "div",
+  hide: !showSelection || selectionMode === "single",
+};
+'''
+      }
+    }
+    {
+      id: "25"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  pointer-events: auto;
+  cursor: pointer;
+  width: 1rem;
+  height: 1rem;
+  accent-color: ${args.theme.var.color.text};
+  flex-shrink: 0;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const showSelection = args.fns.getShowSelection();
+const selectionMode = args.fns.getSelectionMode?.();
+const selected = args.fns.getSelectedRows();
+const visibleIds = args.fns.getSelectableVisibleRowIds?.() ?? [];
+const allSelected = visibleIds.length > 0 && visibleIds.every((id) => selected.has(id));
+// const usePolaris = args.fns.getUsePolarisUI?.() === true;
+const usePolaris = false;
+
+return {
+  as: usePolaris ? "s-checkbox" : "input",
+  type: usePolaris ? undefined : "checkbox",
+  "attr:checked": usePolaris && allSelected ? true : undefined,
+  "attr:accessibilityLabel": usePolaris ? "Select all rows" : undefined,
+  checked: usePolaris ? undefined : allSelected,
+  onChange: usePolaris ? (e) => {
+    const checked = e.target?.checked ?? e.detail?.checked ?? !allSelected;
+    if (checked) args.fns.selectAllRows();
+    else args.fns.clearSelection();
+  } : () => {
+    if (allSelected) args.fns.clearSelection();
+    else args.fns.selectAllRows();
+  },
+  hide: !showSelection || args.fns.getSelectionMode?.() === "single"
+};
+'''
+      }
+    }
+    {
+      id: "26"
+      L: Attr
+      P: {
+        css:
+          '''
+const showSelection = args.fns.getShowSelection();
+const resizableColumns = args.fns.getResizableColumns();
+
+return `._id {
+  position: absolute;
+  top: 0;
+  right: -4px;
+  bottom: 0;
+  width: 8px;
+  cursor: col-resize;
+  z-index: 20;
+  touch-action: none;
+  transition: background ${args.theme.var.animation.fast} ease, border-color ${args.theme.var.animation.fast} ease;
+  border-left: 1px solid ${args.theme.var.color.border_light_400};
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background: ${args.theme.var.color.primary_light_200};
+      opacity: 0.6;
+      border-left-color: ${args.theme.var.color.primary_light_300};
+    }
+  }
+
+  &:active {
+    background: ${args.theme.var.color.primary_light_200};
+    opacity: 0.8;
+    border-left-color: ${args.theme.var.color.primary_light_300};
+  }
+
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const showSelection = args.fns.getShowSelection();
+const resizableColumns = args.fns.getResizableColumns();
+
+const resizeHandler = args.fns.createResizeHandler("__selection");
+
+return {
+  as: "div",
+  hide: !resizableColumns || !showSelection,
+  onMouseDown: resizeHandler,
+  onTouchStart: resizeHandler
+};
+'''
+      }
+    }
+    {
+      id: "27"
+      L: Attr
+      P: {
+        css:
+          '''
+const hasFormConfig = !!args.fns.getFormConfig();
+
+return `._id {
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  font-weight: 600;
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.text};
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.xs};
+  cursor: default;
+  user-select: none;
+  position: relative;
+}`;
+'''
+        displayOrder: 0.6
+        componentName: Html
+        props:
+          '''
+const hasFormConfig = !!args.fns.getFormConfig();
+
+return {
+  as: "div",
+  hide: !args.fns.getShowActionsColumn()
+};
+'''
+      }
+    }
+    {
+      id: "27a"
+      L: Attr
+      P: {
+        css:
+          '''
+const column = { key: "__actions", label: "Actions" };
+
+return `._id {
+  color: ${args.theme.var.color.muted};
+  font-size: ${args.theme.var.fontSize.xs};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const hasFormConfig = !!args.fns.getFormConfig();
+
+return {
+  as: "div",
+  text: "Actions",
+  hide: !args.fns.getShowActionsColumn()
+};
+'''
+      }
+    }
+    {
+      id: "28"
+      L: Attr
+      P: {
+        css:
+          '''
+const hasFormConfig = !!args.fns.getFormConfig();
+const resizableColumns = args.fns.getResizableColumns();
+
+return `._id {
+  position: absolute;
+  top: 0;
+  right: -4px;
+  bottom: 0;
+  width: 8px;
+  cursor: col-resize;
+  z-index: 20;
+  touch-action: none;
+  transition: background ${args.theme.var.animation.fast} ease, border-color ${args.theme.var.animation.fast} ease;
+  border-left: 1px solid ${args.theme.var.color.border_light_400};
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background: ${args.theme.var.color.primary_light_200};
+      opacity: 0.6;
+      border-left-color: ${args.theme.var.color.primary_light_300};
+    }
+  }
+
+  &:active {
+    background: ${args.theme.var.color.primary_light_200};
+    opacity: 0.8;
+    border-left-color: ${args.theme.var.color.primary_light_300};
+  }
+
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const hasFormConfig = !!args.fns.getFormConfig();
+const resizableColumns = args.fns.getResizableColumns();
+
+const resizeHandler = args.fns.createResizeHandler("__actions");
+
+return {
+  as: "div",
+  hide: !resizableColumns || !args.fns.getShowActionsColumn(),
+  onMouseDown: resizeHandler,
+  onTouchStart: resizeHandler
+};
+'''
+      }
+    }
+    {
+      id: "29"
+      L: Attr
+      P: {
+        contextName: column
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const columns = args.fns.getColumns();
+const showRowNumber = args.fns.getShowRowNumber();
+
+return {
+  data: showRowNumber 
+    ? [{ key: "__rowNumber", label: "#", renderer: "rowNumber" }, ...columns]
+    : columns
+};
+'''
+      }
+    }
+    {
+      id: "30"
+      L: Attr
+      P: {
+        css:
+          '''
+const column = args.contextData.column;
+const shouldHide = args.fns.shouldHideColumn(column);
+
+return `._id {
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  font-weight: 600;
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.text};
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.xs};
+  cursor: ${(column.sortable !== false && !args.fns.isStructuralColumn(column)) ? "pointer" : "default"};
+  user-select: none;
+  position: relative;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const column = args.contextData.column;
+const shouldHide = args.fns.shouldHideColumn(column);
+const isRowNumber = args.fns.getColumnRenderer(column) === "rowNumber";
+const isExpandColumn = args.fns.getColumnRenderer(column) === "expand";
+
+return {
+  as: "div",
+  hide: shouldHide,
+  onClick: () => {
+    if (!isRowNumber && !isExpandColumn && column.sortable !== false) {
+      args.fns.handleSort(column);
+    }
+  }
+};
+'''
+      }
+    }
+    {
+      id: "31"
+      L: Attr
+      P: {
+        css:
+          '''
+const column = args.contextData.column;
+
+return `._id {
+  color: ${args.theme.var.color.muted};
+  font-size: ${args.theme.var.fontSize.xs};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const column = args.contextData.column;
+const sortConfig = args.graph.vertexes[args.fns.tableStateVertexId]?.P?.sortConfig ?? { column: null, direction: null };
+const isSorted = sortConfig.column === column.key;
+
+return {
+  as: "div",
+  text: args.fns.getColumnRenderer(column) === "iconAction" || args.fns.getColumnRenderer(column) === "expand"
+    ? ""
+    : (column.label || column.key),
+  hide: args.fns.isStructuralColumn(column)
+};
+'''
+      }
+    }
+    {
+      id: "32"
+      L: Attr
+      P: {
+        css:
+          '''
+const sortConfig = args.graph.vertexes[args.fns.tableStateVertexId]?.P?.sortConfig ?? { column: null, direction: null };
+const column = args.contextData.column;
+const isSorted = sortConfig.column === column.key;
+const direction = sortConfig.direction;
+
+return `._id {
+  display: flex;
+  flex-direction: column;
+  opacity: ${isSorted ? 1 : 0.3};
+  transition: opacity 0.2s ease;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const column = args.contextData.column;
+const sortConfig = args.graph.vertexes[args.fns.tableStateVertexId]?.P?.sortConfig ?? { column: null, direction: null };
+const isSorted = sortConfig.column === column.key;
+const direction = sortConfig.direction;
+const isRowNumber = args.fns.getColumnRenderer(column) === "rowNumber";
+const isExpandColumn = args.fns.getColumnRenderer(column) === "expand";
+
+return {
+  as: "icon",
+  icon: direction === "asc" ? "carbon:chevron-up" : "carbon:chevron-down",
+  width: 16,
+  height: 16,
+  hide: !isSorted || column.sortable === false || isRowNumber || args.fns.getColumnRenderer(column) === "iconAction" || isExpandColumn
+};
+'''
+      }
+    }
+    {
+      id: "32a"
+      L: Attr
+      P: {
+        css:
+          '''
+const column = args.contextData.column;
+
+return `._id {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: 2px;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const column = args.contextData.column;
+const columnFilters = args.graph.vertexes[args.fns.tableStateVertexId]?.P?.columnFilters ?? {};
+const filterValue = columnFilters[column.key];
+const hasFilter = filterValue !== undefined && filterValue !== null && filterValue !== "" && (!Array.isArray(filterValue) || (filterValue.length > 0 && !(filterValue.length === 1 && filterValue[0] === "_All_VALUES_")));
+const isRowNumber = args.fns.getColumnRenderer(column) === "rowNumber";
+const isExpandColumn = args.fns.getColumnRenderer(column) === "expand";
+
+return {
+  as: "icon",
+  icon: "carbon:filter",
+  width: 14,
+  height: 14,
+  hide: !hasFilter || isRowNumber || args.fns.getColumnRenderer(column) === "iconAction" || isExpandColumn,
+  title: "Filter applied"
+};
+'''
+      }
+    }
+    {
+      id: "33"
+      L: Attr
+      P: {
+        css:
+          '''
+const column = args.contextData.column;
+const resizableColumns = args.fns.getResizableColumns();
+const shouldHide = args.fns.shouldHideColumn(column);
+
+return `._id {
+  position: absolute;
+  top: 0;
+  right: -4px;
+  bottom: 0;
+  width: 8px;
+  cursor: col-resize;
+  z-index: 20;
+  touch-action: none;
+  transition: background ${args.theme.var.animation.fast} ease, border-color ${args.theme.var.animation.fast} ease;
+  border-left: 1px solid ${args.theme.var.color.border_light_400};
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background: ${args.theme.var.color.primary_light_200};
+      opacity: 0.6;
+      border-left-color: ${args.theme.var.color.primary_light_300};
+    }
+  }
+
+  &:active {
+    background: ${args.theme.var.color.primary_light_200};
+    opacity: 0.8;
+    border-left-color: ${args.theme.var.color.primary_light_300};
+  }
+
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const column = args.contextData.column;
+const resizableColumns = args.fns.getResizableColumns();
+const shouldHide = args.fns.shouldHideColumn(column);
+
+// Determine column key for resize
+const getColumnKey = () => {
+  if (args.fns.getColumnRenderer(column) === "rowNumber") {
+    return column.key;
+  }
+  return column.key;
+};
+
+const columnKey = getColumnKey();
+const resizeHandler = args.fns.createResizeHandler(columnKey);
+
+return {
+  as: "div",
+  hide: !resizableColumns || shouldHide,
+  onMouseDown: resizeHandler,
+  onTouchStart: resizeHandler
+};
+'''
+      }
+    }
+    {
+      id: "34"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: grid;
+  grid-template-columns: ${args.fns.getGridTemplateColumns()};
+  min-width: min-content;
+  width: 100%;
+  border-bottom: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "35"
+      L: Attr
+      P: {
+        css:
+          '''
+const showSelection = args.fns.getShowSelection();
+
+return `._id {
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+}`;
+'''
+        displayOrder: 0.5
+        componentName: Html
+        props:
+          '''
+const showSelection = args.fns.getShowSelection();
+
+return {
+  as: "div",
+  hide: !showSelection
+};
+'''
+      }
+    }
+    {
+      id: "36"
+      L: Attr
+      P: {
+        css:
+          '''
+const hasFormConfig = !!args.fns.getFormConfig();
+
+return `._id {
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+}`;
+'''
+        displayOrder: 0.6
+        componentName: Html
+        props:
+          '''
+const hasFormConfig = !!args.fns.getFormConfig();
+
+return {
+  as: "div",
+  hide: !args.fns.getShowActionsColumn()
+};
+'''
+      }
+    }
+    {
+      id: "37"
+      L: Attr
+      P: {
+        contextName: column
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const columns = args.fns.getColumns();
+const showRowNumber = args.fns.getShowRowNumber();
+
+return {
+  data: showRowNumber 
+    ? [{ key: "__rowNumber", label: "#", renderer: "rowNumber" }, ...columns]
+    : columns
+};
+'''
+      }
+    }
+    {
+      id: "38"
+      L: Attr
+      P: {
+        css:
+          '''
+const column = args.contextData.column;
+const shouldHide = args.fns.shouldHideColumn(column);
+
+return `._id {
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const column = args.contextData.column;
+const shouldHide = args.fns.shouldHideColumn(column);
+
+return {
+  as: "div",
+  hide: shouldHide || column.filterable === false
+};
+'''
+      }
+    }
+    {
+      id: "39"
+      L: Attr
+      P: {
+        css:
+          '''
+const column = args.contextData.column;
+const columnFilters = args.graph.vertexes[args.fns.tableStateVertexId]?.P?.columnFilters ?? {};
+// Preserve array values from URL - don't default to empty string for select filters
+const filterValue = columnFilters[column.key] !== undefined ? columnFilters[column.key] : (args.fns.getColumnFilterKind(column) === "select" ? [] : "");
+
+return `._id {
+  width: 100%;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const column = args.contextData.column;
+const columnFilters = args.graph.vertexes[args.fns.tableStateVertexId]?.P?.columnFilters ?? {};
+// Access store reactively - ensure we get the current value
+const getFilterValue = () => {
+  const value = columnFilters[column.key];
+  if (value !== undefined) {
+    return value;
+  }
+  // Default to empty array for select filters, empty string for others
+  return args.fns.getColumnFilterKind(column) === "select" ? [] : "";
+};
+const filterValue = getFilterValue();
+
+// Skip filter for rowNumber
+if (args.fns.getColumnRenderer(column) === "rowNumber") {
+  return { as: "div", hide: true };
+}
+
+// Skip filter for preview / image columns
+if (column.key === "preview" || args.fns.getColumnRenderer(column) === "imagePreview" || args.fns.getColumnRenderer(column) === "image") {
+  return { as: "div", hide: true };
+}
+
+// Skip filter for iconAction column
+if (args.fns.getColumnRenderer(column) === "iconAction") {
+  return { as: "div", hide: true };
+}
+
+// Skip filter for expand column
+if (args.fns.getColumnRenderer(column) === "expand") {
+  return { as: "div", hide: true };
+}
+
+// Render appropriate filter component based on column type
+if (args.fns.getColumnFilterKind(column) === "select" && column.options) {
+  const usePolaris = args.fns.getUsePolarisUI?.() === true;
+  if (usePolaris) {
+    const displayValue = Array.isArray(filterValue) ? filterValue.join(", ") : (filterValue || "");
+    return {
+      componentName: "Html",
+      as: "s-search-field",
+      "attr:label": column.label || "Filter",
+      "attr:labelAccessibilityVisibility": "exclusive",
+      value: displayValue,
+      onInput: (e) => {
+        const v = e?.target?.value ?? e?.detail?.value ?? "";
+        const arr = v ? v.split(",").map(s => s.trim()).filter(Boolean) : undefined;
+        args.fns.handleColumnFilterChange(column.key, arr && arr.length ? arr : undefined);
+      }
+    };
+  }
+  return args.fns.getSelectFilterProps(
+    column.key,
+    filterValue,
+    [{ value: "_All_VALUES_", label: "All" }, ...column.options]
+  );
+}
+
+if (args.fns.getColumnFilterKind(column) === "checkbox") {
+  // const usePolaris = args.fns.getUsePolarisUI?.() === true;
+  const usePolaris = false;
+  const isChecked = filterValue === true || filterValue === "true";
+  return {
+    componentName: "Html",
+    as: usePolaris ? "s-checkbox" : "input",
+    type: usePolaris ? undefined : "checkbox",
+    "attr:checked": usePolaris && isChecked ? true : undefined,
+    "attr:accessibilityLabel": usePolaris ? `Filter ${column.label || column.key}` : undefined,
+    checked: usePolaris ? undefined : isChecked,
+    onChange: (e) => {
+      const checked = usePolaris ? (e.target?.checked ?? e.detail?.checked ?? !isChecked) : e.target.checked;
+      args.fns.handleColumnFilterChange(column.key, checked);
+    },
+    css: usePolaris ? undefined : "return `._id { pointer-events: auto; cursor: pointer; width: 1rem; height: 1rem; accent-color: ${args.theme?.var?.color?.text ?? 'inherit'}; flex-shrink: 0; }`;"
+  };
+}
+
+if (args.fns.getColumnFilterKind(column) === "date") {
+  const usePolaris = args.fns.getUsePolarisUI?.() === true;
+  if (usePolaris) {
+    return {
+      componentName: "Html",
+      as: "s-search-field",
+      "attr:label": column.label || "Filter",
+      "attr:labelAccessibilityVisibility": "exclusive",
+      value: filterValue || "",
+      onInput: (e) => args.fns.handleColumnFilterChange(column.key, e?.target?.value ?? e?.detail?.value ?? "")
+    };
+  }
+  return {
+    componentName: "TextInput",
+    type: "date",
+    value: filterValue || "",
+    onChange: (e) => args.fns.handleColumnFilterChange(column.key, e.target.value)
+  };
+}
+
+// Badge columns: show select from badgeToneMap when available, so filter works by raw value
+if (args.fns.getColumnRenderer(column) === "badge" && column.badgeToneMap) {
+  const options = [{ value: "_All_VALUES_", label: "All" }, ...Object.entries(column.badgeToneMap).map(([val, arr]) => ({ value: val, label: Array.isArray(arr) ? arr[0] : String(arr) }))];
+  const usePolaris = args.fns.getUsePolarisUI?.() === true;
+  if (usePolaris) {
+    const displayValue = Array.isArray(filterValue) ? filterValue.join(", ") : (filterValue || "");
+    return {
+      componentName: "Html",
+      as: "s-search-field",
+      "attr:label": column.label || "Filter",
+      "attr:labelAccessibilityVisibility": "exclusive",
+      value: displayValue,
+      onInput: (e) => {
+        const v = e?.target?.value ?? e?.detail?.value ?? "";
+        const arr = v ? v.split(",").map(s => s.trim()).filter(Boolean) : undefined;
+        args.fns.handleColumnFilterChange(column.key, arr && arr.length ? arr : undefined);
+      }
+    };
+  }
+  return args.fns.getSelectFilterProps(column.key, filterValue, options);
+}
+
+// Determine filter type (default: "select" for text columns)
+const filterType = column.filterType || (args.fns.getColumnFilterKind(column) === "text" ? "text" : "select");
+
+// If filterType is "select", show select with unique values
+if (filterType === "select") {
+  const usePolaris = args.fns.getUsePolarisUI?.() === true;
+  if (usePolaris) {
+    const displayValue = Array.isArray(filterValue) ? filterValue.join(", ") : (filterValue || "");
+    return {
+      componentName: "Html",
+      as: "s-search-field",
+      "attr:label": column.label || "Filter",
+      "attr:labelAccessibilityVisibility": "exclusive",
+      value: displayValue,
+      onInput: (e) => {
+        const v = e?.target?.value ?? e?.detail?.value ?? "";
+        const arr = v ? v.split(",").map(s => s.trim()).filter(Boolean) : undefined;
+        args.fns.handleColumnFilterChange(column.key, arr && arr.length ? arr : undefined);
+      }
+    };
+  }
+  const uniqueValues = args.fns.getUniqueColumnValues(column);
+  const options = [{ value: "_All_VALUES_", label: "All" }, ...uniqueValues.map(val => ({ value: val, label: val }))];
+  return args.fns.getSelectFilterProps(
+    column.key,
+    filterValue,
+    options
+  );
+}
+
+// Default: text input (applies filter immediately on change)
+const usePolaris = args.fns.getUsePolarisUI?.() === true;
+if (usePolaris) {
+  return {
+    componentName: "Html",
+    as: "s-search-field",
+    "attr:label": column.label || "Filter",
+    "attr:labelAccessibilityVisibility": "exclusive",
+    value: filterValue || "",
+    onInput: (e) => args.fns.handleColumnFilterChange(column.key, e?.target?.value ?? e?.detail?.value ?? "")
+  };
+}
+return {
+  componentName: "TextInput",
+  type: "text",
+  value: filterValue || "",
+  onChange: (e) => args.fns.handleColumnFilterChange(column.key, e.target.value)
+};
+'''
+      }
+    }
+    {
+      id: "40wrap"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  /* Fills column under header+filter; overflow:auto on one box keeps H+V scrollbars in the visible corner */
+  flex: 1 1 0;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+  overflow: auto;
+  position: relative;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  ref: (el) => {
+    // Same node for VirtualList scroll metrics (vertical) and scrollLeft sync to header/filter (horizontal)
+    args.fns.setTableBodyVScrollEl(el);
+    args.fns.setTableBodyHScrollEl(el);
+  },
+  onScroll: (e) => args.fns.handleTableHorizontalScroll(e)
+};
+'''
+      }
+    }
+    {
+      id: "40"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  /* Content-sized height (spacer) so parent 40wrap can scroll vertically */
+  flex: 0 0 auto;
+  min-width: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}`;
+'''
+        displayOrder: 1
+        componentName: VirtualList
+        props:
+          '''
+return {
+  getItems: args.fns.getDisplayData,
+  itemHeight: args.fns.getRowHeight(),
+  rowHasExpansion: (row) => ((args.fns.getRowExpansionConfigs?.() || []).length > 0) && !!row?.id,
+  containerClass: "table-body-list",
+  tabIndex: 0,
+  role: "listbox",
+  "attr:aria-label": "Table rows; Arrow keys to move, Shift+Arrow Up/Down to select range, Left/Right to collapse/expand group, Space to toggle selection",
+  getScrollContainerElement: () => args.fns.getScrollContainerElementForVirtualList(),
+  getActiveIndex: () => args.fns.activeRowIndex?.(),
+  setActiveIndex: (n) => args.fns.setActiveRowIndex?.(n),
+  getItemRef: (index) => args.fns.getRowRef?.(index),
+  onSpaceKey: (index) => {
+    if (!args.fns.getShowSelection?.()) return;
+    const displayData = args.fns.getDisplayData();
+    const row = displayData[index];
+    if (row?.id) args.fns.toggleRowSelection?.(row.id);
+  },
+  onExpandCollapse: (index, action) => {
+    const displayData = args.fns.getDisplayData?.() ?? [];
+    const row = displayData[index];
+    if (row?._isParent === true && row._parentKey != null) {
+      const parentKey = row._parentKey;
+      const setCollapsedKeysFn = args.fns.setCollapsedKeys;
+      if (!setCollapsedKeysFn) return;
+      if (action === "collapse") {
+        setCollapsedKeysFn(parentKey, true);
+      } else {
+        setCollapsedKeysFn(parentKey, undefined);
+      }
+      return;
+    }
+    const rowExpansions = args.fns.getRowExpansionConfigs?.() || [];
+    if (Array.isArray(rowExpansions) && rowExpansions.length > 0 && row?.id) {
+      const isRowExpanded = args.fns.isExpansionOpen?.(row.id);
+      if (action === "collapse" && isRowExpanded) args.fns.toggleRowExpansion?.(row);
+      if (action === "expand" && !isRowExpanded) args.fns.toggleRowExpansion?.(row);
+    }
+  },
+  onShiftArrow: (currentIndex, nextIndex) => args.fns.handleShiftArrow?.(currentIndex, nextIndex),
+  clearSelectionAnchor: () => args.fns.clearSelectionAnchor?.(),
+  // Ensures body scrollWidth matches column grid (absolute rows do not expand it)
+  contentMinWidthPx: args.fns.getTableBodyMinWidthPx()
+};
+'''
+      }
+    }
+    {
+      id: "40a"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  /* Loading overlay on top of the body scroll area (40wrap) */
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: ${args.theme.var.color.background};
+  z-index: 2;
+}
+`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const isLoading = args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true;
+return {
+  as: "div",
+  hide: !isLoading
+};
+'''
+      }
+    }
+    {
+      id: "40b"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: LoadingSpinner
+        props:
+          '''
+return {
+  size: "medium",
+  color: "primary"
+};
+'''
+      }
+    }
+    {
+      id: "41"
+      L: Attr
+      P: {
+        slotName: children
+        css:
+          '''
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return {};
+const rowIndex = virtualItem.index;
+const rowData = virtualItem.rowData;
+const selectedRows = args.fns.getSelectedRows();
+const isSelected = rowData?.id ? selectedRows.has(rowData.id) : false;
+const isActive = args.fns.activeRowId?.() === rowData?.id;
+const rowHeightPx = args.fns.getRowHeight();
+
+return [
+`._id {
+  width: 100%;
+  height: ${rowHeightPx}px;
+  max-height: ${rowHeightPx}px;
+  min-height: ${rowHeightPx}px;
+  box-sizing: border-box;
+  overflow: hidden;
+}`,
+`._id {
+  display: grid;
+  grid-template-columns: ${args.fns.getGridTemplateColumns()};
+  grid-template-rows: ${rowHeightPx}px;
+  grid-column: 1 / -1;
+  border-bottom: 1px solid ${args.theme.var.color.border};
+  background: ${isSelected ? args.theme.var.color.secondary_light_200 : "transparent"};
+  transition: background 0.2s ease;
+  ${isActive ? `outline: 2px solid ${args.theme.var.color.primary}; outline-offset: -2px;` : ""}
+
+  &:hover {
+    background: ${isSelected ? args.theme.var.color.secondary_light_200 : args.theme.var.color.secondary_light_100};
+  }
+}`];
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return {};
+const rowIndex = virtualItem.index;
+const rowData = virtualItem.rowData;
+
+const showSelection = args.fns.getShowSelection();
+const rowClickable = args.fns.getRowClickable?.();
+const onRowClick = args.fns.getOnRowClick?.();
+
+const selected = args.fns.getSelectedRows();
+const hasSelection = selected.size > 0;
+
+const handleRowClick = (e) => {
+  if (onRowClick && typeof onRowClick === "function") {
+    onRowClick(rowData, args);
+  } else if (rowClickable) {
+    args.fns.handleEdit?.(rowData);
+  } else {
+    args.fns.handleViewRow?.(rowData);
+  }
+};
+
+const isRowClickable = rowClickable || (typeof onRowClick === "function");
+const cursorStyle = isRowClickable ? "cursor: pointer;" : (hasSelection ? "cursor: move;" : undefined);
+
+return {
+  as: "div",
+  role: "option",
+  tabIndex: -1,
+  "attr:aria-selected": args.fns.activeRowId?.() === rowData?.id,
+  "data-row-id": rowData?.id ?? undefined,
+  ref: (el) => {
+    args.fns.setRowRef?.(rowIndex, el ?? null);
+    if (el && args.fns.initTableDraggable) {
+      args.fns.initTableDraggable(el);
+    }
+  },
+  onCleanup: () => {
+    const el = args.fns.getRowRef?.(rowIndex) ?? args.ref?.();
+    args.fns.setRowRef?.(rowIndex, null);
+    if (args.fns.cleanupTableDraggable && el) {
+      args.fns.cleanupTableDraggable(el);
+    }
+  },
+  onClick: (event) => {
+    args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { activeRowId: rowData?.id ?? null });
+    if (isRowClickable) handleRowClick(event);
+  },
+  style: cursorStyle
+};
+'''
+      }
+    }
+    {
+      id: "41exp"
+      L: Attr
+      P: {
+        displayOrder: 5
+        css:
+          '''
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return {};
+const rowData = virtualItem.rowData;
+const rowExpansions = args.fns.getRowExpansionConfigs?.() || [];
+const rowId = rowData?.id;
+const isRowExpansionOpen =
+  Array.isArray(rowExpansions) && rowExpansions.length > 0 && rowId && args.fns.isExpansionOpen?.(rowId);
+const t = args.theme.var.color;
+return `._id {
+  grid-row: 2;
+  grid-column: 1 / -1;
+  overflow: auto;
+  background: ${t.background_light_100};
+  border-top: 1px solid ${t.border};
+  padding: ${args.theme.var.spacing.sm};
+  min-height: 0;
+  max-height: 100%;
+  display: ${isRowExpansionOpen ? 'block' : 'none'};
+  cursor: default;
+}`;
+'''
+        componentName: Html
+        props:
+          '''
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return { as: 'div', hide: true };
+const rowData = virtualItem.rowData;
+const rowId = rowData?.id;
+const rowExpansions = args.fns.getRowExpansionConfigs?.() || [];
+if (!Array.isArray(rowExpansions) || rowExpansions.length === 0 || !rowId) return { as: 'div', hide: true };
+const expansionRowKey = String(rowId);
+const isRowExpansionOpen = args.fns.isExpansionOpen?.(expansionRowKey);
+return {
+  as: 'div',
+  hide: !isRowExpansionOpen,
+  onClick: (e) => e.stopPropagation()
+};
+'''
+      }
+    }
+    {
+      id: "41exp_st"
+      L: Attr
+      P: {
+        displayOrder: 1
+        css:
+          '''
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return {};
+const rowData = virtualItem.rowData;
+const rowId = rowData?.id;
+const rowExpansions = args.fns.getRowExpansionConfigs?.() || [];
+const isRowExpansionOpen =
+  Array.isArray(rowExpansions) && rowExpansions.length > 0 && rowId && args.fns.isExpansionOpen?.(String(rowId));
+const t = args.theme.var.color;
+return `._id {
+  padding: ${args.theme.var.spacing.sm} 0;
+  color: ${t.text};
+  font-size: ${args.theme.var.fontSize.sm};
+}`;
+'''
+        componentName: Html
+        props:
+          '''
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return { as: 'div', hide: true };
+const rowData = virtualItem.rowData;
+const rowId = rowData?.id;
+const rowExpansions = args.fns.getRowExpansionConfigs?.() || [];
+const rowExpansion = Array.isArray(rowExpansions) && rowExpansions.length > 0 ? rowExpansions[0] : null;
+if (!rowExpansion || !rowId) return { as: 'div', hide: true };
+const expansionRowKey = String(rowId);
+const expansionKey = "exp_0";
+const isRowExpansionOpen = args.fns.isExpansionOpen?.(expansionRowKey);
+if (!isRowExpansionOpen) return { as: 'div', hide: true };
+const expP = args.graph.vertexes[args.fns.tableStateVertexId]?.P;
+let rows;
+const expRows = expP?.expansionRows;
+if (Array.isArray(expRows)) {
+  for (let i = 0; i < expRows.length; i++) {
+    const e = expRows[i];
+    if (e && e.id != null && String(e.id) === expansionRowKey && String(e.key || "") === expansionKey && e.rows !== undefined) {
+      rows = e.rows;
+      break;
+    }
+  }
+}
+let loading = false;
+const expLoading = expP?.expansionLoading;
+if (Array.isArray(expLoading)) {
+  for (let i = 0; i < expLoading.length; i++) {
+    const lid = expLoading[i];
+    if (lid != null && lid !== '' && String(lid) === expansionRowKey + "::" + expansionKey) {
+      loading = true;
+      break;
+    }
+  }
+}
+const hasRows = Array.isArray(rows) && rows.length > 0;
+const show = loading || !hasRows;
+return {
+  as: 'div',
+  text: loading
+    ? (rowExpansion.nestedLoadingText || 'Loading…')
+    : (rowExpansion.emptyNestedText || 'No line items'),
+  hide: !show,
+  onClick: (e) => e.stopPropagation()
+};
+'''
+      }
+    }
+    {
+      id: "41exp_nest"
+      L: Attr
+      P: {
+        contextName: expansionTable
+        loop: true
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return { as: "div", hide: true };
+const rowData = virtualItem.rowData;
+const rowId = rowData?.id;
+const rowExpansions = args.fns.getRowExpansionConfigs?.() || [];
+if (!rowId || !Array.isArray(rowExpansions) || rowExpansions.length === 0) return { as: "div", hide: true };
+const expansionRowKey = String(rowId);
+const isRowExpansionOpen = args.fns.isExpansionOpen?.(expansionRowKey);
+return {
+  hide: !isRowExpansionOpen,
+  data: rowExpansions.map((cfg, idx) => ({ ...cfg, _expansionIndex: idx }))
+};
+'''
+      }
+    }
+    {
+      id: "41exp_ret_table"
+      L: Attr
+      P: {
+        displayOrder: 2.5
+        componentName: Table
+        key: nested_order_returns_table
+        props:
+          '''
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return { hide: true };
+const rowData = virtualItem.rowData;
+const rowId = rowData?.id;
+const rowExpansion = args.contextData.expansionTable || {};
+if (!rowId || !rowExpansion || typeof rowExpansion !== "object") return { hide: true };
+const expansionRowKey = String(rowId);
+const outerArgs = args;
+const tableVid = outerArgs.fns.tableStateVertexId;
+const expansionIndex = rowExpansion._expansionIndex != null ? Number(rowExpansion._expansionIndex) : 0;
+const expansionKey = "exp_" + expansionIndex;
+let rows = [];
+let loading = false;
+
+if (rowExpansion.childVertexLabel) {
+  const expP = args.graph.vertexes[tableVid]?.P;
+  const expRows = expP?.expansionRows;
+  if (Array.isArray(expRows)) {
+    for (let i = 0; i < expRows.length; i++) {
+      const e = expRows[i];
+      if (
+        e &&
+        e.id != null &&
+        String(e.id) === expansionRowKey &&
+        e.key != null &&
+        String(e.key) === expansionKey
+      ) {
+        rows = Array.isArray(e.rows) ? e.rows : [];
+        break;
+      }
+    }
+  }
+  const expLoading = expP?.expansionLoading;
+  if (Array.isArray(expLoading)) {
+    for (let i = 0; i < expLoading.length; i++) {
+      const lid = expLoading[i];
+      if (lid != null && String(lid) === expansionRowKey + "::" + expansionKey) {
+        loading = true;
+        break;
+      }
+    }
+  }
+} else if (typeof rowExpansion.getNestedRows === "function") {
+  try {
+    const computedRows = rowExpansion.getNestedRows(rowData, args);
+    rows = Array.isArray(computedRows) ? computedRows : [];
+  } catch (e) {
+    rows = [];
+  }
+}
+
+if (loading || !Array.isArray(rows) || rows.length === 0) return { hide: true };
+return {
+  hide: false,
+  nestedLinesMode: true,
+  nestedTableTitle: rowExpansion.nestedTitle || 'Nested',
+  nestedTableColumns: rowExpansion.nestedColumns || [],
+  nestedRowHeight: rowExpansion.nestedRowHeight || 36,
+  nestedShowIcon: rowExpansion.nestedShowIcon === true,
+  nestedIcon: rowExpansion.nestedIcon,
+  nestedLinesContainerHeight: rowExpansion.expansionPanelHeight ?? 280,
+  nestedLinesContainerMaxHeight: rowExpansion.expansionPanelMaxHeight ?? rowExpansion.expansionPanelHeight ?? 280,
+  showRowNumber: rowExpansion.nestedShowRowNumber !== false,
+  usePolarisUI: rowExpansion.usePolarisUI !== false,
+  loadFromSetting: false,
+  getNestedLineRows: () => rows,
+  getNestedLinesLoading: () => loading,
+  getSelectedRows: () => new Set(),
+  setSelectedRows: () => {},
+  clearSelectedRows: () => {},
+  rowClickable: rowExpansion.rowClickable ?? false,
+  onRowClick: rowExpansion.onRowClick ?? function () {}
+};
+'''
+      }
+    }
+    {
+      id: "42"
+      L: Attr
+      P: {
+        css:
+          '''
+const showSelection = args.fns.getShowSelection();
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return {};
+const rowIndex = virtualItem.index;
+const rowData = virtualItem.rowData;
+const selectedRows = args.fns.getSelectedRows();
+const isSelected = rowData?.id ? selectedRows.has(rowData.id) : false;
+
+return `._id {
+  grid-row: 1;
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}`;
+'''
+        displayOrder: 0.5
+        componentName: Html
+        props:
+          '''
+const showSelection = args.fns.getShowSelection();
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return {};
+const rowIndex = virtualItem.index;
+const rowData = virtualItem.rowData;
+
+return {
+  as: "div",
+  hide: !showSelection,
+  onClick: (e) => {
+    e.stopPropagation();
+    args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { activeRowId: rowData?.id ?? null });
+    if (rowData?.id) args.fns.toggleRowSelection(rowData.id);
+  }
+};
+'''
+      }
+    }
+    {
+      id: "43"
+      L: Attr
+      P: {
+        css:
+          '''
+// s-checkbox has issue so always use native checkbox
+// const usePolaris = args.fns.getUsePolarisUI?.() === true;
+const usePolaris = false;
+if (usePolaris) return '';
+return `._id {
+  pointer-events: auto;
+  cursor: pointer;
+  width: 1rem;
+  height: 1rem;
+  accent-color: ${args.theme.var.color.text};
+  flex-shrink: 0;
+}
+`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const showSelection = args.fns.getShowSelection();
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return {};
+const rowIndex = virtualItem.index;
+const rowData = virtualItem.rowData;
+const selectedRows = args.fns.getSelectedRows();
+const isSelected = rowData?.id ? selectedRows.has(rowData.id) : false;
+
+// const usePolaris = args.fns.getUsePolarisUI?.() === true;
+const usePolaris = false;
+
+return {
+  as: usePolaris ? "s-checkbox" : "input",
+  type: usePolaris ? undefined : "checkbox",
+  "attr:checked": usePolaris && isSelected ? true : undefined,
+  "attr:accessibilityLabel": usePolaris ? "Select row" : undefined,
+  checked: usePolaris ? undefined : isSelected,
+  onChange: (e) => {
+    e.stopPropagation();
+    args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { activeRowId: rowData?.id ?? null });
+    if (rowData?.id) args.fns.toggleRowSelection(rowData.id);
+  },
+  onClick: (e) => e.stopPropagation(),
+  hide: !showSelection
+};
+'''
+      }
+    }
+    {
+      id: "44"
+      L: Attr
+      P: {
+        css:
+          '''
+const hasFormConfig = !!args.fns.getFormConfig();
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return {};
+
+return `._id {
+  grid-row: 1;
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.sm};
+}`;
+'''
+        displayOrder: 0.6
+        componentName: Html
+        props:
+          '''
+const hasFormConfig = !!args.fns.getFormConfig();
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return {};
+const rowData = virtualItem.rowData;
+
+return {
+  as: "div",
+  hide: !args.fns.getShowActionsColumn()
+};
+'''
+      }
+    }
+    {
+      id: "44a"
+      L: Attr
+      P: {
+        contextName: tableAction
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return {};
+return { data: args.fns.getPrimaryActionsForRow(virtualItem.rowData) };
+'''
+      }
+    }
+    {
+      id: "44b"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: IconButton
+        props:
+          '''
+const action = args.contextData.tableAction;
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem || !action) return { hide: true };
+const rowData = virtualItem.rowData;
+const disabled = args.fns.isActionDisabled(action, rowData);
+const loading = args.fns.isActionRunning(action, rowData);
+const reason = args.fns.getActionReasonState(action, rowData);
+const reasonAttrs = args.fns.getActionReasonDataAttrs(action, rowData);
+const hrefValue = args.fns.getActionHref(action, rowData);
+return {
+  icon: loading ? (action.loadingIcon || "carbon:renew") : (action.icon || "carbon:overflow-menu-horizontal"),
+  variant: action.variant || "ghost",
+  size: "sm",
+  href: hrefValue,
+  target: action.target,
+  rel: action.rel,
+  title: reason.text,
+  ariaLabel: reason.text,
+  reasonVariant: reason.active ? reason.variant : undefined,
+  loading,
+  disabled: disabled || loading,
+  ...reasonAttrs,
+  onClick: (e) => {
+    e.stopPropagation();
+    // Modifier or middle-click: keep native <a> behavior (open href in new tab/window).
+    if (hrefValue && (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button === 1)) return;
+    // Plain click: do not navigate; run configured row action (e.g. open modal).
+    if (hrefValue) e.preventDefault();
+    if (disabled || loading) return;
+    args.fns.runRowAction(action, rowData);
+  }
+};
+'''
+      }
+    }
+    {
+      id: "44c"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: FloatingMenu
+        props:
+          '''
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return { hide: true };
+const rowData = virtualItem.rowData;
+return {
+  placement: "bottom-end",
+  triggerIcon: "carbon:overflow-menu-horizontal",
+  hide: !args.fns.hasSecondaryActionsForRow(rowData)
+};
+'''
+      }
+    }
+    {
+      id: "44d"
+      L: Attr
+      P: {
+        contextName: tableMenuAction
+        slotName: menu-items
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return {};
+return { data: args.fns.getSecondaryActionsForRow(virtualItem.rowData) };
+'''
+      }
+    }
+    {
+      id: "44e"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: MenuItem
+        props:
+          '''
+const action = args.contextData.tableMenuAction;
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem || !action) return { hide: true };
+const rowData = virtualItem.rowData;
+const disabled = args.fns.isActionDisabled(action, rowData);
+const loading = args.fns.isActionRunning(action, rowData);
+const reason = args.fns.getActionReasonState(action, rowData);
+const reasonAttrs = args.fns.getActionReasonDataAttrs(action, rowData);
+const isDanger = action.type === "delete" || action.variant === "danger";
+return {
+  text: action.label || action.title || action.key,
+  icon: loading ? (action.loadingIcon || "carbon:renew") : action.icon,
+  type: isDanger ? "danger" : "default",
+  title: reason.text,
+  reasonVariant: reason.active ? reason.variant : undefined,
+  disabled: disabled || loading,
+  ...reasonAttrs,
+  onClick: (e) => {
+    e?.stopPropagation();
+    if (disabled || loading) return;
+    void args.fns.runRowAction(action, rowData);
+    args.contextData.floatingMenuContext?.closeMenu?.();
+  }
+};
+'''
+      }
+    }
+    {
+      id: "47"
+      L: Attr
+      P: {
+        contextName: column
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const columns = args.fns.getColumns();
+const showRowNumber = args.fns.getShowRowNumber();
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return {};
+const rowIndex = virtualItem.index;
+const rowData = virtualItem.rowData;
+
+return {
+  data: showRowNumber 
+    ? [{ key: "__rowNumber", label: "#", renderer: "rowNumber" }, ...columns]
+    : columns
+};
+'''
+      }
+    }
+    {
+      id: "48"
+      L: Attr
+      P: {
+        css:
+          '''
+const column = args.contextData.column;
+const shouldHide = args.fns.shouldHideColumn(column);
+const isExpandColumn = args.fns.getColumnRenderer(column) === "expand";
+
+return `._id {
+  grid-row: 1;
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  display: flex;
+  align-items: ${isExpandColumn ? "stretch" : "center"};
+  justify-content: ${isExpandColumn ? "stretch" : "flex-start"};
+  min-width: 0;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const column = args.contextData.column;
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return {};
+const rowIndex = virtualItem.index;
+const rowData = virtualItem.rowData;
+const shouldHide = args.fns.shouldHideColumn(column);
+
+return {
+  as: "div",
+  hide: shouldHide
+};
+'''
+      }
+    }
+    {
+      id: "49"
+      L: Attr
+      P: {
+        slotName: cell
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const column = args.contextData.column;
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return {};
+const rowIndex = virtualItem.index;
+const rowData = virtualItem.rowData;
+const cellContent = args.fns.renderCellContent(rowData, column, rowIndex);
+
+// Handle different content types
+if (typeof cellContent === "object" && cellContent !== null) {
+  if (cellContent.type === "expand") {
+    const isParent = cellContent.isParent === true;
+    const isExpanded = cellContent.isExpanded === true;
+    const onToggle = cellContent.onToggle;
+    if (!isParent) return { as: "div", style: "width: 16px; flex-shrink: 0;" };
+    const spacingSm = args.theme.var.spacing.sm;
+    const spacingMd = args.theme.var.spacing.md;
+    const textColor = args.theme.var.color.text;
+    return {
+      as: "button",
+      type: "button",
+      style: `display: flex; align-items: center; justify-content: center; flex: 1 1 auto; align-self: stretch; width: calc(100% + 2 * ${spacingMd}); box-sizing: border-box; margin: calc(-1 * ${spacingSm}) calc(-1 * ${spacingMd}); padding: ${spacingSm} ${spacingMd}; min-height: 2.75rem; border: none; background: transparent; cursor: pointer; border-radius: 4px; color: ${textColor};`,
+      "attr:aria-label": isExpanded ? "Collapse row" : "Expand row",
+      "attr:aria-expanded": isExpanded ? "true" : "false",
+      onClick: (e) => {
+        e.stopPropagation();
+        onToggle?.();
+      },
+      onMouseDown: (e) => {
+        e.stopPropagation();
+      },
+      text: isExpanded ? "▼" : "▶"
+    };
+  }
+  if (cellContent.type === "image") {
+    return {
+      as: "img",
+      src: cellContent.url,
+      alt: cellContent.alt,
+      style: "max-width: 100px; max-height: 50px; object-fit: cover; border-radius: 4px;"
+    };
+  }
+  if (cellContent.type === "youtubeLink") {
+    return {
+      as: "a",
+      href: `https://www.youtube.com/watch?v=${cellContent.videoId}`,
+      target: "_blank",
+      rel: "noopener noreferrer",
+      text: "Watch",
+      style: "color: " + args.theme.var.color.primary + "; text-decoration: none;"
+    };
+  }
+  if (cellContent.type === "downloadLink") {
+    return {
+      as: "a",
+      href: cellContent.url,
+      download: true,
+      style: "color: " + args.theme.var.color.primary + "; text-decoration: none; display: flex; align-items: center; gap: 4px;"
+    };
+  }
+  if (cellContent.type === "textLink") {
+    const displayText = (cellContent.text ?? "").toString();
+    const hrefCandidate = cellContent.href;
+    const resolvedHref =
+      hrefCandidate != null && hrefCandidate !== "" ? String(hrefCandidate) : "";
+    const themeColors = args.theme.var.color;
+    const useEllipsis = column.overflowEllipsis === true;
+    const ellipsisStyle =
+      "min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;";
+    if (!resolvedHref) {
+      return {
+        as: "span",
+        text: displayText,
+        title: cellContent.title,
+        style: useEllipsis ? ellipsisStyle : undefined
+      };
+    }
+    const linkStyle =
+      "color: " +
+      themeColors.primary +
+      "; text-decoration: underline; cursor: pointer; " +
+      (useEllipsis ? ellipsisStyle : "");
+    return {
+      as: "a",
+      href: resolvedHref,
+      target: "_blank",
+      rel: "noopener noreferrer",
+      text: displayText,
+      title: cellContent.title,
+      style: linkStyle,
+      onClick: (event) => {
+        event.stopPropagation();
+      }
+    };
+  }
+  if (cellContent.type === "iconAction") {
+    const col = cellContent.actionColumn;
+    const cfg = col.iconAction || {};
+    const rowKey = args.fns.getIconActionRowKey(rowData, rowIndex);
+    const stateKey = col.key + ":" + (rowKey != null ? rowKey : "idx-" + rowIndex);
+    const isActive = args.fns.iconActionActiveKey() === stateKey;
+    const isCarbonStr = (s) => typeof s === "string" && s.trim().length > 0 && !/\s/.test(s) && s.includes(":");
+    const iconIdle = cfg.icon;
+    const iconBusy = cfg.activeIcon;
+    const useIconButton = isCarbonStr(iconIdle) || isCarbonStr(iconBusy);
+    const title = isActive ? (cfg.activeTitle ?? "") : (cfg.title ?? "");
+    const ariaLabel = title || col.label || col.key || "Action";
+    const onAct = (e) => {
+      e.stopPropagation();
+      args.fns.handleIconAction(col, rowData, rowIndex);
+    };
+    if (useIconButton) {
+      const iconName = isActive && isCarbonStr(iconBusy) ? iconBusy : (isCarbonStr(iconIdle) ? iconIdle : "carbon:link");
+      return {
+        componentName: "IconButton",
+        icon: iconName,
+        variant: cfg.variant ?? "ghost",
+        size: cfg.size ?? "sm",
+        title: title || ariaLabel,
+        ariaLabel: ariaLabel,
+        onClick: onAct
+      };
+    }
+    const t = args.theme.var.color;
+    const br = args.theme.var.borderRadius.md;
+    const border = t.border_light_400;
+    const bg = isActive ? (cfg.activeButtonBg || t.success_light_200) : (cfg.buttonBg || t.background);
+    const fg = isActive ? (cfg.activeButtonFg || t.success_dark_300) : (cfg.buttonFg || t.primary);
+    const style = typeof cfg.htmlButtonStyle === "string" ? cfg.htmlButtonStyle : ("min-width: 32px; height: 32px; padding: 0 8px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid " + border + "; border-radius: " + br + "; background: " + bg + "; color: " + fg + "; cursor: pointer; flex-shrink: 0; font-size: 1rem; line-height: 1;");
+    const fallbackText = isActive ? (cfg.activeIconText ?? cfg.iconText ?? "✓") : (cfg.iconText ?? "·");
+    return {
+      componentName: "Html",
+      as: "button",
+      type: "button",
+      title: title || ariaLabel,
+      "attr:aria-label": ariaLabel,
+      text: fallbackText,
+      style,
+      onClick: onAct
+    };
+  }
+  if (cellContent.type === "actions") {
+    return {
+      as: "div",
+      style: "display: flex; gap: 8px; align-items: center;"
+    };
+  }
+  if (cellContent.type === "badge") {
+    const text = (cellContent.text ?? "").toString().trim();
+    if (!text) {
+      return { as: "div", text: "", hide: true };
+    }
+    const usePolaris = args.fns.getUsePolarisUI?.() === true;
+    const tone = cellContent.tone || "neutral";
+    const title = column.badgeTitleAccessor ? column.badgeTitleAccessor(rowData) : undefined;
+    if (usePolaris) {
+      return {
+        as: "s-badge",
+        "attr:tone": tone,
+        text,
+        title
+      };
+    }
+    const t = args.theme.var.color;
+    const br = args.theme.var.borderRadius.full;
+    const fs = args.theme.var.fontSize.xs;
+    const tones = {
+      success: { bg: t.success_light_200, fg: t.success_dark_300 },
+      info: { bg: t.info_light_200, fg: t.info_dark_300 },
+      warning: { bg: t.warning_light_200, fg: t.warning_dark_300 },
+      critical: { bg: t.error_light_200, fg: t.error_dark_300 },
+      caution: { bg: t.warning_light_200, fg: t.warning_dark_300 },
+      neutral: { bg: t.background_light_300, fg: t.text }
+    };
+    const { bg, fg } = tones[tone] || tones.neutral;
+    const style = `display: inline-flex; align-items: center; padding: 2px 8px; border-radius: ${br}; font-size: ${fs}; font-weight: 500; background: ${bg}; color: ${fg}; white-space: nowrap;`;
+    return {
+      as: "span",
+      text,
+      style,
+      title
+    };
+  }
+}
+
+if (args.fns.getColumnRenderer(column) === "actions" && args.fns.getActions().some((a) => a.type === "edit")) {
+  return {
+    as: "div",
+    style: "display: flex; gap: 8px; align-items: center;"
+  };
+}
+
+// Default text rendering
+const cellTitle = column.titleAccessor ? column.titleAccessor(rowData) : undefined;
+const textStr = typeof cellContent === "string" || typeof cellContent === "number" ? String(cellContent) : "";
+const out = {
+  as: "div",
+  text: textStr,
+  title: cellTitle
+};
+if (column.overflowEllipsis) {
+  out.style = "min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;";
+}
+return out;
+'''
+      }
+    }
+    {
+      id: "50"
+      L: Attr
+      P: {
+        slotName: footer
+        displayOrder: 5
+        componentName: Slot
+      }
+    }
+    {
+      id: "51"
+      L: Attr
+      P: {
+        displayOrder: 6
+        componentName: TableModal
+        props:
+          '''
+return {
+  isOpen: args.graph.vertexes[args.fns.tableStateVertexId]?.P?.isModalOpen === true,
+  onClose: () => args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { isModalOpen: false }),
+  mode: args.graph.vertexes[args.fns.tableStateVertexId]?.P?.modalMode ?? "add",
+  formConfig: args.fns.getFormConfig(),
+  initialVertex: args.graph.vertexes[args.fns.tableStateVertexId]?.P?.formData ?? null,
+  onSave: args.fns.handleSave,
+  label: args.fns.getLabel(),
+  tableVertexLabel: args.fns.getTableVertexLabel?.() ?? args.contextData.props?.tableVertexLabel
+};
+'''
+      }
+    }
+    {
+      id: "52"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}`;
+'''
+        displayOrder: 7
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  hide: !args.graph.vertexes[args.fns.tableStateVertexId]?.P?.isImportModalOpen,
+  onClick: () => args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { isImportModalOpen: false })
+};
+'''
+      }
+    }
+    {
+      id: "53"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border-radius: ${args.theme.var.borderRadius.md};
+  padding: ${args.theme.var.spacing.xl};
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  hide: !args.graph.vertexes[args.fns.tableStateVertexId]?.P?.isImportModalOpen,
+  onClick: (e) => e.stopPropagation()
+};
+'''
+      }
+    }
+    {
+      id: "54"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xl};
+  font-weight: 600;
+  margin-bottom: ${args.theme.var.spacing.md};
+  color: ${args.theme.var.color.text};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "h2",
+  text: "Import Data"
+};
+'''
+      }
+    }
+    {
+      id: "55"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  background: ${args.theme.var.color.info_light_100};
+  border-left: 3px solid ${args.theme.var.color.info};
+  padding: ${args.theme.var.spacing.md};
+  margin-bottom: ${args.theme.var.spacing.md};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.text};
+  line-height: 1.6;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "56"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  text: "Data Format: Paste CSV or JSON data. For CSV, first row should be headers. For JSON, provide an array of objects."
+};
+'''
+      }
+    }
+    {
+      id: "57"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  margin-top: ${args.theme.var.spacing.sm};
+  font-weight: 600;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  text: "Sample CSV header:"
+};
+'''
+      }
+    }
+    {
+      id: "58"
+      L: Attr
+      P: {
+        css:
+          '''
+const columns = args.fns.getColumns();
+const getSampleCSVHeader = () => {
+  if (!columns || columns.length === 0) return "";
+  const headers = columns.filter(col => args.fns.getColumnRenderer(col) !== "rowNumber").map(col => col.key);
+  return headers.join(",");
+};
+
+const sampleHeader = getSampleCSVHeader();
+
+return `._id {
+  margin-top: ${args.theme.var.spacing.xs};
+  background: rgba(0,0,0,0.1);
+  padding: ${args.theme.var.spacing.sm};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  font-family: monospace;
+  font-size: ${args.theme.var.fontSize.xs};
+  word-break: break-all;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const columns = args.fns.getColumns();
+const getSampleCSVHeader = () => {
+  if (!columns || columns.length === 0) return "";
+  const headers = columns.filter(col => args.fns.getColumnRenderer(col) !== "rowNumber").map(col => col.key);
+  return headers.join(",");
+};
+
+return {
+  as: "code",
+  text: getSampleCSVHeader()
+};
+'''
+      }
+    }
+    {
+      id: "59"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: TextArea
+        props:
+          '''
+return {
+  value: args.graph.vertexes[args.fns.tableStateVertexId]?.P?.importData ?? "",
+  onChange: (e) => args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { importData: e.target.value }),
+  placeholder: "Paste your data here (CSV or JSON format)...",
+  rows: 10,
+  style: "font-family: monospace; font-size: 12px;"
+};
+'''
+      }
+    }
+    {
+      id: "60"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  gap: ${args.theme.var.spacing.md};
+  justify-content: flex-end;
+  margin-top: ${args.theme.var.spacing.md};
+}`;
+'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "61"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "secondary",
+  onClick: () => {
+    args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { isImportModalOpen: false, importData: "" });
+  },
+  text: "Cancel",
+  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
+  hide: args.fns.getUsePolarisUI?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "61_polaris"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "s-button",
+  "attr:variant": "secondary",
+  text: "Cancel",
+  onClick: () => {
+    args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { isImportModalOpen: false, importData: "" });
+  },
+  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
+  hide: args.fns.getUsePolarisUI?.() !== true
+};
+'''
+      }
+    }
+    {
+      id: "62"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "primary",
+  onClick: () => args.fns.handleImport((args.graph.vertexes[args.fns.tableStateVertexId]?.P?.importData ?? "").trim(), () => {
+    args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { isImportModalOpen: false, importData: "" });
+    args.fns.handleSearch();
+  }),
+  text: "Import",
+  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true || !(args.graph.vertexes[args.fns.tableStateVertexId]?.P?.importData ?? "").trim(),
+  hide: args.fns.getUsePolarisUI?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "62_polaris"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "s-button",
+  "attr:variant": "primary",
+  text: "Import",
+  onClick: () => args.fns.handleImport((args.graph.vertexes[args.fns.tableStateVertexId]?.P?.importData ?? "").trim(), () => {
+    args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { isImportModalOpen: false, importData: "" });
+    args.fns.handleSearch();
+  }),
+  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true || !(args.graph.vertexes[args.fns.tableStateVertexId]?.P?.importData ?? "").trim(),
+  hide: args.fns.getUsePolarisUI?.() !== true
+};
+'''
+      }
+    }
+    {
+      id: "63"
+      L: Attr
+      P: {
+        displayOrder: 8
+        componentName: TableSettingsModal
+        props:
+          '''
+const evaluateConfig = args.fns.evaluateConfig;
+const config = evaluateConfig();
+const getConfigFunction = args.fns.getConfigFunction;
+const vid = args.fns.pageStateVertexId;
+const pageDp = () => args.graph.vertexes[vid]?.P;
+
+// Get initial config as function body string (from settingsModalInitialConfig, settings, or configFunction)
+let initialConfig = "";
+try {
+  const modalConfig = pageDp()?.settingsModalInitialConfig ?? null;
+  const currentSettings = modalConfig ?? pageDp()?.settings;
+  // If settings exist and it's a string (raw function body), use it
+  if (currentSettings && typeof currentSettings === 'string') {
+    initialConfig = currentSettings;
+  } else {
+    // Fallback to configFunction
+    const configFn = getConfigFunction();
+    if (configFn) {
+      // Get the function as string to extract its body
+      const fnString = configFn.toString();
+      // Extract function body (everything between { and })
+      const match = fnString.match(/\{([\s\S]*)\}/);
+      if (match && match[1]) {
+        initialConfig = match[1].trim();
+      } else {
+        // Fallback: call function and convert to return statement
+        const configObj = configFn();
+        if (configObj) {
+          initialConfig = `return ${JSON.stringify(configObj, null, 2)};`;
+        }
+      }
+    } else {
+      // Use current effective config as function body
+      const configObj = {
+        columns: config.columns || [],
+        formConfig: config.formConfig || {},
+        uniqueKeys: config.uniqueKeys || []
+      };
+      initialConfig = `return ${JSON.stringify(configObj, null, 2)};`;
+    }
+  }
+} catch (e) {
+  console.error("Error getting initial config:", e);
+  initialConfig = "return {};";
+}
+
+return {
+  isOpen: pageDp()?.isSettingsModalOpen === true,
+  onClose: () => {
+    args.mergeVertexProperties(0, vid, args.graph, args.setGraph, {
+      settingsModalInitialConfig: null,
+      isSettingsModalOpen: false
+    });
+  },
+  initialConfig: initialConfig,
+  onSave: args.fns.handleSaveSettings,
+  tableVertexLabel: args.fns.getTableVertexLabel()
+};
+'''
+      }
+    }
+    {
+      id: "64"
+      L: ComponentVariant
+      P: {
+        type: object
+        key: formConfig
+      }
+    }
+    {
+      id: "66"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: settingsFunction
+      }
+    }
+    {
+      id: "67"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: showAddButton
+        defValue: true
+      }
+    }
+    {
+      id: "68"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: saveSettingsFunction
+      }
+    }
+    {
+      id: "69"
+      L: ComponentVariant
+      P: {
+        type: array
+        key: batchActions
+        defValue: []
+      }
+    }
+    {
+      id: "70"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: showSelection
+        defValue: true
+      }
+    }
+    {
+      id: "71"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: tableVertexLabel
+      }
+    }
+    {
+      id: "72a"
+      L: ComponentVariant
+      P: {
+        type: array
+        key: actions
+      }
+    }
+    {
+      id: "72b"
+      L: ComponentVariant
+      P: {
+        type: object
+        key: actionHandlers
+      }
+    }
+    {
+      id: "73"
+      L: ComponentVariant
+      P: {
+        type: number
+        key: rowHeight
+        defValue: 50
+      }
+    }
+    {
+      id: "74"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: exportFunction
+      }
+    }
+    {
+      id: "75"
+      L: ComponentVariant
+      P: {
+        type: array
+        key: additionalFilters
+        defValue: []
+      }
+    }
+    {
+      id: "76"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: dataFunction
+      }
+    }
+    {
+      id: "77"
+      L: ComponentVariant
+      P: {
+        type: array
+        key: customActions
+      }
+    }
+    {
+      id: "78"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: searchPlaceholder
+        defValue: Search...
+      }
+    }
+    {
+      id: "79"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: loadFromSetting
+        defValue: false
+      }
+    }
+    {
+      id: "80"
+      L: ComponentVariant
+      P: {
+        type: array
+        key: columns
+        defValue: []
+      }
+    }
+    {
+      id: "81"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: configFunction
+      }
+    }
+    {
+      id: "82"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: showRowNumber
+        defValue: false
+      }
+    }
+    {
+      id: "83"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: importFunction
+      }
+    }
+    {
+      id: "84"
+      L: ComponentVariant
+      P: {
+        type: array
+        key: hideColumns
+        defValue: []
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e2
+      T: ComponentVariant
+      S: "1"
+      E: "63"
+    }
+    {
+      id: e3
+      T: ComponentVariant
+      S: "1"
+      E: "64"
+    }
+    {
+      id: e5
+      T: ComponentVariant
+      S: "1"
+      E: "66"
+    }
+    {
+      id: e6
+      T: ComponentVariant
+      S: "1"
+      E: "67"
+    }
+    {
+      id: e7
+      T: ComponentVariant
+      S: "1"
+      E: "68"
+    }
+    {
+      id: e8
+      T: ComponentVariant
+      S: "1"
+      E: "69"
+    }
+    {
+      id: e9
+      T: ComponentVariant
+      S: "1"
+      E: "70"
+    }
+    {
+      id: e10
+      T: ComponentVariant
+      S: "1"
+      E: "71"
+    }
+    {
+      id: e11a
+      T: ComponentVariant
+      S: "1"
+      E: "72a"
+    }
+    {
+      id: e11b
+      T: ComponentVariant
+      S: "1"
+      E: "72b"
+    }
+    {
+      id: e12
+      T: ComponentVariant
+      S: "1"
+      E: "73"
+    }
+    {
+      id: e13
+      T: ComponentVariant
+      S: "1"
+      E: "74"
+    }
+    {
+      id: e14
+      T: ComponentVariant
+      S: "1"
+      E: "75"
+    }
+    {
+      id: e15
+      T: ComponentVariant
+      S: "1"
+      E: "76"
+    }
+    {
+      id: e16
+      T: ComponentVariant
+      S: "1"
+      E: "77"
+    }
+    {
+      id: e17
+      T: ComponentVariant
+      S: "1"
+      E: "78"
+    }
+    {
+      id: e18
+      T: ComponentVariant
+      S: "1"
+      E: "79"
+    }
+    {
+      id: e19
+      T: ComponentVariant
+      S: "1"
+      E: "80"
+    }
+    {
+      id: e20
+      T: ComponentVariant
+      S: "1"
+      E: "81"
+    }
+    {
+      id: e21
+      T: ComponentVariant
+      S: "1"
+      E: "82"
+    }
+    {
+      id: e22
+      T: ComponentVariant
+      S: "1"
+      E: "83"
+    }
+    {
+      id: e23
+      T: ComponentVariant
+      S: "1"
+      E: "84"
+    }
+    {
+      id: e24
+      T: Attr
+      S: "1"
+      E: "3"
+    }
+    {
+      id: e25
+      T: Attr
+      S: "1"
+      E: "51"
+    }
+    {
+      id: e26
+      T: Attr
+      S: "1"
+      E: "52"
+    }
+    {
+      id: e27
+      T: Attr
+      S: "1"
+      E: "63"
+    }
+    {
+      id: e28
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e29
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+    {
+      id: e30
+      T: Attr
+      S: "3"
+      E: "22"
+    }
+    {
+      id: e31
+      T: Attr
+      S: "3"
+      E: "50"
+    }
+    {
+      id: e32
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e32_subtitle
+      T: Attr
+      S: "5"
+      E: "7d"
+    }
+    {
+      id: e33
+      T: Attr
+      S: "5"
+      E: "16"
+    }
+    {
+      id: e34
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e34a
+      T: Attr
+      S: "7"
+      E: "7a"
+    }
+    {
+      id: e34b
+      T: Attr
+      S: "7"
+      E: "7b"
+    }
+    {
+      id: e34c
+      T: Attr
+      S: "7"
+      E: "7c"
+    }
+    {
+      id: e35
+      T: Attr
+      S: "6"
+      E: "8"
+    }
+    {
+      id: e36
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e39
+      T: Attr
+      S: "10"
+      E: "11"
+    }
+    {
+      id: e39_polaris
+      T: Attr
+      S: "10"
+      E: "11_polaris"
+    }
+    {
+      id: e40
+      T: Attr
+      S: "12"
+      E: "13"
+    }
+    {
+      id: e40_polaris
+      T: Attr
+      S: "12"
+      E: "13_polaris"
+    }
+    {
+      id: e41
+      T: Attr
+      S: "12"
+      E: "14"
+    }
+    {
+      id: e42
+      T: Attr
+      S: "12"
+      E: "15"
+    }
+    {
+      id: e42_polaris
+      T: Attr
+      S: "12"
+      E: "15_polaris"
+    }
+    {
+      id: e43
+      T: Attr
+      S: "16"
+      E: "17"
+    }
+    {
+      id: e37
+      T: Attr
+      S: "16"
+      E: "10"
+    }
+    {
+      id: e38
+      T: Attr
+      S: "16"
+      E: "12"
+    }
+    {
+      id: e44
+      T: Attr
+      S: "16"
+      E: "18"
+    }
+    {
+      id: e45
+      T: Attr
+      S: "16"
+      E: "21"
+    }
+    {
+      id: e45_polaris
+      T: Attr
+      S: "16"
+      E: "21_polaris"
+    }
+    {
+      id: e46
+      T: Attr
+      S: "18"
+      E: "19"
+    }
+    {
+      id: e46_polaris
+      T: Attr
+      S: "18"
+      E: "19_polaris"
+    }
+    {
+      id: e47
+      T: Attr
+      S: "18"
+      E: "20"
+    }
+    {
+      id: e48
+      T: Attr
+      S: "22"
+      E: "22h"
+    }
+    {
+      id: e48h
+      T: Attr
+      S: "22h"
+      E: "23"
+    }
+    {
+      id: e49
+      T: Attr
+      S: "22"
+      E: "22f"
+    }
+    {
+      id: e48f
+      T: Attr
+      S: "22f"
+      E: "34"
+    }
+    {
+      id: e50
+      T: Attr
+      S: "22"
+      E: "40wrap"
+    }
+    {
+      id: e40wrap_vl
+      T: Attr
+      S: "40wrap"
+      E: "40"
+    }
+    {
+      id: e51
+      T: Attr
+      S: "23"
+      E: "24"
+    }
+    {
+      id: e52
+      T: Attr
+      S: "23"
+      E: "27"
+    }
+    {
+      id: e52a
+      T: Attr
+      S: "27"
+      E: "27a"
+    }
+    {
+      id: e52b
+      T: Attr
+      S: "27"
+      E: "28"
+    }
+    {
+      id: e53
+      T: Attr
+      S: "23"
+      E: "29"
+    }
+    {
+      id: e54
+      T: Attr
+      S: "24"
+      E: "25"
+    }
+    {
+      id: e55
+      T: Attr
+      S: "24"
+      E: "26"
+    }
+    {
+      id: e57
+      T: Attr
+      S: "29"
+      E: "30"
+    }
+    {
+      id: e58
+      T: Attr
+      S: "30"
+      E: "31"
+    }
+    {
+      id: e59
+      T: Attr
+      S: "30"
+      E: "32"
+    }
+    {
+      id: e60
+      T: Attr
+      S: "30"
+      E: "33"
+    }
+    {
+      id: e59a
+      T: Attr
+      S: "30"
+      E: "32a"
+    }
+    {
+      id: e61
+      T: Attr
+      S: "34"
+      E: "35"
+    }
+    {
+      id: e62
+      T: Attr
+      S: "34"
+      E: "36"
+    }
+    {
+      id: e63
+      T: Attr
+      S: "34"
+      E: "37"
+    }
+    {
+      id: e64
+      T: Attr
+      S: "37"
+      E: "38"
+    }
+    {
+      id: e65
+      T: Attr
+      S: "38"
+      E: "39"
+    }
+    {
+      id: e66
+      T: Attr
+      S: "40"
+      E: "41"
+    }
+    {
+      id: e66a
+      T: Attr
+      S: "40wrap"
+      E: "40a"
+    }
+    {
+      id: e66b
+      T: Attr
+      S: "40a"
+      E: "40b"
+    }
+    {
+      id: e67
+      T: Attr
+      S: "41"
+      E: "42"
+    }
+    {
+      id: e67exp
+      T: Attr
+      S: "41"
+      E: "41exp"
+    }
+    {
+      id: e67exp_st
+      T: Attr
+      S: "41exp"
+      E: "41exp_st"
+    }
+    {
+      id: e67exp_nest
+      T: Attr
+      S: "41exp"
+      E: "41exp_nest"
+    }
+    {
+      id: e67exp_ret_table
+      T: Attr
+      S: "41exp_nest"
+      E: "41exp_ret_table"
+    }
+    {
+      id: e68
+      T: Attr
+      S: "41"
+      E: "44"
+    }
+    {
+      id: e69
+      T: Attr
+      S: "41"
+      E: "47"
+    }
+    {
+      id: e70
+      T: Attr
+      S: "42"
+      E: "43"
+    }
+    {
+      id: e71_loop
+      T: Attr
+      S: "44"
+      E: "44a"
+    }
+    {
+      id: e71_loop_btn
+      T: Attr
+      S: "44a"
+      E: "44b"
+    }
+    {
+      id: e71_menu
+      T: Attr
+      S: "44"
+      E: "44c"
+    }
+    {
+      id: e71_menu_loop
+      T: Attr
+      S: "44c"
+      E: "44d"
+    }
+    {
+      id: e71_menu_item
+      T: Attr
+      S: "44d"
+      E: "44e"
+    }
+    {
+      id: e73
+      T: Attr
+      S: "47"
+      E: "48"
+    }
+    {
+      id: e74
+      T: Attr
+      S: "48"
+      E: "49"
+    }
+    {
+      id: e75
+      T: Attr
+      S: "52"
+      E: "53"
+    }
+    {
+      id: e76
+      T: Attr
+      S: "53"
+      E: "54"
+    }
+    {
+      id: e77
+      T: Attr
+      S: "53"
+      E: "55"
+    }
+    {
+      id: e78
+      T: Attr
+      S: "53"
+      E: "59"
+    }
+    {
+      id: e79
+      T: Attr
+      S: "53"
+      E: "60"
+    }
+    {
+      id: e80
+      T: Attr
+      S: "55"
+      E: "56"
+    }
+    {
+      id: e81
+      T: Attr
+      S: "55"
+      E: "57"
+    }
+    {
+      id: e82
+      T: Attr
+      S: "55"
+      E: "58"
+    }
+    {
+      id: e83
+      T: Attr
+      S: "60"
+      E: "61"
+    }
+    {
+      id: e83_polaris
+      T: Attr
+      S: "60"
+      E: "61_polaris"
+    }
+    {
+      id: e84
+      T: Attr
+      S: "60"
+      E: "62"
+    }
+    {
+      id: e84_polaris
+      T: Attr
+      S: "60"
+      E: "62_polaris"
+    }
+  ]
+}

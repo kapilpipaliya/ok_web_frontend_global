@@ -1,0 +1,1200 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: TableSettingsModal
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 0;
+    align-items: flex-end;
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const isOpen = args.contextData.props?.isOpen || false;
+const onClose = args.contextData.props?.onClose;
+
+return {
+  as: "div",
+  hide: !isOpen,
+  onClick: (e) => {
+    if (e.target === e.currentTarget && onClose) {
+      onClose();
+    }
+  }
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border-radius: 0.75rem;
+  width: 100%;
+  max-width: 800px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  animation: slideUp 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    max-width: 100%;
+    max-height: 100vh;
+    height: 100vh;
+    border-radius: 0;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}`;
+'''
+        displayOrder: 1
+        fns:
+          '''
+const getInitialConfig = () => args.contextData.props?.initialConfig || "";
+const getTableVertexLabel = () => args.contextData.props?.tableVertexLabel;
+const onSave = args.contextData.props?.onSave;
+const rbConfirm = args.contextData?.confirmContext?.rbConfirm;
+
+// State
+const [configText, setConfigText] = args.createSignal("");
+const [isLoadingDefault, setIsLoadingDefault] = args.createSignal(false);
+const [isExampleExpanded, setIsExampleExpanded] = args.createSignal(false);
+
+// Initialize from props
+const initialize = () => {
+  const initial = getInitialConfig();
+  if (typeof initial === "string") {
+    // If it's already a string (function body), use it directly
+    setConfigText(initial);
+  } else if (initial && typeof initial === "object") {
+    // If it's an object, convert to function body format
+    try {
+      const objString = JSON.stringify(initial, null, 2);
+      // Wrap in return statement for function body
+      setConfigText(`return ${objString};`);
+    } catch (e) {
+      setConfigText("return {};");
+    }
+  } else {
+    // Default empty function body
+    setConfigText("return {};");
+  }
+};
+
+// Load default settings
+const handleLoadDefault = async () => {
+  if (!rbConfirm) {
+    if (args.showErrorToast) {
+      args.showErrorToast("Confirmation dialog not available");
+    }
+    return;
+  }
+
+  const tableVertexLabel = getTableVertexLabel();
+  if (!tableVertexLabel) {
+    if (args.showErrorToast) {
+      args.showErrorToast("Content type not available");
+    }
+    return;
+  }
+
+  // Show confirmation
+  const confirmed = await rbConfirm({
+    title: "Load Default Settings",
+    message: "This will replace your current configuration with the default settings. Are you sure you want to continue?",
+    confirmText: "Load Default",
+    cancelText: "Cancel",
+    variant: "primary"
+  });
+
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+    setIsLoadingDefault(true);
+
+    // Fetch default settings
+    const result = await args.fns.executeYTOFunction("getUserContentSetting", {
+      tableVertexLabel,
+      key: `${tableVertexLabel}_settings_default`
+    });
+
+    if (result?.error) {
+      if (args.showErrorToast) {
+        args.showErrorToast(result.error);
+      }
+      return;
+    }
+
+    if (result?.result?.success && result.result.data?.setting) {
+      const settingData = result.result.data.setting.P || {};
+      const configText = settingData.config;
+
+      if (typeof configText === 'string') {
+        setConfigText(configText);
+        if (args.showSuccessToast) {
+          args.showSuccessToast("Default settings loaded successfully");
+        }
+      } else {
+        if (args.showErrorToast) {
+          args.showErrorToast("Default settings not found or invalid");
+        }
+      }
+    } else {
+      if (args.showErrorToast) {
+        args.showErrorToast("Default settings not found");
+      }
+    }
+  } catch (error) {
+    console.error("Error loading default settings:", error);
+    if (args.showErrorToast) {
+      args.showErrorToast(error.message || "Failed to load default settings");
+    }
+  } finally {
+    setIsLoadingDefault(false);
+  }
+};
+
+// Handle save
+const handleSave = () => {
+  if (!onSave) return;
+
+  try {
+    const text = configText().trim();
+    if (!text) {
+      throw new Error("Configuration cannot be empty");
+    }
+
+    // Validate that it's a valid function body by trying to create a function
+    try {
+      const configFunction = new Function(text);
+      const config = configFunction();
+
+      if (!config || typeof config !== "object") {
+        throw new Error("Function must return an object.");
+      }
+    } catch (validationError) {
+      throw new Error(validationError.message || "Invalid function body syntax");
+    }
+
+    // Save the raw text (function body), not the evaluated result
+    onSave(text, args.fns.handleSearch());
+  } catch (error) {
+    console.error("Error validating config:", error);
+    // Use alert as fallback if showErrorToast is not available
+    if (args.showErrorToast) {
+      args.showErrorToast(error.message || "Invalid configuration syntax");
+    } else {
+      alert(error.message || "Invalid configuration syntax");
+    }
+  }
+};
+
+const toggleExample = () => {
+  setIsExampleExpanded(!isExampleExpanded());
+};
+
+const getDetailedExample = () => {
+  return `return {
+  // Table columns: dataType = semantic data (validation/filter/sort); renderer = presentation only
+  // renderer "iconAction": column.iconAction: { action: "clipboard"|"openUrl"|"custom", textAccessor(row),
+  //   icon, activeIcon (carbon: ids), iconText, activeIconText, title, activeTitle, activeDurationMs, variant, size,
+  //   showFeedback, allowEmpty, openUrlTarget, openUrlWindowFeatures, htmlButtonStyle, buttonBg, activeButtonBg, buttonFg, activeButtonFg,
+  //   onClick(row, column, rowIndex, helpers) for action "custom" — helpers: getPayloadText, copyToClipboard, setFeedbackActive, clearFeedback }
+  columns: [
+    {
+      key: "name",
+      label: "Name",
+      dataType: "text",
+      renderer: "text",
+      sortable: true,
+      filterable: true,
+      editable: true,
+      required: true,
+      width: "200px"
+    },
+    {
+      key: "description",
+      label: "Description",
+      dataType: "text",
+      renderer: "text",
+      sortable: true,
+      filterable: true,
+      editable: true,
+      width: "300px"
+    },
+    {
+      key: "year",
+      label: "Year",
+      dataType: "number",
+      renderer: "text",
+      sortable: true,
+      filterable: true,
+      editable: true,
+      width: "100px"
+    },
+    {
+      key: "language",
+      label: "Language",
+      dataType: "relation",
+      renderer: "text",
+      sortable: true,
+      filterable: true,
+      editable: true,
+      options: ["English", "Spanish", "French"],
+      width: "150px"
+    },
+    {
+      key: "isActive",
+      label: "Active",
+      dataType: "boolean",
+      renderer: "checkbox",
+      sortable: true,
+      filterable: true,
+      editable: true,
+      width: "80px"
+    },
+    {
+      key: "createdAt",
+      label: "Created",
+      dataType: "date",
+      renderer: "isoDateTime",
+      sortable: true,
+      filterable: true,
+      editable: false,
+      width: "180px"
+    },
+    {
+      key: "preview",
+      label: "Preview",
+      dataType: "text",
+      renderer: "image",
+      sortable: false,
+      filterable: false,
+      editable: true,
+      width: "120px"
+    },
+    {
+      key: "download",
+      label: "Download",
+      dataType: "text",
+      renderer: "downloadLink",
+      sortable: false,
+      filterable: false,
+      editable: false,
+      width: "100px"
+    },
+    {
+      key: "__copyLink",
+      label: "",
+      renderer: "iconAction",
+      sortable: false,
+      filterable: false,
+      editable: false,
+      width: "52px",
+      iconAction: {
+        action: "clipboard",
+        icon: "carbon:link",
+        activeIcon: "carbon:checkmark",
+        title: "Copy link",
+        activeTitle: "Copied",
+        activeDurationMs: 3000,
+        textAccessor: (row) => row.P?.imageUrl || row.P?.originUrl || ""
+      }
+    }
+  ],
+
+  // Form configuration (nested structure)
+  formConfig: {
+    gridColumns: 1, // Default columns for groups that don't specify
+    groups: [
+      {
+        key: "basic",
+        title: "Basic Information",
+        gridColumns: 2, // This group uses 2 columns
+        fields: [
+          {
+            key: "name",
+            label: "Name",
+            dataType: "text",
+            renderer: "text",
+            required: true,
+            colSpan: 2 // Span across 2 columns within the group
+          },
+          {
+            key: "description",
+            label: "Description",
+            dataType: "text",
+            renderer: "textArea",
+            required: false,
+            colSpan: 2
+          },
+          {
+            key: "year",
+            label: "Year",
+            dataType: "number",
+            renderer: "number",
+            required: false,
+            colSpan: 1
+          },
+          {
+            key: "language",
+            label: "Language",
+            dataType: "select",
+            renderer: "select",
+            required: false,
+            options: ["English", "Spanish", "French"],
+            colSpan: 1
+          }
+        ]
+      },
+      {
+        key: "status",
+        title: "Status",
+        gridColumns: 1, // This group uses 1 column
+        fields: [
+          {
+            key: "isActive",
+            label: "Active",
+            type: "checkbox",
+            required: false,
+            colSpan: 1
+          }
+        ]
+      }
+    ],
+    saveFunction: null // Optional: custom save function
+  },
+
+  // Unique keys for validation
+  uniqueKeys: ["name", "year"], // Fields that must be unique
+
+  // Table display options
+  title: "My Table",
+  rowHeight: 50,
+  showRowNumber: true,
+  showSelection: true,
+  resizableColumns: true,
+  searchPlaceholder: "Search...",
+
+  // Additional filter fields (displayed above table)
+  additionalFilters: [
+    {
+      key: "status",
+      label: "Status",
+      type: "select",
+      options: ["active", "inactive", "pending"]
+    }
+  ],
+
+  // Custom actions (displayed in table header)
+  customActions: [
+    {
+      label: "Custom Action",
+      onClick: (selectedRows) => {
+        console.log("Custom action", selectedRows);
+      }
+    }
+  ],
+
+  // Batch actions (displayed when rows are selected)
+  batchActions: [
+    {
+      label: "Delete Selected",
+      onClick: (selectedRows) => {
+        console.log("Delete", selectedRows);
+      },
+      variant: "danger"
+    }
+  ],
+
+  // Columns to hide conditionally
+  hideColumns: ["download"], // Hide these columns
+
+  // Show/hide buttons
+  showAddButton: true,
+  actions: [
+    { key: "edit", type: "edit" },
+    { key: "delete", type: "delete", confirm: { title: "Delete?", message: "This cannot be undone." } }
+  ],
+
+  // Data and function props (optional when loadFromSetting is true)
+  dataFunction: null, // Optional: custom data fetching function
+  importFunction: null, // Optional: custom import function
+  exportFunction: null // Optional: custom export function
+};`;
+};
+
+return {
+  configText,
+  setConfigText,
+  initialize,
+  handleSave,
+  handleLoadDefault,
+  isLoadingDefault,
+  isExampleExpanded,
+  toggleExample,
+  getDetailedExample,
+  getUsePolarisUI: () => args.fns.getUsePolarisUI?.() === true
+};
+'''
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  onClick: (e) => e.stopPropagation(),
+  onMount: () => {
+    args.fns.initialize();
+  }
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.lg};
+  border-bottom: 1px solid ${args.theme.var.color.border};
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xl};
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "h2",
+  text: "Table Settings"
+};
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  cursor: pointer;
+  color: ${args.theme.var.color.muted};
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: ${args.theme.var.color.text};
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const onClose = args.contextData.props?.onClose;
+
+return {
+  as: "icon",
+  icon: "carbon:close",
+  width: 24,
+  height: 24,
+  onClick: onClose,
+  hide: args.fns.getUsePolarisUI?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "6_polaris"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const onClose = args.contextData.props?.onClose;
+
+return {
+  as: "s-button",
+  "attr:variant": "plain",
+  "attr:icon": "x",
+  "attr:accessibilityLabel": "Close",
+  onClick: onClose,
+  hide: args.fns.getUsePolarisUI?.() !== true
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  flex: 1;
+  overflow-y: auto;
+  padding: ${args.theme.var.spacing.lg};
+  display: flex;
+  flex-direction: column;
+  gap: ${args.theme.var.spacing.md};
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.lg};
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: ${args.theme.var.spacing.sm};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "h3",
+  text: "Configuration"
+};
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.muted};
+  margin-bottom: ${args.theme.var.spacing.sm};
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "p",
+  text: "Enter JavaScript function body that returns a configuration object. Click below to see a detailed example with all available properties."
+};
+'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: ${args.theme.var.spacing.md};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.md};
+  overflow: hidden;
+}`;
+'''
+        displayOrder: 2.1
+        componentName: Html
+        props:
+          '''
+const hideExample = typeof window !== 'undefined' && window.innerHeight < 1000;
+return {
+  as: "div",
+  hide: hideExample
+};
+'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: ${args.theme.var.spacing.md};
+  background: ${args.theme.var.color.background_light_100};
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background: ${args.theme.var.color.background_light_200};
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  onClick: args.fns.toggleExample
+};
+'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "span",
+  text: "📋 Detailed Configuration Example"
+};
+'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  font-size: ${args.theme.var.fontSize.lg};
+  transition: transform 0.2s ease;
+  transform: ${args.fns.isExampleExpanded() ? 'rotate(180deg)' : 'rotate(0deg)'};
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "span",
+  text: "▼"
+};
+'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  background: ${args.theme.var.color.background};
+  border-top: 1px solid ${args.theme.var.color.border};
+  max-height: ${args.fns.isExampleExpanded() ? '600px' : '0'};
+  overflow: ${args.fns.isExampleExpanded() ? 'auto' : 'hidden'};
+  transition: max-height 0.3s ease, padding 0.3s ease;
+  padding-top: ${args.fns.isExampleExpanded() ? args.theme.var.spacing.md : '0'};
+  padding-bottom: ${args.fns.isExampleExpanded() ? args.theme.var.spacing.md : '0'};
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-family: monospace;
+  font-size: 11px;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  white-space: pre;
+  overflow-x: auto;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "pre",
+  text: args.fns.getDetailedExample(),
+  hide: !args.fns.isExampleExpanded()
+};
+'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-bottom: ${args.theme.var.spacing.sm};
+  gap: ${args.theme.var.spacing.sm};
+}`;
+'''
+        displayOrder: 2.5
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "secondary",
+  onClick: args.fns.handleLoadDefault,
+  text: "Load Default Settings",
+  disabled: args.fns.isLoadingDefault(),
+  hide: args.fns.getUsePolarisUI?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "17_polaris"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "s-button",
+  "attr:variant": "secondary",
+  text: "Load Default Settings",
+  onClick: args.fns.handleLoadDefault,
+  disabled: args.fns.isLoadingDefault(),
+  hide: args.fns.getUsePolarisUI?.() !== true
+};
+'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  min-height: 24px;
+}`;
+'''
+        displayOrder: 2
+        componentName: LoadingSpinner
+        props:
+          '''
+return {
+  size: "small",
+  hide: !args.fns.isLoadingDefault()
+};
+'''
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: TextArea
+        props:
+          '''
+return {
+  value: args.fns.configText(),
+  onChange: (e) => args.fns.setConfigText(e.target.value),
+  placeholder: `return {
+  columns: [...],
+  formConfig: { ... },
+  uniqueKeys: [...]
+};`,
+  rows: 20,
+  style: "font-family: monospace; font-size: 12px;",
+  disabled: args.fns.isLoadingDefault()
+};
+'''
+      }
+    }
+    {
+      id: "20"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.lg};
+  border-top: 1px solid ${args.theme.var.color.border};
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: ${args.theme.var.spacing.md};
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "21"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''
+const onClose = args.contextData.props?.onClose;
+
+return {
+  variant: "secondary",
+  onClick: onClose,
+  text: "Cancel",
+  hide: args.fns.getUsePolarisUI?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "21_polaris"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const onClose = args.contextData.props?.onClose;
+
+return {
+  as: "s-button",
+  "attr:variant": "secondary",
+  text: "Cancel",
+  onClick: onClose,
+  hide: args.fns.getUsePolarisUI?.() !== true
+};
+'''
+      }
+    }
+    {
+      id: "22"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "primary",
+  onClick: args.fns.handleSave,
+  text: "Save Settings",
+  hide: args.fns.getUsePolarisUI?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "22_polaris"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "s-button",
+  "attr:variant": "primary",
+  text: "Save Settings",
+  onClick: args.fns.handleSave,
+  hide: args.fns.getUsePolarisUI?.() !== true
+};
+'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "7"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "20"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "4"
+      E: "6"
+    }
+    {
+      id: e7a
+      T: Attr
+      S: "4"
+      E: "6_polaris"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "7"
+      E: "9"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "7"
+      E: "10"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "7"
+      E: "16"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "7"
+      E: "19"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "10"
+      E: "11"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "10"
+      E: "14"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "11"
+      E: "12"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "11"
+      E: "13"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "14"
+      E: "15"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "16"
+      E: "17"
+    }
+    {
+      id: e18a
+      T: Attr
+      S: "16"
+      E: "17_polaris"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "16"
+      E: "18"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "20"
+      E: "21"
+    }
+    {
+      id: e20a
+      T: Attr
+      S: "20"
+      E: "21_polaris"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "20"
+      E: "22"
+    }
+    {
+      id: e21a
+      T: Attr
+      S: "20"
+      E: "22_polaris"
+    }
+  ]
+}
