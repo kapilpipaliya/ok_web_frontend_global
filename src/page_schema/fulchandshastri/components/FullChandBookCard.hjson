@@ -8,8 +8,12 @@
         componentName: "Html",
         props: '''
 const book = args.contextData.props || {};
+const index = args.contextData.index ?? 0;
 return {
-  as: "div"
+  as: "div",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el, { delay: index * 0.1 })
 };
 ''',
         css: '''

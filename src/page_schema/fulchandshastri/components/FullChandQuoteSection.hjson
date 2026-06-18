@@ -9,7 +9,10 @@
         props: '''
 const quote = args.contextData.props || {};
 return {
-  as: "section"
+  as: "section",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el)
 };
 ''',
         css: '''

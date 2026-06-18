@@ -117,7 +117,10 @@ return `._id {
         componentName: "Html",
         props: '''
 return {
-  as: "div"
+  as: "div",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el)
 };
 ''',
         css: '''
@@ -353,11 +356,15 @@ return `._id {
         componentName: "Html",
         props: '''
 const video = args.contextData.videos;
+const index = args.contextData.index ?? 0;
 return {
   as: "a",
   href: `https://www.youtube.com/watch?v=${video.videoId}`,
   target: "_blank",
-  rel: "noopener noreferrer"
+  rel: "noopener noreferrer",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el, { delay: index * 0.08 })
 };
 ''',
         css: '''
@@ -626,7 +633,10 @@ return {
         componentName: "Html",
         props: '''
 return {
-  as: "div"
+  as: "div",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el)
 };
 ''',
         css: '''

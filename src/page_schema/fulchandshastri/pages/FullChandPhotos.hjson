@@ -155,9 +155,13 @@ return `._id {
         componentName: "Html",
         props: '''
 const album = args.contextData.albums;
+const index = args.contextData.index ?? 0;
 return {
   as: "a",
-  href: album.link
+  href: album.link,
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el, { delay: index * 0.08 })
 };
 ''',
         css: '''
@@ -332,7 +336,10 @@ return `._id {
         componentName: "Html",
         props: '''
 return {
-  as: "section"
+  as: "section",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el)
 };
 '''
       }
@@ -406,8 +413,12 @@ return `._id {
         componentName: "Html",
         props: '''
 const photo = args.contextData.photos;
+const index = args.contextData.index ?? 0;
 return {
-  as: "div"
+  as: "div",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el, { delay: index * 0.08 })
 };
 ''',
         css: '''
@@ -513,7 +524,10 @@ return `._id {
         componentName: "Html",
         props: '''
 return {
-  as: "div"
+  as: "div",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el)
 };
 ''',
         css: '''

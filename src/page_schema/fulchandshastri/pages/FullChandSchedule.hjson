@@ -117,7 +117,10 @@ return `._id {
         componentName: "Html",
         props: '''
 return {
-  as: "section"
+  as: "section",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el)
 };
 ''',
         css: '''
@@ -490,7 +493,10 @@ return `._id {
         componentName: "Html",
         props: '''
 return {
-  as: "section"
+  as: "section",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el)
 };
 ''',
         css: '''
@@ -864,7 +870,10 @@ return `._id {
         componentName: "Html",
         props: '''
 return {
-  as: "div"
+  as: "div",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el)
 };
 ''',
         css: '''

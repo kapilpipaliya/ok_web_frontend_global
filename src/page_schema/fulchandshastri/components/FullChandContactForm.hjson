@@ -8,7 +8,10 @@
         componentName: "Html",
         props: '''
 return {
-  as: "div"
+  as: "div",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el)
 };
 ''',
         css: '''

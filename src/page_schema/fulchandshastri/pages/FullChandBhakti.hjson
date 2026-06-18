@@ -176,8 +176,12 @@ return `._id {
         componentName: "Html",
         props: '''
 const item = args.contextData.bhaktiItems;
+const index = args.contextData.index ?? 0;
 return {
-  as: "div"
+  as: "div",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el, { delay: index * 0.08 })
 };
 ''',
         css: '''

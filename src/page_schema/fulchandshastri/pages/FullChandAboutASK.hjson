@@ -173,7 +173,10 @@ return `._id {
 return {
   as: "img",
   src: "https://fulchandshastri.com/wp-content/uploads/2024/01/Home-banner-1.jpg",
-  alt: "Atma Sadhana Kendra Umarala"
+  alt: "Atma Sadhana Kendra Umarala",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el, { x: -32, y: 0 })
 };
 ''',
         css: '''
@@ -195,7 +198,10 @@ return `._id {
         componentName: "Html",
         props: '''
 return {
-  as: "div"
+  as: "div",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el, { x: 32, y: 0, delay: 0.1 })
 };
 '''
       }
@@ -254,7 +260,10 @@ return `._id {
         componentName: "Html",
         props: '''
 return {
-  as: "div"
+  as: "div",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el)
 };
 ''',
         css: '''
@@ -348,7 +357,10 @@ return {
         componentName: "Html",
         props: '''
 return {
-  as: "div"
+  as: "div",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el)
 };
 ''',
         css: '''
@@ -430,10 +442,14 @@ return {
         componentName: "Html",
         props: '''
 const image = args.contextData.image;
+const index = args.contextData.index ?? 0;
 return {
   as: "img",
   src: image.src,
-  alt: image.alt
+  alt: image.alt,
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el, { delay: index * 0.08 })
 };
 ''',
         css: '''
@@ -460,7 +476,10 @@ return `._id {
         componentName: "Html",
         props: '''
 return {
-  as: "div"
+  as: "div",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el)
 };
 ''',
         css: '''

@@ -81,8 +81,12 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const welcome = args.contextData.homeSettings?.welcome;
 return {
-  as: "section"
+  as: "section",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el)
 };
 ''',
         css: '''
@@ -220,7 +224,10 @@ return {
         componentName: "Html",
         props: '''
 return {
-  as: "section"
+  as: "section",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el)
 };
 ''',
         css: '''
@@ -302,8 +309,12 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const index = args.contextData.index ?? 0;
 return {
-  as: "div"
+  as: "div",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el, { delay: index * 0.08 })
 };
 '''
       }

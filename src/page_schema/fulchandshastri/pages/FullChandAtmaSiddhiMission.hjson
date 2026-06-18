@@ -142,7 +142,10 @@ return `._id {
         componentName: "Html",
         props: '''
 return {
-  as: "div"
+  as: "div",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el)
 };
 ''',
         css: '''
@@ -208,7 +211,10 @@ return `._id {
         componentName: "Html",
         props: '''
 return {
-  as: "div"
+  as: "div",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el)
 };
 ''',
         css: '''
@@ -286,8 +292,12 @@ return {
         componentName: "Html",
         props: '''
 const principle = args.contextData.principle;
+const index = args.contextData.index ?? 0;
 return {
-  as: "div"
+  as: "div",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el, { delay: index * 0.08 })
 };
 ''',
         css: '''
@@ -381,7 +391,10 @@ return `._id {
         componentName: "Html",
         props: '''
 return {
-  as: "div"
+  as: "div",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el)
 };
 ''',
         css: '''
@@ -466,8 +479,12 @@ return {
         componentName: "Html",
         props: '''
 const activity = args.contextData.activity;
+const index = args.contextData.index ?? 0;
 return {
-  as: "div"
+  as: "div",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el, { delay: index * 0.08 })
 };
 ''',
         css: '''
@@ -562,7 +579,10 @@ return `._id {
         componentName: "Html",
         props: '''
 return {
-  as: "div"
+  as: "div",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el)
 };
 ''',
         css: '''
