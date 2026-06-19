@@ -136,11 +136,90 @@ for (let k = 0; k < (defaultSectionDocuments?.length || 0); k++) {
   stats.updated += r.updated;
 }
 
+async function migrateExistingLocalizedValues() {
+  if (dryRun) return { converted: 0 };
+
+  const languagesResult = await args.executeNamedServerFunction({
+    functionName: "getFulchandSiteLanguages",
+    contextData: {}
+  });
+  const languages = languagesResult?.result?.data?.languages || [
+    { code: "en", label: "English", isDefault: true }
+  ];
+
+  const docsResult = await args.session.run(`
+    MATCH (g:GlobalSetting {key: 'Default'})-[:GlobalSettingHasSettingsSection]->(d:SettingsSectionDocument)
+    RETURN d.pageId AS pageId, d.sectionId AS sectionId, d.values AS values, id(d) AS nodeId
+  `);
+
+  let converted = 0;
+  for (let i = 0; i < docsResult.records.length; i++) {
+    const record = docsResult.records[i];
+    const pageId = record.get("pageId");
+    const sectionId = record.get("sectionId");
+    const nodeId = record.get("nodeId");
+    let values = record.get("values");
+    if (typeof values === "string") {
+      try { values = JSON.parse(values); } catch { values = {}; }
+    }
+    if (!values || typeof values !== "object") continue;
+
+    const configKey = pageId + "_settings_page_default";
+    const configResult = await args.session.run(
+      `MATCH (s:Setting {key: $key}) RETURN s.config AS config LIMIT 1`,
+      { key: configKey }
+    );
+    if (configResult.records.length === 0) continue;
+
+    let sectionConfig = null;
+    try {
+      const configFn = new Function(configResult.records[0].get("config"));
+      const pageConfig = configFn();
+      sectionConfig = (pageConfig?.sections || []).find((s) => s.id === sectionId) || null;
+    } catch (configError) {
+      console.warn("migrateLocalizedValues: invalid config for", pageId, configError);
+      continue;
+    }
+    if (!sectionConfig) continue;
+
+    const normalizeResult = await args.executeNamedServerFunction({
+      functionName: "fulchandLocalizationHelpers",
+      contextData: {
+        action: "localizeSectionValues",
+        sectionConfig,
+        values,
+        mode: "normalize",
+        languages
+      }
+    });
+
+    const normalizedValues = normalizeResult?.result?.data?.values;
+    if (!normalizedValues) continue;
+
+    if (JSON.stringify(normalizedValues) !== JSON.stringify(values)) {
+      await args.session.run(
+        `MATCH (d) WHERE id(d) = $nodeId SET d.values = $valuesJson, d.updatedAt = $now`,
+        {
+          nodeId,
+          valuesJson: JSON.stringify(normalizedValues),
+          now: nowIso()
+        }
+      );
+      converted += 1;
+    }
+  }
+
+  return { converted };
+}
+
+const localizedMigration = await migrateExistingLocalizedValues();
+stats.localizedDocumentsConverted = localizedMigration.converted || 0;
+
 return {
   success: true,
   message: dryRun
     ? `Fulchand Shastri settings migration dry run. Would touch ${stats.total} records.`
-    : `Fulchand Shastri settings migration complete. Created ${stats.created}, updated ${stats.updated}.`,
+    : `Fulchand Shastri settings migration complete. Created ${stats.created}, updated ${stats.updated}, localized ${stats.localizedDocumentsConverted} documents.`,
   stats
 };
 '''

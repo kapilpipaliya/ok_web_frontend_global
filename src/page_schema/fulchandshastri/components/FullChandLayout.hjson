@@ -108,7 +108,12 @@ const animateOnView = (el, options = {}) => {
 };
 
 return {
-  animateOnView
+  animateOnView,
+  executeYTOFunction: (functionName, contextData) =>
+    args.executeNamedServerFunction({
+      functionName,
+      contextData: contextData || {}
+    })
 };
 '''
       }
@@ -187,7 +192,8 @@ return {};
         componentName: "Html",
         props: '''
 return {
-  as: "div"
+  as: "div",
+  "data-fulchand-page-main": ""
 };
 ''',
         css: '''
@@ -199,11 +205,27 @@ return `._id {
       }
     },
     {
+      id: "fcl_settings_editor",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "FullChandPageSettingsEditor"
+      }
+    },
+    {
       id: "fcl_slot",
       L: "Attr",
       P: {
         displayOrder: 1,
         componentName: "Slot"
+      }
+    },
+    {
+      id: "fcl_confirm",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "ConfirmProvider"
       }
     },
     {
@@ -225,6 +247,8 @@ return {};
     { id: "fcl_e2", T: "Attr", S: "fcl_shell", E: "fcl_header" },
     { id: "fcl_e3", T: "Attr", S: "fcl_shell", E: "fcl_main" },
     { id: "fcl_e4", T: "Attr", S: "fcl_shell", E: "fcl_footer" },
-    { id: "fcl_e5", T: "Attr", S: "fcl_main", E: "fcl_slot" }
+    { id: "fcl_e4b", T: "Attr", S: "fcl_root", E: "fcl_confirm" },
+    { id: "fcl_e5", T: "Attr", S: "fcl_root", E: "fcl_settings_editor" },
+    { id: "fcl_e6", T: "Attr", S: "fcl_main", E: "fcl_slot" }
   ]
 }

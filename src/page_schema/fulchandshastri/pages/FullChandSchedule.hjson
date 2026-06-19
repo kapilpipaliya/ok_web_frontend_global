@@ -10,6 +10,7 @@
         isNoPermissionCheck: true,
         url: "/schedule"
         contextName: "scheduleSettings"
+        settingsPageId: "schedule"
         serverFunction: '''
 try {
   const result = await args.executeNamedServerFunction({

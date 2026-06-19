@@ -10,6 +10,7 @@
         isNoPermissionCheck: true,
         url: "/gyaan-deepak-prajwalan"
         contextName: "gyaanDeepakSettings"
+        settingsPageId: "gyaan-deepak"
         serverFunction: '''
 try {
   const result = await args.executeNamedServerFunction({

@@ -8,6 +8,162 @@
         description: Returns Fulchand Shastri settings page configs and default section documents for all public pages.
         body:
           '''
+const DEFAULT_SITE_LANGUAGES = [
+  { code: "en", label: "English", isDefault: true },
+  { code: "hi", label: "Hindi", isDefault: false },
+  { code: "gu", label: "Gujarati", isDefault: false }
+];
+
+const NON_TRANSLATABLE_FIELD_KEYS = new Set([
+  "leftVideoUrl", "rightVideoUrl", "videoUrl", "videoId", "youtubeId", "audioUrl",
+  "thumbnail", "imageUrl", "pdfUrl", "downloadUrl", "mapUrl", "website", "url", "href",
+  "icon", "link", "align", "code", "language", "duration", "views", "date", "email",
+  "phone", "slug", "key", "path", "file", "src", "langOption1", "langOption2",
+  "langOption3", "langOption4", "videoEmbedUrl", "spotifyUrl", "facebookUrl",
+  "instagramUrl", "twitterUrl", "youtubeUrl", "whatsappNumber", "addressLine1",
+  "addressLine2", "postalCode", "city", "country", "latitude", "longitude"
+]);
+
+function buildField({ key, label, renderer, translatable, ...rest }) {
+  const isTextField = renderer === "text" || renderer === "textArea";
+  let resolvedTranslatable = translatable;
+  if (resolvedTranslatable === undefined) {
+    resolvedTranslatable = isTextField;
+  }
+  if (NON_TRANSLATABLE_FIELD_KEYS.has(key)) {
+    resolvedTranslatable = false;
+  }
+  return {
+    key,
+    label,
+    renderer,
+    dataType:
+      renderer === "fieldArray" ? "array" : renderer === "checkbox" ? "boolean" : "text",
+    translatable: resolvedTranslatable,
+    ...rest
+  };
+}
+
+function finalizeField(field) {
+  if (!field || typeof field !== "object") return field;
+  const finalized = buildField({
+    key: field.key,
+    label: field.label,
+    renderer: field.renderer || "text",
+    translatable: field.translatable,
+    required: field.required,
+    colSpan: field.colSpan,
+    defaultValue: field.defaultValue,
+    placeholder: field.placeholder,
+    maxLength: field.maxLength,
+    minLength: field.minLength,
+    validation: field.validation,
+    fieldArrayConfig: field.fieldArrayConfig
+      ? {
+          ...field.fieldArrayConfig,
+          itemFields: (field.fieldArrayConfig.itemFields || []).map((itemField) =>
+            finalizeField(itemField)
+          )
+        }
+      : undefined
+  });
+  return finalized;
+}
+
+function getDefaultLanguageCode(languages) {
+  const list = Array.isArray(languages) && languages.length > 0 ? languages : DEFAULT_SITE_LANGUAGES;
+  const explicit = list.find((lang) => lang?.isDefault === true && lang?.code);
+  if (explicit?.code) return String(explicit.code);
+  return list[0]?.code ? String(list[0].code) : "en";
+}
+
+function isTranslatableField(field) {
+  return field?.translatable !== false;
+}
+
+function normalizeLocalizedDefault(value, languages, defaultCode) {
+  const code = defaultCode || getDefaultLanguageCode(languages);
+  const normalized = {};
+  for (let i = 0; i < languages.length; i++) {
+    normalized[languages[i].code] = "";
+  }
+  if (value != null && typeof value === "object" && !Array.isArray(value)) {
+    for (const langKey of Object.keys(value)) {
+      if (Object.prototype.hasOwnProperty.call(normalized, langKey)) {
+        normalized[langKey] = value[langKey] == null ? "" : String(value[langKey]);
+      }
+    }
+    return normalized;
+  }
+  if (typeof value === "string") {
+    normalized[code] = value;
+  }
+  return normalized;
+}
+
+function localizeFieldValue(field, value, languages) {
+  if (!isTranslatableField(field)) return value;
+  const defaultCode = getDefaultLanguageCode(languages);
+  return normalizeLocalizedDefault(value, languages, defaultCode);
+}
+
+function localizeDefaultDocumentValues(page, languages) {
+  const defaultCode = getDefaultLanguageCode(languages);
+  return (page.defaultDocuments || []).map((doc) => {
+    const section = (page.sections || []).find((s) => s.id === doc.sectionId);
+    if (!section) return doc;
+    const values = { ...(doc.values || {}) };
+    for (let fi = 0; fi < (section.fields || []).length; fi++) {
+      const field = section.fields[fi];
+      if (!field?.key) continue;
+      if (field.renderer === "fieldArray" && Array.isArray(values[field.key])) {
+        const itemFields = field.fieldArrayConfig?.itemFields || [];
+        values[field.key] = values[field.key].map((item) => {
+          const nextItem = { ...(item || {}) };
+          for (let ii = 0; ii < itemFields.length; ii++) {
+            const itemField = itemFields[ii];
+            if (!itemField?.key) continue;
+            nextItem[itemField.key] = localizeFieldValue(
+              itemField,
+              nextItem[itemField.key],
+              languages
+            );
+          }
+          return nextItem;
+        });
+      } else if (Object.prototype.hasOwnProperty.call(values, field.key)) {
+        values[field.key] = localizeFieldValue(field, values[field.key], languages);
+      }
+    }
+    return { ...doc, values };
+  });
+}
+
+function finalizePage(page) {
+  const sections = (page.sections || []).map((section) => ({
+    ...section,
+    fields: (section.fields || []).map((field) => finalizeField(field))
+  }));
+  const localizedDefaults = localizeDefaultDocumentValues(
+    { ...page, sections },
+    DEFAULT_SITE_LANGUAGES
+  );
+  return {
+    ...page,
+    sections,
+    defaultDocuments: localizedDefaults
+  };
+}
+
+const globalSidebarItems = [
+  {
+    id: "global",
+    label: "Global Settings",
+    path: "/settings?page=global",
+    icon: "settings"
+  }
+];
+
 const sidebarItems = [
   {
     "id": "home",
@@ -102,6 +258,64 @@ const sidebarItems = [
 ];
 
 const pages = [
+  {
+    "settingsPageId": "global",
+    "name": "Global Settings",
+    "description": "Configure site-wide languages used for content translation.",
+    "sections": [
+      {
+        "id": "siteLanguages",
+        "title": "Site languages",
+        "description": "Languages available for translating page content. Mark one as default.",
+        "fields": [
+          buildField({
+            key: "languages",
+            label: "Languages",
+            renderer: "fieldArray",
+            required: true,
+            colSpan: 1,
+            translatable: false,
+            defaultValue: DEFAULT_SITE_LANGUAGES,
+            fieldArrayConfig: {
+              itemLabel: "Language",
+              addButtonLabel: "Add language",
+              minItems: 1,
+              itemFields: [
+                buildField({
+                  key: "code",
+                  label: "Language code",
+                  renderer: "text",
+                  required: true,
+                  translatable: false
+                }),
+                buildField({
+                  key: "label",
+                  label: "Display name",
+                  renderer: "text",
+                  required: true,
+                  translatable: false
+                }),
+                buildField({
+                  key: "isDefault",
+                  label: "Default language",
+                  renderer: "checkbox",
+                  translatable: false
+                })
+              ]
+            }
+          })
+        ]
+      }
+    ],
+    "defaultDocuments": [
+      {
+        "sectionId": "siteLanguages",
+        "values": {
+          "languages": DEFAULT_SITE_LANGUAGES
+        }
+      }
+    ]
+  },
   {
     "settingsPageId": "home",
     "name": "Home Page Settings",
@@ -4573,7 +4787,7 @@ const pages = [
   }
 ];
 
-function buildConfig(page, sidebarItems) {
+function buildConfig(page, contentSidebarItems, globalItems) {
   const sectionConfigs = page.sections.map((section) => ({
     id: section.id,
     type: "card",
@@ -4602,20 +4816,25 @@ function buildConfig(page, sidebarItems) {
   audit: { enabled: true, resource: "settings.${page.settingsPageId}", includeDiff: true },
   sidebar: {
     title: "Site Settings",
-    groups: [{ id: "content", label: "Content", items: ${JSON.stringify(sidebarItems)} }]
+    groups: [
+      { id: "global", label: "Global", items: ${JSON.stringify(globalItems)} },
+      { id: "content", label: "Content", items: ${JSON.stringify(contentSidebarItems)} }
+    ]
   },
   sections: ${JSON.stringify(sectionConfigs)}
 };`;
 }
 
-const settingsPageConfigs = pages.map((page) => ({
+const finalizedPages = pages.map((page) => finalizePage(page));
+
+const settingsPageConfigs = finalizedPages.map((page) => ({
   key: page.settingsPageId + "_settings_page_default",
   settingsPageId: page.settingsPageId,
   name: page.name,
-  config: buildConfig(page, sidebarItems)
+  config: buildConfig(page, sidebarItems, globalSidebarItems)
 }));
 
-const defaultSectionDocuments = pages.flatMap((page) =>
+const defaultSectionDocuments = finalizedPages.flatMap((page) =>
   (page.defaultDocuments || []).map((doc) => ({
     pageId: page.settingsPageId,
     sectionId: doc.sectionId,

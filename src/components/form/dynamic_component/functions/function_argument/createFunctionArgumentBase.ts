@@ -361,23 +361,55 @@ export function createFunctionArgumentBase(
     findVertexByLabelAndUniqueId,
     findVertexIdsByLabel,
     
-    // Pragmatic drag and drop - direct access to library functions
-    draggable,
-    dropTargetForElements,
-    monitorForElements,
-    dropTargetForExternal,
-    monitorForExternal,
-    setCustomNativeDragPreview,
-    pointerOutsideOfPreview,
-    centerUnderPointer,
-    preserveOffsetOnSource,
-    combine,
-    GroupDropIndicator,
-    DropIndicator,
-    liveRegion,
-    triggerPostMoveFlash,
-    attachInstruction,
-    extractInstruction,
+    // Pragmatic drag and drop - getters so async client import is visible after fns closure creation
+    get draggable() {
+      return draggable;
+    },
+    get dropTargetForElements() {
+      return dropTargetForElements;
+    },
+    get monitorForElements() {
+      return monitorForElements;
+    },
+    get dropTargetForExternal() {
+      return dropTargetForExternal;
+    },
+    get monitorForExternal() {
+      return monitorForExternal;
+    },
+    get setCustomNativeDragPreview() {
+      return setCustomNativeDragPreview;
+    },
+    get pointerOutsideOfPreview() {
+      return pointerOutsideOfPreview;
+    },
+    get centerUnderPointer() {
+      return centerUnderPointer;
+    },
+    get preserveOffsetOnSource() {
+      return preserveOffsetOnSource;
+    },
+    get combine() {
+      return combine;
+    },
+    get GroupDropIndicator() {
+      return GroupDropIndicator;
+    },
+    get DropIndicator() {
+      return DropIndicator;
+    },
+    get liveRegion() {
+      return liveRegion;
+    },
+    get triggerPostMoveFlash() {
+      return triggerPostMoveFlash;
+    },
+    get attachInstruction() {
+      return attachInstruction;
+    },
+    get extractInstruction() {
+      return extractInstruction;
+    },
     createLoopRowRenderer: (
       mapContextValue: (rowData: unknown, index: Accessor<number>) => unknown,
     ) => {

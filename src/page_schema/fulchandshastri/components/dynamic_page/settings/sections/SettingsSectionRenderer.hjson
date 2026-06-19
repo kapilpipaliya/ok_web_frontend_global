@@ -50,11 +50,24 @@ const getSectionState = () => {
   return args.fns.getSectionState?.(sectionId) || null;
 };
 
+const DEFAULT_SITE_LANGUAGES = [
+  { code: "en", label: "English", isDefault: true },
+  { code: "hi", label: "Hindi", isDefault: false },
+  { code: "gu", label: "Gujarati", isDefault: false }
+];
+
+const getSiteLanguages = () => {
+  const languages = args.contextData.props?.siteLanguages;
+  if (Array.isArray(languages) && languages.length > 0) return languages;
+  return DEFAULT_SITE_LANGUAGES;
+};
+
 return {
   getSectionConfig,
   resolveRendererComponent,
   isSectionVisible,
-  getSectionState
+  getSectionState,
+  getSiteLanguages
 };
 '''
       }
@@ -87,6 +100,7 @@ const renderer = args.fns.resolveRendererComponent();
 return {
   sectionConfig,
   sectionState: args.fns.getSectionState(),
+  siteLanguages: args.fns.getSiteLanguages?.() || [],
   hide: renderer !== "SettingsSectionCard"
 };
 '''
@@ -104,6 +118,7 @@ const sectionConfig = args.fns.getSectionConfig();
 const renderer = args.fns.resolveRendererComponent();
 return {
   sectionConfig,
+  siteLanguages: args.fns.getSiteLanguages?.() || [],
   hide: renderer !== "SettingsSectionAccordion"
 };
 '''
@@ -121,6 +136,7 @@ const sectionConfig = args.fns.getSectionConfig();
 const renderer = args.fns.resolveRendererComponent();
 return {
   sectionConfig,
+  siteLanguages: args.fns.getSiteLanguages?.() || [],
   hide: renderer !== "SettingsSectionTabs"
 };
 '''

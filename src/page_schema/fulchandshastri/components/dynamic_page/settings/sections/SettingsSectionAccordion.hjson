@@ -165,6 +165,7 @@ const nestedSection = args.contextData.nestedSection;
 const expanded = args.fns.isExpanded(nestedSection.id);
 return {
   sectionConfig: nestedSection,
+  siteLanguages: args.contextData.props?.siteLanguages || [],
   hide: !expanded
 };
 '''

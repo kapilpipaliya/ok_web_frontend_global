@@ -10,6 +10,7 @@
         isNoPermissionCheck: true,
         url: "/atma-sadhana-nitya-kram"
         contextName: "atmaSadhanaSettings"
+        settingsPageId: "atma-sadhana-nitya-kram"
         serverFunction: '''
 try {
   const result = await args.executeNamedServerFunction({

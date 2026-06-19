@@ -68,7 +68,41 @@ const normalizeFieldArrayValue = (field, value) => {
   return [];
 };
 
-const validateFieldArrayValue = (field, value) => {
+const isTranslatableField = (field) => field?.translatable !== false;
+
+const DEFAULT_SITE_LANGUAGES = [
+  { code: "en", label: "English", isDefault: true },
+  { code: "hi", label: "Hindi", isDefault: false },
+  { code: "gu", label: "Gujarati", isDefault: false }
+];
+
+const resolveLanguages = (inputLanguages) => {
+  if (Array.isArray(inputLanguages) && inputLanguages.length > 0) {
+    return inputLanguages;
+  }
+  return DEFAULT_SITE_LANGUAGES;
+};
+
+const isLocalizedObject = (value) =>
+  value != null && typeof value === "object" && !Array.isArray(value);
+
+const validateLocalizedFieldValue = (field, value, languages) => {
+  if (!isTranslatableField(field)) return null;
+  if (field?.required !== true) return null;
+  const fieldKey = field?.key || field?.name || "field";
+  if (!isLocalizedObject(value)) {
+    return `${fieldKey} requires a value in the default language`;
+  }
+  const defaultLang = (languages || []).find((lang) => lang?.isDefault === true);
+  const defaultCode = defaultLang?.code || languages?.[0]?.code || "en";
+  const defaultValue = value[defaultCode];
+  if (defaultValue == null || String(defaultValue).trim() === "") {
+    return `${fieldKey} requires a value in the default language (${defaultCode})`;
+  }
+  return null;
+};
+
+const validateFieldArrayValue = (field, value, languages) => {
   const items = normalizeFieldArrayValue(field, value);
   const itemFields = field?.fieldArrayConfig?.itemFields || [];
   if (field?.required === true && items.length === 0) {
@@ -78,8 +112,16 @@ const validateFieldArrayValue = (field, value) => {
     const item = items[itemIndex] || {};
     for (let fieldIndex = 0; fieldIndex < itemFields.length; fieldIndex++) {
       const itemField = itemFields[fieldIndex];
-      if (!itemField?.required || !itemField?.key) continue;
+      if (!itemField?.key) continue;
       const itemValue = item[itemField.key];
+      if (isTranslatableField(itemField)) {
+        const localizedError = validateLocalizedFieldValue(itemField, itemValue, languages);
+        if (localizedError) {
+          return `${field.key}[${itemIndex}].${itemField.key}: ${localizedError}`;
+        }
+        continue;
+      }
+      if (!itemField?.required) continue;
       if (itemValue === undefined || itemValue === null || String(itemValue).trim() === "") {
         return `${field.key}[${itemIndex}].${itemField.key} is required`;
       }
@@ -88,10 +130,14 @@ const validateFieldArrayValue = (field, value) => {
   return null;
 };
 
-const validateFieldValue = (field, value) => {
+const validateFieldValue = (field, value, languages) => {
   const fieldKey = field?.key || field?.name || field?.id || "field";
   const rules = field?.validation || {};
   const isRequired = field?.required === true;
+
+  if (isTranslatableField(field)) {
+    return validateLocalizedFieldValue(field, value, languages);
+  }
 
   if (isRequired && (value === undefined || value === null || String(value).trim() === "")) {
     return `${fieldKey} is required`;
@@ -136,24 +182,24 @@ const validateFieldValue = (field, value) => {
   return null;
 };
 
-const validateSectionValues = (sectionConfig, values) => {
+const validateSectionValues = async (sectionConfig, values, languages) => {
   const fields = collectFormFields(sectionConfig);
   const fieldErrors = {};
   for (let fieldIndex = 0; fieldIndex < fields.length; fieldIndex++) {
     const field = fields[fieldIndex];
     const fieldKey = field?.key || field?.name;
     if (!fieldKey) continue;
-    const errorMessage = validateFieldValue(field, values?.[fieldKey]);
+    const errorMessage = validateFieldValue(field, values?.[fieldKey], languages);
     if (errorMessage) fieldErrors[fieldKey] = errorMessage;
     if (!errorMessage && field?.renderer === "fieldArray") {
-      const arrayError = validateFieldArrayValue(field, values?.[fieldKey]);
+      const arrayError = validateFieldArrayValue(field, values?.[fieldKey], languages);
       if (arrayError) fieldErrors[fieldKey] = arrayError;
     }
   }
   return fieldErrors;
 };
 
-const mergeSectionDefaults = (sectionConfig, values) => {
+const mergeSectionDefaults = async (sectionConfig, values, languages) => {
   const fields = collectFormFields(sectionConfig);
   const merged = { ...(values || {}) };
   for (let fieldIndex = 0; fieldIndex < fields.length; fieldIndex++) {
@@ -167,7 +213,19 @@ const mergeSectionDefaults = (sectionConfig, values) => {
       merged[fieldKey] = normalizeFieldArrayValue(field, merged[fieldKey]);
     }
   }
-  return merged;
+
+  const normalizeResult = await args.executeNamedServerFunction({
+    functionName: "fulchandLocalizationHelpers",
+    contextData: {
+      action: "localizeSectionValues",
+      sectionConfig,
+      values: merged,
+      mode: "normalize",
+      languages
+    }
+  });
+
+  return normalizeResult?.result?.data?.values || merged;
 };
 
 const transformSectionValues = (sectionConfig, values) => {
@@ -207,8 +265,9 @@ const buildAuditDiff = (beforeValues, afterValues) => {
 };
 
 if (action === "validateSection") {
-  const { sectionConfig, values } = args.contextData;
-  const fieldErrors = validateSectionValues(sectionConfig, values);
+  const { sectionConfig, values, languages: inputLanguages } = args.contextData;
+  const languages = resolveLanguages(inputLanguages);
+  const fieldErrors = await validateSectionValues(sectionConfig, values, languages);
   if (Object.keys(fieldErrors).length > 0) {
     return { success: false, message: "Validation failed", data: { fieldErrors } };
   }
@@ -216,8 +275,10 @@ if (action === "validateSection") {
 }
 
 if (action === "mergeDefaults") {
-  const { sectionConfig, values } = args.contextData;
-  return { success: true, data: { values: mergeSectionDefaults(sectionConfig, values) } };
+  const { sectionConfig, values, languages: inputLanguages } = args.contextData;
+  const languages = resolveLanguages(inputLanguages);
+  const mergedValues = await mergeSectionDefaults(sectionConfig, values, languages);
+  return { success: true, data: { values: mergedValues } };
 }
 
 if (action === "transformValues") {

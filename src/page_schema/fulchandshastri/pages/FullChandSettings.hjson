@@ -17,9 +17,102 @@ const checkAdminRole = () => {
   });
 };
 
+const PAGE_PREVIEW_URLS = {
+  global: "/",
+  home: "/",
+  about: "/about-fulchand",
+  "about-ask": "/about-ask-umarala",
+  "atma-sadhana-nitya-kram": "/atma-sadhana-nitya-kram",
+  "atma-siddhi-mission": "/atma-siddhi-shastra-mission",
+  bhakti: "/bhakti",
+  books: "/books",
+  contact: "/contact",
+  discourses: "/discourses",
+  donation: "/donation",
+  "gyaan-deepak": "/gyaan-deepak-prajwalan",
+  "his-inspiration": "/his-inspiration",
+  photos: "/photos",
+  schedule: "/schedule",
+  videos: "/videos"
+};
+
+const getPreviewUrl = () => {
+  const settingsPageId = args.searchParams?.page || "home";
+  return PAGE_PREVIEW_URLS[settingsPageId] || "/";
+};
+
+const refreshPreview = () => {
+  const iframe = document.querySelector("[data-fulchand-settings-preview]");
+  if (iframe && iframe.contentWindow) {
+    iframe.contentWindow.location.reload();
+  }
+};
+
+const onSettingsSaved = () => refreshPreview();
+
+const isSchemaMode = () => args.searchParams?.mode === "schema";
+
+const setEditorMode = (mode) => {
+  const page = args.searchParams?.page || "home";
+  if (mode === "schema") {
+    args.setSearchParams({ page, mode: "schema" }, { replace: true });
+  } else {
+    args.setSearchParams({ page, mode: null }, { replace: true });
+  }
+};
+
+const onSchemaSaved = () => {
+  refreshPreview();
+  args.showSuccessToast?.("Schema saved — content editor will use the updated fields");
+};
+
+const [siteLanguages, setSiteLanguages] = args.createSignal([]);
+let siteLanguagesLoadPromise = null;
+
+const DEFAULT_SITE_LANGUAGES = [
+  { code: "en", label: "English", isDefault: true },
+  { code: "hi", label: "Hindi", isDefault: false },
+  { code: "gu", label: "Gujarati", isDefault: false }
+];
+
+const loadSiteLanguages = async () => {
+  const existing = siteLanguages();
+  if (Array.isArray(existing) && existing.length > 0) return existing;
+  if (siteLanguagesLoadPromise) return siteLanguagesLoadPromise;
+
+  siteLanguagesLoadPromise = (async () => {
+    try {
+      const result = await args.executeNamedServerFunction({
+        functionName: "getFulchandSiteLanguages",
+        contextData: {}
+      });
+      const languages = result?.result?.data?.languages || [];
+      const resolved = languages.length > 0 ? languages : DEFAULT_SITE_LANGUAGES;
+      setSiteLanguages(resolved);
+      return resolved;
+    } catch (error) {
+      console.error("FullChandSettings loadSiteLanguages:", error);
+      setSiteLanguages(DEFAULT_SITE_LANGUAGES);
+      return DEFAULT_SITE_LANGUAGES;
+    } finally {
+      siteLanguagesLoadPromise = null;
+    }
+  })();
+
+  return siteLanguagesLoadPromise;
+};
+
 return {
   enabled: () => true,
   checkAdminRole,
+  getPreviewUrl,
+  refreshPreview,
+  onSettingsSaved,
+  isSchemaMode,
+  setEditorMode,
+  onSchemaSaved,
+  siteLanguages,
+  loadSiteLanguages,
   executeYTOFunction: (functionName, contextData) =>
     args.executeNamedServerFunction({
       functionName,
@@ -30,7 +123,7 @@ return {
         props: '''
 return {
   isNoPermissionCheck: true,
-  onMount: () => {
+  onMount: async () => {
     if (!args.user) {
       args.navigate("/auth/signin", { replace: true });
       return;
@@ -38,7 +131,13 @@ return {
     if (!args.fns.checkAdminRole?.()) {
       args.showErrorToast?.("Admin access required");
       args.navigate("/", { replace: true });
+      return;
     }
+    await args.fns.loadSiteLanguages?.();
+    window.addEventListener("fulchand-settings-saved", args.fns.onSettingsSaved);
+  },
+  onCleanup: () => {
+    window.removeEventListener("fulchand-settings-saved", args.fns.onSettingsSaved);
   }
 };
 '''
@@ -52,7 +151,8 @@ return {
         componentName: "Html",
         props: '''
 return {
-  as: "section"
+  as: "section",
+  hide: !args.fns.checkAdminRole?.()
 };
 ''',
         css: '''
@@ -61,6 +161,285 @@ return `._id {
   max-width: none;
   margin: 0;
   text-align: left;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}`;
+'''
+      }
+    },
+    {
+      id: "splitLayout",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  overflow: hidden;
+
+  @media (max-width: 1024px) {
+    flex-direction: column;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "previewPane",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.background_light_50};
+
+  @media (max-width: 1024px) {
+    border-right: none;
+    border-bottom: 1px solid ${args.theme.var.color.border};
+    min-height: 320px;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "previewHeader",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.background};
+}`;
+'''
+      }
+    },
+    {
+      id: "previewTitle",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const pageId = args.searchParams?.page || "home";
+return {
+  as: "h2",
+  text: `Live preview — ${pageId}`
+};
+''',
+        css: '''
+return `._id {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "previewRefresh",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "IconButton",
+        props: '''
+return {
+  icon: "ph:arrow-clockwise",
+  variant: "ghost",
+  size: "sm",
+  title: "Refresh preview",
+  onClick: () => args.fns.refreshPreview?.()
+};
+'''
+      }
+    },
+    {
+      id: "previewFrame",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "iframe",
+  "data-fulchand-settings-preview": "",
+  src: args.fns.getPreviewUrl?.(),
+  title: "Page preview",
+  loading: "lazy"
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  border: none;
+  background: ${args.theme.var.color.background};
+}`;
+'''
+      }
+    },
+    {
+      id: "editorPane",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}`;
+'''
+      }
+    },
+    {
+      id: "editorModeTabs",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.background_light_100};
+}`;
+'''
+      }
+    },
+    {
+      id: "contentTab",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Button",
+        props: '''
+const active = !args.fns.isSchemaMode?.();
+return {
+  variant: active ? "primary" : "secondary",
+  size: "sm",
+  text: "Content",
+  type: "button",
+  onClick: () => args.fns.setEditorMode?.("content")
+};
+'''
+      }
+    },
+    {
+      id: "schemaTab",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Button",
+        props: '''
+const active = args.fns.isSchemaMode?.() === true;
+return {
+  variant: active ? "primary" : "secondary",
+  size: "sm",
+  text: "Field schema",
+  type: "button",
+  onClick: () => args.fns.setEditorMode?.("schema")
+};
+'''
+      }
+    },
+    {
+      id: "editorContent",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  hide: args.fns.isSchemaMode?.() === true
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}`;
+'''
+      }
+    },
+    {
+      id: "dynamicPageShell",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: 100%;
+  position: relative;
 }`;
 '''
       }
@@ -79,13 +458,53 @@ return {
   pageMode: "settings",
   settingsPageId,
   loadFromSetting: true,
+  embeddedMode: true,
   scopeId: "Default",
+  siteLanguages: args.fns.siteLanguages?.() || [],
   scope: {
     vertexLabel: "GlobalSetting",
     matchProperty: "key",
     idParam: "scopeId"
-  },
-  hide: !args.fns.checkAdminRole?.()
+  }
+};
+'''
+      }
+    },
+    {
+      id: "schemaEditorWrap",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  hide: args.fns.isSchemaMode?.() !== true
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}`;
+'''
+      }
+    },
+    {
+      id: "schemaEditor",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "FulchandSettingsConfigEditor",
+        props: '''
+const settingsPageId = args.searchParams?.page || "home";
+return {
+  settingsPageId,
+  siteLanguages: args.fns.siteLanguages?.() || [],
+  onSaved: () => args.fns.onSchemaSaved?.()
 };
 '''
       }
@@ -101,7 +520,21 @@ return {
   ],
   edges: [
     { id: "e1", T: "Attr", S: "page", E: "settingsShell" },
-    { id: "e2", T: "Attr", S: "settingsShell", E: "dynamicPage" },
+    { id: "e2", T: "Attr", S: "settingsShell", E: "splitLayout" },
+    { id: "e3", T: "Attr", S: "splitLayout", E: "previewPane" },
+    { id: "e4", T: "Attr", S: "splitLayout", E: "editorPane" },
+    { id: "e5", T: "Attr", S: "previewPane", E: "previewHeader" },
+    { id: "e6", T: "Attr", S: "previewPane", E: "previewFrame" },
+    { id: "e7", T: "Attr", S: "previewHeader", E: "previewTitle" },
+    { id: "e8", T: "Attr", S: "previewHeader", E: "previewRefresh" },
+    { id: "e9", T: "Attr", S: "editorPane", E: "editorModeTabs" },
+    { id: "e9b", T: "Attr", S: "editorPane", E: "editorContent" },
+    { id: "e9c", T: "Attr", S: "editorPane", E: "schemaEditorWrap" },
+    { id: "e10", T: "Attr", S: "editorModeTabs", E: "contentTab" },
+    { id: "e11", T: "Attr", S: "editorModeTabs", E: "schemaTab" },
+    { id: "e12", T: "Attr", S: "editorContent", E: "dynamicPageShell" },
+    { id: "e12b", T: "Attr", S: "dynamicPageShell", E: "dynamicPage" },
+    { id: "e13", T: "Attr", S: "schemaEditorWrap", E: "schemaEditor" },
     { id: "e_layout", T: "PageLayout", S: "page", E: "layout" }
   ]
 }

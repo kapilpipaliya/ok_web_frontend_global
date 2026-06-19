@@ -155,6 +155,7 @@ const tabPanel = args.contextData.tabPanel;
 const active = args.fns.getActiveTabId() === tabPanel.id;
 return {
   sectionConfig: tabPanel,
+  siteLanguages: args.contextData.props?.siteLanguages || [],
   hide: !active
 };
 '''

@@ -1,0 +1,123 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Function",
+      P: {
+        key: "saveSettingsPageConfig",
+        description: "Saves settings_page_config function body for a page. Admin only; updates the default Setting vertex.",
+        body: '''
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  return { success: false, message: "User session not found. Please log in and try again." };
+}
+
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const { settingsPageId, config, name, saveAsDefault = true } = args.contextData || {};
+
+if (!settingsPageId) {
+  return { success: false, message: "settingsPageId is required" };
+}
+
+if (!config || typeof config !== "string" || config.trim() === "") {
+  return { success: false, message: "config function body is required" };
+}
+
+try {
+  const configFn = new Function(config);
+  const evaluated = configFn();
+  if (!evaluated || typeof evaluated !== "object") {
+    return { success: false, message: "Config must return an object" };
+  }
+  if (evaluated.pageMode !== "settings") {
+    return { success: false, message: "Config pageMode must be settings" };
+  }
+} catch (error) {
+  return {
+    success: false,
+    message: error instanceof Error ? error.message : "Invalid config function body"
+  };
+}
+
+const defaultKey = `${settingsPageId}_settings_page_default`;
+const settingKey = saveAsDefault === false ? `${settingsPageId}_settings_page` : defaultKey;
+const settingName = name || `${settingsPageId} settings`;
+
+if (saveAsDefault === false && user) {
+  const userQuery = `
+    MATCH (u:User {uuid: $userUuid})
+    MERGE (u)-[:UserSetting]->(s:Setting {key: $settingKey})
+    ON CREATE SET
+      s.createdAt = datetime(),
+      s.type = 'settings_page_config',
+      s.settingsPageId = $settingsPageId,
+      s.name = $name,
+      s.config = $config,
+      s.updatedAt = datetime()
+    ON MATCH SET
+      s.config = $config,
+      s.settingsPageId = $settingsPageId,
+      s.name = $name,
+      s.type = 'settings_page_config',
+      s.updatedAt = datetime()
+    RETURN s
+  `;
+  const userResult = await args.session.run(userQuery, {
+    userUuid: user.P.uuid,
+    settingKey,
+    settingsPageId,
+    name: settingName,
+    config
+  });
+  if (userResult.records.length === 0) {
+    return { success: false, message: "Failed to save user settings page config" };
+  }
+  const vertices = args.processResult(userResult.records, args.context, "s");
+  return {
+    success: true,
+    data: { setting: vertices[0], key: settingKey },
+    message: "Settings page config saved"
+  };
+}
+
+const defaultQuery = `
+  MERGE (s:Setting {key: $defaultKey})
+  ON CREATE SET
+    s.createdAt = datetime(),
+    s.type = 'settings_page_config',
+    s.settingsPageId = $settingsPageId,
+    s.name = $name,
+    s.config = $config,
+    s.updatedAt = datetime()
+  ON MATCH SET
+    s.config = $config,
+    s.settingsPageId = $settingsPageId,
+    s.name = $name,
+    s.type = 'settings_page_config',
+    s.updatedAt = datetime()
+  RETURN s
+`;
+
+const defaultResult = await args.session.run(defaultQuery, {
+  defaultKey,
+  settingsPageId,
+  name: settingName,
+  config
+});
+
+if (defaultResult.records.length === 0) {
+  return { success: false, message: "Failed to save default settings page config" };
+}
+
+const defaultVertices = args.processResult(defaultResult.records, args.context, "s");
+return {
+  success: true,
+  data: { setting: defaultVertices[0], key: defaultKey },
+  message: "Default settings page config saved"
+};
+'''
+      }
+    }
+  ],
+  edges: []
+}

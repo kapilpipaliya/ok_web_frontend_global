@@ -27,7 +27,8 @@ args.addNewVertex(0, {
     settingsFormFnsMap: {},
     settingsLoading: false,
     settingsInitializing: false,
-    settingsPageId: null
+    settingsPageId: null,
+    siteLanguages: []
   },
   IN: {},
   OUT: {}
@@ -695,6 +696,32 @@ const getGenericSaveFunction = () => {
   };
 };
 const getGenericSaveSettingsFunction = () => {
+  if (isSettingsPageMode()) {
+    return async (configText) => {
+      try {
+        const settingsPageId = getSettingsPageId();
+        const result = await args.fns.executeYTOFunction("saveSettingsPageConfig", {
+          settingsPageId,
+          config: configText,
+          saveAsDefault: true
+        });
+        const errorMessage = extractError(result, false, "Failed to save settings page config");
+        if (errorMessage) {
+          return { success: false, message: errorMessage };
+        }
+        if (result?.result?.success) {
+          return {
+            success: true,
+            message: result.result.message || "Settings page config saved successfully"
+          };
+        }
+        return { success: false, message: "Failed to save settings page config" };
+      } catch (error) {
+        console.error("Error saving settings page config:", error);
+        return { success: false, message: error?.message || "Failed to save settings page config" };
+      }
+    };
+  }
   const tableVertexLabel = getTableVertexLabel();
   if (!tableVertexLabel) return null;
   return async (configText) => {
@@ -1485,6 +1512,11 @@ const settingsAdapter = {
         version: result.result.data?.version,
         documentId: result.result.data?.documentId
       });
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("fulchand-settings-saved", {
+          detail: { pageId: settingsPageId, sectionId }
+        }));
+      }
       return result.result;
     }
     return { success: false, message: "Failed to save settings" };
@@ -1563,11 +1595,36 @@ const initializeSettingsPage = async () => {
     if (settingsPageId && pageP()?.settingsPageId !== settingsPageId) {
       patchPageP({ settingsPageId });
     }
+    syncSiteLanguagesFromProps();
     await loadSettingsPageData();
   } finally {
     patchPageP({ configLoading: false, settingsInitializing: false });
   }
 };
+
+const syncSiteLanguagesFromProps = () => {
+  const fromProps = args.contextData.props?.siteLanguages;
+  if (!Array.isArray(fromProps) || fromProps.length === 0) return;
+  const cached = pageP()?.siteLanguages;
+  if (JSON.stringify(cached) === JSON.stringify(fromProps)) return;
+  patchPageP({ siteLanguages: fromProps });
+};
+
+const getSiteLanguages = () => {
+  const fromProps = args.contextData.props?.siteLanguages;
+  if (Array.isArray(fromProps) && fromProps.length > 0) return fromProps;
+  const cached = pageP()?.siteLanguages;
+  if (Array.isArray(cached) && cached.length > 0) return cached;
+  return [
+    { code: "en", label: "English", isDefault: true },
+    { code: "hi", label: "Hindi", isDefault: false },
+    { code: "gu", label: "Gujarati", isDefault: false }
+  ];
+};
+
+args.createEffect(() => {
+  syncSiteLanguagesFromProps();
+});
 
 const ensureSettingsPageQueryParam = () => {
   const fromProps = args.contextData.props?.settingsPageId;
@@ -1659,6 +1716,7 @@ return {
   loadSettings,
   initializeSettings,
   initializeSettingsPage,
+  getSiteLanguages,
   handleOpenSettings,
   handleSaveSettings,
   getPageMode,
@@ -1900,6 +1958,7 @@ return {
 const vid = args.fns.pageStateVertexId;
 const configLoading = args.graph.vertexes[vid]?.P?.configLoading !== false;
 const isSettings = args.fns.isSettingsPageMode?.() === true;
+const embedded = args.contextData.props?.embeddedMode === true;
 return {
   as: "div",
   hide: !isSettings || configLoading || args.fns.isDashboardPageMode?.() === true
@@ -1907,16 +1966,23 @@ return {
 '''
         css:
           '''
+const embedded = args.contextData.props?.embeddedMode === true;
 return `._id {
   display: flex;
   flex-wrap: wrap;
   width: 100%;
-  min-height: calc(100vh - 4rem);
   background: ${args.theme.var.color.background};
-}
+  overflow: hidden;
+  ${embedded ? `
+  position: absolute;
+  inset: 0;
+  ` : `
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  `}
 
-@media (min-width: 769px) {
-  ._id {
+  @media (min-width: 769px) {
     flex-wrap: nowrap;
   }
 }`;
@@ -1933,9 +1999,40 @@ return `._id {
         props:
           '''
 const config = args.fns.evaluateConfig?.();
+const hideSidebar = args.contextData.props?.hideSettingsSidebar === true
+  || args.contextData.props?.embeddedMode === true;
 return {
-  sidebarConfig: config?.sidebar || null
+  sidebarConfig: config?.sidebar || null,
+  hide: hideSidebar
 };
+'''
+      }
+    }
+    {
+      id: "11scroll"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        key: settings_page_content_scroll
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+        css:
+          '''
+return `._id {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  overscroll-behavior: contain;
+}`;
 '''
       }
     }
@@ -1943,9 +2040,15 @@ return {
       id: "11"
       L: Attr
       P: {
-        displayOrder: 2
+        displayOrder: 1
         componentName: SettingsPageContent
         key: settings_page_content
+        props:
+          '''
+return {
+  siteLanguages: args.fns.getSiteLanguages?.() || []
+};
+'''
       }
     }
     {
@@ -2048,6 +2151,12 @@ return {
       id: e11
       T: Attr
       S: "9"
+      E: "11scroll"
+    }
+    {
+      id: e11b
+      T: Attr
+      S: "11scroll"
       E: "11"
     }
     {

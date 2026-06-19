@@ -8,13 +8,21 @@
         description: Loads public Fulchand Shastri page settings from GlobalSetting scope. Returns section values keyed by section id.
         body:
           '''
-const { pageId, allowPublicRead = true } = args.contextData || {};
+const { pageId, allowPublicRead = true, locale } = args.contextData || {};
 
 if (!pageId) {
   return { success: false, message: "pageId is required" };
 }
 
 try {
+  const languagesResult = await args.executeNamedServerFunction({
+    functionName: "getFulchandSiteLanguages",
+    contextData: {}
+  });
+  const languages = languagesResult?.result?.data?.languages || [];
+  const defaultLang = languages.find((lang) => lang?.isDefault === true);
+  const resolvedLocale = locale || defaultLang?.code || languages[0]?.code || "en";
+
   const configResult = await args.executeNamedServerFunction({
     functionName: "getSettingsPageConfig",
     contextData: { settingsPageId: pageId, allowPublicRead }
@@ -46,13 +54,32 @@ try {
 
   const loadedSections = loadResult.result.data?.sections || {};
   const sectionsById = {};
+
   for (const sectionId of Object.keys(loadedSections)) {
-    sectionsById[sectionId] = loadedSections[sectionId]?.values ?? {};
+    const rawValues = loadedSections[sectionId]?.values ?? {};
+    const sectionConfig = sections.find((section) => section.id === sectionId) || null;
+
+    if (sectionConfig) {
+      const resolveResult = await args.executeNamedServerFunction({
+        functionName: "fulchandLocalizationHelpers",
+        contextData: {
+          action: "localizeSectionValues",
+          sectionConfig,
+          values: rawValues,
+          mode: "resolve",
+          languages,
+          locale: resolvedLocale
+        }
+      });
+      sectionsById[sectionId] = resolveResult?.result?.data?.values ?? rawValues;
+    } else {
+      sectionsById[sectionId] = rawValues;
+    }
   }
 
   return {
     success: true,
-    data: { pageId, sections: sectionsById },
+    data: { pageId, locale: resolvedLocale, sections: sectionsById },
     message: "Page settings loaded"
   };
 } catch (error) {

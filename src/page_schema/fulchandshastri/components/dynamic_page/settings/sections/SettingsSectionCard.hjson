@@ -10,6 +10,51 @@
           '''
 const getSectionConfig = () => args.contextData.props?.sectionConfig || null;
 
+const DEFAULT_SITE_LANGUAGES = [
+  { code: "en", label: "English", isDefault: true },
+  { code: "hi", label: "Hindi", isDefault: false },
+  { code: "gu", label: "Gujarati", isDefault: false }
+];
+
+const getSiteLanguages = () => {
+  const languages = args.contextData.props?.siteLanguages;
+  if (Array.isArray(languages) && languages.length > 0) return languages;
+  return DEFAULT_SITE_LANGUAGES;
+};
+
+const getDefaultLanguageCode = (languages) => {
+  const explicit = languages.find((lang) => lang?.isDefault === true);
+  if (explicit?.code) return String(explicit.code);
+  return languages[0]?.code ? String(languages[0].code) : "en";
+};
+
+const isTranslatableField = (field) => field?.translatable !== false;
+
+const normalizeLocalizedValue = (value, languages, defaultCode) => {
+  const normalized = {};
+  for (let i = 0; i < languages.length; i++) {
+    normalized[languages[i].code] = "";
+  }
+  if (value != null && typeof value === "object" && !Array.isArray(value)) {
+    for (const key of Object.keys(value)) {
+      if (Object.prototype.hasOwnProperty.call(normalized, key)) {
+        normalized[key] = value[key] == null ? "" : String(value[key]);
+      }
+    }
+    return normalized;
+  }
+  if (typeof value === "string") {
+    normalized[defaultCode] = value;
+  }
+  return normalized;
+};
+
+const normalizeFieldValue = (field, value, languages) => {
+  if (!isTranslatableField(field)) return value;
+  const defaultCode = getDefaultLanguageCode(languages);
+  return normalizeLocalizedValue(value, languages, defaultCode);
+};
+
 const convertToFormConfig = (sectionConfig) => {
   const formConfig = sectionConfig?.form;
   if (!formConfig) return null;
@@ -50,22 +95,43 @@ const collectFormFields = (sectionConfig) => {
 const buildValuesFromSnapshot = (snapshot = {}) => {
   const sectionConfig = getSectionConfig();
   const fields = collectFormFields(sectionConfig);
+  const languages = getSiteLanguages();
   const values = {};
   for (let fi = 0; fi < fields.length; fi++) {
     const field = fields[fi];
     if (!field?.key) continue;
     if (Object.prototype.hasOwnProperty.call(snapshot, field.key)) {
-      values[field.key] = field.renderer === "fieldArray"
-        ? (Array.isArray(snapshot[field.key]) ? snapshot[field.key] : [])
-        : snapshot[field.key];
+      if (field.renderer === "fieldArray") {
+        const items = Array.isArray(snapshot[field.key]) ? snapshot[field.key] : [];
+        const itemFields = field.fieldArrayConfig?.itemFields || [];
+        values[field.key] = items.map((item) => {
+          const nextItem = { ...(item || {}) };
+          for (let ii = 0; ii < itemFields.length; ii++) {
+            const itemField = itemFields[ii];
+            if (!itemField?.key) continue;
+            nextItem[itemField.key] = normalizeFieldValue(
+              itemField,
+              nextItem[itemField.key],
+              languages
+            );
+          }
+          return nextItem;
+        });
+      } else {
+        values[field.key] = normalizeFieldValue(field, snapshot[field.key], languages);
+      }
     } else if (field.defaultValue !== undefined) {
-      values[field.key] = field.defaultValue;
+      values[field.key] = field.renderer === "fieldArray"
+        ? field.defaultValue
+        : normalizeFieldValue(field, field.defaultValue, languages);
     } else if (field.renderer === "fieldArray") {
       values[field.key] = Array.isArray(field.fieldArrayConfig?.defaultItems)
         ? field.fieldArrayConfig.defaultItems
         : [];
     } else if (field.dataType === "boolean" || field.renderer === "checkbox") {
       values[field.key] = false;
+    } else if (isTranslatableField(field)) {
+      values[field.key] = normalizeLocalizedValue("", languages, getDefaultLanguageCode(languages));
     } else {
       values[field.key] = "";
     }
@@ -376,6 +442,7 @@ const initialVertex = args.fns.initialVertex();
 return {
   formConfig,
   initialVertex,
+  siteLanguages: args.fns.getSiteLanguages?.() || [],
   mode: "edit",
   vertexLabel: "SettingsFormData",
   hideActionsBar: true,

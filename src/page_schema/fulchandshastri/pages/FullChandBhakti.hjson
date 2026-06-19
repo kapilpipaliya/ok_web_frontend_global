@@ -10,6 +10,7 @@
         isNoPermissionCheck: true,
         url: "/bhakti"
         contextName: "bhaktiSettings"
+        settingsPageId: "bhakti"
         serverFunction: '''
 try {
   const result = await args.executeNamedServerFunction({

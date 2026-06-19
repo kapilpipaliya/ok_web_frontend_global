@@ -399,6 +399,9 @@ export function HtmlField(
         };
       });
 
+      const loopOptions = () =>
+        Array.isArray(processedData().options) ? processedData().options : [];
+
       return (
         <Switch>
           <Match when={processedData().error}>
@@ -415,7 +418,7 @@ export function HtmlField(
             </As>
           </Match>
           <Match when={Array.isArray(processedData().options) && local.loop}>
-            <For each={processedData().options}>
+            <For each={loopOptions()}>
               {(value, index) => {
                 return (
                   <DataInternal
@@ -535,9 +538,6 @@ export function HtmlField(
 
   return (
     <Switch>
-      <Match when={!local.as || asLowerCase() === "fragment"}>
-        <Content />
-      </Match>
       <Match when={asLowerCase() === "img"}>
         <img
           class={`${local.class || ""}`}
@@ -591,6 +591,9 @@ export function HtmlField(
         </Portal>
       </Match>
       <Match when={asLowerCase() === "slot"}>
+        <Content />
+      </Match>
+      <Match when={!local.as || asLowerCase() === "fragment"}>
         <Content />
       </Match>
       <Match when={true}>

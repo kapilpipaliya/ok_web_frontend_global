@@ -10,6 +10,7 @@
         isNoPermissionCheck: true,
         url: "/his-inspiration"
         contextName: "hisInspirationSettings"
+        settingsPageId: "his-inspiration"
         serverFunction: '''
 try {
   const result = await args.executeNamedServerFunction({

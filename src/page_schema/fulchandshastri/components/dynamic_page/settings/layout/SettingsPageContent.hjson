@@ -10,6 +10,18 @@
           '''
 const getPageConfig = () => args.fns.getEvaluatedSettingsConfig?.() || args.fns.evaluateConfig?.() || null;
 
+const DEFAULT_SITE_LANGUAGES = [
+  { code: "en", label: "English", isDefault: true },
+  { code: "hi", label: "Hindi", isDefault: false },
+  { code: "gu", label: "Gujarati", isDefault: false }
+];
+
+const getSiteLanguages = () => {
+  const languages = args.contextData.props?.siteLanguages;
+  if (Array.isArray(languages) && languages.length > 0) return languages;
+  return DEFAULT_SITE_LANGUAGES;
+};
+
 const getVisibleSections = () => {
   const pageConfig = getPageConfig();
   const sections = pageConfig?.sections;
@@ -35,7 +47,8 @@ const filterSectionsForUrl = () => {
 return {
   getPageConfig,
   getVisibleSections,
-  filterSectionsForUrl
+  filterSectionsForUrl,
+  getSiteLanguages
 };
 '''
       }
@@ -50,9 +63,11 @@ return {
 return `._id {
   flex: 1;
   min-width: 0;
+  min-height: 0;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  min-height: 100%;
+  overflow: hidden;
 }`;
 '''
         componentName: Html
@@ -189,8 +204,12 @@ return {
           '''
 return `._id {
   flex: 1;
+  min-height: 0;
   padding: 0 ${args.theme.var.spacing.lg} ${args.theme.var.spacing.lg};
   overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }`;
 '''
         componentName: Html
@@ -231,7 +250,8 @@ return {
           '''
 const sectionItem = args.contextData.sectionItem;
 return {
-  sectionConfig: sectionItem
+  sectionConfig: sectionItem,
+  siteLanguages: args.fns.getSiteLanguages?.() || []
 };
 '''
       }

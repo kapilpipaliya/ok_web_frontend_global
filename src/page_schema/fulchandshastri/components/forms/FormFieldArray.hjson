@@ -5,7 +5,7 @@
       L: Component
       P: {
         key: FormFieldArray
-        dynamicComponent: TextInput, TextArea, Button
+        dynamicComponent: TextInput, TextArea, Button, FormLocalizedText
       }
     }
     {
@@ -53,6 +53,8 @@ const buildDefaultItem = () => {
       item[itemField.key] = itemField.defaultValue;
     } else if (itemField.dataType === "boolean" || itemField.renderer === "checkbox") {
       item[itemField.key] = false;
+    } else if (itemField.translatable !== false) {
+      item[itemField.key] = {};
     } else {
       item[itemField.key] = "";
     }
@@ -83,6 +85,76 @@ const removeItem = (itemIndex) => {
   commitItems(items.filter((_, index) => index !== itemIndex));
 };
 
+const reorderItems = (fromIndex, toIndex) => {
+  const items = getItems();
+  if (fromIndex === toIndex || fromIndex < 0 || toIndex < 0) return;
+  if (fromIndex >= items.length || toIndex >= items.length) return;
+  const nextItems = [...items];
+  const [moved] = nextItems.splice(fromIndex, 1);
+  nextItems.splice(toIndex, 0, moved);
+  commitItems(nextItems);
+};
+
+const fieldArrayDraggableCleanups = new Map();
+const [draggedItemIndex, setDraggedItemIndex] = args.createSignal(null);
+const [dragOverItemIndex, setDragOverItemIndex] = args.createSignal(null);
+
+const initFieldArrayDraggable = (element, itemIndex) => {
+  if (!element || !args.draggable || args.fns.isDisabled?.()) return;
+
+  const existingCleanup = fieldArrayDraggableCleanups.get(element);
+  if (existingCleanup) existingCleanup();
+
+  const cleanup = args.draggable({
+    element,
+    getInitialData: () => ({
+      type: "field-array-item",
+      index: itemIndex
+    }),
+    onDragStart: () => setDraggedItemIndex(itemIndex),
+    onDrop: () => {
+      setDraggedItemIndex(null);
+      setDragOverItemIndex(null);
+    }
+  });
+
+  fieldArrayDraggableCleanups.set(element, cleanup);
+};
+
+const initFieldArrayDropTarget = (element, itemIndex) => {
+  if (!element || !args.dropTargetForElements || args.fns.isDisabled?.()) return null;
+
+  return args.dropTargetForElements({
+    element,
+    canDrop: ({ source }) => source.data?.type === "field-array-item",
+    onDragEnter: ({ source }) => {
+      if (typeof source.data?.index === "number") {
+        setDragOverItemIndex(itemIndex);
+      }
+    },
+    onDragLeave: () => setDragOverItemIndex(null),
+    onDrop: ({ source }) => {
+      const fromIndex = source.data?.index;
+      if (typeof fromIndex === "number") {
+        reorderItems(fromIndex, itemIndex);
+      }
+      setDraggedItemIndex(null);
+      setDragOverItemIndex(null);
+    }
+  });
+};
+
+const cleanupFieldArrayDraggable = (element) => {
+  const cleanup = fieldArrayDraggableCleanups.get(element);
+  if (cleanup) {
+    cleanup();
+    fieldArrayDraggableCleanups.delete(element);
+  }
+};
+
+const isItemDragging = (itemIndex) => draggedItemIndex() === itemIndex;
+const isItemDragOver = (itemIndex) => dragOverItemIndex() === itemIndex;
+
 // Use stable numeric indices for loop data so Solid <For> does not remount rows on each keystroke.
 const getItemIndices = () => {
   const items = getItems();
@@ -101,8 +173,24 @@ const getItemLabel = (itemIndex) =>
 const getItemFieldValue = (item, itemField) => {
   if (!itemField?.key) return "";
   const value = item?.[itemField.key];
-  if (value == null) return "";
+  if (value == null) {
+    return itemField.translatable !== false ? {} : "";
+  }
   return value;
+};
+
+const isItemFieldTranslatable = (itemField) => itemField?.translatable !== false;
+
+const DEFAULT_SITE_LANGUAGES = [
+  { code: "en", label: "English", isDefault: true },
+  { code: "hi", label: "Hindi", isDefault: false },
+  { code: "gu", label: "Gujarati", isDefault: false }
+];
+
+const getSiteLanguages = () => {
+  const languages = getProps().siteLanguages;
+  if (Array.isArray(languages) && languages.length > 0) return languages;
+  return DEFAULT_SITE_LANGUAGES;
 };
 
 const isDisabled = () => getProps().disabled === true;
@@ -116,9 +204,17 @@ return {
   getItemLabel,
   addItem,
   removeItem,
+  reorderItems,
   updateItemField,
   getItemFieldValue,
-  isDisabled
+  isItemFieldTranslatable,
+  getSiteLanguages,
+  isDisabled,
+  initFieldArrayDraggable,
+  initFieldArrayDropTarget,
+  cleanupFieldArrayDraggable,
+  isItemDragging,
+  isItemDragOver
 };
 '''
         componentName: Html
@@ -169,21 +265,49 @@ return {
         props:
           '''
 return {
+  data: args.fns.getItemIndices()
+};
+'''
+      }
+    }
+    {
+      id: "4wrap"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const itemIndex = args.contextData.fieldArrayItem;
+return {
   as: "div",
   class: "fm-field-array-item",
-  data: args.fns.getItemIndices()
+  ref: (element) => {
+    if (element && args.fns.initFieldArrayDropTarget) {
+      const dropCleanup = args.fns.initFieldArrayDropTarget(element, itemIndex);
+      element.__fmFieldArrayDropCleanup = dropCleanup;
+    } else if (element?.__fmFieldArrayDropCleanup) {
+      element.__fmFieldArrayDropCleanup();
+      element.__fmFieldArrayDropCleanup = null;
+    }
+  }
 };
 '''
         css:
           '''
+const itemIndex = args.contextData.fieldArrayItem;
+const dragOver = args.fns.isItemDragOver?.(itemIndex);
+const dragging = args.fns.isItemDragging?.(itemIndex);
 return `._id.fm-field-array-item {
   display: flex;
   flex-direction: column;
   gap: ${args.theme.var.spacing.sm};
   padding: ${args.theme.var.spacing.md};
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${dragOver ? args.theme.var.color.primary : args.theme.var.color.border};
   border-radius: 0.5rem;
   background: ${args.theme.var.color.background_light_50};
+  ${dragging ? "opacity: 0.55;" : ""}
+  ${dragOver ? `outline: 2px dashed ${args.theme.var.color.primary};` : ""}
 }`;
 '''
       }
@@ -205,9 +329,70 @@ return {
           '''
 return `._id.fm-field-array-item-header {
   display: flex;
+  align-items: flex-start;
+  gap: ${args.theme.var.spacing.sm};
+}`;
+'''
+      }
+    }
+    {
+      id: "5b"
+      L: Attr
+      P: {
+        displayOrder: 0
+        componentName: Html
+        props:
+          '''
+const itemIndex = args.contextData.fieldArrayItem;
+return {
+  as: "icon",
+  icon: "ph:dots-six-vertical",
+  height: 16,
+  width: 16,
+  class: "fm-field-array-drag-handle",
+  hide: args.fns.isDisabled?.(),
+  ref: (element) => {
+    const index = args.contextData.fieldArrayItem;
+    if (element && args.fns.initFieldArrayDraggable) {
+      args.fns.initFieldArrayDraggable(element, index);
+    } else if (element === null && args.fns.cleanupFieldArrayDraggable) {
+      args.fns.cleanupFieldArrayDraggable(element);
+    }
+  }
+};
+'''
+        css:
+          '''
+return `._id.fm-field-array-drag-handle {
+  flex-shrink: 0;
+  color: ${args.theme.var.color.muted};
+  cursor: grab;
+}`;
+'''
+      }
+    }
+    {
+      id: "5c"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "fm-field-array-item-header-main"
+};
+'''
+        css:
+          '''
+return `._id.fm-field-array-item-header-main {
+  display: flex;
   align-items: center;
   justify-content: space-between;
   gap: ${args.theme.var.spacing.sm};
+  flex: 1;
+  min-width: 0;
 }`;
 '''
       }
@@ -314,16 +499,42 @@ return `._id.fm-field-array-field-label {
       L: Attr
       P: {
         displayOrder: 2
+        componentName: FormLocalizedText
+        props:
+          '''
+const itemField = args.contextData.fieldArrayField || {};
+const itemIndex = args.contextData.fieldArrayItem;
+const isTranslatable = args.fns.isItemFieldTranslatable?.(itemField);
+const isTextArea = itemField.renderer === "textArea";
+const hide = !isTranslatable;
+const value = args.fns.getItemFieldValue(args.fns.getItemAt(itemIndex), itemField);
+return {
+  hide,
+  languages: args.fns.getSiteLanguages?.(),
+  value: typeof value === "object" && value != null ? value : {},
+  multiline: isTextArea,
+  onChange: (nextValue) => args.fns.updateItemField(itemIndex, itemField.key, nextValue),
+  required: itemField.required === true,
+  disabled: args.fns.isDisabled()
+};
+'''
+      }
+    }
+    {
+      id: "10b"
+      L: Attr
+      P: {
+        displayOrder: 2
         componentName: TextArea
         props:
           '''
 const itemField = args.contextData.fieldArrayField || {};
 const itemIndex = args.contextData.fieldArrayItem;
-const hide = itemField.renderer !== "textArea";
+const hide = itemField.renderer !== "textArea" || args.fns.isItemFieldTranslatable?.(itemField);
 const value = args.fns.getItemFieldValue(args.fns.getItemAt(itemIndex), itemField);
 return {
   hide,
-  value,
+  value: typeof value === "string" ? value : "",
   onChange: (e) => args.fns.updateItemField(itemIndex, itemField.key, e.target.value),
   placeholder: itemField.placeholder || "",
   required: itemField.required === true,
@@ -342,11 +553,11 @@ return {
           '''
 const itemField = args.contextData.fieldArrayField || {};
 const itemIndex = args.contextData.fieldArrayItem;
-const hide = itemField.renderer === "textArea";
+const hide = itemField.renderer === "textArea" || args.fns.isItemFieldTranslatable?.(itemField);
 const value = args.fns.getItemFieldValue(args.fns.getItemAt(itemIndex), itemField);
 return {
   hide,
-  value,
+  value: typeof value === "string" ? value : "",
   onChange: (e) => args.fns.updateItemField(itemIndex, itemField.key, e.target.value),
   placeholder: itemField.placeholder || "",
   required: itemField.required === true,
@@ -361,12 +572,16 @@ return {
     { id: "e1", T: "Attr", S: "1", E: "2" }
     { id: "e2", T: "Attr", S: "2", E: "3" }
     { id: "e3", T: "Attr", S: "2", E: "4" }
-    { id: "e4", T: "Attr", S: "4", E: "5" }
-    { id: "e5", T: "Attr", S: "5", E: "6" }
-    { id: "e6", T: "Attr", S: "5", E: "7" }
-    { id: "e7", T: "Attr", S: "4", E: "8" }
+    { id: "e3b", T: "Attr", S: "4", E: "4wrap" }
+    { id: "e4", T: "Attr", S: "4wrap", E: "5" }
+    { id: "e4b", T: "Attr", S: "5", E: "5b" }
+    { id: "e4c", T: "Attr", S: "5", E: "5c" }
+    { id: "e5", T: "Attr", S: "5c", E: "6" }
+    { id: "e6", T: "Attr", S: "5c", E: "7" }
+    { id: "e7", T: "Attr", S: "4wrap", E: "8" }
     { id: "e8", T: "Attr", S: "8", E: "9" }
     { id: "e9", T: "Attr", S: "8", E: "10" }
+    { id: "e9b", T: "Attr", S: "8", E: "10b" }
     { id: "e10", T: "Attr", S: "8", E: "11" }
   ]
 }

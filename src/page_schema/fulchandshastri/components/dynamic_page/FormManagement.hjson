@@ -5,23 +5,13 @@
       L: Component
       P: {
         key: FormManagement
-        dynamicComponent: FloatingHelpTooltip, VertexPicker, FileUploader, TomSelect, TextArea, FormNestedLineItems, FormFieldArray
+        dynamicComponent: FloatingHelpTooltip, VertexPicker, FileUploader, TomSelect, TextArea, FormNestedLineItems, FormFieldArray, FormLocalizedText
       }
     }
     {
       id: "2"
       L: Attr
       P: {
-        css:
-          '''
-return `._id {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: ${args.theme.var.spacing.md};
-  height: 100%;
-}`;
-'''
         displayOrder: 1
         fns:
           '''
@@ -29,6 +19,12 @@ return `._id {
 const getFieldDataType = (field) => field?.dataType || "text";
 
 const getFieldRenderer = (field) => field?.renderer || "text";
+
+const isTranslatableTextField = (field) => {
+  if (field?.translatable === false) return false;
+  const renderer = getFieldRenderer(field);
+  return renderer === "text" || renderer === "textArea";
+};
 
 const isRelationField = (field) => {
   const fieldDataType = getFieldDataType(field);
@@ -47,6 +43,18 @@ const getClonePropertyOverrides = () => {
   return overrides != null && typeof overrides === "object" && !Array.isArray(overrides)
     ? overrides
     : {};
+};
+
+const DEFAULT_SITE_LANGUAGES = [
+  { code: "en", label: "English", isDefault: true },
+  { code: "hi", label: "Hindi", isDefault: false },
+  { code: "gu", label: "Gujarati", isDefault: false }
+];
+
+const getSiteLanguages = () => {
+  const languages = args.contextData.props?.siteLanguages;
+  if (Array.isArray(languages) && languages.length > 0) return languages;
+  return DEFAULT_SITE_LANGUAGES;
 };
 
 // Form vertex ID - vertex will be read from graph
@@ -1037,7 +1045,9 @@ return {
   applyAutoReferenceSequencesAfterAdd,
   getFieldDataType,
   getFieldRenderer,
+  isTranslatableTextField,
   isRelationField,
+  getSiteLanguages,
   assignFormVertex: (vertexId) => {
     if (vertexId == null || String(vertexId).trim() === "") return;
     setFormVertexId(String(vertexId).trim());
@@ -1509,6 +1519,7 @@ if (args.fns.getFieldRenderer(field) === "fieldArray" && field.fieldArrayConfig)
     field,
     value: args.fns.getFieldValue(field.key),
     disabled: fieldDisabled,
+    siteLanguages: args.fns.getSiteLanguages?.(),
     onChange: (nextItems) => args.fns.setFieldValue(field.key, nextItems)
   };
 }
@@ -1526,6 +1537,17 @@ if (args.fns.getFieldRenderer(field) === "nestedLineItems" && field.nestedLineIt
 }
 
 if (args.fns.getFieldRenderer(field) === "textArea") {
+  if (args.fns.isTranslatableTextField(field)) {
+    return {
+      componentName: "FormLocalizedText",
+      languages: args.fns.getSiteLanguages?.(),
+      value: value,
+      multiline: true,
+      onChange: (nextValue) => setFieldValue(field.key, nextValue),
+      required: fieldRequired,
+      disabled: fieldDisabled
+    };
+  }
   return {
     componentName: "TextArea",
     value: value,
@@ -1710,6 +1732,18 @@ if (args.fns.getFieldDataType(field) === "number") {
 }
 
 // Default: text input
+if (args.fns.isTranslatableTextField(field) && args.fns.getFieldRenderer(field) === "text") {
+  return {
+    componentName: "FormLocalizedText",
+    languages: args.fns.getSiteLanguages?.(),
+    value: value,
+    multiline: false,
+    onChange: (nextValue) => setFieldValue(field.key, nextValue),
+    required: fieldRequired,
+    disabled: fieldDisabled
+  };
+}
+
 return {
   componentName: "TextInput",
   type: args.fns.getFieldDataType(field) === "email" ? "email" : "text",

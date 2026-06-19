@@ -10,6 +10,7 @@
         isNoPermissionCheck: true,
         url: "/videos"
         contextName: "videosSettings"
+        settingsPageId: "videos"
         serverFunction: '''
 try {
   const result = await args.executeNamedServerFunction({

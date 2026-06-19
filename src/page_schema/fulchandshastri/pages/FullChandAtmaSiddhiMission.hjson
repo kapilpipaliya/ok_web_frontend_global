@@ -10,6 +10,7 @@
         isNoPermissionCheck: true,
         url: "/atma-siddhi-shastra-mission"
         contextName: "atmaSiddhiMissionSettings"
+        settingsPageId: "atma-siddhi-mission"
         serverFunction: '''
 try {
   const result = await args.executeNamedServerFunction({
