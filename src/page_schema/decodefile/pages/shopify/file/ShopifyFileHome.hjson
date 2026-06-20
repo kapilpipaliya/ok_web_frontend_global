@@ -117,7 +117,7 @@
         text: **Decode Files Organizer** is a Shopify app that helps you organize your file catalog in nested categories and view files by category. Manage everything without leaving your Shopify admin.
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -176,7 +176,7 @@
 '''
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -199,7 +199,7 @@
 '''
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -222,7 +222,7 @@
 '''
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -279,7 +279,7 @@
         text: 1\. Install **Decode Files Organizer** app from the [Shopify App Store](https://apps.shopify.com/) and open it from your Shopify admin. Your store's files are synced into the app.
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -378,7 +378,7 @@
 '''
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }

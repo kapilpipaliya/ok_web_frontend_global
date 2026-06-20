@@ -117,7 +117,7 @@
         text: **Solvo – Support Tickets & Helpdesk** is a Shopify app that helps you organize your ticket catalog in nested categories and view tickets by category. Manage everything without leaving your Shopify admin.
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -216,7 +216,7 @@
 '''
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -240,7 +240,7 @@ for each category a Shopify collection is created and for each root level catego
 All changes stay automatically synced with your store — when you update categories, collections and menus are updated instantly to match.'''
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -261,7 +261,7 @@ All changes stay automatically synced with your store — when you update catego
         text: **Video guides:** Watch tutorials and updates from the Solvo support team.
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -284,7 +284,7 @@ All changes stay automatically synced with your store — when you update catego
 you can customize the functionality of the app by changing settings. for more help contact us at [Support](/support) page in Shopify admin.'''
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -307,7 +307,7 @@ you can customize the functionality of the app by changing settings. for more he
 '''
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -364,7 +364,7 @@ you can customize the functionality of the app by changing settings. for more he
         text: 1\. Install **Solvo – Support Tickets & Helpdesk** app from the [Shopify App Store]( https://apps.shopify.com/ ) and open it from your Shopify admin. Your store’s tickets are loaded into the app.
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -519,7 +519,7 @@ you can customize the functionality of the app by changing settings. for more he
 '''
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }

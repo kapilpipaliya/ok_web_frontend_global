@@ -203,7 +203,7 @@
 **Site structure.**'''
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -510,7 +510,7 @@
 - These products belong here.'''
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -1165,7 +1165,7 @@
 Here's how:'''
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -1458,7 +1458,7 @@ A structured menu:
 '''
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -1668,7 +1668,7 @@ A structured menu:
 But ignore structural SEO.'''
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -1696,7 +1696,7 @@ But ignore structural SEO.'''
 Structure is the foundation.'''
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -1882,7 +1882,7 @@ But if your site structure and category hierarchy are weak, your SEO growth will
 '''
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -1926,7 +1926,7 @@ But if your site structure and category hierarchy are weak, your SEO growth will
 It becomes an SEO advantage.'''
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }

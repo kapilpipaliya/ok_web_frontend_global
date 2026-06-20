@@ -69,7 +69,7 @@
         textType: markdown
         componentName: Html
         text: Staff time and shift tracking for Shopify store teams. Manage **employees and roles**, track hours, and review daily/weekly time — inside Shopify Admin.
-        props: '''return { as: "p" }'''
+        props: '''return { as: "div" }'''
       }
     }
     {

@@ -117,7 +117,7 @@
         text: **Store Tasks** is embedded in Shopify admin. Open the app from your admin sidebar to manage tasks in a table, organize them into lists in the sidebar, and keep everyone aligned with status, priority, and due dates.
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -176,7 +176,7 @@
 '''
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -199,7 +199,7 @@
 '''
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -222,7 +222,7 @@
 '''
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -245,7 +245,7 @@
 '''
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -302,7 +302,7 @@
         text: 1\. Install **Store Tasks** from the [Shopify App Store](https://apps.shopify.com/) and open it from your Shopify admin.
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -401,7 +401,7 @@
 '''
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }

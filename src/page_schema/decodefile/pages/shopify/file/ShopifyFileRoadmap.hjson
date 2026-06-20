@@ -129,7 +129,7 @@
         key: unique_5
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }

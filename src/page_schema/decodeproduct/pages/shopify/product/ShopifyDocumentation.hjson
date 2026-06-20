@@ -85,7 +85,7 @@
 '''
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -142,7 +142,7 @@
         text: In the Shopify admin main sidebar you'll see a menu **Decode Products Organizer** with links: [Products](/app), [Support](/support), [FAQ](/faq), [Documentation](/docs), [Billing](/billing), and [Privacy](/privacy). Click any link to go to that section.
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -165,7 +165,7 @@
 '''
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -220,11 +220,11 @@
         textType: markdown
         componentName: Html
         text:
-          '''First, go to the Shopify App Store and install the **Decode Products Organizer** app.
+          '''First, go to the [Shopify App Store](https://apps.shopify.com/decode-products-organizer) and install the **Decode Products Organizer** app.
 '''
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -307,7 +307,7 @@
 '''
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -353,7 +353,7 @@
         key: unique_3
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -403,7 +403,7 @@ select the rows and drag and drop to a category in the sidebar to assign product
         key: unique_5
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -449,7 +449,7 @@ select the rows and drag and drop to a category in the sidebar to assign product
         key: unique_7
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -497,7 +497,7 @@ select the rows and drag and drop to a category in the sidebar to assign product
         key: unique_9
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -543,7 +543,7 @@ select the rows and drag and drop to a category in the sidebar to assign product
         key: unique_11
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -604,7 +604,7 @@ select the rows and drag and drop to a category in the sidebar to assign product
         key: unique_12
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -652,7 +652,7 @@ select the rows and drag and drop to a category in the sidebar to assign product
         key: unique_14
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -674,7 +674,7 @@ select the rows and drag and drop to a category in the sidebar to assign product
         key: unique_15
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -721,7 +721,7 @@ select the rows and drag and drop to a category in the sidebar to assign product
 '''
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }

@@ -180,7 +180,7 @@ A curated list of essential Shopify resources for Shopify app developers.
         key: unique_3
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }

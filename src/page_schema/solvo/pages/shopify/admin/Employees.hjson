@@ -61,7 +61,7 @@ return {
         key: unique_outside_p
         text: "Please open **Solvo** inside your Shopify admin (embedded app)."
         textType: "markdown"
-        props: "return { as: 'p' };"
+        props: "return { as: 'div' };"
       }
     }
     {

@@ -64,7 +64,7 @@ return {
         key: "unique_2",
         text: "Please open **Store Tasks** inside your Shopify admin (embedded app) to manage staff.",
         textType: "markdown",
-        props: "return { as: 'p' };"
+        props: "return { as: 'div' };"
       }
     },
     {

@@ -49,7 +49,7 @@ return { expandedIndex, toggleExpanded };
         textType: markdown
         css: '''return `._id{ margin: 0 0 1.25rem 0; color:${args.theme.var.color.muted}; line-height: 1.6; }`;'''
         text: Common questions about **Attendra**.
-        props: '''return { as: "p" };'''
+        props: '''return { as: "div" };'''
       }
     }
     {
@@ -154,7 +154,7 @@ return { as: "p", text: item?.a || "", show: () => args.fns.expandedIndex?.() ==
         textType: markdown
         css: '''return `._id{ margin-top: 1.25rem; color:${args.theme.var.color.muted}; }`;'''
         text: Need more help? Visit [Support](/support).
-        props: '''return { as:"p" };'''
+        props: '''return { as: "div" };'''
       }
     }
     {

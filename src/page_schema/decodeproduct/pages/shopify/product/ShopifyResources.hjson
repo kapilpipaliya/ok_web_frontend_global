@@ -76,8 +76,8 @@ A curated list of essential Shopify resources for Shopify app developers.
 
 ## 🚀 App Development
 
-- **Shopify App Store**  
-  https://apps.shopify.com/
+- **Decode Products Organizer (Shopify App Store)**  
+  https://apps.shopify.com/decode-products-organizer
 
 - **Shopify Partner Dashboard (Submit Your App)**  
   https://partners.shopify.com/
@@ -180,7 +180,7 @@ A curated list of essential Shopify resources for Shopify app developers.
         key: unique_3
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }

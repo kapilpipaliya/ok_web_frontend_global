@@ -269,6 +269,16 @@ export function HtmlField(
 
   const asLowerCase = createMemo(() => local.as?.toLowerCase());
 
+  // Markdown renders block elements (<div>, <p>); wrapping in <p> is invalid HTML
+  // and breaks SSR hydration. Use a block wrapper instead.
+  const wrapperComponent = createMemo(() => {
+    const as = local.as?.toLowerCase();
+    if (local.textType === "markdown" && (as === "p" || as === "span")) {
+      return "div";
+    }
+    return local.as || "div";
+  });
+
   const DataField = () => {
     // Check if local.data is an async function
     const isAsyncDataFunction = () => {
@@ -511,12 +521,7 @@ export function HtmlField(
     const TextContent = () => {
       return (
         <Show when={local.textType === "markdown"} fallback={local.text}>
-          <SolidMarkdown
-            renderingStrategy="reconcile"
-            remarkPlugins={[remarkGfm]}
-          >
-            {local.text}
-          </SolidMarkdown>
+          <SolidMarkdown remarkPlugins={[remarkGfm]}>{local.text}</SolidMarkdown>
         </Show>
       );
     };
@@ -599,7 +604,7 @@ export function HtmlField(
       <Match when={true}>
         <Dynamic
           class={`${local.class || ""}`}
-          component={local.as || "div"}
+          component={wrapperComponent()}
           {...others}
         >
           <Content />

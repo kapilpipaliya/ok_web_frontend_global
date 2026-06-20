@@ -85,7 +85,7 @@
 '''
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -142,7 +142,7 @@
         text: In Shopify admin open **Store Tasks** from Apps. Typical links are [Tasks](/tasks) for work, [Support](/support) for conversations, plus [FAQ](/faq), [Documentation](/docs), [Tutorial](/tutorial), [Changelog](/changelog), [Billing](/billing), and [Privacy](/privacy). Shops and ticketing tools may expose [Shops](/ShopifyShops) and [Tickets](/ShopifySupportTickets) depending on setup.
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -165,7 +165,7 @@
 '''
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -288,7 +288,7 @@
 '''
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -457,7 +457,7 @@
         text: Still stuck? Reach us from [Support](/support), skim [FAQ](/faq), or walk through [Tutorial](/tutorial).
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }

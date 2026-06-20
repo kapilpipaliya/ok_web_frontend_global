@@ -47,7 +47,7 @@
         key: "unique_2",
         text: "Please open the Transfers page in your Shopify admin.",
         textType: "markdown",
-        props: "return { as: 'p' };"
+        props: "return { as: 'div' };"
       }
     },
     {

@@ -76,7 +76,7 @@ return {
         text: "Please open **Solvo** inside your Shopify admin (embedded app) to manage tasks."
         textType: markdown
         props:
-          '''return { as: "p" };'''
+          '''return { as: "div" };'''
       }
     }
     {

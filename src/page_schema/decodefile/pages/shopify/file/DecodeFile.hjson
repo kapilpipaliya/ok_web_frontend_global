@@ -63,7 +63,7 @@
         key: unique_2
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }

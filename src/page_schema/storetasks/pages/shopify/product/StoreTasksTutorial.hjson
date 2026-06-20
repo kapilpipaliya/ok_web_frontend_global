@@ -83,7 +83,7 @@
         text: Follow these steps to get the most out of **Store Tasks**.
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -118,7 +118,7 @@ Read [FAQ](/faq) and [Documentation](/docs); contact us from [Support](/support)
 '''
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }

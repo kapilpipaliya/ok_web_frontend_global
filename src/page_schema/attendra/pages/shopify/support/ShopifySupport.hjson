@@ -1292,7 +1292,7 @@ We will be happy to assist you with organizing your products.'''
         key: unique_4
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }

@@ -83,7 +83,7 @@
         text: Billing for the **Decode Products Organizer** app is managed through your Shopify admin. Your current plan, payment method, and invoices are available in your Shopify billing settings.
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }

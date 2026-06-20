@@ -157,7 +157,7 @@ When structure breaks, everything slows down.
         key: unique_1
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -865,7 +865,7 @@ It was structured architecture.
 '''
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -1407,7 +1407,7 @@ Scaling stores cannot.
 '''
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -1556,7 +1556,7 @@ Design drives aesthetics.
 But structure drives scalability.'''
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -1581,7 +1581,7 @@ It must become systematic.
 '''
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }

@@ -85,7 +85,7 @@
 '''
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -142,7 +142,7 @@
         text: In the Shopify admin main sidebar you'll see a menu **Decode Files Organizer** with links: [Files](/files), [Support](/support), [FAQ](/faq), [Documentation](/docs), [Billing](/billing), and [Privacy](/privacy). Click any link to go to that section.
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -165,7 +165,7 @@
 '''
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -224,7 +224,7 @@
 '''
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }

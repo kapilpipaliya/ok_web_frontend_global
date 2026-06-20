@@ -59,11 +59,11 @@
         displayOrder: 1
         textType: markdown
         componentName: Html
-        text: Please open the [Products](/app) page in your Shopify admin.
+        text: Install [Decode Products Organizer](https://apps.shopify.com/decode-products-organizer) from the Shopify App Store, then open the [Products](/app) page in your Shopify admin.
         key: unique_2
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }

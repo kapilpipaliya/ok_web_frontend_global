@@ -83,7 +83,7 @@
         text: Follow these steps to get the most out of the **Decode Files Organizer** app.
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -223,7 +223,7 @@
         text: Install **Decode Files Organizer** from the [Shopify App Store](https://apps.shopify.com/). Authorize the app when prompted.
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -446,7 +446,7 @@
         text: For more help, see [Documentation](/docs), [FAQ](/faq), or contact us via [Support](/support).
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }

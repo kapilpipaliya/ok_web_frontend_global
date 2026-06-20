@@ -83,7 +83,7 @@
         text: Follow these steps to get the most out of the **Decode Products Organizer** app.
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -225,11 +225,11 @@ return `._id {
         displayOrder: 2
         textType: markdown
         componentName: Html
-        text: Install **Decode Products Organizer** from [Shopify App Store]( https://apps.shopify.com/ ) . Authorize the app when prompted.
+        text: Install **Decode Products Organizer** from [Shopify App Store](https://apps.shopify.com/decode-products-organizer). Authorize the app when prompted.
         key: unique_5
         props:
           '''return {
-  as: "p",
+  as: "div",
 };
 '''
       }
@@ -369,7 +369,7 @@ You can try filtering and searching to find products. Click a row to open the de
         key: unique_20
         props:
           '''return {
-  as: "p",
+  as: "div",
 };
 '''
       }
@@ -510,7 +510,7 @@ All application behavior can be configured from Settings. If you need assistance
         key: unique_15
         props:
           '''return {
-  as: "p",
+  as: "div",
 };
 '''
       }
@@ -648,7 +648,7 @@ return `._id {
         key: unique_10
         props:
           '''return {
-  as: "p",
+  as: "div",
 };
 '''
       }

@@ -98,7 +98,7 @@ return {
 '''
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }
@@ -250,7 +250,7 @@ return {
 '''
         props:
           '''return {
-  as: "p",
+  as: "div",
 }'''
       }
     }

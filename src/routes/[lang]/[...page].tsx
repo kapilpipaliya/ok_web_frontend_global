@@ -3,9 +3,7 @@ import { createMemo, Show } from "solid-js";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/entity/findVertex";
-
-const isLanguageShortCode = (value: string | undefined) =>
-  !!value && /^[a-z]{2,3}$/i.test(value);
+import { isSupportedLanguageCode } from "~/lib/i18n/supportedLanguageCodes";
 
 const normalizePagePath = (path: string) => {
   if (!path) return "/";
@@ -20,7 +18,7 @@ export default function PageHandler() {
     const lang = params.lang;
     const page = params.page;
 
-    if (isLanguageShortCode(lang)) {
+    if (isSupportedLanguageCode(lang)) {
       return normalizePagePath(page ?? "");
     }
 
