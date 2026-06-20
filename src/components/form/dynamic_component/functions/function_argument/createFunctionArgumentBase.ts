@@ -17,7 +17,7 @@ import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 import type { SetStoreFunction } from "solid-js/store";
 import { createStore, reconcile } from "solid-js/store";
 import type { ThemeContext, ColorMode } from "~/lib/styles/types/types";
-import type { Navigator, useSearchParams } from "@solidjs/router";
+import type { Navigator, useSearchParams, useParams } from "@solidjs/router";
 import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex/replaceVertexProperties";
 import { deleteTxnIdAndCreateNew } from "~/components/form/functions/deleteTxnIdAndCreateNew";
 import { ensureData } from "~/components/form/functions/ensureData";
@@ -141,6 +141,7 @@ export function createFunctionArgumentBase(
     toast: ToastFunctions;
     searchParams: ReturnType<typeof useSearchParams>[0];
     setSearchParams: ReturnType<typeof useSearchParams>[1];
+    params: ReturnType<typeof useParams>;
     zIndex: number;
     navigate: Navigator;
     location: {
@@ -291,6 +292,9 @@ export function createFunctionArgumentBase(
       );
     },
     setSearchParams: hooks.setSearchParams,
+    get params() {
+      return hooks.params;
+    },
     showErrorToast: hooks.toast.showErrorToast,
     showSuccessToast: hooks.toast.showSuccessToast,
     showWarningToast: hooks.toast.showWarningToast,

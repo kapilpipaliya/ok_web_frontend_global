@@ -221,9 +221,17 @@ return `._id {
         componentName: "Html",
         props: '''
 const feature = args.contextData.props || {};
+const localizeHref = (path) => {
+  if (!path || path.startsWith("http") || path.startsWith("mailto:") || path === "#") return path || "#";
+  const lang = args.params?.lang;
+  const code = lang && /^[a-z]{2,3}$/i.test(String(lang)) ? String(lang).toLowerCase() : "en";
+  if (path === "/") return `/${code}`;
+  const normalized = path.startsWith("/") ? path : `/${path}`;
+  return `/${code}${normalized}`;
+};
 return {
   as: "a",
-  href: feature.link || "#",
+  href: localizeHref(feature.link),
   text: feature.linkText || "Learn More"
 };
 ''',

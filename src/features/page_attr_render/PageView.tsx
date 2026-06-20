@@ -6,7 +6,7 @@ import {
   createSignal,
   onCleanup,
 } from "solid-js";
-import { createStore, type SetStoreFunction } from "solid-js/store";
+import { createStore } from "solid-js/store";
 
 import { PageAttrRender } from "~/features/page_attr_render/PageAttrRender";
 import {
@@ -231,14 +231,12 @@ export function PageView(
       },
     );
 
-    const pageMeta = () => props.metaVertex?.P;
-
     const hasPageDataFetch = createMemo(
       () =>
         !!(
-          pageMeta()?.data ||
-          pageMeta()?.expression ||
-          pageMeta()?.serverFunction
+          dynamicProps().data ||
+          dynamicProps().expression ||
+          dynamicProps().serverFunction
         ),
     );
 
@@ -367,15 +365,15 @@ export function PageView(
           <Match when={hasPageDataFetch()}>
             <HtmlField
               data={
-                pageMeta()?.data as
+                dynamicProps().data as
                   | (() => unknown[])
                   | unknown[]
                   | undefined
               }
-              expression={pageMeta()?.expression as string | undefined}
-              serverFunction={pageMeta()?.serverFunction as string | undefined}
-              loop={pageMeta()?.loop as boolean | undefined}
-              contextName={pageMeta()?.contextName as string | undefined}
+              expression={dynamicProps().expression as string | undefined}
+              serverFunction={dynamicProps().serverFunction as string | undefined}
+              loop={dynamicProps().loop as boolean | undefined}
+              contextName={dynamicProps().contextName as string | undefined}
               renderChildren
             >
               <MainContent />

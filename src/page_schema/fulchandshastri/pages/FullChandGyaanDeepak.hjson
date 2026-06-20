@@ -9,13 +9,16 @@
         fns: "return { enabled: () => true }",
         isNoPermissionCheck: true,
         url: "/gyaan-deepak-prajwalan"
-        contextName: "gyaanDeepakSettings"
         settingsPageId: "gyaan-deepak"
-        serverFunction: '''
+        props: '''
+const locale = args.params?.lang ? String(args.params.lang).toLowerCase() : undefined;
+return {
+  contextName: "gyaanDeepakSettings",
+  serverFunction: `
 try {
   const result = await args.executeNamedServerFunction({
     functionName: "loadFulchandPublicPageSettings",
-    contextData: { pageId: "gyaan-deepak", allowPublicRead: true }
+    contextData: { pageId: "gyaan-deepak", allowPublicRead: true, locale: ${JSON.stringify(locale ?? null)} }
   });
   if (!result?.result?.success) return {};
   return result.result.data?.sections || {};
@@ -23,6 +26,8 @@ try {
   console.error("Error loading page settings:", error);
   return {};
 }
+`
+};
 '''
       }
     },

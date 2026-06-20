@@ -65,6 +65,7 @@ export interface FunctionArgumentBaseType {
   // setFormValueStore: SetStoreFunction<FormStoreObject>;
   // updateFormValueStore: (data: any, setDirtyFlag?: boolean) => void;
   searchParams?: Record<string, string | undefined>;
+  params?: Record<string, string | undefined>;
   setError: (error: string | undefined, key?: string) => void;
   setGraph: SetStoreFunction<GraphInterface>;
   setGraphData: (

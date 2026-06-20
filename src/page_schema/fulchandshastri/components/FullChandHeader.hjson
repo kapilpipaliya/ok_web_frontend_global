@@ -414,6 +414,14 @@ return `._id {
       }
     },
     {
+      id: "languageSelector",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "FullChandLanguageSelector"
+      }
+    },
+    {
       id: "themeToggle",
       L: "Attr",
       P: {
@@ -479,9 +487,14 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const getCurrentLang = () => {
+  const lang = args.params?.lang;
+  if (lang && /^[a-z]{2,3}$/i.test(String(lang))) return String(lang).toLowerCase();
+  return "en";
+};
 return {
   as: "a",
-  href: "/"
+  href: `/${getCurrentLang()}`
 };
 ''',
         css: '''
@@ -579,73 +592,100 @@ return {
         componentName: "Html",
         contextName: "navigation",
         props: '''
+const getCurrentLang = () => {
+  const lang = args.params?.lang;
+  if (lang && /^[a-z]{2,3}$/i.test(String(lang))) return String(lang).toLowerCase();
+  return "en";
+};
+
+const localizeHref = (path) => {
+  if (!path || path.startsWith("http") || path.startsWith("mailto:") || path === "#") return path;
+  const lang = getCurrentLang();
+  if (path === "/") return `/${lang}`;
+  const normalized = path.startsWith("/") ? path : `/${path}`;
+  return `/${lang}${normalized}`;
+};
+
+const baseNav = [
+  {
+    id: 1,
+    text: "Home",
+    href: "/",
+    submenu: null
+  },
+  {
+    id: 2,
+    text: "About",
+    href: "#",
+    submenu: [
+      { id: 1, text: "About Fulchand", href: "/about-fulchand" },
+      { id: 2, text: "His Inspiration", href: "/his-inspiration" },
+      { id: 3, text: "About ASK Umarala", href: "/about-ask-umarala" },
+      { id: 4, text: "Atma Siddhi Shastra Mission", href: "/atma-siddhi-shastra-mission" },
+      { id: 5, text: "Gyaan Deepak ! Prajwalan", href: "/gyaan-deepak-prajwalan" },
+      { id: 6, text: "Atma Sadhana Nitya Kram", href: "/atma-sadhana-nitya-kram" }
+    ]
+  },
+  {
+    id: 3,
+    text: "Books",
+    href: "/books",
+    submenu: null
+  },
+  {
+    id: 4,
+    text: "Discourses",
+    href: "/discourses",
+    submenu: null
+  },
+  {
+    id: 5,
+    text: "Schedule",
+    href: "/schedule",
+    submenu: null
+  },
+  {
+    id: 6,
+    text: "Gallery",
+    href: "#",
+    submenu: [
+      { id: 1, text: "Photos", href: "/photos" },
+      { id: 2, text: "Videos", href: "/videos" }
+    ]
+  },
+  {
+    id: 7,
+    text: "Donation",
+    href: "/donation",
+    submenu: null
+  },
+  {
+    id: 8,
+    text: "Bhakti",
+    href: "/bhakti",
+    submenu: null
+  },
+  {
+    id: 9,
+    text: "Contact",
+    href: "/contact",
+    submenu: null
+  }
+];
+
 return {
-  data: [
-    {
-      id: 1,
-      text: "Home",
-      href: "/",
-      submenu: null
-    },
-    {
-      id: 2,
-      text: "About",
-      href: "#",
-      submenu: [
-        { id: 1, text: "About Fulchand", href: "/about-fulchand" },
-        { id: 2, text: "His Inspiration", href: "/his-inspiration" },
-        { id: 3, text: "About ASK Umarala", href: "/about-ask-umarala" },
-        { id: 4, text: "Atma Siddhi Shastra Mission", href: "/atma-siddhi-shastra-mission" },
-        { id: 5, text: "Gyaan Deepak ! Prajwalan", href: "/gyaan-deepak-prajwalan" },
-        { id: 6, text: "Atma Sadhana Nitya Kram", href: "/atma-sadhana-nitya-kram" }
-      ]
-    },
-    {
-      id: 3,
-      text: "Books",
-      href: "/books",
-      submenu: null
-    },
-    {
-      id: 4,
-      text: "Discourses",
-      href: "/discourses",
-      submenu: null
-    },
-    {
-      id: 5,
-      text: "Schedule",
-      href: "/schedule",
-      submenu: null
-    },
-    {
-      id: 6,
-      text: "Gallery",
-      href: "#",
-      submenu: [
-        { id: 1, text: "Photos", href: "/photos" },
-        { id: 2, text: "Videos", href: "/videos" }
-      ]
-    },
-    {
-      id: 7,
-      text: "Donation",
-      href: "/donation",
-      submenu: null
-    },
-    {
-      id: 8,
-      text: "Bhakti",
-      href: "/bhakti",
-      submenu: null
-    },
-    {
-      id: 9,
-      text: "Contact",
-      href: "/contact",
-      submenu: null
-    }
-  ]
+  data: baseNav.map((item) => ({
+    ...item,
+    href: localizeHref(item.href),
+    baseHref: item.href,
+    submenu: Array.isArray(item.submenu)
+      ? item.submenu.map((sub) => ({
+          ...sub,
+          href: localizeHref(sub.href),
+          baseHref: sub.href
+        }))
+      : null
+  }))
 };
 '''
       }
@@ -736,9 +776,17 @@ return `._id {
         componentName: "Html",
         props: '''
 const navItem = args.contextData.navItem;
-const currentPath = args.location.pathname;
-const isActive = currentPath === navItem.href || 
-  (navItem.submenu && navItem.submenu.some(item => currentPath === item.href));
+const getPagePath = () => {
+  const parts = String(args.location?.pathname || "").split("/").filter(Boolean);
+  if (parts.length > 0 && /^[a-z]{2,3}$/i.test(parts[0])) {
+    return parts.length > 1 ? "/" + parts.slice(1).join("/") : "/";
+  }
+  return args.location?.pathname || "/";
+};
+const currentPath = getPagePath();
+const itemPath = navItem.baseHref || navItem.href;
+const isActive = currentPath === itemPath ||
+  (navItem.submenu && navItem.submenu.some((item) => currentPath === (item.baseHref || item.href)));
 return {
   as: "a",
   href: navItem.href,
@@ -747,9 +795,17 @@ return {
 ''',
         css: '''
 const navItem = args.contextData.navItem;
-const currentPath = args.location.pathname;
-const isActive = currentPath === navItem.href || 
-  (navItem.submenu && navItem.submenu.some(item => currentPath === item.href));
+const getPagePath = () => {
+  const parts = String(args.location?.pathname || "").split("/").filter(Boolean);
+  if (parts.length > 0 && /^[a-z]{2,3}$/i.test(parts[0])) {
+    return parts.length > 1 ? "/" + parts.slice(1).join("/") : "/";
+  }
+  return args.location?.pathname || "/";
+};
+const currentPath = getPagePath();
+const itemPath = navItem.baseHref || navItem.href;
+const isActive = currentPath === itemPath ||
+  (navItem.submenu && navItem.submenu.some((item) => currentPath === (item.baseHref || item.href)));
 return `._id {
   padding: 1rem 1.5rem;
   color: #3a2317;
@@ -860,8 +916,15 @@ return {
 ''',
         css: '''
 const submenuItem = args.contextData.submenuItem;
-const currentPath = args.location.pathname;
-const isActive = currentPath === submenuItem.href;
+const getPagePath = () => {
+  const parts = String(args.location?.pathname || "").split("/").filter(Boolean);
+  if (parts.length > 0 && /^[a-z]{2,3}$/i.test(parts[0])) {
+    return parts.length > 1 ? "/" + parts.slice(1).join("/") : "/";
+  }
+  return args.location?.pathname || "/";
+};
+const currentPath = getPagePath();
+const isActive = currentPath === (submenuItem.baseHref || submenuItem.href);
 return `._id {
   display: block;
   padding: 0.75rem 1.5rem;
@@ -1004,6 +1067,7 @@ return `._id {
     { id: "e15", T: "Attr", S: "locationLink", E: "locationIcon" },
     { id: "e16", T: "Attr", S: "locationLink", E: "locationText" },
     { id: "e17", T: "Attr", S: "locationInfo", E: "dateTime" },
+    { id: "e17b", T: "Attr", S: "locationInfo", E: "languageSelector" },
     { id: "e18", T: "Attr", S: "locationInfo", E: "themeToggle" },
     { id: "e19", T: "Attr", S: "headerStateData", E: "mainNav" },
     { id: "e20", T: "Attr", S: "mainNav", E: "navContainer" },

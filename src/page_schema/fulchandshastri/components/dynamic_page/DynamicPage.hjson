@@ -1999,8 +1999,7 @@ return `._id {
         props:
           '''
 const config = args.fns.evaluateConfig?.();
-const hideSidebar = args.contextData.props?.hideSettingsSidebar === true
-  || args.contextData.props?.embeddedMode === true;
+const hideSidebar = args.contextData.props?.hideSettingsSidebar === true;
 return {
   sidebarConfig: config?.sidebar || null,
   hide: hideSidebar

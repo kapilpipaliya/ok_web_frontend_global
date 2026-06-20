@@ -13,10 +13,10 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
-const SOURCE = path.join(ROOT, "src/page_schema/attendra");
+const SOURCE = path.join(ROOT, "src/page_schema/solvo");
 
 /** Destination directory names under src/page_schema (each gets a full copy). */
-const DEST_NAMES = ["solvo"];
+const DEST_NAMES = ["fulchandshastri"];
 
 const SKIP_DIRS = [
   //"functions",

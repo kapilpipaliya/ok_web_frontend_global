@@ -9,13 +9,16 @@
         fns: "return { enabled: () => true }",
         isNoPermissionCheck: true,
         url: "/about-ask-umarala"
-        contextName: "aboutAskSettings"
         settingsPageId: "about-ask"
-        serverFunction: '''
+        props: '''
+const locale = args.params?.lang ? String(args.params.lang).toLowerCase() : undefined;
+return {
+  contextName: "aboutAskSettings",
+  serverFunction: `
 try {
   const result = await args.executeNamedServerFunction({
     functionName: "loadFulchandPublicPageSettings",
-    contextData: { pageId: "about-ask", allowPublicRead: true }
+    contextData: { pageId: "about-ask", allowPublicRead: true, locale: ${JSON.stringify(locale ?? null)} }
   });
   if (!result?.result?.success) return {};
   return result.result.data?.sections || {};
@@ -23,6 +26,8 @@ try {
   console.error("Error loading page settings:", error);
   return {};
 }
+`
+};
 '''
       }
     },

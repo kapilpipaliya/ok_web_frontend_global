@@ -1,5 +1,5 @@
 import { createMemo, createSignal, getOwner, type Accessor } from "solid-js";
-import { useSearchParams, useLocation, useNavigate } from "@solidjs/router";
+import { useSearchParams, useParams, useLocation, useNavigate } from "@solidjs/router";
 import { useToast } from "~/components/styled/modal/Toast";
 import { useZIndex } from "~/components/fields/ZIndex";
 import { useTheme } from "~/lib/theme/ThemeContext";
@@ -44,6 +44,7 @@ export function useFunctionProxy(options: UseFunctionProxyOptions) {
   const [previewStore] = usePreviewContext();
   const toast = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
+  const params = useParams();
   const zIndex = useZIndex();
   const navigate = useNavigate();
   const location = useLocation();
@@ -89,6 +90,7 @@ export function useFunctionProxy(options: UseFunctionProxyOptions) {
           toast,
           searchParams,
           setSearchParams,
+          params,
           zIndex,
           navigate,
           location,

@@ -9,13 +9,16 @@
         fns: "return { enabled: () => true }",
         isNoPermissionCheck: true,
         url: "/atma-siddhi-shastra-mission"
-        contextName: "atmaSiddhiMissionSettings"
         settingsPageId: "atma-siddhi-mission"
-        serverFunction: '''
+        props: '''
+const locale = args.params?.lang ? String(args.params.lang).toLowerCase() : undefined;
+return {
+  contextName: "atmaSiddhiMissionSettings",
+  serverFunction: `
 try {
   const result = await args.executeNamedServerFunction({
     functionName: "loadFulchandPublicPageSettings",
-    contextData: { pageId: "atma-siddhi-mission", allowPublicRead: true }
+    contextData: { pageId: "atma-siddhi-mission", allowPublicRead: true, locale: ${JSON.stringify(locale ?? null)} }
   });
   if (!result?.result?.success) return {};
   return result.result.data?.sections || {};
@@ -23,6 +26,8 @@ try {
   console.error("Error loading page settings:", error);
   return {};
 }
+`
+};
 '''
       }
     },

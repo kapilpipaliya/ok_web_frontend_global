@@ -56,6 +56,11 @@ const setEditorMode = (mode) => {
   const page = args.searchParams?.page || "home";
   if (mode === "schema") {
     args.setSearchParams({ page, mode: "schema" }, { replace: true });
+    const minWidth = Math.min(getMaxEditorWidth(), SCHEMA_EDITOR_MIN_WIDTH);
+    if (editorPaneWidth() < minWidth) {
+      setEditorPaneWidth(minWidth);
+      persistEditorWidth(minWidth);
+    }
   } else {
     args.setSearchParams({ page, mode: null }, { replace: true });
   }
@@ -64,6 +69,68 @@ const setEditorMode = (mode) => {
 const onSchemaSaved = () => {
   refreshPreview();
   args.showSuccessToast?.("Schema saved — content editor will use the updated fields");
+};
+
+const DEFAULT_EDITOR_WIDTH = 560;
+const MIN_EDITOR_WIDTH = 360;
+const MAX_EDITOR_WIDTH = 1200;
+const SCHEMA_EDITOR_MIN_WIDTH = 640;
+const EDITOR_WIDTH_STORAGE_KEY = "fulchand-settings-editor-width";
+
+const loadStoredEditorWidth = () => {
+  if (typeof window === "undefined") return DEFAULT_EDITOR_WIDTH;
+  try {
+    const stored = Number(window.localStorage.getItem(EDITOR_WIDTH_STORAGE_KEY));
+    if (Number.isFinite(stored) && stored >= MIN_EDITOR_WIDTH && stored <= MAX_EDITOR_WIDTH) {
+      return stored;
+    }
+  } catch (_) {}
+  return DEFAULT_EDITOR_WIDTH;
+};
+
+const persistEditorWidth = (width) => {
+  try {
+    window.localStorage.setItem(EDITOR_WIDTH_STORAGE_KEY, String(width));
+  } catch (_) {}
+};
+
+const getMaxEditorWidth = () => {
+  if (typeof window === "undefined") return MAX_EDITOR_WIDTH;
+  return Math.min(MAX_EDITOR_WIDTH, Math.floor(window.innerWidth * 0.85));
+};
+
+const [editorPaneWidth, setEditorPaneWidth] = args.createSignal(loadStoredEditorWidth());
+const [isResizingEditor, setIsResizingEditor] = args.createSignal(false);
+
+const syncEditorPaneWidth = () => {
+  const width = editorPaneWidth();
+  document.documentElement.style.setProperty("--fulchand-settings-editor-width", `${width}px`);
+};
+
+const startEditorResize = (event) => {
+  event.preventDefault();
+  event.stopPropagation();
+  setIsResizingEditor(true);
+  const startX = event.clientX;
+  const startWidth = editorPaneWidth();
+
+  const handleMouseMove = (moveEvent) => {
+    const delta = startX - moveEvent.clientX;
+    const next = Math.max(MIN_EDITOR_WIDTH, Math.min(getMaxEditorWidth(), startWidth + delta));
+    setEditorPaneWidth(next);
+  };
+
+  const handleMouseUp = () => {
+    setIsResizingEditor(false);
+    persistEditorWidth(editorPaneWidth());
+    document.body.classList.remove("fulchand-settings-resizing");
+    document.removeEventListener("mousemove", handleMouseMove, true);
+    document.removeEventListener("mouseup", handleMouseUp, true);
+  };
+
+  document.body.classList.add("fulchand-settings-resizing");
+  document.addEventListener("mousemove", handleMouseMove, true);
+  document.addEventListener("mouseup", handleMouseUp, true);
 };
 
 const [siteLanguages, setSiteLanguages] = args.createSignal([]);
@@ -102,8 +169,19 @@ const loadSiteLanguages = async () => {
   return siteLanguagesLoadPromise;
 };
 
+args.createEffect(() => {
+  editorPaneWidth();
+  syncEditorPaneWidth();
+});
+
 return {
   enabled: () => true,
+  DEFAULT_EDITOR_WIDTH,
+  MIN_EDITOR_WIDTH,
+  MAX_EDITOR_WIDTH,
+  editorPaneWidth,
+  isResizingEditor,
+  startEditorResize,
   checkAdminRole,
   getPreviewUrl,
   refreshPreview,
@@ -113,6 +191,7 @@ return {
   onSchemaSaved,
   siteLanguages,
   loadSiteLanguages,
+  syncEditorPaneWidth,
   executeYTOFunction: (functionName, contextData) =>
     args.executeNamedServerFunction({
       functionName,
@@ -134,12 +213,59 @@ return {
       return;
     }
     await args.fns.loadSiteLanguages?.();
+    args.fns.syncEditorPaneWidth?.();
     window.addEventListener("fulchand-settings-saved", args.fns.onSettingsSaved);
   },
   onCleanup: () => {
     window.removeEventListener("fulchand-settings-saved", args.fns.onSettingsSaved);
+    document.documentElement.style.removeProperty("--fulchand-settings-editor-width");
   }
 };
+'''
+      }
+    },
+    {
+      id: "resizeOverlayStyle",
+      L: "Attr",
+      P: {
+        displayOrder: 0,
+        componentName: "Html",
+        props: '''
+return {
+  as: "style",
+  text: `body.fulchand-settings-resizing {
+  cursor: col-resize !important;
+  user-select: none;
+}
+
+body.fulchand-settings-resizing [data-fulchand-settings-preview] {
+  pointer-events: none;
+}`
+};
+'''
+      }
+    },
+    {
+      id: "resizeOverlay",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  "aria-hidden": true,
+  hide: !args.fns.isResizingEditor?.()
+};
+''',
+        css: '''
+return `._id {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  cursor: col-resize;
+  background: transparent;
+}`;
 '''
       }
     },
@@ -189,11 +315,63 @@ return `._id {
   min-height: 0;
   width: 100%;
   overflow: hidden;
+  position: relative;
 
   @media (max-width: 1024px) {
     flex-direction: column;
     overflow-y: auto;
     overscroll-behavior: contain;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "splitResize",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  role: "separator",
+  "aria-orientation": "vertical",
+  "aria-label": "Resize settings editor",
+  title: "Drag to resize settings panel",
+  onMouseDown: (event) => args.fns.startEditorResize?.(event)
+};
+''',
+        css: '''
+return `._id {
+  width: 6px;
+  flex-shrink: 0;
+  cursor: col-resize;
+  touch-action: none;
+  user-select: none;
+  position: relative;
+  z-index: 2;
+  background: transparent;
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 2px;
+    transform: translateX(-50%);
+    background: transparent;
+    transition: background 0.15s ease;
+  }
+
+  &:hover::after,
+  body.fulchand-settings-resizing & {
+    background: ${args.theme.var.color.primary};
+  }
+
+  @media (max-width: 1024px) {
+    display: none;
   }
 }`;
 '''
@@ -216,12 +394,9 @@ return `._id {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  border-right: 1px solid ${args.theme.var.color.border};
   background: ${args.theme.var.color.background_light_50};
 
   @media (max-width: 1024px) {
-    border-right: none;
-    border-bottom: 1px solid ${args.theme.var.color.border};
     min-height: 320px;
   }
 }`;
@@ -322,7 +497,7 @@ return `._id {
       id: "editorPane",
       L: "Attr",
       P: {
-        displayOrder: 2,
+        displayOrder: 3,
         componentName: "Html",
         props: '''
 return {
@@ -330,13 +505,24 @@ return {
 };
 ''',
         css: '''
+const resizing = args.fns.isResizingEditor?.();
 return `._id {
-  flex: 1;
+  width: var(--fulchand-settings-editor-width, ${args.fns.DEFAULT_EDITOR_WIDTH}px);
+  flex-shrink: 0;
   min-width: 0;
   display: flex;
   flex-direction: column;
   min-height: 0;
   overflow: hidden;
+  border-left: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.background};
+  transition: ${resizing ? "none" : "width 0.25s ease"};
+
+  @media (max-width: 1024px) {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid ${args.theme.var.color.border};
+  }
 }`;
 '''
       }
@@ -519,9 +705,12 @@ return {
     }
   ],
   edges: [
+    { id: "e0", T: "Attr", S: "page", E: "resizeOverlayStyle" },
+    { id: "e0b", T: "Attr", S: "page", E: "resizeOverlay" },
     { id: "e1", T: "Attr", S: "page", E: "settingsShell" },
     { id: "e2", T: "Attr", S: "settingsShell", E: "splitLayout" },
     { id: "e3", T: "Attr", S: "splitLayout", E: "previewPane" },
+    { id: "e3b", T: "Attr", S: "splitLayout", E: "splitResize" },
     { id: "e4", T: "Attr", S: "splitLayout", E: "editorPane" },
     { id: "e5", T: "Attr", S: "previewPane", E: "previewHeader" },
     { id: "e6", T: "Attr", S: "previewPane", E: "previewFrame" },
