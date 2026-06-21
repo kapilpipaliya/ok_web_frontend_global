@@ -62,14 +62,47 @@ interface PanelProps {
   children: any;
   isResizing: boolean;
   onResize?: (e: PointerEvent) => void;
+  onResizeLeft?: (e: PointerEvent) => void;
+  onResizeRight?: (e: PointerEvent) => void;
   ref?: (el: HTMLDivElement) => void;
   resizeKey?: string;
+  resizeKeyLeft?: string;
+  resizeKeyRight?: string;
   resizePosition?: "bottom" | "left" | "right" | "top";
   style?: any;
   title?: string;
 }
 
 const Panel: Component<PanelProps> = (props) => {
+  const leftResizeHandler = () =>
+    props.onResizeLeft ??
+    (props.onResize && props.resizePosition === "left"
+      ? props.onResize
+      : undefined);
+
+  const rightResizeHandler = () =>
+    props.onResizeRight ??
+    (props.onResize &&
+    props.resizePosition !== "left" &&
+    props.resizePosition !== "top"
+      ? props.onResize
+      : undefined);
+
+  const gridTemplateColumns = () => {
+    const hasLeft = !!leftResizeHandler();
+    const hasRight = !!rightResizeHandler();
+    if (hasLeft && hasRight) {
+      return "3px 1fr 3px";
+    }
+    if (hasLeft) {
+      return "3px 1fr";
+    }
+    if (hasRight) {
+      return "1fr 3px";
+    }
+    return "1fr";
+  };
+
   const Content = () => {
     return (
       <Show
@@ -119,7 +152,7 @@ const Panel: Component<PanelProps> = (props) => {
         `return \`._id {
           border: 1px solid \${args.theme.var.color.border};
           display: grid;
-          grid-template-columns: ${props.resizePosition === "left" ? "3px 1fr" : "1fr 3px"};
+          grid-template-columns: ${gridTemplateColumns()};
           grid-template-rows: ${props.resizePosition === "top" ? "3px 1fr" : "100%"};
           height: 100%;
         }\`;`,
@@ -127,39 +160,25 @@ const Panel: Component<PanelProps> = (props) => {
       ref={props.ref}
       style={props.style}
     >
-      <div
-        style={{
-          display:
-            props.resizePosition === "left" && props.onResize
-              ? "block"
-              : "none",
-        }}
-      >
+      <div style={{ display: leftResizeHandler() ? "block" : "none" }}>
         <ResizeHandle
           activeResizeKey={props.activeResizeKey}
           isHorizontal={props.resizePosition !== "top"}
           isResizing={props.isResizing}
-          onPointerDown={props.onResize!}
-          position={props.resizePosition!}
-          resizeKey={props.resizeKey || ""}
+          onPointerDown={leftResizeHandler()!}
+          position="left"
+          resizeKey={props.resizeKeyLeft || props.resizeKey || ""}
         />
       </div>
       <Content />
-      <div
-        style={{
-          display:
-            props.resizePosition !== "left" && props.onResize
-              ? "block"
-              : "none",
-        }}
-      >
+      <div style={{ display: rightResizeHandler() ? "block" : "none" }}>
         <ResizeHandle
           activeResizeKey={props.activeResizeKey}
           isHorizontal={props.resizePosition !== "top"}
           isResizing={props.isResizing}
-          onPointerDown={props.onResize!}
-          position={props.resizePosition || "right"}
-          resizeKey={props.resizeKey || ""}
+          onPointerDown={rightResizeHandler()!}
+          position="right"
+          resizeKey={props.resizeKeyRight || props.resizeKey || ""}
         />
       </div>
     </As>
@@ -180,12 +199,27 @@ export function RenderMainContent() {
     const layout = layoutStore();
     const columns: string[] = [];
 
-    // Left panel
+    // Components panel
     if (layout.isLeftOpen) {
       columns.push(`${layout.leftWidth}px`);
     }
 
-    // Main panels
+    // Settings panel (was last, now second)
+    if (layout.isRight2Open) {
+      columns.push(`${layout.rightWidth2}px`);
+    }
+
+    // Properties panel (third)
+    if (layout.isRight1Open) {
+      columns.push(`${layout.rightWidth1}px`);
+    }
+
+    // AI panel
+    if (layout.isRight0Open) {
+      columns.push(`${layout.rightWidth0}px`);
+    }
+
+    // Preview panels
     if (layout.mainPanel) {
       const mainPanelColumns = layout.mainPanel.map((panel) => {
         const width = layout[`mainPanel${panel}Width`];
@@ -194,7 +228,7 @@ export function RenderMainContent() {
       columns.push(...mainPanelColumns);
     }
 
-    // Check if we need to add a flexible column
+    // Flexible column for preview expansion
     const hasFlexibleMainPanel = layout.mainPanel?.some(
       (panel) => layout[`mainPanel${panel}Width`] === "1fr",
     );
@@ -202,17 +236,6 @@ export function RenderMainContent() {
       columns.push("0px");
     } else {
       columns.push("1fr");
-    }
-
-    // Right panels
-    if (layout.isRight0Open) {
-      columns.push(`${layout.rightWidth0}px`);
-    }
-    if (layout.isRight1Open) {
-      columns.push(`${layout.rightWidth1}px`);
-    }
-    if (layout.isRight2Open) {
-      columns.push(`${layout.rightWidth2}px`);
     }
 
     return columns.join(" ");
@@ -243,6 +266,7 @@ export function RenderMainContent() {
         | `mainPanel${string}Width`,
       panelRef: () => HTMLDivElement | undefined,
       isHorizontal: boolean,
+      growOnDragRight = key === "leftWidth" || key.startsWith("mainPanel"),
     ) =>
     (e: PointerEvent) => {
       e.preventDefault();
@@ -264,12 +288,9 @@ export function RenderMainContent() {
         const currentPos = isHorizontal ? e.pageX : e.pageY;
         const diff = currentPos - startPos;
 
-        // Determine if we're resizing from left/top (positive) or right/bottom (negative)
-        const isPositiveResize =
-          key === "leftWidth" || key.startsWith("mainPanel");
         const newWidth = Math.max(
           100,
-          startWidth + (isPositiveResize ? diff : -diff),
+          startWidth + (growOnDragRight ? diff : -diff),
         );
 
         mergeVertexProperties<PageLayoutObject>(
@@ -339,53 +360,25 @@ export function RenderMainContent() {
         </Panel>
       </As>
 
-      <For each={layoutStore().mainPanel}>
-        {(mainPanel) => (
-          <Panel
-            activeResizeKey={activeResizeKey()}
-            isResizing={isResizing()}
-            // onResize={index() < layoutStore().mainPanel.length - 1 ? createResizeHandler(`mainPanel${index()}` as `mainPanel${string}`, () => mainPanelRefs()[`mainPanel${index()}`], true) : undefined}
-            onResize={createResizeHandler(
-              `mainPanel${mainPanel}Width` as `mainPanel${string}Width`,
-              () => mainPanelRefs()[`mainPanel${mainPanel}`],
-              true,
-            )}
-            ref={(el) =>
-              setMainPanelRefs((prev) => ({
-                ...prev,
-                [`mainPanel${mainPanel}`]: el,
-              }))
-            }
-            resizeKey={`mainPanel${mainPanel}Width`}
-            style={
-              {
-                // 'background-color': '#ffffff',
-              }
-            }
-          >
-            <TabBar mainPanel={mainPanel} />
-            <PageViewComponent mainPanel={mainPanel} />
-          </Panel>
-        )}
-      </For>
-
-      <div />
-
       <As
         as="div"
         css={STYLES.overflowCss}
-        style={{ display: layoutStore().isRight0Open ? "block" : "none" }}
+        style={{ display: layoutStore().isRight2Open ? "block" : "none" }}
       >
         <Panel
           activeResizeKey={activeResizeKey()}
           isResizing={isResizing()}
-          onResize={createResizeHandler("rightWidth0", rightPanel0Ref, true)}
-          ref={setRightPanel0Ref}
-          resizeKey="rightWidth0"
-          resizePosition="left"
-          title="AI Content Generator"
+          onResize={createResizeHandler(
+            "rightWidth2",
+            rightPanel2Ref,
+            true,
+            true,
+          )}
+          ref={setRightPanel2Ref}
+          resizeKey="rightWidth2"
+          resizePosition="right"
         >
-          <UseObjectAIPanel />
+          <SettingTabs />
         </Panel>
       </As>
 
@@ -397,10 +390,15 @@ export function RenderMainContent() {
         <Panel
           activeResizeKey={activeResizeKey()}
           isResizing={isResizing()}
-          onResize={createResizeHandler("rightWidth1", rightPanel1Ref, true)}
+          onResize={createResizeHandler(
+            "rightWidth1",
+            rightPanel1Ref,
+            true,
+            true,
+          )}
           ref={setRightPanel1Ref}
           resizeKey="rightWidth1"
-          resizePosition="left"
+          resizePosition="right"
           title="Properties"
         >
           {/* <Show
@@ -427,19 +425,65 @@ export function RenderMainContent() {
       <As
         as="div"
         css={STYLES.overflowCss}
-        style={{ display: layoutStore().isRight2Open ? "block" : "none" }}
+        style={{ display: layoutStore().isRight0Open ? "block" : "none" }}
       >
         <Panel
           activeResizeKey={activeResizeKey()}
           isResizing={isResizing()}
-          onResize={createResizeHandler("rightWidth2", rightPanel2Ref, true)}
-          ref={setRightPanel2Ref}
-          resizeKey="rightWidth2"
-          resizePosition="left"
+          onResize={createResizeHandler(
+            "rightWidth0",
+            rightPanel0Ref,
+            true,
+            true,
+          )}
+          ref={setRightPanel0Ref}
+          resizeKey="rightWidth0"
+          resizePosition="right"
+          title="AI Content Generator"
         >
-          <SettingTabs />
+          <UseObjectAIPanel />
         </Panel>
       </As>
+
+      <For each={layoutStore().mainPanel}>
+        {(mainPanel) => (
+          <Panel
+            activeResizeKey={activeResizeKey()}
+            isResizing={isResizing()}
+            onResizeLeft={createResizeHandler(
+              `mainPanel${mainPanel}Width` as `mainPanel${string}Width`,
+              () => mainPanelRefs()[`mainPanel${mainPanel}`],
+              true,
+              false,
+            )}
+            onResizeRight={createResizeHandler(
+              `mainPanel${mainPanel}Width` as `mainPanel${string}Width`,
+              () => mainPanelRefs()[`mainPanel${mainPanel}`],
+              true,
+              true,
+            )}
+            ref={(el) =>
+              setMainPanelRefs((prev) => ({
+                ...prev,
+                [`mainPanel${mainPanel}`]: el,
+              }))
+            }
+            resizeKey={`mainPanel${mainPanel}Width`}
+            resizeKeyLeft={`mainPanel${mainPanel}Width`}
+            resizeKeyRight={`mainPanel${mainPanel}Width`}
+            style={
+              {
+                // 'background-color': '#ffffff',
+              }
+            }
+          >
+            <TabBar mainPanel={mainPanel} />
+            <PageViewComponent mainPanel={mainPanel} />
+          </Panel>
+        )}
+      </For>
+
+      <div />
 
       {/* <Panel
         style={{ 'grid-column': '1 / span 4' }}
