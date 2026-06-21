@@ -2071,165 +2071,6 @@ const pages = [
             "defaultValue": "Explore our collection of spiritual texts and writings"
           }
         ]
-      },
-      {
-        "id": "books",
-        "title": "books",
-        "fields": [
-          {
-            "key": "books",
-            "label": "books",
-            "dataType": "array",
-            "renderer": "fieldArray",
-            "required": false,
-            "colSpan": 1,
-            "defaultValue": [
-              {
-                "id": 1,
-                "title": "Atma Siddhi Shastra",
-                "description": "A profound spiritual text offering deep insights into self-realization and the path to liberation. This masterpiece contains 142 verses that guide seekers on their spiritual journey.",
-                "image": "https://www.fulchandshastri.com/wp-content/uploads/2018/01/Atma-Siddhi-Shastra-Cover-page-Eng-e1548072132279.png",
-                "language": "English",
-                "pages": 200,
-                "price": "Free",
-                "downloadUrl": "https://www.fulchandshastri.com/books/atma-siddhi-shastra-english.pdf",
-                "readUrl": "https://www.fulchandshastri.com/books/read/atma-siddhi-shastra-english"
-              },
-              {
-                "id": 2,
-                "title": "आत्मसिद्धि शास्त्र",
-                "description": "श्रीमद् राजचंद्र द्वारा रचित यह महान ग्रंथ आत्म-साक्षात्कार और मोक्ष के मार्ग को प्रकाशित करता है। १४२ श्लोकों में आध्यात्मिक ज्ञान का सार।",
-                "image": "https://www.fulchandshastri.com/wp-content/uploads/2018/01/Atma-Siddhi-Shastra-Cover-Page-Hin-e1548072172353.jpg",
-                "language": "Hindi",
-                "pages": 200,
-                "price": "Free",
-                "downloadUrl": "https://www.fulchandshastri.com/books/atma-siddhi-shastra-hindi.pdf",
-                "readUrl": "https://www.fulchandshastri.com/books/read/atma-siddhi-shastra-hindi"
-              },
-              {
-                "id": 3,
-                "title": "આત્મસિદ્ધિ શાસ્ત્ર",
-                "description": "શ્રીમદ્ રાજચંદ્ર દ્વારા રચાયેલ આ મહાન ગ્રંથ આત્મ-સાક્ષાત્કાર અને મોક્ષના માર્ગને પ્રકાશિત કરે છે.",
-                "image": "https://www.fulchandshastri.com/wp-content/uploads/2018/01/Atma-Siddhi-Shastra-Cover-Page-Guj-e1548072148982.jpg",
-                "language": "Gujarati",
-                "pages": 200,
-                "price": "Free",
-                "downloadUrl": "https://www.fulchandshastri.com/books/atma-siddhi-shastra-gujarati.pdf",
-                "readUrl": "https://www.fulchandshastri.com/books/read/atma-siddhi-shastra-gujarati"
-              },
-              {
-                "id": 4,
-                "title": "Self Realization - A Deep Study",
-                "description": "An in-depth exploration of the concept of self-realization, examining various aspects of spiritual awakening and the journey towards enlightenment.",
-                "image": "https://www.fulchandshastri.com/wp-content/uploads/2018/01/21-Self-Realization-A-Deep-Study-e1548072029235.jpg",
-                "language": "English",
-                "pages": 350,
-                "price": "Free",
-                "downloadUrl": "https://www.fulchandshastri.com/books/self-realization-deep-study.pdf",
-                "readUrl": "https://www.fulchandshastri.com/books/read/self-realization-deep-study"
-              },
-              {
-                "id": 5,
-                "title": "ज्ञान से ज्ञायक तक",
-                "description": "ज्ञान की यात्रा से लेकर ज्ञाता बनने तक का मार्ग। यह पुस्तक साधकों को आत्म-बोध की गहराइयों में ले जाती है।",
-                "image": "https://www.fulchandshastri.com/wp-content/uploads/2018/01/11-Gyaan-se-Gyaayak-tak-e1548071848682.jpg",
-                "language": "Hindi",
-                "pages": 280,
-                "price": "Free",
-                "downloadUrl": "https://www.fulchandshastri.com/books/gyan-se-gyayak-tak.pdf",
-                "readUrl": "https://www.fulchandshastri.com/books/read/gyan-se-gyayak-tak"
-              },
-              {
-                "id": 6,
-                "title": "મારણ નો હરણ",
-                "description": "મૃત્યુના ભયને કેવી રીતે દૂર કરવો અને આત્માની અમરતાને સમજવી તેના પર આધારિત આધ્યાત્મિક માર્ગદર્શન.",
-                "image": "https://www.fulchandshastri.com/wp-content/uploads/2018/01/14-Maran-ka-Haran-e1548071966275.jpg",
-                "language": "Gujarati",
-                "pages": 150,
-                "price": "Free",
-                "downloadUrl": "https://www.fulchandshastri.com/books/maran-no-haran.pdf",
-                "readUrl": "https://www.fulchandshastri.com/books/read/maran-no-haran"
-              },
-              {
-                "id": 7,
-                "title": "Multiple Viewpoints on Terrorism",
-                "description": "A unique spiritual perspective on terrorism and violence, exploring the roots of hatred and the path to universal compassion and understanding.",
-                "image": "https://www.fulchandshastri.com/wp-content/uploads/2018/01/23-Multiple-Viewpoints-on-Terrorism-e1548072092336.jpg",
-                "language": "English",
-                "pages": 180,
-                "price": "Free",
-                "downloadUrl": "https://www.fulchandshastri.com/books/multiple-viewpoints-terrorism.pdf",
-                "readUrl": "https://www.fulchandshastri.com/books/read/multiple-viewpoints-terrorism"
-              },
-              {
-                "id": 8,
-                "title": "वर्धमान से महावीर",
-                "description": "भगवान महावीर के जीवन की यात्रा - एक राजकुमार से तीर्थंकर बनने तक की प्रेरणादायक कहानी।",
-                "image": "https://www.fulchandshastri.com/wp-content/uploads/2018/01/16-Vardhamaan-se-Mahavira-e1546934165272.jpg",
-                "language": "Hindi",
-                "pages": 250,
-                "price": "Free",
-                "downloadUrl": "https://www.fulchandshastri.com/books/vardhaman-se-mahavir.pdf",
-                "readUrl": "https://www.fulchandshastri.com/books/read/vardhaman-se-mahavir"
-              }
-            ],
-            "fieldArrayConfig": {
-              "itemLabel": "Item",
-              "addButtonLabel": "Add item",
-              "minItems": 0,
-              "itemFields": [
-                {
-                  "key": "title",
-                  "label": "title",
-                  "dataType": "text",
-                  "renderer": "text"
-                },
-                {
-                  "key": "description",
-                  "label": "description",
-                  "dataType": "text",
-                  "renderer": "textArea"
-                },
-                {
-                  "key": "image",
-                  "label": "image",
-                  "dataType": "text",
-                  "renderer": "textArea"
-                },
-                {
-                  "key": "language",
-                  "label": "language",
-                  "dataType": "text",
-                  "renderer": "text"
-                },
-                {
-                  "key": "pages",
-                  "label": "pages",
-                  "dataType": "number",
-                  "renderer": "text"
-                },
-                {
-                  "key": "price",
-                  "label": "price",
-                  "dataType": "text",
-                  "renderer": "text"
-                },
-                {
-                  "key": "downloadUrl",
-                  "label": "downloadUrl",
-                  "dataType": "text",
-                  "renderer": "text"
-                },
-                {
-                  "key": "readUrl",
-                  "label": "readUrl",
-                  "dataType": "text",
-                  "renderer": "text"
-                }
-              ]
-            }
-          }
-        ]
       }
     ],
     "defaultDocuments": [
@@ -2239,102 +2080,6 @@ const pages = [
         "values": {
           "pageTitle": "Books",
           "pageSubtitle": "Explore our collection of spiritual texts and writings"
-        }
-      },
-      {
-        "pageId": "books",
-        "sectionId": "books",
-        "values": {
-          "books": [
-            {
-              "id": 1,
-              "title": "Atma Siddhi Shastra",
-              "description": "A profound spiritual text offering deep insights into self-realization and the path to liberation. This masterpiece contains 142 verses that guide seekers on their spiritual journey.",
-              "image": "https://www.fulchandshastri.com/wp-content/uploads/2018/01/Atma-Siddhi-Shastra-Cover-page-Eng-e1548072132279.png",
-              "language": "English",
-              "pages": 200,
-              "price": "Free",
-              "downloadUrl": "https://www.fulchandshastri.com/books/atma-siddhi-shastra-english.pdf",
-              "readUrl": "https://www.fulchandshastri.com/books/read/atma-siddhi-shastra-english"
-            },
-            {
-              "id": 2,
-              "title": "आत्मसिद्धि शास्त्र",
-              "description": "श्रीमद् राजचंद्र द्वारा रचित यह महान ग्रंथ आत्म-साक्षात्कार और मोक्ष के मार्ग को प्रकाशित करता है। १४२ श्लोकों में आध्यात्मिक ज्ञान का सार।",
-              "image": "https://www.fulchandshastri.com/wp-content/uploads/2018/01/Atma-Siddhi-Shastra-Cover-Page-Hin-e1548072172353.jpg",
-              "language": "Hindi",
-              "pages": 200,
-              "price": "Free",
-              "downloadUrl": "https://www.fulchandshastri.com/books/atma-siddhi-shastra-hindi.pdf",
-              "readUrl": "https://www.fulchandshastri.com/books/read/atma-siddhi-shastra-hindi"
-            },
-            {
-              "id": 3,
-              "title": "આત્મસિદ્ધિ શાસ્ત્ર",
-              "description": "શ્રીમદ્ રાજચંદ્ર દ્વારા રચાયેલ આ મહાન ગ્રંથ આત્મ-સાક્ષાત્કાર અને મોક્ષના માર્ગને પ્રકાશિત કરે છે.",
-              "image": "https://www.fulchandshastri.com/wp-content/uploads/2018/01/Atma-Siddhi-Shastra-Cover-Page-Guj-e1548072148982.jpg",
-              "language": "Gujarati",
-              "pages": 200,
-              "price": "Free",
-              "downloadUrl": "https://www.fulchandshastri.com/books/atma-siddhi-shastra-gujarati.pdf",
-              "readUrl": "https://www.fulchandshastri.com/books/read/atma-siddhi-shastra-gujarati"
-            },
-            {
-              "id": 4,
-              "title": "Self Realization - A Deep Study",
-              "description": "An in-depth exploration of the concept of self-realization, examining various aspects of spiritual awakening and the journey towards enlightenment.",
-              "image": "https://www.fulchandshastri.com/wp-content/uploads/2018/01/21-Self-Realization-A-Deep-Study-e1548072029235.jpg",
-              "language": "English",
-              "pages": 350,
-              "price": "Free",
-              "downloadUrl": "https://www.fulchandshastri.com/books/self-realization-deep-study.pdf",
-              "readUrl": "https://www.fulchandshastri.com/books/read/self-realization-deep-study"
-            },
-            {
-              "id": 5,
-              "title": "ज्ञान से ज्ञायक तक",
-              "description": "ज्ञान की यात्रा से लेकर ज्ञाता बनने तक का मार्ग। यह पुस्तक साधकों को आत्म-बोध की गहराइयों में ले जाती है।",
-              "image": "https://www.fulchandshastri.com/wp-content/uploads/2018/01/11-Gyaan-se-Gyaayak-tak-e1548071848682.jpg",
-              "language": "Hindi",
-              "pages": 280,
-              "price": "Free",
-              "downloadUrl": "https://www.fulchandshastri.com/books/gyan-se-gyayak-tak.pdf",
-              "readUrl": "https://www.fulchandshastri.com/books/read/gyan-se-gyayak-tak"
-            },
-            {
-              "id": 6,
-              "title": "મારણ નો હરણ",
-              "description": "મૃત્યુના ભયને કેવી રીતે દૂર કરવો અને આત્માની અમરતાને સમજવી તેના પર આધારિત આધ્યાત્મિક માર્ગદર્શન.",
-              "image": "https://www.fulchandshastri.com/wp-content/uploads/2018/01/14-Maran-ka-Haran-e1548071966275.jpg",
-              "language": "Gujarati",
-              "pages": 150,
-              "price": "Free",
-              "downloadUrl": "https://www.fulchandshastri.com/books/maran-no-haran.pdf",
-              "readUrl": "https://www.fulchandshastri.com/books/read/maran-no-haran"
-            },
-            {
-              "id": 7,
-              "title": "Multiple Viewpoints on Terrorism",
-              "description": "A unique spiritual perspective on terrorism and violence, exploring the roots of hatred and the path to universal compassion and understanding.",
-              "image": "https://www.fulchandshastri.com/wp-content/uploads/2018/01/23-Multiple-Viewpoints-on-Terrorism-e1548072092336.jpg",
-              "language": "English",
-              "pages": 180,
-              "price": "Free",
-              "downloadUrl": "https://www.fulchandshastri.com/books/multiple-viewpoints-terrorism.pdf",
-              "readUrl": "https://www.fulchandshastri.com/books/read/multiple-viewpoints-terrorism"
-            },
-            {
-              "id": 8,
-              "title": "वर्धमान से महावीर",
-              "description": "भगवान महावीर के जीवन की यात्रा - एक राजकुमार से तीर्थंकर बनने तक की प्रेरणादायक कहानी।",
-              "image": "https://www.fulchandshastri.com/wp-content/uploads/2018/01/16-Vardhamaan-se-Mahavira-e1546934165272.jpg",
-              "language": "Hindi",
-              "pages": 250,
-              "price": "Free",
-              "downloadUrl": "https://www.fulchandshastri.com/books/vardhaman-se-mahavir.pdf",
-              "readUrl": "https://www.fulchandshastri.com/books/read/vardhaman-se-mahavir"
-            }
-          ]
         }
       }
     ]
@@ -4787,6 +4532,21 @@ const pages = [
   }
 ];
 
+function stripFieldSchema(field) {
+  if (!field || typeof field !== "object") return field;
+  const next = { ...field };
+  delete next.defaultValue;
+  if (next.fieldArrayConfig && typeof next.fieldArrayConfig === "object") {
+    const config = { ...next.fieldArrayConfig };
+    delete config.defaultItems;
+    if (Array.isArray(config.itemFields)) {
+      config.itemFields = config.itemFields.map(stripFieldSchema);
+    }
+    next.fieldArrayConfig = config;
+  }
+  return next;
+}
+
 function buildConfig(page, contentSidebarItems, globalItems) {
   const sectionConfigs = page.sections.map((section) => ({
     id: section.id,
@@ -4799,7 +4559,7 @@ function buildConfig(page, contentSidebarItems, globalItems) {
         key: section.id + "Form",
         title: "",
         gridColumns: 1,
-        fields: section.fields
+        fields: (section.fields || []).map(stripFieldSchema)
       }]
     }
   }));
@@ -4828,7 +4588,7 @@ function buildConfig(page, contentSidebarItems, globalItems) {
 const finalizedPages = pages.map((page) => finalizePage(page));
 
 const settingsPageConfigs = finalizedPages.map((page) => ({
-  key: page.settingsPageId + "_settings_page_default",
+  key: page.settingsPageId + "_settings_page",
   settingsPageId: page.settingsPageId,
   name: page.name,
   config: buildConfig(page, sidebarItems, globalSidebarItems)
@@ -4842,9 +4602,155 @@ const defaultSectionDocuments = finalizedPages.flatMap((page) =>
   }))
 );
 
+const bookTableColumns = [
+  { key: "coverImageUrl", label: "Preview", dataType: "text", renderer: "imagePreview", width: "80px", sortable: false },
+  { key: "title", label: "Title", dataType: "text", renderer: "text", width: "220px", required: true, overflowEllipsis: true },
+  { key: "description", label: "Description", dataType: "text", renderer: "text", width: "280px", overflowEllipsis: true },
+  { key: "language", label: "Language", dataType: "text", renderer: "text", width: "100px" },
+  { key: "pages", label: "Pages", dataType: "number", renderer: "number", width: "80px" },
+  { key: "price", label: "Price", dataType: "text", renderer: "text", width: "80px" },
+  { key: "originalFileUrl", label: "Download", dataType: "text", renderer: "downloadLink", width: "100px", sortable: false }
+];
+
+const bookTableGeneral = {
+  publicRead: true,
+  title: "Books",
+  label: "Book",
+  icon: "ph:book-open",
+  usePolarisUI: true,
+  enableUserScopingForContent: false,
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  showSelection: true,
+  hideExportButtons: false,
+  hideImportButtons: true,
+  hideSettingsButton: false,
+  hideAddButton: false,
+  rowHeight: 56,
+  columnWidths: { __selection: "36px", __rowNumber: "48px", __actions: "88px" },
+  rowClickable: true,
+  showRowNumber: true,
+  resizableColumns: true,
+  actions: [
+    { key: "edit", type: "edit" },
+    { key: "delete", type: "delete", confirm: { title: "Delete book?", message: "This cannot be undone.", confirmText: "Delete", cancelText: "Cancel", variant: "danger" } }
+  ],
+  hooks: {}
+};
+
+const bookTableFormConfig = {
+  gridColumns: 2,
+  groups: [
+    {
+      key: "basic",
+      title: "Book",
+      gridColumns: 2,
+      fields: [
+        { key: "title", label: "Title", dataType: "text", renderer: "text", required: true, colSpan: 2, translatable: true },
+        { key: "description", label: "Description", dataType: "text", renderer: "textArea", colSpan: 2, translatable: true },
+        { key: "language", label: "Language", dataType: "text", renderer: "text", colSpan: 1 },
+        { key: "pages", label: "Pages", dataType: "number", renderer: "text", colSpan: 1 },
+        { key: "price", label: "Price", dataType: "text", renderer: "text", colSpan: 1 },
+        { key: "coverImageUrl", label: "Cover image URL", dataType: "text", renderer: "text", colSpan: 2 },
+        { key: "originalFileUrl", label: "Download URL", dataType: "text", renderer: "text", colSpan: 2 }
+      ]
+    }
+  ]
+};
+
+const bookTableSidebar = {
+  enabled: true,
+  parentVertexLabel: "BookCategory",
+  toParentEdgeType: "ParentBookCategory",
+  rootKeys: { key: "root" },
+  label: "Categories",
+  formConfig: {
+    gridColumns: 1,
+    groups: [
+      {
+        key: "basic",
+        title: "Category",
+        gridColumns: 2,
+        fields: [
+          { key: "name", label: "Name", dataType: "text", renderer: "text", required: true, colSpan: 2 },
+          { key: "key", label: "Key", dataType: "text", renderer: "text", colSpan: 2 }
+        ]
+      }
+    ]
+  }
+};
+
+function buildTableSchemaPartConfig(part, body) {
+  const payload = { part, ...(body && typeof body === "object" ? body : {}) };
+  return `return ${JSON.stringify(payload, null, 2)};`;
+}
+
+const tableDefinitions = [
+  {
+    tableKey: "books",
+    tableVertexLabel: "Book",
+    pageId: "table:books",
+    schemaKeys: {
+      general: "books_schema_general",
+      columns: "books_schema_columns",
+      formConfig: "books_schema_formconfig",
+      sidebar: "books_schema_sidebar"
+    },
+    name: "Books",
+    description: "Sacred books table for public /books page and portal admin",
+    general: bookTableGeneral,
+    columns: bookTableColumns,
+    formConfig: bookTableFormConfig,
+    sidebar: bookTableSidebar
+  }
+];
+
+const tableSchemaParts = tableDefinitions.flatMap((tableDef) => [
+  {
+    key: tableDef.schemaKeys.general,
+    tableKey: tableDef.tableKey,
+    tableVertexLabel: tableDef.tableVertexLabel,
+    part: "general",
+    name: tableDef.name + " general schema",
+    config: buildTableSchemaPartConfig("general", tableDef.general)
+  },
+  {
+    key: tableDef.schemaKeys.columns,
+    tableKey: tableDef.tableKey,
+    tableVertexLabel: tableDef.tableVertexLabel,
+    part: "columns",
+    name: tableDef.name + " columns schema",
+    config: buildTableSchemaPartConfig("columns", { columns: tableDef.columns })
+  },
+  {
+    key: tableDef.schemaKeys.formConfig,
+    tableKey: tableDef.tableKey,
+    tableVertexLabel: tableDef.tableVertexLabel,
+    part: "formConfig",
+    name: tableDef.name + " form config schema",
+    config: buildTableSchemaPartConfig("formConfig", tableDef.formConfig)
+  },
+  {
+    key: tableDef.schemaKeys.sidebar,
+    tableKey: tableDef.tableKey,
+    tableVertexLabel: tableDef.tableVertexLabel,
+    part: "sidebar",
+    name: tableDef.name + " sidebar schema",
+    config: buildTableSchemaPartConfig("sidebar", tableDef.sidebar)
+  }
+]);
+
+const tableSectionDocuments = [];
+
 return {
   success: true,
-  data: { settingsPageConfigs, defaultSectionDocuments }
+  data: {
+    settingsPageConfigs,
+    defaultSectionDocuments,
+    tableDefinitions,
+    tableSchemaParts,
+    tableSectionDocuments
+  }
 };
 '''
       }

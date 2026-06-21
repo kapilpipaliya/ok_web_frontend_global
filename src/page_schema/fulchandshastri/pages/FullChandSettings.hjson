@@ -528,169 +528,24 @@ return `._id {
       }
     },
     {
-      id: "editorModeTabs",
+      id: "settingsEditorShell",
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return { as: "div" };
-''',
-        css: '''
-return `._id {
-  display: flex;
-  gap: 0.25rem;
-  padding: 0.5rem 0.75rem;
-  border-bottom: 1px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background_light_100};
-}`;
-'''
-      }
-    },
-    {
-      id: "contentTab",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Button",
-        props: '''
-const active = !args.fns.isSchemaMode?.();
-return {
-  variant: active ? "primary" : "secondary",
-  size: "sm",
-  text: "Content",
-  type: "button",
-  onClick: () => args.fns.setEditorMode?.("content")
-};
-'''
-      }
-    },
-    {
-      id: "schemaTab",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Button",
-        props: '''
-const active = args.fns.isSchemaMode?.() === true;
-return {
-  variant: active ? "primary" : "secondary",
-  size: "sm",
-  text: "Field schema",
-  type: "button",
-  onClick: () => args.fns.setEditorMode?.("schema")
-};
-'''
-      }
-    },
-    {
-      id: "editorContent",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  hide: args.fns.isSchemaMode?.() === true
-};
-''',
-        css: '''
-return `._id {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}`;
-'''
-      }
-    },
-    {
-      id: "dynamicPageShell",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  height: 100%;
-  position: relative;
-}`;
-'''
-      }
-    },
-    {
-      id: "dynamicPage",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "DynamicPage",
-        key: "fullchand_settings_dynamic_page",
+        componentName: "SettingsEditorShell",
         props: '''
 const settingsPageId = args.searchParams?.page || "home";
-
 return {
-  pageMode: "settings",
   settingsPageId,
-  loadFromSetting: true,
+  siteLanguages: args.fns.siteLanguages?.() || [],
   embeddedMode: true,
-  scopeId: "Default",
-  siteLanguages: args.fns.siteLanguages?.() || [],
-  scope: {
-    vertexLabel: "GlobalSetting",
-    matchProperty: "key",
-    idParam: "scopeId"
-  }
-};
-'''
-      }
-    },
-    {
-      id: "schemaEditorWrap",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  hide: args.fns.isSchemaMode?.() !== true
-};
-''',
-        css: '''
-return `._id {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}`;
-'''
-      }
-    },
-    {
-      id: "schemaEditor",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "FulchandSettingsConfigEditor",
-        props: '''
-const settingsPageId = args.searchParams?.page || "home";
-return {
-  settingsPageId,
-  siteLanguages: args.fns.siteLanguages?.() || [],
-  onSaved: () => args.fns.onSchemaSaved?.()
+  isSchemaMode: () => args.fns.isSchemaMode?.() === true,
+  onSetContentMode: () => args.fns.setEditorMode?.("content"),
+  onSetSchemaMode: () => args.fns.setEditorMode?.("schema"),
+  onSchemaSaved: () => args.fns.onSchemaSaved?.(),
+  schemaTabLabel: "Field schema",
+  contentTabLabel: "Content",
+  dynamicPageKey: "fullchand_settings_dynamic_page"
 };
 '''
       }
@@ -716,14 +571,7 @@ return {
     { id: "e6", T: "Attr", S: "previewPane", E: "previewFrame" },
     { id: "e7", T: "Attr", S: "previewHeader", E: "previewTitle" },
     { id: "e8", T: "Attr", S: "previewHeader", E: "previewRefresh" },
-    { id: "e9", T: "Attr", S: "editorPane", E: "editorModeTabs" },
-    { id: "e9b", T: "Attr", S: "editorPane", E: "editorContent" },
-    { id: "e9c", T: "Attr", S: "editorPane", E: "schemaEditorWrap" },
-    { id: "e10", T: "Attr", S: "editorModeTabs", E: "contentTab" },
-    { id: "e11", T: "Attr", S: "editorModeTabs", E: "schemaTab" },
-    { id: "e12", T: "Attr", S: "editorContent", E: "dynamicPageShell" },
-    { id: "e12b", T: "Attr", S: "dynamicPageShell", E: "dynamicPage" },
-    { id: "e13", T: "Attr", S: "schemaEditorWrap", E: "schemaEditor" },
+    { id: "e9", T: "Attr", S: "editorPane", E: "settingsEditorShell" },
     { id: "e_layout", T: "PageLayout", S: "page", E: "layout" }
   ]
 }

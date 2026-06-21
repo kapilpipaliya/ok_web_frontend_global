@@ -18,11 +18,13 @@ if (!actualUser && !allowPublicRead) {
 const user = actualUser
   ? await args.getEffectiveUser(args.session, actualUser, args.contextData)
   : null;
-const { settingsPageId, key, settingsLabel } = args.contextData;
+const { settingsPageId, key: schemaKey, settingsLabel } = args.contextData;
 
 const labelForSettings = settingsLabel || settingsPageId;
-const settingKey = key || (labelForSettings ? `${labelForSettings}_settings_page` : null);
-const defaultKey = labelForSettings ? `${labelForSettings}_settings_page_default` : null;
+const userSettingKey = labelForSettings ? `${labelForSettings}_settings_page` : null;
+const siteSettingKey = schemaKey && String(schemaKey).trim() !== ""
+  ? String(schemaKey).trim()
+  : userSettingKey;
 
 if (!settingsPageId) {
   let bootstrapResult = await args.session.run(
@@ -57,10 +59,10 @@ const userQuery = `
   RETURN s LIMIT 1
 `;
 
-if (user) {
+if (user && userSettingKey) {
   const userResult = await args.session.run(userQuery, {
     userUuid: user.P.uuid,
-    settingKey
+    settingKey: userSettingKey
   });
 
   if (userResult.records.length > 0) {
@@ -73,32 +75,40 @@ if (user) {
   }
 }
 
-let defaultResult = await args.session.run(
-  `MATCH (s:Setting {key: $defaultKey}) RETURN s LIMIT 1`,
-  { defaultKey }
-);
+let siteResult = siteSettingKey
+  ? await args.session.run(
+      `MATCH (s:Setting {key: $siteSettingKey})
+       WHERE NOT (s)<-[:UserSetting]-()
+       RETURN s LIMIT 1`,
+      { siteSettingKey }
+    )
+  : null;
 
-if (defaultResult.records.length === 0 && args.executeNamedServerFunction) {
+if ((!siteResult || siteResult.records.length === 0) && args.executeNamedServerFunction) {
   try {
     await args.executeNamedServerFunction({
       functionName: "migrateDynamicPageSettings",
       contextData: { dryRun: false }
     });
-    defaultResult = await args.session.run(
-      `MATCH (s:Setting {key: $defaultKey}) RETURN s LIMIT 1`,
-      { defaultKey }
-    );
+    if (siteSettingKey) {
+      siteResult = await args.session.run(
+        `MATCH (s:Setting {key: $siteSettingKey})
+         WHERE NOT (s)<-[:UserSetting]-()
+         RETURN s LIMIT 1`,
+        { siteSettingKey }
+      );
+    }
   } catch (migrateError) {
     console.error("getSettingsPageConfig: migration failed", migrateError);
   }
 }
 
-if (defaultResult.records.length > 0) {
-  const defaultVertices = args.processResult(defaultResult.records, args.context, "s");
+if (siteResult && siteResult.records.length > 0) {
+  const siteVertices = args.processResult(siteResult.records, args.context, "s");
   return {
     success: true,
-    data: { setting: defaultVertices[0], isDefault: true },
-    message: "Using default settings page configuration"
+    data: { setting: siteVertices[0], isDefault: true },
+    message: "Using site settings page configuration"
   };
 }
 

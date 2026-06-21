@@ -9,19 +9,16 @@
           '''
 // Get current authenticated user from session
 const actualUser = await args.getUserFromSession();
-if (!actualUser) {
-  return {
-    success: false,
-    message: "User session not found. Please log in and try again.",
-    data: []
-  };
-}
+let user = null;
+let isPublicRead = false;
 
-// Get effective user (handles admin impersonation)
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+if (actualUser) {
+  user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+}
 
 // Extract parameters
 const { 
+  tableKey,
   tableVertexLabel, 
   search, 
   filters = {}, 
@@ -67,10 +64,14 @@ const hydrateRelationshipSelectProps = (items, rels, bindings) => {
   }
 };
 
-const buildRelationshipPropertyBindingsFromTableConfig = (config) => {
-  if (!config || typeof config !== "object") return [];
+const buildRelationshipPropertyBindingsFromParts = (parts) => {
+  const formConfig = parts?.formConfig && typeof parts.formConfig === "object" ? parts.formConfig : {};
+  const columnsRaw = parts?.columns;
+  const columns = Array.isArray(columnsRaw?.columns)
+    ? columnsRaw.columns
+    : (Array.isArray(columnsRaw) ? columnsRaw : []);
   const fields = [];
-  const groups = config.formConfig?.groups;
+  const groups = formConfig?.groups;
   if (Array.isArray(groups)) {
     for (let gi = 0; gi < groups.length; gi++) {
       const g = groups[gi]?.fields;
@@ -93,16 +94,13 @@ const buildRelationshipPropertyBindingsFromTableConfig = (config) => {
       addBinding(f.key, f.selectConfig.relationshipType);
     }
   }
-  const cols = config.columns;
-  if (Array.isArray(cols)) {
-    for (let ci = 0; ci < cols.length; ci++) {
-      const c = cols[ci];
-      if (c?.dataType === "relation" && c.selectConfig?.relationshipType && c.selectConfig?.edgeOnly === true) {
-        addBinding(c.key, c.selectConfig.relationshipType);
-      }
+  for (let ci = 0; ci < columns.length; ci++) {
+    const c = columns[ci];
+    if (c?.dataType === "relation" && c.selectConfig?.relationshipType && c.selectConfig?.edgeOnly === true) {
+      addBinding(c.key, c.selectConfig.relationshipType);
     }
   }
-  const extra = config.relationshipPropertyBindings;
+  const extra = parts?.relationshipPropertyBindings;
   if (Array.isArray(extra)) {
     for (let j = 0; j < extra.length; j++) {
       const row = extra[j];
@@ -112,42 +110,38 @@ const buildRelationshipPropertyBindingsFromTableConfig = (config) => {
   return bindings;
 };
 
-const fetchTableSettingConfigObject = async (label) => {
-  const uuid = user?.P?.uuid;
-  if (!uuid || !label) return null;
-  const userKey = `${label}_settings`;
-  let res = await args.session.run(
-    `MATCH (u:User {uuid: $uuid})-[:UserSetting]->(s:Setting {key: $key}) RETURN s.config AS cfg LIMIT 1`,
-    { uuid, key: userKey }
-  );
-  let cfg = res.records[0]?.get("cfg");
-  if (cfg == null) {
-    const defaultKey = `${label}_settings_default`;
-    res = await args.session.run(
-      `MATCH (s:Setting {key: $key}) RETURN s.config AS cfg LIMIT 1`,
-      { key: defaultKey }
-    );
-    cfg = res.records[0]?.get("cfg");
-  }
-  if (cfg == null) return null;
-  const str = typeof cfg === "string" ? cfg : String(cfg);
-  if (!str.trim()) return null;
+const evalConfigBody = (cfgStr) => {
+  if (cfgStr == null || String(cfgStr).trim() === "") return null;
   try {
-    const fn = new Function(str);
-    const o = fn();
-    return o && typeof o === "object" ? o : null;
+    const configFn = new Function(String(cfgStr));
+    const value = configFn();
+    return value && typeof value === "object" ? value : null;
   } catch (e) {
-    console.warn("getUserContent: Setting.config eval failed", e);
+    console.warn("getUserContent: config eval failed", e);
     return null;
   }
 };
 
-const resolveRelationshipPropertyBindings = async (label) => {
-  if (Array.isArray(relationshipPropertyBindings)) {
-    return relationshipPropertyBindings;
-  }
-  const configObj = await fetchTableSettingConfigObject(label);
-  return buildRelationshipPropertyBindingsFromTableConfig(configObj);
+const stripPartMeta = (value) => {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  const { part: _part, ...rest } = value;
+  return rest;
+};
+
+const evalPartFromGraph = (graph, partVertexIds, part) => {
+  const vertexId = partVertexIds?.[part];
+  const vertex = graph?.vertexes?.[vertexId];
+  if (!vertex?.P?.config) return null;
+  return evalConfigBody(vertex.P.config);
+};
+
+const resolveGeneralFlags = (generalRaw, label) => {
+  const general = stripPartMeta(generalRaw);
+  return {
+    publicRead: general.publicRead === true,
+    enableUserScopingForContent: general.enableUserScopingForContent === true,
+    hooks: general.hooks && typeof general.hooks === "object" ? general.hooks : undefined
+  };
 };
 
 if (!tableVertexLabel || typeof tableVertexLabel !== "string") {
@@ -158,7 +152,73 @@ if (!tableVertexLabel || typeof tableVertexLabel !== "string") {
   };
 }
 
-const effectiveRelationshipPropertyBindings = await resolveRelationshipPropertyBindings(tableVertexLabel);
+let resolvedTableKey = tableKey && String(tableKey).trim() !== "" ? String(tableKey).trim() : null;
+if (!resolvedTableKey) {
+  const idsResult = await args.executeNamedServerFunction({
+    functionName: "getTableIds",
+    contextData: { tableVertexLabel }
+  });
+  resolvedTableKey = idsResult?.result?.data?.tableKey || null;
+}
+
+if (!resolvedTableKey) {
+  return {
+    success: false,
+    message: `No tableKey registered for label: ${tableVertexLabel}`,
+    data: []
+  };
+}
+
+const tableConfigResult = await args.executeNamedServerFunction({
+  functionName: "loadTableConfigByKey",
+  contextData: { tableKey: resolvedTableKey }
+});
+
+if (!tableConfigResult?.result?.success) {
+  return {
+    success: false,
+    message: tableConfigResult?.result?.message || "Failed to load table schema",
+    data: []
+  };
+}
+
+const partVertexIds = tableConfigResult.result.data?.partVertexIds || {};
+const schemaGraph = tableConfigResult.graph || tableConfigResult.result?.graph || { vertexes: {} };
+const generalRaw = evalPartFromGraph(schemaGraph, partVertexIds, "general");
+const generalConfig = resolveGeneralFlags(generalRaw, tableVertexLabel);
+const sidebarRaw = evalPartFromGraph(schemaGraph, partVertexIds, "sidebar");
+const effectiveSidebar = sidebarRaw ? stripPartMeta(sidebarRaw) : null;
+
+const effectiveRelationshipPropertyBindings = Array.isArray(relationshipPropertyBindings)
+  ? relationshipPropertyBindings
+  : buildRelationshipPropertyBindingsFromParts({
+      formConfig: evalPartFromGraph(schemaGraph, partVertexIds, "formConfig"),
+      columns: evalPartFromGraph(schemaGraph, partVertexIds, "columns")
+    });
+
+if (!user) {
+  if (generalConfig.publicRead !== true) {
+    return {
+      success: false,
+      message: "User session not found. Please log in and try again.",
+      data: []
+    };
+  }
+  isPublicRead = true;
+}
+
+const effectiveEnableUserScopingFromConfig = generalConfig.enableUserScopingForContent === true;
+const effectiveEnableUserScoping =
+  enableUserScoping !== undefined && enableUserScoping !== null
+    ? enableUserScoping === true
+    : effectiveEnableUserScopingFromConfig;
+
+const effectiveHooks = hooks && typeof hooks === "object"
+  ? hooks
+  : generalConfig.hooks;
+
+const effectiveParentVertexLabel = parentVertexLabel || effectiveSidebar?.parentVertexLabel;
+const effectiveToParentEdgeType = toParentEdgeType || effectiveSidebar?.toParentEdgeType;
 
 // Lightweight path: return only rows that are no longer queued (for background refresh without full reload)
 if (onlyNotQueued === true && Array.isArray(elementIds) && elementIds.length > 0) {
@@ -191,13 +251,13 @@ const relationshipType = `User${vertexLabel}`;
 const uncategorizedVertexId = '_' + vertexLabel + '_uncategorized';
 const categoryIdIsSyntheticUncategorized = !!(categoryId && categoryId === uncategorizedVertexId);
 const applyUnassignedCategoryScope =
-  !!(parentVertexLabel && toParentEdgeType && (showUnassigned === true || categoryIdIsSyntheticUncategorized));
+  !!(effectiveParentVertexLabel && effectiveToParentEdgeType && (showUnassigned === true || categoryIdIsSyntheticUncategorized));
 const useRealCategoryGraphMatch =
-  !!(categoryId && parentVertexLabel && toParentEdgeType && !categoryIdIsSyntheticUncategorized);
+  !!(categoryId && effectiveParentVertexLabel && effectiveToParentEdgeType && !categoryIdIsSyntheticUncategorized);
 
 // Build WHERE clause for filters
 const whereConditions = [];
-const queryParams = enableUserScoping ? { userUuid: user.P.uuid } : {};
+const queryParams = effectiveEnableUserScoping && user?.P?.uuid ? { userUuid: user.P.uuid } : {};
 
 // Add search filter
 if (search && search.trim()) {
@@ -263,13 +323,13 @@ if (sort && sort.column) {
 let categoryFilter = "";
 if (useRealCategoryGraphMatch) {
   categoryFilter = `
-  MATCH (cat:${parentVertexLabel})
+  MATCH (cat:${effectiveParentVertexLabel})
   WHERE elementId(cat) = $categoryId
-  MATCH (c)-[:${toParentEdgeType}]->(cat)`;
+  MATCH (c)-[:${effectiveToParentEdgeType}]->(cat)`;
   queryParams.categoryId = categoryId;
 } else if (applyUnassignedCategoryScope) {
   whereConditions.push(`NOT EXISTS {
-    MATCH (c)-[:${toParentEdgeType}]->(cat:${parentVertexLabel})
+    MATCH (c)-[:${effectiveToParentEdgeType}]->(cat:${effectiveParentVertexLabel})
   }`);
 }
 
@@ -281,18 +341,19 @@ const queryModification = {
   forceEmptyResult: false
 };
 
-await args.executeHooks(hooks?.beforeFetchData, {
+await args.executeHooks(effectiveHooks?.beforeFetchData, {
   tableVertexLabel,
   search,
   filters,
   sort,
   categoryId,
   showUnassigned,
-  parentVertexLabel,
-  toParentEdgeType,
-  enableUserScoping,
+  parentVertexLabel: effectiveParentVertexLabel,
+  toParentEdgeType: effectiveToParentEdgeType,
+  enableUserScoping: effectiveEnableUserScoping,
   queryModification,
-  sessionUser: user
+  sessionUser: user,
+  isPublicRead
 });
 
 if (queryModification.forceEmptyResult === true) {
@@ -306,8 +367,8 @@ if (queryModification.forceEmptyResult === true) {
 }
 
 // beforeFetchData may set bypassUserScoping (e.g. portalFilesBeforeFetch for Admin on FilePortal).
-const effectiveEnableUserScoping =
-  queryModification.bypassUserScoping === true ? false : enableUserScoping;
+const queryEnableUserScoping =
+  queryModification.bypassUserScoping === true ? false : effectiveEnableUserScoping;
 
 const combinedWhereConditions = whereConditions.concat(
   Array.isArray(queryModification.additionalWhereConditions)
@@ -339,13 +400,13 @@ const buildStandardContentMatch = () =>
 
 // Optimized query with indexed user lookup first and related vertices
 let query = "";
-if (!effectiveEnableUserScoping) {
+if (!queryEnableUserScoping) {
   if (useRealCategoryGraphMatch) {
     query = `
-    MATCH (cat:${parentVertexLabel})
+    MATCH (cat:${effectiveParentVertexLabel})
     WHERE elementId(cat) = $categoryId
     ${buildStandardContentMatch()}
-    MATCH (c)-[:${toParentEdgeType}]->(cat)
+    MATCH (c)-[:${effectiveToParentEdgeType}]->(cat)
     ${combinedWhereClause}
     OPTIONAL MATCH (c)-[r]->(related)
     ${orderByClause}
@@ -375,10 +436,10 @@ if (!effectiveEnableUserScoping) {
       : `MATCH (c:${vertexLabel})`;
     query = `
     MATCH (u:User {uuid: $userUuid})
-    MATCH (cat:${parentVertexLabel})
+    MATCH (cat:${effectiveParentVertexLabel})
     WHERE elementId(cat) = $categoryId
     ${scopedContentMatch}
-    MATCH (c)-[:${toParentEdgeType}]->(cat)
+    MATCH (c)-[:${effectiveToParentEdgeType}]->(cat)
     MATCH (u)-[:${relationshipType}]->(c)
     ${combinedWhereClause}
     OPTIONAL MATCH (c)-[r]->(related)
@@ -427,16 +488,17 @@ const result = {
 };
 
 // Execute afterFetchData hooks
-await args.executeHooks(hooks?.afterFetchData, {
+await args.executeHooks(effectiveHooks?.afterFetchData, {
   tableVertexLabel,
   search,
   filters,
   sort,
   categoryId,
   showUnassigned,
-  parentVertexLabel,
-  toParentEdgeType,
-  enableUserScoping: effectiveEnableUserScoping,
+  parentVertexLabel: effectiveParentVertexLabel,
+  toParentEdgeType: effectiveToParentEdgeType,
+  enableUserScoping: queryEnableUserScoping,
+  isPublicRead,
   result: result
 });
 

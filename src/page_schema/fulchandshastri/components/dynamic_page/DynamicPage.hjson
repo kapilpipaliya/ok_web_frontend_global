@@ -10,6 +10,8 @@ args.addNewVertex(0, {
   id: pageStateVertexId,
   L: ["DynamicPageUiState"],
   P: {
+    tableSchemaPartVertexIds: null,
+    tableIds: null,
     memoizedConfig: null,
     memoizedLoadFromSetting: false,
     isSettingsModalOpen: false,
@@ -46,8 +48,19 @@ const selectedSidebarItem = () => {
 };
 
 // Basic context/prop accessors
+const getTableKey = () => {
+  const raw = args.contextData.props?.tableKey;
+  if (raw != null && String(raw).trim() !== "") return String(raw).trim();
+  const settingsPageId = getSettingsPageId();
+  if (String(settingsPageId || "").startsWith("table:")) {
+    return String(settingsPageId).slice("table:".length).trim();
+  }
+  return null;
+};
 const getTableVertexLabel = () => args.contextData.props?.tableVertexLabel;
 const getTableSettingsLabel = () => {
+  const tableKey = getTableKey();
+  if (tableKey) return tableKey;
   const raw = args.contextData.props?.tableSettingsLabel;
   const fallback = getTableVertexLabel();
   if (raw != null && String(raw).trim() !== "") return String(raw).trim();
@@ -58,6 +71,109 @@ const getUncategorizedVertexId = () => {
   return label ? '_' + label + '_uncategorized' : null;
 };
 const getLoadFromSetting = () => args.contextData.props?.loadFromSetting === true;
+const isTableSchemaMode = () => {
+  const pageMode = args.contextData.props?.pageMode;
+  if (pageMode === "settings" || pageMode === "dashboard") return false;
+  return getLoadFromSetting() && !!getTableKey();
+};
+const getTableSchemaPartVertexIds = () => pageP()?.tableSchemaPartVertexIds || null;
+const getTableIdsState = () => pageP()?.tableIds || null;
+
+const evalConfigBody = (cfgStr) => {
+  if (cfgStr == null || String(cfgStr).trim() === "") return null;
+  try {
+    const configFn = new Function(String(cfgStr));
+    const value = configFn();
+    return value && typeof value === "object" ? value : null;
+  } catch (error) {
+    console.error("evalConfigBody failed:", error);
+    return null;
+  }
+};
+
+const stripPartMeta = (value) => {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  const { part: _part, ...rest } = value;
+  return rest;
+};
+
+const evalSchemaPart = (part) => {
+  const ids = getTableSchemaPartVertexIds();
+  const vertexId = ids?.[part];
+  if (!vertexId) return null;
+  const vertex = args.graph?.vertexes?.[vertexId];
+  if (!vertex?.P?.config) return null;
+  const raw = evalConfigBody(vertex.P.config);
+  if (part === "columns") return raw;
+  return stripPartMeta(raw);
+};
+
+const resolveGeneralFromPart = (generalRaw, tableVertexLabel) => {
+  const general = stripPartMeta(generalRaw || {});
+  return {
+    publicRead: general.publicRead === true,
+    title: general.title || tableVertexLabel,
+    label: general.label || tableVertexLabel,
+    icon: general.icon || "ph:book-open",
+    usePolarisUI: general.usePolarisUI === true,
+    enableUserScopingForContent: general.enableUserScopingForContent === true,
+    enableUserScopingForSidebar: general.enableUserScopingForSidebar === true,
+    enableLocalFilters: general.enableLocalFilters !== false,
+    enableLocalSort: general.enableLocalSort !== false,
+    showSelection: general.showSelection !== false,
+    hideExportButtons: general.hideExportButtons === true,
+    hideImportButtons: general.hideImportButtons !== false,
+    hideSettingsButton: general.hideSettingsButton === true,
+    hideAddButton: general.hideAddButton === true,
+    rowHeight: general.rowHeight ?? 56,
+    columnWidths: general.columnWidths || {},
+    rowClickable: general.rowClickable === true,
+    showRowNumber: general.showRowNumber !== false,
+    resizableColumns: general.resizableColumns === true,
+    actions: Array.isArray(general.actions) ? general.actions : [],
+    hooks: general.hooks && typeof general.hooks === "object" ? general.hooks : {},
+    rowExpansion: general.rowExpansion,
+    reasonCodeMap: general.reasonCodeMap,
+    refetchIntervalWhenQueued: general.refetchIntervalWhenQueued
+  };
+};
+
+const buildTableRuntimeConfig = () => {
+  const tableVertexLabel = getTableIdsState()?.tableVertexLabel || getTableVertexLabel();
+  const general = resolveGeneralFromPart(evalSchemaPart("general"), tableVertexLabel);
+  const columnsPart = evalSchemaPart("columns");
+  const columns = Array.isArray(columnsPart?.columns) ? columnsPart.columns : [];
+  const formConfig = evalSchemaPart("formConfig") || {};
+  const sidebar = evalSchemaPart("sidebar") || { enabled: false };
+  return { general, columns, formConfig, sidebar };
+};
+
+const loadTableSchemaParts = async () => {
+  const tableKey = getTableKey();
+  if (!tableKey) return false;
+  try {
+    const result = await args.fns.executeYTOFunction("loadTableConfigByKey", { tableKey });
+    const errorMessage = extractError(result, true, "Failed to load table schema");
+    if (errorMessage) return false;
+    applyServerGraphToLocalGraph(result);
+    const partVertexIds = result?.result?.data?.partVertexIds;
+    const ids = result?.result?.data?.ids;
+    if (!partVertexIds || !ids) return false;
+    patchPageP({
+      tableSchemaPartVertexIds: partVertexIds,
+      tableIds: ids,
+      evaluatedConfig: null,
+      memoizedConfig: null,
+      settings: null
+    });
+    return true;
+  } catch (error) {
+    console.error("loadTableSchemaParts failed:", error);
+    args.showErrorToast?.(error?.message || "Failed to load table schema");
+    return false;
+  }
+};
+
 const getPageMode = () => {
   const fromProps = args.contextData.props?.pageMode;
   if (fromProps === "settings" || fromProps === "table" || fromProps === "dashboard") return fromProps;
@@ -115,6 +231,13 @@ const getConfigFunction = () => args.contextData.props?.configFunction;
 
 // Helper to get cached config (and trigger memo evaluation if needed)
 const getCachedConfig = () => {
+  if (isTableSchemaMode()) {
+    const partIds = getTableSchemaPartVertexIds();
+    if (partIds) {
+      return { config: buildTableRuntimeConfig(), loadFromSetting: true };
+    }
+    return { config: null, loadFromSetting: true };
+  }
   const p = pageP();
   const cached = p?.memoizedConfig;
   if (cached !== null && cached !== undefined) {
@@ -124,6 +247,30 @@ const getCachedConfig = () => {
   const p2 = pageP();
   return { config: p2?.memoizedConfig ?? null, loadFromSetting: p2?.memoizedLoadFromSetting === true };
 };
+
+const ROOT_CONFIG_KEYS = new Set([
+  "columns", "formConfig", "sidebar", "actions", "relationshipPropertyBindings",
+  "nestedLinePropertyStripKeys", "uniqueKeys", "dashboardConfig", "pageMode",
+  "sections", "saveStrategy", "audit", "id", "route", "title", "description",
+  "version", "scope", "general"
+]);
+
+const getConfigGeneralValue = (key) => {
+  if (isTableSchemaMode()) {
+    const runtime = buildTableRuntimeConfig();
+    if (runtime?.general && runtime.general[key] !== undefined) {
+      return runtime.general[key];
+    }
+    return runtime?.[key];
+  }
+  const { config } = getCachedConfig();
+  if (config?.general && config.general[key] !== undefined) {
+    return config.general[key];
+  }
+  return config?.[key];
+};
+
+const getConfigHooks = () => getConfigGeneralValue("hooks");
 
 const prop = (key, localProps) => {
   const fromLocalProps = localProps?.[key];
@@ -136,11 +283,21 @@ const prop = (key, localProps) => {
   }
   const { config, loadFromSetting } = getCachedConfig();
   if (loadFromSetting) {
+    if (ROOT_CONFIG_KEYS.has(key)) {
+      if (key === "columns") return config?.columns;
+      if (key === "formConfig") return config?.formConfig;
+      if (key === "sidebar") return config?.sidebar;
+      return config?.[key];
+    }
+    const general = config?.general;
+    if (general && general[key] !== undefined) {
+      return general[key];
+    }
     return config?.[key];
   }
 };
 
-// Derive server payload from evaluated table config (see migrate default table_config return shape).
+// Derive server payload from evaluated table config (merged from table_schema parts).
 const collectFormConfigFields = (config) => {
   const groups = config?.formConfig?.groups;
   if (!Array.isArray(groups)) return [];
@@ -260,24 +417,25 @@ const applyServerGraphToLocalGraph = (response) => {
 
 // Functions invoked by "get*" which must be defined before their usages
 const getGenericSettingsFunction = () => {
+  const tableKey = getTableKey();
   const tableVertexLabel = getTableVertexLabel();
-  if (!tableVertexLabel) return null;
+  if (isTableSchemaMode()) return null;
+  if (!tableKey && !tableVertexLabel) return null;
+
   return async () => {
     try {
       const tableSettingsLabel = getTableSettingsLabel();
       const result = await args.fns.executeYTOFunction("getUserContentSetting", {
-        tableVertexLabel,
+        tableVertexLabel: tableVertexLabel || tableKey,
         settingsLabel: tableSettingsLabel,
         key: `${tableSettingsLabel}_settings`
       });
 
-      // Check for errors and show toast
       const errorMessage = extractError(result, true, "Failed to load settings");
       if (errorMessage) {
         return { success: false, data: { setting: null } };
       }
 
-      // Return successful result
       if (result?.result?.success && result.result.data?.setting) {
         return result.result;
       }
@@ -325,8 +483,7 @@ const getGenericSettingsPageConfigFunction = () => {
     try {
       const result = await args.fns.executeYTOFunction("getSettingsPageConfig", {
         settingsPageId: settingsPageId || undefined,
-        settingsLabel: settingsPageId || undefined,
-        key: settingsPageId ? `${settingsPageId}_settings_page` : undefined
+        settingsLabel: settingsPageId || undefined
       });
       const errorMessage = extractError(result, true, "Failed to load settings page config");
       if (errorMessage) return { success: false, data: { setting: null } };
@@ -348,15 +505,16 @@ const getGenericDataFunction = () => {
 
       // Get config to check user scoping settings and hooks
       const { config } = getCachedConfig();
-      const enableUserScopingForContent = config?.enableUserScopingForContent === true;
+      const enableUserScopingForContent = getConfigGeneralValue("enableUserScopingForContent") === true;
 
       // Get config to check if local filters/sort are enabled
-      const enableLocalFilters = config?.enableLocalFilters === true;
-      const enableLocalSort = config?.enableLocalSort === true;
+      const enableLocalFilters = getConfigGeneralValue("enableLocalFilters") === true;
+      const enableLocalSort = getConfigGeneralValue("enableLocalSort") === true;
 
       // Build filter parameters
       // Skip filters/sort if local filtering/sorting is enabled
       const filterParams = {
+        tableKey: getTableKey(),
         tableVertexLabel,
         search: enableLocalFilters ? undefined : filters.search,
         filters: enableLocalFilters ? undefined : filters.filters,
@@ -388,7 +546,7 @@ const getGenericDataFunction = () => {
       }
 
       // Pass hooks to server function - hooks will be executed server-side
-      filterParams.hooks = config?.hooks;
+      filterParams.hooks = getConfigHooks();
       filterParams.relationshipPropertyBindings = buildRelationshipPropertyBindings(config);
 
       const result = await args.fns.executeYTOFunction("getUserContent", filterParams);
@@ -443,7 +601,7 @@ const fetchUserContentRows = async (params = {}) => {
   const { tableVertexLabel, search, filters, sort, hooks } = params;
   if (!tableVertexLabel) return [];
   const { config } = getCachedConfig();
-  const enableUserScopingForContent = config?.enableUserScopingForContent === true;
+  const enableUserScopingForContent = getConfigGeneralValue("enableUserScopingForContent") === true;
   try {
     const result = await args.fns.executeYTOFunction("getUserContent", {
       tableVertexLabel,
@@ -451,7 +609,7 @@ const fetchUserContentRows = async (params = {}) => {
       filters,
       sort,
       enableUserScoping: enableUserScopingForContent,
-      hooks: hooks !== undefined ? hooks : config?.hooks,
+      hooks: hooks !== undefined ? hooks : getConfigHooks(),
       relationshipPropertyBindings: buildRelationshipPropertyBindings(config),
       tableSettingsLabel: getTableSettingsLabel()
     });
@@ -619,8 +777,8 @@ const getGenericSaveFunction = () => {
           if (sidebarItem.P?.key !== rootKey && !isUncatSave) {
             // Get config to check user scoping settings
             const { config } = getCachedConfig();
-            const enableUserScopingForSidebar = config?.enableUserScopingForSidebar === true;
-            const enableUserScopingForContent = config?.enableUserScopingForContent === true;
+            const enableUserScopingForSidebar = getConfigGeneralValue("enableUserScopingForSidebar") === true;
+            const enableUserScopingForContent = getConfigGeneralValue("enableUserScopingForContent") === true;
 
             // File -[toParentEdgeType]-> Folder (MERGE on server); merge graph + bump count on success
             try {
@@ -633,7 +791,7 @@ const getGenericSaveFunction = () => {
                 contentLabel: tableVertexLabel,
                 enableUserScopingForSidebar: enableUserScopingForSidebar,
                 enableUserScopingForContent: enableUserScopingForContent,
-                hooks: config?.hooks
+                hooks: getConfigHooks()
               });
               applyServerGraphToLocalGraph(relResult);
               // Update category count - increment by 1
@@ -722,13 +880,14 @@ const getGenericSaveSettingsFunction = () => {
       }
     };
   }
+  const tableKey = getTableKey();
   const tableVertexLabel = getTableVertexLabel();
-  if (!tableVertexLabel) return null;
+  if (!tableKey && !tableVertexLabel) return null;
   return async (configText) => {
     try {
       const tableSettingsLabel = getTableSettingsLabel();
       const result = await args.fns.executeYTOFunction("saveUserContentSetting", {
-        tableVertexLabel,
+        tableVertexLabel: tableVertexLabel || tableKey,
         settingsLabel: tableSettingsLabel,
         key: `${tableSettingsLabel}_settings`,
         config: configText
@@ -759,13 +918,13 @@ const getGenericImportFunction = () => {
     try {
       // Get config to check user scoping settings and hooks
       const { config } = getCachedConfig();
-      const enableUserScopingForContent = config?.enableUserScopingForContent === true;
+      const enableUserScopingForContent = getConfigGeneralValue("enableUserScopingForContent") === true;
 
       const result = await args.fns.executeYTOFunction("importUserContent", {
         tableVertexLabel,
         data,
         enableUserScoping: enableUserScopingForContent,
-        hooks: config?.hooks,
+        hooks: getConfigHooks(),
         tableSettingsLabel: getTableSettingsLabel()
       });
 
@@ -795,7 +954,7 @@ const getGenericExportFunction = () => {
       const sanitizedColumns = JSON.parse(JSON.stringify(columns));
       // Get config to check user scoping settings and hooks
       const { config } = getCachedConfig();
-      const enableUserScopingForContent = config?.enableUserScopingForContent === true;
+      const enableUserScopingForContent = getConfigGeneralValue("enableUserScopingForContent") === true;
 
       const result = await args.fns.executeYTOFunction("exportUserContent", {
         tableVertexLabel,
@@ -803,7 +962,7 @@ const getGenericExportFunction = () => {
         data: data,
         columns: sanitizedColumns,
         enableUserScoping: enableUserScopingForContent,
-        hooks: config?.hooks,
+        hooks: getConfigHooks(),
         relationshipPropertyBindings: buildRelationshipPropertyBindings(config),
         tableSettingsLabel: getTableSettingsLabel()
       });
@@ -842,6 +1001,9 @@ const getDataFunction = () => {
 };
 const getSettingsFunction = () => {
   const loadFromSetting = getLoadFromSetting();
+  if (loadFromSetting && isTableSchemaMode()) {
+    return null;
+  }
   if (loadFromSetting && isDashboardPageMode()) {
     return getGenericDashboardSettingsFunction();
   }
@@ -894,6 +1056,12 @@ const hasEvaluatedConfigContent = (value) => {
 };
 
 const evaluateConfig = () => {
+  if (isTableSchemaMode()) {
+    const partIds = getTableSchemaPartVertexIds();
+    if (!partIds) return null;
+    return buildTableRuntimeConfig();
+  }
+
   const cached = pageP()?.evaluatedConfig;
   if (hasEvaluatedConfigContent(cached)) return cached;
 
@@ -1108,12 +1276,16 @@ const loadSettings = async (options = {}) => {
 const initializeSettings = async () => {
   patchPageP({ configLoading: true });
   try {
-    const settingsFn = getSettingsFunction();
-    if (settingsFn) {
-      await loadSettings();
-      updateMemoizedConfig();
+    if (isTableSchemaMode()) {
+      await loadTableSchemaParts();
     } else {
-      updateMemoizedConfig();
+      const settingsFn = getSettingsFunction();
+      if (settingsFn) {
+        await loadSettings();
+        updateMemoizedConfig();
+      } else {
+        updateMemoizedConfig();
+      }
     }
   } catch (error) {
     console.error("[DynamicPage] initializeSettings error:", error);
@@ -1122,10 +1294,9 @@ const initializeSettings = async () => {
   }
 };
 
-// Handle opening settings modal - load config without updating state to avoid table loading spinner
+// Handle opening settings modal — TableFormConfigSchemaEditor loads schema itself.
 const handleOpenSettings = async () => {
-  const configText = await loadSettings({ updateState: false });
-  patchPageP({ settingsModalInitialConfig: configText, isSettingsModalOpen: true });
+  patchPageP({ isSettingsModalOpen: true });
 };
 
 // Handle saving settings
@@ -1162,6 +1333,9 @@ const handleSaveSettings = async (configText, callback) => {
 
 // Sidebar config
 const getSidebarConfig = () => {
+  if (isTableSchemaMode()) {
+    return evalSchemaPart("sidebar") || { enabled: false };
+  }
   const { config, loadFromSetting } = getCachedConfig();
   if (loadFromSetting) {
     return config?.sidebar;
@@ -1178,7 +1352,7 @@ const hasSidebar = () => {
 // Check if Polaris UI should be used (table-level config)
 const getUsePolarisUI = () => {
   const { config } = getCachedConfig();
-  return config?.usePolarisUI === true;
+  return getConfigGeneralValue("usePolarisUI") === true;
 };
 
 // Get category key for selected rows storage
@@ -1247,8 +1421,8 @@ const handleMoveItemsToCategory = async (contentIds, categoryId, sidebarConfig) 
   }
 
   const { config } = getCachedConfig();
-  const enableUserScopingForSidebar = config?.enableUserScopingForSidebar === true;
-  const enableUserScopingForContent = config?.enableUserScopingForContent === true;
+            const enableUserScopingForSidebar = getConfigGeneralValue("enableUserScopingForSidebar") === true;
+            const enableUserScopingForContent = getConfigGeneralValue("enableUserScopingForContent") === true;
 
   const relationshipType = tableVertexLabel ? `User${tableVertexLabel}` : null;
 
@@ -1282,7 +1456,7 @@ const handleMoveItemsToCategory = async (contentIds, categoryId, sidebarConfig) 
       enableUserScopingForSidebar: enableUserScopingForSidebar,
       enableUserScopingForContent: enableUserScopingForContent,
       sourceCategoryId: sourceCategoryId,
-      hooks: config?.hooks
+      hooks: getConfigHooks()
     };
 
     const result = await args.executeNamedServerFunction({
@@ -1487,6 +1661,38 @@ const settingsAdapter = {
     const scopeId = getScopeId();
     const pageConfig = evaluateConfig();
 
+    if (String(settingsPageId || "").startsWith("table:")) {
+      const tableKey = getTableKey() || String(settingsPageId).slice("table:".length).trim();
+      const result = await args.fns.executeYTOFunction("saveTableConfigSection", {
+        tableKey,
+        sectionId,
+        values,
+        version,
+        sectionConfig,
+        pageConfig
+      });
+      const errorMessage = extractError(result, false, "Failed to save table section");
+      if (errorMessage) {
+        args.showErrorToast?.(errorMessage);
+        return { success: false, message: errorMessage };
+      }
+      if (result?.result?.success) {
+        args.showSuccessToast?.(result.result.message || "Table section saved");
+        markSectionClean(sectionId, result.result.data?.values, {
+          version: result.result.data?.version,
+          documentId: result.result.data?.documentId
+        });
+        patchPageP({ evaluatedConfig: null, memoizedConfig: null });
+        if (isTableSchemaMode()) {
+          await loadTableSchemaParts();
+        } else {
+          await args.fns.initializeSettings?.();
+        }
+        return result.result;
+      }
+      return { success: false, message: "Failed to save table section" };
+    }
+
     const result = await args.fns.executeYTOFunction("saveSettingsSection", {
       pageId: settingsPageId,
       sectionId,
@@ -1642,11 +1848,25 @@ const resetSettingsPageData = () => {
     settings: null,
     evaluatedConfig: null,
     memoizedConfig: null,
+    tableSchemaPartVertexIds: null,
+    tableIds: null,
     settingsSectionStateMap: {},
     settingsDirtySectionIds: [],
     settingsFormFnsMap: {}
   });
 };
+
+args.createEffect(() => {
+  if (typeof window === "undefined") return;
+  const handleTableSchemaSaved = (event) => {
+    const savedTableKey = event?.detail?.tableKey;
+    if (!savedTableKey || savedTableKey !== getTableKey()) return;
+    if (!isTableSchemaMode()) return;
+    void loadTableSchemaParts();
+  };
+  window.addEventListener("fulchand-table-schema-saved", handleTableSchemaSaved);
+  return () => window.removeEventListener("fulchand-table-schema-saved", handleTableSchemaSaved);
+});
 
 args.createEffect(() => {
   if (!isSettingsPageMode()) return;
@@ -1700,10 +1920,12 @@ return {
   getOnSelectionChange,
   getInitialSelectedRowIds,
   getTablePassthroughProps,
+  getTableKey,
   getTableVertexLabel,
   getTableSettingsLabel,
   getUncategorizedVertexId,
   getLoadFromSetting,
+  getConfigGeneralValue,
   getConfigFunction,
   getSettingsFunction,
   getFormConfig,
@@ -1716,6 +1938,9 @@ return {
   loadSettings,
   initializeSettings,
   initializeSettingsPage,
+  loadTableSchemaParts,
+  evalSchemaPart,
+  isTableSchemaMode,
   getSiteLanguages,
   handleOpenSettings,
   handleSaveSettings,
@@ -1863,7 +2088,7 @@ const relationshipType = tableVertexLabel ? `User${tableSettingsLabel}` : null;
 
 // Get config to check user scoping settings and hooks
 const { config } = args.fns.getCachedConfig();
-const enableUserScopingForSidebar = config?.enableUserScopingForSidebar === true;
+const enableUserScopingForSidebar = args.fns.getConfigGeneralValue?.("enableUserScopingForSidebar") === true;
 
 const vid = args.fns.pageStateVertexId;
 return {

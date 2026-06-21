@@ -870,9 +870,8 @@ const syncNestedLinesTableData = () => {
   if (syncKey === lastNestedLinesSyncKey) return;
   lastNestedLinesSyncKey = syncKey;
   patchTableP({ data: ids });
-  const config = args.fns.evaluateConfig?.() || {};
-  const enableLocalFilters = config?.enableLocalFilters === true;
-  const enableLocalSort = config?.enableLocalSort === true;
+  const enableLocalFilters = args.fns.getConfigGeneralValue?.("enableLocalFilters") !== false;
+  const enableLocalSort = args.fns.getConfigGeneralValue?.("enableLocalSort") !== false;
   if (enableLocalFilters || enableLocalSort) {
     applyLocalFilters();
   } else {
@@ -1206,8 +1205,7 @@ const updateCategoryCountFromFetchedData = (fetchedData, categoryItem) => {
   // This ensures we update the count for the category that was actually fetched
   if (!categoryItem) return;
   
-  const config = args.fns.evaluateConfig?.() || {};
-  const sidebarConfig = config?.sidebar;
+  const sidebarConfig = args.fns.getSidebarConfig?.() || (args.fns.evaluateConfig?.() || {}).sidebar;
   if (!sidebarConfig) return;
   
   const rootKeys = sidebarConfig.rootKeys || {};
@@ -1257,8 +1255,7 @@ const debouncedSetSearchTerm = args.debounce(value => {
   patchTableP({ searchTerm: value });
   
   // Check if local filters are enabled
-  const config = args.fns.evaluateConfig?.() || {};
-  const enableLocalFilters = config?.enableLocalFilters === true;
+  const enableLocalFilters = args.fns.getConfigGeneralValue?.("enableLocalFilters") !== false;
   
   if (enableLocalFilters) {
     // Apply local filters only
@@ -1489,8 +1486,7 @@ const handleSort = (column) => {
   }
 
   // Check if local sort is enabled
-  const config = args.fns.evaluateConfig?.() || {};
-  const enableLocalSort = config?.enableLocalSort === true;
+  const enableLocalSort = args.fns.getConfigGeneralValue?.("enableLocalSort") !== false;
   
   if (enableLocalSort) {
     // Apply local sort only
@@ -1580,8 +1576,7 @@ const handleColumnFilterChange = (columnKey, value) => {
   );
 
   // Check if local filters are enabled
-  const config = args.fns.evaluateConfig?.() || {};
-  const enableLocalFilters = config?.enableLocalFilters === true;
+  const enableLocalFilters = args.fns.getConfigGeneralValue?.("enableLocalFilters") !== false;
   
   if (enableLocalFilters) {
     // Apply local filters only
@@ -1595,8 +1590,7 @@ const handleColumnFilterChange = (columnKey, value) => {
 
 // Background poll: fetch only queued row ids and merge updates (no full reload, no loader)
 const pollQueuedRows = async () => {
-  const config = args.fns.evaluateConfig?.() || {};
-  const intervalMs = config?.refetchIntervalWhenQueued;
+  const intervalMs = args.fns.getConfigGeneralValue?.("refetchIntervalWhenQueued");
   const ids = normalizeRowIds(tableP()?.data ?? []);
   const queuedIds = [];
   for (let i = 0; i < ids.length; i++) {
@@ -1646,8 +1640,7 @@ const startPollIfQueued = (dataToCheck) => {
     clearTimeout(pollRef.id);
     pollRef.id = null;
   }
-  const config = args.fns.evaluateConfig?.() || {};
-  const intervalMs = config?.refetchIntervalWhenQueued;
+  const intervalMs = args.fns.getConfigGeneralValue?.("refetchIntervalWhenQueued");
   const refresh = args.fns.refreshQueuedRows;
   const hasQueued = Array.isArray(rows) && rows.some(r => (r.P?.syncStatus) === 'queued');
   if (intervalMs && refresh && typeof refresh === 'function' && hasQueued) {
@@ -1664,9 +1657,8 @@ const handleSearch = () => {
     syncNestedLinesTableData();
     return;
   }
-  const config = args.fns.evaluateConfig?.() || {};
-  const enableLocalFilters = config?.enableLocalFilters === true;
-  const enableLocalSort = config?.enableLocalSort === true;
+  const enableLocalFilters = args.fns.getConfigGeneralValue?.("enableLocalFilters") !== false;
+  const enableLocalSort = args.fns.getConfigGeneralValue?.("enableLocalSort") !== false;
   
   // If local filters/sort are enabled, fetch all data and apply locally
   // Otherwise, pass filters/sort to server
@@ -5449,63 +5441,25 @@ return {
         componentName: TableSettingsModal
         props:
           '''
-const evaluateConfig = args.fns.evaluateConfig;
-const config = evaluateConfig();
-const getConfigFunction = args.fns.getConfigFunction;
 const vid = args.fns.pageStateVertexId;
 const pageDp = () => args.graph.vertexes[vid]?.P;
-
-// Get initial config as function body string (from settingsModalInitialConfig, settings, or configFunction)
-let initialConfig = "";
-try {
-  const modalConfig = pageDp()?.settingsModalInitialConfig ?? null;
-  const currentSettings = modalConfig ?? pageDp()?.settings;
-  // If settings exist and it's a string (raw function body), use it
-  if (currentSettings && typeof currentSettings === 'string') {
-    initialConfig = currentSettings;
-  } else {
-    // Fallback to configFunction
-    const configFn = getConfigFunction();
-    if (configFn) {
-      // Get the function as string to extract its body
-      const fnString = configFn.toString();
-      // Extract function body (everything between { and })
-      const match = fnString.match(/\{([\s\S]*)\}/);
-      if (match && match[1]) {
-        initialConfig = match[1].trim();
-      } else {
-        // Fallback: call function and convert to return statement
-        const configObj = configFn();
-        if (configObj) {
-          initialConfig = `return ${JSON.stringify(configObj, null, 2)};`;
-        }
-      }
-    } else {
-      // Use current effective config as function body
-      const configObj = {
-        columns: config.columns || [],
-        formConfig: config.formConfig || {},
-        uniqueKeys: config.uniqueKeys || []
-      };
-      initialConfig = `return ${JSON.stringify(configObj, null, 2)};`;
-    }
-  }
-} catch (e) {
-  console.error("Error getting initial config:", e);
-  initialConfig = "return {};";
-}
+const tableKey = args.fns.getTableKey?.() ?? args.contextData.props?.tableKey;
+const tableVertexLabel = args.fns.getTableVertexLabel?.();
 
 return {
   isOpen: pageDp()?.isSettingsModalOpen === true,
   onClose: () => {
     args.mergeVertexProperties(0, vid, args.graph, args.setGraph, {
-      settingsModalInitialConfig: null,
       isSettingsModalOpen: false
     });
   },
-  initialConfig: initialConfig,
-  onSave: args.fns.handleSaveSettings,
-  tableVertexLabel: args.fns.getTableVertexLabel()
+  tableKey,
+  tableVertexLabel,
+  onSaved: () => {
+    args.mergeVertexProperties(0, vid, args.graph, args.setGraph, {
+      isSettingsModalOpen: false
+    });
+  }
 };
 '''
       }

@@ -1,0 +1,307 @@
+{
+  vertexes: [
+    {
+      id: "page",
+      L: "Page",
+      P: {
+        key: "FullChandPortalTable",
+        url: "/portal/table",
+        title: "Table Admin",
+        signinRequired: true,
+        fns: '''
+const checkAdminRole = () => {
+  const userRoles = args.user?.OUT?.UserRole || [];
+  return userRoles.some((edgeId) => {
+    const edge = args.graph.edges[edgeId];
+    const role = args.graph.vertexes[edge?.E];
+    return role?.P?.key === "Admin";
+  });
+};
+
+const getTableVertexLabel = () => {
+  const table = args.searchParams?.table;
+  if (table) {
+    const value = String(table).trim();
+    if (value === "Book") return "Book";
+    return value;
+  }
+  return "Book";
+};
+
+const getTableKey = () => {
+  const fromQuery = args.searchParams?.key;
+  if (fromQuery != null && String(fromQuery).trim() !== "") return String(fromQuery).trim();
+  return "books";
+};
+
+const isSchemaMode = () => args.searchParams?.mode === "schema";
+
+const setEditorMode = (mode) => {
+  const table = getTableVertexLabel();
+  if (mode === "schema") {
+    args.setSearchParams({ table, mode: "schema" }, { replace: true });
+  } else {
+    args.setSearchParams({ table, mode: null }, { replace: true });
+  }
+};
+
+const onSchemaSaved = () => {
+  const tableKey = args.fns.getTableKey?.();
+  if (!tableKey || String(tableKey).trim() === "") {
+    args.showErrorToast?.("Table key missing. Unable to process schema save.");
+    return;
+  }
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("fulchand-table-schema-saved", { detail: { tableKey } }));
+  }
+  args.showSuccessToast?.("Table schema saved");
+};
+
+return {
+  checkAdminRole,
+  getTableVertexLabel,
+  getTableKey,
+  isSchemaMode,
+  setEditorMode,
+  onSchemaSaved
+};
+''',
+        props: '''
+return {
+  isNoPermissionCheck: true,
+  onMount: () => {
+    if (!args.user) {
+      args.navigate("/auth/signin", { replace: true });
+      return;
+    }
+    if (!args.fns.checkAdminRole?.()) {
+      args.showErrorToast?.("Admin access required");
+      args.navigate("/", { replace: true });
+    }
+  }
+};
+'''
+      }
+    },
+    {
+      id: "shell",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section",
+  hide: !args.fns.checkAdminRole?.()
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}`;
+'''
+      }
+    },
+    {
+      id: "header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "header" };
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid ${args.theme.var.color.border_light_300};
+  background: ${args.theme.var.color.background};
+  flex-shrink: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "headerTitle",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const table = args.fns.getTableVertexLabel?.() || "Book";
+return {
+  as: "h1",
+  text: `${table} table`
+};
+''',
+        css: '''
+return `._id {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "modeTabs",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "contentTab",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Button",
+        props: '''
+const active = args.fns.isSchemaMode?.() !== true;
+return {
+  text: "Content",
+  variant: active ? "primary" : "secondary",
+  onClick: () => args.fns.setEditorMode?.("content")
+};
+'''
+      }
+    },
+    {
+      id: "schemaTab",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Button",
+        props: '''
+const active = args.fns.isSchemaMode?.() === true;
+return {
+  text: "Schema",
+  variant: active ? "primary" : "secondary",
+  onClick: () => args.fns.setEditorMode?.("schema")
+};
+'''
+      }
+    },
+    {
+      id: "contentPane",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  hide: args.fns.isSchemaMode?.() === true
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}`;
+'''
+      }
+    },
+    {
+      id: "dynamicPage",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "DynamicPage",
+        props: '''
+const tableKey = args.fns.getTableKey?.() || "books";
+const tableVertexLabel = args.fns.getTableVertexLabel?.() || "Book";
+return {
+  tableKey,
+  tableVertexLabel,
+  loadFromSetting: true,
+  usePolarisUI: true
+};
+'''
+      }
+    },
+    {
+      id: "schemaPane",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  hide: args.fns.isSchemaMode?.() !== true
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}`;
+'''
+      }
+    },
+    {
+      id: "schemaEditor",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "TableSchemaEditorShell",
+        props: '''
+const tableKey = args.fns.getTableKey?.() || "books";
+return {
+  tableKey,
+  embeddedMode: true,
+  onSaved: () => args.fns.onSchemaSaved?.()
+};
+'''
+      }
+    },
+    {
+      id: "layout",
+      L: "PageLayout",
+      P: {
+        displayOrder: 1,
+        componentName: "FullChandPortalLayout"
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "page", E: "shell" },
+    { id: "e2", T: "Attr", S: "shell", E: "header" },
+    { id: "e3", T: "Attr", S: "header", E: "headerTitle" },
+    { id: "e4", T: "Attr", S: "header", E: "modeTabs" },
+    { id: "e5", T: "Attr", S: "modeTabs", E: "contentTab" },
+    { id: "e6", T: "Attr", S: "modeTabs", E: "schemaTab" },
+    { id: "e7", T: "Attr", S: "shell", E: "contentPane" },
+    { id: "e8", T: "Attr", S: "contentPane", E: "dynamicPage" },
+    { id: "e9", T: "Attr", S: "shell", E: "schemaPane" },
+    { id: "e10", T: "Attr", S: "schemaPane", E: "schemaEditor" },
+    { id: "e_layout", T: "PageLayout", S: "page", E: "layout" }
+  ]
+}

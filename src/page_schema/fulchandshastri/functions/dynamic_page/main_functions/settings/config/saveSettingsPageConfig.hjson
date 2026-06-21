@@ -13,7 +13,8 @@ if (!actualUser) {
 }
 
 const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
-const { settingsPageId, config, name, saveAsDefault = true } = args.contextData || {};
+const { settingsPageId, name, saveAsDefault = true, key: schemaKey } = args.contextData || {};
+let { config } = args.contextData || {};
 
 if (!settingsPageId) {
   return { success: false, message: "settingsPageId is required" };
@@ -25,12 +26,20 @@ if (!config || typeof config !== "string" || config.trim() === "") {
 
 try {
   const configFn = new Function(config);
-  const evaluated = configFn();
+  let evaluated = configFn();
   if (!evaluated || typeof evaluated !== "object") {
     return { success: false, message: "Config must return an object" };
   }
-  if (evaluated.pageMode !== "settings") {
-    return { success: false, message: "Config pageMode must be settings" };
+  if (evaluated.pageMode !== "settings" && evaluated.pageMode !== "table") {
+    return { success: false, message: "Config pageMode must be settings or table" };
+  }
+  const stripResult = await args.executeNamedServerFunction({
+    functionName: "settingsSchemaHelpers",
+    contextData: { action: "stripConfigSchema", config: evaluated }
+  });
+  if (stripResult?.result?.data?.config) {
+    evaluated = stripResult.result.data.config;
+    config = `return ${JSON.stringify(evaluated, null, 2)};`;
   }
 } catch (error) {
   return {
@@ -39,8 +48,10 @@ try {
   };
 }
 
-const defaultKey = `${settingsPageId}_settings_page_default`;
-const settingKey = saveAsDefault === false ? `${settingsPageId}_settings_page` : defaultKey;
+const siteSettingKey = schemaKey && String(schemaKey).trim() !== ""
+  ? String(schemaKey).trim()
+  : `${settingsPageId}_settings_page`;
+const settingKey = saveAsDefault === false ? `${settingsPageId}_settings_page` : siteSettingKey;
 const settingName = name || `${settingsPageId} settings`;
 
 if (saveAsDefault === false && user) {
@@ -81,7 +92,7 @@ if (saveAsDefault === false && user) {
 }
 
 const defaultQuery = `
-  MERGE (s:Setting {key: $defaultKey})
+  MERGE (s:Setting {key: $siteSettingKey})
   ON CREATE SET
     s.createdAt = datetime(),
     s.type = 'settings_page_config',
@@ -99,7 +110,7 @@ const defaultQuery = `
 `;
 
 const defaultResult = await args.session.run(defaultQuery, {
-  defaultKey,
+  siteSettingKey,
   settingsPageId,
   name: settingName,
   config
@@ -112,7 +123,7 @@ if (defaultResult.records.length === 0) {
 const defaultVertices = args.processResult(defaultResult.records, args.context, "s");
 return {
   success: true,
-  data: { setting: defaultVertices[0], key: defaultKey },
+  data: { setting: defaultVertices[0], key: siteSettingKey },
   message: "Default settings page config saved"
 };
 '''

@@ -123,6 +123,13 @@ const portalNavSectionsData = [
         label: "Home page",
         icon: "ph:gear-six",
         pathCheck: (pathname) => String(pathname || "").startsWith("/settings")
+      },
+      {
+        id: "books_table",
+        href: "/portal/table?table=Book",
+        label: "Books",
+        icon: "ph:book-open",
+        pathCheck: (pathname) => String(pathname || "") === "/portal/table"
       }
     ]
   }

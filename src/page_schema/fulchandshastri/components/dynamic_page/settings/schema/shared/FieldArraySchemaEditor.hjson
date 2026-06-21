@@ -4,9 +4,9 @@
       id: "faf_root",
       L: "Component",
       P: {
-        key: "FulchandFieldArraySchemaEditor",
-        description: "Visual editor for fieldArray schema config, item fields, and default items.",
-        dynamicComponent: "TextInput, Button, IconButton, FormFieldArray, Html",
+        key: "FieldArraySchemaEditor",
+        description: "Visual editor for fieldArray schema config and item fields (schema only).",
+        dynamicComponent: "TextInput, Button, IconButton, Html",
         fns: '''
 const getProps = () => args.contextData.props || {};
 const getField = () => getProps().field || {};
@@ -90,20 +90,6 @@ const deleteItemField = (index) => {
   setItemFields(getItemFields().filter((_, i) => i !== index));
 };
 
-const getDefaultItems = () => {
-  const value = getField().defaultValue;
-  return Array.isArray(value) ? value.map((item) => ({ ...(item || {}) })) : [];
-};
-
-const updateDefaultValue = (items) => {
-  emitPatch({ defaultValue: Array.isArray(items) ? items : [] });
-};
-
-const getFieldArrayField = () => ({
-  ...getField(),
-  fieldArrayConfig: getConfig()
-});
-
 return {
   getConfig,
   getSiteLanguages,
@@ -112,10 +98,7 @@ return {
   updateConfig,
   addItemField,
   updateItemFieldAt,
-  deleteItemField,
-  getDefaultItems,
-  updateDefaultValue,
-  getFieldArrayField
+  deleteItemField
 };
 '''
       }
@@ -719,97 +702,12 @@ return {
 };
 '''
       }
-    },
-    {
-      id: "faf_defaults_section",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-return { as: "div", class: "faf-defaults-section" };
-''',
-        css: '''
-return `._id.faf-defaults-section {
-  display: flex;
-  flex-direction: column;
-  gap: 0.625rem;
-  padding: 0.75rem;
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: 0.5rem;
-  background: ${args.theme.var.color.background};
-}`;
-'''
-      }
-    },
-    {
-      id: "faf_defaults_title",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "h4",
-  text: "Default items",
-  class: "faf-section-title"
-};
-''',
-        css: '''
-return `._id.faf-section-title {
-  margin: 0;
-  font-size: 0.8125rem;
-  font-weight: 600;
-}`;
-'''
-      }
-    },
-    {
-      id: "faf_defaults_hint",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "p",
-  text: "Preview and edit the default array items using the field list below.",
-  class: "faf-defaults-hint"
-};
-''',
-        css: '''
-return `._id.faf-defaults-hint {
-  margin: 0;
-  font-size: 0.75rem;
-  color: ${args.theme.var.color.muted};
-}`;
-'''
-      }
-    },
-    {
-      id: "faf_defaults_field_array",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "FormFieldArray",
-        props: '''
-const field = args.fns.getFieldArrayField?.() || {};
-const items = args.fns.getDefaultItems?.() || [];
-return {
-  field,
-  value: items,
-  siteLanguages: args.fns.getSiteLanguages?.(),
-  onChange: (nextItems) => args.fns.updateDefaultValue?.(nextItems)
-};
-'''
-      }
     }
   ],
   edges: [
     { id: "faf_e1", T: "Attr", S: "faf_root", E: "faf_shell" },
     { id: "faf_e2", T: "Attr", S: "faf_shell", E: "faf_config_section" },
     { id: "faf_e3", T: "Attr", S: "faf_shell", E: "faf_item_fields_section" },
-    { id: "faf_e4", T: "Attr", S: "faf_shell", E: "faf_defaults_section" },
     { id: "faf_e5", T: "Attr", S: "faf_config_section", E: "faf_config_title" },
     { id: "faf_e6", T: "Attr", S: "faf_config_section", E: "faf_config_grid" },
     { id: "faf_e7", T: "Attr", S: "faf_config_grid", E: "faf_item_label_input" },
@@ -836,9 +734,6 @@ return {
     { id: "faf_e23", T: "Attr", S: "faf_item_field_renderer_wrap", E: "faf_item_field_renderer" },
     { id: "faf_e24", T: "Attr", S: "faf_item_field_renderer", E: "faf_renderer_opt_text" },
     { id: "faf_e25", T: "Attr", S: "faf_item_field_renderer", E: "faf_renderer_opt_textarea" },
-    { id: "faf_e26", T: "Attr", S: "faf_item_field_renderer", E: "faf_renderer_opt_checkbox" },
-    { id: "faf_e27", T: "Attr", S: "faf_defaults_section", E: "faf_defaults_title" },
-    { id: "faf_e28", T: "Attr", S: "faf_defaults_section", E: "faf_defaults_hint" },
-    { id: "faf_e29", T: "Attr", S: "faf_defaults_section", E: "faf_defaults_field_array" }
+    { id: "faf_e26", T: "Attr", S: "faf_item_field_renderer", E: "faf_renderer_opt_checkbox" }
   ]
 }

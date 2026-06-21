@@ -46,39 +46,42 @@ const result = await args.session.run(query, {
 });
 
 if (result.records.length === 0) {
-  // No user setting found, try default setting key derived from requested key
-  const defaultKey = settingKey.endsWith("_default") ? settingKey : `${settingKey}_default`;
-  let defaultResult = await args.session.run(
-    `MATCH (s:Setting {key: $defaultKey}) RETURN s LIMIT 1`,
-    { defaultKey }
+  // No user setting — load site-wide Setting (not linked via UserSetting)
+  let siteResult = await args.session.run(
+    `MATCH (s:Setting {key: $settingKey})
+     WHERE NOT (s)<-[:UserSetting]-()
+     RETURN s LIMIT 1`,
+    { settingKey }
   );
 
-  // If no default exists, run migration to create default settings (so hooks and full config are available)
-  if (defaultResult.records.length === 0 && args.executeNamedServerFunction) {
+  // If no site setting exists, run migration to create defaults
+  if (siteResult.records.length === 0 && args.executeNamedServerFunction) {
     try {
       await args.executeNamedServerFunction({
         functionName: "migrateDynamicPageSettings",
         contextData: { dryRun: false }
       });
-      defaultResult = await args.session.run(
-        `MATCH (s:Setting {key: $defaultKey}) RETURN s LIMIT 1`,
-        { defaultKey }
+      siteResult = await args.session.run(
+        `MATCH (s:Setting {key: $settingKey})
+         WHERE NOT (s)<-[:UserSetting]-()
+         RETURN s LIMIT 1`,
+        { settingKey }
       );
     } catch (migrateError) {
       console.error('getUserContentSetting: settings migration failed', migrateError);
     }
   }
 
-  if (defaultResult.records.length > 0) {
-    const defaultVertices = args.processResult(defaultResult.records, args.context, 's');
-    const defaultVertex = defaultVertices[0];
+  if (siteResult.records.length > 0) {
+    const siteVertices = args.processResult(siteResult.records, args.context, 's');
+    const siteVertex = siteVertices[0];
     return {
       success: true,
       data: {
-        setting: defaultVertex,
+        setting: siteVertex,
         isDefault: true
       },
-      message: "Using default configuration."
+      message: "Using site configuration."
     };
   }
 
@@ -88,7 +91,7 @@ if (result.records.length === 0) {
       setting: null,
       isDefault: true
     },
-    message: "No custom settings found. Using default configuration."
+    message: "No custom settings found."
   };
 }
 

@@ -319,11 +319,7 @@ export function PageView(
 
     const repeterStore = createStore({
       get context() {
-        return {
-          get fns() {
-            return functionProxy;
-          },
-        };
+        return getFunctionArgumentWithValue();
       },
     } as PageRenderObject);
 

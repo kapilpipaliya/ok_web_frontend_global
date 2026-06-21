@@ -16,15 +16,29 @@ return {
   contextName: "booksSettings",
   serverFunction: `
 try {
-  const result = await args.executeNamedServerFunction({
+  const pageResult = await args.executeNamedServerFunction({
     functionName: "loadFulchandPublicPageSettings",
     contextData: { pageId: "books", allowPublicRead: true, locale: ${JSON.stringify(locale ?? null)} }
   });
-  if (!result?.result?.success) return {};
-  return result.result.data?.sections || {};
+  const tableResult = await args.executeNamedServerFunction({
+    functionName: "loadPublicTableContent",
+    contextData: { tableKey: "books", tableVertexLabel: "Book", locale: ${JSON.stringify(locale ?? null)} }
+  });
+
+  const sections = pageResult?.result?.success ? (pageResult.result.data?.sections || {}) : {};
+  const tableData = tableResult?.result?.success ? (tableResult.result.data || {}) : {};
+  return {
+    content: sections.content || {},
+    table: {
+      rowIds: tableData.rowIds || [],
+      partVertexIds: tableData.partVertexIds || {},
+      ids: tableData.ids || null,
+      graph: tableData.graph || null
+    }
+  };
 } catch (error) {
-  console.error("Error loading page settings:", error);
-  return {};
+  console.error("Error loading books page:", error);
+  return { content: {}, table: { rowIds: [], partVertexIds: {}, ids: null, graph: null } };
 }
 `
 };
@@ -138,51 +152,21 @@ return `._id {
       }
     },
     {
-      id: "booksData",
+      id: "booksTable",
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Html",
-        contextName: "books",
-        loop: true,
+        componentName: "FullChandPublicTable",
         props: '''
-const items = args.contextData.booksSettings?.books?.books ?? [];
+const table = args.contextData.booksSettings?.table || {};
 return {
-  as: "fragment",
-  data: items
+  tableKey: "books",
+  tableVertexLabel: "Book",
+  rowIds: table.rowIds || [],
+  partVertexIds: table.partVertexIds || {},
+  ids: table.ids || null,
+  graph: table.graph
 };
-'''
-      }
-    },
-    {
-      id: "booksList",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "bookCard",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "FullChandBookCard",
-        props: '''
-const book = args.contextData.books;
-return book;
 '''
       }
     },
@@ -201,9 +185,7 @@ return book;
     { id: "e4", T: "Attr", S: "pageHeader", E: "pageSubtitle" },
     { id: "e5", T: "Attr", S: "page", E: "mainContent" },
     { id: "e6", T: "Attr", S: "mainContent", E: "container" },
-    { id: "e7", T: "Attr", S: "container", E: "booksData" },
-    { id: "e8", T: "Attr", S: "booksData", E: "booksList" },
-    { id: "e9", T: "Attr", S: "booksList", E: "bookCard" },
+    { id: "e7", T: "Attr", S: "container", E: "booksTable" },
     { id: "e_layout", T: "PageLayout", S: "page", E: "layout" }
   ]
 }
