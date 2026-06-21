@@ -1,9 +1,15 @@
+import { createSignal, onCleanup } from "solid-js";
+
 import { IconButton } from "~/components/styled/IconButton";
 import {
   type PageLayoutObject,
   useDesignerLayoutStore,
 } from "~/features/page_designer/context/LayoutContext";
-import { handleDragStart } from "~/features/page_designer/event_handler/handleDragStart";
+import { attachLayoutItemDraggable } from "~/features/page_designer/functions/drag_drop/pragmatic/pragmaticDragDrop";
+import {
+  bindDragDropRef,
+  cleanupDragDropRef,
+} from "~/features/page_designer/functions/drag_drop/pragmatic/bindDragDropRef";
 import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
 
 import { DeleteButton } from "../buttons/DeleteButton";
@@ -36,6 +42,23 @@ export function SelectedAttrConfigPopOver(
   const parentRenderContext = () => getLastItem(parentItems)?.[0];
 
   const [graph, setGraph] = useGraph();
+  const [dragHandleRef, setDragHandleRef] = createSignal<HTMLButtonElement>();
+
+  const bindLayoutDrag = bindDragDropRef(
+    `layout-handle-${props.item.id}`,
+    (element) =>
+      attachLayoutItemDraggable(element, {
+        layoutStoreVertex,
+        graph,
+        setGraph,
+        layoutVertex: props.item,
+      }),
+  );
+
+  onCleanup(() => {
+    cleanupDragDropRef(dragHandleRef());
+  });
+
   const getComponentName = () => parentRenderContext()?.context.componentName;
 
   const iconSize = 20;
@@ -72,14 +95,16 @@ export function SelectedAttrConfigPopOver(
             `return \`._id {
             background-color: transparent;
             border: none;
+            cursor: grab;
+            touch-action: none;
           }\`;`,
           ]}
-          draggable={true}
           icon="ph:dots-six-vertical-bold"
           onClick={() => {}}
-          onDragStart={(e) =>
-            handleDragStart(e, graph, setGraph, layoutStoreVertex(), props.item)
-          }
+          ref={(element) => {
+            setDragHandleRef(element);
+            bindLayoutDrag(element);
+          }}
           size={iconSize}
           title="Move"
         />

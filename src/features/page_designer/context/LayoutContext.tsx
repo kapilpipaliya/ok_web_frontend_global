@@ -46,7 +46,6 @@ export function getInitialDesignerLayoutStore() {
     bottomHeight: INITIAL_WIDTHS.bottom,
     copiedItem: null as Vertex | null,
     draggedTab: null as Id | null,
-    draggedVertexIds: [] as Id[],
     formId: null as Id | null,
     id: uuidv7(),
     ...getInitialLayoutSettings(),

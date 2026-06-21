@@ -15,15 +15,9 @@ export interface TreeItemContainerProps {
   css?: CssType;
   // Include standard HTMLDivElement attributes
   onClick?: JSX.EventHandlerUnion<HTMLDivElement, MouseEvent>;
-  onDragEnter?: JSX.EventHandlerUnion<HTMLDivElement, DragEvent>;
-  onDragLeave?: JSX.EventHandlerUnion<HTMLDivElement, DragEvent>;
-  onDragOver?: JSX.EventHandlerUnion<HTMLDivElement, DragEvent>;
-  onDragStart?: JSX.EventHandlerUnion<HTMLDivElement, DragEvent>;
-  onDrop?: JSX.EventHandlerUnion<HTMLDivElement, DragEvent>;
   onMouseEnter?: JSX.EventHandlerUnion<HTMLDivElement, MouseEvent>;
   onmouseleave?: JSX.EventHandlerUnion<HTMLDivElement, MouseEvent>;
   ref?: (element: HTMLDivElement) => void;
-  draggable?: boolean | "true" | "false";
   tabIndex?: number;
 }
 

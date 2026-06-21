@@ -118,5 +118,4 @@ export async function handleDropAtPosition(
     saveUndoPoint(txnId, graph, setGraph);
     return;
   }
-  // we should clean draggedVertexIds on drop finished
 }

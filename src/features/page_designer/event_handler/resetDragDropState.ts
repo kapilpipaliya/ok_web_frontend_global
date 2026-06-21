@@ -21,7 +21,6 @@ export function resetDragDropState(
       setGraph,
       {
         activeItem: null,
-        draggedVertexIds: [],
         dragPosition: null,
       },
     );

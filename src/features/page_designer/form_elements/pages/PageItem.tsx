@@ -1,5 +1,5 @@
 import { toTitle } from "case-switcher-js";
-import { createSignal, Show } from "solid-js";
+import { createSignal, onCleanup, Show } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
@@ -17,8 +17,12 @@ import {
   type PageLayoutObject,
   useDesignerLayoutStore,
 } from "../../context/LayoutContext";
+import { attachPalettePageDraggable } from "../../functions/drag_drop/pragmatic/pragmaticDragDrop";
+import {
+  bindDragDropRef,
+  cleanupDragDropRef,
+} from "../../functions/drag_drop/pragmatic/bindDragDropRef";
 import { As } from "~/components/As";
-import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import type { Id } from "~/lib/graph/type/id";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
@@ -83,41 +87,26 @@ export function PageItem(
     return baseItemStyle;
   };
 
-  const handleDragStart = (e: DragEvent) => {
-    e.stopPropagation();
-    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
-      draggedVertexIds: [],
-    });
-    const dataTransfer =
-      selectedComponents().size > 0
-        ? Array.from(selectedComponents())
-        : [graph.vertexes[props.child.id]];
+  const [itemRef, setItemRef] = createSignal<HTMLDivElement>();
 
-    // Safely access draggedVertexIds
-    const currentDraggedIds = layoutStoreVertex()?.P.draggedVertexIds || [];
+  const bindPaletteDrag = bindDragDropRef(
+    `palette-page-${props.child.id}`,
+    (element) =>
+      attachPalettePageDraggable(element, {
+        graph,
+        vertexId: props.child.id,
+        getSelectedVertices: () => Array.from(selectedComponents()),
+        clearSelectedVertices: () => setSelectedComponents(new Set<Vertex>()),
+      }),
+  );
 
-    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
-      draggedVertexIds: [
-        ...currentDraggedIds,
-        ...dataTransfer.map((v) => v.id),
-      ],
-    });
-    setSelectedComponents(new Set<Vertex>());
-  };
+  onCleanup(() => {
+    cleanupDragDropRef(itemRef());
+  });
 
   const handleDoubleClick = () => {
-    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
-      draggedVertexIds: [props.child.id],
-    });
-
     const formStore = formStoreVertex();
     if (!formStore) {
-      return;
-    }
-
-    // Safe access to properties
-    const draggedVertex = layoutStoreVertex()?.P.draggedVertexIds?.[0];
-    if (!draggedVertex) {
       return;
     }
 
@@ -125,15 +114,12 @@ export function PageItem(
       graph,
       setGraph,
       formStore.P.txnId,
-      graph.vertexes[draggedVertex],
+      graph.vertexes[props.child.id],
       graph.vertexes[formStore.P.formDataId],
       formStore.P.selectedId !== -1
         ? formStore.P.selectedId
         : formStore.P.formDataId,
     );
-    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
-      draggedVertexIds: [],
-    });
   };
 
   // Use shared function to create open in new tab handler
@@ -152,11 +138,13 @@ export function PageItem(
       <As
         as="div"
         css={getItemStyle()}
-        draggable={"true"}
         ondblclick={handleDoubleClick}
-        onDragStart={handleDragStart}
         onMouseEnter={handleItemMouseEnter}
         onMouseLeave={handleItemMouseLeave}
+        ref={(element) => {
+          setItemRef(element);
+          bindPaletteDrag(element);
+        }}
       >
         <Show when={props.child.P.icon}>
           <Icon height={20} icon={props.child.P.icon} noobserver width={20} />

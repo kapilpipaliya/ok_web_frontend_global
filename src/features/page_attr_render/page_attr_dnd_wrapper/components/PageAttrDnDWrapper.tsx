@@ -4,6 +4,7 @@ import {
   createSelector,
   createSignal,
   type JSX,
+  onCleanup,
   Show,
 } from "solid-js";
 
@@ -16,11 +17,12 @@ import {
   useDesignerLayoutStore,
 } from "~/features/page_designer/context/LayoutContext";
 import { usePreviewContext } from "~/features/page_designer/context/PreviewContext";
-import { handleDragLeave } from "~/features/page_designer/event_handler/handleDragLeave";
-import { handleDragOver } from "~/features/page_designer/event_handler/handleDragOver";
-import { handleDrop } from "~/features/page_designer/event_handler/handleDrop";
+import { attachPreviewDropTarget } from "~/features/page_designer/functions/drag_drop/pragmatic/pragmaticDragDrop";
+import {
+  bindDragDropRef,
+  cleanupDragDropRef,
+} from "~/features/page_designer/functions/drag_drop/pragmatic/bindDragDropRef";
 import { onLayoutItemClick } from "~/features/page_designer/event_handler/onLayoutItemClick";
-import { resetDragDropState } from "~/features/page_designer/event_handler/resetDragDropState";
 import { getBoundingRectChildren } from "~/features/page_designer/functions/drag_drop/ui/getBoundingRectChildren";
 import { getChildrenAttrs } from "~/features/page_designer/functions/layout/getChildrenAttrs";
 import {
@@ -68,6 +70,26 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
   const [reference, setReference] = createSignal<HTMLElement | null>(null);
   const contextData = useDataContext() || {};
 
+  const bindPreviewDrop = bindDragDropRef(
+    `preview-drop-${props.item.id}`,
+    (element) =>
+      attachPreviewDropTarget(element, {
+        layoutStoreVertex,
+        formStoreVertex,
+        layoutVertex: props.item,
+        graph,
+        setGraph,
+        isDesignMode: previewStore.isDesignMode,
+        collapsedKeys: false,
+        children: childrenAttrs,
+        showErrorToast,
+      }),
+  );
+
+  onCleanup(() => {
+    cleanupDragDropRef(reference() ?? undefined);
+  });
+
   const handleClick = (e: MouseEvent) => {
     e.stopPropagation();
     onLayoutItemClick(
@@ -80,7 +102,6 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
     );
   };
 
-  // no need debounde, it is called too less
   const handleMouseEnter = (e: MouseEvent) => {
     e.stopPropagation();
     mergeVertexProperties<FormStoreObject>(0, formStoreId!, graph, setGraph, {
@@ -97,51 +118,15 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
     clearLayoutPreviewHover(layoutStoreId, graph, setGraph);
   };
 
-  // debounce is giving error, node not found when running element.currentTarget and we must need it
-  const handleDragOverEvent = (e: DragEvent) => {
-    const formDataId = formStoreVertex()?.P.formDataId;
-    if (!formDataId) {
-      return; // Exit early if formDataId doesn't exist
-    }
-
-    handleDragOver(
-      e,
-      layoutStoreVertex(),
-      formStoreVertex(),
-      props.item,
-      previewStore.isDesignMode,
-      false,
-      childrenAttrs,
-      graph,
-      setGraph,
-      graph.vertexes[formDataId],
-    );
-  };
-
-  const handleDropEvent = async (e: DragEvent) => {
-    await handleDrop(
-      e,
-      layoutStoreVertex(),
-      formStoreVertex(),
-      graph,
-      setGraph,
-      showErrorToast,
-    );
-    resetDragDropState(layoutStoreVertex(), graph, setGraph);
-  };
-
   return (
     <div // NOSONAR
       onClick={handleClick}
-      onDragEnter={handleDragOverEvent}
-      onDragLeave={() => handleDragLeave(graph, setGraph, layoutStoreId)}
-      onDragOver={handleDragOverEvent}
-      onDrop={handleDropEvent}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onMouseOver={handleMouseEnter} // NOSONAR
       ref={(el) => {
         setReference(el);
+        bindPreviewDrop(el);
         // @ts-expect-error ignore
         el.getBoundingClientRectOriginal = el.getBoundingClientRect.bind(el);
         el.getBoundingClientRect = () => {

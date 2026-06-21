@@ -1,5 +1,11 @@
 import { Icon } from "@iconify-icon/solid";
-import { createMemo, createSignal, For, Show } from "solid-js";
+import {
+  createMemo,
+  createSignal,
+  For,
+  onCleanup,
+  Show,
+} from "solid-js";
 
 import { componentsMap } from "~/components/form/functions/componentsMap";
 import { IconButton } from "~/components/styled/IconButton";
@@ -8,11 +14,13 @@ import { iconMap } from "~/lib/ui/iconMap";
 
 import type { PageLayoutObject } from "../../context/LayoutContext";
 import { useDesignerLayoutStore } from "../../context/LayoutContext";
-import { resetDragDropState } from "../../event_handler/resetDragDropState";
-// import { OpenComponentSettings } from "../../OpenComponentSettings";
+import { attachPaletteComponentDraggable } from "../../functions/drag_drop/pragmatic/pragmaticDragDrop";
+import {
+  bindDragDropRef,
+  cleanupDragDropRef,
+} from "../../functions/drag_drop/pragmatic/bindDragDropRef";
 import { TreeItemExpandButton } from "../../settings/layout/TreeItemExpandButton";
 import { getCompChildren } from "./functions/getCompChildren";
-import { onCompDragStart } from "./functions/onCompDragStart";
 import { As } from "~/components/As";
 import {
   baseItemStyle,
@@ -94,13 +102,28 @@ export function ComponentItem(
       `return \`._id {
         background-color: ${backgroundColor};
         color: ${textColor};
+        cursor: grab;
+        touch-action: none;
       }\`;`,
     ];
   };
 
-  const onDragEnd = () => {
-    resetDragDropState(layoutStoreVertex(), graph, setGraph);
-  };
+  const [itemRef, setItemRef] = createSignal<HTMLDivElement>();
+
+  const bindPaletteDrag = bindDragDropRef(
+    `palette-component-${props.child.id}`,
+    (element) =>
+      attachPaletteComponentDraggable(element, {
+        graph,
+        vertexId: props.child.id,
+        getSelectedVertices: () => Array.from(selectedComponents()),
+        clearSelectedVertices: () => setSelectedComponents(new Set<Vertex>()),
+      }),
+  );
+
+  onCleanup(() => {
+    cleanupDragDropRef(itemRef());
+  });
 
   const children = createMemo(() =>
     getCompChildren([props.child], props.edgeName, graph),
@@ -128,23 +151,14 @@ export function ComponentItem(
       <As
         as="div"
         css={getItemStyle()}
-        draggable={"true"}
         onClick={() => props.toggleExpand(props.child.id)}
         onDblClick={() => props.onDoubleClick?.(props.child)}
-        onDragEnd={onDragEnd}
-        onDragStart={(e) => {
-          return onCompDragStart(
-            e,
-            graph,
-            setGraph,
-            props.child.id,
-            layoutStoreVertex(),
-            selectedComponents,
-            setSelectedComponents,
-          );
-        }}
         onMouseEnter={handleItemMouseEnter}
         onMouseLeave={handleItemMouseLeave}
+        ref={(element) => {
+          setItemRef(element);
+          bindPaletteDrag(element);
+        }}
       >
         <Show when={children().length > 0}>
           <TreeItemExpandButton

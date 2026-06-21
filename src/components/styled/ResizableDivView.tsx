@@ -1,12 +1,15 @@
-import { createEffect, createSignal, type JSX, Show } from "solid-js";
+import { createEffect, createSignal, type JSX, onCleanup, Show } from "solid-js";
 
 import {
   type PageLayoutObject,
   useDesignerFormIdContext,
   useDesignerLayoutStore,
 } from "~/features/page_designer/context/LayoutContext";
-import { handleDrop } from "~/features/page_designer/event_handler/handleDrop";
-import { resetDragDropState } from "~/features/page_designer/event_handler/resetDragDropState";
+import { attachRootDropTarget } from "~/features/page_designer/functions/drag_drop/pragmatic/pragmaticDragDrop";
+import {
+  bindDragDropRef,
+  cleanupDragDropRef,
+} from "~/features/page_designer/functions/drag_drop/pragmatic/bindDragDropRef";
 import { STYLES } from "~/pages/settings/constants";
 
 import type { FormStoreObject } from "../form/context/FormContext";
@@ -156,38 +159,23 @@ export function ResizableContainer(
     window.addEventListener("pointercancel", handlePointerUp);
   };
 
-  const handleDragOver = (e: DragEvent) => {
-    e.preventDefault(); // Allow drop
-    setIsDraggingOver(true);
-  };
+  const bindRootDrop = bindDragDropRef(
+    `resizable-view-${props.view}`,
+    (element) =>
+      attachRootDropTarget(element, {
+        layoutStoreVertex,
+        formStoreVertex,
+        graph,
+        setGraph,
+        showErrorToast,
+        onDragEnter: () => setIsDraggingOver(true),
+        onDragLeave: () => setIsDraggingOver(false),
+      }),
+  );
 
-  const handleDragLeave = () => {
-    setIsDraggingOver(false);
-  };
-
-  const handleDropEvent = async (e: DragEvent) => {
-    setIsDraggingOver(false);
-    mergeVertexProperties<PageLayoutObject>(
-      0,
-      layoutStoreId!,
-      graph,
-      setGraph,
-      {
-        activeItem: formStoreVertex()?.P.formDataId,
-        dragPosition: "center",
-      },
-    );
-
-    await handleDrop(
-      e,
-      layoutStoreVertex(),
-      formStoreVertex(),
-      graph,
-      setGraph,
-      showErrorToast,
-    );
-    resetDragDropState(layoutStoreVertex(), graph, setGraph);
-  };
+  onCleanup(() => {
+    cleanupDragDropRef(containerRef());
+  });
 
   return (
     <As
@@ -217,10 +205,10 @@ export function ResizableContainer(
             : "",
           resizing() ? "return `._id { user-select: none; }`;" : "",
         ]}
-        onDragLeave={handleDragLeave}
-        onDragOver={handleDragOver}
-        onDrop={handleDropEvent}
-        ref={setContainerRef}
+        ref={(element) => {
+          setContainerRef(element);
+          bindRootDrop(element);
+        }}
         style={{
           height: height(),
           width: width(),

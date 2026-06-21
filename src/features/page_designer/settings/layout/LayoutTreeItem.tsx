@@ -4,9 +4,9 @@ import {
   createSelector,
   createSignal,
   For,
+  onCleanup,
   Show,
   createEffect,
-  onCleanup,
 } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
@@ -14,11 +14,13 @@ import { componentsMap } from "~/components/form/functions/componentsMap";
 
 import { useToast } from "~/components/styled/modal/Toast";
 import { generateBoxShadow } from "~/lib/css/generateBoxShadow";
-import { handleDragStart } from "~/features/page_designer/event_handler/handleDragStart";
-import { handleDrop } from "~/features/page_designer/event_handler/handleDrop";
 import { onLayoutItemClick } from "~/features/page_designer/event_handler/onLayoutItemClick";
-import { resetDragDropState } from "~/features/page_designer/event_handler/resetDragDropState";
 import { getDnDBoxShadowArgs } from "~/features/page_designer/functions/drag_drop/ui/getDnDBoxShadowArgs";
+import { attachLayoutTreeItemDragDrop } from "~/features/page_designer/functions/drag_drop/pragmatic/pragmaticDragDrop";
+import {
+  bindDragDropRef,
+  cleanupDragDropRef,
+} from "~/features/page_designer/functions/drag_drop/pragmatic/bindDragDropRef";
 import { saveUndoPoint } from "~/lib/graph/transaction/steps/saveUndoPoint";
 import {
   createOpenInNewTab,
@@ -30,7 +32,6 @@ import {
   useDesignerFormIdContext,
   useDesignerLayoutStore,
 } from "../../context/LayoutContext";
-import { handleDragOver } from "../../event_handler/handleDragOver";
 import { getChildrenAttrs } from "../../functions/layout/getChildrenAttrs";
 import {
   clearLayoutPreviewHover,
@@ -130,55 +131,32 @@ export function LayoutTreeItem(
     }
   });
 
-  let startTime = 0;
-
-  // debounce is giving error, node not found
-  const handleDragOverEvent = (e: DragEvent) => {
-    handleDragOver(
-      e,
-      layoutStoreVertex(),
-      formStoreVertex(),
-      props.metaVertex,
-      false,
-      props.collapsedKeys,
-      children,
-      graph,
-      setGraph,
-      graph.vertexes[formStoreVertex()?.P.formDataId] || null,
-      (dragPosition) => {
-        if (dragPosition === "center" && Date.now() - startTime > 1000) {
-          if (props.collapsedKeys().includes(props.metaVertex.id)) {
+  const bindLayoutDragDrop = bindDragDropRef(
+    `layout-tree-${props.metaVertex.id}`,
+    (element) =>
+      attachLayoutTreeItemDragDrop(element, {
+        layoutStoreVertex,
+        formStoreVertex,
+        layoutVertex: props.metaVertex,
+        graph,
+        setGraph,
+        collapsedKeys: props.collapsedKeys,
+        children,
+        showErrorToast,
+        onExpandChildren: (dragPosition) => {
+          if (
+            dragPosition === "center" &&
+            props.collapsedKeys().includes(props.metaVertex.id)
+          ) {
             props.toggleExpand(props.metaVertex.id);
           }
-        }
-      },
-    );
-  };
+        },
+      }),
+  );
 
-  const handleDragLeave = () => {
-    mergeVertexProperties<PageLayoutObject>(
-      0,
-      layoutStoreId!,
-      graph,
-      setGraph,
-      {
-        activeItem: null,
-        dragPosition: null,
-      },
-    );
-  };
-
-  const handleDropEvent = async (e: DragEvent) => {
-    await handleDrop(
-      e,
-      layoutStoreVertex(),
-      formStoreVertex(),
-      graph,
-      setGraph,
-      showErrorToast,
-    );
-    resetDragDropState(layoutStoreVertex(), graph, setGraph);
-  };
+  onCleanup(() => {
+    cleanupDragDropRef(parentRef());
+  });
 
   const handleClick = () => {
     onLayoutItemClick(
@@ -541,35 +519,17 @@ export function LayoutTreeItem(
     <Show when={shouldShowItem()}>
       <TreeItemContainer
         css={[`return \`._id { ${getBorder()} }\`;`, getHighlightStyle()]}
-        draggable={"true"}
         hasChildren={!!children().length}
         isDragOver={isActiveTargetItem()}
         isHovered={isSelectedHoverId(props.metaVertex.id)}
         isSelected={isSelectedLayoutId(props.metaVertex.id)}
         itemId={props.metaVertex.id}
         onClick={handleClick}
-        onDragEnter={(e) => {
-          startTime = Date.now();
-          handleDragOverEvent(e);
-        }}
-        onDragLeave={handleDragLeave}
-        onDragOver={handleDragOverEvent}
-        onDragStart={(e) =>
-          handleDragStart(
-            e,
-            graph,
-            setGraph,
-            layoutStoreVertex(),
-            props.metaVertex,
-          )
-        }
-        onDrop={handleDropEvent}
         onMouseEnter={handleMouseOver}
         onmouseleave={handleMouseLeave}
-        ref={(el) => {
-          setParentRef(el);
-          // @ts-expect-error ignore
-          el.useCurrentPosition = true;
+        ref={(element) => {
+          setParentRef(element);
+          bindLayoutDragDrop(element);
         }}
         // data-testid={getLayerTestId()}
         // data-text={props.metaVertex.P.text}

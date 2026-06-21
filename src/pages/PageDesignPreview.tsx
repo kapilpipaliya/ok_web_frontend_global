@@ -1,4 +1,4 @@
-import { createSignal, onMount, Show } from "solid-js";
+import { createSignal, onCleanup, onMount, Show } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
@@ -9,15 +9,17 @@ import {
   type PageLayoutObject,
   useDesignerLayoutStore,
 } from "~/features/page_designer/context/LayoutContext";
-import { handleDrop } from "~/features/page_designer/event_handler/handleDrop";
-import { resetDragDropState } from "~/features/page_designer/event_handler/resetDragDropState";
+import { attachRootDropTarget } from "~/features/page_designer/functions/drag_drop/pragmatic/pragmaticDragDrop";
+import {
+  bindDragDropRef,
+  cleanupDragDropRef,
+} from "~/features/page_designer/functions/drag_drop/pragmatic/bindDragDropRef";
+import { onLayoutItemClick } from "~/features/page_designer/event_handler/onLayoutItemClick";
 import { As } from "~/components/As";
-import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import { getChannel } from "~/lib/graph/mutate/core/channel/getChannel";
 import { handleChannelMessage } from "~/lib/graph/mutate/core/channel/handleChannelMessage";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
-import { onLayoutItemClick } from "~/features/page_designer/event_handler/onLayoutItemClick";
 import type { Id } from "~/lib/graph/type/id";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 import { Suspense } from "solid-js";
@@ -146,6 +148,24 @@ function DroppableWrapper(props: {
   const formStoreVertex = () =>
     graph.vertexes[props.formStoreId] as Vertex<FormStoreObject>;
 
+  const [dropRef, setDropRef] = createSignal<HTMLDivElement>();
+
+  const bindRootDrop = bindDragDropRef("preview-root-drop", (element) =>
+    attachRootDropTarget(element, {
+      layoutStoreVertex,
+      formStoreVertex,
+      graph,
+      setGraph,
+      showErrorToast: (error) => console.error(error),
+      onDragEnter: () => setIsDraggingOver(true),
+      onDragLeave: () => setIsDraggingOver(false),
+    }),
+  );
+
+  onCleanup(() => {
+    cleanupDragDropRef(dropRef());
+  });
+
   return (
     <As
       as="div"
@@ -162,35 +182,9 @@ function DroppableWrapper(props: {
           setGraph,
         );
       }}
-      onDragLeave={() => {
-        setIsDraggingOver(false);
-      }}
-      onDragOver={(e) => {
-        e.preventDefault(); // Allow drop
-        setIsDraggingOver(true);
-      }}
-      onDrop={async (e) => {
-        setIsDraggingOver(false);
-        mergeVertexProperties<PageLayoutObject>(
-          0,
-          layoutStoreId,
-          graph,
-          setGraph,
-          {
-            activeItem: formStoreVertex()?.P.formDataId,
-            dragPosition: "center",
-          },
-        );
-
-        await handleDrop(
-          e,
-          layoutStoreVertex(),
-          formStoreVertex(),
-          graph,
-          setGraph,
-          (error) => console.error(error),
-        );
-        resetDragDropState(layoutStoreVertex(), graph, setGraph);
+      ref={(element) => {
+        setDropRef(element);
+        bindRootDrop(element);
       }}
     >
       {props.children}

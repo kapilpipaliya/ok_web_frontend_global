@@ -1,4 +1,4 @@
-import { For, Show } from "solid-js";
+import { createSignal, For, onCleanup, Show } from "solid-js";
 import { v7 as uuidv7 } from "uuid";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
@@ -12,6 +12,14 @@ import {
   useDesignerLayoutStore,
 } from "../../context/LayoutContext";
 import { getTabLabel } from "./functions/getTabLabel";
+import {
+  attachTabDragDrop,
+  attachTabPanelDropTarget,
+} from "../../functions/drag_drop/pragmatic/pragmaticDragDrop";
+import {
+  bindDragDropRef,
+  cleanupDragDropRef,
+} from "../../functions/drag_drop/pragmatic/bindDragDropRef";
 import { As } from "~/components/As";
 import { deleteVertex } from "~/lib/graph/mutate/core/vertex/deleteVertex";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
@@ -19,13 +27,136 @@ import type { Id } from "~/lib/graph/type/id";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 
+function TabBarItem(props: {
+  openedFormId: Id;
+  mainPanel: Id;
+  layoutStoreId: Id;
+  index: number;
+  getTabCss: (openedFormId: Id) => string;
+  handleTabClick: (formId: string) => void;
+  handleClose: (openedFormId: Id) => void;
+  isUnsaved: (formId: string) => boolean;
+  moveTab: (toPanelId: Id) => void;
+  graph: ReturnType<typeof useGraph>[0];
+  setGraph: ReturnType<typeof useGraph>[1];
+}) {
+  const [tabRef, setTabRef] = createSignal<HTMLDivElement>();
+
+  const bindTabDragDrop = bindDragDropRef(
+    `tab-${props.openedFormId}`,
+    (element) =>
+      attachTabDragDrop(element, {
+        layoutStoreId: props.layoutStoreId,
+        layoutStoreVertex: () =>
+          props.graph.vertexes[props.layoutStoreId] as Vertex<PageLayoutObject>,
+        graph: props.graph,
+        setGraph: props.setGraph,
+        openedFormId: props.openedFormId,
+        mainPanel: props.mainPanel,
+        moveTab: props.moveTab,
+      }),
+  );
+
+  onCleanup(() => {
+    cleanupDragDropRef(tabRef());
+  });
+
+  const formId = () => props.graph.vertexes[props.openedFormId].P.formId;
+
+  return (
+    <As
+      as="div"
+      css={props.getTabCss(props.openedFormId)}
+      onClick={[props.handleTabClick, formId()]}
+      ref={(element) => {
+        setTabRef(element);
+        bindTabDragDrop(element);
+      }}
+    >
+      <As
+        as="span"
+        css={`return \`._id {
+  user-select: none;
+  white-space: nowrap;
+}\`;`}
+      >
+        {getTabLabel(props.openedFormId, props.graph)}
+        {props.isUnsaved(formId()) && (
+          <As
+            as="span"
+            css={`return \`._id {
+                      color:\${args.theme.var.color.error};
+                      font-weight: bold;
+                      margin-left: 3px;
+                      display: inline-block;
+                    }\`;`}
+            title="Unsaved changes"
+          >
+            *
+          </As>
+        )}
+      </As>
+      <IconButton
+        icon="ph:plus"
+        css={`return \`._id {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  color: \${args.theme.var.color.primary_text};
+  transition: color 0.2s ease;
+  &:hover {
+    color: \${args.theme.var.color.primary};
+  }
+}\`;`}
+        onClick={() => {
+          const newView = createViewVertex({ view: "Mobile" }, props.graph, props.setGraph);
+          const currentVertexProps = props.graph.vertexes[formId()]?.P as FormStoreObject;
+          const currentViews = currentVertexProps?.openedViews || [];
+
+          mergeVertexProperties<FormStoreObject>(
+            0,
+            formId(),
+            props.graph,
+            props.setGraph,
+            {
+              openedViews: [...currentViews, newView.id],
+              lastAddedViewId: newView.id,
+            },
+          );
+        }}
+        size={16}
+        title="Add View"
+      />
+      <Show when={props.index !== 0}>
+        <IconButton
+          css={`return \`._id {
+  background-color: transparent;
+  color: \${args.theme.var.color.error};
+  cursor: pointer;
+  border: none;
+  &:hover {
+    color: \${args.theme.var.color.error_light_800};
+  }
+}\`;`}
+          icon="ph:x"
+          onClick={(e) => {
+            e.stopPropagation();
+            props.handleClose(props.openedFormId);
+          }}
+          size={16}
+          title="Close Tab"
+        />
+      </Show>
+    </As>
+  );
+}
+
 export function TabBar(props: { mainPanel: Id }) {
   const [graph, setGraph] = useGraph();
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStore = () =>
     (graph.vertexes[layoutStoreId]?.P as PageLayoutObject) || {};
 
-  // Helper function to determine tab CSS based on active state
   const getTabCss = (openedFormId: Id) => {
     const key = `mainPanel${props.mainPanel}Tab` as keyof PageLayoutObject;
     const layoutStoreValue = layoutStore() as Record<string, unknown>;
@@ -34,7 +165,7 @@ export function TabBar(props: { mainPanel: Id }) {
     const isCurrentForm =
       layoutStore().formId === graph.vertexes[openedFormId].P.formId;
 
-    const baseCss = `return \`._id {
+    return `return \`._id {
       align-items: center;
       border-radius: 4px;
       display: flex;
@@ -49,14 +180,11 @@ export function TabBar(props: { mainPanel: Id }) {
       }
       ${isCurrentForm ? "border-bottom: 2px solid ${args.theme.var.color.error};" : ""}
     }\`;`;
-
-    return baseCss;
   };
 
   const handleClose = (openedFormId: Id) => {
     const openTab = layoutStore().openedFormIds.find((f) => f !== openedFormId);
     const prevFormId = graph.vertexes[openTab!]?.P.formId || null;
-    // Note: cloneProperties is false because we don't want to clone the properties of the form. It cause re-render of the form.
     mergeVertexProperties<PageLayoutObject>(
       0,
       layoutStoreId,
@@ -99,10 +227,7 @@ export function TabBar(props: { mainPanel: Id }) {
     }
 
     const tab = graph.vertexes[dragInfo].P.mainPanel;
-    if (!tab) {
-      return;
-    }
-    if (tab === toPanelId) {
+    if (!tab || tab === toPanelId) {
       return;
     }
 
@@ -137,6 +262,26 @@ export function TabBar(props: { mainPanel: Id }) {
     }
   };
 
+  const [panelRef, setPanelRef] = createSignal<HTMLDivElement>();
+
+  const bindPanelDrop = bindDragDropRef(
+    `tab-panel-${props.mainPanel}`,
+    (element) =>
+      attachTabPanelDropTarget(element, {
+        layoutStoreId,
+        layoutStoreVertex: () =>
+          graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>,
+        graph,
+        setGraph,
+        mainPanel: props.mainPanel,
+        moveTab,
+      }),
+  );
+
+  onCleanup(() => {
+    cleanupDragDropRef(panelRef());
+  });
+
   return (
     <As
       as="div"
@@ -147,8 +292,10 @@ export function TabBar(props: { mainPanel: Id }) {
   border-bottom: 1px solid \${args.theme.var.color.border};
   background-color: \${args.theme.var.color.background_light_100};
 }\`;`}
-      onDragOver={(e) => e.preventDefault()}
-      onDrop={() => moveTab(props.mainPanel)}
+      ref={(element) => {
+        setPanelRef(element);
+        bindPanelDrop(element);
+      }}
     >
       <IconButton
         icon="ph:plus-circle"
@@ -181,102 +328,19 @@ export function TabBar(props: { mainPanel: Id }) {
           )}
         >
           {(openedFormId, index) => (
-            <As
-              as="div"
-              css={getTabCss(openedFormId)}
-              draggable={"true"}
-              onClick={[handleTabClick, graph.vertexes[openedFormId].P.formId]}
-              onDragOver={(e) => e.preventDefault()}
-              onDragStart={(e) => {
-                // Set required data for drag operation
-                e.dataTransfer?.setData("text/plain", openedFormId);
-                mergeVertexProperties(0, layoutStoreId, graph, setGraph, {
-                  draggedTab: openedFormId,
-                });
-              }}
-              onDrop={() => moveTab(props.mainPanel)}
-            >
-              <As
-                as="span"
-                css={`return \`._id {
-  user-select: none;
-  white-space: nowrap;
-}\`;`}
-              >
-                {getTabLabel(openedFormId, graph)}
-                {isUnsaved(graph.vertexes[openedFormId].P.formId) && (
-                  <As
-                    as="span"
-                    css={`return \`._id {
-                      color:\${args.theme.var.color.error};
-                      font-weight: bold;
-                      margin-left: 3px;
-                      display: inline-block;
-                    }\`;`}
-                    title="Unsaved changes"
-                  >
-                    *
-                  </As>
-                )}
-              </As>
-              <IconButton
-                icon="ph:plus"
-                css={`return \`._id {
-  background-color: transparent;
-  border: none;
-  cursor: pointer;
-  color: \${args.theme.var.color.primary_text};
-  transition: color 0.2s ease;
-  &:hover {
-    color: \${args.theme.var.color.primary};
-  }
-}\`;`}
-                onClick={() => {
-                  const newView = createViewVertex(
-                    { view: "Mobile" },
-                    graph,
-                    setGraph,
-                  );
-                  const formId = graph.vertexes[openedFormId].P.formId;
-                  const currentVertexProps = graph.vertexes[formId]
-                    ?.P as FormStoreObject;
-                  const currentViews = currentVertexProps?.openedViews || [];
-
-                  mergeVertexProperties<FormStoreObject>(
-                    0,
-                    formId,
-                    graph,
-                    setGraph,
-                    {
-                      openedViews: [...currentViews, newView.id],
-                      lastAddedViewId: newView.id,
-                    },
-                  );
-                }}
-                size={16}
-                title="Add View"
-              />
-              <Show when={index() !== 0}>
-                <IconButton
-                  css={`return \`._id {
-  background-color: transparent;
-  color: \${args.theme.var.color.error};
-  cursor: pointer;
-  border: none;
-  &:hover {
-    color: \${args.theme.var.color.error_light_800};
-  }
-}\`;`}
-                  icon="ph:x"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleClose(openedFormId);
-                  }}
-                  size={16}
-                  title="Close Tab"
-                />
-              </Show>
-            </As>
+            <TabBarItem
+              openedFormId={openedFormId}
+              mainPanel={props.mainPanel}
+              layoutStoreId={layoutStoreId}
+              index={index()}
+              getTabCss={getTabCss}
+              handleTabClick={handleTabClick}
+              handleClose={handleClose}
+              isUnsaved={isUnsaved}
+              moveTab={moveTab}
+              graph={graph}
+              setGraph={setGraph}
+            />
           )}
         </For>
       </As>
@@ -298,10 +362,8 @@ export function TabBar(props: { mainPanel: Id }) {
             const nextPanelId = layoutStore().mainPanel[panelIndex + 1];
             const targetPanelId = previousPanelId || nextPanelId;
 
-            // Move all forms from current panel to target panel
             moveFormsToPanel(props.mainPanel, targetPanelId);
 
-            // Remove the current panel
             mergeVertexProperties<PageLayoutObject>(
               0,
               layoutStoreId,
