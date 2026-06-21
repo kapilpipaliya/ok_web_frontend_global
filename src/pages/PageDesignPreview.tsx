@@ -151,6 +151,8 @@ function DroppableWrapper(props: {
   const [dropRef, setDropRef] = createSignal<HTMLDivElement>();
 
   const bindRootDrop = bindDragDropRef("preview-root-drop", (element) =>
+    // Catches drops on empty preview area; nested PageAttrDnDWrapper targets
+    // handle item-level drops when pointer is over a component.
     attachRootDropTarget(element, {
       layoutStoreVertex,
       formStoreVertex,

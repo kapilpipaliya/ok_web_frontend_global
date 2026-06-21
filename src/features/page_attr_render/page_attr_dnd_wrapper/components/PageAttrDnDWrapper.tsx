@@ -26,8 +26,10 @@ import { onLayoutItemClick } from "~/features/page_designer/event_handler/onLayo
 import { getBoundingRectChildren } from "~/features/page_designer/functions/drag_drop/ui/getBoundingRectChildren";
 import { getChildrenAttrs } from "~/features/page_designer/functions/layout/getChildrenAttrs";
 import {
+  cancelPendingPreviewHoverClear,
   clearLayoutPreviewHover,
   isLayoutPreviewHover,
+  schedulePreviewHoverClear,
   setLayoutPreviewHover,
 } from "~/features/page_designer/functions/layout/previewHover";
 
@@ -83,6 +85,31 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
         collapsedKeys: false,
         children: childrenAttrs,
         showErrorToast,
+        // Mouse events don't fire during pragmatic drag — set hover from drop target.
+        onDragEnter: () => {
+          cancelPendingPreviewHoverClear();
+          mergeVertexProperties<FormStoreObject>(
+            0,
+            formStoreId!,
+            graph,
+            setGraph,
+            { hoverId: props.item.id },
+          );
+          setLayoutPreviewHover(
+            layoutStoreId,
+            props.item.id,
+            graph,
+            setGraph,
+          );
+        },
+        onDragLeave: () => {
+          schedulePreviewHoverClear(
+            layoutStoreId,
+            formStoreId!,
+            graph,
+            setGraph,
+          );
+        },
       }),
   );
 
@@ -127,6 +154,7 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
       ref={(el) => {
         setReference(el);
         bindPreviewDrop(el);
+        // display:contents has no box; aggregate child bounds for hit-testing.
         // @ts-expect-error ignore
         el.getBoundingClientRectOriginal = el.getBoundingClientRect.bind(el);
         el.getBoundingClientRect = () => {

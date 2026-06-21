@@ -21,6 +21,7 @@ export function getPaletteDragVertices(ctx: PaletteDragContext) {
 export function getVertexIdsFromSourceData(
   data: Record<string, unknown>,
 ): Id[] {
+  // Dragged items travel in pragmatic source.data, not layout store state.
   if (Array.isArray(data.vertexIds)) {
     return data.vertexIds.filter((id): id is Id => id != null);
   }

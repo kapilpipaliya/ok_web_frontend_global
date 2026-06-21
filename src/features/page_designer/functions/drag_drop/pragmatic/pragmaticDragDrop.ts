@@ -41,6 +41,7 @@ function canDropPageDesignerSource(source: { data: Record<string, unknown> }) {
 }
 
 function markUseCurrentPosition(element: HTMLElement) {
+  // Enables 4px edge zones in getIndicatorPosition (layout tree + preview).
   // @ts-expect-error used by getIndicatorPosition
   element.useCurrentPosition = true;
 }
@@ -51,6 +52,55 @@ function getLayoutStore(ctx: {
   return ctx.layoutStoreVertex();
 }
 
+type DropTargetLocation = {
+  current: {
+    dropTargets: Array<{ element: Element }>;
+    input: { clientX: number; clientY: number };
+  };
+};
+
+type PositionUpdater = (
+  input: { clientX: number; clientY: number },
+  sourceData: Record<string, unknown>,
+) => void;
+
+// Nested wrappers (parent + child Attr) all register drop targets. This map
+// lets us promote the next innermost target when leaving a nested child.
+const dropTargetHandlers = new WeakMap<
+  HTMLElement,
+  {
+    onDragEnter?: () => void;
+    onDragLeave?: () => void;
+    updatePosition: PositionUpdater;
+  }
+>();
+
+// Pragmatic lists drop targets innermost-first. Parent targets must not
+// overwrite position/drop when a child target is also under the pointer.
+function isInnermostDropTarget(
+  element: Element,
+  location: DropTargetLocation,
+) {
+  return location.current.dropTargets[0]?.element === element;
+}
+
+// Moving from a child wrapper to its parent leaves the child but the parent
+// is still a valid target — refresh position/hover on the new innermost.
+function promoteInnermostDropTarget(
+  location: DropTargetLocation,
+  sourceData: Record<string, unknown>,
+) {
+  cancelPendingDropPositionClear();
+  const innermost = location.current.dropTargets[0]?.element;
+  if (!(innermost instanceof HTMLElement)) {
+    return;
+  }
+
+  const handlers = dropTargetHandlers.get(innermost);
+  handlers?.onDragEnter?.();
+  handlers?.updatePosition(location.current.input, sourceData);
+}
+
 function scheduleDropStateCleanup(
   ctx: {
     layoutStoreVertex: () => Vertex<PageLayoutObject>;
@@ -58,6 +108,8 @@ function scheduleDropStateCleanup(
     setGraph: SetStoreFunction<GraphInterface>;
   },
 ) {
+  // Drop target onDrop runs before draggable onDrop; defer cleanup so the
+  // snapshot is captured before activeItem/dragPosition are cleared.
   queueMicrotask(() => {
     resetDragDropState(getLayoutStore(ctx), ctx.graph, ctx.setGraph);
   });
@@ -78,6 +130,7 @@ async function runLayoutDrop(
   cancelPendingDropPositionClear();
 
   const formStore = ctx.formStoreVertex();
+  // Snapshot is taken synchronously at drop time; vertexIds come from source.data.
   const snapshot = createLayoutDropSnapshot(
     getLayoutStore(ctx),
     vertexIds,
@@ -192,24 +245,35 @@ function createPositionUpdater(
 function attachElementDropTarget(
   element: HTMLElement,
   ctx: PreviewDropTargetContext,
-  updatePosition: (
-    input: { clientX: number; clientY: number },
-    sourceData: Record<string, unknown>,
-  ) => void,
+  updatePosition: PositionUpdater,
   onExpandChildren?: (dragPosition: string) => void,
 ) {
   let expandStartTime = 0;
+
+  dropTargetHandlers.set(element, {
+    onDragEnter: ctx.onDragEnter,
+    onDragLeave: ctx.onDragLeave,
+    updatePosition,
+  });
 
   return dropTargetForElements({
     element,
     canDrop: ({ source }) => canDropPageDesignerSource(source),
     onDragEnter: ({ location, source }) => {
+      if (!isInnermostDropTarget(element, location)) {
+        return;
+      }
+
       cancelPendingDropPositionClear();
       ctx.onDragEnter?.();
       expandStartTime = Date.now();
       updatePosition(location.current.input, source.data);
     },
     onDrag: ({ location, source }) => {
+      if (!isInnermostDropTarget(element, location)) {
+        return;
+      }
+
       cancelPendingDropPositionClear();
       updatePosition(location.current.input, source.data);
       const dragPosition = getLayoutStore(ctx).P.dragPosition;
@@ -221,10 +285,23 @@ function attachElementDropTarget(
         onExpandChildren(dragPosition);
       }
     },
-    onDragLeave: () => {
+    onDragLeave: ({ location, source }) => {
+      // Still over a parent/ancestor target — promote instead of clearing.
+      if (location.current.dropTargets.length > 0) {
+        promoteInnermostDropTarget(location, source.data);
+        return;
+      }
+
+      // Left all drop targets (e.g. dragged out of preview).
       scheduleDropPositionClear(getLayoutStore(ctx), ctx.graph, ctx.setGraph);
+      ctx.onDragLeave?.();
     },
     onDrop: ({ location, source }) => {
+      // Pragmatic fires onDrop on every nested target; only innermost executes.
+      if (!isInnermostDropTarget(element, location)) {
+        return;
+      }
+
       cancelPendingDropPositionClear();
       updatePosition(location.current.input, source.data);
       void runLayoutDrop(ctx, getVertexIdsFromSourceData(source.data));
@@ -322,8 +399,28 @@ export function attachPreviewDropTarget(
   element: HTMLElement,
   ctx: PreviewDropTargetContext,
 ): () => void {
+  // Preview canvas uses tight edge zones like the layout tree.
+  markUseCurrentPosition(element);
   const updatePosition = createPositionUpdater(element, ctx);
   return attachElementDropTarget(element, ctx, updatePosition);
+}
+
+function isRootDropTargetActive(
+  layoutStore: Vertex<PageLayoutObject>,
+  formDataId: Id | undefined,
+) {
+  // Root only owns the drop when no nested item has set activeItem, or when
+  // activeItem is the page root (append-to-page / empty-area drop).
+  if (!formDataId) {
+    return true;
+  }
+
+  const { activeItem, dragPosition } = layoutStore.P;
+  if (activeItem == null || dragPosition == null) {
+    return true;
+  }
+
+  return activeItem === formDataId;
 }
 
 export function attachRootDropTarget(
@@ -347,18 +444,49 @@ export function attachRootDropTarget(
   return dropTargetForElements({
     element,
     canDrop: ({ source }) => canDropPageDesignerSource(source),
-    onDragEnter: ({ source }) => {
+    onDragEnter: () => {
       cancelPendingDropPositionClear();
       ctx.onDragEnter?.();
-      setRootPosition();
+      // Do not set root position here — nested item targets set activeItem.
     },
-    onDragLeave: () => {
+    onDrag: ({ location }) => {
+      if (!isInnermostDropTarget(element, location)) {
+        return;
+      }
+
+      cancelPendingDropPositionClear();
+      const layoutStore = getLayoutStore(ctx);
+      const formDataId = ctx.formStoreVertex()?.P.formDataId;
+      if (isRootDropTargetActive(layoutStore, formDataId)) {
+        setRootPosition();
+      }
+    },
+    onDragLeave: ({ location }) => {
+      if (location.current.dropTargets.length > 0) {
+        return;
+      }
+
       scheduleDropPositionClear(getLayoutStore(ctx), ctx.graph, ctx.setGraph);
       ctx.onDragLeave?.();
     },
-    onDrop: ({ source }) => {
+    onDrop: ({ location, source }) => {
+      // Only handle when pointer is over empty preview (no nested item target).
+      if (!isInnermostDropTarget(element, location)) {
+        return;
+      }
+
       cancelPendingDropPositionClear();
-      setRootPosition();
+      const layoutStore = getLayoutStore(ctx);
+      const formDataId = ctx.formStoreVertex()?.P.formDataId;
+
+      if (!isRootDropTargetActive(layoutStore, formDataId)) {
+        return;
+      }
+
+      if (layoutStore.P.activeItem == null || layoutStore.P.dragPosition == null) {
+        setRootPosition();
+      }
+
       void runLayoutDrop(ctx, getVertexIdsFromSourceData(source.data));
     },
   });

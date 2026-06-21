@@ -49,15 +49,19 @@ export function BorderOverlay(
   );
   const isActiveTargetItem = () => activeItemChanged(props.item.id);
 
-  const getBorder = createMemo(() => {
-    let styles = {};
+  const isActiveDropTarget = () =>
+    isActiveTargetItem() && !!layoutStoreVertex()?.P.dragPosition;
 
-    if (isActiveTargetItem()) {
+  const getBorder = createMemo(() => {
+    let styles: Record<string, string> = {};
+
+    // Drop indicator (green edge shadow) takes priority over hover border.
+    if (isActiveDropTarget()) {
       const boxShadowProps = getDnDBoxShadowArgs(
         layoutStoreVertex()?.P.dragPosition,
         "green",
       );
-      styles = {
+      return {
         "box-shadow": generateBoxShadow([boxShadowProps]),
       };
     }
@@ -124,7 +128,18 @@ export function BorderOverlay(
     };
 
     createEffect(
-      on([() => floatingState().x, () => floatingState().y], updatePos),
+      on(
+        [
+          () => layoutStoreVertex()?.P.activeItem,
+          () => layoutStoreVertex()?.P.dragPosition,
+          () => layoutStoreVertex()?.P.previewHoverId,
+          () => formStoreVertex()?.P.hoverId,
+          () => floatingState().x,
+          () => floatingState().y,
+        ],
+        // Re-measure when drop zone or hover changes during drag.
+        updatePos,
+      ),
     );
 
     return (

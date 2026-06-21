@@ -27,6 +27,7 @@ export function scheduleDropPositionClear(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
 ) {
+  // Debounced: dragLeave on nested targets fires when moving between siblings.
   cancelPendingDropPositionClear();
   pendingDropClearRaf = requestAnimationFrame(() => {
     pendingDropClearRaf = null;
@@ -38,6 +39,7 @@ export function createLayoutDropSnapshot(
   layoutStoreVertex: Vertex<PageLayoutObject>,
   vertexIds: Id[],
 ): LayoutDropSnapshot | null {
+  // Position comes from layout store; dragged items come from pragmatic source.data.
   const { activeItem, dragPosition } = layoutStoreVertex.P;
   if (activeItem == null || !dragPosition || vertexIds.length === 0) {
     return null;
