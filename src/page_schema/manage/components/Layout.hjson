@@ -1,0 +1,117 @@
+{
+  vertexes: [
+    {
+      id: "layout_root"
+      L: Component
+      P: {
+        key: Layout
+      }
+    }
+    {
+      id: "layout_shell"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+};'''
+        css:
+          '''return `._id {
+  min-height: 100vh;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  display: flex;
+  flex-direction: column;
+}`;'''
+      }
+    }
+    {
+      id: "layout_header"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "header",
+  text: "Manage"
+};'''
+        css:
+          '''return `._id {
+  padding: ${args.theme.var.spacing.lg} ${args.theme.var.spacing.xl};
+  border-bottom: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.background_light_100};
+  font-size: ${args.theme.var.fontSize.title};
+  font-weight: 700;
+  letter-spacing: -0.02em;
+
+  @media (max-width: 768px) {
+    padding: ${args.theme.var.spacing.md};
+    font-size: ${args.theme.var.fontSize.xl};
+  }
+}`;'''
+      }
+    }
+    {
+      id: "layout_subtitle"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Connect to the local execute server on your machine and manage code sources."
+};'''
+        css:
+          '''return `._id {
+  margin: ${args.theme.var.spacing.xs} 0 0;
+  padding: 0 ${args.theme.var.spacing.xl} ${args.theme.var.spacing.md};
+  color: ${args.theme.var.color.muted};
+  font-size: ${args.theme.var.fontSize.sm};
+
+  @media (max-width: 768px) {
+    padding: 0 ${args.theme.var.spacing.md} ${args.theme.var.spacing.sm};
+  }
+}`;'''
+      }
+    }
+    {
+      id: "layout_content"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Slot
+        slot: children
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "layout_root"
+      E: "layout_shell"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "layout_shell"
+      E: "layout_header"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "layout_shell"
+      E: "layout_subtitle"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "layout_shell"
+      E: "layout_content"
+    }
+  ]
+}

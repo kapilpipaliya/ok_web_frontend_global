@@ -1,0 +1,429 @@
+{
+  vertexes: [
+    {
+      id: "page1"
+      L: Page
+      P: {
+        key: LocalFilesPage
+        url: /manage/files
+        title: Local files
+        public: true
+        props:
+          '''return {
+  isNoPermissionCheck: true
+}'''
+      }
+    }
+    {
+      id: "layout1"
+      L: PageLayout
+      P: {
+        componentName: Layout
+        displayOrder: 1
+      }
+    }
+    {
+      id: "root"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        fns:
+          '''
+const [store, setStore] = args.createStore({
+  host: args.userSetting?.connectionHost || "127.0.0.1",
+  port: String(args.userSetting?.connectionPort || "3000"),
+  selection: []
+});
+
+const onSelectionChange = (selection) => {
+  setStore("selection", selection);
+  args.saveUserSetting({
+    localPathSelectionJson: JSON.stringify(selection)
+  });
+};
+
+const initFromSettings = () => {
+  const raw = args.userSetting?.localPathSelectionJson;
+  if (typeof raw !== "string" || !raw.trim()) return;
+  try {
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) {
+      setStore("selection", parsed);
+    }
+  } catch {
+    // ignore invalid saved selection
+  }
+};
+
+const formatSelection = () => {
+  try {
+    return JSON.stringify(store.selection, null, 2);
+  } catch {
+    return "[]";
+  }
+};
+
+return {
+  store,
+  setStore,
+  onSelectionChange,
+  initFromSettings,
+  formatSelection
+};
+'''
+        props:
+          '''return {
+  as: "div",
+  onMount: () => {
+    args.fns.initFromSettings();
+  }
+};'''
+        css:
+          '''return `._id {
+  padding: ${args.theme.var.spacing.lg} ${args.theme.var.spacing.xl};
+  max-width: 960px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+
+  @media (max-width: 768px) {
+    padding: ${args.theme.var.spacing.md};
+  }
+}`;'''
+      }
+    }
+    {
+      id: "page_title"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h1",
+  text: "Pick local files and folders"
+};'''
+        css:
+          '''return `._id {
+  margin: 0 0 ${args.theme.var.spacing.sm};
+  font-size: ${args.theme.var.fontSize.title};
+  font-weight: 700;
+}`;'''
+      }
+    }
+    {
+      id: "page_desc"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Select multiple files or folders from this PC using native pickers, or browse directories through the local execute server."
+};'''
+        css:
+          '''return `._id {
+  margin: 0 0 ${args.theme.var.spacing.lg};
+  color: ${args.theme.var.color.muted};
+  font-size: ${args.theme.var.fontSize.sm};
+}`;'''
+      }
+    }
+    {
+      id: "conn_row"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+};'''
+        css:
+          '''return `._id {
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${args.theme.var.spacing.md};
+  margin-bottom: ${args.theme.var.spacing.lg};
+}`;'''
+      }
+    }
+    {
+      id: "host_field"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+};'''
+        css:
+          '''return `._id {
+  flex: 1 1 160px;
+}`;'''
+      }
+    }
+    {
+      id: "host_label"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "label",
+  text: "Execute server host"
+};'''
+        css:
+          '''return `._id {
+  display: block;
+  margin-bottom: ${args.theme.var.spacing.xs};
+  font-size: ${args.theme.var.fontSize.sm};
+}`;'''
+      }
+    }
+    {
+      id: "host_input"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: TextInput
+        props:
+          '''return {
+  value: args.fns.store.host,
+  onInput: (event) => args.fns.setStore("host", event.target.value),
+  onBlur: () => args.saveUserSetting({
+    connectionHost: args.fns.store.host,
+    connectionPort: args.fns.store.port
+  })
+};'''
+      }
+    }
+    {
+      id: "port_field"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+};'''
+        css:
+          '''return `._id {
+  flex: 0 1 120px;
+}`;'''
+      }
+    }
+    {
+      id: "port_label"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "label",
+  text: "Port"
+};'''
+        css:
+          '''return `._id {
+  display: block;
+  margin-bottom: ${args.theme.var.spacing.xs};
+  font-size: ${args.theme.var.fontSize.sm};
+}`;'''
+      }
+    }
+    {
+      id: "port_input"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: TextInput
+        props:
+          '''return {
+  value: args.fns.store.port,
+  onInput: (event) => args.fns.setStore("port", event.target.value),
+  onBlur: () => args.saveUserSetting({
+    connectionHost: args.fns.store.host,
+    connectionPort: args.fns.store.port
+  })
+};'''
+      }
+    }
+    {
+      id: "picker"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: LocalPathPicker
+        props:
+          '''return {
+  executeHost: args.fns.store.host,
+  executePort: args.fns.store.port,
+  multiple: true,
+  allowFiles: true,
+  allowFolders: true,
+  allowBrowse: true,
+  value: args.fns.store.selection,
+  onChange: args.fns.onSelectionChange
+};'''
+      }
+    }
+    {
+      id: "json_panel"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''return {
+  as: "section"
+};'''
+        css:
+          '''return `._id {
+  margin-top: ${args.theme.var.spacing.lg};
+}`;'''
+      }
+    }
+    {
+      id: "json_title"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Selection JSON"
+};'''
+        css:
+          '''return `._id {
+  margin: 0 0 ${args.theme.var.spacing.sm};
+  font-size: ${args.theme.var.fontSize.lg};
+  font-weight: 600;
+}`;'''
+      }
+    }
+    {
+      id: "json_output"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "pre",
+  text: args.fns.formatSelection()
+};'''
+        css:
+          '''return `._id {
+  margin: 0;
+  padding: ${args.theme.var.spacing.md};
+  border-radius: ${args.theme.var.borderRadius.md};
+  background: ${args.theme.var.color.background_dark_900};
+  color: ${args.theme.var.color.background_light_900_text};
+  font-size: ${args.theme.var.fontSize.sm};
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}`;'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e_page_layout
+      T: PageLayout
+      S: page1
+      E: layout1
+    }
+    {
+      id: e_page_root
+      T: Attr
+      S: page1
+      E: root
+    }
+    {
+      id: e_root_title
+      T: Attr
+      S: root
+      E: page_title
+    }
+    {
+      id: e_root_desc
+      T: Attr
+      S: root
+      E: page_desc
+    }
+    {
+      id: e_root_conn
+      T: Attr
+      S: root
+      E: conn_row
+    }
+    {
+      id: e_conn_host
+      T: Attr
+      S: conn_row
+      E: host_field
+    }
+    {
+      id: e_host_label
+      T: Attr
+      S: host_field
+      E: host_label
+    }
+    {
+      id: e_host_input
+      T: Attr
+      S: host_field
+      E: host_input
+    }
+    {
+      id: e_conn_port
+      T: Attr
+      S: conn_row
+      E: port_field
+    }
+    {
+      id: e_port_label
+      T: Attr
+      S: port_field
+      E: port_label
+    }
+    {
+      id: e_port_input
+      T: Attr
+      S: port_field
+      E: port_input
+    }
+    {
+      id: e_root_picker
+      T: Attr
+      S: root
+      E: picker
+    }
+    {
+      id: e_root_json
+      T: Attr
+      S: root
+      E: json_panel
+    }
+    {
+      id: e_json_title
+      T: Attr
+      S: json_panel
+      E: json_title
+    }
+    {
+      id: e_json_output
+      T: Attr
+      S: json_panel
+      E: json_output
+    }
+  ]
+}

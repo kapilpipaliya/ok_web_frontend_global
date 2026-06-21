@@ -1,0 +1,889 @@
+{
+  vertexes: [
+    {
+      id: "picker_root"
+      L: Component
+      P: {
+        key: LocalPathPicker
+      }
+    }
+    {
+      id: "picker_shell"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        fns:
+          '''
+const props = () => args.contextData.props || {};
+
+const [selection, setSelection] = args.createSignal([]);
+const [browsePath, setBrowsePath] = args.createSignal("");
+const [browseParent, setBrowseParent] = args.createSignal("");
+const [browseEntries, setBrowseEntries] = args.createSignal([]);
+const [loading, setLoading] = args.createSignal(false);
+const [error, setError] = args.createSignal("");
+
+let fileInputRef = null;
+let folderInputRef = null;
+
+const getExecuteBaseUrl = () => {
+  const host = (props().executeHost || "127.0.0.1").trim();
+  const port = (props().executePort || "3000").trim();
+  return `http://${host}:${port}`;
+};
+
+const getTargetAddressSpace = () => {
+  const host = (props().executeHost || "127.0.0.1").trim().toLowerCase();
+  if (host === "localhost" || host === "127.0.0.1" || host === "[::1]" || host === "::1") {
+    return "loopback";
+  }
+  return "local";
+};
+
+const makeId = () => globalThis.crypto?.randomUUID?.() || `item-${Date.now()}-${Math.random()}`;
+
+const notifyChange = (next) => {
+  setSelection(next);
+  if (typeof props().onChange === "function") {
+    props().onChange(next);
+  }
+};
+
+const mergeSelection = (items) => {
+  const multiple = props().multiple !== false;
+  const map = new Map();
+  if (multiple) {
+    for (const item of selection()) {
+      map.set(`${item.kind}:${item.path}`, item);
+    }
+  }
+  for (const item of items) {
+    map.set(`${item.kind}:${item.path}`, item);
+  }
+  notifyChange(Array.from(map.values()));
+};
+
+const pickFilesNative = async () => {
+  setError("");
+  if (typeof window.showOpenFilePicker === "function") {
+    const handles = await window.showOpenFilePicker({ multiple: props().multiple !== false });
+    const list = [];
+    for (const handle of handles) {
+      const file = await handle.getFile();
+      list.push({
+        id: makeId(),
+        name: handle.name,
+        path: handle.name,
+        kind: "file",
+        size: file.size,
+        source: "picker"
+      });
+    }
+    mergeSelection(list);
+    return;
+  }
+  fileInputRef?.click();
+};
+
+const pickFoldersNative = async () => {
+  setError("");
+  if (typeof window.showDirectoryPicker === "function") {
+    const handle = await window.showDirectoryPicker();
+    mergeSelection([
+      {
+        id: makeId(),
+        name: handle.name,
+        path: handle.name,
+        kind: "directory",
+        source: "picker"
+      }
+    ]);
+    return;
+  }
+  folderInputRef?.click();
+};
+
+const onFileInputChange = (event) => {
+  const files = Array.from(event.target.files || []);
+  mergeSelection(
+    files.map((file) => ({
+      id: makeId(),
+      name: file.name,
+      path: file.webkitRelativePath || file.name,
+      kind: "file",
+      size: file.size,
+      source: "picker"
+    }))
+  );
+  event.target.value = "";
+};
+
+const onFolderInputChange = (event) => {
+  const files = Array.from(event.target.files || []);
+  if (!files.length) return;
+  const root = files[0].webkitRelativePath.split("/")[0] || files[0].name;
+  mergeSelection([
+    {
+      id: makeId(),
+      name: root,
+      path: root,
+      kind: "directory",
+      fileCount: files.length,
+      source: "picker"
+    }
+  ]);
+  event.target.value = "";
+};
+
+const clearSelection = () => {
+  setError("");
+  notifyChange([]);
+};
+
+const removeItem = (id) => {
+  notifyChange(selection().filter((item) => item.id !== id));
+};
+
+const executeOnServer = async (code, userArgs) => {
+  const response = await fetch(`${getExecuteBaseUrl()}/execute`, {
+    method: "POST",
+    mode: "cors",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ code, args: userArgs }),
+    targetAddressSpace: getTargetAddressSpace()
+  });
+  const data = await response.json();
+  if (!response.ok || !data.success) {
+    throw new Error(data?.error?.message || `Execute failed (${response.status})`);
+  }
+  return data.result;
+};
+
+const browseList = async (targetPath) => {
+  if (props().allowBrowse === false) return;
+  setLoading(true);
+  setError("");
+  try {
+    const result = await executeOnServer(
+      `const fs = args.fs.promises;
+const path = args.path;
+const os = args.os;
+const requestedPath = args.targetPath || os.homedir();
+const resolvedPath = path.resolve(requestedPath);
+const dirEntries = await fs.readdir(resolvedPath, { withFileTypes: true });
+const entries = dirEntries
+  .map((entry) => ({
+    name: entry.name,
+    path: path.join(resolvedPath, entry.name),
+    kind: entry.isDirectory() ? "directory" : "file",
+  }))
+  .sort((a, b) => {
+    if (a.kind !== b.kind) return a.kind === "directory" ? -1 : 1;
+    return a.name.localeCompare(b.name);
+  });
+return {
+  path: resolvedPath,
+  parent: path.dirname(resolvedPath),
+  entries,
+};`,
+      { targetPath: targetPath || "" }
+    );
+    setBrowsePath(result.path);
+    setBrowseParent(result.parent);
+    setBrowseEntries(result.entries || []);
+  } catch (err) {
+    setError(err instanceof Error ? err.message : String(err));
+    args.showErrorToast?.("Could not browse remote folders");
+  } finally {
+    setLoading(false);
+  }
+};
+
+const toggleBrowseEntry = (entry) => {
+  mergeSelection([
+    {
+      id: makeId(),
+      name: entry.name,
+      path: entry.path,
+      kind: entry.kind,
+      source: "browser"
+    }
+  ]);
+};
+
+const addCurrentBrowseFolder = () => {
+  const current = browsePath();
+  if (!current) return;
+  const name = current.split(/[/\\\\]/).filter(Boolean).pop() || current;
+  mergeSelection([
+    {
+      id: makeId(),
+      name,
+      path: current,
+      kind: "directory",
+      source: "browser"
+    }
+  ]);
+};
+
+const initSelection = (items) => {
+  if (Array.isArray(items)) {
+    notifyChange(items);
+  }
+};
+
+return {
+  props,
+  selection,
+  pickFilesNative,
+  pickFoldersNative,
+  onFileInputChange,
+  onFolderInputChange,
+  clearSelection,
+  removeItem,
+  browseList,
+  browsePath,
+  browseParent,
+  browseEntries,
+  loading,
+  error,
+  setFileInputRef: (el) => {
+    fileInputRef = el;
+  },
+  setFolderInputRef: (el) => {
+    folderInputRef = el;
+  },
+  toggleBrowseEntry,
+  addCurrentBrowseFolder,
+  initSelection
+};
+'''
+        props:
+          '''return {
+  as: "div",
+  onMount: () => {
+    const initial = args.contextData.props?.value;
+    if (Array.isArray(initial) && initial.length) {
+      args.fns.initSelection(initial);
+    }
+    if (args.contextData.props?.allowBrowse !== false) {
+      args.fns.browseList("");
+    }
+  }
+};'''
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: ${args.theme.var.spacing.md};
+}`;'''
+      }
+    }
+    {
+      id: "picker_toolbar"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+};'''
+        css:
+          '''return `._id {
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${args.theme.var.spacing.sm};
+}`;'''
+      }
+    }
+    {
+      id: "pick_files_btn"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''return {
+  text: "Pick files",
+  size: "sm",
+  hide: args.contextData.props?.allowFiles === false,
+  onClick: () => args.fns.pickFilesNative().catch((err) => args.showErrorToast?.(err.message))
+};'''
+      }
+    }
+    {
+      id: "pick_folders_btn"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''return {
+  text: "Pick folders",
+  size: "sm",
+  variant: "secondary",
+  hide: args.contextData.props?.allowFolders === false,
+  onClick: () => args.fns.pickFoldersNative().catch((err) => args.showErrorToast?.(err.message))
+};'''
+      }
+    }
+    {
+      id: "clear_btn"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Button
+        props:
+          '''return {
+  text: "Clear",
+  size: "sm",
+  variant: "danger",
+  onClick: () => args.fns.clearSelection()
+};'''
+      }
+    }
+    {
+      id: "file_input"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "input",
+  type: "file",
+  multiple: args.contextData.props?.multiple !== false,
+  hide: true,
+  ref: args.fns.setFileInputRef,
+  onChange: args.fns.onFileInputChange
+};'''
+      }
+    }
+    {
+      id: "folder_input"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "input",
+  type: "file",
+  webkitdirectory: true,
+  multiple: true,
+  hide: true,
+  ref: args.fns.setFolderInputRef,
+  onChange: args.fns.onFolderInputChange
+};'''
+      }
+    }
+    {
+      id: "error_text"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: args.fns.error(),
+  hide: !args.fns.error()
+};'''
+        css:
+          '''return `._id {
+  margin: 0;
+  color: ${args.theme.var.color.error};
+  font-size: ${args.theme.var.fontSize.sm};
+}`;'''
+      }
+    }
+    {
+      id: "selected_panel"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''return {
+  as: "section"
+};'''
+        css:
+          '''return `._id {
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.md};
+  padding: ${args.theme.var.spacing.md};
+  background: ${args.theme.var.color.background_light_100};
+}`;'''
+      }
+    }
+    {
+      id: "selected_title"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h3",
+  text: `Selected (${args.fns.selection().length})`
+};'''
+        css:
+          '''return `._id {
+  margin: 0 0 ${args.theme.var.spacing.sm};
+  font-size: ${args.theme.var.fontSize.md};
+  font-weight: 600;
+}`;'''
+      }
+    }
+    {
+      id: "selected_empty"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "No files or folders selected yet.",
+  hide: args.fns.selection().length > 0
+};'''
+        css:
+          '''return `._id {
+  margin: 0;
+  color: ${args.theme.var.color.muted};
+  font-size: ${args.theme.var.fontSize.sm};
+}`;'''
+      }
+    }
+    {
+      id: "selected_list"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        contextName: selectedItem
+        loop: true
+        props:
+          '''return {
+  as: "fragment",
+  data: args.fns.selection()
+};'''
+      }
+    }
+    {
+      id: "selected_row"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const item = args.contextData.selectedItem;
+return {
+  as: "div"
+};'''
+        css:
+          '''return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: ${args.theme.var.spacing.sm};
+  padding: ${args.theme.var.spacing.xs} 0;
+  border-bottom: 1px solid ${args.theme.var.color.border};
+
+  &:last-child {
+    border-bottom: none;
+  }
+}`;'''
+      }
+    }
+    {
+      id: "selected_meta"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const item = args.contextData.selectedItem;
+const suffix = item.kind === "directory" ? "folder" : "file";
+const sizeText = item.size != null ? ` · ${item.size} bytes` : item.fileCount != null ? ` · ${item.fileCount} files` : "";
+return {
+  as: "div",
+  text: `${item.name} (${suffix}, ${item.source})${sizeText}\\n${item.path}`
+};'''
+        css:
+          '''return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  word-break: break-all;
+}`;'''
+      }
+    }
+    {
+      id: "selected_path"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const item = args.contextData.selectedItem;
+return {
+  as: "span",
+  text: item.path,
+  title: item.path
+};'''
+        css:
+          '''return `._id {
+  display: block;
+  font-size: ${args.theme.var.fontSize.xs};
+  color: ${args.theme.var.color.muted};
+  word-break: break-all;
+}`;'''
+      }
+    }
+    {
+      id: "remove_item_btn"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''const item = args.contextData.selectedItem;
+return {
+  text: "Remove",
+  size: "xs",
+  variant: "secondary",
+  onClick: () => args.fns.removeItem(item.id)
+};'''
+      }
+    }
+    {
+      id: "browse_panel"
+      L: Attr
+      P: {
+        displayOrder: 6
+        componentName: Html
+        props:
+          '''return {
+  as: "section",
+  hide: args.contextData.props?.allowBrowse === false
+};'''
+        css:
+          '''return `._id {
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.md};
+  padding: ${args.theme.var.spacing.md};
+}`;'''
+      }
+    }
+    {
+      id: "browse_title"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h3",
+  text: "Browse remote PC (via execute server)"
+};'''
+        css:
+          '''return `._id {
+  margin: 0 0 ${args.theme.var.spacing.sm};
+  font-size: ${args.theme.var.fontSize.md};
+  font-weight: 600;
+}`;'''
+      }
+    }
+    {
+      id: "browse_path_row"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+};'''
+        css:
+          '''return `._id {
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${args.theme.var.spacing.sm};
+  align-items: center;
+  margin-bottom: ${args.theme.var.spacing.sm};
+}`;'''
+      }
+    }
+    {
+      id: "browse_path_text"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "code",
+  text: args.fns.browsePath() || "Loading..."
+};'''
+        css:
+          '''return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  word-break: break-all;
+}`;'''
+      }
+    }
+    {
+      id: "browse_up_btn"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''return {
+  text: "Up",
+  size: "xs",
+  variant: "secondary",
+  disabled: !args.fns.browseParent() || args.fns.browseParent() === args.fns.browsePath(),
+  onClick: () => args.fns.browseList(args.fns.browseParent())
+};'''
+      }
+    }
+    {
+      id: "browse_refresh_btn"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Button
+        props:
+          '''return {
+  text: args.fns.loading() ? "Loading..." : "Refresh",
+  size: "xs",
+  disabled: args.fns.loading(),
+  onClick: () => args.fns.browseList(args.fns.browsePath())
+};'''
+      }
+    }
+    {
+      id: "browse_add_folder_btn"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Button
+        props:
+          '''return {
+  text: "Add this folder",
+  size: "xs",
+  variant: "secondary",
+  onClick: () => args.fns.addCurrentBrowseFolder()
+};'''
+      }
+    }
+    {
+      id: "browse_list"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        contextName: browseItem
+        loop: true
+        props:
+          '''return {
+  as: "fragment",
+  data: args.fns.browseEntries()
+};'''
+      }
+    }
+    {
+      id: "browse_row"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const entry = args.contextData.browseItem;
+return {
+  as: "button",
+  type: "button",
+  text: entry.kind === "directory" ? `[dir] ${entry.name}` : entry.name,
+  onClick: () => {
+    if (entry.kind === "directory") {
+      args.fns.browseList(entry.path);
+      return;
+    }
+    args.fns.toggleBrowseEntry(entry);
+  }
+};'''
+        css:
+          '''return `._id {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.sm};
+  margin-bottom: ${args.theme.var.spacing.xxs};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  background: ${args.theme.var.color.background};
+  cursor: pointer;
+  font-size: ${args.theme.var.fontSize.sm};
+
+  &:hover {
+    border-color: ${args.theme.var.color.primary};
+  }
+}`;'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e_root_shell
+      T: Attr
+      S: picker_root
+      E: picker_shell
+    }
+    {
+      id: e_shell_toolbar
+      T: Attr
+      S: picker_shell
+      E: picker_toolbar
+    }
+    {
+      id: e_toolbar_files
+      T: Attr
+      S: picker_toolbar
+      E: pick_files_btn
+    }
+    {
+      id: e_toolbar_folders
+      T: Attr
+      S: picker_toolbar
+      E: pick_folders_btn
+    }
+    {
+      id: e_toolbar_clear
+      T: Attr
+      S: picker_toolbar
+      E: clear_btn
+    }
+    {
+      id: e_shell_file_input
+      T: Attr
+      S: picker_shell
+      E: file_input
+    }
+    {
+      id: e_shell_folder_input
+      T: Attr
+      S: picker_shell
+      E: folder_input
+    }
+    {
+      id: e_shell_error
+      T: Attr
+      S: picker_shell
+      E: error_text
+    }
+    {
+      id: e_shell_selected
+      T: Attr
+      S: picker_shell
+      E: selected_panel
+    }
+    {
+      id: e_selected_title
+      T: Attr
+      S: selected_panel
+      E: selected_title
+    }
+    {
+      id: e_selected_empty
+      T: Attr
+      S: selected_panel
+      E: selected_empty
+    }
+    {
+      id: e_selected_list
+      T: Attr
+      S: selected_panel
+      E: selected_list
+    }
+    {
+      id: e_list_row
+      T: Attr
+      S: selected_list
+      E: selected_row
+    }
+    {
+      id: e_row_meta
+      T: Attr
+      S: selected_row
+      E: selected_meta
+    }
+    {
+      id: e_row_path
+      T: Attr
+      S: selected_row
+      E: selected_path
+    }
+    {
+      id: e_row_remove
+      T: Attr
+      S: selected_row
+      E: remove_item_btn
+    }
+    {
+      id: e_shell_browse
+      T: Attr
+      S: picker_shell
+      E: browse_panel
+    }
+    {
+      id: e_browse_title
+      T: Attr
+      S: browse_panel
+      E: browse_title
+    }
+    {
+      id: e_browse_path_row
+      T: Attr
+      S: browse_panel
+      E: browse_path_row
+    }
+    {
+      id: e_path_text
+      T: Attr
+      S: browse_path_row
+      E: browse_path_text
+    }
+    {
+      id: e_path_up
+      T: Attr
+      S: browse_path_row
+      E: browse_up_btn
+    }
+    {
+      id: e_path_refresh
+      T: Attr
+      S: browse_path_row
+      E: browse_refresh_btn
+    }
+    {
+      id: e_path_add_folder
+      T: Attr
+      S: browse_path_row
+      E: browse_add_folder_btn
+    }
+    {
+      id: e_browse_list
+      T: Attr
+      S: browse_panel
+      E: browse_list
+    }
+    {
+      id: e_browse_row
+      T: Attr
+      S: browse_list
+      E: browse_row
+    }
+  ]
+}
