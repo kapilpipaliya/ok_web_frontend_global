@@ -26,11 +26,5 @@ export const PreviewContext = createContext<PreviewStore>(
 );
 
 export function usePreviewContext() {
-  const ctx = useContext(PreviewContext);
-  if (!ctx) {
-    throw new Error(
-      "usePreviewContext must be used within PreviewContextProvider",
-    );
-  }
-  return ctx;
+  return useContext(PreviewContext) ?? [getInitialPreviewStore(), () => {}];
 }

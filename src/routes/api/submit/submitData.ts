@@ -3,6 +3,7 @@ import type { APIEvent } from "@solidjs/start/server";
 import { mutateData } from "~/cypher/mutate/mutate_data/mutateData";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
+import { invalidateFormMetaDataCacheIfNeeded } from "~/server/redis/invalidateFormMetaDataCache";
 
 export async function POST({ request }: APIEvent) {
   if (!request.headers.get("content-type")?.includes("application/json")) {
@@ -27,6 +28,7 @@ export async function POST({ request }: APIEvent) {
     try {
       const res = await mutateData(data, tx);
       await tx.commit();
+      await invalidateFormMetaDataCacheIfNeeded(subDomain, data);
       return res;
     } catch (error: unknown) {
       await tx.rollback();

@@ -1,10 +1,15 @@
 import type { Session } from "neo4j-driver";
 
 import { fetchDataFromDB } from "~/cypher/get/fetchDataFromDB";
+import { getSubdomainForRequest } from "~/cypher/session/getSessionForSubdomain";
 import { isValidResponse } from "~/lib/api/general/isValidResponse";
 import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/edge/getEdgesFromRowsAttr";
 import { FormMetaData } from "~/lib/meta/formMetaData";
-import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
+import {
+  getFormMetaDataCacheKey,
+  getFormMetaDataCacheTtl,
+  redisCacheGetOrSet,
+} from "~/server/redis/redisCache";
 import type { FetchFormMetaDataResult } from "./fetchPageData";
 import { fetchComponentDataFromGraph } from "./fetchComponentData";
 
@@ -20,7 +25,6 @@ export async function fetchFormMetaData(
   dbSession?: Session,
 ): Promise<FetchFormMetaDataResult> {
   "use server";
-  let form: IFormMetaData | null = null;
   if (isDesignMode) {
     const form = FormMetaData[pageVertexName!];
     // can't return form, if it contins functions
@@ -30,7 +34,57 @@ export async function fetchFormMetaData(
     const form = FormMetaData[pageVertexName!];
     return { form };
   }
-  form = FormMetaData[pageVertexName ?? "Page"] || FormMetaData.Page;
+
+  if (!dbSession) {
+    const { subDomain } = await getSubdomainForRequest();
+    const cacheKey = getFormMetaDataCacheKey(subDomain, {
+      pageVertexName,
+      formId,
+      expression,
+      pageKeyName,
+      url,
+      skipComponentData,
+    });
+
+    return redisCacheGetOrSet(
+      cacheKey,
+      () =>
+        fetchFormMetaDataFromDB(
+          pageVertexName,
+          formId,
+          expression,
+          pageKeyName,
+          url,
+          skipComponentData,
+        ),
+      {
+        ttl: getFormMetaDataCacheTtl(),
+        shouldCache: (result) => !result.error,
+      },
+    );
+  }
+
+  return fetchFormMetaDataFromDB(
+    pageVertexName,
+    formId,
+    expression,
+    pageKeyName,
+    url,
+    skipComponentData,
+    dbSession,
+  );
+}
+
+async function fetchFormMetaDataFromDB(
+  pageVertexName?: string,
+  formId?: string,
+  expression?: string,
+  pageKeyName?: string,
+  url?: string,
+  skipComponentData?: boolean,
+  dbSession?: Session,
+): Promise<FetchFormMetaDataResult> {
+  const form = FormMetaData[pageVertexName ?? "Page"] || FormMetaData.Page;
   const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);
 
   const data = await fetchDataFromDB(
