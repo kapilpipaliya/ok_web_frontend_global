@@ -6,11 +6,13 @@ import {
   type Accessor,
   type ParentProps,
 } from "solid-js";
-import { createStore } from "solid-js/store";
 import { isServer } from "solid-js/web";
 
 import { removePerComponentStyleElements } from "~/components/ComponentScopedStyle";
-import { createInitialCssState } from "~/lib/styles/componentCssTypes";
+import {
+  createInitialCssState,
+  type ComponentCssState,
+} from "~/lib/styles/componentCssTypes";
 import {
   insertRulesForHash,
   removeRulesForHash,
@@ -26,7 +28,7 @@ type ComponentStylesContextValue = {
 const ComponentStylesContext = createContext<ComponentStylesContextValue>();
 
 export function ComponentStylesProvider(props: ParentProps) {
-  const [cssState, setCssState] = createStore(createInitialCssState());
+  const cssState: ComponentCssState = createInitialCssState();
   const [hydrated, setHydrated] = createSignal(false);
 
   const usePerComponentStyles = () => isServer || !hydrated();
@@ -36,16 +38,12 @@ export function ComponentStylesProvider(props: ParentProps) {
 
   const acquireComponentCss = (hash: string, css: string) => {
     const prev = cssState.refCounts.get(hash) ?? 0;
-    const nextRefCounts = new Map(cssState.refCounts);
-    nextRefCounts.set(hash, prev + 1);
-    setCssState("refCounts", nextRefCounts);
+    cssState.refCounts.set(hash, prev + 1);
 
     if (prev === 0) {
-      const nextRegistry = new Map(cssState.registry);
-      nextRegistry.set(hash, css);
-      setCssState("registry", nextRegistry);
+      cssState.registry.set(hash, css);
       if (isGlobalStylesActive()) {
-        insertRulesForHash(cssState, setCssState, hash, css);
+        insertRulesForHash(cssState, hash, css);
       }
     }
   };
@@ -58,29 +56,22 @@ export function ComponentStylesProvider(props: ParentProps) {
     const prev = cssState.refCounts.get(hash) ?? 0;
 
     if (prev <= 1) {
-      const nextRefCounts = new Map(cssState.refCounts);
-      nextRefCounts.delete(hash);
-      setCssState("refCounts", nextRefCounts);
-
-      const nextRegistry = new Map(cssState.registry);
-      nextRegistry.delete(hash);
-      setCssState("registry", nextRegistry);
+      cssState.refCounts.delete(hash);
+      cssState.registry.delete(hash);
 
       if (isGlobalStylesActive()) {
-        removeRulesForHash(cssState, setCssState, hash);
+        removeRulesForHash(cssState, hash);
       }
     } else {
-      const nextRefCounts = new Map(cssState.refCounts);
-      nextRefCounts.set(hash, prev - 1);
-      setCssState("refCounts", nextRefCounts);
+      cssState.refCounts.set(hash, prev - 1);
     }
   };
 
   onMount(() => {
     removePerComponentStyleElements();
     setHydrated(true);
-    setCssState("globalStylesActive", true);
-    syncAllRegistryRulesToSheet(() => cssState, setCssState);
+    cssState.globalStylesActive = true;
+    syncAllRegistryRulesToSheet(cssState);
   });
 
   return (
