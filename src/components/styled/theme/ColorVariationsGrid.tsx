@@ -174,6 +174,43 @@ interface ColorVariationsGridProps {
   showTooltip?: boolean;
 }
 
+function ColorShadeCell(props: {
+  baseColor: ColorDefinition | undefined;
+  shade: (typeof COLOR_SHADES)[number];
+  currentMode: ColorMode;
+  isLastRow: boolean;
+  showColorTooltip?: (event: MouseEvent, color: string) => void;
+  hideColorTooltip?: () => void;
+  showTooltip?: boolean;
+}) {
+  const shadeColor = createMemo(() =>
+    getShadeColor(props.baseColor, props.shade.value, props.currentMode),
+  );
+
+  return (
+    <As
+      as="div"
+      css={gridCellStyles({
+        isBase: props.shade.label === "Base",
+        isLastRow: props.isLastRow,
+      })}
+    >
+      <Show
+        when={shadeColor()}
+        fallback={<As as="div" css={shadeSwatchStyles(undefined)} />}
+      >
+        <As
+          as="div"
+          css={shadeSwatchStyles(shadeColor())}
+          onMouseEnter={(e) => props.showColorTooltip?.(e, shadeColor()!)}
+          onMouseLeave={props.hideColorTooltip}
+          title={props.showTooltip ? undefined : shadeColor()}
+        />
+      </Show>
+    </As>
+  );
+}
+
 // Main component
 export function ColorVariationsGrid(props: ColorVariationsGridProps) {
   return (
@@ -242,39 +279,17 @@ export function ColorVariationsGrid(props: ColorVariationsGridProps) {
                 </As>
               </As>
               <For each={COLOR_SHADES}>
-                {(shade) => {
-                  const shadeColor = createMemo(() =>
-                    getShadeColor(baseColor, shade.value, props.currentMode),
-                  );
-                  const isBase = shade.label === "Base";
-
-                  return (
-                    <As
-                      as="div"
-                      css={gridCellStyles({
-                        isBase,
-                        isLastRow: isLastRow(),
-                      })}
-                    >
-                      <Show
-                        when={shadeColor()}
-                        fallback={
-                          <As as="div" css={shadeSwatchStyles(undefined)} />
-                        }
-                      >
-                        <As
-                          as="div"
-                          css={shadeSwatchStyles(shadeColor())}
-                          onMouseEnter={(e) =>
-                            props.showColorTooltip?.(e, shadeColor()!)
-                          }
-                          onMouseLeave={props.hideColorTooltip}
-                          title={props.showTooltip ? undefined : shadeColor()}
-                        />
-                      </Show>
-                    </As>
-                  );
-                }}
+                {(shade) => (
+                  <ColorShadeCell
+                    baseColor={baseColor}
+                    shade={shade}
+                    currentMode={props.currentMode}
+                    isLastRow={isLastRow()}
+                    showColorTooltip={props.showColorTooltip}
+                    hideColorTooltip={props.hideColorTooltip}
+                    showTooltip={props.showTooltip}
+                  />
+                )}
               </For>
             </>
           );

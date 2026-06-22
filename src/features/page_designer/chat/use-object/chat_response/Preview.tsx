@@ -23,6 +23,111 @@ import { useGraph } from "~/lib/graph/context/UseGraph";
 import { importGraphStructure } from "~/lib/graph/import/importGraphStructure";
 import { processImportedGraph } from "~/lib/graph/import/processImportedGraph";
 
+function ComponentPreviewItem(props: {
+  componentVertex: Vertex;
+  layoutStoreVertex: () => Vertex<PageLayoutObject>;
+}) {
+  const [graph, setGraph] = useGraph();
+  const [isPreview, setIsPreview] = createSignal(true);
+  const formId = uuidv7();
+
+  return (
+    <As
+      as="div"
+      css={[
+        `return \`._id {
+  margin-bottom: 24px;
+}\`;`,
+      ]}
+    >
+      <As
+        as="div"
+        css={[
+          `return \`._id {
+  display: none;
+}\`;`,
+        ]}
+      >
+        <PageViewWrapper
+          formDataId={props.componentVertex.id}
+          hideSaveCancelButton
+          isNoPermissionCheck={true}
+          pageVertexName="Component"
+          uuid={formId}
+        />
+      </As>
+
+      <Show when={graph.vertexes[formId]}>
+        <As
+          as="div"
+          css={[
+            toolBarCss,
+            `return \`._id {
+  display: none;
+}\`;`,
+          ]}
+        >
+          <IconButton
+            css={`return \`._id {
+  background-color: transparent;
+  padding: 4px;
+  border-radius: 4px;
+  hover: {
+    background-color: \${args.theme.var.color.primary_light_800};
+  }
+}\`;`}
+            icon="ph:arrows-clockwise"
+            onClick={() => {
+              setIsPreview(false);
+              setTimeout(() => setIsPreview(true), 100);
+            }}
+          />
+        </As>
+
+        <Show when={isPreview()}>
+          <IFramePreview formStoreId={formId} noMinHeight />
+        </Show>
+
+        <As
+          as="div"
+          css={[
+            `return \`._id {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}\`;`,
+          ]}
+        >
+          <IconButton
+            css={`return \`._id {
+  background-color: transparent;
+  padding: 4px;
+  border-radius: 4px;
+  hover: {
+    background-color: \${args.theme.var.color.primary_light_800};
+  }
+}\`;`}
+            disabled={
+              props.layoutStoreVertex()?.P.formId === formId ||
+              !props.layoutStoreVertex()?.P.formId
+            }
+            icon="ph:plus-circle"
+            onClick={() =>
+              insertComponents(
+                [props.componentVertex],
+                graph,
+                setGraph,
+                props.layoutStoreVertex,
+              )
+            }
+            title="Insert Component"
+          />
+        </As>
+      </Show>
+    </As>
+  );
+}
+
 export function Preview(props: {
   message: Vertex;
   object: {
@@ -209,105 +314,12 @@ export function Preview(props: {
 
     return (
       <For each={componentVertexes()}>
-        {(componentVertex) => {
-          const [isPreview, setIsPreview] = createSignal(true);
-          const formId = uuidv7();
-          return (
-            <As
-              as="div"
-              css={[
-                `return \`._id {
-  margin-bottom: 24px;
-}\`;`,
-              ]}
-            >
-              <As
-                as="div"
-                css={[
-                  `return \`._id {
-  display: none;
-}\`;`,
-                ]}
-              >
-                <PageViewWrapper
-                  formDataId={componentVertex.id}
-                  hideSaveCancelButton
-                  isNoPermissionCheck={true}
-                  pageVertexName="Component"
-                  uuid={formId}
-                />
-              </As>
-
-              <Show when={graph.vertexes[formId]}>
-                <As
-                  as="div"
-                  css={[
-                    toolBarCss,
-                    `return \`._id {
-  display: none;
-}\`;`,
-                  ]}
-                >
-                  <IconButton
-                    css={`return \`._id {
-  background-color: transparent;
-  padding: 4px;
-  border-radius: 4px;
-  hover: {
-    background-color: \${args.theme.var.color.primary_light_800};
-  }
-}\`;`}
-                    icon="ph:arrows-clockwise"
-                    onClick={() => {
-                      setIsPreview(false);
-                      setTimeout(() => setIsPreview(true), 100);
-                    }}
-                  />
-                </As>
-
-                <Show when={isPreview()}>
-                  <IFramePreview formStoreId={formId} noMinHeight />
-                </Show>
-
-                <As
-                  as="div"
-                  css={[
-                    `return \`._id {
-  display: flex;
-  gap: 8px;
-  margin-top: 12px;
-}\`;`,
-                  ]}
-                >
-                  <IconButton
-                    css={`return \`._id {
-  background-color: transparent;
-  padding: 4px;
-  border-radius: 4px;
-  hover: {
-    background-color: \${args.theme.var.color.primary_light_800};
-  }
-}\`;`}
-                    disabled={
-                      layoutStoreVertex()?.P.formId === formId ||
-                      !layoutStoreVertex()?.P.formId
-                    }
-                    icon="ph:plus-circle"
-                    onClick={() =>
-                      insertComponents(
-                        [componentVertex],
-                        graph,
-                        setGraph,
-                        layoutStoreVertex,
-                      )
-                    }
-                    title="Insert Component"
-                  />
-                </As>
-              </Show>
-            </As>
-          );
-        }}
+        {(componentVertex) => (
+          <ComponentPreviewItem
+            componentVertex={componentVertex}
+            layoutStoreVertex={layoutStoreVertex}
+          />
+        )}
       </For>
     );
   };

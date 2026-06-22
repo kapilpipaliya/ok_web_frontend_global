@@ -864,3 +864,7 @@ re_Pwtt4Hz7_DogCFDCf6eZJjMMyQqQzY6i9
 
 virtuallist:
 https://github.com/doeixd/create-virtualized-list-solid/blob/main/src/createVirtualizedList.ts
+
+
+
+Solid documentation warns against calling hooks inside map or For callbacks. 
