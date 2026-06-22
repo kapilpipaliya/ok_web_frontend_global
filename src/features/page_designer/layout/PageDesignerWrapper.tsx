@@ -30,6 +30,7 @@ import { getTitle } from "~/lib/graph/get/sync/theme/getTitle";
 import { fetchDataFromDB } from "~/cypher/get/fetchDataFromDB";
 import { isValidResponse } from "~/lib/api/general/isValidResponse";
 import { Title } from "@solidjs/meta";
+import { updateUrlWithOpenedTabs } from "~/features/page_designer/utils/updateUrlWithTabs";
 
 const RenderMainContent = clientOnly(() => import("./RenderMainContent"));
 
@@ -310,6 +311,29 @@ export function PageDesignerWrapper(): JSX.Element {
         await db.put("keyval", widthProps, "page_designer_layout");
       }
     })();
+  });
+
+  createEffect(() => {
+    if (isServer || !isDataReady()) {
+      return;
+    }
+
+    const layoutVertex = graph.vertexes[
+      initialStore.id
+    ] as Vertex<PageLayoutObject> | undefined;
+    if (!layoutVertex) {
+      return;
+    }
+
+    // Keep URL in sync when tabs are opened, closed, or moved between panels.
+    layoutVertex.P.openedFormIds.length;
+    for (const openedFormId of layoutVertex.P.openedFormIds) {
+      graph.vertexes[openedFormId]?.P.mainPanel;
+      graph.vertexes[openedFormId]?.P.label;
+      graph.vertexes[openedFormId]?.P.dataId;
+    }
+
+    updateUrlWithOpenedTabs(initialStore.id, graph);
   });
 
   // Now we are not have comp examples

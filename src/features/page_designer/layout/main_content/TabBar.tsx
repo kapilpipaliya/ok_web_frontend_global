@@ -1,4 +1,4 @@
-import { createSignal, For, onCleanup, Show } from "solid-js";
+import { batch, createSignal, For, onCleanup, Show } from "solid-js";
 import { v7 as uuidv7 } from "uuid";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
@@ -30,13 +30,12 @@ import { useGraph } from "~/lib/graph/context/UseGraph";
 function TabBarItem(props: {
   openedFormId: Id;
   mainPanel: Id;
-  layoutStoreId: Id;
   index: number;
   getTabCss: (openedFormId: Id) => string;
   handleTabClick: (formId: string) => void;
   handleClose: (openedFormId: Id) => void;
   isUnsaved: (formId: string) => boolean;
-  moveTab: (toPanelId: Id) => void;
+  moveTab: (toPanelId: Id, openedFormId: Id) => void;
   graph: ReturnType<typeof useGraph>[0];
   setGraph: ReturnType<typeof useGraph>[1];
 }) {
@@ -46,11 +45,6 @@ function TabBarItem(props: {
     `tab-${props.openedFormId}`,
     (element) =>
       attachTabDragDrop(element, {
-        layoutStoreId: props.layoutStoreId,
-        layoutStoreVertex: () =>
-          props.graph.vertexes[props.layoutStoreId] as Vertex<PageLayoutObject>,
-        graph: props.graph,
-        setGraph: props.setGraph,
         openedFormId: props.openedFormId,
         mainPanel: props.mainPanel,
         moveTab: props.moveTab,
@@ -220,33 +214,39 @@ export function TabBar(props: { mainPanel: Id }) {
     });
   };
 
-  const moveTab = (toPanelId: Id) => {
-    const dragInfo = layoutStore().draggedTab;
+  const moveTab = (toPanelId: Id, openedFormId: Id) => {
+    const dragInfo = openedFormId;
     if (!dragInfo) {
       return;
     }
 
-    const tab = graph.vertexes[dragInfo].P.mainPanel;
-    if (!tab || tab === toPanelId) {
+    const openedForm = graph.vertexes[dragInfo];
+    if (!openedForm) {
       return;
     }
 
-    mergeVertexProperties(0, dragInfo, graph, setGraph, {
-      mainPanel: toPanelId,
-    });
+    const fromPanelId = openedForm.P.mainPanel;
+    if (!fromPanelId || fromPanelId === toPanelId) {
+      return;
+    }
+
     const prevTabOpenForms = layoutStore().openedFormIds.filter(
-      (id) => graph.vertexes[id].P.mainPanel === tab,
+      (id) =>
+        id !== dragInfo && graph.vertexes[id]?.P.mainPanel === fromPanelId,
     );
-    mergeVertexProperties(0, layoutStoreId, graph, setGraph, {
-      [`mainPanel${tab}Tab`]:
-        graph.vertexes[prevTabOpenForms[prevTabOpenForms.length - 1]]?.P
-          .formId || null,
-    });
-    mergeVertexProperties(0, layoutStoreId, graph, setGraph, {
-      [`mainPanel${toPanelId}Tab`]: graph.vertexes[dragInfo]?.P.formId || null,
-    });
-    mergeVertexProperties(0, layoutStoreId, graph, setGraph, {
-      draggedTab: null,
+    const movedFormId = openedForm.P.formId || null;
+    const previousActiveFormId =
+      graph.vertexes[prevTabOpenForms[prevTabOpenForms.length - 1]]?.P.formId ||
+      null;
+
+    batch(() => {
+      mergeVertexProperties(0, dragInfo, graph, setGraph, {
+        mainPanel: toPanelId,
+      });
+      mergeVertexProperties(0, layoutStoreId, graph, setGraph, {
+        [`mainPanel${fromPanelId}Tab`]: previousActiveFormId,
+        [`mainPanel${toPanelId}Tab`]: movedFormId,
+      });
     });
   };
 
@@ -268,11 +268,6 @@ export function TabBar(props: { mainPanel: Id }) {
     `tab-panel-${props.mainPanel}`,
     (element) =>
       attachTabPanelDropTarget(element, {
-        layoutStoreId,
-        layoutStoreVertex: () =>
-          graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>,
-        graph,
-        setGraph,
         mainPanel: props.mainPanel,
         moveTab,
       }),
@@ -331,7 +326,6 @@ export function TabBar(props: { mainPanel: Id }) {
             <TabBarItem
               openedFormId={openedFormId}
               mainPanel={props.mainPanel}
-              layoutStoreId={layoutStoreId}
               index={index()}
               getTabCss={getTabCss}
               handleTabClick={handleTabClick}

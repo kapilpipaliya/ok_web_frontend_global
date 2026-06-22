@@ -31,7 +31,6 @@ import {
   setRootDropPosition,
 } from "~/features/page_designer/functions/drag_drop/pragmatic/setDropPositionFromPointer";
 
-import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import type { Id } from "~/lib/graph/type/id";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
@@ -198,20 +197,12 @@ export interface LayoutItemDragContext {
 }
 
 export interface TabDragContext {
-  layoutStoreId: Id;
-  layoutStoreVertex: () => Vertex<PageLayoutObject>;
-  graph: GraphInterface;
-  setGraph: SetStoreFunction<GraphInterface>;
   openedFormId: Id;
 }
 
 export interface TabPanelDropContext {
-  layoutStoreId: Id;
-  layoutStoreVertex: () => Vertex<PageLayoutObject>;
-  graph: GraphInterface;
-  setGraph: SetStoreFunction<GraphInterface>;
   mainPanel: Id;
-  moveTab: (toPanelId: Id) => void;
+  moveTab: (toPanelId: Id, openedFormId: Id) => void;
 }
 
 function createPositionUpdater(
@@ -519,24 +510,28 @@ export function attachTabDraggable(
       type: PAGE_DESIGNER_DRAG_TYPES.TAB,
       openedFormId: ctx.openedFormId,
     }),
-    onDragStart: () => {
-      mergeVertexProperties<PageLayoutObject>(
-        0,
-        ctx.layoutStoreId,
-        ctx.graph,
-        ctx.setGraph,
-        { draggedTab: ctx.openedFormId },
-      );
-    },
-    onDrop: () => {
-      mergeVertexProperties<PageLayoutObject>(
-        0,
-        ctx.layoutStoreId,
-        ctx.graph,
-        ctx.setGraph,
-        { draggedTab: null },
-      );
-    },
+  });
+}
+
+function getTabDropOpenedFormId(source: { data: Record<string, unknown> }) {
+  const openedFormId = source.data.openedFormId;
+  return typeof openedFormId === "string" ? openedFormId : null;
+}
+
+function scheduleTabMove(
+  ctx: TabPanelDropContext,
+  source: { data: Record<string, unknown> },
+) {
+  const openedFormId = getTabDropOpenedFormId(source);
+  if (!openedFormId) {
+    return;
+  }
+
+  const { mainPanel: toPanelId, moveTab } = ctx;
+
+  // Defer graph updates until pragmatic DnD finishes the drop gesture.
+  queueMicrotask(() => {
+    moveTab(toPanelId, openedFormId);
   });
 }
 
@@ -547,8 +542,12 @@ export function attachTabPanelDropTarget(
   return dropTargetForElements({
     element,
     canDrop: ({ source }) => source.data.type === PAGE_DESIGNER_DRAG_TYPES.TAB,
-    onDrop: () => {
-      ctx.moveTab(ctx.mainPanel);
+    onDrop: ({ location, source }) => {
+      if (!isInnermostDropTarget(element, location)) {
+        return;
+      }
+
+      scheduleTabMove(ctx, source);
     },
   });
 }
@@ -560,8 +559,8 @@ export function attachTabDropTarget(
   return dropTargetForElements({
     element,
     canDrop: ({ source }) => source.data.type === PAGE_DESIGNER_DRAG_TYPES.TAB,
-    onDrop: () => {
-      ctx.moveTab(ctx.mainPanel);
+    onDrop: ({ source }) => {
+      scheduleTabMove(ctx, source);
     },
   });
 }
