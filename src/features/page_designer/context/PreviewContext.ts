@@ -22,9 +22,15 @@ export function getInitialPreviewStore() {
 }
 
 export const PreviewContext = createContext<PreviewStore>(
-  createStore(getInitialPreviewStore()),
+  // getInitialPreviewStore(), // object on initial context make it proxy sometimes.
 );
 
 export function usePreviewContext() {
-  return useContext(PreviewContext);
+  const ctx = useContext(PreviewContext);
+  if (!ctx) {
+    throw new Error(
+      "usePreviewContext must be used within PreviewContextProvider",
+    );
+  }
+  return ctx;
 }

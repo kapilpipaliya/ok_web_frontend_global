@@ -1,25 +1,18 @@
 import { createMemo, For, Match, Show, Switch } from "solid-js";
 
-import type { FormStoreObject } from "~/components/form/context/FormContext";
-
 import { IconButton } from "~/components/styled/IconButton";
 import { evalExpression } from "~/lib/expression_eval";
 import { PROPERTIES } from "~/pages/settings/constants";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 
-import { useDesignerFormIdContext } from "../../context/LayoutContext";
 import { As } from "~/components/As";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 
-type GraphStore = ReturnType<typeof useGraph>;
-
 function VariantInputRow(props: {
   variant: Vertex;
   dataVertex: Vertex;
-  setPropertyValue: (meta: Vertex, value: any) => void;
-  graph: GraphStore[0];
-  setGraph: GraphStore[1];
+  setPropertyValue: (meta: Vertex, value: unknown) => void;
 }) {
 
   const [graph, setGraph] = useGraph();
@@ -158,7 +151,7 @@ function VariantInputRow(props: {
 export function ComponentVariantsInput(props: {
   compVertex: Vertex;
   dataVertex: Vertex;
-  setPropertyValue: (meta: Vertex, value: any) => void;
+  setPropertyValue: (meta: Vertex, value: unknown) => void;
 }) {
   const [graph, setGraph] = useGraph();
 

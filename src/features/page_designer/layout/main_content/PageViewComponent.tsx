@@ -38,19 +38,19 @@ function OpenedViewPanel(props: {
 }) {
   const isHighlighted = () => props.highlightedViewId() === props.openedViewId;
 
-  // Create a reference to scroll to the highlighted view
-  let viewRef: HTMLDivElement | undefined;
+  const [viewRef, setViewRef] = createSignal<HTMLDivElement>();
 
   createEffect(() => {
-    if (isHighlighted() && viewRef) {
-      viewRef.scrollIntoView({
+    const el = viewRef();
+    if (isHighlighted() && el) {
+      el.scrollIntoView({
         behavior: "smooth",
         block: "nearest",
       });
       // When a view is highlighted, also scroll its parent container to the top
       // to ensure the view is fully visible
-      if (viewRef?.parentElement?.parentElement) {
-        viewRef.parentElement.parentElement.scrollTop = 0;
+      if (el.parentElement?.parentElement) {
+        el.parentElement.parentElement.scrollTop = 0;
       }
     }
   });
@@ -59,7 +59,7 @@ function OpenedViewPanel(props: {
     <As
       as="div"
       css={props.isActive() ? "" : "return `._id {display: none;}`;"}
-      ref={viewRef}
+      ref={setViewRef}
     >
       <PageTabBar
         formStoreId={props.formStoreId}
