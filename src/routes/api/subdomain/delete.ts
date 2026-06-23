@@ -14,6 +14,7 @@ import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 import { getBaseDir } from "~/lib/files/getBaseDir";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 import { stopWorkersForSubdomain } from "~/server/queue/initWorkersCore";
+import { invalidateFormMetaDataCacheForSubdomain } from "~/server/redis/invalidateFormMetaDataCache";
 import { deleteAllQueuesForSubdomain } from "~/server/redis/redisManagement";
 import { broadcastStopWorkers } from "~/server/cluster/clusterCommunication";
 
@@ -105,7 +106,7 @@ export async function DELETE({ request }: APIEvent) {
       );
     }
 
-    // Step 2: Delete all Redis queues for this subdomain
+    // Step 2: Delete all Redis queues and form metadata cache for this subdomain
     console.log(
       `[Subdomain Delete] Deleting Redis queues for subdomain: ${key}`,
     );
@@ -119,6 +120,13 @@ export async function DELETE({ request }: APIEvent) {
         `[Subdomain Delete] Error deleting Redis queues: ${redisResult.error}`,
       );
       // Continue with deletion even if Redis cleanup fails
+    }
+
+    const cacheDeleted = await invalidateFormMetaDataCacheForSubdomain(key);
+    if (cacheDeleted > 0) {
+      console.log(
+        `[Subdomain Delete] Invalidated ${cacheDeleted} form metadata cache entries for subdomain: ${key}`,
+      );
     }
 
     // Step 3: Delete the subdomain directory and all files

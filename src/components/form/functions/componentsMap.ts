@@ -3,7 +3,7 @@ import {
   Virtualizer,
   VList,
   WindowVirtualizer,
-} from "virtua/solid";
+} from "~/components/virtua/src/solid";
 import { SlotField } from "~/components/fields/component/SlotField";
 import { ComponentField } from "~/components/fields/component/ComponentField";
 import { SelectField } from "~/components/fields/select/SelectField";

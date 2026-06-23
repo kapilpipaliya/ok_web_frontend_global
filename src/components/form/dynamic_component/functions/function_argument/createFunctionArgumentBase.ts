@@ -10,7 +10,12 @@ import {
   on,
   batch,
   untrack,
+  For,
+  createComponent,
+  mergeProps,
 } from "solid-js";
+import { Dynamic } from "solid-js/web";
+import * as virtua from "~/components/virtua/src/core";
 import * as floatingUI from "@floating-ui/dom";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
@@ -340,6 +345,8 @@ export function createFunctionArgumentBase(
     /** Dashboard platform contracts (interaction, query AST, cache, invalidation). */
     dashboardPlatform: createDashboardPlatform(),
     floatingUI,
+    /** Virtua core virtual-scroll utilities (`createVirtualStore`, `createScroller`, etc.). */
+    virtua,
     debounce,
     focusTrap,
     KeepAwake,
