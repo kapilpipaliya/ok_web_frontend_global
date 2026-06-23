@@ -10,7 +10,7 @@ export async function updateNodeProperties(
   properties: { [key: string]: any },
 ) {
   const result = await dbSession.run(
-    "MATCH (n) WHERE elementId(n) = $id SET n += $properties SET n.updatedAt = localDateTime() RETURN n;",
+    "MATCH (n) WHERE elementId(n) = $id SET n = $properties SET n.updatedAt = localDateTime() RETURN n;",
     { id: node.id, properties },
   );
   return convertNodeToJson(result.records[0].get("n"));

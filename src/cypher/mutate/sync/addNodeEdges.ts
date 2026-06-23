@@ -36,7 +36,7 @@ export async function addNodeEdges(
     if (existingChild) {
       const query = `
         MATCH (a) WHERE elementId(a) = $childId
-        SET a += $props, a.updatedAt = localDateTime()
+        SET a = $props, a.updatedAt = localDateTime()
         RETURN a;
       `;
       const result = await sessionTarget.run(query, {

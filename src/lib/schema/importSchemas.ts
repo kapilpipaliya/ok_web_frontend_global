@@ -2,7 +2,10 @@ import type { Session, Transaction } from "neo4j-driver";
 
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
-import { deleteVertex } from "~/cypher/mutate/page/deletePage";
+import {
+  deleteVertexChildren,
+  replaceVertexProperties,
+} from "~/cypher/mutate/page/deletePage";
 import { mutateData } from "~/cypher/mutate/mutate_data/mutateData";
 import { APIError } from "~/lib/api/server/apiErrorHandler";
 import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
@@ -22,7 +25,7 @@ type SetGraphType = ReturnType<typeof createAppState>[1];
 
 export interface ImportStats {
   importedItems: string[];
-  deletedItems: string[];
+  replacedItems: string[];
   totalVertices: number;
   totalEdges: number;
   activatedTheme?: string;
@@ -35,14 +38,20 @@ interface SchemaImportResult {
     rootVertexIds: string[];
     [key: string]: unknown;
   };
-  commitData: MutationArgs;
+  commitData: MutationArgs | null;
   vertexCount: number;
   edgeCount: number;
+  replacedItems: string[];
 }
 
 interface PreprocessResult {
   schema: ImportGraphData;
   existingNodeMap: Map<string, string>;
+  replacedItems: string[];
+}
+
+function getVertexLabel(vertex: { L: string | string[] }): string {
+  return Array.isArray(vertex.L) ? vertex.L[0] : vertex.L;
 }
 
 /**
@@ -68,115 +77,14 @@ export async function findExistingVertex(
 }
 
 /**
- * Delete existing items (components, pages, themes, functions) before import
- */
-export async function deleteExistingItems(
-  sessionOrTx: Session | Transaction,
-  websiteSchemas: WebsiteSchemas,
-  user: Vertex,
-): Promise<string[]> {
-  const deletedItems: string[] = [];
-
-  // Delete existing components
-  if (websiteSchemas.components) {
-    for (const componentKey of Object.keys(websiteSchemas.components)) {
-      const existingComponentId = await findExistingVertex(
-        sessionOrTx,
-        "Component",
-        componentKey,
-      );
-
-      if (existingComponentId) {
-        console.log(`Deleting existing component: ${componentKey}`);
-        await deleteVertex(sessionOrTx, existingComponentId, user);
-        deletedItems.push(`Component: ${componentKey}`);
-      }
-    }
-  }
-
-  // Delete existing pages
-  if (websiteSchemas.pages) {
-    for (const pageKey of Object.keys(websiteSchemas.pages)) {
-      const existingPageId = await findExistingVertex(
-        sessionOrTx,
-        "Page",
-        pageKey,
-      );
-
-      if (existingPageId) {
-        console.log(`Deleting existing page: ${pageKey}`);
-        await deleteVertex(sessionOrTx, existingPageId, user);
-        deletedItems.push(`Page: ${pageKey}`);
-      }
-    }
-  }
-
-  // Delete existing themes
-  if (websiteSchemas.themes) {
-    for (const themeKey of Object.keys(websiteSchemas.themes)) {
-      const existingThemeId = await findExistingVertex(
-        sessionOrTx,
-        "Theme",
-        themeKey,
-      );
-
-      if (existingThemeId) {
-        console.log(`Deleting existing theme: ${themeKey}`);
-        await deleteVertex(sessionOrTx, existingThemeId, user);
-        deletedItems.push(`Theme: ${themeKey}`);
-      }
-    }
-  }
-
-  // Delete existing functions
-  if (websiteSchemas.functions) {
-    for (const functionKey of Object.keys(websiteSchemas.functions)) {
-      const existingFunctionId = await findExistingVertex(
-        sessionOrTx,
-        "Function",
-        functionKey,
-      );
-
-      if (existingFunctionId) {
-        console.log(`Deleting existing function: ${functionKey}`);
-        await deleteVertex(sessionOrTx, existingFunctionId, user);
-        deletedItems.push(`Function: ${functionKey}`);
-      }
-    }
-  }
-
-  // Delete existing email templates
-  if (websiteSchemas.emailTemplates) {
-    for (const templateKey of Object.keys(websiteSchemas.emailTemplates)) {
-      const existingId = await findExistingVertex(
-        sessionOrTx,
-        "EmailTemplate",
-        templateKey,
-      );
-
-      if (existingId) {
-        console.log(`Deleting existing email template: ${templateKey}`);
-        await deleteVertex(sessionOrTx, existingId, user);
-        deletedItems.push(`EmailTemplate: ${templateKey}`);
-      }
-    }
-  }
-
-  return deletedItems;
-}
-
-/**
- * Preprocess schema to handle existing nodes (Roles, Files, etc.)
+ * Preprocess schema to handle existing nodes (root schema items, Roles, Files, etc.)
  */
 async function preprocessSchemaForExistingNodes(
   schema: ImportGraphData,
   tx: Transaction,
+  rootLabel?: "Component" | "Page" | "Theme" | "Function" | "EmailTemplate",
+  rootKey?: string,
 ): Promise<PreprocessResult> {
-  // This function handles existing nodes like Roles and Files
-  // - Roles: Always use existing roles by key
-  // - Files: Use existing files by fileName if they exist, otherwise create new ones
-  // - AttrSrc relationships: Will automatically connect to the correct File nodes
-
   // Convert to arrays if needed
   const vertexesArray = Array.isArray(schema.vertexes)
     ? schema.vertexes
@@ -192,12 +100,36 @@ async function preprocessSchemaForExistingNodes(
     return {
       schema: { vertexes: vertexesArray, edges: edgesArray },
       existingNodeMap: new Map(),
+      replacedItems: [],
     };
   }
 
   // Create a map to track old IDs to existing database IDs
   const existingNodeMap = new Map<string, string>();
   const verticesToRemove = new Set<string>();
+  const replacedItems: string[] = [];
+
+  if (rootLabel && rootKey) {
+    const rootVertex = vertexesArray.find(
+      (vertex) =>
+        getVertexLabel(vertex) === rootLabel && vertex.P?.key === rootKey,
+    );
+
+    if (rootVertex) {
+      const existingRootId = await findExistingVertex(tx, rootLabel, rootKey);
+
+      if (existingRootId) {
+        console.log(
+          `Reusing existing ${rootLabel}: ${rootKey} (${existingRootId})`,
+        );
+        await deleteVertexChildren(tx, existingRootId, rootLabel);
+        await replaceVertexProperties(tx, existingRootId, { ...rootVertex.P });
+        existingNodeMap.set(rootVertex.id, existingRootId);
+        verticesToRemove.add(rootVertex.id);
+        replacedItems.push(`${rootLabel}: ${rootKey}`);
+      }
+    }
+  }
 
   // Process Role vertices
   const roleVertices = vertexesArray.filter((v) => v.L === "Role");
@@ -246,6 +178,7 @@ async function preprocessSchemaForExistingNodes(
     return {
       schema: { vertexes: vertexesArray, edges: edgesArray },
       existingNodeMap,
+      replacedItems,
     };
   }
 
@@ -265,6 +198,7 @@ async function preprocessSchemaForExistingNodes(
       edges: edgesArray,
     },
     existingNodeMap,
+    replacedItems,
   };
 }
 
@@ -348,8 +282,8 @@ async function importSingleSchema(
   tx: Transaction,
 ): Promise<SchemaImportResult> {
   // Pre-process schema to handle existing nodes (Roles, Files, etc.)
-  const { schema: processedSchema, existingNodeMap } =
-    await preprocessSchemaForExistingNodes(schema, tx);
+  const { schema: processedSchema, existingNodeMap, replacedItems } =
+    await preprocessSchemaForExistingNodes(schema, tx, type, key);
 
   // Load existing nodes into the graph state
   if (existingNodeMap.size > 0) {
@@ -369,7 +303,7 @@ async function importSingleSchema(
 
   // Commit the transaction to get the mutation data
   const commitData = commitTxn(importResult.metaTxnId, graph);
-  if (!commitData) {
+  if (!commitData && replacedItems.length === 0) {
     throw new APIError(
       `Failed to prepare data for ${type.toLowerCase()}: ${key}`,
       500,
@@ -390,7 +324,17 @@ async function importSingleSchema(
     commitData,
     vertexCount,
     edgeCount,
+    replacedItems,
   };
+}
+
+async function persistSchemaImportResult(
+  result: SchemaImportResult,
+  tx: Transaction,
+): Promise<void> {
+  if (result.commitData) {
+    await mutateData(result.commitData, tx);
+  }
 }
 
 /**
@@ -404,7 +348,7 @@ export async function importSchemas(
 ): Promise<ImportStats> {
   const stats: ImportStats = {
     importedItems: [],
-    deletedItems: [],
+    replacedItems: [],
     totalVertices: 0,
     totalEdges: 0,
   };
@@ -427,9 +371,10 @@ export async function importSchemas(
       );
 
       // Save to database
-      await mutateData(result.commitData, tx);
+      await persistSchemaImportResult(result, tx);
 
       stats.importedItems.push(`Component: ${componentKey}`);
+      stats.replacedItems.push(...result.replacedItems);
       stats.totalVertices += result.vertexCount;
       stats.totalEdges += result.edgeCount;
     }
@@ -448,9 +393,10 @@ export async function importSchemas(
       );
 
       // Save to database
-      await mutateData(result.commitData, tx);
+      await persistSchemaImportResult(result, tx);
 
       stats.importedItems.push(`Page: ${pageKey}`);
+      stats.replacedItems.push(...result.replacedItems);
       stats.totalVertices += result.vertexCount;
       stats.totalEdges += result.edgeCount;
     }
@@ -469,9 +415,10 @@ export async function importSchemas(
       );
 
       // Save to database
-      await mutateData(result.commitData, tx);
+      await persistSchemaImportResult(result, tx);
 
       stats.importedItems.push(`Theme: ${themeKey}`);
+      stats.replacedItems.push(...result.replacedItems);
       stats.totalVertices += result.vertexCount;
       stats.totalEdges += result.edgeCount;
       importedThemeKeys.push(themeKey);
@@ -493,9 +440,10 @@ export async function importSchemas(
       );
 
       // Save to database
-      await mutateData(result.commitData, tx);
+      await persistSchemaImportResult(result, tx);
 
       stats.importedItems.push(`Function: ${functionKey}`);
+      stats.replacedItems.push(...result.replacedItems);
       stats.totalVertices += result.vertexCount;
       stats.totalEdges += result.edgeCount;
     }
@@ -515,9 +463,10 @@ export async function importSchemas(
         tx,
       );
 
-      await mutateData(result.commitData, tx);
+      await persistSchemaImportResult(result, tx);
 
       stats.importedItems.push(`EmailTemplate: ${templateKey}`);
+      stats.replacedItems.push(...result.replacedItems);
       stats.totalVertices += result.vertexCount;
       stats.totalEdges += result.edgeCount;
     }
@@ -539,13 +488,12 @@ export async function importSchemas(
 export function buildSuccessResponse(
   websiteName: string,
   stats: ImportStats,
-  deletedItems: string[],
   websiteSchemas: WebsiteSchemas,
   parseIssues: SchemaParseIssue[] = [],
 ) {
   let message = `Successfully imported ${stats.importedItems.length} schemas from website: ${websiteName}`;
-  if (deletedItems.length > 0) {
-    message += ` (deleted ${deletedItems.length} existing items)`;
+  if (stats.replacedItems.length > 0) {
+    message += ` (replaced ${stats.replacedItems.length} existing items)`;
   }
   if (stats.activatedTheme) {
     message += `. Theme "${stats.activatedTheme}" was automatically activated.`;
@@ -560,7 +508,7 @@ export function buildSuccessResponse(
     details: {
       website: websiteName,
       importedItems: stats.importedItems,
-      deletedItems,
+      replacedItems: stats.replacedItems,
       totalVertices: stats.totalVertices,
       totalEdges: stats.totalEdges,
       components: Object.keys(websiteSchemas.components || {}).length,
@@ -583,9 +531,8 @@ export async function createSchemaImportActivityLog(
   websiteName: string,
   userEmail: string,
   stats: ImportStats,
-  deletedItems: string[],
 ): Promise<void> {
-  let activityMessage = `Imported ${stats.importedItems.length} schemas from website: ${websiteName}. Deleted ${deletedItems.length} existing items. Total vertices: ${stats.totalVertices}, Total edges: ${stats.totalEdges}`;
+  let activityMessage = `Imported ${stats.importedItems.length} schemas from website: ${websiteName}. Replaced ${stats.replacedItems.length} existing items. Total vertices: ${stats.totalVertices}, Total edges: ${stats.totalEdges}`;
   if (stats.activatedTheme) {
     activityMessage += `. Activated theme: ${stats.activatedTheme}`;
   }

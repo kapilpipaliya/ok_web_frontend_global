@@ -5,7 +5,6 @@ import { APIError } from "~/lib/api/server/apiErrorHandler";
 import {
   buildSuccessResponse,
   createSchemaImportActivityLog,
-  deleteExistingItems,
   importSchemas,
 } from "~/lib/schema/importSchemas";
 import { runMigration } from "~/lib/schema/runMigration";
@@ -204,20 +203,15 @@ export async function performSchemaImport(
 
   const tx = dbSession.beginTransaction();
   try {
-    const deletedItems = await deleteExistingItems(tx, websiteSchemas, user);
-
     const [graph, setGraph] = createAppState();
 
     const stats = await importSchemas(websiteSchemas, tx, graph, setGraph);
-
-    stats.deletedItems = deletedItems;
 
     await createSchemaImportActivityLog(
       tx,
       websiteName,
       user.P.email,
       stats,
-      deletedItems,
     );
 
     await tx.commit();
@@ -225,7 +219,6 @@ export async function performSchemaImport(
     response = buildSuccessResponse(
       websiteName,
       stats,
-      deletedItems,
       websiteSchemas,
       parseIssues,
     ) as Record<string, unknown>;

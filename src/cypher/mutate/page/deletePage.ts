@@ -11,6 +11,201 @@ export type DeletableVertexType =
   | "Function"
   | "Theme";
 
+export async function replaceVertexProperties(
+  sessionOrTx: Session | Transaction,
+  vertexId: string,
+  properties: Record<string, unknown>,
+): Promise<Vertex> {
+  const result = await sessionOrTx.run(
+    `
+      MATCH (v)
+      WHERE elementId(v) = $id
+      SET v = $properties, v.updatedAt = localDateTime()
+      RETURN v
+    `,
+    { id: vertexId, properties },
+  );
+
+  if (result.records.length === 0) {
+    throw new APIError("Vertex not found", 404);
+  }
+
+  return convertNodeToJson(result.records[0].get("v"));
+}
+
+/**
+ * Deletes child nodes (Attrs, variants, layouts, etc.) while keeping the root vertex.
+ */
+export async function deleteVertexChildren(
+  sessionOrTx: Session | Transaction,
+  vertexId: string,
+  vertexType: DeletableVertexType,
+): Promise<{
+  deletedVertexCount: number;
+  deletedEdgeCount: number;
+  deletedVertexIds: string[];
+  deletedEdgeIds: string[];
+}> {
+  let deletedVertexCount = 0;
+  let deletedEdgeCount = 0;
+  const deletedVertexIds: string[] = [];
+  const deletedEdgeIds: string[] = [];
+
+  const collectDeletion = (
+    nodeIds: string[] | null | undefined,
+    edgeIds: string[] | null | undefined,
+  ) => {
+    if (nodeIds?.length) {
+      deletedVertexIds.push(...nodeIds);
+      deletedVertexCount += nodeIds.length;
+    }
+    if (edgeIds?.length) {
+      deletedEdgeIds.push(...edgeIds);
+      deletedEdgeCount += edgeIds.length;
+    }
+  };
+
+  const attrResult = await sessionOrTx.run(
+    `
+      MATCH (v:${vertexType})
+      WHERE elementId(v) = $id
+      OPTIONAL MATCH (v)-[:Attr]->(rootAttr:Attr)
+      OPTIONAL MATCH path = (rootAttr)-[:Attr*0..]->(descendantAttr:Attr)
+      WITH v, rootAttr, descendantAttr, length(path) as depth
+      ORDER BY depth DESC
+      WITH v, collect(DISTINCT descendantAttr) + collect(DISTINCT rootAttr) as allAttrs
+      UNWIND allAttrs as attr
+      MATCH (attr)-[r]-()
+      WITH attr, collect(DISTINCT elementId(attr)) as nodeIds, collect(DISTINCT elementId(r)) as edgeIds
+      DETACH DELETE attr
+      RETURN reduce(acc = [], n IN collect(nodeIds) | acc + n) as deletedNodeIds,
+             reduce(acc = [], e IN collect(edgeIds) | acc + e) as deletedEdgeIds
+    `,
+    { id: vertexId },
+  );
+
+  if (attrResult.records.length > 0) {
+    const record = attrResult.records[0];
+    collectDeletion(record.get("deletedNodeIds"), record.get("deletedEdgeIds"));
+  }
+
+  if (vertexType === "Component") {
+    const variantResult = await sessionOrTx.run(
+      `
+        MATCH (c:Component)
+        WHERE elementId(c) = $id
+        OPTIONAL MATCH (c)-[r1:ComponentVariant]->(cv:ComponentVariant)
+        OPTIONAL MATCH (cv)-[r2:ComponentVariantOption]->(cvo:ComponentVariantOption)
+        WITH cv, cvo,
+             collect(DISTINCT elementId(cvo)) + collect(DISTINCT elementId(cv)) as nodeIds,
+             collect(DISTINCT elementId(r1)) + collect(DISTINCT elementId(r2)) as edgeIds
+        DETACH DELETE cvo, cv
+        RETURN nodeIds as deletedNodeIds, edgeIds as deletedEdgeIds
+      `,
+      { id: vertexId },
+    );
+
+    if (variantResult.records.length > 0) {
+      const record = variantResult.records[0];
+      collectDeletion(record.get("deletedNodeIds"), record.get("deletedEdgeIds"));
+    }
+  }
+
+  let previewRelType: string | null = null;
+  if (vertexType === "Page") {
+    previewRelType = "PagePreview";
+  } else if (vertexType === "EmailTemplate") {
+    previewRelType = "EmailTemplatePreview";
+  } else if (vertexType === "Component") {
+    previewRelType = "ComponentPreview";
+  }
+
+  if (previewRelType) {
+    const previewResult = await sessionOrTx.run(
+      `
+        MATCH (v:${vertexType})
+        WHERE elementId(v) = $id
+        OPTIONAL MATCH (v)-[r:${previewRelType}]->(f:File)
+        WITH f, collect(DISTINCT elementId(f)) as nodeIds, collect(DISTINCT elementId(r)) as edgeIds
+        DETACH DELETE f
+        RETURN nodeIds as deletedNodeIds, edgeIds as deletedEdgeIds
+      `,
+      { id: vertexId },
+    );
+
+    if (previewResult.records.length > 0) {
+      const record = previewResult.records[0];
+      collectDeletion(record.get("deletedNodeIds"), record.get("deletedEdgeIds"));
+    }
+  }
+
+  if (vertexType === "Page") {
+    const rolePageResult = await sessionOrTx.run(
+      `
+        MATCH (p:Page)
+        WHERE elementId(p) = $id
+        OPTIONAL MATCH (p)<-[r1:RolePagePage]-(rp:RolePage)<-[r2:RolePage]-(:Role)
+        WITH rp,
+             collect(DISTINCT elementId(rp)) as nodeIds,
+             collect(DISTINCT elementId(r1)) + collect(DISTINCT elementId(r2)) as edgeIds
+        DETACH DELETE rp
+        RETURN nodeIds as deletedNodeIds, edgeIds as deletedEdgeIds
+      `,
+      { id: vertexId },
+    );
+
+    if (rolePageResult.records.length > 0) {
+      const record = rolePageResult.records[0];
+      collectDeletion(record.get("deletedNodeIds"), record.get("deletedEdgeIds"));
+    }
+
+    const pageUniqueResult = await sessionOrTx.run(
+      `
+        MATCH (p:Page)
+        WHERE elementId(p) = $id
+        OPTIONAL MATCH (p)-[r:PageUnique]->(pu:PageUnique)
+        WITH pu,
+             collect(DISTINCT elementId(pu)) as nodeIds,
+             collect(DISTINCT elementId(r)) as edgeIds
+        DETACH DELETE pu
+        RETURN nodeIds as deletedNodeIds, edgeIds as deletedEdgeIds
+      `,
+      { id: vertexId },
+    );
+
+    if (pageUniqueResult.records.length > 0) {
+      const record = pageUniqueResult.records[0];
+      collectDeletion(record.get("deletedNodeIds"), record.get("deletedEdgeIds"));
+    }
+
+    const pageLayoutResult = await sessionOrTx.run(
+      `
+        MATCH (p:Page)
+        WHERE elementId(p) = $id
+        OPTIONAL MATCH (p)-[r:PageLayout]->(pl:PageLayout)
+        WITH pl,
+             collect(DISTINCT elementId(pl)) as nodeIds,
+             collect(DISTINCT elementId(r)) as edgeIds
+        DETACH DELETE pl
+        RETURN nodeIds as deletedNodeIds, edgeIds as deletedEdgeIds
+      `,
+      { id: vertexId },
+    );
+
+    if (pageLayoutResult.records.length > 0) {
+      const record = pageLayoutResult.records[0];
+      collectDeletion(record.get("deletedNodeIds"), record.get("deletedEdgeIds"));
+    }
+  }
+
+  return {
+    deletedVertexCount,
+    deletedEdgeCount,
+    deletedVertexIds,
+    deletedEdgeIds,
+  };
+}
+
 export async function deleteVertex(
   sessionOrTx: Session | Transaction,
   vertexId: string,
@@ -67,209 +262,11 @@ export async function deleteVertex(
     const deletedVertexIds: string[] = [];
     const deletedEdgeIds: string[] = [];
 
-    // Delete all Attr nodes and their relationships (including AttrSrc edges)
-    // This query finds all Attr nodes connected to the vertex and deletes them in depth-first order
-    // Returns IDs in depth-first order (leaves first)
-    // First collect the IDs, then delete
-    const attrResult = await tx.run(
-      `
-        MATCH (v:${vertexType})
-        WHERE elementId(v) = $id
-        OPTIONAL MATCH (v)-[:Attr]->(rootAttr:Attr)
-        OPTIONAL MATCH path = (rootAttr)-[:Attr*0..]->(descendantAttr:Attr)
-        WITH v, rootAttr, descendantAttr, length(path) as depth
-        ORDER BY depth DESC
-        WITH v, collect(DISTINCT descendantAttr) + collect(DISTINCT rootAttr) as allAttrs
-        UNWIND allAttrs as attr
-        MATCH (attr)-[r]-()
-        WITH attr, collect(DISTINCT elementId(attr)) as nodeIds, collect(DISTINCT elementId(r)) as edgeIds
-        DETACH DELETE attr
-        RETURN reduce(acc = [], n IN collect(nodeIds) | acc + n) as deletedNodeIds, 
-               reduce(acc = [], e IN collect(edgeIds) | acc + e) as deletedEdgeIds
-      `,
-      { id: vertexId },
-    );
-
-    if (attrResult.records.length > 0) {
-      const record = attrResult.records[0];
-      const attrIds = record.get("deletedNodeIds");
-      const edgeIds = record.get("deletedEdgeIds");
-
-      if (attrIds && attrIds.length > 0) {
-        deletedVertexIds.push(...attrIds);
-        deletedVertexCount += attrIds.length;
-      }
-      if (edgeIds && edgeIds.length > 0) {
-        deletedEdgeIds.push(...edgeIds);
-        deletedEdgeCount += edgeIds.length;
-      }
-    }
-
-    // Delete ComponentVariant nodes and their options (only for Component)
-    if (vertexType === "Component") {
-      const variantResult = await tx.run(
-        `
-          MATCH (c:Component)
-          WHERE elementId(c) = $id
-          OPTIONAL MATCH (c)-[r1:ComponentVariant]->(cv:ComponentVariant)
-          OPTIONAL MATCH (cv)-[r2:ComponentVariantOption]->(cvo:ComponentVariantOption)
-          WITH cv, cvo, 
-               collect(DISTINCT elementId(cvo)) + collect(DISTINCT elementId(cv)) as nodeIds,
-               collect(DISTINCT elementId(r1)) + collect(DISTINCT elementId(r2)) as edgeIds
-          DETACH DELETE cvo, cv
-          RETURN nodeIds as deletedNodeIds, edgeIds as deletedEdgeIds
-        `,
-        { id: vertexId },
-      );
-
-      if (variantResult.records.length > 0) {
-        const record = variantResult.records[0];
-        const variantIds = record.get("deletedNodeIds");
-        const edgeIds = record.get("deletedEdgeIds");
-
-        if (variantIds && variantIds.length > 0) {
-          deletedVertexIds.push(...variantIds);
-          deletedVertexCount += variantIds.length;
-        }
-        if (edgeIds && edgeIds.length > 0) {
-          deletedEdgeIds.push(...edgeIds);
-          deletedEdgeCount += edgeIds.length;
-        }
-      }
-    }
-
-    // Delete preview relationship and associated File node
-    // Page, EmailTemplate, and Component can have preview files
-    let previewRelType: string | null = null;
-    if (vertexType === "Page") {
-      previewRelType = "PagePreview";
-    } else if (vertexType === "EmailTemplate") {
-      previewRelType = "EmailTemplatePreview";
-    } else if (vertexType === "Component") {
-      previewRelType = "ComponentPreview";
-    }
-    // Function doesn't have preview files
-
-    if (previewRelType) {
-      const previewResult = await tx.run(
-        `
-          MATCH (v:${vertexType})
-          WHERE elementId(v) = $id
-          OPTIONAL MATCH (v)-[r:${previewRelType}]->(f:File)
-          WITH f, collect(DISTINCT elementId(f)) as nodeIds, collect(DISTINCT elementId(r)) as edgeIds
-          DETACH DELETE f
-          RETURN nodeIds as deletedNodeIds, edgeIds as deletedEdgeIds
-        `,
-        { id: vertexId },
-      );
-
-      if (previewResult.records.length > 0) {
-        const record = previewResult.records[0];
-        const fileIds = record.get("deletedNodeIds");
-        const edgeIds = record.get("deletedEdgeIds");
-
-        if (fileIds && fileIds.length > 0) {
-          deletedVertexIds.push(...fileIds);
-          deletedVertexCount += fileIds.length;
-        }
-        if (edgeIds && edgeIds.length > 0) {
-          deletedEdgeIds.push(...edgeIds);
-          deletedEdgeCount += edgeIds.length;
-        }
-      }
-    }
-
-    // Delete Role-related nodes and their relationships (only for Page)
-    if (vertexType === "Page") {
-      const rolePageResult = await tx.run(
-        `
-          MATCH (p:Page)
-          WHERE elementId(p) = $id
-          OPTIONAL MATCH (p)<-[r1:RolePagePage]-(rp:RolePage)<-[r2:RolePage]-(:Role)
-          WITH rp, 
-               collect(DISTINCT elementId(rp)) as nodeIds,
-               collect(DISTINCT elementId(r1)) + collect(DISTINCT elementId(r2)) as edgeIds
-          DETACH DELETE rp
-          RETURN nodeIds as deletedNodeIds, edgeIds as deletedEdgeIds
-        `,
-        { id: vertexId },
-      );
-
-      if (rolePageResult.records.length > 0) {
-        const record = rolePageResult.records[0];
-        const rolePageIds = record.get("deletedNodeIds");
-        const edgeIds = record.get("deletedEdgeIds");
-
-        if (rolePageIds && rolePageIds.length > 0) {
-          deletedVertexIds.push(...rolePageIds);
-          deletedVertexCount += rolePageIds.length;
-        }
-        if (edgeIds && edgeIds.length > 0) {
-          deletedEdgeIds.push(...edgeIds);
-          deletedEdgeCount += edgeIds.length;
-        }
-      }
-
-      // Delete PageUnique nodes (only for Page)
-      const pageUniqueResult = await tx.run(
-        `
-          MATCH (p:Page)
-          WHERE elementId(p) = $id
-          OPTIONAL MATCH (p)-[r:PageUnique]->(pu:PageUnique)
-          WITH pu,
-               collect(DISTINCT elementId(pu)) as nodeIds,
-               collect(DISTINCT elementId(r)) as edgeIds
-          DETACH DELETE pu
-          RETURN nodeIds as deletedNodeIds, edgeIds as deletedEdgeIds
-        `,
-        { id: vertexId },
-      );
-
-      if (pageUniqueResult.records.length > 0) {
-        const record = pageUniqueResult.records[0];
-        const pageUniqueIds = record.get("deletedNodeIds");
-        const edgeIds = record.get("deletedEdgeIds");
-
-        if (pageUniqueIds && pageUniqueIds.length > 0) {
-          deletedVertexIds.push(...pageUniqueIds);
-          deletedVertexCount += pageUniqueIds.length;
-        }
-        if (edgeIds && edgeIds.length > 0) {
-          deletedEdgeIds.push(...edgeIds);
-          deletedEdgeCount += edgeIds.length;
-        }
-      }
-
-      // Delete PageLayout nodes (only for Page)
-      const pageLayoutResult = await tx.run(
-        `
-          MATCH (p:Page)
-          WHERE elementId(p) = $id
-          OPTIONAL MATCH (p)-[r:PageLayout]->(pl:PageLayout)
-          WITH pl,
-               collect(DISTINCT elementId(pl)) as nodeIds,
-               collect(DISTINCT elementId(r)) as edgeIds
-          DETACH DELETE pl
-          RETURN nodeIds as deletedNodeIds, edgeIds as deletedEdgeIds
-        `,
-        { id: vertexId },
-      );
-
-      if (pageLayoutResult.records.length > 0) {
-        const record = pageLayoutResult.records[0];
-        const pageLayoutIds = record.get("deletedNodeIds");
-        const edgeIds = record.get("deletedEdgeIds");
-
-        if (pageLayoutIds && pageLayoutIds.length > 0) {
-          deletedVertexIds.push(...pageLayoutIds);
-          deletedVertexCount += pageLayoutIds.length;
-        }
-        if (edgeIds && edgeIds.length > 0) {
-          deletedEdgeIds.push(...edgeIds);
-          deletedEdgeCount += edgeIds.length;
-        }
-      }
-    }
+    const childDeletion = await deleteVertexChildren(tx, vertexId, vertexType);
+    deletedVertexCount += childDeletion.deletedVertexCount;
+    deletedEdgeCount += childDeletion.deletedEdgeCount;
+    deletedVertexIds.push(...childDeletion.deletedVertexIds);
+    deletedEdgeIds.push(...childDeletion.deletedEdgeIds);
 
     // Finally, delete the vertex itself and all its remaining relationships
     const mainVertexResult = await tx.run(

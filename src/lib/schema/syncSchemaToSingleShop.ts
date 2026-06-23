@@ -8,7 +8,6 @@ import { getDriver } from "~/cypher/core/driver";
 import { createDatabase } from "~/cypher/mutate/signup/database/createDatabase";
 import {
   createSchemaImportActivityLog,
-  deleteExistingItems,
   importSchemas,
   type ImportStats,
 } from "~/lib/schema/importSchemas";
@@ -129,22 +128,14 @@ export async function syncSchemaToSingleShop(
 
       const tx = shopDbSession.beginTransaction();
       try {
-        const deletedItems = await deleteExistingItems(
-          tx,
-          websiteSchemas,
-          user,
-        );
-
         const [graph, setGraph] = createAppState();
         stats = await importSchemas(websiteSchemas, tx, graph, setGraph);
-        stats.deletedItems = deletedItems;
 
         await createSchemaImportActivityLog(
           tx,
           shopDatabaseName,
           user.P.email,
           stats,
-          deletedItems,
         );
 
         await tx.commit();
