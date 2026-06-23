@@ -205,7 +205,6 @@ export function ComponentPaletteTreeItem(
         background-color: \${args.theme.var.color.background_light_50};
         color: \${args.theme.var.color.background_light_50_text};
         cursor: ${contentCursor()};
-        touch-action: none;
         ${boxShadow}
       }\`;`,
     ];

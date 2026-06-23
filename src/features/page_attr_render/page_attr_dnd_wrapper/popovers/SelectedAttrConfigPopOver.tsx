@@ -96,7 +96,6 @@ export function SelectedAttrConfigPopOver(
             background-color: transparent;
             border: none;
             cursor: grab;
-            touch-action: none;
           }\`;`,
           ]}
           icon="ph:dots-six-vertical-bold"

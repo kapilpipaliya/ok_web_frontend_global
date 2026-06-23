@@ -103,7 +103,6 @@ export function ComponentItem(
         background-color: ${backgroundColor};
         color: ${textColor};
         cursor: grab;
-        touch-action: none;
       }\`;`,
     ];
   };
