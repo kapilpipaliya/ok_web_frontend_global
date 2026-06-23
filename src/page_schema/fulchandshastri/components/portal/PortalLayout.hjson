@@ -1,0 +1,266 @@
+{
+  vertexes: [
+    {
+      id: "pl1"
+      L: Component
+      P: {
+        fns:
+          '''
+return {
+  executeYTOFunction: (functionName, contextData) =>
+    args.executeNamedServerFunction({ functionName, contextData: contextData || {} })
+};
+'''
+        title: PortalLayout
+        key: PortalLayout
+      }
+    }
+    {
+      id: "pl2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: ConfirmProvider
+        props:
+          '''
+return {
+  getUsePolarisUI: () => true
+};
+'''
+      }
+    }
+    {
+      id: "pl3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "link",
+  rel: "icon",
+  href: "/api/file/downloadCompanyFavicon"
+};
+'''
+      }
+    }
+    {
+      id: "pl_polaris"
+      L: Attr
+      P: {
+        as: script
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  src: "https://cdn.shopify.com/shopifycloud/polaris.js"
+};'''
+      }
+    }
+    {
+      id: "pl10"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  height: 100vh;
+  max-height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  background: ${args.theme.var.color.background};
+}`;'''
+        props:
+          '''return {
+  as: "div"
+};'''
+      }
+    }
+    {
+      id: "pl11"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: PortalNavigation
+        key: fullchand_portal_nav
+      }
+    }
+    {
+      id: "pl12"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        css:
+          '''return `._id {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}`;'''
+        props:
+          '''return {
+  as: "main"
+};'''
+      }
+    }
+    {
+      id: "pl12wrap"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''return `._id {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}`;'''
+        props:
+          '''return {
+  as: "div"
+};'''
+      }
+    }
+    {
+      id: "pl13"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Slot
+        slot: 1children
+        key: portal_slot
+      }
+    }
+    {
+      id: "pl_nav_overlay"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const isNavigating = args.fns.isNavigating?.();
+
+return {
+  as: "div",
+  style: {
+    display: isNavigating ? "flex" : "none"
+  }
+};
+'''
+        css:
+          '''
+return `._id {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: ${args.theme.var.color.background};
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: ${args.theme.var.spacing.xxl};
+  z-index: 1;
+  opacity: 0;
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}`;
+'''
+      }
+    }
+    {
+      id: "pl_nav_spinner"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: LoadingSpinner
+        props:
+          '''
+return {
+  size: "medium",
+  color: "primary"
+};
+'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: pl_e1
+      T: Attr
+      S: "pl1"
+      E: "pl2"
+    }
+    {
+      id: pl_e2
+      T: Attr
+      S: "pl2"
+      E: "pl3"
+    }
+    {
+      id: pl_e_polaris
+      T: Attr
+      S: "pl2"
+      E: "pl_polaris"
+    }
+    {
+      id: pl_e3
+      T: Attr
+      S: "pl2"
+      E: "pl10"
+    }
+    {
+      id: pl_e4
+      T: Attr
+      S: "pl10"
+      E: "pl11"
+    }
+    {
+      id: pl_e5
+      T: Attr
+      S: "pl10"
+      E: "pl12"
+    }
+    {
+      id: pl_e6
+      T: Attr
+      S: "pl12"
+      E: "pl12wrap"
+    }
+    {
+      id: pl_e6b
+      T: Attr
+      S: "pl12wrap"
+      E: "pl13"
+    }
+    {
+      id: pl_e_nav_overlay
+      T: Attr
+      S: "pl12"
+      E: "pl_nav_overlay"
+    }
+    {
+      id: pl_e_nav_spinner
+      T: Attr
+      S: "pl_nav_overlay"
+      E: "pl_nav_spinner"
+    }
+  ]
+}

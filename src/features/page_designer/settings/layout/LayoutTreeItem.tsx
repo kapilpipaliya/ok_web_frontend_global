@@ -36,6 +36,7 @@ import { getChildrenAttrs } from "../../functions/layout/getChildrenAttrs";
 import { getCompKeyFromAttrId } from "~/features/page_designer/functions/layout/syncHighlightedCompKey";
 import {
   clearLayoutPreviewHover,
+  isLayoutPreviewHover,
   setLayoutPreviewHover,
 } from "../../functions/layout/previewHover";
 import { AttrConfigIcons } from "./AttrConfigIcons";
@@ -91,6 +92,8 @@ export function LayoutTreeItem(
     () => layoutStoreVertex()?.P.activeItem,
   );
   const isActiveTargetItem = () => activeItemChanged(props.metaVertex.id);
+  const isPreviewHover = () =>
+    isLayoutPreviewHover(layoutStoreVertex()?.P, props.metaVertex.id);
 
   const isPaletteHighlighted = createMemo(() => {
     const highlightedKey = layoutStoreVertex()?.P.highlightedCompKey;
@@ -225,7 +228,10 @@ export function LayoutTreeItem(
     if (isSelectedLayoutId(props.metaVertex.id)) {
       boxShadow +=
         " background-color:${args.theme.var.color.primary_light_300}; color:${args.theme.var.color.primary_light_300_text};";
-    } else if (isSelectedHoverId(props.metaVertex.id)) {
+    } else if (
+      isSelectedHoverId(props.metaVertex.id) ||
+      isPreviewHover()
+    ) {
       boxShadow +=
         " background-color:${args.theme.var.color.primary_light_750}; color:${args.theme.var.color.primary_light_750_text};";
     }

@@ -19,7 +19,7 @@ console.log(`Fulchand Shastri settings migration (dryRun: ${dryRun})`);
 const nowIso = () => new Date().toISOString();
 
 const definitionsResult = await args.executeNamedServerFunction({
-  functionName: "getFulchandPageSettingsDefinitions",
+  functionName: "getPageSettingsDefinitions",
   contextData: {}
 });
 
@@ -247,7 +247,7 @@ async function migrateExistingLocalizedValues() {
   if (dryRun) return { converted: 0 };
 
   const languagesResult = await args.executeNamedServerFunction({
-    functionName: "getFulchandSiteLanguages",
+    functionName: "getSiteLanguages",
     contextData: {}
   });
   const languages = languagesResult?.result?.data?.languages || [
@@ -290,7 +290,7 @@ async function migrateExistingLocalizedValues() {
     if (!sectionConfig) continue;
 
     const normalizeResult = await args.executeNamedServerFunction({
-      functionName: "fulchandLocalizationHelpers",
+      functionName: "localizationHelpers",
       contextData: {
         action: "localizeSectionValues",
         sectionConfig,

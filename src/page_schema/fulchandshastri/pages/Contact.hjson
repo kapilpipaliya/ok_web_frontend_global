@@ -1,0 +1,861 @@
+{
+  vertexes: [
+    {
+      id: "page",
+      L: "Page",
+      P: {
+        public: true
+        key: "Contact",
+        fns: "return { enabled: () => true }",
+        isNoPermissionCheck: true,
+        url: "/contact"
+        settingsPageId: "contact"
+        props: '''
+const locale = args.params?.lang ? String(args.params.lang).toLowerCase() : undefined;
+return {
+  contextName: "contactSettings",
+  serverFunction: `
+try {
+  const result = await args.executeNamedServerFunction({
+    functionName: "loadPublicPageSettings",
+    contextData: { pageId: "contact", allowPublicRead: true, locale: ${JSON.stringify(locale ?? null)} }
+  });
+  if (!result?.result?.success) return {};
+  return result.result.data?.sections || {};
+} catch (error) {
+  console.error("Error loading page settings:", error);
+  return {};
+}
+`
+};
+'''
+      }
+    },
+    {
+      id: "pageHeader",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: linear-gradient(135deg, ${args.theme.var.color.primary_light_100} 0%, ${args.theme.var.color.primary_light_50} 100%);
+  padding: 3rem 1rem;
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "pageTitle",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const content = args.contextData.contactSettings?.content;
+return {
+  as: "h1",
+  text: content?.pageTitle
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  font-size: 3rem;
+  font-weight: 700;
+  margin: 0;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "pageSubtitle",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const content = args.contextData.contactSettings?.content;
+return {
+  as: "p",
+  text: content?.pageSubtitle
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text_light_200};
+  font-size: 1.25rem;
+  margin-top: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "mainContent",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "main"
+};
+''',
+        css: '''
+return `._id {
+  padding: 3rem 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "contactGrid",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  margin-bottom: 4rem;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "contactInfo",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el, { x: -32, y: 0 })
+};
+'''
+      }
+    },
+    {
+      id: "infoTitle",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const content = args.contextData.contactSettings?.content;
+return {
+  as: "h2",
+  text: content?.infoTitle
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "infoList",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "addressItem",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 1rem;
+  align-items: start;
+}`;
+'''
+      }
+    },
+    {
+      id: "addressIcon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  width: 3rem;
+  height: 3rem;
+  background: ${args.theme.var.color.primary_light_100};
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "addressIconSvg",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:location",
+  width: 24,
+  height: 24
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "addressContent",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "addressTitle",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const content = args.contextData.contactSettings?.content;
+return {
+  as: "h3",
+  text: content?.addressTitle
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "addressText",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const content = args.contextData.contactSettings?.content;
+return {
+  as: "p",
+  text: content?.addressText
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text_light_200};
+  line-height: 1.6;
+  white-space: pre-line;
+}`;
+'''
+      }
+    },
+    {
+      id: "phoneItem",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 1rem;
+  align-items: start;
+}`;
+'''
+      }
+    },
+    {
+      id: "phoneIcon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  width: 3rem;
+  height: 3rem;
+  background: ${args.theme.var.color.primary_light_100};
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "phoneIconSvg",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:phone",
+  width: 24,
+  height: 24
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "phoneContent",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "phoneTitle",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const content = args.contextData.contactSettings?.content;
+return {
+  as: "h3",
+  text: content?.phoneTitle
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "phoneNumbers",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "phone1",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const content = args.contextData.contactSettings?.content;
+return {
+  as: "a",
+  text: content?.phone1
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+  text-decoration: none;
+  transition: color 0.2s ease;
+  
+  &:hover {
+    color: ${args.theme.var.color.primary_dark_200};
+    text-decoration: underline;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "phone2",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const content = args.contextData.contactSettings?.content;
+return {
+  as: "a",
+  text: content?.phone2
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+  text-decoration: none;
+  transition: color 0.2s ease;
+  
+  &:hover {
+    color: ${args.theme.var.color.primary_dark_200};
+    text-decoration: underline;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "emailItem",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 1rem;
+  align-items: start;
+}`;
+'''
+      }
+    },
+    {
+      id: "emailIcon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  width: 3rem;
+  height: 3rem;
+  background: ${args.theme.var.color.primary_light_100};
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "emailIconSvg",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:email",
+  width: 24,
+  height: 24
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "emailContent",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "emailTitle",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const content = args.contextData.contactSettings?.content;
+return {
+  as: "h3",
+  text: content?.emailTitle
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "emailLink",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const content = args.contextData.contactSettings?.content;
+return {
+  as: "a",
+  text: content?.emailLink
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+  text-decoration: none;
+  transition: color 0.2s ease;
+  
+  &:hover {
+    color: ${args.theme.var.color.primary_dark_200};
+    text-decoration: underline;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "contactFormSection",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el, { x: 32, y: 0, delay: 0.1 })
+};
+'''
+      }
+    },
+    {
+      id: "formTitle",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const content = args.contextData.contactSettings?.content;
+return {
+  as: "h2",
+  text: content?.formTitle
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "contactForm",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "ContactForm",
+        props: '''
+return {};
+'''
+      }
+    },
+    {
+      id: "mapSection",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el)
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_light_50};
+  padding: 3rem 0;
+  margin-top: 4rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "mapContainer",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "mapTitle",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const content = args.contextData.contactSettings?.content;
+return {
+  as: "h2",
+  text: content?.mapTitle
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  font-size: 2rem;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 2rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "mapFrame",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  height: 450px;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}`;
+'''
+      }
+    },
+    {
+      id: "map",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "iframe",
+  src: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3705.2985671406!2d71.91442!3d21.76885!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2sAtma+Siddhi+Kaivalya+Kendra!5e0!3m2!1sen!2sin!4v1234567890",
+  width: "100%",
+  height: "100%",
+  frameborder: "0",
+  allowfullscreen: true,
+  loading: "lazy"
+};
+'''
+      }
+    },
+    {
+      id: "layout",
+      L: "PageLayout",
+      P: {
+        displayOrder: 1,
+        componentName: "Layout"
+      }
+    }
+  ],
+  edges: [
+    { id: "e0", T: "Attr", S: "page", E: "pageHeader" },
+    { id: "e3", T: "Attr", S: "pageHeader", E: "pageTitle" },
+    { id: "e4", T: "Attr", S: "pageHeader", E: "pageSubtitle" },
+    { id: "e5", T: "Attr", S: "page", E: "mainContent" },
+    { id: "e6", T: "Attr", S: "mainContent", E: "container" },
+    { id: "e7", T: "Attr", S: "container", E: "contactGrid" },
+    { id: "e8", T: "Attr", S: "contactGrid", E: "contactInfo" },
+    { id: "e9", T: "Attr", S: "contactInfo", E: "infoTitle" },
+    { id: "e10", T: "Attr", S: "contactInfo", E: "infoList" },
+    { id: "e11", T: "Attr", S: "infoList", E: "addressItem" },
+    { id: "e12", T: "Attr", S: "addressItem", E: "addressIcon" },
+    { id: "e13", T: "Attr", S: "addressIcon", E: "addressIconSvg" },
+    { id: "e14", T: "Attr", S: "addressItem", E: "addressContent" },
+    { id: "e15", T: "Attr", S: "addressContent", E: "addressTitle" },
+    { id: "e16", T: "Attr", S: "addressContent", E: "addressText" },
+    { id: "e17", T: "Attr", S: "infoList", E: "phoneItem" },
+    { id: "e18", T: "Attr", S: "phoneItem", E: "phoneIcon" },
+    { id: "e19", T: "Attr", S: "phoneIcon", E: "phoneIconSvg" },
+    { id: "e20", T: "Attr", S: "phoneItem", E: "phoneContent" },
+    { id: "e21", T: "Attr", S: "phoneContent", E: "phoneTitle" },
+    { id: "e22", T: "Attr", S: "phoneContent", E: "phoneNumbers" },
+    { id: "e23", T: "Attr", S: "phoneNumbers", E: "phone1" },
+    { id: "e24", T: "Attr", S: "phoneNumbers", E: "phone2" },
+    { id: "e25", T: "Attr", S: "infoList", E: "emailItem" },
+    { id: "e26", T: "Attr", S: "emailItem", E: "emailIcon" },
+    { id: "e27", T: "Attr", S: "emailIcon", E: "emailIconSvg" },
+    { id: "e28", T: "Attr", S: "emailItem", E: "emailContent" },
+    { id: "e29", T: "Attr", S: "emailContent", E: "emailTitle" },
+    { id: "e30", T: "Attr", S: "emailContent", E: "emailLink" },
+    { id: "e31", T: "Attr", S: "contactGrid", E: "contactFormSection" },
+    { id: "e32", T: "Attr", S: "contactFormSection", E: "formTitle" },
+    { id: "e33", T: "Attr", S: "contactFormSection", E: "contactForm" },
+    { id: "e34", T: "Attr", S: "mainContent", E: "mapSection" },
+    { id: "e35", T: "Attr", S: "mapSection", E: "mapContainer" },
+    { id: "e36", T: "Attr", S: "mapContainer", E: "mapTitle" },
+    { id: "e37", T: "Attr", S: "mapContainer", E: "mapFrame" },
+    { id: "e38", T: "Attr", S: "mapFrame", E: "map" },
+    { id: "e_layout", T: "PageLayout", S: "page", E: "layout" }
+  ]
+}

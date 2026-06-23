@@ -1,0 +1,427 @@
+{
+  vertexes: [
+    {
+      id: "page",
+      L: "Page",
+      P: {
+        public: true
+        key: "Home",
+        fns: "return { enabled: () => true }",
+        isNoPermissionCheck: true,
+        url: "/",
+        settingsPageId: "home"
+        props: '''
+const locale = args.params?.lang ? String(args.params.lang).toLowerCase() : undefined;
+return {
+  contextName: "homeSettings",
+  serverFunction: `
+try {
+  const result = await args.executeNamedServerFunction({
+    functionName: "loadPublicPageSettings",
+    contextData: { pageId: "home", allowPublicRead: true, locale: ${JSON.stringify(locale ?? null)} }
+  });
+  if (!result?.result?.success) return {};
+  return result.result.data?.sections || {};
+} catch (error) {
+  console.error("Error loading page settings:", error);
+  return {};
+}
+`
+};
+'''
+      }
+    },
+    {
+      id: "heroSection",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "HeroSection",
+        props: '''
+const hero = args.contextData.homeSettings?.hero;
+return hero;
+'''
+      }
+    },
+    {
+      id: "mainContent",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "main"
+};
+''',
+        css: '''
+return `._id {
+  padding: 3rem 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "welcomeSection",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const welcome = args.contextData.homeSettings?.welcome;
+return {
+  as: "section",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el)
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  margin-bottom: 4rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "welcomeTitle",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const welcome = args.contextData.homeSettings?.welcome;
+return {
+  as: "h1",
+  text: welcome?.welcomeTitle
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  line-height: 1.3;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "welcomeDesc",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const welcome = args.contextData.homeSettings?.welcome;
+return {
+  as: "p",
+  text: welcome?.welcomeDesc
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text_light_200};
+  font-size: 1.125rem;
+  line-height: 1.8;
+  max-width: 800px;
+  margin: 0 auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "featuresGrid",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: 4rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "featureLoop",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        loop: true,
+        contextName: "featureCard"
+        componentName: "Html",
+        props: '''
+const cards = args.contextData.homeSettings?.features?.featureCards ?? [];
+return {
+  as: "fragment",
+  data: cards.map((card) => ({
+    ...card,
+    align: card.align
+  }))
+};
+'''
+      }
+    },
+    {
+      id: "featureCard",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "FeatureCard",
+        props: '''
+return args.contextData.featureCard;
+'''
+      }
+    },
+    {
+      id: "quote",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "QuoteSection",
+        props: '''
+const quote = args.contextData.homeSettings?.quote;
+return {
+  text: quote.quoteText,
+  author: quote.quoteAuthor
+};
+'''
+      }
+    },
+    {
+      id: "missionSection",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el)
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_light_50};
+  padding: 3rem 2rem;
+  border-radius: 1rem;
+  margin-bottom: 4rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "missionTitle",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const mission = args.contextData.homeSettings?.mission;
+return {
+  as: "h2",
+  text: mission?.missionTitle
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  font-size: 2rem;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 2rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "missionGrid",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "missionItemLoop",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        loop: true,
+        contextName: "missionItem"
+        componentName: "Html",
+        props: '''
+const items = args.contextData.homeSettings?.mission?.missionItems ?? [];
+return {
+  as: "div",
+  data: items
+};
+'''
+      }
+    },
+    {
+      id: "missionItem",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const index = args.contextData.index ?? 0;
+return {
+  as: "div",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el, { delay: index * 0.08 })
+};
+'''
+      }
+    },
+    {
+      id: "missionIcon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  width: 4rem;
+  height: 4rem;
+  background: ${args.theme.var.color.primary_light_100};
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "missionIconSvg",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.missionItem;
+return {
+  as: "icon",
+  icon: item?.icon,
+  width: 32,
+  height: 32
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "missionText",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.missionItem;
+return {
+  as: "p",
+  text: item?.text
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text_light_200};
+  font-size: 1rem;
+  line-height: 1.6;
+}`;
+'''
+      }
+    },
+    {
+      id: "layout",
+      L: "PageLayout",
+      P: {
+        displayOrder: 1,
+        componentName: "Layout"
+      }
+    }
+  ],
+  edges: [
+    { id: "e0", T: "Attr", S: "page", E: "heroSection" },
+    { id: "e3", T: "Attr", S: "page", E: "mainContent" },
+    { id: "e4", T: "Attr", S: "mainContent", E: "container" },
+    { id: "e5", T: "Attr", S: "container", E: "welcomeSection" },
+    { id: "e6", T: "Attr", S: "welcomeSection", E: "welcomeTitle" },
+    { id: "e7", T: "Attr", S: "welcomeSection", E: "welcomeDesc" },
+    { id: "e8", T: "Attr", S: "container", E: "featuresGrid" },
+    { id: "e9", T: "Attr", S: "featuresGrid", E: "featureLoop" },
+    { id: "e9a", T: "Attr", S: "featureLoop", E: "featureCard" },
+    { id: "e12", T: "Attr", S: "container", E: "quote" },
+    { id: "e13", T: "Attr", S: "container", E: "missionSection" },
+    { id: "e14", T: "Attr", S: "missionSection", E: "missionTitle" },
+    { id: "e15", T: "Attr", S: "missionSection", E: "missionGrid" },
+    { id: "e16", T: "Attr", S: "missionGrid", E: "missionItemLoop" },
+    { id: "e17", T: "Attr", S: "missionItemLoop", E: "missionItem" },
+    { id: "e18", T: "Attr", S: "missionItem", E: "missionIcon" },
+    { id: "e19", T: "Attr", S: "missionIcon", E: "missionIconSvg" },
+    { id: "e20", T: "Attr", S: "missionItem", E: "missionText" },
+    { id: "e_layout", T: "PageLayout", S: "page", E: "layout" }
+  ]
+}

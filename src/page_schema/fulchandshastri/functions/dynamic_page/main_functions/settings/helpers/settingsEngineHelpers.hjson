@@ -215,7 +215,7 @@ const mergeSectionDefaults = async (sectionConfig, values, languages) => {
   }
 
   const normalizeResult = await args.executeNamedServerFunction({
-    functionName: "fulchandLocalizationHelpers",
+    functionName: "localizationHelpers",
     contextData: {
       action: "localizeSectionValues",
       sectionConfig,

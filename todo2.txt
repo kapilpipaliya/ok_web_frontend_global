@@ -34,7 +34,7 @@ use carbon icons only like: carbon:api-1
 use theme colors
 add theme switcher button to toggle dark and light theme
 "background" color is white so adding light shades like background_light_100 and background_light_200 will not work
-prefix each component with FullChand
+do not prefix components with FullChand or Fulchand (removed)
 make professional fully featured website fulchandshastri.in
 Dont use primary color as a background as it is not look good when theme is switched to dark mode
 instead of text icons use "Html" component and use as: "icon" and give "icon" property for icon name

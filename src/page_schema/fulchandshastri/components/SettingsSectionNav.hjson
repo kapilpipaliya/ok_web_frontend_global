@@ -1,0 +1,264 @@
+{
+  vertexes: [
+    {
+      id: "fssn_root"
+      L: Component
+      P: {
+        key: SettingsSectionNav
+        description: Horizontal section navigation for embedded Fulchand settings editor with drag-and-drop reordering.
+        fns: '''
+const getSections = () => {
+  const sections = args.contextData.props?.sections;
+  return Array.isArray(sections) ? sections : [];
+};
+
+const getActiveSectionId = () => args.contextData.props?.activeSectionId || null;
+
+const [orderedSections, setOrderedSections] = args.createSignal([]);
+const [draggedIndex, setDraggedIndex] = args.createSignal(null);
+const [dragOverIndex, setDragOverIndex] = args.createSignal(null);
+const draggableCleanups = new Map();
+
+const syncSections = () => {
+  const sections = getSections();
+  setOrderedSections(sections.map((section) => ({ ...section })));
+};
+
+args.createEffect(() => {
+  syncSections();
+});
+
+const handleSectionClick = (sectionId) => {
+  const onSectionClick = args.contextData.props?.onSectionClick;
+  if (typeof onSectionClick === "function") {
+    onSectionClick(sectionId);
+  }
+};
+
+const reorderSections = (fromIndex, toIndex) => {
+  const sections = [...orderedSections()];
+  if (fromIndex === toIndex || fromIndex < 0 || toIndex < 0) return;
+  if (fromIndex >= sections.length || toIndex >= sections.length) return;
+  const [moved] = sections.splice(fromIndex, 1);
+  sections.splice(toIndex, 0, moved);
+  setOrderedSections(sections);
+};
+
+const initDraggable = (element, index) => {
+  if (!element || !args.draggable) return;
+
+  const existingCleanup = draggableCleanups.get(element);
+  if (existingCleanup) existingCleanup();
+
+  const cleanup = args.draggable({
+    element,
+    getInitialData: () => ({
+      type: "settings-section-nav",
+      index
+    }),
+    onDragStart: () => {
+      setDraggedIndex(index);
+    },
+    onDrop: () => {
+      setDraggedIndex(null);
+      setDragOverIndex(null);
+    }
+  });
+
+  draggableCleanups.set(element, cleanup);
+};
+
+const initDropTarget = (element, index) => {
+  if (!element || !args.dropTargetForElements) return;
+
+  const cleanup = args.dropTargetForElements({
+    element,
+    canDrop: ({ source }) => source.data?.type === "settings-section-nav",
+    onDragEnter: ({ source }) => {
+      const fromIndex = source.data?.index;
+      if (typeof fromIndex === "number") {
+        setDragOverIndex(index);
+      }
+    },
+    onDragLeave: () => {
+      setDragOverIndex(null);
+    },
+    onDrop: ({ source }) => {
+      const fromIndex = source.data?.index;
+      if (typeof fromIndex === "number") {
+        reorderSections(fromIndex, index);
+      }
+      setDraggedIndex(null);
+      setDragOverIndex(null);
+    }
+  });
+
+  return cleanup;
+};
+
+const cleanupDraggable = (element) => {
+  const cleanup = draggableCleanups.get(element);
+  if (cleanup) {
+    cleanup();
+    draggableCleanups.delete(element);
+  }
+};
+
+const isActive = (sectionId) => getActiveSectionId() === sectionId;
+
+const isDragOver = (index) => dragOverIndex() === index;
+const isDragging = (index) => draggedIndex() === index;
+
+return {
+  getSections,
+  orderedSections,
+  handleSectionClick,
+  initDraggable,
+  initDropTarget,
+  cleanupDraggable,
+  isActive,
+  isDragOver,
+  isDragging
+};
+'''
+      }
+    },
+    {
+      id: "fssn_shell"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props: '''
+const sections = args.fns.orderedSections?.() || [];
+const hideFromProps = args.contextData.props?.hide === true;
+return {
+  as: "nav",
+  "aria-label": "Settings sections",
+  hide: hideFromProps || sections.length === 0
+};
+'''
+        css: '''
+return `._id {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "fssn_item"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        contextName: sectionNavItem
+        loop: true
+        props: '''
+const sections = args.fns.orderedSections?.() || [];
+return {
+  as: "div",
+  class: "fulchand-section-nav-item",
+  data: sections.map((section, index) => ({ section, index }))
+};
+'''
+        css: '''
+const item = args.contextData.sectionNavItem || {};
+const index = item.index;
+const active = args.fns.isActive?.(item.section?.id);
+const dragOver = args.fns.isDragOver?.(index);
+const dragging = args.fns.isDragging?.(index);
+
+return `._id.fulchand-section-nav-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  border: 1px solid ${active ? args.theme.var.color.primary : args.theme.var.color.border};
+  background: ${active ? args.theme.var.color.primary_light_100 : args.theme.var.color.background};
+  color: ${active ? args.theme.var.color.primary : args.theme.var.color.text};
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: grab;
+  user-select: none;
+  transition: all 0.15s ease;
+  ${dragOver ? `outline: 2px dashed ${args.theme.var.color.primary};` : ""}
+  ${dragging ? "opacity: 0.5;" : ""}
+
+  &:hover {
+    border-color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "fssn_drag_handle"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props: '''
+return {
+  as: "icon",
+  icon: "ph:dots-six-vertical",
+  height: 14,
+  width: 14,
+  class: "fulchand-section-nav-handle",
+  ref: (element) => {
+    const item = args.contextData.sectionNavItem || {};
+    const index = item.index;
+    if (element && args.fns.initDraggable) {
+      args.fns.initDraggable(element, index);
+      const dropCleanup = args.fns.initDropTarget?.(element, index);
+      element.__fssnDropCleanup = dropCleanup;
+    } else if (element === null && args.fns.cleanupDraggable) {
+      args.fns.cleanupDraggable(element);
+      if (element?.__fssnDropCleanup) {
+        element.__fssnDropCleanup();
+        element.__fssnDropCleanup = null;
+      }
+    }
+  }
+};
+'''
+      }
+    },
+    {
+      id: "fssn_label_btn"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props: '''
+const item = args.contextData.sectionNavItem || {};
+const section = item.section || {};
+return {
+  as: "button",
+  type: "button",
+  text: section.title || section.id || "Section",
+  onClick: () => args.fns.handleSectionClick?.(section.id)
+};
+'''
+        css: '''
+return `._id {
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  padding: 0;
+}`;
+'''
+      }
+    }
+  ]
+  edges: [
+    { id: "fssn_e1", T: "Attr", S: "fssn_root", E: "fssn_shell" },
+    { id: "fssn_e2", T: "Attr", S: "fssn_shell", E: "fssn_item" },
+    { id: "fssn_e3", T: "Attr", S: "fssn_item", E: "fssn_drag_handle" },
+    { id: "fssn_e4", T: "Attr", S: "fssn_item", E: "fssn_label_btn" }
+  ]
+}

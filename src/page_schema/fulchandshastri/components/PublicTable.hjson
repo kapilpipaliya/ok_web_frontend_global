@@ -1,0 +1,294 @@
+{
+  vertexes: [
+    {
+      id: "fpt_root",
+      L: "Component",
+      P: {
+        key: "PublicTable",
+        description: "Public read-only table wrapper with client-side graph hydration.",
+        dynamicComponent: "Table",
+        fns: '''
+const pageStateVertexId = args.generateNewVertexId(args.graph, args.setGraph);
+args.addNewVertex(0, {
+  id: pageStateVertexId,
+  L: ["PublicTableUiState"],
+  P: {
+    loading: false,
+    isSettingsModalOpen: false,
+    settingsModalInitialConfig: null,
+    tableSchemaPartVertexIds: null,
+    tableIds: null
+  },
+  IN: {},
+  OUT: {}
+}, args.graph, args.setGraph);
+
+const [graphReady, setGraphReady] = args.createSignal(false);
+const [selectedRows, setSelectedRowsState] = args.createSignal(new Set());
+
+const patchPageP = (partial) => {
+  args.mergeVertexProperties(0, pageStateVertexId, args.graph, args.setGraph, partial);
+};
+const pageP = () => args.graph.vertexes[pageStateVertexId]?.P;
+
+const getTableVertexLabel = () => args.contextData.props?.tableVertexLabel || "Book";
+const getTableSchemaPartVertexIds = () => {
+  const fromState = pageP()?.tableSchemaPartVertexIds;
+  if (fromState) return fromState;
+  return args.contextData.props?.partVertexIds || null;
+};
+const getTableIdsState = () => {
+  const fromState = pageP()?.tableIds;
+  if (fromState) return fromState;
+  return args.contextData.props?.ids || null;
+};
+
+const getRowIds = () => {
+  const ids = args.contextData.props?.rowIds;
+  return Array.isArray(ids) ? ids : [];
+};
+
+const evalConfigBody = (cfgStr) => {
+  if (cfgStr == null || String(cfgStr).trim() === "") return null;
+  try {
+    const configFn = new Function(String(cfgStr));
+    const value = configFn();
+    return value && typeof value === "object" ? value : null;
+  } catch (error) {
+    console.error("evalConfigBody failed:", error);
+    return null;
+  }
+};
+
+const stripPartMeta = (value) => {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  const { part: _part, ...rest } = value;
+  return rest;
+};
+
+const evalSchemaPart = (part) => {
+  const ids = getTableSchemaPartVertexIds();
+  const vertexId = ids?.[part];
+  if (!vertexId) return null;
+  const vertex = args.graph?.vertexes?.[vertexId];
+  if (!vertex?.P?.config) return null;
+  const raw = evalConfigBody(vertex.P.config);
+  if (part === "columns") return raw;
+  return stripPartMeta(raw);
+};
+
+const resolveGeneralFromPart = (generalRaw, tableVertexLabel) => {
+  const general = stripPartMeta(generalRaw || {});
+  return {
+    title: general.title || tableVertexLabel,
+    label: general.label || tableVertexLabel,
+    icon: general.icon || "ph:book-open",
+    usePolarisUI: general.usePolarisUI === true,
+    enableLocalFilters: general.enableLocalFilters !== false,
+    enableLocalSort: general.enableLocalSort !== false,
+    showSelection: general.showSelection !== false,
+    hideExportButtons: general.hideExportButtons === true,
+    hideImportButtons: general.hideImportButtons !== false,
+    hideSettingsButton: general.hideSettingsButton === true,
+    hideAddButton: general.hideAddButton === true,
+    rowHeight: general.rowHeight ?? 56,
+    columnWidths: general.columnWidths || {},
+    rowClickable: general.rowClickable === true,
+    showRowNumber: general.showRowNumber !== false,
+    resizableColumns: general.resizableColumns === true,
+    actions: Array.isArray(general.actions) ? general.actions : []
+  };
+};
+
+const buildTableRuntimeConfig = () => {
+  const tableVertexLabel = getTableIdsState()?.tableVertexLabel || getTableVertexLabel();
+  const general = resolveGeneralFromPart(evalSchemaPart("general"), tableVertexLabel);
+  const columnsPart = evalSchemaPart("columns");
+  const columns = Array.isArray(columnsPart?.columns) ? columnsPart.columns : [];
+  const formConfig = evalSchemaPart("formConfig") || {};
+  const sidebar = evalSchemaPart("sidebar") || { enabled: false };
+  return { general, columns, formConfig, sidebar };
+};
+
+const getConfigGeneralValue = (key) => {
+  const runtime = buildTableRuntimeConfig();
+  if (runtime?.general && runtime.general[key] !== undefined) {
+    return runtime.general[key];
+  }
+  return runtime?.[key];
+};
+
+const getSidebarConfig = () => evalSchemaPart("sidebar") || { enabled: false };
+
+const prop = (key) => {
+  const runtime = buildTableRuntimeConfig();
+  const general = runtime.general || {};
+  const rootKeys = ["columns", "formConfig", "sidebar"];
+  if (rootKeys.includes(key)) return runtime[key];
+  if (general[key] !== undefined) return general[key];
+  return runtime?.[key];
+};
+
+const evaluateConfig = () => {
+  const runtime = buildTableRuntimeConfig();
+  const general = runtime.general || {};
+  const cfg = runtime;
+  return {
+    ...general,
+    title: "",
+    subtitle: "",
+    label: "",
+    hideExportButtons: true,
+    hideImportButtons: true,
+    hideSettingsButton: true,
+    showAddButton: false,
+    showSelection: false,
+    actions: [],
+    columns: cfg.columns || [],
+    formConfig: cfg.formConfig,
+    sidebar: { ...(cfg.sidebar || {}), enabled: false },
+    enableLocalFilters: general.enableLocalFilters !== false,
+    enableLocalSort: general.enableLocalSort !== false
+  };
+};
+
+const applyServerGraphToLocalGraph = (response) => {
+  const graphPayload = response?.result?.graph ?? response?.graph;
+  if (!graphPayload || typeof graphPayload !== "object") return;
+  const vertexes = graphPayload.vertexes || {};
+  const edges = graphPayload.edges || {};
+  const deleted_vertexes = graphPayload.deleted_vertexes;
+  const deleted_edges = graphPayload.deleted_edges;
+  const hasWork =
+    Object.keys(vertexes).length > 0 ||
+    Object.keys(edges).length > 0 ||
+    (Array.isArray(deleted_vertexes) && deleted_vertexes.length > 0) ||
+    (Array.isArray(deleted_edges) && deleted_edges.length > 0);
+  if (!hasWork) return;
+  args.setGraphData(0, { vertexes, edges, deleted_vertexes, deleted_edges }, {});
+};
+
+const applyGraphFromProps = () => {
+  applyServerGraphToLocalGraph({ graph: args.contextData.props?.graph });
+  const partVertexIds = args.contextData.props?.partVertexIds;
+  const ids = args.contextData.props?.ids;
+  if (partVertexIds && ids) {
+    patchPageP({ tableSchemaPartVertexIds: partVertexIds, tableIds: ids });
+  }
+};
+
+args.createEffect(() => {
+  const graph = args.contextData.props?.graph;
+  const rowIds = getRowIds();
+  const partVertexIds = args.contextData.props?.partVertexIds;
+  if (!partVertexIds) {
+    setGraphReady(false);
+    return;
+  }
+  applyGraphFromProps();
+  setGraphReady(rowIds.length > 0 || !!(graph && Object.keys(graph.vertexes || {}).length > 0));
+});
+
+const resolveRowsFromGraph = () => {
+  const ids = getRowIds();
+  const rows = [];
+  for (let i = 0; i < ids.length; i++) {
+    const vertex = args.graph?.vertexes?.[ids[i]];
+    if (vertex) rows.push(vertex);
+  }
+  return rows;
+};
+
+const getExportFunction = () => null;
+
+const handleExport = async () => {};
+
+const fetchData = async (_search, _filters, _sort, callback) => {
+  const rows = resolveRowsFromGraph();
+  if (typeof callback === "function") {
+    callback(rows, null, []);
+  }
+};
+
+const getSelectedRows = () => selectedRows();
+const setSelectedRows = (next) => setSelectedRowsState(next instanceof Set ? next : new Set(next || []));
+const clearSelectedRows = () => setSelectedRowsState(new Set());
+
+return {
+  prop,
+  evaluateConfig,
+  getConfigGeneralValue,
+  getSidebarConfig,
+  fetchData,
+  handleExport,
+  getExportFunction,
+  getImportFunction: () => null,
+  getSettingsFunction: () => null,
+  getFormConfig: () => null,
+  getConfigFunction: () => null,
+  getLoadFromSetting: () => false,
+  hasSidebar: () => false,
+  getTableVertexLabel,
+  getSelectedRows,
+  setSelectedRows,
+  clearSelectedRows,
+  getUsePolarisUI: () => getConfigGeneralValue("usePolarisUI") === true,
+  pageStateVertexId,
+  handleOpenSettings: () => {},
+  handleSaveSettings: async () => ({ success: false }),
+  applyGraphFromProps,
+  graphReady
+};
+''',
+        props: '''
+return {
+  onCleanup: () => {
+    args.deleteVertex(0, args.fns.pageStateVertexId, args.graph, args.setGraph);
+  }
+};
+'''
+      }
+    },
+    {
+      id: "fpt_table",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Table",
+        props: '''
+return {
+  tableVertexLabel: args.contextData.props?.tableVertexLabel || "Book",
+  columns: args.fns.prop?.("columns") || [],
+  formConfig: args.fns.prop?.("formConfig"),
+  sidebar: { ...(args.fns.prop?.("sidebar") || {}), enabled: false },
+  title: "",
+  subtitle: "",
+  label: "",
+  icon: "",
+  showAddButton: false,
+  hideSettingsButton: true,
+  hideExportButtons: true,
+  hideImportButtons: true,
+  showSelection: false,
+  showActionsColumn: false,
+  actions: [],
+  hideColumns: [],
+  enableLocalFilters: args.fns.getConfigGeneralValue?.("enableLocalFilters") !== false,
+  enableLocalSort: args.fns.getConfigGeneralValue?.("enableLocalSort") !== false,
+  rowHeight: args.fns.getConfigGeneralValue?.("rowHeight") || 56,
+  columnWidths: args.fns.getConfigGeneralValue?.("columnWidths") || {},
+  usePolarisUI: args.fns.getConfigGeneralValue?.("usePolarisUI") === true,
+  dataFunction: args.fns.fetchData,
+  getSelectedRows: args.fns.getSelectedRows,
+  setSelectedRows: args.fns.setSelectedRows,
+  clearSelectedRows: args.fns.clearSelectedRows,
+  hide: !args.fns.graphReady?.()
+};
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "fpt_e1", T: "Attr", S: "fpt_root", E: "fpt_table" }
+  ]
+}

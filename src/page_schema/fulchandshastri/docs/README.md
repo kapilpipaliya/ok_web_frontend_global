@@ -15,15 +15,15 @@ The website provides a comprehensive platform for:
 ## Website Structure
 
 ### Pages
-1. **Home** (`FullChandHome.hjson`) - Landing page with hero section, mission overview, and feature highlights
+1. **Home** (`Home.hjson`) - Landing page with hero section, mission overview, and feature highlights
 2. **About** (dropdown menu)
-   - About Fulchand (`FullChandAbout.hjson`) - Biography and teachings
+   - About Fulchand (`About.hjson`) - Biography and teachings
    - His Inspiration - Spiritual influences
    - About ASK Umarala - Information about the ashram
    - Atma Siddhi Shastra Mission - Mission details
    - Gyaan Deepak ! Prajwalan - Knowledge dissemination program
    - Atma Sadhana Nitya Kram - Daily spiritual practice
-3. **Books** (`FullChandBooks.hjson`) - Collection of spiritual texts with download links
+3. **Books** (`Books.hjson`) - Collection of spiritual texts with download links
 4. **Discourses** - Video and audio discourses
 5. **Schedule** - Upcoming events and programs
 6. **Gallery** (dropdown menu)
@@ -31,29 +31,29 @@ The website provides a comprehensive platform for:
    - Videos - Video galleries
 7. **Donation** - Support the mission
 8. **Bhakti** - Devotional content
-9. **Contact** (`FullChandContact.hjson`) - Contact form and information
+9. **Contact** (`Contact.hjson`) - Contact form and information
 
 ### Components
 
 #### Core Components
-- **FullChandHeader** - Navigation header with logo, menu, social links, and music player
-- **FullChandFooter** - Footer with copyright and credits
-- **FullChandThemeToggle** - Dark/light theme switcher
+- **Header** - Navigation header with logo, menu, social links, and music player
+- **Footer** - Footer with copyright and credits
+- **ThemeToggle** - Dark/light theme switcher
 
 #### Content Components
-- **FullChandHeroSection** - Homepage hero with book-style display
-- **FullChandBookCard** - Book display card with download/read options
-- **FullChandFeatureCard** - Reusable feature/content card
-- **FullChandQuoteSection** - Inspirational quote display
-- **FullChandContactForm** - Contact form with validation
+- **HeroSection** - Homepage hero with book-style display
+- **BookCard** - Book display card with download/read options
+- **FeatureCard** - Reusable feature/content card
+- **QuoteSection** - Inspirational quote display
+- **ContactForm** - Contact form with validation
 
 #### Planned Components (To be implemented)
-- **FullChandDiscourseRow** - Table row for discourse listings
-- **FullChandScheduleRow** - Event schedule table row
-- **FullChandPhotoGallery** - Photo gallery with lightbox
-- **FullChandVideoGallery** - Video gallery grid
-- **FullChandLanguageSelector** - Language picker (English/Hindi/Gujarati)
-- **FullChandMusicPlayer** - Background music player
+- **DiscourseRow** - Table row for discourse listings
+- **ScheduleRow** - Event schedule table row
+- **PhotoGallery** - Photo gallery with lightbox
+- **VideoGallery** - Video gallery grid
+- **LanguageSelector** - Language picker (English/Hindi/Gujarati)
+- **MusicPlayer** - Background music player
 
 ## Design Guidelines
 

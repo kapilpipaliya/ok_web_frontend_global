@@ -8,7 +8,12 @@ import { evalExpression } from "~/lib/expression_eval";
 import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
 import { saveUndoPoint } from "~/lib/graph/transaction/steps/saveUndoPoint";
 
-import { useDesignerFormIdContext } from "../../context/LayoutContext";
+import {
+  useDesignerFormIdContext,
+  useDesignerLayoutStore,
+  type PageLayoutObject,
+} from "../../context/LayoutContext";
+import { getPropertiesAttrId } from "../../functions/layout/layoutHoverState";
 import { ComponentVariantsInput } from "./ComponentVariantsInput";
 import { FormGroupProperties } from "./formgroup/FormGroupProperties";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
@@ -20,9 +25,14 @@ export function PropertiesBody() {
   const [graph, setGraph] = useGraph();
 
   const formStoreId = useDesignerFormIdContext();
+  const layoutStoreId = useDesignerLayoutStore();
   const formStoreVertex = () =>
     graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
-  const selectedAttr = () => graph.vertexes[formStoreVertex()?.P.selectedId];
+  const layoutStore = () =>
+    graph.vertexes[layoutStoreId]?.P as PageLayoutObject | undefined;
+  const propertiesAttrId = () =>
+    getPropertiesAttrId(formStoreVertex()?.P, layoutStore());
+  const selectedAttr = () => graph.vertexes[propertiesAttrId()];
   const selectedComp = () =>
     selectedAttr()?.P.componentName
       ? findVertexByLabelAndUniqueId(
@@ -40,7 +50,7 @@ export function PropertiesBody() {
 
     setSelectionValue(
       txnId,
-      graph.vertexes[formStoreVertex()?.P.selectedId],
+      graph.vertexes[propertiesAttrId()],
       graph,
       setGraph,
       meta,
@@ -48,11 +58,12 @@ export function PropertiesBody() {
   };
 
   const setPropertyValue = (meta: Vertex, value: unknown) => {
-    if (formStoreVertex()?.P.selectedId !== -1) {
+    const attrId = propertiesAttrId();
+    if (attrId !== -1) {
       untrack(() => {
         mergeVertexProperties(
           formStoreVertex()?.P.txnId,
-          graph.vertexes[formStoreVertex()?.P.selectedId].id,
+          graph.vertexes[attrId].id,
           graph,
           setGraph,
           {
@@ -81,10 +92,7 @@ export function PropertiesBody() {
 
   return (
     <Show
-      when={
-        formStoreVertex()?.P.selectedId !== -1 &&
-        graph.vertexes[formStoreVertex()?.P.selectedId]
-      }
+      when={propertiesAttrId() !== -1 && selectedAttr()}
     >
       {/* <As as="div" css={`return \`._id {
   display: flex;
@@ -102,30 +110,28 @@ export function PropertiesBody() {
         keyName="fns"
         label="Function Definitions"
         setPropertyValue={setPropertyValue}
+        vertexId={propertiesAttrId()}
       />
       <FunctionEditor
         keyName="props"
         label="Props Function"
         setPropertyValue={setPropertyValue}
+        vertexId={propertiesAttrId()}
       />
 
       <Show when={selectedAttr()?.P.componentName === "Component"}>
         <ComponentVariantsInput
           compVertex={selectedComp()}
-          dataVertex={graph.vertexes[formStoreVertex()?.P.selectedId]}
+          dataVertex={selectedAttr()}
           setPropertyValue={setPropertyValue}
         />
       </Show>
 
-      <Show
-        when={graph.vertexes[formStoreVertex()?.P.selectedId].L?.[0]?.endsWith(
-          "Attr",
-        )}
-      >
+      <Show when={selectedAttr()?.L?.[0]?.endsWith("Attr")}>
         <FormGroupProperties
           metaAttributes={selectedComponentProperties() ?? []}
           onChange={setPropertyValue}
-          selectedLayout={graph.vertexes[formStoreVertex()?.P.selectedId]}
+          selectedLayout={selectedAttr()}
           txnId={formStoreVertex()?.P.txnId}
         />
       </Show>

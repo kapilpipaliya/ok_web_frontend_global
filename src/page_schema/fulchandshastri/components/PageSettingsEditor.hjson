@@ -1,0 +1,692 @@
+{
+  vertexes: [
+    {
+      id: "fpse_root"
+      L: Component
+      P: {
+        key: PageSettingsEditor
+        description: Floating admin panel to edit current page settings while viewing the live page.
+        dynamicComponent: "SettingsEditorShell, SettingsSectionNav, IconButton, Button, Html"
+        fns: '''
+const DEFAULT_PANEL_WIDTH = 440;
+const MIN_PANEL_WIDTH = 360;
+const MAX_PANEL_WIDTH = 960;
+const SCHEMA_PANEL_MIN_WIDTH = 560;
+const PANEL_WIDTH_STORAGE_KEY = "fulchand-settings-panel-width";
+
+const loadStoredPanelWidth = () => {
+  if (typeof window === "undefined") return DEFAULT_PANEL_WIDTH;
+  try {
+    const stored = Number(window.localStorage.getItem(PANEL_WIDTH_STORAGE_KEY));
+    if (Number.isFinite(stored) && stored >= MIN_PANEL_WIDTH && stored <= MAX_PANEL_WIDTH) {
+      return stored;
+    }
+  } catch (_) {}
+  return DEFAULT_PANEL_WIDTH;
+};
+
+const persistPanelWidth = (width) => {
+  try {
+    window.localStorage.setItem(PANEL_WIDTH_STORAGE_KEY, String(width));
+  } catch (_) {}
+};
+
+const getMaxPanelWidth = () => {
+  if (typeof window === "undefined") return MAX_PANEL_WIDTH;
+  return Math.min(MAX_PANEL_WIDTH, Math.floor(window.innerWidth * 0.92));
+};
+
+const checkAdminRole = () => {
+  const userRoles = args.user?.OUT?.UserRole || [];
+  return userRoles.some((edgeId) => {
+    const edge = args.graph.edges[edgeId];
+    const role = args.graph.vertexes[edge?.E];
+    return role?.P?.key === "Admin";
+  });
+};
+
+const URL_TO_SETTINGS_PAGE = {
+  "/": "home",
+  "/about-fulchand": "about",
+  "/about-ask-umarala": "about-ask",
+  "/atma-sadhana-nitya-kram": "atma-sadhana-nitya-kram",
+  "/atma-siddhi-shastra-mission": "atma-siddhi-mission",
+  "/bhakti": "bhakti",
+  "/books": "books",
+  "/contact": "contact",
+  "/discourses": "discourses",
+  "/donation": "donation",
+  "/gyaan-deepak-prajwalan": "gyaan-deepak",
+  "/his-inspiration": "his-inspiration",
+  "/photos": "photos",
+  "/schedule": "schedule",
+  "/videos": "videos"
+};
+
+const isLangCode = (value) =>
+  value != null && /^[a-z]{2,3}$/i.test(String(value).trim());
+
+const getPagePathWithoutLang = () => {
+  const parts = String(args.location?.pathname || "").split("/").filter(Boolean);
+  if (parts.length > 0 && isLangCode(parts[0])) {
+    return parts.length > 1 ? "/" + parts.slice(1).join("/") : "/";
+  }
+  return args.location?.pathname || "/";
+};
+
+const getSettingsPageId = () => {
+  const fromProps = args.contextData.props?.settingsPageId;
+  if (fromProps != null && String(fromProps).trim() !== "") {
+    return String(fromProps).trim();
+  }
+
+  const pathname = getPagePathWithoutLang();
+  for (const vertexId in args.graph.vertexes) {
+    const vertex = args.graph.vertexes[vertexId];
+    if (!vertex?.L?.includes("Page")) continue;
+    const pageUrl = vertex.P?.url || "/";
+    if (pageUrl === pathname && vertex.P?.settingsPageId) {
+      return String(vertex.P.settingsPageId);
+    }
+  }
+
+  return URL_TO_SETTINGS_PAGE[pathname] || null;
+};
+
+const isOnSettingsRoute = () => {
+  const pathname = args.location?.pathname || "";
+  return pathname === "/settings" || pathname.startsWith("/settings/");
+};
+
+const [isPanelOpen, setIsPanelOpen] = args.createSignal(false);
+const [panelWidth, setPanelWidth] = args.createSignal(loadStoredPanelWidth());
+const [isResizingPanel, setIsResizingPanel] = args.createSignal(false);
+const [editorMode, setEditorMode] = args.createSignal("content");
+const [sectionNav, setSectionNav] = args.createSignal([]);
+const [activeSectionId, setActiveSectionId] = args.createSignal(null);
+const [siteLanguages, setSiteLanguages] = args.createSignal([]);
+let siteLanguagesLoadPromise = null;
+
+const DEFAULT_SITE_LANGUAGES = [
+  { code: "en", label: "English", isDefault: true },
+  { code: "hi", label: "Hindi", isDefault: false },
+  { code: "gu", label: "Gujarati", isDefault: false }
+];
+
+const loadSiteLanguages = async () => {
+  const existing = siteLanguages();
+  if (Array.isArray(existing) && existing.length > 0) return existing;
+  if (siteLanguagesLoadPromise) return siteLanguagesLoadPromise;
+
+  siteLanguagesLoadPromise = (async () => {
+    try {
+      const result = await executeYTOFunction("getSiteLanguages", {});
+      const languages = result?.result?.data?.languages || [];
+      const resolved = languages.length > 0 ? languages : DEFAULT_SITE_LANGUAGES;
+      setSiteLanguages(resolved);
+      return resolved;
+    } catch (error) {
+      console.error("PageSettingsEditor loadSiteLanguages:", error);
+      setSiteLanguages(DEFAULT_SITE_LANGUAGES);
+      return DEFAULT_SITE_LANGUAGES;
+    } finally {
+      siteLanguagesLoadPromise = null;
+    }
+  })();
+
+  return siteLanguagesLoadPromise;
+};
+
+const executeYTOFunction = (functionName, contextData) =>
+  args.executeNamedServerFunction({
+    functionName,
+    contextData: contextData || {}
+  });
+
+const loadSectionNav = async () => {
+  const settingsPageId = getSettingsPageId();
+  if (!settingsPageId) {
+    setSectionNav([]);
+    return;
+  }
+
+  try {
+    const result = await executeYTOFunction("getSettingsPageConfig", {
+      settingsPageId,
+      allowPublicRead: true
+    });
+    const setting = result?.result?.data?.setting;
+    if (!setting?.P?.config) {
+      setSectionNav([]);
+      return;
+    }
+    const configFn = new Function(setting.P.config);
+    const pageConfig = configFn();
+    const sections = Array.isArray(pageConfig?.sections) ? pageConfig.sections : [];
+    setSectionNav(sections.map((section) => ({
+      id: section.id,
+      title: section.title || section.id
+    })));
+    if (sections.length > 0 && !activeSectionId()) {
+      setActiveSectionId(sections[0].id);
+    }
+  } catch (error) {
+    console.error("Failed to load settings section nav:", error);
+    setSectionNav([]);
+  }
+};
+
+const refreshPagePreview = () => {
+  const path = args.location?.pathname || "/";
+  const search = args.location?.search || "";
+  args.navigate(path + search, { replace: true });
+};
+
+const togglePanel = async () => {
+  const nextOpen = !isPanelOpen();
+  setIsPanelOpen(nextOpen);
+  if (nextOpen) {
+    setEditorMode("content");
+    await loadSectionNav();
+  }
+};
+
+const closePanel = () => {
+  setIsPanelOpen(false);
+  setEditorMode("content");
+};
+
+const switchEditorMode = (mode) => {
+  setEditorMode(mode);
+  if (mode === "schema") {
+    const minWidth = Math.min(getMaxPanelWidth(), SCHEMA_PANEL_MIN_WIDTH);
+    if (panelWidth() < minWidth) {
+      setPanelWidth(minWidth);
+      persistPanelWidth(minWidth);
+    }
+  }
+};
+
+const scrollToSection = (sectionId) => {
+  if (!sectionId) return;
+  setActiveSectionId(sectionId);
+  const panel = document.querySelector("[data-fulchand-settings-panel]");
+  const target = panel?.querySelector(`[data-section-id="${sectionId}"]`);
+  if (target && typeof target.scrollIntoView === "function") {
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+};
+
+const onSettingsSaved = () => {
+  refreshPagePreview();
+};
+
+const onSchemaSaved = () => {
+  void loadSectionNav();
+  refreshPagePreview();
+};
+
+const syncBodyPanelClass = () => {
+  const open = isPanelOpen();
+  const width = panelWidth();
+  document.body.style.setProperty("--fulchand-settings-panel-width", `${width}px`);
+  if (open) {
+    document.body.classList.add("fulchand-settings-panel-open");
+  } else {
+    document.body.classList.remove("fulchand-settings-panel-open");
+  }
+};
+
+const startPanelResize = (event) => {
+  event.preventDefault();
+  event.stopPropagation();
+  setIsResizingPanel(true);
+  const startX = event.clientX;
+  const startWidth = panelWidth();
+
+  const handleMouseMove = (moveEvent) => {
+    const delta = startX - moveEvent.clientX;
+    const next = Math.max(MIN_PANEL_WIDTH, Math.min(getMaxPanelWidth(), startWidth + delta));
+    setPanelWidth(next);
+  };
+
+  const handleMouseUp = () => {
+    setIsResizingPanel(false);
+    persistPanelWidth(panelWidth());
+    document.body.classList.remove("fulchand-settings-panel-resizing");
+    document.removeEventListener("mousemove", handleMouseMove);
+    document.removeEventListener("mouseup", handleMouseUp);
+  };
+
+  document.body.classList.add("fulchand-settings-panel-resizing");
+  document.addEventListener("mousemove", handleMouseMove);
+  document.addEventListener("mouseup", handleMouseUp);
+};
+
+const handleDocumentKeydown = (event) => {
+  if (event.key === "Escape" && isPanelOpen()) {
+    closePanel();
+  }
+};
+
+const onEditorMount = async () => {
+  await loadSiteLanguages();
+  document.addEventListener("keydown", handleDocumentKeydown);
+  window.addEventListener("fulchand-settings-saved", onSettingsSaved);
+  return () => {
+    document.removeEventListener("keydown", handleDocumentKeydown);
+    window.removeEventListener("fulchand-settings-saved", onSettingsSaved);
+    document.body.classList.remove("fulchand-settings-panel-open");
+    document.body.style.removeProperty("--fulchand-settings-panel-width");
+  };
+};
+
+args.createEffect(() => {
+  panelWidth();
+  isPanelOpen();
+  syncBodyPanelClass();
+});
+
+return {
+  DEFAULT_PANEL_WIDTH,
+  MIN_PANEL_WIDTH,
+  MAX_PANEL_WIDTH,
+  panelWidth,
+  isResizingPanel,
+  startPanelResize,
+  checkAdminRole,
+  getSettingsPageId,
+  isOnSettingsRoute,
+  isPanelOpen,
+  editorMode,
+  setEditorMode,
+  switchEditorMode,
+  sectionNav,
+  activeSectionId,
+  executeYTOFunction,
+  togglePanel,
+  closePanel,
+  scrollToSection,
+  refreshPagePreview,
+  onSettingsSaved,
+  onSchemaSaved,
+  siteLanguages,
+  loadSiteLanguages,
+  onEditorMount
+};
+'''
+      }
+    },
+    {
+      id: "fpse_body_style"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props: '''
+return {
+  as: "style",
+  text: `body.fulchand-settings-panel-open {
+  overflow-x: hidden;
+}
+
+body.fulchand-settings-panel-open [data-fulchand-page-main] {
+  margin-right: var(--fulchand-settings-panel-width, 440px);
+  transition: margin-right 0.25s ease;
+}
+
+body.fulchand-settings-panel-resizing [data-fulchand-page-main] {
+  transition: none;
+}`
+};
+'''
+      }
+    },
+    {
+      id: "fpse_toggle"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props: '''
+const isAdmin = args.fns.checkAdminRole?.();
+const onSettingsRoute = args.fns.isOnSettingsRoute?.();
+const panelOpen = args.fns.isPanelOpen?.();
+return {
+  as: "button",
+  type: "button",
+  "aria-label": panelOpen ? "Close page settings" : "Edit page settings",
+  title: panelOpen ? "Close settings" : "Edit page settings",
+  hide: !isAdmin || onSettingsRoute,
+  onClick: () => (panelOpen ? args.fns.closePanel?.() : args.fns.togglePanel?.())
+};
+'''
+        css: '''
+const panelOpen = args.fns.isPanelOpen?.();
+return `._id {
+  position: fixed;
+  bottom: 1.5rem;
+  right: ${panelOpen ? "calc(var(--fulchand-settings-panel-width, 440px) + 1rem)" : "1.5rem"};
+  z-index: ${panelOpen ? 10000 : 9998};
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 9999px;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 16px oklch(0 0 0 / 0.2);
+  transition: all 0.25s ease;
+
+  &:hover {
+    background: ${args.theme.var.color.primary_dark_200};
+    transform: translateY(-1px);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "fpse_toggle_icon"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props: '''
+const panelOpen = args.fns.isPanelOpen?.();
+return {
+  as: "icon",
+  icon: panelOpen ? "ph:x" : "ph:gear-six",
+  height: 20,
+  width: 20
+};
+'''
+      }
+    },
+    {
+      id: "fpse_toggle_label"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props: '''
+const panelOpen = args.fns.isPanelOpen?.();
+return {
+  as: "span",
+  text: panelOpen ? "Close" : "Edit page"
+};
+'''
+      }
+    },
+    {
+      id: "fpse_panel"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props: '''
+const isAdmin = args.fns.checkAdminRole?.();
+const panelOpen = args.fns.isPanelOpen?.();
+return {
+  as: "aside",
+  "data-fulchand-settings-panel": "",
+  hide: !isAdmin || !panelOpen,
+  onMount: () => args.fns.onEditorMount?.()
+};
+'''
+        css: '''
+const resizing = args.fns.isResizingPanel?.();
+return `._id {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: var(--fulchand-settings-panel-width, ${args.fns.DEFAULT_PANEL_WIDTH}px);
+  max-width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  background: ${args.theme.var.color.background};
+  border-left: 1px solid ${args.theme.var.color.border};
+  box-shadow: -8px 0 32px oklch(0 0 0 / 0.12);
+  transition: ${resizing ? "none" : "width 0.25s ease"};
+}`;
+'''
+      }
+    },
+    {
+      id: "fpse_panel_resize"
+      L: Attr
+      P: {
+        displayOrder: 0
+        componentName: Html
+        props: '''
+return {
+  as: "div",
+  role: "separator",
+  "aria-orientation": "vertical",
+  "aria-label": "Resize settings panel",
+  title: "Drag to resize panel",
+  onMouseDown: (event) => args.fns.startPanelResize?.(event)
+};
+'''
+        css: '''
+return `._id {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 6px;
+  transform: translateX(-50%);
+  cursor: col-resize;
+  z-index: 3;
+  touch-action: none;
+  user-select: none;
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 2px;
+    transform: translateX(-50%);
+    background: transparent;
+    transition: background 0.15s ease;
+  }
+
+  &:hover::after,
+  body.fulchand-settings-panel-resizing & {
+    background: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "fpse_panel_header"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props: '''
+return {
+  as: "header"
+};
+'''
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-bottom: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.background_light_100};
+  flex-shrink: 0;
+  position: relative;
+  z-index: 2;
+}`;
+'''
+      }
+    },
+    {
+      id: "fpse_header_row"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props: '''
+return {
+  as: "div"
+};
+'''
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "fpse_header_title"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props: '''
+return {
+  as: "h2",
+  text: "Page settings"
+};
+'''
+        css: '''
+return `._id {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "fpse_header_actions"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props: '''
+return {
+  as: "div"
+};
+'''
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "fpse_refresh_btn"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: IconButton
+        props: '''
+return {
+  icon: "ph:arrow-clockwise",
+  variant: "ghost",
+  size: "sm",
+  title: "Refresh page preview",
+  onClick: () => args.fns.refreshPagePreview?.()
+};
+'''
+      }
+    },
+    {
+      id: "fpse_close_btn"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: IconButton
+        props: '''
+return {
+  icon: "ph:x",
+  variant: "ghost",
+  size: "sm",
+  title: "Close settings panel",
+  onClick: () => args.fns.closePanel?.()
+};
+'''
+      }
+    },
+    {
+      id: "fpse_section_nav",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "SettingsSectionNav",
+        props: '''
+const isSchema = args.fns.editorMode?.() === "schema";
+return {
+  sections: args.fns.sectionNav?.() || [],
+  activeSectionId: args.fns.activeSectionId?.(),
+  onSectionClick: (sectionId) => args.fns.scrollToSection?.(sectionId),
+  hide: isSchema
+};
+'''
+      }
+    },
+    {
+      id: "fpse_panel_body",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "SettingsEditorShell",
+        props: '''
+const settingsPageId = args.fns.getSettingsPageId?.();
+return {
+  settingsPageId,
+  siteLanguages: args.fns.siteLanguages?.() || [],
+  embeddedMode: true,
+  hideSettingsSidebar: true,
+  hide: !settingsPageId,
+  isSchemaMode: () => args.fns.editorMode?.() === "schema",
+  onSetContentMode: () => args.fns.setEditorMode?.("content"),
+  onSetSchemaMode: () => args.fns.switchEditorMode?.("schema"),
+  onSchemaSaved: () => args.fns.onSchemaSaved?.(),
+  schemaTabLabel: "Fields",
+  contentTabLabel: "Content",
+  dynamicPageKey: "fulchand_embedded_settings_editor"
+};
+'''
+      }
+    }
+  ]
+  edges: [
+    { id: "fpse_e0", T: "Attr", S: "fpse_root", E: "fpse_body_style" },
+    { id: "fpse_e1", T: "Attr", S: "fpse_root", E: "fpse_toggle" },
+    { id: "fpse_e2", T: "Attr", S: "fpse_root", E: "fpse_panel" },
+    { id: "fpse_e2b", T: "Attr", S: "fpse_panel", E: "fpse_panel_resize" },
+    { id: "fpse_e3", T: "Attr", S: "fpse_toggle", E: "fpse_toggle_icon" },
+    { id: "fpse_e4", T: "Attr", S: "fpse_toggle", E: "fpse_toggle_label" },
+    { id: "fpse_e5", T: "Attr", S: "fpse_panel", E: "fpse_panel_header" },
+    { id: "fpse_e6", T: "Attr", S: "fpse_panel", E: "fpse_panel_body" },
+    { id: "fpse_e7", T: "Attr", S: "fpse_panel_header", E: "fpse_header_row" },
+    { id: "fpse_e8", T: "Attr", S: "fpse_panel_header", E: "fpse_section_nav" },
+    { id: "fpse_e9", T: "Attr", S: "fpse_header_row", E: "fpse_header_title" },
+    { id: "fpse_e10", T: "Attr", S: "fpse_header_row", E: "fpse_header_actions" },
+    { id: "fpse_e11", T: "Attr", S: "fpse_header_actions", E: "fpse_refresh_btn" },
+    { id: "fpse_e12", T: "Attr", S: "fpse_header_actions", E: "fpse_close_btn" }
+  ]
+}

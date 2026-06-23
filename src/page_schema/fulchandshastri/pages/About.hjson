@@ -1,0 +1,950 @@
+{
+  vertexes: [
+    {
+      id: "page",
+      L: "Page",
+      P: {
+        public: true
+        key: "About",
+        fns: "return { enabled: () => true }",
+        isNoPermissionCheck: true,
+        url: "/about-fulchand"
+        settingsPageId: "about"
+        props: '''
+const locale = args.params?.lang ? String(args.params.lang).toLowerCase() : undefined;
+return {
+  contextName: "aboutSettings",
+  serverFunction: `
+try {
+  const result = await args.executeNamedServerFunction({
+    functionName: "loadPublicPageSettings",
+    contextData: { pageId: "about", allowPublicRead: true, locale: ${JSON.stringify(locale ?? null)} }
+  });
+  if (!result?.result?.success) return {};
+  return result.result.data?.sections || {};
+} catch (error) {
+  console.error("Error loading page settings:", error);
+  return {};
+}
+`
+};
+'''
+      }
+    },
+    {
+      id: "heroSection",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  position: relative;
+  height: 400px;
+  background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('https://www.fulchandshastri.com/wp-content/uploads/2015/12/Fulchand-banner1.gif');
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: white;
+}`;
+'''
+      }
+    },
+    {
+      id: "heroContent",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "heroTitle",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const content = args.contextData.aboutSettings?.content;
+return {
+  as: "h1",
+  text: content?.heroTitle
+};
+''',
+        css: '''
+return `._id {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "heroSubtitle",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const content = args.contextData.aboutSettings?.content;
+return {
+  as: "p",
+  text: content?.heroSubtitle
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}`;
+'''
+      }
+    },
+    {
+      id: "mainContent",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "main"
+};
+''',
+        css: '''
+return `._id {
+  padding: 3rem 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1000px;
+  margin: 0 auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "introSection",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el)
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: 4rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "introContent",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.125rem;
+  line-height: 1.8;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "introPara1",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const content = args.contextData.aboutSettings?.content;
+return {
+  as: "p",
+  text: content?.introPara1
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "introPara2",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const content = args.contextData.aboutSettings?.content;
+return {
+  as: "p",
+  text: content?.introPara2
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "introPara3",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const content = args.contextData.aboutSettings?.content;
+return {
+  as: "p",
+  text: content?.introPara3
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "journeySection",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el)
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_light_50};
+  padding: 3rem;
+  border-radius: 1rem;
+  margin-bottom: 4rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "journeyTitle",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const content = args.contextData.aboutSettings?.content;
+return {
+  as: "h2",
+  text: content?.journeyTitle
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "journeyGrid",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "journey1",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "FeatureCard",
+        props: '''
+return {
+  icon: "carbon:light",
+  title: "Early Awakening",
+  description: "From a young age, Fulchand showed deep spiritual inclination and was drawn to the teachings of great masters. His quest for truth led him to profound realizations.",
+  align: "left"
+};
+'''
+      }
+    },
+    {
+      id: "journey2",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "FeatureCard",
+        props: '''
+return {
+  icon: "carbon:education",
+  title: "Meeting the Guru",
+  description: "The transformative encounter with the teachings of Shrimad Rajchandra became the turning point in his spiritual journey, illuminating the path ahead.",
+  align: "left"
+};
+'''
+      }
+    },
+    {
+      id: "journey3",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "FeatureCard",
+        props: '''
+return {
+  icon: "carbon:earth",
+  title: "Global Mission",
+  description: "Dedicating his life to spreading divine knowledge, Fulchand has touched souls in over 220 countries, breaking all barriers of religion and nationality.",
+  align: "left"
+};
+'''
+      }
+    },
+    {
+      id: "teachingsSection",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el)
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: 4rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "teachingsTitle",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const content = args.contextData.aboutSettings?.content;
+return {
+  as: "h2",
+  text: content?.teachingsTitle
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "teachingsContent",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "teaching1",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el, { delay: 0 })
+};
+''',
+        css: '''
+return `._id {
+  padding: 2rem;
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.background_light_300};
+  border-radius: 0.75rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "teaching1Icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  width: 3rem;
+  height: 3rem;
+  background: ${args.theme.var.color.primary_light_100};
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "teaching1IconSvg",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:view",
+  width: 24,
+  height: 24
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "teaching1Title",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const content = args.contextData.aboutSettings?.content;
+return {
+  as: "h3",
+  text: content?.teaching1Title
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "teaching1Text",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const content = args.contextData.aboutSettings?.content;
+return {
+  as: "p",
+  text: content?.teaching1Text
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text_light_200};
+  font-size: 0.875rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "teaching2",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el, { delay: 0.08 })
+};
+''',
+        css: '''
+return `._id {
+  padding: 2rem;
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.background_light_300};
+  border-radius: 0.75rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "teaching2Icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  width: 3rem;
+  height: 3rem;
+  background: ${args.theme.var.color.primary_light_100};
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "teaching2IconSvg",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:user-certification",
+  width: 24,
+  height: 24
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "teaching2Title",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const content = args.contextData.aboutSettings?.content;
+return {
+  as: "h3",
+  text: content?.teaching2Title
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "teaching2Text",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const content = args.contextData.aboutSettings?.content;
+return {
+  as: "p",
+  text: content?.teaching2Text
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text_light_200};
+  font-size: 0.875rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "teaching3",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el, { delay: 0.16 })
+};
+''',
+        css: '''
+return `._id {
+  padding: 2rem;
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.background_light_300};
+  border-radius: 0.75rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "teaching3Icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  width: 3rem;
+  height: 3rem;
+  background: ${args.theme.var.color.primary_light_100};
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "teaching3IconSvg",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:group",
+  width: 24,
+  height: 24
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "teaching3Title",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const content = args.contextData.aboutSettings?.content;
+return {
+  as: "h3",
+  text: content?.teaching3Title
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "teaching3Text",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const content = args.contextData.aboutSettings?.content;
+return {
+  as: "p",
+  text: content?.teaching3Text
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text_light_200};
+  font-size: 0.875rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "teaching4",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el, { delay: 0.24 })
+};
+''',
+        css: '''
+return `._id {
+  padding: 2rem;
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.background_light_300};
+  border-radius: 0.75rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "teaching4Icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  width: 3rem;
+  height: 3rem;
+  background: ${args.theme.var.color.primary_light_100};
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "teaching4IconSvg",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:query",
+  width: 24,
+  height: 24
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "teaching4Title",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const content = args.contextData.aboutSettings?.content;
+return {
+  as: "h3",
+  text: content?.teaching4Title
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "teaching4Text",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const content = args.contextData.aboutSettings?.content;
+return {
+  as: "p",
+  text: content?.teaching4Text
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text_light_200};
+  font-size: 0.875rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "layout",
+      L: "PageLayout",
+      P: {
+        displayOrder: 1,
+        componentName: "Layout"
+      }
+    }
+  ],
+  edges: [
+    { id: "e0", T: "Attr", S: "page", E: "heroSection" },
+    { id: "e3", T: "Attr", S: "heroSection", E: "heroContent" },
+    { id: "e4", T: "Attr", S: "heroContent", E: "heroTitle" },
+    { id: "e5", T: "Attr", S: "heroContent", E: "heroSubtitle" },
+    { id: "e6", T: "Attr", S: "page", E: "mainContent" },
+    { id: "e7", T: "Attr", S: "mainContent", E: "container" },
+    { id: "e8", T: "Attr", S: "container", E: "introSection" },
+    { id: "e9", T: "Attr", S: "introSection", E: "introContent" },
+    { id: "e10", T: "Attr", S: "introContent", E: "introPara1" },
+    { id: "e11", T: "Attr", S: "introContent", E: "introPara2" },
+    { id: "e12", T: "Attr", S: "introContent", E: "introPara3" },
+    { id: "e13", T: "Attr", S: "container", E: "journeySection" },
+    { id: "e14", T: "Attr", S: "journeySection", E: "journeyTitle" },
+    { id: "e15", T: "Attr", S: "journeySection", E: "journeyGrid" },
+    { id: "e16", T: "Attr", S: "journeyGrid", E: "journey1" },
+    { id: "e17", T: "Attr", S: "journeyGrid", E: "journey2" },
+    { id: "e18", T: "Attr", S: "journeyGrid", E: "journey3" },
+    { id: "e19", T: "Attr", S: "container", E: "teachingsSection" },
+    { id: "e20", T: "Attr", S: "teachingsSection", E: "teachingsTitle" },
+    { id: "e21", T: "Attr", S: "teachingsSection", E: "teachingsContent" },
+    { id: "e22", T: "Attr", S: "teachingsContent", E: "teaching1" },
+    { id: "e23", T: "Attr", S: "teaching1", E: "teaching1Icon" },
+    { id: "e24", T: "Attr", S: "teaching1Icon", E: "teaching1IconSvg" },
+    { id: "e25", T: "Attr", S: "teaching1", E: "teaching1Title" },
+    { id: "e26", T: "Attr", S: "teaching1", E: "teaching1Text" },
+    { id: "e27", T: "Attr", S: "teachingsContent", E: "teaching2" },
+    { id: "e28", T: "Attr", S: "teaching2", E: "teaching2Icon" },
+    { id: "e29", T: "Attr", S: "teaching2Icon", E: "teaching2IconSvg" },
+    { id: "e30", T: "Attr", S: "teaching2", E: "teaching2Title" },
+    { id: "e31", T: "Attr", S: "teaching2", E: "teaching2Text" },
+    { id: "e32", T: "Attr", S: "teachingsContent", E: "teaching3" },
+    { id: "e33", T: "Attr", S: "teaching3", E: "teaching3Icon" },
+    { id: "e34", T: "Attr", S: "teaching3Icon", E: "teaching3IconSvg" },
+    { id: "e35", T: "Attr", S: "teaching3", E: "teaching3Title" },
+    { id: "e36", T: "Attr", S: "teaching3", E: "teaching3Text" },
+    { id: "e37", T: "Attr", S: "teachingsContent", E: "teaching4" },
+    { id: "e38", T: "Attr", S: "teaching4", E: "teaching4Icon" },
+    { id: "e39", T: "Attr", S: "teaching4Icon", E: "teaching4IconSvg" },
+    { id: "e40", T: "Attr", S: "teaching4", E: "teaching4Title" },
+    { id: "e41", T: "Attr", S: "teaching4", E: "teaching4Text" },
+    { id: "e_layout", T: "PageLayout", S: "page", E: "layout" }
+  ]
+}

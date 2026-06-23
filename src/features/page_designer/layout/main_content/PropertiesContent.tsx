@@ -11,6 +11,7 @@ import {
   type PageLayoutObject,
   useDesignerLayoutStore,
 } from "../../context/LayoutContext";
+import { getPropertiesAttrId } from "../../functions/layout/layoutHoverState";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 
@@ -26,7 +27,9 @@ export function PropertiesContent() {
       <Show
         when={
           formStoreVertex()?.P &&
-          graph.vertexes[formStoreVertex()?.P.selectedId]
+          graph.vertexes[
+            getPropertiesAttrId(formStoreVertex()?.P, layoutStore())
+          ]
         }
       >
         <DesignerFormIdContext.Provider value={formStoreVertex().id}>

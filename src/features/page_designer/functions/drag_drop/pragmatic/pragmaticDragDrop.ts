@@ -30,7 +30,13 @@ import {
   setDropPositionFromPointer,
   setRootDropPosition,
 } from "~/features/page_designer/functions/drag_drop/pragmatic/setDropPositionFromPointer";
+import { syncLayoutTreeDragHover } from "~/features/page_designer/functions/layout/layoutHoverState";
+import {
+  cancelPendingPreviewHoverClear,
+  schedulePreviewHoverClear,
+} from "~/features/page_designer/functions/layout/previewHover";
 
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import type { Id } from "~/lib/graph/type/id";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
@@ -362,9 +368,41 @@ export function attachLayoutTreeItemDragDrop(
     collapsedKeys: ctx.collapsedKeys,
     children: ctx.children,
     showErrorToast: ctx.showErrorToast,
+    // Mouse events don't fire during pragmatic drag — mirror preview hover for tree rows.
+    onDragEnter: () => {
+      cancelPendingPreviewHoverClear();
+      mergeVertexProperties<PageLayoutObject>(
+        0,
+        ctx.layoutStoreVertex().id,
+        ctx.graph,
+        ctx.setGraph,
+        { previewHoverId: ctx.layoutVertex.id },
+      );
+    },
+    onDragLeave: () => {
+      const formStore = ctx.formStoreVertex();
+      if (formStore?.id) {
+        schedulePreviewHoverClear(
+          ctx.layoutStoreVertex().id,
+          formStore.id,
+          ctx.graph,
+          ctx.setGraph,
+        );
+      }
+    },
   };
 
-  const updatePosition = createPositionUpdater(element, previewCtx);
+  const baseUpdatePosition = createPositionUpdater(element, previewCtx);
+  const updatePosition: PositionUpdater = (input, sourceData) => {
+    baseUpdatePosition(input, sourceData);
+    syncLayoutTreeDragHover(
+      ctx.layoutStoreVertex(),
+      ctx.layoutVertex,
+      ctx.formStoreVertex(),
+      ctx.graph,
+      ctx.setGraph,
+    );
+  };
 
   const dragCleanup = draggable({
     element,
