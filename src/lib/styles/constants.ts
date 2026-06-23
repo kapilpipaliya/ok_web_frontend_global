@@ -44,6 +44,42 @@ export const DEFAULT_THEME = {
       dark: "oklch(0.22 0.02 250)",
     },
   },
+  spacing: {
+    xxs: "0.125rem",
+    xs: "0.25rem",
+    sm: "0.5rem",
+    md: "1rem",
+    lg: "1.5rem",
+    xl: "2rem",
+    xxl: "3rem",
+    xxxl: "4rem",
+  },
+  borderRadius: {
+    sm: "0.375rem",
+    md: "0.5rem",
+    lg: "0.75rem",
+    xl: "1rem",
+    full: "9999px",
+  },
+  animation: {
+    fast: "150ms",
+    normal: "300ms",
+    slow: "500ms",
+  },
+  touch: {
+    minTarget: "44px",
+    button: "48px",
+    input: "52px",
+  },
+  fontSize: {
+    xs: "0.75rem",
+    sm: "0.875rem",
+    md: "1rem",
+    lg: "1.125rem",
+    xl: "1.25rem",
+    xxl: "1.5rem",
+    title: "2rem",
+  },
 } as ThemeContext["var"];
 
 // CSS Reset styles

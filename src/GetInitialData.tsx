@@ -1,5 +1,11 @@
-import { createAsync, query, useLocation, useNavigate } from "@solidjs/router";
-import { Match, type ParentProps, Show, Switch } from "solid-js";
+import {
+  createAsync,
+  query,
+  revalidate,
+  useLocation,
+  useNavigate,
+} from "@solidjs/router";
+import { createEffect, Match, type ParentProps, Show, Switch } from "solid-js";
 
 import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { UserData } from "~/lib/graph/mutate/user/loadUser";
@@ -109,40 +115,42 @@ export function GetInitialData(props: GetInitialDataProps) {
     }
   };
 
-  const reSetData = async (
-    count: number | undefined,
-    freshData: ReturnType<typeof fetchData>,
-  ) => {
-    // Only refetch if count is greater than 0 (skip initial load)
-    if (count && count > 0) {
-      setData(freshData.initialData, freshData.userData);
-    }
-  };
+  const data = createAsync(() => fetchData(), { deferStream: true });
+  let dataLoaded = false;
 
-  const data = createAsync(
-    async () => {
-      const trackedCountBeforeFetch = getGlobalStore(graph[0]).P
-        .initialDataRefreshCount;
-      const result = await fetchData();
-      reSetData(trackedCountBeforeFetch, result);
-      return result;
-    },
-    { deferStream: true },
-  );
+  createEffect(() => {
+    const result = data();
+    if (result) {
+      setData(result.initialData, result.userData);
+    }
+  });
+
+  createEffect(() => {
+    const count = getGlobalStore(graph[0]).P.initialDataRefreshCount ?? 0;
+    if (count > 0) {
+      void revalidate("initialData");
+    }
+  });
 
   const RenderContent = () => {
-    setData(data()!.initialData, data()!.userData);
+    const result = data();
+    // for ssr
+    if (!dataLoaded && result) {
+      setData(result.initialData, result.userData);
+      dataLoaded = true;
+    }
+
     return (
-      <Switch>
-        <Match when={getGlobalStore(graph[0]).P.initialDataFetchError}>
-          <SimpleErrorMessage
-            message={getGlobalStore(graph[0]).P.initialDataFetchError}
-          />
-        </Match>
-        <Match when={!getGlobalStore(graph[0]).P.initialDataFetchError}>
-          {props.children}
-        </Match>
-      </Switch>
+    <Switch>
+      <Match when={getGlobalStore(graph[0]).P.initialDataFetchError}>
+        <SimpleErrorMessage
+          message={getGlobalStore(graph[0]).P.initialDataFetchError}
+        />
+      </Match>
+      <Match when={!getGlobalStore(graph[0]).P.initialDataFetchError}>
+        {props.children}
+      </Match>
+    </Switch>
     );
   };
 

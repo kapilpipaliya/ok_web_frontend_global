@@ -1,5 +1,6 @@
 import type { Navigator } from "@solidjs/router";
 
+import { API } from "~/lib/api/endpoints";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
@@ -10,10 +11,13 @@ export function handleSignInRedirect(
 ) {
   const urlParams = new URLSearchParams(window.location.search);
   const redirectUrl = urlParams.get("redirectUrl");
+  const fallbackUrl =
+    value?.P?.redirectUrl && String(value.P.redirectUrl).startsWith("/")
+      ? String(value.P.redirectUrl)
+      : API.urls.admin.root;
 
-  if (redirectUrl) {
-    navigate(redirectUrl);
-  } else if (value != null && value.id !== null) {
-    navigate(`${value.P.redirectUrl ?? ""}`);
-  }
+  const targetUrl =
+    redirectUrl && redirectUrl.startsWith("/") ? redirectUrl : fallbackUrl;
+
+  navigate(targetUrl, { replace: true });
 }

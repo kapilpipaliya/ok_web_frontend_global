@@ -1,6 +1,3 @@
-/**
- * @jsxImportSource solid-js
- */
 import { type ItemResizeObserver } from "../core/index.js";
 import {
   type Component,

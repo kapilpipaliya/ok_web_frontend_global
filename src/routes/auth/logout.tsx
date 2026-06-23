@@ -1,4 +1,4 @@
-import { useNavigate } from "@solidjs/router";
+import { useNavigate, revalidate } from "@solidjs/router";
 import { onMount } from "solid-js";
 
 import { API } from "~/lib/api/endpoints";
@@ -22,6 +22,8 @@ export default function Logout() {
 
       // Clear user data from global store
       clearUserData(graph, setGraph);
+
+      await revalidate("initialData");
 
       // Navigate to signIn page with replaced history
       navigate(API.urls.admin.signIn, { replace: true });

@@ -1,6 +1,3 @@
-/**
- * @jsxImportSource solid-js
- */
 import { type JSX, splitProps } from "solid-js";
 import { type ViewportComponentAttributes } from "./types.js";
 import {

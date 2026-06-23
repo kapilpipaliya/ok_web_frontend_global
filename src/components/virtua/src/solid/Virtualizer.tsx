@@ -1,6 +1,3 @@
-/**
- * @jsxImportSource solid-js
- */
 import {
   onMount,
   onCleanup,

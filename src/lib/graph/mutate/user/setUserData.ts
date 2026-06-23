@@ -6,6 +6,29 @@ import { deleteEdge } from "~/lib/graph/mutate/core/edge/deleteEdge";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 import type { UserData } from "~/lib/graph/mutate/user/loadUser";
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
+import type { Id } from "~/lib/graph/type/id";
+
+function removeVertex(
+  txnId: number,
+  vertexId: Id,
+  graph: GraphInterface,
+  setGraph: SetStoreFunction<GraphInterface>,
+) {
+  const vertex = graph.vertexes[vertexId];
+  if (!vertex) {
+    return;
+  }
+
+  for (const edges of [vertex.IN, vertex.OUT]) {
+    for (const edgeIds of Object.values(edges)) {
+      for (const edgeId of [...(edgeIds ?? [])]) {
+        deleteEdge(txnId, edgeId, graph, setGraph);
+      }
+    }
+  }
+
+  deleteVertex(txnId, vertexId, graph, setGraph);
+}
 
 export function setUserData(
   graph: GraphInterface,
@@ -41,42 +64,22 @@ export function clearUserData(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
 ) {
-  // Get current user IDs from global store
-  const globalStore = getGlobalStore(graph);
-  const { userId } = globalStore.P;
+  const txnId = 0;
+  const { userId, userSettingId, profileImageId } = getGlobalStore(graph).P;
 
-  // Delete user and all related vertices
-  if (userId && graph.vertexes[userId]) {
-    const userVertex = graph.vertexes[userId];
-
-    // Delete all OUT edges and their target vertices
-    for (const edgeType of Object.keys(userVertex.OUT)) {
-      const edgeIds = userVertex.OUT[edgeType];
-      if (edgeIds) {
-        for (const edgeId of edgeIds) {
-          const edge = graph.edges[edgeId];
-          if (edge) {
-            const targetVertexId = edge.E;
-
-            // Delete the edge first
-            deleteEdge(0, edgeId, graph, setGraph);
-
-            // Delete the target vertex if it exists
-            // (will fail silently if vertex has dependencies, which is fine for shared resources like Roles)
-            if (graph.vertexes[targetVertexId]) {
-              deleteVertex(0, targetVertexId, graph, setGraph);
-            }
-          }
-        }
-      }
-    }
-
-    // Now delete the user vertex (should have no OUT edges now)
-    deleteVertex(0, userId, graph, setGraph);
+  // Remove user (all IN/OUT edges; shared targets like Role keep their vertex)
+  if (userId) {
+    removeVertex(txnId, userId, graph, setGraph);
   }
 
-  // Clear all user-related IDs from global store
-  mergeVertexProperties(0, "globalStoreId", graph, setGraph, {
+  // Remove user-owned vertices left behind after edge cleanup
+  for (const id of [userSettingId, profileImageId]) {
+    if (id) {
+      removeVertex(txnId, id, graph, setGraph);
+    }
+  }
+
+  mergeVertexProperties(txnId, "globalStoreId", graph, setGraph, {
     userId: undefined,
     userSettingId: undefined,
     userRoles: undefined,

@@ -1,5 +1,5 @@
 import { useNavigate, useSearchParams } from "@solidjs/router";
-import { createAsync } from "@solidjs/router";
+import { createAsync, revalidate } from "@solidjs/router";
 import { createStore } from "solid-js/store";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
@@ -116,7 +116,10 @@ export function SignupForm() {
       shouldRedirect: true,
       successMessage: "Registered Successfully",
       validateFn: validateSignupData,
-      onSuccess: triggerRefresh,
+      onSuccess: async () => {
+        triggerRefresh();
+        await revalidate("initialData");
+      },
     });
   };
 

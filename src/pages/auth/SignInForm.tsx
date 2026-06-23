@@ -1,5 +1,10 @@
-import { useNavigate, createAsync, useSearchParams } from "@solidjs/router";
-import { onMount, Show } from "solid-js";
+import {
+  useNavigate,
+  createAsync,
+  revalidate,
+  useSearchParams,
+} from "@solidjs/router";
+import { createMemo, createSignal, onMount, Show } from "solid-js";
 import { createStore } from "solid-js/store";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
@@ -26,6 +31,8 @@ import type { GlobalProperties } from "~/lib/graph/context/GlobalProperties";
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
 import { getGlobalSettingVertex } from "~/lib/graph/get/sync/store/getGlobalSettingVertex";
 import { handleGoogleOAuthClick } from "~/pages/auth/functions/handleGoogleOAuthClick";
+import { handleSignInRedirect } from "~/pages/auth/functions/handleSignInRedirect";
+import { Loader } from "~/components/Loader";
 
 // Define type for submitState store
 type SubmitStateStore = ReturnType<
@@ -46,6 +53,7 @@ export function SignInForm() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const graph = useGraph();
+  const [isRedirecting, setIsRedirecting] = createSignal(false);
 
   // Check if Google OAuth is enabled
   const googleOAuthEnabled = createAsync(async () => {
@@ -58,13 +66,9 @@ export function SignInForm() {
     async () => {
       try {
         const userData = await getUserRPC();
-        if (userData?.user && !userData.error) {
-          // User is logged in, redirect them
-          // Use redirectUrl from query params if present, otherwise use the one from getUserRPC
-          const redirectUrl =
-            searchParams.redirectUrl || userData.user.P.redirectUrl;
-
-          navigate(redirectUrl, { replace: true });
+        if (userData && !("error" in userData) && userData.user) {
+          setIsRedirecting(true);
+          handleSignInRedirect(userData.user, graph[0], navigate);
           return userData;
         }
         return null;
@@ -74,6 +78,11 @@ export function SignInForm() {
     },
     { deferStream: true },
   );
+
+  const isAuthenticated = createMemo(() => {
+    const data = authData();
+    return !!(data && !("error" in data) && data.user);
+  });
 
   // Use our utility hooks
   const [showPassword, toggleVisibility] = usePasswordVisibility(["password"]);
@@ -141,7 +150,11 @@ export function SignInForm() {
       shouldRedirect: true,
       successMessage: "Logged In Successfully",
       validateFn: validateLoginData,
-      onSuccess: triggerRefresh,
+      onSuccess: async () => {
+        setIsRedirecting(true);
+        triggerRefresh();
+        await revalidate("initialData");
+      },
     });
   };
 
@@ -554,8 +567,12 @@ export function SignInForm() {
   };
 
   return (
-    <Show when={authData() === null}>
-      <SchemaRenderer
+    <>
+      <Show when={isRedirecting()}>
+        <Loader message="Redirecting..." />
+      </Show>
+      <Show when={!isRedirecting() && !isAuthenticated()}>
+        <SchemaRenderer
         form={{
           attributes: [
             {
@@ -603,6 +620,7 @@ export function SignInForm() {
           key: "Login",
         }}
       />
-    </Show>
+      </Show>
+    </>
   );
 }

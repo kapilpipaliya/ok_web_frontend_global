@@ -98,7 +98,11 @@ export function loadWebsiteSchemasForSubdomain(
     // Process all websites
     const allSchemas = schemas as Record<
       string,
-      { components?: Record<string, any>; pages?: Record<string, any> }
+      {
+        components?: Record<string, any>;
+        pages?: Record<string, any>;
+        themes?: Record<string, any>;
+      }
     >;
 
     for (const [websiteName, websiteSchemas] of Object.entries(allSchemas)) {
@@ -130,12 +134,27 @@ export function loadWebsiteSchemasForSubdomain(
           );
         }
       }
+
+      // Process themes from all websites
+      if (websiteSchemas.themes) {
+        for (const [themeKey, schema] of Object.entries(websiteSchemas.themes)) {
+          const importResult = importGraphStructure(schema, graph, setGraph);
+          processImportedGraph(
+            importResult,
+            graph,
+            setGraph,
+            "Theme",
+            themeKey,
+          );
+        }
+      }
     }
   } else {
     // Process single website schemas
     const websiteSchemas = schemas as {
       components?: Record<string, any>;
       pages?: Record<string, any>;
+      themes?: Record<string, any>;
     };
 
     if (websiteSchemas.components) {
@@ -163,6 +182,20 @@ export function loadWebsiteSchemasForSubdomain(
           setGraph,
           "Page", // Parent label for pages
           pageKey, // Use page key without prefix
+        );
+      }
+    }
+
+    // Process themes from the specific website
+    if (websiteSchemas.themes) {
+      for (const [themeKey, schema] of Object.entries(websiteSchemas.themes)) {
+        const importResult = importGraphStructure(schema, graph, setGraph);
+        processImportedGraph(
+          importResult,
+          graph,
+          setGraph,
+          "Theme",
+          themeKey,
         );
       }
     }
