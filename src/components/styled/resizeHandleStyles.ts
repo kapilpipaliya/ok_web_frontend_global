@@ -7,6 +7,7 @@ export const resizeHandleStyles = `return \`._id {
   left: 0;
   z-index: 100;
   user-select: none;
+  touch-action: none;
   
   &::before {
     content: "";

@@ -31,6 +31,7 @@ import { fetchDataFromDB } from "~/cypher/get/fetchDataFromDB";
 import { isValidResponse } from "~/lib/api/general/isValidResponse";
 import { Title } from "@solidjs/meta";
 import { updateUrlWithOpenedTabs } from "~/features/page_designer/utils/updateUrlWithTabs";
+import { LandscapeOrientationPrompt } from "./LandscapeOrientationPrompt";
 
 const RenderMainContent = clientOnly(() => import("./RenderMainContent"));
 
@@ -287,14 +288,16 @@ export function PageDesignerWrapper(): JSX.Element {
     }
 
     const widthProps = {
-      isLeftOpen: layoutVertex.P.isLeftOpen,
-      isRight0Open: layoutVertex.P.isRight0Open,
-      isRight1Open: layoutVertex.P.isRight1Open,
-      isRight2Open: layoutVertex.P.isRight2Open,
-      leftWidth: layoutVertex.P.leftWidth,
-      rightWidth0: layoutVertex.P.rightWidth0,
-      rightWidth1: layoutVertex.P.rightWidth1,
-      rightWidth2: layoutVertex.P.rightWidth2,
+      isComponentsOpen: layoutVertex.P.isComponentsOpen,
+      isAiOpen: layoutVertex.P.isAiOpen,
+      isPropertiesOpen: layoutVertex.P.isPropertiesOpen,
+      isSettingsOpen: layoutVertex.P.isSettingsOpen,
+      isPropertiesCollapsed: layoutVertex.P.isPropertiesCollapsed,
+      componentsWidth: layoutVertex.P.componentsWidth,
+      aiWidth: layoutVertex.P.aiWidth,
+      propertiesWidth: layoutVertex.P.propertiesWidth,
+      propertiesExpandedWidth: layoutVertex.P.propertiesExpandedWidth,
+      settingsWidth: layoutVertex.P.settingsWidth,
       // Note: this does not work because we use uuidv7 for the mainPanel ids
       ...layoutVertex.P.mainPanel.reduce(
         (acc, panel) => ({
@@ -362,6 +365,7 @@ export function PageDesignerWrapper(): JSX.Element {
       <DesignerLayoutStoreContext.Provider value={initialStore.id}>
         <Title>{getTitle(`${params.entity} Builder`, graph)}</Title>
         <Show when={isDataReady()} fallback={<div>Loading...</div>}>
+          <LandscapeOrientationPrompt />
           <RenderMainContent />
         </Show>
       </DesignerLayoutStoreContext.Provider>

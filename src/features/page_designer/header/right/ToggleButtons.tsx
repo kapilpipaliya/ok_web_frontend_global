@@ -15,7 +15,11 @@ export function ToggleButtons() {
   const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
 
   const togglePanel = (
-    panel: "isLeftOpen" | "isRight0Open" | "isRight1Open" | "isRight2Open",
+    panel:
+      | "isComponentsOpen"
+      | "isAiOpen"
+      | "isPropertiesOpen"
+      | "isSettingsOpen",
   ) => {
     mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
       [panel]: !layoutStore()[panel],
@@ -37,8 +41,8 @@ export function ToggleButtons() {
       <IconButton
         css={headerIconButtonCss}
         icon="ph:squares-four"
-        iconCss={`return \`._id {${layoutStore().isLeftOpen ? "color:${args.theme.var.color.primary}" : "color:${args.theme.var.color.text_light_300}"};}\`;`}
-        onClick={() => togglePanel("isLeftOpen")}
+        iconCss={`return \`._id {${layoutStore().isComponentsOpen ? "color:${args.theme.var.color.primary}" : "color:${args.theme.var.color.text_light_300}"};}\`;`}
+        onClick={() => togglePanel("isComponentsOpen")}
         size={22}
         title="Toggle Elements Panel"
         tooltipGroup="right-buttons"
@@ -46,8 +50,8 @@ export function ToggleButtons() {
       <IconButton
         css={headerIconButtonCss}
         icon="ph:robot"
-        iconCss={`return \`._id {${layoutStore().isRight0Open ? "color:${args.theme.var.color.primary}" : "color:${args.theme.var.color.text_light_300}"};}\`;`}
-        onClick={() => togglePanel("isRight0Open")}
+        iconCss={`return \`._id {${layoutStore().isAiOpen ? "color:${args.theme.var.color.primary}" : "color:${args.theme.var.color.text_light_300}"};}\`;`}
+        onClick={() => togglePanel("isAiOpen")}
         size={22}
         title="Toggle AI Panel"
         tooltipGroup="right-buttons"
@@ -55,8 +59,8 @@ export function ToggleButtons() {
       <IconButton
         css={headerIconButtonCss}
         icon="ph:sliders"
-        iconCss={`return \`._id {${layoutStore().isRight1Open ? "color:${args.theme.var.color.primary}" : "color:${args.theme.var.color.text_light_300}"};}\`;`}
-        onClick={() => togglePanel("isRight1Open")}
+        iconCss={`return \`._id {${layoutStore().isPropertiesOpen ? "color:${args.theme.var.color.primary}" : "color:${args.theme.var.color.text_light_300}"};}\`;`}
+        onClick={() => togglePanel("isPropertiesOpen")}
         size={22}
         title="Toggle Properties Panel"
         tooltipGroup="right-buttons"
@@ -64,8 +68,8 @@ export function ToggleButtons() {
       <IconButton
         css={headerIconButtonCss}
         icon="ph:gear"
-        iconCss={`return \`._id {${layoutStore().isRight2Open ? "color:${args.theme.var.color.primary}" : "color:${args.theme.var.color.text_light_300}"};}\`;`}
-        onClick={() => togglePanel("isRight2Open")}
+        iconCss={`return \`._id {${layoutStore().isSettingsOpen ? "color:${args.theme.var.color.primary}" : "color:${args.theme.var.color.text_light_300}"};}\`;`}
+        onClick={() => togglePanel("isSettingsOpen")}
         size={22}
         title="Toggle Settings Panel"
         tooltipGroup="right-buttons"

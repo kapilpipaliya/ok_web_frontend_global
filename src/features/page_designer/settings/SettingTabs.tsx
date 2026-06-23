@@ -22,6 +22,7 @@ import { Divider } from "~/components/styled/Divider";
 import { isPermissionsConfigurable } from "./utils/permissionUtils";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
+import { STYLES } from "~/pages/settings/constants";
 
 export function SettingTabs() {
   const layoutStoreId = useDesignerLayoutStore();
@@ -58,9 +59,12 @@ export function SettingTabs() {
     >
       <As
         as="div"
-        css={`return \`._id {
-  overflow: auto;
-}\`;`}
+        css={[
+          STYLES.verticalOverflowCss,
+          `return \`._id {
+  min-height: 0;
+}\`;`,
+        ]}
       >
         <As
           as="div"

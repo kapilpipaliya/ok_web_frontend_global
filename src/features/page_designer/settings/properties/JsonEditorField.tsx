@@ -67,23 +67,34 @@ export function JsonEditorFieldComponent(props: {
 
   let editorRef: HTMLDivElement | undefined;
 
-  const onMouseDown = (e: MouseEvent) => {
+  const onPointerDown = (e: PointerEvent) => {
     e.preventDefault();
     const startY = e.clientY;
     const startHeight = editorRef?.offsetHeight ?? 0;
+    const handle = e.currentTarget as HTMLDivElement;
+    const pointerId = e.pointerId;
 
-    const onMouseMove = (moveEvent: MouseEvent) => {
+    const onPointerMove = (moveEvent: PointerEvent) => {
+      if (moveEvent.pointerId !== pointerId) {
+        return;
+      }
       const newHeight = startHeight + (moveEvent.clientY - startY);
-      setManualHeight(`${Math.max(100, newHeight)}px`); // Minimum height 100px
+      setManualHeight(`${Math.max(100, newHeight)}px`);
     };
 
-    const onMouseUp = () => {
-      document.removeEventListener("mousemove", onMouseMove);
-      document.removeEventListener("mouseup", onMouseUp);
+    const onPointerUp = (upEvent: PointerEvent) => {
+      if (upEvent.pointerId !== pointerId) {
+        return;
+      }
+      document.removeEventListener("pointermove", onPointerMove);
+      document.removeEventListener("pointerup", onPointerUp);
+      document.removeEventListener("pointercancel", onPointerUp);
     };
 
-    document.addEventListener("mousemove", onMouseMove);
-    document.addEventListener("mouseup", onMouseUp);
+    handle.setPointerCapture(pointerId);
+    document.addEventListener("pointermove", onPointerMove);
+    document.addEventListener("pointerup", onPointerUp);
+    document.addEventListener("pointercancel", onPointerUp);
   };
 
   return (
@@ -124,7 +135,7 @@ export function JsonEditorFieldComponent(props: {
           Invalid JSON
         </As>
       )}
-      <As as="div" onMouseDown={onMouseDown} css={resizeHandleStyles} />
+      <As as="div" onPointerDown={onPointerDown} css={resizeHandleStyles} />
     </As>
   );
 }

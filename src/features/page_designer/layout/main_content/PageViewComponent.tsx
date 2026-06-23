@@ -9,6 +9,7 @@ import {
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { ResizableContainer } from "~/components/styled/ResizableDivView";
+import { STYLES } from "~/pages/settings/constants";
 
 import {
   DesignerFormIdContext,
@@ -58,37 +59,61 @@ function OpenedViewPanel(props: {
   return (
     <As
       as="div"
-      css={props.isActive() ? "" : "return `._id {display: none;}`;"}
+      css={
+        props.isActive()
+          ? `return \`._id {
+          display: flex;
+          flex-direction: column;
+          flex: 1;
+          min-width: 0;
+          min-height: 0;
+          height: 100%;
+        }\`;`
+          : "return `._id {display: none;}`;"
+      }
       ref={setViewRef}
     >
-      <PageTabBar
-        formStoreId={props.formStoreId}
-        handleRefresh={props.handleRefresh}
-        onClose={props.handleClose}
-        openIndex={props.index}
-        previewsLength={props.previewsLength}
-      />
-      <ResizableContainer
-        view={props.openedViewId}
-        css={
-          isHighlighted()
-            ? [
-                `return \`._id {
+      <As as="div" css={`return \`._id { flex-shrink: 0; }\`;`}>
+        <PageTabBar
+          formStoreId={props.formStoreId}
+          handleRefresh={props.handleRefresh}
+          onClose={props.handleClose}
+          openIndex={props.index}
+          previewsLength={props.previewsLength}
+        />
+      </As>
+      <As
+        as="div"
+        css={[
+          STYLES.verticalOverflowCss,
+          `return \`._id {
+            flex: 1;
+            min-height: 0;
+          }\`;`,
+        ]}
+      >
+        <ResizableContainer
+          view={props.openedViewId}
+          css={
+            isHighlighted()
+              ? [
+                  `return \`._id {
                           border: 3px solid \${args.theme.var.color.primary};
                           animation: borderPulse 1.5s infinite alternate;
                         }\`;`,
-                `return \`@keyframes borderPulse {
+                  `return \`@keyframes borderPulse {
                             from { border-color: \${args.theme.var.color.primary_light_300}; }
                             to { border-color: \${args.theme.var.color.primary}; }
                           }\`;`,
-              ]
-            : ""
-        }
-      >
-        <Show when={props.isPreview()}>
-          <IFramePreview formStoreId={props.formStoreId} />
-        </Show>
-      </ResizableContainer>
+                ]
+              : ""
+          }
+        >
+          <Show when={props.isPreview()}>
+            <IFramePreview formStoreId={props.formStoreId} />
+          </Show>
+        </ResizableContainer>
+      </As>
     </As>
   );
 }
@@ -179,6 +204,9 @@ export function PageViewComponent(props: { mainPanel: Id }) {
   display: flex;
   gap: 8px;
   flex-wrap: nowrap;
+  height: 100%;
+  min-height: 0;
+  align-items: stretch;
 }\`;`}
     >
       <For
@@ -216,23 +244,37 @@ export function PageViewComponent(props: { mainPanel: Id }) {
                   <As
                     as="div"
                     css={
-                      isActive() ? "" : "return `._id {display: none;}`;"
+                      isActive()
+                        ? `return \`._id {
+                          display: flex;
+                          flex-direction: column;
+                          flex: 1;
+                          min-width: 0;
+                          min-height: 0;
+                          height: 100%;
+                        }\`;`
+                        : "return `._id {display: none;}`;"
                     }
                   >
-                    <PageTabBar
-                      formStoreId={graph.vertexes[openedFormId].P.formId}
-                      handleRefresh={handleRefresh}
-                      onClose={() => {}}
-                      openIndex={0}
-                      previewsLength={1}
-                    />
+                    <As as="div" css={`return \`._id { flex-shrink: 0; }\`;`}>
+                      <PageTabBar
+                        formStoreId={graph.vertexes[openedFormId].P.formId}
+                        handleRefresh={handleRefresh}
+                        onClose={() => {}}
+                        openIndex={0}
+                        previewsLength={1}
+                      />
+                    </As>
                     <As
                       as="div"
-                      css={`return \`._id {
-                        padding: 12px;
-                        overflow: auto;
-                        height: 100%;
-                      }\`;`}
+                      css={[
+                        STYLES.verticalOverflowCss,
+                        `return \`._id {
+                          flex: 1;
+                          min-height: 0;
+                          padding: 12px;
+                        }\`;`,
+                      ]}
                     >
                       <DesignerFormIdContext.Provider
                         value={graph.vertexes[openedFormId].P.formId}

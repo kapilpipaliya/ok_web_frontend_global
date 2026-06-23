@@ -246,27 +246,38 @@ export function FunctionEditor(props: {
       }
     });
 
-    const onMouseDownResize = (e: MouseEvent) => {
+    const onPointerDownResize = (e: PointerEvent) => {
       e.preventDefault();
       e.stopPropagation();
       dragStartEditorHeight = Number.parseFloat(
         editorHeight().replace("px", ""),
       );
       dragStartY = e.clientY;
+      const handle = e.currentTarget as HTMLDivElement;
+      const pointerId = e.pointerId;
 
-      const onMouseMoveResize = (moveEvent: MouseEvent) => {
+      const onPointerMoveResize = (moveEvent: PointerEvent) => {
+        if (moveEvent.pointerId !== pointerId) {
+          return;
+        }
         const deltaY = moveEvent.clientY - dragStartY;
         const newHeight = dragStartEditorHeight + deltaY;
-        setEditorHeight(`${Math.max(100, newHeight)}px`); // Minimum height 100px
+        setEditorHeight(`${Math.max(100, newHeight)}px`);
       };
 
-      const onMouseUpResize = () => {
-        document.removeEventListener("mousemove", onMouseMoveResize);
-        document.removeEventListener("mouseup", onMouseUpResize);
+      const onPointerUpResize = (upEvent: PointerEvent) => {
+        if (upEvent.pointerId !== pointerId) {
+          return;
+        }
+        document.removeEventListener("pointermove", onPointerMoveResize);
+        document.removeEventListener("pointerup", onPointerUpResize);
+        document.removeEventListener("pointercancel", onPointerUpResize);
       };
 
-      document.addEventListener("mousemove", onMouseMoveResize);
-      document.addEventListener("mouseup", onMouseUpResize);
+      handle.setPointerCapture(pointerId);
+      document.addEventListener("pointermove", onPointerMoveResize);
+      document.addEventListener("pointerup", onPointerUpResize);
+      document.addEventListener("pointercancel", onPointerUpResize);
     };
 
     return (
@@ -293,7 +304,7 @@ export function FunctionEditor(props: {
           {/* Resize Handle - positioned absolutely to resizableEditorAreaRef */}
           <As
             as="div"
-            onMouseDown={onMouseDownResize}
+            onPointerDown={onPointerDownResize}
             css={resizeHandleStyles}
           />
         </As>

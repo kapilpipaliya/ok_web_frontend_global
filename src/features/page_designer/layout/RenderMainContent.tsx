@@ -3,6 +3,7 @@ import { type Component, createSignal, For, Show } from "solid-js";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { ResizeOverlay } from "~/components/styled/ResizeOverlay";
+import { IconButton } from "~/components/styled/IconButton";
 import {
   useDesignerFormIdContext,
   useDesignerLayoutStore,
@@ -60,33 +61,41 @@ const ResizeHandle: Component<ResizeHandleProps> = (props) => {
 interface PanelProps {
   activeResizeKey: null | string;
   children: any;
+  collapsed?: boolean;
   isResizing: boolean;
+  onExpand?: () => void;
   onResize?: (e: PointerEvent) => void;
   onResizeLeft?: (e: PointerEvent) => void;
   onResizeRight?: (e: PointerEvent) => void;
+  onToggleCollapse?: () => void;
   ref?: (el: HTMLDivElement) => void;
   resizeKey?: string;
   resizeKeyLeft?: string;
   resizeKeyRight?: string;
   resizePosition?: "bottom" | "left" | "right" | "top";
+  scrollContent?: boolean;
   style?: any;
   title?: string;
 }
 
 const Panel: Component<PanelProps> = (props) => {
   const leftResizeHandler = () =>
-    props.onResizeLeft ??
-    (props.onResize && props.resizePosition === "left"
-      ? props.onResize
-      : undefined);
+    props.collapsed
+      ? undefined
+      : (props.onResizeLeft ??
+        (props.onResize && props.resizePosition === "left"
+          ? props.onResize
+          : undefined));
 
   const rightResizeHandler = () =>
-    props.onResizeRight ??
-    (props.onResize &&
-    props.resizePosition !== "left" &&
-    props.resizePosition !== "top"
-      ? props.onResize
-      : undefined);
+    props.collapsed
+      ? undefined
+      : (props.onResizeRight ??
+        (props.onResize &&
+        props.resizePosition !== "left" &&
+        props.resizePosition !== "top"
+          ? props.onResize
+          : undefined));
 
   const gridTemplateColumns = () => {
     const hasLeft = !!leftResizeHandler();
@@ -107,8 +116,21 @@ const Panel: Component<PanelProps> = (props) => {
     return (
       <Show
         fallback={
-          // if overflow is not set, the resize handle will not work
-          <As as="div" css={STYLES.overflowCss}>
+          <As
+            as="div"
+            css={
+              props.scrollContent === false
+                ? `return \`._id {
+                    min-height: 0;
+                    height: 100%;
+                    overflow: hidden;
+                  }\`;`
+                : [
+                    STYLES.verticalOverflowCss,
+                    `return \`._id { min-height: 0; }\`;`,
+                  ]
+            }
+          >
             {props.children}
           </As>
         }
@@ -128,33 +150,84 @@ const Panel: Component<PanelProps> = (props) => {
             background: \${args.theme.var.color.background_light_100};
             border-bottom: 1px solid \${args.theme.var.color.border};
             padding: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            min-height: 1rem;
+            cursor: ${props.collapsed ? "pointer" : "default"};
+            overflow: hidden;
           }}\`;`}
+            onClick={() => {
+              if (props.collapsed) {
+                props.onExpand?.();
+              }
+            }}
           >
-            <As
-              as="h1"
-              css={"return `._id { font-weight: 600; font-size: inherit; }`;"}
+            <Show
+              fallback={
+                <As
+                  as="span"
+                  css={`return \`._id {
+                    writing-mode: vertical-rl;
+                    transform: rotate(180deg);
+                    font-weight: 600;
+                    font-size: inherit;
+                    white-space: nowrap;
+                    user-select: none;
+                  }\`;`}
+                >
+                  {props.title}
+                </As>
+              }
+              when={!props.collapsed}
             >
-              {props.title}
+              <As
+                as="h1"
+                css={"return `._id { font-weight: 600; font-size: inherit; flex: 1; margin: 0; }`;"}
+              >
+                {props.title}
+              </As>
+              <Show when={props.onToggleCollapse}>
+                <IconButton
+                  icon="ph:caret-left"
+                  onClick={(e: MouseEvent) => {
+                    e.stopPropagation();
+                    props.onToggleCollapse?.();
+                  }}
+                  size={18}
+                  title="Collapse panel"
+                />
+              </Show>
+            </Show>
+          </As>
+          <Show when={!props.collapsed}>
+            <As
+              as="div"
+              css={[
+                STYLES.verticalOverflowCss,
+                `return \`._id { min-height: 0; }\`;`,
+              ]}
+            >
+              {props.children}
             </As>
-          </As>
-          <As as="div" css={STYLES.overflowCss}>
-            {props.children}
-          </As>
+          </Show>
         </As>
       </Show>
     );
   };
+
   return (
     <As
       as="div"
       css={[
-        STYLES.overflowCss,
         `return \`._id {
           border: 1px solid \${args.theme.var.color.border};
           display: grid;
           grid-template-columns: ${gridTemplateColumns()};
           grid-template-rows: ${props.resizePosition === "top" ? "3px 1fr" : "100%"};
           height: 100%;
+          min-width: 0;
+          overflow: hidden;
         }\`;`,
       ]}
       ref={props.ref}
@@ -194,48 +267,36 @@ export function RenderMainContent() {
   const _formStoreVertex = () =>
     graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
-  // Helper function to generate grid-template-columns value
   const getGridTemplateColumns = () => {
     const layout = layoutStore();
     const columns: string[] = [];
 
-    // Components panel
-    if (layout.isLeftOpen) {
-      columns.push(`${layout.leftWidth}px`);
+    if (layout.isComponentsOpen) {
+      columns.push(`${layout.componentsWidth}px`);
     }
 
-    // Settings panel (was last, now second)
-    if (layout.isRight2Open) {
-      columns.push(`${layout.rightWidth2}px`);
+    if (layout.isSettingsOpen) {
+      columns.push(`${layout.settingsWidth}px`);
     }
 
-    // Properties panel (third)
-    if (layout.isRight1Open) {
-      columns.push(`${layout.rightWidth1}px`);
+    if (layout.isPropertiesOpen) {
+      columns.push(
+        layout.isPropertiesCollapsed ? "1rem" : `${layout.propertiesWidth}px`,
+      );
     }
 
-    // AI panel
-    if (layout.isRight0Open) {
-      columns.push(`${layout.rightWidth0}px`);
+    if (layout.isAiOpen) {
+      columns.push(`${layout.aiWidth}px`);
     }
 
-    // Preview panels
     if (layout.mainPanel) {
       const mainPanelColumns = layout.mainPanel.map((panel) => {
         const width = layout[`mainPanel${panel}Width`];
-        return typeof width === "number" ? `${width}px` : (width ?? "1fr");
+        return typeof width === "number"
+          ? `${width}px`
+          : "minmax(400px, 1fr)";
       });
       columns.push(...mainPanelColumns);
-    }
-
-    // Flexible column for preview expansion
-    const hasFlexibleMainPanel = layout.mainPanel?.some(
-      (panel) => layout[`mainPanel${panel}Width`] === "1fr",
-    );
-    if (hasFlexibleMainPanel) {
-      columns.push("0px");
-    } else {
-      columns.push("1fr");
     }
 
     return columns.join(" ");
@@ -245,10 +306,13 @@ export function RenderMainContent() {
   const [activeResizeKey, setActiveResizeKey] = createSignal<null | string>(
     null,
   );
-  const [leftPanelRef, setLeftPanelRef] = createSignal<HTMLDivElement>();
-  const [rightPanel0Ref, setRightPanel0Ref] = createSignal<HTMLDivElement>();
-  const [rightPanel1Ref, setRightPanel1Ref] = createSignal<HTMLDivElement>();
-  const [rightPanel2Ref, setRightPanel2Ref] = createSignal<HTMLDivElement>();
+  const [componentsPanelRef, setComponentsPanelRef] =
+    createSignal<HTMLDivElement>();
+  const [aiPanelRef, setAiPanelRef] = createSignal<HTMLDivElement>();
+  const [propertiesPanelRef, setPropertiesPanelRef] =
+    createSignal<HTMLDivElement>();
+  const [settingsPanelRef, setSettingsPanelRef] =
+    createSignal<HTMLDivElement>();
   const [mainPanelRefs, setMainPanelRefs] = createSignal<{
     [key: string]: HTMLDivElement;
   }>({});
@@ -259,14 +323,14 @@ export function RenderMainContent() {
     (
       key:
         | "bottomHeight"
-        | "leftWidth"
-        | "rightWidth0"
-        | "rightWidth1"
-        | "rightWidth2"
+        | "componentsWidth"
+        | "aiWidth"
+        | "propertiesWidth"
+        | "settingsWidth"
         | `mainPanel${string}Width`,
       panelRef: () => HTMLDivElement | undefined,
       isHorizontal: boolean,
-      growOnDragRight = key === "leftWidth" || key.startsWith("mainPanel"),
+      growOnDragRight = key === "componentsWidth" || key.startsWith("mainPanel"),
     ) =>
     (e: PointerEvent) => {
       e.preventDefault();
@@ -321,177 +385,234 @@ export function RenderMainContent() {
       document.addEventListener("pointercancel", onPointerUp);
     };
 
+  const togglePropertiesCollapse = () => {
+    const layout = layoutStore();
+    if (layout.isPropertiesCollapsed) {
+      mergeVertexProperties<PageLayoutObject>(
+        0,
+        layoutStoreId,
+        graph,
+        setGraph,
+        {
+          isPropertiesCollapsed: false,
+          propertiesWidth: layout.propertiesExpandedWidth,
+        },
+      );
+    } else {
+      mergeVertexProperties<PageLayoutObject>(
+        0,
+        layoutStoreId,
+        graph,
+        setGraph,
+        {
+          isPropertiesCollapsed: true,
+          propertiesExpandedWidth: layout.propertiesWidth,
+        },
+      );
+    }
+  };
+
+  const expandProperties = () => {
+    const layout = layoutStore();
+    if (!layout.isPropertiesCollapsed) {
+      return;
+    }
+    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
+      isPropertiesCollapsed: false,
+      propertiesWidth: layout.propertiesExpandedWidth,
+    });
+  };
+
   return (
     <As
       as="div"
       css={`return \`._id {
-        display: grid;
-        grid-template-columns: ${getGridTemplateColumns()};
-        width: 100vw;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
         height: 100vh;
-        grid-template-rows: 38px 1fr;
+        overflow: hidden;
       }\`;`}
-      // overflow:hidden
-      //  grid-template-rows:1fr|${sizes.bottomHeight}px
     >
       <HeaderRow
         css={`return \`._id {
           align-items: center;
+          flex-shrink: 0;
         }}\`;`}
-        style={{
-          "grid-column": `1 / span ${layoutStore().mainPanel?.length + 1 + 4}`,
-        }}
       />
 
       <As
         as="div"
-        css={STYLES.overflowCss}
-        style={{ display: layoutStore().isLeftOpen ? "block" : "none" }}
+        css={[
+          STYLES.horizontalOverflowCss,
+          `return \`._id {
+        flex: 1;
+        min-width: 0;
+        min-height: 0;
+      }\`;`,
+        ]}
       >
-        <Panel
-          activeResizeKey={activeResizeKey()}
-          isResizing={isResizing()}
-          onResize={createResizeHandler("leftWidth", leftPanelRef, true)}
-          ref={setLeftPanelRef}
-          resizeKey="leftWidth"
-          resizePosition="right"
+        <As
+          as="div"
+          css={`return \`._id {
+          display: grid;
+          grid-template-columns: ${getGridTemplateColumns()};
+          width: max-content;
+          min-width: 100%;
+          height: 100%;
+        }\`;`}
         >
-          <FormElements />
-        </Panel>
-      </As>
-
-      <As
-        as="div"
-        css={STYLES.overflowCss}
-        style={{ display: layoutStore().isRight2Open ? "block" : "none" }}
-      >
-        <Panel
-          activeResizeKey={activeResizeKey()}
-          isResizing={isResizing()}
-          onResize={createResizeHandler(
-            "rightWidth2",
-            rightPanel2Ref,
-            true,
-            true,
-          )}
-          ref={setRightPanel2Ref}
-          resizeKey="rightWidth2"
-          resizePosition="right"
+        <As
+          as="div"
+          css={STYLES.panelCellCss}
+          style={{
+            display: layoutStore().isComponentsOpen ? "block" : "none",
+          }}
         >
-          <SettingTabs />
-        </Panel>
-      </As>
-
-      <As
-        as="div"
-        css={STYLES.overflowCss}
-        style={{ display: layoutStore().isRight1Open ? "block" : "none" }}
-      >
-        <Panel
-          activeResizeKey={activeResizeKey()}
-          isResizing={isResizing()}
-          onResize={createResizeHandler(
-            "rightWidth1",
-            rightPanel1Ref,
-            true,
-            true,
-          )}
-          ref={setRightPanel1Ref}
-          resizeKey="rightWidth1"
-          resizePosition="right"
-          title="Properties"
-        >
-          {/* <Show
-            fallback={
-              <div css={`return \`._id {
-  border-left: 1px solid \${args.theme.var.color.border};
-  padding-left: 8px;
-  padding-top: 8px;
-}\`;`}>
-                Element is not selected
-              </As>
-            }
-            when={
-              formStoreVertex()?.P.selectedId !== -1 &&
-              graph.vertexes[formStoreVertex()?.P.selectedId] &&
-              graph.vertexes[formStoreVertex()?.P.selectedId].L?.[0]?.endsWith("Attr")
-            }
-          > */}
-          <PropertiesContent />
-          {/* </Show> */}
-        </Panel>
-      </As>
-
-      <As
-        as="div"
-        css={STYLES.overflowCss}
-        style={{ display: layoutStore().isRight0Open ? "block" : "none" }}
-      >
-        <Panel
-          activeResizeKey={activeResizeKey()}
-          isResizing={isResizing()}
-          onResize={createResizeHandler(
-            "rightWidth0",
-            rightPanel0Ref,
-            true,
-            true,
-          )}
-          ref={setRightPanel0Ref}
-          resizeKey="rightWidth0"
-          resizePosition="right"
-          title="AI Content Generator"
-        >
-          <UseObjectAIPanel />
-        </Panel>
-      </As>
-
-      <For each={layoutStore().mainPanel}>
-        {(mainPanel) => (
           <Panel
             activeResizeKey={activeResizeKey()}
             isResizing={isResizing()}
-            onResizeLeft={createResizeHandler(
-              `mainPanel${mainPanel}Width` as `mainPanel${string}Width`,
-              () => mainPanelRefs()[`mainPanel${mainPanel}`],
-              true,
-              false,
-            )}
-            onResizeRight={createResizeHandler(
-              `mainPanel${mainPanel}Width` as `mainPanel${string}Width`,
-              () => mainPanelRefs()[`mainPanel${mainPanel}`],
-              true,
+            onResize={createResizeHandler(
+              "componentsWidth",
+              componentsPanelRef,
               true,
             )}
-            ref={(el) =>
-              setMainPanelRefs((prev) => ({
-                ...prev,
-                [`mainPanel${mainPanel}`]: el,
-              }))
-            }
-            resizeKey={`mainPanel${mainPanel}Width`}
-            resizeKeyLeft={`mainPanel${mainPanel}Width`}
-            resizeKeyRight={`mainPanel${mainPanel}Width`}
-            style={
-              {
-                // 'background-color': '#ffffff',
-              }
-            }
+            ref={setComponentsPanelRef}
+            resizeKey="componentsWidth"
+            resizePosition="right"
           >
-            <TabBar mainPanel={mainPanel} />
-            <PageViewComponent mainPanel={mainPanel} />
+            <FormElements />
           </Panel>
-        )}
-      </For>
+        </As>
 
-      <div />
+        <As
+          as="div"
+          css={STYLES.panelCellCss}
+          style={{ display: layoutStore().isSettingsOpen ? "block" : "none" }}
+        >
+          <Panel
+            activeResizeKey={activeResizeKey()}
+            isResizing={isResizing()}
+            onResize={createResizeHandler(
+              "settingsWidth",
+              settingsPanelRef,
+              true,
+              true,
+            )}
+            ref={setSettingsPanelRef}
+            resizeKey="settingsWidth"
+            resizePosition="right"
+          >
+            <SettingTabs />
+          </Panel>
+        </As>
 
-      {/* <Panel
-        style={{ 'grid-column': '1 / span 4' }}
-        onResize={createResizeHandler('bottomHeight',()=>undefined, false)}
-        resizePosition="top"
-      >
-        bottom panel
-      </Panel> */}
+        <As
+          as="div"
+          css={STYLES.panelCellCss}
+          style={{
+            display: layoutStore().isPropertiesOpen ? "block" : "none",
+          }}
+        >
+          <Panel
+            activeResizeKey={activeResizeKey()}
+            collapsed={layoutStore().isPropertiesCollapsed}
+            isResizing={isResizing()}
+            onExpand={expandProperties}
+            onResize={createResizeHandler(
+              "propertiesWidth",
+              propertiesPanelRef,
+              true,
+              true,
+            )}
+            onToggleCollapse={togglePropertiesCollapse}
+            ref={setPropertiesPanelRef}
+            resizeKey="propertiesWidth"
+            resizePosition="right"
+            title="Properties"
+          >
+            <PropertiesContent />
+          </Panel>
+        </As>
+
+        <As
+          as="div"
+          css={STYLES.panelCellCss}
+          style={{ display: layoutStore().isAiOpen ? "block" : "none" }}
+        >
+          <Panel
+            activeResizeKey={activeResizeKey()}
+            isResizing={isResizing()}
+            onResize={createResizeHandler("aiWidth", aiPanelRef, true, true)}
+            ref={setAiPanelRef}
+            resizeKey="aiWidth"
+            resizePosition="right"
+            title="AI Content Generator"
+          >
+            <UseObjectAIPanel />
+          </Panel>
+        </As>
+
+        <For each={layoutStore().mainPanel}>
+          {(mainPanel) => (
+            <As as="div" css={STYLES.panelCellCss}>
+              <Panel
+                activeResizeKey={activeResizeKey()}
+                isResizing={isResizing()}
+                onResizeLeft={createResizeHandler(
+                  `mainPanel${mainPanel}Width` as `mainPanel${string}Width`,
+                  () => mainPanelRefs()[`mainPanel${mainPanel}`],
+                  true,
+                  false,
+                )}
+                onResizeRight={createResizeHandler(
+                  `mainPanel${mainPanel}Width` as `mainPanel${string}Width`,
+                  () => mainPanelRefs()[`mainPanel${mainPanel}`],
+                  true,
+                  true,
+                )}
+                ref={(el) =>
+                  setMainPanelRefs((prev) => ({
+                    ...prev,
+                    [`mainPanel${mainPanel}`]: el,
+                  }))
+                }
+                resizeKey={`mainPanel${mainPanel}Width`}
+                resizeKeyLeft={`mainPanel${mainPanel}Width`}
+                resizeKeyRight={`mainPanel${mainPanel}Width`}
+                scrollContent={false}
+              >
+                <As
+                  as="div"
+                  css={`return \`._id {
+                    display: flex;
+                    flex-direction: column;
+                    height: 100%;
+                    min-height: 0;
+                    overflow: hidden;
+                  }\`;`}
+                >
+                  <As as="div" css={`return \`._id { flex-shrink: 0; }\`;`}>
+                    <TabBar mainPanel={mainPanel} />
+                  </As>
+                  <As
+                    as="div"
+                    css={`return \`._id {
+                      flex: 1;
+                      min-height: 0;
+                      overflow: hidden;
+                    }\`;`}
+                  >
+                    <PageViewComponent mainPanel={mainPanel} />
+                  </As>
+                </As>
+              </Panel>
+            </As>
+          )}
+        </For>
+        </As>
+      </As>
+
       <DeleteConfirmation />
       <Show when={isResizing()}>
         <ResizeOverlay />

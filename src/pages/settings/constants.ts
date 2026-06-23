@@ -341,6 +341,79 @@ export const STYLES = {
       overflow: auto;
       scrollbar-color: \${args.theme.var.color.border} \${args.theme.var.color.background_light_300};
       scrollbar-width: thin;
+
+      &::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+
+      &::-webkit-scrollbar-track {
+        background: \${args.theme.var.color.background_light_300};
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background: \${args.theme.var.color.border};
+        border-radius: 3px;
+      }
+
+      &::-webkit-scrollbar-thumb:hover {
+        background: \${args.theme.var.color.text_light_300};
+      }
+    }\`;`,
+
+  verticalOverflowCss: `return \`._id {
+      overflow-x: hidden;
+      overflow-y: auto;
+      min-width: 0;
+      scrollbar-color: \${args.theme.var.color.border} \${args.theme.var.color.background_light_300};
+      scrollbar-width: thin;
+
+      &::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      &::-webkit-scrollbar-track {
+        background: \${args.theme.var.color.background_light_300};
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background: \${args.theme.var.color.border};
+        border-radius: 3px;
+      }
+
+      &::-webkit-scrollbar-thumb:hover {
+        background: \${args.theme.var.color.text_light_300};
+      }
+    }\`;`,
+
+  horizontalOverflowCss: `return \`._id {
+      overflow-x: auto;
+      overflow-y: hidden;
+      scrollbar-color: \${args.theme.var.color.border} \${args.theme.var.color.background_light_300};
+      scrollbar-width: thin;
+
+      &::-webkit-scrollbar {
+        height: 6px;
+      }
+
+      &::-webkit-scrollbar-track {
+        background: \${args.theme.var.color.background_light_300};
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background: \${args.theme.var.color.border};
+        border-radius: 3px;
+      }
+
+      &::-webkit-scrollbar-thumb:hover {
+        background: \${args.theme.var.color.text_light_300};
+      }
+    }\`;`,
+
+  panelCellCss: `return \`._id {
+      height: 100%;
+      min-width: 0;
+      overflow: hidden;
     }\`;`,
 
   // Tooltip styles

@@ -443,8 +443,6 @@ function getMetaVertexes(
   );
 
   const basicVertices = [
-    graph.vertexes[vertexIds.key],
-    graph.vertexes[vertexIds.layerName],
     ...(isPage && componentName === "Page"
       ? [graph.vertexes[vertexIds.thankYouPage]]
       : []),

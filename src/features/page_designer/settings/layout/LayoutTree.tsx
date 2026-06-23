@@ -23,7 +23,7 @@ import {
 } from "../../context/LayoutContext";
 import { LayoutTreeItem } from "./LayoutTreeItem";
 import { IconButton } from "~/components/styled/IconButton";
-import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
+import { ICON_BUTTON_STYLES, STYLES } from "~/pages/settings/constants";
 import { onLayoutItemClick } from "~/features/page_designer/event_handler/onLayoutItemClick";
 import { getChildrenAttrs } from "../../functions/layout/getChildrenAttrs";
 import { toggleHidden } from "./HideShowIcon";
@@ -775,13 +775,16 @@ export function LayoutTree() {
 
       <As
         as="div"
-        css={`return \`._id {
+        css={[
+          STYLES.verticalOverflowCss,
+          `return \`._id {
           padding: 0;
           margin: 0;
-          overflow-y: auto;
           flex: 1;
+          min-height: 0;
           scroll-behavior: smooth;
-        }\`;`}
+        }\`;`,
+        ]}
         class="layouttree"
         ref={setTreeRef}
       >

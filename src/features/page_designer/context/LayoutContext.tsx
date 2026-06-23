@@ -18,22 +18,24 @@ export type PageLayoutObject = ReturnType<typeof getInitialDesignerLayoutStore>;
 
 export const INITIAL_WIDTHS = {
   bottom: 300,
-  left: 190,
-  right0: 305,
-  right1: 305,
-  right2: 310,
+  components: 190,
+  ai: 305,
+  properties: 305,
+  settings: 310,
 } as const;
 
 export function getInitialLayoutSettings() {
   return {
-    isLeftOpen: true,
-    isRight0Open: false,
-    isRight1Open: true,
-    isRight2Open: true,
-    leftWidth: INITIAL_WIDTHS.left,
-    rightWidth0: INITIAL_WIDTHS.right0,
-    rightWidth1: INITIAL_WIDTHS.right1,
-    rightWidth2: INITIAL_WIDTHS.right2,
+    isComponentsOpen: true,
+    isAiOpen: false,
+    isPropertiesOpen: true,
+    isSettingsOpen: true,
+    componentsWidth: INITIAL_WIDTHS.components,
+    aiWidth: INITIAL_WIDTHS.ai,
+    propertiesWidth: INITIAL_WIDTHS.properties,
+    settingsWidth: INITIAL_WIDTHS.settings,
+    isPropertiesCollapsed: false,
+    propertiesExpandedWidth: INITIAL_WIDTHS.properties,
   };
 }
 
