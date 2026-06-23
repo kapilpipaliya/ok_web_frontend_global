@@ -413,7 +413,7 @@ export function ComponentPaletteTreeItem(
                   onPreviewOpen={handlePreviewOpen}
                 />
               </Show>
-              <Show when={isPagePalette() || isFunctionPalette()}>
+              <Show when={isComponentPalette() || isPagePalette() || isFunctionPalette()}>
                 <IconButton
                   css={buttonStyle}
                   icon="ph:arrow-square-out"
