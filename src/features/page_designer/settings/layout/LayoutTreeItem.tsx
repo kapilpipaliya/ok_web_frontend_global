@@ -33,6 +33,7 @@ import {
   useDesignerLayoutStore,
 } from "../../context/LayoutContext";
 import { getChildrenAttrs } from "../../functions/layout/getChildrenAttrs";
+import { getCompKeyFromAttrId } from "~/features/page_designer/functions/layout/syncHighlightedCompKey";
 import {
   clearLayoutPreviewHover,
   setLayoutPreviewHover,
@@ -91,6 +92,23 @@ export function LayoutTreeItem(
   );
   const isActiveTargetItem = () => activeItemChanged(props.metaVertex.id);
 
+  const isPaletteHighlighted = createMemo(() => {
+    const highlightedKey = layoutStoreVertex()?.P.highlightedCompKey;
+    if (!highlightedKey) return false;
+    if (getCompKeyFromAttrId(graph, props.metaVertex.id) !== highlightedKey) {
+      return false;
+    }
+    const form = formStoreVertex()?.P;
+    const activeAttrId =
+      form?.hoverId != null && form.hoverId !== -1
+        ? form.hoverId
+        : form?.selectedId;
+    if (activeAttrId != null && activeAttrId !== -1) {
+      return props.metaVertex.id === activeAttrId;
+    }
+    return true;
+  });
+
   const children = createMemo(() =>
     getChildrenAttrs(graph, setGraph, props.metaVertex),
   );
@@ -118,17 +136,19 @@ export function LayoutTreeItem(
     return props.filterTree(props.metaVertex).match;
   });
 
-  // Add auto-scroll effect when item is selected
+  // Scroll into view when selected or highlighted from the component palette.
   createEffect(() => {
-    if (isSelectedLayoutId(props.metaVertex.id) && parentRef()) {
-      // Use a small timeout to ensure the DOM is fully updated
-      setTimeout(() => {
-        parentRef()?.scrollIntoView({
-          behavior: "smooth",
-          block: "nearest",
-        });
-      }, 50);
-    }
+    const shouldScroll =
+      (isSelectedLayoutId(props.metaVertex.id) || isPaletteHighlighted()) &&
+      parentRef();
+    if (!shouldScroll) return;
+
+    setTimeout(() => {
+      parentRef()?.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+      });
+    }, 50);
   });
 
   const bindLayoutDragDrop = bindDragDropRef(

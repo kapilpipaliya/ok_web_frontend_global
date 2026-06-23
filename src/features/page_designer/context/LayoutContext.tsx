@@ -63,6 +63,7 @@ export function getInitialDesignerLayoutStore() {
       | "right"
       | null,
     previewHoverId: -1 as Id | number,
+    highlightedCompKey: null as string | null,
   };
 }
 

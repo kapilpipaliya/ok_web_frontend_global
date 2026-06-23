@@ -2,6 +2,8 @@ export const PAGE_DESIGNER_DRAG_TYPES = {
   LAYOUT_ITEM: "page-designer-layout-item",
   PALETTE_COMPONENT: "page-designer-palette-component",
   PALETTE_PAGE: "page-designer-palette-page",
+  PALETTE_CATEGORY: "page-designer-palette-category",
+  PALETTE_CONTENT_ITEM: "page-designer-palette-content-item",
   TAB: "page-designer-tab",
 } as const;
 

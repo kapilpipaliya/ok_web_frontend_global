@@ -1,6 +1,7 @@
 import type { Id } from "~/lib/graph/type/id";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
+import { PAGE_DESIGNER_DRAG_TYPES } from "~/features/page_designer/functions/drag_drop/pragmatic/pageDesignerDragTypes";
 
 export interface PaletteDragContext {
   graph: GraphInterface;
@@ -28,6 +29,17 @@ export function getVertexIdsFromSourceData(
 
   if (data.vertexId != null) {
     return [data.vertexId as Id];
+  }
+
+  if (
+    data.type === PAGE_DESIGNER_DRAG_TYPES.PALETTE_CONTENT_ITEM ||
+    data.type === PAGE_DESIGNER_DRAG_TYPES.PALETTE_COMPONENT ||
+    data.type === PAGE_DESIGNER_DRAG_TYPES.PALETTE_PAGE
+  ) {
+    const paletteVertexId = data.compId ?? data.itemId;
+    if (paletteVertexId != null) {
+      return [paletteVertexId as Id];
+    }
   }
 
   return [];

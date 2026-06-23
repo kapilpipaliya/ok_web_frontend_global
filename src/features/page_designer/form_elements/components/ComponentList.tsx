@@ -1,7 +1,6 @@
 import { createMemo, createSignal, For, onMount, Show } from "solid-js";
 import { createStore } from "solid-js/store";
 
-import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { ServerResult } from "~/cypher/types/ServerResult";
 
 import { LoaderNew } from "~/components/styled/LoaderSimple";
@@ -11,10 +10,6 @@ import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 import { fetchAndSetGraphData } from "~/lib/graph/mutate/data/fetchAndSetGraphData";
 import { STYLES } from "~/pages/settings/constants";
 
-import {
-  type PageLayoutObject,
-  useDesignerLayoutStore,
-} from "../../context/LayoutContext";
 import { ComponentItem } from "./ComponentItem";
 import { getCompChildren } from "./functions/getCompChildren";
 import { As } from "~/components/As";
@@ -37,17 +32,6 @@ export function ComponentList(props: {
   const [rootCompVertex, setRootCompVertex] = createSignal<Vertex>();
   const [expandedKeys, setExpandedKeys] = createStore<string[]>([]);
   const [previewPageId, setPreviewPageId] = createSignal<Id | null>(null);
-
-  const layoutStoreId = useDesignerLayoutStore();
-  const layoutStoreVertex = () =>
-    graph.vertexes[layoutStoreId!] as Vertex<PageLayoutObject>;
-
-  const formStoreVertex = () => {
-    const layoutVertex = layoutStoreVertex();
-    return layoutVertex
-      ? (graph.vertexes[layoutVertex.P.formId!] as Vertex<FormStoreObject>)
-      : undefined;
-  };
 
   function toggleExpand(itemId: Id) {
     setExpandedKeys((prev) =>
@@ -106,10 +90,6 @@ export function ComponentList(props: {
     setIsFetchingData(false);
   });
 
-  const showComponentSlot = () => {
-    return formStoreVertex()?.P.formId === "Component";
-  };
-
   // Filter children based on search query
   const filteredChildren = createMemo(() => {
     const children =
@@ -119,13 +99,7 @@ export function ComponentList(props: {
         : []);
     const query = searchQuery().toLowerCase();
 
-    // First filter by component type if showComponentSlot is true
-    const typeFiltered = showComponentSlot()
-      ? children
-      : children.filter((child) => (child.P.key as string) !== "Slot");
-
-    // Then filter by search query
-    return typeFiltered
+    return children
       .filter((child) =>
         ((child.P.label as string) || (child.P.key as string) || "")
           .toLowerCase()

@@ -4680,6 +4680,218 @@ const bookTableSidebar = {
   }
 };
 
+const componentTableColumns = [
+  { key: "key", label: "Key", dataType: "text", renderer: "text", width: "140px", required: true },
+  { key: "label", label: "Label", dataType: "text", renderer: "text", width: "180px", overflowEllipsis: true },
+  { key: "description", label: "Description", dataType: "text", renderer: "text", width: "240px", overflowEllipsis: true },
+  { key: "icon", label: "Icon", dataType: "text", renderer: "text", width: "120px" }
+];
+
+const componentTableGeneral = {
+  publicRead: false,
+  title: "Components",
+  label: "Component",
+  icon: "ph:puzzle-piece",
+  usePolarisUI: true,
+  enableUserScopingForContent: false,
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  showSelection: true,
+  hideExportButtons: true,
+  hideImportButtons: true,
+  hideSettingsButton: false,
+  hideAddButton: true,
+  rowHeight: 48,
+  columnWidths: { __selection: "36px", __rowNumber: "48px", __actions: "88px" },
+  rowClickable: true,
+  showRowNumber: true,
+  resizableColumns: true,
+  actions: [
+    { key: "edit", type: "edit" }
+  ],
+  hooks: {}
+};
+
+const componentTableFormConfig = {
+  gridColumns: 2,
+  groups: [
+    {
+      key: "basic",
+      title: "Component",
+      gridColumns: 2,
+      fields: [
+        { key: "key", label: "Key", dataType: "text", renderer: "text", required: true, colSpan: 1 },
+        { key: "label", label: "Label", dataType: "text", renderer: "text", colSpan: 1 },
+        { key: "icon", label: "Icon", dataType: "text", renderer: "text", colSpan: 1 },
+        { key: "description", label: "Description", dataType: "text", renderer: "textArea", colSpan: 2 }
+      ]
+    }
+  ]
+};
+
+const componentTableSidebar = {
+  enabled: true,
+  parentVertexLabel: "ComponentCategory",
+  toParentEdgeType: "ParentComponentCategory",
+  rootKeys: { key: "root" },
+  label: "Categories",
+  loadFullTree: true,
+  formConfig: {
+    gridColumns: 1,
+    groups: [
+      {
+        key: "basic",
+        title: "Category",
+        gridColumns: 2,
+        fields: [
+          { key: "name", label: "Name", dataType: "text", renderer: "text", required: true, colSpan: 2 },
+          { key: "key", label: "Key", dataType: "text", renderer: "text", colSpan: 2 }
+        ]
+      }
+    ]
+  }
+};
+
+const pageTableColumns = [
+  { key: "key", label: "Key", dataType: "text", renderer: "text", width: "140px", required: true },
+  { key: "title", label: "Title", dataType: "text", renderer: "text", width: "180px", overflowEllipsis: true },
+  { key: "url", label: "URL", dataType: "text", renderer: "text", width: "200px", overflowEllipsis: true },
+  { key: "description", label: "Description", dataType: "text", renderer: "text", width: "240px", overflowEllipsis: true }
+];
+
+const pageTableGeneral = {
+  publicRead: false,
+  title: "Pages",
+  label: "Page",
+  icon: "ph:file",
+  usePolarisUI: true,
+  enableUserScopingForContent: false,
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  showSelection: true,
+  hideExportButtons: true,
+  hideImportButtons: true,
+  hideSettingsButton: false,
+  hideAddButton: true,
+  rowHeight: 48,
+  columnWidths: { __selection: "36px", __rowNumber: "48px", __actions: "88px" },
+  rowClickable: true,
+  showRowNumber: true,
+  resizableColumns: true,
+  actions: [
+    { key: "edit", type: "edit" }
+  ],
+  hooks: {}
+};
+
+const pageTableFormConfig = {
+  gridColumns: 2,
+  groups: [
+    {
+      key: "basic",
+      title: "Page",
+      gridColumns: 2,
+      fields: [
+        { key: "key", label: "Key", dataType: "text", renderer: "text", required: true, colSpan: 1 },
+        { key: "title", label: "Title", dataType: "text", renderer: "text", colSpan: 1 },
+        { key: "url", label: "URL", dataType: "text", renderer: "text", colSpan: 1 },
+        { key: "description", label: "Description", dataType: "text", renderer: "textArea", colSpan: 2 }
+      ]
+    }
+  ]
+};
+
+const pageTableSidebar = {
+  enabled: true,
+  parentVertexLabel: "PageCategory",
+  toParentEdgeType: "ParentPageCategory",
+  rootKeys: { key: "root" },
+  label: "Categories",
+  loadFullTree: true,
+  formConfig: {
+    gridColumns: 1,
+    groups: [
+      {
+        key: "basic",
+        title: "Category",
+        gridColumns: 2,
+        fields: [
+          { key: "name", label: "Name", dataType: "text", renderer: "text", required: true, colSpan: 2 },
+          { key: "key", label: "Key", dataType: "text", renderer: "text", colSpan: 2 }
+        ]
+      }
+    ]
+  }
+};
+
+const functionTableColumns = [
+  { key: "key", label: "Key", dataType: "text", renderer: "text", width: "180px", required: true },
+  { key: "description", label: "Description", dataType: "text", renderer: "text", width: "320px", overflowEllipsis: true }
+];
+
+const functionTableGeneral = {
+  publicRead: false,
+  title: "Functions",
+  label: "Function",
+  icon: "ph:function",
+  usePolarisUI: true,
+  enableUserScopingForContent: false,
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  showSelection: true,
+  hideExportButtons: true,
+  hideImportButtons: true,
+  hideSettingsButton: false,
+  hideAddButton: true,
+  rowHeight: 48,
+  columnWidths: { __selection: "36px", __rowNumber: "48px", __actions: "88px" },
+  rowClickable: true,
+  showRowNumber: true,
+  resizableColumns: true,
+  actions: [
+    { key: "edit", type: "edit" }
+  ],
+  hooks: {}
+};
+
+const functionTableFormConfig = {
+  gridColumns: 2,
+  groups: [
+    {
+      key: "basic",
+      title: "Function",
+      gridColumns: 2,
+      fields: [
+        { key: "key", label: "Key", dataType: "text", renderer: "text", required: true, colSpan: 1 },
+        { key: "description", label: "Description", dataType: "text", renderer: "textArea", colSpan: 2 }
+      ]
+    }
+  ]
+};
+
+const functionTableSidebar = {
+  enabled: true,
+  parentVertexLabel: "FunctionCategory",
+  toParentEdgeType: "ParentFunctionCategory",
+  rootKeys: { key: "root" },
+  label: "Categories",
+  loadFullTree: true,
+  formConfig: {
+    gridColumns: 1,
+    groups: [
+      {
+        key: "basic",
+        title: "Category",
+        gridColumns: 2,
+        fields: [
+          { key: "name", label: "Name", dataType: "text", renderer: "text", required: true, colSpan: 2 },
+          { key: "key", label: "Key", dataType: "text", renderer: "text", colSpan: 2 }
+        ]
+      }
+    ]
+  }
+};
+
 function buildTableSchemaPartConfig(part, body) {
   const payload = { part, ...(body && typeof body === "object" ? body : {}) };
   return `return ${JSON.stringify(payload, null, 2)};`;
@@ -4702,6 +4914,57 @@ const tableDefinitions = [
     columns: bookTableColumns,
     formConfig: bookTableFormConfig,
     sidebar: bookTableSidebar
+  },
+  {
+    tableKey: "components",
+    tableVertexLabel: "Component",
+    pageId: "table:components",
+    schemaKeys: {
+      general: "components_schema_general",
+      columns: "components_schema_columns",
+      formConfig: "components_schema_formconfig",
+      sidebar: "components_schema_sidebar"
+    },
+    name: "Components",
+    description: "Page designer component palette organization",
+    general: componentTableGeneral,
+    columns: componentTableColumns,
+    formConfig: componentTableFormConfig,
+    sidebar: componentTableSidebar
+  },
+  {
+    tableKey: "pages",
+    tableVertexLabel: "Page",
+    pageId: "table:pages",
+    schemaKeys: {
+      general: "pages_schema_general",
+      columns: "pages_schema_columns",
+      formConfig: "pages_schema_formconfig",
+      sidebar: "pages_schema_sidebar"
+    },
+    name: "Pages",
+    description: "Page designer pages palette organization",
+    general: pageTableGeneral,
+    columns: pageTableColumns,
+    formConfig: pageTableFormConfig,
+    sidebar: pageTableSidebar
+  },
+  {
+    tableKey: "functions",
+    tableVertexLabel: "Function",
+    pageId: "table:functions",
+    schemaKeys: {
+      general: "functions_schema_general",
+      columns: "functions_schema_columns",
+      formConfig: "functions_schema_formconfig",
+      sidebar: "functions_schema_sidebar"
+    },
+    name: "Functions",
+    description: "Page designer functions palette organization",
+    general: functionTableGeneral,
+    columns: functionTableColumns,
+    formConfig: functionTableFormConfig,
+    sidebar: functionTableSidebar
   }
 ];
 

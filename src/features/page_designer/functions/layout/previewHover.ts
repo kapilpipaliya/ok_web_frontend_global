@@ -2,6 +2,8 @@ import type { SetStoreFunction } from "solid-js/store";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { PageLayoutObject } from "~/features/page_designer/context/LayoutContext";
+import { clearHighlightedCompKey } from "~/features/page_designer/functions/layout/syncHighlightedCompKey";
+import { syncHighlightedCompKey } from "~/features/page_designer/functions/layout/syncHighlightedCompKey";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 import type { Id } from "~/lib/graph/type/id";
@@ -24,6 +26,9 @@ export function setLayoutPreviewHover(
   mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
     previewHoverId: hoverId,
   });
+  if (hoverId != null && hoverId !== -1) {
+    syncHighlightedCompKey(layoutStoreId, hoverId, graph, setGraph);
+  }
 }
 
 export function clearLayoutPreviewHover(
@@ -50,6 +55,7 @@ export function schedulePreviewHoverClear(
       hoverId: -1,
     });
     clearLayoutPreviewHover(layoutStoreId, graph, setGraph);
+    clearHighlightedCompKey(layoutStoreId, graph, setGraph);
   });
 }
 

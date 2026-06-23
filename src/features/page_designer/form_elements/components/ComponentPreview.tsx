@@ -1,4 +1,4 @@
-import { createSignal, Show, onCleanup } from "solid-js";
+import { createSignal, Show, onCleanup, createEffect } from "solid-js";
 import { IconButton } from "~/components/styled/IconButton";
 import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
 import { PreviewIsolated } from "../pages/PreviewIsolated";
@@ -8,6 +8,7 @@ import { As } from "~/components/As";
 
 export function ComponentPreview(props: {
   item: Vertex;
+  disabled?: boolean;
   onClick?: (e: MouseEvent) => void;
   onPreviewOpen?: () => void;
   onPreviewClose?: () => void;
@@ -17,6 +18,7 @@ export function ComponentPreview(props: {
 
   // Use a custom preview handler that doesn't automatically close
   const openPreview = () => {
+    if (props.disabled) return;
     setIsOpen(true);
     props.onPreviewOpen?.();
   };
@@ -34,6 +36,12 @@ export function ComponentPreview(props: {
     }
   });
 
+  createEffect(() => {
+    if (props.disabled && isOpen()) {
+      closePreview();
+    }
+  });
+
   const handleButtonClick = (e: MouseEvent) => {
     e.stopPropagation();
 
@@ -48,6 +56,7 @@ export function ComponentPreview(props: {
 
   const handleButtonMouseEnter = (e: MouseEvent) => {
     e.stopPropagation();
+    if (props.disabled) return;
 
     if (timeoutId) {
       window.clearTimeout(timeoutId);

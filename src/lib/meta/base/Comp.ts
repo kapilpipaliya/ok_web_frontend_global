@@ -37,12 +37,12 @@ export const parentPermAttribute = {
 export const Comp: IFormMetaData = {
   attributes: [
     {
-      collection: "g:'CompCategory'",
+      collection: "g:'ComponentCategory'",
       componentName: "Select",
 
       inward: true,
       key: "category",
-      parentLabel: "CompCategory",
+      parentLabel: "ComponentCategory",
     },
     {
       componentName: "SystemTextInput",

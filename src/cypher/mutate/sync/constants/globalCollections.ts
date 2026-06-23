@@ -1,1 +1,7 @@
-export const globalCollections = ["DataType", "Comp", "CompCategory"]; // "Nav", "Page"
+export const globalCollections = [
+  "DataType",
+  "Comp",
+  "ComponentCategory",
+  "PageCategory",
+  "FunctionCategory",
+]; // "Nav", "Page"

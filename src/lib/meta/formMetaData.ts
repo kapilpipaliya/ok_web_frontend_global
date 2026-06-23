@@ -4,6 +4,9 @@ import { Perm } from "./auth/Perm";
 import { Role } from "./auth/Role";
 import { User } from "./auth/User";
 import { Comp } from "./base/Comp";
+import { ComponentCategory } from "./base/ComponentCategory";
+import { FunctionCategory } from "./base/FunctionCategory";
+import { PageCategory } from "./base/PageCategory";
 import { GlobalSetting } from "./base/GlobalSetting";
 import { File, FileTag, Folder } from "./file/File";
 import { Coll } from "./page/Coll";
@@ -24,7 +27,9 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
   // Coll: Coll("Page"),
   // CollCategory: CollCategory,
   Comp: Comp,
-  // CompCategory: CompCategory,
+  ComponentCategory: ComponentCategory,
+  FunctionCategory: FunctionCategory,
+  PageCategory: PageCategory,
   // DataType: DataType,
   File: File,
   FileTag: FileTag,
