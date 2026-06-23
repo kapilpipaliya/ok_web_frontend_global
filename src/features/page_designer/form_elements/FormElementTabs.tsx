@@ -89,46 +89,79 @@ export function FormElementTabs() {
 
       <As
         as="div"
-        css={[
-          STYLES.overflowCss,
-          `return \`._id {
-}\`;`,
-        ]}
+        css={`return \`._id {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}\`;`}
       >
         <Switch>
           <Match when={selectedTab().collection === "Comp"}>
-            <ComponentList
-              edgeName="ParentComp"
-              rootExpression={`g:'Comp[Root]'`}
-              hideActionButtons={true}
-            />
-
-            <Divider />
-
             <As
               as="div"
-              css={[
-                `return \`._id {
-  margin-top: 4px;
-}\`;`,
-              ]}
+              css={`return \`._id {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}\`;`}
             >
-              <ComponentPaletteTree searchAlways title="Categories" />
+              <ComponentList
+                edgeName="ParentComp"
+                rootExpression={`g:'Comp[Root]'`}
+                hideActionButtons={true}
+              />
+
+              <Divider />
+
+              <As
+                as="div"
+                css={`return \`._id {
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}\`;`}
+              >
+                <ComponentPaletteTree searchAlways title="Categories" />
+              </As>
             </As>
           </Match>
           <Match when={selectedTab().collection === "Function"}>
-            <ComponentPaletteTree
-              config={FUNCTION_PALETTE_CONFIG}
-              searchAlways
-              title="Functions"
-            />
+            <As
+              as="div"
+              css={`return \`._id {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}\`;`}
+            >
+              <ComponentPaletteTree
+                config={FUNCTION_PALETTE_CONFIG}
+                searchAlways
+                title="Functions"
+              />
+            </As>
           </Match>
           <Match when={selectedTab().collection === "Page"}>
-            <ComponentPaletteTree
-              config={PAGE_PALETTE_CONFIG}
-              searchAlways
-              title="Pages"
-            />
+            <As
+              as="div"
+              css={`return \`._id {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}\`;`}
+            >
+              <ComponentPaletteTree
+                config={PAGE_PALETTE_CONFIG}
+                searchAlways
+                title="Pages"
+              />
+            </As>
           </Match>
         </Switch>
       </As>

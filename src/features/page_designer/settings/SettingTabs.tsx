@@ -71,6 +71,9 @@ export function SettingTabs() {
           css={`return \`._id {
   padding: 5px;
   height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }\`;`}
         >
           <FormConfig />

@@ -705,7 +705,8 @@ export function LayoutTree() {
       css={`return \`._id {
         display: flex;
         flex-direction: column;
-        height: 100%;
+        flex: 1;
+        min-height: 0;
         overflow: hidden;
       }\`;`}
       tabIndex={0}
@@ -801,6 +802,7 @@ export function LayoutTree() {
                 filterTree={filterTree}
                 shouldExpandForSearch={shouldExpandForSearch}
                 searchActive={!!debouncedSearchQuery().trim()}
+                scrollContainer={treeRef}
               />
             )}
           </For>

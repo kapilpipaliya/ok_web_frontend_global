@@ -55,6 +55,7 @@ import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/entity/findVertex";
 import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
+import { scrollElementIntoContainer } from "~/lib/dom/scrollElementIntoContainer";
 import { FunctionEditor } from "../properties/FunctionEditor";
 
 export function LayoutTreeItem(
@@ -71,6 +72,7 @@ export function LayoutTreeItem(
     };
     shouldExpandForSearch?: (vertex: Vertex) => boolean;
     searchActive?: boolean;
+    scrollContainer?: Accessor<HTMLElement | undefined>;
   }>,
 ) {
   const [graph, setGraph] = useGraph();
@@ -146,8 +148,12 @@ export function LayoutTreeItem(
       parentRef();
     if (!shouldScroll) return;
 
+    const container = props.scrollContainer?.();
+    const element = parentRef();
+    if (!container || !element) return;
+
     setTimeout(() => {
-      parentRef()?.scrollIntoView({
+      scrollElementIntoContainer(element, container, {
         behavior: "smooth",
         block: "nearest",
       });
@@ -689,6 +695,7 @@ export function LayoutTreeItem(
                 filterTree={props.filterTree}
                 shouldExpandForSearch={props.shouldExpandForSearch}
                 searchActive={props.searchActive}
+                scrollContainer={props.scrollContainer}
               />
             )}
           </For>

@@ -17,6 +17,7 @@ import { As } from "~/components/As";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 import type { Id } from "~/lib/graph/type/id";
 import type { Vertex } from "~/lib/graph/type/vertex";
+import { scrollElementIntoContainer } from "~/lib/dom/scrollElementIntoContainer";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/entity/findVertex";
 import {
   PAGE_DESIGNER_DRAG_TYPES,
@@ -479,9 +480,15 @@ export function ComponentPaletteTree(props?: {
     queueMicrotask(() => {
       requestAnimationFrame(() => {
         setTimeout(() => {
-          container
-            .querySelector("[data-palette-selected='true']")
-            ?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+          const selected = container.querySelector<HTMLElement>(
+            "[data-palette-selected='true']",
+          );
+          if (selected) {
+            scrollElementIntoContainer(selected, container, {
+              behavior: "smooth",
+              block: "nearest",
+            });
+          }
         }, 50);
       });
     });
@@ -501,7 +508,15 @@ export function ComponentPaletteTree(props?: {
   };
 
   return (
-    <>
+    <As
+      as="div"
+      css={`return \`._id {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}\`;`}
+    >
       <Show when={!props?.compact}>
         <As
           as="div"
@@ -544,7 +559,17 @@ export function ComponentPaletteTree(props?: {
         />
       </Show>
 
-      <As as="div" css={STYLES.overflowCss} ref={setScrollRef}>
+      <As
+        as="div"
+        css={[
+          STYLES.overflowCss,
+          `return \`._id {
+  flex: 1;
+  min-height: 0;
+}\`;`,
+        ]}
+        ref={setScrollRef}
+      >
         <Show fallback={<LoaderNew loaderHeight="55vh" />} when={!isLoading()}>
           <As
             as="ul"
@@ -638,6 +663,6 @@ export function ComponentPaletteTree(props?: {
           </As>
         </As>
       </Show>
-    </>
+    </As>
   );
 }
