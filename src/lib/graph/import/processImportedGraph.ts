@@ -37,6 +37,26 @@ export function processImportedGraph(
 ): ProcessedGraphResult {
   const { metaTxnId, rootVertexIds, vertexIdMap } = importResult;
 
+  const findExistingParentInGraph = (): string | null => {
+    const labelIds = graph.vertexLabelIdMap?.[parentLabel] ?? [];
+    for (const id of labelIds) {
+      const vertex = graph.vertexes[id];
+      if (vertex?.P?.key === parentKey) {
+        return id;
+      }
+    }
+    for (const [, mappedId] of vertexIdMap) {
+      const vertex = graph.vertexes[mappedId];
+      if (
+        vertex?.P?.key === parentKey &&
+        vertex.L.includes(parentLabel)
+      ) {
+        return mappedId;
+      }
+    }
+    return null;
+  };
+
   // First, check if ANY imported vertex (not just roots) has Label "Page", "Component", "Theme", "Function", or "EmailTemplate"
   for (const [, newId] of vertexIdMap) {
     const vertex = graph.vertexes[newId];
@@ -56,6 +76,16 @@ export function processImportedGraph(
         labelGroups: new Map(),
       };
     }
+  }
+
+  const existingParentId = findExistingParentInGraph();
+  if (existingParentId) {
+    return {
+      metaTxnId,
+      parentId: existingParentId,
+      attrRootIds: [],
+      labelGroups: new Map(),
+    };
   }
 
   // Create parent vertex

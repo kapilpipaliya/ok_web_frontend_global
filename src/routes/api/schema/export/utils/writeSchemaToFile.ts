@@ -1,11 +1,12 @@
 import { writeFileSync } from "fs";
+import { unlink } from "fs/promises";
 import { join } from "path";
 import Hjson from "hjson";
 import { ensureDirectoryExists } from "~/lib/files/ensureDirectoryExists";
 import { normalizeMultilineStrings } from "~/lib/hjson/normalizeMultilineStrings";
 import type { ExportedSchema } from "~/routes/api/schema/ExportedSchema";
 import { normalizeSchema } from "./normalizeSchema";
-import { readdir, stat } from "fs/promises";
+import { readdir } from "fs/promises";
 
 export type ExportType =
   | "components"
@@ -42,21 +43,25 @@ export async function writeSchemaToFile(
   type: ExportType,
   key: string,
   schema: ExportedSchema,
+  categorySegments: string[] = [],
 ): Promise<void> {
   const typeDir = join(basePath, subdomain, type);
   await ensureDirectoryExists(typeDir);
 
-  // search subdirectories for existing file
+  const targetDir =
+    categorySegments.length > 0
+      ? join(typeDir, ...categorySegments)
+      : typeDir;
+  await ensureDirectoryExists(targetDir);
+
+  const targetPath = join(targetDir, `${key}.hjson`);
   const existingPath = await findExistingSchemaFile(typeDir, key);
 
-  if (existingPath) {
-    // Overwrite directly
-    writeFileSync(existingPath, generateHjson(schema), "utf8");
-    return;
-  }
+  writeFileSync(targetPath, generateHjson(schema), "utf8");
 
-  const filePath = join(typeDir, `${key}.hjson`);
-  writeFileSync(filePath, generateHjson(schema), "utf8");
+  if (existingPath && existingPath !== targetPath) {
+    await unlink(existingPath);
+  }
 }
 
 function generateHjson(schema: ExportedSchema): string {

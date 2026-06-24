@@ -12,10 +12,12 @@ import { saveMigrationRequestForAllShops } from "~/lib/shopify/shopMigrationRequ
 import { ensureShopDatabaseAndMigrate } from "~/lib/shopify/shopifyHelpers";
 import { getWebsiteSchemasSyncWithIssues } from "~/page_schema/loader";
 import type { WebsiteSchemas } from "~/page_schema/loader";
+import type { SchemaCategoryPaths } from "~/page_schema/loader";
 import type { SchemaParseIssue } from "~/page_schema/loader";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import type { ImportJobPayload } from "~/lib/schema/schemaJobs/schemaJobTypes";
 import { validatePageUrlsForImport } from "~/lib/schema/validateDuplicatePageUrls";
+import { invalidateFormMetaDataCacheForSubdomain } from "~/server/redis/invalidateFormMetaDataCache";
 
 export function parseImportQueryParams(request: Request): {
   components: string[];
@@ -121,6 +123,44 @@ export function resolveWebsiteSchemasForImport(
   return websiteSchemas;
 }
 
+function filterCategoryPathsByParams(
+  categoryPaths: SchemaCategoryPaths,
+  includeComponentKeys: string[],
+  includePageKeys: string[],
+  includeFunctionKeys: string[],
+): SchemaCategoryPaths {
+  const filtered: SchemaCategoryPaths = {};
+
+  if (includeComponentKeys.length > 0 && categoryPaths.components) {
+    filtered.components = {};
+    for (const key of includeComponentKeys) {
+      if (categoryPaths.components[key]) {
+        filtered.components[key] = categoryPaths.components[key];
+      }
+    }
+  }
+
+  if (includePageKeys.length > 0 && categoryPaths.pages) {
+    filtered.pages = {};
+    for (const key of includePageKeys) {
+      if (categoryPaths.pages[key]) {
+        filtered.pages[key] = categoryPaths.pages[key];
+      }
+    }
+  }
+
+  if (includeFunctionKeys.length > 0 && categoryPaths.functions) {
+    filtered.functions = {};
+    for (const key of includeFunctionKeys) {
+      if (categoryPaths.functions[key]) {
+        filtered.functions[key] = categoryPaths.functions[key];
+      }
+    }
+  }
+
+  return filtered;
+}
+
 function resolveWebsiteSchemasForImportWithIssues(
   websiteName: string,
   options: {
@@ -129,9 +169,14 @@ function resolveWebsiteSchemasForImportWithIssues(
     includePageKeys: string[];
     includeFunctionKeys: string[];
   },
-): { websiteSchemas: WebsiteSchemas; parseIssues: SchemaParseIssue[] } {
+): {
+  websiteSchemas: WebsiteSchemas;
+  parseIssues: SchemaParseIssue[];
+  categoryPaths: SchemaCategoryPaths;
+} {
   const loaded = getWebsiteSchemasSyncWithIssues(websiteName);
   let websiteSchemas = loaded.schemas;
+  let categoryPaths = loaded.categoryPaths;
 
   if (options.filterOnly) {
     websiteSchemas = filterWebsiteSchemasByParams(
@@ -140,9 +185,15 @@ function resolveWebsiteSchemasForImportWithIssues(
       options.includePageKeys,
       options.includeFunctionKeys,
     );
+    categoryPaths = filterCategoryPathsByParams(
+      categoryPaths,
+      options.includeComponentKeys,
+      options.includePageKeys,
+      options.includeFunctionKeys,
+    );
   }
 
-  return { websiteSchemas, parseIssues: loaded.parseIssues };
+  return { websiteSchemas, parseIssues: loaded.parseIssues, categoryPaths };
 }
 
 export interface PerformSchemaImportInput {
@@ -175,7 +226,8 @@ export async function performSchemaImport(
 
   const websiteName = subDomain;
 
-  const { websiteSchemas, parseIssues } = resolveWebsiteSchemasForImportWithIssues(
+  const { websiteSchemas, parseIssues, categoryPaths } =
+    resolveWebsiteSchemasForImportWithIssues(
     websiteName,
     {
     filterOnly,
@@ -205,7 +257,13 @@ export async function performSchemaImport(
   try {
     const [graph, setGraph] = createAppState();
 
-    const stats = await importSchemas(websiteSchemas, tx, graph, setGraph);
+    const stats = await importSchemas(
+      websiteSchemas,
+      tx,
+      graph,
+      setGraph,
+      categoryPaths,
+    );
 
     await createSchemaImportActivityLog(
       tx,
@@ -260,6 +318,13 @@ export async function performSchemaImport(
         err,
       );
     }
+  }
+
+  const cacheDeleted = await invalidateFormMetaDataCacheForSubdomain(subDomain);
+  if (cacheDeleted > 0) {
+    console.log(
+      `[Schema Import] Invalidated ${cacheDeleted} form metadata cache entries for subdomain: ${subDomain}`,
+    );
   }
 
   if (migrationResult.functionName) {

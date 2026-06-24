@@ -62,7 +62,8 @@ export async function performSchemaSync(
       .map((r) => String(r.get("shop") ?? "").trim())
       .filter((s) => s.length > 0);
 
-    const websiteSchemas = loadWebsiteSchemasFromDirectory(tempRoot, subDomain);
+    const { schemas: websiteSchemas, categoryPaths } =
+      loadWebsiteSchemasFromDirectory(tempRoot, subDomain);
     const shopResults: SchemaSyncShopResult[] = [];
 
     for (const shop of shops) {
@@ -72,6 +73,7 @@ export async function performSchemaSync(
         shop,
         user,
         websiteSchemas,
+        categoryPaths,
         runMigrationAfterImport: true,
         updateShopifyShopSyncFields: true,
       });

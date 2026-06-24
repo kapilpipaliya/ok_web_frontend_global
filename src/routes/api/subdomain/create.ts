@@ -12,7 +12,8 @@ import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomai
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 import { validateDatabaseName } from "~/lib/validation/validateDatabaseName";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
-import { getWebsiteSchemasSync } from "~/page_schema/loader";
+import { getWebsiteSchemasSyncWithIssues } from "~/page_schema/loader";
+import type { SchemaCategoryPaths, WebsiteSchemas } from "~/page_schema/loader";
 import { createAppState } from "~/createAppState";
 import { getDriver } from "~/cypher/core/driver";
 import type { Vertex } from "~/lib/graph/type/vertex";
@@ -425,7 +426,8 @@ async function importSchemasForSubdomain(
   );
 
   // Load schemas for the subdomain
-  const websiteSchemas = getWebsiteSchemasSync(subdomainKey);
+  const { schemas: websiteSchemas, categoryPaths } =
+    getWebsiteSchemasSyncWithIssues(subdomainKey);
 
   // If no schemas found, try loading from default website
   if (
@@ -440,7 +442,8 @@ async function importSchemasForSubdomain(
     console.log(
       `[Subdomain Create] No schemas found for ${subdomainKey}, trying default...`,
     );
-    const defaultSchemas = getWebsiteSchemasSync("default");
+    const { schemas: defaultSchemas, categoryPaths: defaultCategoryPaths } =
+      getWebsiteSchemasSyncWithIssues("default");
 
     if (
       !(
@@ -463,23 +466,25 @@ async function importSchemasForSubdomain(
       defaultSchemas,
       user,
       "default",
+      defaultCategoryPaths,
     );
   }
 
-  // Import subdomain-specific schemas
   await importSchemasToDatabase(
     subdomainKey,
     websiteSchemas,
     user,
     subdomainKey,
+    categoryPaths,
   );
 }
 
 async function importSchemasToDatabase(
   subdomainKey: string,
-  websiteSchemas: ReturnType<typeof getWebsiteSchemasSync>,
+  websiteSchemas: WebsiteSchemas,
   user: Vertex,
   websiteName: string,
+  categoryPaths: SchemaCategoryPaths = {},
 ): Promise<void> {
   const driver = await getDriver();
   const dbSession = driver.session({ database: subdomainKey });
@@ -492,7 +497,13 @@ async function importSchemasToDatabase(
       const [graph, setGraph] = createAppState();
 
       // Import all schemas using shared library function
-      const stats = await importSchemas(websiteSchemas, tx, graph, setGraph);
+      const stats = await importSchemas(
+        websiteSchemas,
+        tx,
+        graph,
+        setGraph,
+        categoryPaths,
+      );
 
       // Log the import activity
       let activityMessage = `Imported ${stats.importedItems.length} schemas from website: ${websiteName}. Total vertices: ${stats.totalVertices}, Total edges: ${stats.totalEdges}`;

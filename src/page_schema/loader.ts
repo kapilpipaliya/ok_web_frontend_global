@@ -17,6 +17,11 @@ export interface WebsiteSchemas {
   emailTemplates?: Record<string, ExportedSchema>;
 }
 
+/** Subfolder path segments between schema type folder and file (e.g. dynamic_page/main_functions). */
+export type SchemaCategoryPaths = Partial<
+  Record<keyof WebsiteSchemas, Record<string, string[]>>
+>;
+
 export interface SchemaParseIssue {
   websiteName: string;
   schemaType: SchemaFolderType;
@@ -50,6 +55,7 @@ interface ParsedPath {
   websiteName: string;
   schemaType: SchemaFolderType;
   fileName: string;
+  categorySegments: string[];
 }
 
 // Helper function to parse module paths
@@ -70,11 +76,13 @@ function parseModulePath(path: string): ParsedPath | null {
   // Use only the filename for all schema types (no subfolder path)
   // Subfolders are just for organization, not namespacing
   const fileName = parts[parts.length - 1].replace(".hjson", "");
+  const categorySegments = parts.length > 4 ? parts.slice(3, -1) : [];
 
   return {
     websiteName: parts[1],
     schemaType: schemaType as SchemaFolderType,
     fileName: fileName,
+    categorySegments,
   };
 }
 
@@ -129,6 +137,7 @@ function processSchemaFile(
   parsedPath: ParsedPath,
   content: string,
   parseIssues?: SchemaParseIssue[],
+  categoryPaths?: SchemaCategoryPaths,
 ): void {
   try {
     const schema = parseHjsonPreservingMultiline(content);
@@ -145,6 +154,13 @@ function processSchemaFile(
     const key = schemaKey || parsedPath.fileName;
 
     const groupKey = SCHEMA_FOLDER_TO_WEBSITE_KEY[parsedPath.schemaType];
+
+    if (categoryPaths && parsedPath.categorySegments.length > 0) {
+      if (!categoryPaths[groupKey]) {
+        categoryPaths[groupKey] = {};
+      }
+      categoryPaths[groupKey]![key] = parsedPath.categorySegments;
+    }
 
     // Handle both AllWebsiteSchemas and WebsiteSchemas types
     if (
@@ -274,7 +290,7 @@ function loadFromFilesystem(): Record<string, string> {
 export function loadWebsiteSchemasFromDirectory(
   basePath: string,
   websiteName: string,
-): WebsiteSchemas {
+): { schemas: WebsiteSchemas; categoryPaths: SchemaCategoryPaths } {
   const schemas: WebsiteSchemas = {
     components: {},
     pages: {},
@@ -282,10 +298,11 @@ export function loadWebsiteSchemasFromDirectory(
     functions: {},
     emailTemplates: {},
   };
+  const categoryPaths: SchemaCategoryPaths = {};
 
   const websiteDir = path.join(basePath, websiteName);
   if (!fs.existsSync(websiteDir)) {
-    return schemas;
+    return { schemas, categoryPaths };
   }
 
   const modules: Record<string, string> = {};
@@ -312,10 +329,10 @@ export function loadWebsiteSchemasFromDirectory(
     const parsedPath = parseModulePath(filePath);
     if (!parsedPath || parsedPath.websiteName !== websiteName) continue;
 
-    processSchemaFile(schemas, parsedPath, content);
+    processSchemaFile(schemas, parsedPath, content, undefined, categoryPaths);
   }
 
-  return schemas;
+  return { schemas, categoryPaths };
 }
 
 // Get specific website schemas synchronously with caching
@@ -326,6 +343,7 @@ export function getWebsiteSchemasSync(websiteName: string): WebsiteSchemas {
 export function getWebsiteSchemasSyncWithIssues(websiteName: string): {
   schemas: WebsiteSchemas;
   parseIssues: SchemaParseIssue[];
+  categoryPaths: SchemaCategoryPaths;
 } {
   "use server";
   // Check cache first
@@ -333,6 +351,7 @@ export function getWebsiteSchemasSyncWithIssues(websiteName: string): {
     return {
       schemas: websiteSchemaCache.get(websiteName)!,
       parseIssues: [],
+      categoryPaths: {},
     };
   }
 
@@ -343,6 +362,7 @@ export function getWebsiteSchemasSyncWithIssues(websiteName: string): {
     functions: {},
     emailTemplates: {},
   };
+  const categoryPaths: SchemaCategoryPaths = {};
   const parseIssues: SchemaParseIssue[] = [];
 
   // Load all .hjson files from filesystem
@@ -354,13 +374,13 @@ export function getWebsiteSchemasSyncWithIssues(websiteName: string): {
     const parsedPath = parseModulePath(filePath);
     if (!parsedPath || parsedPath.websiteName !== websiteName) continue;
 
-    processSchemaFile(schemas, parsedPath, content, parseIssues);
+    processSchemaFile(schemas, parsedPath, content, parseIssues, categoryPaths);
   }
 
   // Cache the result for future use
   // websiteSchemaCache.set(websiteName, schemas);
 
-  return { schemas, parseIssues };
+  return { schemas, parseIssues, categoryPaths };
 }
 
 // function to get schemas based on subdomain

@@ -9,6 +9,7 @@ import type { Vertex } from "~/lib/graph/type/vertex";
 import { fetchFormMetaData } from "~/pages/functions/fetchFormMetaData";
 import type { ExportedSchema } from "~/routes/api/schema/ExportedSchema";
 import { isPublicSchemaProperty } from "~/lib/schema/filterSchemasForShopSync";
+import { fetchSchemaCategoryFolderPaths } from "~/lib/schema/getSchemaCategoryFolderPaths";
 import {
   type ExportType,
   writeSchemaToFile,
@@ -136,6 +137,7 @@ async function exportEntityGroup({
   folderName,
   statsArray,
   stats,
+  categoryPaths = {},
 }: {
   entities: Record<string, ExportedSchema>;
   basePath: string;
@@ -143,9 +145,17 @@ async function exportEntityGroup({
   folderName: ExportType;
   statsArray: string[];
   stats: ExportStats;
+  categoryPaths?: Record<string, string[]>;
 }) {
   for (const [key, schema] of Object.entries(entities)) {
-    await writeSchemaToFile(basePath, subDomain, folderName, key, schema);
+    await writeSchemaToFile(
+      basePath,
+      subDomain,
+      folderName,
+      key,
+      schema,
+      categoryPaths[key] ?? [],
+    );
     statsArray.push(key);
     stats.totalVertices += schema.vertexes.length;
     stats.totalEdges += schema.edges.length;
@@ -233,6 +243,10 @@ export async function performSchemaExport(
     const components = await fetchEntities(dbSession, "Component", {
       ...(includeComponentKeys.length > 0 ? { includeKeys: includeComponentKeys } : {}),
     });
+    const componentCategoryPaths = await fetchSchemaCategoryFolderPaths(
+      dbSession,
+      "Component",
+    );
     await exportEntityGroup({
       entities: components,
       basePath: exportBasePath,
@@ -240,6 +254,7 @@ export async function performSchemaExport(
       folderName: "components",
       statsArray: stats.exportedComponents,
       stats,
+      categoryPaths: componentCategoryPaths,
     });
   }
 
@@ -248,6 +263,10 @@ export async function performSchemaExport(
       ...(includePageKeys.length > 0 ? { includeKeys: includePageKeys } : {}),
       excludePublicPages,
     });
+    const pageCategoryPaths = await fetchSchemaCategoryFolderPaths(
+      dbSession,
+      "Page",
+    );
     await exportEntityGroup({
       entities: pages,
       basePath: exportBasePath,
@@ -255,11 +274,16 @@ export async function performSchemaExport(
       folderName: "pages",
       statsArray: stats.exportedPages,
       stats,
+      categoryPaths: pageCategoryPaths,
     });
   }
 
   if (!filterOnly) {
     const themes = await fetchEntities(dbSession, "Theme", { skipKeys: ["Default"] });
+    const themeCategoryPaths = await fetchSchemaCategoryFolderPaths(
+      dbSession,
+      "Theme",
+    );
     await exportEntityGroup({
       entities: themes,
       basePath: exportBasePath,
@@ -267,6 +291,7 @@ export async function performSchemaExport(
       folderName: "themes",
       statsArray: stats.exportedThemes,
       stats,
+      categoryPaths: themeCategoryPaths,
     });
   }
 
@@ -274,6 +299,10 @@ export async function performSchemaExport(
     const functions = await fetchEntities(dbSession, "Function", {
       ...(includeFunctionKeys.length > 0 ? { includeKeys: includeFunctionKeys } : {}),
     });
+    const functionCategoryPaths = await fetchSchemaCategoryFolderPaths(
+      dbSession,
+      "Function",
+    );
     await exportEntityGroup({
       entities: functions,
       basePath: exportBasePath,
@@ -281,11 +310,16 @@ export async function performSchemaExport(
       folderName: "functions",
       statsArray: stats.exportedFunctions,
       stats,
+      categoryPaths: functionCategoryPaths,
     });
   }
 
   if (!filterOnly) {
     const emailTemplates = await fetchEntities(dbSession, "EmailTemplate", {});
+    const emailTemplateCategoryPaths = await fetchSchemaCategoryFolderPaths(
+      dbSession,
+      "EmailTemplate",
+    );
     await exportEntityGroup({
       entities: emailTemplates,
       basePath: exportBasePath,
@@ -293,6 +327,7 @@ export async function performSchemaExport(
       folderName: "email_templates",
       statsArray: stats.exportedEmailTemplates,
       stats,
+      categoryPaths: emailTemplateCategoryPaths,
     });
   }
 

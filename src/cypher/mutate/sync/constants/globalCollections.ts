@@ -4,4 +4,6 @@ export const globalCollections = [
   "ComponentCategory",
   "PageCategory",
   "FunctionCategory",
+  "ThemeCategory",
+  "EmailTemplateCategory",
 ]; // "Nav", "Page"

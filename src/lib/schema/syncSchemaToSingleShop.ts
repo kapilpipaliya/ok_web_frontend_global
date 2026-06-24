@@ -15,6 +15,7 @@ import { runMigration } from "~/lib/schema/runMigration";
 import { getDatabaseNameForShop } from "~/lib/shopify/getDatabaseNameForShop";
 import {
   loadWebsiteSchemasFromDirectory,
+  type SchemaCategoryPaths,
   type WebsiteSchemas,
 } from "~/page_schema/loader";
 import type { Vertex } from "~/lib/graph/type/vertex";
@@ -63,6 +64,7 @@ export interface SyncSchemaToSingleShopInput {
   user: Vertex;
   /** Pre-loaded schemas (bulk sync); when omitted, exports from the app subdomain DB. */
   websiteSchemas?: WebsiteSchemas;
+  categoryPaths?: SchemaCategoryPaths;
   /** Run shop migration after import (schema/sync worker path). */
   runMigrationAfterImport?: boolean;
   /** Update ShopifyShop.syncStatus on the app subdomain graph. */
@@ -88,6 +90,7 @@ export async function syncSchemaToSingleShop(
   const shopDatabaseName = getDatabaseNameForShop(shop, appSubDomain);
   let tempRoot: string | null = null;
   let websiteSchemas = input.websiteSchemas;
+  let categoryPaths = input.categoryPaths ?? {};
 
   try {
     if (!websiteSchemas) {
@@ -102,7 +105,9 @@ export async function syncSchemaToSingleShop(
         includeFunctionKeys: [],
         excludePublicPages: true,
       });
-      websiteSchemas = loadWebsiteSchemasFromDirectory(tempRoot, appSubDomain);
+      const loaded = loadWebsiteSchemasFromDirectory(tempRoot, appSubDomain);
+      websiteSchemas = loaded.schemas;
+      categoryPaths = loaded.categoryPaths;
     }
 
     websiteSchemas = filterWebsiteSchemasForShopSync(websiteSchemas);
@@ -129,7 +134,13 @@ export async function syncSchemaToSingleShop(
       const tx = shopDbSession.beginTransaction();
       try {
         const [graph, setGraph] = createAppState();
-        stats = await importSchemas(websiteSchemas, tx, graph, setGraph);
+        stats = await importSchemas(
+          websiteSchemas,
+          tx,
+          graph,
+          setGraph,
+          categoryPaths,
+        );
 
         await createSchemaImportActivityLog(
           tx,

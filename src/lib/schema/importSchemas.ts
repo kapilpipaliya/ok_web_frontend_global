@@ -17,8 +17,10 @@ import { processImportedGraph } from "~/lib/graph/import/processImportedGraph";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import type { createAppState } from "~/createAppState";
 import type { WebsiteSchemas } from "~/page_schema/loader";
+import type { SchemaCategoryPaths } from "~/page_schema/loader";
 import type { SchemaParseIssue } from "~/page_schema/loader";
 import type { MutationArgs } from "~/cypher/types/MutationArgs";
+import { ensureImportedSchemaItemCategory } from "~/lib/schema/ensureSchemaItemCategories";
 
 type GraphType = ReturnType<typeof createAppState>[0];
 type SetGraphType = ReturnType<typeof createAppState>[1];
@@ -66,6 +68,8 @@ export async function findExistingVertex(
     `
       MATCH (v:${label} {key: $key})
       RETURN elementId(v) as id
+      ORDER BY elementId(v)
+      LIMIT 1
     `,
     { key },
   );
@@ -110,24 +114,32 @@ async function preprocessSchemaForExistingNodes(
   const replacedItems: string[] = [];
 
   if (rootLabel && rootKey) {
-    const rootVertex = vertexesArray.find(
-      (vertex) =>
-        getVertexLabel(vertex) === rootLabel && vertex.P?.key === rootKey,
-    );
+    const existingRootId = await findExistingVertex(tx, rootLabel, rootKey);
 
-    if (rootVertex) {
-      const existingRootId = await findExistingVertex(tx, rootLabel, rootKey);
+    const rootVertex =
+      vertexesArray.find(
+        (vertex) =>
+          getVertexLabel(vertex) === rootLabel && vertex.P?.key === rootKey,
+      ) ??
+      vertexesArray.find(
+        (vertex) => getVertexLabel(vertex) === rootLabel,
+      );
 
-      if (existingRootId) {
-        console.log(
-          `Reusing existing ${rootLabel}: ${rootKey} (${existingRootId})`,
-        );
+    if (existingRootId) {
+      console.log(
+        `Reusing existing ${rootLabel}: ${rootKey} (${existingRootId})`,
+      );
+
+      if (rootVertex) {
         await deleteVertexChildren(tx, existingRootId, rootLabel);
         await replaceVertexProperties(tx, existingRootId, { ...rootVertex.P });
         existingNodeMap.set(rootVertex.id, existingRootId);
         verticesToRemove.add(rootVertex.id);
-        replacedItems.push(`${rootLabel}: ${rootKey}`);
+      } else {
+        existingNodeMap.set(`__existing__${rootKey}`, existingRootId);
       }
+
+      replacedItems.push(`${rootLabel}: ${rootKey}`);
     }
   }
 
@@ -302,7 +314,7 @@ async function importSingleSchema(
   processImportedGraph(importResult, graph, setGraph, type, key);
 
   // Commit the transaction to get the mutation data
-  const commitData = commitTxn(importResult.metaTxnId, graph);
+  const commitData = commitTxn(importResult.metaTxnId, graph) ?? null;
   if (!commitData && replacedItems.length === 0) {
     throw new APIError(
       `Failed to prepare data for ${type.toLowerCase()}: ${key}`,
@@ -328,6 +340,54 @@ async function importSingleSchema(
   };
 }
 
+function getCategorySegmentsForKey(
+  categoryPaths: SchemaCategoryPaths | undefined,
+  groupKey: keyof WebsiteSchemas,
+  key: string,
+): string[] {
+  return categoryPaths?.[groupKey]?.[key] ?? [];
+}
+
+async function importSchemaGroup(
+  websiteSchemas: WebsiteSchemas,
+  categoryPaths: SchemaCategoryPaths | undefined,
+  groupKey: keyof WebsiteSchemas,
+  type: "Component" | "Page" | "Theme" | "Function" | "EmailTemplate",
+  graph: GraphType,
+  setGraph: SetGraphType,
+  tx: Transaction,
+  stats: ImportStats,
+  onAfterImport?: (key: string) => void,
+): Promise<void> {
+  const schemas = websiteSchemas[groupKey];
+  if (!schemas) return;
+
+  for (const [schemaKey, schema] of Object.entries(schemas)) {
+    const result = await importSingleSchema(
+      schema,
+      graph,
+      setGraph,
+      type,
+      schemaKey,
+      tx,
+    );
+
+    await persistSchemaImportResult(result, tx);
+    await ensureImportedSchemaItemCategory(
+      tx,
+      type,
+      schemaKey,
+      getCategorySegmentsForKey(categoryPaths, groupKey, schemaKey),
+    );
+
+    stats.importedItems.push(`${type}: ${schemaKey}`);
+    stats.replacedItems.push(...result.replacedItems);
+    stats.totalVertices += result.vertexCount;
+    stats.totalEdges += result.edgeCount;
+    onAfterImport?.(schemaKey);
+  }
+}
+
 async function persistSchemaImportResult(
   result: SchemaImportResult,
   tx: Transaction,
@@ -345,6 +405,7 @@ export async function importSchemas(
   tx: Transaction,
   graph: GraphType,
   setGraph: SetGraphType,
+  categoryPaths: SchemaCategoryPaths = {},
 ): Promise<ImportStats> {
   const stats: ImportStats = {
     importedItems: [],
@@ -353,126 +414,66 @@ export async function importSchemas(
     totalEdges: 0,
   };
 
-  // Keep track of imported theme keys for auto-activation
   const importedThemeKeys: string[] = [];
 
-  // Process components
-  if (websiteSchemas.components) {
-    for (const [componentKey, schema] of Object.entries(
-      websiteSchemas.components,
-    )) {
-      const result = await importSingleSchema(
-        schema,
-        graph,
-        setGraph,
-        "Component",
-        componentKey,
-        tx,
-      );
+  await importSchemaGroup(
+    websiteSchemas,
+    categoryPaths,
+    "components",
+    "Component",
+    graph,
+    setGraph,
+    tx,
+    stats,
+  );
 
-      // Save to database
-      await persistSchemaImportResult(result, tx);
+  await importSchemaGroup(
+    websiteSchemas,
+    categoryPaths,
+    "pages",
+    "Page",
+    graph,
+    setGraph,
+    tx,
+    stats,
+  );
 
-      stats.importedItems.push(`Component: ${componentKey}`);
-      stats.replacedItems.push(...result.replacedItems);
-      stats.totalVertices += result.vertexCount;
-      stats.totalEdges += result.edgeCount;
-    }
-  }
-
-  // Process pages
-  if (websiteSchemas.pages) {
-    for (const [pageKey, schema] of Object.entries(websiteSchemas.pages)) {
-      const result = await importSingleSchema(
-        schema,
-        graph,
-        setGraph,
-        "Page",
-        pageKey,
-        tx,
-      );
-
-      // Save to database
-      await persistSchemaImportResult(result, tx);
-
-      stats.importedItems.push(`Page: ${pageKey}`);
-      stats.replacedItems.push(...result.replacedItems);
-      stats.totalVertices += result.vertexCount;
-      stats.totalEdges += result.edgeCount;
-    }
-  }
-
-  // Process themes
-  if (websiteSchemas.themes) {
-    for (const [themeKey, schema] of Object.entries(websiteSchemas.themes)) {
-      const result = await importSingleSchema(
-        schema,
-        graph,
-        setGraph,
-        "Theme",
-        themeKey,
-        tx,
-      );
-
-      // Save to database
-      await persistSchemaImportResult(result, tx);
-
-      stats.importedItems.push(`Theme: ${themeKey}`);
-      stats.replacedItems.push(...result.replacedItems);
-      stats.totalVertices += result.vertexCount;
-      stats.totalEdges += result.edgeCount;
+  await importSchemaGroup(
+    websiteSchemas,
+    categoryPaths,
+    "themes",
+    "Theme",
+    graph,
+    setGraph,
+    tx,
+    stats,
+    (themeKey) => {
       importedThemeKeys.push(themeKey);
-    }
-  }
+    },
+  );
 
-  // Process functions
-  if (websiteSchemas.functions) {
-    for (const [functionKey, schema] of Object.entries(
-      websiteSchemas.functions,
-    )) {
-      const result = await importSingleSchema(
-        schema,
-        graph,
-        setGraph,
-        "Function",
-        functionKey,
-        tx,
-      );
+  await importSchemaGroup(
+    websiteSchemas,
+    categoryPaths,
+    "functions",
+    "Function",
+    graph,
+    setGraph,
+    tx,
+    stats,
+  );
 
-      // Save to database
-      await persistSchemaImportResult(result, tx);
+  await importSchemaGroup(
+    websiteSchemas,
+    categoryPaths,
+    "emailTemplates",
+    "EmailTemplate",
+    graph,
+    setGraph,
+    tx,
+    stats,
+  );
 
-      stats.importedItems.push(`Function: ${functionKey}`);
-      stats.replacedItems.push(...result.replacedItems);
-      stats.totalVertices += result.vertexCount;
-      stats.totalEdges += result.edgeCount;
-    }
-  }
-
-  // Process email templates
-  if (websiteSchemas.emailTemplates) {
-    for (const [templateKey, schema] of Object.entries(
-      websiteSchemas.emailTemplates,
-    )) {
-      const result = await importSingleSchema(
-        schema,
-        graph,
-        setGraph,
-        "EmailTemplate",
-        templateKey,
-        tx,
-      );
-
-      await persistSchemaImportResult(result, tx);
-
-      stats.importedItems.push(`EmailTemplate: ${templateKey}`);
-      stats.replacedItems.push(...result.replacedItems);
-      stats.totalVertices += result.vertexCount;
-      stats.totalEdges += result.edgeCount;
-    }
-  }
-
-  // If only one theme was imported, activate it automatically
   if (importedThemeKeys.length === 1) {
     await activateTheme(tx, importedThemeKeys[0]);
     stats.activatedTheme = importedThemeKeys[0];

@@ -4733,7 +4733,7 @@ const componentTableSidebar = {
   enabled: true,
   parentVertexLabel: "ComponentCategory",
   toParentEdgeType: "ParentComponentCategory",
-  rootKeys: { key: "root" },
+  rootKeys: {},
   label: "Categories",
   loadFullTree: true,
   formConfig: {
@@ -4805,7 +4805,7 @@ const pageTableSidebar = {
   enabled: true,
   parentVertexLabel: "PageCategory",
   toParentEdgeType: "ParentPageCategory",
-  rootKeys: { key: "root" },
+  rootKeys: {},
   label: "Categories",
   loadFullTree: true,
   formConfig: {
@@ -4873,7 +4873,7 @@ const functionTableSidebar = {
   enabled: true,
   parentVertexLabel: "FunctionCategory",
   toParentEdgeType: "ParentFunctionCategory",
-  rootKeys: { key: "root" },
+  rootKeys: {},
   label: "Categories",
   loadFullTree: true,
   formConfig: {

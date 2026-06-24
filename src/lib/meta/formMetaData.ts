@@ -5,8 +5,10 @@ import { Role } from "./auth/Role";
 import { User } from "./auth/User";
 import { Comp } from "./base/Comp";
 import { ComponentCategory } from "./base/ComponentCategory";
+import { EmailTemplateCategory } from "./base/EmailTemplateCategory";
 import { FunctionCategory } from "./base/FunctionCategory";
 import { PageCategory } from "./base/PageCategory";
+import { ThemeCategory } from "./base/ThemeCategory";
 import { GlobalSetting } from "./base/GlobalSetting";
 import { File, FileTag, Folder } from "./file/File";
 import { Coll } from "./page/Coll";
@@ -28,8 +30,10 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
   // CollCategory: CollCategory,
   Comp: Comp,
   ComponentCategory: ComponentCategory,
+  EmailTemplateCategory: EmailTemplateCategory,
   FunctionCategory: FunctionCategory,
   PageCategory: PageCategory,
+  ThemeCategory: ThemeCategory,
   // DataType: DataType,
   File: File,
   FileTag: FileTag,

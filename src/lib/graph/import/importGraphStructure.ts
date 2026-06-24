@@ -47,9 +47,13 @@ export function importGraphStructure(
     ? graphData.vertexes
     : Object.values(graphData.vertexes);
 
-  // Add all vertices with new IDs
+  // Add all vertices with new IDs (skip vertices mapped to existing DB nodes)
   for (const vertex of vertexesToProcess) {
     const oldId = vertex.id;
+    if (existingNodeMap?.has(oldId)) {
+      continue;
+    }
+
     const newId = generateNewVertexId(graph, setGraph);
     vertexIdMap.set(oldId, newId);
 
