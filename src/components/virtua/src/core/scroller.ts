@@ -9,7 +9,6 @@ import {
   ACTION_SCROLL,
   type VirtualStore,
   ACTION_SCROLL_END,
-  UPDATE_SIZE_EVENT,
   ACTION_MANUAL_SCROLL,
   ACTION_BEFORE_MANUAL_SMOOTH_SCROLL,
   ACTION_START_OFFSET_CHANGE,
@@ -34,7 +33,7 @@ const debounce = <T extends () => void>(fn: T, ms: number) => {
       fn();
     }, ms);
   };
-  debouncedFn._cancel = cancel;
+  debouncedFn.cancel = cancel;
   return debouncedFn;
 };
 
@@ -65,6 +64,7 @@ const createScrollObserver = (
   ) => void,
   getStartOffset?: () => number,
 ) => {
+  const { actions, state } = store;
   const now = Date.now;
 
   let lastScrollTime = 0;
@@ -83,8 +83,7 @@ const createScrollObserver = (
     }
 
     justTouchEnded = false;
-
-    store.$update(ACTION_SCROLL_END);
+    actions.update(ACTION_SCROLL_END);
   }, 150);
 
   const onScroll = () => {
@@ -95,10 +94,9 @@ const createScrollObserver = (
     }
 
     if (getStartOffset) {
-      store.$update(ACTION_START_OFFSET_CHANGE, getStartOffset());
+      actions.update(ACTION_START_OFFSET_CHANGE, getStartOffset());
     }
-    store.$update(ACTION_SCROLL, getScrollOffset());
-
+    actions.update(ACTION_SCROLL, getScrollOffset());
     onScrollEnd();
   };
 
@@ -108,10 +106,9 @@ const createScrollObserver = (
     if (
       wheeling ||
       // Scroll start should be detected with scroll event
-      !store.$isScrolling() ||
+      !state.isScrolling ||
       // Probably a pinch-to-zoom gesture
-      e.ctrlKey
-    ) {
+      e.ctrlKey) {
       return;
     }
 
@@ -146,23 +143,23 @@ const createScrollObserver = (
   viewport.addEventListener("touchend", onTouchEnd, { passive: true });
 
   return {
-    _dispose: () => {
+    dispose: () => {
       viewport.removeEventListener("scroll", onScroll);
       viewport.removeEventListener("wheel", onWheel);
       viewport.removeEventListener("touchstart", onTouchStart);
       viewport.removeEventListener("touchend", onTouchEnd);
-      onScrollEnd._cancel();
+      onScrollEnd.cancel();
     },
-    _fixScrollJump: () => {
-      const [jump, shift] = store._flushJump();
+    fixScrollJump: () => {
+      const [jump, shift] = actions.flushJump();
       if (!jump) return;
       updateScrollOffset(jump, shift, stillMomentumScrolling);
       stillMomentumScrolling = false;
 
-      if (shift && store.$getViewportSize() > store.$getTotalSize()) {
+      if (shift && actions.getViewportSize() > state.totalSize) {
         // In this case applying jump may not cause scroll.
         // Current logic expects scroll event occurs after applying jump so we dispatch it manually.
-        store.$update(ACTION_SCROLL, getScrollOffset());
+        actions.update(ACTION_SCROLL, getScrollOffset());
       }
     },
   };
@@ -180,6 +177,7 @@ const createScrollScheduler = (
   initialized: () => Promise<boolean>,
   scroll: (offset: number, smooth?: boolean) => void,
 ): [scroll: ScheduleScrollFunction, cancel: () => void] => {
+  const { actions } = store;
   let cancelScroll: (() => void) | undefined;
 
   // The given offset will be clamped by browser
@@ -202,34 +200,56 @@ const createScrollScheduler = (
         // Wait for the scroll destination items to be measured.
         // The measurement will be done asynchronously and the timing is not predictable so we use promise.
         const [promise, resolve] = createPromise<boolean>();
-        cancelScroll = () => {
-          resolve(false);
-        };
+        let pollId: ReturnType<typeof setTimeout> | undefined;
+        let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
         // Resize event may not happen when the window/tab is not visible, or during browser back in Safari.
         // We have to wait for the initial measurement to avoid failing imperative scroll on mount.
         // https://github.com/inokawa/virtua/issues/450
-        if (store.$getViewportSize()) {
-          // Cancel when items around scroll destination completely measured
-          timeout(cancelScroll, 150);
-        }
-        return [
-          promise,
-          store.$subscribe(UPDATE_SIZE_EVENT, () => {
+        const cancel = () => {
+          if (pollId != NULL) clearTimeout(pollId);
+          if (timeoutId != NULL) clearTimeout(timeoutId);
+          resolve(false);
+        };
+        cancelScroll = cancel;
+
+        const isRangeMeasured = () => {
+          for (let [i, end] = actions.getRange(); i <= end; i++) {
+            if (actions.isUnmeasuredItem(i)) {
+              return false;
+            }
+          }
+          return true;
+        };
+
+        const poll = () => {
+          if (cancelScroll !== cancel) {
+            return;
+          }
+          if (isRangeMeasured()) {
             resolve(true);
-          }),
-        ];
+            return;
+          }
+          pollId = timeout(poll, 16);
+        };
+
+        if (actions.getViewportSize()) {
+          timeoutId = timeout(cancel, 150);
+        }
+        poll();
+
+        return [promise, cancel];
       };
 
       if (smooth && isSmoothScrollSupported()) {
-        store.$update(ACTION_BEFORE_MANUAL_SMOOTH_SCROLL, getTargetOffset());
+        actions.update(ACTION_BEFORE_MANUAL_SMOOTH_SCROLL, getTargetOffset());
 
         // https://github.com/inokawa/virtua/issues/590
         microtask(async () => {
           while (true) {
             let done = true;
-            for (let [i, end] = store.$getRange(); i <= end; i++) {
-              if (store.$isUnmeasuredItem(i)) {
+            for (let [i, end] = actions.getRange(); i <= end; i++) {
+              if (actions.isUnmeasuredItem(i)) {
                 done = false;
                 break;
               }
@@ -249,7 +269,7 @@ const createScrollScheduler = (
             }
           }
 
-          store.$update(ACTION_MANUAL_SCROLL);
+          actions.update(ACTION_MANUAL_SCROLL);
           scroll(getTargetOffset(), smooth);
         });
       } else {
@@ -257,7 +277,7 @@ const createScrollScheduler = (
           const [promise, unsubscribe] = waitForMeasurement();
 
           try {
-            store.$update(ACTION_MANUAL_SCROLL);
+            actions.update(ACTION_MANUAL_SCROLL);
             scroll(getTargetOffset());
 
             if (!(await promise)) {
@@ -277,10 +297,10 @@ const createScrollScheduler = (
 };
 
 interface Scroller<T extends HTMLElement | void> {
-  $observe: (containerElement: HTMLElement, viewport: T) => void;
-  $dispose(): void;
-  $fixScrollJump: () => void;
-  $isNegative(): boolean;
+  observe: (containerElement: HTMLElement, viewport: T) => void;
+  dispose(): void;
+  fixScrollJump: () => void;
+  isNegative(): boolean;
 }
 
 /**
@@ -290,10 +310,11 @@ export const createScroller = (
   store: VirtualStore,
   isHorizontal: boolean,
 ): Scroller<HTMLElement> & {
-  $scrollTo: (offset: number) => void;
-  $scrollBy: (offset: number) => void;
-  $scrollToIndex: (index: number, opts?: ScrollToIndexOpts) => void;
+  scrollTo: (offset: number) => void;
+  scrollBy: (offset: number) => void;
+  scrollToIndex: (index: number, opts?: ScrollToIndexOpts) => void;
 } => {
+  const { actions, state } = store;
   let viewportElement: HTMLElement | undefined;
   let scrollObserver: ScrollObserver | undefined;
   let initialized = createPromise<boolean>();
@@ -319,7 +340,7 @@ export const createScroller = (
   );
 
   return {
-    $observe(_, viewport) {
+    observe(_, viewport) {
       viewportElement = viewport;
 
       if (isHorizontal) {
@@ -348,7 +369,7 @@ export const createScroller = (
           // Use absolute position not to exceed scrollable bounds
           // https://github.com/inokawa/virtua/discussions/475
           viewport[scrollOffsetKey] = normalizeScrollOffset(
-            store.$getScrollOffset() + jump,
+            state.scrollOffset + jump,
             isNegative,
           );
           if (shift) {
@@ -360,32 +381,32 @@ export const createScroller = (
 
       initialized[1](true);
     },
-    $dispose() {
-      scrollObserver && scrollObserver._dispose();
+    dispose() {
+      scrollObserver && scrollObserver.dispose();
       initialized[1](false);
       // https://github.com/inokawa/virtua/pull/765
       initialized = createPromise();
     },
-    $isNegative: () => isNegative,
-    $scrollTo(offset) {
+    isNegative: () => isNegative,
+    scrollTo(offset) {
       scheduleScroll(() => offset);
     },
-    $scrollBy(offset) {
-      offset += store.$getScrollOffset();
+    scrollBy(offset) {
+      offset += state.scrollOffset;
       scheduleScroll(() => offset);
     },
-    $scrollToIndex(index, { align, smooth, offset = 0 } = {}) {
-      index = clamp(index, 0, store.$getItemsLength() - 1);
+    scrollToIndex(index, { align, smooth, offset = 0 } = {}) {
+      index = clamp(index, 0, actions.getItemsLength() - 1);
 
       if (align === "nearest") {
-        const itemOffset = store.$getItemOffset(index);
-        const scrollOffset = store.$getScrollOffset();
+        const itemOffset = actions.getItemOffset(index);
+        const scrollOffset = state.scrollOffset;
 
         if (itemOffset < scrollOffset) {
           align = "start";
         } else if (
-          itemOffset + store.$getItemSize(index) >
-          scrollOffset + store.$getViewportSize()
+          itemOffset + actions.getItemSize(index) >
+          scrollOffset + actions.getViewportSize()
         ) {
           align = "end";
         } else {
@@ -397,18 +418,18 @@ export const createScroller = (
       scheduleScroll(() => {
         return (
           offset +
-          store.$getStartSpacerSize() +
-          store.$getItemOffset(index) +
+          actions.getStartSpacerSize() +
+          actions.getItemOffset(index) +
           (align === "end"
-            ? store.$getItemSize(index) - store.$getViewportSize()
+            ? actions.getItemSize(index) - actions.getViewportSize()
             : align === "center"
-              ? (store.$getItemSize(index) - store.$getViewportSize()) / 2
+              ? (actions.getItemSize(index) - actions.getViewportSize()) / 2
               : 0)
         );
       }, smooth);
     },
-    $fixScrollJump: () => {
-      scrollObserver && scrollObserver._fixScrollJump();
+    fixScrollJump: () => {
+      scrollObserver && scrollObserver.fixScrollJump();
     },
   };
 };
@@ -420,8 +441,9 @@ export const createWindowScroller = (
   store: VirtualStore,
   isHorizontal: boolean,
 ): Scroller<void> & {
-  $scrollToIndex: (index: number, opts?: ScrollToIndexOpts) => void;
+  scrollToIndex: (index: number, opts?: ScrollToIndexOpts) => void;
 } => {
+  const { actions, state } = store;
   let containerElement: HTMLElement | undefined;
   let scrollObserver: ScrollObserver | undefined;
   let initialized = createPromise<boolean>();
@@ -479,7 +501,7 @@ export const createWindowScroller = (
   };
 
   return {
-    $observe(container) {
+    observe(container) {
       containerElement = container;
       const scrollOffsetKey = isHorizontal ? "scrollX" : "scrollY";
 
@@ -503,7 +525,7 @@ export const createWindowScroller = (
             // Use absolute position not to exceed scrollable bounds
             window.scroll({
               [scrollToKey]: normalizeScrollOffset(
-                store.$getScrollOffset() + jump,
+                state.scrollOffset + jump,
                 isNegative,
               ),
             });
@@ -520,31 +542,31 @@ export const createWindowScroller = (
 
       initialized[1](true);
     },
-    $dispose() {
-      scrollObserver && scrollObserver._dispose();
+    dispose() {
+      scrollObserver && scrollObserver.dispose();
       containerElement = undefined;
       initialized[1](false);
       // https://github.com/inokawa/virtua/pull/765
       initialized = createPromise();
     },
-    $isNegative: () => isNegative,
-    $fixScrollJump: () => {
-      scrollObserver && scrollObserver._fixScrollJump();
+    isNegative: () => isNegative,
+    fixScrollJump: () => {
+      scrollObserver && scrollObserver.fixScrollJump();
     },
-    $scrollToIndex(index, { align, smooth, offset = 0 } = {}) {
+    scrollToIndex(index, { align, smooth, offset = 0 } = {}) {
       if (!containerElement) return;
 
-      index = clamp(index, 0, store.$getItemsLength() - 1);
+      index = clamp(index, 0, actions.getItemsLength() - 1);
 
       if (align === "nearest") {
-        const itemOffset = store.$getItemOffset(index);
-        const scrollOffset = store.$getScrollOffset();
+        const itemOffset = actions.getItemOffset(index);
+        const scrollOffset = state.scrollOffset;
 
         if (itemOffset < scrollOffset) {
           align = "start";
         } else if (
-          itemOffset + store.$getItemSize(index) >
-          scrollOffset + store.$getViewportSize()
+          itemOffset + actions.getItemSize(index) >
+          scrollOffset + actions.getViewportSize()
         ) {
           align = "end";
         } else {
@@ -556,7 +578,7 @@ export const createWindowScroller = (
       const window = getCurrentWindow(document);
       const html = getDocumentElement(document);
       const getScrollbarSize = () =>
-        store.$getViewportSize() -
+        actions.getViewportSize() -
         (isHorizontal ? html.clientWidth : html.clientHeight);
 
       scheduleScroll(() => {
@@ -569,14 +591,13 @@ export const createWindowScroller = (
             window,
             isHorizontal,
           ) +
-          // store._getStartSpacerSize() +
-          store.$getItemOffset(index) +
+          actions.getItemOffset(index) +
           (align === "end"
-            ? store.$getItemSize(index) -
-              (store.$getViewportSize() - getScrollbarSize())
+            ? actions.getItemSize(index) -
+              (actions.getViewportSize() - getScrollbarSize())
             : align === "center"
-              ? (store.$getItemSize(index) -
-                  (store.$getViewportSize() - getScrollbarSize())) /
+              ? (actions.getItemSize(index) -
+                  (actions.getViewportSize() - getScrollbarSize())) /
                 2
               : 0)
         );
@@ -589,9 +610,9 @@ export const createWindowScroller = (
  * @internal
  */
 export interface GridScroller extends Scroller<HTMLElement> {
-  $scrollTo: (offsetX?: number, offsetY?: number) => void;
-  $scrollBy: (offsetX?: number, offsetY?: number) => void;
-  $scrollToIndex: (indexX?: number, indexY?: number) => void;
+  scrollTo: (offsetX?: number, offsetY?: number) => void;
+  scrollBy: (offsetX?: number, offsetY?: number) => void;
+  scrollToIndex: (indexX?: number, indexY?: number) => void;
 }
 
 /**
@@ -604,42 +625,42 @@ export const createGridScroller = (
   const rowScroller = createScroller(rowStore, false);
   const colScroller = createScroller(colStore, true);
   return {
-    $observe(container, viewport) {
-      rowScroller.$observe(container, viewport);
-      colScroller.$observe(container, viewport);
+    observe(container, viewport) {
+      rowScroller.observe(container, viewport);
+      colScroller.observe(container, viewport);
     },
-    $dispose() {
-      rowScroller.$dispose();
-      colScroller.$dispose();
+    dispose() {
+      rowScroller.dispose();
+      colScroller.dispose();
     },
-    $isNegative: colScroller.$isNegative,
-    $scrollTo(row, col) {
+    isNegative: colScroller.isNegative,
+    scrollTo(row, col) {
       if (row != null) {
-        rowScroller.$scrollTo(row);
+        rowScroller.scrollTo(row);
       }
       if (col != null) {
-        colScroller.$scrollTo(col);
+        colScroller.scrollTo(col);
       }
     },
-    $scrollBy(row, col) {
+    scrollBy(row, col) {
       if (row != null) {
-        rowScroller.$scrollBy(row);
+        rowScroller.scrollBy(row);
       }
       if (col != null) {
-        colScroller.$scrollBy(col);
+        colScroller.scrollBy(col);
       }
     },
-    $scrollToIndex(row, col) {
+    scrollToIndex(row, col) {
       if (row != null) {
-        rowScroller.$scrollToIndex(row);
+        rowScroller.scrollToIndex(row);
       }
       if (col != null) {
-        colScroller.$scrollToIndex(col);
+        colScroller.scrollToIndex(col);
       }
     },
-    $fixScrollJump() {
-      rowScroller.$fixScrollJump();
-      colScroller.$fixScrollJump();
+    fixScrollJump() {
+      rowScroller.fixScrollJump();
+      colScroller.fixScrollJump();
     },
   };
 };

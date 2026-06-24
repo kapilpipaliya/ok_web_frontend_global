@@ -1,3 +1,6 @@
+/**
+ * @jsxImportSource solid-js
+ */
 import { type ItemResizeObserver } from "../core/index.js";
 import {
   type Component,
@@ -6,18 +9,18 @@ import {
   createMemo,
   mergeProps,
   onCleanup,
+  type ParentProps,
   type ValidComponent,
 } from "solid-js";
 import { Dynamic } from "solid-js/web";
 
-interface ListItemProps {
-  _children: JSX.Element;
-  _resizer: ItemResizeObserver;
-  _index: number;
-  _offset: number;
-  _hide: boolean;
-  _isHorizontal: boolean;
-  _as?: ValidComponent;
+interface ListItemProps extends ParentProps {
+  resizer: ItemResizeObserver;
+  index: number;
+  offset: number;
+  hide: boolean;
+  isHorizontal: boolean;
+  as?: ValidComponent;
 }
 
 /**
@@ -26,25 +29,24 @@ interface ListItemProps {
 export const ListItem: Component<ListItemProps> = (props) => {
   let elementRef: HTMLDivElement | undefined;
   props = mergeProps<[Partial<ListItemProps>, ListItemProps]>(
-    { _as: "div" },
+    { as: "div" },
     props,
   );
 
-  // The index may be changed if elements are inserted to or removed from the start of props.children
   createEffect(() => {
     if (!elementRef) return;
-    onCleanup(props._resizer(elementRef, props._index));
+    onCleanup(props.resizer(elementRef, props.index));
   });
 
   const style = createMemo(() => {
-    const isHorizontal = props._isHorizontal;
+    const isHorizontal = props.isHorizontal;
     const style: JSX.CSSProperties = {
       contain: "layout style",
       position: "absolute",
       [isHorizontal ? "height" : "width"]: "100%",
       [isHorizontal ? "top" : "left"]: "0px",
-      [isHorizontal ? "left" : "top"]: props._offset + "px",
-      visibility: props._hide ? "hidden" : undefined,
+      [isHorizontal ? "left" : "top"]: props.offset + "px",
+      visibility: props.hide ? "hidden" : undefined,
     };
     if (isHorizontal) {
       style.display = "inline-flex";
@@ -54,12 +56,12 @@ export const ListItem: Component<ListItemProps> = (props) => {
 
   return (
     <Dynamic
-      component={props._as}
-      index={props._index}
+      component={props.as}
+      index={props.index}
       ref={elementRef}
       style={style()}
     >
-      {props._children}
+      {props.children}
     </Dynamic>
   );
 };

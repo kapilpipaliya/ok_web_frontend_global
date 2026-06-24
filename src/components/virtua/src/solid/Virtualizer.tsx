@@ -1,8 +1,10 @@
+/**
+ * @jsxImportSource solid-js
+ */
 import {
   onMount,
   onCleanup,
   createEffect,
-  createSignal,
   createMemo,
   type JSX,
   on,
@@ -15,9 +17,6 @@ import {
 } from "solid-js";
 import { Dynamic } from "solid-js/web";
 import {
-  UPDATE_SCROLL_EVENT,
-  UPDATE_SCROLL_END_EVENT,
-  UPDATE_VIRTUAL_STATE,
   createVirtualStore,
   ACTION_ITEMS_LENGTH_CHANGE,
   getScrollSize,
@@ -178,70 +177,79 @@ export const Virtualizer = <T,>(props: VirtualizerProps<T>): JSX.Element => {
     cache,
     !itemSize,
   );
+  const { state, actions } = store;
   const resizer = createResizer(store, horizontal);
   const scroller = createScroller(store, horizontal);
 
-  const [stateVersion, setRerender] = createSignal(store.$getStateVersion());
-
-  store.$subscribe(UPDATE_VIRTUAL_STATE, () => {
-    setRerender(store.$getStateVersion());
-  });
-  store.$subscribe(UPDATE_SCROLL_EVENT, () => {
-    props.onScroll?.(store.$getScrollOffset());
-  });
-  store.$subscribe(UPDATE_SCROLL_END_EVENT, () => {
-    props.onScrollEnd?.();
-  });
+  createEffect(
+    on(
+      () => state.scrollOffset,
+      (offset) => {
+        props.onScroll?.(offset);
+      },
+    ),
+  );
+  createEffect(
+    on(
+      () => state.scrollEndVersion,
+      () => {
+        props.onScrollEnd?.();
+      },
+    ),
+  );
 
   const range = createMemo<ItemsRange>((prev) => {
-    stateVersion();
-    const next = store.$getRange(props.bufferSize);
+    state.version;
+    const next = actions.getRange(props.bufferSize);
     if (prev && isSameRange(prev, next)) {
       return prev;
     }
     return next;
   });
-  const isScrolling = createMemo(() => stateVersion() && store.$isScrolling());
-  const totalSize = createMemo(() => stateVersion() && store.$getTotalSize());
-  const isNegative = createMemo(() => stateVersion() && scroller.$isNegative());
+  const isScrolling = () => state.isScrolling;
+  const totalSize = () => state.totalSize;
+  const isNegative = createMemo(() => {
+    state.version;
+    return scroller.isNegative();
+  });
 
   onMount(() => {
     if (props.ref) {
       props.ref({
         get cache() {
-          return store.$getCacheSnapshot();
+          return actions.getCacheSnapshot();
         },
         get scrollOffset() {
-          return store.$getScrollOffset();
+          return state.scrollOffset;
         },
         get scrollSize() {
           return getScrollSize(store);
         },
         get viewportSize() {
-          return store.$getViewportSize();
+          return actions.getViewportSize();
         },
-        findItemIndex: store.$findItemIndex,
-        getItemOffset: store.$getItemOffset,
-        getItemSize: store.$getItemSize,
-        scrollToIndex: scroller.$scrollToIndex,
-        scrollTo: scroller.$scrollTo,
-        scrollBy: scroller.$scrollBy,
+        findItemIndex: actions.findItemIndex,
+        getItemOffset: actions.getItemOffset,
+        getItemSize: actions.getItemSize,
+        scrollToIndex: scroller.scrollToIndex,
+        scrollTo: scroller.scrollTo,
+        scrollBy: scroller.scrollBy,
       });
     }
 
     const container = containerRef!;
     const scrollable = props.scrollRef || container.parentElement!;
-    resizer.$observeRoot(scrollable);
-    scroller.$observe(container, scrollable);
+    resizer.observeRoot(scrollable);
+    scroller.observe(container, scrollable);
 
     onCleanup(() => {
       if (props.ref) {
         props.ref();
       }
 
-      store.$dispose();
-      resizer.$dispose();
-      scroller.$dispose();
+      actions.dispose();
+      resizer.dispose();
+      scroller.dispose();
     });
   });
 
@@ -249,24 +257,27 @@ export const Virtualizer = <T,>(props: VirtualizerProps<T>): JSX.Element => {
     on(
       () => props.startMargin || 0,
       (value) => {
-        if (value !== store.$getStartSpacerSize()) {
-          store.$update(ACTION_START_OFFSET_CHANGE, value);
+        if (value !== actions.getStartSpacerSize()) {
+          actions.update(ACTION_START_OFFSET_CHANGE, value);
         }
       },
     ),
   );
 
   createEffect(
-    on(stateVersion, () => {
-      scroller.$fixScrollJump();
-    }),
+    on(
+      () => state.version,
+      () => {
+        scroller.fixScrollJump();
+      },
+    ),
   );
 
   const dataSlice = createMemo(() => {
     const count = props.data.length;
     untrack(() => {
-      if (count !== store.$getItemsLength()) {
-        store.$update(ACTION_ITEMS_LENGTH_CHANGE, [count, props.shift]);
+      if (count !== actions.getItemsLength()) {
+        actions.update(ACTION_ITEMS_LENGTH_CHANGE, [count, props.shift]);
       }
     });
     const items: T[] = [];
@@ -288,17 +299,17 @@ export const Virtualizer = <T,>(props: VirtualizerProps<T>): JSX.Element => {
       }
     }
 
-    return { _items: items, _indexes: indexes };
+    return { items, indexes };
   });
 
   const renderItem = (data: T, index: Accessor<number>) => {
     const offset = createMemo(() => {
-      stateVersion();
-      return store.$getItemOffset(index(), isNegative());
+      state.version;
+      return actions.getItemOffset(index(), isNegative());
     });
     const hide = createMemo(() => {
-      stateVersion();
-      return store.$isUnmeasuredItem(index());
+      state.version;
+      return actions.isUnmeasuredItem(index());
     });
     const children = createMemo(() => {
       return untrack(() => props.children(data, index));
@@ -306,14 +317,15 @@ export const Virtualizer = <T,>(props: VirtualizerProps<T>): JSX.Element => {
 
     return (
       <ListItem
-        _as={props.item}
-        _index={index()}
-        _resizer={resizer.$observeItem}
-        _offset={offset()}
-        _hide={hide()}
-        _children={children()}
-        _isHorizontal={horizontal}
-      />
+        as={props.item}
+        index={index()}
+        resizer={resizer.observeItem}
+        offset={offset()}
+        hide={hide()}
+        isHorizontal={horizontal}
+      >
+        {children()}
+      </ListItem>
     );
   };
 
@@ -331,9 +343,9 @@ export const Virtualizer = <T,>(props: VirtualizerProps<T>): JSX.Element => {
         "pointer-events": isScrolling() ? "none" : undefined,
       }}
     >
-      <For each={dataSlice()._items}>
+      <For each={dataSlice().items}>
         {(data, index) => {
-          const itemIndex = createMemo(() => dataSlice()._indexes[index()]!);
+          const itemIndex = createMemo(() => dataSlice().indexes[index()]!);
           // eslint-disable-next-line solid/reactivity
           return renderItem(data, itemIndex);
         }}

@@ -1,13 +1,11 @@
 export {
   ACTION_ITEMS_LENGTH_CHANGE,
   ACTION_START_OFFSET_CHANGE,
-  UPDATE_VIRTUAL_STATE,
-  UPDATE_SCROLL_END_EVENT,
-  UPDATE_SCROLL_EVENT,
   createVirtualStore,
   type VirtualStore,
+  type VirtualStoreState,
+  type VirtualStoreActions,
   getScrollSize,
-  type StateVersion,
 } from "./store.js";
 export {
   createScroller,

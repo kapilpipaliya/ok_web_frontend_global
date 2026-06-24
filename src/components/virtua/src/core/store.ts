@@ -1,3 +1,5 @@
+import { batch } from "solid-js";
+import { createStore, type Store } from "solid-js/store";
 import {
   initCache,
   getItemSize as _getItemSize,
@@ -18,8 +20,6 @@ import type {
   ItemsRange,
 } from "./types.js";
 import { abs, max, min, NULL } from "./utils.js";
-
-const MAX_INT_32 = 0x7fffffff;
 
 const SCROLL_IDLE = 0;
 const SCROLL_DOWN = 1;
@@ -68,48 +68,41 @@ type Actions =
   | [type: typeof ACTION_BEFORE_MANUAL_SMOOTH_SCROLL, offset: number];
 
 /** @internal */
-export const UPDATE_VIRTUAL_STATE = 0b0001;
+export type VirtualStoreState = {
+  version: number;
+  scrollOffset: number;
+  scrollEndVersion: number;
+  totalSize: number;
+  isScrolling: boolean;
+};
+
 /** @internal */
-export const UPDATE_SIZE_EVENT = 0b0010;
+export type VirtualStoreActions = {
+  dispose(): void;
+  getCacheSnapshot(): CacheSnapshot;
+  getRange(bufferSize?: number): ItemsRange;
+  findItemIndex(offset: number): number;
+  isUnmeasuredItem(index: number): boolean;
+  getItemOffset(index: number, fromEnd?: boolean): number;
+  getItemSize(index: number): number;
+  getItemsLength(): number;
+  getViewportSize(): number;
+  getStartSpacerSize(): number;
+  flushJump(): [number, boolean];
+  update(...action: Actions): void;
+};
+
 /** @internal */
-export const UPDATE_SCROLL_EVENT = 0b0100;
-/** @internal */
-export const UPDATE_SCROLL_END_EVENT = 0b1000;
+export type VirtualStore = {
+  state: Store<VirtualStoreState>;
+  actions: VirtualStoreActions;
+};
 
 /**
  * @internal
  */
 export const getScrollSize = (store: VirtualStore): number => {
-  return max(store.$getTotalSize(), store.$getViewportSize());
-};
-
-type Subscriber = (sync?: boolean) => void;
-
-/** @internal */
-export type StateVersion =
-  number & {} /* hack for typescript to pretend as not falsy */;
-
-/**
- * @internal
- */
-export type VirtualStore = {
-  $dispose(): void;
-  $getStateVersion(): StateVersion;
-  $getCacheSnapshot(): CacheSnapshot;
-  $getRange(bufferSize?: number): ItemsRange;
-  $findItemIndex(offset: number): number;
-  $isUnmeasuredItem(index: number): boolean;
-  $getItemOffset(index: number, fromEnd?: boolean): number;
-  $getItemSize(index: number): number;
-  $getItemsLength(): number;
-  $getScrollOffset(): number;
-  $isScrolling(): boolean;
-  $getViewportSize(): number;
-  $getStartSpacerSize(): number;
-  $getTotalSize(): number;
-  _flushJump(): [number, boolean];
-  $subscribe(target: number, cb: Subscriber): () => void;
-  $update(...action: Actions): void;
+  return max(store.state.totalSize, store.actions.getViewportSize());
 };
 
 /**
@@ -123,19 +116,18 @@ export const createVirtualStore = (
   shouldAutoEstimateItemSize: boolean = false,
 ): VirtualStore => {
   let isSSR = !!ssrCount;
-  let stateVersion: StateVersion = 1;
   let viewportSize = 0;
   let startSpacerSize = 0;
   let scrollOffset = 0;
   let jump = 0;
   let pendingJump = 0;
-  let _flushedJump = 0;
-  let _scrollDirection: ScrollDirection = SCROLL_IDLE;
-  let _scrollMode: ScrollMode = SCROLL_BY_NATIVE;
-  let _frozenRange: ItemsRange | null = NULL;
-  let _prevRange: ItemsRange = [0, isSSR ? max(ssrCount - 1, 0) : -1];
-  let _totalMeasuredSize = 0;
-  let _isViewportMeasured = false;
+  let flushedJump = 0;
+  let scrollDirection: ScrollDirection = SCROLL_IDLE;
+  let scrollMode: ScrollMode = SCROLL_BY_NATIVE;
+  let frozenRange: ItemsRange | null = NULL;
+  let prevRange: ItemsRange = [0, isSSR ? max(ssrCount - 1, 0) : -1];
+  let totalMeasuredSize = 0;
+  let isViewportMeasured = false;
 
   const cache = initCache(
     elementsCount,
@@ -144,13 +136,22 @@ export const createVirtualStore = (
       : itemSize,
     cacheSnapshot && (cacheSnapshot as unknown as InternalCacheSnapshot)[0],
   );
-  const subscribers = new Set<[number, Subscriber]>();
+
+  const getTotalSize = (): number => _getItemOffset(cache, cache._length);
+
+  const [state, setState] = createStore<VirtualStoreState>({
+    version: 1,
+    scrollOffset: 0,
+    scrollEndVersion: 0,
+    totalSize: getTotalSize(),
+    isScrolling: false,
+  });
+
   const getRelativeScrollOffset = () => scrollOffset - startSpacerSize;
   const getVisibleOffset = () => getRelativeScrollOffset() + pendingJump + jump;
   const getRange = (startOffset: number, endOffset: number) => {
-    return computeRange(cache, startOffset, endOffset, _prevRange[0]);
+    return computeRange(cache, startOffset, endOffset, prevRange[0]);
   };
-  const getTotalSize = (): number => _getItemOffset(cache, cache._length);
   const getItemOffset = (index: number, fromEnd?: boolean): number => {
     const offset = _getItemOffset(cache, index) - pendingJump;
     if (fromEnd) {
@@ -169,10 +170,10 @@ export const createVirtualStore = (
     if (j) {
       if (
         // In iOS WebKit browsers, updating scroll position will stop scrolling so it have to be deferred during scrolling.
-        (isIOSWebKit() && _scrollDirection !== SCROLL_IDLE) ||
+        (isIOSWebKit() && scrollDirection !== SCROLL_IDLE) ||
         // Before imperative smooth scrolling, we measure all items which may be visible during scrolling.
         // However, especially in Firefox, there are rare cases where items resize while scrolling, which can stop smooth scrolling.
-        (_frozenRange && _scrollMode === SCROLL_BY_MANUAL_SCROLL)
+        (frozenRange && scrollMode === SCROLL_BY_MANUAL_SCROLL)
       ) {
         pendingJump += j;
       } else {
@@ -181,27 +182,31 @@ export const createVirtualStore = (
     }
   };
 
-  return {
-    $dispose: () => {
-      subscribers.clear();
-    },
-    $getStateVersion: () => stateVersion,
-    $getCacheSnapshot: () => {
+  const syncVirtualState = () => {
+    setState({
+      totalSize: getTotalSize(),
+      isScrolling: scrollDirection !== SCROLL_IDLE,
+    });
+  };
+
+  const actions: VirtualStoreActions = {
+    dispose: () => {},
+    getCacheSnapshot: () => {
       return takeCacheSnapshot(cache) as unknown as CacheSnapshot;
     },
-    $getRange: (bufferSize = 200) => {
-      if (!_isViewportMeasured || isSSR) {
+    getRange: (bufferSize = 200) => {
+      if (!isViewportMeasured || isSSR) {
         // Return range for SSR, or return [0, -1] to render nothing, until the scroll offset and viewport size are determined.
         // https://github.com/inokawa/virtua/issues/415
         // https://github.com/inokawa/virtua/pull/818
-        return _prevRange;
+        return prevRange;
       }
       let startIndex: number;
       let endIndex: number;
-      if (_flushedJump) {
+      if (flushedJump) {
         // Return previous range for consistent render until next scroll event comes in.
         // And it must be clamped. https://github.com/inokawa/virtua/issues/597
-        [startIndex, endIndex] = _prevRange;
+        [startIndex, endIndex] = prevRange;
       } else {
         let startOffset = max(0, getVisibleOffset());
         let endOffset = startOffset + viewportSize;
@@ -210,78 +215,67 @@ export const createVirtualStore = (
         if (!shouldAutoEstimateItemSize) {
           bufferSize = max(0, bufferSize);
 
-          if (_scrollDirection !== SCROLL_DOWN) {
+          if (scrollDirection !== SCROLL_DOWN) {
             startOffset -= bufferSize;
           }
-          if (_scrollDirection !== SCROLL_UP) {
+          if (scrollDirection !== SCROLL_UP) {
             endOffset += bufferSize;
           }
         }
 
-        [startIndex, endIndex] = _prevRange = getRange(
+        [startIndex, endIndex] = prevRange = getRange(
           max(0, startOffset),
           max(0, endOffset),
         );
-        if (_frozenRange) {
-          startIndex = min(startIndex, _frozenRange[0]);
-          endIndex = max(endIndex, _frozenRange[1]);
+        if (frozenRange) {
+          startIndex = min(startIndex, frozenRange[0]);
+          endIndex = max(endIndex, frozenRange[1]);
         }
       }
 
       return [max(startIndex, 0), min(endIndex, cache._length - 1)];
     },
-    $findItemIndex: (offset) => findIndex(cache, offset - startSpacerSize),
-    $isUnmeasuredItem: isSizeEqual,
-    $getItemOffset: getItemOffset,
-    $getItemSize: getItemSize,
-    $getItemsLength: () => cache._length,
-    $getScrollOffset: () => scrollOffset,
-    $isScrolling: () => _scrollDirection !== SCROLL_IDLE,
-    $getViewportSize: () => viewportSize,
-    $getStartSpacerSize: () => startSpacerSize,
-    $getTotalSize: getTotalSize,
-    _flushJump: () => {
-      _flushedJump = jump;
+    findItemIndex: (offset) => findIndex(cache, offset - startSpacerSize),
+    isUnmeasuredItem: isSizeEqual,
+    getItemOffset,
+    getItemSize,
+    getItemsLength: () => cache._length,
+    getViewportSize: () => viewportSize,
+    getStartSpacerSize: () => startSpacerSize,
+    flushJump: () => {
+      flushedJump = jump;
       jump = 0;
-      return [_flushedJump, _scrollMode === SCROLL_BY_SHIFT];
+      return [flushedJump, scrollMode === SCROLL_BY_SHIFT];
     },
-    $subscribe: (target, cb) => {
-      const sub: [number, Subscriber] = [target, cb];
-      subscribers.add(sub);
-      return () => {
-        subscribers.delete(sub);
-      };
-    },
-    $update: (type, payload): void => {
+    update: (type, payload): void => {
       let shouldFlushPendingJump: boolean | undefined;
-      let shouldSync: boolean | undefined;
-      let mutated = 0;
+      let scrollChanged = false;
+      let virtualChanged = false;
+      let scrollEndChanged = false;
 
       switch (type) {
         case ACTION_SCROLL: {
-          if (payload === scrollOffset && _scrollMode === SCROLL_BY_NATIVE) {
+          if (payload === scrollOffset && scrollMode === SCROLL_BY_NATIVE) {
             // Ignore scroll events from different direction
             break;
           }
 
-          const flushedJump = _flushedJump;
-          _flushedJump = 0;
+          const prevFlushedJump = flushedJump;
+          flushedJump = 0;
 
           const delta = payload - scrollOffset;
-          const distance = abs(delta);
-
           // Scroll event after jump compensation is not reliable because it may result in the opposite direction.
           // The delta of artificial scroll may not be equal with the jump because it may be batched with other scrolls.
           // And at least in latest Chrome/Firefox/Safari in 2023, setting value to scrollTop/scrollLeft can lose subpixel because its integer (sometimes float probably depending on dpr).
-          const isJustJumped = flushedJump && distance < abs(flushedJump) + 1;
+          const isJustJumped =
+            prevFlushedJump && abs(delta) < abs(prevFlushedJump) + 1;
 
-          // Scroll events are dispatched enough so it's ok to skip some of them.
-          if (
-            !isJustJumped &&
-            // Ignore until manual scrolling
-            _scrollMode === SCROLL_BY_NATIVE
-          ) {
-            _scrollDirection = delta < 0 ? SCROLL_UP : SCROLL_DOWN;
+
+            // Scroll events are dispatched enough so it's ok to skip some of them.
+            if (!isJustJumped && 
+              // Ignore until manual scrolling
+              scrollMode === SCROLL_BY_NATIVE) {
+            scrollDirection = delta < 0 ? SCROLL_UP : SCROLL_DOWN;
           }
 
           // TODO This will cause glitch in reverse infinite scrolling. Disable this until better solution is found.
@@ -301,7 +295,7 @@ export const createVirtualStore = (
           }
 
           scrollOffset = payload;
-          mutated = UPDATE_SCROLL_EVENT;
+          scrollChanged = true;
 
           // Skip if offset is not changed
           // Scroll offset may exceed min or max especially in Safari's elastic scrolling.
@@ -310,22 +304,19 @@ export const createVirtualStore = (
             relativeOffset >= -viewportSize &&
             relativeOffset <= getTotalSize()
           ) {
-            mutated += UPDATE_VIRTUAL_STATE;
-
-            // Update synchronously if scrolled a lot
-            shouldSync = distance > viewportSize;
+            virtualChanged = true;
           }
           break;
         }
         case ACTION_SCROLL_END: {
-          mutated = UPDATE_SCROLL_END_EVENT;
-          if (_scrollDirection !== SCROLL_IDLE) {
+          scrollEndChanged = true;
+          if (scrollDirection !== SCROLL_IDLE) {
             shouldFlushPendingJump = true;
-            mutated += UPDATE_VIRTUAL_STATE;
+            virtualChanged = true;
           }
-          _scrollDirection = SCROLL_IDLE;
-          _scrollMode = SCROLL_BY_NATIVE;
-          _frozenRange = NULL;
+          scrollDirection = SCROLL_IDLE;
+          scrollMode = SCROLL_BY_NATIVE;
+          frozenRange = NULL;
           break;
         }
         case ACTION_ITEM_RESIZE: {
@@ -342,31 +333,26 @@ export const createVirtualStore = (
           applyJump(
             updated.reduce((acc, [index, size]) => {
               let shouldKeep: boolean;
-              if (
-                // Keep distance from end during shifting
-                _scrollMode === SCROLL_BY_SHIFT
-              ) {
+              // Keep distance from end during shifting
+              if (scrollMode === SCROLL_BY_SHIFT) {
                 shouldKeep = true;
-              } else if (
-                _frozenRange &&
-                _scrollMode === SCROLL_BY_MANUAL_SCROLL
-              ) {
+              } else if (frozenRange && scrollMode === SCROLL_BY_MANUAL_SCROLL) {
                 // https://github.com/inokawa/virtua/issues/380
                 // https://github.com/inokawa/virtua/issues/758
-                shouldKeep = index < _frozenRange[0];
+                shouldKeep = index < frozenRange[0];
               } else {
-                // Otherwise we should maintain visible position
                 const start = getRelativeScrollOffset();
                 const itemOffset = getItemOffset(index);
                 const itemSize = getItemSize(index);
                 shouldKeep =
-                  _scrollDirection !== SCROLL_DOWN &&
-                  _scrollMode === SCROLL_BY_NATIVE
-                    ? // https://github.com/inokawa/virtua/issues/385
-                      // https://github.com/inokawa/virtua/discussions/865
-                      itemOffset + itemSize < start
+                  scrollDirection !== SCROLL_DOWN &&
+                  scrollMode === SCROLL_BY_NATIVE
+                    ?
+                    // https://github.com/inokawa/virtua/issues/385
+                    // https://github.com/inokawa/virtua/discussions/865 
+                    itemOffset + itemSize < start
                     : // https://github.com/inokawa/virtua/pull/868
-                      itemOffset < start &&
+                    itemOffset < start &&
                       itemOffset + itemSize < start + viewportSize;
               }
 
@@ -383,7 +369,7 @@ export const createVirtualStore = (
             const isInitialMeasurement = setItemSize(cache, index, size);
 
             if (shouldAutoEstimateItemSize) {
-              _totalMeasuredSize += isInitialMeasurement
+              totalMeasuredSize += isInitialMeasurement
                 ? size
                 : size - prevSize;
             }
@@ -394,7 +380,7 @@ export const createVirtualStore = (
             shouldAutoEstimateItemSize &&
             viewportSize &&
             // If the total size is lower than the viewport, the item may be a empty state
-            _totalMeasuredSize > viewportSize
+            totalMeasuredSize > viewportSize
           ) {
             applyJump(
               estimateDefaultItemSize(
@@ -405,38 +391,35 @@ export const createVirtualStore = (
             shouldAutoEstimateItemSize = false;
           }
 
-          mutated = UPDATE_VIRTUAL_STATE + UPDATE_SIZE_EVENT;
-
           // Synchronous update is necessary in current design to minimize visible glitch in concurrent rendering.
           // However this seems to be the main cause of the errors from ResizeObserver.
           // https://github.com/inokawa/virtua/issues/470
           //
           // And in React, synchronous update with flushSync after asynchronous update will overtake the asynchronous one.
           // If items resize happens just after scroll, race condition can occur depending on implementation.
-          shouldSync = true;
+          virtualChanged = true;
           break;
         }
         case ACTION_VIEWPORT_RESIZE: {
           if (viewportSize !== payload) {
             if (!viewportSize) {
-              _isViewportMeasured = shouldSync = true;
+              isViewportMeasured = true;
             }
             viewportSize = payload;
-            mutated = UPDATE_VIRTUAL_STATE + UPDATE_SIZE_EVENT;
+            virtualChanged = true;
           }
           break;
         }
         case ACTION_ITEMS_LENGTH_CHANGE: {
           if (payload[1]) {
             applyJump(updateCacheLength(cache, payload[0], true));
-            _scrollMode = SCROLL_BY_SHIFT;
-            mutated = UPDATE_VIRTUAL_STATE;
+            scrollMode = SCROLL_BY_SHIFT;
           } else {
             updateCacheLength(cache, payload[0]);
             // https://github.com/inokawa/virtua/issues/552
             // https://github.com/inokawa/virtua/issues/557
-            mutated = UPDATE_VIRTUAL_STATE;
           }
+          virtualChanged = true;
           break;
         }
         case ACTION_START_OFFSET_CHANGE: {
@@ -444,34 +427,38 @@ export const createVirtualStore = (
           break;
         }
         case ACTION_MANUAL_SCROLL: {
-          _scrollMode = SCROLL_BY_MANUAL_SCROLL;
+          scrollMode = SCROLL_BY_MANUAL_SCROLL;
           break;
         }
         case ACTION_BEFORE_MANUAL_SMOOTH_SCROLL: {
-          _frozenRange = getRange(payload, payload + viewportSize);
-          mutated = UPDATE_VIRTUAL_STATE;
+          frozenRange = getRange(payload, payload + viewportSize);
+          virtualChanged = true;
           break;
         }
       }
 
-      if (mutated) {
-        stateVersion = (stateVersion & MAX_INT_32) + 1;
-
+      if (scrollChanged || virtualChanged || scrollEndChanged) {
         if (shouldFlushPendingJump && pendingJump) {
           jump += pendingJump;
           pendingJump = 0;
         }
 
-        subscribers.forEach(([target, cb]) => {
-          // Early return to skip React's computation
-          if (!(mutated & target)) {
-            return;
+        batch(() => {
+          if (scrollChanged) {
+            setState("scrollOffset", scrollOffset);
           }
-          // https://github.com/facebook/react/issues/25191
-          // https://github.com/facebook/react/blob/a5fc797db14c6e05d4d5c4dbb22a0dd70d41f5d5/packages/react-reconciler/src/ReactFiberWorkLoop.js#L1443-L1447
-          cb(shouldSync);
+          if (virtualChanged) {
+            setState("version", (v) => v + 1);
+            syncVirtualState();
+          }
+          if (scrollEndChanged) {
+            setState("scrollEndVersion", (v) => v + 1);
+            setState("isScrolling", false);
+          }
         });
       }
     },
   };
+
+  return { state, actions };
 };

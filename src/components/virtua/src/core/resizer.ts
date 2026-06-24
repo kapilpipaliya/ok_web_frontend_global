@@ -11,7 +11,7 @@ const createResizeObserver = (cb: ResizeObserverCallback) => {
   let ro: ResizeObserver | undefined;
 
   return {
-    _observe(e: HTMLElement) {
+    observe(e: HTMLElement) {
       // Initialize ResizeObserver lazily for SSR
       // https://www.w3.org/TR/resize-observer/#intro
       (
@@ -20,10 +20,10 @@ const createResizeObserver = (cb: ResizeObserverCallback) => {
         (ro = new (getCurrentWindow(getCurrentDocument(e)).ResizeObserver)(cb))
       ).observe(e);
     },
-    _unobserve(e: HTMLElement) {
+    unobserve(e: HTMLElement) {
       ro!.unobserve(e);
     },
-    _dispose() {
+    dispose() {
       ro && ro.disconnect();
     },
   };
@@ -35,9 +35,9 @@ const createResizeObserver = (cb: ResizeObserverCallback) => {
 export type ItemResizeObserver = (el: HTMLElement, i: number) => () => void;
 
 interface ListResizer {
-  $observeRoot(viewportElement: HTMLElement): void;
-  $observeItem: ItemResizeObserver;
-  $dispose(): void;
+  observeRoot(viewportElement: HTMLElement): void;
+  observeItem: ItemResizeObserver;
+  dispose(): void;
 }
 
 /**
@@ -47,6 +47,7 @@ export const createResizer = (
   store: VirtualStore,
   isHorizontal: boolean,
 ): ListResizer => {
+  const { actions } = store;
   let viewportElement: HTMLElement | undefined;
   const sizeKey = isHorizontal ? "width" : "height";
   const mountedIndexes = new WeakMap<Element, number>();
@@ -58,7 +59,7 @@ export const createResizer = (
       if (!(target as HTMLElement).offsetParent) continue;
 
       if (target === viewportElement) {
-        store.$update(ACTION_VIEWPORT_RESIZE, contentRect[sizeKey]);
+        actions.update(ACTION_VIEWPORT_RESIZE, contentRect[sizeKey]);
       } else {
         const index = mountedIndexes.get(target);
         if (index != NULL) {
@@ -68,30 +69,30 @@ export const createResizer = (
     }
 
     if (resizes.length) {
-      store.$update(ACTION_ITEM_RESIZE, resizes);
+      actions.update(ACTION_ITEM_RESIZE, resizes);
     }
   });
 
   return {
-    $observeRoot(viewport: HTMLElement) {
-      resizeObserver._observe((viewportElement = viewport));
+    observeRoot(viewport: HTMLElement) {
+      resizeObserver.observe((viewportElement = viewport));
     },
-    $observeItem: (el: HTMLElement, i: number) => {
+    observeItem: (el: HTMLElement, i: number) => {
       mountedIndexes.set(el, i);
-      resizeObserver._observe(el);
+      resizeObserver.observe(el);
       return () => {
         mountedIndexes.delete(el);
-        resizeObserver._unobserve(el);
+        resizeObserver.unobserve(el);
       };
     },
-    $dispose: resizeObserver._dispose,
+    dispose: resizeObserver.dispose,
   };
 };
 
 interface WindowListResizer {
-  $observeRoot(container: HTMLElement): void;
-  $observeItem: ItemResizeObserver;
-  $dispose(): void;
+  observeRoot(container: HTMLElement): void;
+  observeItem: ItemResizeObserver;
+  dispose(): void;
 }
 
 /**
@@ -101,6 +102,7 @@ export const createWindowResizer = (
   store: VirtualStore,
   isHorizontal: boolean,
 ): WindowListResizer => {
+  const { actions } = store;
   const sizeKey = isHorizontal ? "width" : "height";
   const windowSizeKey = isHorizontal ? "innerWidth" : "innerHeight";
   const mountedIndexes = new WeakMap<Element, number>();
@@ -118,17 +120,17 @@ export const createWindowResizer = (
     }
 
     if (resizes.length) {
-      store.$update(ACTION_ITEM_RESIZE, resizes);
+      actions.update(ACTION_ITEM_RESIZE, resizes);
     }
   });
 
   let cleanupOnWindowResize: (() => void) | undefined;
 
   return {
-    $observeRoot(container) {
+    observeRoot(container) {
       const window = getCurrentWindow(getCurrentDocument(container));
       const onWindowResize = () => {
-        store.$update(ACTION_VIEWPORT_RESIZE, window[windowSizeKey]);
+        actions.update(ACTION_VIEWPORT_RESIZE, window[windowSizeKey]);
       };
       window.addEventListener("resize", onWindowResize);
 
@@ -139,17 +141,17 @@ export const createWindowResizer = (
         window.removeEventListener("resize", onWindowResize);
       };
     },
-    $observeItem: (el: HTMLElement, i: number) => {
+    observeItem: (el: HTMLElement, i: number) => {
       mountedIndexes.set(el, i);
-      resizeObserver._observe(el);
+      resizeObserver.observe(el);
       return () => {
         mountedIndexes.delete(el);
-        resizeObserver._unobserve(el);
+        resizeObserver.unobserve(el);
       };
     },
-    $dispose() {
+    dispose() {
       cleanupOnWindowResize && cleanupOnWindowResize();
-      resizeObserver._dispose();
+      resizeObserver.dispose();
     },
   };
 };
@@ -161,6 +163,8 @@ export const createGridResizer = (
   rowStore: VirtualStore,
   colStore: VirtualStore,
 ) => {
+  const rowActions = rowStore.actions;
+  const colActions = colStore.actions;
   let viewportElement: HTMLElement | undefined;
 
   const mountedIndexes = new WeakMap<
@@ -186,8 +190,8 @@ export const createGridResizer = (
       if (!(target as HTMLElement).offsetParent) continue;
 
       if (target === viewportElement) {
-        rowStore.$update(ACTION_VIEWPORT_RESIZE, height);
-        colStore.$update(ACTION_VIEWPORT_RESIZE, width);
+        rowActions.update(ACTION_VIEWPORT_RESIZE, height);
+        colActions.update(ACTION_VIEWPORT_RESIZE, width);
       } else {
         const cell = mountedIndexes.get(target);
         if (cell) {
@@ -233,7 +237,7 @@ export const createGridResizer = (
           heightResizes.push([rowIndex, maxHeight]);
         }
       });
-      rowStore.$update(ACTION_ITEM_RESIZE, heightResizes);
+      rowActions.update(ACTION_ITEM_RESIZE, heightResizes);
     }
     if (resizedCols.size) {
       const widthResizes: ItemResize[] = [];
@@ -249,41 +253,41 @@ export const createGridResizer = (
           widthResizes.push([colIndex, maxWidth]);
         }
       });
-      colStore.$update(ACTION_ITEM_RESIZE, widthResizes);
+      colActions.update(ACTION_ITEM_RESIZE, widthResizes);
     }
   });
 
   return {
-    $observeRoot(viewport: HTMLElement) {
-      resizeObserver._observe((viewportElement = viewport));
+    observeRoot(viewport: HTMLElement) {
+      resizeObserver.observe((viewportElement = viewport));
     },
-    $observeItem(el: HTMLElement, rowIndex: number, colIndex: number) {
+    observeItem(el: HTMLElement, rowIndex: number, colIndex: number) {
       mountedIndexes.set(el, [rowIndex, colIndex]);
       maybeCachedRowIndexes.add(rowIndex);
       maybeCachedColIndexes.add(colIndex);
-      resizeObserver._observe(el);
+      resizeObserver.observe(el);
       return () => {
         mountedIndexes.delete(el);
-        resizeObserver._unobserve(el);
+        resizeObserver.unobserve(el);
       };
     },
-    $resizeCols(cols: ItemResize[]) {
+    resizeCols(cols: ItemResize[]) {
       for (const [c] of cols) {
-        for (let r = 0; r < rowStore.$getItemsLength(); r++) {
+        for (let r = 0; r < rowActions.getItemsLength(); r++) {
           sizeCache.delete(getKey(r, c));
         }
       }
-      colStore.$update(ACTION_ITEM_RESIZE, cols);
+      colActions.update(ACTION_ITEM_RESIZE, cols);
     },
-    $resizeRows(rows: ItemResize[]) {
+    resizeRows(rows: ItemResize[]) {
       for (const [r] of rows) {
-        for (let c = 0; c < colStore.$getItemsLength(); c++) {
+        for (let c = 0; c < colActions.getItemsLength(); c++) {
           sizeCache.delete(getKey(r, c));
         }
       }
-      rowStore.$update(ACTION_ITEM_RESIZE, rows);
+      rowActions.update(ACTION_ITEM_RESIZE, rows);
     },
-    $dispose: resizeObserver._dispose,
+    dispose: resizeObserver.dispose,
   };
 };
 
