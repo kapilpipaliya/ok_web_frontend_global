@@ -7,6 +7,57 @@ import type {
 import type { Id } from "~/lib/graph/type/id";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
+function isInternalId(id: string): boolean {
+  return id.includes(":") || id.includes("-");
+}
+
+function getKeyFromCurrentUrl(entity: string): string | undefined {
+  const currentUrl = new URL(window.location.href);
+  const pathParts = currentUrl.pathname.split("/").filter(Boolean);
+  const adminIndex = pathParts.indexOf("admin");
+
+  if (adminIndex !== -1 && pathParts[adminIndex + 1] === entity) {
+    const pathKey = pathParts[adminIndex + 2];
+    if (pathKey && !isInternalId(pathKey)) {
+      return pathKey;
+    }
+  }
+
+  const tabs = currentUrl.searchParams.get("tabs");
+  if (tabs) {
+    for (const tab of tabs.split(",")) {
+      const [tabEntity, tabKey] = tab.split(":");
+      if (tabEntity === entity && tabKey && !isInternalId(tabKey)) {
+        return tabKey;
+      }
+    }
+  }
+
+  return undefined;
+}
+
+function resolveTabKey(form: OpenFormInfo, graph: GraphInterface): string | undefined {
+  const dataVertex = graph.vertexes[form.dataId];
+  if (dataVertex?.P?.key) {
+    return dataVertex.P.key as string;
+  }
+
+  const formStore = graph.vertexes[form.formId]?.P;
+  const formDataId = formStore?.formDataId as Id | undefined;
+  if (formDataId) {
+    const formDataVertex = graph.vertexes[formDataId];
+    if (formDataVertex?.P?.key) {
+      return formDataVertex.P.key as string;
+    }
+  }
+
+  if (!isInternalId(form.dataId)) {
+    return form.dataId;
+  }
+
+  return getKeyFromCurrentUrl(form.label);
+}
+
 /**
  * Updates the URL query parameters with all opened form tabs (entity:key format)
  * @param layoutStoreId - The ID of the layout store vertex
@@ -27,44 +78,51 @@ export function updateUrlWithOpenedTabs(
     return;
   }
 
-  const allTabs = layoutStore.openedFormIds
-    .map((formId) => {
-      const form = graph.vertexes[formId]?.P as OpenFormInfo | undefined;
-      if (!form?.dataId || form.dataId === "new" || !form.label) {
+  const openForms = layoutStore.openedFormIds
+    .map((formId) => graph.vertexes[formId]?.P as OpenFormInfo | undefined)
+    .filter((form): form is OpenFormInfo =>
+      Boolean(form?.dataId && form.dataId !== "new" && form.label),
+    );
+
+  const allTabs = openForms
+    .map((form) => {
+      const key = resolveTabKey(form, graph);
+      if (!key) {
         return undefined;
       }
-      // Get the vertex by dataId and use its key, fall back to dataId if no key
-      const vertex = graph.vertexes[form.dataId];
-      const key = vertex?.P?.key || form.dataId;
       return `${form.label}:${key}`;
     })
     .filter((tab): tab is string => Boolean(tab));
 
+  const currentUrl = new URL(window.location.href);
+
   if (allTabs.length === 0) {
-    // If no tabs left, remove the tabs parameter
-    const currentUrl = new URL(window.location.href);
+    // Keep the current URL while tabs are still loading and keys are unresolved.
+    if (openForms.length > 0) {
+      return;
+    }
+
     currentUrl.searchParams.delete("tabs");
-    window.history.replaceState({}, "", currentUrl.toString());
+    const nextUrl = currentUrl.toString();
+    if (nextUrl !== window.location.href) {
+      window.history.replaceState({}, "", nextUrl);
+    }
     return;
   }
 
-  const currentUrl = new URL(window.location.href);
   const firstTab = allTabs[0];
   const [firstEntity, firstKey] = firstTab.split(":");
-  const pathParts = currentUrl.pathname.split("/");
-  const entityIndex = pathParts.findIndex(
-    (part) => part && !part.includes("("),
-  );
+  if (!firstEntity || !firstKey) {
+    return;
+  }
 
-  // Build new path with first tab's entity and key
-  if (entityIndex !== -1 && firstEntity && firstKey) {
-    const newPath = `/admin/${firstEntity}/${firstKey}`;
-    const newUrl = new URL(window.location.origin + newPath);
+  const newPath = `/admin/${firstEntity}/${firstKey}`;
+  const newUrl = new URL(window.location.href);
+  newUrl.pathname = newPath;
+  newUrl.searchParams.set("tabs", allTabs.join(","));
 
-    // Set all tabs in query parameter (format: entity:key,entity:key)
-    newUrl.searchParams.set("tabs", allTabs.join(","));
-
-    // Update URL without page reload
-    window.history.replaceState({}, "", newUrl.toString());
+  const nextUrl = newUrl.toString();
+  if (nextUrl !== window.location.href) {
+    window.history.replaceState({}, "", nextUrl);
   }
 }

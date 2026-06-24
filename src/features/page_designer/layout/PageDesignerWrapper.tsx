@@ -336,6 +336,10 @@ export function PageDesignerWrapper(): JSX.Element {
       graph.vertexes[openedFormId]?.P.mainPanel;
       graph.vertexes[openedFormId]?.P.label;
       graph.vertexes[openedFormId]?.P.dataId;
+      const formId = graph.vertexes[openedFormId]?.P.formId;
+      if (formId) {
+        graph.vertexes[formId]?.P.formDataId;
+      }
     }
 
     updateUrlWithOpenedTabs(initialStore.id, graph);
