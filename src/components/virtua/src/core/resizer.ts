@@ -34,7 +34,16 @@ const createResizeObserver = (cb: ResizeObserverCallback) => {
  */
 export type ItemResizeObserver = (el: HTMLElement, i: number) => () => void;
 
+const getViewportSizeFromElement = (
+  el: HTMLElement,
+  isHorizontal: boolean,
+): number => {
+  return isHorizontal ? el.clientWidth : el.clientHeight;
+};
+
 interface ListResizer {
+  // I added this method to run on component run to render rows first time.
+  measureRoot(viewportElement: HTMLElement): void;
   observeRoot(viewportElement: HTMLElement): void;
   observeItem: ItemResizeObserver;
   dispose(): void;
@@ -73,9 +82,20 @@ export const createResizer = (
     }
   });
 
+  // I added this method to run on component run to render rows first time.
+  const measureRoot = (viewport: HTMLElement) => {
+    const size = getViewportSizeFromElement(viewport, isHorizontal);
+    if (size > 0) {
+      actions.update(ACTION_VIEWPORT_RESIZE, size);
+    }
+  };
+
   return {
+    measureRoot,
     observeRoot(viewport: HTMLElement) {
       resizeObserver.observe((viewportElement = viewport));
+      // I added this method to run on component run to render rows first time.
+      measureRoot(viewport);
     },
     observeItem: (el: HTMLElement, i: number) => {
       mountedIndexes.set(el, i);

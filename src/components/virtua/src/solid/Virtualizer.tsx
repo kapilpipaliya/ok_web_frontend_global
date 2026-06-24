@@ -15,6 +15,7 @@ import {
   type Accessor,
   untrack,
 } from "solid-js";
+import type { Store } from "solid-js/store";
 import { Dynamic } from "solid-js/web";
 import {
   createVirtualStore,
@@ -26,6 +27,9 @@ import {
   type ItemsRange,
   type ScrollToIndexOpts,
   type CacheSnapshot,
+  type VirtualStoreActions,
+  type VirtualStoreState,
+  type ItemResizeObserver,
   sort,
 } from "../core/index.js";
 import { ListItem } from "./ListItem.js";
@@ -159,6 +163,49 @@ export interface VirtualizerProps<T> {
   onScrollEnd?: () => void;
 }
 
+type VirtualizerItemProps<T> = {
+  data: T;
+  sliceIndex: Accessor<number>;
+  dataSlice: Accessor<{ items: T[]; indexes: number[] }>;
+  state: Store<VirtualStoreState>;
+  actions: VirtualStoreActions;
+  isNegative: Accessor<boolean>;
+  horizontal: boolean;
+  as?: ValidComponent;
+  resizer: ItemResizeObserver;
+  children: (data: T, index: Accessor<number>) => JSX.Element;
+};
+
+const VirtualizerItem = <T,>(props: VirtualizerItemProps<T>): JSX.Element => {
+  const itemIndex = createMemo(
+    () => props.dataSlice().indexes[props.sliceIndex()]!,
+  );
+  const offset = createMemo(() => {
+    props.state.version;
+    return props.actions.getItemOffset(itemIndex(), props.isNegative());
+  });
+  const hide = createMemo(() => {
+    props.state.version;
+    return props.actions.isUnmeasuredItem(itemIndex());
+  });
+  const children = createMemo(() => {
+    return untrack(() => props.children(props.data, itemIndex));
+  });
+
+  return (
+    <ListItem
+      as={props.as}
+      index={itemIndex()}
+      resizer={props.resizer}
+      offset={offset()}
+      hide={hide()}
+      isHorizontal={props.horizontal}
+    >
+      {children()}
+    </ListItem>
+  );
+};
+
 /**
  * Customizable list virtualizer for advanced usage. See {@link VirtualizerProps} and {@link VirtualizerHandle}.
  */
@@ -198,6 +245,17 @@ export const Virtualizer = <T,>(props: VirtualizerProps<T>): JSX.Element => {
     ),
   );
 
+  createComputed(
+    on(
+      () => props.scrollRef,
+      (scrollable) => {
+        if (scrollable) {
+          resizer.measureRoot(scrollable);
+        }
+      },
+    ),
+  );
+
   const range = createMemo<ItemsRange>((prev) => {
     state.version;
     const next = actions.getRange(props.bufferSize);
@@ -214,38 +272,39 @@ export const Virtualizer = <T,>(props: VirtualizerProps<T>): JSX.Element => {
   });
 
   onMount(() => {
-    if (props.ref) {
-      props.ref({
-        get cache() {
-          return actions.getCacheSnapshot();
-        },
-        get scrollOffset() {
-          return state.scrollOffset;
-        },
-        get scrollSize() {
-          return getScrollSize(store);
-        },
-        get viewportSize() {
-          return actions.getViewportSize();
-        },
-        findItemIndex: actions.findItemIndex,
-        getItemOffset: actions.getItemOffset,
-        getItemSize: actions.getItemSize,
-        scrollToIndex: scroller.scrollToIndex,
-        scrollTo: scroller.scrollTo,
-        scrollBy: scroller.scrollBy,
-      });
-    }
+    // if (props.ref) {
+    //   props.ref({
+    //     get cache() {
+    //       return actions.getCacheSnapshot();
+    //     },
+    //     get scrollOffset() {
+    //       return state.scrollOffset;
+    //     },
+    //     get scrollSize() {
+    //       return getScrollSize(store);
+    //     },
+    //     get viewportSize() {
+    //       return actions.getViewportSize();
+    //     },
+    //     findItemIndex: actions.findItemIndex,
+    //     getItemOffset: actions.getItemOffset,
+    //     getItemSize: actions.getItemSize,
+    //     scrollToIndex: scroller.scrollToIndex,
+    //     scrollTo: scroller.scrollTo,
+    //     scrollBy: scroller.scrollBy,
+    //   });
+    // }
 
     const container = containerRef!;
     const scrollable = props.scrollRef || container.parentElement!;
+    resizer.measureRoot(scrollable);
     resizer.observeRoot(scrollable);
     scroller.observe(container, scrollable);
 
     onCleanup(() => {
-      if (props.ref) {
-        props.ref();
-      }
+      // if (props.ref) {
+      //   props.ref();
+      // }
 
       actions.dispose();
       resizer.dispose();
@@ -302,33 +361,6 @@ export const Virtualizer = <T,>(props: VirtualizerProps<T>): JSX.Element => {
     return { items, indexes };
   });
 
-  const renderItem = (data: T, index: Accessor<number>) => {
-    const offset = createMemo(() => {
-      state.version;
-      return actions.getItemOffset(index(), isNegative());
-    });
-    const hide = createMemo(() => {
-      state.version;
-      return actions.isUnmeasuredItem(index());
-    });
-    const children = createMemo(() => {
-      return untrack(() => props.children(data, index));
-    });
-
-    return (
-      <ListItem
-        as={props.item}
-        index={index()}
-        resizer={resizer.observeItem}
-        offset={offset()}
-        hide={hide()}
-        isHorizontal={horizontal}
-      >
-        {children()}
-      </ListItem>
-    );
-  };
-
   return (
     <Dynamic
       component={props.as}
@@ -344,11 +376,21 @@ export const Virtualizer = <T,>(props: VirtualizerProps<T>): JSX.Element => {
       }}
     >
       <For each={dataSlice().items}>
-        {(data, index) => {
-          const itemIndex = createMemo(() => dataSlice().indexes[index()]!);
-          // eslint-disable-next-line solid/reactivity
-          return renderItem(data, itemIndex);
-        }}
+        {(data, sliceIndex) => (
+          <VirtualizerItem
+            data={data}
+            sliceIndex={sliceIndex}
+            dataSlice={dataSlice}
+            state={state}
+            actions={actions}
+            isNegative={isNegative}
+            horizontal={horizontal}
+            as={props.item}
+            resizer={resizer.observeItem}
+          >
+            {props.children}
+          </VirtualizerItem>
+        )}
       </For>
     </Dynamic>
   );
