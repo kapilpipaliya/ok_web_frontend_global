@@ -33,7 +33,6 @@ import {
   useDesignerLayoutStore,
 } from "../../context/LayoutContext";
 import { getChildrenAttrs } from "../../functions/layout/getChildrenAttrs";
-import { getCompKeyFromAttrId } from "~/features/page_designer/functions/layout/syncHighlightedCompKey";
 import {
   clearLayoutPreviewHover,
   isLayoutPreviewHover,
@@ -97,23 +96,6 @@ export function LayoutTreeItem(
   const isPreviewHover = () =>
     isLayoutPreviewHover(layoutStoreVertex()?.P, props.metaVertex.id);
 
-  const isPaletteHighlighted = createMemo(() => {
-    const highlightedKey = layoutStoreVertex()?.P.highlightedCompKey;
-    if (!highlightedKey) return false;
-    if (getCompKeyFromAttrId(graph, props.metaVertex.id) !== highlightedKey) {
-      return false;
-    }
-    const form = formStoreVertex()?.P;
-    const activeAttrId =
-      form?.hoverId != null && form.hoverId !== -1
-        ? form.hoverId
-        : form?.selectedId;
-    if (activeAttrId != null && activeAttrId !== -1) {
-      return props.metaVertex.id === activeAttrId;
-    }
-    return true;
-  });
-
   const children = createMemo(() =>
     getChildrenAttrs(graph, setGraph, props.metaVertex),
   );
@@ -141,23 +123,26 @@ export function LayoutTreeItem(
     return props.filterTree(props.metaVertex).match;
   });
 
-  // Scroll into view when selected or highlighted from the component palette.
+  // Scroll into view when preview drives selection/hover — not when interacting in the layers panel.
   createEffect(() => {
+    if (layoutStoreVertex()?.P.layoutTreeScrollSource !== "preview") return;
+
     const shouldScroll =
-      (isSelectedLayoutId(props.metaVertex.id) || isPaletteHighlighted()) &&
-      parentRef();
-    if (!shouldScroll) return;
+      isSelectedLayoutId(props.metaVertex.id) || isPreviewHover();
+    if (!shouldScroll || !parentRef()) return;
 
     const container = props.scrollContainer?.();
     const element = parentRef();
     if (!container || !element) return;
 
-    setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       scrollElementIntoContainer(element, container, {
-        behavior: "smooth",
+        behavior: "auto",
         block: "nearest",
       });
     }, 50);
+
+    onCleanup(() => clearTimeout(timeoutId));
   });
 
   const bindLayoutDragDrop = bindDragDropRef(
@@ -194,6 +179,8 @@ export function LayoutTreeItem(
       props.metaVertex.id,
       graph,
       setGraph,
+      0,
+      "layoutTree",
     );
   };
 
@@ -202,7 +189,13 @@ export function LayoutTreeItem(
     mergeVertexProperties<FormStoreObject>(0, formStoreId!, graph, setGraph, {
       hoverId: props.metaVertex.id,
     });
-    setLayoutPreviewHover(layoutStoreId, props.metaVertex.id, graph, setGraph);
+    setLayoutPreviewHover(
+      layoutStoreId,
+      props.metaVertex.id,
+      graph,
+      setGraph,
+      "layoutTree",
+    );
   };
 
   const handleMouseLeave = (e: MouseEvent) => {

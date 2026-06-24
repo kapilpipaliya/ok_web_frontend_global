@@ -8,21 +8,28 @@ import { DialogSubTitle } from "~/components/styled/dialog/DialogSubTitle";
 import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
 import { useToast } from "~/components/styled/modal/Toast";
 import { checkUniqueConstrains } from "~/cypher/mutate/validations/checkUniqueConstrains";
-import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
+import { useDesignerFormIdContext, useDesignerLayoutStore, type PageLayoutObject } from "~/features/page_designer/context/LayoutContext";
+import { openInNewInternalTab } from "~/features/page_designer/form_elements/pages/functions/openInNewInternalTab";
+import {
+  COMPONENT_PALETTE_CONFIG,
+  resolvePaletteSaveCategoryId,
+} from "~/features/page_designer/form_elements/components/componentPaletteConfig";
+import {
+  getPaletteServerError,
+  isPaletteServerSuccess,
+  moveContentToCategory,
+} from "~/features/page_designer/form_elements/components/componentPaletteApi";
 import { cloneLayoutAndChildren } from "~/features/page_designer/functions/layout/cloneLayoutAndChildren";
+import { moveLayoutToComponent } from "~/features/page_designer/functions/layout/moveLayoutToComponent";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { isNegative } from "~/lib/data_structure/number/isNegative";
 import { createFormVertex } from "~/lib/graph/mutate/form/createForm";
-import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
 import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
-import {
-  parentComponentAttribute,
-  parentTemplateAttribute,
-} from "~/lib/meta/base/Comp";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { As } from "~/components/As";
 import { getErrorMessage } from "~/lib/api/general/getErrorMessage";
+import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/entity/findVertex";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 
@@ -76,7 +83,7 @@ function TemplateNameInput(props: {
   );
 }
 
-function SaveInCurrentPageCheckbox(props: {
+function SaveCurrentPageCheckbox(props: {
   checked: boolean;
   onChange: (checked: boolean) => void;
 }) {
@@ -84,7 +91,7 @@ function SaveInCurrentPageCheckbox(props: {
     <As
       as="div"
       css={`return \`._id {
-  margin-top: 2px;
+  margin-top: 0.75rem;
 }\`;`}
     >
       <As
@@ -93,6 +100,7 @@ function SaveInCurrentPageCheckbox(props: {
   display: flex;
   gap: 0.5rem;
   align-items: center;
+  cursor: pointer;
 }\`;`}
       >
         <As
@@ -107,7 +115,7 @@ function SaveInCurrentPageCheckbox(props: {
   font-size: 0.875rem;
 }\`;`}
         >
-          Save in current page
+          Save current page
         </As>
       </As>
     </As>
@@ -128,15 +136,29 @@ export function SaveAsTemplateMenu(
   const [graph, setGraph] = useGraph();
   const [templateName, setTemplateName] = createSignal("");
   const [error, setError] = createSignal("");
-  const [saveInCurrentPage, _setSaveInCurrentPage] = createSignal(false);
+  const [saveCurrentPage, setSaveCurrentPage] = createSignal(true);
   const { showSuccessToast, showWarningToast } = useToast();
   const label = () => props.saveAsLabel.replace(/Page$/, "");
 
   const formStoreId = useDesignerFormIdContext();
+  const layoutStoreId = useDesignerLayoutStore();
+  const layoutStore = () =>
+    graph.vertexes[layoutStoreId]?.P as PageLayoutObject | undefined;
   const formStoreVertex = () =>
     graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   const saveTemplate = async () => {
+    const pageTxnId = formStoreVertex()?.P.txnId;
+    const formData = graph.vertexes[formStoreVertex()?.P.formDataId || ""];
+
+    const shouldSaveCurrentPage =
+      props.saveAsLabel === "Component" && saveCurrentPage();
+
+    if (shouldSaveCurrentPage && isNegative(formStoreVertex().P.formDataId)) {
+      showWarningToast("Please Save Parent Page first.");
+      return;
+    }
+
     const newFormTxnId = generateNewTxnId(graph, setGraph);
     const createResult = createFormVertex(
       graph,
@@ -145,40 +167,39 @@ export function SaveAsTemplateMenu(
       props.saveAsLabel,
       { key: templateName() },
     );
-    const dataVertex = createResult.vertex!;
-    cloneLayoutAndChildren(
-      props.item,
-      dataVertex,
-      newFormTxnId,
-      formStoreVertex()?.P.txnId,
-      graph,
-      setGraph,
-      graph.vertexes[formStoreVertex()?.P.formDataId || ""],
-    );
-    const parentComponentMetaVertex = {
-      id: "",
-      IN: {},
-      L: [],
-      OUT: {},
-      P:
-        props.saveAsLabel === "Template"
-          ? parentTemplateAttribute
-          : parentComponentAttribute,
-    } as Vertex;
-    if (saveInCurrentPage()) {
-      if (isNegative(formStoreVertex().P.formDataId)) {
-        showWarningToast("Please Save Parent Page first.");
-        return;
-      }
-      setSelectionValue(
-        newFormTxnId,
+    if (createResult.error || !createResult.vertex) {
+      setError(createResult.error || "Failed to create component");
+      return;
+    }
+    const dataVertex = createResult.vertex;
+
+    if (props.saveAsLabel === "Component") {
+      const componentRefId = moveLayoutToComponent(
+        props.item,
         dataVertex,
+        templateName(),
+        newFormTxnId,
+        pageTxnId,
         graph,
         setGraph,
-        parentComponentMetaVertex,
-        formStoreVertex().P.formDataId,
+        formData,
+      );
+      if (componentRefId === -1) {
+        setError("Failed to move attributes to component");
+        return;
+      }
+    } else {
+      cloneLayoutAndChildren(
+        props.item,
+        dataVertex,
+        newFormTxnId,
+        pageTxnId,
+        graph,
+        setGraph,
+        formData,
       );
     }
+
     const data = commitTxn(newFormTxnId, graph);
 
     if (!data) {
@@ -188,6 +209,55 @@ export function SaveAsTemplateMenu(
 
     try {
       await submitDataCall({ ...data }, graph, setGraph, newFormTxnId);
+
+      if (shouldSaveCurrentPage && pageTxnId) {
+        const pageData = commitTxn(pageTxnId, graph);
+        if (pageData) {
+          await submitDataCall({ ...pageData }, graph, setGraph, pageTxnId);
+        }
+      }
+
+      if (props.saveAsLabel === "Component") {
+        const componentVertex =
+          findVertexByLabelAndUniqueId(
+            graph,
+            "Component",
+            "key",
+            templateName(),
+          ) ?? dataVertex;
+
+        const categoryId = resolvePaletteSaveCategoryId(
+          graph,
+          layoutStore()?.selectedComponentCategoryId,
+          COMPONENT_PALETTE_CONFIG,
+        );
+
+        if (categoryId) {
+          const categoryResult = await moveContentToCategory(
+            graph,
+            setGraph,
+            COMPONENT_PALETTE_CONFIG,
+            [componentVertex.id],
+            categoryId,
+          );
+          if (!isPaletteServerSuccess(categoryResult)) {
+            showWarningToast(
+              getPaletteServerError(
+                categoryResult,
+                "Failed to assign component to category",
+              ),
+            );
+          }
+        }
+
+        openInNewInternalTab(
+          layoutStoreId,
+          componentVertex,
+          graph,
+          setGraph,
+        );
+      }
+
       showSuccessToast(`${label()} Saved Successfully`);
       props.onClose();
     } catch (error) {
@@ -235,12 +305,12 @@ export function SaveAsTemplateMenu(
         ref={(el) => (nameInputRef = el)}
       />
 
-      {/* <Show when={props.saveAsLabel !== "Template"}>
-        <SaveInCurrentPageCheckbox 
-          checked={saveInCurrentPage()} 
-          onChange={setSaveInCurrentPage} 
+      <Show when={props.saveAsLabel === "Component"}>
+        <SaveCurrentPageCheckbox
+          checked={saveCurrentPage()}
+          onChange={setSaveCurrentPage}
         />
-      </Show> */}
+      </Show>
 
       <Show when={error()}>
         <As

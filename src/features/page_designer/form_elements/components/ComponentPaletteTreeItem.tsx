@@ -46,6 +46,7 @@ import {
   getItemSortName,
   isPaletteCategory,
   isPaletteContent,
+  isPaletteRootCategory,
 } from "./componentPaletteUtils";
 import { ComponentPreview } from "./ComponentPreview";
 
@@ -67,6 +68,8 @@ export function ComponentPaletteTreeItem(
     ) => void;
     onDrop: (snapshot: ComponentPaletteDropSnapshot) => Promise<void>;
     onSelectCategory?: (categoryId: Id) => void;
+    onEditCategory?: (category: Vertex) => void;
+    onDeleteCategory?: (category: Vertex) => void;
     onAddSubcategory?: (parentId: Id) => void;
     filterTree?: (vertex: Vertex) => { match: boolean; matchedChildren: boolean };
     shouldExpandForSearch?: (vertex: Vertex) => boolean;
@@ -103,6 +106,13 @@ export function ComponentPaletteTreeItem(
   const isContentItem = () => isPaletteContent(props.item, paletteConfig());
   const isUncategorized = () =>
     isUncategorizedPaletteId(paletteConfig(), props.item.id);
+  const isRootCategory = () =>
+    isPaletteRootCategory(props.item, paletteConfig());
+  const canManageCategory = () =>
+    isCategory() && !isUncategorized() && !isRootCategory();
+  const canDeleteCategory = () =>
+    canManageCategory() &&
+    !categoryHasChildren(graph, setGraph, props.item.id, paletteConfig());
 
   const categoryChildren = createMemo(() =>
     isCategory() || isUncategorized()
@@ -161,7 +171,7 @@ export function ComponentPaletteTreeItem(
         key === props.highlightedCompKey
       );
     }
-    if (isCategory() && !isUncategorized()) {
+    if (isCategory() || isUncategorized()) {
       return props.selectedCategoryId === props.item.id;
     }
     return false;
@@ -330,7 +340,7 @@ export function ComponentPaletteTreeItem(
             }
           }}
           onClick={() => {
-            if (isCategory() && !isUncategorized()) {
+            if (isCategory() || isUncategorized()) {
               props.onSelectCategory?.(props.item.id);
               return;
             }
@@ -393,11 +403,24 @@ export function ComponentPaletteTreeItem(
                 {(contentCount() ?? "")}
               </As>
             </Show>
-            <Show when={isCategory() && !isUncategorized() && isHovered()}>
-              <As
-                as="span"
-                onClick={(e) => e.stopPropagation()}
-              >
+            <Show when={canManageCategory() && isHovered()}>
+              <As as="span" css={`return \`._id { display: flex; gap: 2px; }\`;`} onClick={(e) => e.stopPropagation()}>
+                <IconButton
+                  css={buttonStyle}
+                  icon="ph:pencil-simple"
+                  onClick={() => props.onEditCategory?.(props.item)}
+                  size={14}
+                  title="Rename category"
+                />
+                <Show when={canDeleteCategory()}>
+                  <IconButton
+                    css={buttonStyle}
+                    icon="ph:trash"
+                    onClick={() => props.onDeleteCategory?.(props.item)}
+                    size={14}
+                    title="Delete category"
+                  />
+                </Show>
                 <PlusIconButton
                   ariaLabel="Add subcategory"
                   onClick={() => props.onAddSubcategory?.(props.item.id)}
@@ -455,7 +478,9 @@ export function ComponentPaletteTreeItem(
                   item={child}
                   itemRef={props.itemRef}
                   onAddSubcategory={props.onAddSubcategory}
+                  onDeleteCategory={props.onDeleteCategory}
                   onDrop={props.onDrop}
+                  onEditCategory={props.onEditCategory}
                   onPaletteDragEnd={props.onPaletteDragEnd}
                   onPaletteDragStart={props.onPaletteDragStart}
                   onSelectCategory={props.onSelectCategory}
@@ -482,7 +507,9 @@ export function ComponentPaletteTreeItem(
                   item={child}
                   itemRef={props.itemRef}
                   onAddSubcategory={props.onAddSubcategory}
+                  onDeleteCategory={props.onDeleteCategory}
                   onDrop={props.onDrop}
+                  onEditCategory={props.onEditCategory}
                   onPaletteDragEnd={props.onPaletteDragEnd}
                   onPaletteDragStart={props.onPaletteDragStart}
                   onSelectCategory={props.onSelectCategory}

@@ -4,7 +4,10 @@ import { batch } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
-import type { PageLayoutObject } from "../context/LayoutContext";
+import type {
+  LayoutTreeScrollSource,
+  PageLayoutObject,
+} from "../context/LayoutContext";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import { syncHighlightedCompKey } from "~/features/page_designer/functions/layout/syncHighlightedCompKey";
 import type { Id } from "~/lib/graph/type/id";
@@ -18,17 +21,23 @@ export function onLayoutItemClick(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
   selectedIndex = 0,
+  scrollSource?: LayoutTreeScrollSource,
 ) {
   batch(() => {
+    const layoutUpdates: Partial<PageLayoutObject> = {};
     if (layoutStoreVertex.P.formId !== formStoreVertex.id) {
+      layoutUpdates.formId = formStoreVertex.id;
+    }
+    if (scrollSource) {
+      layoutUpdates.layoutTreeScrollSource = scrollSource;
+    }
+    if (Object.keys(layoutUpdates).length > 0) {
       mergeVertexProperties<PageLayoutObject>(
         0,
         layoutStoreVertex.id,
         graph,
         setGraph,
-        {
-          formId: formStoreVertex.id,
-        },
+        layoutUpdates,
       );
     }
     mergeVertexProperties<FormStoreObject>(

@@ -75,6 +75,8 @@ export function Breadcrumbs(props: BreadcrumbsProps) {
       vertex.id,
       graph,
       setGraph,
+      0,
+      "layoutTree",
     );
   };
 

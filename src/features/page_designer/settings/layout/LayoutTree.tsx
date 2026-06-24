@@ -1,6 +1,5 @@
 import { createSignal, For, Show, onCleanup } from "solid-js";
 import { createStore, reconcile, type SetStoreFunction } from "solid-js/store";
-import { Icon } from "@iconify-icon/solid";
 import { debounce } from "@solid-primitives/scheduled";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
@@ -23,7 +22,7 @@ import {
 } from "../../context/LayoutContext";
 import { LayoutTreeItem } from "./LayoutTreeItem";
 import { IconButton } from "~/components/styled/IconButton";
-import { ICON_BUTTON_STYLES, STYLES } from "~/pages/settings/constants";
+import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
 import { onLayoutItemClick } from "~/features/page_designer/event_handler/onLayoutItemClick";
 import { getChildrenAttrs } from "../../functions/layout/getChildrenAttrs";
 import { toggleHidden } from "./HideShowIcon";
@@ -384,6 +383,8 @@ export function LayoutTree() {
       newComponentId,
       graph,
       setGraph,
+      0,
+      "layoutTree",
     );
 
     // Focus the newly created item
@@ -574,6 +575,8 @@ export function LayoutTree() {
           nextItemId,
           graph,
           setGraph,
+          0,
+          "layoutTree",
         );
 
         // Focus the newly selected item
@@ -614,6 +617,8 @@ export function LayoutTree() {
               parentElements[0].id,
               graph,
               setGraph,
+              0,
+              "layoutTree",
             );
 
             // Focus the parent item
@@ -637,6 +642,8 @@ export function LayoutTree() {
               childElements[0].id,
               graph,
               setGraph,
+              0,
+              "layoutTree",
             );
 
             // Focus the first child
@@ -702,43 +709,24 @@ export function LayoutTree() {
   return (
     <As
       as="div"
-      css={`return \`._id {
-        display: flex;
-        flex-direction: column;
-        flex: 1;
-        min-height: 0;
-        overflow: hidden;
-      }\`;`}
       tabIndex={0}
       onKeyDown={handleKeyDown}
+      ref={setTreeRef}
     >
       <As
         as="div"
         css={`return \`._id {
           display: flex;
           align-items: center;
-          padding-bottom: 8px;
-          border-bottom: 1px solid \${args.theme.var.color.border};
           gap: 8px;
-          position: sticky;
-          top: 0;
-          background-color: \${args.theme.var.color.background};
         }\`;`}
       >
-        <As
-          as="h3"
-          css={`return \`._id {
-            color: \${args.theme.var.color.text};
-            font-size: 1rem;
-            font-weight: 600;
-            line-height: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-          }\`;`}
-        >
-          <Icon icon="tabler:layout-2" />
-          Layers
+        <As as="div" css={`return \`._id { flex: 1; min-width: 0; }\`;`}>
+          <SearchBar
+            handleChange={onSearchChange}
+            placeholder="Search layers..."
+            value={searchQuery()}
+          />
         </As>
 
         <IconButton
@@ -751,18 +739,11 @@ export function LayoutTree() {
               ${formStoreVertex()?.P.showAllJsonEditors ? "color: ${args.theme.var.color.primary};" : ""}
               background-color: transparent;
               border: none;
+              flex-shrink: 0;
         }\`;`,
           ]}
           icon="tabler:json"
           size={18}
-        />
-      </As>
-
-      <As as="div">
-        <SearchBar
-          handleChange={onSearchChange}
-          placeholder="Search layers..."
-          value={searchQuery()}
         />
       </As>
 
@@ -776,18 +757,12 @@ export function LayoutTree() {
 
       <As
         as="div"
-        css={[
-          STYLES.verticalOverflowCss,
-          `return \`._id {
+        css={`return \`._id {
           padding: 0;
           margin: 0;
-          flex: 1;
-          min-height: 0;
-          scroll-behavior: smooth;
-        }\`;`,
-        ]}
+          min-width: 0;
+        }\`;`}
         class="layouttree"
-        ref={setTreeRef}
       >
         <Show when={formStoreVertex()}>
           <For each={filteredRootVertexes()}>

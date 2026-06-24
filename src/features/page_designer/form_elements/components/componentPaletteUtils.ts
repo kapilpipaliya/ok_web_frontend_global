@@ -24,6 +24,13 @@ export function isPaletteContent(
   return !!vertex?.L?.includes(config.tableVertexLabel);
 }
 
+export function isPaletteRootCategory(
+  vertex: Vertex | undefined,
+  config: PaletteTreeConfig,
+) {
+  return vertex?.P?.key === config.rootKeys.key;
+}
+
 export function getItemSortName(item: Vertex) {
   return String(
     item?.P?.name ?? item?.P?.label ?? item?.P?.title ?? item?.P?.key ?? "",

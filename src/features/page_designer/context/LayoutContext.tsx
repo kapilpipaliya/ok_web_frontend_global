@@ -16,22 +16,28 @@ export interface OpenFormInfo {
 
 export type PageLayoutObject = ReturnType<typeof getInitialDesignerLayoutStore>;
 
+/** Where the latest layout-tree highlight came from — controls auto-scroll in the layers panel. */
+export type LayoutTreeScrollSource = "preview" | "layoutTree";
+
 export const INITIAL_WIDTHS = {
   bottom: 300,
-  components: 190,
+  components: 250,
   ai: 305,
+  layoutTree: 280,
   properties: 305,
-  settings: 310,
+  settings: 220,
 } as const;
 
 export function getInitialLayoutSettings() {
   return {
     isComponentsOpen: true,
     isAiOpen: false,
+    isLayoutTreeOpen: true,
     isPropertiesOpen: true,
     isSettingsOpen: true,
     componentsWidth: INITIAL_WIDTHS.components,
     aiWidth: INITIAL_WIDTHS.ai,
+    layoutTreeWidth: INITIAL_WIDTHS.layoutTree,
     propertiesWidth: INITIAL_WIDTHS.properties,
     settingsWidth: INITIAL_WIDTHS.settings,
     isPropertiesCollapsed: false,
@@ -64,6 +70,8 @@ export function getInitialDesignerLayoutStore() {
       | null,
     previewHoverId: -1 as Id | number,
     highlightedCompKey: null as string | null,
+    selectedComponentCategoryId: null as Id | null,
+    layoutTreeScrollSource: null as LayoutTreeScrollSource | null,
   };
 }
 

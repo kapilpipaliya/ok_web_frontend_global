@@ -1,4 +1,5 @@
 import { type Component, createSignal, For, Show } from "solid-js";
+import { Icon } from "@iconify-icon/solid";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
@@ -9,6 +10,7 @@ import {
   useDesignerLayoutStore,
 } from "~/features/page_designer/context/LayoutContext";
 import { SettingTabs } from "~/features/page_designer/settings/SettingTabs";
+import { LayoutTreePanel } from "~/features/page_designer/settings/LayoutTreePanel";
 import { GraphView } from "~/pages/debug/GraphView";
 import { STYLES } from "~/pages/settings/constants";
 
@@ -75,6 +77,7 @@ interface PanelProps {
   scrollContent?: boolean;
   style?: any;
   title?: string;
+  titleIcon?: string;
 }
 
 const Panel: Component<PanelProps> = (props) => {
@@ -125,8 +128,8 @@ const Panel: Component<PanelProps> = (props) => {
                     overflow: hidden;
                   }\`;`
                 : [
-                    STYLES.verticalOverflowCss,
-                    `return \`._id { min-height: 0; }\`;`,
+                    STYLES.overflowCss,
+                    `return \`._id { min-height: 0; min-width: 0; }\`;`,
                   ]
             }
           >
@@ -180,6 +183,9 @@ const Panel: Component<PanelProps> = (props) => {
               }
               when={!props.collapsed}
             >
+              <Show when={props.titleIcon}>
+                <Icon icon={props.titleIcon!} />
+              </Show>
               <As
                 as="h1"
                 css={"return `._id { font-weight: 600; font-size: inherit; flex: 1; margin: 0; }`;"}
@@ -203,8 +209,8 @@ const Panel: Component<PanelProps> = (props) => {
             <As
               as="div"
               css={[
-                STYLES.verticalOverflowCss,
-                `return \`._id { min-height: 0; }\`;`,
+                STYLES.overflowCss,
+                `return \`._id { min-height: 0; min-width: 0; }\`;`,
               ]}
             >
               {props.children}
@@ -270,12 +276,16 @@ export function RenderMainContent() {
     const layout = layoutStore();
     const columns: string[] = [];
 
+    if (layout.isSettingsOpen) {
+      columns.push(`${layout.settingsWidth}px`);
+    }
+
     if (layout.isComponentsOpen) {
       columns.push(`${layout.componentsWidth}px`);
     }
 
-    if (layout.isSettingsOpen) {
-      columns.push(`${layout.settingsWidth}px`);
+    if (layout.isLayoutTreeOpen) {
+      columns.push(`${layout.layoutTreeWidth}px`);
     }
 
     if (layout.isPropertiesOpen) {
@@ -305,6 +315,8 @@ export function RenderMainContent() {
   const [activeResizeKey, setActiveResizeKey] = createSignal<null | string>(
     null,
   );
+  const [layoutTreePanelRef, setLayoutTreePanelRef] =
+    createSignal<HTMLDivElement>();
   const [componentsPanelRef, setComponentsPanelRef] =
     createSignal<HTMLDivElement>();
   const [aiPanelRef, setAiPanelRef] = createSignal<HTMLDivElement>();
@@ -324,6 +336,7 @@ export function RenderMainContent() {
         | "bottomHeight"
         | "componentsWidth"
         | "aiWidth"
+        | "layoutTreeWidth"
         | "propertiesWidth"
         | "settingsWidth"
         | `mainPanel${string}Width`,
@@ -464,6 +477,29 @@ export function RenderMainContent() {
         <As
           as="div"
           css={STYLES.panelCellCss}
+          style={{ display: layoutStore().isSettingsOpen ? "block" : "none" }}
+        >
+          <Panel
+            activeResizeKey={activeResizeKey()}
+            isResizing={isResizing()}
+            onResize={createResizeHandler(
+              "settingsWidth",
+              settingsPanelRef,
+              true,
+              true,
+            )}
+            ref={setSettingsPanelRef}
+            resizeKey="settingsWidth"
+            resizePosition="right"
+            title="Settings"
+          >
+            <SettingTabs />
+          </Panel>
+        </As>
+
+        <As
+          as="div"
+          css={STYLES.panelCellCss}
           style={{
             display: layoutStore().isComponentsOpen ? "block" : "none",
           }}
@@ -479,6 +515,7 @@ export function RenderMainContent() {
             ref={setComponentsPanelRef}
             resizeKey="componentsWidth"
             resizePosition="right"
+            scrollContent={false}
           >
             <FormElements />
           </Panel>
@@ -487,22 +524,26 @@ export function RenderMainContent() {
         <As
           as="div"
           css={STYLES.panelCellCss}
-          style={{ display: layoutStore().isSettingsOpen ? "block" : "none" }}
+          style={{
+            display: layoutStore().isLayoutTreeOpen ? "block" : "none",
+          }}
         >
           <Panel
             activeResizeKey={activeResizeKey()}
             isResizing={isResizing()}
             onResize={createResizeHandler(
-              "settingsWidth",
-              settingsPanelRef,
+              "layoutTreeWidth",
+              layoutTreePanelRef,
               true,
               true,
             )}
-            ref={setSettingsPanelRef}
-            resizeKey="settingsWidth"
+            ref={setLayoutTreePanelRef}
+            resizeKey="layoutTreeWidth"
             resizePosition="right"
+            title="Layout Tree"
+            titleIcon="tabler:layout-2"
           >
-            <SettingTabs />
+            <LayoutTreePanel />
           </Panel>
         </As>
 

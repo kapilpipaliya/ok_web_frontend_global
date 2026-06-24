@@ -8,7 +8,6 @@ import { SearchBar } from "~/components/styled/SearchBar";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/entity/findVertex";
 import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 import { fetchAndSetGraphData } from "~/lib/graph/mutate/data/fetchAndSetGraphData";
-import { STYLES } from "~/pages/settings/constants";
 
 import { ComponentItem } from "./ComponentItem";
 import { getCompChildren } from "./functions/getCompChildren";
@@ -138,7 +137,7 @@ export function ComponentList(props: {
           value={searchQuery()}
         />
       </Show>
-      <As as="div" css={STYLES.overflowCss}>
+      <As as="div">
         <Show
           fallback={<LoaderNew loaderHeight="55vh" />}
           when={!isFetchingData()}

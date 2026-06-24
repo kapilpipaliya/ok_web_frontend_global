@@ -290,11 +290,13 @@ export function PageDesignerWrapper(): JSX.Element {
     const widthProps = {
       isComponentsOpen: layoutVertex.P.isComponentsOpen,
       isAiOpen: layoutVertex.P.isAiOpen,
+      isLayoutTreeOpen: layoutVertex.P.isLayoutTreeOpen,
       isPropertiesOpen: layoutVertex.P.isPropertiesOpen,
       isSettingsOpen: layoutVertex.P.isSettingsOpen,
       isPropertiesCollapsed: layoutVertex.P.isPropertiesCollapsed,
       componentsWidth: layoutVertex.P.componentsWidth,
       aiWidth: layoutVertex.P.aiWidth,
+      layoutTreeWidth: layoutVertex.P.layoutTreeWidth,
       propertiesWidth: layoutVertex.P.propertiesWidth,
       propertiesExpandedWidth: layoutVertex.P.propertiesExpandedWidth,
       settingsWidth: layoutVertex.P.settingsWidth,

@@ -88,3 +88,21 @@ export function isUncategorizedPaletteId(
 ) {
   return id === getUncategorizedPaletteId(config);
 }
+
+export function resolvePaletteSaveCategoryId(
+  graph: { vertexes: Record<string, { P?: { key?: string } } | undefined> },
+  categoryId: string | null | undefined,
+  config: PaletteTreeConfig,
+): string | null {
+  if (!categoryId || isUncategorizedPaletteId(config, categoryId)) {
+    return null;
+  }
+  const vertex = graph.vertexes[categoryId];
+  if (!vertex) {
+    return null;
+  }
+  if (vertex.P?.key === config.rootKeys.key) {
+    return null;
+  }
+  return categoryId;
+}

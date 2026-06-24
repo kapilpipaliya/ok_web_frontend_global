@@ -12,9 +12,9 @@ import { LoaderNew } from "~/components/styled/LoaderSimple";
 import { SearchBar } from "~/components/styled/SearchBar";
 import { useToast } from "~/components/styled/modal/Toast";
 import { PlusIconButton } from "~/components/styled/buttons/PlusIconButton";
-import { STYLES } from "~/pages/settings/constants";
 import { As } from "~/components/As";
 import { useGraph } from "~/lib/graph/context/UseGraph";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import type { Id } from "~/lib/graph/type/id";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { scrollElementIntoContainer } from "~/lib/dom/scrollElementIntoContainer";
@@ -35,6 +35,7 @@ import {
   movePaletteCategory,
   reorderPaletteSiblings,
   savePaletteCategory,
+  deletePaletteCategory,
   getPaletteServerError,
   isPaletteServerSuccess,
 } from "./componentPaletteApi";
@@ -50,7 +51,9 @@ import {
   getAncestorCategoryIds,
   getCategoryChildren,
   getContentChildrenForCategory,
+  getItemSortName,
   getPaletteRootItems,
+  categoryHasChildren,
   isPaletteCategory,
   isPaletteContent,
 } from "./componentPaletteUtils";
@@ -69,21 +72,25 @@ export function ComponentPaletteTree(props?: {
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStore = () =>
     (graph.vertexes[layoutStoreId!]?.P as PageLayoutObject) || {};
-  const { showErrorToast, showSuccessToast } = useToast();
+  const { showErrorToast, showSuccessToast, showWarningToast } = useToast();
 
   const [isLoading, setIsLoading] = createSignal(true);
   const [searchQuery, setSearchQuery] = createSignal("");
   const [expandedKeys, setExpandedKeys] = createStore<string[]>([]);
   const [selectedCompId, setSelectedCompId] = createSignal<Id | null>(null);
+  const [localSelectedCategoryId, setLocalSelectedCategoryId] =
+    createSignal<Id | null>(null);
   const [scrollRef, setScrollRef] = createSignal<HTMLDivElement>();
 
-  const [showAddModal, setShowAddModal] = createSignal(false);
+  const [categoryModalMode, setCategoryModalMode] = createSignal<
+    "add" | "edit" | null
+  >(null);
+  const [editingCategoryId, setEditingCategoryId] = createSignal<Id | null>(
+    null,
+  );
   const [addParentId, setAddParentId] = createSignal<string | null>(null);
   const [categoryName, setCategoryName] = createSignal("");
   const [categoryKey, setCategoryKey] = createSignal("");
-  const [selectedCategoryId, setSelectedCategoryId] = createSignal<Id | null>(
-    null,
-  );
   const [dropActiveItem, setDropActiveItem] = createSignal<Id | null>(null);
   const [dropPosition, setDropPosition] =
     createSignal<PaletteDropPosition | null>(null);
@@ -119,9 +126,47 @@ export function ComponentPaletteTree(props?: {
     );
   }
 
+  const selectedCategoryId = () =>
+    isComponentPalette()
+      ? layoutStore().selectedComponentCategoryId
+      : localSelectedCategoryId();
+
+  const setSelectedCategoryId = (categoryId: Id) => {
+    if (isComponentPalette()) {
+      mergeVertexProperties<PageLayoutObject>(
+        0,
+        layoutStoreId,
+        graph,
+        setGraph,
+        { selectedComponentCategoryId: categoryId },
+      );
+      return;
+    }
+    setLocalSelectedCategoryId(categoryId);
+  };
+
+  function closeCategoryModal() {
+    setCategoryModalMode(null);
+    setEditingCategoryId(null);
+    setCategoryName("");
+    setCategoryKey("");
+    setAddParentId(null);
+  }
+
   function openAddCategoryModal(parentId: string | null = null) {
+    setCategoryModalMode("add");
+    setEditingCategoryId(null);
     setAddParentId(parentId ?? selectedCategoryId());
-    setShowAddModal(true);
+    setCategoryName("");
+    setCategoryKey("");
+  }
+
+  function openEditCategoryModal(category: Vertex) {
+    setCategoryModalMode("edit");
+    setEditingCategoryId(category.id);
+    setCategoryName(getItemSortName(category));
+    setCategoryKey(String(category.P?.key ?? ""));
+    setAddParentId(getParentCategoryId(category.id));
   }
 
   const rootItems = createMemo(() => getPaletteRootItems(graph, paletteConfig()));
@@ -164,7 +209,9 @@ export function ComponentPaletteTree(props?: {
       ]);
       if (rootCategory) {
         setExpandedKeys((keys) => [...new Set([...keys, rootCategory.id])]);
-        setSelectedCategoryId(rootCategory.id);
+        if (!selectedCategoryId()) {
+          setSelectedCategoryId(rootCategory.id);
+        }
       }
     } catch (e) {
       showErrorToast(e instanceof Error ? e.message : String(e));
@@ -413,30 +460,100 @@ export function ComponentPaletteTree(props?: {
     }
   }
 
-  async function handleAddCategory() {
+  async function handleSaveCategory() {
     const name = categoryName().trim();
     const key = categoryKey().trim() || name.toLowerCase().replace(/\s+/g, "_");
     if (!name) {
       showErrorToast("Category name is required");
       return;
     }
+
+    const mode = categoryModalMode();
+    const editingId = editingCategoryId();
     const result = await savePaletteCategory(graph, setGraph, paletteConfig(), {
+      vertexId: mode === "edit" ? editingId : undefined,
       name,
       key,
-      parentId: addParentId(),
+      parentId:
+        mode === "edit" && editingId
+          ? getParentCategoryId(editingId)
+          : addParentId(),
     });
+
     if (result.result?.success) {
-      showSuccessToast(result.result.message || "Category created");
-      setShowAddModal(false);
-      setCategoryName("");
-      setCategoryKey("");
-      const parentId = addParentId();
+      showSuccessToast(
+        result.result.message ||
+          (mode === "edit" ? "Category updated" : "Category created"),
+      );
+      closeCategoryModal();
+      const parentId =
+        mode === "edit" && editingId
+          ? getParentCategoryId(editingId)
+          : addParentId();
       if (parentId) {
         setExpandedKeys((k) => [...k, parentId]);
         setSelectedCategoryId(parentId);
       }
+      if (mode === "edit" && editingId) {
+        setSelectedCategoryId(editingId);
+      }
     } else {
-      showErrorToast(result.result?.message || "Failed to create category");
+      showErrorToast(
+        result.result?.message ||
+          (mode === "edit" ? "Failed to update category" : "Failed to create category"),
+      );
+    }
+  }
+
+  async function handleDeleteCategory(category: Vertex) {
+    if (categoryHasChildren(graph, setGraph, category.id, paletteConfig())) {
+      showWarningToast(
+        "Cannot delete category with items. Remove all items first.",
+      );
+      return;
+    }
+
+    const name = getItemSortName(category);
+    if (
+      !window.confirm(
+        `Delete category "${name}"? This action cannot be undone.`,
+      )
+    ) {
+      return;
+    }
+
+    const result = await deletePaletteCategory(
+      graph,
+      setGraph,
+      paletteConfig(),
+      category.id,
+    );
+
+    if (isPaletteServerSuccess(result)) {
+      showSuccessToast(result.result?.message || "Category deleted");
+      if (selectedCategoryId() === category.id) {
+        const rootCategory = findVertexByLabelAndUniqueId(
+          graph,
+          paletteConfig().parentVertexLabel,
+          "key",
+          paletteConfig().rootKeys.key,
+        );
+        if (rootCategory) {
+          setSelectedCategoryId(rootCategory.id);
+        } else if (isComponentPalette()) {
+          mergeVertexProperties<PageLayoutObject>(
+            0,
+            layoutStoreId,
+            graph,
+            setGraph,
+            { selectedComponentCategoryId: null },
+          );
+        } else {
+          setLocalSelectedCategoryId(null);
+        }
+      }
+    } else {
+      showErrorToast(getPaletteServerError(result, "Failed to delete category"));
     }
   }
 
@@ -508,15 +625,7 @@ export function ComponentPaletteTree(props?: {
   };
 
   return (
-    <As
-      as="div"
-      css={`return \`._id {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0;
-}\`;`}
-    >
+    <As as="div" ref={setScrollRef}>
       <Show when={!props?.compact}>
         <As
           as="div"
@@ -559,57 +668,47 @@ export function ComponentPaletteTree(props?: {
         />
       </Show>
 
-      <As
-        as="div"
-        css={[
-          STYLES.overflowCss,
-          `return \`._id {
-  flex: 1;
-  min-height: 0;
-}\`;`,
-        ]}
-        ref={setScrollRef}
-      >
-        <Show fallback={<LoaderNew loaderHeight="55vh" />} when={!isLoading()}>
-          <As
-            as="ul"
-            css={`return \`._id {
+      <Show fallback={<LoaderNew loaderHeight="55vh" />} when={!isLoading()}>
+        <As
+          as="ul"
+          css={`return \`._id {
   list-style: none;
   margin: 0;
   padding: 0;
 }\`;`}
-          >
-            <For each={getFilteredRoots()}>
-              {(item) => (
-                <ComponentPaletteTreeItem
-                  config={paletteConfig()}
-                  dropActiveItem={dropActiveItem()}
-                  dropPosition={dropPosition()}
-                  expandedKeys={expandedKeys}
-                  filterTree={filterTree}
-                  highlightedCompKey={layoutStore().highlightedCompKey}
-                  isPaletteDragging={isPaletteDragging()}
-                  item={item}
-                  itemRef={setSelectedItemRef}
-                  onAddSubcategory={(parentId) => openAddCategoryModal(parentId)}
-                  onDrop={handlePaletteDrop}
-                  onPaletteDragEnd={() => setIsPaletteDragging(false)}
-                  onPaletteDragStart={() => setIsPaletteDragging(true)}
-                  onSelectCategory={setSelectedCategoryId}
-                  searchActive={searchActive()}
-                  selectedCategoryId={selectedCategoryId()}
-                  selectedCompId={selectedCompId()}
-                  setDropState={setDropState}
-                  shouldExpandForSearch={shouldExpandForSearch}
-                  toggleExpand={toggleExpand}
-                />
-              )}
-            </For>
-          </As>
-        </Show>
-      </As>
+        >
+          <For each={getFilteredRoots()}>
+            {(item) => (
+              <ComponentPaletteTreeItem
+                config={paletteConfig()}
+                dropActiveItem={dropActiveItem()}
+                dropPosition={dropPosition()}
+                expandedKeys={expandedKeys}
+                filterTree={filterTree}
+                highlightedCompKey={layoutStore().highlightedCompKey}
+                isPaletteDragging={isPaletteDragging()}
+                item={item}
+                itemRef={setSelectedItemRef}
+                onAddSubcategory={(parentId) => openAddCategoryModal(parentId)}
+                onDeleteCategory={(category) => void handleDeleteCategory(category)}
+                onDrop={handlePaletteDrop}
+                onEditCategory={openEditCategoryModal}
+                onPaletteDragEnd={() => setIsPaletteDragging(false)}
+                onPaletteDragStart={() => setIsPaletteDragging(true)}
+                onSelectCategory={setSelectedCategoryId}
+                searchActive={searchActive()}
+                selectedCategoryId={selectedCategoryId()}
+                selectedCompId={selectedCompId()}
+                setDropState={setDropState}
+                shouldExpandForSearch={shouldExpandForSearch}
+                toggleExpand={toggleExpand}
+              />
+            )}
+          </For>
+        </As>
+      </Show>
 
-      <Show when={showAddModal()}>
+      <Show when={categoryModalMode()}>
         <As
           as="div"
           css={`return \`._id {
@@ -621,7 +720,7 @@ export function ComponentPaletteTree(props?: {
   justify-content: center;
   z-index: 1000;
 }\`;`}
-          onClick={() => setShowAddModal(false)}
+          onClick={closeCategoryModal}
         >
           <As
             as="div"
@@ -637,7 +736,7 @@ export function ComponentPaletteTree(props?: {
             onClick={(e) => e.stopPropagation()}
           >
             <As as="h3" css={`return \`._id { margin: 0; font-size: 1rem; }\`;`}>
-              Add Category
+              {categoryModalMode() === "edit" ? "Edit Category" : "Add Category"}
             </As>
             <input
               placeholder="Name"
@@ -653,10 +752,10 @@ export function ComponentPaletteTree(props?: {
               as="div"
               css={`return \`._id { display: flex; gap: 0.5rem; justify-content: flex-end; }\`;`}
             >
-              <button type="button" onClick={() => setShowAddModal(false)}>
+              <button type="button" onClick={closeCategoryModal}>
                 Cancel
               </button>
-              <button type="button" onClick={() => void handleAddCategory()}>
+              <button type="button" onClick={() => void handleSaveCategory()}>
                 Save
               </button>
             </As>

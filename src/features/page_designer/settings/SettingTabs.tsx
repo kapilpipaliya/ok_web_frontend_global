@@ -13,7 +13,6 @@ import {
 import { FormConfig } from "./form/FormConfig";
 import { NameKey } from "./keys/NameKey";
 import { UniqueConstrains } from "./keys/UniqueConstrain";
-import { LayoutTree } from "./layout/LayoutTree";
 import { LayoutTable } from "./layout/LayoutTable";
 import { Permission } from "./permission/Permission";
 import { Variants } from "./variants/Variants";
@@ -60,9 +59,10 @@ export function SettingTabs() {
       <As
         as="div"
         css={[
-          STYLES.verticalOverflowCss,
+          STYLES.overflowCss,
           `return \`._id {
   min-height: 0;
+  min-width: 0;
 }\`;`,
         ]}
       >
@@ -129,8 +129,6 @@ export function SettingTabs() {
                   <Divider />
                   <Variants />
                 </Show>
-                <Divider />
-                <LayoutTree />
               </FormContext.Provider>
             </DesignerFormIdContext.Provider>
           </Show>

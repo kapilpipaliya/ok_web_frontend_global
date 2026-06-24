@@ -3,6 +3,8 @@ import type { SetStoreFunction } from "solid-js/store";
 import type { ServerResult } from "~/cypher/types/ServerResult";
 import { executeNamedServerFunction } from "~/cypher/get/executeNamedServerFunction";
 import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
+import { deleteEdge } from "~/lib/graph/mutate/core/edge/deleteEdge";
+import { deleteVertex } from "~/lib/graph/mutate/core/vertex/deleteVertex";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 import type { PaletteTreeConfig } from "./componentPaletteConfig";
@@ -156,6 +158,45 @@ export async function moveContentToCategory(
     await fetchCategoryChildren(graph, setGraph, config, categoryId, {
       defer: false,
     });
+  }
+
+  return result;
+}
+
+export async function deletePaletteCategory(
+  graph: GraphInterface,
+  setGraph: SetStoreFunction<GraphInterface>,
+  config: PaletteTreeConfig,
+  categoryId: string,
+) {
+  const vertex = graph.vertexes[categoryId];
+  const result = await savePaletteCategory(graph, setGraph, config, {
+    vertexId: categoryId,
+    name: String(vertex?.P?.name ?? vertex?.P?.key ?? ""),
+    key: String(vertex?.P?.key ?? ""),
+    operation: "delete",
+  });
+
+  if (isPaletteServerSuccess(result)) {
+    const edgeIds = new Set<string>();
+    if (vertex?.OUT) {
+      for (const ids of Object.values(vertex.OUT)) {
+        for (const edgeId of ids ?? []) {
+          edgeIds.add(edgeId);
+        }
+      }
+    }
+    if (vertex?.IN) {
+      for (const ids of Object.values(vertex.IN)) {
+        for (const edgeId of ids ?? []) {
+          edgeIds.add(edgeId);
+        }
+      }
+    }
+    for (const edgeId of edgeIds) {
+      deleteEdge(0, edgeId, graph, setGraph);
+    }
+    deleteVertex(0, categoryId, graph, setGraph);
   }
 
   return result;

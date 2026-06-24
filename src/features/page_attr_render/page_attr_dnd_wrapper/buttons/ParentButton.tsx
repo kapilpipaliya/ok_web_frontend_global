@@ -57,6 +57,8 @@ export function ParentButton(props: Readonly<ParentButtonProps>) {
           parentResult[0].id,
           graph,
           setGraph,
+          0,
+          "layoutTree",
         );
       }}
       size={props.size}

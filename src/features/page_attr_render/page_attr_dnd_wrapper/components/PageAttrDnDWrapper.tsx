@@ -100,6 +100,7 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
             props.item.id,
             graph,
             setGraph,
+            "preview",
           );
         },
         onDragLeave: () => {
@@ -126,6 +127,7 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
       graph,
       setGraph,
       contextData.index,
+      "preview",
     );
   };
 
@@ -134,7 +136,13 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
     mergeVertexProperties<FormStoreObject>(0, formStoreId!, graph, setGraph, {
       hoverId: props.item.id,
     });
-    setLayoutPreviewHover(layoutStoreId, props.item.id, graph, setGraph);
+    setLayoutPreviewHover(
+      layoutStoreId,
+      props.item.id,
+      graph,
+      setGraph,
+      "preview",
+    );
   };
 
   const handleMouseLeave = (e: MouseEvent) => {

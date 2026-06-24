@@ -18,6 +18,7 @@ export function ToggleButtons() {
     panel:
       | "isComponentsOpen"
       | "isAiOpen"
+      | "isLayoutTreeOpen"
       | "isPropertiesOpen"
       | "isSettingsOpen",
   ) => {
@@ -40,6 +41,15 @@ export function ToggleButtons() {
     <>
       <IconButton
         css={headerIconButtonCss}
+        icon="ph:gear"
+        iconCss={`return \`._id {${layoutStore().isSettingsOpen ? "color:${args.theme.var.color.primary}" : "color:${args.theme.var.color.text_light_300}"};}\`;`}
+        onClick={() => togglePanel("isSettingsOpen")}
+        size={22}
+        title="Toggle Settings Panel"
+        tooltipGroup="right-buttons"
+      />
+      <IconButton
+        css={headerIconButtonCss}
         icon="ph:squares-four"
         iconCss={`return \`._id {${layoutStore().isComponentsOpen ? "color:${args.theme.var.color.primary}" : "color:${args.theme.var.color.text_light_300}"};}\`;`}
         onClick={() => togglePanel("isComponentsOpen")}
@@ -49,11 +59,11 @@ export function ToggleButtons() {
       />
       <IconButton
         css={headerIconButtonCss}
-        icon="ph:robot"
-        iconCss={`return \`._id {${layoutStore().isAiOpen ? "color:${args.theme.var.color.primary}" : "color:${args.theme.var.color.text_light_300}"};}\`;`}
-        onClick={() => togglePanel("isAiOpen")}
+        icon="ph:tree-structure"
+        iconCss={`return \`._id {${layoutStore().isLayoutTreeOpen ? "color:${args.theme.var.color.primary}" : "color:${args.theme.var.color.text_light_300}"};}\`;`}
+        onClick={() => togglePanel("isLayoutTreeOpen")}
         size={22}
-        title="Toggle AI Panel"
+        title="Toggle Layout Tree Panel"
         tooltipGroup="right-buttons"
       />
       <IconButton
@@ -67,11 +77,11 @@ export function ToggleButtons() {
       />
       <IconButton
         css={headerIconButtonCss}
-        icon="ph:gear"
-        iconCss={`return \`._id {${layoutStore().isSettingsOpen ? "color:${args.theme.var.color.primary}" : "color:${args.theme.var.color.text_light_300}"};}\`;`}
-        onClick={() => togglePanel("isSettingsOpen")}
+        icon="ph:robot"
+        iconCss={`return \`._id {${layoutStore().isAiOpen ? "color:${args.theme.var.color.primary}" : "color:${args.theme.var.color.text_light_300}"};}\`;`}
+        onClick={() => togglePanel("isAiOpen")}
         size={22}
-        title="Toggle Settings Panel"
+        title="Toggle AI Panel"
         tooltipGroup="right-buttons"
       />
       <IconButton

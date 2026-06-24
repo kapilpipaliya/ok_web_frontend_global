@@ -376,7 +376,10 @@ export function attachLayoutTreeItemDragDrop(
         ctx.layoutStoreVertex().id,
         ctx.graph,
         ctx.setGraph,
-        { previewHoverId: ctx.layoutVertex.id },
+        {
+          previewHoverId: ctx.layoutVertex.id,
+          layoutTreeScrollSource: "layoutTree",
+        },
       );
     },
     onDragLeave: () => {
