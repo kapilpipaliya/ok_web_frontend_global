@@ -419,11 +419,7 @@ export const rateLimit = {
       strategy: "sliding-window" as RateLimitStrategy,
     }),
 
-    tokenBucket: (
-      capacity: number,
-      refillRate: number,
-      window = 60,
-    ) => ({
+    tokenBucket: (capacity: number, refillRate: number, window = 60) => ({
       max: capacity,
       window,
       strategy: "token-bucket" as RateLimitStrategy,

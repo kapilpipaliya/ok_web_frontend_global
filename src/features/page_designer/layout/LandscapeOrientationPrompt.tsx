@@ -57,7 +57,8 @@ export function LandscapeOrientationPrompt() {
               margin: 0;
             }\`;`}
           >
-            Please rotate your device to landscape mode to use the Page Designer.
+            Please rotate your device to landscape mode to use the Page
+            Designer.
           </As>
         </As>
       </ZIndex>

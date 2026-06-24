@@ -116,9 +116,9 @@ export function PageItem(
       formStore.P.txnId,
       graph.vertexes[props.child.id],
       graph.vertexes[formStore.P.formDataId],
-      formStore.P.selectedId !== -1
-        ? formStore.P.selectedId
-        : formStore.P.formDataId,
+      formStore.P.selectedId === -1
+        ? formStore.P.formDataId
+        : formStore.P.selectedId,
     );
   };
 

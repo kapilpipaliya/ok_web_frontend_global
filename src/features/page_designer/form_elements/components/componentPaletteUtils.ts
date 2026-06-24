@@ -37,10 +37,7 @@ export function getItemSortName(item: Vertex) {
   );
 }
 
-export function sortPaletteItems(
-  items: Vertex[],
-  config: PaletteTreeConfig,
-) {
+export function sortPaletteItems(items: Vertex[], config: PaletteTreeConfig) {
   const uncategorizedId = getUncategorizedPaletteId(config);
   return [...items].sort((a, b) => {
     const isAUncat = a.id === uncategorizedId;
@@ -95,7 +92,8 @@ export function categoryHasChildren(
 ) {
   return (
     getCategoryChildren(graph, setGraph, categoryId, config).length > 0 ||
-    getContentChildrenForCategory(graph, setGraph, categoryId, config).length > 0
+    getContentChildrenForCategory(graph, setGraph, categoryId, config).length >
+      0
   );
 }
 
@@ -217,7 +215,12 @@ export function filterPaletteTreeVertex(
   const searchable = getItemSortName(item).toLowerCase();
   if (searchable.includes(q)) return { match: true, matchedChildren: false };
 
-  const categoryChildren = getCategoryChildren(graph, setGraph, item.id, config);
+  const categoryChildren = getCategoryChildren(
+    graph,
+    setGraph,
+    item.id,
+    config,
+  );
   const contentChildren = getContentChildrenForCategory(
     graph,
     setGraph,

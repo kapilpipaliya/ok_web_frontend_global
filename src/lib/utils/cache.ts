@@ -319,11 +319,7 @@ export function cacheSize(): number {
  * Cache decorator for class methods
  */
 export function Cached(options: CacheOptions = {}) {
-  return (
-    target: any,
-    propertyKey: string,
-    descriptor: PropertyDescriptor,
-  ) => {
+  return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
     const originalMethod = descriptor.value;
 
     descriptor.value = async function (...args: any[]) {

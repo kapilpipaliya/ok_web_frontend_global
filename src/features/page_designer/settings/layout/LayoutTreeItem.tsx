@@ -129,11 +129,11 @@ export function LayoutTreeItem(
 
     const shouldScroll =
       isSelectedLayoutId(props.metaVertex.id) || isPreviewHover();
-    if (!shouldScroll || !parentRef()) return;
+    if (!(shouldScroll && parentRef())) return;
 
     const container = props.scrollContainer?.();
     const element = parentRef();
-    if (!container || !element) return;
+    if (!(container && element)) return;
 
     const timeoutId = setTimeout(() => {
       scrollElementIntoContainer(element, container, {
@@ -227,10 +227,7 @@ export function LayoutTreeItem(
     if (isSelectedLayoutId(props.metaVertex.id)) {
       boxShadow +=
         " background-color:${args.theme.var.color.primary_light_300}; color:${args.theme.var.color.primary_light_300_text};";
-    } else if (
-      isSelectedHoverId(props.metaVertex.id) ||
-      isPreviewHover()
-    ) {
+    } else if (isSelectedHoverId(props.metaVertex.id) || isPreviewHover()) {
       boxShadow +=
         " background-color:${args.theme.var.color.primary_light_750}; color:${args.theme.var.color.primary_light_750_text};";
     }

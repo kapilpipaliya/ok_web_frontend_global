@@ -1,4 +1,10 @@
-import { createEffect, createSignal, onCleanup, Show, type JSX } from "solid-js";
+import {
+  createEffect,
+  createSignal,
+  onCleanup,
+  Show,
+  type JSX,
+} from "solid-js";
 import { useLocation, useNavigate } from "@solidjs/router";
 
 export interface SchemaJobRunnerProps {
@@ -11,7 +17,9 @@ function jobIdFromSearch(search: string): string | null {
   return new URLSearchParams(search).get("jobId");
 }
 
-export default function SchemaJobRunner(props: Readonly<SchemaJobRunnerProps>): JSX.Element {
+export default function SchemaJobRunner(
+  props: Readonly<SchemaJobRunnerProps>,
+): JSX.Element {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -23,7 +31,7 @@ export default function SchemaJobRunner(props: Readonly<SchemaJobRunnerProps>): 
 
   let pollTimer: ReturnType<typeof setInterval> | undefined;
   /** Last `jobId` from the URL we started polling for (avoids resetting the interval when search is unchanged). */
-  let syncedJobIdFromUrl: string | null | undefined = undefined;
+  let syncedJobIdFromUrl: string | null | undefined ;
 
   const stopPolling = () => {
     if (pollTimer !== undefined) {
@@ -45,7 +53,9 @@ export default function SchemaJobRunner(props: Readonly<SchemaJobRunnerProps>): 
 
     if (res.status === 404) {
       setStatus("complete");
-      setError(body.message ?? "Job not found (may have completed and been removed).");
+      setError(
+        body.message ?? "Job not found (may have completed and been removed).",
+      );
       stopPolling();
       setBusy(false);
       return;
@@ -72,7 +82,9 @@ export default function SchemaJobRunner(props: Readonly<SchemaJobRunnerProps>): 
 
   const navigateToJobId = (id: string) => {
     const path = location.pathname;
-    const url = new URL(typeof window !== "undefined" ? window.location.href : "http://local");
+    const url = new URL(
+      typeof window === "undefined" ? "http://local" : window.location.href,
+    );
     url.searchParams.set("jobId", id);
     navigate(`${path}${url.search}`, { scroll: false, replace: false });
   };
@@ -117,15 +129,17 @@ export default function SchemaJobRunner(props: Readonly<SchemaJobRunnerProps>): 
     setBusy(true);
     try {
       const u =
-        typeof window !== "undefined"
-          ? new URL(window.location.href)
-          : new URL("http://local");
+        typeof window === "undefined"
+          ? new URL("http://local")
+          : new URL(window.location.href);
       u.searchParams.delete("jobId");
       const suffix = u.search;
 
-      const res = await fetch(`${props.apiPath}${suffix}`, { credentials: "include" });
+      const res = await fetch(`${props.apiPath}${suffix}`, {
+        credentials: "include",
+      });
       const body = (await res.json()) as { jobId?: string; message?: string };
-      if (!res.ok || !body.jobId) {
+      if (!(res.ok && body.jobId)) {
         setError(body.message ?? `Failed to queue job (${res.status})`);
         setBusy(false);
         return;
@@ -141,8 +155,8 @@ export default function SchemaJobRunner(props: Readonly<SchemaJobRunnerProps>): 
     <div style={{ padding: "1.5rem", "max-width": "960px", margin: "0 auto" }}>
       <h1 style={{ "margin-bottom": "0.75rem" }}>{props.title}</h1>
       <p style={{ "margin-bottom": "1rem", color: "#555" }}>
-        Jobs run in the background. Refreshing keeps <code>jobId</code> in the URL so polling
-        continues.
+        Jobs run in the background. Refreshing keeps <code>jobId</code> in the
+        URL so polling continues.
       </p>
 
       <Show when={!jobId()}>

@@ -83,7 +83,8 @@ function mergeInvalidationTargets(
 export function createRealtimeInvalidationBridge(
   options: CreateRealtimeBridgeOptions,
 ): RealtimeInvalidationBridge {
-  const { platformApi, dashboardKey, realtimeConfig, pollEvents, devtools } = options;
+  const { platformApi, dashboardKey, realtimeConfig, pollEvents, devtools } =
+    options;
   const channel = String(realtimeConfig.channel || "dashboard");
   const intervalMs = Number(realtimeConfig.pollingIntervalMs || 30000);
   const staleWhileRevalidate = realtimeConfig.staleWhileRevalidate !== false;

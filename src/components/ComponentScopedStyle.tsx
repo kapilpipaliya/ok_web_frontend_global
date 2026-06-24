@@ -3,7 +3,9 @@ import type { JSX } from "solid-js";
 export const SCOPED_STYLE_ATTR = "data-component-scoped-style";
 
 /** Per-component style tag for SSR/hydration (removed after hydrate). */
-export function ComponentScopedStyle(props: { cssContent: string }): JSX.Element {
+export function ComponentScopedStyle(props: {
+  cssContent: string;
+}): JSX.Element {
   return <style data-component-scoped-style>{props.cssContent}</style>;
 }
 

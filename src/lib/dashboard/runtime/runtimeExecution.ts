@@ -43,7 +43,10 @@ export type CommitPayload = {
 
 export type CommitResult =
   | { ok: true; execution: ExecutionRecord }
-  | { ok: false; reason: "stale" | "cancelled" | "not_found" | "invalid_status" };
+  | {
+      ok: false;
+      reason: "stale" | "cancelled" | "not_found" | "invalid_status";
+    };
 
 export type ExecutionTimelineEntry = {
   at: number;
@@ -94,7 +97,11 @@ export function createDashboardExecutionCoordinator(): DashboardExecutionCoordin
       const key = widgetKey(widgetId, runtimeScopeId);
       const next = (generations.get(key) ?? 0) + 1;
       generations.set(key, next);
-      log("generation_bump", { widgetId, generation: next, detail: runtimeScopeId });
+      log("generation_bump", {
+        widgetId,
+        generation: next,
+        detail: runtimeScopeId,
+      });
       return next;
     },
 
@@ -104,13 +111,15 @@ export function createDashboardExecutionCoordinator(): DashboardExecutionCoordin
 
     begin(params) {
       const key = widgetKey(params.widgetId, params.runtimeScopeId);
-      const generation =
-        params.generation ?? generations.get(key) ?? 0;
+      const generation = params.generation ?? generations.get(key) ?? 0;
 
       const previousId = activeByWidget.get(key);
       if (previousId) {
         const prev = executions.get(previousId);
-        if (prev && (prev.status === "running" || prev.status === "pending_commit")) {
+        if (
+          prev &&
+          (prev.status === "running" || prev.status === "pending_commit")
+        ) {
           prev.status = "cancelled";
           log("execution_cancelled", {
             executionId: previousId,
@@ -152,10 +161,15 @@ export function createDashboardExecutionCoordinator(): DashboardExecutionCoordin
     enterPendingCommit(executionId) {
       const record = executions.get(executionId);
       if (!record || record.status !== "running") return false;
-      const currentGen = generations.get(widgetKey(record.widgetId, record.runtimeScopeId)) ?? 0;
+      const currentGen =
+        generations.get(widgetKey(record.widgetId, record.runtimeScopeId)) ?? 0;
       if (record.generation < currentGen) {
         record.status = "stale";
-        log("execution_stale", { executionId, widgetId: record.widgetId, generation: record.generation });
+        log("execution_stale", {
+          executionId,
+          widgetId: record.widgetId,
+          generation: record.generation,
+        });
         return false;
       }
       record.status = "pending_commit";
@@ -166,8 +180,10 @@ export function createDashboardExecutionCoordinator(): DashboardExecutionCoordin
     commit(executionId, payload) {
       const record = executions.get(executionId);
       if (!record) return { ok: false, reason: "not_found" };
-      if (record.status === "cancelled") return { ok: false, reason: "cancelled" };
-      const currentGen = generations.get(widgetKey(record.widgetId, record.runtimeScopeId)) ?? 0;
+      if (record.status === "cancelled")
+        return { ok: false, reason: "cancelled" };
+      const currentGen =
+        generations.get(widgetKey(record.widgetId, record.runtimeScopeId)) ?? 0;
       if (record.generation < currentGen || payload.generation < currentGen) {
         record.status = "stale";
         log("commit_rejected_stale", {
@@ -183,7 +199,11 @@ export function createDashboardExecutionCoordinator(): DashboardExecutionCoordin
       record.status = "committed";
       const key = widgetKey(record.widgetId, record.runtimeScopeId);
       if (activeByWidget.get(key) === executionId) activeByWidget.delete(key);
-      log("execution_committed", { executionId, widgetId: record.widgetId, generation: record.generation });
+      log("execution_committed", {
+        executionId,
+        widgetId: record.widgetId,
+        generation: record.generation,
+      });
       return { ok: true, execution: record };
     },
 
@@ -193,7 +213,11 @@ export function createDashboardExecutionCoordinator(): DashboardExecutionCoordin
       record.status = "cancelled";
       const key = widgetKey(record.widgetId, record.runtimeScopeId);
       if (activeByWidget.get(key) === executionId) activeByWidget.delete(key);
-      log("execution_cancelled", { executionId, widgetId: record.widgetId, detail: reason });
+      log("execution_cancelled", {
+        executionId,
+        widgetId: record.widgetId,
+        detail: reason,
+      });
     },
 
     cancelWidget(widgetId, runtimeScopeId) {

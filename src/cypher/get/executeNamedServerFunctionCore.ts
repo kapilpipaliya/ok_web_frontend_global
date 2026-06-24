@@ -261,7 +261,9 @@ export async function executeNamedServerFunctionCore(
   let functionLookupSession: Session | undefined;
   let functionLookupSessionCreated = false;
 
-  let fallbackSessionData: { dbSession: Session; subDomain: string } | undefined;
+  let fallbackSessionData:
+    | { dbSession: Session; subDomain: string }
+    | undefined;
 
   // Request for Shopify auth and getShopifyClient (used when building args)
   let rawRequest: Request | undefined;
@@ -302,10 +304,14 @@ export async function executeNamedServerFunctionCore(
           if (req.headers.get("authorization")) {
             // For app subdomains, get shop from Shopify authentication
             try {
-              const shopify = await getShopify(rawSubDomain!, fallbackSessionData!.dbSession);
+              const shopify = await getShopify(
+                rawSubDomain!,
+                fallbackSessionData!.dbSession,
+              );
               const result = await shopify.authenticate.admin(req);
               shopFromRequest = result.session.shop;
-              if (shopFromRequest) shopForContext = shopForContext ?? shopFromRequest;
+              if (shopFromRequest)
+                shopForContext = shopForContext ?? shopFromRequest;
             } catch (authError) {
               console.error(authError);
             }
@@ -324,8 +330,9 @@ export async function executeNamedServerFunctionCore(
         "shopifySupportReplyAsShop",
         "shopifySupportReplyAsAdmin",
       ];
-      const useCentralDbForSupport =
-        SUPPORT_FUNCTION_KEYS.includes(request.functionName);
+      const useCentralDbForSupport = SUPPORT_FUNCTION_KEYS.includes(
+        request.functionName,
+      );
 
       if (useCentralDbForSupport) {
         // Support tickets live in central DB so admin sees all shops
@@ -357,7 +364,7 @@ export async function executeNamedServerFunctionCore(
     // Function lookup session - use provided one if available, otherwise use fallback
     // Functions are typically stored in the main/admin database, not shop-specific databases
     // But for subdomain-specific functions (like seed functions), they may be in the subdomain database
-    
+
     if (context.functionLookupSession) {
       // Use the provided function lookup session
       functionLookupSession = context.functionLookupSession;
@@ -376,7 +383,7 @@ export async function executeNamedServerFunctionCore(
       }
       functionLookupSession = fallbackSessionData.dbSession;
     }
-    
+
     // Ensure functionLookupSession is defined (should always be assigned above)
     if (!functionLookupSession) {
       return {
@@ -413,7 +420,6 @@ export async function executeNamedServerFunctionCore(
     const AsyncFunction = Object.getPrototypeOf(async () => {}).constructor;
     const serverFunction = new AsyncFunction("args", functionBody);
 
-
     // Parent context (e.g. shop) to merge into hook contextData so hooks receive it without callers passing it explicitly
     const parentContextDataForHooks = {
       ...(request.contextData || {}),
@@ -435,8 +441,16 @@ export async function executeNamedServerFunctionCore(
       });
 
       try {
-        const executionContext: EvalExpressionContext & { [key: `$${string}`]: any } = ctx
-          ? { ...ctx, dbSession: nestedSession, subDomain: nestedDbName, rawSubDomain, rawDbSession: fallbackSessionData?.dbSession }
+        const executionContext: EvalExpressionContext & {
+          [key: `$${string}`]: any;
+        } = ctx
+          ? {
+              ...ctx,
+              dbSession: nestedSession,
+              subDomain: nestedDbName,
+              rawSubDomain,
+              rawDbSession: fallbackSessionData?.dbSession,
+            }
           : {
               dbSession: nestedSession,
               subDomain: nestedDbName,
@@ -447,7 +461,10 @@ export async function executeNamedServerFunctionCore(
               vertexes: {} as unknown as any,
             };
 
-        req.contextData = { ...parentContextDataForHooks, ...(req.contextData || {}) };
+        req.contextData = {
+          ...parentContextDataForHooks,
+          ...(req.contextData || {}),
+        };
 
         return await executeNamedServerFunctionCore(req, executionContext);
       } finally {
@@ -457,15 +474,18 @@ export async function executeNamedServerFunctionCore(
 
     // Helper function to execute hooks (string or string[])
     // Must be defined after contextAwareExecuteNamedServerFunction
-    const executeHooks = async (hooks: string | string[] | undefined, hookContextData: any = {}) => {
+    const executeHooks = async (
+      hooks: string | string[] | undefined,
+      hookContextData: any = {},
+    ) => {
       if (!hooks) return;
-      
+
       // Normalize to array
       const hookArray = Array.isArray(hooks) ? hooks : [hooks];
-      
+
       // Execute each hook sequentially; merge parent context (e.g. shop) so hooks receive it
       for (const hookName of hookArray) {
-        if (!hookName || typeof hookName !== 'string') continue;
+        if (!hookName || typeof hookName !== "string") continue;
 
         await contextAwareExecuteNamedServerFunction({
           functionName: hookName,
@@ -638,16 +658,16 @@ export async function executeNamedServerFunctionCore(
       // Generic server function executor (functionBody-based)
       executeServerFunction,
       // Shopify helpers (request required; subdomain from request)
-      verifyShopifyAdminRequest: (params: Parameters<typeof verifyShopifyAdminRequest>[0]) =>
-        verifyShopifyAdminRequest(params, rawRequest!),
+      verifyShopifyAdminRequest: (
+        params: Parameters<typeof verifyShopifyAdminRequest>[0],
+      ) => verifyShopifyAdminRequest(params, rawRequest!),
       ensureShopDatabaseAndMigrate,
       rawSubDomain: rawSubDomain,
       getDBSessionForShop,
       getDatabaseNameForShop,
       /** Same as POST `/api/users/invite`: `sendInvitationEmail(request, userVertex, subDomain, dbSession)` — use `args.request` / `getRequestEvent`, `args.subDomain`, `args.session`. */
       sendInvitationEmail,
-      getShopifyClient: () =>
-        getShopify(rawSubDomain!),
+      getShopifyClient: () => getShopify(rawSubDomain!),
       getSessionUser,
       runMigration,
       processResult,

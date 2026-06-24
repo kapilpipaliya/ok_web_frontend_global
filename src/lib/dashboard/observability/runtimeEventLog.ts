@@ -28,7 +28,11 @@ export type RuntimeTimelineEntry = {
 };
 
 export type DashboardRuntimeEventLog = {
-  push: (type: RuntimeTimelineEventType, detail?: Record<string, unknown>, causality?: RuntimeCausality) => void;
+  push: (
+    type: RuntimeTimelineEventType,
+    detail?: Record<string, unknown>,
+    causality?: RuntimeCausality,
+  ) => void;
   getTimeline: () => RuntimeTimelineEntry[];
   getWaterfall: (invalidationId?: string) => RuntimeTimelineEntry[];
   snapshot: () => { timeline: RuntimeTimelineEntry[] };
@@ -57,8 +61,10 @@ export function createDashboardRuntimeEventLog(): DashboardRuntimeEventLog {
       if (!invalidationId) return this.getTimeline();
       const relatedIds = new Set<string>([invalidationId]);
       for (const entry of entries) {
-        if (entry.causality?.invalidationId) relatedIds.add(entry.causality.invalidationId);
-        if (entry.causality?.parentInvalidationId) relatedIds.add(entry.causality.parentInvalidationId);
+        if (entry.causality?.invalidationId)
+          relatedIds.add(entry.causality.invalidationId);
+        if (entry.causality?.parentInvalidationId)
+          relatedIds.add(entry.causality.parentInvalidationId);
         if (entry.causality?.batchId) relatedIds.add(entry.causality.batchId);
       }
       return entries

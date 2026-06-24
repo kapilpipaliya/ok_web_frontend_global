@@ -64,7 +64,6 @@ export default function App() {
             const location = useLocation();
             const navigate = useNavigate();
 
-
             // Set up Capacitor deep linking listener
             onMount(() => {
               if (isServer) return;
@@ -135,9 +134,7 @@ export default function App() {
                     {/* </Show> */}
                   </Show>
                   <NoHydration>
-                    <HydrationLoader
-                      show={showLoader()}
-                    />
+                    <HydrationLoader show={showLoader()} />
                   </NoHydration>
                 </ErrorBoundary>
               </MetaProvider>

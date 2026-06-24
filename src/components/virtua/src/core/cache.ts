@@ -1,4 +1,4 @@
-import { type InternalCacheSnapshot, type ItemsRange } from "./types.js";
+import type { InternalCacheSnapshot, ItemsRange } from "./types.js";
 import { clamp, floor, max, min, sort } from "./utils.js";
 
 type Writeable<T> = {
@@ -89,7 +89,7 @@ export const getItemOffset = (
 export const findIndex = (
   cache: Cache,
   offset: number,
-  low: number = 0,
+  low = 0,
   high: number = cache._length - 1,
 ): number => {
   // Find with binary search
@@ -123,12 +123,11 @@ export const computeRange = (
     // start <= end, prevStartIndex <= start
     const end = findIndex(cache, endOffset, prevStartIndex);
     return [findIndex(cache, startOffset, prevStartIndex, end), end];
-  } else {
+  }
     // search backward
     // start <= end, start <= prevStartIndex
     const start = findIndex(cache, startOffset, undefined, prevStartIndex);
     return [start, findIndex(cache, endOffset, start)];
-  }
 };
 
 /**
@@ -220,7 +219,7 @@ export const updateCacheLength = (
     fill(cache._offsets, diff);
     fill(cache._sizes, diff, isShift);
     return cache._defaultItemSize * diff;
-  } else {
+  }
     // Removed
     cache._offsets.splice(diff);
     return (
@@ -230,5 +229,4 @@ export const updateCacheLength = (
         acc - (removed === UNCACHED ? cache._defaultItemSize : removed),
       0,
     );
-  }
 };

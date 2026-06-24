@@ -124,7 +124,7 @@ export function schemaOpButtonCss(
   const pad = size === "sm" ? "0.35rem 0.5rem" : "0.5rem 0.85rem";
   const fontSize = size === "sm" ? "0.7rem" : "0.8rem";
   const base = `padding: ${pad}; border-radius: 0.375rem; font-size: ${fontSize}; font-weight: 600; cursor: pointer; transition: opacity 0.15s ease;`;
-  const disabled = `._id:disabled { opacity: 0.45; cursor: not-allowed; }`;
+  const disabled = "._id:disabled { opacity: 0.45; cursor: not-allowed; }";
 
   switch (variant) {
     case "primary":

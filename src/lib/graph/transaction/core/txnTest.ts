@@ -168,7 +168,7 @@ export function undo(
     .find((index) => index < activeUndoIndex);
 
   const newUndoIndex =
-    nearestLowestIndex !== undefined ? nearestLowestIndex : activeUndoIndex - 1;
+    nearestLowestIndex === undefined ? activeUndoIndex - 1 : nearestLowestIndex;
 
   txnValue.steps.slice(newUndoIndex + 1, activeUndoIndex + 1);
   txnValue.activeUndoIndex = newUndoIndex;

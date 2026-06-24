@@ -146,7 +146,7 @@ async function getShopUserByEmail(
   email: string,
 ): Promise<Vertex | null> {
   const result = await session.run(
-    `MATCH (u:User {email: $email}) RETURN u LIMIT 1`,
+    "MATCH (u:User {email: $email}) RETURN u LIMIT 1",
     { email },
   );
 
@@ -312,7 +312,10 @@ export async function ensureShopDatabaseAndMigrate(
       await sleep(MIGRATION_RETRY_GAP_MS);
       const stillInProgress = await isMigrationInProgress(shop, shopDbSession);
       if (!stillInProgress) {
-        const needMigration = await shouldRunMigrationForShop(shop, shopDbSession);
+        const needMigration = await shouldRunMigrationForShop(
+          shop,
+          shopDbSession,
+        );
         if (!needMigration) {
           await shopDbSession.close();
           return getDBSessionForShop(shop, options.appSubDomain);
@@ -354,12 +357,12 @@ export async function ensureShopDatabaseAndMigrate(
       shopDatabaseName,
       shopAdminUser,
       {
-      dryRun: options.dryRun ?? false,
-      contextData: {
-        shop,
-        ...options.contextData,
-      },
-      appSubDomain: options.appSubDomain,
+        dryRun: options.dryRun ?? false,
+        contextData: {
+          shop,
+          ...options.contextData,
+        },
+        appSubDomain: options.appSubDomain,
       },
     );
 

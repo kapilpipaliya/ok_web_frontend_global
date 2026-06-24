@@ -25,7 +25,8 @@ export async function GET({ request }: APIEvent) {
 
   try {
     const url = new URL(request.url);
-    const { targetDomain, targetSubdomain, redirectPath } = validateRequest(url);
+    const { targetDomain, targetSubdomain, redirectPath } =
+      validateRequest(url);
 
     if (subDomain !== ADMIN_DB_NAME) {
       throw new APIError(

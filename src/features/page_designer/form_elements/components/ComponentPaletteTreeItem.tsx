@@ -23,7 +23,11 @@ import {
 } from "~/features/page_designer/functions/drag_drop/pragmatic/bindDragDropRef";
 import { TreeItemExpandButton } from "~/features/page_designer/settings/layout/TreeItemExpandButton";
 import { As } from "~/components/As";
-import { baseItemStyle, buttonStyle, createOpenInNewTab } from "../common/ItemStyles";
+import {
+  baseItemStyle,
+  buttonStyle,
+  createOpenInNewTab,
+} from "../common/ItemStyles";
 import type { Id } from "~/lib/graph/type/id";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
@@ -37,7 +41,11 @@ import {
   type ComponentPaletteDropSnapshot,
   type PaletteDropPosition,
 } from "./componentPaletteDragDrop";
-import { COMPONENT_PALETTE_CONFIG, isUncategorizedPaletteId, type PaletteTreeConfig } from "./componentPaletteConfig";
+import {
+  COMPONENT_PALETTE_CONFIG,
+  isUncategorizedPaletteId,
+  type PaletteTreeConfig,
+} from "./componentPaletteConfig";
 import {
   categoryHasChildren,
   getCategoryChildren,
@@ -71,7 +79,10 @@ export function ComponentPaletteTreeItem(
     onEditCategory?: (category: Vertex) => void;
     onDeleteCategory?: (category: Vertex) => void;
     onAddSubcategory?: (parentId: Id) => void;
-    filterTree?: (vertex: Vertex) => { match: boolean; matchedChildren: boolean };
+    filterTree?: (vertex: Vertex) => {
+      match: boolean;
+      matchedChildren: boolean;
+    };
     shouldExpandForSearch?: (vertex: Vertex) => boolean;
     searchActive?: boolean;
     isPaletteDragging?: boolean;
@@ -132,12 +143,12 @@ export function ComponentPaletteTreeItem(
   );
 
   const hasChildren = createMemo(() => {
-    if (!isCategory() && !isUncategorized()) return false;
+    if (!(isCategory() || isUncategorized())) return false;
     return categoryHasChildren(graph, setGraph, props.item.id, paletteConfig());
   });
 
   const contentCount = createMemo(() => {
-    if (!isCategory() && !isUncategorized()) return null;
+    if (!(isCategory() || isUncategorized())) return null;
     return getCategoryContentCount(graph, props.item.id, paletteConfig());
   });
 
@@ -149,12 +160,12 @@ export function ComponentPaletteTreeItem(
   });
 
   const isDirectMatch = createMemo(() => {
-    if (!props.searchActive || !props.filterTree) return false;
+    if (!(props.searchActive && props.filterTree)) return false;
     return props.filterTree(props.item).match;
   });
 
   const shouldShowItem = createMemo(() => {
-    if (!props.searchActive || !props.filterTree) return true;
+    if (!(props.searchActive && props.filterTree)) return true;
     const r = props.filterTree(props.item);
     return r.match || r.matchedChildren;
   });
@@ -178,9 +189,7 @@ export function ComponentPaletteTreeItem(
   });
 
   const isDropTarget = createMemo(() => {
-    return (
-      props.dropActiveItem === props.item.id && !!props.dropPosition
-    );
+    return props.dropActiveItem === props.item.id && !!props.dropPosition;
   });
 
   const contentCursor = () => {
@@ -240,7 +249,7 @@ export function ComponentPaletteTreeItem(
   });
 
   createEffect(() => {
-    if (!props.itemRef || !isSelected()) return;
+    if (!(props.itemRef && isSelected())) return;
     const el = itemRef();
     if (el) props.itemRef(el);
   });
@@ -264,7 +273,7 @@ export function ComponentPaletteTreeItem(
   };
 
   const isMissingComp = createMemo(() => {
-    if (!isContentItem() || !isComponentPalette()) return false;
+    if (!(isContentItem() && isComponentPalette())) return false;
     if (props.item.L?.includes("Component")) return false;
     const key = props.item.P?.key as string;
     return key && !componentsMap[key];
@@ -289,9 +298,9 @@ export function ComponentPaletteTreeItem(
       formStore.P.txnId,
       props.item,
       graph.vertexes[formStore.P.formDataId],
-      formStore.P.selectedId !== -1
-        ? formStore.P.selectedId
-        : formStore.P.formDataId,
+      formStore.P.selectedId === -1
+        ? formStore.P.formDataId
+        : formStore.P.selectedId,
     );
   };
 
@@ -356,9 +365,7 @@ export function ComponentPaletteTreeItem(
           <As
             as="div"
             css={[
-              isDirectMatch()
-                ? `return \`._id { font-weight: bold; }\`;`
-                : "",
+              isDirectMatch() ? "return `._id { font-weight: bold; }`;" : "",
               `return \`._id {
   display: flex;
   align-items: center;
@@ -379,7 +386,7 @@ export function ComponentPaletteTreeItem(
               as="span"
               css={[
                 isMissingComp()
-                  ? `return \`._id { color: \${args.theme.var.color.error}; }\`;`
+                  ? "return `._id { color: ${args.theme.var.color.error}; }`;"
                   : "",
                 `return \`._id {
   flex: 1;
@@ -400,11 +407,15 @@ export function ComponentPaletteTreeItem(
   opacity: 0.6;
 }\`;`}
               >
-                {(contentCount() ?? "")}
+                {contentCount() ?? ""}
               </As>
             </Show>
             <Show when={canManageCategory() && isHovered()}>
-              <As as="span" css={`return \`._id { display: flex; gap: 2px; }\`;`} onClick={(e) => e.stopPropagation()}>
+              <As
+                as="span"
+                css={"return `._id { display: flex; gap: 2px; }`;"}
+                onClick={(e) => e.stopPropagation()}
+              >
                 <IconButton
                   css={buttonStyle}
                   icon="ph:pencil-simple"
@@ -436,7 +447,11 @@ export function ComponentPaletteTreeItem(
                   onPreviewOpen={handlePreviewOpen}
                 />
               </Show>
-              <Show when={isComponentPalette() || isPagePalette() || isFunctionPalette()}>
+              <Show
+                when={
+                  isComponentPalette() || isPagePalette() || isFunctionPalette()
+                }
+              >
                 <IconButton
                   css={buttonStyle}
                   icon="ph:arrow-square-out"
@@ -526,9 +541,7 @@ export function ComponentPaletteTreeItem(
           </As>
         </Show>
 
-        <Show
-          when={isDropTarget() && props.dropPosition === "after"}
-        >
+        <Show when={isDropTarget() && props.dropPosition === "after"}>
           <As
             as="div"
             css={`return \`._id {

@@ -120,10 +120,7 @@ async function preprocessSchemaForExistingNodes(
       vertexesArray.find(
         (vertex) =>
           getVertexLabel(vertex) === rootLabel && vertex.P?.key === rootKey,
-      ) ??
-      vertexesArray.find(
-        (vertex) => getVertexLabel(vertex) === rootLabel,
-      );
+      ) ?? vertexesArray.find((vertex) => getVertexLabel(vertex) === rootLabel);
 
     if (existingRootId) {
       console.log(
@@ -294,8 +291,11 @@ async function importSingleSchema(
   tx: Transaction,
 ): Promise<SchemaImportResult> {
   // Pre-process schema to handle existing nodes (Roles, Files, etc.)
-  const { schema: processedSchema, existingNodeMap, replacedItems } =
-    await preprocessSchemaForExistingNodes(schema, tx, type, key);
+  const {
+    schema: processedSchema,
+    existingNodeMap,
+    replacedItems,
+  } = await preprocessSchemaForExistingNodes(schema, tx, type, key);
 
   // Load existing nodes into the graph state
   if (existingNodeMap.size > 0) {

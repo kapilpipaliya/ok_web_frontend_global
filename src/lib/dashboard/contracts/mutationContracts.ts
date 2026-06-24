@@ -40,7 +40,9 @@ export function resolveMutationInvalidationTargets(event: MutationEvent): {
   };
 }
 
-export function normalizeMutationEvent(raw: MutationEvent | null | undefined): MutationEvent | null {
+export function normalizeMutationEvent(
+  raw: MutationEvent | null | undefined,
+): MutationEvent | null {
   if (!raw?.type) return null;
   const type = String(raw.type).toUpperCase() as MutationEventType;
   if (!MUTATION_EVENT_TYPES.includes(type)) return null;

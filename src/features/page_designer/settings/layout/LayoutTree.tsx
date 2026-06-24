@@ -347,7 +347,7 @@ export function LayoutTree() {
       setGraph, // Graph setter
       "Html", // Component type
       htmlProps, // Component properties
-      dragPosition !== "center" ? targetVertex : undefined, // Target vertex
+      dragPosition === "center" ? undefined : targetVertex, // Target vertex
       dragPosition, // Position
     );
 
@@ -707,12 +707,7 @@ export function LayoutTree() {
   };
 
   return (
-    <As
-      as="div"
-      tabIndex={0}
-      onKeyDown={handleKeyDown}
-      ref={setTreeRef}
-    >
+    <As as="div" tabIndex={0} onKeyDown={handleKeyDown} ref={setTreeRef}>
       <As
         as="div"
         css={`return \`._id {
@@ -721,7 +716,7 @@ export function LayoutTree() {
           gap: 8px;
         }\`;`}
       >
-        <As as="div" css={`return \`._id { flex: 1; min-width: 0; }\`;`}>
+        <As as="div" css={"return `._id { flex: 1; min-width: 0; }`;"}>
           <SearchBar
             handleChange={onSearchChange}
             placeholder="Search layers..."

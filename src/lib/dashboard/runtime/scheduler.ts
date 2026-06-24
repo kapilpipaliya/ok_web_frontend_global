@@ -29,14 +29,22 @@ export type RefreshExecutor = (
 ) => void | Promise<void>;
 
 export type SchedulerState = {
-  queue: { widgetId: string; priority: number; reason?: string; swr?: boolean }[];
+  queue: {
+    widgetId: string;
+    priority: number;
+    reason?: string;
+    swr?: boolean;
+  }[];
   pendingFlush: boolean;
   lastFlushAt: number;
   flushCount: number;
 };
 
 export type DashboardRuntimeScheduler = {
-  schedule: (widgetIds: string | string[], options?: ScheduleRefreshOptions) => void;
+  schedule: (
+    widgetIds: string | string[],
+    options?: ScheduleRefreshOptions,
+  ) => void;
   flush: () => Promise<void>;
   clear: () => void;
   getState: () => SchedulerState;
@@ -72,7 +80,9 @@ export function createDashboardRuntimeScheduler(
   let batchTimer: ReturnType<typeof setTimeout> | null = null;
   let flushCount = 0;
   let lastFlushAt = 0;
-  let onLifecycle: ((widgetId: string, phase: WidgetLifecyclePhase) => void) | undefined;
+  let onLifecycle:
+    | ((widgetId: string, phase: WidgetLifecyclePhase) => void)
+    | undefined;
 
   const flushNow = async () => {
     if (queue.size === 0) return;
@@ -86,8 +96,14 @@ export function createDashboardRuntimeScheduler(
 
     const widgetIds = jobs.map((j) => j.widgetId);
     const swr = jobs.some((j) => j.swr);
-    const reason = jobs.map((j) => j.reason).filter(Boolean).join("; ") || undefined;
-    const rawEventCount = pendingRawEventCount || jobs.reduce((sum, j) => sum + (j.rawEventCount || 1), 0);
+    const reason =
+      jobs
+        .map((j) => j.reason)
+        .filter(Boolean)
+        .join("; ") || undefined;
+    const rawEventCount =
+      pendingRawEventCount ||
+      jobs.reduce((sum, j) => sum + (j.rawEventCount || 1), 0);
     const coalescedWidgetCount = Math.max(0, rawEventCount - widgetIds.length);
     pendingRawEventCount = 0;
 
@@ -157,7 +173,8 @@ export function createDashboardRuntimeScheduler(
           priority: Math.max(existing?.priority ?? 0, priority),
           reason: options.reason || existing?.reason,
           swr: options.staleWhileRevalidate ?? existing?.swr,
-          rawEventCount: (existing?.rawEventCount || 0) + Number(options.rawEventCount || 1),
+          rawEventCount:
+            (existing?.rawEventCount || 0) + Number(options.rawEventCount || 1),
         });
       }
       scheduleFlush(options.debounceMs ?? debounceMs);

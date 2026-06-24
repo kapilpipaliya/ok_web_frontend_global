@@ -32,7 +32,9 @@ async function upsertGlobalSettingOnShopSession(
   props: Record<string, unknown>,
 ): Promise<void> {
   const key =
-    typeof props.key === "string" && props.key.length > 0 ? props.key : "Default";
+    typeof props.key === "string" && props.key.length > 0
+      ? props.key
+      : "Default";
 
   const updateResult = await shopSession.run(
     `MATCH (s:GlobalSetting {key: $key})
@@ -69,7 +71,7 @@ export async function syncGlobalSettingsToSingleShop(
 
   try {
     const settingResult = await mainSession.run(
-      `MATCH (s:GlobalSetting) RETURN s LIMIT 1`,
+      "MATCH (s:GlobalSetting) RETURN s LIMIT 1",
     );
 
     if (settingResult.records.length === 0) {
@@ -113,7 +115,7 @@ export async function syncGlobalSettingsToShopDatabases(
 
   try {
     const settingResult = await mainSession.run(
-      `MATCH (s:GlobalSetting) RETURN s LIMIT 1`,
+      "MATCH (s:GlobalSetting) RETURN s LIMIT 1",
     );
 
     if (settingResult.records.length === 0) {

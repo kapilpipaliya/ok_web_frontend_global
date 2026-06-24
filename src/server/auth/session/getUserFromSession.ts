@@ -24,14 +24,17 @@ export async function getSessionUser(): Promise<undefined | Vertex> {
       try {
         if (event.request.headers.get("authorization")) {
           // Authenticate with Shopify to get shop
-          const { dbSession: authDbSession, subDomain } = await getDBSessionForSubdomain(event.request);
+          const { dbSession: authDbSession, subDomain } =
+            await getDBSessionForSubdomain(event.request);
           try {
             const shopify = await getShopify(subDomain, authDbSession);
             const result = await shopify.authenticate.admin(event.request);
             const shop = result.session.shop;
 
             if (shop) {
-              const shopEmail = await getShopEmailFromShopifyAdmin(result.admin);
+              const shopEmail = await getShopEmailFromShopifyAdmin(
+                result.admin,
+              );
               if (!shopEmail || validateEmail(shopEmail)) {
                 return undefined;
               }
@@ -48,7 +51,7 @@ export async function getSessionUser(): Promise<undefined | Vertex> {
 
                 try {
                   const userResult = await dbSession.run(
-                    `MATCH (u:User {email: $email}) RETURN u LIMIT 1`,
+                    "MATCH (u:User {email: $email}) RETURN u LIMIT 1",
                     { email },
                   );
 
@@ -83,15 +86,20 @@ export async function getSessionUser(): Promise<undefined | Vertex> {
       } catch (errorOrResponse) {
         if (errorOrResponse instanceof Response) {
           // Check if we're in a server function context (API route) vs normal page load
-          const isServerFunctionCall = event && (() => {
-            try {
-              const urlObj = new URL(event.request.url);
-              // Server functions are called via API routes or _server endpoint
-              return urlObj.pathname.startsWith('/api/') || urlObj.pathname.startsWith('/_server');
-            } catch {
-              return false;
-            }
-          })();
+          const isServerFunctionCall =
+            event &&
+            (() => {
+              try {
+                const urlObj = new URL(event.request.url);
+                // Server functions are called via API routes or _server endpoint
+                return (
+                  urlObj.pathname.startsWith("/api/") ||
+                  urlObj.pathname.startsWith("/_server")
+                );
+              } catch {
+                return false;
+              }
+            })();
           if (isServerFunctionCall && event?.response) {
             // In server function context: try to copy headers if they're writable
             try {
@@ -103,21 +111,28 @@ export async function getSessionUser(): Promise<undefined | Vertex> {
             } catch (headerError) {
               // Headers were already sent - can't modify them
               // This is expected for normal page loads where response may have been sent by parallel code
-              console.log("Cannot set headers (already sent), falling through to regular session check");
+              console.log(
+                "Cannot set headers (already sent), falling through to regular session check",
+              );
             }
           } else {
             // Not a server function call or no event.response: fall through to regular session check
             // The response may already have been sent (e.g. by parallel code in GetInitialData),
             // which causes "Cannot set headers after they are sent" error.
-            console.log("Shopify authentication returned Response (likely a page load), falling through to regular session check");
+            console.log(
+              "Shopify authentication returned Response (likely a page load), falling through to regular session check",
+            );
           }
         } else {
           // If Shopify authentication fails with a non-Response error, log and fall through
-          console.error("Error in Shopify authentication for getSessionUser:", errorOrResponse);
+          console.error(
+            "Error in Shopify authentication for getSessionUser:",
+            errorOrResponse,
+          );
         }
       }
     }
-    
+
     // Regular session check for other hostnames
     const httpSession = await getHttpsSession();
     const sessionUser = httpSession?.data?.user;
@@ -144,7 +159,7 @@ export async function getUserFromSession(
     }
     if (sessionUser?.P?.shop) {
       return sessionUser;
-    } 
+    }
 
     // Get user password from database
     const sessionData = await getDBSessionForSubdomain(request);

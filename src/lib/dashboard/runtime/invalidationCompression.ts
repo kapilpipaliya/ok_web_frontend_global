@@ -60,7 +60,11 @@ export function createInvalidationCompressionLayer(options: {
   let flushTimer: ReturnType<typeof setTimeout> | null = null;
 
   const buildBatch = (): CompressedInvalidationBatch | null => {
-    if (logicalKeys.size === 0 && querySignatures.size === 0 && widgetIds.size === 0) {
+    if (
+      logicalKeys.size === 0 &&
+      querySignatures.size === 0 &&
+      widgetIds.size === 0
+    ) {
       return null;
     }
 
@@ -70,12 +74,16 @@ export function createInvalidationCompressionLayer(options: {
 
     if (options.subscriptionGraph) {
       for (const key of logicalList) {
-        for (const id of options.subscriptionGraph.resolveWidgetsForLogicalKeys([key])) {
+        for (const id of options.subscriptionGraph.resolveWidgetsForLogicalKeys(
+          [key],
+        )) {
           resolvedWidgets.add(id);
         }
       }
       for (const sig of signatureList) {
-        for (const id of options.subscriptionGraph.resolveWidgetsForSignatures([sig])) {
+        for (const id of options.subscriptionGraph.resolveWidgetsForSignatures([
+          sig,
+        ])) {
           resolvedWidgets.add(id);
         }
       }
@@ -85,7 +93,8 @@ export function createInvalidationCompressionLayer(options: {
     const batchId = `invbatch_${batchCounter}_${Date.now().toString(36)}`;
     const compressedLogicalKeyCount = logicalList.length;
     const raw = rawEventCount || 1;
-    const compressionRatio = raw > 0 ? raw / Math.max(resolvedWidgets.size, 1) : 1;
+    const compressionRatio =
+      raw > 0 ? raw / Math.max(resolvedWidgets.size, 1) : 1;
 
     const batch: CompressedInvalidationBatch = {
       batchId,
@@ -138,7 +147,10 @@ export function createInvalidationCompressionLayer(options: {
       if (request.staleWhileRevalidate === true) lastSwr = true;
       if (request.reason) lastReason = request.reason;
       if (request.causality) {
-        lastCausality = { ...request.causality, cause: request.causality.cause || request.reason };
+        lastCausality = {
+          ...request.causality,
+          cause: request.causality.cause || request.reason,
+        };
       }
 
       scheduleFlush();

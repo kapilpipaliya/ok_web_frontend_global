@@ -80,7 +80,7 @@ export function toCSV(data: any[], options: ExportOptions = {}): string {
 
     const values = fields.map((field) => {
       const value = row[field];
-      return escapeCSV(value != null ? String(value) : "");
+      return escapeCSV(value == null ? "" : String(value));
     });
 
     lines.push(values.join(delimiter));

@@ -47,7 +47,7 @@ export async function POST({ request }: APIEvent) {
     try {
       // Store the pending email if changing
       const setEmail =
-        email !== oldUser.P.email ? "u.pendingEmail = $email," : "";
+        email === oldUser.P.email ? "" : "u.pendingEmail = $email,";
       const isEmailChanged = email !== oldUser.P.email;
       const isUsernameChanged = username !== oldUser.P.username;
       const isNameChanged = name !== oldUser.P.name;

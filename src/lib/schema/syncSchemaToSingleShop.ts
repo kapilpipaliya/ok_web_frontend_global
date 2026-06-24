@@ -157,9 +157,7 @@ export async function syncSchemaToSingleShop(
         await tx.close();
       }
 
-      let migration:
-        | SchemaSyncShopResult["migration"]
-        | undefined;
+      let migration: SchemaSyncShopResult["migration"] | undefined;
 
       if (runMigrationAfterImport) {
         const migrationResult = await runMigration(

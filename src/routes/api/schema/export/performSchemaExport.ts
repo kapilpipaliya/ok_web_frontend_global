@@ -34,7 +34,11 @@ async function fetchEntities(
     excludePublicPages?: boolean;
   } = {},
 ): Promise<Record<string, ExportedSchema>> {
-  const { skipKeys = [], includeKeys = [], excludePublicPages = false } = options;
+  const {
+    skipKeys = [],
+    includeKeys = [],
+    excludePublicPages = false,
+  } = options;
   const useInclude = includeKeys.length > 0;
   const result = await dbSession.run(
     useInclude
@@ -174,22 +178,33 @@ export function parseExportQueryParams(request: Request): {
   const functionsParam = url.searchParams.get("functions")?.trim() ?? "";
   const componentKeys =
     componentsParam.length > 0
-      ? componentsParam.split(",").map((k) => k.trim()).filter(Boolean)
+      ? componentsParam
+          .split(",")
+          .map((k) => k.trim())
+          .filter(Boolean)
       : [];
   const pageKeys =
     pagesParam.length > 0
-      ? pagesParam.split(",").map((k) => k.trim()).filter(Boolean)
+      ? pagesParam
+          .split(",")
+          .map((k) => k.trim())
+          .filter(Boolean)
       : [];
   const functionKeys =
     functionsParam.length > 0
-      ? functionsParam.split(",").map((k) => k.trim()).filter(Boolean)
+      ? functionsParam
+          .split(",")
+          .map((k) => k.trim())
+          .filter(Boolean)
       : [];
   return {
     components: componentKeys,
     pages: pageKeys,
     functions: functionKeys,
     filterOnly:
-      componentKeys.length > 0 || pageKeys.length > 0 || functionKeys.length > 0,
+      componentKeys.length > 0 ||
+      pageKeys.length > 0 ||
+      functionKeys.length > 0,
   };
 }
 
@@ -241,7 +256,9 @@ export async function performSchemaExport(
 
   if (exportComponents) {
     const components = await fetchEntities(dbSession, "Component", {
-      ...(includeComponentKeys.length > 0 ? { includeKeys: includeComponentKeys } : {}),
+      ...(includeComponentKeys.length > 0
+        ? { includeKeys: includeComponentKeys }
+        : {}),
     });
     const componentCategoryPaths = await fetchSchemaCategoryFolderPaths(
       dbSession,
@@ -279,7 +296,9 @@ export async function performSchemaExport(
   }
 
   if (!filterOnly) {
-    const themes = await fetchEntities(dbSession, "Theme", { skipKeys: ["Default"] });
+    const themes = await fetchEntities(dbSession, "Theme", {
+      skipKeys: ["Default"],
+    });
     const themeCategoryPaths = await fetchSchemaCategoryFolderPaths(
       dbSession,
       "Theme",
@@ -297,7 +316,9 @@ export async function performSchemaExport(
 
   if (exportFunctions) {
     const functions = await fetchEntities(dbSession, "Function", {
-      ...(includeFunctionKeys.length > 0 ? { includeKeys: includeFunctionKeys } : {}),
+      ...(includeFunctionKeys.length > 0
+        ? { includeKeys: includeFunctionKeys }
+        : {}),
     });
     const functionCategoryPaths = await fetchSchemaCategoryFolderPaths(
       dbSession,

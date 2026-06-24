@@ -2,9 +2,7 @@ function canScroll(container: HTMLElement): boolean {
   return container.scrollHeight > container.clientHeight + 1;
 }
 
-function resolveScrollContainer(
-  preferredContainer: HTMLElement,
-): HTMLElement {
+function resolveScrollContainer(preferredContainer: HTMLElement): HTMLElement {
   if (canScroll(preferredContainer)) {
     return preferredContainer;
   }

@@ -78,7 +78,10 @@ export async function POST({ request }: APIEvent) {
 
     if (!isShopDatabaseName(subDomain)) {
       void enqueueGlobalSettingsShopSync(subDomain).catch((err) => {
-        console.warn("[Global settings] Failed to enqueue Shopify shop global settings sync:", err);
+        console.warn(
+          "[Global settings] Failed to enqueue Shopify shop global settings sync:",
+          err,
+        );
       });
     }
 

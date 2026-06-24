@@ -14,7 +14,6 @@ function VariantInputRow(props: {
   dataVertex: Vertex;
   setPropertyValue: (meta: Vertex, value: unknown) => void;
 }) {
-
   const [graph, setGraph] = useGraph();
 
   const options = createMemo(() => {

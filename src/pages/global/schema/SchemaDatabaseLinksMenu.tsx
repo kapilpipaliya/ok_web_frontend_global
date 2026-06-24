@@ -63,7 +63,7 @@ export function SchemaDatabaseLinksMenu(props: SchemaDatabaseLinksMenuProps) {
                     <As
                       as="li"
                       role="none"
-                      css={`return \`._id { margin: 0; padding: 0; }\`;`}
+                      css={"return `._id { margin: 0; padding: 0; }`;"}
                     >
                       <As
                         as="a"

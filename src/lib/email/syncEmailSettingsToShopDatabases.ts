@@ -78,7 +78,7 @@ export async function syncEmailSettingsToSingleShop(
 
   try {
     const settingResult = await mainSession.run(
-      `MATCH (s:Setting {type: $type}) RETURN s LIMIT 1`,
+      "MATCH (s:Setting {type: $type}) RETURN s LIMIT 1",
       { type: "email" },
     );
 
@@ -123,7 +123,7 @@ export async function syncEmailSettingsToShopDatabases(
 
   try {
     const settingResult = await mainSession.run(
-      `MATCH (s:Setting {type: $type}) RETURN s LIMIT 1`,
+      "MATCH (s:Setting {type: $type}) RETURN s LIMIT 1",
       { type: "email" },
     );
 

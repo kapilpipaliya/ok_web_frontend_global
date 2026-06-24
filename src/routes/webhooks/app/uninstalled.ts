@@ -19,7 +19,8 @@ export async function POST({ request }: APIEvent) {
 
     console.log(`Received ${topic} webhook for ${shop}`);
 
-    const deletedCount = await shopify.sessionStorage.deleteSessionsByShop(shop);
+    const deletedCount =
+      await shopify.sessionStorage.deleteSessionsByShop(shop);
     console.log(`Deleted ${deletedCount} sessions for ${shop}`);
 
     return new Response(null, { status: 200 });

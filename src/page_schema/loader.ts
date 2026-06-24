@@ -227,13 +227,13 @@ const websiteSchemaCache = new Map<string, WebsiteSchemas>();
 // Get the base directory for page_schema files
 function getSchemaBaseDir(): string {
   const schemaPath = path.join(process.cwd(), "src", "page_schema");
-  
+
   if (!fs.existsSync(schemaPath)) {
     throw new Error(
       `Could not find page_schema directory at: ${schemaPath}. Current working directory: ${process.cwd()}`,
     );
   }
-  
+
   return schemaPath;
 }
 
@@ -243,7 +243,7 @@ function loadFromFilesystem(): Record<string, string> {
   const result: Record<string, string> = {};
   let fileCount = 0;
 
-  function readDir(dir: string, relativePath: string = ""): void {
+  function readDir(dir: string, relativePath = ""): void {
     try {
       if (!fs.existsSync(dir)) {
         console.warn(`Directory does not exist: ${dir}`);

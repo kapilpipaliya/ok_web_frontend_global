@@ -30,9 +30,7 @@ export function useComponentLifecycle(options: {
 
   // Snapshot taken at mount — do NOT read dynamicProps/getFunctionArgumentWithValue
   // during cleanup (see setupCleanup).
-  let pendingCleanupFn:
-    | ((arg: FunctionArgumentType) => void)
-    | undefined;
+  let pendingCleanupFn: ((arg: FunctionArgumentType) => void) | undefined;
   let pendingCleanupArgs: FunctionArgumentType | undefined;
 
   /** Store onCleanup callback and args while the component is still mounted and reactive reads are safe. */

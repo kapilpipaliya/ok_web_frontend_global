@@ -23,7 +23,7 @@ export async function GET({ request }: APIEvent) {
     }
 
     const result = await dbSession.run(
-      `MATCH (r:RobotsTxt) RETURN r.robotsTxt as robotsTxt LIMIT 1`,
+      "MATCH (r:RobotsTxt) RETURN r.robotsTxt as robotsTxt LIMIT 1",
     );
 
     const robotsTxt =

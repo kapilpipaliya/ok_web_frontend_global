@@ -222,9 +222,9 @@ export function getHslComponents(color: string): {
       s: Math.round((oklchColor.c || 0) * 100), // Chroma as saturation
       l: Math.round((oklchColor.l || 0) * 100),
       a:
-        oklchColor.alpha !== undefined
-          ? Math.round(oklchColor.alpha * 100) / 100
-          : 1,
+        oklchColor.alpha === undefined
+          ? 1
+          : Math.round(oklchColor.alpha * 100) / 100,
     };
   } catch {
     return { h: 0, s: 0, l: 0, a: 1 };

@@ -296,8 +296,7 @@ export const responses = {
   /**
    * Forbidden error (403)
    */
-  forbidden: (message = "Access denied") =>
-    error(message, "Forbidden", 403),
+  forbidden: (message = "Access denied") => error(message, "Forbidden", 403),
 
   /**
    * Not found error (404)

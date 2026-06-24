@@ -39,10 +39,7 @@ export function LayoutTreePanel() {
 
   return (
     <As as="div">
-      <Show
-        keyed
-        when={!isActiveFormFunction() && formStoreVertex()?.id}
-      >
+      <Show keyed when={!isActiveFormFunction() && formStoreVertex()?.id}>
         {(formStoreId) => (
           <DesignerFormIdContext.Provider value={formStoreId}>
             <FormContext.Provider value={formStoreId}>

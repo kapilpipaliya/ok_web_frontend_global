@@ -37,7 +37,8 @@ function stableStringify(value: unknown): string {
   }
   const keys = Object.keys(value as object).sort();
   const parts = keys.map(
-    (key) => `${JSON.stringify(key)}:${stableStringify((value as Record<string, unknown>)[key])}`,
+    (key) =>
+      `${JSON.stringify(key)}:${stableStringify((value as Record<string, unknown>)[key])}`,
   );
   return `{${parts.join(",")}}`;
 }
@@ -71,8 +72,9 @@ export function buildQueryAst(
   const queryOverrides = widgetConfig?.queryOverrides || {};
   const widgetId = widgetConfig.id || "";
   const widgetUi =
-    (typeof store.getWidgetState === "function" ? store.getWidgetState(widgetId) : null) ||
-    {};
+    (typeof store.getWidgetState === "function"
+      ? store.getWidgetState(widgetId)
+      : null) || {};
   const widgetScoped = widgetUi.filters || {};
 
   const eqFilters: Record<string, unknown> = {};
@@ -80,7 +82,9 @@ export function buildQueryAst(
     const value = globalFilters[key];
     if (value != null && value !== "") eqFilters[key] = value;
   }
-  const overrideFilters = Array.isArray(queryOverrides.filters) ? queryOverrides.filters : [];
+  const overrideFilters = Array.isArray(queryOverrides.filters)
+    ? queryOverrides.filters
+    : [];
   const neqFilters: QueryFilterRow[] = [];
   for (const row of overrideFilters) {
     if (!row?.field) continue;

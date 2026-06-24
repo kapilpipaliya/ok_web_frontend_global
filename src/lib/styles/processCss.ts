@@ -46,7 +46,12 @@ export const processCssContent = (
 
   // Handle function CSS
   if (typeof cssContent === "function") {
-    return processStyle(cssContent(functionArgs), functionArgs, uniqueId, options);
+    return processStyle(
+      cssContent(functionArgs),
+      functionArgs,
+      uniqueId,
+      options,
+    );
   }
 
   // Handle string CSS directly

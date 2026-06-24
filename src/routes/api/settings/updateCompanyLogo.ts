@@ -20,7 +20,7 @@ import type { Vertex } from "~/lib/graph/type/vertex";
 function collectDeletedEdgeIds(raw: unknown): string[] {
   if (!Array.isArray(raw)) return [];
   return raw
-    .map((edgeId) => (edgeId != null ? String(edgeId).trim() : ""))
+    .map((edgeId) => (edgeId == null ? "" : String(edgeId).trim()))
     .filter((edgeId) => edgeId !== "");
 }
 
@@ -188,7 +188,10 @@ export async function POST({ request }: APIEvent) {
 
     if (!isShopDatabaseName(subDomain)) {
       void enqueueCompanyLogosShopSync(subDomain).catch((err) => {
-        console.warn("[Company logos] Failed to enqueue Shopify shop company logos sync:", err);
+        console.warn(
+          "[Company logos] Failed to enqueue Shopify shop company logos sync:",
+          err,
+        );
       });
     }
 

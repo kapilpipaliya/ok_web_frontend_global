@@ -61,7 +61,7 @@ const content = [
     componentName: "Html",
     displayOrder: 4,
     props: `return {
-      href: "${typeof window !== "undefined" ? window.location.origin : ""}/admin/"
+      href: "${typeof window === "undefined" ? "" : window.location.origin}/admin/"
     }`,
     target: "_blank",
     text: "Get Started",

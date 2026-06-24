@@ -51,7 +51,7 @@ export async function POST({ request }: APIEvent) {
       deleteOtherProfileImageEdgesResult.records[0]?.get("deletedEdgeIds");
     const deletedEdgeIds = Array.isArray(deletedEdgeIdsRaw)
       ? deletedEdgeIdsRaw
-          .map((edgeId) => (edgeId != null ? String(edgeId).trim() : ""))
+          .map((edgeId) => (edgeId == null ? "" : String(edgeId).trim()))
           .filter((edgeId) => edgeId !== "")
       : [];
 
@@ -63,7 +63,7 @@ export async function POST({ request }: APIEvent) {
       { profileImage, uuid },
     );
 
-    if (!linkResult.records[0]?.get("u") || !linkResult.records[0]?.get("f")) {
+    if (!(linkResult.records[0]?.get("u") && linkResult.records[0]?.get("f"))) {
       throw new APIError("User or file not found", 404);
     }
 

@@ -199,7 +199,7 @@ function getNewUndoIndex(
     .reverse()
     .find((index) => index < activeUndoIndex);
 
-  return nearestLowestIndex !== undefined
-    ? nearestLowestIndex
-    : activeUndoIndex - 1;
+  return nearestLowestIndex === undefined
+    ? activeUndoIndex - 1
+    : nearestLowestIndex;
 }

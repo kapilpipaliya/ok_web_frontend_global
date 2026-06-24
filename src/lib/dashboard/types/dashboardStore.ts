@@ -48,7 +48,9 @@ export type DashboardRuntimeStore = DashboardQueryStore & {
     widgetId: string,
     partial:
       | Partial<DashboardWidgetStateSlice>
-      | ((prev: DashboardWidgetStateSlice) => Partial<DashboardWidgetStateSlice>),
+      | ((
+          prev: DashboardWidgetStateSlice,
+        ) => Partial<DashboardWidgetStateSlice>),
   ) => void;
   resolveWidgetPresentation: (widgetId: string) => Record<string, unknown>;
   getWidgetStateVertexId: (widgetId: string) => string | undefined;

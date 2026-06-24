@@ -107,7 +107,10 @@ export async function deleteVertexChildren(
 
     if (variantResult.records.length > 0) {
       const record = variantResult.records[0];
-      collectDeletion(record.get("deletedNodeIds"), record.get("deletedEdgeIds"));
+      collectDeletion(
+        record.get("deletedNodeIds"),
+        record.get("deletedEdgeIds"),
+      );
     }
   }
 
@@ -135,7 +138,10 @@ export async function deleteVertexChildren(
 
     if (previewResult.records.length > 0) {
       const record = previewResult.records[0];
-      collectDeletion(record.get("deletedNodeIds"), record.get("deletedEdgeIds"));
+      collectDeletion(
+        record.get("deletedNodeIds"),
+        record.get("deletedEdgeIds"),
+      );
     }
   }
 
@@ -156,7 +162,10 @@ export async function deleteVertexChildren(
 
     if (rolePageResult.records.length > 0) {
       const record = rolePageResult.records[0];
-      collectDeletion(record.get("deletedNodeIds"), record.get("deletedEdgeIds"));
+      collectDeletion(
+        record.get("deletedNodeIds"),
+        record.get("deletedEdgeIds"),
+      );
     }
 
     const pageUniqueResult = await sessionOrTx.run(
@@ -175,7 +184,10 @@ export async function deleteVertexChildren(
 
     if (pageUniqueResult.records.length > 0) {
       const record = pageUniqueResult.records[0];
-      collectDeletion(record.get("deletedNodeIds"), record.get("deletedEdgeIds"));
+      collectDeletion(
+        record.get("deletedNodeIds"),
+        record.get("deletedEdgeIds"),
+      );
     }
 
     const pageLayoutResult = await sessionOrTx.run(
@@ -194,7 +206,10 @@ export async function deleteVertexChildren(
 
     if (pageLayoutResult.records.length > 0) {
       const record = pageLayoutResult.records[0];
-      collectDeletion(record.get("deletedNodeIds"), record.get("deletedEdgeIds"));
+      collectDeletion(
+        record.get("deletedNodeIds"),
+        record.get("deletedEdgeIds"),
+      );
     }
   }
 

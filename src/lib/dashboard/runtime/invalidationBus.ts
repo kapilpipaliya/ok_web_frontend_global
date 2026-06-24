@@ -1,5 +1,8 @@
 import type { DashboardCache } from "../query/cacheManager";
-import type { RuntimeCausality, RuntimeEventSource } from "../observability/runtimeCausality";
+import type {
+  RuntimeCausality,
+  RuntimeEventSource,
+} from "../observability/runtimeCausality";
 
 export type InvalidationEvent = {
   type?: "invalidate";
@@ -19,21 +22,28 @@ export type InvalidationEvent = {
   immediate?: boolean;
 };
 
-export type InvalidationListener = (event: InvalidationEvent, affectedWidgetIds: string[]) => void;
+export type InvalidationListener = (
+  event: InvalidationEvent,
+  affectedWidgetIds: string[],
+) => void;
 
 export type DashboardInvalidationBus = {
   publish: (event: InvalidationEvent) => string[];
   subscribe: (listener: InvalidationListener) => () => void;
 };
 
-export function createInvalidationBus(cache: DashboardCache): DashboardInvalidationBus {
+export function createInvalidationBus(
+  cache: DashboardCache,
+): DashboardInvalidationBus {
   const listeners = new Set<InvalidationListener>();
 
   return {
     publish(event) {
       const affected = new Set<string>();
       if (event.querySignatures?.length) {
-        for (const widgetId of cache.invalidateSignatures(event.querySignatures)) {
+        for (const widgetId of cache.invalidateSignatures(
+          event.querySignatures,
+        )) {
           affected.add(widgetId);
         }
       }

@@ -73,8 +73,7 @@ export function SchemaJobOutputPopover(props: SchemaJobOutputPopoverProps) {
   const [floating, setFloating] = createSignal<HTMLElement | null>(null);
   const [coords, setCoords] = createSignal({ x: 0, y: 0 });
 
-  const visibleTabs = () =>
-    props.tabs().filter((t) => hasJobOutput(t.row));
+  const visibleTabs = () => props.tabs().filter((t) => hasJobOutput(t.row));
 
   const canShow = () => visibleTabs().length > 0;
 
@@ -95,7 +94,7 @@ export function SchemaJobOutputPopover(props: SchemaJobOutputPopoverProps) {
   const updatePosition = async () => {
     const refEl = reference();
     const floatEl = floating();
-    if (!refEl || !floatEl) {
+    if (!(refEl && floatEl)) {
       return;
     }
     const { x, y } = await computePosition(refEl, floatEl, {
@@ -107,7 +106,7 @@ export function SchemaJobOutputPopover(props: SchemaJobOutputPopoverProps) {
   };
 
   createEffect(() => {
-    if (!open() || !reference() || !floating()) {
+    if (!((open() && reference() ) && floating())) {
       return;
     }
     void updatePosition();

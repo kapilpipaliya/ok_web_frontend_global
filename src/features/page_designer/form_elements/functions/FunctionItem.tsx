@@ -40,12 +40,7 @@ export function FunctionItem(props: { item: FunctionNavItem }) {
 
   const handleOpenInNewTab = () => {
     if (!layoutStore()) return;
-    openInNewInternalTab(
-      layoutStoreId,
-      getVertex(),
-      graph,
-      setGraph,
-    );
+    openInNewInternalTab(layoutStoreId, getVertex(), graph, setGraph);
   };
 
   return (

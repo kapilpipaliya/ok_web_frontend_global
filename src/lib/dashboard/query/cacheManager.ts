@@ -37,7 +37,10 @@ export type DashboardCache = {
 
 export function createDashboardCache(): DashboardCache {
   const query = new Map<string, WidgetCacheEntry>();
-  const widget = new Map<string, { lastSignature: string; entry: WidgetCacheEntry }>();
+  const widget = new Map<
+    string,
+    { lastSignature: string; entry: WidgetCacheEntry }
+  >();
   const layout = new Map<string, unknown>();
   const preference = new Map<string, unknown>();
   const abort = new Map<string, AbortController>();
@@ -69,7 +72,7 @@ export function createDashboardCache(): DashboardCache {
         ttlSeconds != null && ttlSeconds > 0 ? ttlSeconds * 1000 : undefined;
       const withExpiry: WidgetCacheEntry = {
         ...entry,
-        expiresAt: ttlMs != null ? Date.now() + ttlMs : undefined,
+        expiresAt: ttlMs == null ? undefined : Date.now() + ttlMs,
       };
       widget.set(widgetId, { lastSignature: signature, entry: withExpiry });
       query.set(signature, withExpiry);

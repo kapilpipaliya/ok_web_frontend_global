@@ -25,7 +25,9 @@ if (!global.__schemaJobsQueueWorkerStartPromise) {
 function normalizeSchemaJobError(error: unknown): Error {
   if (error instanceof Error) {
     const maybeHint =
-      "hint" in error && typeof error.hint === "string" ? error.hint.trim() : "";
+      "hint" in error && typeof error.hint === "string"
+        ? error.hint.trim()
+        : "";
     if (!maybeHint) {
       return error;
     }
@@ -123,9 +125,7 @@ export async function stopSchemaJobsQueueWorker(force = false) {
     return;
   }
 
-  logger.info(
-    `Stopping schema jobs queue worker${force ? " (force)" : ""}...`,
-  );
+  logger.info(`Stopping schema jobs queue worker${force ? " (force)" : ""}...`);
   await global.__schemaJobsQueueWorker.close(force);
   global.__schemaJobsQueueWorker = undefined;
   global.__schemaJobsQueueWorkerStartPromise = undefined;

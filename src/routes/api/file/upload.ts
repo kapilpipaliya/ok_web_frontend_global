@@ -17,7 +17,7 @@ export async function POST({ request }: APIEvent) {
       throw new APIError("No file data available", 400);
     }
     const user = await getUserFromSession(request);
-    const linkUuid = user?.P?.uuid != null ? String(user.P.uuid).trim() : null;
+    const linkUuid = user?.P?.uuid == null ? null : String(user.P.uuid).trim();
     return await uploadFiles(data, subDomain, dbSession, linkUuid || undefined);
   } catch (error) {
     return handleAPIError(error);

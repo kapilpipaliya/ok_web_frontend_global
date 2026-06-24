@@ -41,16 +41,11 @@ export async function getUncategorizedFilesData(
   setGraph: SetStoreFunction<GraphInterface>,
   toParentEdgeType: string,
 ) {
-  return await fetchAndSetGraphData(
-    graph,
-    setGraph,
-    `g:'File[$1]'`,
-    {
-      $1: { filter: { __noOutgoingEdge__: toParentEdgeType } },
-      nodes: {},
-      relationships: {},
-    },
-  );
+  return await fetchAndSetGraphData(graph, setGraph, `g:'File[$1]'`, {
+    $1: { filter: { __noOutgoingEdge__: toParentEdgeType } },
+    nodes: {},
+    relationships: {},
+  });
 }
 
 export async function getFilesData(

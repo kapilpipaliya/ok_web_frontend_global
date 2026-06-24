@@ -83,8 +83,7 @@ async function syncCompanyLogosOnShopSession(
   globalSettingKey: string,
   logos: CompanyLogoFiles,
 ): Promise<void> {
-  const key =
-    globalSettingKey.length > 0 ? globalSettingKey : "Default";
+  const key = globalSettingKey.length > 0 ? globalSettingKey : "Default";
 
   await shopSession.run(
     `MERGE (g:GlobalSetting {key: $key})
@@ -118,7 +117,7 @@ async function syncCompanyLogosOnShopSession(
     );
     const shopFileNameRaw = existingResult.records[0]?.get("shopFileName");
     const shopFileName =
-      shopFileNameRaw != null ? String(shopFileNameRaw).trim() : "";
+      shopFileNameRaw == null ? "" : String(shopFileNameRaw).trim();
     const mainFileName = String(fileName).trim();
 
     // Shop has a different file (custom upload) — do not overwrite.
@@ -167,11 +166,7 @@ export async function syncCompanyLogosToSingleShop(
     );
 
     try {
-      await syncCompanyLogosOnShopSession(
-        shopSession,
-        globalSettingKey,
-        logos,
-      );
+      await syncCompanyLogosOnShopSession(shopSession, globalSettingKey, logos);
       return { ok: true };
     } finally {
       await shopSession.close();

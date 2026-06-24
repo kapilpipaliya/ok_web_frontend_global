@@ -2,7 +2,7 @@
  * @jsxImportSource solid-js
  */
 import { type JSX, splitProps } from "solid-js";
-import { type ViewportComponentAttributes } from "./types.js";
+import type { ViewportComponentAttributes } from "./types.js";
 import {
   Virtualizer,
   type VirtualizerHandle,
@@ -18,8 +18,7 @@ export interface VListHandle extends VirtualizerHandle {}
  * Props of {@link VList}.
  */
 export interface VListProps<T>
-  extends
-    Pick<
+  extends Pick<
       VirtualizerProps<T>,
       | "ref"
       | "data"

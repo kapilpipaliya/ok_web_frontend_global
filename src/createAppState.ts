@@ -137,7 +137,9 @@ export function loadWebsiteSchemasForSubdomain(
 
       // Process themes from all websites
       if (websiteSchemas.themes) {
-        for (const [themeKey, schema] of Object.entries(websiteSchemas.themes)) {
+        for (const [themeKey, schema] of Object.entries(
+          websiteSchemas.themes,
+        )) {
           const importResult = importGraphStructure(schema, graph, setGraph);
           processImportedGraph(
             importResult,
@@ -190,13 +192,7 @@ export function loadWebsiteSchemasForSubdomain(
     if (websiteSchemas.themes) {
       for (const [themeKey, schema] of Object.entries(websiteSchemas.themes)) {
         const importResult = importGraphStructure(schema, graph, setGraph);
-        processImportedGraph(
-          importResult,
-          graph,
-          setGraph,
-          "Theme",
-          themeKey,
-        );
+        processImportedGraph(importResult, graph, setGraph, "Theme", themeKey);
       }
     }
   }

@@ -47,7 +47,7 @@ export function SchemaOperationsManagement() {
   return (
     <As
       as="motionFragment"
-      css={`return \`._id { padding: 2rem; max-width: 90rem; }\`;`}
+      css={"return `._id { padding: 2rem; max-width: 90rem; }`;"}
     >
       <As
         as="header"
@@ -72,7 +72,7 @@ export function SchemaOperationsManagement() {
         </As>
         <As
           as="div"
-          css={`return \`._id { display: flex; gap: 0.75rem; flex-wrap: wrap; }\`;`}
+          css={"return `._id { display: flex; gap: 0.75rem; flex-wrap: wrap; }`;"}
         >
           <As
             as="button"
@@ -195,7 +195,9 @@ export function SchemaOperationsManagement() {
                 databases={data.shopDatabases}
                 operations={SHOP_OPERATIONS}
                 {...shared}
-                onRunAll={(op) => void batch.runOperation(op, { scope: "shop" })}
+                onRunAll={(op) =>
+                  void batch.runOperation(op, { scope: "shop" })
+                }
                 onRunOne={(op, name) =>
                   void batch.runOperation(op, { databaseNames: [name] })
                 }
@@ -209,7 +211,7 @@ export function SchemaOperationsManagement() {
       <Show when={databaseGroups()?.success === false}>
         <As
           as="p"
-          css={`return \`._id { color: \${args.theme.var.color.error}; margin-top: 1rem; }\`;`}
+          css={"return `._id { color: ${args.theme.var.color.error}; margin-top: 1rem; }`;"}
         >
           {databaseGroups()?.error || "Failed to load databases"}
         </As>

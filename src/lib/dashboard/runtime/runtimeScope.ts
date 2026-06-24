@@ -21,7 +21,10 @@ export function createRuntimeScope(
   return { scopeId, parentScopeId, namespace, kind };
 }
 
-export function scopedInteractionKey(scope: RuntimeScope, eventType: string): string {
+export function scopedInteractionKey(
+  scope: RuntimeScope,
+  eventType: string,
+): string {
   return `${scope.namespace}:${eventType}`;
 }
 

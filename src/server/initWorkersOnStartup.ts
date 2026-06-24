@@ -75,7 +75,9 @@ export async function initializeWorkersIfNeeded() {
       console.log("[Server] ✓ Platform workers initialized successfully");
 
       // App SubDomain DBs + synced Shopify shop DBs (each shop has its own worker set)
-      console.log("[Server] Initializing subdomain and shop database workers...");
+      console.log(
+        "[Server] Initializing subdomain and shop database workers...",
+      );
       await initAllSubdomainWorkers();
       console.log("[Server] ✓ All workers initialized successfully");
     } catch (error) {

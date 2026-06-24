@@ -5,10 +5,7 @@ import { evalExpression } from "~/lib/expression_eval";
 import { SchemaRenderer } from "~/pages/SchemaRenderer";
 
 import { useFileManagerStore } from "../FileManagerContext";
-import {
-  getFilesData,
-  UNCATEGORIZED_ID,
-} from "../sidebar/getFilesData";
+import { getFilesData, UNCATEGORIZED_ID } from "../sidebar/getFilesData";
 import { AddNewFileButton } from "./AddNewFileButton";
 import { getEditFileOrFolderSchema } from "./fileFormEditSchema";
 import { getComponentFormSchema } from "./getComponentFormSchema";

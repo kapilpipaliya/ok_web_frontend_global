@@ -47,10 +47,7 @@ export function processImportedGraph(
     }
     for (const [, mappedId] of vertexIdMap) {
       const vertex = graph.vertexes[mappedId];
-      if (
-        vertex?.P?.key === parentKey &&
-        vertex.L.includes(parentLabel)
-      ) {
+      if (vertex?.P?.key === parentKey && vertex.L.includes(parentLabel)) {
         return mappedId;
       }
     }

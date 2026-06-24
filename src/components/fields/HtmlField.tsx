@@ -521,7 +521,9 @@ export function HtmlField(
     const TextContent = () => {
       return (
         <Show when={local.textType === "markdown"} fallback={local.text}>
-          <SolidMarkdown remarkPlugins={[remarkGfm]}>{local.text}</SolidMarkdown>
+          <SolidMarkdown remarkPlugins={[remarkGfm]}>
+            {local.text}
+          </SolidMarkdown>
         </Show>
       );
     };

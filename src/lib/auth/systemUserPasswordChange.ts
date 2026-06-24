@@ -10,7 +10,7 @@ export function isSystemDbUserWithoutLocalPassword(
   subDomain: string,
   password?: string | null,
 ): boolean {
-  return !password && !isShopDatabaseName(subDomain);
+  return !(password || isShopDatabaseName(subDomain));
 }
 
 export function assertUserCanChangePasswordLocally(
@@ -18,7 +18,9 @@ export function assertUserCanChangePasswordLocally(
   subDomain: string,
 ): void {
   const password =
-    "P" in user && user.P ? user.P.password : (user as { password?: string | null }).password;
+    "P" in user && user.P
+      ? user.P.password
+      : (user as { password?: string | null }).password;
 
   if (isSystemDbUserWithoutLocalPassword(subDomain, password)) {
     throw new APIError(SYSTEM_USER_PASSWORD_CHANGE_MESSAGE, 403);

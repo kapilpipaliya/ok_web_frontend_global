@@ -141,16 +141,16 @@ export function GetInitialData(props: GetInitialDataProps) {
     }
 
     return (
-    <Switch>
-      <Match when={getGlobalStore(graph[0]).P.initialDataFetchError}>
-        <SimpleErrorMessage
-          message={getGlobalStore(graph[0]).P.initialDataFetchError}
-        />
-      </Match>
-      <Match when={!getGlobalStore(graph[0]).P.initialDataFetchError}>
-        {props.children}
-      </Match>
-    </Switch>
+      <Switch>
+        <Match when={getGlobalStore(graph[0]).P.initialDataFetchError}>
+          <SimpleErrorMessage
+            message={getGlobalStore(graph[0]).P.initialDataFetchError}
+          />
+        </Match>
+        <Match when={!getGlobalStore(graph[0]).P.initialDataFetchError}>
+          {props.children}
+        </Match>
+      </Switch>
     );
   };
 

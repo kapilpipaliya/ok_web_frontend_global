@@ -31,22 +31,33 @@ export function parseImportQueryParams(request: Request): {
   const functionsParam = url.searchParams.get("functions")?.trim() ?? "";
   const componentKeys =
     componentsParam.length > 0
-      ? componentsParam.split(",").map((k) => k.trim()).filter(Boolean)
+      ? componentsParam
+          .split(",")
+          .map((k) => k.trim())
+          .filter(Boolean)
       : [];
   const pageKeys =
     pagesParam.length > 0
-      ? pagesParam.split(",").map((k) => k.trim()).filter(Boolean)
+      ? pagesParam
+          .split(",")
+          .map((k) => k.trim())
+          .filter(Boolean)
       : [];
   const functionKeys =
     functionsParam.length > 0
-      ? functionsParam.split(",").map((k) => k.trim()).filter(Boolean)
+      ? functionsParam
+          .split(",")
+          .map((k) => k.trim())
+          .filter(Boolean)
       : [];
   return {
     components: componentKeys,
     pages: pageKeys,
     functions: functionKeys,
     filterOnly:
-      componentKeys.length > 0 || pageKeys.length > 0 || functionKeys.length > 0,
+      componentKeys.length > 0 ||
+      pageKeys.length > 0 ||
+      functionKeys.length > 0,
   };
 }
 
@@ -227,15 +238,12 @@ export async function performSchemaImport(
   const websiteName = subDomain;
 
   const { websiteSchemas, parseIssues, categoryPaths } =
-    resolveWebsiteSchemasForImportWithIssues(
-    websiteName,
-    {
-    filterOnly,
-    includeComponentKeys,
-    includePageKeys,
-    includeFunctionKeys,
-    },
-  );
+    resolveWebsiteSchemasForImportWithIssues(websiteName, {
+      filterOnly,
+      includeComponentKeys,
+      includePageKeys,
+      includeFunctionKeys,
+    });
 
   await validatePageUrlsForImport(dbSession, websiteSchemas.pages);
 
@@ -265,12 +273,7 @@ export async function performSchemaImport(
       categoryPaths,
     );
 
-    await createSchemaImportActivityLog(
-      tx,
-      websiteName,
-      user.P.email,
-      stats,
-    );
+    await createSchemaImportActivityLog(tx, websiteName, user.P.email, stats);
 
     await tx.commit();
 

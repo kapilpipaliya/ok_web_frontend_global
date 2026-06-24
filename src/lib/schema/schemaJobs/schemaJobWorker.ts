@@ -11,7 +11,10 @@ import type {
   ExportJobPayload,
   SchemaJobQueueData,
 } from "~/lib/schema/schemaJobs/schemaJobTypes";
-import { parseExportQueryParams, performSchemaExport } from "~/routes/api/schema/export/performSchemaExport";
+import {
+  parseExportQueryParams,
+  performSchemaExport,
+} from "~/routes/api/schema/export/performSchemaExport";
 
 function syntheticWorkerUser(email: string, jobId: string): Vertex {
   return {
@@ -61,14 +64,18 @@ export async function executeSchemaQueueJob(
       });
     }
     if (data.operation === "migrate") {
-      const migrationResult = await runMigration(session, data.subDomain, user, {
-        dryRun: data.payload.dryRun,
-        functionName: data.payload.functionName ?? undefined,
-      });
+      const migrationResult = await runMigration(
+        session,
+        data.subDomain,
+        user,
+        {
+          dryRun: data.payload.dryRun,
+          functionName: data.payload.functionName ?? undefined,
+        },
+      );
       if (!migrationResult.success) {
         throw new Error(
-          migrationResult.error ||
-            `Migration failed for ${data.subDomain}`,
+          migrationResult.error || `Migration failed for ${data.subDomain}`,
         );
       }
       return {
@@ -79,7 +86,9 @@ export async function executeSchemaQueueJob(
         data: migrationResult.data,
       };
     }
-    throw new Error(`Unknown operation: ${(data as { operation: string }).operation}`);
+    throw new Error(
+      `Unknown operation: ${(data as { operation: string }).operation}`,
+    );
   } finally {
     await session.close();
   }

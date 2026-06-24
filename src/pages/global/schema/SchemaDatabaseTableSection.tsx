@@ -21,14 +21,9 @@ import {
   statusLabel,
 } from "~/pages/global/schema/schemaOperationsUtils";
 
-const TABLE_GRID =
-  "2fr 1fr 1fr 1.5fr minmax(280px, 3fr)";
+const TABLE_GRID = "2fr 1fr 1fr 1.5fr minmax(280px, 3fr)";
 
-function statusBadgeCss(
-  args: any,
-  status: string,
-  showOutputHint: boolean,
-) {
+function statusBadgeCss(args: any, status: string, showOutputHint: boolean) {
   const isErr =
     status === "failed" ||
     status === "enqueue_failed" ||
@@ -161,15 +156,14 @@ export interface SchemaDatabaseTableSectionProps {
   getAdminPageUrl?: (databaseName: string, path: string) => string;
 }
 
-export function SchemaDatabaseTableSection(props: SchemaDatabaseTableSectionProps) {
+export function SchemaDatabaseTableSection(
+  props: SchemaDatabaseTableSectionProps,
+) {
   const rowDisabled = (db: SchemaDatabaseInfo) =>
     props.busy || db.currentStatus !== "online";
 
   return (
-    <As
-      as="section"
-      css={`return \`._id { margin-bottom: 2.5rem; }\`;`}
-    >
+    <As as="section" css={"return `._id { margin-bottom: 2.5rem; }`;"}>
       <As
         as="div"
         css={`return \`._id {
@@ -207,7 +201,7 @@ export function SchemaDatabaseTableSection(props: SchemaDatabaseTableSectionProp
         </As>
         <As
           as="motionFragment"
-          css={`return \`._id { display: flex; flex-wrap: wrap; gap: 0.5rem; }\`;`}
+          css={"return `._id { display: flex; flex-wrap: wrap; gap: 0.5rem; }`;"}
         >
           <For each={props.operations}>
             {(op) => (

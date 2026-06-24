@@ -6,10 +6,17 @@ import {
   resolveWidgetInteraction,
   substitutePayloadTemplates,
 } from "./contracts/interactionContracts";
-import { buildQueryAst, composeWidgetQuery, hashQuerySignature } from "./query/queryEngine";
+import {
+  buildQueryAst,
+  composeWidgetQuery,
+  hashQuerySignature,
+} from "./query/queryEngine";
 import { createDashboardCache } from "./query/cacheManager";
 import { createInvalidationBus } from "./runtime/invalidationBus";
-import { resolveWidgetCapabilities, resolveWidgetEditorMeta } from "./widget/widgetCapabilities";
+import {
+  resolveWidgetCapabilities,
+  resolveWidgetEditorMeta,
+} from "./widget/widgetCapabilities";
 import { createQuerySubscriptionGraph } from "./query/subscriptionGraph";
 import { createDashboardRuntimeScheduler } from "./runtime/scheduler";
 import { createRuntimeScope } from "./runtime/runtimeScope";
@@ -27,7 +34,10 @@ import {
 import { createDashboardDevtoolsCollector } from "./observability/devtools";
 import { createDashboardExecutionCoordinator } from "./runtime/runtimeExecution";
 import { createRuntimeLifetimeTree } from "./runtime/lifetimeTree";
-import { createDashboardPlatformAPI, type DashboardPlatformAPI } from "./runtime/platformApi";
+import {
+  createDashboardPlatformAPI,
+  type DashboardPlatformAPI,
+} from "./runtime/platformApi";
 import {
   createRealtimeInvalidationBridge,
   type DashboardRealtimeConfig,

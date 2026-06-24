@@ -32,9 +32,9 @@ export function JsonEditorFieldComponent(props: {
     if (props?.vertexId) {
       return graph.vertexes[props.vertexId];
     }
-    return formStoreVertex()?.P.selectedId !== -1
-      ? graph.vertexes[formStoreVertex()?.P.selectedId]
-      : undefined;
+    return formStoreVertex()?.P.selectedId === -1
+      ? undefined
+      : graph.vertexes[formStoreVertex()?.P.selectedId];
   };
 
   const replacePropertyValue = (value: string) => {

@@ -68,15 +68,14 @@ export function setDropPositionFromPointer(
   const fromVertex = fromVertexId ? graph.vertexes[fromVertexId] : undefined;
   // fromVertexId is passed from pragmatic source.data (not layout store).
   if (
-    !fromVertex ||
-    !validateDragOver(
+    !(fromVertex &&validateDragOver(
       graph,
       setGraph,
       fromVertex,
       activeItem,
       formData!,
       dragPosition,
-    )
+    ))
   ) {
     mergeVertexProperties<PageLayoutObject>(
       0,

@@ -23,7 +23,7 @@ export async function GET({ request }: APIEvent) {
     }
 
     const result = await dbSession.run(
-      `MATCH (c:CredentialsJson) RETURN c.credentialsJson as credentialsJson LIMIT 1`,
+      "MATCH (c:CredentialsJson) RETURN c.credentialsJson as credentialsJson LIMIT 1",
     );
 
     const credentialsJson =

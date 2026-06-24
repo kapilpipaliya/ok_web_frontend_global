@@ -34,7 +34,9 @@ function safeDatabaseSlug(name: string): string {
   return (name || "").replace(/[^a-z0-9-]/gi, "-");
 }
 
-export function createEmailSettingsShopSyncJobId(mainDatabaseName: string): string {
+export function createEmailSettingsShopSyncJobId(
+  mainDatabaseName: string,
+): string {
   return `sync-email-settings-${safeDatabaseSlug(mainDatabaseName)}`;
 }
 
@@ -44,10 +46,7 @@ export function createEmailSettingsShopSyncJobId(mainDatabaseName: string): stri
  */
 export async function enqueueEmailSettingsShopSync(
   mainDatabaseName: string,
-): Promise<
-  | { ok: true; jobId: string }
-  | { ok: false; error: string }
-> {
+): Promise<{ ok: true; jobId: string } | { ok: false; error: string }> {
   const jobId = createEmailSettingsShopSyncJobId(mainDatabaseName);
   const data: EmailSettingsShopSyncJobData = { mainDatabaseName };
 
@@ -64,8 +63,7 @@ export async function enqueueEmailSettingsShopSync(
     await emailSettingsShopSyncQueue.add(JOB_NAME, data, { jobId });
     return { ok: true, jobId };
   } catch (e) {
-    const msg =
-      e instanceof Error ? e.message : String(e);
+    const msg = e instanceof Error ? e.message : String(e);
     return {
       ok: false,
       error: `Failed to queue email settings shop sync (is Redis running?): ${msg}`,

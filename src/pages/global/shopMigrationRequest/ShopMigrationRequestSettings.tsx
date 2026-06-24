@@ -31,7 +31,9 @@ export function ShopMigrationRequestSettings() {
     try {
       const result = await saveMigrationRequestForAllShopsAction();
       if (result.success) {
-        showSuccessToast("Migration request for all shops saved. Shops will run migration on next load when their last migration is older than this time.");
+        showSuccessToast(
+          "Migration request for all shops saved. Shops will run migration on next load when their last migration is older than this time.",
+        );
         setRefreshKey((prev) => prev + 1);
       } else {
         setErrorMessage(result.error ?? "Failed to save");
@@ -73,17 +75,20 @@ export function ShopMigrationRequestSettings() {
   margin-bottom: 1.5rem;
 }\`;`}
       >
-        <As as="h3" css={`return \`._id { margin: 0 0 0.5rem 0; font-size: 1rem; }\`;`}>
+        <As
+          as="h3"
+          css={"return `._id { margin: 0 0 0.5rem 0; font-size: 1rem; }`;"}
+        >
           Shop migration request (all shops)
         </As>
         <As
           as="p"
-          css={`return \`._id { margin: 0; font-size: 0.875rem; opacity: 0.9; }\`;`}
+          css={"return `._id { margin: 0; font-size: 0.875rem; opacity: 0.9; }`;"}
         >
-          Set a global "migration request" time. Each Shopify shop runs migration
-          only when this time is <strong>greater than</strong> that shop's last
-          migration time. Use this after deploying schema changes so shops
-          migrate on next load instead of on every load.
+          Set a global "migration request" time. Each Shopify shop runs
+          migration only when this time is <strong>greater than</strong> that
+          shop's last migration time. Use this after deploying schema changes so
+          shops migrate on next load instead of on every load.
         </As>
       </As>
 
@@ -113,10 +118,10 @@ export function ShopMigrationRequestSettings() {
   margin-bottom: 1rem;
 }\`;`}
       >
-        <As as="span" css={`return \`._id { font-weight: 500; }\`;`}>
+        <As as="span" css={"return `._id { font-weight: 500; }`;"}>
           Current migration request time:
         </As>
-        <As as="span" css={`return \`._id { font-family: monospace; }\`;`}>
+        <As as="span" css={"return `._id { font-family: monospace; }`;"}>
           {migrationRequest()?.migrationRequestAt
             ? formatDate(migrationRequest()?.migrationRequestAt)
             : "Not set"}

@@ -50,8 +50,7 @@ export function syncHighlightedCompFromFormStore(
   if (!formStoreVertex) return;
   const hoverId = formStoreVertex.P.hoverId;
   const selectedId = formStoreVertex.P.selectedId;
-  const attrId =
-    hoverId != null && hoverId !== -1 ? hoverId : selectedId;
+  const attrId = hoverId != null && hoverId !== -1 ? hoverId : selectedId;
   if (attrId == null || attrId === -1) {
     clearHighlightedCompKey(layoutStoreId, graph, setGraph);
     return;

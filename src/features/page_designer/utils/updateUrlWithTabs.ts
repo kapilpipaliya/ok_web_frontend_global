@@ -36,7 +36,10 @@ function getKeyFromCurrentUrl(entity: string): string | undefined {
   return undefined;
 }
 
-function resolveTabKey(form: OpenFormInfo, graph: GraphInterface): string | undefined {
+function resolveTabKey(
+  form: OpenFormInfo,
+  graph: GraphInterface,
+): string | undefined {
   const dataVertex = graph.vertexes[form.dataId];
   if (dataVertex?.P?.key) {
     return dataVertex.P.key as string;
@@ -112,7 +115,7 @@ export function updateUrlWithOpenedTabs(
 
   const firstTab = allTabs[0];
   const [firstEntity, firstKey] = firstTab.split(":");
-  if (!firstEntity || !firstKey) {
+  if (!(firstEntity && firstKey)) {
     return;
   }
 

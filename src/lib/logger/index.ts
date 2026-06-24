@@ -328,7 +328,7 @@ class AppLogger {
         type: "database_operation",
         ...context,
       },
-      `DB: ${context.operation}${context.duration ? ` (${context.duration}ms)` : ""}${context.recordCount !== undefined ? ` - ${context.recordCount} records` : ""}`,
+      `DB: ${context.operation}${context.duration ? ` (${context.duration}ms)` : ""}${context.recordCount === undefined ? "" : ` - ${context.recordCount} records`}`,
     );
   }
 

@@ -15,10 +15,9 @@ export async function deleteShopVertexFromGlobalDb(
 ): Promise<void> {
   const { dbSession } = await getDBSessionForSubdomain(request);
   try {
-    await dbSession.run(
-      `MATCH (s:ShopifyShop {shop: $shop}) DELETE s`,
-      { shop },
-    );
+    await dbSession.run("MATCH (s:ShopifyShop {shop: $shop}) DELETE s", {
+      shop,
+    });
     console.log(`Deleted ShopifyShop vertex for ${shop} from subdomain DB`);
   } catch (error) {
     console.error(`Failed to delete ShopifyShop vertex for ${shop}:`, error);
@@ -43,7 +42,10 @@ export async function deleteShopDataAndDatabase(
     await systemSession.run(`DROP DATABASE ${shopDatabaseName} IF EXISTS`);
     console.log(`Dropped database ${shopDatabaseName} for ${shop}`);
   } catch (error) {
-    console.error(`Failed to drop database ${shopDatabaseName} for ${shop}:`, error);
+    console.error(
+      `Failed to drop database ${shopDatabaseName} for ${shop}:`,
+      error,
+    );
   } finally {
     await systemSession.close();
   }

@@ -275,7 +275,10 @@ export async function startWorker(workerKey: string) {
     const { dbSession, subDomain } = await getDBSessionForSubdomain();
     try {
       // Start worker on current node
-      const localResult = await startWorkerForSubdomainCore(subDomain, workerKey);
+      const localResult = await startWorkerForSubdomainCore(
+        subDomain,
+        workerKey,
+      );
 
       if (!localResult.success) {
         return localResult;

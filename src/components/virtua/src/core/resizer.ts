@@ -4,7 +4,7 @@ import {
   ACTION_VIEWPORT_RESIZE,
   type VirtualStore,
 } from "./store.js";
-import { type ItemResize } from "./types.js";
+import type { ItemResize } from "./types.js";
 import { max, microtask, NULL } from "./utils.js";
 
 const createResizeObserver = (cb: ResizeObserverCallback) => {
@@ -220,15 +220,15 @@ export const createGridResizer = (
           const prevSize = sizeCache.get(key);
           let rowResized: boolean | undefined;
           let colResized: boolean | undefined;
-          if (!prevSize) {
-            rowResized = colResized = true;
-          } else {
+          if (prevSize) {
             if (prevSize[0] !== height) {
               rowResized = true;
             }
             if (prevSize[1] !== width) {
               colResized = true;
             }
+          } else {
+            rowResized = colResized = true;
           }
           if (rowResized) {
             resizedRows.add(rowIndex);

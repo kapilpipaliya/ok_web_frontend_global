@@ -59,7 +59,7 @@ const content = [
     componentName: "Html",
     displayOrder: 5,
     props: `return {
-      href: "${typeof window !== "undefined" ? window.location.origin : ""}/support/contact"
+      href: "${typeof window === "undefined" ? "" : window.location.origin}/support/contact"
     }`,
     target: "_blank",
     text: "Contact Support",

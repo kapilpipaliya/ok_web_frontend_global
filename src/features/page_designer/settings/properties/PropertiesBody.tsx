@@ -91,9 +91,7 @@ export function PropertiesBody() {
   };
 
   return (
-    <Show
-      when={propertiesAttrId() !== -1 && selectedAttr()}
-    >
+    <Show when={propertiesAttrId() !== -1 && selectedAttr()}>
       {/* <As as="div" css={`return \`._id {
   display: flex;
   gap: 2px;

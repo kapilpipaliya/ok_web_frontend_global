@@ -4,7 +4,7 @@ const ZIndexContext = createContext<number>();
 
 export function useZIndex(): number {
   const context = useContext(ZIndexContext);
-  return context !== undefined ? context : 0;
+  return context === undefined ? 0 : context;
 }
 
 export function ZIndex(

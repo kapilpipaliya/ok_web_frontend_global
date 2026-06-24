@@ -118,8 +118,14 @@ export interface FunctionArgumentBaseType {
   z: typeof import("zod").z;
   /** Build a virtua/render-prop row renderer from the loop + Slot graph template. */
   createLoopRowRenderer: (
-    mapContextValue: (rowData: unknown, index: import("solid-js").Accessor<number>) => unknown,
-  ) => (rowData: unknown, index: import("solid-js").Accessor<number>) => import("solid-js").JSX.Element;
+    mapContextValue: (
+      rowData: unknown,
+      index: import("solid-js").Accessor<number>,
+    ) => unknown,
+  ) => (
+    rowData: unknown,
+    index: import("solid-js").Accessor<number>,
+  ) => import("solid-js").JSX.Element;
 }
 
 export interface FunctionArgumentType extends FunctionArgumentBaseType {

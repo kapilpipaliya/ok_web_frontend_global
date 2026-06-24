@@ -1,5 +1,5 @@
 import { createContext, useContext } from "solid-js";
-import { createStore } from "solid-js/store";
+import type { createStore } from "solid-js/store";
 
 import { InitialPermissions } from "~/features/page_attr_render/InitialPermissions";
 import type { Id } from "~/lib/graph/type/id";
@@ -21,9 +21,10 @@ export function getInitialPreviewStore() {
   };
 }
 
-export const PreviewContext = createContext<PreviewStore>(
-  // getInitialPreviewStore(), // object on initial context make it proxy sometimes.
-);
+export const PreviewContext =
+  createContext<PreviewStore>(
+    // getInitialPreviewStore(), // object on initial context make it proxy sometimes.
+  );
 
 export function usePreviewContext() {
   return useContext(PreviewContext) ?? [getInitialPreviewStore(), () => {}];

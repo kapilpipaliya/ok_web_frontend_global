@@ -40,7 +40,8 @@ function resolveChildrenProps(
   dynamicProps: DynamicPropsType,
   parentChildren?: JSX.Element,
 ) {
-  const { children: childrenFromProps, ...componentDynamicProps } = dynamicProps;
+  const { children: childrenFromProps, ...componentDynamicProps } =
+    dynamicProps;
   const childrenFn =
     typeof childrenFromProps === "function" ? childrenFromProps : undefined;
   const slotContent =

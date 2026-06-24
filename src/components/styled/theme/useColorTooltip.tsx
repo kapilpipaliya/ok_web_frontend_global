@@ -79,8 +79,8 @@ export const useColorTooltip = () => {
       }[placement.split("-")[0]]!;
 
       Object.assign(arrowRef.style, {
-        left: arrowX != null ? `${arrowX}px` : "",
-        top: arrowY != null ? `${arrowY}px` : "",
+        left: arrowX == null ? "" : `${arrowX}px`,
+        top: arrowY == null ? "" : `${arrowY}px`,
         right: "",
         bottom: "",
         [staticSide]: "-4px",

@@ -13,7 +13,7 @@ import {
   ACTION_BEFORE_MANUAL_SMOOTH_SCROLL,
   ACTION_START_OFFSET_CHANGE,
 } from "./store.js";
-import { type ScrollToIndexOpts } from "./types.js";
+import type { ScrollToIndexOpts } from "./types.js";
 import { clamp, createPromise, microtask, NULL } from "./utils.js";
 
 const timeout = setTimeout;
@@ -108,7 +108,8 @@ const createScrollObserver = (
       // Scroll start should be detected with scroll event
       !state.isScrolling ||
       // Probably a pinch-to-zoom gesture
-      e.ctrlKey) {
+      e.ctrlKey
+    ) {
       return;
     }
 
@@ -476,7 +477,7 @@ export const createWindowScroller = (
     viewport: HTMLElement,
     window: Window,
     isHorizontal: boolean,
-    offset: number = 0,
+    offset = 0,
   ): number => {
     // TODO calc offset only when it changes (maybe impossible)
     const offsetKey = isHorizontal ? "offsetLeft" : "offsetTop";

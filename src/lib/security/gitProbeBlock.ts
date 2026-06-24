@@ -27,7 +27,10 @@ export function isGitRepositoryProbePath(pathname: string): boolean {
   return p === "/.git" || p.startsWith("/.git/");
 }
 
-export function getClientIpForBlocking(request: Request, clientAddress?: string): string | undefined {
+export function getClientIpForBlocking(
+  request: Request,
+  clientAddress?: string,
+): string | undefined {
   const forwarded = request.headers.get("x-forwarded-for");
   if (forwarded) {
     const first = forwarded.split(",")[0]?.trim();

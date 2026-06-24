@@ -9,7 +9,9 @@ import { redisConnection } from "../redisConfig";
 import type { EmailSettingsShopSyncJobData } from "../emailSettingsShopSyncQueue";
 
 declare global {
-  var __emailSettingsShopSyncWorker: Worker<EmailSettingsShopSyncJobData> | undefined;
+  var __emailSettingsShopSyncWorker:
+    | Worker<EmailSettingsShopSyncJobData>
+    | undefined;
   var __emailSettingsShopSyncWorkerStartPromise:
     | Promise<Worker<EmailSettingsShopSyncJobData>>
     | undefined;

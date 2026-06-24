@@ -13,10 +13,7 @@ import type { PaletteTreeConfig } from "./componentPaletteConfig";
 import type { Id } from "~/lib/graph/type/id";
 import type { Vertex } from "~/lib/graph/type/vertex";
 
-import {
-  isPaletteCategory,
-  isPaletteContent,
-} from "./componentPaletteUtils";
+import { isPaletteCategory, isPaletteContent } from "./componentPaletteUtils";
 
 export type PaletteDropPosition = "before" | "after" | "center";
 

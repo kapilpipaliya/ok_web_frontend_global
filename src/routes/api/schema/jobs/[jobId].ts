@@ -4,7 +4,10 @@ import { Job } from "bullmq";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 import type { SchemaJobQueueData } from "~/lib/schema/schemaJobs/schemaJobTypes";
-import { parseSchemaJobIdParam, schemaJobQueue } from "~/server/queue/schemaJobQueue";
+import {
+  parseSchemaJobIdParam,
+  schemaJobQueue,
+} from "~/server/queue/schemaJobQueue";
 import { validateUserAndPermissions } from "~/routes/api/schema/export/validation/validateUserAndPermissions";
 
 function getJobFailureDetails(job: Job<SchemaJobQueueData>): string | null {
@@ -82,7 +85,8 @@ export async function GET({ request, params }: APIEvent) {
         JSON.stringify({
           jobId: rawId.trim(),
           status: "complete",
-          message: "Job not found or no longer in Redis (expired after completion).",
+          message:
+            "Job not found or no longer in Redis (expired after completion).",
         }),
         { status: 404, headers: { "Content-Type": "application/json" } },
       );
@@ -97,10 +101,9 @@ export async function GET({ request, params }: APIEvent) {
     const status = mapBullState(bullState);
 
     const result =
-      status === "success" && job.returnvalue != null
-        ? job.returnvalue
-        : null;
-    const parseIssue = status === "success" ? getImportParseIssueSummary(result) : null;
+      status === "success" && job.returnvalue != null ? job.returnvalue : null;
+    const parseIssue =
+      status === "success" ? getImportParseIssueSummary(result) : null;
 
     return new Response(
       JSON.stringify({
@@ -108,9 +111,7 @@ export async function GET({ request, params }: APIEvent) {
         operation: data.operation,
         status,
         subDomain: data.subDomain,
-        createdAt: job.timestamp
-          ? new Date(job.timestamp).toISOString()
-          : null,
+        createdAt: job.timestamp ? new Date(job.timestamp).toISOString() : null,
         startedAt: job.processedOn
           ? new Date(job.processedOn).toISOString()
           : null,
@@ -118,11 +119,13 @@ export async function GET({ request, params }: APIEvent) {
           ? new Date(job.finishedOn).toISOString()
           : null,
         error:
-          status === "failed" ? job.failedReason : parseIssue?.message ?? null,
+          status === "failed"
+            ? job.failedReason
+            : (parseIssue?.message ?? null),
         errorDetails:
           status === "failed"
             ? getJobFailureDetails(job)
-            : parseIssue?.details ?? null,
+            : (parseIssue?.details ?? null),
         result,
       }),
       { status: 200, headers: { "Content-Type": "application/json" } },

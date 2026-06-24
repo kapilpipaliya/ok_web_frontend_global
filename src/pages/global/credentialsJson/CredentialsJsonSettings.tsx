@@ -62,7 +62,8 @@ export function CredentialsJsonSettings() {
             css: PROPERTIES.Css.TextFieldCss,
             componentName: "SystemTextInput",
             key: "credentialsJson",
-            placeholder: '{"shopifyAPIKey": "...", "shopifyAPISecret": "...", "shopifyAppUrl": "https://...", "shopifyScopes": "read_products,write_products"}',
+            placeholder:
+              '{"shopifyAPIKey": "...", "shopifyAPISecret": "...", "shopifyAppUrl": "https://...", "shopifyScopes": "read_products,write_products"}',
             rows: 16,
             type: "textarea",
           },
@@ -90,8 +91,7 @@ export function CredentialsJsonSettings() {
                       const response = await postAPI(
                         API.settings.credentialsJson.updateUrl,
                         {
-                          credentialsJson:
-                            settings.P?.credentialsJson ?? "",
+                          credentialsJson: settings.P?.credentialsJson ?? "",
                         },
                       );
                       if (response.error) {

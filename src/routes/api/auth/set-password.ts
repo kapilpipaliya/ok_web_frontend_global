@@ -38,10 +38,9 @@ export async function POST({ request }: APIEvent) {
     const { uuid } = decodeUserData(userPayload);
 
     const user = await dbSession.executeWrite(async (tx) => {
-      const userResult = await tx.run(
-        `MATCH (u:User {uuid: $uuid}) RETURN u`,
-        { uuid },
-      );
+      const userResult = await tx.run("MATCH (u:User {uuid: $uuid}) RETURN u", {
+        uuid,
+      });
 
       if (userResult.records.length === 0) {
         throw new APIError("User not found", 404);

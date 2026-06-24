@@ -150,13 +150,13 @@ export function ComponentField(props: Readonly<{ children?: JSX.Element }>) {
         },
         getOwnPropertyDescriptor(_, prop) {
           const value = propsMemo()[prop as keyof ReturnType<typeof propsMemo>];
-          return value !== undefined
-            ? {
+          return value === undefined
+            ? undefined
+            : {
                 enumerable: true,
                 configurable: true,
                 value,
-              }
-            : undefined;
+              };
         },
       },
     );
@@ -315,9 +315,9 @@ export function ComponentField(props: Readonly<{ children?: JSX.Element }>) {
         when={getCompVertex() && typeof componentName() === "string"}
         fallback={
           <div>
-            {typeof componentName() !== "string"
-              ? "Component name should be a string"
-              : `No Component Found: ${componentName()}`}
+            {typeof componentName() === "string"
+              ? `No Component Found: ${componentName()}`
+              : "Component name should be a string"}
           </div>
         }
       >

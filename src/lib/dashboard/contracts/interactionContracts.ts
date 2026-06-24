@@ -51,7 +51,10 @@ const TEMPLATE_CLICKED_VALUE = /\{\{clicked\.value\}\}/g;
 
 export function substituteTemplateString(
   template: string,
-  context: { row?: { id?: string; P?: Record<string, unknown> }; clicked?: { value?: unknown } },
+  context: {
+    row?: { id?: string; P?: Record<string, unknown> };
+    clicked?: { value?: unknown };
+  },
 ): string {
   let result = String(template);
   if (context.row) {
@@ -61,14 +64,20 @@ export function substituteTemplateString(
     );
   }
   if (context.clicked?.value != null) {
-    result = result.replace(TEMPLATE_CLICKED_VALUE, String(context.clicked.value));
+    result = result.replace(
+      TEMPLATE_CLICKED_VALUE,
+      String(context.clicked.value),
+    );
   }
   return result;
 }
 
 export function substitutePayloadTemplates(
   payload: Record<string, unknown> | undefined,
-  context: { row?: { id?: string; P?: Record<string, unknown> }; clicked?: { value?: unknown } },
+  context: {
+    row?: { id?: string; P?: Record<string, unknown> };
+    clicked?: { value?: unknown };
+  },
 ): Record<string, unknown> {
   if (!payload || typeof payload !== "object") return {};
   const out: Record<string, unknown> = {};
@@ -76,8 +85,15 @@ export function substitutePayloadTemplates(
     const value = payload[key];
     if (typeof value === "string") {
       out[key] = substituteTemplateString(value, context);
-    } else if (value != null && typeof value === "object" && !Array.isArray(value)) {
-      out[key] = substitutePayloadTemplates(value as Record<string, unknown>, context);
+    } else if (
+      value != null &&
+      typeof value === "object" &&
+      !Array.isArray(value)
+    ) {
+      out[key] = substitutePayloadTemplates(
+        value as Record<string, unknown>,
+        context,
+      );
     } else {
       out[key] = value;
     }
@@ -98,7 +114,8 @@ export function normalizeInteractionEvent(
     type,
     sourceWidgetId: raw.sourceWidgetId,
     targetWidgetId: raw.targetWidgetId,
-    payload: raw.payload && typeof raw.payload === "object" ? { ...raw.payload } : {},
+    payload:
+      raw.payload && typeof raw.payload === "object" ? { ...raw.payload } : {},
     to: raw.to,
     value: raw.value,
     widgetId: raw.widgetId,
@@ -112,7 +129,7 @@ export function resolveWidgetInteraction(
     clicked?: { value?: unknown; label?: unknown; count?: unknown };
   },
 ): DashboardInteractionEvent | null {
-  if (!config?.trigger || !config?.type) return null;
+  if (!(config?.trigger && config?.type)) return null;
   const payload = substitutePayloadTemplates(
     {
       ...(config.payload || {}),

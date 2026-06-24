@@ -584,9 +584,9 @@ export function MultiSelectField(props: MultiSelectFieldProps) {
         <As
           as="div"
           css={[
-            props.selectionLimit !== 1
-              ? "return `._id {flex-wrap: wrap;}`;"
-              : "",
+            props.selectionLimit === 1
+              ? ""
+              : "return `._id {flex-wrap: wrap;}`;",
             `return \`._id {
   align-items: center;
   display: flex;
@@ -631,7 +631,7 @@ export function MultiSelectField(props: MultiSelectFieldProps) {
               css={[
                 `return \`._id {
   ${props.selectionLimit === 1 && selectedValue().length === 1 ? "width: 100px;" : ""}
-  ${props.selectionLimit !== 1 ? "min-width: 100px;" : ""}
+  ${props.selectionLimit === 1 ? "" : "min-width: 100px;"}
   border: none;
   flex: 1;
   outline: none;

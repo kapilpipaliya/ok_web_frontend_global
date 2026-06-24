@@ -8,7 +8,11 @@ import { DialogSubTitle } from "~/components/styled/dialog/DialogSubTitle";
 import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
 import { useToast } from "~/components/styled/modal/Toast";
 import { checkUniqueConstrains } from "~/cypher/mutate/validations/checkUniqueConstrains";
-import { useDesignerFormIdContext, useDesignerLayoutStore, type PageLayoutObject } from "~/features/page_designer/context/LayoutContext";
+import {
+  useDesignerFormIdContext,
+  useDesignerLayoutStore,
+  type PageLayoutObject,
+} from "~/features/page_designer/context/LayoutContext";
 import { openInNewInternalTab } from "~/features/page_designer/form_elements/pages/functions/openInNewInternalTab";
 import {
   COMPONENT_PALETTE_CONFIG,
@@ -250,12 +254,7 @@ export function SaveAsTemplateMenu(
           }
         }
 
-        openInNewInternalTab(
-          layoutStoreId,
-          componentVertex,
-          graph,
-          setGraph,
-        );
+        openInNewInternalTab(layoutStoreId, componentVertex, graph, setGraph);
       }
 
       showSuccessToast(`${label()} Saved Successfully`);

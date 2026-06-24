@@ -129,8 +129,9 @@ RETURN n`;
       } = getLabelFilterSkipLimit(label, context);
       if (newLabel) {
         query = `MATCH (n:${newLabel})`;
-        const { params: filterParams, query: whereClause } =
-          mongoToCypher(filter as MongoFilter);
+        const { params: filterParams, query: whereClause } = mongoToCypher(
+          filter as MongoFilter,
+        );
         if (whereClause) {
           query += ` WHERE ${whereClause}`;
           params = { ...params, ...filterParams };

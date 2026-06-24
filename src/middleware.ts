@@ -93,7 +93,10 @@ export default createMiddleware({
     async (event) => {
       // Allow _server and webhooks without permission check
       const url = new URL(event.request.url);
-      if (url.pathname === "/_server" || url.pathname.startsWith("/webhooks/")) {
+      if (
+        url.pathname === "/_server" ||
+        url.pathname.startsWith("/webhooks/")
+      ) {
         return;
       }
 
@@ -116,10 +119,15 @@ export default createMiddleware({
         event.request.headers.get("x-forwarded-host") ??
         event.request.headers.get("host");
       if (event.response && host === "decoedeproduct.decodecomerce.com") {
-        const { dbSession, subDomain } = await getDBSessionForSubdomain(event.request);
+        const { dbSession, subDomain } = await getDBSessionForSubdomain(
+          event.request,
+        );
         try {
           const shopify = await getShopify(subDomain, dbSession);
-          shopify.addDocumentResponseHeaders(event.request, event.response.headers);
+          shopify.addDocumentResponseHeaders(
+            event.request,
+            event.response.headers,
+          );
         } finally {
           await dbSession.close();
         }

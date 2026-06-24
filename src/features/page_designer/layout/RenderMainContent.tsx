@@ -129,7 +129,7 @@ const Panel: Component<PanelProps> = (props) => {
                   }\`;`
                 : [
                     STYLES.overflowCss,
-                    `return \`._id { min-height: 0; min-width: 0; }\`;`,
+                    "return `._id { min-height: 0; min-width: 0; }`;",
                   ]
             }
           >
@@ -188,7 +188,9 @@ const Panel: Component<PanelProps> = (props) => {
               </Show>
               <As
                 as="h1"
-                css={"return `._id { font-weight: 600; font-size: inherit; flex: 1; margin: 0; }`;"}
+                css={
+                  "return `._id { font-weight: 600; font-size: inherit; flex: 1; margin: 0; }`;"
+                }
               >
                 {props.title}
               </As>
@@ -210,7 +212,7 @@ const Panel: Component<PanelProps> = (props) => {
               as="div"
               css={[
                 STYLES.overflowCss,
-                `return \`._id { min-height: 0; min-width: 0; }\`;`,
+                "return `._id { min-height: 0; min-width: 0; }`;",
               ]}
             >
               {props.children}
@@ -301,9 +303,7 @@ export function RenderMainContent() {
     if (layout.mainPanel) {
       const mainPanelColumns = layout.mainPanel.map((panel) => {
         const width = layout[`mainPanel${panel}Width`];
-        return typeof width === "number"
-          ? `${width}px`
-          : "minmax(400px, 1fr)";
+        return typeof width === "number" ? `${width}px` : "minmax(400px, 1fr)";
       });
       columns.push(...mainPanelColumns);
     }
@@ -342,7 +342,8 @@ export function RenderMainContent() {
         | `mainPanel${string}Width`,
       panelRef: () => HTMLDivElement | undefined,
       isHorizontal: boolean,
-      growOnDragRight = key === "componentsWidth" || key.startsWith("mainPanel"),
+      growOnDragRight = key === "componentsWidth" ||
+        key.startsWith("mainPanel"),
     ) =>
     (e: PointerEvent) => {
       e.preventDefault();
@@ -474,182 +475,182 @@ export function RenderMainContent() {
           height: 100%;
         }\`;`}
         >
-        <As
-          as="div"
-          css={STYLES.panelCellCss}
-          style={{ display: layoutStore().isSettingsOpen ? "block" : "none" }}
-        >
-          <Panel
-            activeResizeKey={activeResizeKey()}
-            isResizing={isResizing()}
-            onResize={createResizeHandler(
-              "settingsWidth",
-              settingsPanelRef,
-              true,
-              true,
-            )}
-            ref={setSettingsPanelRef}
-            resizeKey="settingsWidth"
-            resizePosition="right"
-            title="Settings"
+          <As
+            as="div"
+            css={STYLES.panelCellCss}
+            style={{ display: layoutStore().isSettingsOpen ? "block" : "none" }}
           >
-            <SettingTabs />
-          </Panel>
-        </As>
+            <Panel
+              activeResizeKey={activeResizeKey()}
+              isResizing={isResizing()}
+              onResize={createResizeHandler(
+                "settingsWidth",
+                settingsPanelRef,
+                true,
+                true,
+              )}
+              ref={setSettingsPanelRef}
+              resizeKey="settingsWidth"
+              resizePosition="right"
+              title="Settings"
+            >
+              <SettingTabs />
+            </Panel>
+          </As>
 
-        <As
-          as="div"
-          css={STYLES.panelCellCss}
-          style={{
-            display: layoutStore().isComponentsOpen ? "block" : "none",
-          }}
-        >
-          <Panel
-            activeResizeKey={activeResizeKey()}
-            isResizing={isResizing()}
-            onResize={createResizeHandler(
-              "componentsWidth",
-              componentsPanelRef,
-              true,
-            )}
-            ref={setComponentsPanelRef}
-            resizeKey="componentsWidth"
-            resizePosition="right"
-            scrollContent={false}
+          <As
+            as="div"
+            css={STYLES.panelCellCss}
+            style={{
+              display: layoutStore().isComponentsOpen ? "block" : "none",
+            }}
           >
-            <FormElements />
-          </Panel>
-        </As>
+            <Panel
+              activeResizeKey={activeResizeKey()}
+              isResizing={isResizing()}
+              onResize={createResizeHandler(
+                "componentsWidth",
+                componentsPanelRef,
+                true,
+              )}
+              ref={setComponentsPanelRef}
+              resizeKey="componentsWidth"
+              resizePosition="right"
+              scrollContent={false}
+            >
+              <FormElements />
+            </Panel>
+          </As>
 
-        <As
-          as="div"
-          css={STYLES.panelCellCss}
-          style={{
-            display: layoutStore().isLayoutTreeOpen ? "block" : "none",
-          }}
-        >
-          <Panel
-            activeResizeKey={activeResizeKey()}
-            isResizing={isResizing()}
-            onResize={createResizeHandler(
-              "layoutTreeWidth",
-              layoutTreePanelRef,
-              true,
-              true,
-            )}
-            ref={setLayoutTreePanelRef}
-            resizeKey="layoutTreeWidth"
-            resizePosition="right"
-            title="Layout Tree"
-            titleIcon="tabler:layout-2"
+          <As
+            as="div"
+            css={STYLES.panelCellCss}
+            style={{
+              display: layoutStore().isLayoutTreeOpen ? "block" : "none",
+            }}
           >
-            <LayoutTreePanel />
-          </Panel>
-        </As>
+            <Panel
+              activeResizeKey={activeResizeKey()}
+              isResizing={isResizing()}
+              onResize={createResizeHandler(
+                "layoutTreeWidth",
+                layoutTreePanelRef,
+                true,
+                true,
+              )}
+              ref={setLayoutTreePanelRef}
+              resizeKey="layoutTreeWidth"
+              resizePosition="right"
+              title="Layout Tree"
+              titleIcon="tabler:layout-2"
+            >
+              <LayoutTreePanel />
+            </Panel>
+          </As>
 
-        <As
-          as="div"
-          css={STYLES.panelCellCss}
-          style={{
-            display: layoutStore().isPropertiesOpen ? "block" : "none",
-          }}
-        >
-          <Panel
-            activeResizeKey={activeResizeKey()}
-            collapsed={layoutStore().isPropertiesCollapsed}
-            isResizing={isResizing()}
-            onExpand={expandProperties}
-            onResize={createResizeHandler(
-              "propertiesWidth",
-              propertiesPanelRef,
-              true,
-              true,
-            )}
-            onToggleCollapse={togglePropertiesCollapse}
-            ref={setPropertiesPanelRef}
-            resizeKey="propertiesWidth"
-            resizePosition="right"
-            title="Properties"
+          <As
+            as="div"
+            css={STYLES.panelCellCss}
+            style={{
+              display: layoutStore().isPropertiesOpen ? "block" : "none",
+            }}
           >
-            <PropertiesContent />
-          </Panel>
-        </As>
+            <Panel
+              activeResizeKey={activeResizeKey()}
+              collapsed={layoutStore().isPropertiesCollapsed}
+              isResizing={isResizing()}
+              onExpand={expandProperties}
+              onResize={createResizeHandler(
+                "propertiesWidth",
+                propertiesPanelRef,
+                true,
+                true,
+              )}
+              onToggleCollapse={togglePropertiesCollapse}
+              ref={setPropertiesPanelRef}
+              resizeKey="propertiesWidth"
+              resizePosition="right"
+              title="Properties"
+            >
+              <PropertiesContent />
+            </Panel>
+          </As>
 
-        <As
-          as="div"
-          css={STYLES.panelCellCss}
-          style={{ display: layoutStore().isAiOpen ? "block" : "none" }}
-        >
-          <Panel
-            activeResizeKey={activeResizeKey()}
-            isResizing={isResizing()}
-            onResize={createResizeHandler("aiWidth", aiPanelRef, true, true)}
-            ref={setAiPanelRef}
-            resizeKey="aiWidth"
-            resizePosition="right"
-            title="AI Content Generator"
+          <As
+            as="div"
+            css={STYLES.panelCellCss}
+            style={{ display: layoutStore().isAiOpen ? "block" : "none" }}
           >
-            <UseObjectAIPanel />
-          </Panel>
-        </As>
+            <Panel
+              activeResizeKey={activeResizeKey()}
+              isResizing={isResizing()}
+              onResize={createResizeHandler("aiWidth", aiPanelRef, true, true)}
+              ref={setAiPanelRef}
+              resizeKey="aiWidth"
+              resizePosition="right"
+              title="AI Content Generator"
+            >
+              <UseObjectAIPanel />
+            </Panel>
+          </As>
 
-        <For each={layoutStore().mainPanel}>
-          {(mainPanel) => (
-            <As as="div" css={STYLES.panelCellCss}>
-              <Panel
-                activeResizeKey={activeResizeKey()}
-                isResizing={isResizing()}
-                onResizeLeft={createResizeHandler(
-                  `mainPanel${mainPanel}Width` as `mainPanel${string}Width`,
-                  () => mainPanelRefs()[`mainPanel${mainPanel}`],
-                  true,
-                  false,
-                )}
-                onResizeRight={createResizeHandler(
-                  `mainPanel${mainPanel}Width` as `mainPanel${string}Width`,
-                  () => mainPanelRefs()[`mainPanel${mainPanel}`],
-                  true,
-                  true,
-                )}
-                ref={(el) =>
-                  setMainPanelRefs((prev) => ({
-                    ...prev,
-                    [`mainPanel${mainPanel}`]: el,
-                  }))
-                }
-                resizeKey={`mainPanel${mainPanel}Width`}
-                resizeKeyLeft={`mainPanel${mainPanel}Width`}
-                resizeKeyRight={`mainPanel${mainPanel}Width`}
-                scrollContent={false}
-              >
-                <As
-                  as="div"
-                  css={`return \`._id {
+          <For each={layoutStore().mainPanel}>
+            {(mainPanel) => (
+              <As as="div" css={STYLES.panelCellCss}>
+                <Panel
+                  activeResizeKey={activeResizeKey()}
+                  isResizing={isResizing()}
+                  onResizeLeft={createResizeHandler(
+                    `mainPanel${mainPanel}Width` as `mainPanel${string}Width`,
+                    () => mainPanelRefs()[`mainPanel${mainPanel}`],
+                    true,
+                    false,
+                  )}
+                  onResizeRight={createResizeHandler(
+                    `mainPanel${mainPanel}Width` as `mainPanel${string}Width`,
+                    () => mainPanelRefs()[`mainPanel${mainPanel}`],
+                    true,
+                    true,
+                  )}
+                  ref={(el) =>
+                    setMainPanelRefs((prev) => ({
+                      ...prev,
+                      [`mainPanel${mainPanel}`]: el,
+                    }))
+                  }
+                  resizeKey={`mainPanel${mainPanel}Width`}
+                  resizeKeyLeft={`mainPanel${mainPanel}Width`}
+                  resizeKeyRight={`mainPanel${mainPanel}Width`}
+                  scrollContent={false}
+                >
+                  <As
+                    as="div"
+                    css={`return \`._id {
                     display: flex;
                     flex-direction: column;
                     height: 100%;
                     min-height: 0;
                     overflow: hidden;
                   }\`;`}
-                >
-                  <As as="div" css={`return \`._id { flex-shrink: 0; }\`;`}>
-                    <TabBar mainPanel={mainPanel} />
-                  </As>
-                  <As
-                    as="div"
-                    css={`return \`._id {
+                  >
+                    <As as="div" css={"return `._id { flex-shrink: 0; }`;"}>
+                      <TabBar mainPanel={mainPanel} />
+                    </As>
+                    <As
+                      as="div"
+                      css={`return \`._id {
                       flex: 1;
                       min-height: 0;
                       overflow: hidden;
                     }\`;`}
-                  >
-                    <PageViewComponent mainPanel={mainPanel} />
+                    >
+                      <PageViewComponent mainPanel={mainPanel} />
+                    </As>
                   </As>
-                </As>
-              </Panel>
-            </As>
-          )}
-        </For>
+                </Panel>
+              </As>
+            )}
+          </For>
         </As>
       </As>
 

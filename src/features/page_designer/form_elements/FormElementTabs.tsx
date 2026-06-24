@@ -98,36 +98,36 @@ export function FormElementTabs() {
         ]}
       >
         <Switch>
-        <Match when={selectedTab().collection === "Comp"}>
-          <As as="div">
-            <ComponentList
-              edgeName="ParentComp"
-              rootExpression={`g:'Comp[Root]'`}
-              hideActionButtons={true}
-            />
+          <Match when={selectedTab().collection === "Comp"}>
+            <As as="div">
+              <ComponentList
+                edgeName="ParentComp"
+                rootExpression={`g:'Comp[Root]'`}
+                hideActionButtons={true}
+              />
 
-            <Divider />
+              <Divider />
 
-            <As as="div" css={`return \`._id { margin-top: 4px; }\`;`}>
-              <ComponentPaletteTree searchAlways title="Categories" />
+              <As as="div" css={"return `._id { margin-top: 4px; }`;"}>
+                <ComponentPaletteTree searchAlways title="Categories" />
+              </As>
             </As>
-          </As>
-        </Match>
-        <Match when={selectedTab().collection === "Function"}>
-          <ComponentPaletteTree
-            config={FUNCTION_PALETTE_CONFIG}
-            searchAlways
-            title="Functions"
-          />
-        </Match>
-        <Match when={selectedTab().collection === "Page"}>
-          <ComponentPaletteTree
-            config={PAGE_PALETTE_CONFIG}
-            searchAlways
-            title="Pages"
-          />
-        </Match>
-      </Switch>
+          </Match>
+          <Match when={selectedTab().collection === "Function"}>
+            <ComponentPaletteTree
+              config={FUNCTION_PALETTE_CONFIG}
+              searchAlways
+              title="Functions"
+            />
+          </Match>
+          <Match when={selectedTab().collection === "Page"}>
+            <ComponentPaletteTree
+              config={PAGE_PALETTE_CONFIG}
+              searchAlways
+              title="Pages"
+            />
+          </Match>
+        </Switch>
       </As>
     </As>
   );

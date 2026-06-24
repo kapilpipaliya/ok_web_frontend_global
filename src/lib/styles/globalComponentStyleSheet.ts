@@ -31,7 +31,10 @@ function ensureGlobalSheet(state: ComponentCssState): CSSStyleSheet | null {
 
   if (!state.styleSheet) {
     state.styleSheet = new CSSStyleSheet();
-    document.adoptedStyleSheets = [...document.adoptedStyleSheets, state.styleSheet];
+    document.adoptedStyleSheets = [
+      ...document.adoptedStyleSheets,
+      state.styleSheet,
+    ];
   }
   return state.styleSheet;
 }
@@ -70,11 +73,13 @@ export function removeRulesForHash(
   hash: string,
 ): void {
   const sheet = state.styleSheet;
-  if (!sheet || !state.insertedHashes.has(hash)) {
+  if (!(sheet && state.insertedHashes.has(hash))) {
     return;
   }
 
-  const indices = [...(state.ruleIndices.get(hash) ?? [])].sort((a, b) => b - a);
+  const indices = [...(state.ruleIndices.get(hash) ?? [])].sort(
+    (a, b) => b - a,
+  );
 
   state.ruleIndices.delete(hash);
   state.insertedHashes.delete(hash);

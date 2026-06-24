@@ -6,9 +6,7 @@ export function isPublicSchemaProperty(value: unknown): boolean {
   return value === true || value === "true";
 }
 
-export function getPageRootVertex(
-  schema: ExportedSchema,
-): Vertex | undefined {
+export function getPageRootVertex(schema: ExportedSchema): Vertex | undefined {
   return schema.vertexes.find((v) => {
     const label = Array.isArray(v.L) ? v.L[0] : v.L;
     return label === "Page";

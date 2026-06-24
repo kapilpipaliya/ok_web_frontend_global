@@ -41,7 +41,7 @@ export async function getSubDomain(host: string) {
       MATCH (s:SubDomain {domain: $domain})
       RETURN s.key as subdomain
     `;
-    
+
     // First, try to find hostname in database
     if (hostname) {
       const result = await dbSession.run(query, { domain: hostname });
@@ -58,7 +58,10 @@ export async function getSubDomain(host: string) {
       }
     }
 
-    console.error("Domain not found in SubDomain vertices:", hostname || domain);
+    console.error(
+      "Domain not found in SubDomain vertices:",
+      hostname || domain,
+    );
     throw new Error(`Domain not found: ${hostname || domain}`);
   } catch (error) {
     console.error("Error looking up domain:", error, hostname || domain);

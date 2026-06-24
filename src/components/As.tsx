@@ -1,4 +1,10 @@
-import { type Component, createMemo, type JSX, Show, splitProps } from "solid-js";
+import {
+  type Component,
+  createMemo,
+  type JSX,
+  Show,
+  splitProps,
+} from "solid-js";
 import { Dynamic } from "solid-js/web";
 
 import { ComponentScopedStyle } from "~/components/ComponentScopedStyle";
@@ -46,9 +52,7 @@ export function As<T extends keyof JSX.IntrinsicElements | Component<any>>(
 
   const finalClass = () => {
     const hashClass = scopedCss()?.hash;
-    return hashClass
-      ? `${hashClass} ${local.class || ""}`.trim()
-      : local.class;
+    return hashClass ? `${hashClass} ${local.class || ""}`.trim() : local.class;
   };
 
   return (

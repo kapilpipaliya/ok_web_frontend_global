@@ -40,7 +40,7 @@ export interface NotificationProperties extends TimestampProperties {
  *
  * Define relationships to other models (currently none for simplicity)
  */
-export type NotificationRelationships = {}
+export type NotificationRelationships = {};
 
 /**
  * Notification Static Methods Interface

@@ -39,7 +39,7 @@ const content = [
     displayOrder: 3,
     props: `return {
       // href: window.location.origin + "/admin/UserSettings",
-      href: "${typeof window !== "undefined" ? window.location.origin : ""}/"
+      href: "${typeof window === "undefined" ? "" : window.location.origin}/"
     }`,
     target: "_blank",
     text: "View Profile",

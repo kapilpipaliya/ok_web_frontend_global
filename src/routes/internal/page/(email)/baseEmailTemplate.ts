@@ -25,7 +25,7 @@ export function getLogoSchema(
             displayOrder: 1,
             props: `return {
             alt: "Logo",
-            src: "${typeof window !== "undefined" ? window.location.origin : ""}${API.file.downloadCompanyRectangularLogoUrl}"
+            src: "${typeof window === "undefined" ? "" : window.location.origin}${API.file.downloadCompanyRectangularLogoUrl}"
             }`,
           },
         ],

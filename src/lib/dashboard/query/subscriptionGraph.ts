@@ -9,9 +9,17 @@ export type WidgetSubscription = {
 };
 
 export type QuerySubscriptionGraph = {
-  register: (widgetId: string, querySignatures: string[], logicalKeys?: string[]) => void;
+  register: (
+    widgetId: string,
+    querySignatures: string[],
+    logicalKeys?: string[],
+  ) => void;
   unregister: (widgetId: string) => void;
-  update: (widgetId: string, querySignatures: string[], logicalKeys?: string[]) => void;
+  update: (
+    widgetId: string,
+    querySignatures: string[],
+    logicalKeys?: string[],
+  ) => void;
   resolveWidgetsForSignatures: (signatures: string[]) => string[];
   resolveWidgetsForLogicalKeys: (keys: string[]) => string[];
   getWidgetSignatures: (widgetId: string) => string[];
@@ -24,7 +32,11 @@ export function createQuerySubscriptionGraph(): QuerySubscriptionGraph {
   const signatureToWidgets = new Map<string, Set<string>>();
   const logicalToWidgets = new Map<string, Set<string>>();
 
-  const link = (map: Map<string, Set<string>>, key: string, widgetId: string) => {
+  const link = (
+    map: Map<string, Set<string>>,
+    key: string,
+    widgetId: string,
+  ) => {
     if (!key) return;
     let set = map.get(key);
     if (!set) {
@@ -34,7 +46,11 @@ export function createQuerySubscriptionGraph(): QuerySubscriptionGraph {
     set.add(widgetId);
   };
 
-  const unlink = (map: Map<string, Set<string>>, key: string, widgetId: string) => {
+  const unlink = (
+    map: Map<string, Set<string>>,
+    key: string,
+    widgetId: string,
+  ) => {
     const set = map.get(key);
     if (!set) return;
     set.delete(widgetId);
@@ -43,11 +59,15 @@ export function createQuerySubscriptionGraph(): QuerySubscriptionGraph {
 
   const reindex = (sub: WidgetSubscription, previous?: WidgetSubscription) => {
     if (previous) {
-      for (const sig of previous.querySignatures) unlink(signatureToWidgets, sig, sub.widgetId);
-      for (const key of previous.logicalKeys) unlink(logicalToWidgets, key, sub.widgetId);
+      for (const sig of previous.querySignatures)
+        unlink(signatureToWidgets, sig, sub.widgetId);
+      for (const key of previous.logicalKeys)
+        unlink(logicalToWidgets, key, sub.widgetId);
     }
-    for (const sig of sub.querySignatures) link(signatureToWidgets, sig, sub.widgetId);
-    for (const key of sub.logicalKeys) link(logicalToWidgets, key, sub.widgetId);
+    for (const sig of sub.querySignatures)
+      link(signatureToWidgets, sig, sub.widgetId);
+    for (const key of sub.logicalKeys)
+      link(logicalToWidgets, key, sub.widgetId);
   };
 
   return {

@@ -20,10 +20,16 @@ function parseCredentialsJson(raw: string): ShopifyCredentials {
   try {
     const parsed = JSON.parse(raw) as Record<string, unknown>;
     return {
-      apiKey: typeof parsed.shopifyAPIKey === "string" ? parsed.shopifyAPIKey : "",
-      apiSecretKey: typeof parsed.shopifyAPISecret === "string" ? parsed.shopifyAPISecret : "",
-      shopifyAppUrl: typeof parsed.shopifyAppUrl === "string" ? parsed.shopifyAppUrl : "",
-      shopifyScopes: typeof parsed.shopifyScopes === "string" ? parsed.shopifyScopes : "",
+      apiKey:
+        typeof parsed.shopifyAPIKey === "string" ? parsed.shopifyAPIKey : "",
+      apiSecretKey:
+        typeof parsed.shopifyAPISecret === "string"
+          ? parsed.shopifyAPISecret
+          : "",
+      shopifyAppUrl:
+        typeof parsed.shopifyAppUrl === "string" ? parsed.shopifyAppUrl : "",
+      shopifyScopes:
+        typeof parsed.shopifyScopes === "string" ? parsed.shopifyScopes : "",
     };
   } catch {
     return empty;
@@ -45,7 +51,7 @@ export async function getShopifyCredentialsFromSession(
   };
   try {
     const result = await dbSession.run(
-      `MATCH (c:CredentialsJson) RETURN c.credentialsJson as credentialsJson LIMIT 1`,
+      "MATCH (c:CredentialsJson) RETURN c.credentialsJson as credentialsJson LIMIT 1",
     );
     const raw =
       (result.records[0]?.get("credentialsJson") as string | undefined) ?? "";

@@ -9,14 +9,16 @@ export interface CompanyLogosShopSyncJobData {
   mainDatabaseName: string;
 }
 
-export const companyLogosShopSyncQueue =
-  new Queue<CompanyLogosShopSyncJobData>("company-logos-shop-sync", {
+export const companyLogosShopSyncQueue = new Queue<CompanyLogosShopSyncJobData>(
+  "company-logos-shop-sync",
+  {
     connection: redisConnection,
     defaultJobOptions: {
       ...defaultJobOptions,
       attempts: 2,
     },
-  });
+  },
+);
 
 const JOB_NAME = "sync-company-logos-to-shops";
 

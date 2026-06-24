@@ -29,7 +29,10 @@ function getRedisClient(): Redis | null {
       });
 
       global.__redisCacheClient.on("error", (error) => {
-        console.warn("[RedisCache] Redis error, disabling cache:", error.message);
+        console.warn(
+          "[RedisCache] Redis error, disabling cache:",
+          error.message,
+        );
         global.__redisCacheDisabled = true;
       });
     } catch (error) {
@@ -118,7 +121,9 @@ export async function redisCacheDelete(key: string): Promise<void> {
   }
 }
 
-export async function redisCacheDeleteByPattern(pattern: string): Promise<number> {
+export async function redisCacheDeleteByPattern(
+  pattern: string,
+): Promise<number> {
   const client = getRedisClient();
   if (!client) {
     return 0;

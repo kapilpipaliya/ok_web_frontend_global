@@ -1,7 +1,7 @@
 import type { Session, Transaction } from "neo4j-driver";
 
 import type { Edge } from "~/lib/graph/type/edge";
-import { Id } from "~/lib/graph/type/id";
+import type { Id } from "~/lib/graph/type/id";
 import type { Vertex } from "~/lib/graph/type/vertex";
 
 export interface EvalExpressionContext {

@@ -1,5 +1,10 @@
 import { createMemo, createSignal, getOwner, type Accessor } from "solid-js";
-import { useSearchParams, useParams, useLocation, useNavigate } from "@solidjs/router";
+import {
+  useSearchParams,
+  useParams,
+  useLocation,
+  useNavigate,
+} from "@solidjs/router";
 import { useToast } from "~/components/styled/modal/Toast";
 import { useZIndex } from "~/components/fields/ZIndex";
 import { useTheme } from "~/lib/theme/ThemeContext";

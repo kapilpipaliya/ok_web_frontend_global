@@ -323,9 +323,9 @@ export function PageDesignerWrapper(): JSX.Element {
       return;
     }
 
-    const layoutVertex = graph.vertexes[
-      initialStore.id
-    ] as Vertex<PageLayoutObject> | undefined;
+    const layoutVertex = graph.vertexes[initialStore.id] as
+      | Vertex<PageLayoutObject>
+      | undefined;
     if (!layoutVertex) {
       return;
     }

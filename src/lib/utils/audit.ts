@@ -214,11 +214,7 @@ export async function queryAudit(
  * Audit decorator for tracking changes
  */
 export function auditTrail(action: AuditAction, resourceType?: string) {
-  return (
-    target: any,
-    propertyKey: string,
-    descriptor: PropertyDescriptor,
-  ) => {
+  return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
     const originalMethod = descriptor.value;
 
     descriptor.value = async function (...args: any[]) {

@@ -15,7 +15,10 @@ import type {
 import { isShopDatabaseName } from "~/lib/shopify/getDatabaseNameForShop";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 import { getAllSubdomains } from "~/server/backup/backupManagement";
-import { enqueueSchemaJob, schemaJobQueue } from "~/server/queue/schemaJobQueue";
+import {
+  enqueueSchemaJob,
+  schemaJobQueue,
+} from "~/server/queue/schemaJobQueue";
 
 export interface SchemaDatabaseInfo {
   name: string;
@@ -157,7 +160,12 @@ async function assertAdminAccess() {
 }
 
 function partitionDatabases(
-  records: Array<{ name?: string; address?: string; role?: string; currentStatus?: string }>,
+  records: Array<{
+    name?: string;
+    address?: string;
+    role?: string;
+    currentStatus?: string;
+  }>,
 ): { appDatabases: SchemaDatabaseInfo[]; shopDatabases: SchemaDatabaseInfo[] } {
   const appDatabases: SchemaDatabaseInfo[] = [];
   const shopDatabases: SchemaDatabaseInfo[] = [];
@@ -169,10 +177,10 @@ function partitionDatabases(
     }
     const row: SchemaDatabaseInfo = {
       name,
-      address: db.address != null ? String(db.address) : undefined,
-      role: db.role != null ? String(db.role) : undefined,
+      address: db.address == null ? undefined : String(db.address),
+      role: db.role == null ? undefined : String(db.role),
       currentStatus:
-        db.currentStatus != null ? String(db.currentStatus) : undefined,
+        db.currentStatus == null ? undefined : String(db.currentStatus),
     };
     if (isShopDatabaseName(name)) {
       shopDatabases.push(row);
@@ -209,7 +217,10 @@ export async function listSchemaOperationDatabases(): Promise<
 
   const listed = await getAllSubdomains();
   if (!listed.success) {
-    return { success: false, error: listed.error || "Failed to list databases" };
+    return {
+      success: false,
+      error: listed.error || "Failed to list databases",
+    };
   }
 
   return {
@@ -318,9 +329,7 @@ export async function startSchemaOperations(input: {
       continue;
     }
     const subDomain = databaseName;
-    let enqueued:
-      | { ok: true; jobId: string }
-      | { ok: false; error: string };
+    let enqueued: { ok: true; jobId: string } | { ok: false; error: string };
 
     if (input.operation === "export") {
       enqueued = await enqueueSchemaJob({
@@ -409,9 +418,9 @@ export async function getSchemaOperationsStatus(input: {
   for (const row of input.rows) {
     const databaseName = String(row.databaseName ?? "").trim();
     const operation = row.operation;
-    const jobId = row.jobId != null ? String(row.jobId).trim() : "";
+    const jobId = row.jobId == null ? "" : String(row.jobId).trim();
 
-    if (!databaseName || !jobId) {
+    if (!(databaseName && jobId)) {
       updated.push({
         databaseName,
         operation,
@@ -447,7 +456,9 @@ export async function getSchemaOperationsStatus(input: {
       const bullState = await job.getState();
       const status = mapBullState(bullState);
       const parseIssue =
-        status === "success" ? getImportParseIssueSummary(job.returnvalue) : null;
+        status === "success"
+          ? getImportParseIssueSummary(job.returnvalue)
+          : null;
 
       updated.push({
         databaseName,
@@ -456,12 +467,12 @@ export async function getSchemaOperationsStatus(input: {
         status,
         error:
           status === "failed"
-            ? job.failedReason ?? "Job failed"
-            : parseIssue?.message ?? null,
+            ? (job.failedReason ?? "Job failed")
+            : (parseIssue?.message ?? null),
         errorDetails:
           status === "failed"
             ? getJobFailureDetails(job)
-            : parseIssue?.details ?? null,
+            : (parseIssue?.details ?? null),
         result:
           status === "success" && job.returnvalue != null
             ? job.returnvalue

@@ -18,10 +18,7 @@ export type OwnedResource = {
 };
 
 export type ResourceOwnershipGraph = {
-  register: (
-    resource: OwnedResource,
-    onCleanup?: () => void,
-  ) => void;
+  register: (resource: OwnedResource, onCleanup?: () => void) => void;
   unregister: (resourceId: string) => void;
   disposeScope: (scopeId: string) => void;
   getSnapshot: () => OwnedResource[];
@@ -29,7 +26,10 @@ export type ResourceOwnershipGraph = {
 };
 
 export function createResourceOwnershipGraph(): ResourceOwnershipGraph {
-  const resources = new Map<string, { resource: OwnedResource; onCleanup?: () => void }>();
+  const resources = new Map<
+    string,
+    { resource: OwnedResource; onCleanup?: () => void }
+  >();
   let lifetimeTree: RuntimeLifetimeTree | null = null;
 
   const disposeResource = (resourceId: string) => {
@@ -38,7 +38,10 @@ export function createResourceOwnershipGraph(): ResourceOwnershipGraph {
     try {
       entry.onCleanup?.();
     } catch (error) {
-      console.error(`ResourceOwnershipGraph cleanup error [${resourceId}]:`, error);
+      console.error(
+        `ResourceOwnershipGraph cleanup error [${resourceId}]:`,
+        error,
+      );
     }
     resources.delete(resourceId);
   };
@@ -47,7 +50,9 @@ export function createResourceOwnershipGraph(): ResourceOwnershipGraph {
     register(resource, onCleanup) {
       resources.set(resource.resourceId, { resource, onCleanup });
       if (lifetimeTree) {
-        lifetimeTree.addDisposeCallback(resource.scopeId, () => disposeResource(resource.resourceId));
+        lifetimeTree.addDisposeCallback(resource.scopeId, () =>
+          disposeResource(resource.resourceId),
+        );
       }
     },
     unregister(resourceId) {

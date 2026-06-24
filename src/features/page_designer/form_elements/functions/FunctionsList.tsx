@@ -110,7 +110,7 @@ export function FunctionsList() {
             </Show>
             <As
               as="div"
-              css={[STYLES.overflowCss, `return \`._id { display: grid; }\`;`]}
+              css={[STYLES.overflowCss, "return `._id { display: grid; }`;"]}
             >
               <For each={filteredData()}>
                 {(item) => <FunctionItem item={item} />}

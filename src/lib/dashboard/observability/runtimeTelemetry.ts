@@ -19,7 +19,10 @@ export type RuntimeTelemetrySnapshot = {
 };
 
 export type DashboardRuntimeTelemetry = {
-  recordInvalidationFanout: (widgetCount: number, rawEventCount: number) => void;
+  recordInvalidationFanout: (
+    widgetCount: number,
+    rawEventCount: number,
+  ) => void;
   recordCompression: (rawEventCount: number, widgetCount: number) => void;
   recordSchedulerEnqueue: (queueDepth: number) => void;
   recordStaleReject: () => void;
@@ -99,15 +102,24 @@ export function createDashboardRuntimeTelemetry(): DashboardRuntimeTelemetry {
     },
     snapshot() {
       const fanoutTotal = fanoutSamples.reduce((sum, value) => sum + value, 0);
-      const fanoutAvg = fanoutSamples.length ? fanoutTotal / fanoutSamples.length : 0;
+      const fanoutAvg = fanoutSamples.length
+        ? fanoutTotal / fanoutSamples.length
+        : 0;
       const fanoutMax = fanoutSamples.length ? Math.max(...fanoutSamples) : 0;
       const durationAvg = durations.length
         ? durations.reduce((sum, value) => sum + value, 0) / durations.length
         : 0;
       const cacheTotal = cacheHits + cacheMisses;
       return {
-        invalidationFanout: { total: fanoutTotal, avg: fanoutAvg, max: fanoutMax },
-        schedulerQueueDepth: { current: schedulerCurrentDepth, max: schedulerMaxDepth },
+        invalidationFanout: {
+          total: fanoutTotal,
+          avg: fanoutAvg,
+          max: fanoutMax,
+        },
+        schedulerQueueDepth: {
+          current: schedulerCurrentDepth,
+          max: schedulerMaxDepth,
+        },
         staleExecutionRejects: staleRejects,
         executionCancellations: executionCancels,
         executionDurationMs: {
@@ -118,11 +130,14 @@ export function createDashboardRuntimeTelemetry(): DashboardRuntimeTelemetry {
         cacheHits,
         cacheMisses,
         refreshCoalescingRatio:
-          totalScheduledRefreshes > 0 ? coalescedRefreshes / totalScheduledRefreshes : 0,
+          totalScheduledRefreshes > 0
+            ? coalescedRefreshes / totalScheduledRefreshes
+            : 0,
         entityRefreshRate: entityRefreshes,
         scopeDisposals,
         compressionRatio: {
-          avg: compressedBatches > 0 ? compressionRatioSum / compressedBatches : 0,
+          avg:
+            compressedBatches > 0 ? compressionRatioSum / compressedBatches : 0,
           last: lastCompressionRatio,
         },
         rawInvalidationEvents,

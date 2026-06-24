@@ -110,10 +110,10 @@ export const getScrollSize = (store: VirtualStore): number => {
  */
 export const createVirtualStore = (
   elementsCount: number,
-  itemSize: number = 40,
-  ssrCount: number = 0,
+  itemSize = 40,
+  ssrCount = 0,
   cacheSnapshot?: CacheSnapshot | undefined,
-  shouldAutoEstimateItemSize: boolean = false,
+  shouldAutoEstimateItemSize = false,
 ): VirtualStore => {
   let isSSR = !!ssrCount;
   let viewportSize = 0;
@@ -270,11 +270,12 @@ export const createVirtualStore = (
           const isJustJumped =
             prevFlushedJump && abs(delta) < abs(prevFlushedJump) + 1;
 
-
-            // Scroll events are dispatched enough so it's ok to skip some of them.
-            if (!isJustJumped && 
-              // Ignore until manual scrolling
-              scrollMode === SCROLL_BY_NATIVE) {
+          // Scroll events are dispatched enough so it's ok to skip some of them.
+          if (
+            !isJustJumped &&
+            // Ignore until manual scrolling
+            scrollMode === SCROLL_BY_NATIVE
+          ) {
             scrollDirection = delta < 0 ? SCROLL_UP : SCROLL_DOWN;
           }
 
@@ -336,7 +337,10 @@ export const createVirtualStore = (
               // Keep distance from end during shifting
               if (scrollMode === SCROLL_BY_SHIFT) {
                 shouldKeep = true;
-              } else if (frozenRange && scrollMode === SCROLL_BY_MANUAL_SCROLL) {
+              } else if (
+                frozenRange &&
+                scrollMode === SCROLL_BY_MANUAL_SCROLL
+              ) {
                 // https://github.com/inokawa/virtua/issues/380
                 // https://github.com/inokawa/virtua/issues/758
                 shouldKeep = index < frozenRange[0];
@@ -347,12 +351,11 @@ export const createVirtualStore = (
                 shouldKeep =
                   scrollDirection !== SCROLL_DOWN &&
                   scrollMode === SCROLL_BY_NATIVE
-                    ?
-                    // https://github.com/inokawa/virtua/issues/385
-                    // https://github.com/inokawa/virtua/discussions/865 
-                    itemOffset + itemSize < start
+                    ? // https://github.com/inokawa/virtua/issues/385
+                      // https://github.com/inokawa/virtua/discussions/865
+                      itemOffset + itemSize < start
                     : // https://github.com/inokawa/virtua/pull/868
-                    itemOffset < start &&
+                      itemOffset < start &&
                       itemOffset + itemSize < start + viewportSize;
               }
 

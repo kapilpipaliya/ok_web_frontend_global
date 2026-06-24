@@ -16,9 +16,10 @@ export async function POST({ request }: APIEvent) {
   const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
   try {
     const shopify = await getShopify(subDomain, dbSession);
-    const { topic, shop, payload } = await shopify.authenticate.webhook(request);
+    const { topic, shop, payload } =
+      await shopify.authenticate.webhook(request);
     console.log(`Received ${topic} webhook for ${shop}`);
-    console.log('payload', payload);
+    console.log("payload", payload);
 
     const shopDatabaseName = getDatabaseNameForShop(shop, subDomain);
     const driver = await getDriver();

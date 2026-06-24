@@ -19,9 +19,7 @@ import type { Id } from "~/lib/graph/type/id";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { scrollElementIntoContainer } from "~/lib/dom/scrollElementIntoContainer";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/entity/findVertex";
-import {
-  PAGE_DESIGNER_DRAG_TYPES,
-} from "~/features/page_designer/functions/drag_drop/pragmatic/pageDesignerDragTypes";
+import { PAGE_DESIGNER_DRAG_TYPES } from "~/features/page_designer/functions/drag_drop/pragmatic/pageDesignerDragTypes";
 import {
   type PageLayoutObject,
   useDesignerLayoutStore,
@@ -39,7 +37,10 @@ import {
   getPaletteServerError,
   isPaletteServerSuccess,
 } from "./componentPaletteApi";
-import type { ComponentPaletteDropSnapshot, PaletteDropPosition } from "./componentPaletteDragDrop";
+import type {
+  ComponentPaletteDropSnapshot,
+  PaletteDropPosition,
+} from "./componentPaletteDragDrop";
 import {
   COMPONENT_PALETTE_CONFIG,
   getUncategorizedPaletteId,
@@ -120,10 +121,10 @@ export function ComponentPaletteTree(props?: {
     return normalizeReorderParentId(getParentCategoryId(itemId));
   }
 
-  function getSiblingsParentKey(parentCategoryId: string | null): string | null {
-    return (
-      parentCategoryId ?? getUncategorizedPaletteId(paletteConfig())
-    );
+  function getSiblingsParentKey(
+    parentCategoryId: string | null,
+  ): string | null {
+    return parentCategoryId ?? getUncategorizedPaletteId(paletteConfig());
   }
 
   const selectedCategoryId = () =>
@@ -169,12 +170,20 @@ export function ComponentPaletteTree(props?: {
     setAddParentId(getParentCategoryId(category.id));
   }
 
-  const rootItems = createMemo(() => getPaletteRootItems(graph, paletteConfig()));
+  const rootItems = createMemo(() =>
+    getPaletteRootItems(graph, paletteConfig()),
+  );
 
   const searchActive = createMemo(() => !!searchQuery().trim());
 
   const filterTree = (vertex: Vertex) =>
-    filterPaletteTreeVertex(graph, setGraph, vertex, searchQuery(), paletteConfig());
+    filterPaletteTreeVertex(
+      graph,
+      setGraph,
+      vertex,
+      searchQuery(),
+      paletteConfig(),
+    );
 
   const shouldExpandForSearch = (vertex: Vertex) => {
     if (!searchActive()) return expandedKeys.includes(vertex.id);
@@ -232,8 +241,7 @@ export function ComponentPaletteTree(props?: {
     }
     setExpandedKeys((prev) => [...prev, itemId]);
     if (
-      !paletteConfig().loadFullTree &&
-      !isUncategorizedPaletteId(paletteConfig(), itemId) &&
+      !(paletteConfig().loadFullTree ||isUncategorizedPaletteId(paletteConfig(), itemId) ) &&
       isPaletteCategory(graph.vertexes[itemId], paletteConfig())
     ) {
       void fetchCategoryChildren(graph, setGraph, paletteConfig(), itemId);
@@ -318,8 +326,14 @@ export function ComponentPaletteTree(props?: {
 
     try {
       if (sourceType === PAGE_DESIGNER_DRAG_TYPES.PALETTE_CATEGORY) {
-        if (dragPosition === "center" && isPaletteCategory(target, paletteConfig())) {
-          const newParentId = isUncategorizedPaletteId(paletteConfig(), target.id)
+        if (
+          dragPosition === "center" &&
+          isPaletteCategory(target, paletteConfig())
+        ) {
+          const newParentId = isUncategorizedPaletteId(
+            paletteConfig(),
+            target.id,
+          )
             ? null
             : target.id;
           const result = await movePaletteCategory(
@@ -333,7 +347,9 @@ export function ComponentPaletteTree(props?: {
             showSuccessToast(result.result.message || "Category moved");
             if (newParentId) setExpandedKeys((k) => [...k, newParentId]);
           } else {
-            showErrorToast(getPaletteServerError(result, "Failed to move category"));
+            showErrorToast(
+              getPaletteServerError(result, "Failed to move category"),
+            );
           }
           return;
         }
@@ -359,10 +375,11 @@ export function ComponentPaletteTree(props?: {
             setGraph,
             paletteConfig(),
             {
-            orderedItemIds: orderedIds,
-            parentCategoryId: normalizeReorderParentId(parentId),
-            vertexLabel: paletteConfig().parentVertexLabel,
-          });
+              orderedItemIds: orderedIds,
+              parentCategoryId: normalizeReorderParentId(parentId),
+              vertexLabel: paletteConfig().parentVertexLabel,
+            },
+          );
           if (isPaletteServerSuccess(result)) {
             showSuccessToast("Category order saved");
           } else {
@@ -381,7 +398,10 @@ export function ComponentPaletteTree(props?: {
           (isPaletteCategory(target, paletteConfig()) ||
             isUncategorizedPaletteId(paletteConfig(), target.id))
         ) {
-          const categoryId = isUncategorizedPaletteId(paletteConfig(), target.id)
+          const categoryId = isUncategorizedPaletteId(
+            paletteConfig(),
+            target.id,
+          )
             ? null
             : target.id;
           const result = await moveContentToCategory(
@@ -395,7 +415,9 @@ export function ComponentPaletteTree(props?: {
             showSuccessToast(result.result.message || "Item moved");
             if (categoryId) setExpandedKeys((k) => [...k, categoryId]);
           } else {
-            showErrorToast(getPaletteServerError(result, "Failed to move item"));
+            showErrorToast(
+              getPaletteServerError(result, "Failed to move item"),
+            );
           }
           return;
         }
@@ -442,10 +464,11 @@ export function ComponentPaletteTree(props?: {
             setGraph,
             paletteConfig(),
             {
-            orderedItemIds: orderedIds,
-            parentCategoryId: targetParentId,
-            vertexLabel: paletteConfig().tableVertexLabel,
-          });
+              orderedItemIds: orderedIds,
+              parentCategoryId: targetParentId,
+              vertexLabel: paletteConfig().tableVertexLabel,
+            },
+          );
           if (isPaletteServerSuccess(result)) {
             showSuccessToast("Order saved");
           } else {
@@ -500,7 +523,9 @@ export function ComponentPaletteTree(props?: {
     } else {
       showErrorToast(
         result.result?.message ||
-          (mode === "edit" ? "Failed to update category" : "Failed to create category"),
+          (mode === "edit"
+            ? "Failed to update category"
+            : "Failed to create category"),
       );
     }
   }
@@ -553,7 +578,9 @@ export function ComponentPaletteTree(props?: {
         }
       }
     } else {
-      showErrorToast(getPaletteServerError(result, "Failed to delete category"));
+      showErrorToast(
+        getPaletteServerError(result, "Failed to delete category"),
+      );
     }
   }
 
@@ -656,9 +683,7 @@ export function ComponentPaletteTree(props?: {
 
       <Show
         when={
-          props?.searchAlways ||
-          rootItems().length >= 5 ||
-          searchQuery().trim()
+          props?.searchAlways || rootItems().length >= 5 || searchQuery().trim()
         }
       >
         <SearchBar
@@ -690,7 +715,9 @@ export function ComponentPaletteTree(props?: {
                 item={item}
                 itemRef={setSelectedItemRef}
                 onAddSubcategory={(parentId) => openAddCategoryModal(parentId)}
-                onDeleteCategory={(category) => void handleDeleteCategory(category)}
+                onDeleteCategory={(category) =>
+                  void handleDeleteCategory(category)
+                }
                 onDrop={handlePaletteDrop}
                 onEditCategory={openEditCategoryModal}
                 onPaletteDragEnd={() => setIsPaletteDragging(false)}
@@ -735,8 +762,13 @@ export function ComponentPaletteTree(props?: {
 }\`;`}
             onClick={(e) => e.stopPropagation()}
           >
-            <As as="h3" css={`return \`._id { margin: 0; font-size: 1rem; }\`;`}>
-              {categoryModalMode() === "edit" ? "Edit Category" : "Add Category"}
+            <As
+              as="h3"
+              css={"return `._id { margin: 0; font-size: 1rem; }`;"}
+            >
+              {categoryModalMode() === "edit"
+                ? "Edit Category"
+                : "Add Category"}
             </As>
             <input
               placeholder="Name"
@@ -750,7 +782,7 @@ export function ComponentPaletteTree(props?: {
             />
             <As
               as="div"
-              css={`return \`._id { display: flex; gap: 0.5rem; justify-content: flex-end; }\`;`}
+              css={"return `._id { display: flex; gap: 0.5rem; justify-content: flex-end; }`;"}
             >
               <button type="button" onClick={closeCategoryModal}>
                 Cancel

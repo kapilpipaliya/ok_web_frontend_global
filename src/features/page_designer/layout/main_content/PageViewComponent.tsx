@@ -1,10 +1,4 @@
-import {
-  createSignal,
-  For,
-  Show,
-  createEffect,
-  type Accessor,
-} from "solid-js";
+import { createSignal, For, Show, createEffect, type Accessor } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
@@ -73,7 +67,7 @@ function OpenedViewPanel(props: {
       }
       ref={setViewRef}
     >
-      <As as="div" css={`return \`._id { flex-shrink: 0; }\`;`}>
+      <As as="div" css={"return `._id { flex-shrink: 0; }`;"}>
         <PageTabBar
           formStoreId={props.formStoreId}
           handleRefresh={props.handleRefresh}
@@ -233,8 +227,7 @@ export function PageViewComponent(props: { mainPanel: Id }) {
           const openFormLabel = () =>
             (graph.vertexes[openedFormId].P.label as string) || "";
           const isFunctionForm = () => openFormLabel() === "Function";
-          const formDataId = () =>
-            formStoreVertex()?.P.formDataId as Id;
+          const formDataId = () => formStoreVertex()?.P.formDataId as Id;
 
           return (
             <Show when={formStoreVertex()?.id}>
@@ -256,7 +249,7 @@ export function PageViewComponent(props: { mainPanel: Id }) {
                         : "return `._id {display: none;}`;"
                     }
                   >
-                    <As as="div" css={`return \`._id { flex-shrink: 0; }\`;`}>
+                    <As as="div" css={"return `._id { flex-shrink: 0; }`;"}>
                       <PageTabBar
                         formStoreId={graph.vertexes[openedFormId].P.formId}
                         handleRefresh={handleRefresh}
@@ -286,10 +279,11 @@ export function PageViewComponent(props: { mainPanel: Id }) {
                           returnType="object"
                           setPropertyValue={(meta, value) => {
                             const key = (meta.P?.key as string) ?? "body";
-                            const dataVertex =
-                              graph.vertexes[formDataId()] as Vertex;
+                            const dataVertex = graph.vertexes[
+                              formDataId()
+                            ] as Vertex;
                             const formStore = formStoreVertex();
-                            if (!dataVertex || !formStore) return;
+                            if (!(dataVertex && formStore)) return;
 
                             // Use transaction-aware helper so Save button picks up changes
                             setValueGlobal(

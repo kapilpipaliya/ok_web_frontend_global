@@ -19,8 +19,7 @@ export async function POST({ request }: APIEvent) {
     const shopify = await getShopify(subDomain, dbSession);
     const { topic, payload } = await shopify.authenticate.webhook(request);
 
-    const shopDomain =
-      (payload as { shop_domain?: string }).shop_domain ?? "";
+    const shopDomain = (payload as { shop_domain?: string }).shop_domain ?? "";
     console.log(`Received ${topic} webhook for ${shopDomain}`);
 
     if (shopDomain) {

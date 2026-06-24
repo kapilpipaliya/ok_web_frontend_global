@@ -61,7 +61,11 @@ import { newEdge } from "~/lib/graph/mutate/core/edge/newEdge";
 import { klona } from "klona";
 import { z } from "zod";
 import { cloneVertexWithEdges } from "~/lib/graph/get/sync/entity/cloneVertexWithEdges";
-import { findVertexByLabelAndPks, findVertexByLabelAndUniqueId, findVertexIdsByLabel } from "~/lib/graph/get/sync/entity/findVertex";
+import {
+  findVertexByLabelAndPks,
+  findVertexByLabelAndUniqueId,
+  findVertexIdsByLabel,
+} from "~/lib/graph/get/sync/entity/findVertex";
 import { createDashboardPlatform } from "~/lib/dashboard";
 import { findLoopTemplateMeta } from "~/components/form/dynamic_component/components/LoopChildrenRenderer";
 import { createLoopRowRenderer } from "~/components/form/dynamic_component/functions/createLoopRowRenderer";
@@ -77,12 +81,15 @@ let setCustomNativeDragPreview: any;
 let pointerOutsideOfPreview: any;
 let centerUnderPointer: any;
 let preserveOffsetOnSource: any;
-let combine: any, GroupDropIndicator: any, liveRegion: any, triggerPostMoveFlash: any;
+let combine: any,
+  GroupDropIndicator: any,
+  liveRegion: any,
+  triggerPostMoveFlash: any;
 let attachInstruction: any, extractInstruction: any, DropIndicator: any;
 
 if (typeof window !== "undefined") {
   // Only import drag-and-drop modules and related drag+drop utilities on the client
-  import("./pragmaticElementAdapter").then(mod => {
+  import("./pragmaticElementAdapter").then((mod) => {
     draggable = mod.draggable;
     dropTargetForElements = mod.dropTargetForElements;
     monitorForElements = mod.monitorForElements;
@@ -366,12 +373,12 @@ export function createFunctionArgumentBase(
 
     // setGraphData,
     klona,
-    
+
     // Graph query helpers using existing functions
     findVertexByLabelAndPks,
     findVertexByLabelAndUniqueId,
     findVertexIdsByLabel,
-    
+
     // Pragmatic drag and drop - getters so async client import is visible after fns closure creation
     get draggable() {
       return draggable;

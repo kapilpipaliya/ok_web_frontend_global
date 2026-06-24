@@ -123,8 +123,7 @@ export function ResendVerificationForm() {
             componentName: "Html",
             props: (options: ResendVerificationFunctionArgumentType) => {
               const isEmpty = !options.data?.P?.identifier?.trim();
-              const isLoading =
-                options.contextData.submitState[0]?.isLoading;
+              const isLoading = options.contextData.submitState[0]?.isLoading;
 
               return {
                 disabled: isLoading || isEmpty,

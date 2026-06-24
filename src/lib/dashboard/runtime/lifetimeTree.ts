@@ -16,7 +16,11 @@ export type LifetimeNode = {
 export type RuntimeLifetimeTree = {
   register: (
     scopeId: string,
-    options: { parentScopeId?: string | null; kind?: string; onDispose?: LifetimeDisposeFn },
+    options: {
+      parentScopeId?: string | null;
+      kind?: string;
+      onDispose?: LifetimeDisposeFn;
+    },
   ) => void;
   addDisposeCallback: (scopeId: string, fn: LifetimeDisposeFn) => void;
   dispose: (scopeId: string) => void;
@@ -26,10 +30,16 @@ export type RuntimeLifetimeTree = {
   getTreeSnapshot: () => LifetimeNode[];
 };
 
-export function createRuntimeLifetimeTree(rootScopeId: string): RuntimeLifetimeTree {
+export function createRuntimeLifetimeTree(
+  rootScopeId: string,
+): RuntimeLifetimeTree {
   const nodes = new Map<string, LifetimeNode>();
 
-  const ensureNode = (scopeId: string, parentScopeId: string | null, kind: string) => {
+  const ensureNode = (
+    scopeId: string,
+    parentScopeId: string | null,
+    kind: string,
+  ) => {
     let node = nodes.get(scopeId);
     if (!node) {
       node = {

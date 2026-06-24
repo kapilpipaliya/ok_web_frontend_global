@@ -79,11 +79,7 @@ export async function saveSetting(
       accountId,
     );
 
-    if (
-      !result.error &&
-      type === "email" &&
-      !accountId
-    ) {
+    if (!result.error && type === "email" && !accountId) {
       void enqueueEmailSettingsShopSync(subDomain).catch((err) => {
         console.warn(
           "[Email settings] Failed to enqueue Shopify shop email sync:",

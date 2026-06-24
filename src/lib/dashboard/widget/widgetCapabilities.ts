@@ -14,17 +14,60 @@ export type WidgetEditorMeta = {
 };
 
 const DEFAULT_BY_TYPE: Record<string, Partial<WidgetCapabilities>> = {
-  metricCard: { filterable: true, drilldown: false, exportable: false, realtime: true, editable: false, selectable: false },
-  chart: { filterable: true, drilldown: true, exportable: false, realtime: true, editable: false, selectable: false },
-  crudTable: { filterable: true, drilldown: true, exportable: true, realtime: true, editable: true, selectable: true },
-  markdown: { filterable: false, drilldown: false, exportable: false, realtime: false, editable: false, selectable: false },
-  html: { filterable: false, drilldown: false, exportable: false, realtime: false, editable: false, selectable: false },
-  quickActions: { filterable: false, drilldown: false, exportable: false, realtime: false, editable: false, selectable: false },
+  metricCard: {
+    filterable: true,
+    drilldown: false,
+    exportable: false,
+    realtime: true,
+    editable: false,
+    selectable: false,
+  },
+  chart: {
+    filterable: true,
+    drilldown: true,
+    exportable: false,
+    realtime: true,
+    editable: false,
+    selectable: false,
+  },
+  crudTable: {
+    filterable: true,
+    drilldown: true,
+    exportable: true,
+    realtime: true,
+    editable: true,
+    selectable: true,
+  },
+  markdown: {
+    filterable: false,
+    drilldown: false,
+    exportable: false,
+    realtime: false,
+    editable: false,
+    selectable: false,
+  },
+  html: {
+    filterable: false,
+    drilldown: false,
+    exportable: false,
+    realtime: false,
+    editable: false,
+    selectable: false,
+  },
+  quickActions: {
+    filterable: false,
+    drilldown: false,
+    exportable: false,
+    realtime: false,
+    editable: false,
+    selectable: false,
+  },
 };
 
-export function resolveWidgetCapabilities(
-  widget: { type?: string; capabilities?: Partial<WidgetCapabilities> },
-): WidgetCapabilities {
+export function resolveWidgetCapabilities(widget: {
+  type?: string;
+  capabilities?: Partial<WidgetCapabilities>;
+}): WidgetCapabilities {
   const type = widget.type || "";
   const defaults = DEFAULT_BY_TYPE[type] || DEFAULT_BY_TYPE.metricCard;
   return {
@@ -44,7 +87,12 @@ export function resolveWidgetEditorMeta(widget: {
 }): WidgetEditorMeta {
   const layout = widget.layout || {};
   return {
-    configurableFields: widget.editor?.configurableFields ?? ["title", "layout", "dataSource", "interactions"],
+    configurableFields: widget.editor?.configurableFields ?? [
+      "title",
+      "layout",
+      "dataSource",
+      "interactions",
+    ],
     supportedLayouts: widget.editor?.supportedLayouts ?? ["grid"],
     defaultSize: widget.editor?.defaultSize ?? {
       w: Number(layout.w ?? 3),

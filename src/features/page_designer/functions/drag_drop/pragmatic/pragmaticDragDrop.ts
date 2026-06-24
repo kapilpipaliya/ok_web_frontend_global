@@ -82,10 +82,7 @@ const dropTargetHandlers = new WeakMap<
 
 // Pragmatic lists drop targets innermost-first. Parent targets must not
 // overwrite position/drop when a child target is also under the pointer.
-function isInnermostDropTarget(
-  element: Element,
-  location: DropTargetLocation,
-) {
+function isInnermostDropTarget(element: Element, location: DropTargetLocation) {
   return location.current.dropTargets[0]?.element === element;
 }
 
@@ -106,13 +103,11 @@ function promoteInnermostDropTarget(
   handlers?.updatePosition(location.current.input, sourceData);
 }
 
-function scheduleDropStateCleanup(
-  ctx: {
-    layoutStoreVertex: () => Vertex<PageLayoutObject>;
-    graph: GraphInterface;
-    setGraph: SetStoreFunction<GraphInterface>;
-  },
-) {
+function scheduleDropStateCleanup(ctx: {
+  layoutStoreVertex: () => Vertex<PageLayoutObject>;
+  graph: GraphInterface;
+  setGraph: SetStoreFunction<GraphInterface>;
+}) {
   // Drop target onDrop runs before draggable onDrop; defer cleanup so the
   // snapshot is captured before activeItem/dragPosition are cleared.
   queueMicrotask(() => {
@@ -136,11 +131,8 @@ async function runLayoutDrop(
 
   const formStore = ctx.formStoreVertex();
   // Snapshot is taken synchronously at drop time; vertexIds come from source.data.
-  const snapshot = createLayoutDropSnapshot(
-    getLayoutStore(ctx),
-    vertexIds,
-  );
-  if (!formStore || !snapshot) {
+  const snapshot = createLayoutDropSnapshot(getLayoutStore(ctx), vertexIds);
+  if (!(formStore && snapshot)) {
     return;
   }
 
@@ -421,8 +413,11 @@ export function attachLayoutTreeItemDragDrop(
 
   return combine(
     dragCleanup,
-    attachElementDropTarget(element, previewCtx, updatePosition, (dragPosition) =>
-      ctx.onExpandChildren?.(dragPosition),
+    attachElementDropTarget(
+      element,
+      previewCtx,
+      updatePosition,
+      (dragPosition) => ctx.onExpandChildren?.(dragPosition),
     ),
   );
 }
@@ -515,7 +510,10 @@ export function attachRootDropTarget(
         return;
       }
 
-      if (layoutStore.P.activeItem == null || layoutStore.P.dragPosition == null) {
+      if (
+        layoutStore.P.activeItem == null ||
+        layoutStore.P.dragPosition == null
+      ) {
         setRootPosition();
       }
 

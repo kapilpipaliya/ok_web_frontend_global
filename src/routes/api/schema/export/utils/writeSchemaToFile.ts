@@ -49,9 +49,7 @@ export async function writeSchemaToFile(
   await ensureDirectoryExists(typeDir);
 
   const targetDir =
-    categorySegments.length > 0
-      ? join(typeDir, ...categorySegments)
-      : typeDir;
+    categorySegments.length > 0 ? join(typeDir, ...categorySegments) : typeDir;
   await ensureDirectoryExists(targetDir);
 
   const targetPath = join(targetDir, `${key}.hjson`);

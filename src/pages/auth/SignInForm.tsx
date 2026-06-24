@@ -571,13 +571,13 @@ export function SignInForm() {
       <Show when={isRedirecting()}>
         <Loader message="Redirecting..." />
       </Show>
-      <Show when={!isRedirecting() && !isAuthenticated()}>
+      <Show when={!(isRedirecting() || isAuthenticated())}>
         <SchemaRenderer
-        form={{
-          attributes: [
-            {
-              ...wrapFormInCard(form),
-              fns: `
+          form={{
+            attributes: [
+              {
+                ...wrapFormInCard(form),
+                fns: `
                 let trap = null;
 
                 const initializeFocusTrap = () => {
@@ -607,19 +607,19 @@ export function SignInForm() {
                   cleanupFocusTrap
                 };
               `,
-              props: (options: FunctionArgumentType) => ({
-                onMount: () => {
-                  options.fns.initializeFocusTrap?.();
-                },
-                onCleanup: () => {
-                  options.fns.cleanupFocusTrap?.();
-                },
-              }),
-            },
-          ],
-          key: "Login",
-        }}
-      />
+                props: (options: FunctionArgumentType) => ({
+                  onMount: () => {
+                    options.fns.initializeFocusTrap?.();
+                  },
+                  onCleanup: () => {
+                    options.fns.cleanupFocusTrap?.();
+                  },
+                }),
+              },
+            ],
+            key: "Login",
+          }}
+        />
       </Show>
     </>
   );

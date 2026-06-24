@@ -1,11 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
-import {
-  createMemo,
-  createSignal,
-  For,
-  onCleanup,
-  Show,
-} from "solid-js";
+import { createMemo, createSignal, For, onCleanup, Show } from "solid-js";
 
 import { componentsMap } from "~/components/form/functions/componentsMap";
 import { IconButton } from "~/components/styled/IconButton";

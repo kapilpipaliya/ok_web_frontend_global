@@ -124,10 +124,9 @@ export function SetPasswordForm() {
         params.delete("username");
         params.delete("email");
         const qs = params.toString();
-        navigate(
-          `${API.urls.admin.signIn}${qs ? `?${qs}` : ""}`,
-          { replace: true },
-        );
+        navigate(`${API.urls.admin.signIn}${qs ? `?${qs}` : ""}`, {
+          replace: true,
+        });
       }, 2000);
     } catch (error) {
       showErrorToast(
@@ -275,8 +274,7 @@ export function SetPasswordForm() {
                 options.data?.P?.newPassword?.trim() &&
                 options.data?.P?.confirmPassword?.trim()
               );
-              const isLoading =
-                options.contextData.submitState[0]?.isLoading;
+              const isLoading = options.contextData.submitState[0]?.isLoading;
 
               return {
                 disabled: isLoading || isEmpty,
@@ -381,10 +379,9 @@ export function SetPasswordForm() {
                 params.delete("username");
                 params.delete("email");
                 const qs = params.toString();
-                navigate(
-                  `${API.urls.admin.signIn}${qs ? `?${qs}` : ""}`,
-                  { replace: true },
-                );
+                navigate(`${API.urls.admin.signIn}${qs ? `?${qs}` : ""}`, {
+                  replace: true,
+                });
               },
             }),
             text: "Sign in",

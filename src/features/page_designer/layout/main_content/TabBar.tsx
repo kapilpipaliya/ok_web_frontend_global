@@ -103,8 +103,13 @@ function TabBarItem(props: {
   }
 }\`;`}
         onClick={() => {
-          const newView = createViewVertex({ view: "Mobile" }, props.graph, props.setGraph);
-          const currentVertexProps = props.graph.vertexes[formId()]?.P as FormStoreObject;
+          const newView = createViewVertex(
+            { view: "Mobile" },
+            props.graph,
+            props.setGraph,
+          );
+          const currentVertexProps = props.graph.vertexes[formId()]
+            ?.P as FormStoreObject;
           const currentViews = currentVertexProps?.openedViews || [];
 
           mergeVertexProperties<FormStoreObject>(

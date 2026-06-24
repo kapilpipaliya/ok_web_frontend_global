@@ -58,10 +58,7 @@ function generateWebhookId(): string {
 /**
  * Calculate retry delay with exponential backoff
  */
-function calculateRetryDelay(
-  attempt: number,
-  baseDelay = 1000,
-): number {
+function calculateRetryDelay(attempt: number, baseDelay = 1000): number {
   return baseDelay * 2 ** attempt;
 }
 

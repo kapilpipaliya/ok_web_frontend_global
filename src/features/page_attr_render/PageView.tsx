@@ -361,13 +361,12 @@ export function PageView(
           <Match when={hasPageDataFetch()}>
             <HtmlField
               data={
-                dynamicProps().data as
-                  | (() => unknown[])
-                  | unknown[]
-                  | undefined
+                dynamicProps().data as (() => unknown[]) | unknown[] | undefined
               }
               expression={dynamicProps().expression as string | undefined}
-              serverFunction={dynamicProps().serverFunction as string | undefined}
+              serverFunction={
+                dynamicProps().serverFunction as string | undefined
+              }
               loop={dynamicProps().loop as boolean | undefined}
               contextName={dynamicProps().contextName as string | undefined}
               renderChildren
@@ -441,7 +440,10 @@ export function PageView(
           </Match>
           <Match
             when={
-              !(props.metaVertex?.P?.signinRequired ||dynamicProps().signinRequired)
+              !(
+                props.metaVertex?.P?.signinRequired ||
+                dynamicProps().signinRequired
+              )
             }
           >
             <PageViewContent />

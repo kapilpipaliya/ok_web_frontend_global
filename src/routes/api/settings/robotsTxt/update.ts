@@ -25,8 +25,7 @@ export async function POST({ request }: APIEvent) {
     }
 
     const body = await request.json();
-    const robotsTxt =
-      typeof body.robotsTxt === "string" ? body.robotsTxt : "";
+    const robotsTxt = typeof body.robotsTxt === "string" ? body.robotsTxt : "";
 
     const result = await dbSession.run(
       `MERGE (r:RobotsTxt { key: $key })

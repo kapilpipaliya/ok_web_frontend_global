@@ -226,12 +226,15 @@ function toDate(value: unknown): Date | null {
       minute: { toNumber?: () => number };
       second: { toNumber?: () => number };
     };
-    const y = typeof v.year === "number" ? v.year : v.year?.toNumber?.() ?? 0;
-    const m = typeof v.month === "number" ? v.month : v.month?.toNumber?.() ?? 0;
-    const d = typeof v.day === "number" ? v.day : v.day?.toNumber?.() ?? 0;
-    const h = typeof v.hour === "number" ? v.hour : v.hour?.toNumber?.() ?? 0;
-    const min = typeof v.minute === "number" ? v.minute : v.minute?.toNumber?.() ?? 0;
-    const sec = typeof v.second === "number" ? v.second : v.second?.toNumber?.() ?? 0;
+    const y = typeof v.year === "number" ? v.year : (v.year?.toNumber?.() ?? 0);
+    const m =
+      typeof v.month === "number" ? v.month : (v.month?.toNumber?.() ?? 0);
+    const d = typeof v.day === "number" ? v.day : (v.day?.toNumber?.() ?? 0);
+    const h = typeof v.hour === "number" ? v.hour : (v.hour?.toNumber?.() ?? 0);
+    const min =
+      typeof v.minute === "number" ? v.minute : (v.minute?.toNumber?.() ?? 0);
+    const sec =
+      typeof v.second === "number" ? v.second : (v.second?.toNumber?.() ?? 0);
     return new Date(y, m - 1, d, h, min, sec);
   }
   return null;

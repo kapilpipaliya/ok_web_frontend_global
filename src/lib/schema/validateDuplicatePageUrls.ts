@@ -1,7 +1,11 @@
 import type { Session } from "neo4j-driver";
 
 import { APIError } from "~/lib/api/server/apiErrorHandler";
-import type { ExportedEdge, ExportedSchema, ExportedVertex } from "~/routes/api/schema/ExportedSchema";
+import type {
+  ExportedEdge,
+  ExportedSchema,
+  ExportedVertex,
+} from "~/routes/api/schema/ExportedSchema";
 
 export interface PageUrlEntry {
   key: string;
@@ -25,7 +29,9 @@ function getRootVertices(schema: ExportedSchema): ExportedVertex[] {
 }
 
 /** Page URL from the root Page vertex in a page schema file, or null if missing. */
-export function extractPageUrlFromSchema(schema: ExportedSchema): string | null {
+export function extractPageUrlFromSchema(
+  schema: ExportedSchema,
+): string | null {
   for (const vertex of getRootVertices(schema)) {
     const labels = Array.isArray(vertex.L) ? vertex.L : [vertex.L];
     if (!labels.includes("Page")) continue;

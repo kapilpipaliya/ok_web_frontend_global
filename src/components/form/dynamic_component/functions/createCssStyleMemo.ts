@@ -17,10 +17,7 @@ export function createCssStyleMemo(
   styleId: Accessor<string | undefined>;
 } {
   const scopedCss = createMemo(() =>
-    scopeComponentCss(
-      props.meta.P.css,
-      options.getFunctionArgumentWithValue(),
-    ),
+    scopeComponentCss(props.meta.P.css, options.getFunctionArgumentWithValue()),
   );
 
   useComponentCssLifecycle(scopedCss);

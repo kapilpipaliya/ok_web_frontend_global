@@ -125,7 +125,9 @@ export async function initWorkersCore() {
       platformWorkers.set("emailSettingsShopSyncWorker", {
         stop: stopEmailSettingsShopSyncWorker,
       });
-      console.log("[Workers] Email settings shop sync worker started successfully");
+      console.log(
+        "[Workers] Email settings shop sync worker started successfully",
+      );
     } catch (error) {
       console.error(
         "[Workers] Failed to start email settings shop sync worker:",

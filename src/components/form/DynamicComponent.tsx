@@ -229,10 +229,23 @@ export function DynamicComponent(props: DynamicComponentProps) {
       <Match when={isHidden()} />
       <Match when={!component()}>NO INPUT {componentName() as string}</Match>
 
-      <Match when={component() && (isNoPermissionCheck() || hasPermission()) && dynamicProps().key} keyed>
+      <Match
+        when={
+          component() &&
+          (isNoPermissionCheck() || hasPermission()) &&
+          dynamicProps().key
+        }
+        keyed
+      >
         <ContentWrapperWithMount />
       </Match>
-      <Match when={component() && (isNoPermissionCheck() || hasPermission()) && !dynamicProps().key}>
+      <Match
+        when={
+          component() &&
+          (isNoPermissionCheck() || hasPermission()) &&
+          !dynamicProps().key
+        }
+      >
         <ContentWrapperWithMount />
       </Match>
       <Match when={getGlobalStore(graph).P.isDevelopment}>
