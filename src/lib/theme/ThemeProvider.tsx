@@ -67,6 +67,10 @@ export const ThemeProvider: Component<ThemeProviderProps> = (props) => {
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
       }
+      body {
+        background-color: ${safeThemeVars.color?.background};
+        color: ${safeThemeVars.color?.text};
+      }
 
       /* Code and preformatted text */
       code, pre, kbd {
