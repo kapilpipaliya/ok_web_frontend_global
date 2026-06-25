@@ -15,23 +15,17 @@ The website provides a comprehensive platform for:
 ## Website Structure
 
 ### Pages
-1. **Home** (`Home.hjson`) - Landing page with hero section, mission overview, and feature highlights
-2. **About** (dropdown menu)
-   - About Fulchand (`About.hjson`) - Biography and teachings
-   - His Inspiration - Spiritual influences
-   - About ASK Umarala - Information about the ashram
-   - Atma Siddhi Shastra Mission - Mission details
-   - Gyaan Deepak ! Prajwalan - Knowledge dissemination program
-   - Atma Sadhana Nitya Kram - Daily spiritual practice
-3. **Books** (`Books.hjson`) - Collection of spiritual texts with download links
-4. **Discourses** - Video and audio discourses
-5. **Schedule** - Upcoming events and programs
-6. **Gallery** (dropdown menu)
-   - Photos - Photo galleries
-   - Videos - Video galleries
-7. **Donation** - Support the mission
-8. **Bhakti** - Devotional content
-9. **Contact** (`Contact.hjson`) - Contact form and information
+
+Page schemas are grouped in subfolders under `pages/` (organization only; page keys are unchanged):
+
+| Folder | Pages |
+|--------|-------|
+| `pages/` | **Home** — Landing page with hero section, mission overview, and feature highlights |
+| `pages/about/` | **About** dropdown: About Fulchand, His Inspiration, About ASK Umarala, Atma Siddhi Shastra Mission, Gyaan Deepak ! Prajwalan, Atma Sadhana Nitya Kram |
+| `pages/content/` | **Books**, **Discourses**, **Bhakti**, **Schedule** |
+| `pages/gallery/` | **Photos**, **Videos** |
+| `pages/contact/` | **Contact**, **Donation** |
+| `pages/portal/` | **PortalTable**, **Settings** (admin/portal UI) |
 
 ### Components
 
