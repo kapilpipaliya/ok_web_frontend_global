@@ -19,6 +19,7 @@ import type { PageLayoutObject } from "../context/LayoutContext";
 import { UseObjectAIPanel } from "../chat/use-object/UseObjectAIPanel";
 import { HeaderRow } from "../header/header_row/HeaderRow";
 import { DeleteConfirmation } from "./main_content/DeleteConfirmation";
+import { UnsavedTabSaveReminder } from "./UnsavedTabSaveReminder";
 import { FormElements } from "./main_content/FormElements";
 import { PageViewComponent } from "./main_content/PageViewComponent";
 import { PropertiesContent } from "./main_content/PropertiesContent";
@@ -655,6 +656,7 @@ export function RenderMainContent() {
       </As>
 
       <DeleteConfirmation />
+      <UnsavedTabSaveReminder />
       <Show when={isResizing()}>
         <ResizeOverlay />
       </Show>
