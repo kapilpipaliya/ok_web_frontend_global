@@ -8,6 +8,12 @@ import { Queue } from "bullmq";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { getDriver } from "~/cypher/core/driver";
 import Redis from "ioredis";
+import {
+  DEFAULT_BACKUP_SCHEDULE,
+  formatBackupScheduleLabel,
+  getBackupRetentionSummary,
+  getScheduledBackupType,
+} from "~/lib/backup/backupSchedule";
 
 // Redis connection configuration
 function getRedisConnection() {
@@ -787,13 +793,18 @@ export async function getBackupStatus() {
     // Check if backup is enabled
     const backupEnabled = process.env.BACKUP_ENABLED === "true";
 
+    const backupSchedule = process.env.BACKUP_SCHEDULE || DEFAULT_BACKUP_SCHEDULE;
+
     await queue.close();
 
     return {
       success: true,
       data: {
         enabled: backupEnabled,
-        schedule: process.env.BACKUP_SCHEDULE || "0 2 * * *",
+        schedule: backupSchedule,
+        scheduleLabel: formatBackupScheduleLabel(backupSchedule),
+        backupType: getScheduledBackupType(backupSchedule),
+        retentionSummary: getBackupRetentionSummary(),
         storageType: process.env.BACKUP_STORAGE_TYPE || "s3",
         stats: {
           waiting,

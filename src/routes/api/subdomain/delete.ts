@@ -129,16 +129,24 @@ export async function DELETE({ request }: APIEvent) {
       );
     }
 
-    // Step 3: Delete the subdomain directory and all files
-    console.log(`[Subdomain Delete] Deleting directory for subdomain: ${key}`);
-    const deleteResult = await deleteSubdomainDirectory(key);
-    if (deleteResult.success) {
-      console.log(`[Subdomain Delete] Deleted directory for subdomain: ${key}`);
+    // Step 3: Archive the subdomain files folder (rename with tmp_timestamp_ prefix)
+    console.log(`[Subdomain Delete] Archiving directory for subdomain: ${key}`);
+    const archiveResult = await archiveSubdomainDirectory(key);
+    if (archiveResult.success) {
+      if (archiveResult.archivedPath) {
+        console.log(
+          `[Subdomain Delete] Archived directory for subdomain: ${key} -> ${archiveResult.archivedPath}`,
+        );
+      } else {
+        console.log(
+          `[Subdomain Delete] No directory found for subdomain: ${key}`,
+        );
+      }
     } else {
       console.error(
-        `[Subdomain Delete] Error deleting directory: ${deleteResult.error}`,
+        `[Subdomain Delete] Error archiving directory: ${archiveResult.error}`,
       );
-      // Continue with deletion even if directory cleanup fails
+      // Continue with deletion even if directory archive fails
     }
 
     // Step 4: Drop the Neo4j database for this subdomain
@@ -156,7 +164,7 @@ export async function DELETE({ request }: APIEvent) {
       "SubDomain",
       subdomain.elementId,
       user.P.email,
-      `Deleted subdomain ${key}, dropped database, and removed all files`,
+      `Deleted subdomain ${key}, dropped database, and archived files folder`,
     );
 
     return {
@@ -229,24 +237,31 @@ async function dropDatabase(subDomainKey: string) {
   await new Promise((resolve) => setTimeout(resolve, 1000));
 }
 
-async function deleteSubdomainDirectory(
+async function archiveSubdomainDirectory(
   subDomainKey: string,
-): Promise<{ success: boolean; error?: string }> {
+): Promise<{ success: boolean; archivedPath?: string; error?: string }> {
   try {
     const baseDir = getBaseDir();
     const subdomainDir = path.join(baseDir, subDomainKey);
 
-    // Check if directory exists
     if (!fs.existsSync(subdomainDir)) {
-      return { success: true }; // Directory doesn't exist, nothing to delete
+      return { success: true };
     }
 
-    // Delete directory recursively
-    fs.rmSync(subdomainDir, { recursive: true, force: true });
+    const timestamp = Date.now();
+    let archivedName = `tmp_${timestamp}_${subDomainKey}`;
+    let archivedPath = path.join(baseDir, archivedName);
 
-    return { success: true };
+    while (fs.existsSync(archivedPath)) {
+      archivedName = `tmp_${timestamp}_${subDomainKey}_${Math.random().toString(36).slice(2, 8)}`;
+      archivedPath = path.join(baseDir, archivedName);
+    }
+
+    fs.renameSync(subdomainDir, archivedPath);
+
+    return { success: true, archivedPath };
   } catch (error) {
-    console.error(`Error deleting subdomain directory: ${error}`);
+    console.error(`Error archiving subdomain directory: ${error}`);
     return {
       success: false,
       error: error instanceof Error ? error.message : String(error),

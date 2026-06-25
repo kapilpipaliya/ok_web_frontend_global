@@ -5,7 +5,7 @@
       L: "Function",
       P: {
         key: "backgroundBackupDatabase",
-        description: "Background worker that automatically backs up all Neo4j databases daily and uploads to cloud storage",
+        description: "Background worker that automatically backs up all Neo4j databases on schedule and uploads to cloud storage",
         body: '''
 // This is a background worker function that runs on a schedule
 if (args.contextData.action === 'start') {
@@ -55,8 +55,16 @@ if (args.contextData.action === 'start') {
   // Create a queue for the scheduled backup jobs
   const backupQueue = new Queue('backgroundBackupDatabase', { connection });
 
-  // Get backup schedule from environment (default: daily at 2 AM UTC)
-  const backupSchedule = process.env.BACKUP_SCHEDULE || '0 2 * * *';
+  // Get backup schedule from environment (default: every hour at minute 0 UTC)
+  const backupSchedule = process.env.BACKUP_SCHEDULE || '0 * * * *';
+  const getScheduledBackupType = (schedule) => {
+    const trimmed = (schedule || '').trim();
+    if (trimmed === '0 * * * *' || trimmed === '0 */1 * * *') {
+      return 'hourly';
+    }
+    return 'daily';
+  };
+  const scheduledBackupType = getScheduledBackupType(backupSchedule);
   const backupEnabled = process.env.BACKUP_ENABLED !== 'false';
 
   if (!backupEnabled) {
@@ -87,6 +95,7 @@ if (args.contextData.action === 'start') {
 
   await logMessage('info', 'Scheduled repeatable backup job', {
     cronPattern: backupSchedule,
+    backupType: scheduledBackupType,
     timezone: 'UTC',
     enabled: backupEnabled
   });
@@ -140,7 +149,7 @@ if (args.contextData.action === 'start') {
             // Call backup utilities to create and upload backup
             const backupResult = await args.createDatabaseBackup({
               databaseName,
-              backupType: 'daily',
+              backupType: scheduledBackupType,
               jobId: job.id
             });
 

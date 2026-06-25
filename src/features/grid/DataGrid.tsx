@@ -44,6 +44,7 @@ import { GridHeader } from "./header/GridHeader";
 import { CreateGridHeaders } from "./schema/CreateGridHeaders";
 
 import { PermissionLevel } from "~/features/page_attr_render/PermissionLevel";
+import type { Id } from "~/lib/graph/type/id";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 import { getConfiguredPermissions } from "~/features/page_attr_render/getConfiguredPermissions";
@@ -65,6 +66,14 @@ interface DataGridProps {
   initialSelectedRowIds?: string[];
   initializeGridStoreParent?: (formStore: DataGridStore) => void;
   isShowPagination?: boolean;
+  renderDeleteDialog?: (props: {
+    deleteRowId: Id;
+    isDeleting: boolean;
+    onCancel: () => void;
+    onConfirm: () => void;
+    open: Accessor<boolean>;
+    setOpen: () => void;
+  }) => JSX.Element;
   tableId: string;
 }
 
@@ -602,17 +611,33 @@ export function DataGrid(props: Readonly<DataGridProps>) {
               />
             </Show>
             <Show when={gridState.deleteRowId}>
-              <DialogWithButtons
-                isLoading={gridState.isDeletingRow}
-                message="Are you sure you want to delete this item?"
-                onCancel={() => setGridState("deleteRowId", null)}
-                onConfirm={onDelete}
-                open={
-                  (() => gridState.deleteRowId) as unknown as Accessor<boolean>
+              <Show
+                when={props.renderDeleteDialog}
+                fallback={
+                  <DialogWithButtons
+                    isLoading={gridState.isDeletingRow}
+                    message="Are you sure you want to delete this item?"
+                    onCancel={() => setGridState("deleteRowId", null)}
+                    onConfirm={onDelete}
+                    open={
+                      (() =>
+                        gridState.deleteRowId) as unknown as Accessor<boolean>
+                    }
+                    setOpen={() => setGridState("deleteRowId", null)}
+                    title="Delete Item"
+                  />
                 }
-                setOpen={() => setGridState("deleteRowId", null)}
-                title="Delete Item"
-              />
+              >
+                {props.renderDeleteDialog!({
+                  deleteRowId: gridState.deleteRowId!,
+                  isDeleting: gridState.isDeletingRow,
+                  onCancel: () => setGridState("deleteRowId", null),
+                  onConfirm: onDelete,
+                  open: (() =>
+                    gridState.deleteRowId) as unknown as Accessor<boolean>,
+                  setOpen: () => setGridState("deleteRowId", null),
+                })}
+              </Show>
             </Show>
           </Match>
         </Switch>

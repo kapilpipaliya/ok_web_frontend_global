@@ -1,7 +1,9 @@
 import { createAsync } from "@solidjs/router";
-import { createSignal, createMemo, Show, For } from "solid-js";
+import { createSignal, createMemo, createEffect, Show, For } from "solid-js";
 import { useToast } from "~/components/styled/modal/Toast";
 import { As } from "~/components/As";
+import { TableActions } from "~/components/styled/table/TableActions";
+import type { Vertex } from "~/lib/graph/type/vertex";
 import {
   getBackupStatus,
   triggerManualBackup,
@@ -35,6 +37,8 @@ export function BackupManagement() {
   // Feature: Search/Filter
   const [searchQuery, setSearchQuery] = createSignal("");
   const [filterDatabase, setFilterDatabase] = createSignal("");
+  const [backupPage, setBackupPage] = createSignal(0);
+  const [backupRowsPerPage, setBackupRowsPerPage] = createSignal(25);
 
   // Feature: Loading States
   const [creatingBackup, setCreatingBackup] = createSignal<string | null>(null);
@@ -398,6 +402,26 @@ export function BackupManagement() {
 
       return matchesSearch && matchesDb;
     });
+  });
+
+  const backupTotalPages = createMemo(() => {
+    const total = filteredBackups().length;
+    return Math.max(1, Math.ceil(total / backupRowsPerPage()));
+  });
+
+  const paginatedBackups = createMemo(() => {
+    const backups = filteredBackups();
+    const start = backupPage() * backupRowsPerPage();
+    return backups.slice(start, start + backupRowsPerPage());
+  });
+
+  createEffect(() => {
+    searchQuery();
+    filterDatabase();
+    const totalPages = backupTotalPages();
+    if (backupPage() > totalPages - 1) {
+      setBackupPage(Math.max(0, totalPages - 1));
+    }
   });
 
   // Helper: Toggle backup selection
@@ -1013,7 +1037,7 @@ export function BackupManagement() {
   border-radius: 0.25rem;
 }\`;`}
                   >
-                    {backup.schedule}
+                    {backup.scheduleLabel || backup.schedule}
                   </As>
                 </As>
                 <As
@@ -1373,7 +1397,7 @@ export function BackupManagement() {
                   </As>
                   <As
                     as="div"
-                    title="Retention Policy: Daily (7 days), Weekly (4 weeks), Monthly (12 months)"
+                    title={`Retention Policy: ${backupStatus()?.data?.retentionSummary || "24h / 4w / 12m"}`}
                     css={`return \`._id {
   padding: 0.5rem 1rem;
   background: \${args.theme.var.color.warning_light_900};
@@ -1393,7 +1417,8 @@ export function BackupManagement() {
   font-weight: 500;
 }\`;`}
                     >
-                      🔄 Auto-Cleanup: 7d / 4w / 12m
+                      🔄 Auto-Cleanup:{" "}
+                      {backupStatus()?.data?.retentionSummary || "24h / 4w / 12m"}
                     </As>
                   </As>
                 </As>
@@ -1694,7 +1719,7 @@ export function BackupManagement() {
                   </As>
 
                   {/* Table Rows */}
-                  <For each={filteredBackups()}>
+                  <For each={paginatedBackups()}>
                     {(backup) => {
                       const backupId = `${backup.databaseName}-${backup.filename}`;
                       const isDownloading = downloadingBackup() === backupId;
@@ -2148,6 +2173,35 @@ export function BackupManagement() {
                       );
                     }}
                   </For>
+
+                  <TableActions
+                    currentPage={backupPage}
+                    data={filteredBackups() as unknown as Vertex[]}
+                    displayedRows={
+                      paginatedBackups as unknown as () => Vertex[]
+                    }
+                      handleFirstPage={() => setBackupPage(0)}
+                      handleLastPage={() =>
+                        setBackupPage(backupTotalPages() - 1)
+                      }
+                      handleNextPage={() =>
+                        setBackupPage((page) =>
+                          Math.min(page + 1, backupTotalPages() - 1),
+                        )
+                      }
+                      handlePreviousPage={() =>
+                        setBackupPage((page) => Math.max(page - 1, 0))
+                      }
+                      handleRowsPerPageChange={(e) => {
+                        setBackupRowsPerPage(
+                          parseInt((e.target as HTMLSelectElement).value, 10),
+                        );
+                        setBackupPage(0);
+                      }}
+                      rowsPerPage={backupRowsPerPage}
+                      rowsPerPageOptions={[10, 25, 50, 100]}
+                      totalPages={backupTotalPages}
+                    />
                 </As>
               </Show>
             </As>

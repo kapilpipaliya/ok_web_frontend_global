@@ -16,7 +16,7 @@ const pipelineAsync = promisify(pipeline);
 
 export interface CreateBackupOptions {
   databaseName: string;
-  backupType?: "daily" | "weekly" | "monthly" | "manual";
+  backupType?: "hourly" | "daily" | "weekly" | "monthly" | "manual";
   jobId?: string;
   session?: Session;
 }
@@ -44,7 +44,7 @@ export interface BackupResult {
 export async function createDatabaseBackup(
   options: CreateBackupOptions,
 ): Promise<BackupResult> {
-  const { databaseName, backupType = "daily", jobId } = options;
+  const { databaseName, backupType = "hourly", jobId } = options;
 
   if (!databaseName) {
     return {

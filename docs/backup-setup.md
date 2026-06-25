@@ -2,11 +2,11 @@
 
 ## Overview
 
-The automated backup system protects your Neo4j databases by creating daily backups and storing them securely in cloud storage (AWS S3 or Google Cloud Storage). This guide will walk you through the complete setup process.
+The automated backup system protects your Neo4j databases by creating scheduled backups (hourly by default) and storing them securely in cloud storage (AWS S3 or Google Cloud Storage). This guide will walk you through the complete setup process.
 
 ## Features
 
-- ✅ **Automated Daily Backups** - Runs on schedule (default: 2 AM UTC)
+- ✅ **Automated Hourly Backups** - Runs every hour by default (configurable via cron)
 - ✅ **Multi-Database Support** - Backs up all active subdomains + admin database
 - ✅ **Compression** - Reduces storage costs with gzip compression
 - ✅ **Cloud Storage** - Secure storage in AWS S3 or Google Cloud Storage
@@ -126,7 +126,7 @@ Edit `.env` and configure the backup section:
 ```bash
 # Backup Configuration
 BACKUP_ENABLED=true
-BACKUP_SCHEDULE=0 2 * * *  # Daily at 2 AM UTC
+BACKUP_SCHEDULE=0 * * * *  # Every hour at minute 0 UTC
 BACKUP_STORAGE_TYPE=s3     # 's3' or 'gcs'
 
 # === AWS S3 Configuration (if using S3) ===
@@ -141,7 +141,8 @@ AWS_S3_REGION=us-east-1
 # GCS_KEYFILE_PATH=/path/to/service-account-key.json
 
 # Backup Retention Policy
-BACKUP_RETENTION_DAILY=7    # Keep 7 daily backups
+BACKUP_RETENTION_HOURLY=24  # Keep 24 hourly backups (last 24 hours)
+BACKUP_RETENTION_DAILY=7    # Keep 7 daily backups (when using daily schedule)
 BACKUP_RETENTION_WEEKLY=4   # Keep 4 weekly backups
 BACKUP_RETENTION_MONTHLY=12 # Keep 12 monthly backups
 
@@ -167,10 +168,13 @@ The `BACKUP_SCHEDULE` uses cron syntax:
 ```
 
 Examples:
+- `0 * * * *` - Every hour at minute 0 UTC (**default**)
 - `0 2 * * *` - Daily at 2:00 AM UTC
 - `0 */6 * * *` - Every 6 hours
 - `0 0 * * 0` - Weekly on Sunday at midnight
 - `0 3 1 * *` - Monthly on 1st at 3:00 AM
+
+When using the hourly schedule (`0 * * * *`), scheduled backups are tagged as `hourly` and retention uses `BACKUP_RETENTION_HOURLY`. For daily schedules, backups are tagged as `daily` and `BACKUP_RETENTION_DAILY` applies.
 
 ---
 
@@ -280,8 +284,8 @@ await executeNamedServerFunction({
 aws s3 ls s3://your-backup-bucket/ --recursive
 
 # Expected structure:
-# admin/admin-20250111-020000-daily.dump.gz
-# ytorganizer/ytorganizer-20250111-020000-daily.dump.gz
+# admin/admin-20250111-140000-hourly.dump.gz
+# ytorganizer/ytorganizer-20250111-140000-hourly.dump.gz
 ```
 
 **Google Cloud Storage:**
@@ -290,8 +294,8 @@ aws s3 ls s3://your-backup-bucket/ --recursive
 gsutil ls -r gs://your-backup-bucket/
 
 # Expected structure:
-# gs://your-backup-bucket/admin/admin-20250111-020000-daily.dump.gz
-# gs://your-backup-bucket/ytorganizer/ytorganizer-20250111-020000-daily.dump.gz
+# gs://your-backup-bucket/admin/admin-20250111-140000-hourly.dump.gz
+# gs://your-backup-bucket/ytorganizer/ytorganizer-20250111-140000-hourly.dump.gz
 ```
 
 ### 3. Check Email Alerts
@@ -327,7 +331,7 @@ The Backup Management interface provides a comprehensive dashboard for managing 
 - **Last Successful Backup**: Displays time since last successful backup
 - **Last Failed Backup**: Shows details of most recent failure (if any)
 - **Statistics**: Total completed and failed backups
-- **Configuration Info**: Current schedule, storage type (S3/GCS)
+- **Configuration Info**: Current schedule (e.g. "Every hour (UTC)"), storage type (S3/GCS), retention summary
 - **Manual Trigger**: Button to trigger immediate backup for all databases
 
 #### 2. Databases / Subdomains Table
@@ -341,7 +345,7 @@ The Backup Management interface provides a comprehensive dashboard for managing 
   - Shows success/error toast notification
 
 #### 3. Cloud Backups Table
-- **Comprehensive List**: All backups from cloud storage (S3 or GCS)
+- **Comprehensive List**: All backups from cloud storage (S3 or GCS), with pagination for large lists
 - **Metadata Display**:
   - Filename (with timestamp)
   - Source database name
@@ -466,7 +470,7 @@ Periodically test backup integrity by restoring to a test database:
 **Option 2: Via TypeScript Function**
 ```typescript
 await args.restoreFromBackup({
-  filename: 'admin-20250111-020000-daily.dump.gz',
+  filename: 'admin-20250111-140000-hourly.dump.gz',
   sourceDatabaseName: 'admin',
   targetDatabaseName: 'admin_test',  // Restore to test database
   confirmed: true,
@@ -491,10 +495,13 @@ gsutil du -sh gs://your-backup-bucket
 **Adjust Retention Policy:**
 If storage costs are high, reduce retention in `.env`:
 ```bash
-BACKUP_RETENTION_DAILY=5     # Reduced from 7
+BACKUP_RETENTION_HOURLY=12   # Reduced from 24 (keep 12 hours)
+BACKUP_RETENTION_DAILY=5     # For daily schedule only
 BACKUP_RETENTION_WEEKLY=3    # Reduced from 4
 BACKUP_RETENTION_MONTHLY=6   # Reduced from 12
 ```
+
+> **Note:** With hourly backups, storage usage grows faster. Monitor the Cloud Backups table and adjust `BACKUP_RETENTION_HOURLY` if needed.
 
 ---
 

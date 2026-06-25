@@ -5,9 +5,11 @@ import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { DataGrid } from "~/features/grid/DataGrid";
 import { API } from "~/lib/api/endpoints";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 import { SchemaRenderer } from "../SchemaRenderer";
 import { getSubDomainFormSchema } from "./functions/getSubDomainFormSchema";
+import { SubdomainDeleteDialog } from "./SubdomainDeleteDialog";
 import { As } from "~/components/As";
 import { getSubDomains } from "~/routes/api/subdomain/getSubDomains";
 import type { ServerResult } from "~/cypher/types/ServerResult";
@@ -26,7 +28,7 @@ export interface SubDomain {
 }
 
 export const SubDomainGrid = () => {
-  // const [graph, setGraph] = useGraph();
+  const [graph] = useGraph();
   const getTableData = async () => {
     const data = (await getSubDomains()) as ServerResult;
     // data.result.map((subdomain: Vertex<SubDomain>) => {
@@ -133,6 +135,13 @@ export const SubDomainGrid = () => {
         gridStore = gridStore_;
       }}
       isShowPagination={true}
+      renderDeleteDialog={(dialogProps) => (
+        <SubdomainDeleteDialog
+          {...dialogProps}
+          isLoading={dialogProps.isDeleting}
+          subdomain={graph.vertexes[dialogProps.deleteRowId]}
+        />
+      )}
       tableId="subdomains"
     />
   );

@@ -13,7 +13,7 @@ export interface UploadBackupOptions {
   localPath: string;
   filename: string;
   databaseName?: string;
-  backupType?: "daily" | "weekly" | "monthly";
+  backupType?: "hourly" | "daily" | "weekly" | "monthly";
   metadata?: Record<string, string>;
 }
 
@@ -45,7 +45,7 @@ export async function uploadBackupToCloud(
     localPath,
     filename,
     databaseName,
-    backupType = "daily",
+    backupType = "hourly",
     metadata = {},
   } = options;
 

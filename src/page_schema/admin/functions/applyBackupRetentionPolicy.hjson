@@ -10,11 +10,13 @@
 const { jobId } = args.contextData;
 
 // Get retention policy from environment variables
+const retentionHourly = parseInt(process.env.BACKUP_RETENTION_HOURLY || '24');
 const retentionDaily = parseInt(process.env.BACKUP_RETENTION_DAILY || '7');
 const retentionWeekly = parseInt(process.env.BACKUP_RETENTION_WEEKLY || '4');
 const retentionMonthly = parseInt(process.env.BACKUP_RETENTION_MONTHLY || '12');
 
 console.log(`[Retention] Applying backup retention policy`, {
+  hourly: retentionHourly,
   daily: retentionDaily,
   weekly: retentionWeekly,
   monthly: retentionMonthly
@@ -64,12 +66,18 @@ try {
     );
 
     // Separate backups by type
+    const hourlyBackups = sortedBackups.filter(b => b.backupType === 'hourly');
     const dailyBackups = sortedBackups.filter(b => b.backupType === 'daily');
     const weeklyBackups = sortedBackups.filter(b => b.backupType === 'weekly');
     const monthlyBackups = sortedBackups.filter(b => b.backupType === 'monthly');
 
     // Mark backups for deletion based on retention policy
     const toDelete = [];
+
+    // Delete old hourly backups (keep last N)
+    if (hourlyBackups.length > retentionHourly) {
+      toDelete.push(...hourlyBackups.slice(retentionHourly));
+    }
 
     // Delete old daily backups (keep last N)
     if (dailyBackups.length > retentionDaily) {
