@@ -18,11 +18,30 @@ const checkAdminRole = () => {
   });
 };
 
+const TABLE_KEY_BY_LABEL = {
+  Book: "books",
+  Page: "pages",
+  Component: "components",
+  Function: "functions",
+  EmailTemplate: "email_templates"
+};
+
+const TABLE_TITLE_BY_LABEL = {
+  Book: "Books",
+  Page: "Pages",
+  Component: "Components",
+  Function: "Functions",
+  EmailTemplate: "Email templates"
+};
+
+const PAGE_DESIGNER_ENTITIES = new Set(["Page", "Component", "Function", "EmailTemplate"]);
+const PAGE_DESIGNER_KEY_ENTITIES = new Set(["Page", "Component"]);
+
 const getTableVertexLabel = () => {
   const table = args.searchParams?.table;
   if (table) {
     const value = String(table).trim();
-    if (value === "Book") return "Book";
+    if (TABLE_KEY_BY_LABEL[value]) return value;
     return value;
   }
   return "Book";
@@ -31,17 +50,111 @@ const getTableVertexLabel = () => {
 const getTableKey = () => {
   const fromQuery = args.searchParams?.key;
   if (fromQuery != null && String(fromQuery).trim() !== "") return String(fromQuery).trim();
-  return "books";
+  const label = getTableVertexLabel();
+  return TABLE_KEY_BY_LABEL[label] || "books";
+};
+
+const getPageDesignerEntity = () => {
+  const label = getTableVertexLabel();
+  return PAGE_DESIGNER_ENTITIES.has(label) ? label : null;
+};
+
+const getPageDesignerPath = (entity, row) => {
+  if (!entity || !row) return null;
+  const useKey = PAGE_DESIGNER_KEY_ENTITIES.has(entity);
+  const segment = useKey ? row?.P?.key : row?.id;
+  if (segment == null || String(segment).trim() === "") return null;
+  return `/admin/${entity}/${encodeURIComponent(String(segment).trim())}`;
+};
+
+const openInPageDesigner = (row) => {
+  const entity = getPageDesignerEntity();
+  if (!entity) return;
+  const path = getPageDesignerPath(entity, row);
+  if (path) args.navigate(path);
+};
+
+const deleteDesignerEntity = async (row) => {
+  const entity = getPageDesignerEntity();
+  if (!entity) return;
+  const id = row?.id;
+  if (!id) return;
+  const result = await args.postAPI("/api/page/delete", { id }, "DELETE");
+  if (result?.success) {
+    if (result.graph) {
+      args.setGraphData(0, result.graph, {});
+    }
+    args.showSuccessToast?.(`${getTableTitle()} entry deleted successfully`);
+    const table = getTableVertexLabel();
+    const key = getTableKey();
+    if (isSchemaMode()) {
+      args.setSearchParams({ table, key, mode: "schema" }, { replace: true });
+    } else {
+      args.setSearchParams({ table, key, mode: null }, { replace: true });
+    }
+    return;
+  }
+  args.showErrorToast?.(result?.error || `Failed to delete ${entity}`);
+  throw new Error(result?.error || "Delete failed");
+};
+
+const getTableActionHandlers = () => {
+  if (!getPageDesignerEntity()) return undefined;
+  return {
+    edit: openInPageDesigner,
+    delete: deleteDesignerEntity
+  };
+};
+
+const makeDeleteConfirm = (entityLabel) => ({
+  title: `Delete ${entityLabel.toLowerCase()}?`,
+  message: "This cannot be undone.",
+  confirmText: "Delete",
+  cancelText: "Cancel",
+  variant: "danger"
+});
+
+const getDesignerTableActions = () => [
+  {
+    key: "edit",
+    type: "edit",
+    icon: "ph:pen",
+    title: "Open in page designer",
+    ariaLabel: "Open in page designer"
+  },
+  {
+    key: "delete",
+    type: "delete",
+    icon: "ph:trash",
+    confirm: makeDeleteConfirm(getTableTitle().replace(/s$/, "") || "item")
+  }
+];
+
+const getTableActions = () => {
+  if (getPageDesignerEntity()) return getDesignerTableActions();
+  if (getTableVertexLabel() === "Book") {
+    return [
+      { key: "edit", type: "edit" },
+      { key: "delete", type: "delete", confirm: makeDeleteConfirm("book") }
+    ];
+  }
+  return undefined;
+};
+
+const getTableTitle = () => {
+  const label = getTableVertexLabel();
+  return TABLE_TITLE_BY_LABEL[label] || `${label} table`;
 };
 
 const isSchemaMode = () => args.searchParams?.mode === "schema";
 
 const setEditorMode = (mode) => {
   const table = getTableVertexLabel();
+  const key = getTableKey();
   if (mode === "schema") {
-    args.setSearchParams({ table, mode: "schema" }, { replace: true });
+    args.setSearchParams({ table, key, mode: "schema" }, { replace: true });
   } else {
-    args.setSearchParams({ table, mode: null }, { replace: true });
+    args.setSearchParams({ table, key, mode: null }, { replace: true });
   }
 };
 
@@ -61,6 +174,10 @@ return {
   checkAdminRole,
   getTableVertexLabel,
   getTableKey,
+  getTableTitle,
+  getTableActionHandlers,
+  getTableActions,
+  openInPageDesigner,
   isSchemaMode,
   setEditorMode,
   onSchemaSaved
@@ -137,10 +254,9 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const table = args.fns.getTableVertexLabel?.() || "Book";
 return {
   as: "h1",
-  text: `${table} table`
+  text: args.fns.getTableTitle?.()
 };
 ''',
         css: '''
@@ -234,11 +350,16 @@ return `._id {
         props: '''
 const tableKey = args.fns.getTableKey?.() || "books";
 const tableVertexLabel = args.fns.getTableVertexLabel?.() || "Book";
+const actionHandlers = args.fns.getTableActionHandlers?.();
+const actions = args.fns.getTableActions?.();
 return {
   tableKey,
   tableVertexLabel,
   loadFromSetting: true,
-  usePolarisUI: true
+  usePolarisUI: true,
+  ...(actions ? { actions } : {}),
+  ...(actionHandlers ? { actionHandlers } : {}),
+  ...(actionHandlers ? { onRowClick: (row) => args.fns.openInPageDesigner?.(row) } : {})
 };
 '''
       }
@@ -273,7 +394,7 @@ return `._id {
         displayOrder: 1,
         componentName: "TableSchemaEditorShell",
         props: '''
-const tableKey = args.fns.getTableKey?.() || "books";
+const tableKey = args.fns.getTableKey?.();
 return {
   tableKey,
   embeddedMode: true,

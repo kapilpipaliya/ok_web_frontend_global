@@ -226,7 +226,10 @@ const invokeActionPredicate = (fn, action, row, label) => {
 /** `visible`: boolean | `({ row, action, … }) => boolean` — false hides; omitted => shown. */
 const isActionVisible = (action, row) => {
   if (!action) return false;
-  if (action.type === "edit" && !args.fns.getFormConfig?.()) return false;
+  if (action.type === "edit" && !args.fns.getFormConfig?.()) {
+    const handlers = getActionHandlers();
+    if (typeof handlers[action.key] !== "function") return false;
+  }
   if (action.visible === false) return false;
   if (action.visible === true) return true;
   if (typeof action.visible === "function") {

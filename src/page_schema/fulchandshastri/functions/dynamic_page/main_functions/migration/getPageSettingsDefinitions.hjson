@@ -4680,6 +4680,28 @@ const bookTableSidebar = {
   }
 };
 
+const designerOrganizerActions = (entityLabel) => [
+  {
+    key: "edit",
+    type: "edit",
+    icon: "ph:pen",
+    title: "Open in page designer",
+    ariaLabel: "Open in page designer"
+  },
+  {
+    key: "delete",
+    type: "delete",
+    icon: "ph:trash",
+    confirm: {
+      title: `Delete ${entityLabel.toLowerCase()}?`,
+      message: "This cannot be undone.",
+      confirmText: "Delete",
+      cancelText: "Cancel",
+      variant: "danger"
+    }
+  }
+];
+
 const componentTableColumns = [
   { key: "key", label: "Key", dataType: "text", renderer: "text", width: "140px", required: true },
   { key: "label", label: "Label", dataType: "text", renderer: "text", width: "180px", overflowEllipsis: true },
@@ -4702,13 +4724,11 @@ const componentTableGeneral = {
   hideSettingsButton: false,
   hideAddButton: true,
   rowHeight: 48,
-  columnWidths: { __selection: "36px", __rowNumber: "48px", __actions: "88px" },
+  columnWidths: { __selection: "36px", __rowNumber: "48px", __actions: "104px" },
   rowClickable: true,
   showRowNumber: true,
   resizableColumns: true,
-  actions: [
-    { key: "edit", type: "edit" }
-  ],
+  actions: designerOrganizerActions("Component"),
   hooks: {}
 };
 
@@ -4774,13 +4794,11 @@ const pageTableGeneral = {
   hideSettingsButton: false,
   hideAddButton: true,
   rowHeight: 48,
-  columnWidths: { __selection: "36px", __rowNumber: "48px", __actions: "88px" },
+  columnWidths: { __selection: "36px", __rowNumber: "48px", __actions: "104px" },
   rowClickable: true,
   showRowNumber: true,
   resizableColumns: true,
-  actions: [
-    { key: "edit", type: "edit" }
-  ],
+  actions: designerOrganizerActions("Page"),
   hooks: {}
 };
 
@@ -4844,13 +4862,11 @@ const functionTableGeneral = {
   hideSettingsButton: false,
   hideAddButton: true,
   rowHeight: 48,
-  columnWidths: { __selection: "36px", __rowNumber: "48px", __actions: "88px" },
+  columnWidths: { __selection: "36px", __rowNumber: "48px", __actions: "104px" },
   rowClickable: true,
   showRowNumber: true,
   resizableColumns: true,
-  actions: [
-    { key: "edit", type: "edit" }
-  ],
+  actions: designerOrganizerActions("Function"),
   hooks: {}
 };
 
@@ -4873,6 +4889,74 @@ const functionTableSidebar = {
   enabled: true,
   parentVertexLabel: "FunctionCategory",
   toParentEdgeType: "ParentFunctionCategory",
+  rootKeys: {},
+  label: "Categories",
+  loadFullTree: true,
+  formConfig: {
+    gridColumns: 1,
+    groups: [
+      {
+        key: "basic",
+        title: "Category",
+        gridColumns: 2,
+        fields: [
+          { key: "name", label: "Name", dataType: "text", renderer: "text", required: true, colSpan: 2 },
+          { key: "key", label: "Key", dataType: "text", renderer: "text", colSpan: 2 }
+        ]
+      }
+    ]
+  }
+};
+
+const emailTemplateTableColumns = [
+  { key: "key", label: "Key", dataType: "text", renderer: "text", width: "140px", required: true },
+  { key: "title", label: "Title", dataType: "text", renderer: "text", width: "180px", overflowEllipsis: true },
+  { key: "description", label: "Description", dataType: "text", renderer: "text", width: "240px", overflowEllipsis: true }
+];
+
+const emailTemplateTableGeneral = {
+  publicRead: false,
+  title: "Email templates",
+  label: "Email template",
+  icon: "ph:envelope",
+  usePolarisUI: true,
+  enableUserScopingForContent: false,
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  showSelection: true,
+  hideExportButtons: true,
+  hideImportButtons: true,
+  hideSettingsButton: false,
+  hideAddButton: true,
+  rowHeight: 48,
+  columnWidths: { __selection: "36px", __rowNumber: "48px", __actions: "104px" },
+  rowClickable: true,
+  showRowNumber: true,
+  resizableColumns: true,
+  actions: designerOrganizerActions("Email template"),
+  hooks: {}
+};
+
+const emailTemplateTableFormConfig = {
+  gridColumns: 2,
+  groups: [
+    {
+      key: "basic",
+      title: "Email template",
+      gridColumns: 2,
+      fields: [
+        { key: "key", label: "Key", dataType: "text", renderer: "text", required: true, colSpan: 1 },
+        { key: "title", label: "Title", dataType: "text", renderer: "text", colSpan: 1 },
+        { key: "description", label: "Description", dataType: "text", renderer: "textArea", colSpan: 2 }
+      ]
+    }
+  ]
+};
+
+const emailTemplateTableSidebar = {
+  enabled: true,
+  parentVertexLabel: "EmailTemplateCategory",
+  toParentEdgeType: "ParentEmailTemplateCategory",
   rootKeys: {},
   label: "Categories",
   loadFullTree: true,
@@ -4965,6 +5049,23 @@ const tableDefinitions = [
     columns: functionTableColumns,
     formConfig: functionTableFormConfig,
     sidebar: functionTableSidebar
+  },
+  {
+    tableKey: "email_templates",
+    tableVertexLabel: "EmailTemplate",
+    pageId: "table:email_templates",
+    schemaKeys: {
+      general: "email_templates_schema_general",
+      columns: "email_templates_schema_columns",
+      formConfig: "email_templates_schema_formconfig",
+      sidebar: "email_templates_schema_sidebar"
+    },
+    name: "Email templates",
+    description: "Page designer email templates palette organization",
+    general: emailTemplateTableGeneral,
+    columns: emailTemplateTableColumns,
+    formConfig: emailTemplateTableFormConfig,
+    sidebar: emailTemplateTableSidebar
   }
 ];
 

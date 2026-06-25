@@ -108,7 +108,7 @@ const portalNavSectionsData = [
         href: "/",
         label: "View site",
         icon: "ph:house",
-        pathCheck: (pathname) => String(pathname || "") === "/"
+        pathCheck: () => String(args.location?.pathname || "") === "/"
       }
     ]
   },
@@ -122,14 +122,58 @@ const portalNavSectionsData = [
         href: "/settings?page=home",
         label: "Home page",
         icon: "ph:gear-six",
-        pathCheck: (pathname) => String(pathname || "").startsWith("/settings")
+        pathCheck: () => String(args.location?.pathname || "").startsWith("/settings")
+      },
+      {
+        id: "pages_organizer",
+        href: "/portal/table?table=Page&key=pages",
+        label: "Page organizer",
+        icon: "ph:file",
+        pathCheck: () => {
+          if (String(args.location?.pathname || "") !== "/portal/table") return false;
+          return String(args.searchParams?.table || "").trim() === "Page";
+        }
+      },
+      {
+        id: "components_organizer",
+        href: "/portal/table?table=Component&key=components",
+        label: "Component organizer",
+        icon: "ph:puzzle-piece",
+        pathCheck: () => {
+          if (String(args.location?.pathname || "") !== "/portal/table") return false;
+          return String(args.searchParams?.table || "").trim() === "Component";
+        }
+      },
+      {
+        id: "functions_organizer",
+        href: "/portal/table?table=Function&key=functions",
+        label: "Function organizer",
+        icon: "ph:function",
+        pathCheck: () => {
+          if (String(args.location?.pathname || "") !== "/portal/table") return false;
+          return String(args.searchParams?.table || "").trim() === "Function";
+        }
+      },
+      {
+        id: "email_templates_organizer",
+        href: "/portal/table?table=EmailTemplate&key=email_templates",
+        label: "Email templates organizer",
+        icon: "ph:envelope",
+        pathCheck: () => {
+          if (String(args.location?.pathname || "") !== "/portal/table") return false;
+          return String(args.searchParams?.table || "").trim() === "EmailTemplate";
+        }
       },
       {
         id: "books_table",
-        href: "/portal/table?table=Book",
+        href: "/portal/table?table=Book&key=books",
         label: "Books",
         icon: "ph:book-open",
-        pathCheck: (pathname) => String(pathname || "") === "/portal/table"
+        pathCheck: () => {
+          if (String(args.location?.pathname || "") !== "/portal/table") return false;
+          const table = String(args.searchParams?.table || "Book").trim();
+          return table === "Book";
+        }
       }
     ]
   }
@@ -142,7 +186,7 @@ const portalNavSections = args.createMemo(() =>
 );
 
 const isNavItemActive = (item) =>
-  item.pathCheck ? item.pathCheck(args.location?.pathname) : false;
+  item.pathCheck ? item.pathCheck() : false;
 
 const onUserMenuMount = () => {
   document.addEventListener("click", handleUserMenuDocumentClick);

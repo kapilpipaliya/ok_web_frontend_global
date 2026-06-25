@@ -287,6 +287,10 @@ const prop = (key, localProps) => {
       if (key === "columns") return config?.columns;
       if (key === "formConfig") return config?.formConfig;
       if (key === "sidebar") return config?.sidebar;
+      if (key === "actions") {
+        if (Array.isArray(config?.actions)) return config.actions;
+        return config?.general?.actions;
+      }
       return config?.[key];
     }
     const general = config?.general;
