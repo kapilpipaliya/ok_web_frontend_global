@@ -1,6 +1,3 @@
-/**
- * @jsxImportSource solid-js
- */
 import { it, expect, describe, afterEach } from "vitest";
 import { cleanup } from "@solidjs/testing-library";
 import { VList } from "./VList.js";
