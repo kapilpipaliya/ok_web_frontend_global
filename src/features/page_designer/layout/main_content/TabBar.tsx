@@ -5,13 +5,13 @@ import type { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { IconButton } from "~/components/styled/IconButton";
 import { createViewVertex } from "~/lib/graph/mutate/vertex/createViewVertex";
-import { isDisabledTxn } from "~/lib/graph/transaction/value/isDisabledTxn";
 
 import {
   type PageLayoutObject,
   useDesignerLayoutStore,
 } from "../../context/LayoutContext";
 import { getTabLabel } from "./functions/getTabLabel";
+import { isFormUnsaved } from "../../utils/getUnsavedTabs";
 import {
   attachTabDragDrop,
   attachTabPanelDropTarget,
@@ -208,10 +208,7 @@ export function TabBar(props: { mainPanel: Id }) {
     });
   };
 
-  const isUnsaved = (formId: string) => {
-    const vertex = graph.vertexes[formId] as Vertex<FormStoreObject>;
-    return vertex?.P.txnId && !isDisabledTxn(vertex.P.txnId, graph);
-  };
+  const isUnsaved = (formId: string) => isFormUnsaved(graph, formId);
 
   const addMainPanel = () => {
     mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {

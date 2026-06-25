@@ -13,6 +13,12 @@ export interface UnsavedTabInfo {
   openedFormId: Id;
 }
 
+export function isFormUnsaved(graph: GraphInterface, formId: Id): boolean {
+  const formStore = graph.vertexes[formId] as Vertex<FormStoreObject> | undefined;
+  const txnId = formStore?.P?.txnId;
+  return !!txnId && !isDisabledTxn(txnId, graph);
+}
+
 export function getUnsavedTabs(
   graph: GraphInterface,
   layoutStore: PageLayoutObject,
@@ -27,8 +33,7 @@ export function getUnsavedTabs(
     }
 
     const formStore = graph.vertexes[formId] as Vertex<FormStoreObject> | undefined;
-    const txnId = formStore?.P?.txnId;
-    if (!txnId || isDisabledTxn(txnId, graph)) {
+    if (!formStore || !isFormUnsaved(graph, formId)) {
       continue;
     }
 
