@@ -18,6 +18,7 @@ import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVerte
 import type { Id } from "~/lib/graph/type/id";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { scrollElementIntoContainer } from "~/lib/dom/scrollElementIntoContainer";
+import { handlePaletteTouchBackground } from "~/lib/event/touchRevealedRow";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/entity/findVertex";
 import { PAGE_DESIGNER_DRAG_TYPES } from "~/features/page_designer/functions/drag_drop/pragmatic/pageDesignerDragTypes";
 import {
@@ -652,7 +653,7 @@ export function ComponentPaletteTree(props?: {
   };
 
   return (
-    <As as="div" ref={setScrollRef}>
+    <As as="div" onPointerDown={handlePaletteTouchBackground} ref={setScrollRef}>
       <Show when={!props?.compact}>
         <As
           as="div"

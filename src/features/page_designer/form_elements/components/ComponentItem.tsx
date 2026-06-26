@@ -24,7 +24,11 @@ import {
 import type { Id } from "~/lib/graph/type/id";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
-import { canHover } from "~/lib/event/canHover";
+import { isFinePointer } from "~/lib/event/isFinePointer";
+import {
+  isTouchRevealedRow,
+  revealTouchRow,
+} from "~/lib/event/touchRevealedRow";
 import { ComponentPreview } from "./ComponentPreview";
 
 export function ComponentItem(
@@ -43,6 +47,9 @@ export function ComponentItem(
   const [isHovered, setIsHovered] = createSignal(false);
   const [isPreviewOpen, setIsPreviewOpen] = createSignal(false);
   const [isMouseOverItem, setIsMouseOverItem] = createSignal(false);
+
+  const rowActionsVisible = () =>
+    isHovered() || isTouchRevealedRow(props.child.id);
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStoreVertex = () =>
     graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
@@ -51,17 +58,16 @@ export function ComponentItem(
     new Set<Vertex>(),
   );
 
-  const handleItemMouseEnter = () => {
-    // Touch devices synthesize mouseenter on first tap; skip hover there.
-    if (!canHover()) return;
+  const handleItemPointerEnter = (e: PointerEvent) => {
+    if (!isFinePointer(e)) return;
     setIsHovered(true);
     setIsMouseOverItem(true);
   };
 
-  const handleItemMouseLeave = () => {
-    if (!canHover()) return;
+  const handleItemPointerLeave = (e: PointerEvent) => {
+    // Finger lift fires pointerleave; touch-revealed state is kept globally.
+    if (!isFinePointer(e)) return;
     setIsMouseOverItem(false);
-    // Only change hover state if preview is not open
     if (!isPreviewOpen()) {
       setIsHovered(false);
     }
@@ -141,7 +147,7 @@ export function ComponentItem(
   };
 
   // Should show buttons if item is hovered or preview is open
-  const shouldShowButtons = () => isHovered() || isPreviewOpen();
+  const shouldShowButtons = () => rowActionsVisible() || isPreviewOpen();
 
   return (
     <>
@@ -150,8 +156,14 @@ export function ComponentItem(
         css={getItemStyle()}
         onClick={() => props.toggleExpand(props.child.id)}
         onDblClick={() => props.onDoubleClick?.(props.child)}
-        onMouseEnter={handleItemMouseEnter}
-        onMouseLeave={handleItemMouseLeave}
+        data-palette-row=""
+        onPointerDown={(e) => {
+          if (e.pointerType === "touch") {
+            revealTouchRow(props.child.id);
+          }
+        }}
+        onPointerEnter={handleItemPointerEnter}
+        onPointerLeave={handleItemPointerLeave}
         ref={(element) => {
           setItemRef(element);
           bindPaletteDrag(element);

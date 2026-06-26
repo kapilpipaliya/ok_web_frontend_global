@@ -56,7 +56,11 @@ import {
   isPaletteContent,
   isPaletteRootCategory,
 } from "./componentPaletteUtils";
-import { canHover } from "~/lib/event/canHover";
+import { isFinePointer } from "~/lib/event/isFinePointer";
+import {
+  isTouchRevealedRow,
+  revealTouchRow,
+} from "~/lib/event/touchRevealedRow";
 import { ComponentPreview } from "./ComponentPreview";
 
 export function ComponentPaletteTreeItem(
@@ -99,6 +103,9 @@ export function ComponentPaletteTreeItem(
   const [isHovered, setIsHovered] = createSignal(false);
   const [isPreviewOpen, setIsPreviewOpen] = createSignal(false);
   const [isMouseOverItem, setIsMouseOverItem] = createSignal(false);
+
+  const rowActionsVisible = () =>
+    isHovered() || isTouchRevealedRow(props.item.id);
 
   const paletteConfig = () => props.config;
   const isComponentPalette = () =>
@@ -219,7 +226,7 @@ export function ComponentPaletteTreeItem(
     if (isSelected()) {
       boxShadow +=
         " background-color:${args.theme.var.color.primary_light_300}; color:${args.theme.var.color.primary_light_300_text};";
-    } else if (isHovered()) {
+    } else if (rowActionsVisible()) {
       boxShadow +=
         " background-color:${args.theme.var.color.primary_light_750}; color:${args.theme.var.color.primary_light_750_text};";
     } else if (isNegative(props.item.id)) {
@@ -334,7 +341,7 @@ export function ComponentPaletteTreeItem(
       isPagePalette() ||
       isFunctionPalette() ||
       isEmailTemplatePalette()) &&
-    (isHovered() || isPreviewOpen());
+    (rowActionsVisible() || isPreviewOpen());
 
   return (
     <Show when={shouldShowItem()}>
@@ -349,16 +356,22 @@ export function ComponentPaletteTreeItem(
         <As
           as="div"
           css={getItemStyle()}
-          onMouseEnter={() => {
-            // Touch devices synthesize mouseenter on first tap; skip hover there.
-            if (!canHover()) return;
+          data-palette-row=""
+          onPointerEnter={(e) => {
+            if (!isFinePointer(e)) return;
             setIsHovered(true);
             setIsMouseOverItem(true);
           }}
-          onMouseLeave={() => {
-            if (!canHover()) return;
+          onPointerLeave={(e) => {
+            // Finger lift fires pointerleave; touch-revealed state is kept globally.
+            if (!isFinePointer(e)) return;
             setIsMouseOverItem(false);
             if (!isPreviewOpen()) setIsHovered(false);
+          }}
+          onPointerDown={(e) => {
+            if (e.pointerType === "touch") {
+              revealTouchRow(props.item.id);
+            }
           }}
           onDblClick={() => {
             if (isPagePalette() && isContentItem()) {
@@ -430,7 +443,7 @@ export function ComponentPaletteTreeItem(
                 {contentCount() ?? ""}
               </As>
             </Show>
-            <Show when={canManageCategory() && isHovered()}>
+            <Show when={canManageCategory() && rowActionsVisible()}>
               <As
                 as="span"
                 css={"return `._id { display: flex; gap: 2px; }`;"}

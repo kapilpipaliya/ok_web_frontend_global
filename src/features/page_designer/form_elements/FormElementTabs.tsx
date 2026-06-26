@@ -67,7 +67,6 @@ export function ComponentsPanel() {
       <ComponentList
         edgeName="ParentComp"
         rootExpression={`g:'Comp[Root]'`}
-        hideActionButtons={true}
       />
 
       <Divider />
