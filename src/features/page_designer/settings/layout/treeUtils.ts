@@ -41,6 +41,17 @@ export const getTreeItemBorder = (index: number) => {
 };
 
 /**
+ * Gets CSS for hovered tree item styling
+ * @returns CSS string for hovered item styling
+ */
+export const getHoveredItemStyle = () => {
+  return `
+    background-color: \${args.theme.var.color.primary_light_400};
+    color: \${args.theme.var.color.primary_light_400_text};
+  `;
+};
+
+/**
  * Gets CSS for selected tree item styling
  * @returns CSS string for selected item styling
  */

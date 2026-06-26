@@ -101,6 +101,13 @@ export function LayoutTreeItem(
   );
   const [parentRef, setParentRef] = createSignal<HTMLElement>();
 
+  const isExpanded = createMemo(() => {
+    if (props.shouldExpandForSearch) {
+      return props.shouldExpandForSearch(props.metaVertex);
+    }
+    return !props.collapsedKeys().includes(props.metaVertex.id);
+  });
+
   // Determine if this item should be shown based on search - optimized
   const shouldShowItem = createMemo(() => {
     // Always show if no search is active
@@ -206,34 +213,20 @@ export function LayoutTreeItem(
     clearLayoutPreviewHover(layoutStoreId, graph, setGraph);
   };
 
-  const isAfter = createMemo(
-    () =>
-      isActiveTargetItem() && layoutStoreVertex()?.P.dragPosition === "after",
-  );
-
   const getBorder = createMemo(() => {
-    let boxShadow = "";
-
-    if (isActiveTargetItem()) {
-      if (layoutStoreVertex()?.P.dragPosition !== "after") {
-        const boxShadowProps = getDnDBoxShadowArgs(
-          layoutStoreVertex()?.P.dragPosition,
-          "${args.theme.var.color.success}",
-        );
-        boxShadow = `box-shadow:${generateBoxShadow([boxShadowProps])};`;
-      }
+    if (!isActiveTargetItem()) {
+      return "";
     }
 
-    if (isSelectedLayoutId(props.metaVertex.id)) {
-      boxShadow +=
-        " background-color:${args.theme.var.color.primary_light_300}; color:${args.theme.var.color.primary_light_300_text};";
-    } else if (isSelectedHoverId(props.metaVertex.id) || isPreviewHover()) {
-      boxShadow +=
-        " background-color:${args.theme.var.color.primary_light_750}; color:${args.theme.var.color.primary_light_750_text};";
-    }
-
-    return boxShadow;
+    const boxShadowProps = getDnDBoxShadowArgs(
+      layoutStoreVertex()?.P.dragPosition,
+      "${args.theme.var.color.success}",
+    );
+    return `box-shadow:${generateBoxShadow([boxShadowProps])};`;
   });
+
+  const isHovered = () =>
+    isSelectedHoverId(props.metaVertex.id) || isPreviewHover();
 
   const replacePropertiesValue = (properties: { [key: string]: unknown }) => {
     replaceVertexProperties(
@@ -340,14 +333,6 @@ export function LayoutTreeItem(
   // Check if the item is in the hidden nodes list
   const isNodeHidden = () =>
     (formStoreVertex()?.P.hiddenNodes || []).includes(props.metaVertex.id);
-
-  // Check if the item should be expanded
-  const isExpanded = createMemo(() => {
-    if (props.shouldExpandForSearch) {
-      return props.shouldExpandForSearch(props.metaVertex);
-    }
-    return !props.collapsedKeys().includes(props.metaVertex.id);
-  });
 
   // Add search highlight styles
   const getHighlightStyle = createMemo(() => {
@@ -543,8 +528,8 @@ export function LayoutTreeItem(
         css={[`return \`._id { ${getBorder()} }\`;`, getHighlightStyle()]}
         hasChildren={!!children().length}
         isDragOver={isActiveTargetItem()}
-        isHovered={isSelectedHoverId(props.metaVertex.id)}
-        isSelected={isSelectedLayoutId(props.metaVertex.id)}
+        isHovered={isHovered}
+        isSelected={() => isSelectedLayoutId(props.metaVertex.id)}
         itemId={props.metaVertex.id}
         onClick={handleClick}
         onMouseEnter={handleMouseOver}
@@ -690,14 +675,6 @@ export function LayoutTreeItem(
             )}
           </For>
         </As>
-      </Show>
-      <Show when={isAfter()}>
-        <As
-          as="div"
-          css={`return \`._id {
-  border: 1px solid \${args.theme.var.color.primary};
-}\`;`}
-        />
       </Show>
     </Show>
   );
