@@ -1,6 +1,6 @@
 import type * as Monaco from "monaco-editor";
 
-import { createEffect, createSignal, on, Show } from "solid-js";
+import { createEffect, createSignal, For, on, Show } from "solid-js";
 import type { JSX } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
@@ -22,6 +22,7 @@ import { As } from "~/components/As";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import type { Id } from "~/lib/graph/type/id";
 import { useGraph } from "~/lib/graph/context/UseGraph";
+import { createIsTouchDevice } from "~/lib/hooks/createIsTouchDevice";
 
 // import onigasm from 'onigasm/lib/onigasm.wasm?url';
 
@@ -111,8 +112,144 @@ export function FunctionEditor(props: {
   const [originalValue, setOriginalValue] = createSignal(getPropertyValue());
   const [hasChanges, setHasChanges] = createSignal(false);
 
+  const isTouchDevice = createIsTouchDevice();
+
   // Editor reference
   let editorRef: Monaco.editor.IStandaloneCodeEditor | undefined;
+
+  const runEditorAction = (actionId: string) => {
+    editorRef?.focus();
+    editorRef?.getAction(actionId)?.run();
+  };
+
+  const getEditorSelectionText = () => {
+    const editor = editorRef;
+    const model = editor?.getModel();
+    const selection = editor?.getSelection();
+    if (!editor || !model || !selection || selection.isEmpty()) {
+      return null;
+    }
+
+    const text = model.getValueInRange(selection);
+    return text ? { editor, model, selection, text } : null;
+  };
+
+  const writeClipboardText = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.style.position = "fixed";
+      textarea.style.left = "-9999px";
+      document.body.appendChild(textarea);
+      textarea.select();
+      const success = document.execCommand("copy");
+      document.body.removeChild(textarea);
+      return success;
+    }
+  };
+
+  const cutSelection = async () => {
+    const selectionData = getEditorSelectionText();
+    if (!selectionData) {
+      return;
+    }
+
+    const { editor, model, selection, text } = selectionData;
+    const copied = await writeClipboardText(text);
+    if (!copied) {
+      return;
+    }
+
+    editor.pushUndoStop();
+    editor.executeEdits("touch-cut", [
+      { range: selection, text: "", forceMoveMarkers: true },
+    ]);
+    handleEditorChange(model.getValue());
+  };
+
+  const copySelection = async () => {
+    const selectionData = getEditorSelectionText();
+    if (!selectionData) {
+      return;
+    }
+
+    await writeClipboardText(selectionData.text);
+  };
+
+  const pasteFromClipboard = async () => {
+    const editor = editorRef;
+    if (!editor) {
+      return;
+    }
+
+    let text = "";
+    try {
+      text = await navigator.clipboard.readText();
+    } catch {
+      return;
+    }
+
+    const selection = editor.getSelection();
+    if (!selection) {
+      return;
+    }
+
+    editor.pushUndoStop();
+    editor.executeEdits("touch-paste", [
+      { range: selection, text, forceMoveMarkers: true },
+    ]);
+
+    const model = editor.getModel();
+    if (model) {
+      handleEditorChange(model.getValue());
+    }
+  };
+
+  const touchToolbarActions = [
+    {
+      icon: "ph:arrow-counter-clockwise",
+      title: "Undo",
+      onClick: () => {
+        editorRef?.focus();
+        editorRef?.trigger("toolbar", "undo", null);
+      },
+    },
+    {
+      icon: "ph:arrow-clockwise",
+      title: "Redo",
+      onClick: () => {
+        editorRef?.focus();
+        editorRef?.trigger("toolbar", "redo", null);
+      },
+    },
+    {
+      icon: "ph:magnifying-glass",
+      title: "Find",
+      onClick: () => runEditorAction("actions.find"),
+    },
+    {
+      icon: "ph:copy-simple",
+      title: "Copy",
+      onClick: () => void copySelection(),
+    },
+    {
+      icon: "ph:scissors",
+      title: "Cut",
+      onClick: () => void cutSelection(),
+    },
+    {
+      icon: "ph:clipboard",
+      title: "Paste",
+      onClick: () => void pasteFromClipboard(),
+    },
+  ] as const;
+
+  const handleTouchToolbarPointerDown = (event: PointerEvent) => {
+    event.preventDefault();
+  };
 
   // Update editor value when target element changes or property value changes
   createEffect(
@@ -287,9 +424,39 @@ export function FunctionEditor(props: {
         css={`return \`._id {
           display: flex;
           flex-direction: column;
-          gap: 8px; /* Gap between resizable editor area and buttons below */
+          gap: 8px;
         }\`;`}
       >
+        <Show when={isTouchDevice()}>
+          <As
+            as="div"
+            css={`return \`._id {
+              display: flex;
+              align-items: center;
+              gap: 2px;
+              padding-bottom: 4px;
+              border-bottom: 1px solid \${args.theme.var.color.border};
+            }\`;`}
+          >
+            <For each={touchToolbarActions}>
+              {(action) => (
+                <IconButton
+                  css={`return \`._id {
+                    background-color: transparent;
+                    border: none;
+                    padding: 2px;
+                  }\`;`}
+                  icon={action.icon}
+                  onClick={action.onClick}
+                  onPointerDown={handleTouchToolbarPointerDown}
+                  size={16}
+                  title={action.title}
+                />
+              )}
+            </For>
+          </As>
+        </Show>
+
         {/* Wrapper for the resizable editor and its handle */}
         <As as="div" ref={resizableEditorAreaRef} css={resizeContainerStyles}>
           <MonacoEditorWrapper
@@ -309,11 +476,13 @@ export function FunctionEditor(props: {
           />
         </As>
 
-        {/* Buttons container - now follows the resizable editor area */}
+        {/* Buttons container - follows the resizable editor area */}
         <As
           as="div"
           css={`return \`._id {
             display: flex;
+            flex-wrap: wrap;
+            align-items: center;
             gap: 4px;
           }\`;`}
         >
