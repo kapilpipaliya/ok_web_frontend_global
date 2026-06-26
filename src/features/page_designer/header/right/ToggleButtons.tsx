@@ -17,6 +17,8 @@ export function ToggleButtons() {
   const togglePanel = (
     panel:
       | "isComponentsOpen"
+      | "isPagesOpen"
+      | "isFunctionsOpen"
       | "isAiOpen"
       | "isLayoutTreeOpen"
       | "isPropertiesOpen"
@@ -50,11 +52,29 @@ export function ToggleButtons() {
       />
       <IconButton
         css={headerIconButtonCss}
+        icon="ph:file-text"
+        iconCss={`return \`._id {${layoutStore().isPagesOpen ? "color:${args.theme.var.color.primary}" : "color:${args.theme.var.color.text_light_300}"};}\`;`}
+        onClick={() => togglePanel("isPagesOpen")}
+        size={22}
+        title="Toggle Pages Panel"
+        tooltipGroup="right-buttons"
+      />
+      <IconButton
+        css={headerIconButtonCss}
         icon="ph:squares-four"
         iconCss={`return \`._id {${layoutStore().isComponentsOpen ? "color:${args.theme.var.color.primary}" : "color:${args.theme.var.color.text_light_300}"};}\`;`}
         onClick={() => togglePanel("isComponentsOpen")}
         size={22}
-        title="Toggle Elements Panel"
+        title="Toggle Components Panel"
+        tooltipGroup="right-buttons"
+      />
+      <IconButton
+        css={headerIconButtonCss}
+        icon="ph:function"
+        iconCss={`return \`._id {${layoutStore().isFunctionsOpen ? "color:${args.theme.var.color.primary}" : "color:${args.theme.var.color.text_light_300}"};}\`;`}
+        onClick={() => togglePanel("isFunctionsOpen")}
+        size={22}
+        title="Toggle Functions Panel"
         tooltipGroup="right-buttons"
       />
       <IconButton

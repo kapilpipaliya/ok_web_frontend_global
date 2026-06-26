@@ -78,6 +78,17 @@ export const FUNCTION_PALETTE_CONFIG: PaletteTreeConfig = {
   formConfig: categoryFormConfig,
 };
 
+export const EMAIL_TEMPLATE_PALETTE_CONFIG: PaletteTreeConfig = {
+  parentVertexLabel: "EmailTemplateCategory",
+  toParentEdgeType: "ParentEmailTemplateCategory",
+  rootKeys: { key: "root" },
+  tableVertexLabel: "EmailTemplate",
+  relationshipType: "ParentEmailTemplateCategory",
+  label: "Categories",
+  loadFullTree: true,
+  formConfig: categoryFormConfig,
+};
+
 export function getUncategorizedPaletteId(config: PaletteTreeConfig) {
   return `_${config.tableVertexLabel}_uncategorized`;
 }

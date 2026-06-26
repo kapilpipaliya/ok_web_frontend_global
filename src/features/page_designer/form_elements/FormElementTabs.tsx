@@ -7,6 +7,7 @@ import { ComponentList } from "./components/ComponentList";
 import { ComponentPaletteTree } from "./components/ComponentPaletteTree";
 import {
   COMPONENT_PALETTE_CONFIG,
+  EMAIL_TEMPLATE_PALETTE_CONFIG,
   FUNCTION_PALETTE_CONFIG,
   PAGE_PALETTE_CONFIG,
 } from "./components/componentPaletteConfig";
@@ -51,13 +52,39 @@ const TabList = (props: {
   </UlContainer>
 );
 
-export function FormElementTabs() {
-  const leftMenuTabs = [
-    { collection: "Comp", title: "Components" },
+const panelContentCss = [
+  STYLES.overflowCss,
+  `return \`._id {
+  min-height: 0;
+  min-width: 0;
+  height: 100%;
+}\`;`,
+];
+
+export function ComponentsPanel() {
+  return (
+    <As as="div" css={panelContentCss}>
+      <ComponentList
+        edgeName="ParentComp"
+        rootExpression={`g:'Comp[Root]'`}
+        hideActionButtons={true}
+      />
+
+      <Divider />
+
+      <As as="div" css={"return `._id { margin-top: 4px; }`;"}>
+        <ComponentPaletteTree searchAlways title="Categories" />
+      </As>
+    </As>
+  );
+}
+
+export function PagesPanel() {
+  const pageTabs = [
     { collection: "Page", title: "Pages" },
-    { collection: "Function", title: "Functions" },
+    { collection: "EmailTemplate", title: "Email Templates" },
   ];
-  const [selectedTab, setSelectedTab] = createSignal(leftMenuTabs[0]);
+  const [selectedTab, setSelectedTab] = createSignal(pageTabs[0]);
 
   return (
     <As
@@ -80,46 +107,15 @@ export function FormElementTabs() {
       >
         <TabsContainer>
           <TabList
-            tabs={leftMenuTabs}
+            tabs={pageTabs}
             selectedTab={selectedTab()}
             onSelect={setSelectedTab}
           />
         </TabsContainer>
       </As>
 
-      <As
-        as="div"
-        css={[
-          STYLES.overflowCss,
-          `return \`._id {
-  min-height: 0;
-  min-width: 0;
-}\`;`,
-        ]}
-      >
+      <As as="div" css={panelContentCss}>
         <Switch>
-          <Match when={selectedTab().collection === "Comp"}>
-            <As as="div">
-              <ComponentList
-                edgeName="ParentComp"
-                rootExpression={`g:'Comp[Root]'`}
-                hideActionButtons={true}
-              />
-
-              <Divider />
-
-              <As as="div" css={"return `._id { margin-top: 4px; }`;"}>
-                <ComponentPaletteTree searchAlways title="Categories" />
-              </As>
-            </As>
-          </Match>
-          <Match when={selectedTab().collection === "Function"}>
-            <ComponentPaletteTree
-              config={FUNCTION_PALETTE_CONFIG}
-              searchAlways
-              title="Functions"
-            />
-          </Match>
           <Match when={selectedTab().collection === "Page"}>
             <ComponentPaletteTree
               config={PAGE_PALETTE_CONFIG}
@@ -127,8 +123,27 @@ export function FormElementTabs() {
               title="Pages"
             />
           </Match>
+          <Match when={selectedTab().collection === "EmailTemplate"}>
+            <ComponentPaletteTree
+              config={EMAIL_TEMPLATE_PALETTE_CONFIG}
+              searchAlways
+              title="Email Templates"
+            />
+          </Match>
         </Switch>
       </As>
+    </As>
+  );
+}
+
+export function FunctionsPanel() {
+  return (
+    <As as="div" css={panelContentCss}>
+      <ComponentPaletteTree
+        config={FUNCTION_PALETTE_CONFIG}
+        searchAlways
+        title="Functions"
+      />
     </As>
   );
 }

@@ -22,6 +22,8 @@ export type LayoutTreeScrollSource = "preview" | "layoutTree";
 export const INITIAL_WIDTHS = {
   bottom: 300,
   components: 250,
+  pages: 250,
+  functions: 250,
   ai: 305,
   layoutTree: 280,
   properties: 305,
@@ -31,11 +33,15 @@ export const INITIAL_WIDTHS = {
 export function getInitialLayoutSettings() {
   return {
     isComponentsOpen: true,
+    isPagesOpen: true,
+    isFunctionsOpen: false,
     isAiOpen: false,
     isLayoutTreeOpen: true,
     isPropertiesOpen: true,
     isSettingsOpen: true,
     componentsWidth: INITIAL_WIDTHS.components,
+    pagesWidth: INITIAL_WIDTHS.pages,
+    functionsWidth: INITIAL_WIDTHS.functions,
     aiWidth: INITIAL_WIDTHS.ai,
     layoutTreeWidth: INITIAL_WIDTHS.layoutTree,
     propertiesWidth: INITIAL_WIDTHS.properties,

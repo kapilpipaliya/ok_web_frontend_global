@@ -20,7 +20,11 @@ import { UseObjectAIPanel } from "../chat/use-object/UseObjectAIPanel";
 import { HeaderRow } from "../header/header_row/HeaderRow";
 import { DeleteConfirmation } from "./main_content/DeleteConfirmation";
 import { UnsavedTabSaveReminder } from "./UnsavedTabSaveReminder";
-import { FormElements } from "./main_content/FormElements";
+import {
+  ComponentsPanelContent,
+  FunctionsPanelContent,
+  PagesPanelContent,
+} from "./main_content/FormElements";
 import { PageViewComponent } from "./main_content/PageViewComponent";
 import { PropertiesContent } from "./main_content/PropertiesContent";
 import { TabBar } from "./main_content/TabBar";
@@ -283,8 +287,16 @@ export function RenderMainContent() {
       columns.push(`${layout.settingsWidth}px`);
     }
 
+    if (layout.isPagesOpen) {
+      columns.push(`${layout.pagesWidth}px`);
+    }
+
     if (layout.isComponentsOpen) {
       columns.push(`${layout.componentsWidth}px`);
+    }
+
+    if (layout.isFunctionsOpen) {
+      columns.push(`${layout.functionsWidth}px`);
     }
 
     if (layout.isLayoutTreeOpen) {
@@ -320,6 +332,9 @@ export function RenderMainContent() {
     createSignal<HTMLDivElement>();
   const [componentsPanelRef, setComponentsPanelRef] =
     createSignal<HTMLDivElement>();
+  const [pagesPanelRef, setPagesPanelRef] = createSignal<HTMLDivElement>();
+  const [functionsPanelRef, setFunctionsPanelRef] =
+    createSignal<HTMLDivElement>();
   const [aiPanelRef, setAiPanelRef] = createSignal<HTMLDivElement>();
   const [propertiesPanelRef, setPropertiesPanelRef] =
     createSignal<HTMLDivElement>();
@@ -336,6 +351,8 @@ export function RenderMainContent() {
       key:
         | "bottomHeight"
         | "componentsWidth"
+        | "pagesWidth"
+        | "functionsWidth"
         | "aiWidth"
         | "layoutTreeWidth"
         | "propertiesWidth"
@@ -344,6 +361,8 @@ export function RenderMainContent() {
       panelRef: () => HTMLDivElement | undefined,
       isHorizontal: boolean,
       growOnDragRight = key === "componentsWidth" ||
+        key === "pagesWidth" ||
+        key === "functionsWidth" ||
         key.startsWith("mainPanel"),
     ) =>
     (e: PointerEvent) => {
@@ -502,6 +521,30 @@ export function RenderMainContent() {
           <As
             as="div"
             css={STYLES.panelCellCss}
+            style={{ display: layoutStore().isPagesOpen ? "block" : "none" }}
+          >
+            <Panel
+              activeResizeKey={activeResizeKey()}
+              isResizing={isResizing()}
+              onResize={createResizeHandler(
+                "pagesWidth",
+                pagesPanelRef,
+                true,
+              )}
+              ref={setPagesPanelRef}
+              resizeKey="pagesWidth"
+              resizePosition="right"
+              scrollContent={false}
+              title="Pages"
+              titleIcon="ph:file-text"
+            >
+              <PagesPanelContent />
+            </Panel>
+          </As>
+
+          <As
+            as="div"
+            css={STYLES.panelCellCss}
             style={{
               display: layoutStore().isComponentsOpen ? "block" : "none",
             }}
@@ -518,8 +561,36 @@ export function RenderMainContent() {
               resizeKey="componentsWidth"
               resizePosition="right"
               scrollContent={false}
+              title="Components"
+              titleIcon="ph:puzzle-piece"
             >
-              <FormElements />
+              <ComponentsPanelContent />
+            </Panel>
+          </As>
+
+          <As
+            as="div"
+            css={STYLES.panelCellCss}
+            style={{
+              display: layoutStore().isFunctionsOpen ? "block" : "none",
+            }}
+          >
+            <Panel
+              activeResizeKey={activeResizeKey()}
+              isResizing={isResizing()}
+              onResize={createResizeHandler(
+                "functionsWidth",
+                functionsPanelRef,
+                true,
+              )}
+              ref={setFunctionsPanelRef}
+              resizeKey="functionsWidth"
+              resizePosition="right"
+              scrollContent={false}
+              title="Functions"
+              titleIcon="ph:function"
+            >
+              <FunctionsPanelContent />
             </Panel>
           </As>
 

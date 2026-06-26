@@ -105,6 +105,8 @@ export function ComponentPaletteTreeItem(
   const isPagePalette = () => paletteConfig().tableVertexLabel === "Page";
   const isFunctionPalette = () =>
     paletteConfig().tableVertexLabel === "Function";
+  const isEmailTemplatePalette = () =>
+    paletteConfig().tableVertexLabel === "EmailTemplate";
 
   const formStoreVertex = () => {
     const formId = layoutStoreVertex()?.P.formId;
@@ -193,7 +195,12 @@ export function ComponentPaletteTreeItem(
   });
 
   const contentCursor = () => {
-    if (isFunctionPalette() && isContentItem()) return "pointer";
+    if (
+      (isFunctionPalette() || isEmailTemplatePalette()) &&
+      isContentItem()
+    ) {
+      return "pointer";
+    }
     return "grab";
   };
 
@@ -263,6 +270,9 @@ export function ComponentPaletteTreeItem(
     if (isFunctionPalette()) {
       return "ph:function";
     }
+    if (isEmailTemplatePalette()) {
+      return "ph:envelope";
+    }
     const key = props.item.P?.key as string;
     return (
       (props.item.P?.icon as string) ||
@@ -319,7 +329,10 @@ export function ComponentPaletteTreeItem(
   const shouldShowButtons = () =>
     !props.isPaletteDragging &&
     isContentItem() &&
-    (isComponentPalette() || isPagePalette() || isFunctionPalette()) &&
+    (isComponentPalette() ||
+      isPagePalette() ||
+      isFunctionPalette() ||
+      isEmailTemplatePalette()) &&
     (isHovered() || isPreviewOpen());
 
   return (
@@ -354,6 +367,9 @@ export function ComponentPaletteTreeItem(
               return;
             }
             if (isFunctionPalette() && isContentItem()) {
+              handleFunctionOpen();
+            }
+            if (isEmailTemplatePalette() && isContentItem()) {
               handleFunctionOpen();
             }
           }}
@@ -449,7 +465,10 @@ export function ComponentPaletteTreeItem(
               </Show>
               <Show
                 when={
-                  isComponentPalette() || isPagePalette() || isFunctionPalette()
+                  isComponentPalette() ||
+                  isPagePalette() ||
+                  isFunctionPalette() ||
+                  isEmailTemplatePalette()
                 }
               >
                 <IconButton
@@ -457,7 +476,7 @@ export function ComponentPaletteTreeItem(
                   icon="ph:arrow-square-out"
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (isFunctionPalette()) {
+                    if (isFunctionPalette() || isEmailTemplatePalette()) {
                       handleFunctionOpen();
                     } else {
                       openInNewTab();
