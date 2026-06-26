@@ -11,6 +11,14 @@ export function TreeItemExpandButton(
     toggleExpand: (itemId: Id) => void;
   }>,
 ) {
+  // Finger taps fire pointerup then a synthetic click; skip the duplicate toggle.
+  let handledByTouch = false;
+
+  const handleToggle = (e: Event) => {
+    e.stopPropagation();
+    props.toggleExpand(props.metaVertexId);
+  };
+
   return (
     <Show when={props.hasChildren}>
       <IconButton
@@ -22,11 +30,31 @@ export function TreeItemExpandButton(
           background-color: transparent;
           border: none;
           color: currentColor;
+          /* Skip double-tap zoom delay on touch devices. */
+          touch-action: manipulation;
         }\`;`}
         noCenter
         onClick={(e) => {
+          if (handledByTouch) {
+            handledByTouch = false;
+            e.stopPropagation();
+            return;
+          }
+          handleToggle(e);
+        }}
+        onPointerDown={(e) => {
+          // Keep parent row drag/hover handlers from consuming the first touch.
           e.stopPropagation();
-          props.toggleExpand(props.metaVertexId);
+        }}
+        onPointerUp={(e) => {
+          // Coarse pointers (finger) need an immediate toggle; click alone
+          // waits for a second tap when parent rows use hover styles.
+          if (e.pointerType !== "touch" || e.button !== 0) {
+            return;
+          }
+          e.preventDefault();
+          handledByTouch = true;
+          handleToggle(e);
         }}
         size="1em"
       />

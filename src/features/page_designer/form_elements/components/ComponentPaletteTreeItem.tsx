@@ -56,6 +56,7 @@ import {
   isPaletteContent,
   isPaletteRootCategory,
 } from "./componentPaletteUtils";
+import { canHover } from "~/lib/event/canHover";
 import { ComponentPreview } from "./ComponentPreview";
 
 export function ComponentPaletteTreeItem(
@@ -349,10 +350,13 @@ export function ComponentPaletteTreeItem(
           as="div"
           css={getItemStyle()}
           onMouseEnter={() => {
+            // Touch devices synthesize mouseenter on first tap; skip hover there.
+            if (!canHover()) return;
             setIsHovered(true);
             setIsMouseOverItem(true);
           }}
           onMouseLeave={() => {
+            if (!canHover()) return;
             setIsMouseOverItem(false);
             if (!isPreviewOpen()) setIsHovered(false);
           }}

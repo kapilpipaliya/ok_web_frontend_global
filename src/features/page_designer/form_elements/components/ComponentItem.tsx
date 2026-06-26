@@ -24,6 +24,7 @@ import {
 import type { Id } from "~/lib/graph/type/id";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
+import { canHover } from "~/lib/event/canHover";
 import { ComponentPreview } from "./ComponentPreview";
 
 export function ComponentItem(
@@ -51,11 +52,14 @@ export function ComponentItem(
   );
 
   const handleItemMouseEnter = () => {
+    // Touch devices synthesize mouseenter on first tap; skip hover there.
+    if (!canHover()) return;
     setIsHovered(true);
     setIsMouseOverItem(true);
   };
 
   const handleItemMouseLeave = () => {
+    if (!canHover()) return;
     setIsMouseOverItem(false);
     // Only change hover state if preview is not open
     if (!isPreviewOpen()) {
