@@ -32,6 +32,7 @@ export const buttonStyle = `return \`._id {
   cursor: pointer;
   color: \${args.theme.var.color.text};
   opacity: 0.7;
+  touch-action: manipulation;
   transition: opacity 0.2s ease;
   
   &:hover {

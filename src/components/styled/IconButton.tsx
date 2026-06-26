@@ -1,6 +1,7 @@
 import { Icon } from "@iconify-icon/solid";
 import { type JSX, Show, splitProps } from "solid-js";
 
+import { createTapClickHandler } from "~/lib/event/rowPointer";
 import { STYLES } from "~/pages/settings/constants";
 import { As } from "../As";
 import { TooltipWrapper } from "./modal/TooltipWrapper";
@@ -29,7 +30,7 @@ export type IconButtonProps = {
 );
 
 export function IconButton(props: Readonly<IconButtonProps>): JSX.Element {
-  const [local, others] = splitProps(props, [
+  const [local, rest] = splitProps(props, [
     "icon",
     "class",
     "iconCss",
@@ -40,7 +41,36 @@ export function IconButton(props: Readonly<IconButtonProps>): JSX.Element {
     "title",
     "tooltipGroup",
     "css",
+    "onClick",
+    "onPointerDown",
+    "onPointerUp",
   ]);
+
+  const tap =
+    local.onClick && !props.href
+      ? createTapClickHandler((event) => {
+          if (typeof local.onClick === "function") {
+            local.onClick(event as MouseEvent);
+          }
+        })
+      : null;
+
+  const triggerProps = {
+    ...rest,
+    onClick: tap?.onClick ?? local.onClick,
+    onPointerDown: (event: PointerEvent) => {
+      tap?.onPointerDown(event);
+      if (typeof local.onPointerDown === "function") {
+        local.onPointerDown(event);
+      }
+    },
+    onPointerUp: (event: PointerEvent) => {
+      tap?.onPointerUp(event);
+      if (typeof local.onPointerUp === "function") {
+        local.onPointerUp(event);
+      }
+    },
+  };
 
   const ButtonContent = () => (
     <>
@@ -69,7 +99,7 @@ export function IconButton(props: Readonly<IconButtonProps>): JSX.Element {
             ...ensureArray(local.css),
           ]}
           type="button"
-          {...(others as JSX.ButtonHTMLAttributes<HTMLButtonElement>)}
+          {...(triggerProps as JSX.ButtonHTMLAttributes<HTMLButtonElement>)}
         >
           <ButtonContent />
         </As>
@@ -84,7 +114,7 @@ export function IconButton(props: Readonly<IconButtonProps>): JSX.Element {
         ]}
         href={props.href!}
         target={props.target}
-        {...(others as JSX.AnchorHTMLAttributes<HTMLAnchorElement>)}
+        {...(triggerProps as JSX.AnchorHTMLAttributes<HTMLAnchorElement>)}
       >
         <ButtonContent />
       </As>
@@ -102,7 +132,7 @@ export function IconButton(props: Readonly<IconButtonProps>): JSX.Element {
           ...ensureArray(local.css),
           local.noCenter ? "" : STYLES.iconButtonCss,
         ]}
-        {...others}
+        {...(triggerProps as JSX.ButtonHTMLAttributes<HTMLButtonElement>)}
       >
         <ButtonContent />
       </TooltipWrapper>

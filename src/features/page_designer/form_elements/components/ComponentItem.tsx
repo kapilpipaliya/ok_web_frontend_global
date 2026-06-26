@@ -24,11 +24,12 @@ import {
 import type { Id } from "~/lib/graph/type/id";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
-import { isFinePointer } from "~/lib/event/isFinePointer";
 import {
+  actionPointerProps,
+  createDelayedFineHover,
   isTouchRevealedRow,
   revealTouchRow,
-} from "~/lib/event/touchRevealedRow";
+} from "~/lib/event/rowPointer";
 import { ComponentPreview } from "./ComponentPreview";
 
 export function ComponentItem(
@@ -48,7 +49,18 @@ export function ComponentItem(
   const [isPreviewOpen, setIsPreviewOpen] = createSignal(false);
   const [isMouseOverItem, setIsMouseOverItem] = createSignal(false);
 
-  const rowActionsVisible = () =>
+  const hover = createDelayedFineHover(
+    () => {
+      setIsHovered(true);
+      setIsMouseOverItem(true);
+    },
+    () => {
+      setIsMouseOverItem(false);
+      if (!isPreviewOpen()) setIsHovered(false);
+    },
+  );
+
+  const showActions = () =>
     isHovered() || isTouchRevealedRow(props.child.id);
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStoreVertex = () =>
@@ -58,40 +70,14 @@ export function ComponentItem(
     new Set<Vertex>(),
   );
 
-  const handleItemPointerEnter = (e: PointerEvent) => {
-    if (!isFinePointer(e)) return;
-    setIsHovered(true);
-    setIsMouseOverItem(true);
-  };
-
-  const handleItemPointerLeave = (e: PointerEvent) => {
-    // Finger lift fires pointerleave; touch-revealed state is kept globally.
-    if (!isFinePointer(e)) return;
-    setIsMouseOverItem(false);
-    if (!isPreviewOpen()) {
-      setIsHovered(false);
-    }
-  };
-  /* Preview logic
-    When the mouse enters the item, we set isHovered to true
-    When the mouse enters the eye button, we start a timer to show the preview
-    When the preview shows, isPreviewOpen is set to true
-    As long as either isHovered or isPreviewOpen is true, the buttons remain visible
-    When the preview closes, we use a short timeout to reset the hover state if needed
-  */
   const handlePreviewOpen = () => {
     setIsPreviewOpen(true);
-    // Ensure item stays in hovered state
     setIsHovered(true);
   };
 
   const handlePreviewClose = () => {
     setIsPreviewOpen(false);
-
-    // Only reset hover state if mouse is not over the item
-    if (!isMouseOverItem()) {
-      setIsHovered(false);
-    }
+    if (!isMouseOverItem()) setIsHovered(false);
   };
 
   const getItemStyle = () => {
@@ -126,6 +112,7 @@ export function ComponentItem(
 
   onCleanup(() => {
     cleanupDragDropRef(itemRef());
+    hover.cleanup();
   });
 
   const children = createMemo(() =>
@@ -147,7 +134,7 @@ export function ComponentItem(
   };
 
   // Should show buttons if item is hovered or preview is open
-  const shouldShowButtons = () => rowActionsVisible() || isPreviewOpen();
+  const shouldShowButtons = () => showActions() || isPreviewOpen();
 
   return (
     <>
@@ -162,8 +149,8 @@ export function ComponentItem(
             revealTouchRow(props.child.id);
           }
         }}
-        onPointerEnter={handleItemPointerEnter}
-        onPointerLeave={handleItemPointerLeave}
+        onPointerEnter={hover.onPointerEnter}
+        onPointerLeave={hover.onPointerLeave}
         ref={(element) => {
           setItemRef(element);
           bindPaletteDrag(element);
@@ -209,6 +196,8 @@ export function ComponentItem(
           <As
             as="div"
             css={"return `._id {margin-left: auto; display: flex;}`;"}
+            data-palette-actions=""
+            {...actionPointerProps(hover.keepVisible)}
           >
             <ComponentPreview
               item={props.child}

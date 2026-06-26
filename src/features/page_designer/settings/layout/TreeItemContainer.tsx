@@ -17,6 +17,10 @@ export interface TreeItemContainerProps {
   onClick?: JSX.EventHandlerUnion<HTMLDivElement, MouseEvent>;
   onMouseEnter?: JSX.EventHandlerUnion<HTMLDivElement, MouseEvent>;
   onmouseleave?: JSX.EventHandlerUnion<HTMLDivElement, MouseEvent>;
+  onPointerDown?: JSX.EventHandlerUnion<HTMLDivElement, PointerEvent>;
+  onPointerEnter?: JSX.EventHandlerUnion<HTMLDivElement, PointerEvent>;
+  onPointerLeave?: JSX.EventHandlerUnion<HTMLDivElement, PointerEvent>;
+  onPointerUp?: JSX.EventHandlerUnion<HTMLDivElement, PointerEvent>;
   ref?: (element: HTMLDivElement) => void;
   tabIndex?: number;
 }

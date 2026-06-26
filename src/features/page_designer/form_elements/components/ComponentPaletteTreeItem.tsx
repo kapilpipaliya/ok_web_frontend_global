@@ -56,11 +56,12 @@ import {
   isPaletteContent,
   isPaletteRootCategory,
 } from "./componentPaletteUtils";
-import { isFinePointer } from "~/lib/event/isFinePointer";
 import {
+  actionPointerProps,
+  createDelayedFineHover,
   isTouchRevealedRow,
   revealTouchRow,
-} from "~/lib/event/touchRevealedRow";
+} from "~/lib/event/rowPointer";
 import { ComponentPreview } from "./ComponentPreview";
 
 export function ComponentPaletteTreeItem(
@@ -104,7 +105,18 @@ export function ComponentPaletteTreeItem(
   const [isPreviewOpen, setIsPreviewOpen] = createSignal(false);
   const [isMouseOverItem, setIsMouseOverItem] = createSignal(false);
 
-  const rowActionsVisible = () =>
+  const hover = createDelayedFineHover(
+    () => {
+      setIsHovered(true);
+      setIsMouseOverItem(true);
+    },
+    () => {
+      setIsMouseOverItem(false);
+      if (!isPreviewOpen()) setIsHovered(false);
+    },
+  );
+
+  const showActions = () =>
     isHovered() || isTouchRevealedRow(props.item.id);
 
   const paletteConfig = () => props.config;
@@ -226,7 +238,7 @@ export function ComponentPaletteTreeItem(
     if (isSelected()) {
       boxShadow +=
         " background-color:${args.theme.var.color.primary_light_300}; color:${args.theme.var.color.primary_light_300_text};";
-    } else if (rowActionsVisible()) {
+    } else if (showActions()) {
       boxShadow +=
         " background-color:${args.theme.var.color.primary_light_750}; color:${args.theme.var.color.primary_light_750_text};";
     } else if (isNegative(props.item.id)) {
@@ -261,6 +273,7 @@ export function ComponentPaletteTreeItem(
 
   onCleanup(() => {
     cleanupDragDropRef(itemRef());
+    hover.cleanup();
   });
 
   createEffect(() => {
@@ -341,7 +354,7 @@ export function ComponentPaletteTreeItem(
       isPagePalette() ||
       isFunctionPalette() ||
       isEmailTemplatePalette()) &&
-    (rowActionsVisible() || isPreviewOpen());
+    (showActions() || isPreviewOpen());
 
   return (
     <Show when={shouldShowItem()}>
@@ -357,17 +370,8 @@ export function ComponentPaletteTreeItem(
           as="div"
           css={getItemStyle()}
           data-palette-row=""
-          onPointerEnter={(e) => {
-            if (!isFinePointer(e)) return;
-            setIsHovered(true);
-            setIsMouseOverItem(true);
-          }}
-          onPointerLeave={(e) => {
-            // Finger lift fires pointerleave; touch-revealed state is kept globally.
-            if (!isFinePointer(e)) return;
-            setIsMouseOverItem(false);
-            if (!isPreviewOpen()) setIsHovered(false);
-          }}
+          onPointerEnter={hover.onPointerEnter}
+          onPointerLeave={hover.onPointerLeave}
           onPointerDown={(e) => {
             if (e.pointerType === "touch") {
               revealTouchRow(props.item.id);
@@ -443,10 +447,11 @@ export function ComponentPaletteTreeItem(
                 {contentCount() ?? ""}
               </As>
             </Show>
-            <Show when={canManageCategory() && rowActionsVisible()}>
+            <Show when={canManageCategory() && showActions()}>
               <As
                 as="span"
                 css={"return `._id { display: flex; gap: 2px; }`;"}
+                {...actionPointerProps(hover.keepVisible)}
                 onClick={(e) => e.stopPropagation()}
               >
                 <IconButton
@@ -472,6 +477,12 @@ export function ComponentPaletteTreeItem(
               </As>
             </Show>
             <Show when={shouldShowButtons()}>
+              <As
+                as="span"
+                css={"return `._id { display: inline-flex; align-items: center; gap: 2px; }`;"}
+                data-palette-actions=""
+                {...actionPointerProps(hover.keepVisible)}
+              >
               <Show when={isComponentPalette() || isPagePalette()}>
                 <ComponentPreview
                   disabled={props.isPaletteDragging}
@@ -503,6 +514,7 @@ export function ComponentPaletteTreeItem(
                   title="Open in new tab"
                 />
               </Show>
+              </As>
             </Show>
           </As>
         </As>

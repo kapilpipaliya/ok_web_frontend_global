@@ -15,7 +15,7 @@ import { As } from "~/components/As";
 import type { Id } from "~/lib/graph/type/id";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
-import { handlePaletteTouchBackground } from "~/lib/event/touchRevealedRow";
+import { handlePaletteTouchBackground } from "~/lib/event/rowPointer";
 
 export function ComponentList(props: {
   edgeName: string;

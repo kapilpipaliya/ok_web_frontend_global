@@ -21,6 +21,11 @@ import {
   bindDragDropRef,
   cleanupDragDropRef,
 } from "~/features/page_designer/functions/drag_drop/pragmatic/bindDragDropRef";
+import {
+  actionPointerProps,
+  createDelayedFineHover,
+  createRowTapSelect,
+} from "~/lib/event/rowPointer";
 import { saveUndoPoint } from "~/lib/graph/transaction/steps/saveUndoPoint";
 import {
   createOpenInNewTab,
@@ -177,6 +182,7 @@ export function LayoutTreeItem(
 
   onCleanup(() => {
     cleanupDragDropRef(parentRef());
+    hover.cleanup();
   });
 
   const handleClick = () => {
@@ -191,27 +197,29 @@ export function LayoutTreeItem(
     );
   };
 
-  const handleMouseOver = (e: MouseEvent) => {
-    e.stopPropagation();
-    mergeVertexProperties<FormStoreObject>(0, formStoreId!, graph, setGraph, {
-      hoverId: props.metaVertex.id,
-    });
-    setLayoutPreviewHover(
-      layoutStoreId,
-      props.metaVertex.id,
-      graph,
-      setGraph,
-      "layoutTree",
-    );
-  };
+  const rowTapSelect = createRowTapSelect(handleClick);
 
-  const handleMouseLeave = (e: MouseEvent) => {
-    e.stopPropagation();
-    mergeVertexProperties<FormStoreObject>(0, formStoreId!, graph, setGraph, {
-      hoverId: -1,
-    });
-    clearLayoutPreviewHover(layoutStoreId, graph, setGraph);
-  };
+  const hover = createDelayedFineHover(
+    () => {
+      mergeVertexProperties<FormStoreObject>(0, formStoreId!, graph, setGraph, {
+        hoverId: props.metaVertex.id,
+      });
+      setLayoutPreviewHover(
+        layoutStoreId,
+        props.metaVertex.id,
+        graph,
+        setGraph,
+        "layoutTree",
+      );
+    },
+    () => {
+      mergeVertexProperties<FormStoreObject>(0, formStoreId!, graph, setGraph, {
+        hoverId: -1,
+      });
+      clearLayoutPreviewHover(layoutStoreId, graph, setGraph);
+    },
+    150,
+  );
 
   const getBorder = createMemo(() => {
     if (!isActiveTargetItem()) {
@@ -531,9 +539,17 @@ export function LayoutTreeItem(
         isHovered={isHovered}
         isSelected={() => isSelectedLayoutId(props.metaVertex.id)}
         itemId={props.metaVertex.id}
-        onClick={handleClick}
-        onMouseEnter={handleMouseOver}
-        onmouseleave={handleMouseLeave}
+        onClick={rowTapSelect.handleClick}
+        onPointerDown={rowTapSelect.handlePointerDown}
+        onPointerEnter={(e) => {
+          e.stopPropagation();
+          hover.onPointerEnter(e);
+        }}
+        onPointerLeave={(e) => {
+          e.stopPropagation();
+          hover.onPointerLeave(e);
+        }}
+        onPointerUp={rowTapSelect.handlePointerUp}
         ref={(element) => {
           setParentRef(element);
           bindLayoutDragDrop(element);
@@ -581,52 +597,56 @@ export function LayoutTreeItem(
             metaVertex={props.metaVertex}
           />
         </Show>
-        <Show when={isSelectedHoverId(props.metaVertex.id) || isNodeHidden()}>
-          <HideShowIcon iconSize={20} metaVertex={props.metaVertex} />
-        </Show>
-        <Show when={isSelectedHoverId(props.metaVertex.id) || showJsonEditor()}>
-          <IconButton
-            css={[
-              ICON_BUTTON_STYLES.baseCss,
-              ICON_BUTTON_STYLES.defaultCss,
-              ICON_BUTTON_STYLES.spacingCss,
-              `return \`._id {
+        <As
+          as="span"
+          css={"return `._id { display: contents; }`;"}
+          data-row-actions=""
+          {...actionPointerProps(hover.keepVisible)}
+        >
+          <Show when={isSelectedHoverId(props.metaVertex.id) || isNodeHidden()}>
+            <HideShowIcon iconSize={20} metaVertex={props.metaVertex} />
+          </Show>
+          <Show when={isSelectedHoverId(props.metaVertex.id) || showJsonEditor()}>
+            <IconButton
+              css={[
+                ICON_BUTTON_STYLES.baseCss,
+                ICON_BUTTON_STYLES.defaultCss,
+                ICON_BUTTON_STYLES.spacingCss,
+                `return \`._id {
                 background-color: transparent;
                 border: none;
                 ${showJsonEditor() ? "color: ${args.theme.var.color.primary};" : ""}
               }\`;`,
-            ]}
-            icon="tabler:json"
-            size={16}
-            onClick={toggleJsonEditor}
-            title={showJsonEditor() ? "Hide JSON editor" : "Show JSON editor"}
+              ]}
+              icon="tabler:json"
+              size={16}
+              onClick={toggleJsonEditor}
+              title={showJsonEditor() ? "Hide JSON editor" : "Show JSON editor"}
+            />
+          </Show>
+          <Show
+            when={
+              isSelectedHoverId(props.metaVertex.id) &&
+              props.metaVertex.L &&
+              !(props.metaVertex.P.componentName in componentsMap)
+            }
+          >
+            <IconButton
+              css={buttonStyle}
+              icon="ph:arrow-square-out"
+              onClick={(e) => {
+                e.stopPropagation();
+                openInNewTab();
+              }}
+              size={18}
+              title="Open in new tab"
+            />
+          </Show>
+          <AttrConfigIcons
+            metaVertex={props.metaVertex}
+            parentRef={parentRef()!}
           />
-        </Show>
-        <Show
-          when={
-            isSelectedHoverId(props.metaVertex.id) &&
-            props.metaVertex.L &&
-            !(props.metaVertex.P.componentName in componentsMap)
-          }
-        >
-          <IconButton
-            css={buttonStyle}
-            icon="ph:arrow-square-out"
-            onClick={(e) => {
-              e.stopPropagation();
-              openInNewTab();
-            }}
-            size={18}
-            title="Open in new tab"
-          />
-        </Show>
-        {/* <Show when={formStoreVertex()?.P.formDataId !== props.metaVertex.id}> */}
-        <AttrConfigIcons
-          metaVertex={props.metaVertex}
-          parentRef={parentRef()!}
-        />
-        {/* {getLayerTestId()} */}
-        {/* </Show> */}
+        </As>
       </TreeItemContainer>
       <Show when={showJsonEditor()}>
         <As
