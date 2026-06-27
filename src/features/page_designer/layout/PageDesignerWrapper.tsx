@@ -109,7 +109,7 @@ export function PageDesignerWrapper(): JSX.Element {
     {
       ...initialStore,
       [`mainPanel${initialStore.mainPanel[0]}Tab`]: formId,
-      formId,
+      focusedFormId: formId,
       mainFormId: formId,
       openedFormIds: [newOpenVertex.id],
     },
@@ -242,7 +242,7 @@ export function PageDesignerWrapper(): JSX.Element {
       {
         openedFormIds,
         [`mainPanel${initialStore.mainPanel[0]}Tab`]: activeFormId,
-        formId: activeFormId,
+        focusedFormId: activeFormId,
       },
     );
 
@@ -295,14 +295,10 @@ export function PageDesignerWrapper(): JSX.Element {
       isLayoutTreeOpen: layoutVertex.P.isLayoutTreeOpen,
       isPropertiesOpen: layoutVertex.P.isPropertiesOpen,
       isSettingsOpen: layoutVertex.P.isSettingsOpen,
-      isPropertiesCollapsed: layoutVertex.P.isPropertiesCollapsed,
       componentsWidth: layoutVertex.P.componentsWidth,
       pagesWidth: layoutVertex.P.pagesWidth,
       functionsWidth: layoutVertex.P.functionsWidth,
       aiWidth: layoutVertex.P.aiWidth,
-      layoutTreeWidth: layoutVertex.P.layoutTreeWidth,
-      propertiesWidth: layoutVertex.P.propertiesWidth,
-      propertiesExpandedWidth: layoutVertex.P.propertiesExpandedWidth,
       settingsWidth: layoutVertex.P.settingsWidth,
       // Note: this does not work because we use uuidv7 for the mainPanel ids
       ...layoutVertex.P.mainPanel.reduce(

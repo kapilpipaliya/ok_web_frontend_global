@@ -1,22 +1,18 @@
-import { type Component, createSignal, For, Show } from "solid-js";
-import { Icon } from "@iconify-icon/solid";
-
-import type { FormStoreObject } from "~/components/form/context/FormContext";
+import { createSignal, For, Show } from "solid-js";
 
 import { ResizeOverlay } from "~/components/styled/ResizeOverlay";
-import { IconButton } from "~/components/styled/IconButton";
-import {
-  useDesignerFormIdContext,
-  useDesignerLayoutStore,
-} from "~/features/page_designer/context/LayoutContext";
+import { useDesignerLayoutStore } from "~/features/page_designer/context/LayoutContext";
 import { SettingTabs } from "~/features/page_designer/settings/SettingTabs";
-import { LayoutTreePanel } from "~/features/page_designer/settings/LayoutTreePanel";
 import { GraphView } from "~/pages/debug/GraphView";
 import { STYLES } from "~/pages/settings/constants";
 
 import type { PageLayoutObject } from "../context/LayoutContext";
 
 import { UseObjectAIPanel } from "../chat/use-object/UseObjectAIPanel";
+import {
+  createPanelResizeHandler,
+  DesignerPanel,
+} from "./DesignerPanel";
 import { HeaderRow } from "../header/header_row/HeaderRow";
 import { DeleteConfirmation } from "./main_content/DeleteConfirmation";
 import { UnsavedTabSaveReminder } from "./UnsavedTabSaveReminder";
@@ -26,258 +22,15 @@ import {
   PagesPanelContent,
 } from "./main_content/FormElements";
 import { PageViewComponent } from "./main_content/PageViewComponent";
-import { PropertiesContent } from "./main_content/PropertiesContent";
 import { TabBar } from "./main_content/TabBar";
 import { As } from "~/components/As";
-import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
-import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
-
-interface ResizeHandleProps {
-  activeResizeKey: null | string;
-  isHorizontal?: boolean;
-  isResizing: boolean;
-  onPointerDown: (e: PointerEvent) => void;
-  position: "bottom" | "left" | "right" | "top";
-  resizeKey: string;
-}
-
-const ResizeHandle: Component<ResizeHandleProps> = (props) => {
-  const isHorizontal = props.isHorizontal ?? true;
-  const [isHovered, setIsHovered] = createSignal(false);
-
-  return (
-    <As
-      as="div"
-      css={`return \`._id {
-        width: ${isHorizontal ? "3px" : "100%"};
-        height: ${isHorizontal ? "100%" : "3px"};
-        cursor: ${isHorizontal ? "col-resize" : "row-resize"};
-        background-color: ${isHovered() || (props.isResizing && props.resizeKey === props.activeResizeKey) ? "${args.theme.var.color.text_light_300}" : "transparent"};
-        transition: background-color 0.2s;
-        height: 100%;
-      }}\`;`}
-      onMouseEnter={() => !props.isResizing && setIsHovered(true)}
-      onMouseLeave={() => !props.isResizing && setIsHovered(false)}
-      onPointerDown={props.onPointerDown}
-    />
-  );
-};
-
-interface PanelProps {
-  activeResizeKey: null | string;
-  children: any;
-  collapsed?: boolean;
-  isResizing: boolean;
-  onExpand?: () => void;
-  onResize?: (e: PointerEvent) => void;
-  onResizeLeft?: (e: PointerEvent) => void;
-  onResizeRight?: (e: PointerEvent) => void;
-  onToggleCollapse?: () => void;
-  ref?: (el: HTMLDivElement) => void;
-  resizeKey?: string;
-  resizeKeyLeft?: string;
-  resizeKeyRight?: string;
-  resizePosition?: "bottom" | "left" | "right" | "top";
-  scrollContent?: boolean;
-  style?: any;
-  title?: string;
-  titleIcon?: string;
-}
-
-const Panel: Component<PanelProps> = (props) => {
-  const leftResizeHandler = () =>
-    props.collapsed
-      ? undefined
-      : (props.onResizeLeft ??
-        (props.onResize && props.resizePosition === "left"
-          ? props.onResize
-          : undefined));
-
-  const rightResizeHandler = () =>
-    props.collapsed
-      ? undefined
-      : (props.onResizeRight ??
-        (props.onResize &&
-        props.resizePosition !== "left" &&
-        props.resizePosition !== "top"
-          ? props.onResize
-          : undefined));
-
-  const gridTemplateColumns = () => {
-    const hasLeft = !!leftResizeHandler();
-    const hasRight = !!rightResizeHandler();
-    if (hasLeft && hasRight) {
-      return "3px 1fr 3px";
-    }
-    if (hasLeft) {
-      return "3px 1fr";
-    }
-    if (hasRight) {
-      return "1fr 3px";
-    }
-    return "1fr";
-  };
-
-  const Content = () => {
-    return (
-      <Show
-        fallback={
-          <As
-            as="div"
-            css={
-              props.scrollContent === false
-                ? `return \`._id {
-                    min-height: 0;
-                    height: 100%;
-                    overflow: hidden;
-                  }\`;`
-                : [
-                    STYLES.overflowCss,
-                    "return `._id { min-height: 0; min-width: 0; }`;",
-                  ]
-            }
-          >
-            {props.children}
-          </As>
-        }
-        when={props.title}
-      >
-        <As
-          as="div"
-          css={`return \`._id {
-          display: grid;
-          grid-template-rows: auto 1fr;
-          height: 100%;
-        }}\`;`}
-        >
-          <As
-            as="div"
-            css={`return \`._id {
-            background: \${args.theme.var.color.background_light_100};
-            border-bottom: 1px solid \${args.theme.var.color.border};
-            padding: 4px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            min-height: 1rem;
-            cursor: ${props.collapsed ? "pointer" : "default"};
-            overflow: hidden;
-          }}\`;`}
-            onClick={() => {
-              if (props.collapsed) {
-                props.onExpand?.();
-              }
-            }}
-          >
-            <Show
-              fallback={
-                <As
-                  as="span"
-                  css={`return \`._id {
-                    writing-mode: vertical-rl;
-                    transform: rotate(180deg);
-                    font-weight: 600;
-                    font-size: inherit;
-                    white-space: nowrap;
-                    user-select: none;
-                  }\`;`}
-                >
-                  {props.title}
-                </As>
-              }
-              when={!props.collapsed}
-            >
-              <Show when={props.titleIcon}>
-                <Icon icon={props.titleIcon!} />
-              </Show>
-              <As
-                as="h1"
-                css={
-                  "return `._id { font-weight: 600; font-size: inherit; flex: 1; margin: 0; }`;"
-                }
-              >
-                {props.title}
-              </As>
-              <Show when={props.onToggleCollapse}>
-                <IconButton
-                  icon="ph:caret-left"
-                  onClick={(e: MouseEvent) => {
-                    e.stopPropagation();
-                    props.onToggleCollapse?.();
-                  }}
-                  size={18}
-                  title="Collapse panel"
-                />
-              </Show>
-            </Show>
-          </As>
-          <Show when={!props.collapsed}>
-            <As
-              as="div"
-              css={[
-                STYLES.overflowCss,
-                "return `._id { min-height: 0; min-width: 0; }`;",
-              ]}
-            >
-              {props.children}
-            </As>
-          </Show>
-        </As>
-      </Show>
-    );
-  };
-
-  return (
-    <As
-      as="div"
-      css={[
-        `return \`._id {
-          border: 1px solid \${args.theme.var.color.border};
-          display: grid;
-          grid-template-columns: ${gridTemplateColumns()};
-          grid-template-rows: ${props.resizePosition === "top" ? "3px 1fr" : "100%"};
-          height: 100%;
-          min-width: 0;
-          overflow: hidden;
-        }\`;`,
-      ]}
-      ref={props.ref}
-      style={props.style}
-    >
-      <div style={{ display: leftResizeHandler() ? "block" : "none" }}>
-        <ResizeHandle
-          activeResizeKey={props.activeResizeKey}
-          isHorizontal={props.resizePosition !== "top"}
-          isResizing={props.isResizing}
-          onPointerDown={leftResizeHandler()!}
-          position="left"
-          resizeKey={props.resizeKeyLeft || props.resizeKey || ""}
-        />
-      </div>
-      <Content />
-      <div style={{ display: rightResizeHandler() ? "block" : "none" }}>
-        <ResizeHandle
-          activeResizeKey={props.activeResizeKey}
-          isHorizontal={props.resizePosition !== "top"}
-          isResizing={props.isResizing}
-          onPointerDown={rightResizeHandler()!}
-          position="right"
-          resizeKey={props.resizeKeyRight || props.resizeKey || ""}
-        />
-      </div>
-    </As>
-  );
-};
 
 export function RenderMainContent() {
   const [graph, setGraph] = useGraph();
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStore = () =>
     (graph.vertexes[layoutStoreId]?.P as PageLayoutObject) || {};
-  const formStoreId = useDesignerFormIdContext();
-  const _formStoreVertex = () =>
-    graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   const getGridTemplateColumns = () => {
     const layout = layoutStore();
@@ -299,23 +52,15 @@ export function RenderMainContent() {
       columns.push(`${layout.functionsWidth}px`);
     }
 
-    if (layout.isLayoutTreeOpen) {
-      columns.push(`${layout.layoutTreeWidth}px`);
-    }
-
-    if (layout.isPropertiesOpen) {
-      columns.push(
-        layout.isPropertiesCollapsed ? "1rem" : `${layout.propertiesWidth}px`,
-      );
-    }
-
     if (layout.isAiOpen) {
       columns.push(`${layout.aiWidth}px`);
     }
 
     if (layout.mainPanel) {
       const mainPanelColumns = layout.mainPanel.map((panel) => {
-        const width = layout[`mainPanel${panel}Width`];
+        const width = (layout as Record<string, unknown>)[
+          `mainPanel${panel}Width`
+        ];
         return typeof width === "number" ? `${width}px` : "minmax(400px, 1fr)";
       });
       columns.push(...mainPanelColumns);
@@ -328,16 +73,12 @@ export function RenderMainContent() {
   const [activeResizeKey, setActiveResizeKey] = createSignal<null | string>(
     null,
   );
-  const [layoutTreePanelRef, setLayoutTreePanelRef] =
-    createSignal<HTMLDivElement>();
   const [componentsPanelRef, setComponentsPanelRef] =
     createSignal<HTMLDivElement>();
   const [pagesPanelRef, setPagesPanelRef] = createSignal<HTMLDivElement>();
   const [functionsPanelRef, setFunctionsPanelRef] =
     createSignal<HTMLDivElement>();
   const [aiPanelRef, setAiPanelRef] = createSignal<HTMLDivElement>();
-  const [propertiesPanelRef, setPropertiesPanelRef] =
-    createSignal<HTMLDivElement>();
   const [settingsPanelRef, setSettingsPanelRef] =
     createSignal<HTMLDivElement>();
   const [mainPanelRefs, setMainPanelRefs] = createSignal<{
@@ -346,115 +87,33 @@ export function RenderMainContent() {
 
   const [showGraphView, setShowGraphView] = createSignal(false);
 
-  const createResizeHandler =
-    (
-      key:
-        | "bottomHeight"
-        | "componentsWidth"
-        | "pagesWidth"
-        | "functionsWidth"
-        | "aiWidth"
-        | "layoutTreeWidth"
-        | "propertiesWidth"
-        | "settingsWidth"
-        | `mainPanel${string}Width`,
-      panelRef: () => HTMLDivElement | undefined,
-      isHorizontal: boolean,
-      growOnDragRight = key === "componentsWidth" ||
-        key === "pagesWidth" ||
-        key === "functionsWidth" ||
-        key.startsWith("mainPanel"),
-    ) =>
-    (e: PointerEvent) => {
-      e.preventDefault();
-      setIsResizing(true);
-      setActiveResizeKey(key);
-      const startPos = isHorizontal ? e.pageX : e.pageY;
-      const panel = panelRef();
-      if (!panel) {
-        return;
-      }
-
-      const startWidth = panel.getBoundingClientRect().width;
-      const pointerId = e.pointerId;
-
-      const onPointerMove = (e: PointerEvent) => {
-        if (e.pointerId !== pointerId) {
-          return;
-        }
-        const currentPos = isHorizontal ? e.pageX : e.pageY;
-        const diff = currentPos - startPos;
-
-        const newWidth = Math.max(
-          100,
-          startWidth + (growOnDragRight ? diff : -diff),
-        );
-
-        mergeVertexProperties<PageLayoutObject>(
-          0,
-          layoutStoreId,
-          graph,
-          setGraph,
-          {
-            [key]: newWidth,
-          },
-        );
-      };
-
-      const onPointerUp = (e: PointerEvent) => {
-        if (e.pointerId !== pointerId) {
-          return;
-        }
-        setIsResizing(false);
-        setActiveResizeKey(null);
-        document.removeEventListener("pointermove", onPointerMove);
-        document.removeEventListener("pointerup", onPointerUp);
-        document.removeEventListener("pointercancel", onPointerUp);
-      };
-
-      panel.setPointerCapture(pointerId);
-      document.addEventListener("pointermove", onPointerMove);
-      document.addEventListener("pointerup", onPointerUp);
-      document.addEventListener("pointercancel", onPointerUp);
-    };
-
-  const togglePropertiesCollapse = () => {
-    const layout = layoutStore();
-    if (layout.isPropertiesCollapsed) {
-      mergeVertexProperties<PageLayoutObject>(
-        0,
-        layoutStoreId,
-        graph,
-        setGraph,
-        {
-          isPropertiesCollapsed: false,
-          propertiesWidth: layout.propertiesExpandedWidth,
-        },
-      );
-    } else {
-      mergeVertexProperties<PageLayoutObject>(
-        0,
-        layoutStoreId,
-        graph,
-        setGraph,
-        {
-          isPropertiesCollapsed: true,
-          propertiesExpandedWidth: layout.propertiesWidth,
-        },
-      );
-    }
-  };
-
-  const expandProperties = () => {
-    const layout = layoutStore();
-    if (!layout.isPropertiesCollapsed) {
-      return;
-    }
-    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
-      isPropertiesCollapsed: false,
-      propertiesWidth: layout.propertiesExpandedWidth,
-    });
-  };
+  const createResizeHandler = (
+    key:
+      | "componentsWidth"
+      | "pagesWidth"
+      | "functionsWidth"
+      | "aiWidth"
+      | "settingsWidth"
+      | `mainPanel${string}Width`,
+    panelRef: () => HTMLDivElement | undefined,
+    growOnDragRight?: boolean,
+  ) =>
+    createPanelResizeHandler(
+      key,
+      layoutStoreId,
+      graph,
+      setGraph,
+      panelRef,
+      setIsResizing,
+      setActiveResizeKey,
+      growOnDragRight ??
+        (key === "componentsWidth" ||
+          key === "pagesWidth" ||
+          key === "functionsWidth" ||
+          key === "settingsWidth" ||
+          key === "aiWidth" ||
+          key.startsWith("mainPanel")),
+    );
 
   return (
     <As
@@ -500,13 +159,12 @@ export function RenderMainContent() {
             css={STYLES.panelCellCss}
             style={{ display: layoutStore().isSettingsOpen ? "block" : "none" }}
           >
-            <Panel
+            <DesignerPanel
               activeResizeKey={activeResizeKey()}
               isResizing={isResizing()}
               onResize={createResizeHandler(
                 "settingsWidth",
                 settingsPanelRef,
-                true,
                 true,
               )}
               ref={setSettingsPanelRef}
@@ -515,7 +173,7 @@ export function RenderMainContent() {
               title="Settings"
             >
               <SettingTabs />
-            </Panel>
+            </DesignerPanel>
           </As>
 
           <As
@@ -523,14 +181,10 @@ export function RenderMainContent() {
             css={STYLES.panelCellCss}
             style={{ display: layoutStore().isPagesOpen ? "block" : "none" }}
           >
-            <Panel
+            <DesignerPanel
               activeResizeKey={activeResizeKey()}
               isResizing={isResizing()}
-              onResize={createResizeHandler(
-                "pagesWidth",
-                pagesPanelRef,
-                true,
-              )}
+              onResize={createResizeHandler("pagesWidth", pagesPanelRef)}
               ref={setPagesPanelRef}
               resizeKey="pagesWidth"
               resizePosition="right"
@@ -539,7 +193,7 @@ export function RenderMainContent() {
               titleIcon="ph:file-text"
             >
               <PagesPanelContent />
-            </Panel>
+            </DesignerPanel>
           </As>
 
           <As
@@ -549,13 +203,12 @@ export function RenderMainContent() {
               display: layoutStore().isComponentsOpen ? "block" : "none",
             }}
           >
-            <Panel
+            <DesignerPanel
               activeResizeKey={activeResizeKey()}
               isResizing={isResizing()}
               onResize={createResizeHandler(
                 "componentsWidth",
                 componentsPanelRef,
-                true,
               )}
               ref={setComponentsPanelRef}
               resizeKey="componentsWidth"
@@ -565,7 +218,7 @@ export function RenderMainContent() {
               titleIcon="ph:puzzle-piece"
             >
               <ComponentsPanelContent />
-            </Panel>
+            </DesignerPanel>
           </As>
 
           <As
@@ -575,13 +228,12 @@ export function RenderMainContent() {
               display: layoutStore().isFunctionsOpen ? "block" : "none",
             }}
           >
-            <Panel
+            <DesignerPanel
               activeResizeKey={activeResizeKey()}
               isResizing={isResizing()}
               onResize={createResizeHandler(
                 "functionsWidth",
                 functionsPanelRef,
-                true,
               )}
               ref={setFunctionsPanelRef}
               resizeKey="functionsWidth"
@@ -591,61 +243,7 @@ export function RenderMainContent() {
               titleIcon="ph:function"
             >
               <FunctionsPanelContent />
-            </Panel>
-          </As>
-
-          <As
-            as="div"
-            css={STYLES.panelCellCss}
-            style={{
-              display: layoutStore().isLayoutTreeOpen ? "block" : "none",
-            }}
-          >
-            <Panel
-              activeResizeKey={activeResizeKey()}
-              isResizing={isResizing()}
-              onResize={createResizeHandler(
-                "layoutTreeWidth",
-                layoutTreePanelRef,
-                true,
-                true,
-              )}
-              ref={setLayoutTreePanelRef}
-              resizeKey="layoutTreeWidth"
-              resizePosition="right"
-              title="Layout Tree"
-              titleIcon="tabler:layout-2"
-            >
-              <LayoutTreePanel />
-            </Panel>
-          </As>
-
-          <As
-            as="div"
-            css={STYLES.panelCellCss}
-            style={{
-              display: layoutStore().isPropertiesOpen ? "block" : "none",
-            }}
-          >
-            <Panel
-              activeResizeKey={activeResizeKey()}
-              collapsed={layoutStore().isPropertiesCollapsed}
-              isResizing={isResizing()}
-              onExpand={expandProperties}
-              onResize={createResizeHandler(
-                "propertiesWidth",
-                propertiesPanelRef,
-                true,
-                true,
-              )}
-              onToggleCollapse={togglePropertiesCollapse}
-              ref={setPropertiesPanelRef}
-              resizeKey="propertiesWidth"
-              resizePosition="right"
-              title="Properties"
-            >
-              <PropertiesContent />
-            </Panel>
+            </DesignerPanel>
           </As>
 
           <As
@@ -653,38 +251,36 @@ export function RenderMainContent() {
             css={STYLES.panelCellCss}
             style={{ display: layoutStore().isAiOpen ? "block" : "none" }}
           >
-            <Panel
+            <DesignerPanel
               activeResizeKey={activeResizeKey()}
               isResizing={isResizing()}
-              onResize={createResizeHandler("aiWidth", aiPanelRef, true, true)}
+              onResize={createResizeHandler("aiWidth", aiPanelRef, true)}
               ref={setAiPanelRef}
               resizeKey="aiWidth"
               resizePosition="right"
               title="AI Content Generator"
             >
               <UseObjectAIPanel />
-            </Panel>
+            </DesignerPanel>
           </As>
 
           <For each={layoutStore().mainPanel}>
             {(mainPanel) => (
               <As as="div" css={STYLES.panelCellCss}>
-                <Panel
+                <DesignerPanel
                   activeResizeKey={activeResizeKey()}
                   isResizing={isResizing()}
                   onResizeLeft={createResizeHandler(
                     `mainPanel${mainPanel}Width` as `mainPanel${string}Width`,
                     () => mainPanelRefs()[`mainPanel${mainPanel}`],
-                    true,
                     false,
                   )}
                   onResizeRight={createResizeHandler(
                     `mainPanel${mainPanel}Width` as `mainPanel${string}Width`,
                     () => mainPanelRefs()[`mainPanel${mainPanel}`],
                     true,
-                    true,
                   )}
-                  ref={(el) =>
+                  ref={(el: HTMLDivElement) =>
                     setMainPanelRefs((prev) => ({
                       ...prev,
                       [`mainPanel${mainPanel}`]: el,
@@ -719,7 +315,7 @@ export function RenderMainContent() {
                       <PageViewComponent mainPanel={mainPanel} />
                     </As>
                   </As>
-                </Panel>
+                </DesignerPanel>
               </As>
             )}
           </For>

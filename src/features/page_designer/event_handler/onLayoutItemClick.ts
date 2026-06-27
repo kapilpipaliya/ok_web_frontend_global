@@ -25,8 +25,8 @@ export function onLayoutItemClick(
 ) {
   batch(() => {
     const layoutUpdates: Partial<PageLayoutObject> = {};
-    if (layoutStoreVertex.P.formId !== formStoreVertex.id) {
-      layoutUpdates.formId = formStoreVertex.id;
+    if (layoutStoreVertex.P.focusedFormId !== formStoreVertex.id) {
+      layoutUpdates.focusedFormId = formStoreVertex.id;
     }
     if (scrollSource) {
       layoutUpdates.layoutTreeScrollSource = scrollSource;

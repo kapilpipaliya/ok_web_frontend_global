@@ -25,54 +25,63 @@ export function openInNewInternalTab(
     return;
   }
   const label = Array.isArray(child.L) ? child.L[0] : child.L;
+  const childId = child.id;
 
-  // Check if form with same label and dataId already exists
-  const exists =
-    child.id !== "new" &&
-    layoutStore.openedFormIds.some((formId) => {
-      const form = graph.vertexes[formId].P as OpenFormInfo;
-      return form.label === label && form.dataId === child.id;
-    });
-
-  if (exists) {
-    // Find the existing form and activate it
-    const openFormId = layoutStore.openedFormIds.find((formId) => {
-      const form = graph.vertexes[formId].P as OpenFormInfo;
-      return form.label === label && form.dataId === child.id;
-    });
-    if (openFormId) {
-      const existingForm = graph.vertexes[openFormId].P as OpenFormInfo;
-      mergeVertexProperties(0, layoutStoreId, graph, setGraph, {
-        [`mainPanel${existingForm.mainPanel}Tab`]: existingForm.formId,
-        formId: existingForm.formId,
-      });
+  let existingOpenFormId: Id | undefined;
+  if (childId !== "new") {
+    for (const openedFormId of layoutStore.openedFormIds) {
+      const form = graph.vertexes[openedFormId].P as OpenFormInfo;
+      if (form.label === label && form.dataId === childId) {
+        existingOpenFormId = openedFormId;
+        break;
+      }
     }
-  } else {
-    const formId = uuidv7();
-    const newOpenVertex = newVertex<OpenFormInfo>(uuidv7(), ["OpenForm"], {
-      dataId: child.id,
-      formDataId: child.P.formDataId,
-      formId,
-      label,
-      mainPanel: layoutStore.mainPanel[0],
-      parentId: child.P.parentId,
-      txnId: child.P.txnId,
-    });
-    addNewVertex(0, newOpenVertex, graph, setGraph);
-
-    // Note: cloneProperties is false because we don't want to clone the properties of the form. It cause re-render of the form.
-    mergeVertexProperties<PageLayoutObject>(
-      0,
-      layoutStoreId,
-      graph,
-      setGraph,
-      {
-        openedFormIds: [...layoutStore.openedFormIds, newOpenVertex.id],
-        // Activate the newly created tab
-        [`mainPanel${layoutStore.mainPanel[0]}Tab`]: newOpenVertex.P.formId,
-        formId: newOpenVertex.P.formId,
-      },
-      { cloneProperties: false },
-    );
   }
+
+  if (existingOpenFormId) {
+    const existingForm = graph.vertexes[existingOpenFormId].P as OpenFormInfo;
+    mergeVertexProperties(0, layoutStoreId, graph, setGraph, {
+      [`mainPanel${existingForm.mainPanel}Tab`]: existingForm.formId,
+      focusedFormId: existingForm.formId,
+    });
+    return;
+  }
+
+  let targetMainPanel = layoutStore.mainPanel[0];
+  if (layoutStore.focusedFormId) {
+    for (const openedFormId of layoutStore.openedFormIds) {
+      const form = graph.vertexes[openedFormId]?.P as OpenFormInfo | undefined;
+      if (form?.formId === layoutStore.focusedFormId) {
+        targetMainPanel = form.mainPanel;
+        break;
+      }
+    }
+  }
+
+  const formId = uuidv7();
+  const newOpenVertex = newVertex<OpenFormInfo>(uuidv7(), ["OpenForm"], {
+    dataId: child.id,
+    formDataId: child.P.formDataId,
+    formId,
+    label,
+    mainPanel: targetMainPanel,
+    parentId: child.P.parentId,
+    txnId: child.P.txnId,
+  });
+  addNewVertex(0, newOpenVertex, graph, setGraph);
+
+  // Note: cloneProperties is false because we don't want to clone the properties of the form. It cause re-render of the form.
+  mergeVertexProperties<PageLayoutObject>(
+    0,
+    layoutStoreId,
+    graph,
+    setGraph,
+    {
+      openedFormIds: [...layoutStore.openedFormIds, newOpenVertex.id],
+      // Activate the newly created tab in the focused tab's panel
+      [`mainPanel${targetMainPanel}Tab`]: newOpenVertex.P.formId,
+      focusedFormId: newOpenVertex.P.formId,
+    },
+    { cloneProperties: false },
+  );
 }

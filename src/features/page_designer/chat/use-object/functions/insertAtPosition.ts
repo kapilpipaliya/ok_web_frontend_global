@@ -23,15 +23,15 @@ export function insertAtPosition(
 ) {
   if (
     !fromStoreVertex ||
-    layoutStoreVertex()?.P.formId === fromStoreVertex.P.formId ||
-    !layoutStoreVertex()?.P.formId
+    layoutStoreVertex()?.P.focusedFormId === fromStoreVertex.P.formId ||
+    !layoutStoreVertex()?.P.focusedFormId
   ) {
     console.warn("cannot insert at position");
     return;
   }
 
   const toStoreVertex = graph.vertexes[
-    layoutStoreVertex().P.formId!
+    layoutStoreVertex().P.focusedFormId!
   ] as Vertex<FormStoreObject>;
   if (!(toStoreVertex && graph.vertexes[toStoreVertex.P.selectedId!])) {
     console.warn("cannot insert at position");

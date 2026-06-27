@@ -170,7 +170,7 @@ export function FormConfig() {
         {(openedFormId) => {
           const label = () => graph.vertexes[openedFormId]?.P?.label as string;
           const isActive = () =>
-            layoutStore().formId === graph.vertexes[openedFormId].P.formId;
+            layoutStore().focusedFormId === graph.vertexes[openedFormId].P.formId;
           return (
             <div
               style={{

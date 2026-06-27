@@ -19,9 +19,10 @@ import { FormGroupProperties } from "./formgroup/FormGroupProperties";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
+import type { Id } from "~/lib/graph/type/id";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/entity/findVertex";
 
-export function PropertiesBody() {
+export function PropertiesBody(props: { openedFormId: Id }) {
   const [graph, setGraph] = useGraph();
 
   const formStoreId = useDesignerFormIdContext();
@@ -129,6 +130,7 @@ export function PropertiesBody() {
         <FormGroupProperties
           metaAttributes={selectedComponentProperties() ?? []}
           onChange={setPropertyValue}
+          openedFormId={props.openedFormId}
           selectedLayout={selectedAttr()}
           txnId={formStoreVertex()?.P.txnId}
         />

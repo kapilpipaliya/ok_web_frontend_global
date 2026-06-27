@@ -43,11 +43,7 @@ export function getInitialLayoutSettings() {
     pagesWidth: INITIAL_WIDTHS.pages,
     functionsWidth: INITIAL_WIDTHS.functions,
     aiWidth: INITIAL_WIDTHS.ai,
-    layoutTreeWidth: INITIAL_WIDTHS.layoutTree,
-    propertiesWidth: INITIAL_WIDTHS.properties,
     settingsWidth: INITIAL_WIDTHS.settings,
-    isPropertiesCollapsed: false,
-    propertiesExpandedWidth: INITIAL_WIDTHS.properties,
   };
 }
 
@@ -60,7 +56,7 @@ export function getInitialDesignerLayoutStore() {
     bottomHeight: INITIAL_WIDTHS.bottom,
     copiedItem: null as Vertex | null,
     draggedTab: null as Id | null,
-    formId: null as Id | null,
+    focusedFormId: null as Id | null,
     id: uuidv7(),
     ...getInitialLayoutSettings(),
     isSmallScreen: false,

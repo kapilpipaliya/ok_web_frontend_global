@@ -108,8 +108,8 @@ function ComponentPreviewItem(props: {
   }
 }\`;`}
             disabled={
-              props.layoutStoreVertex()?.P.formId === formId ||
-              !props.layoutStoreVertex()?.P.formId
+              props.layoutStoreVertex()?.P.focusedFormId === formId ||
+              !props.layoutStoreVertex()?.P.focusedFormId
             }
             icon="ph:plus-circle"
             onClick={() =>
@@ -278,10 +278,10 @@ export function Preview(props: {
   }
 }\`;`}
                 disabled={
-                  layoutStoreVertex()?.P.formId === formId ||
-                  !layoutStoreVertex()?.P.formId ||
+                  layoutStoreVertex()?.P.focusedFormId === formId ||
+                  !layoutStoreVertex()?.P.focusedFormId ||
                   !graph.vertexes[
-                    graph.vertexes[layoutStoreVertex()?.P.formId]?.P
+                    graph.vertexes[layoutStoreVertex()?.P.focusedFormId ?? ""]?.P
                       ?.selectedId || ""
                   ]
                 }

@@ -31,11 +31,11 @@ export function SettingTabs() {
     (graph.vertexes[layoutStoreId].P as PageLayoutObject) ?? {};
 
   const formStoreVertex = () =>
-    graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+    graph.vertexes[layoutStore().focusedFormId!] as Vertex<FormStoreObject>;
 
   // Active form is Function when the open tab's label is "Function" (so we hide attributes)
   const isActiveFormFunction = () => {
-    const formId = layoutStore().formId;
+    const formId = layoutStore().focusedFormId;
     if (!formId) return false;
     const openFormId = layoutStore().openedFormIds?.find(
       (id) => graph.vertexes[id]?.P?.formId === formId,

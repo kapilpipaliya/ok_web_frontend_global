@@ -3,6 +3,7 @@ import type { SetStoreFunction } from "solid-js/store";
 import { createContext, useContext } from "solid-js";
 
 import { InitialPermissions } from "~/features/page_attr_render/InitialPermissions";
+import { INITIAL_WIDTHS } from "~/features/page_designer/context/LayoutContext";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 import type { Id } from "~/lib/graph/type/id";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
@@ -38,6 +39,10 @@ export function getInitialFormStore(
     usedAttrsInNameKeys: [] as Array<Id | number>,
     usedAttrsInUniqueConstraints: [] as Array<Id | number>,
     lastAddedViewId: null as Id | null,
+    layoutTreeWidth: INITIAL_WIDTHS.layoutTree,
+    propertiesWidth: INITIAL_WIDTHS.properties,
+    isPropertiesCollapsed: false,
+    propertiesExpandedWidth: INITIAL_WIDTHS.properties,
   };
 }
 

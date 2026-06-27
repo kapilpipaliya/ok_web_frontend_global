@@ -27,7 +27,7 @@ export function resetDragDropState(
         dragPosition: null,
       },
     );
-    const formId = layoutStoreVertex.P.formId;
+    const formId = layoutStoreVertex.P.focusedFormId;
     if (formId) {
       mergeVertexProperties<FormStoreObject>(0, formId, graph, setGraph, {
         hoverId: -1,

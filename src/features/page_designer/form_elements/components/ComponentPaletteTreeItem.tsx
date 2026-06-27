@@ -129,7 +129,7 @@ export function ComponentPaletteTreeItem(
     paletteConfig().tableVertexLabel === "EmailTemplate";
 
   const formStoreVertex = () => {
-    const formId = layoutStoreVertex()?.P.formId;
+    const formId = layoutStoreVertex()?.P.focusedFormId;
     return formId
       ? (graph.vertexes[formId] as Vertex<FormStoreObject>)
       : undefined;

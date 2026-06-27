@@ -10,30 +10,22 @@ import { useGraph } from "~/lib/graph/context/UseGraph";
 
 import {
   DesignerFormIdContext,
-  type PageLayoutObject,
   useDesignerLayoutStore,
 } from "../context/LayoutContext";
 import { LayoutTree } from "./layout/LayoutTree";
+import type { Id } from "~/lib/graph/type/id";
 
-export function LayoutTreePanel() {
-  const layoutStoreId = useDesignerLayoutStore();
+export function LayoutTreePanel(props: { openedFormId: Id }) {
   const [graph] = useGraph();
 
-  const layoutStore = () =>
-    (graph.vertexes[layoutStoreId].P as PageLayoutObject) ?? {};
-
+  const formStoreId = () => graph.vertexes[props.openedFormId]?.P?.formId as Id;
   const formStoreVertex = () =>
-    graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+    graph.vertexes[formStoreId()] as Vertex<FormStoreObject>;
 
   const isActiveFormFunction = () => {
-    const formId = layoutStore().formId;
-    if (!formId) return false;
-    const openFormId = layoutStore().openedFormIds?.find(
-      (id) => graph.vertexes[id]?.P?.formId === formId,
-    );
-    const label = openFormId
-      ? (graph.vertexes[openFormId]?.P?.label as string)
-      : graph.vertexes[formStoreVertex()?.P?.formDataId]?.L?.[0];
+    const label = graph.vertexes[props.openedFormId]?.P?.label as
+      | string
+      | undefined;
     return label === "Function";
   };
 

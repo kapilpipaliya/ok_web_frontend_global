@@ -13,15 +13,18 @@ import {
 } from "../../context/LayoutContext";
 import { getPropertiesAttrId } from "../../functions/layout/layoutHoverState";
 import type { Vertex } from "~/lib/graph/type/vertex";
+import type { Id } from "~/lib/graph/type/id";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 
-export function PropertiesContent() {
+export function PropertiesContent(props: { openedFormId: Id }) {
   const [graph] = useGraph();
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStore = () =>
     (graph.vertexes[layoutStoreId]?.P as PageLayoutObject) || {};
+  const formStoreId = () =>
+    graph.vertexes[props.openedFormId]?.P?.formId as Id;
   const formStoreVertex = () =>
-    graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+    graph.vertexes[formStoreId()] as Vertex<FormStoreObject>;
   return (
     <Show keyed when={formStoreVertex()?.id}>
       <Show
@@ -34,7 +37,7 @@ export function PropertiesContent() {
       >
         <DesignerFormIdContext.Provider value={formStoreVertex().id}>
           <FormContext.Provider value={formStoreVertex().id}>
-            <PropertiesBody />
+            <PropertiesBody openedFormId={props.openedFormId} />
           </FormContext.Provider>
         </DesignerFormIdContext.Provider>
       </Show>

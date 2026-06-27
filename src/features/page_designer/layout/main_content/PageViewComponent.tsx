@@ -12,6 +12,7 @@ import {
 } from "../../context/LayoutContext";
 import { FunctionEditor } from "../../settings/properties/FunctionEditor";
 import { IFramePreview } from "../IFramePreview";
+import { MainPanelInnerGrid } from "./MainPanelInnerGrid";
 import { PageTabBar } from "./PageTabBar";
 import { As } from "~/components/As";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
@@ -192,9 +193,10 @@ export function PageViewComponent(props: { mainPanel: Id }) {
   });
 
   return (
-    <As
-      as="div"
-      css={`return \`._id {
+    <MainPanelInnerGrid mainPanel={props.mainPanel}>
+      <As
+        as="div"
+        css={`return \`._id {
   display: flex;
   gap: 8px;
   flex-wrap: nowrap;
@@ -202,7 +204,7 @@ export function PageViewComponent(props: { mainPanel: Id }) {
   min-height: 0;
   align-items: stretch;
 }\`;`}
-    >
+      >
       <For
         each={layoutStore().openedFormIds.filter(
           (id) => graph.vertexes[id].P.mainPanel === props.mainPanel,
@@ -327,6 +329,7 @@ export function PageViewComponent(props: { mainPanel: Id }) {
           );
         }}
       </For>
-    </As>
+      </As>
+    </MainPanelInnerGrid>
   );
 }

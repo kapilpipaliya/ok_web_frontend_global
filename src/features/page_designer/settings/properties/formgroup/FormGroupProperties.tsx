@@ -27,9 +27,7 @@ import { PROPERTIES } from "~/pages/settings/constants";
 import { evalExpression } from "~/lib/expression_eval";
 
 import {
-  type PageLayoutObject,
   useDesignerFormIdContext,
-  useDesignerLayoutStore,
 } from "../../../context/LayoutContext";
 import { ValidationConfig } from "../validations/ValidationConfig";
 import { HighlightSetValueContent } from "./HighlightSetValueContent";
@@ -44,10 +42,12 @@ import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVerte
 import { newVertex } from "~/lib/graph/mutate/core/vertex/newVertex";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
+import type { Id } from "~/lib/graph/type/id";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 
 interface FormGroupPropertiesProps {
   metaAttributes: Vertex[];
+  openedFormId: Id;
   selectedLayout: Vertex;
   txnId: number;
 
@@ -58,6 +58,7 @@ interface PropertyFieldProps {
   meta: Vertex;
   metaTxnId: number;
   onChange: (meta: Vertex, data: unknown) => void;
+  openedFormId: Id;
   selectedLayout: Vertex;
   txnId: number;
 }
@@ -135,6 +136,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
             meta={meta}
             metaTxnId={metaTxnId}
             onChange={props.onChange}
+            openedFormId={props.openedFormId}
             selectedLayout={props.selectedLayout}
             txnId={props.txnId}
           />
@@ -481,13 +483,11 @@ function getMetaVertexes(
 
 function PropertyField(props: Readonly<PropertyFieldProps>) {
   const [graph, setGraph] = useGraph();
-  const layoutStoreId = useDesignerLayoutStore();
 
-  const layoutStore = () =>
-    (graph.vertexes[layoutStoreId].P as PageLayoutObject) ?? {};
-
+  const formStoreId = () =>
+    graph.vertexes[props.openedFormId]?.P?.formId as Id;
   const formStoreVertex = () =>
-    graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+    graph.vertexes[formStoreId()] as Vertex<FormStoreObject>;
 
   const metaProps = getPropsFromMetaExpression(
     graph,

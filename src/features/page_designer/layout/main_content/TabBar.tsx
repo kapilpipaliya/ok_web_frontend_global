@@ -162,7 +162,7 @@ export function TabBar(props: { mainPanel: Id }) {
     const isActiveTab =
       layoutStoreValue[key] === graph.vertexes[openedFormId].P.formId;
     const isCurrentForm =
-      layoutStore().formId === graph.vertexes[openedFormId].P.formId;
+      layoutStore().focusedFormId === graph.vertexes[openedFormId].P.formId;
 
     return `return \`._id {
       align-items: center;
@@ -191,7 +191,7 @@ export function TabBar(props: { mainPanel: Id }) {
       setGraph,
       {
         [`mainPanel${props.mainPanel}Tab`]: prevFormId,
-        formId: prevFormId,
+        focusedFormId: prevFormId,
         openedFormIds: layoutStore().openedFormIds.filter(
           (f) => f !== openedFormId,
         ),
@@ -204,7 +204,7 @@ export function TabBar(props: { mainPanel: Id }) {
   const handleTabClick = (formId: string) => {
     mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
       [`mainPanel${props.mainPanel}Tab`]: formId,
-      formId,
+      focusedFormId: formId,
     });
   };
 
