@@ -7,6 +7,7 @@ import { IconButton } from "~/components/styled/IconButton";
 import { createViewVertex } from "~/lib/graph/mutate/vertex/createViewVertex";
 
 import {
+  getMainPanelRow,
   type PageLayoutObject,
   useDesignerLayoutStore,
 } from "../../context/LayoutContext";
@@ -211,8 +212,20 @@ export function TabBar(props: { mainPanel: Id }) {
   const isUnsaved = (formId: string) => isFormUnsaved(graph, formId);
 
   const addMainPanel = () => {
+    const rowIndex = getMainPanelRow(
+      layoutStore().mainPanelRows,
+      props.mainPanel,
+    );
+    if (rowIndex === undefined) {
+      return;
+    }
+    const newId = uuidv7();
+    const rows = layoutStore().mainPanelRows.map((row, i) =>
+      i === rowIndex ? [...row, newId] : [...row],
+    ) as PageLayoutObject["mainPanelRows"];
     mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
-      mainPanel: [...layoutStore().mainPanel, uuidv7()],
+      mainPanelRows: rows,
+      [`mainPanel${newId}Tab` as `mainPanel${string}Tab`]: null,
     });
   };
 
@@ -250,6 +263,48 @@ export function TabBar(props: { mainPanel: Id }) {
         [`mainPanel${toPanelId}Tab`]: movedFormId,
       });
     });
+  };
+
+  const canClosePanel = () => {
+    const rowIndex = getMainPanelRow(
+      layoutStore().mainPanelRows,
+      props.mainPanel,
+    );
+    if (rowIndex === undefined) {
+      return false;
+    }
+    return layoutStore().mainPanelRows[rowIndex].length > 1;
+  };
+
+  const closeMainPanel = () => {
+    const rowIndex = getMainPanelRow(
+      layoutStore().mainPanelRows,
+      props.mainPanel,
+    );
+    if (rowIndex === undefined) {
+      return;
+    }
+    const row = layoutStore().mainPanelRows[rowIndex];
+    if (row.length <= 1) {
+      return;
+    }
+
+    const panelIndex = row.indexOf(props.mainPanel);
+    const targetPanelId = row[panelIndex - 1] || row[panelIndex + 1];
+
+    moveFormsToPanel(props.mainPanel, targetPanelId);
+
+    const mainPanelRows = layoutStore().mainPanelRows.map((r, i) =>
+      i === rowIndex ? r.filter((id) => id !== props.mainPanel) : [...r],
+    ) as PageLayoutObject["mainPanelRows"];
+
+    mergeVertexProperties<PageLayoutObject>(
+      0,
+      layoutStoreId,
+      graph,
+      setGraph,
+      { mainPanelRows },
+    );
   };
 
   const moveFormsToPanel = (fromPanelId: Id, toPanelId: Id) => {
@@ -340,7 +395,7 @@ export function TabBar(props: { mainPanel: Id }) {
           )}
         </For>
       </As>
-      <Show when={layoutStore().mainPanel.length > 1}>
+      <Show when={canClosePanel()}>
         <IconButton
           css={`return \`._id {
   margin-left: auto;
@@ -352,26 +407,7 @@ export function TabBar(props: { mainPanel: Id }) {
   }
 }\`;`}
           icon="ph:x-circle"
-          onClick={() => {
-            const panelIndex = layoutStore().mainPanel.indexOf(props.mainPanel);
-            const previousPanelId = layoutStore().mainPanel[panelIndex - 1];
-            const nextPanelId = layoutStore().mainPanel[panelIndex + 1];
-            const targetPanelId = previousPanelId || nextPanelId;
-
-            moveFormsToPanel(props.mainPanel, targetPanelId);
-
-            mergeVertexProperties<PageLayoutObject>(
-              0,
-              layoutStoreId,
-              graph,
-              setGraph,
-              {
-                mainPanel: layoutStore().mainPanel.filter(
-                  (id) => id !== props.mainPanel,
-                ),
-              },
-            );
-          }}
+          onClick={closeMainPanel}
           size={22}
           title="Close Panel"
         />

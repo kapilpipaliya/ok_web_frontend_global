@@ -7,9 +7,12 @@ import { GraphView } from "~/pages/debug/GraphView";
 import { STYLES } from "~/pages/settings/constants";
 
 import type { PageLayoutObject } from "../context/LayoutContext";
+import { MIN_MAIN_PANEL_ROW_HEIGHT } from "../context/LayoutContext";
 
 import { UseObjectAIPanel } from "../chat/use-object/UseObjectAIPanel";
 import {
+  createMainPanelRowWidthResizeHandler,
+  createPanelRowHeightResizeHandler,
   createPanelResizeHandler,
   DesignerPanel,
 } from "./DesignerPanel";
@@ -25,6 +28,7 @@ import { PageViewComponent } from "./main_content/PageViewComponent";
 import { TabBar } from "./main_content/TabBar";
 import { As } from "~/components/As";
 import { useGraph } from "~/lib/graph/context/UseGraph";
+import type { Id } from "~/lib/graph/type/id";
 
 export function RenderMainContent() {
   const [graph, setGraph] = useGraph();
@@ -32,7 +36,7 @@ export function RenderMainContent() {
   const layoutStore = () =>
     (graph.vertexes[layoutStoreId]?.P as PageLayoutObject) || {};
 
-  const getGridTemplateColumns = () => {
+  const getSidebarGridTemplateColumns = () => {
     const layout = layoutStore();
     const columns: string[] = [];
 
@@ -56,17 +60,38 @@ export function RenderMainContent() {
       columns.push(`${layout.aiWidth}px`);
     }
 
-    if (layout.mainPanel) {
-      const mainPanelColumns = layout.mainPanel.map((panel) => {
-        const width = (layout as Record<string, unknown>)[
-          `mainPanel${panel}Width`
-        ];
-        return typeof width === "number" ? `${width}px` : "minmax(400px, 1fr)";
-      });
-      columns.push(...mainPanelColumns);
-    }
-
+    columns.push("minmax(0, 1fr)");
     return columns.join(" ");
+  };
+
+  const getRowGridColumns = (rowIndex: 0 | 1) => {
+    const layout = layoutStore();
+    const panels = layout.mainPanelRows[rowIndex];
+    const rowWidth = (layout as Record<string, unknown>)[
+      `mainPanelRow${rowIndex}Width`
+    ];
+    if (typeof rowWidth === "number") {
+      return panels.map(() => `${rowWidth}px`).join(" ");
+    }
+    return panels.map(() => "1fr").join(" ");
+  };
+
+  const getRowInnerGridCss = (rowIndex: 0 | 1) => {
+    const rowWidth = (layoutStore() as Record<string, unknown>)[
+      `mainPanelRow${rowIndex}Width`
+    ];
+    if (typeof rowWidth === "number") {
+      return "width: max-content; min-width: 100%;";
+    }
+    return "width: 100%; min-width: 0;";
+  };
+
+  const getMainRowsTemplate = () => {
+    const height = layoutStore().mainPanelRow0Height;
+    if (height) {
+      return `${height}px 3px 1fr`;
+    }
+    return "0.8fr 3px 1fr";
   };
 
   const [isResizing, setIsResizing] = createSignal(false);
@@ -85,7 +110,36 @@ export function RenderMainContent() {
     [key: string]: HTMLDivElement;
   }>({});
 
+  const [mainPanelRow0Ref, setMainPanelRow0Ref] =
+    createSignal<HTMLDivElement>();
   const [showGraphView, setShowGraphView] = createSignal(false);
+
+  const createRowWidthResizeHandler = (
+    rowIndex: 0 | 1,
+    panelRef: () => HTMLDivElement | undefined,
+    growOnDragRight?: boolean,
+  ) =>
+    createMainPanelRowWidthResizeHandler(
+      rowIndex,
+      layoutStoreId,
+      graph,
+      setGraph,
+      panelRef,
+      setIsResizing,
+      setActiveResizeKey,
+      growOnDragRight,
+    );
+
+  const handleRowHeightResize = createPanelRowHeightResizeHandler(
+    "mainPanelRow0Height",
+    layoutStoreId,
+    graph,
+    setGraph,
+    mainPanelRow0Ref,
+    setIsResizing,
+    setActiveResizeKey,
+    MIN_MAIN_PANEL_ROW_HEIGHT,
+  );
 
   const createResizeHandler = (
     key:
@@ -114,6 +168,33 @@ export function RenderMainContent() {
           key === "aiWidth" ||
           key.startsWith("mainPanel")),
     );
+
+  const renderMainPanelContent = (mainPanel: Id) => (
+    <As
+      as="div"
+      css={`return \`._id {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        min-height: 0;
+        overflow: hidden;
+      }\`;`}
+    >
+      <As as="div" css={"return `._id { flex-shrink: 0; }`;"}>
+        <TabBar mainPanel={mainPanel} />
+      </As>
+      <As
+        as="div"
+        css={`return \`._id {
+          flex: 1;
+          min-height: 0;
+          overflow: hidden;
+        }\`;`}
+      >
+        <PageViewComponent mainPanel={mainPanel} />
+      </As>
+    </As>
+  );
 
   return (
     <As
@@ -148,7 +229,7 @@ export function RenderMainContent() {
           as="div"
           css={`return \`._id {
           display: grid;
-          grid-template-columns: ${getGridTemplateColumns()};
+          grid-template-columns: ${getSidebarGridTemplateColumns()};
           width: max-content;
           min-width: 100%;
           height: 100%;
@@ -264,61 +345,140 @@ export function RenderMainContent() {
             </DesignerPanel>
           </As>
 
-          <For each={layoutStore().mainPanel}>
-            {(mainPanel) => (
-              <As as="div" css={STYLES.panelCellCss}>
-                <DesignerPanel
-                  activeResizeKey={activeResizeKey()}
-                  isResizing={isResizing()}
-                  onResizeLeft={createResizeHandler(
-                    `mainPanel${mainPanel}Width` as `mainPanel${string}Width`,
-                    () => mainPanelRefs()[`mainPanel${mainPanel}`],
-                    false,
-                  )}
-                  onResizeRight={createResizeHandler(
-                    `mainPanel${mainPanel}Width` as `mainPanel${string}Width`,
-                    () => mainPanelRefs()[`mainPanel${mainPanel}`],
-                    true,
-                  )}
-                  ref={(el: HTMLDivElement) =>
-                    setMainPanelRefs((prev) => ({
-                      ...prev,
-                      [`mainPanel${mainPanel}`]: el,
-                    }))
-                  }
-                  resizeKey={`mainPanel${mainPanel}Width`}
-                  resizeKeyLeft={`mainPanel${mainPanel}Width`}
-                  resizeKeyRight={`mainPanel${mainPanel}Width`}
-                  scrollContent={false}
-                >
-                  <As
-                    as="div"
-                    css={`return \`._id {
-                    display: flex;
-                    flex-direction: column;
+          <As
+            as="div"
+            css={`return \`._id {
+              display: grid;
+              grid-template-rows: ${getMainRowsTemplate()};
+              min-height: 0;
+              height: 100%;
+              width: max-content;
+              min-width: 100%;
+              overflow: hidden;
+            }\`;`}
+          >
+            <As
+              as="div"
+              css={`return \`._id {
+                min-height: 0;
+                overflow: hidden;
+              }\`;`}
+              ref={setMainPanelRow0Ref}
+            >
+              <As
+                as="div"
+                css={`return \`._id {
+                    display: grid;
+                    grid-template-columns: ${getRowGridColumns(0)};
                     height: 100%;
-                    min-height: 0;
-                    overflow: hidden;
+                    ${getRowInnerGridCss(0)}
                   }\`;`}
-                  >
-                    <As as="div" css={"return `._id { flex-shrink: 0; }`;"}>
-                      <TabBar mainPanel={mainPanel} />
-                    </As>
-                    <As
-                      as="div"
-                      css={`return \`._id {
-                      flex: 1;
-                      min-height: 0;
-                      overflow: hidden;
-                    }\`;`}
-                    >
-                      <PageViewComponent mainPanel={mainPanel} />
-                    </As>
-                  </As>
-                </DesignerPanel>
+              >
+                  <For each={layoutStore().mainPanelRows[0]}>
+                    {(mainPanel) => (
+                      <As as="div" css={STYLES.panelCellCss}>
+                        <DesignerPanel
+                          activeResizeKey={activeResizeKey()}
+                          isResizing={isResizing()}
+                          onResizeLeft={createRowWidthResizeHandler(
+                            0,
+                            () => mainPanelRefs()[`mainPanel${mainPanel}`],
+                            false,
+                          )}
+                          onResizeRight={createRowWidthResizeHandler(
+                            0,
+                            () => mainPanelRefs()[`mainPanel${mainPanel}`],
+                            true,
+                          )}
+                          ref={(el: HTMLDivElement) =>
+                            setMainPanelRefs((prev) => ({
+                              ...prev,
+                              [`mainPanel${mainPanel}`]: el,
+                            }))
+                          }
+                          resizeKey="mainPanelRow0Width"
+                          resizeKeyLeft="mainPanelRow0Width"
+                          resizeKeyRight="mainPanelRow0Width"
+                          scrollContent={false}
+                        >
+                          {renderMainPanelContent(mainPanel)}
+                        </DesignerPanel>
+                      </As>
+                    )}
+                  </For>
+                </As>
               </As>
-            )}
-          </For>
+
+              <As
+                as="div"
+                css={`return \`._id {
+                  height: 3px;
+                  flex-shrink: 0;
+                  cursor: row-resize;
+                  background-color: ${
+                    activeResizeKey() === "mainPanelRow0Height"
+                      ? "${args.theme.var.color.text_light_300}"
+                      : "transparent"
+                  };
+                  transition: background-color 0.2s;
+                  &:hover {
+                    background-color: \${args.theme.var.color.text_light_300};
+                  }
+                }\`;`}
+                onPointerDown={handleRowHeightResize}
+              />
+
+              <As
+                as="div"
+                css={`return \`._id {
+                  min-height: 0;
+                  overflow: hidden;
+                }\`;`}
+              >
+                <As
+                  as="div"
+                  css={`return \`._id {
+                    display: grid;
+                    grid-template-columns: ${getRowGridColumns(1)};
+                    height: 100%;
+                    ${getRowInnerGridCss(1)}
+                  }\`;`}
+                >
+                  <For each={layoutStore().mainPanelRows[1]}>
+                    {(mainPanel) => (
+                      <As as="div" css={STYLES.panelCellCss}>
+                        <DesignerPanel
+                          activeResizeKey={activeResizeKey()}
+                          isResizing={isResizing()}
+                          onResizeLeft={createRowWidthResizeHandler(
+                            1,
+                            () => mainPanelRefs()[`mainPanel${mainPanel}`],
+                            false,
+                          )}
+                          onResizeRight={createRowWidthResizeHandler(
+                            1,
+                            () => mainPanelRefs()[`mainPanel${mainPanel}`],
+                            true,
+                          )}
+                          ref={(el: HTMLDivElement) =>
+                            setMainPanelRefs((prev) => ({
+                              ...prev,
+                              [`mainPanel${mainPanel}`]: el,
+                            }))
+                          }
+                          resizeKey="mainPanelRow1Width"
+                          resizeKeyLeft="mainPanelRow1Width"
+                          resizeKeyRight="mainPanelRow1Width"
+                          scrollContent={false}
+                        >
+                          {renderMainPanelContent(mainPanel)}
+                        </DesignerPanel>
+                      </As>
+                    )}
+                  </For>
+                </As>
+              </As>
+          </As>
         </As>
       </As>
 

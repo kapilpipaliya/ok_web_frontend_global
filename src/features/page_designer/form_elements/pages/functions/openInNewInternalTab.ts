@@ -47,7 +47,7 @@ export function openInNewInternalTab(
     return;
   }
 
-  let targetMainPanel = layoutStore.mainPanel[0];
+  let targetMainPanel = layoutStore.mainPanelRows[0][0];
   if (layoutStore.focusedFormId) {
     for (const openedFormId of layoutStore.openedFormIds) {
       const form = graph.vertexes[openedFormId]?.P as OpenFormInfo | undefined;

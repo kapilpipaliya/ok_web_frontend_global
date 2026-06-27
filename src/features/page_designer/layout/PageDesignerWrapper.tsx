@@ -17,6 +17,8 @@ import { v7 as uuidv7 } from "uuid";
 import { ZIndex } from "~/components/fields/ZIndex";
 import {
   DesignerLayoutStoreContext,
+  getAllMainPanels,
+  cloneMainPanelRows,
   getInitialDesignerLayoutStore,
   type PageLayoutObject,
 } from "~/features/page_designer/context/LayoutContext";
@@ -95,11 +97,12 @@ export function PageDesignerWrapper(): JSX.Element {
     entity: params.entity || "",
     key: params.id || "",
   };
+  const initialMainPanel = initialStore.mainPanelRows[0][0];
   const newOpenVertex = newVertex(uuidv7(), ["OpenForm"], {
     dataId: firstTab.key,
     formId,
     label: firstTab.entity,
-    mainPanel: initialStore.mainPanel[0],
+    mainPanel: initialMainPanel,
   });
   addNewVertex(0, newOpenVertex, graph, setGraph);
 
@@ -108,7 +111,7 @@ export function PageDesignerWrapper(): JSX.Element {
     ["PageDesigner"],
     {
       ...initialStore,
-      [`mainPanel${initialStore.mainPanel[0]}Tab`]: formId,
+      [`mainPanel${initialMainPanel}Tab`]: formId,
       focusedFormId: formId,
       mainFormId: formId,
       openedFormIds: [newOpenVertex.id],
@@ -225,7 +228,7 @@ export function PageDesignerWrapper(): JSX.Element {
           dataId: actualId,
           formId: additionalFormId,
           label: tab.entity,
-          mainPanel: initialStore.mainPanel[0],
+          mainPanel: initialMainPanel,
         });
         addNewVertex(0, additionalOpenVertex, graph, setGraph);
         openedFormIds.push(additionalOpenVertex.id);
@@ -241,7 +244,7 @@ export function PageDesignerWrapper(): JSX.Element {
       setGraph,
       {
         openedFormIds,
-        [`mainPanel${initialStore.mainPanel[0]}Tab`]: activeFormId,
+        [`mainPanel${initialMainPanel}Tab`]: activeFormId,
         focusedFormId: activeFormId,
       },
     );
@@ -300,11 +303,17 @@ export function PageDesignerWrapper(): JSX.Element {
       functionsWidth: layoutVertex.P.functionsWidth,
       aiWidth: layoutVertex.P.aiWidth,
       settingsWidth: layoutVertex.P.settingsWidth,
+      mainPanelRows: cloneMainPanelRows(layoutVertex.P.mainPanelRows),
+      mainPanelRow0Height: layoutVertex.P.mainPanelRow0Height,
+      mainPanelRow0Width: layoutVertex.P.mainPanelRow0Width,
+      mainPanelRow1Width: layoutVertex.P.mainPanelRow1Width,
       // Note: this does not work because we use uuidv7 for the mainPanel ids
-      ...layoutVertex.P.mainPanel.reduce(
+      ...getAllMainPanels(layoutVertex.P.mainPanelRows).reduce(
         (acc, panel) => ({
           ...acc,
-          [`mainPanel${panel}Width`]: layoutVertex.P[`mainPanel${panel}Width`],
+          [`mainPanel${panel}Width`]: (
+            layoutVertex.P as Record<string, unknown>
+          )[`mainPanel${panel}Width`],
         }),
         {},
       ),

@@ -16,6 +16,34 @@ export interface OpenFormInfo {
 
 export type PageLayoutObject = ReturnType<typeof getInitialDesignerLayoutStore>;
 
+export type MainPanelRows = [Id[], Id[]];
+
+export const MAIN_PANEL_ROW_COUNT = 2;
+
+export function getAllMainPanels(rows: MainPanelRows): Id[] {
+  return [...rows[0], ...rows[1]];
+}
+
+export function getMainPanelRow(
+  rows: MainPanelRows,
+  panelId: Id,
+): 0 | 1 | undefined {
+  if (rows[0].includes(panelId)) {
+    return 0;
+  }
+  if (rows[1].includes(panelId)) {
+    return 1;
+  }
+}
+
+export function cloneMainPanelRows(rows: MainPanelRows): MainPanelRows {
+  return [[...rows[0]], [...rows[1]]];
+}
+
+const MIN_MAIN_PANEL_ROW_HEIGHT = 120;
+
+export { MIN_MAIN_PANEL_ROW_HEIGHT };
+
 /** Where the latest layout-tree highlight came from — controls auto-scroll in the layers panel. */
 export type LayoutTreeScrollSource = "preview" | "layoutTree";
 
@@ -48,10 +76,13 @@ export function getInitialLayoutSettings() {
 }
 
 export function getInitialDesignerLayoutStore() {
-  const mainPanel = uuidv7();
+  const row0Panel = uuidv7();
+  const row1Panel = uuidv7();
   return {
-    [`mainPanel${mainPanel}Tab` as `mainPanel${string}Tab`]: null as Id | null,
-    [`mainPanel${mainPanel}Width` as `mainPanel${string}Width`]: "1fr",
+    [`mainPanel${row0Panel}Tab` as `mainPanel${string}Tab`]: null as Id | null,
+    [`mainPanel${row0Panel}Width` as `mainPanel${string}Width`]: "1fr",
+    [`mainPanel${row1Panel}Tab` as `mainPanel${string}Tab`]: null as Id | null,
+    [`mainPanel${row1Panel}Width` as `mainPanel${string}Width`]: "1fr",
     activeItem: null as Id | null | number,
     bottomHeight: INITIAL_WIDTHS.bottom,
     copiedItem: null as Vertex | null,
@@ -61,7 +92,10 @@ export function getInitialDesignerLayoutStore() {
     ...getInitialLayoutSettings(),
     isSmallScreen: false,
     mainFormId: null as Id | null,
-    mainPanel: [mainPanel],
+    mainPanelRows: [[row0Panel], [row1Panel]] as MainPanelRows,
+    mainPanelRow0Height: null as number | null,
+    mainPanelRow0Width: null as number | null,
+    mainPanelRow1Width: null as number | null,
     openedFormIds: [] as Id[],
     dragPosition: null as
       | "after"

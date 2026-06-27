@@ -321,3 +321,125 @@ export function createPanelResizeHandler<T extends Record<string, unknown>>(
     document.addEventListener("pointercancel", onPointerUp);
   };
 }
+
+export function createPanelRowHeightResizeHandler<T extends Record<string, unknown>>(
+  key: "mainPanelRow0Height",
+  storeId: Id | (() => Id | undefined),
+  graph: GraphInterface,
+  setGraph: SetStoreFunction<GraphInterface>,
+  rowRef: () => HTMLDivElement | undefined,
+  setIsResizing: (value: boolean) => void,
+  setActiveResizeKey: (value: null | string) => void,
+  minHeight = 120,
+) {
+  return (e: PointerEvent) => {
+    e.preventDefault();
+    setIsResizing(true);
+    setActiveResizeKey(key);
+    const startPos = e.pageY;
+    const row = rowRef();
+    if (!row) {
+      return;
+    }
+
+    const startHeight = row.getBoundingClientRect().height;
+    const pointerId = e.pointerId;
+
+    const onPointerMove = (e: PointerEvent) => {
+      if (e.pointerId !== pointerId) {
+        return;
+      }
+      const resolvedStoreId =
+        typeof storeId === "function" ? storeId() : storeId;
+      if (!resolvedStoreId) {
+        return;
+      }
+      const diff = e.pageY - startPos;
+      const newHeight = Math.max(minHeight, startHeight + diff);
+
+      mergeVertexProperties<T>(0, resolvedStoreId, graph, setGraph, {
+        [key]: newHeight,
+      } as unknown as Partial<T>);
+    };
+
+    const onPointerUp = (e: PointerEvent) => {
+      if (e.pointerId !== pointerId) {
+        return;
+      }
+      setIsResizing(false);
+      setActiveResizeKey(null);
+      document.removeEventListener("pointermove", onPointerMove);
+      document.removeEventListener("pointerup", onPointerUp);
+      document.removeEventListener("pointercancel", onPointerUp);
+    };
+
+    row.setPointerCapture(pointerId);
+    document.addEventListener("pointermove", onPointerMove);
+    document.addEventListener("pointerup", onPointerUp);
+    document.addEventListener("pointercancel", onPointerUp);
+  };
+}
+
+export function createMainPanelRowWidthResizeHandler<
+  T extends Record<string, unknown>,
+>(
+  rowIndex: 0 | 1,
+  storeId: Id | (() => Id | undefined),
+  graph: GraphInterface,
+  setGraph: SetStoreFunction<GraphInterface>,
+  panelRef: () => HTMLDivElement | undefined,
+  setIsResizing: (value: boolean) => void,
+  setActiveResizeKey: (value: null | string) => void,
+  growOnDragRight = true,
+) {
+  const key = `mainPanelRow${rowIndex}Width`;
+  return (e: PointerEvent) => {
+    e.preventDefault();
+    setIsResizing(true);
+    setActiveResizeKey(key);
+    const startPos = e.pageX;
+    const panel = panelRef();
+    if (!panel) {
+      return;
+    }
+
+    const startWidth = panel.getBoundingClientRect().width;
+    const pointerId = e.pointerId;
+
+    const onPointerMove = (e: PointerEvent) => {
+      if (e.pointerId !== pointerId) {
+        return;
+      }
+      const resolvedStoreId =
+        typeof storeId === "function" ? storeId() : storeId;
+      if (!resolvedStoreId) {
+        return;
+      }
+      const diff = e.pageX - startPos;
+      const newWidth = Math.max(
+        100,
+        startWidth + (growOnDragRight ? diff : -diff),
+      );
+
+      mergeVertexProperties<T>(0, resolvedStoreId, graph, setGraph, {
+        [key]: newWidth,
+      } as unknown as Partial<T>);
+    };
+
+    const onPointerUp = (e: PointerEvent) => {
+      if (e.pointerId !== pointerId) {
+        return;
+      }
+      setIsResizing(false);
+      setActiveResizeKey(null);
+      document.removeEventListener("pointermove", onPointerMove);
+      document.removeEventListener("pointerup", onPointerUp);
+      document.removeEventListener("pointercancel", onPointerUp);
+    };
+
+    panel.setPointerCapture(pointerId);
+    document.addEventListener("pointermove", onPointerMove);
+    document.addEventListener("pointerup", onPointerUp);
+    document.addEventListener("pointercancel", onPointerUp);
+  };
+}
