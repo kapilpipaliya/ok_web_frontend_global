@@ -323,7 +323,7 @@ export function createPanelResizeHandler<T extends Record<string, unknown>>(
 }
 
 export function createPanelRowHeightResizeHandler<T extends Record<string, unknown>>(
-  key: "mainPanelRow0Height",
+  key: "mainPanelRow0Height" | "mainPanelRow1Height",
   storeId: Id | (() => Id | undefined),
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,

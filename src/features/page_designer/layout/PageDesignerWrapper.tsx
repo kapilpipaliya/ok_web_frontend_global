@@ -305,6 +305,7 @@ export function PageDesignerWrapper(): JSX.Element {
       settingsWidth: layoutVertex.P.settingsWidth,
       mainPanelRows: cloneMainPanelRows(layoutVertex.P.mainPanelRows),
       mainPanelRow0Height: layoutVertex.P.mainPanelRow0Height,
+      mainPanelRow1Height: layoutVertex.P.mainPanelRow1Height,
       mainPanelRow0Width: layoutVertex.P.mainPanelRow0Width,
       mainPanelRow1Width: layoutVertex.P.mainPanelRow1Width,
       // Note: this does not work because we use uuidv7 for the mainPanel ids

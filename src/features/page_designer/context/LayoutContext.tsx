@@ -94,6 +94,7 @@ export function getInitialDesignerLayoutStore() {
     mainFormId: null as Id | null,
     mainPanelRows: [[row0Panel], [row1Panel]] as MainPanelRows,
     mainPanelRow0Height: null as number | null,
+    mainPanelRow1Height: null as number | null,
     mainPanelRow0Width: null as number | null,
     mainPanelRow1Width: null as number | null,
     openedFormIds: [] as Id[],

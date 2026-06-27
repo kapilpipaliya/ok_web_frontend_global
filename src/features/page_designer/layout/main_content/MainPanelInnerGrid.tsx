@@ -10,6 +10,7 @@ import {
 } from "~/features/page_designer/layout/DesignerPanel";
 import { LayoutTreePanel } from "~/features/page_designer/settings/LayoutTreePanel";
 import {
+  INITIAL_WIDTHS,
   type PageLayoutObject,
   useDesignerLayoutStore,
 } from "../../context/LayoutContext";
@@ -65,12 +66,17 @@ export function MainPanelInnerGrid(
     const store = formStore();
 
     if (layout.isLayoutTreeOpen) {
-      columns.push(`${store.layoutTreeWidth}px`);
+      columns.push(
+        `${store?.layoutTreeWidth ?? INITIAL_WIDTHS.layoutTree}px`,
+      );
     }
 
     if (layout.isPropertiesOpen) {
+      const isCollapsed = store?.isPropertiesCollapsed ?? false;
       columns.push(
-        store.isPropertiesCollapsed ? "1rem" : `${store.propertiesWidth}px`,
+        isCollapsed
+          ? "1rem"
+          : `${store?.propertiesWidth ?? INITIAL_WIDTHS.properties}px`,
       );
     }
 
@@ -91,6 +97,9 @@ export function MainPanelInnerGrid(
 
   const togglePropertiesCollapse = () => {
     const store = formStore();
+    if (!store) {
+      return;
+    }
     if (store.isPropertiesCollapsed) {
       mergeVertexProperties<FormStoreObject>(
         0,
@@ -118,7 +127,7 @@ export function MainPanelInnerGrid(
 
   const expandProperties = () => {
     const store = formStore();
-    if (!store.isPropertiesCollapsed) {
+    if (!store || !store.isPropertiesCollapsed) {
       return;
     }
     mergeVertexProperties<FormStoreObject>(0, formStoreId(), graph, setGraph, {
@@ -140,7 +149,13 @@ export function MainPanelInnerGrid(
           overflow: hidden;
         }\`;`}
       >
-        <Show when={layoutStore().isLayoutTreeOpen && activeOpenedFormId()}>
+        <Show
+          when={
+            layoutStore().isLayoutTreeOpen &&
+            activeOpenedFormId() &&
+            formStore()
+          }
+        >
           <As as="div" css={STYLES.panelCellCss}>
             <DesignerPanel
               activeResizeKey={activeResizeKey()}
@@ -157,11 +172,17 @@ export function MainPanelInnerGrid(
           </As>
         </Show>
 
-        <Show when={layoutStore().isPropertiesOpen && activeOpenedFormId()}>
+        <Show
+          when={
+            layoutStore().isPropertiesOpen &&
+            activeOpenedFormId() &&
+            formStore()
+          }
+        >
           <As as="div" css={STYLES.panelCellCss}>
             <DesignerPanel
               activeResizeKey={activeResizeKey()}
-              collapsed={formStore().isPropertiesCollapsed}
+              collapsed={formStore()!.isPropertiesCollapsed}
               isResizing={isResizing()}
               onExpand={expandProperties}
               onResize={createResizeHandler("propertiesWidth")}

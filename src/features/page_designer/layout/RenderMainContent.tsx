@@ -86,18 +86,59 @@ export function RenderMainContent() {
     return "width: 100%; min-width: 0;";
   };
 
+  const hasAnyFixedRowHeight = () => {
+    const layout = layoutStore();
+    return (
+      layout.mainPanelRow0Height != null || layout.mainPanelRow1Height != null
+    );
+  };
+
+  const getOuterGridHeightCss = () =>
+    hasAnyFixedRowHeight()
+      ? "min-height: 100%; height: auto;"
+      : "height: 100%; min-height: 100%;";
+
+  const getMainAreaHeightCss = () =>
+    hasAnyFixedRowHeight()
+      ? "height: auto; min-height: 100%;"
+      : "height: 100%; min-height: 0;";
+
   const getMainRowsTemplate = () => {
-    const height = layoutStore().mainPanelRow0Height;
-    if (height) {
-      return `${height}px 3px 1fr`;
-    }
-    return "0.8fr 3px 1fr";
+    const layout = layoutStore();
+    const row0Css = layout.mainPanelRow0Height
+      ? `${layout.mainPanelRow0Height}px`
+      : layout.mainPanelRow1Height != null
+        ? `minmax(${MIN_MAIN_PANEL_ROW_HEIGHT}px, auto)`
+        : "0.8fr";
+    const row1Css = layout.mainPanelRow1Height
+      ? `${layout.mainPanelRow1Height}px`
+      : layout.mainPanelRow0Height != null
+        ? `minmax(${MIN_MAIN_PANEL_ROW_HEIGHT}px, auto)`
+        : "1fr";
+    return `${row0Css} 3px ${row1Css} 3px`;
   };
 
   const [isResizing, setIsResizing] = createSignal(false);
   const [activeResizeKey, setActiveResizeKey] = createSignal<null | string>(
     null,
   );
+
+  const rowHeightHandleCss = (resizeKey: string) =>
+    `return \`._id {
+      height: 3px;
+      flex-shrink: 0;
+      cursor: row-resize;
+      background-color: ${
+        activeResizeKey() === resizeKey
+          ? "${args.theme.var.color.text_light_300}"
+          : "transparent"
+      };
+      transition: background-color 0.2s;
+      &:hover {
+        background-color: \${args.theme.var.color.text_light_300};
+      }
+    }\`;`;
+
   const [componentsPanelRef, setComponentsPanelRef] =
     createSignal<HTMLDivElement>();
   const [pagesPanelRef, setPagesPanelRef] = createSignal<HTMLDivElement>();
@@ -111,6 +152,8 @@ export function RenderMainContent() {
   }>({});
 
   const [mainPanelRow0Ref, setMainPanelRow0Ref] =
+    createSignal<HTMLDivElement>();
+  const [mainPanelRow1Ref, setMainPanelRow1Ref] =
     createSignal<HTMLDivElement>();
   const [showGraphView, setShowGraphView] = createSignal(false);
 
@@ -130,12 +173,23 @@ export function RenderMainContent() {
       growOnDragRight,
     );
 
-  const handleRowHeightResize = createPanelRowHeightResizeHandler(
+  const handleRow0HeightResize = createPanelRowHeightResizeHandler(
     "mainPanelRow0Height",
     layoutStoreId,
     graph,
     setGraph,
     mainPanelRow0Ref,
+    setIsResizing,
+    setActiveResizeKey,
+    MIN_MAIN_PANEL_ROW_HEIGHT,
+  );
+
+  const handleRow1HeightResize = createPanelRowHeightResizeHandler(
+    "mainPanelRow1Height",
+    layoutStoreId,
+    graph,
+    setGraph,
+    mainPanelRow1Ref,
     setIsResizing,
     setActiveResizeKey,
     MIN_MAIN_PANEL_ROW_HEIGHT,
@@ -222,6 +276,7 @@ export function RenderMainContent() {
         flex: 1;
         min-width: 0;
         min-height: 0;
+        overflow-y: auto;
       }\`;`,
         ]}
       >
@@ -232,7 +287,7 @@ export function RenderMainContent() {
           grid-template-columns: ${getSidebarGridTemplateColumns()};
           width: max-content;
           min-width: 100%;
-          height: 100%;
+          ${getOuterGridHeightCss()}
         }\`;`}
         >
           <As
@@ -350,11 +405,9 @@ export function RenderMainContent() {
             css={`return \`._id {
               display: grid;
               grid-template-rows: ${getMainRowsTemplate()};
-              min-height: 0;
-              height: 100%;
+              ${getMainAreaHeightCss()}
               width: max-content;
               min-width: 100%;
-              overflow: hidden;
             }\`;`}
           >
             <As
@@ -411,21 +464,8 @@ export function RenderMainContent() {
 
               <As
                 as="div"
-                css={`return \`._id {
-                  height: 3px;
-                  flex-shrink: 0;
-                  cursor: row-resize;
-                  background-color: ${
-                    activeResizeKey() === "mainPanelRow0Height"
-                      ? "${args.theme.var.color.text_light_300}"
-                      : "transparent"
-                  };
-                  transition: background-color 0.2s;
-                  &:hover {
-                    background-color: \${args.theme.var.color.text_light_300};
-                  }
-                }\`;`}
-                onPointerDown={handleRowHeightResize}
+                css={rowHeightHandleCss("mainPanelRow0Height")}
+                onPointerDown={handleRow0HeightResize}
               />
 
               <As
@@ -434,6 +474,7 @@ export function RenderMainContent() {
                   min-height: 0;
                   overflow: hidden;
                 }\`;`}
+                ref={setMainPanelRow1Ref}
               >
                 <As
                   as="div"
@@ -478,6 +519,12 @@ export function RenderMainContent() {
                   </For>
                 </As>
               </As>
+
+              <As
+                as="div"
+                css={rowHeightHandleCss("mainPanelRow1Height")}
+                onPointerDown={handleRow1HeightResize}
+              />
           </As>
         </As>
       </As>
