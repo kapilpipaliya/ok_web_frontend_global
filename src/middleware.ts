@@ -1,9 +1,17 @@
 import { redirect } from "@solidjs/router";
 import { createMiddleware } from "@solidjs/start/middleware";
+import type { H3Event } from "h3";
 import { csrf } from "shieldwall/start";
 
 import { checkRoutePermissionBase } from "./lib/permissions/checkRoutePermission";
 import { logger } from "./lib/logger";
+import {
+  blockClientIpForPhpProbe,
+  getClientIpForBlocking,
+  isIpPhpBlocked,
+  isPhpProbePath,
+  terminateConnectionSilently,
+} from "./lib/security/phpProbeBlock";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { getShopify } from "~/lib/shopify/shopify.server";
 import { initializeWorkersIfNeeded } from "~/server/initWorkersOnStartup";
@@ -30,6 +38,28 @@ const shouldSkipLogging = (pathname: string) => {
 // Note: this authorization will not work in client side
 export default createMiddleware({
   onRequest: [
+    // Block IPs that request `.php` paths until server restart
+    async (event) => {
+      if (typeof window !== "undefined") return;
+
+      const url = new URL(event.request.url);
+      const h3Event = event.nativeEvent as H3Event;
+      const ip = getClientIpForBlocking(
+        event.request,
+        h3Event.node?.req?.socket?.remoteAddress,
+      );
+
+      if (isIpPhpBlocked(ip)) {
+        terminateConnectionSilently(event);
+        return;
+      }
+
+      if (isPhpProbePath(url.pathname)) {
+        blockClientIpForPhpProbe(ip);
+        terminateConnectionSilently(event);
+        return;
+      }
+    },
     // Handle HEAD requests and log incoming requests
     async (event) => {
       if (typeof window !== "undefined") return;
