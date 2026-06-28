@@ -2,10 +2,9 @@ import { type Component } from "solid-js";
 
 import { As } from "~/components/As";
 
-export const DESIGNER_RESIZE_TRACK_SIZE = 10;
-export const DESIGNER_RESIZE_VISIBLE_SIZE = 2;
+import { DESIGNER_RESIZE_VISIBLE_SIZE, type ResizeAxis } from "./useDesignerResizeTrackSize";
 
-export type ResizeAxis = "x" | "y";
+export type { ResizeAxis } from "./useDesignerResizeTrackSize";
 
 interface DesignerResizeHandleProps {
   active: boolean;
@@ -21,6 +20,7 @@ export const DesignerResizeHandle: Component<DesignerResizeHandleProps> = (
 
   const handlePointerDown = (e: PointerEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
     props.onPointerDown(e);
   };
@@ -39,9 +39,9 @@ export const DesignerResizeHandle: Component<DesignerResizeHandleProps> = (
         background: transparent;
         cursor: ${isXAxis() ? "col-resize" : "row-resize"};
         touch-action: none;
+        -webkit-touch-callout: none;
         user-select: none;
         flex-shrink: 0;
-        z-index: 2;
 
         &::before {
           content: "";
@@ -49,6 +49,7 @@ export const DesignerResizeHandle: Component<DesignerResizeHandleProps> = (
           top: 50%;
           left: 50%;
           transform: translate(-50%, -50%);
+          pointer-events: none;
           ${
             isXAxis()
               ? `width: ${DESIGNER_RESIZE_VISIBLE_SIZE}px; height: 100%;`
@@ -62,8 +63,10 @@ export const DesignerResizeHandle: Component<DesignerResizeHandleProps> = (
           background-color: \${args.theme.var.color.text_light_300};
         }
 
-        &:hover::before {
-          background-color: \${args.theme.var.color.text_light_300};
+        @media (hover: hover) {
+          &:hover::before {
+            background-color: \${args.theme.var.color.text_light_300};
+          }
         }
       }\`;`}
       data-active={props.active ? "" : undefined}
@@ -73,5 +76,3 @@ export const DesignerResizeHandle: Component<DesignerResizeHandleProps> = (
     />
   );
 };
-
-// touch-action: none is the real fix

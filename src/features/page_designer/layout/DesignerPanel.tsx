@@ -9,10 +9,9 @@ import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVerte
 import type { Id } from "~/lib/graph/type/id";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 import { STYLES } from "~/pages/settings/constants";
-import {
-  DESIGNER_RESIZE_TRACK_SIZE,
-  DesignerResizeHandle,
-} from "./resizable/DesignerResizeHandle";
+import { attachPointerDrag } from "./resizable/attachPointerDrag";
+import { DesignerResizeHandle } from "./resizable/DesignerResizeHandle";
+import { useDesignerResizeTrackSize } from "./resizable/useDesignerResizeTrackSize";
 
 export interface DesignerPanelProps {
   activeResizeKey: null | string;
@@ -36,6 +35,9 @@ export interface DesignerPanelProps {
 }
 
 export const DesignerPanel: Component<DesignerPanelProps> = (props) => {
+  const resizeTrackSize = useDesignerResizeTrackSize();
+  const trackSize = () => `${resizeTrackSize()}px`;
+
   const leftResizeHandler = () =>
     props.collapsed
       ? undefined
@@ -54,19 +56,18 @@ export const DesignerPanel: Component<DesignerPanelProps> = (props) => {
           ? props.onResize
           : undefined));
 
-  const trackSize = `${DESIGNER_RESIZE_TRACK_SIZE}px`;
-
   const gridTemplateColumns = () => {
+    const track = trackSize();
     const hasLeft = !!leftResizeHandler();
     const hasRight = !!rightResizeHandler();
     if (hasLeft && hasRight) {
-      return `${trackSize} 1fr ${trackSize}`;
+      return `${track} 1fr ${track}`;
     }
     if (hasLeft) {
-      return `${trackSize} 1fr`;
+      return `${track} 1fr`;
     }
     if (hasRight) {
-      return `1fr ${trackSize}`;
+      return `1fr ${track}`;
     }
     return "1fr";
   };
@@ -190,16 +191,17 @@ export const DesignerPanel: Component<DesignerPanelProps> = (props) => {
           border: 1px solid \${args.theme.var.color.border};
           display: grid;
           grid-template-columns: ${gridTemplateColumns()};
-          grid-template-rows: ${props.resizePosition === "top" ? `${trackSize} 1fr` : "100%"};
+          grid-template-rows: ${props.resizePosition === "top" ? `${trackSize()} 1fr` : "100%"};
           height: 100%;
           min-width: 0;
+          min-height: 0;
           overflow: hidden;
         }\`;`,
       ]}
       ref={props.ref}
       style={props.style}
     >
-      <div style={{ display: leftResizeHandler() ? "block" : "none" }}>
+      <Show when={leftResizeHandler()}>
         <DesignerResizeHandle
           active={
             props.activeResizeKey ===
@@ -208,9 +210,19 @@ export const DesignerPanel: Component<DesignerPanelProps> = (props) => {
           axis={resizeAxis()}
           onPointerDown={leftResizeHandler()!}
         />
-      </div>
-      <Content />
-      <div style={{ display: rightResizeHandler() ? "block" : "none" }}>
+      </Show>
+      <As
+        as="div"
+        css={`return \`._id {
+          min-width: 0;
+          min-height: 0;
+          height: 100%;
+          overflow: hidden;
+        }\`;`}
+      >
+        <Content />
+      </As>
+      <Show when={rightResizeHandler()}>
         <DesignerResizeHandle
           active={
             props.activeResizeKey ===
@@ -219,7 +231,7 @@ export const DesignerPanel: Component<DesignerPanelProps> = (props) => {
           axis={resizeAxis()}
           onPointerDown={rightResizeHandler()!}
         />
-      </div>
+      </Show>
     </As>
   );
 };
@@ -249,52 +261,39 @@ export function createPanelResizeHandler<T extends Record<string, unknown>>(
     key.startsWith("mainPanel"),
 ) {
   return (e: PointerEvent) => {
-    e.preventDefault();
-    setIsResizing(true);
-    setActiveResizeKey(key);
-    const startPos = e.pageX;
     const panel = panelRef();
     if (!panel) {
       return;
     }
 
+    setIsResizing(true);
+    setActiveResizeKey(key);
+    const startPos = e.pageX;
     const startWidth = panel.getBoundingClientRect().width;
-    const pointerId = e.pointerId;
 
-    const onPointerMove = (e: PointerEvent) => {
-      if (e.pointerId !== pointerId) {
-        return;
-      }
-      const resolvedStoreId =
-        typeof storeId === "function" ? storeId() : storeId;
-      if (!resolvedStoreId) {
-        return;
-      }
-      const diff = e.pageX - startPos;
-      const newWidth = Math.max(
-        100,
-        startWidth + (growOnDragRight ? diff : -diff),
-      );
+    attachPointerDrag(
+      e,
+      (point) => {
+        const resolvedStoreId =
+          typeof storeId === "function" ? storeId() : storeId;
+        if (!resolvedStoreId) {
+          return;
+        }
+        const diff = point.pageX - startPos;
+        const newWidth = Math.max(
+          100,
+          startWidth + (growOnDragRight ? diff : -diff),
+        );
 
-      mergeVertexProperties<T>(0, resolvedStoreId, graph, setGraph, {
-        [key]: newWidth,
-      } as Partial<T>);
-    };
-
-    const onPointerUp = (e: PointerEvent) => {
-      if (e.pointerId !== pointerId) {
-        return;
-      }
-      setIsResizing(false);
-      setActiveResizeKey(null);
-      document.removeEventListener("pointermove", onPointerMove);
-      document.removeEventListener("pointerup", onPointerUp);
-      document.removeEventListener("pointercancel", onPointerUp);
-    };
-
-    document.addEventListener("pointermove", onPointerMove);
-    document.addEventListener("pointerup", onPointerUp);
-    document.addEventListener("pointercancel", onPointerUp);
+        mergeVertexProperties<T>(0, resolvedStoreId, graph, setGraph, {
+          [key]: newWidth,
+        } as Partial<T>);
+      },
+      () => {
+        setIsResizing(false);
+        setActiveResizeKey(null);
+      },
+    );
   };
 }
 
@@ -309,49 +308,36 @@ export function createPanelRowHeightResizeHandler<T extends Record<string, unkno
   minHeight = 120,
 ) {
   return (e: PointerEvent) => {
-    e.preventDefault();
-    setIsResizing(true);
-    setActiveResizeKey(key);
-    const startPos = e.pageY;
     const row = rowRef();
     if (!row) {
       return;
     }
 
+    setIsResizing(true);
+    setActiveResizeKey(key);
+    const startPos = e.pageY;
     const startHeight = row.getBoundingClientRect().height;
-    const pointerId = e.pointerId;
 
-    const onPointerMove = (e: PointerEvent) => {
-      if (e.pointerId !== pointerId) {
-        return;
-      }
-      const resolvedStoreId =
-        typeof storeId === "function" ? storeId() : storeId;
-      if (!resolvedStoreId) {
-        return;
-      }
-      const diff = e.pageY - startPos;
-      const newHeight = Math.max(minHeight, startHeight + diff);
+    attachPointerDrag(
+      e,
+      (point) => {
+        const resolvedStoreId =
+          typeof storeId === "function" ? storeId() : storeId;
+        if (!resolvedStoreId) {
+          return;
+        }
+        const diff = point.pageY - startPos;
+        const newHeight = Math.max(minHeight, startHeight + diff);
 
-      mergeVertexProperties<T>(0, resolvedStoreId, graph, setGraph, {
-        [key]: newHeight,
-      } as unknown as Partial<T>);
-    };
-
-    const onPointerUp = (e: PointerEvent) => {
-      if (e.pointerId !== pointerId) {
-        return;
-      }
-      setIsResizing(false);
-      setActiveResizeKey(null);
-      document.removeEventListener("pointermove", onPointerMove);
-      document.removeEventListener("pointerup", onPointerUp);
-      document.removeEventListener("pointercancel", onPointerUp);
-    };
-
-    document.addEventListener("pointermove", onPointerMove);
-    document.addEventListener("pointerup", onPointerUp);
-    document.addEventListener("pointercancel", onPointerUp);
+        mergeVertexProperties<T>(0, resolvedStoreId, graph, setGraph, {
+          [key]: newHeight,
+        } as unknown as Partial<T>);
+      },
+      () => {
+        setIsResizing(false);
+        setActiveResizeKey(null);
+      },
+    );
   };
 }
 
@@ -369,51 +355,38 @@ export function createMainPanelRowWidthResizeHandler<
 ) {
   const key = `mainPanelRow${rowIndex}Width`;
   return (e: PointerEvent) => {
-    e.preventDefault();
-    setIsResizing(true);
-    setActiveResizeKey(key);
-    const startPos = e.pageX;
     const panel = panelRef();
     if (!panel) {
       return;
     }
 
+    setIsResizing(true);
+    setActiveResizeKey(key);
+    const startPos = e.pageX;
     const startWidth = panel.getBoundingClientRect().width;
-    const pointerId = e.pointerId;
 
-    const onPointerMove = (e: PointerEvent) => {
-      if (e.pointerId !== pointerId) {
-        return;
-      }
-      const resolvedStoreId =
-        typeof storeId === "function" ? storeId() : storeId;
-      if (!resolvedStoreId) {
-        return;
-      }
-      const diff = e.pageX - startPos;
-      const newWidth = Math.max(
-        100,
-        startWidth + (growOnDragRight ? diff : -diff),
-      );
+    attachPointerDrag(
+      e,
+      (point) => {
+        const resolvedStoreId =
+          typeof storeId === "function" ? storeId() : storeId;
+        if (!resolvedStoreId) {
+          return;
+        }
+        const diff = point.pageX - startPos;
+        const newWidth = Math.max(
+          100,
+          startWidth + (growOnDragRight ? diff : -diff),
+        );
 
-      mergeVertexProperties<T>(0, resolvedStoreId, graph, setGraph, {
-        [key]: newWidth,
-      } as unknown as Partial<T>);
-    };
-
-    const onPointerUp = (e: PointerEvent) => {
-      if (e.pointerId !== pointerId) {
-        return;
-      }
-      setIsResizing(false);
-      setActiveResizeKey(null);
-      document.removeEventListener("pointermove", onPointerMove);
-      document.removeEventListener("pointerup", onPointerUp);
-      document.removeEventListener("pointercancel", onPointerUp);
-    };
-
-    document.addEventListener("pointermove", onPointerMove);
-    document.addEventListener("pointerup", onPointerUp);
-    document.addEventListener("pointercancel", onPointerUp);
+        mergeVertexProperties<T>(0, resolvedStoreId, graph, setGraph, {
+          [key]: newWidth,
+        } as unknown as Partial<T>);
+      },
+      () => {
+        setIsResizing(false);
+        setActiveResizeKey(null);
+      },
+    );
   };
 }

@@ -16,10 +16,8 @@ import {
   createPanelResizeHandler,
   DesignerPanel,
 } from "./DesignerPanel";
-import {
-  DESIGNER_RESIZE_TRACK_SIZE,
-  DesignerResizeHandle,
-} from "./resizable/DesignerResizeHandle";
+import { DesignerResizeHandle } from "./resizable/DesignerResizeHandle";
+import { useDesignerResizeTrackSize } from "./resizable/useDesignerResizeTrackSize";
 import { HeaderRow } from "../header/header_row/HeaderRow";
 import { DeleteConfirmation } from "./main_content/DeleteConfirmation";
 import { UnsavedTabSaveReminder } from "./UnsavedTabSaveReminder";
@@ -36,6 +34,7 @@ import type { Id } from "~/lib/graph/type/id";
 
 export function RenderMainContent() {
   const [graph, setGraph] = useGraph();
+  const resizeTrackSize = useDesignerResizeTrackSize();
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStore = () =>
     (graph.vertexes[layoutStoreId]?.P as PageLayoutObject) || {};
@@ -119,7 +118,7 @@ export function RenderMainContent() {
       : layout.mainPanelRow0Height != null
         ? `minmax(${MIN_MAIN_PANEL_ROW_HEIGHT}px, auto)`
         : "1fr";
-    return `${row0Css} ${DESIGNER_RESIZE_TRACK_SIZE}px ${row1Css} ${DESIGNER_RESIZE_TRACK_SIZE}px`;
+    return `${row0Css} ${resizeTrackSize()}px ${row1Css} ${resizeTrackSize()}px`;
   };
 
   const [isResizing, setIsResizing] = createSignal(false);
