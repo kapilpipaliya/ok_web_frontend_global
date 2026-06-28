@@ -59,10 +59,11 @@ function OpenedViewPanel(props: {
           ? `return \`._id {
           display: flex;
           flex-direction: column;
-          flex: 1;
+          flex-shrink: 0;
           min-width: 0;
           min-height: 0;
           height: 100%;
+          ${props.previewsLength === 1 ? "flex: 1;" : ""}
         }\`;`
           : "return `._id {display: none;}`;"
       }
@@ -80,10 +81,11 @@ function OpenedViewPanel(props: {
       <As
         as="div"
         css={[
-          STYLES.verticalOverflowCss,
+          STYLES.overflowCss,
           `return \`._id {
             flex: 1;
             min-height: 0;
+            min-width: 0;
           }\`;`,
         ]}
       >
@@ -196,14 +198,18 @@ export function PageViewComponent(props: { mainPanel: Id }) {
     <MainPanelInnerGrid mainPanel={props.mainPanel}>
       <As
         as="div"
-        css={`return \`._id {
-  display: flex;
-  gap: 8px;
-  flex-wrap: nowrap;
-  height: 100%;
-  min-height: 0;
-  align-items: stretch;
-}\`;`}
+        css={[
+          STYLES.overflowCss,
+          `return \`._id {
+            display: flex;
+            gap: 0;
+            flex-wrap: nowrap;
+            height: 100%;
+            min-height: 0;
+            min-width: 0;
+            align-items: flex-start;
+          }\`;`,
+        ]}
       >
       <For
         each={layoutStore().openedFormIds.filter(
