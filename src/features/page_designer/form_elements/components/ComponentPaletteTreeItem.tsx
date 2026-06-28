@@ -57,10 +57,7 @@ import {
   isPaletteRootCategory,
 } from "./componentPaletteUtils";
 import {
-  actionPointerProps,
-  createDelayedFineHover,
-  isTouchRevealedRow,
-  revealTouchRow,
+  createTreeRowInteraction,
 } from "~/lib/event/rowPointer";
 import { ComponentPreview } from "./ComponentPreview";
 
@@ -82,9 +79,9 @@ export function ComponentPaletteTreeItem(
     ) => void;
     onDrop: (snapshot: ComponentPaletteDropSnapshot) => Promise<void>;
     onSelectCategory?: (categoryId: Id) => void;
-    onEditCategory?: (category: Vertex) => void;
+    onEditCategory?: (category: Vertex, anchorEl: HTMLElement) => void;
     onDeleteCategory?: (category: Vertex) => void;
-    onAddSubcategory?: (parentId: Id) => void;
+    onAddSubcategory?: (parentId: Id, anchorEl: HTMLElement) => void;
     onAddItem?: (categoryId: Id, anchorEl: HTMLElement) => void;
     filterTree?: (vertex: Vertex) => {
       match: boolean;
@@ -96,29 +93,23 @@ export function ComponentPaletteTreeItem(
     onPaletteDragStart?: () => void;
     onPaletteDragEnd?: () => void;
     itemRef?: (el: HTMLDivElement | undefined) => void;
+    openCreateCategoryId?: Id | null;
   }>,
 ) {
   const [graph, setGraph] = useGraph();
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStoreVertex = () =>
     graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
-  const [isHovered, setIsHovered] = createSignal(false);
   const [isPreviewOpen, setIsPreviewOpen] = createSignal(false);
-  const [isMouseOverItem, setIsMouseOverItem] = createSignal(false);
 
-  const hover = createDelayedFineHover(
-    () => {
-      setIsHovered(true);
-      setIsMouseOverItem(true);
-    },
-    () => {
-      setIsMouseOverItem(false);
-      if (!isPreviewOpen()) setIsHovered(false);
-    },
-  );
+  const isCreateMenuOpen = () => props.openCreateCategoryId === props.item.id;
 
-  const showActions = () =>
-    isHovered() || isTouchRevealedRow(props.item.id);
+  const row = createTreeRowInteraction({
+    itemId: props.item.id,
+    pinWhile: () => isPreviewOpen() || isCreateMenuOpen(),
+  });
+
+  const showActions = row.showActions;
 
   const paletteConfig = () => props.config;
   const isComponentPalette = () =>
@@ -149,8 +140,6 @@ export function ComponentPaletteTreeItem(
     !categoryHasChildren(graph, setGraph, props.item.id, paletteConfig());
   const canAddItemToCategory = () =>
     (isCategory() || isUncategorized()) && !isRootCategory();
-
-  let addItemButtonRef!: HTMLElement;
 
   const categoryChildren = createMemo(() =>
     isCategory() || isUncategorized()
@@ -243,7 +232,7 @@ export function ComponentPaletteTreeItem(
     if (isSelected()) {
       boxShadow +=
         " background-color:${args.theme.var.color.primary_light_300}; color:${args.theme.var.color.primary_light_300_text};";
-    } else if (showActions()) {
+    } else if (row.isHighlighted()) {
       boxShadow +=
         " background-color:${args.theme.var.color.primary_light_750}; color:${args.theme.var.color.primary_light_750_text};";
     } else if (isNegative(props.item.id)) {
@@ -278,7 +267,7 @@ export function ComponentPaletteTreeItem(
 
   onCleanup(() => {
     cleanupDragDropRef(itemRef());
-    hover.cleanup();
+    row.cleanup();
   });
 
   createEffect(() => {
@@ -317,12 +306,12 @@ export function ComponentPaletteTreeItem(
 
   const handlePreviewOpen = () => {
     setIsPreviewOpen(true);
-    setIsHovered(true);
+    row.pin();
   };
 
   const handlePreviewClose = () => {
     setIsPreviewOpen(false);
-    if (!isMouseOverItem()) setIsHovered(false);
+    row.unpinIfNotOverRow();
   };
 
   const handlePageDoubleClick = () => {
@@ -375,13 +364,7 @@ export function ComponentPaletteTreeItem(
           as="div"
           css={getItemStyle()}
           data-palette-row=""
-          onPointerEnter={hover.onPointerEnter}
-          onPointerLeave={hover.onPointerLeave}
-          onPointerDown={(e) => {
-            if (e.pointerType === "touch") {
-              revealTouchRow(props.item.id);
-            }
-          }}
+          {...row.rowPointerProps}
           onDblClick={() => {
             if (isPagePalette() && isContentItem()) {
               handlePageDoubleClick();
@@ -452,19 +435,19 @@ export function ComponentPaletteTreeItem(
                 {contentCount() ?? ""}
               </As>
             </Show>
-            <Show when={canAddItemToCategory() && showActions()}>
+            <Show when={canAddItemToCategory() && (showActions() || isCreateMenuOpen())}>
               <As
                 as="span"
-                {...actionPointerProps(hover.keepVisible)}
+                {...row.actionAreaProps}
                 onClick={(e) => e.stopPropagation()}
               >
                 <IconButton
                   css={buttonStyle}
                   icon="ph:file-plus"
-                  onClick={() =>
-                    props.onAddItem?.(props.item.id, addItemButtonRef)
-                  }
-                  ref={(el) => (addItemButtonRef = el)}
+                  onClick={() => {
+                    const el = itemRef();
+                    if (el) props.onAddItem?.(props.item.id, el);
+                  }}
                   size={14}
                   title={`Add ${paletteConfig().tableVertexLabel}`}
                 />
@@ -474,13 +457,16 @@ export function ComponentPaletteTreeItem(
               <As
                 as="span"
                 css={"return `._id { display: flex; gap: 2px; }`;"}
-                {...actionPointerProps(hover.keepVisible)}
+                {...row.actionAreaProps}
                 onClick={(e) => e.stopPropagation()}
               >
                 <IconButton
                   css={buttonStyle}
                   icon="ph:pencil-simple"
-                  onClick={() => props.onEditCategory?.(props.item)}
+                  onClick={() => {
+                    const el = itemRef();
+                    if (el) props.onEditCategory?.(props.item, el);
+                  }}
                   size={14}
                   title="Rename category"
                 />
@@ -495,7 +481,10 @@ export function ComponentPaletteTreeItem(
                 </Show>
                 <PlusIconButton
                   ariaLabel="Add subcategory"
-                  onClick={() => props.onAddSubcategory?.(props.item.id)}
+                  onClick={() => {
+                    const el = itemRef();
+                    if (el) props.onAddSubcategory?.(props.item.id, el);
+                  }}
                 />
               </As>
             </Show>
@@ -504,7 +493,7 @@ export function ComponentPaletteTreeItem(
                 as="span"
                 css={"return `._id { display: inline-flex; align-items: center; gap: 2px; }`;"}
                 data-palette-actions=""
-                {...actionPointerProps(hover.keepVisible)}
+                {...row.actionAreaProps}
               >
               <Show when={isComponentPalette() || isPagePalette()}>
                 <ComponentPreview
@@ -563,6 +552,7 @@ export function ComponentPaletteTreeItem(
                   isPaletteDragging={props.isPaletteDragging}
                   item={child}
                   itemRef={props.itemRef}
+                  openCreateCategoryId={props.openCreateCategoryId}
                   onAddItem={props.onAddItem}
                   onAddSubcategory={props.onAddSubcategory}
                   onDeleteCategory={props.onDeleteCategory}
@@ -593,6 +583,7 @@ export function ComponentPaletteTreeItem(
                   isPaletteDragging={props.isPaletteDragging}
                   item={child}
                   itemRef={props.itemRef}
+                  openCreateCategoryId={props.openCreateCategoryId}
                   onAddItem={props.onAddItem}
                   onAddSubcategory={props.onAddSubcategory}
                   onDeleteCategory={props.onDeleteCategory}

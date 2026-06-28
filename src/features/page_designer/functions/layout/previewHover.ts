@@ -36,13 +36,26 @@ export function setLayoutPreviewHover(
   }
 }
 
+export function isLayoutTreeHoverActive(
+  layout: PageLayoutObject | undefined,
+) {
+  return (
+    !!layout &&
+    layout.layoutTreeScrollSource === "layoutTree" &&
+    layout.previewHoverId != null &&
+    layout.previewHoverId !== -1
+  );
+}
+
 export function clearLayoutPreviewHover(
   layoutStoreId: Id,
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
+  options?: { clearScrollSource?: boolean },
 ) {
   mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
     previewHoverId: -1,
+    ...(options?.clearScrollSource ? { layoutTreeScrollSource: null } : {}),
   });
 }
 
@@ -52,10 +65,23 @@ export function schedulePreviewHoverClear(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
 ) {
+  const layout = graph.vertexes[layoutStoreId]?.P as
+    | PageLayoutObject
+    | undefined;
+  if (isLayoutTreeHoverActive(layout)) {
+    return;
+  }
+
   // Debounced: avoids flicker when moving between nested preview wrappers.
   cancelPendingPreviewHoverClear();
   pendingPreviewHoverClearRaf = requestAnimationFrame(() => {
     pendingPreviewHoverClearRaf = null;
+    const latestLayout = graph.vertexes[layoutStoreId]?.P as
+      | PageLayoutObject
+      | undefined;
+    if (isLayoutTreeHoverActive(latestLayout)) {
+      return;
+    }
     mergeVertexProperties<FormStoreObject>(0, formStoreId, graph, setGraph, {
       hoverId: -1,
     });

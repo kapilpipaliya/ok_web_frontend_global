@@ -12,7 +12,13 @@ import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function AttrConfigIcons(
-  props: Readonly<{ metaVertex: Vertex; parentRef: HTMLElement }>,
+  props: Readonly<{
+    metaVertex: Vertex;
+    parentRef: HTMLElement;
+    showActions?: () => boolean;
+    onPointerEnter?: () => void;
+    onPointerLeave?: (event: PointerEvent) => void;
+  }>,
 ) {
   const [graph] = useGraph();
   const formStoreId = useDesignerFormIdContext();
@@ -22,6 +28,9 @@ export function AttrConfigIcons(
   const isSelectedLayoutId = createSelector(
     () => formStoreVertex()?.P.selectedId,
   );
+
+  const showActionButtons = () =>
+    isSelectedLayoutId(props.metaVertex.id) || (props.showActions?.() ?? false);
 
   const isRootLevel = () =>
     formStoreVertex()?.P.formDataId === props.metaVertex.id;
@@ -34,6 +43,8 @@ export function AttrConfigIcons(
     <DropdownMenu
       applyDefaultStyles={false}
       offset={-32}
+      onPointerEnter={props.onPointerEnter}
+      onPointerLeave={props.onPointerLeave}
       parentRef={props.parentRef}
       placement="right"
       useFlip={false}
@@ -47,7 +58,7 @@ export function AttrConfigIcons(
   background-color: \${args.theme.var.color.background_light_100};
 }\`;`}
       >
-        <Show when={isSelectedLayoutId(props.metaVertex.id)}>
+        <Show when={showActionButtons()}>
           <AttrActionButtons
             componentName={getComponent()}
             isRootLevel={isRootLevel()}

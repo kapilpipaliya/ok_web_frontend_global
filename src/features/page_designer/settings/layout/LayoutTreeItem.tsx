@@ -22,10 +22,13 @@ import {
   cleanupDragDropRef,
 } from "~/features/page_designer/functions/drag_drop/pragmatic/bindDragDropRef";
 import {
-  actionPointerProps,
-  createDelayedFineHover,
   createRowTapSelect,
+  createTreeRowInteraction,
 } from "~/lib/event/rowPointer";
+import {
+  clearDesignerHoverFromLayoutTree,
+  setDesignerHover,
+} from "../../functions/layout/designerHoverCoordinator";
 import { saveUndoPoint } from "~/lib/graph/transaction/steps/saveUndoPoint";
 import {
   createOpenInNewTab,
@@ -39,9 +42,7 @@ import {
 } from "../../context/LayoutContext";
 import { getChildrenAttrs } from "../../functions/layout/getChildrenAttrs";
 import {
-  clearLayoutPreviewHover,
   isLayoutPreviewHover,
-  setLayoutPreviewHover,
 } from "../../functions/layout/previewHover";
 import { AttrConfigIcons } from "./AttrConfigIcons";
 import { HideShowIcon } from "./HideShowIcon";
@@ -105,6 +106,35 @@ export function LayoutTreeItem(
     getChildrenAttrs(graph, setGraph, props.metaVertex),
   );
   const [parentRef, setParentRef] = createSignal<HTMLElement>();
+
+  const showJsonEditor = () => {
+    return props.isJsonEditorOpen
+      ? props.isJsonEditorOpen(props.metaVertex.id)
+      : false;
+  };
+
+  const row = createTreeRowInteraction({
+    itemId: props.metaVertex.id,
+    pinWhile: showJsonEditor,
+    onFineEnter: () => {
+      setDesignerHover(
+        formStoreId!,
+        layoutStoreId,
+        props.metaVertex.id,
+        "layoutTree",
+        graph,
+        setGraph,
+      );
+    },
+    onFineLeave: () => {
+      clearDesignerHoverFromLayoutTree(
+        formStoreId!,
+        layoutStoreId,
+        graph,
+        setGraph,
+      );
+    },
+  });
 
   const isExpanded = createMemo(() => {
     if (props.shouldExpandForSearch) {
@@ -182,7 +212,7 @@ export function LayoutTreeItem(
 
   onCleanup(() => {
     cleanupDragDropRef(parentRef());
-    hover.cleanup();
+    row.cleanup();
   });
 
   const handleClick = () => {
@@ -199,27 +229,7 @@ export function LayoutTreeItem(
 
   const rowTapSelect = createRowTapSelect(handleClick);
 
-  const hover = createDelayedFineHover(
-    () => {
-      mergeVertexProperties<FormStoreObject>(0, formStoreId!, graph, setGraph, {
-        hoverId: props.metaVertex.id,
-      });
-      setLayoutPreviewHover(
-        layoutStoreId,
-        props.metaVertex.id,
-        graph,
-        setGraph,
-        "layoutTree",
-      );
-    },
-    () => {
-      mergeVertexProperties<FormStoreObject>(0, formStoreId!, graph, setGraph, {
-        hoverId: -1,
-      });
-      clearLayoutPreviewHover(layoutStoreId, graph, setGraph);
-    },
-    150,
-  );
+  const showRowActions = () => row.showActions() || isPreviewHover();
 
   const getBorder = createMemo(() => {
     if (!isActiveTargetItem()) {
@@ -234,7 +244,9 @@ export function LayoutTreeItem(
   });
 
   const isHovered = () =>
-    isSelectedHoverId(props.metaVertex.id) || isPreviewHover();
+    row.isHighlighted() ||
+    isSelectedHoverId(props.metaVertex.id) ||
+    isPreviewHover();
 
   const replacePropertiesValue = (properties: { [key: string]: unknown }) => {
     replaceVertexProperties(
@@ -323,12 +335,7 @@ export function LayoutTreeItem(
   };
   */
 
-  // Function to get JSON editor state for this item
-  const showJsonEditor = () => {
-    return props.isJsonEditorOpen
-      ? props.isJsonEditorOpen(props.metaVertex.id)
-      : false;
-  };
+  // Function to get JSON editor state for this item — showJsonEditor defined above
 
   // Function to toggle JSON editor for this item
   const toggleJsonEditor = (e: MouseEvent) => {
@@ -540,14 +547,17 @@ export function LayoutTreeItem(
         isSelected={() => isSelectedLayoutId(props.metaVertex.id)}
         itemId={props.metaVertex.id}
         onClick={rowTapSelect.handleClick}
-        onPointerDown={rowTapSelect.handlePointerDown}
+        onPointerDown={(e) => {
+          rowTapSelect.handlePointerDown(e);
+          row.rowPointerProps.onPointerDown(e);
+        }}
         onPointerEnter={(e) => {
           e.stopPropagation();
-          hover.onPointerEnter(e);
+          row.rowPointerProps.onPointerEnter(e);
         }}
         onPointerLeave={(e) => {
           e.stopPropagation();
-          hover.onPointerLeave(e);
+          row.rowPointerProps.onPointerLeave(e);
         }}
         onPointerUp={rowTapSelect.handlePointerUp}
         ref={(element) => {
@@ -601,12 +611,18 @@ export function LayoutTreeItem(
           as="span"
           css={"return `._id { display: contents; }`;"}
           data-row-actions=""
-          {...actionPointerProps(hover.keepVisible)}
+          {...row.actionAreaProps}
         >
-          <Show when={isSelectedHoverId(props.metaVertex.id) || isNodeHidden()}>
+          <Show
+            when={
+              showRowActions() ||
+              isSelectedLayoutId(props.metaVertex.id) ||
+              isNodeHidden()
+            }
+          >
             <HideShowIcon iconSize={20} metaVertex={props.metaVertex} />
           </Show>
-          <Show when={isSelectedHoverId(props.metaVertex.id) || showJsonEditor()}>
+          <Show when={showRowActions() || showJsonEditor()}>
             <IconButton
               css={[
                 ICON_BUTTON_STYLES.baseCss,
@@ -626,7 +642,7 @@ export function LayoutTreeItem(
           </Show>
           <Show
             when={
-              isSelectedHoverId(props.metaVertex.id) &&
+              showRowActions() &&
               props.metaVertex.L &&
               !(props.metaVertex.P.componentName in componentsMap)
             }
@@ -642,10 +658,18 @@ export function LayoutTreeItem(
               title="Open in new tab"
             />
           </Show>
-          <AttrConfigIcons
-            metaVertex={props.metaVertex}
-            parentRef={parentRef()!}
-          />
+          <Show
+            when={
+              showRowActions() || isSelectedLayoutId(props.metaVertex.id)
+            }
+          >
+            <AttrConfigIcons
+              metaVertex={props.metaVertex}
+              parentRef={parentRef()!}
+              showActions={row.showActions}
+              {...row.floatingBridgeProps}
+            />
+          </Show>
         </As>
       </TreeItemContainer>
       <Show when={showJsonEditor()}>

@@ -24,12 +24,7 @@ import {
 import type { Id } from "~/lib/graph/type/id";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
-import {
-  actionPointerProps,
-  createDelayedFineHover,
-  isTouchRevealedRow,
-  revealTouchRow,
-} from "~/lib/event/rowPointer";
+import { createTreeRowInteraction } from "~/lib/event/rowPointer";
 import { ComponentPreview } from "./ComponentPreview";
 
 export function ComponentItem(
@@ -45,23 +40,14 @@ export function ComponentItem(
   }>,
 ) {
   const [graph, setGraph] = useGraph();
-  const [isHovered, setIsHovered] = createSignal(false);
   const [isPreviewOpen, setIsPreviewOpen] = createSignal(false);
-  const [isMouseOverItem, setIsMouseOverItem] = createSignal(false);
 
-  const hover = createDelayedFineHover(
-    () => {
-      setIsHovered(true);
-      setIsMouseOverItem(true);
-    },
-    () => {
-      setIsMouseOverItem(false);
-      if (!isPreviewOpen()) setIsHovered(false);
-    },
-  );
+  const row = createTreeRowInteraction({
+    itemId: props.child.id,
+    pinWhile: isPreviewOpen,
+  });
 
-  const showActions = () =>
-    isHovered() || isTouchRevealedRow(props.child.id);
+  const showActions = row.showActions;
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStoreVertex = () =>
     graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
@@ -72,12 +58,12 @@ export function ComponentItem(
 
   const handlePreviewOpen = () => {
     setIsPreviewOpen(true);
-    setIsHovered(true);
+    row.pin();
   };
 
   const handlePreviewClose = () => {
     setIsPreviewOpen(false);
-    if (!isMouseOverItem()) setIsHovered(false);
+    row.unpinIfNotOverRow();
   };
 
   const getItemStyle = () => {
@@ -112,7 +98,7 @@ export function ComponentItem(
 
   onCleanup(() => {
     cleanupDragDropRef(itemRef());
-    hover.cleanup();
+    row.cleanup();
   });
 
   const children = createMemo(() =>
@@ -144,13 +130,7 @@ export function ComponentItem(
         onClick={() => props.toggleExpand(props.child.id)}
         onDblClick={() => props.onDoubleClick?.(props.child)}
         data-palette-row=""
-        onPointerDown={(e) => {
-          if (e.pointerType === "touch") {
-            revealTouchRow(props.child.id);
-          }
-        }}
-        onPointerEnter={hover.onPointerEnter}
-        onPointerLeave={hover.onPointerLeave}
+        {...row.rowPointerProps}
         ref={(element) => {
           setItemRef(element);
           bindPaletteDrag(element);
@@ -197,7 +177,7 @@ export function ComponentItem(
             as="div"
             css={"return `._id {margin-left: auto; display: flex;}`;"}
             data-palette-actions=""
-            {...actionPointerProps(hover.keepVisible)}
+            {...row.actionAreaProps}
           >
             <ComponentPreview
               item={props.child}

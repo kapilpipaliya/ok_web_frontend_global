@@ -26,17 +26,17 @@ import { onLayoutItemClick } from "~/features/page_designer/event_handler/onLayo
 import { getBoundingRectChildren } from "~/features/page_designer/functions/drag_drop/ui/getBoundingRectChildren";
 import { getChildrenAttrs } from "~/features/page_designer/functions/layout/getChildrenAttrs";
 import {
-  cancelPendingPreviewHoverClear,
-  clearLayoutPreviewHover,
+  clearDesignerHoverFromPreview,
+  setDesignerHover,
+} from "~/features/page_designer/functions/layout/designerHoverCoordinator";
+import {
   isLayoutPreviewHover,
   schedulePreviewHoverClear,
-  setLayoutPreviewHover,
 } from "~/features/page_designer/functions/layout/previewHover";
 
 import { BorderOverlay } from "../overlays/BorderOverlay";
 import { AttrConfigPopOverWrapper } from "../popovers/AttrConfigPopOverWrapper";
 import { useDataContext } from "../../context/DataContext";
-import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 
@@ -87,20 +87,13 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
         showErrorToast,
         // Mouse events don't fire during pragmatic drag — set hover from drop target.
         onDragEnter: () => {
-          cancelPendingPreviewHoverClear();
-          mergeVertexProperties<FormStoreObject>(
-            0,
+          setDesignerHover(
             formStoreId!,
-            graph,
-            setGraph,
-            { hoverId: props.item.id },
-          );
-          setLayoutPreviewHover(
             layoutStoreId,
             props.item.id,
+            "preview",
             graph,
             setGraph,
-            "preview",
           );
         },
         onDragLeave: () => {
@@ -133,24 +126,24 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
 
   const handleMouseEnter = (e: MouseEvent) => {
     e.stopPropagation();
-    mergeVertexProperties<FormStoreObject>(0, formStoreId!, graph, setGraph, {
-      hoverId: props.item.id,
-    });
-    setLayoutPreviewHover(
+    setDesignerHover(
+      formStoreId!,
       layoutStoreId,
       props.item.id,
+      "preview",
       graph,
       setGraph,
-      "preview",
     );
   };
 
   const handleMouseLeave = (e: MouseEvent) => {
     e.stopPropagation();
-    mergeVertexProperties<FormStoreObject>(0, formStoreId!, graph, setGraph, {
-      hoverId: -1,
-    });
-    clearLayoutPreviewHover(layoutStoreId, graph, setGraph);
+    clearDesignerHoverFromPreview(
+      formStoreId!,
+      layoutStoreId,
+      graph,
+      setGraph,
+    );
   };
 
   return (
