@@ -11,6 +11,9 @@ import {
   useDesignerFormIdContext,
   useDesignerLayoutStore,
 } from "~/features/page_designer/context/LayoutContext";
+import { attachPointerDrag } from "~/features/page_designer/layout/resizable/attachPointerDrag";
+import { DesignerResizeHandle } from "~/features/page_designer/layout/resizable/DesignerResizeHandle";
+import { useDesignerResizeTrackSize } from "~/features/page_designer/layout/resizable/useDesignerResizeTrackSize";
 import { attachRootDropTarget } from "~/features/page_designer/functions/drag_drop/pragmatic/pragmaticDragDrop";
 import {
   bindDragDropRef,
@@ -51,24 +54,6 @@ export const DIMENSIONS = {
   },
 } as const;
 
-const getResizeHandleCSS = (direction: "horizontal" | "vertical") => {
-  const isHorizontal = direction === "horizontal";
-
-  return `return \`._id {
-  ${isHorizontal ? "width: 4px;" : "width: 100%;"}
-  ${isHorizontal ? "height: 100%;" : "height: 4px;"}
-  background-color: \${args.theme.var.color.border};
-  cursor: ${isHorizontal ? "col-resize" : "row-resize"};
-  position: absolute;
-  ${isHorizontal ? "right: 0;" : "bottom: 0;"}
-  transition: background-color 0.2s ease;
-
-  &:hover {
-    background-color: \${args.theme.var.color.border_dark_200};
-  }
-}\`;`;
-};
-
 export function ResizableContainer(
   props: Readonly<{
     children: JSX.Element;
@@ -82,9 +67,13 @@ export function ResizableContainer(
   const [graph, setGraph] = useGraph();
   const [height, setHeight] = createSignal(props.height || "");
   const [containerRef, setContainerRef] = createSignal<HTMLDivElement>();
-  const [resizing, setResizing] = createSignal(false);
+  const [activeResizeKey, setActiveResizeKey] = createSignal<
+    null | "height" | "width"
+  >(null);
   const [isDraggingOver, setIsDraggingOver] = createSignal(false);
   const { showErrorToast } = useToast();
+  const resizeTrackSize = useDesignerResizeTrackSize();
+  const trackSize = () => `${resizeTrackSize()}px`;
 
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStoreVertex = () =>
@@ -113,56 +102,59 @@ export function ResizableContainer(
     }
   });
 
-  const handlePointerDown = (
-    e: PointerEvent,
-    direction: "horizontal" | "vertical",
-  ) => {
-    e.preventDefault();
+  const handleWidthResize = (e: PointerEvent) => {
     const container = containerRef();
     if (!container) {
       return;
     }
 
-    setResizing(true);
-    const initialWidth = container.offsetWidth;
-    const initialHeight = container.offsetHeight;
-    const startX = e.clientX;
-    const startY = e.clientY;
+    setActiveResizeKey("width");
+    const startX = e.pageX;
+    const track = resizeTrackSize();
+    const initialWidth = container.offsetWidth - track;
 
-    const handlePointerMove = (e: PointerEvent) => {
-      if (!resizing()) {
-        return;
-      }
-
-      if (direction === "horizontal") {
-        const newWidthValue = Math.max(50, initialWidth + e.clientX - startX);
+    attachPointerDrag(
+      e,
+      (point) => {
+        const newWidthValue = Math.max(50, initialWidth + (point.pageX - startX));
         const roundedWidth = Math.round(newWidthValue * 100) / 100;
         const newWidth = `${roundedWidth}px`;
         setWidth(newWidth);
         mergeVertexProperties(0, props.view, graph, setGraph, {
           width: newWidth,
         });
-      } else if (direction === "vertical") {
-        const newHeightValue = Math.max(50, initialHeight + e.clientY - startY);
+      },
+      () => setActiveResizeKey(null),
+    );
+  };
+
+  const handleHeightResize = (e: PointerEvent) => {
+    const container = containerRef();
+    if (!container) {
+      return;
+    }
+
+    setActiveResizeKey("height");
+    const startY = e.pageY;
+    const track = resizeTrackSize();
+    const initialHeight = container.offsetHeight - track;
+
+    attachPointerDrag(
+      e,
+      (point) => {
+        const newHeightValue = Math.max(
+          50,
+          initialHeight + (point.pageY - startY),
+        );
         const roundedHeight = Math.round(newHeightValue * 100) / 100;
         const newHeight = `${roundedHeight}px`;
         setHeight(newHeight);
         mergeVertexProperties(0, props.view, graph, setGraph, {
           height: newHeight,
         });
-      }
-    };
-
-    const handlePointerUp = () => {
-      setResizing(false);
-      window.removeEventListener("pointermove", handlePointerMove);
-      window.removeEventListener("pointerup", handlePointerUp);
-      window.removeEventListener("pointercancel", handlePointerUp);
-    };
-
-    window.addEventListener("pointermove", handlePointerMove);
-    window.addEventListener("pointerup", handlePointerUp);
-    window.addEventListener("pointercancel", handlePointerUp);
+      },
+      () => setActiveResizeKey(null),
+    );
   };
 
   const bindRootDrop = bindDragDropRef(
@@ -200,40 +192,54 @@ export function ResizableContainer(
         css={[
           STYLES.overflowCss,
           `return \`._id {
-  position: relative;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr ${trackSize()};
+  grid-template-rows: 1fr ${trackSize()};
   border-left: 1px solid \${args.theme.var.color.border};
   border-top: 1px solid \${args.theme.var.color.border};
+  min-width: 0;
+  min-height: 0;
 }\`;`,
           isDraggingOver()
             ? "return `._id { background-color: ${args.theme.var.color.primary_light_150}; }`;"
             : "",
-          resizing() ? "return `._id { user-select: none; }`;" : "",
+          activeResizeKey() ? "return `._id { user-select: none; }`;" : "",
         ]}
         ref={(element) => {
           setContainerRef(element);
           bindRootDrop(element);
         }}
         style={{
-          height: height(),
-          width: width(),
+          height: `calc(${height()} + ${trackSize()})`,
+          width: `calc(${width()} + ${trackSize()})`,
         }}
       >
         <As
           as="div"
-          css={getResizeHandleCSS("horizontal")}
-          onPointerDown={(e) => handlePointerDown(e, "horizontal")}
+          css={`return \`._id {
+            min-width: 0;
+            min-height: 0;
+            overflow: hidden;
+          }\`;`}
+        >
+          {props.children}
+        </As>
+        <DesignerResizeHandle
+          active={activeResizeKey() === "width"}
+          ariaLabel="Resize preview width"
+          axis="x"
+          onPointerDown={handleWidthResize}
         />
-        {props.children}
-        <As
-          as="div"
-          css={getResizeHandleCSS("vertical")}
-          onPointerDown={(e) => handlePointerDown(e, "vertical")}
+        <DesignerResizeHandle
+          active={activeResizeKey() === "height"}
+          ariaLabel="Resize preview height"
+          axis="y"
+          onPointerDown={handleHeightResize}
         />
+        <div aria-hidden="true" />
       </As>
 
-      <Show when={resizing()}>
+      <Show when={activeResizeKey()}>
         <ResizeOverlay />
       </Show>
     </As>
