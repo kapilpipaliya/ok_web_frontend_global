@@ -85,6 +85,7 @@ export function ComponentPaletteTreeItem(
     onEditCategory?: (category: Vertex) => void;
     onDeleteCategory?: (category: Vertex) => void;
     onAddSubcategory?: (parentId: Id) => void;
+    onAddItem?: (categoryId: Id, anchorEl: HTMLElement) => void;
     filterTree?: (vertex: Vertex) => {
       match: boolean;
       matchedChildren: boolean;
@@ -146,6 +147,10 @@ export function ComponentPaletteTreeItem(
   const canDeleteCategory = () =>
     canManageCategory() &&
     !categoryHasChildren(graph, setGraph, props.item.id, paletteConfig());
+  const canAddItemToCategory = () =>
+    (isCategory() || isUncategorized()) && !isRootCategory();
+
+  let addItemButtonRef!: HTMLElement;
 
   const categoryChildren = createMemo(() =>
     isCategory() || isUncategorized()
@@ -447,6 +452,24 @@ export function ComponentPaletteTreeItem(
                 {contentCount() ?? ""}
               </As>
             </Show>
+            <Show when={canAddItemToCategory() && showActions()}>
+              <As
+                as="span"
+                {...actionPointerProps(hover.keepVisible)}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <IconButton
+                  css={buttonStyle}
+                  icon="ph:file-plus"
+                  onClick={() =>
+                    props.onAddItem?.(props.item.id, addItemButtonRef)
+                  }
+                  ref={(el) => (addItemButtonRef = el)}
+                  size={14}
+                  title={`Add ${paletteConfig().tableVertexLabel}`}
+                />
+              </As>
+            </Show>
             <Show when={canManageCategory() && showActions()}>
               <As
                 as="span"
@@ -540,6 +563,7 @@ export function ComponentPaletteTreeItem(
                   isPaletteDragging={props.isPaletteDragging}
                   item={child}
                   itemRef={props.itemRef}
+                  onAddItem={props.onAddItem}
                   onAddSubcategory={props.onAddSubcategory}
                   onDeleteCategory={props.onDeleteCategory}
                   onDrop={props.onDrop}
@@ -569,6 +593,7 @@ export function ComponentPaletteTreeItem(
                   isPaletteDragging={props.isPaletteDragging}
                   item={child}
                   itemRef={props.itemRef}
+                  onAddItem={props.onAddItem}
                   onAddSubcategory={props.onAddSubcategory}
                   onDeleteCategory={props.onDeleteCategory}
                   onDrop={props.onDrop}

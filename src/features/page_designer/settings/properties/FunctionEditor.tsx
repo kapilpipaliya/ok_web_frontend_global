@@ -9,33 +9,31 @@ import { IconButton } from "~/components/styled/IconButton";
 import { CustomModal } from "~/components/styled/modal/CustomModal";
 import { MonacoEditorWrapper } from "~/components/styled/MonacoEditorWrapper";
 import {
-  resizeHandleStyles,
+  bottomResizeHandleStyles,
   resizeContainerStyles,
+  topResizeHandleStyles,
 } from "~/components/styled/resizeHandleStyles";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
 import {
   formatCSSCode,
   formatJavaScriptCode,
 } from "~/lib/data_structure/string/formatUtils";
+import { useVerticalResize } from "~/lib/hooks/useVerticalResize";
 import { validateFunction } from "~/lib/validation/validateFunction";
 import { As } from "~/components/As";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import type { Id } from "~/lib/graph/type/id";
 import { useGraph } from "~/lib/graph/context/UseGraph";
-import { createIsTouchDevice } from "~/lib/hooks/createIsTouchDevice";
 
-// import onigasm from 'onigasm/lib/onigasm.wasm?url';
-
-// Shared button styles
 const buttonStyles = (color: string) => `return \`._id {
-  padding: 1px 4px;
+  padding: 1px 6px;
   background-color: ${color};
   color: \${args.theme.var.color.primary_text};
-  border-radius: 1px;
+  border-radius: 2px;
   border: none;
+  font-size: 0.75rem;
 }\`;`;
 
-// Button components
 const EditorButton = (props: {
   onClick: () => void;
   color: string;
@@ -52,9 +50,9 @@ const EditorButton = (props: {
       cursor: ${props.disabled ? "not-allowed" : "pointer"};
     }\`;`,
     ]}
+    disabled={props.disabled}
     onClick={props.onClick}
     title={props.title}
-    disabled={props.disabled}
   >
     {props.children}
   </As>
@@ -67,33 +65,28 @@ export function FunctionEditor(props: {
   returnType?: "object" | "string";
   defaultValue?: string;
   setPropertyValue: (meta: Vertex, value: unknown) => void;
-  vertexId?: Id; // Optional: specific vertex to track instead of selected
+  vertexId?: Id;
 }) {
   const [graph] = useGraph();
   const formStoreId = useDesignerFormIdContext();
   const formStoreVertex = () =>
     graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
-  // Determine which vertex to track - either specific vertex or selected
   const targetVertexId = () =>
     props.vertexId ?? formStoreVertex()?.P.selectedId;
 
-  // Derived state
   const propertyKey = () => props.keyName || "props";
   const getPropertyValue = () => {
     const currentValue = graph.vertexes[targetVertexId()]?.P[propertyKey()];
 
-    // If value exists, return it
     if (currentValue !== undefined && currentValue !== null) {
       return currentValue;
     }
 
-    // Use prop defaultValue if provided
     if (props.defaultValue !== undefined) {
       return props.defaultValue;
     }
 
-    // Default values based on keyName
     if (propertyKey() === "css") {
       return "return `._id {\n  \n}`;";
     }
@@ -101,20 +94,15 @@ export function FunctionEditor(props: {
       return "return {\n  \n}";
     }
 
-    // Fallback to empty string for other cases
     return "";
   };
 
-  // State
   const [isFunctionValid, setIsFunctionValid] = createSignal(true);
   const [isModalOpen, setIsModalOpen] = createSignal(false);
   const [editorValue, setEditorValue] = createSignal(getPropertyValue());
   const [originalValue, setOriginalValue] = createSignal(getPropertyValue());
   const [hasChanges, setHasChanges] = createSignal(false);
 
-  const isTouchDevice = createIsTouchDevice();
-
-  // Editor reference
   let editorRef: Monaco.editor.IStandaloneCodeEditor | undefined;
 
   const runEditorAction = (actionId: string) => {
@@ -164,7 +152,7 @@ export function FunctionEditor(props: {
     }
 
     editor.pushUndoStop();
-    editor.executeEdits("touch-cut", [
+    editor.executeEdits("toolbar-cut", [
       { range: selection, text: "", forceMoveMarkers: true },
     ]);
     handleEditorChange(model.getValue());
@@ -198,7 +186,7 @@ export function FunctionEditor(props: {
     }
 
     editor.pushUndoStop();
-    editor.executeEdits("touch-paste", [
+    editor.executeEdits("toolbar-paste", [
       { range: selection, text, forceMoveMarkers: true },
     ]);
 
@@ -208,7 +196,7 @@ export function FunctionEditor(props: {
     }
   };
 
-  const touchToolbarActions = [
+  const toolbarActions = [
     {
       icon: "ph:arrow-counter-clockwise",
       title: "Undo",
@@ -247,11 +235,10 @@ export function FunctionEditor(props: {
     },
   ] as const;
 
-  const handleTouchToolbarPointerDown = (event: PointerEvent) => {
+  const handleToolbarPointerDown = (event: PointerEvent) => {
     event.preventDefault();
   };
 
-  // Update editor value when target element changes or property value changes
   createEffect(
     on(
       () => {
@@ -262,7 +249,7 @@ export function FunctionEditor(props: {
             : undefined;
         return { vertexId, propertyValue };
       },
-      ({ vertexId, propertyValue }) => {
+      ({ vertexId }) => {
         if (vertexId !== -1 && vertexId !== undefined) {
           const newValue = getPropertyValue();
           setIsFunctionValid(true);
@@ -270,7 +257,6 @@ export function FunctionEditor(props: {
           setOriginalValue(newValue);
           setHasChanges(false);
 
-          // Update Monaco editor if it exists
           if (editorRef) {
             const model = editorRef.getModel();
             if (model && model.getValue() !== newValue) {
@@ -283,13 +269,11 @@ export function FunctionEditor(props: {
     ),
   );
 
-  // Check for changes when editor value updates
   const handleEditorChange = (value: string) => {
     setEditorValue(value);
     setHasChanges(value !== originalValue());
   };
 
-  // Handlers
   const evaluateProperty = (value: string) => {
     const validation = validateFunction(value, props.returnType);
     setIsFunctionValid(validation.isValid);
@@ -350,15 +334,13 @@ export function FunctionEditor(props: {
     }
   };
 
-  // UI Components
   const EditorContent = (p: { maxHeight?: string }) => {
-    // Calculate initial height based on content
-    const calculateInitialHeight = () => {
+    const calculateAutoHeight = () => {
       const lines = editorValue().split("\n").length;
-      const lineHeight = 19; // Monaco editor default line height
-      const padding = 40; // Extra padding for scrollbar and margins
+      const lineHeight = 19;
+      const padding = 40;
       const minHeight = 100;
-      const maxHeight = p.maxHeight ? Number.parseInt(p.maxHeight) : 400; // Use provided maxHeight or default
+      const maxHeight = p.maxHeight ? Number.parseInt(p.maxHeight) : 400;
 
       const calculatedHeight = Math.min(
         Math.max(lines * lineHeight + padding, minHeight),
@@ -367,160 +349,55 @@ export function FunctionEditor(props: {
       return `${calculatedHeight}px`;
     };
 
-    const [editorHeight, setEditorHeight] = createSignal(
-      calculateInitialHeight(),
-    );
-    let resizableEditorAreaRef: HTMLDivElement | undefined; // Ref for the area containing editor + handle
-    let dragStartEditorHeight = 0;
-    let dragStartY = 0;
+    const autoHeight = () => calculateAutoHeight();
+    const resize = useVerticalResize({
+      initialHeight: autoHeight,
+      autoHeight,
+    });
 
-    // Update height when content changes
     createEffect(() => {
-      editorValue(); // Track changes
+      editorValue();
       if (!isModalOpen()) {
-        // Only auto-adjust for inline editor
-        setEditorHeight(calculateInitialHeight());
+        resize.resetManualHeight();
       }
     });
 
-    const onPointerDownResize = (e: PointerEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      dragStartEditorHeight = Number.parseFloat(
-        editorHeight().replace("px", ""),
-      );
-      dragStartY = e.clientY;
-      const handle = e.currentTarget as HTMLDivElement;
-      const pointerId = e.pointerId;
-
-      const onPointerMoveResize = (moveEvent: PointerEvent) => {
-        if (moveEvent.pointerId !== pointerId) {
-          return;
-        }
-        const deltaY = moveEvent.clientY - dragStartY;
-        const newHeight = dragStartEditorHeight + deltaY;
-        setEditorHeight(`${Math.max(100, newHeight)}px`);
-      };
-
-      const onPointerUpResize = (upEvent: PointerEvent) => {
-        if (upEvent.pointerId !== pointerId) {
-          return;
-        }
-        document.removeEventListener("pointermove", onPointerMoveResize);
-        document.removeEventListener("pointerup", onPointerUpResize);
-        document.removeEventListener("pointercancel", onPointerUpResize);
-      };
-
-      handle.setPointerCapture(pointerId);
-      document.addEventListener("pointermove", onPointerMoveResize);
-      document.addEventListener("pointerup", onPointerUpResize);
-      document.addEventListener("pointercancel", onPointerUpResize);
-    };
-
     return (
-      // Main container for all parts of EditorContent (editor, buttons, messages)
       <As
         as="div"
         css={`return \`._id {
           display: flex;
           flex-direction: column;
-          gap: 8px;
+          gap: 4px;
         }\`;`}
       >
-        <Show when={isTouchDevice()}>
+        <As as="div" css={resizeContainerStyles}>
           <As
             as="div"
-            css={`return \`._id {
-              display: flex;
-              align-items: center;
-              gap: 2px;
-              padding-bottom: 4px;
-              border-bottom: 1px solid \${args.theme.var.color.border};
-            }\`;`}
-          >
-            <For each={touchToolbarActions}>
-              {(action) => (
-                <IconButton
-                  css={`return \`._id {
-                    background-color: transparent;
-                    border: none;
-                    padding: 2px;
-                  }\`;`}
-                  icon={action.icon}
-                  onClick={action.onClick}
-                  onPointerDown={handleTouchToolbarPointerDown}
-                  size={16}
-                  title={action.title}
-                />
-              )}
-            </For>
-          </As>
-        </Show>
-
-        {/* Wrapper for the resizable editor and its handle */}
-        <As as="div" ref={resizableEditorAreaRef} css={resizeContainerStyles}>
+            css={topResizeHandleStyles}
+            onPointerDown={resize.onTopPointerDown}
+          />
           <MonacoEditorWrapper
             error={!isFunctionValid()}
-            height={editorHeight()}
+            height={resize.height()}
             language={props.language || "javascript"}
             onChange={handleEditorChange}
             onMount={(_monaco, editor) => (editorRef = editor)}
             showMinimap={false}
             value={editorValue()}
           />
-          {/* Resize Handle - positioned absolutely to resizableEditorAreaRef */}
           <As
             as="div"
-            onPointerDown={onPointerDownResize}
-            css={resizeHandleStyles}
+            css={bottomResizeHandleStyles}
+            onPointerDown={resize.onBottomPointerDown}
           />
         </As>
 
-        {/* Buttons container - follows the resizable editor area */}
-        <As
-          as="div"
-          css={`return \`._id {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 4px;
-          }\`;`}
-        >
-          <EditorButton
-            color={"${args.theme.var.color.primary}"}
-            onClick={handleSave}
-            disabled={!hasChanges()}
-          >
-            Submit
-          </EditorButton>
-
-          <EditorButton
-            color={"${args.theme.var.color.primary_light_300}"}
-            onClick={formatCode}
-            title="Format Code with Prettier"
-          >
-            Format
-          </EditorButton>
-
-          <Show when={isModalOpen()}>
-            <As as="div" css={"return `._id { margin-left: auto; }`;"}>
-              <EditorButton
-                color={"${args.theme.var.color.error_light_800}"}
-                onClick={() => setIsModalOpen(false)}
-              >
-                Cancel
-              </EditorButton>
-            </As>
-          </Show>
-        </As>
-
-        {/* Invalid Function message - also follows buttons */}
         <Show when={!isFunctionValid()}>
           <As
             as="span"
             css={`return \`._id {
               color: \${args.theme.var.color.error};
-              margin-top: 4px; 
             }\`;`}
           >
             Invalid Function
@@ -534,24 +411,93 @@ export function FunctionEditor(props: {
     <>
       <As as="div" css={"return `._id { margin-top: 5px; }`;"}>
         <As
-          as="span"
-          css={"return `._id { display: flex; align-items: center; }`;"}
+          as="div"
+          css={`return \`._id {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-wrap: wrap;
+            margin-bottom: 4px;
+          }\`;`}
         >
-          {props.label}
-          <IconButton
+          <As
+            as="span"
             css={`return \`._id {
-              margin-left: 6px;
-              background-color: transparent;
-              border: none;
+              font-weight: 500;
+              font-size: 0.875rem;
+              margin-right: 4px;
             }\`;`}
-            icon="ph:arrow-square-out"
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsModalOpen(true);
-            }}
-            title="Edit Function in Modal"
-          />
+          >
+            {props.label}
+          </As>
+
+          <As
+            as="div"
+            css={`return \`._id {
+              display: flex;
+              align-items: center;
+              gap: 2px;
+            }\`;`}
+          >
+            <For each={toolbarActions}>
+              {(action) => (
+                <IconButton
+                  css={`return \`._id {
+                    background-color: transparent;
+                    border: none;
+                    padding: 2px;
+                  }\`;`}
+                  icon={action.icon}
+                  onClick={action.onClick}
+                  onPointerDown={handleToolbarPointerDown}
+                  size={16}
+                  title={action.title}
+                />
+              )}
+            </For>
+          </As>
+
+          <As
+            as="div"
+            css={`return \`._id {
+              display: flex;
+              align-items: center;
+              gap: 4px;
+              margin-left: auto;
+            }\`;`}
+          >
+            <EditorButton
+              color={"${args.theme.var.color.success}"}
+              disabled={!hasChanges()}
+              onClick={handleSave}
+            >
+              Submit
+            </EditorButton>
+
+            <EditorButton
+              color={"${args.theme.var.color.primary_light_300}"}
+              onClick={formatCode}
+              title="Format Code with Prettier"
+            >
+              Format
+            </EditorButton>
+
+            <IconButton
+              css={`return \`._id {
+                background-color: transparent;
+                border: none;
+              }\`;`}
+              icon="ph:arrow-square-out"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsModalOpen(true);
+              }}
+              size={16}
+              title="Edit Function in Modal"
+            />
+          </As>
         </As>
+
         <EditorContent />
       </As>
 

@@ -14,6 +14,7 @@ import type { CssType } from "~/components/form/type/CssType";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 import { getChildrenAttrs } from "~/features/page_designer/functions/layout/getChildrenAttrs";
+import { getPlatformModifierKeyLabel } from "~/lib/dom/getPlatformModifierKeyLabel";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 import type { VertexMap } from "~/lib/graph/type/vertexMap";
 import type { EdgeMap } from "~/lib/graph/type/edgeMap";
@@ -124,7 +125,7 @@ export function CopyButton(props: Readonly<CopyButtonProps>) {
         }
       }}
       size={props.size}
-      title="Copy (Ctrl+Click to Duplicate)"
+      title={`Copy (${getPlatformModifierKeyLabel()}+Click to Duplicate)`}
     />
   );
 }

@@ -16,7 +16,7 @@ interface ImportHtmlButtonProps {
 }
 
 export function ImportHtmlButton(props: Readonly<ImportHtmlButtonProps>) {
-  let saveAsTemplateRef: HTMLElement;
+  let importHtmlRef: HTMLElement;
   const [showModal, setShowModal] = createSignal(false);
   return (
     <>
@@ -35,7 +35,7 @@ export function ImportHtmlButton(props: Readonly<ImportHtmlButtonProps>) {
           e.stopPropagation();
           setShowModal(true);
         }}
-        ref={(el) => (saveAsTemplateRef = el)}
+        ref={(el) => (importHtmlRef = el)}
         size={props.size}
         title="Import HTML"
       />
@@ -43,8 +43,7 @@ export function ImportHtmlButton(props: Readonly<ImportHtmlButtonProps>) {
         <ImportMenu
           item={props.item}
           onClose={() => setShowModal(false)}
-          // onMouseLeave={() => setShowModal(false)}
-          parentRef={saveAsTemplateRef!}
+          parentRef={importHtmlRef!}
         />
       </Show>
     </>

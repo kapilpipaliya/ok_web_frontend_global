@@ -12,6 +12,7 @@ import { cloneLayoutAndChildren } from "~/features/page_designer/functions/layou
 import type { CssType } from "~/components/form/type/CssType";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
+import { getPlatformModifierKeyLabel } from "~/lib/dom/getPlatformModifierKeyLabel";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
 import { importGraphStructure } from "~/lib/graph/import/importGraphStructure";
@@ -119,7 +120,7 @@ export function PasteButton(props: Readonly<PasteButtonProps>) {
         }
       }}
       size={props.size}
-      title="Paste (Ctrl+Click to paste from clipboard)"
+      title={`Paste (${getPlatformModifierKeyLabel()}+Click to paste from clipboard)`}
     />
   );
 }

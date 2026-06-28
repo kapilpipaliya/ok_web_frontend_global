@@ -107,13 +107,13 @@ export function PropertiesBody(props: { openedFormId: Id }) {
 
       <FunctionEditor
         keyName="fns"
-        label="Function Definitions"
+        label="fns"
         setPropertyValue={setPropertyValue}
         vertexId={propertiesAttrId()}
       />
       <FunctionEditor
         keyName="props"
-        label="Props Function"
+        label="prop"
         setPropertyValue={setPropertyValue}
         vertexId={propertiesAttrId()}
       />

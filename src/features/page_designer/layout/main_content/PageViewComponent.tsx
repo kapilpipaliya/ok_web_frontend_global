@@ -276,7 +276,7 @@ export function PageViewComponent(props: { mainPanel: Id }) {
                       >
                         <FunctionEditor
                           keyName="body"
-                          label="Function body"
+                          label="body"
                           language="javascript"
                           returnType="object"
                           setPropertyValue={(meta, value) => {

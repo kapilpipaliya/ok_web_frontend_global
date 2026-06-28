@@ -27,6 +27,8 @@ import {
 } from "../../context/LayoutContext";
 
 import { ComponentPaletteTreeItem } from "./ComponentPaletteTreeItem";
+import { CreatePaletteItemMenu } from "./CreatePaletteItemMenu";
+import { validatePaletteCategoryUnique } from "./validatePaletteCategoryUnique";
 import {
   fetchCategoryChildren,
   fetchPaletteTree,
@@ -97,6 +99,11 @@ export function ComponentPaletteTree(props?: {
   const [dropPosition, setDropPosition] =
     createSignal<PaletteDropPosition | null>(null);
   const [isPaletteDragging, setIsPaletteDragging] = createSignal(false);
+  const [isSavingCategory, setIsSavingCategory] = createSignal(false);
+  const [createItemTarget, setCreateItemTarget] = createSignal<{
+    categoryId: Id;
+    parentRef: HTMLElement;
+  } | null>(null);
 
   let dropInFlight = false;
 
@@ -485,6 +492,10 @@ export function ComponentPaletteTree(props?: {
   }
 
   async function handleSaveCategory() {
+    if (isSavingCategory()) {
+      return;
+    }
+
     const name = categoryName().trim();
     const key = categoryKey().trim() || name.toLowerCase().replace(/\s+/g, "_");
     if (!name) {
@@ -494,40 +505,56 @@ export function ComponentPaletteTree(props?: {
 
     const mode = categoryModalMode();
     const editingId = editingCategoryId();
-    const result = await savePaletteCategory(graph, setGraph, paletteConfig(), {
-      vertexId: mode === "edit" ? editingId : undefined,
+
+    const validation = validatePaletteCategoryUnique(graph, paletteConfig(), {
       name,
       key,
-      parentId:
-        mode === "edit" && editingId
-          ? getParentCategoryId(editingId)
-          : addParentId(),
+      excludeVertexId: mode === "edit" ? editingId : null,
     });
+    if (!validation.valid) {
+      showErrorToast(validation.message);
+      return;
+    }
 
-    if (result.result?.success) {
-      showSuccessToast(
-        result.result.message ||
-          (mode === "edit" ? "Category updated" : "Category created"),
-      );
-      closeCategoryModal();
-      const parentId =
-        mode === "edit" && editingId
-          ? getParentCategoryId(editingId)
-          : addParentId();
-      if (parentId) {
-        setExpandedKeys((k) => [...k, parentId]);
-        setSelectedCategoryId(parentId);
+    setIsSavingCategory(true);
+    try {
+      const result = await savePaletteCategory(graph, setGraph, paletteConfig(), {
+        vertexId: mode === "edit" ? editingId : undefined,
+        name,
+        key,
+        parentId:
+          mode === "edit" && editingId
+            ? getParentCategoryId(editingId)
+            : addParentId(),
+      });
+
+      if (result.result?.success) {
+        showSuccessToast(
+          result.result.message ||
+            (mode === "edit" ? "Category updated" : "Category created"),
+        );
+        closeCategoryModal();
+        const parentId =
+          mode === "edit" && editingId
+            ? getParentCategoryId(editingId)
+            : addParentId();
+        if (parentId) {
+          setExpandedKeys((k) => [...k, parentId]);
+          setSelectedCategoryId(parentId);
+        }
+        if (mode === "edit" && editingId) {
+          setSelectedCategoryId(editingId);
+        }
+      } else {
+        showErrorToast(
+          result.result?.message ||
+            (mode === "edit"
+              ? "Failed to update category"
+              : "Failed to create category"),
+        );
       }
-      if (mode === "edit" && editingId) {
-        setSelectedCategoryId(editingId);
-      }
-    } else {
-      showErrorToast(
-        result.result?.message ||
-          (mode === "edit"
-            ? "Failed to update category"
-            : "Failed to create category"),
-      );
+    } finally {
+      setIsSavingCategory(false);
     }
   }
 
@@ -715,6 +742,10 @@ export function ComponentPaletteTree(props?: {
                 isPaletteDragging={isPaletteDragging()}
                 item={item}
                 itemRef={setSelectedItemRef}
+                onAddItem={(categoryId, parentRef) => {
+                  setSelectedCategoryId(categoryId);
+                  setCreateItemTarget({ categoryId, parentRef });
+                }}
                 onAddSubcategory={(parentId) => openAddCategoryModal(parentId)}
                 onDeleteCategory={(category) =>
                   void handleDeleteCategory(category)
@@ -772,11 +803,13 @@ export function ComponentPaletteTree(props?: {
                 : "Add Category"}
             </As>
             <input
+              disabled={isSavingCategory()}
               placeholder="Name"
               value={categoryName()}
               onInput={(e) => setCategoryName(e.currentTarget.value)}
             />
             <input
+              disabled={isSavingCategory()}
               placeholder="Key (optional)"
               value={categoryKey()}
               onInput={(e) => setCategoryKey(e.currentTarget.value)}
@@ -785,15 +818,33 @@ export function ComponentPaletteTree(props?: {
               as="div"
               css={"return `._id { display: flex; gap: 0.5rem; justify-content: flex-end; }`;"}
             >
-              <button type="button" onClick={closeCategoryModal}>
+              <button
+                disabled={isSavingCategory()}
+                type="button"
+                onClick={closeCategoryModal}
+              >
                 Cancel
               </button>
-              <button type="button" onClick={() => void handleSaveCategory()}>
-                Save
+              <button
+                disabled={isSavingCategory()}
+                type="button"
+                onClick={() => void handleSaveCategory()}
+              >
+                {isSavingCategory() ? "Saving..." : "Save"}
               </button>
             </As>
           </As>
         </As>
+      </Show>
+
+      <Show when={createItemTarget()}>
+        <CreatePaletteItemMenu
+          config={paletteConfig()}
+          onClickOutside={() => setCreateItemTarget(null)}
+          onClose={() => setCreateItemTarget(null)}
+          parentRef={createItemTarget()!.parentRef}
+          selectedCategoryId={createItemTarget()!.categoryId}
+        />
       </Show>
     </As>
   );

@@ -36,6 +36,7 @@ import { SelectPermissionField } from "./permission_field/SelectPermissionField"
 import { SelectPageField } from "./SelectPageField";
 import { UniqueNameField } from "./UniqueNameField";
 import { FunctionEditor } from "../FunctionEditor";
+import { TextTypeButtonGroup } from "./TextTypeButtonGroup";
 import { isPermissionsConfigurable } from "../../utils/permissionUtils";
 import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
@@ -145,19 +146,36 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
       <Show when={selectedAttr()?.P.componentName !== "Data"}>
         <FunctionEditor
           keyName="css"
-          label="CSS"
-          // language="css"
+          label="css"
           language="javascript"
           returnType="string"
           setPropertyValue={props.onChange}
         />
-        {/* <ClassesComponent
-          metaAttributes={props.metaAttributes}
+      </Show>
+      <Show when={selectedAttr()?.P.componentName === "Html"}>
+        <TextTypeButtonGroup
+          meta={graph.vertexes[vertexIds.textType]}
+          onChange={props.onChange}
+          selectedLayout={props.selectedLayout}
+        />
+        <HighlightSetValueContent
+          meta={graph.vertexes[vertexIds.text]}
           onChange={props.onChange}
           selectedLayout={props.selectedLayout}
           txnId={props.txnId}
-          vertexIds={vertexIds}
-        /> */}
+        />
+      </Show>
+      <Show
+        when={isPermissionsConfigurable(
+          graph,
+          formStoreVertex()?.P.formDataId,
+        )}
+      >
+        <SelectPermissionField
+          meta={graph.vertexes[vertexIds.perm]}
+          selectedLayout={props.selectedLayout}
+          txnId={props.txnId}
+        />
       </Show>
     </>
   );
@@ -448,7 +466,6 @@ function getMetaVertexes(
     ...(isPage && componentName === "Page"
       ? [graph.vertexes[vertexIds.thankYouPage]]
       : []),
-    graph.vertexes[vertexIds.perm],
     ...(isFormField ? [graph.vertexes[vertexIds.defaultValue]] : []),
     // always displayed properties
     graph.vertexes[vertexIds.calculatedValue],
@@ -471,8 +488,6 @@ function getMetaVertexes(
           graph.vertexes[vertexIds.height],
         ]
       : []),
-    ...(componentName === "Html" ? [graph.vertexes[vertexIds.textType]] : []),
-    ...(componentName === "Html" ? [graph.vertexes[vertexIds.text]] : []),
     ...(isParentSlot ? [graph.vertexes[vertexIds.slot]] : []),
     ...(isCurrentComponentSlot ? [graph.vertexes[vertexIds.slot]] : []),
     ...nonCssVertices,

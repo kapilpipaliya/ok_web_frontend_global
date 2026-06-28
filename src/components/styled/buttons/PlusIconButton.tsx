@@ -4,6 +4,7 @@ interface PlusIconButtonProps {
   onClick: () => void;
   ariaLabel?: string;
   size?: string;
+  ref?: (el: HTMLElement) => void;
 }
 
 export function PlusIconButton(props: PlusIconButtonProps) {
@@ -24,6 +25,7 @@ export function PlusIconButton(props: PlusIconButtonProps) {
         }
       }\`;`}
       icon="ph:plus"
+      ref={props.ref}
       size={props.size || "18"}
       aria-label={props.ariaLabel || "Add new item"}
       onClick={props.onClick}

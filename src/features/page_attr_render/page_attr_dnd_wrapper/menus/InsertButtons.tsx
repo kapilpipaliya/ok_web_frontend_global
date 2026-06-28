@@ -2,8 +2,8 @@ import { createSignal, Show } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
+import { FloatingFormDropdown } from "~/components/styled/dialog/FloatingFormDropdown";
 import { IconButton } from "~/components/styled/IconButton";
-import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
 import { ComponentList } from "~/features/page_designer/form_elements/components/ComponentList";
 import { handleDropAtPosition } from "~/features/page_designer/functions/drag_drop/core/handleDropAtPosition";
@@ -30,10 +30,8 @@ export function InsertButtons(props: Readonly<{ item: Vertex; size: number }>) {
   const formStoreVertex = () =>
     graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
-  // Check if this is a root-level component
   const isRootLevel = () => formStoreVertex()?.P.formDataId === props.item.id;
 
-  // Safe reference to form data for drag and drop operations
   const getFormData = () =>
     graph.vertexes[formStoreVertex()?.P.formDataId || ""] || undefined;
 
@@ -58,7 +56,7 @@ export function InsertButtons(props: Readonly<{ item: Vertex; size: number }>) {
           }}
           ref={(el) => setInsertBeforeButtonsRef(el)}
           size={props.size}
-          title="Add Before"
+          title="Insert Before"
         />
         <Show when={showBeforeMenu() && insertBeforeButtonsRef()}>
           <InsertButtonsMenu
@@ -74,9 +72,11 @@ export function InsertButtons(props: Readonly<{ item: Vertex; size: number }>) {
                 props.item,
                 "before",
               );
+              setShowBeforeMenu(false);
             }}
-            onMouseLeave={() => setShowBeforeMenu(false)}
             parentRef={insertBeforeButtonsRef()!}
+            subtitle="Double-click a component to insert before the selected element."
+            title="Insert Before"
           />
         </Show>
 
@@ -98,7 +98,7 @@ export function InsertButtons(props: Readonly<{ item: Vertex; size: number }>) {
           }}
           ref={(el) => setInsertAfterButtonsRef(el)}
           size={props.size}
-          title="Add After"
+          title="Insert After"
         />
         <Show when={showAfterMenu() && insertAfterButtonsRef()}>
           <InsertButtonsMenu
@@ -114,9 +114,11 @@ export function InsertButtons(props: Readonly<{ item: Vertex; size: number }>) {
                 props.item,
                 "after",
               );
+              setShowAfterMenu(false);
             }}
-            onMouseLeave={() => setShowAfterMenu(false)}
             parentRef={insertAfterButtonsRef()!}
+            subtitle="Double-click a component to insert after the selected element."
+            title="Insert After"
           />
         </Show>
       </Show>
@@ -155,9 +157,11 @@ export function InsertButtons(props: Readonly<{ item: Vertex; size: number }>) {
               props.item,
               "center",
             );
+            setShowInsideMenu(false);
           }}
-          onMouseLeave={() => setShowInsideMenu(false)}
           parentRef={insertInsideButtonsRef()!}
+          subtitle="Double-click a component to add it inside the selected element."
+          title="Add Inside"
         />
       </Show>
     </>
@@ -167,25 +171,26 @@ export function InsertButtons(props: Readonly<{ item: Vertex; size: number }>) {
 export function InsertButtonsMenu(
   props: Readonly<{
     item: Vertex;
+    title: string;
+    subtitle: string;
     onClose: () => void;
     onDoubleClick: (fromVertex: Vertex) => void;
-    onMouseLeave: () => void;
     parentRef: HTMLElement;
   }>,
 ) {
   return (
-    <DropdownMenu
-      css={`return \`._id {
-  padding: 0.50rem;
-}\`;`}
-      onMouseLeave={props.onMouseLeave}
+    <FloatingFormDropdown
+      onClickOutside={props.onClose}
       parentRef={props.parentRef}
+      showFooter={false}
+      subtitle={props.subtitle}
+      title={props.title}
     >
       <ComponentList
         edgeName="ParentComp"
         onDoubleClick={props.onDoubleClick}
         rootExpression={`g:'Comp[Root]'`}
       />
-    </DropdownMenu>
+    </FloatingFormDropdown>
   );
 }

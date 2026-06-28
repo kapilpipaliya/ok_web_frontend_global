@@ -3,17 +3,10 @@ import { createSelector, Show } from "solid-js";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
-import { DeleteButton } from "~/features/page_attr_render/page_attr_dnd_wrapper/buttons/DeleteButton";
-import { ImportHtmlButton } from "~/features/page_attr_render/page_attr_dnd_wrapper/buttons/ImportHtmlButton";
-import { ParentButton } from "~/features/page_attr_render/page_attr_dnd_wrapper/buttons/ParentButton";
-import { SaveAsTemplateButton } from "~/features/page_attr_render/page_attr_dnd_wrapper/buttons/SaveAsTemplateButton";
-import { CopyButton } from "~/features/page_attr_render/page_attr_dnd_wrapper/buttons/CopyButton";
-import { PasteButton } from "~/features/page_attr_render/page_attr_dnd_wrapper/buttons/PasteButton";
-import { InsertButtons } from "~/features/page_attr_render/page_attr_dnd_wrapper/menus/InsertButtons";
+import { AttrActionButtons } from "~/features/page_attr_render/page_attr_dnd_wrapper/buttons/AttrActionButtons";
 
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
 import { getComponentLabel } from "../../functions/component/getComponentLabel";
-import { HideShowIcon } from "./HideShowIcon";
 import { As } from "~/components/As";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
@@ -32,8 +25,6 @@ export function AttrConfigIcons(
 
   const isRootLevel = () =>
     formStoreVertex()?.P.formDataId === props.metaVertex.id;
-
-  // const isSelectedHoverId = createSelector(() => formStoreVertex()?.P.hoverId);
 
   const iconSize = 32;
 
@@ -57,35 +48,14 @@ export function AttrConfigIcons(
 }\`;`}
       >
         <Show when={isSelectedLayoutId(props.metaVertex.id)}>
-          <InsertButtons item={props.metaVertex} size={iconSize} />
-        </Show>
-
-        <Show when={isSelectedLayoutId(props.metaVertex.id)}>
-          <Show when={!isRootLevel()}>
-            <ParentButton item={props.metaVertex} size={iconSize} />
-          </Show>
-
-          <CopyButton item={props.metaVertex} size={iconSize} />
-
-          <PasteButton item={props.metaVertex} size={iconSize} />
-
-          {/* <Show when={!isRootLevel()}> */}
-          <SaveAsTemplateButton item={props.metaVertex} size={iconSize} />
-          {/* </Show> */}
-
-          <ImportHtmlButton item={props.metaVertex} size={iconSize} />
-
-          <Show when={!isRootLevel()}>
-            <HideShowIcon iconSize={iconSize} metaVertex={props.metaVertex} />
-          </Show>
-
-          <Show when={!isRootLevel()}>
-            <DeleteButton
-              componentName={getComponent()!}
-              item={props.metaVertex}
-              size={iconSize}
-            />
-          </Show>
+          <AttrActionButtons
+            componentName={getComponent()}
+            isRootLevel={isRootLevel()}
+            isSelected={isSelectedLayoutId(props.metaVertex.id)}
+            item={props.metaVertex}
+            layout="column"
+            size={iconSize}
+          />
         </Show>
       </As>
     </DropdownMenu>

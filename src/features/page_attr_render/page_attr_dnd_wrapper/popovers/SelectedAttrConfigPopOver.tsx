@@ -16,7 +16,7 @@ import { DeleteButton } from "../buttons/DeleteButton";
 import { ImportHtmlButton } from "../buttons/ImportHtmlButton";
 import { ParentButton } from "../buttons/ParentButton";
 import { PreviewCSSButton } from "../buttons/PreviewCSSButton";
-import { SaveAsTemplateButton } from "../buttons/SaveAsTemplateButton";
+import { SaveAsComponentButton } from "../buttons/SaveAsComponentButton";
 import { CopyButton } from "../buttons/CopyButton";
 import { PasteButton } from "../buttons/PasteButton";
 import { OpenInNewTabButton } from "../buttons/OpenInNewTabButton";
@@ -113,7 +113,7 @@ export function SelectedAttrConfigPopOver(
         <ParentButton item={props.item} size={iconSize} />
         <CopyButton item={props.item} size={iconSize} />
         <PasteButton item={props.item} size={iconSize} />
-        <SaveAsTemplateButton item={props.item} size={iconSize} />
+        <SaveAsComponentButton item={props.item} size={iconSize} />
         <PreviewCSSButton item={props.item} size={iconSize} />
         <ImportHtmlButton item={props.item} size={iconSize} />
         <DeleteButton

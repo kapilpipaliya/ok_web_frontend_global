@@ -1,17 +1,13 @@
-import { createSignal, onCleanup, onMount, Show } from "solid-js";
+import { createSignal, onCleanup, onMount } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
-import { DialogFooter } from "~/components/styled/dialog/DialogFooter";
-import { DialogHeader } from "~/components/styled/dialog/DialogHeader";
-import { DialogSubTitle } from "~/components/styled/dialog/DialogSubTitle";
-import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
+import { FloatingFormDropdown } from "~/components/styled/dialog/FloatingFormDropdown";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
 import { generateNewVertexId } from "~/lib/graph/mutate/core/generateNewVertexId";
 import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revert/revertTransactionUpToIndex";
 import { getLastTxnIndex } from "~/lib/graph/transaction/value/getLastTxnIndex";
 import JsxParser from "~/lib/jsx_parser/components/JsxParser";
-import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { As } from "~/components/As";
 import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
 import { deleteVertex } from "~/lib/graph/mutate/core/vertex/deleteVertex";
@@ -26,7 +22,7 @@ export function ImportMenu(
     parentRef: HTMLElement;
   }>,
 ) {
-  let nameInputRef: HTMLTextAreaElement;
+  let nameInputRef!: HTMLTextAreaElement;
   const [graph, setGraph] = useGraph();
 
   const formStoreId = useDesignerFormIdContext();
@@ -34,7 +30,6 @@ export function ImportMenu(
     graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   const [htmlContent, setHtmlContent] = createSignal("");
-  const [error] = createSignal("");
   const prevTxnIndex = getLastTxnIndex(formStoreVertex()?.P.txnId, graph);
 
   const metaVertexId = generateNewVertexId(graph, setGraph);
@@ -56,12 +51,14 @@ export function ImportMenu(
     const jsxParser = new JsxParser({
       formData: graph.vertexes[formStoreVertex()?.P.formDataId!],
       jsx: htmlContent(),
-      parent: graph.vertexes[formStoreVertex()?.P().selectedId],
+      parent: graph.vertexes[formStoreVertex()?.P.selectedId],
       showWarnings: true,
       txnId: formStoreVertex()?.P.txnId,
     });
     jsxParser.render(graph, setGraph);
+    props.onClose();
   };
+
   const onCancel = () => {
     if (prevTxnIndex !== -1) {
       revertTransactionUpToIndex(
@@ -79,17 +76,16 @@ export function ImportMenu(
   });
 
   return (
-    <DropdownMenu
-      css={`return \`._id {
-  padding: 0.50rem;
-}\`;`}
-      onClickOutside={props.onClose}
+    <FloatingFormDropdown
+      footerButtonText="Import"
+      footerDisabled={!htmlContent().trim()}
+      onClickOutside={onCancel}
+      onFooterClick={onImport}
       onMouseLeave={props.onMouseLeave}
       parentRef={props.parentRef}
+      subtitle="Import HTML to the page."
+      title="Import HTML"
     >
-      <DialogHeader title="Import HTML" />
-      <DialogSubTitle>Import HTML to the page.</DialogSubTitle>
-
       <div>
         <As
           as="label"
@@ -121,45 +117,16 @@ export function ImportMenu(
   padding-left: 0.75rem; padding-right: 0.75rem;
   padding-top: 0.375rem; padding-bottom: 0.375rem;
   width: 100%;
+  min-height: 120px;
 }\`;`}
             id="importHtml"
-            onChange={(e) => setHtmlContent(e.target.value)}
+            onInput={(e) => setHtmlContent(e.currentTarget.value)}
             placeholder="Paste HTML here"
             ref={nameInputRef!}
             value={htmlContent()}
           />
         </As>
       </div>
-      <Show when={error()}>
-        <As
-          as="div"
-          css={`return \`._id {
-  color: \${args.theme.var.color.error};
-}\`;`}
-        >
-          {error()}
-        </As>
-      </Show>
-
-      <DialogFooter>
-        <As
-          as="button"
-          css={[SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CSS]}
-          disabled={!htmlContent()}
-          onClick={onImport}
-          type="button"
-        >
-          Import
-        </As>
-        <As
-          as="button"
-          css={[SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CSS]}
-          onClick={onCancel}
-          type="button"
-        >
-          Cancel
-        </As>
-      </DialogFooter>
-    </DropdownMenu>
+    </FloatingFormDropdown>
   );
 }
