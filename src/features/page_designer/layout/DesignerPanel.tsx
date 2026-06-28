@@ -1,4 +1,4 @@
-import { type Component, createSignal, Show } from "solid-js";
+import { type Component, Show } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
 import type { SetStoreFunction } from "solid-js/store";
 
@@ -9,37 +9,10 @@ import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVerte
 import type { Id } from "~/lib/graph/type/id";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 import { STYLES } from "~/pages/settings/constants";
-
-interface ResizeHandleProps {
-  activeResizeKey: null | string;
-  isHorizontal?: boolean;
-  isResizing: boolean;
-  onPointerDown: (e: PointerEvent) => void;
-  position: "bottom" | "left" | "right" | "top";
-  resizeKey: string;
-}
-
-const ResizeHandle: Component<ResizeHandleProps> = (props) => {
-  const isHorizontal = props.isHorizontal ?? true;
-  const [isHovered, setIsHovered] = createSignal(false);
-
-  return (
-    <As
-      as="div"
-      css={`return \`._id {
-        width: ${isHorizontal ? "3px" : "100%"};
-        height: ${isHorizontal ? "100%" : "3px"};
-        cursor: ${isHorizontal ? "col-resize" : "row-resize"};
-        background-color: ${isHovered() || (props.isResizing && props.resizeKey === props.activeResizeKey) ? "${args.theme.var.color.text_light_300}" : "transparent"};
-        transition: background-color 0.2s;
-        height: 100%;
-      }}\`;`}
-      onMouseEnter={() => !props.isResizing && setIsHovered(true)}
-      onMouseLeave={() => !props.isResizing && setIsHovered(false)}
-      onPointerDown={props.onPointerDown}
-    />
-  );
-};
+import {
+  DESIGNER_RESIZE_TRACK_SIZE,
+  DesignerResizeHandle,
+} from "./resizable/DesignerResizeHandle";
 
 export interface DesignerPanelProps {
   activeResizeKey: null | string;
@@ -81,20 +54,24 @@ export const DesignerPanel: Component<DesignerPanelProps> = (props) => {
           ? props.onResize
           : undefined));
 
+  const trackSize = `${DESIGNER_RESIZE_TRACK_SIZE}px`;
+
   const gridTemplateColumns = () => {
     const hasLeft = !!leftResizeHandler();
     const hasRight = !!rightResizeHandler();
     if (hasLeft && hasRight) {
-      return "3px 1fr 3px";
+      return `${trackSize} 1fr ${trackSize}`;
     }
     if (hasLeft) {
-      return "3px 1fr";
+      return `${trackSize} 1fr`;
     }
     if (hasRight) {
-      return "1fr 3px";
+      return `1fr ${trackSize}`;
     }
     return "1fr";
   };
+
+  const resizeAxis = () => (props.resizePosition === "top" ? "y" : "x");
 
   const Content = () => {
     return (
@@ -213,7 +190,7 @@ export const DesignerPanel: Component<DesignerPanelProps> = (props) => {
           border: 1px solid \${args.theme.var.color.border};
           display: grid;
           grid-template-columns: ${gridTemplateColumns()};
-          grid-template-rows: ${props.resizePosition === "top" ? "3px 1fr" : "100%"};
+          grid-template-rows: ${props.resizePosition === "top" ? `${trackSize} 1fr` : "100%"};
           height: 100%;
           min-width: 0;
           overflow: hidden;
@@ -223,24 +200,24 @@ export const DesignerPanel: Component<DesignerPanelProps> = (props) => {
       style={props.style}
     >
       <div style={{ display: leftResizeHandler() ? "block" : "none" }}>
-        <ResizeHandle
-          activeResizeKey={props.activeResizeKey}
-          isHorizontal={props.resizePosition !== "top"}
-          isResizing={props.isResizing}
+        <DesignerResizeHandle
+          active={
+            props.activeResizeKey ===
+            (props.resizeKeyLeft || props.resizeKey || "")
+          }
+          axis={resizeAxis()}
           onPointerDown={leftResizeHandler()!}
-          position="left"
-          resizeKey={props.resizeKeyLeft || props.resizeKey || ""}
         />
       </div>
       <Content />
       <div style={{ display: rightResizeHandler() ? "block" : "none" }}>
-        <ResizeHandle
-          activeResizeKey={props.activeResizeKey}
-          isHorizontal={props.resizePosition !== "top"}
-          isResizing={props.isResizing}
+        <DesignerResizeHandle
+          active={
+            props.activeResizeKey ===
+            (props.resizeKeyRight || props.resizeKey || "")
+          }
+          axis={resizeAxis()}
           onPointerDown={rightResizeHandler()!}
-          position="right"
-          resizeKey={props.resizeKeyRight || props.resizeKey || ""}
         />
       </div>
     </As>
@@ -315,7 +292,6 @@ export function createPanelResizeHandler<T extends Record<string, unknown>>(
       document.removeEventListener("pointercancel", onPointerUp);
     };
 
-    panel.setPointerCapture(pointerId);
     document.addEventListener("pointermove", onPointerMove);
     document.addEventListener("pointerup", onPointerUp);
     document.addEventListener("pointercancel", onPointerUp);
@@ -373,7 +349,6 @@ export function createPanelRowHeightResizeHandler<T extends Record<string, unkno
       document.removeEventListener("pointercancel", onPointerUp);
     };
 
-    row.setPointerCapture(pointerId);
     document.addEventListener("pointermove", onPointerMove);
     document.addEventListener("pointerup", onPointerUp);
     document.addEventListener("pointercancel", onPointerUp);
@@ -437,7 +412,6 @@ export function createMainPanelRowWidthResizeHandler<
       document.removeEventListener("pointercancel", onPointerUp);
     };
 
-    panel.setPointerCapture(pointerId);
     document.addEventListener("pointermove", onPointerMove);
     document.addEventListener("pointerup", onPointerUp);
     document.addEventListener("pointercancel", onPointerUp);

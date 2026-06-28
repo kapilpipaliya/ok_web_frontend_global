@@ -16,6 +16,10 @@ import {
   createPanelResizeHandler,
   DesignerPanel,
 } from "./DesignerPanel";
+import {
+  DESIGNER_RESIZE_TRACK_SIZE,
+  DesignerResizeHandle,
+} from "./resizable/DesignerResizeHandle";
 import { HeaderRow } from "../header/header_row/HeaderRow";
 import { DeleteConfirmation } from "./main_content/DeleteConfirmation";
 import { UnsavedTabSaveReminder } from "./UnsavedTabSaveReminder";
@@ -115,29 +119,13 @@ export function RenderMainContent() {
       : layout.mainPanelRow0Height != null
         ? `minmax(${MIN_MAIN_PANEL_ROW_HEIGHT}px, auto)`
         : "1fr";
-    return `${row0Css} 3px ${row1Css} 3px`;
+    return `${row0Css} ${DESIGNER_RESIZE_TRACK_SIZE}px ${row1Css} ${DESIGNER_RESIZE_TRACK_SIZE}px`;
   };
 
   const [isResizing, setIsResizing] = createSignal(false);
   const [activeResizeKey, setActiveResizeKey] = createSignal<null | string>(
     null,
   );
-
-  const rowHeightHandleCss = (resizeKey: string) =>
-    `return \`._id {
-      height: 3px;
-      flex-shrink: 0;
-      cursor: row-resize;
-      background-color: ${
-        activeResizeKey() === resizeKey
-          ? "${args.theme.var.color.text_light_300}"
-          : "transparent"
-      };
-      transition: background-color 0.2s;
-      &:hover {
-        background-color: \${args.theme.var.color.text_light_300};
-      }
-    }\`;`;
 
   const [componentsPanelRef, setComponentsPanelRef] =
     createSignal<HTMLDivElement>();
@@ -462,9 +450,9 @@ export function RenderMainContent() {
                 </As>
               </As>
 
-              <As
-                as="div"
-                css={rowHeightHandleCss("mainPanelRow0Height")}
+              <DesignerResizeHandle
+                active={activeResizeKey() === "mainPanelRow0Height"}
+                axis="y"
                 onPointerDown={handleRow0HeightResize}
               />
 
@@ -520,9 +508,9 @@ export function RenderMainContent() {
                 </As>
               </As>
 
-              <As
-                as="div"
-                css={rowHeightHandleCss("mainPanelRow1Height")}
+              <DesignerResizeHandle
+                active={activeResizeKey() === "mainPanelRow1Height"}
+                axis="y"
                 onPointerDown={handleRow1HeightResize}
               />
           </As>

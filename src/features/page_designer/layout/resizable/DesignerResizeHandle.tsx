@@ -1,0 +1,77 @@
+import { type Component } from "solid-js";
+
+import { As } from "~/components/As";
+
+export const DESIGNER_RESIZE_TRACK_SIZE = 10;
+export const DESIGNER_RESIZE_VISIBLE_SIZE = 2;
+
+export type ResizeAxis = "x" | "y";
+
+interface DesignerResizeHandleProps {
+  active: boolean;
+  ariaLabel?: string;
+  axis: ResizeAxis;
+  onPointerDown: (e: PointerEvent) => void;
+}
+
+export const DesignerResizeHandle: Component<DesignerResizeHandleProps> = (
+  props,
+) => {
+  const isXAxis = () => props.axis === "x";
+
+  const handlePointerDown = (e: PointerEvent) => {
+    e.preventDefault();
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    props.onPointerDown(e);
+  };
+
+  return (
+    <As
+      aria-label={props.ariaLabel ?? "Resize panels"}
+      aria-orientation={isXAxis() ? "vertical" : "horizontal"}
+      as="button"
+      css={`return \`._id {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        cursor: ${isXAxis() ? "col-resize" : "row-resize"};
+        touch-action: none;
+        user-select: none;
+        flex-shrink: 0;
+        z-index: 2;
+
+        &::before {
+          content: "";
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          ${
+            isXAxis()
+              ? `width: ${DESIGNER_RESIZE_VISIBLE_SIZE}px; height: 100%;`
+              : `height: ${DESIGNER_RESIZE_VISIBLE_SIZE}px; width: 100%;`
+          }
+          background-color: \${args.theme.var.color.border};
+          transition: background-color 0.2s;
+        }
+
+        &[data-active]::before {
+          background-color: \${args.theme.var.color.text_light_300};
+        }
+
+        &:hover::before {
+          background-color: \${args.theme.var.color.text_light_300};
+        }
+      }\`;`}
+      data-active={props.active ? "" : undefined}
+      onPointerDown={handlePointerDown}
+      role="separator"
+      type="button"
+    />
+  );
+};
+
+// touch-action: none is the real fix
