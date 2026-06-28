@@ -1,5 +1,10 @@
 import { createSignal, type Accessor } from "solid-js";
 
+import { createAxisResizeHandler } from "~/lib/resizable/createAxisResizeHandler";
+import { useResizeOverlay } from "~/lib/resizable/ResizeOverlayContext";
+
+type VerticalResizeEdge = "bottom" | "top";
+
 export function useVerticalResize(options: {
   minHeight?: number;
   initialHeight: Accessor<string>;
@@ -8,51 +13,41 @@ export function useVerticalResize(options: {
 }) {
   const minHeight = options.minHeight ?? 100;
   const [manualHeight, setManualHeight] = createSignal<string | null>(null);
+  const [activeKey, setActiveKey] = createSignal<null | VerticalResizeEdge>(
+    null,
+  );
+  const { setResizing } = useResizeOverlay();
 
-  const height = () => manualHeight() ?? options.autoHeight?.() ?? options.initialHeight();
+  const height = () =>
+    manualHeight() ?? options.autoHeight?.() ?? options.initialHeight();
 
-  const createPointerDown =
-    (direction: "top" | "bottom") => (e: PointerEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const startHeight = Number.parseFloat(height().replace("px", ""));
-      const startY = e.clientY;
-      const handle = e.currentTarget as HTMLDivElement;
-      const pointerId = e.pointerId;
+  const parseHeight = () =>
+    Number.parseFloat(height().replace("px", "")) || minHeight;
 
-      const onPointerMove = (moveEvent: PointerEvent) => {
-        if (moveEvent.pointerId !== pointerId) {
-          return;
-        }
-        const deltaY = moveEvent.clientY - startY;
-        const newHeight =
-          direction === "bottom"
-            ? startHeight + deltaY
-            : startHeight - deltaY;
-        setManualHeight(`${Math.max(minHeight, newHeight)}px`);
-      };
-
-      const onPointerUp = (upEvent: PointerEvent) => {
-        if (upEvent.pointerId !== pointerId) {
-          return;
-        }
-        document.removeEventListener("pointermove", onPointerMove);
-        document.removeEventListener("pointerup", onPointerUp);
-        document.removeEventListener("pointercancel", onPointerUp);
-      };
-
-      handle.setPointerCapture(pointerId);
-      document.addEventListener("pointermove", onPointerMove);
-      document.addEventListener("pointerup", onPointerUp);
-      document.addEventListener("pointercancel", onPointerUp);
-    };
+  const createHandler = (edge: VerticalResizeEdge) =>
+    createAxisResizeHandler({
+      axis: "y",
+      getStartSize: parseHeight,
+      growOnDragPositive: edge === "bottom",
+      minSize: minHeight,
+      onEnd: () => {
+        setActiveKey(null);
+        setResizing(false);
+      },
+      onResize: (size) => setManualHeight(`${size}px`),
+      onStart: () => {
+        setActiveKey(edge);
+        setResizing(true);
+      },
+    });
 
   const resetManualHeight = () => setManualHeight(null);
 
   return {
+    activeKey,
     height,
     resetManualHeight,
-    onTopPointerDown: createPointerDown("top"),
-    onBottomPointerDown: createPointerDown("bottom"),
+    onTopPointerDown: createHandler("top"),
+    onBottomPointerDown: createHandler("bottom"),
   };
 }

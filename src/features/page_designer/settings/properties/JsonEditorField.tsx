@@ -3,10 +3,10 @@ import { createEffect, createSignal, on } from "solid-js";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { VanilaJsonEditor } from "~/components/styled/VanilaJsonEditor";
-import {
-  resizeHandleStyles,
-  resizeContainerStyles,
-} from "~/components/styled/resizeHandleStyles";
+import { createAxisResizeHandler } from "~/lib/resizable/createAxisResizeHandler";
+import { DesignerResizeHandle } from "~/lib/resizable/DesignerResizeHandle";
+import { useResizeOverlay } from "~/lib/resizable/ResizeOverlayContext";
+import { useDesignerResizeTrackSize } from "~/lib/resizable/useDesignerResizeTrackSize";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
 import { As } from "~/components/As";
 import type { Vertex } from "~/lib/graph/type/vertex";
@@ -26,6 +26,30 @@ export function JsonEditorFieldComponent(props: {
   const [manualHeight, setManualHeight] = createSignal<string | undefined>(
     props.height,
   );
+  const [activeResize, setActiveResize] = createSignal(false);
+  const { setResizing } = useResizeOverlay();
+  const resizeTrackSize = useDesignerResizeTrackSize();
+  const trackPx = () => `${resizeTrackSize()}px`;
+
+  const editorHeight = () => manualHeight() ?? "200px";
+  const parseHeight = () =>
+    Number.parseFloat(editorHeight().replace("px", "")) || 100;
+
+  const handleHeightResize = createAxisResizeHandler({
+    axis: "y",
+    getStartSize: parseHeight,
+    growOnDragPositive: true,
+    minSize: 100,
+    onEnd: () => {
+      setActiveResize(false);
+      setResizing(false);
+    },
+    onResize: (size) => setManualHeight(`${size}px`),
+    onStart: () => {
+      setActiveResize(true);
+      setResizing(true);
+    },
+  });
 
   // Get vertex to edit - either specified by props or use selected vertex
   const getVertexToEdit = () => {
@@ -65,64 +89,48 @@ export function JsonEditorFieldComponent(props: {
     ),
   );
 
-  let editorRef: HTMLDivElement | undefined;
-
-  const onPointerDown = (e: PointerEvent) => {
-    e.preventDefault();
-    const startY = e.clientY;
-    const startHeight = editorRef?.offsetHeight ?? 0;
-    const handle = e.currentTarget as HTMLDivElement;
-    const pointerId = e.pointerId;
-
-    const onPointerMove = (moveEvent: PointerEvent) => {
-      if (moveEvent.pointerId !== pointerId) {
-        return;
-      }
-      const newHeight = startHeight + (moveEvent.clientY - startY);
-      setManualHeight(`${Math.max(100, newHeight)}px`);
-    };
-
-    const onPointerUp = (upEvent: PointerEvent) => {
-      if (upEvent.pointerId !== pointerId) {
-        return;
-      }
-      document.removeEventListener("pointermove", onPointerMove);
-      document.removeEventListener("pointerup", onPointerUp);
-      document.removeEventListener("pointercancel", onPointerUp);
-    };
-
-    handle.setPointerCapture(pointerId);
-    document.addEventListener("pointermove", onPointerMove);
-    document.addEventListener("pointerup", onPointerUp);
-    document.addEventListener("pointercancel", onPointerUp);
-  };
-
   return (
     <As
       as="div"
-      css={[
-        resizeContainerStyles,
-        `return \`._id {
-  margin-top: 5px;
-}\`;`,
-      ]}
-      ref={editorRef}
+      css={`return \`._id {
+        margin-top: 5px;
+      }\`;`}
     >
       {!props?.hideLabel && "JSON"}
       <As
         as="div"
         css={`return \`._id {
-          position: relative;
-          z-index: 1;
+          display: grid;
+          grid-template-rows: 1fr ${trackPx()};
+          min-height: 0;
         }\`;`}
+        style={{
+          height: manualHeight()
+            ? `calc(${editorHeight()} + ${trackPx()})`
+            : undefined,
+        }}
       >
-        <VanilaJsonEditor
-          json={getVertexToEdit()?.P ?? {}}
-          onChange={replacePropertyValue}
-          height={manualHeight()}
-          autoHeight={!manualHeight()}
-          minHeight={100}
-          maxHeight={800}
+        <As
+          as="div"
+          css={`return \`._id {
+            position: relative;
+            z-index: 1;
+            min-height: 0;
+          }\`;`}
+        >
+          <VanilaJsonEditor
+            json={getVertexToEdit()?.P ?? {}}
+            onChange={replacePropertyValue}
+            height={manualHeight()}
+            autoHeight={!manualHeight()}
+            minHeight={100}
+            maxHeight={800}
+          />
+        </As>
+        <DesignerResizeHandle
+          active={activeResize()}
+          axis="y"
+          onPointerDown={handleHeightResize}
         />
       </As>
       {!isJsonValid() && (
@@ -135,7 +143,6 @@ export function JsonEditorFieldComponent(props: {
           Invalid JSON
         </As>
       )}
-      <As as="div" onPointerDown={onPointerDown} css={resizeHandleStyles} />
     </As>
   );
 }

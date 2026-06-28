@@ -1,6 +1,5 @@
 import { createSignal, For, Show } from "solid-js";
 
-import { ResizeOverlay } from "~/components/styled/ResizeOverlay";
 import { useDesignerLayoutStore } from "~/features/page_designer/context/LayoutContext";
 import { SettingTabs } from "~/features/page_designer/settings/SettingTabs";
 import { GraphView } from "~/pages/debug/GraphView";
@@ -16,8 +15,9 @@ import {
   createPanelResizeHandler,
   DesignerPanel,
 } from "./DesignerPanel";
-import { DesignerResizeHandle } from "./resizable/DesignerResizeHandle";
-import { useDesignerResizeTrackSize } from "./resizable/useDesignerResizeTrackSize";
+import { DesignerResizeHandle } from "~/lib/resizable/DesignerResizeHandle";
+import { useResizeOverlay } from "~/lib/resizable/ResizeOverlayContext";
+import { useDesignerResizeTrackSize } from "~/lib/resizable/useDesignerResizeTrackSize";
 import { HeaderRow } from "../header/header_row/HeaderRow";
 import { DeleteConfirmation } from "./main_content/DeleteConfirmation";
 import { UnsavedTabSaveReminder } from "./UnsavedTabSaveReminder";
@@ -121,7 +121,7 @@ export function RenderMainContent() {
     return `${row0Css} ${resizeTrackSize()}px ${row1Css} ${resizeTrackSize()}px`;
   };
 
-  const [isResizing, setIsResizing] = createSignal(false);
+  const { setResizing } = useResizeOverlay();
   const [activeResizeKey, setActiveResizeKey] = createSignal<null | string>(
     null,
   );
@@ -155,7 +155,7 @@ export function RenderMainContent() {
       graph,
       setGraph,
       panelRef,
-      setIsResizing,
+      setResizing,
       setActiveResizeKey,
       growOnDragRight,
     );
@@ -166,7 +166,7 @@ export function RenderMainContent() {
     graph,
     setGraph,
     mainPanelRow0Ref,
-    setIsResizing,
+    setResizing,
     setActiveResizeKey,
     MIN_MAIN_PANEL_ROW_HEIGHT,
   );
@@ -177,7 +177,7 @@ export function RenderMainContent() {
     graph,
     setGraph,
     mainPanelRow1Ref,
-    setIsResizing,
+    setResizing,
     setActiveResizeKey,
     MIN_MAIN_PANEL_ROW_HEIGHT,
   );
@@ -199,7 +199,7 @@ export function RenderMainContent() {
       graph,
       setGraph,
       panelRef,
-      setIsResizing,
+      setResizing,
       setActiveResizeKey,
       growOnDragRight ??
         (key === "componentsWidth" ||
@@ -284,7 +284,6 @@ export function RenderMainContent() {
           >
             <DesignerPanel
               activeResizeKey={activeResizeKey()}
-              isResizing={isResizing()}
               onResize={createResizeHandler(
                 "settingsWidth",
                 settingsPanelRef,
@@ -306,7 +305,6 @@ export function RenderMainContent() {
           >
             <DesignerPanel
               activeResizeKey={activeResizeKey()}
-              isResizing={isResizing()}
               onResize={createResizeHandler("pagesWidth", pagesPanelRef)}
               ref={setPagesPanelRef}
               resizeKey="pagesWidth"
@@ -328,7 +326,6 @@ export function RenderMainContent() {
           >
             <DesignerPanel
               activeResizeKey={activeResizeKey()}
-              isResizing={isResizing()}
               onResize={createResizeHandler(
                 "componentsWidth",
                 componentsPanelRef,
@@ -353,7 +350,6 @@ export function RenderMainContent() {
           >
             <DesignerPanel
               activeResizeKey={activeResizeKey()}
-              isResizing={isResizing()}
               onResize={createResizeHandler(
                 "functionsWidth",
                 functionsPanelRef,
@@ -376,7 +372,6 @@ export function RenderMainContent() {
           >
             <DesignerPanel
               activeResizeKey={activeResizeKey()}
-              isResizing={isResizing()}
               onResize={createResizeHandler("aiWidth", aiPanelRef, true)}
               ref={setAiPanelRef}
               resizeKey="aiWidth"
@@ -419,7 +414,6 @@ export function RenderMainContent() {
                       <As as="div" css={STYLES.panelCellCss}>
                         <DesignerPanel
                           activeResizeKey={activeResizeKey()}
-                          isResizing={isResizing()}
                           onResizeLeft={createRowWidthResizeHandler(
                             0,
                             () => mainPanelRefs()[`mainPanel${mainPanel}`],
@@ -477,7 +471,6 @@ export function RenderMainContent() {
                       <As as="div" css={STYLES.panelCellCss}>
                         <DesignerPanel
                           activeResizeKey={activeResizeKey()}
-                          isResizing={isResizing()}
                           onResizeLeft={createRowWidthResizeHandler(
                             1,
                             () => mainPanelRefs()[`mainPanel${mainPanel}`],
@@ -518,9 +511,6 @@ export function RenderMainContent() {
 
       <DeleteConfirmation />
       <UnsavedTabSaveReminder />
-      <Show when={isResizing()}>
-        <ResizeOverlay />
-      </Show>
       <button
         onClick={() => setShowGraphView(!showGraphView())}
         style={{ display: "none" }}

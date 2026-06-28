@@ -9,15 +9,14 @@ import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVerte
 import type { Id } from "~/lib/graph/type/id";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 import { STYLES } from "~/pages/settings/constants";
-import { attachPointerDrag } from "./resizable/attachPointerDrag";
-import { DesignerResizeHandle } from "./resizable/DesignerResizeHandle";
-import { useDesignerResizeTrackSize } from "./resizable/useDesignerResizeTrackSize";
+import { createAxisResizeHandler } from "~/lib/resizable/createAxisResizeHandler";
+import { DesignerResizeHandle } from "~/lib/resizable/DesignerResizeHandle";
+import { useDesignerResizeTrackSize } from "~/lib/resizable/useDesignerResizeTrackSize";
 
 export interface DesignerPanelProps {
   activeResizeKey: null | string;
   children: any;
   collapsed?: boolean;
-  isResizing: boolean;
   onExpand?: () => void;
   onResize?: (e: PointerEvent) => void;
   onResizeLeft?: (e: PointerEvent) => void;
@@ -266,34 +265,30 @@ export function createPanelResizeHandler<T extends Record<string, unknown>>(
       return;
     }
 
-    setIsResizing(true);
-    setActiveResizeKey(key);
-    const startPos = e.pageX;
-    const startWidth = panel.getBoundingClientRect().width;
-
-    attachPointerDrag(
-      e,
-      (point) => {
+    createAxisResizeHandler({
+      axis: "x",
+      getStartSize: () => panel.getBoundingClientRect().width,
+      growOnDragPositive: growOnDragRight,
+      minSize: 100,
+      onEnd: () => {
+        setIsResizing(false);
+        setActiveResizeKey(null);
+      },
+      onResize: (newWidth) => {
         const resolvedStoreId =
           typeof storeId === "function" ? storeId() : storeId;
         if (!resolvedStoreId) {
           return;
         }
-        const diff = point.pageX - startPos;
-        const newWidth = Math.max(
-          100,
-          startWidth + (growOnDragRight ? diff : -diff),
-        );
-
         mergeVertexProperties<T>(0, resolvedStoreId, graph, setGraph, {
           [key]: newWidth,
         } as Partial<T>);
       },
-      () => {
-        setIsResizing(false);
-        setActiveResizeKey(null);
+      onStart: () => {
+        setIsResizing(true);
+        setActiveResizeKey(key);
       },
-    );
+    })(e);
   };
 }
 
@@ -313,31 +308,30 @@ export function createPanelRowHeightResizeHandler<T extends Record<string, unkno
       return;
     }
 
-    setIsResizing(true);
-    setActiveResizeKey(key);
-    const startPos = e.pageY;
-    const startHeight = row.getBoundingClientRect().height;
-
-    attachPointerDrag(
-      e,
-      (point) => {
+    createAxisResizeHandler({
+      axis: "y",
+      getStartSize: () => row.getBoundingClientRect().height,
+      growOnDragPositive: true,
+      minSize: minHeight,
+      onEnd: () => {
+        setIsResizing(false);
+        setActiveResizeKey(null);
+      },
+      onResize: (newHeight) => {
         const resolvedStoreId =
           typeof storeId === "function" ? storeId() : storeId;
         if (!resolvedStoreId) {
           return;
         }
-        const diff = point.pageY - startPos;
-        const newHeight = Math.max(minHeight, startHeight + diff);
-
         mergeVertexProperties<T>(0, resolvedStoreId, graph, setGraph, {
           [key]: newHeight,
         } as unknown as Partial<T>);
       },
-      () => {
-        setIsResizing(false);
-        setActiveResizeKey(null);
+      onStart: () => {
+        setIsResizing(true);
+        setActiveResizeKey(key);
       },
-    );
+    })(e);
   };
 }
 
@@ -360,33 +354,29 @@ export function createMainPanelRowWidthResizeHandler<
       return;
     }
 
-    setIsResizing(true);
-    setActiveResizeKey(key);
-    const startPos = e.pageX;
-    const startWidth = panel.getBoundingClientRect().width;
-
-    attachPointerDrag(
-      e,
-      (point) => {
+    createAxisResizeHandler({
+      axis: "x",
+      getStartSize: () => panel.getBoundingClientRect().width,
+      growOnDragPositive: growOnDragRight,
+      minSize: 100,
+      onEnd: () => {
+        setIsResizing(false);
+        setActiveResizeKey(null);
+      },
+      onResize: (newWidth) => {
         const resolvedStoreId =
           typeof storeId === "function" ? storeId() : storeId;
         if (!resolvedStoreId) {
           return;
         }
-        const diff = point.pageX - startPos;
-        const newWidth = Math.max(
-          100,
-          startWidth + (growOnDragRight ? diff : -diff),
-        );
-
         mergeVertexProperties<T>(0, resolvedStoreId, graph, setGraph, {
           [key]: newWidth,
         } as unknown as Partial<T>);
       },
-      () => {
-        setIsResizing(false);
-        setActiveResizeKey(null);
+      onStart: () => {
+        setIsResizing(true);
+        setActiveResizeKey(key);
       },
-    );
+    })(e);
   };
 }

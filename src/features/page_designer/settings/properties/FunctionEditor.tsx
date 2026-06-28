@@ -8,6 +8,9 @@ import type { FormStoreObject } from "~/components/form/context/FormContext";
 import { IconButton } from "~/components/styled/IconButton";
 import { CustomModal } from "~/components/styled/modal/CustomModal";
 import { MonacoEditorWrapper } from "~/components/styled/MonacoEditorWrapper";
+// Intentionally not using ~/lib/resizable (DesignerResizeHandle): Monaco needs an
+// explicit pixel height, handles overlay the editor edges without grid tracks, and
+// useVerticalResize keeps auto-height + manual resize in sync when content changes.
 import {
   bottomResizeHandleStyles,
   resizeContainerStyles,

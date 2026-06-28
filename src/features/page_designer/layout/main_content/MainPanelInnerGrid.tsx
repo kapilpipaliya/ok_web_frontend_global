@@ -3,11 +3,11 @@ import { createMemo, createSignal, Show, type ParentProps } from "solid-js";
 import {
   type FormStoreObject,
 } from "~/components/form/context/FormContext";
-import { ResizeOverlay } from "~/components/styled/ResizeOverlay";
 import {
   createPanelResizeHandler,
   DesignerPanel,
 } from "~/features/page_designer/layout/DesignerPanel";
+import { useResizeOverlay } from "~/lib/resizable/ResizeOverlayContext";
 import { LayoutTreePanel } from "~/features/page_designer/settings/LayoutTreePanel";
 import {
   INITIAL_WIDTHS,
@@ -45,7 +45,7 @@ export function MainPanelInnerGrid(
   const formStore = () =>
     graph.vertexes[formStoreId()]?.P as FormStoreObject;
 
-  const [isResizing, setIsResizing] = createSignal(false);
+  const { setResizing } = useResizeOverlay();
   const [activeResizeKey, setActiveResizeKey] = createSignal<null | string>(
     null,
   );
@@ -91,7 +91,7 @@ export function MainPanelInnerGrid(
       graph,
       setGraph,
       key === "layoutTreeWidth" ? layoutTreePanelRef : propertiesPanelRef,
-      setIsResizing,
+      setResizing,
       setActiveResizeKey,
     );
 
@@ -159,7 +159,6 @@ export function MainPanelInnerGrid(
           <As as="div" css={STYLES.panelCellCss}>
             <DesignerPanel
               activeResizeKey={activeResizeKey()}
-              isResizing={isResizing()}
               onResize={createResizeHandler("layoutTreeWidth")}
               ref={setLayoutTreePanelRef}
               resizeKey="layoutTreeWidth"
@@ -183,7 +182,6 @@ export function MainPanelInnerGrid(
             <DesignerPanel
               activeResizeKey={activeResizeKey()}
               collapsed={formStore()!.isPropertiesCollapsed}
-              isResizing={isResizing()}
               onExpand={expandProperties}
               onResize={createResizeHandler("propertiesWidth")}
               onToggleCollapse={togglePropertiesCollapse}
@@ -209,9 +207,6 @@ export function MainPanelInnerGrid(
           {props.children}
         </As>
       </As>
-      <Show when={isResizing()}>
-        <ResizeOverlay />
-      </Show>
     </>
   );
 }

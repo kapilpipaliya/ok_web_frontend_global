@@ -4,7 +4,6 @@ import {
   type JSX,
   on,
   onCleanup,
-  Show,
 } from "solid-js";
 
 import {
@@ -12,9 +11,10 @@ import {
   useDesignerFormIdContext,
   useDesignerLayoutStore,
 } from "~/features/page_designer/context/LayoutContext";
-import { attachPointerDrag } from "~/features/page_designer/layout/resizable/attachPointerDrag";
-import { DesignerResizeHandle } from "~/features/page_designer/layout/resizable/DesignerResizeHandle";
-import { useDesignerResizeTrackSize } from "~/features/page_designer/layout/resizable/useDesignerResizeTrackSize";
+import { createAxisResizeHandler } from "~/lib/resizable/createAxisResizeHandler";
+import { DesignerResizeHandle } from "~/lib/resizable/DesignerResizeHandle";
+import { useResizeOverlay } from "~/lib/resizable/ResizeOverlayContext";
+import { useDesignerResizeTrackSize } from "~/lib/resizable/useDesignerResizeTrackSize";
 import { attachRootDropTarget } from "~/features/page_designer/functions/drag_drop/pragmatic/pragmaticDragDrop";
 import {
   bindDragDropRef,
@@ -25,7 +25,6 @@ import { STYLES } from "~/pages/settings/constants";
 import type { FormStoreObject } from "../form/context/FormContext";
 
 import { useToast } from "./modal/Toast";
-import { ResizeOverlay } from "./ResizeOverlay";
 import { As } from "../As";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
@@ -96,6 +95,7 @@ export function ResizableContainer(
   >(null);
   const [isDraggingOver, setIsDraggingOver] = createSignal(false);
   const { showErrorToast } = useToast();
+  const { setResizing } = useResizeOverlay();
   const resizeTrackSize = useDesignerResizeTrackSize();
   const trackPx = () => `${resizeTrackSize()}px`;
 
@@ -145,60 +145,58 @@ export function ResizableContainer(
     });
   };
 
-  const handleRightWidthResize = (e: PointerEvent) => {
-    const startX = e.pageX;
-    const initialWidth = parsePx(width());
+  /**
+   * Left handle uses left-edge-anchored resize: the left edge stays fixed in flex
+   * layout and width changes grow/shrink toward the right. Do not use margin-left
+   * or translateX — those break multi-panel preview layout.
+   */
+  const handleLeftWidthResize = createAxisResizeHandler({
+    axis: "x",
+    getStartSize: () => parsePx(width()),
+    growOnDragPositive: false,
+    minSize: 50,
+    onEnd: () => {
+      setActiveResizeKey(null);
+      setResizing(false);
+    },
+    onResize: (size) => persistWidth(`${size}px`),
+    onStart: () => {
+      setActiveResizeKey("width-left");
+      setResizing(true);
+    },
+  });
 
-    setActiveResizeKey("width-right");
-    attachPointerDrag(
-      e,
-      (point) => {
-        const newWidthValue = Math.max(
-          50,
-          initialWidth + (point.pageX - startX),
-        );
-        const roundedWidth = Math.round(newWidthValue * 100) / 100;
-        persistWidth(`${roundedWidth}px`);
-      },
-      () => setActiveResizeKey(null),
-    );
-  };
+  const handleRightWidthResize = createAxisResizeHandler({
+    axis: "x",
+    getStartSize: () => parsePx(width()),
+    growOnDragPositive: true,
+    minSize: 50,
+    onEnd: () => {
+      setActiveResizeKey(null);
+      setResizing(false);
+    },
+    onResize: (size) => persistWidth(`${size}px`),
+    onStart: () => {
+      setActiveResizeKey("width-right");
+      setResizing(true);
+    },
+  });
 
-  const handleLeftWidthResize = (e: PointerEvent) => {
-    const startX = e.pageX;
-    const initialWidth = parsePx(width());
-
-    setActiveResizeKey("width-left");
-    attachPointerDrag(
-      e,
-      (point) => {
-        const dx = point.pageX - startX;
-        const newWidthValue = Math.max(50, initialWidth - dx);
-        const roundedWidth = Math.round(newWidthValue * 100) / 100;
-        persistWidth(`${roundedWidth}px`);
-      },
-      () => setActiveResizeKey(null),
-    );
-  };
-
-  const handleHeightResize = (e: PointerEvent) => {
-    const startY = e.pageY;
-    const initialHeight = parsePx(height());
-
-    setActiveResizeKey("height");
-    attachPointerDrag(
-      e,
-      (point) => {
-        const newHeightValue = Math.max(
-          50,
-          initialHeight + (point.pageY - startY),
-        );
-        const roundedHeight = Math.round(newHeightValue * 100) / 100;
-        persistHeight(`${roundedHeight}px`);
-      },
-      () => setActiveResizeKey(null),
-    );
-  };
+  const handleHeightResize = createAxisResizeHandler({
+    axis: "y",
+    getStartSize: () => parsePx(height()),
+    growOnDragPositive: true,
+    minSize: 50,
+    onEnd: () => {
+      setActiveResizeKey(null);
+      setResizing(false);
+    },
+    onResize: (size) => persistHeight(`${size}px`),
+    onStart: () => {
+      setActiveResizeKey("height");
+      setResizing(true);
+    },
+  });
 
   const bindRootDrop = bindDragDropRef(
     `resizable-view-${props.view}`,
@@ -291,10 +289,6 @@ export function ResizableContainer(
         />
         <div aria-hidden="true" />
       </As>
-
-      <Show when={activeResizeKey()}>
-        <ResizeOverlay />
-      </Show>
     </As>
   );
 }

@@ -2,7 +2,10 @@ import { type Component } from "solid-js";
 
 import { As } from "~/components/As";
 
-import { DESIGNER_RESIZE_VISIBLE_SIZE, type ResizeAxis } from "./useDesignerResizeTrackSize";
+import {
+  DESIGNER_RESIZE_VISIBLE_SIZE,
+  type ResizeAxis,
+} from "./useDesignerResizeTrackSize";
 
 export type { ResizeAxis } from "./useDesignerResizeTrackSize";
 
