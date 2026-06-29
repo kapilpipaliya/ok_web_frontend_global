@@ -33,7 +33,6 @@ import { fetchDataFromDB } from "~/cypher/get/fetchDataFromDB";
 import { isValidResponse } from "~/lib/api/general/isValidResponse";
 import { Title } from "@solidjs/meta";
 import { updateUrlWithOpenedTabs } from "~/features/page_designer/utils/updateUrlWithTabs";
-import { LandscapeOrientationPrompt } from "./LandscapeOrientationPrompt";
 import { ResizeOverlayProvider } from "~/lib/resizable/ResizeOverlayContext";
 
 const RenderMainContent = clientOnly(() => import("./RenderMainContent"));
@@ -383,7 +382,6 @@ export function PageDesignerWrapper(): JSX.Element {
         <Title>{getTitle(`${params.entity} Builder`, graph)}</Title>
         <Show when={isDataReady()} fallback={<div>Loading...</div>}>
           <ResizeOverlayProvider>
-            <LandscapeOrientationPrompt />
             <RenderMainContent />
           </ResizeOverlayProvider>
         </Show>
