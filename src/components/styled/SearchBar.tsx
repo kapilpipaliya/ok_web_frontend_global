@@ -17,7 +17,6 @@ export function SearchBar(
   /* lh: 28px; */
   display: flex;
   align-items: center;
-  padding: 5px 0px;
   position: relative;
   width: 100%;
 }\`;`}

@@ -8,7 +8,7 @@ import { As } from "~/components/As";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import type { Id } from "~/lib/graph/type/id";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
-import { STYLES } from "~/pages/settings/constants";
+import { headerIconButtonCss, STYLES } from "~/pages/settings/constants";
 import { createAxisResizeHandler } from "~/lib/resizable/createAxisResizeHandler";
 import { DesignerResizeHandle } from "~/lib/resizable/DesignerResizeHandle";
 import { useDesignerResizeTrackSize } from "~/lib/resizable/useDesignerResizeTrackSize";
@@ -155,7 +155,12 @@ export const DesignerPanel: Component<DesignerPanelProps> = (props) => {
               </As>
               <Show when={props.onToggleCollapse}>
                 <IconButton
+                  css={[
+                    headerIconButtonCss,
+                    "return `._id { flex-shrink: 0; }`;",
+                  ]}
                   icon="ph:caret-left"
+                  iconCss={`return \`._id { color: \${args.theme.var.color.text_light_300}; }\`;`}
                   onClick={(e: MouseEvent) => {
                     e.stopPropagation();
                     props.onToggleCollapse?.();

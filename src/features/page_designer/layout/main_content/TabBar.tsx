@@ -173,12 +173,20 @@ export function TabBar(props: { mainPanel: Id }) {
       padding: 5px;
       cursor: move;
       flex-shrink: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
       ${
         isActiveTab
-          ? "background-color: ${args.theme.var.color.primary_light_250}; color: ${args.theme.var.color.primary_light_250_text};"
-          : "background-color: ${args.theme.var.color.background_light_200}; color: ${args.theme.var.color.background_light_200_text};"
+          ? "background-color: ${args.theme.var.color.primary_light_250}; color: ${args.theme.var.color.primary_light_250_text}; border: 1px solid transparent;"
+          : "background-color: ${args.theme.var.color.background_light_100}; color: ${args.theme.var.color.text_light_300}; border: 1px solid ${args.theme.var.color.border};"
       }
       ${isCurrentForm ? "border-bottom: 2px solid ${args.theme.var.color.error};" : ""}
+      ${
+        !isActiveTab
+          ? "&:hover { color: ${args.theme.var.color.primary}; }"
+          : ""
+      }
     }\`;`;
   };
 

@@ -72,7 +72,7 @@ export function ComponentsPanel() {
       <Divider />
 
       <As as="div" css={"return `._id { margin-top: 4px; }`;"}>
-        <ComponentPaletteTree searchAlways title="Categories" />
+        <ComponentPaletteTree searchAlways />
       </As>
     </As>
   );
@@ -119,14 +119,12 @@ export function PagesPanel() {
             <ComponentPaletteTree
               config={PAGE_PALETTE_CONFIG}
               searchAlways
-              title="Pages"
             />
           </Match>
           <Match when={selectedTab().collection === "EmailTemplate"}>
             <ComponentPaletteTree
               config={EMAIL_TEMPLATE_PALETTE_CONFIG}
               searchAlways
-              title="Email Templates"
             />
           </Match>
         </Switch>
@@ -141,7 +139,6 @@ export function FunctionsPanel() {
       <ComponentPaletteTree
         config={FUNCTION_PALETTE_CONFIG}
         searchAlways
-        title="Functions"
       />
     </As>
   );

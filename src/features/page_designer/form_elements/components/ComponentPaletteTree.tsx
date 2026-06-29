@@ -66,7 +66,6 @@ export function ComponentPaletteTree(props?: {
   config?: PaletteTreeConfig;
   onCompDoubleClick?: (comp: Vertex) => void;
   searchAlways?: boolean;
-  title?: string;
 }) {
   const paletteConfig = () => props?.config ?? COMPONENT_PALETTE_CONFIG;
   const isComponentPalette = () =>
@@ -621,7 +620,12 @@ export function ComponentPaletteTree(props?: {
     }
   };
 
-  let headerAddRef!: HTMLElement;
+  let addCategoryRef!: HTMLElement;
+
+  const showSearch = () =>
+    props?.searchAlways ||
+    rootItems().length >= 5 ||
+    Boolean(searchQuery().trim());
 
   return (
     <As as="div" onPointerDown={handlePaletteTouchBackground} ref={setScrollRef}>
@@ -631,39 +635,41 @@ export function ComponentPaletteTree(props?: {
           css={`return \`._id {
   display: flex;
   align-items: center;
-  gap: 2px;
-  background-color: \${args.theme.var.color.background_light_150};
-  padding: 4px 0;
+  gap: 6px;
+  width: 100%;
 }\`;`}
         >
+          <Show when={showSearch()}>
+            <As
+              as="div"
+              css={`return \`._id {
+  flex: 1;
+  min-width: 0;
+  margin-left: 1px;
+}\`;`}
+            >
+              <SearchBar
+                handleChange={setSearchQuery}
+                noPadding
+                placeholder={`Search ${paletteConfig().tableVertexLabel.toLowerCase()}s...`}
+                value={searchQuery()}
+              />
+            </As>
+          </Show>
           <As
             as="div"
             css={`return \`._id {
-  padding: 6px;
-  font-weight: 500;
-  font-size: 0.82rem;
+  flex-shrink: 0;
+  margin-left: auto;
 }\`;`}
           >
-            {props?.title ?? "Categories"}
+            <PlusIconButton
+              ariaLabel="Add category"
+              ref={(el) => (addCategoryRef = el)}
+              onClick={() => openAddCategoryModal(null, addCategoryRef)}
+            />
           </As>
-          <PlusIconButton
-            ariaLabel="Add category"
-            ref={(el) => (headerAddRef = el)}
-            onClick={() => openAddCategoryModal(null, headerAddRef)}
-          />
         </As>
-      </Show>
-
-      <Show
-        when={
-          props?.searchAlways || rootItems().length >= 5 || searchQuery().trim()
-        }
-      >
-        <SearchBar
-          handleChange={setSearchQuery}
-          placeholder={`Search ${paletteConfig().tableVertexLabel.toLowerCase()}s...`}
-          value={searchQuery()}
-        />
       </Show>
 
       <Show fallback={<LoaderNew loaderHeight="55vh" />} when={!isLoading()}>
