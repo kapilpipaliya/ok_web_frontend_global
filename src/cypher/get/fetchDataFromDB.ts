@@ -91,7 +91,7 @@ export async function fetchDataFromDB(
       context,
     );
 
-    // Process nested incoming/outgoing relationships
+    // Fetch related nodes/edges in parallel where safe (see processIncomingOutgoingExpressions)
     await processIncomingOutgoingExpressions(expression, mainResult, context);
 
     return {
@@ -120,21 +120,58 @@ export async function fetchDataFromDB(
   }
 }
 
+type FetchDataContext = EvalExpressionContext & { adminui?: boolean } & {
+  [key: `$${string}`]: any;
+};
+
+/**
+ * Fetches related graph data for all incoming/outgoing expressions on the main result.
+ *
+ * Incoming and outgoing expressions at the same level are independent (they all start
+ * from the same mainResult vertices), so they are fetched in parallel for performance.
+ * Deeper nesting is handled recursively inside each fetchDataFromDB call.
+ */
 async function processIncomingOutgoingExpressions(
   expression: NestedExpression,
   mainResult: Vertex[],
-  context: EvalExpressionContext,
+  context: FetchDataContext,
 ) {
-  if (expression.incoming && mainResult && mainResult.length > 0) {
-    for (const exp of expression.incoming) {
-      context.vertexes = [...mainResult];
+  if (!mainResult?.length) {
+    return;
+  }
+
+  // Combine sibling expressions so incoming + outgoing can run concurrently.
+  const expressions = [
+    ...(expression.incoming ?? []),
+    ...(expression.outgoing ?? []),
+  ];
+
+  if (expressions.length === 0) {
+    return;
+  }
+
+  // All nested expressions read from the same parent vertices.
+  const vertexes = [...mainResult];
+
+  // Transactions must stay sequential — Neo4j does not support concurrent tx.run().
+  if (context.tx) {
+    for (const exp of expressions) {
+      context.vertexes = vertexes;
       await fetchDataFromDB(exp, context);
     }
+    return;
   }
-  if (expression.outgoing && mainResult && mainResult.length > 0) {
-    for (const exp of expression.outgoing) {
-      context.vertexes = [...mainResult];
-      await fetchDataFromDB(exp, context);
-    }
-  }
+
+  // Each branch gets its own session (dbSession: undefined) so queries can run in
+  // parallel without sharing one session. nodes/relationships stay shared so results
+  // merge into the same graph on the parent context.
+  await Promise.all(
+    expressions.map((exp) =>
+      fetchDataFromDB(exp, {
+        ...context,
+        vertexes,
+        dbSession: undefined,
+      } as FetchDataContext),
+    ),
+  );
 }

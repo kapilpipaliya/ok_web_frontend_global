@@ -1,3 +1,5 @@
+import type { Session } from "neo4j-driver";
+
 import { fetchComponentDataPure } from "~/cypher/get/fetchComponentData";
 import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { VertexMap } from "~/lib/graph/type/vertexMap";
@@ -10,6 +12,7 @@ import type { VertexMap } from "~/lib/graph/type/vertexMap";
  */
 export async function fetchComponentDataFromGraph(
   graphData?: ServerResult,
+  dbSession?: Session,
 ): Promise<ServerResult[]> {
   if (!graphData?.graph?.vertexes) {
     return [];
@@ -75,7 +78,10 @@ export async function fetchComponentDataFromGraph(
     }
 
     // Fetch the new components
-    const componentData = await fetchComponentDataPure(newComponentNames);
+    const componentData = await fetchComponentDataPure(
+      newComponentNames,
+      dbSession,
+    );
 
     if (componentData?.graph?.vertexes) {
       // Mark these components as fetched

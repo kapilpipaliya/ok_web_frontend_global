@@ -10,8 +10,28 @@ import {
   getFormMetaDataCacheTtl,
   redisCacheGetOrSet,
 } from "~/server/redis/redisCache";
+import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { FetchFormMetaDataResult } from "./fetchPageData";
 import { fetchComponentDataFromGraph } from "./fetchComponentData";
+
+function stripGraphTimestamps(graph?: ServerResult["graph"]) {
+  if (!graph) {
+    return;
+  }
+
+  for (const vertex of Object.values(graph.vertexes || {})) {
+    delete vertex.P.createdAt;
+    delete vertex.P.updatedAt;
+  }
+
+  for (const edge of Object.values(graph.edges || {})) {
+    delete edge.P.createdAt;
+    delete edge.P.updatedAt;
+    if (Object.keys(edge.P).length === 0) {
+      delete (edge as { P?: typeof edge.P }).P;
+    }
+  }
+}
 
 export async function fetchFormMetaData(
   // graph: GraphInterface,
@@ -113,38 +133,19 @@ async function fetchFormMetaDataFromDB(
     return { error: "404" };
   }
 
-  for (const [, vertex] of Object.entries(data.graph?.vertexes || {})) {
-    delete vertex.P.createdAt;
-    delete vertex.P.updatedAt;
-  }
-  for (const [, edge] of Object.entries(data.graph?.edges || {})) {
-    delete edge.P.createdAt;
-    delete edge.P.updatedAt;
-    if (Object.keys(edge.P).length === 0) {
-      delete edge.P;
-    }
-  }
+  stripGraphTimestamps(data.graph);
 
   if (skipComponentData) {
     return { data };
   }
 
-  const componentDataResults = await fetchComponentDataFromGraph(data);
+  const componentDataResults = await fetchComponentDataFromGraph(
+    data,
+    dbSession,
+  );
 
   for (const componentData of componentDataResults) {
-    for (const [, vertex] of Object.entries(
-      componentData.graph?.vertexes || {},
-    )) {
-      delete vertex.P.createdAt;
-      delete vertex.P.updatedAt;
-    }
-    for (const [, edge] of Object.entries(componentData.graph?.edges || {})) {
-      delete edge.P.createdAt;
-      delete edge.P.updatedAt;
-      if (Object.keys(edge.P).length === 0) {
-        delete edge.P;
-      }
-    }
+    stripGraphTimestamps(componentData.graph);
   }
 
   return { data, componentData: componentDataResults };
