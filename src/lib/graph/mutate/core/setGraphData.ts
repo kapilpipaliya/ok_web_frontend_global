@@ -10,6 +10,7 @@ import type { Edge } from "~/lib/graph/type/edge";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 import type { GraphData } from "~/lib/types/GraphData";
+import { restoreVertexAdjacencyFromEdges } from "~/lib/graph/transfer/restoreVertexAdjacencyFromEdges";
 
 export interface UpdateOptions {
   skipExisting?: boolean;
@@ -23,6 +24,10 @@ export function setGraphData(
   args: GraphData,
   options: UpdateOptions = {},
 ) {
+  if (Object.keys(args.edges).length > 0) {
+    restoreVertexAdjacencyFromEdges(args);
+  }
+
   batch(() => {
     for (const vertexId in args.vertexes) {
       updateVertex(vertexId, args.vertexes[vertexId], graph, setGraph, options);

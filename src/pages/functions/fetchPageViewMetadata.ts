@@ -1,9 +1,5 @@
 import { isObject } from "~/lib/data_structure/object/isObject";
 import {
-  stripFetchFormDataResultForTransfer,
-  stripFetchFormMetaDataResultForTransfer,
-} from "~/lib/graph/transfer/stripGraphAdjacency";
-import {
   fetchFormData,
   type FetchFormDataResult,
   type FetchFormMetaDataResult,
@@ -88,9 +84,6 @@ export async function fetchPageViewMetadata(
     );
     result.dataResult = dataResult;
   }
-
-  stripFetchFormMetaDataResultForTransfer(result.metaResult);
-  stripFetchFormDataResultForTransfer(result.dataResult);
 
   return result;
 }

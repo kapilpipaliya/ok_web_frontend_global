@@ -1,4 +1,5 @@
 import type { ServerResult } from "~/cypher/types/ServerResult";
+import { stripVertexAdjacency } from "~/lib/graph/transfer/stripVertexAdjacency";
 
 export function stripGraphTimestamps(graph?: ServerResult["graph"]) {
   if (!graph) {
@@ -28,7 +29,11 @@ export function mergeGraphs(
 
   if (results.length === 1) {
     const { graph } = results[0];
-    return graph ? { graph } : undefined;
+    if (!graph) {
+      return undefined;
+    }
+    stripVertexAdjacency(graph);
+    return { graph };
   }
 
   const merged: ServerResult = {
@@ -44,5 +49,6 @@ export function mergeGraphs(
     }
   }
 
+  stripVertexAdjacency(merged.graph);
   return merged;
 }

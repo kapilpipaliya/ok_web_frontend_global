@@ -13,6 +13,7 @@ import {
 import type { FetchFormMetaDataResult } from "./fetchPageData";
 import { fetchComponentDataFromGraph } from "~/lib/graph/fetch/fetchComponentGraph";
 import { stripGraphTimestamps } from "~/lib/graph/fetch/graphFetchUtils";
+import { stripVertexAdjacency } from "~/lib/graph/transfer/stripVertexAdjacency";
 
 export async function fetchFormMetaData(
   // graph: GraphInterface,
@@ -115,6 +116,7 @@ async function fetchFormMetaDataFromDB(
   }
 
   stripGraphTimestamps(data.graph);
+  stripVertexAdjacency(data.graph);
 
   if (skipComponentData) {
     return { data };

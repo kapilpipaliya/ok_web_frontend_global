@@ -5,6 +5,7 @@ import { getFormData } from "~/components/form/functions/getFormData";
 import type { Id } from "~/lib/graph/type/id";
 import { fetchComponentDataFromGraph } from "~/lib/graph/fetch/fetchComponentGraph";
 import { stripGraphTimestamps } from "~/lib/graph/fetch/graphFetchUtils";
+import { stripVertexAdjacency } from "~/lib/graph/transfer/stripVertexAdjacency";
 
 export type ComponentGraphData = Pick<ServerResult, "graph">;
 
@@ -69,6 +70,8 @@ export async function fetchFormData(
     );
 
     stripGraphTimestamps(componentData?.graph);
+    stripGraphTimestamps(formDataResult.data?.graph);
+    stripVertexAdjacency(formDataResult.data?.graph);
 
     return { componentData, data: formDataResult.data };
   } catch (e) {
