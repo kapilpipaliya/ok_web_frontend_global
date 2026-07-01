@@ -1,10 +1,10 @@
-import { isObject } from "~/lib/data_structure/object/isObject";
 import {
   fetchFormData,
   type FetchFormDataResult,
   type FetchFormMetaDataResult,
 } from "./fetchPageData";
 import { fetchFormMetaData } from "./fetchFormMetaData";
+import { resolveFormFetchEdges } from "~/lib/graph/fetch/resolveFormFetchEdges";
 
 export interface FetchPageViewMetadataParams {
   pageVertexName?: string;
@@ -51,18 +51,11 @@ export async function fetchPageViewMetadata(
     return { error: metaResult.error };
   }
 
-  let formMetaId: string | undefined;
-  if (metaResult.data) {
-    if (Array.isArray(metaResult.data.result)) {
-      if (metaResult.data.result.length > 0) {
-        formMetaId = metaResult.data.result[0].id;
-      }
-    } else if (isObject(metaResult.data.result)) {
-      formMetaId = metaResult.data.result.id;
-    }
-  }
+  const formMetaId = metaResult.formMetaId;
 
-  const metaVertex = metaResult.data?.graph?.vertexes[formMetaId!];
+  const metaVertex = formMetaId
+    ? metaResult.data?.graph?.vertexes[formMetaId]
+    : undefined;
   const isNoPermissionCheck =
     params.isNoPermissionCheck ||
     metaVertex?.P?.isNoPermissionCheck ||
@@ -70,12 +63,13 @@ export async function fetchPageViewMetadata(
 
   const result: FetchPageViewMetadataResult = { formMetaId, metaResult };
 
-  if (
-    params.dataId &&
-    params.dataId !== "new"
-  ) {
-    const dataResult = await fetchFormData(
+  if (params.dataId && params.dataId !== "new" && formMetaId) {
+    const { incoming, outgoing } = resolveFormFetchEdges(
       metaResult,
+      formMetaId,
+    );
+    const dataResult = await fetchFormData(
+      { incoming, outgoing },
       params.formDataId,
       params.dataId,
       isNoPermissionCheck,

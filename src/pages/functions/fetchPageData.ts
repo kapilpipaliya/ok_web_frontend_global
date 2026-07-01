@@ -1,3 +1,4 @@
+import type { NestedExpression } from "~/cypher/types/NestedExpression";
 import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
@@ -5,15 +6,25 @@ import { getFormData } from "~/components/form/functions/getFormData";
 import type { Id } from "~/lib/graph/type/id";
 import { fetchComponentDataFromGraph } from "~/lib/graph/fetch/fetchComponentGraph";
 import { stripGraphTimestamps } from "~/lib/graph/fetch/graphFetchUtils";
+import {
+  extractRootIdFromResult,
+  stripResultFromServerResult,
+} from "~/lib/graph/fetch/wirePayloadUtils";
 import { stripVertexAdjacency } from "~/lib/graph/transfer/stripVertexAdjacency";
 
 export type ComponentGraphData = Pick<ServerResult, "graph">;
+
+export interface FetchFormDataParams {
+  incoming: NestedExpression[];
+  outgoing: NestedExpression[];
+}
 
 export interface FetchFormDataResult {
   componentData?: ComponentGraphData;
   createNew?: boolean;
   data?: ServerResult;
   error?: string;
+  formDataId?: Id;
   formDataIdOverride?: Id;
 }
 
@@ -22,14 +33,11 @@ export interface FetchFormMetaDataResult {
   data?: ServerResult;
   error?: string;
   form?: IFormMetaData;
+  formMetaId?: Id;
 }
 
 export async function fetchFormData(
-  metaResult: {
-    data?: ServerResult;
-    form?: IFormMetaData;
-  },
-  // getFormDataFn?: () => Promise<ServerResult>,
+  edges: FetchFormDataParams,
   formDataId?: Id,
   id?: Id,
   isNoPermissionCheck?: boolean,
@@ -51,19 +59,18 @@ export async function fetchFormData(
   }
 
   if (id && id.startsWith("-")) {
-    return { data: { result: [{ id }] } };
+    return { formDataId: id };
   }
 
   try {
-    const formDataResult = await getFormData(metaResult, id);
+    const formDataResult = await getFormData(id, edges);
 
-    if (
-      formDataResult.error ||
-      !Array.isArray(formDataResult.data?.result) ||
-      formDataResult.data.result.length === 0
-    ) {
+    if (formDataResult.error || !formDataResult.data?.graph) {
       return { error: `No ${pageVertexName} found` };
     }
+
+    const resolvedFormDataId =
+      extractRootIdFromResult(formDataResult.data) ?? id;
 
     const componentData = await fetchComponentDataFromGraph(
       formDataResult.data,
@@ -72,8 +79,13 @@ export async function fetchFormData(
     stripGraphTimestamps(componentData?.graph);
     stripGraphTimestamps(formDataResult.data?.graph);
     stripVertexAdjacency(formDataResult.data?.graph);
+    stripResultFromServerResult(formDataResult.data);
 
-    return { componentData, data: formDataResult.data };
+    return {
+      componentData,
+      data: formDataResult.data,
+      formDataId: resolvedFormDataId,
+    };
   } catch (e) {
     return { error: `Error When Loading Page: ${(e as Error).message}` };
   }

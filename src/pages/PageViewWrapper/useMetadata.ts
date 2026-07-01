@@ -1,10 +1,10 @@
 import { query, createAsync } from "@solidjs/router";
 import { untrack } from "solid-js";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
-import { isObject } from "~/lib/data_structure/object/isObject";
 import { PageDesignerLabels } from "~/features/page_designer/constants/PageDesignerLabels";
 import { createMeta } from "~/lib/graph/mutate/form/createMeta";
 import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
+import { resolveFormFetchEdges } from "~/lib/graph/fetch/resolveFormFetchEdges";
 import {
   fetchFormData,
   type FetchFormDataResult,
@@ -14,6 +14,7 @@ import { fetchFormMetaData } from "../functions/fetchFormMetaData";
 import type { PageViewConstants, PageViewWrapperProps } from "./types";
 import type { PreviewStoreObject } from "~/features/page_designer/context/PreviewContext";
 import type { SetStoreFunction } from "solid-js/store";
+import type { NestedExpression } from "~/cypher/types/NestedExpression";
 import type { ServerResult } from "~/cypher/types/ServerResult";
 
 interface UseMetadataOptions {
@@ -35,7 +36,8 @@ interface FetchFormMetaDataParams {
 }
 
 interface FetchFormDataParams {
-  metaResult: FetchFormMetaDataResult;
+  incoming: NestedExpression[];
+  outgoing: NestedExpression[];
   formDataId?: string;
   id?: string;
   isNoPermissionCheck?: boolean;
@@ -63,7 +65,7 @@ const fetchFormMetaDataQuery = query(
 
 const fetchFormDataQuery = query(async (params: FetchFormDataParams) => {
   return await fetchFormData(
-    params.metaResult,
+    { incoming: params.incoming, outgoing: params.outgoing },
     params.formDataId,
     params.id,
     params.isNoPermissionCheck,
@@ -113,34 +115,23 @@ export function useMetadata(
         return {};
       }
       const metaResult = await fetchFormMetaDataQuery(metaResultParams);
-      console.log("metaResult", metaResult);
       if (metaResult.error) {
         return metaResult;
       }
 
-      // Extract formMetaId from metaResult
-      let formMetaId = constants.formMetaId;
-      if (metaResult.data) {
-        if (Array.isArray(metaResult.data.result)) {
-          if (metaResult.data.result.length > 0) {
-            formMetaId = metaResult.data.result[0].id;
-          }
-        } else if (isObject(metaResult.data.result)) {
-          formMetaId = metaResult.data.result.id;
-        }
-      }
+      const formMetaId = metaResult.formMetaId ?? constants.formMetaId;
 
-      // Determine isNoPermissionCheck
       const metaVertex = constants.formMetaId
         ? options.graph.vertexes[constants.formMetaId]
-        : metaResult.data?.graph?.vertexes[formMetaId!];
+        : formMetaId
+          ? metaResult.data?.graph?.vertexes[formMetaId]
+          : undefined;
 
       const isNoPermissionCheck =
         constants.isNoPermissionCheck ||
         metaVertex?.P?.isNoPermissionCheck ||
         options.previewStore.isNoPermissionCheck;
 
-      // Fetch form data if needed
       const result: {
         formMetaId?: string;
         metaResult?: FetchFormMetaDataResult;
@@ -151,12 +142,19 @@ export function useMetadata(
       if (
         constants.dataId &&
         constants.dataId !== "new" &&
-        !constants.getFormData
+        !constants.getFormData &&
+        formMetaId
       ) {
+        const { incoming, outgoing } = resolveFormFetchEdges(
+          metaResult,
+          formMetaId,
+          options.graph,
+        );
         const idLocal =
           constants.dataId === "new" ? undefined : constants.dataId;
         const formDataParams: FetchFormDataParams = {
-          metaResult,
+          incoming,
+          outgoing,
           formDataId: constants.formDataId,
           id: idLocal,
           isNoPermissionCheck,

@@ -13,6 +13,10 @@ import {
 import type { FetchFormMetaDataResult } from "./fetchPageData";
 import { fetchComponentDataFromGraph } from "~/lib/graph/fetch/fetchComponentGraph";
 import { stripGraphTimestamps } from "~/lib/graph/fetch/graphFetchUtils";
+import {
+  extractRootIdFromResult,
+  stripResultFromServerResult,
+} from "~/lib/graph/fetch/wirePayloadUtils";
 import { stripVertexAdjacency } from "~/lib/graph/transfer/stripVertexAdjacency";
 
 export async function fetchFormMetaData(
@@ -115,16 +119,19 @@ async function fetchFormMetaDataFromDB(
     return { error: "404" };
   }
 
+  const formMetaId = extractRootIdFromResult(data);
+
   stripGraphTimestamps(data.graph);
   stripVertexAdjacency(data.graph);
+  stripResultFromServerResult(data);
 
   if (skipComponentData) {
-    return { data };
+    return { data, formMetaId };
   }
 
   const componentData = await fetchComponentDataFromGraph(data, dbSession);
 
   stripGraphTimestamps(componentData?.graph);
 
-  return { data, componentData };
+  return { data, componentData, formMetaId };
 }
