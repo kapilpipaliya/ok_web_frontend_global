@@ -29,24 +29,29 @@ Page schemas are grouped in subfolders under `pages/` (organization only; page k
 
 ### Components
 
-#### Core Components
-- **Header** - Navigation header with logo, menu, social links, and music player
-- **Footer** - Footer with copyright and credits
-- **ThemeToggle** - Dark/light theme switcher
+Component schemas are grouped in subfolders under `components/` (organization only; component keys are unchanged):
 
-#### Content Components
-- **HeroSection** - Homepage hero with book-style display
-- **BookCard** - Book display card with download/read options
-- **FeatureCard** - Reusable feature/content card
-- **QuoteSection** - Inspirational quote display
-- **ContactForm** - Contact form with validation
+| Folder | Components |
+|--------|------------|
+| `components/layouts/` | **Header**, **Footer**, **Layout** — site shell and page wrapper |
+| `components/sections/` | **HeroSection**, **QuoteSection** — full-width page sections |
+| `components/cards/` | **BookCard**, **FeatureCard** — card-style content blocks |
+| `components/contact/` | **ContactForm** — contact form with validation |
+| `components/theme/` | **ThemeToggle** — dark/light theme switcher |
+| `components/language/` | **LanguageSelector** — language picker (English/Hindi/Gujarati) |
+| `components/public_table/` | **PublicTable** — public read-only table wrapper |
+| `components/page_settings/` | **PageSettingsEditor**, **SettingsSectionNav** — live-page settings editor |
+| `components/forms/` | Shared form inputs (TextInput, TomSelect, Button, etc.) |
+| `components/ui/` | Generic UI primitives (IconButton, LoadingSpinner, etc.) |
+| `components/table/` | Data table system (Table, VirtualList, etc.) |
+| `components/portal/` | **PortalLayout**, **PortalNavigation** — admin portal shell |
+| `components/dynamic_page/` | DynamicPage CMS system (sidebar, form management, settings editors) |
 
 #### Planned Components (To be implemented)
 - **DiscourseRow** - Table row for discourse listings
 - **ScheduleRow** - Event schedule table row
 - **PhotoGallery** - Photo gallery with lightbox
 - **VideoGallery** - Video gallery grid
-- **LanguageSelector** - Language picker (English/Hindi/Gujarati)
 - **MusicPlayer** - Background music player
 
 ## Design Guidelines
