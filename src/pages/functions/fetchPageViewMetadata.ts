@@ -63,10 +63,15 @@ export async function fetchPageViewMetadata(
 
   const result: FetchPageViewMetadataResult = { formMetaId, metaResult };
 
-  if (params.dataId && params.dataId !== "new" && formMetaId) {
+  const canFetchFormData =
+    params.dataId &&
+    params.dataId !== "new" &&
+    (formMetaId || metaResult.form || metaResult.data?.graph);
+
+  if (canFetchFormData) {
     const { incoming, outgoing } = resolveFormFetchEdges(
       metaResult,
-      formMetaId,
+      formMetaId ?? params.dataId!,
     );
     const dataResult = await fetchFormData(
       { incoming, outgoing },

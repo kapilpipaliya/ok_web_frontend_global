@@ -141,15 +141,16 @@ export function useMetadata(
         error?: string;
       } = { formMetaId, metaResult };
 
-      if (
+      const canFetchFormData =
         constants.dataId &&
         constants.dataId !== "new" &&
         !constants.getFormData &&
-        formMetaId
-      ) {
+        (formMetaId || metaResult.form || metaResult.data?.graph);
+
+      if (canFetchFormData) {
         const { incoming, outgoing } = resolveFormFetchEdges(
           metaResult,
-          formMetaId,
+          formMetaId ?? constants.dataId!,
           options.graph,
         );
         const idLocal =
