@@ -12,7 +12,7 @@ import {
 } from "~/server/redis/redisCache";
 import type { FetchFormMetaDataResult } from "./fetchPageData";
 import { fetchComponentDataFromGraph } from "~/lib/graph/fetch/fetchComponentGraph";
-import { stripGraphTimestamps } from "~/lib/graph/fetch/graphFetchUtils";
+import { prepareGraphForWireTransfer } from "~/lib/graph/fetch/graphFetchUtils";
 import {
   extractRootIdFromResult,
   stripResultFromServerResult,
@@ -110,7 +110,6 @@ async function fetchFormMetaDataFromDB(
       nodes: {},
       relationships: {},
       ...(dbSession ? { dbSession } : {}),
-      // @ts-expect-error ignore error
       $urlFilter: { filter: { url: url } },
     },
   );
@@ -121,7 +120,7 @@ async function fetchFormMetaDataFromDB(
 
   const formMetaId = extractRootIdFromResult(data);
 
-  stripGraphTimestamps(data.graph);
+  prepareGraphForWireTransfer(data.graph);
   stripVertexAdjacency(data.graph);
   stripResultFromServerResult(data);
 
@@ -131,7 +130,7 @@ async function fetchFormMetaDataFromDB(
 
   const componentData = await fetchComponentDataFromGraph(data, dbSession);
 
-  stripGraphTimestamps(componentData?.graph);
+  prepareGraphForWireTransfer(componentData?.graph);
 
   return { data, componentData, formMetaId };
 }

@@ -5,7 +5,7 @@ import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 import { getFormData } from "~/components/form/functions/getFormData";
 import type { Id } from "~/lib/graph/type/id";
 import { fetchComponentDataFromGraph } from "~/lib/graph/fetch/fetchComponentGraph";
-import { stripGraphTimestamps } from "~/lib/graph/fetch/graphFetchUtils";
+import { prepareGraphForWireTransfer } from "~/lib/graph/fetch/graphFetchUtils";
 import {
   extractRootIdFromResult,
   stripResultFromServerResult,
@@ -43,6 +43,7 @@ export async function fetchFormData(
   isNoPermissionCheck?: boolean,
   hasRequiredPermissions?: boolean,
   pageVertexName?: string,
+  isDesignMode?: boolean,
 ): Promise<FetchFormDataResult> {
   // adding use server, is passing function in response when Component tab is opened, and it breaks the SSR.
   // "use server";
@@ -76,8 +77,9 @@ export async function fetchFormData(
       formDataResult.data,
     );
 
-    stripGraphTimestamps(componentData?.graph);
-    stripGraphTimestamps(formDataResult.data?.graph);
+    const wireOptions = { isDesignMode };
+    prepareGraphForWireTransfer(componentData?.graph, wireOptions);
+    prepareGraphForWireTransfer(formDataResult.data?.graph, wireOptions);
     stripVertexAdjacency(formDataResult.data?.graph);
     stripResultFromServerResult(formDataResult.data);
 

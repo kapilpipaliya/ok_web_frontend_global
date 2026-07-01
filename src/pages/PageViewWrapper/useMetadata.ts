@@ -43,6 +43,7 @@ interface FetchFormDataParams {
   isNoPermissionCheck?: boolean;
   hasRequiredPermissions?: boolean;
   pageVertexName?: string;
+  isDesignMode?: boolean;
 }
 
 const fetchFormMetaDataQuery = query(
@@ -71,6 +72,7 @@ const fetchFormDataQuery = query(async (params: FetchFormDataParams) => {
     params.isNoPermissionCheck,
     params.hasRequiredPermissions,
     params.pageVertexName,
+    params.isDesignMode,
   );
 }, "fetchFormData");
 
@@ -160,6 +162,7 @@ export function useMetadata(
           isNoPermissionCheck,
           hasRequiredPermissions: true,
           pageVertexName: constants.pageVertexName,
+          isDesignMode: constants.isDesignMode,
         };
         const dataResult = await fetchFormDataQuery(formDataParams);
         return { ...result, dataResult };

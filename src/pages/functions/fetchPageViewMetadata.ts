@@ -75,6 +75,7 @@ export async function fetchPageViewMetadata(
       isNoPermissionCheck,
       true,
       params.pageVertexName,
+      params.isDesignMode,
     );
     result.dataResult = dataResult;
   }

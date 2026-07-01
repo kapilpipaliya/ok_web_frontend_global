@@ -1,5 +1,46 @@
 import type { ServerResult } from "~/cypher/types/ServerResult";
 import { stripVertexAdjacency } from "~/lib/graph/transfer/stripVertexAdjacency";
+import type { Vertex } from "~/lib/graph/type/vertex";
+
+const VERTEX_LABELS_KEEPING_UPDATED_AT = new Set([
+  "Page",
+  "Component",
+  "EmailTemplate",
+  "Theme",
+  "Function",
+]);
+
+/** Attr P keys used only in the page designer or server fetch planning — not at render time. */
+const PAGE_BUILDER_ATTR_DESIGNER_ONLY_KEYS = [
+  "layerName",
+] as const;
+
+
+function shouldKeepVertexUpdatedAt(vertex: Vertex): boolean {
+  return (
+    vertex.L?.some((label) => VERTEX_LABELS_KEEPING_UPDATED_AT.has(label)) ??
+    false
+  );
+}
+
+function isPageBuilderAttr(vertex: Vertex): boolean {
+  if (!vertex.L?.includes("Attr") || !vertex.P) {
+    return false;
+  }
+
+  return true;
+}
+
+function stripEmptyEdgeProperties(graph: NonNullable<ServerResult["graph"]>) {
+  for (const edge of Object.values(graph.edges || {})) {
+    if (!edge) {
+      continue;
+    }
+    if (edge.P && Object.keys(edge.P).length === 0) {
+      delete (edge as { P?: typeof edge.P }).P;
+    }
+  }
+}
 
 export function stripGraphTimestamps(graph?: ServerResult["graph"]) {
   if (!graph) {
@@ -7,16 +48,55 @@ export function stripGraphTimestamps(graph?: ServerResult["graph"]) {
   }
 
   for (const vertex of Object.values(graph.vertexes || {})) {
+    if (!vertex?.P) {
+      continue;
+    }
     delete vertex.P.createdAt;
-    delete vertex.P.updatedAt;
+    if (!shouldKeepVertexUpdatedAt(vertex)) {
+      delete vertex.P.updatedAt;
+    }
   }
 
   for (const edge of Object.values(graph.edges || {})) {
+    if (!edge?.P) {
+      continue;
+    }
     delete edge.P.createdAt;
     delete edge.P.updatedAt;
-    if (Object.keys(edge.P).length === 0) {
-      delete (edge as { P?: typeof edge.P }).P;
+  }
+
+  stripEmptyEdgeProperties(graph);
+}
+
+
+export function stripDesignerAttrProperties(graph?: ServerResult["graph"]) {
+  if (!graph) {
+    return;
+  }
+
+  for (const vertex of Object.values(graph.vertexes || {})) {
+    if (!isPageBuilderAttr(vertex)) {
+      continue;
     }
+
+    for (const key of PAGE_BUILDER_ATTR_DESIGNER_ONLY_KEYS) {
+      delete vertex.P[key];
+    }
+  }
+}
+
+export function prepareGraphForWireTransfer(
+  graph?: ServerResult["graph"],
+  options?: { isDesignMode?: boolean },
+) {
+  if (!graph) {
+    return;
+  }
+
+  stripGraphTimestamps(graph);
+
+  if (!options?.isDesignMode) {
+    stripDesignerAttrProperties(graph);
   }
 }
 
