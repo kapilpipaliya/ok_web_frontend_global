@@ -14,7 +14,7 @@ import {
   SlotContext,
   type SlotContextType,
 } from "~/components/fields/component/contexts/SlotContext";
-import { fetchComponentData } from "~/cypher/get/fetchComponentData";
+import { fetchComponentDataWithNested } from "~/lib/graph/fetch/fetchComponentGraph";
 import {
   usePageRenderContext,
   PageRenderContextProvider,
@@ -74,7 +74,7 @@ export function ComponentField(props: Readonly<{ children?: JSX.Element }>) {
       if (vertex && getChildrenAttrs(graph, setGraph, vertex).length !== 0) {
         return {};
       }
-      return await fetchComponentData([name]);
+      return (await fetchComponentDataWithNested([name])) ?? {};
     },
     { deferStream: true },
   );

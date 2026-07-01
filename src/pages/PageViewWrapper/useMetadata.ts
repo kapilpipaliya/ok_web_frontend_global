@@ -113,6 +113,7 @@ export function useMetadata(
         return {};
       }
       const metaResult = await fetchFormMetaDataQuery(metaResultParams);
+      console.log("metaResult", metaResult);
       if (metaResult.error) {
         return metaResult;
       }
@@ -204,18 +205,19 @@ export function useMetadata(
       if (constants.formId && options.graph.vertexes[constants.formId]) {
         delete metaResult.data.graph!.vertexes[constants.formId];
       }
-      setGraphData(options.graph, options.setGraph, metaResult.data.graph!);
     }
 
-    // Process componentData from metaResult
-    if (metaResult.componentData?.length) {
-      for (const componentData of metaResult.componentData) {
-        if (componentData.graph) {
-          setGraphData(options.graph, options.setGraph, componentData.graph, {
-            skipExisting: true,
-          });
-        }
-      }
+    if (metaResult.data?.graph) {
+      setGraphData(options.graph, options.setGraph, metaResult.data.graph);
+    }
+
+    if (metaResult.componentData?.graph) {
+      setGraphData(
+        options.graph,
+        options.setGraph,
+        metaResult.componentData.graph,
+        { skipExisting: true },
+      );
     }
 
     if (formMetaId) {

@@ -116,14 +116,13 @@ export function useFormData(
         skipExisting: true,
       });
     }
-    if (result.componentData?.length) {
-      for (const componentData of result.componentData) {
-        if (componentData.graph) {
-          setGraphData(options.graph, options.setGraph, componentData.graph, {
-            skipExisting: true,
-          });
-        }
-      }
+    if (result.componentData?.graph) {
+      setGraphData(
+        options.graph,
+        options.setGraph,
+        result.componentData.graph,
+        { skipExisting: true },
+      );
     }
 
     if (formDataId) {

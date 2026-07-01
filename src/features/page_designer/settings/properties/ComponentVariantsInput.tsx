@@ -164,8 +164,12 @@ export function ComponentVariantsInput(props: {
 
   // createEffect(() => {
   //   if (variants().length === 0) {
-  //     // Fetch variants data if not already loaded
-  //     fetchComponentData([graph.vertexes[formStoreVertex()?.P.selectedComponent]], graph, setGraph);
+  //     const componentKey =
+  //       graph.vertexes[formStoreVertex()?.P.selectedComponent]?.P.key;
+  //     if (componentKey) {
+  //       const componentData = await fetchComponentDataWithNested([componentKey]);
+  //       setGraphData(graph, setGraph, componentData.graph, { skipExisting: true });
+  //     }
   //   }
   // });
   return (

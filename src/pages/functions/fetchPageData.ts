@@ -3,10 +3,13 @@ import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { getFormData } from "~/components/form/functions/getFormData";
 import type { Id } from "~/lib/graph/type/id";
-import { fetchComponentDataFromGraph } from "./fetchComponentData";
+import { fetchComponentDataFromGraph } from "~/lib/graph/fetch/fetchComponentGraph";
+import { stripGraphTimestamps } from "~/lib/graph/fetch/graphFetchUtils";
+
+export type ComponentGraphData = Pick<ServerResult, "graph">;
 
 export interface FetchFormDataResult {
-  componentData?: ServerResult[];
+  componentData?: ComponentGraphData;
   createNew?: boolean;
   data?: ServerResult;
   error?: string;
@@ -14,7 +17,7 @@ export interface FetchFormDataResult {
 }
 
 export interface FetchFormMetaDataResult {
-  componentData?: ServerResult[];
+  componentData?: ComponentGraphData;
   data?: ServerResult;
   error?: string;
   form?: IFormMetaData;
@@ -64,6 +67,8 @@ export async function fetchFormData(
     const componentData = await fetchComponentDataFromGraph(
       formDataResult.data,
     );
+
+    stripGraphTimestamps(componentData?.graph);
 
     return { componentData, data: formDataResult.data };
   } catch (e) {
