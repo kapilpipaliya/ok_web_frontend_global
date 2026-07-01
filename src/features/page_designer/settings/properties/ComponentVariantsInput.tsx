@@ -103,6 +103,7 @@ function VariantInputRow(props: {
               meta={
                 {
                   P: {
+                    key: props.variant.P.key,
                     css: `return \`._id {
                               flex: 1;
                               padding: 1px 2px;
