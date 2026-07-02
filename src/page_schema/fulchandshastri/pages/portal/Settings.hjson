@@ -17,28 +17,38 @@ const checkAdminRole = () => {
   });
 };
 
-const PAGE_PREVIEW_URLS = {
-  global: "/",
-  home: "/",
-  about: "/about-fulchand",
-  "about-ask": "/about-ask-umarala",
-  "atma-sadhana-nitya-kram": "/atma-sadhana-nitya-kram",
-  "atma-siddhi-mission": "/atma-siddhi-shastra-mission",
-  bhakti: "/bhakti",
-  books: "/books",
-  contact: "/contact",
-  discourses: "/discourses",
-  donation: "/donation",
-  "gyaan-deepak": "/gyaan-deepak-prajwalan",
-  "his-inspiration": "/his-inspiration",
-  photos: "/photos",
-  schedule: "/schedule",
-  videos: "/videos"
+const [pagePreviewUrls, setPagePreviewUrls] = args.createSignal({ global: "/" });
+let pagePreviewUrlsLoadPromise = null;
+
+const loadPagePreviewUrls = async () => {
+  const existing = pagePreviewUrls();
+  if (existing && Object.keys(existing).length > 1) return existing;
+  if (pagePreviewUrlsLoadPromise) return pagePreviewUrlsLoadPromise;
+
+  pagePreviewUrlsLoadPromise = (async () => {
+    try {
+      const result = await args.executeNamedServerFunction({
+        functionName: "getSettingsPagePreviewUrls",
+        contextData: {}
+      });
+      const urls = result?.result?.data?.previewUrls || {};
+      const resolved = { global: "/", ...urls };
+      setPagePreviewUrls(resolved);
+      return resolved;
+    } catch (error) {
+      console.error("Settings loadPagePreviewUrls:", error);
+      return { global: "/" };
+    } finally {
+      pagePreviewUrlsLoadPromise = null;
+    }
+  })();
+
+  return pagePreviewUrlsLoadPromise;
 };
 
 const getPreviewUrl = () => {
   const settingsPageId = args.searchParams?.page || "home";
-  return PAGE_PREVIEW_URLS[settingsPageId] || "/";
+  return pagePreviewUrls()[settingsPageId] || "/";
 };
 
 const refreshPreview = () => {
@@ -191,6 +201,8 @@ return {
   onSchemaSaved,
   siteLanguages,
   loadSiteLanguages,
+  pagePreviewUrls,
+  loadPagePreviewUrls,
   syncEditorPaneWidth,
   executeYTOFunction: (functionName, contextData) =>
     args.executeNamedServerFunction({
@@ -212,7 +224,10 @@ return {
       args.navigate("/", { replace: true });
       return;
     }
-    await args.fns.loadSiteLanguages?.();
+    await Promise.all([
+      args.fns.loadSiteLanguages?.(),
+      args.fns.loadPagePreviewUrls?.()
+    ]);
     args.fns.syncEditorPaneWidth?.();
     window.addEventListener("fulchand-settings-saved", args.fns.onSettingsSaved);
   },

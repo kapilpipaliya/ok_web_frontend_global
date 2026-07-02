@@ -26,7 +26,7 @@ const DEFAULT_LANGUAGES = [
   { code: "gu", label: "Gujarati", isDefault: false }
 ];
 
-const isTranslatableField = (field) => field?.translatable !== false;
+const isTranslatableField = (field) => field?.translatable === true;
 
 const getDefaultLanguageCode = (languages) => {
   const list = Array.isArray(languages) && languages.length > 0 ? languages : DEFAULT_LANGUAGES;
@@ -171,7 +171,7 @@ const applyTranslatableDefaultsToField = (field) => {
   const isTextField = field.renderer === "text" || field.renderer === "textArea";
   const next = { ...field };
   if (next.translatable === undefined) {
-    next.translatable = isTextField;
+    next.translatable = isTextField ? true : false;
   }
   if (next.renderer === "fieldArray" && next.fieldArrayConfig?.itemFields) {
     next.fieldArrayConfig = {
@@ -181,7 +181,7 @@ const applyTranslatableDefaultsToField = (field) => {
       )
     };
   }
-  if (isTextField && next.translatable !== false && next.dataType === undefined) {
+  if (isTextField && next.translatable === true && next.dataType === undefined) {
     next.dataType = "text";
   }
   return next;

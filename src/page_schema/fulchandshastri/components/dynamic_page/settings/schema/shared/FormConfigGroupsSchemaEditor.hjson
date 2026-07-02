@@ -130,7 +130,7 @@ const addField = () => {
       dataType: "text",
       renderer: "text",
       required: false,
-      translatable: true,
+      translatable: false,
       colSpan: 1
     }
   ];
@@ -696,8 +696,7 @@ return {
     const renderer = e.target.value;
     args.fns.updateFieldAt?.(index, {
       renderer,
-      dataType: renderer === "checkbox" ? "boolean" : renderer === "fieldArray" ? "array" : "text",
-      translatable: renderer === "text" || renderer === "textArea"
+      dataType: renderer === "checkbox" ? "boolean" : renderer === "fieldArray" ? "array" : "text"
     });
   }
 };
@@ -846,7 +845,7 @@ const field = args.fns.getFieldAt?.(index) || {};
 return {
   as: "input",
   type: "checkbox",
-  checked: field.translatable !== false,
+  checked: field.translatable === true,
   onChange: (e) => args.fns.updateFieldAt?.(index, { translatable: e.target.checked })
 };
 '''

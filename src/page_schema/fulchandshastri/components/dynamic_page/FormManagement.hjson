@@ -21,7 +21,7 @@ const getFieldDataType = (field) => field?.dataType || "text";
 const getFieldRenderer = (field) => field?.renderer || "text";
 
 const isTranslatableTextField = (field) => {
-  if (field?.translatable === false) return false;
+  if (field?.translatable !== true) return false;
   const renderer = getFieldRenderer(field);
   return renderer === "text" || renderer === "textArea";
 };

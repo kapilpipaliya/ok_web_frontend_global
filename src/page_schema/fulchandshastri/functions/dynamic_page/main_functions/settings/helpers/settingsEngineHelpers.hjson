@@ -68,7 +68,7 @@ const normalizeFieldArrayValue = (field, value) => {
   return [];
 };
 
-const isTranslatableField = (field) => field?.translatable !== false;
+const isTranslatableField = (field) => field?.translatable === true;
 
 const DEFAULT_SITE_LANGUAGES = [
   { code: "en", label: "English", isDefault: true },

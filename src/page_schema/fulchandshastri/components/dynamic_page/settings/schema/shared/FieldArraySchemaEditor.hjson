@@ -75,7 +75,7 @@ const addItemField = () => {
       label: "New field",
       dataType: "text",
       renderer: "text",
-      translatable: true,
+      translatable: false,
       required: false
     }
   ]);
@@ -508,8 +508,7 @@ return {
     const dataType = nextRenderer === "checkbox" ? "boolean" : "text";
     args.fns.updateItemFieldAt?.(index, {
       renderer: nextRenderer,
-      dataType,
-      translatable: nextRenderer === "text" || nextRenderer === "textArea"
+      dataType
     });
   }
 };
@@ -658,7 +657,7 @@ const itemField = args.fns.getItemFieldAt?.(index) || {};
 return {
   as: "input",
   type: "checkbox",
-  checked: itemField.translatable !== false,
+  checked: itemField.translatable === true,
   onChange: (e) => args.fns.updateItemFieldAt?.(index, { translatable: e.target.checked })
 };
 '''

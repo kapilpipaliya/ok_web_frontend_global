@@ -135,7 +135,7 @@ const fieldValuesToFormP = (field) => {
     label: field?.label || "",
     renderer,
     required: field?.required === true,
-    translatable: field?.translatable !== false && isTextRenderer(renderer),
+    translatable: field?.translatable === true,
     colSpan: field?.colSpan ?? 1
   };
 };
@@ -143,7 +143,7 @@ const fieldValuesToFormP = (field) => {
 const formPToFieldPatch = (formP, existingField) => {
   const renderer = formP.renderer || "text";
   const isTextField = isTextRenderer(renderer);
-  const translatable = isTextField ? formP.translatable !== false : false;
+  const translatable = isTextField && formP.translatable === true;
   const patch = {
     key: formP.key,
     label: formP.label,
@@ -362,7 +362,7 @@ const fieldSchemaMatches = (field, patch) => {
     field.label === patch.label &&
     (field.renderer || "text") === (patch.renderer || "text") &&
     field.required === patch.required &&
-    (field.translatable !== false) === (patch.translatable !== false) &&
+    (field.translatable === true) === (patch.translatable === true) &&
     Number(field.colSpan || 1) === Number(patch.colSpan || 1) &&
     (field.dataType || "text") === (patch.dataType || "text") &&
     sameArrayConfig
@@ -613,7 +613,7 @@ const addField = () => {
     label: "New field",
     dataType: "text",
     renderer: "text",
-    translatable: true,
+    translatable: false,
     required: false,
     colSpan: 1
   };

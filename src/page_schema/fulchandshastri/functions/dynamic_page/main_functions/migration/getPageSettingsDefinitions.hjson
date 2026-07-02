@@ -28,7 +28,13 @@ function buildField({ key, label, renderer, translatable, ...rest }) {
   const isTextField = renderer === "text" || renderer === "textArea";
   let resolvedTranslatable = translatable;
   if (resolvedTranslatable === undefined) {
-    resolvedTranslatable = isTextField;
+    if (NON_TRANSLATABLE_FIELD_KEYS.has(key)) {
+      resolvedTranslatable = false;
+    } else if (isTextField) {
+      resolvedTranslatable = true;
+    } else {
+      resolvedTranslatable = false;
+    }
   }
   if (NON_TRANSLATABLE_FIELD_KEYS.has(key)) {
     resolvedTranslatable = false;
@@ -78,7 +84,7 @@ function getDefaultLanguageCode(languages) {
 }
 
 function isTranslatableField(field) {
-  return field?.translatable !== false;
+  return field?.translatable === true;
 }
 
 function normalizeLocalizedDefault(value, languages, defaultCode) {

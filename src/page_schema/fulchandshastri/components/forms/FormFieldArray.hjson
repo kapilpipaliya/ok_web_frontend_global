@@ -53,7 +53,7 @@ const buildDefaultItem = () => {
       item[itemField.key] = itemField.defaultValue;
     } else if (itemField.dataType === "boolean" || itemField.renderer === "checkbox") {
       item[itemField.key] = false;
-    } else if (itemField.translatable !== false) {
+    } else if (itemField.translatable === true) {
       item[itemField.key] = {};
     } else {
       item[itemField.key] = "";
@@ -174,12 +174,12 @@ const getItemFieldValue = (item, itemField) => {
   if (!itemField?.key) return "";
   const value = item?.[itemField.key];
   if (value == null) {
-    return itemField.translatable !== false ? {} : "";
+    return itemField.translatable === true ? {} : "";
   }
   return value;
 };
 
-const isItemFieldTranslatable = (itemField) => itemField?.translatable !== false;
+const isItemFieldTranslatable = (itemField) => itemField?.translatable === true;
 
 const DEFAULT_SITE_LANGUAGES = [
   { code: "en", label: "English", isDefault: true },

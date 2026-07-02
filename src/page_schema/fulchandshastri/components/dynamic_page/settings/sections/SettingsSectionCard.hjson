@@ -28,7 +28,7 @@ const getDefaultLanguageCode = (languages) => {
   return languages[0]?.code ? String(languages[0].code) : "en";
 };
 
-const isTranslatableField = (field) => field?.translatable !== false;
+const isTranslatableField = (field) => field?.translatable === true;
 
 const normalizeLocalizedValue = (value, languages, defaultCode) => {
   const normalized = {};
