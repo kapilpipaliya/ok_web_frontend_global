@@ -357,6 +357,79 @@ const getAllFields = () => {
   return [];
 };
 
+const getTranslatableFieldKeys = () => {
+  const keys = [];
+  const allFields = getAllFields();
+  for (let i = 0; i < allFields.length; i++) {
+    const field = allFields[i];
+    if (isTranslatableTextField(field) && field?.key) keys.push(String(field.key));
+  }
+  return keys;
+};
+
+const getDefaultLanguageCode = (languages) => {
+  const list = Array.isArray(languages) ? languages : [];
+  const explicit = list.find((lang) => lang?.isDefault === true && lang?.code);
+  if (explicit?.code) return String(explicit.code);
+  const first = list.find((lang) => lang?.code);
+  return first?.code ? String(first.code) : "en";
+};
+
+const isLocalizedMap = (value) =>
+  value != null && typeof value === "object" && !Array.isArray(value);
+
+/** Merge root default-language strings + {Label}Translation vertices into FormLocalizedText maps. */
+const hydrateTranslationsOntoFormVertex = (txnId, formVertex, sourceVertex, vertexLabel) => {
+  if (!formVertex?.id || !sourceVertex || !vertexLabel) return;
+  const fieldKeys = getTranslatableFieldKeys();
+  if (fieldKeys.length === 0) return;
+
+  const languages = getSiteLanguages();
+  const defaultCode = getDefaultLanguageCode(languages);
+  const translationLabel = `${vertexLabel}Translation`;
+  const edgeType = `${vertexLabel}${translationLabel}`;
+
+  const maps = {};
+  for (let i = 0; i < fieldKeys.length; i++) {
+    const key = fieldKeys[i];
+    const normalized = {};
+    for (let li = 0; li < languages.length; li++) {
+      const code = languages[li]?.code;
+      if (code) normalized[code] = "";
+    }
+    const rootVal = sourceVertex.P?.[key];
+    if (isLocalizedMap(rootVal)) {
+      for (const locale of Object.keys(rootVal)) {
+        if (Object.prototype.hasOwnProperty.call(normalized, locale)) {
+          normalized[locale] = rootVal[locale] == null ? "" : String(rootVal[locale]);
+        }
+      }
+    } else if (rootVal != null && String(rootVal) !== "") {
+      normalized[defaultCode] = String(rootVal);
+    }
+    maps[key] = normalized;
+  }
+
+  const edgeIds = sourceVertex.OUT?.[edgeType] || [];
+  for (let ei = 0; ei < edgeIds.length; ei++) {
+    const edge = args.graph.edges[edgeIds[ei]];
+    if (!edge?.E) continue;
+    const translationVertex = args.graph.vertexes[edge.E];
+    if (!translationVertex?.L?.includes(translationLabel)) continue;
+    const locale = translationVertex.P?.locale;
+    if (locale == null || String(locale).trim() === "") continue;
+    const localeCode = String(locale);
+    for (let fi = 0; fi < fieldKeys.length; fi++) {
+      const key = fieldKeys[fi];
+      if (!maps[key]) continue;
+      const text = translationVertex.P?.[key];
+      if (text != null) maps[key][localeCode] = String(text);
+    }
+  }
+
+  args.mergeVertexProperties(txnId, formVertex.id, args.graph, args.setGraph, maps);
+};
+
 // Initialize form from vertex
 const initializeForm = () => {
   const pendingTxn = formTxnId();
@@ -402,6 +475,7 @@ const initializeForm = () => {
         args.setGraph,
       );
       setFormVertexId(clonedVertex.id);
+      hydrateTranslationsOntoFormVertex(txnId, clonedVertex, existingVertex, vertexLabel);
       hydrateNestedLineFields();
     } else {
       // Vertex doesn't exist in graph, create new vertex with initialVertex properties
@@ -417,6 +491,7 @@ const initializeForm = () => {
 
       // Store vertex ID instead of vertex object
       setFormVertexId(vertexId);
+      hydrateTranslationsOntoFormVertex(txnId, createdVertex, initialVertex, vertexLabel);
       hydrateNestedLineFields();
     }
   } else {

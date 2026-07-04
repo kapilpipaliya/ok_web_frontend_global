@@ -24,7 +24,7 @@ export function setGraphData(
   args: GraphData,
   options: UpdateOptions = {},
 ) {
-  if (Object.keys(args.edges).length > 0) {
+  if (args.edges && Object.keys(args.edges).length > 0) {
     restoreVertexAdjacencyFromEdges(args);
   }
 

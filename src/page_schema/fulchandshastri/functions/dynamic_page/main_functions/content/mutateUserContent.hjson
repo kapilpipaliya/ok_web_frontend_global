@@ -25,12 +25,204 @@ const inputData = args.contextData.data || {};
 const vertex = inputData.vertex;
 const relationships = inputData.relationships || {};
 const nestedLineSync = inputData.nestedLineSync || {};
-const { tableVertexLabel, operation, elementId, uniqueKeys = [], enableUserScoping, hooks, nestedLinePropertyStripKeys = [] } = args.contextData;
+const {
+  tableVertexLabel,
+  operation,
+  elementId,
+  uniqueKeys = [],
+  enableUserScoping,
+  hooks,
+  nestedLinePropertyStripKeys = [],
+  translatableFieldKeys = [],
+  siteLanguages = []
+} = args.contextData;
 
 const nestedLineStripFromConfig = Array.isArray(nestedLinePropertyStripKeys)
   ? nestedLinePropertyStripKeys.map((k) => String(k))
   : [];
 const NESTED_LINE_STRIP_KEYS = new Set([...Object.keys(nestedLineSync), ...nestedLineStripFromConfig]);
+
+const TRANSLATABLE_FIELD_KEYS = Array.isArray(translatableFieldKeys)
+  ? translatableFieldKeys.map((k) => String(k)).filter(Boolean)
+  : [];
+
+const getDefaultLanguageCode = (languages) => {
+  const list = Array.isArray(languages) ? languages : [];
+  const explicit = list.find((lang) => lang?.isDefault === true && lang?.code);
+  if (explicit?.code) return String(explicit.code);
+  const first = list.find((lang) => lang?.code);
+  return first?.code ? String(first.code) : "en";
+};
+
+const DEFAULT_LANGUAGE_CODE = getDefaultLanguageCode(siteLanguages);
+
+const getTranslationLabel = (rootLabel) => `${rootLabel}Translation`;
+const getTranslationEdgeType = (rootLabel) => {
+  const translationLabel = getTranslationLabel(rootLabel);
+  return `${rootLabel}${translationLabel}`;
+};
+
+const isLocalizedMap = (value) =>
+  value != null && typeof value === "object" && !Array.isArray(value);
+
+const translationHasContent = (props, fieldKeys) => {
+  if (!props || typeof props !== "object") return false;
+  for (let i = 0; i < fieldKeys.length; i++) {
+    const text = props[fieldKeys[i]];
+    if (text != null && String(text).trim() !== "") return true;
+  }
+  return false;
+};
+
+const splitTranslatableProps = (props, fieldKeys, defaultCode) => {
+  const rootProps = { ...(props || {}) };
+  const translationsByLocale = {};
+  if (!Array.isArray(fieldKeys) || fieldKeys.length === 0) {
+    return { rootProps, translationsByLocale };
+  }
+  for (let i = 0; i < fieldKeys.length; i++) {
+    const key = fieldKeys[i];
+    const value = rootProps[key];
+    if (!isLocalizedMap(value)) continue;
+    const defaultText = value[defaultCode];
+    rootProps[key] = defaultText != null ? String(defaultText) : "";
+    for (const locale of Object.keys(value)) {
+      if (locale === defaultCode) continue;
+      if (!translationsByLocale[locale]) {
+        translationsByLocale[locale] = { locale };
+      }
+      const text = value[locale];
+      translationsByLocale[locale][key] = text != null ? String(text) : "";
+    }
+  }
+  return { rootProps, translationsByLocale };
+};
+
+const trackDeletedVertexId = (context, vertexId) => {
+  if (!context || vertexId == null || vertexId === "") return;
+  if (!context.deletedVertexes) context.deletedVertexes = [];
+  const id = String(vertexId);
+  if (!context.deletedVertexes.includes(id)) context.deletedVertexes.push(id);
+};
+
+const deleteTranslationVertices = async (session, parentElementId, rootLabel, context) => {
+  if (!parentElementId || !rootLabel) return;
+  const translationLabel = getTranslationLabel(rootLabel);
+  const edgeType = getTranslationEdgeType(rootLabel);
+  const existingRes = await session.run(
+    `MATCH (c:${rootLabel})-[:${edgeType}]->(t:${translationLabel})
+     WHERE elementId(c) = $pid
+     RETURN elementId(t) AS tid`,
+    { pid: parentElementId }
+  );
+  for (let i = 0; i < existingRes.records.length; i++) {
+    const tid = existingRes.records[i].get("tid");
+    if (tid != null) trackDeletedVertexId(context, tid);
+  }
+  await session.run(
+    `MATCH (c:${rootLabel})-[:${edgeType}]->(t:${translationLabel})
+     WHERE elementId(c) = $pid
+     DETACH DELETE t`,
+    { pid: parentElementId }
+  );
+};
+
+const syncTranslationVertices = async (session, params) => {
+  const {
+    parentElementId,
+    rootLabel,
+    translationsByLocale,
+    fieldKeys,
+    processResult,
+    context
+  } = params;
+  if (!parentElementId || !rootLabel || !Array.isArray(fieldKeys) || fieldKeys.length === 0) return;
+
+  const translationLabel = getTranslationLabel(rootLabel);
+  const edgeType = getTranslationEdgeType(rootLabel);
+  const nowIso = new Date().toISOString();
+
+  const existingRes = await session.run(
+    `MATCH (c:${rootLabel})-[r:${edgeType}]->(t:${translationLabel})
+     WHERE elementId(c) = $pid
+     RETURN elementId(t) AS tid, t.locale AS locale`,
+    { pid: parentElementId }
+  );
+  const existingByLocale = {};
+  for (let i = 0; i < existingRes.records.length; i++) {
+    const rec = existingRes.records[i];
+    const locale = rec.get("locale");
+    const tid = rec.get("tid");
+    if (locale != null && String(locale).trim() !== "" && tid != null) {
+      existingByLocale[String(locale)] = { elementId: String(tid) };
+    }
+  }
+
+  const removeTranslation = async (tid) => {
+    if (!tid) return;
+    trackDeletedVertexId(context, tid);
+    await session.run(
+      `MATCH (c:${rootLabel})-[:${edgeType}]->(t:${translationLabel})
+       WHERE elementId(c) = $pid AND elementId(t) = $tid
+       DETACH DELETE t`,
+      { pid: parentElementId, tid }
+    );
+  };
+
+  const desiredLocales = Object.keys(translationsByLocale || {});
+  for (let i = 0; i < desiredLocales.length; i++) {
+    const locale = desiredLocales[i];
+    const localeProps = translationsByLocale[locale] || { locale };
+    if (!translationHasContent(localeProps, fieldKeys)) {
+      const existing = existingByLocale[locale];
+      if (existing?.elementId) await removeTranslation(existing.elementId);
+      continue;
+    }
+
+    const translationProps = { locale, updatedAt: nowIso };
+    for (let fi = 0; fi < fieldKeys.length; fi++) {
+      const key = fieldKeys[fi];
+      const text = localeProps[key];
+      translationProps[key] = text != null ? String(text) : "";
+    }
+
+    const existing = existingByLocale[locale];
+    if (existing?.elementId) {
+      const updateRes = await session.run(
+        `MATCH (c:${rootLabel})-[r:${edgeType}]->(t:${translationLabel})
+         WHERE elementId(c) = $pid AND elementId(t) = $tid
+         SET t += $props
+         RETURN c, r, t`,
+        { pid: parentElementId, tid: existing.elementId, props: translationProps }
+      );
+      if (processResult && context) {
+        processResult(updateRes.records, context, ["c", "t"], "r");
+      }
+    } else {
+      translationProps.createdAt = nowIso;
+      const createRes = await session.run(
+        `MATCH (c:${rootLabel})
+         WHERE elementId(c) = $pid
+         CREATE (t:${translationLabel} $props)
+         CREATE (c)-[r:${edgeType}]->(t)
+         RETURN c, r, t`,
+        { pid: parentElementId, props: translationProps }
+      );
+      if (processResult && context) {
+        processResult(createRes.records, context, ["c", "t"], "r");
+      }
+    }
+  }
+
+  const existingLocales = Object.keys(existingByLocale);
+  for (let i = 0; i < existingLocales.length; i++) {
+    const locale = existingLocales[i];
+    if (desiredLocales.includes(locale)) continue;
+    const existing = existingByLocale[locale];
+    if (!existing?.elementId) continue;
+    await removeTranslation(existing.elementId);
+  }
+};
 
 const getInventoryVertexIdFromLineRow = (lineRow) => {
   if (lineRow.inventoryItemId != null && String(lineRow.inventoryItemId).trim() !== "")
@@ -271,7 +463,11 @@ if (!vertex || !vertex.P) {
     message: `${tableVertexLabel || 'Content'} data is required`
   };
 }
-const formData = vertex.P;
+const { rootProps: formData, translationsByLocale } = splitTranslatableProps(
+  vertex.P,
+  TRANSLATABLE_FIELD_KEYS,
+  DEFAULT_LANGUAGE_CODE
+);
 
 if (!tableVertexLabel || typeof tableVertexLabel !== "string") {
   return {
@@ -481,6 +677,19 @@ try {
       });
     } catch (nestedErr) {
       console.error("syncNestedLineCollections (create):", nestedErr);
+    }
+
+    try {
+      await syncTranslationVertices(args.session, {
+        parentElementId: createdElementId,
+        rootLabel: vertexLabel,
+        translationsByLocale,
+        fieldKeys: TRANSLATABLE_FIELD_KEYS,
+        processResult: args.processResult,
+        context: args.context
+      });
+    } catch (translationErr) {
+      console.error("syncTranslationVertices (create):", translationErr);
     }
 
     const createResult = {
@@ -720,6 +929,19 @@ try {
       console.error("syncNestedLineCollections (update):", nestedErr);
     }
 
+    try {
+      await syncTranslationVertices(args.session, {
+        parentElementId: updateElementId,
+        rootLabel: vertexLabel,
+        translationsByLocale,
+        fieldKeys: TRANSLATABLE_FIELD_KEYS,
+        processResult: args.processResult,
+        context: args.context
+      });
+    } catch (translationErr) {
+      console.error("syncTranslationVertices (update):", translationErr);
+    }
+
     const updateResult = {
       success: true,
       data: updatedContent,
@@ -764,6 +986,17 @@ try {
       }
     } catch (e) {
       console.warn("Failed to fetch vertex data before deletion for hooks:", e);
+    }
+
+    try {
+      await deleteTranslationVertices(
+        args.session,
+        deleteElementId,
+        vertexLabel,
+        args.context
+      );
+    } catch (translationErr) {
+      console.error("deleteTranslationVertices:", translationErr);
     }
 
     // Verify ownership and delete in single optimized query
