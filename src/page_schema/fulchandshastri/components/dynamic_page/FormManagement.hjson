@@ -357,14 +357,25 @@ const getAllFields = () => {
   return [];
 };
 
-const getTranslatableFieldKeys = () => {
+/** Same rule as localizationHelpers.collectTranslatableFieldKeys / DynamicPage. */
+const collectTranslatableFieldKeys = (formConfig) => {
   const keys = [];
-  const allFields = getAllFields();
-  for (let i = 0; i < allFields.length; i++) {
-    const field = allFields[i];
-    if (isTranslatableTextField(field) && field?.key) keys.push(String(field.key));
+  const groups = formConfig?.groups;
+  if (!Array.isArray(groups)) return keys;
+  for (let gi = 0; gi < groups.length; gi++) {
+    const fields = groups[gi]?.fields;
+    if (!Array.isArray(fields)) continue;
+    for (let fi = 0; fi < fields.length; fi++) {
+      const field = fields[fi];
+      if (field?.translatable === true && field?.key) keys.push(String(field.key));
+    }
   }
   return keys;
+};
+
+const getTranslationMeta = (rootLabel) => {
+  const translationLabel = `${rootLabel}Translation`;
+  return { translationLabel, edgeType: `${rootLabel}${translationLabel}` };
 };
 
 const getDefaultLanguageCode = (languages) => {
@@ -381,13 +392,12 @@ const isLocalizedMap = (value) =>
 /** Merge root default-language strings + {Label}Translation vertices into FormLocalizedText maps. */
 const hydrateTranslationsOntoFormVertex = (txnId, formVertex, sourceVertex, vertexLabel) => {
   if (!formVertex?.id || !sourceVertex || !vertexLabel) return;
-  const fieldKeys = getTranslatableFieldKeys();
+  const fieldKeys = collectTranslatableFieldKeys(getFormConfig());
   if (fieldKeys.length === 0) return;
 
   const languages = getSiteLanguages();
   const defaultCode = getDefaultLanguageCode(languages);
-  const translationLabel = `${vertexLabel}Translation`;
-  const edgeType = `${vertexLabel}${translationLabel}`;
+  const { translationLabel, edgeType } = getTranslationMeta(vertexLabel);
 
   const maps = {};
   for (let i = 0; i < fieldKeys.length; i++) {

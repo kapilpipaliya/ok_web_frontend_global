@@ -868,3 +868,9 @@ https://github.com/doeixd/create-virtualized-list-solid/blob/main/src/createVirt
 
 
 Solid documentation warns against calling hooks inside map or For callbacks. 
+
+
+
+
+5. Hydrate on load, not only in the form Hydrate only in FormManagement means table cells and public pages still see default-language strings on the root (correct for admin English UI). If you need locale-aware display, resolve in [getUserContent.hjson](src/page_schema/fulchandshastri/functions/dynamic_page/main_functions/content/getUserContent.hjson) / [loadPublicTableContent.hjson](src/page_schema/fulchandshastri/functions/dynamic_page/main_functions/content/loadPublicTableContent.hjson) using the same merge helper (overlay non-empty translation fields only — per your earlier Book notes). Form hydrate can stay as a safety net or become a thin client of already-merged props.
+
