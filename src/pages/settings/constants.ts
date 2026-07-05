@@ -413,6 +413,18 @@ export const STYLES = {
   panelCellCss: `return \`._id {
       height: 100%;
       min-width: 0;
+      min-height: 0;
+      overflow: hidden;
+    }\`;`,
+
+  sidebarPanelViewportHeightCss: `return \`._id {
+      align-self: start;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      max-height: 100vh;
+      min-width: 0;
+      min-height: 0;
       overflow: hidden;
     }\`;`,
 

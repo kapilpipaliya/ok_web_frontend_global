@@ -103,6 +103,8 @@ export const DesignerPanel: Component<DesignerPanelProps> = (props) => {
           display: grid;
           grid-template-rows: auto 1fr;
           height: 100%;
+          min-height: 0;
+          overflow: hidden;
         }}\`;`}
         >
           <As
@@ -174,10 +176,19 @@ export const DesignerPanel: Component<DesignerPanelProps> = (props) => {
           <Show when={!props.collapsed}>
             <As
               as="div"
-              css={[
-                STYLES.overflowCss,
-                "return `._id { min-height: 0; min-width: 0; }`;",
-              ]}
+              css={
+                props.scrollContent === false
+                  ? `return \`._id {
+                      min-height: 0;
+                      min-width: 0;
+                      height: 100%;
+                      overflow: hidden;
+                    }\`;`
+                  : [
+                      STYLES.overflowCss,
+                      "return `._id { min-height: 0; min-width: 0; }`;",
+                    ]
+              }
             >
               {props.children}
             </As>

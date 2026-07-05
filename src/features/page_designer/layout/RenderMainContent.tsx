@@ -106,6 +106,11 @@ export function RenderMainContent() {
       ? "height: auto; min-height: 100%;"
       : "height: 100%; min-height: 0;";
 
+  const getSidebarPanelCellCss = () =>
+    hasAnyFixedRowHeight()
+      ? STYLES.sidebarPanelViewportHeightCss
+      : STYLES.panelCellCss;
+
   const getMainRowsTemplate = () => {
     const layout = layoutStore();
     const row0Css = layout.mainPanelRow0Height
@@ -300,7 +305,7 @@ export function RenderMainContent() {
 
           <As
             as="div"
-            css={STYLES.panelCellCss}
+            css={getSidebarPanelCellCss()}
             style={{ display: layoutStore().isPagesOpen ? "block" : "none" }}
           >
             <DesignerPanel
@@ -319,7 +324,7 @@ export function RenderMainContent() {
 
           <As
             as="div"
-            css={STYLES.panelCellCss}
+            css={getSidebarPanelCellCss()}
             style={{
               display: layoutStore().isComponentsOpen ? "block" : "none",
             }}
