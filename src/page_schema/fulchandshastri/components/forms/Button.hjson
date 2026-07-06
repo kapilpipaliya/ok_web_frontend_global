@@ -98,7 +98,7 @@ if (variant === 'primary') {
 } else if (variant === 'secondary') {
   variantStyles = `
     background: none;
-    color: ${args.theme.var.color.muted};
+    color: ${args.theme.var.color.text_light_500};
     border: 1px solid ${args.theme.var.color.border};
 
     &:not(:disabled):hover {

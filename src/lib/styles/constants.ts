@@ -101,7 +101,9 @@ export const CSS_RESET = `
 }
 body {
   /* 5. Improve text rendering */
+  -webkit-text-size-adjust: 100%;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 /* 6. Improve media defaults */
 img, picture, video, canvas, svg {
@@ -122,5 +124,10 @@ p {
 }
 h1, h2, h3, h4, h5, h6 {
   text-wrap: balance;
+}
+
+/* Code and preformatted text */
+code, pre, kbd {
+  font-family: "Roboto Mono", Menlo, Monaco, Consolas, monospace;
 }
 `;

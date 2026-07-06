@@ -137,7 +137,7 @@ return {
           '''
 return `._id {
   font-size: ${args.theme.var.fontSize.sm};
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin: 0;
   line-height: 1.5;
 }`;

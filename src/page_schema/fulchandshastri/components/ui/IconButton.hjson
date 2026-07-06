@@ -41,7 +41,7 @@ let variantStyles = '';
 if (variant === 'ghost') {
   variantStyles = `
     background: transparent;
-    color: ${args.theme.var.color.muted};
+    color: ${args.theme.var.color.text_light_500};
 
     &:not(:disabled):hover {
       background: ${args.theme.var.color.background_light_200};

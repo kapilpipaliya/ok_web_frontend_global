@@ -106,7 +106,7 @@ return active
   border-bottom: 2px solid transparent;
   cursor: pointer;
   font-weight: 500;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin-bottom: -1px;
 }
 ._id:hover {

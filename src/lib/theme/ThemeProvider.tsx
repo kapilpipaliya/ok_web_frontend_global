@@ -61,21 +61,6 @@ export const ThemeProvider: Component<ThemeProviderProps> = (props) => {
     // }
     return `
       ${CSS_RESET}
-
-      body {
-        -webkit-text-size-adjust: 100%;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-      }
-      body {
-        background-color: ${safeThemeVars.color?.background};
-        color: ${safeThemeVars.color?.text};
-      }
-
-      /* Code and preformatted text */
-      code, pre, kbd {
-        font-family: "Roboto Mono", Menlo, Monaco, Consolas, monospace;
-      }
     `;
   });
 

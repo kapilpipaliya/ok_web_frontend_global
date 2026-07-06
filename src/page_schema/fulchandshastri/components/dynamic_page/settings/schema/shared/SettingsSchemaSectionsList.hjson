@@ -182,7 +182,7 @@ return `._id.fsce-section-drag-handle {
   justify-content: center;
   width: 1.25rem;
   height: 1.25rem;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   cursor: grab;
   touch-action: none;
   user-select: none;

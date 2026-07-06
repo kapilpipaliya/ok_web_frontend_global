@@ -162,7 +162,7 @@ return `._id {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin-bottom: ${args.theme.var.spacing.xs};
   padding: 0 ${args.theme.var.spacing.sm};
 }`;

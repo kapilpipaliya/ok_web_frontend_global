@@ -3463,7 +3463,7 @@ return {
 const column = { key: "__actions", label: "Actions" };
 
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   font-size: ${args.theme.var.fontSize.xs};
 }`;
 '''
@@ -3609,7 +3609,7 @@ return {
 const column = args.contextData.column;
 
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   font-size: ${args.theme.var.fontSize.xs};
 }`;
 '''
@@ -4258,12 +4258,12 @@ return [
   grid-template-rows: ${rowHeightPx}px;
   grid-column: 1 / -1;
   border-bottom: 1px solid ${args.theme.var.color.border};
-  background: ${isSelected ? args.theme.var.color.secondary_light_200 : "transparent"};
+  background: ${isSelected ? args.theme.var.color.background_light_200 : "transparent"};
   transition: background 0.2s ease;
   ${isActive ? `outline: 2px solid ${args.theme.var.color.primary}; outline-offset: -2px;` : ""}
 
   &:hover {
-    background: ${isSelected ? args.theme.var.color.secondary_light_200 : args.theme.var.color.secondary_light_100};
+    background: ${isSelected ? args.theme.var.color.background_light_200 : args.theme.var.color.background_light_100};
   }
 }`];
 '''

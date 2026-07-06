@@ -1435,7 +1435,7 @@ return {
 return `._id {
   font-size: ${args.theme.var.fontSize.xs};
   line-height: 1.35;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin-top: 0;
 }`;
 '''

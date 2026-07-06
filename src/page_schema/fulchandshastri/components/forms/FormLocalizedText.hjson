@@ -121,7 +121,7 @@ return {
 return `._id.flt-empty {
   margin: 0;
   font-size: 0.8125rem;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
 }`;
 '''
       }

@@ -206,7 +206,7 @@ return {
           '''
 return `._id {
   cursor: pointer;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   transition: color 0.2s ease;
 
   &:hover {

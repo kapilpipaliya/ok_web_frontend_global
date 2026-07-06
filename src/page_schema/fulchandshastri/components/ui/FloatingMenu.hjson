@@ -150,7 +150,7 @@ return {
 return `._id {
   background: none;
   border: none;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   cursor: pointer;
   padding: ${args.theme.var.spacing.xs};
   border-radius: ${args.theme.var.borderRadius.sm};

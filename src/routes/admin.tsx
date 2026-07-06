@@ -1,6 +1,7 @@
 import type { RouteSectionProps } from "@solidjs/router";
 
 import { Link } from "@solidjs/meta";
+import { createMemo } from "solid-js";
 
 import { HomeIconButton } from "~/components/styled/buttons/HomeIconButton";
 import { RedirectUrlIconButton } from "~/components/styled/buttons/RedirectUrlIconButton";
@@ -12,12 +13,33 @@ import { As } from "~/components/As";
 import { EmailConfirmationBanner } from "~/components/notifications/EmailConfirmationBanner";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 import { AuthRequired } from "~/components/auth/AuthRequired";
+import { StyleRenderer } from "~/components/StyleRenderer";
+import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
+import { processCssContent } from "~/lib/styles/processCss";
+import { useTheme } from "~/lib/theme/ThemeContext";
 
 export default function AdminLayoutRoute(props: Readonly<RouteSectionProps>) {
   const [graph] = useGraph();
+  const theme = useTheme();
+
+  const adminGlobalCss = createMemo(() => {
+    const functionArgs = {
+      theme,
+    } as FunctionArgumentType;
+
+    return processCssContent(
+      `return \`body {
+        background-color: \${args.theme.var.color?.background};
+        color: \${args.theme.var.color?.text};
+      }\`;`,
+      functionArgs,
+      "admin-global",
+    );
+  });
 
   return (
     <PermissionGuard>
+      <StyleRenderer cssContent={adminGlobalCss()} id="admin-global-styles" />
       <AuthRequired>
         <Link href={getCompanySquareLogoUrl(graph) || ""} rel="icon" />
         <As as="header" css={SETTINGS_CONSTANTS.HEADER_MENU_CSS}>

@@ -60,7 +60,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   flex-shrink: 0;
   margin-left: ${args.theme.var.spacing.md};
   margin-right: ${args.theme.var.spacing.sm};
@@ -104,7 +104,7 @@ return `._id {
   // line-height: 1.5;
 
   &::placeholder {
-    color: ${args.theme.var.color.muted};
+    color: ${args.theme.var.color.text_light_500};
     opacity: 1;
     font-size: ${args.theme.var.fontSize.sm};
   }
@@ -148,7 +148,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   flex-shrink: 0;
   margin-left: ${args.theme.var.spacing.sm};
   margin-right: ${args.theme.var.spacing.md};

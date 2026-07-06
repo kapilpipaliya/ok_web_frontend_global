@@ -674,7 +674,7 @@ return { as: "label", text: "Renderer", class: "fcg-field-label" };
 return `._id.fcg-field-label {
   font-size: 0.75rem;
   font-weight: 500;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
 }`;
 '''
       }

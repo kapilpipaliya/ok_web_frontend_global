@@ -365,7 +365,7 @@ return {
           '''
 return `._id.fm-field-array-drag-handle {
   flex-shrink: 0;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   cursor: grab;
 }`;
 '''

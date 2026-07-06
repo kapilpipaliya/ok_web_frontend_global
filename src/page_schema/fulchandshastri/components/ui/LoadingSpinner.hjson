@@ -64,7 +64,7 @@ const colorConfig = {
   },
   muted: {
     border: args.theme.var.color.background_light_200,
-    accent: args.theme.var.color.muted
+    accent: args.theme.var.color.text_light_500
   },
   white: {
     border: "rgba(255, 255, 255, 0.3)",
@@ -127,7 +127,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   font-size: ${args.theme.var.fontSize.md};
   text-align: center;
 }`;
