@@ -837,7 +837,7 @@ css: '''
 return `._id {
   padding: ${args.theme.var.spacing.md};
   border-radius: ${args.theme.var.borderRadius.md};
-  transition: all ${args.theme.var.animation.normal} ease;
+  transition: all 300ms ease;
 }`;
 '''
 ```

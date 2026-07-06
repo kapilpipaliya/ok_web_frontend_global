@@ -100,7 +100,7 @@ return { week, loading, loadWeekly };
         css:
           '''return `._id.hm-stats-title {
   margin: 0;
-  font-size: ${args.theme.var.fontSize.xxl};
+  font-size: 1.5rem;
   font-weight: 700;
   color: ${args.theme.var.color.text};
 }`;'''
@@ -124,8 +124,8 @@ return {
         css:
           '''return `._id.hm-stats-goal {
   margin: 0;
-  color: ${args.theme.var.color.muted};
-  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.text_light_500};
+  font-size: 0.875rem;
 }`;'''
       }
     }
@@ -150,7 +150,7 @@ return {
   padding: ${args.theme.var.spacing.md};
   border-radius: ${args.theme.var.borderRadius.lg};
   border: 1px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.secondary};
+  background: ${args.theme.var.color.background_light_200};
 }`;'''
       }
     }
@@ -241,8 +241,8 @@ return {
 };'''
         css:
           '''return `._id.hm-bar-label {
-  font-size: ${args.theme.var.fontSize.xs};
-  color: ${args.theme.var.color.muted};
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.text_light_500};
 }`;'''
       }
     }

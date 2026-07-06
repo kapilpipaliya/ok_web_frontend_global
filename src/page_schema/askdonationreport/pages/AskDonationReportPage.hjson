@@ -537,7 +537,7 @@ return {
           '''return `._id {
   font-size: 0.95rem;
   line-height: 1.55;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin-bottom: 1.25rem;
 }`;
 '''
@@ -790,7 +790,7 @@ return {
           '''return `._id {
   font-size: 0.875rem;
   line-height: 1.5;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin: 0 0 0.85rem;
 }`;
 '''

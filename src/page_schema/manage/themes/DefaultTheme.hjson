@@ -43,14 +43,6 @@ return {
       border: {
         light: "oklch(0.88 0.01 250)",
         dark: "oklch(0.28 0.02 250)"
-      },
-      muted: {
-        light: "oklch(0.55 0.02 250)",
-        dark: "oklch(0.55 0.02 250)"
-      },
-      secondary: {
-        light: "oklch(0.92 0.015 250)",
-        dark: "oklch(0.22 0.02 250)"
       }
     },
     spacing: {
@@ -68,21 +60,8 @@ return {
       lg: "0.75rem",
       xl: "1rem",
       full: "9999px"
-    },
-    animation: {
-      fast: "150ms",
-      normal: "200ms",
-      slow: "300ms"
-    },
-    fontSize: {
-      xs: "0.75rem",
-      sm: "0.875rem",
-      md: "1rem",
-      lg: "1.125rem",
-      xl: "1.25rem",
-      title: "1.5rem"
     }
-  }
+}
 };
 '''
       }

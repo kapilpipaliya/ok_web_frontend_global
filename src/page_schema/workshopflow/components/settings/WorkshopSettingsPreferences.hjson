@@ -134,7 +134,7 @@ return {
         css:
           '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.xl};
+  font-size: 1.25rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
   margin: 0 0 ${args.theme.var.spacing.lg} 0;
@@ -217,8 +217,8 @@ return {
         css:
           '''
 return `._id.ws-pref-theme-sub {
-  font-size: ${args.theme.var.fontSize.sm};
-  color: ${args.theme.var.color.muted};
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text_light_500};
 }`;
 '''
       }
@@ -247,7 +247,7 @@ return `._id {
   border-radius: ${args.theme.var.borderRadius.md};
   font-weight: 500;
   cursor: pointer;
-  transition: all ${args.theme.var.animation.fast} ease;
+  transition: all 150ms ease;
 }
 ._id:hover {
   background: ${args.theme.var.color.primary_dark_200};
@@ -316,8 +316,8 @@ return {
         css:
           '''
 return `._id.ws-pref-tz-sub {
-  font-size: ${args.theme.var.fontSize.sm};
-  color: ${args.theme.var.color.muted};
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text_light_500};
 }`;
 '''
       }
@@ -350,7 +350,7 @@ return `._id.ws-pref-tz-select {
   border: 1px solid ${args.theme.var.color.border};
   background: ${args.theme.var.color.background};
   color: ${args.theme.var.color.text};
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
 }`;
 '''
       }

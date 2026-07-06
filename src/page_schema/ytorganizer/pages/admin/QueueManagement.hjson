@@ -174,7 +174,7 @@ return {
           '''
 return `._id {
   font-size: 1rem;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin: 0;
 }`;
 '''
@@ -483,7 +483,7 @@ return {
           '''
 return `._id {
   font-size: 0.9375rem;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin: 0 0 1.25rem 0;
   line-height: 1.6;
 }`;

@@ -216,7 +216,7 @@ return `._id {
     border-right: 1px solid ${args.theme.var.color.border};
     flex-direction: column;
     box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
-    transition: width ${args.theme.var.animation?.normal || '300ms'} ease;
+    transition: width 300ms ease;
     position: fixed;
     top: 0;
     left: 0;
@@ -248,7 +248,7 @@ return `._id {
   width: 16px;
   cursor: col-resize;
   z-index: 100;
-  transition: background ${args.theme.var.animation?.fast || '150ms'} ease;
+  transition: background 150ms ease;
 
   /* Only apply hover on devices that support hover (not touch devices) */
   @media (hover: hover) and (pointer: fine) {
@@ -501,9 +501,9 @@ return {
         css:
           '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   font-weight: 600;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin: 0 0 ${args.theme.var.spacing.sm} 0;
@@ -602,7 +602,7 @@ return `._id {
   color: ${isDanger ? args.theme.var.color.error : (isActive ? args.theme.var.color.primary : args.theme.var.color.text)};
   text-decoration: none;
   font-weight: ${isActive ? '600' : '500'};
-  transition: all ${args.theme.var.animation.fast} ease;
+  transition: all 150ms ease;
   ${isCollapsed ? 'justify-content: center;' : ''}
   ${isButton ? `
     border: none;
@@ -763,7 +763,7 @@ return `._id {
   text-align: left;
   font-family: inherit;
   font-size: inherit;
-  transition: all ${args.theme.var.animation.fast} ease;
+  transition: all 150ms ease;
 
   &:hover {
     background: ${args.theme.var.color.background_light_200};
@@ -853,7 +853,7 @@ return `._id {
 @media (min-width: 768px) {
   ._id {
     margin-left: ${sidebarWidth};
-    transition: margin-left ${args.theme.var.animation?.normal || '300ms'} ease;
+    transition: margin-left 300ms ease;
     overflow: hidden;
   }
 }`;
@@ -1056,9 +1056,9 @@ return `._id {
   background: none;
   text-decoration: none;
   cursor: pointer;
-  min-height: ${args.theme.var.touch.minTarget};
-  color: ${isActive ? args.theme.var.color.primary : args.theme.var.color.muted};
-  transition: all ${args.theme.var.animation.fast} ease;
+  min-height: 44px;
+  color: ${isActive ? args.theme.var.color.primary : args.theme.var.color.text_light_500};
+  transition: all 150ms ease;
   width: 100%;
   position: relative;
 
@@ -1125,7 +1125,7 @@ return {
         css:
           '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.xs};
+  font-size: 0.75rem;
   font-weight: 500;
   text-align: center;
 }`;

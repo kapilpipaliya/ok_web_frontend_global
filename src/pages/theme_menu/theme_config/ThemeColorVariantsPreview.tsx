@@ -49,7 +49,7 @@ export function ThemeColorVariantsPreview(props: { themeVertex: Vertex }) {
           <As
             as="p"
             css={`return \`._id {
-          color: \${args.theme.var.color.muted};
+          color: \${args.theme.var.color.text_light_500};
           font-style: italic;
         }\`;`}
           >

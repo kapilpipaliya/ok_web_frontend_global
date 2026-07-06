@@ -339,8 +339,8 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.lg};
-  color: ${args.theme.var.color.muted};
+  font-size: 1.125rem;
+  color: ${args.theme.var.color.text_light_500};
   margin: 0;
 }`;
 '''
@@ -390,11 +390,11 @@ return {
 return `._id {
   background: none;
   border: none;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   cursor: pointer;
   padding: ${args.theme.var.spacing.sm};
   border-radius: ${args.theme.var.borderRadius.sm};
-  transition: all ${args.theme.var.animation.fast} ease;
+  transition: all 150ms ease;
   display: flex;
   align-items: center;
 
@@ -470,7 +470,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.lg};
+  font-size: 1.125rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
   margin-bottom: ${args.theme.var.spacing.md};
@@ -522,7 +522,7 @@ return `._id {
   height: 12px;
   background: ${args.theme.var.color.success};
   border-radius: ${args.theme.var.borderRadius.full};
-  transition: width ${args.theme.var.animation.slow} ease;
+  transition: width 500ms ease;
 }`;
 '''
       }
@@ -587,8 +587,8 @@ return {
 return `._id {
   padding: ${args.theme.var.spacing.xl};
   text-align: center;
-  color: ${args.theme.var.color.muted};
-  font-size: ${args.theme.var.fontSize.lg};
+  color: ${args.theme.var.color.text_light_500};
+  font-size: 1.125rem;
 }`;
 '''
       }
@@ -660,7 +660,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.lg};
+  font-size: 1.125rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
   margin: 0 0 ${args.theme.var.spacing.lg} 0;
@@ -719,7 +719,7 @@ if (status === 'completed') {
 } else if (status === 'missed') {
   borderColor = '${args.theme.var.color.error}';
 } else if (status === 'skipped') {
-  borderColor = '${args.theme.var.color.muted}';
+  borderColor = '${args.theme.var.color.text_light_500}';
 }
 
 return `._id {
@@ -727,7 +727,7 @@ return `._id {
   border: 2px solid ${borderColor};
   border-radius: ${args.theme.var.borderRadius.lg};
   padding: ${args.theme.var.spacing.lg};
-  transition: all ${args.theme.var.animation.fast} ease;
+  transition: all 150ms ease;
 
   &:hover {
     border-color: ${args.theme.var.color.primary};
@@ -776,7 +776,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.lg};
+  font-size: 1.125rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
   margin: 0;
@@ -802,7 +802,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   color: ${args.theme.var.color.warning};
   font-weight: 500;
 }`;
@@ -875,7 +875,7 @@ return `._id {
   align-items: center;
   gap: ${args.theme.var.spacing.xs};
   cursor: pointer;
-  transition: all ${args.theme.var.animation.fast} ease;
+  transition: all 150ms ease;
   font-weight: 500;
   opacity: ${isActive ? '1' : '0.7'};
 
@@ -921,7 +921,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.xs};
+  font-size: 0.75rem;
 }`;
 '''
       }
@@ -971,7 +971,7 @@ return `._id {
   align-items: center;
   gap: ${args.theme.var.spacing.xs};
   cursor: pointer;
-  transition: all ${args.theme.var.animation.fast} ease;
+  transition: all 150ms ease;
   font-weight: 500;
   opacity: ${isActive ? '1' : '0.7'};
 
@@ -1017,7 +1017,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.xs};
+  font-size: 0.75rem;
 }`;
 '''
       }
@@ -1067,7 +1067,7 @@ return `._id {
   align-items: center;
   gap: ${args.theme.var.spacing.xs};
   cursor: pointer;
-  transition: all ${args.theme.var.animation.fast} ease;
+  transition: all 150ms ease;
   font-weight: 500;
   opacity: ${isActive ? '1' : '0.7'};
 
@@ -1113,7 +1113,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.xs};
+  font-size: 0.75rem;
 }`;
 '''
       }
@@ -1153,8 +1153,8 @@ const status = tracking?.P?.status;
 const isActive = status === 'skipped';
 
 return `._id {
-  background: ${isActive ? '${args.theme.var.color.muted}' : '${args.theme.var.color.muted_light_200}'};
-  color: ${isActive ? '${args.theme.var.color.muted_text}' : '${args.theme.var.color.muted_light_200_text}'};
+  background: ${isActive ? '${args.theme.var.color.text_light_500}' : '${args.theme.var.color.text_light_300}'};
+  color: ${isActive ? '${args.theme.var.color.text_light_500_text}' : '${args.theme.var.color.text_light_300_text}'};
   border: none;
   padding: ${args.theme.var.spacing.md};
   border-radius: ${args.theme.var.borderRadius.md};
@@ -1163,12 +1163,12 @@ return `._id {
   align-items: center;
   gap: ${args.theme.var.spacing.xs};
   cursor: pointer;
-  transition: all ${args.theme.var.animation.fast} ease;
+  transition: all 150ms ease;
   font-weight: 500;
   opacity: ${isActive ? '1' : '0.7'};
 
   &:hover {
-    background: ${args.theme.var.color.muted_dark_200};
+    background: ${args.theme.var.color.text_light_600};
     opacity: 1;
   }
 
@@ -1209,7 +1209,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.xs};
+  font-size: 0.75rem;
 }`;
 '''
       }
@@ -1268,16 +1268,16 @@ const isDisabled = isLoading || (progressStats && progressStats.completed === pr
 
 return `._id {
   width: 100%;
-  background: ${isDisabled ? '${args.theme.var.color.muted}' : '${args.theme.var.color.primary}'};
-  color: ${isDisabled ? '${args.theme.var.color.muted_text}' : '${args.theme.var.color.primary_text}'};
+  background: ${isDisabled ? '${args.theme.var.color.text_light_500}' : '${args.theme.var.color.primary}'};
+  color: ${isDisabled ? '${args.theme.var.color.text_light_500_text}' : '${args.theme.var.color.primary_text}'};
   border: none;
   padding: ${args.theme.var.spacing.lg};
   border-radius: ${args.theme.var.borderRadius.lg};
-  font-size: ${args.theme.var.fontSize.lg};
+  font-size: 1.125rem;
   font-weight: 600;
   cursor: ${isDisabled ? 'not-allowed' : 'pointer'};
   margin-top: ${args.theme.var.spacing.xl};
-  transition: all ${args.theme.var.animation.fast} ease;
+  transition: all 150ms ease;
   opacity: ${isDisabled ? '0.6' : '1'};
 
   ${!isDisabled ? `

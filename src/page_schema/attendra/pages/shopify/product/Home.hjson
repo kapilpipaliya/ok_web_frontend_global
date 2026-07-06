@@ -64,7 +64,7 @@
       L: Attr
       P: {
         css:
-          '''return `._id { margin: 0 0 1.25rem 0; color: ${args.theme.var.color.muted}; font-size: 1.05rem; line-height: 1.6; }`;'''
+          '''return `._id { margin: 0 0 1.25rem 0; color: ${args.theme.var.color.text_light_500}; font-size: 1.05rem; line-height: 1.6; }`;'''
         displayOrder: 2
         textType: markdown
         componentName: Html

@@ -211,7 +211,7 @@ return `._id {
   border-radius: 0.25rem;
   border: 1px solid ${args.theme.var.color.border};
   background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   cursor: grab;
 }`;
 '''

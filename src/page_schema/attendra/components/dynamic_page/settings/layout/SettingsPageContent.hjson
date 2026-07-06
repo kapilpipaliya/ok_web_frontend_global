@@ -96,7 +96,7 @@ return {
         css:
           '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.xl};
+  font-size: 1.25rem;
   font-weight: 700;
   color: ${args.theme.var.color.text};
   margin: 0 0 ${args.theme.var.spacing.xs} 0;
@@ -121,8 +121,8 @@ return {
         css:
           '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.sm};
-  color: ${args.theme.var.color.muted};
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text_light_500};
   margin: 0;
   line-height: 1.5;
 }`;

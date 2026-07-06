@@ -174,7 +174,7 @@ return {
         css:
           '''return `._id {
   font-size: 0.9375rem;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin: 0 0 1.5rem 0;
   line-height: 1.5;
 }`;'''
@@ -357,7 +357,7 @@ return {
         css:
           '''return `._id {
   font-size: 0.8125rem;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   line-height: 1.45;
   margin: 0 0 0.35rem 0;
 }`;'''
@@ -488,7 +488,7 @@ return {
       L: Attr
       P: {
         css:
-          '''return `._id { padding: 2rem; text-align: center; color: ${args.theme.var.color.muted}; }`;'''
+          '''return `._id { padding: 2rem; text-align: center; color: ${args.theme.var.color.text_light_500}; }`;'''
         displayOrder: 5
         componentName: Html
         props:

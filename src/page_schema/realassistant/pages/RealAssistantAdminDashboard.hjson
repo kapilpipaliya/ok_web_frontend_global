@@ -424,7 +424,7 @@ return `._id {
   gap: 0.5rem;
   padding: 1rem 0;
   border-bottom: 2px solid ${isActive ? args.theme.var.color.primary : "transparent"};
-  color: ${isActive ? args.theme.var.color.primary : args.theme.var.color.muted};
+  color: ${isActive ? args.theme.var.color.primary : args.theme.var.color.text_light_500};
   cursor: pointer;
   white-space: nowrap;
   transition: all 0.2s ease;
@@ -667,7 +667,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
 }`;
 '''
       }
@@ -750,7 +750,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   font-size: 0.875rem;
   margin: 0;
 }`;
@@ -881,7 +881,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   font-size: 0.875rem;
   margin: 0;
 }`;
@@ -904,7 +904,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.secondary_light_300};
+  color: ${args.theme.var.color.background_light_300};
 }`;
 '''
       }
@@ -1011,7 +1011,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   font-size: 0.875rem;
   margin: 0;
 }`;
@@ -1143,7 +1143,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   font-size: 0.875rem;
   margin: 0;
 }`;
@@ -1273,7 +1273,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   font-size: 0.875rem;
   margin: 0;
 }`;
@@ -1531,7 +1531,7 @@ return `._id {
   text-align: left;
   padding: 0.75rem;
   font-weight: 600;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   font-size: 0.875rem;
 }`;
 '''
@@ -1554,7 +1554,7 @@ return `._id {
   text-align: left;
   padding: 0.75rem;
   font-weight: 600;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   font-size: 0.875rem;
 }`;
 '''
@@ -1577,7 +1577,7 @@ return `._id {
   text-align: left;
   padding: 0.75rem;
   font-weight: 600;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   font-size: 0.875rem;
 }`;
 '''
@@ -1600,7 +1600,7 @@ return `._id {
   text-align: left;
   padding: 0.75rem;
   font-weight: 600;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   font-size: 0.875rem;
 }`;
 '''
@@ -1623,7 +1623,7 @@ return `._id {
   text-align: right;
   padding: 0.75rem;
   font-weight: 600;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   font-size: 0.875rem;
 }`;
 '''
@@ -1752,7 +1752,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.75rem;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin: 0;
 }`;
 '''
@@ -2099,7 +2099,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin: 0;
 }`;
 '''
@@ -2120,7 +2120,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin: 0;
 }`;
 '''

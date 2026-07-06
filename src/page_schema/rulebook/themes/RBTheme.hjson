@@ -43,10 +43,6 @@ return {
         light: "oklch(0.85 0.01 280)",
         dark: "oklch(0.25 0.01 280)"
       },
-      muted: {
-        light: "oklch(0.60 0.02 280)",
-        dark: "oklch(0.45 0.02 280)"
-      },
       // Motivational colors for tracking
       streak: {
         light: "oklch(0.75 0.20 50)",
@@ -67,12 +63,8 @@ return {
       skipped: {
         light: "oklch(0.60 0.02 280)",
         dark: "oklch(0.45 0.02 280)"
-      },
-      secondary: {
-        light: "oklch(0.92 0.015 280)",
-        dark: "oklch(0.22 0.02 280)"
       }
-    },
+},
     // Custom spacing for mobile-first design
     spacing: {
       xs: "0.25rem",
@@ -89,37 +81,8 @@ return {
       lg: "0.75rem",
       xl: "1rem",
       full: "9999px"
-    },
-    // Animation timing
-    animation: {
-      fast: "150ms",
-      normal: "300ms",
-      slow: "500ms"
-    },
-    // Touch-friendly sizing
-    touch: {
-      minTarget: "44px",
-      button: "48px",
-      input: "52px"
-    },
-    // Typography scale
-    fontSize: {
-      xs: "0.75rem",
-      sm: "0.875rem",
-      md: "1rem",
-      lg: "1.125rem",
-      xl: "1.25rem",
-      xxl: "1.5rem",
-      title: "2rem"
-    },
-    // Z-index layers
-    zIndex: {
-      dropdown: "1000",
-      modal: "1050",
-      toast: "1100",
-      tooltip: "1200"
     }
-  }
+}
 };
 '''
       }

@@ -74,7 +74,7 @@
           '''return `._id {
   font-size: 0.9375rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin-bottom: 1.5rem;
 }`;'''
         displayOrder: 2

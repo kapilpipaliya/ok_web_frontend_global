@@ -107,7 +107,7 @@ return {
           '''
 return `._id {
   font-size: 1.125rem;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin: 0.5rem 0 0 0;
 }`;
 '''
@@ -418,7 +418,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin: 0;
   line-height: 1.5;
   font-size: 0.9375rem;
@@ -446,7 +446,7 @@ return {
 const section = args.contextData.adminSection;
 const actionColor = section.enabled
   ? args.theme.var.color[section.hoverBorder]
-  : args.theme.var.color.muted;
+  : args.theme.var.color.text_light_500;
 
 return `._id {
   margin-top: auto;

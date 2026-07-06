@@ -22,25 +22,25 @@ const size = args.contextData.props?.size || "md";
 const sizeStyles = {
   xs: {
     padding: `${args.theme.var.spacing.xxs} ${args.theme.var.spacing.xs}`,
-    fontSize: args.theme.var.fontSize.xs,
+    fontSize: "0.75rem",
     borderRadius: args.theme.var.borderRadius.sm,
     gap: args.theme.var.spacing.xxs
   },
   sm: {
     padding: `${args.theme.var.spacing.xs} ${args.theme.var.spacing.sm}`,
-    fontSize: args.theme.var.fontSize.sm,
+    fontSize: "0.875rem",
     borderRadius: args.theme.var.borderRadius.sm,
     gap: args.theme.var.spacing.xs
   },
   md: {
     padding: `${args.theme.var.spacing.sm} ${args.theme.var.spacing.md}`,
-    fontSize: args.theme.var.fontSize.md,
+    fontSize: "1rem",
     borderRadius: args.theme.var.borderRadius.md,
     gap: args.theme.var.spacing.sm
   },
   lg: {
     padding: `${args.theme.var.spacing.md} ${args.theme.var.spacing.lg}`,
-    fontSize: args.theme.var.fontSize.lg,
+    fontSize: "1.125rem",
     borderRadius: args.theme.var.borderRadius.md,
     gap: args.theme.var.spacing.md
   }
@@ -59,7 +59,7 @@ let baseStyles = `
   font-weight: 500;
   font-size: ${sizeConfig.fontSize};
   cursor: pointer;
-  transition: all ${args.theme.var.animation.fast} ease;
+  transition: all 150ms ease;
   border: none;
   ${fullWidth ? 'width: 100%;' : ''}
 

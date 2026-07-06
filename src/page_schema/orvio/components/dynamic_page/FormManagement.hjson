@@ -1097,7 +1097,7 @@ const group = args.contextData.fieldGroup;
 const gridColumns = group?.gridColumns || 1;
 
 return `._id {
-  font-size: ${args.theme.var.fontSize.lg};
+  font-size: 1.125rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
   padding-bottom: ${args.theme.var.spacing.sm};
@@ -1243,7 +1243,7 @@ return {
         css:
           '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   font-weight: 500;
   color: ${args.theme.var.color.text};
 }`;
@@ -1290,9 +1290,9 @@ return {
         css:
           '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.xs};
+  font-size: 0.75rem;
   line-height: 1.35;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin-top: 0;
 }`;
 '''
@@ -1676,7 +1676,7 @@ return {
         css:
           '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.xs};
+  font-size: 0.75rem;
   color: ${args.theme.var.color.error};
   min-height: 1.25rem;
 }`;

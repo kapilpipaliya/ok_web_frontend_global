@@ -592,10 +592,8 @@ The theme system supports any custom variables, not just colors. Access all them
 
 **Custom Theme Variables:**
 You can define and use any custom variables in your theme:
-- Font sizes: `args.theme.var.fontSize.xs`, `args.theme.var.fontSize.sm`, `args.theme.var.fontSize.md`, `args.theme.var.fontSize.lg`, `args.theme.var.fontSize.xl`, `args.theme.var.fontSize.title`
 - Spacing: `args.theme.var.spacing.xs`, `args.theme.var.spacing.sm`, `args.theme.var.spacing.md`, `args.theme.var.spacing.lg`, `args.theme.var.spacing.xl`
 - Border radius: `args.theme.var.borderRadius.sm`, `args.theme.var.borderRadius.md`, `args.theme.var.borderRadius.lg`, `args.theme.var.borderRadius.full`
-- Animation timing: `args.theme.var.animation.fast`, `args.theme.var.animation.normal`, `args.theme.var.animation.slow`
 - Any other custom values: `args.theme.var.customCategory.customValue`
 
 **Example Usage:**
@@ -603,9 +601,9 @@ You can define and use any custom variables in your theme:
 css: '''
 return `._id {
   padding: ${args.theme.var.spacing.md};
-  font-size: ${args.theme.var.fontSize.lg};
+  font-size: 1.125rem;
   border-radius: ${args.theme.var.borderRadius.md};
-  transition: all ${args.theme.var.animation.normal} ease;
+  transition: all 300ms ease;
   background: ${args.theme.var.color.primary};
   color: ${args.theme.var.color.primary_text};
 }`;

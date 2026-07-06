@@ -21,7 +21,7 @@ export function ResponseContent(props: { response: string }) {
         <As
           as="span"
           css={`return \`._id {
-            background: linear-gradient(45deg, \${args.theme.var.color.primary}, \${args.theme.var.color.secondary});
+            background: linear-gradient(45deg, \${args.theme.var.color.primary}, \${args.theme.var.color.background_light_200});
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             font-size: 18px;

@@ -37,7 +37,7 @@ const buildOption = (data, chartType, theme) => {
   const values = data?.datasets?.[0]?.data || [];
   const seriesLabel = data?.datasets?.[0]?.label || "Series";
   const textColor = theme.var.color.text;
-  const muted = theme.var.color.muted;
+  const muted = theme.var.color.text_light_500;
   const border = theme.var.color.border;
   const bg = theme.var.color.background;
   const primary = theme.var.color.primary;
@@ -120,7 +120,7 @@ const renderChart = async () => {
   if (!chart.labels?.length) {
     container.innerHTML =
       '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:' +
-      args.theme.var.color.muted +
+      args.theme.var.color.text_light_500 +
       '">No chart data</div>';
     return;
   }

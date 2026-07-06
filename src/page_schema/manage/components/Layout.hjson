@@ -43,13 +43,13 @@
   padding: ${args.theme.var.spacing.lg} ${args.theme.var.spacing.xl};
   border-bottom: 1px solid ${args.theme.var.color.border};
   background: ${args.theme.var.color.background_light_100};
-  font-size: ${args.theme.var.fontSize.title};
+  font-size: 1.875rem;
   font-weight: 700;
   letter-spacing: -0.02em;
 
   @media (max-width: 768px) {
     padding: ${args.theme.var.spacing.md};
-    font-size: ${args.theme.var.fontSize.xl};
+    font-size: 1.25rem;
   }
 }`;'''
       }
@@ -69,8 +69,8 @@
           '''return `._id {
   margin: ${args.theme.var.spacing.xs} 0 0;
   padding: 0 ${args.theme.var.spacing.xl} ${args.theme.var.spacing.md};
-  color: ${args.theme.var.color.muted};
-  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.text_light_500};
+  font-size: 0.875rem;
 
   @media (max-width: 768px) {
     padding: 0 ${args.theme.var.spacing.md} ${args.theme.var.spacing.sm};

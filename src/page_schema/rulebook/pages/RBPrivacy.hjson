@@ -107,7 +107,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   font-style: italic;
   margin: 0;
 }`;
@@ -148,7 +148,7 @@ return {
 return `._id {
   line-height: 1.6;
   margin-bottom: ${args.theme.var.spacing.lg};
-  font-size: ${args.theme.var.fontSize.lg};
+  font-size: 1.125rem;
 }`;
 '''
       }
@@ -185,7 +185,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.xl};
+  font-size: 1.25rem;
   font-weight: 600;
   color: ${args.theme.var.color.primary};
   margin-bottom: ${args.theme.var.spacing.lg};
@@ -212,7 +212,7 @@ return `._id {
 }
 
 ._id h3 {
-  font-size: ${args.theme.var.fontSize.lg};
+  font-size: 1.125rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
   margin: ${args.theme.var.spacing.lg} 0 ${args.theme.var.spacing.sm} 0;
@@ -474,7 +474,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.xl};
+  font-size: 1.25rem;
   font-weight: 600;
   color: ${args.theme.var.color.primary};
   margin-bottom: ${args.theme.var.spacing.lg};
@@ -625,7 +625,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.xl};
+  font-size: 1.25rem;
   font-weight: 600;
   color: ${args.theme.var.color.primary};
   margin-bottom: ${args.theme.var.spacing.lg};
@@ -780,7 +780,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.xl};
+  font-size: 1.25rem;
   font-weight: 600;
   color: ${args.theme.var.color.primary};
   margin-bottom: ${args.theme.var.spacing.lg};
@@ -942,7 +942,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.xl};
+  font-size: 1.25rem;
   font-weight: 600;
   color: ${args.theme.var.color.primary};
   margin-bottom: ${args.theme.var.spacing.md};

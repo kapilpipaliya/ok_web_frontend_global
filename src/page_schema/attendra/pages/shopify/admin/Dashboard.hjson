@@ -103,7 +103,7 @@ return {
         key: sub
         css:
           '''return `._id{
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin: 0 0 1.25rem 0;
   font-size: 0.95rem;
 }`;'''
@@ -210,7 +210,7 @@ return {
         displayOrder: 1
         componentName: Html
         css:
-          '''return `._id{ color:${args.theme.var.color.muted}; font-size: 0.85rem; margin: 0 0 0.25rem 0; }`;'''
+          '''return `._id{ color:${args.theme.var.color.text_light_500}; font-size: 0.85rem; margin: 0 0 0.25rem 0; }`;'''
         props:
           '''return {
   as: "div",
@@ -269,7 +269,7 @@ return {
         componentName: Html
         textType: markdown
         css:
-          '''return `._id{ margin: 0; color:${args.theme.var.color.muted}; font-size: 0.95rem; line-height: 1.6; }`;'''
+          '''return `._id{ margin: 0; color:${args.theme.var.color.text_light_500}; font-size: 0.95rem; line-height: 1.6; }`;'''
         props:
           '''
 const d = args.fns.dashboard?.();

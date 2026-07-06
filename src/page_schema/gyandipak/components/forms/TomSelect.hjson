@@ -57,7 +57,7 @@ return `._id {
 }
 
 ._id .ts-control.single .ts-control-input::placeholder {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
 }
 
 /* Dropdown */
@@ -139,7 +139,7 @@ return `._id {
   right: 0.75rem;
   top: 50%;
   transform: translateY(-50%);
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   font-size: 0.75rem;
   pointer-events: none;
   transition: transform 0.15s ease;
@@ -162,7 +162,7 @@ return `._id {
 
 /* No results */
 ._id .ts-dropdown .no-results {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   padding: 0.75rem;
   text-align: center;
   font-style: italic;

@@ -190,7 +190,7 @@ ${theme.customCss || ""}`;
         css:
           '''return `._id {
   margin: 0 0 1.25rem 0;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   line-height: 1.5;
 }`;'''
         props:

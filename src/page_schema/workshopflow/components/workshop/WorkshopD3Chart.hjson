@@ -207,7 +207,7 @@ const createChart = async (container, data, chartType, width, height, theme) => 
           }
         },
         axisLabel: {
-          color: theme.var.color.muted,
+          color: theme.var.color.text_light_500,
           rotate: 45,
           interval: 0,
           fontSize: 10
@@ -221,7 +221,7 @@ const createChart = async (container, data, chartType, width, height, theme) => 
           }
         },
         axisLabel: {
-          color: theme.var.color.muted
+          color: theme.var.color.text_light_500
         },
         splitLine: {
           lineStyle: {
@@ -284,7 +284,7 @@ const createChart = async (container, data, chartType, width, height, theme) => 
           }
         },
         axisLabel: {
-          color: theme.var.color.muted,
+          color: theme.var.color.text_light_500,
           rotate: 45,
           interval: 0,
           fontSize: 10
@@ -298,7 +298,7 @@ const createChart = async (container, data, chartType, width, height, theme) => 
           }
         },
         axisLabel: {
-          color: theme.var.color.muted
+          color: theme.var.color.text_light_500
         },
         splitLine: {
           lineStyle: {
@@ -360,7 +360,7 @@ const createChart = async (container, data, chartType, width, height, theme) => 
           }
         },
         axisLabel: {
-          color: theme.var.color.muted,
+          color: theme.var.color.text_light_500,
           rotate: 45,
           interval: 0,
           fontSize: 10
@@ -374,7 +374,7 @@ const createChart = async (container, data, chartType, width, height, theme) => 
           }
         },
         axisLabel: {
-          color: theme.var.color.muted
+          color: theme.var.color.text_light_500
         },
         splitLine: {
           lineStyle: {
@@ -401,7 +401,7 @@ const renderChart = async () => {
   if (!data) {
     container.innerHTML =
       '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: ' +
-      args.theme.var.color.muted +
+      args.theme.var.color.text_light_500 +
       ';">No data available</div>';
     return;
   }

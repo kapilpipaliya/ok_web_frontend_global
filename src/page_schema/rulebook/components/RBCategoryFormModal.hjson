@@ -240,7 +240,7 @@ return `._id {
   align-items: center;
   justify-content: center;
   padding: ${args.theme.var.spacing.md};
-  animation: fadeIn ${args.theme.var.animation.normal} ease;
+  animation: fadeIn 300ms ease;
 }
 
 @media (max-width: 768px) {
@@ -277,7 +277,7 @@ return `._id {
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  animation: slideUp ${args.theme.var.animation.normal} ease;
+  animation: slideUp 300ms ease;
 }
 
 @media (max-width: 768px) {
@@ -286,7 +286,7 @@ return `._id {
     max-height: 100vh;
     height: 100vh;
     border-radius: 0;
-    animation: slideUpMobile ${args.theme.var.animation.normal} ease;
+    animation: slideUpMobile 300ms ease;
   }
 }
 
@@ -353,7 +353,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.title};
+  font-size: 1.875rem;
   font-weight: 700;
   color: ${args.theme.var.color.text};
   margin: 0;
@@ -380,11 +380,11 @@ return {
 return `._id {
   background: none;
   border: none;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   cursor: pointer;
   padding: ${args.theme.var.spacing.sm};
   border-radius: ${args.theme.var.borderRadius.sm};
-  transition: all ${args.theme.var.animation.fast} ease;
+  transition: all 150ms ease;
 
   &:hover {
     background: ${args.theme.var.color.background_dark_200};

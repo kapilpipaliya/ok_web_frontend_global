@@ -117,13 +117,13 @@ return `._id {
   align-items: center;
   justify-content: center;
   padding: 0 ${args.theme.var.spacing.md};
-  min-width: ${args.theme.var.touch.minTarget};
+  min-width: 44px;
   background: ${args.theme.var.color.background};
   color: ${args.theme.var.color.text};
   border: none;
   border-radius: 0 ${args.theme.var.borderRadius.md} ${args.theme.var.borderRadius.md} 0;
   cursor: pointer;
-  transition: all ${args.theme.var.animation.fast} ease;
+  transition: all 150ms ease;
 
   &:hover:not(:disabled) {
     background: ${args.theme.var.color.background_dark_200};

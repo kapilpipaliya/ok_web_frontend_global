@@ -77,7 +77,7 @@ return `._id {
   border: none;
   border-radius: ${args.theme.var.borderRadius.sm};
   cursor: pointer;
-  transition: all ${args.theme.var.animation.fast} ease;
+  transition: all 150ms ease;
   ${variantStyles}
 
   &:disabled {

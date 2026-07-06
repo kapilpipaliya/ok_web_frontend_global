@@ -39,7 +39,7 @@
       P: {
         displayOrder: 2
         componentName: Html
-        css: '''return `._id{ color:${args.theme.var.color.muted}; line-height:1.6; margin:0 0 1rem 0; }`;'''
+        css: '''return `._id{ color:${args.theme.var.color.text_light_500}; line-height:1.6; margin:0 0 1rem 0; }`;'''
         props: '''return { as:"p", text:"Recent updates and improvements to Attendra." };'''
       }
     }
@@ -70,7 +70,7 @@
         displayOrder: 2
         componentName: Html
         textType: markdown
-        css: '''return `._id{ color:${args.theme.var.color.muted}; line-height:1.7; margin:0; }`;'''
+        css: '''return `._id{ color:${args.theme.var.color.text_light_500}; line-height:1.7; margin:0; }`;'''
         text:
           '''- MVP admin pages: Dashboard, Employees, Roles, Time Logs, Settings
 - Staff portal sign-in URL on Dashboard

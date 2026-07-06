@@ -60,33 +60,8 @@ return {
       lg: "0.75rem",
       xl: "1rem",
       full: "9999px"
-    },
-    animation: {
-      fast: "150ms",
-      normal: "300ms",
-      slow: "500ms"
-    },
-    touch: {
-      minTarget: "44px",
-      button: "48px",
-      input: "52px"
-    },
-    fontSize: {
-      xs: "0.75rem",
-      sm: "0.875rem",
-      md: "1rem",
-      lg: "1.125rem",
-      xl: "1.25rem",
-      xxl: "1.5rem",
-      title: "2rem"
-    },
-    zIndex: {
-      dropdown: "1000",
-      modal: "1050",
-      toast: "1100",
-      tooltip: "1200"
     }
-  }
+}
 };
 '''
       }

@@ -40,7 +40,7 @@
         displayOrder: 2
         componentName: Html
         textType: markdown
-        css: '''return `._id{ margin: 0 0 1.25rem 0; color:${args.theme.var.color.muted}; line-height:1.6; }`;'''
+        css: '''return `._id{ margin: 0 0 1.25rem 0; color:${args.theme.var.color.text_light_500}; line-height:1.6; }`;'''
         text: Follow these steps to get Attendra running in minutes.
         props: '''return { as: "div" };'''
       }

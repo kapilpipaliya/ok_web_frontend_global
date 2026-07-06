@@ -85,7 +85,7 @@ return {
         css:
           '''
 return `._id.workshop-settings-sidebar-title {
-  font-size: ${args.theme.var.fontSize.lg};
+  font-size: 1.125rem;
   font-weight: 700;
   color: ${args.theme.var.color.text};
   margin-bottom: ${args.theme.var.spacing.md};
@@ -147,7 +147,7 @@ return `._id.workshop-settings-nav-link {
   border-radius: ${args.theme.var.borderRadius.md};
   color: ${args.theme.var.color.text};
   text-decoration: none;
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   font-weight: 500;
 }
 ._id.workshop-settings-nav-link:hover {

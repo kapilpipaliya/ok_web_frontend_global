@@ -154,7 +154,7 @@ return `._id {
   cursor: pointer;
   padding: ${args.theme.var.spacing.xs};
   border-radius: ${args.theme.var.borderRadius.sm};
-  transition: all ${args.theme.var.animation.fast} ease;
+  transition: all 150ms ease;
   display: flex;
   align-items: center;
   justify-content: center;

@@ -395,7 +395,7 @@ return {
           '''return `._id {
   margin: 0;
   color: ${args.theme.var.color.error};
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
 }`;'''
       }
     }
@@ -432,7 +432,7 @@ return {
         css:
           '''return `._id {
   margin: 0 0 ${args.theme.var.spacing.sm};
-  font-size: ${args.theme.var.fontSize.md};
+  font-size: 1rem;
   font-weight: 600;
 }`;'''
       }
@@ -452,8 +452,8 @@ return {
         css:
           '''return `._id {
   margin: 0;
-  color: ${args.theme.var.color.muted};
-  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.text_light_500};
+  font-size: 0.875rem;
 }`;'''
       }
     }
@@ -514,7 +514,7 @@ return {
 };'''
         css:
           '''return `._id {
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   word-break: break-all;
 }`;'''
       }
@@ -535,8 +535,8 @@ return {
         css:
           '''return `._id {
   display: block;
-  font-size: ${args.theme.var.fontSize.xs};
-  color: ${args.theme.var.color.muted};
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.text_light_500};
   word-break: break-all;
 }`;'''
       }
@@ -590,7 +590,7 @@ return {
         css:
           '''return `._id {
   margin: 0 0 ${args.theme.var.spacing.sm};
-  font-size: ${args.theme.var.fontSize.md};
+  font-size: 1rem;
   font-weight: 600;
 }`;'''
       }
@@ -628,7 +628,7 @@ return {
 };'''
         css:
           '''return `._id {
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   word-break: break-all;
 }`;'''
       }
@@ -725,7 +725,7 @@ return {
   border-radius: ${args.theme.var.borderRadius.sm};
   background: ${args.theme.var.color.background};
   cursor: pointer;
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
 
   &:hover {
     border-color: ${args.theme.var.color.primary};

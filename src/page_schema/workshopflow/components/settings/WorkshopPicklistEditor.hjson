@@ -221,7 +221,7 @@ return {
         css:
           '''
 return `._id.workshop-picklist-editor-title {
-  font-size: ${args.theme.var.fontSize.xl};
+  font-size: 1.25rem;
   font-weight: 700;
   color: ${args.theme.var.color.text};
   margin: 0;
@@ -249,8 +249,8 @@ return {
           '''
 return `._id.workshop-picklist-editor-desc {
   margin: 0;
-  font-size: ${args.theme.var.fontSize.sm};
-  color: ${args.theme.var.color.muted};
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text_light_500};
   max-width: 52rem;
 }`;
 '''
@@ -296,7 +296,7 @@ return {
         css:
           '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
 }`;
@@ -325,7 +325,7 @@ return {
         css:
           '''
 return `._id.workshop-picklist-meta-summary {
-  font-size: ${args.theme.var.fontSize.md};
+  font-size: 1rem;
   color: ${args.theme.var.color.text};
   line-height: 1.4;
 }`;
@@ -425,8 +425,8 @@ return {
         css:
           '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.sm};
-  color: ${args.theme.var.color.muted};
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text_light_500};
   margin: 0;
 }`;
 '''
@@ -474,7 +474,7 @@ return {
 return `._id {
   width: 100%;
   border-collapse: collapse;
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
 }
 ._id th {
   text-align: left;

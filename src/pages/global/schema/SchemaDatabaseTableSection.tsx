@@ -191,7 +191,7 @@ export function SchemaDatabaseTableSection(
             css={`return \`._id {
   margin: 0;
   font-size: 0.875rem;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
   max-width: 40rem;
   line-height: 1.45;
 }\`;`}
@@ -241,7 +241,7 @@ export function SchemaDatabaseTableSection(
           <As
             as="p"
             css={`return \`._id {
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
   padding: 1.5rem;
   border: 1px solid \${args.theme.var.color.border};
   border-radius: 0.5rem;
@@ -271,7 +271,7 @@ export function SchemaDatabaseTableSection(
   text-transform: uppercase;
   letter-spacing: 0.03em;
   background: \${args.theme.var.color.background_light_200};
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
 }\`;`}
           >
             <As as="span">Database</As>

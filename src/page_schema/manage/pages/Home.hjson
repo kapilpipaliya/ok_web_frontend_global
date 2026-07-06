@@ -368,7 +368,7 @@ return {
         css:
           '''return `._id {
   margin: 0 0 ${args.theme.var.spacing.sm};
-  font-size: ${args.theme.var.fontSize.lg};
+  font-size: 1.125rem;
   font-weight: 600;
 }`;'''
       }
@@ -424,7 +424,7 @@ return {
           '''return `._id {
   display: block;
   margin-bottom: ${args.theme.var.spacing.xs};
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   font-weight: 500;
 }`;'''
       }
@@ -476,7 +476,7 @@ return {
           '''return `._id {
   display: block;
   margin-bottom: ${args.theme.var.spacing.xs};
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   font-weight: 500;
 }`;'''
       }
@@ -529,9 +529,9 @@ return {
           '''return [
   `._id {
     margin: ${args.theme.var.spacing.md} 0 0;
-    font-size: ${args.theme.var.fontSize.sm};
+    font-size: 0.875rem;
   }`,
-  `._id.status-idle { color: ${args.theme.var.color.muted}; }`,
+  `._id.status-idle { color: ${args.theme.var.color.text_light_500}; }`,
   `._id.status-checking { color: ${args.theme.var.color.info}; }`,
   `._id.status-online { color: ${args.theme.var.color.success}; }`,
   `._id.status-offline { color: ${args.theme.var.color.error}; }`
@@ -614,7 +614,7 @@ return {
         css:
           '''return `._id {
   margin: 0;
-  font-size: ${args.theme.var.fontSize.lg};
+  font-size: 1.125rem;
   font-weight: 600;
 }`;'''
       }
@@ -676,8 +676,8 @@ return {
   background: ${args.theme.var.color.background};
   color: ${args.theme.var.color.text};
   cursor: pointer;
-  font-size: ${args.theme.var.fontSize.sm};
-  transition: all ${args.theme.var.animation.fast} ease;
+  font-size: 0.875rem;
+  transition: all 150ms ease;
 
   &:hover {
     border-color: ${args.theme.var.color.primary};
@@ -724,7 +724,7 @@ return {
         css:
           '''return `._id {
   margin: 0 0 ${args.theme.var.spacing.md};
-  font-size: ${args.theme.var.fontSize.lg};
+  font-size: 1.125rem;
   font-weight: 600;
 }`;'''
       }
@@ -760,7 +760,7 @@ return {
           '''return `._id {
   display: block;
   margin-bottom: ${args.theme.var.spacing.xs};
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   font-weight: 500;
 }`;'''
       }
@@ -809,7 +809,7 @@ return {
           '''return `._id {
   display: block;
   margin-bottom: ${args.theme.var.spacing.xs};
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   font-weight: 500;
 }`;'''
       }
@@ -859,7 +859,7 @@ return {
           '''return `._id {
   display: block;
   margin-bottom: ${args.theme.var.spacing.xs};
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   font-weight: 500;
 }`;'''
       }
@@ -911,7 +911,7 @@ return {
           '''return `._id {
   display: block;
   margin-bottom: ${args.theme.var.spacing.xs};
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   font-weight: 500;
 }`;'''
       }
@@ -1022,7 +1022,7 @@ return {
         css:
           '''return `._id {
   margin: 0 0 ${args.theme.var.spacing.sm};
-  font-size: ${args.theme.var.fontSize.md};
+  font-size: 1rem;
   font-weight: 600;
 }`;'''
       }
@@ -1047,7 +1047,7 @@ return {
   border-radius: ${args.theme.var.borderRadius.md};
   background: ${args.theme.var.color.error_light_100};
   color: ${args.theme.var.color.error_text};
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   overflow-x: auto;
   white-space: pre-wrap;
   word-break: break-word;
@@ -1074,7 +1074,7 @@ return {
   border-radius: ${args.theme.var.borderRadius.md};
   background: ${args.theme.var.color.background_dark_900};
   color: ${args.theme.var.color.background_light_900_text};
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   overflow-x: auto;
   white-space: pre-wrap;
   word-break: break-word;

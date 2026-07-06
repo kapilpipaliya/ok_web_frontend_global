@@ -93,7 +93,7 @@ return {
           '''
 return `._id {
   font-size: 1rem;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin: 0.5rem 0 2rem 0;
 }`;
 '''
@@ -523,9 +523,9 @@ return {
           '''
 return `._id {
   display: block;
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   font-weight: 500;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin-bottom: ${args.theme.var.spacing.sm};
 }`;
 '''
@@ -653,7 +653,7 @@ return {
           '''
 return `._id {
   margin: 0;
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   color: ${args.theme.var.color.info_light_100_text};
   line-height: 1.5;
   flex: 1;
@@ -746,8 +746,8 @@ return {
         css:
           '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.sm};
-  color: ${args.theme.var.color.muted};
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text_light_500};
   margin: 0 0 ${args.theme.var.spacing.md} 0;
 }`;
 '''

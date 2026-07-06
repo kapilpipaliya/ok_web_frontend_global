@@ -666,7 +666,7 @@ return {
           '''
 return `._id {
   margin: 0;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
 }`;
 '''
         displayOrder: 2

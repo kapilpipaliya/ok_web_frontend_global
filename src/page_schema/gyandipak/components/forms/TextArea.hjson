@@ -20,14 +20,14 @@ return `._id {
   padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
   border: 1px solid ${args.theme.var.color.border};
   border-radius: ${args.theme.var.borderRadius.sm};
-  font-size: ${args.theme.var.fontSize.md};
+  font-size: 1rem;
   background: ${args.theme.var.color.background};
   color: ${args.theme.var.color.text};
-  transition: all ${args.theme.var.animation.fast} ease;
+  transition: all 150ms ease;
   line-height: 1.6;
   font-family: inherit;
   resize: ${resize};
-  min-height: calc(${args.theme.var.touch.input} * 2);
+  min-height: calc(52px * 2);
 
   &:focus {
     outline: none;
@@ -52,14 +52,14 @@ return `._id {
   }
 
   &::placeholder {
-    color: ${args.theme.var.color.muted};
+    color: ${args.theme.var.color.text_light_500};
     opacity: 1;
   }
 
   /* Mobile responsive adjustments */
   @media (max-width: 768px) {
     padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-    font-size: ${args.theme.var.fontSize.md};
+    font-size: 1rem;
     resize: vertical;
   }
 }`;

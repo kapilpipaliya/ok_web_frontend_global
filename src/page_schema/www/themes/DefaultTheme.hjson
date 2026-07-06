@@ -42,14 +42,6 @@ return {
       border: {
         light: "oklch(0.85 0.01 0)",
         dark: "oklch(0.25 0.01 0)"
-      },
-      muted: {
-        light: "oklch(0.60 0.02 0)",
-        dark: "oklch(0.45 0.02 0)"
-      },
-      secondary: {
-        light: "oklch(0.92 0.015 0)",
-        dark: "oklch(0.22 0.02 0)"
       }
     }
   }

@@ -36,7 +36,7 @@ return `._id {
   border: 1px solid ${borderColor};
   border-radius: ${args.theme.var.borderRadius.lg};
   ${noPadding ? '' : `padding: ${args.theme.var.spacing.lg};`}
-  transition: box-shadow ${args.theme.var.animation.normal} ease;
+  transition: box-shadow 300ms ease;
 
   &:hover {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -120,7 +120,7 @@ return {
         css:
           '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.lg};
+  font-size: 1.125rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
   margin: 0;

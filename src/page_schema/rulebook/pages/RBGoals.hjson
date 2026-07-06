@@ -256,10 +256,10 @@ return `._id {
   align-items: center;
   gap: ${args.theme.var.spacing.sm};
   color: ${args.theme.var.color.text};
-  font-size: ${args.theme.var.fontSize.base};
+  font-size: 1rem;
   cursor: pointer;
   user-select: none;
-  transition: opacity ${args.theme.var.animation.fast} ease;
+  transition: opacity 150ms ease;
 
   &:hover {
     opacity: 0.8;
@@ -329,7 +329,7 @@ if (args.fns.error()) {
     text-align: center;
     padding: ${args.theme.var.spacing.xl};
     color: ${args.theme.var.color.error};
-    font-size: ${args.theme.var.fontSize.lg};
+    font-size: 1.125rem;
   }`;
 }
 
@@ -339,8 +339,8 @@ if (goalsArray.length === 0 && !args.fns.isLoading()) {
   return `._id {
     text-align: center;
     padding: ${args.theme.var.spacing.xl};
-    color: ${args.theme.var.color.muted};
-    font-size: ${args.theme.var.fontSize.lg};
+    color: ${args.theme.var.color.text_light_500};
+    font-size: 1.125rem;
   }`;
 }
 
@@ -451,7 +451,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.lg};
+  font-size: 1.125rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
   margin: 0 0 ${args.theme.var.spacing.md} 0;
@@ -514,7 +514,7 @@ const colorMap = {
   time: args.theme.var.color.info,
   percentage: args.theme.var.color.primary
 };
-const accentColor = isCompleted ? args.theme.var.color.muted : (colorMap[goalType] || args.theme.var.color.primary);
+const accentColor = isCompleted ? args.theme.var.color.text_light_500 : (colorMap[goalType] || args.theme.var.color.primary);
 
 return {
   as: "a",
@@ -551,7 +551,7 @@ const colorMap = {
   time: args.theme.var.color.info,
   percentage: args.theme.var.color.primary
 };
-const accentColor = isCompleted ? args.theme.var.color.muted : (colorMap[goalType] || args.theme.var.color.primary);
+const accentColor = isCompleted ? args.theme.var.color.text_light_500 : (colorMap[goalType] || args.theme.var.color.primary);
 
 // Get rule category for additional styling
 const ruleCategoryName = rule?.P?.categoryName || "";
@@ -565,7 +565,7 @@ return `._id {
   position: relative;
   overflow: hidden;
   cursor: pointer;
-  transition: all ${args.theme.var.animation.normal} ease;
+  transition: all 300ms ease;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   text-decoration: none;
   color: inherit;
@@ -926,7 +926,7 @@ return `._id {
   color: ${bgColor}_text;
   padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.sm};
   border-radius: ${args.theme.var.borderRadius.full};
-  font-size: ${args.theme.var.fontSize.xs};
+  font-size: 0.75rem;
   font-weight: 600;
   margin-bottom: ${args.theme.var.spacing.sm};
 }`;
@@ -952,7 +952,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.lg};
+  font-size: 1.125rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
   margin: 0 0 ${args.theme.var.spacing.xs} 0;
@@ -983,7 +983,7 @@ return `._id {
   color: ${args.theme.var.color.success_text};
   padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.sm};
   border-radius: ${args.theme.var.borderRadius.sm};
-  font-size: ${args.theme.var.fontSize.xs};
+  font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -1012,8 +1012,8 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
-  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.text_light_500};
+  font-size: 0.875rem;
   margin: 0;
 }`;
 '''
@@ -1093,7 +1093,7 @@ return `._id {
   height: 12px;
   background: ${progressColor};
   border-radius: ${args.theme.var.borderRadius.full};
-  transition: width ${args.theme.var.animation.slow} ease;
+  transition: width 500ms ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }`;
 '''
@@ -1122,7 +1122,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   font-weight: 500;
   color: ${args.theme.var.color.text};
 }`;
@@ -1155,7 +1155,7 @@ return `._id {
   color: ${args.theme.var.color.warning_text};
   padding: ${args.theme.var.spacing.sm};
   border-radius: ${args.theme.var.borderRadius.sm};
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   font-weight: 500;
 }`;
 '''
@@ -1185,7 +1185,7 @@ return `._id {
   justify-content: center;
   padding: ${args.theme.var.spacing.xxxl};
   text-align: center;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
 }`;
 '''
       }
@@ -1204,7 +1204,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.md};
+  font-size: 1rem;
   margin-bottom: ${args.theme.var.spacing.md};
 }`;
 '''

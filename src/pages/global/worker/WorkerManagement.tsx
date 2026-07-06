@@ -751,7 +751,7 @@ export function WorkerManagement() {
                     css={`return \`._id {
   font-size: 0.875rem;
   margin-top: 0.5rem;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
 }\`;`}
                   >
                     Note: Platform-level workers (like email worker) are managed

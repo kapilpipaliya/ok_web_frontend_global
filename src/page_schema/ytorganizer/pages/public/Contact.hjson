@@ -109,7 +109,7 @@ return {
 return `._id {
   font-size: 1.1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin-bottom: 1rem;
   text-align: center;
 }`;
@@ -273,7 +273,7 @@ return `._id {
 }
 
 ._id::placeholder {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
 }`;
 '''
         displayOrder: 2
@@ -361,7 +361,7 @@ return `._id {
 }
 
 ._id::placeholder {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
 }`;
 '''
         displayOrder: 2
@@ -452,7 +452,7 @@ return `._id {
 }
 
 ._id::placeholder {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
 }`;
 '''
         displayOrder: 2
@@ -605,7 +605,7 @@ return {
       <strong>Email:</strong>
       <a href="mailto:support@ysaar.com" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">support@ysaar.com</a>
     </p>
-    <p style="color: ${args.theme.var.color.muted}; font-size: 0.95rem;">
+    <p style="color: ${args.theme.var.color.text_light_500}; font-size: 0.95rem;">
       We typically respond within 24-48 hours
     </p>
   `

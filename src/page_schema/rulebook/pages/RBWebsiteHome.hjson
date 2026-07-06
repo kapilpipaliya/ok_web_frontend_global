@@ -403,7 +403,7 @@ return {
         css: '''
 return `._id {
   font-size: 1.2rem;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin: 0 0 3rem 0;
   max-width: 600px;
   margin-left: auto;
@@ -537,7 +537,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin: 0;
   font-size: 1rem;
 }`;
@@ -989,7 +989,7 @@ return {
         css: '''
 return `._id {
   font-size: 1.2rem;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin: 0 0 3rem 0;
   max-width: 600px;
   margin-left: auto;
@@ -1119,7 +1119,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   line-height: 1.6;
   margin: 0;
 }`;
@@ -1211,7 +1211,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   line-height: 1.6;
   margin: 0;
 }`;
@@ -1303,7 +1303,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   line-height: 1.6;
   margin: 0;
 }`;
@@ -1568,7 +1568,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
 }`;
 '''
       }
@@ -1729,7 +1729,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
 }`;
 '''
       }
@@ -1890,7 +1890,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
 }`;
 '''
       }
@@ -1984,7 +1984,7 @@ return {
         css: '''
 return `._id {
   font-size: 1.2rem;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin: 0 0 2.5rem 0;
   line-height: 1.6;
 }

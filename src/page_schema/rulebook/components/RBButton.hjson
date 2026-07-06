@@ -143,12 +143,12 @@ let baseStyles = `
   padding: ${args.theme.var.spacing.md};
   border-radius: ${args.theme.var.borderRadius.md};
   font-weight: 500;
-  font-size: ${args.theme.var.fontSize.md};
+  font-size: 1rem;
   cursor: pointer;
-  transition: all ${args.theme.var.animation.fast} ease;
+  transition: all 150ms ease;
   border: none;
   ${fullWidth ? 'width: 100%;' : ''}
-  min-height: ${args.theme.var.touch.minTarget};
+  min-height: 44px;
 
   &:disabled {
     opacity: 0.6;
@@ -184,7 +184,7 @@ if (variant === 'primary') {
 } else if (variant === 'secondary') {
   variantStyles = `
     background: none;
-    color: ${args.theme.var.color.muted};
+    color: ${args.theme.var.color.text_light_500};
     border: 1px solid ${args.theme.var.color.border};
 
     &:not(:disabled):hover {

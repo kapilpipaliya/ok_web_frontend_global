@@ -62,7 +62,7 @@ return {
         css:
           '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.lg};
+  font-size: 1.125rem;
   font-weight: 600;
   margin-bottom: ${args.theme.var.spacing.md};
   color: ${args.theme.var.color.text};

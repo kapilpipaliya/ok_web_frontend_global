@@ -174,7 +174,7 @@ return {
         css:
           '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.xl};
+  font-size: 1.25rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
 }`;
@@ -206,7 +206,7 @@ return {
           '''
 return `._id {
   cursor: pointer;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   transition: color 0.2s ease;
 
   &:hover {

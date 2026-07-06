@@ -149,9 +149,9 @@ const colors = {
     hover: args.theme.var.color.primary_dark_200
   },
   secondary: {
-    bg: args.theme.var.color.secondary,
-    text: args.theme.var.color.secondary_text,
-    hover: args.theme.var.color.secondary_dark_200
+    bg: args.theme.var.color.background_light_200,
+    text: args.theme.var.color.background_light_200_text,
+    hover: args.theme.var.color.background_dark_200
   },
   success: {
     bg: args.theme.var.color.success,

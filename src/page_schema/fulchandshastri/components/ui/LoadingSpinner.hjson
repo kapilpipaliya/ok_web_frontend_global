@@ -128,7 +128,7 @@ return {
           '''
 return `._id {
   color: ${args.theme.var.color.text_light_500};
-  font-size: ${args.theme.var.fontSize.md};
+  font-size: 1rem;
   text-align: center;
 }`;
 '''

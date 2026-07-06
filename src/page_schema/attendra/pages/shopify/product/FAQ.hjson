@@ -47,7 +47,7 @@ return { expandedIndex, toggleExpanded };
         displayOrder: 2
         componentName: Html
         textType: markdown
-        css: '''return `._id{ margin: 0 0 1.25rem 0; color:${args.theme.var.color.muted}; line-height: 1.6; }`;'''
+        css: '''return `._id{ margin: 0 0 1.25rem 0; color:${args.theme.var.color.text_light_500}; line-height: 1.6; }`;'''
         text: Common questions about **Attendra**.
         props: '''return { as: "div" };'''
       }
@@ -136,7 +136,7 @@ return {
       P: {
         displayOrder: 2
         componentName: Html
-        css: '''return `._id{ padding: 0 1rem 1rem 1rem; border-top:1px solid ${args.theme.var.color.border}; color:${args.theme.var.color.muted}; line-height:1.6; margin:0; }`;'''
+        css: '''return `._id{ padding: 0 1rem 1rem 1rem; border-top:1px solid ${args.theme.var.color.border}; color:${args.theme.var.color.text_light_500}; line-height:1.6; margin:0; }`;'''
         props:
           '''
 const item = args.contextData.faqItem;
@@ -152,7 +152,7 @@ return { as: "p", text: item?.a || "", show: () => args.fns.expandedIndex?.() ==
         displayOrder: 4
         componentName: Html
         textType: markdown
-        css: '''return `._id{ margin-top: 1.25rem; color:${args.theme.var.color.muted}; }`;'''
+        css: '''return `._id{ margin-top: 1.25rem; color:${args.theme.var.color.text_light_500}; }`;'''
         text: Need more help? Visit [Support](/support).
         props: '''return { as: "div" };'''
       }

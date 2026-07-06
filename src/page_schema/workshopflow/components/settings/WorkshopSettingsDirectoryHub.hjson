@@ -70,7 +70,7 @@ return {
         css:
           '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.xl};
+  font-size: 1.25rem;
   font-weight: 700;
   margin: 0;
   color: ${args.theme.var.color.text};
@@ -96,8 +96,8 @@ return {
           '''
 return `._id {
   margin: 0;
-  font-size: ${args.theme.var.fontSize.sm};
-  color: ${args.theme.var.color.muted};
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text_light_500};
   line-height: 1.5;
 }`;
 '''
@@ -155,8 +155,8 @@ return `._id.workshop-dir-hub-card {
   background: ${args.theme.var.color.background};
   color: ${args.theme.var.color.text};
   cursor: pointer;
-  transition: border-color ${args.theme.var.animation.fast} ease,
-    background ${args.theme.var.animation.fast} ease;
+  transition: border-color 150ms ease,
+    background 150ms ease;
 }
 ._id.workshop-dir-hub-card:hover {
   border-color: ${args.theme.var.color.primary};
@@ -184,7 +184,7 @@ return {
           '''
 return `._id {
   font-weight: 600;
-  font-size: ${args.theme.var.fontSize.md};
+  font-size: 1rem;
   margin-bottom: ${args.theme.var.spacing.xs};
 }`;
 '''
@@ -208,8 +208,8 @@ return {
         css:
           '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.sm};
-  color: ${args.theme.var.color.muted};
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text_light_500};
 }`;
 '''
       }

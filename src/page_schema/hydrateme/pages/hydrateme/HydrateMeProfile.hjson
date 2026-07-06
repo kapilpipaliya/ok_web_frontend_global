@@ -48,8 +48,8 @@ return {
         css:
           '''return `._id.hm-lead {
   margin: 0 0 1rem;
-  font-size: ${args.theme.var.fontSize.md};
-  color: ${args.theme.var.color.muted};
+  font-size: 1rem;
+  color: ${args.theme.var.color.text_light_500};
 }`;'''
       }
     }

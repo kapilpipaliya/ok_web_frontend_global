@@ -825,7 +825,7 @@ export function BackupManagement() {
                     css={`return \`._id {
   font-size: 0.875rem;
   font-weight: 500;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
   margin: 0 0 0.5rem 0;
   text-transform: uppercase;
 }\`;`}
@@ -839,7 +839,7 @@ export function BackupManagement() {
                         as="p"
                         css={`return \`._id {
   font-size: 0.875rem;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
   margin: 0;
 }\`;`}
                       >
@@ -863,7 +863,7 @@ export function BackupManagement() {
                         as="p"
                         css={`return \`._id {
   font-size: 0.75rem;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
   margin: 0.25rem 0 0 0;
 }\`;`}
                       >
@@ -943,7 +943,7 @@ export function BackupManagement() {
                     css={`return \`._id {
   font-size: 0.875rem;
   font-weight: 500;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
   margin: 0 0 0.5rem 0;
   text-transform: uppercase;
 }\`;`}
@@ -976,7 +976,7 @@ export function BackupManagement() {
                     css={`return \`._id {
   font-size: 0.875rem;
   font-weight: 500;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
   margin: 0 0 0.5rem 0;
   text-transform: uppercase;
 }\`;`}
@@ -1023,7 +1023,7 @@ export function BackupManagement() {
                     as="span"
                     css={`return \`._id {
   font-weight: 500;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
 }\`;`}
                   >
                     Schedule:
@@ -1052,7 +1052,7 @@ export function BackupManagement() {
                     as="span"
                     css={`return \`._id {
   font-weight: 500;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
 }\`;`}
                   >
                     Storage:
@@ -1125,7 +1125,7 @@ export function BackupManagement() {
                     css={`return \`._id {
   padding: 3rem;
   text-align: center;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
   border: 1px solid \${args.theme.var.color.border};
   border-radius: 0.5rem;
 }\`;`}
@@ -1213,7 +1213,7 @@ export function BackupManagement() {
                           as="div"
                           css={`return \`._id {
   font-size: 0.875rem;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
 }\`;`}
                         >
                           {database.role}
@@ -1660,7 +1660,7 @@ export function BackupManagement() {
                     css={`return \`._id {
   padding: 3rem;
   text-align: center;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
   border: 1px solid \${args.theme.var.color.border};
   border-radius: 0.5rem;
 }\`;`}
@@ -1837,7 +1837,7 @@ export function BackupManagement() {
                             as="div"
                             css={`return \`._id {
   font-size: 0.875rem;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
 }\`;`}
                           >
                             {new Date(backup.lastModified).toLocaleDateString()}
@@ -1887,7 +1887,7 @@ export function BackupManagement() {
                                 as="span"
                                 css={`return \`._id {
   font-size: 0.7rem;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
 }\`;`}
                               >
                                 {backup.encryption?.keyManagement || ""}
@@ -1903,7 +1903,7 @@ export function BackupManagement() {
                                 as="div"
                                 css={`return \`._id {
   font-size: 0.75rem;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
   text-align: center;
 }\`;`}
                               >
@@ -2255,7 +2255,7 @@ export function BackupManagement() {
                   as="p"
                   css={`return \`._id {
   margin: 0 0 1.5rem 0;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
 }\`;`}
                 >
                   Are you sure you want to {type} backup:{" "}
@@ -2424,7 +2424,7 @@ export function BackupManagement() {
                       css={`return \`._id {
   font-weight: 500;
   font-size: 0.875rem;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
 }\`;`}
                     >
                       Source Backup:
@@ -2457,7 +2457,7 @@ export function BackupManagement() {
                       css={`return \`._id {
   font-weight: 500;
   font-size: 0.875rem;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
 }\`;`}
                     >
                       Original Database:
@@ -2489,7 +2489,7 @@ export function BackupManagement() {
                       css={`return \`._id {
   font-weight: 500;
   font-size: 0.875rem;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
 }\`;`}
                     >
                       Target Database (leave empty to restore to original):
@@ -2720,7 +2720,7 @@ export function BackupManagement() {
   border-radius: 0.375rem;
   font-family: monospace;
   font-size: 0.875rem;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
 }\`;`}
                 >
                   {modal.backupKey.split("/").pop()}
@@ -2878,7 +2878,7 @@ export function BackupManagement() {
                       as="div"
                       css={`return \`._id {
   font-size: 0.75rem;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
   margin-bottom: 0.5rem;
 }\`;`}
                     >
@@ -2899,7 +2899,7 @@ export function BackupManagement() {
                       as="div"
                       css={`return \`._id {
   font-size: 0.75rem;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
   margin-top: 0.25rem;
 }\`;`}
                     >
@@ -2923,7 +2923,7 @@ export function BackupManagement() {
                       as="div"
                       css={`return \`._id {
   font-size: 0.75rem;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
   margin-bottom: 0.5rem;
 }\`;`}
                     >
@@ -2944,7 +2944,7 @@ export function BackupManagement() {
                       as="div"
                       css={`return \`._id {
   font-size: 0.75rem;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
   margin-top: 0.25rem;
 }\`;`}
                     >
@@ -3098,7 +3098,7 @@ export function BackupManagement() {
                             <As
                               as="span"
                               css={`return \`._id {
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
   min-width: 60px;
 }\`;`}
                             >
@@ -3227,7 +3227,7 @@ export function BackupManagement() {
                     as="div"
                     css={`return \`._id {
   font-size: 0.875rem;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
   font-family: monospace;
 }\`;`}
                   >
@@ -3275,7 +3275,7 @@ export function BackupManagement() {
                         as="div"
                         css={`return \`._id {
   font-size: 0.75rem;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
   margin-top: 0.25rem;
 }\`;`}
                       >
@@ -3306,7 +3306,7 @@ export function BackupManagement() {
                         as="div"
                         css={`return \`._id {
   font-size: 0.75rem;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
   margin-top: 0.25rem;
 }\`;`}
                       >
@@ -3337,7 +3337,7 @@ export function BackupManagement() {
                         as="div"
                         css={`return \`._id {
   font-size: 0.75rem;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
   margin-top: 0.25rem;
 }\`;`}
                       >
@@ -3382,7 +3382,7 @@ export function BackupManagement() {
                           <As
                             as="div"
                             css={`return \`._id {
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
   font-size: 0.875rem;
 }\`;`}
                           >
@@ -3459,7 +3459,7 @@ export function BackupManagement() {
                           <As
                             as="div"
                             css={`return \`._id {
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
   font-size: 0.875rem;
 }\`;`}
                           >
@@ -3640,7 +3640,7 @@ export function BackupManagement() {
                       css={`return \`._id {
   font-weight: 500;
   font-size: 0.875rem;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
 }\`;`}
                     >
                       Select Backup File (.gz):
@@ -3675,7 +3675,7 @@ export function BackupManagement() {
                         as="div"
                         css={`return \`._id {
   font-size: 0.875rem;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
   padding: 0.5rem;
   background: \${args.theme.var.color.background_light_200};
   border-radius: 0.375rem;
@@ -3701,7 +3701,7 @@ export function BackupManagement() {
                       css={`return \`._id {
   font-weight: 500;
   font-size: 0.875rem;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
 }\`;`}
                     >
                       Target Database:

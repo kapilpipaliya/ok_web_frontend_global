@@ -255,7 +255,7 @@ return {
         css: '''
 return `._id {
   color: ${args.theme.var.color.error};
-  font-size: ${args.theme.var.fontSize.xl};
+  font-size: 1.25rem;
   font-weight: 600;
   margin: 0 0 ${args.theme.var.spacing.sm} 0;
 }`;
@@ -366,8 +366,8 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.lg};
-  color: ${args.theme.var.color.muted};
+  font-size: 1.125rem;
+  color: ${args.theme.var.color.text_light_500};
   margin: 0;
 }`;
 '''
@@ -409,7 +409,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.xl};
+  font-size: 1.25rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
   margin: 0 0 ${args.theme.var.spacing.lg} 0;
@@ -471,9 +471,9 @@ const hasRules = progress.totalActiveRules > 0;
 return `._id {
   width: ${Math.max(percentage, hasRules ? 2 : 0)}%;
   height: 12px;
-  background: ${percentage === 0 ? args.theme.var.color.muted : args.theme.var.color.success};
+  background: ${percentage === 0 ? args.theme.var.color.text_light_500 : args.theme.var.color.success};
   border-radius: ${args.theme.var.borderRadius.full};
-  transition: width ${args.theme.var.animation.slow} ease;
+  transition: width 500ms ease;
 }`;
 '''
       }
@@ -495,7 +495,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.lg};
+  font-size: 1.125rem;
   font-weight: 500;
   color: ${args.theme.var.color.text};
   margin: 0;
@@ -566,7 +566,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.xl};
+  font-size: 1.25rem;
   font-weight: 700;
   color: ${args.theme.var.color.streak};
   margin-bottom: ${args.theme.var.spacing.xs};
@@ -588,8 +588,8 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.sm};
-  color: ${args.theme.var.color.muted};
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text_light_500};
 }`;
 '''
       }
@@ -635,7 +635,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.xl};
+  font-size: 1.25rem;
   font-weight: 700;
   color: ${args.theme.var.color.completed};
   margin-bottom: ${args.theme.var.spacing.xs};
@@ -657,8 +657,8 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.sm};
-  color: ${args.theme.var.color.muted};
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text_light_500};
 }`;
 '''
       }
@@ -704,7 +704,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.xl};
+  font-size: 1.25rem;
   font-weight: 700;
   color: ${args.theme.var.color.info};
   margin-bottom: ${args.theme.var.spacing.xs};
@@ -726,8 +726,8 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.sm};
-  color: ${args.theme.var.color.muted};
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text_light_500};
 }`;
 '''
       }
@@ -764,7 +764,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.xl};
+  font-size: 1.25rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
   margin: 0 0 ${args.theme.var.spacing.lg} 0;
@@ -940,7 +940,7 @@ if (todayTracking) {
 }
 
 return `._id {
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   color: ${args.theme.var.color[colorKey]};
 }`;
 '''
@@ -995,8 +995,8 @@ if (isCompleted) {
     border-radius: ${args.theme.var.borderRadius.sm};
     font-weight: 500;
     cursor: pointer;
-    min-height: ${args.theme.var.touch.minTarget};
-    transition: all ${args.theme.var.animation.fast} ease;
+    min-height: 44px;
+    transition: all 150ms ease;
     text-decoration: none;
     display: inline-block;
 

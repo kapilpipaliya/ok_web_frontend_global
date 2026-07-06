@@ -205,7 +205,7 @@ return {
 const p = args.contextData.props || {};
 const tt = p.triggerTint;
 const tint =
-  typeof tt === "function" ? tt() : args.theme.var.color.muted;
+  typeof tt === "function" ? tt() : args.theme.var.color.text_light_500;
 return `._id {
   flex-shrink: 0;
   color: ${tint};
@@ -492,7 +492,7 @@ const c = !hasInput
   ? args.theme.var.color.text
   : met
     ? args.theme.var.color.success
-    : args.theme.var.color.muted;
+    : args.theme.var.color.text_light_500;
 return `._id {
   font-size: 14px;
   color: ${c};

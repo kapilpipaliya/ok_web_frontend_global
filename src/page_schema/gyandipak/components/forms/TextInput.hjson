@@ -25,8 +25,8 @@ return `._id {
   border: 1px solid ${args.theme.var.color.border};
   border-radius: ${args.theme.var.borderRadius.sm};
   background: ${args.theme.var.color.background};
-  transition: all ${args.theme.var.animation.fast} ease;
-  min-height: ${args.theme.var.touch.input};
+  transition: all 150ms ease;
+  min-height: 52px;
 
   &:focus-within {
     border-color: ${args.theme.var.color.primary};
@@ -61,7 +61,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   flex-shrink: 0;
   margin-left: ${args.theme.var.spacing.md};
   margin-right: ${args.theme.var.spacing.sm};
@@ -99,13 +99,13 @@ return `._id {
   padding: ${args.theme.var.spacing.sm} ${hasRightIcon ? '0' : args.theme.var.spacing.md} ${args.theme.var.spacing.sm} ${hasLeftIcon ? '0' : args.theme.var.spacing.md};
   border: none;
   outline: none;
-  font-size: ${args.theme.var.fontSize.md};
+  font-size: 1rem;
   background: transparent;
   color: ${args.theme.var.color.text};
   line-height: 1.5;
 
   &::placeholder {
-    color: ${args.theme.var.color.muted};
+    color: ${args.theme.var.color.text_light_500};
     opacity: 1;
   }
 
@@ -146,7 +146,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   flex-shrink: 0;
   margin-left: ${args.theme.var.spacing.sm};
   margin-right: ${args.theme.var.spacing.md};

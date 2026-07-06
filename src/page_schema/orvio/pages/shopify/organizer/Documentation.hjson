@@ -39,7 +39,7 @@
       L: Attr
       P: {
         css:
-          "return `._id { font-size: 0.9375rem; line-height: 1.65; color: ${args.theme.var.color.muted}; margin-bottom: 1.5rem; }`;"
+          "return `._id { font-size: 0.9375rem; line-height: 1.65; color: ${args.theme.var.color.text_light_500}; margin-bottom: 1.5rem; }`;"
         displayOrder: 2
         textType: markdown
         componentName: Html

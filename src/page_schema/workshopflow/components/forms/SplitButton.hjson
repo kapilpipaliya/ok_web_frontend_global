@@ -122,7 +122,7 @@ return `._id {
   border: none;
   border-radius: 0 ${args.theme.var.borderRadius.md} ${args.theme.var.borderRadius.md} 0;
   cursor: pointer;
-  transition: all ${args.theme.var.animation.fast} ease;
+  transition: all 150ms ease;
 
   &:hover:not(:disabled) {
     background: ${args.theme.var.color.background_dark_200};

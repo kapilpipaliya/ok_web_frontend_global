@@ -63,7 +63,7 @@
   class: "workshop-doc-p"
 };'''
         css:
-          '''return `._id.workshop-doc-p { margin: 0 0 1rem; line-height: 1.55; color: ${args.theme.var.color.muted}; }`;'''
+          '''return `._id.workshop-doc-p { margin: 0 0 1rem; line-height: 1.55; color: ${args.theme.var.color.text_light_500}; }`;'''
       }
     }
     {

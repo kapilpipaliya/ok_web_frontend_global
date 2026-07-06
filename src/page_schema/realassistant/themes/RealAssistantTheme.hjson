@@ -50,21 +50,6 @@ return {
       border: {
         light: "oklch(0.88 0.01 0)",
         dark: "oklch(0.28 0.01 0)"
-      },
-      // Muted text
-      muted: {
-        light: "oklch(0.55 0.02 0)",
-        dark: "oklch(0.50 0.02 0)"
-      },
-      // Secondary - Purple for premium feel
-      secondary: {
-        light: "oklch(0.60 0.20 290)",
-        dark: "oklch(0.70 0.18 290)"
-      },
-      // Accent - Teal for highlights
-      accent: {
-        light: "oklch(0.68 0.15 180)",
-        dark: "oklch(0.78 0.12 180)"
       }
     }
   }

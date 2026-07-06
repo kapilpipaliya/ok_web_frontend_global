@@ -109,7 +109,7 @@ return {
 return `._id {
   font-size: 1.1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin: 0 auto;
   max-width: 700px;
 }
@@ -154,7 +154,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.xxl};
+  font-size: 1.5rem;
   font-weight: 700;
   color: ${args.theme.var.color.primary};
   text-align: center;
@@ -217,7 +217,7 @@ return {
 ''',
         css: '''
 return `._id p {
-  font-size: ${args.theme.var.fontSize.lg};
+  font-size: 1.125rem;
   line-height: 1.8;
   margin-bottom: ${args.theme.var.spacing.lg};
   color: ${args.theme.var.color.text};
@@ -363,7 +363,7 @@ return `._id {
 
 ._id p {
   color: ${args.theme.var.color.text};
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
 }`;
 '''
       }
@@ -445,7 +445,7 @@ return `._id {
 
 ._id p {
   color: ${args.theme.var.color.text};
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
 }`;
 '''
       }
@@ -527,7 +527,7 @@ return `._id {
 
 ._id p {
   color: ${args.theme.var.color.text};
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
 }`;
 '''
       }
@@ -609,7 +609,7 @@ return `._id {
 
 ._id p {
   color: ${args.theme.var.color.text};
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
 }`;
 '''
       }
@@ -694,7 +694,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.xxl};
+  font-size: 1.5rem;
   font-weight: 700;
   color: ${args.theme.var.color.primary};
   text-align: center;
@@ -769,13 +769,13 @@ return `._id {
   color: ${args.theme.var.color.primary};
   font-weight: 600;
   margin-bottom: ${args.theme.var.spacing.md};
-  font-size: ${args.theme.var.fontSize.lg};
+  font-size: 1.125rem;
 }
 
 ._id p {
   color: ${args.theme.var.color.text};
   line-height: 1.6;
-  font-size: ${args.theme.var.fontSize.md};
+  font-size: 1rem;
 }`;
 '''
       }
@@ -850,13 +850,13 @@ return `._id {
   color: ${args.theme.var.color.success};
   font-weight: 600;
   margin-bottom: ${args.theme.var.spacing.md};
-  font-size: ${args.theme.var.fontSize.lg};
+  font-size: 1.125rem;
 }
 
 ._id p {
   color: ${args.theme.var.color.text};
   line-height: 1.6;
-  font-size: ${args.theme.var.fontSize.md};
+  font-size: 1rem;
 }`;
 '''
       }
@@ -931,13 +931,13 @@ return `._id {
   color: ${args.theme.var.color.info};
   font-weight: 600;
   margin-bottom: ${args.theme.var.spacing.md};
-  font-size: ${args.theme.var.fontSize.lg};
+  font-size: 1.125rem;
 }
 
 ._id p {
   color: ${args.theme.var.color.text};
   line-height: 1.6;
-  font-size: ${args.theme.var.fontSize.md};
+  font-size: 1rem;
 }`;
 '''
       }
@@ -1008,14 +1008,14 @@ return `._id {
 }
 
 ._id h2 {
-  font-size: ${args.theme.var.fontSize.xxl};
+  font-size: 1.5rem;
   font-weight: 700;
   margin-bottom: ${args.theme.var.spacing.lg};
   color: ${args.theme.var.color.primary_text};
 }
 
 ._id p {
-  font-size: ${args.theme.var.fontSize.lg};
+  font-size: 1.125rem;
   margin-bottom: ${args.theme.var.spacing.xl};
   opacity: 0.9;
   max-width: 500px;
@@ -1029,7 +1029,7 @@ return `._id {
   padding: ${args.theme.var.spacing.md} ${args.theme.var.spacing.xl};
   border: none;
   border-radius: ${args.theme.var.borderRadius.full};
-  font-size: ${args.theme.var.fontSize.lg};
+  font-size: 1.125rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -1047,11 +1047,11 @@ return `._id {
   }
 
   ._id h2 {
-    font-size: ${args.theme.var.fontSize.xl};
+    font-size: 1.25rem;
   }
 
   ._id p {
-    font-size: ${args.theme.var.fontSize.md};
+    font-size: 1rem;
   }
 }`;
 '''

@@ -111,7 +111,7 @@ return {
         css:
           '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.lg};
+  font-size: 1.125rem;
   font-weight: 700;
   color: ${args.theme.var.color.text};
   margin-bottom: ${args.theme.var.spacing.md};
@@ -158,11 +158,11 @@ return {
         css:
           '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.xs};
+  font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin-bottom: ${args.theme.var.spacing.xs};
   padding: 0 ${args.theme.var.spacing.sm};
 }`;
@@ -222,9 +222,9 @@ return active
   color: ${args.theme.var.color.primary_text};
   background: ${args.theme.var.color.primary};
   text-decoration: none;
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   font-weight: 500;
-  transition: background ${args.theme.var.animation.fast} ease;
+  transition: background 150ms ease;
 }`
   : `._id {
   display: block;
@@ -232,9 +232,9 @@ return active
   border-radius: ${args.theme.var.borderRadius.md};
   color: ${args.theme.var.color.text};
   text-decoration: none;
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   font-weight: 500;
-  transition: background ${args.theme.var.animation.fast} ease;
+  transition: background 150ms ease;
 }
 ._id:hover {
   background: ${args.theme.var.color.background_light_200};

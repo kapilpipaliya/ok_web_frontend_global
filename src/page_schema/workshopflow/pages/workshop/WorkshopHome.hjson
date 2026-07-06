@@ -80,7 +80,7 @@
           '''return `._id.workshop-marketing-lead {
   font-size: 1.0625rem;
   line-height: 1.55;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin: 0 0 1.5rem;
 }`;'''
       }
@@ -274,7 +274,7 @@
     min-width: 5.5rem;
   }`,
   `.workshop-flowchart-arrow {
-    color: ${args.theme.var.color.muted};
+    color: ${args.theme.var.color.text_light_500};
     font-size: 1.125rem;
     font-weight: 700;
     line-height: 1;
@@ -430,7 +430,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin-bottom: 0.25rem;
 }
 ._id .workshop-flowchart-pill {
@@ -510,7 +510,7 @@
   margin: 0 0 1.25rem;
   font-size: 0.9375rem;
   line-height: 1.55;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
 }`;'''
       }
     }
@@ -739,7 +739,7 @@ Open Payments, select invoice record, enter method and amount, then save to upda
   margin: 0 0 0.75rem;
   font-size: 0.9375rem;
   line-height: 1.55;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
 }`;'''
       }
     }

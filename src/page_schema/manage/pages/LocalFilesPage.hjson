@@ -107,7 +107,7 @@ return {
         css:
           '''return `._id {
   margin: 0 0 ${args.theme.var.spacing.sm};
-  font-size: ${args.theme.var.fontSize.title};
+  font-size: 1.875rem;
   font-weight: 700;
 }`;'''
       }
@@ -126,8 +126,8 @@ return {
         css:
           '''return `._id {
   margin: 0 0 ${args.theme.var.spacing.lg};
-  color: ${args.theme.var.color.muted};
-  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.text_light_500};
+  font-size: 0.875rem;
 }`;'''
       }
     }
@@ -181,7 +181,7 @@ return {
           '''return `._id {
   display: block;
   margin-bottom: ${args.theme.var.spacing.xs};
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
 }`;'''
       }
     }
@@ -233,7 +233,7 @@ return {
           '''return `._id {
   display: block;
   margin-bottom: ${args.theme.var.spacing.xs};
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
 }`;'''
       }
     }
@@ -303,7 +303,7 @@ return {
         css:
           '''return `._id {
   margin: 0 0 ${args.theme.var.spacing.sm};
-  font-size: ${args.theme.var.fontSize.lg};
+  font-size: 1.125rem;
   font-weight: 600;
 }`;'''
       }
@@ -326,7 +326,7 @@ return {
   border-radius: ${args.theme.var.borderRadius.md};
   background: ${args.theme.var.color.background_dark_900};
   color: ${args.theme.var.color.background_light_900_text};
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   overflow-x: auto;
   white-space: pre-wrap;
   word-break: break-word;

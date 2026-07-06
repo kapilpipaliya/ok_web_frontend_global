@@ -1477,7 +1477,7 @@ return {
         css:
           '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.title};
+  font-size: 1.875rem;
   font-weight: 700;
   color: ${args.theme.var.color.text};
   margin: 0 0 0.5rem 0;
@@ -1485,7 +1485,7 @@ return `._id {
 
 @media (max-width: 768px) {
   ._id {
-    font-size: ${args.theme.var.fontSize.xl};
+    font-size: 1.25rem;
   }
 }`;
 '''
@@ -1886,15 +1886,15 @@ return {
         css:
           '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.md};
-  color: ${args.theme.var.color.muted};
+  font-size: 1rem;
+  color: ${args.theme.var.color.text_light_500};
   margin: 0;
   flex: 1;
 }
 
 @media (max-width: 768px) {
   ._id {
-    font-size: ${args.theme.var.fontSize.sm};
+    font-size: 0.875rem;
   }
 }`;
 '''
@@ -2058,14 +2058,14 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.muted};
-  font-size: ${args.theme.var.fontSize.md};
+  color: ${args.theme.var.color.text_light_500};
+  font-size: 1rem;
   margin: 0;
 }
 
 @media (max-width: 768px) {
   ._id {
-    font-size: ${args.theme.var.fontSize.sm};
+    font-size: 0.875rem;
   }
 }`;
 '''
@@ -2153,7 +2153,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin-bottom: 1rem;
   opacity: 0.5;
 }`;
@@ -2241,7 +2241,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin: 0;
 }`;
 '''

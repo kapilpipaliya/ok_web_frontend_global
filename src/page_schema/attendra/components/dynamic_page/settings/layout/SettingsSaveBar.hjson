@@ -84,7 +84,7 @@ return `._id {
   transform: translateY(${isVisible ? "0" : "calc(100% + 1rem)"});
   opacity: ${isVisible ? "1" : "0"};
   pointer-events: ${isVisible ? "auto" : "none"};
-  transition: transform ${args.theme.var.animation.normal} ease, opacity ${args.theme.var.animation.fast} ease;
+  transition: transform 300ms ease, opacity 150ms ease;
 }`;
 '''
         componentName: Html
@@ -106,7 +106,7 @@ return {
         css:
           '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   color: ${args.theme.var.color.text};
   font-weight: 500;
 }`;

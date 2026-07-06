@@ -109,7 +109,7 @@ return {
 return `._id {
   font-size: 1.1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin: 0 auto;
   max-width: 700px;
 }
@@ -154,7 +154,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.xxl};
+  font-size: 1.5rem;
   font-weight: 700;
   color: ${args.theme.var.color.primary};
   text-align: center;
@@ -237,7 +237,7 @@ return `._id {
 ._id h3 {
   color: ${args.theme.var.color.primary};
   font-weight: 700;
-  font-size: ${args.theme.var.fontSize.xl};
+  font-size: 1.25rem;
   margin-bottom: ${args.theme.var.spacing.md};
 }
 
@@ -245,7 +245,7 @@ return `._id {
   color: ${args.theme.var.color.text};
   line-height: 1.7;
   margin-bottom: ${args.theme.var.spacing.lg};
-  font-size: ${args.theme.var.fontSize.md};
+  font-size: 1rem;
 }
 
 ._id ul {
@@ -407,7 +407,7 @@ return `._id {
 ._id h3 {
   color: ${args.theme.var.color.success};
   font-weight: 700;
-  font-size: ${args.theme.var.fontSize.xl};
+  font-size: 1.25rem;
   margin-bottom: ${args.theme.var.spacing.md};
 }
 
@@ -415,7 +415,7 @@ return `._id {
   color: ${args.theme.var.color.text};
   line-height: 1.7;
   margin-bottom: ${args.theme.var.spacing.lg};
-  font-size: ${args.theme.var.fontSize.md};
+  font-size: 1rem;
 }
 
 ._id ul {
@@ -577,7 +577,7 @@ return `._id {
 ._id h3 {
   color: ${args.theme.var.color.streak};
   font-weight: 700;
-  font-size: ${args.theme.var.fontSize.xl};
+  font-size: 1.25rem;
   margin-bottom: ${args.theme.var.spacing.md};
 }
 
@@ -585,7 +585,7 @@ return `._id {
   color: ${args.theme.var.color.text};
   line-height: 1.7;
   margin-bottom: ${args.theme.var.spacing.lg};
-  font-size: ${args.theme.var.fontSize.md};
+  font-size: 1rem;
 }
 
 ._id ul {
@@ -747,7 +747,7 @@ return `._id {
 ._id h3 {
   color: ${args.theme.var.color.info};
   font-weight: 700;
-  font-size: ${args.theme.var.fontSize.xl};
+  font-size: 1.25rem;
   margin-bottom: ${args.theme.var.spacing.md};
 }
 
@@ -755,7 +755,7 @@ return `._id {
   color: ${args.theme.var.color.text};
   line-height: 1.7;
   margin-bottom: ${args.theme.var.spacing.lg};
-  font-size: ${args.theme.var.fontSize.md};
+  font-size: 1rem;
 }
 
 ._id ul {
@@ -917,7 +917,7 @@ return `._id {
 ._id h3 {
   color: ${args.theme.var.color.warning_dark_300};
   font-weight: 700;
-  font-size: ${args.theme.var.fontSize.xl};
+  font-size: 1.25rem;
   margin-bottom: ${args.theme.var.spacing.md};
 }
 
@@ -925,7 +925,7 @@ return `._id {
   color: ${args.theme.var.color.text};
   line-height: 1.7;
   margin-bottom: ${args.theme.var.spacing.lg};
-  font-size: ${args.theme.var.fontSize.md};
+  font-size: 1rem;
 }
 
 ._id ul {
@@ -1069,25 +1069,25 @@ return `._id {
   padding: ${args.theme.var.spacing.xl};
   background: ${args.theme.var.color.background_light_100};
   border-radius: ${args.theme.var.borderRadius.xl};
-  border: 2px solid ${args.theme.var.color.muted_light_200};
+  border: 2px solid ${args.theme.var.color.text_light_300};
   transition: all 0.3s ease;
 }
 
 ._id:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 25px ${args.theme.var.color.muted_light_300};
-  border-color: ${args.theme.var.color.muted_light_300};
+  box-shadow: 0 8px 25px ${args.theme.var.color.text_light_400};
+  border-color: ${args.theme.var.color.text_light_400};
 }
 
 ._id .icon {
-  color: ${args.theme.var.color.muted_dark_200};
+  color: ${args.theme.var.color.text_light_600};
   margin-bottom: ${args.theme.var.spacing.lg};
 }
 
 ._id h3 {
-  color: ${args.theme.var.color.muted_dark_200};
+  color: ${args.theme.var.color.text_light_600};
   font-weight: 700;
-  font-size: ${args.theme.var.fontSize.xl};
+  font-size: 1.25rem;
   margin-bottom: ${args.theme.var.spacing.md};
 }
 
@@ -1095,7 +1095,7 @@ return `._id {
   color: ${args.theme.var.color.text};
   line-height: 1.7;
   margin-bottom: ${args.theme.var.spacing.lg};
-  font-size: ${args.theme.var.fontSize.md};
+  font-size: 1rem;
 }
 
 ._id ul {
@@ -1277,7 +1277,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.xxl};
+  font-size: 1.5rem;
   font-weight: 700;
   color: ${args.theme.var.color.info};
   text-align: center;
@@ -1358,8 +1358,8 @@ return `._id {
 }
 
 ._id p {
-  color: ${args.theme.var.color.muted};
-  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.text_light_500};
+  font-size: 0.875rem;
   line-height: 1.6;
 }`;
 '''
@@ -1441,8 +1441,8 @@ return `._id {
 }
 
 ._id p {
-  color: ${args.theme.var.color.muted};
-  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.text_light_500};
+  font-size: 0.875rem;
   line-height: 1.6;
 }`;
 '''
@@ -1524,8 +1524,8 @@ return `._id {
 }
 
 ._id p {
-  color: ${args.theme.var.color.muted};
-  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.text_light_500};
+  font-size: 0.875rem;
   line-height: 1.6;
 }`;
 '''
@@ -1607,8 +1607,8 @@ return `._id {
 }
 
 ._id p {
-  color: ${args.theme.var.color.muted};
-  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.text_light_500};
+  font-size: 0.875rem;
   line-height: 1.6;
 }`;
 '''
@@ -1679,14 +1679,14 @@ return `._id {
 }
 
 ._id h2 {
-  font-size: ${args.theme.var.fontSize.xxl};
+  font-size: 1.5rem;
   font-weight: 700;
   margin-bottom: ${args.theme.var.spacing.lg};
   color: ${args.theme.var.color.primary_text};
 }
 
 ._id p {
-  font-size: ${args.theme.var.fontSize.lg};
+  font-size: 1.125rem;
   margin-bottom: ${args.theme.var.spacing.xl};
   opacity: 0.9;
   max-width: 600px;
@@ -1705,7 +1705,7 @@ return `._id {
   padding: ${args.theme.var.spacing.md} ${args.theme.var.spacing.xl};
   border: none;
   border-radius: ${args.theme.var.borderRadius.full};
-  font-size: ${args.theme.var.fontSize.lg};
+  font-size: 1.125rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -1740,11 +1740,11 @@ return `._id {
   }
 
   ._id h2 {
-    font-size: ${args.theme.var.fontSize.xl};
+    font-size: 1.25rem;
   }
 
   ._id p {
-    font-size: ${args.theme.var.fontSize.md};
+    font-size: 1rem;
   }
 
   ._id .buttons {

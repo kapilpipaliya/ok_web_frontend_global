@@ -247,12 +247,12 @@ return {
 return `._id {
   background: none;
   border: none;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   cursor: pointer;
   text-decoration: none;
   padding: ${args.theme.var.spacing.sm};
   border-radius: ${args.theme.var.borderRadius.sm};
-  transition: all ${args.theme.var.animation.fast} ease;
+  transition: all 150ms ease;
   display: flex;
   align-items: center;
   gap: ${args.theme.var.spacing.xs};
@@ -451,12 +451,12 @@ const isActive = activeTab === "all";
 return `._id {
   padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
   background: ${isActive ? args.theme.var.color.background : 'transparent'};
-  color: ${isActive ? args.theme.var.color.text : args.theme.var.color.muted};
+  color: ${isActive ? args.theme.var.color.text : args.theme.var.color.text_light_500};
   border: none;
   border-radius: ${args.theme.var.borderRadius.sm};
   font-weight: ${isActive ? '600' : '500'};
   cursor: pointer;
-  transition: all ${args.theme.var.animation.fast} ease;
+  transition: all 150ms ease;
   text-align: center;
 
   &:hover {
@@ -506,12 +506,12 @@ const isActive = activeTab === "active";
 return `._id {
   padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
   background: ${isActive ? args.theme.var.color.background : 'transparent'};
-  color: ${isActive ? args.theme.var.color.text : args.theme.var.color.muted};
+  color: ${isActive ? args.theme.var.color.text : args.theme.var.color.text_light_500};
   border: none;
   border-radius: ${args.theme.var.borderRadius.sm};
   font-weight: ${isActive ? '600' : '500'};
   cursor: pointer;
-  transition: all ${args.theme.var.animation.fast} ease;
+  transition: all 150ms ease;
   text-align: center;
 
   &:hover {
@@ -564,12 +564,12 @@ const isActive = activeTab === "paused";
 return `._id {
   padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
   background: ${isActive ? args.theme.var.color.background : 'transparent'};
-  color: ${isActive ? args.theme.var.color.text : args.theme.var.color.muted};
+  color: ${isActive ? args.theme.var.color.text : args.theme.var.color.text_light_500};
   border: none;
   border-radius: ${args.theme.var.borderRadius.sm};
   font-weight: ${isActive ? '600' : '500'};
   cursor: pointer;
-  transition: all ${args.theme.var.animation.fast} ease;
+  transition: all 150ms ease;
   text-align: center;
 
   &:hover {
@@ -660,7 +660,7 @@ return `._id {
   text-align: center;
   padding: ${args.theme.var.spacing.xl};
   color: ${args.theme.var.color.error};
-  font-size: ${args.theme.var.fontSize.lg};
+  font-size: 1.125rem;
 }`;
 '''
       }
@@ -728,7 +728,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.lg};
+  font-size: 1.125rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
   margin: 0 0 ${args.theme.var.spacing.md} 0;
@@ -795,7 +795,7 @@ return `._id {
   border-radius: ${args.theme.var.borderRadius.md};
   padding: ${args.theme.var.spacing.md};
   cursor: pointer;
-  transition: all ${args.theme.var.animation.fast} ease;
+  transition: all 150ms ease;
   ${isPaused ? 'opacity: 0.7;' : ''}
 
   &:hover {
@@ -869,7 +869,7 @@ const isPaused = rule?.P?.isActive === false;
 return `._id {
   width: 20px;
   height: 20px;
-  border: 2px solid ${isCompleted ? args.theme.var.color.success : (isPaused ? args.theme.var.color.muted : args.theme.var.color.border)};
+  border: 2px solid ${isCompleted ? args.theme.var.color.success : (isPaused ? args.theme.var.color.text_light_500 : args.theme.var.color.border)};
   border-radius: ${args.theme.var.borderRadius.sm};
   background: ${isCompleted ? args.theme.var.color.success : 'transparent'};
   display: flex;
@@ -940,7 +940,7 @@ const isPaused = rule?.P?.isActive === false;
 
 return `._id {
   font-weight: 500;
-  color: ${isPaused ? args.theme.var.color.muted : args.theme.var.color.text};
+  color: ${isPaused ? args.theme.var.color.text_light_500 : args.theme.var.color.text};
   margin-bottom: ${args.theme.var.spacing.xs};
 }`;
 '''
@@ -968,8 +968,8 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.sm};
-  color: ${args.theme.var.color.muted};
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text_light_500};
 }`;
 '''
       }
@@ -1016,7 +1016,7 @@ if (isPaused) {
 }
 
 return `._id {
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   color: ${statusColor};
   font-weight: 500;
 }`;
@@ -1206,7 +1206,7 @@ return `._id {
   justify-content: center;
   padding: ${args.theme.var.spacing.xxxl};
   text-align: center;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
 }`;
 '''
       }
@@ -1238,7 +1238,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.md};
+  font-size: 1rem;
   margin-bottom: ${args.theme.var.spacing.md};
 }`;
 '''

@@ -104,7 +104,7 @@ return {
         css:
           '''
 return `._id.workshop-seed-title {
-  font-size: ${args.theme.var.fontSize.xl};
+  font-size: 1.25rem;
   font-weight: 700;
   margin: 0;
   color: ${args.theme.var.color.text};
@@ -130,8 +130,8 @@ return {
           '''
 return `._id.workshop-seed-desc {
   margin: 0;
-  font-size: ${args.theme.var.fontSize.sm};
-  color: ${args.theme.var.color.muted};
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text_light_500};
   line-height: 1.5;
 }`;
 '''
@@ -154,7 +154,7 @@ return {
         css:
           '''
 return `._id.workshop-seed-label {
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
 }`;
@@ -269,7 +269,7 @@ return `._id.workshop-seed-log {
   background: ${args.theme.var.color.background_light_100};
   border: 1px solid ${args.theme.var.color.border};
   border-radius: ${args.theme.var.borderRadius.md};
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   white-space: pre-wrap;
   word-break: break-word;
   color: ${args.theme.var.color.text};

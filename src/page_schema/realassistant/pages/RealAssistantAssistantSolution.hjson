@@ -457,7 +457,7 @@ return `._id {
   gap: 1rem;
   margin-bottom: 1rem;
   font-size: 0.875rem;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
 }`;
 '''
       }
@@ -689,7 +689,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin: 0;
 }`;
 '''
@@ -872,7 +872,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.75rem;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
 }`;
 '''
       }
@@ -986,7 +986,7 @@ return `._id {
   }
   
   &::placeholder {
-    color: ${args.theme.var.color.muted};
+    color: ${args.theme.var.color.text_light_500};
   }
 }`;
 '''
@@ -1059,7 +1059,7 @@ const content = args.contextData.solutionStore?.solution?.content || "";
 const charCount = content.length;
 return `._id {
   font-size: 0.875rem;
-  color: ${charCount < 50 ? args.theme.var.color.error : args.theme.var.color.muted};
+  color: ${charCount < 50 ? args.theme.var.color.error : args.theme.var.color.text_light_500};
 }`;
 '''
       }
@@ -1431,7 +1431,7 @@ return `._id {
   }
   
   &::placeholder {
-    color: ${args.theme.var.color.muted};
+    color: ${args.theme.var.color.text_light_500};
   }
 }`;
 '''

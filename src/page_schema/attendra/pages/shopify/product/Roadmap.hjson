@@ -40,7 +40,7 @@
         displayOrder: 2
         componentName: Html
         textType: markdown
-        css: '''return `._id{ color:${args.theme.var.color.muted}; line-height:1.7; margin:0; }`;'''
+        css: '''return `._id{ color:${args.theme.var.color.text_light_500}; line-height:1.7; margin:0; }`;'''
         text:
           '''Planned (post‑MVP):\n\n- QR check-in\n- CSV export\n- Break tracking\n- Overtime rules\n- Multi-location\n\nWe’re intentionally not building payroll/biometrics in MVP.'''
         props: '''return { as:"div", textType:"markdown" };'''

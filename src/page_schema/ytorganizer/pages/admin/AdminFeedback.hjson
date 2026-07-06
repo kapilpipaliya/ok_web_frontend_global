@@ -368,7 +368,7 @@ return {
         css:
           '''
 return `._id {
-  font-size: ${args.theme.var.fontSize['2xl']};
+  font-size: 1.5rem;
   font-weight: 700;
   color: ${args.theme.var.color.text};
   margin: 0 0 ${args.theme.var.spacing.xs} 0;
@@ -392,8 +392,8 @@ return {
         css:
           '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.sm};
-  color: ${args.theme.var.color.muted};
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text_light_500};
   margin: 0;
 }`;
 '''
@@ -538,7 +538,7 @@ return {
         css:
           '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.lg};
+  font-size: 1.125rem;
   font-weight: 700;
   color: ${args.theme.var.color.text};
 }`;
@@ -562,8 +562,8 @@ return {
         css:
           '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.sm};
-  color: ${args.theme.var.color.muted};
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text_light_500};
 }`;
 '''
         displayOrder: 2
@@ -746,7 +746,7 @@ return {
         css:
           '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   font-weight: 600;
   color: ${args.theme.var.color.primary_light_100_text};
 }`;
@@ -775,7 +775,7 @@ return `._id {
   border: 1px solid ${args.theme.var.color.border};
   border-radius: ${args.theme.var.borderRadius.sm};
   color: ${args.theme.var.color.text};
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.2s ease;
 
@@ -805,7 +805,7 @@ return {
 return `._id {
   text-align: center;
   padding: ${args.theme.var.spacing.xl};
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
 }`;
 '''
         displayOrder: 3
@@ -899,7 +899,7 @@ return {
 return `._id {
   width: 100%;
   border-collapse: collapse;
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
 }`;
 '''
         displayOrder: 1
@@ -1370,8 +1370,8 @@ return {
         css:
           '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.xs};
-  color: ${args.theme.var.color.muted};
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.text_light_500};
 }`;
 '''
         displayOrder: 2
@@ -1439,7 +1439,7 @@ return `._id {
   background: ${color.bg};
   color: ${color.text};
   border-radius: ${args.theme.var.borderRadius.sm};
-  font-size: ${args.theme.var.fontSize.xs};
+  font-size: 0.75rem;
   font-weight: 600;
 }`;
 '''
@@ -1534,7 +1534,7 @@ return `._id {
   background: ${color.bg};
   color: ${color.text};
   border-radius: ${args.theme.var.borderRadius.sm};
-  font-size: ${args.theme.var.fontSize.xs};
+  font-size: 0.75rem;
   font-weight: 600;
 }`;
 '''
@@ -1827,8 +1827,8 @@ return {
         css:
           '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.sm};
-  color: ${args.theme.var.color.muted};
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text_light_500};
 }`;
 '''
         displayOrder: 1
@@ -1883,7 +1883,7 @@ return `._id {
   border: 1px solid ${args.theme.var.color.border};
   border-radius: ${args.theme.var.borderRadius.sm};
   color: ${args.theme.var.color.text};
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   cursor: ${isDisabled ? 'not-allowed' : 'pointer'};
   opacity: ${isDisabled ? '0.5' : '1'};
   transition: all 0.2s ease;
@@ -1952,7 +1952,7 @@ return `._id {
   border: 1px solid ${isActive ? args.theme.var.color.primary : args.theme.var.color.border};
   border-radius: ${args.theme.var.borderRadius.sm};
   color: ${isActive ? args.theme.var.color.primary_text : args.theme.var.color.text};
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   font-weight: ${isActive ? '700' : '400'};
   cursor: ${isEllipsis || isActive ? 'default' : 'pointer'};
   transition: all 0.2s ease;
@@ -2000,7 +2000,7 @@ return `._id {
   border: 1px solid ${args.theme.var.color.border};
   border-radius: ${args.theme.var.borderRadius.sm};
   color: ${args.theme.var.color.text};
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   cursor: ${isDisabled ? 'not-allowed' : 'pointer'};
   opacity: ${isDisabled ? '0.5' : '1'};
   transition: all 0.2s ease;
@@ -2037,7 +2037,7 @@ return {
 return `._id {
   text-align: center;
   padding: ${args.theme.var.spacing.xl};
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
 }`;
 '''
         displayOrder: 7

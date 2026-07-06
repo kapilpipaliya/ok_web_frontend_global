@@ -475,7 +475,7 @@ export function RedisManagement() {
                   css={`return \`._id {
   font-size: 0.875rem;
   font-weight: 500;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
   margin: 0 0 0.5rem 0;
   text-transform: uppercase;
 }\`;`}
@@ -507,7 +507,7 @@ export function RedisManagement() {
                   css={`return \`._id {
   font-size: 0.875rem;
   font-weight: 500;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
   margin: 0 0 0.5rem 0;
   text-transform: uppercase;
 }\`;`}
@@ -539,7 +539,7 @@ export function RedisManagement() {
                   css={`return \`._id {
   font-size: 0.875rem;
   font-weight: 500;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
   margin: 0 0 0.5rem 0;
   text-transform: uppercase;
 }\`;`}
@@ -628,7 +628,7 @@ export function RedisManagement() {
             css={`return \`._id {
   padding: 3rem;
   text-align: center;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
 }\`;`}
           >
             {queues()?.error || "Loading queues..."}
@@ -643,7 +643,7 @@ export function RedisManagement() {
               css={`return \`._id {
   padding: 3rem;
   text-align: center;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
 }\`;`}
             >
               No queues found
@@ -1085,7 +1085,7 @@ export function RedisManagement() {
                             as="div"
                             css={`return \`._id {
   font-size: 0.875rem;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
   white-space: nowrap;
 }\`;`}
                           >
@@ -1131,7 +1131,7 @@ export function RedisManagement() {
   cursor: pointer;
   font-weight: 500;
   font-size: 0.875rem;
-  color: ${selectedState() === state ? "${args.theme.var.color.primary}" : "${args.theme.var.color.muted}"};
+  color: ${selectedState() === state ? "${args.theme.var.color.primary}" : "${args.theme.var.color.text_light_500}"};
   border-bottom: 2px solid ${selectedState() === state ? "${args.theme.var.color.primary}" : "transparent"};
   margin-bottom: -2px;
   transition: all 0.2s;
@@ -1156,7 +1156,7 @@ export function RedisManagement() {
                             css={`return \`._id {
   padding: 2rem;
   text-align: center;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
 }\`;`}
                           >
                             Loading jobs...
@@ -1171,7 +1171,7 @@ export function RedisManagement() {
                               css={`return \`._id {
   padding: 2rem;
   text-align: center;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
 }\`;`}
                             >
                               No {selectedState()} jobs found
@@ -1197,7 +1197,7 @@ export function RedisManagement() {
   display: grid;
   grid-template-columns: 40px 150px 120px 2fr 120px 80px 200px;
   gap: 1rem;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
   align-items: center;
 }\`;`}
                             >
@@ -1296,7 +1296,7 @@ export function RedisManagement() {
                                     css={`return \`._id {
   font-family: monospace;
   font-size: 0.75rem;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1307,7 +1307,7 @@ export function RedisManagement() {
                                   <As
                                     as="div"
                                     css={`return \`._id {
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
   font-size: 0.75rem;
 }\`;`}
                                   >
@@ -1414,7 +1414,7 @@ export function RedisManagement() {
   align-items: center;
   gap: 1rem;
   font-size: 0.875rem;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
 }\`;`}
                             >
                               <As as="span">
@@ -1500,7 +1500,7 @@ export function RedisManagement() {
   font-size: 0.875rem;
   display: flex;
   align-items: center;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
 }\`;`}
                               >
                                 Page {currentPage()} of{" "}
@@ -1600,7 +1600,7 @@ export function RedisManagement() {
                   as="p"
                   css={`return \`._id {
   margin: 0 0 1.5rem 0;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
 }\`;`}
                 >
                   {type === "delete" &&
@@ -1755,7 +1755,7 @@ export function RedisManagement() {
                         css={`return \`._id {
   font-family: monospace;
   font-size: 0.8125rem;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
 }\`;`}
                       >
                         ID: {job.id}
@@ -1780,7 +1780,7 @@ export function RedisManagement() {
   background: none;
   cursor: pointer;
   font-size: 1.5rem;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
   line-height: 1;
   transition: color 0.2s;
 }
@@ -1810,7 +1810,7 @@ export function RedisManagement() {
   font-size: 1rem;
   font-weight: 600;
   margin: 0 0 1rem 0;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
   text-transform: uppercase;
   font-size: 0.8125rem;
 }\`;`}
@@ -1837,7 +1837,7 @@ export function RedisManagement() {
                           as="div"
                           css={`return \`._id {
   font-size: 0.75rem;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
   margin-bottom: 0.25rem;
 }\`;`}
                         >
@@ -1858,7 +1858,7 @@ export function RedisManagement() {
                           as="div"
                           css={`return \`._id {
   font-size: 0.75rem;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
   margin-top: 0.25rem;
 }\`;`}
                         >
@@ -1878,7 +1878,7 @@ export function RedisManagement() {
                             as="div"
                             css={`return \`._id {
   font-size: 0.75rem;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
   margin-bottom: 0.25rem;
 }\`;`}
                           >
@@ -1897,7 +1897,7 @@ export function RedisManagement() {
                             as="div"
                             css={`return \`._id {
   font-size: 0.75rem;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
   margin-top: 0.25rem;
 }\`;`}
                           >
@@ -1918,7 +1918,7 @@ export function RedisManagement() {
                             as="div"
                             css={`return \`._id {
   font-size: 0.75rem;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
   margin-bottom: 0.25rem;
 }\`;`}
                           >
@@ -1937,7 +1937,7 @@ export function RedisManagement() {
                             as="div"
                             css={`return \`._id {
   font-size: 0.75rem;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
   margin-top: 0.25rem;
 }\`;`}
                           >
@@ -1956,7 +1956,7 @@ export function RedisManagement() {
   font-size: 1rem;
   font-weight: 600;
   margin: 0 0 1rem 0;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
   text-transform: uppercase;
   font-size: 0.8125rem;
 }\`;`}
@@ -2028,7 +2028,7 @@ export function RedisManagement() {
   font-size: 1rem;
   font-weight: 600;
   margin: 0 0 1rem 0;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
   text-transform: uppercase;
   font-size: 0.8125rem;
 }\`;`}
@@ -2063,7 +2063,7 @@ export function RedisManagement() {
   font-size: 1rem;
   font-weight: 600;
   margin: 0 0 1rem 0;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
   text-transform: uppercase;
   font-size: 0.8125rem;
 }\`;`}

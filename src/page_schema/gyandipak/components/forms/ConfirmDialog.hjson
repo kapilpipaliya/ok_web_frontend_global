@@ -26,7 +26,7 @@ return `._id {
   align-items: center;
   justify-content: center;
   padding: ${args.theme.var.spacing.md};
-  animation: fadeIn ${args.theme.var.animation.fast} ease-out;
+  animation: fadeIn 150ms ease-out;
 }
 
 @keyframes fadeIn {
@@ -75,7 +75,7 @@ return `._id {
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
-  animation: slideIn ${args.theme.var.animation.normal} ease-out;
+  animation: slideIn 300ms ease-out;
 }
 
 @keyframes slideIn {
@@ -94,7 +94,7 @@ return `._id {
     margin-bottom: 0;
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
-    animation: slideUp ${args.theme.var.animation.normal} ease-out;
+    animation: slideUp 300ms ease-out;
   }
 
   @keyframes slideUp {
@@ -204,7 +204,7 @@ return {
         css:
           '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.xl};
+  font-size: 1.25rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
   margin: 0;
@@ -253,7 +253,7 @@ return {
           '''
 return `._id {
   color: ${args.theme.var.color.text};
-  font-size: ${args.theme.var.fontSize.md};
+  font-size: 1rem;
   line-height: 1.6;
   margin: 0;
   white-space: pre-line;
@@ -309,16 +309,16 @@ return {
         css:
           '''
 return `._id {
-  min-height: ${args.theme.var.touch.button};
+  min-height: 48px;
   padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.lg};
-  font-size: ${args.theme.var.fontSize.md};
+  font-size: 1rem;
   font-weight: 500;
   border: 1px solid ${args.theme.var.color.border};
   border-radius: ${args.theme.var.borderRadius.md};
   background: ${args.theme.var.color.background};
   color: ${args.theme.var.color.text};
   cursor: pointer;
-  transition: all ${args.theme.var.animation.fast} ease;
+  transition: all 150ms ease;
   flex: 1;
 
   &:hover:not(:disabled) {
@@ -341,7 +341,7 @@ return `._id {
 @media (max-width: 768px) {
   ._id {
     padding: ${args.theme.var.spacing.md};
-    font-size: ${args.theme.var.fontSize.md};
+    font-size: 1rem;
   }
 }`;
 '''
@@ -399,16 +399,16 @@ const variantStyles = {
 const style = variantStyles[variant] || variantStyles.danger;
 
 return `._id {
-  min-height: ${args.theme.var.touch.button};
+  min-height: 48px;
   padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.lg};
-  font-size: ${args.theme.var.fontSize.md};
+  font-size: 1rem;
   font-weight: 500;
   border: 1px solid transparent;
   border-radius: ${args.theme.var.borderRadius.md};
   background: ${style.background};
   color: ${style.text};
   cursor: pointer;
-  transition: all ${args.theme.var.animation.fast} ease;
+  transition: all 150ms ease;
   flex: 1;
 
   &:hover:not(:disabled) {
@@ -431,7 +431,7 @@ return `._id {
 @media (max-width: 768px) {
   ._id {
     padding: ${args.theme.var.spacing.md};
-    font-size: ${args.theme.var.fontSize.md};
+    font-size: 1rem;
   }
 }`;
 '''

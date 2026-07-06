@@ -100,7 +100,7 @@ export function SchemaOperationsManagement() {
         as="p"
         css={`return \`._id {
   margin: 0 0 1.5rem 0;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
   font-size: 0.95rem;
   line-height: 1.5;
   max-width: 52rem;
@@ -129,7 +129,7 @@ export function SchemaOperationsManagement() {
           css={`return \`._id {
   font-size: 0.8rem;
   font-weight: 600;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
   margin-right: 0.25rem;
 }\`;`}
         >

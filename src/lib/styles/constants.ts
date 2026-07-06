@@ -35,14 +35,6 @@ export const DEFAULT_THEME = {
       light: "oklch(0.85 0.02 250)", // Light border
       dark: "oklch(0.3 0.03 250)", // Dark border
     },
-    muted: {
-      light: "oklch(0.6 0.03 250)", // Muted text
-      dark: "oklch(0.6 0.03 250)", // Muted text
-    },
-    secondary: {
-      light: "oklch(0.92 0.015 250)", // Subtle neutral for hover/selection
-      dark: "oklch(0.22 0.02 250)",
-    },
   },
   spacing: {
     xxs: "0.125rem",
@@ -52,34 +44,15 @@ export const DEFAULT_THEME = {
     lg: "1.5rem",
     xl: "2rem",
     xxl: "3rem",
-    xxxl: "4rem",
+    xxxl: "4rem"
   },
   borderRadius: {
     sm: "0.375rem",
     md: "0.5rem",
     lg: "0.75rem",
     xl: "1rem",
-    full: "9999px",
-  },
-  animation: {
-    fast: "150ms",
-    normal: "300ms",
-    slow: "500ms",
-  },
-  touch: {
-    minTarget: "44px",
-    button: "48px",
-    input: "52px",
-  },
-  fontSize: {
-    xs: "0.75rem",
-    sm: "0.875rem",
-    md: "1rem",
-    lg: "1.125rem",
-    xl: "1.25rem",
-    xxl: "1.5rem",
-    title: "2rem",
-  },
+    full: "9999px"
+  }
 } as ThemeContext["var"];
 
 // CSS Reset styles

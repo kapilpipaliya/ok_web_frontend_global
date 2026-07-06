@@ -375,9 +375,9 @@ return `._id.fm-nested-line-header-row {
   padding: ${args.theme.var.spacing.sm};
   background: ${args.theme.var.color.background_light_100};
   border-bottom: 1px solid ${args.theme.var.color.border};
-  font-size: ${args.theme.var.fontSize.xs};
+  font-size: 0.75rem;
   font-weight: 600;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
 }`;
 '''
       }

@@ -106,7 +106,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin-bottom: 2rem;
   font-size: 0.875rem;
 }`;

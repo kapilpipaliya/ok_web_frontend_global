@@ -249,7 +249,7 @@ export function ColorVariationsGrid(props: ColorVariationsGridProps) {
                   : `return \`._id {
                     font-size: 0.65rem;
                     font-weight: 600;
-                    color: \${args.theme.var.color.muted};
+                    color: \${args.theme.var.color.text_light_500};
                     text-transform: none;
                   }\`;`
               }

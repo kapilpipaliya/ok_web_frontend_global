@@ -415,7 +415,7 @@ return {
         css:
           '''
 return `._id.fm-field-array-item-title {
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
 }`;
@@ -487,7 +487,7 @@ return {
         css:
           '''
 return `._id.fm-field-array-field-label {
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   font-weight: 500;
   color: ${args.theme.var.color.text};
 }`;

@@ -559,7 +559,7 @@ return {
         css:
           '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   font-weight: 500;
   color: ${args.theme.var.color.background_dark_900_text};
   margin: 0;

@@ -235,7 +235,7 @@ return {
         displayOrder: 2
         componentName: Html
         props: '''return { as: "p", text: "Connect your NetSuite account to enable server-side NetSuite API integration for this app." };'''
-        css: '''return `._id { margin: 0 0 1.5rem 0; color: ${args.theme.var.color.muted}; }`;'''
+        css: '''return `._id { margin: 0 0 1.5rem 0; color: ${args.theme.var.color.text_light_500}; }`;'''
       }
     }
     {

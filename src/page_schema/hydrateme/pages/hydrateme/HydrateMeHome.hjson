@@ -141,9 +141,9 @@ return { dash, loadDashboard, logQuick };
         css:
           '''return `._id.hm-home-lead {
   margin: 0;
-  font-size: ${args.theme.var.fontSize.md};
+  font-size: 1rem;
   line-height: 1.55;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
 }`;'''
       }
     }
@@ -166,7 +166,7 @@ return { dash, loadDashboard, logQuick };
   padding: ${args.theme.var.spacing.md};
   border-radius: ${args.theme.var.borderRadius.lg};
   border: 1px dashed ${args.theme.var.color.border};
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
 }`;'''
       }
     }
@@ -209,7 +209,7 @@ return { dash, loadDashboard, logQuick };
   padding: ${args.theme.var.spacing.md};
   border-radius: ${args.theme.var.borderRadius.lg};
   border: 1px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.secondary};
+  background: ${args.theme.var.color.background_light_200};
 }`;'''
       }
     }
@@ -284,7 +284,7 @@ return {
   height: 100%;
   border-radius: ${args.theme.var.borderRadius.full};
   background: ${args.theme.var.color.primary};
-  transition: width ${args.theme.var.animation.normal} ease;
+  transition: width 300ms ease;
 }`;'''
       }
     }
@@ -327,7 +327,7 @@ return {
 };'''
         css:
           '''return `._id {
-  min-height: ${args.theme.var.touch.minTarget};
+  min-height: 44px;
   padding: 0 ${args.theme.var.spacing.md};
   border-radius: ${args.theme.var.borderRadius.md};
   border: none;
@@ -355,7 +355,7 @@ return {
 };'''
         css:
           '''return `._id {
-  min-height: ${args.theme.var.touch.minTarget};
+  min-height: 44px;
   padding: 0 ${args.theme.var.spacing.md};
   border-radius: ${args.theme.var.borderRadius.md};
   border: 1px solid ${args.theme.var.color.border};
@@ -383,7 +383,7 @@ return {
 };'''
         css:
           '''return `._id {
-  min-height: ${args.theme.var.touch.minTarget};
+  min-height: 44px;
   padding: 0 ${args.theme.var.spacing.md};
   border-radius: ${args.theme.var.borderRadius.md};
   border: none;
@@ -412,7 +412,7 @@ return {
         css:
           '''return `._id.hm-recent-h {
   margin: 0;
-  font-size: ${args.theme.var.fontSize.lg};
+  font-size: 1.125rem;
   font-weight: 700;
 }`;'''
       }
@@ -455,7 +455,7 @@ return {
           '''return `._id.hm-recent-row {
   padding: ${args.theme.var.spacing.xs} 0;
   border-bottom: 1px solid ${args.theme.var.color.border};
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   color: ${args.theme.var.color.text};
 }`;'''
       }
@@ -477,8 +477,8 @@ return {
         css:
           '''return `._id.hm-tip {
   margin: 0;
-  font-size: ${args.theme.var.fontSize.xs};
-  color: ${args.theme.var.color.muted};
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.text_light_500};
 }`;'''
       }
     }

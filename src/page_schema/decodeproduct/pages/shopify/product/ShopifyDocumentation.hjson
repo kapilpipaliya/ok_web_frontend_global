@@ -74,7 +74,7 @@
           '''return `._id {
   font-size: 0.9375rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin-bottom: 1.5rem;
 }`;'''
         displayOrder: 2
@@ -133,7 +133,7 @@
           '''return `._id {
   font-size: 0.9375rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 2
@@ -154,7 +154,7 @@
           '''return `._id {
   font-size: 0.9375rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin: 0;
 }`;'''
         displayOrder: 3
@@ -213,7 +213,7 @@
           '''return `._id {
   font-size: 0.9375rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin: 0;
 }`;'''
         displayOrder: 2
@@ -296,7 +296,7 @@
           '''return `._id {
   font-size: 0.9375rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin: 0;
 }`;'''
         displayOrder: 2
@@ -343,7 +343,7 @@
           '''return `._id {
   font-size: 0.9375rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin: 0;
 }`;'''
         displayOrder: 4
@@ -389,7 +389,7 @@
           '''return `._id {
   font-size: 0.9375rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin: 0;
 }`;'''
         displayOrder: 6
@@ -439,7 +439,7 @@ select the rows and drag and drop to a category in the sidebar to assign product
           '''return `._id {
   font-size: 0.9375rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin: 0;
 }`;'''
         displayOrder: 8
@@ -485,7 +485,7 @@ select the rows and drag and drop to a category in the sidebar to assign product
           '''return `._id {
   font-size: 0.9375rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin: 0;
 }`;'''
         displayOrder: 10
@@ -533,7 +533,7 @@ select the rows and drag and drop to a category in the sidebar to assign product
           '''return `._id {
   font-size: 0.9375rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin: 0;
 }`;'''
         displayOrder: 12
@@ -591,7 +591,7 @@ select the rows and drag and drop to a category in the sidebar to assign product
           '''return `._id {
   font-size: 0.9375rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin: 0;
 }`;'''
         displayOrder: 2
@@ -640,7 +640,7 @@ select the rows and drag and drop to a category in the sidebar to assign product
           '''return `._id {
   font-size: 0.9375rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin: 0;
 }`;'''
         displayOrder: 4
@@ -664,7 +664,7 @@ select the rows and drag and drop to a category in the sidebar to assign product
           '''return `._id {
   font-size: 0.9375rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin: 0;
 }`;'''
         displayOrder: 5
@@ -710,7 +710,7 @@ select the rows and drag and drop to a category in the sidebar to assign product
           '''return `._id {
   font-size: 0.9375rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin-top: 1.5rem;
 }`;'''
         displayOrder: 8

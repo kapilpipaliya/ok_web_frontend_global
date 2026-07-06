@@ -534,7 +534,7 @@ return {
         css:
           '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.xl};
+  font-size: 1.25rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
 }`;
@@ -558,7 +558,7 @@ return {
           '''
 return `._id {
   cursor: pointer;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   transition: color 0.2s ease;
 
   &:hover {
@@ -636,7 +636,7 @@ return {
         css:
           '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.lg};
+  font-size: 1.125rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
   margin-bottom: ${args.theme.var.spacing.sm};
@@ -660,8 +660,8 @@ return {
         css:
           '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.sm};
-  color: ${args.theme.var.color.muted};
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text_light_500};
   margin-bottom: ${args.theme.var.spacing.sm};
 }`;
 '''
@@ -742,7 +742,7 @@ return {
         css:
           '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
 }`;
@@ -765,8 +765,8 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.muted};
-  font-size: ${args.theme.var.fontSize.lg};
+  color: ${args.theme.var.color.text_light_500};
+  font-size: 1.125rem;
   transition: transform 0.2s ease;
   transform: ${args.fns.isExampleExpanded() ? 'rotate(180deg)' : 'rotate(0deg)'};
 }`;

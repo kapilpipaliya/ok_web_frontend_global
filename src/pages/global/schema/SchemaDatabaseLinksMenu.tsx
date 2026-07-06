@@ -101,7 +101,7 @@ export function SchemaDatabaseLinksMenu(props: SchemaDatabaseLinksMenuProps) {
                           css={`return \`._id {
   display: block;
   font-size: 0.65rem;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
   font-family: ui-monospace, monospace;
 }\`;`}
                         >

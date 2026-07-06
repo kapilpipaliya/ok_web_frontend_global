@@ -243,7 +243,7 @@ export function SchemaJobOutputPopover(props: SchemaJobOutputPopoverProps) {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
 }\`;`}
               >
                 Job output
@@ -258,7 +258,7 @@ export function SchemaJobOutputPopover(props: SchemaJobOutputPopoverProps) {
   cursor: pointer;
   font-size: 1rem;
   line-height: 1;
-  color: \${args.theme.var.color.muted};
+  color: \${args.theme.var.color.text_light_500};
   padding: 0.125rem 0.25rem;
 }\`;`}
                 aria-label="Close"
@@ -297,7 +297,7 @@ export function SchemaJobOutputPopover(props: SchemaJobOutputPopoverProps) {
   font-weight: 600;
   cursor: pointer;
   background: ${selected ? args.theme.var.color.background_light_200 : "transparent"};
-  color: ${selected ? args.theme.var.color.text : args.theme.var.color.muted};
+  color: ${selected ? args.theme.var.color.text : args.theme.var.color.text_light_500};
   border-bottom: 2px solid ${selected ? args.theme.var.color.primary : "transparent"};
   margin-bottom: -1px;
 }\`;`;

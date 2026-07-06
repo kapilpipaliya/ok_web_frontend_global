@@ -2658,7 +2658,7 @@ return `._id {
   display: flex;
   align-items: center;
   gap: ${args.theme.var.spacing.sm};
-  font-size: ${args.theme.var.fontSize.xl};
+  font-size: 1.25rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
 }`;
@@ -2750,7 +2750,7 @@ return {
           '''
 return `._id {
   margin: 0;
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   line-height: 1.5;
   color: ${args.theme.var.color.text_dark_400};
 }`;
@@ -3297,7 +3297,7 @@ const showSelection = args.fns.getShowSelection();
 return `._id {
   padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
   font-weight: 600;
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   color: ${args.theme.var.color.text};
   display: flex;
   align-items: center;
@@ -3383,7 +3383,7 @@ return `._id {
   cursor: col-resize;
   z-index: 20;
   touch-action: none;
-  transition: background ${args.theme.var.animation.fast} ease, border-color ${args.theme.var.animation.fast} ease;
+  transition: background 150ms ease, border-color 150ms ease;
   border-left: 1px solid ${args.theme.var.color.border_light_400};
 
   @media (hover: hover) and (pointer: fine) {
@@ -3431,7 +3431,7 @@ const hasFormConfig = !!args.fns.getFormConfig();
 return `._id {
   padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
   font-weight: 600;
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   color: ${args.theme.var.color.text};
   display: flex;
   align-items: center;
@@ -3464,7 +3464,7 @@ const column = { key: "__actions", label: "Actions" };
 
 return `._id {
   color: ${args.theme.var.color.text_light_500};
-  font-size: ${args.theme.var.fontSize.xs};
+  font-size: 0.75rem;
 }`;
 '''
         displayOrder: 1
@@ -3499,7 +3499,7 @@ return `._id {
   cursor: col-resize;
   z-index: 20;
   touch-action: none;
-  transition: background ${args.theme.var.animation.fast} ease, border-color ${args.theme.var.animation.fast} ease;
+  transition: background 150ms ease, border-color 150ms ease;
   border-left: 1px solid ${args.theme.var.color.border_light_400};
 
   @media (hover: hover) and (pointer: fine) {
@@ -3569,7 +3569,7 @@ const shouldHide = args.fns.shouldHideColumn(column);
 return `._id {
   padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
   font-weight: 600;
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   color: ${args.theme.var.color.text};
   display: flex;
   align-items: center;
@@ -3610,7 +3610,7 @@ const column = args.contextData.column;
 
 return `._id {
   color: ${args.theme.var.color.text_light_500};
-  font-size: ${args.theme.var.fontSize.xs};
+  font-size: 0.75rem;
 }`;
 '''
         displayOrder: 1
@@ -3726,7 +3726,7 @@ return `._id {
   cursor: col-resize;
   z-index: 20;
   touch-action: none;
-  transition: background ${args.theme.var.animation.fast} ease, border-color ${args.theme.var.animation.fast} ease;
+  transition: background 150ms ease, border-color 150ms ease;
   border-left: 1px solid ${args.theme.var.color.border_light_400};
 
   @media (hover: hover) and (pointer: fine) {
@@ -4389,7 +4389,7 @@ const t = args.theme.var.color;
 return `._id {
   padding: ${args.theme.var.spacing.sm} 0;
   color: ${t.text};
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
 }`;
 '''
         componentName: Html
@@ -5048,7 +5048,7 @@ if (typeof cellContent === "object" && cellContent !== null) {
     }
     const t = args.theme.var.color;
     const br = args.theme.var.borderRadius.full;
-    const fs = args.theme.var.fontSize.xs;
+    const fs = "0.75rem";
     const tones = {
       success: { bg: t.success_light_200, fg: t.success_dark_300 },
       info: { bg: t.info_light_200, fg: t.info_dark_300 },
@@ -5187,7 +5187,7 @@ return {
         css:
           '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.xl};
+  font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: ${args.theme.var.spacing.md};
   color: ${args.theme.var.color.text};
@@ -5216,7 +5216,7 @@ return `._id {
   padding: ${args.theme.var.spacing.md};
   margin-bottom: ${args.theme.var.spacing.md};
   border-radius: ${args.theme.var.borderRadius.sm};
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   color: ${args.theme.var.color.text};
   line-height: 1.6;
 }`;
@@ -5289,7 +5289,7 @@ return `._id {
   padding: ${args.theme.var.spacing.sm};
   border-radius: ${args.theme.var.borderRadius.sm};
   font-family: monospace;
-  font-size: ${args.theme.var.fontSize.xs};
+  font-size: 0.75rem;
   word-break: break-all;
 }`;
 '''

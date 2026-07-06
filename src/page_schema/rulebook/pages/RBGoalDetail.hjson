@@ -143,11 +143,11 @@ return {
 return `._id {
   background: none;
   border: none;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   cursor: pointer;
   padding: ${args.theme.var.spacing.sm};
   border-radius: ${args.theme.var.borderRadius.sm};
-  transition: all ${args.theme.var.animation.fast} ease;
+  transition: all 150ms ease;
   text-decoration: none;
 
   &:hover {
@@ -253,8 +253,8 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
-  font-size: ${args.theme.var.fontSize.md};
+  color: ${args.theme.var.color.text_light_500};
+  font-size: 1rem;
   margin: 0;
 }`;
 '''
@@ -323,11 +323,11 @@ return {
 return `._id {
   background: none;
   border: none;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   cursor: pointer;
   padding: ${args.theme.var.spacing.sm};
   border-radius: ${args.theme.var.borderRadius.sm};
-  transition: all ${args.theme.var.animation.fast} ease;
+  transition: all 150ms ease;
 
   &:hover {
     background: ${args.theme.var.color.background_dark_200};
@@ -438,9 +438,9 @@ return `._id {
   border: none;
   padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
   color: ${args.theme.var.color.text};
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   cursor: pointer;
-  transition: all ${args.theme.var.animation.fast} ease;
+  transition: all 150ms ease;
 
   &:hover {
     background: ${args.theme.var.color.background_light_200};
@@ -528,9 +528,9 @@ return `._id {
   border: none;
   padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
   color: ${args.theme.var.color.text};
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   cursor: pointer;
-  transition: all ${args.theme.var.animation.fast} ease;
+  transition: all 150ms ease;
 
   &:hover {
     background: ${args.theme.var.color.background_light_200};
@@ -609,9 +609,9 @@ return `._id {
   border: none;
   padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
   color: ${args.theme.var.color.error};
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   cursor: pointer;
-  transition: all ${args.theme.var.animation.fast} ease;
+  transition: all 150ms ease;
 
   &:hover {
     background: ${args.theme.var.color.error_light_100};
@@ -690,7 +690,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.xl};
+  font-size: 1.25rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
   margin: 0 0 ${args.theme.var.spacing.sm} 0;
@@ -712,7 +712,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin: 0;
 }`;
 '''
@@ -795,8 +795,8 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
-  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.text_light_500};
+  font-size: 0.875rem;
   margin-top: ${args.theme.var.spacing.xs};
 }`;
 '''
@@ -858,8 +858,8 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
-  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.text_light_500};
+  font-size: 0.875rem;
   margin-top: ${args.theme.var.spacing.xs};
 }`;
 '''
@@ -921,8 +921,8 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
-  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.text_light_500};
+  font-size: 0.875rem;
   margin-top: ${args.theme.var.spacing.xs};
 }`;
 '''
@@ -970,7 +970,7 @@ return `._id {
   height: 16px;
   background: linear-gradient(90deg, ${args.theme.var.color.success}, ${args.theme.var.color.primary});
   border-radius: ${args.theme.var.borderRadius.full};
-  transition: width ${args.theme.var.animation.slow} ease;
+  transition: width 500ms ease;
   position: relative;
 
   &:after {
@@ -979,7 +979,7 @@ return `._id {
     right: ${args.theme.var.spacing.sm};
     top: 50%;
     transform: translateY(-50%);
-    font-size: ${args.theme.var.fontSize.xs};
+    font-size: 0.75rem;
     font-weight: 600;
     color: ${textColor};
     text-shadow: ${progressPercentage <= 5 ? 'none' : '0 1px 2px rgba(0,0,0,0.3)'};
@@ -1030,7 +1030,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.lg};
+  font-size: 1.125rem;
   font-weight: 600;
 }`;
 '''
@@ -1075,7 +1075,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.xl};
+  font-size: 1.25rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
   margin: 0 0 ${args.theme.var.spacing.md} 0;
@@ -1102,7 +1102,7 @@ return `._id {
   color: ${args.theme.var.color.text};
   line-height: 1.6;
   margin: 0;
-  font-size: ${args.theme.var.fontSize.md};
+  font-size: 1rem;
 }`;
 '''
       }
@@ -1145,7 +1145,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.xl};
+  font-size: 1.25rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
   margin: 0 0 ${args.theme.var.spacing.md} 0;
@@ -1177,7 +1177,7 @@ return `._id {
   border: 1px solid ${args.theme.var.color.border};
   border-radius: ${args.theme.var.borderRadius.md};
   text-decoration: none;
-  transition: all ${args.theme.var.animation.fast} ease;
+  transition: all 150ms ease;
 
   &:hover {
     border-color: ${args.theme.var.color.primary};
@@ -1307,8 +1307,8 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.sm};
-  color: ${args.theme.var.color.muted};
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text_light_500};
 }`;
 '''
       }

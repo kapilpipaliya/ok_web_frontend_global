@@ -637,7 +637,7 @@ return {
 const log = args.contextData.logItem;
 const level = log?.P?.level || 'info';
 
-let color = args.theme.var.color.muted;
+let color = args.theme.var.color.text_light_500;
 if (level === 'error') {
   color = args.theme.var.color.error_light_50_text;
 }
@@ -717,7 +717,7 @@ const log = args.contextData.logItem;
 const level = log?.P?.level || 'info';
 
 let bgColor = args.theme.var.color.background_light_100;
-let textColor = args.theme.var.color.muted;
+let textColor = args.theme.var.color.text_light_500;
 
 if (level === 'error') {
   bgColor = args.theme.var.color.error_light_100;
@@ -857,7 +857,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   opacity: 0.5;
   margin-bottom: 1rem;
 }`;
@@ -884,7 +884,7 @@ return {
 return `._id {
   font-size: 1.125rem;
   font-weight: 500;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin: 0;
 }`;
 '''

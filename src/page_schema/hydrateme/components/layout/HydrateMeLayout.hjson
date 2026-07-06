@@ -78,7 +78,7 @@ return { navItems };
   border: none;
   background: transparent;
   font-weight: 700;
-  font-size: ${args.theme.var.fontSize.title};
+  font-size: 1.875rem;
   color: ${args.theme.var.color.primary};
   cursor: pointer;
   padding: ${args.theme.var.spacing.xs} 0;
@@ -138,14 +138,14 @@ return {
   border: 1px solid transparent;
   background: transparent;
   color: ${args.theme.var.color.text};
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   font-weight: 500;
   padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.sm};
   cursor: pointer;
-  transition: background ${args.theme.var.animation.fast} ease, border-color ${args.theme.var.animation.fast} ease;
+  transition: background 150ms ease, border-color 150ms ease;
 }
 ._id.hm-nav-link:hover {
-  background: ${args.theme.var.color.secondary};
+  background: ${args.theme.var.color.background_light_200};
 }
 ._id.hm-nav-link-active {
   border-color: ${args.theme.var.color.primary};

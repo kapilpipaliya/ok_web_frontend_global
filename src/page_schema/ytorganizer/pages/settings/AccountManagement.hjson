@@ -222,13 +222,13 @@ return {
         css:
           '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.title};
+  font-size: 1.875rem;
   font-weight: 700;
   color: ${args.theme.var.color.text};
   margin: 0 0 ${args.theme.var.spacing.sm} 0;
 
   @media (max-width: 768px) {
-    font-size: ${args.theme.var.fontSize.xxl};
+    font-size: 1.5rem;
   }
 }`;
 '''
@@ -250,12 +250,12 @@ return {
         css:
           '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.md};
-  color: ${args.theme.var.color.muted};
+  font-size: 1rem;
+  color: ${args.theme.var.color.text_light_500};
   margin: 0;
 
   @media (max-width: 768px) {
-    font-size: ${args.theme.var.fontSize.sm};
+    font-size: 0.875rem;
   }
 }`;
 '''
@@ -336,7 +336,7 @@ return {
 return `._id {
   margin: 0;
   color: ${args.theme.var.color.info_light_100_text};
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   line-height: 1.5;
 }`;
 '''
@@ -464,11 +464,11 @@ const isError = messageState?.type === 'error';
 return `._id {
   margin: 0;
   color: ${isError ? args.theme.var.color.error_light_100_text : args.theme.var.color.success_light_100_text};
-  font-size: ${args.theme.var.fontSize.md};
+  font-size: 1rem;
   line-height: 1.5;
 
   @media (max-width: 768px) {
-    font-size: ${args.theme.var.fontSize.sm};
+    font-size: 0.875rem;
   }
 }`;
 '''
@@ -504,7 +504,7 @@ return `._id {
   align-items: center;
   justify-content: center;
   border-radius: ${args.theme.var.borderRadius.sm};
-  transition: background ${args.theme.var.animation.fast} ease;
+  transition: background 150ms ease;
   flex-shrink: 0;
 
   &:hover {
@@ -580,8 +580,8 @@ return {
 return `._id {
   text-align: center;
   padding: ${args.theme.var.spacing.xxl};
-  color: ${args.theme.var.color.muted};
-  font-size: ${args.theme.var.fontSize.lg};
+  color: ${args.theme.var.color.text_light_500};
+  font-size: 1.125rem;
 }`;
 '''
         displayOrder: 4
@@ -634,7 +634,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin-bottom: ${args.theme.var.spacing.md};
 }`;
 '''
@@ -658,7 +658,7 @@ return {
         css:
           '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.xl};
+  font-size: 1.25rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
   margin: 0 0 ${args.theme.var.spacing.sm} 0;
@@ -682,8 +682,8 @@ return {
         css:
           '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.md};
-  color: ${args.theme.var.color.muted};
+  font-size: 1rem;
+  color: ${args.theme.var.color.text_light_500};
   margin: 0 0 ${args.theme.var.spacing.lg} 0;
 }`;
 '''
@@ -753,7 +753,7 @@ return {
 return `._id {
   width: 100%;
   border-collapse: collapse;
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
 }`;
 '''
         displayOrder: 1
@@ -997,7 +997,7 @@ return {
           '''
 return `._id {
   border-bottom: 1px solid ${args.theme.var.color.border};
-  transition: background ${args.theme.var.animation.fast} ease;
+  transition: background 150ms ease;
 
   &:hover {
     background: ${args.theme.var.color.background_dark_50};
@@ -1079,9 +1079,9 @@ return {
           '''
 return `._id {
   padding: ${args.theme.var.spacing.md};
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   font-family: monospace;
-  font-size: ${args.theme.var.fontSize.xs};
+  font-size: 0.75rem;
 }`;
 '''
         displayOrder: 3
@@ -1133,15 +1133,15 @@ return `._id {
   display: inline-block;
   padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.sm};
   border-radius: ${args.theme.var.borderRadius.sm};
-  font-size: ${args.theme.var.fontSize.xs};
+  font-size: 0.75rem;
   font-weight: 600;
   white-space: nowrap;
   ${isConnected ? `
     background: ${args.theme.var.color.success_light_100};
     color: ${args.theme.var.color.success_light_100_text};
   ` : `
-    background: ${args.theme.var.color.muted_light_100};
-    color: ${args.theme.var.color.muted_light_100_text};
+    background: ${args.theme.var.color.background_light_100};
+    color: ${args.theme.var.color.background_light_100_text};
   `}
 }`;
 '''
@@ -1168,7 +1168,7 @@ return {
 return `._id {
   padding: ${args.theme.var.spacing.md};
   text-align: center;
-  font-size: ${args.theme.var.fontSize.lg};
+  font-size: 1.125rem;
 }`;
 '''
         displayOrder: 5
@@ -1194,8 +1194,8 @@ return {
           '''
 return `._id {
   padding: ${args.theme.var.spacing.md};
-  color: ${args.theme.var.color.muted};
-  font-size: ${args.theme.var.fontSize.xs};
+  color: ${args.theme.var.color.text_light_500};
+  font-size: 0.75rem;
   white-space: nowrap;
 }`;
 '''

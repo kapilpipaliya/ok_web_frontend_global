@@ -126,7 +126,7 @@ const HeaderSection = () => (
       as="p"
       css={`return \`._id {
           font-size: 1.1rem; 
-          color: \${args.theme.var.color.muted}; 
+          color: \${args.theme.var.color.text_light_500}; 
           margin: 1rem 0 0 0; 
           font-weight: 400;
           max-width: 600px;
@@ -209,7 +209,7 @@ export function ThemeExample() {
           as="p"
           css={`return \`._id {
               font-size: 1rem; 
-              color: \${args.theme.var.color.muted}; 
+              color: \${args.theme.var.color.text_light_500}; 
               margin: 0 0 2rem 0; 
               font-weight: 400;
             }\`;`}

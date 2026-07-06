@@ -46,7 +46,7 @@ return `._id {
   border: 1px solid ${args.theme.var.color.border};
   background: transparent;
   font-size: 0.8125rem;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   cursor: pointer;
 }
 

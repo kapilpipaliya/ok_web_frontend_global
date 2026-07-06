@@ -78,7 +78,7 @@ return {
 ''',
         css: '''
 return `._id {
-  background: linear-gradient(135deg, ${args.theme.var.color.primary}10 0%, ${args.theme.var.color.secondary}10 100%);
+  background: linear-gradient(135deg, ${args.theme.var.color.primary}10 0%, ${args.theme.var.color.background_light_200}10 100%);
   padding: 4rem 2rem 2rem;
   text-align: center;
   
@@ -149,7 +149,7 @@ return {
         css: '''
 return `._id {
   font-size: 1.2rem;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin-bottom: 2rem;
   max-width: 800px;
   margin-left: auto;
@@ -345,7 +345,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   line-height: 1.6;
   margin-bottom: 1.5rem;
 }`;
@@ -387,7 +387,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
 }`;
@@ -408,7 +408,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
 }`;
@@ -429,7 +429,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
 }`;
@@ -484,7 +484,7 @@ return {
 return `._id {
   width: 100px;
   height: 100px;
-  background: ${args.theme.var.color.secondary}20;
+  background: ${args.theme.var.color.background_light_200}20;
   border-radius: 1.5rem;
   display: flex;
   align-items: center;
@@ -510,7 +510,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.secondary};
+  color: ${args.theme.var.color.background_light_200};
 }`;
 '''
       }
@@ -551,7 +551,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   line-height: 1.6;
   margin-bottom: 1.5rem;
 }`;
@@ -593,7 +593,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
 }`;
@@ -614,7 +614,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
 }`;
@@ -635,7 +635,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
 }`;
@@ -690,7 +690,7 @@ return {
 return `._id {
   width: 100px;
   height: 100px;
-  background: ${args.theme.var.color.accent}20;
+  background: ${args.theme.var.color.primary}20;
   border-radius: 1.5rem;
   display: flex;
   align-items: center;
@@ -716,7 +716,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.accent};
+  color: ${args.theme.var.color.primary};
 }`;
 '''
       }
@@ -757,7 +757,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   line-height: 1.6;
   margin-bottom: 1.5rem;
 }`;
@@ -799,7 +799,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
 }`;
@@ -820,7 +820,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
 }`;
@@ -841,7 +841,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
 }`;
@@ -989,7 +989,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   line-height: 1.6;
   margin-bottom: 1.5rem;
 }`;
@@ -1031,7 +1031,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
 }`;
@@ -1052,7 +1052,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
 }`;
@@ -1073,7 +1073,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
 }`;
@@ -1195,7 +1195,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   line-height: 1.6;
   margin-bottom: 1.5rem;
 }`;
@@ -1237,7 +1237,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
 }`;
@@ -1258,7 +1258,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
 }`;
@@ -1279,7 +1279,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
 }`;
@@ -1370,7 +1370,7 @@ return {
         css: '''
 return `._id {
   font-size: 1.2rem;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin-bottom: 2rem;
   
   @media (max-width: 768px) {

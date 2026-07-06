@@ -197,7 +197,7 @@ return {
         css:
           '''
 return `._id.workshop-refseq-editor-title {
-  font-size: ${args.theme.var.fontSize.lg};
+  font-size: 1.125rem;
   font-weight: 700;
   color: ${args.theme.var.color.text};
   margin: 0 0 ${args.theme.var.spacing.sm} 0;
@@ -225,8 +225,8 @@ return {
           '''
 return `._id.workshop-refseq-editor-desc {
   margin: 0 0 ${args.theme.var.spacing.md} 0;
-  font-size: ${args.theme.var.fontSize.sm};
-  color: ${args.theme.var.color.muted};
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text_light_500};
   line-height: 1.45;
 }`;
 '''
@@ -249,7 +249,7 @@ return {
         css:
           '''
 return `._id.workshop-refseq-meta {
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   color: ${args.theme.var.color.text};
   margin-bottom: ${args.theme.var.spacing.md};
 }`;
@@ -302,7 +302,7 @@ return { as: "div", text: "Prefix", class: "workshop-refseq-label" };
         css:
           '''
 return `._id.workshop-refseq-label {
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
   line-height: 1.3;
@@ -340,7 +340,7 @@ return { as: "div", text: "Suffix", class: "workshop-refseq-label" };
         css:
           '''
 return `._id.workshop-refseq-label {
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
   line-height: 1.3;
@@ -378,7 +378,7 @@ return { as: "div", text: "Starting number", class: "workshop-refseq-label" };
         css:
           '''
 return `._id.workshop-refseq-label {
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
   line-height: 1.3;
@@ -417,7 +417,7 @@ return { as: "div", text: "Increment step", class: "workshop-refseq-label" };
         css:
           '''
 return `._id.workshop-refseq-label {
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
   line-height: 1.3;
@@ -456,7 +456,7 @@ return { as: "div", text: "Format template", class: "workshop-refseq-label" };
         css:
           '''
 return `._id.workshop-refseq-label {
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
   line-height: 1.3;
@@ -495,7 +495,7 @@ return { as: "div", text: "Number padding", class: "workshop-refseq-label" };
         css:
           '''
 return `._id.workshop-refseq-label {
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
   line-height: 1.3;
@@ -539,7 +539,7 @@ return {
         css:
           '''
 return `._id.workshop-refseq-label {
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
   line-height: 1.3;

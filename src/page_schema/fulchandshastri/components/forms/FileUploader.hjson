@@ -520,11 +520,11 @@ return `._id {
   justify-content: center;
   padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
   border-radius: ${args.theme.var.borderRadius.md};
-  font-size: ${args.theme.var.fontSize.md};
+  font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
   border: none;
-  transition: all ${args.theme.var.animation.fast} ease;
+  transition: all 150ms ease;
   ${variantStyles}
   &:disabled {
     opacity: 0.6;
@@ -774,7 +774,7 @@ return {
         componentName: Html
         css:
           '''return `._id {
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   line-height: 1.4;
   color: ${args.theme.var.color.error};
   margin-top: ${args.theme.var.spacing.xs};
@@ -798,7 +798,7 @@ return {
           '''
 return `._id {
   padding: 0.75rem 1rem;
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   color: ${args.theme.var.color.text};
   word-break: break-word;
 }`;

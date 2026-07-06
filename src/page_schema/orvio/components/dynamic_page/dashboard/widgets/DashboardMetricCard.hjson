@@ -68,7 +68,7 @@ const color =
     ? args.theme.var.color.success
     : direction === "down"
       ? args.theme.var.color.error
-      : args.theme.var.color.muted;
+      : args.theme.var.color.text_light_500;
 return `._id {
   margin: 0.5rem 0 0;
   font-size: 0.8rem;

@@ -11,6 +11,11 @@ import { EmailConfirmationBanner } from "~/components/notifications/EmailConfirm
 import { useGraph } from "~/lib/graph/context/UseGraph";
 import { AuthRequired } from "~/components/auth/AuthRequired";
 import { RedirectUrlIconButton } from "~/components/styled/buttons/RedirectUrlIconButton";
+import { useTheme } from "~/lib/theme/ThemeContext";
+import { createMemo } from "solid-js";
+import { processCssContent } from "~/lib/styles/processCss";
+import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
+import { StyleRenderer } from "~/components/StyleRenderer";
 
 export default function Admin() {
   return (
@@ -22,8 +27,26 @@ export default function Admin() {
 
 function AdminLayoutRoute(props: { children: JSX.Element }) {
   const [graph] = useGraph();
+  const theme = useTheme();
+
+  const adminGlobalCss = createMemo(() => {
+    const functionArgs = {
+      theme,
+    } as FunctionArgumentType;
+
+    return processCssContent(
+      `return \`body {
+        background-color: \${args.theme.var.color?.background};
+        color: \${args.theme.var.color?.text};
+      }\`;`,
+      functionArgs,
+      "admin-global",
+    );
+  });
+
   return (
     <PermissionGuard>
+      <StyleRenderer cssContent={adminGlobalCss()} id="admin-global-styles" />
       <AuthRequired>
         <Link href={getCompanySquareLogoUrl(graph) || ""} rel="icon" />
         <As as="header" css={SETTINGS_CONSTANTS.HEADER_MENU_CSS}>

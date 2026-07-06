@@ -40,7 +40,7 @@
         displayOrder: 2
         componentName: Html
         textType: markdown
-        css: '''return `._id{ color:${args.theme.var.color.muted}; line-height:1.6; margin:0 0 1rem 0; }`;'''
+        css: '''return `._id{ color:${args.theme.var.color.text_light_500}; line-height:1.6; margin:0 0 1rem 0; }`;'''
         text: Billing for **Attendra** is managed through your Shopify admin. Your plan and invoices are available in Shopify billing settings.
         props: '''return { as: "div" };'''
       }

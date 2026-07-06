@@ -126,7 +126,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   line-height: 1.6;
   margin-bottom: 1rem;
 }`;
@@ -219,7 +219,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   text-decoration: none;
   transition: color 0.2s ease;
   
@@ -258,7 +258,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   text-decoration: none;
   transition: color 0.2s ease;
   
@@ -297,7 +297,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   text-decoration: none;
   transition: color 0.2s ease;
   
@@ -356,7 +356,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   line-height: 1.6;
   margin-bottom: 1rem;
 }`;
@@ -425,7 +425,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   font-size: 0.9rem;
   margin: 0;
 }`;

@@ -320,7 +320,7 @@ return { as: "p", hide: !subtitle, text: subtitle };
 return `._id {
   margin: 0.25rem 0 0;
   font-size: 0.8125rem;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
 }`;
 '''
       }

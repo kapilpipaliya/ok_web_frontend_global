@@ -40,14 +40,6 @@ return {
       border: {
         light: "oklch(0.90 0.01 264)",
         dark: "oklch(0.28 0.02 264)"
-      },
-      muted: {
-        light: "oklch(0.55 0.02 264)",
-        dark: "oklch(0.55 0.02 264)"
-      },
-      secondary: {
-        light: "oklch(0.92 0.015 264)",
-        dark: "oklch(0.22 0.02 264)"
       }
     },
     spacing: {
@@ -65,27 +57,8 @@ return {
       lg: "0.75rem",
       xl: "1rem",
       full: "9999px"
-    },
-    animation: {
-      fast: "150ms",
-      normal: "200ms",
-      slow: "300ms"
-    },
-    touch: {
-      minTarget: "44px",
-      button: "36px",
-      input: "36px"
-    },
-    fontSize: {
-      xs: "0.75rem",
-      sm: "0.8125rem",
-      md: "0.875rem",
-      lg: "1rem",
-      xl: "1.125rem",
-      xxl: "1.25rem",
-      title: "1.5rem"
     }
-  }
+}
 };
 '''
         name: Shopify Theme

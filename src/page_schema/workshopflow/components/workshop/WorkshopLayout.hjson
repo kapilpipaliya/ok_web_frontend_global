@@ -460,7 +460,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.xl};
+  font-size: 1.25rem;
   font-weight: 700;
   color: ${args.theme.var.color.text};
   margin: 0;
@@ -547,9 +547,9 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   font-weight: 600;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin: 0 0 ${args.theme.var.spacing.sm} 0;
@@ -647,7 +647,7 @@ return `._id {
   color: ${isDanger ? args.theme.var.color.error : (isActive ? args.theme.var.color.primary : args.theme.var.color.text)};
   text-decoration: none;
   font-weight: ${isActive ? '600' : '500'};
-  transition: all ${args.theme.var.animation.fast} ease;
+  transition: all 150ms ease;
   ${isButton ? `
     border: none;
     font-size: inherit;
@@ -825,9 +825,9 @@ return `._id {
   background: none;
   text-decoration: none;
   cursor: pointer;
-  min-height: ${args.theme.var.touch.minTarget};
-  color: ${isActive ? args.theme.var.color.primary : args.theme.var.color.muted};
-  transition: all ${args.theme.var.animation.fast} ease;
+  min-height: 44px;
+  color: ${isActive ? args.theme.var.color.primary : args.theme.var.color.text_light_500};
+  transition: all 150ms ease;
   width: 100%;
   position: relative;
 
@@ -876,7 +876,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.xs};
+  font-size: 0.75rem;
   font-weight: 500;
   text-align: center;
 }`;

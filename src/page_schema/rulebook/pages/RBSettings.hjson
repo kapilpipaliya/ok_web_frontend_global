@@ -145,7 +145,7 @@ return `._id {
   border-radius: ${args.theme.var.borderRadius.lg};
   padding: ${args.theme.var.spacing.lg};
   cursor: pointer;
-  transition: all ${args.theme.var.animation.fast} ease;
+  transition: all 150ms ease;
   text-decoration: none;
 
   &:hover {
@@ -255,7 +255,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.lg};
+  font-size: 1.125rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
   margin: 0 0 ${args.theme.var.spacing.xs} 0;
@@ -279,8 +279,8 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
-  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.text_light_500};
+  font-size: 0.875rem;
   margin: 0;
   line-height: 1.4;
 }`;
@@ -303,7 +303,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
 }`;
 '''
       }
@@ -343,7 +343,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.xl};
+  font-size: 1.25rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
   margin: 0 0 ${args.theme.var.spacing.lg} 0;
@@ -421,8 +421,8 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.sm};
-  color: ${args.theme.var.color.muted};
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text_light_500};
 }`;
 '''
       }
@@ -449,7 +449,7 @@ return `._id {
   border-radius: ${args.theme.var.borderRadius.md};
   font-weight: 500;
   cursor: pointer;
-  transition: all ${args.theme.var.animation.fast} ease;
+  transition: all 150ms ease;
   text-decoration: none;
 
   &:hover {
@@ -686,8 +686,8 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.sm};
-  color: ${args.theme.var.color.muted};
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text_light_500};
 }`;
 '''
       }
@@ -945,7 +945,7 @@ return {
 return `._id {
   padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
   cursor: pointer;
-  transition: background ${args.theme.var.animation.fast} ease;
+  transition: background 150ms ease;
 
   &:hover {
     background: ${args.theme.var.color.background_light_200};
@@ -1039,7 +1039,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.xl};
+  font-size: 1.25rem;
   font-weight: 600;
   color: ${args.theme.var.color.info};
   margin: 0 0 ${args.theme.var.spacing.lg} 0;
@@ -1101,7 +1101,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.lg};
+  font-size: 1.125rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
   margin: 0 0 ${args.theme.var.spacing.xs} 0;
@@ -1123,8 +1123,8 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
-  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.text_light_500};
+  font-size: 0.875rem;
   margin: 0;
   line-height: 1.4;
 }`;
@@ -1154,12 +1154,12 @@ const isDisabled = generating();
 return `._id {
   padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
   background: ${isDisabled ? args.theme.var.color.background_light_300 : args.theme.var.color.info};
-  color: ${isDisabled ? args.theme.var.color.muted : args.theme.var.color.info_text};
+  color: ${isDisabled ? args.theme.var.color.text_light_500 : args.theme.var.color.info_text};
   border: none;
   border-radius: ${args.theme.var.borderRadius.md};
   font-weight: 500;
   cursor: ${isDisabled ? 'not-allowed' : 'pointer'};
-  transition: all ${args.theme.var.animation.fast} ease;
+  transition: all 150ms ease;
   white-space: nowrap;
 
   &:hover {
@@ -1208,7 +1208,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.xl};
+  font-size: 1.25rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
   margin: 0 0 ${args.theme.var.spacing.lg} 0;
@@ -1269,7 +1269,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.lg};
+  font-size: 1.125rem;
   font-weight: 500;
   color: ${args.theme.var.color.text};
   margin: 0 0 ${args.theme.var.spacing.xs} 0;
@@ -1291,8 +1291,8 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.sm};
-  color: ${args.theme.var.color.muted};
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text_light_500};
   margin: 0;
 }`;
 '''
@@ -1366,7 +1366,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.xl};
+  font-size: 1.25rem;
   font-weight: 600;
   color: ${args.theme.var.color.error};
   margin: 0 0 ${args.theme.var.spacing.lg} 0;
@@ -1462,7 +1462,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   color: ${args.theme.var.color.error_dark_200};
   line-height: 1.4;
 }`;
@@ -1714,7 +1714,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   color: ${args.theme.var.color.error_dark_200};
   line-height: 1.4;
 }`;

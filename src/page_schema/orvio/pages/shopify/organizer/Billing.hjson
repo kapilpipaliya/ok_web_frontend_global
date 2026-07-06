@@ -39,7 +39,7 @@
       L: Attr
       P: {
         css:
-          "return `._id { font-size: 1rem; line-height: 1.6; color: ${args.theme.var.color.muted}; margin-bottom: 1.5rem; }`;"
+          "return `._id { font-size: 1rem; line-height: 1.6; color: ${args.theme.var.color.text_light_500}; margin-bottom: 1.5rem; }`;"
         displayOrder: 2
         textType: markdown
         componentName: Html
@@ -73,7 +73,7 @@
       L: Attr
       P: {
         css:
-          "return `._id { font-size: 0.9375rem; line-height: 1.6; color: ${args.theme.var.color.muted}; margin: 0; }`;"
+          "return `._id { font-size: 0.9375rem; line-height: 1.6; color: ${args.theme.var.color.text_light_500}; margin: 0; }`;"
         displayOrder: 2
         componentName: Html
         props:

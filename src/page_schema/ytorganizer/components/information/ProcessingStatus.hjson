@@ -21,7 +21,7 @@ const colorMap = {
   blue: args.theme.var.color.info,
   yellow: args.theme.var.color.warning,
   orange: args.theme.var.color.warning,
-  gray: args.theme.var.color.muted,
+  gray: args.theme.var.color.text_light_500,
   green: args.theme.var.color.success,
   red: args.theme.var.color.error
 };
@@ -80,14 +80,14 @@ const colorMap = {
   blue: args.theme.var.color.info,
   yellow: args.theme.var.color.warning,
   orange: args.theme.var.color.warning,
-  gray: args.theme.var.color.muted,
+  gray: args.theme.var.color.text_light_500,
   green: args.theme.var.color.success,
   red: args.theme.var.color.error
 };
 
 // Use icon and color from queueStatus info, fallback to defaults
 const icon = statusInfo?.icon || 'carbon:help';
-const color = statusInfo?.color ? colorMap[statusInfo.color] : args.theme.var.color.muted;
+const color = statusInfo?.color ? colorMap[statusInfo.color] : args.theme.var.color.text_light_500;
 
 return {
   as: "icon",

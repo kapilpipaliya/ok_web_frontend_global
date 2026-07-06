@@ -724,9 +724,9 @@ return {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   font-weight: 500;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   text-align: right;
 }`;'''
         displayOrder: 15
@@ -764,7 +764,7 @@ return out;
   text-decoration: none;
   font-weight: 500;
   flex-shrink: 0;
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
 }
 ._id:hover {
   text-decoration: underline;

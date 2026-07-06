@@ -9,11 +9,33 @@ import { As } from "~/components/As";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 import type { JSX } from "solid-js";
 import { AuthRequired } from "~/components/auth/AuthRequired";
+import { StyleRenderer } from "~/components/StyleRenderer";
+import { useTheme } from "~/lib/theme/ThemeContext";
+import { createMemo } from "solid-js";
+import { processCssContent } from "~/lib/styles/processCss";
+import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 
 export default function Projects() {
+  const theme = useTheme();
+
+  const systemGlobalCss = createMemo(() => {
+    const functionArgs = {
+      theme,
+    } as FunctionArgumentType;
+
+    return processCssContent(
+      `return \`body {
+        background-color: \${args.theme.var.color?.background};
+        color: \${args.theme.var.color?.text};
+      }\`;`,
+      functionArgs,
+      "system-global",
+    );
+  });
   return (
     <SystemLayoutRoute>
       <Title>Projects</Title>
+      <StyleRenderer cssContent={systemGlobalCss()} id="system-global-styles" />
       <As as="header" css={SETTINGS_CONSTANTS.HEADER_MENU_CSS}>
         <As
           as="div"

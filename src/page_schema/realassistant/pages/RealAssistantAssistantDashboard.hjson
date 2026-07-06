@@ -291,7 +291,7 @@ return `._id {
   gap: 0.5rem;
   padding: 0.5rem 1rem;
   background: ${isAvailable ? args.theme.var.color.success_light_100 : args.theme.var.color.background_dark_100};
-  color: ${isAvailable ? args.theme.var.color.success : args.theme.var.color.muted};
+  color: ${isAvailable ? args.theme.var.color.success : args.theme.var.color.text_light_500};
   border: 1px solid ${isAvailable ? args.theme.var.color.success : args.theme.var.color.border};
   border-radius: 2rem;
   font-weight: 600;
@@ -328,7 +328,7 @@ return {
         css: '''
 const isAvailable = args.contextData.assistantStore?.assistant?.isAvailable;
 return `._id {
-  color: ${isAvailable ? args.theme.var.color.success : args.theme.var.color.muted};
+  color: ${isAvailable ? args.theme.var.color.success : args.theme.var.color.text_light_500};
 }`;
 '''
       }
@@ -509,7 +509,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   font-size: 0.875rem;
   margin-bottom: 0.25rem;
 }`;
@@ -615,7 +615,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   font-size: 0.875rem;
   margin-bottom: 0.25rem;
 }`;
@@ -721,7 +721,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   font-size: 0.875rem;
   margin-bottom: 0.25rem;
 }`;
@@ -827,7 +827,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   font-size: 0.875rem;
   margin-bottom: 0.25rem;
 }`;
@@ -1134,7 +1134,7 @@ return `._id {
   display: flex;
   gap: 1rem;
   font-size: 0.875rem;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
 }`;
 '''
       }
@@ -1387,7 +1387,7 @@ const colorMap = {
   rating_received: args.theme.var.color.warning
 };
 return `._id {
-  color: ${colorMap[activity.type] || args.theme.var.color.muted};
+  color: ${colorMap[activity.type] || args.theme.var.color.text_light_500};
   margin-top: 0.125rem;
 }`;
 '''
@@ -1479,7 +1479,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.75rem;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
 }`;
 '''
       }

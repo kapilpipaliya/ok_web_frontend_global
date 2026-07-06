@@ -67,7 +67,7 @@
       L: Attr
       P: {
         css:
-          "return `._id {\n  font-size: 1.125rem;\n  line-height: 1.6;\n  color: ${args.theme.var.color.muted};\n  margin: 0 0 1rem 0;\n}`;"
+          "return `._id {\n  font-size: 1.125rem;\n  line-height: 1.6;\n  color: ${args.theme.var.color.text_light_500};\n  margin: 0 0 1rem 0;\n}`;"
         displayOrder: 2
         componentName: Html
         props:

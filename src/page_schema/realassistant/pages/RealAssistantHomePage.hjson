@@ -79,7 +79,7 @@ return {
 return `._id {
   padding: 4rem 2rem;
   text-align: center;
-  background: linear-gradient(135deg, ${args.theme.var.color.primary_light_50} 0%, ${args.theme.var.color.secondary_light_50} 100%);
+  background: linear-gradient(135deg, ${args.theme.var.color.primary_light_50} 0%, ${args.theme.var.color.background_light_50} 100%);
   
   @media (max-width: 768px) {
     padding: 2rem 1rem;
@@ -148,7 +148,7 @@ return {
         css: '''
 return `._id {
   font-size: 1.25rem;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin-bottom: 2rem;
   line-height: 1.6;
   
@@ -412,7 +412,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   line-height: 1.5;
 }`;
 '''
@@ -626,7 +626,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   line-height: 1.5;
 }`;
 '''

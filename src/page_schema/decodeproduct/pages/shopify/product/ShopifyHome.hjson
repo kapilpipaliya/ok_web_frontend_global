@@ -88,7 +88,7 @@
           '''return `._id {
   font-size: 1.125rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   margin: 0 0 1rem 0;
 }`;'''
         displayOrder: 3

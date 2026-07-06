@@ -157,11 +157,11 @@ return {
 return `._id {
   background: none;
   border: none;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
   cursor: pointer;
   padding: ${args.theme.var.spacing.sm};
   border-radius: ${args.theme.var.borderRadius.sm};
-  transition: all ${args.theme.var.animation.fast} ease;
+  transition: all 150ms ease;
   text-decoration: none;
   display: flex;
   align-items: center;
@@ -255,7 +255,7 @@ return `._id {
   justify-content: center;
   align-items: center;
   padding: ${args.theme.var.spacing.xl};
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
 }`;
 '''
       }
@@ -339,7 +339,7 @@ return {
         css: '''
 return `._id {
   color: ${args.theme.var.color.error_text};
-  font-size: ${args.theme.var.fontSize.md};
+  font-size: 1rem;
 }`;
 '''
       }
@@ -415,7 +415,7 @@ return `._id {
   border-radius: ${args.theme.var.borderRadius.lg};
   padding: ${args.theme.var.spacing.lg};
   cursor: pointer;
-  transition: all ${args.theme.var.animation.fast} ease;
+  transition: all 150ms ease;
   position: relative;
   overflow: hidden;
   text-decoration: none;
@@ -577,7 +577,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.lg};
+  font-size: 1.125rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
   margin: 0;
@@ -755,8 +755,8 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
-  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.text_light_500};
+  font-size: 0.875rem;
   margin: 0 0 ${args.theme.var.spacing.md} 0;
   line-height: 1.5;
 }`;
@@ -800,7 +800,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   color: ${args.theme.var.color.text};
   font-weight: 500;
 }`;
@@ -821,7 +821,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 0.875rem;
   color: ${args.theme.var.color.success};
   font-weight: 500;
 }`;
@@ -848,7 +848,7 @@ return {
 return `._id {
   text-align: center;
   padding: ${args.theme.var.spacing.xl};
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_500};
 }`;
 '''
       }
@@ -867,7 +867,7 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.md};
+  font-size: 1rem;
   margin-bottom: ${args.theme.var.spacing.md};
 }`;
 '''

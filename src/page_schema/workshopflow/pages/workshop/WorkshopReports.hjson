@@ -175,7 +175,7 @@ return {
 return {
   as: "p",
   text: "Charts load from the WorkshopReports_charts_default setting (see migrateDynamicPageSettings).",
-  style: { margin: 0, color: args.theme.var.color.muted, "font-size": "0.875rem" }
+  style: { margin: 0, color: args.theme.var.color.text_light_500, "font-size": "0.875rem" }
 };
 '''
       }
