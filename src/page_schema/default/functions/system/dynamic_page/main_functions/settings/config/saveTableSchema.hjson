@@ -1,0 +1,125 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: saveTableSchema
+        description: Saves one table_schema Setting vertex by explicit key. Admin only.
+        body:
+          '''
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  return { success: false, message: "User session not found. Please log in and try again." };
+}
+
+await args.getEffectiveUser(args.session, actualUser, args.contextData);
+
+let { key, tableKey, part, config, name } = args.contextData || {};
+
+if ((!key || !String(key).trim()) && tableKey && part) {
+  const idsResult = await args.executeNamedServerFunction({
+    functionName: "getTableIds",
+    contextData: { tableKey: String(tableKey).trim() }
+  });
+  const ids = idsResult?.result?.data;
+  if (!ids?.schemaKeys?.[part]) {
+    return {
+      success: false,
+      message: idsResult?.result?.message || `Failed to resolve schema key for part: ${part}`
+    };
+  }
+  key = ids.schemaKeys[part];
+  if (!tableKey) tableKey = ids.tableKey;
+  if (!name) name = `${ids.name || ids.tableKey} ${part} schema`;
+}
+
+if (!key || !String(key).trim()) {
+  return { success: false, message: "key is required (or tableKey + part)" };
+}
+
+if (!config || typeof config !== "string" || config.trim() === "") {
+  return { success: false, message: "config function body is required" };
+}
+
+key = String(key).trim();
+const resolvedTableKey = tableKey ? String(tableKey).trim() : null;
+const resolvedPart = part ? String(part).trim() : null;
+const settingName = name || key;
+
+let evaluated;
+try {
+  const configFn = new Function(config);
+  evaluated = configFn();
+  if (!evaluated || typeof evaluated !== "object") {
+    return { success: false, message: "Config must return an object" };
+  }
+  if (resolvedPart && evaluated.part !== resolvedPart) {
+    evaluated = { ...evaluated, part: resolvedPart };
+  }
+  const stripResult = await args.executeNamedServerFunction({
+    functionName: "settingsSchemaHelpers",
+    contextData: {
+      action: "stripTableSchema",
+      part: evaluated.part || resolvedPart,
+      config: evaluated
+    }
+  });
+  if (stripResult?.result?.data?.config) {
+    evaluated = stripResult.result.data.config;
+    config = `return ${JSON.stringify(evaluated, null, 2)};`;
+  }
+} catch (error) {
+  return {
+    success: false,
+    message: error instanceof Error ? error.message : "Invalid config function body"
+  };
+}
+
+const schemaPart = evaluated.part || resolvedPart || null;
+
+const query = `
+  MERGE (s:Setting {key: $key})
+  ON CREATE SET
+    s.createdAt = datetime(),
+    s.type = 'table_schema',
+    s.tableKey = $tableKey,
+    s.part = $part,
+    s.name = $name,
+    s.config = $config,
+    s.updatedAt = datetime()
+  ON MATCH SET
+    s.config = $config,
+    s.type = 'table_schema',
+    s.tableKey = $tableKey,
+    s.part = $part,
+    s.name = $name,
+    s.updatedAt = datetime()
+  RETURN s
+`;
+
+const saveResult = await args.session.run(query, {
+  key,
+  tableKey: resolvedTableKey,
+  part: schemaPart,
+  name: settingName,
+  config
+});
+
+if (saveResult.records.length === 0) {
+  return { success: false, message: "Failed to save table schema" };
+}
+
+const vertices = args.processResult(saveResult.records, args.context, "s");
+
+return {
+  success: true,
+  data: { setting: vertices[0], key },
+  message: "Table schema saved"
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

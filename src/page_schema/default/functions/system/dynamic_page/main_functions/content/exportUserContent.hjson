@@ -1,0 +1,218 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Exports user content (Books or AudioVideo) to CSV format
+        body:
+          '''
+// Get current authenticated user from session
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  return {
+    success: false,
+    message: "User session not found. Please log in and try again."
+  };
+}
+
+// Get effective user (handles admin impersonation)
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+
+// Extract parameters
+const { tableVertexLabel, format = "csv", data, columns, enableUserScoping, hooks, relationshipPropertyBindings } = args.contextData;
+
+if (!tableVertexLabel) {
+  return {
+    success: false,
+    message: "Invalid tableVertexLabel. Must not be empty."
+  };
+}
+
+// If data is provided, use it (filtered export), otherwise fetch all data
+let items = [];
+
+if (data && Array.isArray(data) && data.length > 0) {
+  // Use provided filtered data
+  items = data;
+} else {
+  // Fetch all data using getUserContent function
+  const getUserContentResult = await args.executeNamedServerFunction({
+    functionName: "getUserContent",
+    contextData: {
+      tableVertexLabel,
+      search: undefined,
+      filters: {},
+      sort: {},
+      enableUserScoping,
+      relationshipPropertyBindings
+    }
+  });
+
+  if (getUserContentResult?.result?.success && getUserContentResult.result.data) {
+    items = Array.isArray(getUserContentResult.result.data) ? getUserContentResult.result.data : [];
+  } else {
+    return {
+      success: false,
+      message: getUserContentResult?.result?.message || "Failed to fetch data for export"
+    };
+  }
+}
+
+if (items.length === 0) {
+  return {
+    success: false,
+    message: "No data to export"
+  };
+}
+
+// Execute beforeExport hooks
+await args.executeHooks(hooks?.beforeExport, {
+  tableVertexLabel,
+  format,
+  itemsCount: items.length,
+  columns,
+  enableUserScoping
+});
+
+// Export to CSV
+if (format === "csv") {
+  let headers = [];
+
+  // If columns are provided, use their order
+  if (columns && Array.isArray(columns) && columns.length > 0) {
+    // Extract keys from columns in order, filtering out special types
+    headers = columns
+      .map(col => col.key)
+      .filter(key => key && key !== "__rowNumber" && key !== "rowNumber");
+
+    // Also collect any additional keys from items that aren't in columns
+    const allKeys = new Set(headers);
+    items.forEach(item => {
+      const props = item.P || item;
+      Object.keys(props).forEach(key => {
+        if (key !== "id" && key !== "elementId" && key !== "L" && !allKeys.has(key)) {
+          allKeys.add(key);
+        }
+      });
+    });
+
+    // Add any additional keys found in items (but not in columns) at the end
+    const additionalKeys = Array.from(allKeys).filter(key => !headers.includes(key)).sort();
+    headers = [...headers, ...additionalKeys];
+  } else {
+    // Fallback: Get all unique keys from items (prioritize P properties)
+    const allKeys = new Set();
+    items.forEach(item => {
+      const props = item.P || item;
+      Object.keys(props).forEach(key => {
+        if (key !== "id" && key !== "elementId" && key !== "L") {
+          allKeys.add(key);
+        }
+      });
+    });
+    headers = Array.from(allKeys).sort();
+  }
+
+  // Build CSV with proper escaping
+  let csv = headers.map(h => {
+    // Escape header if needed
+    const headerStr = String(h);
+    if (headerStr.includes(",") || headerStr.includes('"') || headerStr.includes("\\n")) {
+      return `"${headerStr.replace(/"/g, '""')}"`;
+    }
+    return headerStr;
+  }).join(",") + "\\n";
+
+  items.forEach(item => {
+    const props = item.P || item;
+    const values = headers.map(header => {
+      const value = props?.[header];
+      if (value === null || value === undefined) {
+        return "";
+      }
+      // Convert to string and escape
+      const stringValue = String(value);
+      // Always quote if contains comma, quote, or newline
+      if (stringValue.includes(",") || stringValue.includes('"') || stringValue.includes("\\n") || stringValue.includes("\\r")) {
+        return `"${stringValue.replace(/"/g, '""')}"`;
+      }
+      return stringValue;
+    });
+    csv += values.join(",") + "\\n";
+  });
+
+  const csvResult = {
+    success: true,
+    data: csv,
+    contentType: "text/csv",
+    filename: `${tableVertexLabel}_export_${new Date().toISOString().split("T")[0]}.csv`
+  };
+
+  // Execute afterExport hooks
+  await args.executeHooks(hooks?.afterExport, {
+    tableVertexLabel,
+    format,
+    itemsCount: items.length,
+    columns,
+    enableUserScoping,
+    result: csvResult
+  });
+
+  return csvResult;
+}
+
+// Export to JSON
+if (format === "json") {
+  const jsonData = items.map(item => {
+    const props = item.P || item;
+    const cleanItem = { ...props };
+    delete cleanItem.id;
+    delete cleanItem.elementId;
+    delete cleanItem.L;
+    return cleanItem;
+  });
+
+  const jsonResult = {
+    success: true,
+    data: JSON.stringify(jsonData, null, 2),
+    contentType: "application/json",
+    filename: `${tableVertexLabel}_export_${new Date().toISOString().split("T")[0]}.json`
+  };
+
+  // Execute afterExport hooks
+  await args.executeHooks(hooks?.afterExport, {
+    tableVertexLabel,
+    format,
+    itemsCount: items.length,
+    columns,
+    enableUserScoping,
+    result: jsonResult
+  });
+
+  return jsonResult;
+}
+
+const unsupportedResult = {
+  success: false,
+  message: `Unsupported format: ${format}`
+};
+
+// Execute afterExport hooks even on failure
+await args.executeHooks(hooks?.afterExport, {
+  tableVertexLabel,
+  format,
+  itemsCount: items.length,
+  columns,
+  enableUserScoping,
+  result: unsupportedResult
+});
+
+return unsupportedResult;
+'''
+        key: exportUserContent
+      }
+    }
+  ]
+  edges: []
+}

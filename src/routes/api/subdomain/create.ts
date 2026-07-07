@@ -21,6 +21,7 @@ import { initSubdomainWorkersForSubdomain } from "~/server/queue/initWorkersCore
 import { importSchemas } from "~/lib/schema/importSchemas";
 import { executeNamedServerFunctionCore } from "~/cypher/get/executeNamedServerFunctionCore";
 import { broadcastStartWorkers } from "~/server/cluster/clusterCommunication";
+import { ensurePageSchemaFolderForSubdomain } from "~/lib/schema/ensurePageSchemaFolder";
 import { runMigration } from "~/lib/schema/runMigration";
 
 // Reserved subdomain keys that cannot be used
@@ -127,6 +128,14 @@ export async function POST({ request }: APIEvent) {
       password: "",
       subDomain: key,
     });
+
+    // Create page_schema folder for subdomain from default template if missing
+    const pageSchemaResult = ensurePageSchemaFolderForSubdomain(key);
+    if (pageSchemaResult.created) {
+      console.log(
+        `[Subdomain Create] Created page_schema folder for ${key} from ${pageSchemaResult.copiedFrom}`,
+      );
+    }
 
     // Automatically import schemas for the new subdomain
     await importSchemasForSubdomain(key, user);

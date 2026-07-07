@@ -1,0 +1,58 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: getPaletteCategoryChildren
+        description: Fetches category and content children for a Page Designer palette category parent.
+        body:
+          '''
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  return { success: false, message: "User session not found. Please log in and try again.", data: [] };
+}
+
+const { parentVertexLabel, toParentEdgeType, parentId, tableVertexLabel } = args.contextData;
+
+if (!parentVertexLabel || !toParentEdgeType || !parentId) {
+  return {
+    success: false,
+    message: "parentVertexLabel, toParentEdgeType and parentId are required",
+    data: []
+  };
+}
+
+if (!args.context.nodes) args.context.nodes = {};
+
+const categoryResult = await args.session.run(
+  `MATCH (child:${parentVertexLabel})-[r:${toParentEdgeType}]->(parent:${parentVertexLabel})
+   WHERE elementId(parent) = $parentId
+   RETURN child, parent, r
+   ORDER BY COALESCE(child.displayOrder, 0), COALESCE(child.key, '') ASC`,
+  { parentId }
+);
+const categoryVertices = args.processResult(categoryResult.records, args.context, ['child', 'parent'], 'r');
+
+if (tableVertexLabel) {
+  const contentResult = await args.session.run(
+    `MATCH (content:${tableVertexLabel})-[r:${toParentEdgeType}]->(cat:${parentVertexLabel})
+     WHERE elementId(cat) = $parentId
+     RETURN content, cat, r
+     ORDER BY COALESCE(content.displayOrder, 0), COALESCE(content.key, '') ASC`,
+    { parentId }
+  );
+  args.processResult(contentResult.records, args.context, ['content', 'cat'], 'r');
+}
+
+return {
+  success: true,
+  data: categoryVertices,
+  message: `Loaded children for palette category`
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

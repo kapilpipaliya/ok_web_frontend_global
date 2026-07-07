@@ -1,0 +1,134 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Function",
+      P: {
+        key: "saveSettingsPageConfig",
+        description: "Saves settings_page_config function body for a page. Admin only; updates the default Setting vertex.",
+        body: '''
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  return { success: false, message: "User session not found. Please log in and try again." };
+}
+
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const { settingsPageId, name, saveAsDefault = true, key: schemaKey } = args.contextData || {};
+let { config } = args.contextData || {};
+
+if (!settingsPageId) {
+  return { success: false, message: "settingsPageId is required" };
+}
+
+if (!config || typeof config !== "string" || config.trim() === "") {
+  return { success: false, message: "config function body is required" };
+}
+
+try {
+  const configFn = new Function(config);
+  let evaluated = configFn();
+  if (!evaluated || typeof evaluated !== "object") {
+    return { success: false, message: "Config must return an object" };
+  }
+  if (evaluated.pageMode !== "settings" && evaluated.pageMode !== "table") {
+    return { success: false, message: "Config pageMode must be settings or table" };
+  }
+  const stripResult = await args.executeNamedServerFunction({
+    functionName: "settingsSchemaHelpers",
+    contextData: { action: "stripConfigSchema", config: evaluated }
+  });
+  if (stripResult?.result?.data?.config) {
+    evaluated = stripResult.result.data.config;
+    config = `return ${JSON.stringify(evaluated, null, 2)};`;
+  }
+} catch (error) {
+  return {
+    success: false,
+    message: error instanceof Error ? error.message : "Invalid config function body"
+  };
+}
+
+const siteSettingKey = schemaKey && String(schemaKey).trim() !== ""
+  ? String(schemaKey).trim()
+  : `${settingsPageId}_settings_page`;
+const settingKey = saveAsDefault === false ? `${settingsPageId}_settings_page` : siteSettingKey;
+const settingName = name || `${settingsPageId} settings`;
+
+if (saveAsDefault === false && user) {
+  const userQuery = `
+    MATCH (u:User {uuid: $userUuid})
+    MERGE (u)-[:UserSetting]->(s:Setting {key: $settingKey})
+    ON CREATE SET
+      s.createdAt = datetime(),
+      s.type = 'settings_page_config',
+      s.settingsPageId = $settingsPageId,
+      s.name = $name,
+      s.config = $config,
+      s.updatedAt = datetime()
+    ON MATCH SET
+      s.config = $config,
+      s.settingsPageId = $settingsPageId,
+      s.name = $name,
+      s.type = 'settings_page_config',
+      s.updatedAt = datetime()
+    RETURN s
+  `;
+  const userResult = await args.session.run(userQuery, {
+    userUuid: user.P.uuid,
+    settingKey,
+    settingsPageId,
+    name: settingName,
+    config
+  });
+  if (userResult.records.length === 0) {
+    return { success: false, message: "Failed to save user settings page config" };
+  }
+  const vertices = args.processResult(userResult.records, args.context, "s");
+  return {
+    success: true,
+    data: { setting: vertices[0], key: settingKey },
+    message: "Settings page config saved"
+  };
+}
+
+const defaultQuery = `
+  MERGE (s:Setting {key: $siteSettingKey})
+  ON CREATE SET
+    s.createdAt = datetime(),
+    s.type = 'settings_page_config',
+    s.settingsPageId = $settingsPageId,
+    s.name = $name,
+    s.config = $config,
+    s.updatedAt = datetime()
+  ON MATCH SET
+    s.config = $config,
+    s.settingsPageId = $settingsPageId,
+    s.name = $name,
+    s.type = 'settings_page_config',
+    s.updatedAt = datetime()
+  RETURN s
+`;
+
+const defaultResult = await args.session.run(defaultQuery, {
+  siteSettingKey,
+  settingsPageId,
+  name: settingName,
+  config
+});
+
+if (defaultResult.records.length === 0) {
+  return { success: false, message: "Failed to save default settings page config" };
+}
+
+const defaultVertices = args.processResult(defaultResult.records, args.context, "s");
+return {
+  success: true,
+  data: { setting: defaultVertices[0], key: siteSettingKey },
+  message: "Default settings page config saved"
+};
+'''
+      }
+    }
+  ],
+  edges: []
+}

@@ -1,0 +1,280 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: SettingsPageContent
+        dynamicComponent: SettingsSectionRenderer, SettingsSaveBar
+        fns:
+          '''
+const getPageConfig = () => args.fns.getEvaluatedSettingsConfig?.() || args.fns.evaluateConfig?.() || null;
+
+const DEFAULT_SITE_LANGUAGES = [
+  { code: "en", label: "English", isDefault: true },
+  { code: "hi", label: "Hindi", isDefault: false },
+  { code: "gu", label: "Gujarati", isDefault: false }
+];
+
+const getSiteLanguages = () => {
+  const languages = args.contextData.props?.siteLanguages;
+  if (Array.isArray(languages) && languages.length > 0) return languages;
+  return DEFAULT_SITE_LANGUAGES;
+};
+
+const getVisibleSections = () => {
+  const pageConfig = getPageConfig();
+  const sections = pageConfig?.sections;
+  if (!Array.isArray(sections)) return [];
+  return sections.filter((section) => {
+    if (!section.permissions?.anyOf) return true;
+    if (args.isNoPermissionCheck === true) return true;
+    if (args.hasFullPermission || args.hasEditPermission || args.hasViewPermission) return true;
+    return false;
+  });
+};
+
+const filterSectionsForUrl = () => {
+  const urlSection = args.searchParams?.section;
+  const sections = getVisibleSections();
+  if (urlSection) {
+    const matched = sections.filter((section) => section.id === urlSection);
+    if (matched.length > 0) return matched;
+  }
+  return sections;
+};
+
+return {
+  getPageConfig,
+  getVisibleSections,
+  filterSectionsForUrl,
+  getSiteLanguages
+};
+'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        css:
+          '''
+return `._id {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}`;
+'''
+        componentName: Html
+        props:
+          '''
+return {
+  as: "main"
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.lg};
+  border-bottom: 1px solid ${args.theme.var.color.border};
+  margin-bottom: ${args.theme.var.spacing.md};
+}`;
+'''
+        componentName: Html
+        props:
+          '''
+const pageConfig = args.fns.getPageConfig();
+return {
+  as: "header",
+  hide: !pageConfig?.title && !pageConfig?.description
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 1
+        css:
+          '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 ${args.theme.var.spacing.xs} 0;
+}`;
+'''
+        componentName: Html
+        props:
+          '''
+const pageConfig = args.fns.getPageConfig();
+return {
+  as: "h1",
+  text: pageConfig?.title || "Settings"
+};
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 2
+        css:
+          '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text_light_500};
+  margin: 0;
+  line-height: 1.5;
+}`;
+'''
+        componentName: Html
+        props:
+          '''
+const pageConfig = args.fns.getPageConfig();
+return {
+  as: "p",
+  text: pageConfig?.description || "",
+  hide: !pageConfig?.description
+};
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 2
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: ${args.theme.var.spacing.xl};
+  min-height: 12rem;
+}`;
+'''
+        componentName: Html
+        props:
+          '''
+const loading = args.fns.isSettingsLoading?.() === true;
+return {
+  as: "div",
+  hide: !loading
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: LoadingSpinner
+        props:
+          '''
+return {
+  size: "large",
+  color: "primary"
+};
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 3
+        css:
+          '''
+return `._id {
+  flex: 1;
+  min-height: 0;
+  padding: 0 ${args.theme.var.spacing.lg} ${args.theme.var.spacing.lg};
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}`;
+'''
+        componentName: Html
+        props:
+          '''
+const loading = args.fns.isSettingsLoading?.() === true;
+return {
+  as: "div",
+  hide: loading
+};
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        contextName: sectionItem
+        loop: true
+        props:
+          '''
+return {
+  as: "div",
+  data: args.fns.filterSectionsForUrl()
+};
+'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: SettingsSectionRenderer
+        props:
+          '''
+const sectionItem = args.contextData.sectionItem;
+return {
+  sectionConfig: sectionItem,
+  siteLanguages: args.fns.getSiteLanguages?.() || []
+};
+'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: SettingsSaveBar
+      }
+    }
+  ]
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" }
+    { id: "e2", T: "Attr", S: "2", E: "3" }
+    { id: "e3", T: "Attr", S: "3", E: "4" }
+    { id: "e4", T: "Attr", S: "3", E: "5" }
+    { id: "e5", T: "Attr", S: "2", E: "6" }
+    { id: "e6", T: "Attr", S: "6", E: "7" }
+    { id: "e7", T: "Attr", S: "2", E: "8" }
+    { id: "e8", T: "Attr", S: "8", E: "9" }
+    { id: "e9", T: "Attr", S: "9", E: "10" }
+    { id: "e10", T: "Attr", S: "2", E: "11" }
+  ]
+}

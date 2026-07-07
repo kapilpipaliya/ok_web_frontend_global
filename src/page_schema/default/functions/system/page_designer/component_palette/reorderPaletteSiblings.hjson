@@ -1,0 +1,63 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: reorderPaletteSiblings
+        description: Updates displayOrder for sibling category or content vertices in the Page Designer palette tree.
+        body:
+          '''
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  return { success: false, message: "User session not found. Please log in and try again." };
+}
+
+const {
+  orderedItemIds,
+  parentCategoryId,
+  parentVertexLabel,
+  toParentEdgeType,
+  vertexLabel,
+  tableVertexLabel
+} = args.contextData;
+
+if (!orderedItemIds || !Array.isArray(orderedItemIds) || orderedItemIds.length === 0) {
+  return { success: false, message: "orderedItemIds array is required and must not be empty" };
+}
+
+if (!parentVertexLabel || !toParentEdgeType || !vertexLabel) {
+  return { success: false, message: "parentVertexLabel, toParentEdgeType, and vertexLabel are required" };
+}
+
+try {
+  for (let i = 0; i < orderedItemIds.length; i++) {
+    const itemId = orderedItemIds[i];
+    const displayOrder = i + 1;
+    const result = await args.session.run(
+      `MATCH (v:${vertexLabel})
+       WHERE elementId(v) = $itemId
+       SET v.displayOrder = $displayOrder, v.updatedAt = datetime()
+       RETURN v`,
+      { itemId, displayOrder }
+    );
+    if (result.records.length > 0) {
+      args.processResult(result.records, args.context, 'v');
+    }
+  }
+
+  return {
+    success: true,
+    message: "Order updated successfully",
+    data: { orderedItemIds, parentCategoryId: parentCategoryId || null }
+  };
+} catch (error) {
+  console.error("Error reordering palette siblings:", error);
+  return { success: false, message: error.message || "Failed to reorder items" };
+}
+'''
+      }
+    }
+  ]
+  edges: []
+}

@@ -1,0 +1,277 @@
+{
+  vertexes: [
+    {
+      id: "sssl_root",
+      L: "Component",
+      P: {
+        key: "SettingsSchemaSectionsList",
+        description: "Draggable section list sidebar for settings schema editor.",
+        dynamicComponent: "IconButton, Html"
+      }
+    },
+{
+      id: "sssl_sidebar",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''const api = args.contextData.props?.editorApi || {};
+
+return {
+  as: "aside",
+  "aria-label": "Sections",
+  hide: api.isSingleSectionMode?.() === true || api.isJsonMode?.() === true
+};
+''',
+        css: '''
+return `._id {
+  width: 220px;
+  flex-shrink: 0;
+  border-right: 1px solid ${args.theme.var.color.border};
+  overflow: hidden;
+  padding: 0.75rem;
+  background: ${args.theme.var.color.background_light_50};
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}`;
+'''
+      }
+    },
+{
+      id: "sssl_list",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  width: 100%;
+}`;
+'''
+      }
+    },
+{
+      id: "sssl_item",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "configSectionItem",
+        loop: true,
+        props: '''const api = args.contextData.props?.editorApi || {};
+
+return {
+  data: api.getSectionIndices?.() || []
+};
+'''
+      }
+    },
+{
+      id: "sssl_row",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''const api = args.contextData.props?.editorApi || {};
+
+const index = args.contextData.configSectionItem;
+const section = api.getSectionAt?.(index) || {};
+return {
+  as: "div",
+  class: "fsce-section-item",
+  role: "button",
+  tabIndex: 0,
+  onClick: () => api.selectSection?.(section.id),
+  onKeyDown: (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      api.selectSection?.(section.id);
+    }
+  },
+  ref: (element) => {
+    if (element && typeof index === "number" && api.attachSectionDropTarget) {
+      api.attachSectionDropTarget(element, index);
+    }
+  }
+};
+''',
+        css: '''const api = args.contextData.props?.editorApi || {};
+
+const index = args.contextData.configSectionItem;
+const section = api.getSectionAt?.(index) || {};
+const active = api.selectedSectionId?.() === section.id;
+const dragOver = api.dragOverSectionIndex?.() === index;
+const dragging = api.draggedSectionIndex?.() === index;
+const fieldDragOver = api.dragOverSectionIdForField?.() === section.id;
+return `._id.fsce-section-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.375rem;
+  width: 100%;
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  border: 1px solid ${active ? args.theme.var.color.primary : args.theme.var.color.border};
+  background: ${active ? args.theme.var.color.primary_light_100 : args.theme.var.color.background};
+  cursor: pointer;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  ${dragOver ? `outline: 2px dashed ${args.theme.var.color.primary};` : ""}
+  ${fieldDragOver ? `outline: 2px dashed ${args.theme.var.color.success}; background: ${args.theme.var.color.success_light_100};` : ""}
+  ${dragging ? "opacity: 0.5;" : ""}
+
+  .fsce-section-drag-handle {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.15s ease, visibility 0.15s ease;
+  }
+
+  &:hover .fsce-section-drag-handle {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+  ${dragging ? `
+  & .fsce-section-drag-handle {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }` : ""}
+}`;
+'''
+      }
+    },
+{
+      id: "sssl_drag",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''const api = args.contextData.props?.editorApi || {};
+
+const index = args.contextData.configSectionItem;
+return {
+  as: "div",
+  class: "fsce-section-drag-handle",
+  role: "presentation",
+  onClick: (e) => e.stopPropagation?.(),
+  onMouseDown: (e) => e.stopPropagation?.(),
+  ref: (element) => {
+    if (element && typeof index === "number" && api.attachSectionDraggable) {
+      api.attachSectionDraggable(element, index);
+    }
+  }
+};
+'''
+        css: '''
+return `._id.fsce-section-drag-handle {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  color: ${args.theme.var.color.text_light_500};
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}`;
+'''
+      }
+    },
+{
+      id: "sssl_drag_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "ph:dots-six-vertical",
+  height: 14,
+  width: 14,
+  class: "fsce-section-drag-icon"
+};
+''',
+        css: '''
+return `._id.fsce-section-drag-icon {
+  pointer-events: none;
+}`;
+'''
+      }
+    },
+{
+      id: "sssl_label",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''const api = args.contextData.props?.editorApi || {};
+
+const index = args.contextData.configSectionItem;
+const section = api.getSectionAt?.(index) || {};
+return {
+  as: "span",
+  class: "fsce-section-label",
+  text: section.title || section.id
+};
+''',
+        css: '''
+return `._id.fsce-section-label {
+  flex: 1;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}`;
+'''
+      }
+    },
+{
+      id: "sssl_delete",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "IconButton",
+        props: '''const api = args.contextData.props?.editorApi || {};
+
+const index = args.contextData.configSectionItem;
+const section = api.getSectionAt?.(index) || {};
+return {
+  icon: "ph:trash",
+  variant: "danger",
+  size: "sm",
+  title: "Delete section",
+  onClick: (e) => {
+    e?.stopPropagation?.();
+    api.deleteSection?.(section.id);
+  }
+};
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "sssl_root_e1", T: "Attr", S: "sssl_root", E: "sssl_sidebar" },
+    { id: "sssl_root_e2", T: "Attr", S: "sssl_sidebar", E: "sssl_list" },
+    { id: "sssl_root_e3", T: "Attr", S: "sssl_list", E: "sssl_item" },
+    { id: "sssl_root_e4", T: "Attr", S: "sssl_item", E: "sssl_row" },
+    { id: "sssl_root_e5", T: "Attr", S: "sssl_row", E: "sssl_drag" },
+    { id: "sssl_root_e6", T: "Attr", S: "sssl_drag", E: "sssl_drag_icon" },
+    { id: "sssl_root_e7", T: "Attr", S: "sssl_row", E: "sssl_label" },
+    { id: "sssl_root_e8", T: "Attr", S: "sssl_row", E: "sssl_delete" }
+  ]
+}

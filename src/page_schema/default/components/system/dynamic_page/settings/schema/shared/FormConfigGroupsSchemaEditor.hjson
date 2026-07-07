@@ -1,0 +1,980 @@
+{
+  vertexes: [
+    {
+      id: "fcg_root",
+      L: "Component",
+      P: {
+        key: "FormConfigGroupsSchemaEditor",
+        description: "Visual editor for formConfig groups[].fields[] schema.",
+        dynamicComponent: "TextInput, Button, IconButton, Html",
+        fns: '''
+const getProps = () => args.contextData.props || {};
+const DEFAULT_SITE_LANGUAGES = [
+  { code: "en", label: "English", isDefault: true },
+  { code: "hi", label: "Hindi", isDefault: false },
+  { code: "gu", label: "Gujarati", isDefault: false }
+];
+
+const getSiteLanguages = () => {
+  const languages = getProps().siteLanguages;
+  if (Array.isArray(languages) && languages.length > 0) return languages;
+  return DEFAULT_SITE_LANGUAGES;
+};
+
+const getGroups = () => {
+  const groups = getProps().groups;
+  if (!Array.isArray(groups)) return [];
+  return groups.map((g) => ({
+    ...g,
+    fields: Array.isArray(g?.fields) ? g.fields.map((f) => ({ ...f })) : []
+  }));
+};
+
+const emitGroups = (groups) => {
+  const onChange = getProps().onChange;
+  if (typeof onChange === "function") onChange({ groups });
+};
+
+const [selectedGroupIndex, setSelectedGroupIndex] = args.createSignal(0);
+const [selectedFieldIndex, setSelectedFieldIndex] = args.createSignal(null);
+
+const getSelectedGroupIndex = () => {
+  const groups = getGroups();
+  const idx = selectedGroupIndex();
+  if (groups.length === 0) return -1;
+  if (idx >= 0 && idx < groups.length) return idx;
+  return 0;
+};
+
+const getSelectedGroup = () => {
+  const idx = getSelectedGroupIndex();
+  return idx >= 0 ? getGroups()[idx] : null;
+};
+
+const getFields = () => {
+  const group = getSelectedGroup();
+  return group?.fields || [];
+};
+
+const getFieldIndices = () => {
+  const fields = getFields();
+  const indices = [];
+  for (let i = 0; i < fields.length; i++) indices.push(i);
+  return indices;
+};
+
+const getGroupIndices = () => {
+  const groups = getGroups();
+  const indices = [];
+  for (let i = 0; i < groups.length; i++) indices.push(i);
+  return indices;
+};
+
+const getGroupAt = (index) => getGroups()[index] || {};
+const getFieldAt = (index) => getFields()[index] || {};
+
+const setGroups = (nextGroups) => {
+  emitGroups(nextGroups);
+};
+
+const updateGroupAt = (index, partial) => {
+  const groups = getGroups();
+  setGroups(groups.map((g, i) => (i === index ? { ...g, ...partial } : g)));
+};
+
+const addGroup = () => {
+  const groups = getGroups();
+  const next = [
+    ...groups,
+    {
+      key: `group_${Date.now()}`,
+      title: "New group",
+      gridColumns: 2,
+      fields: []
+    }
+  ];
+  setGroups(next);
+  setSelectedGroupIndex(next.length - 1);
+  setSelectedFieldIndex(null);
+};
+
+const deleteGroup = (index) => {
+  const groups = getGroups().filter((_, i) => i !== index);
+  setGroups(groups);
+  setSelectedGroupIndex(Math.min(selectedGroupIndex(), Math.max(0, groups.length - 1)));
+  setSelectedFieldIndex(null);
+};
+
+const selectGroup = (index) => {
+  setSelectedGroupIndex(index);
+  setSelectedFieldIndex(null);
+};
+
+const updateSelectedGroup = (partial) => {
+  const idx = getSelectedGroupIndex();
+  if (idx < 0) return;
+  updateGroupAt(idx, partial);
+};
+
+const setFieldsOnSelectedGroup = (fields) => {
+  updateSelectedGroup({ fields });
+};
+
+const addField = () => {
+  const fields = getFields();
+  const next = [
+    ...fields,
+    {
+      key: `field_${Date.now()}`,
+      label: "New field",
+      dataType: "text",
+      renderer: "text",
+      required: false,
+      translatable: false,
+      colSpan: 1
+    }
+  ];
+  setFieldsOnSelectedGroup(next);
+  setSelectedFieldIndex(next.length - 1);
+};
+
+const updateFieldAt = (index, partial) => {
+  const fields = getFields();
+  setFieldsOnSelectedGroup(fields.map((f, i) => (i === index ? { ...f, ...partial } : f)));
+};
+
+const deleteField = (index) => {
+  setFieldsOnSelectedGroup(getFields().filter((_, i) => i !== index));
+  if (selectedFieldIndex() === index) setSelectedFieldIndex(null);
+};
+
+const moveField = (index, direction) => {
+  const fields = [...getFields()];
+  const target = index + direction;
+  if (target < 0 || target >= fields.length) return;
+  const tmp = fields[index];
+  fields[index] = fields[target];
+  fields[target] = tmp;
+  setFieldsOnSelectedGroup(fields);
+  setSelectedFieldIndex(target);
+};
+
+const isGroupSelected = (index) => getSelectedGroupIndex() === index;
+const isFieldSelected = (index) => selectedFieldIndex() === index;
+
+return {
+  getSiteLanguages,
+  getGroupIndices,
+  getGroupAt,
+  getSelectedGroupIndex,
+  getSelectedGroup,
+  getFieldIndices,
+  getFieldAt,
+  addGroup,
+  deleteGroup,
+  selectGroup,
+  updateSelectedGroup,
+  addField,
+  updateFieldAt,
+  deleteField,
+  moveField,
+  isGroupSelected,
+  isFieldSelected,
+  setSelectedFieldIndex,
+  selectedFieldIndex
+};
+'''
+      }
+    },
+    {
+      id: "fcg_shell",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''return { as: "div" };''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: minmax(10rem, 14rem) minmax(0, 1fr);
+  gap: 0.75rem;
+  width: 100%;
+  min-height: 0;
+  flex: 1;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "fcg_groups_panel",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''return { as: "aside", class: "fcg-groups-panel" };''',
+        css: '''
+return `._id.fcg-groups-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.625rem;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background_light_50};
+  overflow: auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "fcg_groups_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div", class: "fcg-groups-header" };
+''',
+        css: '''
+return `._id.fcg-groups-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.375rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "fcg_groups_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "h4", text: "Groups", class: "fcg-section-title" };
+''',
+        css: '''
+return `._id.fcg-section-title {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}`;
+'''
+      }
+    },
+    {
+      id: "fcg_add_group_btn",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Button",
+        props: '''
+return {
+  variant: "secondary",
+  size: "sm",
+  text: "Add",
+  type: "button",
+  onClick: () => args.fns.addGroup?.()
+};
+'''
+      }
+    },
+    {
+      id: "fcg_group_loop",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        contextName: "fcgGroupIndex",
+        loop: true,
+        props: '''
+return { data: args.fns.getGroupIndices?.() || [] };
+'''
+      }
+    },
+    {
+      id: "fcg_group_card",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const index = args.contextData.fcgGroupIndex;
+const group = args.fns.getGroupAt?.(index) || {};
+const selected = args.fns.isGroupSelected?.(index);
+return {
+  as: "button",
+  type: "button",
+  class: selected ? "fcg-group-card fcg-group-card-selected" : "fcg-group-card",
+  onClick: () => args.fns.selectGroup?.(index),
+  text: group.title || group.key || `Group ${index + 1}`
+};
+''',
+        css: '''
+return `._id.fcg-group-card {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0.625rem;
+  text-align: left;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.375rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  font-size: 0.8125rem;
+  cursor: pointer;
+
+  &:hover {
+    background: ${args.theme.var.color.background_light_200};
+  }
+}
+
+._id.fcg-group-card-selected {
+  border-color: ${args.theme.var.color.primary};
+  background: ${args.theme.var.color.primary_light_100};
+}`;
+'''
+      }
+    },
+    {
+      id: "fcg_detail_panel",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  class: "fcg-detail-panel",
+  hide: args.fns.getSelectedGroupIndex?.() < 0
+};
+''',
+        css: '''
+return `._id.fcg-detail-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 0;
+  overflow: auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "fcg_group_meta",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''return { as: "div", class: "fcg-group-meta" };''',
+        css: '''
+return `._id.fcg-group-meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  padding: 0.625rem;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background_light_50};
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "fcg_group_key",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "TextInput",
+        props: '''
+const group = args.fns.getSelectedGroup?.() || {};
+return {
+  label: "Group key",
+  value: group.key || "",
+  onChange: (e) => args.fns.updateSelectedGroup?.({ key: e.target.value })
+};
+'''
+      }
+    },
+    {
+      id: "fcg_group_title",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "TextInput",
+        props: '''
+const group = args.fns.getSelectedGroup?.() || {};
+return {
+  label: "Group title",
+  value: group.title || "",
+  onChange: (e) => args.fns.updateSelectedGroup?.({ title: e.target.value })
+};
+'''
+      }
+    },
+    {
+      id: "fcg_group_grid",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "TextInput",
+        props: '''
+const group = args.fns.getSelectedGroup?.() || {};
+return {
+  label: "Grid columns",
+  type: "number",
+  value: group.gridColumns != null ? String(group.gridColumns) : "2",
+  onChange: (e) => args.fns.updateSelectedGroup?.({ gridColumns: Number(e.target.value) || 1 })
+};
+'''
+      }
+    },
+    {
+      id: "fcg_fields_section",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''return { as: "div", class: "fcg-fields-section" };''',
+        css: '''
+return `._id.fcg-fields-section {
+  display: grid;
+  grid-template-columns: minmax(8rem, 12rem) minmax(0, 1fr);
+  gap: 0.625rem;
+  min-height: 0;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "fcg_fields_list_panel",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''return { as: "div", class: "fcg-fields-list-panel" };''',
+        css: '''
+return `._id.fcg-fields-list-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  padding: 0.625rem;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background};
+}`;
+'''
+      }
+    },
+    {
+      id: "fcg_fields_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''return { as: "div", class: "fcg-fields-header" };''',
+        css: '''
+return `._id.fcg-fields-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.375rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "fcg_fields_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''return { as: "h4", text: "Fields", class: "fcg-section-title" };'''
+      }
+    },
+    {
+      id: "fcg_add_field_btn",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Button",
+        props: '''
+return {
+  variant: "secondary",
+  size: "sm",
+  text: "Add field",
+  type: "button",
+  onClick: () => args.fns.addField?.()
+};
+'''
+      }
+    },
+    {
+      id: "fcg_field_loop",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        contextName: "fcgFieldIndex",
+        loop: true,
+        props: '''
+return { data: args.fns.getFieldIndices?.() || [] };
+'''
+      }
+    },
+    {
+      id: "fcg_field_card",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const index = args.contextData.fcgFieldIndex;
+const field = args.fns.getFieldAt?.(index) || {};
+const selected = args.fns.isFieldSelected?.(index);
+return {
+  as: "button",
+  type: "button",
+  class: selected ? "fcg-field-card fcg-field-card-selected" : "fcg-field-card",
+  onClick: () => args.fns.setSelectedFieldIndex?.(index),
+  text: field.label || field.key || `Field ${index + 1}`
+};
+''',
+        css: '''
+return `._id.fcg-field-card {
+  display: block;
+  width: 100%;
+  padding: 0.375rem 0.5rem;
+  text-align: left;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.375rem;
+  background: ${args.theme.var.color.background_light_50};
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+._id.fcg-field-card-selected {
+  border-color: ${args.theme.var.color.primary};
+  background: ${args.theme.var.color.primary_light_100};
+}`;
+'''
+      }
+    },
+    {
+      id: "fcg_field_detail",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  class: "fcg-field-detail",
+  hide: args.fns.selectedFieldIndex?.() == null
+};
+''',
+        css: '''
+return `._id.fcg-field-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.625rem;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background_light_50};
+}`;
+'''
+      }
+    },
+    {
+      id: "fcg_field_detail_grid",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''return { as: "div", class: "fcg-field-detail-grid" };''',
+        css: '''
+return `._id.fcg-field-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "fcg_field_key",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "TextInput",
+        props: '''
+const index = args.fns.selectedFieldIndex?.();
+const field = args.fns.getFieldAt?.(index) || {};
+return {
+  label: "Key",
+  value: field.key || "",
+  onChange: (e) => args.fns.updateFieldAt?.(index, { key: e.target.value })
+};
+'''
+      }
+    },
+    {
+      id: "fcg_field_label",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "TextInput",
+        props: '''
+const index = args.fns.selectedFieldIndex?.();
+const field = args.fns.getFieldAt?.(index) || {};
+return {
+  label: "Label",
+  value: field.label || "",
+  onChange: (e) => args.fns.updateFieldAt?.(index, { label: e.target.value })
+};
+'''
+      }
+    },
+    {
+      id: "fcg_field_renderer_wrap",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''return { as: "div" };'''
+      }
+    },
+    {
+      id: "fcg_field_renderer_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "label", text: "Renderer", class: "fcg-field-label" };
+''',
+        css: '''
+return `._id.fcg-field-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: ${args.theme.var.color.text_light_500};
+}`;
+'''
+      }
+    },
+    {
+      id: "fcg_field_renderer",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const index = args.fns.selectedFieldIndex?.();
+const field = args.fns.getFieldAt?.(index) || {};
+return {
+  as: "select",
+  class: "fcg-renderer-select",
+  value: field.renderer || "text",
+  onChange: (e) => {
+    const renderer = e.target.value;
+    args.fns.updateFieldAt?.(index, {
+      renderer,
+      dataType: renderer === "checkbox" ? "boolean" : renderer === "fieldArray" ? "array" : "text"
+    });
+  }
+};
+''',
+        css: '''
+return `._id.fcg-renderer-select {
+  width: 100%;
+  padding: 0.5rem 0.625rem;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.375rem;
+  background: ${args.theme.var.color.background};
+  font-size: 0.8125rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "fcg_renderer_opt_text",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''return { as: "option", text: "Text", value: "text" };'''
+      }
+    },
+    {
+      id: "fcg_renderer_opt_textarea",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''return { as: "option", text: "Text area", value: "textArea" };'''
+      }
+    },
+    {
+      id: "fcg_renderer_opt_checkbox",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''return { as: "option", text: "Checkbox", value: "checkbox" };'''
+      }
+    },
+    {
+      id: "fcg_field_colspan",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "TextInput",
+        props: '''
+const index = args.fns.selectedFieldIndex?.();
+const field = args.fns.getFieldAt?.(index) || {};
+return {
+  label: "Column span",
+  type: "number",
+  value: field.colSpan != null ? String(field.colSpan) : "1",
+  onChange: (e) => args.fns.updateFieldAt?.(index, { colSpan: Number(e.target.value) || 1 })
+};
+'''
+      }
+    },
+    {
+      id: "fcg_field_flags",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''return { as: "div", class: "fcg-field-flags" };''',
+        css: '''
+return `._id.fcg-field-flags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "fcg_field_required_wrap",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''return { as: "label", class: "fcg-flag-wrap" };''',
+        css: '''
+return `._id.fcg-flag-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "fcg_field_required",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const index = args.fns.selectedFieldIndex?.();
+const field = args.fns.getFieldAt?.(index) || {};
+return {
+  as: "input",
+  type: "checkbox",
+  checked: field.required === true,
+  onChange: (e) => args.fns.updateFieldAt?.(index, { required: e.target.checked })
+};
+'''
+      }
+    },
+    {
+      id: "fcg_field_required_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''return { as: "span", text: "Required" };'''
+      }
+    },
+    {
+      id: "fcg_field_trans_wrap",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const index = args.fns.selectedFieldIndex?.();
+const field = args.fns.getFieldAt?.(index) || {};
+const isText = field.renderer === "text" || field.renderer === "textArea";
+return { as: "label", class: "fcg-flag-wrap", hide: !isText };
+'''
+      }
+    },
+    {
+      id: "fcg_field_trans",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const index = args.fns.selectedFieldIndex?.();
+const field = args.fns.getFieldAt?.(index) || {};
+return {
+  as: "input",
+  type: "checkbox",
+  checked: field.translatable === true,
+  onChange: (e) => args.fns.updateFieldAt?.(index, { translatable: e.target.checked })
+};
+'''
+      }
+    },
+    {
+      id: "fcg_field_trans_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''return { as: "span", text: "Translatable" };'''
+      }
+    },
+    {
+      id: "fcg_field_actions",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''return { as: "div", class: "fcg-field-actions" };''',
+        css: '''
+return `._id.fcg-field-actions {
+  display: flex;
+  gap: 0.375rem;
+  flex-wrap: wrap;
+}`;
+'''
+      }
+    },
+    {
+      id: "fcg_field_up",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Button",
+        props: '''
+const index = args.fns.selectedFieldIndex?.();
+return {
+  variant: "secondary",
+  size: "sm",
+  text: "Move up",
+  type: "button",
+  disabled: index == null || index <= 0,
+  onClick: () => args.fns.moveField?.(index, -1)
+};
+'''
+      }
+    },
+    {
+      id: "fcg_field_down",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Button",
+        props: '''
+const index = args.fns.selectedFieldIndex?.();
+const count = args.fns.getFieldIndices?.().length || 0;
+return {
+  variant: "secondary",
+  size: "sm",
+  text: "Move down",
+  type: "button",
+  disabled: index == null || index >= count - 1,
+  onClick: () => args.fns.moveField?.(index, 1)
+};
+'''
+      }
+    },
+    {
+      id: "fcg_field_delete",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Button",
+        props: '''
+const index = args.fns.selectedFieldIndex?.();
+return {
+  variant: "danger",
+  size: "sm",
+  text: "Delete field",
+  type: "button",
+  onClick: () => args.fns.deleteField?.(index)
+};
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "fcg_e1", T: "Attr", S: "fcg_root", E: "fcg_shell" },
+    { id: "fcg_e2", T: "Attr", S: "fcg_shell", E: "fcg_groups_panel" },
+    { id: "fcg_e3", T: "Attr", S: "fcg_shell", E: "fcg_detail_panel" },
+    { id: "fcg_e4", T: "Attr", S: "fcg_groups_panel", E: "fcg_groups_header" },
+    { id: "fcg_e5", T: "Attr", S: "fcg_groups_panel", E: "fcg_group_loop" },
+    { id: "fcg_e6", T: "Attr", S: "fcg_groups_header", E: "fcg_groups_title" },
+    { id: "fcg_e7", T: "Attr", S: "fcg_groups_header", E: "fcg_add_group_btn" },
+    { id: "fcg_e8", T: "Attr", S: "fcg_group_loop", E: "fcg_group_card" },
+    { id: "fcg_e9", T: "Attr", S: "fcg_detail_panel", E: "fcg_group_meta" },
+    { id: "fcg_e10", T: "Attr", S: "fcg_detail_panel", E: "fcg_fields_section" },
+    { id: "fcg_e11", T: "Attr", S: "fcg_group_meta", E: "fcg_group_key" },
+    { id: "fcg_e12", T: "Attr", S: "fcg_group_meta", E: "fcg_group_title" },
+    { id: "fcg_e13", T: "Attr", S: "fcg_group_meta", E: "fcg_group_grid" },
+    { id: "fcg_e14", T: "Attr", S: "fcg_fields_section", E: "fcg_fields_list_panel" },
+    { id: "fcg_e15", T: "Attr", S: "fcg_fields_section", E: "fcg_field_detail" },
+    { id: "fcg_e16", T: "Attr", S: "fcg_fields_list_panel", E: "fcg_fields_header" },
+    { id: "fcg_e17", T: "Attr", S: "fcg_fields_list_panel", E: "fcg_field_loop" },
+    { id: "fcg_e18", T: "Attr", S: "fcg_fields_header", E: "fcg_fields_title" },
+    { id: "fcg_e19", T: "Attr", S: "fcg_fields_header", E: "fcg_add_field_btn" },
+    { id: "fcg_e20", T: "Attr", S: "fcg_field_loop", E: "fcg_field_card" },
+    { id: "fcg_e21", T: "Attr", S: "fcg_field_detail", E: "fcg_field_detail_grid" },
+    { id: "fcg_e22", T: "Attr", S: "fcg_field_detail", E: "fcg_field_flags" },
+    { id: "fcg_e23", T: "Attr", S: "fcg_field_detail", E: "fcg_field_actions" },
+    { id: "fcg_e24", T: "Attr", S: "fcg_field_detail_grid", E: "fcg_field_key" },
+    { id: "fcg_e25", T: "Attr", S: "fcg_field_detail_grid", E: "fcg_field_label" },
+    { id: "fcg_e26", T: "Attr", S: "fcg_field_detail_grid", E: "fcg_field_renderer_wrap" },
+    { id: "fcg_e27", T: "Attr", S: "fcg_field_detail_grid", E: "fcg_field_colspan" },
+    { id: "fcg_e28", T: "Attr", S: "fcg_field_renderer_wrap", E: "fcg_field_renderer_label" },
+    { id: "fcg_e29", T: "Attr", S: "fcg_field_renderer_wrap", E: "fcg_field_renderer" },
+    { id: "fcg_e30", T: "Attr", S: "fcg_field_renderer", E: "fcg_renderer_opt_text" },
+    { id: "fcg_e31", T: "Attr", S: "fcg_field_renderer", E: "fcg_renderer_opt_textarea" },
+    { id: "fcg_e32", T: "Attr", S: "fcg_field_renderer", E: "fcg_renderer_opt_checkbox" },
+    { id: "fcg_e33", T: "Attr", S: "fcg_field_flags", E: "fcg_field_required_wrap" },
+    { id: "fcg_e34", T: "Attr", S: "fcg_field_flags", E: "fcg_field_trans_wrap" },
+    { id: "fcg_e35", T: "Attr", S: "fcg_field_required_wrap", E: "fcg_field_required" },
+    { id: "fcg_e36", T: "Attr", S: "fcg_field_required_wrap", E: "fcg_field_required_text" },
+    { id: "fcg_e37", T: "Attr", S: "fcg_field_trans_wrap", E: "fcg_field_trans" },
+    { id: "fcg_e38", T: "Attr", S: "fcg_field_trans_wrap", E: "fcg_field_trans_text" },
+    { id: "fcg_e39", T: "Attr", S: "fcg_field_actions", E: "fcg_field_up" },
+    { id: "fcg_e40", T: "Attr", S: "fcg_field_actions", E: "fcg_field_down" },
+    { id: "fcg_e41", T: "Attr", S: "fcg_field_actions", E: "fcg_field_delete" }
+  ]
+}
