@@ -1,0 +1,134 @@
+{
+  vertexes: [
+    {
+      id: "function_validation_errors"
+      L: "Function"
+      P: {
+        key: "exampleValidationAndErrors"
+        description: "Example: Schema validation and structured error handling"
+        body: '''
+// Example 1: Schema Validation with Zod
+// =====================================
+
+// Define schema using built-in patterns
+const createUserSchema = args.schema.object({
+  email: args.schema.email(),
+  name: args.schema.string().min(2).max(100),
+  age: args.schema.number().int().positive().optional()
+});
+
+// Get data from request
+const userData = args.contextData;
+
+// Validate data
+const validation = args.validate(userData, createUserSchema);
+
+if (!validation.success) {
+  // Return validation error with details
+  return args.responses.badRequest(
+    validation.error,
+    { errors: validation.errors }
+  );
+}
+
+// Or use validateOrThrow (automatically throws ValidationError)
+try {
+  const validData = args.validateOrThrow(userData, createUserSchema);
+  // validData is now type-safe and validated
+} catch (error) {
+  if (args.isAppError(error)) {
+    return error.toJSON();
+  }
+}
+
+// Example 2: Using Schema Builders
+// =================================
+
+// Common patterns built-in
+const paginationSchema = args.commonSchemas.pagination;
+const idParamSchema = args.commonSchemas.idParam;
+
+// Custom schema patterns
+const customSchema = args.createSchema({
+  userId: args.schema.uuid(),
+  status: args.schema.enum(["active", "inactive", "pending"]),
+  tags: args.schema.array(args.schema.string()),
+  metadata: args.schema.record(args.schema.string(), args.schema.any())
+});
+
+// Example 3: Structured Error Classes
+// ====================================
+
+// Throw specific errors
+if (!userData.email) {
+  throw args.errors.Validation("Email is required");
+}
+
+// Authentication error
+const user = await args.getUserFromSession();
+if (!user) {
+  throw args.errors.Authentication("Please log in");
+}
+
+// Authorization error
+if (!args.hasRole(user, "admin")) {
+  throw args.errors.Forbidden("Admin access required");
+}
+
+// Not found error
+const resource = await args.session.run(
+  "MATCH (n:User {id: $id}) RETURN n",
+  { id: userData.userId }
+);
+
+if (resource.records.length === 0) {
+  throw args.errors.NotFound("User", userData.userId);
+}
+
+// Business logic error
+if (user.P.balance < 100) {
+  throw args.errors.BusinessLogic(
+    "Insufficient balance",
+    { required: 100, current: user.P.balance }
+  );
+}
+
+// Example 4: Response Formatters
+// ===============================
+
+// Success response
+return args.responses.ok({
+  user: validation.data,
+  message: "User validated successfully"
+});
+
+// Created response (201)
+return args.responses.created({
+  id: "new-user-123",
+  email: validation.data.email
+});
+
+// Paginated response
+return args.responses.paginated(
+  [{ id: 1 }, { id: 2 }],  // data
+  1,                        // page
+  10,                       // limit
+  25                        // total
+);
+
+// Example 5: Error Response Conversion
+// ====================================
+
+try {
+  // Some operation that might fail
+  throw new Error("Something went wrong");
+} catch (error) {
+  // Convert any error to standardized response
+  return args.errorToResponse(error);
+}
+'''
+      }
+    }
+  ]
+  edges: []
+}

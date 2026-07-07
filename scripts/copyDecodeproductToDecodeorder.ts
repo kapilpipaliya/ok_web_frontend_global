@@ -2,6 +2,14 @@
 /**
  * Copies every file from src/page_schema/decodeproduct to multiple destination
  * directories (orvio, decodefile, etc.) with the same folder structure.
+ *
+ * Usage (works on any Node version after npm install):
+ *   ./scripts/copyDecodeproductToDecodeorder.ts
+ *   npx tsx scripts/copyDecodeproductToDecodeorder.ts
+ *   npm run copy-schema
+ *
+ * Note: `node scripts/...ts` ignores the shebang and only works if your shell
+ * has NODE_OPTIONS=--experimental-strip-types or Node 22.18+/23.6+.
  * Skips:
  *   - Directories listed in SKIP_DIRS (and everything inside them)
  *   - Individual files listed in SKIP_FILES (paths relative to decodeproduct)
@@ -13,10 +21,10 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
-const SOURCE = path.join(ROOT, "src/page_schema/solvo");
+const SOURCE = path.join(ROOT, "src/page_schema/fulchandshastri");
 
 /** Destination directory names under src/page_schema (each gets a full copy). */
-const DEST_NAMES = ["fulchandshastri"];
+const DEST_NAMES = ["default"];
 
 const SKIP_DIRS = [
   //"functions",

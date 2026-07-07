@@ -1,0 +1,268 @@
+{
+  vertexes: [
+    {
+      id: "example_neogma_usage_function",
+      L: "Function",
+      P: {
+        key: "exampleNeogmaUsage",
+        description: "Example demonstrating Neogma OGM usage with hybrid approach (OGM + raw Cypher)",
+        body: '''
+/**
+ * Example: User Notification Dashboard
+ *
+ * This function demonstrates the hybrid approach:
+ * - Using Neogma OGM for simple CRUD operations (notifications)
+ * - Using raw Cypher for complex queries (aggregations, stats)
+ * - Proper session management
+ * - Converting OGM results to Vertex format for UI compatibility
+ *
+ * Parameters (via args.contextData):
+ * - userId: string (required) - User UUID
+ * - action: string (optional) - Action to perform: "list", "create", "markRead", "delete"
+ * - notificationId: string (optional) - For markRead and delete actions
+ * - notificationData: object (optional) - For create action
+ *   - type: "info" | "success" | "warning" | "error"
+ *   - title: string
+ *   - message: string
+ *   - actionUrl: string (optional)
+ *   - actionText: string (optional)
+ *
+ * Returns:
+ * - success: boolean
+ * - data: object with notifications and stats
+ * - message: string
+ */
+
+try {
+  const { userId, action = "list", notificationId, notificationData } = args.contextData;
+
+  // Validate user ID
+  if (!userId) {
+    return {
+      success: false,
+      error: "User ID is required",
+      data: null
+    };
+  }
+
+  // Import helper functions
+  const { modelsToVertices, modelToVertex } = await import("~/lib/models");
+
+  // ==================== ACTION: CREATE ====================
+  if (action === "create") {
+    if (!notificationData || !notificationData.title || !notificationData.message) {
+      return {
+        success: false,
+        error: "Notification data with title and message is required",
+        data: null
+      };
+    }
+
+    // Use OGM to create notification (simple CRUD)
+    const notification = await args.Models.Notification.createOne({
+      userId,
+      type: notificationData.type || "info",
+      title: notificationData.title,
+      message: notificationData.message,
+      actionUrl: notificationData.actionUrl || null,
+      actionText: notificationData.actionText || null,
+      read: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    }, { session: args.session });
+
+    // Convert to Vertex format for UI
+    const vertexFormat = modelToVertex(notification);
+
+    return {
+      success: true,
+      message: "Notification created successfully",
+      data: {
+        notification: vertexFormat
+      }
+    };
+  }
+
+  // ==================== ACTION: MARK AS READ ====================
+  if (action === "markRead") {
+    if (!notificationId) {
+      return {
+        success: false,
+        error: "Notification ID is required for markRead action",
+        data: null
+      };
+    }
+
+    // Use OGM to find and update (simple CRUD)
+    const notification = await args.Models.Notification.findOne(
+      { where: { id: notificationId } },
+      args.session
+    );
+
+    if (!notification) {
+      return {
+        success: false,
+        error: "Notification not found",
+        data: null
+      };
+    }
+
+    // Verify ownership
+    if (notification.dataValues.userId !== userId) {
+      return {
+        success: false,
+        error: "Access denied",
+        data: null
+      };
+    }
+
+    // Use OGM instance method
+    await notification.markAsRead(args.session);
+
+    return {
+      success: true,
+      message: "Notification marked as read",
+      data: {
+        notification: modelToVertex(notification)
+      }
+    };
+  }
+
+  // ==================== ACTION: DELETE ====================
+  if (action === "delete") {
+    if (!notificationId) {
+      return {
+        success: false,
+        error: "Notification ID is required for delete action",
+        data: null
+      };
+    }
+
+    // Use raw Cypher for delete with ownership check (more control)
+    const deleteResult = await args.session.run(`
+      MATCH (n:Notification {id: $notificationId, userId: $userId})
+      DELETE n
+      RETURN count(n) as deletedCount
+    `, {
+      notificationId,
+      userId
+    });
+
+    const deletedCount = deleteResult.records[0]?.get("deletedCount")?.toNumber() || 0;
+
+    if (deletedCount === 0) {
+      return {
+        success: false,
+        error: "Notification not found or access denied",
+        data: null
+      };
+    }
+
+    return {
+      success: true,
+      message: "Notification deleted successfully",
+      data: null
+    };
+  }
+
+  // ==================== ACTION: LIST (DEFAULT) ====================
+  // HYBRID APPROACH: Mix OGM and raw Cypher
+
+  // 1. Use OGM for simple notification query
+  const recentNotifications = await args.Models.Notification.findByUserId(
+    userId,
+    {
+      session: args.session,
+      unreadOnly: false,
+      limit: 20
+    }
+  );
+
+  // 2. Use OGM static method for unread count
+  const unreadCount = await args.Models.Notification.getUnreadCount(
+    userId,
+    args.session
+  );
+
+  // 3. Use raw Cypher for complex aggregation stats
+  // Example: Get notification stats by type and time period
+  const statsResult = await args.session.run(`
+    MATCH (n:Notification {userId: $userId})
+    WITH n,
+      datetime(n.createdAt) as createdDateTime,
+      datetime() as now
+    WITH n,
+      duration.between(createdDateTime, now).days as daysAgo
+    RETURN
+      count(n) as total,
+      sum(CASE WHEN n.read = false THEN 1 ELSE 0 END) as unread,
+      sum(CASE WHEN n.read = true THEN 1 ELSE 0 END) as read,
+      sum(CASE WHEN n.type = 'info' THEN 1 ELSE 0 END) as infoCount,
+      sum(CASE WHEN n.type = 'success' THEN 1 ELSE 0 END) as successCount,
+      sum(CASE WHEN n.type = 'warning' THEN 1 ELSE 0 END) as warningCount,
+      sum(CASE WHEN n.type = 'error' THEN 1 ELSE 0 END) as errorCount,
+      sum(CASE WHEN daysAgo <= 1 THEN 1 ELSE 0 END) as last24Hours,
+      sum(CASE WHEN daysAgo <= 7 THEN 1 ELSE 0 END) as lastWeek,
+      sum(CASE WHEN daysAgo <= 30 THEN 1 ELSE 0 END) as lastMonth
+  `, { userId });
+
+  const statsRecord = statsResult.records[0];
+  const stats = statsRecord ? {
+    total: statsRecord.get("total")?.toNumber() || 0,
+    unread: statsRecord.get("unread")?.toNumber() || 0,
+    read: statsRecord.get("read")?.toNumber() || 0,
+    byType: {
+      info: statsRecord.get("infoCount")?.toNumber() || 0,
+      success: statsRecord.get("successCount")?.toNumber() || 0,
+      warning: statsRecord.get("warningCount")?.toNumber() || 0,
+      error: statsRecord.get("errorCount")?.toNumber() || 0
+    },
+    byTime: {
+      last24Hours: statsRecord.get("last24Hours")?.toNumber() || 0,
+      lastWeek: statsRecord.get("lastWeek")?.toNumber() || 0,
+      lastMonth: statsRecord.get("lastMonth")?.toNumber() || 0
+    }
+  } : {
+    total: 0,
+    unread: 0,
+    read: 0,
+    byType: { info: 0, success: 0, warning: 0, error: 0 },
+    byTime: { last24Hours: 0, lastWeek: 0, lastMonth: 0 }
+  };
+
+  // 4. Convert OGM results to Vertex format for UI compatibility
+  const notificationsVertexFormat = modelsToVertices(recentNotifications);
+
+  // 5. Return combined data
+  return {
+    success: true,
+    message: `Found ${recentNotifications.length} recent notifications`,
+    data: {
+      // UI-compatible Vertex format
+      notifications: notificationsVertexFormat,
+
+      // Stats from complex aggregation
+      stats: stats,
+
+      // Additional info
+      unreadCount: unreadCount,
+      hasMore: recentNotifications.length === 20
+    }
+  };
+
+} catch (error) {
+  console.error("Error in exampleNeogmaUsage:", error);
+
+  return {
+    success: false,
+    error: error.message || "Failed to process request",
+    errorType: error.name || "UnknownError",
+    data: null
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}
