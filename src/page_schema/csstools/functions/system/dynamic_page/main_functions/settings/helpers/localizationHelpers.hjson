@@ -1,0 +1,399 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: localizationHelpers
+        description: Fulchand settings localization — normalize, resolve, validate translatable field values.
+        body:
+          '''
+/**
+ * contextData.action:
+ *   isTranslatableField | normalizeLocalizedValue | resolveLocalizedValue |
+ *   firstNonEmptyLanguage | localizeSectionValues | validateLocalizedField |
+ *   applyTranslatableDefaults | getDefaultLanguageCode |
+ *   getTranslationMeta | splitTranslatableProps | mergeTranslationsOntoProps |
+ *   collectTranslatableFieldKeys
+ */
+
+const action = args.contextData?.action;
+if (!action) {
+  return { success: false, message: "action is required" };
+}
+
+const DEFAULT_LANGUAGES = [
+  { code: "en", label: "English", isDefault: true },
+  { code: "hi", label: "Hindi", isDefault: false },
+  { code: "gu", label: "Gujarati", isDefault: false }
+];
+
+const isTranslatableField = (field) => field?.translatable === true;
+
+const getDefaultLanguageCode = (languages) => {
+  const list = Array.isArray(languages) && languages.length > 0 ? languages : DEFAULT_LANGUAGES;
+  const explicit = list.find((lang) => lang?.isDefault === true && lang?.code);
+  if (explicit?.code) return String(explicit.code);
+  const first = list.find((lang) => lang?.code);
+  return first?.code ? String(first.code) : "en";
+};
+
+const normalizeLanguageList = (languages) => {
+  if (!Array.isArray(languages) || languages.length === 0) return DEFAULT_LANGUAGES;
+  return languages
+    .filter((lang) => lang?.code != null && String(lang.code).trim() !== "")
+    .map((lang) => ({
+      code: String(lang.code).trim(),
+      label: lang.label != null ? String(lang.label) : String(lang.code).trim(),
+      isDefault: lang.isDefault === true
+    }));
+};
+
+const isLocalizedObject = (value) =>
+  value != null && typeof value === "object" && !Array.isArray(value);
+
+const normalizeLocalizedValue = (value, languages, defaultCode) => {
+  const list = normalizeLanguageList(languages);
+  const code = defaultCode || getDefaultLanguageCode(list);
+  const normalized = {};
+  for (let i = 0; i < list.length; i++) {
+    const langCode = list[i].code;
+    normalized[langCode] = "";
+  }
+  if (isLocalizedObject(value)) {
+    for (const key of Object.keys(value)) {
+      if (Object.prototype.hasOwnProperty.call(normalized, key)) {
+        normalized[key] = value[key] == null ? "" : String(value[key]);
+      }
+    }
+    return normalized;
+  }
+  if (typeof value === "string") {
+    normalized[code] = value;
+  }
+  return normalized;
+};
+
+const firstNonEmptyLanguage = (value, languages) => {
+  if (!isLocalizedObject(value)) return "";
+  const list = normalizeLanguageList(languages);
+  for (let i = 0; i < list.length; i++) {
+    const langCode = list[i].code;
+    const text = value[langCode];
+    if (text != null && String(text).trim() !== "") return String(text);
+  }
+  return "";
+};
+
+const resolveLocalizedValue = (value, locale, languages) => {
+  if (!isLocalizedObject(value)) return "";
+  const list = normalizeLanguageList(languages);
+  const defaultCode = getDefaultLanguageCode(list);
+  const resolvedLocale = locale || defaultCode;
+  return (
+    value[resolvedLocale]
+    || value[defaultCode]
+    || firstNonEmptyLanguage(value, list)
+    || ""
+  );
+};
+
+const validateLocalizedField = (field, value, languages) => {
+  if (!isTranslatableField(field)) return null;
+  if (field?.required !== true) return null;
+  const list = normalizeLanguageList(languages);
+  const defaultCode = getDefaultLanguageCode(list);
+  const normalized = normalizeLocalizedValue(value, list, defaultCode);
+  const defaultValue = normalized[defaultCode];
+  if (defaultValue == null || String(defaultValue).trim() === "") {
+    const fieldKey = field?.key || field?.name || "field";
+    return `${fieldKey} requires a value in the default language (${defaultCode})`;
+  }
+  return null;
+};
+
+const collectFormFields = (sectionConfig) => {
+  const formConfig = sectionConfig?.form;
+  if (!formConfig) return [];
+  if (Array.isArray(formConfig.groups)) {
+    const fields = [];
+    for (let gi = 0; gi < formConfig.groups.length; gi++) {
+      const groupFields = formConfig.groups[gi]?.fields;
+      if (Array.isArray(groupFields)) fields.push(...groupFields);
+    }
+    return fields;
+  }
+  if (Array.isArray(formConfig.fields)) return formConfig.fields;
+  return [];
+};
+
+const applyValueAction = (field, value, mode, languages, locale) => {
+  if (!isTranslatableField(field)) return value;
+  if (mode === "resolve") {
+    return resolveLocalizedValue(value, locale, languages);
+  }
+  const defaultCode = getDefaultLanguageCode(languages);
+  return normalizeLocalizedValue(value, languages, defaultCode);
+};
+
+const localizeSectionValues = (sectionConfig, values, mode, languages, locale) => {
+  const fields = collectFormFields(sectionConfig);
+  const output = { ...(values || {}) };
+  for (let fi = 0; fi < fields.length; fi++) {
+    const field = fields[fi];
+    const fieldKey = field?.key;
+    if (!fieldKey) continue;
+    if (field.renderer === "fieldArray" && Array.isArray(output[fieldKey])) {
+      const itemFields = field.fieldArrayConfig?.itemFields || [];
+      output[fieldKey] = output[fieldKey].map((item) => {
+        const nextItem = { ...(item || {}) };
+        for (let ii = 0; ii < itemFields.length; ii++) {
+          const itemField = itemFields[ii];
+          const itemKey = itemField?.key;
+          if (!itemKey) continue;
+          nextItem[itemKey] = applyValueAction(
+            itemField,
+            nextItem[itemKey],
+            mode,
+            languages,
+            locale
+          );
+        }
+        return nextItem;
+      });
+      continue;
+    }
+    output[fieldKey] = applyValueAction(field, output[fieldKey], mode, languages, locale);
+  }
+  return output;
+};
+
+const applyTranslatableDefaultsToField = (field) => {
+  if (!field || typeof field !== "object") return field;
+  const isTextField = field.renderer === "text" || field.renderer === "textArea";
+  const next = { ...field };
+  if (next.translatable === undefined) {
+    next.translatable = isTextField ? true : false;
+  }
+  if (next.renderer === "fieldArray" && next.fieldArrayConfig?.itemFields) {
+    next.fieldArrayConfig = {
+      ...next.fieldArrayConfig,
+      itemFields: next.fieldArrayConfig.itemFields.map((itemField) =>
+        applyTranslatableDefaultsToField(itemField)
+      )
+    };
+  }
+  if (isTextField && next.translatable === true && next.dataType === undefined) {
+    next.dataType = "text";
+  }
+  return next;
+};
+
+if (action === "isTranslatableField") {
+  return { success: true, data: { translatable: isTranslatableField(args.contextData.field) } };
+}
+
+if (action === "getDefaultLanguageCode") {
+  return {
+    success: true,
+    data: { defaultCode: getDefaultLanguageCode(args.contextData.languages) }
+  };
+}
+
+if (action === "normalizeLanguageList") {
+  return {
+    success: true,
+    data: { languages: normalizeLanguageList(args.contextData.languages) }
+  };
+}
+
+if (action === "normalizeLocalizedValue") {
+  const { value, languages, defaultCode } = args.contextData;
+  return {
+    success: true,
+    data: { value: normalizeLocalizedValue(value, languages, defaultCode) }
+  };
+}
+
+if (action === "firstNonEmptyLanguage") {
+  const { value, languages } = args.contextData;
+  return {
+    success: true,
+    data: { text: firstNonEmptyLanguage(value, languages) }
+  };
+}
+
+if (action === "resolveLocalizedValue") {
+  const { value, locale, languages } = args.contextData;
+  return {
+    success: true,
+    data: { text: resolveLocalizedValue(value, locale, languages) }
+  };
+}
+
+if (action === "validateLocalizedField") {
+  const { field, value, languages } = args.contextData;
+  const error = validateLocalizedField(field, value, languages);
+  if (error) return { success: false, message: error };
+  return { success: true, data: { valid: true } };
+}
+
+if (action === "localizeSectionValues") {
+  const { sectionConfig, values, mode, languages, locale } = args.contextData;
+  return {
+    success: true,
+    data: {
+      values: localizeSectionValues(sectionConfig, values, mode, languages, locale)
+    }
+  };
+}
+
+if (action === "applyTranslatableDefaults") {
+  const { field } = args.contextData;
+  return {
+    success: true,
+    data: { field: applyTranslatableDefaultsToField(field) }
+  };
+}
+
+const getTranslationMeta = (rootLabel) => {
+  const label = rootLabel != null ? String(rootLabel).trim() : "";
+  const translationLabel = `${label}Translation`;
+  return {
+    rootLabel: label,
+    translationLabel,
+    edgeType: `${label}${translationLabel}`
+  };
+};
+
+const collectTranslatableFieldKeys = (formConfig) => {
+  const keys = [];
+  const groups = formConfig?.groups;
+  if (Array.isArray(groups)) {
+    for (let gi = 0; gi < groups.length; gi++) {
+      const fields = groups[gi]?.fields;
+      if (!Array.isArray(fields)) continue;
+      for (let fi = 0; fi < fields.length; fi++) {
+        const field = fields[fi];
+        if (isTranslatableField(field) && field?.key) keys.push(String(field.key));
+      }
+    }
+    return keys;
+  }
+  const fields = formConfig?.fields;
+  if (Array.isArray(fields)) {
+    for (let fi = 0; fi < fields.length; fi++) {
+      const field = fields[fi];
+      if (isTranslatableField(field) && field?.key) keys.push(String(field.key));
+    }
+  }
+  return keys;
+};
+
+const splitTranslatableProps = (props, fieldKeys, languages) => {
+  const defaultCode = getDefaultLanguageCode(languages);
+  const rootProps = { ...(props || {}) };
+  const translationsByLocale = {};
+  const keys = Array.isArray(fieldKeys) ? fieldKeys.map((k) => String(k)).filter(Boolean) : [];
+  if (keys.length === 0) {
+    return { rootProps, translationsByLocale, defaultCode };
+  }
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i];
+    const value = rootProps[key];
+    if (!isLocalizedObject(value)) continue;
+    const defaultText = value[defaultCode];
+    rootProps[key] = defaultText != null ? String(defaultText) : "";
+    for (const locale of Object.keys(value)) {
+      if (locale === defaultCode) continue;
+      if (!translationsByLocale[locale]) {
+        translationsByLocale[locale] = { locale };
+      }
+      const text = value[locale];
+      translationsByLocale[locale][key] = text != null ? String(text) : "";
+    }
+  }
+  return { rootProps, translationsByLocale, defaultCode };
+};
+
+const mergeTranslationsOntoProps = (params) => {
+  const {
+    rootProps,
+    fieldKeys,
+    languages,
+    translations
+  } = params || {};
+  const keys = Array.isArray(fieldKeys) ? fieldKeys.map((k) => String(k)).filter(Boolean) : [];
+  const list = normalizeLanguageList(languages);
+  const defaultCode = getDefaultLanguageCode(list);
+  const maps = {};
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i];
+    const normalized = {};
+    for (let li = 0; li < list.length; li++) {
+      normalized[list[li].code] = "";
+    }
+    const rootVal = rootProps?.[key];
+    if (isLocalizedObject(rootVal)) {
+      for (const locale of Object.keys(rootVal)) {
+        if (Object.prototype.hasOwnProperty.call(normalized, locale)) {
+          normalized[locale] = rootVal[locale] == null ? "" : String(rootVal[locale]);
+        }
+      }
+    } else if (rootVal != null && String(rootVal) !== "") {
+      normalized[defaultCode] = String(rootVal);
+    }
+    maps[key] = normalized;
+  }
+  const translationRows = Array.isArray(translations) ? translations : [];
+  for (let ti = 0; ti < translationRows.length; ti++) {
+    const row = translationRows[ti];
+    const locale = row?.locale != null ? String(row.locale) : "";
+    if (!locale) continue;
+    for (let fi = 0; fi < keys.length; fi++) {
+      const key = keys[fi];
+      if (!maps[key]) continue;
+      const text = row[key];
+      if (text != null) maps[key][locale] = String(text);
+    }
+  }
+  return maps;
+};
+
+if (action === "getTranslationMeta") {
+  const rootLabel = args.contextData.rootLabel || args.contextData.tableVertexLabel;
+  if (!rootLabel) return { success: false, message: "rootLabel is required" };
+  return { success: true, data: getTranslationMeta(rootLabel) };
+}
+
+if (action === "collectTranslatableFieldKeys") {
+  return {
+    success: true,
+    data: { keys: collectTranslatableFieldKeys(args.contextData.formConfig) }
+  };
+}
+
+if (action === "splitTranslatableProps") {
+  const { props, fieldKeys, languages } = args.contextData;
+  return {
+    success: true,
+    data: splitTranslatableProps(props, fieldKeys, languages)
+  };
+}
+
+if (action === "mergeTranslationsOntoProps") {
+  return {
+    success: true,
+    data: {
+      maps: mergeTranslationsOntoProps(args.contextData)
+    }
+  };
+}
+
+return { success: false, message: `Unknown action: ${action}` };
+'''
+      }
+    }
+  ]
+  edges: []
+}

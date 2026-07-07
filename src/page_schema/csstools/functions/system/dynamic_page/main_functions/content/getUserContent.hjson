@@ -1,0 +1,512 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Fetches user content with filtering, sorting, and search support. Works with any tableVertexLabel.
+        body:
+          '''
+// Get current authenticated user from session
+const actualUser = await args.getUserFromSession();
+let user = null;
+let isPublicRead = false;
+
+if (actualUser) {
+  user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+}
+
+// Extract parameters
+const { 
+  tableKey,
+  tableVertexLabel, 
+  search, 
+  filters = {}, 
+  sort = {},
+  categoryId,
+  showUnassigned,
+  parentVertexLabel,
+  toParentEdgeType,
+  enableUserScoping,
+  hooks,
+  elementIds,
+  onlyNotQueued,
+  relationshipPropertyBindings
+} = args.contextData;
+
+const getGraphPayload = (nodes, rels) => ({
+  vertexes: nodes || {},
+  edges: rels || {},
+  deleted_vertexes: Array.isArray(args.context?.deletedVertexes) ? args.context.deletedVertexes : [],
+  deleted_edges: Array.isArray(args.context?.deletedEdges) ? args.context.deletedEdges : []
+});
+
+// Optional: client passes bindings from table config (form fields with selectConfig.edgeOnly + relationshipType, plus config.relationshipPropertyBindings).
+const hydrateRelationshipSelectProps = (items, rels, bindings) => {
+  if (!Array.isArray(bindings) || bindings.length === 0 || !Array.isArray(items)) return;
+  for (let vi = 0; vi < items.length; vi++) {
+    const v = items[vi];
+    if (!v?.P || !v?.OUT) continue;
+    for (let bi = 0; bi < bindings.length; bi++) {
+      const row = bindings[bi];
+      const prop = row?.prop;
+      const rel = row?.rel;
+      if (!prop || !rel) continue;
+      const outArr = v.OUT[rel];
+      if (!Array.isArray(outArr) || outArr.length === 0) {
+        v.P[prop] = null;
+        continue;
+      }
+      const edgeObj = rels[outArr[0]];
+      if (edgeObj && edgeObj.E != null) v.P[prop] = edgeObj.E;
+      else v.P[prop] = null;
+    }
+  }
+};
+
+const buildRelationshipPropertyBindingsFromParts = (parts) => {
+  const formConfig = parts?.formConfig && typeof parts.formConfig === "object" ? parts.formConfig : {};
+  const columnsRaw = parts?.columns;
+  const columns = Array.isArray(columnsRaw?.columns)
+    ? columnsRaw.columns
+    : (Array.isArray(columnsRaw) ? columnsRaw : []);
+  const fields = [];
+  const groups = formConfig?.groups;
+  if (Array.isArray(groups)) {
+    for (let gi = 0; gi < groups.length; gi++) {
+      const g = groups[gi]?.fields;
+      if (!Array.isArray(g)) continue;
+      for (let fi = 0; fi < g.length; fi++) fields.push(g[fi]);
+    }
+  }
+  const seen = new Set();
+  const bindings = [];
+  const addBinding = (prop, rel) => {
+    if (!prop || !rel) return;
+    const k = `${prop}\0${rel}`;
+    if (seen.has(k)) return;
+    seen.add(k);
+    bindings.push({ prop, rel });
+  };
+  for (let i = 0; i < fields.length; i++) {
+    const f = fields[i];
+    if ((f?.dataType === "select" || f?.dataType === "relation") && f.selectConfig?.relationshipType && f.selectConfig?.edgeOnly === true) {
+      addBinding(f.key, f.selectConfig.relationshipType);
+    }
+  }
+  for (let ci = 0; ci < columns.length; ci++) {
+    const c = columns[ci];
+    if (c?.dataType === "relation" && c.selectConfig?.relationshipType && c.selectConfig?.edgeOnly === true) {
+      addBinding(c.key, c.selectConfig.relationshipType);
+    }
+  }
+  const extra = parts?.relationshipPropertyBindings;
+  if (Array.isArray(extra)) {
+    for (let j = 0; j < extra.length; j++) {
+      const row = extra[j];
+      addBinding(row?.prop, row?.rel);
+    }
+  }
+  return bindings;
+};
+
+const evalConfigBody = (cfgStr) => {
+  if (cfgStr == null || String(cfgStr).trim() === "") return null;
+  try {
+    const configFn = new Function(String(cfgStr));
+    const value = configFn();
+    return value && typeof value === "object" ? value : null;
+  } catch (e) {
+    console.warn("getUserContent: config eval failed", e);
+    return null;
+  }
+};
+
+const stripPartMeta = (value) => {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  const { part: _part, ...rest } = value;
+  return rest;
+};
+
+const evalPartFromGraph = (graph, partVertexIds, part) => {
+  const vertexId = partVertexIds?.[part];
+  const vertex = graph?.vertexes?.[vertexId];
+  if (!vertex?.P?.config) return null;
+  return evalConfigBody(vertex.P.config);
+};
+
+const resolveGeneralFlags = (generalRaw, label) => {
+  const general = stripPartMeta(generalRaw);
+  return {
+    publicRead: general.publicRead === true,
+    enableUserScopingForContent: general.enableUserScopingForContent === true,
+    hooks: general.hooks && typeof general.hooks === "object" ? general.hooks : undefined
+  };
+};
+
+if (!tableVertexLabel || typeof tableVertexLabel !== "string") {
+  return {
+    success: false,
+    message: "tableVertexLabel is required and must be a string",
+    data: []
+  };
+}
+
+let resolvedTableKey = tableKey && String(tableKey).trim() !== "" ? String(tableKey).trim() : null;
+if (!resolvedTableKey) {
+  const idsResult = await args.executeNamedServerFunction({
+    functionName: "getTableIds",
+    contextData: { tableVertexLabel }
+  });
+  resolvedTableKey = idsResult?.result?.data?.tableKey || null;
+}
+
+if (!resolvedTableKey) {
+  return {
+    success: false,
+    message: `No tableKey registered for label: ${tableVertexLabel}`,
+    data: []
+  };
+}
+
+const tableConfigResult = await args.executeNamedServerFunction({
+  functionName: "loadTableConfigByKey",
+  contextData: { tableKey: resolvedTableKey }
+});
+
+if (!tableConfigResult?.result?.success) {
+  return {
+    success: false,
+    message: tableConfigResult?.result?.message || "Failed to load table schema",
+    data: []
+  };
+}
+
+const partVertexIds = tableConfigResult.result.data?.partVertexIds || {};
+const schemaGraph = tableConfigResult.graph || tableConfigResult.result?.graph || { vertexes: {} };
+const generalRaw = evalPartFromGraph(schemaGraph, partVertexIds, "general");
+const generalConfig = resolveGeneralFlags(generalRaw, tableVertexLabel);
+const sidebarRaw = evalPartFromGraph(schemaGraph, partVertexIds, "sidebar");
+const effectiveSidebar = sidebarRaw ? stripPartMeta(sidebarRaw) : null;
+
+const effectiveRelationshipPropertyBindings = Array.isArray(relationshipPropertyBindings)
+  ? relationshipPropertyBindings
+  : buildRelationshipPropertyBindingsFromParts({
+      formConfig: evalPartFromGraph(schemaGraph, partVertexIds, "formConfig"),
+      columns: evalPartFromGraph(schemaGraph, partVertexIds, "columns")
+    });
+
+if (!user) {
+  if (generalConfig.publicRead !== true) {
+    return {
+      success: false,
+      message: "User session not found. Please log in and try again.",
+      data: []
+    };
+  }
+  isPublicRead = true;
+}
+
+const effectiveEnableUserScopingFromConfig = generalConfig.enableUserScopingForContent === true;
+const effectiveEnableUserScoping =
+  enableUserScoping !== undefined && enableUserScoping !== null
+    ? enableUserScoping === true
+    : effectiveEnableUserScopingFromConfig;
+
+const effectiveHooks = hooks && typeof hooks === "object"
+  ? hooks
+  : generalConfig.hooks;
+
+const effectiveParentVertexLabel = parentVertexLabel || effectiveSidebar?.parentVertexLabel;
+const effectiveToParentEdgeType = toParentEdgeType || effectiveSidebar?.toParentEdgeType;
+
+// Lightweight path: return only rows that are no longer queued (for background refresh without full reload)
+if (onlyNotQueued === true && Array.isArray(elementIds) && elementIds.length > 0) {
+  const query = `
+  MATCH (c:${tableVertexLabel})
+  WHERE elementId(c) IN $elementIds
+  AND (c.syncStatus IS NULL OR c.syncStatus <> 'queued')
+  OPTIONAL MATCH (c)-[r]->(related)
+  RETURN c, r, related
+  `;
+  const queryResult = await args.session.run(query, { elementIds });
+  args.processResult(queryResult.records, args.context, ['c', 'related'], 'r');
+  const nodes = args.context.nodes || {};
+  const rels = args.context.relationships || {};
+  const items = Object.values(nodes).filter(v => v.L && v.L.includes(tableVertexLabel));
+  hydrateRelationshipSelectProps(items, rels, effectiveRelationshipPropertyBindings);
+  return {
+    success: true,
+    data: items,
+    relatedVertices: Object.values(nodes).filter(v => !v.L || !v.L.includes(tableVertexLabel)),
+    graph: getGraphPayload(nodes, rels),
+    message: `Found ${items.length} row(s) no longer queued`
+  };
+}
+
+// Determine vertex label and relationship type based on tableVertexLabel
+const vertexLabel = tableVertexLabel;
+// Relationship type is "User" + vertexLabel (e.g., "UserBook", "UserAudioVideo", "UserCategory")
+const relationshipType = `User${vertexLabel}`;
+const uncategorizedVertexId = '_' + vertexLabel + '_uncategorized';
+const categoryIdIsSyntheticUncategorized = !!(categoryId && categoryId === uncategorizedVertexId);
+const applyUnassignedCategoryScope =
+  !!(effectiveParentVertexLabel && effectiveToParentEdgeType && (showUnassigned === true || categoryIdIsSyntheticUncategorized));
+const useRealCategoryGraphMatch =
+  !!(categoryId && effectiveParentVertexLabel && effectiveToParentEdgeType && !categoryIdIsSyntheticUncategorized);
+
+// Build WHERE clause for filters
+const whereConditions = [];
+const queryParams = effectiveEnableUserScoping && user?.P?.uuid ? { userUuid: user.P.uuid } : {};
+
+// Add search filter
+if (search && search.trim()) {
+  const searchTerm = search.trim().toLowerCase();
+  whereConditions.push(`(
+    toLower(COALESCE(c.fileName, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.name, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.description, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.title, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.subTitle, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.event, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.language, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.orderName, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.productTitle, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.lineItemName, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.variantTitle, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.sku, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.vendor, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.email, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.username, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.displayFinancialStatus, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.displayFulfillmentStatus, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.tags, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.note, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.customerDisplayName, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.status, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.draftOrderName, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.partNo, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.supplierName, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.supplierCode, '')) CONTAINS $searchTerm
+  )`);
+  queryParams.searchTerm = searchTerm;
+}
+
+// Add column filters
+if (filters && typeof filters === "object") {
+  for (const [key, value] of Object.entries(filters)) {
+    if (value !== undefined && value !== null && value !== "") {
+      const paramKey = `filter_${key}`;
+      // Support both single values and arrays (for multiple select filters)
+      if (Array.isArray(value) && value.length > 0) {
+        whereConditions.push(`c.${key} IN $${paramKey}`);
+        queryParams[paramKey] = value;
+      } else if (!Array.isArray(value)) {
+        whereConditions.push(`c.${key} = $${paramKey}`);
+        queryParams[paramKey] = value;
+      }
+    }
+  }
+}
+
+// Build ORDER BY clause
+let orderByClause = "";
+if (sort && sort.column) {
+  const direction = sort.direction === "desc" ? "DESC" : "ASC";
+  orderByClause = `ORDER BY c.${sort.column} ${direction}`;
+} else {
+  // Default sorting - try name first, then title, then createdAt
+  orderByClause = "ORDER BY COALESCE(c.fileName, c.name, c.title, '') ASC, c.createdAt DESC";
+}
+
+// Build category filter if provided (synthetic uncategorized id uses unassigned scope, not elementId(cat))
+let categoryFilter = "";
+if (useRealCategoryGraphMatch) {
+  categoryFilter = `
+  MATCH (cat:${effectiveParentVertexLabel})
+  WHERE elementId(cat) = $categoryId
+  MATCH (c)-[:${effectiveToParentEdgeType}]->(cat)`;
+  queryParams.categoryId = categoryId;
+} else if (applyUnassignedCategoryScope) {
+  whereConditions.push(`NOT EXISTS {
+    MATCH (c)-[:${effectiveToParentEdgeType}]->(cat:${effectiveParentVertexLabel})
+  }`);
+}
+
+// beforeFetchData hooks may append Cypher match segments / WHERE conditions (see queryModification).
+const queryModification = {
+  leadingMatchSegments: [],
+  additionalWhereConditions: [],
+  additionalQueryParameters: {},
+  forceEmptyResult: false
+};
+
+await args.executeHooks(effectiveHooks?.beforeFetchData, {
+  tableVertexLabel,
+  search,
+  filters,
+  sort,
+  categoryId,
+  showUnassigned,
+  parentVertexLabel: effectiveParentVertexLabel,
+  toParentEdgeType: effectiveToParentEdgeType,
+  enableUserScoping: effectiveEnableUserScoping,
+  queryModification,
+  sessionUser: user,
+  isPublicRead
+});
+
+if (queryModification.forceEmptyResult === true) {
+  return {
+    success: true,
+    data: [],
+    relatedVertices: [],
+    graph: getGraphPayload({}, {}),
+    message: `Found 0 ${tableVertexLabel} items`
+  };
+}
+
+// beforeFetchData may set bypassUserScoping (e.g. portalFilesBeforeFetch for Admin on FilePortal).
+const queryEnableUserScoping =
+  queryModification.bypassUserScoping === true ? false : effectiveEnableUserScoping;
+
+const combinedWhereConditions = whereConditions.concat(
+  Array.isArray(queryModification.additionalWhereConditions)
+    ? queryModification.additionalWhereConditions
+    : []
+);
+const combinedQueryParameters = Object.assign(
+  {},
+  queryParams,
+  queryModification.additionalQueryParameters && typeof queryModification.additionalQueryParameters === "object"
+    ? queryModification.additionalQueryParameters
+    : {}
+);
+
+let combinedWhereClause =
+  combinedWhereConditions.length > 0
+    ? "WHERE " + combinedWhereConditions.join(" AND ")
+    : "";
+
+const hasCustomLeadingMatch =
+  Array.isArray(queryModification.leadingMatchSegments) &&
+  queryModification.leadingMatchSegments.length > 0;
+const leadingMatchBlock = hasCustomLeadingMatch
+  ? queryModification.leadingMatchSegments.join("\n")
+  : "";
+
+const buildStandardContentMatch = () =>
+  hasCustomLeadingMatch ? leadingMatchBlock : `MATCH (c:${vertexLabel})`;
+
+// Optimized query with indexed user lookup first and related vertices
+let query = "";
+if (!queryEnableUserScoping) {
+  if (useRealCategoryGraphMatch) {
+    query = `
+    MATCH (cat:${effectiveParentVertexLabel})
+    WHERE elementId(cat) = $categoryId
+    ${buildStandardContentMatch()}
+    MATCH (c)-[:${effectiveToParentEdgeType}]->(cat)
+    ${combinedWhereClause}
+    OPTIONAL MATCH (c)-[r]->(related)
+    ${orderByClause}
+    RETURN c, r, related
+    `;
+  } else if (hasCustomLeadingMatch) {
+    query = `
+    ${leadingMatchBlock}
+    ${combinedWhereClause}
+    OPTIONAL MATCH (c)-[r]->(related)
+    ${orderByClause}
+    RETURN c, r, related
+    `;
+  } else {
+    query = `
+    MATCH (c:${vertexLabel})
+    ${combinedWhereClause}
+    OPTIONAL MATCH (c)-[r]->(related)
+    ${orderByClause}
+    RETURN c, r, related
+    `;
+  }
+} else {
+  if (useRealCategoryGraphMatch) {
+    const scopedContentMatch = hasCustomLeadingMatch
+      ? leadingMatchBlock
+      : `MATCH (c:${vertexLabel})`;
+    query = `
+    MATCH (u:User {uuid: $userUuid})
+    MATCH (cat:${effectiveParentVertexLabel})
+    WHERE elementId(cat) = $categoryId
+    ${scopedContentMatch}
+    MATCH (c)-[:${effectiveToParentEdgeType}]->(cat)
+    MATCH (u)-[:${relationshipType}]->(c)
+    ${combinedWhereClause}
+    OPTIONAL MATCH (c)-[r]->(related)
+    ${orderByClause}
+    RETURN c, r, related
+    `;
+  } else if (hasCustomLeadingMatch) {
+    query = `
+    MATCH (u:User {uuid: $userUuid})
+    ${leadingMatchBlock}
+    MATCH (u)-[:${relationshipType}]->(c)
+    ${combinedWhereClause}
+    OPTIONAL MATCH (c)-[r]->(related)
+    ${orderByClause}
+    RETURN c, r, related
+    `;
+  } else {
+    query = `
+    MATCH (u:User {uuid: $userUuid})
+    MATCH (u)-[:${relationshipType}]->(c:${vertexLabel})
+    ${combinedWhereClause}
+    OPTIONAL MATCH (c)-[r]->(related)
+    ${orderByClause}
+    RETURN c, r, related
+    `;
+  }
+}
+
+const queryResult = await args.session.run(query, combinedQueryParameters);
+
+// Use processResult to populate graph structure (nodes + relationships)
+if (!args.context.nodes) args.context.nodes = {};
+if (!args.context.relationships) args.context.relationships = {};
+args.processResult(queryResult.records, args.context, ['c', 'related'], 'r');
+const nodes = args.context.nodes || {};
+const rels = args.context.relationships || {};
+const items = Object.values(nodes).filter(v => v.L && v.L.includes(vertexLabel));
+hydrateRelationshipSelectProps(items, rels, effectiveRelationshipPropertyBindings);
+
+const result = {
+  success: true,
+  data: items,
+  relatedVertices: Object.values(nodes).filter(v => !v.L || !v.L.includes(vertexLabel)),
+  graph: getGraphPayload(nodes, rels),
+  message: `Found ${items.length} ${tableVertexLabel} item${items.length !== 1 ? 's' : ''}`
+};
+
+// Execute afterFetchData hooks
+await args.executeHooks(effectiveHooks?.afterFetchData, {
+  tableVertexLabel,
+  search,
+  filters,
+  sort,
+  categoryId,
+  showUnassigned,
+  parentVertexLabel: effectiveParentVertexLabel,
+  toParentEdgeType: effectiveToParentEdgeType,
+  enableUserScoping: queryEnableUserScoping,
+  isPublicRead,
+  result: result
+});
+
+return result;
+'''
+        key: getUserContent
+      }
+    }
+  ]
+  edges: []
+}

@@ -51,6 +51,8 @@ const myCss = () => css`
 `;
 ```
 
+For tagged-template CSS helpers (`up`, `container`, `animation`, etc.), see [cssHelpers.README.md](./cssHelpers.README.md).
+
 ### Example
 
 ```tsx

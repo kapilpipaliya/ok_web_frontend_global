@@ -1,0 +1,243 @@
+{
+  vertexes: [
+    {
+      id: "example_global_model_registration",
+      L: "Function",
+      P: {
+        key: "exampleGlobalModelRegistration",
+        description: "Example showing how to register and use models globally from hjson functions",
+        body: '''
+/**
+ * Example: Global Model Registration
+ *
+ * This demonstrates:
+ * - Registering models dynamically via args.registerModel
+ * - Using args.getNeogmaInstance instead of global access
+ * - Using args.modelToVertex / args.modelsToVertices (no import needed)
+ * - Checking model existence with args.hasModel
+ * - Getting all models with args.getRegisteredModels
+ *
+ * Parameters (via args.contextData):
+ * - action: string - Action to perform:
+ *   - "register" - Register the UserActivity model
+ *   - "create" - Create a user activity log
+ *   - "list" - List user activities
+ *   - "stats" - Get model registry stats
+ * - userId: string (optional) - User UUID
+ * - activityType: string (optional) - Activity type
+ * - metadata: object (optional) - Activity metadata
+ */
+
+try {
+  const {
+    action = "register",
+    userId,
+    activityType,
+    metadata
+  } = args.contextData;
+
+  // ==================== ACTION: REGISTER ====================
+  if (action === "register") {
+    // Check if already registered
+    if (args.hasModel("UserActivity")) {
+      return args.utils.createSuccessResponse(
+        { alreadyRegistered: true },
+        "UserActivity model was already registered"
+      );
+    }
+
+    // Import ModelFactory
+    const { ModelFactory } = await import("neogma");
+
+    // Get neogma instance via args (new pattern!)
+    const neogma = await args.getNeogmaInstance();
+
+    // Create UserActivity model
+    const UserActivityModel = ModelFactory({
+      label: "UserActivity",
+      schema: {
+        userId: { type: "string", required: true },
+        activityType: { type: "string", required: true },
+        timestamp: { type: "string", required: true },
+        metadata: { type: "string", required: false },
+        ipAddress: { type: "string", required: false },
+        userAgent: { type: "string", required: false }
+      }
+    }, neogma);
+
+    // Add custom static method
+    UserActivityModel.findByUser = async (userId, options = {}) => {
+      const { session, limit = 50, activityType } = options;
+
+      const where = { userId };
+      if (activityType) {
+        where.activityType = activityType;
+      }
+
+      const activities = await UserActivityModel.findMany(
+        { where, limit },
+        session
+      );
+
+      return activities;
+    };
+
+    // Register globally
+    args.registerModel("UserActivity", () => UserActivityModel);
+
+    return args.utils.createSuccessResponse(
+      {
+        modelName: "UserActivity",
+        registered: true,
+        availableModels: args.getRegisteredModels()
+      },
+      "UserActivity model registered successfully"
+    );
+  }
+
+  // ==================== ACTION: CREATE ====================
+  if (action === "create") {
+    // Ensure model is registered
+    if (!args.hasModel("UserActivity")) {
+      return args.utils.createErrorResponse(
+        "UserActivity model not registered. Call with action=register first.",
+        "ModelNotFoundError"
+      );
+    }
+
+    // Validate inputs
+    if (!userId || !args.utils.isValidUUID(userId)) {
+      return args.utils.createErrorResponse(
+        "Valid user ID is required",
+        "ValidationError"
+      );
+    }
+
+    if (args.utils.isEmpty(activityType)) {
+      return args.utils.createErrorResponse(
+        "Activity type is required",
+        "ValidationError"
+      );
+    }
+
+    // Create activity log using registered model
+    const activity = await args.Models.UserActivity.createOne({
+      userId,
+      activityType,
+      timestamp: args.utils.now(),
+      metadata: metadata ? args.utils.safeJsonStringify(metadata) : null,
+      ipAddress: args.request?.headers?.get("x-forwarded-for") || null,
+      userAgent: args.request?.headers?.get("user-agent") || null
+    }, { session: args.session });
+
+    // Convert to Vertex format using args (no import needed!)
+    const vertexFormat = args.modelToVertex(activity);
+
+    return args.utils.createSuccessResponse(
+      { activity: vertexFormat },
+      "Activity logged successfully"
+    );
+  }
+
+  // ==================== ACTION: LIST ====================
+  if (action === "list") {
+    // Ensure model is registered
+    if (!args.hasModel("UserActivity")) {
+      return args.utils.createErrorResponse(
+        "UserActivity model not registered",
+        "ModelNotFoundError"
+      );
+    }
+
+    // Validate user ID
+    if (!userId || !args.utils.isValidUUID(userId)) {
+      return args.utils.createErrorResponse(
+        "Valid user ID is required",
+        "ValidationError"
+      );
+    }
+
+    // Use custom static method
+    const activities = await args.Models.UserActivity.findByUser(
+      userId,
+      {
+        session: args.session,
+        limit: 20,
+        activityType: activityType || undefined
+      }
+    );
+
+    // Convert to Vertex format using args (no import needed!)
+    const vertexArray = args.modelsToVertices(activities);
+
+    // Get count using raw Cypher for demonstration
+    const countQuery = args.cypher.buildCountQuery(
+      "UserActivity",
+      { userId },
+      "a"
+    );
+    const countResult = await args.session.run(countQuery.query, countQuery.params);
+    const total = countResult.records[0]?.get("count")?.toNumber() || 0;
+
+    return args.utils.createPaginatedResponse({
+      data: vertexArray,
+      total,
+      page: 1,
+      limit: 20,
+      success: true,
+      message: `Found ${activities.length} activities`
+    });
+  }
+
+  // ==================== ACTION: STATS ====================
+  if (action === "stats") {
+    // Get all registered models
+    const allModels = args.getRegisteredModels();
+
+    // Check each model
+    const modelStatus = {};
+    for (const modelName of ["Notification", "UserActivity", "Cache"]) {
+      modelStatus[modelName] = args.hasModel(modelName);
+    }
+
+    return args.utils.createSuccessResponse(
+      {
+        totalModels: allModels.length,
+        registeredModels: allModels,
+        modelStatus,
+        // Show that UserActivity has custom methods if registered
+        hasUserActivityCustomMethods: args.hasModel("UserActivity")
+          ? typeof args.Models.UserActivity?.findByUser === "function"
+          : false
+      },
+      "Model registry statistics"
+    );
+  }
+
+  // ==================== INVALID ACTION ====================
+  return args.utils.createErrorResponse(
+    `Invalid action: ${action}`,
+    "ValidationError",
+    {
+      validActions: ["register", "create", "list", "stats"]
+    }
+  );
+
+} catch (error) {
+  console.error("Error in exampleGlobalModelRegistration:", error);
+
+  return args.utils.createErrorResponse(
+    error.message || "An unexpected error occurred",
+    error.name || "ServerError",
+    {
+      stack: error.stack,
+      functionName: args.functionName
+    }
+  );
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

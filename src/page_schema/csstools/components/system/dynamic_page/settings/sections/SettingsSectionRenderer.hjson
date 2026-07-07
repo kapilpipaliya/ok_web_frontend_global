@@ -1,0 +1,152 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: SettingsSectionRenderer
+        dynamicComponent: SettingsSectionCard, SettingsSectionAccordion, SettingsSectionTabs
+        fns:
+          '''
+const SECTION_RENDERER_REGISTRY = {
+  card: "SettingsSectionCard",
+  accordion: "SettingsSectionAccordion",
+  tabs: "SettingsSectionTabs",
+  group: "SettingsSectionCard"
+};
+
+const getSectionConfig = () => args.contextData.props?.sectionConfig || null;
+
+const resolveRendererComponent = () => {
+  const sectionConfig = getSectionConfig();
+  if (!sectionConfig) return null;
+  const sectionType = sectionConfig.type || "card";
+  return SECTION_RENDERER_REGISTRY[sectionType] || "SettingsSectionCard";
+};
+
+const checkPermissions = (permissionConfig) => {
+  if (!permissionConfig) return true;
+  if (args.isNoPermissionCheck === true) return true;
+  if (args.hasFullPermission || args.hasEditPermission || args.hasViewPermission) return true;
+  return false;
+};
+
+const checkFeatureFlags = (featureFlags) => {
+  if (!Array.isArray(featureFlags) || featureFlags.length === 0) return true;
+  return true;
+};
+
+const isSectionVisible = () => {
+  const sectionConfig = getSectionConfig();
+  if (!sectionConfig) return false;
+  if (!checkPermissions(sectionConfig.permissions)) return false;
+  if (!checkFeatureFlags(sectionConfig.featureFlags)) return false;
+  return true;
+};
+
+const getSectionState = () => {
+  const sectionId = getSectionConfig()?.id;
+  if (!sectionId) return null;
+  return args.fns.getSectionState?.(sectionId) || null;
+};
+
+const DEFAULT_SITE_LANGUAGES = [
+  { code: "en", label: "English", isDefault: true },
+  { code: "hi", label: "Hindi", isDefault: false },
+  { code: "gu", label: "Gujarati", isDefault: false }
+];
+
+const getSiteLanguages = () => {
+  const languages = args.contextData.props?.siteLanguages;
+  if (Array.isArray(languages) && languages.length > 0) return languages;
+  return DEFAULT_SITE_LANGUAGES;
+};
+
+return {
+  getSectionConfig,
+  resolveRendererComponent,
+  isSectionVisible,
+  getSectionState,
+  getSiteLanguages
+};
+'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  hide: !args.fns.isSectionVisible()
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: SettingsSectionCard
+        props:
+          '''
+const sectionConfig = args.fns.getSectionConfig();
+const renderer = args.fns.resolveRendererComponent();
+return {
+  sectionConfig,
+  sectionState: args.fns.getSectionState(),
+  siteLanguages: args.fns.getSiteLanguages?.() || [],
+  hide: renderer !== "SettingsSectionCard"
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: SettingsSectionAccordion
+        props:
+          '''
+const sectionConfig = args.fns.getSectionConfig();
+const renderer = args.fns.resolveRendererComponent();
+return {
+  sectionConfig,
+  siteLanguages: args.fns.getSiteLanguages?.() || [],
+  hide: renderer !== "SettingsSectionAccordion"
+};
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: SettingsSectionTabs
+        props:
+          '''
+const sectionConfig = args.fns.getSectionConfig();
+const renderer = args.fns.resolveRendererComponent();
+return {
+  sectionConfig,
+  siteLanguages: args.fns.getSiteLanguages?.() || [],
+  hide: renderer !== "SettingsSectionTabs"
+};
+'''
+      }
+    }
+  ]
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" }
+    { id: "e2", T: "Attr", S: "2", E: "3" }
+    { id: "e3", T: "Attr", S: "2", E: "4" }
+    { id: "e4", T: "Attr", S: "2", E: "5" }
+  ]
+}

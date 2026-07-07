@@ -1,0 +1,196 @@
+{
+  vertexes: [
+    {
+      id: "function_pipeline"
+      L: "Function"
+      P: {
+        key: "examplePipelineMiddleware"
+        description: "Example: Pipeline/middleware for clean function structure"
+        body: '''
+// Example 1: Basic Pipeline with Authentication
+// ==============================================
+
+const userSchema = args.schema.object({
+  name: args.schema.string().min(2),
+  email: args.schema.email()
+});
+
+const result = await args.createPipeline(args.contextData, {
+  session: args.session,
+  getUserFromSession: args.getUserFromSession,
+})
+  .validate(userSchema)           // Validate input
+  .authenticate()                  // Require authentication
+  .execute(async (ctx) => {
+    // ctx.data is now validated
+    // ctx.user is authenticated user
+
+    return {
+      message: "User data processed",
+      user: ctx.user.P.email,
+      data: ctx.data
+    };
+  });
+
+return result;
+
+// Example 2: Pipeline with Authorization
+// =======================================
+
+const adminSchema = args.schema.object({
+  action: args.schema.string(),
+  targetId: args.schema.uuid()
+});
+
+const adminResult = await args.createPipeline(args.contextData, {
+  session: args.session,
+  getUserFromSession: args.getUserFromSession,
+})
+  .validate(adminSchema)
+  .authenticate()
+  .authorize("admin", "moderator")  // Require admin or moderator role
+  .execute(async (ctx) => {
+    // Only admins/moderators reach here
+    return {
+      action: ctx.data.action,
+      performedBy: ctx.user.P.email
+    };
+  });
+
+return adminResult;
+
+// Example 3: Pipeline with Rate Limiting
+// =======================================
+
+const apiResult = await args.createPipeline(args.contextData, {
+  session: args.session,
+  getUserFromSession: args.getUserFromSession,
+})
+  .authenticate()
+  .rateLimit({
+    max: 10,              // 10 requests
+    window: 60,           // per 60 seconds
+    key: "api-endpoint"   // optional custom key
+  })
+  .execute(async (ctx) => {
+    // Rate-limited operation
+    return { success: true };
+  });
+
+return apiResult;
+
+// Example 4: Pipeline with Data Transformation
+// ============================================
+
+const transformResult = await args.createPipeline(args.contextData, {
+  session: args.session,
+})
+  .transform((data) => {
+    // Transform input data
+    return {
+      ...data,
+      timestamp: Date.now(),
+      processed: true
+    };
+  })
+  .execute(async (ctx) => {
+    // ctx.data now has timestamp and processed fields
+    return ctx.data;
+  });
+
+return transformResult;
+
+// Example 5: Pipeline with Custom Middleware
+// ===========================================
+
+const customResult = await args.createPipeline(args.contextData, {
+  session: args.session,
+  getUserFromSession: args.getUserFromSession,
+})
+  .authenticate()
+  .custom(async (ctx) => {
+    // Custom validation or processing
+    if (ctx.data.amount > 1000) {
+      throw args.errors.BusinessLogic("Amount exceeds limit");
+    }
+
+    // Add data to context metadata
+    ctx.metadata.ipAddress = ctx.request?.headers?.get("x-forwarded-for");
+  })
+  .execute(async (ctx) => {
+    return {
+      data: ctx.data,
+      metadata: ctx.metadata
+    };
+  });
+
+return customResult;
+
+// Example 6: Complex Pipeline Chain
+// ==================================
+
+const updateProfileSchema = args.schema.object({
+  userId: args.schema.uuid(),
+  name: args.schema.string().min(2).max(100).optional(),
+  bio: args.schema.string().max(500).optional()
+});
+
+const complexResult = await args.createPipeline(args.contextData, {
+  session: args.session,
+  getUserFromSession: args.getUserFromSession,
+})
+  // Step 1: Validate input
+  .validate(updateProfileSchema)
+
+  // Step 2: Authenticate user
+  .authenticate()
+
+  // Step 3: Check rate limit
+  .rateLimit({ max: 5, window: 60 })
+
+  // Step 4: Custom authorization (ownership check)
+  .custom(async (ctx) => {
+    const isOwner = ctx.user.P.uuid === ctx.data.userId;
+    const isAdmin = args.hasRole(ctx.user, "admin");
+
+    if (!isOwner && !isAdmin) {
+      throw args.errors.Forbidden("Can only update own profile");
+    }
+  })
+
+  // Step 5: Transform data
+  .transform((data) => ({
+    ...data,
+    updatedAt: Date.now()
+  }))
+
+  // Step 6: Execute main logic
+  .execute(async (ctx) => {
+    // Update profile in database
+    const result = await ctx.session.run(
+      `MATCH (u:User {id: $userId})
+       SET u.name = COALESCE($name, u.name),
+           u.bio = COALESCE($bio, u.bio),
+           u.updatedAt = $updatedAt
+       RETURN u`,
+      ctx.data
+    );
+
+    const updatedUser = result.records[0]?.get("u");
+
+    return args.responses.ok({
+      user: args.formatters.vertex(updatedUser),
+      message: "Profile updated successfully"
+    });
+  });
+
+return complexResult;
+
+// Note: Pipeline automatically handles errors and formats responses
+// All errors are caught and converted to proper JSON responses
+'''
+      }
+    }
+  ]
+  edges: []
+}
