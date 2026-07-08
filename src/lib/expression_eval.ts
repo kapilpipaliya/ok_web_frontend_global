@@ -380,7 +380,7 @@ addBinaryOp(
       }
       const type = edgeType.replaceAll("$0", currentVertex.L[0]);
 
-      const edgeIds = currentVertex.OUT[type] || [];
+      const edgeIds = currentVertex.OUT?.[type] || [];
       if (edgeIds.length === 0) {
         const strict = true;
         // we only return error if its in middle of path
@@ -461,7 +461,7 @@ addBinaryOp(
       }
       const type = edgeType.replaceAll("$0", currentVertex.L[0]);
 
-      const edgeIds = currentVertex.IN[type];
+      const edgeIds = currentVertex.IN?.[type];
       if (!edgeIds) {
         continue;
       }

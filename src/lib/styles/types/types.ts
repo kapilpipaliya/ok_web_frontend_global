@@ -8,8 +8,7 @@ export type ThemeColorKey =
   | "text"
   | "background"
   | "border"
-  | "muted"
-  | "secondary";
+  ;
 // Typography and layout types removed - use fixed values in CSS
 // Media breakpoints
 export type Breakpoint = "sm" | "md" | "lg" | "xl" | "2xl";
@@ -112,7 +111,6 @@ export interface ThemeContext {
       text?: ColorDefinition;
       background?: ColorDefinition;
       border?: ColorDefinition;
-      muted?: ColorDefinition;
 
       [key: string]: ColorDefinition | undefined;
     };
@@ -165,7 +163,7 @@ export interface ThemeContext {
 
   // Advanced color utilities
   getSemanticColor?: (
-    context: "text" | "background" | "border" | "muted",
+    context: "text" | "background" | "border",
   ) => string;
   mixColors?: (color1: string, color2: string, amount?: number) => string;
   createGradient?: (

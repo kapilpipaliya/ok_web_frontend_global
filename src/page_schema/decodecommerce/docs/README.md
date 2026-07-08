@@ -169,7 +169,7 @@ decodecommerce/
 - **Background**: Base background color
 - **Background shades**: `_d100`, `_d200` for sections
 - **Text**: Main text color
-- **Text shades**: `_d300`, `_d400` for muted text
+- **Text shades**: `_d300`, `_d400` for subtle text
 - **Success**: For positive indicators, checkmarks
 - **Warning/Primary**: For star ratings
 

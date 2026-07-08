@@ -1,6 +1,5 @@
 import type { Strategy } from "@floating-ui/dom";
 
-import createFloating from "@corvu/utils/create/floating";
 import {
   type Accessor,
   createEffect,
@@ -21,6 +20,7 @@ import {
 } from "~/features/page_designer/context/LayoutContext";
 
 import { generateBoxShadow } from "~/lib/css/generateBoxShadow";
+import { createFloating } from "~/lib/dom/createFloating";
 import { getBoundingRectChildren } from "~/features/page_designer/functions/drag_drop/ui/getBoundingRectChildren";
 import { getDnDBoxShadowArgs } from "~/features/page_designer/functions/drag_drop/ui/getDnDBoxShadowArgs";
 import { isLayoutPreviewHover } from "~/features/page_designer/functions/layout/previewHover";
@@ -81,68 +81,65 @@ export function BorderOverlay(
     return styles;
   });
 
-  const ShowBorder = () => {
-    const [floating, setFloating] = createSignal<HTMLElement | null>(null);
+  const isVisible = createMemo(() => Object.keys(getBorder()).length > 0);
 
+  const [floating, setFloating] = createSignal<HTMLElement | null>(null);
+  const [store, setStore] = createStore({
+    maxHeight: 0,
+    maxWidth: 0,
+    x: 0,
+    y: 0,
+  });
+
+  const strategy = () => "fixed" as Strategy;
+
+  const floatingState = createFloating({
+    enabled: () => isVisible() && !!props.reference(),
+    floating,
+    options: () => ({}),
+    placement: () => "bottom-start",
+    reference: () => props.reference() ?? null,
+    strategy,
+  });
+
+  const updatePos = () => {
     const ref = props.reference();
     if (!ref) {
       return;
     }
-
-    const [store, setStore] = createStore({
-      maxHeight: 0,
-      maxWidth: 0,
-      x: 0,
-      y: 0,
+    const rect = getBoundingRectChildren(ref);
+    setStore({
+      maxHeight: rect.height + 2,
+      maxWidth: rect.width + 2,
+      x: (floatingState().x ?? 0) - 1,
+      y: (floatingState().y ?? 0) - rect.height - 1,
     });
-    // const updateInitial = () => {
-    //   const rect = getBoundingRectChildren(props.reference()!);
-    //   setStore({
-    //     maxHeight: rect.height + 2,
-    //     maxWidth: rect.width + 2,
-    //     x: rect.x - 1,
-    //     y: rect.y - 1
-    //   });
-    // }
-    // updateInitial();
+  };
 
-    const strategy = () => "fixed" as Strategy;
-
-    const floatingState = createFloating({
-      enabled: true,
-      floating: floating,
-      options: () => ({}),
-      placement: () => "bottom-start",
-      reference: () => props.reference() ?? null,
-      strategy,
-    });
-
-    const updatePos = () => {
-      const rect = getBoundingRectChildren(props.reference()!);
-      setStore({
-        maxHeight: rect.height + 2,
-        maxWidth: rect.width + 2,
-        x: (floatingState().x ?? 0) - 1,
-        y: (floatingState().y ?? 0) - rect.height - 1,
-      });
-    };
-
-    createEffect(
-      on(
-        [
-          () => layoutStoreVertex()?.P.activeItem,
-          () => layoutStoreVertex()?.P.dragPosition,
-          () => layoutStoreVertex()?.P.previewHoverId,
-          () => formStoreVertex()?.P.hoverId,
-          () => floatingState().x,
-          () => floatingState().y,
-        ],
+  createEffect(
+    on(
+      [
+        isVisible,
+        () => layoutStoreVertex()?.P.activeItem,
+        () => layoutStoreVertex()?.P.dragPosition,
+        () => layoutStoreVertex()?.P.previewHoverId,
+        () => formStoreVertex()?.P.hoverId,
+        () => props.reference(),
+        () => floatingState().x,
+        () => floatingState().y,
+      ],
+      () => {
+        if (!isVisible()) {
+          return;
+        }
         // Re-measure when drop zone or hover changes during drag.
-        updatePos,
-      ),
-    );
+        updatePos();
+      },
+    ),
+  );
 
-    return (
+  return (
+    <Show when={isVisible()}>
       <Portal>
         <div
           ref={setFloating}
@@ -157,12 +154,6 @@ export function BorderOverlay(
           }}
         />
       </Portal>
-    );
-  };
-
-  return (
-    <Show when={Object.keys(getBorder()).length > 0}>
-      <ShowBorder />
     </Show>
   );
 }

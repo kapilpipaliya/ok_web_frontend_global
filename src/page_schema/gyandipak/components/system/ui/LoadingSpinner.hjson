@@ -62,7 +62,7 @@ const colorConfig = {
     border: args.theme.var.color.background_light_300,
     accent: args.theme.var.color.primary
   },
-  muted: {
+  text: {
     border: args.theme.var.color.background_light_200,
     accent: args.theme.var.color.text_light_500
   },
@@ -169,9 +169,9 @@ return {
       id: "7"
       L: ComponentVariantOption
       P: {
-        description: Muted theme color
-        value: muted
-        key: muted
+        description: Text theme color
+        value: text
+        key: text
       }
     }
     {

@@ -177,6 +177,12 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
           txnId={props.txnId}
         />
       </Show>
+      <HighlightSetValueContent
+        meta={graph.vertexes[vertexIds.layerName]}
+        onChange={props.onChange}
+        selectedLayout={props.selectedLayout}
+        txnId={props.txnId}
+      />
     </>
   );
 }

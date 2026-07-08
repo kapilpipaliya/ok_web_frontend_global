@@ -7,59 +7,58 @@ import {
   Show,
 } from "solid-js";
 import { createStore } from "solid-js/store";
-
-import { LoaderNew } from "~/components/styled/LoaderSimple";
-import { SearchBar } from "~/components/styled/SearchBar";
-import { useToast } from "~/components/styled/modal/Toast";
-import { PlusIconButton } from "~/components/styled/buttons/PlusIconButton";
 import { As } from "~/components/As";
+import { PlusIconButton } from "~/components/styled/buttons/PlusIconButton";
+import { LoaderNew } from "~/components/styled/LoaderSimple";
+import { useToast } from "~/components/styled/modal/Toast";
+import { SearchBar } from "~/components/styled/SearchBar";
+import { PAGE_DESIGNER_DRAG_TYPES } from "~/features/page_designer/functions/drag_drop/pragmatic/pageDesignerDragTypes";
+import { scrollElementIntoContainer } from "~/lib/dom/scrollElementIntoContainer";
 import { useGraph } from "~/lib/graph/context/UseGraph";
+import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/entity/findVertex";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import type { Id } from "~/lib/graph/type/id";
 import type { Vertex } from "~/lib/graph/type/vertex";
-import { scrollElementIntoContainer } from "~/lib/dom/scrollElementIntoContainer";
-import { handlePaletteTouchBackground } from "~/lib/event/rowPointer";
-import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/entity/findVertex";
-import { PAGE_DESIGNER_DRAG_TYPES } from "~/features/page_designer/functions/drag_drop/pragmatic/pageDesignerDragTypes";
 import {
   type PageLayoutObject,
   useDesignerLayoutStore,
 } from "../../context/LayoutContext";
+import { layoutTouchBackgroundHandler } from "../../context/layoutTouchReveal";
 
 import { ComponentPaletteTreeItem } from "./ComponentPaletteTreeItem";
 import { CreatePaletteItemMenu } from "./CreatePaletteItemMenu";
-import { PaletteCategoryMenu } from "./PaletteCategoryMenu";
 import {
+  deletePaletteCategory,
   fetchCategoryChildren,
   fetchPaletteTree,
+  getPaletteServerError,
+  isPaletteServerSuccess,
   moveContentToCategory,
   movePaletteCategory,
   reorderPaletteSiblings,
-  deletePaletteCategory,
-  getPaletteServerError,
-  isPaletteServerSuccess,
 } from "./componentPaletteApi";
-import type {
-  ComponentPaletteDropSnapshot,
-  PaletteDropPosition,
-} from "./componentPaletteDragDrop";
 import {
   COMPONENT_PALETTE_CONFIG,
   getUncategorizedPaletteId,
   isUncategorizedPaletteId,
   type PaletteTreeConfig,
 } from "./componentPaletteConfig";
+import type {
+  ComponentPaletteDropSnapshot,
+  PaletteDropPosition,
+} from "./componentPaletteDragDrop";
 import {
+  categoryHasChildren,
   filterPaletteTreeVertex,
   getAncestorCategoryIds,
   getCategoryChildren,
   getContentChildrenForCategory,
   getItemSortName,
   getPaletteRootItems,
-  categoryHasChildren,
   isPaletteCategory,
   isPaletteContent,
 } from "./componentPaletteUtils";
+import { PaletteCategoryMenu } from "./PaletteCategoryMenu";
 
 export function ComponentPaletteTree(props?: {
   compact?: boolean;
@@ -83,6 +82,11 @@ export function ComponentPaletteTree(props?: {
   const [localSelectedCategoryId, setLocalSelectedCategoryId] =
     createSignal<Id | null>(null);
   const [scrollRef, setScrollRef] = createSignal<HTMLDivElement>();
+  const handleTouchBackground = layoutTouchBackgroundHandler(
+    layoutStoreId,
+    graph,
+    setGraph,
+  );
 
   const [categoryModalTarget, setCategoryModalTarget] = createSignal<{
     mode: "add" | "edit";
@@ -257,7 +261,10 @@ export function ComponentPaletteTree(props?: {
     }
     setExpandedKeys((prev) => [...prev, itemId]);
     if (
-      !(paletteConfig().loadFullTree ||isUncategorizedPaletteId(paletteConfig(), itemId) ) &&
+      !(
+        paletteConfig().loadFullTree ||
+        isUncategorizedPaletteId(paletteConfig(), itemId)
+      ) &&
       isPaletteCategory(graph.vertexes[itemId], paletteConfig())
     ) {
       void fetchCategoryChildren(graph, setGraph, paletteConfig(), itemId);
@@ -628,7 +635,7 @@ export function ComponentPaletteTree(props?: {
     Boolean(searchQuery().trim());
 
   return (
-    <As as="div" onPointerDown={handlePaletteTouchBackground} ref={setScrollRef}>
+    <As as="div" onPointerDown={handleTouchBackground} ref={setScrollRef}>
       <Show when={!props?.compact}>
         <As
           as="div"

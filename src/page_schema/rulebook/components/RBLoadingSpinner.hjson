@@ -62,12 +62,12 @@
       }
     },
     {
-      id: "color_muted",
+      id: "color_text",
       L: "ComponentVariantOption",
       P: {
-        key: "muted",
-        value: "muted",
-        description: "Muted theme color"
+        key: "text",
+        value: "text",
+        description: "Text theme color"
       }
     },
     {
@@ -151,7 +151,7 @@ const colorConfig = {
     border: args.theme.var.color.background_light_300,
     accent: args.theme.var.color.primary
   },
-  muted: {
+  text: {
     border: args.theme.var.color.background_light_200,
     accent: args.theme.var.color.text_light_500
   },
@@ -230,7 +230,7 @@ return `._id {
     { id: "e4", T: "ComponentVariantOption", S: "variant_size", E: "size_large" },
     { id: "e5", T: "ComponentVariant", S: "component_root", E: "variant_color" },
     { id: "e6", T: "ComponentVariantOption", S: "variant_color", E: "color_primary" },
-    { id: "e7", T: "ComponentVariantOption", S: "variant_color", E: "color_muted" },
+    { id: "e7", T: "ComponentVariantOption", S: "variant_color", E: "color_text" },
     { id: "e8", T: "ComponentVariantOption", S: "variant_color", E: "color_white" },
     { id: "e9", T: "ComponentVariant", S: "component_root", E: "variant_text" },
     { id: "e10", T: "Attr", S: "component_root", E: "spinner_container" },

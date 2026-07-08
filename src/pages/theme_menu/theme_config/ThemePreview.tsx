@@ -21,7 +21,7 @@ export function ThemePreview(props: { item: Vertex }) {
     return `background-color:${resolveColorForMode(color, colorMode())};`;
   };
 
-  const colorVariables = ["primary", "background", "border", "muted"];
+  const colorVariables = ["primary", "background", "border", "text"];
 
   return (
     <As

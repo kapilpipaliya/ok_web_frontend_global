@@ -6,6 +6,7 @@ import {
   type JSX,
   onCleanup,
   Show,
+  untrack,
 } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
@@ -159,7 +160,10 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
         // @ts-expect-error ignore
         el.getBoundingClientRectOriginal = el.getBoundingClientRect.bind(el);
         el.getBoundingClientRect = () => {
-          if (formStoreVertex()?.P?.hiddenNodes.includes(props.item.id)) {
+          const isHidden = untrack(() =>
+            formStoreVertex()?.P?.hiddenNodes.includes(props.item.id),
+          );
+          if (isHidden) {
             // @ts-expect-error ignore
             return el.getBoundingClientRectOriginal();
           }
@@ -181,15 +185,7 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
           formStoreVertex()?.P.multiHighlight.includes(props.item.id)
         }
       >
-        <AttrConfigPopOverWrapper
-          isSelectedLayoutId={
-            isSelectedLayoutId(props.item.id) &&
-            (formStoreVertex()?.P.selectedIndex === contextData.index ||
-              formStoreVertex()?.P.selectedIndex === -1)
-          }
-          item={props.item}
-          reference={reference}
-        />
+        <AttrConfigPopOverWrapper item={props.item} reference={reference} />
       </Show>
       <Show
         keyed

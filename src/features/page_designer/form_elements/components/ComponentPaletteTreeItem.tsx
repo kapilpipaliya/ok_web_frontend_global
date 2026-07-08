@@ -31,10 +31,8 @@ import {
 import type { Id } from "~/lib/graph/type/id";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
-import {
-  type PageLayoutObject,
-  useDesignerLayoutStore,
-} from "../../context/LayoutContext";
+import { useDesignerLayoutStore } from "../../context/LayoutContext";
+import { layoutTouchRevealRowOptions } from "../../context/layoutTouchReveal";
 import { openInNewInternalTab } from "../pages/functions/openInNewInternalTab";
 import {
   attachComponentPaletteTreeDragDrop,
@@ -107,6 +105,12 @@ export function ComponentPaletteTreeItem(
   const row = createTreeRowInteraction({
     itemId: props.item.id,
     pinWhile: () => isPreviewOpen() || isCreateMenuOpen(),
+    ...layoutTouchRevealRowOptions(
+      layoutStoreId,
+      layoutStoreVertex,
+      graph,
+      setGraph,
+    ),
   });
 
   const showActions = row.showActions;

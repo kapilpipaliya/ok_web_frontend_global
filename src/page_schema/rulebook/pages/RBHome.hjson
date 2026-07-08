@@ -917,7 +917,7 @@ return {
 const ruleData = args.contextData.rulesList;
 const todayTracking = ruleData?.todayTracking;
 
-let colorKey = "muted";
+let colorKey = "text";
 
 if (todayTracking) {
   const status = todayTracking.P?.status || "";

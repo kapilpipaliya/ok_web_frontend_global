@@ -40,6 +40,7 @@ import {
   useDesignerFormIdContext,
   useDesignerLayoutStore,
 } from "../../context/LayoutContext";
+import { layoutTouchRevealRowOptions } from "../../context/layoutTouchReveal";
 import { getChildrenAttrs } from "../../functions/layout/getChildrenAttrs";
 import {
   isLayoutPreviewHover,
@@ -116,6 +117,12 @@ export function LayoutTreeItem(
   const row = createTreeRowInteraction({
     itemId: props.metaVertex.id,
     pinWhile: showJsonEditor,
+    ...layoutTouchRevealRowOptions(
+      layoutStoreId,
+      layoutStoreVertex,
+      graph,
+      setGraph,
+    ),
     onFineEnter: () => {
       setDesignerHover(
         formStoreId!,

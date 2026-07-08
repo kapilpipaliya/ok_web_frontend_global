@@ -3,6 +3,7 @@ import { createMemo, Show } from "solid-js";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/entity/findVertex";
+import { PublicPageAdminFloatingButton } from "~/pages/PublicPageAdminFloatingButton";
 
 export default function PageHandler() {
   const params = useParams();
@@ -20,13 +21,19 @@ export default function PageHandler() {
   });
 
   return (
-    <Show when={pagePath()}>
-      <PageViewWrapper
-        formMetaId={pageVertex()?.id}
-        pageVertexName={"Page"}
-        // pageKeyName={params.pageName}
-        url={pagePath()}
+    <>
+      <PublicPageAdminFloatingButton
+        pageKey={() => pageVertex()?.P?.key}
       />
-    </Show>
+
+      <Show when={pagePath()}>
+        <PageViewWrapper
+          formMetaId={pageVertex()?.id}
+          pageVertexName={"Page"}
+          // pageKeyName={params.pageName}
+          url={pagePath()}
+        />
+      </Show>
+    </>
   );
 }

@@ -37,7 +37,7 @@ const buildOption = (data, chartType, theme) => {
   const values = data?.datasets?.[0]?.data || [];
   const seriesLabel = data?.datasets?.[0]?.label || "Series";
   const textColor = theme.var.color.text;
-  const muted = theme.var.color.text_light_500;
+  const subtleText = theme.var.color.text_light_500;
   const border = theme.var.color.border;
   const bg = theme.var.color.background;
   const primary = theme.var.color.primary;
@@ -93,12 +93,12 @@ const buildOption = (data, chartType, theme) => {
       type: "category",
       data: labels,
       axisLine: { lineStyle: { color: border } },
-      axisLabel: { color: muted, rotate: labels.length > 6 ? 35 : 0, fontSize: 10 }
+      axisLabel: { color: subtleText, rotate: labels.length > 6 ? 35 : 0, fontSize: 10 }
     },
     yAxis: {
       type: "value",
       axisLine: { lineStyle: { color: border } },
-      axisLabel: { color: muted },
+      axisLabel: { color: subtleText },
       splitLine: { lineStyle: { color: border, opacity: 0.3 } }
     },
     series

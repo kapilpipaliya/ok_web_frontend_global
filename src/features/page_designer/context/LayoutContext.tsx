@@ -107,6 +107,10 @@ export function getInitialDesignerLayoutStore() {
       | null,
     previewHoverId: -1 as Id | number,
     highlightedCompKey: null as string | null,
+    // Finger: keep one row's action buttons visible until another row is tapped.
+    // Stored in the designer layout vertex so it can be shared across hover/touch
+    // interactions in the layout tree and component palette.
+    touchRevealedId: null as Id | null,
     selectedComponentCategoryId: null as Id | null,
     layoutTreeScrollSource: null as LayoutTreeScrollSource | null,
   };

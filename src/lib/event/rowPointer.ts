@@ -147,6 +147,12 @@ function deactivateFineHoverExcept(keepItemId: Id | null) {
 export function createTreeRowInteraction(options: {
   itemId: Id;
   pinWhile?: Accessor<boolean> | (() => boolean);
+  /**
+   * Finger: when true for a row id, its action buttons stay visible until
+   * another row is tapped or the background clears it.
+   */
+  touchRevealedId?: Accessor<Id | null> | (() => Id | null);
+  setTouchRevealedId?: (id: Id | null) => void;
   onFineEnter?: () => void;
   onFineLeave?: () => void;
   /** Delay before row action buttons appear (0 = instant, same as highlight). */
@@ -263,13 +269,13 @@ export function createTreeRowInteraction(options: {
 
   const showActions = () =>
     actionsVisible() ||
-    isTouchRevealedRow(options.itemId) ||
+    options.touchRevealedId?.() === options.itemId ||
     isPinned();
 
   const isRowHighlighted = () =>
     isHighlighted() ||
     actionsVisible() ||
-    isTouchRevealedRow(options.itemId) ||
+    options.touchRevealedId?.() === options.itemId ||
     isPinned();
 
   const rowPointerProps = {
@@ -285,7 +291,7 @@ export function createTreeRowInteraction(options: {
     onPointerLeave: onPointerLeaveRow,
     onPointerDown: (event: PointerEvent) => {
       if (event.pointerType === "touch") {
-        revealTouchRow(options.itemId);
+        options.setTouchRevealedId?.(options.itemId);
       }
     },
   };
@@ -415,26 +421,4 @@ export function createRowTapSelect(onSelect: () => void) {
   };
 
   return { handleClick, handlePointerDown, handlePointerUp };
-}
-
-// Finger: keep one row's action buttons visible until another row is tapped.
-const [touchRevealedId, setTouchRevealedId] = createSignal<Id | null>(null);
-
-export function revealTouchRow(itemId: Id) {
-  setTouchRevealedId(itemId);
-}
-
-export function isTouchRevealedRow(itemId: Id) {
-  return touchRevealedId() === itemId;
-}
-
-export function clearTouchRevealedRow() {
-  setTouchRevealedId(null);
-}
-
-export function handlePaletteTouchBackground(event: PointerEvent) {
-  if (event.pointerType !== "touch") return;
-  if (!(event.target as HTMLElement).closest("[data-palette-row]")) {
-    clearTouchRevealedRow();
-  }
 }

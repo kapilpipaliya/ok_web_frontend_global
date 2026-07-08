@@ -436,7 +436,7 @@ return {
       { label: "New", value: newCount, icon: "carbon:email-new", color: "primary" },
       { label: "Read", value: readCount, icon: "carbon:email", color: "info" },
       { label: "Responded", value: respondedCount, icon: "carbon:checkmark", color: "success" },
-      { label: "Closed", value: closedCount, icon: "carbon:close", color: "muted" }
+      { label: "Closed", value: closedCount, icon: "carbon:close", color: "text" }
     ];
   }
 };

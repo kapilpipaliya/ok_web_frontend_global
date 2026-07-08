@@ -6,8 +6,8 @@ import { IconButton } from "~/components/styled/IconButton";
 import { isNegative } from "~/lib/data_structure/number/isNegative";
 import { iconMap } from "~/lib/ui/iconMap";
 
-import type { PageLayoutObject } from "../../context/LayoutContext";
 import { useDesignerLayoutStore } from "../../context/LayoutContext";
+import { layoutTouchRevealRowOptions } from "../../context/layoutTouchReveal";
 import { attachPaletteComponentDraggable } from "../../functions/drag_drop/pragmatic/pragmaticDragDrop";
 import {
   bindDragDropRef,
@@ -42,15 +42,21 @@ export function ComponentItem(
   const [graph, setGraph] = useGraph();
   const [isPreviewOpen, setIsPreviewOpen] = createSignal(false);
 
+  const layoutStoreId = useDesignerLayoutStore();
+  const layoutStoreVertex = () => graph.vertexes[layoutStoreId];
+
   const row = createTreeRowInteraction({
     itemId: props.child.id,
     pinWhile: isPreviewOpen,
+    ...layoutTouchRevealRowOptions(
+      layoutStoreId,
+      layoutStoreVertex,
+      graph,
+      setGraph,
+    ),
   });
 
   const showActions = row.showActions;
-  const layoutStoreId = useDesignerLayoutStore();
-  const layoutStoreVertex = () =>
-    graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
 
   const [selectedComponents, setSelectedComponents] = createSignal(
     new Set<Vertex>(),

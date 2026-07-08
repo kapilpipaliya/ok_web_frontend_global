@@ -1,0 +1,58 @@
+import { createMemo, onMount, Show, createSignal } from "solid-js";
+import { IconButton } from "~/components/styled/IconButton";
+
+export function PublicPageAdminFloatingButton(props: Readonly<{
+  pageKey: () => string | undefined;
+}>) {
+  // Prevent SSR/CSR markup mismatches during hydration.
+  // We only show the button after mount, so the initial hydrated output
+  // matches the server output (button not rendered).
+  const [isClientReady, setIsClientReady] = createSignal(false);
+  onMount(() => {
+    setIsClientReady(true);
+  });
+
+  const adminEditUrl = createMemo(() => {
+    const key = props.pageKey();
+    if (!key) return undefined;
+
+    const tabs = `Page:${key}`;
+    return `/admin/Page/${encodeURIComponent(key)}?tabs=${encodeURIComponent(
+      tabs,
+    )}`;
+  });
+
+  return (
+    <Show when={isClientReady() && adminEditUrl()}>
+      <IconButton
+        href={adminEditUrl()!}
+        target="_blank"
+        icon="ph:gear"
+        size={22}
+        title="Edit this page in admin"
+        css={`return \`._id {
+  position: fixed;
+  left: 16px;
+  bottom: 16px;
+  z-index: 9999;
+  background-color: \${args.theme.var.color.primary};
+  color: \${args.theme.var.color.primary_text};
+  border: 1px solid \${args.theme.var.color.border};
+  border-radius: 9999px;
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+  text-decoration: none;
+
+  &:hover:not(:disabled) {
+    background-color: \${args.theme.var.color.primary_dark_100};
+  }
+}\`;`}
+      />
+    </Show>
+  );
+}
+

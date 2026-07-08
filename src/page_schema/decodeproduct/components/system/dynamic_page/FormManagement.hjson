@@ -774,7 +774,7 @@ const handleSave = async () => {
 // Tooltip / help: tooltip | helpText | description (first non-empty string wins)
 // Floating panel (ⓘ hover): tooltipDisplay "native" | "both" (default native); tooltipIcon: false disables ⓘ
 // tooltipTitle overrides body text in the floating panel; tooltipShortcut appended as (shortcut)
-// tooltipDisplay "below" | "both": extra muted line under label; tooltipPlacement passed to Floating UI (e.g. top, bottom-start)
+// tooltipDisplay "below" | "both": extra helper line under label; tooltipPlacement passed to Floating UI (e.g. top, bottom-start)
 // tooltipDelay reserved; showTooltip: false disables all help UI
 const pickHelpString = (...vals) => {
   for (const candidate of vals) {
