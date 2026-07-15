@@ -23,8 +23,11 @@ const splitSegments = (path: string): string[] =>
 /**
  * Match a concrete path against a single page url pattern.
  * Returns the extracted params, or null when the pattern does not match.
+ *
  * A ":segment" matches exactly one path segment regardless of its value
- * (including values that carry a ".html" style extension).
+ * (including values that carry a ".html" style extension). A trailing
+ * ":segment?" is optional, so "/gallery/:category?" matches both "/gallery"
+ * and "/gallery/animals".
  */
 export function matchUrlPattern(
   pattern: string,
@@ -32,7 +35,18 @@ export function matchUrlPattern(
 ): Record<string, string> | null {
   const patternSegments = splitSegments(pattern);
   const pathSegments = splitSegments(path);
-  if (patternSegments.length !== pathSegments.length) {
+
+  let requiredCount = 0;
+  for (const segment of patternSegments) {
+    const isOptional = segment.startsWith(":") && segment.endsWith("?");
+    if (!isOptional) {
+      requiredCount++;
+    }
+  }
+  if (
+    pathSegments.length < requiredCount ||
+    pathSegments.length > patternSegments.length
+  ) {
     return null;
   }
 
@@ -42,8 +56,15 @@ export function matchUrlPattern(
     const pathSegment = pathSegments[i];
 
     if (patternSegment.startsWith(":")) {
-      const key = patternSegment.slice(1);
+      const isOptional = patternSegment.endsWith("?");
+      const key = patternSegment.slice(1, isOptional ? -1 : undefined);
       if (!key) {
+        return null;
+      }
+      if (pathSegment === undefined) {
+        if (isOptional) {
+          continue;
+        }
         return null;
       }
       try {

@@ -69,9 +69,8 @@ const getBasePath = () => {
 const folderHref = (folderKey) => {
   if (!useUrlState()) return null;
   const base = getBasePath();
-  const param = urlParam();
   if (!folderKey) return base;
-  return `${base}?${param}=${encodeURIComponent(String(folderKey))}`;
+  return `${base}/${encodeURIComponent(String(folderKey))}`;
 };
 
 const crumbHref = (crumb) => {

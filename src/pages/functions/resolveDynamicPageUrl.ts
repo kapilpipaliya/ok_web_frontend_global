@@ -16,6 +16,8 @@ interface CompiledPattern {
   segments: string[];
   /** Number of dynamic (":") segments; fewer = more specific. */
   dynamicCount: number;
+  /** Number of non-optional segments (trailing ":param?" are optional). */
+  requiredCount: number;
 }
 
 /**
@@ -51,16 +53,25 @@ function toSegments(path: string): string[] {
 function compilePattern(url: string): CompiledPattern {
   const segments = toSegments(url);
   let dynamicCount = 0;
+  let requiredCount = 0;
   for (const segment of segments) {
-    if (segment.startsWith(":")) {
+    const isDynamic = segment.charCodeAt(0) === 58; /* ":" */
+    const isOptional = isDynamic && segment.charCodeAt(segment.length - 1) === 63; /* "?" */
+    if (isDynamic) {
       dynamicCount++;
     }
+    if (!isOptional) {
+      requiredCount++;
+    }
   }
-  return { url, segments, dynamicCount };
+  return { url, segments, dynamicCount, requiredCount };
 }
 
 function matchesPattern(pattern: CompiledPattern, pathSegments: string[]): boolean {
-  if (pattern.segments.length !== pathSegments.length) {
+  if (
+    pathSegments.length < pattern.requiredCount ||
+    pathSegments.length > pattern.segments.length
+  ) {
     return false;
   }
   for (let i = 0; i < pattern.segments.length; i++) {

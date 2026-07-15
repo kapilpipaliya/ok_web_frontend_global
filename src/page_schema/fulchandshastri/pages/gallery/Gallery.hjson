@@ -8,14 +8,14 @@
         key: "Gallery",
         fns: "return { enabled: () => true }",
         isNoPermissionCheck: true,
-        url: "/gallery"
+        url: "/gallery/:category?"
         settingsPageId: "photos"
         props: '''
 const locale = args.params?.lang ? String(args.params.lang).toLowerCase() : undefined;
-const categoryKey = args.searchParams?.category != null && String(args.searchParams.category).trim() !== ""
-  ? String(args.searchParams.category).trim()
+const routeParams = args.context?.getParams?.(args.meta) || {};
+const categoryKey = routeParams.category != null && String(routeParams.category).trim() !== ""
+  ? String(routeParams.category).trim()
   : null;
-const langPrefix = locale && /^[a-z]{2,3}$/i.test(locale) ? `/${locale}` : "";
 return {
   contextName: "gallerySettings",
   serverFunction: `
@@ -176,7 +176,6 @@ return {
   tableVertexLabel: "GalleryItem",
   locale,
   useUrlState: true,
-  urlParam: "category",
   basePath: `${langPrefix}/gallery`,
   initialData: folderData,
   labels: {
