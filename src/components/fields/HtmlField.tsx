@@ -14,7 +14,7 @@ import { Dynamic, Portal } from "solid-js/web";
 import { untrack } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
 import { Link, Meta, Title, Base, Style, useHead } from "@solidjs/meta";
-import { createAsync } from "@solidjs/router";
+import { createAsync, query } from "@solidjs/router";
 
 import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
 import {
@@ -44,6 +44,35 @@ import { As } from "~/components/As";
 import { SolidMarkdown } from "~/components/solid-markdown";
 import remarkGfm from "remark-gfm";
 import { SlotContext } from "~/components/fields/component/contexts/SlotContext";
+
+// Dedupe + hydration-safe server function execution. A single logical call
+// runs once — even across SSR + client hydration, component remounts (e.g. when
+// a page layout resolves and the field re-mounts), and a page's leave
+// transition (so the outgoing page never refetches).
+//
+// The cache key is intentionally ONLY the processed function body + its context
+// — never the source vertex. `query` subscribes `createAsync` to the entry's
+// version signal, so navigation re-runs the (still-mounted, leaving) field's
+// resource; if the key included the vertex, that re-run would compute a new key
+// (the vertex changes as the page tears down / graph streams in), miss the
+// cache and refetch. Keying on the stable body means the re-run hits the same
+// live entry and returns the cached result instead. Server functions here do
+// not read `args.vertexes`, so omitting them is safe; a changed dynamic route
+// param is baked into the body, so it still yields a new key and a fresh call.
+// `query` also scopes its cache per-request on the server (no cross-request
+// leakage).
+const executeServerFunctionQuery = query(
+  (payload: {
+    functionBody: string;
+    contextData: unknown;
+  }): Promise<ServerResult> =>
+    executeServerFunction(
+      { functionBody: payload.functionBody, contextData: payload.contextData },
+      { nodes: {}, relationships: {}, vertexes: [] },
+    ),
+  "htmlFieldServerFunction",
+);
+
 const MetaTag = (
   tag: string,
   props: { [k: string]: any },
@@ -314,23 +343,18 @@ export function HtmlField(
           } as ServerResult;
         }
 
-        // If serverFunction is provided, execute it
+        // If serverFunction is provided, execute it. The call is keyed only by
+        // its body + context (see executeServerFunctionQuery) so it runs once
+        // and never refetches on navigation.
         if (local.serverFunction) {
           const { context, processedFunctionBody } = createContextObject(
             contextData,
             local.serverFunction,
           );
-          return executeServerFunction(
-            {
-              functionBody: processedFunctionBody,
-              contextData: context,
-            },
-            {
-              nodes: {},
-              relationships: {},
-              vertexes: data() ? [data()!] : [],
-            },
-          );
+          return executeServerFunctionQuery({
+            functionBody: processedFunctionBody,
+            contextData: context,
+          });
         }
 
         // Otherwise, use expression-based fetch
