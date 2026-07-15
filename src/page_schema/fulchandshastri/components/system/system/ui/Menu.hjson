@@ -569,8 +569,12 @@ const item = args.contextData.menuItem;
 const hasChildren = args.fns.getChildren(item).length > 0;
 // NEVER use as:"portal" — Solid Portal SSR returns "" and drops all children.
 // Fixed panels + Floating UI work without portal and SSR correctly.
+// Leaf items have no submenu: hide the whole panel subtree so we don't
+// instantiate an empty nested Menu per leaf (that recursion overflows the
+// client render stack on larger/deeper menus).
 return {
-  as: hasChildren ? "div" : null
+  as: "div",
+  hide: !hasChildren
 };
 '''
       }

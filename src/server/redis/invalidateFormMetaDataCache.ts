@@ -1,6 +1,7 @@
 import type { MutationArgs } from "~/cypher/types/MutationArgs";
 import type { Edge } from "~/lib/graph/type/edge";
 import type { Vertex } from "~/lib/graph/type/vertex";
+import { clearDynamicPageUrlCache } from "~/pages/functions/resolveDynamicPageUrl";
 import { redisCacheDeleteByPattern } from "./redisCache";
 
 const FORM_META_CACHE_LABELS = new Set([
@@ -55,6 +56,9 @@ export function mutationAffectsFormMetaData(args: MutationArgs): boolean {
 export async function invalidateFormMetaDataCacheForSubdomain(
   subDomain: string,
 ): Promise<number> {
+  // Also drop the in-process dynamic page url index (L1) so newly added or
+  // renamed dynamic page urls resolve immediately in this process.
+  clearDynamicPageUrlCache(subDomain);
   return redisCacheDeleteByPattern(`form-meta:${subDomain}:*`);
 }
 

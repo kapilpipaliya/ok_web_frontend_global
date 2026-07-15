@@ -242,7 +242,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.text_light_400};
   line-height: 1.5;
   font-size: 0.95rem;
 

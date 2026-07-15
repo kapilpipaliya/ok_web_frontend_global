@@ -10,6 +10,7 @@ import {
   getFormMetaDataCacheTtl,
   redisCacheGetOrSet,
 } from "~/server/redis/redisCache";
+import { resolveDynamicPageUrl } from "./resolveDynamicPageUrl";
 import type { FetchFormMetaDataResult } from "./fetchPageData";
 import { fetchComponentDataFromGraph } from "~/lib/graph/fetch/fetchComponentGraph";
 import { prepareGraphForWireTransfer } from "~/lib/graph/fetch/graphFetchUtils";
@@ -43,12 +44,20 @@ export async function fetchFormMetaData(
 
   if (!dbSession) {
     const { subDomain } = await getSubdomainForRequest();
+
+    // Resolve dynamic ":param" urls (e.g. /users/john/12/profile.html) to the
+    // page's stored url pattern so all concrete urls share one cache entry and
+    // one DB query, and dynamic pages load on the first request (empty graph).
+    const resolvedUrl = url
+      ? await resolveDynamicPageUrl(subDomain, url, pageVertexName)
+      : url;
+
     const cacheKey = getFormMetaDataCacheKey(subDomain, {
       pageVertexName,
       formId,
       expression,
       pageKeyName,
-      url,
+      url: resolvedUrl,
       skipComponentData,
     });
 
@@ -60,7 +69,7 @@ export async function fetchFormMetaData(
           formId,
           expression,
           pageKeyName,
-          url,
+          resolvedUrl,
           skipComponentData,
         ),
       {
@@ -70,12 +79,16 @@ export async function fetchFormMetaData(
     );
   }
 
+  const resolvedUrl = url
+    ? await resolveDynamicPageUrl("", url, pageVertexName, dbSession)
+    : url;
+
   return fetchFormMetaDataFromDB(
     pageVertexName,
     formId,
     expression,
     pageKeyName,
-    url,
+    resolvedUrl,
     skipComponentData,
     dbSession,
   );
