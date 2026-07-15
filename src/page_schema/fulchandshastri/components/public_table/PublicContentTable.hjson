@@ -1,0 +1,233 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Component",
+      P: {
+        key: "PublicContentTable",
+        description: "Reusable public HTML table with dynamic columns and a children slot for each row."
+      }
+    },
+    {
+      id: "shell",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}`;
+'''
+      }
+    },
+    {
+      id: "tableWrapper",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  overflow-x: auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "table",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "table"
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 600px;
+
+  th, td {
+    border: 1px solid ${args.theme.var.color.border};
+    padding: 0.5rem 0.75rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "tableHead",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "thead"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.primary_light_50};
+}`;
+'''
+      }
+    },
+    {
+      id: "headerRow",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "tr"
+};
+'''
+      }
+    },
+    {
+      id: "headerCells",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const columns = args.contextData.props?.columns || [];
+return {
+  as: "fragment",
+  data: columns,
+  contextName: "column",
+  loop: true
+};
+'''
+      }
+    },
+    {
+      id: "headerCell",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const column = args.contextData.column || {};
+return {
+  as: "th",
+  text: column.label || "",
+  style: column.width ? { width: column.width } : undefined
+};
+''',
+        css: '''
+const column = args.contextData.column || {};
+const align = column.align || "left";
+return `._id {
+  text-align: ${align};
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "tableBody",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "tbody"
+};
+'''
+      }
+    },
+    {
+      id: "dataRows",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const rows = args.contextData.props?.rows || [];
+const contextName = args.contextData.props?.contextName || "row";
+const hasRows = Array.isArray(rows);
+
+return {
+  as: "fragment",
+  ...(hasRows
+    ? {
+        data: rows,
+        contextName,
+        loop: true
+      }
+    : {})
+};
+'''
+      }
+    },
+    {
+      id: "rowSlot",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Slot"
+      }
+    },
+    {
+      id: "emptyState",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const rows = args.contextData.props?.rows || [];
+const emptyMessage = args.contextData.props?.emptyMessage || "No items available yet.";
+return {
+  as: "p",
+  text: emptyMessage,
+  hide: () => Array.isArray(rows) && rows.length > 0
+};
+''',
+        css: '''
+return `._id {
+  padding: 2rem 1rem;
+  text-align: center;
+  color: ${args.theme.var.color.text_light_300};
+  margin: 0;
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "shell" },
+    { id: "e2", T: "Attr", S: "shell", E: "tableWrapper" },
+    { id: "e3", T: "Attr", S: "tableWrapper", E: "table" },
+    { id: "e4", T: "Attr", S: "table", E: "tableHead" },
+    { id: "e5", T: "Attr", S: "tableHead", E: "headerRow" },
+    { id: "e6", T: "Attr", S: "headerRow", E: "headerCells" },
+    { id: "e7", T: "Attr", S: "headerCells", E: "headerCell" },
+    { id: "e8", T: "Attr", S: "table", E: "tableBody" },
+    { id: "e9", T: "Attr", S: "tableBody", E: "dataRows" },
+    { id: "e10", T: "Attr", S: "dataRows", E: "rowSlot" },
+    { id: "e11", T: "Attr", S: "shell", E: "emptyState" }
+  ]
+}

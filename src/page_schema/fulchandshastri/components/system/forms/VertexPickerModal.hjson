@@ -9,6 +9,18 @@
       }
     }
     {
+      id: "vpm_portal"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "portal"
+};'''
+      }
+    }
+    {
       id: "vpm_root"
       L: Attr
       P: {
@@ -18,7 +30,7 @@
           '''return `._id {
   position: fixed;
   inset: 0;
-  z-index: 10050;
+  z-index: 101;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -50,8 +62,8 @@ return {
         componentName: Html
         css:
           '''return `._id {
-  width: min(960px, 96vw);
-  height: min(720px, 90vh);
+  width: 96vw;
+  height: 92vh;
   display: flex;
   flex-direction: column;
   background: ${args.theme.var.color.background};
@@ -295,9 +307,15 @@ return {
   ]
   edges: [
     {
-      id: vpm_e1
+      id: vpm_e0
       T: Attr
       S: "vpm1"
+      E: "vpm_portal"
+    }
+    {
+      id: vpm_e1
+      T: Attr
+      S: "vpm_portal"
       E: "vpm_root"
     }
     {

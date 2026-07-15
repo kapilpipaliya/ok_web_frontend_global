@@ -952,7 +952,9 @@ try {
     const deleteResult = {
       success: true,
       message: `${vertexLabel} deleted successfully`,
-      data: deletedVertexData ? { P: deletedVertexData.P } : null
+      data: deletedVertexData
+        ? { id: deleteElementId, P: deletedVertexData.P }
+        : { id: deleteElementId }
     };
     
     // Execute afterDelete hooks

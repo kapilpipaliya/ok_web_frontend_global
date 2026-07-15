@@ -1,0 +1,326 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: loadPublicGalleryFolder
+        description: "Public gallery folder browser. Returns breadcrumb, child folders, and media items (Photo/Video/Pdf). Identify folders by category key (URL ?category=key), not internal id."
+        body:
+          '''
+const {
+  tableKey = "gallery",
+  tableVertexLabel = "GalleryItem",
+  categoryKey,
+  locale
+} = args.contextData || {};
+
+const resolvedTableKey = tableKey && String(tableKey).trim() !== "" ? String(tableKey).trim() : "gallery";
+const resolvedTableVertexLabel =
+  tableVertexLabel && String(tableVertexLabel).trim() !== ""
+    ? String(tableVertexLabel).trim()
+    : "GalleryItem";
+
+const configResult = await args.executeNamedServerFunction({
+  functionName: "loadTableConfigByKey",
+  contextData: { tableKey: resolvedTableKey }
+});
+
+if (!configResult?.result?.success) {
+  return configResult?.result || { success: false, message: "Failed to load gallery table schema" };
+}
+
+const schemaGraph = configResult.graph || configResult?.result?.graph || { vertexes: {}, edges: {} };
+const partVertexIds = configResult.result.data?.partVertexIds || {};
+
+const evalConfigBody = (cfgStr) => {
+  if (cfgStr == null || String(cfgStr).trim() === "") return null;
+  try {
+    const configFn = new Function(String(cfgStr));
+    const value = configFn();
+    return value && typeof value === "object" ? value : null;
+  } catch (e) {
+    console.warn("loadPublicGalleryFolder: config eval failed", e);
+    return null;
+  }
+};
+
+const stripPartMeta = (value) => {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  const { part: _part, ...rest } = value;
+  return rest;
+};
+
+const evalPartFromGraph = (graph, partIds, part) => {
+  const vertexId = partIds?.[part];
+  const vertex = graph?.vertexes?.[vertexId];
+  if (!vertex?.P?.config) return null;
+  return evalConfigBody(vertex.P.config);
+};
+
+const generalRaw = evalPartFromGraph(schemaGraph, partVertexIds, "general");
+const general = generalRaw ? stripPartMeta(generalRaw) : {};
+if (general.publicRead !== true) {
+  return { success: false, message: "Gallery table is not publicly readable" };
+}
+
+const sidebarRaw = evalPartFromGraph(schemaGraph, partVertexIds, "sidebar");
+const sidebar = sidebarRaw ? stripPartMeta(sidebarRaw) : {};
+const parentVertexLabel = sidebar.parentVertexLabel || "GalleryCategory";
+const toParentEdgeType = sidebar.toParentEdgeType || "ParentGalleryCategory";
+
+if (!args.context.nodes) args.context.nodes = {};
+if (!args.context.relationships) args.context.relationships = {};
+
+const currentCategoryKey =
+  categoryKey != null && String(categoryKey).trim() !== ""
+    ? String(categoryKey).trim()
+    : null;
+const isRootView = !currentCategoryKey;
+
+let currentCategory = null;
+let currentCategoryId = null;
+if (currentCategoryKey) {
+  const catResult = await args.session.run(
+    `
+    MATCH (v:${parentVertexLabel})
+    WHERE v.key = $categoryKey
+    RETURN v
+    LIMIT 1
+    `,
+    { categoryKey: currentCategoryKey }
+  );
+  const cats = args.processResult(catResult.records, args.context, "v") || [];
+  currentCategory = cats[0] || null;
+  if (!currentCategory) {
+    return { success: false, message: "Gallery folder not found" };
+  }
+  currentCategoryId = currentCategory.id;
+}
+
+const buildFolderEntry = async (child) => {
+  if (!child?.id) return null;
+  const childCountResult = await args.session.run(
+    `
+    MATCH (content:${resolvedTableVertexLabel})-[:${toParentEdgeType}]->(cat:${parentVertexLabel})
+    WHERE elementId(cat) = $categoryId
+    RETURN count(DISTINCT content) AS contentCount
+    `,
+    { categoryId: child.id }
+  );
+  const folderCountResult = await args.session.run(
+    `
+    MATCH (nested:${parentVertexLabel})-[:${toParentEdgeType}]->(parent:${parentVertexLabel})
+    WHERE elementId(parent) = $categoryId
+    RETURN count(DISTINCT nested) AS folderCount
+    `,
+    { categoryId: child.id }
+  );
+  return {
+    id: child.id,
+    name: child.P?.name || child.P?.key || "Folder",
+    key: child.P?.key || "",
+    contentCount: Number(childCountResult.records[0]?.get("contentCount") || 0),
+    folderCount: Number(folderCountResult.records[0]?.get("folderCount") || 0),
+    kind: "folder"
+  };
+};
+
+const folders = [];
+if (isRootView) {
+  // Top-level folders = categories with no parent
+  const topResult = await args.session.run(
+    `
+    MATCH (v:${parentVertexLabel})
+    WHERE NOT EXISTS { MATCH (v)-[:${toParentEdgeType}]->(:${parentVertexLabel}) }
+    RETURN v
+    ORDER BY COALESCE(v.displayOrder, 0), COALESCE(v.name, v.key, '') ASC
+    `
+  );
+  const topFolders = args.processResult(topResult.records, args.context, "v") || [];
+  for (const child of topFolders) {
+    const entry = await buildFolderEntry(child);
+    if (entry) folders.push(entry);
+  }
+} else {
+  const childrenResult = await args.session.run(
+    `
+    MATCH (child:${parentVertexLabel})-[r:${toParentEdgeType}]->(parent:${parentVertexLabel})
+    WHERE elementId(parent) = $parentId
+    RETURN child, parent, r
+    ORDER BY COALESCE(child.displayOrder, 0), COALESCE(child.name, child.key, '') ASC
+    `,
+    { parentId: currentCategoryId }
+  );
+  const childVertices = args.processResult(childrenResult.records, args.context, ["child", "parent"], "r") || [];
+  for (const child of childVertices) {
+    const entry = await buildFolderEntry(child);
+    if (entry) folders.push(entry);
+  }
+}
+
+const contentResult = await args.executeNamedServerFunction({
+  functionName: "getUserContent",
+  contextData: {
+    tableKey: resolvedTableKey,
+    tableVertexLabel: resolvedTableVertexLabel,
+    parentVertexLabel,
+    toParentEdgeType,
+    ...(locale != null ? { locale } : {}),
+    ...(currentCategoryId
+      ? { categoryId: currentCategoryId }
+      : { showUnassigned: true })
+  }
+});
+
+if (!contentResult?.result?.success) {
+  return contentResult?.result || { success: false, message: "Failed to load gallery items" };
+}
+
+const contentGraph = contentResult.graph || contentResult?.result?.graph || { vertexes: {}, edges: {} };
+const rows = Array.isArray(contentResult.result.data) ? contentResult.result.data : [];
+
+const resolveFileFromRelation = (item, relationshipType, graph) => {
+  const edgeIds = item?.OUT?.[relationshipType] || [];
+  if (!Array.isArray(edgeIds) || edgeIds.length === 0) return null;
+  const edge = graph.edges?.[edgeIds[0]];
+  const file = edge?.E != null ? graph.vertexes?.[edge.E] : null;
+  if (!file) return null;
+  const fileName = file?.P?.fileName != null ? String(file.P.fileName).trim() : "";
+  if (!fileName) return null;
+  return {
+    id: file.id,
+    fileName,
+    mimeType: file.P?.mimeType || file.P?.fileType || "",
+    url: "/api/file/download/" + encodeURIComponent(fileName)
+  };
+};
+
+const MEDIA_ICONS = {
+  Photo: "ph:image",
+  Video: "ph:video",
+  Pdf: "ph:file-pdf"
+};
+
+const items = rows
+  .map((item) => {
+    if (!item?.id) return null;
+    const mediaType = String(item.P?.mediaType || "Photo").trim() || "Photo";
+    const file = resolveFileFromRelation(item, "GalleryItemFile", contentGraph);
+    const thumbnail = resolveFileFromRelation(item, "GalleryItemThumbnail", contentGraph);
+    const previewUrl =
+      thumbnail?.url ||
+      (mediaType === "Photo" ? file?.url : "") ||
+      "";
+    return {
+      id: item.id,
+      title: item.P?.title || file?.fileName || "Untitled",
+      description: item.P?.description || "",
+      mediaType,
+      icon: MEDIA_ICONS[mediaType] || "ph:file",
+      fileUrl: file?.url || "",
+      fileName: file?.fileName || "",
+      mimeType: file?.mimeType || "",
+      previewUrl,
+      kind: "file"
+    };
+  })
+  .filter(Boolean);
+
+// Synthetic gallery root (no reserved DB root vertex)
+const breadcrumb = [
+  {
+    id: null,
+    name: "Gallery",
+    key: "",
+    isRoot: true
+  }
+];
+
+if (currentCategoryId) {
+  const ancestors = [];
+  let walkId = currentCategoryId;
+  const seen = new Set();
+  for (let depth = 0; depth < 24 && walkId; depth++) {
+    if (seen.has(walkId)) break;
+    seen.add(walkId);
+
+    let walkVertex = args.context.nodes[walkId];
+    if (!walkVertex) {
+      const walkResult = await args.session.run(
+        `
+        MATCH (v:${parentVertexLabel})
+        WHERE elementId(v) = $id
+        RETURN v
+        LIMIT 1
+        `,
+        { id: walkId }
+      );
+      const walked = args.processResult(walkResult.records, args.context, "v") || [];
+      walkVertex = walked[0] || null;
+    }
+    if (!walkVertex) break;
+
+    ancestors.unshift({
+      id: walkVertex.id,
+      name: walkVertex.P?.name || walkVertex.P?.key || "Folder",
+      key: walkVertex.P?.key || "",
+      isRoot: false
+    });
+
+    const parentResult = await args.session.run(
+      `
+      MATCH (child:${parentVertexLabel})-[:${toParentEdgeType}]->(parent:${parentVertexLabel})
+      WHERE elementId(child) = $id
+      RETURN parent
+      LIMIT 1
+      `,
+      { id: walkId }
+    );
+    const parents = args.processResult(parentResult.records, args.context, "parent") || [];
+    walkId = parents[0]?.id || null;
+  }
+  for (const node of ancestors) {
+    breadcrumb.push(node);
+  }
+}
+
+const mergedVertexes = Object.assign({}, contentGraph.vertexes || {}, schemaGraph.vertexes || {}, args.context.nodes || {});
+const mergedEdges = Object.assign({}, contentGraph.edges || {}, schemaGraph.edges || {}, args.context.relationships || {});
+
+return {
+  success: true,
+  data: {
+    tableKey: resolvedTableKey,
+    tableVertexLabel: resolvedTableVertexLabel,
+    parentVertexLabel,
+    toParentEdgeType,
+    rootCategoryId: null,
+    currentCategoryId,
+    currentCategoryKey,
+    currentCategory: currentCategory
+      ? {
+          id: currentCategory.id,
+          name: currentCategory.P?.name || currentCategory.P?.key || "Folder",
+          key: currentCategory.P?.key || ""
+        }
+      : null,
+    isRootView,
+    breadcrumb,
+    folders,
+    items,
+    graph: {
+      vertexes: mergedVertexes,
+      edges: mergedEdges,
+      deleted_vertexes: [],
+      deleted_edges: []
+    }
+  },
+  message: `Loaded ${folders.length} folder(s) and ${items.length} item(s)`
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

@@ -203,11 +203,16 @@ const getDefaultSettingsPageId = () => {
   const { config } = getCachedConfig();
   return getDefaultSettingsPageIdFromConfig(config);
 };
+// When false (e.g. VertexPicker modal), ignore URL query entirely and use local/page state.
+const useUrlQueryParams = () => prop("useUrlQueryParams") !== false;
+
 const getSettingsPageId = () => {
   const fromProps = args.contextData.props?.settingsPageId;
   if (fromProps != null && String(fromProps).trim() !== "") return String(fromProps).trim();
-  const fromQuery = args.searchParams?.page;
-  if (fromQuery != null && String(fromQuery).trim() !== "") return String(fromQuery).trim();
+  if (useUrlQueryParams()) {
+    const fromQuery = args.searchParams?.page;
+    if (fromQuery != null && String(fromQuery).trim() !== "") return String(fromQuery).trim();
+  }
   const fromState = pageP()?.settingsPageId;
   if (fromState != null && String(fromState).trim() !== "") return String(fromState).trim();
   return getDefaultSettingsPageId();
@@ -223,8 +228,10 @@ const getScopeId = () => {
   const scopeConfig = getScopeConfig();
   const fromProps = args.contextData.props?.scopeId;
   if (fromProps != null && String(fromProps).trim() !== "") return String(fromProps).trim();
-  const fromSearch = args.searchParams?.[scopeConfig.idParam || "scopeId"];
-  if (fromSearch != null && String(fromSearch).trim() !== "") return String(fromSearch).trim();
+  if (useUrlQueryParams()) {
+    const fromSearch = args.searchParams?.[scopeConfig.idParam || "scopeId"];
+    if (fromSearch != null && String(fromSearch).trim() !== "") return String(fromSearch).trim();
+  }
   return args.user?.P?.uuid || null;
 };
 const getConfigFunction = () => args.contextData.props?.configFunction;
@@ -769,65 +776,80 @@ const getGenericSaveFunction = () => {
         elementId: resolvedMutateElementId,
         uniqueKeys: uniqueKeys,
         enableUserScoping: enableUserScopingForContent,
-        hooks: tableConfig?.hooks,
+        hooks: getConfigHooks(),
         nestedLinePropertyStripKeys: buildNestedLinePropertyStripKeys(tableConfig),
         translatableFieldKeys: collectTranslatableFieldKeys(tableConfig?.formConfig),
         siteLanguages: getSiteLanguages()
       });
       applyServerGraphToLocalGraph(result);
 
-      const savedContentId = String(
-        result?.result?.data?.id ?? ""
-      );
-      const shouldAssignSidebarCategory =
-        result?.result?.success &&
-        result.result.data &&
-        (!isContentInTableData(savedContentId));
+      const toContentIds = (...values) => {
+        const out = [];
+        for (let i = 0; i < values.length; i++) {
+          const value = values[i];
+          const list = Array.isArray(value) ? value : value != null ? [value] : [];
+          for (let j = 0; j < list.length; j++) {
+            const id = String(list[j] || "").trim();
+            if (id && !id.startsWith("-") && !out.includes(id)) out.push(id);
+          }
+        }
+        return out;
+      };
 
-      if (shouldAssignSidebarCategory) {
+      const contentIdsToAssign = toContentIds(
+        apiData?.uploadedContentIds,
+        result?.result?.data?.id,
+        resolvedMutateElementId,
+        effectiveElementIdFromVertex(apiData?.vertex)
+      );
+      const pendingSidebarIds = contentIdsToAssign.filter((id) => !isContentInTableData(id));
+
+      if (
+        mode !== "delete" &&
+        result?.result?.success === true &&
+        pendingSidebarIds.length > 0
+      ) {
         const sidebarItem = selectedSidebarItem();
         const sidebarConfig = getSidebarConfig();
-
-        if (sidebarItem && sidebarConfig && sidebarConfig.toParentEdgeType) {
-          const rootKeys = sidebarConfig.rootKeys || {};
-          const rootKey = rootKeys.key;
-
+        if (sidebarItem && sidebarConfig?.toParentEdgeType) {
+          const rootKey = sidebarConfig.rootKeys?.key;
           const uCatSave = getUncategorizedVertexId();
           const isUncatSave =
             uCatSave && (sidebarItem.id === uCatSave || sidebarItem.P?.key === uCatSave);
-          if (sidebarItem.P?.key !== rootKey && !isUncatSave) {
-            // Get config to check user scoping settings
-            const { config } = getCachedConfig();
-            const enableUserScopingForSidebar = getConfigGeneralValue("enableUserScopingForSidebar") === true;
-            const enableUserScopingForContent = getConfigGeneralValue("enableUserScopingForContent") === true;
 
-            // File -[toParentEdgeType]-> Folder (MERGE on server); merge graph + bump count on success
-            try {
-              if (!savedContentId) throw new Error("missing content id after save");
-              const relResult = await args.fns.executeYTOFunction("createSidebarContentRelationship", {
-                categoryId: sidebarItem.id,
-                contentId: savedContentId,
-                relationshipType: sidebarConfig.toParentEdgeType,
-                categoryLabel: sidebarConfig.parentVertexLabel,
-                contentLabel: tableVertexLabel,
-                enableUserScopingForSidebar: enableUserScopingForSidebar,
-                enableUserScopingForContent: enableUserScopingForContent,
-                hooks: getConfigHooks()
-              });
-              applyServerGraphToLocalGraph(relResult);
-              // Update category count - increment by 1
-              if (!extractError(relResult, false)) updateSidebarCategoryCount(sidebarItem.id, 1);
-            } catch (relError) {
-              console.error("Error creating sidebar relationship:", relError);
-              // Don't fail the whole operation if relationship creation fails
+          if (sidebarItem.P?.key !== rootKey && !isUncatSave) {
+            const enableUserScopingForSidebar =
+              getConfigGeneralValue("enableUserScopingForSidebar") === true;
+            const enableUserScopingForContent =
+              getConfigGeneralValue("enableUserScopingForContent") === true;
+            for (let ci = 0; ci < pendingSidebarIds.length; ci++) {
+              try {
+                const relResult = await args.fns.executeYTOFunction(
+                  "createSidebarContentRelationship",
+                  {
+                    categoryId: sidebarItem.id,
+                    contentId: pendingSidebarIds[ci],
+                    relationshipType: sidebarConfig.toParentEdgeType,
+                    categoryLabel: sidebarConfig.parentVertexLabel,
+                    contentLabel: tableVertexLabel,
+                    enableUserScopingForSidebar,
+                    enableUserScopingForContent,
+                    hooks: getConfigHooks()
+                  }
+                );
+                applyServerGraphToLocalGraph(relResult);
+                if (!extractError(relResult, false)) {
+                  updateSidebarCategoryCount(sidebarItem.id, 1);
+                }
+              } catch (relError) {
+                console.error("Error creating sidebar relationship:", relError);
+              }
             }
+          } else if (sidebarItem.P?.key === rootKey) {
+            updateSidebarCategoryCount(rootKey, pendingSidebarIds.length);
           } else {
-            if (sidebarItem.P?.key === rootKey) {
-              updateSidebarCategoryCount(rootKey, 1);
-            } else {
-              const uKey = getUncategorizedVertexId();
-              if (uKey) updateSidebarCategoryCount(uKey, 1);
-            }
+            const uKey = getUncategorizedVertexId();
+            if (uKey) updateSidebarCategoryCount(uKey, pendingSidebarIds.length);
           }
         }
       }
@@ -1427,10 +1449,23 @@ const clearSelectedRows = () => {
 // Handle sidebar item selection
 const handleSidebarItemSelect = (item) => {
   patchPageP({ selectedSidebarCategoryId: item?.id ?? null });
-  // Persist selected category in URL so reload restores the same category (vertex id only)
-  if (item?.id != null && args.setSearchParams) {
+
+  // Persist selected category in URL (modals set useUrlQueryParams: false).
+  if (useUrlQueryParams() && item?.id != null && args.setSearchParams) {
     const current = args.searchParams || {};
     args.setSearchParams({ ...current, sidebarCategory: item.id }, { replace: true });
+  }
+
+  // Opt-in: treat sidebar category click as the picker selection value.
+  if (args.contextData.props?.allowSidebarSelection === true && item?.id) {
+    const onSidebarItemSelect = prop("onSidebarItemSelect");
+    if (typeof onSidebarItemSelect === "function") {
+      onSidebarItemSelect(item, args);
+    }
+    const onSelectionChange = getOnSelectionChange();
+    if (typeof onSelectionChange === "function") {
+      onSelectionChange(new Set([String(item.id)]), [{ id: item.id, vertex: item }], args);
+    }
   }
 };
 
@@ -1557,9 +1592,22 @@ const getTablePassthroughProps = () => {
   if (typeof onRowClick === "function") {
     passthrough.onRowClick = onRowClick;
   }
+  // Explicit false must win over general.rowClickable from settings (embedded pickers).
+  const rowClickableValue = prop("rowClickable");
+  if (rowClickableValue !== undefined) {
+    passthrough.rowClickable = rowClickableValue === true;
+  }
+  const showAddButtonValue = prop("showAddButton");
+  if (showAddButtonValue !== undefined) {
+    passthrough.showAddButton = showAddButtonValue === true;
+  }
   const actionHandlers = prop("actionHandlers");
   if (actionHandlers && typeof actionHandlers === "object") {
     passthrough.actionHandlers = actionHandlers;
+  }
+  // Embedded/modal DynamicPage: keep table search/filters/sort in local state only.
+  if (prop("useUrlQueryParams") === false) {
+    passthrough.useUrlQueryParams = false;
   }
   return passthrough;
 };
@@ -1854,6 +1902,7 @@ args.createEffect(() => {
 });
 
 const ensureSettingsPageQueryParam = () => {
+  if (!useUrlQueryParams()) return;
   const fromProps = args.contextData.props?.settingsPageId;
   if (fromProps != null && String(fromProps).trim() !== "") return;
   const fromQuery = args.searchParams?.page;
@@ -1967,6 +2016,7 @@ return {
   handleSaveSettings,
   getPageMode,
   isSettingsPageMode,
+  useUrlQueryParams,
   getSettingsPageId,
   getScopeConfig,
   getScopeId,
@@ -2122,7 +2172,10 @@ return {
   setSidebarWidth: (w) => args.mergeVertexProperties(0, vid, args.graph, args.setGraph, { sidebarWidth: w }),
   fetchRoot: args.fns.fetchRoot,
   hooks: config?.sidebar?.hooks,
-  initialCategoryId: args.searchParams?.sidebarCategory,
+  initialCategoryId: args.fns.useUrlQueryParams?.() !== false
+    ? args.searchParams?.sidebarCategory
+    : args.contextData.props?.initialCategoryId,
+  initialSelectedRowIds: args.fns.getInitialSelectedRowIds?.(),
   contentLabel: args.fns.prop('label')
 };
 '''

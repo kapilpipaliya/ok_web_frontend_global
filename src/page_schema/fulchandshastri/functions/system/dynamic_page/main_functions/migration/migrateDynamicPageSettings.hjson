@@ -5,7 +5,7 @@
       L: Function
       P: {
         key: migrateDynamicPageSettings
-        description: Seeds Fulchand Shastri settings_page_config and default GlobalSetting section documents for all public pages.
+        description: Seeds Fulchand Shastri settings_page_config, table schemas (books, recommended_books, gallery, schedule, pages, components, functions, email templates, files), and default GlobalSetting section documents.
         body:
           '''
 /**
@@ -26,7 +26,12 @@ const definitionsResult = await args.executeNamedServerFunction({
 if (!definitionsResult?.result?.success) {
   return {
     success: false,
-    message: definitionsResult?.result?.message || "Failed to load page settings definitions"
+    message:
+      definitionsResult?.error ||
+      definitionsResult?.result?.message ||
+      definitionsResult?.result?.error ||
+      "Failed to load page settings definitions",
+    definitionsResult
   };
 }
 
@@ -198,8 +203,7 @@ const stats = {
   settingsPageConfigs: settingsPageConfigs?.length || 0,
   defaultSectionDocuments: defaultSectionDocuments?.length || 0,
   tableSchemaParts: tableSchemaParts?.length || 0,
-  tableSectionDocuments: tableSectionDocuments?.length || 0,
-  tableContentSeeded: 0
+  tableSectionDocuments: tableSectionDocuments?.length || 0
 };
 
 await ensureGlobalSetting();
@@ -228,19 +232,6 @@ for (let ts = 0; ts < (tableSectionDocuments?.length || 0); ts++) {
   const r = await processTableSectionDocument(tableSectionDocuments[ts]);
   stats.created += r.created;
   stats.updated += r.updated;
-}
-
-if (!dryRun && (tableDefinitions?.length || 0) > 0) {
-  for (let td = 0; td < tableDefinitions.length; td++) {
-    const tableDef = tableDefinitions[td];
-    const seedResult = await args.executeNamedServerFunction({
-      functionName: "seedTableContent",
-      contextData: { tableVertexLabel: tableDef.tableVertexLabel }
-    });
-    if (seedResult?.result?.success) {
-      stats.tableContentSeeded += seedResult.result.data?.created || 0;
-    }
-  }
 }
 
 async function migrateExistingLocalizedValues() {

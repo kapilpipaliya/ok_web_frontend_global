@@ -24,8 +24,16 @@ export function setGraphData(
   args: GraphData,
   options: UpdateOptions = {},
 ) {
-  if (args.edges && Object.keys(args.edges).length > 0) {
-    restoreVertexAdjacencyFromEdges(args);
+  if (args.vertexes) {
+    if (args.edges && Object.keys(args.edges).length > 0) {
+      restoreVertexAdjacencyFromEdges(args);
+    } else {
+      // Stripped wire payloads may omit IN/OUT even when there are no edges.
+      for (const vertex of Object.values(args.vertexes)) {
+        if (!vertex.IN) vertex.IN = {};
+        if (!vertex.OUT) vertex.OUT = {};
+      }
+    }
   }
 
   batch(() => {
@@ -99,21 +107,25 @@ export function updateVertex(
 
   setGraph("vertexes", vertexId, (prev) => {
     if (prev) {
+      // Existing vertices may lack IN/OUT after strip-without-restore wire transfers.
+      const prevIN = prev.IN || {};
+      const prevOUT = prev.OUT || {};
+
       // Create deep merged IN object
-      const IN: { [key: string]: Id[] } = { ...prev.IN };
+      const IN: { [key: string]: Id[] } = { ...prevIN };
       if (vertexData.IN) {
         for (const key in vertexData.IN) {
-          const prevIds = prev.IN[key] || [];
+          const prevIds = prevIN[key] || [];
           const newIds = vertexData.IN[key] || [];
           IN[key] = [...new Set([...newIds, ...prevIds])];
         }
       }
 
       // Create deep merged OUT object
-      const OUT: { [key: string]: Id[] } = { ...prev.OUT };
+      const OUT: { [key: string]: Id[] } = { ...prevOUT };
       if (vertexData.OUT) {
         for (const key in vertexData.OUT) {
-          const prevIds = prev.OUT[key] || [];
+          const prevIds = prevOUT[key] || [];
           const newIds = vertexData.OUT[key] || [];
           OUT[key] = [...new Set([...newIds, ...prevIds])];
         }
@@ -121,7 +133,11 @@ export function updateVertex(
 
       return { ...vertexData, IN, OUT };
     }
-    return vertexData;
+    return {
+      ...vertexData,
+      IN: vertexData.IN || {},
+      OUT: vertexData.OUT || {},
+    };
   });
 
   for (const label of vertexData.L) {

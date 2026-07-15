@@ -30,6 +30,10 @@ export const API = {
     downloadFileUrl: "/api/file/download",
     replaceFileUrl: "/api/file/replace",
     uploadFileUrl: "/api/file/upload",
+    uploadInitUrl: "/api/file/upload/init",
+    uploadChunkUrl: "/api/file/upload/chunk",
+    uploadCompleteUrl: "/api/file/upload/complete",
+    uploadAbortUrl: "/api/file/upload/abort",
   },
   // Other endpoints
   // getInitialDataUrl: "/api/get/getInitialData",

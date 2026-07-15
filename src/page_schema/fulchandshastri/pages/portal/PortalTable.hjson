@@ -20,6 +20,10 @@ const checkAdminRole = () => {
 
 const TABLE_KEY_BY_LABEL = {
   Book: "books",
+  RecommendedBook: "recommended_books",
+  GalleryItem: "gallery",
+  ScheduleEvent: "schedule",
+  File: "files",
   Page: "pages",
   Component: "components",
   Function: "functions",
@@ -27,7 +31,11 @@ const TABLE_KEY_BY_LABEL = {
 };
 
 const TABLE_TITLE_BY_LABEL = {
-  Book: "Books",
+  Book: "Books By Fulchand",
+  RecommendedBook: "Books Recommended by Fulchand",
+  GalleryItem: "Gallery",
+  ScheduleEvent: "Schedule",
+  File: "Files",
   Page: "Pages",
   Component: "Components",
   Function: "Functions",
@@ -136,6 +144,30 @@ const getTableActions = () => {
     return [
       { key: "edit", type: "edit" },
       { key: "delete", type: "delete", confirm: makeDeleteConfirm("book") }
+    ];
+  }
+  if (getTableVertexLabel() === "RecommendedBook") {
+    return [
+      { key: "edit", type: "edit" },
+      { key: "delete", type: "delete", confirm: makeDeleteConfirm("recommended book") }
+    ];
+  }
+  if (getTableVertexLabel() === "GalleryItem") {
+    return [
+      { key: "edit", type: "edit" },
+      { key: "delete", type: "delete", confirm: makeDeleteConfirm("gallery item") }
+    ];
+  }
+  if (getTableVertexLabel() === "ScheduleEvent") {
+    return [
+      { key: "edit", type: "edit" },
+      { key: "delete", type: "delete", confirm: makeDeleteConfirm("event") }
+    ];
+  }
+  if (getTableVertexLabel() === "File") {
+    return [
+      { key: "edit", type: "edit" },
+      { key: "delete", type: "delete", confirm: makeDeleteConfirm("file") }
     ];
   }
   return undefined;

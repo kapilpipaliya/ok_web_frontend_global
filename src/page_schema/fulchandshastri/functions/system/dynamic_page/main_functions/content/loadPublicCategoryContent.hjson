@@ -1,0 +1,227 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: loadPublicCategoryContent
+        description: Loads public table rows filtered by category key/id using the same getUserContent path as DynamicPage. Generic for any table with a sidebar category (Folder, BookCategory, etc.).
+        body:
+          '''
+const {
+  tableKey,
+  tableVertexLabel,
+  categoryKey,
+  categoryId,
+  showUnassigned,
+  locale,
+  search,
+  filters,
+  sort,
+  parentVertexLabel,
+  toParentEdgeType
+} = args.contextData || {};
+
+if (!tableVertexLabel && !tableKey) {
+  return { success: false, message: "tableKey or tableVertexLabel is required" };
+}
+
+if (!categoryKey && !categoryId && showUnassigned !== true) {
+  return {
+    success: false,
+    message: "categoryKey, categoryId, or showUnassigned is required"
+  };
+}
+
+let resolvedTableKey = tableKey && String(tableKey).trim() !== "" ? String(tableKey).trim() : null;
+let resolvedTableVertexLabel = tableVertexLabel && String(tableVertexLabel).trim() !== ""
+  ? String(tableVertexLabel).trim()
+  : null;
+
+if (!resolvedTableKey || !resolvedTableVertexLabel) {
+  const idsResult = await args.executeNamedServerFunction({
+    functionName: "getTableIds",
+    contextData: {
+      ...(resolvedTableKey ? { tableKey: resolvedTableKey } : {}),
+      ...(resolvedTableVertexLabel ? { tableVertexLabel: resolvedTableVertexLabel } : {})
+    }
+  });
+  const ids = idsResult?.result?.data;
+  if (ids) {
+    resolvedTableKey = resolvedTableKey || ids.tableKey || null;
+    resolvedTableVertexLabel = resolvedTableVertexLabel || ids.tableVertexLabel || null;
+  }
+}
+
+if (!resolvedTableKey || !resolvedTableVertexLabel) {
+  return { success: false, message: "Failed to resolve table identity" };
+}
+
+const configResult = await args.executeNamedServerFunction({
+  functionName: "loadTableConfigByKey",
+  contextData: { tableKey: resolvedTableKey }
+});
+
+if (!configResult?.result?.success) {
+  return configResult?.result || { success: false, message: "Failed to load table schema" };
+}
+
+const schemaGraph = configResult.graph || configResult?.result?.graph || { vertexes: {} };
+const partVertexIds = configResult.result.data?.partVertexIds || {};
+
+const evalConfigBody = (cfgStr) => {
+  if (cfgStr == null || String(cfgStr).trim() === "") return null;
+  try {
+    const configFn = new Function(String(cfgStr));
+    const value = configFn();
+    return value && typeof value === "object" ? value : null;
+  } catch (e) {
+    console.warn("loadPublicCategoryContent: config eval failed", e);
+    return null;
+  }
+};
+
+const stripPartMeta = (value) => {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  const { part: _part, ...rest } = value;
+  return rest;
+};
+
+const evalPartFromGraph = (graph, partIds, part) => {
+  const vertexId = partIds?.[part];
+  const vertex = graph?.vertexes?.[vertexId];
+  if (!vertex?.P?.config) return null;
+  return evalConfigBody(vertex.P.config);
+};
+
+const sidebarRaw = evalPartFromGraph(schemaGraph, partVertexIds, "sidebar");
+const sidebar = sidebarRaw ? stripPartMeta(sidebarRaw) : {};
+
+const effectiveParentVertexLabel =
+  (parentVertexLabel && String(parentVertexLabel).trim()) ||
+  sidebar.parentVertexLabel ||
+  null;
+const effectiveToParentEdgeType =
+  (toParentEdgeType && String(toParentEdgeType).trim()) ||
+  sidebar.toParentEdgeType ||
+  null;
+
+if (!effectiveParentVertexLabel || !effectiveToParentEdgeType) {
+  return {
+    success: false,
+    message: "Table sidebar parentVertexLabel and toParentEdgeType are required"
+  };
+}
+
+let resolvedCategoryId = categoryId && String(categoryId).trim() !== ""
+  ? String(categoryId).trim()
+  : null;
+let resolvedCategory = null;
+let useShowUnassigned = showUnassigned === true;
+
+if (!useShowUnassigned && !resolvedCategoryId && categoryKey) {
+  const key = String(categoryKey).trim();
+  if (!key) {
+    return { success: false, message: "categoryKey is empty" };
+  }
+
+  const categoryResult = await args.session.run(
+    `
+    MATCH (cat:${effectiveParentVertexLabel})
+    WHERE toLower(COALESCE(cat.key, '')) = toLower($categoryKey)
+       OR toLower(COALESCE(cat.name, '')) = toLower($categoryKey)
+    RETURN cat
+    LIMIT 1
+    `,
+    { categoryKey: key }
+  );
+
+  const categories = args.processResult(categoryResult.records, args.context, "cat") || [];
+  resolvedCategory = categories[0] || null;
+  resolvedCategoryId = resolvedCategory?.id || null;
+
+  if (!resolvedCategoryId) {
+    return {
+      success: true,
+      data: {
+        rows: [],
+        rowIds: [],
+        category: null,
+        categoryId: null,
+        partVertexIds,
+        ids: configResult.result.data?.ids || null,
+        graph: {
+          vertexes: schemaGraph.vertexes || {},
+          edges: schemaGraph.edges || {},
+          deleted_vertexes: [],
+          deleted_edges: []
+        }
+      },
+      message: `No ${effectiveParentVertexLabel} found for key: ${key}`
+    };
+  }
+}
+
+const contentContextData = {
+  tableKey: resolvedTableKey,
+  tableVertexLabel: resolvedTableVertexLabel,
+  parentVertexLabel: effectiveParentVertexLabel,
+  toParentEdgeType: effectiveToParentEdgeType,
+  ...(locale != null ? { locale } : {}),
+  ...(search != null ? { search } : {}),
+  ...(filters && typeof filters === "object" ? { filters } : {}),
+  ...(sort && typeof sort === "object" ? { sort } : {})
+};
+
+if (useShowUnassigned) {
+  contentContextData.showUnassigned = true;
+} else {
+  contentContextData.categoryId = resolvedCategoryId;
+}
+
+const contentResult = await args.executeNamedServerFunction({
+  functionName: "getUserContent",
+  contextData: contentContextData
+});
+
+if (!contentResult?.result?.success) {
+  return contentResult?.result || { success: false, message: "Failed to load category content" };
+}
+
+const contentGraph = contentResult.graph || contentResult?.result?.graph || { vertexes: {}, edges: {} };
+const rows = Array.isArray(contentResult.result.data) ? contentResult.result.data : [];
+const rowIds = rows
+  .map((row) => row?.id)
+  .filter((id) => id != null && String(id).trim() !== "");
+
+const mergedVertexes = Object.assign({}, contentGraph.vertexes || {}, schemaGraph.vertexes || {});
+const mergedEdges = Object.assign({}, contentGraph.edges || {}, schemaGraph.edges || {});
+
+if (!resolvedCategory && resolvedCategoryId && mergedVertexes[resolvedCategoryId]) {
+  resolvedCategory = mergedVertexes[resolvedCategoryId];
+}
+
+return {
+  success: true,
+  data: {
+    rows,
+    rowIds,
+    category: resolvedCategory,
+    categoryId: resolvedCategoryId,
+    partVertexIds,
+    ids: configResult.result.data?.ids || null,
+    graph: {
+      vertexes: mergedVertexes,
+      edges: mergedEdges,
+      deleted_vertexes: [],
+      deleted_edges: []
+    }
+  },
+  message: `Loaded ${rowIds.length} public ${resolvedTableVertexLabel} row(s) for category`
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

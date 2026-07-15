@@ -1,0 +1,591 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        fns: return { enabled: () => true }
+        key: TrimVideos
+        url: /trimvideos
+        updatedAt: 2026-07-12T03:39:17.842Z
+        props:
+          '''return {
+  isNoPermissionCheck: true,
+};
+'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        fns:
+          '''
+const [generatedCommand, setGeneratedCommand] = args.createSignal("");
+const [formManagementFns, setFormManagementFns] = args.createSignal(null);
+
+const quoteShellArg = (value) => {
+  const text = String(value ?? "").trim();
+  if (!text) return "''";
+  if (/^[A-Za-z0-9._/-]+$/.test(text)) return text;
+  return `'${text.replace(/'/g, `'\\''`)}'`;
+};
+
+const deriveOutputFileName = (inputFile) => {
+  const text = String(inputFile ?? "").trim() || "input.mp4";
+  const slash = Math.max(text.lastIndexOf("/"), text.lastIndexOf("\\"));
+  const dir = slash >= 0 ? text.slice(0, slash + 1) : "";
+  const base = slash >= 0 ? text.slice(slash + 1) : text;
+  const lastDot = base.lastIndexOf(".");
+  if (lastDot > 0) {
+    return `${dir}${base.slice(0, lastDot)}_trimmed${base.slice(lastDot)}`;
+  }
+  return `${dir}${base}_trimmed`;
+};
+
+const buildFfmpegCommand = (values) => {
+  const inputFile = String(values?.inputFile || "").trim() || "input.mp4";
+  const startTime = String(values?.startTime || "").trim() || "00:00:00";
+  const endMode = String(values?.endMode || "").trim();
+  const outputFile = String(values?.outputFile || "").trim() || deriveOutputFileName(inputFile);
+  const copyStreams = values?.copyStreams === true || values?.copyStreams === "true";
+
+  const parts = ["ffmpeg", "-ss", startTime];
+
+  if (endMode === "duration") {
+    const duration = String(values?.duration || "").trim();
+    if (duration) parts.push("-t", duration);
+  } else if (endMode === "to") {
+    const endTime = String(values?.endTime || "").trim();
+    if (endTime) parts.push("-to", endTime);
+  }
+
+  parts.push("-i", quoteShellArg(inputFile));
+  if (copyStreams) parts.push("-c", "copy");
+  parts.push(quoteShellArg(outputFile));
+
+  return parts.join(" ");
+};
+
+const handleGenerate = async ({ vertex }) => {
+  const values = vertex?.P || {};
+  const command = buildFfmpegCommand(values);
+  setGeneratedCommand(command);
+
+  try {
+    await navigator.clipboard.writeText(command);
+    args.showSuccessToast?.("Command generated and copied to clipboard");
+  } catch (error) {
+    console.error("Clipboard copy failed:", error);
+    args.showSuccessToast?.("Command generated");
+  }
+
+  return true;
+};
+
+const registerFormManagementFns = (formFns) => {
+  setFormManagementFns(formFns);
+};
+
+const handleFieldChange = (fieldKey, value) => {
+  if (fieldKey !== "inputFile") return;
+  const formFns = formManagementFns();
+  if (!formFns?.setFieldValue) return;
+  formFns.setFieldValue("outputFile", deriveOutputFileName(value));
+};
+
+const runGenerate = () => {
+  const formFns = formManagementFns();
+  if (!formFns?.handleSave) {
+    args.showErrorToast?.("Form is not ready yet");
+    return;
+  }
+  formFns.handleSave();
+};
+
+const copyGeneratedCommand = async () => {
+  const command = generatedCommand();
+  if (!command) {
+    args.showWarningToast?.("Generate a command first");
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(command);
+    args.showSuccessToast?.("Copied to clipboard");
+  } catch (error) {
+    console.error("Clipboard copy failed:", error);
+    args.showErrorToast?.("Could not copy to clipboard");
+  }
+};
+
+return {
+  generatedCommand,
+  setGeneratedCommand,
+  formManagementFns,
+  registerFormManagementFns,
+  handleFieldChange,
+  handleGenerate,
+  runGenerate,
+  copyGeneratedCommand,
+  deriveOutputFileName,
+  buildFfmpegCommand
+};
+'''
+        css:
+          '''
+return `._id {
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}`;
+'''
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''
+return `._id {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+        props:
+          '''
+return {
+  as: "h1",
+  text: "Trim Videos"
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        textType: markdown
+        text:
+          '''Fill the form to build an `ffmpeg` trim command.
+
+- `-ss` = start time
+- `-to` = end time
+- `-t` = duration
+- `-c copy` = copy streams without re-encoding
+'''
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  line-height: 1.5;
+  font-size: 0.95rem;
+
+  p {
+    margin: 0 0 0.5rem;
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 1.25rem;
+  }
+}`;
+'''
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: FormManagement
+        css:
+          '''
+return `._id {
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background_light_50};
+  overflow: hidden;
+}`;
+'''
+        props:
+          '''
+return {
+  mode: "add",
+  vertexLabel: "TrimVideoCommand",
+  hideActionsBar: true,
+  afterSuccessfulSave: "reinitialize",
+  onSave: args.fns.handleGenerate,
+  onFnsReady: args.fns.registerFormManagementFns,
+  onFieldChange: args.fns.handleFieldChange,
+  formConfig: {
+    gridColumns: 2,
+    groups: [
+      {
+        key: "trimInputs",
+        title: "Trim settings",
+        gridColumns: 2,
+        fields: [
+          {
+            key: "inputFile",
+            label: "Input file",
+            dataType: "text",
+            renderer: "text",
+            required: true,
+            colSpan: 2,
+            defaultValue: "input.mp4",
+            placeholder: "input.mp4",
+            tooltip: "Path or filename of the source video"
+          },
+          {
+            key: "startTime",
+            label: "Start time (-ss)",
+            dataType: "text",
+            renderer: "text",
+            required: true,
+            colSpan: 1,
+            defaultValue: "00:01:30",
+            placeholder: "HH:MM:SS",
+            pattern: "^\\d{1,2}:\\d{2}(:\\d{2}(\\.\\d+)?)?$",
+            patternMessage: "Use time like 00:01:30 or 1:30:00"
+          },
+          {
+            key: "endMode",
+            label: "End mode",
+            dataType: "select",
+            renderer: "text",
+            required: false,
+            colSpan: 1,
+            defaultValue: "none",
+            tooltip: "Optional. Leave as None to omit -to / -t from the command.",
+            options: [
+              { value: "none", label: "None" },
+              { value: "to", label: "End time (-to)" },
+              { value: "duration", label: "Duration (-t)" }
+            ]
+          },
+          {
+            key: "endTime",
+            label: "End time (-to)",
+            dataType: "text",
+            renderer: "text",
+            required: true,
+            colSpan: 1,
+            defaultValue: "00:02:45",
+            placeholder: "HH:MM:SS",
+            pattern: "^\\d{1,2}:\\d{2}(:\\d{2}(\\.\\d+)?)?$",
+            patternMessage: "Use time like 00:02:45 or 1:30:00",
+            dependsOn: {
+              field: "endMode",
+              operator: "equals",
+              value: "to"
+            }
+          },
+          {
+            key: "duration",
+            label: "Duration (-t)",
+            dataType: "text",
+            renderer: "text",
+            required: true,
+            colSpan: 1,
+            defaultValue: "00:01:15",
+            placeholder: "HH:MM:SS",
+            pattern: "^\\d{1,2}:\\d{2}(:\\d{2}(\\.\\d+)?)?$",
+            patternMessage: "Use duration like 00:01:15",
+            dependsOn: {
+              field: "endMode",
+              operator: "equals",
+              value: "duration"
+            }
+          },
+          {
+            key: "outputFile",
+            label: "Output file",
+            dataType: "text",
+            renderer: "text",
+            required: true,
+            colSpan: 2,
+            defaultValue: "input_trimmed.mp4",
+            placeholder: "input_trimmed.mp4"
+          },
+          {
+            key: "copyStreams",
+            label: "Copy streams (-c copy)",
+            dataType: "boolean",
+            renderer: "checkbox",
+            colSpan: 2,
+            defaultValue: true,
+            tooltip: "Faster trim without re-encoding. Disable if you need frame-accurate cuts."
+          }
+        ]
+      }
+    ]
+  }
+};
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        css:
+          '''
+return `._id {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}`;
+'''
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "primary",
+  text: "Generate Command",
+  onClick: args.fns.runGenerate
+};
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background};
+}`;
+'''
+        props:
+          '''
+return {
+  as: "div",
+  show: () => !!args.fns.generatedCommand()
+};
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}`;
+'''
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''
+return `._id {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+        props:
+          '''
+return {
+  as: "h2",
+  text: "Generated command"
+};
+'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "secondary",
+  text: "Copy",
+  onClick: args.fns.copyGeneratedCommand
+};
+'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        css:
+          '''
+return `._id {
+  margin: 0;
+  padding: 0.875rem 1rem;
+  border-radius: 0.375rem;
+  background: ${args.theme.var.color.background_dark_800};
+  color: ${args.theme.var.color.background_dark_800_text};
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}`;
+'''
+        props:
+          '''
+return {
+  as: "pre",
+  text: args.fns.generatedCommand()
+};
+'''
+      }
+    }
+    {
+      id: "13"
+      L: PageLayout
+      P: {
+        componentName: Layout
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "5"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "6"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "2"
+      E: "8"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "9"
+      E: "11"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "8"
+      E: "12"
+    }
+    {
+      id: e12
+      T: PageLayout
+      S: "1"
+      E: "13"
+    }
+  ]
+}

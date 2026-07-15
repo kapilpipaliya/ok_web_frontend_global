@@ -62,8 +62,16 @@ const [formVertexId, setFormVertexId] = args.createSignal(null);
 const [formTxnId, setFormTxnId] = args.createSignal(0);
 const [errors, setErrors] = args.createStore({});
 const [isSubmitting, setIsSubmitting] = args.createSignal(false);
+const [isFileUploading, setIsFileUploading] = args.createSignal(false);
+const [uploadedContentIds, setUploadedContentIds] = args.createSignal([]);
 const [nestedLineMeta, setNestedLineMeta] = args.createSignal({ deletedIdsByField: {} });
 const resetNestedLineMeta = () => setNestedLineMeta({ deletedIdsByField: {} });
+const rememberUploadedContentIds = (ids) => {
+  const list = (Array.isArray(ids) ? ids : ids != null ? [ids] : [])
+    .map((id) => String(id || "").trim())
+    .filter((id) => id && !id.startsWith("-"));
+  setUploadedContentIds(list);
+};
 
 const markNestedLineDeleted = (fieldKey, lineId) => {
   if (!fieldKey || !lineId) return;
@@ -453,6 +461,7 @@ const initializeForm = () => {
   const mode = getMode();
   const vertexLabel = getVertexLabel();
   resetNestedLineMeta();
+  setUploadedContentIds([]);
 
   const hasFields =
     Array.isArray(formConfig?.groups) &&
@@ -778,7 +787,20 @@ const validate = () => {
   const newErrors = {};
   for (const field of allFields) {
     if (!isFieldVisible(field)) continue;
-    if (getFieldRenderer(field) === "graphFileUpload") continue;
+    if (getFieldRenderer(field) === "graphFileUpload") {
+      if (isFieldRequired(field)) {
+        const formVertex = getFormVertex();
+        const vertexId = formVertex?.id != null ? String(formVertex.id).trim() : "";
+        const isLocalDraft = vertexId === "" || vertexId.startsWith("-");
+        const uploadedName =
+          formVertex?.P?.fileName != null ? String(formVertex.P.fileName).trim() : "";
+        if (isLocalDraft || uploadedName === "") {
+          const multi = field.uploadConfiguration?.multiple === true;
+          newErrors[field.key] = multi ? "Please upload at least one file" : "Please upload a file";
+        }
+      }
+      continue;
+    }
     const value = embeddedVertexPickerUsesRelationshipEdge(field)
       ? getFieldValue(field.key)
       : vertex.P[field.key];
@@ -889,6 +911,11 @@ const validate = () => {
 
 // Handle save
 const handleSave = async () => {
+  if (isFileUploading()) {
+    args.showErrorToast?.("Please wait for the file upload to finish");
+    return;
+  }
+
   if (!validate()) {
     args.showErrorToast?.("Please fix form errors");
     return;
@@ -998,7 +1025,8 @@ const handleSave = async () => {
     const result = await onSave({
       vertex: vertex,
       relationships: relationshipData,
-      nestedLineSync
+      nestedLineSync,
+      uploadedContentIds: uploadedContentIds()
     });
 
     // Clean up only after successful save (when onSave returns truthy)
@@ -1111,6 +1139,9 @@ return {
   setErrors,
   isSubmitting,
   setIsSubmitting,
+  isFileUploading,
+  setIsFileUploading,
+  rememberUploadedContentIds,
   initializeForm,
   getFieldValue,
   setFieldValue,
@@ -1499,7 +1530,7 @@ if (args.fns.getFieldRenderer(field) === "graphFileUpload") {
   }
   return {
     componentName: "FileUploader",
-    disabled: fieldDisabled,
+    disabled: fieldDisabled || args.fns.isSubmitting(),
     uploadConfiguration: baseUploadConfiguration,
     uploadCallbacks: {
       setFieldValue,
@@ -1509,6 +1540,8 @@ if (args.fns.getFieldRenderer(field) === "graphFileUpload") {
       setFormTxnId: args.fns.setFormTxnId,
       formTxnId: args.fns.formTxnId,
       revertTransaction: args.revertTransaction,
+      setIsFileUploading: args.fns.setIsFileUploading,
+      onFilesUploaded: args.fns.rememberUploadedContentIds,
     },
     ...accessibility
   };
@@ -1967,7 +2000,7 @@ return {
   "attr:variant": "secondary",
   text: "Cancel",
   onClick: handleCancel,
-  disabled: args.fns.isSubmitting(),
+  disabled: args.fns.isSubmitting() || args.fns.isFileUploading?.() === true,
   hide: args.fns.getUsePolarisUI?.() !== true
 };
 '''
@@ -1984,9 +2017,9 @@ return {
 return {
   as: "s-button",
   "attr:variant": "primary",
-  text: "Save",
+  text: args.fns.isFileUploading?.() === true ? "Uploading…" : "Save",
   onClick: args.fns.handleSave,
-  disabled: args.fns.isSubmitting(),
+  disabled: args.fns.isSubmitting() || args.fns.isFileUploading?.() === true,
   hide: args.fns.getUsePolarisUI?.() !== true
 };
 '''
@@ -2003,8 +2036,8 @@ return {
 return {
   variant: "primary",
   onClick: args.fns.handleSave,
-  text: "Save",
-  disabled: args.fns.isSubmitting(),
+  text: args.fns.isFileUploading?.() === true ? "Uploading…" : "Save",
+  disabled: args.fns.isSubmitting() || args.fns.isFileUploading?.() === true,
   hide: args.fns.getUsePolarisUI?.() === true
 };
 '''

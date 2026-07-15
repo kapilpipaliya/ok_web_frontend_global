@@ -1,0 +1,84 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        fns: return { enabled: () => true }
+        url: /todo
+        key: Todo
+        props:
+          '''return {
+  isNoPermissionCheck: true
+}'''
+        updatedAt: 2026-07-12T04:08:39.487Z
+      }
+    }
+    {
+      id: "2"
+      L: PageLayout
+      P: {
+        componentName: Layout
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        as: div
+        displayOrder: 1
+        textType: markdown
+        componentName: Html
+        text:
+          '''- get all images and add to websites
+
+- Home Page
+  - Fix all the contents.
+
+- Contact Page
+  - Fix Map
+
+
+- Books Page
+- Dravya Drsti Prakash
+  - Make A BASIC CSS GRID LAYOUT For contents manually then ask AI to make it working.
+
+
+
+
+- Make New Pages
+   - FFMPEG page for making command for trimming.
+
+- Footer Display time line when playing audio.
+
+- Add Video Player on layout.
+
+- When not logged in make local theme switching working.
+
+- Make Translatable text in all the pages.
+
+- Make The search working in all the pages.
+
+
+
+
+'''
+        key: unique_1
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: PageLayout
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "1"
+      E: "3"
+    }
+  ]
+}

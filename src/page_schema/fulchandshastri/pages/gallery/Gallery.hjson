@@ -1,0 +1,210 @@
+{
+  vertexes: [
+    {
+      id: "page",
+      L: "Page",
+      P: {
+        public: true
+        key: "Gallery",
+        fns: "return { enabled: () => true }",
+        isNoPermissionCheck: true,
+        url: "/gallery"
+        settingsPageId: "photos"
+        props: '''
+const locale = args.params?.lang ? String(args.params.lang).toLowerCase() : undefined;
+const categoryKey = args.searchParams?.category != null && String(args.searchParams.category).trim() !== ""
+  ? String(args.searchParams.category).trim()
+  : null;
+const langPrefix = locale && /^[a-z]{2,3}$/i.test(locale) ? `/${locale}` : "";
+return {
+  contextName: "gallerySettings",
+  serverFunction: `
+try {
+  const pageResult = await args.executeNamedServerFunction({
+    functionName: "loadPublicPageSettings",
+    contextData: { pageId: "photos", allowPublicRead: true, locale: ${JSON.stringify(locale ?? null)} }
+  });
+  const folderResult = await args.executeNamedServerFunction({
+    functionName: "loadPublicGalleryFolder",
+    contextData: {
+      tableKey: "gallery",
+      tableVertexLabel: "GalleryItem",
+      categoryKey: ${JSON.stringify(categoryKey)},
+      locale: ${JSON.stringify(locale ?? null)}
+    }
+  });
+
+  const sections = pageResult?.result?.success ? (pageResult.result.data?.sections || {}) : {};
+  const folderData = folderResult?.result?.success ? (folderResult.result.data || {}) : {};
+
+  return {
+    content: sections.content || {},
+    folderData
+  };
+} catch (error) {
+  console.error("Error loading gallery page:", error);
+  return {
+    content: {},
+    folderData: { folders: [], items: [], breadcrumb: [] }
+  };
+}
+`
+};
+'''
+      }
+    },
+    {
+      id: "pageHeader",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: linear-gradient(135deg, ${args.theme.var.color.primary_light_100} 0%, ${args.theme.var.color.primary_light_50} 100%);
+  padding: 3rem 1rem;
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "pageTitle",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const content = args.contextData.gallerySettings?.content;
+return {
+  as: "h1",
+  text: content?.pageTitle || "Gallery"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  font-size: 3rem;
+  font-weight: 700;
+  margin: 0;
+
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "pageSubtitle",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const content = args.contextData.gallerySettings?.content;
+return {
+  as: "p",
+  text: content?.pageSubtitle || "",
+  hide: !content?.pageSubtitle
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text_light_200};
+  font-size: 1.25rem;
+  margin-top: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "mainContent",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "main"
+};
+''',
+        css: '''
+return `._id {
+  padding: 3rem 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "galleryBrowser",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "GalleryBrowser",
+        props: '''
+const content = args.contextData.gallerySettings?.content || {};
+const folderData = args.contextData.gallerySettings?.folderData || {};
+const locale = args.params?.lang ? String(args.params.lang).toLowerCase() : undefined;
+const langPrefix = locale && /^[a-z]{2,3}$/i.test(locale) ? `/${locale}` : "";
+return {
+  tableKey: "gallery",
+  tableVertexLabel: "GalleryItem",
+  locale,
+  useUrlState: true,
+  urlParam: "category",
+  basePath: `${langPrefix}/gallery`,
+  initialData: folderData,
+  labels: {
+    rootBreadcrumbLabel: content.rootBreadcrumbLabel || content.pageTitle || "Gallery",
+    emptyFoldersText: content.emptyFoldersText || "No folders in this location.",
+    emptyFilesText: content.emptyFilesText || "No files in this folder.",
+    loadingText: "Loading…"
+  }
+};
+'''
+      }
+    },
+    {
+      id: "layout",
+      L: "PageLayout",
+      P: {
+        displayOrder: 1,
+        componentName: "Layout"
+      }
+    }
+  ],
+  edges: [
+    { id: "e0", T: "Attr", S: "page", E: "pageHeader" },
+    { id: "e3", T: "Attr", S: "pageHeader", E: "pageTitle" },
+    { id: "e4", T: "Attr", S: "pageHeader", E: "pageSubtitle" },
+    { id: "e5", T: "Attr", S: "page", E: "mainContent" },
+    { id: "e6", T: "Attr", S: "mainContent", E: "container" },
+    { id: "e7", T: "Attr", S: "container", E: "galleryBrowser" },
+    { id: "e_layout", T: "PageLayout", S: "page", E: "layout" }
+  ]
+}

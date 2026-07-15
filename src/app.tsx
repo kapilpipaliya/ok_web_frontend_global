@@ -18,7 +18,7 @@ import { GraphContext } from "~/lib/graph/context/GraphContext";
 import { GetInitialData } from "./GetInitialData";
 import { HydrationLoader } from "./components/HydrationLoader";
 
-/** Above VertexPickerModal (10050) and other app overlays so toasts stay visible. */
+/** Above VertexPickerModal (101) and other app overlays so toasts stay visible. */
 const TOAST_CONTAINER_Z_INDEX = 20000;
 
 // Create a generic error fallback component

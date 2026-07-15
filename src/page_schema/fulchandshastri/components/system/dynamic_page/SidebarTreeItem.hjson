@@ -1046,13 +1046,14 @@ return `._id {
   font-size: 14px;
   font-weight: ${args.fns.hasChildren() ? "bold" : "normal"};
   width: 100%;
+  position: relative;
   border-radius: ${args.fns.hasChildren() ? "5px" : "0 5px 5px 0"};
   ${backgroundColor ? `background-color: ${backgroundColor};
   ${isDirectMatch ? " font-weight: bold;" : ""}` : ""}
   ${dragOverStyle}
   ${isDragging ? `opacity: 0.5;` : ""}
   padding: 2px 0;
-  transition: all 0.15s ease-in-out;
+  transition: background-color 0.15s ease-in-out;
   ${args.fns.hasChildren() ? "" : `border-left: 1px dashed ${args.theme.var.color.border};`}
 
   &:hover {
@@ -1062,7 +1063,7 @@ return `._id {
   &:hover .tree-item-actions {
     opacity: 1;
     visibility: visible;
-    display: flex;
+    pointer-events: auto;
   }
 }`;
 '''
@@ -1253,18 +1254,23 @@ return {
         css:
           '''
 return `._id {
-  margin-left: 4px;
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-left: 0;
   cursor: pointer;
   color: ${args.theme.var.color.primary};
   opacity: 0;
   visibility: hidden;
-  display: none;
-  gap: 4px;
+  pointer-events: none;
+  display: flex;
+  gap: 2px;
   align-items: center;
+  background-color: ${args.theme.var.color.background_dark_150};
+  border-radius: 4px;
+  padding: 0 2px;
   transition: opacity 0.2s ease, visibility 0.2s ease;
-  &:hover {
-    opacity: 1;
-  }
 }`;
 '''
         displayOrder: 5
@@ -1328,8 +1334,8 @@ return `._id {
 return {
   as: "icon",
   icon: "ph:plus",
-  height: 14,
-  width: 14,
+  height: 12,
+  width: 12,
   onClick: args.fns.handleOpenAddModal,
   hide: args.fns.getUsePolarisUI?.() === true
 };
@@ -1360,8 +1366,8 @@ return `._id {
 return {
   as: "icon",
   icon: "ph:pencil",
-  height: 14,
-  width: 14,
+  height: 12,
+  width: 12,
   onClick: args.fns.handleOpenEditModal,
   hide: args.fns.getUsePolarisUI?.() === true
 };
@@ -1415,8 +1421,8 @@ const isRoot = args.fns.isUncategorizedTreeNode?.(item) ?? false;
 return {
   as: "icon",
   icon: "ph:trash",
-  height: 14,
-  width: 14,
+  height: 12,
+  width: 12,
   onClick: args.fns.handleDelete,
   hide: isRoot || args.fns.getUsePolarisUI?.() === true
 };

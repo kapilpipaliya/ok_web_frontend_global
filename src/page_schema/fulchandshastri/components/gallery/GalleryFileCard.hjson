@@ -1,0 +1,281 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Component",
+      P: {
+        key: "GalleryFileCard",
+        description: "Media file card for Photo/Video/Pdf. Props: item, onOpen(item), index."
+      }
+    },
+    {
+      id: "root",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.props?.item || args.contextData.props || {};
+const index = args.contextData.props?.index ?? args.contextData.index ?? 0;
+const href = args.contextData.props?.href || item.fileUrl || "";
+const onOpen = args.contextData.props?.onOpen;
+return {
+  as: href ? "a" : "button",
+  type: href ? undefined : "button",
+  href: href || undefined,
+  target: href ? "_blank" : undefined,
+  rel: href ? "noopener noreferrer" : undefined,
+  "data-animate": "",
+  ref: (el) => el && args.fns.animateOnView?.(el, { delay: index * 0.05 }),
+  onClick: (e) => {
+    if (!onOpen) return;
+    e.preventDefault();
+    onOpen(item);
+  }
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  text-align: left;
+  padding: 0;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.75rem;
+  background: ${args.theme.var.color.background};
+  overflow: hidden;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    border-color: ${args.theme.var.color.primary_light_300};
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${args.theme.var.color.primary};
+    outline-offset: 2px;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "preview",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: ${args.theme.var.color.background_light_200};
+  overflow: hidden;
+}`;
+'''
+      }
+    },
+    {
+      id: "previewImage",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.props?.item || args.contextData.props || {};
+const src = item.previewUrl || "";
+return {
+  as: src ? "img" : "fragment",
+  src: src || undefined,
+  alt: item.title || "Gallery item",
+  loading: "lazy"
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+
+  button:hover & {
+    transform: scale(1.04);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "previewFallback",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.props?.item || args.contextData.props || {};
+return {
+  as: "div",
+  hide: !!item.previewUrl
+};
+''',
+        css: '''
+return `._id {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: ${args.theme.var.color.primary};
+  background: linear-gradient(
+    135deg,
+    ${args.theme.var.color.primary_light_100} 0%,
+    ${args.theme.var.color.background_light_100} 100%
+  );
+}`;
+'''
+      }
+    },
+    {
+      id: "fallbackIcon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.props?.item || args.contextData.props || {};
+return {
+  as: "icon",
+  icon: item.icon || "ph:file",
+  width: 40,
+  height: 40
+};
+'''
+      }
+    },
+    {
+      id: "typeBadge",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.props?.item || args.contextData.props || {};
+return {
+  as: "span",
+  text: item.mediaType || "File"
+};
+''',
+        css: '''
+return `._id {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  border: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+      }
+    },
+    {
+      id: "body",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.875rem 1rem 1rem;
+  min-width: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.props?.item || args.contextData.props || {};
+return {
+  as: "h3",
+  text: item.title || "Untitled"
+};
+''',
+        css: '''
+return `._id {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}`;
+'''
+      }
+    },
+    {
+      id: "description",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.props?.item || args.contextData.props || {};
+return {
+  as: "p",
+  text: item.description || "",
+  hide: !item.description
+};
+''',
+        css: '''
+return `._id {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: ${args.theme.var.color.text_light_300};
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "root" },
+    { id: "e2", T: "Attr", S: "root", E: "preview" },
+    { id: "e3", T: "Attr", S: "preview", E: "previewImage" },
+    { id: "e4", T: "Attr", S: "preview", E: "previewFallback" },
+    { id: "e5", T: "Attr", S: "previewFallback", E: "fallbackIcon" },
+    { id: "e6", T: "Attr", S: "preview", E: "typeBadge" },
+    { id: "e7", T: "Attr", S: "root", E: "body" },
+    { id: "e8", T: "Attr", S: "body", E: "title" },
+    { id: "e9", T: "Attr", S: "body", E: "description" }
+  ]
+}

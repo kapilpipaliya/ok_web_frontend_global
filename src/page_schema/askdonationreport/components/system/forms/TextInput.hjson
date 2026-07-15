@@ -1,0 +1,552 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: TextInput
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''
+const hasLeftIcon = !!args.contextData.props?.leftIcon;
+const hasRightIcon = !!args.contextData.props?.rightIcon;
+const iconSize = args.contextData.props?.iconSize || 20;
+
+return `._id {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  background: ${args.theme.var.color.background};
+  transition: all 150ms ease;
+
+  &:focus-within {
+    border-color: ${args.theme.var.color.primary};
+    box-shadow: 0 0 0 3px ${args.theme.var.color.primary_light_200};
+  }
+
+  &:hover:not(:focus-within) {
+    border-color: ${args.theme.var.color.border_dark_200};
+  }
+
+  &.disabled {
+    background: ${args.theme.var.color.background_light_100};
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.text_light_500};
+  flex-shrink: 0;
+  margin-left: ${args.theme.var.spacing.md};
+  margin-right: ${args.theme.var.spacing.sm};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const leftIcon = args.contextData.props?.leftIcon;
+const iconSize = args.contextData.props?.iconSize || 20;
+
+return {
+  as: "icon",
+  icon: leftIcon,
+  width: iconSize,
+  height: iconSize,
+  hide: !leftIcon
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
+const hasLeftIcon = !!args.contextData.props?.leftIcon;
+const hasRightIcon = !!args.contextData.props?.rightIcon;
+
+return `._id {
+  flex: 1;
+  width: 100%;
+  padding: ${args.theme.var.spacing.sm} ${hasRightIcon ? '0' : args.theme.var.spacing.md} ${args.theme.var.spacing.sm} ${hasLeftIcon ? '0' : args.theme.var.spacing.md};
+  border: none;
+  outline: none;
+  font-size: 1rem;
+  background: transparent;
+  color: ${args.theme.var.color.text};
+  // line-height: 1.5;
+
+  &::placeholder {
+    color: ${args.theme.var.color.text_light_500};
+    opacity: 1;
+    font-size: 0.875rem;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "input",
+  type: args.contextData.props?.type || "text",
+  value: args.contextData.props?.value || "",
+  placeholder: args.contextData.props?.placeholder || "",
+  required: args.contextData.props?.required || false,
+  disabled: args.contextData.props?.disabled || false,
+  title: args.contextData.props?.title || undefined,
+  "aria-describedby": args.contextData.props?.["aria-describedby"] || undefined,
+  // readOnly: args.contextData.props?.readOnly || false, // not work on server
+  maxLength: args.contextData.props?.maxLength || undefined,
+  minLength: args.contextData.props?.minLength || undefined,
+  autoFocus: args.contextData.props?.autoFocus || false,
+  onChange: args.contextData.props?.onChange || null,
+  onBlur: args.contextData.props?.onBlur || null,
+  onFocus: args.contextData.props?.onFocus || null,
+  onInput: args.contextData.props?.onInput || null,
+  onKeyDown: args.contextData.props?.onKeyDown || null,
+  onMount: args.contextData.props?.onMount || null
+};
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.text_light_500};
+  flex-shrink: 0;
+  margin-left: ${args.theme.var.spacing.sm};
+  margin-right: ${args.theme.var.spacing.md};
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const rightIcon = args.contextData.props?.rightIcon;
+const iconSize = args.contextData.props?.iconSize || 20;
+
+return {
+  as: "icon",
+  icon: rightIcon,
+  width: iconSize,
+  height: iconSize,
+  hide: !rightIcon
+};
+'''
+      }
+    }
+    {
+      id: "6"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onInput
+      }
+    }
+    {
+      id: "7"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: ""
+        key: value
+      }
+    }
+    {
+      id: "8"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: text
+        key: type
+      }
+    }
+    {
+      id: "9"
+      L: ComponentVariantOption
+      P: {
+        description: Standard text input
+        value: text
+        key: text
+      }
+    }
+    {
+      id: "10"
+      L: ComponentVariantOption
+      P: {
+        description: Email input with validation
+        value: email
+        key: email
+      }
+    }
+    {
+      id: "11"
+      L: ComponentVariantOption
+      P: {
+        description: Password input (hidden text)
+        value: password
+        key: password
+      }
+    }
+    {
+      id: "12"
+      L: ComponentVariantOption
+      P: {
+        description: Numeric input
+        value: number
+        key: number
+      }
+    }
+    {
+      id: "13"
+      L: ComponentVariantOption
+      P: {
+        description: Telephone number input
+        value: tel
+        key: tel
+      }
+    }
+    {
+      id: "14"
+      L: ComponentVariantOption
+      P: {
+        description: URL input with validation
+        value: url
+        key: url
+      }
+    }
+    {
+      id: "15"
+      L: ComponentVariantOption
+      P: {
+        description: Search input
+        value: search
+        key: search
+      }
+    }
+    {
+      id: "16"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: required
+        defValue: false
+      }
+    }
+    {
+      id: "17"
+      L: ComponentVariant
+      P: {
+        type: number
+        key: iconSize
+        defValue: 20
+      }
+    }
+    {
+      id: "18"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onChange
+      }
+    }
+    {
+      id: "19"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: placeholder
+        defValue: ""
+      }
+    }
+    {
+      id: "20"
+      L: ComponentVariant
+      P: {
+        type: number
+        key: minLength
+      }
+    }
+    {
+      id: "21"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: readOnly
+        defValue: false
+      }
+    }
+    {
+      id: "22"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: leftIcon
+      }
+    }
+    {
+      id: "23"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onFocus
+      }
+    }
+    {
+      id: "24"
+      L: ComponentVariant
+      P: {
+        type: number
+        key: maxLength
+      }
+    }
+    {
+      id: "25"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: rightIcon
+      }
+    }
+    {
+      id: "26"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onBlur
+      }
+    }
+    {
+      id: "27"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: disabled
+        defValue: false
+      }
+    }
+    {
+      id: "28"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onMount
+      }
+    }
+    {
+      id: "29"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: autoFocus
+        defValue: false
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: ComponentVariant
+      S: "1"
+      E: "6"
+    }
+    {
+      id: e3
+      T: ComponentVariant
+      S: "1"
+      E: "7"
+    }
+    {
+      id: e4
+      T: ComponentVariant
+      S: "1"
+      E: "8"
+    }
+    {
+      id: e5
+      T: ComponentVariant
+      S: "1"
+      E: "16"
+    }
+    {
+      id: e6
+      T: ComponentVariant
+      S: "1"
+      E: "17"
+    }
+    {
+      id: e7
+      T: ComponentVariant
+      S: "1"
+      E: "18"
+    }
+    {
+      id: e8
+      T: ComponentVariant
+      S: "1"
+      E: "19"
+    }
+    {
+      id: e9
+      T: ComponentVariant
+      S: "1"
+      E: "20"
+    }
+    {
+      id: e10
+      T: ComponentVariant
+      S: "1"
+      E: "21"
+    }
+    {
+      id: e11
+      T: ComponentVariant
+      S: "1"
+      E: "22"
+    }
+    {
+      id: e12
+      T: ComponentVariant
+      S: "1"
+      E: "23"
+    }
+    {
+      id: e13
+      T: ComponentVariant
+      S: "1"
+      E: "24"
+    }
+    {
+      id: e14
+      T: ComponentVariant
+      S: "1"
+      E: "25"
+    }
+    {
+      id: e15
+      T: ComponentVariant
+      S: "1"
+      E: "26"
+    }
+    {
+      id: e16
+      T: ComponentVariant
+      S: "1"
+      E: "27"
+    }
+    {
+      id: e17
+      T: ComponentVariant
+      S: "1"
+      E: "28"
+    }
+    {
+      id: e18
+      T: ComponentVariant
+      S: "1"
+      E: "29"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "2"
+      E: "5"
+    }
+    {
+      id: e22
+      T: ComponentVariantOption
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e23
+      T: ComponentVariantOption
+      S: "8"
+      E: "10"
+    }
+    {
+      id: e24
+      T: ComponentVariantOption
+      S: "8"
+      E: "11"
+    }
+    {
+      id: e25
+      T: ComponentVariantOption
+      S: "8"
+      E: "12"
+    }
+    {
+      id: e26
+      T: ComponentVariantOption
+      S: "8"
+      E: "13"
+    }
+    {
+      id: e27
+      T: ComponentVariantOption
+      S: "8"
+      E: "14"
+    }
+    {
+      id: e28
+      T: ComponentVariantOption
+      S: "8"
+      E: "15"
+    }
+  ]
+}

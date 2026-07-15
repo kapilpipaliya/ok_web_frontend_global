@@ -450,12 +450,16 @@ export async function executeNamedServerFunctionCore(
               subDomain: nestedDbName,
               rawSubDomain,
               rawDbSession: fallbackSessionData?.dbSession,
+              // Keep nested lookups on the same Function catalog as the parent
+              // (e.g. migrateDynamicPageSettings → getPageSettingsDefinitions).
+              functionLookupSession,
             }
           : {
               dbSession: nestedSession,
               subDomain: nestedDbName,
               rawSubDomain,
               rawDbSession: fallbackSessionData?.dbSession,
+              functionLookupSession,
               nodes: {},
               relationships: {},
               vertexes: {} as unknown as any,

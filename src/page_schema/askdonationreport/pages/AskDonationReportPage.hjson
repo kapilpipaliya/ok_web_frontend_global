@@ -380,19 +380,74 @@ const downloadZip = async () => {
   setBusy(true);
   setStatusMsg("Loading PDF engine from CDN…");
   try {
-    const verRaw = template.pdfmeVersion;
-    const ver =
-      typeof verRaw === "string" && verRaw.trim()
-        ? verRaw.trim().replace(/^v/i, "")
-        : "6.0.6";
+    // Always use latest pdfme — ignore template.pdfmeVersion (old pins break esm.sh deps).
+    const ver = "6.1.11";
     const pdfmeUrl =
-      "https://esm.sh/@pdfme/generator@" + ver + "?deps=@pdfme/common@" + ver;
+      "https://esm.sh/@pdfme/generator@" +
+      ver +
+      "?deps=@pdfme/common@" +
+      ver +
+      ",@pdfme/schemas@" +
+      ver;
+    const schemasUrl = "https://esm.sh/@pdfme/schemas@" + ver + "?deps=@pdfme/common@" + ver;
     const jszipUrl = "https://esm.sh/jszip@3.10.1";
-    const [{ generate }, JSZipMod] = await Promise.all([
+    const [{ generate }, schemasMod, JSZipMod] = await Promise.all([
       import(pdfmeUrl),
+      import(schemasUrl),
       import(jszipUrl),
     ]);
     const JSZip = JSZipMod.default;
+    const {
+      text,
+      multiVariableText,
+      list: listSchema,
+      image,
+      signature,
+      svg,
+      line,
+      rectangle,
+      ellipse,
+      dateTime,
+      date,
+      time,
+      select,
+      checkbox,
+      radioGroup,
+      circleMark,
+      barcodes,
+      table,
+    } = schemasMod;
+    const plugins = {
+      text,
+      multiVariableText,
+      list: listSchema,
+      image,
+      signature,
+      svg,
+      line,
+      rectangle,
+      ellipse,
+      dateTime,
+      date,
+      time,
+      select,
+      checkbox,
+      radioGroup,
+      circleMark,
+      table,
+      qrcode: barcodes?.qrcode,
+      japanpost: barcodes?.japanpost,
+      ean13: barcodes?.ean13,
+      ean8: barcodes?.ean8,
+      code39: barcodes?.code39,
+      code128: barcodes?.code128,
+      nw7: barcodes?.nw7,
+      itf14: barcodes?.itf14,
+      upca: barcodes?.upca,
+      upce: barcodes?.upce,
+      gs1datamatrix: barcodes?.gs1datamatrix,
+      pdf417: barcodes?.pdf417,
+    };
     setStatusMsg("Generating PDFs…");
     const zip = new JSZip();
     const list = norm.rows;
@@ -410,6 +465,7 @@ const downloadZip = async () => {
       const pdf = await generate({
         template: tplStyled,
         inputs,
+        plugins,
         options: { font: fontOpt },
       });
       let buf;

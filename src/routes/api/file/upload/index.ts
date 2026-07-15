@@ -6,7 +6,7 @@ import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomai
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
-import { uploadFiles } from "./functions/uploadFile";
+import { uploadFiles } from "../functions/uploadFile";
 
 export async function POST({ request }: APIEvent) {
   const { dbSession, subDomain } = await getDBSessionForSubdomain(request);

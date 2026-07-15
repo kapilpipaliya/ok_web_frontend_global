@@ -1,0 +1,166 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Component",
+      P: {
+        key: "GalleryBreadcrumb",
+        description: "Breadcrumb trail for recursive gallery folder navigation. Props: items[], onNavigate(item), rootLabel."
+      }
+    },
+    {
+      id: "root",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "nav",
+  "aria-label": "Gallery breadcrumb"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.5rem;
+  margin-bottom: 1.5rem;
+  padding: 0.75rem 1rem;
+  background: ${args.theme.var.color.background_light_50};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "itemsLoop",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "crumb",
+        loop: true,
+        props: '''
+const items = Array.isArray(args.contextData.props?.items) ? args.contextData.props.items : [];
+return {
+  as: "fragment",
+  data: items
+};
+'''
+      }
+    },
+    {
+      id: "crumbItem",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "span" };
+''',
+        css: '''
+return `._id {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "separator",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const index = args.contextData.index ?? 0;
+return {
+  as: "icon",
+  icon: "ph:caret-right",
+  width: 14,
+  height: 14,
+  hide: index === 0
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text_light_400};
+  flex-shrink: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "crumbButton",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const crumb = args.contextData.crumb || {};
+const items = Array.isArray(args.contextData.props?.items) ? args.contextData.props.items : [];
+const index = args.contextData.index ?? 0;
+const isLast = index === items.length - 1;
+const rootLabel = args.contextData.props?.rootLabel || "Gallery";
+const label = crumb.isRoot ? (rootLabel || crumb.name || "Gallery") : (crumb.name || "Folder");
+const hrefFor = args.contextData.props?.hrefFor;
+const rootHref = args.contextData.props?.rootHref;
+const href = !isLast
+  ? (typeof hrefFor === "function" ? hrefFor(crumb) : null)
+  : null;
+const resolvedHref = href || (crumb.isRoot && !isLast ? rootHref : null);
+const onNavigate = args.contextData.props?.onNavigate;
+return {
+  as: isLast ? "span" : (resolvedHref ? "a" : "button"),
+  type: isLast || resolvedHref ? undefined : "button",
+  href: isLast ? undefined : (resolvedHref || undefined),
+  text: label,
+  "aria-current": isLast ? "page" : undefined,
+  onClick: isLast
+    ? undefined
+    : (e) => {
+        if (!onNavigate) return;
+        if (resolvedHref) e.preventDefault();
+        onNavigate(crumb);
+      }
+};
+''',
+        css: '''
+const items = Array.isArray(args.contextData.props?.items) ? args.contextData.props.items : [];
+const index = args.contextData.index ?? 0;
+const isLast = index === items.length - 1;
+return `._id {
+  border: none;
+  background: transparent;
+  padding: 0.15rem 0.35rem;
+  border-radius: 0.25rem;
+  font-size: 0.9375rem;
+  font-weight: ${isLast ? 600 : 500};
+  color: ${isLast ? args.theme.var.color.text : args.theme.var.color.primary};
+  cursor: ${isLast ? "default" : "pointer"};
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease;
+
+  ${!isLast ? `
+  &:hover {
+    background: ${args.theme.var.color.primary_light_100};
+    color: ${args.theme.var.color.primary_dark_200};
+  }
+  ` : ""}
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "root" },
+    { id: "e2", T: "Attr", S: "root", E: "itemsLoop" },
+    { id: "e3", T: "Attr", S: "itemsLoop", E: "crumbItem" },
+    { id: "e4", T: "Attr", S: "crumbItem", E: "separator" },
+    { id: "e5", T: "Attr", S: "crumbItem", E: "crumbButton" }
+  ]
+}

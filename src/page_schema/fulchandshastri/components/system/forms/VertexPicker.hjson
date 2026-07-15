@@ -27,18 +27,45 @@ const vertexPayloadFromGraph = (graphVertex) => {
   };
 };
 
+const isAllowedVertex = (graphVertex, pickerConfiguration) => {
+  if (!graphVertex) return false;
+  const allowedVertexLabels = pickerConfiguration?.targetVertexLabels;
+  if (!Array.isArray(allowedVertexLabels) || allowedVertexLabels.length === 0) {
+    return true;
+  }
+  const allowedLabelSet = new Set(allowedVertexLabels.map((label) => String(label)));
+  const vertexLabels = Array.isArray(graphVertex.L) ? graphVertex.L : [];
+  return vertexLabels.some((label) => allowedLabelSet.has(String(label)));
+};
+
 const buildSelectionChangeHandler = (pickerConfiguration) => {
   return (selectedRowIds, _selectedItems, tableEnvironmentArguments) => {
     const selectionMode = getSelectionMode(pickerConfiguration);
+
     const selectedIdList =
-      selectedRowIds instanceof Set ? [...selectedRowIds].map((id) => String(id)).filter(Boolean) : [];
+      selectedRowIds instanceof Set
+        ? [...selectedRowIds].map((id) => String(id)).filter(Boolean)
+        : Array.isArray(selectedRowIds)
+          ? selectedRowIds.map((id) => String(id)).filter(Boolean)
+          : [];
 
     if (selectionMode === "multiple") {
       const nextVertices = [];
+      let rejected = false;
       for (const rowElementId of selectedIdList) {
         const graphVertex = tableEnvironmentArguments?.graph?.vertexes?.[rowElementId];
+        if (!isAllowedVertex(graphVertex, pickerConfiguration)) {
+          rejected = true;
+          continue;
+        }
         const payload = vertexPayloadFromGraph(graphVertex);
         if (payload) nextVertices.push(payload);
+      }
+      if (rejected && nextVertices.length === 0) {
+        const invalidTypeMessage = pickerConfiguration?.invalidTypeMessage;
+        if (invalidTypeMessage != null && String(invalidTypeMessage).trim() !== "") {
+          args.showErrorToast?.(String(invalidTypeMessage).trim());
+        }
       }
       setDraftVertices(nextVertices);
       setDraftVertex(nextVertices[0] ?? null);
@@ -56,6 +83,15 @@ const buildSelectionChangeHandler = (pickerConfiguration) => {
       return;
     }
     const selectedGraphVertex = tableEnvironmentArguments?.graph?.vertexes?.[rowElementId];
+    if (!isAllowedVertex(selectedGraphVertex, pickerConfiguration)) {
+      setDraftVertex(null);
+      setDraftVertices([]);
+      const invalidTypeMessage = pickerConfiguration?.invalidTypeMessage;
+      if (invalidTypeMessage != null && String(invalidTypeMessage).trim() !== "") {
+        args.showErrorToast?.(String(invalidTypeMessage).trim());
+      }
+      return;
+    }
     const vertexPayload = vertexPayloadFromGraph(selectedGraphVertex);
     if (!vertexPayload) return;
     setDraftVertex(vertexPayload);
@@ -89,14 +125,26 @@ const buildPickerBodyProps = (pickerConfiguration) => {
   const useRowClickSelection =
     basePickerBodyProps.rowClickable === true &&
     typeof basePickerBodyProps.onRowClick === "function";
+
   const pickerBodyProps = Object.assign({}, basePickerBodyProps, {
     showSelection: basePickerBodyProps.showSelection !== false,
     selectionMode,
     initialSelectedRowIds: buildInitialSelectedRowIds(pickerConfiguration),
     onSelectionChange: buildSelectionChangeHandler(pickerConfiguration),
     rowClickable: useRowClickSelection,
-    onRowClick: useRowClickSelection ? basePickerBodyProps.onRowClick : undefined
+    onRowClick: useRowClickSelection ? basePickerBodyProps.onRowClick : undefined,
+    // Embedded pickers: local state only unless consumer opts into URL sync.
+    // Do not treat folder click as pick value unless opted in.
+    allowSidebarSelection:
+      pickerConfiguration?.allowSidebarSelection === true ||
+      basePickerBodyProps.allowSidebarSelection === true,
+    useUrlQueryParams:
+      pickerConfiguration?.useUrlQueryParams === true ||
+      basePickerBodyProps.useUrlQueryParams === true
+      ? true
+      : false
   });
+
   return pickerBodyProps;
 };
 

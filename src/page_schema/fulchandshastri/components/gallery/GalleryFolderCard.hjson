@@ -1,0 +1,187 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Component",
+      P: {
+        key: "GalleryFolderCard",
+        description: "Folder card for gallery browser. Props: folder {id,name,contentCount,folderCount}, onOpen(folder), index."
+      }
+    },
+    {
+      id: "root",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const folder = args.contextData.props?.folder || args.contextData.props || {};
+const index = args.contextData.props?.index ?? args.contextData.index ?? 0;
+const href = args.contextData.props?.href;
+const onOpen = args.contextData.props?.onOpen;
+return {
+  as: href ? "a" : "button",
+  type: href ? undefined : "button",
+  href: href || undefined,
+  "data-animate": "",
+  ref: (el) => el && args.fns.animateOnView?.(el, { delay: index * 0.05 }),
+  onClick: (e) => {
+    if (!onOpen) return;
+    if (href) e.preventDefault();
+    onOpen(folder);
+  }
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+  width: 100%;
+  text-align: left;
+  padding: 1.25rem;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.75rem;
+  background: ${args.theme.var.color.background};
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    border-color: ${args.theme.var.color.primary_light_300};
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${args.theme.var.color.primary};
+    outline-offset: 2px;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "iconWrap",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.625rem;
+  background: ${args.theme.var.color.primary_light_100};
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: args.contextData.props?.icon || "ph:folder",
+  width: 28,
+  height: 28
+};
+'''
+      }
+    },
+    {
+      id: "body",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+  width: 100%;
+}`;
+'''
+      }
+    },
+    {
+      id: "title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const folder = args.contextData.props?.folder || args.contextData.props || {};
+return {
+  as: "h3",
+  text: folder.name || "Folder"
+};
+''',
+        css: '''
+return `._id {
+  margin: 0;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}`;
+'''
+      }
+    },
+    {
+      id: "meta",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const folder = args.contextData.props?.folder || args.contextData.props || {};
+const folders = Number(folder.folderCount || 0);
+const files = Number(folder.contentCount || 0);
+const parts = [];
+if (folders > 0) parts.push(`${folders} folder${folders === 1 ? "" : "s"}`);
+if (files > 0) parts.push(`${files} file${files === 1 ? "" : "s"}`);
+return {
+  as: "p",
+  text: parts.length > 0 ? parts.join(" · ") : "Empty"
+};
+''',
+        css: '''
+return `._id {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: ${args.theme.var.color.text_light_300};
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "root" },
+    { id: "e2", T: "Attr", S: "root", E: "iconWrap" },
+    { id: "e3", T: "Attr", S: "iconWrap", E: "icon" },
+    { id: "e4", T: "Attr", S: "root", E: "body" },
+    { id: "e5", T: "Attr", S: "body", E: "title" },
+    { id: "e6", T: "Attr", S: "body", E: "meta" }
+  ]
+}

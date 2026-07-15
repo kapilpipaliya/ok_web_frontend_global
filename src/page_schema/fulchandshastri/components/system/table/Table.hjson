@@ -545,6 +545,45 @@ const notifySelectionChange = () => {
   onSelectionChange(selectedIds, selectedItems, args);
 };
 
+const getColumnWidthsStorageKey = () => {
+  const tableKey = args.fns.getTableKey?.() ?? args.contextData.props?.tableKey;
+  const tableVertexLabel = args.fns.getTableVertexLabel?.() ?? args.contextData.props?.tableVertexLabel;
+  const id = (tableKey != null && String(tableKey).trim() !== "")
+    ? String(tableKey).trim()
+    : (tableVertexLabel != null && String(tableVertexLabel).trim() !== "")
+      ? String(tableVertexLabel).trim()
+      : null;
+  if (!id) return null;
+  const nestedSuffix = isNestedLinesTable()
+    ? `:nested:${args.contextData.props?.nestedTableTitle || "nested"}`
+    : "";
+  return `fulchand-table-column-widths:${id}${nestedSuffix}`;
+};
+
+const loadStoredColumnWidths = () => {
+  if (typeof window === "undefined") return {};
+  const key = getColumnWidthsStorageKey();
+  if (!key) return {};
+  try {
+    const raw = window.localStorage.getItem(key);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return {};
+    return parsed;
+  } catch (_) {
+    return {};
+  }
+};
+
+const persistColumnWidths = (widths) => {
+  if (typeof window === "undefined") return;
+  const key = getColumnWidthsStorageKey();
+  if (!key) return;
+  try {
+    window.localStorage.setItem(key, JSON.stringify(widths && typeof widths === "object" ? widths : {}));
+  } catch (_) {}
+};
+
 const propsTableStateVertexId = args.contextData.props?.tableStateVertexId;
 let tableStateVertexId = propsTableStateVertexId;
 let ownTableStateVertex = false;
@@ -573,7 +612,7 @@ if (!tableStateVertexId) {
       formData: null,
       isImportModalOpen: false,
       importData: "",
-      columnWidths: {},
+      columnWidths: loadStoredColumnWidths(),
       isResizing: false,
       iconActionActiveKey: null,
       selectionAnchorIndex: null
@@ -587,6 +626,17 @@ const patchTableP = (partial) => {
   args.mergeVertexProperties(0, tableStateVertexId, args.graph, args.setGraph, partial);
 };
 const tableP = () => args.graph.vertexes[tableStateVertexId]?.P;
+
+// Restore persisted widths when reusing an existing table state with empty widths
+if (!ownTableStateVertex) {
+  const existingWidths = tableP()?.columnWidths;
+  if (!existingWidths || typeof existingWidths !== "object" || Object.keys(existingWidths).length === 0) {
+    const storedWidths = loadStoredColumnWidths();
+    if (Object.keys(storedWidths).length > 0) {
+      patchTableP({ columnWidths: storedWidths });
+    }
+  }
+}
 
 /** TableUiState: P.data / P.filteredData are string[] vertex ids only. Resolve bodies via args.graph.vertexes[id]. */
 const normalizeRowIds = (entries) => {
@@ -1011,7 +1061,10 @@ const setRowRef = (index, el) => {
 const getRowRef = (index) => rowRefs[index];
 
 // Initialize from query parameters
+const useUrlQueryParams = () => args.contextData.props?.useUrlQueryParams !== false;
+
 const initializeFromQueryParams = () => {
+  if (!useUrlQueryParams()) return;
   const searchParams = args.searchParams || {};
   if (searchParams.search) {
     patchTableP({ searchTerm: searchParams.search });
@@ -1041,6 +1094,7 @@ const initializeFromQueryParams = () => {
 
 // Update query parameters
 const updateQueryParams = () => {
+  if (!useUrlQueryParams()) return;
   const params = {};
   // Handle searchTerm
   const st = tableP()?.searchTerm ?? "";
@@ -1855,6 +1909,19 @@ const handleSave = async (formDataToSave) => {
     return;
   }
 
+  const appendRowIds = (ids) => {
+    const toAdd = (Array.isArray(ids) ? ids : [])
+      .map((id) => String(id || "").trim())
+      .filter(Boolean);
+    if (toAdd.length === 0) return;
+    const cur = normalizeRowIds(tableP()?.data ?? []);
+    const merged = [...cur];
+    for (let i = 0; i < toAdd.length; i++) {
+      if (!merged.includes(toAdd[i])) merged.push(toAdd[i]);
+    }
+    patchTableP({ data: normalizeRowIds(merged) });
+  };
+
   try {
     args.mergeVertexProperties(0, args.fns.pageStateVertexId, args.graph, args.setGraph, { loading: true });
     const mode = tableP()?.modalMode ?? "add";
@@ -1870,41 +1937,20 @@ const handleSave = async (formDataToSave) => {
         mode === "add" ? "Item added successfully" : "Item updated successfully"
       );
       patchTableP({ isModalOpen: false });
-      // Optimistic update: state is ids only; graph is merged by DynamicPage save
-      if (mode === "add") {
-        const newId = result.data?.id != null ? String(result.data.id) : null;
-        if (newId) {
-          patchTableP({ data: normalizeRowIds([...(tableP()?.data ?? []), newId]) });
-        }
-        
-        // Check if onAfterAdd function is provided
-        const onAfterAdd = getOnAfterAdd();
-        if (onAfterAdd && typeof onAfterAdd === 'function') {
-          try {
-            await onAfterAdd(result, args);
-          } catch (error) {
-            console.error("Error in onAfterAdd function:", error);
-            args.showErrorToast?.(error?.message || "Failed to execute after add action");
-          }
-        }
-      } else {
-        // (add or any edit save for a row not yet listed): append id so the table refreshes without a full reload.
-        const rowId = result.data?.id != null ? String(result.data.id) : null;
-        if (rowId) {
-          const cur = normalizeRowIds(tableP()?.data ?? []);
-          if (!cur.includes(rowId)) {
-            patchTableP({ data: normalizeRowIds([...cur, rowId]) });
-          }
-        }
-        // Check if onAfterEdit function is provided
-        const onAfterEdit = getOnAfterEdit();
-        if (onAfterEdit && typeof onAfterEdit === 'function') {
-          try {
-            await onAfterEdit(result, args);
-          } catch (error) {
-            console.error("Error in onAfterEdit function:", error);
-            args.showErrorToast?.(error?.message || "Failed to execute after edit action");
-          }
+      appendRowIds([
+        ...(Array.isArray(formDataToSave?.uploadedContentIds)
+          ? formDataToSave.uploadedContentIds
+          : []),
+        result.data?.id
+      ]);
+
+      const afterHook = mode === "add" ? getOnAfterAdd() : getOnAfterEdit();
+      if (typeof afterHook === "function") {
+        try {
+          await afterHook(result, args);
+        } catch (error) {
+          console.error(mode === "add" ? "Error in onAfterAdd function:" : "Error in onAfterEdit function:", error);
+          args.showErrorToast?.(error?.message || "Failed to execute after save action");
         }
       }
       applyLocalFilters();
@@ -2102,6 +2148,7 @@ const createResizeHandler = (columnKey) => {
       document.removeEventListener('touchmove', handleMouseMove);
       document.removeEventListener('touchend', handleMouseUp);
       setIsResizing(false);
+      persistColumnWidths(tableP()?.columnWidths ?? {});
       // Prevent the click from this gesture from bubbling and triggering column sort
       const preventResizeClick = (clickEvent) => {
         clickEvent.preventDefault();
@@ -3269,8 +3316,8 @@ const usePolaris = args.fns.getUsePolarisUI?.() === true
 return `._id {
   display: grid;
   grid-template-columns: ${args.fns.getGridTemplateColumns()};
-  min-width: min-content;
-  width: 100%;
+  width: max-content;
+  min-width: 100%;
   background: ${usePolaris ? "#f7f7f7" : args.theme.var.color.background_light_100};
   border-top: 1px solid ${args.theme.var.color.border};
   border-bottom: 1px solid ${args.theme.var.color.border};
@@ -3310,11 +3357,12 @@ return `._id {
         props:
           '''
 const showSelection = args.fns.getShowSelection();
-const selectionMode = args.fns.getSelectionMode?.();
 
 return {
   as: "div",
-  hide: !showSelection || selectionMode === "single",
+  // Keep the cell in single-select mode so the grid stays aligned with body checkboxes
+  // (select-all checkbox is still hidden below when selectionMode === "single").
+  hide: !showSelection,
 };
 '''
       }
@@ -3782,8 +3830,8 @@ return {
 return `._id {
   display: grid;
   grid-template-columns: ${args.fns.getGridTemplateColumns()};
-  min-width: min-content;
-  width: 100%;
+  width: max-content;
+  min-width: 100%;
   border-bottom: 1px solid ${args.theme.var.color.border};
 }`;
 '''
@@ -4245,7 +4293,8 @@ const rowHeightPx = args.fns.getRowHeight();
 
 return [
 `._id {
-  width: 100%;
+  width: max-content;
+  min-width: 100%;
   height: ${rowHeightPx}px;
   max-height: ${rowHeightPx}px;
   min-height: ${rowHeightPx}px;

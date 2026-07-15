@@ -24,7 +24,7 @@ const ROOT = path.resolve(__dirname, "..");
 const SOURCE = path.join(ROOT, "src/page_schema/fulchandshastri");
 
 /** Destination directory names under src/page_schema (each gets a full copy). */
-const DEST_NAMES = ["default"];
+const DEST_NAMES = ["askdonationreport"];
 
 const SKIP_DIRS = [
   //"functions",

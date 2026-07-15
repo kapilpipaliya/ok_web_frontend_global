@@ -82,6 +82,7 @@ export function PagesPanel() {
   const pageTabs = [
     { collection: "Page", title: "Pages" },
     { collection: "EmailTemplate", title: "Email Templates" },
+    { collection: "Function", title: "Functions" },
   ];
   const [selectedTab, setSelectedTab] = createSignal(pageTabs[0]);
 
@@ -124,6 +125,12 @@ export function PagesPanel() {
           <Match when={selectedTab().collection === "EmailTemplate"}>
             <ComponentPaletteTree
               config={EMAIL_TEMPLATE_PALETTE_CONFIG}
+              searchAlways
+            />
+          </Match>
+          <Match when={selectedTab().collection === "Function"}>
+            <ComponentPaletteTree
+              config={FUNCTION_PALETTE_CONFIG}
               searchAlways
             />
           </Match>

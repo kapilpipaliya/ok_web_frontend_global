@@ -245,7 +245,7 @@ const sidebarItems = [
   },
   {
     "id": "photos",
-    "label": "Photos",
+    "label": "Gallery",
     "path": "/settings?page=photos",
     "icon": "document"
   },
@@ -3522,8 +3522,8 @@ const pages = [
   },
   {
     "settingsPageId": "photos",
-    "name": "Photos Settings",
-    "description": "Manage content for the Photos page.",
+    "name": "Gallery Settings",
+    "description": "Manage content for the Gallery page.",
     "sections": [
       {
         "id": "content",
@@ -3536,170 +3536,43 @@ const pages = [
             "renderer": "text",
             "required": false,
             "colSpan": 1,
-            "defaultValue": "Photos"
+            "defaultValue": "Gallery"
           },
           {
-            "key": "sectionTitle",
-            "label": "sectionTitle",
+            "key": "pageSubtitle",
+            "label": "pageSubtitle",
             "dataType": "text",
             "renderer": "text",
             "required": false,
             "colSpan": 1,
-            "defaultValue": "Recent Photos"
+            "defaultValue": "Browse photos, videos, and PDFs by folder"
           },
           {
-            "key": "viewAllText",
-            "label": "viewAllText",
+            "key": "emptyFoldersText",
+            "label": "emptyFoldersText",
             "dataType": "text",
             "renderer": "text",
             "required": false,
             "colSpan": 1,
-            "defaultValue": "View All Photos"
-          }
-        ]
-      },
-      {
-        "id": "albums",
-        "title": "albums",
-        "fields": [
+            "defaultValue": "No folders in this location."
+          },
           {
-            "key": "albums",
-            "label": "albums",
-            "dataType": "array",
-            "renderer": "fieldArray",
+            "key": "emptyFilesText",
+            "label": "emptyFilesText",
+            "dataType": "text",
+            "renderer": "text",
             "required": false,
             "colSpan": 1,
-            "defaultValue": [
-              {
-                "id": 1,
-                "title": "2019",
-                "thumbnail": "https://www.fulchandshastri.com/wp-content/uploads/2019/01/2019-thumb.jpg",
-                "count": 45,
-                "link": "#"
-              },
-              {
-                "id": 2,
-                "title": "Shri Mahaveer Prasthatha Maha Mahotsav",
-                "thumbnail": "https://www.fulchandshastri.com/wp-content/uploads/2019/04/mahaveer-thumb.jpg",
-                "count": 120,
-                "link": "#"
-              },
-              {
-                "id": 3,
-                "title": "Album one",
-                "thumbnail": "https://www.fulchandshastri.com/wp-content/uploads/2018/12/album-one-thumb.jpg",
-                "count": 78,
-                "link": "#"
-              }
-            ],
-            "fieldArrayConfig": {
-              "itemLabel": "Item",
-              "addButtonLabel": "Add item",
-              "minItems": 0,
-              "itemFields": [
-                {
-                  "key": "title",
-                  "label": "title",
-                  "dataType": "text",
-                  "renderer": "text"
-                },
-                {
-                  "key": "thumbnail",
-                  "label": "thumbnail",
-                  "dataType": "text",
-                  "renderer": "text"
-                },
-                {
-                  "key": "count",
-                  "label": "count",
-                  "dataType": "number",
-                  "renderer": "text"
-                },
-                {
-                  "key": "link",
-                  "label": "link",
-                  "dataType": "text",
-                  "renderer": "text"
-                }
-              ]
-            }
-          }
-        ]
-      },
-      {
-        "id": "photos",
-        "title": "photos",
-        "fields": [
+            "defaultValue": "No files in this folder."
+          },
           {
-            "key": "photos",
-            "label": "photos",
-            "dataType": "array",
-            "renderer": "fieldArray",
+            "key": "rootBreadcrumbLabel",
+            "label": "rootBreadcrumbLabel",
+            "dataType": "text",
+            "renderer": "text",
             "required": false,
             "colSpan": 1,
-            "defaultValue": [
-              {
-                "id": 1,
-                "src": "https://www.fulchandshastri.com/wp-content/uploads/2019/01/photo1.jpg",
-                "alt": "Spiritual gathering at ASK Umarala",
-                "caption": "Spiritual gathering at ASK Umarala"
-              },
-              {
-                "id": 2,
-                "src": "https://www.fulchandshastri.com/wp-content/uploads/2019/01/photo2.jpg",
-                "alt": "Discourse session",
-                "caption": "Discourse session"
-              },
-              {
-                "id": 3,
-                "src": "https://www.fulchandshastri.com/wp-content/uploads/2019/01/photo3.jpg",
-                "alt": "Meditation program",
-                "caption": "Meditation program"
-              },
-              {
-                "id": 4,
-                "src": "https://www.fulchandshastri.com/wp-content/uploads/2019/01/photo4.jpg",
-                "alt": "Book release ceremony",
-                "caption": "Book release ceremony"
-              },
-              {
-                "id": 5,
-                "src": "https://www.fulchandshastri.com/wp-content/uploads/2019/01/photo5.jpg",
-                "alt": "Youth spiritual camp",
-                "caption": "Youth spiritual camp"
-              },
-              {
-                "id": 6,
-                "src": "https://www.fulchandshastri.com/wp-content/uploads/2019/01/photo6.jpg",
-                "alt": "International conference",
-                "caption": "International conference"
-              }
-            ],
-            "fieldArrayConfig": {
-              "itemLabel": "Item",
-              "addButtonLabel": "Add item",
-              "minItems": 0,
-              "itemFields": [
-                {
-                  "key": "src",
-                  "label": "src",
-                  "dataType": "text",
-                  "renderer": "text"
-                },
-                {
-                  "key": "alt",
-                  "label": "alt",
-                  "dataType": "text",
-                  "renderer": "text"
-                },
-                {
-                  "key": "caption",
-                  "label": "caption",
-                  "dataType": "text",
-                  "renderer": "text"
-                }
-              ]
-            }
+            "defaultValue": "Gallery"
           }
         ]
       }
@@ -3709,82 +3582,11 @@ const pages = [
         "pageId": "photos",
         "sectionId": "content",
         "values": {
-          "pageTitle": "Photos",
-          "sectionTitle": "Recent Photos",
-          "viewAllText": "View All Photos"
-        }
-      },
-      {
-        "pageId": "photos",
-        "sectionId": "albums",
-        "values": {
-          "albums": [
-            {
-              "id": 1,
-              "title": "2019",
-              "thumbnail": "https://www.fulchandshastri.com/wp-content/uploads/2019/01/2019-thumb.jpg",
-              "count": 45,
-              "link": "#"
-            },
-            {
-              "id": 2,
-              "title": "Shri Mahaveer Prasthatha Maha Mahotsav",
-              "thumbnail": "https://www.fulchandshastri.com/wp-content/uploads/2019/04/mahaveer-thumb.jpg",
-              "count": 120,
-              "link": "#"
-            },
-            {
-              "id": 3,
-              "title": "Album one",
-              "thumbnail": "https://www.fulchandshastri.com/wp-content/uploads/2018/12/album-one-thumb.jpg",
-              "count": 78,
-              "link": "#"
-            }
-          ]
-        }
-      },
-      {
-        "pageId": "photos",
-        "sectionId": "photos",
-        "values": {
-          "photos": [
-            {
-              "id": 1,
-              "src": "https://www.fulchandshastri.com/wp-content/uploads/2019/01/photo1.jpg",
-              "alt": "Spiritual gathering at ASK Umarala",
-              "caption": "Spiritual gathering at ASK Umarala"
-            },
-            {
-              "id": 2,
-              "src": "https://www.fulchandshastri.com/wp-content/uploads/2019/01/photo2.jpg",
-              "alt": "Discourse session",
-              "caption": "Discourse session"
-            },
-            {
-              "id": 3,
-              "src": "https://www.fulchandshastri.com/wp-content/uploads/2019/01/photo3.jpg",
-              "alt": "Meditation program",
-              "caption": "Meditation program"
-            },
-            {
-              "id": 4,
-              "src": "https://www.fulchandshastri.com/wp-content/uploads/2019/01/photo4.jpg",
-              "alt": "Book release ceremony",
-              "caption": "Book release ceremony"
-            },
-            {
-              "id": 5,
-              "src": "https://www.fulchandshastri.com/wp-content/uploads/2019/01/photo5.jpg",
-              "alt": "Youth spiritual camp",
-              "caption": "Youth spiritual camp"
-            },
-            {
-              "id": 6,
-              "src": "https://www.fulchandshastri.com/wp-content/uploads/2019/01/photo6.jpg",
-              "alt": "International conference",
-              "caption": "International conference"
-            }
-          ]
+          "pageTitle": "Gallery",
+          "pageSubtitle": "Browse photos, videos, and PDFs by folder",
+          "emptyFoldersText": "No folders in this location.",
+          "emptyFilesText": "No files in this folder.",
+          "rootBreadcrumbLabel": "Gallery"
         }
       }
     ]
@@ -3792,7 +3594,7 @@ const pages = [
   {
     "settingsPageId": "schedule",
     "name": "Schedule Settings",
-    "description": "Manage content for the Schedule page.",
+    "description": "Manage content for the Schedule page. Event rows are managed in portal table Schedule.",
     "sections": [
       {
         "id": "content",
@@ -3808,320 +3610,13 @@ const pages = [
             "defaultValue": "Schedule"
           },
           {
-            "key": "yearTitle",
-            "label": "yearTitle",
+            "key": "pageSubtitle",
+            "label": "pageSubtitle",
             "dataType": "text",
             "renderer": "text",
             "required": false,
             "colSpan": 1,
-            "defaultValue": "Upcoming events in 2025"
-          },
-          {
-            "key": "dateHeader",
-            "label": "dateHeader",
-            "dataType": "text",
-            "renderer": "text",
-            "required": false,
-            "colSpan": 1,
-            "defaultValue": "Date"
-          },
-          {
-            "key": "placeHeader",
-            "label": "placeHeader",
-            "dataType": "text",
-            "renderer": "text",
-            "required": false,
-            "colSpan": 1,
-            "defaultValue": "Place"
-          },
-          {
-            "key": "programmeHeader",
-            "label": "programmeHeader",
-            "dataType": "text",
-            "renderer": "text",
-            "required": false,
-            "colSpan": 1,
-            "defaultValue": "Programme"
-          },
-          {
-            "key": "detailsHeader",
-            "label": "detailsHeader",
-            "dataType": "text",
-            "renderer": "text",
-            "required": false,
-            "colSpan": 1,
-            "defaultValue": "Details"
-          },
-          {
-            "key": "previousTitle",
-            "label": "previousTitle",
-            "dataType": "text",
-            "renderer": "text",
-            "required": false,
-            "colSpan": 1,
-            "defaultValue": "Previous events in 2025"
-          },
-          {
-            "key": "prevDateHeader",
-            "label": "prevDateHeader",
-            "dataType": "text",
-            "renderer": "text",
-            "required": false,
-            "colSpan": 1,
-            "defaultValue": "Date"
-          },
-          {
-            "key": "prevPlaceHeader",
-            "label": "prevPlaceHeader",
-            "dataType": "text",
-            "renderer": "text",
-            "required": false,
-            "colSpan": 1,
-            "defaultValue": "Place"
-          },
-          {
-            "key": "prevProgrammeHeader",
-            "label": "prevProgrammeHeader",
-            "dataType": "text",
-            "renderer": "text",
-            "required": false,
-            "colSpan": 1,
-            "defaultValue": "Programme"
-          },
-          {
-            "key": "prevDetailsHeader",
-            "label": "prevDetailsHeader",
-            "dataType": "text",
-            "renderer": "text",
-            "required": false,
-            "colSpan": 1,
-            "defaultValue": "Details"
-          },
-          {
-            "key": "footerCopyright",
-            "label": "footerCopyright",
-            "dataType": "text",
-            "renderer": "text",
-            "required": false,
-            "colSpan": 1,
-            "defaultValue": "Copyright © 2025 Fulchand Shastri"
-          },
-          {
-            "key": "designText",
-            "label": "designText",
-            "dataType": "text",
-            "renderer": "text",
-            "required": false,
-            "colSpan": 1,
-            "defaultValue": "Design by "
-          },
-          {
-            "key": "designLink",
-            "label": "designLink",
-            "dataType": "text",
-            "renderer": "text",
-            "required": false,
-            "colSpan": 1,
-            "defaultValue": "ASK Umarala"
-          }
-        ]
-      },
-      {
-        "id": "events",
-        "title": "events",
-        "fields": [
-          {
-            "key": "events",
-            "label": "events",
-            "dataType": "array",
-            "renderer": "fieldArray",
-            "required": false,
-            "colSpan": 1,
-            "defaultValue": [
-              {
-                "id": 1,
-                "date": "6 Jan - 8 Jan\nFri - Sun",
-                "place": "Gajapantha",
-                "programme": "Kibauk Ka Bodh Shibar",
-                "details": "Contact:\nDharmendra Jain +91-9898245201"
-              },
-              {
-                "id": 2,
-                "date": "18 Jan - 21 Jan\nWed - Sat",
-                "place": "Singapore",
-                "programme": "Dharma Paryatan",
-                "details": "Contact:\nDharmendra Jain +91-9898245201"
-              },
-              {
-                "id": 3,
-                "date": "3 Jul - 6 Jul\nThu - Sun",
-                "place": "Chowai, USA",
-                "programme": "JAINA Convention",
-                "details": "Contact:\nDharmendra Jain +91-9898245201"
-              },
-              {
-                "id": 4,
-                "date": "16 Aug - 3 Sep\nSat - Tue",
-                "place": "ASK Umarala",
-                "programme": "Chaitanya Samaysar Paryushan Mahaparva 2025",
-                "details": "Contact:\nDharmendra Jain +91-9898245201"
-              },
-              {
-                "id": 5,
-                "date": "30 May - 10 Apr\nSun - Thu",
-                "place": "ASK Umarala",
-                "programme": "Pratishtha Anniversary",
-                "details": "Contact:\nASK Umarala +91-9825242501"
-              },
-              {
-                "id": 6,
-                "date": "29 Mar - 30 Mar\nFri - Sun",
-                "place": "Mumbai",
-                "programme": "Dharma Paryatan",
-                "details": "Contact:\nASK Umarala +91-9825242501"
-              },
-              {
-                "id": 7,
-                "date": "24 Mar - 28 Mar\nMon - Fri",
-                "place": "Gajapantha",
-                "programme": "Atma Sadhana",
-                "details": "Contact:\nASK Umarala +91-9825242501"
-              },
-              {
-                "id": 8,
-                "date": "21 Mar - 24 Mar\nFri - Mon",
-                "place": "Surat (MP)",
-                "programme": "Dharma Paryatan",
-                "details": "Contact:\nASK Umarala +91-9825242501"
-              },
-              {
-                "id": 9,
-                "date": "16 Mar - 21 Mar\nTue - Fri",
-                "place": "Chindbadi (MP)",
-                "programme": "Atma Sadhana",
-                "details": "Contact:\nASK Umarala +91-9825242501"
-              },
-              {
-                "id": 10,
-                "date": "14 Mar - 16 Mar\nSun - Tue",
-                "place": "Gajapantha (MP)",
-                "programme": "Atma Sadhana",
-                "details": "Contact:\nASK Umarala +91-9825242501"
-              }
-            ],
-            "fieldArrayConfig": {
-              "itemLabel": "Item",
-              "addButtonLabel": "Add item",
-              "minItems": 0,
-              "itemFields": [
-                {
-                  "key": "date",
-                  "label": "date",
-                  "dataType": "text",
-                  "renderer": "text"
-                },
-                {
-                  "key": "place",
-                  "label": "place",
-                  "dataType": "text",
-                  "renderer": "text"
-                },
-                {
-                  "key": "programme",
-                  "label": "programme",
-                  "dataType": "text",
-                  "renderer": "text"
-                },
-                {
-                  "key": "details",
-                  "label": "details",
-                  "dataType": "text",
-                  "renderer": "text"
-                }
-              ]
-            }
-          }
-        ]
-      },
-      {
-        "id": "previous_events",
-        "title": "previousEvents",
-        "fields": [
-          {
-            "key": "previousEvents",
-            "label": "previousEvents",
-            "dataType": "array",
-            "renderer": "fieldArray",
-            "required": false,
-            "colSpan": 1,
-            "defaultValue": [
-              {
-                "id": 1,
-                "date": "15 Feb\nSat",
-                "place": "Delhi",
-                "programme": "Dharma Paryatan",
-                "details": "ASK Umarala +91-9825242501"
-              },
-              {
-                "id": 2,
-                "date": "12 Feb - 14 Feb\nWed - Fri",
-                "place": "Jaipur (RJ)",
-                "programme": "Dharma Paryatan",
-                "details": "Contact for Registration:\nDharmendra Jain +91-9898245201"
-              },
-              {
-                "id": 3,
-                "date": "10 Feb - 11 Feb\nMon - Tue",
-                "place": "Mumbai",
-                "programme": "Dharma Paryatan",
-                "details": "ASK Umarala +91-9825242501"
-              },
-              {
-                "id": 4,
-                "date": "4 Feb - 9 Feb\nTue - Sun",
-                "place": "Aurangabad (MH)",
-                "programme": "Dharma Paryatan",
-                "details": "Contact for Registration:\nSanjay Randhir +91-8329406215"
-              },
-              {
-                "id": 5,
-                "date": "2 Feb - 4 Feb\nSun - Tue",
-                "place": "Gajapantha (MH)",
-                "programme": "Atma Sadhana",
-                "details": "ASK Umarala +91-9825242501"
-              }
-            ],
-            "fieldArrayConfig": {
-              "itemLabel": "Item",
-              "addButtonLabel": "Add item",
-              "minItems": 0,
-              "itemFields": [
-                {
-                  "key": "date",
-                  "label": "date",
-                  "dataType": "text",
-                  "renderer": "text"
-                },
-                {
-                  "key": "place",
-                  "label": "place",
-                  "dataType": "text",
-                  "renderer": "text"
-                },
-                {
-                  "key": "programme",
-                  "label": "programme",
-                  "dataType": "text",
-                  "renderer": "text"
-                },
-                {
-                  "key": "details",
-                  "label": "details",
-                  "dataType": "text",
-                  "renderer": "text"
-                }
-              ]
-            }
+            "defaultValue": "Upcoming and previous spiritual gatherings and programmes"
           }
         ]
       }
@@ -4132,140 +3627,7 @@ const pages = [
         "sectionId": "content",
         "values": {
           "pageTitle": "Schedule",
-          "yearTitle": "Upcoming events in 2025",
-          "dateHeader": "Date",
-          "placeHeader": "Place",
-          "programmeHeader": "Programme",
-          "detailsHeader": "Details",
-          "previousTitle": "Previous events in 2025",
-          "prevDateHeader": "Date",
-          "prevPlaceHeader": "Place",
-          "prevProgrammeHeader": "Programme",
-          "prevDetailsHeader": "Details",
-          "footerCopyright": "Copyright © 2025 Fulchand Shastri",
-          "designText": "Design by ",
-          "designLink": "ASK Umarala"
-        }
-      },
-      {
-        "pageId": "schedule",
-        "sectionId": "events",
-        "values": {
-          "events": [
-            {
-              "id": 1,
-              "date": "6 Jan - 8 Jan\nFri - Sun",
-              "place": "Gajapantha",
-              "programme": "Kibauk Ka Bodh Shibar",
-              "details": "Contact:\nDharmendra Jain +91-9898245201"
-            },
-            {
-              "id": 2,
-              "date": "18 Jan - 21 Jan\nWed - Sat",
-              "place": "Singapore",
-              "programme": "Dharma Paryatan",
-              "details": "Contact:\nDharmendra Jain +91-9898245201"
-            },
-            {
-              "id": 3,
-              "date": "3 Jul - 6 Jul\nThu - Sun",
-              "place": "Chowai, USA",
-              "programme": "JAINA Convention",
-              "details": "Contact:\nDharmendra Jain +91-9898245201"
-            },
-            {
-              "id": 4,
-              "date": "16 Aug - 3 Sep\nSat - Tue",
-              "place": "ASK Umarala",
-              "programme": "Chaitanya Samaysar Paryushan Mahaparva 2025",
-              "details": "Contact:\nDharmendra Jain +91-9898245201"
-            },
-            {
-              "id": 5,
-              "date": "30 May - 10 Apr\nSun - Thu",
-              "place": "ASK Umarala",
-              "programme": "Pratishtha Anniversary",
-              "details": "Contact:\nASK Umarala +91-9825242501"
-            },
-            {
-              "id": 6,
-              "date": "29 Mar - 30 Mar\nFri - Sun",
-              "place": "Mumbai",
-              "programme": "Dharma Paryatan",
-              "details": "Contact:\nASK Umarala +91-9825242501"
-            },
-            {
-              "id": 7,
-              "date": "24 Mar - 28 Mar\nMon - Fri",
-              "place": "Gajapantha",
-              "programme": "Atma Sadhana",
-              "details": "Contact:\nASK Umarala +91-9825242501"
-            },
-            {
-              "id": 8,
-              "date": "21 Mar - 24 Mar\nFri - Mon",
-              "place": "Surat (MP)",
-              "programme": "Dharma Paryatan",
-              "details": "Contact:\nASK Umarala +91-9825242501"
-            },
-            {
-              "id": 9,
-              "date": "16 Mar - 21 Mar\nTue - Fri",
-              "place": "Chindbadi (MP)",
-              "programme": "Atma Sadhana",
-              "details": "Contact:\nASK Umarala +91-9825242501"
-            },
-            {
-              "id": 10,
-              "date": "14 Mar - 16 Mar\nSun - Tue",
-              "place": "Gajapantha (MP)",
-              "programme": "Atma Sadhana",
-              "details": "Contact:\nASK Umarala +91-9825242501"
-            }
-          ]
-        }
-      },
-      {
-        "pageId": "schedule",
-        "sectionId": "previous_events",
-        "values": {
-          "previousEvents": [
-            {
-              "id": 1,
-              "date": "15 Feb\nSat",
-              "place": "Delhi",
-              "programme": "Dharma Paryatan",
-              "details": "ASK Umarala +91-9825242501"
-            },
-            {
-              "id": 2,
-              "date": "12 Feb - 14 Feb\nWed - Fri",
-              "place": "Jaipur (RJ)",
-              "programme": "Dharma Paryatan",
-              "details": "Contact for Registration:\nDharmendra Jain +91-9898245201"
-            },
-            {
-              "id": 3,
-              "date": "10 Feb - 11 Feb\nMon - Tue",
-              "place": "Mumbai",
-              "programme": "Dharma Paryatan",
-              "details": "ASK Umarala +91-9825242501"
-            },
-            {
-              "id": 4,
-              "date": "4 Feb - 9 Feb\nTue - Sun",
-              "place": "Aurangabad (MH)",
-              "programme": "Dharma Paryatan",
-              "details": "Contact for Registration:\nSanjay Randhir +91-8329406215"
-            },
-            {
-              "id": 5,
-              "date": "2 Feb - 4 Feb\nSun - Tue",
-              "place": "Gajapantha (MH)",
-              "programme": "Atma Sadhana",
-              "details": "ASK Umarala +91-9825242501"
-            }
-          ]
+          "pageSubtitle": "Upcoming and previous spiritual gatherings and programmes"
         }
       }
     ]
@@ -4608,19 +3970,77 @@ const defaultSectionDocuments = finalizedPages.flatMap((page) =>
   }))
 );
 
+const BOOK_LANGUAGE_OPTIONS = [
+  { value: "English", label: "English" },
+  { value: "Hindi", label: "Hindi" },
+  { value: "Gujarati", label: "Gujarati" },
+  { value: "Sanskrit", label: "Sanskrit" },
+  { value: "Indonesian", label: "Indonesian" },
+];
+
+const BOOK_YEAR_OPTIONS = (() => {
+  const years = [];
+  const currentYear = new Date().getFullYear();
+  for (let y = currentYear; y >= 1990; y--) {
+    years.push({ value: String(y), label: String(y) });
+  }
+  return years;
+})();
+
 const bookTableColumns = [
-  { key: "coverImageUrl", label: "Preview", dataType: "text", renderer: "imagePreview", width: "80px", sortable: false },
-  { key: "title", label: "Title", dataType: "text", renderer: "text", width: "220px", required: true, overflowEllipsis: true },
+  {
+    key: "coverImage",
+    label: "Preview",
+    dataType: "relation",
+    renderer: "text",
+    width: "140px",
+    sortable: false,
+    overflowEllipsis: true,
+    selectConfig: {
+      relationshipType: "BookCoverFile",
+      edgeOnly: true,
+      label: "File",
+      labelField: "fileName"
+    }
+  },
+  { key: "title", label: "Name", dataType: "text", renderer: "text", width: "220px", required: true, overflowEllipsis: true },
   { key: "description", label: "Description", dataType: "text", renderer: "text", width: "280px", overflowEllipsis: true },
-  { key: "language", label: "Language", dataType: "text", renderer: "text", width: "100px" },
-  { key: "pages", label: "Pages", dataType: "number", renderer: "number", width: "80px" },
-  { key: "price", label: "Price", dataType: "text", renderer: "text", width: "80px" },
-  { key: "originalFileUrl", label: "Download", dataType: "text", renderer: "downloadLink", width: "100px", sortable: false }
+  {
+    key: "year",
+    label: "Year",
+    dataType: "select",
+    renderer: "text",
+    width: "80px",
+    options: BOOK_YEAR_OPTIONS
+  },
+  {
+    key: "language",
+    label: "Language",
+    dataType: "select",
+    renderer: "text",
+    width: "100px",
+    options: BOOK_LANGUAGE_OPTIONS
+  },
+  {
+    key: "file",
+    label: "Download",
+    dataType: "relation",
+    renderer: "text",
+    width: "140px",
+    sortable: false,
+    overflowEllipsis: true,
+    selectConfig: {
+      relationshipType: "BookFile",
+      edgeOnly: true,
+      label: "File",
+      labelField: "fileName"
+    }
+  }
 ];
 
 const bookTableGeneral = {
   publicRead: true,
-  title: "Books",
+  title: "Books By Fulchand",
   label: "Book",
   icon: "ph:book-open",
   usePolarisUI: true,
@@ -4652,13 +4072,102 @@ const bookTableFormConfig = {
       title: "Book",
       gridColumns: 2,
       fields: [
-        { key: "title", label: "Title", dataType: "text", renderer: "text", required: true, colSpan: 2, translatable: true },
-        { key: "description", label: "Description", dataType: "text", renderer: "textArea", colSpan: 2, translatable: true },
-        { key: "language", label: "Language", dataType: "text", renderer: "text", colSpan: 1 },
-        { key: "pages", label: "Pages", dataType: "number", renderer: "text", colSpan: 1 },
-        { key: "price", label: "Price", dataType: "text", renderer: "text", colSpan: 1 },
-        { key: "coverImageUrl", label: "Cover image URL", dataType: "text", renderer: "text", colSpan: 2 },
-        { key: "originalFileUrl", label: "Download URL", dataType: "text", renderer: "text", colSpan: 2 }
+        { key: "title", label: "Name", dataType: "text", renderer: "text", required: true, colSpan: 2, translatable: false },
+        { key: "description", label: "Description", dataType: "text", renderer: "textArea", colSpan: 2, translatable: false },
+        {
+          key: "year",
+          label: "Year",
+          dataType: "select",
+          renderer: "text",
+          colSpan: 1,
+          translatable: false,
+          options: BOOK_YEAR_OPTIONS
+        },
+        {
+          key: "language",
+          label: "Language",
+          dataType: "select",
+          renderer: "text",
+          colSpan: 1,
+          translatable: false,
+          options: BOOK_LANGUAGE_OPTIONS
+        },
+        {
+          key: "coverImage",
+          label: "Cover image",
+          dataType: "relation",
+          renderer: "embeddedVertexPicker",
+          colSpan: 2,
+          translatable: false,
+          selectConfig: {
+            relationshipType: "BookCoverFile",
+            edgeOnly: true,
+            label: "File",
+            labelField: "fileName"
+          },
+          pickerConfiguration: {
+            fieldLabel: "Cover image",
+            chooseButtonLabel: "Select image…",
+            clearButtonLabel: "Clear",
+            modalTitle: "Choose a cover image",
+            modalHintEmpty: "Select a file using the checkbox, then confirm.",
+            modalHintSelected: "Selected: {name} — confirm or choose another file.",
+            selectionMode: "single",
+            confirmButtonLabel: "Use selection",
+            cancelButtonLabel: "Cancel",
+            closeButtonLabel: "Close",
+            selectRowMessage: "Select a row in the list first.",
+            invalidTypeMessage: "This type does not match the configured selection.",
+            usePolarisUI: true,
+            targetVertexLabels: ["File"],
+            fileDownloadUrlPrefix: "/api/file/download",
+            showImagePreview: true,
+            buildSecondaryLabelFromVertex: true,
+            pickerBodyProps: {
+              tableVertexLabel: "File",
+              tableKey: "files",
+              loadFromSetting: true
+            }
+          }
+        },
+        {
+          key: "file",
+          label: "File",
+          dataType: "relation",
+          renderer: "embeddedVertexPicker",
+          colSpan: 2,
+          translatable: false,
+          selectConfig: {
+            relationshipType: "BookFile",
+            edgeOnly: true,
+            label: "File",
+            labelField: "fileName"
+          },
+          pickerConfiguration: {
+            fieldLabel: "Download file",
+            chooseButtonLabel: "Select file…",
+            clearButtonLabel: "Clear",
+            modalTitle: "Choose a file",
+            modalHintEmpty: "Select a file using the checkbox, then confirm.",
+            modalHintSelected: "Selected: {name} — confirm or choose another file.",
+            selectionMode: "single",
+            confirmButtonLabel: "Use selection",
+            cancelButtonLabel: "Cancel",
+            closeButtonLabel: "Close",
+            selectRowMessage: "Select a row in the list first.",
+            invalidTypeMessage: "This type does not match the configured selection.",
+            usePolarisUI: true,
+            targetVertexLabels: ["File"],
+            fileDownloadUrlPrefix: "/api/file/download",
+            showImagePreview: false,
+            buildSecondaryLabelFromVertex: true,
+            pickerBodyProps: {
+              tableVertexLabel: "File",
+              tableKey: "files",
+              loadFromSetting: true
+            }
+          }
+        }
       ]
     }
   ]
@@ -4676,6 +4185,512 @@ const bookTableSidebar = {
       {
         key: "basic",
         title: "Category",
+        gridColumns: 2,
+        fields: [
+          { key: "name", label: "Name", dataType: "text", renderer: "text", required: true, colSpan: 2 },
+          { key: "key", label: "Key", dataType: "text", renderer: "text", colSpan: 2 }
+        ]
+      }
+    ]
+  }
+};
+
+const recommendedBookTableColumns = [
+  {
+    key: "coverImage",
+    label: "Preview",
+    dataType: "relation",
+    renderer: "text",
+    width: "140px",
+    sortable: false,
+    overflowEllipsis: true,
+    selectConfig: {
+      relationshipType: "RecommendedBookCoverFile",
+      edgeOnly: true,
+      label: "File",
+      labelField: "fileName"
+    }
+  },
+  { key: "title", label: "Name", dataType: "text", renderer: "text", width: "220px", required: true, overflowEllipsis: true },
+  { key: "description", label: "Description", dataType: "text", renderer: "text", width: "280px", overflowEllipsis: true },
+  {
+    key: "year",
+    label: "Year",
+    dataType: "select",
+    renderer: "text",
+    width: "80px",
+    options: BOOK_YEAR_OPTIONS
+  },
+  {
+    key: "language",
+    label: "Language",
+    dataType: "select",
+    renderer: "text",
+    width: "100px",
+    options: BOOK_LANGUAGE_OPTIONS
+  },
+  {
+    key: "file",
+    label: "Download",
+    dataType: "relation",
+    renderer: "text",
+    width: "140px",
+    sortable: false,
+    overflowEllipsis: true,
+    selectConfig: {
+      relationshipType: "RecommendedBookFile",
+      edgeOnly: true,
+      label: "File",
+      labelField: "fileName"
+    }
+  }
+];
+
+const recommendedBookTableGeneral = {
+  publicRead: true,
+  title: "Books Recommended by Fulchand",
+  label: "RecommendedBook",
+  icon: "ph:books",
+  usePolarisUI: true,
+  enableUserScopingForContent: false,
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  showSelection: true,
+  hideExportButtons: false,
+  hideImportButtons: true,
+  hideSettingsButton: false,
+  hideAddButton: false,
+  rowHeight: 56,
+  columnWidths: { __selection: "36px", __rowNumber: "48px", __actions: "88px" },
+  rowClickable: true,
+  showRowNumber: true,
+  resizableColumns: true,
+  actions: [
+    { key: "edit", type: "edit" },
+    { key: "delete", type: "delete", confirm: { title: "Delete recommended book?", message: "This cannot be undone.", confirmText: "Delete", cancelText: "Cancel", variant: "danger" } }
+  ],
+  hooks: {}
+};
+
+const recommendedBookTableFormConfig = {
+  gridColumns: 2,
+  groups: [
+    {
+      key: "basic",
+      title: "Recommended book",
+      gridColumns: 2,
+      fields: [
+        { key: "title", label: "Name", dataType: "text", renderer: "text", required: true, colSpan: 2, translatable: false },
+        { key: "description", label: "Description", dataType: "text", renderer: "textArea", colSpan: 2, translatable: false },
+        {
+          key: "year",
+          label: "Year",
+          dataType: "select",
+          renderer: "text",
+          colSpan: 1,
+          translatable: false,
+          options: BOOK_YEAR_OPTIONS
+        },
+        {
+          key: "language",
+          label: "Language",
+          dataType: "select",
+          renderer: "text",
+          colSpan: 1,
+          translatable: false,
+          options: BOOK_LANGUAGE_OPTIONS
+        },
+        {
+          key: "coverImage",
+          label: "Cover image",
+          dataType: "relation",
+          renderer: "embeddedVertexPicker",
+          colSpan: 2,
+          translatable: false,
+          selectConfig: {
+            relationshipType: "RecommendedBookCoverFile",
+            edgeOnly: true,
+            label: "File",
+            labelField: "fileName"
+          },
+          pickerConfiguration: {
+            fieldLabel: "Cover image",
+            chooseButtonLabel: "Select image…",
+            clearButtonLabel: "Clear",
+            modalTitle: "Choose a cover image",
+            modalHintEmpty: "Select a file using the checkbox, then confirm.",
+            modalHintSelected: "Selected: {name} — confirm or choose another file.",
+            selectionMode: "single",
+            confirmButtonLabel: "Use selection",
+            cancelButtonLabel: "Cancel",
+            closeButtonLabel: "Close",
+            selectRowMessage: "Select a row in the list first.",
+            invalidTypeMessage: "This type does not match the configured selection.",
+            usePolarisUI: true,
+            targetVertexLabels: ["File"],
+            fileDownloadUrlPrefix: "/api/file/download",
+            showImagePreview: true,
+            buildSecondaryLabelFromVertex: true,
+            pickerBodyProps: {
+              tableVertexLabel: "File",
+              tableKey: "files",
+              loadFromSetting: true
+            }
+          }
+        },
+        {
+          key: "file",
+          label: "File",
+          dataType: "relation",
+          renderer: "embeddedVertexPicker",
+          colSpan: 2,
+          translatable: false,
+          selectConfig: {
+            relationshipType: "RecommendedBookFile",
+            edgeOnly: true,
+            label: "File",
+            labelField: "fileName"
+          },
+          pickerConfiguration: {
+            fieldLabel: "Download file",
+            chooseButtonLabel: "Select file…",
+            clearButtonLabel: "Clear",
+            modalTitle: "Choose a file",
+            modalHintEmpty: "Select a file using the checkbox, then confirm.",
+            modalHintSelected: "Selected: {name} — confirm or choose another file.",
+            selectionMode: "single",
+            confirmButtonLabel: "Use selection",
+            cancelButtonLabel: "Cancel",
+            closeButtonLabel: "Close",
+            selectRowMessage: "Select a row in the list first.",
+            invalidTypeMessage: "This type does not match the configured selection.",
+            usePolarisUI: true,
+            targetVertexLabels: ["File"],
+            fileDownloadUrlPrefix: "/api/file/download",
+            showImagePreview: false,
+            buildSecondaryLabelFromVertex: true,
+            pickerBodyProps: {
+              tableVertexLabel: "File",
+              tableKey: "files",
+              loadFromSetting: true
+            }
+          }
+        }
+      ]
+    }
+  ]
+};
+
+const recommendedBookTableSidebar = {
+  enabled: true,
+  parentVertexLabel: "RecommendedBookCategory",
+  toParentEdgeType: "ParentRecommendedBookCategory",
+  rootKeys: { key: "root" },
+  label: "Categories",
+  formConfig: {
+    gridColumns: 1,
+    groups: [
+      {
+        key: "basic",
+        title: "Category",
+        gridColumns: 2,
+        fields: [
+          { key: "name", label: "Name", dataType: "text", renderer: "text", required: true, colSpan: 2 },
+          { key: "key", label: "Key", dataType: "text", renderer: "text", colSpan: 2 }
+        ]
+      }
+    ]
+  }
+};
+
+const scheduleBannerPickerConfiguration = {
+  fieldLabel: "Banner",
+  chooseButtonLabel: "Select banner…",
+  clearButtonLabel: "Clear",
+  modalTitle: "Choose a banner image",
+  modalHintEmpty: "Select a file using the checkbox, then confirm.",
+  modalHintSelected: "Selected: {name} — confirm or choose another file.",
+  selectionMode: "single",
+  confirmButtonLabel: "Use selection",
+  cancelButtonLabel: "Cancel",
+  closeButtonLabel: "Close",
+  selectRowMessage: "Select a row in the list first.",
+  invalidTypeMessage: "This type does not match the configured selection.",
+  usePolarisUI: true,
+  targetVertexLabels: ["File"],
+  fileDownloadUrlPrefix: "/api/file/download",
+  showImagePreview: true,
+  buildSecondaryLabelFromVertex: true,
+  pickerBodyProps: {
+    tableVertexLabel: "File",
+    tableKey: "files",
+    loadFromSetting: true
+  }
+};
+
+const scheduleTableColumns = [
+  {
+    key: "banner",
+    label: "Banner",
+    dataType: "relation",
+    renderer: "text",
+    width: "140px",
+    sortable: false,
+    overflowEllipsis: true,
+    selectConfig: {
+      relationshipType: "ScheduleEventBannerFile",
+      edgeOnly: true,
+      label: "File",
+      labelField: "fileName"
+    }
+  },
+  { key: "startDate", label: "Start Date", dataType: "date", renderer: "date", width: "120px", required: true },
+  { key: "endDate", label: "End Date", dataType: "date", renderer: "date", width: "120px" },
+  { key: "place", label: "Place", dataType: "text", renderer: "text", width: "160px", overflowEllipsis: true },
+  { key: "programme", label: "Programme", dataType: "text", renderer: "text", width: "240px", required: true, overflowEllipsis: true },
+  { key: "details", label: "Details", dataType: "text", renderer: "text", width: "280px", overflowEllipsis: true }
+];
+
+const scheduleTableGeneral = {
+  publicRead: true,
+  title: "Schedule",
+  label: "Schedule event",
+  icon: "ph:calendar",
+  usePolarisUI: true,
+  enableUserScopingForContent: false,
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  showSelection: true,
+  hideExportButtons: false,
+  hideImportButtons: true,
+  hideSettingsButton: false,
+  hideAddButton: false,
+  rowHeight: 56,
+  columnWidths: { __selection: "36px", __rowNumber: "48px", __actions: "88px" },
+  rowClickable: true,
+  showRowNumber: true,
+  resizableColumns: true,
+  actions: [
+    { key: "edit", type: "edit" },
+    { key: "delete", type: "delete", confirm: { title: "Delete event?", message: "This cannot be undone.", confirmText: "Delete", cancelText: "Cancel", variant: "danger" } }
+  ],
+  hooks: {}
+};
+
+const scheduleTableFormConfig = {
+  gridColumns: 2,
+  groups: [
+    {
+      key: "basic",
+      title: "Event",
+      gridColumns: 2,
+      fields: [
+        { key: "startDate", label: "Start Date", dataType: "date", renderer: "date", required: true, colSpan: 1, translatable: false },
+        { key: "endDate", label: "End Date", dataType: "date", renderer: "date", colSpan: 1, translatable: false },
+        { key: "place", label: "Place", dataType: "text", renderer: "text", colSpan: 2, translatable: false },
+        { key: "programme", label: "Programme", dataType: "text", renderer: "text", required: true, colSpan: 2, translatable: false },
+        { key: "details", label: "Details", dataType: "text", renderer: "textArea", colSpan: 2, translatable: false },
+        {
+          key: "banner",
+          label: "Banner",
+          dataType: "relation",
+          renderer: "embeddedVertexPicker",
+          colSpan: 2,
+          translatable: false,
+          selectConfig: {
+            relationshipType: "ScheduleEventBannerFile",
+            edgeOnly: true,
+            label: "File",
+            labelField: "fileName"
+          },
+          pickerConfiguration: scheduleBannerPickerConfiguration
+        }
+      ]
+    }
+  ]
+};
+
+const scheduleTableSidebar = {
+  enabled: false
+};
+
+const GALLERY_MEDIA_TYPE_OPTIONS = [
+  { value: "Photo", label: "Photo" },
+  { value: "Video", label: "Video" },
+  { value: "Pdf", label: "Pdf" }
+];
+
+const galleryFilePickerConfiguration = {
+  fieldLabel: "Media file",
+  chooseButtonLabel: "Select file…",
+  clearButtonLabel: "Clear",
+  modalTitle: "Choose a media file",
+  modalHintEmpty: "Select a file using the checkbox, then confirm.",
+  modalHintSelected: "Selected: {name} — confirm or choose another file.",
+  selectionMode: "single",
+  confirmButtonLabel: "Use selection",
+  cancelButtonLabel: "Cancel",
+  closeButtonLabel: "Close",
+  selectRowMessage: "Select a row in the list first.",
+  invalidTypeMessage: "This type does not match the configured selection.",
+  usePolarisUI: true,
+  targetVertexLabels: ["File"],
+  fileDownloadUrlPrefix: "/api/file/download",
+  showImagePreview: true,
+  buildSecondaryLabelFromVertex: true,
+  pickerBodyProps: {
+    tableVertexLabel: "File",
+    tableKey: "files",
+    loadFromSetting: true
+  }
+};
+
+const galleryThumbnailPickerConfiguration = {
+  ...galleryFilePickerConfiguration,
+  fieldLabel: "Thumbnail",
+  chooseButtonLabel: "Select thumbnail…",
+  modalTitle: "Choose a thumbnail image",
+  showImagePreview: true
+};
+
+const galleryTableColumns = [
+  {
+    key: "thumbnail",
+    label: "Preview",
+    dataType: "relation",
+    renderer: "text",
+    width: "140px",
+    sortable: false,
+    overflowEllipsis: true,
+    selectConfig: {
+      relationshipType: "GalleryItemThumbnail",
+      edgeOnly: true,
+      label: "File",
+      labelField: "fileName"
+    }
+  },
+  { key: "title", label: "Title", dataType: "text", renderer: "text", width: "220px", required: true, overflowEllipsis: true },
+  {
+    key: "mediaType",
+    label: "Type",
+    dataType: "select",
+    renderer: "text",
+    width: "100px",
+    required: true,
+    options: GALLERY_MEDIA_TYPE_OPTIONS
+  },
+  { key: "description", label: "Description", dataType: "text", renderer: "text", width: "280px", overflowEllipsis: true },
+  {
+    key: "file",
+    label: "File",
+    dataType: "relation",
+    renderer: "text",
+    width: "160px",
+    sortable: false,
+    overflowEllipsis: true,
+    selectConfig: {
+      relationshipType: "GalleryItemFile",
+      edgeOnly: true,
+      label: "File",
+      labelField: "fileName"
+    }
+  }
+];
+
+const galleryTableGeneral = {
+  publicRead: true,
+  title: "Gallery",
+  label: "Gallery item",
+  icon: "ph:images",
+  usePolarisUI: true,
+  enableUserScopingForContent: false,
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  showSelection: true,
+  hideExportButtons: false,
+  hideImportButtons: true,
+  hideSettingsButton: false,
+  hideAddButton: false,
+  rowHeight: 56,
+  columnWidths: { __selection: "36px", __rowNumber: "48px", __actions: "88px" },
+  rowClickable: true,
+  showRowNumber: true,
+  resizableColumns: true,
+  actions: [
+    { key: "edit", type: "edit" },
+    { key: "delete", type: "delete", confirm: { title: "Delete gallery item?", message: "This cannot be undone.", confirmText: "Delete", cancelText: "Cancel", variant: "danger" } }
+  ],
+  hooks: {}
+};
+
+const galleryTableFormConfig = {
+  gridColumns: 2,
+  groups: [
+    {
+      key: "basic",
+      title: "Gallery item",
+      gridColumns: 2,
+      fields: [
+        { key: "title", label: "Title", dataType: "text", renderer: "text", required: true, colSpan: 2, translatable: false },
+        {
+          key: "mediaType",
+          label: "Media type",
+          dataType: "select",
+          renderer: "text",
+          required: true,
+          colSpan: 1,
+          translatable: false,
+          options: GALLERY_MEDIA_TYPE_OPTIONS
+        },
+        { key: "description", label: "Description", dataType: "text", renderer: "textArea", colSpan: 2, translatable: false },
+        {
+          key: "file",
+          label: "Media file",
+          dataType: "relation",
+          renderer: "embeddedVertexPicker",
+          colSpan: 2,
+          translatable: false,
+          selectConfig: {
+            relationshipType: "GalleryItemFile",
+            edgeOnly: true,
+            label: "File",
+            labelField: "fileName"
+          },
+          pickerConfiguration: galleryFilePickerConfiguration
+        },
+        {
+          key: "thumbnail",
+          label: "Thumbnail",
+          dataType: "relation",
+          renderer: "embeddedVertexPicker",
+          colSpan: 2,
+          translatable: false,
+          selectConfig: {
+            relationshipType: "GalleryItemThumbnail",
+            edgeOnly: true,
+            label: "File",
+            labelField: "fileName"
+          },
+          pickerConfiguration: galleryThumbnailPickerConfiguration
+        }
+      ]
+    }
+  ]
+};
+
+const galleryTableSidebar = {
+  enabled: true,
+  parentVertexLabel: "GalleryCategory",
+  toParentEdgeType: "ParentGalleryCategory",
+  rootKeys: {},
+  loadFullTree: true,
+  label: "Folders",
+  formConfig: {
+    gridColumns: 1,
+    groups: [
+      {
+        key: "basic",
+        title: "Folder",
         gridColumns: 2,
         fields: [
           { key: "name", label: "Name", dataType: "text", renderer: "text", required: true, colSpan: 2 },
@@ -4982,6 +4997,214 @@ const emailTemplateTableSidebar = {
   }
 };
 
+const fileTableGeneral = {
+  publicRead: true,
+  title: "Files",
+  label: "File",
+  icon: "ph:folder",
+  usePolarisUI: true,
+  enableUserScopingForContent: false,
+  enableUserScopingForSidebar: false,
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  showSelection: true,
+  hideExportButtons: true,
+  hideImportButtons: true,
+  hideSettingsButton: false,
+  hideAddButton: false,
+  showAddButton: true,
+  rowHeight: 64,
+  columnWidths: { __selection: "36px", __rowNumber: "48px", __actions: "88px" },
+  rowClickable: true,
+  showRowNumber: true,
+  resizableColumns: true,
+  actions: [
+    { key: "edit", type: "edit" },
+    { key: "delete", type: "delete", confirm: { title: "Delete file?", message: "This cannot be undone.", confirmText: "Delete", cancelText: "Cancel", variant: "danger" } }
+  ],
+  hooks: {
+    afterDelete: "fileAfterDelete"
+  }
+};
+
+const fileTableSidebar = {
+  enabled: true,
+  parentVertexLabel: "Folder",
+  toParentEdgeType: "ParentFolder",
+  rootKeys: {},
+  label: "Folder",
+  loadFullTree: true,
+  formConfig: {
+    gridColumns: 1,
+    groups: [
+      {
+        key: "basic",
+        title: "Folder",
+        gridColumns: 2,
+        fields: [
+          { key: "key", label: "Key", dataType: "text", renderer: "text", required: true, maxLength: 255, colSpan: 2 },
+          { key: "description", label: "Description", dataType: "text", renderer: "textArea", maxLength: 2000, colSpan: 2 }
+        ]
+      }
+    ]
+  },
+  hooks: {}
+};
+
+// Columns + formConfig keep valueAccessor / onUploadSuccess as real functions (not JSON).
+const fileTableColumnsConfig = `return {
+  part: "columns",
+  columns: [
+    {
+      key: "preview",
+      label: "Preview",
+      dataType: "text",
+      renderer: "imagePreview",
+      width: "150px",
+      sortable: false,
+      valueAccessor: (row) => {
+        const fileName = row.P?.fileName != null ? String(row.P.fileName).trim() : "";
+        if (fileName === "") return null;
+        const mime = String(row.P?.mimeType || row.P?.fileType || "");
+        if (mime && !mime.startsWith("image/")) return null;
+        return "/api/file/download/" + encodeURIComponent(fileName);
+      }
+    },
+    {
+      key: "fileName",
+      label: "Name",
+      dataType: "text",
+      renderer: "text",
+      width: "240px",
+      valueAccessor: (row) => row.P?.fileName || "",
+      overflowEllipsis: true
+    },
+    {
+      key: "fileSize",
+      label: "Size (bytes)",
+      dataType: "text",
+      renderer: "text",
+      width: "110px",
+      valueAccessor: (row) => (row.P?.fileSize != null ? String(row.P.fileSize) : "")
+    },
+    {
+      key: "fileType",
+      label: "Type",
+      dataType: "text",
+      renderer: "text",
+      width: "140px",
+      valueAccessor: (row) => row.P?.mimeType || row.P?.fileType || ""
+    },
+    { key: "uploadDate", label: "Uploaded", dataType: "date", renderer: "date", width: "130px" },
+    {
+      key: "description",
+      label: "Description",
+      dataType: "text",
+      renderer: "text",
+      width: "220px",
+      valueAccessor: (row) => row.P?.description,
+      overflowEllipsis: true
+    }
+  ]
+};`;
+
+const fileTableFormConfigConfig = `return {
+  part: "formConfig",
+  gridColumns: 1,
+  groups: [
+    {
+      key: "basic",
+      title: "File",
+      gridColumns: 2,
+      fields: [
+        {
+          key: "__fileUpload",
+          dataType: "file",
+          renderer: "graphFileUpload",
+          required: true,
+          colSpan: 2,
+          tooltip: "Choose one or more files to upload. They are stored in the repository and linked to your user (UserFile). Then set description and save.",
+          visible: "ctx.mode === 'create'",
+          uploadConfiguration: {
+            accept: "*/*",
+            uploadUrl: "/api/file/upload",
+            uploadInitUrl: "/api/file/upload/init",
+            uploadChunkUrl: "/api/file/upload/chunk",
+            uploadCompleteUrl: "/api/file/upload/complete",
+            uploadAbortUrl: "/api/file/upload/abort",
+            chunkThresholdBytes: 5242880,
+            chunkSizeBytes: 4194304,
+            multiple: true,
+            maxFiles: 100,
+            hidePreview: false,
+            enableDragDrop: true,
+            fullWidth: true,
+            previewMinHeight: "8rem",
+            previewMaxItemWidth: "10rem",
+            previewMaxItemHeight: "10rem",
+            previewObjectFit: "contain",
+            fileDownloadUrlPrefix: "/api/file/download",
+            pickButtonLabel: "Choose files to upload",
+            onUploadSuccess: async (hook) => {
+              if (!hook.isLastFile) return;
+              hook.callbacks.assignFormVertex?.(hook.uploadedId);
+              hook.syncFormFields?.(hook.uploadedId);
+              if ((hook.fileCount || 1) === 1) hook.syncPreview(hook.uploadedId);
+              hook.showSuccess(
+                hook.fileCount > 1 ? (hook.fileCount + " files uploaded") : undefined
+              );
+            }
+          }
+        },
+        {
+          key: "fileName",
+          label: "File name",
+          dataType: "text",
+          renderer: "text",
+          required: true,
+          maxLength: 512,
+          colSpan: 2,
+          tooltip: "Display name for the file.",
+          disabled: "ctx.mode === 'edit'"
+        },
+        {
+          key: "description",
+          label: "Description",
+          dataType: "text",
+          renderer: "textArea",
+          required: false,
+          maxLength: 4000,
+          colSpan: 2
+        },
+        {
+          key: "fileSize",
+          label: "Size (bytes)",
+          dataType: "text",
+          renderer: "text",
+          disabled: true,
+          colSpan: 1
+        },
+        {
+          key: "fileType",
+          label: "MIME type",
+          dataType: "text",
+          renderer: "text",
+          disabled: true,
+          colSpan: 1
+        },
+        {
+          key: "uploadDate",
+          label: "Upload date",
+          dataType: "text",
+          renderer: "text",
+          disabled: true,
+          colSpan: 2
+        }
+      ]
+    }
+  ]
+};`;
+
 function buildTableSchemaPartConfig(part, body) {
   const payload = { part, ...(body && typeof body === "object" ? body : {}) };
   return `return ${JSON.stringify(payload, null, 2)};`;
@@ -4998,12 +5221,63 @@ const tableDefinitions = [
       formConfig: "books_schema_formconfig",
       sidebar: "books_schema_sidebar"
     },
-    name: "Books",
-    description: "Sacred books table for public /books page and portal admin",
+    name: "Books By Fulchand",
+    description: "Books by Fulchand table for public /books page and portal admin",
     general: bookTableGeneral,
     columns: bookTableColumns,
     formConfig: bookTableFormConfig,
     sidebar: bookTableSidebar
+  },
+  {
+    tableKey: "recommended_books",
+    tableVertexLabel: "RecommendedBook",
+    pageId: "table:recommended_books",
+    schemaKeys: {
+      general: "recommended_books_schema_general",
+      columns: "recommended_books_schema_columns",
+      formConfig: "recommended_books_schema_formconfig",
+      sidebar: "recommended_books_schema_sidebar"
+    },
+    name: "Books Recommended by Fulchand",
+    description: "Recommended books table for public /books page second tab and portal admin. No seed data.",
+    general: recommendedBookTableGeneral,
+    columns: recommendedBookTableColumns,
+    formConfig: recommendedBookTableFormConfig,
+    sidebar: recommendedBookTableSidebar
+  },
+  {
+    tableKey: "gallery",
+    tableVertexLabel: "GalleryItem",
+    pageId: "table:gallery",
+    schemaKeys: {
+      general: "gallery_schema_general",
+      columns: "gallery_schema_columns",
+      formConfig: "gallery_schema_formconfig",
+      sidebar: "gallery_schema_sidebar"
+    },
+    name: "Gallery",
+    description: "Gallery table for public /gallery page and portal admin. Supports Photo, Video, and Pdf with recursive folders.",
+    general: galleryTableGeneral,
+    columns: galleryTableColumns,
+    formConfig: galleryTableFormConfig,
+    sidebar: galleryTableSidebar
+  },
+  {
+    tableKey: "schedule",
+    tableVertexLabel: "ScheduleEvent",
+    pageId: "table:schedule",
+    schemaKeys: {
+      general: "schedule_schema_general",
+      columns: "schedule_schema_columns",
+      formConfig: "schedule_schema_formconfig",
+      sidebar: "schedule_schema_sidebar"
+    },
+    name: "Schedule",
+    description: "Schedule events table for public /schedule page and portal admin",
+    general: scheduleTableGeneral,
+    columns: scheduleTableColumns,
+    formConfig: scheduleTableFormConfig,
+    sidebar: scheduleTableSidebar
   },
   {
     tableKey: "components",
@@ -5072,6 +5346,23 @@ const tableDefinitions = [
     columns: emailTemplateTableColumns,
     formConfig: emailTemplateTableFormConfig,
     sidebar: emailTemplateTableSidebar
+  },
+  {
+    tableKey: "files",
+    tableVertexLabel: "File",
+    pageId: "table:files",
+    schemaKeys: {
+      general: "files_schema_general",
+      columns: "files_schema_columns",
+      formConfig: "files_schema_formconfig",
+      sidebar: "files_schema_sidebar"
+    },
+    name: "Files",
+    description: "File organizer for portal admin (/portal/table?table=File&key=files)",
+    general: fileTableGeneral,
+    columnsConfig: fileTableColumnsConfig,
+    formConfigConfig: fileTableFormConfigConfig,
+    sidebar: fileTableSidebar
   }
 ];
 
@@ -5090,7 +5381,7 @@ const tableSchemaParts = tableDefinitions.flatMap((tableDef) => [
     tableVertexLabel: tableDef.tableVertexLabel,
     part: "columns",
     name: tableDef.name + " columns schema",
-    config: buildTableSchemaPartConfig("columns", { columns: tableDef.columns })
+    config: tableDef.columnsConfig || buildTableSchemaPartConfig("columns", { columns: tableDef.columns })
   },
   {
     key: tableDef.schemaKeys.formConfig,
@@ -5098,7 +5389,7 @@ const tableSchemaParts = tableDefinitions.flatMap((tableDef) => [
     tableVertexLabel: tableDef.tableVertexLabel,
     part: "formConfig",
     name: tableDef.name + " form config schema",
-    config: buildTableSchemaPartConfig("formConfig", tableDef.formConfig)
+    config: tableDef.formConfigConfig || buildTableSchemaPartConfig("formConfig", tableDef.formConfig)
   },
   {
     key: tableDef.schemaKeys.sidebar,

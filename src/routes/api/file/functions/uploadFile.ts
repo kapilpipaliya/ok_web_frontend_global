@@ -1,18 +1,7 @@
 import type { MultiPartData } from "h3";
-import type { Node, Session, Transaction } from "neo4j-driver";
+import type { Session, Transaction } from "neo4j-driver";
 
-import fs from "node:fs";
-import path from "node:path";
-
-import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
-import { processResult } from "~/cypher/conversion/processResult";
-import type { Edge } from "~/lib/graph/type/edge";
-import type { Vertex } from "~/lib/graph/type/vertex";
-import { calculateChecksum } from "~/lib/files/calculateChecksum";
-import { ensureDirectoryExists } from "~/lib/files/ensureDirectoryExists";
-import { getBaseDir } from "~/lib/files/getBaseDir";
-import { saveFileToDisk } from "~/lib/files/saveFileToDisk";
-import { saveFileMetadata } from "~/routes/api/file/functions/functions/saveFileMetadata";
+import { finalizeFileUpload } from "./finalizeFileUpload";
 
 export async function uploadFiles(
   data: (MultiPartData & { label?: string })[],
@@ -20,115 +9,63 @@ export async function uploadFiles(
   neo4jSession: Session | Transaction,
   linkUserUuid?: string | null,
 ) {
-  const currentDate = new Date().toISOString();
-  const [year, month, day] = currentDate.split("T")[0].split("-");
-  const baseDir = getBaseDir();
-  const userDir = path.join(baseDir, subDomain, year, month, day);
-
-  ensureDirectoryExists(userDir);
-
   const fileNodes = await Promise.all(
     data.map(async (file) => {
       if (!file) {
         return null;
       }
-      const { data, filename, type, ...others } = file;
+      const { data: fileData, filename, type, ...others } = file;
       if (!filename) {
         return null;
       }
 
-      // Use original filename without timestamp
-      const newFilename = filename;
-      const filePath = path.join(userDir, newFilename);
-
-      // Check if file already exists on disk
-      if (fs.existsSync(filePath)) {
-        throw new Error(`File with name "${filename}" already exists`);
-      }
-
-      // Check if file with same name exists in database
-      const checkQuery = `
-        MATCH (f:File {fileName: $fileName})
-        RETURN f
-        LIMIT 1
-      `;
-      const checkResult = await neo4jSession.run(checkQuery, {
-        fileName: newFilename,
+      const uploaded = await finalizeFileUpload({
+        data: fileData,
+        filename,
+        mimeType: type,
+        subDomain,
+        neo4jSession,
+        linkUserUuid,
+        label: others.label,
       });
 
-      if (checkResult.records.length > 0) {
-        throw new Error(
-          `File with name "${filename}" already exists in database`,
-        );
-      }
-
-      // Save file to disk
-      saveFileToDisk(userDir, newFilename, data);
-
-      const fileSize = data.length;
-      const mimeType = type;
-      const checksum = calculateChecksum(data);
-
-      const metadata = {
-        checksum,
-        fileName: newFilename,
-        filePath: filePath,
-        // fileId,
-        fileSize,
-        mimeType,
-        originalFileName: filename,
-        subDomain,
-        // username,
-      };
-
-      const record = await saveFileMetadata(
-        neo4jSession,
-        metadata,
-        undefined,
-        others.label,
-      );
-      if (record && linkUserUuid) {
-        try {
-          const node = record.get("f");
-          if (node) {
-            const v = convertNodeToJson(node as Node);
-            const fileId = v?.id;
-            if (fileId) {
-              await neo4jSession.run(
-                `MATCH (u:User {uuid: $uuid})
-                 MATCH (f:File) WHERE elementId(f) = $fileId
-                 MERGE (u)-[r:UserFile]->(f)
-                 ON CREATE SET r.createdAt = datetime()`,
-                { uuid: linkUserUuid, fileId },
-              );
-            }
-          }
-        } catch (e) {
-          console.error("uploadFiles: UserFile link failed", e);
-        }
-      }
-      return record;
+      // Preserve previous shape: callers expect { graph, result } once for all files.
+      // Collect records via result array entries.
+      return uploaded;
     }),
   );
 
-  const context = {
-    nodes: {} as Record<string, Vertex>,
-    relationships: {} as Record<string, Edge>,
-  };
+  const uploads = fileNodes.filter((node) => node !== null);
+  if (uploads.length === 0) {
+    return {
+      graph: { edges: {}, vertexes: {} },
+      result: [],
+    };
+  }
 
-  const result = processResult(
-    fileNodes.filter((node) => node !== null),
-    context,
-    "f",
-  );
+  if (uploads.length === 1) {
+    return uploads[0];
+  }
 
-  return {
+  const merged = {
     graph: {
-      edges: context.relationships,
-      vertexes: context.nodes,
+      edges: {} as Record<string, unknown>,
+      vertexes: {} as Record<string, unknown>,
     },
-    result,
+    result: [] as unknown[],
   };
+
+  for (const upload of uploads) {
+    Object.assign(merged.graph.edges, upload.graph.edges);
+    Object.assign(merged.graph.vertexes, upload.graph.vertexes);
+    if (Array.isArray(upload.result)) {
+      merged.result.push(...upload.result);
+    } else if (upload.result != null) {
+      merged.result.push(upload.result);
+    }
+  }
+
+  return merged;
 }
 
 // File Repository:

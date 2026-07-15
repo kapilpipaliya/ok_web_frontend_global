@@ -15,6 +15,9 @@ export function updateNodeRelations(
 
   const sourceNode = nodes[relationship.S];
   if (sourceNode) {
+    if (!sourceNode.OUT) {
+      sourceNode.OUT = {};
+    }
     if (!sourceNode.OUT[relationship.T]) {
       sourceNode.OUT[relationship.T] = [];
     }
@@ -24,6 +27,9 @@ export function updateNodeRelations(
 
   const targetNode = nodes[relationship.E];
   if (targetNode) {
+    if (!targetNode.IN) {
+      targetNode.IN = {};
+    }
     if (!targetNode.IN[relationship.T]) {
       targetNode.IN[relationship.T] = [];
     }

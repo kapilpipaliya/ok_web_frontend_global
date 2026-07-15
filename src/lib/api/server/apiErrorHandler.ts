@@ -14,12 +14,18 @@ export type APIErrorResponse = {
   error: string;
 };
 
-export function handleAPIError(error: unknown): APIErrorResponse | Response {
+export function handleAPIError(error: unknown): Response {
   if (error instanceof APIError) {
-    return {
-      details: error.details,
-      error: error.message,
-    };
+    return new Response(
+      JSON.stringify({
+        details: error.details,
+        error: error.message,
+      }),
+      {
+        headers: { "Content-Type": "application/json" },
+        status: error.status || 500,
+      },
+    );
   }
 
   // Check if it's a Neo4j error

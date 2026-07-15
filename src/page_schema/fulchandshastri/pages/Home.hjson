@@ -1,16 +1,18 @@
 {
   vertexes: [
     {
-      id: "page",
-      L: "Page",
+      id: "1"
+      L: Page
       P: {
         public: true
-        key: "Home",
-        fns: "return { enabled: () => true }",
-        isNoPermissionCheck: true,
-        url: "/",
-        settingsPageId: "home"
-        props: '''
+        settingsPageId: home
+        isNoPermissionCheck: true
+        fns: return { enabled: () => true }
+        url: /
+        key: Home
+        updatedAt: 2026-07-12T04:08:39.709Z
+        props:
+          '''
 const locale = args.params?.lang ? String(args.params.lang).toLowerCase() : undefined;
 return {
   contextName: "homeSettings",
@@ -20,73 +22,225 @@ try {
     functionName: "loadPublicPageSettings",
     contextData: { pageId: "home", allowPublicRead: true, locale: ${JSON.stringify(locale ?? null)} }
   });
-  if (!result?.result?.success) return {};
-  return result.result.data?.sections || {};
+  const sections = result?.result?.success ? (result.result.data?.sections || {}) : {};
+
+  let banners = [];
+  try {
+    const bannerResult = await args.executeNamedServerFunction({
+      functionName: "loadPublicCategoryContent",
+      contextData: {
+        tableKey: "files",
+        tableVertexLabel: "File",
+        categoryKey: "HomeBanner",
+        locale: ${JSON.stringify(locale ?? null)}
+      }
+    });
+    const rows = bannerResult?.result?.success
+      ? (bannerResult.result.data?.rows || [])
+      : [];
+    banners = rows.filter((file) => {
+      const mime = String(file?.P?.mimeType || file?.P?.fileType || "");
+      if (mime.startsWith("image/")) return true;
+      const name = String(file?.P?.fileName || "").toLowerCase();
+      return (
+        name.endsWith(".png") ||
+        name.endsWith(".jpg") ||
+        name.endsWith(".jpeg") ||
+        name.endsWith(".gif") ||
+        name.endsWith(".webp") ||
+        name.endsWith(".svg") ||
+        name.endsWith(".avif")
+      );
+    });
+  } catch (bannerError) {
+    console.error("Error loading HomeBanner images:", bannerError);
+  }
+
+  return {
+    ...sections,
+    banners
+  };
 } catch (error) {
   console.error("Error loading page settings:", error);
-  return {};
+  return { banners: [] };
 }
 `
 };
 '''
       }
-    },
+    }
     {
-      id: "heroSection",
-      L: "Attr",
+      id: "2"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "HeroSection",
-        props: '''
-const hero = args.contextData.homeSettings?.hero;
-return hero;
+        css:
+          '''return `._id {
+  padding: 0;
+  margin-bottom: 0;
+}`;
+'''
+        displayOrder: 1
+        componentName: Carousel
+        key: unique_3
+        props:
+          '''
+const banners = args.contextData.homeSettings?.banners ?? [];
+return {
+  data: banners,
+  contextName: "banner",
+  loop: true,
+  showArrows: true,
+  showDots: true,
+  hide: () => banners.length === 0
+};
 '''
       }
-    },
+    }
     {
-      id: "mainContent",
-      L: "Attr",
+      id: "3"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "main"
+        css:
+          '''return `._id {
+  display: block;
+  width: 100%;
+  min-height: 12rem;
+  line-height: 0;
+  text-decoration: none;
+  color: inherit;
+  overflow: hidden;
+  background: ${args.theme.var.color.background_light_100};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        key: unique_6
+        props:
+          '''
+const banner = args.contextData.banner;
+const rawPath = banner?.P?.description != null ? String(banner.P.description).trim() : "";
+
+const localizeHref = (path) => {
+  if (!path) return null;
+  if (/^https?:\/\//i.test(path) || path.startsWith("mailto:") || path === "#") {
+    return path;
+  }
+  const normalized = path.startsWith("/") ? path : `/${path}`;
+  const lang = args.params?.lang ? String(args.params.lang).toLowerCase() : "";
+  // Match [lang]/[...page].tsx: only prefix when first segment is a language code
+  if (lang && /^[a-z]{2,3}$/i.test(lang)) {
+    if (normalized === "/") return `/${lang}`;
+    return `/${lang}${normalized}`;
+  }
+  return normalized;
 };
-''',
-        css: '''
+
+const href = localizeHref(rawPath);
+
+return {
+  as: href ? "a" : "div",
+  ...(href ? { href } : {})
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
+const isFirst = (args.contextData.index ?? 0) === 0;
+return [
+  `@keyframes homeBannerFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}`,
+  `._id {
+  display: block;
+  width: 100%;
+  height: auto;
+  min-height: 12rem;
+  object-fit: cover;
+  object-position: center;
+  ${isFirst ? `
+  opacity: 0;
+  animation: homeBannerFadeIn 0.55s ease forwards;
+  ` : ""}
+}`
+];'''
+        displayOrder: 1
+        componentName: Html
+        key: unique_7
+        props:
+          '''
+const banner = args.contextData.banner;
+const fileName = banner?.P?.fileName != null ? String(banner.P.fileName).trim() : "";
+const isFirst = (args.contextData.index ?? 0) === 0;
+return {
+  as: "img",
+  src: fileName ? `/api/file/download/${encodeURIComponent(fileName)}` : undefined,
+  alt: fileName || "Home banner",
+  loading: isFirst ? "eager" : "lazy"
+};
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   padding: 3rem 1rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "container",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div"
+  as: "main"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   max-width: 1200px;
   margin: 0 auto;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "welcomeSection",
-      L: "Attr",
+      id: "7"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  text-align: center;
+  margin-bottom: 4rem;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const welcome = args.contextData.homeSettings?.welcome;
 return {
   as: "section",
@@ -94,57 +248,45 @@ return {
 
   ref: (el) => el && args.fns.animateOnView(el)
 };
-''',
-        css: '''
-return `._id {
-  text-align: center;
-  margin-bottom: 4rem;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "welcomeTitle",
-      L: "Attr",
+      id: "8"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const welcome = args.contextData.homeSettings?.welcome;
-return {
-  as: "h1",
-  text: welcome?.welcomeTitle
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.text};
   font-size: 2.5rem;
   font-weight: 700;
   margin-bottom: 1.5rem;
   line-height: 1.3;
-  
+
   @media (max-width: 768px) {
     font-size: 2rem;
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "welcomeDesc",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const welcome = args.contextData.homeSettings?.welcome;
 return {
-  as: "p",
-  text: welcome?.welcomeDesc
+  as: "h1",
+  text: welcome?.welcomeTitle
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.text_light_200};
   font-size: 1.125rem;
@@ -153,20 +295,24 @@ return `._id {
   margin: 0 auto;
 }`;
 '''
-      }
-    },
-    {
-      id: "featuresGrid",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const welcome = args.contextData.homeSettings?.welcome;
 return {
-  as: "div"
+  as: "p",
+  text: welcome?.welcomeDesc
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -174,17 +320,26 @@ return `._id {
   margin-bottom: 4rem;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "featureLoop",
-      L: "Attr",
+      id: "11"
+      L: Attr
       P: {
-        displayOrder: 1,
-        loop: true,
-        contextName: "featureCard"
-        componentName: "Html",
-        props: '''
+        contextName: featureCard
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const cards = args.contextData.homeSettings?.features?.featureCards ?? [];
 return {
   as: "fragment",
@@ -195,25 +350,27 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "featureCard",
-      L: "Attr",
+      id: "12"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "FeatureCard",
-        props: '''
+        displayOrder: 1
+        componentName: FeatureCard
+        props:
+          '''
 return args.contextData.featureCard;
 '''
       }
-    },
+    }
     {
-      id: "quote",
-      L: "Attr",
+      id: "13"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "QuoteSection",
-        props: '''
+        displayOrder: 3
+        componentName: QuoteSection
+        props:
+          '''
 const quote = args.contextData.homeSettings?.quote;
 return {
   text: quote.quoteText,
@@ -221,22 +378,13 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "missionSection",
-      L: "Attr",
+      id: "14"
+      L: Attr
       P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
-return {
-  as: "section",
-  "data-animate": "",
-
-  ref: (el) => el && args.fns.animateOnView(el)
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   background: ${args.theme.var.color.background_light_50};
   padding: 3rem 2rem;
@@ -244,22 +392,25 @@ return `._id {
   margin-bottom: 4rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "missionTitle",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const mission = args.contextData.homeSettings?.mission;
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
 return {
-  as: "h2",
-  text: mission?.missionTitle
+  as: "section",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el)
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.text};
   font-size: 2rem;
@@ -268,75 +419,76 @@ return `._id {
   margin-bottom: 2rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "missionGrid",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const mission = args.contextData.homeSettings?.mission;
 return {
-  as: "div"
+  as: "h2",
+  text: mission?.missionTitle
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 2rem;
-  text-align: center;
+  max-width: 40rem;
+  margin: 0 auto;
 }`;
 '''
-      }
-    },
-    {
-      id: "missionItemLoop",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        loop: true,
-        contextName: "missionItem"
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Carousel
+        props:
+          '''
 const items = args.contextData.homeSettings?.mission?.missionItems ?? [];
 return {
-  as: "div",
-  data: items
+  data: items,
+  contextName: "missionItem",
+  loop: true,
+  showArrows: true,
+  showDots: true,
+  hide: () => items.length === 0
 };
 '''
       }
-    },
+    }
     {
-      id: "missionItem",
-      L: "Attr",
+      id: "17"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  text-align: center;
+  padding: 0.5rem 3rem 0.25rem;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const index = args.contextData.index ?? 0;
 return {
   as: "div",
   "data-animate": "",
 
-  ref: (el) => el && args.fns.animateOnView(el, { delay: index * 0.08 })
+  ref: (el) => el && args.fns.animateOnView(el, { delay: index === 0 ? 0 : 0.08 })
 };
 '''
       }
-    },
+    }
     {
-      id: "missionIcon",
-      L: "Attr",
+      id: "18"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   width: 4rem;
   height: 4rem;
@@ -348,15 +500,30 @@ return `._id {
   margin: 0 auto 1rem;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "missionIconSvg",
-      L: "Attr",
+      id: "19"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const item = args.contextData.missionItem;
 return {
   as: "icon",
@@ -364,64 +531,162 @@ return {
   width: 32,
   height: 32
 };
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.primary};
-}`;
 '''
       }
-    },
+    }
     {
-      id: "missionText",
-      L: "Attr",
+      id: "20"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const item = args.contextData.missionItem;
-return {
-  as: "p",
-  text: item?.text
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.text_light_200};
   font-size: 1rem;
   line-height: 1.6;
 }`;
 '''
-      }
-    },
-    {
-      id: "layout",
-      L: "PageLayout",
-      P: {
-        displayOrder: 1,
-        componentName: "Layout"
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.missionItem;
+return {
+  as: "p",
+  text: item?.text
+};
+'''
       }
     }
-  ],
+    {
+      id: "21"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: Layout
+      }
+    }
+  ]
   edges: [
-    { id: "e0", T: "Attr", S: "page", E: "heroSection" },
-    { id: "e3", T: "Attr", S: "page", E: "mainContent" },
-    { id: "e4", T: "Attr", S: "mainContent", E: "container" },
-    { id: "e5", T: "Attr", S: "container", E: "welcomeSection" },
-    { id: "e6", T: "Attr", S: "welcomeSection", E: "welcomeTitle" },
-    { id: "e7", T: "Attr", S: "welcomeSection", E: "welcomeDesc" },
-    { id: "e8", T: "Attr", S: "container", E: "featuresGrid" },
-    { id: "e9", T: "Attr", S: "featuresGrid", E: "featureLoop" },
-    { id: "e9a", T: "Attr", S: "featureLoop", E: "featureCard" },
-    { id: "e12", T: "Attr", S: "container", E: "quote" },
-    { id: "e13", T: "Attr", S: "container", E: "missionSection" },
-    { id: "e14", T: "Attr", S: "missionSection", E: "missionTitle" },
-    { id: "e15", T: "Attr", S: "missionSection", E: "missionGrid" },
-    { id: "e16", T: "Attr", S: "missionGrid", E: "missionItemLoop" },
-    { id: "e17", T: "Attr", S: "missionItemLoop", E: "missionItem" },
-    { id: "e18", T: "Attr", S: "missionItem", E: "missionIcon" },
-    { id: "e19", T: "Attr", S: "missionIcon", E: "missionIconSvg" },
-    { id: "e20", T: "Attr", S: "missionItem", E: "missionText" },
-    { id: "e_layout", T: "PageLayout", S: "page", E: "layout" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "1"
+      E: "5"
+    }
+    {
+      id: e3
+      T: PageLayout
+      S: "1"
+      E: "21"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "6"
+      E: "10"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "6"
+      E: "13"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "6"
+      E: "14"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "7"
+      E: "9"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "10"
+      E: "11"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "11"
+      E: "12"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "14"
+      E: "15"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "14"
+      E: "16"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "16"
+      E: "17"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "17"
+      E: "18"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "17"
+      E: "20"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "18"
+      E: "19"
+    }
   ]
 }

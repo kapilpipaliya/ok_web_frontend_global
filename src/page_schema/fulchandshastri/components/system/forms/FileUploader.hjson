@@ -11,8 +11,13 @@
 const [files, setFiles] = args.createSignal([]);
 const [previewUrls, setPreviewUrls] = args.createSignal([]);
 const [uploadError, setUploadError] = args.createSignal("");
+const [isUploading, setIsUploading] = args.createSignal(false);
+const [uploadProgress, setUploadProgress] = args.createSignal(0);
+const [uploadStatusText, setUploadStatusText] = args.createSignal("");
 
 let inputRef = null;
+const DEFAULT_CHUNK_THRESHOLD_BYTES = 5 * 1024 * 1024;
+const DEFAULT_CHUNK_SIZE_BYTES = 4 * 1024 * 1024;
 
 const clearUploadError = () => setUploadError("");
 const setUploadErrorMessage = (message) => {
@@ -53,6 +58,7 @@ const getUploadConfiguration = () => {
       accept: "*/*",
       uploadUrl: "/api/file/upload",
       multiple: false,
+      maxFiles: 0,
       hidePreview: true,
       enableDragDrop: true,
       pickButtonLabel: "Select file",
@@ -70,6 +76,14 @@ const getUploadConfiguration = () => {
       uploadFailedMessage: "Upload failed",
       noFileReturnedMessage: "Upload failed: no file returned",
       notInGraphMessage: "Upload saved but file not found in graph",
+      uploadingMessage: "Uploading…",
+      showUploadErrorToast: true,
+      chunkThresholdBytes: DEFAULT_CHUNK_THRESHOLD_BYTES,
+      chunkSizeBytes: DEFAULT_CHUNK_SIZE_BYTES,
+      uploadInitUrl: "/api/file/upload/init",
+      uploadChunkUrl: "/api/file/upload/chunk",
+      uploadCompleteUrl: "/api/file/upload/complete",
+      uploadAbortUrl: "/api/file/upload/abort",
       onFileSelect: null,
       onUploadSuccess: null,
     };
@@ -81,6 +95,9 @@ const getUploadConfiguration = () => {
       : "";
   const multiple = raw.multiple === true;
   const hidePreview = raw.hidePreview === true;
+  const maxFilesRaw = Number(raw.maxFiles);
+  const maxFiles =
+    Number.isFinite(maxFilesRaw) && maxFilesRaw > 0 ? Math.floor(maxFilesRaw) : 0;
   const defaultPickLabel = multiple ? "Select files" : "Select file";
   const pickButtonLabel =
     raw.pickButtonLabel != null && String(raw.pickButtonLabel).trim() !== ""
@@ -94,6 +111,7 @@ const getUploadConfiguration = () => {
         ? String(raw.uploadUrl).trim()
         : "/api/file/upload",
     multiple,
+    maxFiles,
     hidePreview,
     enableDragDrop: raw.enableDragDrop !== false,
     pickButtonLabel,
@@ -134,6 +152,35 @@ const getUploadConfiguration = () => {
       raw.notInGraphMessage != null
         ? String(raw.notInGraphMessage)
         : "Upload saved but file not found in graph",
+    uploadingMessage:
+      raw.uploadingMessage != null && String(raw.uploadingMessage).trim() !== ""
+        ? String(raw.uploadingMessage).trim()
+        : "Uploading…",
+    showUploadErrorToast: raw.showUploadErrorToast !== false,
+    chunkThresholdBytes:
+      Number.isFinite(Number(raw.chunkThresholdBytes)) && Number(raw.chunkThresholdBytes) > 0
+        ? Number(raw.chunkThresholdBytes)
+        : DEFAULT_CHUNK_THRESHOLD_BYTES,
+    chunkSizeBytes:
+      Number.isFinite(Number(raw.chunkSizeBytes)) && Number(raw.chunkSizeBytes) > 0
+        ? Number(raw.chunkSizeBytes)
+        : DEFAULT_CHUNK_SIZE_BYTES,
+    uploadInitUrl:
+      raw.uploadInitUrl != null && String(raw.uploadInitUrl).trim() !== ""
+        ? String(raw.uploadInitUrl).trim()
+        : "/api/file/upload/init",
+    uploadChunkUrl:
+      raw.uploadChunkUrl != null && String(raw.uploadChunkUrl).trim() !== ""
+        ? String(raw.uploadChunkUrl).trim()
+        : "/api/file/upload/chunk",
+    uploadCompleteUrl:
+      raw.uploadCompleteUrl != null && String(raw.uploadCompleteUrl).trim() !== ""
+        ? String(raw.uploadCompleteUrl).trim()
+        : "/api/file/upload/complete",
+    uploadAbortUrl:
+      raw.uploadAbortUrl != null && String(raw.uploadAbortUrl).trim() !== ""
+        ? String(raw.uploadAbortUrl).trim()
+        : "/api/file/upload/abort",
     onFileSelect: compileUploadHook(raw.onFileSelect),
     onUploadSuccess: compileUploadHook(raw.onUploadSuccess),
   };
@@ -241,7 +288,160 @@ const syncFormFieldsFromVertex = (vertexId, callbacks) => {
 
 let uploadInProgress = false;
 
-const buildUploadHookContext = (uploadedId, uploadedVertex, file, fileList, response, cfg, callbacks) => ({
+const notifyUploading = (value, progress, statusText) => {
+  setIsUploading(value === true);
+  if (typeof progress === "number" && Number.isFinite(progress)) {
+    setUploadProgress(Math.max(0, Math.min(100, Math.round(progress))));
+  } else if (value !== true) {
+    setUploadProgress(0);
+  }
+  if (statusText != null) {
+    setUploadStatusText(String(statusText));
+  } else if (value !== true) {
+    setUploadStatusText("");
+  }
+  const callbacks = getUploadCallbacks();
+  if (typeof callbacks.setIsFileUploading === "function") {
+    try {
+      callbacks.setIsFileUploading(value === true);
+    } catch (_) {
+      /* parent may already be disposing */
+    }
+  }
+};
+
+const resetFileInput = () => {
+  if (!inputRef) return;
+  try {
+    inputRef.value = "";
+  } catch (_) {
+    /* ignore */
+  }
+};
+
+const clearLocalSelection = () => {
+  revokePreviewUrls(previewUrls());
+  setPreviewUrls([]);
+  setFiles([]);
+  resetFileInput();
+};
+
+const formatUploadErrorMessage = (error, fallbackMessage) => {
+  const raw =
+    error instanceof Error
+      ? error.message
+      : error != null
+        ? String(error)
+        : "";
+  const text = raw.trim() || String(fallbackMessage || "Upload failed");
+  if (/already exists/i.test(text)) {
+    return `${text}. Choose a different file or rename it before uploading.`;
+  }
+  return text;
+};
+
+const scheduleIdle = (fn) => {
+  if (typeof queueMicrotask === "function") {
+    queueMicrotask(fn);
+    return;
+  }
+  setTimeout(fn, 0);
+};
+
+const parseJsonResponse = async (response) => {
+  const contentType = response.headers.get("content-type") || "";
+  if (contentType.includes("application/json")) {
+    return await response.json();
+  }
+  const text = await response.text();
+  throw new Error(text || response.statusText || "Upload failed");
+};
+
+const ensureValidApiPayload = (payload, fallbackMessage) => {
+  if (!payload || payload.error || payload.statusCode === 500) {
+    const message =
+      payload?.error ||
+      payload?.message ||
+      payload?.statusMessage ||
+      fallbackMessage ||
+      "Upload failed";
+    throw new Error(String(message));
+  }
+  return payload;
+};
+
+const postJson = async (url, body) => {
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body || {}),
+  });
+  const payload = await parseJsonResponse(response);
+  // Some runtimes may still return 200 with `{ error }` — treat that as failure.
+  if (!response.ok || payload?.error) {
+    throw new Error(
+      payload?.error ||
+        payload?.message ||
+        payload?.statusMessage ||
+        response.statusText ||
+        "Upload failed",
+    );
+  }
+  return ensureValidApiPayload(payload);
+};
+
+const uploadFormDataWithProgress = (url, formData, onProgress) =>
+  new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", url);
+    xhr.timeout = 10 * 60 * 1000;
+    xhr.responseType = "text";
+    xhr.upload.onprogress = (event) => {
+      if (!event.lengthComputable || typeof onProgress !== "function") return;
+      onProgress(Math.round((event.loaded / event.total) * 100));
+    };
+    xhr.onload = () => {
+      let payload = null;
+      try {
+        payload = xhr.responseText ? JSON.parse(xhr.responseText) : {};
+      } catch (_) {
+        reject(new Error(xhr.responseText || xhr.statusText || "Upload failed"));
+        return;
+      }
+      if (xhr.status < 200 || xhr.status >= 300) {
+        reject(
+          new Error(
+            payload?.error ||
+              payload?.message ||
+              payload?.statusMessage ||
+              xhr.statusText ||
+              "Upload failed",
+          ),
+        );
+        return;
+      }
+      try {
+        resolve(ensureValidApiPayload(payload));
+      } catch (error) {
+        reject(error);
+      }
+    };
+    xhr.onerror = () => reject(new Error("Network error during upload"));
+    xhr.ontimeout = () => reject(new Error("Upload timed out. Try again or use a smaller file."));
+    xhr.onabort = () => reject(new Error("Upload aborted"));
+    xhr.send(formData);
+  });
+
+const buildUploadHookContext = (
+  uploadedId,
+  uploadedVertex,
+  file,
+  fileList,
+  response,
+  cfg,
+  callbacks,
+  batchMeta
+) => ({
   uploadedId,
   uploadedVertex,
   file,
@@ -250,6 +450,10 @@ const buildUploadHookContext = (uploadedId, uploadedVertex, file, fileList, resp
   configuration: cfg,
   callbacks,
   args,
+  fileIndex: batchMeta?.fileIndex ?? 0,
+  fileCount: batchMeta?.fileCount ?? (Array.isArray(fileList) ? fileList.length : 1),
+  isLastFile: batchMeta?.isLastFile !== false,
+  uploadedIds: batchMeta?.uploadedIds || (uploadedId ? [uploadedId] : []),
   syncPreview: (vertexId) => {
     const id =
       vertexId != null && String(vertexId).trim() !== ""
@@ -270,21 +474,156 @@ const buildUploadHookContext = (uploadedId, uploadedVertex, file, fileList, resp
         ? String(message).trim()
         : cfg.uploadFailedMessage;
     setUploadErrorMessage(text);
-    if (cfg.showUploadErrorToast === true) {
+    if (cfg.showUploadErrorToast !== false) {
       args.showErrorToast?.(text);
     }
   },
   syncFormFields: (vertexId) => syncFormFieldsFromVertex(vertexId, callbacks),
 });
 
+const handleUploadedResponse = async (data, file, fileList, cfg, callbacks, batchMeta) => {
+  if (data?.graph && typeof data.graph === "object") {
+    args.setGraphData(0, data.graph, {});
+  }
+
+  const rows = data?.result;
+  const first = Array.isArray(rows) ? rows[0] : rows;
+  const uploadedId = first?.id != null ? String(first.id) : "";
+  if (uploadedId === "") throw new Error(cfg.noFileReturnedMessage);
+
+  await Promise.resolve();
+  const uploadedVertex = args.graph.vertexes[uploadedId];
+  if (!uploadedVertex) throw new Error(cfg.notInGraphMessage);
+
+  clearUploadError();
+
+  const fileCount = batchMeta?.fileCount ?? (Array.isArray(fileList) ? fileList.length : 1);
+  const isLastFile = batchMeta?.isLastFile !== false;
+  const uploadedIds = Array.isArray(batchMeta?.uploadedIds)
+    ? batchMeta.uploadedIds
+    : [uploadedId];
+
+  const hookContext = buildUploadHookContext(
+    uploadedId,
+    uploadedVertex,
+    file,
+    fileList,
+    data,
+    cfg,
+    callbacks,
+    {
+      fileIndex: batchMeta?.fileIndex ?? 0,
+      fileCount,
+      isLastFile,
+      uploadedIds,
+    },
+  );
+
+  if (typeof cfg.onUploadSuccess === "function") {
+    await cfg.onUploadSuccess(hookContext);
+  } else if (isLastFile) {
+    if (
+      cfg.integrationMode === "attachField" &&
+      cfg.attachUploadedFileToFieldKey !== "" &&
+      typeof callbacks.setFieldValue === "function"
+    ) {
+      callbacks.setFieldValue(
+        cfg.attachUploadedFileToFieldKey,
+        fileCount > 1 ? uploadedIds : uploadedId,
+      );
+    }
+    syncPreviewFromVertex(uploadedId);
+    args.showSuccessToast?.(
+      fileCount > 1 ? `${fileCount} files uploaded` : cfg.successToastMessage,
+    );
+  }
+
+  if (isLastFile && typeof callbacks.onFilesUploaded === "function") {
+    try {
+      callbacks.onFilesUploaded(uploadedIds.length > 0 ? uploadedIds : [uploadedId]);
+    } catch (_) {
+      /* parent may ignore */
+    }
+  }
+};
+
+const uploadFileDirect = async (file, cfg, onProgress) => {
+  const formData = new FormData();
+  formData.append(cfg.formDataFieldName, file);
+  return await uploadFormDataWithProgress(cfg.uploadUrl, formData, onProgress);
+};
+
+const uploadFileChunked = async (file, cfg, onProgress) => {
+  const chunkSize = cfg.chunkSizeBytes || DEFAULT_CHUNK_SIZE_BYTES;
+  const init = await postJson(cfg.uploadInitUrl, {
+    fileName: file.name,
+    fileSize: file.size,
+    mimeType: file.type || "",
+    chunkSize,
+  });
+
+  const uploadId = init?.uploadId != null ? String(init.uploadId) : "";
+  const resolvedChunkSize = Number(init?.chunkSize) || chunkSize;
+  const totalChunks =
+    Number(init?.totalChunks) || Math.ceil(file.size / resolvedChunkSize);
+
+  if (!uploadId) {
+    throw new Error("Failed to start chunked upload");
+  }
+
+  try {
+    for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+      const start = chunkIndex * resolvedChunkSize;
+      const end = Math.min(file.size, start + resolvedChunkSize);
+      const blob = file.slice(start, end);
+      const formData = new FormData();
+      formData.append("uploadId", uploadId);
+      formData.append("chunkIndex", String(chunkIndex));
+      formData.append("totalChunks", String(totalChunks));
+      formData.append("chunk", blob, file.name);
+
+      await uploadFormDataWithProgress(cfg.uploadChunkUrl, formData, (chunkPct) => {
+        const base = (chunkIndex / totalChunks) * 100;
+        const span = 100 / totalChunks;
+        if (typeof onProgress === "function") {
+          onProgress(base + (chunkPct / 100) * span);
+        }
+      });
+
+      if (typeof onProgress === "function") {
+        onProgress(((chunkIndex + 1) / totalChunks) * 100);
+      }
+    }
+
+    return await postJson(cfg.uploadCompleteUrl, { uploadId });
+  } catch (error) {
+    try {
+      await postJson(cfg.uploadAbortUrl, { uploadId });
+    } catch (_) {
+      /* ignore abort errors */
+    }
+    throw error;
+  }
+};
+
+const formatBatchStatus = (cfg, fileIndex, fileCount, pct) => {
+  const rounded = Math.round(pct);
+  const pctText = rounded > 0 ? ` (${rounded}%)` : "";
+  if (fileCount > 1) {
+    return `Uploading ${fileIndex + 1} of ${fileCount}${pctText}`;
+  }
+  const base = cfg.uploadingMessage || "Uploading…";
+  return rounded > 0 ? `${base} ${rounded}%` : base;
+};
+
 const processUpload = async (fileList) => {
   if (uploadInProgress) return;
   uploadInProgress = true;
+  const cfg = getUploadConfiguration();
+  const callbacks = getUploadCallbacks();
   try {
-    const cfg = getUploadConfiguration();
-    const callbacks = getUploadCallbacks();
-
     if (typeof cfg.onFileSelect === "function") {
+      notifyUploading(true, 0, cfg.uploadingMessage);
       await cfg.onFileSelect(fileList, {
         args,
         configuration: cfg,
@@ -296,90 +635,97 @@ const processUpload = async (fileList) => {
       return;
     }
 
-    const file = fileList?.[0];
-    if (!file) return;
+    const filesToUpload =
+      cfg.multiple === true ? fileList || [] : fileList?.[0] ? [fileList[0]] : [];
+    if (filesToUpload.length === 0) return;
 
-    const formData = new FormData();
-    formData.append(cfg.formDataFieldName, file);
-    const data = await args.postAPI(cfg.uploadUrl, formData);
+    const fileCount = filesToUpload.length;
+    const uploadedIds = [];
 
-    if (data?.graph && typeof data.graph === "object") {
-      args.setGraphData(0, data.graph, {});
+    for (let fileIndex = 0; fileIndex < fileCount; fileIndex++) {
+      const file = filesToUpload[fileIndex];
+      const overallBase = (fileIndex / fileCount) * 100;
+      const overallSpan = 100 / fileCount;
+      notifyUploading(true, overallBase, formatBatchStatus(cfg, fileIndex, fileCount, 0));
+
+      const useChunked = Number(file.size) > Number(cfg.chunkThresholdBytes || 0);
+      const data = useChunked
+        ? await uploadFileChunked(file, cfg, (pct) => {
+            const overall = overallBase + (pct / 100) * overallSpan;
+            notifyUploading(true, overall, formatBatchStatus(cfg, fileIndex, fileCount, pct));
+          })
+        : await uploadFileDirect(file, cfg, (pct) => {
+            const overall = overallBase + (pct / 100) * overallSpan;
+            notifyUploading(true, overall, formatBatchStatus(cfg, fileIndex, fileCount, pct));
+          });
+
+      const rows = data?.result;
+      const first = Array.isArray(rows) ? rows[0] : rows;
+      const uploadedId = first?.id != null ? String(first.id) : "";
+      if (uploadedId) uploadedIds.push(uploadedId);
+
+      const isLastFile = fileIndex === fileCount - 1;
+      await handleUploadedResponse(data, file, filesToUpload, cfg, callbacks, {
+        fileIndex,
+        fileCount,
+        isLastFile,
+        uploadedIds: [...uploadedIds],
+      });
     }
 
-    const rows = data?.result;
-    const first = Array.isArray(rows) ? rows[0] : rows;
-    const uploadedId = first?.id != null ? String(first.id) : "";
-    if (uploadedId === "") {
-      setUploadErrorMessage(cfg.noFileReturnedMessage);
-      return;
-    }
-
-    await Promise.resolve();
-    const uploadedVertex = args.graph.vertexes[uploadedId];
-    if (!uploadedVertex) {
-      setUploadErrorMessage(cfg.notInGraphMessage);
-      return;
-    }
-
-    clearUploadError();
-
-    const hookContext = buildUploadHookContext(
-      uploadedId,
-      uploadedVertex,
-      file,
-      fileList,
-      data,
-      cfg,
-      callbacks,
-    );
-
-    if (typeof cfg.onUploadSuccess === "function") {
-      await cfg.onUploadSuccess(hookContext);
-    } else if (
-      cfg.integrationMode === "attachField" &&
-      cfg.attachUploadedFileToFieldKey !== ""
-    ) {
-      if (typeof callbacks.setFieldValue === "function") {
-        callbacks.setFieldValue(cfg.attachUploadedFileToFieldKey, uploadedId);
-      }
-      syncPreviewFromVertex(uploadedId);
-      args.showSuccessToast?.(cfg.successToastMessage);
-    } else {
-      syncPreviewFromVertex(uploadedId);
-      args.showSuccessToast?.(cfg.successToastMessage);
-    }
+    notifyUploading(true, 100, formatBatchStatus(cfg, fileCount - 1, fileCount, 100));
   } catch (error) {
     console.error("FileUploader upload", error);
-    const cfg = getUploadConfiguration();
-    const message = error instanceof Error ? error.message : cfg.uploadFailedMessage;
+    const message = formatUploadErrorMessage(error, cfg.uploadFailedMessage);
     setUploadErrorMessage(message);
-    if (cfg.showUploadErrorToast === true) {
+    // Keep selected file visible so the user can see what failed; only reset input for retry.
+    resetFileInput();
+    if (cfg.showUploadErrorToast !== false) {
       args.showErrorToast?.(message);
     }
   } finally {
     uploadInProgress = false;
+    // Defer hide/enable updates so Solid is not disposing nested nodes mid-update.
+    scheduleIdle(() => {
+      notifyUploading(false, 0, "");
+    });
   }
 };
 
 const applyFileList = async (fileList) => {
   if (!fileList || fileList.length === 0) return;
+  if (uploadInProgress || isUploading()) return;
+  const cfg = getUploadConfiguration();
+  let filesArray = Array.from(fileList).filter(
+    (file) => file && typeof file === "object" && typeof file.name === "string" && file.name.trim() !== "",
+  );
+  if (filesArray.length === 0) return;
+  if (cfg.multiple !== true) {
+    filesArray = filesArray.slice(0, 1);
+  } else if (cfg.maxFiles > 0 && filesArray.length > cfg.maxFiles) {
+    setUploadErrorMessage(`Select at most ${cfg.maxFiles} files`);
+    if (cfg.showUploadErrorToast !== false) {
+      args.showErrorToast?.(`Select at most ${cfg.maxFiles} files`);
+    }
+    resetFileInput();
+    return;
+  }
   clearUploadError();
-  const filesArray = Array.from(fileList);
   revokePreviewUrls(previewUrls());
   const urls = filesArray.map((file) => URL.createObjectURL(file));
   setFiles(filesArray);
   setPreviewUrls(urls);
   await Promise.resolve();
-  await processUpload(fileList);
+  await processUpload(filesArray);
 };
 
 args.onCleanup(() => {
   revokePreviewUrls(previewUrls());
+  // Do not notify parent FormManagement here — it may already be disposing.
 });
 
 const openPicker = () => {
-  if (args.contextData.props?.disabled === true) return;
+  if (args.contextData.props?.disabled === true || isUploading()) return;
   inputRef?.click?.();
 };
 
@@ -402,6 +748,8 @@ const previewItems = () => {
       fileName: file?.name || "",
       isImage: isImageFile(file),
       isVideo: isVideoFile(file),
+      index,
+      total: fileList.length,
     }));
   }
   if (urls.length > 0) {
@@ -428,15 +776,41 @@ const previewItems = () => {
         fileName,
         isImage,
         isVideo,
+        index,
+        total: urls.length,
       };
     });
   }
   return [];
 };
 
+const getSelectionSummary = () => {
+  const count = files().length || previewItems().length;
+  if (count <= 0) return "";
+  if (count === 1) {
+    return files()[0]?.name || previewItems()[0]?.fileName || "1 file";
+  }
+  return `${count} files selected`;
+};
+
+const showSelectionSummary = () =>
+  getUploadConfiguration().multiple === true &&
+  (files().length > 1 || previewItems().length > 1);
+
 const showUploadError = () => {
   const msg = uploadError();
   return msg != null && String(msg).trim() !== "";
+};
+
+const showUploadStatus = () => isUploading() === true;
+
+const getUploadStatusLabel = () => {
+  const custom = uploadStatusText();
+  if (custom != null && String(custom).trim() !== "") return String(custom).trim();
+  const cfg = getUploadConfiguration();
+  const pct = uploadProgress();
+  if (pct > 0) return `${cfg.uploadingMessage} ${pct}%`;
+  return cfg.uploadingMessage || "Uploading…";
 };
 
 return {
@@ -446,8 +820,14 @@ return {
   setInputRef,
   showPreview,
   showUploadError,
+  showUploadStatus,
+  getUploadStatusLabel,
   previewItems,
+  getSelectionSummary,
+  showSelectionSummary,
   uploadError,
+  isUploading,
+  uploadProgress,
 };
 '''
       }
@@ -536,9 +916,16 @@ return `._id {
           '''
 const cfg = args.fns.getUploadConfiguration?.() ?? {};
 const usePolaris = cfg.usePolarisUI === true;
-const label = cfg.pickButtonLabel || "Select file";
-const disabled = args.contextData.props?.disabled === true;
-const onClick = () => args.fns.openPicker?.();
+const uploading = args.fns.isUploading?.() === true;
+const label = uploading
+  ? args.fns.getUploadStatusLabel?.() || cfg.uploadingMessage || "Uploading…"
+  : cfg.pickButtonLabel || (cfg.multiple === true ? "Select files" : "Select file");
+const disabled = args.contextData.props?.disabled === true || uploading;
+const onClick = (event) => {
+  event?.stopPropagation?.();
+  event?.preventDefault?.();
+  args.fns.openPicker?.();
+};
 
 if (usePolaris) {
   const variant =
@@ -580,7 +967,7 @@ return {
   type: "file",
   accept: cfg.accept || "*/*",
   multiple: cfg.multiple === true,
-  disabled: args.contextData.props?.disabled === true,
+  disabled: args.contextData.props?.disabled === true || args.fns.isUploading?.() === true,
   style: "display: none;",
   ref: (el) => args.fns.setInputRef?.(el),
   onChange: (event) => {
@@ -588,6 +975,145 @@ return {
     void args.fns.applyFileList?.(input?.files ?? null);
   }
 };'''
+      }
+    }
+    {
+      id: "fu_upload_status"
+      L: Attr
+      P: {
+        displayOrder: 2.5
+        componentName: Html
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.sm};
+  width: 100%;
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  border-radius: ${args.theme.var.borderRadius.md};
+  background: ${args.theme.var.color.background_light_100};
+  border: 1px solid ${args.theme.var.color.border};
+  box-sizing: border-box;
+}`;
+'''
+        props:
+          '''
+return {
+  as: "div",
+  role: "status",
+  "aria-live": "polite",
+  hide: () => !args.fns.showUploadStatus?.()
+};
+'''
+      }
+    }
+    {
+      id: "fu_upload_spinner"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''
+return [
+  `@keyframes fuUploadSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }`,
+  `._id {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 9999px;
+    border: 2px solid ${args.theme.var.color.background_light_400};
+    border-top-color: ${args.theme.var.color.primary};
+    animation: fuUploadSpin 0.8s linear infinite;
+    flex-shrink: 0;
+  }`
+];
+'''
+        props:
+          '''
+return {
+  as: "div",
+  "aria-hidden": true
+};
+'''
+      }
+    }
+    {
+      id: "fu_upload_status_text"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        css:
+          '''
+return `._id {
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: ${args.theme.var.color.text};
+  flex: 1;
+  min-width: 0;
+}`;
+'''
+        props:
+          '''
+return {
+  as: "div",
+  text: () => args.fns.getUploadStatusLabel?.() || "Uploading…"
+};
+'''
+      }
+    }
+    {
+      id: "fu_upload_progress_track"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        css:
+          '''
+return `._id {
+  width: 100%;
+  height: 0.375rem;
+  border-radius: 9999px;
+  background: ${args.theme.var.color.background_light_300};
+  overflow: hidden;
+  margin-top: ${args.theme.var.spacing.xs};
+}`;
+'''
+        props:
+          '''
+return {
+  as: "div",
+  hide: () => !args.fns.showUploadStatus?.()
+};
+'''
+      }
+    }
+    {
+      id: "fu_upload_progress_bar"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''
+return `._id {
+  height: 100%;
+  background: ${args.theme.var.color.primary};
+  transition: width 150ms ease;
+}`;
+'''
+        props:
+          '''
+const pct = Math.max(0, Math.min(100, Number(args.fns.uploadProgress?.() || 0)));
+return {
+  as: "div",
+  style: `width: ${pct}%;`
+};
+'''
       }
     }
     {
@@ -609,15 +1135,43 @@ return `._id {
   flex-direction: column;
   align-items: stretch;
   text-align: center;
-  cursor: pointer;
+  cursor: default;
   border: 2px dashed ${args.theme.var.color.border};
   background: ${args.theme.var.color.background_light_50};
   overflow: hidden;
+  padding: ${args.theme.var.spacing.sm};
+  box-sizing: border-box;
 }`;
 '''
         props:
           '''
 return { as: "motionFragment", hide: () => !args.fns.showPreview?.() };
+'''
+      }
+    }
+    {
+      id: "fu_selection_summary"
+      L: Attr
+      P: {
+        displayOrder: 0.5
+        componentName: Html
+        css:
+          '''
+return `._id {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: ${args.theme.var.color.text_light_400};
+  padding: 0 ${args.theme.var.spacing.xs} ${args.theme.var.spacing.xs};
+  text-align: left;
+}`;
+'''
+        props:
+          '''
+return {
+  as: "div",
+  hide: () => !args.fns.showSelectionSummary?.(),
+  text: () => args.fns.getSelectionSummary?.() || ""
+};
 '''
       }
     }
@@ -631,14 +1185,16 @@ return { as: "motionFragment", hide: () => !args.fns.showPreview?.() };
           '''
 const cfg = args.fns.getUploadConfiguration?.() ?? {};
 const minHeight = cfg.previewMinHeight || "12.5rem";
+const maxW = cfg.previewMaxItemWidth || "12.5rem";
 return `._id {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, ${maxW}), 1fr));
+  gap: ${args.theme.var.spacing.sm};
   width: 100%;
   min-height: ${minHeight};
   flex: 1;
   box-sizing: border-box;
+  align-items: start;
 }`;
 '''
         props:
@@ -647,12 +1203,16 @@ const cfg = args.fns.getUploadConfiguration?.() ?? {};
 const dragEnabled = cfg.enableDragDrop !== false;
 return {
   as: "div",
-  onClick: () => args.fns.openPicker?.(),
+  // Do not open the OS file picker on preview click — only the pick button should.
+  onClick: (event) => event?.stopPropagation?.(),
   onDragOver: dragEnabled ? (event) => event?.preventDefault?.() : undefined,
   onDrop: dragEnabled
     ? (event) => {
         event?.preventDefault?.();
-        void args.fns.applyFileList?.(event?.dataTransfer?.files ?? null);
+        event?.stopPropagation?.();
+        const dropped = event?.dataTransfer?.files ?? null;
+        if (!dropped || dropped.length === 0) return;
+        void args.fns.applyFileList?.(dropped);
       }
     : undefined
 };
@@ -683,21 +1243,25 @@ return {
         css:
           '''
 const cfg = args.fns.getUploadConfiguration?.() ?? {};
-const minHeight = cfg.previewMinHeight || "12.5rem";
 const maxH = cfg.previewMaxItemHeight || "12.5rem";
 return `._id {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
   width: 100%;
-  min-height: ${minHeight};
-  max-height: ${maxH};
+  max-height: none;
   box-sizing: border-box;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.md};
+  background: ${args.theme.var.color.background};
+  overflow: hidden;
+  min-height: 0;
 }`;
 '''
         props:
           '''const item = args.contextData.previewItem;
-return { as: "motionFragment", hide: !item };'''
+return { as: "div", hide: !item };'''
       }
     }
     {
@@ -709,25 +1273,24 @@ return { as: "motionFragment", hide: !item };'''
         css:
           '''
 const cfg = args.fns.getUploadConfiguration?.() ?? {};
-const minHeight = cfg.previewMinHeight || "12.5rem";
 const maxH = cfg.previewMaxItemHeight || "12.5rem";
 const fit = cfg.previewObjectFit || "contain";
 return `._id {
   display: block;
   width: 100%;
-  height: 100%;
-  min-height: ${minHeight};
+  height: auto;
   max-height: ${maxH};
+  aspect-ratio: 4 / 3;
   object-fit: ${fit};
   object-position: center;
-  border-radius: ${args.theme.var.borderRadius.md};
+  background: ${args.theme.var.color.background_light_100};
 }`;
 '''
         props:
           '''const item = args.contextData.previewItem;
 return {
   as: "img",
-  alt: "Upload preview",
+  alt: item?.fileName || "Upload preview",
   src: item?.url ?? "",
   hide: !item?.url || item?.isVideo === true
 };'''
@@ -742,18 +1305,17 @@ return {
         css:
           '''
 const cfg = args.fns.getUploadConfiguration?.() ?? {};
-const minHeight = cfg.previewMinHeight || "12.5rem";
 const maxH = cfg.previewMaxItemHeight || "12.5rem";
 const fit = cfg.previewObjectFit || "contain";
 return `._id {
   display: block;
   width: 100%;
-  height: 100%;
-  min-height: ${minHeight};
+  height: auto;
   max-height: ${maxH};
+  aspect-ratio: 4 / 3;
   object-fit: ${fit};
   object-position: center;
-  border-radius: ${args.theme.var.borderRadius.md};
+  background: ${args.theme.var.color.background_light_100};
 }`;
 '''
         props:
@@ -797,18 +1359,24 @@ return {
         css:
           '''
 return `._id {
-  padding: 0.75rem 1rem;
-  font-size: 0.875rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+  line-height: 1.35;
   color: ${args.theme.var.color.text};
   word-break: break-word;
+  text-align: left;
+  border-top: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.background_light_50};
 }`;
 '''
         props:
           '''const item = args.contextData.previewItem;
+const showName = Boolean(item?.fileName) || !(item?.isImage || item?.isVideo);
 return {
   as: "div",
   text: item?.fileName || "Selected file",
-  hide: item?.isImage || item?.isVideo
+  title: item?.fileName || "",
+  hide: !showName
 };'''
       }
     }
@@ -842,9 +1410,15 @@ return {
     { id: "fu_e1", T: "Attr", S: "fu1", E: "fu_root" }
     { id: "fu_e2", T: "Attr", S: "fu_root", E: "fu_pick_btn" }
     { id: "fu_e3", T: "Attr", S: "fu_root", E: "fu_input" }
+    { id: "fu_e3a", T: "Attr", S: "fu_root", E: "fu_upload_status" }
+    { id: "fu_e3b", T: "Attr", S: "fu_upload_status", E: "fu_upload_spinner" }
+    { id: "fu_e3c", T: "Attr", S: "fu_upload_status", E: "fu_upload_status_text" }
+    { id: "fu_e3d", T: "Attr", S: "fu_root", E: "fu_upload_progress_track" }
+    { id: "fu_e3e", T: "Attr", S: "fu_upload_progress_track", E: "fu_upload_progress_bar" }
     { id: "fu_e4", T: "Attr", S: "fu_root", E: "fu_preview_wrap" }
     { id: "fu_e4b", T: "Attr", S: "fu_root", E: "fu_upload_error" }
-    { id: "fu_e4a", T: "Attr", S: "fu_preview_wrap", E: "fu_preview_drop" }
+    { id: "fu_e4a", T: "Attr", S: "fu_preview_wrap", E: "fu_selection_summary" }
+    { id: "fu_e4c", T: "Attr", S: "fu_preview_wrap", E: "fu_preview_drop" }
     { id: "fu_e5", T: "Attr", S: "fu_preview_drop", E: "fu_preview_row" }
     { id: "fu_e6", T: "Attr", S: "fu_preview_row", E: "fu_preview_item" }
     { id: "fu_e7", T: "Attr", S: "fu_preview_item", E: "fu_preview_img" }

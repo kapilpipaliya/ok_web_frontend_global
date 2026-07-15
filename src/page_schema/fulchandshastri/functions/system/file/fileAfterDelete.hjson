@@ -1,0 +1,32 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: fileAfterDelete
+        description: After a File vertex is deleted, remove the corresponding file from disk (same as DELETE /api/file).
+        body:
+          '''
+const { tableVertexLabel, operation, result } = args.contextData;
+
+if (tableVertexLabel !== "File" || operation !== "delete") return;
+
+const filePath = result?.data?.P?.filePath;
+if (!filePath) return;
+
+// Mirror src/routes/api/file/functions/deleteFile.ts disk cleanup
+const fs = await import("node:fs/promises");
+try {
+  await fs.access(filePath);
+  await fs.unlink(filePath);
+} catch (e) {
+  console.log(e)
+  // Silently continue if file doesn't exist
+}
+'''
+      }
+    }
+  ]
+  edges: []
+}

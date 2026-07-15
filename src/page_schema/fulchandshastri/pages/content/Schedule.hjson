@@ -16,15 +16,103 @@ return {
   contextName: "scheduleSettings",
   serverFunction: `
 try {
-  const result = await args.executeNamedServerFunction({
+  const pageResult = await args.executeNamedServerFunction({
     functionName: "loadPublicPageSettings",
     contextData: { pageId: "schedule", allowPublicRead: true, locale: ${JSON.stringify(locale ?? null)} }
   });
-  if (!result?.result?.success) return {};
-  return result.result.data?.sections || {};
+  const tableResult = await args.executeNamedServerFunction({
+    functionName: "loadPublicTableContent",
+    contextData: { tableKey: "schedule", tableVertexLabel: "ScheduleEvent", locale: ${JSON.stringify(locale ?? null)} }
+  });
+
+  const sections = pageResult?.result?.success ? (pageResult.result.data?.sections || {}) : {};
+  const tableData = tableResult?.result?.success ? (tableResult.result.data || {}) : {};
+  const graph = tableData.graph || { vertexes: {}, edges: {} };
+  const rowIds = Array.isArray(tableData.rowIds) ? tableData.rowIds : [];
+
+  const parseDate = (value) => {
+    if (value == null || value === "") return null;
+    const d = new Date(value);
+    return Number.isNaN(d.getTime()) ? null : d;
+  };
+
+  const formatDate = (value) => {
+    const d = parseDate(value);
+    if (!d) return value != null ? String(value) : "";
+    return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+  };
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const events = rowIds.map((id) => {
+    const event = graph.vertexes?.[id];
+    const edgeIds = event?.OUT?.ScheduleEventBannerFile || [];
+    let banner = "";
+    if (Array.isArray(edgeIds) && edgeIds.length > 0) {
+      const edge = graph.edges?.[edgeIds[0]];
+      const file = edge?.E != null ? graph.vertexes?.[edge.E] : null;
+      const fileName = file?.P?.fileName != null ? String(file.P.fileName).trim() : "";
+      if (fileName) banner = "/api/file/download/" + encodeURIComponent(fileName);
+    }
+    return {
+      id,
+      startDateRaw: event?.P?.startDate ?? "",
+      endDateRaw: event?.P?.endDate ?? "",
+      startDate: formatDate(event?.P?.startDate),
+      endDate: formatDate(event?.P?.endDate),
+      place: event?.P?.place || "",
+      programme: event?.P?.programme || "",
+      details: event?.P?.details || "",
+      banner
+    };
+  });
+
+  const upcomingByYear = {};
+  const previousByYear = {};
+
+  for (const event of events) {
+    const start = parseDate(event.startDateRaw);
+    const end = parseDate(event.endDateRaw) || start;
+    const year = (start || end)?.getFullYear();
+    if (year == null) continue;
+    const isPrevious = end && end < today;
+    const bucket = isPrevious ? previousByYear : upcomingByYear;
+    if (!bucket[year]) bucket[year] = [];
+    bucket[year].push(event);
+  }
+
+  const sortByStart = (a, b) => {
+    const da = parseDate(a.startDateRaw)?.getTime() ?? 0;
+    const db = parseDate(b.startDateRaw)?.getTime() ?? 0;
+    return da - db;
+  };
+
+  const yearSections = [];
+  const upcomingYears = Object.keys(upcomingByYear).map(Number).sort((a, b) => a - b);
+  for (const year of upcomingYears) {
+    yearSections.push({
+      id: "upcoming-" + year,
+      title: "Upcoming events in " + year,
+      rows: upcomingByYear[year].slice().sort(sortByStart)
+    });
+  }
+  const previousYears = Object.keys(previousByYear).map(Number).sort((a, b) => b - a);
+  for (const year of previousYears) {
+    yearSections.push({
+      id: "previous-" + year,
+      title: "Previous events in " + year,
+      rows: previousByYear[year].slice().sort((a, b) => -sortByStart(a, b))
+    });
+  }
+
+  return {
+    content: sections.content || {},
+    yearSections
+  };
 } catch (error) {
-  console.error("Error loading page settings:", error);
-  return {};
+  console.error("Error loading schedule page:", error);
+  return { content: {}, yearSections: [] };
 }
 `
 };
@@ -61,7 +149,7 @@ return `._id {
 const content = args.contextData.scheduleSettings?.content;
 return {
   as: "h1",
-  text: content?.pageTitle
+  text: content?.pageTitle || "Schedule"
 };
 ''',
         css: '''
@@ -70,10 +158,32 @@ return `._id {
   font-size: 3rem;
   font-weight: 700;
   margin: 0;
-  
+
   @media (max-width: 768px) {
     font-size: 2rem;
   }
+}`;
+'''
+      }
+    },
+    {
+      id: "pageSubtitle",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const content = args.contextData.scheduleSettings?.content;
+return {
+  as: "p",
+  text: content?.pageSubtitle || ""
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text_light_200};
+  font-size: 1.25rem;
+  margin-top: 1rem;
 }`;
 '''
       }
@@ -116,6 +226,23 @@ return `._id {
       }
     },
     {
+      id: "yearSections",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "scheduleSection",
+        loop: true,
+        props: '''
+const sections = args.contextData.scheduleSettings?.yearSections ?? [];
+return {
+  as: "fragment",
+  data: sections
+};
+'''
+      }
+    },
+    {
       id: "yearSection",
       L: "Attr",
       P: {
@@ -125,8 +252,7 @@ return `._id {
 return {
   as: "section",
   "data-animate": "",
-
-  ref: (el) => el && args.fns.animateOnView(el)
+  ref: (el) => el && args.fns.animateOnView?.(el)
 };
 ''',
         css: '''
@@ -143,10 +269,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const content = args.contextData.scheduleSettings?.content;
+const section = args.contextData.scheduleSection;
 return {
   as: "h2",
-  text: content?.yearTitle
+  text: section?.title || ""
 };
 ''',
         css: '''
@@ -165,211 +291,32 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 2,
-        componentName: "Html",
+        componentName: "PublicContentTable",
         props: '''
+const section = args.contextData.scheduleSection;
 return {
-  as: "div"
+  columns: [
+    { key: "startDate", label: "Start Date", width: "120px" },
+    { key: "endDate", label: "End Date", width: "120px" },
+    { key: "place", label: "Place" },
+    { key: "programme", label: "Programme" },
+    { key: "details", label: "Details" }
+  ],
+  rows: section?.rows ?? [],
+  emptyMessage: "No events in this section."
 };
-''',
-        css: '''
-return `._id {
-  background: ${args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.background_light_300};
-  border-radius: 0.75rem;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}`;
 '''
       }
     },
     {
-      id: "tableWrapper",
+      id: "eventRowGroup",
       L: "Attr",
       P: {
         displayOrder: 1,
         componentName: "Html",
         props: '''
 return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  overflow-x: auto;
-}`;
-'''
-      }
-    },
-    {
-      id: "table",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "table"
-};
-''',
-        css: '''
-return `._id {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 600px;
-}`;
-'''
-      }
-    },
-    {
-      id: "tableHead",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "thead"
-};
-''',
-        css: '''
-return `._id {
-  background: ${args.theme.var.color.primary_light_50};
-  border-bottom: 2px solid ${args.theme.var.color.primary_light_200};
-}`;
-'''
-      }
-    },
-    {
-      id: "headerRow",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "tr"
-};
-'''
-      }
-    },
-    {
-      id: "dateHeader",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const content = args.contextData.scheduleSettings?.content;
-return {
-  as: "th",
-  text: content?.dateHeader
-};
-''',
-        css: '''
-return `._id {
-  padding: 1rem;
-  text-align: left;
-  font-weight: 600;
-  color: ${args.theme.var.color.text};
-}`;
-'''
-      }
-    },
-    {
-      id: "placeHeader",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const content = args.contextData.scheduleSettings?.content;
-return {
-  as: "th",
-  text: content?.placeHeader
-};
-''',
-        css: '''
-return `._id {
-  padding: 1rem;
-  text-align: left;
-  font-weight: 600;
-  color: ${args.theme.var.color.text};
-}`;
-'''
-      }
-    },
-    {
-      id: "programmeHeader",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-const content = args.contextData.scheduleSettings?.content;
-return {
-  as: "th",
-  text: content?.programmeHeader
-};
-''',
-        css: '''
-return `._id {
-  padding: 1rem;
-  text-align: left;
-  font-weight: 600;
-  color: ${args.theme.var.color.text};
-}`;
-'''
-      }
-    },
-    {
-      id: "detailsHeader",
-      L: "Attr",
-      P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
-const content = args.contextData.scheduleSettings?.content;
-return {
-  as: "th",
-  text: content?.detailsHeader
-};
-''',
-        css: '''
-return `._id {
-  padding: 1rem;
-  text-align: left;
-  font-weight: 600;
-  color: ${args.theme.var.color.text};
-}`;
-'''
-      }
-    },
-    {
-      id: "tableBody",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "tbody"
-};
-'''
-      }
-    },
-    {
-      id: "scheduleData",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        contextName: "events",
-        loop: true,
-        props: '''
-const items = args.contextData.scheduleSettings?.events?.events ?? [];
-return {
-  as: "fragment",
-  data: items
+  as: "fragment"
 };
 '''
       }
@@ -381,595 +328,223 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const event = args.contextData.events;
 return {
   as: "tr"
 };
 ''',
         css: '''
 return `._id {
-  border-bottom: 1px solid ${args.theme.var.color.background_light_200};
   transition: background 0.2s ease;
-  
+
   &:hover {
     background: ${args.theme.var.color.background_light_50};
   }
-  
-  &:last-child {
-    border-bottom: none;
-  }
 }`;
 '''
       }
     },
     {
-      id: "dateCell",
+      id: "cellStartDate",
       L: "Attr",
       P: {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const event = args.contextData.events;
+const row = args.contextData.row || {};
 return {
   as: "td",
-  text: event.date
+  text: row.startDate || "",
+  style: { width: "120px" }
 };
 ''',
         css: '''
 return `._id {
-  padding: 1rem;
-  white-space: pre-line;
+  text-align: left;
+  vertical-align: middle;
   color: ${args.theme.var.color.text};
-  font-weight: 500;
 }`;
 '''
       }
     },
     {
-      id: "placeCell",
+      id: "cellEndDate",
       L: "Attr",
       P: {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const event = args.contextData.events;
+const row = args.contextData.row || {};
 return {
   as: "td",
-  text: event.place
+  text: row.endDate || "",
+  style: { width: "120px" }
 };
 ''',
         css: '''
 return `._id {
-  padding: 1rem;
-  color: ${args.theme.var.color.text_light_200};
+  text-align: left;
+  vertical-align: middle;
+  color: ${args.theme.var.color.text};
 }`;
 '''
       }
     },
     {
-      id: "programmeCell",
+      id: "cellPlace",
       L: "Attr",
       P: {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const event = args.contextData.events;
+const row = args.contextData.row || {};
 return {
   as: "td",
-  text: event.programme
+  text: row.place || ""
 };
 ''',
         css: '''
 return `._id {
-  padding: 1rem;
+  text-align: left;
+  vertical-align: middle;
   color: ${args.theme.var.color.text};
-  font-weight: 500;
 }`;
 '''
       }
     },
     {
-      id: "detailsCell",
+      id: "cellProgramme",
       L: "Attr",
       P: {
         displayOrder: 4,
         componentName: "Html",
         props: '''
-const event = args.contextData.events;
+const row = args.contextData.row || {};
 return {
   as: "td",
-  text: event.details
+  text: row.programme || ""
 };
 ''',
         css: '''
 return `._id {
-  padding: 1rem;
+  text-align: left;
+  vertical-align: middle;
+  color: ${args.theme.var.color.text};
+  font-weight: 600;
+}`;
+'''
+      }
+    },
+    {
+      id: "cellDetails",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+const row = args.contextData.row || {};
+return {
+  as: "td",
+  text: row.details || ""
+};
+''',
+        css: '''
+return `._id {
+  text-align: left;
+  vertical-align: middle;
+  color: ${args.theme.var.color.text};
   white-space: pre-line;
-  color: ${args.theme.var.color.text_light_200};
-  font-size: 0.875rem;
+  max-width: 320px;
 }`;
 '''
       }
     },
     {
-      id: "previousSection",
+      id: "bannerRow",
       L: "Attr",
       P: {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const row = args.contextData.row || {};
+const src = row.banner || "";
 return {
-  as: "section",
-  "data-animate": "",
-
-  ref: (el) => el && args.fns.animateOnView(el)
+  as: "tr",
+  hide: () => !src
 };
 ''',
         css: '''
 return `._id {
-  margin-top: 4rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "previousTitle",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const content = args.contextData.scheduleSettings?.content;
-return {
-  as: "h2",
-  text: content?.previousTitle
-};
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.text};
-  font-size: 2rem;
-  font-weight: 600;
-  margin-bottom: 2rem;
-  text-align: center;
-}`;
-'''
-      }
-    },
-    {
-      id: "previousTable",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  background: ${args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.background_light_300};
-  border-radius: 0.75rem;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  opacity: 0.8;
-}`;
-'''
-      }
-    },
-    {
-      id: "previousTableWrapper",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  overflow-x: auto;
-}`;
-'''
-      }
-    },
-    {
-      id: "previousTableContent",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "table"
-};
-''',
-        css: '''
-return `._id {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 600px;
-}`;
-'''
-      }
-    },
-    {
-      id: "previousTableHead",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "thead"
-};
-''',
-        css: '''
-return `._id {
-  background: ${args.theme.var.color.background_light_100};
-  border-bottom: 2px solid ${args.theme.var.color.background_light_300};
-}`;
-'''
-      }
-    },
-    {
-      id: "previousHeaderRow",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "tr"
-};
-'''
-      }
-    },
-    {
-      id: "prevDateHeader",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const content = args.contextData.scheduleSettings?.content;
-return {
-  as: "th",
-  text: content?.prevDateHeader
-};
-''',
-        css: '''
-return `._id {
-  padding: 1rem;
-  text-align: left;
-  font-weight: 600;
-  color: ${args.theme.var.color.text};
-}`;
-'''
-      }
-    },
-    {
-      id: "prevPlaceHeader",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const content = args.contextData.scheduleSettings?.content;
-return {
-  as: "th",
-  text: content?.prevPlaceHeader
-};
-''',
-        css: '''
-return `._id {
-  padding: 1rem;
-  text-align: left;
-  font-weight: 600;
-  color: ${args.theme.var.color.text};
-}`;
-'''
-      }
-    },
-    {
-      id: "prevProgrammeHeader",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-const content = args.contextData.scheduleSettings?.content;
-return {
-  as: "th",
-  text: content?.prevProgrammeHeader
-};
-''',
-        css: '''
-return `._id {
-  padding: 1rem;
-  text-align: left;
-  font-weight: 600;
-  color: ${args.theme.var.color.text};
-}`;
-'''
-      }
-    },
-    {
-      id: "prevDetailsHeader",
-      L: "Attr",
-      P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
-const content = args.contextData.scheduleSettings?.content;
-return {
-  as: "th",
-  text: content?.prevDetailsHeader
-};
-''',
-        css: '''
-return `._id {
-  padding: 1rem;
-  text-align: left;
-  font-weight: 600;
-  color: ${args.theme.var.color.text};
-}`;
-'''
-      }
-    },
-    {
-      id: "previousTableBody",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "tbody"
-};
-'''
-      }
-    },
-    {
-      id: "previousData",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        contextName: "previousEvents",
-        loop: true,
-        props: '''
-const items = args.contextData.scheduleSettings?.previous_events?.previousEvents ?? [];
-return {
-  as: "fragment",
-  data: items
-};
-'''
-      }
-    },
-    {
-      id: "prevEventRow",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const event = args.contextData.previousEvents;
-return {
-  as: "tr"
-};
-''',
-        css: '''
-return `._id {
-  border-bottom: 1px solid ${args.theme.var.color.background_light_200};
-  transition: background 0.2s ease;
-  
-  &:hover {
-    background: ${args.theme.var.color.background_light_50};
-  }
-  
-  &:last-child {
-    border-bottom: none;
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "prevDateCell",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const event = args.contextData.previousEvents;
-return {
-  as: "td",
-  text: event.date
-};
-''',
-        css: '''
-return `._id {
-  padding: 1rem;
-  white-space: pre-line;
-  color: ${args.theme.var.color.text_light_300};
-  font-weight: 500;
-}`;
-'''
-      }
-    },
-    {
-      id: "prevPlaceCell",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const event = args.contextData.previousEvents;
-return {
-  as: "td",
-  text: event.place
-};
-''',
-        css: '''
-return `._id {
-  padding: 1rem;
-  color: ${args.theme.var.color.text_light_300};
-}`;
-'''
-      }
-    },
-    {
-      id: "prevProgrammeCell",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-const event = args.contextData.previousEvents;
-return {
-  as: "td",
-  text: event.programme
-};
-''',
-        css: '''
-return `._id {
-  padding: 1rem;
-  color: ${args.theme.var.color.text_light_300};
-  font-weight: 500;
-}`;
-'''
-      }
-    },
-    {
-      id: "prevDetailsCell",
-      L: "Attr",
-      P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
-const event = args.contextData.previousEvents;
-return {
-  as: "td",
-  text: event.details
-};
-''',
-        css: '''
-return `._id {
-  padding: 1rem;
-  white-space: pre-line;
-  color: ${args.theme.var.color.text_light_400};
-  font-size: 0.875rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "footerNote",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  "data-animate": "",
-
-  ref: (el) => el && args.fns.animateOnView(el)
-};
-''',
-        css: '''
-return `._id {
-  text-align: center;
-  margin-top: 3rem;
-  padding: 2rem;
   background: ${args.theme.var.color.background_light_50};
-  border-radius: 0.75rem;
 }`;
 '''
       }
     },
     {
-      id: "footerCopyright",
+      id: "bannerCell",
       L: "Attr",
       P: {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const content = args.contextData.scheduleSettings?.content;
+return {
+  as: "td",
+  "attr:colspan": 5
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.75rem;
+  text-align: center;
+  vertical-align: middle;
+}`;
+'''
+      }
+    },
+    {
+      id: "bannerImage",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const row = args.contextData.row || {};
+const src = row.banner || "";
+return {
+  as: "img",
+  src,
+  alt: row.programme || row.place || "Banner",
+  hide: () => !src
+};
+''',
+        css: '''
+return `._id {
+  display: block;
+  width: 100%;
+  object-fit: cover;
+  border-radius: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "emptyState",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const sections = args.contextData.scheduleSettings?.yearSections ?? [];
 return {
   as: "p",
-  text: content?.footerCopyright
+  text: "No scheduled events available yet.",
+  hide: () => sections.length > 0
 };
 ''',
         css: '''
 return `._id {
+  padding: 2rem 1rem;
+  text-align: center;
   color: ${args.theme.var.color.text_light_300};
-  font-size: 0.875rem;
-  margin-bottom: 0.5rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "footerDesign",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "p"
-};
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.text_light_300};
-  font-size: 0.875rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "designText",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const content = args.contextData.scheduleSettings?.content;
-return {
-  as: "span",
-  text: content?.designText
-};
-'''
-      }
-    },
-    {
-      id: "designLink",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const content = args.contextData.scheduleSettings?.content;
-return {
-  as: "a",
-  text: content?.designLink
-};
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.primary};
-  text-decoration: none;
-  
-  &:hover {
-    text-decoration: underline;
-  }
 }`;
 '''
       }
@@ -985,50 +560,25 @@ return `._id {
   ],
   edges: [
     { id: "e0", T: "Attr", S: "page", E: "pageHeader" },
-    { id: "e3", T: "Attr", S: "pageHeader", E: "pageTitle" },
-    { id: "e4", T: "Attr", S: "page", E: "mainContent" },
-    { id: "e5", T: "Attr", S: "mainContent", E: "container" },
-    { id: "e6", T: "Attr", S: "container", E: "yearSection" },
+    { id: "e1", T: "Attr", S: "pageHeader", E: "pageTitle" },
+    { id: "e2", T: "Attr", S: "pageHeader", E: "pageSubtitle" },
+    { id: "e3", T: "Attr", S: "page", E: "mainContent" },
+    { id: "e4", T: "Attr", S: "mainContent", E: "container" },
+    { id: "e5", T: "Attr", S: "container", E: "yearSections" },
+    { id: "e6", T: "Attr", S: "yearSections", E: "yearSection" },
     { id: "e7", T: "Attr", S: "yearSection", E: "yearTitle" },
     { id: "e8", T: "Attr", S: "yearSection", E: "scheduleTable" },
-    { id: "e9", T: "Attr", S: "scheduleTable", E: "tableWrapper" },
-    { id: "e10", T: "Attr", S: "tableWrapper", E: "table" },
-    { id: "e11", T: "Attr", S: "table", E: "tableHead" },
-    { id: "e12", T: "Attr", S: "tableHead", E: "headerRow" },
-    { id: "e13", T: "Attr", S: "headerRow", E: "dateHeader" },
-    { id: "e14", T: "Attr", S: "headerRow", E: "placeHeader" },
-    { id: "e15", T: "Attr", S: "headerRow", E: "programmeHeader" },
-    { id: "e16", T: "Attr", S: "headerRow", E: "detailsHeader" },
-    { id: "e17", T: "Attr", S: "table", E: "tableBody" },
-    { id: "e18", T: "Attr", S: "tableBody", E: "scheduleData" },
-    { id: "e19", T: "Attr", S: "scheduleData", E: "eventRow" },
-    { id: "e20", T: "Attr", S: "eventRow", E: "dateCell" },
-    { id: "e21", T: "Attr", S: "eventRow", E: "placeCell" },
-    { id: "e22", T: "Attr", S: "eventRow", E: "programmeCell" },
-    { id: "e23", T: "Attr", S: "eventRow", E: "detailsCell" },
-    { id: "e24", T: "Attr", S: "container", E: "previousSection" },
-    { id: "e25", T: "Attr", S: "previousSection", E: "previousTitle" },
-    { id: "e26", T: "Attr", S: "previousSection", E: "previousTable" },
-    { id: "e27", T: "Attr", S: "previousTable", E: "previousTableWrapper" },
-    { id: "e28", T: "Attr", S: "previousTableWrapper", E: "previousTableContent" },
-    { id: "e29", T: "Attr", S: "previousTableContent", E: "previousTableHead" },
-    { id: "e30", T: "Attr", S: "previousTableHead", E: "previousHeaderRow" },
-    { id: "e31", T: "Attr", S: "previousHeaderRow", E: "prevDateHeader" },
-    { id: "e32", T: "Attr", S: "previousHeaderRow", E: "prevPlaceHeader" },
-    { id: "e33", T: "Attr", S: "previousHeaderRow", E: "prevProgrammeHeader" },
-    { id: "e34", T: "Attr", S: "previousHeaderRow", E: "prevDetailsHeader" },
-    { id: "e35", T: "Attr", S: "previousTableContent", E: "previousTableBody" },
-    { id: "e36", T: "Attr", S: "previousTableBody", E: "previousData" },
-    { id: "e37", T: "Attr", S: "previousData", E: "prevEventRow" },
-    { id: "e38", T: "Attr", S: "prevEventRow", E: "prevDateCell" },
-    { id: "e39", T: "Attr", S: "prevEventRow", E: "prevPlaceCell" },
-    { id: "e40", T: "Attr", S: "prevEventRow", E: "prevProgrammeCell" },
-    { id: "e41", T: "Attr", S: "prevEventRow", E: "prevDetailsCell" },
-    { id: "e42", T: "Attr", S: "container", E: "footerNote" },
-    { id: "e43", T: "Attr", S: "footerNote", E: "footerCopyright" },
-    { id: "e44", T: "Attr", S: "footerNote", E: "footerDesign" },
-    { id: "e45", T: "Attr", S: "footerDesign", E: "designText" },
-    { id: "e46", T: "Attr", S: "footerDesign", E: "designLink" },
+    { id: "e_row_group", T: "Attr", S: "scheduleTable", E: "eventRowGroup" },
+    { id: "e_event_row", T: "Attr", S: "eventRowGroup", E: "eventRow" },
+    { id: "e_start", T: "Attr", S: "eventRow", E: "cellStartDate" },
+    { id: "e_end", T: "Attr", S: "eventRow", E: "cellEndDate" },
+    { id: "e_place", T: "Attr", S: "eventRow", E: "cellPlace" },
+    { id: "e_programme", T: "Attr", S: "eventRow", E: "cellProgramme" },
+    { id: "e_details", T: "Attr", S: "eventRow", E: "cellDetails" },
+    { id: "e_banner_row", T: "Attr", S: "eventRowGroup", E: "bannerRow" },
+    { id: "e_banner_cell", T: "Attr", S: "bannerRow", E: "bannerCell" },
+    { id: "e_banner_img", T: "Attr", S: "bannerCell", E: "bannerImage" },
+    { id: "e9", T: "Attr", S: "container", E: "emptyState" },
     { id: "e_layout", T: "PageLayout", S: "page", E: "layout" }
   ]
 }

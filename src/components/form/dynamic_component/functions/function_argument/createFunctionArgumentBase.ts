@@ -70,6 +70,7 @@ import { createDashboardPlatform } from "~/lib/dashboard";
 import { findLoopTemplateMeta } from "~/components/form/dynamic_component/components/LoopChildrenRenderer";
 import { createLoopRowRenderer } from "~/components/form/dynamic_component/functions/createLoopRowRenderer";
 import { cssHelpers } from "~/lib/styles/cssHelpers";
+import useEmblaCarousel from "embla-carousel-solid";
 // Following Untitled-1 (11-21, 12-13): also import `combine`, `GroupDropIndicator`, `liveRegion`, `type Instruction`, and `triggerPostMoveFlash` non-directly (no direct imports).
 // Only import drag-and-drop modules and related utilities on the client, using dynamic import assignment.
 
@@ -429,6 +430,7 @@ export function createFunctionArgumentBase(
     get extractInstruction() {
       return extractInstruction;
     },
+    useCarousel: useEmblaCarousel,
     css: cssHelpers,
     createLoopRowRenderer: (
       mapContextValue: (rowData: unknown, index: Accessor<number>) => unknown,

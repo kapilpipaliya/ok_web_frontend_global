@@ -1,0 +1,990 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        fns: return { enabled: () => true }
+        key: MakeImportURL
+        url: /make-import-url
+        props:
+          '''return {
+  isNoPermissionCheck: true,
+};
+'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        fns:
+          '''
+const [generatedImportUrl, setGeneratedImportUrl] = args.createSignal("");
+const [generatedExportUrl, setGeneratedExportUrl] = args.createSignal("");
+const [formManagementFns, setFormManagementFns] = args.createSignal(null);
+const [previewModalOpen, setPreviewModalOpen] = args.createSignal(false);
+const [previewUrl, setPreviewUrl] = args.createSignal("");
+const [previewTitle, setPreviewTitle] = args.createSignal("");
+
+const parseKeyList = (value) => {
+  return String(value ?? "")
+    .split(/[,\n]+/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+};
+
+const normalizeBaseUrl = (value) => {
+  return String(value ?? "").trim().replace(/\/+$/, "");
+};
+
+const buildQueryString = (values) => {
+  const params = new URLSearchParams();
+  const components = parseKeyList(values?.components);
+  const pages = parseKeyList(values?.pages);
+  const functions = parseKeyList(values?.functions);
+  const shop = String(values?.shop || "").trim();
+  const jobId = String(values?.jobId || "").trim();
+
+  if (components.length) params.set("components", components.join(","));
+  if (pages.length) params.set("pages", pages.join(","));
+  if (functions.length) params.set("functions", functions.join(","));
+  if (shop) params.set("shop", shop);
+  if (jobId) params.set("jobId", jobId);
+
+  const query = params.toString();
+  return query ? `?${query}` : "";
+};
+
+const buildUrls = (values) => {
+  const baseUrl = normalizeBaseUrl(values?.baseUrl);
+  const query = buildQueryString(values);
+  return {
+    importUrl: `${baseUrl}/admin/SchemaImport${query}`,
+    exportUrl: `${baseUrl}/admin/SchemaExport${query}`
+  };
+};
+
+const getUrlByKind = (kind) => {
+  return kind === "export" ? generatedExportUrl() : generatedImportUrl();
+};
+
+const handleGenerate = async ({ vertex }) => {
+  const values = vertex?.P || {};
+  const baseUrl = normalizeBaseUrl(values?.baseUrl);
+  if (!baseUrl) {
+    args.showErrorToast?.("Base URL is required");
+    return false;
+  }
+
+  const { importUrl, exportUrl } = buildUrls(values);
+  setGeneratedImportUrl(importUrl);
+  setGeneratedExportUrl(exportUrl);
+
+  try {
+    await navigator.clipboard.writeText(importUrl);
+    args.showSuccessToast?.("URLs generated. Import URL copied to clipboard");
+  } catch (error) {
+    console.error("Clipboard copy failed:", error);
+    args.showSuccessToast?.("URLs generated");
+  }
+
+  // Return false so FormManagement does not reinitialize / clear the form.
+  return false;
+};
+
+const registerFormManagementFns = (formFns) => {
+  setFormManagementFns(formFns);
+  if (!formFns?.setFieldValue) return;
+  const current = String(formFns.getFieldValue?.("baseUrl") ?? "").trim();
+  if (current) return;
+  formFns.setFieldValue("baseUrl", window.location.origin);
+};
+
+const runGenerate = () => {
+  const formFns = formManagementFns();
+  if (!formFns?.handleSave) {
+    args.showErrorToast?.("Form is not ready yet");
+    return;
+  }
+  formFns.handleSave();
+};
+
+const copyUrl = async (kind) => {
+  const url = getUrlByKind(kind);
+  if (!url) {
+    args.showWarningToast?.("Generate URLs first");
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(url);
+    args.showSuccessToast?.("Copied to clipboard");
+  } catch (error) {
+    console.error("Clipboard copy failed:", error);
+    args.showErrorToast?.("Could not copy to clipboard");
+  }
+};
+
+const openUrlInNewTab = (kind) => {
+  const url = getUrlByKind(kind);
+  if (!url) {
+    args.showWarningToast?.("Generate URLs first");
+    return;
+  }
+  window.open(url, "_blank", "noopener,noreferrer");
+};
+
+const openUrlInModal = (kind) => {
+  const url = getUrlByKind(kind);
+  if (!url) {
+    args.showWarningToast?.("Generate URLs first");
+    return;
+  }
+  setPreviewTitle(kind === "export" ? "Export URL preview" : "Import URL preview");
+  setPreviewUrl(url);
+  setPreviewModalOpen(true);
+};
+
+const closePreviewModal = () => {
+  setPreviewModalOpen(false);
+  setPreviewUrl("");
+  setPreviewTitle("");
+};
+
+const copyImportUrl = () => copyUrl("import");
+const copyExportUrl = () => copyUrl("export");
+const openImportInNewTab = () => openUrlInNewTab("import");
+const openExportInNewTab = () => openUrlInNewTab("export");
+const openImportInModal = () => openUrlInModal("import");
+const openExportInModal = () => openUrlInModal("export");
+
+return {
+  generatedImportUrl,
+  generatedExportUrl,
+  formManagementFns,
+  registerFormManagementFns,
+  handleGenerate,
+  runGenerate,
+  copyImportUrl,
+  copyExportUrl,
+  openImportInNewTab,
+  openExportInNewTab,
+  openImportInModal,
+  openExportInModal,
+  previewModalOpen,
+  previewUrl,
+  previewTitle,
+  closePreviewModal,
+  buildUrls
+};
+'''
+        css:
+          '''
+return `._id {
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}`;
+'''
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''
+return `._id {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+        props:
+          '''
+return {
+  as: "h1",
+  text: "Make Import / Export URL"
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        textType: markdown
+        text:
+          '''Fill the form to build Schema Import and Export URLs.
+
+- Leave filters empty for a **full** import/export (components, pages, themes, functions, email templates).
+- Fill any of `components` / `pages` / `functions` to filter those keys only.
+- Keys can be comma-separated or one per line.
+- `jobId` is optional (useful when sharing a running job poll URL).
+- `shop` is optional and applies to import.
+'''
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  line-height: 1.5;
+  font-size: 0.95rem;
+
+  p {
+    margin: 0 0 0.5rem;
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 1.25rem;
+  }
+
+  code {
+    font-size: 0.875em;
+  }
+}`;
+'''
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: FormManagement
+        css:
+          '''
+return `._id {
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background_light_50};
+  overflow: hidden;
+}`;
+'''
+        props:
+          '''
+return {
+  mode: "add",
+  vertexLabel: "SchemaImportUrl",
+  hideActionsBar: true,
+  onSave: args.fns.handleGenerate,
+  onFnsReady: args.fns.registerFormManagementFns,
+  formConfig: {
+    gridColumns: 2,
+    groups: [
+      {
+        key: "urlParts",
+        title: "URL parts",
+        gridColumns: 2,
+        fields: [
+          {
+            key: "baseUrl",
+            label: "Base URL",
+            dataType: "text",
+            renderer: "text",
+            required: true,
+            colSpan: 2,
+            placeholder: "https://example.com",
+            tooltip: "Origin only, no trailing slash required"
+          },
+          {
+            key: "components",
+            label: "Components",
+            dataType: "text",
+            renderer: "textArea",
+            required: false,
+            colSpan: 2,
+            placeholder: "ComponentA, ComponentB",
+            tooltip: "Comma or newline separated component keys. Leave empty to skip filter."
+          },
+          {
+            key: "pages",
+            label: "Pages",
+            dataType: "text",
+            renderer: "textArea",
+            required: false,
+            colSpan: 2,
+            placeholder: "PageA, PageB",
+            tooltip: "Comma or newline separated page keys. Leave empty to skip filter."
+          },
+          {
+            key: "functions",
+            label: "Functions",
+            dataType: "text",
+            renderer: "textArea",
+            required: false,
+            colSpan: 2,
+            placeholder: "functionA, functionB",
+            tooltip: "Comma or newline separated function keys. Leave empty to skip filter."
+          },
+          {
+            key: "shop",
+            label: "Shop (import only)",
+            dataType: "text",
+            renderer: "text",
+            required: false,
+            colSpan: 1,
+            placeholder: "optional shop id",
+            tooltip: "Optional. Passed as shop= on the import URL."
+          },
+          {
+            key: "jobId",
+            label: "Job ID (optional)",
+            dataType: "text",
+            renderer: "text",
+            required: false,
+            colSpan: 1,
+            placeholder: "run-schema-job-...",
+            tooltip: "Optional. Include when sharing an already-running job poll URL."
+          }
+        ]
+      }
+    ]
+  }
+};
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        css:
+          '''
+return `._id {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}`;
+'''
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "primary",
+  text: "Generate URLs",
+  onClick: args.fns.runGenerate
+};
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}`;
+'''
+        props:
+          '''
+return {
+  as: "div",
+  show: () => !!args.fns.generatedImportUrl()
+};
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background};
+}`;
+'''
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}`;
+'''
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''
+return `._id {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+        props:
+          '''
+return {
+  as: "h2",
+  text: "Import URL"
+};
+'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}`;
+'''
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "12a"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "secondary",
+  text: "Copy",
+  onClick: args.fns.copyImportUrl
+};
+'''
+      }
+    }
+    {
+      id: "12b"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "secondary",
+  text: "Open",
+  onClick: args.fns.openImportInNewTab
+};
+'''
+      }
+    }
+    {
+      id: "12c"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "secondary",
+  text: "Modal",
+  onClick: args.fns.openImportInModal
+};
+'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        css:
+          '''
+return `._id {
+  margin: 0;
+  padding: 0.875rem 1rem;
+  border-radius: 0.375rem;
+  background: ${args.theme.var.color.background_dark_800};
+  color: ${args.theme.var.color.background_dark_800_text};
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}`;
+'''
+        props:
+          '''
+return {
+  as: "pre",
+  text: args.fns.generatedImportUrl()
+};
+'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background};
+}`;
+'''
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}`;
+'''
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''
+return `._id {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+        props:
+          '''
+return {
+  as: "h2",
+  text: "Export URL"
+};
+'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}`;
+'''
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "17a"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "secondary",
+  text: "Copy",
+  onClick: args.fns.copyExportUrl
+};
+'''
+      }
+    }
+    {
+      id: "17b"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "secondary",
+  text: "Open",
+  onClick: args.fns.openExportInNewTab
+};
+'''
+      }
+    }
+    {
+      id: "17c"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "secondary",
+  text: "Modal",
+  onClick: args.fns.openExportInModal
+};
+'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        css:
+          '''
+return `._id {
+  margin: 0;
+  padding: 0.875rem 1rem;
+  border-radius: 0.375rem;
+  background: ${args.theme.var.color.background_dark_800};
+  color: ${args.theme.var.color.background_dark_800_text};
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}`;
+'''
+        props:
+          '''
+return {
+  as: "pre",
+  text: args.fns.generatedExportUrl()
+};
+'''
+      }
+    }
+    {
+      id: "20"
+      L: Attr
+      P: {
+        displayOrder: 6
+        componentName: ContentModal
+        props:
+          '''
+return {
+  isOpen: args.fns.previewModalOpen() === true,
+  title: args.fns.previewTitle() || "URL preview",
+  maxWidth: "96vw",
+  onClose: args.fns.closePreviewModal
+};
+'''
+      }
+    }
+    {
+      id: "21"
+      L: Attr
+      P: {
+        displayOrder: 1
+        slotName: children
+        componentName: Html
+        css:
+          '''
+return `._id {
+  width: 100%;
+  height: min(80vh, 900px);
+  border: 0;
+  display: block;
+  background: ${args.theme.var.color.background};
+}`;
+'''
+        props:
+          '''
+return {
+  as: "iframe",
+  src: args.fns.previewUrl() || "about:blank",
+  title: args.fns.previewTitle() || "URL preview",
+  loading: "lazy"
+};
+'''
+      }
+    }
+    {
+      id: "19"
+      L: PageLayout
+      P: {
+        componentName: Layout
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "5"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "6"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "2"
+      E: "8"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "10"
+      E: "11"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "10"
+      E: "12"
+    }
+    {
+      id: e11a
+      T: Attr
+      S: "12"
+      E: "12a"
+    }
+    {
+      id: e11b
+      T: Attr
+      S: "12"
+      E: "12b"
+    }
+    {
+      id: e11c
+      T: Attr
+      S: "12"
+      E: "12c"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "9"
+      E: "13"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "8"
+      E: "14"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "14"
+      E: "15"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "15"
+      E: "16"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "15"
+      E: "17"
+    }
+    {
+      id: e16a
+      T: Attr
+      S: "17"
+      E: "17a"
+    }
+    {
+      id: e16b
+      T: Attr
+      S: "17"
+      E: "17b"
+    }
+    {
+      id: e16c
+      T: Attr
+      S: "17"
+      E: "17c"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "14"
+      E: "18"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "2"
+      E: "20"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "20"
+      E: "21"
+    }
+    {
+      id: e18
+      T: PageLayout
+      S: "1"
+      E: "19"
+    }
+  ]
+}
