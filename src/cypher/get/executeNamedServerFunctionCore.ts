@@ -451,8 +451,15 @@ export async function executeNamedServerFunctionCore(
               rawSubDomain,
               rawDbSession: fallbackSessionData?.dbSession,
               // Keep nested lookups on the same Function catalog as the parent
-              // (e.g. migrateDynamicPageSettings → getPageSettingsDefinitions).
-              functionLookupSession,
+              // (e.g. migrateDynamicPageSettings → getPageSettingsDefinitions),
+              // BUT never override an explicit lookup target chosen by the caller.
+              // Reusing the parent's (possibly shared/busy) functionLookupSession
+              // for callers that want a fresh one — e.g. background workers passing
+              // { functionLookupSubDomain } — causes concurrent queries on the same
+              // session ("Queries cannot be run directly on a session with ongoing work").
+              ...(ctx.functionLookupSession || ctx.functionLookupSubDomain
+                ? {}
+                : { functionLookupSession }),
             }
           : {
               dbSession: nestedSession,

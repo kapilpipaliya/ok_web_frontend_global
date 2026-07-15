@@ -105,6 +105,7 @@
     "solid-monaco": "^0.3.0",
     "solid-transition-group": "0.3.0",
     "space-separated-tokens": "^2.0.2",
+    "tinykeys": "^4.0.0",
     "tldts": "^7.4.6",
     "unified": "^11.0.5",
     "unist-util-visit": "^5.1.0",

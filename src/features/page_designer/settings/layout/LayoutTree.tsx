@@ -1,6 +1,7 @@
-import { createSignal, For, Show, onCleanup } from "solid-js";
+import { createSignal, For, Show, onCleanup, createEffect } from "solid-js";
 import { createStore, reconcile, type SetStoreFunction } from "solid-js/store";
 import { debounce } from "@solid-primitives/scheduled";
+import { tinykeys } from "tinykeys";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
@@ -160,7 +161,8 @@ export function LayoutTree() {
   >({});
   const [searchQuery, setSearchQuery] = createSignal("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = createSignal("");
-  const { showErrorToast, showLoadingToast, showWarningToast } = useToast();
+  const { showErrorToast, showLoadingToast, showWarningToast, showSuccessToast } =
+    useToast();
   const navigate = useNavigate();
 
   const formStoreId = useDesignerFormIdContext();
@@ -391,147 +393,87 @@ export function LayoutTree() {
     setTimeout(focusSelectedItem, 20);
   };
 
-  // Handle keyboard navigation with DOM-based approach
-  const handleKeyDown = (e: KeyboardEvent) => {
-    // Skip handling if the tree element doesn't have focus
-    const treeElement = treeRef();
+  // ---- Keyboard shortcut handlers ----
 
-    // First check for shortcuts from other components
-    // ----------------------------------------------
-
-    // Add HTML components with shortcuts
-    // Cmd+C - Add HTML component center
-    if ((e.metaKey || e.ctrlKey) && e.key === "k" && !e.shiftKey && !e.altKey) {
-      e.preventDefault();
-      addHtmlComponent("center");
-      return;
-    }
-
-    // Cmd+B - Add HTML component before
-    if ((e.metaKey || e.ctrlKey) && e.key === "j" && !e.shiftKey && !e.altKey) {
-      e.preventDefault();
-      addHtmlComponent("before");
-      return;
-    }
-
-    // Cmd+A - Add HTML component after
-    if ((e.metaKey || e.ctrlKey) && e.key === "l" && !e.shiftKey && !e.altKey) {
-      e.preventDefault();
-      addHtmlComponent("after");
-      return;
-    }
-
-    // Delete - Delete/Backspace key
-    if (
-      (e.metaKey || e.ctrlKey) &&
-      (e.key === "Delete" || e.key === "Backspace" || e.key === "d")
-    ) {
-      e.preventDefault();
-      const currentSelectedId = formStoreVertex()?.P.selectedId;
-      if (!currentSelectedId) {
-        return;
-      }
-
-      const selectedVertex = graph.vertexes[currentSelectedId];
-      if (!selectedVertex) {
-        return;
-      }
-
-      // Get component name for the toast message
-      const componentName = selectedVertex.P?.key || "Html";
-
-      // Import the deleteLayoutAttr functionality from DeleteButton
-      const { showSuccessToast } = useToast();
-      deleteLayoutAttr(
-        formStoreVertex(),
-        selectedVertex,
-        graph,
-        setGraph,
-        formStoreVertex()?.P.txnId,
-        componentName,
-        showSuccessToast,
-        layoutStoreId,
-      );
-      return;
-    }
-
-    // Undo - Ctrl+Z
-    if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
-      e.preventDefault();
-      const formTxnId = formStoreVertex()?.P.txnId;
-      if (formTxnId && undoAllowed(formTxnId, graph)) {
-        undo(formTxnId, graph, setGraph);
-      }
-      return;
-    }
-
-    // Redo - Ctrl+Y or Ctrl+Shift+Z
-    if (
-      ((e.ctrlKey || e.metaKey) && e.key === "y") ||
-      ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === "z")
-    ) {
-      e.preventDefault();
-      const formTxnId = formStoreVertex()?.P.txnId;
-      if (formTxnId && redoAllowed(formTxnId, graph)) {
-        redo(formTxnId, graph, setGraph);
-      }
-      return;
-    }
-
-    // Save - Ctrl+S
-    if ((e.ctrlKey || e.metaKey) && e.key === "s") {
-      e.preventDefault(); // Prevent browser's save dialog
-      if (!isSaveDisabled()) {
-        handleSaveForm();
-      }
-      return;
-    }
-
-    // Refresh - F5 or Ctrl+R
-    // if (e.key === 'F5' || ((e.ctrlKey || e.metaKey) && e.key === 'r')) {
-    //   e.preventDefault();
-    //   handleRefresh();
-    //   return;
-    // }
-
+  const deleteSelected = () => {
     const currentSelectedId = formStoreVertex()?.P.selectedId;
     if (!currentSelectedId) {
       return;
     }
 
-    // Find all selectable tree items in the DOM
-    if (!treeElement) {
+    const selectedVertex = graph.vertexes[currentSelectedId];
+    if (!selectedVertex) {
       return;
     }
 
-    // Handle backslash key to toggle visibility
-    if (e.key === "\\") {
-      e.preventDefault();
-      const itemId = String(currentSelectedId);
-      const vertex = graph.vertexes[itemId];
-      if (!vertex) {
-        return;
-      }
+    // Component name is used for the toast message
+    const componentName = selectedVertex.P?.key || "Html";
 
-      // Call toggleHidden from HideShowIcon
-      toggleHidden(itemId as Id, formStoreId!, graph, setGraph);
+    deleteLayoutAttr(
+      formStoreVertex(),
+      selectedVertex,
+      graph,
+      setGraph,
+      formStoreVertex()?.P.txnId,
+      componentName,
+      showSuccessToast,
+      layoutStoreId,
+    );
+  };
+
+  const handleUndo = () => {
+    const formTxnId = formStoreVertex()?.P.txnId;
+    if (formTxnId && undoAllowed(formTxnId, graph)) {
+      undo(formTxnId, graph, setGraph);
+    }
+  };
+
+  const handleRedo = () => {
+    const formTxnId = formStoreVertex()?.P.txnId;
+    if (formTxnId && redoAllowed(formTxnId, graph)) {
+      redo(formTxnId, graph, setGraph);
+    }
+  };
+
+  const handleSaveShortcut = () => {
+    if (!isSaveDisabled()) {
+      handleSaveForm();
+    }
+  };
+
+  const toggleHiddenSelected = () => {
+    const currentSelectedId = formStoreVertex()?.P.selectedId;
+    if (!currentSelectedId) {
       return;
     }
 
-    if ((e.ctrlKey || e.metaKey) && e.key === "o") {
-      e.preventDefault();
-      // Get the current item's JSON editor state
-      const itemId = String(currentSelectedId);
-      const vertex = graph.vertexes[itemId];
-      if (!vertex) {
-        return;
-      }
+    const itemId = String(currentSelectedId);
+    if (!graph.vertexes[itemId]) {
+      return;
+    }
 
-      // Toggle JSON editor for the selected item
-      toggleJsonEditorForItem(itemId as Id);
+    toggleHidden(itemId as Id, formStoreId!, graph, setGraph);
+  };
 
-      // Focus the item after toggling
-      focusSelectedItem();
+  const toggleJsonEditorSelected = () => {
+    const currentSelectedId = formStoreVertex()?.P.selectedId;
+    if (!currentSelectedId) {
+      return;
+    }
+
+    const itemId = String(currentSelectedId);
+    if (!graph.vertexes[itemId]) {
+      return;
+    }
+
+    toggleJsonEditorForItem(itemId as Id);
+    focusSelectedItem();
+  };
+
+  const navigateVertical = (direction: "up" | "down") => {
+    const treeElement = treeRef();
+    const currentSelectedId = formStoreVertex()?.P.selectedId;
+    if (!(treeElement && currentSelectedId)) {
       return;
     }
 
@@ -540,7 +482,6 @@ export function LayoutTree() {
       return;
     }
 
-    // Find the currently selected element
     const currentElementIndex = Array.from(itemElements).findIndex(
       (el) => el.getAttribute("data-item-id") === String(currentSelectedId),
     );
@@ -549,122 +490,154 @@ export function LayoutTree() {
       return;
     }
 
-    if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-      e.preventDefault();
-      // Vertical navigation
-      let newIndex;
-      if (e.key === "ArrowUp") {
-        // Move to previous visible item
-        newIndex =
-          currentElementIndex > 0
-            ? currentElementIndex - 1
-            : itemElements.length - 1;
-      } else {
-        // Move to next visible item
-        newIndex =
-          currentElementIndex < itemElements.length - 1
-            ? currentElementIndex + 1
-            : 0;
-      }
+    const newIndex =
+      direction === "up"
+        ? currentElementIndex > 0
+          ? currentElementIndex - 1
+          : itemElements.length - 1
+        : currentElementIndex < itemElements.length - 1
+          ? currentElementIndex + 1
+          : 0;
 
-      const nextItemId = itemElements[newIndex].getAttribute("data-item-id");
-      if (nextItemId) {
-        onLayoutItemClick(
-          layoutStoreVertex(),
-          formStoreVertex(),
-          nextItemId,
-          graph,
-          setGraph,
-          0,
-          "layoutTree",
-        );
+    const nextItemId = itemElements[newIndex].getAttribute("data-item-id");
+    if (nextItemId) {
+      onLayoutItemClick(
+        layoutStoreVertex(),
+        formStoreVertex(),
+        nextItemId,
+        graph,
+        setGraph,
+        0,
+        "layoutTree",
+      );
 
-        // Focus the newly selected item
-        focusSelectedItem();
-      }
-    } else if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
-      e.preventDefault();
-      // Horizontal navigation - expand/collapse
-      const itemId = String(currentSelectedId);
-
-      // Check if the item has children
-      const vertex = graph.vertexes[itemId];
-      if (!vertex) {
-        return;
-      }
-
-      const hasChildren = getChildrenAttrs(graph, setGraph, vertex).length > 0;
-
-      if (e.key === "ArrowLeft") {
-        const isExpanded = !collapsedKeys().includes(itemId as Id);
-
-        if (isExpanded && hasChildren) {
-          // Collapse if expanded
-          toggleExpand(itemId as Id);
-
-          // Focus the current item after collapsing
-          focusSelectedItem();
-        } else {
-          // If already collapsed or no children, try to move to parent
-          // Use evalExpression directly to get the parent since getChildrenAttrs doesn't support a parent parameter
-          const parentElements =
-            evalExpression("<-Attr", { graph, vertexes: [vertex] }) || [];
-
-          if (parentElements && parentElements.length > 0) {
-            onLayoutItemClick(
-              layoutStoreVertex(),
-              formStoreVertex(),
-              parentElements[0].id,
-              graph,
-              setGraph,
-              0,
-              "layoutTree",
-            );
-
-            // Focus the parent item
-            focusSelectedItem();
-          } else {
-            // Make sure we maintain focus on the current item if there's no parent
-            focusSelectedItem();
-          }
-        }
-      } else if (e.key === "ArrowRight" && hasChildren) {
-        const isExpanded = !collapsedKeys().includes(itemId as Id);
-
-        if (isExpanded) {
-          // If already expanded, move to first child
-          const childElements = getChildrenAttrs(graph, setGraph, vertex);
-
-          if (childElements.length > 0) {
-            onLayoutItemClick(
-              layoutStoreVertex(),
-              formStoreVertex(),
-              childElements[0].id,
-              graph,
-              setGraph,
-              0,
-              "layoutTree",
-            );
-
-            // Focus the first child
-            focusSelectedItem();
-          } else {
-            // Make sure we maintain focus if something went wrong
-            focusSelectedItem();
-          }
-        } else {
-          // Expand if collapsed
-          toggleExpand(itemId as Id);
-
-          // Focus the current item after expanding
-          focusSelectedItem();
-        }
-      } else {
-        // Just ensure focus is maintained
-        focusSelectedItem();
-      }
+      focusSelectedItem();
     }
   };
+
+  const navigateHorizontal = (direction: "left" | "right") => {
+    const currentSelectedId = formStoreVertex()?.P.selectedId;
+    if (!(treeRef() && currentSelectedId)) {
+      return;
+    }
+
+    const itemId = String(currentSelectedId);
+    const vertex = graph.vertexes[itemId];
+    if (!vertex) {
+      return;
+    }
+
+    const hasChildren = getChildrenAttrs(graph, setGraph, vertex).length > 0;
+
+    if (direction === "left") {
+      const isExpanded = !collapsedKeys().includes(itemId as Id);
+
+      if (isExpanded && hasChildren) {
+        // Collapse if expanded
+        toggleExpand(itemId as Id);
+        focusSelectedItem();
+      } else {
+        // If already collapsed or no children, try to move to parent
+        const parentElements =
+          evalExpression("<-Attr", { graph, vertexes: [vertex] }) || [];
+
+        if (parentElements && parentElements.length > 0) {
+          onLayoutItemClick(
+            layoutStoreVertex(),
+            formStoreVertex(),
+            parentElements[0].id,
+            graph,
+            setGraph,
+            0,
+            "layoutTree",
+          );
+        }
+
+        focusSelectedItem();
+      }
+    } else if (hasChildren) {
+      const isExpanded = !collapsedKeys().includes(itemId as Id);
+
+      if (isExpanded) {
+        // If already expanded, move to first child
+        const childElements = getChildrenAttrs(graph, setGraph, vertex);
+
+        if (childElements.length > 0) {
+          onLayoutItemClick(
+            layoutStoreVertex(),
+            formStoreVertex(),
+            childElements[0].id,
+            graph,
+            setGraph,
+            0,
+            "layoutTree",
+          );
+        }
+
+        focusSelectedItem();
+      } else {
+        // Expand if collapsed
+        toggleExpand(itemId as Id);
+        focusSelectedItem();
+      }
+    } else {
+      // No children: just keep focus on the current item
+      focusSelectedItem();
+    }
+  };
+
+  // Wrap a handler so it prevents the browser default before running
+  const withPreventDefault =
+    (handler: () => void) => (event: KeyboardEvent) => {
+      event.preventDefault();
+      handler();
+    };
+
+  // Bind keyboard shortcuts to the tree element via tinykeys once the ref
+  // is available. `$mod` resolves to Cmd on macOS and Ctrl elsewhere.
+  createEffect(() => {
+    const treeElement = treeRef();
+    if (!treeElement) {
+      return;
+    }
+
+    const unsubscribe = tinykeys(
+      treeElement,
+      {
+        "$mod+KeyK": withPreventDefault(() => addHtmlComponent("center")),
+        "$mod+KeyJ": withPreventDefault(() => addHtmlComponent("before")),
+        "$mod+KeyL": withPreventDefault(() => addHtmlComponent("after")),
+        "$mod+KeyD": withPreventDefault(deleteSelected),
+        "$mod+Delete": withPreventDefault(deleteSelected),
+        "$mod+Backspace": withPreventDefault(deleteSelected),
+        "$mod+KeyZ": withPreventDefault(handleUndo),
+        "$mod+KeyY": withPreventDefault(handleRedo),
+        "$mod+Shift+KeyZ": withPreventDefault(handleRedo),
+        "$mod+KeyS": withPreventDefault(handleSaveShortcut),
+        "$mod+KeyO": withPreventDefault(toggleJsonEditorSelected),
+        Backslash: withPreventDefault(toggleHiddenSelected),
+        ArrowUp: withPreventDefault(() => navigateVertical("up")),
+        ArrowDown: withPreventDefault(() => navigateVertical("down")),
+        ArrowLeft: withPreventDefault(() => navigateHorizontal("left")),
+        ArrowRight: withPreventDefault(() => navigateHorizontal("right")),
+      },
+      {
+        // Mirror tinykeys' default ignore (skip typing in form fields) but keep
+        // key-repeat so holding an arrow keeps navigating the tree.
+        ignore: (event) => {
+          const target = event.target;
+          return (
+            event.isComposing ||
+            (target instanceof Element &&
+              target !== event.currentTarget &&
+              target.matches("[contenteditable],input,select,textarea"))
+          );
+        },
+      },
+    );
+
+    onCleanup(unsubscribe);
+  });
 
   // Create a debounced function using Solid's primitive
   const debouncedSearch = debounce((value: string) => {
@@ -707,7 +680,7 @@ export function LayoutTree() {
   };
 
   return (
-    <As as="div" tabIndex={0} onKeyDown={handleKeyDown} ref={setTreeRef}>
+    <As as="div" tabIndex={0} ref={setTreeRef}>
       <As
         as="div"
         css={`return \`._id {

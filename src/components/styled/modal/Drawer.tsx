@@ -1,12 +1,14 @@
-import { makeEventListener } from "@solid-primitives/event-listener";
 import {
   type Accessor,
   createSignal,
   type JSX,
+  onCleanup,
+  onMount,
   type Setter,
   Show,
 } from "solid-js";
 import { Portal } from "solid-js/web";
+import { tinykeys } from "tinykeys";
 
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
 import { createClickOutside } from "~/lib/hooks/createClickOutside";
@@ -59,7 +61,7 @@ export function Drawer(props: Readonly<DrawerProps>) {
     setIsOpen(!isOpen());
   };
 
-  const handleEscClose = (event: KeyboardEvent) => {
+  const handleEscClose = () => {
     if (
       activeClickOutside !==
       getGlobalStore(graph).P.activeClickOutside[
@@ -68,12 +70,21 @@ export function Drawer(props: Readonly<DrawerProps>) {
     ) {
       return;
     }
-    if (event.key === "Escape" && isOpen()) {
+    if (isOpen()) {
       toggleDrawer();
     }
   };
 
-  makeEventListener(document, "keydown", handleEscClose);
+  // Close on Escape only for the top-most drawer. Registered on mount so
+  // `window` is only referenced client-side.
+  onMount(() => {
+    const unsubscribe = tinykeys(
+      window,
+      { Escape: handleEscClose },
+      { ignore: () => false },
+    );
+    onCleanup(unsubscribe);
+  });
 
   const Resizer = () => {
     let initialX: number;

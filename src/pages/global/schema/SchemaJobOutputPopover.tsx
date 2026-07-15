@@ -14,6 +14,7 @@ import {
   type JSX,
 } from "solid-js";
 import { Portal } from "solid-js/web";
+import { tinykeys } from "tinykeys";
 import { As } from "~/components/As";
 import type { SchemaJobStatusRow } from "~/server/schema/schemaOperationsManagement";
 
@@ -122,11 +123,6 @@ export function SchemaJobOutputPopover(props: SchemaJobOutputPopoverProps) {
     if (!open()) {
       return;
     }
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setOpen(false);
-      }
-    };
     const onPointerDown = (e: PointerEvent) => {
       const target = e.target as Node | null;
       if (
@@ -137,10 +133,15 @@ export function SchemaJobOutputPopover(props: SchemaJobOutputPopoverProps) {
         setOpen(false);
       }
     };
-    document.addEventListener("keydown", onKeyDown);
+    // Close on Escape, even while focus is inside the popover.
+    const unsubscribeKeys = tinykeys(
+      window,
+      { Escape: () => setOpen(false) },
+      { ignore: () => false },
+    );
     document.addEventListener("pointerdown", onPointerDown, true);
     onCleanup(() => {
-      document.removeEventListener("keydown", onKeyDown);
+      unsubscribeKeys();
       document.removeEventListener("pointerdown", onPointerDown, true);
     });
   });

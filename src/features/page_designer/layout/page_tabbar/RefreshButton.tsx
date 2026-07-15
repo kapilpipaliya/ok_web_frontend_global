@@ -1,24 +1,28 @@
 import { IconButton } from "~/components/styled/IconButton";
 import { headerIconButtonCss } from "~/pages/settings/constants";
 import { onMount, onCleanup } from "solid-js";
+import { tinykeys } from "tinykeys";
 
 export function RefreshButton(props: { handleRefresh: () => void }) {
-  // Handle keyboard shortcuts
-  const handleKeyDown = (e: KeyboardEvent) => {
-    // Refresh - F5 or Ctrl+R
-    if (e.key === "F5" || ((e.ctrlKey || e.metaKey) && e.key === "u")) {
+  // Register keyboard shortcuts on mount (window is only available client-side).
+  // `$mod` resolves to Cmd on macOS and Ctrl elsewhere.
+  onMount(() => {
+    const refresh = (e: KeyboardEvent) => {
       e.preventDefault();
       props.handleRefresh();
-    }
-  };
+    };
 
-  // Register and clean up event listeners
-  onMount(() => {
-    document.addEventListener("keydown", handleKeyDown);
-  });
+    const unsubscribe = tinykeys(
+      window,
+      {
+        F5: refresh,
+        "$mod+KeyU": refresh,
+      },
+      // Fire regardless of focused element (e.g. while typing in an input).
+      { ignore: () => false },
+    );
 
-  onCleanup(() => {
-    document.removeEventListener("keydown", handleKeyDown);
+    onCleanup(unsubscribe);
   });
 
   return (
