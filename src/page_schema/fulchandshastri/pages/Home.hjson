@@ -6,11 +6,12 @@
       P: {
         public: true
         settingsPageId: home
+        description: Home
         isNoPermissionCheck: true
         fns: return { enabled: () => true }
         url: /
         key: Home
-        updatedAt: 2026-07-12T04:08:39.709Z
+        updatedAt: 2026-07-14T07:03:14.081Z
         props:
           '''
 const locale = args.params?.lang ? String(args.params.lang).toLowerCase() : undefined;
@@ -71,6 +72,14 @@ try {
     }
     {
       id: "2"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: Layout
+      }
+    }
+    {
+      id: "3"
       L: Attr
       P: {
         css:
@@ -97,7 +106,7 @@ return {
       }
     }
     {
-      id: "3"
+      id: "4"
       L: Attr
       P: {
         css:
@@ -144,7 +153,7 @@ return {
       }
     }
     {
-      id: "4"
+      id: "5"
       L: Attr
       P: {
         css:
@@ -186,7 +195,7 @@ return {
       }
     }
     {
-      id: "5"
+      id: "6"
       L: Attr
       P: {
         css:
@@ -206,7 +215,7 @@ return {
       }
     }
     {
-      id: "6"
+      id: "7"
       L: Attr
       P: {
         css:
@@ -227,7 +236,7 @@ return {
       }
     }
     {
-      id: "7"
+      id: "8"
       L: Attr
       P: {
         css:
@@ -252,7 +261,7 @@ return {
       }
     }
     {
-      id: "8"
+      id: "9"
       L: Attr
       P: {
         css:
@@ -282,7 +291,7 @@ return {
       }
     }
     {
-      id: "9"
+      id: "10"
       L: Attr
       P: {
         css:
@@ -308,16 +317,178 @@ return {
       }
     }
     {
-      id: "10"
+      id: "22"
       L: Attr
       P: {
         css:
           '''
 return `._id {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
+  text-align: center;
   margin-bottom: 4rem;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "section",
+  "data-animate": "",
+  ref: (el) => el && args.fns.animateOnView(el)
+};
+'''
+      }
+    }
+    {
+      id: "23"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  line-height: 1.3;
+
+  @media (max-width: 768px) {
+    font-size: 1.5rem;
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "h2",
+  text: "Featured Video"
+};
+'''
+      }
+    }
+    {
+      id: "24"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: block;
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${args.theme.var.color.primary};
+    outline-offset: 4px;
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const YOUTUBE_ID = "QouGP5MZBCY";
+const featuredVideo = {
+  P: {
+    youtubeId: YOUTUBE_ID,
+    title: "Featured Video"
+  }
+};
+return {
+  as: "button",
+  type: "button",
+  "aria-label": "Play featured video",
+  onClick: () => args.fns.openPlayer(featuredVideo)
+};
+'''
+      }
+    }
+    {
+      id: "25"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  position: relative;
+  padding-bottom: 56.25%;
+  overflow: hidden;
+  background: ${args.theme.var.color.background_light_200};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "26"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "img",
+  src: "https://img.youtube.com/vi/QouGP5MZBCY/hqdefault.jpg",
+  alt: "Featured video thumbnail",
+  loading: "lazy"
+};
+'''
+      }
+    }
+    {
+      id: "27"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 4.5rem;
+  height: 4.5rem;
+  background: rgba(0, 0, 0, 0.72);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
 }`;
 '''
         displayOrder: 2
@@ -331,7 +502,54 @@ return {
       }
     }
     {
+      id: "28"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  color: white;
+  margin-left: 0.25rem;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "icon",
+  icon: "carbon:play-filled",
+  width: 32,
+  height: 32
+};
+'''
+      }
+    }
+    {
       id: "11"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: 4rem;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "12"
       L: Attr
       P: {
         contextName: featureCard
@@ -352,7 +570,7 @@ return {
       }
     }
     {
-      id: "12"
+      id: "13"
       L: Attr
       P: {
         displayOrder: 1
@@ -364,10 +582,10 @@ return args.contextData.featureCard;
       }
     }
     {
-      id: "13"
+      id: "14"
       L: Attr
       P: {
-        displayOrder: 3
+        displayOrder: 4
         componentName: QuoteSection
         props:
           '''
@@ -380,7 +598,7 @@ return {
       }
     }
     {
-      id: "14"
+      id: "15"
       L: Attr
       P: {
         css:
@@ -392,7 +610,7 @@ return `._id {
   margin-bottom: 4rem;
 }`;
 '''
-        displayOrder: 4
+        displayOrder: 5
         componentName: Html
         props:
           '''
@@ -406,7 +624,7 @@ return {
       }
     }
     {
-      id: "15"
+      id: "16"
       L: Attr
       P: {
         css:
@@ -432,7 +650,7 @@ return {
       }
     }
     {
-      id: "16"
+      id: "17"
       L: Attr
       P: {
         css:
@@ -459,7 +677,7 @@ return {
       }
     }
     {
-      id: "17"
+      id: "18"
       L: Attr
       P: {
         css:
@@ -484,7 +702,7 @@ return {
       }
     }
     {
-      id: "18"
+      id: "19"
       L: Attr
       P: {
         css:
@@ -511,7 +729,7 @@ return {
       }
     }
     {
-      id: "19"
+      id: "20"
       L: Attr
       P: {
         css:
@@ -535,7 +753,7 @@ return {
       }
     }
     {
-      id: "20"
+      id: "21"
       L: Attr
       P: {
         css:
@@ -558,19 +776,11 @@ return {
 '''
       }
     }
-    {
-      id: "21"
-      L: PageLayout
-      P: {
-        displayOrder: 1
-        componentName: Layout
-      }
-    }
   ]
   edges: [
     {
       id: e1
-      T: Attr
+      T: PageLayout
       S: "1"
       E: "2"
     }
@@ -578,115 +788,157 @@ return {
       id: e2
       T: Attr
       S: "1"
-      E: "5"
-    }
-    {
-      id: e3
-      T: PageLayout
-      S: "1"
-      E: "21"
-    }
-    {
-      id: e4
-      T: Attr
-      S: "2"
       E: "3"
     }
     {
-      id: e5
+      id: e3
+      T: Attr
+      S: "1"
+      E: "6"
+    }
+    {
+      id: e4
       T: Attr
       S: "3"
       E: "4"
     }
     {
-      id: e6
+      id: e5
       T: Attr
-      S: "5"
-      E: "6"
+      S: "4"
+      E: "5"
     }
     {
-      id: e7
+      id: e6
       T: Attr
       S: "6"
       E: "7"
     }
     {
-      id: e8
-      T: Attr
-      S: "6"
-      E: "10"
-    }
-    {
-      id: e9
-      T: Attr
-      S: "6"
-      E: "13"
-    }
-    {
-      id: e10
-      T: Attr
-      S: "6"
-      E: "14"
-    }
-    {
-      id: e11
+      id: e7
       T: Attr
       S: "7"
       E: "8"
     }
     {
-      id: e12
+      id: e8
       T: Attr
       S: "7"
-      E: "9"
+      E: "22"
     }
     {
-      id: e13
+      id: e21
       T: Attr
-      S: "10"
+      S: "7"
       E: "11"
     }
     {
-      id: e14
+      id: e9
+      T: Attr
+      S: "7"
+      E: "14"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "7"
+      E: "15"
+    }
+    {
+      id: e22
+      T: Attr
+      S: "22"
+      E: "23"
+    }
+    {
+      id: e23
+      T: Attr
+      S: "22"
+      E: "24"
+    }
+    {
+      id: e24
+      T: Attr
+      S: "24"
+      E: "25"
+    }
+    {
+      id: e25
+      T: Attr
+      S: "25"
+      E: "26"
+    }
+    {
+      id: e26
+      T: Attr
+      S: "25"
+      E: "27"
+    }
+    {
+      id: e27
+      T: Attr
+      S: "27"
+      E: "28"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "8"
+      E: "10"
+    }
+    {
+      id: e13
       T: Attr
       S: "11"
       E: "12"
     }
     {
+      id: e14
+      T: Attr
+      S: "12"
+      E: "13"
+    }
+    {
       id: e15
       T: Attr
-      S: "14"
-      E: "15"
+      S: "15"
+      E: "16"
     }
     {
       id: e16
       T: Attr
-      S: "14"
-      E: "16"
-    }
-    {
-      id: e17
-      T: Attr
-      S: "16"
+      S: "15"
       E: "17"
     }
     {
-      id: e18
+      id: e17
       T: Attr
       S: "17"
       E: "18"
     }
     {
+      id: e18
+      T: Attr
+      S: "18"
+      E: "19"
+    }
+    {
       id: e19
       T: Attr
-      S: "17"
-      E: "20"
+      S: "18"
+      E: "21"
     }
     {
       id: e20
       T: Attr
-      S: "18"
-      E: "19"
+      S: "19"
+      E: "20"
     }
   ]
 }

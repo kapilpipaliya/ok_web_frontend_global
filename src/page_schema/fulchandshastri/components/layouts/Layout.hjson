@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "fcl_root",
-      L: "Component",
+      id: "1"
+      L: Component
       P: {
-        key: "Layout",
-        description: "Shared layout with header, page content slot, and footer for Fulchand Shastri pages",
-        fns: '''
+        description: Shared layout with header, page content slot, and footer for Fulchand Shastri pages
+        fns:
+          '''
 const prefersReducedMotion = () =>
   window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -116,15 +116,18 @@ return {
     })
 };
 '''
+        key: Layout
+        updatedAt: 2026-07-16T18:28:01.832Z
       }
-    },
+    }
     {
-      id: "fcl_motion_style",
-      L: "Attr",
+      id: "2"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
   as: "style",
   text: `[data-animate]:not([data-motion-init]) { opacity: 0; }
@@ -135,14 +138,15 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "fcl_motion_script",
-      L: "Attr",
+      id: "3"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
 return {
   as: "script",
   type: "module",
@@ -151,104 +155,307 @@ window.__motion = { animate, scroll, inView };`
 };
 '''
       }
-    },
+    }
     {
-      id: "fcl_shell",
-      L: "Attr",
+      id: "4"
+      L: Attr
       P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
+        css:
+          '''return `._id {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
 }`;
 '''
+        displayOrder: 4
+        fns:
+          '''// Global state for cookie consent
+const [hasCookieConsent, setHasCookieConsent] = args.createSignal(false);
+
+// Global state for video player
+const [playerState, setPlayerState] = args.createSignal("closed"); // "closed", "minimized", "maximized"
+const [currentVideo, setCurrentVideo] = args.createSignal(null);
+const [videoQueue, setVideoQueue] = args.createSignal([]);
+const [playerPosition, setPlayerPosition] = args.createStore({ x: null, y: null });
+const [playerSize, setPlayerSize] = args.createStore({ width: 480, height: 270 });
+
+// Keep Awake wrapper functions
+const keepAwake = async () => {
+  await args.KeepAwake.keepAwake();
+};
+
+const allowSleep = async () => {
+  await args.KeepAwake.allowSleep();
+};
+
+const isSupported = async () => {
+  const result = await args.KeepAwake.isSupported();
+  return result.isSupported;
+};
+
+const isKeptAwake = async () => {
+  const result = await args.KeepAwake.isKeptAwake();
+  return result.isKeptAwake;
+};
+
+// Keep Awake management
+const enableKeepAwake = async () => {
+  try {
+    const supported = await isSupported();
+    if (!supported) return;
+
+    const alreadyAwake = await isKeptAwake();
+    if (alreadyAwake) return;
+
+    await keepAwake();
+    console.log('Keep Awake enabled');
+  } catch (error) {
+    console.error('Error enabling Keep Awake:', error);
+  }
+};
+
+const disableKeepAwake = async () => {
+  try {
+    const supported = await isSupported();
+    if (!supported) return;
+
+    const awake = await isKeptAwake();
+    if (!awake) return;
+
+    await allowSleep();
+    console.log('Keep Awake disabled');
+  } catch (error) {
+    console.error('Error disabling Keep Awake:', error);
+  }
+};
+
+// Player control functions
+const openPlayer = async (video) => {
+  setCurrentVideo(video);
+  setPlayerState("minimized");
+  await enableKeepAwake();
+};
+
+const closePlayer = async () => {
+  setPlayerState("closed");
+  setCurrentVideo(null);
+  setVideoQueue([]);
+  await disableKeepAwake();
+};
+
+const togglePlayerState = () => {
+  setPlayerState(prev => prev === "minimized" ? "maximized" : "minimized");
+};
+
+const playNext = () => {
+  const queue = videoQueue();
+  if (queue.length > 0) {
+    const [nextVideo, ...rest] = queue;
+    setCurrentVideo(nextVideo);
+    setVideoQueue(rest);
+  } else {
+    closePlayer();
+  }
+};
+
+return {
+  hasCookieConsent,
+  setHasCookieConsent,
+  playerState,
+  setPlayerState,
+  currentVideo,
+  setCurrentVideo,
+  videoQueue,
+  setVideoQueue,
+  playerPosition,
+  setPlayerPosition,
+  playerSize,
+  setPlayerSize,
+  openPlayer,
+  closePlayer,
+  togglePlayerState,
+  playNext,
+  keepAwake,
+  allowSleep,
+  isSupported,
+  isKeptAwake,
+  enableKeepAwake,
+  disableKeepAwake
+};
+'''
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  onMount: () => {
+    // Check localStorage for cookie consent
+    const hasAccepted =
+      localStorage.getItem("cookie_consent_accepted") === "true";
+    args.fns.setHasCookieConsent(hasAccepted);
+
+    // Load Google Analytics gtag.js
+    if (!window.dataLayer) {
+      // Initialize dataLayer
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        window.dataLayer.push(arguments);
       }
-    },
+      window.gtag = gtag;
+      gtag("js", new Date());
+      gtag("config", "AW-17540558480");
+
+      // Load gtag.js script with error handling
+      const script = document.createElement("script");
+      script.async = true;
+      script.src = "https://www.googletagmanager.com/gtag/js?id=AW-17540558480";
+
+      // Handle script load errors (e.g., ad blockers)
+      script.onerror = () => {
+        // Silently fail if blocked by ad blocker or privacy extension
+        console.info("Google Analytics blocked by browser extension");
+      };
+
+      document.head.appendChild(script);
+    }
+  },
+};
+'''
+      }
+    }
     {
-      id: "fcl_header",
-      L: "Attr",
+      id: "5"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Header",
-        props: '''
+        displayOrder: 1
+        componentName: Header
+        props:
+          '''
 return {};
 '''
       }
-    },
+    }
     {
-      id: "fcl_main",
-      L: "Attr",
+      id: "6"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  "data-fulchand-page-main": ""
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   flex: 1;
   width: 100%;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  "data-fulchand-page-main": ""
+};
+'''
       }
-    },
+    }
     {
-      id: "fcl_settings_editor",
-      L: "Attr",
+      id: "7"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "PageSettingsEditor"
+        displayOrder: 1
+        componentName: Slot
       }
-    },
+    }
     {
-      id: "fcl_slot",
-      L: "Attr",
+      id: "8"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Slot"
-      }
-    },
-    {
-      id: "fcl_confirm",
-      L: "Attr",
-      P: {
-        displayOrder: 5,
-        componentName: "ConfirmProvider"
-      }
-    },
-    {
-      id: "fcl_footer",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Footer",
-        props: '''
+        css:
+          '''return `._id {
+  width:100%;
+}`;
+'''
+        displayOrder: 3
+        componentName: Footer
+        props:
+          '''
 return {};
 '''
       }
     }
-  ],
+    {
+      id: "9"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: VideoPlayer
+        key: unique_1
+        props:
+          '''return {
+  playerState: args.fns.playerState,
+  currentVideo: args.fns.currentVideo,
+  videoQueue: args.fns.videoQueue,
+  playerPosition: args.fns.playerPosition,
+  playerSize: args.fns.playerSize,
+  setPlayerPosition: args.fns.setPlayerPosition,
+  setPlayerSize: args.fns.setPlayerSize,
+  closePlayer: args.fns.closePlayer,
+  togglePlayerState: args.fns.togglePlayerState,
+  playNext: args.fns.playNext,
+  openQueueModal: () => { }
+};'''
+      }
+    }
+  ]
   edges: [
-    { id: "fcl_e0", T: "Attr", S: "fcl_root", E: "fcl_motion_style" },
-    { id: "fcl_e0b", T: "Attr", S: "fcl_root", E: "fcl_motion_script" },
-    { id: "fcl_e1", T: "Attr", S: "fcl_root", E: "fcl_shell" },
-    { id: "fcl_e2", T: "Attr", S: "fcl_shell", E: "fcl_header" },
-    { id: "fcl_e3", T: "Attr", S: "fcl_shell", E: "fcl_main" },
-    { id: "fcl_e4", T: "Attr", S: "fcl_shell", E: "fcl_footer" },
-    { id: "fcl_e4b", T: "Attr", S: "fcl_root", E: "fcl_confirm" },
-    { id: "fcl_e5", T: "Attr", S: "fcl_root", E: "fcl_settings_editor" },
-    { id: "fcl_e6", T: "Attr", S: "fcl_main", E: "fcl_slot" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "1"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "1"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "4"
+      E: "6"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "4"
+      E: "8"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "4"
+      E: "9"
+    }
   ]
 }
