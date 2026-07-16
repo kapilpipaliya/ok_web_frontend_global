@@ -1,4 +1,5 @@
 import type { Id } from "~/lib/graph/type/id";
+import type { ColorMode } from "~/lib/styles/types/types";
 
 export interface GlobalProperties {
   activeClickOutside: string[];
@@ -21,6 +22,7 @@ export interface GlobalProperties {
   activeTooltips?: { [key: string]: boolean };
   subdomain?: string; // Current subdomain
   domain?: string; // Current domain
+  themeColorMode?: ColorMode; // Local theme preference when no user setting
   // isAuthenticated: false,
   // theme: "light" as "light" | "dark",
   // notifications: [] as Array<{ id: number; message: string; type: "info" | "warning" | "error" }>,

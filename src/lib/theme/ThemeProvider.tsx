@@ -1,30 +1,30 @@
-import { type Component, createMemo, type JSX } from "solid-js";
+import { type Component, createMemo, onMount, type JSX } from "solid-js";
 import { StyleRenderer } from "~/components/StyleRenderer";
 import { ComponentStylesProvider } from "~/lib/styles/ComponentStylesContext";
 import { getGlobalThemeVertex } from "../graph/get/sync/store/getGlobalThemeVertex";
-import { getGlobalStore } from "../graph/get/sync/store/getGlobalStore";
 import { themeConfig } from "../graph/get/sync/theme/themeConfig";
 import { CSS_RESET } from "../styles/constants";
 import { createSafeThemeProxy, ThemeContext } from "./ThemeContext";
-import type {
-  ColorMode,
-  ThemeContext as ThemeContextType,
-} from "~/lib/styles/types/types";
+import type { ThemeContext as ThemeContextType } from "~/lib/styles/types/types";
 import { useGraph } from "~/lib/graph/context/UseGraph";
+import {
+  getThemeColorMode,
+  hydrateThemeColorModeFromLocalStorage,
+  initThemeColorModeStorageSync,
+} from "./themeColorModeStorage";
 
 export interface ThemeProviderProps {
   children: JSX.Element;
 }
 export const ThemeProvider: Component<ThemeProviderProps> = (props) => {
-  const [graph] = useGraph();
+  const [graph, setGraph] = useGraph();
 
-  const currentMode = createMemo(() => {
-    const globalStore = getGlobalStore(graph);
-    const userSettingId = globalStore?.P?.userSettingId;
-    const userThemeColorMode =
-      userSettingId && graph.vertexes[userSettingId]?.P?.themeColorMode;
-    return (userThemeColorMode || "light") as ColorMode;
+  onMount(() => {
+    hydrateThemeColorModeFromLocalStorage(graph, setGraph);
+    return initThemeColorModeStorageSync(graph, setGraph);
   });
+
+  const currentMode = createMemo(() => getThemeColorMode(graph));
 
   const themeMemo = createMemo(() => {
     return themeConfig(getGlobalThemeVertex(graph));

@@ -1775,12 +1775,18 @@ const applyCompanionMainRatio = (ratio) => {
   return clampedRatio;
 };
 
-const persistCompanionMainRatio = () => {
-  const available = getCompanionAvailableHeight();
-  const mainHeight = getCompanionMainHeight();
-  if (available == null || mainHeight == null) return;
-  const ratio = clampCompanionRatio(mainHeight / available, available);
-  persistPageResize({ companionMainRatio: ratio });
+const persistCompanionMainRatio = (ratio) => {
+  const appliedRatio =
+    ratio != null && Number.isFinite(ratio)
+      ? applyCompanionMainRatio(ratio)
+      : (() => {
+          const available = getCompanionAvailableHeight();
+          const mainHeight = getCompanionMainHeight();
+          if (available == null || mainHeight == null) return null;
+          return applyCompanionMainRatio(mainHeight / available);
+        })();
+  if (appliedRatio == null) return;
+  persistPageResize({ companionMainRatio: appliedRatio });
 };
 
 const restoreCompanionMainRatio = () => {
