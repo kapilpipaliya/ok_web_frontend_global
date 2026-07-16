@@ -1043,9 +1043,11 @@ const handleSave = async () => {
         setFormVertexId(null);
       }
     }
+    return result;
   } catch (error) {
     console.error("Error saving:", error);
     args.showErrorToast?.("Failed to save");
+    return false;
   } finally {
     setIsSubmitting(false);
   }

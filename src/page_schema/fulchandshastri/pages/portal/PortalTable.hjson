@@ -374,6 +374,29 @@ return `._id {
       }
     },
     {
+      id: "pageFill",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}`;
+'''
+      }
+    },
+    {
       id: "dynamicPage",
       L: "Attr",
       P: {
@@ -385,10 +408,12 @@ const tableVertexLabel = args.fns.getTableVertexLabel?.() || "Book";
 const actionHandlers = args.fns.getTableActionHandlers?.();
 const actions = args.fns.getTableActions?.();
 return {
+  key: tableKey,
   tableKey,
   tableVertexLabel,
   loadFromSetting: true,
   usePolarisUI: true,
+  embeddedMode: true,
   ...(actions ? { actions } : {}),
   ...(actionHandlers ? { actionHandlers } : {}),
   ...(actionHandlers ? { onRowClick: (row) => args.fns.openInPageDesigner?.(row) } : {})
@@ -452,7 +477,8 @@ return {
     { id: "e5", T: "Attr", S: "modeTabs", E: "contentTab" },
     { id: "e6", T: "Attr", S: "modeTabs", E: "schemaTab" },
     { id: "e7", T: "Attr", S: "shell", E: "contentPane" },
-    { id: "e8", T: "Attr", S: "contentPane", E: "dynamicPage" },
+    { id: "e7a", T: "Attr", S: "contentPane", E: "pageFill" },
+    { id: "e8", T: "Attr", S: "pageFill", E: "dynamicPage" },
     { id: "e9", T: "Attr", S: "shell", E: "schemaPane" },
     { id: "e10", T: "Attr", S: "schemaPane", E: "schemaEditor" },
     { id: "e_layout", T: "PageLayout", S: "page", E: "layout" }

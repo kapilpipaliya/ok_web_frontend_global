@@ -3970,6 +3970,20 @@ const defaultSectionDocuments = finalizedPages.flatMap((page) =>
   }))
 );
 
+const buildFilesCompanionPage = (hint) => ({
+  position: "below",
+  tableKey: "files",
+  tableVertexLabel: "File",
+  useUrlQueryParams: false,
+  usePolarisUI: true,
+  loadFromSetting: true,
+  embeddedMode: true,
+  title: "Files",
+  hint: hint || "Browse and select files."
+});
+
+const filesCompanionPages = (hint) => [buildFilesCompanionPage(hint)];
+
 const BOOK_LANGUAGE_OPTIONS = [
   { value: "English", label: "English" },
   { value: "Hindi", label: "Hindi" },
@@ -4061,7 +4075,10 @@ const bookTableGeneral = {
     { key: "edit", type: "edit" },
     { key: "delete", type: "delete", confirm: { title: "Delete book?", message: "This cannot be undone.", confirmText: "Delete", cancelText: "Cancel", variant: "danger" } }
   ],
-  hooks: {}
+  hooks: {},
+  companionPages: filesCompanionPages(
+    "Browse files for cover images and downloads when editing books above."
+  )
 };
 
 const bookTableFormConfig = {
@@ -4269,7 +4286,10 @@ const recommendedBookTableGeneral = {
     { key: "edit", type: "edit" },
     { key: "delete", type: "delete", confirm: { title: "Delete recommended book?", message: "This cannot be undone.", confirmText: "Delete", cancelText: "Cancel", variant: "danger" } }
   ],
-  hooks: {}
+  hooks: {},
+  companionPages: filesCompanionPages(
+    "Browse files for cover images and downloads when editing recommended books above."
+  )
 };
 
 const recommendedBookTableFormConfig = {
@@ -4474,7 +4494,10 @@ const scheduleTableGeneral = {
     { key: "edit", type: "edit" },
     { key: "delete", type: "delete", confirm: { title: "Delete event?", message: "This cannot be undone.", confirmText: "Delete", cancelText: "Cancel", variant: "danger" } }
   ],
-  hooks: {}
+  hooks: {},
+  companionPages: filesCompanionPages(
+    "Browse files for event banners when editing schedule events above."
+  )
 };
 
 const scheduleTableFormConfig = {
@@ -4597,6 +4620,67 @@ const galleryTableColumns = [
   }
 ];
 
+const galleryDropCreateFrom = {
+  enabled: true,
+  sourceTableVertexLabels: ["File"],
+  sourceTableKeys: ["files"],
+  fileDownloadUrlPrefix: "/api/file/download",
+  reviewModal: {
+    title: "Add gallery items",
+    maxWidth: "1100px",
+    confirmLabel: "Create gallery items",
+    cancelLabel: "Cancel",
+    removeRowLabel: "Remove",
+    emptyHint: "No files to add.",
+    columns: [
+      { key: "preview", label: "Preview", type: "filePreview", width: "96px" },
+      { key: "title", label: "Title", type: "text", required: true, width: "220px" },
+      {
+        key: "mediaType",
+        label: "Type",
+        type: "select",
+        required: true,
+        width: "130px",
+        options: GALLERY_MEDIA_TYPE_OPTIONS
+      },
+      { key: "description", label: "Description", type: "text", width: "260px" },
+      { key: "fileName", label: "File", type: "readonly", width: "160px" }
+    ]
+  },
+  create: {
+    titleFrom: "fileName",
+    descriptionFrom: "description",
+    mediaTypeRules: [
+      { match: "mimeStartsWith", value: "image/", mediaType: "Photo" },
+      { match: "mimeStartsWith", value: "video/", mediaType: "Video" },
+      { match: "mimeEquals", value: "application/pdf", mediaType: "Pdf" },
+      { match: "default", mediaType: "Photo" }
+    ],
+    relationships: [
+      {
+        fieldKey: "file",
+        relationshipType: "GalleryItemFile",
+        targetLabel: "File",
+        fromDroppedItem: true
+      }
+    ],
+    thumbnailForImageMime: {
+      fieldKey: "thumbnail",
+      relationshipType: "GalleryItemThumbnail",
+      targetLabel: "File"
+    },
+    assignToActiveSidebarCategory: true
+  },
+  messages: {
+    success: "Created {count} gallery item(s)",
+    emptySelection: "Select one or more files first",
+    wrongSource: "Only files can be dropped here",
+    validationRequired: "Please fill all required fields",
+    duplicateInCategory: '"{fileName}" is already associated in this category',
+    duplicatesInCategory: "{count} file(s) already associated in this category: {names}"
+  }
+};
+
 const galleryTableGeneral = {
   publicRead: true,
   title: "Gallery",
@@ -4620,7 +4704,11 @@ const galleryTableGeneral = {
     { key: "edit", type: "edit" },
     { key: "delete", type: "delete", confirm: { title: "Delete gallery item?", message: "This cannot be undone.", confirmText: "Delete", cancelText: "Cancel", variant: "danger" } }
   ],
-  hooks: {}
+  hooks: {},
+  companionPages: filesCompanionPages(
+    "Select files and drag them onto the gallery table above to add gallery items."
+  ),
+  dropCreateFrom: galleryDropCreateFrom
 };
 
 const galleryTableFormConfig = {

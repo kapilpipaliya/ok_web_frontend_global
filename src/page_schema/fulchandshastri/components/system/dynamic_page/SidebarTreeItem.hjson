@@ -463,6 +463,16 @@ const initDropTarget = (element) => {
         if (!data.itemIds || !Array.isArray(data.itemIds) || data.itemIds.length === 0) {
           return false;
         }
+        // Reject drops from a different table (e.g. Files onto Gallery sidebar)
+        const contentLabel = args.contextData.props?.tableVertexLabel
+          || args.contextData.props?.contentLabel
+          || null;
+        const sourceLabel = data.sourceTableVertexLabel != null
+          ? String(data.sourceTableVertexLabel)
+          : "";
+        if (contentLabel && sourceLabel && sourceLabel !== String(contentLabel)) {
+          return false;
+        }
         return true;
       }
 

@@ -2191,6 +2191,24 @@ if (rowsToRemove && setRowsToRemove) {
   });
 }
 
+const rowsToAdd = args.contextData.props?.rowsToAdd;
+const setRowsToAdd = args.contextData.props?.setRowsToAdd;
+if (rowsToAdd && setRowsToAdd) {
+  args.createEffect(() => {
+    const idsToAdd = rowsToAdd?.();
+    if (!idsToAdd || !Array.isArray(idsToAdd) || idsToAdd.length === 0) return;
+    const cur = normalizeRowIds(tableP()?.data ?? []);
+    const merged = [...cur];
+    for (let i = 0; i < idsToAdd.length; i++) {
+      const id = String(idsToAdd[i] || "").trim();
+      if (id && !merged.includes(id)) merged.push(id);
+    }
+    patchTableP({ data: normalizeRowIds(merged) });
+    applyLocalFilters();
+    setRowsToAdd(null);
+  });
+}
+
 // Drag and drop functionality using @atlaskit/pragmatic-drag-and-drop
 const tableDraggableCleanups = new Map();
 const tableDraggableElements = new Map(); // Store elements by rowId
@@ -2233,7 +2251,15 @@ const initTableDraggable = (element) => {
       return {
         type: 'table-items',
         itemIds,
-        count: itemIds.length
+        count: itemIds.length,
+        sourceTableVertexLabel:
+          args.contextData.props?.sourceTableVertexLabel ||
+          args.fns.getTableVertexLabel?.() ||
+          null,
+        sourceTableKey:
+          args.contextData.props?.sourceTableKey ||
+          args.fns.getTableKey?.() ||
+          null
       };
     },
     onGenerateDragPreview: ({ nativeSetDragImage }) => {
@@ -2326,6 +2352,90 @@ const cleanupTableDraggable = (element) => {
     tableDraggableCleanups.clear();
     tableDraggableElements.clear();
   }
+};
+
+// Drop-create target (e.g. Files → Gallery): opens review modal via DynamicPage handler
+const [dropCreateDragOver, setDropCreateDragOver] = args.createSignal(false);
+let dropCreateTargetCleanup = null;
+
+const getDropCreateFromConfig = () => {
+  const fromProps = args.contextData.props?.dropCreateFrom;
+  if (fromProps && typeof fromProps === "object") return fromProps;
+  return args.fns.getConfigGeneralValue?.("dropCreateFrom") || null;
+};
+
+const isDropCreateEnabled = () => {
+  const cfg = getDropCreateFromConfig();
+  return !!(cfg && cfg.enabled !== false && typeof args.contextData.props?.onDropCreateFrom === "function");
+};
+
+const initDropCreateTarget = (element) => {
+  if (!element || !args.dropTargetForElements) return;
+  if (!isDropCreateEnabled()) {
+    if (dropCreateTargetCleanup) {
+      dropCreateTargetCleanup();
+      dropCreateTargetCleanup = null;
+    }
+    setDropCreateDragOver(false);
+    return;
+  }
+  if (dropCreateTargetCleanup) {
+    dropCreateTargetCleanup();
+    dropCreateTargetCleanup = null;
+  }
+
+  dropCreateTargetCleanup = args.dropTargetForElements({
+    element,
+    getData: () => ({ type: "drop-create-target" }),
+    canDrop: ({ source }) => {
+      const data = source?.data;
+      if (!data || data.type !== "table-items") return false;
+      if (!Array.isArray(data.itemIds) || data.itemIds.length === 0) return false;
+      const cfg = getDropCreateFromConfig();
+      if (!cfg || cfg.enabled === false) return false;
+      const sourceLabels = Array.isArray(cfg.sourceTableVertexLabels)
+        ? cfg.sourceTableVertexLabels
+        : [];
+      const sourceKeys = Array.isArray(cfg.sourceTableKeys) ? cfg.sourceTableKeys : [];
+      const label = data.sourceTableVertexLabel != null
+        ? String(data.sourceTableVertexLabel)
+        : "";
+      const key = data.sourceTableKey != null ? String(data.sourceTableKey) : "";
+      if (sourceLabels.length > 0 && !sourceLabels.includes(label)) return false;
+      if (sourceKeys.length > 0 && !sourceKeys.includes(key)) return false;
+      return true;
+    },
+    onDragEnter: () => setDropCreateDragOver(true),
+    onDrag: () => setDropCreateDragOver(true),
+    onDragLeave: () => setDropCreateDragOver(false),
+    onDrop: async ({ source }) => {
+      setDropCreateDragOver(false);
+      const data = source?.data;
+      if (!data || data.type !== "table-items") return;
+      const onDropCreateFrom = args.contextData.props?.onDropCreateFrom;
+      if (typeof onDropCreateFrom !== "function") return;
+      try {
+        await onDropCreateFrom({
+          type: data.type,
+          itemIds: data.itemIds,
+          count: data.count,
+          sourceTableVertexLabel: data.sourceTableVertexLabel,
+          sourceTableKey: data.sourceTableKey
+        });
+      } catch (error) {
+        console.error("onDropCreateFrom failed:", error);
+        args.showErrorToast?.(error?.message || "Drop failed");
+      }
+    }
+  });
+};
+
+const cleanupDropCreateTarget = () => {
+  if (dropCreateTargetCleanup) {
+    dropCreateTargetCleanup();
+    dropCreateTargetCleanup = null;
+  }
+  setDropCreateDragOver(false);
 };
 
 const getSelectedItems = () => {
@@ -2506,6 +2616,9 @@ return {
   handleDelete,
   initTableDraggable,
   cleanupTableDraggable,
+  initDropCreateTarget,
+  cleanupDropCreateTarget,
+  dropCreateDragOver,
   getSelectedItems,
   resolveFilteredVerticesForExport: resolvedFilteredVertices,
   getSelectFilterProps,
@@ -2576,6 +2689,7 @@ return {
     }
   },
   onCleanup: () => {
+    args.fns.cleanupDropCreateTarget?.();
     args.deleteVertex(0, args.fns.tableStateVertexId, args.graph, args.setGraph);
   }
 }'''
@@ -2614,13 +2728,17 @@ return args.contextData.props?.nestedLinesMode === true
   ? `._id {
   display: flex;
   flex-direction: column;
+  flex: 1 1 auto;
+  width: 100%;
   height: 100%;
-  min-height: 280px;
   min-height: 0;
+  max-height: 100%;
+  overflow: hidden;
 }`
   : `._id {
   display: flex;
   flex-direction: column;
+  width: 100%;
   height: calc(100vh - 48px);
   /* min-height:0 lets flex children (e.g. table body) shrink so overflow/scroll works */
   min-height: 0;
@@ -4138,6 +4256,7 @@ return {
       P: {
         css:
           '''
+const dragOver = args.fns.dropCreateDragOver?.() === true;
 return `._id {
   /* Fills column under header+filter; overflow:auto on one box keeps H+V scrollbars in the visible corner */
   flex: 1 1 0;
@@ -4146,6 +4265,11 @@ return `._id {
   width: 100%;
   overflow: auto;
   position: relative;
+  ${dragOver ? `
+  outline: 2px dashed ${args.theme.var.color.primary};
+  outline-offset: -4px;
+  background: ${args.theme.var.color.primary_light_900};
+  ` : ""}
 }`;
 '''
         displayOrder: 3
@@ -4158,6 +4282,11 @@ return {
     // Same node for VirtualList scroll metrics (vertical) and scrollLeft sync to header/filter (horizontal)
     args.fns.setTableBodyVScrollEl(el);
     args.fns.setTableBodyHScrollEl(el);
+    if (el) {
+      args.fns.initDropCreateTarget?.(el);
+    } else {
+      args.fns.cleanupDropCreateTarget?.();
+    }
   },
   onScroll: (e) => args.fns.handleTableHorizontalScroll(e)
 };
