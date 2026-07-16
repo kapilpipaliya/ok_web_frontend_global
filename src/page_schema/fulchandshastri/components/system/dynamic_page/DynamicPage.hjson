@@ -92,6 +92,79 @@ const getUncategorizedVertexId = () => {
   const label = getTableVertexLabel();
   return label ? '_' + label + '_uncategorized' : null;
 };
+
+const PAGE_RESIZE_STORAGE_PREFIX = "dynamic-page-resize:";
+const DEFAULT_SIDEBAR_WIDTH = 240;
+const MIN_SIDEBAR_WIDTH = 200;
+const MAX_SIDEBAR_WIDTH = 800;
+let pendingCompanionMainRatio = null;
+
+const getPageResizeStorageKey = () => {
+  const label = getTableVertexLabel();
+  const key = getTableKey();
+  if (label && key) return `${PAGE_RESIZE_STORAGE_PREFIX}${label}:${key}`;
+  const settingsPageId = getSettingsPageIdWithoutConfig();
+  if (settingsPageId) return `${PAGE_RESIZE_STORAGE_PREFIX}settings:${settingsPageId}`;
+  if (label) return `${PAGE_RESIZE_STORAGE_PREFIX}label:${label}`;
+  const pathname = typeof window !== "undefined" ? (args.location?.pathname || "") : "";
+  if (pathname) return `${PAGE_RESIZE_STORAGE_PREFIX}path:${pathname}`;
+  return `${PAGE_RESIZE_STORAGE_PREFIX}default`;
+};
+
+const loadStoredPageResize = () => {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(getPageResizeStorageKey());
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? parsed : null;
+  } catch (_) {
+    return null;
+  }
+};
+
+const persistPageResize = (partial) => {
+  if (typeof window === "undefined" || !partial || typeof partial !== "object") return;
+  try {
+    const current = loadStoredPageResize() || {};
+    window.localStorage.setItem(
+      getPageResizeStorageKey(),
+      JSON.stringify({ ...current, ...partial })
+    );
+  } catch (_) {}
+};
+
+const getSidebarWidth = () => {
+  const width = pageP()?.sidebarWidth;
+  return typeof width === "number" && width > 0 ? width : DEFAULT_SIDEBAR_WIDTH;
+};
+
+const persistSidebarWidthDebounced = args.debounce((width) => {
+  persistPageResize({ sidebarWidth: width });
+}, 250);
+
+const setSidebarWidth = (width) => {
+  const next = Math.round(Number(width) || 0);
+  if (next < MIN_SIDEBAR_WIDTH || next > MAX_SIDEBAR_WIDTH) return;
+  patchPageP({ sidebarWidth: next });
+  persistSidebarWidthDebounced(next);
+};
+
+const restorePageResizeFromLocalStorage = () => {
+  const stored = loadStoredPageResize();
+  if (!stored) return;
+  if (
+    typeof stored.sidebarWidth === "number" &&
+    stored.sidebarWidth >= MIN_SIDEBAR_WIDTH &&
+    stored.sidebarWidth <= MAX_SIDEBAR_WIDTH
+  ) {
+    patchPageP({ sidebarWidth: Math.round(stored.sidebarWidth) });
+  }
+  if (Number.isFinite(stored.companionMainRatio)) {
+    pendingCompanionMainRatio = stored.companionMainRatio;
+  }
+};
+
 const getLoadFromSetting = () => args.contextData.props?.loadFromSetting === true;
 const isTableSchemaMode = () => {
   const pageMode = args.contextData.props?.pageMode;
@@ -1349,6 +1422,7 @@ const loadSettings = async (options = {}) => {
 
 // Initialize settings on mount
 const initializeSettings = async () => {
+  restorePageResizeFromLocalStorage();
   patchPageP({ configLoading: true });
   try {
     if (isTableSchemaMode()) {
@@ -1362,10 +1436,12 @@ const initializeSettings = async () => {
         updateMemoizedConfig();
       }
     }
+    restoreCompanionMainRatio();
   } catch (error) {
     console.error("[DynamicPage] initializeSettings error:", error);
   } finally {
     patchPageP({ configLoading: false });
+    restoreCompanionMainRatio();
   }
 };
 
@@ -1624,6 +1700,29 @@ const hasCompanionPages = () => getCompanionPages().length > 0;
 const COMPANION_SPLIT_TRACK_PX = 6;
 const MIN_COMPANION_MAIN_HEIGHT = 160;
 const MIN_COMPANION_PANE_HEIGHT = 180;
+const DEFAULT_COMPANION_MAIN_RATIO = 0.58;
+
+const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+
+const getCompanionAvailableHeight = () => {
+  const shellEl = primaryPaneRef?.parentElement;
+  if (!shellEl) return null;
+  const available =
+    shellEl.getBoundingClientRect().height - COMPANION_SPLIT_TRACK_PX;
+  return available > MIN_COMPANION_MAIN_HEIGHT + MIN_COMPANION_PANE_HEIGHT
+    ? available
+    : null;
+};
+
+const getCompanionMinRatio = (available) => MIN_COMPANION_MAIN_HEIGHT / available;
+const getCompanionMaxRatio = (available) =>
+  (available - MIN_COMPANION_PANE_HEIGHT) / available;
+
+const clampCompanionRatio = (ratio, available) =>
+  clamp(ratio, getCompanionMinRatio(available), getCompanionMaxRatio(available));
+
+const parseCompanionRatio = (ratio) =>
+  Number.isFinite(ratio) ? ratio : DEFAULT_COMPANION_MAIN_RATIO;
 
 const getCompanionMainHeight = () => {
   const height = pageP()?.companionMainHeight;
@@ -1666,8 +1765,37 @@ const setCompanionPaneHeight = (height) => {
 
 const [companionResizeActive, setCompanionResizeActive] = args.createSignal(false);
 let primaryPaneRef = null;
+
+const applyCompanionMainRatio = (ratio) => {
+  const available = getCompanionAvailableHeight();
+  if (available == null) return null;
+  const clampedRatio = clampCompanionRatio(parseCompanionRatio(ratio), available);
+  const mainHeight = Math.round(available * clampedRatio);
+  patchPageP({ companionMainHeight: mainHeight, companionPaneHeight: null });
+  return clampedRatio;
+};
+
+const persistCompanionMainRatio = () => {
+  const available = getCompanionAvailableHeight();
+  const mainHeight = getCompanionMainHeight();
+  if (available == null || mainHeight == null) return;
+  const ratio = clampCompanionRatio(mainHeight / available, available);
+  persistPageResize({ companionMainRatio: ratio });
+};
+
+const restoreCompanionMainRatio = () => {
+  if (!hasCompanionPages()) return;
+  if (pendingCompanionMainRatio == null || !Number.isFinite(pendingCompanionMainRatio)) {
+    return;
+  }
+  if (applyCompanionMainRatio(pendingCompanionMainRatio) != null) {
+    pendingCompanionMainRatio = null;
+  }
+};
+
 const setPrimaryPaneRef = (el) => {
   primaryPaneRef = el || null;
+  restoreCompanionMainRatio();
 };
 
 const handleCompanionSplitResize = (e) => {
@@ -1703,6 +1831,7 @@ const handleCompanionSplitResize = (e) => {
     document.removeEventListener("pointermove", handleMove);
     document.removeEventListener("pointerup", handleUp);
     document.removeEventListener("pointercancel", handleUp);
+    persistCompanionMainRatio();
   };
 
   document.addEventListener("pointermove", handleMove);
@@ -2676,6 +2805,8 @@ return {
   handleExport,
   getSidebarConfig,
   hasSidebar,
+  getSidebarWidth,
+  setSidebarWidth,
   getUsePolarisUI,
   selectedSidebarItem,
   handleSidebarItemSelect,
@@ -2946,8 +3077,8 @@ return {
   relationshipType: relationshipType,
   enableUserScoping: enableUserScopingForSidebar,
   onMoveItemsToCategory: args.fns.handleMoveItemsToCategory,
-  sidebarWidth: () => args.graph.vertexes[vid]?.P?.sidebarWidth ?? 240,
-  setSidebarWidth: (w) => args.mergeVertexProperties(0, vid, args.graph, args.setGraph, { sidebarWidth: w }),
+  sidebarWidth: () => args.fns.getSidebarWidth?.() ?? 240,
+  setSidebarWidth: (w) => args.fns.setSidebarWidth?.(w),
   fetchRoot: args.fns.fetchRoot,
   hooks: config?.sidebar?.hooks,
   initialCategoryId: args.fns.useUrlQueryParams?.() !== false
