@@ -104,12 +104,12 @@ const getRowHeight = () => {
   return args.fns.prop('rowHeight', args.contextData.props) || 36;
 };
 const getTitle = () => {
-  if (args.fns.isEmbeddedMode?.() === true && args.contextData.props?.hidePageChrome !== false) return "";
+  if (args.fns.isEmbeddedMode?.() === true && args.contextData.props?.hidePageChrome === true) return "";
   if (isNestedLinesTable()) return args.contextData.props?.nestedTableTitle ?? '';
   return args.fns.prop('title', args.contextData.props);
 };
 const getSubtitle = () => {
-  if (args.fns.isEmbeddedMode?.() === true && args.contextData.props?.hidePageChrome !== false) return "";
+  if (args.fns.isEmbeddedMode?.() === true && args.contextData.props?.hidePageChrome === true) return "";
   if (isNestedLinesTable()) return args.contextData.props?.nestedTableSubtitle ?? '';
   return args.fns.prop('subtitle', args.contextData.props);
 };
@@ -130,9 +130,16 @@ const getShowRowNumber = () => {
 const getHideColumns = () => args.fns.prop('hideColumns', args.contextData.props) || [];
 
 const getUniqueKeys = () => args.fns.prop('uniqueKeys', args.contextData.props) || [];
-const getShowAddButton = () => {
-  if (isNestedLinesTable()) return args.contextData.props?.showAddButton ?? false;
-  return args.fns.prop('showAddButton', args.contextData.props) ?? true;
+const getHideAddButton = () => {
+  if (isNestedLinesTable()) {
+    // Nested line tables hide Add unless explicitly enabled via hideAddButton: false
+    return args.contextData.props?.hideAddButton !== false;
+  }
+  const loadFromSetting = args.fns.getLoadFromSetting?.() === true;
+  if (loadFromSetting) {
+    return args.fns.prop('hideAddButton') === true;
+  }
+  return args.fns.prop('hideAddButton', args.contextData.props) === true;
 };
 const getShowSelection = () => {
   if (isNestedLinesTable()) return args.contextData.props?.showSelection ?? false;
@@ -485,15 +492,24 @@ const runBulkAction = async (action, rows) => {
 const getResizableColumns = () => args.fns.prop('resizableColumns', args.contextData.props) ?? true;
 const getHideExportButtons = () => {
   if (isNestedLinesTable()) return true;
-  return args.fns.prop('hideExportButtons', args.contextData.props) ?? false;
+  const loadFromSetting = args.fns.getLoadFromSetting?.() === true;
+  return loadFromSetting
+    ? (args.fns.prop('hideExportButtons') === true)
+    : (args.fns.prop('hideExportButtons', args.contextData.props) ?? false);
 };
 const getHideImportButtons = () => {
   if (isNestedLinesTable()) return true;
-  return args.fns.prop('hideImportButtons', args.contextData.props) ?? false;
+  const loadFromSetting = args.fns.getLoadFromSetting?.() === true;
+  return loadFromSetting
+    ? (args.fns.prop('hideImportButtons') === true)
+    : (args.fns.prop('hideImportButtons', args.contextData.props) ?? false);
 };
 const getHideSettingsButton = () => {
   if (isNestedLinesTable()) return true;
-  return args.fns.prop('hideSettingsButton', args.contextData.props) ?? false;
+  const loadFromSetting = args.fns.getLoadFromSetting?.() === true;
+  return loadFromSetting
+    ? (args.fns.prop('hideSettingsButton') === true)
+    : (args.fns.prop('hideSettingsButton', args.contextData.props) ?? false);
 };
 const getIcon = () => {
   if (isNestedLinesTable()) {
@@ -2531,7 +2547,7 @@ return {
   getBatchActions,
   getShowRowNumber,
   getHideColumns,
-  getShowAddButton,
+  getHideAddButton,
   getShowSelection,
   getResizableColumns,
   getHideExportButtons,
@@ -2784,7 +2800,7 @@ return `._id {
           '''
 return {
   as: "div",
-  hide: args.fns.isEmbeddedMode?.() === true && args.contextData.props?.hidePageChrome !== false
+  hide: args.fns.isEmbeddedMode?.() === true && args.contextData.props?.hidePageChrome === true
 };
 '''
       }
@@ -3018,12 +3034,12 @@ return `._id {
         componentName: Html
         props:
           '''
-const showAddButton = args.fns.getShowAddButton();
+const hideAddButton = args.fns.getHideAddButton();
 const formConfig = args.fns.getFormConfig();
 
 return {
   as: "div",
-  hide: !showAddButton || !formConfig
+  hide: hideAddButton || !formConfig
 };
 '''
       }
@@ -5666,8 +5682,8 @@ return {
       L: ComponentVariant
       P: {
         type: boolean
-        key: showAddButton
-        defValue: true
+        key: hideAddButton
+        defValue: false
       }
     }
     {
@@ -6088,6 +6104,12 @@ return {
       T: Attr
       S: "12"
       E: "14"
+    }
+    {
+      id: e41_polaris
+      T: Attr
+      S: "12"
+      E: "14_polaris"
     }
     {
       id: e42

@@ -59,6 +59,7 @@ import { addNewEdge } from "~/lib/graph/mutate/core/edge/addNewEdge";
 import { deleteEdge } from "~/lib/graph/mutate/core/edge/deleteEdge";
 import { newEdge } from "~/lib/graph/mutate/core/edge/newEdge";
 import { klona } from "klona";
+import * as dateFns from "date-fns";
 import { z } from "zod";
 import { cloneVertexWithEdges } from "~/lib/graph/get/sync/entity/cloneVertexWithEdges";
 import {
@@ -375,6 +376,8 @@ export function createFunctionArgumentBase(
 
     // setGraphData,
     klona,
+    /** date-fns — date utilities for use in `props`, `fns`, `css` bodies. */
+    dateFns,
 
     // Graph query helpers using existing functions
     findVertexByLabelAndPks,

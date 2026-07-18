@@ -217,7 +217,7 @@ const resolveGeneralFromPart = (generalRaw, tableVertexLabel) => {
     enableLocalSort: general.enableLocalSort !== false,
     showSelection: general.showSelection !== false,
     hideExportButtons: general.hideExportButtons === true,
-    hideImportButtons: general.hideImportButtons !== false,
+    hideImportButtons: general.hideImportButtons === true,
     hideSettingsButton: general.hideSettingsButton === true,
     hideAddButton: general.hideAddButton === true,
     rowHeight: general.rowHeight ?? 56,
@@ -1872,9 +1872,9 @@ const getTablePassthroughProps = () => {
   if (rowClickableValue !== undefined) {
     passthrough.rowClickable = rowClickableValue === true;
   }
-  const showAddButtonValue = prop("showAddButton");
-  if (showAddButtonValue !== undefined) {
-    passthrough.showAddButton = showAddButtonValue === true;
+  const hidePageChromeValue = prop("hidePageChrome");
+  if (hidePageChromeValue !== undefined) {
+    passthrough.hidePageChrome = hidePageChromeValue === true;
   }
   const actionHandlers = prop("actionHandlers");
   if (actionHandlers && typeof actionHandlers === "object") {

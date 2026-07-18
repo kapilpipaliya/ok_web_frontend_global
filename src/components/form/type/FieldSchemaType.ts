@@ -116,6 +116,8 @@ export interface FunctionArgumentBaseType {
   ) => Promise<Record<string, unknown>>;
   /** Zod namespace (`import { z } from "zod"`); exposed on dynamic component / page `args`. */
   z: typeof import("zod").z;
+  /** date-fns namespace (`import * as dateFns from "date-fns"`); exposed on dynamic component / page `args`. */
+  dateFns: typeof import("date-fns");
   /** Build a virtua/render-prop row renderer from the loop + Slot graph template. */
   createLoopRowRenderer: (
     mapContextValue: (

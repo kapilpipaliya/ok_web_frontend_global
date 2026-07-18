@@ -67,7 +67,7 @@ const partPayloads = {
     enableLocalSort: general.enableLocalSort !== false,
     showSelection: general.showSelection !== false,
     hideExportButtons: general.hideExportButtons === true,
-    hideImportButtons: general.hideImportButtons !== false,
+    hideImportButtons: general.hideImportButtons === true,
     hideSettingsButton: general.hideSettingsButton === true,
     hideAddButton: general.hideAddButton === true,
     rowHeight: general.rowHeight ?? 56,

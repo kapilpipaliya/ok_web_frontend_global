@@ -204,6 +204,16 @@ const portalNavSectionsData = [
         }
       },
       {
+        id: "dravya_drishti_prakash_videos_table",
+        href: "/portal/table?table=DravyaDrishtiPrakashVideo&key=dravya_drishti_prakash_videos",
+        label: "Dravya Drishti Prakash Videos",
+        icon: "ph:youtube-logo",
+        pathCheck: () => {
+          if (String(args.location?.pathname || "") !== "/portal/table") return false;
+          return String(args.searchParams?.table || "").trim() === "DravyaDrishtiPrakashVideo";
+        }
+      },
+      {
         id: "files_organizer",
         href: "/portal/table?table=File&key=files",
         label: "Files",

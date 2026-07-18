@@ -23,6 +23,7 @@ const TABLE_KEY_BY_LABEL = {
   RecommendedBook: "recommended_books",
   GalleryItem: "gallery",
   ScheduleEvent: "schedule",
+  DravyaDrishtiPrakashVideo: "dravya_drishti_prakash_videos",
   File: "files",
   Page: "pages",
   Component: "components",
@@ -35,6 +36,7 @@ const TABLE_TITLE_BY_LABEL = {
   RecommendedBook: "Books Recommended by Fulchand",
   GalleryItem: "Gallery",
   ScheduleEvent: "Schedule",
+  DravyaDrishtiPrakashVideo: "Dravya Drishti Prakash Videos",
   File: "Files",
   Page: "Pages",
   Component: "Components",
@@ -162,6 +164,12 @@ const getTableActions = () => {
     return [
       { key: "edit", type: "edit" },
       { key: "delete", type: "delete", confirm: makeDeleteConfirm("event") }
+    ];
+  }
+  if (getTableVertexLabel() === "DravyaDrishtiPrakashVideo") {
+    return [
+      { key: "edit", type: "edit" },
+      { key: "delete", type: "delete", confirm: makeDeleteConfirm("video") }
     ];
   }
   if (getTableVertexLabel() === "File") {
@@ -414,6 +422,7 @@ return {
   loadFromSetting: true,
   usePolarisUI: true,
   embeddedMode: true,
+  hidePageChrome: false,
   ...(actions ? { actions } : {}),
   ...(actionHandlers ? { actionHandlers } : {}),
   ...(actionHandlers ? { onRowClick: (row) => args.fns.openInPageDesigner?.(row) } : {})

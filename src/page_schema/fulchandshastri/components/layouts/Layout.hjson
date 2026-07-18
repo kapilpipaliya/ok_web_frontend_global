@@ -182,6 +182,9 @@ const [videoQueue, setVideoQueue] = args.createSignal([]);
 const [playerPosition, setPlayerPosition] = args.createStore({ x: null, y: null });
 const [playerSize, setPlayerSize] = args.createStore({ width: 480, height: 270 });
 
+// Queue modal state (client-only; clears on reload)
+const [isQueueModalOpen, setIsQueueModalOpen] = args.createSignal(false);
+
 // Keep Awake wrapper functions
 const keepAwake = async () => {
   await args.KeepAwake.keepAwake();
@@ -232,33 +235,99 @@ const disableKeepAwake = async () => {
   }
 };
 
-// Player control functions
+// Open player without modifying queue (used by pages that set queue themselves)
 const openPlayer = async (video) => {
   setCurrentVideo(video);
   setPlayerState("minimized");
   await enableKeepAwake();
 };
 
+// Add video to in-memory queue (no server persistence)
+const addToQueue = async (video) => {
+  const queue = videoQueue();
+  const videoId = video?.P?.youtubeId;
+
+  const alreadyInQueue = queue.some(v => v?.P?.youtubeId === videoId);
+  if (alreadyInQueue) {
+    args.showWarningToast("Video already in queue");
+    return;
+  }
+
+  setVideoQueue([...queue, video]);
+  args.showSuccessToast("Added to queue");
+};
+
+// Play video and add to queue
+const playVideo = async (video) => {
+  setCurrentVideo(video);
+  setPlayerState("minimized");
+  await enableKeepAwake();
+  await addToQueue(video);
+};
+
 const closePlayer = async () => {
   setPlayerState("closed");
   setCurrentVideo(null);
-  setVideoQueue([]);
   await disableKeepAwake();
 };
 
 const togglePlayerState = () => {
-  setPlayerState(prev => prev === "minimized" ? "maximized" : "minimized");
+  const current = playerState();
+  if (current === "minimized") {
+    setPlayerState("maximized");
+  } else if (current === "maximized") {
+    setPlayerState("minimized");
+  }
 };
 
-const playNext = () => {
+const playNext = async () => {
   const queue = videoQueue();
-  if (queue.length > 0) {
-    const [nextVideo, ...rest] = queue;
-    setCurrentVideo(nextVideo);
-    setVideoQueue(rest);
-  } else {
-    closePlayer();
+  if (queue.length === 0) {
+    return;
   }
+
+  const nextVideo = queue[0];
+  setCurrentVideo(nextVideo);
+  setVideoQueue(queue.slice(1));
+};
+
+const removeFromQueue = async (index) => {
+  const queue = videoQueue();
+  const newQueue = [...queue.slice(0, index), ...queue.slice(index + 1)];
+  setVideoQueue(newQueue);
+  args.showSuccessToast("Removed from queue");
+};
+
+const clearQueue = async () => {
+  setVideoQueue([]);
+  args.showSuccessToast("Queue cleared");
+};
+
+const reorderQueue = async (fromIndex, toIndex) => {
+  const queue = videoQueue();
+
+  if (fromIndex < 0 || fromIndex >= queue.length || toIndex < 0 || toIndex >= queue.length) {
+    args.showErrorToast("Invalid queue position");
+    return;
+  }
+
+  if (fromIndex === toIndex) {
+    return;
+  }
+
+  const newQueue = [...queue];
+  const [movedVideo] = newQueue.splice(fromIndex, 1);
+  newQueue.splice(toIndex, 0, movedVideo);
+  setVideoQueue(newQueue);
+  args.showSuccessToast("Queue reordered");
+};
+
+const openQueueModal = () => {
+  setIsQueueModalOpen(true);
+};
+
+const closeQueueModal = () => {
+  setIsQueueModalOpen(false);
 };
 
 return {
@@ -275,9 +344,17 @@ return {
   playerSize,
   setPlayerSize,
   openPlayer,
+  playVideo,
+  addToQueue,
+  removeFromQueue,
+  clearQueue,
+  reorderQueue,
   closePlayer,
   togglePlayerState,
   playNext,
+  isQueueModalOpen,
+  openQueueModal,
+  closeQueueModal,
   keepAwake,
   allowSleep,
   isSupported,
@@ -392,7 +469,8 @@ return {};
         componentName: VideoPlayer
         key: unique_1
         props:
-          '''return {
+          '''
+return {
   playerState: args.fns.playerState,
   currentVideo: args.fns.currentVideo,
   videoQueue: args.fns.videoQueue,
@@ -403,8 +481,33 @@ return {};
   closePlayer: args.fns.closePlayer,
   togglePlayerState: args.fns.togglePlayerState,
   playNext: args.fns.playNext,
-  openQueueModal: () => { }
-};'''
+  removeFromQueue: args.fns.removeFromQueue,
+  clearQueue: args.fns.clearQueue,
+  openQueueModal: args.fns.openQueueModal
+};
+'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: QueueModal
+        props:
+          '''
+return {
+  isOpen: args.fns.isQueueModalOpen,
+  onClose: args.fns.closeQueueModal,
+  videoQueue: args.fns.videoQueue,
+  setVideoQueue: args.fns.setVideoQueue,
+  playVideo: args.fns.playVideo,
+  removeFromQueue: args.fns.removeFromQueue,
+  clearQueue: args.fns.clearQueue,
+  reorderQueue: args.fns.reorderQueue,
+  executeYTOFunction: args.fns.executeYTOFunction
+};
+'''
       }
     }
   ]
@@ -456,6 +559,12 @@ return {};
       T: Attr
       S: "4"
       E: "9"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "4"
+      E: "10"
     }
   ]
 }

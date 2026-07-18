@@ -4063,7 +4063,7 @@ const bookTableGeneral = {
   enableLocalSort: true,
   showSelection: true,
   hideExportButtons: false,
-  hideImportButtons: true,
+  hideImportButtons: false,
   hideSettingsButton: false,
   hideAddButton: false,
   rowHeight: 56,
@@ -4274,7 +4274,7 @@ const recommendedBookTableGeneral = {
   enableLocalSort: true,
   showSelection: true,
   hideExportButtons: false,
-  hideImportButtons: true,
+  hideImportButtons: false,
   hideSettingsButton: false,
   hideAddButton: false,
   rowHeight: 56,
@@ -4482,7 +4482,7 @@ const scheduleTableGeneral = {
   enableLocalSort: true,
   showSelection: true,
   hideExportButtons: false,
-  hideImportButtons: true,
+  hideImportButtons: false,
   hideSettingsButton: false,
   hideAddButton: false,
   rowHeight: 56,
@@ -4534,6 +4534,62 @@ const scheduleTableFormConfig = {
 };
 
 const scheduleTableSidebar = {
+  enabled: false
+};
+
+const dravyaDrishtiPrakashVideoTableColumns = [
+  { key: "subject", label: "Subject", dataType: "text", renderer: "text", width: "320px", required: true, overflowEllipsis: true },
+  { key: "date", label: "Date", dataType: "date", renderer: "date", width: "130px" },
+  { key: "time", label: "Time", dataType: "text", renderer: "text", width: "110px" },
+  { key: "youtubeUrl", label: "YouTube link", dataType: "text", renderer: "text", width: "320px", required: true, overflowEllipsis: true },
+  { key: "bol", label: "Bol", dataType: "text", renderer: "text", width: "180px", overflowEllipsis: true }
+];
+
+const dravyaDrishtiPrakashVideoTableGeneral = {
+  publicRead: true,
+  title: "Dravya Drishti Prakash Videos",
+  label: "Dravya Drishti Prakash video",
+  icon: "ph:youtube-logo",
+  usePolarisUI: true,
+  enableUserScopingForContent: false,
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  showSelection: true,
+  hideExportButtons: false,
+  hideImportButtons: false,
+  hideSettingsButton: false,
+  hideAddButton: false,
+  rowHeight: 56,
+  columnWidths: { __selection: "36px", __rowNumber: "48px", __actions: "88px" },
+  rowClickable: true,
+  showRowNumber: true,
+  resizableColumns: true,
+  actions: [
+    { key: "edit", type: "edit" },
+    { key: "delete", type: "delete", confirm: { title: "Delete video?", message: "This cannot be undone.", confirmText: "Delete", cancelText: "Cancel", variant: "danger" } }
+  ],
+  hooks: {}
+};
+
+const dravyaDrishtiPrakashVideoTableFormConfig = {
+  gridColumns: 2,
+  groups: [
+    {
+      key: "basic",
+      title: "Video",
+      gridColumns: 2,
+      fields: [
+        { key: "subject", label: "Subject", dataType: "text", renderer: "text", required: true, colSpan: 2, translatable: false },
+        { key: "date", label: "Date", dataType: "date", renderer: "date", colSpan: 1, translatable: false },
+        { key: "time", label: "Time", dataType: "text", renderer: "text", colSpan: 1, translatable: false },
+        { key: "youtubeUrl", label: "YouTube link", dataType: "text", renderer: "text", required: true, colSpan: 2, translatable: false },
+        { key: "bol", label: "Bol", dataType: "text", renderer: "textArea", colSpan: 2, translatable: false }
+      ]
+    }
+  ]
+};
+
+const dravyaDrishtiPrakashVideoTableSidebar = {
   enabled: false
 };
 
@@ -4692,7 +4748,7 @@ const galleryTableGeneral = {
   enableLocalSort: true,
   showSelection: true,
   hideExportButtons: false,
-  hideImportButtons: true,
+  hideImportButtons: false,
   hideSettingsButton: false,
   hideAddButton: false,
   rowHeight: 56,
@@ -4828,10 +4884,10 @@ const componentTableGeneral = {
   enableLocalFilters: true,
   enableLocalSort: true,
   showSelection: true,
-  hideExportButtons: true,
-  hideImportButtons: true,
+  hideExportButtons: false,
+  hideImportButtons: false,
   hideSettingsButton: false,
-  hideAddButton: true,
+  hideAddButton: false,
   rowHeight: 48,
   columnWidths: { __selection: "36px", __rowNumber: "48px", __actions: "104px" },
   rowClickable: true,
@@ -4898,10 +4954,10 @@ const pageTableGeneral = {
   enableLocalFilters: true,
   enableLocalSort: true,
   showSelection: true,
-  hideExportButtons: true,
-  hideImportButtons: true,
+  hideExportButtons: false,
+  hideImportButtons: false,
   hideSettingsButton: false,
-  hideAddButton: true,
+  hideAddButton: false,
   rowHeight: 48,
   columnWidths: { __selection: "36px", __rowNumber: "48px", __actions: "104px" },
   rowClickable: true,
@@ -4966,10 +5022,10 @@ const functionTableGeneral = {
   enableLocalFilters: true,
   enableLocalSort: true,
   showSelection: true,
-  hideExportButtons: true,
-  hideImportButtons: true,
+  hideExportButtons: false,
+  hideImportButtons: false,
   hideSettingsButton: false,
-  hideAddButton: true,
+  hideAddButton: false,
   rowHeight: 48,
   columnWidths: { __selection: "36px", __rowNumber: "48px", __actions: "104px" },
   rowClickable: true,
@@ -5033,10 +5089,10 @@ const emailTemplateTableGeneral = {
   enableLocalFilters: true,
   enableLocalSort: true,
   showSelection: true,
-  hideExportButtons: true,
-  hideImportButtons: true,
+  hideExportButtons: false,
+  hideImportButtons: false,
   hideSettingsButton: false,
-  hideAddButton: true,
+  hideAddButton: false,
   rowHeight: 48,
   columnWidths: { __selection: "36px", __rowNumber: "48px", __actions: "104px" },
   rowClickable: true,
@@ -5096,11 +5152,10 @@ const fileTableGeneral = {
   enableLocalFilters: true,
   enableLocalSort: true,
   showSelection: true,
-  hideExportButtons: true,
-  hideImportButtons: true,
+  hideExportButtons: false,
+  hideImportButtons: false,
   hideSettingsButton: false,
   hideAddButton: false,
-  showAddButton: true,
   rowHeight: 64,
   columnWidths: { __selection: "36px", __rowNumber: "48px", __actions: "88px" },
   rowClickable: true,
@@ -5366,6 +5421,23 @@ const tableDefinitions = [
     columns: scheduleTableColumns,
     formConfig: scheduleTableFormConfig,
     sidebar: scheduleTableSidebar
+  },
+  {
+    tableKey: "dravya_drishti_prakash_videos",
+    tableVertexLabel: "DravyaDrishtiPrakashVideo",
+    pageId: "table:dravya_drishti_prakash_videos",
+    schemaKeys: {
+      general: "dravya_drishti_prakash_videos_schema_general",
+      columns: "dravya_drishti_prakash_videos_schema_columns",
+      formConfig: "dravya_drishti_prakash_videos_schema_formconfig",
+      sidebar: "dravya_drishti_prakash_videos_schema_sidebar"
+    },
+    name: "Dravya Drishti Prakash Videos",
+    description: "Video table for public /dravya-drishti-prakash page and portal admin. No content rows are seeded.",
+    general: dravyaDrishtiPrakashVideoTableGeneral,
+    columns: dravyaDrishtiPrakashVideoTableColumns,
+    formConfig: dravyaDrishtiPrakashVideoTableFormConfig,
+    sidebar: dravyaDrishtiPrakashVideoTableSidebar
   },
   {
     tableKey: "components",
