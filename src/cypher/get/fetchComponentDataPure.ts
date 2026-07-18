@@ -6,6 +6,7 @@ import { FormMetaData } from "~/lib/meta/formMetaData";
 export async function fetchComponentDataPure(
   componentNames: string[],
   dbSession?: Session,
+  subDomain?: string,
 ) {
   const { incoming, outgoing } = getEdgesFromRowsAttr(
     FormMetaData.Component.attributes,
@@ -20,7 +21,7 @@ export async function fetchComponentDataPure(
       nodes: {},
       relationships: {},
       ...(dbSession ? { dbSession } : {}),
-      // @ts-expect-error ignore error
+      ...(subDomain ? { subDomain } : {}),
       $initial: { filter: { key: { $in: componentNames } } },
     },
   );

@@ -27,6 +27,7 @@ export interface ExportStats {
 
 async function fetchEntities(
   dbSession: Session,
+  subDomain: string,
   entityType: "Component" | "Page" | "Theme" | "Function" | "EmailTemplate",
   options: {
     skipKeys?: string[];
@@ -101,6 +102,7 @@ async function fetchEntities(
       undefined,
       true,
       dbSession,
+      subDomain,
     );
 
     if (fetchResult.error || !fetchResult.data) {
@@ -255,7 +257,7 @@ export async function performSchemaExport(
   const exportFunctions = !filterOnly || includeFunctionKeys.length > 0;
 
   if (exportComponents) {
-    const components = await fetchEntities(dbSession, "Component", {
+    const components = await fetchEntities(dbSession, subDomain, "Component", {
       ...(includeComponentKeys.length > 0
         ? { includeKeys: includeComponentKeys }
         : {}),
@@ -276,7 +278,7 @@ export async function performSchemaExport(
   }
 
   if (exportPages) {
-    const pages = await fetchEntities(dbSession, "Page", {
+    const pages = await fetchEntities(dbSession, subDomain, "Page", {
       ...(includePageKeys.length > 0 ? { includeKeys: includePageKeys } : {}),
       excludePublicPages,
     });
@@ -296,7 +298,7 @@ export async function performSchemaExport(
   }
 
   if (!filterOnly) {
-    const themes = await fetchEntities(dbSession, "Theme", {
+    const themes = await fetchEntities(dbSession, subDomain, "Theme", {
       skipKeys: ["Default"],
     });
     const themeCategoryPaths = await fetchSchemaCategoryFolderPaths(
@@ -315,7 +317,7 @@ export async function performSchemaExport(
   }
 
   if (exportFunctions) {
-    const functions = await fetchEntities(dbSession, "Function", {
+    const functions = await fetchEntities(dbSession, subDomain, "Function", {
       ...(includeFunctionKeys.length > 0
         ? { includeKeys: includeFunctionKeys }
         : {}),
@@ -336,7 +338,7 @@ export async function performSchemaExport(
   }
 
   if (!filterOnly) {
-    const emailTemplates = await fetchEntities(dbSession, "EmailTemplate", {});
+    const emailTemplates = await fetchEntities(dbSession, subDomain, "EmailTemplate", {});
     const emailTemplateCategoryPaths = await fetchSchemaCategoryFolderPaths(
       dbSession,
       "EmailTemplate",

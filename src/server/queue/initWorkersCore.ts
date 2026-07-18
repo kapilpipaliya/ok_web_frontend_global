@@ -18,7 +18,6 @@ import {
   startSchemaJobsQueueWorker,
   stopSchemaJobsQueueWorker,
 } from "~/server/queue/workers/schemaJobsQueueWorker";
-import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { getAllDatabases } from "~/cypher/mutate/manage/getAllDatabases";
 import { getDriver } from "~/cypher/core/driver";
 import { executeNamedServerFunctionCore } from "~/cypher/get/executeNamedServerFunctionCore";
@@ -264,115 +263,6 @@ export async function initWorkersCore() {
 }
 
 /**
- * Initialize subdomain-specific workers from database
- * Should be called per subdomain, not at app startup
- * Uses current subdomain from request context automatically
- * Uses Promise-based singleton per subdomain to prevent race conditions
- */
-export async function initSubdomainWorkers() {
-  // Get subdomain to check if already initializing
-  const { dbSession: tempSession, subDomain } =
-    await getDBSessionForSubdomain();
-  await tempSession.close();
-
-  // If already initializing for this subdomain, wait for/return the same promise
-  if (workerState.subdomainInitPromises.has(subDomain)) {
-    return workerState.subdomainInitPromises.get(subDomain)!;
-  }
-
-  // Create the initialization promise for this subdomain
-  const initPromise = (async () => {
-    console.log("[Workers] Starting subdomain-specific workers...");
-
-    // Find and execute all database-defined worker functions
-    const { dbSession, subDomain: currentSubdomain } =
-      await getDBSessionForSubdomain();
-
-    console.log(
-      `[Workers] Initializing workers for subdomain: ${currentSubdomain}`,
-    );
-
-    // Get or create worker map for this subdomain
-    const subdomainWorkers = getSubdomainWorkers(currentSubdomain);
-
-    try {
-      const query = `
-        MATCH (f:Function)
-        WHERE f.key STARTS WITH 'process' OR f.key STARTS WITH 'background'
-        RETURN f
-      `;
-
-      const result = await dbSession.run(query);
-
-      console.log(
-        `[Workers] Found ${result.records.length} subdomain worker functions for ${currentSubdomain}`,
-      );
-
-      for (const record of result.records) {
-        const functionVertex = record.get("f");
-        const functionKey = functionVertex.properties.key;
-
-        try {
-          console.log(
-            `[Workers] Initializing subdomain worker ${functionKey} for ${currentSubdomain}`,
-          );
-
-          const workerResult = await executeNamedServerFunctionCore(
-            {
-              functionName: functionKey,
-              contextData: {
-                action: "start",
-              },
-            },
-            {
-              dbSession,
-              functionLookupSession: dbSession,
-              subDomain: currentSubdomain,
-              nodes: {},
-              relationships: {},
-              vertexes: undefined as any,
-            },
-          );
-
-          if (workerResult.error) {
-            console.error(
-              `[Workers] Failed to initialize ${functionKey}:`,
-              workerResult.error,
-            );
-          } else {
-            console.log(
-              `[Workers] Successfully initialized: ${functionKey} for ${currentSubdomain}`,
-            );
-            // Store worker reference if the function returns a stop method
-            if (workerResult.result?.stop) {
-              subdomainWorkers.set(functionKey, workerResult.result);
-            }
-          }
-        } catch (error) {
-          console.error(`[Workers] Error initializing ${functionKey}:`, error);
-        }
-      }
-    } catch (error) {
-      console.error(
-        "[Workers] Error finding subdomain worker functions:",
-        error,
-      );
-    } finally {
-      await dbSession.close();
-    }
-
-    console.log(
-      `[Workers] Subdomain workers initialization complete for ${currentSubdomain}`,
-    );
-  })();
-
-  // Store the promise
-  workerState.subdomainInitPromises.set(subDomain, initPromise);
-
-  return initPromise;
-}
-
-/**
  * All Neo4j databases that may host synced worker Function vertices:
  * app SubDomain databases plus per-shop Shopify databases (shop*).
  */
@@ -562,44 +452,6 @@ export async function initAllSubdomainWorkers() {
       "[Workers] Error initializing workers for all subdomains/shops:",
       error,
     );
-  }
-}
-
-/**
- * Close all active workers for current subdomain
- * Automatically gets the current subdomain from request context
- */
-export async function closeAllWorkers() {
-  // Get current subdomain from request context
-  const { dbSession, subDomain } = await getDBSessionForSubdomain();
-  await dbSession.close();
-
-  // Close workers only for the current subdomain
-  const subdomainWorkers = workerState.activeWorkers.get(subDomain);
-
-  if (subdomainWorkers) {
-    console.log(`[Workers] Stopping all workers for subdomain: ${subDomain}`);
-    for (const [workerName, worker] of subdomainWorkers.entries()) {
-      try {
-        console.log(
-          `[Workers] Stopping worker: ${workerName} (subdomain: ${subDomain})`,
-        );
-        await worker.stop();
-
-        // Clean up individual worker start promise
-        const workerStartKey = `${subDomain}:${workerName}`;
-        workerState.workerStartPromises.delete(workerStartKey);
-      } catch (error) {
-        console.error(`[Workers] Error stopping ${workerName}:`, error);
-      }
-    }
-    subdomainWorkers.clear();
-    workerState.activeWorkers.delete(subDomain);
-    // Clean up the initialization promise so workers can be reinitialized
-    workerState.subdomainInitPromises.delete(subDomain);
-    console.log(`[Workers] All workers stopped for subdomain: ${subDomain}`);
-  } else {
-    console.log(`[Workers] No workers found for subdomain: ${subDomain}`);
   }
 }
 

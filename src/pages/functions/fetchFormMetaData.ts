@@ -30,6 +30,8 @@ export async function fetchFormMetaData(
   url?: string,
   skipComponentData?: boolean,
   dbSession?: Session,
+  /** Database name for `dbSession`; required to fetch nested data outside a request context (e.g. queue workers). */
+  subDomain?: string,
 ): Promise<FetchFormMetaDataResult> {
   "use server";
   if (isDesignMode) {
@@ -71,6 +73,8 @@ export async function fetchFormMetaData(
           pageKeyName,
           resolvedUrl,
           skipComponentData,
+          undefined,
+          subDomain,
         ),
       {
         ttl: getFormMetaDataCacheTtl(),
@@ -91,6 +95,7 @@ export async function fetchFormMetaData(
     resolvedUrl,
     skipComponentData,
     dbSession,
+    subDomain,
   );
 }
 
@@ -102,6 +107,7 @@ async function fetchFormMetaDataFromDB(
   url?: string,
   skipComponentData?: boolean,
   dbSession?: Session,
+  subDomain?: string,
 ): Promise<FetchFormMetaDataResult> {
   const form = FormMetaData[pageVertexName ?? "Page"] || FormMetaData.Page;
   const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);
@@ -123,6 +129,7 @@ async function fetchFormMetaDataFromDB(
       nodes: {},
       relationships: {},
       ...(dbSession ? { dbSession } : {}),
+      ...(subDomain ? { subDomain } : {}),
       $urlFilter: { filter: { url: url } },
     },
   );
@@ -141,7 +148,11 @@ async function fetchFormMetaDataFromDB(
     return { data, formMetaId };
   }
 
-  const componentData = await fetchComponentDataFromGraph(data, dbSession);
+  const componentData = await fetchComponentDataFromGraph(
+    data,
+    dbSession,
+    subDomain,
+  );
 
   prepareGraphForWireTransfer(componentData?.graph);
 

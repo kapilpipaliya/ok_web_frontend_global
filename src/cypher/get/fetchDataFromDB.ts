@@ -7,6 +7,8 @@ import { evalExpressionAsync } from "~/lib/expression_eval";
 import type { EvalExpressionContext } from "../types/EvalExpressionContext";
 import type { NestedExpression } from "../types/NestedExpression";
 
+import { getDriver } from "~/cypher/core/driver";
+
 import { getDBSessionForSubdomain } from "../session/getSessionForSubdomain";
 import type { Edge } from "~/lib/graph/type/edge";
 import type { Vertex } from "~/lib/graph/type/vertex";
@@ -34,7 +36,7 @@ import type { Vertex } from "~/lib/graph/type/vertex";
  */
 export async function fetchDataFromDB(
   expression: NestedExpression,
-  context: EvalExpressionContext & { adminui?: boolean } & {
+  context: EvalExpressionContext & {
     [key: `$${string}`]: any;
   } = {
     nodes: {} as { [key: string]: Vertex },
@@ -50,11 +52,6 @@ export async function fetchDataFromDB(
   let dbSession: Session | undefined;
   let sessionCreatedLocally = false; // Track if we created the session (and must close it)
 
-  // @ts-expect-error ignore
-  if (expression.adminui) {
-    context.adminui = true;
-  }
-
   try {
     // Session acquisition strategy:
     // 1. Reuse existing session from context if available (for nested calls)
@@ -63,16 +60,22 @@ export async function fetchDataFromDB(
       // Reuse session from parent context
       // Do NOT close this session - parent context owns it
       dbSession = context.dbSession;
+    } else if (context.subDomain) {
+      // Known target database (e.g. queue workers with no HTTP request context):
+      // create the session directly instead of resolving via getRequestURL().
+      dbSession = (await getDriver()).session({ database: context.subDomain });
+      sessionCreatedLocally = true;
+      context.dbSession = dbSession;
     } else {
       // Create new session for this operation
       // MUST close this session in finally block
-      ({ dbSession } = await getDBSessionForSubdomain(
-        context.adminui
-          ? ({ url: "http://localhost/?adminui=true" } as Request)
-          : undefined,
-      ));
+      const sessionData = await getDBSessionForSubdomain();
+      dbSession = sessionData.dbSession;
       sessionCreatedLocally = true; // Flag: we own this session and must close it
       context.dbSession = dbSession; // Share with nested calls
+      // Remember the database so nested parallel calls (which spawn their own
+      // sessions) target the same database without needing a request context.
+      context.subDomain = sessionData.subDomain;
     }
 
     // if (permissionCheck) {
@@ -120,7 +123,7 @@ export async function fetchDataFromDB(
   }
 }
 
-type FetchDataContext = EvalExpressionContext & { adminui?: boolean } & {
+type FetchDataContext = EvalExpressionContext & {
   [key: `$${string}`]: any;
 };
 
@@ -157,7 +160,8 @@ async function processIncomingOutgoingExpressions(
   if (context.tx) {
     for (const exp of expressions) {
       context.vertexes = vertexes;
-      await fetchDataFromDB(exp, context);
+      const result = await fetchDataFromDB(exp, context);
+      throwIfNestedFetchFailed(result, exp);
     }
     return;
   }
@@ -165,7 +169,7 @@ async function processIncomingOutgoingExpressions(
   // Each branch gets its own session (dbSession: undefined) so queries can run in
   // parallel without sharing one session. nodes/relationships stay shared so results
   // merge into the same graph on the parent context.
-  await Promise.all(
+  const results = await Promise.all(
     expressions.map((exp) =>
       fetchDataFromDB(exp, {
         ...context,
@@ -174,4 +178,23 @@ async function processIncomingOutgoingExpressions(
       } as FetchDataContext),
     ),
   );
+  for (let i = 0; i < results.length; i++) {
+    throwIfNestedFetchFailed(results[i], expressions[i]);
+  }
+}
+
+/**
+ * Nested expression failures must fail the whole fetch. Silently ignoring them
+ * returns a partial graph, which callers (e.g. schema export) can't distinguish
+ * from complete data and may persist as truncated files.
+ */
+function throwIfNestedFetchFailed(
+  result: ServerResult,
+  expression: NestedExpression,
+) {
+  if (result.error) {
+    throw new Error(
+      `Nested expression failed: ${expression.expression}: ${result.error}`,
+    );
+  }
 }

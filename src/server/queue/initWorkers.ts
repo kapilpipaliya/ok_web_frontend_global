@@ -9,8 +9,8 @@
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { executeNamedServerFunction } from "~/cypher/get/executeNamedServerFunction";
 import {
-  closeAllWorkers,
-  initSubdomainWorkers,
+  initSubdomainWorkersForSubdomain,
+  stopWorkersForSubdomain,
   workerState,
   initAllSubdomainWorkers,
 } from "~/server/queue/initWorkersCore";
@@ -36,7 +36,7 @@ export async function initSubdomainWorkersUI() {
   const { dbSession, subDomain } = await getDBSessionForSubdomain();
   try {
     // Initialize workers on current node
-    const localResult = await initSubdomainWorkers();
+    const localResult = await initSubdomainWorkersForSubdomain(subDomain);
 
     // Broadcast to other cluster nodes
     try {
@@ -81,7 +81,7 @@ export async function stopWorkers() {
   const { dbSession, subDomain } = await getDBSessionForSubdomain();
   try {
     // Stop workers on current node
-    await closeAllWorkers();
+    await stopWorkersForSubdomain(subDomain);
     console.log("[Workers] Stopped all workers for current subdomain");
 
     // Broadcast to other cluster nodes

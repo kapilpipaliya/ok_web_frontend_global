@@ -12,10 +12,6 @@ export interface EnsureSchemaCategoryResult {
   categoryKey: string;
 }
 
-function buildCategoryKey(segments: string[]): string {
-  return segments.join("/");
-}
-
 async function ensureCategoryHierarchy(
   tx: Transaction,
   config: SchemaCategoryConfig,
@@ -25,7 +21,7 @@ async function ensureCategoryHierarchy(
 
   for (let index = 0; index < segments.length; index++) {
     const segment = segments[index];
-    const categoryKey = buildCategoryKey(segments.slice(0, index + 1));
+    const categoryKey = segment;
 
     if (parentKey === null) {
       await tx.run(
@@ -69,7 +65,7 @@ async function ensureCategoryHierarchy(
     parentKey = categoryKey;
   }
 
-  const categoryKey = buildCategoryKey(segments);
+  const categoryKey = segments[segments.length - 1];
   const result = await tx.run(
     `
     MATCH (cat:${config.categoryLabel} {key: $categoryKey})
@@ -99,7 +95,7 @@ export async function ensureImportedSchemaItemCategory(
     return { categoryCreated: false, linked: false, categoryKey: "" };
   }
 
-  const categoryKey = buildCategoryKey(categorySegments);
+  const categoryKey = categorySegments[categorySegments.length - 1];
 
   await tx.run(
     `

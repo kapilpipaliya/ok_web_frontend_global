@@ -22,7 +22,7 @@ export const TemplateGraphProvider = (props: ParentProps) => {
     "globalStoreId",
     graph[0],
     graph[1],
-    { url: "adminui" },
+    { url: "template" },
   );
   const TemplateGraph = createKeyedContext("templateGraph", graph);
   return (

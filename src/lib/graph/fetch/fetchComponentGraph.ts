@@ -13,6 +13,7 @@ import { mergeGraphs } from "./graphFetchUtils";
 export async function fetchComponentDataFromGraph(
   graphData?: ServerResult,
   dbSession?: Session,
+  subDomain?: string,
 ): Promise<ServerResult | undefined> {
   if (!graphData?.graph?.vertexes) {
     return undefined;
@@ -35,6 +36,7 @@ export async function fetchComponentDataFromGraph(
     const componentData = await fetchComponentDataPure(
       newComponentNames,
       dbSession,
+      subDomain,
     );
 
     if (componentData?.graph?.vertexes) {
