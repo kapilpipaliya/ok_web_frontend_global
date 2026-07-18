@@ -1,0 +1,177 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        fns: return { enabled: () => true }
+        url: /Kapil/:url
+        key: Test
+        updatedAt: 2026-07-15T10:27:55.402Z
+        props:
+          '''return {
+  isNoPermissionCheck: true
+}'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        as: div
+        css:
+          '''return `._id {
+        padding: 10px;
+        color: ${args.theme.var.color.text};
+      }`;
+'''
+        displayOrder: 4
+        componentName: Html
+        key: unique_4
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        as: a
+        css:
+          '''return `._id {
+        padding: 10px;
+      }`;'''
+        displayOrder: 1
+        componentName: Html
+        text: A
+        key: unique_1
+        props:
+          '''return {
+  href: "/Kapil/A",
+  text: "A"
+}'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        as: a
+        css:
+          '''return `._id {
+        padding: 10px;
+      }`;'''
+        displayOrder: 2
+        componentName: Html
+        text: B
+        key: unique_3
+        props:
+          '''return {
+  href: "/Kapil/B",
+  text: "B"
+}'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+        padding: 10px;
+      }`;'''
+        as: a
+        displayOrder: 3
+        componentName: Html
+        key: unique_2
+        props:
+          '''return {
+  href: "/Kapil/C",
+  text: "C"
+}'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+        padding: 10px;
+      }`;'''
+        as: div
+        displayOrder: 4
+        componentName: Html
+        key: unique_5
+        props:
+          '''const params = args.context?.getParams?.(args.meta) || {};
+return {
+  text: "Matched URL IS: " + (params.url ?? args.context?.url ?? "")
+}'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        as: div
+        css:
+          '''return `._id {
+        padding: 10px;
+      }`;'''
+        displayOrder: 5
+        componentName: Html
+        key: unique_6
+      }
+    }
+    {
+      id: "8"
+      L: PageLayout
+      P: {
+        componentName: Layout
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "1"
+      E: "7"
+    }
+    {
+      id: e3
+      T: PageLayout
+      S: "1"
+      E: "8"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "2"
+      E: "5"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "2"
+      E: "6"
+    }
+  ]
+}

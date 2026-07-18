@@ -1,16 +1,17 @@
 {
   vertexes: [
     {
-      id: "page",
-      L: "Page",
+      id: "1"
+      L: Page
       P: {
         public: true
-        key: "Donation",
-        fns: "return { enabled: () => true }",
-        isNoPermissionCheck: true,
-        url: "/donation"
-        settingsPageId: "donation"
-        props: '''
+        settingsPageId: donation
+        isNoPermissionCheck: true
+        fns: return { enabled: () => true }
+        url: /donation
+        key: Donation
+        props:
+          '''
 const locale = args.params?.lang ? String(args.params.lang).toLowerCase() : undefined;
 return {
   contextName: "donationSettings",
@@ -30,149 +31,161 @@ try {
 };
 '''
       }
-    },
+    }
     {
-      id: "pageHeader",
-      L: "Attr",
+      id: "2"
+      L: PageLayout
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        displayOrder: 1
+        componentName: Layout
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   background: linear-gradient(135deg, ${args.theme.var.color.primary_light_100} 0%, ${args.theme.var.color.primary_light_50} 100%);
   padding: 3rem 1rem;
   text-align: center;
 }`;
 '''
-      }
-    },
-    {
-      id: "pageTitle",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const content = args.contextData.donationSettings?.content;
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "h1",
-  text: content?.pageTitle
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.text};
   font-size: 3rem;
   font-weight: 700;
   margin: 0;
-  
+
   @media (max-width: 768px) {
     font-size: 2rem;
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "pageSubtitle",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const content = args.contextData.donationSettings?.content;
 return {
-  as: "p",
-  text: content?.pageSubtitle
+  as: "h1",
+  text: content?.pageTitle
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.text_light_200};
   font-size: 1.25rem;
   margin-top: 1rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "mainContent",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const content = args.contextData.donationSettings?.content;
 return {
-  as: "main"
+  as: "p",
+  text: content?.pageSubtitle
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   padding: 3rem 1rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "container",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div"
+  as: "main"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   max-width: 1000px;
   margin: 0 auto;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "introSection",
-      L: "Attr",
+      id: "8"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  text-align: center;
+  margin-bottom: 3rem;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "section",
   "data-animate": "",
 
   ref: (el) => el && args.fns.animateOnView(el)
 };
-''',
-        css: '''
-return `._id {
-  text-align: center;
-  margin-bottom: 3rem;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "introText",
-      L: "Attr",
+      id: "9"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const content = args.contextData.donationSettings?.content;
-return {
-  as: "p",
-  text: content?.introText
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   font-size: 1.125rem;
   line-height: 1.8;
@@ -181,23 +194,24 @@ return `._id {
   margin: 0 auto;
 }`;
 '''
-      }
-    },
-    {
-      id: "donationOptions",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const content = args.contextData.donationSettings?.content;
 return {
-  as: "section",
-  "data-animate": "",
-
-  ref: (el) => el && args.fns.animateOnView(el)
+  as: "p",
+  text: content?.introText
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -205,458 +219,496 @@ return `._id {
   margin-bottom: 3rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "option1",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  "data-animate": "",
-
-  ref: (el) => el && args.fns.animateOnView(el, { delay: 0 })
-};
-''',
-        css: '''
-return `._id {
-  background: ${args.theme.var.color.background};
-  border: 2px solid ${args.theme.var.color.primary_light_200};
-  border-radius: 0.75rem;
-  padding: 2rem;
-  text-align: center;
-  transition: all 0.3s ease;
-  
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-    border-color: ${args.theme.var.color.primary};
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "option1Icon",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  width: 4rem;
-  height: 4rem;
-  background: ${args.theme.var.color.primary_light_100};
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 1.5rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "option1IconSvg",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "icon",
-  icon: "carbon:education",
-  width: 32,
-  height: 32
-};
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.primary};
-}`;
-'''
-      }
-    },
-    {
-      id: "option1Title",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const content = args.contextData.donationSettings?.content;
-return {
-  as: "h3",
-  text: content?.option1Title
-};
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.text};
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "option1Desc",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-const content = args.contextData.donationSettings?.content;
-return {
-  as: "p",
-  text: content?.option1Desc
-};
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.text_light_200};
-  line-height: 1.6;
-  margin-bottom: 1.5rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "option1Amount",
-      L: "Attr",
-      P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
-const content = args.contextData.donationSettings?.content;
-return {
-  as: "p",
-  text: content?.option1Amount
-};
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.primary};
-  font-size: 1.25rem;
-  font-weight: 600;
-}`;
-'''
-      }
-    },
-    {
-      id: "option2",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  "data-animate": "",
-
-  ref: (el) => el && args.fns.animateOnView(el, { delay: 0.08 })
-};
-''',
-        css: '''
-return `._id {
-  background: ${args.theme.var.color.background};
-  border: 2px solid ${args.theme.var.color.primary_light_200};
-  border-radius: 0.75rem;
-  padding: 2rem;
-  text-align: center;
-  transition: all 0.3s ease;
-  
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-    border-color: ${args.theme.var.color.primary};
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "option2Icon",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  width: 4rem;
-  height: 4rem;
-  background: ${args.theme.var.color.primary_light_100};
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 1.5rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "option2IconSvg",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "icon",
-  icon: "carbon:home",
-  width: 32,
-  height: 32
-};
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.primary};
-}`;
-'''
-      }
-    },
-    {
-      id: "option2Title",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const content = args.contextData.donationSettings?.content;
-return {
-  as: "h3",
-  text: content?.option2Title
-};
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.text};
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "option2Desc",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-const content = args.contextData.donationSettings?.content;
-return {
-  as: "p",
-  text: content?.option2Desc
-};
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.text_light_200};
-  line-height: 1.6;
-  margin-bottom: 1.5rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "option2Amount",
-      L: "Attr",
-      P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
-const content = args.contextData.donationSettings?.content;
-return {
-  as: "p",
-  text: content?.option2Amount
-};
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.primary};
-  font-size: 1.25rem;
-  font-weight: 600;
-}`;
-'''
-      }
-    },
-    {
-      id: "option3",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  "data-animate": "",
-
-  ref: (el) => el && args.fns.animateOnView(el, { delay: 0.16 })
-};
-''',
-        css: '''
-return `._id {
-  background: ${args.theme.var.color.background};
-  border: 2px solid ${args.theme.var.color.primary_light_200};
-  border-radius: 0.75rem;
-  padding: 2rem;
-  text-align: center;
-  transition: all 0.3s ease;
-  
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-    border-color: ${args.theme.var.color.primary};
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "option3Icon",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  width: 4rem;
-  height: 4rem;
-  background: ${args.theme.var.color.primary_light_100};
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 1.5rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "option3IconSvg",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "icon",
-  icon: "carbon:book",
-  width: 32,
-  height: 32
-};
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.primary};
-}`;
-'''
-      }
-    },
-    {
-      id: "option3Title",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const content = args.contextData.donationSettings?.content;
-return {
-  as: "h3",
-  text: content?.option3Title
-};
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.text};
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "option3Desc",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-const content = args.contextData.donationSettings?.content;
-return {
-  as: "p",
-  text: content?.option3Desc
-};
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.text_light_200};
-  line-height: 1.6;
-  margin-bottom: 1.5rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "option3Amount",
-      L: "Attr",
-      P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
-const content = args.contextData.donationSettings?.content;
-return {
-  as: "p",
-  text: content?.option3Amount
-};
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.primary};
-  font-size: 1.25rem;
-  font-weight: 600;
-}`;
-'''
-      }
-    },
-    {
-      id: "generalDonation",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
   as: "section",
   "data-animate": "",
 
   ref: (el) => el && args.fns.animateOnView(el)
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border: 2px solid ${args.theme.var.color.primary_light_200};
+  border-radius: 0.75rem;
+  padding: 2rem;
+  text-align: center;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    border-color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el, { delay: 0 })
+};
+'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  width: 4rem;
+  height: 4rem;
+  background: ${args.theme.var.color.primary_light_100};
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "icon",
+  icon: "carbon:education",
+  width: 32,
+  height: 32
+};
+'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const content = args.contextData.donationSettings?.content;
+return {
+  as: "h3",
+  text: content?.option1Title
+};
+'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.text_light_200};
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const content = args.contextData.donationSettings?.content;
+return {
+  as: "p",
+  text: content?.option1Desc
+};
+'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+  font-size: 1.25rem;
+  font-weight: 600;
+}`;
+'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+const content = args.contextData.donationSettings?.content;
+return {
+  as: "p",
+  text: content?.option1Amount
+};
+'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border: 2px solid ${args.theme.var.color.primary_light_200};
+  border-radius: 0.75rem;
+  padding: 2rem;
+  text-align: center;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    border-color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el, { delay: 0.08 })
+};
+'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  width: 4rem;
+  height: 4rem;
+  background: ${args.theme.var.color.primary_light_100};
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "icon",
+  icon: "carbon:home",
+  width: 32,
+  height: 32
+};
+'''
+      }
+    }
+    {
+      id: "20"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const content = args.contextData.donationSettings?.content;
+return {
+  as: "h3",
+  text: content?.option2Title
+};
+'''
+      }
+    }
+    {
+      id: "21"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.text_light_200};
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const content = args.contextData.donationSettings?.content;
+return {
+  as: "p",
+  text: content?.option2Desc
+};
+'''
+      }
+    }
+    {
+      id: "22"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+  font-size: 1.25rem;
+  font-weight: 600;
+}`;
+'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+const content = args.contextData.donationSettings?.content;
+return {
+  as: "p",
+  text: content?.option2Amount
+};
+'''
+      }
+    }
+    {
+      id: "23"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border: 2px solid ${args.theme.var.color.primary_light_200};
+  border-radius: 0.75rem;
+  padding: 2rem;
+  text-align: center;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    border-color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el, { delay: 0.16 })
+};
+'''
+      }
+    }
+    {
+      id: "24"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  width: 4rem;
+  height: 4rem;
+  background: ${args.theme.var.color.primary_light_100};
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "25"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "icon",
+  icon: "carbon:book",
+  width: 32,
+  height: 32
+};
+'''
+      }
+    }
+    {
+      id: "26"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const content = args.contextData.donationSettings?.content;
+return {
+  as: "h3",
+  text: content?.option3Title
+};
+'''
+      }
+    }
+    {
+      id: "27"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.text_light_200};
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const content = args.contextData.donationSettings?.content;
+return {
+  as: "p",
+  text: content?.option3Desc
+};
+'''
+      }
+    }
+    {
+      id: "28"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+  font-size: 1.25rem;
+  font-weight: 600;
+}`;
+'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+const content = args.contextData.donationSettings?.content;
+return {
+  as: "p",
+  text: content?.option3Amount
+};
+'''
+      }
+    }
+    {
+      id: "29"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   background: ${args.theme.var.color.background_light_50};
   border-radius: 1rem;
@@ -665,22 +717,25 @@ return `._id {
   margin-bottom: 3rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "generalTitle",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const content = args.contextData.donationSettings?.content;
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
 return {
-  as: "h2",
-  text: content?.generalTitle
+  as: "section",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el)
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "30"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.text};
   font-size: 2rem;
@@ -688,22 +743,24 @@ return `._id {
   margin-bottom: 1.5rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "generalDesc",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const content = args.contextData.donationSettings?.content;
 return {
-  as: "p",
-  text: content?.generalDesc
+  as: "h2",
+  text: content?.generalTitle
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "31"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.text_light_200};
   font-size: 1.125rem;
@@ -712,20 +769,24 @@ return `._id {
   margin: 0 auto 2rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "amountOptions",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const content = args.contextData.donationSettings?.content;
 return {
-  as: "div"
+  as: "p",
+  text: content?.generalDesc
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "32"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   gap: 1rem;
@@ -734,20 +795,22 @@ return `._id {
   margin-bottom: 2rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "amount1",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
 return {
-  as: "button"
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "33"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   padding: 0.75rem 1.5rem;
   background: ${args.theme.var.color.background};
@@ -757,7 +820,7 @@ return `._id {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  
+
   &:hover {
     background: ${args.theme.var.color.primary};
     color: ${args.theme.var.color.primary_text};
@@ -765,15 +828,24 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button"
+};
+'''
       }
-    },
+    }
     {
-      id: "amount1Text",
-      L: "Attr",
+      id: "34"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const content = args.contextData.donationSettings?.content;
 return {
   as: "span",
@@ -781,19 +853,13 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "amount2",
-      L: "Attr",
+      id: "35"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "button"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   padding: 0.75rem 1.5rem;
   background: ${args.theme.var.color.background};
@@ -803,7 +869,7 @@ return `._id {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  
+
   &:hover {
     background: ${args.theme.var.color.primary};
     color: ${args.theme.var.color.primary_text};
@@ -811,15 +877,24 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button"
+};
+'''
       }
-    },
+    }
     {
-      id: "amount2Text",
-      L: "Attr",
+      id: "36"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const content = args.contextData.donationSettings?.content;
 return {
   as: "span",
@@ -827,19 +902,13 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "amount3",
-      L: "Attr",
+      id: "37"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-return {
-  as: "button"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   padding: 0.75rem 1.5rem;
   background: ${args.theme.var.color.background};
@@ -849,7 +918,7 @@ return `._id {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  
+
   &:hover {
     background: ${args.theme.var.color.primary};
     color: ${args.theme.var.color.primary_text};
@@ -857,15 +926,24 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button"
+};
+'''
       }
-    },
+    }
     {
-      id: "amount3Text",
-      L: "Attr",
+      id: "38"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const content = args.contextData.donationSettings?.content;
 return {
   as: "span",
@@ -873,19 +951,13 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "amount4",
-      L: "Attr",
+      id: "39"
+      L: Attr
       P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
-return {
-  as: "button"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   padding: 0.75rem 1.5rem;
   background: ${args.theme.var.color.background};
@@ -895,7 +967,7 @@ return `._id {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  
+
   &:hover {
     background: ${args.theme.var.color.primary};
     color: ${args.theme.var.color.primary_text};
@@ -903,15 +975,24 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button"
+};
+'''
       }
-    },
+    }
     {
-      id: "amount4Text",
-      L: "Attr",
+      id: "40"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const content = args.contextData.donationSettings?.content;
 return {
   as: "span",
@@ -919,19 +1000,13 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "donateButton",
-      L: "Attr",
+      id: "41"
+      L: Attr
       P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
-return {
-  as: "button"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   padding: 1rem 3rem;
   background: ${args.theme.var.color.primary};
@@ -942,7 +1017,7 @@ return `._id {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  
+
   &:hover {
     background: ${args.theme.var.color.primary_dark_200};
     transform: translateY(-2px);
@@ -950,15 +1025,24 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button"
+};
+'''
       }
-    },
+    }
     {
-      id: "donateText",
-      L: "Attr",
+      id: "42"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const content = args.contextData.donationSettings?.content;
 return {
   as: "span",
@@ -966,22 +1050,13 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "bankDetails",
-      L: "Attr",
+      id: "43"
+      L: Attr
       P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
-return {
-  as: "section",
-  "data-animate": "",
-
-  ref: (el) => el && args.fns.animateOnView(el)
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   background: ${args.theme.var.color.background};
   border: 1px solid ${args.theme.var.color.background_light_300};
@@ -990,22 +1065,25 @@ return `._id {
   margin-bottom: 3rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "bankTitle",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const content = args.contextData.donationSettings?.content;
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
 return {
-  as: "h3",
-  text: content?.bankTitle
+  as: "section",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el)
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "44"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.text};
   font-size: 1.5rem;
@@ -1014,267 +1092,290 @@ return `._id {
   text-align: center;
 }`;
 '''
-      }
-    },
-    {
-      id: "bankInfo",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const content = args.contextData.donationSettings?.content;
 return {
-  as: "div"
+  as: "h3",
+  text: content?.bankTitle
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "45"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 1.5rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "bankDetail1",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
   as: "div"
 };
 '''
       }
-    },
+    }
     {
-      id: "bankLabel1",
-      L: "Attr",
+      id: "46"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "47"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.text_light_300};
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const content = args.contextData.donationSettings?.content;
 return {
   as: "p",
   text: content?.bankLabel1
 };
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.text_light_300};
-  font-size: 0.875rem;
-  margin-bottom: 0.25rem;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "bankValue1",
-      L: "Attr",
+      id: "48"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  font-weight: 600;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 const content = args.contextData.donationSettings?.content;
 return {
   as: "p",
   text: content?.bankValue1
 };
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.text};
-  font-weight: 600;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "bankDetail2",
-      L: "Attr",
+      id: "49"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
   as: "div"
 };
 '''
       }
-    },
+    }
     {
-      id: "bankLabel2",
-      L: "Attr",
+      id: "50"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.text_light_300};
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const content = args.contextData.donationSettings?.content;
 return {
   as: "p",
   text: content?.bankLabel2
 };
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.text_light_300};
-  font-size: 0.875rem;
-  margin-bottom: 0.25rem;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "bankValue2",
-      L: "Attr",
+      id: "51"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  font-weight: 600;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 const content = args.contextData.donationSettings?.content;
 return {
   as: "p",
   text: content?.bankValue2
 };
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.text};
-  font-weight: 600;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "bankDetail3",
-      L: "Attr",
+      id: "52"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
 return {
   as: "div"
 };
 '''
       }
-    },
+    }
     {
-      id: "bankLabel3",
-      L: "Attr",
+      id: "53"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.text_light_300};
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const content = args.contextData.donationSettings?.content;
 return {
   as: "p",
   text: content?.bankLabel3
 };
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.text_light_300};
-  font-size: 0.875rem;
-  margin-bottom: 0.25rem;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "bankValue3",
-      L: "Attr",
+      id: "54"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  font-weight: 600;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 const content = args.contextData.donationSettings?.content;
 return {
   as: "p",
   text: content?.bankValue3
 };
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.text};
-  font-weight: 600;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "bankDetail4",
-      L: "Attr",
+      id: "55"
+      L: Attr
       P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
 return {
   as: "div"
 };
 '''
       }
-    },
+    }
     {
-      id: "bankLabel4",
-      L: "Attr",
+      id: "56"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const content = args.contextData.donationSettings?.content;
-return {
-  as: "p",
-  text: content?.bankLabel4
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.text_light_300};
   font-size: 0.875rem;
   margin-bottom: 0.25rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "bankValue4",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const content = args.contextData.donationSettings?.content;
 return {
   as: "p",
-  text: content?.bankValue4
+  text: content?.bankLabel4
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "57"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.text};
   font-weight: 600;
 }`;
 '''
-      }
-    },
-    {
-      id: "taxNote",
-      L: "Attr",
-      P: {
-        displayOrder: 5,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const content = args.contextData.donationSettings?.content;
 return {
-  as: "div",
-  "data-animate": "",
-
-  ref: (el) => el && args.fns.animateOnView(el)
+  as: "p",
+  text: content?.bankValue4
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "58"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   text-align: center;
   padding: 1.5rem;
@@ -1283,120 +1384,422 @@ return `._id {
   margin-bottom: 2rem;
 }`;
 '''
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el)
+};
+'''
       }
-    },
+    }
     {
-      id: "taxIcon",
-      L: "Attr",
+      id: "59"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.success};
+  margin-bottom: 0.5rem;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "icon",
   icon: "carbon:certificate",
   width: 24,
   height: 24
 };
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.success};
-  margin-bottom: 0.5rem;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "taxText",
-      L: "Attr",
+      id: "60"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const content = args.contextData.donationSettings?.content;
-return {
-  as: "p",
-  text: content?.taxText
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.success_dark_200};
   font-weight: 500;
   margin: 0;
 }`;
 '''
-      }
-    },
-    {
-      id: "layout",
-      L: "PageLayout",
-      P: {
-        displayOrder: 1,
-        componentName: "Layout"
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const content = args.contextData.donationSettings?.content;
+return {
+  as: "p",
+  text: content?.taxText
+};
+'''
       }
     }
-  ],
+  ]
   edges: [
-    { id: "e0", T: "Attr", S: "page", E: "pageHeader" },
-    { id: "e3", T: "Attr", S: "pageHeader", E: "pageTitle" },
-    { id: "e4", T: "Attr", S: "pageHeader", E: "pageSubtitle" },
-    { id: "e5", T: "Attr", S: "page", E: "mainContent" },
-    { id: "e6", T: "Attr", S: "mainContent", E: "container" },
-    { id: "e7", T: "Attr", S: "container", E: "introSection" },
-    { id: "e8", T: "Attr", S: "introSection", E: "introText" },
-    { id: "e9", T: "Attr", S: "container", E: "donationOptions" },
-    { id: "e10", T: "Attr", S: "donationOptions", E: "option1" },
-    { id: "e11", T: "Attr", S: "option1", E: "option1Icon" },
-    { id: "e12", T: "Attr", S: "option1Icon", E: "option1IconSvg" },
-    { id: "e13", T: "Attr", S: "option1", E: "option1Title" },
-    { id: "e14", T: "Attr", S: "option1", E: "option1Desc" },
-    { id: "e15", T: "Attr", S: "option1", E: "option1Amount" },
-    { id: "e16", T: "Attr", S: "donationOptions", E: "option2" },
-    { id: "e17", T: "Attr", S: "option2", E: "option2Icon" },
-    { id: "e18", T: "Attr", S: "option2Icon", E: "option2IconSvg" },
-    { id: "e19", T: "Attr", S: "option2", E: "option2Title" },
-    { id: "e20", T: "Attr", S: "option2", E: "option2Desc" },
-    { id: "e21", T: "Attr", S: "option2", E: "option2Amount" },
-    { id: "e22", T: "Attr", S: "donationOptions", E: "option3" },
-    { id: "e23", T: "Attr", S: "option3", E: "option3Icon" },
-    { id: "e24", T: "Attr", S: "option3Icon", E: "option3IconSvg" },
-    { id: "e25", T: "Attr", S: "option3", E: "option3Title" },
-    { id: "e26", T: "Attr", S: "option3", E: "option3Desc" },
-    { id: "e27", T: "Attr", S: "option3", E: "option3Amount" },
-    { id: "e28", T: "Attr", S: "container", E: "generalDonation" },
-    { id: "e29", T: "Attr", S: "generalDonation", E: "generalTitle" },
-    { id: "e30", T: "Attr", S: "generalDonation", E: "generalDesc" },
-    { id: "e31", T: "Attr", S: "generalDonation", E: "amountOptions" },
-    { id: "e32", T: "Attr", S: "amountOptions", E: "amount1" },
-    { id: "e33", T: "Attr", S: "amount1", E: "amount1Text" },
-    { id: "e34", T: "Attr", S: "amountOptions", E: "amount2" },
-    { id: "e35", T: "Attr", S: "amount2", E: "amount2Text" },
-    { id: "e36", T: "Attr", S: "amountOptions", E: "amount3" },
-    { id: "e37", T: "Attr", S: "amount3", E: "amount3Text" },
-    { id: "e38", T: "Attr", S: "amountOptions", E: "amount4" },
-    { id: "e39", T: "Attr", S: "amount4", E: "amount4Text" },
-    { id: "e40", T: "Attr", S: "generalDonation", E: "donateButton" },
-    { id: "e41", T: "Attr", S: "donateButton", E: "donateText" },
-    { id: "e42", T: "Attr", S: "container", E: "bankDetails" },
-    { id: "e43", T: "Attr", S: "bankDetails", E: "bankTitle" },
-    { id: "e44", T: "Attr", S: "bankDetails", E: "bankInfo" },
-    { id: "e45", T: "Attr", S: "bankInfo", E: "bankDetail1" },
-    { id: "e46", T: "Attr", S: "bankDetail1", E: "bankLabel1" },
-    { id: "e47", T: "Attr", S: "bankDetail1", E: "bankValue1" },
-    { id: "e48", T: "Attr", S: "bankInfo", E: "bankDetail2" },
-    { id: "e49", T: "Attr", S: "bankDetail2", E: "bankLabel2" },
-    { id: "e50", T: "Attr", S: "bankDetail2", E: "bankValue2" },
-    { id: "e51", T: "Attr", S: "bankInfo", E: "bankDetail3" },
-    { id: "e52", T: "Attr", S: "bankDetail3", E: "bankLabel3" },
-    { id: "e53", T: "Attr", S: "bankDetail3", E: "bankValue3" },
-    { id: "e54", T: "Attr", S: "bankInfo", E: "bankDetail4" },
-    { id: "e55", T: "Attr", S: "bankDetail4", E: "bankLabel4" },
-    { id: "e56", T: "Attr", S: "bankDetail4", E: "bankValue4" },
-    { id: "e57", T: "Attr", S: "container", E: "taxNote" },
-    { id: "e58", T: "Attr", S: "taxNote", E: "taxIcon" },
-    { id: "e59", T: "Attr", S: "taxNote", E: "taxText" },
-    { id: "e_layout", T: "PageLayout", S: "page", E: "layout" }
+    {
+      id: e1
+      T: PageLayout
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "1"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "1"
+      E: "6"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "7"
+      E: "10"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "7"
+      E: "29"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "7"
+      E: "43"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "7"
+      E: "58"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "10"
+      E: "11"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "10"
+      E: "17"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "10"
+      E: "23"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "11"
+      E: "12"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "11"
+      E: "14"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "11"
+      E: "15"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "11"
+      E: "16"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "12"
+      E: "13"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "17"
+      E: "18"
+    }
+    {
+      id: e22
+      T: Attr
+      S: "17"
+      E: "20"
+    }
+    {
+      id: e23
+      T: Attr
+      S: "17"
+      E: "21"
+    }
+    {
+      id: e24
+      T: Attr
+      S: "17"
+      E: "22"
+    }
+    {
+      id: e25
+      T: Attr
+      S: "18"
+      E: "19"
+    }
+    {
+      id: e26
+      T: Attr
+      S: "23"
+      E: "24"
+    }
+    {
+      id: e27
+      T: Attr
+      S: "23"
+      E: "26"
+    }
+    {
+      id: e28
+      T: Attr
+      S: "23"
+      E: "27"
+    }
+    {
+      id: e29
+      T: Attr
+      S: "23"
+      E: "28"
+    }
+    {
+      id: e30
+      T: Attr
+      S: "24"
+      E: "25"
+    }
+    {
+      id: e31
+      T: Attr
+      S: "29"
+      E: "30"
+    }
+    {
+      id: e32
+      T: Attr
+      S: "29"
+      E: "31"
+    }
+    {
+      id: e33
+      T: Attr
+      S: "29"
+      E: "32"
+    }
+    {
+      id: e34
+      T: Attr
+      S: "29"
+      E: "41"
+    }
+    {
+      id: e35
+      T: Attr
+      S: "32"
+      E: "33"
+    }
+    {
+      id: e36
+      T: Attr
+      S: "32"
+      E: "35"
+    }
+    {
+      id: e37
+      T: Attr
+      S: "32"
+      E: "37"
+    }
+    {
+      id: e38
+      T: Attr
+      S: "32"
+      E: "39"
+    }
+    {
+      id: e39
+      T: Attr
+      S: "33"
+      E: "34"
+    }
+    {
+      id: e40
+      T: Attr
+      S: "35"
+      E: "36"
+    }
+    {
+      id: e41
+      T: Attr
+      S: "37"
+      E: "38"
+    }
+    {
+      id: e42
+      T: Attr
+      S: "39"
+      E: "40"
+    }
+    {
+      id: e43
+      T: Attr
+      S: "41"
+      E: "42"
+    }
+    {
+      id: e44
+      T: Attr
+      S: "43"
+      E: "44"
+    }
+    {
+      id: e45
+      T: Attr
+      S: "43"
+      E: "45"
+    }
+    {
+      id: e46
+      T: Attr
+      S: "45"
+      E: "46"
+    }
+    {
+      id: e47
+      T: Attr
+      S: "45"
+      E: "49"
+    }
+    {
+      id: e48
+      T: Attr
+      S: "45"
+      E: "52"
+    }
+    {
+      id: e49
+      T: Attr
+      S: "45"
+      E: "55"
+    }
+    {
+      id: e50
+      T: Attr
+      S: "46"
+      E: "47"
+    }
+    {
+      id: e51
+      T: Attr
+      S: "46"
+      E: "48"
+    }
+    {
+      id: e52
+      T: Attr
+      S: "49"
+      E: "50"
+    }
+    {
+      id: e53
+      T: Attr
+      S: "49"
+      E: "51"
+    }
+    {
+      id: e54
+      T: Attr
+      S: "52"
+      E: "53"
+    }
+    {
+      id: e55
+      T: Attr
+      S: "52"
+      E: "54"
+    }
+    {
+      id: e56
+      T: Attr
+      S: "55"
+      E: "56"
+    }
+    {
+      id: e57
+      T: Attr
+      S: "55"
+      E: "57"
+    }
+    {
+      id: e58
+      T: Attr
+      S: "58"
+      E: "59"
+    }
+    {
+      id: e59
+      T: Attr
+      S: "58"
+      E: "60"
+    }
   ]
 }

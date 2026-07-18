@@ -1,0 +1,50 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        fns: return { enabled: () => true }
+        key: Samadhi_pragna
+        url: /samadhi-pragna
+        updatedAt: 2026-07-08T04:30:35.451Z
+        props:
+          '''return {
+  isNoPermissionCheck: true
+}'''
+      }
+    }
+    {
+      id: "2"
+      L: PageLayout
+      P: {
+        componentName: Layout
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        as: div
+        displayOrder: 1
+        componentName: Html
+        text: Test
+        key: unique_1
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: PageLayout
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "1"
+      E: "3"
+    }
+  ]
+}

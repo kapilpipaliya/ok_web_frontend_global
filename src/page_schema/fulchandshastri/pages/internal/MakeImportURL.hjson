@@ -12,14 +12,32 @@
   isNoPermissionCheck: true,
 };
 '''
+        updatedAt: 2026-07-15T11:09:22.722Z
       }
     }
     {
       id: "2"
+      L: PageLayout
+      P: {
+        componentName: Layout
+      }
+    }
+    {
+      id: "3"
       L: Attr
       P: {
+        css:
+          '''
+return `._id {
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}`;
+'''
         displayOrder: 1
-        componentName: Html
         fns:
           '''
 const [generatedImportUrl, setGeneratedImportUrl] = args.createSignal("");
@@ -180,17 +198,7 @@ return {
   buildUrls
 };
 '''
-        css:
-          '''
-return `._id {
-  max-width: 48rem;
-  margin: 0 auto;
-  padding: 1.5rem 1rem 3rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}`;
-'''
+        componentName: Html
         props:
           '''
 return {
@@ -200,11 +208,9 @@ return {
       }
     }
     {
-      id: "3"
+      id: "4"
       L: Attr
       P: {
-        displayOrder: 1
-        componentName: Html
         css:
           '''
 return `._id {
@@ -214,6 +220,8 @@ return `._id {
   color: ${args.theme.var.color.text};
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
         props:
           '''
 return {
@@ -224,21 +232,9 @@ return {
       }
     }
     {
-      id: "4"
+      id: "5"
       L: Attr
       P: {
-        displayOrder: 2
-        componentName: Html
-        textType: markdown
-        text:
-          '''Fill the form to build Schema Import and Export URLs.
-
-- Leave filters empty for a **full** import/export (components, pages, themes, functions, email templates).
-- Fill any of `components` / `pages` / `functions` to filter those keys only.
-- Keys can be comma-separated or one per line.
-- `jobId` is optional (useful when sharing a running job poll URL).
-- `shop` is optional and applies to import.
-'''
         css:
           '''
 return `._id {
@@ -260,6 +256,18 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 2
+        textType: markdown
+        componentName: Html
+        text:
+          '''Fill the form to build Schema Import and Export URLs.
+
+- Leave filters empty for a **full** import/export (components, pages, themes, functions, email templates).
+- Fill any of `components` / `pages` / `functions` to filter those keys only.
+- Keys can be comma-separated or one per line.
+- `jobId` is optional (useful when sharing a running job poll URL).
+- `shop` is optional and applies to import.
+'''
         props:
           '''
 return {
@@ -269,11 +277,9 @@ return {
       }
     }
     {
-      id: "5"
+      id: "6"
       L: Attr
       P: {
-        displayOrder: 3
-        componentName: FormManagement
         css:
           '''
 return `._id {
@@ -283,6 +289,8 @@ return `._id {
   overflow: hidden;
 }`;
 '''
+        displayOrder: 3
+        componentName: FormManagement
         props:
           '''
 return {
@@ -368,11 +376,9 @@ return {
       }
     }
     {
-      id: "6"
+      id: "7"
       L: Attr
       P: {
-        displayOrder: 4
-        componentName: Html
         css:
           '''
 return `._id {
@@ -381,6 +387,8 @@ return `._id {
   gap: 0.75rem;
 }`;
 '''
+        displayOrder: 4
+        componentName: Html
         props:
           '''
 return {
@@ -390,7 +398,7 @@ return {
       }
     }
     {
-      id: "7"
+      id: "8"
       L: Attr
       P: {
         displayOrder: 1
@@ -406,11 +414,9 @@ return {
       }
     }
     {
-      id: "8"
+      id: "9"
       L: Attr
       P: {
-        displayOrder: 5
-        componentName: Html
         css:
           '''
 return `._id {
@@ -419,6 +425,8 @@ return `._id {
   gap: 1rem;
 }`;
 '''
+        displayOrder: 5
+        componentName: Html
         props:
           '''
 return {
@@ -429,11 +437,9 @@ return {
       }
     }
     {
-      id: "9"
+      id: "10"
       L: Attr
       P: {
-        displayOrder: 1
-        componentName: Html
         css:
           '''
 return `._id {
@@ -446,30 +452,8 @@ return `._id {
   background: ${args.theme.var.color.background};
 }`;
 '''
-        props:
-          '''
-return {
-  as: "div"
-};
-'''
-      }
-    }
-    {
-      id: "10"
-      L: Attr
-      P: {
         displayOrder: 1
         componentName: Html
-        css:
-          '''
-return `._id {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-}`;
-'''
         props:
           '''
 return {
@@ -482,8 +466,30 @@ return {
       id: "11"
       L: Attr
       P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}`;
+'''
         displayOrder: 1
         componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
         css:
           '''
 return `._id {
@@ -493,6 +499,8 @@ return `._id {
   color: ${args.theme.var.color.text};
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
         props:
           '''
 return {
@@ -503,11 +511,9 @@ return {
       }
     }
     {
-      id: "12"
+      id: "13"
       L: Attr
       P: {
-        displayOrder: 2
-        componentName: Html
         css:
           '''
 return `._id {
@@ -516,6 +522,8 @@ return `._id {
   gap: 0.5rem;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
         props:
           '''
 return {
@@ -525,7 +533,7 @@ return {
       }
     }
     {
-      id: "12a"
+      id: "14"
       L: Attr
       P: {
         displayOrder: 1
@@ -541,7 +549,7 @@ return {
       }
     }
     {
-      id: "12b"
+      id: "15"
       L: Attr
       P: {
         displayOrder: 2
@@ -557,7 +565,7 @@ return {
       }
     }
     {
-      id: "12c"
+      id: "16"
       L: Attr
       P: {
         displayOrder: 3
@@ -573,11 +581,9 @@ return {
       }
     }
     {
-      id: "13"
+      id: "17"
       L: Attr
       P: {
-        displayOrder: 2
-        componentName: Html
         css:
           '''
 return `._id {
@@ -593,6 +599,8 @@ return `._id {
   word-break: break-word;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
         props:
           '''
 return {
@@ -603,11 +611,9 @@ return {
       }
     }
     {
-      id: "14"
+      id: "18"
       L: Attr
       P: {
-        displayOrder: 2
-        componentName: Html
         css:
           '''
 return `._id {
@@ -620,6 +626,8 @@ return `._id {
   background: ${args.theme.var.color.background};
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
         props:
           '''
 return {
@@ -629,11 +637,9 @@ return {
       }
     }
     {
-      id: "15"
+      id: "19"
       L: Attr
       P: {
-        displayOrder: 1
-        componentName: Html
         css:
           '''
 return `._id {
@@ -644,6 +650,8 @@ return `._id {
   flex-wrap: wrap;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
         props:
           '''
 return {
@@ -653,11 +661,9 @@ return {
       }
     }
     {
-      id: "16"
+      id: "20"
       L: Attr
       P: {
-        displayOrder: 1
-        componentName: Html
         css:
           '''
 return `._id {
@@ -667,6 +673,8 @@ return `._id {
   color: ${args.theme.var.color.text};
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
         props:
           '''
 return {
@@ -677,11 +685,9 @@ return {
       }
     }
     {
-      id: "17"
+      id: "21"
       L: Attr
       P: {
-        displayOrder: 2
-        componentName: Html
         css:
           '''
 return `._id {
@@ -690,6 +696,8 @@ return `._id {
   gap: 0.5rem;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
         props:
           '''
 return {
@@ -699,7 +707,7 @@ return {
       }
     }
     {
-      id: "17a"
+      id: "22"
       L: Attr
       P: {
         displayOrder: 1
@@ -715,7 +723,7 @@ return {
       }
     }
     {
-      id: "17b"
+      id: "23"
       L: Attr
       P: {
         displayOrder: 2
@@ -731,7 +739,7 @@ return {
       }
     }
     {
-      id: "17c"
+      id: "24"
       L: Attr
       P: {
         displayOrder: 3
@@ -747,11 +755,9 @@ return {
       }
     }
     {
-      id: "18"
+      id: "25"
       L: Attr
       P: {
-        displayOrder: 2
-        componentName: Html
         css:
           '''
 return `._id {
@@ -767,6 +773,8 @@ return `._id {
   word-break: break-word;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
         props:
           '''
 return {
@@ -777,7 +785,7 @@ return {
       }
     }
     {
-      id: "20"
+      id: "26"
       L: Attr
       P: {
         displayOrder: 6
@@ -794,12 +802,10 @@ return {
       }
     }
     {
-      id: "21"
+      id: "27"
       L: Attr
       P: {
-        displayOrder: 1
         slotName: children
-        componentName: Html
         css:
           '''
 return `._id {
@@ -810,6 +816,8 @@ return `._id {
   background: ${args.theme.var.color.background};
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
         props:
           '''
 return {
@@ -821,170 +829,163 @@ return {
 '''
       }
     }
-    {
-      id: "19"
-      L: PageLayout
-      P: {
-        componentName: Layout
-      }
-    }
   ]
   edges: [
     {
       id: e1
-      T: Attr
+      T: PageLayout
       S: "1"
       E: "2"
     }
     {
       id: e2
       T: Attr
-      S: "2"
+      S: "1"
       E: "3"
     }
     {
       id: e3
       T: Attr
-      S: "2"
+      S: "3"
       E: "4"
     }
     {
       id: e4
       T: Attr
-      S: "2"
+      S: "3"
       E: "5"
     }
     {
       id: e5
       T: Attr
-      S: "2"
+      S: "3"
       E: "6"
     }
     {
       id: e6
       T: Attr
-      S: "6"
+      S: "3"
       E: "7"
     }
     {
       id: e7
       T: Attr
-      S: "2"
-      E: "8"
+      S: "3"
+      E: "9"
     }
     {
       id: e8
       T: Attr
-      S: "8"
-      E: "9"
+      S: "3"
+      E: "26"
     }
     {
       id: e9
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e10
       T: Attr
       S: "9"
       E: "10"
     }
     {
-      id: e10
+      id: e11
+      T: Attr
+      S: "9"
+      E: "18"
+    }
+    {
+      id: e12
       T: Attr
       S: "10"
       E: "11"
     }
     {
-      id: e11
-      T: Attr
-      S: "10"
-      E: "12"
-    }
-    {
-      id: e11a
-      T: Attr
-      S: "12"
-      E: "12a"
-    }
-    {
-      id: e11b
-      T: Attr
-      S: "12"
-      E: "12b"
-    }
-    {
-      id: e11c
-      T: Attr
-      S: "12"
-      E: "12c"
-    }
-    {
-      id: e12
-      T: Attr
-      S: "9"
-      E: "13"
-    }
-    {
       id: e13
       T: Attr
-      S: "8"
-      E: "14"
+      S: "10"
+      E: "17"
     }
     {
       id: e14
       T: Attr
-      S: "14"
-      E: "15"
+      S: "11"
+      E: "12"
     }
     {
       id: e15
       T: Attr
-      S: "15"
-      E: "16"
+      S: "11"
+      E: "13"
     }
     {
       id: e16
       T: Attr
-      S: "15"
-      E: "17"
-    }
-    {
-      id: e16a
-      T: Attr
-      S: "17"
-      E: "17a"
-    }
-    {
-      id: e16b
-      T: Attr
-      S: "17"
-      E: "17b"
-    }
-    {
-      id: e16c
-      T: Attr
-      S: "17"
-      E: "17c"
+      S: "13"
+      E: "14"
     }
     {
       id: e17
       T: Attr
-      S: "14"
-      E: "18"
+      S: "13"
+      E: "15"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "13"
+      E: "16"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "18"
+      E: "19"
     }
     {
       id: e20
       T: Attr
-      S: "2"
-      E: "20"
+      S: "18"
+      E: "25"
     }
     {
       id: e21
       T: Attr
-      S: "20"
+      S: "19"
+      E: "20"
+    }
+    {
+      id: e22
+      T: Attr
+      S: "19"
       E: "21"
     }
     {
-      id: e18
-      T: PageLayout
-      S: "1"
-      E: "19"
+      id: e23
+      T: Attr
+      S: "21"
+      E: "22"
+    }
+    {
+      id: e24
+      T: Attr
+      S: "21"
+      E: "23"
+    }
+    {
+      id: e25
+      T: Attr
+      S: "21"
+      E: "24"
+    }
+    {
+      id: e26
+      T: Attr
+      S: "26"
+      E: "27"
     }
   ]
 }

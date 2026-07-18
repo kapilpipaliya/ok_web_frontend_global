@@ -11,7 +11,7 @@
         fns: return { enabled: () => true }
         url: /
         key: Home
-        updatedAt: 2026-07-14T07:03:14.081Z
+        updatedAt: 2026-07-16T18:35:22.667Z
         props:
           '''
 const locale = args.params?.lang ? String(args.params.lang).toLowerCase() : undefined;
@@ -317,7 +317,7 @@ return {
       }
     }
     {
-      id: "22"
+      id: "11"
       L: Attr
       P: {
         css:
@@ -340,7 +340,7 @@ return {
       }
     }
     {
-      id: "23"
+      id: "12"
       L: Attr
       P: {
         css:
@@ -369,7 +369,7 @@ return {
       }
     }
     {
-      id: "24"
+      id: "13"
       L: Attr
       P: {
         css:
@@ -414,13 +414,16 @@ return {
   as: "button",
   type: "button",
   "aria-label": "Play featured video",
-  onClick: () => args.fns.openPlayer(featuredVideo)
+  onClick: () => {
+    debugger;
+    args.fns.openPlayer(featuredVideo)
+  }
 };
 '''
       }
     }
     {
-      id: "25"
+      id: "14"
       L: Attr
       P: {
         css:
@@ -443,7 +446,7 @@ return {
       }
     }
     {
-      id: "26"
+      id: "15"
       L: Attr
       P: {
         css:
@@ -471,7 +474,7 @@ return {
       }
     }
     {
-      id: "27"
+      id: "16"
       L: Attr
       P: {
         css:
@@ -502,7 +505,7 @@ return {
       }
     }
     {
-      id: "28"
+      id: "17"
       L: Attr
       P: {
         css:
@@ -526,7 +529,7 @@ return {
       }
     }
     {
-      id: "11"
+      id: "18"
       L: Attr
       P: {
         css:
@@ -549,7 +552,7 @@ return {
       }
     }
     {
-      id: "12"
+      id: "19"
       L: Attr
       P: {
         contextName: featureCard
@@ -570,7 +573,7 @@ return {
       }
     }
     {
-      id: "13"
+      id: "20"
       L: Attr
       P: {
         displayOrder: 1
@@ -582,7 +585,7 @@ return args.contextData.featureCard;
       }
     }
     {
-      id: "14"
+      id: "21"
       L: Attr
       P: {
         displayOrder: 4
@@ -598,7 +601,7 @@ return {
       }
     }
     {
-      id: "15"
+      id: "22"
       L: Attr
       P: {
         css:
@@ -624,7 +627,7 @@ return {
       }
     }
     {
-      id: "16"
+      id: "23"
       L: Attr
       P: {
         css:
@@ -650,7 +653,7 @@ return {
       }
     }
     {
-      id: "17"
+      id: "24"
       L: Attr
       P: {
         css:
@@ -677,7 +680,7 @@ return {
       }
     }
     {
-      id: "18"
+      id: "25"
       L: Attr
       P: {
         css:
@@ -702,7 +705,7 @@ return {
       }
     }
     {
-      id: "19"
+      id: "26"
       L: Attr
       P: {
         css:
@@ -729,7 +732,7 @@ return {
       }
     }
     {
-      id: "20"
+      id: "27"
       L: Attr
       P: {
         css:
@@ -753,7 +756,7 @@ return {
       }
     }
     {
-      id: "21"
+      id: "28"
       L: Attr
       P: {
         css:
@@ -824,25 +827,85 @@ return {
       id: e8
       T: Attr
       S: "7"
-      E: "22"
-    }
-    {
-      id: e21
-      T: Attr
-      S: "7"
       E: "11"
     }
     {
       id: e9
       T: Attr
       S: "7"
-      E: "14"
+      E: "18"
     }
     {
       id: e10
       T: Attr
       S: "7"
+      E: "21"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "7"
+      E: "22"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "8"
+      E: "10"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "11"
+      E: "12"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "11"
+      E: "13"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "13"
+      E: "14"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "14"
       E: "15"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "14"
+      E: "16"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "16"
+      E: "17"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "18"
+      E: "19"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "19"
+      E: "20"
     }
     {
       id: e22
@@ -872,73 +935,13 @@ return {
       id: e26
       T: Attr
       S: "25"
-      E: "27"
+      E: "28"
     }
     {
       id: e27
       T: Attr
-      S: "27"
-      E: "28"
-    }
-    {
-      id: e11
-      T: Attr
-      S: "8"
-      E: "9"
-    }
-    {
-      id: e12
-      T: Attr
-      S: "8"
-      E: "10"
-    }
-    {
-      id: e13
-      T: Attr
-      S: "11"
-      E: "12"
-    }
-    {
-      id: e14
-      T: Attr
-      S: "12"
-      E: "13"
-    }
-    {
-      id: e15
-      T: Attr
-      S: "15"
-      E: "16"
-    }
-    {
-      id: e16
-      T: Attr
-      S: "15"
-      E: "17"
-    }
-    {
-      id: e17
-      T: Attr
-      S: "17"
-      E: "18"
-    }
-    {
-      id: e18
-      T: Attr
-      S: "18"
-      E: "19"
-    }
-    {
-      id: e19
-      T: Attr
-      S: "18"
-      E: "21"
-    }
-    {
-      id: e20
-      T: Attr
-      S: "19"
-      E: "20"
+      S: "26"
+      E: "27"
     }
   ]
 }

@@ -1,20 +1,20 @@
 {
   vertexes: [
     {
-      id: "root",
-      L: "Attr",
+      id: "1"
+      L: Component
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  "data-animate": "",
-
-  ref: (el) => el && args.fns.animateOnView(el)
-};
-''',
-        css: '''
+        isNoPermissionCheck: true
+        fns: return { enabled: () => true }
+        key: ContactForm
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   max-width: 600px;
   margin: 0 auto;
@@ -24,15 +24,35 @@ return `._id {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el)
+};
+'''
       }
-    },
+    }
     {
-      id: "form",
-      L: "Attr",
+      id: "3"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "form",
   onSubmit: (e) => {
@@ -44,65 +64,85 @@ return {
     e.target.reset();
   }
 };
-''',
-        css: '''
-return `._id {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "nameField",
-      L: "Attr",
+      id: "4"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "nameLabel",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "label",
-  for: "name",
-  text: "Your Name *"
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.text};
   font-weight: 500;
   font-size: 0.875rem;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "label",
+  for: "name",
+  text: "Your Name *"
+};
+'''
       }
-    },
+    }
     {
-      id: "nameInput",
-      L: "Attr",
+      id: "6"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  padding: 0.75rem 1rem;
+  border: 1px solid ${args.theme.var.color.background_light_300};
+  border-radius: 0.375rem;
+  font-size: 1rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  transition: all 0.2s ease;
+
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+    box-shadow: 0 0 0 3px ${args.theme.var.color.primary_light_100};
+  }
+
+  &::placeholder {
+    color: ${args.theme.var.color.text_light_300};
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
   as: "input",
   type: "text",
@@ -111,8 +151,61 @@ return {
   placeholder: "Enter your full name",
   required: true
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  font-weight: 500;
+  font-size: 0.875rem;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "label",
+  for: "email",
+  text: "Email Address *"
+};
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   padding: 0.75rem 1rem;
   border: 1px solid ${args.theme.var.color.background_light_300};
@@ -121,69 +214,22 @@ return `._id {
   background: ${args.theme.var.color.background};
   color: ${args.theme.var.color.text};
   transition: all 0.2s ease;
-  
+
   &:focus {
     outline: none;
     border-color: ${args.theme.var.color.primary};
     box-shadow: 0 0 0 3px ${args.theme.var.color.primary_light_100};
   }
-  
+
   &::placeholder {
     color: ${args.theme.var.color.text_light_300};
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "emailField",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "emailLabel",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "label",
-  for: "email",
-  text: "Email Address *"
-};
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.text};
-  font-weight: 500;
-  font-size: 0.875rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "emailInput",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
   as: "input",
   type: "email",
@@ -192,8 +238,61 @@ return {
   placeholder: "your@email.com",
   required: true
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  font-weight: 500;
+  font-size: 0.875rem;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "label",
+  for: "phone",
+  text: "Phone Number"
+};
+'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   padding: 0.75rem 1rem;
   border: 1px solid ${args.theme.var.color.background_light_300};
@@ -202,69 +301,22 @@ return `._id {
   background: ${args.theme.var.color.background};
   color: ${args.theme.var.color.text};
   transition: all 0.2s ease;
-  
+
   &:focus {
     outline: none;
     border-color: ${args.theme.var.color.primary};
     box-shadow: 0 0 0 3px ${args.theme.var.color.primary_light_100};
   }
-  
+
   &::placeholder {
     color: ${args.theme.var.color.text_light_300};
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "phoneField",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "phoneLabel",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "label",
-  for: "phone",
-  text: "Phone Number"
-};
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.text};
-  font-weight: 500;
-  font-size: 0.875rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "phoneInput",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
   as: "input",
   type: "tel",
@@ -272,8 +324,61 @@ return {
   name: "phone",
   placeholder: "+91 98252 42501"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}`;
+'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  font-weight: 500;
+  font-size: 0.875rem;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "label",
+  for: "subject",
+  text: "Subject *"
+};
+'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   padding: 0.75rem 1rem;
   border: 1px solid ${args.theme.var.color.background_light_300};
@@ -282,69 +387,22 @@ return `._id {
   background: ${args.theme.var.color.background};
   color: ${args.theme.var.color.text};
   transition: all 0.2s ease;
-  
+
   &:focus {
     outline: none;
     border-color: ${args.theme.var.color.primary};
     box-shadow: 0 0 0 3px ${args.theme.var.color.primary_light_100};
   }
-  
+
   &::placeholder {
     color: ${args.theme.var.color.text_light_300};
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "subjectField",
-      L: "Attr",
-      P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "subjectLabel",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "label",
-  for: "subject",
-  text: "Subject *"
-};
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.text};
-  font-weight: 500;
-  font-size: 0.875rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "subjectInput",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
   as: "input",
   type: "text",
@@ -353,89 +411,61 @@ return {
   placeholder: "What is this regarding?",
   required: true
 };
-''',
-        css: '''
-return `._id {
-  padding: 0.75rem 1rem;
-  border: 1px solid ${args.theme.var.color.background_light_300};
-  border-radius: 0.375rem;
-  font-size: 1rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
-  transition: all 0.2s ease;
-  
-  &:focus {
-    outline: none;
-    border-color: ${args.theme.var.color.primary};
-    box-shadow: 0 0 0 3px ${args.theme.var.color.primary_light_100};
-  }
-  
-  &::placeholder {
-    color: ${args.theme.var.color.text_light_300};
-  }
-}`;
 '''
       }
-    },
+    }
     {
-      id: "messageField",
-      L: "Attr",
+      id: "16"
+      L: Attr
       P: {
-        displayOrder: 5,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "messageLabel",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''
 return {
-  as: "label",
-  for: "message",
-  text: "Message *"
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.text};
   font-weight: 500;
   font-size: 0.875rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "messageInput",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "textarea",
-  id: "message",
-  name: "message",
-  placeholder: "Please enter your message here...",
-  rows: 5,
-  required: true
+  as: "label",
+  for: "message",
+  text: "Message *"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   padding: 0.75rem 1rem;
   border: 1px solid ${args.theme.var.color.background_light_300};
@@ -446,33 +476,39 @@ return `._id {
   resize: vertical;
   min-height: 120px;
   transition: all 0.2s ease;
-  
+
   &:focus {
     outline: none;
     border-color: ${args.theme.var.color.primary};
     box-shadow: 0 0 0 3px ${args.theme.var.color.primary_light_100};
   }
-  
+
   &::placeholder {
     color: ${args.theme.var.color.text_light_300};
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "submitButton",
-      L: "Attr",
-      P: {
-        displayOrder: 6,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "button",
-  type: "submit"
+  as: "textarea",
+  id: "message",
+  name: "message",
+  placeholder: "Please enter your message here...",
+  rows: 5,
+  required: true
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   padding: 0.75rem 2rem;
   background: ${args.theme.var.color.primary};
@@ -488,27 +524,37 @@ return `._id {
   justify-content: center;
   gap: 0.5rem;
   align-self: flex-start;
-  
+
   &:hover {
     background: ${args.theme.var.color.primary_dark_200};
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
-  
+
   &:active {
     transform: translateY(0);
   }
 }`;
 '''
+        displayOrder: 6
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  type: "submit"
+};
+'''
       }
-    },
+    }
     {
-      id: "submitIcon",
-      L: "Attr",
+      id: "20"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "icon",
   icon: "carbon:send",
@@ -517,14 +563,15 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "submitText",
-      L: "Attr",
+      id: "21"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
   as: "span",
   text: "Send Message"
@@ -532,26 +579,127 @@ return {
 '''
       }
     }
-  ],
+  ]
   edges: [
-    { id: "e1", T: "Attr", S: "root", E: "form" },
-    { id: "e2", T: "Attr", S: "form", E: "nameField" },
-    { id: "e3", T: "Attr", S: "nameField", E: "nameLabel" },
-    { id: "e4", T: "Attr", S: "nameField", E: "nameInput" },
-    { id: "e5", T: "Attr", S: "form", E: "emailField" },
-    { id: "e6", T: "Attr", S: "emailField", E: "emailLabel" },
-    { id: "e7", T: "Attr", S: "emailField", E: "emailInput" },
-    { id: "e8", T: "Attr", S: "form", E: "phoneField" },
-    { id: "e9", T: "Attr", S: "phoneField", E: "phoneLabel" },
-    { id: "e10", T: "Attr", S: "phoneField", E: "phoneInput" },
-    { id: "e11", T: "Attr", S: "form", E: "subjectField" },
-    { id: "e12", T: "Attr", S: "subjectField", E: "subjectLabel" },
-    { id: "e13", T: "Attr", S: "subjectField", E: "subjectInput" },
-    { id: "e14", T: "Attr", S: "form", E: "messageField" },
-    { id: "e15", T: "Attr", S: "messageField", E: "messageLabel" },
-    { id: "e16", T: "Attr", S: "messageField", E: "messageInput" },
-    { id: "e17", T: "Attr", S: "form", E: "submitButton" },
-    { id: "e18", T: "Attr", S: "submitButton", E: "submitIcon" },
-    { id: "e19", T: "Attr", S: "submitButton", E: "submitText" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "7"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "10"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "3"
+      E: "13"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "3"
+      E: "16"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "3"
+      E: "19"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "4"
+      E: "6"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "7"
+      E: "9"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "10"
+      E: "11"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "10"
+      E: "12"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "13"
+      E: "14"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "13"
+      E: "15"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "16"
+      E: "17"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "16"
+      E: "18"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "19"
+      E: "20"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "19"
+      E: "21"
+    }
   ]
 }

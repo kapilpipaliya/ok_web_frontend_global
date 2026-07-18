@@ -1,23 +1,20 @@
 {
   vertexes: [
     {
-      id: "root",
-      L: "Attr",
+      id: "1"
+      L: Component
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const currentMode = args.currentMode();
-const isDarkMode = currentMode === 'dark';
-return {
-  as: "button",
-  onClick: () => {
-    args.toggleTheme()
-  },
-  title: isDarkMode ? "Switch to light mode" : "Switch to dark mode"
-};
-''',
-        css: '''
+        isNoPermissionCheck: true
+        fns: return { enabled: () => true }
+        key: ThemeToggle
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   background: none;
   color: inherit;
@@ -28,25 +25,40 @@ return `._id {
   justify-content: center;
   padding: 0.25rem;
   transition: opacity 0.2s ease;
-  
+
   &:hover {
     opacity: 0.7;
   }
-  
+
   &:active {
     opacity: 0.5;
   }
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const currentMode = args.currentMode();
+const isDarkMode = currentMode === 'dark';
+return {
+  as: "button",
+  onClick: () => {
+    args.toggleTheme()
+  },
+  title: isDarkMode ? "Switch to light mode" : "Switch to dark mode"
+};
+'''
       }
-    },
+    }
     {
-      id: "icon",
-      L: "Attr",
+      id: "3"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const currentMode = args.currentMode();
 const isDarkMode = currentMode === 'dark';
 return {
@@ -58,8 +70,19 @@ return {
 '''
       }
     }
-  ],
+  ]
   edges: [
-    { id: "e1", T: "Attr", S: "root", E: "icon" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
   ]
 }

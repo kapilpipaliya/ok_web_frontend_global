@@ -789,12 +789,12 @@ const setTomSelectValue = (value) => {
 
   try {
     const multiple = tomSelectInstance.settings.maxItems !== 1;
-    
+
     // Handle multiple mode (arrays)
     if (multiple) {
       // For multiple mode, value should be an array
       const valueArray = Array.isArray(value) ? value : (value ? [value] : []);
-      
+
       // If empty array, clear all selections
       if (valueArray.length === 0) {
         tomSelectInstance.clear(true); // true = silent (don't trigger change event)
@@ -805,7 +805,7 @@ const setTomSelectValue = (value) => {
           if (v === null || v === undefined || v === '') return false;
           return tomSelectInstance.options[v] !== undefined;
         });
-        
+
         if (validValues.length > 0) {
           tomSelectInstance.setValue(validValues, true); // true = silent (don't trigger change event)
         } else {
@@ -955,17 +955,18 @@ return {
       id: "3"
       L: ComponentVariant
       P: {
-        type: number
-        key: maxItems
+        type: array
+        defValue: []
+        key: plugins
       }
     }
     {
       id: "4"
       L: ComponentVariant
       P: {
-        type: array
-        key: plugins
-        defValue: []
+        type: string
+        defValue: Select an option...
+        key: placeholder
       }
     }
     {
@@ -973,44 +974,44 @@ return {
       L: ComponentVariant
       P: {
         type: string
-        key: functionName
         defValue: ""
+        key: functionName
       }
     }
     {
       id: "6"
       L: ComponentVariant
       P: {
-        type: string
-        key: optionType
-        defValue: ""
+        type: boolean
+        defValue: false
+        key: required
       }
     }
     {
       id: "7"
       L: ComponentVariant
       P: {
-        type: string
-        key: dataKey
-        defValue: ""
+        type: boolean
+        defValue: true
+        key: search
       }
     }
     {
       id: "8"
       L: ComponentVariant
       P: {
-        type: array
-        key: options
-        defValue: []
+        type: boolean
+        defValue: false
+        key: disabled
       }
     }
     {
       id: "9"
       L: ComponentVariant
       P: {
-        type: string
-        key: singularName
-        defValue: ""
+        type: boolean
+        defValue: false
+        key: multiple
       }
     }
     {
@@ -1018,17 +1019,16 @@ return {
       L: ComponentVariant
       P: {
         type: string
-        key: placeholder
-        defValue: Select an option...
+        defValue: id
+        key: valueKey
       }
     }
     {
       id: "11"
       L: ComponentVariant
       P: {
-        type: string
-        key: labelKey
-        defValue: title
+        type: number
+        key: maxItems
       }
     }
     {
@@ -1036,8 +1036,8 @@ return {
       L: ComponentVariant
       P: {
         type: string
-        key: subType
         defValue: ""
+        key: subType
       }
     }
     {
@@ -1046,55 +1046,38 @@ return {
       P: {
         type: string
         defValue: ""
-        key: value
+        key: optionType
       }
     }
     {
       id: "14"
       L: ComponentVariant
       P: {
-        type: boolean
-        key: disabled
-        defValue: false
+        type: string
+        key: value
+        defValue: ""
       }
     }
     {
       id: "15"
       L: ComponentVariant
       P: {
-        type: boolean
-        key: search
-        defValue: true
+        type: string
+        defValue: title
+        key: labelKey
       }
     }
     {
       id: "16"
       L: ComponentVariant
       P: {
-        type: boolean
-        key: multiple
-        defValue: false
+        type: string
+        defValue: ""
+        key: pluralName
       }
     }
     {
       id: "17"
-      L: ComponentVariant
-      P: {
-        type: boolean
-        key: required
-        defValue: false
-      }
-    }
-    {
-      id: "18"
-      L: ComponentVariant
-      P: {
-        type: function
-        key: onChange
-      }
-    }
-    {
-      id: "19"
       L: ComponentVariant
       P: {
         type: object
@@ -1102,21 +1085,38 @@ return {
       }
     }
     {
+      id: "18"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: ""
+        key: singularName
+      }
+    }
+    {
+      id: "19"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onChange
+      }
+    }
+    {
       id: "20"
       L: ComponentVariant
       P: {
         type: string
-        key: valueKey
-        defValue: id
+        defValue: ""
+        key: dataKey
       }
     }
     {
       id: "21"
       L: ComponentVariant
       P: {
-        type: string
-        key: pluralName
-        defValue: ""
+        type: array
+        defValue: []
+        key: options
       }
     }
   ]

@@ -1,15 +1,16 @@
 {
   vertexes: [
     {
-      id: "vpm1"
+      id: "1"
       L: Component
       P: {
         title: Vertex picker modal
         key: VertexPickerModal
+        updatedAt: 2026-07-13T16:40:11.922Z
       }
     }
     {
-      id: "vpm_portal"
+      id: "2"
       L: Attr
       P: {
         displayOrder: 1
@@ -21,11 +22,9 @@
       }
     }
     {
-      id: "vpm_root"
+      id: "3"
       L: Attr
       P: {
-        displayOrder: 1
-        componentName: Html
         css:
           '''return `._id {
   position: fixed;
@@ -38,6 +37,8 @@
   box-sizing: border-box;
   background: rgba(0, 0, 0, 0.45);
 }`;'''
+        displayOrder: 1
+        componentName: Html
         props:
           '''const isOpenProp = args.contextData.props?.isOpen;
 const modalIsOpen = typeof isOpenProp === "function" ? isOpenProp() : !!isOpenProp;
@@ -55,11 +56,9 @@ return {
       }
     }
     {
-      id: "vpm_panel"
+      id: "4"
       L: Attr
       P: {
-        displayOrder: 1
-        componentName: Html
         css:
           '''return `._id {
   width: 96vw;
@@ -72,16 +71,15 @@ return {
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
   overflow: hidden;
 }`;'''
-        props:
-          '''return { as: "div", onClick: (clickEvent) => clickEvent.stopPropagation() };'''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "div", onClick: (clickEvent) => clickEvent.stopPropagation() };
       }
     }
     {
-      id: "vpm_head"
+      id: "5"
       L: Attr
       P: {
-        displayOrder: 1
-        componentName: Html
         css:
           '''return `._id {
   display: flex;
@@ -93,16 +91,15 @@ return {
   border-bottom: 1px solid ${args.theme.var.color.border};
   background: ${args.theme.var.color.background_light_100};
 }`;'''
-        props:
-          '''return { as: "div" };'''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "div" };
       }
     }
     {
-      id: "vpm_title"
+      id: "6"
       L: Attr
       P: {
-        displayOrder: 1
-        componentName: Html
         css:
           '''return `._id {
   margin: 0;
@@ -110,6 +107,8 @@ return {
   font-weight: 700;
   color: ${args.theme.var.color.text};
 }`;'''
+        displayOrder: 1
+        componentName: Html
         props:
           '''return {
   as: "h2",
@@ -118,7 +117,7 @@ return {
       }
     }
     {
-      id: "vpm_close"
+      id: "7"
       L: Attr
       P: {
         displayOrder: 2
@@ -148,11 +147,9 @@ return {
       }
     }
     {
-      id: "vpm_hint"
+      id: "8"
       L: Attr
       P: {
-        displayOrder: 2
-        componentName: Html
         css:
           '''return `._id {
   padding: 0.5rem 1rem;
@@ -160,6 +157,8 @@ return {
   color: ${args.theme.var.color.text_dark_400};
   border-bottom: 1px solid ${args.theme.var.color.border};
 }`;'''
+        displayOrder: 2
+        componentName: Html
         props:
           '''const draftProp = args.contextData.props?.draftVertex;
 const draftVertex = typeof draftProp === "function" ? draftProp() : draftProp;
@@ -185,11 +184,9 @@ return {
       }
     }
     {
-      id: "vpm_frame_wrap"
+      id: "9"
       L: Attr
       P: {
-        displayOrder: 3
-        componentName: Html
         css:
           '''return `._id {
   flex: 1;
@@ -197,16 +194,15 @@ return {
   display: flex;
   flex-direction: column;
 }`;'''
-        props:
-          '''return { as: "div" };'''
+        displayOrder: 3
+        componentName: Html
+        props: return { as: "div" };
       }
     }
     {
-      id: "vpm_picker_body"
+      id: "10"
       L: Attr
       P: {
-        displayOrder: 1
-        componentName: DynamicPage
         css:
           '''return `._id {
   flex: 1;
@@ -215,17 +211,17 @@ return {
   overflow: auto;
   background: ${args.theme.var.color.background};
 }`;'''
+        displayOrder: 1
+        componentName: DynamicPage
         props:
           '''const pickerBodyProps = args.contextData.props?.pickerBodyProps;
 return pickerBodyProps != null && typeof pickerBodyProps === "object" ? pickerBodyProps : {};'''
       }
     }
     {
-      id: "vpm_foot"
+      id: "11"
       L: Attr
       P: {
-        displayOrder: 4
-        componentName: Html
         css:
           '''return `._id {
   display: flex;
@@ -237,12 +233,13 @@ return pickerBodyProps != null && typeof pickerBodyProps === "object" ? pickerBo
   border-top: 1px solid ${args.theme.var.color.border};
   background: ${args.theme.var.color.background_light_100};
 }`;'''
-        props:
-          '''return { as: "div" };'''
+        displayOrder: 4
+        componentName: Html
+        props: return { as: "div" };
       }
     }
     {
-      id: "vpm_cancel"
+      id: "12"
       L: Attr
       P: {
         displayOrder: 1
@@ -271,7 +268,7 @@ return {
       }
     }
     {
-      id: "vpm_ok"
+      id: "13"
       L: Attr
       P: {
         displayOrder: 2
@@ -307,76 +304,76 @@ return {
   ]
   edges: [
     {
-      id: vpm_e0
+      id: e1
       T: Attr
-      S: "vpm1"
-      E: "vpm_portal"
+      S: "1"
+      E: "2"
     }
     {
-      id: vpm_e1
+      id: e2
       T: Attr
-      S: "vpm_portal"
-      E: "vpm_root"
+      S: "2"
+      E: "3"
     }
     {
-      id: vpm_e2
+      id: e3
       T: Attr
-      S: "vpm_root"
-      E: "vpm_panel"
+      S: "3"
+      E: "4"
     }
     {
-      id: vpm_e3
+      id: e4
       T: Attr
-      S: "vpm_panel"
-      E: "vpm_head"
+      S: "4"
+      E: "5"
     }
     {
-      id: vpm_e4
+      id: e5
       T: Attr
-      S: "vpm_head"
-      E: "vpm_title"
+      S: "4"
+      E: "8"
     }
     {
-      id: vpm_e5
+      id: e6
       T: Attr
-      S: "vpm_head"
-      E: "vpm_close"
+      S: "4"
+      E: "9"
     }
     {
-      id: vpm_e6
+      id: e7
       T: Attr
-      S: "vpm_panel"
-      E: "vpm_hint"
+      S: "4"
+      E: "11"
     }
     {
-      id: vpm_e7
+      id: e8
       T: Attr
-      S: "vpm_panel"
-      E: "vpm_frame_wrap"
+      S: "5"
+      E: "6"
     }
     {
-      id: vpm_e8
+      id: e9
       T: Attr
-      S: "vpm_frame_wrap"
-      E: "vpm_picker_body"
+      S: "5"
+      E: "7"
     }
     {
-      id: vpm_e9
+      id: e10
       T: Attr
-      S: "vpm_panel"
-      E: "vpm_foot"
+      S: "9"
+      E: "10"
     }
     {
-      id: vpm_e10
+      id: e11
       T: Attr
-      S: "vpm_foot"
-      E: "vpm_cancel"
+      S: "11"
+      E: "12"
     }
     {
-      id: vpm_e11
+      id: e12
       T: Attr
-      S: "vpm_foot"
-      E: "vpm_ok"
+      S: "11"
+      E: "13"
     }
   ]
 }

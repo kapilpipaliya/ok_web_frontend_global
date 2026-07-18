@@ -4,7 +4,6 @@
       id: "1"
       L: Function
       P: {
-        key: loadPublicCategoryContent
         description: Loads public table rows filtered by category key/id using the same getUserContent path as DynamicPage. Generic for any table with a sidebar category (Folder, BookCategory, etc.).
         body:
           '''
@@ -220,6 +219,7 @@ return {
   message: `Loaded ${rowIds.length} public ${resolvedTableVertexLabel} row(s) for category`
 };
 '''
+        key: loadPublicCategoryContent
       }
     }
   ]

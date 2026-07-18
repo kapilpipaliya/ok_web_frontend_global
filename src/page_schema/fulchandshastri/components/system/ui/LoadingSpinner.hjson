@@ -9,6 +9,87 @@
     }
     {
       id: "2"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: primary
+        key: color
+      }
+    }
+    {
+      id: "3"
+      L: ComponentVariantOption
+      P: {
+        description: Primary theme color
+        value: primary
+        key: primary
+      }
+    }
+    {
+      id: "4"
+      L: ComponentVariantOption
+      P: {
+        description: White color
+        value: white
+        key: white
+      }
+    }
+    {
+      id: "5"
+      L: ComponentVariantOption
+      P: {
+        description: Muted theme color
+        value: muted
+        key: muted
+      }
+    }
+    {
+      id: "6"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: text
+        defValue: ""
+      }
+    }
+    {
+      id: "7"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: medium
+        key: size
+      }
+    }
+    {
+      id: "8"
+      L: ComponentVariantOption
+      P: {
+        description: Medium spinner (48px)
+        value: medium
+        key: medium
+      }
+    }
+    {
+      id: "9"
+      L: ComponentVariantOption
+      P: {
+        description: Small spinner (24px)
+        value: small
+        key: small
+      }
+    }
+    {
+      id: "10"
+      L: ComponentVariantOption
+      P: {
+        description: Large spinner (64px)
+        value: large
+        key: large
+      }
+    }
+    {
+      id: "11"
       L: Attr
       P: {
         css:
@@ -38,7 +119,7 @@ return {
       }
     }
     {
-      id: "3"
+      id: "12"
       L: Attr
       P: {
         css:
@@ -62,7 +143,7 @@ const colorConfig = {
     border: args.theme.var.color.background_light_300,
     accent: args.theme.var.color.primary
   },
-  text: {
+  muted: {
     border: args.theme.var.color.background_light_200,
     accent: args.theme.var.color.text_light_500
   },
@@ -121,7 +202,7 @@ return {
       }
     }
     {
-      id: "4"
+      id: "13"
       L: Attr
       P: {
         css:
@@ -147,92 +228,11 @@ return {
 '''
       }
     }
-    {
-      id: "5"
-      L: ComponentVariant
-      P: {
-        type: string
-        key: color
-        defValue: primary
-      }
-    }
-    {
-      id: "6"
-      L: ComponentVariantOption
-      P: {
-        description: Primary theme color
-        value: primary
-        key: primary
-      }
-    }
-    {
-      id: "7"
-      L: ComponentVariantOption
-      P: {
-        description: Text theme color
-        value: text
-        key: text
-      }
-    }
-    {
-      id: "8"
-      L: ComponentVariantOption
-      P: {
-        description: White color
-        value: white
-        key: white
-      }
-    }
-    {
-      id: "9"
-      L: ComponentVariant
-      P: {
-        type: string
-        defValue: ""
-        key: text
-      }
-    }
-    {
-      id: "10"
-      L: ComponentVariant
-      P: {
-        type: string
-        key: size
-        defValue: medium
-      }
-    }
-    {
-      id: "11"
-      L: ComponentVariantOption
-      P: {
-        description: Small spinner (24px)
-        value: small
-        key: small
-      }
-    }
-    {
-      id: "12"
-      L: ComponentVariantOption
-      P: {
-        description: Large spinner (64px)
-        value: large
-        key: large
-      }
-    }
-    {
-      id: "13"
-      L: ComponentVariantOption
-      P: {
-        description: Medium spinner (48px)
-        value: medium
-        key: medium
-      }
-    }
   ]
   edges: [
     {
       id: e1
-      T: Attr
+      T: ComponentVariant
       S: "1"
       E: "2"
     }
@@ -240,66 +240,66 @@ return {
       id: e2
       T: ComponentVariant
       S: "1"
-      E: "5"
+      E: "6"
     }
     {
       id: e3
       T: ComponentVariant
       S: "1"
-      E: "9"
+      E: "7"
     }
     {
       id: e4
-      T: ComponentVariant
+      T: Attr
       S: "1"
-      E: "10"
+      E: "11"
     }
     {
       id: e5
-      T: Attr
+      T: ComponentVariantOption
       S: "2"
       E: "3"
     }
     {
       id: e6
-      T: Attr
+      T: ComponentVariantOption
       S: "2"
       E: "4"
     }
     {
       id: e7
       T: ComponentVariantOption
-      S: "5"
-      E: "6"
+      S: "2"
+      E: "5"
     }
     {
       id: e8
       T: ComponentVariantOption
-      S: "5"
-      E: "7"
+      S: "7"
+      E: "8"
     }
     {
       id: e9
       T: ComponentVariantOption
-      S: "5"
-      E: "8"
+      S: "7"
+      E: "9"
     }
     {
       id: e10
       T: ComponentVariantOption
-      S: "10"
-      E: "11"
+      S: "7"
+      E: "10"
     }
     {
       id: e11
-      T: ComponentVariantOption
-      S: "10"
+      T: Attr
+      S: "11"
       E: "12"
     }
     {
       id: e12
-      T: ComponentVariantOption
-      S: "10"
+      T: Attr
+      S: "11"
       E: "13"
     }
   ]

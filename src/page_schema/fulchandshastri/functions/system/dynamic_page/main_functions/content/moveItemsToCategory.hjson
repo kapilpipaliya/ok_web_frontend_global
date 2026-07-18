@@ -111,7 +111,7 @@ try {
     const getEdgeIdsResult = await args.session.run(getEdgeIdsQuery, queryParams);
     const edgeIds = getEdgeIdsResult.records[0]?.get('edgeIds') || [];
     const validEdgeIds = Array.isArray(edgeIds) ? edgeIds.filter(id => id !== null) : [];
-    
+
     // Now delete the edges
     if (validEdgeIds.length > 0) {
       if (!enableUserScopingForContent) {
@@ -137,16 +137,16 @@ try {
       const deleteResult = await args.session.run(query, queryParams);
       successCount = deleteResult.records[0]?.get('deletedCount') || 0;
     }
-    
+
     // Track deleted edge IDs
     if (validEdgeIds.length > 0) {
       deletedEdgeIds.push(...validEdgeIds);
       args.context.deletedEdges.push(...validEdgeIds);
     }
-    
+
     // Calculate updated content counts for uncategorized and source category
     const updatedCounts = {};
-    
+
     if (successCount > 0) {
       // Calculate uncategorized count (items without any category relationship)
       let uncategorizedCountQuery;
@@ -170,12 +170,12 @@ try {
         `;
         uncategorizedCountParams = { userUuid };
       }
-      
+
       const uncategorizedCountResult = await args.session.run(uncategorizedCountQuery, uncategorizedCountParams);
       const uncategorizedCount = uncategorizedCountResult.records[0]?.get('contentCount') || 0;
       updatedCounts.targetCount = uncategorizedCount;
       updatedCounts.targetCategoryId = uncategorizedVertexId;
-      
+
       // Calculate source category count if provided and not uncategorized
       if (isConcreteCategoryId(sourceCategoryId)) {
         let sourceCountQuery;
@@ -212,7 +212,7 @@ try {
           `;
           sourceCountParams = { userUuid, sourceCategoryId };
         }
-        
+
         const sourceCountResult = await args.session.run(sourceCountQuery, sourceCountParams);
         updatedCounts.sourceCount = sourceCountResult.records[0]?.get('contentCount') || 0;
         updatedCounts.sourceCategoryId = sourceCategoryId;
@@ -222,7 +222,7 @@ try {
         updatedCounts.sourceCategoryId = uncategorizedVertexId;
       }
     }
-    
+
     const label = contentLabelDisplay || 'item';
     const plural = label.endsWith('y') ? label.slice(0, -1) + 'ies' : label + (label.endsWith('s') ? '' : 's');
     const uncategorizedResult = {
@@ -230,7 +230,7 @@ try {
       message: `Moved ${successCount} ${successCount !== 1 ? plural : label} successfully`,
       data: { movedCount: successCount, updatedCounts: Object.keys(updatedCounts).length > 0 ? updatedCounts : undefined }
     };
-    
+
     // Execute afterMoveItemsToCategory hooks
     await args.executeHooks(hooks?.afterMoveItemsToCategory, {
       contentIds,
@@ -243,7 +243,7 @@ try {
       sourceCategoryId,
       result: uncategorizedResult
     });
-    
+
     return uncategorizedResult;
   } else {
     // Create relationships for all content items to the category
@@ -254,7 +254,7 @@ try {
         // First, get old edge IDs before deleting
         let getOldEdgeIdsQuery;
         let getOldEdgeIdsParams;
-        
+
         if (!enableUserScopingForSidebar && !enableUserScopingForContent) {
           getOldEdgeIdsQuery = `
             MATCH (content:${contentLabel})
@@ -292,7 +292,7 @@ try {
         const getOldEdgeIdsResult = await args.session.run(getOldEdgeIdsQuery, getOldEdgeIdsParams);
         const oldRelIds = getOldEdgeIdsResult.records[0]?.get('oldRelIds') || [];
         const validOldRelIds = Array.isArray(oldRelIds) ? oldRelIds.filter(id => id !== null) : [];
-        
+
         // Delete old edges if any exist
         if (validOldRelIds.length > 0) {
           const deleteOldEdgesQuery = `
@@ -306,7 +306,7 @@ try {
           deletedEdgeIds.push(...validOldRelIds);
           args.context.deletedEdges.push(...validOldRelIds);
         }
-        
+
         // Now create the new relationship
         if (!enableUserScopingForSidebar && !enableUserScopingForContent) {
           query = `
@@ -362,7 +362,7 @@ try {
         }
 
         const result = await args.session.run(query, queryParams);
-        
+
         if (result.records.length > 0) {
           // Use processResult to populate graph structure
           args.processResult(result.records, args.context, [], 'r');
@@ -379,7 +379,7 @@ try {
 
     // Calculate updated content counts for source and target categories
     const updatedCounts = {};
-    
+
     if (successCount > 0) {
       // Calculate target category count
       if (categoryId) {
@@ -417,12 +417,12 @@ try {
           `;
           targetCountParams = { userUuid, categoryId };
         }
-        
+
         const targetCountResult = await args.session.run(targetCountQuery, targetCountParams);
         updatedCounts.targetCount = targetCountResult.records[0]?.get('contentCount') || 0;
         updatedCounts.targetCategoryId = categoryId;
       }
-      
+
       // Calculate source category count if provided
       if (sourceCategoryId) {
         if (sourceCategoryId != null && isUncategorizedCategoryId(sourceCategoryId)) {
@@ -448,7 +448,7 @@ try {
             `;
             uncategorizedCountParams = { userUuid };
           }
-          
+
           const uncategorizedCountResult = await args.session.run(uncategorizedCountQuery, uncategorizedCountParams);
           updatedCounts.sourceCount = uncategorizedCountResult.records[0]?.get('contentCount') || 0;
           updatedCounts.sourceCategoryId = uncategorizedVertexId;
@@ -488,13 +488,13 @@ try {
             `;
             sourceCountParams = { userUuid, sourceCategoryId };
           }
-          
+
           const sourceCountResult = await args.session.run(sourceCountQuery, sourceCountParams);
           updatedCounts.sourceCount = sourceCountResult.records[0]?.get('contentCount') || 0;
           updatedCounts.sourceCategoryId = sourceCategoryId;
         }
       }
-      
+
       const label = contentLabelDisplay || 'item';
       const plural = label.endsWith('y') ? label.slice(0, -1) + 'ies' : label + (label.endsWith('s') ? '' : 's');
       const moveResult = {
@@ -507,7 +507,7 @@ try {
           updatedCounts
         }
       };
-      
+
       // Execute afterMoveItemsToCategory hooks
       await args.executeHooks(hooks?.afterMoveItemsToCategory, {
         contentIds,
@@ -520,7 +520,7 @@ try {
         sourceCategoryId,
         result: moveResult
       });
-      
+
       return moveResult;
     } else {
       const failResult = {
@@ -528,7 +528,7 @@ try {
         message: `Failed to move items: ${errors.join('; ')}`,
         data: { movedCount: 0, errorCount, errors }
       };
-      
+
       // Execute afterMoveItemsToCategory hooks even on failure
       await args.executeHooks(hooks?.afterMoveItemsToCategory, {
         contentIds,
@@ -541,7 +541,7 @@ try {
         sourceCategoryId,
         result: failResult
       });
-      
+
       return failResult;
     }
   }
@@ -559,4 +559,3 @@ try {
   ]
   edges: []
 }
-

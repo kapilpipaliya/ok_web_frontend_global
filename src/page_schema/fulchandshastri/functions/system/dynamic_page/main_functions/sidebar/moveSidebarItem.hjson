@@ -107,7 +107,7 @@ try {
   // If newParentId can reach categoryId, then newParentId is a descendant of categoryId
   let descendantCheckQuery;
   let descendantCheckParams;
-  
+
   if (!enableUserScoping) {
     // Check if there's a path from newParentId to categoryId (newParentId is descendant of categoryId)
     // Or check if categoryId has newParentId as a descendant by finding all descendants of categoryId
@@ -134,7 +134,7 @@ try {
 
   const descendantCheckResult = await args.session.run(descendantCheckQuery, descendantCheckParams);
   const pathCount = descendantCheckResult.records[0]?.get('pathCount') || 0;
-  
+
   if (pathCount > 0) {
     return {
       success: false,
@@ -146,7 +146,7 @@ try {
   let getOldEdgeQuery;
   let getOldEdgeParams;
   let oldParentId = null;
-  
+
   if (!enableUserScoping) {
     getOldEdgeQuery = `
       MATCH (category:${parentVertexLabel})-[oldRel:${toParentEdgeType}]->(oldParent:${parentVertexLabel})
@@ -183,7 +183,7 @@ try {
       RETURN count(r) as deletedCount
     `;
     await args.session.run(deleteOldEdgeQuery, { edgeIds: validOldEdgeIds });
-    
+
     // Track deleted edges
     args.context.deletedEdges.push(...validOldEdgeIds);
   }
@@ -192,7 +192,7 @@ try {
   // If newParentId is null or 'root', don't create a relationship (make it a root item)
   let createNewEdgeQuery;
   let createNewEdgeParams;
-  
+
   if (newParentId && newParentId !== 'root' && !isSyntheticUncategorizedSidebarId(newParentId)) {
     if (!enableUserScoping) {
       createNewEdgeQuery = `
@@ -221,7 +221,7 @@ try {
     }
 
     const createResult = await args.session.run(createNewEdgeQuery, createNewEdgeParams);
-    
+
     if (createResult.records.length === 0) {
       return {
         success: false,
@@ -241,7 +241,7 @@ try {
       newParentId: newParentId || null
     }
   };
-  
+
   // Execute afterMoveCategory hooks
   await args.executeHooks(hooks?.afterMoveCategory, {
     categoryId,
@@ -253,7 +253,7 @@ try {
     enableUserScoping,
     result: result
   });
-  
+
   return result;
 } catch (error) {
   console.error("Error moving sidebar item:", error);
@@ -269,4 +269,3 @@ try {
   ]
   edges: []
 }
-

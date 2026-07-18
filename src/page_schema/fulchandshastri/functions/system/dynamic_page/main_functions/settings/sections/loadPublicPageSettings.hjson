@@ -4,7 +4,6 @@
       id: "1"
       L: Function
       P: {
-        key: loadPublicPageSettings
         description: Loads public Fulchand Shastri page settings from GlobalSetting scope. Returns section values keyed by section id.
         body:
           '''
@@ -90,6 +89,7 @@ try {
   };
 }
 '''
+        key: loadPublicPageSettings
       }
     }
   ]

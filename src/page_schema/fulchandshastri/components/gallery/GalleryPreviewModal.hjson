@@ -1,29 +1,20 @@
 {
   vertexes: [
     {
-      id: "1",
-      L: "Component",
+      id: "1"
+      L: Component
       P: {
-        key: "GalleryPreviewModal",
-        description: "Gallery preview modal with Carousel prev/next. Props: isOpen, items, startIndex, onClose."
+        description: Gallery preview modal with Carousel prev/next. Props: isOpen, items, startIndex, onClose.
+        key: GalleryPreviewModal
+        updatedAt: 2026-07-13T18:16:26.992Z
       }
-    },
+    }
     {
-      id: "overlay",
-      L: "Attr",
+      id: "2"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  hide: args.contextData.props?.isOpen !== true,
-  onClick: (e) => {
-    if (e.target === e.currentTarget) args.contextData.props?.onClose?.();
-  }
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   position: fixed;
   inset: 0;
@@ -36,22 +27,26 @@ return `._id {
   backdrop-filter: blur(4px);
 }`;
 '''
-      }
-    },
-    {
-      id: "dialog",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "div",
-  role: "dialog",
-  "aria-modal": "true"
+  hide: args.contextData.props?.isOpen !== true,
+  onClick: (e) => {
+    if (e.target === e.currentTarget) args.contextData.props?.onClose?.();
+  }
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   width: 100%;
   max-width: 960px;
@@ -64,18 +59,24 @@ return `._id {
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  role: "dialog",
+  "aria-modal": "true"
+};
+'''
       }
-    },
+    }
     {
-      id: "header",
-      L: "Attr",
+      id: "4"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return { as: "div" };
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: flex;
   align-items: center;
@@ -86,24 +87,20 @@ return `._id {
   flex-shrink: 0;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return { as: "div" };
+'''
       }
-    },
+    }
     {
-      id: "headerTitle",
-      L: "Attr",
+      id: "5"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const items = Array.isArray(args.contextData.props?.items) ? args.contextData.props.items : [];
-const startIndex = Math.max(0, Number(args.contextData.props?.startIndex) || 0);
-const count = items.length;
-return {
-  as: "h2",
-  text: count > 0 ? `Gallery preview (${Math.min(startIndex + 1, count)} / ${count})` : "Gallery preview"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   margin: 0;
   font-size: 1.125rem;
@@ -111,23 +108,26 @@ return `._id {
   color: ${args.theme.var.color.text};
 }`;
 '''
-      }
-    },
-    {
-      id: "closeBtn",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const items = Array.isArray(args.contextData.props?.items) ? args.contextData.props.items : [];
+const startIndex = Math.max(0, Number(args.contextData.props?.startIndex) || 0);
+const count = items.length;
 return {
-  as: "button",
-  type: "button",
-  "aria-label": "Close",
-  onClick: () => args.contextData.props?.onClose?.()
+  as: "h2",
+  text: count > 0 ? `Gallery preview (${Math.min(startIndex + 1, count)} / ${count})` : "Gallery preview"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: inline-flex;
   align-items: center;
@@ -145,15 +145,27 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  type: "button",
+  "aria-label": "Close",
+  onClick: () => args.contextData.props?.onClose?.()
+};
+'''
       }
-    },
+    }
     {
-      id: "closeIcon",
-      L: "Attr",
+      id: "7"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "icon",
   icon: "ph:x",
@@ -162,17 +174,13 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "body",
-      L: "Attr",
+      id: "8"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return { as: "div" };
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   flex: 1;
   min-height: 0;
@@ -180,15 +188,22 @@ return `._id {
   padding: 1rem;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return { as: "div" };
+'''
       }
-    },
+    }
     {
-      id: "carousel",
-      L: "Attr",
+      id: "9"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Carousel",
-        props: '''
+        displayOrder: 1
+        componentName: Carousel
+        props:
+          '''
 const items = Array.isArray(args.contextData.props?.items) ? args.contextData.props.items : [];
 const rawIndex = Number(args.contextData.props?.startIndex);
 const startIndex = Number.isFinite(rawIndex)
@@ -205,17 +220,13 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "slide",
-      L: "Attr",
+      id: "10"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return { as: "div" };
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: flex;
   flex-direction: column;
@@ -224,18 +235,20 @@ return `._id {
   padding: 0 0.25rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "mediaWrap",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return { as: "div" };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   position: relative;
   width: 100%;
@@ -249,15 +262,31 @@ return `._id {
   background: ${args.theme.var.color.background_light_100};
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return { as: "div" };
+'''
       }
-    },
+    }
     {
-      id: "photoPreview",
-      L: "Attr",
+      id: "12"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  width: 100%;
+  max-height: 62vh;
+  object-fit: contain;
+  display: block;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const item = args.contextData.gallerySlide || {};
 const isPhoto = (item.mediaType || "Photo") === "Photo";
 const src = item.fileUrl || item.previewUrl || "";
@@ -267,24 +296,25 @@ return {
   alt: item.title || "Photo",
   loading: "lazy"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   width: 100%;
   max-height: 62vh;
-  object-fit: contain;
-  display: block;
+  background: ${args.theme.var.color.background_dark_900};
 }`;
 '''
-      }
-    },
-    {
-      id: "videoPreview",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 const item = args.contextData.gallerySlide || {};
 const isVideo = item.mediaType === "Video";
 const src = item.fileUrl || "";
@@ -294,33 +324,15 @@ return {
   controls: true,
   playsinline: true
 };
-''',
-        css: '''
-return `._id {
-  width: 100%;
-  max-height: 62vh;
-  background: ${args.theme.var.color.background_dark_900};
-}`;
 '''
       }
-    },
+    }
     {
-      id: "pdfPreview",
-      L: "Attr",
+      id: "14"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-const item = args.contextData.gallerySlide || {};
-const isPdf = item.mediaType === "Pdf";
-const src = item.fileUrl || "";
-return {
-  as: isPdf && src ? "iframe" : "fragment",
-  src: src || undefined,
-  title: item.title || "PDF preview"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   width: 100%;
   min-height: 62vh;
@@ -329,22 +341,27 @@ return `._id {
   background: ${args.theme.var.color.background_light_50};
 }`;
 '''
-      }
-    },
-    {
-      id: "typeBadge",
-      L: "Attr",
-      P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
 const item = args.contextData.gallerySlide || {};
+const isPdf = item.mediaType === "Pdf";
+const src = item.fileUrl || "";
 return {
-  as: "span",
-  text: item.mediaType || "File"
+  as: isPdf && src ? "iframe" : "fragment",
+  src: src || undefined,
+  title: item.title || "PDF preview"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   position: absolute;
   top: 0.75rem;
@@ -360,22 +377,24 @@ return `._id {
   border: 1px solid ${args.theme.var.color.border};
 }`;
 '''
-      }
-    },
-    {
-      id: "slideTitle",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
 const item = args.contextData.gallerySlide || {};
 return {
-  as: "h3",
-  text: item.title || "Untitled"
+  as: "span",
+  text: item.mediaType || "File"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   margin: 0;
   font-size: 1.0625rem;
@@ -383,23 +402,24 @@ return `._id {
   color: ${args.theme.var.color.text};
 }`;
 '''
-      }
-    },
-    {
-      id: "slideDescription",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 const item = args.contextData.gallerySlide || {};
 return {
-  as: "p",
-  text: item.description || "",
-  hide: !item.description
+  as: "h3",
+  text: item.title || "Untitled"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   margin: 0;
   color: ${args.theme.var.color.text_light_200};
@@ -407,47 +427,49 @@ return `._id {
   line-height: 1.5;
 }`;
 '''
-      }
-    },
-    {
-      id: "slideActions",
-      L: "Attr",
-      P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
 const item = args.contextData.gallerySlide || {};
 return {
-  as: "div",
-  hide: !item.fileUrl
+  as: "p",
+  text: item.description || "",
+  hide: !item.description
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   gap: 0.75rem;
   flex-wrap: wrap;
 }`;
 '''
-      }
-    },
-    {
-      id: "openLink",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
 const item = args.contextData.gallerySlide || {};
 return {
-  as: "a",
-  href: item.fileUrl || "#",
-  target: "_blank",
-  rel: "noopener noreferrer",
-  text: "Open / Download"
+  as: "div",
+  hide: !item.fileUrl
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: inline-flex;
   align-items: center;
@@ -464,23 +486,27 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "emptyState",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const items = Array.isArray(args.contextData.props?.items) ? args.contextData.props.items : [];
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.gallerySlide || {};
 return {
-  as: "p",
-  text: "No files to preview.",
-  hide: items.length > 0
+  as: "a",
+  href: item.fileUrl || "#",
+  target: "_blank",
+  rel: "noopener noreferrer",
+  text: "Open / Download"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "20"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   margin: 0;
   text-align: center;
@@ -488,28 +514,134 @@ return `._id {
   padding: 2rem 1rem;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const items = Array.isArray(args.contextData.props?.items) ? args.contextData.props.items : [];
+return {
+  as: "p",
+  text: "No files to preview.",
+  hide: items.length > 0
+};
+'''
       }
     }
-  ],
+  ]
   edges: [
-    { id: "e1", T: "Attr", S: "1", E: "overlay" },
-    { id: "e2", T: "Attr", S: "overlay", E: "dialog" },
-    { id: "e3", T: "Attr", S: "dialog", E: "header" },
-    { id: "e4", T: "Attr", S: "header", E: "headerTitle" },
-    { id: "e5", T: "Attr", S: "header", E: "closeBtn" },
-    { id: "e6", T: "Attr", S: "closeBtn", E: "closeIcon" },
-    { id: "e7", T: "Attr", S: "dialog", E: "body" },
-    { id: "e8", T: "Attr", S: "body", E: "carousel" },
-    { id: "e9", T: "Attr", S: "carousel", E: "slide" },
-    { id: "e10", T: "Attr", S: "slide", E: "mediaWrap" },
-    { id: "e11", T: "Attr", S: "mediaWrap", E: "photoPreview" },
-    { id: "e12", T: "Attr", S: "mediaWrap", E: "videoPreview" },
-    { id: "e13", T: "Attr", S: "mediaWrap", E: "pdfPreview" },
-    { id: "e14", T: "Attr", S: "mediaWrap", E: "typeBadge" },
-    { id: "e15", T: "Attr", S: "slide", E: "slideTitle" },
-    { id: "e16", T: "Attr", S: "slide", E: "slideDescription" },
-    { id: "e17", T: "Attr", S: "slide", E: "slideActions" },
-    { id: "e18", T: "Attr", S: "slideActions", E: "openLink" },
-    { id: "e19", T: "Attr", S: "body", E: "emptyState" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "8"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "4"
+      E: "6"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "8"
+      E: "20"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "10"
+      E: "11"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "10"
+      E: "16"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "10"
+      E: "17"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "10"
+      E: "18"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "11"
+      E: "12"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "11"
+      E: "13"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "11"
+      E: "14"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "11"
+      E: "15"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "18"
+      E: "19"
+    }
   ]
 }

@@ -4,7 +4,6 @@
       id: "1"
       L: Function
       P: {
-        key: getPaletteTreeRoots
         description: Loads category + content tree roots for Page Designer palette (components, pages, functions).
         body:
           '''
@@ -149,6 +148,7 @@ return {
   message: `Found ${finalVertices.length} root palette categories`
 };
 '''
+        key: getPaletteTreeRoots
       }
     }
   ]

@@ -58,6 +58,10 @@ const fetchRoot = async (options) => {
     const relationshipType = getRelationshipType();
 
     const enableUserScoping = args.contextData.props?.enableUserScoping === true;
+    const rawSelectedIds = args.contextData.props?.initialSelectedRowIds;
+    const selectedContentIds = Array.isArray(rawSelectedIds)
+      ? rawSelectedIds.map((id) => String(id || "").trim()).filter(Boolean)
+      : [];
 
     const sidebarContextData = {
       parentVertexLabel,
@@ -67,7 +71,8 @@ const fetchRoot = async (options) => {
       relationshipType,
       enableUserScoping,
       loadFullTree: args.fns.getSidebarConfig()?.loadFullTree === true,
-      hooks: args.contextData.props?.hooks
+      hooks: args.contextData.props?.hooks,
+      selectedContentIds: selectedContentIds.length > 0 ? selectedContentIds : undefined
     };
     const result = await args.executeNamedServerFunction({
       functionName: "getSidebarTreeRoots",
@@ -99,8 +104,15 @@ const fetchRoot = async (options) => {
         });
       };
 
-      // Restore selection from URL (vertex id) so reload activates same category
-      const initialCategoryId = args.contextData.props?.initialCategoryId;
+      // Restore selection: explicit prop, then selectedCategoryId from sidebar fetch, else first root.
+      let initialCategoryId = args.contextData.props?.initialCategoryId;
+      if (initialCategoryId != null) {
+        initialCategoryId = String(initialCategoryId).trim() || null;
+      }
+      if (!initialCategoryId && result.result.selectedCategoryId != null) {
+        initialCategoryId = String(result.result.selectedCategoryId).trim() || null;
+      }
+
       if (initialCategoryId && args.graph?.vertexes?.[initialCategoryId]) {
         const vertex = args.graph.vertexes[initialCategoryId];
         let parent = getParentCategory(initialCategoryId);
@@ -770,6 +782,7 @@ return {
 '''
         key: Sidebar
         props: ""
+        updatedAt: 2026-07-13T16:40:13.139Z
       }
     }
     {

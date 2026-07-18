@@ -1,0 +1,728 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        public: true
+        settingsPageId: schedule
+        isNoPermissionCheck: true
+        fns: return { enabled: () => true }
+        url: /schedule
+        key: Schedule
+        updatedAt: 2026-07-14T15:36:49.029Z
+        props:
+          '''
+const locale = args.params?.lang ? String(args.params.lang).toLowerCase() : undefined;
+return {
+  contextName: "scheduleSettings",
+  serverFunction: `
+try {
+  const pageResult = await args.executeNamedServerFunction({
+    functionName: "loadPublicPageSettings",
+    contextData: { pageId: "schedule", allowPublicRead: true, locale: ${JSON.stringify(locale ?? null)} }
+  });
+  const tableResult = await args.executeNamedServerFunction({
+    functionName: "loadPublicTableContent",
+    contextData: { tableKey: "schedule", tableVertexLabel: "ScheduleEvent", locale: ${JSON.stringify(locale ?? null)} }
+  });
+
+  const sections = pageResult?.result?.success ? (pageResult.result.data?.sections || {}) : {};
+  const tableData = tableResult?.result?.success ? (tableResult.result.data || {}) : {};
+  const graph = tableData.graph || { vertexes: {}, edges: {} };
+  const rowIds = Array.isArray(tableData.rowIds) ? tableData.rowIds : [];
+
+  const parseDate = (value) => {
+    if (value == null || value === "") return null;
+    const d = new Date(value);
+    return Number.isNaN(d.getTime()) ? null : d;
+  };
+
+  const formatDate = (value) => {
+    const d = parseDate(value);
+    if (!d) return value != null ? String(value) : "";
+    return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+  };
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const events = rowIds.map((id) => {
+    const event = graph.vertexes?.[id];
+    const edgeIds = event?.OUT?.ScheduleEventBannerFile || [];
+    let banner = "";
+    if (Array.isArray(edgeIds) && edgeIds.length > 0) {
+      const edge = graph.edges?.[edgeIds[0]];
+      const file = edge?.E != null ? graph.vertexes?.[edge.E] : null;
+      const fileName = file?.P?.fileName != null ? String(file.P.fileName).trim() : "";
+      if (fileName) banner = "/api/file/download/" + encodeURIComponent(fileName);
+    }
+    return {
+      id,
+      startDateRaw: event?.P?.startDate ?? "",
+      endDateRaw: event?.P?.endDate ?? "",
+      startDate: formatDate(event?.P?.startDate),
+      endDate: formatDate(event?.P?.endDate),
+      place: event?.P?.place || "",
+      programme: event?.P?.programme || "",
+      details: event?.P?.details || "",
+      banner
+    };
+  });
+
+  const upcomingByYear = {};
+  const previousByYear = {};
+
+  for (const event of events) {
+    const start = parseDate(event.startDateRaw);
+    const end = parseDate(event.endDateRaw) || start;
+    const year = (start || end)?.getFullYear();
+    if (year == null) continue;
+    const isPrevious = end && end < today;
+    const bucket = isPrevious ? previousByYear : upcomingByYear;
+    if (!bucket[year]) bucket[year] = [];
+    bucket[year].push(event);
+  }
+
+  const sortByStart = (a, b) => {
+    const da = parseDate(a.startDateRaw)?.getTime() ?? 0;
+    const db = parseDate(b.startDateRaw)?.getTime() ?? 0;
+    return da - db;
+  };
+
+  const yearSections = [];
+  const upcomingYears = Object.keys(upcomingByYear).map(Number).sort((a, b) => a - b);
+  for (const year of upcomingYears) {
+    yearSections.push({
+      id: "upcoming-" + year,
+      title: "Upcoming events in " + year,
+      rows: upcomingByYear[year].slice().sort(sortByStart)
+    });
+  }
+  const previousYears = Object.keys(previousByYear).map(Number).sort((a, b) => b - a);
+  for (const year of previousYears) {
+    yearSections.push({
+      id: "previous-" + year,
+      title: "Previous events in " + year,
+      rows: previousByYear[year].slice().sort((a, b) => -sortByStart(a, b))
+    });
+  }
+
+  return {
+    content: sections.content || {},
+    yearSections
+  };
+} catch (error) {
+  console.error("Error loading schedule page:", error);
+  return { content: {}, yearSections: [] };
+}
+`
+};
+'''
+      }
+    }
+    {
+      id: "2"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: Layout
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  background: linear-gradient(135deg, ${args.theme.var.color.primary_light_100} 0%, ${args.theme.var.color.primary_light_50} 100%);
+  padding: 3rem 1rem;
+  text-align: center;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  font-size: 3rem;
+  font-weight: 700;
+  margin: 0;
+
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const content = args.contextData.scheduleSettings?.content;
+return {
+  as: "h1",
+  text: content?.pageTitle || "Schedule"
+};
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.text_light_200};
+  font-size: 1.25rem;
+  margin-top: 1rem;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const content = args.contextData.scheduleSettings?.content;
+return {
+  as: "p",
+  text: content?.pageSubtitle || ""
+};
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: 3rem 1rem;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "main"
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        contextName: scheduleSection
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const sections = args.contextData.scheduleSettings?.yearSections ?? [];
+return {
+  as: "fragment",
+  data: sections
+};
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  margin-bottom: 3rem;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "section",
+  "data-animate": "",
+  ref: (el) => el && args.fns.animateOnView?.(el)
+};
+'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  text-align: center;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const section = args.contextData.scheduleSection;
+return {
+  as: "h2",
+  text: section?.title || ""
+};
+'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: PublicContentTable
+        props:
+          '''
+const section = args.contextData.scheduleSection;
+return {
+  columns: [
+    { key: "startDate", label: "Start Date", width: "120px" },
+    { key: "endDate", label: "End Date", width: "120px" },
+    { key: "place", label: "Place" },
+    { key: "programme", label: "Programme" },
+    { key: "details", label: "Details" }
+  ],
+  rows: section?.rows ?? [],
+  emptyMessage: "No events in this section."
+};
+'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "fragment"
+};
+'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: ${args.theme.var.color.background_light_50};
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "tr"
+};
+'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  text-align: left;
+  vertical-align: middle;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const row = args.contextData.row || {};
+return {
+  as: "td",
+  text: row.startDate || "",
+  style: { width: "120px" }
+};
+'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  text-align: left;
+  vertical-align: middle;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const row = args.contextData.row || {};
+return {
+  as: "td",
+  text: row.endDate || "",
+  style: { width: "120px" }
+};
+'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  text-align: left;
+  vertical-align: middle;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const row = args.contextData.row || {};
+return {
+  as: "td",
+  text: row.place || ""
+};
+'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  text-align: left;
+  vertical-align: middle;
+  color: ${args.theme.var.color.text};
+  font-weight: 600;
+}`;
+'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+const row = args.contextData.row || {};
+return {
+  as: "td",
+  text: row.programme || ""
+};
+'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  text-align: left;
+  vertical-align: middle;
+  color: ${args.theme.var.color.text};
+  white-space: pre-line;
+  max-width: 320px;
+}`;
+'''
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''
+const row = args.contextData.row || {};
+return {
+  as: "td",
+  text: row.details || ""
+};
+'''
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  background: ${args.theme.var.color.background_light_50};
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const row = args.contextData.row || {};
+const src = row.banner || "";
+return {
+  as: "tr",
+  hide: () => !src
+};
+'''
+      }
+    }
+    {
+      id: "20"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: 0.75rem;
+  text-align: center;
+  vertical-align: middle;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "td",
+  "attr:colspan": 5
+};
+'''
+      }
+    }
+    {
+      id: "21"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: block;
+  width: 100%;
+  object-fit: cover;
+  border-radius: 0.5rem;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const row = args.contextData.row || {};
+const src = row.banner || "";
+return {
+  as: "img",
+  src,
+  alt: row.programme || row.place || "Banner",
+  hide: () => !src
+};
+'''
+      }
+    }
+    {
+      id: "22"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: 2rem 1rem;
+  text-align: center;
+  color: ${args.theme.var.color.text_light_300};
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const sections = args.contextData.scheduleSettings?.yearSections ?? [];
+return {
+  as: "p",
+  text: "No scheduled events available yet.",
+  hide: () => sections.length > 0
+};
+'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: PageLayout
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "1"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "1"
+      E: "6"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "7"
+      E: "22"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "9"
+      E: "11"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "11"
+      E: "12"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "12"
+      E: "13"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "12"
+      E: "19"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "13"
+      E: "14"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "13"
+      E: "15"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "13"
+      E: "16"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "13"
+      E: "17"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "13"
+      E: "18"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "19"
+      E: "20"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "20"
+      E: "21"
+    }
+  ]
+}

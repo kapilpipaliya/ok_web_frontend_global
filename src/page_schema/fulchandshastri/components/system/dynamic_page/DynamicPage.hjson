@@ -2850,6 +2850,7 @@ return {
     args.deleteVertex(0, args.fns.pageStateVertexId, args.graph, args.setGraph);
   }
 }'''
+        updatedAt: 2026-07-17T11:49:41.565Z
       }
     }
     {
@@ -2897,7 +2898,7 @@ return {
       }
     }
     {
-      id: "mainShell"
+      id: "4"
       L: Attr
       P: {
         css:
@@ -2937,19 +2938,9 @@ return {
       }
     }
     {
-      id: "primaryPane"
+      id: "5"
       L: Attr
       P: {
-        displayOrder: 1
-        componentName: Html
-        key: dynamic_page_primary_pane
-        props:
-          '''
-return {
-  as: "div",
-  ref: (el) => args.fns.setPrimaryPaneRef?.(el)
-};
-'''
         css:
           '''
 return `._id {
@@ -2961,34 +2952,168 @@ return `._id {
   ${args.fns.hasCompanionPages?.() === true ? "" : "flex: 1 1 auto;"}
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        key: dynamic_page_primary_pane
+        props:
+          '''
+return {
+  as: "div",
+  ref: (el) => args.fns.setPrimaryPaneRef?.(el)
+};
+'''
       }
     }
     {
-      id: "companionResize"
+      id: "6"
       L: Attr
       P: {
-        displayOrder: 2
+        css:
+          '''
+return `._id {
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}`;
+'''
+        displayOrder: 1
         componentName: Html
-        key: dynamic_page_companion_resize
+        key: dynamic_page_wrapper
         props:
           '''
-const active = args.fns.companionResizeActive?.() === true;
+const hasSidebar = args.fns.hasSidebar();
+const isSettings = args.fns.isSettingsPageMode?.() === true;
 return {
-  as: "button",
-  type: "button",
-  hide: args.fns.hasCompanionPages?.() !== true,
-  "attr:aria-label": "Resize main and companion tables",
-  "attr:aria-orientation": "horizontal",
-  "attr:role": "separator",
-  "attr:data-active": active ? "" : undefined,
-  onPointerDown: (e) => {
-    if (e.currentTarget?.setPointerCapture) {
-      e.currentTarget.setPointerCapture(e.pointerId);
-    }
-    args.fns.handleCompanionSplitResize?.(e);
-  }
+  as: "div",
+  hide: !hasSidebar || isSettings || args.fns.isDashboardPageMode?.() === true
 };
 '''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Sidebar
+        key: sidebar_component
+        props:
+          '''
+const tableVertexLabel = args.fns.getTableVertexLabel();
+const tableSettingsLabel = args.fns.getTableSettingsLabel();
+const relationshipType = tableVertexLabel ? `User${tableSettingsLabel}` : null;
+
+// Get config to check user scoping settings and hooks
+const { config } = args.fns.getCachedConfig();
+const enableUserScopingForSidebar = args.fns.getConfigGeneralValue?.("enableUserScopingForSidebar") === true;
+
+const vid = args.fns.pageStateVertexId;
+return {
+  onItemSelect: args.fns.handleSidebarItemSelect,
+  tableVertexLabel: tableVertexLabel,
+  relationshipType: relationshipType,
+  enableUserScoping: enableUserScopingForSidebar,
+  onMoveItemsToCategory: args.fns.handleMoveItemsToCategory,
+  sidebarWidth: () => args.fns.getSidebarWidth?.() ?? 240,
+  setSidebarWidth: (w) => args.fns.setSidebarWidth?.(w),
+  fetchRoot: args.fns.fetchRoot,
+  hooks: config?.sidebar?.hooks,
+  initialCategoryId: args.fns.useUrlQueryParams?.() !== false
+    ? args.searchParams?.sidebarCategory
+    : args.contextData.props?.initialCategoryId,
+  initialSelectedRowIds: args.fns.getInitialSelectedRowIds?.(),
+  contentLabel: args.fns.prop('label')
+};
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        slotName: main
+        displayOrder: 1
+        fns: ""
+        componentName: Table
+        key: unique_1
+        props:
+          '''
+const vid = args.fns.pageStateVertexId;
+return {
+  selectedSidebarItem: args.fns.selectedSidebarItem,
+  getSelectedRows: args.fns.getSelectedRows,
+  setSelectedRows: args.fns.setSelectedRows,
+  clearSelectedRows: args.fns.clearSelectedRows,
+  rowsToRemove: () => args.graph.vertexes[vid]?.P?.rowsToRemoveVertexIds ?? null,
+  setRowsToRemove: (ids) => args.mergeVertexProperties(0, vid, args.graph, args.setGraph, { rowsToRemoveVertexIds: ids }),
+  rowsToAdd: () => args.graph.vertexes[vid]?.P?.rowsToAddVertexIds ?? null,
+  setRowsToAdd: (ids) => args.mergeVertexProperties(0, vid, args.graph, args.setGraph, { rowsToAddVertexIds: ids }),
+  ...args.fns.getTablePassthroughProps()
+}'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+  flex: 1 1 auto;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        key: dynamic_page_no_sidebar_wrapper
+        props:
+          '''
+const hasSidebar = args.fns.hasSidebar();
+const vid = args.fns.pageStateVertexId;
+const configLoading = args.graph.vertexes[vid]?.P?.configLoading !== false;
+const isSettings = args.fns.isSettingsPageMode?.() === true;
+return {
+  as: "div",
+  hide: hasSidebar || configLoading || isSettings || args.fns.isDashboardPageMode?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        displayOrder: 1
+        fns: ""
+        componentName: Table
+        key: unique_2
+        props:
+          '''
+const vid = args.fns.pageStateVertexId;
+return {
+  getSelectedRows: args.fns.getSelectedRows,
+  setSelectedRows: args.fns.setSelectedRows,
+  clearSelectedRows: args.fns.clearSelectedRows,
+  rowsToRemove: () => args.graph.vertexes[vid]?.P?.rowsToRemoveVertexIds ?? null,
+  setRowsToRemove: (ids) => args.mergeVertexProperties(0, vid, args.graph, args.setGraph, { rowsToRemoveVertexIds: ids }),
+  rowsToAdd: () => args.graph.vertexes[vid]?.P?.rowsToAddVertexIds ?? null,
+  setRowsToAdd: (ids) => args.mergeVertexProperties(0, vid, args.graph, args.setGraph, { rowsToAddVertexIds: ids }),
+  ...args.fns.getTablePassthroughProps()
+}'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
         css:
           '''
 const active = args.fns.companionResizeActive?.() === true;
@@ -3029,100 +3154,65 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        key: dynamic_page_companion_resize
+        props:
+          '''
+const active = args.fns.companionResizeActive?.() === true;
+return {
+  as: "button",
+  type: "button",
+  hide: args.fns.hasCompanionPages?.() !== true,
+  "attr:aria-label": "Resize main and companion tables",
+  "attr:aria-orientation": "horizontal",
+  "attr:role": "separator",
+  "attr:data-active": active ? "" : undefined,
+  onPointerDown: (e) => {
+    if (e.currentTarget?.setPointerCapture) {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    }
+    args.fns.handleCompanionSplitResize?.(e);
+  }
+};
+'''
       }
     }
     {
-      id: "4"
+      id: "12"
       L: Attr
       P: {
+        contextName: companionPage
         css:
           '''
 return `._id {
-  width: 100%;
-  min-width: 0;
   min-height: 0;
+  min-width: 0;
+  width: 100%;
   height: 100%;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
+  background: ${args.theme.var.color.background};
 }`;
 '''
-        displayOrder: 1
+        loop: true
+        displayOrder: 3
         componentName: Html
-        key: dynamic_page_wrapper
+        key: dynamic_page_companion_pane
         props:
           '''
-const hasSidebar = args.fns.hasSidebar();
-const isSettings = args.fns.isSettingsPageMode?.() === true;
 return {
-  as: "div",
-  hide: !hasSidebar || isSettings || args.fns.isDashboardPageMode?.() === true
+  as: "section",
+  data: args.fns.getCompanionPages?.() ?? [],
+  hide: args.fns.hasCompanionPages?.() !== true,
+  "attr:aria-label": "Companion table"
 };
 '''
       }
     }
     {
-      id: "5"
-      L: Attr
-      P: {
-        displayOrder: 1
-        componentName: Sidebar
-        key: sidebar_component
-        props:
-          '''
-const tableVertexLabel = args.fns.getTableVertexLabel();
-const tableSettingsLabel = args.fns.getTableSettingsLabel();
-const relationshipType = tableVertexLabel ? `User${tableSettingsLabel}` : null;
-
-// Get config to check user scoping settings and hooks
-const { config } = args.fns.getCachedConfig();
-const enableUserScopingForSidebar = args.fns.getConfigGeneralValue?.("enableUserScopingForSidebar") === true;
-
-const vid = args.fns.pageStateVertexId;
-return {
-  onItemSelect: args.fns.handleSidebarItemSelect,
-  tableVertexLabel: tableVertexLabel,
-  relationshipType: relationshipType,
-  enableUserScoping: enableUserScopingForSidebar,
-  onMoveItemsToCategory: args.fns.handleMoveItemsToCategory,
-  sidebarWidth: () => args.fns.getSidebarWidth?.() ?? 240,
-  setSidebarWidth: (w) => args.fns.setSidebarWidth?.(w),
-  fetchRoot: args.fns.fetchRoot,
-  hooks: config?.sidebar?.hooks,
-  initialCategoryId: args.fns.useUrlQueryParams?.() !== false
-    ? args.searchParams?.sidebarCategory
-    : args.contextData.props?.initialCategoryId,
-  initialSelectedRowIds: args.fns.getInitialSelectedRowIds?.(),
-  contentLabel: args.fns.prop('label')
-};
-'''
-      }
-    }
-    {
-      id: "6"
-      L: Attr
-      P: {
-        slotName: main
-        displayOrder: 1
-        fns: ""
-        componentName: Table
-        key: unique_1
-        props:
-          '''
-const vid = args.fns.pageStateVertexId;
-return {
-  selectedSidebarItem: args.fns.selectedSidebarItem,
-  getSelectedRows: args.fns.getSelectedRows,
-  setSelectedRows: args.fns.setSelectedRows,
-  clearSelectedRows: args.fns.clearSelectedRows,
-  rowsToRemove: () => args.graph.vertexes[vid]?.P?.rowsToRemoveVertexIds ?? null,
-  setRowsToRemove: (ids) => args.mergeVertexProperties(0, vid, args.graph, args.setGraph, { rowsToRemoveVertexIds: ids }),
-  rowsToAdd: () => args.graph.vertexes[vid]?.P?.rowsToAddVertexIds ?? null,
-  setRowsToAdd: (ids) => args.mergeVertexProperties(0, vid, args.graph, args.setGraph, { rowsToAddVertexIds: ids }),
-  ...args.fns.getTablePassthroughProps()
-}'''
-      }
-    }
-    {
-      id: "7"
+      id: "13"
       L: Attr
       P: {
         css:
@@ -3130,71 +3220,132 @@ return {
 return `._id {
   display: flex;
   flex-direction: column;
-  width: 100%;
-  min-width: 0;
-  min-height: 0;
-  height: 100%;
-  overflow: hidden;
-  flex: 1 1 auto;
+  gap: 0.15rem;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid ${args.theme.var.color.border_light_300 || args.theme.var.color.border};
+  flex-shrink: 0;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const companion = args.contextData.companionPage || {};
+return {
+  as: "div",
+  hide: !companion.title && !companion.hint
+};
+'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const companion = args.contextData.companionPage || {};
+return {
+  as: "h2",
+  text: companion.title || "",
+  hide: !companion.title
+};
+'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  margin: 0;
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.text_dark_400};
 }`;
 '''
         displayOrder: 2
         componentName: Html
-        key: dynamic_page_no_sidebar_wrapper
         props:
           '''
-const hasSidebar = args.fns.hasSidebar();
-const vid = args.fns.pageStateVertexId;
-const configLoading = args.graph.vertexes[vid]?.P?.configLoading !== false;
-const isSettings = args.fns.isSettingsPageMode?.() === true;
+const companion = args.contextData.companionPage || {};
 return {
-  as: "div",
-  hide: hasSidebar || configLoading || isSettings || args.fns.isDashboardPageMode?.() === true
+  as: "p",
+  text: companion.hint || "",
+  hide: !companion.hint
 };
 '''
       }
     }
     {
-      id: "8"
+      id: "16"
       L: Attr
       P: {
-        displayOrder: 1
-        fns: ""
-        componentName: Table
-        key: unique_2
-        props:
+        css:
           '''
-const vid = args.fns.pageStateVertexId;
-return {
-  getSelectedRows: args.fns.getSelectedRows,
-  setSelectedRows: args.fns.setSelectedRows,
-  clearSelectedRows: args.fns.clearSelectedRows,
-  rowsToRemove: () => args.graph.vertexes[vid]?.P?.rowsToRemoveVertexIds ?? null,
-  setRowsToRemove: (ids) => args.mergeVertexProperties(0, vid, args.graph, args.setGraph, { rowsToRemoveVertexIds: ids }),
-  rowsToAdd: () => args.graph.vertexes[vid]?.P?.rowsToAddVertexIds ?? null,
-  setRowsToAdd: (ids) => args.mergeVertexProperties(0, vid, args.graph, args.setGraph, { rowsToAddVertexIds: ids }),
-  ...args.fns.getTablePassthroughProps()
-}'''
-      }
-    }
-    {
-      id: "9"
-      L: Attr
-      P: {
-        displayOrder: 3
+return `._id {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}`;
+'''
+        displayOrder: 2
         componentName: Html
-        key: settings_page_layout_wrapper
+        props: return { as: "div" };
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}`;
+'''
+        displayOrder: 1
+        componentName: DynamicPage
+        key: companion_dynamic_page
         props:
           '''
-const vid = args.fns.pageStateVertexId;
-const configLoading = args.graph.vertexes[vid]?.P?.configLoading !== false;
-const isSettings = args.fns.isSettingsPageMode?.() === true;
-const embedded = args.contextData.props?.embeddedMode === true;
+const companion = args.contextData.companionPage || {};
 return {
-  as: "div",
-  hide: !isSettings || configLoading || args.fns.isDashboardPageMode?.() === true
+  tableKey: companion.tableKey,
+  tableVertexLabel: companion.tableVertexLabel,
+  loadFromSetting: companion.loadFromSetting !== false,
+  useUrlQueryParams: companion.useUrlQueryParams === true,
+  usePolarisUI: companion.usePolarisUI !== false,
+  embeddedMode: true,
+  disableCompanionPages: true
 };
 '''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
         css:
           '''
 const embedded = args.contextData.props?.embeddedMode === true;
@@ -3218,10 +3369,24 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 3
+        componentName: Html
+        key: settings_page_layout_wrapper
+        props:
+          '''
+const vid = args.fns.pageStateVertexId;
+const configLoading = args.graph.vertexes[vid]?.P?.configLoading !== false;
+const isSettings = args.fns.isSettingsPageMode?.() === true;
+const embedded = args.contextData.props?.embeddedMode === true;
+return {
+  as: "div",
+  hide: !isSettings || configLoading || args.fns.isDashboardPageMode?.() === true
+};
+'''
       }
     }
     {
-      id: "10"
+      id: "19"
       L: Attr
       P: {
         displayOrder: 1
@@ -3239,18 +3404,9 @@ return {
       }
     }
     {
-      id: "11scroll"
+      id: "20"
       L: Attr
       P: {
-        displayOrder: 2
-        componentName: Html
-        key: settings_page_content_scroll
-        props:
-          '''
-return {
-  as: "div"
-};
-'''
         css:
           '''
 return `._id {
@@ -3264,10 +3420,19 @@ return `._id {
   overscroll-behavior: contain;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        key: settings_page_content_scroll
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
     }
     {
-      id: "11"
+      id: "21"
       L: Attr
       P: {
         displayOrder: 1
@@ -3282,9 +3447,16 @@ return {
       }
     }
     {
-      id: "12"
+      id: "22"
       L: Attr
       P: {
+        css:
+          '''
+return `._id {
+  width: 100%;
+  min-height: calc(100vh - 4rem);
+}`;
+'''
         displayOrder: 4
         componentName: Html
         key: dashboard_page_wrapper
@@ -3297,17 +3469,10 @@ return {
   hide: args.fns.isDashboardPageMode?.() !== true || configLoading
 };
 '''
-        css:
-          '''
-return `._id {
-  width: 100%;
-  min-height: calc(100vh - 4rem);
-}`;
-'''
       }
     }
     {
-      id: "13"
+      id: "23"
       L: Attr
       P: {
         displayOrder: 1
@@ -3322,7 +3487,7 @@ return {
       }
     }
     {
-      id: "14"
+      id: "24"
       L: Attr
       P: {
         displayOrder: 99
@@ -3331,170 +3496,6 @@ return {
         props:
           '''
 return args.fns.getDropCreateReviewModalProps?.() || { isOpen: false };
-'''
-      }
-    }
-    {
-      id: "companionPane"
-      L: Attr
-      P: {
-        displayOrder: 3
-        componentName: Html
-        loop: true
-        contextName: companionPage
-        key: dynamic_page_companion_pane
-        props:
-          '''
-return {
-  as: "section",
-  data: args.fns.getCompanionPages?.() ?? [],
-  hide: args.fns.hasCompanionPages?.() !== true,
-  "attr:aria-label": "Companion table"
-};
-'''
-        css:
-          '''
-return `._id {
-  min-height: 0;
-  min-width: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  background: ${args.theme.var.color.background};
-}`;
-'''
-      }
-    }
-    {
-      id: "companionHeader"
-      L: Attr
-      P: {
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''
-const companion = args.contextData.companionPage || {};
-return {
-  as: "div",
-  hide: !companion.title && !companion.hint
-};
-'''
-        css:
-          '''
-return `._id {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-  padding: 0.5rem 0.75rem;
-  border-bottom: 1px solid ${args.theme.var.color.border_light_300 || args.theme.var.color.border};
-  flex-shrink: 0;
-}`;
-'''
-      }
-    }
-    {
-      id: "companionTitle"
-      L: Attr
-      P: {
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''
-const companion = args.contextData.companionPage || {};
-return {
-  as: "h2",
-  text: companion.title || "",
-  hide: !companion.title
-};
-'''
-        css:
-          '''
-return `._id {
-  margin: 0;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: ${args.theme.var.color.text};
-}`;
-'''
-      }
-    }
-    {
-      id: "companionHint"
-      L: Attr
-      P: {
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''
-const companion = args.contextData.companionPage || {};
-return {
-  as: "p",
-  text: companion.hint || "",
-  hide: !companion.hint
-};
-'''
-        css:
-          '''
-return `._id {
-  margin: 0;
-  font-size: 0.75rem;
-  color: ${args.theme.var.color.text_dark_400};
-}`;
-'''
-      }
-    }
-    {
-      id: "companionBody"
-      L: Attr
-      P: {
-        displayOrder: 2
-        componentName: Html
-        props: return { as: "div" };
-        css:
-          '''
-return `._id {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  position: relative;
-}`;
-'''
-      }
-    }
-    {
-      id: "companionDynamicPage"
-      L: Attr
-      P: {
-        displayOrder: 1
-        componentName: DynamicPage
-        key: companion_dynamic_page
-        props:
-          '''
-const companion = args.contextData.companionPage || {};
-return {
-  tableKey: companion.tableKey,
-  tableVertexLabel: companion.tableVertexLabel,
-  loadFromSetting: companion.loadFromSetting !== false,
-  useUrlQueryParams: companion.useUrlQueryParams === true,
-  usePolarisUI: companion.usePolarisUI !== false,
-  embeddedMode: true,
-  disableCompanionPages: true
-};
-'''
-        css:
-          '''
-return `._id {
-  flex: 1;
-  min-height: 0;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}`;
 '''
       }
     }
@@ -3507,136 +3508,136 @@ return `._id {
       E: "2"
     }
     {
-      id: e_shell
-      T: Attr
-      S: "1"
-      E: "mainShell"
-    }
-    {
-      id: e_primary
-      T: Attr
-      S: "mainShell"
-      E: "primaryPane"
-    }
-    {
-      id: e_resize
-      T: Attr
-      S: "mainShell"
-      E: "companionResize"
-    }
-    {
-      id: e_comp
-      T: Attr
-      S: "mainShell"
-      E: "companionPane"
-    }
-    {
       id: e2
       T: Attr
-      S: "primaryPane"
+      S: "1"
       E: "4"
     }
     {
       id: e3
       T: Attr
-      S: "primaryPane"
-      E: "7"
+      S: "1"
+      E: "18"
     }
     {
       id: e4
+      T: Attr
+      S: "1"
+      E: "22"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "1"
+      E: "24"
+    }
+    {
+      id: e6
       T: Attr
       S: "2"
       E: "3"
     }
     {
-      id: e5
+      id: e7
       T: Attr
       S: "4"
       E: "5"
     }
     {
-      id: e6
+      id: e8
+      T: Attr
+      S: "4"
+      E: "11"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "4"
+      E: "12"
+    }
+    {
+      id: e10
       T: Attr
       S: "5"
       E: "6"
     }
     {
-      id: e8
+      id: e11
+      T: Attr
+      S: "5"
+      E: "9"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e13
       T: Attr
       S: "7"
       E: "8"
     }
     {
-      id: e9
-      T: Attr
-      S: "1"
-      E: "9"
-    }
-    {
-      id: e10
+      id: e14
       T: Attr
       S: "9"
       E: "10"
     }
     {
-      id: e11
-      T: Attr
-      S: "9"
-      E: "11scroll"
-    }
-    {
-      id: e11b
-      T: Attr
-      S: "11scroll"
-      E: "11"
-    }
-    {
-      id: e12
-      T: Attr
-      S: "1"
-      E: "12"
-    }
-    {
-      id: e13
+      id: e15
       T: Attr
       S: "12"
       E: "13"
     }
     {
-      id: e14
+      id: e16
       T: Attr
-      S: "1"
+      S: "12"
+      E: "16"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "13"
       E: "14"
     }
     {
-      id: e_ch
+      id: e18
       T: Attr
-      S: "companionPane"
-      E: "companionHeader"
+      S: "13"
+      E: "15"
     }
     {
-      id: e_ct
+      id: e19
       T: Attr
-      S: "companionHeader"
-      E: "companionTitle"
+      S: "16"
+      E: "17"
     }
     {
-      id: e_chi
+      id: e20
       T: Attr
-      S: "companionHeader"
-      E: "companionHint"
+      S: "18"
+      E: "19"
     }
     {
-      id: e_cb
+      id: e21
       T: Attr
-      S: "companionPane"
-      E: "companionBody"
+      S: "18"
+      E: "20"
     }
     {
-      id: e_cdp
+      id: e22
       T: Attr
-      S: "companionBody"
-      E: "companionDynamicPage"
+      S: "20"
+      E: "21"
+    }
+    {
+      id: e23
+      T: Attr
+      S: "22"
+      E: "23"
     }
   ]
 }

@@ -5,14 +5,13 @@
       L: Component
       P: {
         key: ContentModal
+        updatedAt: 2026-07-17T11:49:41.764Z
       }
     }
     {
       id: "2"
       L: Attr
       P: {
-        displayOrder: 1
-        componentName: Html
         css:
           '''
 return `._id {
@@ -40,6 +39,8 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
         props:
           '''return {
   as: "div",
@@ -56,8 +57,6 @@ return `._id {
       id: "3"
       L: Attr
       P: {
-        displayOrder: 1
-        componentName: Html
         css:
           '''
 const maxWidth = args.contextData.props?.maxWidth || "880px";
@@ -94,6 +93,8 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
         props:
           '''return {
   as: "div",
@@ -105,8 +106,6 @@ return `._id {
       id: "4"
       L: Attr
       P: {
-        displayOrder: 1
-        componentName: Html
         css:
           '''
 return `._id {
@@ -119,6 +118,8 @@ return `._id {
   flex-shrink: 0;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
         props:
           '''return {
   as: "header",
@@ -130,8 +131,6 @@ return `._id {
       id: "5"
       L: Attr
       P: {
-        displayOrder: 1
-        componentName: Html
         css:
           '''
 return `._id {
@@ -142,6 +141,8 @@ return `._id {
   line-height: 1.35;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
         props:
           '''return {
   as: "h2",
@@ -152,26 +153,6 @@ return `._id {
     }
     {
       id: "6"
-      L: Attr
-      P: {
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''
-const onClose = args.contextData.props?.onClose;
-const usePolaris = args.contextData.props?.usePolarisUI === true;
-return {
-  as: "icon",
-  icon: "carbon:close",
-  width: 22,
-  height: 22,
-  hide: usePolaris,
-  onClick: () => onClose?.()
-};'''
-      }
-    }
-    {
-      id: "6p"
       L: Attr
       P: {
         displayOrder: 2
@@ -195,6 +176,24 @@ return {
       P: {
         displayOrder: 2
         componentName: Html
+        props:
+          '''
+const onClose = args.contextData.props?.onClose;
+const usePolaris = args.contextData.props?.usePolarisUI === true;
+return {
+  as: "icon",
+  icon: "carbon:close",
+  width: 22,
+  height: 22,
+  hide: usePolaris,
+  onClick: () => onClose?.()
+};'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
         css:
           '''
 return `._id {
@@ -205,6 +204,8 @@ return `._id {
   flex-direction: column;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
         props:
           '''return {
   as: "div"
@@ -212,25 +213,25 @@ return `._id {
       }
     }
     {
-      id: "8"
+      id: "9"
       L: Attr
       P: {
         displayOrder: 1
-        slot: children
         componentName: Slot
+        slot: children
       }
     }
     {
-      id: "v1"
+      id: "10"
       L: ComponentVariant
       P: {
         type: boolean
-        key: isOpen
         defValue: false
+        key: usePolarisUI
       }
     }
     {
-      id: "v2"
+      id: "11"
       L: ComponentVariant
       P: {
         type: function
@@ -238,55 +239,125 @@ return `._id {
       }
     }
     {
-      id: "v3"
+      id: "12"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        defValue: false
+        key: isOpen
+      }
+    }
+    {
+      id: "13"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        defValue: true
+        key: showTitle
+      }
+    }
+    {
+      id: "14"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: 880px
+        key: maxWidth
+      }
+    }
+    {
+      id: "15"
       L: ComponentVariant
       P: {
         type: string
         key: title
       }
     }
-    {
-      id: "v4"
-      L: ComponentVariant
-      P: {
-        type: string
-        key: maxWidth
-        defValue: "880px"
-      }
-    }
-    {
-      id: "v5"
-      L: ComponentVariant
-      P: {
-        type: boolean
-        key: usePolarisUI
-        defValue: false
-      }
-    }
-    {
-      id: "v6"
-      L: ComponentVariant
-      P: {
-        type: boolean
-        key: showTitle
-        defValue: true
-      }
-    }
   ]
   edges: [
-    { id: "e1", T: "Attr", S: "1", E: "2" }
-    { id: "e2", T: "Attr", S: "2", E: "3" }
-    { id: "e3", T: "Attr", S: "3", E: "4" }
-    { id: "e4", T: "Attr", S: "3", E: "7" }
-    { id: "e5", T: "Attr", S: "4", E: "5" }
-    { id: "e6", T: "Attr", S: "4", E: "6" }
-    { id: "e6p", T: "Attr", S: "4", E: "6p" }
-    { id: "e7", T: "Attr", S: "7", E: "8" }
-    { id: "ev1", T: "ComponentVariant", S: "1", E: "v1" }
-    { id: "ev2", T: "ComponentVariant", S: "1", E: "v2" }
-    { id: "ev3", T: "ComponentVariant", S: "1", E: "v3" }
-    { id: "ev4", T: "ComponentVariant", S: "1", E: "v4" }
-    { id: "ev5", T: "ComponentVariant", S: "1", E: "v5" }
-    { id: "ev6", T: "ComponentVariant", S: "1", E: "v6" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: ComponentVariant
+      S: "1"
+      E: "10"
+    }
+    {
+      id: e3
+      T: ComponentVariant
+      S: "1"
+      E: "11"
+    }
+    {
+      id: e4
+      T: ComponentVariant
+      S: "1"
+      E: "12"
+    }
+    {
+      id: e5
+      T: ComponentVariant
+      S: "1"
+      E: "13"
+    }
+    {
+      id: e6
+      T: ComponentVariant
+      S: "1"
+      E: "14"
+    }
+    {
+      id: e7
+      T: ComponentVariant
+      S: "1"
+      E: "15"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "3"
+      E: "8"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "4"
+      E: "6"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "4"
+      E: "7"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "8"
+      E: "9"
+    }
   ]
 }

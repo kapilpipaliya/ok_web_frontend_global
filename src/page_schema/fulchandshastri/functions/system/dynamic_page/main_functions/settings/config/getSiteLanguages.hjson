@@ -4,7 +4,6 @@
       id: "1"
       L: Function
       P: {
-        key: getSiteLanguages
         description: Loads configured site languages from GlobalSetting. Uses a direct document query to avoid recursion via loadSettingsPage/mergeDefaults.
         body:
           '''
@@ -80,6 +79,7 @@ try {
   };
 }
 '''
+        key: getSiteLanguages
       }
     }
   ]

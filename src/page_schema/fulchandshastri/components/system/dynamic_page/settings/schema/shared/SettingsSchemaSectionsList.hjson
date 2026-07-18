@@ -1,29 +1,20 @@
 {
   vertexes: [
     {
-      id: "sssl_root",
-      L: "Component",
+      id: "1"
+      L: Component
       P: {
-        key: "SettingsSchemaSectionsList",
-        description: "Draggable section list sidebar for settings schema editor.",
-        dynamicComponent: "IconButton, Html"
+        dynamicComponent: IconButton, Html
+        description: Draggable section list sidebar for settings schema editor.
+        key: SettingsSchemaSectionsList
       }
-    },
-{
-      id: "sssl_sidebar",
-      L: "Attr",
+    }
+    {
+      id: "2"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''const api = args.contextData.props?.editorApi || {};
-
-return {
-  as: "aside",
-  "aria-label": "Sections",
-  hide: api.isSingleSectionMode?.() === true || api.isJsonMode?.() === true
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   width: 220px;
   flex-shrink: 0;
@@ -36,18 +27,25 @@ return `._id {
   min-height: 0;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const api = args.contextData.props?.editorApi || {};
+
+return {
+  as: "aside",
+  "aria-label": "Sections",
+  hide: api.isSingleSectionMode?.() === true || api.isJsonMode?.() === true
+};
+'''
       }
-    },
-{
-      id: "sssl_list",
-      L: "Attr",
+    }
+    {
+      id: "3"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return { as: "div" };
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: flex;
   flex-direction: column;
@@ -58,54 +56,37 @@ return `._id {
   width: 100%;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return { as: "div" };
+'''
       }
-    },
-{
-      id: "sssl_item",
-      L: "Attr",
+    }
+    {
+      id: "4"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        contextName: "configSectionItem",
-        loop: true,
-        props: '''const api = args.contextData.props?.editorApi || {};
+        contextName: configSectionItem
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const api = args.contextData.props?.editorApi || {};
 
 return {
   data: api.getSectionIndices?.() || []
 };
 '''
       }
-    },
-{
-      id: "sssl_row",
-      L: "Attr",
+    }
+    {
+      id: "5"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''const api = args.contextData.props?.editorApi || {};
-
-const index = args.contextData.configSectionItem;
-const section = api.getSectionAt?.(index) || {};
-return {
-  as: "div",
-  class: "fsce-section-item",
-  role: "button",
-  tabIndex: 0,
-  onClick: () => api.selectSection?.(section.id),
-  onKeyDown: (e) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      api.selectSection?.(section.id);
-    }
-  },
-  ref: (element) => {
-    if (element && typeof index === "number" && api.attachSectionDropTarget) {
-      api.attachSectionDropTarget(element, index);
-    }
-  }
-};
-''',
-        css: '''const api = args.contextData.props?.editorApi || {};
+        css:
+          '''const api = args.contextData.props?.editorApi || {};
 
 const index = args.contextData.configSectionItem;
 const section = api.getSectionAt?.(index) || {};
@@ -150,15 +131,57 @@ return `._id.fsce-section-item {
   }` : ""}
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const api = args.contextData.props?.editorApi || {};
+
+const index = args.contextData.configSectionItem;
+const section = api.getSectionAt?.(index) || {};
+return {
+  as: "div",
+  class: "fsce-section-item",
+  role: "button",
+  tabIndex: 0,
+  onClick: () => api.selectSection?.(section.id),
+  onKeyDown: (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      api.selectSection?.(section.id);
+    }
+  },
+  ref: (element) => {
+    if (element && typeof index === "number" && api.attachSectionDropTarget) {
+      api.attachSectionDropTarget(element, index);
+    }
+  }
+};
+'''
       }
-    },
-{
-      id: "sssl_drag",
-      L: "Attr",
+    }
+    {
+      id: "6"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''const api = args.contextData.props?.editorApi || {};
+        css:
+          '''
+return `._id.fsce-section-drag-handle {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  color: ${args.theme.var.color.text_light_500};
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const api = args.contextData.props?.editorApi || {};
 
 const index = args.contextData.configSectionItem;
 return {
@@ -174,29 +197,22 @@ return {
   }
 };
 '''
-        css: '''
-return `._id.fsce-section-drag-handle {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.25rem;
-  height: 1.25rem;
-  color: ${args.theme.var.color.text_light_500};
-  cursor: grab;
-  touch-action: none;
-  user-select: none;
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id.fsce-section-drag-icon {
+  pointer-events: none;
 }`;
 '''
-      }
-    },
-{
-      id: "sssl_drag_icon",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "icon",
   icon: "ph:dots-six-vertical",
@@ -204,31 +220,15 @@ return {
   width: 14,
   class: "fsce-section-drag-icon"
 };
-''',
-        css: '''
-return `._id.fsce-section-drag-icon {
-  pointer-events: none;
-}`;
 '''
       }
-    },
-{
-      id: "sssl_label",
-      L: "Attr",
+    }
+    {
+      id: "8"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''const api = args.contextData.props?.editorApi || {};
-
-const index = args.contextData.configSectionItem;
-const section = api.getSectionAt?.(index) || {};
-return {
-  as: "span",
-  class: "fsce-section-label",
-  text: section.title || section.id
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id.fsce-section-label {
   flex: 1;
   text-align: left;
@@ -238,15 +238,29 @@ return `._id.fsce-section-label {
   min-width: 0;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const api = args.contextData.props?.editorApi || {};
+
+const index = args.contextData.configSectionItem;
+const section = api.getSectionAt?.(index) || {};
+return {
+  as: "span",
+  class: "fsce-section-label",
+  text: section.title || section.id
+};
+'''
       }
-    },
-{
-      id: "sssl_delete",
-      L: "Attr",
+    }
+    {
+      id: "9"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "IconButton",
-        props: '''const api = args.contextData.props?.editorApi || {};
+        displayOrder: 3
+        componentName: IconButton
+        props:
+          '''const api = args.contextData.props?.editorApi || {};
 
 const index = args.contextData.configSectionItem;
 const section = api.getSectionAt?.(index) || {};
@@ -263,15 +277,55 @@ return {
 '''
       }
     }
-  ],
+  ]
   edges: [
-    { id: "sssl_root_e1", T: "Attr", S: "sssl_root", E: "sssl_sidebar" },
-    { id: "sssl_root_e2", T: "Attr", S: "sssl_sidebar", E: "sssl_list" },
-    { id: "sssl_root_e3", T: "Attr", S: "sssl_list", E: "sssl_item" },
-    { id: "sssl_root_e4", T: "Attr", S: "sssl_item", E: "sssl_row" },
-    { id: "sssl_root_e5", T: "Attr", S: "sssl_row", E: "sssl_drag" },
-    { id: "sssl_root_e6", T: "Attr", S: "sssl_drag", E: "sssl_drag_icon" },
-    { id: "sssl_root_e7", T: "Attr", S: "sssl_row", E: "sssl_label" },
-    { id: "sssl_root_e8", T: "Attr", S: "sssl_row", E: "sssl_delete" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "5"
+      E: "8"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "5"
+      E: "9"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "6"
+      E: "7"
+    }
   ]
 }

@@ -1,26 +1,20 @@
 {
   vertexes: [
     {
-      id: "1",
-      L: "Component",
+      id: "1"
+      L: Component
       P: {
-        key: "GalleryBreadcrumb",
-        description: "Breadcrumb trail for recursive gallery folder navigation. Props: items[], onNavigate(item), rootLabel."
+        description: Breadcrumb trail for recursive gallery folder navigation. Props: items[], onNavigate(item), rootLabel.
+        key: GalleryBreadcrumb
+        updatedAt: 2026-07-13T18:16:26.630Z
       }
-    },
+    }
     {
-      id: "root",
-      L: "Attr",
+      id: "2"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "nav",
-  "aria-label": "Gallery breadcrumb"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: flex;
   flex-wrap: wrap;
@@ -33,17 +27,27 @@ return `._id {
   border-radius: 0.5rem;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "nav",
+  "aria-label": "Gallery breadcrumb"
+};
+'''
       }
-    },
+    }
     {
-      id: "itemsLoop",
-      L: "Attr",
+      id: "3"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        contextName: "crumb",
-        loop: true,
-        props: '''
+        contextName: crumb
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const items = Array.isArray(args.contextData.props?.items) ? args.contextData.props.items : [];
 return {
   as: "fragment",
@@ -51,32 +55,42 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "crumbItem",
-      L: "Attr",
+      id: "4"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return { as: "span" };
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return { as: "span" };
+'''
       }
-    },
+    }
     {
-      id: "separator",
-      L: "Attr",
+      id: "5"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.text_light_400};
+  flex-shrink: 0;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const index = args.contextData.index ?? 0;
 return {
   as: "icon",
@@ -85,22 +99,42 @@ return {
   height: 14,
   hide: index === 0
 };
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.text_light_400};
-  flex-shrink: 0;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "crumbButton",
-      L: "Attr",
+      id: "6"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+const items = Array.isArray(args.contextData.props?.items) ? args.contextData.props.items : [];
+const index = args.contextData.index ?? 0;
+const isLast = index === items.length - 1;
+return `._id {
+  border: none;
+  background: transparent;
+  padding: 0.15rem 0.35rem;
+  border-radius: 0.25rem;
+  font-size: 0.9375rem;
+  font-weight: ${isLast ? 600 : 500};
+  color: ${isLast ? args.theme.var.color.text : args.theme.var.color.primary};
+  cursor: ${isLast ? "default" : "pointer"};
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease;
+
+  ${!isLast ? `
+  &:hover {
+    background: ${args.theme.var.color.primary_light_100};
+    color: ${args.theme.var.color.primary_dark_200};
+  }
+  ` : ""}
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 const crumb = args.contextData.crumb || {};
 const items = Array.isArray(args.contextData.props?.items) ? args.contextData.props.items : [];
 const index = args.contextData.index ?? 0;
@@ -128,39 +162,40 @@ return {
         onNavigate(crumb);
       }
 };
-''',
-        css: '''
-const items = Array.isArray(args.contextData.props?.items) ? args.contextData.props.items : [];
-const index = args.contextData.index ?? 0;
-const isLast = index === items.length - 1;
-return `._id {
-  border: none;
-  background: transparent;
-  padding: 0.15rem 0.35rem;
-  border-radius: 0.25rem;
-  font-size: 0.9375rem;
-  font-weight: ${isLast ? 600 : 500};
-  color: ${isLast ? args.theme.var.color.text : args.theme.var.color.primary};
-  cursor: ${isLast ? "default" : "pointer"};
-  text-decoration: none;
-  transition: background 0.15s ease, color 0.15s ease;
-
-  ${!isLast ? `
-  &:hover {
-    background: ${args.theme.var.color.primary_light_100};
-    color: ${args.theme.var.color.primary_dark_200};
-  }
-  ` : ""}
-}`;
 '''
       }
     }
-  ],
+  ]
   edges: [
-    { id: "e1", T: "Attr", S: "1", E: "root" },
-    { id: "e2", T: "Attr", S: "root", E: "itemsLoop" },
-    { id: "e3", T: "Attr", S: "itemsLoop", E: "crumbItem" },
-    { id: "e4", T: "Attr", S: "crumbItem", E: "separator" },
-    { id: "e5", T: "Attr", S: "crumbItem", E: "crumbButton" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "4"
+      E: "6"
+    }
   ]
 }

@@ -1,13 +1,13 @@
 {
   vertexes: [
     {
-      id: "fcg_root",
-      L: "Component",
+      id: "1"
+      L: Component
       P: {
-        key: "FormConfigGroupsSchemaEditor",
-        description: "Visual editor for formConfig groups[].fields[] schema.",
-        dynamicComponent: "TextInput, Button, IconButton, Html",
-        fns: '''
+        dynamicComponent: TextInput, Button, IconButton, Html
+        description: Visual editor for formConfig groups[].fields[] schema.
+        fns:
+          '''
 const getProps = () => args.contextData.props || {};
 const DEFAULT_SITE_LANGUAGES = [
   { code: "en", label: "English", isDefault: true },
@@ -184,16 +184,15 @@ return {
   selectedFieldIndex
 };
 '''
+        key: FormConfigGroupsSchemaEditor
       }
-    },
+    }
     {
-      id: "fcg_shell",
-      L: "Attr",
+      id: "2"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''return { as: "div" };''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: grid;
   grid-template-columns: minmax(10rem, 14rem) minmax(0, 1fr);
@@ -207,16 +206,17 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "div" };
       }
-    },
+    }
     {
-      id: "fcg_groups_panel",
-      L: "Attr",
+      id: "3"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''return { as: "aside", class: "fcg-groups-panel" };''',
-        css: '''
+        css:
+          '''
 return `._id.fcg-groups-panel {
   display: flex;
   flex-direction: column;
@@ -228,18 +228,17 @@ return `._id.fcg-groups-panel {
   overflow: auto;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "aside", class: "fcg-groups-panel" };
       }
-    },
+    }
     {
-      id: "fcg_groups_header",
-      L: "Attr",
+      id: "4"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return { as: "div", class: "fcg-groups-header" };
-''',
-        css: '''
+        css:
+          '''
 return `._id.fcg-groups-header {
   display: flex;
   align-items: center;
@@ -247,33 +246,42 @@ return `._id.fcg-groups-header {
   gap: 0.375rem;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return { as: "div", class: "fcg-groups-header" };
+'''
       }
-    },
+    }
     {
-      id: "fcg_groups_title",
-      L: "Attr",
+      id: "5"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return { as: "h4", text: "Groups", class: "fcg-section-title" };
-''',
-        css: '''
+        css:
+          '''
 return `._id.fcg-section-title {
   margin: 0;
   font-size: 0.8125rem;
   font-weight: 600;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return { as: "h4", text: "Groups", class: "fcg-section-title" };
+'''
       }
-    },
+    }
     {
-      id: "fcg_add_group_btn",
-      L: "Attr",
+      id: "6"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Button",
-        props: '''
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
 return {
   variant: "secondary",
   size: "sm",
@@ -283,39 +291,27 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "fcg_group_loop",
-      L: "Attr",
+      id: "7"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        contextName: "fcgGroupIndex",
-        loop: true,
-        props: '''
+        contextName: fcgGroupIndex
+        loop: true
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return { data: args.fns.getGroupIndices?.() || [] };
 '''
       }
-    },
+    }
     {
-      id: "fcg_group_card",
-      L: "Attr",
+      id: "8"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const index = args.contextData.fcgGroupIndex;
-const group = args.fns.getGroupAt?.(index) || {};
-const selected = args.fns.isGroupSelected?.(index);
-return {
-  as: "button",
-  type: "button",
-  class: selected ? "fcg-group-card fcg-group-card-selected" : "fcg-group-card",
-  onClick: () => args.fns.selectGroup?.(index),
-  text: group.title || group.key || `Group ${index + 1}`
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id.fcg-group-card {
   display: block;
   width: 100%;
@@ -338,22 +334,29 @@ return `._id.fcg-group-card {
   background: ${args.theme.var.color.primary_light_100};
 }`;
 '''
-      }
-    },
-    {
-      id: "fcg_detail_panel",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const index = args.contextData.fcgGroupIndex;
+const group = args.fns.getGroupAt?.(index) || {};
+const selected = args.fns.isGroupSelected?.(index);
 return {
-  as: "div",
-  class: "fcg-detail-panel",
-  hide: args.fns.getSelectedGroupIndex?.() < 0
+  as: "button",
+  type: "button",
+  class: selected ? "fcg-group-card fcg-group-card-selected" : "fcg-group-card",
+  onClick: () => args.fns.selectGroup?.(index),
+  text: group.title || group.key || `Group ${index + 1}`
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id.fcg-detail-panel {
   display: flex;
   flex-direction: column;
@@ -362,16 +365,24 @@ return `._id.fcg-detail-panel {
   overflow: auto;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "fcg-detail-panel",
+  hide: args.fns.getSelectedGroupIndex?.() < 0
+};
+'''
       }
-    },
+    }
     {
-      id: "fcg_group_meta",
-      L: "Attr",
+      id: "10"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''return { as: "div", class: "fcg-group-meta" };''',
-        css: '''
+        css:
+          '''
 return `._id.fcg-group-meta {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -386,15 +397,19 @@ return `._id.fcg-group-meta {
   }
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "div", class: "fcg-group-meta" };
       }
-    },
+    }
     {
-      id: "fcg_group_key",
-      L: "Attr",
+      id: "11"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "TextInput",
-        props: '''
+        displayOrder: 1
+        componentName: TextInput
+        props:
+          '''
 const group = args.fns.getSelectedGroup?.() || {};
 return {
   label: "Group key",
@@ -403,14 +418,15 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "fcg_group_title",
-      L: "Attr",
+      id: "12"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "TextInput",
-        props: '''
+        displayOrder: 2
+        componentName: TextInput
+        props:
+          '''
 const group = args.fns.getSelectedGroup?.() || {};
 return {
   label: "Group title",
@@ -419,14 +435,15 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "fcg_group_grid",
-      L: "Attr",
+      id: "13"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "TextInput",
-        props: '''
+        displayOrder: 3
+        componentName: TextInput
+        props:
+          '''
 const group = args.fns.getSelectedGroup?.() || {};
 return {
   label: "Grid columns",
@@ -436,15 +453,13 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "fcg_fields_section",
-      L: "Attr",
+      id: "14"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''return { as: "div", class: "fcg-fields-section" };''',
-        css: '''
+        css:
+          '''
 return `._id.fcg-fields-section {
   display: grid;
   grid-template-columns: minmax(8rem, 12rem) minmax(0, 1fr);
@@ -456,16 +471,17 @@ return `._id.fcg-fields-section {
   }
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props: return { as: "div", class: "fcg-fields-section" };
       }
-    },
+    }
     {
-      id: "fcg_fields_list_panel",
-      L: "Attr",
+      id: "15"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''return { as: "div", class: "fcg-fields-list-panel" };''',
-        css: '''
+        css:
+          '''
 return `._id.fcg-fields-list-panel {
   display: flex;
   flex-direction: column;
@@ -476,16 +492,17 @@ return `._id.fcg-fields-list-panel {
   background: ${args.theme.var.color.background};
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "div", class: "fcg-fields-list-panel" };
       }
-    },
+    }
     {
-      id: "fcg_fields_header",
-      L: "Attr",
+      id: "16"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''return { as: "div", class: "fcg-fields-header" };''',
-        css: '''
+        css:
+          '''
 return `._id.fcg-fields-header {
   display: flex;
   align-items: center;
@@ -493,24 +510,28 @@ return `._id.fcg-fields-header {
   gap: 0.375rem;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "div", class: "fcg-fields-header" };
       }
-    },
+    }
     {
-      id: "fcg_fields_title",
-      L: "Attr",
+      id: "17"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''return { as: "h4", text: "Fields", class: "fcg-section-title" };'''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "h4", text: "Fields", class: "fcg-section-title" };
       }
-    },
+    }
     {
-      id: "fcg_add_field_btn",
-      L: "Attr",
+      id: "18"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Button",
-        props: '''
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
 return {
   variant: "secondary",
   size: "sm",
@@ -520,39 +541,27 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "fcg_field_loop",
-      L: "Attr",
+      id: "19"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        contextName: "fcgFieldIndex",
-        loop: true,
-        props: '''
+        contextName: fcgFieldIndex
+        loop: true
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return { data: args.fns.getFieldIndices?.() || [] };
 '''
       }
-    },
+    }
     {
-      id: "fcg_field_card",
-      L: "Attr",
+      id: "20"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const index = args.contextData.fcgFieldIndex;
-const field = args.fns.getFieldAt?.(index) || {};
-const selected = args.fns.isFieldSelected?.(index);
-return {
-  as: "button",
-  type: "button",
-  class: selected ? "fcg-field-card fcg-field-card-selected" : "fcg-field-card",
-  onClick: () => args.fns.setSelectedFieldIndex?.(index),
-  text: field.label || field.key || `Field ${index + 1}`
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id.fcg-field-card {
   display: block;
   width: 100%;
@@ -570,22 +579,29 @@ return `._id.fcg-field-card {
   background: ${args.theme.var.color.primary_light_100};
 }`;
 '''
-      }
-    },
-    {
-      id: "fcg_field_detail",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const index = args.contextData.fcgFieldIndex;
+const field = args.fns.getFieldAt?.(index) || {};
+const selected = args.fns.isFieldSelected?.(index);
 return {
-  as: "div",
-  class: "fcg-field-detail",
-  hide: args.fns.selectedFieldIndex?.() == null
+  as: "button",
+  type: "button",
+  class: selected ? "fcg-field-card fcg-field-card-selected" : "fcg-field-card",
+  onClick: () => args.fns.setSelectedFieldIndex?.(index),
+  text: field.label || field.key || `Field ${index + 1}`
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "21"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id.fcg-field-detail {
   display: flex;
   flex-direction: column;
@@ -596,16 +612,24 @@ return `._id.fcg-field-detail {
   background: ${args.theme.var.color.background_light_50};
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "fcg-field-detail",
+  hide: args.fns.selectedFieldIndex?.() == null
+};
+'''
       }
-    },
+    }
     {
-      id: "fcg_field_detail_grid",
-      L: "Attr",
+      id: "22"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''return { as: "div", class: "fcg-field-detail-grid" };''',
-        css: '''
+        css:
+          '''
 return `._id.fcg-field-detail-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -616,15 +640,19 @@ return `._id.fcg-field-detail-grid {
   }
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "div", class: "fcg-field-detail-grid" };
       }
-    },
+    }
     {
-      id: "fcg_field_key",
-      L: "Attr",
+      id: "23"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "TextInput",
-        props: '''
+        displayOrder: 1
+        componentName: TextInput
+        props:
+          '''
 const index = args.fns.selectedFieldIndex?.();
 const field = args.fns.getFieldAt?.(index) || {};
 return {
@@ -634,14 +662,15 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "fcg_field_label",
-      L: "Attr",
+      id: "24"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "TextInput",
-        props: '''
+        displayOrder: 2
+        componentName: TextInput
+        props:
+          '''
 const index = args.fns.selectedFieldIndex?.();
 const field = args.fns.getFieldAt?.(index) || {};
 return {
@@ -651,41 +680,55 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "fcg_field_renderer_wrap",
-      L: "Attr",
+      id: "25"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''return { as: "div" };'''
+        displayOrder: 3
+        componentName: Html
+        props: return { as: "div" };
       }
-    },
+    }
     {
-      id: "fcg_field_renderer_label",
-      L: "Attr",
+      id: "26"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return { as: "label", text: "Renderer", class: "fcg-field-label" };
-''',
-        css: '''
+        css:
+          '''
 return `._id.fcg-field-label {
   font-size: 0.75rem;
   font-weight: 500;
   color: ${args.theme.var.color.text_light_500};
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return { as: "label", text: "Renderer", class: "fcg-field-label" };
+'''
       }
-    },
+    }
     {
-      id: "fcg_field_renderer",
-      L: "Attr",
+      id: "27"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id.fcg-renderer-select {
+  width: 100%;
+  padding: 0.5rem 0.625rem;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.375rem;
+  background: ${args.theme.var.color.background};
+  font-size: 0.8125rem;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 const index = args.fns.selectedFieldIndex?.();
 const field = args.fns.getFieldAt?.(index) || {};
 return {
@@ -700,53 +743,44 @@ return {
     });
   }
 };
-''',
-        css: '''
-return `._id.fcg-renderer-select {
-  width: 100%;
-  padding: 0.5rem 0.625rem;
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: 0.375rem;
-  background: ${args.theme.var.color.background};
-  font-size: 0.8125rem;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "fcg_renderer_opt_text",
-      L: "Attr",
+      id: "28"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''return { as: "option", text: "Text", value: "text" };'''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "option", text: "Text", value: "text" };
       }
-    },
+    }
     {
-      id: "fcg_renderer_opt_textarea",
-      L: "Attr",
+      id: "29"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''return { as: "option", text: "Text area", value: "textArea" };'''
+        displayOrder: 2
+        componentName: Html
+        props: return { as: "option", text: "Text area", value: "textArea" };
       }
-    },
+    }
     {
-      id: "fcg_renderer_opt_checkbox",
-      L: "Attr",
+      id: "30"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''return { as: "option", text: "Checkbox", value: "checkbox" };'''
+        displayOrder: 3
+        componentName: Html
+        props: return { as: "option", text: "Checkbox", value: "checkbox" };
       }
-    },
+    }
     {
-      id: "fcg_field_colspan",
-      L: "Attr",
+      id: "31"
+      L: Attr
       P: {
-        displayOrder: 4,
-        componentName: "TextInput",
-        props: '''
+        displayOrder: 4
+        componentName: TextInput
+        props:
+          '''
 const index = args.fns.selectedFieldIndex?.();
 const field = args.fns.getFieldAt?.(index) || {};
 return {
@@ -757,15 +791,13 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "fcg_field_flags",
-      L: "Attr",
+      id: "32"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''return { as: "div", class: "fcg-field-flags" };''',
-        css: '''
+        css:
+          '''
 return `._id.fcg-field-flags {
   display: flex;
   flex-wrap: wrap;
@@ -773,16 +805,17 @@ return `._id.fcg-field-flags {
   align-items: center;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props: return { as: "div", class: "fcg-field-flags" };
       }
-    },
+    }
     {
-      id: "fcg_field_required_wrap",
-      L: "Attr",
+      id: "33"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''return { as: "label", class: "fcg-flag-wrap" };''',
-        css: '''
+        css:
+          '''
 return `._id.fcg-flag-wrap {
   display: flex;
   align-items: center;
@@ -790,15 +823,19 @@ return `._id.fcg-flag-wrap {
   font-size: 0.75rem;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "label", class: "fcg-flag-wrap" };
       }
-    },
+    }
     {
-      id: "fcg_field_required",
-      L: "Attr",
+      id: "34"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const index = args.fns.selectedFieldIndex?.();
 const field = args.fns.getFieldAt?.(index) || {};
 return {
@@ -809,37 +846,39 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "fcg_field_required_text",
-      L: "Attr",
+      id: "35"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''return { as: "span", text: "Required" };'''
+        displayOrder: 2
+        componentName: Html
+        props: return { as: "span", text: "Required" };
       }
-    },
+    }
     {
-      id: "fcg_field_trans_wrap",
-      L: "Attr",
+      id: "36"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 const index = args.fns.selectedFieldIndex?.();
 const field = args.fns.getFieldAt?.(index) || {};
 const isText = field.renderer === "text" || field.renderer === "textArea";
 return { as: "label", class: "fcg-flag-wrap", hide: !isText };
 '''
       }
-    },
+    }
     {
-      id: "fcg_field_trans",
-      L: "Attr",
+      id: "37"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const index = args.fns.selectedFieldIndex?.();
 const field = args.fns.getFieldAt?.(index) || {};
 return {
@@ -850,39 +889,41 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "fcg_field_trans_text",
-      L: "Attr",
+      id: "38"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''return { as: "span", text: "Translatable" };'''
+        displayOrder: 2
+        componentName: Html
+        props: return { as: "span", text: "Translatable" };
       }
-    },
+    }
     {
-      id: "fcg_field_actions",
-      L: "Attr",
+      id: "39"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''return { as: "div", class: "fcg-field-actions" };''',
-        css: '''
+        css:
+          '''
 return `._id.fcg-field-actions {
   display: flex;
   gap: 0.375rem;
   flex-wrap: wrap;
 }`;
 '''
+        displayOrder: 3
+        componentName: Html
+        props: return { as: "div", class: "fcg-field-actions" };
       }
-    },
+    }
     {
-      id: "fcg_field_up",
-      L: "Attr",
+      id: "40"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Button",
-        props: '''
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''
 const index = args.fns.selectedFieldIndex?.();
 return {
   variant: "secondary",
@@ -894,14 +935,15 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "fcg_field_down",
-      L: "Attr",
+      id: "41"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Button",
-        props: '''
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
 const index = args.fns.selectedFieldIndex?.();
 const count = args.fns.getFieldIndices?.().length || 0;
 return {
@@ -914,14 +956,15 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "fcg_field_delete",
-      L: "Attr",
+      id: "42"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "Button",
-        props: '''
+        displayOrder: 3
+        componentName: Button
+        props:
+          '''
 const index = args.fns.selectedFieldIndex?.();
 return {
   variant: "danger",
@@ -933,48 +976,253 @@ return {
 '''
       }
     }
-  ],
+  ]
   edges: [
-    { id: "fcg_e1", T: "Attr", S: "fcg_root", E: "fcg_shell" },
-    { id: "fcg_e2", T: "Attr", S: "fcg_shell", E: "fcg_groups_panel" },
-    { id: "fcg_e3", T: "Attr", S: "fcg_shell", E: "fcg_detail_panel" },
-    { id: "fcg_e4", T: "Attr", S: "fcg_groups_panel", E: "fcg_groups_header" },
-    { id: "fcg_e5", T: "Attr", S: "fcg_groups_panel", E: "fcg_group_loop" },
-    { id: "fcg_e6", T: "Attr", S: "fcg_groups_header", E: "fcg_groups_title" },
-    { id: "fcg_e7", T: "Attr", S: "fcg_groups_header", E: "fcg_add_group_btn" },
-    { id: "fcg_e8", T: "Attr", S: "fcg_group_loop", E: "fcg_group_card" },
-    { id: "fcg_e9", T: "Attr", S: "fcg_detail_panel", E: "fcg_group_meta" },
-    { id: "fcg_e10", T: "Attr", S: "fcg_detail_panel", E: "fcg_fields_section" },
-    { id: "fcg_e11", T: "Attr", S: "fcg_group_meta", E: "fcg_group_key" },
-    { id: "fcg_e12", T: "Attr", S: "fcg_group_meta", E: "fcg_group_title" },
-    { id: "fcg_e13", T: "Attr", S: "fcg_group_meta", E: "fcg_group_grid" },
-    { id: "fcg_e14", T: "Attr", S: "fcg_fields_section", E: "fcg_fields_list_panel" },
-    { id: "fcg_e15", T: "Attr", S: "fcg_fields_section", E: "fcg_field_detail" },
-    { id: "fcg_e16", T: "Attr", S: "fcg_fields_list_panel", E: "fcg_fields_header" },
-    { id: "fcg_e17", T: "Attr", S: "fcg_fields_list_panel", E: "fcg_field_loop" },
-    { id: "fcg_e18", T: "Attr", S: "fcg_fields_header", E: "fcg_fields_title" },
-    { id: "fcg_e19", T: "Attr", S: "fcg_fields_header", E: "fcg_add_field_btn" },
-    { id: "fcg_e20", T: "Attr", S: "fcg_field_loop", E: "fcg_field_card" },
-    { id: "fcg_e21", T: "Attr", S: "fcg_field_detail", E: "fcg_field_detail_grid" },
-    { id: "fcg_e22", T: "Attr", S: "fcg_field_detail", E: "fcg_field_flags" },
-    { id: "fcg_e23", T: "Attr", S: "fcg_field_detail", E: "fcg_field_actions" },
-    { id: "fcg_e24", T: "Attr", S: "fcg_field_detail_grid", E: "fcg_field_key" },
-    { id: "fcg_e25", T: "Attr", S: "fcg_field_detail_grid", E: "fcg_field_label" },
-    { id: "fcg_e26", T: "Attr", S: "fcg_field_detail_grid", E: "fcg_field_renderer_wrap" },
-    { id: "fcg_e27", T: "Attr", S: "fcg_field_detail_grid", E: "fcg_field_colspan" },
-    { id: "fcg_e28", T: "Attr", S: "fcg_field_renderer_wrap", E: "fcg_field_renderer_label" },
-    { id: "fcg_e29", T: "Attr", S: "fcg_field_renderer_wrap", E: "fcg_field_renderer" },
-    { id: "fcg_e30", T: "Attr", S: "fcg_field_renderer", E: "fcg_renderer_opt_text" },
-    { id: "fcg_e31", T: "Attr", S: "fcg_field_renderer", E: "fcg_renderer_opt_textarea" },
-    { id: "fcg_e32", T: "Attr", S: "fcg_field_renderer", E: "fcg_renderer_opt_checkbox" },
-    { id: "fcg_e33", T: "Attr", S: "fcg_field_flags", E: "fcg_field_required_wrap" },
-    { id: "fcg_e34", T: "Attr", S: "fcg_field_flags", E: "fcg_field_trans_wrap" },
-    { id: "fcg_e35", T: "Attr", S: "fcg_field_required_wrap", E: "fcg_field_required" },
-    { id: "fcg_e36", T: "Attr", S: "fcg_field_required_wrap", E: "fcg_field_required_text" },
-    { id: "fcg_e37", T: "Attr", S: "fcg_field_trans_wrap", E: "fcg_field_trans" },
-    { id: "fcg_e38", T: "Attr", S: "fcg_field_trans_wrap", E: "fcg_field_trans_text" },
-    { id: "fcg_e39", T: "Attr", S: "fcg_field_actions", E: "fcg_field_up" },
-    { id: "fcg_e40", T: "Attr", S: "fcg_field_actions", E: "fcg_field_down" },
-    { id: "fcg_e41", T: "Attr", S: "fcg_field_actions", E: "fcg_field_delete" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "9"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "7"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "4"
+      E: "6"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "9"
+      E: "14"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "10"
+      E: "11"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "10"
+      E: "12"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "10"
+      E: "13"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "14"
+      E: "15"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "14"
+      E: "21"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "15"
+      E: "16"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "15"
+      E: "19"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "16"
+      E: "17"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "16"
+      E: "18"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "19"
+      E: "20"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "21"
+      E: "22"
+    }
+    {
+      id: e22
+      T: Attr
+      S: "21"
+      E: "32"
+    }
+    {
+      id: e23
+      T: Attr
+      S: "21"
+      E: "39"
+    }
+    {
+      id: e24
+      T: Attr
+      S: "22"
+      E: "23"
+    }
+    {
+      id: e25
+      T: Attr
+      S: "22"
+      E: "24"
+    }
+    {
+      id: e26
+      T: Attr
+      S: "22"
+      E: "25"
+    }
+    {
+      id: e27
+      T: Attr
+      S: "22"
+      E: "31"
+    }
+    {
+      id: e28
+      T: Attr
+      S: "25"
+      E: "26"
+    }
+    {
+      id: e29
+      T: Attr
+      S: "25"
+      E: "27"
+    }
+    {
+      id: e30
+      T: Attr
+      S: "27"
+      E: "28"
+    }
+    {
+      id: e31
+      T: Attr
+      S: "27"
+      E: "29"
+    }
+    {
+      id: e32
+      T: Attr
+      S: "27"
+      E: "30"
+    }
+    {
+      id: e33
+      T: Attr
+      S: "32"
+      E: "33"
+    }
+    {
+      id: e34
+      T: Attr
+      S: "32"
+      E: "36"
+    }
+    {
+      id: e35
+      T: Attr
+      S: "33"
+      E: "34"
+    }
+    {
+      id: e36
+      T: Attr
+      S: "33"
+      E: "35"
+    }
+    {
+      id: e37
+      T: Attr
+      S: "36"
+      E: "37"
+    }
+    {
+      id: e38
+      T: Attr
+      S: "36"
+      E: "38"
+    }
+    {
+      id: e39
+      T: Attr
+      S: "39"
+      E: "40"
+    }
+    {
+      id: e40
+      T: Attr
+      S: "39"
+      E: "41"
+    }
+    {
+      id: e41
+      T: Attr
+      S: "39"
+      E: "42"
+    }
   ]
 }

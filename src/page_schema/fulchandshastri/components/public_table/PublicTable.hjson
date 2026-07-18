@@ -1,13 +1,13 @@
 {
   vertexes: [
     {
-      id: "fpt_root",
-      L: "Component",
+      id: "1"
+      L: Component
       P: {
-        key: "PublicTable",
-        description: "Public read-only table wrapper with client-side graph hydration.",
-        dynamicComponent: "Table",
-        fns: '''
+        dynamicComponent: Table
+        description: Public read-only table wrapper with client-side graph hydration.
+        fns:
+          '''
 const pageStateVertexId = args.generateNewVertexId(args.graph, args.setGraph);
 args.addNewVertex(0, {
   id: pageStateVertexId,
@@ -239,23 +239,27 @@ return {
   applyGraphFromProps,
   graphReady
 };
-''',
-        props: '''
+'''
+        key: PublicTable
+        props:
+          '''
 return {
   onCleanup: () => {
     args.deleteVertex(0, args.fns.pageStateVertexId, args.graph, args.setGraph);
   }
 };
 '''
+        updatedAt: 2026-07-17T11:49:41.749Z
       }
-    },
+    }
     {
-      id: "fpt_table",
-      L: "Attr",
+      id: "2"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Table",
-        props: '''
+        displayOrder: 1
+        componentName: Table
+        props:
+          '''
 return {
   tableVertexLabel: args.contextData.props?.tableVertexLabel || "Book",
   columns: args.fns.prop?.("columns") || [],
@@ -287,8 +291,13 @@ return {
 '''
       }
     }
-  ],
+  ]
   edges: [
-    { id: "fpt_e1", T: "Attr", S: "fpt_root", E: "fpt_table" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
   ]
 }

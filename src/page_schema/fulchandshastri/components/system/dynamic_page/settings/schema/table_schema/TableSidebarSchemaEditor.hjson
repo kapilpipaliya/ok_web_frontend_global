@@ -1,0 +1,549 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        dynamicComponent: Button, TextInput, TextArea, LoadingSpinner, FormConfigGroupsSchemaEditor, Html
+        description: Visual editor for table sidebar schema with nested formConfig groups.
+        fns:
+          '''
+const getProps = () => args.contextData.props || {};
+const getTableKey = () => {
+  const v = getProps().tableKey;
+  return v != null && String(v).trim() !== "" ? String(v).trim() : null;
+};
+const getSchemaKey = () => {
+  const v = getProps().schemaKey;
+  return v != null && String(v).trim() !== "" ? String(v).trim() : null;
+};
+const executeYTOFunction = (fn, ctx) => args.executeNamedServerFunction({ functionName: fn, contextData: ctx || {} });
+
+const defaultSidebar = () => ({
+  part: "sidebar",
+  enabled: true,
+  label: "",
+  parentVertexLabel: "",
+  toParentEdgeType: "",
+  formConfig: { gridColumns: 1, groups: [] }
+});
+
+const [loading, setLoading] = args.createSignal(false);
+const [saving, setSaving] = args.createSignal(false);
+const [schemaData, setSchemaData] = args.createSignal(defaultSidebar());
+const [configJsonText, setConfigJsonText] = args.createSignal("");
+const [jsonError, setJsonError] = args.createSignal("");
+const [editorMode, setEditorMode] = args.createSignal("visual");
+
+const isJsonMode = () => editorMode() === "json";
+const syncJsonFromData = (data) => {
+  setConfigJsonText(JSON.stringify(data && typeof data === "object" ? { ...data } : defaultSidebar(), null, 2));
+  setJsonError("");
+};
+
+const applyLoadedSetting = (setting) => {
+  if (!setting?.P?.config) {
+    setSchemaData(defaultSidebar());
+    syncJsonFromData(defaultSidebar());
+    return;
+  }
+  try {
+    const data = new Function(setting.P.config)();
+    const base = defaultSidebar();
+    const merged = {
+      ...base,
+      ...(data || {}),
+      part: "sidebar",
+      formConfig: {
+        ...base.formConfig,
+        ...(data?.formConfig || {}),
+        groups: Array.isArray(data?.formConfig?.groups) ? data.formConfig.groups : []
+      }
+    };
+    setSchemaData(merged);
+    syncJsonFromData(merged);
+  } catch (error) {
+    setSchemaData(defaultSidebar());
+    setConfigJsonText(String(setting.P.config || ""));
+    setJsonError("Failed to parse stored config");
+  }
+};
+
+const loadSchema = async () => {
+  const schemaKey = getSchemaKey();
+  if (!schemaKey) return;
+  setLoading(true);
+  try {
+    const result = await executeYTOFunction("getTableSchema", { key: schemaKey });
+    if (!result?.result?.success) {
+      args.showErrorToast?.(result?.result?.message || "Failed to load table schema");
+      return;
+    }
+    applyLoadedSetting(result.result.data?.setting);
+  } catch (error) {
+    args.showErrorToast?.("Failed to load table schema");
+  } finally {
+    setLoading(false);
+  }
+};
+
+const patchSidebar = (partial) => {
+  const next = { ...(schemaData() || defaultSidebar()), ...partial, part: "sidebar" };
+  setSchemaData(next);
+  syncJsonFromData(next);
+};
+
+const getSidebarValue = (key) => schemaData()?.[key];
+const getFormConfigGroups = () => schemaData()?.formConfig?.groups || [];
+
+const onFormConfigGroupsChange = (patch) => {
+  const current = schemaData() || defaultSidebar();
+  patchSidebar({
+    formConfig: {
+      ...(current.formConfig || {}),
+      groups: patch?.groups || []
+    }
+  });
+};
+
+const saveSchema = async () => {
+  const schemaKey = getSchemaKey();
+  if (!schemaKey) {
+    args.showErrorToast?.("Schema key is missing");
+    return;
+  }
+  setSaving(true);
+  try {
+    const configObj = isJsonMode() ? JSON.parse(configJsonText()) : schemaData();
+    const configBody = `return ${JSON.stringify(configObj, null, 2)};`;
+    const result = await executeYTOFunction("saveTableSchema", {
+      key: schemaKey,
+      tableKey: getTableKey(),
+      part: "sidebar",
+      config: configBody,
+      name: getProps().title || "Table sidebar schema"
+    });
+    if (!result?.result?.success) {
+      args.showErrorToast?.(result?.result?.message || "Failed to save");
+      return;
+    }
+    args.showSuccessToast?.(result.result.message || "Table schema saved");
+    applyLoadedSetting(result.result.data?.setting);
+    getProps().onSaved?.();
+  } catch (error) {
+    args.showErrorToast?.(isJsonMode() ? "Invalid JSON" : "Failed to save table schema");
+  } finally {
+    setSaving(false);
+  }
+};
+
+const setEditorModeSafe = (mode) => {
+  if (mode === "json") syncJsonFromData(schemaData());
+  setEditorMode(mode);
+};
+
+return {
+  loading, saving, isJsonMode, configJsonText, setConfigJsonText, jsonError,
+  loadSchema, saveSchema, setEditorMode: setEditorModeSafe,
+  patchSidebar, getSidebarValue, getFormConfigGroups, onFormConfigGroupsChange
+};
+'''
+        key: TableSidebarSchemaEditor
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; height: 100%;
+  background: ${args.theme.var.color.background};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "div", hide: args.contextData.props?.hide === true, onMount: () => { void args.fns.loadSchema?.(); } };
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
+  padding: 0.75rem 1rem; border-bottom: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.background_light_100}; flex-shrink: 0;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "header" };
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0; font-size: 0.9375rem; font-weight: 700; }`;
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "h3", text: args.contextData.props?.title || "Table sidebar" };
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css: return `._id { display: flex; gap: 0.5rem; }`;
+        displayOrder: 2
+        componentName: Html
+        props: return { as: "div" };
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''
+return {
+  variant: args.fns.isJsonMode?.() ? "secondary" : "primary", size: "sm", text: "Visual", type: "button",
+  onClick: () => args.fns.setEditorMode?.("visual")
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
+return {
+  variant: args.fns.isJsonMode?.() ? "primary" : "secondary", size: "sm", text: "JSON", type: "button",
+  onClick: () => args.fns.setEditorMode?.("json")
+};
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "primary", size: "sm", text: args.fns.saving?.() ? "Saving..." : "Save", type: "button",
+  disabled: args.fns.saving?.() === true, onClick: () => { void args.fns.saveSchema?.(); }
+};
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: LoadingSpinner
+        props: return { hide: args.fns.loading?.() !== true };
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css: return `._id { flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; }`;
+        displayOrder: 3
+        componentName: Html
+        props: return { as: "div", hide: args.fns.loading?.() === true };
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 0.75rem;
+  padding: 0.75rem 1rem; overflow: auto;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "div", hide: args.fns.isJsonMode?.() === true };
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem;
+  padding: 0.625rem; border: 1px solid ${args.theme.var.color.border}; border-radius: 0.5rem;
+  @media (max-width: 768px) { grid-template-columns: 1fr; }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "div" };
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        css: return `._id { display: flex; align-items: center; gap: 0.375rem; font-size: 0.8125rem; grid-column: 1 / -1; }`;
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "label" };
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "input", type: "checkbox", checked: args.fns.getSidebarValue?.("enabled") !== false,
+  onChange: (e) => args.fns.patchSidebar?.({ enabled: e.target.checked })
+};
+'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props: return { as: "span", text: "Enabled" };
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: TextInput
+        props:
+          '''
+return {
+  label: "Label", value: args.fns.getSidebarValue?.("label") || "",
+  onChange: (e) => args.fns.patchSidebar?.({ label: e.target.value })
+};
+'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: TextInput
+        props:
+          '''
+return {
+  label: "Parent vertex label", value: args.fns.getSidebarValue?.("parentVertexLabel") || "",
+  onChange: (e) => args.fns.patchSidebar?.({ parentVertexLabel: e.target.value })
+};
+'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: TextInput
+        props:
+          '''
+return {
+  label: "To parent edge type", value: args.fns.getSidebarValue?.("toParentEdgeType") || "",
+  onChange: (e) => args.fns.patchSidebar?.({ toParentEdgeType: e.target.value })
+};
+'''
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: FormConfigGroupsSchemaEditor
+        props:
+          '''
+return {
+  groups: args.fns.getFormConfigGroups?.() || [],
+  siteLanguages: args.contextData.props?.siteLanguages,
+  onChange: (patch) => args.fns.onFormConfigGroupsChange?.(patch)
+};
+'''
+      }
+    }
+    {
+      id: "20"
+      L: Attr
+      P: {
+        css: return `._id { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 0.75rem 1rem; }`;
+        displayOrder: 2
+        componentName: Html
+        props: return { as: "div", hide: args.fns.isJsonMode?.() !== true };
+      }
+    }
+    {
+      id: "21"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: TextArea
+        props:
+          '''
+return {
+  value: args.fns.configJsonText?.() || "",
+  onInput: (e) => args.fns.setConfigJsonText?.(e.target.value),
+  rows: 24,
+  style: { flex: "1", "min-height": "200px", "font-family": "monospace", "font-size": "0.8125rem" }
+};
+'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "9"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "10"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "5"
+      E: "7"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "5"
+      E: "8"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "10"
+      E: "11"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "10"
+      E: "20"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "11"
+      E: "12"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "11"
+      E: "19"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "12"
+      E: "13"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "12"
+      E: "16"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "12"
+      E: "17"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "12"
+      E: "18"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "13"
+      E: "14"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "13"
+      E: "15"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "20"
+      E: "21"
+    }
+  ]
+}

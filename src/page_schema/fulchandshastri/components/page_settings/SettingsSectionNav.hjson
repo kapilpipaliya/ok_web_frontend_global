@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "fssn_root"
+      id: "1"
       L: Component
       P: {
-        key: SettingsSectionNav
         description: Horizontal section navigation for embedded Fulchand settings editor with drag-and-drop reordering.
-        fns: '''
+        fns:
+          '''
 const getSections = () => {
   const sections = args.contextData.props?.sections;
   return Array.isArray(sections) ? sections : [];
@@ -121,15 +121,25 @@ return {
   isDragging
 };
 '''
+        key: SettingsSectionNav
       }
-    },
+    }
     {
-      id: "fssn_shell"
+      id: "2"
       L: Attr
       P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}`;
+'''
         displayOrder: 1
         componentName: Html
-        props: '''
+        props:
+          '''
 const sections = args.fns.orderedSections?.() || [];
 const hideFromProps = args.contextData.props?.hide === true;
 return {
@@ -138,32 +148,15 @@ return {
   hide: hideFromProps || sections.length === 0
 };
 '''
-        css: '''
-return `._id {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.375rem;
-}`;
-'''
       }
-    },
+    }
     {
-      id: "fssn_item"
+      id: "3"
       L: Attr
       P: {
-        displayOrder: 1
-        componentName: Html
         contextName: sectionNavItem
-        loop: true
-        props: '''
-const sections = args.fns.orderedSections?.() || [];
-return {
-  as: "div",
-  class: "fulchand-section-nav-item",
-  data: sections.map((section, index) => ({ section, index }))
-};
-'''
-        css: '''
+        css:
+          '''
 const item = args.contextData.sectionNavItem || {};
 const index = item.index;
 const active = args.fns.isActive?.(item.section?.id);
@@ -192,15 +185,28 @@ return `._id.fulchand-section-nav-item {
   }
 }`;
 '''
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const sections = args.fns.orderedSections?.() || [];
+return {
+  as: "div",
+  class: "fulchand-section-nav-item",
+  data: sections.map((section, index) => ({ section, index }))
+};
+'''
       }
-    },
+    }
     {
-      id: "fssn_drag_handle"
+      id: "4"
       L: Attr
       P: {
         displayOrder: 1
         componentName: Html
-        props: '''
+        props:
+          '''
 return {
   as: "icon",
   icon: "ph:dots-six-vertical",
@@ -225,24 +231,13 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "fssn_label_btn"
+      id: "5"
       L: Attr
       P: {
-        displayOrder: 2
-        componentName: Html
-        props: '''
-const item = args.contextData.sectionNavItem || {};
-const section = item.section || {};
-return {
-  as: "button",
-  type: "button",
-  text: section.title || section.id || "Section",
-  onClick: () => args.fns.handleSectionClick?.(section.id)
-};
-'''
-        css: '''
+        css:
+          '''
 return `._id {
   border: none;
   background: transparent;
@@ -252,13 +247,46 @@ return `._id {
   padding: 0;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.sectionNavItem || {};
+const section = item.section || {};
+return {
+  as: "button",
+  type: "button",
+  text: section.title || section.id || "Section",
+  onClick: () => args.fns.handleSectionClick?.(section.id)
+};
+'''
       }
     }
   ]
   edges: [
-    { id: "fssn_e1", T: "Attr", S: "fssn_root", E: "fssn_shell" },
-    { id: "fssn_e2", T: "Attr", S: "fssn_shell", E: "fssn_item" },
-    { id: "fssn_e3", T: "Attr", S: "fssn_item", E: "fssn_drag_handle" },
-    { id: "fssn_e4", T: "Attr", S: "fssn_item", E: "fssn_label_btn" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "5"
+    }
   ]
 }

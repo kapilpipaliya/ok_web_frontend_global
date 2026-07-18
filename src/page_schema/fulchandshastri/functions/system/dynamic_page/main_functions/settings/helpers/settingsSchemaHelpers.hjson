@@ -4,7 +4,6 @@
       id: "1"
       L: Function
       P: {
-        key: settingsSchemaHelpers
         description: Schema-only helpers — strip defaultValue from field configs and merge section patches.
         body:
           '''
@@ -281,6 +280,7 @@ if (action === "buildRelationshipPropertyBindingsFromParts") {
 
 return { success: false, message: `Unknown action: ${action}` };
 '''
+        key: settingsSchemaHelpers
       }
     }
   ]

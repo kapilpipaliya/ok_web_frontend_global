@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "fls_root",
-      L: "Component",
+      id: "1"
+      L: Component
       P: {
-        key: "LanguageSelector",
-        description: "Site language switcher for /{lang}/... routes.",
-        fns: '''
+        description: Site language switcher for /{lang}/... routes.
+        fns:
+          '''
 const DEFAULT_LANGUAGES = [
   { code: "en", label: "English", shortLabel: "EN", isDefault: true },
   { code: "hi", label: "Hindi", shortLabel: "HI", isDefault: false },
@@ -66,22 +66,15 @@ return {
   isActiveLang
 };
 '''
+        key: LanguageSelector
       }
-    },
+    }
     {
-      id: "fls_shell",
-      L: "Attr",
+      id: "2"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  class: "fls-shell",
-  "aria-label": "Language"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id.fls-shell {
   display: inline-flex;
   align-items: center;
@@ -91,51 +84,50 @@ return `._id.fls-shell {
   background: rgba(58, 35, 23, 0.08);
 }`;
 '''
-      }
-    },
-    {
-      id: "fls_tabs",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        contextName: "flsLangIndex",
-        loop: true,
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "div",
-  class: "fls-tabs",
-  data: args.fns.getLanguageIndices?.()
+  class: "fls-shell",
+  "aria-label": "Language"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        contextName: flsLangIndex
+        css:
+          '''
 return `._id.fls-tabs {
   display: inline-flex;
   align-items: center;
   gap: 0.125rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "fls_btn",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const lang = args.fns.getLanguageAt?.(args.contextData.flsLangIndex);
-const active = args.fns.isActiveLang?.(lang?.code);
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "button",
-  type: "button",
-  text: lang?.shortLabel || lang?.code || "",
-  title: lang?.label || lang?.code || "",
-  class: active ? "fls-btn fls-btn-active" : "fls-btn",
-  onClick: () => lang?.code && args.fns.switchLanguage?.(lang.code)
+  as: "div",
+  class: "fls-tabs",
+  data: args.fns.getLanguageIndices?.()
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
 const lang = args.fns.getLanguageAt?.(args.contextData.flsLangIndex);
 const active = args.fns.isActiveLang?.(lang?.code);
 return `._id.fls-btn {
@@ -156,12 +148,42 @@ return `._id.fls-btn {
   }
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const lang = args.fns.getLanguageAt?.(args.contextData.flsLangIndex);
+const active = args.fns.isActiveLang?.(lang?.code);
+return {
+  as: "button",
+  type: "button",
+  text: lang?.shortLabel || lang?.code || "",
+  title: lang?.label || lang?.code || "",
+  class: active ? "fls-btn fls-btn-active" : "fls-btn",
+  onClick: () => lang?.code && args.fns.switchLanguage?.(lang.code)
+};
+'''
       }
     }
-  ],
+  ]
   edges: [
-    { id: "fls_e1", T: "Attr", S: "fls_root", E: "fls_shell" },
-    { id: "fls_e2", T: "Attr", S: "fls_shell", E: "fls_tabs" },
-    { id: "fls_e3", T: "Attr", S: "fls_tabs", E: "fls_btn" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "3"
+      E: "4"
+    }
   ]
 }

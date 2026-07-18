@@ -4,7 +4,6 @@
       id: "1"
       L: Function
       P: {
-        key: getPaletteCategoryChildren
         description: Fetches category and content children for a Page Designer palette category parent.
         body:
           '''
@@ -51,6 +50,7 @@ return {
   message: `Loaded children for palette category`
 };
 '''
+        key: getPaletteCategoryChildren
       }
     }
   ]

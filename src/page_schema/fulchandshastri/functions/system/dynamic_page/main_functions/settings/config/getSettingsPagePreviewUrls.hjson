@@ -4,7 +4,6 @@
       id: "1"
       L: Function
       P: {
-        key: getSettingsPagePreviewUrls
         description: Returns preview URL map keyed by settingsPageId from Page vertices.
         body:
           '''
@@ -65,6 +64,7 @@ try {
   };
 }
 '''
+        key: getSettingsPagePreviewUrls
       }
     }
   ]

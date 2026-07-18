@@ -4,7 +4,6 @@
       id: "1"
       L: Function
       P: {
-        key: getTableIds
         description: Returns canonical tableKey, tableVertexLabel, and schemaKeys from Neo4j table_schema part Settings.
         body:
           '''
@@ -120,6 +119,7 @@ return {
   data
 };
 '''
+        key: getTableIds
       }
     }
   ]

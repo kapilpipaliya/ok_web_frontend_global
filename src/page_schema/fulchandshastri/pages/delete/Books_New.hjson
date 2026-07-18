@@ -1,0 +1,33 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        fns: return { enabled: () => true }
+        key: Books_New
+        url: /books-new
+        updatedAt: 2026-07-08T04:30:33.915Z
+        props:
+          '''return {
+  isNoPermissionCheck: true
+}'''
+      }
+    }
+    {
+      id: "2"
+      L: PageLayout
+      P: {
+        componentName: Layout
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: PageLayout
+      S: "1"
+      E: "2"
+    }
+  ]
+}

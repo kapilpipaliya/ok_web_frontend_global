@@ -4,7 +4,6 @@
       id: "1"
       L: Function
       P: {
-        key: loadSettingsSection
         description: Loads a single settings section document with defaults merged. Supports partial section loading for performance.
         body:
           '''
@@ -91,6 +90,7 @@ return {
   message: "Settings section loaded"
 };
 '''
+        key: loadSettingsSection
       }
     }
   ]

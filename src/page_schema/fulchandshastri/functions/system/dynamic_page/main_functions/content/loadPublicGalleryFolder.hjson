@@ -4,8 +4,7 @@
       id: "1"
       L: Function
       P: {
-        key: loadPublicGalleryFolder
-        description: "Public gallery folder browser. Returns breadcrumb, child folders, and media items (Photo/Video/Pdf). Identify folders by category key (URL ?category=key), not internal id."
+        description: Public gallery folder browser. Returns breadcrumb, child folders, and media items (Photo/Video/Pdf). Identify folders by category key (URL ?category=key), not internal id.
         body:
           '''
 const {
@@ -319,6 +318,7 @@ return {
   message: `Loaded ${folders.length} folder(s) and ${items.length} item(s)`
 };
 '''
+        key: loadPublicGalleryFolder
       }
     }
   ]

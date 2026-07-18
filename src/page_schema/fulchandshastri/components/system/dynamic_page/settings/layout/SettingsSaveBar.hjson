@@ -4,7 +4,6 @@
       id: "1"
       L: Component
       P: {
-        key: SettingsSaveBar
         fns:
           '''
 const getSaveStrategy = () => args.contextData.props?.saveStrategy || args.fns.getSaveStrategy?.() || {};
@@ -58,13 +57,13 @@ return {
   getSaveStrategy
 };
 '''
+        key: SettingsSaveBar
       }
     }
     {
       id: "2"
       L: Attr
       P: {
-        displayOrder: 1
         css:
           '''
 const isVisible = args.fns.hasDirtySections();
@@ -87,6 +86,7 @@ return `._id {
   transition: transform 300ms ease, opacity 150ms ease;
 }`;
 '''
+        displayOrder: 1
         componentName: Html
         props:
           '''
@@ -102,7 +102,6 @@ return {
       id: "3"
       L: Attr
       P: {
-        displayOrder: 1
         css:
           '''
 return `._id {
@@ -111,6 +110,7 @@ return `._id {
   font-weight: 500;
 }`;
 '''
+        displayOrder: 1
         componentName: Html
         props:
           '''
@@ -129,7 +129,6 @@ return {
       id: "4"
       L: Attr
       P: {
-        displayOrder: 2
         css:
           '''
 return `._id {
@@ -138,6 +137,7 @@ return `._id {
   gap: ${args.theme.var.spacing.sm};
 }`;
 '''
+        displayOrder: 2
         componentName: Html
         props:
           '''
@@ -183,10 +183,35 @@ return {
     }
   ]
   edges: [
-    { id: "e1", T: "Attr", S: "1", E: "2" }
-    { id: "e2", T: "Attr", S: "2", E: "3" }
-    { id: "e3", T: "Attr", S: "2", E: "4" }
-    { id: "e4", T: "Attr", S: "4", E: "5" }
-    { id: "e5", T: "Attr", S: "4", E: "6" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "4"
+      E: "6"
+    }
   ]
 }

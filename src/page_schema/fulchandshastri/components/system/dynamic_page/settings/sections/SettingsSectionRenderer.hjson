@@ -4,7 +4,6 @@
       id: "1"
       L: Component
       P: {
-        key: SettingsSectionRenderer
         dynamicComponent: SettingsSectionCard, SettingsSectionAccordion, SettingsSectionTabs
         fns:
           '''
@@ -70,6 +69,7 @@ return {
   getSiteLanguages
 };
 '''
+        key: SettingsSectionRenderer
       }
     }
     {
@@ -144,9 +144,29 @@ return {
     }
   ]
   edges: [
-    { id: "e1", T: "Attr", S: "1", E: "2" }
-    { id: "e2", T: "Attr", S: "2", E: "3" }
-    { id: "e3", T: "Attr", S: "2", E: "4" }
-    { id: "e4", T: "Attr", S: "2", E: "5" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "5"
+    }
   ]
 }

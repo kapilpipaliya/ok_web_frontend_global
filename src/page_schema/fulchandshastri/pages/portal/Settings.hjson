@@ -1,13 +1,11 @@
 {
   vertexes: [
     {
-      id: "page",
-      L: "Page",
+      id: "1"
+      L: Page
       P: {
-        key: "Settings",
-        url: "/settings",
-        title: "Site Settings",
-        fns: '''
+        fns:
+          '''
 const checkAdminRole = () => {
   const userRoles = args.user?.OUT?.UserRole || [];
   return userRoles.some((edgeId) => {
@@ -210,8 +208,12 @@ return {
       contextData: contextData || {}
     })
 };
-''',
-        props: '''
+'''
+        title: Site Settings
+        url: /settings
+        key: Settings
+        props:
+          '''
 return {
   isNoPermissionCheck: true,
   onMount: async () => {
@@ -238,14 +240,15 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "resizeOverlayStyle",
-      L: "Attr",
+      id: "2"
+      L: Attr
       P: {
-        displayOrder: 0,
-        componentName: "Html",
-        props: '''
+        displayOrder: 0
+        componentName: Html
+        props:
+          '''
 return {
   as: "style",
   text: `body.fulchand-settings-resizing {
@@ -259,44 +262,13 @@ body.fulchand-settings-resizing [data-fulchand-settings-preview] {
 };
 '''
       }
-    },
+    }
     {
-      id: "resizeOverlay",
-      L: "Attr",
+      id: "3"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  "aria-hidden": true,
-  hide: !args.fns.isResizingEditor?.()
-};
-''',
-        css: '''
-return `._id {
-  position: fixed;
-  inset: 0;
-  z-index: 10000;
-  cursor: col-resize;
-  background: transparent;
-}`;
-'''
-      }
-    },
-    {
-      id: "settingsShell",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "section",
-  hide: !args.fns.checkAdminRole?.()
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   width: 100%;
   max-width: none;
@@ -310,20 +282,23 @@ return `._id {
   overflow: hidden;
 }`;
 '''
-      }
-    },
-    {
-      id: "splitLayout",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div"
+  as: "section",
+  hide: !args.fns.checkAdminRole?.()
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   flex: 1;
@@ -339,25 +314,147 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "splitResize",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div",
-  role: "separator",
-  "aria-orientation": "vertical",
-  "aria-label": "Resize settings editor",
-  title: "Drag to resize settings panel",
-  onMouseDown: (event) => args.fns.startEditorResize?.(event)
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: ${args.theme.var.color.background_light_50};
+
+  @media (max-width: 1024px) {
+    min-height: 320px;
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.background};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const pageId = args.searchParams?.page || "home";
+return {
+  as: "h2",
+  text: `Live preview — ${pageId}`
+};
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: IconButton
+        props:
+          '''
+return {
+  icon: "ph:arrow-clockwise",
+  variant: "ghost",
+  size: "sm",
+  title: "Refresh preview",
+  onClick: () => args.fns.refreshPreview?.()
+};
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  border: none;
+  background: ${args.theme.var.color.background};
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "iframe",
+  "data-fulchand-settings-preview": "",
+  src: args.fns.getPreviewUrl?.(),
+  title: "Page preview",
+  loading: "lazy"
+};
+'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   width: 6px;
   flex-shrink: 0;
@@ -390,136 +487,27 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "previewPane",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  background: ${args.theme.var.color.background_light_50};
-
-  @media (max-width: 1024px) {
-    min-height: 320px;
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "previewHeader",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background};
-}`;
-'''
-      }
-    },
-    {
-      id: "previewTitle",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const pageId = args.searchParams?.page || "home";
-return {
-  as: "h2",
-  text: `Live preview — ${pageId}`
-};
-''',
-        css: '''
-return `._id {
-  margin: 0;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: ${args.theme.var.color.text};
-}`;
-'''
-      }
-    },
-    {
-      id: "previewRefresh",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "IconButton",
-        props: '''
-return {
-  icon: "ph:arrow-clockwise",
-  variant: "ghost",
-  size: "sm",
-  title: "Refresh preview",
-  onClick: () => args.fns.refreshPreview?.()
+  as: "div",
+  role: "separator",
+  "aria-orientation": "vertical",
+  "aria-label": "Resize settings editor",
+  title: "Drag to resize settings panel",
+  onMouseDown: (event) => args.fns.startEditorResize?.(event)
 };
 '''
       }
-    },
+    }
     {
-      id: "previewFrame",
-      L: "Attr",
+      id: "11"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "iframe",
-  "data-fulchand-settings-preview": "",
-  src: args.fns.getPreviewUrl?.(),
-  title: "Page preview",
-  loading: "lazy"
-};
-''',
-        css: '''
-return `._id {
-  flex: 1;
-  width: 100%;
-  min-height: 0;
-  border: none;
-  background: ${args.theme.var.color.background};
-}`;
-'''
-      }
-    },
-    {
-      id: "editorPane",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 const resizing = args.fns.isResizingEditor?.();
 return `._id {
   width: var(--fulchand-settings-editor-width, ${args.fns.DEFAULT_EDITOR_WIDTH}px);
@@ -540,15 +528,24 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "settingsEditorShell",
-      L: "Attr",
+      id: "12"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "SettingsEditorShell",
-        props: '''
+        displayOrder: 1
+        componentName: SettingsEditorShell
+        props:
+          '''
 const settingsPageId = args.searchParams?.page || "home";
 return {
   settingsPageId,
@@ -564,29 +561,120 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "layout",
-      L: "PageLayout",
+      id: "13"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "PortalLayout"
+        css:
+          '''
+return `._id {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  cursor: col-resize;
+  background: transparent;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  "aria-hidden": true,
+  hide: !args.fns.isResizingEditor?.()
+};
+'''
       }
     }
-  ],
+    {
+      id: "14"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: PortalLayout
+      }
+    }
+  ]
   edges: [
-    { id: "e0", T: "Attr", S: "page", E: "resizeOverlayStyle" },
-    { id: "e0b", T: "Attr", S: "page", E: "resizeOverlay" },
-    { id: "e1", T: "Attr", S: "page", E: "settingsShell" },
-    { id: "e2", T: "Attr", S: "settingsShell", E: "splitLayout" },
-    { id: "e3", T: "Attr", S: "splitLayout", E: "previewPane" },
-    { id: "e3b", T: "Attr", S: "splitLayout", E: "splitResize" },
-    { id: "e4", T: "Attr", S: "splitLayout", E: "editorPane" },
-    { id: "e5", T: "Attr", S: "previewPane", E: "previewHeader" },
-    { id: "e6", T: "Attr", S: "previewPane", E: "previewFrame" },
-    { id: "e7", T: "Attr", S: "previewHeader", E: "previewTitle" },
-    { id: "e8", T: "Attr", S: "previewHeader", E: "previewRefresh" },
-    { id: "e9", T: "Attr", S: "editorPane", E: "settingsEditorShell" },
-    { id: "e_layout", T: "PageLayout", S: "page", E: "layout" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "1"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "1"
+      E: "13"
+    }
+    {
+      id: e4
+      T: PageLayout
+      S: "1"
+      E: "14"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "4"
+      E: "10"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "4"
+      E: "11"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "5"
+      E: "9"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "6"
+      E: "8"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "11"
+      E: "12"
+    }
   ]
 }

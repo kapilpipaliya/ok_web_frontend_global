@@ -4,7 +4,6 @@
       id: "1"
       L: Function
       P: {
-        key: loadSettingsPage
         description: Loads all section documents for a settings page. Returns section values keyed by sectionId.
         body:
           '''
@@ -120,6 +119,7 @@ return {
   message: "Settings page loaded"
 };
 '''
+        key: loadSettingsPage
       }
     }
   ]

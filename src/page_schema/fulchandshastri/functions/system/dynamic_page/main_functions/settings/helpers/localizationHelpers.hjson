@@ -4,7 +4,6 @@
       id: "1"
       L: Function
       P: {
-        key: localizationHelpers
         description: Fulchand settings localization — normalize, resolve, validate translatable field values.
         body:
           '''
@@ -392,6 +391,7 @@ if (action === "mergeTranslationsOntoProps") {
 
 return { success: false, message: `Unknown action: ${action}` };
 '''
+        key: localizationHelpers
       }
     }
   ]

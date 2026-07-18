@@ -1,14 +1,14 @@
 {
   vertexes: [
     {
-      id: virtualList_component
+      id: "1"
       L: Component
       P: {
         key: VirtualList
       }
     }
     {
-      id: virtualList_root
+      id: "2"
       L: Attr
       P: {
         displayOrder: 1
@@ -201,7 +201,7 @@ return {
       }
     }
     {
-      id: virtualList_virtua
+      id: "3"
       L: Attr
       P: {
         displayOrder: 1
@@ -228,7 +228,7 @@ return {
       }
     }
     {
-      id: virtualList_loop
+      id: "4"
       L: Attr
       P: {
         contextName: virtualItem
@@ -242,84 +242,84 @@ return { hide: true };
       }
     }
     {
-      id: virtualList_slot
+      id: "5"
       L: Attr
       P: {
         displayOrder: 2
-        slot: children
         componentName: Slot
+        slot: children
       }
     }
     {
-      id: virtualList_variant_containerClass
+      id: "6"
       L: ComponentVariant
       P: {
         type: string
-        key: containerClass
         defValue: ""
+        key: containerClass
       }
     }
     {
-      id: virtualList_variant_itemHeight
+      id: "7"
       L: ComponentVariant
       P: {
         type: number
-        key: itemHeight
         defValue: 50
+        key: itemHeight
       }
     }
     {
-      id: virtualList_variant_items
+      id: "8"
       L: ComponentVariant
       P: {
         type: array
-        key: items
         defValue: []
+        key: items
       }
     }
   ]
   edges: [
     {
-      id: virtualList_e_component_root
+      id: e1
       T: Attr
-      S: virtualList_component
-      E: virtualList_root
+      S: "1"
+      E: "2"
     }
     {
-      id: virtualList_e_variant_containerClass
+      id: e2
       T: ComponentVariant
-      S: virtualList_component
-      E: virtualList_variant_containerClass
+      S: "1"
+      E: "6"
     }
     {
-      id: virtualList_e_variant_itemHeight
+      id: e3
       T: ComponentVariant
-      S: virtualList_component
-      E: virtualList_variant_itemHeight
+      S: "1"
+      E: "7"
     }
     {
-      id: virtualList_e_variant_items
+      id: e4
       T: ComponentVariant
-      S: virtualList_component
-      E: virtualList_variant_items
+      S: "1"
+      E: "8"
     }
     {
-      id: virtualList_e_root_virtua
+      id: e5
       T: Attr
-      S: virtualList_root
-      E: virtualList_virtua
+      S: "2"
+      E: "3"
     }
     {
-      id: virtualList_e_virtua_loop
+      id: e6
       T: Attr
-      S: virtualList_virtua
-      E: virtualList_loop
+      S: "3"
+      E: "4"
     }
     {
-      id: virtualList_e_loop_slot
+      id: e7
       T: Attr
-      S: virtualList_loop
-      E: virtualList_slot
+      S: "4"
+      E: "5"
     }
   ]
 }

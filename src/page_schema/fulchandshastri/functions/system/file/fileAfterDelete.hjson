@@ -4,7 +4,6 @@
       id: "1"
       L: Function
       P: {
-        key: fileAfterDelete
         description: After a File vertex is deleted, remove the corresponding file from disk (same as DELETE /api/file).
         body:
           '''
@@ -25,6 +24,7 @@ try {
   // Silently continue if file doesn't exist
 }
 '''
+        key: fileAfterDelete
       }
     }
   ]

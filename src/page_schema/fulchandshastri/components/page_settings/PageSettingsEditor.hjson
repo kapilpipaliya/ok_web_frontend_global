@@ -1,13 +1,13 @@
 {
   vertexes: [
     {
-      id: "fpse_root"
+      id: "1"
       L: Component
       P: {
-        key: PageSettingsEditor
+        dynamicComponent: SettingsEditorShell, SettingsSectionNav, IconButton, Button, Html
         description: Floating admin panel to edit current page settings while viewing the live page.
-        dynamicComponent: "SettingsEditorShell, SettingsSectionNav, IconButton, Button, Html"
-        fns: '''
+        fns:
+          '''
 const DEFAULT_PANEL_WIDTH = 440;
 const MIN_PANEL_WIDTH = 360;
 const MAX_PANEL_WIDTH = 960;
@@ -316,15 +316,18 @@ return {
   onEditorMount
 };
 '''
+        key: PageSettingsEditor
+        updatedAt: 2026-07-13T18:16:27.324Z
       }
-    },
+    }
     {
-      id: "fpse_body_style"
+      id: "2"
       L: Attr
       P: {
         displayOrder: 1
         componentName: Html
-        props: '''
+        props:
+          '''
 return {
   as: "style",
   text: `body.fulchand-settings-panel-open {
@@ -342,27 +345,13 @@ body.fulchand-settings-panel-resizing [data-fulchand-page-main] {
 };
 '''
       }
-    },
+    }
     {
-      id: "fpse_toggle"
+      id: "3"
       L: Attr
       P: {
-        displayOrder: 2
-        componentName: Html
-        props: '''
-const isAdmin = args.fns.checkAdminRole?.();
-const onSettingsRoute = args.fns.isOnSettingsRoute?.();
-const panelOpen = args.fns.isPanelOpen?.();
-return {
-  as: "button",
-  type: "button",
-  "aria-label": panelOpen ? "Close page settings" : "Edit page settings",
-  title: panelOpen ? "Close settings" : "Edit page settings",
-  hide: !isAdmin || onSettingsRoute,
-  onClick: () => (panelOpen ? args.fns.closePanel?.() : args.fns.togglePanel?.())
-};
-'''
-        css: '''
+        css:
+          '''
 const panelOpen = args.fns.isPanelOpen?.();
 return `._id {
   position: fixed;
@@ -389,15 +378,32 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const isAdmin = args.fns.checkAdminRole?.();
+const onSettingsRoute = args.fns.isOnSettingsRoute?.();
+const panelOpen = args.fns.isPanelOpen?.();
+return {
+  as: "button",
+  type: "button",
+  "aria-label": panelOpen ? "Close page settings" : "Edit page settings",
+  title: panelOpen ? "Close settings" : "Edit page settings",
+  hide: !isAdmin || onSettingsRoute,
+  onClick: () => (panelOpen ? args.fns.closePanel?.() : args.fns.togglePanel?.())
+};
+'''
       }
-    },
+    }
     {
-      id: "fpse_toggle_icon"
+      id: "4"
       L: Attr
       P: {
         displayOrder: 1
         componentName: Html
-        props: '''
+        props:
+          '''
 const panelOpen = args.fns.isPanelOpen?.();
 return {
   as: "icon",
@@ -407,14 +413,15 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "fpse_toggle_label"
+      id: "5"
       L: Attr
       P: {
         displayOrder: 2
         componentName: Html
-        props: '''
+        props:
+          '''
 const panelOpen = args.fns.isPanelOpen?.();
 return {
   as: "span",
@@ -422,24 +429,13 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "fpse_panel"
+      id: "6"
       L: Attr
       P: {
-        displayOrder: 3
-        componentName: Html
-        props: '''
-const isAdmin = args.fns.checkAdminRole?.();
-const panelOpen = args.fns.isPanelOpen?.();
-return {
-  as: "aside",
-  "data-fulchand-settings-panel": "",
-  hide: !isAdmin || !panelOpen,
-  onMount: () => args.fns.onEditorMount?.()
-};
-'''
-        css: '''
+        css:
+          '''
 const resizing = args.fns.isResizingPanel?.();
 return `._id {
   position: fixed;
@@ -457,25 +453,27 @@ return `._id {
   transition: ${resizing ? "none" : "width 0.25s ease"};
 }`;
 '''
-      }
-    },
-    {
-      id: "fpse_panel_resize"
-      L: Attr
-      P: {
-        displayOrder: 0
+        displayOrder: 3
         componentName: Html
-        props: '''
+        props:
+          '''
+const isAdmin = args.fns.checkAdminRole?.();
+const panelOpen = args.fns.isPanelOpen?.();
 return {
-  as: "div",
-  role: "separator",
-  "aria-orientation": "vertical",
-  "aria-label": "Resize settings panel",
-  title: "Drag to resize panel",
-  onMouseDown: (event) => args.fns.startPanelResize?.(event)
+  as: "aside",
+  "data-fulchand-settings-panel": "",
+  hide: !isAdmin || !panelOpen,
+  onMount: () => args.fns.onEditorMount?.()
 };
 '''
-        css: '''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   position: absolute;
   top: 0;
@@ -506,20 +504,27 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "fpse_panel_header"
-      L: Attr
-      P: {
-        displayOrder: 1
+        displayOrder: 0
         componentName: Html
-        props: '''
+        props:
+          '''
 return {
-  as: "header"
+  as: "div",
+  role: "separator",
+  "aria-orientation": "vertical",
+  "aria-label": "Resize settings panel",
+  title: "Drag to resize panel",
+  onMouseDown: (event) => args.fns.startPanelResize?.(event)
 };
 '''
-        css: '''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   flex-direction: column;
@@ -532,20 +537,22 @@ return `._id {
   z-index: 2;
 }`;
 '''
-      }
-    },
-    {
-      id: "fpse_header_row"
-      L: Attr
-      P: {
         displayOrder: 1
         componentName: Html
-        props: '''
+        props:
+          '''
 return {
-  as: "div"
+  as: "header"
 };
 '''
-        css: '''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   align-items: center;
@@ -553,21 +560,22 @@ return `._id {
   gap: 0.75rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "fpse_header_title"
-      L: Attr
-      P: {
         displayOrder: 1
         componentName: Html
-        props: '''
+        props:
+          '''
 return {
-  as: "h2",
-  text: "Page settings"
+  as: "div"
 };
 '''
-        css: '''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   margin: 0;
   font-size: 1rem;
@@ -575,35 +583,47 @@ return `._id {
   color: ${args.theme.var.color.text};
 }`;
 '''
-      }
-    },
-    {
-      id: "fpse_header_actions"
-      L: Attr
-      P: {
-        displayOrder: 2
+        displayOrder: 1
         componentName: Html
-        props: '''
+        props:
+          '''
 return {
-  as: "div"
+  as: "h2",
+  text: "Page settings"
 };
 '''
-        css: '''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   align-items: center;
   gap: 0.25rem;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "fpse_refresh_btn"
+      id: "12"
       L: Attr
       P: {
         displayOrder: 1
         componentName: IconButton
-        props: '''
+        props:
+          '''
 return {
   icon: "ph:arrow-clockwise",
   variant: "ghost",
@@ -613,14 +633,15 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "fpse_close_btn"
+      id: "13"
       L: Attr
       P: {
         displayOrder: 2
         componentName: IconButton
-        props: '''
+        props:
+          '''
 return {
   icon: "ph:x",
   variant: "ghost",
@@ -630,14 +651,15 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "fpse_section_nav",
-      L: "Attr",
+      id: "14"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "SettingsSectionNav",
-        props: '''
+        displayOrder: 3
+        componentName: SettingsSectionNav
+        props:
+          '''
 const isSchema = args.fns.editorMode?.() === "schema";
 return {
   sections: args.fns.sectionNav?.() || [],
@@ -647,14 +669,15 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "fpse_panel_body",
-      L: "Attr",
+      id: "15"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "SettingsEditorShell",
-        props: '''
+        displayOrder: 2
+        componentName: SettingsEditorShell
+        props:
+          '''
 const settingsPageId = args.fns.getSettingsPageId?.();
 return {
   settingsPageId,
@@ -675,19 +698,89 @@ return {
     }
   ]
   edges: [
-    { id: "fpse_e0", T: "Attr", S: "fpse_root", E: "fpse_body_style" },
-    { id: "fpse_e1", T: "Attr", S: "fpse_root", E: "fpse_toggle" },
-    { id: "fpse_e2", T: "Attr", S: "fpse_root", E: "fpse_panel" },
-    { id: "fpse_e2b", T: "Attr", S: "fpse_panel", E: "fpse_panel_resize" },
-    { id: "fpse_e3", T: "Attr", S: "fpse_toggle", E: "fpse_toggle_icon" },
-    { id: "fpse_e4", T: "Attr", S: "fpse_toggle", E: "fpse_toggle_label" },
-    { id: "fpse_e5", T: "Attr", S: "fpse_panel", E: "fpse_panel_header" },
-    { id: "fpse_e6", T: "Attr", S: "fpse_panel", E: "fpse_panel_body" },
-    { id: "fpse_e7", T: "Attr", S: "fpse_panel_header", E: "fpse_header_row" },
-    { id: "fpse_e8", T: "Attr", S: "fpse_panel_header", E: "fpse_section_nav" },
-    { id: "fpse_e9", T: "Attr", S: "fpse_header_row", E: "fpse_header_title" },
-    { id: "fpse_e10", T: "Attr", S: "fpse_header_row", E: "fpse_header_actions" },
-    { id: "fpse_e11", T: "Attr", S: "fpse_header_actions", E: "fpse_refresh_btn" },
-    { id: "fpse_e12", T: "Attr", S: "fpse_header_actions", E: "fpse_close_btn" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "1"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "1"
+      E: "6"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "6"
+      E: "8"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "6"
+      E: "15"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "8"
+      E: "14"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "9"
+      E: "11"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "11"
+      E: "12"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "11"
+      E: "13"
+    }
   ]
 }

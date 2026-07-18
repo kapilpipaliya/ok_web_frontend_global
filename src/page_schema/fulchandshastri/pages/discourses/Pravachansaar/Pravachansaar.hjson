@@ -1,0 +1,51 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        fns: return { enabled: () => true }
+        key: Pravachansaar
+        url: /pravachansaar
+        updatedAt: 2026-07-08T01:50:09.901Z
+        props:
+          '''return {
+  isNoPermissionCheck: true
+}'''
+      }
+    }
+    {
+      id: "2"
+      L: PageLayout
+      P: {
+        componentName: Layout
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        as: div
+        displayOrder: 1
+        textType: markdown
+        componentName: Html
+        text: "[प्रवचनसार Full Granth Only Gatha](https://nikkyjain.github.io/jainDataBase/gatha/01_द्रव्यानुयोग/02_प्रवचनसार--कुन्दकुन्दाचार्य/html/index.html)"
+        key: unique_1
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: PageLayout
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "1"
+      E: "3"
+    }
+  ]
+}

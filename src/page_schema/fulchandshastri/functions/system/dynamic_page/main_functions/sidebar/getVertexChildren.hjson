@@ -104,7 +104,7 @@ if (parentId) {
       }
       const countResult = await args.session.run(countQuery, countParams);
       const contentCount = countResult.records[0]?.get('contentCount') || 0;
-      
+
       // Update vertex in context with count
       if (args.context.nodes[vertex.id]) {
         args.context.nodes[vertex.id].P.contentCount = contentCount;
@@ -207,10 +207,10 @@ if (rootKeys) {
       `;
       uncategorizedCountParams = { userUuid };
     }
-    
+
     const uncategorizedCountResult = await args.session.run(uncategorizedCountQuery, uncategorizedCountParams);
     const uncategorizedCount = uncategorizedCountResult.records[0]?.get('contentCount') || 0;
-    
+
     // Create virtual uncategorized vertex (id is namespaced by content table label)
     const uncategorizedId = '_' + tableVertexLabel + '_uncategorized';
     uncategorizedVertex = {
@@ -225,7 +225,7 @@ if (rootKeys) {
       IN: {},
       OUT: {}
     };
-    
+
     // Add to context graph
     if (!args.context.nodes) {
       args.context.nodes = {};
@@ -239,7 +239,7 @@ if (rootKeys) {
       // For root items, count items without any category relationship or items in this root
       const rootKeys = args.contextData.rootKeys || {};
       const rootKey = rootKeys.key;
-      
+
       let countQuery;
       let countParams;
       if (!enableUserScoping) {
@@ -284,10 +284,10 @@ if (rootKeys) {
           countParams = { userUuid, categoryId: vertex.id };
         }
       }
-      
+
       const countResult = await args.session.run(countQuery, countParams);
       const contentCount = countResult.records[0]?.get('contentCount') || 0;
-      
+
       // Update vertex in context with count
       if (args.context.nodes[vertex.id]) {
         args.context.nodes[vertex.id].P.contentCount = contentCount;

@@ -1,16 +1,18 @@
 {
   vertexes: [
     {
-      id: "page",
-      L: "Page",
+      id: "1"
+      L: Page
       P: {
         public: true
-        key: "Gallery",
-        fns: "return { enabled: () => true }",
-        isNoPermissionCheck: true,
-        url: "/gallery/:category?"
-        settingsPageId: "photos"
-        props: '''
+        settingsPageId: photos
+        isNoPermissionCheck: true
+        fns: return { enabled: () => true }
+        url: /gallery/:category?
+        key: Gallery
+        updatedAt: 2026-07-15T11:23:21.526Z
+        props:
+          '''
 const locale = args.params?.lang ? String(args.params.lang).toLowerCase() : undefined;
 const routeParams = args.context?.getParams?.(args.meta) || {};
 const categoryKey = routeParams.category != null && String(routeParams.category).trim() !== ""
@@ -52,121 +54,55 @@ try {
 };
 '''
       }
-    },
+    }
     {
-      id: "pageHeader",
-      L: "Attr",
+      id: "2"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  background: linear-gradient(135deg, ${args.theme.var.color.primary_light_100} 0%, ${args.theme.var.color.primary_light_50} 100%);
-  padding: 3rem 1rem;
-  text-align: center;
+        css:
+          '''return `._id {
+  padding: 1rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "pageTitle",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const content = args.contextData.gallerySettings?.content;
-return {
-  as: "h1",
-  text: content?.pageTitle || "Gallery"
-};
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.text};
-  font-size: 3rem;
-  font-weight: 700;
-  margin: 0;
-
-  @media (max-width: 768px) {
-    font-size: 2rem;
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "pageSubtitle",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const content = args.contextData.gallerySettings?.content;
-return {
-  as: "p",
-  text: content?.pageSubtitle || "",
-  hide: !content?.pageSubtitle
-};
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.text_light_200};
-  font-size: 1.25rem;
-  margin-top: 1rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "mainContent",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
   as: "main"
 };
-''',
-        css: '''
-return `._id {
-  padding: 3rem 1rem;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "container",
-      L: "Attr",
+      id: "3"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   max-width: 1200px;
   margin: 0 auto;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "galleryBrowser",
-      L: "Attr",
+      id: "4"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "GalleryBrowser",
-        props: '''
+        displayOrder: 2
+        componentName: GalleryBrowser
+        props:
+          '''
 const content = args.contextData.gallerySettings?.content || {};
 const folderData = args.contextData.gallerySettings?.folderData || {};
 const locale = args.params?.lang ? String(args.params.lang).toLowerCase() : undefined;
@@ -187,23 +123,40 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "layout",
-      L: "PageLayout",
+      id: "5"
+      L: PageLayout
       P: {
-        displayOrder: 1,
-        componentName: "Layout"
+        displayOrder: 1
+        componentName: Layout
       }
     }
-  ],
+  ]
   edges: [
-    { id: "e0", T: "Attr", S: "page", E: "pageHeader" },
-    { id: "e3", T: "Attr", S: "pageHeader", E: "pageTitle" },
-    { id: "e4", T: "Attr", S: "pageHeader", E: "pageSubtitle" },
-    { id: "e5", T: "Attr", S: "page", E: "mainContent" },
-    { id: "e6", T: "Attr", S: "mainContent", E: "container" },
-    { id: "e7", T: "Attr", S: "container", E: "galleryBrowser" },
-    { id: "e_layout", T: "PageLayout", S: "page", E: "layout" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: PageLayout
+      S: "1"
+      E: "5"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "4"
+    }
   ]
 }

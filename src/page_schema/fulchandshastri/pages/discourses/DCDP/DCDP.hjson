@@ -1,0 +1,33 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        fns: return { enabled: () => true }
+        url: /dcdp
+        key: DCDP
+        props:
+          '''return {
+  isNoPermissionCheck: true
+}'''
+        updatedAt: 2026-07-08T04:36:55.704Z
+      }
+    }
+    {
+      id: "2"
+      L: PageLayout
+      P: {
+        componentName: Layout
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: PageLayout
+      S: "1"
+      E: "2"
+    }
+  ]
+}

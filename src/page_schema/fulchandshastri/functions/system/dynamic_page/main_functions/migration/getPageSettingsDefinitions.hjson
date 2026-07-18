@@ -4,7 +4,6 @@
       id: "1"
       L: Function
       P: {
-        key: getPageSettingsDefinitions
         description: Returns Fulchand Shastri settings page configs and default section documents for all public pages.
         body:
           '''
@@ -5574,6 +5573,7 @@ return {
   }
 };
 '''
+        key: getPageSettingsDefinitions
       }
     }
   ]

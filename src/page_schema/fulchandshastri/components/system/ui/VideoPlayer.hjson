@@ -5,6 +5,7 @@
       L: Component
       P: {
         key: VideoPlayer
+        updatedAt: 2026-07-17T11:49:42.176Z
       }
     }
     {

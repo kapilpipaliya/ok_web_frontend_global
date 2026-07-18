@@ -4,7 +4,6 @@
       id: "1"
       L: Component
       P: {
-        key: SettingsSectionCard
         dynamicComponent: FormManagement
         fns:
           '''
@@ -316,13 +315,13 @@ return {
   isDangerVariant
 };
 '''
+        key: SettingsSectionCard
       }
     }
     {
       id: "2"
       L: Attr
       P: {
-        displayOrder: 1
         css:
           '''
 const isDanger = args.fns.isDangerVariant?.() === true;
@@ -334,6 +333,7 @@ return `._id {
   overflow: hidden;
 }`;
 '''
+        displayOrder: 1
         componentName: Html
         props:
           '''
@@ -351,7 +351,6 @@ return {
       id: "3"
       L: Attr
       P: {
-        displayOrder: 1
         css:
           '''
 return `._id {
@@ -359,6 +358,7 @@ return `._id {
   border-bottom: 1px solid ${args.theme.var.color.border};
 }`;
 '''
+        displayOrder: 1
         componentName: Html
         props:
           '''
@@ -374,7 +374,6 @@ return {
       id: "4"
       L: Attr
       P: {
-        displayOrder: 1
         css:
           '''
 return `._id {
@@ -384,6 +383,7 @@ return `._id {
   margin: 0 0 ${args.theme.var.spacing.xs} 0;
 }`;
 '''
+        displayOrder: 1
         componentName: Html
         props:
           '''
@@ -400,7 +400,6 @@ return {
       id: "5"
       L: Attr
       P: {
-        displayOrder: 2
         css:
           '''
 return `._id {
@@ -410,6 +409,7 @@ return `._id {
   line-height: 1.5;
 }`;
 '''
+        displayOrder: 2
         componentName: Html
         props:
           '''
@@ -426,14 +426,14 @@ return {
       id: "6"
       L: Attr
       P: {
-        displayOrder: 2
-        componentName: FormManagement
         css:
           '''
 return `._id {
   padding: ${args.theme.var.spacing.lg};
 }`;
 '''
+        displayOrder: 2
+        componentName: FormManagement
         props:
           '''
 const sectionConfig = args.fns.getSectionConfig();
@@ -459,7 +459,6 @@ return {
       id: "7"
       L: Attr
       P: {
-        displayOrder: 3
         css:
           '''
 return `._id {
@@ -472,6 +471,7 @@ return `._id {
   background: ${args.theme.var.color.background_light_50};
 }`;
 '''
+        displayOrder: 3
         componentName: Html
         props:
           '''
@@ -518,13 +518,53 @@ return {
     }
   ]
   edges: [
-    { id: "e1", T: "Attr", S: "1", E: "2" }
-    { id: "e2", T: "Attr", S: "2", E: "3" }
-    { id: "e3", T: "Attr", S: "3", E: "4" }
-    { id: "e4", T: "Attr", S: "3", E: "5" }
-    { id: "e5", T: "Attr", S: "2", E: "6" }
-    { id: "e6", T: "Attr", S: "2", E: "7" }
-    { id: "e7", T: "Attr", S: "7", E: "8" }
-    { id: "e8", T: "Attr", S: "7", E: "9" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "6"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "7"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "7"
+      E: "9"
+    }
   ]
 }

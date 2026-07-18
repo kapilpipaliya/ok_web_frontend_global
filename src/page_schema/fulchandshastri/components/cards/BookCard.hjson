@@ -1,22 +1,20 @@
 {
   vertexes: [
     {
-      id: "root",
-      L: "Attr",
+      id: "1"
+      L: Component
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const book = args.contextData.props || {};
-const index = args.contextData.index ?? 0;
-return {
-  as: "div",
-  "data-animate": "",
-
-  ref: (el) => el && args.fns.animateOnView(el, { delay: index * 0.1 })
-};
-''',
-        css: '''
+        isNoPermissionCheck: true
+        fns: return { enabled: () => true }
+        key: BookCard
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   background: ${args.theme.var.color.background};
   border: 1px solid ${args.theme.var.color.background_light_300};
@@ -26,12 +24,12 @@ return `._id {
   gap: 1rem;
   align-items: start;
   transition: all 0.3s ease;
-  
+
   &:hover {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     transform: translateY(-2px);
   }
-  
+
   @media (max-width: 768px) {
     flex-direction: column;
     align-items: center;
@@ -39,25 +37,27 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "bookImage",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const book = args.contextData.props || {};
+const index = args.contextData.index ?? 0;
 return {
-  as: "img",
-  src: book.image || "https://www.fulchandshastri.com/wp-content/uploads/2018/01/placeholder-book.jpg",
-  alt: book.title || "Book",
-  width: 120,
-  height: 160
+  as: "div",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el, { delay: index * 0.1 })
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   width: 120px;
   height: 160px;
@@ -67,20 +67,27 @@ return `._id {
   flex-shrink: 0;
 }`;
 '''
-      }
-    },
-    {
-      id: "bookDetails",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const book = args.contextData.props || {};
 return {
-  as: "div"
+  as: "img",
+  src: book.image || "https://www.fulchandshastri.com/wp-content/uploads/2018/01/placeholder-book.jpg",
+  alt: book.title || "Book",
+  width: 120,
+  height: 160
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   flex: 1;
   display: flex;
@@ -88,22 +95,22 @@ return `._id {
   gap: 0.75rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "bookTitle",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const book = args.contextData.props || {};
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "h3",
-  text: book.title || "Book Title"
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.text};
   font-size: 1.25rem;
@@ -112,22 +119,24 @@ return `._id {
   line-height: 1.4;
 }`;
 '''
-      }
-    },
-    {
-      id: "bookDescription",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const book = args.contextData.props || {};
 return {
-  as: "p",
-  text: book.description || "Book description"
+  as: "h3",
+  text: book.title || "Book Title"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.text_light_200};
   font-size: 0.875rem;
@@ -135,20 +144,24 @@ return `._id {
   margin: 0;
 }`;
 '''
-      }
-    },
-    {
-      id: "bookMeta",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const book = args.contextData.props || {};
 return {
-  as: "div"
+  as: "p",
+  text: book.description || "Book description"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   gap: 1rem;
@@ -158,15 +171,24 @@ return `._id {
   color: ${args.theme.var.color.text_light_300};
 }`;
 '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "language",
-      L: "Attr",
+      id: "8"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const book = args.contextData.props || {};
 return {
   as: "span",
@@ -174,14 +196,15 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "pages",
-      L: "Attr",
+      id: "9"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 const book = args.contextData.props || {};
 return {
   as: "span",
@@ -189,14 +212,15 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "price",
-      L: "Attr",
+      id: "10"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
 const book = args.contextData.props || {};
 return {
   as: "span",
@@ -204,44 +228,36 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "downloadSection",
-      L: "Attr",
+      id: "11"
+      L: Attr
       P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
-const book = args.contextData.props || {};
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: flex;
   gap: 1rem;
   margin-top: 0.5rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "downloadButton",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
 const book = args.contextData.props || {};
 return {
-  as: "a",
-  href: book.downloadUrl || "#",
-  target: "_blank",
-  rel: "noopener noreferrer"
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: inline-flex;
   align-items: center;
@@ -253,22 +269,35 @@ return `._id {
   text-decoration: none;
   font-weight: 500;
   transition: all 0.2s ease;
-  
+
   &:hover {
     background: ${args.theme.var.color.primary_dark_200};
     transform: translateY(-1px);
   }
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const book = args.contextData.props || {};
+return {
+  as: "a",
+  href: book.downloadUrl || "#",
+  target: "_blank",
+  rel: "noopener noreferrer"
+};
+'''
       }
-    },
+    }
     {
-      id: "downloadIcon",
-      L: "Attr",
+      id: "13"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "icon",
   icon: "carbon:download",
@@ -277,37 +306,28 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "downloadText",
-      L: "Attr",
+      id: "14"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
   as: "span",
   text: "Download"
 };
 '''
       }
-    },
+    }
     {
-      id: "readButton",
-      L: "Attr",
+      id: "15"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const book = args.contextData.props || {};
-return {
-  as: "a",
-  href: book.readUrl || "#",
-  target: "_blank",
-  rel: "noopener noreferrer"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: inline-flex;
   align-items: center;
@@ -320,22 +340,35 @@ return `._id {
   text-decoration: none;
   font-weight: 500;
   transition: all 0.2s ease;
-  
+
   &:hover {
     background: ${args.theme.var.color.background_light_300};
     transform: translateY(-1px);
   }
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const book = args.contextData.props || {};
+return {
+  as: "a",
+  href: book.readUrl || "#",
+  target: "_blank",
+  rel: "noopener noreferrer"
+};
+'''
       }
-    },
+    }
     {
-      id: "readIcon",
-      L: "Attr",
+      id: "16"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "icon",
   icon: "carbon:document",
@@ -344,14 +377,15 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "readText",
-      L: "Attr",
+      id: "17"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
   as: "span",
   text: "Read Online"
@@ -359,22 +393,103 @@ return {
 '''
       }
     }
-  ],
+  ]
   edges: [
-    { id: "e1", T: "Attr", S: "root", E: "bookImage" },
-    { id: "e2", T: "Attr", S: "root", E: "bookDetails" },
-    { id: "e3", T: "Attr", S: "bookDetails", E: "bookTitle" },
-    { id: "e4", T: "Attr", S: "bookDetails", E: "bookDescription" },
-    { id: "e5", T: "Attr", S: "bookDetails", E: "bookMeta" },
-    { id: "e6", T: "Attr", S: "bookMeta", E: "language" },
-    { id: "e7", T: "Attr", S: "bookMeta", E: "pages" },
-    { id: "e8", T: "Attr", S: "bookMeta", E: "price" },
-    { id: "e9", T: "Attr", S: "bookDetails", E: "downloadSection" },
-    { id: "e10", T: "Attr", S: "downloadSection", E: "downloadButton" },
-    { id: "e11", T: "Attr", S: "downloadButton", E: "downloadIcon" },
-    { id: "e12", T: "Attr", S: "downloadButton", E: "downloadText" },
-    { id: "e13", T: "Attr", S: "downloadSection", E: "readButton" },
-    { id: "e14", T: "Attr", S: "readButton", E: "readIcon" },
-    { id: "e15", T: "Attr", S: "readButton", E: "readText" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "4"
+      E: "6"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "4"
+      E: "7"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "4"
+      E: "11"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "7"
+      E: "9"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "7"
+      E: "10"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "11"
+      E: "12"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "11"
+      E: "15"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "12"
+      E: "13"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "12"
+      E: "14"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "15"
+      E: "16"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "15"
+      E: "17"
+    }
   ]
 }

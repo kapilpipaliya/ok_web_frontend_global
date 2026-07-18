@@ -1,7 +1,7 @@
 {
   vertexes: [
     {
-      id: "evpf1"
+      id: "1"
       L: Component
       P: {
         title: Embedded vertex picker field
@@ -9,11 +9,9 @@
       }
     }
     {
-      id: "evpf_row"
+      id: "2"
       L: Attr
       P: {
-        displayOrder: 1
-        componentName: Html
         css:
           '''return `._id {
   display: flex;
@@ -21,16 +19,15 @@
   gap: 0.65rem;
   width: 100%;
 }`;'''
-        props:
-          '''return { as: "div" };'''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "div" };
       }
     }
     {
-      id: "evpf_prev_row"
+      id: "3"
       L: Attr
       P: {
-        displayOrder: 1
-        componentName: Html
         css:
           '''return `._id {
   display: flex;
@@ -38,16 +35,15 @@
   align-items: center;
   gap: 1rem;
 }`;'''
-        props:
-          '''return { as: "div" };'''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "div" };
       }
     }
     {
-      id: "evpf_thumb"
+      id: "4"
       L: Attr
       P: {
-        displayOrder: 1
-        componentName: Html
         css:
           '''return `._id {
   width: 88px;
@@ -61,12 +57,13 @@
   overflow: hidden;
   flex-shrink: 0;
 }`;'''
-        props:
-          '''return { as: "div" };'''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "div" };
       }
     }
     {
-      id: "evpf_img"
+      id: "5"
       L: Attr
       P: {
         displayOrder: 1
@@ -85,13 +82,12 @@ return {
       }
     }
     {
-      id: "evpf_ico"
+      id: "6"
       L: Attr
       P: {
+        css: return `._id { color: ${args.theme.var.color.text_dark_400}; }`;
         displayOrder: 2
         componentName: Html
-        css:
-          '''return `._id { color: ${args.theme.var.color.text_dark_400}; }`;'''
         props:
           '''const previewUrl = String(args.contextData.props?.previewUrl || "").trim();
 const showImage = args.contextData.props?.showImagePreview !== false;
@@ -106,11 +102,9 @@ return {
       }
     }
     {
-      id: "evpf_meta"
+      id: "7"
       L: Attr
       P: {
-        displayOrder: 2
-        componentName: Html
         css:
           '''return `._id {
   flex: 1;
@@ -119,22 +113,23 @@ return {
   flex-direction: column;
   gap: 0.35rem;
 }`;'''
-        props:
-          '''return { as: "div" };'''
+        displayOrder: 2
+        componentName: Html
+        props: return { as: "div" };
       }
     }
     {
-      id: "evpf_lbl"
+      id: "8"
       L: Attr
       P: {
-        displayOrder: 1
-        componentName: Html
         css:
           '''return `._id {
   font-size: 0.8rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
 }`;'''
+        displayOrder: 1
+        componentName: Html
         props:
           '''const fieldLabel = args.contextData.props?.label;
 const labelText =
@@ -147,17 +142,17 @@ return {
       }
     }
     {
-      id: "evpf_fn"
+      id: "9"
       L: Attr
       P: {
-        displayOrder: 2
-        componentName: Html
         css:
           '''return `._id {
   font-size: 0.85rem;
   color: ${args.theme.var.color.text_dark_400};
   word-break: break-word;
 }`;'''
+        displayOrder: 2
+        componentName: Html
         props:
           '''const secondaryLabel = args.contextData.props?.secondaryLabel;
 const secondaryText =
@@ -172,11 +167,9 @@ return {
       }
     }
     {
-      id: "evpf_actions"
+      id: "10"
       L: Attr
       P: {
-        displayOrder: 2
-        componentName: Html
         css:
           '''return `._id {
   display: flex;
@@ -184,12 +177,13 @@ return {
   flex-wrap: wrap;
   gap: 0.5rem;
 }`;'''
-        props:
-          '''return { as: "div" };'''
+        displayOrder: 2
+        componentName: Html
+        props: return { as: "div" };
       }
     }
     {
-      id: "evpf_pick"
+      id: "11"
       L: Attr
       P: {
         displayOrder: 1
@@ -219,7 +213,7 @@ return {
       }
     }
     {
-      id: "evpf_clr"
+      id: "12"
       L: Attr
       P: {
         displayOrder: 2
@@ -255,70 +249,70 @@ return {
   ]
   edges: [
     {
-      id: evpf_e1
+      id: e1
       T: Attr
-      S: "evpf1"
-      E: "evpf_row"
+      S: "1"
+      E: "2"
     }
     {
-      id: evpf_e2
+      id: e2
       T: Attr
-      S: "evpf_row"
-      E: "evpf_prev_row"
+      S: "2"
+      E: "3"
     }
     {
-      id: evpf_e3
+      id: e3
       T: Attr
-      S: "evpf_prev_row"
-      E: "evpf_thumb"
+      S: "2"
+      E: "10"
     }
     {
-      id: evpf_e4
+      id: e4
       T: Attr
-      S: "evpf_thumb"
-      E: "evpf_img"
+      S: "3"
+      E: "4"
     }
     {
-      id: evpf_e5
+      id: e5
       T: Attr
-      S: "evpf_thumb"
-      E: "evpf_ico"
+      S: "3"
+      E: "7"
     }
     {
-      id: evpf_e6
+      id: e6
       T: Attr
-      S: "evpf_prev_row"
-      E: "evpf_meta"
+      S: "4"
+      E: "5"
     }
     {
-      id: evpf_e7
+      id: e7
       T: Attr
-      S: "evpf_meta"
-      E: "evpf_lbl"
+      S: "4"
+      E: "6"
     }
     {
-      id: evpf_e8
+      id: e8
       T: Attr
-      S: "evpf_meta"
-      E: "evpf_fn"
+      S: "7"
+      E: "8"
     }
     {
-      id: evpf_e9
+      id: e9
       T: Attr
-      S: "evpf_row"
-      E: "evpf_actions"
+      S: "7"
+      E: "9"
     }
     {
-      id: evpf_e10
+      id: e10
       T: Attr
-      S: "evpf_actions"
-      E: "evpf_pick"
+      S: "10"
+      E: "11"
     }
     {
-      id: evpf_e11
+      id: e11
       T: Attr
-      S: "evpf_actions"
-      E: "evpf_clr"
+      S: "10"
+      E: "12"
     }
   ]
 }

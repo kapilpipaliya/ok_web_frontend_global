@@ -4,7 +4,6 @@
       id: "1"
       L: Function
       P: {
-        key: seedTableContent
         description: Seeds default content vertices for a table (generic). Supports Book and ScheduleEvent.
         body:
           '''
@@ -195,6 +194,7 @@ return {
   data: { created }
 };
 '''
+        key: seedTableContent
       }
     }
   ]

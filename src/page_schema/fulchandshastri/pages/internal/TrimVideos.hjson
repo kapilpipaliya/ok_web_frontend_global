@@ -7,7 +7,7 @@
         fns: return { enabled: () => true }
         key: TrimVideos
         url: /trimvideos
-        updatedAt: 2026-07-12T03:39:17.842Z
+        updatedAt: 2026-07-15T11:09:22.969Z
         props:
           '''return {
   isNoPermissionCheck: true,
@@ -19,8 +19,18 @@
       id: "2"
       L: Attr
       P: {
+        css:
+          '''
+return `._id {
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}`;
+'''
         displayOrder: 1
-        componentName: Html
         fns:
           '''
 const [generatedCommand, setGeneratedCommand] = args.createSignal("");
@@ -133,17 +143,7 @@ return {
   buildFfmpegCommand
 };
 '''
-        css:
-          '''
-return `._id {
-  max-width: 48rem;
-  margin: 0 auto;
-  padding: 1.5rem 1rem 3rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}`;
-'''
+        componentName: Html
         props:
           '''
 return {
@@ -156,8 +156,6 @@ return {
       id: "3"
       L: Attr
       P: {
-        displayOrder: 1
-        componentName: Html
         css:
           '''
 return `._id {
@@ -167,6 +165,8 @@ return `._id {
   color: ${args.theme.var.color.text};
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
         props:
           '''
 return {
@@ -180,17 +180,6 @@ return {
       id: "4"
       L: Attr
       P: {
-        displayOrder: 2
-        componentName: Html
-        textType: markdown
-        text:
-          '''Fill the form to build an `ffmpeg` trim command.
-
-- `-ss` = start time
-- `-to` = end time
-- `-t` = duration
-- `-c copy` = copy streams without re-encoding
-'''
         css:
           '''
 return `._id {
@@ -208,6 +197,17 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 2
+        textType: markdown
+        componentName: Html
+        text:
+          '''Fill the form to build an `ffmpeg` trim command.
+
+- `-ss` = start time
+- `-to` = end time
+- `-t` = duration
+- `-c copy` = copy streams without re-encoding
+'''
         props:
           '''
 return {
@@ -220,8 +220,6 @@ return {
       id: "5"
       L: Attr
       P: {
-        displayOrder: 3
-        componentName: FormManagement
         css:
           '''
 return `._id {
@@ -231,6 +229,8 @@ return `._id {
   overflow: hidden;
 }`;
 '''
+        displayOrder: 3
+        componentName: FormManagement
         props:
           '''
 return {
@@ -352,8 +352,6 @@ return {
       id: "6"
       L: Attr
       P: {
-        displayOrder: 4
-        componentName: Html
         css:
           '''
 return `._id {
@@ -362,6 +360,8 @@ return `._id {
   gap: 0.75rem;
 }`;
 '''
+        displayOrder: 4
+        componentName: Html
         props:
           '''
 return {
@@ -390,8 +390,6 @@ return {
       id: "8"
       L: Attr
       P: {
-        displayOrder: 5
-        componentName: Html
         css:
           '''
 return `._id {
@@ -404,6 +402,8 @@ return `._id {
   background: ${args.theme.var.color.background};
 }`;
 '''
+        displayOrder: 5
+        componentName: Html
         props:
           '''
 return {
@@ -417,8 +417,6 @@ return {
       id: "9"
       L: Attr
       P: {
-        displayOrder: 1
-        componentName: Html
         css:
           '''
 return `._id {
@@ -428,6 +426,8 @@ return `._id {
   gap: 0.75rem;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
         props:
           '''
 return {
@@ -440,8 +440,6 @@ return {
       id: "10"
       L: Attr
       P: {
-        displayOrder: 1
-        componentName: Html
         css:
           '''
 return `._id {
@@ -451,6 +449,8 @@ return `._id {
   color: ${args.theme.var.color.text};
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
         props:
           '''
 return {
@@ -480,8 +480,6 @@ return {
       id: "12"
       L: Attr
       P: {
-        displayOrder: 2
-        componentName: Html
         css:
           '''
 return `._id {
@@ -497,6 +495,8 @@ return `._id {
   word-break: break-word;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
         props:
           '''
 return {
@@ -523,33 +523,33 @@ return {
     }
     {
       id: e2
-      T: Attr
-      S: "2"
-      E: "3"
+      T: PageLayout
+      S: "1"
+      E: "13"
     }
     {
       id: e3
       T: Attr
       S: "2"
-      E: "4"
+      E: "3"
     }
     {
       id: e4
       T: Attr
       S: "2"
-      E: "5"
+      E: "4"
     }
     {
       id: e5
       T: Attr
       S: "2"
-      E: "6"
+      E: "5"
     }
     {
       id: e6
       T: Attr
-      S: "6"
-      E: "7"
+      S: "2"
+      E: "6"
     }
     {
       id: e7
@@ -560,32 +560,32 @@ return {
     {
       id: e8
       T: Attr
-      S: "8"
-      E: "9"
+      S: "6"
+      E: "7"
     }
     {
       id: e9
       T: Attr
-      S: "9"
-      E: "10"
+      S: "8"
+      E: "9"
     }
     {
       id: e10
-      T: Attr
-      S: "9"
-      E: "11"
-    }
-    {
-      id: e11
       T: Attr
       S: "8"
       E: "12"
     }
     {
+      id: e11
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
       id: e12
-      T: PageLayout
-      S: "1"
-      E: "13"
+      T: Attr
+      S: "9"
+      E: "11"
     }
   ]
 }

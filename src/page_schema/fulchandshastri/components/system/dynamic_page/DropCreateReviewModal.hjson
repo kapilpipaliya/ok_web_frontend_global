@@ -4,8 +4,7 @@
       id: "1"
       L: Component
       P: {
-        key: DropCreateReviewModal
-        description: "Review modal for drag-drop create using FormManagement per draft row."
+        description: Review modal for drag-drop create using FormManagement per draft row.
         fns:
           '''
 const getProps = () => args.contextData.props || {};
@@ -147,10 +146,12 @@ return {
   buildRowSaveHandler
 };
 '''
+        key: DropCreateReviewModal
+        updatedAt: 2026-07-16T18:05:54.558Z
       }
     }
     {
-      id: "root"
+      id: "2"
       L: Attr
       P: {
         displayOrder: 1
@@ -169,13 +170,10 @@ return {
       }
     }
     {
-      id: "body"
+      id: "3"
       L: Attr
       P: {
-        displayOrder: 1
-        componentName: Html
         slotName: children
-        props: return { as: "div" };
         css:
           '''
 return `._id {
@@ -187,12 +185,23 @@ return `._id {
   padding: 1rem 1.25rem 1.25rem;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "div" };
       }
     }
     {
-      id: "hint"
+      id: "4"
       L: Attr
       P: {
+        css:
+          '''
+return `._id {
+  margin: 0;
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text_dark_400};
+}`;
+'''
         displayOrder: 1
         componentName: Html
         props:
@@ -204,30 +213,12 @@ return {
   hide: !hint
 };
 '''
-        css:
-          '''
-return `._id {
-  margin: 0;
-  font-size: 0.875rem;
-  color: ${args.theme.var.color.text_dark_400};
-}`;
-'''
       }
     }
     {
-      id: "empty"
+      id: "5"
       L: Attr
       P: {
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''
-return {
-  as: "p",
-  text: args.fns.getProps()?.emptyHint || "No rows.",
-  hide: args.fns.getRows().length > 0
-};
-'''
         css:
           '''
 return `._id {
@@ -238,24 +229,23 @@ return `._id {
   font-size: 0.9rem;
 }`;
 '''
-      }
-    }
-    {
-      id: "rows"
-      L: Attr
-      P: {
-        displayOrder: 3
+        displayOrder: 2
         componentName: Html
-        loop: true
-        contextName: draftRow
         props:
           '''
 return {
-  as: "div",
-  data: args.fns.getRows(),
-  hide: args.fns.getRows().length === 0
+  as: "p",
+  text: args.fns.getProps()?.emptyHint || "No rows.",
+  hide: args.fns.getRows().length > 0
 };
 '''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        contextName: draftRow
         css:
           '''
 return `._id {
@@ -267,15 +257,23 @@ return `._id {
   gap: 0.75rem;
 }`;
 '''
+        loop: true
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  data: args.fns.getRows(),
+  hide: args.fns.getRows().length === 0
+};
+'''
       }
     }
     {
-      id: "rowCard"
+      id: "7"
       L: Attr
       P: {
-        displayOrder: 1
-        componentName: Html
-        props: return { as: "article" };
         css:
           '''
 return `._id {
@@ -288,15 +286,15 @@ return `._id {
   background: ${args.theme.var.color.background};
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "article" };
       }
     }
     {
-      id: "rowHeader"
+      id: "8"
       L: Attr
       P: {
-        displayOrder: 1
-        componentName: Html
-        props: return { as: "div" };
         css:
           '''
 return `._id {
@@ -305,23 +303,15 @@ return `._id {
   gap: 0.75rem;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "div" };
       }
     }
     {
-      id: "previewBox"
+      id: "9"
       L: Attr
       P: {
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''
-const draftRow = args.contextData.draftRow;
-const url = args.fns.getPreviewUrl(draftRow);
-return {
-  as: "div",
-  "attr:aria-label": url ? "File preview" : "No preview"
-};
-'''
         css:
           '''
 return `._id {
@@ -337,12 +327,31 @@ return `._id {
   flex-shrink: 0;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const draftRow = args.contextData.draftRow;
+const url = args.fns.getPreviewUrl(draftRow);
+return {
+  as: "div",
+  "attr:aria-label": url ? "File preview" : "No preview"
+};
+'''
       }
     }
     {
-      id: "previewImg"
+      id: "10"
       L: Attr
       P: {
+        css:
+          '''
+return `._id {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}`;
+'''
         displayOrder: 1
         componentName: Html
         props:
@@ -356,18 +365,10 @@ return {
   hide: !url
 };
 '''
-        css:
-          '''
-return `._id {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}`;
-'''
       }
     }
     {
-      id: "previewIcon"
+      id: "11"
       L: Attr
       P: {
         displayOrder: 2
@@ -391,19 +392,9 @@ return {
       }
     }
     {
-      id: "fileMeta"
+      id: "12"
       L: Attr
       P: {
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''
-const draftRow = args.contextData.draftRow;
-return {
-  as: "div",
-  text: draftRow?.fileName || "File"
-};
-'''
         css:
           '''
 return `._id {
@@ -417,28 +408,22 @@ return `._id {
   white-space: nowrap;
 }`;
 '''
-      }
-    }
-    {
-      id: "removeBtn"
-      L: Attr
-      P: {
-        displayOrder: 3
+        displayOrder: 2
         componentName: Html
         props:
           '''
-const rowIndex = args.contextData.draftRow_index;
 const draftRow = args.contextData.draftRow;
-const label = args.fns.getProps()?.removeRowLabel || "Remove";
 return {
-  as: "button",
-  type: "button",
-  text: label,
-  disabled: args.fns.isConfirming(),
-  onClick: () => args.fns.removeRow(draftRow, rowIndex),
-  "attr:aria-label": label
+  as: "div",
+  text: draftRow?.fileName || "File"
 };
 '''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
         css:
           '''
 return `._id {
@@ -459,10 +444,26 @@ return `._id {
   cursor: not-allowed;
 }`;
 '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const rowIndex = args.contextData.draftRow_index;
+const draftRow = args.contextData.draftRow;
+const label = args.fns.getProps()?.removeRowLabel || "Remove";
+return {
+  as: "button",
+  type: "button",
+  text: label,
+  disabled: args.fns.isConfirming(),
+  onClick: () => args.fns.removeRow(draftRow, rowIndex),
+  "attr:aria-label": label
+};
+'''
       }
     }
     {
-      id: "form"
+      id: "14"
       L: Attr
       P: {
         displayOrder: 2
@@ -486,12 +487,9 @@ return {
       }
     }
     {
-      id: "footer"
+      id: "15"
       L: Attr
       P: {
-        displayOrder: 4
-        componentName: Html
-        props: return { as: "div" };
         css:
           '''
 return `._id {
@@ -502,10 +500,13 @@ return `._id {
   padding-top: 0.25rem;
 }`;
 '''
+        displayOrder: 4
+        componentName: Html
+        props: return { as: "div" };
       }
     }
     {
-      id: "cancelBtn"
+      id: "16"
       L: Attr
       P: {
         displayOrder: 1
@@ -523,7 +524,7 @@ return {
       }
     }
     {
-      id: "confirmBtn"
+      id: "17"
       L: Attr
       P: {
         displayOrder: 2
@@ -543,21 +544,101 @@ return {
     }
   ]
   edges: [
-    { id: "e1", T: "Attr", S: "1", E: "root" }
-    { id: "e2", T: "Attr", S: "root", E: "body" }
-    { id: "e3", T: "Attr", S: "body", E: "hint" }
-    { id: "e4", T: "Attr", S: "body", E: "empty" }
-    { id: "e5", T: "Attr", S: "body", E: "rows" }
-    { id: "e6", T: "Attr", S: "body", E: "footer" }
-    { id: "e7", T: "Attr", S: "rows", E: "rowCard" }
-    { id: "e8", T: "Attr", S: "rowCard", E: "rowHeader" }
-    { id: "e9", T: "Attr", S: "rowCard", E: "form" }
-    { id: "e10", T: "Attr", S: "rowHeader", E: "previewBox" }
-    { id: "e11", T: "Attr", S: "previewBox", E: "previewImg" }
-    { id: "e12", T: "Attr", S: "previewBox", E: "previewIcon" }
-    { id: "e13", T: "Attr", S: "rowHeader", E: "fileMeta" }
-    { id: "e14", T: "Attr", S: "rowHeader", E: "removeBtn" }
-    { id: "e15", T: "Attr", S: "footer", E: "cancelBtn" }
-    { id: "e16", T: "Attr", S: "footer", E: "confirmBtn" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "6"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "3"
+      E: "15"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "7"
+      E: "14"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "8"
+      E: "12"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "8"
+      E: "13"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "9"
+      E: "11"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "15"
+      E: "16"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "15"
+      E: "17"
+    }
   ]
 }

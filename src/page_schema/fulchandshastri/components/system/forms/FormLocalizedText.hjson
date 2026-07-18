@@ -1,13 +1,13 @@
 {
   vertexes: [
     {
-      id: "flt_root",
-      L: "Component",
+      id: "1"
+      L: Component
       P: {
-        key: "FormLocalizedText",
-        description: "Multi-language text input with language tabs. Languages passed via props only.",
-        dynamicComponent: "TextInput, TextArea",
-        fns: '''
+        dynamicComponent: TextInput, TextArea
+        description: Multi-language text input with language tabs. Languages passed via props only.
+        fns:
+          '''
 const DEFAULT_SITE_LANGUAGES = [
   { code: "en", label: "English", isDefault: true },
   { code: "hi", label: "Hindi", isDefault: false },
@@ -101,45 +101,40 @@ return {
   hasLanguages: () => getLanguages().length > 0
 };
 '''
+        key: FormLocalizedText
       }
-    },
+    }
     {
-      id: "flt_empty",
-      L: "Attr",
+      id: "2"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "p",
-  hide: args.fns.hasLanguages?.(),
-  text: "Configure site languages in Global Settings first.",
-  class: "flt-empty"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id.flt-empty {
   margin: 0;
   font-size: 0.8125rem;
   color: ${args.theme.var.color.text_light_500};
 }`;
 '''
-      }
-    },
-    {
-      id: "flt_shell",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div",
-  hide: !args.fns.hasLanguages?.(),
-  class: "flt-shell"
+  as: "p",
+  hide: args.fns.hasLanguages?.(),
+  text: "Configure site languages in Global Settings first.",
+  class: "flt-empty"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id.flt-shell {
   display: flex;
   flex-direction: column;
@@ -147,51 +142,50 @@ return `._id.flt-shell {
   width: 100%;
 }`;
 '''
-      }
-    },
-    {
-      id: "flt_tabs",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        contextName: "fltLangIndex",
-        loop: true,
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
   as: "div",
-  class: "flt-tabs",
-  data: args.fns.getLanguageIndices?.()
+  hide: !args.fns.hasLanguages?.(),
+  class: "flt-shell"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        contextName: fltLangIndex
+        css:
+          '''
 return `._id.flt-tabs {
   display: flex;
   flex-wrap: wrap;
   gap: 0.25rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "flt_tab_btn",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const lang = args.fns.getLanguageAt?.(args.contextData.fltLangIndex);
-const active = args.fns.activeTab?.() === lang?.code;
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "button",
-  type: "button",
-  text: lang?.label || lang?.code || "Language",
-  class: active ? "flt-tab flt-tab-active" : "flt-tab",
-  disabled: args.fns.isDisabled?.(),
-  onClick: () => lang?.code && args.fns.setActiveTab?.(lang.code)
+  as: "div",
+  class: "flt-tabs",
+  data: args.fns.getLanguageIndices?.()
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''
 const lang = args.fns.getLanguageAt?.(args.contextData.fltLangIndex);
 const active = args.fns.activeTab?.() === lang?.code;
 return `._id.flt-tab {
@@ -211,31 +205,49 @@ return `._id.flt-tab {
   }
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const lang = args.fns.getLanguageAt?.(args.contextData.fltLangIndex);
+const active = args.fns.activeTab?.() === lang?.code;
+return {
+  as: "button",
+  type: "button",
+  text: lang?.label || lang?.code || "Language",
+  class: active ? "flt-tab flt-tab-active" : "flt-tab",
+  disabled: args.fns.isDisabled?.(),
+  onClick: () => lang?.code && args.fns.setActiveTab?.(lang.code)
+};
+'''
       }
-    },
+    }
     {
-      id: "flt_input_area",
-      L: "Attr",
+      id: "6"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return { as: "div", class: "flt-input-area" };
-''',
-        css: '''
+        css:
+          '''
 return `._id.flt-input-area {
   width: 100%;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return { as: "div", class: "flt-input-area" };
+'''
       }
-    },
+    }
     {
-      id: "flt_textarea",
-      L: "Attr",
+      id: "7"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "TextArea",
-        props: '''
+        displayOrder: 1
+        componentName: TextArea
+        props:
+          '''
 const code = args.fns.activeTab?.();
 const hide = !code || !args.fns.isMultiline?.();
 return {
@@ -249,14 +261,15 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "flt_textinput",
-      L: "Attr",
+      id: "8"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "TextInput",
-        props: '''
+        displayOrder: 2
+        componentName: TextInput
+        props:
+          '''
 const code = args.fns.activeTab?.();
 const hide = !code || args.fns.isMultiline?.() === true;
 return {
@@ -271,14 +284,49 @@ return {
 '''
       }
     }
-  ],
+  ]
   edges: [
-    { id: "flt_e1", T: "Attr", S: "flt_root", E: "flt_empty" },
-    { id: "flt_e2", T: "Attr", S: "flt_root", E: "flt_shell" },
-    { id: "flt_e3", T: "Attr", S: "flt_shell", E: "flt_tabs" },
-    { id: "flt_e4", T: "Attr", S: "flt_shell", E: "flt_input_area" },
-    { id: "flt_e5", T: "Attr", S: "flt_tabs", E: "flt_tab_btn" },
-    { id: "flt_e6", T: "Attr", S: "flt_input_area", E: "flt_textarea" },
-    { id: "flt_e7", T: "Attr", S: "flt_input_area", E: "flt_textinput" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "1"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "6"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "6"
+      E: "8"
+    }
   ]
 }

@@ -1,40 +1,20 @@
 {
   vertexes: [
     {
-      id: "1",
-      L: "Component",
+      id: "1"
+      L: Component
       P: {
-        key: "GalleryFileCard",
-        description: "Media file card for Photo/Video/Pdf. Props: item, onOpen(item), index."
+        description: Media file card for Photo/Video/Pdf. Props: item, onOpen(item), index.
+        key: GalleryFileCard
+        updatedAt: 2026-07-13T18:16:26.834Z
       }
-    },
+    }
     {
-      id: "root",
-      L: "Attr",
+      id: "2"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const item = args.contextData.props?.item || args.contextData.props || {};
-const index = args.contextData.props?.index ?? args.contextData.index ?? 0;
-const href = args.contextData.props?.href || item.fileUrl || "";
-const onOpen = args.contextData.props?.onOpen;
-return {
-  as: href ? "a" : "button",
-  type: href ? undefined : "button",
-  href: href || undefined,
-  target: href ? "_blank" : undefined,
-  rel: href ? "noopener noreferrer" : undefined,
-  "data-animate": "",
-  ref: (el) => el && args.fns.animateOnView?.(el, { delay: index * 0.05 }),
-  onClick: (e) => {
-    if (!onOpen) return;
-    e.preventDefault();
-    onOpen(item);
-  }
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: flex;
   flex-direction: column;
@@ -62,18 +42,37 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.props?.item || args.contextData.props || {};
+const index = args.contextData.props?.index ?? args.contextData.index ?? 0;
+const href = args.contextData.props?.href || item.fileUrl || "";
+const onOpen = args.contextData.props?.onOpen;
+return {
+  as: href ? "a" : "button",
+  type: href ? undefined : "button",
+  href: href || undefined,
+  target: href ? "_blank" : undefined,
+  rel: href ? "noopener noreferrer" : undefined,
+  "data-animate": "",
+  ref: (el) => el && args.fns.animateOnView?.(el, { delay: index * 0.05 }),
+  onClick: (e) => {
+    if (!onOpen) return;
+    e.preventDefault();
+    onOpen(item);
+  }
+};
+'''
       }
-    },
+    }
     {
-      id: "preview",
-      L: "Attr",
+      id: "3"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return { as: "div" };
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   position: relative;
   width: 100%;
@@ -82,25 +81,20 @@ return `._id {
   overflow: hidden;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return { as: "div" };
+'''
       }
-    },
+    }
     {
-      id: "previewImage",
-      L: "Attr",
+      id: "4"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const item = args.contextData.props?.item || args.contextData.props || {};
-const src = item.previewUrl || "";
-return {
-  as: src ? "img" : "fragment",
-  src: src || undefined,
-  alt: item.title || "Gallery item",
-  loading: "lazy"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   width: 100%;
   height: 100%;
@@ -113,22 +107,27 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "previewFallback",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const item = args.contextData.props?.item || args.contextData.props || {};
+const src = item.previewUrl || "";
 return {
-  as: "div",
-  hide: !!item.previewUrl
+  as: src ? "img" : "fragment",
+  src: src || undefined,
+  alt: item.title || "Gallery item",
+  loading: "lazy"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   position: absolute;
   inset: 0;
@@ -143,15 +142,26 @@ return `._id {
   );
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.props?.item || args.contextData.props || {};
+return {
+  as: "div",
+  hide: !!item.previewUrl
+};
+'''
       }
-    },
+    }
     {
-      id: "fallbackIcon",
-      L: "Attr",
+      id: "6"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const item = args.contextData.props?.item || args.contextData.props || {};
 return {
   as: "icon",
@@ -161,21 +171,13 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "typeBadge",
-      L: "Attr",
+      id: "7"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-const item = args.contextData.props?.item || args.contextData.props || {};
-return {
-  as: "span",
-  text: item.mediaType || "File"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   position: absolute;
   top: 0.5rem;
@@ -191,18 +193,24 @@ return `._id {
   border: 1px solid ${args.theme.var.color.border};
 }`;
 '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.props?.item || args.contextData.props || {};
+return {
+  as: "span",
+  text: item.mediaType || "File"
+};
+'''
       }
-    },
+    }
     {
-      id: "body",
-      L: "Attr",
+      id: "8"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return { as: "div" };
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: flex;
   flex-direction: column;
@@ -211,22 +219,20 @@ return `._id {
   min-width: 0;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return { as: "div" };
+'''
       }
-    },
+    }
     {
-      id: "title",
-      L: "Attr",
+      id: "9"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const item = args.contextData.props?.item || args.contextData.props || {};
-return {
-  as: "h3",
-  text: item.title || "Untitled"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   margin: 0;
   font-size: 0.9375rem;
@@ -237,23 +243,24 @@ return `._id {
   white-space: nowrap;
 }`;
 '''
-      }
-    },
-    {
-      id: "description",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const item = args.contextData.props?.item || args.contextData.props || {};
 return {
-  as: "p",
-  text: item.description || "",
-  hide: !item.description
+  as: "h3",
+  text: item.title || "Untitled"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   margin: 0;
   font-size: 0.8125rem;
@@ -264,18 +271,74 @@ return `._id {
   overflow: hidden;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.props?.item || args.contextData.props || {};
+return {
+  as: "p",
+  text: item.description || "",
+  hide: !item.description
+};
+'''
       }
     }
-  ],
+  ]
   edges: [
-    { id: "e1", T: "Attr", S: "1", E: "root" },
-    { id: "e2", T: "Attr", S: "root", E: "preview" },
-    { id: "e3", T: "Attr", S: "preview", E: "previewImage" },
-    { id: "e4", T: "Attr", S: "preview", E: "previewFallback" },
-    { id: "e5", T: "Attr", S: "previewFallback", E: "fallbackIcon" },
-    { id: "e6", T: "Attr", S: "preview", E: "typeBadge" },
-    { id: "e7", T: "Attr", S: "root", E: "body" },
-    { id: "e8", T: "Attr", S: "body", E: "title" },
-    { id: "e9", T: "Attr", S: "body", E: "description" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "8"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "3"
+      E: "7"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "8"
+      E: "10"
+    }
   ]
 }

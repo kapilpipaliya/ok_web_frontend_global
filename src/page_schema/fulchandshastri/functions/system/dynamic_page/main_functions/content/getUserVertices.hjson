@@ -56,7 +56,7 @@ if (!enableUserScoping) {
 } else {
   // User scoping enabled - filter by user relationship
   params.userUuid = targetUserUuid;
-  
+
   if (relationshipType) {
     // Query with specific relationship type
     query = `

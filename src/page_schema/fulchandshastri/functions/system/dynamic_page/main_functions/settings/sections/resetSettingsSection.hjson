@@ -4,7 +4,6 @@
       id: "1"
       L: Function
       P: {
-        key: resetSettingsSection
         description: Resets a settings section to config defaults. Deletes persisted document or sets default values.
         body:
           '''
@@ -101,6 +100,7 @@ return {
   message: "Settings section reset to defaults"
 };
 '''
+        key: resetSettingsSection
       }
     }
   ]

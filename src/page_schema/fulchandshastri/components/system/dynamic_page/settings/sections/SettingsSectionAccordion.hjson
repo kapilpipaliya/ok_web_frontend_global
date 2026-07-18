@@ -4,7 +4,6 @@
       id: "1"
       L: Component
       P: {
-        key: SettingsSectionAccordion
         dynamicComponent: SettingsSectionRenderer
         fns:
           '''
@@ -32,19 +31,20 @@ return {
   getNestedSections
 };
 '''
+        key: SettingsSectionAccordion
       }
     }
     {
       id: "2"
       L: Attr
       P: {
-        displayOrder: 1
         css:
           '''
 return `._id {
   margin-bottom: ${args.theme.var.spacing.lg};
 }`;
 '''
+        displayOrder: 1
         componentName: Html
         props:
           '''
@@ -58,7 +58,6 @@ return {
       id: "3"
       L: Attr
       P: {
-        displayOrder: 1
         css:
           '''
 return `._id {
@@ -68,6 +67,7 @@ return `._id {
   color: ${args.theme.var.color.text};
 }`;
 '''
+        displayOrder: 1
         componentName: Html
         props:
           '''
@@ -84,7 +84,7 @@ return {
       id: "4"
       L: Attr
       P: {
-        displayOrder: 2
+        contextName: nestedSection
         css:
           '''
 return `._id {
@@ -94,9 +94,9 @@ return `._id {
   overflow: hidden;
 }`;
 '''
-        componentName: Html
-        contextName: nestedSection
         loop: true
+        displayOrder: 2
+        componentName: Html
         props:
           '''
 return {
@@ -110,7 +110,6 @@ return {
       id: "5"
       L: Attr
       P: {
-        displayOrder: 1
         css:
           '''
 const nestedSection = args.contextData.nestedSection;
@@ -140,6 +139,7 @@ return expanded
   background: ${args.theme.var.color.background_light_200};
 }`;
 '''
+        displayOrder: 1
         componentName: Html
         props:
           '''
@@ -173,10 +173,35 @@ return {
     }
   ]
   edges: [
-    { id: "e1", T: "Attr", S: "1", E: "2" }
-    { id: "e2", T: "Attr", S: "2", E: "3" }
-    { id: "e3", T: "Attr", S: "2", E: "4" }
-    { id: "e4", T: "Attr", S: "4", E: "5" }
-    { id: "e5", T: "Attr", S: "4", E: "6" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "4"
+      E: "6"
+    }
   ]
 }

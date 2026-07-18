@@ -1,16 +1,17 @@
 {
   vertexes: [
     {
-      id: "page",
-      L: "Page",
+      id: "1"
+      L: Page
       P: {
         public: true
-        key: "Contact",
-        fns: "return { enabled: () => true }",
-        isNoPermissionCheck: true,
-        url: "/contact"
-        settingsPageId: "contact"
-        props: '''
+        settingsPageId: contact
+        isNoPermissionCheck: true
+        fns: return { enabled: () => true }
+        url: /contact
+        key: Contact
+        props:
+          '''
 const locale = args.params?.lang ? String(args.params.lang).toLowerCase() : undefined;
 return {
   contextName: "contactSettings",
@@ -30,146 +31,84 @@ try {
 };
 '''
       }
-    },
+    }
     {
-      id: "pageHeader",
-      L: "Attr",
+      id: "2"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
-  background: linear-gradient(135deg, ${args.theme.var.color.primary_light_100} 0%, ${args.theme.var.color.primary_light_50} 100%);
   padding: 3rem 1rem;
-  text-align: center;
 }`;
 '''
-      }
-    },
-    {
-      id: "pageTitle",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const content = args.contextData.contactSettings?.content;
-return {
-  as: "h1",
-  text: content?.pageTitle
-};
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.text};
-  font-size: 3rem;
-  font-weight: 700;
-  margin: 0;
-  
-  @media (max-width: 768px) {
-    font-size: 2rem;
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "pageSubtitle",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const content = args.contextData.contactSettings?.content;
-return {
-  as: "p",
-  text: content?.pageSubtitle
-};
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.text_light_200};
-  font-size: 1.25rem;
-  margin-top: 1rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "mainContent",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
   as: "main"
 };
-''',
-        css: '''
-return `._id {
-  padding: 3rem 1rem;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "container",
-      L: "Attr",
+      id: "3"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   max-width: 1200px;
   margin: 0 auto;
 }`;
 '''
-      }
-    },
-    {
-      id: "contactGrid",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 4rem;
   margin-bottom: 4rem;
-  
+
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
     gap: 3rem;
   }
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "contactInfo",
-      L: "Attr",
+      id: "5"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "div",
   "data-animate": "",
@@ -178,21 +117,13 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "infoTitle",
-      L: "Attr",
+      id: "6"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const content = args.contextData.contactSettings?.content;
-return {
-  as: "h2",
-  text: content?.infoTitle
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.text};
   font-size: 2rem;
@@ -200,60 +131,68 @@ return `._id {
   margin-bottom: 2rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "infoList",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const content = args.contextData.contactSettings?.content;
 return {
-  as: "div"
+  as: "h2",
+  text: content?.infoTitle
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   flex-direction: column;
   gap: 2rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "addressItem",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
   as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   gap: 1rem;
   align-items: start;
 }`;
 '''
-      }
-    },
-    {
-      id: "addressIcon",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   width: 3rem;
   height: 3rem;
@@ -265,56 +204,59 @@ return `._id {
   flex-shrink: 0;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "addressIconSvg",
-      L: "Attr",
+      id: "10"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "icon",
   icon: "carbon:location",
   width: 24,
   height: 24
 };
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.primary};
-}`;
 '''
       }
-    },
+    }
     {
-      id: "addressContent",
-      L: "Attr",
+      id: "11"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
   as: "div"
 };
 '''
       }
-    },
+    }
     {
-      id: "addressTitle",
-      L: "Attr",
+      id: "12"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const content = args.contextData.contactSettings?.content;
-return {
-  as: "h3",
-  text: content?.addressTitle
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.text};
   font-size: 1.25rem;
@@ -322,62 +264,70 @@ return `._id {
   margin-bottom: 0.5rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "addressText",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const content = args.contextData.contactSettings?.content;
 return {
-  as: "p",
-  text: content?.addressText
+  as: "h3",
+  text: content?.addressTitle
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.text_light_200};
   line-height: 1.6;
   white-space: pre-line;
 }`;
 '''
-      }
-    },
-    {
-      id: "phoneItem",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const content = args.contextData.contactSettings?.content;
 return {
-  as: "div"
+  as: "p",
+  text: content?.addressText
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   gap: 1rem;
   align-items: start;
 }`;
 '''
-      }
-    },
-    {
-      id: "phoneIcon",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
   as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   width: 3rem;
   height: 3rem;
@@ -389,56 +339,59 @@ return `._id {
   flex-shrink: 0;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "phoneIconSvg",
-      L: "Attr",
+      id: "16"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "icon",
   icon: "carbon:phone",
   width: 24,
   height: 24
 };
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.primary};
-}`;
 '''
       }
-    },
+    }
     {
-      id: "phoneContent",
-      L: "Attr",
+      id: "17"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
   as: "div"
 };
 '''
       }
-    },
+    }
     {
-      id: "phoneTitle",
-      L: "Attr",
+      id: "18"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const content = args.contextData.contactSettings?.content;
-return {
-  as: "h3",
-  text: content?.phoneTitle
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.text};
   font-size: 1.25rem;
@@ -446,114 +399,126 @@ return `._id {
   margin-bottom: 0.5rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "phoneNumbers",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const content = args.contextData.contactSettings?.content;
 return {
-  as: "div"
+  as: "h3",
+  text: content?.phoneTitle
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "phone1",
-      L: "Attr",
+      id: "20"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+  text-decoration: none;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: ${args.theme.var.color.primary_dark_200};
+    text-decoration: underline;
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const content = args.contextData.contactSettings?.content;
 return {
   as: "a",
   text: content?.phone1
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "21"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.primary};
   text-decoration: none;
   transition: color 0.2s ease;
-  
+
   &:hover {
     color: ${args.theme.var.color.primary_dark_200};
     text-decoration: underline;
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "phone2",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 const content = args.contextData.contactSettings?.content;
 return {
   as: "a",
   text: content?.phone2
 };
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.primary};
-  text-decoration: none;
-  transition: color 0.2s ease;
-  
-  &:hover {
-    color: ${args.theme.var.color.primary_dark_200};
-    text-decoration: underline;
-  }
-}`;
 '''
       }
-    },
+    }
     {
-      id: "emailItem",
-      L: "Attr",
+      id: "22"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: flex;
   gap: 1rem;
   align-items: start;
 }`;
 '''
-      }
-    },
-    {
-      id: "emailIcon",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
 return {
   as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "23"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   width: 3rem;
   height: 3rem;
@@ -565,56 +530,59 @@ return `._id {
   flex-shrink: 0;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "emailIconSvg",
-      L: "Attr",
+      id: "24"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "icon",
   icon: "carbon:email",
   width: 24,
   height: 24
 };
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.primary};
-}`;
 '''
       }
-    },
+    }
     {
-      id: "emailContent",
-      L: "Attr",
+      id: "25"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
   as: "div"
 };
 '''
       }
-    },
+    }
     {
-      id: "emailTitle",
-      L: "Attr",
+      id: "26"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const content = args.contextData.contactSettings?.content;
-return {
-  as: "h3",
-  text: content?.emailTitle
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.text};
   font-size: 1.25rem;
@@ -622,42 +590,55 @@ return `._id {
   margin-bottom: 0.5rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "emailLink",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const content = args.contextData.contactSettings?.content;
 return {
-  as: "a",
-  text: content?.emailLink
+  as: "h3",
+  text: content?.emailTitle
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "27"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.primary};
   text-decoration: none;
   transition: color 0.2s ease;
-  
+
   &:hover {
     color: ${args.theme.var.color.primary_dark_200};
     text-decoration: underline;
   }
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const content = args.contextData.contactSettings?.content;
+return {
+  as: "a",
+  text: content?.emailLink
+};
+'''
       }
-    },
+    }
     {
-      id: "contactFormSection",
-      L: "Attr",
+      id: "28"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
   as: "div",
   "data-animate": "",
@@ -666,21 +647,13 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "formTitle",
-      L: "Attr",
+      id: "29"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const content = args.contextData.contactSettings?.content;
-return {
-  as: "h2",
-  text: content?.formTitle
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.text};
   font-size: 2rem;
@@ -688,76 +661,83 @@ return `._id {
   margin-bottom: 2rem;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const content = args.contextData.contactSettings?.content;
+return {
+  as: "h2",
+  text: content?.formTitle
+};
+'''
       }
-    },
+    }
     {
-      id: "contactForm",
-      L: "Attr",
+      id: "30"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "ContactForm",
-        props: '''
+        displayOrder: 2
+        componentName: ContactForm
+        props:
+          '''
 return {};
 '''
       }
-    },
+    }
     {
-      id: "mapSection",
-      L: "Attr",
+      id: "31"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "section",
-  "data-animate": "",
-
-  ref: (el) => el && args.fns.animateOnView(el)
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   background: ${args.theme.var.color.background_light_50};
   padding: 3rem 0;
   margin-top: 4rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "mapContainer",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div"
+  as: "section",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el)
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "32"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 1rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "mapTitle",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const content = args.contextData.contactSettings?.content;
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "h2",
-  text: content?.mapTitle
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "33"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.text};
   font-size: 2rem;
@@ -766,20 +746,24 @@ return `._id {
   margin-bottom: 2rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "mapFrame",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const content = args.contextData.contactSettings?.content;
 return {
-  as: "div"
+  as: "h2",
+  text: content?.mapTitle
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "34"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   width: 100%;
   height: 450px;
@@ -788,15 +772,24 @@ return `._id {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "map",
-      L: "Attr",
+      id: "35"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "iframe",
   src: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3705.2985671406!2d71.91442!3d21.76885!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2sAtma+Siddhi+Kaivalya+Kendra!5e0!3m2!1sen!2sin!4v1234567890",
@@ -808,54 +801,226 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "layout",
-      L: "PageLayout",
+      id: "36"
+      L: PageLayout
       P: {
-        displayOrder: 1,
-        componentName: "Layout"
+        displayOrder: 1
+        componentName: Layout
       }
     }
-  ],
+  ]
   edges: [
-    { id: "e0", T: "Attr", S: "page", E: "pageHeader" },
-    { id: "e3", T: "Attr", S: "pageHeader", E: "pageTitle" },
-    { id: "e4", T: "Attr", S: "pageHeader", E: "pageSubtitle" },
-    { id: "e5", T: "Attr", S: "page", E: "mainContent" },
-    { id: "e6", T: "Attr", S: "mainContent", E: "container" },
-    { id: "e7", T: "Attr", S: "container", E: "contactGrid" },
-    { id: "e8", T: "Attr", S: "contactGrid", E: "contactInfo" },
-    { id: "e9", T: "Attr", S: "contactInfo", E: "infoTitle" },
-    { id: "e10", T: "Attr", S: "contactInfo", E: "infoList" },
-    { id: "e11", T: "Attr", S: "infoList", E: "addressItem" },
-    { id: "e12", T: "Attr", S: "addressItem", E: "addressIcon" },
-    { id: "e13", T: "Attr", S: "addressIcon", E: "addressIconSvg" },
-    { id: "e14", T: "Attr", S: "addressItem", E: "addressContent" },
-    { id: "e15", T: "Attr", S: "addressContent", E: "addressTitle" },
-    { id: "e16", T: "Attr", S: "addressContent", E: "addressText" },
-    { id: "e17", T: "Attr", S: "infoList", E: "phoneItem" },
-    { id: "e18", T: "Attr", S: "phoneItem", E: "phoneIcon" },
-    { id: "e19", T: "Attr", S: "phoneIcon", E: "phoneIconSvg" },
-    { id: "e20", T: "Attr", S: "phoneItem", E: "phoneContent" },
-    { id: "e21", T: "Attr", S: "phoneContent", E: "phoneTitle" },
-    { id: "e22", T: "Attr", S: "phoneContent", E: "phoneNumbers" },
-    { id: "e23", T: "Attr", S: "phoneNumbers", E: "phone1" },
-    { id: "e24", T: "Attr", S: "phoneNumbers", E: "phone2" },
-    { id: "e25", T: "Attr", S: "infoList", E: "emailItem" },
-    { id: "e26", T: "Attr", S: "emailItem", E: "emailIcon" },
-    { id: "e27", T: "Attr", S: "emailIcon", E: "emailIconSvg" },
-    { id: "e28", T: "Attr", S: "emailItem", E: "emailContent" },
-    { id: "e29", T: "Attr", S: "emailContent", E: "emailTitle" },
-    { id: "e30", T: "Attr", S: "emailContent", E: "emailLink" },
-    { id: "e31", T: "Attr", S: "contactGrid", E: "contactFormSection" },
-    { id: "e32", T: "Attr", S: "contactFormSection", E: "formTitle" },
-    { id: "e33", T: "Attr", S: "contactFormSection", E: "contactForm" },
-    { id: "e34", T: "Attr", S: "mainContent", E: "mapSection" },
-    { id: "e35", T: "Attr", S: "mapSection", E: "mapContainer" },
-    { id: "e36", T: "Attr", S: "mapContainer", E: "mapTitle" },
-    { id: "e37", T: "Attr", S: "mapContainer", E: "mapFrame" },
-    { id: "e38", T: "Attr", S: "mapFrame", E: "map" },
-    { id: "e_layout", T: "PageLayout", S: "page", E: "layout" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: PageLayout
+      S: "1"
+      E: "36"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "31"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "4"
+      E: "28"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "5"
+      E: "7"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "7"
+      E: "14"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "7"
+      E: "22"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "8"
+      E: "11"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "11"
+      E: "12"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "11"
+      E: "13"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "14"
+      E: "15"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "14"
+      E: "17"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "15"
+      E: "16"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "17"
+      E: "18"
+    }
+    {
+      id: e22
+      T: Attr
+      S: "17"
+      E: "19"
+    }
+    {
+      id: e23
+      T: Attr
+      S: "19"
+      E: "20"
+    }
+    {
+      id: e24
+      T: Attr
+      S: "19"
+      E: "21"
+    }
+    {
+      id: e25
+      T: Attr
+      S: "22"
+      E: "23"
+    }
+    {
+      id: e26
+      T: Attr
+      S: "22"
+      E: "25"
+    }
+    {
+      id: e27
+      T: Attr
+      S: "23"
+      E: "24"
+    }
+    {
+      id: e28
+      T: Attr
+      S: "25"
+      E: "26"
+    }
+    {
+      id: e29
+      T: Attr
+      S: "25"
+      E: "27"
+    }
+    {
+      id: e30
+      T: Attr
+      S: "28"
+      E: "29"
+    }
+    {
+      id: e31
+      T: Attr
+      S: "28"
+      E: "30"
+    }
+    {
+      id: e32
+      T: Attr
+      S: "31"
+      E: "32"
+    }
+    {
+      id: e33
+      T: Attr
+      S: "32"
+      E: "33"
+    }
+    {
+      id: e34
+      T: Attr
+      S: "32"
+      E: "34"
+    }
+    {
+      id: e35
+      T: Attr
+      S: "34"
+      E: "35"
+    }
   ]
 }

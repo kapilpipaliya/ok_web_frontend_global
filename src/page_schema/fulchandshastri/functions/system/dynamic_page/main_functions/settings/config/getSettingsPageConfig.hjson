@@ -4,7 +4,6 @@
       id: "1"
       L: Function
       P: {
-        key: getSettingsPageConfig
         description: Loads settings page configuration (settings_page_config) from Setting vertex — user override or default.
         body:
           '''
@@ -118,6 +117,7 @@ return {
   message: "No settings page configuration found"
 };
 '''
+        key: getSettingsPageConfig
       }
     }
   ]

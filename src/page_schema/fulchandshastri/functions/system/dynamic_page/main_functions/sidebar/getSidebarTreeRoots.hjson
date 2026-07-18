@@ -17,7 +17,7 @@ if (!actualUser) {
   };
 }
 
-const { parentVertexLabel, toParentEdgeType, rootKeys, tableVertexLabel, relationshipType, enableUserScoping, hooks, loadFullTree } = args.contextData;
+const { parentVertexLabel, toParentEdgeType, rootKeys, tableVertexLabel, relationshipType, enableUserScoping, hooks, loadFullTree, selectedContentIds } = args.contextData;
 
 if (!parentVertexLabel || !toParentEdgeType || !rootKeys) {
   return {
@@ -275,9 +275,54 @@ if (tableVertexLabel && relationshipType && args.context.nodes) {
 }
 
 const finalVertices = uncategorizedVertex ? [uncategorizedVertex, ...rootVertices] : rootVertices;
+
+// Optional: resolve parent category for preselected content (e.g. VertexPicker reopen).
+let selectedCategoryId = null;
+const selectedIds = Array.isArray(selectedContentIds)
+  ? selectedContentIds.map((id) => String(id || "").trim()).filter(Boolean)
+  : [];
+if (selectedIds.length > 0 && tableVertexLabel && toParentEdgeType && parentVertexLabel) {
+  const uncategorizedId = '_' + tableVertexLabel + '_uncategorized';
+  let selectedCategoryQuery;
+  let selectedCategoryParams = { selectedIds };
+  if (!enableUserScoping) {
+    selectedCategoryQuery = `
+      MATCH (c:${tableVertexLabel})
+      WHERE elementId(c) IN $selectedIds
+      OPTIONAL MATCH (c)-[:${toParentEdgeType}]->(cat:${parentVertexLabel})
+      RETURN elementId(cat) AS categoryId
+      LIMIT 1
+    `;
+  } else if (relationshipType) {
+    selectedCategoryQuery = `
+      MATCH (u:User {uuid: $userUuid})-[:${relationshipType}]->(c:${tableVertexLabel})
+      WHERE elementId(c) IN $selectedIds
+      OPTIONAL MATCH (c)-[:${toParentEdgeType}]->(cat:${parentVertexLabel})
+      RETURN elementId(cat) AS categoryId
+      LIMIT 1
+    `;
+    selectedCategoryParams.userUuid = userUuid;
+  }
+  if (selectedCategoryQuery) {
+    try {
+      const selectedCategoryResult = await args.session.run(selectedCategoryQuery, selectedCategoryParams);
+      if (selectedCategoryResult.records.length > 0) {
+        const categoryId = selectedCategoryResult.records[0].get("categoryId");
+        selectedCategoryId =
+          categoryId != null && String(categoryId).trim() !== ""
+            ? String(categoryId)
+            : uncategorizedId;
+      }
+    } catch (error) {
+      console.error("getSidebarTreeRoots selectedCategoryId lookup failed:", error);
+    }
+  }
+}
+
 const resultData = {
   success: true,
   data: finalVertices,
+  selectedCategoryId,
   message: `Found ${finalVertices.length} root vertices with first-level children`
 };
 

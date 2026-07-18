@@ -1,0 +1,550 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        isNoPermissionCheck: true
+        fns: return { enabled: () => true }
+        key: HeroSection
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  background: linear-gradient(135deg, #f5e6d3 0%, #e8d5b7 100%);
+  padding: 3rem 1rem;
+  min-height: 500px;
+  position: relative;
+  overflow: hidden;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "section"
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('https://www.fulchandshastri.com/wp-content/themes/ppm-travelify/images/pattern.png');
+  background-repeat: repeat;
+  opacity: 0.1;
+  pointer-events: none;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0;
+  perspective: 1000px;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 2rem;
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  width: 400px;
+  height: 500px;
+  background: #faf8f3;
+  border: 2px solid #8b6914;
+  box-shadow: -10px 10px 30px rgba(0, 0, 0, 0.3);
+  transform: rotateY(10deg);
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    right: 1rem;
+    bottom: 1rem;
+    border: 1px solid #d4a574;
+  }
+
+  @media (max-width: 768px) {
+    width: 90%;
+    max-width: 350px;
+    transform: none;
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  text-align: center;
+  z-index: 1;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  margin-bottom: 1.5rem;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  border: 3px solid #8b6914;
+  border-radius: 4px;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const hero = args.contextData.props || {};
+return {
+  as: "iframe",
+  src: hero.leftVideoUrl || "https://www.youtube.com/embed/dQw4w9WgXcQ",
+  width: 300,
+  height: 200,
+  frameborder: "0",
+  allowfullscreen: true
+};
+'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  color: #8b6914;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  font-family: 'Noto Sans Devanagari', sans-serif;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const hero = args.contextData.props || {};
+return {
+  as: "h3",
+  text: hero.leftTitle || "आत्मज्ञान की यात्रा"
+};
+'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  color: #5a4a3a;
+  font-size: 1rem;
+  font-family: 'Noto Sans Devanagari', sans-serif;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const hero = args.contextData.props || {};
+return {
+  as: "p",
+  text: hero.leftDesc || "श्रीमद् राजचंद्र के उपदेशों का प्रसार"
+};
+'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  width: 400px;
+  height: 500px;
+  background: #faf8f3;
+  border: 2px solid #8b6914;
+  box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.3);
+  transform: rotateY(-10deg);
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    right: 1rem;
+    bottom: 1rem;
+    border: 1px solid #d4a574;
+  }
+
+  @media (max-width: 768px) {
+    width: 90%;
+    max-width: 350px;
+    transform: none;
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  text-align: center;
+  z-index: 1;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  margin-bottom: 1.5rem;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  border: 3px solid #8b6914;
+  border-radius: 4px;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const hero = args.contextData.props || {};
+return {
+  as: "iframe",
+  src: hero.rightVideoUrl || "https://www.youtube.com/embed/dQw4w9WgXcQ",
+  width: 300,
+  height: 200,
+  frameborder: "0",
+  allowfullscreen: true
+};
+'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  background: #8b6914;
+  color: #faf8f3;
+  padding: 0.75rem 1.5rem;
+  font-size: 1.25rem;
+  font-weight: bold;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const hero = args.contextData.props || {};
+return {
+  as: "h2",
+  text: hero.watchButtonText || "WATCH OR LISTEN TO HIM ONLINE"
+};
+'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  color: #5a4a3a;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  text-align: justify;
+  padding: 0 1rem;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const hero = args.contextData.props || {};
+return {
+  as: "p",
+  text: hero.rightDesc || ""
+};
+'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "5"
+      E: "12"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "7"
+      E: "10"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "7"
+      E: "11"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "12"
+      E: "13"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "13"
+      E: "14"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "13"
+      E: "16"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "13"
+      E: "17"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "14"
+      E: "15"
+    }
+  ]
+}

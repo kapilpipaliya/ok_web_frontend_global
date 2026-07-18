@@ -4,7 +4,6 @@
       id: "1"
       L: Component
       P: {
-        key: SettingsPageContent
         dynamicComponent: SettingsSectionRenderer, SettingsSaveBar
         fns:
           '''
@@ -51,13 +50,13 @@ return {
   getSiteLanguages
 };
 '''
+        key: SettingsPageContent
       }
     }
     {
       id: "2"
       L: Attr
       P: {
-        displayOrder: 1
         css:
           '''
 return `._id {
@@ -70,6 +69,7 @@ return `._id {
   overflow: hidden;
 }`;
 '''
+        displayOrder: 1
         componentName: Html
         props:
           '''
@@ -83,7 +83,6 @@ return {
       id: "3"
       L: Attr
       P: {
-        displayOrder: 1
         css:
           '''
 return `._id {
@@ -92,6 +91,7 @@ return `._id {
   margin-bottom: ${args.theme.var.spacing.md};
 }`;
 '''
+        displayOrder: 1
         componentName: Html
         props:
           '''
@@ -107,7 +107,6 @@ return {
       id: "4"
       L: Attr
       P: {
-        displayOrder: 1
         css:
           '''
 return `._id {
@@ -117,6 +116,7 @@ return `._id {
   margin: 0 0 ${args.theme.var.spacing.xs} 0;
 }`;
 '''
+        displayOrder: 1
         componentName: Html
         props:
           '''
@@ -132,7 +132,6 @@ return {
       id: "5"
       L: Attr
       P: {
-        displayOrder: 2
         css:
           '''
 return `._id {
@@ -142,6 +141,7 @@ return `._id {
   line-height: 1.5;
 }`;
 '''
+        displayOrder: 2
         componentName: Html
         props:
           '''
@@ -158,7 +158,6 @@ return {
       id: "6"
       L: Attr
       P: {
-        displayOrder: 2
         css:
           '''
 return `._id {
@@ -169,6 +168,7 @@ return `._id {
   min-height: 12rem;
 }`;
 '''
+        displayOrder: 2
         componentName: Html
         props:
           '''
@@ -199,7 +199,6 @@ return {
       id: "8"
       L: Attr
       P: {
-        displayOrder: 3
         css:
           '''
 return `._id {
@@ -212,6 +211,7 @@ return `._id {
   -webkit-overflow-scrolling: touch;
 }`;
 '''
+        displayOrder: 3
         componentName: Html
         props:
           '''
@@ -227,10 +227,10 @@ return {
       id: "9"
       L: Attr
       P: {
-        displayOrder: 1
-        componentName: Html
         contextName: sectionItem
         loop: true
+        displayOrder: 1
+        componentName: Html
         props:
           '''
 return {
@@ -266,15 +266,65 @@ return {
     }
   ]
   edges: [
-    { id: "e1", T: "Attr", S: "1", E: "2" }
-    { id: "e2", T: "Attr", S: "2", E: "3" }
-    { id: "e3", T: "Attr", S: "3", E: "4" }
-    { id: "e4", T: "Attr", S: "3", E: "5" }
-    { id: "e5", T: "Attr", S: "2", E: "6" }
-    { id: "e6", T: "Attr", S: "6", E: "7" }
-    { id: "e7", T: "Attr", S: "2", E: "8" }
-    { id: "e8", T: "Attr", S: "8", E: "9" }
-    { id: "e9", T: "Attr", S: "9", E: "10" }
-    { id: "e10", T: "Attr", S: "2", E: "11" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "6"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "8"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "11"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "9"
+      E: "10"
+    }
   ]
 }

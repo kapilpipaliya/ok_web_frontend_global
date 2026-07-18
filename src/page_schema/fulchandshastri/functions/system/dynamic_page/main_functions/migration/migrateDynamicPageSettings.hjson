@@ -4,7 +4,6 @@
       id: "1"
       L: Function
       P: {
-        key: migrateDynamicPageSettings
         description: Seeds Fulchand Shastri settings_page_config, table schemas (books, recommended_books, gallery, schedule, pages, components, functions, email templates, files), and default GlobalSetting section documents.
         body:
           '''
@@ -321,6 +320,7 @@ return {
   stats
 };
 '''
+        key: migrateDynamicPageSettings
       }
     }
   ]

@@ -1,38 +1,20 @@
 {
   vertexes: [
     {
-      id: "1",
-      L: "Component",
+      id: "1"
+      L: Component
       P: {
-        key: "GalleryFolderCard",
-        description: "Folder card for gallery browser. Props: folder {id,name,contentCount,folderCount}, onOpen(folder), index."
+        description: Folder card for gallery browser. Props: folder {id,name,contentCount,folderCount}, onOpen(folder), index.
+        key: GalleryFolderCard
+        updatedAt: 2026-07-13T18:16:26.920Z
       }
-    },
+    }
     {
-      id: "root",
-      L: "Attr",
+      id: "2"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const folder = args.contextData.props?.folder || args.contextData.props || {};
-const index = args.contextData.props?.index ?? args.contextData.index ?? 0;
-const href = args.contextData.props?.href;
-const onOpen = args.contextData.props?.onOpen;
-return {
-  as: href ? "a" : "button",
-  type: href ? undefined : "button",
-  href: href || undefined,
-  "data-animate": "",
-  ref: (el) => el && args.fns.animateOnView?.(el, { delay: index * 0.05 }),
-  onClick: (e) => {
-    if (!onOpen) return;
-    if (href) e.preventDefault();
-    onOpen(folder);
-  }
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: flex;
   flex-direction: column;
@@ -61,18 +43,35 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const folder = args.contextData.props?.folder || args.contextData.props || {};
+const index = args.contextData.props?.index ?? args.contextData.index ?? 0;
+const href = args.contextData.props?.href;
+const onOpen = args.contextData.props?.onOpen;
+return {
+  as: href ? "a" : "button",
+  type: href ? undefined : "button",
+  href: href || undefined,
+  "data-animate": "",
+  ref: (el) => el && args.fns.animateOnView?.(el, { delay: index * 0.05 }),
+  onClick: (e) => {
+    if (!onOpen) return;
+    if (href) e.preventDefault();
+    onOpen(folder);
+  }
+};
+'''
       }
-    },
+    }
     {
-      id: "iconWrap",
-      L: "Attr",
+      id: "3"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return { as: "div" };
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: inline-flex;
   align-items: center;
@@ -84,15 +83,22 @@ return `._id {
   color: ${args.theme.var.color.primary};
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return { as: "div" };
+'''
       }
-    },
+    }
     {
-      id: "icon",
-      L: "Attr",
+      id: "4"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "icon",
   icon: args.contextData.props?.icon || "ph:folder",
@@ -101,17 +107,13 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "body",
-      L: "Attr",
+      id: "5"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return { as: "div" };
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: flex;
   flex-direction: column;
@@ -120,22 +122,20 @@ return `._id {
   width: 100%;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return { as: "div" };
+'''
       }
-    },
+    }
     {
-      id: "title",
-      L: "Attr",
+      id: "6"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const folder = args.contextData.props?.folder || args.contextData.props || {};
-return {
-  as: "h3",
-  text: folder.name || "Folder"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   margin: 0;
   font-size: 1.0625rem;
@@ -146,15 +146,34 @@ return `._id {
   white-space: nowrap;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const folder = args.contextData.props?.folder || args.contextData.props || {};
+return {
+  as: "h3",
+  text: folder.name || "Folder"
+};
+'''
       }
-    },
+    }
     {
-      id: "meta",
-      L: "Attr",
+      id: "7"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: ${args.theme.var.color.text_light_300};
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 const folder = args.contextData.props?.folder || args.contextData.props || {};
 const folders = Number(folder.folderCount || 0);
 const files = Number(folder.contentCount || 0);
@@ -165,23 +184,46 @@ return {
   as: "p",
   text: parts.length > 0 ? parts.join(" · ") : "Empty"
 };
-''',
-        css: '''
-return `._id {
-  margin: 0;
-  font-size: 0.8125rem;
-  color: ${args.theme.var.color.text_light_300};
-}`;
 '''
       }
     }
-  ],
+  ]
   edges: [
-    { id: "e1", T: "Attr", S: "1", E: "root" },
-    { id: "e2", T: "Attr", S: "root", E: "iconWrap" },
-    { id: "e3", T: "Attr", S: "iconWrap", E: "icon" },
-    { id: "e4", T: "Attr", S: "root", E: "body" },
-    { id: "e5", T: "Attr", S: "body", E: "title" },
-    { id: "e6", T: "Attr", S: "body", E: "meta" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "5"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "5"
+      E: "7"
+    }
   ]
 }

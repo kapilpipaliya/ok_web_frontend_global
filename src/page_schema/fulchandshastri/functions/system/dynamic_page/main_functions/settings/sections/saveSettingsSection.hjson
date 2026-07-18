@@ -4,7 +4,6 @@
       id: "1"
       L: Function
       P: {
-        key: saveSettingsSection
         description: Generic settings section save with version concurrency check, validation, transforms, hooks, and audit logging.
         body:
           '''
@@ -224,6 +223,7 @@ return {
   message: "Settings section saved successfully"
 };
 '''
+        key: saveSettingsSection
       }
     }
   ]

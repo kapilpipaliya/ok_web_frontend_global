@@ -4,7 +4,6 @@
       id: "1"
       L: Function
       P: {
-        key: loadTableConfigByKey
         description: Loads table_schema part Setting vertices into graph payload with partVertexIds.
         body:
           '''
@@ -112,6 +111,7 @@ return {
   message: "Table schema parts loaded"
 };
 '''
+        key: loadTableConfigByKey
       }
     }
   ]

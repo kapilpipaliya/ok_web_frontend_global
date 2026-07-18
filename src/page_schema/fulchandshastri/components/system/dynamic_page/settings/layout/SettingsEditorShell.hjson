@@ -1,27 +1,20 @@
 {
   vertexes: [
     {
-      id: "ses_root",
-      L: "Component",
+      id: "1"
+      L: Component
       P: {
-        key: "SettingsEditorShell",
-        description: "Content/Fields tab split with DynamicPage content editor and SettingsPageSchemaEditor.",
-        dynamicComponent: "Button, DynamicPage, SettingsPageSchemaEditor"
+        dynamicComponent: Button, DynamicPage, SettingsPageSchemaEditor
+        description: Content/Fields tab split with DynamicPage content editor and SettingsPageSchemaEditor.
+        key: SettingsEditorShell
       }
-    },
+    }
     {
-      id: "ses_shell",
-      L: "Attr",
+      id: "2"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  hide: args.contextData.props?.hide === true
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: flex;
   flex-direction: column;
@@ -31,18 +24,23 @@ return `._id {
   height: 100%;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  hide: args.contextData.props?.hide === true
+};
+'''
       }
-    },
+    }
     {
-      id: "ses_tabs",
-      L: "Attr",
+      id: "3"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return { as: "div" };
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: flex;
   gap: 0.25rem;
@@ -52,15 +50,22 @@ return `._id {
   flex-shrink: 0;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return { as: "div" };
+'''
       }
-    },
+    }
     {
-      id: "ses_content_tab",
-      L: "Attr",
+      id: "4"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Button",
-        props: '''
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''
 const isSchemaMode = args.contextData.props?.isSchemaMode;
 const active = typeof isSchemaMode === "function" ? !isSchemaMode() : isSchemaMode !== true;
 return {
@@ -72,14 +77,15 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "ses_schema_tab",
-      L: "Attr",
+      id: "5"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Button",
-        props: '''
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
 const isSchemaMode = args.contextData.props?.isSchemaMode;
 const active = typeof isSchemaMode === "function" ? isSchemaMode() === true : isSchemaMode === true;
 return {
@@ -91,19 +97,13 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "ses_content_pane",
-      L: "Attr",
+      id: "6"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const isSchemaMode = args.contextData.props?.isSchemaMode;
-const hide = typeof isSchemaMode === "function" ? isSchemaMode() === true : isSchemaMode === true;
-return { as: "div", hide };
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   flex: 1;
   min-height: 0;
@@ -112,18 +112,22 @@ return `._id {
   overflow: hidden;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const isSchemaMode = args.contextData.props?.isSchemaMode;
+const hide = typeof isSchemaMode === "function" ? isSchemaMode() === true : isSchemaMode === true;
+return { as: "div", hide };
+'''
       }
-    },
+    }
     {
-      id: "ses_content_inner",
-      L: "Attr",
+      id: "7"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return { as: "div" };
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   flex: 1;
   min-height: 0;
@@ -134,15 +138,22 @@ return `._id {
   position: relative;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return { as: "div" };
+'''
       }
-    },
+    }
     {
-      id: "ses_dynamic_page",
-      L: "Attr",
+      id: "8"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "DynamicPage",
-        props: '''
+        displayOrder: 1
+        componentName: DynamicPage
+        props:
+          '''
 const settingsPageId = args.contextData.props?.settingsPageId;
 return {
   key: args.contextData.props?.dynamicPageKey || "settings_editor_dynamic_page",
@@ -162,19 +173,13 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "ses_schema_pane",
-      L: "Attr",
+      id: "9"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-const isSchemaMode = args.contextData.props?.isSchemaMode;
-const show = typeof isSchemaMode === "function" ? isSchemaMode() === true : isSchemaMode === true;
-return { as: "div", hide: !show };
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   flex: 1;
   min-height: 0;
@@ -184,15 +189,24 @@ return `._id {
   position: relative;
 }`;
 '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const isSchemaMode = args.contextData.props?.isSchemaMode;
+const show = typeof isSchemaMode === "function" ? isSchemaMode() === true : isSchemaMode === true;
+return { as: "div", hide: !show };
+'''
       }
-    },
+    }
     {
-      id: "ses_schema_editor",
-      L: "Attr",
+      id: "10"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "SettingsPageSchemaEditor",
-        props: '''
+        displayOrder: 1
+        componentName: SettingsPageSchemaEditor
+        props:
+          '''
 const settingsPageId = args.contextData.props?.settingsPageId;
 return {
   settingsPageId,
@@ -203,16 +217,61 @@ return {
 '''
       }
     }
-  ],
+  ]
   edges: [
-    { id: "ses_e1", T: "Attr", S: "ses_root", E: "ses_shell" },
-    { id: "ses_e2", T: "Attr", S: "ses_shell", E: "ses_tabs" },
-    { id: "ses_e3", T: "Attr", S: "ses_shell", E: "ses_content_pane" },
-    { id: "ses_e4", T: "Attr", S: "ses_shell", E: "ses_schema_pane" },
-    { id: "ses_e5", T: "Attr", S: "ses_tabs", E: "ses_content_tab" },
-    { id: "ses_e6", T: "Attr", S: "ses_tabs", E: "ses_schema_tab" },
-    { id: "ses_e7", T: "Attr", S: "ses_content_pane", E: "ses_content_inner" },
-    { id: "ses_e8", T: "Attr", S: "ses_content_inner", E: "ses_dynamic_page" },
-    { id: "ses_e9", T: "Attr", S: "ses_schema_pane", E: "ses_schema_editor" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "6"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "9"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "9"
+      E: "10"
+    }
   ]
 }

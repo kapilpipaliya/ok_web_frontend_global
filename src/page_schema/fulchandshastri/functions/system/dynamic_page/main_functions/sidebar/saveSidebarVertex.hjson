@@ -190,7 +190,7 @@ if (isDelete) {
     if (fetchResult.records.length > 0) {
       const vertexNode = fetchResult.records[0].get('v');
       deletedVertexData = args.convertNodeToJson(vertexNode);
-      
+
       // Filter out null edges and collect separately
       const outgoingEdgesRaw = fetchResult.records[0].get('outgoingEdges') || [];
       const incomingEdgesRaw = fetchResult.records[0].get('incomingEdges') || [];
@@ -456,7 +456,7 @@ if (isUpdate) {
     properties: vertexProperties,
     isRoot: !parentId
   });
-  
+
   // Create new vertex
   const propertyKeys = Object.keys(vertexProperties);
   const propertyAssignments = propertyKeys.map((key, index) => `v.${key} = $prop${index}`).join(', ');
@@ -528,7 +528,7 @@ if (args.context.nodes[vertexElementId]) {
 // Calculate and add content count if tableVertexLabel and relationshipType are provided
 if (tableVertexLabel && relationshipType) {
   const rootKey = rootKeys.key;
-  
+
   let countQuery;
   let countParams;
   if (!enableUserScoping) {
@@ -573,10 +573,10 @@ if (tableVertexLabel && relationshipType) {
       countParams = { userUuid, categoryId: vertex.id };
     }
   }
-  
+
   const countResult = await args.session.run(countQuery, countParams);
   const contentCount = countResult.records[0]?.get('contentCount') || 0;
-  
+
   // Update vertex with count
   vertex.P.contentCount = contentCount;
   if (args.context.nodes[vertex.id]) {

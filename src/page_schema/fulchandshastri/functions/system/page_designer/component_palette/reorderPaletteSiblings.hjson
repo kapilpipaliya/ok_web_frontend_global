@@ -4,7 +4,6 @@
       id: "1"
       L: Function
       P: {
-        key: reorderPaletteSiblings
         description: Updates displayOrder for sibling category or content vertices in the Page Designer palette tree.
         body:
           '''
@@ -56,6 +55,7 @@ try {
   return { success: false, message: error.message || "Failed to reorder items" };
 }
 '''
+        key: reorderPaletteSiblings
       }
     }
   ]

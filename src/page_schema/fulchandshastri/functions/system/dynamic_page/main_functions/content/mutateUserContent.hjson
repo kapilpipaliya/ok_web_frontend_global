@@ -606,7 +606,7 @@ try {
       data: createdContent,
       message: `${vertexLabel} created successfully`
     };
-    
+
     // Execute afterCreate hooks
     await args.executeHooks(hooks?.afterCreate, {
       tableVertexLabel,
@@ -860,7 +860,7 @@ try {
       data: updatedContent,
       message: `${vertexLabel} updated successfully`
     };
-    
+
     // Execute afterUpdate hooks
     await args.executeHooks(hooks?.afterUpdate, {
       tableVertexLabel,
@@ -956,7 +956,7 @@ try {
         ? { id: deleteElementId, P: deletedVertexData.P }
         : { id: deleteElementId }
     };
-    
+
     // Execute afterDelete hooks
     await args.executeHooks(hooks?.afterDelete, {
       tableVertexLabel,
@@ -967,7 +967,7 @@ try {
       enableUserScoping,
       result: deleteResult
     });
-    
+
     return deleteResult;
   }
 } catch (error) {

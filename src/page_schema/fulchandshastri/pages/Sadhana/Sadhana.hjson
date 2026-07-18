@@ -1,0 +1,72 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        fns: return { enabled: () => true }
+        key: Sadhana
+        url: /sadhana
+        updatedAt: 2026-07-08T04:30:35.065Z
+        props:
+          '''return {
+  isNoPermissionCheck: true
+}'''
+      }
+    }
+    {
+      id: "2"
+      L: PageLayout
+      P: {
+        componentName: Layout
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        as: div
+        displayOrder: 1
+        textType: markdown
+        componentName: Html
+        text:
+          '''- 142  प्रत्यक्ष ज्ञान दीपक 🪔 
+-  415 परोक्ष ज्ञान दीपक 🪔
+- 200 धर्म शिष्य  (142 ज्ञान दीपक 🪔 + 58 परोक्ष ज्ञान दीपक 🪔)
+
+200 धर्म शिष्य ही क्यों ?
+कृपालुदेव की भावना थी की 100-200 धर्म शिष्य तैयार करना।
+
+*नित्यकर्म pdf*
+
+साधना रिपोर्ट:
+142@f..com
+415@f…com
+
+धर्म शिष्य लोगो
+
+
+धर्म शिष्य के नियम:
+1, 6 महीने  में एक बार गुरुजी से मिलना होगा
+2 सफेद कपड़े पहनकर सत्संग में बैठना होगा
+3, कैमरा ओपन करके ज़ूम सत्संग में बैठना ह्वोगा
+4 प्रतिदिन प्रवचन सुनना होगा '''
+        key: unique_1
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: PageLayout
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "1"
+      E: "3"
+    }
+  ]
+}

@@ -1,32 +1,19 @@
 {
   vertexes: [
     {
-      id: "tsm_root",
-      L: "Component",
+      id: "1"
+      L: Component
       P: {
-        key: "TableSettingsModal",
-        description: "Modal wrapper for TableSchemaEditorShell (table schema editor)."
+        description: Modal wrapper for TableSchemaEditorShell (table schema editor).
+        key: TableSettingsModal
       }
-    },
+    }
     {
-      id: "tsm_overlay",
-      L: "Attr",
+      id: "2"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const isOpen = args.contextData.props?.isOpen === true;
-const onClose = args.contextData.props?.onClose;
-
-return {
-  as: "div",
-  hide: !isOpen,
-  onClick: (e) => {
-    if (e.target === e.currentTarget && onClose) onClose();
-  }
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   position: fixed;
   top: 0;
@@ -55,18 +42,29 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const isOpen = args.contextData.props?.isOpen === true;
+const onClose = args.contextData.props?.onClose;
+
+return {
+  as: "div",
+  hide: !isOpen,
+  onClick: (e) => {
+    if (e.target === e.currentTarget && onClose) onClose();
+  }
+};
+'''
       }
-    },
+    }
     {
-      id: "tsm_panel",
-      L: "Attr",
+      id: "3"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return { as: "div" };
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   background: ${args.theme.var.color.background};
   border-radius: 0.75rem;
@@ -98,18 +96,20 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "tsm_editor_wrap",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return { as: "div" };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   flex: 1;
   min-height: 0;
@@ -119,15 +119,22 @@ return `._id {
   flex-direction: column;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return { as: "div" };
+'''
       }
-    },
+    }
     {
-      id: "tsm_editor",
-      L: "Attr",
+      id: "5"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "TableSchemaEditorShell",
-        props: '''
+        displayOrder: 1
+        componentName: TableSchemaEditorShell
+        props:
+          '''
 const tableKey = args.contextData.props?.tableKey;
 const onClose = args.contextData.props?.onClose;
 const onSaved = args.contextData.props?.onSaved;
@@ -144,11 +151,31 @@ return {
 '''
       }
     }
-  ],
+  ]
   edges: [
-    { id: "tsm_e1", T: "Attr", S: "tsm_root", E: "tsm_overlay" },
-    { id: "tsm_e2", T: "Attr", S: "tsm_overlay", E: "tsm_panel" },
-    { id: "tsm_e3", T: "Attr", S: "tsm_panel", E: "tsm_editor_wrap" },
-    { id: "tsm_e4", T: "Attr", S: "tsm_editor_wrap", E: "tsm_editor" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "4"
+      E: "5"
+    }
   ]
 }

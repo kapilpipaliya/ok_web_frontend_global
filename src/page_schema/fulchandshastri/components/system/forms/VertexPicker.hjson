@@ -1,11 +1,9 @@
 {
   vertexes: [
     {
-      id: "vp1"
+      id: "1"
       L: Component
       P: {
-        title: Vertex picker
-        key: VertexPicker
         fns:
           '''
 const [pickerModalOpen, setPickerModalOpen] = args.createSignal(false);
@@ -253,26 +251,28 @@ return {
   confirmPickerSelection
 };
 '''
+        title: Vertex picker
+        key: VertexPicker
+        updatedAt: 2026-07-13T16:40:11.891Z
       }
     }
     {
-      id: "vp_root"
+      id: "2"
       L: Attr
       P: {
-        displayOrder: 1
-        componentName: Html
         css:
           '''return `._id {
   display: flex;
   flex-direction: column;
   width: 100%;
 }`;'''
-        props:
-          '''return { as: "div" };'''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "div" };
       }
     }
     {
-      id: "vp_field"
+      id: "3"
       L: Attr
       P: {
         displayOrder: 1
@@ -295,7 +295,7 @@ return {
       }
     }
     {
-      id: "vp_modal"
+      id: "4"
       L: Attr
       P: {
         displayOrder: 2
@@ -321,22 +321,22 @@ return {
   ]
   edges: [
     {
-      id: vp_e1
+      id: e1
       T: Attr
-      S: "vp1"
-      E: "vp_root"
+      S: "1"
+      E: "2"
     }
     {
-      id: vp_e2
+      id: e2
       T: Attr
-      S: "vp_root"
-      E: "vp_field"
+      S: "2"
+      E: "3"
     }
     {
-      id: vp_e3
+      id: e3
       T: Attr
-      S: "vp_root"
-      E: "vp_modal"
+      S: "2"
+      E: "4"
     }
   ]
 }

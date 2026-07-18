@@ -1,25 +1,20 @@
 {
   vertexes: [
     {
-      id: "1",
-      L: "Component",
+      id: "1"
+      L: Component
       P: {
-        key: "PublicContentTable",
-        description: "Reusable public HTML table with dynamic columns and a children slot for each row."
+        description: Reusable public HTML table with dynamic columns and a children slot for each row.
+        key: PublicContentTable
+        updatedAt: 2026-07-14T15:36:48.785Z
       }
-    },
+    }
     {
-      id: "shell",
-      L: "Attr",
+      id: "2"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   background: ${args.theme.var.color.background};
   border: 1px solid ${args.theme.var.color.border};
@@ -28,38 +23,42 @@ return `._id {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }`;
 '''
-      }
-    },
-    {
-      id: "tableWrapper",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   overflow-x: auto;
 }`;
 '''
-      }
-    },
-    {
-      id: "table",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "table"
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   width: 100%;
   border-collapse: collapse;
@@ -71,46 +70,58 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "tableHead",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "thead"
+  as: "table"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   background: ${args.theme.var.color.primary_light_50};
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "thead"
+};
+'''
       }
-    },
+    }
     {
-      id: "headerRow",
-      L: "Attr",
+      id: "6"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "tr"
 };
 '''
       }
-    },
+    }
     {
-      id: "headerCells",
-      L: "Attr",
+      id: "7"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const columns = args.contextData.props?.columns || [];
 return {
   as: "fragment",
@@ -120,22 +131,13 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "headerCell",
-      L: "Attr",
+      id: "8"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const column = args.contextData.column || {};
-return {
-  as: "th",
-  text: column.label || "",
-  style: column.width ? { width: column.width } : undefined
-};
-''',
-        css: '''
+        css:
+          '''
 const column = args.contextData.column || {};
 const align = column.align || "left";
 return `._id {
@@ -144,28 +146,41 @@ return `._id {
   color: ${args.theme.var.color.text};
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const column = args.contextData.column || {};
+return {
+  as: "th",
+  text: column.label || "",
+  style: column.width ? { width: column.width } : undefined
+};
+'''
       }
-    },
+    }
     {
-      id: "tableBody",
-      L: "Attr",
+      id: "9"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
   as: "tbody"
 };
 '''
       }
-    },
+    }
     {
-      id: "dataRows",
-      L: "Attr",
+      id: "10"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const rows = args.contextData.props?.rows || [];
 const contextName = args.contextData.props?.contextName || "row";
 const hasRows = Array.isArray(rows);
@@ -182,31 +197,21 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "rowSlot",
-      L: "Attr",
+      id: "11"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Slot"
+        displayOrder: 1
+        componentName: Slot
       }
-    },
+    }
     {
-      id: "emptyState",
-      L: "Attr",
+      id: "12"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const rows = args.contextData.props?.rows || [];
-const emptyMessage = args.contextData.props?.emptyMessage || "No items available yet.";
-return {
-  as: "p",
-  text: emptyMessage,
-  hide: () => Array.isArray(rows) && rows.length > 0
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   padding: 2rem 1rem;
   text-align: center;
@@ -214,20 +219,87 @@ return `._id {
   margin: 0;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const rows = args.contextData.props?.rows || [];
+const emptyMessage = args.contextData.props?.emptyMessage || "No items available yet.";
+return {
+  as: "p",
+  text: emptyMessage,
+  hide: () => Array.isArray(rows) && rows.length > 0
+};
+'''
       }
     }
-  ],
+  ]
   edges: [
-    { id: "e1", T: "Attr", S: "1", E: "shell" },
-    { id: "e2", T: "Attr", S: "shell", E: "tableWrapper" },
-    { id: "e3", T: "Attr", S: "tableWrapper", E: "table" },
-    { id: "e4", T: "Attr", S: "table", E: "tableHead" },
-    { id: "e5", T: "Attr", S: "tableHead", E: "headerRow" },
-    { id: "e6", T: "Attr", S: "headerRow", E: "headerCells" },
-    { id: "e7", T: "Attr", S: "headerCells", E: "headerCell" },
-    { id: "e8", T: "Attr", S: "table", E: "tableBody" },
-    { id: "e9", T: "Attr", S: "tableBody", E: "dataRows" },
-    { id: "e10", T: "Attr", S: "dataRows", E: "rowSlot" },
-    { id: "e11", T: "Attr", S: "shell", E: "emptyState" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "12"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "4"
+      E: "9"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "10"
+      E: "11"
+    }
   ]
 }

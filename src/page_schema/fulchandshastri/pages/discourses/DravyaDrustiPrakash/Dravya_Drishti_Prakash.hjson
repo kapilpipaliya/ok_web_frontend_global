@@ -1,0 +1,804 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        public: true
+        isNoPermissionCheck: true
+        fns:
+          '''
+const [selectedVideoIds, setSelectedVideoIds] = args.createSignal(new Set());
+
+const getYouTubeId = (video) => {
+  const rawValue = video?.P?.youtubeId || video?.P?.youtubeUrl || "";
+  const value = String(rawValue).trim();
+  if (/^[A-Za-z0-9_-]{11}$/.test(value)) return value;
+
+  try {
+    const parsedUrl = new URL(value);
+    const host = parsedUrl.hostname.replace(/^www\./, "").toLowerCase();
+    if (host === "youtu.be") {
+      return parsedUrl.pathname.split("/").filter(Boolean)[0] || "";
+    }
+    if (host === "youtube.com" || host === "m.youtube.com") {
+      const queryId = parsedUrl.searchParams.get("v");
+      if (queryId) return queryId;
+      const pathParts = parsedUrl.pathname.split("/").filter(Boolean);
+      if (["embed", "shorts", "live"].includes(pathParts[0])) {
+        return pathParts[1] || "";
+      }
+    }
+  } catch (error) {
+    return "";
+  }
+
+  return "";
+};
+
+const prepareVideo = (video) => {
+  const youtubeId = getYouTubeId(video);
+  if (!youtubeId) return null;
+  return {
+    ...video,
+    P: {
+      ...(video?.P || {}),
+      youtubeId,
+      title: video?.P?.subject || "Dravya Drishti Prakash",
+      thumbnail: video?.P?.thumbnail || `https://img.youtube.com/vi/${youtubeId}/mqdefault.jpg`
+    }
+  };
+};
+
+const isVideoSelected = (video) =>
+  video?.id != null && selectedVideoIds().has(String(video.id));
+
+const setVideoSelected = (video, selected) => {
+  if (video?.id == null) return;
+  const videoId = String(video.id);
+  setSelectedVideoIds((current) => {
+    const next = new Set(current);
+    if (selected) next.add(videoId);
+    else next.delete(videoId);
+    return next;
+  });
+};
+
+const areAllVideosSelected = (videos) => {
+  const list = Array.isArray(videos) ? videos : [];
+  return list.length > 0 && list.every((video) => isVideoSelected(video));
+};
+
+const setAllVideosSelected = (videos, selected) => {
+  const list = Array.isArray(videos) ? videos : [];
+  setSelectedVideoIds((current) => {
+    const next = new Set(current);
+    for (const video of list) {
+      if (video?.id == null) continue;
+      const videoId = String(video.id);
+      if (selected) next.add(videoId);
+      else next.delete(videoId);
+    }
+    return next;
+  });
+};
+
+const playVideos = async (videos) => {
+  const playlist = (Array.isArray(videos) ? videos : [])
+    .map(prepareVideo)
+    .filter(Boolean);
+  if (playlist.length === 0) {
+    args.showWarningToast("Select at least one video with a valid YouTube link.");
+    return;
+  }
+  args.fns.setVideoQueue?.(playlist.slice(1));
+  await args.fns.openPlayer?.(playlist[0]);
+};
+
+const playSingleVideo = async (video) => {
+  args.fns.setVideoQueue?.([]);
+  await playVideos([video]);
+};
+
+const playSelectedVideos = async (videos) => {
+  const selected = (Array.isArray(videos) ? videos : []).filter(isVideoSelected);
+  await playVideos(selected);
+};
+
+const formatDate = (value) => {
+  if (value == null || value === "") return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  return date.toLocaleDateString();
+};
+
+return {
+  selectedVideoIds,
+  getYouTubeId,
+  isVideoSelected,
+  setVideoSelected,
+  areAllVideosSelected,
+  setAllVideosSelected,
+  playSingleVideo,
+  playSelectedVideos,
+  formatDate
+};
+'''
+        url: /dravya-drishti-prakash
+        key: Dravya_Drishti_Prakash
+        updatedAt: 2026-07-17T11:49:43.220Z
+        props:
+          '''
+return {
+  contextName: "dravyaDrishtiPrakashData",
+  serverFunction: `
+try {
+  const tableResult = await args.executeNamedServerFunction({
+    functionName: "loadPublicTableContent",
+    contextData: {
+      tableKey: "dravya_drishti_prakash_videos",
+      tableVertexLabel: "DravyaDrishtiPrakashVideo"
+    }
+  });
+
+  const tableData = tableResult?.result?.success ? (tableResult.result.data || {}) : {};
+  const graph = tableData.graph || { vertexes: {}, edges: {} };
+  const rowIds = Array.isArray(tableData.rowIds) ? tableData.rowIds : [];
+  const videos = rowIds
+    .map((rowId) => graph.vertexes?.[rowId])
+    .filter(Boolean);
+
+  return { videos };
+} catch (error) {
+  console.error("Error loading Dravya Drishti Prakash videos:", error);
+  return { videos: [] };
+}
+`
+};
+'''
+      }
+    }
+    {
+      id: "2"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: Layout
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css: return `._id { padding: 1rem; }`;
+        displayOrder: 2
+        componentName: Html
+        props: return { as: "main" };
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "div" };
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  margin: 0;
+  color: ${args.theme.var.color.text};
+  font-size: 3rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  ._id { font-size: 2rem; }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "h1", text: "Dravya Drishti Prakash" };
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const videos = args.contextData.dravyaDrishtiPrakashData?.videos || [];
+return {
+  as: "div",
+  hide: videos.length === 0
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: ${args.theme.var.color.text};
+  cursor: pointer;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "label" };
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css: return `._id { width: 1.1rem; height: 1.1rem; cursor: pointer; }`;
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const videos = args.contextData.dravyaDrishtiPrakashData?.videos || [];
+return {
+  as: "input",
+  type: "checkbox",
+  checked: args.fns.areAllVideosSelected(videos),
+  onChange: (event) => args.fns.setAllVideosSelected(videos, event.target.checked),
+  "attr:aria-label": "Select all videos"
+};
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props: return { as: "span", text: "Select all" };
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: 0.625rem 1rem;
+  border: 1px solid ${args.theme.var.color.primary};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  font-weight: 600;
+  cursor: pointer;
+}
+
+._id:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const videos = args.contextData.dravyaDrishtiPrakashData?.videos || [];
+const selectedCount = videos.filter((video) => args.fns.isVideoSelected(video)).length;
+return {
+  as: "button",
+  type: "button",
+  text: selectedCount > 0
+    ? `Add ${selectedCount} to playlist & play`
+    : "Add selected to playlist & play",
+  disabled: selectedCount === 0,
+  onClick: () => args.fns.playSelectedVideos(videos)
+};
+'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  text-align: center;
+}
+
+._id table {
+  counter-reset: video-row;
+}
+
+._id th,
+._id td {
+  text-align: center;
+  vertical-align: middle;
+}`;
+'''
+        displayOrder: 3
+        componentName: PublicContentTable
+        props:
+          '''
+const videos = args.contextData.dravyaDrishtiPrakashData?.videos || [];
+return {
+  columns: [
+    { key: "select", label: "Select", width: "72px", align: "center" },
+    { key: "number", label: "No", width: "56px", align: "center" },
+    { key: "thumbnail", label: "YouTube", width: "150px", align: "center" },
+    { key: "date", label: "Date", width: "110px", align: "center" },
+    { key: "time", label: "Time", width: "90px", align: "center" },
+    { key: "subject", label: "Subject", align: "center" },
+    { key: "link", label: "YouTube link", width: "130px", align: "center" },
+    { key: "bol", label: "Bol", align: "center" }
+  ],
+  rows: videos,
+  contextName: "video",
+  emptyMessage: "No videos are available."
+};
+'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  counter-increment: video-row;
+  transition: background 0.2s ease;
+}
+
+._id:hover,
+._id.selected-video-row {
+  background: ${args.theme.var.color.primary_light_900};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const video = args.contextData.video;
+return {
+  as: "tr",
+  class: args.fns.isVideoSelected(video) ? "selected-video-row" : ""
+};
+'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        css: return `._id { text-align: center; vertical-align: middle; }`;
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "td" };
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        css: return `._id { width: 1.1rem; height: 1.1rem; cursor: pointer; }`;
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const video = args.contextData.video;
+return {
+  as: "input",
+  type: "checkbox",
+  checked: args.fns.isVideoSelected(video),
+  onChange: (event) => args.fns.setVideoSelected(video, event.target.checked),
+  "attr:aria-label": `Select ${video?.P?.subject || "video"}`
+};
+'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  text-align: center;
+  vertical-align: middle;
+}
+
+._id::before {
+  content: counter(video-row);
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props: return { as: "td" };
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        css: return `._id { text-align: center; vertical-align: middle; }`;
+        displayOrder: 3
+        componentName: Html
+        props: return { as: "td" };
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  position: relative;
+  display: inline-flex;
+  padding: 0;
+  border: none;
+  border-radius: 0.375rem;
+  overflow: hidden;
+  background: transparent;
+  cursor: pointer;
+}
+
+._id:disabled {
+  cursor: not-allowed;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const video = args.contextData.video;
+const youtubeId = args.fns.getYouTubeId(video);
+return {
+  as: "button",
+  type: "button",
+  disabled: !youtubeId,
+  onClick: () => args.fns.playSingleVideo(video),
+  "attr:aria-label": `Play ${video?.P?.subject || "video"}`
+};
+'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: block;
+  width: 250px;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const video = args.contextData.video;
+const youtubeId = args.fns.getYouTubeId(video);
+return {
+  as: "img",
+  src: youtubeId ? `https://img.youtube.com/vi/${youtubeId}/mqdefault.jpg` : "",
+  alt: video?.P?.subject ? `${video.P.subject} thumbnail` : "YouTube thumbnail",
+  loading: "lazy",
+  hide: !youtubeId
+};
+'''
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        css: return `._id { text-align: center; vertical-align: middle; }`;
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+const video = args.contextData.video;
+return {
+  as: "td",
+  text: args.fns.formatDate(video?.P?.date)
+};
+'''
+      }
+    }
+    {
+      id: "20"
+      L: Attr
+      P: {
+        css: return `._id { text-align: center; vertical-align: middle; }`;
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''
+const video = args.contextData.video;
+return {
+  as: "td",
+  text: video?.P?.time || ""
+};
+'''
+      }
+    }
+    {
+      id: "21"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  text-align: center;
+  vertical-align: middle;
+  font-weight: 600;
+}`;
+'''
+        displayOrder: 6
+        componentName: Html
+        props:
+          '''
+const video = args.contextData.video;
+return {
+  as: "td",
+  text: video?.P?.subject || ""
+};
+'''
+      }
+    }
+    {
+      id: "22"
+      L: Attr
+      P: {
+        css: return `._id { text-align: center; vertical-align: middle; }`;
+        displayOrder: 7
+        componentName: Html
+        props: return { as: "td" };
+      }
+    }
+    {
+      id: "23"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: ${args.theme.var.color.primary};
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+._id:disabled {
+  color: ${args.theme.var.color.text_light_300};
+  cursor: not-allowed;
+  text-decoration: none;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const video = args.contextData.video;
+const youtubeId = args.fns.getYouTubeId(video);
+return {
+  as: "button",
+  type: "button",
+  text: "Watch",
+  disabled: !youtubeId,
+  onClick: () => args.fns.playSingleVideo(video),
+  "attr:aria-label": `Play ${video?.P?.subject || "video"}`
+};
+'''
+      }
+    }
+    {
+      id: "24"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  text-align: center;
+  vertical-align: middle;
+  white-space: pre-wrap;
+}`;
+'''
+        displayOrder: 8
+        componentName: Html
+        props:
+          '''
+const video = args.contextData.video;
+return {
+  as: "td",
+  text: video?.P?.bol || ""
+};
+'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: PageLayout
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "1"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "4"
+      E: "6"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "4"
+      E: "11"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "6"
+      E: "10"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "7"
+      E: "9"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "11"
+      E: "12"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "12"
+      E: "13"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "12"
+      E: "15"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "12"
+      E: "16"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "12"
+      E: "19"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "12"
+      E: "20"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "12"
+      E: "21"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "12"
+      E: "22"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "12"
+      E: "24"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "13"
+      E: "14"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "16"
+      E: "17"
+    }
+    {
+      id: e22
+      T: Attr
+      S: "17"
+      E: "18"
+    }
+    {
+      id: e23
+      T: Attr
+      S: "22"
+      E: "23"
+    }
+  ]
+}

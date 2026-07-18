@@ -4,7 +4,6 @@
       id: "1"
       L: Function
       P: {
-        key: syncContentTranslations
         description: Sync or delete {Label}Translation vertices for table content. Edge type is rootLabel + translationLabel.
         body:
           '''
@@ -226,6 +225,7 @@ if (action === "sync") {
 
 return { success: false, message: `Unknown action: ${action}` };
 '''
+        key: syncContentTranslations
       }
     }
   ]

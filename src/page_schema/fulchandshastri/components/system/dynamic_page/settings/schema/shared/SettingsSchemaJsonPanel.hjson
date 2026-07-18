@@ -1,28 +1,20 @@
 {
   vertexes: [
     {
-      id: "ssjp_root",
-      L: "Component",
+      id: "1"
+      L: Component
       P: {
-        key: "SettingsSchemaJsonPanel",
-        description: "JSON editor panel for settings page schema.",
-        dynamicComponent: "Button, TextArea, Html"
+        dynamicComponent: Button, TextArea, Html
+        description: JSON editor panel for settings page schema.
+        key: SettingsSchemaJsonPanel
       }
-    },
-{
-      id: "ssjp_panel",
-      L: "Attr",
+    }
+    {
+      id: "2"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''const api = args.contextData.props?.editorApi || {};
-
-return {
-  as: "div",
-  hide: api.isVisualMode?.() === true
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   flex: 1;
   min-width: 0;
@@ -33,20 +25,24 @@ return `._id {
   background: ${args.theme.var.color.background};
 }`;
 '''
-      }
-    },
-{
-      id: "ssjp_header",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''const api = args.contextData.props?.editorApi || {};
+
 return {
-  as: "div"
+  as: "div",
+  hide: api.isVisualMode?.() === true
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   align-items: center;
@@ -58,36 +54,47 @@ return `._id {
   flex-shrink: 0;
 }`;
 '''
-      }
-    },
-{
-      id: "ssjp_title",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "p",
-  text: "Schema config (JSON). Structure only — no default values."
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   margin: 0;
   font-size: 0.8125rem;
   color: ${args.theme.var.color.text_light_500};
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "p",
+  text: "Schema config (JSON). Structure only — no default values."
+};
+'''
       }
-    },
-{
-      id: "ssjp_refresh",
-      L: "Attr",
+    }
+    {
+      id: "5"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Button",
-        props: '''const api = args.contextData.props?.editorApi || {};
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''const api = args.contextData.props?.editorApi || {};
 
 return {
   variant: "secondary",
@@ -99,24 +106,13 @@ return {
 };
 '''
       }
-    },
-{
-      id: "ssjp_error",
-      L: "Attr",
+    }
+    {
+      id: "6"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''const api = args.contextData.props?.editorApi || {};
-
-const error = api.jsonError?.();
-return {
-  as: "div",
-  text: error ? `JSON error: ${error}` : "",
-  hide: !error,
-  role: "alert"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   padding: 0.5rem 1rem;
   font-size: 0.8125rem;
@@ -126,18 +122,27 @@ return `._id {
   flex-shrink: 0;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const api = args.contextData.props?.editorApi || {};
+
+const error = api.jsonError?.();
+return {
+  as: "div",
+  text: error ? `JSON error: ${error}` : "",
+  hide: !error,
+  role: "alert"
+};
+'''
       }
-    },
-{
-      id: "ssjp_textarea_wrap",
-      L: "Attr",
+    }
+    {
+      id: "7"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-return { as: "div" };
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   flex: 1;
   min-height: 0;
@@ -146,26 +151,20 @@ return `._id {
   flex-direction: column;
 }`;
 '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return { as: "div" };
+'''
       }
-    },
-{
-      id: "ssjp_textarea",
-      L: "Attr",
+    }
+    {
+      id: "8"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "TextArea",
-        props: '''const api = args.contextData.props?.editorApi || {};
-
-return {
-  label: "Config JSON",
-  value: api.configJsonText?.() || "",
-  rows: 24,
-  resize: "none",
-  placeholder: `{"pageMode": "settings", ...}`,
-  onChange: (e) => api.onJsonTextChange?.(e.target.value)
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   flex: 1;
   min-height: 0;
@@ -182,16 +181,65 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 1
+        componentName: TextArea
+        props:
+          '''const api = args.contextData.props?.editorApi || {};
+
+return {
+  label: "Config JSON",
+  value: api.configJsonText?.() || "",
+  rows: 24,
+  resize: "none",
+  placeholder: `{"pageMode": "settings", ...}`,
+  onChange: (e) => api.onJsonTextChange?.(e.target.value)
+};
+'''
       }
     }
-  ],
+  ]
   edges: [
-    { id: "ssjp_root_e1", T: "Attr", S: "ssjp_root", E: "ssjp_panel" },
-    { id: "ssjp_root_e2", T: "Attr", S: "ssjp_panel", E: "ssjp_header" },
-    { id: "ssjp_root_e3", T: "Attr", S: "ssjp_panel", E: "ssjp_error" },
-    { id: "ssjp_root_e4", T: "Attr", S: "ssjp_panel", E: "ssjp_textarea_wrap" },
-    { id: "ssjp_root_e5", T: "Attr", S: "ssjp_header", E: "ssjp_title" },
-    { id: "ssjp_root_e6", T: "Attr", S: "ssjp_header", E: "ssjp_refresh" },
-    { id: "ssjp_root_e7", T: "Attr", S: "ssjp_textarea_wrap", E: "ssjp_textarea" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "6"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "7"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "7"
+      E: "8"
+    }
   ]
 }

@@ -1,7 +1,7 @@
 {
   vertexes: [
     {
-      id: "pl1"
+      id: "1"
       L: Component
       P: {
         fns:
@@ -16,7 +16,7 @@ return {
       }
     }
     {
-      id: "pl2"
+      id: "2"
       L: Attr
       P: {
         displayOrder: 1
@@ -30,7 +30,7 @@ return {
       }
     }
     {
-      id: "pl3"
+      id: "3"
       L: Attr
       P: {
         displayOrder: 1
@@ -46,7 +46,7 @@ return {
       }
     }
     {
-      id: "pl_polaris"
+      id: "4"
       L: Attr
       P: {
         as: script
@@ -59,11 +59,9 @@ return {
       }
     }
     {
-      id: "pl10"
+      id: "5"
       L: Attr
       P: {
-        displayOrder: 3
-        componentName: Html
         css:
           '''return `._id {
   display: flex;
@@ -74,7 +72,10 @@ return {
   width: 100%;
   overflow: hidden;
   background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
 }`;'''
+        displayOrder: 3
+        componentName: Html
         props:
           '''return {
   as: "div"
@@ -82,7 +83,7 @@ return {
       }
     }
     {
-      id: "pl11"
+      id: "6"
       L: Attr
       P: {
         displayOrder: 1
@@ -91,11 +92,9 @@ return {
       }
     }
     {
-      id: "pl12"
+      id: "7"
       L: Attr
       P: {
-        displayOrder: 2
-        componentName: Html
         css:
           '''return `._id {
   flex: 1;
@@ -106,6 +105,8 @@ return {
   overflow: hidden;
   position: relative;
 }`;'''
+        displayOrder: 2
+        componentName: Html
         props:
           '''return {
   as: "main"
@@ -113,11 +114,9 @@ return {
       }
     }
     {
-      id: "pl12wrap"
+      id: "8"
       L: Attr
       P: {
-        displayOrder: 1
-        componentName: Html
         css:
           '''return `._id {
   flex: 1;
@@ -126,14 +125,17 @@ return {
   flex-direction: column;
   overflow: hidden;
 }`;'''
+        displayOrder: 1
+        componentName: Html
         props:
           '''return {
-  as: "div"
-};'''
+  as: "div",
+};
+'''
       }
     }
     {
-      id: "pl13"
+      id: "9"
       L: Attr
       P: {
         displayOrder: 1
@@ -143,22 +145,9 @@ return {
       }
     }
     {
-      id: "pl_nav_overlay"
+      id: "10"
       L: Attr
       P: {
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''
-const isNavigating = args.fns.isNavigating?.();
-
-return {
-  as: "div",
-  style: {
-    display: isNavigating ? "flex" : "none"
-  }
-};
-'''
         css:
           '''
 return `._id {
@@ -183,10 +172,23 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const isNavigating = args.fns.isNavigating?.();
+
+return {
+  as: "div",
+  style: {
+    display: isNavigating ? "flex" : "none"
+  }
+};
+'''
       }
     }
     {
-      id: "pl_nav_spinner"
+      id: "11"
       L: Attr
       P: {
         displayOrder: 1
@@ -203,64 +205,64 @@ return {
   ]
   edges: [
     {
-      id: pl_e1
+      id: e1
       T: Attr
-      S: "pl1"
-      E: "pl2"
+      S: "1"
+      E: "2"
     }
     {
-      id: pl_e2
+      id: e2
       T: Attr
-      S: "pl2"
-      E: "pl3"
+      S: "2"
+      E: "3"
     }
     {
-      id: pl_e_polaris
+      id: e3
       T: Attr
-      S: "pl2"
-      E: "pl_polaris"
+      S: "2"
+      E: "4"
     }
     {
-      id: pl_e3
+      id: e4
       T: Attr
-      S: "pl2"
-      E: "pl10"
+      S: "2"
+      E: "5"
     }
     {
-      id: pl_e4
+      id: e5
       T: Attr
-      S: "pl10"
-      E: "pl11"
+      S: "5"
+      E: "6"
     }
     {
-      id: pl_e5
+      id: e6
       T: Attr
-      S: "pl10"
-      E: "pl12"
+      S: "5"
+      E: "7"
     }
     {
-      id: pl_e6
+      id: e7
       T: Attr
-      S: "pl12"
-      E: "pl12wrap"
+      S: "7"
+      E: "8"
     }
     {
-      id: pl_e6b
+      id: e8
       T: Attr
-      S: "pl12wrap"
-      E: "pl13"
+      S: "7"
+      E: "10"
     }
     {
-      id: pl_e_nav_overlay
+      id: e9
       T: Attr
-      S: "pl12"
-      E: "pl_nav_overlay"
+      S: "8"
+      E: "9"
     }
     {
-      id: pl_e_nav_spinner
+      id: e10
       T: Attr
-      S: "pl_nav_overlay"
-      E: "pl_nav_spinner"
+      S: "10"
+      E: "11"
     }
   ]
 }

@@ -1,0 +1,1059 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        dynamicComponent: Button, TextInput, TextArea, LoadingSpinner, Html
+        description: Visual editor for table columns schema with load/save.
+        fns:
+          '''
+const getProps = () => args.contextData.props || {};
+const getTableKey = () => {
+  const v = getProps().tableKey;
+  return v != null && String(v).trim() !== "" ? String(v).trim() : null;
+};
+const getSchemaKey = () => {
+  const v = getProps().schemaKey;
+  return v != null && String(v).trim() !== "" ? String(v).trim() : null;
+};
+const executeYTOFunction = (functionName, contextData) =>
+  args.executeNamedServerFunction({ functionName, contextData: contextData || {} });
+
+const [loading, setLoading] = args.createSignal(false);
+const [saving, setSaving] = args.createSignal(false);
+const [schemaData, setSchemaData] = args.createSignal(null);
+const [configJsonText, setConfigJsonText] = args.createSignal("");
+const [jsonError, setJsonError] = args.createSignal("");
+const [isDirty, setIsDirty] = args.createSignal(false);
+const [editorMode, setEditorMode] = args.createSignal("visual");
+const [selectedColumnIndex, setSelectedColumnIndex] = args.createSignal(null);
+
+const isJsonMode = () => editorMode() === "json";
+
+const syncJsonFromData = (data) => {
+  const payload = data && typeof data === "object" ? { ...data } : {};
+  setConfigJsonText(JSON.stringify(payload, null, 2));
+  setJsonError("");
+};
+
+const applyLoadedSetting = (setting) => {
+  if (!setting?.P?.config) {
+    setSchemaData({ part: "columns", columns: [] });
+    syncJsonFromData({ part: "columns", columns: [] });
+    setIsDirty(false);
+    return;
+  }
+  try {
+    const data = new Function(setting.P.config)();
+    setSchemaData(data && typeof data === "object" ? data : { part: "columns", columns: [] });
+    syncJsonFromData(data);
+    setIsDirty(false);
+  } catch (error) {
+    setSchemaData(null);
+    setConfigJsonText(String(setting.P.config || ""));
+    setJsonError("Failed to parse stored config");
+  }
+};
+
+const loadSchema = async () => {
+  const schemaKey = getSchemaKey();
+  if (!schemaKey) return;
+  setLoading(true);
+  try {
+    const result = await executeYTOFunction("getTableSchema", { key: schemaKey });
+    if (!result?.result?.success) {
+      args.showErrorToast?.(result?.result?.message || "Failed to load table schema");
+      return;
+    }
+    applyLoadedSetting(result.result.data?.setting);
+  } catch (error) {
+    args.showErrorToast?.("Failed to load table schema");
+  } finally {
+    setLoading(false);
+  }
+};
+
+const getColumns = () => {
+  const data = schemaData();
+  const cols = data?.columns;
+  return Array.isArray(cols) ? cols.map((c) => ({ ...c })) : [];
+};
+
+const getColumnIndices = () => {
+  const cols = getColumns();
+  const indices = [];
+  for (let i = 0; i < cols.length; i++) indices.push(i);
+  return indices;
+};
+
+const getColumnAt = (index) => getColumns()[index] || {};
+
+const patchColumns = (columns) => {
+  const next = { ...(schemaData() || { part: "columns" }), part: "columns", columns };
+  setSchemaData(next);
+  syncJsonFromData(next);
+  setIsDirty(true);
+};
+
+const updateColumnAt = (index, partial) => {
+  patchColumns(getColumns().map((c, i) => (i === index ? { ...c, ...partial } : c)));
+};
+
+const addColumn = () => {
+  const cols = getColumns();
+  patchColumns([
+    ...cols,
+    { key: `col_${Date.now()}`, label: "New column", dataType: "text", renderer: "text", width: "120px", sortable: true }
+  ]);
+  setSelectedColumnIndex(cols.length);
+};
+
+const deleteColumn = (index) => {
+  patchColumns(getColumns().filter((_, i) => i !== index));
+  if (selectedColumnIndex() === index) setSelectedColumnIndex(null);
+};
+
+const buildConfigObject = () => {
+  if (isJsonMode()) return JSON.parse(configJsonText());
+  const data = schemaData();
+  return data && typeof data === "object" ? data : { part: "columns", columns: [] };
+};
+
+const saveSchema = async () => {
+  const schemaKey = getSchemaKey();
+  if (!schemaKey) {
+    args.showErrorToast?.("Schema key is missing");
+    return;
+  }
+  setSaving(true);
+  try {
+    const configObj = buildConfigObject();
+    const configBody = `return ${JSON.stringify(configObj, null, 2)};`;
+    const result = await executeYTOFunction("saveTableSchema", {
+      key: schemaKey,
+      tableKey: getTableKey(),
+      part: "columns",
+      config: configBody,
+      name: getProps().title || "Table columns schema"
+    });
+    if (!result?.result?.success) {
+      args.showErrorToast?.(result?.result?.message || "Failed to save");
+      return;
+    }
+    args.showSuccessToast?.(result.result.message || "Table schema saved");
+    applyLoadedSetting(result.result.data?.setting);
+    setIsDirty(false);
+    getProps().onSaved?.();
+  } catch (error) {
+    args.showErrorToast?.(error instanceof Error && isJsonMode() ? "Invalid JSON" : "Failed to save table schema");
+  } finally {
+    setSaving(false);
+  }
+};
+
+const setEditorModeSafe = (mode) => {
+  if (mode === "json") syncJsonFromData(schemaData());
+  setEditorMode(mode);
+};
+
+return {
+  loading, saving, isJsonMode, isDirty, configJsonText, setConfigJsonText, jsonError,
+  loadSchema, saveSchema, setEditorMode: setEditorModeSafe,
+  getColumnIndices, getColumnAt, selectedColumnIndex, setSelectedColumnIndex,
+  addColumn, updateColumnAt, deleteColumn, patchColumns
+};
+'''
+        key: TableColumnsSchemaEditor
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  height: 100%;
+  background: ${args.theme.var.color.background};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  hide: args.contextData.props?.hide === true,
+  onMount: () => { void args.fns.loadSchema?.(); }
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.background_light_100};
+  flex-shrink: 0;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "header" };
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id { margin: 0; font-size: 0.9375rem; font-weight: 700; }`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "h3",
+  text: args.contextData.props?.title || "Table columns"
+};
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css: return `._id { display: flex; gap: 0.5rem; }`;
+        displayOrder: 2
+        componentName: Html
+        props: return { as: "div" };
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''
+return {
+  variant: args.fns.isJsonMode?.() ? "secondary" : "primary",
+  size: "sm", text: "Visual", type: "button",
+  onClick: () => args.fns.setEditorMode?.("visual")
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
+return {
+  variant: args.fns.isJsonMode?.() ? "primary" : "secondary",
+  size: "sm", text: "JSON", type: "button",
+  onClick: () => args.fns.setEditorMode?.("json")
+};
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "primary", size: "sm",
+  text: args.fns.saving?.() ? "Saving..." : "Save",
+  type: "button", disabled: args.fns.saving?.() === true,
+  onClick: () => { void args.fns.saveSchema?.(); }
+};
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: LoadingSpinner
+        props: return { hide: args.fns.loading?.() !== true };
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id { flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return { as: "div", hide: args.fns.loading?.() === true };
+'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(10rem, 14rem) minmax(0, 1fr);
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  overflow: hidden;
+
+  @media (max-width: 768px) { grid-template-columns: 1fr; }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return { as: "div", hide: args.fns.isJsonMode?.() === true };
+'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  padding: 0.625rem;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background_light_50};
+  overflow: auto;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "aside" };
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        css: return `._id { display: flex; justify-content: space-between; align-items: center; }`;
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "div" };
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0; font-size: 0.8125rem; font-weight: 600; }`;
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "h4", text: "Columns" };
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
+return { variant: "secondary", size: "sm", text: "Add", type: "button", onClick: () => args.fns.addColumn?.() };
+'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        contextName: tcseColIndex
+        loop: true
+        displayOrder: 2
+        componentName: Html
+        props: return { data: args.fns.getColumnIndices?.() || [] };
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id.tcse-col-card {
+  display: block; width: 100%; padding: 0.5rem; text-align: left;
+  border: 1px solid ${args.theme.var.color.border}; border-radius: 0.375rem;
+  background: ${args.theme.var.color.background}; font-size: 0.75rem; cursor: pointer;
+}
+._id.tcse-col-card-selected {
+  border-color: ${args.theme.var.color.primary};
+  background: ${args.theme.var.color.primary_light_100};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const index = args.contextData.tcseColIndex;
+const col = args.fns.getColumnAt?.(index) || {};
+const selected = args.fns.selectedColumnIndex?.() === index;
+return {
+  as: "button", type: "button",
+  class: selected ? "tcse-col-card tcse-col-card-selected" : "tcse-col-card",
+  onClick: () => args.fns.setSelectedColumnIndex?.(index),
+  text: `${col.label || col.key || "Column"} (${col.key || "?"})`
+};
+'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+  padding: 0.625rem;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background_light_50};
+  overflow: auto;
+  align-content: start;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return { as: "div", hide: args.fns.selectedColumnIndex?.() == null };
+'''
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: TextInput
+        props:
+          '''
+const i = args.fns.selectedColumnIndex?.();
+const col = args.fns.getColumnAt?.(i) || {};
+return { label: "Key", value: col.key || "", onChange: (e) => args.fns.updateColumnAt?.(i, { key: e.target.value }) };
+'''
+      }
+    }
+    {
+      id: "20"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: TextInput
+        props:
+          '''
+const i = args.fns.selectedColumnIndex?.();
+const col = args.fns.getColumnAt?.(i) || {};
+return { label: "Label", value: col.label || "", onChange: (e) => args.fns.updateColumnAt?.(i, { label: e.target.value }) };
+'''
+      }
+    }
+    {
+      id: "21"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: TextInput
+        props:
+          '''
+const i = args.fns.selectedColumnIndex?.();
+const col = args.fns.getColumnAt?.(i) || {};
+return { label: "Width", value: col.width || "", placeholder: "120px", onChange: (e) => args.fns.updateColumnAt?.(i, { width: e.target.value }) };
+'''
+      }
+    }
+    {
+      id: "22"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        props: return { as: "div" };
+      }
+    }
+    {
+      id: "23"
+      L: Attr
+      P: {
+        css: return `._id { font-size: 0.75rem; color: ${args.theme.var.color.text_light_500}; }`;
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "label", text: "Renderer" };
+      }
+    }
+    {
+      id: "24"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  width: 100%; padding: 0.5rem; border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.375rem; background: ${args.theme.var.color.background};
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const i = args.fns.selectedColumnIndex?.();
+const col = args.fns.getColumnAt?.(i) || {};
+return {
+  as: "select", value: col.renderer || "text",
+  onChange: (e) => args.fns.updateColumnAt?.(i, { renderer: e.target.value, dataType: e.target.value === "number" ? "number" : "text" })
+};
+'''
+      }
+    }
+    {
+      id: "25"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "option", text: "Text", value: "text" };
+      }
+    }
+    {
+      id: "26"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props: return { as: "option", text: "Number", value: "number" };
+      }
+    }
+    {
+      id: "27"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props: return { as: "option", text: "Badge", value: "badge" };
+      }
+    }
+    {
+      id: "28"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        props: return { as: "option", text: "Link", value: "link" };
+      }
+    }
+    {
+      id: "29"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        props: return { as: "option", text: "Image", value: "imagePreview" };
+      }
+    }
+    {
+      id: "30"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        props: return { as: "div" };
+      }
+    }
+    {
+      id: "31"
+      L: Attr
+      P: {
+        css: return `._id { font-size: 0.75rem; color: ${args.theme.var.color.text_light_500}; }`;
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "label", text: "Align" };
+      }
+    }
+    {
+      id: "32"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  width: 100%; padding: 0.5rem; border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.375rem; background: ${args.theme.var.color.background};
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const i = args.fns.selectedColumnIndex?.();
+const col = args.fns.getColumnAt?.(i) || {};
+return {
+  as: "select", value: col.align || "left",
+  onChange: (e) => args.fns.updateColumnAt?.(i, { align: e.target.value })
+};
+'''
+      }
+    }
+    {
+      id: "33"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "option", text: "Left", value: "left" };
+      }
+    }
+    {
+      id: "34"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props: return { as: "option", text: "Center", value: "center" };
+      }
+    }
+    {
+      id: "35"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props: return { as: "option", text: "Right", value: "right" };
+      }
+    }
+    {
+      id: "36"
+      L: Attr
+      P: {
+        css: return `._id { display: flex; flex-wrap: wrap; gap: 0.75rem; grid-column: 1 / -1; }`;
+        displayOrder: 6
+        componentName: Html
+        props: return { as: "div" };
+      }
+    }
+    {
+      id: "37"
+      L: Attr
+      P: {
+        css: return `._id { display: flex; align-items: center; gap: 0.375rem; font-size: 0.75rem; }`;
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "label" };
+      }
+    }
+    {
+      id: "38"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const i = args.fns.selectedColumnIndex?.();
+const col = args.fns.getColumnAt?.(i) || {};
+return { as: "input", type: "checkbox", checked: col.sortable !== false, onChange: (e) => args.fns.updateColumnAt?.(i, { sortable: e.target.checked }) };
+'''
+      }
+    }
+    {
+      id: "39"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props: return { as: "span", text: "Sortable" };
+      }
+    }
+    {
+      id: "40"
+      L: Attr
+      P: {
+        css: return `._id { display: flex; align-items: center; gap: 0.375rem; font-size: 0.75rem; }`;
+        displayOrder: 2
+        componentName: Html
+        props: return { as: "label" };
+      }
+    }
+    {
+      id: "41"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const i = args.fns.selectedColumnIndex?.();
+const col = args.fns.getColumnAt?.(i) || {};
+return { as: "input", type: "checkbox", checked: col.hidden === true, onChange: (e) => args.fns.updateColumnAt?.(i, { hidden: e.target.checked }) };
+'''
+      }
+    }
+    {
+      id: "42"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props: return { as: "span", text: "Hidden" };
+      }
+    }
+    {
+      id: "43"
+      L: Attr
+      P: {
+        css: return `._id { grid-column: 1 / -1; justify-self: start; }`;
+        displayOrder: 7
+        componentName: Button
+        props:
+          '''
+const i = args.fns.selectedColumnIndex?.();
+return { variant: "danger", size: "sm", text: "Delete column", type: "button", onClick: () => args.fns.deleteColumn?.(i) };
+'''
+      }
+    }
+    {
+      id: "44"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 0.75rem 1rem; gap: 0.5rem; }`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props: return { as: "div", hide: args.fns.isJsonMode?.() !== true };
+      }
+    }
+    {
+      id: "45"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: TextArea
+        props:
+          '''
+return {
+  value: args.fns.configJsonText?.() || "",
+  onInput: (e) => args.fns.setConfigJsonText?.(e.target.value),
+  rows: 24,
+  style: { flex: "1", "min-height": "200px", "font-family": "monospace", "font-size": "0.8125rem" }
+};
+'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "9"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "10"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "5"
+      E: "7"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "5"
+      E: "8"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "10"
+      E: "11"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "10"
+      E: "44"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "11"
+      E: "12"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "11"
+      E: "18"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "12"
+      E: "13"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "12"
+      E: "16"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "13"
+      E: "14"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "13"
+      E: "15"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "16"
+      E: "17"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "18"
+      E: "19"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "18"
+      E: "20"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "18"
+      E: "21"
+    }
+    {
+      id: e22
+      T: Attr
+      S: "18"
+      E: "22"
+    }
+    {
+      id: e23
+      T: Attr
+      S: "18"
+      E: "30"
+    }
+    {
+      id: e24
+      T: Attr
+      S: "18"
+      E: "36"
+    }
+    {
+      id: e25
+      T: Attr
+      S: "18"
+      E: "43"
+    }
+    {
+      id: e26
+      T: Attr
+      S: "22"
+      E: "23"
+    }
+    {
+      id: e27
+      T: Attr
+      S: "22"
+      E: "24"
+    }
+    {
+      id: e28
+      T: Attr
+      S: "24"
+      E: "25"
+    }
+    {
+      id: e29
+      T: Attr
+      S: "24"
+      E: "26"
+    }
+    {
+      id: e30
+      T: Attr
+      S: "24"
+      E: "27"
+    }
+    {
+      id: e31
+      T: Attr
+      S: "24"
+      E: "28"
+    }
+    {
+      id: e32
+      T: Attr
+      S: "24"
+      E: "29"
+    }
+    {
+      id: e33
+      T: Attr
+      S: "30"
+      E: "31"
+    }
+    {
+      id: e34
+      T: Attr
+      S: "30"
+      E: "32"
+    }
+    {
+      id: e35
+      T: Attr
+      S: "32"
+      E: "33"
+    }
+    {
+      id: e36
+      T: Attr
+      S: "32"
+      E: "34"
+    }
+    {
+      id: e37
+      T: Attr
+      S: "32"
+      E: "35"
+    }
+    {
+      id: e38
+      T: Attr
+      S: "36"
+      E: "37"
+    }
+    {
+      id: e39
+      T: Attr
+      S: "36"
+      E: "40"
+    }
+    {
+      id: e40
+      T: Attr
+      S: "37"
+      E: "38"
+    }
+    {
+      id: e41
+      T: Attr
+      S: "37"
+      E: "39"
+    }
+    {
+      id: e42
+      T: Attr
+      S: "40"
+      E: "41"
+    }
+    {
+      id: e43
+      T: Attr
+      S: "40"
+      E: "42"
+    }
+    {
+      id: e44
+      T: Attr
+      S: "44"
+      E: "45"
+    }
+  ]
+}

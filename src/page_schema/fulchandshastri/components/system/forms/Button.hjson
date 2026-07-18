@@ -149,208 +149,6 @@ return {
     }
     {
       id: "3"
-      L: ComponentVariant
-      P: {
-        type: boolean
-        key: loading
-        defValue: false
-      }
-    }
-    {
-      id: "4"
-      L: ComponentVariant
-      P: {
-        type: string
-        key: variant
-        defValue: primary
-      }
-    }
-    {
-      id: "5"
-      L: ComponentVariantOption
-      P: {
-        description: Secondary button with border
-        value: secondary
-        key: secondary
-      }
-    }
-    {
-      id: "6"
-      L: ComponentVariantOption
-      P: {
-        description: Success button with green color
-        value: success
-        key: success
-      }
-    }
-    {
-      id: "7"
-      L: ComponentVariantOption
-      P: {
-        description: Danger button with red color
-        value: danger
-        key: danger
-      }
-    }
-    {
-      id: "8"
-      L: ComponentVariantOption
-      P: {
-        description: Primary button with brand color
-        value: primary
-        key: primary
-      }
-    }
-    {
-      id: "9"
-      L: ComponentVariant
-      P: {
-        type: string
-        key: text
-        defValue: Button
-      }
-    }
-    {
-      id: "10"
-      L: ComponentVariant
-      P: {
-        type: string
-        key: type
-        defValue: button
-      }
-    }
-    {
-      id: "11"
-      L: ComponentVariant
-      P: {
-        type: function
-        key: onClick
-      }
-    }
-    {
-      id: "12"
-      L: ComponentVariant
-      P: {
-        type: boolean
-        key: disabled
-        defValue: false
-      }
-    }
-    {
-      id: "13"
-      L: ComponentVariant
-      P: {
-        type: boolean
-        key: fullWidth
-        defValue: false
-      }
-    }
-    {
-      id: "14"
-      L: ComponentVariant
-      P: {
-        type: string
-        key: leftIcon
-      }
-    }
-    {
-      id: "15"
-      L: ComponentVariant
-      P: {
-        type: string
-        key: rightIcon
-      }
-    }
-    {
-      id: "19"
-      L: ComponentVariant
-      P: {
-        type: string
-        key: iconSize
-        defValue: md
-      }
-    }
-    {
-      id: "20"
-      L: ComponentVariantOption
-      P: {
-        displayOrder: 1
-        description: Small icon size (16px)
-        value: sm
-        key: sm
-      }
-    }
-    {
-      id: "21"
-      L: ComponentVariantOption
-      P: {
-        displayOrder: 2
-        description: Medium icon size (20px)
-        value: md
-        key: md
-      }
-    }
-    {
-      id: "22"
-      L: ComponentVariantOption
-      P: {
-        displayOrder: 3
-        description: Large icon size (24px)
-        value: lg
-        key: lg
-      }
-    }
-    {
-      id: "23"
-      L: ComponentVariant
-      P: {
-        type: string
-        key: size
-        defValue: md
-      }
-    }
-    {
-      id: "27"
-      L: ComponentVariantOption
-      P: {
-        displayOrder: 1
-        description: Extra small button size
-        value: xs
-        key: xs
-      }
-    }
-    {
-      id: "24"
-      L: ComponentVariantOption
-      P: {
-        displayOrder: 2
-        description: Small button size
-        value: sm
-        key: sm
-      }
-    }
-    {
-      id: "25"
-      L: ComponentVariantOption
-      P: {
-        displayOrder: 3
-        description: Medium button size
-        value: md
-        key: md
-      }
-    }
-    {
-      id: "26"
-      L: ComponentVariantOption
-      P: {
-        displayOrder: 4
-        description: Large button size
-        value: lg
-        key: lg
-      }
-    }
-    {
-      id: "16"
       L: Attr
       P: {
         displayOrder: 1
@@ -383,7 +181,25 @@ return {
       }
     }
     {
-      id: "17"
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const text = args.contextData.props?.text || "Button";
+
+return {
+  as: "span",
+  text: text,
+  hide: !text
+};
+'''
+      }
+    }
+    {
+      id: "5"
       L: Attr
       P: {
         displayOrder: 3
@@ -416,21 +232,205 @@ return {
       }
     }
     {
-      id: "18"
-      L: Attr
+      id: "6"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: size
+        defValue: md
+      }
+    }
+    {
+      id: "7"
+      L: ComponentVariantOption
+      P: {
+        displayOrder: 1
+        description: Extra small button size
+        value: xs
+        key: xs
+      }
+    }
+    {
+      id: "8"
+      L: ComponentVariantOption
       P: {
         displayOrder: 2
-        componentName: Html
-        props:
-          '''
-const text = args.contextData.props?.text || "Button";
-
-return {
-  as: "span",
-  text: text,
-  hide: !text
-};
-'''
+        description: Small button size
+        value: sm
+        key: sm
+      }
+    }
+    {
+      id: "9"
+      L: ComponentVariantOption
+      P: {
+        displayOrder: 3
+        description: Medium button size
+        value: md
+        key: md
+      }
+    }
+    {
+      id: "10"
+      L: ComponentVariantOption
+      P: {
+        displayOrder: 4
+        description: Large button size
+        value: lg
+        key: lg
+      }
+    }
+    {
+      id: "11"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        defValue: false
+        key: loading
+      }
+    }
+    {
+      id: "12"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: primary
+        key: variant
+      }
+    }
+    {
+      id: "13"
+      L: ComponentVariantOption
+      P: {
+        description: Secondary button with border
+        value: secondary
+        key: secondary
+      }
+    }
+    {
+      id: "14"
+      L: ComponentVariantOption
+      P: {
+        description: Success button with green color
+        value: success
+        key: success
+      }
+    }
+    {
+      id: "15"
+      L: ComponentVariantOption
+      P: {
+        description: Danger button with red color
+        value: danger
+        key: danger
+      }
+    }
+    {
+      id: "16"
+      L: ComponentVariantOption
+      P: {
+        description: Primary button with brand color
+        value: primary
+        key: primary
+      }
+    }
+    {
+      id: "17"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: Button
+        key: text
+      }
+    }
+    {
+      id: "18"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        defValue: false
+        key: fullWidth
+      }
+    }
+    {
+      id: "19"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: rightIcon
+      }
+    }
+    {
+      id: "20"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: md
+        key: iconSize
+      }
+    }
+    {
+      id: "21"
+      L: ComponentVariantOption
+      P: {
+        displayOrder: 1
+        description: Small icon size (16px)
+        value: sm
+        key: sm
+      }
+    }
+    {
+      id: "22"
+      L: ComponentVariantOption
+      P: {
+        displayOrder: 2
+        description: Medium icon size (20px)
+        value: md
+        key: md
+      }
+    }
+    {
+      id: "23"
+      L: ComponentVariantOption
+      P: {
+        displayOrder: 3
+        description: Large icon size (24px)
+        value: lg
+        key: lg
+      }
+    }
+    {
+      id: "24"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        defValue: false
+        key: disabled
+      }
+    }
+    {
+      id: "25"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: button
+        key: type
+      }
+    }
+    {
+      id: "26"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onClick
+      }
+    }
+    {
+      id: "27"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: leftIcon
       }
     }
   ]
@@ -445,151 +445,151 @@ return {
       id: e2
       T: ComponentVariant
       S: "1"
-      E: "3"
+      E: "6"
     }
     {
       id: e3
       T: ComponentVariant
       S: "1"
-      E: "4"
+      E: "11"
     }
     {
       id: e4
       T: ComponentVariant
       S: "1"
-      E: "9"
+      E: "12"
     }
     {
       id: e5
       T: ComponentVariant
       S: "1"
-      E: "10"
+      E: "17"
     }
     {
       id: e6
       T: ComponentVariant
       S: "1"
-      E: "11"
+      E: "18"
     }
     {
       id: e7
       T: ComponentVariant
       S: "1"
-      E: "12"
+      E: "19"
     }
     {
       id: e8
       T: ComponentVariant
       S: "1"
-      E: "13"
-    }
-    {
-      id: e13
-      T: ComponentVariant
-      S: "1"
-      E: "14"
-    }
-    {
-      id: e14
-      T: ComponentVariant
-      S: "1"
-      E: "15"
-    }
-    {
-      id: e18
-      T: ComponentVariant
-      S: "1"
-      E: "19"
-    }
-    {
-      id: e19
-      T: ComponentVariantOption
-      S: "19"
       E: "20"
     }
     {
-      id: e20
-      T: ComponentVariantOption
-      S: "19"
-      E: "21"
-    }
-    {
-      id: e21
-      T: ComponentVariantOption
-      S: "19"
-      E: "22"
-    }
-    {
-      id: e22
+      id: e9
       T: ComponentVariant
       S: "1"
-      E: "23"
-    }
-    {
-      id: e26
-      T: ComponentVariantOption
-      S: "23"
-      E: "27"
-    }
-    {
-      id: e23
-      T: ComponentVariantOption
-      S: "23"
       E: "24"
     }
     {
-      id: e24
-      T: ComponentVariantOption
-      S: "23"
+      id: e10
+      T: ComponentVariant
+      S: "1"
       E: "25"
     }
     {
-      id: e25
-      T: ComponentVariantOption
-      S: "23"
+      id: e11
+      T: ComponentVariant
+      S: "1"
       E: "26"
+    }
+    {
+      id: e12
+      T: ComponentVariant
+      S: "1"
+      E: "27"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "2"
+      E: "4"
     }
     {
       id: e15
       T: Attr
       S: "2"
-      E: "16"
-    }
-    {
-      id: e16
-      T: Attr
-      S: "2"
-      E: "17"
-    }
-    {
-      id: e17
-      T: Attr
-      S: "2"
-      E: "18"
-    }
-    {
-      id: e9
-      T: ComponentVariantOption
-      S: "4"
       E: "5"
     }
     {
-      id: e10
+      id: e16
       T: ComponentVariantOption
-      S: "4"
-      E: "6"
-    }
-    {
-      id: e11
-      T: ComponentVariantOption
-      S: "4"
+      S: "6"
       E: "7"
     }
     {
-      id: e12
+      id: e17
       T: ComponentVariantOption
-      S: "4"
+      S: "6"
       E: "8"
+    }
+    {
+      id: e18
+      T: ComponentVariantOption
+      S: "6"
+      E: "9"
+    }
+    {
+      id: e19
+      T: ComponentVariantOption
+      S: "6"
+      E: "10"
+    }
+    {
+      id: e20
+      T: ComponentVariantOption
+      S: "12"
+      E: "13"
+    }
+    {
+      id: e21
+      T: ComponentVariantOption
+      S: "12"
+      E: "14"
+    }
+    {
+      id: e22
+      T: ComponentVariantOption
+      S: "12"
+      E: "15"
+    }
+    {
+      id: e23
+      T: ComponentVariantOption
+      S: "12"
+      E: "16"
+    }
+    {
+      id: e24
+      T: ComponentVariantOption
+      S: "20"
+      E: "21"
+    }
+    {
+      id: e25
+      T: ComponentVariantOption
+      S: "20"
+      E: "22"
+    }
+    {
+      id: e26
+      T: ComponentVariantOption
+      S: "20"
+      E: "23"
     }
   ]
 }

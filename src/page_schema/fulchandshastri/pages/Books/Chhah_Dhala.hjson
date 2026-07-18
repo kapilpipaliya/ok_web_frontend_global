@@ -1,0 +1,150 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        fns: return { enabled: () => true }
+        key: Chhah_Dhala
+        url: /chhah-dhala
+        updatedAt: 2026-07-08T04:30:33.510Z
+        props:
+          '''return {
+  isNoPermissionCheck: true
+}'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  padding: 1rem;
+}`;
+'''
+        displayOrder: 2
+        fns:
+          '''
+const [activeTab, setActiveTab] = args.createSignal("by");
+return {
+  activeTab,
+  setActiveTab,
+  isByTab: () => activeTab() === "by",
+  isRecommendedTab: () => activeTab() === "recommended"
+};
+'''
+        componentName: Html
+        key: unique_2
+        props:
+          '''
+return {
+  as: "main"
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        key: unique_3
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  font-size: 3rem;
+  font-weight: 700;
+  margin: 0;
+
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        text: ""
+        key: unique_4
+        props:
+          '''const content = args.contextData.booksSettings?.content;
+return {
+  as: "h1",
+  text: content?.pageTitle || "छह ढाला-षट्पद विवेचन",
+};
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        as: div
+        displayOrder: 2
+        componentName: Html
+        text: '''"छह ढाला-षट्पद विवेचन" गुरुदेव श्री फूलचंद शास्त्री द्वारा रचित अति गहन शास्त्र है ।'''
+        key: unique_1
+      }
+    }
+    {
+      id: "6"
+      L: PageLayout
+      P: {
+        componentName: Layout
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: PageLayout
+      S: "1"
+      E: "6"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+  ]
+}

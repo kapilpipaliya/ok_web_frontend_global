@@ -4,7 +4,6 @@
       id: "1"
       L: Function
       P: {
-        key: saveTableSchema
         description: Saves one table_schema Setting vertex by explicit key. Admin only.
         body:
           '''
@@ -118,6 +117,7 @@ return {
   message: "Table schema saved"
 };
 '''
+        key: saveTableSchema
       }
     }
   ]

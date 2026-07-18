@@ -1,28 +1,20 @@
 {
   vertexes: [
     {
-      id: "ssse_root",
-      L: "Component",
+      id: "1"
+      L: Component
       P: {
-        key: "SettingsSchemaSectionEditor",
-        description: "Section meta and field schema editor pane.",
-        dynamicComponent: "FormManagement, Button, IconButton, FieldArraySchemaEditor, Html"
+        dynamicComponent: FormManagement, Button, IconButton, FieldArraySchemaEditor, Html
+        description: Section meta and field schema editor pane.
+        key: SettingsSchemaSectionEditor
       }
-    },
-{
-      id: "ssse_main",
-      L: "Attr",
+    }
+    {
+      id: "2"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''const api = args.contextData.props?.editorApi || {};
-
-return {
-  as: "div",
-  hide: api.isJsonMode?.() === true
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   flex: 1;
   min-width: 0;
@@ -31,15 +23,33 @@ return `._id {
   overflow: hidden;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const api = args.contextData.props?.editorApi || {};
+
+return {
+  as: "div",
+  hide: api.isJsonMode?.() === true
+};
+'''
       }
-    },
-{
-      id: "ssse_section_meta",
-      L: "Attr",
+    }
+    {
+      id: "3"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "FormManagement",
-        props: '''const api = args.contextData.props?.editorApi || {};
+        css:
+          '''
+return `._id {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+        displayOrder: 1
+        componentName: FormManagement
+        props:
+          '''const api = args.contextData.props?.editorApi || {};
 
 const section = api.getSelectedSection?.();
 const initialVertex = api.sectionMetaVertex?.();
@@ -54,30 +64,15 @@ return {
   onFnsReady: api.registerSectionMetaFormFns,
   onFieldChange: () => api.syncSectionMetaFromForm?.()
 };
-''',
-        css: '''
-return `._id {
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid ${args.theme.var.color.border};
-}`;
 '''
       }
-    },
-{
-      id: "ssse_fields_header",
-      L: "Attr",
+    }
+    {
+      id: "4"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''const api = args.contextData.props?.editorApi || {};
-
-const section = api.getSelectedSection?.();
-return {
-  as: "div",
-  hide: !section
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: flex;
   align-items: center;
@@ -86,36 +81,50 @@ return `._id {
   border-bottom: 1px solid ${args.theme.var.color.border};
 }`;
 '''
-      }
-    },
-{
-      id: "ssse_fields_title",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const api = args.contextData.props?.editorApi || {};
+
+const section = api.getSelectedSection?.();
 return {
-  as: "h3",
-  text: "Fields"
+  as: "div",
+  hide: !section
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   margin: 0;
   font-size: 0.875rem;
   font-weight: 600;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "h3",
+  text: "Fields"
+};
+'''
       }
-    },
-{
-      id: "ssse_add_field",
-      L: "Attr",
+    }
+    {
+      id: "6"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Button",
-        props: '''const api = args.contextData.props?.editorApi || {};
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''const api = args.contextData.props?.editorApi || {};
 
 return {
   variant: "secondary",
@@ -126,22 +135,13 @@ return {
 };
 '''
       }
-    },
-{
-      id: "ssse_fields_row",
-      L: "Attr",
+    }
+    {
+      id: "7"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''const api = args.contextData.props?.editorApi || {};
-
-const section = api.getSelectedSection?.();
-return {
-  as: "div",
-  hide: !section
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: flex;
   flex: 1;
@@ -149,28 +149,25 @@ return `._id {
   overflow: hidden;
 }`;
 '''
-      }
-    },
-{
-      id: "ssse_fields_list",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''const api = args.contextData.props?.editorApi || {};
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''const api = args.contextData.props?.editorApi || {};
 
 const section = api.getSelectedSection?.();
 return {
   as: "div",
-  hide: !section,
-  ref: (element) => {
-    if (element && api.attachFieldsListBoundary) {
-      api.attachFieldsListBoundary(element);
-    }
-  }
+  hide: !section
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   width: 280px;
   flex-shrink: 0;
@@ -183,33 +180,30 @@ return `._id {
   background: ${args.theme.var.color.background_light_50};
 }`;
 '''
-      }
-    },
-{
-      id: "ssse_field_items_list",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''const api = args.contextData.props?.editorApi || {};
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const api = args.contextData.props?.editorApi || {};
 
-const emptyDrop = api.isFieldListEmptyDrop?.();
-const dragging = !!api.fieldDragSource?.();
+const section = api.getSelectedSection?.();
 return {
   as: "div",
-  class: [
-    "fsce-field-items-list",
-    dragging ? "fsce-field-items-list-dragging" : "",
-    emptyDrop ? "fsce-field-list-drop-empty" : ""
-  ].filter(Boolean).join(" "),
+  hide: !section,
   ref: (element) => {
-    if (element && api.attachFieldListDropTarget) {
-      api.attachFieldListDropTarget(element);
+    if (element && api.attachFieldsListBoundary) {
+      api.attachFieldsListBoundary(element);
     }
   }
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id.fsce-field-items-list {
   position: relative;
   display: flex;
@@ -252,56 +246,52 @@ return `._id.fsce-field-items-list {
   pointer-events: none;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const api = args.contextData.props?.editorApi || {};
+
+const emptyDrop = api.isFieldListEmptyDrop?.();
+const dragging = !!api.fieldDragSource?.();
+return {
+  as: "div",
+  class: [
+    "fsce-field-items-list",
+    dragging ? "fsce-field-items-list-dragging" : "",
+    emptyDrop ? "fsce-field-list-drop-empty" : ""
+  ].filter(Boolean).join(" "),
+  ref: (element) => {
+    if (element && api.attachFieldListDropTarget) {
+      api.attachFieldListDropTarget(element);
+    }
+  }
+};
+'''
       }
-    },
-{
-      id: "ssse_field_item",
-      L: "Attr",
+    }
+    {
+      id: "10"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        contextName: "configFieldItem",
-        loop: true,
-        props: '''const api = args.contextData.props?.editorApi || {};
+        contextName: configFieldItem
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const api = args.contextData.props?.editorApi || {};
 
 return {
   data: api.getFieldIndices?.() || []
 };
 '''
       }
-    },
-{
-      id: "ssse_field_row",
-      L: "Attr",
+    }
+    {
+      id: "11"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''const api = args.contextData.props?.editorApi || {};
-
-const index = args.contextData.configFieldItem;
-const field = api.getFieldAt?.(index) || {};
-const dropBefore = api.isFieldDropBefore?.(index);
-const dropAfter = api.isFieldDropAfter?.(index);
-return {
-  as: "div",
-  class: `fsce-field-item${dropBefore ? " fsce-field-drop-before" : ""}${dropAfter ? " fsce-field-drop-after" : ""}`,
-  role: "button",
-  tabIndex: 0,
-  onClick: () => api.selectField?.(index),
-  onKeyDown: (e) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      api.selectField?.(index);
-    }
-  },
-  ref: (element) => {
-    if (element && typeof index === "number" && api.attachFieldDropTarget) {
-      api.attachFieldDropTarget(element, index);
-    }
-  }
-};
-''',
-        css: '''const api = args.contextData.props?.editorApi || {};
+        css:
+          '''const api = args.contextData.props?.editorApi || {};
 
 const index = args.contextData.configFieldItem;
 const active = api.selectedFieldIndex?.() === index;
@@ -404,15 +394,59 @@ return `._id.fsce-field-item {
   pointer-events: none;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const api = args.contextData.props?.editorApi || {};
+
+const index = args.contextData.configFieldItem;
+const field = api.getFieldAt?.(index) || {};
+const dropBefore = api.isFieldDropBefore?.(index);
+const dropAfter = api.isFieldDropAfter?.(index);
+return {
+  as: "div",
+  class: `fsce-field-item${dropBefore ? " fsce-field-drop-before" : ""}${dropAfter ? " fsce-field-drop-after" : ""}`,
+  role: "button",
+  tabIndex: 0,
+  onClick: () => api.selectField?.(index),
+  onKeyDown: (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      api.selectField?.(index);
+    }
+  },
+  ref: (element) => {
+    if (element && typeof index === "number" && api.attachFieldDropTarget) {
+      api.attachFieldDropTarget(element, index);
+    }
+  }
+};
+'''
       }
-    },
-{
-      id: "ssse_field_drag",
-      L: "Attr",
+    }
+    {
+      id: "12"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''const api = args.contextData.props?.editorApi || {};
+        css:
+          '''
+return `._id.fsce-field-drag-handle {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  color: ${args.theme.var.color.text_light_500};
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const api = args.contextData.props?.editorApi || {};
 
 const index = args.contextData.configFieldItem;
 return {
@@ -428,29 +462,22 @@ return {
   }
 };
 '''
-        css: '''
-return `._id.fsce-field-drag-handle {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.25rem;
-  height: 1.25rem;
-  color: ${args.theme.var.color.text_light_500};
-  cursor: grab;
-  touch-action: none;
-  user-select: none;
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id.fsce-field-drag-icon {
+  pointer-events: none;
 }`;
 '''
-      }
-    },
-{
-      id: "ssse_field_drag_icon",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "icon",
   icon: "ph:dots-six-vertical",
@@ -458,31 +485,15 @@ return {
   width: 14,
   class: "fsce-field-drag-icon"
 };
-''',
-        css: '''
-return `._id.fsce-field-drag-icon {
-  pointer-events: none;
-}`;
 '''
       }
-    },
-{
-      id: "ssse_field_summary",
-      L: "Attr",
+    }
+    {
+      id: "14"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''const api = args.contextData.props?.editorApi || {};
-
-const index = args.contextData.configFieldItem;
-const field = api.getFieldAt?.(index) || {};
-return {
-  as: "span",
-  class: "fsce-field-summary",
-  text: `${field.label || field.key || "Field"} (${field.renderer || "text"})`
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id.fsce-field-summary {
   flex: 1;
   text-align: left;
@@ -493,15 +504,29 @@ return `._id.fsce-field-summary {
   font-size: 0.8125rem;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const api = args.contextData.props?.editorApi || {};
+
+const index = args.contextData.configFieldItem;
+const field = api.getFieldAt?.(index) || {};
+return {
+  as: "span",
+  class: "fsce-field-summary",
+  text: `${field.label || field.key || "Field"} (${field.renderer || "text"})`
+};
+'''
       }
-    },
-{
-      id: "ssse_field_delete",
-      L: "Attr",
+    }
+    {
+      id: "15"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "IconButton",
-        props: '''const api = args.contextData.props?.editorApi || {};
+        displayOrder: 3
+        componentName: IconButton
+        props:
+          '''const api = args.contextData.props?.editorApi || {};
 
 const index = args.contextData.configFieldItem;
 return {
@@ -516,22 +541,13 @@ return {
 };
 '''
       }
-    },
-{
-      id: "ssse_field_editor_column",
-      L: "Attr",
+    }
+    {
+      id: "16"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''const api = args.contextData.props?.editorApi || {};
-
-const section = api.getSelectedSection?.();
-return {
-  as: "div",
-  hide: !section
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   flex: 1;
   min-width: 0;
@@ -542,15 +558,38 @@ return `._id {
   background: ${args.theme.var.color.background};
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const api = args.contextData.props?.editorApi || {};
+
+const section = api.getSelectedSection?.();
+return {
+  as: "div",
+  hide: !section
+};
+'''
       }
-    },
-{
-      id: "ssse_field_editor",
-      L: "Attr",
+    }
+    {
+      id: "17"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "FormManagement",
-        props: '''const api = args.contextData.props?.editorApi || {};
+        css:
+          '''
+return `._id {
+  flex-shrink: 0;
+  min-width: 0;
+  overflow-y: auto;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.background};
+}`;
+'''
+        displayOrder: 1
+        componentName: FormManagement
+        props:
+          '''const api = args.contextData.props?.editorApi || {};
 
 const field = api.getSelectedField?.();
 const fieldIndex = api.selectedFieldIndex?.();
@@ -569,26 +608,27 @@ return {
   onFnsReady: api.registerFieldEditorFormFns,
   onFieldChange: () => api.syncFieldFromForm?.()
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
-  flex-shrink: 0;
+  flex: 1;
+  min-height: 0;
   min-width: 0;
   overflow-y: auto;
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background};
 }`;
 '''
-      }
-    },
-{
-      id: "ssse_field_array_schema",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "FieldArraySchemaEditor",
-        props: '''const api = args.contextData.props?.editorApi || {};
+        displayOrder: 2
+        componentName: FieldArraySchemaEditor
+        props:
+          '''const api = args.contextData.props?.editorApi || {};
 
 const field = api.getSelectedField?.();
 const fieldIndex = api.selectedFieldIndex?.();
@@ -602,36 +642,112 @@ return {
   siteLanguages: api.getSiteLanguages?.(),
   onChange: (patch) => api.onFieldArraySchemaChange?.(patch)
 };
-''',
-        css: '''
-return `._id {
-  flex: 1;
-  min-height: 0;
-  min-width: 0;
-  overflow-y: auto;
-  padding: 0.75rem 1rem;
-}`;
 '''
       }
     }
-  ],
+  ]
   edges: [
-    { id: "ssse_root_e1", T: "Attr", S: "ssse_root", E: "ssse_main" },
-    { id: "ssse_root_e2", T: "Attr", S: "ssse_main", E: "ssse_section_meta" },
-    { id: "ssse_root_e3", T: "Attr", S: "ssse_main", E: "ssse_fields_header" },
-    { id: "ssse_root_e4", T: "Attr", S: "ssse_main", E: "ssse_fields_row" },
-    { id: "ssse_root_e5", T: "Attr", S: "ssse_fields_header", E: "ssse_fields_title" },
-    { id: "ssse_root_e6", T: "Attr", S: "ssse_fields_header", E: "ssse_add_field" },
-    { id: "ssse_root_e7", T: "Attr", S: "ssse_fields_row", E: "ssse_fields_list" },
-    { id: "ssse_root_e8", T: "Attr", S: "ssse_fields_row", E: "ssse_field_editor_column" },
-    { id: "ssse_root_e9", T: "Attr", S: "ssse_fields_list", E: "ssse_field_items_list" },
-    { id: "ssse_root_e10", T: "Attr", S: "ssse_field_items_list", E: "ssse_field_item" },
-    { id: "ssse_root_e11", T: "Attr", S: "ssse_field_item", E: "ssse_field_row" },
-    { id: "ssse_root_e12", T: "Attr", S: "ssse_field_row", E: "ssse_field_drag" },
-    { id: "ssse_root_e13", T: "Attr", S: "ssse_field_drag", E: "ssse_field_drag_icon" },
-    { id: "ssse_root_e14", T: "Attr", S: "ssse_field_row", E: "ssse_field_summary" },
-    { id: "ssse_root_e15", T: "Attr", S: "ssse_field_row", E: "ssse_field_delete" },
-    { id: "ssse_root_e16", T: "Attr", S: "ssse_field_editor_column", E: "ssse_field_editor" },
-    { id: "ssse_root_e17", T: "Attr", S: "ssse_field_editor_column", E: "ssse_field_array_schema" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "7"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "4"
+      E: "6"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "7"
+      E: "16"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "10"
+      E: "11"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "11"
+      E: "12"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "11"
+      E: "14"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "11"
+      E: "15"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "12"
+      E: "13"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "16"
+      E: "17"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "16"
+      E: "18"
+    }
   ]
 }

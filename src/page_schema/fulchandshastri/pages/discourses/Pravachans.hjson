@@ -1,0 +1,57 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        fns: return { enabled: () => true }
+        key: Pravachans
+        url: /pravachans
+        updatedAt: 2026-07-08T01:53:20.972Z
+        props:
+          '''return {
+    isNoPermissionCheck: true
+}'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        as: div
+        displayOrder: 1
+        textType: markdown
+        componentName: Html
+        text:
+          '''- [Pravachansaar](/pravachansaar)
+- [द्रव्य दृष्टि प्रकाश](/dravya-drishti-prakash)
+- [धर्म सभा](/dharm-sabha)
+- [समाधि प्रज्ञ](/samadhi-pragna)
+- [DCDP](/dcdp)
+'''
+        key: unique_1
+      }
+    }
+    {
+      id: "3"
+      L: PageLayout
+      P: {
+        componentName: Layout
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: PageLayout
+      S: "1"
+      E: "3"
+    }
+  ]
+}

@@ -1,14 +1,12 @@
 {
   vertexes: [
     {
-      id: "page",
-      L: "Page",
+      id: "1"
+      L: Page
       P: {
-        key: "PortalTable",
-        url: "/portal/table",
-        title: "Table Admin",
-        signinRequired: true,
-        fns: '''
+        signinRequired: true
+        fns:
+          '''
 const checkAdminRole = () => {
   const userRoles = args.user?.OUT?.UserRole || [];
   return userRoles.some((edgeId) => {
@@ -222,8 +220,13 @@ return {
   setEditorMode,
   onSchemaSaved
 };
-''',
-        props: '''
+'''
+        title: Table Admin
+        key: PortalTable
+        url: /portal/table
+        updatedAt: 2026-07-17T11:49:43.378Z
+        props:
+          '''
 return {
   isNoPermissionCheck: true,
   onMount: () => {
@@ -239,20 +242,13 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "shell",
-      L: "Attr",
+      id: "2"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "section",
-  hide: !args.fns.checkAdminRole?.()
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: flex;
   flex-direction: column;
@@ -262,18 +258,23 @@ return `._id {
   overflow: hidden;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "section",
+  hide: !args.fns.checkAdminRole?.()
+};
+'''
       }
-    },
+    }
     {
-      id: "header",
-      L: "Attr",
+      id: "3"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return { as: "header" };
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: flex;
   align-items: center;
@@ -285,21 +286,20 @@ return `._id {
   flex-shrink: 0;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return { as: "header" };
+'''
       }
-    },
+    }
     {
-      id: "headerTitle",
-      L: "Attr",
+      id: "4"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "h1",
-  text: args.fns.getTableTitle?.()
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   margin: 0;
   font-size: 1.25rem;
@@ -307,32 +307,44 @@ return `._id {
   color: ${args.theme.var.color.text};
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "h1",
+  text: args.fns.getTableTitle?.()
+};
+'''
       }
-    },
+    }
     {
-      id: "modeTabs",
-      L: "Attr",
+      id: "5"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return { as: "div" };
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: flex;
   gap: 0.5rem;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return { as: "div" };
+'''
       }
-    },
+    }
     {
-      id: "contentTab",
-      L: "Attr",
+      id: "6"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Button",
-        props: '''
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''
 const active = args.fns.isSchemaMode?.() !== true;
 return {
   text: "Content",
@@ -341,14 +353,15 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "schemaTab",
-      L: "Attr",
+      id: "7"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Button",
-        props: '''
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
 const active = args.fns.isSchemaMode?.() === true;
 return {
   text: "Schema",
@@ -357,20 +370,13 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "contentPane",
-      L: "Attr",
+      id: "8"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  hide: args.fns.isSchemaMode?.() === true
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   flex: 1;
   min-height: 0;
@@ -379,18 +385,23 @@ return `._id {
   overflow: hidden;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  hide: args.fns.isSchemaMode?.() === true
+};
+'''
       }
-    },
+    }
     {
-      id: "pageFill",
-      L: "Attr",
+      id: "9"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return { as: "div" };
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   flex: 1;
   min-height: 0;
@@ -402,15 +413,22 @@ return `._id {
   overflow: hidden;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return { as: "div" };
+'''
       }
-    },
+    }
     {
-      id: "dynamicPage",
-      L: "Attr",
+      id: "10"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "DynamicPage",
-        props: '''
+        displayOrder: 1
+        componentName: DynamicPage
+        props:
+          '''
 const tableKey = args.fns.getTableKey?.() || "books";
 const tableVertexLabel = args.fns.getTableVertexLabel?.() || "Book";
 const actionHandlers = args.fns.getTableActionHandlers?.();
@@ -429,20 +447,13 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "schemaPane",
-      L: "Attr",
+      id: "11"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  hide: args.fns.isSchemaMode?.() !== true
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   flex: 1;
   min-height: 0;
@@ -451,15 +462,25 @@ return `._id {
   overflow: hidden;
 }`;
 '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  hide: args.fns.isSchemaMode?.() !== true
+};
+'''
       }
-    },
+    }
     {
-      id: "schemaEditor",
-      L: "Attr",
+      id: "12"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "TableSchemaEditorShell",
-        props: '''
+        displayOrder: 1
+        componentName: TableSchemaEditorShell
+        props:
+          '''
 const tableKey = args.fns.getTableKey?.();
 return {
   tableKey,
@@ -468,28 +489,88 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "layout",
-      L: "PageLayout",
+      id: "13"
+      L: PageLayout
       P: {
-        displayOrder: 1,
-        componentName: "PortalLayout"
+        displayOrder: 1
+        componentName: PortalLayout
       }
     }
-  ],
+  ]
   edges: [
-    { id: "e1", T: "Attr", S: "page", E: "shell" },
-    { id: "e2", T: "Attr", S: "shell", E: "header" },
-    { id: "e3", T: "Attr", S: "header", E: "headerTitle" },
-    { id: "e4", T: "Attr", S: "header", E: "modeTabs" },
-    { id: "e5", T: "Attr", S: "modeTabs", E: "contentTab" },
-    { id: "e6", T: "Attr", S: "modeTabs", E: "schemaTab" },
-    { id: "e7", T: "Attr", S: "shell", E: "contentPane" },
-    { id: "e7a", T: "Attr", S: "contentPane", E: "pageFill" },
-    { id: "e8", T: "Attr", S: "pageFill", E: "dynamicPage" },
-    { id: "e9", T: "Attr", S: "shell", E: "schemaPane" },
-    { id: "e10", T: "Attr", S: "schemaPane", E: "schemaEditor" },
-    { id: "e_layout", T: "PageLayout", S: "page", E: "layout" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: PageLayout
+      S: "1"
+      E: "13"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "8"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "11"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "5"
+      E: "7"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "11"
+      E: "12"
+    }
   ]
 }

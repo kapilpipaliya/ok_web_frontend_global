@@ -175,30 +175,13 @@ return {
       id: "6"
       L: ComponentVariant
       P: {
-        type: function
-        key: onInput
+        type: string
+        key: type
+        defValue: text
       }
     }
     {
       id: "7"
-      L: ComponentVariant
-      P: {
-        type: string
-        defValue: ""
-        key: value
-      }
-    }
-    {
-      id: "8"
-      L: ComponentVariant
-      P: {
-        type: string
-        defValue: text
-        key: type
-      }
-    }
-    {
-      id: "9"
       L: ComponentVariantOption
       P: {
         description: Standard text input
@@ -207,7 +190,7 @@ return {
       }
     }
     {
-      id: "10"
+      id: "8"
       L: ComponentVariantOption
       P: {
         description: Email input with validation
@@ -216,7 +199,7 @@ return {
       }
     }
     {
-      id: "11"
+      id: "9"
       L: ComponentVariantOption
       P: {
         description: Password input (hidden text)
@@ -225,7 +208,7 @@ return {
       }
     }
     {
-      id: "12"
+      id: "10"
       L: ComponentVariantOption
       P: {
         description: Numeric input
@@ -234,7 +217,7 @@ return {
       }
     }
     {
-      id: "13"
+      id: "11"
       L: ComponentVariantOption
       P: {
         description: Telephone number input
@@ -243,7 +226,7 @@ return {
       }
     }
     {
-      id: "14"
+      id: "12"
       L: ComponentVariantOption
       P: {
         description: URL input with validation
@@ -252,7 +235,7 @@ return {
       }
     }
     {
-      id: "15"
+      id: "13"
       L: ComponentVariantOption
       P: {
         description: Search input
@@ -261,91 +244,7 @@ return {
       }
     }
     {
-      id: "16"
-      L: ComponentVariant
-      P: {
-        type: boolean
-        key: required
-        defValue: false
-      }
-    }
-    {
-      id: "17"
-      L: ComponentVariant
-      P: {
-        type: number
-        key: iconSize
-        defValue: 20
-      }
-    }
-    {
-      id: "18"
-      L: ComponentVariant
-      P: {
-        type: function
-        key: onChange
-      }
-    }
-    {
-      id: "19"
-      L: ComponentVariant
-      P: {
-        type: string
-        key: placeholder
-        defValue: ""
-      }
-    }
-    {
-      id: "20"
-      L: ComponentVariant
-      P: {
-        type: number
-        key: minLength
-      }
-    }
-    {
-      id: "21"
-      L: ComponentVariant
-      P: {
-        type: boolean
-        key: readOnly
-        defValue: false
-      }
-    }
-    {
-      id: "22"
-      L: ComponentVariant
-      P: {
-        type: string
-        key: leftIcon
-      }
-    }
-    {
-      id: "23"
-      L: ComponentVariant
-      P: {
-        type: function
-        key: onFocus
-      }
-    }
-    {
-      id: "24"
-      L: ComponentVariant
-      P: {
-        type: number
-        key: maxLength
-      }
-    }
-    {
-      id: "25"
-      L: ComponentVariant
-      P: {
-        type: string
-        key: rightIcon
-      }
-    }
-    {
-      id: "26"
+      id: "14"
       L: ComponentVariant
       P: {
         type: function
@@ -353,16 +252,50 @@ return {
       }
     }
     {
-      id: "27"
+      id: "15"
       L: ComponentVariant
       P: {
-        type: boolean
-        key: disabled
-        defValue: false
+        type: string
+        key: leftIcon
       }
     }
     {
-      id: "28"
+      id: "16"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        defValue: false
+        key: required
+      }
+    }
+    {
+      id: "17"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        defValue: false
+        key: autoFocus
+      }
+    }
+    {
+      id: "18"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: value
+        defValue: ""
+      }
+    }
+    {
+      id: "19"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onFocus
+      }
+    }
+    {
+      id: "20"
       L: ComponentVariant
       P: {
         type: function
@@ -370,12 +303,79 @@ return {
       }
     }
     {
-      id: "29"
+      id: "21"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: rightIcon
+      }
+    }
+    {
+      id: "22"
+      L: ComponentVariant
+      P: {
+        type: number
+        defValue: 20
+        key: iconSize
+      }
+    }
+    {
+      id: "23"
+      L: ComponentVariant
+      P: {
+        type: number
+        key: maxLength
+      }
+    }
+    {
+      id: "24"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onChange
+      }
+    }
+    {
+      id: "25"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onInput
+      }
+    }
+    {
+      id: "26"
       L: ComponentVariant
       P: {
         type: boolean
-        key: autoFocus
         defValue: false
+        key: readOnly
+      }
+    }
+    {
+      id: "27"
+      L: ComponentVariant
+      P: {
+        type: number
+        key: minLength
+      }
+    }
+    {
+      id: "28"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        defValue: false
+        key: disabled
+      }
+    }
+    {
+      id: "29"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: ""
+        key: placeholder
       }
     }
   ]
@@ -396,13 +396,13 @@ return {
       id: e3
       T: ComponentVariant
       S: "1"
-      E: "7"
+      E: "14"
     }
     {
       id: e4
       T: ComponentVariant
       S: "1"
-      E: "8"
+      E: "15"
     }
     {
       id: e5
@@ -509,44 +509,44 @@ return {
     {
       id: e22
       T: ComponentVariantOption
-      S: "8"
-      E: "9"
+      S: "6"
+      E: "7"
     }
     {
       id: e23
       T: ComponentVariantOption
-      S: "8"
-      E: "10"
+      S: "6"
+      E: "8"
     }
     {
       id: e24
       T: ComponentVariantOption
-      S: "8"
-      E: "11"
+      S: "6"
+      E: "9"
     }
     {
       id: e25
       T: ComponentVariantOption
-      S: "8"
-      E: "12"
+      S: "6"
+      E: "10"
     }
     {
       id: e26
       T: ComponentVariantOption
-      S: "8"
-      E: "13"
+      S: "6"
+      E: "11"
     }
     {
       id: e27
       T: ComponentVariantOption
-      S: "8"
-      E: "14"
+      S: "6"
+      E: "12"
     }
     {
       id: e28
       T: ComponentVariantOption
-      S: "8"
-      E: "15"
+      S: "6"
+      E: "13"
     }
   ]
 }

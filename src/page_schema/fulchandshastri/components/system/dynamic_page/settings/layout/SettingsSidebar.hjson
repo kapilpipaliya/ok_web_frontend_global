@@ -4,7 +4,6 @@
       id: "1"
       L: Component
       P: {
-        key: SettingsSidebar
         fns:
           '''
 const getSidebarConfig = () => args.contextData.props?.sidebarConfig || args.fns.getSettingsSidebarConfig?.() || null;
@@ -66,13 +65,13 @@ return {
   sidebarTitle: () => getSidebarConfig()?.title || "Settings"
 };
 '''
+        key: SettingsSidebar
       }
     }
     {
       id: "2"
       L: Attr
       P: {
-        displayOrder: 1
         css:
           '''
 return `._id {
@@ -94,6 +93,7 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 1
         componentName: Html
         props:
           '''
@@ -107,7 +107,6 @@ return {
       id: "3"
       L: Attr
       P: {
-        displayOrder: 1
         css:
           '''
 return `._id {
@@ -117,6 +116,7 @@ return `._id {
   margin-bottom: ${args.theme.var.spacing.md};
 }`;
 '''
+        displayOrder: 1
         componentName: Html
         props:
           '''
@@ -131,16 +131,16 @@ return {
       id: "4"
       L: Attr
       P: {
-        displayOrder: 2
+        contextName: sidebarGroup
         css:
           '''
 return `._id {
   margin-bottom: ${args.theme.var.spacing.md};
 }`;
 '''
-        componentName: Html
-        contextName: sidebarGroup
         loop: true
+        displayOrder: 2
+        componentName: Html
         props:
           '''
 return {
@@ -154,7 +154,6 @@ return {
       id: "5"
       L: Attr
       P: {
-        displayOrder: 1
         css:
           '''
 return `._id {
@@ -167,6 +166,7 @@ return `._id {
   padding: 0 ${args.theme.var.spacing.sm};
 }`;
 '''
+        displayOrder: 1
         componentName: Html
         props:
           '''
@@ -183,7 +183,7 @@ return {
       id: "6"
       L: Attr
       P: {
-        displayOrder: 2
+        contextName: navItem
         css:
           '''
 return `._id {
@@ -192,9 +192,9 @@ return `._id {
   gap: ${args.theme.var.spacing.xxs};
 }`;
 '''
-        componentName: Html
-        contextName: navItem
         loop: true
+        displayOrder: 2
+        componentName: Html
         props:
           '''
 const group = args.contextData.sidebarGroup;
@@ -209,7 +209,6 @@ return {
       id: "7"
       L: Attr
       P: {
-        displayOrder: 1
         css:
           '''
 const item = args.contextData.navItem;
@@ -240,6 +239,7 @@ return active
   background: ${args.theme.var.color.background_light_200};
 }`;
 '''
+        displayOrder: 1
         componentName: Html
         props:
           '''
@@ -258,11 +258,41 @@ return {
     }
   ]
   edges: [
-    { id: "e1", T: "Attr", S: "1", E: "2" }
-    { id: "e2", T: "Attr", S: "2", E: "3" }
-    { id: "e3", T: "Attr", S: "2", E: "4" }
-    { id: "e4", T: "Attr", S: "4", E: "5" }
-    { id: "e5", T: "Attr", S: "4", E: "6" }
-    { id: "e6", T: "Attr", S: "6", E: "7" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "4"
+      E: "6"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "6"
+      E: "7"
+    }
   ]
 }

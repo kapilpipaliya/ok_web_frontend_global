@@ -4,7 +4,6 @@
       id: "1"
       L: Function
       P: {
-        key: saveTableConfigSection
         description: Saves a table config section document then syncs table_schema part Settings.
         body:
           '''
@@ -75,6 +74,7 @@ return {
   }
 };
 '''
+        key: saveTableConfigSection
       }
     }
   ]

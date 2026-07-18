@@ -4,7 +4,6 @@
       id: "1"
       L: Function
       P: {
-        key: getTableSchema
         description: Loads a table_schema Setting vertex by explicit key or tableKey + part.
         body:
           '''
@@ -64,6 +63,7 @@ return {
   message: "Table schema loaded"
 };
 '''
+        key: getTableSchema
       }
     }
   ]

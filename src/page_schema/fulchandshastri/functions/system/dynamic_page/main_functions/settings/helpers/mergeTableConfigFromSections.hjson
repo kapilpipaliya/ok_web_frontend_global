@@ -4,7 +4,6 @@
       id: "1"
       L: Function
       P: {
-        key: mergeTableConfigFromSections
         description: Syncs table section documents into table_schema part Settings (general, columns, formConfig, sidebar).
         body:
           '''
@@ -157,6 +156,7 @@ return {
   data: { config: runtimeConfig, schemaKeys: ids.schemaKeys, ids }
 };
 '''
+        key: mergeTableConfigFromSections
       }
     }
   ]

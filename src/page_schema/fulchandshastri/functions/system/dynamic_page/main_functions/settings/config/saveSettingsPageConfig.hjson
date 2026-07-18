@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "1",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "saveSettingsPageConfig",
-        description: "Saves settings_page_config function body for a page. Admin only; updates the default Setting vertex.",
-        body: '''
+        description: Saves settings_page_config function body for a page. Admin only; updates the default Setting vertex.
+        body:
+          '''
 const actualUser = await args.getUserFromSession();
 if (!actualUser) {
   return { success: false, message: "User session not found. Please log in and try again." };
@@ -127,8 +127,9 @@ return {
   message: "Default settings page config saved"
 };
 '''
+        key: saveSettingsPageConfig
       }
     }
-  ],
+  ]
   edges: []
 }

@@ -450,20 +450,12 @@ return {
       id: "9"
       L: ComponentVariant
       P: {
-        type: object
-        key: initialVertex
+        type: function
+        key: onClose
       }
     }
     {
       id: "10"
-      L: ComponentVariant
-      P: {
-        type: object
-        key: rootKeys
-      }
-    }
-    {
-      id: "11"
       L: ComponentVariant
       P: {
         type: string
@@ -471,23 +463,40 @@ return {
       }
     }
     {
-      id: "12"
+      id: "11"
       L: ComponentVariant
       P: {
         type: string
-        key: toParentEdgeType
+        key: parentVertexLabel
+      }
+    }
+    {
+      id: "12"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onSave
       }
     }
     {
       id: "13"
       L: ComponentVariant
       P: {
-        type: function
-        key: onClose
+        type: string
+        key: vertexId
       }
     }
     {
       id: "14"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: mode
+        defValue: add
+      }
+    }
+    {
+      id: "15"
       L: ComponentVariant
       P: {
         type: boolean
@@ -496,32 +505,7 @@ return {
       }
     }
     {
-      id: "15"
-      L: ComponentVariant
-      P: {
-        type: string
-        key: parentVertexLabel
-      }
-    }
-    {
       id: "16"
-      L: ComponentVariant
-      P: {
-        type: string
-        defValue: add
-        key: mode
-      }
-    }
-    {
-      id: "17"
-      L: ComponentVariant
-      P: {
-        type: function
-        key: onSave
-      }
-    }
-    {
-      id: "18"
       L: ComponentVariant
       P: {
         type: object
@@ -529,11 +513,27 @@ return {
       }
     }
     {
+      id: "17"
+      L: ComponentVariant
+      P: {
+        type: object
+        key: initialVertex
+      }
+    }
+    {
+      id: "18"
+      L: ComponentVariant
+      P: {
+        type: object
+        key: rootKeys
+      }
+    }
+    {
       id: "19"
       L: ComponentVariant
       P: {
         type: string
-        key: vertexId
+        key: toParentEdgeType
       }
     }
   ]

@@ -1277,13 +1277,13 @@ const updateCategoryCountFromFetchedData = (fetchedData, categoryItem) => {
   // Use the category item passed from fetchData, not the currently selected item
   // This ensures we update the count for the category that was actually fetched
   if (!categoryItem) return;
-  
+
   const sidebarConfig = args.fns.getSidebarConfig?.() || (args.fns.evaluateConfig?.() || {}).sidebar;
   if (!sidebarConfig) return;
-  
+
   const rootKeys = sidebarConfig.rootKeys || {};
   const rootKey = rootKeys.key;
-  
+
   const tableLabel = args.fns.getTableVertexLabel?.();
   const uncategorizedVertexId = tableLabel ? '_' + tableLabel + '_uncategorized' : null;
   const isSyntheticUncat =
@@ -1292,9 +1292,9 @@ const updateCategoryCountFromFetchedData = (fetchedData, categoryItem) => {
   const isUncategorized = categoryItem.P?.key === rootKey || isSyntheticUncat;
   if (isUncategorized && !uncategorizedVertexId) return;
   const categoryId = isUncategorized ? uncategorizedVertexId : categoryItem.id;
-  
+
   if (!categoryId) return;
-  
+
   let currentCount = 0;
   if (isUncategorized) {
     const uncategorizedVertex = args.graph?.vertexes?.[uncategorizedVertexId];
@@ -1303,7 +1303,7 @@ const updateCategoryCountFromFetchedData = (fetchedData, categoryItem) => {
     const categoryVertex = args.graph?.vertexes?.[categoryId];
     currentCount = categoryVertex?.P?.contentCount ?? 0;
   }
-  
+
   const fetchedLength = fetchedData?.length ?? 0;
   if (currentCount !== fetchedLength) {
     if (isUncategorized) {
@@ -1326,10 +1326,10 @@ const updateCategoryCountFromFetchedData = (fetchedData, categoryItem) => {
 
 const debouncedSetSearchTerm = args.debounce(value => {
   patchTableP({ searchTerm: value });
-  
+
   // Check if local filters are enabled
   const enableLocalFilters = args.fns.getConfigGeneralValue?.("enableLocalFilters") !== false;
-  
+
   if (enableLocalFilters) {
     // Apply local filters only
     applyLocalFilters();
@@ -1560,7 +1560,7 @@ const handleSort = (column) => {
 
   // Check if local sort is enabled
   const enableLocalSort = args.fns.getConfigGeneralValue?.("enableLocalSort") !== false;
-  
+
   if (enableLocalSort) {
     // Apply local sort only
     applyLocalFilters();
@@ -1594,11 +1594,11 @@ const getSelectFilterProps = (columnKey, filterValue, options) => {
   let normalizedValue = Array.isArray(filterValue) 
     ? filterValue.filter(v => v !== null && v !== undefined && v !== "" && v !== "_All_VALUES_")
     : (filterValue && filterValue !== "_All_VALUES_" ? [filterValue] : []);
-  
+
   // If filter is cleared (undefined), pass empty array to clear TomSelect
   // TomSelect needs empty array for multiple mode to show as cleared
   const displayValue = filterValue === undefined ? [] : normalizedValue;
-  
+
   // Check if filter is currently empty
   const isFilterEmpty = filterValue === undefined || 
     (Array.isArray(filterValue) && filterValue.length === 0) ||
@@ -1650,7 +1650,7 @@ const handleColumnFilterChange = (columnKey, value) => {
 
   // Check if local filters are enabled
   const enableLocalFilters = args.fns.getConfigGeneralValue?.("enableLocalFilters") !== false;
-  
+
   if (enableLocalFilters) {
     // Apply local filters only
     applyLocalFilters();
@@ -1732,7 +1732,7 @@ const handleSearch = () => {
   }
   const enableLocalFilters = args.fns.getConfigGeneralValue?.("enableLocalFilters") !== false;
   const enableLocalSort = args.fns.getConfigGeneralValue?.("enableLocalSort") !== false;
-  
+
   // If local filters/sort are enabled, fetch all data and apply locally
   // Otherwise, pass filters/sort to server
   args.fns.fetchData(
@@ -1752,20 +1752,20 @@ const handleSearch = () => {
       }
       const contentRowIds = rowIdsFromVertices(fetchedRows);
       patchTableP({ data: contentRowIds });
-      
+
       // Update category count with fetched data length if local filters are enabled
       // Pass the categoryItem that was used for fetching, not the currently selected item
       if (enableLocalFilters) {
         updateCategoryCountFromFetchedData(fetchedRows, categoryItem);
       }
-      
+
       // Always apply local filters if enabled, or if server didn't filter
       if (enableLocalFilters || enableLocalSort) {
         applyLocalFilters();
       } else {
         patchTableP({ filteredData: contentRowIds });
       }
-      
+
       startPollIfQueued(fetchedRows);
     }
   );
@@ -1878,7 +1878,7 @@ const getActiveRowIndex = () => {
 // Handle add/edit
 const handleAdd = async () => {
   const onAdd = getOnAdd();
-  
+
   // If onAdd function is provided, call it instead of opening modal
   if (onAdd && typeof onAdd === 'function') {
     try {
@@ -1890,14 +1890,14 @@ const handleAdd = async () => {
       return;
     }
   }
-  
+
   // Default behavior: open add modal
   patchTableP({ modalMode: "add", editingRow: null, formData: null, isModalOpen: true });
 };
 
 const handleEdit = async (row) => {
   const onEdit = getOnEdit();
-  
+
   // If onEdit function is provided, call it instead of opening modal
   if (onEdit && typeof onEdit === 'function') {
     try {
@@ -1909,7 +1909,7 @@ const handleEdit = async (row) => {
       return;
     }
   }
-  
+
   // Default behavior: open edit modal
   patchTableP({ modalMode: "edit", editingRow: row, formData: row, isModalOpen: true });
 };
@@ -2045,7 +2045,7 @@ const handleDelete = async (row, options = {}) => {
       const updated = normalizeRowIds(tableP()?.data ?? []).filter((id) => id !== rid);
       patchTableP({ data: updated });
       applyLocalFilters();
-      
+
       // Check if onAfterDelete function is provided
       const onAfterDelete = getOnAfterDelete();
       if (onAfterDelete && typeof onAfterDelete === 'function') {
@@ -2246,13 +2246,13 @@ const canDragRow = (rowId) => {
 // Initialize draggable for table row - rowId read from element data-row-id
 const initTableDraggable = (element) => {
   if (!element || !args.draggable) return;
-  
+
   // Clean up existing draggable for this element if any
   const existingCleanup = tableDraggableCleanups.get(element);
   if (existingCleanup) {
     existingCleanup();
   }
-  
+
   const cleanup = args.draggable({
     element,
     getInitialData: () => {
@@ -2260,10 +2260,10 @@ const initTableDraggable = (element) => {
       if (!currentRowId || !canDragRow(currentRowId)) {
         return { type: 'table-items', itemIds: [], count: 0 };
       }
-      
+
       const selected = getEffectiveSelectedRows();
       const itemIds = Array.from(selected).filter(id => id !== undefined && id !== null);
-      
+
       return {
         type: 'table-items',
         itemIds,
@@ -2341,7 +2341,7 @@ const initTableDraggable = (element) => {
       if (element) element.style.opacity = "1";
     }
   });
-  
+
   tableDraggableCleanups.set(element, cleanup);
   const rowId = getRowIdFromElement(element);
   if (rowId) tableDraggableElements.set(rowId, element);
@@ -2709,10 +2709,11 @@ return {
     args.deleteVertex(0, args.fns.tableStateVertexId, args.graph, args.setGraph);
   }
 }'''
+        updatedAt: 2026-07-17T11:49:40.522Z
       }
     }
     {
-      id: "3"
+      id: "2"
       L: Attr
       P: {
         css:
@@ -2771,7 +2772,7 @@ return {
       }
     }
     {
-      id: "4"
+      id: "3"
       L: Attr
       P: {
         slotName: header
@@ -2780,7 +2781,7 @@ return {
       }
     }
     {
-      id: "5"
+      id: "4"
       L: Attr
       P: {
         css:
@@ -2806,7 +2807,7 @@ return {
       }
     }
     {
-      id: "6"
+      id: "5"
       L: Attr
       P: {
         css:
@@ -2830,7 +2831,7 @@ return {
       }
     }
     {
-      id: "7"
+      id: "6"
       L: Attr
       P: {
         css:
@@ -2858,7 +2859,7 @@ return {
       }
     }
     {
-      id: "7a"
+      id: "7"
       L: Attr
       P: {
         displayOrder: 1
@@ -2877,7 +2878,7 @@ return {
       }
     }
     {
-      id: "7b"
+      id: "8"
       L: Attr
       P: {
         css:
@@ -2901,7 +2902,7 @@ return {
       }
     }
     {
-      id: "7c"
+      id: "9"
       L: Attr
       P: {
         css:
@@ -2924,7 +2925,42 @@ return {
       }
     }
     {
-      id: "7d"
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.sm};
+  flex-wrap: wrap;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const customActions = args.fns.getCustomActions?.() || [];
+const hasCustomActions = Array.isArray(customActions) ? customActions.length > 0 : !!customActions;
+return {
+  as: "div",
+  hide: !hasCustomActions
+};
+'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        slotName: customActions
+        displayOrder: 1
+        componentName: Slot
+      }
+    }
+    {
+      id: "12"
       L: Attr
       P: {
         css:
@@ -2952,42 +2988,7 @@ return {
       }
     }
     {
-      id: "8"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  display: flex;
-  align-items: center;
-  gap: ${args.theme.var.spacing.sm};
-  flex-wrap: wrap;
-}`;
-'''
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''
-const customActions = args.fns.getCustomActions?.() || [];
-const hasCustomActions = Array.isArray(customActions) ? customActions.length > 0 : !!customActions;
-return {
-  as: "div",
-  hide: !hasCustomActions
-};
-'''
-      }
-    }
-    {
-      id: "9"
-      L: Attr
-      P: {
-        slotName: customActions
-        displayOrder: 1
-        componentName: Slot
-      }
-    }
-    {
-      id: "16"
+      id: "13"
       L: Attr
       P: {
         css:
@@ -3010,7 +3011,7 @@ return {
       }
     }
     {
-      id: "17"
+      id: "14"
       L: Attr
       P: {
         slotName: additionalFilters
@@ -3019,7 +3020,7 @@ return {
       }
     }
     {
-      id: "10"
+      id: "15"
       L: Attr
       P: {
         css:
@@ -3045,25 +3046,7 @@ return {
       }
     }
     {
-      id: "11"
-      L: Attr
-      P: {
-        displayOrder: 1
-        componentName: Button
-        props:
-          '''
-return {
-  variant: "primary",
-  onClick: args.fns.handleAdd,
-  text: "Add",
-  leftIcon: "carbon:add",
-  hide: args.fns.getUsePolarisUI?.() === true
-};
-'''
-      }
-    }
-    {
-      id: "11_polaris"
+      id: "16"
       L: Attr
       P: {
         displayOrder: 1
@@ -3082,35 +3065,7 @@ return {
       }
     }
     {
-      id: "12"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  display: flex;
-  align-items: center;
-  gap: ${args.theme.var.spacing.sm};
-}`;
-'''
-        displayOrder: 6
-        componentName: Html
-        props:
-          '''
-const hasImport = !!args.fns.getImportFunction();
-const hasExport = !!args.fns.getExportFunction();
-const hideImportButtons = args.fns.getHideImportButtons();
-const hideExportButtons = args.fns.getHideExportButtons();
-
-return {
-  as: "div",
-  hide: (!hasImport && !hasExport) || (hideImportButtons && hideExportButtons)
-};
-'''
-      }
-    }
-    {
-      id: "14"
+      id: "17"
       L: Attr
       P: {
         displayOrder: 1
@@ -3118,110 +3073,11 @@ return {
         props:
           '''
 return {
-  variant: "secondary",
-  onClick: () => args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { isImportModalOpen: true }),
-  text: "Import",
-  leftIcon: "carbon:upload",
-  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
-  hide: !args.fns.getImportFunction() || args.fns.getHideImportButtons() || args.fns.getUsePolarisUI?.() === true
-};
-'''
-      }
-    }
-    {
-      id: "14_polaris"
-      L: Attr
-      P: {
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''
-return {
-  as: "s-button",
-  "attr:variant": "secondary",
-  "attr:icon": "upload",
-  text: "Import",
-  onClick: () => args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { isImportModalOpen: true }),
-  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
-  hide: !args.fns.getImportFunction() || args.fns.getHideImportButtons() || args.fns.getUsePolarisUI?.() !== true
-};
-'''
-      }
-    }
-    {
-      id: "13"
-      L: Attr
-      P: {
-        displayOrder: 2
-        componentName: Button
-        props:
-          '''
-return {
-  variant: "secondary",
-  onClick: args.fns.handleExport,
-  text: "Export All",
-  leftIcon: "carbon:download",
-  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
-  hide: !args.fns.getExportFunction() || args.fns.getHideExportButtons() || args.fns.getUsePolarisUI?.() === true
-};
-'''
-      }
-    }
-    {
-      id: "13_polaris"
-      L: Attr
-      P: {
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''
-return {
-  as: "s-button",
-  "attr:variant": "secondary",
-  "attr:icon": "download",
-  text: "Export All",
-  onClick: args.fns.handleExport,
-  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
-  hide: !args.fns.getExportFunction() || args.fns.getHideExportButtons() || args.fns.getUsePolarisUI?.() !== true
-};
-'''
-      }
-    }
-    {
-      id: "15"
-      L: Attr
-      P: {
-        displayOrder: 3
-        componentName: Button
-        props:
-          '''
-return {
-  variant: "secondary",
-  onClick: () => args.fns.handleExport(args.fns.resolveFilteredVerticesForExport?.() ?? []),
-  text: "Export Filtered",
-  leftIcon: "carbon:filter",
-  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
-  hide: !args.fns.getExportFunction() || args.fns.getHideExportButtons() || args.fns.getUsePolarisUI?.() === true
-};
-'''
-      }
-    }
-    {
-      id: "15_polaris"
-      L: Attr
-      P: {
-        displayOrder: 3
-        componentName: Html
-        props:
-          '''
-return {
-  as: "s-button",
-  "attr:variant": "secondary",
-  "attr:icon": "filter",
-  text: "Export Filtered",
-  onClick: () => args.fns.handleExport(args.fns.resolveFilteredVerticesForExport?.() ?? []),
-  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
-  hide: !args.fns.getExportFunction() || args.fns.getHideExportButtons() || args.fns.getUsePolarisUI?.() !== true
+  variant: "primary",
+  onClick: args.fns.handleAdd,
+  text: "Add",
+  leftIcon: "carbon:add",
+  hide: args.fns.getUsePolarisUI?.() === true
 };
 '''
       }
@@ -3271,7 +3127,7 @@ return {
       }
     }
     {
-      id: "19_polaris"
+      id: "20"
       L: Attr
       P: {
         css:
@@ -3298,7 +3154,7 @@ return {
       }
     }
     {
-      id: "20"
+      id: "21"
       L: Attr
       P: {
         displayOrder: 2
@@ -3317,26 +3173,7 @@ return {
       }
     }
     {
-      id: "21"
-      L: Attr
-      P: {
-        displayOrder: 5
-        componentName: Button
-        props:
-          '''
-return {
-  variant: "secondary",
-  onClick: args.fns.handleOpenSettings,
-  text: "Settings",
-  leftIcon: "carbon:settings",
-  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
-  hide: !args.fns.getSettingsFunction() || args.fns.getHideSettingsButton() || args.fns.getUsePolarisUI?.() === true
-};
-'''
-      }
-    }
-    {
-      id: "21_polaris"
+      id: "22"
       L: Attr
       P: {
         displayOrder: 5
@@ -3356,7 +3193,171 @@ return {
       }
     }
     {
-      id: "22"
+      id: "23"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "secondary",
+  onClick: args.fns.handleOpenSettings,
+  text: "Settings",
+  leftIcon: "carbon:settings",
+  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
+  hide: !args.fns.getSettingsFunction() || args.fns.getHideSettingsButton() || args.fns.getUsePolarisUI?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "24"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.sm};
+}`;
+'''
+        displayOrder: 6
+        componentName: Html
+        props:
+          '''
+const hasImport = !!args.fns.getImportFunction();
+const hasExport = !!args.fns.getExportFunction();
+const hideImportButtons = args.fns.getHideImportButtons();
+const hideExportButtons = args.fns.getHideExportButtons();
+
+return {
+  as: "div",
+  hide: (!hasImport && !hasExport) || (hideImportButtons && hideExportButtons)
+};
+'''
+      }
+    }
+    {
+      id: "25"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "s-button",
+  "attr:variant": "secondary",
+  "attr:icon": "upload",
+  text: "Import",
+  onClick: () => args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { isImportModalOpen: true }),
+  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
+  hide: !args.fns.getImportFunction() || args.fns.getHideImportButtons() || args.fns.getUsePolarisUI?.() !== true
+};
+'''
+      }
+    }
+    {
+      id: "26"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "secondary",
+  onClick: () => args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { isImportModalOpen: true }),
+  text: "Import",
+  leftIcon: "carbon:upload",
+  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
+  hide: !args.fns.getImportFunction() || args.fns.getHideImportButtons() || args.fns.getUsePolarisUI?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "27"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "secondary",
+  onClick: args.fns.handleExport,
+  text: "Export All",
+  leftIcon: "carbon:download",
+  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
+  hide: !args.fns.getExportFunction() || args.fns.getHideExportButtons() || args.fns.getUsePolarisUI?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "28"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "s-button",
+  "attr:variant": "secondary",
+  "attr:icon": "download",
+  text: "Export All",
+  onClick: args.fns.handleExport,
+  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
+  hide: !args.fns.getExportFunction() || args.fns.getHideExportButtons() || args.fns.getUsePolarisUI?.() !== true
+};
+'''
+      }
+    }
+    {
+      id: "29"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "secondary",
+  onClick: () => args.fns.handleExport(args.fns.resolveFilteredVerticesForExport?.() ?? []),
+  text: "Export Filtered",
+  leftIcon: "carbon:filter",
+  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
+  hide: !args.fns.getExportFunction() || args.fns.getHideExportButtons() || args.fns.getUsePolarisUI?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "30"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "s-button",
+  "attr:variant": "secondary",
+  "attr:icon": "filter",
+  text: "Export Filtered",
+  onClick: () => args.fns.handleExport(args.fns.resolveFilteredVerticesForExport?.() ?? []),
+  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
+  hide: !args.fns.getExportFunction() || args.fns.getHideExportButtons() || args.fns.getUsePolarisUI?.() !== true
+};
+'''
+      }
+    }
+    {
+      id: "31"
       L: Attr
       P: {
         css:
@@ -3385,7 +3386,7 @@ return {
       }
     }
     {
-      id: "22h"
+      id: "32"
       L: Attr
       P: {
         css:
@@ -3413,35 +3414,7 @@ return {
       }
     }
     {
-      id: "22f"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  flex-shrink: 0;
-  min-width: 0;
-  width: 100%;
-  /* Same as header strip: hidden overflow + scrollLeft sync from body */
-  overflow-x: hidden;
-  overflow-y: hidden;
-}`;
-'''
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''
-return {
-  as: "div",
-  ref: (el) => {
-    args.fns.setTableFilterHScrollEl(el);
-  }
-};
-'''
-      }
-    }
-    {
-      id: "23"
+      id: "33"
       L: Attr
       P: {
         css:
@@ -3468,7 +3441,7 @@ return {
       }
     }
     {
-      id: "24"
+      id: "34"
       L: Attr
       P: {
         css:
@@ -3502,53 +3475,7 @@ return {
       }
     }
     {
-      id: "25"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  pointer-events: auto;
-  cursor: pointer;
-  width: 1rem;
-  height: 1rem;
-  accent-color: ${args.theme.var.color.text};
-  flex-shrink: 0;
-}`;
-'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''
-const showSelection = args.fns.getShowSelection();
-const selectionMode = args.fns.getSelectionMode?.();
-const selected = args.fns.getSelectedRows();
-const visibleIds = args.fns.getSelectableVisibleRowIds?.() ?? [];
-const allSelected = visibleIds.length > 0 && visibleIds.every((id) => selected.has(id));
-// const usePolaris = args.fns.getUsePolarisUI?.() === true;
-const usePolaris = false;
-
-return {
-  as: usePolaris ? "s-checkbox" : "input",
-  type: usePolaris ? undefined : "checkbox",
-  "attr:checked": usePolaris && allSelected ? true : undefined,
-  "attr:accessibilityLabel": usePolaris ? "Select all rows" : undefined,
-  checked: usePolaris ? undefined : allSelected,
-  onChange: usePolaris ? (e) => {
-    const checked = e.target?.checked ?? e.detail?.checked ?? !allSelected;
-    if (checked) args.fns.selectAllRows();
-    else args.fns.clearSelection();
-  } : () => {
-    if (allSelected) args.fns.clearSelection();
-    else args.fns.selectAllRows();
-  },
-  hide: !showSelection || args.fns.getSelectionMode?.() === "single"
-};
-'''
-      }
-    }
-    {
-      id: "26"
+      id: "35"
       L: Attr
       P: {
         css:
@@ -3603,7 +3530,53 @@ return {
       }
     }
     {
-      id: "27"
+      id: "36"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  pointer-events: auto;
+  cursor: pointer;
+  width: 1rem;
+  height: 1rem;
+  accent-color: ${args.theme.var.color.text};
+  flex-shrink: 0;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const showSelection = args.fns.getShowSelection();
+const selectionMode = args.fns.getSelectionMode?.();
+const selected = args.fns.getSelectedRows();
+const visibleIds = args.fns.getSelectableVisibleRowIds?.() ?? [];
+const allSelected = visibleIds.length > 0 && visibleIds.every((id) => selected.has(id));
+// const usePolaris = args.fns.getUsePolarisUI?.() === true;
+const usePolaris = false;
+
+return {
+  as: usePolaris ? "s-checkbox" : "input",
+  type: usePolaris ? undefined : "checkbox",
+  "attr:checked": usePolaris && allSelected ? true : undefined,
+  "attr:accessibilityLabel": usePolaris ? "Select all rows" : undefined,
+  checked: usePolaris ? undefined : allSelected,
+  onChange: usePolaris ? (e) => {
+    const checked = e.target?.checked ?? e.detail?.checked ?? !allSelected;
+    if (checked) args.fns.selectAllRows();
+    else args.fns.clearSelection();
+  } : () => {
+    if (allSelected) args.fns.clearSelection();
+    else args.fns.selectAllRows();
+  },
+  hide: !showSelection || args.fns.getSelectionMode?.() === "single"
+};
+'''
+      }
+    }
+    {
+      id: "37"
       L: Attr
       P: {
         css:
@@ -3637,7 +3610,7 @@ return {
       }
     }
     {
-      id: "27a"
+      id: "38"
       L: Attr
       P: {
         css:
@@ -3664,7 +3637,7 @@ return {
       }
     }
     {
-      id: "28"
+      id: "39"
       L: Attr
       P: {
         css:
@@ -3719,7 +3692,7 @@ return {
       }
     }
     {
-      id: "29"
+      id: "40"
       L: Attr
       P: {
         contextName: column
@@ -3740,7 +3713,7 @@ return {
       }
     }
     {
-      id: "30"
+      id: "41"
       L: Attr
       P: {
         css:
@@ -3783,7 +3756,7 @@ return {
       }
     }
     {
-      id: "31"
+      id: "42"
       L: Attr
       P: {
         css:
@@ -3814,7 +3787,44 @@ return {
       }
     }
     {
-      id: "32"
+      id: "43"
+      L: Attr
+      P: {
+        css:
+          '''
+const column = args.contextData.column;
+
+return `._id {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: 2px;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const column = args.contextData.column;
+const columnFilters = args.graph.vertexes[args.fns.tableStateVertexId]?.P?.columnFilters ?? {};
+const filterValue = columnFilters[column.key];
+const hasFilter = filterValue !== undefined && filterValue !== null && filterValue !== "" && (!Array.isArray(filterValue) || (filterValue.length > 0 && !(filterValue.length === 1 && filterValue[0] === "_All_VALUES_")));
+const isRowNumber = args.fns.getColumnRenderer(column) === "rowNumber";
+const isExpandColumn = args.fns.getColumnRenderer(column) === "expand";
+
+return {
+  as: "icon",
+  icon: "carbon:filter",
+  width: 14,
+  height: 14,
+  hide: !hasFilter || isRowNumber || args.fns.getColumnRenderer(column) === "iconAction" || isExpandColumn,
+  title: "Filter applied"
+};
+'''
+      }
+    }
+    {
+      id: "44"
       L: Attr
       P: {
         css:
@@ -3853,44 +3863,7 @@ return {
       }
     }
     {
-      id: "32a"
-      L: Attr
-      P: {
-        css:
-          '''
-const column = args.contextData.column;
-
-return `._id {
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
-  margin-left: 2px;
-}`;
-'''
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''
-const column = args.contextData.column;
-const columnFilters = args.graph.vertexes[args.fns.tableStateVertexId]?.P?.columnFilters ?? {};
-const filterValue = columnFilters[column.key];
-const hasFilter = filterValue !== undefined && filterValue !== null && filterValue !== "" && (!Array.isArray(filterValue) || (filterValue.length > 0 && !(filterValue.length === 1 && filterValue[0] === "_All_VALUES_")));
-const isRowNumber = args.fns.getColumnRenderer(column) === "rowNumber";
-const isExpandColumn = args.fns.getColumnRenderer(column) === "expand";
-
-return {
-  as: "icon",
-  icon: "carbon:filter",
-  width: 14,
-  height: 14,
-  hide: !hasFilter || isRowNumber || args.fns.getColumnRenderer(column) === "iconAction" || isExpandColumn,
-  title: "Filter applied"
-};
-'''
-      }
-    }
-    {
-      id: "33"
+      id: "45"
       L: Attr
       P: {
         css:
@@ -3956,7 +3929,35 @@ return {
       }
     }
     {
-      id: "34"
+      id: "46"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  flex-shrink: 0;
+  min-width: 0;
+  width: 100%;
+  /* Same as header strip: hidden overflow + scrollLeft sync from body */
+  overflow-x: hidden;
+  overflow-y: hidden;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  ref: (el) => {
+    args.fns.setTableFilterHScrollEl(el);
+  }
+};
+'''
+      }
+    }
+    {
+      id: "47"
       L: Attr
       P: {
         css:
@@ -3980,7 +3981,7 @@ return {
       }
     }
     {
-      id: "35"
+      id: "48"
       L: Attr
       P: {
         css:
@@ -4005,7 +4006,7 @@ return {
       }
     }
     {
-      id: "36"
+      id: "49"
       L: Attr
       P: {
         css:
@@ -4030,7 +4031,7 @@ return {
       }
     }
     {
-      id: "37"
+      id: "50"
       L: Attr
       P: {
         contextName: column
@@ -4051,7 +4052,7 @@ return {
       }
     }
     {
-      id: "38"
+      id: "51"
       L: Attr
       P: {
         css:
@@ -4078,7 +4079,7 @@ return {
       }
     }
     {
-      id: "39"
+      id: "52"
       L: Attr
       P: {
         css:
@@ -4267,7 +4268,7 @@ return {
       }
     }
     {
-      id: "40wrap"
+      id: "53"
       L: Attr
       P: {
         css:
@@ -4310,7 +4311,7 @@ return {
       }
     }
     {
-      id: "40"
+      id: "54"
       L: Attr
       P: {
         css:
@@ -4376,52 +4377,7 @@ return {
       }
     }
     {
-      id: "40a"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  /* Loading overlay on top of the body scroll area (40wrap) */
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: ${args.theme.var.color.background};
-  z-index: 2;
-}
-`;
-'''
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''
-const isLoading = args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true;
-return {
-  as: "div",
-  hide: !isLoading
-};
-'''
-      }
-    }
-    {
-      id: "40b"
-      L: Attr
-      P: {
-        displayOrder: 1
-        componentName: LoadingSpinner
-        props:
-          '''
-return {
-  size: "medium",
-  color: "primary"
-};
-'''
-      }
-    }
-    {
-      id: "41"
+      id: "55"
       L: Attr
       P: {
         slotName: children
@@ -4519,235 +4475,7 @@ return {
       }
     }
     {
-      id: "41exp"
-      L: Attr
-      P: {
-        displayOrder: 5
-        css:
-          '''
-const virtualItem = args.contextData.virtualItem;
-if (!virtualItem) return {};
-const rowData = virtualItem.rowData;
-const rowExpansions = args.fns.getRowExpansionConfigs?.() || [];
-const rowId = rowData?.id;
-const isRowExpansionOpen =
-  Array.isArray(rowExpansions) && rowExpansions.length > 0 && rowId && args.fns.isExpansionOpen?.(rowId);
-const t = args.theme.var.color;
-return `._id {
-  grid-row: 2;
-  grid-column: 1 / -1;
-  overflow: auto;
-  background: ${t.background_light_100};
-  border-top: 1px solid ${t.border};
-  padding: ${args.theme.var.spacing.sm};
-  min-height: 0;
-  max-height: 100%;
-  display: ${isRowExpansionOpen ? 'block' : 'none'};
-  cursor: default;
-}`;
-'''
-        componentName: Html
-        props:
-          '''
-const virtualItem = args.contextData.virtualItem;
-if (!virtualItem) return { as: 'div', hide: true };
-const rowData = virtualItem.rowData;
-const rowId = rowData?.id;
-const rowExpansions = args.fns.getRowExpansionConfigs?.() || [];
-if (!Array.isArray(rowExpansions) || rowExpansions.length === 0 || !rowId) return { as: 'div', hide: true };
-const expansionRowKey = String(rowId);
-const isRowExpansionOpen = args.fns.isExpansionOpen?.(expansionRowKey);
-return {
-  as: 'div',
-  hide: !isRowExpansionOpen,
-  onClick: (e) => e.stopPropagation()
-};
-'''
-      }
-    }
-    {
-      id: "41exp_st"
-      L: Attr
-      P: {
-        displayOrder: 1
-        css:
-          '''
-const virtualItem = args.contextData.virtualItem;
-if (!virtualItem) return {};
-const rowData = virtualItem.rowData;
-const rowId = rowData?.id;
-const rowExpansions = args.fns.getRowExpansionConfigs?.() || [];
-const isRowExpansionOpen =
-  Array.isArray(rowExpansions) && rowExpansions.length > 0 && rowId && args.fns.isExpansionOpen?.(String(rowId));
-const t = args.theme.var.color;
-return `._id {
-  padding: ${args.theme.var.spacing.sm} 0;
-  color: ${t.text};
-  font-size: 0.875rem;
-}`;
-'''
-        componentName: Html
-        props:
-          '''
-const virtualItem = args.contextData.virtualItem;
-if (!virtualItem) return { as: 'div', hide: true };
-const rowData = virtualItem.rowData;
-const rowId = rowData?.id;
-const rowExpansions = args.fns.getRowExpansionConfigs?.() || [];
-const rowExpansion = Array.isArray(rowExpansions) && rowExpansions.length > 0 ? rowExpansions[0] : null;
-if (!rowExpansion || !rowId) return { as: 'div', hide: true };
-const expansionRowKey = String(rowId);
-const expansionKey = "exp_0";
-const isRowExpansionOpen = args.fns.isExpansionOpen?.(expansionRowKey);
-if (!isRowExpansionOpen) return { as: 'div', hide: true };
-const expP = args.graph.vertexes[args.fns.tableStateVertexId]?.P;
-let rows;
-const expRows = expP?.expansionRows;
-if (Array.isArray(expRows)) {
-  for (let i = 0; i < expRows.length; i++) {
-    const e = expRows[i];
-    if (e && e.id != null && String(e.id) === expansionRowKey && String(e.key || "") === expansionKey && e.rows !== undefined) {
-      rows = e.rows;
-      break;
-    }
-  }
-}
-let loading = false;
-const expLoading = expP?.expansionLoading;
-if (Array.isArray(expLoading)) {
-  for (let i = 0; i < expLoading.length; i++) {
-    const lid = expLoading[i];
-    if (lid != null && lid !== '' && String(lid) === expansionRowKey + "::" + expansionKey) {
-      loading = true;
-      break;
-    }
-  }
-}
-const hasRows = Array.isArray(rows) && rows.length > 0;
-const show = loading || !hasRows;
-return {
-  as: 'div',
-  text: loading
-    ? (rowExpansion.nestedLoadingText || 'Loading…')
-    : (rowExpansion.emptyNestedText || 'No line items'),
-  hide: !show,
-  onClick: (e) => e.stopPropagation()
-};
-'''
-      }
-    }
-    {
-      id: "41exp_nest"
-      L: Attr
-      P: {
-        contextName: expansionTable
-        loop: true
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''
-const virtualItem = args.contextData.virtualItem;
-if (!virtualItem) return { as: "div", hide: true };
-const rowData = virtualItem.rowData;
-const rowId = rowData?.id;
-const rowExpansions = args.fns.getRowExpansionConfigs?.() || [];
-if (!rowId || !Array.isArray(rowExpansions) || rowExpansions.length === 0) return { as: "div", hide: true };
-const expansionRowKey = String(rowId);
-const isRowExpansionOpen = args.fns.isExpansionOpen?.(expansionRowKey);
-return {
-  hide: !isRowExpansionOpen,
-  data: rowExpansions.map((cfg, idx) => ({ ...cfg, _expansionIndex: idx }))
-};
-'''
-      }
-    }
-    {
-      id: "41exp_ret_table"
-      L: Attr
-      P: {
-        displayOrder: 2.5
-        componentName: Table
-        key: nested_order_returns_table
-        props:
-          '''
-const virtualItem = args.contextData.virtualItem;
-if (!virtualItem) return { hide: true };
-const rowData = virtualItem.rowData;
-const rowId = rowData?.id;
-const rowExpansion = args.contextData.expansionTable || {};
-if (!rowId || !rowExpansion || typeof rowExpansion !== "object") return { hide: true };
-const expansionRowKey = String(rowId);
-const outerArgs = args;
-const tableVid = outerArgs.fns.tableStateVertexId;
-const expansionIndex = rowExpansion._expansionIndex != null ? Number(rowExpansion._expansionIndex) : 0;
-const expansionKey = "exp_" + expansionIndex;
-let rows = [];
-let loading = false;
-
-if (rowExpansion.childVertexLabel) {
-  const expP = args.graph.vertexes[tableVid]?.P;
-  const expRows = expP?.expansionRows;
-  if (Array.isArray(expRows)) {
-    for (let i = 0; i < expRows.length; i++) {
-      const e = expRows[i];
-      if (
-        e &&
-        e.id != null &&
-        String(e.id) === expansionRowKey &&
-        e.key != null &&
-        String(e.key) === expansionKey
-      ) {
-        rows = Array.isArray(e.rows) ? e.rows : [];
-        break;
-      }
-    }
-  }
-  const expLoading = expP?.expansionLoading;
-  if (Array.isArray(expLoading)) {
-    for (let i = 0; i < expLoading.length; i++) {
-      const lid = expLoading[i];
-      if (lid != null && String(lid) === expansionRowKey + "::" + expansionKey) {
-        loading = true;
-        break;
-      }
-    }
-  }
-} else if (typeof rowExpansion.getNestedRows === "function") {
-  try {
-    const computedRows = rowExpansion.getNestedRows(rowData, args);
-    rows = Array.isArray(computedRows) ? computedRows : [];
-  } catch (e) {
-    rows = [];
-  }
-}
-
-if (loading || !Array.isArray(rows) || rows.length === 0) return { hide: true };
-return {
-  hide: false,
-  nestedLinesMode: true,
-  nestedTableTitle: rowExpansion.nestedTitle || 'Nested',
-  nestedTableColumns: rowExpansion.nestedColumns || [],
-  nestedRowHeight: rowExpansion.nestedRowHeight || 36,
-  nestedShowIcon: rowExpansion.nestedShowIcon === true,
-  nestedIcon: rowExpansion.nestedIcon,
-  nestedLinesContainerHeight: rowExpansion.expansionPanelHeight ?? 280,
-  nestedLinesContainerMaxHeight: rowExpansion.expansionPanelMaxHeight ?? rowExpansion.expansionPanelHeight ?? 280,
-  showRowNumber: rowExpansion.nestedShowRowNumber !== false,
-  usePolarisUI: rowExpansion.usePolarisUI !== false,
-  loadFromSetting: false,
-  getNestedLineRows: () => rows,
-  getNestedLinesLoading: () => loading,
-  getSelectedRows: () => new Set(),
-  setSelectedRows: () => {},
-  clearSelectedRows: () => {},
-  rowClickable: rowExpansion.rowClickable ?? false,
-  onRowClick: rowExpansion.onRowClick ?? function () {}
-};
-'''
-      }
-    }
-    {
-      id: "42"
+      id: "56"
       L: Attr
       P: {
         css:
@@ -4792,7 +4520,7 @@ return {
       }
     }
     {
-      id: "43"
+      id: "57"
       L: Attr
       P: {
         css:
@@ -4844,7 +4572,7 @@ return {
       }
     }
     {
-      id: "44"
+      id: "58"
       L: Attr
       P: {
         css:
@@ -4878,7 +4606,7 @@ return {
       }
     }
     {
-      id: "44a"
+      id: "59"
       L: Attr
       P: {
         contextName: tableAction
@@ -4894,7 +4622,7 @@ return { data: args.fns.getPrimaryActionsForRow(virtualItem.rowData) };
       }
     }
     {
-      id: "44b"
+      id: "60"
       L: Attr
       P: {
         displayOrder: 1
@@ -4937,7 +4665,7 @@ return {
       }
     }
     {
-      id: "44c"
+      id: "61"
       L: Attr
       P: {
         displayOrder: 2
@@ -4956,11 +4684,11 @@ return {
       }
     }
     {
-      id: "44d"
+      id: "62"
       L: Attr
       P: {
-        contextName: tableMenuAction
         slotName: menu-items
+        contextName: tableMenuAction
         loop: true
         displayOrder: 1
         componentName: Html
@@ -4973,7 +4701,7 @@ return { data: args.fns.getSecondaryActionsForRow(virtualItem.rowData) };
       }
     }
     {
-      id: "44e"
+      id: "63"
       L: Attr
       P: {
         displayOrder: 1
@@ -5008,7 +4736,7 @@ return {
       }
     }
     {
-      id: "47"
+      id: "64"
       L: Attr
       P: {
         contextName: column
@@ -5033,7 +4761,7 @@ return {
       }
     }
     {
-      id: "48"
+      id: "65"
       L: Attr
       P: {
         css:
@@ -5070,7 +4798,7 @@ return {
       }
     }
     {
-      id: "49"
+      id: "66"
       L: Attr
       P: {
         slotName: cell
@@ -5285,7 +5013,280 @@ return out;
       }
     }
     {
-      id: "50"
+      id: "67"
+      L: Attr
+      P: {
+        css:
+          '''
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return {};
+const rowData = virtualItem.rowData;
+const rowExpansions = args.fns.getRowExpansionConfigs?.() || [];
+const rowId = rowData?.id;
+const isRowExpansionOpen =
+  Array.isArray(rowExpansions) && rowExpansions.length > 0 && rowId && args.fns.isExpansionOpen?.(rowId);
+const t = args.theme.var.color;
+return `._id {
+  grid-row: 2;
+  grid-column: 1 / -1;
+  overflow: auto;
+  background: ${t.background_light_100};
+  border-top: 1px solid ${t.border};
+  padding: ${args.theme.var.spacing.sm};
+  min-height: 0;
+  max-height: 100%;
+  display: ${isRowExpansionOpen ? 'block' : 'none'};
+  cursor: default;
+}`;
+'''
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return { as: 'div', hide: true };
+const rowData = virtualItem.rowData;
+const rowId = rowData?.id;
+const rowExpansions = args.fns.getRowExpansionConfigs?.() || [];
+if (!Array.isArray(rowExpansions) || rowExpansions.length === 0 || !rowId) return { as: 'div', hide: true };
+const expansionRowKey = String(rowId);
+const isRowExpansionOpen = args.fns.isExpansionOpen?.(expansionRowKey);
+return {
+  as: 'div',
+  hide: !isRowExpansionOpen,
+  onClick: (e) => e.stopPropagation()
+};
+'''
+      }
+    }
+    {
+      id: "68"
+      L: Attr
+      P: {
+        css:
+          '''
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return {};
+const rowData = virtualItem.rowData;
+const rowId = rowData?.id;
+const rowExpansions = args.fns.getRowExpansionConfigs?.() || [];
+const isRowExpansionOpen =
+  Array.isArray(rowExpansions) && rowExpansions.length > 0 && rowId && args.fns.isExpansionOpen?.(String(rowId));
+const t = args.theme.var.color;
+return `._id {
+  padding: ${args.theme.var.spacing.sm} 0;
+  color: ${t.text};
+  font-size: 0.875rem;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return { as: 'div', hide: true };
+const rowData = virtualItem.rowData;
+const rowId = rowData?.id;
+const rowExpansions = args.fns.getRowExpansionConfigs?.() || [];
+const rowExpansion = Array.isArray(rowExpansions) && rowExpansions.length > 0 ? rowExpansions[0] : null;
+if (!rowExpansion || !rowId) return { as: 'div', hide: true };
+const expansionRowKey = String(rowId);
+const expansionKey = "exp_0";
+const isRowExpansionOpen = args.fns.isExpansionOpen?.(expansionRowKey);
+if (!isRowExpansionOpen) return { as: 'div', hide: true };
+const expP = args.graph.vertexes[args.fns.tableStateVertexId]?.P;
+let rows;
+const expRows = expP?.expansionRows;
+if (Array.isArray(expRows)) {
+  for (let i = 0; i < expRows.length; i++) {
+    const e = expRows[i];
+    if (e && e.id != null && String(e.id) === expansionRowKey && String(e.key || "") === expansionKey && e.rows !== undefined) {
+      rows = e.rows;
+      break;
+    }
+  }
+}
+let loading = false;
+const expLoading = expP?.expansionLoading;
+if (Array.isArray(expLoading)) {
+  for (let i = 0; i < expLoading.length; i++) {
+    const lid = expLoading[i];
+    if (lid != null && lid !== '' && String(lid) === expansionRowKey + "::" + expansionKey) {
+      loading = true;
+      break;
+    }
+  }
+}
+const hasRows = Array.isArray(rows) && rows.length > 0;
+const show = loading || !hasRows;
+return {
+  as: 'div',
+  text: loading
+    ? (rowExpansion.nestedLoadingText || 'Loading…')
+    : (rowExpansion.emptyNestedText || 'No line items'),
+  hide: !show,
+  onClick: (e) => e.stopPropagation()
+};
+'''
+      }
+    }
+    {
+      id: "69"
+      L: Attr
+      P: {
+        contextName: expansionTable
+        loop: true
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return { as: "div", hide: true };
+const rowData = virtualItem.rowData;
+const rowId = rowData?.id;
+const rowExpansions = args.fns.getRowExpansionConfigs?.() || [];
+if (!rowId || !Array.isArray(rowExpansions) || rowExpansions.length === 0) return { as: "div", hide: true };
+const expansionRowKey = String(rowId);
+const isRowExpansionOpen = args.fns.isExpansionOpen?.(expansionRowKey);
+return {
+  hide: !isRowExpansionOpen,
+  data: rowExpansions.map((cfg, idx) => ({ ...cfg, _expansionIndex: idx }))
+};
+'''
+      }
+    }
+    {
+      id: "70"
+      L: Attr
+      P: {
+        displayOrder: 2.5
+        componentName: Table
+        key: nested_order_returns_table
+        props:
+          '''
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return { hide: true };
+const rowData = virtualItem.rowData;
+const rowId = rowData?.id;
+const rowExpansion = args.contextData.expansionTable || {};
+if (!rowId || !rowExpansion || typeof rowExpansion !== "object") return { hide: true };
+const expansionRowKey = String(rowId);
+const outerArgs = args;
+const tableVid = outerArgs.fns.tableStateVertexId;
+const expansionIndex = rowExpansion._expansionIndex != null ? Number(rowExpansion._expansionIndex) : 0;
+const expansionKey = "exp_" + expansionIndex;
+let rows = [];
+let loading = false;
+
+if (rowExpansion.childVertexLabel) {
+  const expP = args.graph.vertexes[tableVid]?.P;
+  const expRows = expP?.expansionRows;
+  if (Array.isArray(expRows)) {
+    for (let i = 0; i < expRows.length; i++) {
+      const e = expRows[i];
+      if (
+        e &&
+        e.id != null &&
+        String(e.id) === expansionRowKey &&
+        e.key != null &&
+        String(e.key) === expansionKey
+      ) {
+        rows = Array.isArray(e.rows) ? e.rows : [];
+        break;
+      }
+    }
+  }
+  const expLoading = expP?.expansionLoading;
+  if (Array.isArray(expLoading)) {
+    for (let i = 0; i < expLoading.length; i++) {
+      const lid = expLoading[i];
+      if (lid != null && String(lid) === expansionRowKey + "::" + expansionKey) {
+        loading = true;
+        break;
+      }
+    }
+  }
+} else if (typeof rowExpansion.getNestedRows === "function") {
+  try {
+    const computedRows = rowExpansion.getNestedRows(rowData, args);
+    rows = Array.isArray(computedRows) ? computedRows : [];
+  } catch (e) {
+    rows = [];
+  }
+}
+
+if (loading || !Array.isArray(rows) || rows.length === 0) return { hide: true };
+return {
+  hide: false,
+  nestedLinesMode: true,
+  nestedTableTitle: rowExpansion.nestedTitle || 'Nested',
+  nestedTableColumns: rowExpansion.nestedColumns || [],
+  nestedRowHeight: rowExpansion.nestedRowHeight || 36,
+  nestedShowIcon: rowExpansion.nestedShowIcon === true,
+  nestedIcon: rowExpansion.nestedIcon,
+  nestedLinesContainerHeight: rowExpansion.expansionPanelHeight ?? 280,
+  nestedLinesContainerMaxHeight: rowExpansion.expansionPanelMaxHeight ?? rowExpansion.expansionPanelHeight ?? 280,
+  showRowNumber: rowExpansion.nestedShowRowNumber !== false,
+  usePolarisUI: rowExpansion.usePolarisUI !== false,
+  loadFromSetting: false,
+  getNestedLineRows: () => rows,
+  getNestedLinesLoading: () => loading,
+  getSelectedRows: () => new Set(),
+  setSelectedRows: () => {},
+  clearSelectedRows: () => {},
+  rowClickable: rowExpansion.rowClickable ?? false,
+  onRowClick: rowExpansion.onRowClick ?? function () {}
+};
+'''
+      }
+    }
+    {
+      id: "71"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  /* Loading overlay on top of the body scroll area (40wrap) */
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: ${args.theme.var.color.background};
+  z-index: 2;
+}
+`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const isLoading = args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true;
+return {
+  as: "div",
+  hide: !isLoading
+};
+'''
+      }
+    }
+    {
+      id: "72"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: LoadingSpinner
+        props:
+          '''
+return {
+  size: "medium",
+  color: "primary"
+};
+'''
+      }
+    }
+    {
+      id: "73"
       L: Attr
       P: {
         slotName: footer
@@ -5294,7 +5295,7 @@ return out;
       }
     }
     {
-      id: "51"
+      id: "74"
       L: Attr
       P: {
         displayOrder: 6
@@ -5315,7 +5316,7 @@ return {
       }
     }
     {
-      id: "52"
+      id: "75"
       L: Attr
       P: {
         css:
@@ -5346,7 +5347,7 @@ return {
       }
     }
     {
-      id: "53"
+      id: "76"
       L: Attr
       P: {
         css:
@@ -5375,7 +5376,7 @@ return {
       }
     }
     {
-      id: "54"
+      id: "77"
       L: Attr
       P: {
         css:
@@ -5399,7 +5400,7 @@ return {
       }
     }
     {
-      id: "55"
+      id: "78"
       L: Attr
       P: {
         css:
@@ -5426,7 +5427,7 @@ return {
       }
     }
     {
-      id: "56"
+      id: "79"
       L: Attr
       P: {
         displayOrder: 1
@@ -5441,7 +5442,7 @@ return {
       }
     }
     {
-      id: "57"
+      id: "80"
       L: Attr
       P: {
         css:
@@ -5463,7 +5464,7 @@ return {
       }
     }
     {
-      id: "58"
+      id: "81"
       L: Attr
       P: {
         css:
@@ -5506,7 +5507,7 @@ return {
       }
     }
     {
-      id: "59"
+      id: "82"
       L: Attr
       P: {
         displayOrder: 3
@@ -5524,7 +5525,7 @@ return {
       }
     }
     {
-      id: "60"
+      id: "83"
       L: Attr
       P: {
         css:
@@ -5547,27 +5548,7 @@ return {
       }
     }
     {
-      id: "61"
-      L: Attr
-      P: {
-        displayOrder: 1
-        componentName: Button
-        props:
-          '''
-return {
-  variant: "secondary",
-  onClick: () => {
-    args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { isImportModalOpen: false, importData: "" });
-  },
-  text: "Cancel",
-  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
-  hide: args.fns.getUsePolarisUI?.() === true
-};
-'''
-      }
-    }
-    {
-      id: "61_polaris"
+      id: "84"
       L: Attr
       P: {
         displayOrder: 1
@@ -5588,28 +5569,27 @@ return {
       }
     }
     {
-      id: "62"
+      id: "85"
       L: Attr
       P: {
-        displayOrder: 2
+        displayOrder: 1
         componentName: Button
         props:
           '''
 return {
-  variant: "primary",
-  onClick: () => args.fns.handleImport((args.graph.vertexes[args.fns.tableStateVertexId]?.P?.importData ?? "").trim(), () => {
+  variant: "secondary",
+  onClick: () => {
     args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { isImportModalOpen: false, importData: "" });
-    args.fns.handleSearch();
-  }),
-  text: "Import",
-  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true || !(args.graph.vertexes[args.fns.tableStateVertexId]?.P?.importData ?? "").trim(),
+  },
+  text: "Cancel",
+  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
   hide: args.fns.getUsePolarisUI?.() === true
 };
 '''
       }
     }
     {
-      id: "62_polaris"
+      id: "86"
       L: Attr
       P: {
         displayOrder: 2
@@ -5631,7 +5611,28 @@ return {
       }
     }
     {
-      id: "63"
+      id: "87"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "primary",
+  onClick: () => args.fns.handleImport((args.graph.vertexes[args.fns.tableStateVertexId]?.P?.importData ?? "").trim(), () => {
+    args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { isImportModalOpen: false, importData: "" });
+    args.fns.handleSearch();
+  }),
+  text: "Import",
+  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true || !(args.graph.vertexes[args.fns.tableStateVertexId]?.P?.importData ?? "").trim(),
+  hide: args.fns.getUsePolarisUI?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "88"
       L: Attr
       P: {
         displayOrder: 8
@@ -5662,32 +5663,24 @@ return {
       }
     }
     {
-      id: "64"
-      L: ComponentVariant
-      P: {
-        type: object
-        key: formConfig
-      }
-    }
-    {
-      id: "66"
+      id: "89"
       L: ComponentVariant
       P: {
         type: function
-        key: settingsFunction
+        key: importFunction
       }
     }
     {
-      id: "67"
+      id: "90"
       L: ComponentVariant
       P: {
         type: boolean
-        key: hideAddButton
         defValue: false
+        key: showRowNumber
       }
     }
     {
-      id: "68"
+      id: "91"
       L: ComponentVariant
       P: {
         type: function
@@ -5695,66 +5688,15 @@ return {
       }
     }
     {
-      id: "69"
-      L: ComponentVariant
-      P: {
-        type: array
-        key: batchActions
-        defValue: []
-      }
-    }
-    {
-      id: "70"
-      L: ComponentVariant
-      P: {
-        type: boolean
-        key: showSelection
-        defValue: true
-      }
-    }
-    {
-      id: "71"
-      L: ComponentVariant
-      P: {
-        type: string
-        key: tableVertexLabel
-      }
-    }
-    {
-      id: "72a"
-      L: ComponentVariant
-      P: {
-        type: array
-        key: actions
-      }
-    }
-    {
-      id: "72b"
-      L: ComponentVariant
-      P: {
-        type: object
-        key: actionHandlers
-      }
-    }
-    {
-      id: "73"
-      L: ComponentVariant
-      P: {
-        type: number
-        key: rowHeight
-        defValue: 50
-      }
-    }
-    {
-      id: "74"
+      id: "92"
       L: ComponentVariant
       P: {
         type: function
-        key: exportFunction
+        key: dataFunction
       }
     }
     {
-      id: "75"
+      id: "93"
       L: ComponentVariant
       P: {
         type: array
@@ -5763,15 +5705,51 @@ return {
       }
     }
     {
-      id: "76"
+      id: "94"
       L: ComponentVariant
       P: {
-        type: function
-        key: dataFunction
+        type: string
+        defValue: Search...
+        key: searchPlaceholder
       }
     }
     {
-      id: "77"
+      id: "95"
+      L: ComponentVariant
+      P: {
+        type: object
+        key: formConfig
+      }
+    }
+    {
+      id: "96"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        defValue: false
+        key: hideAddButton
+      }
+    }
+    {
+      id: "97"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        defValue: true
+        key: showSelection
+      }
+    }
+    {
+      id: "98"
+      L: ComponentVariant
+      P: {
+        type: array
+        defValue: []
+        key: columns
+      }
+    }
+    {
+      id: "99"
       L: ComponentVariant
       P: {
         type: array
@@ -5779,16 +5757,65 @@ return {
       }
     }
     {
-      id: "78"
+      id: "100"
       L: ComponentVariant
       P: {
-        type: string
-        key: searchPlaceholder
-        defValue: Search...
+        type: function
+        key: exportFunction
       }
     }
     {
-      id: "79"
+      id: "101"
+      L: ComponentVariant
+      P: {
+        type: array
+        key: actions
+      }
+    }
+    {
+      id: "102"
+      L: ComponentVariant
+      P: {
+        type: array
+        defValue: []
+        key: hideColumns
+      }
+    }
+    {
+      id: "103"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: settingsFunction
+      }
+    }
+    {
+      id: "104"
+      L: ComponentVariant
+      P: {
+        type: array
+        defValue: []
+        key: batchActions
+      }
+    }
+    {
+      id: "105"
+      L: ComponentVariant
+      P: {
+        type: object
+        key: actionHandlers
+      }
+    }
+    {
+      id: "106"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: tableVertexLabel
+      }
+    }
+    {
+      id: "107"
       L: ComponentVariant
       P: {
         type: boolean
@@ -5797,16 +5824,7 @@ return {
       }
     }
     {
-      id: "80"
-      L: ComponentVariant
-      P: {
-        type: array
-        key: columns
-        defValue: []
-      }
-    }
-    {
-      id: "81"
+      id: "108"
       L: ComponentVariant
       P: {
         type: function
@@ -5814,265 +5832,242 @@ return {
       }
     }
     {
-      id: "82"
+      id: "109"
       L: ComponentVariant
       P: {
-        type: boolean
-        key: showRowNumber
-        defValue: false
-      }
-    }
-    {
-      id: "83"
-      L: ComponentVariant
-      P: {
-        type: function
-        key: importFunction
-      }
-    }
-    {
-      id: "84"
-      L: ComponentVariant
-      P: {
-        type: array
-        key: hideColumns
-        defValue: []
+        type: number
+        defValue: 50
+        key: rowHeight
       }
     }
   ]
   edges: [
     {
-      id: e2
-      T: ComponentVariant
+      id: e1
+      T: Attr
       S: "1"
-      E: "63"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "1"
+      E: "74"
     }
     {
       id: e3
-      T: ComponentVariant
+      T: Attr
       S: "1"
-      E: "64"
+      E: "75"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "1"
+      E: "88"
     }
     {
       id: e5
       T: ComponentVariant
       S: "1"
-      E: "66"
+      E: "88"
     }
     {
       id: e6
       T: ComponentVariant
       S: "1"
-      E: "67"
+      E: "89"
     }
     {
       id: e7
       T: ComponentVariant
       S: "1"
-      E: "68"
+      E: "90"
     }
     {
       id: e8
       T: ComponentVariant
       S: "1"
-      E: "69"
+      E: "91"
     }
     {
       id: e9
       T: ComponentVariant
       S: "1"
-      E: "70"
+      E: "92"
     }
     {
       id: e10
       T: ComponentVariant
       S: "1"
-      E: "71"
+      E: "93"
     }
     {
-      id: e11a
+      id: e11
       T: ComponentVariant
       S: "1"
-      E: "72a"
-    }
-    {
-      id: e11b
-      T: ComponentVariant
-      S: "1"
-      E: "72b"
+      E: "94"
     }
     {
       id: e12
       T: ComponentVariant
       S: "1"
-      E: "73"
+      E: "95"
     }
     {
       id: e13
       T: ComponentVariant
       S: "1"
-      E: "74"
+      E: "96"
     }
     {
       id: e14
       T: ComponentVariant
       S: "1"
-      E: "75"
+      E: "97"
     }
     {
       id: e15
       T: ComponentVariant
       S: "1"
-      E: "76"
+      E: "98"
     }
     {
       id: e16
       T: ComponentVariant
       S: "1"
-      E: "77"
+      E: "99"
     }
     {
       id: e17
       T: ComponentVariant
       S: "1"
-      E: "78"
+      E: "100"
     }
     {
       id: e18
       T: ComponentVariant
       S: "1"
-      E: "79"
+      E: "101"
     }
     {
       id: e19
       T: ComponentVariant
       S: "1"
-      E: "80"
+      E: "102"
     }
     {
       id: e20
       T: ComponentVariant
       S: "1"
-      E: "81"
+      E: "103"
     }
     {
       id: e21
       T: ComponentVariant
       S: "1"
-      E: "82"
+      E: "104"
     }
     {
       id: e22
       T: ComponentVariant
       S: "1"
-      E: "83"
+      E: "105"
     }
     {
       id: e23
       T: ComponentVariant
       S: "1"
-      E: "84"
+      E: "106"
     }
     {
       id: e24
-      T: Attr
+      T: ComponentVariant
       S: "1"
-      E: "3"
+      E: "107"
     }
     {
       id: e25
-      T: Attr
+      T: ComponentVariant
       S: "1"
-      E: "51"
+      E: "108"
     }
     {
       id: e26
-      T: Attr
+      T: ComponentVariant
       S: "1"
-      E: "52"
+      E: "109"
     }
     {
       id: e27
       T: Attr
-      S: "1"
-      E: "63"
+      S: "2"
+      E: "3"
     }
     {
       id: e28
       T: Attr
-      S: "3"
+      S: "2"
       E: "4"
     }
     {
       id: e29
       T: Attr
-      S: "3"
-      E: "5"
+      S: "2"
+      E: "31"
     }
     {
       id: e30
       T: Attr
-      S: "3"
-      E: "22"
+      S: "2"
+      E: "73"
     }
     {
       id: e31
       T: Attr
-      S: "3"
-      E: "50"
+      S: "4"
+      E: "5"
     }
     {
       id: e32
+      T: Attr
+      S: "4"
+      E: "12"
+    }
+    {
+      id: e33
+      T: Attr
+      S: "4"
+      E: "13"
+    }
+    {
+      id: e34
       T: Attr
       S: "5"
       E: "6"
     }
     {
-      id: e32_subtitle
+      id: e35
       T: Attr
       S: "5"
-      E: "7d"
+      E: "10"
     }
     {
-      id: e33
-      T: Attr
-      S: "5"
-      E: "16"
-    }
-    {
-      id: e34
+      id: e36
       T: Attr
       S: "6"
       E: "7"
     }
     {
-      id: e34a
-      T: Attr
-      S: "7"
-      E: "7a"
-    }
-    {
-      id: e34b
-      T: Attr
-      S: "7"
-      E: "7b"
-    }
-    {
-      id: e34c
-      T: Attr
-      S: "7"
-      E: "7c"
-    }
-    {
-      id: e35
+      id: e37
       T: Attr
       S: "6"
       E: "8"
     }
     {
-      id: e36
+      id: e38
       T: Attr
-      S: "8"
+      S: "6"
       E: "9"
     }
     {
@@ -6082,418 +6077,424 @@ return {
       E: "11"
     }
     {
-      id: e39_polaris
-      T: Attr
-      S: "10"
-      E: "11_polaris"
-    }
-    {
       id: e40
       T: Attr
-      S: "12"
-      E: "13"
-    }
-    {
-      id: e40_polaris
-      T: Attr
-      S: "12"
-      E: "13_polaris"
+      S: "13"
+      E: "14"
     }
     {
       id: e41
       T: Attr
-      S: "12"
-      E: "14"
-    }
-    {
-      id: e41_polaris
-      T: Attr
-      S: "12"
-      E: "14_polaris"
+      S: "13"
+      E: "15"
     }
     {
       id: e42
       T: Attr
-      S: "12"
-      E: "15"
-    }
-    {
-      id: e42_polaris
-      T: Attr
-      S: "12"
-      E: "15_polaris"
+      S: "13"
+      E: "18"
     }
     {
       id: e43
       T: Attr
-      S: "16"
-      E: "17"
-    }
-    {
-      id: e37
-      T: Attr
-      S: "16"
-      E: "10"
-    }
-    {
-      id: e38
-      T: Attr
-      S: "16"
-      E: "12"
+      S: "13"
+      E: "22"
     }
     {
       id: e44
       T: Attr
-      S: "16"
-      E: "18"
+      S: "13"
+      E: "23"
     }
     {
       id: e45
       T: Attr
-      S: "16"
-      E: "21"
-    }
-    {
-      id: e45_polaris
-      T: Attr
-      S: "16"
-      E: "21_polaris"
+      S: "13"
+      E: "24"
     }
     {
       id: e46
+      T: Attr
+      S: "15"
+      E: "16"
+    }
+    {
+      id: e47
+      T: Attr
+      S: "15"
+      E: "17"
+    }
+    {
+      id: e48
       T: Attr
       S: "18"
       E: "19"
     }
     {
-      id: e46_polaris
-      T: Attr
-      S: "18"
-      E: "19_polaris"
-    }
-    {
-      id: e47
+      id: e49
       T: Attr
       S: "18"
       E: "20"
     }
     {
-      id: e48
-      T: Attr
-      S: "22"
-      E: "22h"
-    }
-    {
-      id: e48h
-      T: Attr
-      S: "22h"
-      E: "23"
-    }
-    {
-      id: e49
-      T: Attr
-      S: "22"
-      E: "22f"
-    }
-    {
-      id: e48f
-      T: Attr
-      S: "22f"
-      E: "34"
-    }
-    {
       id: e50
       T: Attr
-      S: "22"
-      E: "40wrap"
-    }
-    {
-      id: e40wrap_vl
-      T: Attr
-      S: "40wrap"
-      E: "40"
+      S: "18"
+      E: "21"
     }
     {
       id: e51
-      T: Attr
-      S: "23"
-      E: "24"
-    }
-    {
-      id: e52
-      T: Attr
-      S: "23"
-      E: "27"
-    }
-    {
-      id: e52a
-      T: Attr
-      S: "27"
-      E: "27a"
-    }
-    {
-      id: e52b
-      T: Attr
-      S: "27"
-      E: "28"
-    }
-    {
-      id: e53
-      T: Attr
-      S: "23"
-      E: "29"
-    }
-    {
-      id: e54
       T: Attr
       S: "24"
       E: "25"
     }
     {
-      id: e55
+      id: e52
       T: Attr
       S: "24"
       E: "26"
     }
     {
+      id: e53
+      T: Attr
+      S: "24"
+      E: "27"
+    }
+    {
+      id: e54
+      T: Attr
+      S: "24"
+      E: "28"
+    }
+    {
+      id: e55
+      T: Attr
+      S: "24"
+      E: "29"
+    }
+    {
+      id: e56
+      T: Attr
+      S: "24"
+      E: "30"
+    }
+    {
       id: e57
       T: Attr
-      S: "29"
-      E: "30"
+      S: "31"
+      E: "32"
     }
     {
       id: e58
       T: Attr
-      S: "30"
-      E: "31"
+      S: "31"
+      E: "46"
     }
     {
       id: e59
       T: Attr
-      S: "30"
-      E: "32"
+      S: "31"
+      E: "53"
     }
     {
       id: e60
       T: Attr
-      S: "30"
+      S: "32"
       E: "33"
     }
     {
-      id: e59a
+      id: e61
       T: Attr
-      S: "30"
-      E: "32a"
+      S: "33"
+      E: "34"
     }
     {
-      id: e61
+      id: e62
+      T: Attr
+      S: "33"
+      E: "37"
+    }
+    {
+      id: e63
+      T: Attr
+      S: "33"
+      E: "40"
+    }
+    {
+      id: e64
       T: Attr
       S: "34"
       E: "35"
     }
     {
-      id: e62
+      id: e65
       T: Attr
       S: "34"
       E: "36"
     }
     {
-      id: e63
-      T: Attr
-      S: "34"
-      E: "37"
-    }
-    {
-      id: e64
+      id: e66
       T: Attr
       S: "37"
       E: "38"
     }
     {
-      id: e65
+      id: e67
       T: Attr
-      S: "38"
+      S: "37"
       E: "39"
     }
     {
-      id: e66
+      id: e68
       T: Attr
       S: "40"
       E: "41"
     }
     {
-      id: e66a
-      T: Attr
-      S: "40wrap"
-      E: "40a"
-    }
-    {
-      id: e66b
-      T: Attr
-      S: "40a"
-      E: "40b"
-    }
-    {
-      id: e67
+      id: e69
       T: Attr
       S: "41"
       E: "42"
     }
     {
-      id: e67exp
+      id: e70
       T: Attr
       S: "41"
-      E: "41exp"
+      E: "43"
     }
     {
-      id: e67exp_st
-      T: Attr
-      S: "41exp"
-      E: "41exp_st"
-    }
-    {
-      id: e67exp_nest
-      T: Attr
-      S: "41exp"
-      E: "41exp_nest"
-    }
-    {
-      id: e67exp_ret_table
-      T: Attr
-      S: "41exp_nest"
-      E: "41exp_ret_table"
-    }
-    {
-      id: e68
+      id: e71
       T: Attr
       S: "41"
       E: "44"
     }
     {
-      id: e69
+      id: e72
       T: Attr
       S: "41"
-      E: "47"
-    }
-    {
-      id: e70
-      T: Attr
-      S: "42"
-      E: "43"
-    }
-    {
-      id: e71_loop
-      T: Attr
-      S: "44"
-      E: "44a"
-    }
-    {
-      id: e71_loop_btn
-      T: Attr
-      S: "44a"
-      E: "44b"
-    }
-    {
-      id: e71_menu
-      T: Attr
-      S: "44"
-      E: "44c"
-    }
-    {
-      id: e71_menu_loop
-      T: Attr
-      S: "44c"
-      E: "44d"
-    }
-    {
-      id: e71_menu_item
-      T: Attr
-      S: "44d"
-      E: "44e"
+      E: "45"
     }
     {
       id: e73
+      T: Attr
+      S: "46"
+      E: "47"
+    }
+    {
+      id: e74
       T: Attr
       S: "47"
       E: "48"
     }
     {
-      id: e74
-      T: Attr
-      S: "48"
-      E: "49"
-    }
-    {
       id: e75
       T: Attr
-      S: "52"
-      E: "53"
+      S: "47"
+      E: "49"
     }
     {
       id: e76
       T: Attr
-      S: "53"
-      E: "54"
+      S: "47"
+      E: "50"
     }
     {
       id: e77
       T: Attr
-      S: "53"
-      E: "55"
+      S: "50"
+      E: "51"
     }
     {
       id: e78
       T: Attr
-      S: "53"
-      E: "59"
+      S: "51"
+      E: "52"
     }
     {
       id: e79
       T: Attr
       S: "53"
-      E: "60"
+      E: "54"
     }
     {
       id: e80
       T: Attr
-      S: "55"
-      E: "56"
+      S: "53"
+      E: "71"
     }
     {
       id: e81
       T: Attr
-      S: "55"
-      E: "57"
+      S: "54"
+      E: "55"
     }
     {
       id: e82
       T: Attr
       S: "55"
-      E: "58"
+      E: "56"
     }
     {
       id: e83
       T: Attr
-      S: "60"
-      E: "61"
-    }
-    {
-      id: e83_polaris
-      T: Attr
-      S: "60"
-      E: "61_polaris"
+      S: "55"
+      E: "58"
     }
     {
       id: e84
       T: Attr
-      S: "60"
+      S: "55"
+      E: "64"
+    }
+    {
+      id: e85
+      T: Attr
+      S: "55"
+      E: "67"
+    }
+    {
+      id: e86
+      T: Attr
+      S: "56"
+      E: "57"
+    }
+    {
+      id: e87
+      T: Attr
+      S: "58"
+      E: "59"
+    }
+    {
+      id: e88
+      T: Attr
+      S: "58"
+      E: "61"
+    }
+    {
+      id: e89
+      T: Attr
+      S: "59"
+      E: "60"
+    }
+    {
+      id: e90
+      T: Attr
+      S: "61"
       E: "62"
     }
     {
-      id: e84_polaris
+      id: e91
       T: Attr
-      S: "60"
-      E: "62_polaris"
+      S: "62"
+      E: "63"
+    }
+    {
+      id: e92
+      T: Attr
+      S: "64"
+      E: "65"
+    }
+    {
+      id: e93
+      T: Attr
+      S: "65"
+      E: "66"
+    }
+    {
+      id: e94
+      T: Attr
+      S: "67"
+      E: "68"
+    }
+    {
+      id: e95
+      T: Attr
+      S: "67"
+      E: "69"
+    }
+    {
+      id: e96
+      T: Attr
+      S: "69"
+      E: "70"
+    }
+    {
+      id: e97
+      T: Attr
+      S: "71"
+      E: "72"
+    }
+    {
+      id: e98
+      T: Attr
+      S: "75"
+      E: "76"
+    }
+    {
+      id: e99
+      T: Attr
+      S: "76"
+      E: "77"
+    }
+    {
+      id: e100
+      T: Attr
+      S: "76"
+      E: "78"
+    }
+    {
+      id: e101
+      T: Attr
+      S: "76"
+      E: "82"
+    }
+    {
+      id: e102
+      T: Attr
+      S: "76"
+      E: "83"
+    }
+    {
+      id: e103
+      T: Attr
+      S: "78"
+      E: "79"
+    }
+    {
+      id: e104
+      T: Attr
+      S: "78"
+      E: "80"
+    }
+    {
+      id: e105
+      T: Attr
+      S: "78"
+      E: "81"
+    }
+    {
+      id: e106
+      T: Attr
+      S: "83"
+      E: "84"
+    }
+    {
+      id: e107
+      T: Attr
+      S: "83"
+      E: "85"
+    }
+    {
+      id: e108
+      T: Attr
+      S: "83"
+      E: "86"
+    }
+    {
+      id: e109
+      T: Attr
+      S: "83"
+      E: "87"
     }
   ]
 }

@@ -1,16 +1,17 @@
 {
   vertexes: [
     {
-      id: "page",
-      L: "Page",
+      id: "1"
+      L: Page
       P: {
         public: true
-        key: "HisInspiration",
-        fns: "return { enabled: () => true }",
-        isNoPermissionCheck: true,
-        url: "/his-inspiration"
-        settingsPageId: "his-inspiration"
-        props: '''
+        settingsPageId: his-inspiration
+        isNoPermissionCheck: true
+        fns: return { enabled: () => true }
+        url: /his-inspiration
+        key: HisInspiration
+        props:
+          '''
 const locale = args.params?.lang ? String(args.params.lang).toLowerCase() : undefined;
 return {
   contextName: "hisInspirationSettings",
@@ -30,189 +31,261 @@ try {
 };
 '''
       }
-    },
+    }
     {
-      id: "pageHeader",
-      L: "Attr",
+      id: "2"
+      L: PageLayout
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        displayOrder: 1
+        componentName: Layout
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
-  background: linear-gradient(135deg, ${args.theme.var.color.primary_light_100} 0%, ${args.theme.var.color.primary_light_50} 100%);
   padding: 3rem 1rem;
-  text-align: center;
 }`;
 '''
-      }
-    },
-    {
-      id: "pageTitle",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const content = args.contextData.hisInspirationSettings?.content;
-return {
-  as: "h1",
-  text: content?.pageTitle
-};
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.text};
-  font-size: 3rem;
-  font-weight: 700;
-  margin: 0;
-  
-  @media (max-width: 768px) {
-    font-size: 2rem;
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "mainContent",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
 return {
   as: "main"
 };
-''',
-        css: '''
-return `._id {
-  padding: 3rem 1rem;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "container",
-      L: "Attr",
+      id: "4"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   max-width: 1000px;
   margin: 0 auto;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "shrimadSection",
-      L: "Attr",
+      id: "5"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''return `._id {
+  font-size: 3rem;
+  font-weight: 700;
+
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const content = args.contextData.hisInspirationSettings?.content;
+return {
+  as: "h1",
+  text: content?.pageTitle
+};
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  margin-bottom: 4rem;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
   as: "section",
   "data-animate": "",
 
   ref: (el) => el && args.fns.animateOnView(el)
 };
-''',
-        css: '''
-return `._id {
-  margin-bottom: 4rem;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "shrimadTitle",
-      L: "Attr",
+      id: "7"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.primary};
+  font-size: 2.5rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const content = args.contextData.hisInspirationSettings?.content;
 return {
   as: "h2",
   text: content?.shrimadTitle
 };
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.primary};
-  font-size: 2.5rem;
-  font-weight: 600;
-  margin-bottom: 2rem;
-  text-align: center;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "shrimadContent",
-      L: "Attr",
+      id: "8"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
+        css:
+          '''return `._id {
   display: grid;
-  grid-template-columns: 1fr 2fr;
+  grid-template-columns: 3fr 1fr;
   gap: 3rem;
   align-items: start;
-  
+
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "shrimadImage",
-      L: "Attr",
+      id: "9"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  font-size: 1.125rem;
+  line-height: 1.8;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "div",
   "data-animate": "",
 
-  ref: (el) => el && args.fns.animateOnView(el, { x: -32, y: 0 })
+  ref: (el) => el && args.fns.animateOnView(el, { x: -32, y: 0, delay: 0.1 })
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  margin-bottom: 1.5rem;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const content = args.contextData.hisInspirationSettings?.content;
+return {
+  as: "p",
+  text: content?.shrimadPara1
+};
+'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  margin-bottom: 1.5rem;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const content = args.contextData.hisInspirationSettings?.content;
+return {
+  as: "p",
+  text: content?.shrimadPara2
+};
+'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   text-align: center;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el, { x: 32, y: 0 })
+};
+'''
       }
-    },
+    }
     {
-      id: "shrimadPhoto",
-      L: "Attr",
+      id: "13"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-width: 100%;
+  height: auto;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "img",
   src: "https://www.fulchandshastri.com/wp-content/uploads/2016/09/Shrimad-Rajchandra-240x300.jpg",
@@ -220,87 +293,17 @@ return {
   width: 240,
   height: 300
 };
-''',
-        css: '''
-return `._id {
-  border-radius: 0.5rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  max-width: 100%;
-  height: auto;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "shrimadText",
-      L: "Attr",
+      id: "14"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  "data-animate": "",
-
-  ref: (el) => el && args.fns.animateOnView(el, { x: 32, y: 0, delay: 0.1 })
-};
-''',
-        css: '''
-return `._id {
-  font-size: 1.125rem;
-  line-height: 1.8;
-  color: ${args.theme.var.color.text};
-}`;
-'''
-      }
-    },
-    {
-      id: "shrimadPara1",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const content = args.contextData.hisInspirationSettings?.content;
-return {
-  as: "p",
-  text: content?.shrimadPara1
-};
-''',
-        css: '''
-return `._id {
-  margin-bottom: 1.5rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "shrimadPara2",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const content = args.contextData.hisInspirationSettings?.content;
-return {
-  as: "p",
-  text: content?.shrimadPara2
-};
-''',
-        css: '''
-return `._id {
-  margin-bottom: 1.5rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "kanjiSection",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
 return {
   as: "section",
   "data-animate": "",
@@ -309,180 +312,181 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "kanjiTitle",
-      L: "Attr",
+      id: "15"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.primary};
+  font-size: 2.5rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const content = args.contextData.hisInspirationSettings?.content;
 return {
   as: "h2",
   text: content?.kanjiTitle
 };
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.primary};
-  font-size: 2.5rem;
-  font-weight: 600;
-  margin-bottom: 2rem;
-  text-align: center;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "kanjiContent",
-      L: "Attr",
+      id: "16"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
+        css:
+          '''return `._id {
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: 3fr 1fr;
   gap: 3rem;
   align-items: start;
-  
+
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "kanjiText",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div",
-  "data-animate": "",
-
-  ref: (el) => el && args.fns.animateOnView(el, { x: -32, y: 0 })
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: 1.125rem;
   line-height: 1.8;
   color: ${args.theme.var.color.text};
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el, { x: -32, y: 0 })
+};
+'''
       }
-    },
+    }
     {
-      id: "kanjiPara1",
-      L: "Attr",
+      id: "18"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  margin-bottom: 1.5rem;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const content = args.contextData.hisInspirationSettings?.content;
 return {
   as: "p",
   text: content?.kanjiPara1
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   margin-bottom: 1.5rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "kanjiPara2",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 const content = args.contextData.hisInspirationSettings?.content;
 return {
   as: "p",
   text: content?.kanjiPara2
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "20"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   margin-bottom: 1.5rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "kanjiPara3",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
 const content = args.contextData.hisInspirationSettings?.content;
 return {
   as: "p",
   text: content?.kanjiPara3
 };
-''',
-        css: '''
-return `._id {
-  margin-bottom: 1.5rem;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "kanjiImage",
-      L: "Attr",
+      id: "21"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  text-align: center;
+
+  @media (max-width: 768px) {
+    order: -1;
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
   as: "div",
   "data-animate": "",
 
   ref: (el) => el && args.fns.animateOnView(el, { x: 32, y: 0, delay: 0.1 })
 };
-''',
-        css: '''
-return `._id {
-  text-align: center;
-  
-  @media (max-width: 768px) {
-    order: -1;
-  }
-}`;
 '''
       }
-    },
+    }
     {
-      id: "kanjiPhoto",
-      L: "Attr",
+      id: "22"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "img",
-  src: "https://www.fulchandshastri.com/wp-content/uploads/2016/09/kanjiswami-240x300.jpg",
-  alt: "Shri Kanjiswami",
-  width: 240,
-  height: 300
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   border-radius: 0.5rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -490,39 +494,147 @@ return `._id {
   height: auto;
 }`;
 '''
-      }
-    },
-    {
-      id: "layout",
-      L: "PageLayout",
-      P: {
-        displayOrder: 1,
-        componentName: "Layout"
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "img",
+  src: "https://www.fulchandshastri.com/wp-content/uploads/2016/09/kanjiswami-240x300.jpg",
+  alt: "Shri Kanjiswami",
+  width: 240,
+  height: 300
+};
+'''
       }
     }
-  ],
+  ]
   edges: [
-    { id: "e0", T: "Attr", S: "page", E: "pageHeader" },
-    { id: "e3", T: "Attr", S: "pageHeader", E: "pageTitle" },
-    { id: "e4", T: "Attr", S: "page", E: "mainContent" },
-    { id: "e5", T: "Attr", S: "mainContent", E: "container" },
-    { id: "e6", T: "Attr", S: "container", E: "shrimadSection" },
-    { id: "e7", T: "Attr", S: "shrimadSection", E: "shrimadTitle" },
-    { id: "e8", T: "Attr", S: "shrimadSection", E: "shrimadContent" },
-    { id: "e9", T: "Attr", S: "shrimadContent", E: "shrimadImage" },
-    { id: "e10", T: "Attr", S: "shrimadImage", E: "shrimadPhoto" },
-    { id: "e11", T: "Attr", S: "shrimadContent", E: "shrimadText" },
-    { id: "e12", T: "Attr", S: "shrimadText", E: "shrimadPara1" },
-    { id: "e13", T: "Attr", S: "shrimadText", E: "shrimadPara2" },
-    { id: "e14", T: "Attr", S: "container", E: "kanjiSection" },
-    { id: "e15", T: "Attr", S: "kanjiSection", E: "kanjiTitle" },
-    { id: "e16", T: "Attr", S: "kanjiSection", E: "kanjiContent" },
-    { id: "e17", T: "Attr", S: "kanjiContent", E: "kanjiText" },
-    { id: "e18", T: "Attr", S: "kanjiText", E: "kanjiPara1" },
-    { id: "e19", T: "Attr", S: "kanjiText", E: "kanjiPara2" },
-    { id: "e20", T: "Attr", S: "kanjiText", E: "kanjiPara3" },
-    { id: "e21", T: "Attr", S: "kanjiContent", E: "kanjiImage" },
-    { id: "e22", T: "Attr", S: "kanjiImage", E: "kanjiPhoto" },
-    { id: "e_layout", T: "PageLayout", S: "page", E: "layout" }
+    {
+      id: e1
+      T: PageLayout
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "1"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "4"
+      E: "6"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "4"
+      E: "14"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "6"
+      E: "8"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "8"
+      E: "12"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "9"
+      E: "11"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "12"
+      E: "13"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "14"
+      E: "15"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "14"
+      E: "16"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "16"
+      E: "17"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "16"
+      E: "21"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "17"
+      E: "18"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "17"
+      E: "19"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "17"
+      E: "20"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "21"
+      E: "22"
+    }
   ]
 }

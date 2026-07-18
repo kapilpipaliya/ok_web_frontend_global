@@ -197,101 +197,22 @@ return {
       L: ComponentVariant
       P: {
         type: string
-        key: ariaLabel
+        key: size
+        defValue: md
       }
     }
     {
       id: "5"
-      L: ComponentVariant
+      L: ComponentVariantOption
       P: {
-        type: boolean
-        key: disabled
-        defValue: false
-      }
-    }
-    {
-      id: "5a"
-      L: ComponentVariant
-      P: {
-        type: boolean
-        key: loading
-        defValue: false
+        displayOrder: 3
+        description: Large size (24px icon)
+        value: lg
+        key: lg
       }
     }
     {
       id: "6"
-      L: ComponentVariant
-      P: {
-        type: function
-        key: onClick
-      }
-    }
-    {
-      id: "7"
-      L: ComponentVariant
-      P: {
-        type: string
-        key: variant
-        defValue: ghost
-      }
-    }
-    {
-      id: "8"
-      L: ComponentVariantOption
-      P: {
-        displayOrder: 2
-        description: Danger variant with error color
-        value: danger
-        key: danger
-      }
-    }
-    {
-      id: "9"
-      L: ComponentVariantOption
-      P: {
-        displayOrder: 3
-        description: Primary variant with primary color
-        value: primary
-        key: primary
-      }
-    }
-    {
-      id: "10"
-      L: ComponentVariantOption
-      P: {
-        displayOrder: 1
-        description: Transparent background with hover effect
-        value: ghost
-        key: ghost
-      }
-    }
-    {
-      id: "11"
-      L: ComponentVariant
-      P: {
-        type: string
-        key: title
-      }
-    }
-    {
-      id: "12"
-      L: ComponentVariant
-      P: {
-        type: string
-        key: icon
-      }
-    }
-    {
-      id: "13"
-      L: ComponentVariant
-      P: {
-        type: string
-        defValue: md
-        key: size
-      }
-    }
-    {
-      id: "14"
       L: ComponentVariantOption
       P: {
         displayOrder: 1
@@ -301,7 +222,7 @@ return {
       }
     }
     {
-      id: "15"
+      id: "7"
       L: ComponentVariantOption
       P: {
         displayOrder: 2
@@ -311,13 +232,83 @@ return {
       }
     }
     {
-      id: "16"
+      id: "8"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onClick
+      }
+    }
+    {
+      id: "9"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: icon
+      }
+    }
+    {
+      id: "10"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: ariaLabel
+      }
+    }
+    {
+      id: "11"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: ghost
+        key: variant
+      }
+    }
+    {
+      id: "12"
+      L: ComponentVariantOption
+      P: {
+        displayOrder: 1
+        description: Transparent background with hover effect
+        value: ghost
+        key: ghost
+      }
+    }
+    {
+      id: "13"
+      L: ComponentVariantOption
+      P: {
+        displayOrder: 2
+        description: Danger variant with error color
+        value: danger
+        key: danger
+      }
+    }
+    {
+      id: "14"
       L: ComponentVariantOption
       P: {
         displayOrder: 3
-        description: Large size (24px icon)
-        value: lg
-        key: lg
+        description: Primary variant with primary color
+        value: primary
+        key: primary
+      }
+    }
+    {
+      id: "15"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        defValue: false
+        key: disabled
+      }
+    }
+    {
+      id: "16"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: title
       }
     }
   ]
@@ -338,19 +329,19 @@ return {
       id: e3
       T: ComponentVariant
       S: "1"
-      E: "5"
+      E: "8"
     }
     {
       id: e4
       T: ComponentVariant
       S: "1"
-      E: "6"
+      E: "9"
     }
     {
       id: e5
       T: ComponentVariant
       S: "1"
-      E: "7"
+      E: "10"
     }
     {
       id: e6
@@ -362,13 +353,13 @@ return {
       id: e7
       T: ComponentVariant
       S: "1"
-      E: "12"
+      E: "15"
     }
     {
       id: e8
       T: ComponentVariant
       S: "1"
-      E: "13"
+      E: "16"
     }
     {
       id: e9
@@ -379,38 +370,38 @@ return {
     {
       id: e10
       T: ComponentVariantOption
-      S: "7"
-      E: "8"
+      S: "4"
+      E: "5"
     }
     {
       id: e11
       T: ComponentVariantOption
-      S: "7"
-      E: "9"
+      S: "4"
+      E: "6"
     }
     {
       id: e12
       T: ComponentVariantOption
-      S: "7"
-      E: "10"
+      S: "4"
+      E: "7"
     }
     {
       id: e13
       T: ComponentVariantOption
-      S: "13"
-      E: "14"
+      S: "11"
+      E: "12"
     }
     {
       id: e14
       T: ComponentVariantOption
-      S: "13"
-      E: "15"
+      S: "11"
+      E: "13"
     }
     {
       id: e15
       T: ComponentVariantOption
-      S: "13"
-      E: "16"
+      S: "11"
+      E: "14"
     }
   ]
 }

@@ -1,0 +1,146 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        fns: return { enabled: () => true }
+        key: Guru_Mantra
+        url: /guru-mantra
+        updatedAt: 2026-07-08T04:30:34.684Z
+        props:
+          '''return {
+  isNoPermissionCheck: true
+}'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        as: div
+        css:
+          '''return `._id {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 600px 1fr;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        key: unique_1
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        as: div
+        displayOrder: 1
+        componentName: Html
+        key: unique_2
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        as: div
+        displayOrder: 2
+        componentName: Html
+        key: unique_6
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+}`;'''
+        as: div
+        displayOrder: 3
+        textType: markdown
+        text:
+          '''जगत के ज्ञेयों का - विरोध नहीं,\
+विकल्पों का - विरोध नहीं,\
+ज्ञान पर्यायों  का - विरोध नहीं,\
+ज्ञान पर्यायों में सत्ता मात्र\
+मैं ज्ञायक ज्ञायक ज्ञायक... ही हूँ ।'''
+        componentName: Html
+        key: unique_5
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+}`;
+'''
+        as: div
+        displayOrder: 4
+        textType: markdown
+        text:
+          '''जगत के ज्ञेयों का मेला - मैं नहीं,\
+विकल्पों का जाल - मैं नहीं,\
+ज्ञान पर्यायों का प्रवाह - मैं नहीं,\
+ज्ञान के प्रवाह मैं अस्तित्व मात्र\
+मैं ज्ञायक ज्ञायक ज्ञायक... ही हूँ।'''
+        componentName: Html
+        key: unique_4
+      }
+    }
+    {
+      id: "7"
+      L: PageLayout
+      P: {
+        componentName: Layout
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: PageLayout
+      S: "1"
+      E: "7"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "5"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "2"
+      E: "6"
+    }
+  ]
+}

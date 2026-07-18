@@ -4,7 +4,6 @@
       id: "1"
       L: Function
       P: {
-        key: settingsEngineHelpers
         description: Shared settings engine utilities — validation, transforms, defaults merge, hook runner, audit payload builder.
         body:
           '''
@@ -298,6 +297,7 @@ if (action === "collectFormFields") {
 
 return { success: false, message: `Unknown action: ${action}` };
 '''
+        key: settingsEngineHelpers
       }
     }
   ]

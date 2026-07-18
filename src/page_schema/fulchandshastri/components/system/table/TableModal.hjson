@@ -202,6 +202,31 @@ return {
       id: "6"
       L: Attr
       P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const wrappedOnClose = () => {
+  args.fns.cleanup();
+  const onClose = args.contextData.props?.onClose;
+  if (onClose) onClose();
+};
+
+return {
+  as: "s-button",
+  "attr:variant": "plain",
+  "attr:icon": "x",
+  "attr:accessibilityLabel": "Close",
+  onClick: wrappedOnClose,
+  hide: args.fns.getUsePolarisUI?.() !== true
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
         css:
           '''
 return `._id {
@@ -236,32 +261,7 @@ return {
       }
     }
     {
-      id: "6_polaris"
-      L: Attr
-      P: {
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''
-const wrappedOnClose = () => {
-  args.fns.cleanup();
-  const onClose = args.contextData.props?.onClose;
-  if (onClose) onClose();
-};
-
-return {
-  as: "s-button",
-  "attr:variant": "plain",
-  "attr:icon": "x",
-  "attr:accessibilityLabel": "Close",
-  onClick: wrappedOnClose,
-  hide: args.fns.getUsePolarisUI?.() !== true
-};
-'''
-      }
-    }
-    {
-      id: "7"
+      id: "8"
       L: Attr
       P: {
         css:
@@ -320,20 +320,11 @@ return {
       }
     }
     {
-      id: "8"
-      L: ComponentVariant
-      P: {
-        type: boolean
-        key: isOpen
-        defValue: false
-      }
-    }
-    {
       id: "9"
       L: ComponentVariant
       P: {
-        type: string
-        key: tableVertexLabel
+        type: object
+        key: initialVertex
       }
     }
     {
@@ -348,20 +339,12 @@ return {
       id: "11"
       L: ComponentVariant
       P: {
-        type: object
-        key: initialVertex
+        type: string
+        key: label
       }
     }
     {
       id: "12"
-      L: ComponentVariant
-      P: {
-        type: function
-        key: onSave
-      }
-    }
-    {
-      id: "13"
       L: ComponentVariant
       P: {
         type: object
@@ -369,12 +352,20 @@ return {
       }
     }
     {
-      id: "14"
+      id: "13"
       L: ComponentVariant
       P: {
         type: string
-        defValue: add
         key: mode
+        defValue: add
+      }
+    }
+    {
+      id: "14"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onSave
       }
     }
     {
@@ -382,7 +373,16 @@ return {
       L: ComponentVariant
       P: {
         type: string
-        key: label
+        key: tableVertexLabel
+      }
+    }
+    {
+      id: "16"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        defValue: false
+        key: isOpen
       }
     }
   ]
@@ -397,85 +397,85 @@ return {
       id: e2
       T: ComponentVariant
       S: "1"
-      E: "8"
+      E: "9"
     }
     {
       id: e3
       T: ComponentVariant
       S: "1"
-      E: "9"
+      E: "10"
     }
     {
       id: e4
       T: ComponentVariant
       S: "1"
-      E: "10"
+      E: "11"
     }
     {
       id: e5
       T: ComponentVariant
       S: "1"
-      E: "11"
+      E: "12"
     }
     {
       id: e6
       T: ComponentVariant
       S: "1"
-      E: "12"
+      E: "13"
     }
     {
       id: e7
       T: ComponentVariant
       S: "1"
-      E: "13"
-    }
-    {
-      id: e8
-      T: ComponentVariant
-      S: "1"
       E: "14"
     }
     {
-      id: e8a
+      id: e8
       T: ComponentVariant
       S: "1"
       E: "15"
     }
     {
       id: e9
+      T: ComponentVariant
+      S: "1"
+      E: "16"
+    }
+    {
+      id: e10
       T: Attr
       S: "2"
       E: "3"
     }
     {
-      id: e10
+      id: e11
       T: Attr
       S: "3"
       E: "4"
     }
     {
-      id: e11
-      T: Attr
-      S: "3"
-      E: "7"
-    }
-    {
       id: e12
       T: Attr
-      S: "4"
-      E: "5"
+      S: "3"
+      E: "8"
     }
     {
       id: e13
       T: Attr
       S: "4"
+      E: "5"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "4"
       E: "6"
     }
     {
-      id: e13a
+      id: e15
       T: Attr
       S: "4"
-      E: "6_polaris"
+      E: "7"
     }
   ]
 }

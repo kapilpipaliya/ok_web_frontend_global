@@ -4,7 +4,6 @@
       id: "1"
       L: Component
       P: {
-        key: SettingsSectionTabs
         dynamicComponent: SettingsSectionRenderer
         fns:
           '''
@@ -31,19 +30,20 @@ return {
   setActiveTabId
 };
 '''
+        key: SettingsSectionTabs
       }
     }
     {
       id: "2"
       L: Attr
       P: {
-        displayOrder: 1
         css:
           '''
 return `._id {
   margin-bottom: ${args.theme.var.spacing.lg};
 }`;
 '''
+        displayOrder: 1
         componentName: Html
         props:
           '''
@@ -57,7 +57,7 @@ return {
       id: "3"
       L: Attr
       P: {
-        displayOrder: 1
+        contextName: tabItem
         css:
           '''
 return `._id {
@@ -67,9 +67,9 @@ return `._id {
   margin-bottom: ${args.theme.var.spacing.md};
 }`;
 '''
-        componentName: Html
-        contextName: tabItem
         loop: true
+        displayOrder: 1
+        componentName: Html
         props:
           '''
 return {
@@ -83,7 +83,6 @@ return {
       id: "4"
       L: Attr
       P: {
-        displayOrder: 1
         css:
           '''
 const tabItem = args.contextData.tabItem;
@@ -113,6 +112,7 @@ return active
   color: ${args.theme.var.color.text};
 }`;
 '''
+        displayOrder: 1
         componentName: Html
         props:
           '''
@@ -130,10 +130,10 @@ return {
       id: "5"
       L: Attr
       P: {
-        displayOrder: 2
-        componentName: Html
         contextName: tabPanel
         loop: true
+        displayOrder: 2
+        componentName: Html
         props:
           '''
 return {
@@ -163,10 +163,35 @@ return {
     }
   ]
   edges: [
-    { id: "e1", T: "Attr", S: "1", E: "2" }
-    { id: "e2", T: "Attr", S: "2", E: "3" }
-    { id: "e3", T: "Attr", S: "3", E: "4" }
-    { id: "e4", T: "Attr", S: "2", E: "5" }
-    { id: "e5", T: "Attr", S: "5", E: "6" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "5"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "5"
+      E: "6"
+    }
   ]
 }

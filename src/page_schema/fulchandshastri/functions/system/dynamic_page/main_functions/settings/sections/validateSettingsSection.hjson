@@ -4,7 +4,6 @@
       id: "1"
       L: Function
       P: {
-        key: validateSettingsSection
         description: Server-side validation for a settings section using config-driven field rules.
         body:
           '''
@@ -29,6 +28,7 @@ if (validateResult?.result?.success === false) {
 
 return { success: true, data: { valid: true }, message: "Validation passed" };
 '''
+        key: validateSettingsSection
       }
     }
   ]

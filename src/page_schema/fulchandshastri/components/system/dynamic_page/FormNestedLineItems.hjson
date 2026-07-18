@@ -11,6 +11,40 @@
       id: "2"
       L: Attr
       P: {
+        css:
+          '''
+return [
+  `._id.fm-nested-line-items {
+  display: flex;
+  flex-direction: column;
+  gap: ${args.theme.var.spacing.sm};
+  width: 100%;
+}`,
+  `._id.fm-nested-line-items .fm-nested-line-header-row,
+._id.fm-nested-line-items .fm-nested-line-row {
+  display: grid;
+  grid-template-columns: var(--fm-nl-cols, minmax(4rem, 1fr));
+  gap: ${args.theme.var.spacing.sm};
+}`,
+  `._id.fm-nested-line-items .fm-nested-line-header-row {
+  align-items: center;
+}`,
+  `._id.fm-nested-line-items .fm-nested-line-row {
+  align-items: end;
+}`,
+  `._id.fm-nested-line-items .fm-nested-line-cell {
+  min-width: 0;
+  width: 100%;
+}`,
+  `._id.fm-nested-line-items .fm-nested-line-row:focus-within {
+  position: relative;
+  z-index: 4;
+}`,
+  `._id.fm-nested-line-items .ts-dropdown .ts-dropdown-content {
+  max-height: min(50vh, 20rem);
+}`
+];
+'''
         displayOrder: 1
         fns:
           '''
@@ -274,40 +308,6 @@ return {
   class: "fm-nested-line-items"
 };
 '''
-        css:
-          '''
-return [
-  `._id.fm-nested-line-items {
-  display: flex;
-  flex-direction: column;
-  gap: ${args.theme.var.spacing.sm};
-  width: 100%;
-}`,
-  `._id.fm-nested-line-items .fm-nested-line-header-row,
-._id.fm-nested-line-items .fm-nested-line-row {
-  display: grid;
-  grid-template-columns: var(--fm-nl-cols, minmax(4rem, 1fr));
-  gap: ${args.theme.var.spacing.sm};
-}`,
-  `._id.fm-nested-line-items .fm-nested-line-header-row {
-  align-items: center;
-}`,
-  `._id.fm-nested-line-items .fm-nested-line-row {
-  align-items: end;
-}`,
-  `._id.fm-nested-line-items .fm-nested-line-cell {
-  min-width: 0;
-  width: 100%;
-}`,
-  `._id.fm-nested-line-items .fm-nested-line-row:focus-within {
-  position: relative;
-  z-index: 4;
-}`,
-  `._id.fm-nested-line-items .ts-dropdown .ts-dropdown-content {
-  max-height: min(50vh, 20rem);
-}`
-];
-'''
       }
     }
     {
@@ -329,19 +329,9 @@ return {
       }
     }
     {
-      id: "4w"
+      id: "4"
       L: Attr
       P: {
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''
-return {
-  as: "div",
-  class: "fm-nested-line-table",
-  style: { "--fm-nl-cols": args.fns.gridTemplateColumns() }
-};
-'''
         css:
           '''
 return `._id.fm-nested-line-table {
@@ -353,22 +343,22 @@ return `._id.fm-nested-line-table {
   flex-direction: column;
 }`;
 '''
-      }
-    }
-    {
-      id: "4h"
-      L: Attr
-      P: {
-        displayOrder: 1
+        displayOrder: 2
         componentName: Html
         props:
           '''
 return {
   as: "div",
-  class: "fm-nested-line-header-row",
-  role: "row"
+  class: "fm-nested-line-table",
+  style: { "--fm-nl-cols": args.fns.gridTemplateColumns() }
 };
 '''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
         css:
           '''
 return `._id.fm-nested-line-header-row {
@@ -380,10 +370,20 @@ return `._id.fm-nested-line-header-row {
   color: ${args.theme.var.color.text_light_500};
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "fm-nested-line-header-row",
+  role: "row"
+};
+'''
       }
     }
     {
-      id: "nlhLoop"
+      id: "6"
       L: Attr
       P: {
         displayOrder: 1
@@ -399,7 +399,7 @@ return {
       }
     }
     {
-      id: "nlhLbl"
+      id: "7"
       L: Attr
       P: {
         displayOrder: 1
@@ -416,12 +416,18 @@ return headerLabelProps;
       }
     }
     {
-      id: "4"
+      id: "8"
       L: Attr
       P: {
-        displayOrder: 2
-        loop: true
         contextName: lineEntry
+        css:
+          '''
+return `._id {
+  width: 100%;
+}`;
+'''
+        loop: true
+        displayOrder: 2
         componentName: Html
         props:
           '''
@@ -429,18 +435,22 @@ return {
   data: () => args.fns.rowEntries()
 };
 '''
-        css:
-          '''
-return `._id {
-  width: 100%;
-}`;
-'''
       }
     }
     {
-      id: "5"
+      id: "9"
       L: Attr
       P: {
+        css:
+          '''
+return `._id.fm-nested-line-row {
+  padding: ${args.theme.var.spacing.sm};
+  border-bottom: 1px solid ${args.theme.var.color.border};
+}
+._id.fm-nested-line-row:last-child {
+  border-bottom: none;
+}`;
+'''
         displayOrder: 1
         componentName: Html
         props:
@@ -452,20 +462,10 @@ return {
   hide: !lineEntryContext
 };
 '''
-        css:
-          '''
-return `._id.fm-nested-line-row {
-  padding: ${args.theme.var.spacing.sm};
-  border-bottom: 1px solid ${args.theme.var.color.border};
-}
-._id.fm-nested-line-row:last-child {
-  border-bottom: none;
-}`;
-'''
       }
     }
     {
-      id: "nlcLoop"
+      id: "10"
       L: Attr
       P: {
         displayOrder: 1
@@ -481,7 +481,7 @@ return {
       }
     }
     {
-      id: "nlcCell"
+      id: "11"
       L: Attr
       P: {
         displayOrder: 1
@@ -496,7 +496,7 @@ return {
       }
     }
     {
-      id: "nlSel"
+      id: "12"
       L: Attr
       P: {
         displayOrder: 1
@@ -520,7 +520,7 @@ return {
       }
     }
     {
-      id: "nlTxt"
+      id: "13"
       L: Attr
       P: {
         displayOrder: 2
@@ -543,7 +543,7 @@ return {
       }
     }
     {
-      id: "nlNum"
+      id: "14"
       L: Attr
       P: {
         displayOrder: 3
@@ -573,7 +573,7 @@ return {
       }
     }
     {
-      id: "nlInv"
+      id: "15"
       L: Attr
       P: {
         displayOrder: 4
@@ -622,7 +622,7 @@ return {
       }
     }
     {
-      id: "nlAct"
+      id: "16"
       L: Attr
       P: {
         displayOrder: 5
@@ -645,20 +645,95 @@ return {
     }
   ]
   edges: [
-    { id: "fnli1", T: "Attr", S: "1", E: "2" }
-    { id: "fnli2", T: "Attr", S: "2", E: "3" }
-    { id: "fnli3", T: "Attr", S: "2", E: "4w" }
-    { id: "fnli3w", T: "Attr", S: "4w", E: "4h" }
-    { id: "fnli3hl", T: "Attr", S: "4h", E: "nlhLoop" }
-    { id: "fnli3hLbl", T: "Attr", S: "nlhLoop", E: "nlhLbl" }
-    { id: "fnli3b", T: "Attr", S: "4w", E: "4" }
-    { id: "fnli4", T: "Attr", S: "4", E: "5" }
-    { id: "fnli5lc", T: "Attr", S: "5", E: "nlcLoop" }
-    { id: "fnli5cell", T: "Attr", S: "nlcLoop", E: "nlcCell" }
-    { id: "fnli5s", T: "Attr", S: "nlcCell", E: "nlSel" }
-    { id: "fnli5t", T: "Attr", S: "nlcCell", E: "nlTxt" }
-    { id: "fnli5n", T: "Attr", S: "nlcCell", E: "nlNum" }
-    { id: "fnli5i", T: "Attr", S: "nlcCell", E: "nlInv" }
-    { id: "fnli5a", T: "Attr", S: "nlcCell", E: "nlAct" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "4"
+      E: "8"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "10"
+      E: "11"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "11"
+      E: "12"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "11"
+      E: "13"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "11"
+      E: "14"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "11"
+      E: "15"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "11"
+      E: "16"
+    }
   ]
 }
