@@ -85,6 +85,35 @@ export function stripDesignerAttrProperties(graph?: ServerResult["graph"]) {
   }
 }
 
+const ATTR_CODE_KEYS = ["props", "css", "fns"] as const;
+
+/**
+ * Shrink Attr code strings without touching spaces inside literals:
+ * trim trailing line whitespace and collapse runs of blank lines.
+ */
+export function compactAttrCodeStrings(graph?: ServerResult["graph"]) {
+  if (!graph?.vertexes) {
+    return;
+  }
+
+  for (const vertex of Object.values(graph.vertexes)) {
+    if (!isPageBuilderAttr(vertex) || !vertex.P) {
+      continue;
+    }
+    for (const key of ATTR_CODE_KEYS) {
+      const value = vertex.P[key];
+      if (typeof value === "string" && value.length > 0) {
+        vertex.P[key] = value
+          .split("\n")
+          .map((line) => line.trimEnd())
+          .join("\n")
+          .replace(/\n{3,}/g, "\n\n")
+          .trim();
+      }
+    }
+  }
+}
+
 export function prepareGraphForWireTransfer(
   graph?: ServerResult["graph"],
   options?: { isDesignMode?: boolean },
@@ -97,6 +126,7 @@ export function prepareGraphForWireTransfer(
 
   if (!options?.isDesignMode) {
     stripDesignerAttrProperties(graph);
+    compactAttrCodeStrings(graph);
   }
 }
 

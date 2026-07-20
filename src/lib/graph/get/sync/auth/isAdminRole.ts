@@ -3,6 +3,6 @@ import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export function isAdminRole(graph: GraphInterface) {
   return getGlobalStore(graph).P.userRoles?.some(
-    (role) => graph.vertexes[role].P.key === "Admin",
+    (role) => graph.vertexes[role]?.P.key === "Admin",
   );
 }

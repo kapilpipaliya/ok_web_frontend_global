@@ -1,9 +1,12 @@
 import { createMemo, onMount, Show, createSignal } from "solid-js";
 import { IconButton } from "~/components/styled/IconButton";
+import { isAdminRole } from "~/lib/graph/get/sync/auth/isAdminRole";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function PublicPageAdminFloatingButton(props: Readonly<{
   pageKey: () => string | undefined;
 }>) {
+  const [graph] = useGraph();
   // Prevent SSR/CSR markup mismatches during hydration.
   // We only show the button after mount, so the initial hydrated output
   // matches the server output (button not rendered).
@@ -23,7 +26,7 @@ export function PublicPageAdminFloatingButton(props: Readonly<{
   });
 
   return (
-    <Show when={isClientReady() && adminEditUrl()}>
+    <Show when={isAdminRole(graph) && isClientReady() && adminEditUrl()}>
       <IconButton
         href={adminEditUrl()!}
         target="_blank"

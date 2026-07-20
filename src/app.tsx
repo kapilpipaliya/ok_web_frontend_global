@@ -4,10 +4,17 @@ import { clientOnly } from "@solidjs/start";
 import { FileRoutes } from "@solidjs/start/router";
 import { ToastProvider } from "solid-hot-toast";
 import { App as CapacitorApp } from "@capacitor/app";
+import { makeTimer } from "@solid-primitives/timer";
 
 // import "~/base.css";
-import { ErrorBoundary, onMount, Suspense, createSignal, Show } from "solid-js";
-import { NoHydration, isServer } from "solid-js/web";
+import {
+  ErrorBoundary,
+  onMount,
+  Suspense,
+  createSignal,
+  Show,
+} from "solid-js";
+import { isServer, NoHydration } from "solid-js/web";
 
 import { createAppState } from "~/createAppState";
 import { ThemeProvider } from "./lib/theme/ThemeProvider";
@@ -17,6 +24,7 @@ import { toastValue } from "./toastValue";
 import { GraphContext } from "~/lib/graph/context/GraphContext";
 import { GetInitialData } from "./GetInitialData";
 import { HydrationLoader } from "./components/HydrationLoader";
+import { NavigationProgressBar } from "./components/NavigationProgressBar";
 import {
   isNetworkError,
   NETWORK_ERROR_MESSAGE,
@@ -24,6 +32,8 @@ import {
 
 /** Above VertexPickerModal (101) and other app overlays so toasts stay visible. */
 const TOAST_CONTAINER_Z_INDEX = 20000;
+/** Only show the blur overlay if JS has not reached onMount within this window. */
+const HYDRATION_LOADER_DELAY_MS = 250;
 
 // Create a generic error fallback component
 const ErrorFallback = (props: {
@@ -47,21 +57,7 @@ const ErrorFallback = (props: {
 export default function App() {
   const graph = createAppState();
   const [isHydrated, setIsHydrated] = createSignal(false);
-  const [showLoader, setShowLoader] = createSignal(true);
-  const Toaster = clientOnly(() => import("./Toaster"));
 
-  // Set up global error handlers on client-side only
-  onMount(() => {
-    if (!isServer) {
-      setupGlobalErrorHandlers();
-      // Set isHydrated to true after a short delay to ensure components are ready
-      setTimeout(() => {
-        setIsHydrated(true);
-      }, 100);
-      // Hide loader after hydration
-      setShowLoader(false);
-    }
-  });
 
   return (
     <ToastProvider {...toastValue}>
@@ -87,7 +83,7 @@ export default function App() {
                   if (path.startsWith("/api/")) {
                     window.location.href = path;
                   } else if (useTimeout) {
-                    setTimeout(() => navigate(path), 100);
+                    makeTimer(() => navigate(path), 100, setTimeout);
                   } else {
                     navigate(path);
                   }
@@ -140,9 +136,7 @@ export default function App() {
                     />
                     {/* </Show> */}
                   </Show>
-                  <NoHydration>
-                    <HydrationLoader show={showLoader()} />
-                  </NoHydration>
+
                 </ErrorBoundary>
               </MetaProvider>
             );

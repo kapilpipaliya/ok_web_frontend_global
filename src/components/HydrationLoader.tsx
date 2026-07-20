@@ -4,6 +4,10 @@ interface HydrationLoaderProps {
   show: boolean;
 }
 
+/**
+ * Full-screen blur while JS hydrates. Prefer not to SSR this as visible —
+ * parent should delay `show` until hydration is actually slow (~250ms).
+ */
 export const HydrationLoader = (props: HydrationLoaderProps) => {
   return (
     <Show when={props.show}>
