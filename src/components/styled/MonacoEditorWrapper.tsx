@@ -19,11 +19,12 @@ function ensureMonacoWorkers(): Promise<void> {
     return Promise.resolve();
   }
   if (!monacoWorkersPromise) {
+    // Monaco 0.56+ remaps exports: use monaco-editor/<path> (not esm/vs/...)
     monacoWorkersPromise = Promise.all([
-      import("monaco-editor/esm/vs/editor/editor.worker?worker"),
-      import("monaco-editor/esm/vs/language/css/css.worker?worker"),
-      import("monaco-editor/esm/vs/language/json/json.worker?worker"),
-      import("monaco-editor/esm/vs/language/typescript/ts.worker?worker"),
+      import("monaco-editor/editor/editor.worker.js?worker"),
+      import("monaco-editor/language/css/css.worker.js?worker"),
+      import("monaco-editor/language/json/json.worker.js?worker"),
+      import("monaco-editor/language/typescript/ts.worker.js?worker"),
     ]).then(([editorWorker, cssWorker, jsonWorker, tsWorker]) => {
       window.MonacoEnvironment = {
         getWorker(_moduleId: unknown, label: string) {
