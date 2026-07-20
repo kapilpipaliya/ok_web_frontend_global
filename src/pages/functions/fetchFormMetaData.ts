@@ -12,13 +12,63 @@ import {
 } from "~/server/redis/redisCache";
 import { resolveDynamicPageUrl } from "./resolveDynamicPageUrl";
 import type { FetchFormMetaDataResult } from "./fetchPageData";
-import { fetchComponentDataFromGraph } from "~/lib/graph/fetch/fetchComponentGraph";
+import { fetchComponentDataFromGraphCached } from "~/server/redis/loadComponentsWithCache";
 import { prepareGraphForWireTransfer } from "~/lib/graph/fetch/graphFetchUtils";
 import {
   extractRootIdFromResult,
   stripResultFromServerResult,
 } from "~/lib/graph/fetch/wirePayloadUtils";
 import { stripVertexAdjacency } from "~/lib/graph/transfer/stripVertexAdjacency";
+
+/**
+ * L1 in-process cache of page-only metadata (no componentData).
+ * Components live in a separate per-key cache — see componentCache.ts.
+ */
+const MEMORY_TTL_MS = 15_000;
+const MAX_MEMORY_ENTRIES = 200;
+
+interface MemoryEntry {
+  value: FetchFormMetaDataResult;
+  expiresAt: number;
+}
+
+const memoryCache = new Map<string, MemoryEntry>();
+
+function getFromMemoryCache(key: string): FetchFormMetaDataResult | undefined {
+  const entry = memoryCache.get(key);
+  if (!entry) {
+    return undefined;
+  }
+  if (entry.expiresAt <= Date.now()) {
+    memoryCache.delete(key);
+    return undefined;
+  }
+  return entry.value;
+}
+
+function setInMemoryCache(key: string, value: FetchFormMetaDataResult): void {
+  if (memoryCache.size >= MAX_MEMORY_ENTRIES) {
+    const oldestKey = memoryCache.keys().next().value;
+    if (oldestKey !== undefined) {
+      memoryCache.delete(oldestKey);
+    }
+  }
+  memoryCache.set(key, { value, expiresAt: Date.now() + MEMORY_TTL_MS });
+}
+
+/** Clear the L1 page metadata cache (all subdomains, or a single one). */
+export function clearFormMetaDataMemoryCache(subDomain?: string): void {
+  if (!subDomain) {
+    memoryCache.clear();
+    return;
+  }
+  const prefix = `form-meta:${subDomain}:`;
+  for (const key of memoryCache.keys()) {
+    if (key.startsWith(prefix)) {
+      memoryCache.delete(key);
+    }
+  }
+}
 
 export async function fetchFormMetaData(
   // graph: GraphInterface,
@@ -32,6 +82,11 @@ export async function fetchFormMetaData(
   dbSession?: Session,
   /** Database name for `dbSession`; required to fetch nested data outside a request context (e.g. queue workers). */
   subDomain?: string,
+  /**
+   * Component keys the client already has in its graph (post-hydration).
+   * Server skips fetching/sending those to shrink the wire payload.
+   */
+  knownComponentKeys?: string[],
 ): Promise<FetchFormMetaDataResult> {
   "use server";
   if (isDesignMode) {
@@ -45,58 +100,103 @@ export async function fetchFormMetaData(
   }
 
   if (!dbSession) {
-    const { subDomain } = await getSubdomainForRequest();
+    const { subDomain: requestSubDomain } = await getSubdomainForRequest();
 
     // Resolve dynamic ":param" urls (e.g. /users/john/12/profile.html) to the
     // page's stored url pattern so all concrete urls share one cache entry and
     // one DB query, and dynamic pages load on the first request (empty graph).
     const resolvedUrl = url
-      ? await resolveDynamicPageUrl(subDomain, url, pageVertexName)
+      ? await resolveDynamicPageUrl(requestSubDomain, url, pageVertexName)
       : url;
 
-    const cacheKey = getFormMetaDataCacheKey(subDomain, {
+    // Page cache is always component-free so knownComponentKeys can vary per
+    // client without busting the shared page entry.
+    const cacheKey = getFormMetaDataCacheKey(requestSubDomain, {
       pageVertexName,
       formId,
       expression,
       pageKeyName,
       url: resolvedUrl,
-      skipComponentData,
+      skipComponentData: true,
     });
 
-    return redisCacheGetOrSet(
-      cacheKey,
-      () =>
-        fetchFormMetaDataFromDB(
-          pageVertexName,
-          formId,
-          expression,
-          pageKeyName,
-          resolvedUrl,
-          skipComponentData,
-          undefined,
-          subDomain,
-        ),
+    const memoryHit = getFromMemoryCache(cacheKey);
+    const pageResult =
+      memoryHit ??
+      (await redisCacheGetOrSet(
+        cacheKey,
+        () =>
+          fetchFormMetaDataFromDB(
+            pageVertexName,
+            formId,
+            expression,
+            pageKeyName,
+            resolvedUrl,
+            true,
+            undefined,
+            requestSubDomain,
+          ),
+        {
+          ttl: getFormMetaDataCacheTtl(),
+          shouldCache: (result) => !result.error,
+        },
+      ));
+
+    if (!memoryHit && !pageResult.error) {
+      setInMemoryCache(cacheKey, pageResult);
+    }
+
+    if (pageResult.error || skipComponentData) {
+      return pageResult;
+    }
+
+    const componentData = await fetchComponentDataFromGraphCached(
+      pageResult.data,
+      undefined,
+      requestSubDomain,
       {
-        ttl: getFormMetaDataCacheTtl(),
-        shouldCache: (result) => !result.error,
+        skipKeys: knownComponentKeys,
+        cacheSubDomain: requestSubDomain,
       },
     );
+
+    prepareGraphForWireTransfer(componentData?.graph);
+
+    return { ...pageResult, componentData };
   }
 
   const resolvedUrl = url
     ? await resolveDynamicPageUrl("", url, pageVertexName, dbSession)
     : url;
 
-  return fetchFormMetaDataFromDB(
+  const pageResult = await fetchFormMetaDataFromDB(
     pageVertexName,
     formId,
     expression,
     pageKeyName,
     resolvedUrl,
-    skipComponentData,
+    true,
     dbSession,
     subDomain,
   );
+
+  if (pageResult.error || skipComponentData) {
+    return pageResult;
+  }
+
+  const componentData = await fetchComponentDataFromGraphCached(
+    pageResult.data,
+    dbSession,
+    subDomain,
+    {
+      skipKeys: knownComponentKeys,
+      cacheSubDomain: subDomain || "",
+    },
+  );
+
+  prepareGraphForWireTransfer(componentData?.graph);
+
+  return { ...pageResult, componentData };
 }
 
 async function fetchFormMetaDataFromDB(
@@ -148,10 +248,11 @@ async function fetchFormMetaDataFromDB(
     return { data, formMetaId };
   }
 
-  const componentData = await fetchComponentDataFromGraph(
+  const componentData = await fetchComponentDataFromGraphCached(
     data,
     dbSession,
     subDomain,
+    { cacheSubDomain: subDomain || "" },
   );
 
   prepareGraphForWireTransfer(componentData?.graph);

@@ -1,5 +1,3 @@
-// ADD a Feature:
-// When nested PageViewWrapper is used, children should get parent context too.
 import {
   batch,
   createMemo,
@@ -10,6 +8,7 @@ import {
   Switch,
   untrack,
 } from "solid-js";
+import { revalidate } from "@solidjs/router";
 
 import { FormContext } from "~/components/form/context/FormContext";
 import { DialogWithButtons } from "~/components/styled/modal/DeleteDialog";
@@ -37,6 +36,11 @@ import type {
 } from "~/pages/functions/fetchPageData";
 import { SaveCancelButton } from "~/components/form/SaveCancelButton";
 import { isDisabledTxn } from "~/lib/graph/transaction/value/isDisabledTxn";
+import {
+  isNetworkErrorMessage,
+  NETWORK_ERROR_MESSAGE,
+} from "~/lib/api/withNetworkRetry";
+import { As } from "~/components/As";
 
 export function PageViewWrapper(props: Readonly<PageViewWrapperProps>) {
   const [graph, setGraph] = useGraph();
@@ -186,7 +190,41 @@ export function PageViewWrapper(props: Readonly<PageViewWrapperProps>) {
           <NotFound error={""} />
         </Show>
         <Show when={formStore().P.error !== "404" && formStore().P.error}>
-          <SimpleAlert type="error" message={formStore().P.error} />
+          <SimpleAlert
+            type="error"
+            message={
+              isNetworkErrorMessage(formStore().P.error)
+                ? NETWORK_ERROR_MESSAGE
+                : formStore().P.error
+            }
+          />
+          <Show when={isNetworkErrorMessage(formStore().P.error)}>
+            <As
+              as="button"
+              type="button"
+              css={`return \`._id {
+                margin-top: 0.75rem;
+                padding: 0.5rem 1rem;
+                background: \${args.theme.var.color.primary};
+                color: \${args.theme.var.color.primary_text};
+                border: none;
+                border-radius: 0.375rem;
+                cursor: pointer;
+                font-size: 0.875rem;
+                font-weight: 500;
+                &:hover {
+                  background: \${args.theme.var.color.primary_dark_200};
+                }
+              }\`;`}
+              onClick={() => {
+                setFormStore("error", "");
+                void revalidate("fetchFormMetaData");
+                void revalidate("fetchFormData");
+              }}
+            >
+              Retry
+            </As>
+          </Show>
         </Show>
         {/* <Show when={getGlobalStore(graph).P.isDevelopment}>
         <DebugPermissionInfo

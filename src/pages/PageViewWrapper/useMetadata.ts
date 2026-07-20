@@ -16,6 +16,12 @@ import type { PreviewStoreObject } from "~/features/page_designer/context/Previe
 import type { SetStoreFunction } from "solid-js/store";
 import type { NestedExpression } from "~/cypher/types/NestedExpression";
 import type { ServerResult } from "~/cypher/types/ServerResult";
+import {
+  toUserFacingNetworkMessage,
+  withNetworkRetry,
+} from "~/lib/api/withNetworkRetry";
+import { getKnownComponentKeysFromGraph } from "~/lib/graph/fetch/getKnownComponentKeysFromGraph";
+import { isServer } from "solid-js/web";
 
 interface UseMetadataOptions {
   graph: GraphInterface;
@@ -33,6 +39,8 @@ interface FetchFormMetaDataParams {
   isDesignMode?: boolean;
   pageKeyName?: string;
   url?: string;
+  /** Component keys already in the client graph (post-hydration). */
+  knownComponentKeys?: string[];
 }
 
 interface FetchFormDataParams {
@@ -48,45 +56,63 @@ interface FetchFormDataParams {
 
 const fetchFormMetaDataQuery = query(
   async (params: FetchFormMetaDataParams) => {
-    const metaResult = await fetchFormMetaData(
-      params.pageVertexName,
-      params.formId,
-      params.expression,
-      params.isDesignMode,
-      params.pageKeyName,
-      params.url,
-    );
-    if (!metaResult) {
-      return { error: "404" } as FetchFormMetaDataResult;
+    try {
+      const metaResult = await withNetworkRetry(() =>
+        fetchFormMetaData(
+          params.pageVertexName,
+          params.formId,
+          params.expression,
+          params.isDesignMode,
+          params.pageKeyName,
+          params.url,
+          undefined,
+          undefined,
+          undefined,
+          params.knownComponentKeys,
+        ),
+      );
+      if (!metaResult) {
+        return { error: "404" } as FetchFormMetaDataResult;
+      }
+      return metaResult;
+    } catch (error) {
+      return {
+        error: toUserFacingNetworkMessage(error),
+      } as FetchFormMetaDataResult;
     }
-    return metaResult;
   },
   "fetchFormMetaData",
 );
 
 const fetchFormDataQuery = query(async (params: FetchFormDataParams) => {
-  return await fetchFormData(
-    { incoming: params.incoming, outgoing: params.outgoing },
-    params.formDataId,
-    params.id,
-    params.isNoPermissionCheck,
-    params.hasRequiredPermissions,
-    params.pageVertexName,
-    params.isDesignMode,
-  );
+  try {
+    return await withNetworkRetry(() =>
+      fetchFormData(
+        { incoming: params.incoming, outgoing: params.outgoing },
+        params.formDataId,
+        params.id,
+        params.isNoPermissionCheck,
+        params.hasRequiredPermissions,
+        params.pageVertexName,
+        params.isDesignMode,
+      ),
+    );
+  } catch (error) {
+    return { error: toUserFacingNetworkMessage(error) };
+  }
 }, "fetchFormData");
 
 const fetchCustomFormDataQuery = async (
   getFormData: () => Promise<ServerResult>,
 ) => {
   try {
-    const data = await getFormData();
+    const data = await withNetworkRetry(() => getFormData());
     if (!data || data.error) {
       return { error: data?.error || "Error fetching form data" };
     }
     return { dataResult: { data } };
   } catch (error) {
-    return { error: (error as Error).message };
+    return { error: toUserFacingNetworkMessage(error) };
   }
 };
 
@@ -109,6 +135,11 @@ export function useMetadata(
         isDesignMode: constants.isDesignMode,
         pageKeyName: constants.pageKeyName,
         url: constants.url,
+        // Snapshot only — must not track graph.vertexes, or applying the
+        // response via setGraphData retriggers createAsync in an infinite loop.
+        knownComponentKeys: isServer
+          ? undefined
+          : untrack(() => getKnownComponentKeysFromGraph(options.graph)),
       };
       if (constants.formMetaId) {
         if (props.getFormData) {

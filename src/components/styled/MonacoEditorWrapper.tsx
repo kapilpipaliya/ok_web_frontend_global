@@ -1,35 +1,49 @@
 import type * as Monaco from "monaco-editor";
 
-import editorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker";
-import cssWorker from "monaco-editor/esm/vs/language/css/css.worker?worker";
-import jsonWorker from "monaco-editor/esm/vs/language/json/json.worker?worker";
-import tsWorker from "monaco-editor/esm/vs/language/typescript/ts.worker?worker";
 import { MonacoEditor } from "solid-monaco";
-import { createMemo } from "solid-js";
+import { createMemo, createSignal, onMount, Show } from "solid-js";
 import { useThemeMode } from "~/lib/theme/useThemeMode";
 
 // import onigasm from 'onigasm/lib/onigasm.wasm?url';
 import { PROPERTIES } from "~/pages/settings/constants";
 import { As } from "../As";
 
-// Initialize Monaco workers if not already done
-if (!window.MonacoEnvironment) {
-  window.MonacoEnvironment = {
-    getWorker(_moduleId: unknown, label: string) {
-      switch (label) {
-        case "css":
-          return new cssWorker();
-        case "javascript":
-        case "typescript":
-          return new tsWorker();
-        case "json":
-          return new jsonWorker();
-        default:
-          return new editorWorker();
-      }
-    },
-    // onigasm,
-  };
+let monacoWorkersPromise: Promise<void> | undefined;
+
+/** Load Monaco workers only when an editor mounts (keeps ~9MB workers off public pages). */
+function ensureMonacoWorkers(): Promise<void> {
+  if (typeof window === "undefined") {
+    return Promise.resolve();
+  }
+  if (window.MonacoEnvironment) {
+    return Promise.resolve();
+  }
+  if (!monacoWorkersPromise) {
+    monacoWorkersPromise = Promise.all([
+      import("monaco-editor/esm/vs/editor/editor.worker?worker"),
+      import("monaco-editor/esm/vs/language/css/css.worker?worker"),
+      import("monaco-editor/esm/vs/language/json/json.worker?worker"),
+      import("monaco-editor/esm/vs/language/typescript/ts.worker?worker"),
+    ]).then(([editorWorker, cssWorker, jsonWorker, tsWorker]) => {
+      window.MonacoEnvironment = {
+        getWorker(_moduleId: unknown, label: string) {
+          switch (label) {
+            case "css":
+              return new cssWorker.default();
+            case "javascript":
+            case "typescript":
+              return new tsWorker.default();
+            case "json":
+              return new jsonWorker.default();
+            default:
+              return new editorWorker.default();
+          }
+        },
+        // onigasm,
+      };
+    });
+  }
+  return monacoWorkersPromise;
 }
 
 export interface MonacoEditorWrapperProps {
@@ -47,6 +61,15 @@ export interface MonacoEditorWrapperProps {
 
 export function MonacoEditorWrapper(props: Readonly<MonacoEditorWrapperProps>) {
   const themeMode = useThemeMode();
+  const [workersReady, setWorkersReady] = createSignal(false);
+
+  onMount(() => {
+    ensureMonacoWorkers()
+      .then(() => setWorkersReady(true))
+      .catch((error) => {
+        console.error("Failed to load Monaco workers:", error);
+      });
+  });
 
   const theme = createMemo(() => {
     return themeMode() === "dark" ? "vs-dark" : "vs";
@@ -69,44 +92,46 @@ export function MonacoEditorWrapper(props: Readonly<MonacoEditorWrapperProps>) {
   };
 
   return (
-    <As
-      as={MonacoEditor}
-      css={[
-        PROPERTIES.Css.TextFieldCss,
-        `return \`._id {
+    <Show when={workersReady()}>
+      <As
+        as={MonacoEditor}
+        css={[
+          PROPERTIES.Css.TextFieldCss,
+          `return \`._id {
           ${props.error ? "b: error" : ""}
         }\`;`,
-      ]}
-      height={props.height ?? "200px"}
-      language={props.language}
-      onChange={(value: string) => props.onChange(value)}
-      onMount={handleEditorMount}
-      options={{
-        autoIndent: "full",
-        theme: theme(),
-        folding: false,
-        fontSize: 14,
-        formatOnPaste: true,
-        formatOnType: true,
-        glyphMargin: false,
-        lineDecorationsWidth: 0,
-        lineNumbers: "off",
-        lineNumbersMinChars: 0,
-        minimap: { enabled: props.showMinimap ?? false },
-        scrollbar: {
-          // https://github.com/kubernetes-sigs/kui/issues/6480
-          alwaysConsumeMouseWheel: false,
-          horizontalScrollbarSize: 5,
-          verticalScrollbarSize: 5,
-          horizontal: "auto",
-          vertical: "auto",
-          handleMouseWheel: true,
-          scrollByPage: false,
-        },
-        scrollBeyondLastLine: false,
-        tabSize: 2,
-      }}
-      value={props.value}
-    />
+        ]}
+        height={props.height ?? "200px"}
+        language={props.language}
+        onChange={(value: string) => props.onChange(value)}
+        onMount={handleEditorMount}
+        options={{
+          autoIndent: "full",
+          theme: theme(),
+          folding: false,
+          fontSize: 14,
+          formatOnPaste: true,
+          formatOnType: true,
+          glyphMargin: false,
+          lineDecorationsWidth: 0,
+          lineNumbers: "off",
+          lineNumbersMinChars: 0,
+          minimap: { enabled: props.showMinimap ?? false },
+          scrollbar: {
+            // https://github.com/kubernetes-sigs/kui/issues/6480
+            alwaysConsumeMouseWheel: false,
+            horizontalScrollbarSize: 5,
+            verticalScrollbarSize: 5,
+            horizontal: "auto",
+            vertical: "auto",
+            handleMouseWheel: true,
+            scrollByPage: false,
+          },
+          scrollBeyondLastLine: false,
+          tabSize: 2,
+        }}
+        value={props.value}
+      />
+    </Show>
   );
 }

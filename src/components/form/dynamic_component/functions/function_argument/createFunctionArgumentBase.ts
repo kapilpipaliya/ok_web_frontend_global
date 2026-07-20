@@ -45,11 +45,11 @@ import { saveUserSetting } from "~/lib/api/saveUserSetting";
 import { postAPI } from "~/lib/api/general/postApi";
 import { executeServerFunction } from "~/cypher/get/executeServerFunction";
 import { executeNamedServerFunction } from "~/cypher/get/executeNamedServerFunction";
+import { withNetworkRetry } from "~/lib/api/withNetworkRetry";
 import { getMemberVertex } from "~/lib/graph/get/sync/store/getMemberVertex";
 import { getGlobalSettingVertex } from "~/lib/graph/get/sync/store/getGlobalSettingVertex";
 import { debounce } from "@solid-primitives/scheduled";
 import * as focusTrap from "focus-trap";
-import { KeepAwake } from "@capacitor-community/keep-awake";
 import { atom } from "~/lib/solid/atom";
 import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
 import { deleteVertex } from "~/lib/graph/mutate/core/vertex/deleteVertex";
@@ -71,6 +71,9 @@ import { createDashboardPlatform } from "~/lib/dashboard";
 import { findLoopTemplateMeta } from "~/components/form/dynamic_component/components/LoopChildrenRenderer";
 import { createLoopRowRenderer } from "~/components/form/dynamic_component/functions/createLoopRowRenderer";
 import { cssHelpers } from "~/lib/styles/cssHelpers";
+// Static: `args.useCarousel(...)` runs synchronously during SSR render (it
+// creates the embla ref in component `fns`), so it must be available on the
+// server. Small (~8KB gzip), unlike the truly client-only lazy deps below.
 import useEmblaCarousel from "embla-carousel-solid";
 // Following Untitled-1 (11-21, 12-13): also import `combine`, `GroupDropIndicator`, `liveRegion`, `type Instruction`, and `triggerPostMoveFlash` non-directly (no direct imports).
 // Only import drag-and-drop modules and related utilities on the client, using dynamic import assignment.
@@ -89,6 +92,9 @@ let combine: any,
   liveRegion: any,
   triggerPostMoveFlash: any;
 let attachInstruction: any, extractInstruction: any, DropIndicator: any;
+
+/** Lazily loaded client-only deps (only used in browser event handlers, never during SSR render). */
+let KeepAwake: typeof import("@capacitor-community/keep-awake").KeepAwake | undefined;
 
 if (typeof window !== "undefined") {
   // Only import drag-and-drop modules and related drag+drop utilities on the client
@@ -109,6 +115,9 @@ if (typeof window !== "undefined") {
     triggerPostMoveFlash = mod.triggerPostMoveFlash;
     attachInstruction = mod.attachInstruction;
     extractInstruction = mod.extractInstruction;
+  });
+  import("@capacitor-community/keep-awake").then((mod) => {
+    KeepAwake = mod.KeepAwake;
   });
 }
 
@@ -347,8 +356,14 @@ export function createFunctionArgumentBase(
     get user() {
       return getMemberVertex(hooks.graph);
     },
-    executeServerFunction,
-    executeNamedServerFunction,
+    executeServerFunction: ((...args: Parameters<typeof executeServerFunction>) =>
+      withNetworkRetry(() => executeServerFunction(...args))) as typeof executeServerFunction,
+    executeNamedServerFunction: ((
+      ...args: Parameters<typeof executeNamedServerFunction>
+    ) =>
+      withNetworkRetry(() =>
+        executeNamedServerFunction(...args),
+      )) as typeof executeNamedServerFunction,
     postAPI,
     /** Zod — same library as server/schema helpers; safe for use in `props`, `fns`, `css` bodies. */
     z,
@@ -359,7 +374,9 @@ export function createFunctionArgumentBase(
     virtua,
     debounce,
     focusTrap,
-    KeepAwake,
+    get KeepAwake() {
+      return KeepAwake;
+    },
     atom,
     // Vertex utilities
     newVertex,

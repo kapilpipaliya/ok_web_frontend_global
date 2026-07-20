@@ -1,10 +1,12 @@
-import { createSignal, Show } from "solid-js";
+import { createSignal, lazy, Show, Suspense } from "solid-js";
 
 import { IconButton } from "~/components/styled/IconButton";
 import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
 import { headerIconButtonCss } from "~/pages/settings/constants";
 
-import { SelectThemeMenu } from "./SelectThemeMenu";
+const SelectThemeMenu = lazy(() =>
+  import("./SelectThemeMenu").then((m) => ({ default: m.SelectThemeMenu })),
+);
 
 export function SelectThemeButton() {
   const [isThemeOptionsOpen, setIsThemeOptionsOpen] = createSignal(false);
@@ -28,7 +30,9 @@ export function SelectThemeButton() {
           onClickOutside={() => setIsThemeOptionsOpen(false)}
           parentRef={buttonRef()!}
         >
-          <SelectThemeMenu />
+          <Suspense fallback={null}>
+            <SelectThemeMenu />
+          </Suspense>
         </DropdownMenu>
       </Show>
     </>

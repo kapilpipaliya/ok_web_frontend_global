@@ -17,6 +17,10 @@ import { toastValue } from "./toastValue";
 import { GraphContext } from "~/lib/graph/context/GraphContext";
 import { GetInitialData } from "./GetInitialData";
 import { HydrationLoader } from "./components/HydrationLoader";
+import {
+  isNetworkError,
+  NETWORK_ERROR_MESSAGE,
+} from "~/lib/api/withNetworkRetry";
 
 /** Above VertexPickerModal (101) and other app overlays so toasts stay visible. */
 const TOAST_CONTAINER_Z_INDEX = 20000;
@@ -27,10 +31,13 @@ const ErrorFallback = (props: {
   resetErrorBoundary: () => void;
 }) => {
   console.error(props.error);
+  const message = isNetworkError(props.error)
+    ? NETWORK_ERROR_MESSAGE
+    : props.error.message;
   return (
     <div class="error-boundary-fallback">
       <h2>Something went wrong</h2>
-      <p>{props.error.message}</p>
+      <p>{message}</p>
       <button onClick={props.resetErrorBoundary}>Try again</button>
     </div>
   );

@@ -1,5 +1,11 @@
-import { SelectThemeMenu } from "~/pages/theme_menu/SelectThemeMenu";
+import { lazy, Suspense } from "solid-js";
 import { As } from "~/components/As";
+
+const SelectThemeMenu = lazy(() =>
+  import("~/pages/theme_menu/SelectThemeMenu").then((m) => ({
+    default: m.SelectThemeMenu,
+  })),
+);
 
 export function ThemeSettings() {
   return (
@@ -46,7 +52,9 @@ export function ThemeSettings() {
   padding: 1rem;
 }\`;`}
       >
-        <SelectThemeMenu isStandalone={true} />
+        <Suspense fallback={null}>
+          <SelectThemeMenu isStandalone={true} />
+        </Suspense>
       </As>
     </As>
   );

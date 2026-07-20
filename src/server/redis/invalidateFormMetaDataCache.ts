@@ -2,6 +2,11 @@ import type { MutationArgs } from "~/cypher/types/MutationArgs";
 import type { Edge } from "~/lib/graph/type/edge";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { clearDynamicPageUrlCache } from "~/pages/functions/resolveDynamicPageUrl";
+import { clearFormMetaDataMemoryCache } from "~/pages/functions/fetchFormMetaData";
+import {
+  clearComponentMemoryCache,
+  invalidateComponentCacheForSubdomain,
+} from "./componentCache";
 import { redisCacheDeleteByPattern } from "./redisCache";
 
 const FORM_META_CACHE_LABELS = new Set([
@@ -56,10 +61,18 @@ export function mutationAffectsFormMetaData(args: MutationArgs): boolean {
 export async function invalidateFormMetaDataCacheForSubdomain(
   subDomain: string,
 ): Promise<number> {
-  // Also drop the in-process dynamic page url index (L1) so newly added or
-  // renamed dynamic page urls resolve immediately in this process.
+  // Also drop the in-process caches (L1) so newly added or renamed pages
+  // resolve immediately in this process.
   clearDynamicPageUrlCache(subDomain);
-  return redisCacheDeleteByPattern(`form-meta:${subDomain}:*`);
+  clearFormMetaDataMemoryCache(subDomain);
+  clearComponentMemoryCache(subDomain);
+
+  const [pageDeleted, componentDeleted] = await Promise.all([
+    redisCacheDeleteByPattern(`form-meta:${subDomain}:*`),
+    invalidateComponentCacheForSubdomain(subDomain),
+  ]);
+
+  return pageDeleted + componentDeleted;
 }
 
 export async function invalidateFormMetaDataCacheIfNeeded(

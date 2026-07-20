@@ -11,6 +11,14 @@ export default defineConfig({
     experimental: {
       websocket: true,
     },
+    // Hashed Vinxi assets — long-lived cache for slow/repeat visits
+    routeRules: {
+      "/_build/**": {
+        headers: {
+          "Cache-Control": "public, max-age=31536000, immutable",
+        },
+      },
+    },
     // https: true,
   },
   vite: {
