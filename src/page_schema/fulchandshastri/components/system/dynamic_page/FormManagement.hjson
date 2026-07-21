@@ -15,8 +15,7 @@
       P: {
         displayOrder: 1
         fns:
-          '''
-// Form field schema: dataType = semantics/validation; renderer = UI control
+          '''// Form field schema: dataType = semantics/validation; renderer = UI control
 const getFieldDataType = (field) => field?.dataType || "text";
 
 const getFieldRenderer = (field) => field?.renderer || "text";
@@ -1171,12 +1170,10 @@ return {
     if (vertexId == null || String(vertexId).trim() === "") return;
     setFormVertexId(String(vertexId).trim());
   }
-};
-'''
+};'''
         componentName: Html
         props:
-          '''
-const containerClass = args.contextData.props?.class || "";
+          '''const containerClass = args.contextData.props?.class || "";
 return {
   as: "div",
   class: containerClass,
@@ -1184,8 +1181,7 @@ return {
     args.fns.initializeForm();
     void args.fns.applyAutoReferenceSequencesAfterAdd();
   }
-};
-'''
+};'''
       }
     }
     {
@@ -1193,21 +1189,17 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   flex-direction: column;
   gap: ${args.theme.var.spacing.lg};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -1219,8 +1211,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const formConfig = args.fns.getFormConfig();
+          '''const formConfig = args.fns.getFormConfig();
 
 const fieldGroups =
   formConfig?.groups && Array.isArray(formConfig.groups)
@@ -1234,8 +1225,7 @@ const fieldGroups =
 
 return {
   data: fieldGroups
-};
-'''
+};'''
       }
     }
     {
@@ -1243,16 +1233,14 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const group = args.contextData.fieldGroup;
+          '''const group = args.contextData.fieldGroup;
 const gridColumns = group?.gridColumns || 1;
 
 return `._id {
   display: grid;
   grid-template-columns: repeat(${gridColumns}, 1fr);
   gap: ${args.theme.var.spacing.md};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
@@ -1260,8 +1248,7 @@ return `._id {
 return {
   as: "div",
   hide: !group || group.fields.length === 0
-};
-'''
+};'''
       }
     }
     {
@@ -1269,8 +1256,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const group = args.contextData.fieldGroup;
+          '''const group = args.contextData.fieldGroup;
 const gridColumns = group?.gridColumns || 1;
 
 return `._id {
@@ -1281,20 +1267,17 @@ return `._id {
   margin-bottom: ${args.theme.var.spacing.sm};
   border-bottom: 2px solid ${args.theme.var.color.border};
   grid-column: 1 / -1;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const group = args.contextData.fieldGroup;
+          '''const group = args.contextData.fieldGroup;
 
 return {
   as: "div",
   text: group?.title || "",
   hide: !group?.title
-};
-'''
+};'''
       }
     }
     {
@@ -1306,8 +1289,7 @@ return {
         displayOrder: 3
         componentName: Html
         props:
-          '''
-const group = args.contextData.fieldGroup;
+          '''const group = args.contextData.fieldGroup;
 const fields = group?.fields || [];
 
 return {
@@ -1318,8 +1300,7 @@ return {
       return index;
     }
   }
-};
-'''
+};'''
       }
     }
     {
@@ -1327,20 +1308,17 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   width: 100%;
   height: 1px;
   background: ${args.theme.var.color.border};
   margin: ${args.theme.var.spacing.md} 0;
   grid-column: 1 / -1;
-}`;
-'''
+}`;'''
         displayOrder: 0
         componentName: Html
         props:
-          '''
-const group = args.contextData.fieldGroup;
+          '''const group = args.contextData.fieldGroup;
 const fieldIndex = args.contextData.fieldIndex || 0;
 const field = args.contextData.field;
 
@@ -1350,8 +1328,7 @@ const showLine = field?.startNewLine && !(fieldIndex === 0 && group?.title);
 return {
   as: "hr",
   hide: !showLine
-};
-'''
+};'''
       }
     }
     {
@@ -1359,8 +1336,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const field = args.contextData.field;
+          '''const field = args.contextData.field;
 const group = args.contextData.fieldGroup;
 const fieldSpan = field?.colSpan || 1;
 const gridColumns = group?.gridColumns || 1;
@@ -1371,20 +1347,17 @@ return `._id {
   flex-direction: column;
   gap: ${args.theme.var.spacing.xs};
   grid-column: ${startNewLine ? "1 / -1" : `span ${Math.min(fieldSpan, gridColumns)}`};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const field = args.contextData.field;
+          '''const field = args.contextData.field;
 const isVisible = args.fns.isFieldVisible(field);
 
 return {
   as: "div",
   hide: !isVisible
-};
-'''
+};'''
       }
     }
     {
@@ -1392,25 +1365,21 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   flex-direction: row;
   align-items: center;
   flex-wrap: wrap;
   gap: 0.125rem;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const field = args.contextData.field;
+          '''const field = args.contextData.field;
 return {
   as: "div",
   hide: args.fns.getFieldRenderer(field) === "graphFileUpload"
-};
-'''
+};'''
       }
     }
     {
@@ -1418,25 +1387,21 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   font-size: 0.875rem;
   font-weight: 500;
   color: ${args.theme.var.color.text};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const field = args.contextData.field;
+          '''const field = args.contextData.field;
 const label = field.label || field.key;
 
 return {
   as: "label",
   text: label + (args.fns.isFieldRequired(field) ? " *" : "")
-};
-'''
+};'''
       }
     }
     {
@@ -1446,8 +1411,7 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const field = args.contextData.field;
+          '''const field = args.contextData.field;
 const tooltipMeta = args.fns.getFieldTooltipMeta(field);
 
 return {
@@ -1456,8 +1420,7 @@ return {
   fieldLabel: field.label || field.key,
   placement: tooltipMeta.placement,
   hide: !tooltipMeta.showFloatingHelp
-};
-'''
+};'''
       }
     }
     {
@@ -1465,19 +1428,16 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   font-size: 0.75rem;
   line-height: 1.35;
   color: ${args.theme.var.color.text_light_500};
   margin-top: 0;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const field = args.contextData.field;
+          '''const field = args.contextData.field;
 const tooltipMeta = args.fns.getFieldTooltipMeta(field);
 return {
   as: "div",
@@ -1485,8 +1445,7 @@ return {
   text: tooltipMeta.body,
   hide: args.fns.getFieldRenderer(field) === "graphFileUpload" || !tooltipMeta.showBelow,
   "aria-live": "polite"
-};
-'''
+};'''
       }
     }
     {
@@ -1494,8 +1453,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const field = args.contextData.field;
+          '''const field = args.contextData.field;
 if (args.fns.getFieldRenderer(field) === "graphFileUpload") {
   return `._id {
   width: auto;
@@ -1505,13 +1463,11 @@ if (args.fns.getFieldRenderer(field) === "graphFileUpload") {
 }
 return `._id {
   width: 100%;
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-const field = args.contextData.field;
+          '''const field = args.contextData.field;
 const value = args.fns.getFieldValue(field.key);
 const setFieldValue = args.fns.setFieldValue;
 const fieldDisabled = args.fns.isFieldDisabled(field);
@@ -1878,8 +1834,7 @@ return {
   minLength: field.minLength,
   disabled: fieldDisabled,
   ...accessibility
-};
-'''
+};'''
       }
     }
     {
@@ -1887,26 +1842,22 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   font-size: 0.75rem;
   color: ${args.theme.var.color.error};
   min-height: 1.25rem;
-}`;
-'''
+}`;'''
         displayOrder: 4
         componentName: Html
         props:
-          '''
-const field = args.contextData.field;
+          '''const field = args.contextData.field;
 const error = args.fns.errors[field.key];
 
 return {
   as: "div",
   text: error || "",
   hide: !error
-};
-'''
+};'''
       }
     }
     {
@@ -1914,8 +1865,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const inModal = args.contextData.props?.inModal === true;
+          '''const inModal = args.contextData.props?.inModal === true;
 const lg = args.theme.var.spacing.lg;
 const md = args.theme.var.spacing.md;
 return `._id {
@@ -1933,17 +1883,14 @@ return `._id {
   padding-right: ${lg};
   padding-bottom: ${lg};
   ` : ''}
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   hide: args.fns.getMode?.() === "view" || args.contextData.props?.hideActionsBar === true
-};
-'''
+};'''
       }
     }
     {
@@ -1953,8 +1900,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const onClose = args.contextData.props?.onClose;
+          '''const onClose = args.contextData.props?.onClose;
 
 const handleCancel = () => {
   const txnId = args.fns.formTxnId();
@@ -1972,8 +1918,7 @@ return {
   onClick: handleCancel,
   disabled: args.fns.isSubmitting() || args.fns.isFileUploading?.() === true,
   hide: args.fns.getUsePolarisUI?.() !== true
-};
-'''
+};'''
       }
     }
     {
@@ -1983,8 +1928,7 @@ return {
         displayOrder: 1
         componentName: Button
         props:
-          '''
-const onClose = args.contextData.props?.onClose;
+          '''const onClose = args.contextData.props?.onClose;
 
 const handleCancel = () => {
   // Cleanup transaction if needed
@@ -2005,8 +1949,7 @@ return {
   text: "Cancel",
   disabled: args.fns.isSubmitting(),
   hide: args.fns.getUsePolarisUI?.() === true
-};
-'''
+};'''
       }
     }
     {
@@ -2016,16 +1959,14 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "s-button",
   "attr:variant": "primary",
   text: args.fns.isFileUploading?.() === true ? "Uploading…" : "Save",
   onClick: args.fns.handleSave,
   disabled: args.fns.isSubmitting() || args.fns.isFileUploading?.() === true,
   hide: args.fns.getUsePolarisUI?.() !== true
-};
-'''
+};'''
       }
     }
     {
@@ -2035,15 +1976,13 @@ return {
         displayOrder: 2
         componentName: Button
         props:
-          '''
-return {
+          '''return {
   variant: "primary",
   onClick: args.fns.handleSave,
   text: args.fns.isFileUploading?.() === true ? "Uploading…" : "Save",
   disabled: args.fns.isSubmitting() || args.fns.isFileUploading?.() === true,
   hide: args.fns.getUsePolarisUI?.() === true
-};
-'''
+};'''
       }
     }
     {

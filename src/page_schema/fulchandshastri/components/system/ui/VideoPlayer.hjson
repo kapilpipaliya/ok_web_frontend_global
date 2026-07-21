@@ -15,11 +15,9 @@
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "portal"
-};
-'''
+};'''
       }
     }
     {
@@ -27,8 +25,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const getPlayerState = args.contextData.props?.playerState;
+          '''const getPlayerState = args.contextData.props?.playerState;
 const state = getPlayerState?.() || "closed";
 const isMinimized = state === "minimized";
 const isMaximized = state === "maximized";
@@ -69,12 +66,10 @@ return `._id {
     /* Max width ensures player never exceeds screen */
     max-width: calc(100vw - 16px);
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         fns:
-          '''
-// State to track if resize is active
+          '''// State to track if resize is active
 const [isResizing, setIsResizing] = args.createSignal(false);
 
 // Get responsive values based on screen size
@@ -307,12 +302,10 @@ return {
   isResizing,
   getResponsiveValues,
   constrainPlayerPosition
-};
-'''
+};'''
         componentName: Html
         props:
-          '''
-const getPlayerState = args.contextData.props?.playerState;
+          '''const getPlayerState = args.contextData.props?.playerState;
 const currentState = getPlayerState?.() || "closed";
 const playerPosition = args.contextData.props?.playerPosition || { x: null, y: null };
 const playerSize = args.contextData.props?.playerSize || { width: 480, height: 270 };
@@ -367,8 +360,7 @@ return {
     window.removeEventListener('resize', handleResize);
     window.removeEventListener('orientationchange', handleResize);
   }
-};
-'''
+};'''
       }
     }
     {
@@ -376,8 +368,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const getPlayerState = args.contextData.props?.playerState;
+          '''const getPlayerState = args.contextData.props?.playerState;
 const state = getPlayerState?.() || "closed";
 
 return `._id {
@@ -390,13 +381,11 @@ return `._id {
   cursor: ${state === "minimized" ? 'move' : 'default'};
   user-select: none;
   touch-action: ${state === "minimized" ? 'none' : 'auto'};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-let lastClickTime = 0;
+          '''let lastClickTime = 0;
 let hasDragged = false;
 
 const handleMouseDown = (e) => {
@@ -501,8 +490,7 @@ return {
   as: "div",
   onMouseDown: handleMouseDown,
   onTouchStart: handleTouchStart
-};
-'''
+};'''
       }
     }
     {
@@ -510,23 +498,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   flex: 1;
   min-width: 0;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -534,23 +518,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   color: #FF0000;
   flex-shrink: 0;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "icon",
   icon: "mdi:youtube",
   width: 24,
   height: 24
-};
-'''
+};'''
       }
     }
     {
@@ -558,8 +538,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   font-size: 0.875rem;
   font-weight: 500;
   color: ${args.theme.var.color.background_dark_900_text};
@@ -569,21 +548,18 @@ return `._id {
   white-space: nowrap;
   flex: 1;
   min-width: 0;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const getCurrentVideo = args.contextData.props?.currentVideo;
+          '''const getCurrentVideo = args.contextData.props?.currentVideo;
 const video = getCurrentVideo?.();
 const title = video?.P?.title || "YouTube Video";
 
 return {
   as: "h3",
   text: title
-};
-'''
+};'''
       }
     }
     {
@@ -591,21 +567,17 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   align-items: center;
   gap: ${args.theme.var.spacing.xs};
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -613,8 +585,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   background: none;
   border: none;
   color: ${args.theme.var.color.background_dark_900_text};
@@ -634,13 +605,11 @@ return `._id {
     opacity: 0.5;
     cursor: not-allowed;
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const getVideoQueue = args.contextData.props?.videoQueue;
+          '''const getVideoQueue = args.contextData.props?.videoQueue;
 const queue = getVideoQueue?.() || [];
 const playNext = args.contextData.props?.playNext;
 const hasNext = queue.length > 0;
@@ -652,8 +621,7 @@ return {
   title: `Next (${queue.length} in queue)`,
   disabled: !hasNext,
   hide: !hasNext
-};
-'''
+};'''
       }
     }
     {
@@ -663,14 +631,12 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "icon",
   icon: "carbon:skip-forward",
   width: 20,
   height: 20
-};
-'''
+};'''
       }
     }
     {
@@ -678,8 +644,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   background: none;
   border: none;
   color: ${args.theme.var.color.background_dark_900_text};
@@ -694,13 +659,11 @@ return `._id {
   &:hover {
     background: ${args.theme.var.color.background_dark_700};
   }
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const getVideoQueue = args.contextData.props?.videoQueue;
+          '''const getVideoQueue = args.contextData.props?.videoQueue;
 const queue = getVideoQueue?.() || [];
 const hasQueue = queue.length > 0;
 const openQueueModal = args.contextData.props?.openQueueModal;
@@ -711,8 +674,7 @@ return {
   "aria-label": "Manage queue",
   title: `Queue (${queue.length})`,
   hide: !hasQueue
-};
-'''
+};'''
       }
     }
     {
@@ -722,14 +684,12 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "icon",
   icon: "carbon:list",
   width: 20,
   height: 20
-};
-'''
+};'''
       }
     }
     {
@@ -737,8 +697,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   background: #FF0000;
   border: none;
   color: white;
@@ -757,13 +716,11 @@ return `._id {
   &:hover {
     background: #CC0000;
   }
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-const getCurrentVideo = args.contextData.props?.currentVideo;
+          '''const getCurrentVideo = args.contextData.props?.currentVideo;
 const video = getCurrentVideo?.();
 const youtubeId = video?.P?.youtubeId || "";
 const youtubeUrl = `https://www.youtube.com/watch?v=${youtubeId}`;
@@ -780,8 +737,7 @@ return {
     e.stopPropagation();
     args.fns.openYouTubeInParentTab(youtubeUrl);
   }
-};
-'''
+};'''
       }
     }
     {
@@ -791,14 +747,12 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "icon",
   icon: "carbon:launch",
   width: 16,
   height: 16
-};
-'''
+};'''
       }
     }
     {
@@ -806,22 +760,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   @media (max-width: 768px) {
     display: none;
   }
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "span",
   text: "YouTube"
-};
-'''
+};'''
       }
     }
     {
@@ -829,8 +779,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   background: none;
   border: none;
   color: ${args.theme.var.color.background_dark_900_text};
@@ -845,13 +794,11 @@ return `._id {
   &:hover {
     background: ${args.theme.var.color.background_dark_700};
   }
-}`;
-'''
+}`;'''
         displayOrder: 4
         componentName: Html
         props:
-          '''
-const getPlayerState = args.contextData.props?.playerState;
+          '''const getPlayerState = args.contextData.props?.playerState;
 const state = getPlayerState?.() || "closed";
 const isMinimized = state === "minimized";
 const togglePlayerState = args.contextData.props?.togglePlayerState;
@@ -861,8 +808,7 @@ return {
   onClick: togglePlayerState,
   "aria-label": isMinimized ? "Maximize player" : "Minimize player",
   title: isMinimized ? "Maximize" : "Minimize"
-};
-'''
+};'''
       }
     }
     {
@@ -872,8 +818,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const getPlayerState = args.contextData.props?.playerState;
+          '''const getPlayerState = args.contextData.props?.playerState;
 const state = getPlayerState?.() || "closed";
 const isMinimized = state === "minimized";
 
@@ -882,8 +827,7 @@ return {
   icon: isMinimized ? "carbon:maximize" : "carbon:minimize",
   width: 20,
   height: 20
-};
-'''
+};'''
       }
     }
     {
@@ -891,8 +835,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   background: none;
   border: none;
   color: ${args.theme.var.color.background_dark_900_text};
@@ -907,21 +850,18 @@ return `._id {
   &:hover {
     background: ${args.theme.var.color.error_dark_600};
   }
-}`;
-'''
+}`;'''
         displayOrder: 5
         componentName: Html
         props:
-          '''
-const closePlayer = args.contextData.props?.closePlayer;
+          '''const closePlayer = args.contextData.props?.closePlayer;
 
 return {
   as: "button",
   onClick: closePlayer,
   "aria-label": "Close player",
   title: "Close"
-};
-'''
+};'''
       }
     }
     {
@@ -931,14 +871,12 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "icon",
   icon: "carbon:close",
   width: 20,
   height: 20
-};
-'''
+};'''
       }
     }
     {
@@ -946,18 +884,15 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   width: 100%;
   height: calc(100% - 48px);
   background: ${args.theme.var.color.background_dark_900};
   position: relative;
-}`;
-'''
+}`;'''
         displayOrder: 2
         fns:
-          '''
-// Create reactive store for player state
+          '''// Create reactive store for player state
 const [playerState, setPlayerState] = args.createStore({
   player: null,
   isPlayerReady: false,
@@ -1012,15 +947,12 @@ return {
       setPlayerState('isLoading', false);
     }
   }
-};
-'''
+};'''
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -1028,16 +960,13 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   width: 100%;
   height: 100%;
-}`;
-'''
+}`;'''
         displayOrder: 1
         fns:
-          '''
-// Watch for video changes and update player without changing iframe src
+          '''// Watch for video changes and update player without changing iframe src
 args.createEffect(() => {
   const getCurrentVideo = args.untrack(() => args.contextData.props?.currentVideo);
   const video = getCurrentVideo?.();
@@ -1057,12 +986,10 @@ args.createEffect(() => {
   });
 });
 
-return {};
-'''
+return {};'''
         componentName: Html
         props:
-          '''
-const getCurrentVideo = args.contextData.props?.currentVideo;
+          '''const getCurrentVideo = args.contextData.props?.currentVideo;
 const video = getCurrentVideo?.();
 const youtubeId = video?.P?.youtubeId || "";
 
@@ -1144,8 +1071,7 @@ return {
     args.fns.setPlayerReady(false);
     args.fns.playerState.setPlayer(null);
   }
-};
-'''
+};'''
       }
     }
     {
@@ -1153,8 +1079,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   position: absolute;
   top: 0;
   left: 0;
@@ -1165,20 +1090,17 @@ return `._id {
   justify-content: center;
   background: ${args.theme.var.color.background_dark_900};
   z-index: 10;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const isLoading = args.fns.playerState.isLoading;
+          '''const isLoading = args.fns.playerState.isLoading;
 const isPlayerReady = args.fns.playerState.isPlayerReady;
 
 return {
   as: "div",
   hide: () => !isLoading && isPlayerReady
-};
-'''
+};'''
       }
     }
     {
@@ -1186,8 +1108,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return [
+          '''return [
   `@keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
@@ -1200,16 +1121,13 @@ return [
     border-radius: 50%;
     animation: spin 1s linear infinite;
   }`
-];
-'''
+];'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -1217,8 +1135,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   position: absolute;
   bottom: 0;
   right: 0;
@@ -1243,13 +1160,11 @@ return `._id {
     width: 30px;
     height: 30px;
   }
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-const getPlayerState = args.contextData.props?.playerState;
+          '''const getPlayerState = args.contextData.props?.playerState;
 
 return {
   as: "div",
@@ -1259,8 +1174,7 @@ return {
     const state = getPlayerState?.();
     return state !== "minimized";
   }
-};
-'''
+};'''
       }
     }
     {
@@ -1268,8 +1182,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   position: absolute;
   top: 20px;
   right: 0;
@@ -1282,13 +1195,11 @@ return `._id {
   @media (max-width: 1024px) {
     width: 12px;
   }
-}`;
-'''
+}`;'''
         displayOrder: 4
         componentName: Html
         props:
-          '''
-const getPlayerState = args.contextData.props?.playerState;
+          '''const getPlayerState = args.contextData.props?.playerState;
 
 return {
   as: "div",
@@ -1298,8 +1209,7 @@ return {
     const state = getPlayerState?.();
     return state !== "minimized";
   }
-};
-'''
+};'''
       }
     }
     {
@@ -1307,8 +1217,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   position: absolute;
   bottom: 0;
   left: 20px;
@@ -1321,13 +1230,11 @@ return `._id {
   @media (max-width: 1024px) {
     height: 12px;
   }
-}`;
-'''
+}`;'''
         displayOrder: 5
         componentName: Html
         props:
-          '''
-const getPlayerState = args.contextData.props?.playerState;
+          '''const getPlayerState = args.contextData.props?.playerState;
 
 return {
   as: "div",
@@ -1337,8 +1244,7 @@ return {
     const state = getPlayerState?.();
     return state !== "minimized";
   }
-};
-'''
+};'''
       }
     }
     {
@@ -1346,8 +1252,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   position: absolute;
   top: 20px;
   left: 0;
@@ -1360,13 +1265,11 @@ return `._id {
   @media (max-width: 1024px) {
     width: 12px;
   }
-}`;
-'''
+}`;'''
         displayOrder: 6
         componentName: Html
         props:
-          '''
-const getPlayerState = args.contextData.props?.playerState;
+          '''const getPlayerState = args.contextData.props?.playerState;
 
 return {
   as: "div",
@@ -1376,8 +1279,7 @@ return {
     const state = getPlayerState?.();
     return state !== "minimized";
   }
-};
-'''
+};'''
       }
     }
     {
@@ -1385,8 +1287,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   position: absolute;
   top: 0;
   left: 20px;
@@ -1399,13 +1300,11 @@ return `._id {
   @media (max-width: 1024px) {
     height: 12px;
   }
-}`;
-'''
+}`;'''
         displayOrder: 7
         componentName: Html
         props:
-          '''
-const getPlayerState = args.contextData.props?.playerState;
+          '''const getPlayerState = args.contextData.props?.playerState;
 
 return {
   as: "div",
@@ -1415,8 +1314,7 @@ return {
     const state = getPlayerState?.();
     return state !== "minimized";
   }
-};
-'''
+};'''
       }
     }
     {
@@ -1424,8 +1322,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   position: absolute;
   top: 0;
   right: 0;
@@ -1450,13 +1347,11 @@ return `._id {
     width: 30px;
     height: 30px;
   }
-}`;
-'''
+}`;'''
         displayOrder: 8
         componentName: Html
         props:
-          '''
-const getPlayerState = args.contextData.props?.playerState;
+          '''const getPlayerState = args.contextData.props?.playerState;
 
 return {
   as: "div",
@@ -1466,8 +1361,7 @@ return {
     const state = getPlayerState?.();
     return state !== "minimized";
   }
-};
-'''
+};'''
       }
     }
     {
@@ -1475,8 +1369,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   position: absolute;
   top: 0;
   left: 0;
@@ -1501,13 +1394,11 @@ return `._id {
     width: 30px;
     height: 30px;
   }
-}`;
-'''
+}`;'''
         displayOrder: 9
         componentName: Html
         props:
-          '''
-const getPlayerState = args.contextData.props?.playerState;
+          '''const getPlayerState = args.contextData.props?.playerState;
 
 return {
   as: "div",
@@ -1517,8 +1408,7 @@ return {
     const state = getPlayerState?.();
     return state !== "minimized";
   }
-};
-'''
+};'''
       }
     }
     {
@@ -1526,8 +1416,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   position: absolute;
   bottom: 0;
   left: 0;
@@ -1552,13 +1441,11 @@ return `._id {
     width: 30px;
     height: 30px;
   }
-}`;
-'''
+}`;'''
         displayOrder: 10
         componentName: Html
         props:
-          '''
-const getPlayerState = args.contextData.props?.playerState;
+          '''const getPlayerState = args.contextData.props?.playerState;
 
 return {
   as: "div",
@@ -1568,8 +1455,7 @@ return {
     const state = getPlayerState?.();
     return state !== "minimized";
   }
-};
-'''
+};'''
       }
     }
     {
@@ -1577,8 +1463,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   position: absolute;
   top: 0;
   left: 0;
@@ -1587,19 +1472,16 @@ return `._id {
   z-index: 100;
   pointer-events: auto;
   background: transparent;
-}`;
-'''
+}`;'''
         displayOrder: 11
         componentName: Html
         props:
-          '''
-const isResizing = () => args.graph.vertexes[args.fns.tableStateVertexId]?.P?.isResizing === true;
+          '''const isResizing = () => args.graph.vertexes[args.fns.tableStateVertexId]?.P?.isResizing === true;
 
 return {
   as: "div",
   hide: () => !isResizing()
-};
-'''
+};'''
       }
     }
   ]

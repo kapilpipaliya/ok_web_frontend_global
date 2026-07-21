@@ -1,0 +1,288 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Schema-only helpers — strip defaultValue from field configs and merge section patches.
+        body:
+          '''
+/**
+ * contextData.action:
+ *   "stripFieldSchema" | "stripConfigSchema" | "mergeConfigSections" | "stripTableSchema"
+ *   | "evalConfigBody" | "evalPartFromVertex" | "resolveGeneralFlags"
+ *   | "buildRelationshipPropertyBindingsFromParts"
+ */
+
+const action = args.contextData?.action;
+if (!action) {
+  return { success: false, message: "action is required" };
+}
+
+const stripFieldSchema = (field) => {
+  if (!field || typeof field !== "object") return field;
+  const next = { ...field };
+  delete next.defaultValue;
+  if (next.fieldArrayConfig && typeof next.fieldArrayConfig === "object") {
+    const config = { ...next.fieldArrayConfig };
+    delete config.defaultItems;
+    if (Array.isArray(config.itemFields)) {
+      config.itemFields = config.itemFields.map((itemField) => stripFieldSchema(itemField));
+    }
+    next.fieldArrayConfig = config;
+  }
+  return next;
+};
+
+const stripSectionFields = (section) => {
+  if (!section || typeof section !== "object") return section;
+  const form = section.form;
+  if (!form || typeof form !== "object") return section;
+  const groups = Array.isArray(form.groups) ? form.groups : [];
+  const nextGroups = groups.map((group) => {
+    if (!group || typeof group !== "object") return group;
+    const fields = Array.isArray(group.fields) ? group.fields.map(stripFieldSchema) : group.fields;
+    return { ...group, fields };
+  });
+  return {
+    ...section,
+    form: {
+      ...form,
+      groups: nextGroups
+    }
+  };
+};
+
+const stripConfigSchema = (config) => {
+  if (!config || typeof config !== "object" || Array.isArray(config)) {
+    return config;
+  }
+  const sections = Array.isArray(config.sections)
+    ? config.sections.map(stripSectionFields)
+    : config.sections;
+  return { ...config, sections };
+};
+
+const mergeConfigSections = (baseConfig, patchConfig) => {
+  const base = baseConfig && typeof baseConfig === "object" ? { ...baseConfig } : {};
+  const patchSections = Array.isArray(patchConfig?.sections) ? patchConfig.sections : [];
+  if (patchSections.length === 0) return base;
+
+  const sectionMap = new Map();
+  const baseSections = Array.isArray(base.sections) ? base.sections : [];
+  for (let i = 0; i < baseSections.length; i++) {
+    const section = baseSections[i];
+    if (section?.id) sectionMap.set(section.id, section);
+  }
+  for (let j = 0; j < patchSections.length; j++) {
+    const patchSection = patchSections[j];
+    if (!patchSection?.id) continue;
+    sectionMap.set(patchSection.id, patchSection);
+  }
+
+  base.sections = Array.from(sectionMap.values());
+  return base;
+};
+
+const stripTableSchema = (config, part) => {
+  if (!config || typeof config !== "object" || Array.isArray(config)) {
+    return config;
+  }
+  const resolvedPart = part || config.part;
+  const next = { ...config };
+  if (resolvedPart) next.part = resolvedPart;
+
+  if (resolvedPart === "formConfig" && Array.isArray(next.groups)) {
+    next.groups = next.groups.map((group) => {
+      if (!group || typeof group !== "object") return group;
+      const fields = Array.isArray(group.fields) ? group.fields.map(stripFieldSchema) : group.fields;
+      return { ...group, fields };
+    });
+    return next;
+  }
+
+  if (resolvedPart === "sidebar" && next.formConfig?.groups) {
+    const formConfig = { ...next.formConfig };
+    formConfig.groups = Array.isArray(formConfig.groups)
+      ? formConfig.groups.map((group) => {
+          if (!group || typeof group !== "object") return group;
+          const fields = Array.isArray(group.fields) ? group.fields.map(stripFieldSchema) : group.fields;
+          return { ...group, fields };
+        })
+      : formConfig.groups;
+    next.formConfig = formConfig;
+  }
+
+  return next;
+};
+
+if (action === "stripFieldSchema") {
+  return {
+    success: true,
+    data: { field: stripFieldSchema(args.contextData.field) }
+  };
+}
+
+if (action === "stripConfigSchema") {
+  return {
+    success: true,
+    data: { config: stripConfigSchema(args.contextData.config) }
+  };
+}
+
+if (action === "mergeConfigSections") {
+  return {
+    success: true,
+    data: {
+      config: mergeConfigSections(args.contextData.baseConfig, args.contextData.patchConfig)
+    }
+  };
+}
+
+if (action === "stripTableSchema") {
+  return {
+    success: true,
+    data: {
+      config: stripTableSchema(args.contextData.config, args.contextData.part)
+    }
+  };
+}
+
+const evalConfigBody = (cfgStr) => {
+  if (cfgStr == null || String(cfgStr).trim() === "") return null;
+  try {
+    const configFn = new Function(String(cfgStr));
+    const value = configFn();
+    return value && typeof value === "object" ? value : null;
+  } catch (e) {
+    console.warn("settingsSchemaHelpers: evalConfigBody failed", e);
+    return null;
+  }
+};
+
+const stripPartMeta = (value) => {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  const { part: _part, ...rest } = value;
+  return rest;
+};
+
+const evalPartFromVertex = (vertex) => {
+  if (!vertex?.P?.config) return null;
+  return evalConfigBody(vertex.P.config);
+};
+
+const resolveGeneralFlags = (generalRaw, tableVertexLabel) => {
+  const general = stripPartMeta(generalRaw);
+  return {
+    publicRead: general.publicRead === true,
+    title: general.title || tableVertexLabel,
+    label: general.label || tableVertexLabel,
+    icon: general.icon || "ph:book-open",
+    usePolarisUI: general.usePolarisUI === true,
+    enableUserScopingForContent: general.enableUserScopingForContent === true,
+    enableLocalFilters: general.enableLocalFilters !== false,
+    enableLocalSort: general.enableLocalSort !== false,
+    showSelection: general.showSelection !== false,
+    hideExportButtons: general.hideExportButtons === true,
+    hideImportButtons: general.hideImportButtons === true,
+    hideSettingsButton: general.hideSettingsButton === true,
+    hideAddButton: general.hideAddButton === true,
+    rowHeight: general.rowHeight ?? 56,
+    columnWidths: general.columnWidths || {},
+    rowClickable: general.rowClickable === true,
+    showRowNumber: general.showRowNumber !== false,
+    resizableColumns: general.resizableColumns === true,
+    actions: Array.isArray(general.actions) ? general.actions : [],
+    hooks: general.hooks && typeof general.hooks === "object" ? general.hooks : {}
+  };
+};
+
+const buildRelationshipPropertyBindingsFromParts = (parts) => {
+  const formConfig = stripPartMeta(parts?.formConfig);
+  const columnsRaw = parts?.columns;
+  const columns = Array.isArray(columnsRaw?.columns) ? columnsRaw.columns : (Array.isArray(columnsRaw) ? columnsRaw : []);
+  const config = {
+    formConfig,
+    columns,
+    relationshipPropertyBindings: parts?.relationshipPropertyBindings
+  };
+  const fields = [];
+  const groups = config.formConfig?.groups;
+  if (Array.isArray(groups)) {
+    for (let gi = 0; gi < groups.length; gi++) {
+      const g = groups[gi]?.fields;
+      if (!Array.isArray(g)) continue;
+      for (let fi = 0; fi < g.length; fi++) fields.push(g[fi]);
+    }
+  }
+  const seen = new Set();
+  const bindings = [];
+  const addBinding = (prop, rel) => {
+    if (!prop || !rel) return;
+    const k = `${prop}\0${rel}`;
+    if (seen.has(k)) return;
+    seen.add(k);
+    bindings.push({ prop, rel });
+  };
+  for (let i = 0; i < fields.length; i++) {
+    const f = fields[i];
+    if ((f?.dataType === "select" || f?.dataType === "relation") && f.selectConfig?.relationshipType && f.selectConfig?.edgeOnly === true) {
+      addBinding(f.key, f.selectConfig.relationshipType);
+    }
+  }
+  for (let ci = 0; ci < columns.length; ci++) {
+    const c = columns[ci];
+    if (c?.dataType === "relation" && c.selectConfig?.relationshipType && c.selectConfig?.edgeOnly === true) {
+      addBinding(c.key, c.selectConfig.relationshipType);
+    }
+  }
+  const extra = config.relationshipPropertyBindings;
+  if (Array.isArray(extra)) {
+    for (let j = 0; j < extra.length; j++) {
+      const row = extra[j];
+      addBinding(row?.prop, row?.rel);
+    }
+  }
+  return bindings;
+};
+
+if (action === "evalConfigBody") {
+  return {
+    success: true,
+    data: { value: evalConfigBody(args.contextData.configBody) }
+  };
+}
+
+if (action === "evalPartFromVertex") {
+  return {
+    success: true,
+    data: { value: evalPartFromVertex(args.contextData.vertex) }
+  };
+}
+
+if (action === "resolveGeneralFlags") {
+  return {
+    success: true,
+    data: {
+      general: resolveGeneralFlags(args.contextData.generalRaw, args.contextData.tableVertexLabel)
+    }
+  };
+}
+
+if (action === "buildRelationshipPropertyBindingsFromParts") {
+  return {
+    success: true,
+    data: {
+      bindings: buildRelationshipPropertyBindingsFromParts(args.contextData.parts)
+    }
+  };
+}
+
+return { success: false, message: `Unknown action: ${action}` };
+'''
+        key: settingsSchemaHelpers
+      }
+    }
+  ]
+  edges: []
+}

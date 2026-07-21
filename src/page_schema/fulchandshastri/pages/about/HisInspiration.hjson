@@ -45,19 +45,15 @@ try {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   padding: 3rem 1rem;
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "main"
-};
-'''
+};'''
       }
     }
     {
@@ -65,20 +61,16 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   max-width: 1000px;
   margin: 0 auto;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -90,18 +82,15 @@ return {
   font-size: 3rem;
   font-weight: 700;
 
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const content = args.contextData.hisInspirationSettings?.content;
+          '''const content = args.contextData.hisInspirationSettings?.content;
 return {
   as: "h1",
   text: content?.pageTitle
-};
-'''
+};'''
       }
     }
     {
@@ -109,22 +98,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   margin-bottom: 4rem;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "section",
   "data-animate": "",
 
   ref: (el) => el && args.fns.animateOnView(el)
-};
-'''
+};'''
       }
     }
     {
@@ -137,18 +122,15 @@ return {
   font-size: 2.5rem;
   font-weight: 600;
   margin-bottom: 2rem;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const content = args.contextData.hisInspirationSettings?.content;
+          '''const content = args.contextData.hisInspirationSettings?.content;
 return {
   as: "h2",
   text: content?.shrimadTitle
-};
-'''
+};'''
       }
     }
     {
@@ -165,16 +147,13 @@ return {
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -182,24 +161,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   font-size: 1.125rem;
   line-height: 1.8;
   color: ${args.theme.var.color.text};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   "data-animate": "",
 
   ref: (el) => el && args.fns.animateOnView(el, { x: -32, y: 0, delay: 0.1 })
-};
-'''
+};'''
       }
     }
     {
@@ -207,21 +182,17 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   margin-bottom: 1.5rem;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const content = args.contextData.hisInspirationSettings?.content;
+          '''const content = args.contextData.hisInspirationSettings?.content;
 return {
   as: "p",
   text: content?.shrimadPara1
-};
-'''
+};'''
       }
     }
     {
@@ -229,21 +200,17 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   margin-bottom: 1.5rem;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const content = args.contextData.hisInspirationSettings?.content;
+          '''const content = args.contextData.hisInspirationSettings?.content;
 return {
   as: "p",
   text: content?.shrimadPara2
-};
-'''
+};'''
       }
     }
     {
@@ -251,22 +218,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   text-align: center;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   "data-animate": "",
 
   ref: (el) => el && args.fns.animateOnView(el, { x: 32, y: 0 })
-};
-'''
+};'''
       }
     }
     {
@@ -274,26 +237,22 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   border-radius: 0.5rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   max-width: 100%;
   height: auto;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "img",
   src: "https://www.fulchandshastri.com/wp-content/uploads/2016/09/Shrimad-Rajchandra-240x300.jpg",
   alt: "Shrimad Rajchandra",
   width: 240,
   height: 300
-};
-'''
+};'''
       }
     }
     {
@@ -303,14 +262,12 @@ return {
         displayOrder: 3
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "section",
   "data-animate": "",
 
   ref: (el) => el && args.fns.animateOnView(el)
-};
-'''
+};'''
       }
     }
     {
@@ -323,18 +280,15 @@ return {
   font-size: 2.5rem;
   font-weight: 600;
   margin-bottom: 2rem;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const content = args.contextData.hisInspirationSettings?.content;
+          '''const content = args.contextData.hisInspirationSettings?.content;
 return {
   as: "h2",
   text: content?.kanjiTitle
-};
-'''
+};'''
       }
     }
     {
@@ -351,16 +305,13 @@ return {
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -368,24 +319,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   font-size: 1.125rem;
   line-height: 1.8;
   color: ${args.theme.var.color.text};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   "data-animate": "",
 
   ref: (el) => el && args.fns.animateOnView(el, { x: -32, y: 0 })
-};
-'''
+};'''
       }
     }
     {
@@ -393,21 +340,17 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   margin-bottom: 1.5rem;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const content = args.contextData.hisInspirationSettings?.content;
+          '''const content = args.contextData.hisInspirationSettings?.content;
 return {
   as: "p",
   text: content?.kanjiPara1
-};
-'''
+};'''
       }
     }
     {
@@ -415,21 +358,17 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   margin-bottom: 1.5rem;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const content = args.contextData.hisInspirationSettings?.content;
+          '''const content = args.contextData.hisInspirationSettings?.content;
 return {
   as: "p",
   text: content?.kanjiPara2
-};
-'''
+};'''
       }
     }
     {
@@ -437,21 +376,17 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   margin-bottom: 1.5rem;
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-const content = args.contextData.hisInspirationSettings?.content;
+          '''const content = args.contextData.hisInspirationSettings?.content;
 return {
   as: "p",
   text: content?.kanjiPara3
-};
-'''
+};'''
       }
     }
     {
@@ -459,26 +394,22 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   text-align: center;
 
   @media (max-width: 768px) {
     order: -1;
   }
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   "data-animate": "",
 
   ref: (el) => el && args.fns.animateOnView(el, { x: 32, y: 0, delay: 0.1 })
-};
-'''
+};'''
       }
     }
     {
@@ -486,26 +417,22 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   border-radius: 0.5rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   max-width: 100%;
   height: auto;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "img",
   src: "https://www.fulchandshastri.com/wp-content/uploads/2016/09/kanjiswami-240x300.jpg",
   alt: "Shri Kanjiswami",
   width: 240,
   height: 300
-};
-'''
+};'''
       }
     }
   ]

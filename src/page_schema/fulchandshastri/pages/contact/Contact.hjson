@@ -37,19 +37,15 @@ try {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   padding: 3rem 1rem;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "main"
-};
-'''
+};'''
       }
     }
     {
@@ -57,20 +53,16 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   max-width: 1200px;
   margin: 0 auto;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -78,8 +70,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 4rem;
@@ -89,16 +80,13 @@ return `._id {
     grid-template-columns: 1fr;
     gap: 3rem;
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -108,14 +96,12 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   "data-animate": "",
 
   ref: (el) => el && args.fns.animateOnView(el, { x: -32, y: 0 })
-};
-'''
+};'''
       }
     }
     {
@@ -123,24 +109,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   color: ${args.theme.var.color.text};
   font-size: 2rem;
   font-weight: 600;
   margin-bottom: 2rem;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const content = args.contextData.contactSettings?.content;
+          '''const content = args.contextData.contactSettings?.content;
 return {
   as: "h2",
   text: content?.infoTitle
-};
-'''
+};'''
       }
     }
     {
@@ -148,21 +130,17 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   flex-direction: column;
   gap: 2rem;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -170,21 +148,17 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   gap: 1rem;
   align-items: start;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -192,8 +166,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   width: 3rem;
   height: 3rem;
   background: ${args.theme.var.color.primary_light_100};
@@ -202,16 +175,13 @@ return `._id {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -219,22 +189,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   color: ${args.theme.var.color.primary};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "icon",
   icon: "carbon:location",
   width: 24,
   height: 24
-};
-'''
+};'''
       }
     }
     {
@@ -244,11 +210,9 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -256,24 +220,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   color: ${args.theme.var.color.text};
   font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const content = args.contextData.contactSettings?.content;
+          '''const content = args.contextData.contactSettings?.content;
 return {
   as: "h3",
   text: content?.addressTitle
-};
-'''
+};'''
       }
     }
     {
@@ -281,23 +241,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   color: ${args.theme.var.color.text_light_200};
   line-height: 1.6;
   white-space: pre-line;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const content = args.contextData.contactSettings?.content;
+          '''const content = args.contextData.contactSettings?.content;
 return {
   as: "p",
   text: content?.addressText
-};
-'''
+};'''
       }
     }
     {
@@ -305,21 +261,17 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   gap: 1rem;
   align-items: start;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -327,8 +279,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   width: 3rem;
   height: 3rem;
   background: ${args.theme.var.color.primary_light_100};
@@ -337,16 +288,13 @@ return `._id {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -354,22 +302,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   color: ${args.theme.var.color.primary};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "icon",
   icon: "carbon:phone",
   width: 24,
   height: 24
-};
-'''
+};'''
       }
     }
     {
@@ -379,11 +323,9 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -391,24 +333,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   color: ${args.theme.var.color.text};
   font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const content = args.contextData.contactSettings?.content;
+          '''const content = args.contextData.contactSettings?.content;
 return {
   as: "h3",
   text: content?.phoneTitle
-};
-'''
+};'''
       }
     }
     {
@@ -416,21 +354,17 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -438,8 +372,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   color: ${args.theme.var.color.primary};
   text-decoration: none;
   transition: color 0.2s ease;
@@ -448,18 +381,15 @@ return `._id {
     color: ${args.theme.var.color.primary_dark_200};
     text-decoration: underline;
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const content = args.contextData.contactSettings?.content;
+          '''const content = args.contextData.contactSettings?.content;
 return {
   as: "a",
   text: content?.phone1
-};
-'''
+};'''
       }
     }
     {
@@ -467,8 +397,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   color: ${args.theme.var.color.primary};
   text-decoration: none;
   transition: color 0.2s ease;
@@ -477,18 +406,15 @@ return `._id {
     color: ${args.theme.var.color.primary_dark_200};
     text-decoration: underline;
   }
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const content = args.contextData.contactSettings?.content;
+          '''const content = args.contextData.contactSettings?.content;
 return {
   as: "a",
   text: content?.phone2
-};
-'''
+};'''
       }
     }
     {
@@ -496,21 +422,17 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   gap: 1rem;
   align-items: start;
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -518,8 +440,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   width: 3rem;
   height: 3rem;
   background: ${args.theme.var.color.primary_light_100};
@@ -528,16 +449,13 @@ return `._id {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -545,22 +463,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   color: ${args.theme.var.color.primary};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "icon",
   icon: "carbon:email",
   width: 24,
   height: 24
-};
-'''
+};'''
       }
     }
     {
@@ -570,11 +484,9 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -582,24 +494,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   color: ${args.theme.var.color.text};
   font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const content = args.contextData.contactSettings?.content;
+          '''const content = args.contextData.contactSettings?.content;
 return {
   as: "h3",
   text: content?.emailTitle
-};
-'''
+};'''
       }
     }
     {
@@ -607,8 +515,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   color: ${args.theme.var.color.primary};
   text-decoration: none;
   transition: color 0.2s ease;
@@ -617,18 +524,15 @@ return `._id {
     color: ${args.theme.var.color.primary_dark_200};
     text-decoration: underline;
   }
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const content = args.contextData.contactSettings?.content;
+          '''const content = args.contextData.contactSettings?.content;
 return {
   as: "a",
   text: content?.emailLink
-};
-'''
+};'''
       }
     }
     {
@@ -638,14 +542,12 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   "data-animate": "",
 
   ref: (el) => el && args.fns.animateOnView(el, { x: 32, y: 0, delay: 0.1 })
-};
-'''
+};'''
       }
     }
     {
@@ -653,24 +555,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   color: ${args.theme.var.color.text};
   font-size: 2rem;
   font-weight: 600;
   margin-bottom: 2rem;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const content = args.contextData.contactSettings?.content;
+          '''const content = args.contextData.contactSettings?.content;
 return {
   as: "h2",
   text: content?.formTitle
-};
-'''
+};'''
       }
     }
     {
@@ -679,10 +577,7 @@ return {
       P: {
         displayOrder: 2
         componentName: ContactForm
-        props:
-          '''
-return {};
-'''
+        props: return {};
       }
     }
     {
@@ -690,24 +585,20 @@ return {};
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   background: ${args.theme.var.color.background_light_50};
   padding: 3rem 0;
   margin-top: 4rem;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "section",
   "data-animate": "",
 
   ref: (el) => el && args.fns.animateOnView(el)
-};
-'''
+};'''
       }
     }
     {
@@ -715,21 +606,17 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 1rem;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -737,25 +624,21 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   color: ${args.theme.var.color.text};
   font-size: 2rem;
   font-weight: 600;
   text-align: center;
   margin-bottom: 2rem;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const content = args.contextData.contactSettings?.content;
+          '''const content = args.contextData.contactSettings?.content;
 return {
   as: "h2",
   text: content?.mapTitle
-};
-'''
+};'''
       }
     }
     {
@@ -763,23 +646,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   width: 100%;
   height: 450px;
   border-radius: 0.75rem;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -789,8 +668,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "iframe",
   src: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3705.2985671406!2d71.91442!3d21.76885!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2sAtma+Siddhi+Kaivalya+Kendra!5e0!3m2!1sen!2sin!4v1234567890",
   width: "100%",
@@ -798,8 +676,7 @@ return {
   frameborder: "0",
   allowfullscreen: true,
   loading: "lazy"
-};
-'''
+};'''
       }
     }
     {

@@ -1,0 +1,164 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Syncs table section documents into table_schema part Settings (general, columns, formConfig, sidebar).
+        body:
+          '''
+const { tableKey, dryRun = false } = args.contextData || {};
+
+if (!tableKey) {
+  return { success: false, message: "tableKey is required" };
+}
+
+const idsResult = await args.executeNamedServerFunction({
+  functionName: "getTableIds",
+  contextData: { tableKey }
+});
+const ids = idsResult?.result?.data;
+if (!idsResult?.result?.success) {
+  return { success: false, message: idsResult?.result?.message || "Failed to resolve table ids" };
+}
+
+if (!ids?.pageId || !ids?.schemaKeys) {
+  return { success: false, message: "Failed to resolve table schema keys" };
+}
+
+const tableVertexLabel = ids.tableVertexLabel || tableKey;
+
+const parseValues = (raw) => {
+  if (raw == null) return {};
+  if (typeof raw === "object") return raw;
+  try { return JSON.parse(String(raw)); } catch { return {}; }
+};
+
+const docsResult = await args.session.run(
+  `
+  MATCH (g:GlobalSetting {key: 'Default'})-[:GlobalSettingHasSettingsSection]->(d:SettingsSectionDocument {pageId: $pageId})
+  RETURN d.sectionId AS sectionId, d.values AS values
+  `,
+  { pageId: ids.pageId }
+);
+
+const sectionMap = {};
+for (let i = 0; i < docsResult.records.length; i++) {
+  const record = docsResult.records[i];
+  sectionMap[record.get("sectionId")] = parseValues(record.get("values"));
+}
+
+const general = sectionMap.general || {};
+const columnsSection = sectionMap.columns || {};
+const formConfigSection = sectionMap.formConfig || {};
+const sidebarSection = sectionMap.sidebar || {};
+
+const partPayloads = {
+  general: {
+    part: "general",
+    publicRead: general.publicRead === true,
+    title: general.title || tableVertexLabel,
+    label: general.label || tableVertexLabel,
+    icon: general.icon || "ph:book-open",
+    usePolarisUI: general.usePolarisUI === true,
+    enableUserScopingForContent: general.enableUserScopingForContent === true,
+    enableLocalFilters: general.enableLocalFilters !== false,
+    enableLocalSort: general.enableLocalSort !== false,
+    showSelection: general.showSelection !== false,
+    hideExportButtons: general.hideExportButtons === true,
+    hideImportButtons: general.hideImportButtons === true,
+    hideSettingsButton: general.hideSettingsButton === true,
+    hideAddButton: general.hideAddButton === true,
+    rowHeight: general.rowHeight ?? 56,
+    columnWidths: general.columnWidths || {},
+    rowClickable: general.rowClickable === true,
+    showRowNumber: general.showRowNumber !== false,
+    resizableColumns: general.resizableColumns === true,
+    actions: Array.isArray(general.actions) ? general.actions : [],
+    hooks: general.hooks && typeof general.hooks === "object" ? general.hooks : {}
+  },
+  columns: {
+    part: "columns",
+    columns: Array.isArray(columnsSection.columns) ? columnsSection.columns : []
+  },
+  formConfig: {
+    part: "formConfig",
+    ...(formConfigSection.formConfig && typeof formConfigSection.formConfig === "object"
+      ? formConfigSection.formConfig
+      : {})
+  },
+  sidebar: {
+    part: "sidebar",
+    ...(sidebarSection.sidebar && typeof sidebarSection.sidebar === "object"
+      ? sidebarSection.sidebar
+      : { enabled: false })
+  }
+};
+
+const runtimeConfig = {
+  general: partPayloads.general,
+  columns: partPayloads.columns.columns,
+  formConfig: Object.fromEntries(Object.entries(partPayloads.formConfig).filter(([key]) => key !== "part")),
+  sidebar: Object.fromEntries(Object.entries(partPayloads.sidebar).filter(([key]) => key !== "part"))
+};
+
+if (dryRun) {
+  return {
+    success: true,
+    message: "Dry run — table part sync preview",
+    data: { config: runtimeConfig, schemaKeys: ids.schemaKeys }
+  };
+}
+
+const partNames = ["general", "columns", "formConfig", "sidebar"];
+for (let i = 0; i < partNames.length; i++) {
+  const part = partNames[i];
+  const key = ids.schemaKeys[part];
+  const payload = partPayloads[part];
+  const configBody = `return ${JSON.stringify(payload, null, 2)};`;
+
+  await args.session.run(
+    `
+    MERGE (s:Setting {key: $key})
+    ON CREATE SET
+      s.createdAt = datetime(),
+      s.type = 'table_schema',
+      s.tableKey = $tableKey,
+      s.tableVertexLabel = $tableVertexLabel,
+      s.part = $part,
+      s.name = $name,
+      s.config = $config,
+      s.updatedAt = datetime()
+    ON MATCH SET
+      s.config = $config,
+      s.type = 'table_schema',
+      s.tableKey = $tableKey,
+      s.tableVertexLabel = $tableVertexLabel,
+      s.part = $part,
+      s.name = $name,
+      s.updatedAt = datetime()
+    RETURN s
+    `,
+    {
+      key,
+      tableKey,
+      tableVertexLabel,
+      part,
+      name: `${ids.name || tableKey} ${part} schema`,
+      config: configBody
+    }
+  );
+}
+
+return {
+  success: true,
+  message: "Table schema parts synced from sections",
+  data: { config: runtimeConfig, schemaKeys: ids.schemaKeys, ids }
+};
+'''
+        key: mergeTableConfigFromSections
+      }
+    }
+  ]
+  edges: []
+}

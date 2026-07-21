@@ -1,0 +1,605 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        description: Recursive product category browser. Props: initialData, labels, tableKey, tableVertexLabel, useUrlState (default false = local state), basePath, urlParam (default category), locale.
+        key: ProductBrowser
+        updatedAt: 2026-07-15T11:23:21.356Z
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}`;'''
+        displayOrder: 1
+        fns:
+          '''const props = () => args.contextData.props || {};
+
+// useUrlState true  → real links; page reloads initialData from ?category=
+// useUrlState false → local loadFolder (no URL)
+const useUrlState = () => props().useUrlState === true;
+const urlParam = () => {
+  const key = props().urlParam;
+  return key != null && String(key).trim() !== "" ? String(key).trim() : "category";
+};
+
+const [overrideData, setOverrideData] = args.createSignal(null);
+const [loading, setLoading] = args.createSignal(false);
+const [error, setError] = args.createSignal("");
+const [previewItem, setPreviewItem] = args.createSignal(null);
+const [previewIndex, setPreviewIndex] = args.createSignal(0);
+const [previewOpen, setPreviewOpen] = args.createSignal(false);
+
+const getData = () => {
+  if (useUrlState()) return props().initialData || {};
+  return overrideData() || props().initialData || {};
+};
+
+const getFoldersForRender = () => {
+  const list = getData().folders;
+  return Array.isArray(list) ? list : [];
+};
+const getItemsForRender = () => {
+  const list = getData().items;
+  return Array.isArray(list) ? list : [];
+};
+const getBreadcrumbForRender = () => {
+  const list = getData().breadcrumb;
+  return Array.isArray(list) ? list : [];
+};
+
+const labels = () => ({
+  rootBreadcrumbLabel: "Products",
+  emptyCategoriesText: "No categories in this location.",
+  emptyProductsText: "No products in this category.",
+  loadingText: "Loading…",
+  ...(props().labels || {})
+});
+
+const getBasePath = () => {
+  const fromProps = props().basePath;
+  if (fromProps != null && String(fromProps).trim() !== "") return String(fromProps).trim();
+  const lang = args.params?.lang ? String(args.params.lang).toLowerCase() : "";
+  if (lang && /^[a-z]{2,3}$/i.test(lang)) return `/${lang}/products`;
+  return "/products";
+};
+
+const folderHref = (folderKey) => {
+  if (!useUrlState()) return null;
+  const base = getBasePath();
+  if (!folderKey) return base;
+  return `${base}/${encodeURIComponent(String(folderKey))}`;
+};
+
+const crumbHref = (crumb) => {
+  if (!useUrlState()) return null;
+  if (!crumb || crumb.isRoot || !crumb.key) return getBasePath();
+  return folderHref(crumb.key);
+};
+
+const loadFolder = async (categoryKey) => {
+  setLoading(true);
+  setError("");
+  try {
+    const result = await args.executeNamedServerFunction({
+      functionName: "loadPublicProductsFolder",
+      contextData: {
+        tableKey: props().tableKey || "products",
+        tableVertexLabel: props().tableVertexLabel || "AffiliateProduct",
+        categoryKey: categoryKey || null,
+        locale: props().locale || null
+      }
+    });
+    if (!result?.result?.success) {
+      setError(result?.result?.message || result?.error || "Failed to load products");
+      return;
+    }
+    const data = result.result.data || {};
+    setOverrideData({
+      folders: Array.isArray(data.folders) ? data.folders : [],
+      items: Array.isArray(data.items) ? data.items : [],
+      breadcrumb: Array.isArray(data.breadcrumb) ? data.breadcrumb : [],
+      currentCategoryId: data.currentCategoryId || null,
+      currentCategoryKey: data.currentCategoryKey || null
+    });
+    setPreviewOpen(false);
+    setPreviewItem(null);
+    setPreviewIndex(0);
+  } catch (e) {
+    console.error("ProductBrowser loadFolder failed:", e);
+    setError(e?.message || "Failed to load products");
+  } finally {
+    setLoading(false);
+  }
+};
+
+const openFolder = (folder) => {
+  if (useUrlState() || !folder?.key) return;
+  loadFolder(folder.key);
+};
+
+const navigateBreadcrumb = (crumb) => {
+  if (useUrlState() || !crumb) return;
+  if (crumb.isRoot) loadFolder(null);
+  else if (crumb.key) loadFolder(crumb.key);
+};
+
+const openProduct = (item) => {
+  if (!item) return;
+  const list = getItemsForRender();
+  const index = list.findIndex((row) => row?.id === item.id);
+  setPreviewItem(item);
+  setPreviewIndex(index >= 0 ? index : 0);
+  setPreviewOpen(true);
+};
+
+const closePreview = () => {
+  setPreviewOpen(false);
+  setPreviewItem(null);
+  setPreviewIndex(0);
+};
+
+return {
+  useUrlState,
+  urlParam,
+  getFoldersForRender,
+  getItemsForRender,
+  getBreadcrumbForRender,
+  loading,
+  error,
+  previewItem,
+  previewIndex,
+  previewOpen,
+  labels,
+  getBasePath,
+  folderHref,
+  crumbHref,
+  openFolder,
+  navigateBreadcrumb,
+  openProduct,
+  closePreview,
+  hasFolders: () => getFoldersForRender().length > 0,
+  hasItems: () => getItemsForRender().length > 0,
+  isEmpty: () => getFoldersForRender().length === 0 && getItemsForRender().length === 0,
+  getData
+};'''
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+};'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: GalleryBreadcrumb
+        props:
+          '''const crumbs = args.fns.getBreadcrumbForRender?.()
+  || args.contextData.props?.initialData?.breadcrumb
+  || [];
+const withUrl = args.fns.useUrlState?.() === true
+  || args.contextData.props?.useUrlState === true;
+const basePath = args.fns.getBasePath?.() || args.contextData.props?.basePath || "/products";
+return {
+  items: Array.isArray(crumbs) ? crumbs : [],
+  rootLabel: args.fns.labels?.()?.rootBreadcrumbLabel || "Products",
+  rootHref: withUrl ? basePath : null,
+  hrefFor: withUrl
+    ? (crumb) => args.fns.crumbHref?.(crumb) || basePath
+    : null,
+  onNavigate: withUrl ? undefined : (crumb) => args.fns.navigateBreadcrumb?.(crumb)
+};'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.background_light_50};
+  color: ${args.theme.var.color.text};
+  font-size: 0.875rem;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const loading = args.fns.loading?.();
+const error = args.fns.error?.();
+return {
+  as: "div",
+  hide: !loading && !error
+};'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''const error = args.fns.error?.();
+return `._id {
+  color: ${error ? args.theme.var.color.error : args.theme.var.color.text_light_200};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const loading = args.fns.loading?.();
+const error = args.fns.error?.();
+return {
+  as: "span",
+  text: error || args.fns.labels?.()?.loadingText || "Loading…"
+};'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''const folders = args.fns.getFoldersForRender?.()
+  || args.contextData.props?.initialData?.folders
+  || [];
+return {
+  as: "section",
+  hide: !Array.isArray(folders) || folders.length === 0
+};'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0 0 1rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Folders"
+};'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+};'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        contextName: folderRow
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const folders = args.fns.getFoldersForRender?.()
+  || args.contextData.props?.initialData?.folders
+  || [];
+return {
+  as: "fragment",
+  data: Array.isArray(folders) ? folders : []
+};'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: GalleryFolderCard
+        props:
+          '''const folder = args.contextData.folderRow || {};
+const index = args.contextData.index ?? 0;
+const withUrl = args.fns.useUrlState?.() === true
+  || args.contextData.props?.useUrlState === true;
+const href = withUrl ? (args.fns.folderHref?.(folder.key) || null) : null;
+return {
+  folder,
+  index,
+  href,
+  onOpen: withUrl ? undefined : (f) => args.fns.openFolder?.(f)
+};'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''const items = args.fns.getItemsForRender?.()
+  || args.contextData.props?.initialData?.items
+  || [];
+return {
+  as: "section",
+  hide: !Array.isArray(items) || items.length === 0
+};'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0 0 1rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Products"
+};'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+};'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        contextName: fileRow
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const items = args.fns.getItemsForRender?.()
+  || args.contextData.props?.initialData?.items
+  || [];
+return {
+  as: "fragment",
+  data: Array.isArray(items) ? items : []
+};'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: ProductCard
+        props:
+          '''const item = args.contextData.fileRow || {};
+const index = args.contextData.index ?? 0;
+return {
+  item,
+  index,
+  href: item.fileUrl || "",
+  onOpen: (f) => args.fns.openProduct?.(f)
+};'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  border: 1px dashed ${args.theme.var.color.border};
+  border-radius: 0.75rem;
+  background: ${args.theme.var.color.background_light_50};
+  color: ${args.theme.var.color.text_light_300};
+}`;'''
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''const folders = args.fns.getFoldersForRender?.()
+  || args.contextData.props?.initialData?.folders
+  || [];
+const items = args.fns.getItemsForRender?.()
+  || args.contextData.props?.initialData?.items
+  || [];
+const loading = args.fns.loading?.();
+return {
+  as: "div",
+  hide: loading || (Array.isArray(folders) && folders.length > 0) || (Array.isArray(items) && items.length > 0)
+};'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0;
+  font-size: 0.9375rem;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const labels = args.fns.labels?.() || args.contextData.props?.labels || {};
+return {
+  as: "p",
+  text: labels.emptyProductsText || "No products in this category."
+};'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        displayOrder: 6
+        componentName: ProductPreviewModal
+        props:
+          '''const items = args.fns.getItemsForRender?.()
+  || args.contextData.props?.initialData?.items
+  || [];
+return {
+  isOpen: args.fns.previewOpen?.() === true,
+  items: Array.isArray(items) ? items : [],
+  startIndex: args.fns.previewIndex?.() || 0,
+  item: args.fns.previewItem?.() || null,
+  onClose: () => args.fns.closePreview?.()
+};'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "6"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "11"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "2"
+      E: "16"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "2"
+      E: "18"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "6"
+      E: "8"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "11"
+      E: "12"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "11"
+      E: "13"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "13"
+      E: "14"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "14"
+      E: "15"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "16"
+      E: "17"
+    }
+  ]
+}

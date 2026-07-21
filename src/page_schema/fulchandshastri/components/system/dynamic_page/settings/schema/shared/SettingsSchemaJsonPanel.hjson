@@ -14,8 +14,7 @@
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   flex: 1;
   min-width: 0;
   min-height: 0;
@@ -23,8 +22,7 @@ return `._id {
   flex-direction: column;
   overflow: hidden;
   background: ${args.theme.var.color.background};
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
@@ -33,8 +31,7 @@ return `._id {
 return {
   as: "div",
   hide: api.isVisualMode?.() === true
-};
-'''
+};'''
       }
     }
     {
@@ -42,8 +39,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -52,16 +48,13 @@ return `._id {
   border-bottom: 1px solid ${args.theme.var.color.border};
   background: ${args.theme.var.color.background_light_100};
   flex-shrink: 0;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -69,22 +62,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   margin: 0;
   font-size: 0.8125rem;
   color: ${args.theme.var.color.text_light_500};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "p",
   text: "Schema config (JSON). Structure only — no default values."
-};
-'''
+};'''
       }
     }
     {
@@ -103,8 +92,7 @@ return {
   type: "button",
   title: "Replace JSON with the current visual editor state",
   onClick: () => api.syncJsonFromVisual?.()
-};
-'''
+};'''
       }
     }
     {
@@ -112,16 +100,14 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   padding: 0.5rem 1rem;
   font-size: 0.8125rem;
   color: ${args.theme.var.color.error_text};
   background: ${args.theme.var.color.error_light_100};
   border-bottom: 1px solid ${args.theme.var.color.error};
   flex-shrink: 0;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
@@ -133,8 +119,7 @@ return {
   text: error ? `JSON error: ${error}` : "",
   hide: !error,
   role: "alert"
-};
-'''
+};'''
       }
     }
     {
@@ -142,21 +127,16 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   flex: 1;
   min-height: 0;
   padding: 0.75rem 1rem;
   display: flex;
   flex-direction: column;
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
-        props:
-          '''
-return { as: "div" };
-'''
+        props: return { as: "div" };
       }
     }
     {
@@ -164,8 +144,7 @@ return { as: "div" };
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   flex: 1;
   min-height: 0;
   display: flex;
@@ -179,8 +158,7 @@ return `._id {
     line-height: 1.5;
     resize: none;
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: TextArea
         props:
@@ -193,8 +171,7 @@ return {
   resize: "none",
   placeholder: `{"pageMode": "settings", ...}`,
   onChange: (e) => api.onJsonTextChange?.(e.target.value)
-};
-'''
+};'''
       }
     }
   ]

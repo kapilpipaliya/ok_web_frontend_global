@@ -1,0 +1,325 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        isNoPermissionCheck: true
+        fns: return { enabled: () => true }
+        key: Footer
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  background: #2a1810;
+  color: #d4a574;
+  padding: 2rem 1rem;
+  text-align: center;
+
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "footer"
+};'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    text-align: center;
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+};'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+
+  @media (max-width: 768px) {
+    gap: 0.5rem;
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+};'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+  color: ${args.theme.var.color.primary};
+
+  &:hover {
+    opacity: 0.7;
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "a",
+  href: "https://goo.gl/maps/BGEfU8y8wXz",
+  target: "_blank",
+  rel: "noopener noreferrer"
+};'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "icon",
+  icon: "carbon:location",
+  width: 16,
+  height: 16
+};'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "span",
+  text: "Umarala"
+};'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.primary};
+
+  @media (max-width: 480px) {
+    display: none;
+  }
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''const date = new Date();
+const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+const formattedDate = date.toLocaleDateString('en-US', options);
+return {
+  as: "span",
+  text: formattedDate
+};'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: #d4a574;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const currentYear = new Date().getFullYear();
+return {
+  as: "div",
+  text: `Copyright © ${currentYear} Fulchand Shastri`
+};'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #d4a574;
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+};'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        as: div
+        displayOrder: 4
+        componentName: Html
+        key: unique_1
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "span",
+  text: "Design by"
+};'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: #d4a574;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+  margin-left: 0.2rem;
+
+  &:hover {
+    color: #e8c8a0;
+    text-decoration: underline;
+  }
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "a",
+  href: "https://www.youtube.com/@ASKUMARALA/",
+  text: "ASK Umarala",
+  target: "_blank",
+  rel: "noopener noreferrer",
+};'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "9"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "10"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "4"
+      E: "8"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "5"
+      E: "7"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "10"
+      E: "11"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "11"
+      E: "12"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "11"
+      E: "13"
+    }
+  ]
+}

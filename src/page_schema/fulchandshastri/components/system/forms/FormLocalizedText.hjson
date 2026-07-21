@@ -109,24 +109,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id.flt-empty {
+          '''return `._id.flt-empty {
   margin: 0;
   font-size: 0.8125rem;
   color: ${args.theme.var.color.text_light_500};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "p",
   hide: args.fns.hasLanguages?.(),
   text: "Configure site languages in Global Settings first.",
   class: "flt-empty"
-};
-'''
+};'''
       }
     }
     {
@@ -134,24 +130,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id.flt-shell {
+          '''return `._id.flt-shell {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   width: 100%;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   hide: !args.fns.hasLanguages?.(),
   class: "flt-shell"
-};
-'''
+};'''
       }
     }
     {
@@ -160,24 +152,20 @@ return {
       P: {
         contextName: fltLangIndex
         css:
-          '''
-return `._id.flt-tabs {
+          '''return `._id.flt-tabs {
   display: flex;
   flex-wrap: wrap;
   gap: 0.25rem;
-}`;
-'''
+}`;'''
         loop: true
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   class: "flt-tabs",
   data: args.fns.getLanguageIndices?.()
-};
-'''
+};'''
       }
     }
     {
@@ -185,8 +173,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const lang = args.fns.getLanguageAt?.(args.contextData.fltLangIndex);
+          '''const lang = args.fns.getLanguageAt?.(args.contextData.fltLangIndex);
 const active = args.fns.activeTab?.() === lang?.code;
 return `._id.flt-tab {
   padding: 0.25rem 0.625rem;
@@ -203,13 +190,11 @@ return `._id.flt-tab {
     opacity: 0.6;
     cursor: not-allowed;
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const lang = args.fns.getLanguageAt?.(args.contextData.fltLangIndex);
+          '''const lang = args.fns.getLanguageAt?.(args.contextData.fltLangIndex);
 const active = args.fns.activeTab?.() === lang?.code;
 return {
   as: "button",
@@ -218,8 +203,7 @@ return {
   class: active ? "flt-tab flt-tab-active" : "flt-tab",
   disabled: args.fns.isDisabled?.(),
   onClick: () => lang?.code && args.fns.setActiveTab?.(lang.code)
-};
-'''
+};'''
       }
     }
     {
@@ -227,17 +211,12 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id.flt-input-area {
+          '''return `._id.flt-input-area {
   width: 100%;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
-        props:
-          '''
-return { as: "div", class: "flt-input-area" };
-'''
+        props: return { as: "div", class: "flt-input-area" };
       }
     }
     {
@@ -247,8 +226,7 @@ return { as: "div", class: "flt-input-area" };
         displayOrder: 1
         componentName: TextArea
         props:
-          '''
-const code = args.fns.activeTab?.();
+          '''const code = args.fns.activeTab?.();
 const hide = !code || !args.fns.isMultiline?.();
 return {
   hide,
@@ -258,8 +236,7 @@ return {
   required: args.fns.isRequired?.(),
   disabled: args.fns.isDisabled?.(),
   rows: 4
-};
-'''
+};'''
       }
     }
     {
@@ -269,8 +246,7 @@ return {
         displayOrder: 2
         componentName: TextInput
         props:
-          '''
-const code = args.fns.activeTab?.();
+          '''const code = args.fns.activeTab?.();
 const hide = !code || args.fns.isMultiline?.() === true;
 return {
   hide,
@@ -280,8 +256,7 @@ return {
   placeholder: "",
   required: args.fns.isRequired?.(),
   disabled: args.fns.isDisabled?.()
-};
-'''
+};'''
       }
     }
   ]

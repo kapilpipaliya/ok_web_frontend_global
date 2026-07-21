@@ -12,8 +12,7 @@
       L: Attr
       P: {
         css:
-          '''
-const hasCustomClass = args.contextData.props?.class;
+          '''const hasCustomClass = args.contextData.props?.class;
 
 return `._id {
   ${!hasCustomClass ? 'width: 100%;' : ''}
@@ -221,12 +220,10 @@ return `._id {
 
 ._id .ts-dropdown-content::-webkit-scrollbar-thumb:hover {
   background: ${args.theme.var.color.border_dark_200};
-}`;
-'''
+}`;'''
         displayOrder: 1
         fns:
-          '''
-let tomSelectInstance = null;
+          '''let tomSelectInstance = null;
 
 // Create signals for options, loading state, and error state
 const [options, setOptions] = args.createSignal([]);
@@ -870,12 +867,10 @@ return {
   setOptionsError,
   selectRef,
   setSelectRef
-};
-'''
+};'''
         componentName: Html
         props:
-          '''
-const selectRef = args.fns.selectRef();
+          '''const selectRef = args.fns.selectRef();
 
 // Get props (options may be a Solid accessor — do not use .length on a function)
 const rawOptions = args.contextData.props?.options;
@@ -947,8 +942,7 @@ return {
     }
   },
   onCleanup: args.fns.cleanupTomSelect
-};
-'''
+};'''
       }
     }
     {

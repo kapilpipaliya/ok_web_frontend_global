@@ -1,0 +1,379 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        title: Vertex picker modal
+        key: VertexPickerModal
+        updatedAt: 2026-07-13T16:40:11.922Z
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "portal"
+};'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  position: fixed;
+  inset: 0;
+  z-index: 101;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  box-sizing: border-box;
+  background: rgba(0, 0, 0, 0.45);
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const isOpenProp = args.contextData.props?.isOpen;
+const modalIsOpen = typeof isOpenProp === "function" ? isOpenProp() : !!isOpenProp;
+const modalTitle = args.contextData.props?.title;
+return {
+  as: "div",
+  role: "dialog",
+  "attr:aria-modal": true,
+  "attr:aria-label": modalTitle != null ? String(modalTitle) : "",
+  hide: () => !modalIsOpen,
+  onClick: (event) => {
+    if (event.target === event.currentTarget) args.contextData.props?.onClose?.();
+  }
+};'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  width: 96vw;
+  height: 92vh;
+  display: flex;
+  flex-direction: column;
+  background: ${args.theme.var.color.background};
+  border-radius: 0.5rem;
+  border: 1px solid ${args.theme.var.color.border};
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "div", onClick: (clickEvent) => clickEvent.stopPropagation() };
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.background_light_100};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "div" };
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: args.contextData.props?.title != null ? String(args.contextData.props.title) : ""
+};'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const usePolaris = args.contextData.props?.usePolarisUI === true;
+const closeButtonLabel = args.contextData.props?.closeButtonLabel;
+const closeLabel =
+  closeButtonLabel != null && String(closeButtonLabel).trim() !== ""
+    ? String(closeButtonLabel).trim()
+    : "";
+if (usePolaris) {
+  return {
+    as: "s-button",
+    "attr:variant": "tertiary",
+    "attr:icon": "x",
+    "attr:accessibilityLabel": closeLabel,
+    onClick: () => args.contextData.props?.onClose?.()
+  };
+}
+return {
+  as: "button",
+  type: "button",
+  text: closeLabel,
+  onClick: () => args.contextData.props?.onClose?.()
+};'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  color: ${args.theme.var.color.text_dark_400};
+  border-bottom: 1px solid ${args.theme.var.color.border};
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const draftProp = args.contextData.props?.draftVertex;
+const draftVertex = typeof draftProp === "function" ? draftProp() : draftProp;
+const displayName =
+  draftVertex?.P?.fileName != null
+    ? String(draftVertex.P.fileName)
+    : draftVertex?.P?.name != null
+      ? String(draftVertex.P.name)
+      : "";
+const hintEmpty = args.contextData.props?.hintEmpty;
+const hintSelected = args.contextData.props?.hintSelected;
+let hintText = "";
+if (displayName && hintSelected != null && String(hintSelected).trim() !== "") {
+  hintText = String(hintSelected).replace(/\{name\}/g, displayName);
+} else if (hintEmpty != null && String(hintEmpty).trim() !== "") {
+  hintText = String(hintEmpty).trim();
+}
+return {
+  as: "div",
+  hide: hintText === "",
+  text: hintText
+};'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props: return { as: "div" };
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  overflow: auto;
+  background: ${args.theme.var.color.background};
+}`;'''
+        displayOrder: 1
+        componentName: DynamicPage
+        props:
+          '''const pickerBodyProps = args.contextData.props?.pickerBodyProps;
+return pickerBodyProps != null && typeof pickerBodyProps === "object" ? pickerBodyProps : {};'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-top: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.background_light_100};
+}`;'''
+        displayOrder: 4
+        componentName: Html
+        props: return { as: "div" };
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const usePolaris = args.contextData.props?.usePolarisUI === true;
+const cancelButtonLabel = args.contextData.props?.cancelButtonLabel;
+const cancelLabel =
+  cancelButtonLabel != null && String(cancelButtonLabel).trim() !== ""
+    ? String(cancelButtonLabel).trim()
+    : "";
+if (usePolaris) {
+  return {
+    as: "s-button",
+    "attr:variant": "secondary",
+    text: cancelLabel,
+    onClick: () => args.contextData.props?.onClose?.()
+  };
+}
+return {
+  as: "button",
+  type: "button",
+  text: cancelLabel,
+  onClick: () => args.contextData.props?.onClose?.()
+};'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const usePolaris = args.contextData.props?.usePolarisUI === true;
+const draftProp = args.contextData.props?.draftVertex;
+const draftVertex = typeof draftProp === "function" ? draftProp() : draftProp;
+const hasSelection = !!(draftVertex && draftVertex.id);
+const confirmButtonLabel = args.contextData.props?.confirmButtonLabel;
+const confirmLabel =
+  confirmButtonLabel != null && String(confirmButtonLabel).trim() !== ""
+    ? String(confirmButtonLabel).trim()
+    : "";
+if (usePolaris) {
+  return {
+    as: "s-button",
+    "attr:variant": "primary",
+    text: confirmLabel,
+    disabled: !hasSelection,
+    onClick: () => args.contextData.props?.onConfirm?.()
+  };
+}
+return {
+  as: "button",
+  type: "button",
+  text: confirmLabel,
+  disabled: !hasSelection,
+  onClick: () => args.contextData.props?.onConfirm?.()
+};'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "4"
+      E: "8"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "4"
+      E: "9"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "4"
+      E: "11"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "5"
+      E: "7"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "11"
+      E: "12"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "11"
+      E: "13"
+    }
+  ]
+}

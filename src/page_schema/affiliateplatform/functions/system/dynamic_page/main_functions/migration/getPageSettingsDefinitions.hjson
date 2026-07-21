@@ -1,0 +1,1199 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Returns affiliate platform settings page configs and default table schemas for products and portal admin.
+        body:
+          '''
+
+const DEFAULT_SITE_LANGUAGES = [
+  { code: "en", label: "English", isDefault: true },
+  { code: "hi", label: "Hindi", isDefault: false },
+  { code: "gu", label: "Gujarati", isDefault: false }
+];
+
+const NON_TRANSLATABLE_FIELD_KEYS = new Set([
+  "leftVideoUrl", "rightVideoUrl", "videoUrl", "videoId", "youtubeId", "audioUrl",
+  "thumbnail", "imageUrl", "pdfUrl", "downloadUrl", "mapUrl", "website", "url", "href",
+  "icon", "link", "align", "code", "language", "duration", "views", "date", "email",
+  "phone", "slug", "key", "path", "file", "src", "langOption1", "langOption2",
+  "langOption3", "langOption4", "videoEmbedUrl", "spotifyUrl", "facebookUrl",
+  "instagramUrl", "twitterUrl", "youtubeUrl", "whatsappNumber", "addressLine1",
+  "addressLine2", "postalCode", "city", "country", "latitude", "longitude"
+]);
+
+function buildField({ key, label, renderer, translatable, ...rest }) {
+  const isTextField = renderer === "text" || renderer === "textArea";
+  let resolvedTranslatable = translatable;
+  if (resolvedTranslatable === undefined) {
+    if (NON_TRANSLATABLE_FIELD_KEYS.has(key)) {
+      resolvedTranslatable = false;
+    } else if (isTextField) {
+      resolvedTranslatable = true;
+    } else {
+      resolvedTranslatable = false;
+    }
+  }
+  if (NON_TRANSLATABLE_FIELD_KEYS.has(key)) {
+    resolvedTranslatable = false;
+  }
+  return {
+    key,
+    label,
+    renderer,
+    dataType:
+      renderer === "fieldArray" ? "array" : renderer === "checkbox" ? "boolean" : "text",
+    translatable: resolvedTranslatable,
+    ...rest
+  };
+}
+
+function finalizeField(field) {
+  if (!field || typeof field !== "object") return field;
+  const finalized = buildField({
+    key: field.key,
+    label: field.label,
+    renderer: field.renderer || "text",
+    translatable: field.translatable,
+    required: field.required,
+    colSpan: field.colSpan,
+    defaultValue: field.defaultValue,
+    placeholder: field.placeholder,
+    maxLength: field.maxLength,
+    minLength: field.minLength,
+    validation: field.validation,
+    fieldArrayConfig: field.fieldArrayConfig
+      ? {
+          ...field.fieldArrayConfig,
+          itemFields: (field.fieldArrayConfig.itemFields || []).map((itemField) =>
+            finalizeField(itemField)
+          )
+        }
+      : undefined
+  });
+  return finalized;
+}
+
+function getDefaultLanguageCode(languages) {
+  const list = Array.isArray(languages) && languages.length > 0 ? languages : DEFAULT_SITE_LANGUAGES;
+  const explicit = list.find((lang) => lang?.isDefault === true && lang?.code);
+  if (explicit?.code) return String(explicit.code);
+  return list[0]?.code ? String(list[0].code) : "en";
+}
+
+function isTranslatableField(field) {
+  return field?.translatable === true;
+}
+
+function normalizeLocalizedDefault(value, languages, defaultCode) {
+  const code = defaultCode || getDefaultLanguageCode(languages);
+  const normalized = {};
+  for (let i = 0; i < languages.length; i++) {
+    normalized[languages[i].code] = "";
+  }
+  if (value != null && typeof value === "object" && !Array.isArray(value)) {
+    for (const langKey of Object.keys(value)) {
+      if (Object.prototype.hasOwnProperty.call(normalized, langKey)) {
+        normalized[langKey] = value[langKey] == null ? "" : String(value[langKey]);
+      }
+    }
+    return normalized;
+  }
+  if (typeof value === "string") {
+    normalized[code] = value;
+  }
+  return normalized;
+}
+
+function localizeFieldValue(field, value, languages) {
+  if (!isTranslatableField(field)) return value;
+  const defaultCode = getDefaultLanguageCode(languages);
+  return normalizeLocalizedDefault(value, languages, defaultCode);
+}
+
+function localizeDefaultDocumentValues(page, languages) {
+  const defaultCode = getDefaultLanguageCode(languages);
+  return (page.defaultDocuments || []).map((doc) => {
+    const section = (page.sections || []).find((s) => s.id === doc.sectionId);
+    if (!section) return doc;
+    const values = { ...(doc.values || {}) };
+    for (let fi = 0; fi < (section.fields || []).length; fi++) {
+      const field = section.fields[fi];
+      if (!field?.key) continue;
+      if (field.renderer === "fieldArray" && Array.isArray(values[field.key])) {
+        const itemFields = field.fieldArrayConfig?.itemFields || [];
+        values[field.key] = values[field.key].map((item) => {
+          const nextItem = { ...(item || {}) };
+          for (let ii = 0; ii < itemFields.length; ii++) {
+            const itemField = itemFields[ii];
+            if (!itemField?.key) continue;
+            nextItem[itemField.key] = localizeFieldValue(
+              itemField,
+              nextItem[itemField.key],
+              languages
+            );
+          }
+          return nextItem;
+        });
+      } else if (Object.prototype.hasOwnProperty.call(values, field.key)) {
+        values[field.key] = localizeFieldValue(field, values[field.key], languages);
+      }
+    }
+    return { ...doc, values };
+  });
+}
+
+function finalizePage(page) {
+  const sections = (page.sections || []).map((section) => ({
+    ...section,
+    fields: (section.fields || []).map((field) => finalizeField(field))
+  }));
+  const localizedDefaults = localizeDefaultDocumentValues(
+    { ...page, sections },
+    DEFAULT_SITE_LANGUAGES
+  );
+  return {
+    ...page,
+    sections,
+    defaultDocuments: localizedDefaults
+  };
+}
+
+const globalSidebarItems = [
+  {
+    id: "global",
+    label: "Global Settings",
+    path: "/settings?page=global",
+    icon: "settings"
+  }
+];
+
+const sidebarItems = [
+  { id: "home", label: "Home Page", path: "/settings?page=home", icon: "document" },
+  { id: "products", label: "Products Page", path: "/settings?page=products", icon: "document" },
+  { id: "contact", label: "Contact", path: "/settings?page=contact", icon: "document" }
+];
+
+const pages = [
+  {
+    settingsPageId: "global",
+    name: "Global Settings",
+    description: "Configure site-wide languages used for content translation.",
+    sections: [
+      {
+        id: "siteLanguages",
+        title: "Site languages",
+        description: "Languages available for translating page content. Mark one as default.",
+        fields: [
+          buildField({
+            key: "languages",
+            label: "Languages",
+            renderer: "fieldArray",
+            required: true,
+            colSpan: 1,
+            translatable: false,
+            defaultValue: DEFAULT_SITE_LANGUAGES,
+            fieldArrayConfig: {
+              itemLabel: "Language",
+              addButtonLabel: "Add language",
+              minItems: 1,
+              itemFields: [
+                buildField({ key: "code", label: "Language code", renderer: "text", required: true, translatable: false }),
+                buildField({ key: "label", label: "Display name", renderer: "text", required: true, translatable: false }),
+                buildField({ key: "isDefault", label: "Default language", renderer: "checkbox", translatable: false })
+              ]
+            }
+          })
+        ]
+      }
+    ],
+    defaultDocuments: [{ sectionId: "siteLanguages", values: { languages: DEFAULT_SITE_LANGUAGES } }]
+  },
+  {
+    settingsPageId: "home",
+    name: "Home Page Settings",
+    description: "Manage hero and intro content on the home page.",
+    sections: [
+      {
+        id: "content",
+        title: "Page content",
+        fields: [
+          buildField({ key: "pageTitle", label: "Page title", renderer: "text", defaultValue: "Amazon Product Picks", colSpan: 1 }),
+          buildField({ key: "pageSubtitle", label: "Page subtitle", renderer: "textArea", defaultValue: "Curated affiliate recommendations with honest reviews and buying guides.", colSpan: 1 }),
+          buildField({ key: "ctaText", label: "CTA button text", renderer: "text", defaultValue: "Browse products", colSpan: 1 }),
+          buildField({ key: "ctaHref", label: "CTA button link", renderer: "text", defaultValue: "/products", colSpan: 1, translatable: false }),
+          buildField({ key: "disclosureText", label: "Affiliate disclosure", renderer: "textArea", defaultValue: "As an Amazon Associate we earn from qualifying purchases.", colSpan: 1 })
+        ]
+      }
+    ],
+    defaultDocuments: [{
+      sectionId: "content",
+      values: {
+        pageTitle: "Amazon Product Picks",
+        pageSubtitle: "Curated affiliate recommendations with honest reviews and buying guides.",
+        ctaText: "Browse products",
+        ctaHref: "/products",
+        disclosureText: "As an Amazon Associate we earn from qualifying purchases."
+      }
+    }]
+  },
+  {
+    settingsPageId: "products",
+    name: "Products Page Settings",
+    description: "Manage labels for the public products browser.",
+    sections: [
+      {
+        id: "content",
+        title: "Page content",
+        fields: [
+          buildField({ key: "pageTitle", label: "Page title", renderer: "text", defaultValue: "Products", colSpan: 1 }),
+          buildField({ key: "pageSubtitle", label: "Page subtitle", renderer: "text", defaultValue: "Browse our curated Amazon product picks by category", colSpan: 1 }),
+          buildField({ key: "rootBreadcrumbLabel", label: "Root breadcrumb label", renderer: "text", defaultValue: "Products", colSpan: 1 }),
+          buildField({ key: "emptyCategoriesText", label: "Empty categories text", renderer: "text", defaultValue: "No categories in this location.", colSpan: 1 }),
+          buildField({ key: "emptyProductsText", label: "Empty products text", renderer: "text", defaultValue: "No products in this category.", colSpan: 1 })
+        ]
+      }
+    ],
+    defaultDocuments: [{
+      sectionId: "content",
+      values: {
+        pageTitle: "Products",
+        pageSubtitle: "Browse our curated Amazon product picks by category",
+        rootBreadcrumbLabel: "Products",
+        emptyCategoriesText: "No categories in this location.",
+        emptyProductsText: "No products in this category."
+      }
+    }]
+  },
+  {
+    settingsPageId: "contact",
+    name: "Contact Settings",
+    description: "Manage content for the Contact page.",
+    sections: [
+      {
+        id: "content",
+        title: "Page content",
+        fields: [
+          buildField({ key: "pageTitle", label: "Page title", renderer: "text", defaultValue: "Contact", colSpan: 1 }),
+          buildField({ key: "pageSubtitle", label: "Page subtitle", renderer: "text", defaultValue: "Questions about a product or this site? Get in touch.", colSpan: 1 }),
+          buildField({ key: "infoTitle", label: "Info section title", renderer: "text", defaultValue: "Contact information", colSpan: 1 }),
+          buildField({ key: "email", label: "Email", renderer: "text", defaultValue: "", colSpan: 1, translatable: false })
+        ]
+      }
+    ],
+    defaultDocuments: [{
+      sectionId: "content",
+      values: {
+        pageTitle: "Contact",
+        pageSubtitle: "Questions about a product or this site? Get in touch.",
+        infoTitle: "Contact information",
+        email: ""
+      }
+    }]
+  }
+];
+function stripFieldSchema(field) {
+  if (!field || typeof field !== "object") return field;
+  const next = { ...field };
+  delete next.defaultValue;
+  if (next.fieldArrayConfig && typeof next.fieldArrayConfig === "object") {
+    const config = { ...next.fieldArrayConfig };
+    delete config.defaultItems;
+    if (Array.isArray(config.itemFields)) {
+      config.itemFields = config.itemFields.map(stripFieldSchema);
+    }
+    next.fieldArrayConfig = config;
+  }
+  return next;
+}
+
+function buildConfig(page, contentSidebarItems, globalItems) {
+  const sectionConfigs = page.sections.map((section) => ({
+    id: section.id,
+    type: "card",
+    title: section.title,
+    description: section.description || "",
+    form: {
+      gridColumns: 1,
+      groups: [{
+        key: section.id + "Form",
+        title: "",
+        gridColumns: 1,
+        fields: (section.fields || []).map(stripFieldSchema)
+      }]
+    }
+  }));
+
+  return `return {
+  pageMode: "settings",
+  id: "${page.settingsPageId}",
+  route: "/settings?page=${page.settingsPageId}",
+  title: "${page.name}",
+  description: "${page.description || ""}",
+  version: 1,
+  scope: { vertexLabel: "GlobalSetting", matchProperty: "key", idParam: "scopeId" },
+  saveStrategy: { mode: "section", debounceMs: 1200, autosave: false, showSaveBar: true, warnOnLeave: true },
+  audit: { enabled: true, resource: "settings.${page.settingsPageId}", includeDiff: true },
+  sidebar: {
+    title: "Site Settings",
+    groups: [
+      { id: "global", label: "Global", items: ${JSON.stringify(globalItems)} },
+      { id: "content", label: "Content", items: ${JSON.stringify(contentSidebarItems)} }
+    ]
+  },
+  sections: ${JSON.stringify(sectionConfigs)}
+};`;
+}
+
+const finalizedPages = pages.map((page) => finalizePage(page));
+
+const settingsPageConfigs = finalizedPages.map((page) => ({
+  key: page.settingsPageId + "_settings_page",
+  settingsPageId: page.settingsPageId,
+  name: page.name,
+  config: buildConfig(page, sidebarItems, globalSidebarItems)
+}));
+
+const defaultSectionDocuments = finalizedPages.flatMap((page) =>
+  (page.defaultDocuments || []).map((doc) => ({
+    pageId: page.settingsPageId,
+    sectionId: doc.sectionId,
+    values: doc.values
+  }))
+);
+
+const buildFilesCompanionPage = (hint) => ({
+  position: "below",
+  tableKey: "files",
+  tableVertexLabel: "File",
+  useUrlQueryParams: false,
+  usePolarisUI: true,
+  loadFromSetting: true,
+  embeddedMode: true,
+  title: "Files",
+  hint: hint || "Browse and select files."
+});
+
+const filesCompanionPages = (hint) => [buildFilesCompanionPage(hint)];
+
+const scheduleBannerPickerConfiguration = {
+  fieldLabel: "Banner",
+  chooseButtonLabel: "Select banner…",
+  clearButtonLabel: "Clear",
+  modalTitle: "Choose a banner image",
+  modalHintEmpty: "Select a file using the checkbox, then confirm.",
+  modalHintSelected: "Selected: {name} — confirm or choose another file.",
+  selectionMode: "single",
+  confirmButtonLabel: "Use selection",
+  cancelButtonLabel: "Cancel",
+  closeButtonLabel: "Close",
+  selectRowMessage: "Select a row in the list first.",
+  invalidTypeMessage: "This type does not match the configured selection.",
+  usePolarisUI: true,
+  targetVertexLabels: ["File"],
+  fileDownloadUrlPrefix: "/api/file/download",
+  showImagePreview: true,
+  buildSecondaryLabelFromVertex: true,
+  pickerBodyProps: {
+    tableVertexLabel: "File",
+    tableKey: "files",
+    loadFromSetting: true
+  }
+};
+
+
+const productImagePickerConfiguration = {
+  fieldLabel: "Product image",
+  chooseButtonLabel: "Select image…",
+  clearButtonLabel: "Clear",
+  modalTitle: "Choose a product image",
+  modalHintEmpty: "Select a file using the checkbox, then confirm.",
+  modalHintSelected: "Selected: {name} — confirm or choose another file.",
+  selectionMode: "single",
+  confirmButtonLabel: "Use selection",
+  cancelButtonLabel: "Cancel",
+  closeButtonLabel: "Close",
+  selectRowMessage: "Select a row in the list first.",
+  invalidTypeMessage: "This type does not match the configured selection.",
+  usePolarisUI: true,
+  targetVertexLabels: ["File"],
+  fileDownloadUrlPrefix: "/api/file/download",
+  showImagePreview: true,
+  buildSecondaryLabelFromVertex: true,
+  pickerBodyProps: { tableVertexLabel: "File", tableKey: "files", loadFromSetting: true }
+};
+
+const productTableColumns = [
+  {
+    key: "thumbnail",
+    label: "Image",
+    dataType: "relation",
+    renderer: "text",
+    width: "120px",
+    sortable: false,
+    overflowEllipsis: true,
+    selectConfig: {
+      relationshipType: "AffiliateProductThumbnail",
+      edgeOnly: true,
+      label: "File",
+      labelField: "fileName"
+    }
+  },
+  { key: "title", label: "Title", dataType: "text", renderer: "text", width: "220px", required: true, overflowEllipsis: true },
+  { key: "price", label: "Price", dataType: "text", renderer: "text", width: "90px" },
+  { key: "amazonUrl", label: "Amazon URL", dataType: "text", renderer: "text", width: "240px", overflowEllipsis: true },
+  { key: "shortDescription", label: "Short description", dataType: "text", renderer: "text", width: "220px", overflowEllipsis: true }
+];
+
+const productTableGeneral = {
+  publicRead: true,
+  title: "Products",
+  label: "Affiliate product",
+  icon: "ph:shopping-bag",
+  usePolarisUI: true,
+  enableUserScopingForContent: false,
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  showSelection: true,
+  hideExportButtons: false,
+  hideImportButtons: false,
+  hideSettingsButton: false,
+  hideAddButton: false,
+  rowHeight: 56,
+  columnWidths: { __selection: "36px", __rowNumber: "48px", __actions: "88px" },
+  rowClickable: true,
+  showRowNumber: true,
+  resizableColumns: true,
+  actions: [
+    { key: "edit", type: "edit" },
+    { key: "delete", type: "delete", confirm: { title: "Delete product?", message: "This cannot be undone.", confirmText: "Delete", cancelText: "Cancel", variant: "danger" } }
+  ],
+  hooks: {},
+  companionPages: filesCompanionPages("Upload product images in Files below, then attach them when editing products above.")
+};
+
+const productTableFormConfig = {
+  gridColumns: 2,
+  groups: [
+    {
+      key: "basic",
+      title: "Product",
+      gridColumns: 2,
+      fields: [
+        { key: "title", label: "Title", dataType: "text", renderer: "text", required: true, colSpan: 2, translatable: false },
+        { key: "price", label: "Price label", dataType: "text", renderer: "text", colSpan: 1, translatable: false, placeholder: "e.g. $29.99" },
+        { key: "amazonUrl", label: "Amazon affiliate URL", dataType: "text", renderer: "text", required: true, colSpan: 1, translatable: false },
+        { key: "imageUrl", label: "Image URL (optional)", dataType: "text", renderer: "text", colSpan: 2, translatable: false, placeholder: "https://..." },
+        { key: "shortDescription", label: "Short description", dataType: "text", renderer: "textArea", colSpan: 2, translatable: false, placeholder: "Shown on product cards" },
+        { key: "description", label: "Full description (Markdown)", dataType: "text", renderer: "textArea", colSpan: 2, translatable: false, placeholder: "Use Markdown for headings, lists, and links." },
+        {
+          key: "thumbnail",
+          label: "Product image",
+          dataType: "relation",
+          renderer: "embeddedVertexPicker",
+          colSpan: 2,
+          translatable: false,
+          selectConfig: {
+            relationshipType: "AffiliateProductThumbnail",
+            edgeOnly: true,
+            label: "File",
+            labelField: "fileName"
+          },
+          pickerConfiguration: productImagePickerConfiguration
+        }
+      ]
+    }
+  ]
+};
+
+const productTableSidebar = {
+  enabled: true,
+  parentVertexLabel: "ProductCategory",
+  toParentEdgeType: "ParentProductCategory",
+  rootKeys: {},
+  loadFullTree: true,
+  label: "Categories",
+  formConfig: {
+    gridColumns: 1,
+    groups: [
+      {
+        key: "basic",
+        title: "Category",
+        gridColumns: 2,
+        fields: [
+          { key: "name", label: "Name", dataType: "text", renderer: "text", required: true, colSpan: 2 },
+          { key: "key", label: "Key", dataType: "text", renderer: "text", colSpan: 2 }
+        ]
+      }
+    ]
+  }
+};
+
+const designerOrganizerActions = (entityLabel) => [
+  {
+    key: "edit",
+    type: "edit",
+    icon: "ph:pen",
+    title: "Open in page designer",
+    ariaLabel: "Open in page designer"
+  },
+  {
+    key: "delete",
+    type: "delete",
+    icon: "ph:trash",
+    confirm: {
+      title: `Delete ${entityLabel.toLowerCase()}?`,
+      message: "This cannot be undone.",
+      confirmText: "Delete",
+      cancelText: "Cancel",
+      variant: "danger"
+    }
+  }
+];
+
+const componentTableColumns = [
+  { key: "key", label: "Key", dataType: "text", renderer: "text", width: "140px", required: true },
+  { key: "label", label: "Label", dataType: "text", renderer: "text", width: "180px", overflowEllipsis: true },
+  { key: "description", label: "Description", dataType: "text", renderer: "text", width: "240px", overflowEllipsis: true },
+  { key: "icon", label: "Icon", dataType: "text", renderer: "text", width: "120px" }
+];
+
+const componentTableGeneral = {
+  publicRead: false,
+  title: "Components",
+  label: "Component",
+  icon: "ph:puzzle-piece",
+  usePolarisUI: true,
+  enableUserScopingForContent: false,
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  showSelection: true,
+  hideExportButtons: false,
+  hideImportButtons: false,
+  hideSettingsButton: false,
+  hideAddButton: false,
+  rowHeight: 48,
+  columnWidths: { __selection: "36px", __rowNumber: "48px", __actions: "104px" },
+  rowClickable: true,
+  showRowNumber: true,
+  resizableColumns: true,
+  actions: designerOrganizerActions("Component"),
+  hooks: {}
+};
+
+const componentTableFormConfig = {
+  gridColumns: 2,
+  groups: [
+    {
+      key: "basic",
+      title: "Component",
+      gridColumns: 2,
+      fields: [
+        { key: "key", label: "Key", dataType: "text", renderer: "text", required: true, colSpan: 1 },
+        { key: "label", label: "Label", dataType: "text", renderer: "text", colSpan: 1 },
+        { key: "icon", label: "Icon", dataType: "text", renderer: "text", colSpan: 1 },
+        { key: "description", label: "Description", dataType: "text", renderer: "textArea", colSpan: 2 }
+      ]
+    }
+  ]
+};
+
+const componentTableSidebar = {
+  enabled: true,
+  parentVertexLabel: "ComponentCategory",
+  toParentEdgeType: "ParentComponentCategory",
+  rootKeys: {},
+  label: "Categories",
+  loadFullTree: true,
+  formConfig: {
+    gridColumns: 1,
+    groups: [
+      {
+        key: "basic",
+        title: "Category",
+        gridColumns: 2,
+        fields: [
+          { key: "name", label: "Name", dataType: "text", renderer: "text", required: true, colSpan: 2 },
+          { key: "key", label: "Key", dataType: "text", renderer: "text", colSpan: 2 }
+        ]
+      }
+    ]
+  }
+};
+
+const pageTableColumns = [
+  { key: "key", label: "Key", dataType: "text", renderer: "text", width: "140px", required: true },
+  { key: "title", label: "Title", dataType: "text", renderer: "text", width: "180px", overflowEllipsis: true },
+  { key: "url", label: "URL", dataType: "text", renderer: "text", width: "200px", overflowEllipsis: true },
+  { key: "description", label: "Description", dataType: "text", renderer: "text", width: "240px", overflowEllipsis: true }
+];
+
+const pageTableGeneral = {
+  publicRead: false,
+  title: "Pages",
+  label: "Page",
+  icon: "ph:file",
+  usePolarisUI: true,
+  enableUserScopingForContent: false,
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  showSelection: true,
+  hideExportButtons: false,
+  hideImportButtons: false,
+  hideSettingsButton: false,
+  hideAddButton: false,
+  rowHeight: 48,
+  columnWidths: { __selection: "36px", __rowNumber: "48px", __actions: "104px" },
+  rowClickable: true,
+  showRowNumber: true,
+  resizableColumns: true,
+  actions: designerOrganizerActions("Page"),
+  hooks: {}
+};
+
+const pageTableFormConfig = {
+  gridColumns: 2,
+  groups: [
+    {
+      key: "basic",
+      title: "Page",
+      gridColumns: 2,
+      fields: [
+        { key: "key", label: "Key", dataType: "text", renderer: "text", required: true, colSpan: 1 },
+        { key: "title", label: "Title", dataType: "text", renderer: "text", colSpan: 1 },
+        { key: "url", label: "URL", dataType: "text", renderer: "text", colSpan: 1 },
+        { key: "description", label: "Description", dataType: "text", renderer: "textArea", colSpan: 2 }
+      ]
+    }
+  ]
+};
+
+const pageTableSidebar = {
+  enabled: true,
+  parentVertexLabel: "PageCategory",
+  toParentEdgeType: "ParentPageCategory",
+  rootKeys: {},
+  label: "Categories",
+  loadFullTree: true,
+  formConfig: {
+    gridColumns: 1,
+    groups: [
+      {
+        key: "basic",
+        title: "Category",
+        gridColumns: 2,
+        fields: [
+          { key: "name", label: "Name", dataType: "text", renderer: "text", required: true, colSpan: 2 },
+          { key: "key", label: "Key", dataType: "text", renderer: "text", colSpan: 2 }
+        ]
+      }
+    ]
+  }
+};
+
+const functionTableColumns = [
+  { key: "key", label: "Key", dataType: "text", renderer: "text", width: "180px", required: true },
+  { key: "description", label: "Description", dataType: "text", renderer: "text", width: "320px", overflowEllipsis: true }
+];
+
+const functionTableGeneral = {
+  publicRead: false,
+  title: "Functions",
+  label: "Function",
+  icon: "ph:function",
+  usePolarisUI: true,
+  enableUserScopingForContent: false,
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  showSelection: true,
+  hideExportButtons: false,
+  hideImportButtons: false,
+  hideSettingsButton: false,
+  hideAddButton: false,
+  rowHeight: 48,
+  columnWidths: { __selection: "36px", __rowNumber: "48px", __actions: "104px" },
+  rowClickable: true,
+  showRowNumber: true,
+  resizableColumns: true,
+  actions: designerOrganizerActions("Function"),
+  hooks: {}
+};
+
+const functionTableFormConfig = {
+  gridColumns: 2,
+  groups: [
+    {
+      key: "basic",
+      title: "Function",
+      gridColumns: 2,
+      fields: [
+        { key: "key", label: "Key", dataType: "text", renderer: "text", required: true, colSpan: 1 },
+        { key: "description", label: "Description", dataType: "text", renderer: "textArea", colSpan: 2 }
+      ]
+    }
+  ]
+};
+
+const functionTableSidebar = {
+  enabled: true,
+  parentVertexLabel: "FunctionCategory",
+  toParentEdgeType: "ParentFunctionCategory",
+  rootKeys: {},
+  label: "Categories",
+  loadFullTree: true,
+  formConfig: {
+    gridColumns: 1,
+    groups: [
+      {
+        key: "basic",
+        title: "Category",
+        gridColumns: 2,
+        fields: [
+          { key: "name", label: "Name", dataType: "text", renderer: "text", required: true, colSpan: 2 },
+          { key: "key", label: "Key", dataType: "text", renderer: "text", colSpan: 2 }
+        ]
+      }
+    ]
+  }
+};
+
+const emailTemplateTableColumns = [
+  { key: "key", label: "Key", dataType: "text", renderer: "text", width: "140px", required: true },
+  { key: "title", label: "Title", dataType: "text", renderer: "text", width: "180px", overflowEllipsis: true },
+  { key: "description", label: "Description", dataType: "text", renderer: "text", width: "240px", overflowEllipsis: true }
+];
+
+const emailTemplateTableGeneral = {
+  publicRead: false,
+  title: "Email templates",
+  label: "Email template",
+  icon: "ph:envelope",
+  usePolarisUI: true,
+  enableUserScopingForContent: false,
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  showSelection: true,
+  hideExportButtons: false,
+  hideImportButtons: false,
+  hideSettingsButton: false,
+  hideAddButton: false,
+  rowHeight: 48,
+  columnWidths: { __selection: "36px", __rowNumber: "48px", __actions: "104px" },
+  rowClickable: true,
+  showRowNumber: true,
+  resizableColumns: true,
+  actions: designerOrganizerActions("Email template"),
+  hooks: {}
+};
+
+const emailTemplateTableFormConfig = {
+  gridColumns: 2,
+  groups: [
+    {
+      key: "basic",
+      title: "Email template",
+      gridColumns: 2,
+      fields: [
+        { key: "key", label: "Key", dataType: "text", renderer: "text", required: true, colSpan: 1 },
+        { key: "title", label: "Title", dataType: "text", renderer: "text", colSpan: 1 },
+        { key: "description", label: "Description", dataType: "text", renderer: "textArea", colSpan: 2 }
+      ]
+    }
+  ]
+};
+
+const emailTemplateTableSidebar = {
+  enabled: true,
+  parentVertexLabel: "EmailTemplateCategory",
+  toParentEdgeType: "ParentEmailTemplateCategory",
+  rootKeys: {},
+  label: "Categories",
+  loadFullTree: true,
+  formConfig: {
+    gridColumns: 1,
+    groups: [
+      {
+        key: "basic",
+        title: "Category",
+        gridColumns: 2,
+        fields: [
+          { key: "name", label: "Name", dataType: "text", renderer: "text", required: true, colSpan: 2 },
+          { key: "key", label: "Key", dataType: "text", renderer: "text", colSpan: 2 }
+        ]
+      }
+    ]
+  }
+};
+
+const fileTableGeneral = {
+  publicRead: true,
+  title: "Files",
+  label: "File",
+  icon: "ph:folder",
+  usePolarisUI: true,
+  enableUserScopingForContent: false,
+  enableUserScopingForSidebar: false,
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  showSelection: true,
+  hideExportButtons: false,
+  hideImportButtons: false,
+  hideSettingsButton: false,
+  hideAddButton: false,
+  rowHeight: 64,
+  columnWidths: { __selection: "36px", __rowNumber: "48px", __actions: "88px" },
+  rowClickable: true,
+  showRowNumber: true,
+  resizableColumns: true,
+  actions: [
+    { key: "edit", type: "edit" },
+    { key: "delete", type: "delete", confirm: { title: "Delete file?", message: "This cannot be undone.", confirmText: "Delete", cancelText: "Cancel", variant: "danger" } }
+  ],
+  hooks: {
+    afterDelete: "fileAfterDelete"
+  }
+};
+
+const fileTableSidebar = {
+  enabled: true,
+  parentVertexLabel: "Folder",
+  toParentEdgeType: "ParentFolder",
+  rootKeys: {},
+  label: "Folder",
+  loadFullTree: true,
+  formConfig: {
+    gridColumns: 1,
+    groups: [
+      {
+        key: "basic",
+        title: "Folder",
+        gridColumns: 2,
+        fields: [
+          { key: "key", label: "Key", dataType: "text", renderer: "text", required: true, maxLength: 255, colSpan: 2 },
+          { key: "description", label: "Description", dataType: "text", renderer: "textArea", maxLength: 2000, colSpan: 2 }
+        ]
+      }
+    ]
+  },
+  hooks: {}
+};
+
+// Columns + formConfig keep valueAccessor / onUploadSuccess as real functions (not JSON).
+const fileTableColumnsConfig = `return {
+  part: "columns",
+  columns: [
+    {
+      key: "preview",
+      label: "Preview",
+      dataType: "text",
+      renderer: "imagePreview",
+      width: "150px",
+      sortable: false,
+      valueAccessor: (row) => {
+        const fileName = row.P?.fileName != null ? String(row.P.fileName).trim() : "";
+        if (fileName === "") return null;
+        const mime = String(row.P?.mimeType || row.P?.fileType || "");
+        if (mime && !mime.startsWith("image/")) return null;
+        return "/api/file/download/" + encodeURIComponent(fileName);
+      }
+    },
+    {
+      key: "fileName",
+      label: "Name",
+      dataType: "text",
+      renderer: "text",
+      width: "240px",
+      valueAccessor: (row) => row.P?.fileName || "",
+      overflowEllipsis: true
+    },
+    {
+      key: "fileSize",
+      label: "Size (bytes)",
+      dataType: "text",
+      renderer: "text",
+      width: "110px",
+      valueAccessor: (row) => (row.P?.fileSize != null ? String(row.P.fileSize) : "")
+    },
+    {
+      key: "fileType",
+      label: "Type",
+      dataType: "text",
+      renderer: "text",
+      width: "140px",
+      valueAccessor: (row) => row.P?.mimeType || row.P?.fileType || ""
+    },
+    { key: "uploadDate", label: "Uploaded", dataType: "date", renderer: "date", width: "130px" },
+    {
+      key: "description",
+      label: "Description",
+      dataType: "text",
+      renderer: "text",
+      width: "220px",
+      valueAccessor: (row) => row.P?.description,
+      overflowEllipsis: true
+    }
+  ]
+};`;
+
+const fileTableFormConfigConfig = `return {
+  part: "formConfig",
+  gridColumns: 1,
+  groups: [
+    {
+      key: "basic",
+      title: "File",
+      gridColumns: 2,
+      fields: [
+        {
+          key: "__fileUpload",
+          dataType: "file",
+          renderer: "graphFileUpload",
+          required: true,
+          colSpan: 2,
+          tooltip: "Choose one or more files to upload. They are stored in the repository and linked to your user (UserFile). Then set description and save.",
+          visible: "ctx.mode === 'create'",
+          uploadConfiguration: {
+            accept: "*/*",
+            uploadUrl: "/api/file/upload",
+            uploadInitUrl: "/api/file/upload/init",
+            uploadChunkUrl: "/api/file/upload/chunk",
+            uploadCompleteUrl: "/api/file/upload/complete",
+            uploadAbortUrl: "/api/file/upload/abort",
+            chunkThresholdBytes: 5242880,
+            chunkSizeBytes: 4194304,
+            multiple: true,
+            maxFiles: 100,
+            hidePreview: false,
+            enableDragDrop: true,
+            fullWidth: true,
+            previewMinHeight: "8rem",
+            previewMaxItemWidth: "10rem",
+            previewMaxItemHeight: "10rem",
+            previewObjectFit: "contain",
+            fileDownloadUrlPrefix: "/api/file/download",
+            pickButtonLabel: "Choose files to upload",
+            onUploadSuccess: async (hook) => {
+              if (!hook.isLastFile) return;
+              hook.callbacks.assignFormVertex?.(hook.uploadedId);
+              hook.syncFormFields?.(hook.uploadedId);
+              if ((hook.fileCount || 1) === 1) hook.syncPreview(hook.uploadedId);
+              hook.showSuccess(
+                hook.fileCount > 1 ? (hook.fileCount + " files uploaded") : undefined
+              );
+            }
+          }
+        },
+        {
+          key: "fileName",
+          label: "File name",
+          dataType: "text",
+          renderer: "text",
+          required: true,
+          maxLength: 512,
+          colSpan: 2,
+          tooltip: "Display name for the file.",
+          disabled: "ctx.mode === 'edit'"
+        },
+        {
+          key: "description",
+          label: "Description",
+          dataType: "text",
+          renderer: "textArea",
+          required: false,
+          maxLength: 4000,
+          colSpan: 2
+        },
+        {
+          key: "fileSize",
+          label: "Size (bytes)",
+          dataType: "text",
+          renderer: "text",
+          disabled: true,
+          colSpan: 1
+        },
+        {
+          key: "fileType",
+          label: "MIME type",
+          dataType: "text",
+          renderer: "text",
+          disabled: true,
+          colSpan: 1
+        },
+        {
+          key: "uploadDate",
+          label: "Upload date",
+          dataType: "text",
+          renderer: "text",
+          disabled: true,
+          colSpan: 2
+        }
+      ]
+    }
+  ]
+};`;
+
+function buildTableSchemaPartConfig(part, body) {
+  const payload = { part, ...(body && typeof body === "object" ? body : {}) };
+  return `return ${JSON.stringify(payload, null, 2)};`;
+}
+
+const tableDefinitions = [
+  {
+    tableKey: "products",
+    tableVertexLabel: "AffiliateProduct",
+    pageId: "table:products",
+    schemaKeys: {
+      general: "products_schema_general",
+      columns: "products_schema_columns",
+      formConfig: "products_schema_formconfig",
+      sidebar: "products_schema_sidebar"
+    },
+    name: "Products",
+    description: "Affiliate products for public /products page and portal admin",
+    general: productTableGeneral,
+    columns: productTableColumns,
+    formConfig: productTableFormConfig,
+    sidebar: productTableSidebar
+  },
+  {
+    tableKey: "components",
+    tableVertexLabel: "Component",
+    pageId: "table:components",
+    schemaKeys: {
+      general: "components_schema_general",
+      columns: "components_schema_columns",
+      formConfig: "components_schema_formconfig",
+      sidebar: "components_schema_sidebar"
+    },
+    name: "Components",
+    description: "Page designer component palette organization",
+    general: componentTableGeneral,
+    columns: componentTableColumns,
+    formConfig: componentTableFormConfig,
+    sidebar: componentTableSidebar
+  },
+  {
+    tableKey: "pages",
+    tableVertexLabel: "Page",
+    pageId: "table:pages",
+    schemaKeys: {
+      general: "pages_schema_general",
+      columns: "pages_schema_columns",
+      formConfig: "pages_schema_formconfig",
+      sidebar: "pages_schema_sidebar"
+    },
+    name: "Pages",
+    description: "Page designer pages palette organization",
+    general: pageTableGeneral,
+    columns: pageTableColumns,
+    formConfig: pageTableFormConfig,
+    sidebar: pageTableSidebar
+  },
+  {
+    tableKey: "functions",
+    tableVertexLabel: "Function",
+    pageId: "table:functions",
+    schemaKeys: {
+      general: "functions_schema_general",
+      columns: "functions_schema_columns",
+      formConfig: "functions_schema_formconfig",
+      sidebar: "functions_schema_sidebar"
+    },
+    name: "Functions",
+    description: "Page designer functions palette organization",
+    general: functionTableGeneral,
+    columns: functionTableColumns,
+    formConfig: functionTableFormConfig,
+    sidebar: functionTableSidebar
+  },
+  {
+    tableKey: "email_templates",
+    tableVertexLabel: "EmailTemplate",
+    pageId: "table:email_templates",
+    schemaKeys: {
+      general: "email_templates_schema_general",
+      columns: "email_templates_schema_columns",
+      formConfig: "email_templates_schema_formconfig",
+      sidebar: "email_templates_schema_sidebar"
+    },
+    name: "Email templates",
+    description: "Page designer email templates palette organization",
+    general: emailTemplateTableGeneral,
+    columns: emailTemplateTableColumns,
+    formConfig: emailTemplateTableFormConfig,
+    sidebar: emailTemplateTableSidebar
+  },
+  {
+    tableKey: "files",
+    tableVertexLabel: "File",
+    pageId: "table:files",
+    schemaKeys: {
+      general: "files_schema_general",
+      columns: "files_schema_columns",
+      formConfig: "files_schema_formconfig",
+      sidebar: "files_schema_sidebar"
+    },
+    name: "Files",
+    description: "File organizer for portal admin (/portal/table?table=File&key=files)",
+    general: fileTableGeneral,
+    columnsConfig: fileTableColumnsConfig,
+    formConfigConfig: fileTableFormConfigConfig,
+    sidebar: fileTableSidebar
+  }
+];
+const tableSchemaParts = tableDefinitions.flatMap((tableDef) => [
+  {
+    key: tableDef.schemaKeys.general,
+    tableKey: tableDef.tableKey,
+    tableVertexLabel: tableDef.tableVertexLabel,
+    part: "general",
+    name: tableDef.name + " general schema",
+    config: buildTableSchemaPartConfig("general", tableDef.general)
+  },
+  {
+    key: tableDef.schemaKeys.columns,
+    tableKey: tableDef.tableKey,
+    tableVertexLabel: tableDef.tableVertexLabel,
+    part: "columns",
+    name: tableDef.name + " columns schema",
+    config: tableDef.columnsConfig || buildTableSchemaPartConfig("columns", { columns: tableDef.columns })
+  },
+  {
+    key: tableDef.schemaKeys.formConfig,
+    tableKey: tableDef.tableKey,
+    tableVertexLabel: tableDef.tableVertexLabel,
+    part: "formConfig",
+    name: tableDef.name + " form config schema",
+    config: tableDef.formConfigConfig || buildTableSchemaPartConfig("formConfig", tableDef.formConfig)
+  },
+  {
+    key: tableDef.schemaKeys.sidebar,
+    tableKey: tableDef.tableKey,
+    tableVertexLabel: tableDef.tableVertexLabel,
+    part: "sidebar",
+    name: tableDef.name + " sidebar schema",
+    config: buildTableSchemaPartConfig("sidebar", tableDef.sidebar)
+  }
+]);
+
+const tableSectionDocuments = [];
+
+return {
+  success: true,
+  data: {
+    settingsPageConfigs,
+    defaultSectionDocuments,
+    tableDefinitions,
+    tableSchemaParts,
+    tableSectionDocuments
+  }
+};
+'''
+        key: getPageSettingsDefinitions
+      }
+    }
+  ]
+  edges: []
+}

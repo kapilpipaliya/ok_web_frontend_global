@@ -1,0 +1,108 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Resets a settings section to config defaults. Deletes persisted document or sets default values.
+        body:
+          '''
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  return { success: false, message: "User session not found" };
+}
+
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const {
+  pageId,
+  sectionId,
+  scopeVertexLabel,
+  scopeId,
+  sectionConfig,
+  deleteDocument
+} = args.contextData;
+
+if (!pageId || !sectionId) {
+  return { success: false, message: "pageId and sectionId are required" };
+}
+
+const effectiveScopeLabel = scopeVertexLabel || "User";
+const effectiveScopeId = scopeId || user.P.uuid;
+const edgeType = `${effectiveScopeLabel}HasSettingsSection`;
+const scopeMatchProperty = args.contextData.scopeMatchProperty || "uuid";
+
+let defaultValues = {};
+if (sectionConfig && args.executeNamedServerFunction) {
+  const mergeResult = await args.executeNamedServerFunction({
+    functionName: "settingsEngineHelpers",
+    contextData: { action: "mergeDefaults", sectionConfig, values: {} }
+  });
+  if (mergeResult?.result?.success) {
+    defaultValues = mergeResult.result.data?.values || {};
+  }
+}
+
+let existingQuery;
+if (effectiveScopeLabel === "User") {
+  existingQuery = `
+    MATCH (scope:User {uuid: $scopeId})-[:${edgeType}]->(doc:SettingsSectionDocument {pageId: $pageId, sectionId: $sectionId})
+    RETURN doc LIMIT 1
+  `;
+} else {
+  existingQuery = `
+    MATCH (scope:${effectiveScopeLabel} {${scopeMatchProperty}: $scopeId})-[:${edgeType}]->(doc:SettingsSectionDocument {pageId: $pageId, sectionId: $sectionId})
+    RETURN doc LIMIT 1
+  `;
+}
+
+const existingResult = await args.session.run(existingQuery, {
+  scopeId: effectiveScopeId,
+  pageId,
+  sectionId
+});
+
+if (existingResult.records.length === 0) {
+  return {
+    success: true,
+    data: { pageId, sectionId, values: defaultValues, version: 0, reset: true },
+    message: "Section already at defaults"
+  };
+}
+
+const existingVertices = args.processResult(existingResult.records, args.context, "doc");
+const existingDocument = existingVertices[0];
+const elementId = existingDocument.id;
+
+if (deleteDocument === true) {
+  await args.session.run(
+    `MATCH (doc:SettingsSectionDocument) WHERE elementId(doc) = $elementId DETACH DELETE doc`,
+    { elementId }
+  );
+  return {
+    success: true,
+    data: { pageId, sectionId, values: defaultValues, version: 0, deleted: true },
+    message: "Settings section reset to defaults"
+  };
+}
+
+const valuesJson = JSON.stringify(defaultValues);
+const now = new Date().toISOString();
+await args.session.run(
+  `MATCH (doc:SettingsSectionDocument) WHERE elementId(doc) = $elementId
+   SET doc.values = $valuesJson, doc.version = 1, doc.updatedAt = $now, doc.updatedBy = $updatedBy
+   RETURN doc`,
+  { elementId, valuesJson, now, updatedBy: user.P.uuid }
+);
+
+return {
+  success: true,
+  data: { pageId, sectionId, values: defaultValues, version: 1, reset: true },
+  message: "Settings section reset to defaults"
+};
+'''
+        key: resetSettingsSection
+      }
+    }
+  ]
+  edges: []
+}

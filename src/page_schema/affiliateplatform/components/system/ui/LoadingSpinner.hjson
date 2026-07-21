@@ -1,0 +1,294 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: LoadingSpinner
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: ${args.theme.var.spacing.md};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''// Get variant props with defaults
+const size = args.contextData.props?.size || "medium";
+const color = args.contextData.props?.color || "primary";
+const text = args.contextData.props?.text || "";
+
+return {
+  as: "div",
+  "aria-label": text || "Loading...",
+  role: "status"
+};'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''// Get variant props with defaults
+const size = args.contextData.props?.size || "medium";
+const color = args.contextData.props?.color || "primary";
+
+// Size configurations
+const sizeConfig = {
+  small: { diameter: 24, borderWidth: 2 },
+  medium: { diameter: 48, borderWidth: 4 },
+  large: { diameter: 64, borderWidth: 6 }
+};
+
+const config = sizeConfig[size] || sizeConfig.medium;
+
+// Color configurations
+const colorConfig = {
+  primary: {
+    border: args.theme.var.color.background_light_300,
+    accent: args.theme.var.color.primary
+  },
+  muted: {
+    border: args.theme.var.color.background_light_200,
+    accent: args.theme.var.color.text_light_500
+  },
+  white: {
+    border: "rgba(255, 255, 255, 0.3)",
+    accent: "rgba(255, 255, 255, 0.9)"
+  }
+};
+
+const colors = colorConfig[color] || colorConfig.primary;
+
+return `._id {
+  /* Spinner styling */
+  width: ${config.diameter}px;
+  height: ${config.diameter}px;
+  border: ${config.borderWidth}px solid ${colors.border};
+  border-top: ${config.borderWidth}px solid ${colors.accent};
+  border-radius: 50%;
+
+  /* Animation */
+  animation: ytoSpinnerRotate 1s linear infinite;
+
+  /* Accessibility */
+  display: inline-block;
+}
+
+/* Keyframe animation for spinner rotation */
+@keyframes ytoSpinnerRotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  ._id {
+    animation-duration: 2s;
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''// Get variant props with defaults
+const size = args.contextData.props?.size || "medium";
+const color = args.contextData.props?.color || "primary";
+
+return {
+  as: "div"
+};'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.text_light_500};
+  font-size: 1rem;
+  text-align: center;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''// Get variant props with defaults
+const text = args.contextData.props?.text || "";
+
+return {
+  as: "div",
+  text: text,
+  hide: () => !text || text.trim() === ""
+};'''
+      }
+    }
+    {
+      id: "5"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: primary
+        key: color
+      }
+    }
+    {
+      id: "6"
+      L: ComponentVariantOption
+      P: {
+        description: Primary theme color
+        value: primary
+        key: primary
+      }
+    }
+    {
+      id: "7"
+      L: ComponentVariantOption
+      P: {
+        description: White color
+        value: white
+        key: white
+      }
+    }
+    {
+      id: "8"
+      L: ComponentVariantOption
+      P: {
+        description: Muted theme color
+        value: muted
+        key: muted
+      }
+    }
+    {
+      id: "9"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: text
+        defValue: ""
+      }
+    }
+    {
+      id: "10"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: medium
+        key: size
+      }
+    }
+    {
+      id: "11"
+      L: ComponentVariantOption
+      P: {
+        description: Medium spinner (48px)
+        value: medium
+        key: medium
+      }
+    }
+    {
+      id: "12"
+      L: ComponentVariantOption
+      P: {
+        description: Small spinner (24px)
+        value: small
+        key: small
+      }
+    }
+    {
+      id: "13"
+      L: ComponentVariantOption
+      P: {
+        description: Large spinner (64px)
+        value: large
+        key: large
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: ComponentVariant
+      S: "1"
+      E: "5"
+    }
+    {
+      id: e3
+      T: ComponentVariant
+      S: "1"
+      E: "9"
+    }
+    {
+      id: e4
+      T: ComponentVariant
+      S: "1"
+      E: "10"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e7
+      T: ComponentVariantOption
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e8
+      T: ComponentVariantOption
+      S: "5"
+      E: "7"
+    }
+    {
+      id: e9
+      T: ComponentVariantOption
+      S: "5"
+      E: "8"
+    }
+    {
+      id: e10
+      T: ComponentVariantOption
+      S: "10"
+      E: "11"
+    }
+    {
+      id: e11
+      T: ComponentVariantOption
+      S: "10"
+      E: "12"
+    }
+    {
+      id: e12
+      T: ComponentVariantOption
+      S: "10"
+      E: "13"
+    }
+  ]
+}

@@ -12,8 +12,7 @@
       L: Attr
       P: {
         css:
-          '''
-const variant = args.contextData.props?.variant || "ghost";
+          '''const variant = args.contextData.props?.variant || "ghost";
 const size = args.contextData.props?.size || "md";
 const disabled = args.contextData.props?.disabled || false;
 const loading = args.contextData.props?.loading === true;
@@ -115,13 +114,11 @@ return `._id {
   &._reason-danger {
     box-shadow: inset 0 0 0 1px ${args.theme.var.color.error};
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const icon = args.contextData.props?.icon;
+          '''const icon = args.contextData.props?.icon;
 const onClick = args.contextData.props?.onClick || (() => {});
 const disabled = args.contextData.props?.disabled || false;
 const loading = args.contextData.props?.loading === true;
@@ -157,8 +154,7 @@ return {
   "data-reason-kind": args.contextData.props?.["data-reason-kind"],
   "data-reason-code": args.contextData.props?.["data-reason-code"],
   onClick: onClick
-};
-'''
+};'''
       }
     }
     {
@@ -168,8 +164,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const icon = args.contextData.props?.icon;
+          '''const icon = args.contextData.props?.icon;
 const size = args.contextData.props?.size || "md";
 
 const sizeStyles = {
@@ -188,8 +183,7 @@ return {
   width,
   height,
   hide: !icon
-};
-'''
+};'''
       }
     }
     {

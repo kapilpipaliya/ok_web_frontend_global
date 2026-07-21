@@ -14,17 +14,14 @@
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-}`;
-'''
+}`;'''
         displayOrder: 1
         fns:
-          '''
-const props = () => args.contextData.props || {};
+          '''const props = () => args.contextData.props || {};
 
 // useUrlState true  → real links; page reloads initialData from ?category=
 // useUrlState false → local loadFolder (no URL)
@@ -173,15 +170,12 @@ return {
   hasItems: () => getItemsForRender().length > 0,
   isEmpty: () => getFoldersForRender().length === 0 && getItemsForRender().length === 0,
   getData
-};
-'''
+};'''
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -191,8 +185,7 @@ return {
         displayOrder: 1
         componentName: GalleryBreadcrumb
         props:
-          '''
-const crumbs = args.fns.getBreadcrumbForRender?.()
+          '''const crumbs = args.fns.getBreadcrumbForRender?.()
   || args.contextData.props?.initialData?.breadcrumb
   || [];
 const withUrl = args.fns.useUrlState?.() === true
@@ -206,8 +199,7 @@ return {
     ? (crumb) => args.fns.crumbHref?.(crumb) || basePath
     : null,
   onNavigate: withUrl ? undefined : (crumb) => args.fns.navigateBreadcrumb?.(crumb)
-};
-'''
+};'''
       }
     }
     {
@@ -215,8 +207,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -226,19 +217,16 @@ return `._id {
   background: ${args.theme.var.color.background_light_50};
   color: ${args.theme.var.color.text};
   font-size: 0.875rem;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const loading = args.fns.loading?.();
+          '''const loading = args.fns.loading?.();
 const error = args.fns.error?.();
 return {
   as: "div",
   hide: !loading && !error
-};
-'''
+};'''
       }
     }
     {
@@ -246,23 +234,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const error = args.fns.error?.();
+          '''const error = args.fns.error?.();
 return `._id {
   color: ${error ? args.theme.var.color.error : args.theme.var.color.text_light_200};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const loading = args.fns.loading?.();
+          '''const loading = args.fns.loading?.();
 const error = args.fns.error?.();
 return {
   as: "span",
   text: error || args.fns.labels?.()?.loadingText || "Loading…"
-};
-'''
+};'''
       }
     }
     {
@@ -272,15 +256,13 @@ return {
         displayOrder: 3
         componentName: Html
         props:
-          '''
-const folders = args.fns.getFoldersForRender?.()
+          '''const folders = args.fns.getFoldersForRender?.()
   || args.contextData.props?.initialData?.folders
   || [];
 return {
   as: "section",
   hide: !Array.isArray(folders) || folders.length === 0
-};
-'''
+};'''
       }
     }
     {
@@ -288,23 +270,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   margin: 0 0 1rem 0;
   font-size: 1.25rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "h2",
   text: "Folders"
-};
-'''
+};'''
       }
     }
     {
@@ -312,21 +290,17 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 1rem;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -338,15 +312,13 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const folders = args.fns.getFoldersForRender?.()
+          '''const folders = args.fns.getFoldersForRender?.()
   || args.contextData.props?.initialData?.folders
   || [];
 return {
   as: "fragment",
   data: Array.isArray(folders) ? folders : []
-};
-'''
+};'''
       }
     }
     {
@@ -356,8 +328,7 @@ return {
         displayOrder: 1
         componentName: GalleryFolderCard
         props:
-          '''
-const folder = args.contextData.folderRow || {};
+          '''const folder = args.contextData.folderRow || {};
 const index = args.contextData.index ?? 0;
 const withUrl = args.fns.useUrlState?.() === true
   || args.contextData.props?.useUrlState === true;
@@ -367,8 +338,7 @@ return {
   index,
   href,
   onOpen: withUrl ? undefined : (f) => args.fns.openFolder?.(f)
-};
-'''
+};'''
       }
     }
     {
@@ -378,15 +348,13 @@ return {
         displayOrder: 4
         componentName: Html
         props:
-          '''
-const items = args.fns.getItemsForRender?.()
+          '''const items = args.fns.getItemsForRender?.()
   || args.contextData.props?.initialData?.items
   || [];
 return {
   as: "section",
   hide: !Array.isArray(items) || items.length === 0
-};
-'''
+};'''
       }
     }
     {
@@ -394,23 +362,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   margin: 0 0 1rem 0;
   font-size: 1.25rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "h2",
   text: "Files"
-};
-'''
+};'''
       }
     }
     {
@@ -418,21 +382,17 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 1rem;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -444,15 +404,13 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const items = args.fns.getItemsForRender?.()
+          '''const items = args.fns.getItemsForRender?.()
   || args.contextData.props?.initialData?.items
   || [];
 return {
   as: "fragment",
   data: Array.isArray(items) ? items : []
-};
-'''
+};'''
       }
     }
     {
@@ -462,16 +420,14 @@ return {
         displayOrder: 1
         componentName: GalleryFileCard
         props:
-          '''
-const item = args.contextData.fileRow || {};
+          '''const item = args.contextData.fileRow || {};
 const index = args.contextData.index ?? 0;
 return {
   item,
   index,
   href: item.fileUrl || "",
   onOpen: (f) => args.fns.openFile?.(f)
-};
-'''
+};'''
       }
     }
     {
@@ -479,21 +435,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   padding: 2.5rem 1.5rem;
   text-align: center;
   border: 1px dashed ${args.theme.var.color.border};
   border-radius: 0.75rem;
   background: ${args.theme.var.color.background_light_50};
   color: ${args.theme.var.color.text_light_300};
-}`;
-'''
+}`;'''
         displayOrder: 5
         componentName: Html
         props:
-          '''
-const folders = args.fns.getFoldersForRender?.()
+          '''const folders = args.fns.getFoldersForRender?.()
   || args.contextData.props?.initialData?.folders
   || [];
 const items = args.fns.getItemsForRender?.()
@@ -503,8 +456,7 @@ const loading = args.fns.loading?.();
 return {
   as: "div",
   hide: loading || (Array.isArray(folders) && folders.length > 0) || (Array.isArray(items) && items.length > 0)
-};
-'''
+};'''
       }
     }
     {
@@ -512,22 +464,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   margin: 0;
   font-size: 0.9375rem;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const labels = args.fns.labels?.() || args.contextData.props?.labels || {};
+          '''const labels = args.fns.labels?.() || args.contextData.props?.labels || {};
 return {
   as: "p",
   text: labels.emptyFilesText || "No files in this folder."
-};
-'''
+};'''
       }
     }
     {
@@ -537,8 +485,7 @@ return {
         displayOrder: 6
         componentName: GalleryPreviewModal
         props:
-          '''
-const items = args.fns.getItemsForRender?.()
+          '''const items = args.fns.getItemsForRender?.()
   || args.contextData.props?.initialData?.items
   || [];
 return {
@@ -547,8 +494,7 @@ return {
   startIndex: args.fns.previewIndex?.() || 0,
   item: args.fns.previewItem?.() || null,
   onClose: () => args.fns.closePreview?.()
-};
-'''
+};'''
       }
     }
   ]

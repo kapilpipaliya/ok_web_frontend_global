@@ -1,0 +1,289 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: MenuItem
+      }
+    }
+    {
+      id: "2"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: icon
+        defValue: ""
+      }
+    }
+    {
+      id: "3"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: Menu Item
+        key: text
+      }
+    }
+    {
+      id: "4"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        defValue: false
+        key: disabled
+      }
+    }
+    {
+      id: "5"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: default
+        key: type
+      }
+    }
+    {
+      id: "6"
+      L: ComponentVariantOption
+      P: {
+        description: Default menu item
+        value: default
+        key: default
+      }
+    }
+    {
+      id: "7"
+      L: ComponentVariantOption
+      P: {
+        description: Danger menu item (red)
+        value: danger
+        key: danger
+      }
+    }
+    {
+      id: "8"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: title
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''const type = args.contextData.props?.type || "default";
+const isDivider = args.contextData.props?.isDivider;
+
+// Divider styles
+if (isDivider) {
+  return `._id {
+    height: 1px;
+    background: ${args.theme.var.color.border};
+    margin: 0.25rem 0;
+  }`;
+}
+
+// Regular menu item styles
+return `._id {
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 0.25rem;
+  transition: all 150ms ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: ${type === 'danger' ? args.theme.var.color.error : args.theme.var.color.text};
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+._id:hover {
+  background: ${type === 'danger' ? args.theme.var.color.error_light_100 : args.theme.var.color.primary_light_200};
+  color: ${type === 'danger' ? args.theme.var.color.error_text : args.theme.var.color.text};
+}
+
+._id:focus {
+  outline: 2px solid ${args.theme.var.color.primary};
+  outline-offset: -2px;
+}
+
+._id:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const text = args.contextData.props?.text || "Menu Item";
+const onClick = args.contextData.props?.onClick;
+const href = args.contextData.props?.href;
+const type = args.contextData.props?.type || "default";
+const isDivider = args.contextData.props?.isDivider;
+const title = args.contextData.props?.title || "";
+const disabled = args.contextData.props?.disabled === true;
+const reasonActive = args.contextData.props?.["data-reason-active"] === "true";
+const reasonVariant = args.contextData.props?.["data-reason-variant"];
+const reasonKind = args.contextData.props?.["data-reason-kind"];
+
+// If it's a divider, render a simple div
+if (isDivider) {
+  return {
+    as: "div"
+  };
+}
+
+// If href is provided, render as link
+const reasonAttrs = {
+  "data-reason-active": args.contextData.props?.["data-reason-active"],
+  "data-reason-variant": args.contextData.props?.["data-reason-variant"],
+  "data-reason-kind": args.contextData.props?.["data-reason-kind"],
+  "data-reason-code": args.contextData.props?.["data-reason-code"]
+};
+
+if (href) {
+  return {
+    as: "a",
+    href: disabled ? undefined : href,
+    onClick: disabled ? undefined : onClick,
+    role: "menuitem",
+    title: title || undefined,
+    "aria-disabled": disabled ? true : undefined,
+    class: reasonActive && reasonVariant ? `_reason _reason-${reasonVariant}` : undefined,
+    style: disabled ? "opacity: 0.5; pointer-events: auto; cursor: not-allowed;" : undefined,
+    ...reasonAttrs
+  };
+}
+
+// Default: render as button
+return {
+  as: "button",
+  onClick: onClick,
+  role: "menuitem",
+  title: title || undefined,
+  disabled: disabled,
+  type: "button",
+  class: reasonActive && reasonVariant ? `_reason _reason-${reasonVariant}` : undefined,
+  ...reasonAttrs
+};'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const icon = args.contextData.props?.icon;
+const isDivider = args.contextData.props?.isDivider;
+
+// Hide icon for dividers
+if (isDivider || !icon) {
+  return { as: "div", hide: true };
+}
+
+return {
+  as: "icon",
+  icon: icon,
+  width: 16,
+  height: 16
+};'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  flex: 1;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const text = args.contextData.props?.text || "Menu Item";
+const isDivider = args.contextData.props?.isDivider;
+
+// Hide text for dividers
+if (isDivider) {
+  return { as: "div", hide: true };
+}
+
+return {
+  as: "span",
+  text: text
+};'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: ComponentVariant
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: ComponentVariant
+      S: "1"
+      E: "3"
+    }
+    {
+      id: e3
+      T: ComponentVariant
+      S: "1"
+      E: "4"
+    }
+    {
+      id: e4
+      T: ComponentVariant
+      S: "1"
+      E: "5"
+    }
+    {
+      id: e5
+      T: ComponentVariant
+      S: "1"
+      E: "8"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "1"
+      E: "9"
+    }
+    {
+      id: e7
+      T: ComponentVariantOption
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e8
+      T: ComponentVariantOption
+      S: "5"
+      E: "7"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "9"
+      E: "11"
+    }
+  ]
+}

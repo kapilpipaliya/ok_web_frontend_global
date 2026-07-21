@@ -2717,8 +2717,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return args.contextData.props?.nestedLinesMode === true
+          '''return args.contextData.props?.nestedLinesMode === true
   ? `._id {
   display: flex;
   flex-direction: column;
@@ -2759,16 +2758,13 @@ return args.contextData.props?.nestedLinesMode === true
   height: calc(100vh - 48px);
   /* min-height:0 lets flex children (e.g. table body) shrink so overflow/scroll works */
   min-height: 0;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -2785,25 +2781,21 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   padding: ${args.theme.var.spacing.sm};
   display: flex;
   flex-direction: column;
   gap: ${args.theme.var.spacing.sm};
   /* Toolbar keeps natural height; flex row below (table) gets remaining space */
   flex-shrink: 0;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   hide: args.fns.isEmbeddedMode?.() === true && args.contextData.props?.hidePageChrome === true
-};
-'''
+};'''
       }
     }
     {
@@ -2811,23 +2803,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: ${args.theme.var.spacing.md};
   flex-wrap: wrap;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -2835,27 +2823,23 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   align-items: center;
   gap: ${args.theme.var.spacing.sm};
   font-size: 1.25rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const title = args.fns.getTitle();
+          '''const title = args.fns.getTitle();
 const displayTitle = title;
 return {
   as: "div",
   hide: !displayTitle
-};
-'''
+};'''
       }
     }
     {
@@ -2865,16 +2849,14 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const icon = args.fns.getIcon();
+          '''const icon = args.fns.getIcon();
 return {
   as: "icon",
   icon: icon,
   width: 24,
   height: 24,
   hide: !icon
-};
-'''
+};'''
       }
     }
     {
@@ -2882,23 +2864,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   margin: 0;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const title = args.fns.getTitle();
+          '''const title = args.fns.getTitle();
 const displayTitle = title;
 return {
   as: "span",
   text: displayTitle,
   hide: !displayTitle
-};
-'''
+};'''
       }
     }
     {
@@ -2906,22 +2884,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   align-items: center;
   flex-shrink: 0;
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   hide: true
-};
-'''
+};'''
       }
     }
     {
@@ -2929,25 +2903,21 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   align-items: center;
   gap: ${args.theme.var.spacing.sm};
   flex-wrap: wrap;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const customActions = args.fns.getCustomActions?.() || [];
+          '''const customActions = args.fns.getCustomActions?.() || [];
 const hasCustomActions = Array.isArray(customActions) ? customActions.length > 0 : !!customActions;
 return {
   as: "div",
   hide: !hasCustomActions
-};
-'''
+};'''
       }
     }
     {
@@ -2964,27 +2934,23 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   margin: 0;
   font-size: 0.875rem;
   line-height: 1.5;
   color: ${args.theme.var.color.text_dark_400};
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const subtitle = args.fns.getSubtitle?.();
+          '''const subtitle = args.fns.getSubtitle?.();
 const displaySubtitle =
   subtitle != null && String(subtitle).trim() !== "" ? String(subtitle).trim() : "";
 return {
   as: "p",
   text: displaySubtitle,
   hide: displaySubtitle === ""
-};
-'''
+};'''
       }
     }
     {
@@ -2992,22 +2958,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   align-items: center;
   gap: ${args.theme.var.spacing.sm};
   flex-wrap: wrap;
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -3024,25 +2986,21 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   align-items: center;
   gap: ${args.theme.var.spacing.sm};
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const hideAddButton = args.fns.getHideAddButton();
+          '''const hideAddButton = args.fns.getHideAddButton();
 const formConfig = args.fns.getFormConfig();
 
 return {
   as: "div",
   hide: hideAddButton || !formConfig
-};
-'''
+};'''
       }
     }
     {
@@ -3052,16 +3010,14 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "s-button",
   "attr:variant": "primary",
   "attr:icon": "plus",
   text: "Add",
   onClick: args.fns.handleAdd,
   hide: args.fns.getUsePolarisUI?.() !== true
-};
-'''
+};'''
       }
     }
     {
@@ -3071,15 +3027,13 @@ return {
         displayOrder: 1
         componentName: Button
         props:
-          '''
-return {
+          '''return {
   variant: "primary",
   onClick: args.fns.handleAdd,
   text: "Add",
   leftIcon: "carbon:add",
   hide: args.fns.getUsePolarisUI?.() === true
-};
-'''
+};'''
       }
     }
     {
@@ -3087,23 +3041,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   align-items: center;
   gap: ${args.theme.var.spacing.sm};
   flex: 1;
   min-width: 200px;
-}`;
-'''
+}`;'''
         displayOrder: 4
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -3113,8 +3063,7 @@ return {
         displayOrder: 1
         componentName: TextInput
         props:
-          '''
-return {
+          '''return {
   placeholder: args.fns.getSearchPlaceholder(),
   value: args.graph.vertexes[args.fns.tableStateVertexId]?.P?.searchTerm ?? "",
   onInput: (e) => {
@@ -3122,8 +3071,7 @@ return {
   },
   leftIcon: "carbon:search",
   hide: args.fns.getUsePolarisUI?.() === true
-};
-'''
+};'''
       }
     }
     {
@@ -3131,17 +3079,14 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   flex: 1;
   min-width: 0;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "s-search-field",
   label: "Search",
   "attr:labelAccessibilityVisibility": "exclusive",
@@ -3149,8 +3094,7 @@ return {
   value: args.graph.vertexes[args.fns.tableStateVertexId]?.P?.searchTerm ?? "",
   onInput: (e) => args.fns.debouncedSetSearchTerm(e?.target?.value ?? ''),
   hide: args.fns.getUsePolarisUI?.() !== true
-};
-'''
+};'''
       }
     }
     {
@@ -3160,16 +3104,14 @@ return {
         displayOrder: 2
         componentName: Button
         props:
-          '''
-return {
+          '''return {
   variant: "primary",
   onClick: args.fns.handleSearch,
   text: "Search",
   leftIcon: "carbon:search",
   hide: true,
   disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true
-};
-'''
+};'''
       }
     }
     {
@@ -3179,8 +3121,7 @@ return {
         displayOrder: 5
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "s-button",
   "attr:variant": "secondary",
   "attr:icon": "settings",
@@ -3188,8 +3129,7 @@ return {
   onClick: args.fns.handleOpenSettings,
   disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
   hide: !args.fns.getSettingsFunction() || args.fns.getHideSettingsButton() || args.fns.getUsePolarisUI?.() !== true
-};
-'''
+};'''
       }
     }
     {
@@ -3199,16 +3139,14 @@ return {
         displayOrder: 5
         componentName: Button
         props:
-          '''
-return {
+          '''return {
   variant: "secondary",
   onClick: args.fns.handleOpenSettings,
   text: "Settings",
   leftIcon: "carbon:settings",
   disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
   hide: !args.fns.getSettingsFunction() || args.fns.getHideSettingsButton() || args.fns.getUsePolarisUI?.() === true
-};
-'''
+};'''
       }
     }
     {
@@ -3216,18 +3154,15 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   align-items: center;
   gap: ${args.theme.var.spacing.sm};
-}`;
-'''
+}`;'''
         displayOrder: 6
         componentName: Html
         props:
-          '''
-const hasImport = !!args.fns.getImportFunction();
+          '''const hasImport = !!args.fns.getImportFunction();
 const hasExport = !!args.fns.getExportFunction();
 const hideImportButtons = args.fns.getHideImportButtons();
 const hideExportButtons = args.fns.getHideExportButtons();
@@ -3235,8 +3170,7 @@ const hideExportButtons = args.fns.getHideExportButtons();
 return {
   as: "div",
   hide: (!hasImport && !hasExport) || (hideImportButtons && hideExportButtons)
-};
-'''
+};'''
       }
     }
     {
@@ -3246,8 +3180,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "s-button",
   "attr:variant": "secondary",
   "attr:icon": "upload",
@@ -3255,8 +3188,7 @@ return {
   onClick: () => args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { isImportModalOpen: true }),
   disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
   hide: !args.fns.getImportFunction() || args.fns.getHideImportButtons() || args.fns.getUsePolarisUI?.() !== true
-};
-'''
+};'''
       }
     }
     {
@@ -3266,16 +3198,14 @@ return {
         displayOrder: 1
         componentName: Button
         props:
-          '''
-return {
+          '''return {
   variant: "secondary",
   onClick: () => args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { isImportModalOpen: true }),
   text: "Import",
   leftIcon: "carbon:upload",
   disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
   hide: !args.fns.getImportFunction() || args.fns.getHideImportButtons() || args.fns.getUsePolarisUI?.() === true
-};
-'''
+};'''
       }
     }
     {
@@ -3285,16 +3215,14 @@ return {
         displayOrder: 2
         componentName: Button
         props:
-          '''
-return {
+          '''return {
   variant: "secondary",
   onClick: args.fns.handleExport,
   text: "Export All",
   leftIcon: "carbon:download",
   disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
   hide: !args.fns.getExportFunction() || args.fns.getHideExportButtons() || args.fns.getUsePolarisUI?.() === true
-};
-'''
+};'''
       }
     }
     {
@@ -3304,8 +3232,7 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "s-button",
   "attr:variant": "secondary",
   "attr:icon": "download",
@@ -3313,8 +3240,7 @@ return {
   onClick: args.fns.handleExport,
   disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
   hide: !args.fns.getExportFunction() || args.fns.getHideExportButtons() || args.fns.getUsePolarisUI?.() !== true
-};
-'''
+};'''
       }
     }
     {
@@ -3324,16 +3250,14 @@ return {
         displayOrder: 3
         componentName: Button
         props:
-          '''
-return {
+          '''return {
   variant: "secondary",
   onClick: () => args.fns.handleExport(args.fns.resolveFilteredVerticesForExport?.() ?? []),
   text: "Export Filtered",
   leftIcon: "carbon:filter",
   disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
   hide: !args.fns.getExportFunction() || args.fns.getHideExportButtons() || args.fns.getUsePolarisUI?.() === true
-};
-'''
+};'''
       }
     }
     {
@@ -3343,8 +3267,7 @@ return {
         displayOrder: 3
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "s-button",
   "attr:variant": "secondary",
   "attr:icon": "filter",
@@ -3352,8 +3275,7 @@ return {
   onClick: () => args.fns.handleExport(args.fns.resolveFilteredVerticesForExport?.() ?? []),
   disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
   hide: !args.fns.getExportFunction() || args.fns.getHideExportButtons() || args.fns.getUsePolarisUI?.() !== true
-};
-'''
+};'''
       }
     }
     {
@@ -3361,8 +3283,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const isResizing = args.graph.vertexes[args.fns.tableStateVertexId]?.P?.isResizing === true;
+          '''const isResizing = args.graph.vertexes[args.fns.tableStateVertexId]?.P?.isResizing === true;
 
 return [`._id {
   display: flex;
@@ -3373,16 +3294,13 @@ return [`._id {
   width: 100%;
   overflow: hidden;
   user-select: ${isResizing ? "none" : "auto"};
-}`];
-'''
+}`];'''
         displayOrder: 4
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -3390,27 +3308,23 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   flex-shrink: 0;
   min-width: 0;
   width: 100%;
   /* No native horizontal scrollbar; scrollLeft is synced from body (40wrap) on scroll */
   overflow-x: hidden;
   overflow-y: hidden;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   ref: (el) => {
     args.fns.setTableHeaderHScrollEl(el);
   }
-};
-'''
+};'''
       }
     }
     {
@@ -3418,8 +3332,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const usePolaris = args.fns.getUsePolarisUI?.() === true
+          '''const usePolaris = args.fns.getUsePolarisUI?.() === true
 return `._id {
   display: grid;
   grid-template-columns: ${args.fns.getGridTemplateColumns()};
@@ -3428,16 +3341,13 @@ return `._id {
   background: ${usePolaris ? "#f7f7f7" : args.theme.var.color.background_light_100};
   border-top: 1px solid ${args.theme.var.color.border};
   border-bottom: 1px solid ${args.theme.var.color.border};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -3445,8 +3355,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const showSelection = args.fns.getShowSelection();
+          '''const showSelection = args.fns.getShowSelection();
 
 return `._id {
   padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
@@ -3457,21 +3366,18 @@ return `._id {
   align-items: center;
   justify-content: center;
   position: relative;
-}`;
-'''
+}`;'''
         displayOrder: 0.5
         componentName: Html
         props:
-          '''
-const showSelection = args.fns.getShowSelection();
+          '''const showSelection = args.fns.getShowSelection();
 
 return {
   as: "div",
   // Keep the cell in single-select mode so the grid stays aligned with body checkboxes
   // (select-all checkbox is still hidden below when selectionMode === "single").
   hide: !showSelection,
-};
-'''
+};'''
       }
     }
     {
@@ -3479,8 +3385,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const showSelection = args.fns.getShowSelection();
+          '''const showSelection = args.fns.getShowSelection();
 const resizableColumns = args.fns.getResizableColumns();
 
 return `._id {
@@ -3509,13 +3414,11 @@ return `._id {
     border-left-color: ${args.theme.var.color.primary_light_300};
   }
 
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const showSelection = args.fns.getShowSelection();
+          '''const showSelection = args.fns.getShowSelection();
 const resizableColumns = args.fns.getResizableColumns();
 
 const resizeHandler = args.fns.createResizeHandler("__selection");
@@ -3525,8 +3428,7 @@ return {
   hide: !resizableColumns || !showSelection,
   onMouseDown: resizeHandler,
   onTouchStart: resizeHandler
-};
-'''
+};'''
       }
     }
     {
@@ -3534,21 +3436,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   pointer-events: auto;
   cursor: pointer;
   width: 1rem;
   height: 1rem;
   accent-color: ${args.theme.var.color.text};
   flex-shrink: 0;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const showSelection = args.fns.getShowSelection();
+          '''const showSelection = args.fns.getShowSelection();
 const selectionMode = args.fns.getSelectionMode?.();
 const selected = args.fns.getSelectedRows();
 const visibleIds = args.fns.getSelectableVisibleRowIds?.() ?? [];
@@ -3571,8 +3470,7 @@ return {
     else args.fns.selectAllRows();
   },
   hide: !showSelection || args.fns.getSelectionMode?.() === "single"
-};
-'''
+};'''
       }
     }
     {
@@ -3580,8 +3478,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const hasFormConfig = !!args.fns.getFormConfig();
+          '''const hasFormConfig = !!args.fns.getFormConfig();
 
 return `._id {
   padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
@@ -3594,19 +3491,16 @@ return `._id {
   cursor: default;
   user-select: none;
   position: relative;
-}`;
-'''
+}`;'''
         displayOrder: 0.6
         componentName: Html
         props:
-          '''
-const hasFormConfig = !!args.fns.getFormConfig();
+          '''const hasFormConfig = !!args.fns.getFormConfig();
 
 return {
   as: "div",
   hide: !args.fns.getShowActionsColumn()
-};
-'''
+};'''
       }
     }
     {
@@ -3614,26 +3508,22 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const column = { key: "__actions", label: "Actions" };
+          '''const column = { key: "__actions", label: "Actions" };
 
 return `._id {
   color: ${args.theme.var.color.text_light_500};
   font-size: 0.75rem;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const hasFormConfig = !!args.fns.getFormConfig();
+          '''const hasFormConfig = !!args.fns.getFormConfig();
 
 return {
   as: "div",
   text: "Actions",
   hide: !args.fns.getShowActionsColumn()
-};
-'''
+};'''
       }
     }
     {
@@ -3641,8 +3531,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const hasFormConfig = !!args.fns.getFormConfig();
+          '''const hasFormConfig = !!args.fns.getFormConfig();
 const resizableColumns = args.fns.getResizableColumns();
 
 return `._id {
@@ -3671,13 +3560,11 @@ return `._id {
     border-left-color: ${args.theme.var.color.primary_light_300};
   }
 
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const hasFormConfig = !!args.fns.getFormConfig();
+          '''const hasFormConfig = !!args.fns.getFormConfig();
 const resizableColumns = args.fns.getResizableColumns();
 
 const resizeHandler = args.fns.createResizeHandler("__actions");
@@ -3687,8 +3574,7 @@ return {
   hide: !resizableColumns || !args.fns.getShowActionsColumn(),
   onMouseDown: resizeHandler,
   onTouchStart: resizeHandler
-};
-'''
+};'''
       }
     }
     {
@@ -3700,16 +3586,14 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const columns = args.fns.getColumns();
+          '''const columns = args.fns.getColumns();
 const showRowNumber = args.fns.getShowRowNumber();
 
 return {
-  data: showRowNumber 
+  data: showRowNumber
     ? [{ key: "__rowNumber", label: "#", renderer: "rowNumber" }, ...columns]
     : columns
-};
-'''
+};'''
       }
     }
     {
@@ -3717,8 +3601,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const column = args.contextData.column;
+          '''const column = args.contextData.column;
 const shouldHide = args.fns.shouldHideColumn(column);
 
 return `._id {
@@ -3732,13 +3615,11 @@ return `._id {
   cursor: ${(column.sortable !== false && !args.fns.isStructuralColumn(column)) ? "pointer" : "default"};
   user-select: none;
   position: relative;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const column = args.contextData.column;
+          '''const column = args.contextData.column;
 const shouldHide = args.fns.shouldHideColumn(column);
 const isRowNumber = args.fns.getColumnRenderer(column) === "rowNumber";
 const isExpandColumn = args.fns.getColumnRenderer(column) === "expand";
@@ -3751,8 +3632,7 @@ return {
       args.fns.handleSort(column);
     }
   }
-};
-'''
+};'''
       }
     }
     {
@@ -3760,19 +3640,16 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const column = args.contextData.column;
+          '''const column = args.contextData.column;
 
 return `._id {
   color: ${args.theme.var.color.text_light_500};
   font-size: 0.75rem;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const column = args.contextData.column;
+          '''const column = args.contextData.column;
 const sortConfig = args.graph.vertexes[args.fns.tableStateVertexId]?.P?.sortConfig ?? { column: null, direction: null };
 const isSorted = sortConfig.column === column.key;
 
@@ -3782,8 +3659,7 @@ return {
     ? ""
     : (column.label || column.key),
   hide: args.fns.isStructuralColumn(column)
-};
-'''
+};'''
       }
     }
     {
@@ -3791,21 +3667,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const column = args.contextData.column;
+          '''const column = args.contextData.column;
 
 return `._id {
   display: flex;
   align-items: center;
   flex-shrink: 0;
   margin-left: 2px;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const column = args.contextData.column;
+          '''const column = args.contextData.column;
 const columnFilters = args.graph.vertexes[args.fns.tableStateVertexId]?.P?.columnFilters ?? {};
 const filterValue = columnFilters[column.key];
 const hasFilter = filterValue !== undefined && filterValue !== null && filterValue !== "" && (!Array.isArray(filterValue) || (filterValue.length > 0 && !(filterValue.length === 1 && filterValue[0] === "_All_VALUES_")));
@@ -3819,8 +3692,7 @@ return {
   height: 14,
   hide: !hasFilter || isRowNumber || args.fns.getColumnRenderer(column) === "iconAction" || isExpandColumn,
   title: "Filter applied"
-};
-'''
+};'''
       }
     }
     {
@@ -3828,8 +3700,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const sortConfig = args.graph.vertexes[args.fns.tableStateVertexId]?.P?.sortConfig ?? { column: null, direction: null };
+          '''const sortConfig = args.graph.vertexes[args.fns.tableStateVertexId]?.P?.sortConfig ?? { column: null, direction: null };
 const column = args.contextData.column;
 const isSorted = sortConfig.column === column.key;
 const direction = sortConfig.direction;
@@ -3839,13 +3710,11 @@ return `._id {
   flex-direction: column;
   opacity: ${isSorted ? 1 : 0.3};
   transition: opacity 0.2s ease;
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-const column = args.contextData.column;
+          '''const column = args.contextData.column;
 const sortConfig = args.graph.vertexes[args.fns.tableStateVertexId]?.P?.sortConfig ?? { column: null, direction: null };
 const isSorted = sortConfig.column === column.key;
 const direction = sortConfig.direction;
@@ -3858,8 +3727,7 @@ return {
   width: 16,
   height: 16,
   hide: !isSorted || column.sortable === false || isRowNumber || args.fns.getColumnRenderer(column) === "iconAction" || isExpandColumn
-};
-'''
+};'''
       }
     }
     {
@@ -3867,8 +3735,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const column = args.contextData.column;
+          '''const column = args.contextData.column;
 const resizableColumns = args.fns.getResizableColumns();
 const shouldHide = args.fns.shouldHideColumn(column);
 
@@ -3898,13 +3765,11 @@ return `._id {
     border-left-color: ${args.theme.var.color.primary_light_300};
   }
 
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-const column = args.contextData.column;
+          '''const column = args.contextData.column;
 const resizableColumns = args.fns.getResizableColumns();
 const shouldHide = args.fns.shouldHideColumn(column);
 
@@ -3924,8 +3789,7 @@ return {
   hide: !resizableColumns || shouldHide,
   onMouseDown: resizeHandler,
   onTouchStart: resizeHandler
-};
-'''
+};'''
       }
     }
     {
@@ -3933,27 +3797,23 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   flex-shrink: 0;
   min-width: 0;
   width: 100%;
   /* Same as header strip: hidden overflow + scrollLeft sync from body */
   overflow-x: hidden;
   overflow-y: hidden;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   ref: (el) => {
     args.fns.setTableFilterHScrollEl(el);
   }
-};
-'''
+};'''
       }
     }
     {
@@ -3961,23 +3821,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: grid;
   grid-template-columns: ${args.fns.getGridTemplateColumns()};
   width: max-content;
   min-width: 100%;
   border-bottom: 1px solid ${args.theme.var.color.border};
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -3985,24 +3841,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const showSelection = args.fns.getShowSelection();
+          '''const showSelection = args.fns.getShowSelection();
 
 return `._id {
   padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-}`;
-'''
+}`;'''
         displayOrder: 0.5
         componentName: Html
         props:
-          '''
-const showSelection = args.fns.getShowSelection();
+          '''const showSelection = args.fns.getShowSelection();
 
 return {
   as: "div",
   hide: !showSelection
-};
-'''
+};'''
       }
     }
     {
@@ -4010,24 +3862,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const hasFormConfig = !!args.fns.getFormConfig();
+          '''const hasFormConfig = !!args.fns.getFormConfig();
 
 return `._id {
   padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-}`;
-'''
+}`;'''
         displayOrder: 0.6
         componentName: Html
         props:
-          '''
-const hasFormConfig = !!args.fns.getFormConfig();
+          '''const hasFormConfig = !!args.fns.getFormConfig();
 
 return {
   as: "div",
   hide: !args.fns.getShowActionsColumn()
-};
-'''
+};'''
       }
     }
     {
@@ -4039,16 +3887,14 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const columns = args.fns.getColumns();
+          '''const columns = args.fns.getColumns();
 const showRowNumber = args.fns.getShowRowNumber();
 
 return {
-  data: showRowNumber 
+  data: showRowNumber
     ? [{ key: "__rowNumber", label: "#", renderer: "rowNumber" }, ...columns]
     : columns
-};
-'''
+};'''
       }
     }
     {
@@ -4056,26 +3902,22 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const column = args.contextData.column;
+          '''const column = args.contextData.column;
 const shouldHide = args.fns.shouldHideColumn(column);
 
 return `._id {
   padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const column = args.contextData.column;
+          '''const column = args.contextData.column;
 const shouldHide = args.fns.shouldHideColumn(column);
 
 return {
   as: "div",
   hide: shouldHide || column.filterable === false
-};
-'''
+};'''
       }
     }
     {
@@ -4083,21 +3925,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const column = args.contextData.column;
+          '''const column = args.contextData.column;
 const columnFilters = args.graph.vertexes[args.fns.tableStateVertexId]?.P?.columnFilters ?? {};
 // Preserve array values from URL - don't default to empty string for select filters
 const filterValue = columnFilters[column.key] !== undefined ? columnFilters[column.key] : (args.fns.getColumnFilterKind(column) === "select" ? [] : "");
 
 return `._id {
   width: 100%;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const column = args.contextData.column;
+          '''const column = args.contextData.column;
 const columnFilters = args.graph.vertexes[args.fns.tableStateVertexId]?.P?.columnFilters ?? {};
 // Access store reactively - ensure we get the current value
 const getFilterValue = () => {
@@ -4263,8 +4102,7 @@ return {
   type: "text",
   value: filterValue || "",
   onChange: (e) => args.fns.handleColumnFilterChange(column.key, e.target.value)
-};
-'''
+};'''
       }
     }
     {
@@ -4272,8 +4110,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const dragOver = args.fns.dropCreateDragOver?.() === true;
+          '''const dragOver = args.fns.dropCreateDragOver?.() === true;
 return `._id {
   /* Fills column under header+filter; overflow:auto on one box keeps H+V scrollbars in the visible corner */
   flex: 1 1 0;
@@ -4287,13 +4124,11 @@ return `._id {
   outline-offset: -4px;
   background: ${args.theme.var.color.primary_light_900};
   ` : ""}
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   ref: (el) => {
     // Same node for VirtualList scroll metrics (vertical) and scrollLeft sync to header/filter (horizontal)
@@ -4306,8 +4141,7 @@ return {
     }
   },
   onScroll: (e) => args.fns.handleTableHorizontalScroll(e)
-};
-'''
+};'''
       }
     }
     {
@@ -4315,21 +4149,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   /* Content-sized height (spacer) so parent 40wrap can scroll vertically */
   flex: 0 0 auto;
   min-width: 0;
   width: 100%;
   display: flex;
   flex-direction: column;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: VirtualList
         props:
-          '''
-return {
+          '''return {
   getItems: args.fns.getDisplayData,
   itemHeight: args.fns.getRowHeight(),
   rowHasExpansion: (row) => ((args.fns.getRowExpansionConfigs?.() || []).length > 0) && !!row?.id,
@@ -4372,8 +4203,7 @@ return {
   clearSelectionAnchor: () => args.fns.clearSelectionAnchor?.(),
   // Ensures body scrollWidth matches column grid (absolute rows do not expand it)
   contentMinWidthPx: args.fns.getTableBodyMinWidthPx()
-};
-'''
+};'''
       }
     }
     {
@@ -4382,8 +4212,7 @@ return {
       P: {
         slotName: children
         css:
-          '''
-const virtualItem = args.contextData.virtualItem;
+          '''const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
 const rowIndex = virtualItem.index;
 const rowData = virtualItem.rowData;
@@ -4415,13 +4244,11 @@ return [
   &:hover {
     background: ${isSelected ? args.theme.var.color.background_light_200 : args.theme.var.color.background_light_100};
   }
-}`];
-'''
+}`];'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const virtualItem = args.contextData.virtualItem;
+          '''const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
 const rowIndex = virtualItem.index;
 const rowData = virtualItem.rowData;
@@ -4470,8 +4297,7 @@ return {
     if (isRowClickable) handleRowClick(event);
   },
   style: cursorStyle
-};
-'''
+};'''
       }
     }
     {
@@ -4479,8 +4305,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const showSelection = args.fns.getShowSelection();
+          '''const showSelection = args.fns.getShowSelection();
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
 const rowIndex = virtualItem.index;
@@ -4495,13 +4320,11 @@ return `._id {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-}`;
-'''
+}`;'''
         displayOrder: 0.5
         componentName: Html
         props:
-          '''
-const showSelection = args.fns.getShowSelection();
+          '''const showSelection = args.fns.getShowSelection();
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
 const rowIndex = virtualItem.index;
@@ -4515,8 +4338,7 @@ return {
     args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { activeRowId: rowData?.id ?? null });
     if (rowData?.id) args.fns.toggleRowSelection(rowData.id);
   }
-};
-'''
+};'''
       }
     }
     {
@@ -4524,8 +4346,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-// s-checkbox has issue so always use native checkbox
+          '''// s-checkbox has issue so always use native checkbox
 // const usePolaris = args.fns.getUsePolarisUI?.() === true;
 const usePolaris = false;
 if (usePolaris) return '';
@@ -4537,13 +4358,11 @@ return `._id {
   accent-color: ${args.theme.var.color.text};
   flex-shrink: 0;
 }
-`;
-'''
+`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const showSelection = args.fns.getShowSelection();
+          '''const showSelection = args.fns.getShowSelection();
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
 const rowIndex = virtualItem.index;
@@ -4567,8 +4386,7 @@ return {
   },
   onClick: (e) => e.stopPropagation(),
   hide: !showSelection
-};
-'''
+};'''
       }
     }
     {
@@ -4576,8 +4394,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const hasFormConfig = !!args.fns.getFormConfig();
+          '''const hasFormConfig = !!args.fns.getFormConfig();
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
 
@@ -4587,13 +4404,11 @@ return `._id {
   display: flex;
   align-items: center;
   gap: ${args.theme.var.spacing.sm};
-}`;
-'''
+}`;'''
         displayOrder: 0.6
         componentName: Html
         props:
-          '''
-const hasFormConfig = !!args.fns.getFormConfig();
+          '''const hasFormConfig = !!args.fns.getFormConfig();
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
 const rowData = virtualItem.rowData;
@@ -4601,8 +4416,7 @@ const rowData = virtualItem.rowData;
 return {
   as: "div",
   hide: !args.fns.getShowActionsColumn()
-};
-'''
+};'''
       }
     }
     {
@@ -4614,11 +4428,9 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const virtualItem = args.contextData.virtualItem;
+          '''const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
-return { data: args.fns.getPrimaryActionsForRow(virtualItem.rowData) };
-'''
+return { data: args.fns.getPrimaryActionsForRow(virtualItem.rowData) };'''
       }
     }
     {
@@ -4628,8 +4440,7 @@ return { data: args.fns.getPrimaryActionsForRow(virtualItem.rowData) };
         displayOrder: 1
         componentName: IconButton
         props:
-          '''
-const action = args.contextData.tableAction;
+          '''const action = args.contextData.tableAction;
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem || !action) return { hide: true };
 const rowData = virtualItem.rowData;
@@ -4660,8 +4471,7 @@ return {
     if (disabled || loading) return;
     args.fns.runRowAction(action, rowData);
   }
-};
-'''
+};'''
       }
     }
     {
@@ -4671,16 +4481,14 @@ return {
         displayOrder: 2
         componentName: FloatingMenu
         props:
-          '''
-const virtualItem = args.contextData.virtualItem;
+          '''const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return { hide: true };
 const rowData = virtualItem.rowData;
 return {
   placement: "bottom-end",
   triggerIcon: "carbon:overflow-menu-horizontal",
   hide: !args.fns.hasSecondaryActionsForRow(rowData)
-};
-'''
+};'''
       }
     }
     {
@@ -4693,11 +4501,9 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const virtualItem = args.contextData.virtualItem;
+          '''const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
-return { data: args.fns.getSecondaryActionsForRow(virtualItem.rowData) };
-'''
+return { data: args.fns.getSecondaryActionsForRow(virtualItem.rowData) };'''
       }
     }
     {
@@ -4707,8 +4513,7 @@ return { data: args.fns.getSecondaryActionsForRow(virtualItem.rowData) };
         displayOrder: 1
         componentName: MenuItem
         props:
-          '''
-const action = args.contextData.tableMenuAction;
+          '''const action = args.contextData.tableMenuAction;
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem || !action) return { hide: true };
 const rowData = virtualItem.rowData;
@@ -4731,8 +4536,7 @@ return {
     void args.fns.runRowAction(action, rowData);
     args.contextData.floatingMenuContext?.closeMenu?.();
   }
-};
-'''
+};'''
       }
     }
     {
@@ -4744,8 +4548,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const columns = args.fns.getColumns();
+          '''const columns = args.fns.getColumns();
 const showRowNumber = args.fns.getShowRowNumber();
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
@@ -4753,11 +4556,10 @@ const rowIndex = virtualItem.index;
 const rowData = virtualItem.rowData;
 
 return {
-  data: showRowNumber 
+  data: showRowNumber
     ? [{ key: "__rowNumber", label: "#", renderer: "rowNumber" }, ...columns]
     : columns
-};
-'''
+};'''
       }
     }
     {
@@ -4765,8 +4567,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const column = args.contextData.column;
+          '''const column = args.contextData.column;
 const shouldHide = args.fns.shouldHideColumn(column);
 const isExpandColumn = args.fns.getColumnRenderer(column) === "expand";
 
@@ -4777,13 +4578,11 @@ return `._id {
   align-items: ${isExpandColumn ? "stretch" : "center"};
   justify-content: ${isExpandColumn ? "stretch" : "flex-start"};
   min-width: 0;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const column = args.contextData.column;
+          '''const column = args.contextData.column;
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
 const rowIndex = virtualItem.index;
@@ -4793,8 +4592,7 @@ const shouldHide = args.fns.shouldHideColumn(column);
 return {
   as: "div",
   hide: shouldHide
-};
-'''
+};'''
       }
     }
     {
@@ -4805,8 +4603,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const column = args.contextData.column;
+          '''const column = args.contextData.column;
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
 const rowIndex = virtualItem.index;
@@ -5008,8 +4805,7 @@ const out = {
 if (column.overflowEllipsis) {
   out.style = "min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;";
 }
-return out;
-'''
+return out;'''
       }
     }
     {
@@ -5017,8 +4813,7 @@ return out;
       L: Attr
       P: {
         css:
-          '''
-const virtualItem = args.contextData.virtualItem;
+          '''const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
 const rowData = virtualItem.rowData;
 const rowExpansions = args.fns.getRowExpansionConfigs?.() || [];
@@ -5037,13 +4832,11 @@ return `._id {
   max-height: 100%;
   display: ${isRowExpansionOpen ? 'block' : 'none'};
   cursor: default;
-}`;
-'''
+}`;'''
         displayOrder: 5
         componentName: Html
         props:
-          '''
-const virtualItem = args.contextData.virtualItem;
+          '''const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return { as: 'div', hide: true };
 const rowData = virtualItem.rowData;
 const rowId = rowData?.id;
@@ -5055,8 +4848,7 @@ return {
   as: 'div',
   hide: !isRowExpansionOpen,
   onClick: (e) => e.stopPropagation()
-};
-'''
+};'''
       }
     }
     {
@@ -5064,8 +4856,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const virtualItem = args.contextData.virtualItem;
+          '''const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
 const rowData = virtualItem.rowData;
 const rowId = rowData?.id;
@@ -5077,13 +4868,11 @@ return `._id {
   padding: ${args.theme.var.spacing.sm} 0;
   color: ${t.text};
   font-size: 0.875rem;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const virtualItem = args.contextData.virtualItem;
+          '''const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return { as: 'div', hide: true };
 const rowData = virtualItem.rowData;
 const rowId = rowData?.id;
@@ -5126,8 +4915,7 @@ return {
     : (rowExpansion.emptyNestedText || 'No line items'),
   hide: !show,
   onClick: (e) => e.stopPropagation()
-};
-'''
+};'''
       }
     }
     {
@@ -5139,8 +4927,7 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const virtualItem = args.contextData.virtualItem;
+          '''const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return { as: "div", hide: true };
 const rowData = virtualItem.rowData;
 const rowId = rowData?.id;
@@ -5151,8 +4938,7 @@ const isRowExpansionOpen = args.fns.isExpansionOpen?.(expansionRowKey);
 return {
   hide: !isRowExpansionOpen,
   data: rowExpansions.map((cfg, idx) => ({ ...cfg, _expansionIndex: idx }))
-};
-'''
+};'''
       }
     }
     {
@@ -5163,8 +4949,7 @@ return {
         componentName: Table
         key: nested_order_returns_table
         props:
-          '''
-const virtualItem = args.contextData.virtualItem;
+          '''const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return { hide: true };
 const rowData = virtualItem.rowData;
 const rowId = rowData?.id;
@@ -5236,8 +5021,7 @@ return {
   clearSelectedRows: () => {},
   rowClickable: rowExpansion.rowClickable ?? false,
   onRowClick: rowExpansion.onRowClick ?? function () {}
-};
-'''
+};'''
       }
     }
     {
@@ -5245,8 +5029,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   /* Loading overlay on top of the body scroll area (40wrap) */
   position: absolute;
   inset: 0;
@@ -5256,18 +5039,15 @@ return `._id {
   background: ${args.theme.var.color.background};
   z-index: 2;
 }
-`;
-'''
+`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const isLoading = args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true;
+          '''const isLoading = args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true;
 return {
   as: "div",
   hide: !isLoading
-};
-'''
+};'''
       }
     }
     {
@@ -5277,12 +5057,10 @@ return {
         displayOrder: 1
         componentName: LoadingSpinner
         props:
-          '''
-return {
+          '''return {
   size: "medium",
   color: "primary"
-};
-'''
+};'''
       }
     }
     {
@@ -5301,8 +5079,7 @@ return {
         displayOrder: 6
         componentName: TableModal
         props:
-          '''
-return {
+          '''return {
   isOpen: args.graph.vertexes[args.fns.tableStateVertexId]?.P?.isModalOpen === true,
   onClose: () => args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { isModalOpen: false }),
   mode: args.graph.vertexes[args.fns.tableStateVertexId]?.P?.modalMode ?? "add",
@@ -5311,8 +5088,7 @@ return {
   onSave: args.fns.handleSave,
   label: args.fns.getLabel(),
   tableVertexLabel: args.fns.getTableVertexLabel?.() ?? args.contextData.props?.tableVertexLabel
-};
-'''
+};'''
       }
     }
     {
@@ -5320,8 +5096,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   position: fixed;
   top: 0;
   left: 0;
@@ -5332,18 +5107,15 @@ return `._id {
   align-items: center;
   justify-content: center;
   z-index: 1000;
-}`;
-'''
+}`;'''
         displayOrder: 7
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   hide: !args.graph.vertexes[args.fns.tableStateVertexId]?.P?.isImportModalOpen,
   onClick: () => args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { isImportModalOpen: false })
-};
-'''
+};'''
       }
     }
     {
@@ -5351,8 +5123,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   background: ${args.theme.var.color.background};
   border-radius: ${args.theme.var.borderRadius.md};
   padding: ${args.theme.var.spacing.xl};
@@ -5361,18 +5132,15 @@ return `._id {
   max-height: 80vh;
   overflow-y: auto;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   hide: !args.graph.vertexes[args.fns.tableStateVertexId]?.P?.isImportModalOpen,
   onClick: (e) => e.stopPropagation()
-};
-'''
+};'''
       }
     }
     {
@@ -5380,23 +5148,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: ${args.theme.var.spacing.md};
   color: ${args.theme.var.color.text};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "h2",
   text: "Import Data"
-};
-'''
+};'''
       }
     }
     {
@@ -5404,8 +5168,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   background: ${args.theme.var.color.info_light_100};
   border-left: 3px solid ${args.theme.var.color.info};
   padding: ${args.theme.var.spacing.md};
@@ -5414,16 +5177,13 @@ return `._id {
   font-size: 0.875rem;
   color: ${args.theme.var.color.text};
   line-height: 1.6;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -5433,12 +5193,10 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   text: "Data Format: Paste CSV or JSON data. For CSV, first row should be headers. For JSON, provide an array of objects."
-};
-'''
+};'''
       }
     }
     {
@@ -5446,21 +5204,17 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   margin-top: ${args.theme.var.spacing.sm};
   font-weight: 600;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   text: "Sample CSV header:"
-};
-'''
+};'''
       }
     }
     {
@@ -5468,8 +5222,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const columns = args.fns.getColumns();
+          '''const columns = args.fns.getColumns();
 const getSampleCSVHeader = () => {
   if (!columns || columns.length === 0) return "";
   const headers = columns.filter(col => args.fns.getColumnRenderer(col) !== "rowNumber").map(col => col.key);
@@ -5486,13 +5239,11 @@ return `._id {
   font-family: monospace;
   font-size: 0.75rem;
   word-break: break-all;
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-const columns = args.fns.getColumns();
+          '''const columns = args.fns.getColumns();
 const getSampleCSVHeader = () => {
   if (!columns || columns.length === 0) return "";
   const headers = columns.filter(col => args.fns.getColumnRenderer(col) !== "rowNumber").map(col => col.key);
@@ -5502,8 +5253,7 @@ const getSampleCSVHeader = () => {
 return {
   as: "code",
   text: getSampleCSVHeader()
-};
-'''
+};'''
       }
     }
     {
@@ -5513,15 +5263,13 @@ return {
         displayOrder: 3
         componentName: TextArea
         props:
-          '''
-return {
+          '''return {
   value: args.graph.vertexes[args.fns.tableStateVertexId]?.P?.importData ?? "",
   onChange: (e) => args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { importData: e.target.value }),
   placeholder: "Paste your data here (CSV or JSON format)...",
   rows: 10,
   style: "font-family: monospace; font-size: 12px;"
-};
-'''
+};'''
       }
     }
     {
@@ -5529,22 +5277,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   gap: ${args.theme.var.spacing.md};
   justify-content: flex-end;
   margin-top: ${args.theme.var.spacing.md};
-}`;
-'''
+}`;'''
         displayOrder: 4
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -5554,8 +5298,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "s-button",
   "attr:variant": "secondary",
   text: "Cancel",
@@ -5564,8 +5307,7 @@ return {
   },
   disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
   hide: args.fns.getUsePolarisUI?.() !== true
-};
-'''
+};'''
       }
     }
     {
@@ -5575,8 +5317,7 @@ return {
         displayOrder: 1
         componentName: Button
         props:
-          '''
-return {
+          '''return {
   variant: "secondary",
   onClick: () => {
     args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { isImportModalOpen: false, importData: "" });
@@ -5584,8 +5325,7 @@ return {
   text: "Cancel",
   disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
   hide: args.fns.getUsePolarisUI?.() === true
-};
-'''
+};'''
       }
     }
     {
@@ -5595,8 +5335,7 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "s-button",
   "attr:variant": "primary",
   text: "Import",
@@ -5606,8 +5345,7 @@ return {
   }),
   disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true || !(args.graph.vertexes[args.fns.tableStateVertexId]?.P?.importData ?? "").trim(),
   hide: args.fns.getUsePolarisUI?.() !== true
-};
-'''
+};'''
       }
     }
     {
@@ -5617,8 +5355,7 @@ return {
         displayOrder: 2
         componentName: Button
         props:
-          '''
-return {
+          '''return {
   variant: "primary",
   onClick: () => args.fns.handleImport((args.graph.vertexes[args.fns.tableStateVertexId]?.P?.importData ?? "").trim(), () => {
     args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { isImportModalOpen: false, importData: "" });
@@ -5627,8 +5364,7 @@ return {
   text: "Import",
   disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true || !(args.graph.vertexes[args.fns.tableStateVertexId]?.P?.importData ?? "").trim(),
   hide: args.fns.getUsePolarisUI?.() === true
-};
-'''
+};'''
       }
     }
     {
@@ -5638,8 +5374,7 @@ return {
         displayOrder: 8
         componentName: TableSettingsModal
         props:
-          '''
-const vid = args.fns.pageStateVertexId;
+          '''const vid = args.fns.pageStateVertexId;
 const pageDp = () => args.graph.vertexes[vid]?.P;
 const tableKey = args.fns.getTableKey?.() ?? args.contextData.props?.tableKey;
 const tableVertexLabel = args.fns.getTableVertexLabel?.();
@@ -5658,8 +5393,7 @@ return {
       isSettingsModalOpen: false
     });
   }
-};
-'''
+};'''
       }
     }
     {

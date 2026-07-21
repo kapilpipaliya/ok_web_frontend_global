@@ -12,8 +12,7 @@
       L: Attr
       P: {
         css:
-          '''
-const resize = args.contextData.props?.resize || "vertical";
+          '''const resize = args.contextData.props?.resize || "vertical";
 
 return `._id {
   width: 100%;
@@ -61,13 +60,11 @@ return `._id {
     font-size: 1rem;
     resize: vertical;
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "textarea",
   value: args.contextData.props?.value || "",
   placeholder: args.contextData.props?.placeholder || "",
@@ -84,8 +81,7 @@ return {
   onChange: args.contextData.props?.onChange || null,
   onBlur: args.contextData.props?.onBlur || null,
   onFocus: args.contextData.props?.onFocus || null
-};
-'''
+};'''
       }
     }
     {

@@ -248,25 +248,21 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   flex-direction: column;
   flex: 1;
   min-height: 0;
   height: 100%;
   overflow: hidden;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "section",
   hide: !args.fns.checkAdminRole?.()
-};
-'''
+};'''
       }
     }
     {
@@ -274,8 +270,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -284,14 +279,10 @@ return `._id {
   border-bottom: 1px solid ${args.theme.var.color.border_light_300};
   background: ${args.theme.var.color.background};
   flex-shrink: 0;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
-        props:
-          '''
-return { as: "header" };
-'''
+        props: return { as: "header" };
       }
     }
     {
@@ -299,23 +290,19 @@ return { as: "header" };
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   margin: 0;
   font-size: 1.25rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "h1",
   text: args.fns.getTableTitle?.()
-};
-'''
+};'''
       }
     }
     {
@@ -323,18 +310,13 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   gap: 0.5rem;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
-        props:
-          '''
-return { as: "div" };
-'''
+        props: return { as: "div" };
       }
     }
     {
@@ -344,14 +326,12 @@ return { as: "div" };
         displayOrder: 1
         componentName: Button
         props:
-          '''
-const active = args.fns.isSchemaMode?.() !== true;
+          '''const active = args.fns.isSchemaMode?.() !== true;
 return {
   text: "Content",
   variant: active ? "primary" : "secondary",
   onClick: () => args.fns.setEditorMode?.("content")
-};
-'''
+};'''
       }
     }
     {
@@ -361,14 +341,12 @@ return {
         displayOrder: 2
         componentName: Button
         props:
-          '''
-const active = args.fns.isSchemaMode?.() === true;
+          '''const active = args.fns.isSchemaMode?.() === true;
 return {
   text: "Schema",
   variant: active ? "primary" : "secondary",
   onClick: () => args.fns.setEditorMode?.("schema")
-};
-'''
+};'''
       }
     }
     {
@@ -376,24 +354,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   flex: 1;
   min-height: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   hide: args.fns.isSchemaMode?.() === true
-};
-'''
+};'''
       }
     }
     {
@@ -401,8 +375,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   flex: 1;
   min-height: 0;
   min-width: 0;
@@ -411,14 +384,10 @@ return `._id {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
-        props:
-          '''
-return { as: "div" };
-'''
+        props: return { as: "div" };
       }
     }
     {
@@ -428,8 +397,7 @@ return { as: "div" };
         displayOrder: 1
         componentName: DynamicPage
         props:
-          '''
-const tableKey = args.fns.getTableKey?.() || "books";
+          '''const tableKey = args.fns.getTableKey?.() || "books";
 const tableVertexLabel = args.fns.getTableVertexLabel?.() || "Book";
 const actionHandlers = args.fns.getTableActionHandlers?.();
 const actions = args.fns.getTableActions?.();
@@ -444,8 +412,7 @@ return {
   ...(actions ? { actions } : {}),
   ...(actionHandlers ? { actionHandlers } : {}),
   ...(actionHandlers ? { onRowClick: (row) => args.fns.openInPageDesigner?.(row) } : {})
-};
-'''
+};'''
       }
     }
     {
@@ -453,24 +420,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   flex: 1;
   min-height: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   hide: args.fns.isSchemaMode?.() !== true
-};
-'''
+};'''
       }
     }
     {
@@ -480,14 +443,12 @@ return {
         displayOrder: 1
         componentName: TableSchemaEditorShell
         props:
-          '''
-const tableKey = args.fns.getTableKey?.();
+          '''const tableKey = args.fns.getTableKey?.();
 return {
   tableKey,
   embeddedMode: true,
   onSaved: () => args.fns.onSchemaSaved?.()
-};
-'''
+};'''
       }
     }
     {

@@ -14,8 +14,7 @@
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -24,14 +23,10 @@ return `._id {
   border-bottom: 1px solid ${args.theme.var.color.border};
   background: ${args.theme.var.color.background_light_100};
   flex-shrink: 0;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
-        props:
-          '''
-return { as: "header" };
-'''
+        props: return { as: "header" };
       }
     }
     {
@@ -39,14 +34,12 @@ return { as: "header" };
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   margin: 0;
   font-size: 0.9375rem;
   font-weight: 700;
   color: ${args.theme.var.color.text};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
@@ -60,8 +53,7 @@ const title = api.isSingleSectionMode?.()
 return {
   as: "h2",
   text: title
-};
-'''
+};'''
       }
     }
     {
@@ -69,19 +61,14 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   align-items: center;
   gap: 0.25rem;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
-        props:
-          '''
-return { as: "div" };
-'''
+        props: return { as: "div" };
       }
     }
     {
@@ -100,8 +87,7 @@ return {
   text: "Visual",
   type: "button",
   onClick: () => api.setEditorMode?.("visual")
-};
-'''
+};'''
       }
     }
     {
@@ -120,8 +106,7 @@ return {
   text: "JSON",
   type: "button",
   onClick: () => api.setEditorMode?.("json")
-};
-'''
+};'''
       }
     }
     {
@@ -129,19 +114,14 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
-        props:
-          '''
-return { as: "div" };
-'''
+        props: return { as: "div" };
       }
     }
     {
@@ -160,8 +140,7 @@ return {
   type: "button",
   hide: api.isSingleSectionMode?.() === true || api.isJsonMode?.() === true,
   onClick: () => api.addSection?.()
-};
-'''
+};'''
       }
     }
     {
@@ -182,8 +161,7 @@ return {
   type: "button",
   disabled: !dirty || saving,
   onClick: () => api.saveConfig?.()
-};
-'''
+};'''
       }
     }
   ]

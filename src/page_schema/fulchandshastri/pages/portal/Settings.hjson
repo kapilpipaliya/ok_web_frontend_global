@@ -248,8 +248,7 @@ return {
         displayOrder: 0
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "style",
   text: `body.fulchand-settings-resizing {
   cursor: col-resize !important;
@@ -259,8 +258,7 @@ return {
 body.fulchand-settings-resizing [data-fulchand-settings-preview] {
   pointer-events: none;
 }`
-};
-'''
+};'''
       }
     }
     {
@@ -268,8 +266,7 @@ body.fulchand-settings-resizing [data-fulchand-settings-preview] {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   width: 100%;
   max-width: none;
   margin: 0;
@@ -280,17 +277,14 @@ return `._id {
   min-height: 0;
   height: 100%;
   overflow: hidden;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "section",
   hide: !args.fns.checkAdminRole?.()
-};
-'''
+};'''
       }
     }
     {
@@ -298,8 +292,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   flex: 1;
   min-height: 0;
@@ -312,16 +305,13 @@ return `._id {
     overflow-y: auto;
     overscroll-behavior: contain;
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -329,8 +319,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   flex: 1;
   min-width: 0;
   display: flex;
@@ -340,16 +329,13 @@ return `._id {
   @media (max-width: 1024px) {
     min-height: 320px;
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -357,8 +343,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -366,16 +351,13 @@ return `._id {
   padding: 0.75rem 1rem;
   border-bottom: 1px solid ${args.theme.var.color.border};
   background: ${args.theme.var.color.background};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -383,24 +365,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   margin: 0;
   font-size: 0.875rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const pageId = args.searchParams?.page || "home";
+          '''const pageId = args.searchParams?.page || "home";
 return {
   as: "h2",
   text: `Live preview — ${pageId}`
-};
-'''
+};'''
       }
     }
     {
@@ -410,15 +388,13 @@ return {
         displayOrder: 2
         componentName: IconButton
         props:
-          '''
-return {
+          '''return {
   icon: "ph:arrow-clockwise",
   variant: "ghost",
   size: "sm",
   title: "Refresh preview",
   onClick: () => args.fns.refreshPreview?.()
-};
-'''
+};'''
       }
     }
     {
@@ -426,27 +402,23 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   flex: 1;
   width: 100%;
   min-height: 0;
   border: none;
   background: ${args.theme.var.color.background};
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "iframe",
   "data-fulchand-settings-preview": "",
   src: args.fns.getPreviewUrl?.(),
   title: "Page preview",
   loading: "lazy"
-};
-'''
+};'''
       }
     }
     {
@@ -454,8 +426,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   width: 6px;
   flex-shrink: 0;
   cursor: col-resize;
@@ -485,21 +456,18 @@ return `._id {
   @media (max-width: 1024px) {
     display: none;
   }
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   role: "separator",
   "aria-orientation": "vertical",
   "aria-label": "Resize settings editor",
   title: "Drag to resize settings panel",
   onMouseDown: (event) => args.fns.startEditorResize?.(event)
-};
-'''
+};'''
       }
     }
     {
@@ -507,8 +475,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const resizing = args.fns.isResizingEditor?.();
+          '''const resizing = args.fns.isResizingEditor?.();
 return `._id {
   width: var(--fulchand-settings-editor-width, ${args.fns.DEFAULT_EDITOR_WIDTH}px);
   flex-shrink: 0;
@@ -526,16 +493,13 @@ return `._id {
     border-left: none;
     border-top: 1px solid ${args.theme.var.color.border};
   }
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -545,8 +509,7 @@ return {
         displayOrder: 1
         componentName: SettingsEditorShell
         props:
-          '''
-const settingsPageId = args.searchParams?.page || "home";
+          '''const settingsPageId = args.searchParams?.page || "home";
 return {
   settingsPageId,
   siteLanguages: args.fns.siteLanguages?.() || [],
@@ -558,8 +521,7 @@ return {
   schemaTabLabel: "Field schema",
   contentTabLabel: "Content",
   dynamicPageKey: "fullchand_settings_dynamic_page"
-};
-'''
+};'''
       }
     }
     {
@@ -567,25 +529,21 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   position: fixed;
   inset: 0;
   z-index: 10000;
   cursor: col-resize;
   background: transparent;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   "aria-hidden": true,
   hide: !args.fns.isResizingEditor?.()
-};
-'''
+};'''
       }
     }
     {

@@ -12,8 +12,7 @@
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   position: fixed;
   top: 0;
   left: 0;
@@ -39,8 +38,7 @@ return `._id {
     padding: 0;
     align-items: flex-end;
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
@@ -54,8 +52,7 @@ return {
       args.contextData.props?.onClose();
     }
   },
-};
-'''
+};'''
       }
     }
     {
@@ -63,8 +60,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   background: ${args.theme.var.color.background};
   border-radius: 0.75rem;
   width: 100%;
@@ -106,12 +102,10 @@ return `._id {
     opacity: 1;
     transform: translateY(0);
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         fns:
-          '''
-// Track form txnId for cleanup
+          '''// Track form txnId for cleanup
 const [formTxnId, setFormTxnId] = args.createSignal(0);
 
 // Cleanup function to revert transaction
@@ -128,19 +122,16 @@ return {
   setFormTxnId,
   cleanup,
   getUsePolarisUI: () => args.fns.getUsePolarisUI?.() === true
-};
-'''
+};'''
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   onClick: (e) => e.stopPropagation(),
   onCleanup: () => {
     args.fns.cleanup();
   }
-};
-'''
+};'''
       }
     }
     {
@@ -148,23 +139,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   padding: ${args.theme.var.spacing.lg};
   border-bottom: 1px solid ${args.theme.var.color.border};
   display: flex;
   align-items: center;
   justify-content: space-between;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -172,20 +159,17 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   font-size: 1.25rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const mode = args.contextData.props?.mode || "add";
+          '''const mode = args.contextData.props?.mode || "add";
 const label = args.contextData.props?.label;
-const title = mode === "add" 
+const title = mode === "add"
   ? (label ? `Add New ${label}` : "Add New Item")
   : mode === "view"
   ? (label ? `View ${label}` : "View Item")
@@ -194,8 +178,7 @@ const title = mode === "add"
 return {
   as: "div",
   text: title
-};
-'''
+};'''
       }
     }
     {
@@ -205,8 +188,7 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const wrappedOnClose = () => {
+          '''const wrappedOnClose = () => {
   args.fns.cleanup();
   const onClose = args.contextData.props?.onClose;
   if (onClose) onClose();
@@ -219,8 +201,7 @@ return {
   "attr:accessibilityLabel": "Close",
   onClick: wrappedOnClose,
   hide: args.fns.getUsePolarisUI?.() !== true
-};
-'''
+};'''
       }
     }
     {
@@ -228,8 +209,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   cursor: pointer;
   color: ${args.theme.var.color.text_light_500};
   transition: color 0.2s ease;
@@ -237,13 +217,11 @@ return `._id {
   &:hover {
     color: ${args.theme.var.color.text};
   }
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const wrappedOnClose = () => {
+          '''const wrappedOnClose = () => {
   args.fns.cleanup();
   const onClose = args.contextData.props?.onClose;
   if (onClose) onClose();
@@ -256,8 +234,7 @@ return {
   height: 24,
   onClick: wrappedOnClose,
   hide: args.fns.getUsePolarisUI?.() === true
-};
-'''
+};'''
       }
     }
     {
@@ -265,18 +242,15 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   flex: 1;
   overflow-y: auto;
   padding: ${args.theme.var.spacing.lg};
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: FormManagement
         props:
-          '''
-const formConfig = args.contextData.props?.formConfig;
+          '''const formConfig = args.contextData.props?.formConfig;
 const mode = args.contextData.props?.mode || "add";
 const tableVertexLabel = args.contextData.props?.tableVertexLabel;
 const initialVertex = args.contextData.props?.initialVertex;
@@ -315,8 +289,7 @@ return {
   hide: () => !(args.contextData.props?.isOpen === true),
   onSave: wrappedOnSave,
   onClose: wrappedOnClose
-};
-'''
+};'''
       }
     }
     {

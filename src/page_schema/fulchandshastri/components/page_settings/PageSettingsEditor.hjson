@@ -327,8 +327,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "style",
   text: `body.fulchand-settings-panel-open {
   overflow-x: hidden;
@@ -342,8 +341,7 @@ body.fulchand-settings-panel-open [data-fulchand-page-main] {
 body.fulchand-settings-panel-resizing [data-fulchand-page-main] {
   transition: none;
 }`
-};
-'''
+};'''
       }
     }
     {
@@ -351,8 +349,7 @@ body.fulchand-settings-panel-resizing [data-fulchand-page-main] {
       L: Attr
       P: {
         css:
-          '''
-const panelOpen = args.fns.isPanelOpen?.();
+          '''const panelOpen = args.fns.isPanelOpen?.();
 return `._id {
   position: fixed;
   bottom: 1.5rem;
@@ -376,13 +373,11 @@ return `._id {
     background: ${args.theme.var.color.primary_dark_200};
     transform: translateY(-1px);
   }
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const isAdmin = args.fns.checkAdminRole?.();
+          '''const isAdmin = args.fns.checkAdminRole?.();
 const onSettingsRoute = args.fns.isOnSettingsRoute?.();
 const panelOpen = args.fns.isPanelOpen?.();
 return {
@@ -392,8 +387,7 @@ return {
   title: panelOpen ? "Close settings" : "Edit page settings",
   hide: !isAdmin || onSettingsRoute,
   onClick: () => (panelOpen ? args.fns.closePanel?.() : args.fns.togglePanel?.())
-};
-'''
+};'''
       }
     }
     {
@@ -403,15 +397,13 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const panelOpen = args.fns.isPanelOpen?.();
+          '''const panelOpen = args.fns.isPanelOpen?.();
 return {
   as: "icon",
   icon: panelOpen ? "ph:x" : "ph:gear-six",
   height: 20,
   width: 20
-};
-'''
+};'''
       }
     }
     {
@@ -421,13 +413,11 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const panelOpen = args.fns.isPanelOpen?.();
+          '''const panelOpen = args.fns.isPanelOpen?.();
 return {
   as: "span",
   text: panelOpen ? "Close" : "Edit page"
-};
-'''
+};'''
       }
     }
     {
@@ -435,8 +425,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const resizing = args.fns.isResizingPanel?.();
+          '''const resizing = args.fns.isResizingPanel?.();
 return `._id {
   position: fixed;
   top: 0;
@@ -451,21 +440,18 @@ return `._id {
   border-left: 1px solid ${args.theme.var.color.border};
   box-shadow: -8px 0 32px oklch(0 0 0 / 0.12);
   transition: ${resizing ? "none" : "width 0.25s ease"};
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-const isAdmin = args.fns.checkAdminRole?.();
+          '''const isAdmin = args.fns.checkAdminRole?.();
 const panelOpen = args.fns.isPanelOpen?.();
 return {
   as: "aside",
   "data-fulchand-settings-panel": "",
   hide: !isAdmin || !panelOpen,
   onMount: () => args.fns.onEditorMount?.()
-};
-'''
+};'''
       }
     }
     {
@@ -473,8 +459,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   position: absolute;
   top: 0;
   left: 0;
@@ -502,21 +487,18 @@ return `._id {
   body.fulchand-settings-panel-resizing & {
     background: ${args.theme.var.color.primary};
   }
-}`;
-'''
+}`;'''
         displayOrder: 0
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   role: "separator",
   "aria-orientation": "vertical",
   "aria-label": "Resize settings panel",
   title: "Drag to resize panel",
   onMouseDown: (event) => args.fns.startPanelResize?.(event)
-};
-'''
+};'''
       }
     }
     {
@@ -524,8 +506,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -535,16 +516,13 @@ return `._id {
   flex-shrink: 0;
   position: relative;
   z-index: 2;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "header"
-};
-'''
+};'''
       }
     }
     {
@@ -552,22 +530,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -575,23 +549,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   margin: 0;
   font-size: 1rem;
   font-weight: 700;
   color: ${args.theme.var.color.text};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "h2",
   text: "Page settings"
-};
-'''
+};'''
       }
     }
     {
@@ -599,21 +569,17 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   align-items: center;
   gap: 0.25rem;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -623,15 +589,13 @@ return {
         displayOrder: 1
         componentName: IconButton
         props:
-          '''
-return {
+          '''return {
   icon: "ph:arrow-clockwise",
   variant: "ghost",
   size: "sm",
   title: "Refresh page preview",
   onClick: () => args.fns.refreshPagePreview?.()
-};
-'''
+};'''
       }
     }
     {
@@ -641,15 +605,13 @@ return {
         displayOrder: 2
         componentName: IconButton
         props:
-          '''
-return {
+          '''return {
   icon: "ph:x",
   variant: "ghost",
   size: "sm",
   title: "Close settings panel",
   onClick: () => args.fns.closePanel?.()
-};
-'''
+};'''
       }
     }
     {
@@ -659,15 +621,13 @@ return {
         displayOrder: 3
         componentName: SettingsSectionNav
         props:
-          '''
-const isSchema = args.fns.editorMode?.() === "schema";
+          '''const isSchema = args.fns.editorMode?.() === "schema";
 return {
   sections: args.fns.sectionNav?.() || [],
   activeSectionId: args.fns.activeSectionId?.(),
   onSectionClick: (sectionId) => args.fns.scrollToSection?.(sectionId),
   hide: isSchema
-};
-'''
+};'''
       }
     }
     {
@@ -677,8 +637,7 @@ return {
         displayOrder: 2
         componentName: SettingsEditorShell
         props:
-          '''
-const settingsPageId = args.fns.getSettingsPageId?.();
+          '''const settingsPageId = args.fns.getSettingsPageId?.();
 return {
   settingsPageId,
   siteLanguages: args.fns.siteLanguages?.() || [],
@@ -692,8 +651,7 @@ return {
   schemaTabLabel: "Fields",
   contentTabLabel: "Content",
   dynamicPageKey: "fulchand_embedded_settings_editor"
-};
-'''
+};'''
       }
     }
   ]

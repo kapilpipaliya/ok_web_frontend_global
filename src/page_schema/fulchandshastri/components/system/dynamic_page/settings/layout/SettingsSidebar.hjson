@@ -73,8 +73,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   width: 240px;
   flex-shrink: 0;
   border-right: 1px solid ${args.theme.var.color.border};
@@ -91,16 +90,13 @@ return `._id {
     border-bottom: 1px solid ${args.theme.var.color.border};
     max-height: 240px;
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "aside"
-};
-'''
+};'''
       }
     }
     {
@@ -108,23 +104,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   font-size: 1.125rem;
   font-weight: 700;
   color: ${args.theme.var.color.text};
   margin-bottom: ${args.theme.var.spacing.md};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   text: args.fns.sidebarTitle()
-};
-'''
+};'''
       }
     }
     {
@@ -133,21 +125,17 @@ return {
       P: {
         contextName: sidebarGroup
         css:
-          '''
-return `._id {
+          '''return `._id {
   margin-bottom: ${args.theme.var.spacing.md};
-}`;
-'''
+}`;'''
         loop: true
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   data: args.fns.getVisibleGroups()
-};
-'''
+};'''
       }
     }
     {
@@ -155,8 +143,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -164,19 +151,16 @@ return `._id {
   color: ${args.theme.var.color.text_light_500};
   margin-bottom: ${args.theme.var.spacing.xs};
   padding: 0 ${args.theme.var.spacing.sm};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const group = args.contextData.sidebarGroup;
+          '''const group = args.contextData.sidebarGroup;
 return {
   as: "div",
   text: group.label || "",
   hide: !group.label
-};
-'''
+};'''
       }
     }
     {
@@ -185,24 +169,20 @@ return {
       P: {
         contextName: navItem
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   flex-direction: column;
   gap: ${args.theme.var.spacing.xxs};
-}`;
-'''
+}`;'''
         loop: true
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const group = args.contextData.sidebarGroup;
+          '''const group = args.contextData.sidebarGroup;
 return {
   as: "nav",
   data: group.items || []
-};
-'''
+};'''
       }
     }
     {
@@ -210,8 +190,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const item = args.contextData.navItem;
+          '''const item = args.contextData.navItem;
 const active = args.fns.isActivePath(item.path);
 return active
   ? `._id {
@@ -237,13 +216,11 @@ return active
 }
 ._id:hover {
   background: ${args.theme.var.color.background_light_200};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const item = args.contextData.navItem;
+          '''const item = args.contextData.navItem;
 return {
   as: "a",
   href: item.path,
@@ -252,8 +229,7 @@ return {
     event.preventDefault();
     args.fns.handleNavigate(item);
   }
-};
-'''
+};'''
       }
     }
   ]

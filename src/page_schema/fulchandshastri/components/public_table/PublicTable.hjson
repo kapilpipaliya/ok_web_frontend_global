@@ -259,8 +259,7 @@ return {
         displayOrder: 1
         componentName: Table
         props:
-          '''
-return {
+          '''return {
   tableVertexLabel: args.contextData.props?.tableVertexLabel || "Book",
   columns: args.fns.prop?.("columns") || [],
   formConfig: args.fns.prop?.("formConfig"),
@@ -287,8 +286,7 @@ return {
   setSelectedRows: args.fns.setSelectedRows,
   clearSelectedRows: args.fns.clearSelectedRows,
   hide: !args.fns.graphReady?.()
-};
-'''
+};'''
       }
     }
   ]

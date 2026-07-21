@@ -17,30 +17,20 @@
     }
     {
       id: "2"
-      L: PageLayout
-      P: {
-        componentName: Layout
-      }
-    }
-    {
-      id: "3"
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   max-width: 48rem;
   margin: 0 auto;
   padding: 1.5rem 1rem 3rem;
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
-}`;
-'''
+}`;'''
         displayOrder: 1
         fns:
-          '''
-const [generatedImportUrl, setGeneratedImportUrl] = args.createSignal("");
+          '''const [generatedImportUrl, setGeneratedImportUrl] = args.createSignal("");
 const [generatedExportUrl, setGeneratedExportUrl] = args.createSignal("");
 const [formManagementFns, setFormManagementFns] = args.createSignal(null);
 const [previewModalOpen, setPreviewModalOpen] = args.createSignal(false);
@@ -196,15 +186,32 @@ return {
   previewTitle,
   closePreviewModal,
   buildUrls
-};
-'''
+};'''
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h1",
+  text: "Make Import / Export URL"
+};'''
       }
     }
     {
@@ -212,32 +219,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  margin: 0;
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: ${args.theme.var.color.text};
-}`;
-'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''
-return {
-  as: "h1",
-  text: "Make Import / Export URL"
-};
-'''
-      }
-    }
-    {
-      id: "5"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
+          '''return `._id {
   color: ${args.theme.var.color.text_light_400};
   line-height: 1.5;
   font-size: 0.95rem;
@@ -254,8 +236,7 @@ return `._id {
   code {
     font-size: 0.875em;
   }
-}`;
-'''
+}`;'''
         displayOrder: 2
         textType: markdown
         componentName: Html
@@ -269,31 +250,26 @@ return `._id {
 - `shop` is optional and applies to import.
 '''
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
-      id: "6"
+      id: "5"
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   border: 1px solid ${args.theme.var.color.border};
   border-radius: 0.5rem;
   background: ${args.theme.var.color.background_light_50};
   overflow: hidden;
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: FormManagement
         props:
-          '''
-return {
+          '''return {
   mode: "add",
   vertexLabel: "SchemaImportUrl",
   hideActionsBar: true,
@@ -371,46 +347,58 @@ return {
       }
     ]
   }
-};
-'''
+};'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}`;'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+};'''
       }
     }
     {
       id: "7"
       L: Attr
       P: {
-        css:
-          '''
-return `._id {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-}`;
-'''
-        displayOrder: 4
-        componentName: Html
+        displayOrder: 1
+        componentName: Button
         props:
-          '''
-return {
-  as: "div"
-};
-'''
+          '''return {
+  variant: "primary",
+  text: "Generate URLs",
+  onClick: args.fns.runGenerate
+};'''
       }
     }
     {
       id: "8"
       L: Attr
       P: {
-        displayOrder: 1
-        componentName: Button
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}`;'''
+        displayOrder: 5
+        componentName: Html
         props:
-          '''
-return {
-  variant: "primary",
-  text: "Generate URLs",
-  onClick: args.fns.runGenerate
-};
-'''
+          '''return {
+  as: "div",
+  show: () => !!args.fns.generatedImportUrl()
+};'''
       }
     }
     {
@@ -418,22 +406,21 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-}`;
-'''
-        displayOrder: 5
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background};
+}`;'''
+        displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
-  as: "div",
-  show: () => !!args.fns.generatedImportUrl()
-};
-'''
+          '''return {
+  as: "div"
+};'''
       }
     }
     {
@@ -441,25 +428,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
   gap: 0.75rem;
-  padding: 1rem;
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: 0.5rem;
-  background: ${args.theme.var.color.background};
-}`;
-'''
+  flex-wrap: wrap;
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -467,23 +448,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-}`;
-'''
+          '''return `._id {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
-  as: "div"
-};
-'''
+          '''return {
+  as: "h2",
+  text: "Import URL"
+};'''
       }
     }
     {
@@ -491,93 +468,85 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  margin: 0;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: ${args.theme.var.color.text};
-}`;
-'''
-        displayOrder: 1
+          '''return `._id {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}`;'''
+        displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
-  as: "h2",
-  text: "Import URL"
-};
-'''
+          '''return {
+  as: "div"
+};'''
       }
     }
     {
       id: "13"
       L: Attr
       P: {
-        css:
-          '''
-return `._id {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}`;
-'''
-        displayOrder: 2
-        componentName: Html
+        displayOrder: 1
+        componentName: Button
         props:
-          '''
-return {
-  as: "div"
-};
-'''
+          '''return {
+  variant: "secondary",
+  text: "Copy",
+  onClick: args.fns.copyImportUrl
+};'''
       }
     }
     {
       id: "14"
       L: Attr
       P: {
-        displayOrder: 1
+        displayOrder: 2
         componentName: Button
         props:
-          '''
-return {
+          '''return {
   variant: "secondary",
-  text: "Copy",
-  onClick: args.fns.copyImportUrl
-};
-'''
+  text: "Open",
+  onClick: args.fns.openImportInNewTab
+};'''
       }
     }
     {
       id: "15"
       L: Attr
       P: {
-        displayOrder: 2
+        displayOrder: 3
         componentName: Button
         props:
-          '''
-return {
+          '''return {
   variant: "secondary",
-  text: "Open",
-  onClick: args.fns.openImportInNewTab
-};
-'''
+  text: "Modal",
+  onClick: args.fns.openImportInModal
+};'''
       }
     }
     {
       id: "16"
       L: Attr
       P: {
-        displayOrder: 3
-        componentName: Button
+        css:
+          '''return `._id {
+  margin: 0;
+  padding: 0.875rem 1rem;
+  border-radius: 0.375rem;
+  background: ${args.theme.var.color.background_dark_800};
+  color: ${args.theme.var.color.background_dark_800_text};
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}`;'''
+        displayOrder: 2
+        componentName: Html
         props:
-          '''
-return {
-  variant: "secondary",
-  text: "Modal",
-  onClick: args.fns.openImportInModal
-};
-'''
+          '''return {
+  as: "pre",
+  text: args.fns.generatedImportUrl()
+};'''
       }
     }
     {
@@ -585,38 +554,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  margin: 0;
-  padding: 0.875rem 1rem;
-  border-radius: 0.375rem;
-  background: ${args.theme.var.color.background_dark_800};
-  color: ${args.theme.var.color.background_dark_800_text};
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  font-size: 0.875rem;
-  line-height: 1.5;
-  white-space: pre-wrap;
-  word-break: break-word;
-}`;
-'''
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''
-return {
-  as: "pre",
-  text: args.fns.generatedImportUrl()
-};
-'''
-      }
-    }
-    {
-      id: "18"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -624,16 +562,33 @@ return `._id {
   border: 1px solid ${args.theme.var.color.border};
   border-radius: 0.5rem;
   background: ${args.theme.var.color.background};
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+};'''
       }
     }
     {
@@ -641,23 +596,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-}`;
-'''
+          '''return `._id {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
-  as: "div"
-};
-'''
+          '''return {
+  as: "h2",
+  text: "Export URL"
+};'''
       }
     }
     {
@@ -665,102 +616,67 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  margin: 0;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: ${args.theme.var.color.text};
-}`;
-'''
-        displayOrder: 1
+          '''return `._id {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}`;'''
+        displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
-  as: "h2",
-  text: "Export URL"
-};
-'''
+          '''return {
+  as: "div"
+};'''
       }
     }
     {
       id: "21"
       L: Attr
       P: {
-        css:
-          '''
-return `._id {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}`;
-'''
-        displayOrder: 2
-        componentName: Html
+        displayOrder: 1
+        componentName: Button
         props:
-          '''
-return {
-  as: "div"
-};
-'''
+          '''return {
+  variant: "secondary",
+  text: "Copy",
+  onClick: args.fns.copyExportUrl
+};'''
       }
     }
     {
       id: "22"
       L: Attr
       P: {
-        displayOrder: 1
+        displayOrder: 2
         componentName: Button
         props:
-          '''
-return {
+          '''return {
   variant: "secondary",
-  text: "Copy",
-  onClick: args.fns.copyExportUrl
-};
-'''
+  text: "Open",
+  onClick: args.fns.openExportInNewTab
+};'''
       }
     }
     {
       id: "23"
       L: Attr
       P: {
-        displayOrder: 2
+        displayOrder: 3
         componentName: Button
         props:
-          '''
-return {
+          '''return {
   variant: "secondary",
-  text: "Open",
-  onClick: args.fns.openExportInNewTab
-};
-'''
+  text: "Modal",
+  onClick: args.fns.openExportInModal
+};'''
       }
     }
     {
       id: "24"
       L: Attr
       P: {
-        displayOrder: 3
-        componentName: Button
-        props:
-          '''
-return {
-  variant: "secondary",
-  text: "Modal",
-  onClick: args.fns.openExportInModal
-};
-'''
-      }
-    }
-    {
-      id: "25"
-      L: Attr
-      P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   margin: 0;
   padding: 0.875rem 1rem;
   border-radius: 0.375rem;
@@ -771,221 +687,219 @@ return `._id {
   line-height: 1.5;
   white-space: pre-wrap;
   word-break: break-word;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "pre",
   text: args.fns.generatedExportUrl()
-};
-'''
+};'''
+      }
+    }
+    {
+      id: "25"
+      L: Attr
+      P: {
+        displayOrder: 6
+        componentName: ContentModal
+        props:
+          '''return {
+  isOpen: args.fns.previewModalOpen() === true,
+  title: args.fns.previewTitle() || "URL preview",
+  maxWidth: "96vw",
+  onClose: args.fns.closePreviewModal
+};'''
       }
     }
     {
       id: "26"
       L: Attr
       P: {
-        displayOrder: 6
-        componentName: ContentModal
-        props:
-          '''
-return {
-  isOpen: args.fns.previewModalOpen() === true,
-  title: args.fns.previewTitle() || "URL preview",
-  maxWidth: "96vw",
-  onClose: args.fns.closePreviewModal
-};
-'''
-      }
-    }
-    {
-      id: "27"
-      L: Attr
-      P: {
         slotName: children
         css:
-          '''
-return `._id {
+          '''return `._id {
   width: 100%;
   height: min(80vh, 900px);
   border: 0;
   display: block;
   background: ${args.theme.var.color.background};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "iframe",
   src: args.fns.previewUrl() || "about:blank",
   title: args.fns.previewTitle() || "URL preview",
   loading: "lazy"
-};
-'''
+};'''
+      }
+    }
+    {
+      id: "27"
+      L: PageLayout
+      P: {
+        componentName: Layout
       }
     }
   ]
   edges: [
     {
       id: e1
-      T: PageLayout
+      T: Attr
       S: "1"
       E: "2"
     }
     {
       id: e2
-      T: Attr
+      T: PageLayout
       S: "1"
-      E: "3"
+      E: "27"
     }
     {
       id: e3
       T: Attr
-      S: "3"
-      E: "4"
+      S: "2"
+      E: "3"
     }
     {
       id: e4
       T: Attr
-      S: "3"
-      E: "5"
+      S: "2"
+      E: "4"
     }
     {
       id: e5
       T: Attr
-      S: "3"
-      E: "6"
+      S: "2"
+      E: "5"
     }
     {
       id: e6
       T: Attr
-      S: "3"
-      E: "7"
+      S: "2"
+      E: "6"
     }
     {
       id: e7
       T: Attr
-      S: "3"
-      E: "9"
+      S: "2"
+      E: "8"
     }
     {
       id: e8
       T: Attr
-      S: "3"
-      E: "26"
+      S: "2"
+      E: "25"
     }
     {
       id: e9
       T: Attr
-      S: "7"
-      E: "8"
+      S: "6"
+      E: "7"
     }
     {
       id: e10
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "8"
+      E: "17"
+    }
+    {
+      id: e12
       T: Attr
       S: "9"
       E: "10"
     }
     {
-      id: e11
+      id: e13
       T: Attr
       S: "9"
-      E: "18"
+      E: "16"
     }
     {
-      id: e12
+      id: e14
       T: Attr
       S: "10"
       E: "11"
     }
     {
-      id: e13
-      T: Attr
-      S: "10"
-      E: "17"
-    }
-    {
-      id: e14
-      T: Attr
-      S: "11"
-      E: "12"
-    }
-    {
       id: e15
       T: Attr
-      S: "11"
-      E: "13"
+      S: "10"
+      E: "12"
     }
     {
       id: e16
       T: Attr
-      S: "13"
-      E: "14"
+      S: "12"
+      E: "13"
     }
     {
       id: e17
       T: Attr
-      S: "13"
-      E: "15"
+      S: "12"
+      E: "14"
     }
     {
       id: e18
       T: Attr
-      S: "13"
-      E: "16"
+      S: "12"
+      E: "15"
     }
     {
       id: e19
+      T: Attr
+      S: "17"
+      E: "18"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "17"
+      E: "24"
+    }
+    {
+      id: e21
       T: Attr
       S: "18"
       E: "19"
     }
     {
-      id: e20
-      T: Attr
-      S: "18"
-      E: "25"
-    }
-    {
-      id: e21
-      T: Attr
-      S: "19"
-      E: "20"
-    }
-    {
       id: e22
       T: Attr
-      S: "19"
-      E: "21"
+      S: "18"
+      E: "20"
     }
     {
       id: e23
       T: Attr
-      S: "21"
-      E: "22"
+      S: "20"
+      E: "21"
     }
     {
       id: e24
       T: Attr
-      S: "21"
-      E: "23"
+      S: "20"
+      E: "22"
     }
     {
       id: e25
       T: Attr
-      S: "21"
-      E: "24"
+      S: "20"
+      E: "23"
     }
     {
       id: e26
       T: Attr
-      S: "26"
-      E: "27"
+      S: "25"
+      E: "26"
     }
   ]
 }

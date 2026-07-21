@@ -1,0 +1,351 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: ContentModal
+        updatedAt: 2026-07-17T11:49:41.764Z
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  animation: contentModalFadeIn 0.2s ease;
+}
+
+@keyframes contentModalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 0;
+    align-items: flex-end;
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  hide: args.contextData.props?.isOpen !== true,
+  onClick: (e) => {
+    if (e.target === e.currentTarget) {
+      args.contextData.props?.onClose?.();
+    }
+  }
+};'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''const maxWidth = args.contextData.props?.maxWidth || "880px";
+return `._id {
+  background: ${args.theme.var.color.background};
+  border-radius: 0.75rem;
+  width: 100%;
+  max-width: ${maxWidth};
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.12);
+  animation: contentModalSlideUp 0.28s ease;
+  overflow: hidden;
+}
+
+@keyframes contentModalSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 768px) {
+  ._id {
+    max-width: 100%;
+    max-height: 100vh;
+    height: 100vh;
+    border-radius: 0;
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  onClick: (e) => e.stopPropagation()
+};'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid ${args.theme.var.color.border};
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "header",
+  hide: args.contextData.props?.showTitle === false
+};'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+  line-height: 1.35;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  hide: args.contextData.props?.showTitle === false,
+  text: args.contextData.props?.title || "Dialog"
+};'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const onClose = args.contextData.props?.onClose;
+return {
+  as: "s-button",
+  "attr:variant": "plain",
+  "attr:icon": "x",
+  "attr:accessibilityLabel": "Close",
+  hide: args.contextData.props?.usePolarisUI !== true,
+  onClick: () => onClose?.()
+};'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const onClose = args.contextData.props?.onClose;
+const usePolaris = args.contextData.props?.usePolarisUI === true;
+return {
+  as: "icon",
+  icon: "carbon:close",
+  width: 22,
+  height: 22,
+  hide: usePolaris,
+  onClick: () => onClose?.()
+};'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+};'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Slot
+        slot: children
+      }
+    }
+    {
+      id: "10"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        defValue: false
+        key: usePolarisUI
+      }
+    }
+    {
+      id: "11"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onClose
+      }
+    }
+    {
+      id: "12"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        defValue: false
+        key: isOpen
+      }
+    }
+    {
+      id: "13"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        defValue: true
+        key: showTitle
+      }
+    }
+    {
+      id: "14"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: 880px
+        key: maxWidth
+      }
+    }
+    {
+      id: "15"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: title
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: ComponentVariant
+      S: "1"
+      E: "10"
+    }
+    {
+      id: e3
+      T: ComponentVariant
+      S: "1"
+      E: "11"
+    }
+    {
+      id: e4
+      T: ComponentVariant
+      S: "1"
+      E: "12"
+    }
+    {
+      id: e5
+      T: ComponentVariant
+      S: "1"
+      E: "13"
+    }
+    {
+      id: e6
+      T: ComponentVariant
+      S: "1"
+      E: "14"
+    }
+    {
+      id: e7
+      T: ComponentVariant
+      S: "1"
+      E: "15"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "3"
+      E: "8"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "4"
+      E: "6"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "4"
+      E: "7"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+  ]
+}

@@ -181,13 +181,11 @@ try {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props: return { as: "div" };
@@ -198,8 +196,7 @@ return `._id {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   margin: 0;
   color: ${args.theme.var.color.text};
   font-size: 3rem;
@@ -210,8 +207,7 @@ return `._id {
 
 @media (max-width: 768px) {
   ._id { font-size: 2rem; }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props: return { as: "h1", text: "Dravya Drishti Prakash" };
@@ -222,8 +218,7 @@ return `._id {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -231,18 +226,15 @@ return `._id {
   gap: 1rem;
   margin-bottom: 1rem;
   text-align: center;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const videos = args.contextData.dravyaDrishtiPrakashData?.videos || [];
+          '''const videos = args.contextData.dravyaDrishtiPrakashData?.videos || [];
 return {
   as: "div",
   hide: videos.length === 0
-};
-'''
+};'''
       }
     }
     {
@@ -250,16 +242,14 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
   color: ${args.theme.var.color.text};
   cursor: pointer;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props: return { as: "label" };
@@ -273,16 +263,14 @@ return `._id {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const videos = args.contextData.dravyaDrishtiPrakashData?.videos || [];
+          '''const videos = args.contextData.dravyaDrishtiPrakashData?.videos || [];
 return {
   as: "input",
   type: "checkbox",
   checked: args.fns.areAllVideosSelected(videos),
   onChange: (event) => args.fns.setAllVideosSelected(videos, event.target.checked),
   "attr:aria-label": "Select all videos"
-};
-'''
+};'''
       }
     }
     {
@@ -299,8 +287,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   padding: 0.625rem 1rem;
   border: 1px solid ${args.theme.var.color.primary};
   border-radius: 0.5rem;
@@ -313,13 +300,11 @@ return `._id {
 ._id:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const videos = args.contextData.dravyaDrishtiPrakashData?.videos || [];
+          '''const videos = args.contextData.dravyaDrishtiPrakashData?.videos || [];
 const selectedCount = videos.filter((video) => args.fns.isVideoSelected(video)).length;
 return {
   as: "button",
@@ -329,8 +314,7 @@ return {
     : "Add selected to playlist & play",
   disabled: selectedCount === 0,
   onClick: () => args.fns.playSelectedVideos(videos)
-};
-'''
+};'''
       }
     }
     {
@@ -338,8 +322,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   text-align: center;
 }
 
@@ -351,13 +334,11 @@ return `._id {
 ._id td {
   text-align: center;
   vertical-align: middle;
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: PublicContentTable
         props:
-          '''
-const videos = args.contextData.dravyaDrishtiPrakashData?.videos || [];
+          '''const videos = args.contextData.dravyaDrishtiPrakashData?.videos || [];
 return {
   columns: [
     { key: "select", label: "Select", width: "72px", align: "center" },
@@ -372,8 +353,7 @@ return {
   rows: videos,
   contextName: "video",
   emptyMessage: "No videos are available."
-};
-'''
+};'''
       }
     }
     {
@@ -381,8 +361,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   counter-increment: video-row;
   transition: background 0.2s ease;
 }
@@ -390,18 +369,15 @@ return `._id {
 ._id:hover,
 ._id.selected-video-row {
   background: ${args.theme.var.color.primary_light_900};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const video = args.contextData.video;
+          '''const video = args.contextData.video;
 return {
   as: "tr",
   class: args.fns.isVideoSelected(video) ? "selected-video-row" : ""
-};
-'''
+};'''
       }
     }
     {
@@ -422,16 +398,14 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const video = args.contextData.video;
+          '''const video = args.contextData.video;
 return {
   as: "input",
   type: "checkbox",
   checked: args.fns.isVideoSelected(video),
   onChange: (event) => args.fns.setVideoSelected(video, event.target.checked),
   "attr:aria-label": `Select ${video?.P?.subject || "video"}`
-};
-'''
+};'''
       }
     }
     {
@@ -439,16 +413,14 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   text-align: center;
   vertical-align: middle;
 }
 
 ._id::before {
   content: counter(video-row);
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props: return { as: "td" };
@@ -469,8 +441,7 @@ return `._id {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   position: relative;
   display: inline-flex;
   padding: 0;
@@ -483,13 +454,11 @@ return `._id {
 
 ._id:disabled {
   cursor: not-allowed;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const video = args.contextData.video;
+          '''const video = args.contextData.video;
 const youtubeId = args.fns.getYouTubeId(video);
 return {
   as: "button",
@@ -497,8 +466,7 @@ return {
   disabled: !youtubeId,
   onClick: () => args.fns.playSingleVideo(video),
   "attr:aria-label": `Play ${video?.P?.subject || "video"}`
-};
-'''
+};'''
       }
     }
     {
@@ -511,13 +479,11 @@ return {
   width: 250px;
   aspect-ratio: 16 / 9;
   object-fit: cover;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const video = args.contextData.video;
+          '''const video = args.contextData.video;
 const youtubeId = args.fns.getYouTubeId(video);
 return {
   as: "img",
@@ -525,8 +491,7 @@ return {
   alt: video?.P?.subject ? `${video.P.subject} thumbnail` : "YouTube thumbnail",
   loading: "lazy",
   hide: !youtubeId
-};
-'''
+};'''
       }
     }
     {
@@ -537,13 +502,11 @@ return {
         displayOrder: 4
         componentName: Html
         props:
-          '''
-const video = args.contextData.video;
+          '''const video = args.contextData.video;
 return {
   as: "td",
   text: args.fns.formatDate(video?.P?.date)
-};
-'''
+};'''
       }
     }
     {
@@ -554,13 +517,11 @@ return {
         displayOrder: 5
         componentName: Html
         props:
-          '''
-const video = args.contextData.video;
+          '''const video = args.contextData.video;
 return {
   as: "td",
   text: video?.P?.time || ""
-};
-'''
+};'''
       }
     }
     {
@@ -568,23 +529,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   text-align: center;
   vertical-align: middle;
   font-weight: 600;
-}`;
-'''
+}`;'''
         displayOrder: 6
         componentName: Html
         props:
-          '''
-const video = args.contextData.video;
+          '''const video = args.contextData.video;
 return {
   as: "td",
   text: video?.P?.subject || ""
-};
-'''
+};'''
       }
     }
     {
@@ -602,8 +559,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   padding: 0;
   border: none;
   background: transparent;
@@ -617,13 +573,11 @@ return `._id {
   color: ${args.theme.var.color.text_light_300};
   cursor: not-allowed;
   text-decoration: none;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const video = args.contextData.video;
+          '''const video = args.contextData.video;
 const youtubeId = args.fns.getYouTubeId(video);
 return {
   as: "button",
@@ -632,8 +586,7 @@ return {
   disabled: !youtubeId,
   onClick: () => args.fns.playSingleVideo(video),
   "attr:aria-label": `Play ${video?.P?.subject || "video"}`
-};
-'''
+};'''
       }
     }
     {
@@ -641,23 +594,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   text-align: center;
   vertical-align: middle;
   white-space: pre-wrap;
-}`;
-'''
+}`;'''
         displayOrder: 8
         componentName: Html
         props:
-          '''
-const video = args.contextData.video;
+          '''const video = args.contextData.video;
 return {
   as: "td",
   text: video?.P?.bol || ""
-};
-'''
+};'''
       }
     }
   ]

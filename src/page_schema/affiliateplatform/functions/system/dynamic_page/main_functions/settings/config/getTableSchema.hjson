@@ -1,0 +1,71 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Loads a table_schema Setting vertex by explicit key or tableKey + part.
+        body:
+          '''
+let { key, tableKey, part } = args.contextData || {};
+
+if ((!key || !String(key).trim()) && tableKey && part) {
+  const idsResult = await args.executeNamedServerFunction({
+    functionName: "getTableIds",
+    contextData: { tableKey: String(tableKey).trim() }
+  });
+  const ids = idsResult?.result?.data;
+  if (!ids?.schemaKeys?.[part]) {
+    return {
+      success: false,
+      message: idsResult?.result?.message || `Failed to resolve schema key for part: ${part}`
+    };
+  }
+  key = ids.schemaKeys[part];
+}
+
+if (!key || !String(key).trim()) {
+  return { success: false, message: "key is required (or tableKey + part)" };
+}
+
+key = String(key).trim();
+
+let result = await args.session.run(
+  `MATCH (s:Setting {key: $key}) RETURN s LIMIT 1`,
+  { key }
+);
+
+if (result.records.length === 0 && args.executeNamedServerFunction) {
+  try {
+    await args.executeNamedServerFunction({
+      functionName: "migrateDynamicPageSettings",
+      contextData: { dryRun: false }
+    });
+    result = await args.session.run(
+      `MATCH (s:Setting {key: $key}) RETURN s LIMIT 1`,
+      { key }
+    );
+  } catch (migrateError) {
+    console.error("getTableSchema: migration failed", migrateError);
+  }
+}
+
+if (result.records.length === 0) {
+  return { success: false, message: `No table schema found for key: ${key}` };
+}
+
+const vertices = args.processResult(result.records, args.context, "s");
+const setting = vertices[0];
+
+return {
+  success: true,
+  data: { setting, key },
+  message: "Table schema loaded"
+};
+'''
+        key: getTableSchema
+      }
+    }
+  ]
+  edges: []
+}

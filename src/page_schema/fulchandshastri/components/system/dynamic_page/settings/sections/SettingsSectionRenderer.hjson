@@ -79,12 +79,10 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   hide: !args.fns.isSectionVisible()
-};
-'''
+};'''
       }
     }
     {
@@ -94,16 +92,14 @@ return {
         displayOrder: 1
         componentName: SettingsSectionCard
         props:
-          '''
-const sectionConfig = args.fns.getSectionConfig();
+          '''const sectionConfig = args.fns.getSectionConfig();
 const renderer = args.fns.resolveRendererComponent();
 return {
   sectionConfig,
   sectionState: args.fns.getSectionState(),
   siteLanguages: args.fns.getSiteLanguages?.() || [],
   hide: renderer !== "SettingsSectionCard"
-};
-'''
+};'''
       }
     }
     {
@@ -113,15 +109,13 @@ return {
         displayOrder: 2
         componentName: SettingsSectionAccordion
         props:
-          '''
-const sectionConfig = args.fns.getSectionConfig();
+          '''const sectionConfig = args.fns.getSectionConfig();
 const renderer = args.fns.resolveRendererComponent();
 return {
   sectionConfig,
   siteLanguages: args.fns.getSiteLanguages?.() || [],
   hide: renderer !== "SettingsSectionAccordion"
-};
-'''
+};'''
       }
     }
     {
@@ -131,15 +125,13 @@ return {
         displayOrder: 3
         componentName: SettingsSectionTabs
         props:
-          '''
-const sectionConfig = args.fns.getSectionConfig();
+          '''const sectionConfig = args.fns.getSectionConfig();
 const renderer = args.fns.resolveRendererComponent();
 return {
   sectionConfig,
   siteLanguages: args.fns.getSiteLanguages?.() || [],
   hide: renderer !== "SettingsSectionTabs"
-};
-'''
+};'''
       }
     }
   ]

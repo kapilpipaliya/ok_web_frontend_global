@@ -20,73 +20,17 @@ return {
       L: Attr
       P: {
         contextName: socialLinks
+        as: div
         css:
           '''return `._id {
-  margin-top: 3rem;
-}`;
-'''
+  margin-top: 0.1rem;
+  display: flex;
+  flex-wrap: wrap;
+}`;'''
         displayOrder: 1
-        fns:
-          '''const [musicPlaying, setMusicPlaying] = args.createSignal(false);
-const [audioRef, setAudioRef] = args.createSignal(null);
-
-return {
-  musicPlaying,
-  setMusicPlaying,
-  audioRef,
-  setAudioRef,
-};
-'''
+        fns: ""
         componentName: Html
-        props:
-          '''const [musicPlaying, setMusicPlaying] = args.createSignal(false);
-const [audioRef, setAudioRef] = args.createSignal(null);
-
-return {
-  musicPlaying,
-  setMusicPlaying,
-  audioRef,
-  setAudioRef,
-  data: [
-    {
-      id: 1,
-      icon: "carbon:logo-facebook",
-      href: "https://www.facebook.com/people/Fulchand-Shastri/100000525786302/",
-      title: "Facebook",
-    },
-    {
-      id: 2,
-      icon: "carbon:logo-instagram",
-      href: "https://www.instagram.com/fulchand_shastri/?hl=en/",
-      title: "Instagram",
-    },
-    {
-      id: 3,
-      icon: "carbon:logo-youtube",
-      href: "https://www.youtube.com/channel/UCDkvYtH9ia8xK2_Q821_ILg?app=desktop",
-      title: "YouTube",
-    },
-    {
-      id: 4,
-      icon: "carbon:chat",
-      href: "https://chat.whatsapp.com/LO7MR4bNNoBHBrq02sA1CG",
-      title: "WhatsApp Group",
-    },
-    {
-      id: 5,
-      icon: "carbon:video",
-      href: "https://zoom.us/j/4399270150?pwd=REZOVHVrdGFOc1U1OVg5dWxCVVl2Zz09",
-      title: "Zoom Meeting",
-    },
-    {
-      id: 6,
-      icon: "carbon:email",
-      href: "mailto:info@fulchandshastri.com",
-      title: "Email",
-    },
-  ],
-};
-'''
+        props: ""
       }
     }
     {
@@ -94,42 +38,52 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  display: flex;
-  gap: 1rem;
+          '''return `._id {
+  display: inline-flex;
   align-items: center;
-
-  @media (max-width: 480px) {
-    gap: 0.5rem;
-  }
-}`;
-'''
-        displayOrder: 2
+  text-decoration: none;
+  color: #3a2317;
+  font-weight: bold;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}`;'''
+        displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
-  as: "div"
+          '''const getCurrentLang = () => {
+  const lang = args.params?.lang;
+  if (lang && /^[a-z]{2,3}$/i.test(String(lang))) return String(lang).toLowerCase();
+  return "en";
 };
-'''
+return {
+  as: "a",
+  href: `/${getCurrentLang()}`
+};'''
       }
     }
     {
       id: "4"
       L: Attr
       P: {
-        contextName: social
-        loop: true
+        css:
+          '''return `._id {
+  height: 60px;
+  width: auto;
+
+  @media (max-width: 768px) {
+    height: 40px;
+  }
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const socialLinks = args.contextData.socialLinks;
-return {
-  data: socialLinks
-};
-'''
+          '''return {
+  as: "img",
+  src: "https://www.fulchandshastri.com/wp-content/themes/fulchand/include-files/images/logo.png",
+  alt: "Fulchand Shastri",
+  width: 200,
+  height: 60
+};'''
       }
     }
     {
@@ -138,279 +92,24 @@ return {
       P: {
         css:
           '''return `._id {
-  transition: opacity 0.2s ease;
   display: inline-flex;
-  color: ${args.theme.var.color.primary};
-  &:hover {
-    opacity: 0.7;
-  }
-}`;
-'''
-        displayOrder: 1
+  flex-wrap: wrap;
+  gap: 0;
+  align-items: center;
+  justify-content: flex-start;
+  flex: 1;
+  min-width: 0;
+}`;'''
+        displayOrder: 2
         componentName: Html
         props:
-          '''
-const social = args.contextData.social;
-return {
-  as: "a",
-  href: social.href,
-  target: "_blank",
-  rel: "noopener noreferrer",
-  title: social.title
-};
-'''
+          '''return {
+  as: "div"
+};'''
       }
     }
     {
       id: "6"
-      L: Attr
-      P: {
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''
-const social = args.contextData.social;
-return {
-  as: "icon",
-  icon: social.icon,
-  width: 20,
-  height: 20
-};
-'''
-      }
-    }
-    {
-      id: "7"
-      L: Attr
-      P: {
-        css:
-          '''return `._id {
-  background: none;
-  color: ${args.theme.var.color.primary};
-  border: none;
-  cursor: pointer;
-  padding: 0;
-
-  transition: opacity 0.2s ease;
-  display: flex;
-
-  &:hover {
-    opacity: 0.7;
-  }
-}`;
-'''
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''return {
-  as: "button",
-  onClick: async () => {
-    const audioElement = args.fns.audioRef();
-
-    if (audioElement) {
-      try {
-        if (args.fns.musicPlaying()) {
-          audioElement.pause();
-        } else {
-          const playPromise = audioElement.play();
-          if (playPromise !== undefined) {
-            await playPromise;
-          }
-        }
-      } catch (error) {
-        console.error("Audio playback error:", error);
-        args.showErrorToast(
-          "Unable to play audio. Please check your browser settings.",
-        );
-      }
-    }
-  },
-};
-'''
-      }
-    }
-    {
-      id: "8"
-      L: Attr
-      P: {
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''return {
-  as: "icon",
-  icon: args.fns.musicPlaying() ? "carbon:stop-filled" : "carbon:play-filled",
-  width: 20,
-  height: 20,
-};
-'''
-      }
-    }
-    {
-      id: "9"
-      L: Attr
-      P: {
-        displayOrder: 3
-        componentName: Html
-        props:
-          '''return {
-  as: "audio",
-  src: "/audio/au.mp3", // Using local file to avoid CORS issues
-  // loop: true,
-  preload: "auto",
-  onPlay: () => args.fns.setMusicPlaying(true),
-  onPause: () => args.fns.setMusicPlaying(false),
-  onEnded: () => args.fns.setMusicPlaying(false),
-  ref: (el) => {
-    if (el) {
-      args.fns.setAudioRef(el);
-    }
-  },
-};
-'''
-      }
-    }
-    {
-      id: "10"
-      L: Attr
-      P: {
-        css:
-          '''return `._id {
-  background: linear-gradient(to bottom, #d4a574, #c8956d);
-  color: #3a2317;
-  padding: 0.5rem 0;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}`;
-'''
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''
-return {
-  as: "header"
-};
-'''
-      }
-    }
-    {
-      id: "11"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0 1rem;
-  position: relative;
-  flex-wrap: wrap;
-}`;
-'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''
-return {
-  as: "div"
-};
-'''
-      }
-    }
-    {
-      id: "12"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  display: flex;
-  align-items: center;
-  text-decoration: none;
-  color: #3a2317;
-  font-weight: bold;
-  font-size: 1.5rem;
-  flex-shrink: 0;
-}`;
-'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''
-const getCurrentLang = () => {
-  const lang = args.params?.lang;
-  if (lang && /^[a-z]{2,3}$/i.test(String(lang))) return String(lang).toLowerCase();
-  return "en";
-};
-return {
-  as: "a",
-  href: `/${getCurrentLang()}`
-};
-'''
-      }
-    }
-    {
-      id: "13"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  height: 60px;
-  width: auto;
-
-  @media (max-width: 768px) {
-    height: 40px;
-  }
-}`;
-'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''
-return {
-  as: "img",
-  src: "https://www.fulchandshastri.com/wp-content/themes/fulchand/include-files/images/logo.png",
-  alt: "Fulchand Shastri",
-  width: 200,
-  height: 60
-};
-'''
-      }
-    }
-    {
-      id: "14"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0;
-  align-items: center;
-  justify-content: flex-end;
-  flex: 1;
-  min-width: 0;
-}`;
-'''
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''
-return {
-  as: "div"
-};
-'''
-      }
-    }
-    {
-      id: "15"
       L: Attr
       P: {
         displayOrder: 1
@@ -450,29 +149,7 @@ const localizeItem = (item) => ({
 
 const items = [
   //{ id: "home", text: "Home", href: "/" },
-  {
-    id: "about",
-    text: "About",
-    href: "#",
-    children: [
-      { id: "about-fulchand", text: "About Fulchand", href: "/about-fulchand" },
-      {
-        id: "his-inspiration",
-        text: "His Inspiration",
-        href: "/his-inspiration",
-      },
-      {
-        id: "atma-siddhi",
-        text: "Atma Siddhi Shastra Mission",
-        href: "/atma-siddhi-shastra-mission",
-      },
-      {
-        id: "about-ask",
-        text: "About ASK Umarala",
-        href: "/about-ask-umarala",
-      },
-    ],
-  },
+
   {
     id: "teachings",
     text: "Teachings",
@@ -538,15 +215,42 @@ const items = [
     ],
   },
   {
-    id: "gallery",
-    text: "Gallery",
-    href: "/gallery",
-  },
-  {
     id: "connect",
     text: "Connect",
     href: "#",
     children: [
+      {
+        id: "about",
+        text: "About",
+        href: "#",
+        children: [
+          {
+            id: "about-fulchand",
+            text: "About Fulchand",
+            href: "/about-fulchand",
+          },
+          {
+            id: "his-inspiration",
+            text: "His Inspiration",
+            href: "/his-inspiration",
+          },
+          {
+            id: "atma-siddhi",
+            text: "Atma Siddhi Shastra Mission",
+            href: "/atma-siddhi-shastra-mission",
+          },
+          {
+            id: "about-ask",
+            text: "About ASK Umarala",
+            href: "/about-ask-umarala",
+          },
+        ],
+      },
+      {
+        id: "gallery",
+        text: "Gallery",
+        href: "/gallery",
+      },
       { id: "schedule", text: "Schedule", href: "/schedule" },
       { id: "contact", text: "Contact", href: "/contact" },
       { id: "donation", text: "Donation", href: "/donation" },
@@ -560,17 +264,15 @@ return {
   panelBackground: "#f5e6d3",
   hoverBackground: "rgba(0, 0, 0, 0.1)",
   activeBorderColor: "#3a2317",
-};
-'''
+};'''
       }
     }
     {
-      id: "16"
+      id: "7"
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   padding: 0.5rem;
   background: none;
   border: none;
@@ -583,37 +285,33 @@ return `._id {
   &:hover {
     opacity: 0.7;
   }
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
-  as: "button"
-};
-'''
+          '''return {
+  as: "button",
+  hide: true
+};'''
       }
     }
     {
-      id: "17"
+      id: "8"
       L: Attr
       P: {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "icon",
   icon: "carbon:search",
   width: 20,
   height: 20
-};
-'''
+};'''
       }
     }
     {
-      id: "18"
+      id: "9"
       L: Attr
       P: {
         displayOrder: 3
@@ -621,67 +319,255 @@ return {
       }
     }
     {
-      id: "19"
+      id: "10"
       L: Attr
       P: {
+        css:
+          '''return `._id {
+  display: inline-flex;
+  gap: 1rem;
+  align-items: center;
+
+  @media (max-width: 480px) {
+    gap: 0.5rem;
+  }
+}`;'''
         displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+};'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        contextName: social
+        css:
+          '''return `._id {
+  display: flex;
+  gap: 0.4rem;
+}`;'''
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const socialLinks = [
+  {
+    id: 5,
+    icon: "selfhst:zoom",
+    href: "https://zoom.us/j/4399270150?pwd=REZOVHVrdGFOc1U1OVg5dWxCVVl2Zz09",
+    title: "Zoom Meeting",
+  },
+  {
+    id: 3,
+    icon: "selfhst:youtube",
+    href: "https://www.youtube.com/channel/UCDkvYtH9ia8xK2_Q821_ILg?app=desktop",
+    title: "YouTube",
+  },
+  {
+    id: 4,
+    icon: "selfhst:whatsapp",
+    href: "https://chat.whatsapp.com/LO7MR4bNNoBHBrq02sA1CG",
+    title: "WhatsApp Group",
+  },
+  {
+    id: 6,
+    icon: "selfhst:gmail-cleaner",
+    href: "mailto:info@fulchandshastri.com",
+    title: "Email",
+  },
+  {
+    id: 1,
+    icon: "selfhst:facebook",
+    href: "https://www.facebook.com/people/Fulchand-Shastri/100000525786302/",
+    title: "Facebook",
+  },
+  {
+    id: 2,
+    icon: "selfhst:instagram",
+    href: "https://www.instagram.com/fulchand_shastri/?hl=en/",
+    title: "Instagram",
+  },
+];
+return {
+  data: socialLinks,
+};'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  transition: opacity 0.2s ease;
+  display: inline-flex;
+  color: ${args.theme.var.color.primary};
+  &:hover {
+    opacity: 0.7;
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const social = args.contextData.social;
+return {
+  as: "a",
+  href: social.href,
+  target: "_blank",
+  rel: "noopener noreferrer",
+  title: social.title
+};'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const social = args.contextData.social;
+return {
+  as: "icon",
+  icon: social.icon,
+  width: 36,
+  height: 36,
+};'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  background: none;
+  color: ${args.theme.var.color.primary};
+  border: none;
+  cursor: pointer;
+  padding: 0;
+
+  transition: opacity 0.2s ease;
+  display: flex;
+
+  &:hover {
+    opacity: 0.7;
+  }
+}`;'''
+        displayOrder: 2
+        fns:
+          '''const [musicPlaying, setMusicPlaying] = args.createSignal(false);
+const [audioRef, setAudioRef] = args.createSignal(null);
+
+return {
+  musicPlaying,
+  setMusicPlaying,
+  audioRef,
+  setAudioRef,
+};'''
+        componentName: Html
+        props:
+          '''return {
+  as: "button",
+  onClick: async () => {
+    const audioElement = args.fns.audioRef();
+
+    if (audioElement) {
+      try {
+        if (args.fns.musicPlaying()) {
+          audioElement.pause();
+        } else {
+          const playPromise = audioElement.play();
+          if (playPromise !== undefined) {
+            await playPromise;
+          }
+        }
+      } catch (error) {
+        console.error("Audio playback error:", error);
+        args.showErrorToast(
+          "Unable to play audio. Please check your browser settings.",
+        );
+      }
+    }
+  },
+};'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "icon",
+  icon: args.fns.musicPlaying() ? "carbon:stop-filled" : "carbon:play-filled",
+  width: 36,
+  height: 36,
+};'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "audio",
+  src: "/audio/au.mp3", // Using local file to avoid CORS issues
+  // loop: true,
+  preload: "auto",
+  onPlay: () => args.fns.setMusicPlaying(true),
+  onPause: () => args.fns.setMusicPlaying(false),
+  onEnded: () => args.fns.setMusicPlaying(false),
+  ref: (el) => {
+    if (el) {
+      args.fns.setAudioRef(el);
+    }
+  },
+};'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        displayOrder: 5
         componentName: ThemeToggle
         props:
-          '''
-return {
+          '''return {
   currentMode: () => args.theme.mode,
   toggleTheme: () => {
     args.theme.mode = args.theme.mode === "dark" ? "light" : "dark";
   }
-};
-'''
+};'''
       }
     }
     {
-      id: "20"
+      id: "18"
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
 
-
-
-
-}`;
-'''
-        displayOrder: 3
+}`;'''
+        displayOrder: 6
         componentName: Html
         props:
-          '''
-return {
-  as: "div"
-};
-'''
-      }
-    }
-    {
-      id: "21"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-
-}`;
-'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''
-return {
+          '''return {
   as: "img",
   src: "https://www.fulchandshastri.com/wp-content/themes/fulchand/include-files/images/guruji.png",
   alt: "Guruji",
   width: 60,
   height: 60
-};
-'''
+};'''
       }
     }
   ]
@@ -695,116 +581,98 @@ return {
     {
       id: e2
       T: Attr
-      S: "1"
-      E: "10"
+      S: "2"
+      E: "3"
     }
     {
       id: e3
       T: Attr
       S: "2"
-      E: "3"
+      E: "5"
     }
     {
       id: e4
+      T: Attr
+      S: "2"
+      E: "9"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "10"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "2"
+      E: "17"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "2"
+      E: "18"
+    }
+    {
+      id: e8
       T: Attr
       S: "3"
       E: "4"
     }
     {
-      id: e5
-      T: Attr
-      S: "3"
-      E: "7"
-    }
-    {
-      id: e6
-      T: Attr
-      S: "3"
-      E: "9"
-    }
-    {
-      id: e7
-      T: Attr
-      S: "4"
-      E: "5"
-    }
-    {
-      id: e8
+      id: e9
       T: Attr
       S: "5"
       E: "6"
     }
     {
-      id: e9
+      id: e10
+      T: Attr
+      S: "5"
+      E: "7"
+    }
+    {
+      id: e11
       T: Attr
       S: "7"
       E: "8"
     }
     {
-      id: e10
+      id: e12
       T: Attr
       S: "10"
       E: "11"
     }
     {
-      id: e11
+      id: e13
+      T: Attr
+      S: "10"
+      E: "14"
+    }
+    {
+      id: e14
       T: Attr
       S: "11"
       E: "12"
     }
     {
-      id: e12
-      T: Attr
-      S: "11"
-      E: "14"
-    }
-    {
-      id: e13
-      T: Attr
-      S: "11"
-      E: "20"
-    }
-    {
-      id: e14
+      id: e15
       T: Attr
       S: "12"
       E: "13"
     }
     {
-      id: e15
+      id: e16
       T: Attr
       S: "14"
       E: "15"
     }
     {
-      id: e16
-      T: Attr
-      S: "14"
-      E: "16"
-    }
-    {
       id: e17
       T: Attr
       S: "14"
-      E: "18"
-    }
-    {
-      id: e18
-      T: Attr
-      S: "14"
-      E: "19"
-    }
-    {
-      id: e19
-      T: Attr
-      S: "16"
-      E: "17"
-    }
-    {
-      id: e20
-      T: Attr
-      S: "20"
-      E: "21"
+      E: "16"
     }
   ]
 }

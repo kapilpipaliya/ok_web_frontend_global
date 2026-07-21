@@ -183,22 +183,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; height: 100%;
   background: ${args.theme.var.color.background};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   hide: args.contextData.props?.hide === true || args.contextData.props?.isOpen === false,
   onMount: () => { void args.fns.loadSchema?.(); }
-};
-'''
+};'''
       }
     }
     {
@@ -206,13 +202,11 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
   padding: 0.75rem 1rem; border-bottom: 1px solid ${args.theme.var.color.border};
   background: ${args.theme.var.color.background_light_100}; flex-shrink: 0;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props: return { as: "header" };
@@ -226,12 +220,10 @@ return `._id {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "h3",
   text: args.contextData.props?.title || "Form config"
-};
-'''
+};'''
       }
     }
     {
@@ -251,12 +243,10 @@ return {
         displayOrder: 1
         componentName: Button
         props:
-          '''
-return {
+          '''return {
   variant: args.fns.isJsonMode?.() ? "secondary" : "primary", size: "sm", text: "Visual", type: "button",
   onClick: () => args.fns.setEditorMode?.("visual")
-};
-'''
+};'''
       }
     }
     {
@@ -266,12 +256,10 @@ return {
         displayOrder: 2
         componentName: Button
         props:
-          '''
-return {
+          '''return {
   variant: args.fns.isJsonMode?.() ? "primary" : "secondary", size: "sm", text: "JSON", type: "button",
   onClick: () => args.fns.setEditorMode?.("json")
-};
-'''
+};'''
       }
     }
     {
@@ -281,12 +269,10 @@ return {
         displayOrder: 3
         componentName: Button
         props:
-          '''
-return {
+          '''return {
   variant: "primary", size: "sm", text: args.fns.saving?.() ? "Saving..." : "Save", type: "button",
   disabled: args.fns.saving?.() === true, onClick: () => { void args.fns.saveSchema?.(); }
-};
-'''
+};'''
       }
     }
     {
@@ -313,12 +299,10 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 0.625rem;
   padding: 0.75rem 1rem; overflow: hidden;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props: return { as: "div", hide: args.fns.isJsonMode?.() === true };
@@ -331,15 +315,13 @@ return `._id {
         displayOrder: 1
         componentName: TextInput
         props:
-          '''
-const data = args.fns.schemaData?.() || {};
+          '''const data = args.fns.schemaData?.() || {};
 return {
   label: "Grid columns",
   type: "number",
   value: data.gridColumns != null ? String(data.gridColumns) : "2",
   onChange: (e) => args.fns.patchFormConfig?.({ gridColumns: Number(e.target.value) || 1 })
-};
-'''
+};'''
       }
     }
     {
@@ -349,13 +331,11 @@ return {
         displayOrder: 2
         componentName: FormConfigGroupsSchemaEditor
         props:
-          '''
-return {
+          '''return {
   groups: args.fns.getGroups?.() || [],
   siteLanguages: args.contextData.props?.siteLanguages,
   onChange: (patch) => args.fns.onGroupsChange?.(patch)
-};
-'''
+};'''
       }
     }
     {
@@ -375,14 +355,12 @@ return {
         displayOrder: 1
         componentName: TextArea
         props:
-          '''
-return {
+          '''return {
   value: args.fns.configJsonText?.() || "",
   onInput: (e) => args.fns.setConfigJsonText?.(e.target.value),
   rows: 24,
   style: { flex: "1", "min-height": "200px", "font-family": "monospace", "font-size": "0.8125rem" }
-};
-'''
+};'''
       }
     }
   ]

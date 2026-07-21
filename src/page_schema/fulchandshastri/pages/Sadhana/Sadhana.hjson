@@ -16,13 +16,6 @@
     }
     {
       id: "2"
-      L: PageLayout
-      P: {
-        componentName: Layout
-      }
-    }
-    {
-      id: "3"
       L: Attr
       P: {
         as: div
@@ -54,17 +47,24 @@
         key: unique_1
       }
     }
+    {
+      id: "3"
+      L: PageLayout
+      P: {
+        componentName: Layout
+      }
+    }
   ]
   edges: [
     {
       id: e1
-      T: PageLayout
+      T: Attr
       S: "1"
       E: "2"
     }
     {
       id: e2
-      T: Attr
+      T: PageLayout
       S: "1"
       E: "3"
     }

@@ -1,0 +1,82 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Saves a table config section document then syncs table_schema part Settings.
+        body:
+          '''
+const {
+  tableKey,
+  sectionId,
+  values,
+  version,
+  sectionConfig,
+  pageConfig
+} = args.contextData || {};
+
+if (!tableKey) {
+  return { success: false, message: "tableKey is required" };
+}
+if (!sectionId) {
+  return { success: false, message: "sectionId is required" };
+}
+
+const idsResult = await args.executeNamedServerFunction({
+  functionName: "getTableIds",
+  contextData: { tableKey }
+});
+const ids = idsResult?.result?.data;
+if (!ids?.pageId) {
+  return { success: false, message: idsResult?.result?.message || "Failed to resolve table ids" };
+}
+
+const saveResult = await args.executeNamedServerFunction({
+  functionName: "saveSettingsSection",
+  contextData: {
+    pageId: ids.pageId,
+    sectionId,
+    values,
+    version,
+    scopeVertexLabel: "GlobalSetting",
+    scopeId: "Default",
+    scopeMatchProperty: "key",
+    sectionConfig,
+    pageConfig,
+    auditEnabled: true
+  }
+});
+
+if (!saveResult?.result?.success) {
+  return saveResult?.result || { success: false, message: "Failed to save table section" };
+}
+
+const mergeResult = await args.executeNamedServerFunction({
+  functionName: "mergeTableConfigFromSections",
+  contextData: { tableKey }
+});
+
+if (!mergeResult?.result?.success) {
+  return {
+    success: false,
+    message: mergeResult?.result?.message || "Section saved but merge failed",
+    data: saveResult.result.data
+  };
+}
+
+return {
+  success: true,
+    message: saveResult.result.message || "Table section saved and parts synced",
+  data: {
+    ...saveResult.result.data,
+    mergedConfig: mergeResult.result.data?.config
+  }
+};
+'''
+        key: saveTableConfigSection
+      }
+    }
+  ]
+  edges: []
+}

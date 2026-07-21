@@ -1,0 +1,318 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        title: Embedded vertex picker field
+        key: EmbeddedVertexPickerField
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  width: 100%;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "div" };
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1rem;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "div" };
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  width: 88px;
+  height: 88px;
+  border-radius: 0.5rem;
+  border: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.background_light_100};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "div" };
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const previewUrl = String(args.contextData.props?.previewUrl || "").trim();
+const showImage = args.contextData.props?.showImagePreview !== false;
+const hasImg = showImage && previewUrl && /\.(png|jpe?g|gif|webp|svg)$/i.test(previewUrl);
+return {
+  as: "img",
+  src: hasImg ? previewUrl : "",
+  alt: "",
+  hide: () => !hasImg,
+  style: "width:100%;height:100%;object-fit:cover;"
+};'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css: return `._id { color: ${args.theme.var.color.text_dark_400}; }`;
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const previewUrl = String(args.contextData.props?.previewUrl || "").trim();
+const showImage = args.contextData.props?.showImagePreview !== false;
+const hasImg = showImage && previewUrl && /\.(png|jpe?g|gif|webp|svg)$/i.test(previewUrl);
+return {
+  as: "icon",
+  icon: "ph:image-square",
+  width: 40,
+  height: 40,
+  hide: () => !!hasImg
+};'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props: return { as: "div" };
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const fieldLabel = args.contextData.props?.label;
+const labelText =
+  fieldLabel != null && String(fieldLabel).trim() !== "" ? String(fieldLabel).trim() : "";
+return {
+  as: "div",
+  hide: labelText === "",
+  text: labelText
+};'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 0.85rem;
+  color: ${args.theme.var.color.text_dark_400};
+  word-break: break-word;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const secondaryLabel = args.contextData.props?.secondaryLabel;
+const secondaryText =
+  secondaryLabel != null && String(secondaryLabel).trim() !== ""
+    ? String(secondaryLabel).trim()
+    : "";
+return {
+  as: "div",
+  hide: secondaryText === "",
+  text: secondaryText
+};'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props: return { as: "div" };
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const disabled = !!args.contextData.props?.disabled;
+const usePolaris = args.contextData.props?.usePolarisUI === true;
+if (usePolaris) {
+  return {
+    as: "s-button",
+    "attr:variant": "primary",
+    text:
+      args.contextData.props?.chooseButtonLabel != null
+        ? String(args.contextData.props.chooseButtonLabel)
+        : "",
+    disabled,
+    onClick: () => args.contextData.props?.onOpenPicker?.()
+  };
+}
+return {
+  as: "button",
+  type: "button",
+  disabled,
+  text: String(args.contextData.props?.chooseButtonLabel || "Select…"),
+  onClick: () => args.contextData.props?.onOpenPicker?.()
+};'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const disabled = !!args.contextData.props?.disabled;
+const hasValue = !!(args.contextData.props?.value != null && String(args.contextData.props?.value).trim() !== "");
+const usePolaris = args.contextData.props?.usePolarisUI === true;
+if (usePolaris) {
+  return {
+    as: "s-button",
+    "attr:variant": "tertiary",
+    text:
+    args.contextData.props?.clearButtonLabel != null
+      ? String(args.contextData.props.clearButtonLabel)
+      : "",
+    disabled: disabled || !hasValue,
+    onClick: () => args.contextData.props?.onClear?.()
+  };
+}
+return {
+  as: "button",
+  type: "button",
+  disabled: disabled || !hasValue,
+  text:
+    args.contextData.props?.clearButtonLabel != null
+      ? String(args.contextData.props.clearButtonLabel)
+      : "",
+  onClick: () => args.contextData.props?.onClear?.()
+};'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "10"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "7"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "4"
+      E: "6"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "7"
+      E: "9"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "10"
+      E: "11"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "10"
+      E: "12"
+    }
+  ]
+}

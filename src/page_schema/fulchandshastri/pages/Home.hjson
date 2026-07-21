@@ -72,28 +72,18 @@ try {
     }
     {
       id: "2"
-      L: PageLayout
-      P: {
-        displayOrder: 1
-        componentName: Layout
-      }
-    }
-    {
-      id: "3"
       L: Attr
       P: {
         css:
           '''return `._id {
   padding: 0;
   margin-bottom: 0;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Carousel
         key: unique_3
         props:
-          '''
-const banners = args.contextData.homeSettings?.banners ?? [];
+          '''const banners = args.contextData.homeSettings?.banners ?? [];
 return {
   data: banners,
   contextName: "banner",
@@ -101,12 +91,11 @@ return {
   showArrows: true,
   showDots: true,
   hide: () => banners.length === 0
-};
-'''
+};'''
       }
     }
     {
-      id: "4"
+      id: "3"
       L: Attr
       P: {
         css:
@@ -124,8 +113,7 @@ return {
         componentName: Html
         key: unique_6
         props:
-          '''
-const banner = args.contextData.banner;
+          '''const banner = args.contextData.banner;
 const rawPath = banner?.P?.description != null ? String(banner.P.description).trim() : "";
 
 const localizeHref = (path) => {
@@ -148,17 +136,15 @@ const href = localizeHref(rawPath);
 return {
   as: href ? "a" : "div",
   ...(href ? { href } : {})
-};
-'''
+};'''
       }
     }
     {
-      id: "5"
+      id: "4"
       L: Attr
       P: {
         css:
-          '''
-const isFirst = (args.contextData.index ?? 0) === 0;
+          '''const isFirst = (args.contextData.index ?? 0) === 0;
 return [
   `@keyframes homeBannerFadeIn {
   from { opacity: 0; }
@@ -181,8 +167,7 @@ return [
         componentName: Html
         key: unique_7
         props:
-          '''
-const banner = args.contextData.banner;
+          '''const banner = args.contextData.banner;
 const fileName = banner?.P?.fileName != null ? String(banner.P.fileName).trim() : "";
 const isFirst = (args.contextData.index ?? 0) === 0;
 return {
@@ -190,8 +175,23 @@ return {
   src: fileName ? `/api/file/download/${encodeURIComponent(fileName)}` : undefined,
   alt: fileName || "Home banner",
   loading: isFirst ? "eager" : "lazy"
-};
-'''
+};'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  padding: 3rem 1rem;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "main"
+};'''
       }
     }
     {
@@ -199,19 +199,16 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  padding: 3rem 1rem;
-}`;
-'''
-        displayOrder: 2
+          '''return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+}`;'''
+        displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
-  as: "main"
-};
-'''
+          '''return {
+  as: "div"
+};'''
       }
     }
     {
@@ -219,20 +216,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  max-width: 1200px;
-  margin: 0 auto;
-}`;
-'''
+          '''return `._id {
+  text-align: center;
+  margin-bottom: 4rem;
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
+          '''const welcome = args.contextData.homeSettings?.welcome;
 return {
-  as: "div"
-};
-'''
+  as: "section",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el)
+};'''
       }
     }
     {
@@ -240,33 +237,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  text-align: center;
-  margin-bottom: 4rem;
-}`;
-'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''
-const welcome = args.contextData.homeSettings?.welcome;
-return {
-  as: "section",
-  "data-animate": "",
-
-  ref: (el) => el && args.fns.animateOnView(el)
-};
-'''
-      }
-    }
-    {
-      id: "9"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
+          '''return `._id {
   color: ${args.theme.var.color.text};
   font-size: 2.5rem;
   font-weight: 700;
@@ -276,18 +247,37 @@ return `._id {
   @media (max-width: 768px) {
     font-size: 2rem;
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const welcome = args.contextData.homeSettings?.welcome;
+          '''const welcome = args.contextData.homeSettings?.welcome;
 return {
   as: "h1",
   text: welcome?.welcomeTitle
-};
-'''
+};'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.text_light_200};
+  font-size: 1.125rem;
+  line-height: 1.8;
+  max-width: 800px;
+  margin: 0 auto;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const welcome = args.contextData.homeSettings?.welcome;
+return {
+  as: "p",
+  text: welcome?.welcomeDesc
+};'''
       }
     }
     {
@@ -295,25 +285,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  color: ${args.theme.var.color.text_light_200};
-  font-size: 1.125rem;
-  line-height: 1.8;
-  max-width: 800px;
-  margin: 0 auto;
-}`;
-'''
+          '''return `._id {
+  text-align: center;
+  margin-bottom: 4rem;
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const welcome = args.contextData.homeSettings?.welcome;
-return {
-  as: "p",
-  text: welcome?.welcomeDesc
-};
-'''
+          '''return {
+  as: "section",
+  "data-animate": "",
+  ref: (el) => el && args.fns.animateOnView(el)
+};'''
       }
     }
     {
@@ -321,31 +304,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  text-align: center;
-  margin-bottom: 4rem;
-}`;
-'''
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''
-return {
-  as: "section",
-  "data-animate": "",
-  ref: (el) => el && args.fns.animateOnView(el)
-};
-'''
-      }
-    }
-    {
-      id: "12"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
+          '''return `._id {
   color: ${args.theme.var.color.text};
   font-size: 2rem;
   font-weight: 600;
@@ -355,26 +314,22 @@ return `._id {
   @media (max-width: 768px) {
     font-size: 1.5rem;
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "h2",
   text: "Featured Video"
-};
-'''
+};'''
       }
     }
     {
-      id: "13"
+      id: "12"
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: block;
   width: 100%;
   max-width: 720px;
@@ -397,13 +352,11 @@ return `._id {
     outline: 2px solid ${args.theme.var.color.primary};
     outline-offset: 4px;
   }
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const YOUTUBE_ID = "QouGP5MZBCY";
+          '''const YOUTUBE_ID = "QouGP5MZBCY";
 const featuredVideo = {
   P: {
     youtubeId: YOUTUBE_ID,
@@ -418,8 +371,26 @@ return {
     debugger;
     args.fns.openPlayer(featuredVideo)
   }
-};
-'''
+};'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  position: relative;
+  padding-bottom: 56.25%;
+  overflow: hidden;
+  background: ${args.theme.var.color.background_light_200};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+};'''
       }
     }
     {
@@ -427,22 +398,23 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  position: relative;
-  padding-bottom: 56.25%;
-  overflow: hidden;
-  background: ${args.theme.var.color.background_light_200};
-}`;
-'''
+          '''return `._id {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
-  as: "div"
-};
-'''
+          '''return {
+  as: "img",
+  src: "https://img.youtube.com/vi/QouGP5MZBCY/hqdefault.jpg",
+  alt: "Featured video thumbnail",
+  loading: "lazy"
+};'''
       }
     }
     {
@@ -450,36 +422,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}`;
-'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''
-return {
-  as: "img",
-  src: "https://img.youtube.com/vi/QouGP5MZBCY/hqdefault.jpg",
-  alt: "Featured video thumbnail",
-  loading: "lazy"
-};
-'''
-      }
-    }
-    {
-      id: "16"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
+          '''return `._id {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -492,16 +435,33 @@ return `._id {
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: white;
+  margin-left: 0.25rem;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "icon",
+  icon: "carbon:play-filled",
+  width: 32,
+  height: 32
+};'''
       }
     }
     {
@@ -509,50 +469,22 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  color: white;
-  margin-left: 0.25rem;
-}`;
-'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''
-return {
-  as: "icon",
-  icon: "carbon:play-filled",
-  width: 32,
-  height: 32
-};
-'''
-      }
-    }
-    {
-      id: "18"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
+          '''return `._id {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 2rem;
   margin-bottom: 4rem;
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
-      id: "19"
+      id: "18"
       L: Attr
       P: {
         contextName: featureCard
@@ -560,44 +492,59 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const cards = args.contextData.homeSettings?.features?.featureCards ?? [];
+          '''const cards = args.contextData.homeSettings?.features?.featureCards ?? [];
 return {
   as: "fragment",
   data: cards.map((card) => ({
     ...card,
     align: card.align
   }))
-};
-'''
+};'''
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: FeatureCard
+        props: return args.contextData.featureCard;
       }
     }
     {
       id: "20"
       L: Attr
       P: {
-        displayOrder: 1
-        componentName: FeatureCard
+        displayOrder: 4
+        componentName: QuoteSection
         props:
-          '''
-return args.contextData.featureCard;
-'''
+          '''const quote = args.contextData.homeSettings?.quote;
+return {
+  text: quote.quoteText,
+  author: quote.quoteAuthor
+};'''
       }
     }
     {
       id: "21"
       L: Attr
       P: {
-        displayOrder: 4
-        componentName: QuoteSection
+        css:
+          '''return `._id {
+  background: ${args.theme.var.color.background_light_50};
+  padding: 3rem 2rem;
+  border-radius: 1rem;
+  margin-bottom: 4rem;
+}`;'''
+        displayOrder: 5
+        componentName: Html
         props:
-          '''
-const quote = args.contextData.homeSettings?.quote;
-return {
-  text: quote.quoteText,
-  author: quote.quoteAuthor
-};
-'''
+          '''return {
+  as: "section",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el)
+};'''
       }
     }
     {
@@ -605,25 +552,21 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  background: ${args.theme.var.color.background_light_50};
-  padding: 3rem 2rem;
-  border-radius: 1rem;
-  margin-bottom: 4rem;
-}`;
-'''
-        displayOrder: 5
+          '''return `._id {
+  color: ${args.theme.var.color.text};
+  font-size: 2rem;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 2rem;
+}`;'''
+        displayOrder: 1
         componentName: Html
         props:
-          '''
+          '''const mission = args.contextData.homeSettings?.mission;
 return {
-  as: "section",
-  "data-animate": "",
-
-  ref: (el) => el && args.fns.animateOnView(el)
-};
-'''
+  as: "h2",
+  text: mission?.missionTitle
+};'''
       }
     }
     {
@@ -631,43 +574,14 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  color: ${args.theme.var.color.text};
-  font-size: 2rem;
-  font-weight: 600;
-  text-align: center;
-  margin-bottom: 2rem;
-}`;
-'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''
-const mission = args.contextData.homeSettings?.mission;
-return {
-  as: "h2",
-  text: mission?.missionTitle
-};
-'''
-      }
-    }
-    {
-      id: "24"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
+          '''return `._id {
   max-width: 40rem;
   margin: 0 auto;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Carousel
         props:
-          '''
-const items = args.contextData.homeSettings?.mission?.missionItems ?? [];
+          '''const items = args.contextData.homeSettings?.mission?.missionItems ?? [];
 return {
   data: items,
   contextName: "missionItem",
@@ -675,8 +589,28 @@ return {
   showArrows: true,
   showDots: true,
   hide: () => items.length === 0
-};
-'''
+};'''
+      }
+    }
+    {
+      id: "24"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  text-align: center;
+  padding: 0.5rem 3rem 0.25rem;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const index = args.contextData.index ?? 0;
+return {
+  as: "div",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el, { delay: index === 0 ? 0 : 0.08 })
+};'''
       }
     }
     {
@@ -684,33 +618,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  text-align: center;
-  padding: 0.5rem 3rem 0.25rem;
-}`;
-'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''
-const index = args.contextData.index ?? 0;
-return {
-  as: "div",
-  "data-animate": "",
-
-  ref: (el) => el && args.fns.animateOnView(el, { delay: index === 0 ? 0 : 0.08 })
-};
-'''
-      }
-    }
-    {
-      id: "26"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
+          '''return `._id {
   width: 4rem;
   height: 4rem;
   background: ${args.theme.var.color.primary_light_100};
@@ -719,16 +627,33 @@ return `._id {
   align-items: center;
   justify-content: center;
   margin: 0 auto 1rem;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
+      }
+    }
+    {
+      id: "26"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.primary};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const item = args.contextData.missionItem;
+return {
+  as: "icon",
+  icon: item?.icon,
+  width: 32,
+  height: 32
+};'''
       }
     }
     {
@@ -736,54 +661,34 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  color: ${args.theme.var.color.primary};
-}`;
-'''
-        displayOrder: 1
+          '''return `._id {
+  color: ${args.theme.var.color.text_light_200};
+  font-size: 1rem;
+  line-height: 1.6;
+}`;'''
+        displayOrder: 2
         componentName: Html
         props:
-          '''
-const item = args.contextData.missionItem;
+          '''const item = args.contextData.missionItem;
 return {
-  as: "icon",
-  icon: item?.icon,
-  width: 32,
-  height: 32
-};
-'''
+  as: "p",
+  text: item?.text
+};'''
       }
     }
     {
       id: "28"
-      L: Attr
+      L: PageLayout
       P: {
-        css:
-          '''
-return `._id {
-  color: ${args.theme.var.color.text_light_200};
-  font-size: 1rem;
-  line-height: 1.6;
-}`;
-'''
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''
-const item = args.contextData.missionItem;
-return {
-  as: "p",
-  text: item?.text
-};
-'''
+        displayOrder: 1
+        componentName: Layout
       }
     }
   ]
   edges: [
     {
       id: e1
-      T: PageLayout
+      T: Attr
       S: "1"
       E: "2"
     }
@@ -791,157 +696,157 @@ return {
       id: e2
       T: Attr
       S: "1"
-      E: "3"
+      E: "5"
     }
     {
       id: e3
-      T: Attr
+      T: PageLayout
       S: "1"
-      E: "6"
+      E: "28"
     }
     {
       id: e4
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e5
       T: Attr
       S: "3"
       E: "4"
     }
     {
-      id: e5
+      id: e6
       T: Attr
-      S: "4"
-      E: "5"
+      S: "5"
+      E: "6"
     }
     {
-      id: e6
+      id: e7
       T: Attr
       S: "6"
       E: "7"
     }
     {
-      id: e7
+      id: e8
+      T: Attr
+      S: "6"
+      E: "10"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "6"
+      E: "17"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "6"
+      E: "20"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "6"
+      E: "21"
+    }
+    {
+      id: e12
       T: Attr
       S: "7"
       E: "8"
     }
     {
-      id: e8
-      T: Attr
-      S: "7"
-      E: "11"
-    }
-    {
-      id: e9
-      T: Attr
-      S: "7"
-      E: "18"
-    }
-    {
-      id: e10
-      T: Attr
-      S: "7"
-      E: "21"
-    }
-    {
-      id: e11
-      T: Attr
-      S: "7"
-      E: "22"
-    }
-    {
-      id: e12
-      T: Attr
-      S: "8"
-      E: "9"
-    }
-    {
       id: e13
       T: Attr
-      S: "8"
-      E: "10"
+      S: "7"
+      E: "9"
     }
     {
       id: e14
       T: Attr
-      S: "11"
-      E: "12"
+      S: "10"
+      E: "11"
     }
     {
       id: e15
       T: Attr
-      S: "11"
-      E: "13"
+      S: "10"
+      E: "12"
     }
     {
       id: e16
+      T: Attr
+      S: "12"
+      E: "13"
+    }
+    {
+      id: e17
       T: Attr
       S: "13"
       E: "14"
     }
     {
-      id: e17
-      T: Attr
-      S: "14"
-      E: "15"
-    }
-    {
       id: e18
       T: Attr
-      S: "14"
-      E: "16"
+      S: "13"
+      E: "15"
     }
     {
       id: e19
       T: Attr
-      S: "16"
-      E: "17"
+      S: "15"
+      E: "16"
     }
     {
       id: e20
+      T: Attr
+      S: "17"
+      E: "18"
+    }
+    {
+      id: e21
       T: Attr
       S: "18"
       E: "19"
     }
     {
-      id: e21
-      T: Attr
-      S: "19"
-      E: "20"
-    }
-    {
       id: e22
       T: Attr
-      S: "22"
-      E: "23"
+      S: "21"
+      E: "22"
     }
     {
       id: e23
       T: Attr
-      S: "22"
-      E: "24"
+      S: "21"
+      E: "23"
     }
     {
       id: e24
+      T: Attr
+      S: "23"
+      E: "24"
+    }
+    {
+      id: e25
       T: Attr
       S: "24"
       E: "25"
     }
     {
-      id: e25
-      T: Attr
-      S: "25"
-      E: "26"
-    }
-    {
       id: e26
       T: Attr
-      S: "25"
-      E: "28"
+      S: "24"
+      E: "27"
     }
     {
       id: e27
       T: Attr
-      S: "26"
-      E: "27"
+      S: "25"
+      E: "26"
     }
   ]
 }

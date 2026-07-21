@@ -1,0 +1,235 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        public: true
+        settingsPageId: home
+        description: Home
+        isNoPermissionCheck: true
+        fns: return { enabled: () => true }
+        url: /
+        key: Home
+        props:
+          '''
+const locale = args.params?.lang ? String(args.params.lang).toLowerCase() : undefined;
+return {
+  contextName: "homeSettings",
+  serverFunction: `
+try {
+  const result = await args.executeNamedServerFunction({
+    functionName: "loadPublicPageSettings",
+    contextData: { pageId: "home", allowPublicRead: true, locale: ${JSON.stringify(locale ?? null)} }
+  });
+  if (!result?.result?.success) return {};
+  return result.result.data?.sections?.content || {};
+} catch (error) {
+  console.error("Error loading page settings:", error);
+  return {};
+}
+`
+};
+'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  padding: 4rem 1rem 3rem;
+  background: linear-gradient(
+    180deg,
+    ${args.theme.var.color.primary_light_100} 0%,
+    ${args.theme.var.color.background} 100%
+  );
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "main" };
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "div" };
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0;
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 800;
+  line-height: 1.15;
+  color: ${args.theme.var.color.text};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const content = args.contextData.homeSettings || {};
+return {
+  as: "h1",
+  text: content.pageTitle || "Amazon Product Picks"
+};'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0;
+  font-size: 1.125rem;
+  line-height: 1.7;
+  color: ${args.theme.var.color.text_light_200};
+  max-width: 42rem;
+  margin-left: auto;
+  margin-right: auto;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const content = args.contextData.homeSettings || {};
+return {
+  as: "p",
+  text: content.pageSubtitle || "Curated affiliate recommendations with honest reviews and buying guides."
+};'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.5rem;
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props: return { as: "div" };
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''const content = args.contextData.homeSettings || {};
+const lang = args.params?.lang && /^[a-z]{2,3}$/i.test(String(args.params.lang))
+  ? String(args.params.lang).toLowerCase()
+  : "en";
+const path = content.ctaHref || "/products";
+const target = path === "/" ? `/${lang}` : `/${lang}${path.startsWith("/") ? path : `/${path}`}`;
+return {
+  text: content.ctaText || "Browse products",
+  variant: "primary",
+  onClick: () => args.navigate(target)
+};'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: ${args.theme.var.color.text_light_300};
+  max-width: 40rem;
+  margin-left: auto;
+  margin-right: auto;
+}`;'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''const content = args.contextData.homeSettings || {};
+return {
+  as: "p",
+  text: content.disclosureText || "As an Amazon Associate we earn from qualifying purchases."
+};'''
+      }
+    }
+    {
+      id: "9"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: Layout
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: PageLayout
+      S: "1"
+      E: "9"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "3"
+      E: "6"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "3"
+      E: "8"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+  ]
+}

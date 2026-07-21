@@ -1,0 +1,201 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        public: true
+        settingsPageId: products
+        isNoPermissionCheck: true
+        fns: return { enabled: () => true }
+        url: /products/:category?
+        key: Products
+        props:
+          '''
+const locale = args.params?.lang ? String(args.params.lang).toLowerCase() : undefined;
+const routeParams = args.context?.getParams?.(args.meta) || {};
+const categoryKey = routeParams.category != null && String(routeParams.category).trim() !== ""
+  ? String(routeParams.category).trim()
+  : null;
+return {
+  contextName: "productsSettings",
+  serverFunction: `
+try {
+  const pageResult = await args.executeNamedServerFunction({
+    functionName: "loadPublicPageSettings",
+    contextData: { pageId: "products", allowPublicRead: true, locale: ${JSON.stringify(locale ?? null)} }
+  });
+  const folderResult = await args.executeNamedServerFunction({
+    functionName: "loadPublicProductsFolder",
+    contextData: {
+      tableKey: "products",
+      tableVertexLabel: "AffiliateProduct",
+      categoryKey: ${JSON.stringify(categoryKey)},
+      locale: ${JSON.stringify(locale ?? null)}
+    }
+  });
+
+  const sections = pageResult?.result?.success ? (pageResult.result.data?.sections || {}) : {};
+  const folderData = folderResult?.result?.success ? (folderResult.result.data || {}) : {};
+
+  return {
+    content: sections.content || {},
+    folderData
+  };
+} catch (error) {
+  console.error("Error loading products page:", error);
+  return {
+    content: {},
+    folderData: { folders: [], items: [], breadcrumb: [] }
+  };
+}
+`
+};
+'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  padding: 1rem;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props: return { as: "main" };
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "div" };
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0 0 1.5rem 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const content = args.contextData.productsSettings?.content || {};
+return {
+  as: "h1",
+  text: content.pageTitle || "Products"
+};'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: -0.75rem 0 1.5rem 0;
+  color: ${args.theme.var.color.text_light_300};
+  font-size: 1rem;
+  line-height: 1.5;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const content = args.contextData.productsSettings?.content || {};
+return {
+  as: "p",
+  text: content.pageSubtitle || "Browse our curated Amazon product picks",
+  hide: !content.pageSubtitle && !content.pageTitle
+};'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: ProductBrowser
+        props:
+          '''const content = args.contextData.productsSettings?.content || {};
+const folderData = args.contextData.productsSettings?.folderData || {};
+const locale = args.params?.lang ? String(args.params.lang).toLowerCase() : undefined;
+const langPrefix = locale && /^[a-z]{2,3}$/i.test(locale) ? `/${locale}` : "";
+return {
+  tableKey: "products",
+  tableVertexLabel: "AffiliateProduct",
+  locale,
+  useUrlState: true,
+  basePath: `${langPrefix}/products`,
+  initialData: folderData,
+  labels: {
+    rootBreadcrumbLabel: content.rootBreadcrumbLabel || content.pageTitle || "Products",
+    emptyCategoriesText: content.emptyCategoriesText || "No categories in this location.",
+    emptyProductsText: content.emptyProductsText || "No products in this category.",
+    loadingText: "Loading…"
+  }
+};'''
+      }
+    }
+    {
+      id: "7"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: Layout
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: PageLayout
+      S: "1"
+      E: "7"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "3"
+      E: "6"
+    }
+  ]
+}

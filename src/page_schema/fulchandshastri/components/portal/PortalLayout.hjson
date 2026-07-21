@@ -22,11 +22,9 @@ return {
         displayOrder: 1
         componentName: ConfirmProvider
         props:
-          '''
-return {
+          '''return {
   getUsePolarisUI: () => true
-};
-'''
+};'''
       }
     }
     {
@@ -36,13 +34,11 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "link",
   rel: "icon",
   href: "/api/file/downloadCompanyFavicon"
-};
-'''
+};'''
       }
     }
     {
@@ -130,8 +126,7 @@ return {
         props:
           '''return {
   as: "div",
-};
-'''
+};'''
       }
     }
     {
@@ -149,8 +144,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   position: absolute;
   top: 0;
   left: 0;
@@ -170,21 +164,18 @@ return `._id {
   to {
     opacity: 1;
   }
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const isNavigating = args.fns.isNavigating?.();
+          '''const isNavigating = args.fns.isNavigating?.();
 
 return {
   as: "div",
   style: {
     display: isNavigating ? "flex" : "none"
   }
-};
-'''
+};'''
       }
     }
     {
@@ -194,12 +185,10 @@ return {
         displayOrder: 1
         componentName: LoadingSpinner
         props:
-          '''
-return {
+          '''return {
   size: "medium",
   color: "primary"
-};
-'''
+};'''
       }
     }
   ]

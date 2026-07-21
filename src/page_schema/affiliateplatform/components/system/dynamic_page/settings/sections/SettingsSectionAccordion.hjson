@@ -1,0 +1,189 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        dynamicComponent: SettingsSectionRenderer
+        fns:
+          '''
+const getSectionConfig = () => args.contextData.props?.sectionConfig || null;
+const [expandedSectionIds, setExpandedSectionIds] = args.createSignal([]);
+
+const toggleSection = (sectionId) => {
+  setExpandedSectionIds((current) => {
+    if (current.includes(sectionId)) return current.filter((id) => id !== sectionId);
+    return [...current, sectionId];
+  });
+};
+
+const isExpanded = (sectionId) => expandedSectionIds().includes(sectionId);
+
+const getNestedSections = () => {
+  const sectionConfig = getSectionConfig();
+  return Array.isArray(sectionConfig?.sections) ? sectionConfig.sections : [];
+};
+
+return {
+  getSectionConfig,
+  toggleSection,
+  isExpanded,
+  getNestedSections
+};
+'''
+        key: SettingsSectionAccordion
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin-bottom: ${args.theme.var.spacing.lg};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+};'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: ${args.theme.var.spacing.md};
+  color: ${args.theme.var.color.text};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const sectionConfig = args.fns.getSectionConfig();
+return {
+  as: "h2",
+  text: sectionConfig?.title || "",
+  hide: !sectionConfig?.title
+};'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        contextName: nestedSection
+        css:
+          '''return `._id {
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.md};
+  margin-bottom: ${args.theme.var.spacing.sm};
+  overflow: hidden;
+}`;'''
+        loop: true
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  data: args.fns.getNestedSections()
+};'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''const nestedSection = args.contextData.nestedSection;
+const expanded = args.fns.isExpanded(nestedSection.id);
+return expanded
+  ? `._id {
+  width: 100%;
+  text-align: left;
+  padding: ${args.theme.var.spacing.md};
+  background: ${args.theme.var.color.background_light_200};
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  color: ${args.theme.var.color.text};
+}`
+  : `._id {
+  width: 100%;
+  text-align: left;
+  padding: ${args.theme.var.spacing.md};
+  background: ${args.theme.var.color.background_light_100};
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  color: ${args.theme.var.color.text};
+}
+._id:hover {
+  background: ${args.theme.var.color.background_light_200};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const nestedSection = args.contextData.nestedSection;
+return {
+  as: "button",
+  type: "button",
+  text: nestedSection.title || nestedSection.id,
+  onClick: () => args.fns.toggleSection(nestedSection.id)
+};'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: SettingsSectionRenderer
+        props:
+          '''const nestedSection = args.contextData.nestedSection;
+const expanded = args.fns.isExpanded(nestedSection.id);
+return {
+  sectionConfig: nestedSection,
+  siteLanguages: args.contextData.props?.siteLanguages || [],
+  hide: !expanded
+};'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "4"
+      E: "6"
+    }
+  ]
+}

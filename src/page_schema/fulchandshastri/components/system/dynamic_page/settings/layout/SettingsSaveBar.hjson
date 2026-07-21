@@ -65,8 +65,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const isVisible = args.fns.hasDirtySections();
+          '''const isVisible = args.fns.hasDirtySections();
 return `._id {
   position: sticky;
   bottom: 0;
@@ -84,18 +83,15 @@ return `._id {
   opacity: ${isVisible ? "1" : "0"};
   pointer-events: ${isVisible ? "auto" : "none"};
   transition: transform 300ms ease, opacity 150ms ease;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const saveStrategy = args.fns.getSaveStrategy();
+          '''const saveStrategy = args.fns.getSaveStrategy();
 return {
   as: "div",
   hide: saveStrategy?.showSaveBar === false
-};
-'''
+};'''
       }
     }
     {
@@ -103,26 +99,22 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   font-size: 0.875rem;
   color: ${args.theme.var.color.text};
   font-weight: 500;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const dirtyCount = args.fns.getDirtySectionIds().length;
+          '''const dirtyCount = args.fns.getDirtySectionIds().length;
 const hasDirty = args.fns.hasDirtySections();
 return {
   as: "span",
   text: hasDirty
     ? `Unsaved changes in ${dirtyCount} section${dirtyCount > 1 ? "s" : ""}`
     : "No unsaved changes"
-};
-'''
+};'''
       }
     }
     {
@@ -130,21 +122,17 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   align-items: center;
   gap: ${args.theme.var.spacing.sm};
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -154,14 +142,12 @@ return {
         displayOrder: 1
         componentName: Button
         props:
-          '''
-return {
+          '''return {
   variant: "secondary",
   text: "Discard",
   onClick: args.fns.handleDiscard,
   disabled: !args.fns.hasDirtySections() || args.fns.isSaving()
-};
-'''
+};'''
       }
     }
     {
@@ -171,14 +157,12 @@ return {
         displayOrder: 2
         componentName: Button
         props:
-          '''
-return {
+          '''return {
   variant: "primary",
   text: args.fns.isSaving() ? "Saving..." : "Save",
   onClick: args.fns.handleSave,
   disabled: !args.fns.hasDirtySections() || args.fns.isSaving()
-};
-'''
+};'''
       }
     }
   ]

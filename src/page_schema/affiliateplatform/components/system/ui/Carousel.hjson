@@ -1,0 +1,452 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        description: Embla carousel with overlay prev/next on slides, dots below, and children slot for slides
+        key: Carousel
+        updatedAt: 2026-07-11T11:45:05.128Z
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  width: 100%;
+}`;'''
+        displayOrder: 1
+        fns:
+          '''// https://www.embla-carousel.com/docs/get-started/solid
+// Embla root = viewport; it reads root.children[0] as the container.
+// Bind only after the container mounts (see container onMount), otherwise
+// visiting the page can init Embla while viewport still has no children.
+const carouselOptions = {
+  loop: args.contextData.props?.loop === true,
+  align: args.contextData.props?.align || "center",
+  ...(args.contextData.props?.options || {})
+};
+const [emblaRef, emblaApi] = args.useCarousel(() => carouselOptions);
+
+const [prevBtnDisabled, setPrevBtnDisabled] = args.createSignal(true);
+const [nextBtnDisabled, setNextBtnDisabled] = args.createSignal(true);
+const [selectedIndex, setSelectedIndex] = args.createSignal(0);
+const [scrollSnaps, setScrollSnaps] = args.createSignal([]);
+
+const onPrevButtonClick = () => {
+  const api = emblaApi();
+  if (!api) return;
+  api.scrollPrev();
+};
+
+const onNextButtonClick = () => {
+  const api = emblaApi();
+  if (!api) return;
+  api.scrollNext();
+};
+
+const onDotButtonClick = (index) => {
+  const api = emblaApi();
+  if (!api) return;
+  api.scrollTo(index);
+};
+
+const onInit = (api) => {
+  setScrollSnaps(api.scrollSnapList());
+};
+
+const onSelect = (api) => {
+  setPrevBtnDisabled(!api.canScrollPrev());
+  setNextBtnDisabled(!api.canScrollNext());
+  setSelectedIndex(api.selectedScrollSnap());
+};
+
+args.createEffect(
+  args.on(emblaApi, (api) => {
+    if (!api) return;
+
+    onInit(api);
+    onSelect(api);
+    api
+      .on("reInit", onInit)
+      .on("reInit", onSelect)
+      .on("select", onSelect)
+      .on("slidesChanged", onInit);
+
+    args.onCleanup(() => {
+      api
+        .off("reInit", onInit)
+        .off("reInit", onSelect)
+        .off("select", onSelect)
+        .off("slidesChanged", onInit);
+    });
+  })
+);
+
+return {
+  emblaRef,
+  emblaApi,
+  prevBtnDisabled,
+  nextBtnDisabled,
+  selectedIndex,
+  scrollSnaps,
+  onPrevButtonClick,
+  onNextButtonClick,
+  onDotButtonClick,
+  slideSize: () => args.contextData.props?.slideSize || "100%",
+  slideSpacing: () => args.contextData.props?.slideSpacing || "0",
+  showArrows: () => args.contextData.props?.showArrows !== false,
+  showDots: () => args.contextData.props?.showDots !== false
+};'''
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  class: args.contextData.props.class
+};'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  position: relative;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+};'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  overflow: hidden;
+  width: 100%;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+};'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''const slideSize = args.fns.slideSize();
+const slideSpacing = args.fns.slideSpacing();
+const hasSpacing = slideSpacing && slideSpacing !== "0" && slideSpacing !== "0rem";
+
+return `._id {
+  display: flex;
+  touch-action: pan-y pinch-zoom;
+  ${hasSpacing ? `margin-left: calc(${slideSpacing} * -1);` : ""}
+}
+
+._id > * {
+  flex: 0 0 ${slideSize};
+  min-width: 0;
+  ${hasSpacing ? `padding-left: ${slideSpacing};` : ""}
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const data = args.contextData.props?.data;
+const contextName = args.contextData.props?.contextName || "slide";
+const hasData = Array.isArray(data);
+
+return {
+  as: "div",
+  ...(hasData
+    ? {
+        data,
+        contextName,
+        loop: true
+      }
+    : {}),
+  // Embla root is the viewport (parent). It does root.children[0] for the container.
+  // Bind here on container mount so the child already exists — viewport onMount is too early.
+  onMount: () => {
+    const container = args.ref();
+    const viewport = container?.parentElement;
+    if (viewport) {
+      args.fns.emblaRef(viewport);
+    }
+    return () => args.fns.emblaRef(undefined);
+  }
+};'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Slot
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  data: [
+    {
+      side: "prev",
+      icon: "carbon:chevron-left",
+      ariaLabel: "Previous slide",
+      onClick: args.fns.onPrevButtonClick,
+      disabled: args.fns.prevBtnDisabled
+    },
+    {
+      side: "next",
+      icon: "carbon:chevron-right",
+      ariaLabel: "Next slide",
+      onClick: args.fns.onNextButtonClick,
+      disabled: args.fns.nextBtnDisabled
+    }
+  ],
+  contextName: "control",
+  loop: true,
+  hide: !args.fns.showArrows()
+};'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''const side = args.contextData.control?.side || "prev";
+const inset = side === "prev" ? "left: 0.75rem;" : "right: 0.75rem;";
+const insetMobile = side === "prev" ? "left: 0.5rem;" : "right: 0.5rem;";
+
+return `._id {
+  appearance: none;
+  position: absolute;
+  top: 50%;
+  ${inset}
+  transform: translateY(-50%);
+  z-index: 2;
+  background: ${args.theme.var.color.background};
+  touch-action: manipulation;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  border: 1px solid ${args.theme.var.color.border};
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  color: ${args.theme.var.color.text};
+  transition: background 150ms ease, border-color 150ms ease, color 150ms ease, opacity 150ms ease;
+
+  &:hover:not(:disabled) {
+    background: ${args.theme.var.color.primary_light_100};
+    border-color: ${args.theme.var.color.primary_light_400};
+    color: ${args.theme.var.color.primary};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${args.theme.var.color.primary};
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+
+  @media (max-width: 640px) {
+    ${insetMobile}
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const control = args.contextData.control;
+const disabled =
+  typeof control.disabled === "function" ? control.disabled() : control.disabled;
+
+return {
+  as: "button",
+  type: "button",
+  disabled,
+  onClick: control.onClick,
+  "aria-label": control.ariaLabel
+};'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "icon",
+  icon: args.contextData.control.icon,
+  width: 18,
+  height: 18
+};'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 1.25rem;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  data: args.fns.scrollSnaps().map((_, index) => index),
+  contextName: "dotIndex",
+  loop: true,
+  hide: !args.fns.showDots()
+};'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  appearance: none;
+  background: ${args.theme.var.color.border};
+  touch-action: manipulation;
+  display: flex;
+  cursor: pointer;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  transition: background 150ms ease, transform 150ms ease, width 150ms ease;
+
+  &:hover {
+    background: ${args.theme.var.color.text_light_400};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${args.theme.var.color.primary};
+    outline-offset: 2px;
+  }
+
+  &.embla__dot--selected {
+    background: ${args.theme.var.color.primary};
+    width: 1.25rem;
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const index = args.contextData.dotIndex;
+const selected = args.fns.selectedIndex() === index;
+
+return {
+  as: "button",
+  type: "button",
+  class: selected ? "embla__dot--selected" : undefined,
+  onClick: () => args.fns.onDotButtonClick(index),
+  "aria-label": "Go to slide " + (index + 1),
+  "aria-current": selected ? "true" : undefined
+};'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "10"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "7"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "10"
+      E: "11"
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Returns preview URL map keyed by settingsPageId from Page vertices.
+        body:
+          '''
+/**
+ * Loads settings page preview URLs from Page vertices.
+ * Returns { previewUrls: { [settingsPageId]: url }, pages: [{ settingsPageId, url, key, title }] }
+ */
+
+try {
+  const result = await args.session.run(
+    `
+    MATCH (p:Page)
+    WHERE p.settingsPageId IS NOT NULL
+      AND p.url IS NOT NULL
+      AND trim(toString(p.settingsPageId)) <> ""
+      AND trim(toString(p.url)) <> ""
+    RETURN
+      p.settingsPageId AS settingsPageId,
+      p.url AS url,
+      p.key AS key,
+      p.title AS title
+    ORDER BY toLower(toString(p.title)), toLower(toString(p.key))
+    `
+  );
+
+  const previewUrls = { global: "/" };
+  const pages = [];
+
+  for (let i = 0; i < result.records.length; i++) {
+    const record = result.records[i];
+    const settingsPageId = record.get("settingsPageId");
+    const url = record.get("url");
+    if (settingsPageId == null || url == null) continue;
+
+    const pageId = String(settingsPageId).trim();
+    const pageUrl = String(url).trim();
+    if (!pageId || !pageUrl) continue;
+
+    previewUrls[pageId] = pageUrl;
+    pages.push({
+      settingsPageId: pageId,
+      url: pageUrl,
+      key: record.get("key") != null ? String(record.get("key")) : null,
+      title: record.get("title") != null ? String(record.get("title")) : null
+    });
+  }
+
+  return {
+    success: true,
+    data: { previewUrls, pages },
+    message: `Loaded ${pages.length} page preview URLs`
+  };
+} catch (error) {
+  console.error("getSettingsPagePreviewUrls:", error);
+  return {
+    success: false,
+    message: error?.message || "Failed to load page preview URLs"
+  };
+}
+'''
+        key: getSettingsPagePreviewUrls
+      }
+    }
+  ]
+  edges: []
+}

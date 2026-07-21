@@ -62,16 +62,13 @@ try {
         css:
           '''return `._id {
   padding: 1rem;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "main"
-};
-'''
+};'''
       }
     }
     {
@@ -79,20 +76,16 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   max-width: 1200px;
   margin: 0 auto;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -102,8 +95,7 @@ return {
         displayOrder: 2
         componentName: GalleryBrowser
         props:
-          '''
-const content = args.contextData.gallerySettings?.content || {};
+          '''const content = args.contextData.gallerySettings?.content || {};
 const folderData = args.contextData.gallerySettings?.folderData || {};
 const locale = args.params?.lang ? String(args.params.lang).toLowerCase() : undefined;
 const langPrefix = locale && /^[a-z]{2,3}$/i.test(locale) ? `/${locale}` : "";
@@ -120,8 +112,7 @@ return {
     emptyFilesText: content.emptyFilesText || "No files in this folder.",
     loadingText: "Loading…"
   }
-};
-'''
+};'''
       }
     }
     {

@@ -34,10 +34,20 @@ try {
     }
     {
       id: "2"
-      L: PageLayout
+      L: Attr
       P: {
+        css:
+          '''return `._id {
+  background: linear-gradient(135deg, ${args.theme.var.color.primary_light_100} 0%, ${args.theme.var.color.primary_light_50} 100%);
+  padding: 3rem 1rem;
+  text-align: center;
+}`;'''
         displayOrder: 1
-        componentName: Layout
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+};'''
       }
     }
     {
@@ -45,30 +55,7 @@ try {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  background: linear-gradient(135deg, ${args.theme.var.color.primary_light_100} 0%, ${args.theme.var.color.primary_light_50} 100%);
-  padding: 3rem 1rem;
-  text-align: center;
-}`;
-'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''
-return {
-  as: "div"
-};
-'''
-      }
-    }
-    {
-      id: "4"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
+          '''return `._id {
   color: ${args.theme.var.color.text};
   font-size: 3rem;
   font-weight: 700;
@@ -77,18 +64,31 @@ return `._id {
   @media (max-width: 768px) {
     font-size: 2rem;
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const content = args.contextData.videosSettings?.content;
+          '''const content = args.contextData.videosSettings?.content;
 return {
   as: "h1",
   text: content?.pageTitle
-};
-'''
+};'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  padding: 3rem 1rem;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "main"
+};'''
       }
     }
     {
@@ -96,19 +96,16 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  padding: 3rem 1rem;
-}`;
-'''
-        displayOrder: 2
+          '''return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+}`;'''
+        displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
-  as: "main"
-};
-'''
+          '''return {
+  as: "div"
+};'''
       }
     }
     {
@@ -116,20 +113,22 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  max-width: 1200px;
-  margin: 0 auto;
-}`;
-'''
+          '''return `._id {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 3rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
-  as: "div"
-};
-'''
+          '''return {
+  as: "div",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el)
+};'''
       }
     }
     {
@@ -137,35 +136,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 3rem;
-  flex-wrap: wrap;
-  justify-content: center;
-}`;
-'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''
-return {
-  as: "div",
-  "data-animate": "",
-
-  ref: (el) => el && args.fns.animateOnView(el)
-};
-'''
-      }
-    }
-    {
-      id: "8"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
+          '''return `._id {
   padding: 0.5rem 1.5rem;
   background: ${args.theme.var.color.primary};
   color: ${args.theme.var.color.primary_text};
@@ -179,135 +150,117 @@ return `._id {
     background: ${args.theme.var.color.primary_dark_200};
     transform: translateY(-1px);
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "button"
-};
-'''
+};'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const content = args.contextData.videosSettings?.content;
+return {
+  as: "span",
+  text: content?.category1Text
+};'''
       }
     }
     {
       id: "9"
       L: Attr
       P: {
-        displayOrder: 1
+        css:
+          '''return `._id {
+  padding: 0.5rem 1.5rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  border: 1px solid ${args.theme.var.color.background_light_300};
+  border-radius: 9999px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${args.theme.var.color.background_light_100};
+  }
+}`;'''
+        displayOrder: 2
         componentName: Html
         props:
-          '''
-const content = args.contextData.videosSettings?.content;
-return {
-  as: "span",
-  text: content?.category1Text
-};
-'''
+          '''return {
+  as: "button"
+};'''
       }
     }
     {
       id: "10"
       L: Attr
       P: {
-        css:
-          '''
-return `._id {
-  padding: 0.5rem 1.5rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
-  border: 1px solid ${args.theme.var.color.background_light_300};
-  border-radius: 9999px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background: ${args.theme.var.color.background_light_100};
-  }
-}`;
-'''
-        displayOrder: 2
+        displayOrder: 1
         componentName: Html
         props:
-          '''
+          '''const content = args.contextData.videosSettings?.content;
 return {
-  as: "button"
-};
-'''
+  as: "span",
+  text: content?.category2Text
+};'''
       }
     }
     {
       id: "11"
       L: Attr
       P: {
-        displayOrder: 1
+        css:
+          '''return `._id {
+  padding: 0.5rem 1.5rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  border: 1px solid ${args.theme.var.color.background_light_300};
+  border-radius: 9999px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${args.theme.var.color.background_light_100};
+  }
+}`;'''
+        displayOrder: 3
         componentName: Html
         props:
-          '''
-const content = args.contextData.videosSettings?.content;
-return {
-  as: "span",
-  text: content?.category2Text
-};
-'''
+          '''return {
+  as: "button"
+};'''
       }
     }
     {
       id: "12"
       L: Attr
       P: {
-        css:
-          '''
-return `._id {
-  padding: 0.5rem 1.5rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
-  border: 1px solid ${args.theme.var.color.background_light_300};
-  border-radius: 9999px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background: ${args.theme.var.color.background_light_100};
-  }
-}`;
-'''
-        displayOrder: 3
+        displayOrder: 1
         componentName: Html
         props:
-          '''
+          '''const content = args.contextData.videosSettings?.content;
 return {
-  as: "button"
-};
-'''
+  as: "span",
+  text: content?.category3Text
+};'''
       }
     }
     {
       id: "13"
       L: Attr
       P: {
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''
-const content = args.contextData.videosSettings?.content;
-return {
-  as: "span",
-  text: content?.category3Text
-};
-'''
-      }
-    }
-    {
-      id: "14"
-      L: Attr
-      P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   padding: 0.5rem 1.5rem;
   background: ${args.theme.var.color.background};
   color: ${args.theme.var.color.text};
@@ -320,36 +273,31 @@ return `._id {
   &:hover {
     background: ${args.theme.var.color.background_light_100};
   }
-}`;
-'''
+}`;'''
         displayOrder: 4
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "button"
-};
-'''
+};'''
       }
     }
     {
-      id: "15"
+      id: "14"
       L: Attr
       P: {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const content = args.contextData.videosSettings?.content;
+          '''const content = args.contextData.videosSettings?.content;
 return {
   as: "span",
   text: content?.category4Text
-};
-'''
+};'''
       }
     }
     {
-      id: "16"
+      id: "15"
       L: Attr
       P: {
         contextName: videos
@@ -357,13 +305,29 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const items = args.contextData.videosSettings?.videos?.videos ?? [];
+          '''const items = args.contextData.videosSettings?.videos?.videos ?? [];
 return {
   as: "fragment",
   data: items
-};
-'''
+};'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 2rem;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+};'''
       }
     }
     {
@@ -371,30 +335,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 2rem;
-}`;
-'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''
-return {
-  as: "div"
-};
-'''
-      }
-    }
-    {
-      id: "18"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
+          '''return `._id {
   display: block;
   background: ${args.theme.var.color.background};
   border-radius: 0.75rem;
@@ -407,13 +348,11 @@ return `._id {
     transform: translateY(-4px);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const video = args.contextData.videos;
+          '''const video = args.contextData.videos;
 const index = args.contextData.index ?? 0;
 return {
   as: "a",
@@ -423,8 +362,26 @@ return {
   "data-animate": "",
 
   ref: (el) => el && args.fns.animateOnView(el, { delay: index * 0.08 })
-};
-'''
+};'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  position: relative;
+  padding-bottom: 56.25%;
+  overflow: hidden;
+  background: ${args.theme.var.color.background_light_200};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+};'''
       }
     }
     {
@@ -432,22 +389,23 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  position: relative;
-  padding-bottom: 56.25%;
-  overflow: hidden;
-  background: ${args.theme.var.color.background_light_200};
-}`;
-'''
+          '''return `._id {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
+          '''const video = args.contextData.videos;
 return {
-  as: "div"
-};
-'''
+  as: "img",
+  src: video.thumbnail,
+  alt: video.title
+};'''
       }
     }
     {
@@ -455,36 +413,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}`;
-'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''
-const video = args.contextData.videos;
-return {
-  as: "img",
-  src: video.thumbnail,
-  alt: video.title
-};
-'''
-      }
-    }
-    {
-      id: "21"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
+          '''return `._id {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -502,16 +431,33 @@ return `._id {
     background: rgba(0, 0, 0, 0.9);
     transform: translate(-50%, -50%) scale(1.1);
   }
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
+      }
+    }
+    {
+      id: "21"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: white;
+  margin-left: 4px;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "icon",
+  icon: "carbon:play-filled",
+  width: 24,
+  height: 24
+};'''
       }
     }
     {
@@ -519,32 +465,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  color: white;
-  margin-left: 4px;
-}`;
-'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''
-return {
-  as: "icon",
-  icon: "carbon:play-filled",
-  width: 24,
-  height: 24
-};
-'''
-      }
-    }
-    {
-      id: "23"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
+          '''return `._id {
   position: absolute;
   bottom: 8px;
   right: 8px;
@@ -554,18 +475,31 @@ return `._id {
   border-radius: 0.25rem;
   font-size: 0.875rem;
   font-weight: 500;
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-const video = args.contextData.videos;
+          '''const video = args.contextData.videos;
 return {
   as: "span",
   text: video.duration
-};
-'''
+};'''
+      }
+    }
+    {
+      id: "23"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  padding: 1.25rem;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+};'''
       }
     }
     {
@@ -573,19 +507,21 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  padding: 1.25rem;
-}`;
-'''
-        displayOrder: 2
+          '''return `._id {
+  color: ${args.theme.var.color.text};
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0 0 0.75rem 0;
+  line-height: 1.4;
+}`;'''
+        displayOrder: 1
         componentName: Html
         props:
-          '''
+          '''const video = args.contextData.videos;
 return {
-  as: "div"
-};
-'''
+  as: "h3",
+  text: video.title
+};'''
       }
     }
     {
@@ -593,97 +529,81 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  color: ${args.theme.var.color.text};
-  font-size: 1.125rem;
-  font-weight: 600;
-  margin: 0 0 0.75rem 0;
-  line-height: 1.4;
-}`;
-'''
-        displayOrder: 1
+          '''return `._id {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text_light_300};
+}`;'''
+        displayOrder: 2
         componentName: Html
         props:
-          '''
-const video = args.contextData.videos;
-return {
-  as: "h3",
-  text: video.title
-};
-'''
+          '''return {
+  as: "div"
+};'''
       }
     }
     {
       id: "26"
       L: Attr
       P: {
-        css:
-          '''
-return `._id {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_300};
-}`;
-'''
-        displayOrder: 2
+        displayOrder: 1
         componentName: Html
         props:
-          '''
+          '''const video = args.contextData.videos;
 return {
-  as: "div"
-};
-'''
+  as: "span",
+  text: `${video.views} views`
+};'''
       }
     }
     {
       id: "27"
       L: Attr
       P: {
-        displayOrder: 1
+        displayOrder: 2
         componentName: Html
         props:
-          '''
-const video = args.contextData.videos;
+          '''const content = args.contextData.videosSettings?.content;
 return {
   as: "span",
-  text: `${video.views} views`
-};
-'''
+  text: content?.separator
+};'''
       }
     }
     {
       id: "28"
       L: Attr
       P: {
-        displayOrder: 2
+        displayOrder: 3
         componentName: Html
         props:
-          '''
-const content = args.contextData.videosSettings?.content;
+          '''const video = args.contextData.videos;
 return {
   as: "span",
-  text: content?.separator
-};
-'''
+  text: video.date
+};'''
       }
     }
     {
       id: "29"
       L: Attr
       P: {
+        css:
+          '''return `._id {
+  text-align: center;
+  margin-top: 3rem;
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-const video = args.contextData.videos;
-return {
-  as: "span",
-  text: video.date
-};
-'''
+          '''return {
+  as: "div",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el)
+};'''
       }
     }
     {
@@ -691,32 +611,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  text-align: center;
-  margin-top: 3rem;
-}`;
-'''
-        displayOrder: 3
-        componentName: Html
-        props:
-          '''
-return {
-  as: "div",
-  "data-animate": "",
-
-  ref: (el) => el && args.fns.animateOnView(el)
-};
-'''
-      }
-    }
-    {
-      id: "31"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
+          '''return `._id {
   padding: 0.75rem 2rem;
   background: ${args.theme.var.color.background};
   color: ${args.theme.var.color.text};
@@ -732,39 +627,42 @@ return `._id {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "button"
-};
-'''
+};'''
       }
     }
     {
-      id: "32"
+      id: "31"
       L: Attr
       P: {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const content = args.contextData.videosSettings?.content;
+          '''const content = args.contextData.videosSettings?.content;
 return {
   as: "span",
   text: content?.loadMoreText
-};
-'''
+};'''
+      }
+    }
+    {
+      id: "32"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: Layout
       }
     }
   ]
   edges: [
     {
       id: e1
-      T: PageLayout
+      T: Attr
       S: "1"
       E: "2"
     }
@@ -772,181 +670,181 @@ return {
       id: e2
       T: Attr
       S: "1"
-      E: "3"
+      E: "4"
     }
     {
       id: e3
-      T: Attr
+      T: PageLayout
       S: "1"
-      E: "5"
+      E: "32"
     }
     {
       id: e4
       T: Attr
-      S: "3"
-      E: "4"
+      S: "2"
+      E: "3"
     }
     {
       id: e5
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e6
       T: Attr
       S: "5"
       E: "6"
     }
     {
-      id: e6
+      id: e7
+      T: Attr
+      S: "5"
+      E: "15"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "5"
+      E: "29"
+    }
+    {
+      id: e9
       T: Attr
       S: "6"
       E: "7"
     }
     {
-      id: e7
+      id: e10
       T: Attr
       S: "6"
-      E: "16"
+      E: "9"
     }
     {
-      id: e8
+      id: e11
       T: Attr
       S: "6"
-      E: "30"
+      E: "11"
     }
     {
-      id: e9
+      id: e12
+      T: Attr
+      S: "6"
+      E: "13"
+    }
+    {
+      id: e13
       T: Attr
       S: "7"
       E: "8"
     }
     {
-      id: e10
-      T: Attr
-      S: "7"
-      E: "10"
-    }
-    {
-      id: e11
-      T: Attr
-      S: "7"
-      E: "12"
-    }
-    {
-      id: e12
-      T: Attr
-      S: "7"
-      E: "14"
-    }
-    {
-      id: e13
-      T: Attr
-      S: "8"
-      E: "9"
-    }
-    {
       id: e14
       T: Attr
-      S: "10"
-      E: "11"
+      S: "9"
+      E: "10"
     }
     {
       id: e15
       T: Attr
-      S: "12"
-      E: "13"
+      S: "11"
+      E: "12"
     }
     {
       id: e16
       T: Attr
-      S: "14"
-      E: "15"
+      S: "13"
+      E: "14"
     }
     {
       id: e17
+      T: Attr
+      S: "15"
+      E: "16"
+    }
+    {
+      id: e18
       T: Attr
       S: "16"
       E: "17"
     }
     {
-      id: e18
+      id: e19
       T: Attr
       S: "17"
       E: "18"
     }
     {
-      id: e19
+      id: e20
+      T: Attr
+      S: "17"
+      E: "23"
+    }
+    {
+      id: e21
       T: Attr
       S: "18"
       E: "19"
     }
     {
-      id: e20
-      T: Attr
-      S: "18"
-      E: "24"
-    }
-    {
-      id: e21
-      T: Attr
-      S: "19"
-      E: "20"
-    }
-    {
       id: e22
       T: Attr
-      S: "19"
-      E: "21"
+      S: "18"
+      E: "20"
     }
     {
       id: e23
       T: Attr
-      S: "19"
-      E: "23"
+      S: "18"
+      E: "22"
     }
     {
       id: e24
       T: Attr
-      S: "21"
-      E: "22"
+      S: "20"
+      E: "21"
     }
     {
       id: e25
       T: Attr
-      S: "24"
-      E: "25"
+      S: "23"
+      E: "24"
     }
     {
       id: e26
       T: Attr
-      S: "24"
-      E: "26"
+      S: "23"
+      E: "25"
     }
     {
       id: e27
       T: Attr
-      S: "26"
-      E: "27"
+      S: "25"
+      E: "26"
     }
     {
       id: e28
       T: Attr
-      S: "26"
-      E: "28"
+      S: "25"
+      E: "27"
     }
     {
       id: e29
       T: Attr
-      S: "26"
-      E: "29"
+      S: "25"
+      E: "28"
     }
     {
       id: e30
       T: Attr
-      S: "30"
-      E: "31"
+      S: "29"
+      E: "30"
     }
     {
       id: e31
       T: Attr
-      S: "31"
-      E: "32"
+      S: "30"
+      E: "31"
     }
   ]
 }

@@ -14,8 +14,7 @@
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   background: ${args.theme.var.color.background};
   border: 1px solid ${args.theme.var.color.background_light_300};
   border-radius: 0.75rem;
@@ -27,21 +26,18 @@ return `._id {
     transform: translateY(-4px);
     border-color: ${args.theme.var.color.primary_light_300};
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const feature = args.contextData.props || {};
+          '''const feature = args.contextData.props || {};
 const index = args.contextData.index ?? 0;
 return {
   as: "div",
   "data-animate": "",
 
   ref: (el) => el && args.fns.animateOnView(el, { delay: index * 0.08 })
-};
-'''
+};'''
       }
     }
     {
@@ -49,8 +45,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   width: 4rem;
   height: 4rem;
   background: ${args.theme.var.color.primary_light_100};
@@ -59,18 +54,15 @@ return `._id {
   align-items: center;
   justify-content: center;
   margin-bottom: 1.5rem;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const feature = args.contextData.props || {};
+          '''const feature = args.contextData.props || {};
 const showIcon = feature.icon ? true : false;
 return {
   as: showIcon ? "div" : "fragment"
-};
-'''
+};'''
       }
     }
     {
@@ -78,23 +70,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   color: ${args.theme.var.color.primary};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const feature = args.contextData.props || {};
+          '''const feature = args.contextData.props || {};
 return {
   as: "icon",
   icon: feature.icon || "carbon:star",
   width: 32,
   height: 32
-};
-'''
+};'''
       }
     }
     {
@@ -102,23 +90,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   margin-bottom: 1.5rem;
   border-radius: 0.5rem;
   overflow: hidden;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const feature = args.contextData.props || {};
+          '''const feature = args.contextData.props || {};
 const showImage = feature.image ? true : false;
 return {
   as: showImage ? "div" : "fragment"
-};
-'''
+};'''
       }
     }
     {
@@ -126,25 +110,21 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   width: 100%;
   height: auto;
   display: block;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const feature = args.contextData.props || {};
+          '''const feature = args.contextData.props || {};
 return {
   as: "img",
   src: feature.image || "",
   alt: feature.title || "Feature image",
   width: "100%"
-};
-'''
+};'''
       }
     }
     {
@@ -152,19 +132,15 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   text-align: ${args.contextData.props?.align || 'left'};
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -172,25 +148,21 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   color: ${args.theme.var.color.text};
   font-size: 1.5rem;
   font-weight: 600;
   margin: 0 0 1rem 0;
   line-height: 1.4;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const feature = args.contextData.props || {};
+          '''const feature = args.contextData.props || {};
 return {
   as: "h3",
   text: feature.title || "Feature Title"
-};
-'''
+};'''
       }
     }
     {
@@ -198,24 +170,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   color: ${args.theme.var.color.text_light_200};
   font-size: 1rem;
   line-height: 1.7;
   margin: 0 0 1rem 0;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const feature = args.contextData.props || {};
+          '''const feature = args.contextData.props || {};
 return {
   as: "p",
   text: feature.description || "Feature description goes here."
-};
-'''
+};'''
       }
     }
     {
@@ -223,21 +191,17 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   margin-top: 1.5rem;
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-const feature = args.contextData.props || {};
+          '''const feature = args.contextData.props || {};
 const showLink = feature.link ? true : false;
 return {
   as: showLink ? "div" : "fragment"
-};
-'''
+};'''
       }
     }
     {
@@ -245,8 +209,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -259,13 +222,11 @@ return `._id {
     gap: 0.75rem;
     text-decoration: underline;
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const feature = args.contextData.props || {};
+          '''const feature = args.contextData.props || {};
 const localizeHref = (path) => {
   if (!path || path.startsWith("http") || path.startsWith("mailto:") || path === "#") return path || "#";
   const lang = args.params?.lang;
@@ -278,8 +239,7 @@ return {
   as: "a",
   href: localizeHref(feature.link),
   text: feature.linkText || "Learn More"
-};
-'''
+};'''
       }
     }
     {
@@ -289,14 +249,12 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "icon",
   icon: "carbon:arrow-right",
   width: 16,
   height: 16
-};
-'''
+};'''
       }
     }
   ]

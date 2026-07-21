@@ -1,0 +1,598 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        description: Review modal for drag-drop create using FormManagement per draft row.
+        fns:
+          '''
+const getProps = () => args.contextData.props || {};
+
+const [formApisByKey, setFormApisByKey] = args.createStore({});
+
+const getRows = () => {
+  const rows = getProps().rows;
+  return Array.isArray(rows) ? rows : [];
+};
+
+const rowKey = (row, rowIndex) => {
+  if (row?.fileId) return String(row.fileId);
+  return `idx-${rowIndex}`;
+};
+
+const isConfirming = () => getProps().confirming === true;
+
+const getPreviewUrl = (row) => {
+  if (!row) return "";
+  if (row.previewUrl) return String(row.previewUrl);
+  const fileName = row.fileName != null ? String(row.fileName).trim() : "";
+  if (!fileName) return "";
+  const mime = String(row.mimeType || row.fileType || "");
+  if (mime && !mime.startsWith("image/")) return "";
+  const prefix = getProps().fileDownloadUrlPrefix || "/api/file/download";
+  return `${prefix}/${encodeURIComponent(fileName)}`;
+};
+
+const registerFormApi = (row, rowIndex, formApi) => {
+  const key = rowKey(row, rowIndex);
+  setFormApisByKey(key, formApi);
+  if (!row || !formApi?.setFieldValue) return;
+
+  // Prefill editable fields + file relationship after FormManagement initializes.
+  if (row.title != null) formApi.setFieldValue("title", row.title);
+  if (row.mediaType != null) formApi.setFieldValue("mediaType", row.mediaType);
+  if (row.description != null) formApi.setFieldValue("description", row.description);
+  if (row.fileId) {
+    formApi.setFieldValue("file", row.fileId);
+    const mime = String(row.mimeType || row.fileType || "").toLowerCase();
+    if (mime.startsWith("image/")) {
+      formApi.setFieldValue("thumbnail", row.fileId);
+    }
+  }
+};
+
+const removeRow = (row, rowIndex) => {
+  const key = rowKey(row, rowIndex);
+  const api = formApisByKey[key];
+  if (api?.formTxnId) {
+    const txnId = typeof api.formTxnId === "function" ? api.formTxnId() : api.formTxnId;
+    if (txnId && txnId > 0) {
+      args.revertTransaction(txnId);
+    }
+  }
+  setFormApisByKey(key, undefined);
+  getProps().onRemoveRow?.(rowIndex);
+};
+
+const handleConfirm = async () => {
+  if (isConfirming()) return;
+  const rows = getRows();
+  if (rows.length === 0) {
+    args.showErrorToast?.(getProps().emptyHint || "No rows to create");
+    return;
+  }
+
+  const onSaveRow = getProps().onSaveRow;
+  if (typeof onSaveRow !== "function") {
+    args.showErrorToast?.("Save handler missing");
+    return;
+  }
+
+  getProps().onConfirmStart?.();
+
+  const createdIds = [];
+  try {
+    for (let i = 0; i < rows.length; i++) {
+      const draft = rows[i];
+      const api = formApisByKey[rowKey(draft, i)];
+      if (!api?.handleSave) {
+        args.showErrorToast?.("Form not ready for row " + (i + 1));
+        getProps().onConfirmEnd?.(createdIds);
+        return;
+      }
+      const result = await api.handleSave();
+      if (!result) {
+        getProps().onConfirmEnd?.(createdIds);
+        return;
+      }
+      const id =
+        result?.data?.id ||
+        result?.result?.data?.id ||
+        result?.id ||
+        null;
+      if (id) createdIds.push(String(id));
+    }
+    getProps().onConfirmSuccess?.(createdIds);
+  } catch (error) {
+    console.error("DropCreateReviewModal confirm:", error);
+    args.showErrorToast?.(error?.message || "Failed to create items");
+    getProps().onConfirmEnd?.(createdIds);
+  }
+};
+
+const handleCancel = () => {
+  if (isConfirming()) return;
+  Object.keys(formApisByKey).forEach((key) => {
+    const api = formApisByKey[key];
+    if (api?.formTxnId) {
+      const txnId = typeof api.formTxnId === "function" ? api.formTxnId() : api.formTxnId;
+      if (txnId && txnId > 0) args.revertTransaction(txnId);
+    }
+  });
+  setFormApisByKey(args.reconcile({}));
+  getProps().onCancel?.();
+};
+
+const buildRowSaveHandler = (row, rowIndex) => {
+  return async (saveData) => {
+    const draft = getRows().find((r, i) => rowKey(r, i) === rowKey(row, rowIndex)) || row;
+    const onSaveRow = getProps().onSaveRow;
+    if (typeof onSaveRow !== "function") return false;
+    return await onSaveRow(draft, saveData, rowIndex);
+  };
+};
+
+return {
+  getProps,
+  getRows,
+  rowKey,
+  isConfirming,
+  getPreviewUrl,
+  registerFormApi,
+  removeRow,
+  handleConfirm,
+  handleCancel,
+  buildRowSaveHandler
+};
+'''
+        key: DropCreateReviewModal
+        updatedAt: 2026-07-16T18:05:54.558Z
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: ContentModal
+        props:
+          '''const p = args.fns.getProps();
+return {
+  isOpen: p.isOpen === true,
+  title: p.title || "Review items",
+  maxWidth: p.maxWidth || "1100px",
+  usePolarisUI: p.usePolarisUI === true,
+  onClose: () => args.fns.handleCancel?.()
+};'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        slotName: children
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-height: 0;
+  max-height: calc(90vh - 5rem);
+  padding: 1rem 1.25rem 1.25rem;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "div" };
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0;
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text_dark_400};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const hint = args.fns.getProps()?.hint;
+return {
+  as: "p",
+  text: hint || "",
+  hide: !hint
+};'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0;
+  padding: 1.5rem 0.5rem;
+  text-align: center;
+  color: ${args.theme.var.color.text_dark_400};
+  font-size: 0.9rem;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: args.fns.getProps()?.emptyHint || "No rows.",
+  hide: args.fns.getRows().length > 0
+};'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        contextName: draftRow
+        css:
+          '''return `._id {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}`;'''
+        loop: true
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  data: args.fns.getRows(),
+  hide: args.fns.getRows().length === 0
+};'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "article" };
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "div" };
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  width: 72px;
+  height: 52px;
+  border-radius: 0.375rem;
+  border: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.background_light_200};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const draftRow = args.contextData.draftRow;
+const url = args.fns.getPreviewUrl(draftRow);
+return {
+  as: "div",
+  "attr:aria-label": url ? "File preview" : "No preview"
+};'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const draftRow = args.contextData.draftRow;
+const url = args.fns.getPreviewUrl(draftRow);
+return {
+  as: "img",
+  src: url,
+  alt: draftRow?.fileName || "Preview",
+  hide: !url
+};'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const draftRow = args.contextData.draftRow;
+const url = args.fns.getPreviewUrl(draftRow);
+const mime = String(draftRow?.mimeType || draftRow?.fileType || "");
+let icon = "ph:file";
+if (mime.startsWith("video/")) icon = "ph:video";
+else if (mime === "application/pdf" || mime.includes("pdf")) icon = "ph:file-pdf";
+return {
+  as: "icon",
+  icon,
+  width: 22,
+  height: 22,
+  hide: !!url
+};'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const draftRow = args.contextData.draftRow;
+return {
+  as: "div",
+  text: draftRow?.fileName || "File"
+};'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  border: none;
+  background: transparent;
+  color: ${args.theme.var.color.error};
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 0.25rem 0.35rem;
+  border-radius: 0.25rem;
+  flex-shrink: 0;
+}
+._id:hover:not(:disabled) {
+  background: ${args.theme.var.color.error_light_900};
+}
+._id:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''const rowIndex = args.contextData.draftRow_index;
+const draftRow = args.contextData.draftRow;
+const label = args.fns.getProps()?.removeRowLabel || "Remove";
+return {
+  as: "button",
+  type: "button",
+  text: label,
+  disabled: args.fns.isConfirming(),
+  onClick: () => args.fns.removeRow(draftRow, rowIndex),
+  "attr:aria-label": label
+};'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: FormManagement
+        props:
+          '''const p = args.fns.getProps();
+const draftRow = args.contextData.draftRow;
+const rowIndex = args.contextData.draftRow_index;
+return {
+  formConfig: p.formConfig,
+  mode: "add",
+  inModal: true,
+  hideActionsBar: true,
+  vertexLabel: p.tableVertexLabel || "GalleryItem",
+  onSave: args.fns.buildRowSaveHandler(draftRow, rowIndex),
+  onFnsReady: (formApi) => args.fns.registerFormApi(draftRow, rowIndex, formApi),
+  hide: !p.formConfig
+};'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  padding-top: 0.25rem;
+}`;'''
+        displayOrder: 4
+        componentName: Html
+        props: return { as: "div" };
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''const p = args.fns.getProps();
+return {
+  text: p.cancelLabel || "Cancel",
+  variant: "secondary",
+  disabled: args.fns.isConfirming(),
+  onClick: () => args.fns.handleCancel?.()
+};'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''const p = args.fns.getProps();
+const count = args.fns.getRows().length;
+return {
+  text: p.confirmLabel || "Create",
+  variant: "primary",
+  disabled: args.fns.isConfirming() || count === 0,
+  onClick: () => void args.fns.handleConfirm?.()
+};'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "6"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "3"
+      E: "15"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "7"
+      E: "14"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "8"
+      E: "12"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "8"
+      E: "13"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "9"
+      E: "11"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "15"
+      E: "16"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "15"
+      E: "17"
+    }
+  ]
+}

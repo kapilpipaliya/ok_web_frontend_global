@@ -14,8 +14,7 @@
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -40,13 +39,11 @@ return `._id {
     outline: 2px solid ${args.theme.var.color.primary};
     outline-offset: 2px;
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const item = args.contextData.props?.item || args.contextData.props || {};
+          '''const item = args.contextData.props?.item || args.contextData.props || {};
 const index = args.contextData.props?.index ?? args.contextData.index ?? 0;
 const href = args.contextData.props?.href || item.fileUrl || "";
 const onOpen = args.contextData.props?.onOpen;
@@ -63,8 +60,7 @@ return {
     e.preventDefault();
     onOpen(item);
   }
-};
-'''
+};'''
       }
     }
     {
@@ -72,21 +68,16 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   position: relative;
   width: 100%;
   aspect-ratio: 4 / 3;
   background: ${args.theme.var.color.background_light_200};
   overflow: hidden;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
-        props:
-          '''
-return { as: "div" };
-'''
+        props: return { as: "div" };
       }
     }
     {
@@ -94,8 +85,7 @@ return { as: "div" };
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -105,21 +95,18 @@ return `._id {
   button:hover & {
     transform: scale(1.04);
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const item = args.contextData.props?.item || args.contextData.props || {};
+          '''const item = args.contextData.props?.item || args.contextData.props || {};
 const src = item.previewUrl || "";
 return {
   as: src ? "img" : "fragment",
   src: src || undefined,
   alt: item.title || "Gallery item",
   loading: "lazy"
-};
-'''
+};'''
       }
     }
     {
@@ -127,8 +114,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   position: absolute;
   inset: 0;
   display: flex;
@@ -140,18 +126,15 @@ return `._id {
     ${args.theme.var.color.primary_light_100} 0%,
     ${args.theme.var.color.background_light_100} 100%
   );
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const item = args.contextData.props?.item || args.contextData.props || {};
+          '''const item = args.contextData.props?.item || args.contextData.props || {};
 return {
   as: "div",
   hide: !!item.previewUrl
-};
-'''
+};'''
       }
     }
     {
@@ -161,15 +144,13 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const item = args.contextData.props?.item || args.contextData.props || {};
+          '''const item = args.contextData.props?.item || args.contextData.props || {};
 return {
   as: "icon",
   icon: item.icon || "ph:file",
   width: 40,
   height: 40
-};
-'''
+};'''
       }
     }
     {
@@ -177,8 +158,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   position: absolute;
   top: 0.5rem;
   left: 0.5rem;
@@ -191,18 +171,15 @@ return `._id {
   background: ${args.theme.var.color.background};
   color: ${args.theme.var.color.text};
   border: 1px solid ${args.theme.var.color.border};
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-const item = args.contextData.props?.item || args.contextData.props || {};
+          '''const item = args.contextData.props?.item || args.contextData.props || {};
 return {
   as: "span",
   text: item.mediaType || "File"
-};
-'''
+};'''
       }
     }
     {
@@ -210,21 +187,16 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
   padding: 0.875rem 1rem 1rem;
   min-width: 0;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
-        props:
-          '''
-return { as: "div" };
-'''
+        props: return { as: "div" };
       }
     }
     {
@@ -232,8 +204,7 @@ return { as: "div" };
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   margin: 0;
   font-size: 0.9375rem;
   font-weight: 600;
@@ -241,18 +212,15 @@ return `._id {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const item = args.contextData.props?.item || args.contextData.props || {};
+          '''const item = args.contextData.props?.item || args.contextData.props || {};
 return {
   as: "h3",
   text: item.title || "Untitled"
-};
-'''
+};'''
       }
     }
     {
@@ -260,8 +228,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   margin: 0;
   font-size: 0.8125rem;
   color: ${args.theme.var.color.text_light_300};
@@ -269,19 +236,16 @@ return `._id {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const item = args.contextData.props?.item || args.contextData.props || {};
+          '''const item = args.contextData.props?.item || args.contextData.props || {};
 return {
   as: "p",
   text: item.description || "",
   hide: !item.description
-};
-'''
+};'''
       }
     }
   ]

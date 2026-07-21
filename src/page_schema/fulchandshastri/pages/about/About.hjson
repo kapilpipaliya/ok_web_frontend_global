@@ -45,8 +45,7 @@ try {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   position: relative;
   height: 400px;
   background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('https://www.fulchandshastri.com/wp-content/uploads/2015/12/Fulchand-banner1.gif');
@@ -57,16 +56,13 @@ return `._id {
   justify-content: center;
   text-align: center;
   color: white;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -76,11 +72,9 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -88,8 +82,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   font-size: 3rem;
   font-weight: 700;
   margin-bottom: 1rem;
@@ -98,18 +91,15 @@ return `._id {
   @media (max-width: 768px) {
     font-size: 2rem;
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const content = args.contextData.aboutSettings?.content;
+          '''const content = args.contextData.aboutSettings?.content;
 return {
   as: "h1",
   text: content?.heroTitle
-};
-'''
+};'''
       }
     }
     {
@@ -117,22 +107,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   font-size: 1.25rem;
   text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const content = args.contextData.aboutSettings?.content;
+          '''const content = args.contextData.aboutSettings?.content;
 return {
   as: "p",
   text: content?.heroSubtitle
-};
-'''
+};'''
       }
     }
     {
@@ -140,19 +126,15 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   padding: 3rem 1rem;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "main"
-};
-'''
+};'''
       }
     }
     {
@@ -160,20 +142,16 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   max-width: 1000px;
   margin: 0 auto;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -181,22 +159,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   margin-bottom: 4rem;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "section",
   "data-animate": "",
 
   ref: (el) => el && args.fns.animateOnView(el)
-};
-'''
+};'''
       }
     }
     {
@@ -204,21 +178,17 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   font-size: 1.125rem;
   line-height: 1.8;
   color: ${args.theme.var.color.text};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -226,21 +196,17 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   margin-bottom: 1.5rem;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const content = args.contextData.aboutSettings?.content;
+          '''const content = args.contextData.aboutSettings?.content;
 return {
   as: "p",
   text: content?.introPara1
-};
-'''
+};'''
       }
     }
     {
@@ -248,21 +214,17 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   margin-bottom: 1.5rem;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const content = args.contextData.aboutSettings?.content;
+          '''const content = args.contextData.aboutSettings?.content;
 return {
   as: "p",
   text: content?.introPara2
-};
-'''
+};'''
       }
     }
     {
@@ -270,21 +232,17 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   margin-bottom: 1.5rem;
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-const content = args.contextData.aboutSettings?.content;
+          '''const content = args.contextData.aboutSettings?.content;
 return {
   as: "p",
   text: content?.introPara3
-};
-'''
+};'''
       }
     }
     {
@@ -292,25 +250,21 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   background: ${args.theme.var.color.background_light_50};
   padding: 3rem;
   border-radius: 1rem;
   margin-bottom: 4rem;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "section",
   "data-animate": "",
 
   ref: (el) => el && args.fns.animateOnView(el)
-};
-'''
+};'''
       }
     }
     {
@@ -318,25 +272,21 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   color: ${args.theme.var.color.text};
   font-size: 2rem;
   font-weight: 600;
   margin-bottom: 2rem;
   text-align: center;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const content = args.contextData.aboutSettings?.content;
+          '''const content = args.contextData.aboutSettings?.content;
 return {
   as: "h2",
   text: content?.journeyTitle
-};
-'''
+};'''
       }
     }
     {
@@ -344,21 +294,17 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 2rem;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -368,14 +314,12 @@ return {
         displayOrder: 1
         componentName: FeatureCard
         props:
-          '''
-return {
+          '''return {
   icon: "carbon:light",
   title: "Early Awakening",
   description: "From a young age, Fulchand showed deep spiritual inclination and was drawn to the teachings of great masters. His quest for truth led him to profound realizations.",
   align: "left"
-};
-'''
+};'''
       }
     }
     {
@@ -385,14 +329,12 @@ return {
         displayOrder: 2
         componentName: FeatureCard
         props:
-          '''
-return {
+          '''return {
   icon: "carbon:education",
   title: "Meeting the Guru",
   description: "The transformative encounter with the teachings of Shrimad Rajchandra became the turning point in his spiritual journey, illuminating the path ahead.",
   align: "left"
-};
-'''
+};'''
       }
     }
     {
@@ -402,14 +344,12 @@ return {
         displayOrder: 3
         componentName: FeatureCard
         props:
-          '''
-return {
+          '''return {
   icon: "carbon:earth",
   title: "Global Mission",
   description: "Dedicating his life to spreading divine knowledge, Fulchand has touched souls in over 220 countries, breaking all barriers of religion and nationality.",
   align: "left"
-};
-'''
+};'''
       }
     }
     {
@@ -417,22 +357,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   margin-bottom: 4rem;
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "section",
   "data-animate": "",
 
   ref: (el) => el && args.fns.animateOnView(el)
-};
-'''
+};'''
       }
     }
     {
@@ -440,25 +376,21 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   color: ${args.theme.var.color.text};
   font-size: 2rem;
   font-weight: 600;
   margin-bottom: 2rem;
   text-align: center;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const content = args.contextData.aboutSettings?.content;
+          '''const content = args.contextData.aboutSettings?.content;
 return {
   as: "h2",
   text: content?.teachingsTitle
-};
-'''
+};'''
       }
     }
     {
@@ -466,22 +398,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 2rem;
   text-align: center;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -489,25 +417,21 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   padding: 2rem;
   background: ${args.theme.var.color.background};
   border: 1px solid ${args.theme.var.color.background_light_300};
   border-radius: 0.75rem;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   "data-animate": "",
 
   ref: (el) => el && args.fns.animateOnView(el, { delay: 0 })
-};
-'''
+};'''
       }
     }
     {
@@ -515,8 +439,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   width: 3rem;
   height: 3rem;
   background: ${args.theme.var.color.primary_light_100};
@@ -525,16 +448,13 @@ return `._id {
   align-items: center;
   justify-content: center;
   margin: 0 auto 1rem;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -542,22 +462,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   color: ${args.theme.var.color.primary};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "icon",
   icon: "carbon:view",
   width: 24,
   height: 24
-};
-'''
+};'''
       }
     }
     {
@@ -565,24 +481,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   color: ${args.theme.var.color.text};
   font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const content = args.contextData.aboutSettings?.content;
+          '''const content = args.contextData.aboutSettings?.content;
 return {
   as: "h3",
   text: content?.teaching1Title
-};
-'''
+};'''
       }
     }
     {
@@ -590,22 +502,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   color: ${args.theme.var.color.text_light_200};
   font-size: 0.875rem;
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-const content = args.contextData.aboutSettings?.content;
+          '''const content = args.contextData.aboutSettings?.content;
 return {
   as: "p",
   text: content?.teaching1Text
-};
-'''
+};'''
       }
     }
     {
@@ -613,25 +521,21 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   padding: 2rem;
   background: ${args.theme.var.color.background};
   border: 1px solid ${args.theme.var.color.background_light_300};
   border-radius: 0.75rem;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   "data-animate": "",
 
   ref: (el) => el && args.fns.animateOnView(el, { delay: 0.08 })
-};
-'''
+};'''
       }
     }
     {
@@ -639,8 +543,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   width: 3rem;
   height: 3rem;
   background: ${args.theme.var.color.primary_light_100};
@@ -649,16 +552,13 @@ return `._id {
   align-items: center;
   justify-content: center;
   margin: 0 auto 1rem;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -666,22 +566,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   color: ${args.theme.var.color.primary};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "icon",
   icon: "carbon:user-certification",
   width: 24,
   height: 24
-};
-'''
+};'''
       }
     }
     {
@@ -689,24 +585,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   color: ${args.theme.var.color.text};
   font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const content = args.contextData.aboutSettings?.content;
+          '''const content = args.contextData.aboutSettings?.content;
 return {
   as: "h3",
   text: content?.teaching2Title
-};
-'''
+};'''
       }
     }
     {
@@ -714,22 +606,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   color: ${args.theme.var.color.text_light_200};
   font-size: 0.875rem;
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-const content = args.contextData.aboutSettings?.content;
+          '''const content = args.contextData.aboutSettings?.content;
 return {
   as: "p",
   text: content?.teaching2Text
-};
-'''
+};'''
       }
     }
     {
@@ -737,25 +625,21 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   padding: 2rem;
   background: ${args.theme.var.color.background};
   border: 1px solid ${args.theme.var.color.background_light_300};
   border-radius: 0.75rem;
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   "data-animate": "",
 
   ref: (el) => el && args.fns.animateOnView(el, { delay: 0.16 })
-};
-'''
+};'''
       }
     }
     {
@@ -763,8 +647,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   width: 3rem;
   height: 3rem;
   background: ${args.theme.var.color.primary_light_100};
@@ -773,16 +656,13 @@ return `._id {
   align-items: center;
   justify-content: center;
   margin: 0 auto 1rem;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -790,22 +670,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   color: ${args.theme.var.color.primary};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "icon",
   icon: "carbon:group",
   width: 24,
   height: 24
-};
-'''
+};'''
       }
     }
     {
@@ -813,24 +689,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   color: ${args.theme.var.color.text};
   font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const content = args.contextData.aboutSettings?.content;
+          '''const content = args.contextData.aboutSettings?.content;
 return {
   as: "h3",
   text: content?.teaching3Title
-};
-'''
+};'''
       }
     }
     {
@@ -838,22 +710,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   color: ${args.theme.var.color.text_light_200};
   font-size: 0.875rem;
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-const content = args.contextData.aboutSettings?.content;
+          '''const content = args.contextData.aboutSettings?.content;
 return {
   as: "p",
   text: content?.teaching3Text
-};
-'''
+};'''
       }
     }
     {
@@ -861,25 +729,21 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   padding: 2rem;
   background: ${args.theme.var.color.background};
   border: 1px solid ${args.theme.var.color.background_light_300};
   border-radius: 0.75rem;
-}`;
-'''
+}`;'''
         displayOrder: 4
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   "data-animate": "",
 
   ref: (el) => el && args.fns.animateOnView(el, { delay: 0.24 })
-};
-'''
+};'''
       }
     }
     {
@@ -887,8 +751,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   width: 3rem;
   height: 3rem;
   background: ${args.theme.var.color.primary_light_100};
@@ -897,16 +760,13 @@ return `._id {
   align-items: center;
   justify-content: center;
   margin: 0 auto 1rem;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -914,22 +774,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   color: ${args.theme.var.color.primary};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "icon",
   icon: "carbon:query",
   width: 24,
   height: 24
-};
-'''
+};'''
       }
     }
     {
@@ -937,24 +793,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   color: ${args.theme.var.color.text};
   font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const content = args.contextData.aboutSettings?.content;
+          '''const content = args.contextData.aboutSettings?.content;
 return {
   as: "h3",
   text: content?.teaching4Title
-};
-'''
+};'''
       }
     }
     {
@@ -962,22 +814,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   color: ${args.theme.var.color.text_light_200};
   font-size: 0.875rem;
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-const content = args.contextData.aboutSettings?.content;
+          '''const content = args.contextData.aboutSettings?.content;
 return {
   as: "p",
   text: content?.teaching4Text
-};
-'''
+};'''
       }
     }
   ]

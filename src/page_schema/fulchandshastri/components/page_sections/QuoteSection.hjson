@@ -14,15 +14,13 @@
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   background: linear-gradient(135deg, ${args.theme.var.color.background_light_50} 0%, ${args.theme.var.color.background_light_100} 100%);
   padding: 3rem 1rem;
   margin: 2rem 0;
   position: relative;
   overflow: hidden;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
@@ -32,8 +30,7 @@ return {
   "data-animate": "",
 
   ref: (el) => el && args.fns.animateOnView?.(el),
-};
-'''
+};'''
       }
     }
     {
@@ -41,8 +38,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   position: absolute;
   top: 1rem;
   left: 1rem;
@@ -51,16 +47,13 @@ return `._id {
   opacity: 0.3;
   font-family: serif;
   line-height: 1;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -70,12 +63,10 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "span",
   text: '"'
-};
-'''
+};'''
       }
     }
     {
@@ -83,23 +74,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   max-width: 800px;
   margin: 0 auto;
   text-align: center;
   position: relative;
   z-index: 1;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -107,8 +94,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   font-size: 1.5rem;
   font-style: italic;
   color: ${args.theme.var.color.text};
@@ -120,18 +106,15 @@ return `._id {
     font-size: 1.25rem;
     padding: 0 1rem;
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const quote = args.contextData.props || {};
+          '''const quote = args.contextData.props || {};
 return {
   as: "blockquote",
   text: quote.text || "The soul's journey towards enlightenment begins with a single step of self-realization."
-};
-'''
+};'''
       }
     }
     {
@@ -139,23 +122,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
   color: ${args.theme.var.color.text_light_300};
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -163,20 +142,16 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   font-size: 1.25rem;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "span",
   text: "—"
-};
-'''
+};'''
       }
     }
     {
@@ -184,23 +159,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   font-style: normal;
   font-weight: 500;
   font-size: 1.125rem;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const quote = args.contextData.props || {};
+          '''const quote = args.contextData.props || {};
 return {
   as: "cite",
   text: quote.author || "Fulchand Shastri"
-};
-'''
+};'''
       }
     }
     {
@@ -208,8 +179,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   position: absolute;
   bottom: 1rem;
   right: 1rem;
@@ -219,16 +189,13 @@ return `._id {
   font-family: serif;
   line-height: 1;
   transform: rotate(180deg);
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -238,12 +205,10 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "span",
   text: '"'
-};
-'''
+};'''
       }
     }
   ]

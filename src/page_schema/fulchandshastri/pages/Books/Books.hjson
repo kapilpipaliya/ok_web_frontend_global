@@ -77,10 +77,26 @@ try {
     }
     {
       id: "2"
-      L: PageLayout
+      L: Attr
       P: {
-        displayOrder: 1
-        componentName: Layout
+        css:
+          '''return `._id {
+  padding: 1rem;
+}`;'''
+        displayOrder: 2
+        fns:
+          '''const [activeTab, setActiveTab] = args.createSignal("by");
+return {
+  activeTab,
+  setActiveTab,
+  isByTab: () => activeTab() === "by",
+  isRecommendedTab: () => activeTab() === "recommended"
+};'''
+        componentName: Html
+        props:
+          '''return {
+  as: "main"
+};'''
       }
     }
     {
@@ -89,27 +105,15 @@ try {
       P: {
         css:
           '''return `._id {
-  padding: 1rem;
-}`;
-'''
-        displayOrder: 2
-        fns:
-          '''
-const [activeTab, setActiveTab] = args.createSignal("by");
-return {
-  activeTab,
-  setActiveTab,
-  isByTab: () => activeTab() === "by",
-  isRecommendedTab: () => activeTab() === "recommended"
-};
-'''
+  max-width: 1200px;
+  margin: 0 auto;
+}`;'''
+        displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
-  as: "main"
-};
-'''
+          '''return {
+  as: "div"
+};'''
       }
     }
     {
@@ -117,29 +121,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  max-width: 1200px;
-  margin: 0 auto;
-}`;
-'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''
-return {
-  as: "div"
-};
-'''
-      }
-    }
-    {
-      id: "5"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
+          '''return `._id {
   color: ${args.theme.var.color.text};
   font-size: 3rem;
   font-weight: 700;
@@ -148,18 +130,36 @@ return `._id {
   @media (max-width: 768px) {
     font-size: 2rem;
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const content = args.contextData.booksSettings?.content;
+          '''const content = args.contextData.booksSettings?.content;
 return {
   as: "h1",
   text: content?.pageTitle || "Books"
-};
-'''
+};'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  role: "tablist",
+  "aria-label": "Books categories"
+};'''
       }
     }
     {
@@ -167,33 +167,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  margin-bottom: 1.5rem;
-}`;
-'''
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''
-return {
-  as: "div",
-  role: "tablist",
-  "aria-label": "Books categories"
-};
-'''
-      }
-    }
-    {
-      id: "7"
-      L: Attr
-      P: {
-        css:
-          '''
-const active = args.fns.isByTab?.() === true;
+          '''const active = args.fns.isByTab?.() === true;
 return `._id.books-tab {
   padding: 0.625rem 1.25rem;
   border: 1px solid ${active ? args.theme.var.color.primary : args.theme.var.color.border};
@@ -214,13 +188,11 @@ return `._id.books-tab {
     width: 100%;
     text-align: center;
   }
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const active = args.fns.isByTab?.() === true;
+          '''const active = args.fns.isByTab?.() === true;
 return {
   as: "button",
   type: "button",
@@ -229,17 +201,15 @@ return {
   text: "Books By Fulchand",
   class: active ? "books-tab books-tab-active" : "books-tab",
   onClick: () => args.fns.setActiveTab?.("by")
-};
-'''
+};'''
       }
     }
     {
-      id: "8"
+      id: "7"
       L: Attr
       P: {
         css:
-          '''
-const active = args.fns.isRecommendedTab?.() === true;
+          '''const active = args.fns.isRecommendedTab?.() === true;
 return `._id.books-tab {
   padding: 0.625rem 1.25rem;
   border: 1px solid ${active ? args.theme.var.color.primary : args.theme.var.color.border};
@@ -260,13 +230,11 @@ return `._id.books-tab {
     width: 100%;
     text-align: center;
   }
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-const active = args.fns.isRecommendedTab?.() === true;
+          '''const active = args.fns.isRecommendedTab?.() === true;
 return {
   as: "button",
   type: "button",
@@ -275,19 +243,17 @@ return {
   text: "Books Recommended by Fulchand",
   class: active ? "books-tab books-tab-active" : "books-tab",
   onClick: () => args.fns.setActiveTab?.("recommended")
-};
-'''
+};'''
       }
     }
     {
-      id: "9"
+      id: "8"
       L: Attr
       P: {
         displayOrder: 3
         componentName: PublicContentTable
         props:
-          '''
-const isRecommended = args.fns.isRecommendedTab?.() === true;
+          '''const isRecommended = args.fns.isRecommendedTab?.() === true;
 const books = isRecommended
   ? (args.contextData.booksSettings?.recommendedBooks ?? [])
   : (args.contextData.booksSettings?.books ?? []);
@@ -305,8 +271,27 @@ return {
   emptyMessage: isRecommended
     ? "No recommended books available yet."
     : "No books available yet."
-};
-'''
+};'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: ${args.theme.var.color.background_light_50};
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "tr"
+};'''
       }
     }
     {
@@ -314,23 +299,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  transition: background 0.2s ease;
-
-  &:hover {
-    background: ${args.theme.var.color.background_light_50};
-  }
-}`;
-'''
+          '''return `._id {
+  text-align: left;
+  vertical-align: middle;
+  color: ${args.theme.var.color.text};
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
+          '''const row = args.contextData.row || {};
 return {
-  as: "tr"
-};
-'''
+  as: "td",
+  text: row.serial != null && row.serial !== "" ? String(row.serial) : "",
+  style: { width: "48px" }
+};'''
       }
     }
     {
@@ -338,24 +320,17 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  text-align: left;
+          '''return `._id {
+  text-align: center;
   vertical-align: middle;
-  color: ${args.theme.var.color.text};
-}`;
-'''
-        displayOrder: 1
+}`;'''
+        displayOrder: 2
         componentName: Html
         props:
-          '''
-const row = args.contextData.row || {};
-return {
+          '''return {
   as: "td",
-  text: row.serial != null && row.serial !== "" ? String(row.serial) : "",
-  style: { width: "48px" }
-};
-'''
+  style: { width: "120px" }
+};'''
       }
     }
     {
@@ -363,30 +338,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  text-align: center;
-  vertical-align: middle;
-}`;
-'''
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''
-return {
-  as: "td",
-  style: { width: "120px" }
-};
-'''
-      }
-    }
-    {
-      id: "13"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
+          '''return `._id {
   width: 40px;
   height: 56px;
   object-fit: cover;
@@ -403,21 +355,39 @@ return `._id {
     width: 112px;
     height: 148px;
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const row = args.contextData.row || {};
+          '''const row = args.contextData.row || {};
 const src = row.preview || "";
 return {
   as: "img",
   src,
   alt: row.name || "Book cover",
   hide: () => !src
-};
-'''
+};'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  text-align: left;
+  vertical-align: middle;
+  color: ${args.theme.var.color.text};
+  font-weight: 600;
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''const row = args.contextData.row || {};
+return {
+  as: "td",
+  text: row.name || ""
+};'''
       }
     }
     {
@@ -425,24 +395,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   text-align: left;
   vertical-align: middle;
   color: ${args.theme.var.color.text};
-  font-weight: 600;
-}`;
-'''
-        displayOrder: 3
+  max-width: 320px;
+}`;'''
+        displayOrder: 4
         componentName: Html
         props:
-          '''
-const row = args.contextData.row || {};
+          '''const row = args.contextData.row || {};
 return {
   as: "td",
-  text: row.name || ""
-};
-'''
+  text: row.description || ""
+};'''
       }
     }
     {
@@ -450,24 +416,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   text-align: left;
   vertical-align: middle;
   color: ${args.theme.var.color.text};
-  max-width: 320px;
-}`;
-'''
-        displayOrder: 4
+}`;'''
+        displayOrder: 5
         componentName: Html
         props:
-          '''
-const row = args.contextData.row || {};
+          '''const row = args.contextData.row || {};
 return {
   as: "td",
-  text: row.description || ""
-};
-'''
+  text: row.year != null && row.year !== "" ? String(row.year) : "",
+  style: { width: "64px" }
+};'''
       }
     }
     {
@@ -475,24 +437,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   text-align: left;
   vertical-align: middle;
   color: ${args.theme.var.color.text};
-}`;
-'''
-        displayOrder: 5
+}`;'''
+        displayOrder: 6
         componentName: Html
         props:
-          '''
-const row = args.contextData.row || {};
+          '''const row = args.contextData.row || {};
 return {
   as: "td",
-  text: row.year != null && row.year !== "" ? String(row.year) : "",
-  style: { width: "64px" }
-};
-'''
+  text: row.language || "",
+  style: { width: "96px" }
+};'''
       }
     }
     {
@@ -500,24 +458,17 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  text-align: left;
+          '''return `._id {
+  text-align: center;
   vertical-align: middle;
-  color: ${args.theme.var.color.text};
-}`;
-'''
-        displayOrder: 6
+}`;'''
+        displayOrder: 7
         componentName: Html
         props:
-          '''
-const row = args.contextData.row || {};
-return {
+          '''return {
   as: "td",
-  text: row.language || "",
   style: { width: "96px" }
-};
-'''
+};'''
       }
     }
     {
@@ -525,30 +476,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  text-align: center;
-  vertical-align: middle;
-}`;
-'''
-        displayOrder: 7
-        componentName: Html
-        props:
-          '''
-return {
-  as: "td",
-  style: { width: "96px" }
-};
-'''
-      }
-    }
-    {
-      id: "19"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
+          '''return `._id {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -564,13 +492,11 @@ return `._id {
   &:hover {
     background: ${args.theme.var.color.primary_dark_200};
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const row = args.contextData.row || {};
+          '''const row = args.contextData.row || {};
 const href = row.downloadUrl || "";
 return {
   as: "a",
@@ -579,119 +505,126 @@ return {
   target: "_blank",
   rel: "noopener noreferrer",
   hide: () => !href
-};
-'''
+};'''
+      }
+    }
+    {
+      id: "19"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: Layout
       }
     }
   ]
   edges: [
     {
       id: e1
-      T: PageLayout
+      T: Attr
       S: "1"
       E: "2"
     }
     {
       id: e2
-      T: Attr
+      T: PageLayout
       S: "1"
-      E: "3"
+      E: "19"
     }
     {
       id: e3
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e4
       T: Attr
       S: "3"
       E: "4"
     }
     {
-      id: e4
-      T: Attr
-      S: "4"
-      E: "5"
-    }
-    {
       id: e5
       T: Attr
-      S: "4"
-      E: "6"
+      S: "3"
+      E: "5"
     }
     {
       id: e6
       T: Attr
-      S: "4"
-      E: "9"
+      S: "3"
+      E: "8"
     }
     {
       id: e7
       T: Attr
-      S: "6"
-      E: "7"
+      S: "5"
+      E: "6"
     }
     {
       id: e8
       T: Attr
-      S: "6"
-      E: "8"
+      S: "5"
+      E: "7"
     }
     {
       id: e9
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e10
       T: Attr
       S: "9"
       E: "10"
     }
     {
-      id: e10
-      T: Attr
-      S: "10"
-      E: "11"
-    }
-    {
       id: e11
       T: Attr
-      S: "10"
-      E: "12"
+      S: "9"
+      E: "11"
     }
     {
       id: e12
       T: Attr
-      S: "10"
-      E: "14"
+      S: "9"
+      E: "13"
     }
     {
       id: e13
       T: Attr
-      S: "10"
-      E: "15"
+      S: "9"
+      E: "14"
     }
     {
       id: e14
       T: Attr
-      S: "10"
-      E: "16"
+      S: "9"
+      E: "15"
     }
     {
       id: e15
       T: Attr
-      S: "10"
-      E: "17"
+      S: "9"
+      E: "16"
     }
     {
       id: e16
       T: Attr
-      S: "10"
-      E: "18"
+      S: "9"
+      E: "17"
     }
     {
       id: e17
       T: Attr
-      S: "12"
-      E: "13"
+      S: "11"
+      E: "12"
     }
     {
       id: e18
       T: Attr
-      S: "18"
-      E: "19"
+      S: "17"
+      E: "18"
     }
   ]
 }

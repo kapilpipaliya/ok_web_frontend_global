@@ -13,8 +13,7 @@
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   position: fixed;
   top: 0;
   left: 0;
@@ -40,13 +39,11 @@ return `._id {
     padding: 0;
     align-items: stretch;
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const isOpen = args.contextData.props?.isOpen === true;
+          '''const isOpen = args.contextData.props?.isOpen === true;
 const onClose = args.contextData.props?.onClose;
 
 return {
@@ -55,8 +52,7 @@ return {
   onClick: (e) => {
     if (e.target === e.currentTarget && onClose) onClose();
   }
-};
-'''
+};'''
       }
     }
     {
@@ -64,8 +60,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   background: ${args.theme.var.color.background};
   border-radius: 0.75rem;
   width: min(1200px, 96vw);
@@ -94,14 +89,10 @@ return `._id {
     opacity: 1;
     transform: translateY(0) scale(1);
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
-        props:
-          '''
-return { as: "div" };
-'''
+        props: return { as: "div" };
       }
     }
     {
@@ -109,22 +100,17 @@ return { as: "div" };
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   flex: 1;
   min-height: 0;
   position: relative;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
-        props:
-          '''
-return { as: "div" };
-'''
+        props: return { as: "div" };
       }
     }
     {
@@ -134,8 +120,7 @@ return { as: "div" };
         displayOrder: 1
         componentName: TableSchemaEditorShell
         props:
-          '''
-const tableKey = args.contextData.props?.tableKey;
+          '''const tableKey = args.contextData.props?.tableKey;
 const onClose = args.contextData.props?.onClose;
 const onSaved = args.contextData.props?.onSaved;
 const isOpen = args.contextData.props?.isOpen === true;
@@ -147,8 +132,7 @@ return {
   onSaved: () => {
     if (typeof onSaved === "function") onSaved();
   }
-};
-'''
+};'''
       }
     }
   ]

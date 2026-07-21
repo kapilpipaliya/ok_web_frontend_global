@@ -1,0 +1,541 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: FloatingHelpTooltip
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  flex-shrink: 0;
+}`;'''
+        displayOrder: 1
+        fns:
+          '''const [isOpen, setIsOpen] = args.createSignal(false);
+const [triggerRef, setTriggerRef] = args.createSignal(null);
+const [floatingRef, setFloatingRef] = args.createSignal(null);
+let cleanup = null;
+let hideTimer = null;
+
+const getPlacement = () => args.contextData.props?.placement || "top";
+
+const clearHideTimer = () => {
+  if (hideTimer != null) {
+    clearTimeout(hideTimer);
+    hideTimer = null;
+  }
+};
+
+const tearDownFloating = () => {
+  clearHideTimer();
+  if (cleanup) {
+    cleanup();
+    cleanup = null;
+  }
+};
+
+const setupFloatingUI = async () => {
+  const trigger = triggerRef();
+  const floating = floatingRef();
+  if (!trigger || !floating || !args.floatingUI) return;
+
+  try {
+    const { computePosition, flip, shift, offset, autoUpdate } = args.floatingUI;
+
+    const updatePosition = async () => {
+      const { x, y } = await computePosition(trigger, floating, {
+        placement: getPlacement(),
+        strategy: "fixed",
+        middleware: [
+          offset(6),
+          flip(),
+          shift({ padding: 8 })
+        ]
+      });
+      Object.assign(floating.style, {
+        left: String(x) + "px",
+        top: String(y) + "px"
+      });
+    };
+
+    if (cleanup) {
+      cleanup();
+      cleanup = null;
+    }
+
+    await updatePosition();
+
+    cleanup = autoUpdate(trigger, floating, updatePosition, {
+      ancestorScroll: true,
+      ancestorResize: true,
+      elementResize: true,
+      layoutShift: true,
+      animationFrame: false
+    });
+  } catch (e) {
+    console.error("FloatingHelpTooltip:", e);
+  }
+};
+
+const openTooltip = () => {
+  clearHideTimer();
+  setIsOpen(true);
+  requestAnimationFrame(() => setupFloatingUI());
+};
+
+const scheduleClose = () => {
+  clearHideTimer();
+  hideTimer = window.setTimeout(() => {
+    setIsOpen(false);
+    tearDownFloating();
+    hideTimer = null;
+  }, 100);
+};
+
+return {
+  isOpen,
+  setTriggerRef,
+  setFloatingRef,
+  openTooltip,
+  scheduleClose,
+  clearHideTimer,
+  tearDownFloating
+};'''
+        componentName: Html
+        props:
+          '''const p = args.contextData.props || {};
+const rawText = p.text;
+const textNonEmpty =
+  typeof rawText === "string"
+    ? rawText.replace(/\\n/g, "\n").trim() !== ""
+    : Boolean(rawText);
+const hasPolicy = typeof p.policyRows === "function";
+const policyCount = hasPolicy ? (p.policyRows() || []).length : 0;
+const hasText = textNonEmpty || (hasPolicy && policyCount > 0);
+return {
+  as: "span",
+  hide: p.hide === true || !hasText,
+  onCleanup: () => {
+    args.fns.tearDownFloating();
+  }
+};'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.125rem;
+  min-width: 1.375rem;
+  min-height: 1.375rem;
+  margin-left: 0.25rem;
+  border: none;
+  background: transparent;
+  border-radius: ${args.theme.var.borderRadius.sm};
+  cursor: help;
+  font-size: 0.75rem;
+  line-height: 1;
+  padding: 0.125rem;
+  flex-shrink: 0;
+  box-sizing: content-box;
+}
+
+._id:hover {
+  background: ${args.theme.var.color.background_light_200};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const p = args.contextData.props || {};
+const rawText = p.text || "";
+const textTrim =
+  typeof rawText === "string" &&
+  rawText.replace(/\\n/g, "\n").trim() !== "";
+const hasPolicy = typeof p.policyRows === "function";
+const policyCount = hasPolicy ? (p.policyRows() || []).length : 0;
+const hasContent = textTrim || (hasPolicy && policyCount > 0);
+const fieldLabel = p.fieldLabel || "";
+const aria =
+  fieldLabel && hasContent
+    ? `Password requirements for ${fieldLabel}`
+    : "Help";
+
+return {
+  as: "span",
+  ref: args.fns.setTriggerRef,
+  onMouseEnter: () => args.fns.openTooltip(),
+  onMouseLeave: () => args.fns.scheduleClose(),
+  hide: !hasContent,
+  "aria-label": aria,
+  tabIndex: 0
+};'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''const p = args.contextData.props || {};
+const tt = p.triggerTint;
+const tint =
+  typeof tt === "function" ? tt() : args.theme.var.color.text_light_500;
+return `._id {
+  flex-shrink: 0;
+  color: ${tint};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const p = args.contextData.props || {};
+const trig = p.triggerIcon;
+if (trig === undefined || trig === null || trig === "") {
+  return {
+    as: "icon",
+    icon: "ph:question",
+    width: 20,
+    height: 20,
+    hide: true
+  };
+}
+const iconRaw = typeof trig === "function" ? trig() : trig;
+const icon = String(iconRaw || "").trim() || "ph:question";
+return {
+  as: "icon",
+  icon,
+  width: 20,
+  height: 20,
+  hide: false
+};'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const p = args.contextData.props || {};
+const trig = p.triggerIcon;
+if (trig === undefined || trig === null || trig === "") {
+  return {
+    as: "span",
+    text: "\u24D8",
+    hide: false
+  };
+}
+const iconRaw = typeof trig === "function" ? trig() : trig;
+const hasIcon = Boolean(String(iconRaw || "").trim());
+return {
+  as: "span",
+  text: "\u24D8",
+  hide: hasIcon
+};'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "portal"
+};'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  position: fixed;
+  z-index: 1100;
+  max-width: min(18.75rem, calc(100vw - 1rem));
+  padding: 12px;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 4px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.45;
+  pointer-events: auto;
+  animation: fm-help-fade 0.12s ease-out;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  white-space: normal;
+}
+
+@keyframes fm-help-fade {
+  from { opacity: 0; transform: translateY(2px); }
+  to { opacity: 1; transform: translateY(0); }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  ref: args.fns.setFloatingRef,
+  role: "tooltip",
+  hide: !args.fns.isOpen(),
+  onMouseEnter: () => args.fns.clearHideTimer(),
+  onMouseLeave: () => args.fns.scheduleClose()
+};'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  white-space: pre-wrap;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const p = args.contextData.props || {};
+const hasPolicy = typeof p.policyRows === "function";
+const rawText = p.text || "";
+const text =
+  typeof rawText === "string" ? rawText.replace(/\\n/g, "\n") : rawText;
+return {
+  as: "div",
+  text,
+  hide: hasPolicy || !text
+};'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 16px;
+  color: ${args.theme.var.color.primary};
+  margin: 0;
+  margin-bottom: 8px;
+  font-weight: 600;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const p = args.contextData.props || {};
+const hasPolicy = typeof p.policyRows === "function";
+const title =
+  typeof p.policyTitle === "string" && p.policyTitle.trim() !== ""
+    ? p.policyTitle.trim()
+    : "Password Requirements";
+return {
+  as: "div",
+  text: title,
+  hide: !hasPolicy
+};'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0;
+  padding-left: 16px;
+  list-style: none;
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''const p = args.contextData.props || {};
+const hasPolicy = typeof p.policyRows === "function";
+return {
+  as: "div",
+  loop: true,
+  contextName: "policyRow",
+  data: () => (hasPolicy ? p.policyRows() || [] : []),
+  hide: !hasPolicy
+};'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 14px;
+  margin-bottom: 4px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  line-height: 1.35;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+};'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        css:
+          '''const row = args.contextData.policyRow;
+const hasInput = Boolean(row?.hasInput);
+const met = Boolean(row?.met);
+const c = !hasInput
+  ? args.theme.var.color.text
+  : met
+    ? args.theme.var.color.success
+    : args.theme.var.color.error;
+return `._id {
+  flex-shrink: 0;
+  color: ${c};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const row = args.contextData.policyRow;
+const hasInput = Boolean(row?.hasInput);
+const met = Boolean(row?.met);
+const icon = !hasInput
+  ? "ph:circle"
+  : met
+    ? "ph:check-circle-fill"
+    : "ph:x-circle-fill";
+return {
+  as: "icon",
+  icon,
+  width: 18,
+  height: 18
+};'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        css:
+          '''const row = args.contextData.policyRow;
+const hasInput = Boolean(row?.hasInput);
+const met = Boolean(row?.met);
+const c = !hasInput
+  ? args.theme.var.color.text
+  : met
+    ? args.theme.var.color.success
+    : args.theme.var.color.text_light_500;
+return `._id {
+  font-size: 14px;
+  color: ${c};
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "span",
+  text: args.contextData.policyRow?.message || ""
+};'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "6"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "7"
+      E: "9"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "7"
+      E: "10"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "10"
+      E: "11"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "11"
+      E: "12"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "11"
+      E: "13"
+    }
+  ]
+}

@@ -13,18 +13,15 @@
       L: Attr
       P: {
         css:
-          '''
-return `._id.fm-field-array {
+          '''return `._id.fm-field-array {
   display: flex;
   flex-direction: column;
   gap: ${args.theme.var.spacing.md};
   width: 100%;
-}`;
-'''
+}`;'''
         displayOrder: 1
         fns:
-          '''
-const getProps = () => args.contextData.props || {};
+          '''const getProps = () => args.contextData.props || {};
 const getField = () => getProps().field || {};
 const getConfig = () => getField().fieldArrayConfig || {};
 
@@ -224,16 +221,13 @@ return {
   cleanupFieldArrayDraggable,
   isItemDragging,
   isItemDragOver
-};
-'''
+};'''
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   class: "fm-field-array"
-};
-'''
+};'''
       }
     }
     {
@@ -245,11 +239,9 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   data: args.fns.getItemIndices()
-};
-'''
+};'''
       }
     }
     {
@@ -257,8 +249,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const itemIndex = args.contextData.fieldArrayItem;
+          '''const itemIndex = args.contextData.fieldArrayItem;
 const dragOver = args.fns.isItemDragOver?.(itemIndex);
 const dragging = args.fns.isItemDragging?.(itemIndex);
 return `._id.fm-field-array-item {
@@ -271,13 +262,11 @@ return `._id.fm-field-array-item {
   background: ${args.theme.var.color.background_light_50};
   ${dragging ? "opacity: 0.55;" : ""}
   ${dragOver ? `outline: 2px dashed ${args.theme.var.color.primary};` : ""}
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const itemIndex = args.contextData.fieldArrayItem;
+          '''const itemIndex = args.contextData.fieldArrayItem;
 return {
   as: "div",
   class: "fm-field-array-item",
@@ -290,8 +279,7 @@ return {
       element.__fmFieldArrayDropCleanup = null;
     }
   }
-};
-'''
+};'''
       }
     }
     {
@@ -299,22 +287,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id.fm-field-array-item-header {
+          '''return `._id.fm-field-array-item-header {
   display: flex;
   align-items: flex-start;
   gap: ${args.theme.var.spacing.sm};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   class: "fm-field-array-item-header"
-};
-'''
+};'''
       }
     }
     {
@@ -322,18 +306,15 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id.fm-field-array-drag-handle {
+          '''return `._id.fm-field-array-drag-handle {
   flex-shrink: 0;
   color: ${args.theme.var.color.text_light_500};
   cursor: grab;
-}`;
-'''
+}`;'''
         displayOrder: 0
         componentName: Html
         props:
-          '''
-const itemIndex = args.contextData.fieldArrayItem;
+          '''const itemIndex = args.contextData.fieldArrayItem;
 return {
   as: "icon",
   icon: "ph:dots-six-vertical",
@@ -349,8 +330,7 @@ return {
       args.fns.cleanupFieldArrayDraggable(element);
     }
   }
-};
-'''
+};'''
       }
     }
     {
@@ -358,25 +338,21 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id.fm-field-array-item-header-main {
+          '''return `._id.fm-field-array-item-header-main {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: ${args.theme.var.spacing.sm};
   flex: 1;
   min-width: 0;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   class: "fm-field-array-item-header-main"
-};
-'''
+};'''
       }
     }
     {
@@ -384,24 +360,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id.fm-field-array-item-title {
+          '''return `._id.fm-field-array-item-title {
   font-size: 0.875rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const itemIndex = args.contextData.fieldArrayItem;
+          '''const itemIndex = args.contextData.fieldArrayItem;
 return {
   as: "div",
   text: args.fns.getItemLabel(itemIndex),
   class: "fm-field-array-item-title"
-};
-'''
+};'''
       }
     }
     {
@@ -411,8 +383,7 @@ return {
         displayOrder: 2
         componentName: Button
         props:
-          '''
-const itemIndex = args.contextData.fieldArrayItem;
+          '''const itemIndex = args.contextData.fieldArrayItem;
 return {
   variant: "danger",
   size: "sm",
@@ -420,8 +391,7 @@ return {
   type: "button",
   disabled: args.fns.isDisabled(),
   onClick: () => args.fns.removeItem(itemIndex)
-};
-'''
+};'''
       }
     }
     {
@@ -430,25 +400,21 @@ return {
       P: {
         contextName: fieldArrayField
         css:
-          '''
-return `._id.fm-field-array-field {
+          '''return `._id.fm-field-array-field {
   display: flex;
   flex-direction: column;
   gap: ${args.theme.var.spacing.xs};
   width: 100%;
-}`;
-'''
+}`;'''
         loop: true
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   class: "fm-field-array-field",
   data: args.fns.getItemFields()
-};
-'''
+};'''
       }
     }
     {
@@ -456,24 +422,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id.fm-field-array-field-label {
+          '''return `._id.fm-field-array-field-label {
   font-size: 0.875rem;
   font-weight: 500;
   color: ${args.theme.var.color.text};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const itemField = args.contextData.fieldArrayField || {};
+          '''const itemField = args.contextData.fieldArrayField || {};
 return {
   as: "label",
   text: itemField.label || itemField.key || "Field",
   class: "fm-field-array-field-label"
-};
-'''
+};'''
       }
     }
     {
@@ -483,8 +445,7 @@ return {
         displayOrder: 2
         componentName: FormLocalizedText
         props:
-          '''
-const itemField = args.contextData.fieldArrayField || {};
+          '''const itemField = args.contextData.fieldArrayField || {};
 const itemIndex = args.contextData.fieldArrayItem;
 const isTranslatable = args.fns.isItemFieldTranslatable?.(itemField);
 const isTextArea = itemField.renderer === "textArea";
@@ -498,8 +459,7 @@ return {
   onChange: (nextValue) => args.fns.updateItemField(itemIndex, itemField.key, nextValue),
   required: itemField.required === true,
   disabled: args.fns.isDisabled()
-};
-'''
+};'''
       }
     }
     {
@@ -509,8 +469,7 @@ return {
         displayOrder: 2
         componentName: TextArea
         props:
-          '''
-const itemField = args.contextData.fieldArrayField || {};
+          '''const itemField = args.contextData.fieldArrayField || {};
 const itemIndex = args.contextData.fieldArrayItem;
 const hide = itemField.renderer !== "textArea" || args.fns.isItemFieldTranslatable?.(itemField);
 const value = args.fns.getItemFieldValue(args.fns.getItemAt(itemIndex), itemField);
@@ -521,8 +480,7 @@ return {
   placeholder: itemField.placeholder || "",
   required: itemField.required === true,
   disabled: args.fns.isDisabled()
-};
-'''
+};'''
       }
     }
     {
@@ -532,8 +490,7 @@ return {
         displayOrder: 3
         componentName: TextInput
         props:
-          '''
-const itemField = args.contextData.fieldArrayField || {};
+          '''const itemField = args.contextData.fieldArrayField || {};
 const itemIndex = args.contextData.fieldArrayItem;
 const hide = itemField.renderer === "textArea" || args.fns.isItemFieldTranslatable?.(itemField);
 const value = args.fns.getItemFieldValue(args.fns.getItemAt(itemIndex), itemField);
@@ -545,8 +502,7 @@ return {
   required: itemField.required === true,
   disabled: args.fns.isDisabled(),
   type: itemField.dataType === "number" ? "number" : "text"
-};
-'''
+};'''
       }
     }
     {
@@ -556,15 +512,13 @@ return {
         displayOrder: 3
         componentName: Button
         props:
-          '''
-return {
+          '''return {
   variant: "secondary",
   text: args.fns.getConfig()?.addButtonLabel || "Add item",
   type: "button",
   disabled: args.fns.isDisabled(),
   onClick: () => args.fns.addItem()
-};
-'''
+};'''
       }
     }
   ]

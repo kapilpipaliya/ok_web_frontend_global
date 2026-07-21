@@ -14,8 +14,7 @@
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   width: 220px;
   flex-shrink: 0;
   border-right: 1px solid ${args.theme.var.color.border};
@@ -25,8 +24,7 @@ return `._id {
   display: flex;
   flex-direction: column;
   min-height: 0;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
@@ -36,8 +34,7 @@ return {
   as: "aside",
   "aria-label": "Sections",
   hide: api.isSingleSectionMode?.() === true || api.isJsonMode?.() === true
-};
-'''
+};'''
       }
     }
     {
@@ -45,8 +42,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   flex-direction: column;
   gap: 0.375rem;
@@ -54,14 +50,10 @@ return `._id {
   min-height: 0;
   overflow-y: auto;
   width: 100%;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
-        props:
-          '''
-return { as: "div" };
-'''
+        props: return { as: "div" };
       }
     }
     {
@@ -77,8 +69,7 @@ return { as: "div" };
 
 return {
   data: api.getSectionIndices?.() || []
-};
-'''
+};'''
       }
     }
     {
@@ -129,8 +120,7 @@ return `._id.fsce-section-item {
     visibility: visible;
     pointer-events: auto;
   }` : ""}
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
@@ -155,8 +145,7 @@ return {
       api.attachSectionDropTarget(element, index);
     }
   }
-};
-'''
+};'''
       }
     }
     {
@@ -164,8 +153,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id.fsce-section-drag-handle {
+          '''return `._id.fsce-section-drag-handle {
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -176,8 +164,7 @@ return `._id.fsce-section-drag-handle {
   cursor: grab;
   touch-action: none;
   user-select: none;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
@@ -195,8 +182,7 @@ return {
       api.attachSectionDraggable(element, index);
     }
   }
-};
-'''
+};'''
       }
     }
     {
@@ -204,23 +190,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id.fsce-section-drag-icon {
+          '''return `._id.fsce-section-drag-icon {
   pointer-events: none;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "icon",
   icon: "ph:dots-six-vertical",
   height: 14,
   width: 14,
   class: "fsce-section-drag-icon"
-};
-'''
+};'''
       }
     }
     {
@@ -228,16 +210,14 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id.fsce-section-label {
+          '''return `._id.fsce-section-label {
   flex: 1;
   text-align: left;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   min-width: 0;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
@@ -249,8 +229,7 @@ return {
   as: "span",
   class: "fsce-section-label",
   text: section.title || section.id
-};
-'''
+};'''
       }
     }
     {
@@ -273,8 +252,7 @@ return {
     e?.stopPropagation?.();
     api.deleteSection?.(section.id);
   }
-};
-'''
+};'''
       }
     }
   ]

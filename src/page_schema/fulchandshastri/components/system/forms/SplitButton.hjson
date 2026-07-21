@@ -12,24 +12,20 @@
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: inline-flex;
   align-items: stretch;
   border-radius: ${args.theme.var.borderRadius.md};
   border: 1px solid ${args.theme.var.color.border};
   background: ${args.theme.var.color.background};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   class: args.contextData.props?.class
-};
-'''
+};'''
       }
     }
     {
@@ -37,20 +33,16 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   flex: 1;
   min-width: 150px;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -58,16 +50,13 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   border-radius: ${args.theme.var.borderRadius.md} 0 0 ${args.theme.var.borderRadius.md};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: TomSelect
         props:
-          '''
-const field = args.contextData.props?.field || "";
+          '''const field = args.contextData.props?.field || "";
 const options = args.contextData.props?.options || [];
 const onFieldChange = args.contextData.props?.onFieldChange || (() => {});
 const disabled = args.contextData.props?.disabled || false;
@@ -81,8 +70,7 @@ return {
   disabled: disabled,
   search: false,
   placeholder: "Sort by..."
-};
-'''
+};'''
       }
     }
     {
@@ -90,20 +78,16 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   width: 1px;
   background: ${args.theme.var.color.border};
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -111,8 +95,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -136,13 +119,11 @@ return `._id {
     opacity: 0.6;
     cursor: not-allowed;
   }
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-const direction = args.contextData.props?.direction || "asc";
+          '''const direction = args.contextData.props?.direction || "asc";
 const onDirectionToggle = args.contextData.props?.onDirectionToggle || (() => {});
 const disabled = args.contextData.props?.disabled || false;
 
@@ -159,8 +140,7 @@ return {
   disabled: disabled,
   "aria-label": ariaLabel,
   title: ariaLabel
-};
-'''
+};'''
       }
     }
     {
@@ -168,16 +148,13 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: block;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const direction = args.contextData.props?.direction || "asc";
+          '''const direction = args.contextData.props?.direction || "asc";
 const iconName = direction === "asc" ? "ph:arrow-up" : "ph:arrow-down";
 
 return {
@@ -185,8 +162,7 @@ return {
   icon: iconName,
   width: "20",
   height: "20"
-};
-'''
+};'''
       }
     }
     {

@@ -192,8 +192,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: grid;
   grid-template-columns: minmax(10rem, 14rem) minmax(0, 1fr);
   gap: 0.75rem;
@@ -204,8 +203,7 @@ return `._id {
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props: return { as: "div" };
@@ -216,8 +214,7 @@ return `._id {
       L: Attr
       P: {
         css:
-          '''
-return `._id.fcg-groups-panel {
+          '''return `._id.fcg-groups-panel {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -226,8 +223,7 @@ return `._id.fcg-groups-panel {
   border-radius: 0.5rem;
   background: ${args.theme.var.color.background_light_50};
   overflow: auto;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props: return { as: "aside", class: "fcg-groups-panel" };
@@ -238,20 +234,15 @@ return `._id.fcg-groups-panel {
       L: Attr
       P: {
         css:
-          '''
-return `._id.fcg-groups-header {
+          '''return `._id.fcg-groups-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.375rem;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
-        props:
-          '''
-return { as: "div", class: "fcg-groups-header" };
-'''
+        props: return { as: "div", class: "fcg-groups-header" };
       }
     }
     {
@@ -259,19 +250,14 @@ return { as: "div", class: "fcg-groups-header" };
       L: Attr
       P: {
         css:
-          '''
-return `._id.fcg-section-title {
+          '''return `._id.fcg-section-title {
   margin: 0;
   font-size: 0.8125rem;
   font-weight: 600;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
-        props:
-          '''
-return { as: "h4", text: "Groups", class: "fcg-section-title" };
-'''
+        props: return { as: "h4", text: "Groups", class: "fcg-section-title" };
       }
     }
     {
@@ -281,15 +267,13 @@ return { as: "h4", text: "Groups", class: "fcg-section-title" };
         displayOrder: 2
         componentName: Button
         props:
-          '''
-return {
+          '''return {
   variant: "secondary",
   size: "sm",
   text: "Add",
   type: "button",
   onClick: () => args.fns.addGroup?.()
-};
-'''
+};'''
       }
     }
     {
@@ -300,10 +284,7 @@ return {
         loop: true
         displayOrder: 2
         componentName: Html
-        props:
-          '''
-return { data: args.fns.getGroupIndices?.() || [] };
-'''
+        props: return { data: args.fns.getGroupIndices?.() || [] };
       }
     }
     {
@@ -311,8 +292,7 @@ return { data: args.fns.getGroupIndices?.() || [] };
       L: Attr
       P: {
         css:
-          '''
-return `._id.fcg-group-card {
+          '''return `._id.fcg-group-card {
   display: block;
   width: 100%;
   padding: 0.5rem 0.625rem;
@@ -332,13 +312,11 @@ return `._id.fcg-group-card {
 ._id.fcg-group-card-selected {
   border-color: ${args.theme.var.color.primary};
   background: ${args.theme.var.color.primary_light_100};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const index = args.contextData.fcgGroupIndex;
+          '''const index = args.contextData.fcgGroupIndex;
 const group = args.fns.getGroupAt?.(index) || {};
 const selected = args.fns.isGroupSelected?.(index);
 return {
@@ -347,8 +325,7 @@ return {
   class: selected ? "fcg-group-card fcg-group-card-selected" : "fcg-group-card",
   onClick: () => args.fns.selectGroup?.(index),
   text: group.title || group.key || `Group ${index + 1}`
-};
-'''
+};'''
       }
     }
     {
@@ -356,25 +333,21 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id.fcg-detail-panel {
+          '''return `._id.fcg-detail-panel {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
   min-width: 0;
   overflow: auto;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   class: "fcg-detail-panel",
   hide: args.fns.getSelectedGroupIndex?.() < 0
-};
-'''
+};'''
       }
     }
     {
@@ -382,8 +355,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id.fcg-group-meta {
+          '''return `._id.fcg-group-meta {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.5rem;
@@ -395,8 +367,7 @@ return `._id.fcg-group-meta {
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props: return { as: "div", class: "fcg-group-meta" };
@@ -409,14 +380,12 @@ return `._id.fcg-group-meta {
         displayOrder: 1
         componentName: TextInput
         props:
-          '''
-const group = args.fns.getSelectedGroup?.() || {};
+          '''const group = args.fns.getSelectedGroup?.() || {};
 return {
   label: "Group key",
   value: group.key || "",
   onChange: (e) => args.fns.updateSelectedGroup?.({ key: e.target.value })
-};
-'''
+};'''
       }
     }
     {
@@ -426,14 +395,12 @@ return {
         displayOrder: 2
         componentName: TextInput
         props:
-          '''
-const group = args.fns.getSelectedGroup?.() || {};
+          '''const group = args.fns.getSelectedGroup?.() || {};
 return {
   label: "Group title",
   value: group.title || "",
   onChange: (e) => args.fns.updateSelectedGroup?.({ title: e.target.value })
-};
-'''
+};'''
       }
     }
     {
@@ -443,15 +410,13 @@ return {
         displayOrder: 3
         componentName: TextInput
         props:
-          '''
-const group = args.fns.getSelectedGroup?.() || {};
+          '''const group = args.fns.getSelectedGroup?.() || {};
 return {
   label: "Grid columns",
   type: "number",
   value: group.gridColumns != null ? String(group.gridColumns) : "2",
   onChange: (e) => args.fns.updateSelectedGroup?.({ gridColumns: Number(e.target.value) || 1 })
-};
-'''
+};'''
       }
     }
     {
@@ -459,8 +424,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id.fcg-fields-section {
+          '''return `._id.fcg-fields-section {
   display: grid;
   grid-template-columns: minmax(8rem, 12rem) minmax(0, 1fr);
   gap: 0.625rem;
@@ -469,8 +433,7 @@ return `._id.fcg-fields-section {
   @media (max-width: 900px) {
     grid-template-columns: 1fr;
   }
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props: return { as: "div", class: "fcg-fields-section" };
@@ -481,8 +444,7 @@ return `._id.fcg-fields-section {
       L: Attr
       P: {
         css:
-          '''
-return `._id.fcg-fields-list-panel {
+          '''return `._id.fcg-fields-list-panel {
   display: flex;
   flex-direction: column;
   gap: 0.375rem;
@@ -490,8 +452,7 @@ return `._id.fcg-fields-list-panel {
   border: 1px solid ${args.theme.var.color.border};
   border-radius: 0.5rem;
   background: ${args.theme.var.color.background};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props: return { as: "div", class: "fcg-fields-list-panel" };
@@ -502,14 +463,12 @@ return `._id.fcg-fields-list-panel {
       L: Attr
       P: {
         css:
-          '''
-return `._id.fcg-fields-header {
+          '''return `._id.fcg-fields-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.375rem;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props: return { as: "div", class: "fcg-fields-header" };
@@ -531,15 +490,13 @@ return `._id.fcg-fields-header {
         displayOrder: 2
         componentName: Button
         props:
-          '''
-return {
+          '''return {
   variant: "secondary",
   size: "sm",
   text: "Add field",
   type: "button",
   onClick: () => args.fns.addField?.()
-};
-'''
+};'''
       }
     }
     {
@@ -550,10 +507,7 @@ return {
         loop: true
         displayOrder: 2
         componentName: Html
-        props:
-          '''
-return { data: args.fns.getFieldIndices?.() || [] };
-'''
+        props: return { data: args.fns.getFieldIndices?.() || [] };
       }
     }
     {
@@ -561,8 +515,7 @@ return { data: args.fns.getFieldIndices?.() || [] };
       L: Attr
       P: {
         css:
-          '''
-return `._id.fcg-field-card {
+          '''return `._id.fcg-field-card {
   display: block;
   width: 100%;
   padding: 0.375rem 0.5rem;
@@ -577,13 +530,11 @@ return `._id.fcg-field-card {
 ._id.fcg-field-card-selected {
   border-color: ${args.theme.var.color.primary};
   background: ${args.theme.var.color.primary_light_100};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const index = args.contextData.fcgFieldIndex;
+          '''const index = args.contextData.fcgFieldIndex;
 const field = args.fns.getFieldAt?.(index) || {};
 const selected = args.fns.isFieldSelected?.(index);
 return {
@@ -592,8 +543,7 @@ return {
   class: selected ? "fcg-field-card fcg-field-card-selected" : "fcg-field-card",
   onClick: () => args.fns.setSelectedFieldIndex?.(index),
   text: field.label || field.key || `Field ${index + 1}`
-};
-'''
+};'''
       }
     }
     {
@@ -601,8 +551,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id.fcg-field-detail {
+          '''return `._id.fcg-field-detail {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -610,18 +559,15 @@ return `._id.fcg-field-detail {
   border: 1px solid ${args.theme.var.color.border};
   border-radius: 0.5rem;
   background: ${args.theme.var.color.background_light_50};
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   class: "fcg-field-detail",
   hide: args.fns.selectedFieldIndex?.() == null
-};
-'''
+};'''
       }
     }
     {
@@ -629,8 +575,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id.fcg-field-detail-grid {
+          '''return `._id.fcg-field-detail-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.5rem;
@@ -638,8 +583,7 @@ return `._id.fcg-field-detail-grid {
   @media (max-width: 640px) {
     grid-template-columns: 1fr;
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props: return { as: "div", class: "fcg-field-detail-grid" };
@@ -652,15 +596,13 @@ return `._id.fcg-field-detail-grid {
         displayOrder: 1
         componentName: TextInput
         props:
-          '''
-const index = args.fns.selectedFieldIndex?.();
+          '''const index = args.fns.selectedFieldIndex?.();
 const field = args.fns.getFieldAt?.(index) || {};
 return {
   label: "Key",
   value: field.key || "",
   onChange: (e) => args.fns.updateFieldAt?.(index, { key: e.target.value })
-};
-'''
+};'''
       }
     }
     {
@@ -670,15 +612,13 @@ return {
         displayOrder: 2
         componentName: TextInput
         props:
-          '''
-const index = args.fns.selectedFieldIndex?.();
+          '''const index = args.fns.selectedFieldIndex?.();
 const field = args.fns.getFieldAt?.(index) || {};
 return {
   label: "Label",
   value: field.label || "",
   onChange: (e) => args.fns.updateFieldAt?.(index, { label: e.target.value })
-};
-'''
+};'''
       }
     }
     {
@@ -695,19 +635,14 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id.fcg-field-label {
+          '''return `._id.fcg-field-label {
   font-size: 0.75rem;
   font-weight: 500;
   color: ${args.theme.var.color.text_light_500};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
-        props:
-          '''
-return { as: "label", text: "Renderer", class: "fcg-field-label" };
-'''
+        props: return { as: "label", text: "Renderer", class: "fcg-field-label" };
       }
     }
     {
@@ -715,21 +650,18 @@ return { as: "label", text: "Renderer", class: "fcg-field-label" };
       L: Attr
       P: {
         css:
-          '''
-return `._id.fcg-renderer-select {
+          '''return `._id.fcg-renderer-select {
   width: 100%;
   padding: 0.5rem 0.625rem;
   border: 1px solid ${args.theme.var.color.border};
   border-radius: 0.375rem;
   background: ${args.theme.var.color.background};
   font-size: 0.8125rem;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const index = args.fns.selectedFieldIndex?.();
+          '''const index = args.fns.selectedFieldIndex?.();
 const field = args.fns.getFieldAt?.(index) || {};
 return {
   as: "select",
@@ -742,8 +674,7 @@ return {
       dataType: renderer === "checkbox" ? "boolean" : renderer === "fieldArray" ? "array" : "text"
     });
   }
-};
-'''
+};'''
       }
     }
     {
@@ -780,16 +711,14 @@ return {
         displayOrder: 4
         componentName: TextInput
         props:
-          '''
-const index = args.fns.selectedFieldIndex?.();
+          '''const index = args.fns.selectedFieldIndex?.();
 const field = args.fns.getFieldAt?.(index) || {};
 return {
   label: "Column span",
   type: "number",
   value: field.colSpan != null ? String(field.colSpan) : "1",
   onChange: (e) => args.fns.updateFieldAt?.(index, { colSpan: Number(e.target.value) || 1 })
-};
-'''
+};'''
       }
     }
     {
@@ -797,14 +726,12 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id.fcg-field-flags {
+          '''return `._id.fcg-field-flags {
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
   align-items: center;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props: return { as: "div", class: "fcg-field-flags" };
@@ -815,14 +742,12 @@ return `._id.fcg-field-flags {
       L: Attr
       P: {
         css:
-          '''
-return `._id.fcg-flag-wrap {
+          '''return `._id.fcg-flag-wrap {
   display: flex;
   align-items: center;
   gap: 0.375rem;
   font-size: 0.75rem;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props: return { as: "label", class: "fcg-flag-wrap" };
@@ -835,16 +760,14 @@ return `._id.fcg-flag-wrap {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const index = args.fns.selectedFieldIndex?.();
+          '''const index = args.fns.selectedFieldIndex?.();
 const field = args.fns.getFieldAt?.(index) || {};
 return {
   as: "input",
   type: "checkbox",
   checked: field.required === true,
   onChange: (e) => args.fns.updateFieldAt?.(index, { required: e.target.checked })
-};
-'''
+};'''
       }
     }
     {
@@ -863,12 +786,10 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const index = args.fns.selectedFieldIndex?.();
+          '''const index = args.fns.selectedFieldIndex?.();
 const field = args.fns.getFieldAt?.(index) || {};
 const isText = field.renderer === "text" || field.renderer === "textArea";
-return { as: "label", class: "fcg-flag-wrap", hide: !isText };
-'''
+return { as: "label", class: "fcg-flag-wrap", hide: !isText };'''
       }
     }
     {
@@ -878,16 +799,14 @@ return { as: "label", class: "fcg-flag-wrap", hide: !isText };
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const index = args.fns.selectedFieldIndex?.();
+          '''const index = args.fns.selectedFieldIndex?.();
 const field = args.fns.getFieldAt?.(index) || {};
 return {
   as: "input",
   type: "checkbox",
   checked: field.translatable === true,
   onChange: (e) => args.fns.updateFieldAt?.(index, { translatable: e.target.checked })
-};
-'''
+};'''
       }
     }
     {
@@ -904,13 +823,11 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id.fcg-field-actions {
+          '''return `._id.fcg-field-actions {
   display: flex;
   gap: 0.375rem;
   flex-wrap: wrap;
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props: return { as: "div", class: "fcg-field-actions" };
@@ -923,8 +840,7 @@ return `._id.fcg-field-actions {
         displayOrder: 1
         componentName: Button
         props:
-          '''
-const index = args.fns.selectedFieldIndex?.();
+          '''const index = args.fns.selectedFieldIndex?.();
 return {
   variant: "secondary",
   size: "sm",
@@ -932,8 +848,7 @@ return {
   type: "button",
   disabled: index == null || index <= 0,
   onClick: () => args.fns.moveField?.(index, -1)
-};
-'''
+};'''
       }
     }
     {
@@ -943,8 +858,7 @@ return {
         displayOrder: 2
         componentName: Button
         props:
-          '''
-const index = args.fns.selectedFieldIndex?.();
+          '''const index = args.fns.selectedFieldIndex?.();
 const count = args.fns.getFieldIndices?.().length || 0;
 return {
   variant: "secondary",
@@ -953,8 +867,7 @@ return {
   type: "button",
   disabled: index == null || index >= count - 1,
   onClick: () => args.fns.moveField?.(index, 1)
-};
-'''
+};'''
       }
     }
     {
@@ -964,16 +877,14 @@ return {
         displayOrder: 3
         componentName: Button
         props:
-          '''
-const index = args.fns.selectedFieldIndex?.();
+          '''const index = args.fns.selectedFieldIndex?.();
 return {
   variant: "danger",
   size: "sm",
   text: "Delete field",
   type: "button",
   onClick: () => args.fns.deleteField?.(index)
-};
-'''
+};'''
       }
     }
   ]

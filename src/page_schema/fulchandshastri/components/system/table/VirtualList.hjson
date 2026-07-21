@@ -9,12 +9,38 @@
     }
     {
       id: "2"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: ""
+        key: containerClass
+      }
+    }
+    {
+      id: "3"
+      L: ComponentVariant
+      P: {
+        type: number
+        defValue: 50
+        key: itemHeight
+      }
+    }
+    {
+      id: "4"
+      L: ComponentVariant
+      P: {
+        type: array
+        defValue: []
+        key: items
+      }
+    }
+    {
+      id: "5"
       L: Attr
       P: {
         displayOrder: 1
         fns:
-          '''
-const getItems = () => {
+          '''const getItems = () => {
   const getter = args.contextData.props?.getItems;
   if (typeof getter === "function") return getter() || [];
   return args.contextData.props?.items || [];
@@ -170,12 +196,10 @@ return {
   handleListKeyDown,
   handleListMouseDown,
   useKeyNav,
-};
-'''
+};'''
         componentName: Html
         props:
-          '''
-const containerClass = args.contextData.props?.class || args.contextData.props?.containerClass || "";
+          '''const containerClass = args.contextData.props?.class || args.contextData.props?.containerClass || "";
 const mw = args.contextData.props?.contentMinWidthPx;
 const minWStyle =
   typeof mw === "number" && mw > 0 ? `min-width: ${mw}px;width:100%;box-sizing:border-box;` : "";
@@ -196,19 +220,17 @@ return {
     onKeyDownCapture: args.fns.handleListKeyDown,
     onMouseDownCapture: args.fns.handleListMouseDown,
   }),
-};
-'''
+};'''
       }
     }
     {
-      id: "3"
+      id: "6"
       L: Attr
       P: {
         displayOrder: 1
         componentName: Virtualizer
         props:
-          '''
-const scrollEl = args.fns.scrollElement?.();
+          '''const scrollEl = args.fns.scrollElement?.();
 const usesExternalScroll = typeof args.contextData.props?.getScrollContainerElement === "function";
 
 if (usesExternalScroll && !scrollEl) {
@@ -223,26 +245,22 @@ return {
   itemSize: rowHeight,
   ref: args.fns.setVirtualizerHandle,
   children: args.fns.renderRow,
-};
-'''
+};'''
       }
     }
     {
-      id: "4"
+      id: "7"
       L: Attr
       P: {
         contextName: virtualItem
         loop: true
         displayOrder: 1
         componentName: Html
-        props:
-          '''
-return { hide: true };
-'''
+        props: return { hide: true };
       }
     }
     {
-      id: "5"
+      id: "8"
       L: Attr
       P: {
         displayOrder: 2
@@ -250,38 +268,11 @@ return { hide: true };
         slot: children
       }
     }
-    {
-      id: "6"
-      L: ComponentVariant
-      P: {
-        type: string
-        defValue: ""
-        key: containerClass
-      }
-    }
-    {
-      id: "7"
-      L: ComponentVariant
-      P: {
-        type: number
-        defValue: 50
-        key: itemHeight
-      }
-    }
-    {
-      id: "8"
-      L: ComponentVariant
-      P: {
-        type: array
-        defValue: []
-        key: items
-      }
-    }
   ]
   edges: [
     {
       id: e1
-      T: Attr
+      T: ComponentVariant
       S: "1"
       E: "2"
     }
@@ -289,37 +280,37 @@ return { hide: true };
       id: e2
       T: ComponentVariant
       S: "1"
-      E: "6"
+      E: "3"
     }
     {
       id: e3
       T: ComponentVariant
       S: "1"
-      E: "7"
+      E: "4"
     }
     {
       id: e4
-      T: ComponentVariant
+      T: Attr
       S: "1"
-      E: "8"
+      E: "5"
     }
     {
       id: e5
       T: Attr
-      S: "2"
-      E: "3"
+      S: "5"
+      E: "6"
     }
     {
       id: e6
       T: Attr
-      S: "3"
-      E: "4"
+      S: "6"
+      E: "7"
     }
     {
       id: e7
       T: Attr
-      S: "4"
-      E: "5"
+      S: "7"
+      E: "8"
     }
   ]
 }

@@ -123,10 +123,20 @@ try {
     }
     {
       id: "2"
-      L: PageLayout
+      L: Attr
       P: {
+        css:
+          '''return `._id {
+  background: linear-gradient(135deg, ${args.theme.var.color.primary_light_100} 0%, ${args.theme.var.color.primary_light_50} 100%);
+  padding: 3rem 1rem;
+  text-align: center;
+}`;'''
         displayOrder: 1
-        componentName: Layout
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+};'''
       }
     }
     {
@@ -134,30 +144,7 @@ try {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  background: linear-gradient(135deg, ${args.theme.var.color.primary_light_100} 0%, ${args.theme.var.color.primary_light_50} 100%);
-  padding: 3rem 1rem;
-  text-align: center;
-}`;
-'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''
-return {
-  as: "div"
-};
-'''
-      }
-    }
-    {
-      id: "4"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
+          '''return `._id {
   color: ${args.theme.var.color.text};
   font-size: 3rem;
   font-weight: 700;
@@ -166,18 +153,35 @@ return `._id {
   @media (max-width: 768px) {
     font-size: 2rem;
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const content = args.contextData.scheduleSettings?.content;
+          '''const content = args.contextData.scheduleSettings?.content;
 return {
   as: "h1",
   text: content?.pageTitle || "Schedule"
-};
-'''
+};'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.text_light_200};
+  font-size: 1.25rem;
+  margin-top: 1rem;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const content = args.contextData.scheduleSettings?.content;
+return {
+  as: "p",
+  text: content?.pageSubtitle || ""
+};'''
       }
     }
     {
@@ -185,23 +189,15 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  color: ${args.theme.var.color.text_light_200};
-  font-size: 1.25rem;
-  margin-top: 1rem;
-}`;
-'''
+          '''return `._id {
+  padding: 3rem 1rem;
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const content = args.contextData.scheduleSettings?.content;
-return {
-  as: "p",
-  text: content?.pageSubtitle || ""
-};
-'''
+          '''return {
+  as: "main"
+};'''
       }
     }
     {
@@ -209,44 +205,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  padding: 3rem 1rem;
-}`;
-'''
-        displayOrder: 2
+          '''return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+}`;'''
+        displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
-  as: "main"
-};
-'''
+          '''return {
+  as: "div"
+};'''
       }
     }
     {
       id: "7"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  max-width: 1200px;
-  margin: 0 auto;
-}`;
-'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''
-return {
-  as: "div"
-};
-'''
-      }
-    }
-    {
-      id: "8"
       L: Attr
       P: {
         contextName: scheduleSection
@@ -254,13 +226,29 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const sections = args.contextData.scheduleSettings?.yearSections ?? [];
+          '''const sections = args.contextData.scheduleSettings?.yearSections ?? [];
 return {
   as: "fragment",
   data: sections
-};
-'''
+};'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin-bottom: 3rem;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "section",
+  "data-animate": "",
+  ref: (el) => el && args.fns.animateOnView?.(el)
+};'''
       }
     }
     {
@@ -268,58 +256,31 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  margin-bottom: 3rem;
-}`;
-'''
+          '''return `._id {
+  color: ${args.theme.var.color.text};
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  text-align: center;
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
+          '''const section = args.contextData.scheduleSection;
 return {
-  as: "section",
-  "data-animate": "",
-  ref: (el) => el && args.fns.animateOnView?.(el)
-};
-'''
+  as: "h2",
+  text: section?.title || ""
+};'''
       }
     }
     {
       id: "10"
       L: Attr
       P: {
-        css:
-          '''
-return `._id {
-  color: ${args.theme.var.color.text};
-  font-size: 2rem;
-  font-weight: 600;
-  margin-bottom: 2rem;
-  text-align: center;
-}`;
-'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''
-const section = args.contextData.scheduleSection;
-return {
-  as: "h2",
-  text: section?.title || ""
-};
-'''
-      }
-    }
-    {
-      id: "11"
-      L: Attr
-      P: {
         displayOrder: 2
         componentName: PublicContentTable
         props:
-          '''
-const section = args.contextData.scheduleSection;
+          '''const section = args.contextData.scheduleSection;
 return {
   columns: [
     { key: "startDate", label: "Start Date", width: "120px" },
@@ -330,22 +291,39 @@ return {
   ],
   rows: section?.rows ?? [],
   emptyMessage: "No events in this section."
-};
-'''
+};'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "fragment"
+};'''
       }
     }
     {
       id: "12"
       L: Attr
       P: {
+        css:
+          '''return `._id {
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: ${args.theme.var.color.background_light_50};
+  }
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
-  as: "fragment"
-};
-'''
+          '''return {
+  as: "tr"
+};'''
       }
     }
     {
@@ -353,23 +331,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  transition: background 0.2s ease;
-
-  &:hover {
-    background: ${args.theme.var.color.background_light_50};
-  }
-}`;
-'''
+          '''return `._id {
+  text-align: left;
+  vertical-align: middle;
+  color: ${args.theme.var.color.text};
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
+          '''const row = args.contextData.row || {};
 return {
-  as: "tr"
-};
-'''
+  as: "td",
+  text: row.startDate || "",
+  style: { width: "120px" }
+};'''
       }
     }
     {
@@ -377,24 +352,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   text-align: left;
   vertical-align: middle;
   color: ${args.theme.var.color.text};
-}`;
-'''
-        displayOrder: 1
+}`;'''
+        displayOrder: 2
         componentName: Html
         props:
-          '''
-const row = args.contextData.row || {};
+          '''const row = args.contextData.row || {};
 return {
   as: "td",
-  text: row.startDate || "",
+  text: row.endDate || "",
   style: { width: "120px" }
-};
-'''
+};'''
       }
     }
     {
@@ -402,24 +373,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   text-align: left;
   vertical-align: middle;
   color: ${args.theme.var.color.text};
-}`;
-'''
-        displayOrder: 2
+}`;'''
+        displayOrder: 3
         componentName: Html
         props:
-          '''
-const row = args.contextData.row || {};
+          '''const row = args.contextData.row || {};
 return {
   as: "td",
-  text: row.endDate || "",
-  style: { width: "120px" }
-};
-'''
+  text: row.place || ""
+};'''
       }
     }
     {
@@ -427,23 +393,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   text-align: left;
   vertical-align: middle;
   color: ${args.theme.var.color.text};
-}`;
-'''
-        displayOrder: 3
+  font-weight: 600;
+}`;'''
+        displayOrder: 4
         componentName: Html
         props:
-          '''
-const row = args.contextData.row || {};
+          '''const row = args.contextData.row || {};
 return {
   as: "td",
-  text: row.place || ""
-};
-'''
+  text: row.programme || ""
+};'''
       }
     }
     {
@@ -451,24 +414,21 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   text-align: left;
   vertical-align: middle;
   color: ${args.theme.var.color.text};
-  font-weight: 600;
-}`;
-'''
-        displayOrder: 4
+  white-space: pre-line;
+  max-width: 320px;
+}`;'''
+        displayOrder: 5
         componentName: Html
         props:
-          '''
-const row = args.contextData.row || {};
+          '''const row = args.contextData.row || {};
 return {
   as: "td",
-  text: row.programme || ""
-};
-'''
+  text: row.details || ""
+};'''
       }
     }
     {
@@ -476,25 +436,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  text-align: left;
-  vertical-align: middle;
-  color: ${args.theme.var.color.text};
-  white-space: pre-line;
-  max-width: 320px;
-}`;
-'''
-        displayOrder: 5
+          '''return `._id {
+  background: ${args.theme.var.color.background_light_50};
+}`;'''
+        displayOrder: 2
         componentName: Html
         props:
-          '''
-const row = args.contextData.row || {};
+          '''const row = args.contextData.row || {};
+const src = row.banner || "";
 return {
-  as: "td",
-  text: row.details || ""
-};
-'''
+  as: "tr",
+  hide: () => !src
+};'''
       }
     }
     {
@@ -502,22 +455,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  background: ${args.theme.var.color.background_light_50};
-}`;
-'''
-        displayOrder: 2
+          '''return `._id {
+  padding: 0.75rem;
+  text-align: center;
+  vertical-align: middle;
+}`;'''
+        displayOrder: 1
         componentName: Html
         props:
-          '''
-const row = args.contextData.row || {};
-const src = row.banner || "";
-return {
-  as: "tr",
-  hide: () => !src
-};
-'''
+          '''return {
+  as: "td",
+  "attr:colspan": 5
+};'''
       }
     }
     {
@@ -525,22 +474,23 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  padding: 0.75rem;
-  text-align: center;
-  vertical-align: middle;
-}`;
-'''
+          '''return `._id {
+  display: block;
+  width: 100%;
+  object-fit: cover;
+  border-radius: 0.5rem;
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
+          '''const row = args.contextData.row || {};
+const src = row.banner || "";
 return {
-  as: "td",
-  "attr:colspan": 5
-};
-'''
+  as: "img",
+  src,
+  alt: row.programme || row.place || "Banner",
+  hide: () => !src
+};'''
       }
     }
     {
@@ -548,59 +498,35 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  display: block;
-  width: 100%;
-  object-fit: cover;
-  border-radius: 0.5rem;
-}`;
-'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''
-const row = args.contextData.row || {};
-const src = row.banner || "";
-return {
-  as: "img",
-  src,
-  alt: row.programme || row.place || "Banner",
-  hide: () => !src
-};
-'''
-      }
-    }
-    {
-      id: "22"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
+          '''return `._id {
   padding: 2rem 1rem;
   text-align: center;
   color: ${args.theme.var.color.text_light_300};
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const sections = args.contextData.scheduleSettings?.yearSections ?? [];
+          '''const sections = args.contextData.scheduleSettings?.yearSections ?? [];
 return {
   as: "p",
   text: "No scheduled events available yet.",
   hide: () => sections.length > 0
-};
-'''
+};'''
+      }
+    }
+    {
+      id: "22"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: Layout
       }
     }
   ]
   edges: [
     {
       id: e1
-      T: PageLayout
+      T: Attr
       S: "1"
       E: "2"
     }
@@ -608,121 +534,121 @@ return {
       id: e2
       T: Attr
       S: "1"
-      E: "3"
+      E: "5"
     }
     {
       id: e3
-      T: Attr
+      T: PageLayout
       S: "1"
-      E: "6"
+      E: "22"
     }
     {
       id: e4
       T: Attr
-      S: "3"
-      E: "4"
+      S: "2"
+      E: "3"
     }
     {
       id: e5
       T: Attr
-      S: "3"
-      E: "5"
+      S: "2"
+      E: "4"
     }
     {
       id: e6
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e7
       T: Attr
       S: "6"
       E: "7"
     }
     {
-      id: e7
+      id: e8
+      T: Attr
+      S: "6"
+      E: "21"
+    }
+    {
+      id: e9
       T: Attr
       S: "7"
       E: "8"
     }
     {
-      id: e8
-      T: Attr
-      S: "7"
-      E: "22"
-    }
-    {
-      id: e9
+      id: e10
       T: Attr
       S: "8"
       E: "9"
     }
     {
-      id: e10
+      id: e11
       T: Attr
-      S: "9"
+      S: "8"
       E: "10"
     }
     {
-      id: e11
+      id: e12
       T: Attr
-      S: "9"
+      S: "10"
       E: "11"
     }
     {
-      id: e12
+      id: e13
       T: Attr
       S: "11"
       E: "12"
     }
     {
-      id: e13
+      id: e14
+      T: Attr
+      S: "11"
+      E: "18"
+    }
+    {
+      id: e15
       T: Attr
       S: "12"
       E: "13"
     }
     {
-      id: e14
-      T: Attr
-      S: "12"
-      E: "19"
-    }
-    {
-      id: e15
-      T: Attr
-      S: "13"
-      E: "14"
-    }
-    {
       id: e16
       T: Attr
-      S: "13"
-      E: "15"
+      S: "12"
+      E: "14"
     }
     {
       id: e17
       T: Attr
-      S: "13"
-      E: "16"
+      S: "12"
+      E: "15"
     }
     {
       id: e18
       T: Attr
-      S: "13"
-      E: "17"
+      S: "12"
+      E: "16"
     }
     {
       id: e19
       T: Attr
-      S: "13"
-      E: "18"
+      S: "12"
+      E: "17"
     }
     {
       id: e20
       T: Attr
-      S: "19"
-      E: "20"
+      S: "18"
+      E: "19"
     }
     {
       id: e21
       T: Attr
-      S: "20"
-      E: "21"
+      S: "19"
+      E: "20"
     }
   ]
 }

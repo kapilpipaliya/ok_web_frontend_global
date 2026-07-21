@@ -12,16 +12,13 @@
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   position: relative;
   display: inline-block;
-}`;
-'''
+}`;'''
         displayOrder: 1
         fns:
-          '''
-// Menu state management
+          '''// Menu state management
 const [isMenuOpen, setIsMenuOpen] = args.createSignal(false);
 const [triggerRef, setTriggerRef] = args.createSignal(null);
 const [menuRef, setMenuRef] = args.createSignal(null);
@@ -129,16 +126,13 @@ return {
   closeMenu,
   setupFloatingUI,
   onMount
-};
-'''
+};'''
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   onMount: args.fns.onMount
-};
-'''
+};'''
       }
     }
     {
@@ -146,8 +140,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   background: none;
   border: none;
   color: ${args.theme.var.color.text_light_500};
@@ -170,13 +163,11 @@ return `._id {
 ._id:focus {
   outline: 2px solid ${args.theme.var.color.primary};
   outline-offset: 2px;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const triggerIcon = args.contextData.props?.triggerIcon || "carbon:overflow-menu-vertical";
+          '''const triggerIcon = args.contextData.props?.triggerIcon || "carbon:overflow-menu-vertical";
 
 return {
   as: "button",
@@ -184,8 +175,7 @@ return {
   "aria-expanded": args.fns.isMenuOpen?.() || false,
   onClick: args.fns.toggleMenu,
   ref: args.fns.setTriggerRef
-};
-'''
+};'''
       }
     }
     {
@@ -195,16 +185,14 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const triggerIcon = args.contextData.props?.triggerIcon || "carbon:overflow-menu-vertical";
+          '''const triggerIcon = args.contextData.props?.triggerIcon || "carbon:overflow-menu-vertical";
 
 return {
   as: "icon",
   icon: triggerIcon,
   width: 30,
   height: 30
-};
-'''
+};'''
       }
     }
     {
@@ -214,11 +202,9 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "portal"
-};
-'''
+};'''
       }
     }
     {
@@ -226,8 +212,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   position: fixed;
   z-index: 1000;
   background: ${args.theme.var.color.background};
@@ -248,18 +233,15 @@ return `._id {
     opacity: 1;
     transform: scale(1);
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   hide: !args.fns.isMenuOpen?.(),
   ref: args.fns.setMenuRef
-};
-'''
+};'''
       }
     }
     {
@@ -270,15 +252,13 @@ return {
         slot: menu-items
         componentName: Slot
         props:
-          '''
-// Provide closeMenu function to menu items
+          '''// Provide closeMenu function to menu items
 return {
   contextName: "floatingMenuContext",
   data: {
     closeMenu: args.fns.closeMenu
   }
-};
-'''
+};'''
       }
     }
     {

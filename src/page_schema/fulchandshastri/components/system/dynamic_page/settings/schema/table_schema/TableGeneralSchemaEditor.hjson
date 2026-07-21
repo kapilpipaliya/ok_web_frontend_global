@@ -147,12 +147,10 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; height: 100%;
   background: ${args.theme.var.color.background};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props: return { as: "div", hide: args.contextData.props?.hide === true, onMount: () => { void args.fns.loadSchema?.(); } };
@@ -163,13 +161,11 @@ return `._id {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
   padding: 0.75rem 1rem; border-bottom: 1px solid ${args.theme.var.color.border};
   background: ${args.theme.var.color.background_light_100}; flex-shrink: 0;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props: return { as: "header" };
@@ -202,12 +198,10 @@ return `._id {
         displayOrder: 1
         componentName: Button
         props:
-          '''
-return {
+          '''return {
   variant: args.fns.isJsonMode?.() ? "secondary" : "primary", size: "sm", text: "Visual", type: "button",
   onClick: () => args.fns.setEditorMode?.("visual")
-};
-'''
+};'''
       }
     }
     {
@@ -217,12 +211,10 @@ return {
         displayOrder: 2
         componentName: Button
         props:
-          '''
-return {
+          '''return {
   variant: args.fns.isJsonMode?.() ? "primary" : "secondary", size: "sm", text: "JSON", type: "button",
   onClick: () => args.fns.setEditorMode?.("json")
-};
-'''
+};'''
       }
     }
     {
@@ -232,12 +224,10 @@ return {
         displayOrder: 3
         componentName: Button
         props:
-          '''
-return {
+          '''return {
   variant: "primary", size: "sm", text: args.fns.saving?.() ? "Saving..." : "Save", type: "button",
   disabled: args.fns.saving?.() === true, onClick: () => { void args.fns.saveSchema?.(); }
-};
-'''
+};'''
       }
     }
     {
@@ -264,13 +254,11 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.625rem;
   padding: 0.75rem 1rem; align-content: start;
   @media (max-width: 768px) { grid-template-columns: 1fr; }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props: return { as: "div", hide: args.fns.isJsonMode?.() === true };
@@ -283,12 +271,10 @@ return `._id {
         displayOrder: 1
         componentName: TextInput
         props:
-          '''
-return {
+          '''return {
   label: "Title", value: args.fns.getValue?.("title") || "",
   onChange: (e) => args.fns.patchGeneral?.({ title: e.target.value })
-};
-'''
+};'''
       }
     }
     {
@@ -298,12 +284,10 @@ return {
         displayOrder: 2
         componentName: TextInput
         props:
-          '''
-return {
+          '''return {
   label: "Label", value: args.fns.getValue?.("label") || "",
   onChange: (e) => args.fns.patchGeneral?.({ label: e.target.value })
-};
-'''
+};'''
       }
     }
     {
@@ -313,12 +297,10 @@ return {
         displayOrder: 3
         componentName: TextInput
         props:
-          '''
-return {
+          '''return {
   label: "Icon", value: args.fns.getValue?.("icon") || "", placeholder: "ph:book-open",
   onChange: (e) => args.fns.patchGeneral?.({ icon: e.target.value })
-};
-'''
+};'''
       }
     }
     {
@@ -326,13 +308,11 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   grid-column: 1 / -1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem;
   padding: 0.625rem; border: 1px solid ${args.theme.var.color.border}; border-radius: 0.5rem;
   @media (max-width: 640px) { grid-template-columns: 1fr; }
-}`;
-'''
+}`;'''
         displayOrder: 4
         componentName: Html
         props: return { as: "div" };
@@ -355,12 +335,10 @@ return `._id {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "input", type: "checkbox", checked: args.fns.getBool?.("publicRead"),
   onChange: (e) => args.fns.patchGeneral?.({ publicRead: e.target.checked })
-};
-'''
+};'''
       }
     }
     {
@@ -388,12 +366,10 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "input", type: "checkbox", checked: args.fns.getBool?.("showSelection"),
   onChange: (e) => args.fns.patchGeneral?.({ showSelection: e.target.checked })
-};
-'''
+};'''
       }
     }
     {
@@ -421,12 +397,10 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "input", type: "checkbox", checked: args.fns.getBool?.("hideExportButtons"),
   onChange: (e) => args.fns.patchGeneral?.({ hideExportButtons: e.target.checked })
-};
-'''
+};'''
       }
     }
     {
@@ -454,12 +428,10 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "input", type: "checkbox", checked: args.fns.getBool?.("hideImportButtons"),
   onChange: (e) => args.fns.patchGeneral?.({ hideImportButtons: e.target.checked })
-};
-'''
+};'''
       }
     }
     {
@@ -487,12 +459,10 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "input", type: "checkbox", checked: args.fns.getBool?.("enableUserScopingForContent"),
   onChange: (e) => args.fns.patchGeneral?.({ enableUserScopingForContent: e.target.checked })
-};
-'''
+};'''
       }
     }
     {
@@ -520,12 +490,10 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "input", type: "checkbox", checked: args.fns.getBool?.("enableLocalFilters"),
   onChange: (e) => args.fns.patchGeneral?.({ enableLocalFilters: e.target.checked })
-};
-'''
+};'''
       }
     }
     {
@@ -553,12 +521,10 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "input", type: "checkbox", checked: args.fns.getBool?.("enableLocalSort"),
   onChange: (e) => args.fns.patchGeneral?.({ enableLocalSort: e.target.checked })
-};
-'''
+};'''
       }
     }
     {
@@ -586,12 +552,10 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "input", type: "checkbox", checked: args.fns.getBool?.("usePolarisUI"),
   onChange: (e) => args.fns.patchGeneral?.({ usePolarisUI: e.target.checked })
-};
-'''
+};'''
       }
     }
     {
@@ -620,14 +584,12 @@ return {
         displayOrder: 1
         componentName: TextArea
         props:
-          '''
-return {
+          '''return {
   value: args.fns.configJsonText?.() || "",
   onInput: (e) => args.fns.setConfigJsonText?.(e.target.value),
   rows: 24,
   style: { flex: "1", "min-height": "200px", "font-family": "monospace", "font-size": "0.8125rem" }
-};
-'''
+};'''
       }
     }
   ]

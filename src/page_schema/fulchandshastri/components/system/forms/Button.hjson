@@ -12,8 +12,7 @@
       L: Attr
       P: {
         css:
-          '''
-// Access props reactively
+          '''// Access props reactively
 const variant = args.contextData.props?.variant || "primary";
 const fullWidth = args.contextData.props?.fullWidth || false;
 const size = args.contextData.props?.size || "md";
@@ -122,13 +121,11 @@ if (variant === 'primary') {
 return `._id {
   ${baseStyles}
   ${variantStyles}
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-// Access props reactively
+          '''// Access props reactively
 const text = args.contextData.props?.text || "Button";
 const type = args.contextData.props?.type || "button";
 const disabled = args.contextData.props?.disabled || args.contextData.props?.loading || false;
@@ -143,8 +140,7 @@ return {
   disabled: disabled,
   onClick: onClick,
   "aria-busy": loading ? "true" : "false"
-};
-'''
+};'''
       }
     }
     {
@@ -154,8 +150,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const leftIcon = args.contextData.props?.leftIcon;
+          '''const leftIcon = args.contextData.props?.leftIcon;
 const iconSize = args.contextData.props?.iconSize;
 const buttonSize = args.contextData.props?.size || "md";
 // Use iconSize if provided, otherwise use button size
@@ -176,8 +171,7 @@ return {
   width: iconSizePx,
   height: iconSizePx,
   hide: !leftIcon
-};
-'''
+};'''
       }
     }
     {
@@ -187,15 +181,13 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const text = args.contextData.props?.text || "Button";
+          '''const text = args.contextData.props?.text || "Button";
 
 return {
   as: "span",
   text: text,
   hide: !text
-};
-'''
+};'''
       }
     }
     {
@@ -205,8 +197,7 @@ return {
         displayOrder: 3
         componentName: Html
         props:
-          '''
-const rightIcon = args.contextData.props?.rightIcon;
+          '''const rightIcon = args.contextData.props?.rightIcon;
 const iconSize = args.contextData.props?.iconSize;
 const buttonSize = args.contextData.props?.size || "md";
 // Use iconSize if provided, otherwise use button size
@@ -227,8 +218,7 @@ return {
   width: iconSizePx,
   height: iconSizePx,
   hide: !rightIcon
-};
-'''
+};'''
       }
     }
     {

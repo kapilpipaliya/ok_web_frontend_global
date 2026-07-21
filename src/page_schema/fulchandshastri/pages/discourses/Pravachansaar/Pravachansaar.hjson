@@ -16,35 +16,64 @@
     }
     {
       id: "2"
-      L: PageLayout
+      L: Attr
       P: {
-        componentName: Layout
+        as: div
+        css:
+          '''return `._id {
+  text-align: center;
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        key: unique_1
       }
     }
     {
       id: "3"
       L: Attr
       P: {
+        css:
+          '''return `._id {
+  font-size: 2.5rem;
+}`;'''
         as: div
         displayOrder: 1
-        textType: markdown
         componentName: Html
-        text: "[प्रवचनसार Full Granth Only Gatha](https://nikkyjain.github.io/jainDataBase/gatha/01_द्रव्यानुयोग/02_प्रवचनसार--कुन्दकुन्दाचार्य/html/index.html)"
-        key: unique_1
+        key: unique_2
+        props:
+          '''return {
+  as: "a",
+  href: "https://nikkyjain.github.io/jainDataBase/gatha/01_द्रव्यानुयोग/02_प्रवचनसार--कुन्दकुन्दाचार्य/html/index.html",
+  text: "प्रवचनसार Full Granth Only Gatha",
+  target: "_blank",
+};'''
+      }
+    }
+    {
+      id: "4"
+      L: PageLayout
+      P: {
+        componentName: Layout
       }
     }
   ]
   edges: [
     {
       id: e1
-      T: PageLayout
+      T: Attr
       S: "1"
       E: "2"
     }
     {
       id: e2
-      T: Attr
+      T: PageLayout
       S: "1"
+      E: "4"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
       E: "3"
     }
   ]

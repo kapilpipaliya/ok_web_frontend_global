@@ -12,8 +12,7 @@
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   position: fixed;
   top: 0;
   left: 0;
@@ -39,13 +38,11 @@ return `._id {
     padding: ${args.theme.var.spacing.sm};
     align-items: flex-end;
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const isOpen = args.contextData.props?.isOpen || false;
+          '''const isOpen = args.contextData.props?.isOpen || false;
 const onCancel = args.contextData.props?.onCancel;
 
 return {
@@ -54,8 +51,7 @@ return {
   onClick: (e) => {
     if (e.target === e.currentTarget && onCancel) onCancel();
   }
-};
-'''
+};'''
       }
     }
     {
@@ -63,8 +59,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   background: ${args.theme.var.color.background};
   border: 1px solid ${args.theme.var.color.border};
   border-radius: ${args.theme.var.borderRadius.lg};
@@ -105,19 +100,16 @@ return `._id {
       transform: translateY(0);
     }
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   onClick: (e) => {
     e.stopPropagation();
   }
-};
-'''
+};'''
       }
     }
     {
@@ -125,20 +117,16 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   padding: ${args.theme.var.spacing.xl} ${args.theme.var.spacing.xl} ${args.theme.var.spacing.md};
   border-bottom: 1px solid ${args.theme.var.color.border};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "header"
-};
-'''
+};'''
       }
     }
     {
@@ -146,8 +134,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const variant = args.contextData.props?.variant || "danger";
+          '''const variant = args.contextData.props?.variant || "danger";
 
 const iconConfig = {
   danger: args.theme.var.color.error,
@@ -161,13 +148,11 @@ return `._id {
   color: ${iconColor};
   margin-bottom: ${args.theme.var.spacing.sm};
   display: block;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const variant = args.contextData.props?.variant || "danger";
+          '''const variant = args.contextData.props?.variant || "danger";
 
 const iconConfig = {
   danger: {
@@ -191,8 +176,7 @@ return {
   icon: config.icon,
   width: 24,
   height: 24
-};
-'''
+};'''
       }
     }
     {
@@ -200,26 +184,22 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   font-size: 1.25rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
   margin: 0;
   line-height: 1.4;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const title = args.contextData.props?.title || "Confirm Action";
+          '''const title = args.contextData.props?.title || "Confirm Action";
 
 return {
   as: "h2",
   text: title
-};
-'''
+};'''
       }
     }
     {
@@ -227,20 +207,16 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   padding: ${args.theme.var.spacing.xl};
   padding-top: ${args.theme.var.spacing.md};
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -248,26 +224,22 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   color: ${args.theme.var.color.text};
   font-size: 1rem;
   line-height: 1.6;
   margin: 0;
   white-space: pre-line;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const message = args.contextData.props?.message || "Are you sure you want to proceed?";
+          '''const message = args.contextData.props?.message || "Are you sure you want to proceed?";
 
 return {
   as: "p",
   text: message
-};
-'''
+};'''
       }
     }
     {
@@ -275,8 +247,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   gap: ${args.theme.var.spacing.md};
   padding: ${args.theme.var.spacing.md} ${args.theme.var.spacing.xl} ${args.theme.var.spacing.xl};
@@ -288,16 +259,13 @@ return `._id {
     flex-direction: column-reverse;
     gap: ${args.theme.var.spacing.sm};
   }
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "footer"
-};
-'''
+};'''
       }
     }
     {
@@ -307,8 +275,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const cancelText = args.contextData.props?.cancelText || "Cancel";
+          '''const cancelText = args.contextData.props?.cancelText || "Cancel";
 const onCancel = args.contextData.props?.onCancel;
 const loading = args.contextData.props?.loading || false;
 
@@ -321,8 +288,7 @@ return {
     if (onCancel && !loading) onCancel();
   },
   hide: args.contextData.props?.getUsePolarisUI !== true
-};
-'''
+};'''
       }
     }
     {
@@ -330,8 +296,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   min-height: 48px;
   padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.lg};
   font-size: 1rem;
@@ -366,13 +331,11 @@ return `._id {
     padding: ${args.theme.var.spacing.md};
     font-size: 1rem;
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const cancelText = args.contextData.props?.cancelText || "Cancel";
+          '''const cancelText = args.contextData.props?.cancelText || "Cancel";
 const onCancel = args.contextData.props?.onCancel;
 const loading = args.contextData.props?.loading || false;
 const usePolaris = args.contextData.props?.getUsePolarisUI === true;
@@ -386,8 +349,7 @@ return {
     if (onCancel && !loading) onCancel();
   },
   hide: usePolaris
-};
-'''
+};'''
       }
     }
     {
@@ -397,8 +359,7 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const confirmText = args.contextData.props?.confirmText || "Confirm";
+          '''const confirmText = args.contextData.props?.confirmText || "Confirm";
 const onConfirm = args.contextData.props?.onConfirm;
 const loading = args.contextData.props?.loading || false;
 const variant = args.contextData.props?.variant || "danger";
@@ -416,8 +377,7 @@ return {
     if (onConfirm && !loading) await onConfirm();
   },
   hide: args.contextData.props?.getUsePolarisUI !== true
-};
-'''
+};'''
       }
     }
     {
@@ -425,8 +385,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const variant = args.contextData.props?.variant || "danger";
+          '''const variant = args.contextData.props?.variant || "danger";
 
 const variantStyles = {
   danger: {
@@ -486,13 +445,11 @@ return `._id {
     padding: ${args.theme.var.spacing.md};
     font-size: 1rem;
   }
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const confirmText = args.contextData.props?.confirmText || "Confirm";
+          '''const confirmText = args.contextData.props?.confirmText || "Confirm";
 const onConfirm = args.contextData.props?.onConfirm;
 const loading = args.contextData.props?.loading || false;
 const usePolaris = args.contextData.props?.getUsePolarisUI === true;
@@ -507,8 +464,7 @@ return {
     if (onConfirm && !loading) await onConfirm();
   },
   hide: usePolaris
-};
-'''
+};'''
       }
     }
     {

@@ -13,8 +13,7 @@
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   position: fixed;
   top: 0;
   left: 0;
@@ -33,13 +32,11 @@ return `._id {
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const getIsOpen = args.contextData.props?.isOpen;
+          '''const getIsOpen = args.contextData.props?.isOpen;
 const isOpen = getIsOpen?.() || false;
 const onClose = args.contextData.props?.onClose;
 
@@ -51,8 +48,7 @@ return {
       onClose?.();
     }
   }
-};
-'''
+};'''
       }
     }
     {
@@ -60,8 +56,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   background: ${args.theme.var.color.background};
   border-radius: 0.75rem;
   width: 100%;
@@ -82,12 +77,10 @@ return `._id {
     opacity: 1;
     transform: translateY(0) scale(1);
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         fns:
-          '''
-const [searchTerm, setSearchTerm] = args.createSignal("");
+          '''const [searchTerm, setSearchTerm] = args.createSignal("");
 const [selectedVideos, setSelectedVideos] = args.createSignal(new Set());
 const [showPlaylistSelector, setShowPlaylistSelector] = args.createSignal(false);
 const [customPlaylists, setCustomPlaylists] = args.createSignal([]);
@@ -256,16 +249,13 @@ return {
   setSelectedPlaylistId,
   showCreateNew,
   setShowCreateNew
-};
-'''
+};'''
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   onClick: (e) => e.stopPropagation()
-};
-'''
+};'''
       }
     }
     {
@@ -273,23 +263,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 1.5rem;
   border-bottom: 1px solid ${args.theme.var.color.border};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -297,25 +283,21 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   font-size: 1.5rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
   margin: 0;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const queue = args.contextData.props?.videoQueue?.() || [];
+          '''const queue = args.contextData.props?.videoQueue?.() || [];
 
 return {
   as: "h2",
   text: `Video Queue (${queue.length})`
-};
-'''
+};'''
       }
     }
     {
@@ -323,8 +305,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   background: none;
   border: none;
   color: ${args.theme.var.color.text_light_500};
@@ -340,20 +321,17 @@ return `._id {
     background: ${args.theme.var.color.background_light_200};
     color: ${args.theme.var.color.text};
   }
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const onClose = args.contextData.props?.onClose;
+          '''const onClose = args.contextData.props?.onClose;
 
 return {
   as: "button",
   onClick: onClose,
   "aria-label": "Close modal"
-};
-'''
+};'''
       }
     }
     {
@@ -363,14 +341,12 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "icon",
   icon: "carbon:close",
   width: 24,
   height: 24
-};
-'''
+};'''
       }
     }
     {
@@ -378,22 +354,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   flex: 1;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -401,23 +373,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   padding: 1rem;
   border-bottom: 1px solid ${args.theme.var.color.border};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const queue = args.contextData.props?.videoQueue?.() || [];
+          '''const queue = args.contextData.props?.videoQueue?.() || [];
 
 return {
   as: "div",
   hide: queue.length === 0
-};
-'''
+};'''
       }
     }
     {
@@ -425,8 +393,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   width: 100%;
   padding: 0.625rem 1rem;
   border: 1px solid ${args.theme.var.color.border};
@@ -445,13 +412,11 @@ return `._id {
   &::placeholder {
     color: ${args.theme.var.color.text_light_500};
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const searchTerm = args.fns.searchTerm?.() || "";
+          '''const searchTerm = args.fns.searchTerm?.() || "";
 const setSearchTerm = args.fns.setSearchTerm;
 
 return {
@@ -460,8 +425,7 @@ return {
   placeholder: "Search videos in queue...",
   value: searchTerm,
   onInput: (e) => setSearchTerm?.(e.target.value)
-};
-'''
+};'''
       }
     }
     {
@@ -469,28 +433,24 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1rem;
   background: ${args.theme.var.color.background_light_100};
   border-bottom: 1px solid ${args.theme.var.color.border};
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const selectedVideos = args.fns.selectedVideos?.() || new Set();
+          '''const selectedVideos = args.fns.selectedVideos?.() || new Set();
 const queue = args.contextData.props?.videoQueue?.() || [];
 
 return {
   as: "div",
   hide: queue.length === 0
-};
-'''
+};'''
       }
     }
     {
@@ -498,18 +458,15 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   width: 1.125rem;
   height: 1.125rem;
   cursor: pointer;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const selectedVideos = args.fns.selectedVideos?.() || new Set();
+          '''const selectedVideos = args.fns.selectedVideos?.() || new Set();
 const queue = args.contextData.props?.videoQueue?.() || [];
 const allSelected = queue.length > 0 && selectedVideos.size === queue.length;
 const someSelected = selectedVideos.size > 0 && selectedVideos.size < queue.length;
@@ -526,8 +483,7 @@ return {
       args.fns.selectAll?.();
     }
   }
-};
-'''
+};'''
       }
     }
     {
@@ -535,24 +491,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   font-size: 0.875rem;
   color: ${args.theme.var.color.text};
   flex: 1;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const selectedVideos = args.fns.selectedVideos?.() || new Set();
+          '''const selectedVideos = args.fns.selectedVideos?.() || new Set();
 
 return {
   as: "span",
   text: selectedVideos.size > 0 ? `${selectedVideos.size} selected` : "Select videos"
-};
-'''
+};'''
       }
     }
     {
@@ -560,8 +512,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   padding: 0.5rem 1rem;
   background: ${args.theme.var.color.error};
   color: ${args.theme.var.color.error_text};
@@ -575,13 +526,11 @@ return `._id {
   &:hover {
     background: ${args.theme.var.color.error_dark_200};
   }
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-const selectedVideos = args.fns.selectedVideos?.() || new Set();
+          '''const selectedVideos = args.fns.selectedVideos?.() || new Set();
 
 return {
   as: "button",
@@ -638,8 +587,7 @@ return {
     }
   },
   text: "Remove"
-};
-'''
+};'''
       }
     }
     {
@@ -647,8 +595,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   padding: 0.5rem 1rem;
   background: ${args.theme.var.color.primary};
   color: ${args.theme.var.color.primary_text};
@@ -662,13 +609,11 @@ return `._id {
   &:hover {
     background: ${args.theme.var.color.primary_dark_200};
   }
-}`;
-'''
+}`;'''
         displayOrder: 4
         componentName: Html
         props:
-          '''
-const selectedVideos = args.fns.selectedVideos?.() || new Set();
+          '''const selectedVideos = args.fns.selectedVideos?.() || new Set();
 
 return {
   as: "button",
@@ -688,8 +633,7 @@ return {
     args.showSuccessToast("Selected videos moved to top");
   },
   text: "Move to Top"
-};
-'''
+};'''
       }
     }
     {
@@ -697,21 +641,17 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   flex: 1;
   overflow: auto;
   padding: 1rem;
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -719,21 +659,17 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -741,24 +677,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   text-align: center;
   padding: 3rem 1rem;
   color: ${args.theme.var.color.text_light_500};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const queue = args.contextData.props?.videoQueue?.() || [];
+          '''const queue = args.contextData.props?.videoQueue?.() || [];
 
 return {
   as: "div",
   hide: queue.length > 0
-};
-'''
+};'''
       }
     }
     {
@@ -766,23 +698,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   opacity: 0.5;
   margin-bottom: 1rem;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "icon",
   icon: "carbon:playlist",
   width: 48,
   height: 48
-};
-'''
+};'''
       }
     }
     {
@@ -790,21 +718,17 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   font-size: 1rem;
   margin: 0;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "p",
   text: "No videos in queue"
-};
-'''
+};'''
       }
     }
     {
@@ -812,24 +736,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const queue = args.contextData.props?.videoQueue?.() || [];
+          '''const queue = args.contextData.props?.videoQueue?.() || [];
 
 return {
   as: "div",
   hide: queue.length === 0
-};
-'''
+};'''
       }
     }
     {
@@ -841,8 +761,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const queue = args.contextData.props?.videoQueue?.() || [];
+          '''const queue = args.contextData.props?.videoQueue?.() || [];
 const searchTerm = args.fns.searchTerm?.() || "";
 
 // Filter queue based on search term
@@ -863,8 +782,7 @@ if (searchTerm.trim()) {
 return {
   // Keep raw vertex identities stable so Solid reuses existing rows.
   data: filteredQueue
-};
-'''
+};'''
       }
     }
     {
@@ -872,8 +790,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   align-items: flex-start;
   gap: 0.75rem;
@@ -887,16 +804,13 @@ return `._id {
     background: ${args.theme.var.color.background_light_50};
     border-color: ${args.theme.var.color.primary_light_200};
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -904,20 +818,17 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   width: 1.125rem;
   height: 1.125rem;
   cursor: pointer;
   margin-top: 0.5rem;
   flex-shrink: 0;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const video = args.contextData.loopItem;
+          '''const video = args.contextData.loopItem;
 const videoId = video?.P?.youtubeId;
 const selectedVideos = args.fns.selectedVideos?.() || new Set();
 const isSelected = selectedVideos.has(videoId);
@@ -930,8 +841,7 @@ return {
     e?.stopPropagation();
     args.fns.toggleVideoSelection?.(videoId);
   }
-};
-'''
+};'''
       }
     }
     {
@@ -939,8 +849,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   background: ${args.theme.var.color.primary};
   color: ${args.theme.var.color.primary_text};
   width: 32px;
@@ -953,21 +862,18 @@ return `._id {
   font-weight: 600;
   flex-shrink: 0;
   margin-top: 0.25rem;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const video = args.contextData.loopItem;
+          '''const video = args.contextData.loopItem;
 const queue = args.contextData.props?.videoQueue?.() || [];
 const index = queue.indexOf(video);
 
 return {
   as: "div",
   text: `${index + 1}`
-};
-'''
+};'''
       }
     }
     {
@@ -975,8 +881,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   flex: 1;
   min-width: 0;
   border: none !important;
@@ -986,21 +891,18 @@ return `._id {
   &:hover {
     background: transparent !important;
   }
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: VideoCard
         props:
-          '''
-const video = args.contextData.loopItem;
+          '''const video = args.contextData.loopItem;
 
 return {
   item: video,
   itemType: "video",
   itemSetting: null,
   hideMenuItems: ["editName", "retry", "delete"]
-};
-'''
+};'''
       }
     }
     {
@@ -1008,22 +910,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   gap: 0.375rem;
   flex-shrink: 0;
   margin-top: 0.25rem;
-}`;
-'''
+}`;'''
         displayOrder: 4
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -1031,8 +929,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   background: ${args.theme.var.color.primary};
   color: ${args.theme.var.color.primary_text};
   border: none;
@@ -1050,13 +947,11 @@ return `._id {
     background: ${args.theme.var.color.primary_dark_200};
     transform: scale(1.05);
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const video = args.contextData.loopItem;
+          '''const video = args.contextData.loopItem;
 const playVideo = args.contextData.props?.playVideo;
 const onClose = args.contextData.props?.onClose;
 
@@ -1070,8 +965,7 @@ return {
   },
   "aria-label": "Play video",
   title: "Play now"
-};
-'''
+};'''
       }
     }
     {
@@ -1081,14 +975,12 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "icon",
   icon: "carbon:play",
   width: 16,
   height: 16
-};
-'''
+};'''
       }
     }
     {
@@ -1096,8 +988,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const video = args.contextData.loopItem;
+          '''const video = args.contextData.loopItem;
 const queue = args.contextData.props?.videoQueue?.() || [];
 const isFirst = queue.indexOf(video) === 0;
 
@@ -1121,13 +1012,11 @@ return `._id {
     color: ${args.theme.var.color.primary_text};
     transform: scale(1.05);
   }
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const video = args.contextData.loopItem;
+          '''const video = args.contextData.loopItem;
 const queue = args.contextData.props?.videoQueue?.() || [];
 const reorderQueue = args.contextData.props?.reorderQueue;
 const index = queue.indexOf(video);
@@ -1143,8 +1032,7 @@ return {
   disabled: isFirst,
   "aria-label": "Move up",
   title: "Move up"
-};
-'''
+};'''
       }
     }
     {
@@ -1154,14 +1042,12 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "icon",
   icon: "carbon:arrow-up",
   width: 16,
   height: 16
-};
-'''
+};'''
       }
     }
     {
@@ -1169,8 +1055,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const video = args.contextData.loopItem;
+          '''const video = args.contextData.loopItem;
 const queue = args.contextData.props?.videoQueue?.() || [];
 const index = queue.indexOf(video);
 const isLast = index === queue.length - 1;
@@ -1195,13 +1080,11 @@ return `._id {
     color: ${args.theme.var.color.primary_text};
     transform: scale(1.05);
   }
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-const video = args.contextData.loopItem;
+          '''const video = args.contextData.loopItem;
 const queue = args.contextData.props?.videoQueue?.() || [];
 const reorderQueue = args.contextData.props?.reorderQueue;
 const index = queue.indexOf(video);
@@ -1217,8 +1100,7 @@ return {
   disabled: isLast,
   "aria-label": "Move down",
   title: "Move down"
-};
-'''
+};'''
       }
     }
     {
@@ -1228,14 +1110,12 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "icon",
   icon: "carbon:arrow-down",
   width: 16,
   height: 16
-};
-'''
+};'''
       }
     }
     {
@@ -1243,8 +1123,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   background: ${args.theme.var.color.background_light_300};
   color: ${args.theme.var.color.text};
   border: none;
@@ -1263,13 +1142,11 @@ return `._id {
     color: ${args.theme.var.color.error_text};
     transform: scale(1.05);
   }
-}`;
-'''
+}`;'''
         displayOrder: 4
         componentName: Html
         props:
-          '''
-const video = args.contextData.loopItem;
+          '''const video = args.contextData.loopItem;
 const queue = args.contextData.props?.videoQueue?.() || [];
 const removeFromQueue = args.contextData.props?.removeFromQueue;
 const index = queue.indexOf(video);
@@ -1283,8 +1160,7 @@ return {
   },
   "aria-label": "Remove from queue",
   title: "Remove"
-};
-'''
+};'''
       }
     }
     {
@@ -1294,14 +1170,12 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "icon",
   icon: "carbon:trash-can",
   width: 16,
   height: 16
-};
-'''
+};'''
       }
     }
     {
@@ -1309,8 +1183,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   position: fixed;
   top: 0;
   left: 0;
@@ -1322,13 +1195,11 @@ return `._id {
   justify-content: center;
   z-index: 10001;
   padding: 1rem;
-}`;
-'''
+}`;'''
         displayOrder: 6
         componentName: Html
         props:
-          '''
-const showPlaylistSelector = args.fns.showPlaylistSelector?.() || false;
+          '''const showPlaylistSelector = args.fns.showPlaylistSelector?.() || false;
 
 return {
   as: "div",
@@ -1338,8 +1209,7 @@ return {
       args.fns.setShowPlaylistSelector?.(false);
     }
   }
-};
-'''
+};'''
       }
     }
     {
@@ -1347,8 +1217,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   background: ${args.theme.var.color.background};
   border-radius: 0.75rem;
   max-width: 500px;
@@ -1357,17 +1226,14 @@ return `._id {
   display: flex;
   flex-direction: column;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   onClick: (e) => e.stopPropagation()
-};
-'''
+};'''
       }
     }
     {
@@ -1375,23 +1241,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   padding: 1.5rem;
   border-bottom: 1px solid ${args.theme.var.color.border};
   display: flex;
   align-items: center;
   justify-content: space-between;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -1399,23 +1261,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   font-size: 1.25rem;
   font-weight: 600;
   margin: 0;
   color: ${args.theme.var.color.text};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "h2",
   text: "Save Queue to Playlist"
-};
-'''
+};'''
       }
     }
     {
@@ -1423,8 +1281,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   background: none;
   border: none;
   font-size: 1.5rem;
@@ -1443,17 +1300,14 @@ return `._id {
     background: ${args.theme.var.color.background_light_200};
     color: ${args.theme.var.color.text};
   }
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "button",
   onClick: () => args.fns.setShowPlaylistSelector?.(false)
-};
-'''
+};'''
       }
     }
     {
@@ -1463,14 +1317,12 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "icon",
   icon: "carbon:close",
   width: "24",
   height: "24"
-};
-'''
+};'''
       }
     }
     {
@@ -1478,21 +1330,17 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   flex: 1;
   overflow: auto;
   padding: 1.5rem;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -1500,22 +1348,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   gap: 0.5rem;
   margin-bottom: 1.5rem;
   border-bottom: 1px solid ${args.theme.var.color.border};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -1523,8 +1367,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const showCreateNew = args.fns.showCreateNew?.() || false;
+          '''const showCreateNew = args.fns.showCreateNew?.() || false;
 
 return `._id {
   background: none;
@@ -1540,20 +1383,17 @@ return `._id {
   &:hover {
     color: ${args.theme.var.color.primary};
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const showCreateNew = args.fns.showCreateNew?.() || false;
+          '''const showCreateNew = args.fns.showCreateNew?.() || false;
 
 return {
   as: "button",
   onClick: () => args.fns.setShowCreateNew?.(false),
   text: "Add to Existing"
-};
-'''
+};'''
       }
     }
     {
@@ -1561,8 +1401,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const showCreateNew = args.fns.showCreateNew?.() || false;
+          '''const showCreateNew = args.fns.showCreateNew?.() || false;
 
 return `._id {
   background: none;
@@ -1578,20 +1417,17 @@ return `._id {
   &:hover {
     color: ${args.theme.var.color.primary};
   }
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const showCreateNew = args.fns.showCreateNew?.() || false;
+          '''const showCreateNew = args.fns.showCreateNew?.() || false;
 
 return {
   as: "button",
   onClick: () => args.fns.setShowCreateNew?.(true),
   text: "Create New"
-};
-'''
+};'''
       }
     }
     {
@@ -1599,24 +1435,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const showCreateNew = args.fns.showCreateNew?.() || false;
+          '''const showCreateNew = args.fns.showCreateNew?.() || false;
 
 return {
   as: "div",
   hide: showCreateNew
-};
-'''
+};'''
       }
     }
     {
@@ -1624,25 +1456,21 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   text-align: center;
   padding: 2rem;
   color: ${args.theme.var.color.text_light_500};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const playlistsLoading = args.fns.playlistsLoading?.() || false;
+          '''const playlistsLoading = args.fns.playlistsLoading?.() || false;
 
 return {
   as: "div",
   hide: !playlistsLoading,
   text: "Loading playlists..."
-};
-'''
+};'''
       }
     }
     {
@@ -1650,26 +1478,22 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   text-align: center;
   padding: 2rem;
   color: ${args.theme.var.color.text_light_500};
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const playlistsLoading = args.fns.playlistsLoading?.() || false;
+          '''const playlistsLoading = args.fns.playlistsLoading?.() || false;
 const customPlaylists = args.fns.customPlaylists?.() || [];
 
 return {
   as: "div",
   hide: playlistsLoading || customPlaylists.length > 0,
   text: "No custom playlists found. Create a new one to get started."
-};
-'''
+};'''
       }
     }
     {
@@ -1681,15 +1505,13 @@ return {
         displayOrder: 3
         componentName: Html
         props:
-          '''
-const playlistsLoading = args.fns.playlistsLoading?.() || false;
+          '''const playlistsLoading = args.fns.playlistsLoading?.() || false;
 const customPlaylists = args.fns.customPlaylists?.() || [];
 
 return {
   hide: playlistsLoading || customPlaylists.length === 0,
   data: customPlaylists
-};
-'''
+};'''
       }
     }
     {
@@ -1697,8 +1519,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const item = args.contextData.playlistItem;
+          '''const item = args.contextData.playlistItem;
 const playlist = item?.playlist;
 const playlistId = playlist?.P?.youtubeId;
 const selectedPlaylistId = args.fns.selectedPlaylistId?.();
@@ -1719,13 +1540,11 @@ return `._id {
     border-color: ${args.theme.var.color.primary};
     background: ${args.theme.var.color.primary_light_100};
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const item = args.contextData.playlistItem;
+          '''const item = args.contextData.playlistItem;
 const playlist = item?.playlist;
 const playlistId = playlist?.P?.youtubeId;
 const selectedPlaylistId = args.fns.selectedPlaylistId?.();
@@ -1734,8 +1553,7 @@ const isSelected = selectedPlaylistId === playlistId;
 return {
   as: "label",
   onClick: () => args.fns.setSelectedPlaylistId?.(playlistId)
-};
-'''
+};'''
       }
     }
     {
@@ -1743,19 +1561,16 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   width: 1.25rem;
   height: 1.25rem;
   cursor: pointer;
   flex-shrink: 0;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const item = args.contextData.playlistItem;
+          '''const item = args.contextData.playlistItem;
 const playlist = item?.playlist;
 const playlistId = playlist?.P?.youtubeId;
 const selectedPlaylistId = args.fns.selectedPlaylistId?.();
@@ -1766,8 +1581,7 @@ return {
   name: "playlist_selector",
   checked: selectedPlaylistId === playlistId,
   onChange: () => args.fns.setSelectedPlaylistId?.(playlistId)
-};
-'''
+};'''
       }
     }
     {
@@ -1775,20 +1589,16 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   flex: 1;
   min-width: 0;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -1796,25 +1606,21 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   font-weight: 500;
   color: ${args.theme.var.color.text};
   margin-bottom: 0.25rem;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const item = args.contextData.playlistItem;
+          '''const item = args.contextData.playlistItem;
 const playlist = item?.playlist;
 
 return {
   as: "div",
   text: playlist?.P?.title || "Untitled"
-};
-'''
+};'''
       }
     }
     {
@@ -1822,25 +1628,21 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   font-size: 0.875rem;
   color: ${args.theme.var.color.text_light_500};
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const item = args.contextData.playlistItem;
+          '''const item = args.contextData.playlistItem;
 const playlist = item?.playlist;
 const itemCount = playlist?.P?.itemCount || 0;
 
 return {
   as: "div",
   text: `${itemCount} video${itemCount !== 1 ? 's' : ''}`
-};
-'''
+};'''
       }
     }
     {
@@ -1848,24 +1650,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-const showCreateNew = args.fns.showCreateNew?.() || false;
+          '''const showCreateNew = args.fns.showCreateNew?.() || false;
 
 return {
   as: "div",
   hide: !showCreateNew
-};
-'''
+};'''
       }
     }
     {
@@ -1873,23 +1671,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   font-weight: 500;
   color: ${args.theme.var.color.text};
   font-size: 0.875rem;
   margin-bottom: 0.5rem;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "label",
   text: "Playlist Name"
-};
-'''
+};'''
       }
     }
     {
@@ -1897,8 +1691,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   width: 100%;
   padding: 0.75rem 1rem;
   border: 1px solid ${args.theme.var.color.border};
@@ -1917,13 +1710,11 @@ return `._id {
   &::placeholder {
     color: ${args.theme.var.color.text_light_500};
   }
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const newPlaylistName = args.fns.newPlaylistName?.() || "";
+          '''const newPlaylistName = args.fns.newPlaylistName?.() || "";
 
 return {
   as: "input",
@@ -1931,8 +1722,7 @@ return {
   placeholder: "Enter playlist name...",
   value: newPlaylistName,
   onInput: (e) => args.fns.setNewPlaylistName?.(e.target.value)
-};
-'''
+};'''
       }
     }
     {
@@ -1940,23 +1730,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   padding: 1.5rem;
   border-top: 1px solid ${args.theme.var.color.border};
   display: flex;
   gap: 0.75rem;
   justify-content: flex-end;
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -1964,8 +1750,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   padding: 0.625rem 1.25rem;
   background: ${args.theme.var.color.background_light_200};
   color: ${args.theme.var.color.text};
@@ -1979,18 +1764,15 @@ return `._id {
   &:hover {
     background: ${args.theme.var.color.background_light_300};
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "button",
   onClick: () => args.fns.setShowPlaylistSelector?.(false),
   text: "Cancel"
-};
-'''
+};'''
       }
     }
     {
@@ -1998,8 +1780,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   padding: 0.625rem 1.25rem;
   background: ${args.theme.var.color.primary};
   color: ${args.theme.var.color.primary_text};
@@ -2018,13 +1799,11 @@ return `._id {
     opacity: 0.5;
     cursor: not-allowed;
   }
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const showCreateNew = args.fns.showCreateNew?.() || false;
+          '''const showCreateNew = args.fns.showCreateNew?.() || false;
 const savingToPlaylist = args.fns.savingToPlaylist?.() || false;
 const newPlaylistName = args.fns.newPlaylistName?.() || "";
 const selectedPlaylistId = args.fns.selectedPlaylistId?.();
@@ -2044,8 +1823,7 @@ return {
     }
   },
   text: savingToPlaylist ? "Saving..." : "Save"
-};
-'''
+};'''
       }
     }
     {
@@ -2053,26 +1831,22 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   padding: 1rem 1.5rem;
   border-top: 1px solid ${args.theme.var.color.border};
   display: flex;
   justify-content: space-between;
   align-items: center;
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-const queue = args.contextData.props?.videoQueue?.() || [];
+          '''const queue = args.contextData.props?.videoQueue?.() || [];
 
 return {
   as: "div",
   hide: queue.length === 0
-};
-'''
+};'''
       }
     }
     {
@@ -2080,23 +1854,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   font-size: 0.875rem;
   color: ${args.theme.var.color.text_light_500};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const queue = args.contextData.props?.videoQueue?.() || [];
+          '''const queue = args.contextData.props?.videoQueue?.() || [];
 
 return {
   as: "div",
   text: `${queue.length} video${queue.length !== 1 ? 's' : ''} in queue`
-};
-'''
+};'''
       }
     }
     {
@@ -2104,20 +1874,16 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   gap: 0.5rem;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -2125,8 +1891,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   background: ${args.theme.var.color.primary};
   color: ${args.theme.var.color.primary_text};
   border: none;
@@ -2140,13 +1905,11 @@ return `._id {
   &:hover {
     background: ${args.theme.var.color.primary_dark_200};
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const queue = args.contextData.props?.videoQueue?.() || [];
+          '''const queue = args.contextData.props?.videoQueue?.() || [];
 const savingToPlaylist = args.fns.savingToPlaylist?.() || false;
 
 return {
@@ -2176,8 +1939,7 @@ return {
     args.fns.setShowPlaylistSelector?.(true);
   },
   text: savingToPlaylist ? "Saving..." : "Save as Playlist"
-};
-'''
+};'''
       }
     }
     {
@@ -2185,8 +1947,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   background: ${args.theme.var.color.error};
   color: ${args.theme.var.color.error_text};
   border: none;
@@ -2200,20 +1961,17 @@ return `._id {
   &:hover {
     background: ${args.theme.var.color.error_dark_200};
   }
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const clearQueue = args.contextData.props?.clearQueue;
+          '''const clearQueue = args.contextData.props?.clearQueue;
 
 return {
   as: "button",
   onClick: clearQueue,
   text: "Clear All"
-};
-'''
+};'''
       }
     }
   ]

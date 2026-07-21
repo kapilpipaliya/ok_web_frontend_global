@@ -1,0 +1,503 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        signinRequired: true
+        fns:
+          '''
+const checkAdminRole = () => {
+  const userRoles = args.user?.OUT?.UserRole || [];
+  return userRoles.some((edgeId) => {
+    const edge = args.graph.edges[edgeId];
+    const role = args.graph.vertexes[edge?.E];
+    return role?.P?.key === "Admin";
+  });
+};
+
+const TABLE_KEY_BY_LABEL = {
+  AffiliateProduct: "products",
+  File: "files",
+  Page: "pages",
+  Component: "components",
+  Function: "functions",
+  EmailTemplate: "email_templates"
+};
+
+const TABLE_TITLE_BY_LABEL = {
+  AffiliateProduct: "Products",
+  File: "Files",
+  Page: "Pages",
+  Component: "Components",
+  Function: "Functions",
+  EmailTemplate: "Email templates"
+};
+
+const PAGE_DESIGNER_ENTITIES = new Set(["Page", "Component", "Function", "EmailTemplate"]);
+const PAGE_DESIGNER_KEY_ENTITIES = new Set(["Page", "Component"]);
+
+const getTableVertexLabel = () => {
+  const table = args.searchParams?.table;
+  if (table) {
+    const value = String(table).trim();
+    if (TABLE_KEY_BY_LABEL[value]) return value;
+    return value;
+  }
+  return "AffiliateProduct";
+};
+
+const getTableKey = () => {
+  const fromQuery = args.searchParams?.key;
+  if (fromQuery != null && String(fromQuery).trim() !== "") return String(fromQuery).trim();
+  const label = getTableVertexLabel();
+  return TABLE_KEY_BY_LABEL[label] || "products";
+};
+
+const getPageDesignerEntity = () => {
+  const label = getTableVertexLabel();
+  return PAGE_DESIGNER_ENTITIES.has(label) ? label : null;
+};
+
+const getPageDesignerPath = (entity, row) => {
+  if (!entity || !row) return null;
+  const useKey = PAGE_DESIGNER_KEY_ENTITIES.has(entity);
+  const segment = useKey ? row?.P?.key : row?.id;
+  if (segment == null || String(segment).trim() === "") return null;
+  return `/admin/${entity}/${encodeURIComponent(String(segment).trim())}`;
+};
+
+const openInPageDesigner = (row) => {
+  const entity = getPageDesignerEntity();
+  if (!entity) return;
+  const path = getPageDesignerPath(entity, row);
+  if (path) args.navigate(path);
+};
+
+const deleteDesignerEntity = async (row) => {
+  const entity = getPageDesignerEntity();
+  if (!entity) return;
+  const id = row?.id;
+  if (!id) return;
+  const result = await args.postAPI("/api/page/delete", { id }, "DELETE");
+  if (result?.success) {
+    if (result.graph) {
+      args.setGraphData(0, result.graph, {});
+    }
+    args.showSuccessToast?.(`${getTableTitle()} entry deleted successfully`);
+    const table = getTableVertexLabel();
+    const key = getTableKey();
+    if (isSchemaMode()) {
+      args.setSearchParams({ table, key, mode: "schema" }, { replace: true });
+    } else {
+      args.setSearchParams({ table, key, mode: null }, { replace: true });
+    }
+    return;
+  }
+  args.showErrorToast?.(result?.error || `Failed to delete ${entity}`);
+  throw new Error(result?.error || "Delete failed");
+};
+
+const getTableActionHandlers = () => {
+  if (!getPageDesignerEntity()) return undefined;
+  return {
+    edit: openInPageDesigner,
+    delete: deleteDesignerEntity
+  };
+};
+
+const makeDeleteConfirm = (entityLabel) => ({
+  title: `Delete ${entityLabel.toLowerCase()}?`,
+  message: "This cannot be undone.",
+  confirmText: "Delete",
+  cancelText: "Cancel",
+  variant: "danger"
+});
+
+const getDesignerTableActions = () => [
+  {
+    key: "edit",
+    type: "edit",
+    icon: "ph:pen",
+    title: "Open in page designer",
+    ariaLabel: "Open in page designer"
+  },
+  {
+    key: "delete",
+    type: "delete",
+    icon: "ph:trash",
+    confirm: makeDeleteConfirm(getTableTitle().replace(/s$/, "") || "item")
+  }
+];
+
+const getTableActions = () => {
+  if (getPageDesignerEntity()) return getDesignerTableActions();
+  if (getTableVertexLabel() === "AffiliateProduct") {
+    return [
+      { key: "edit", type: "edit" },
+      { key: "delete", type: "delete", confirm: makeDeleteConfirm("product") }
+    ];
+  }
+  if (getTableVertexLabel() === "File") {
+    return [
+      { key: "edit", type: "edit" },
+      { key: "delete", type: "delete", confirm: makeDeleteConfirm("file") }
+    ];
+  }
+  return undefined;
+};
+
+const getTableTitle = () => {
+  const label = getTableVertexLabel();
+  return TABLE_TITLE_BY_LABEL[label] || `${label} table`;
+};
+
+const isSchemaMode = () => args.searchParams?.mode === "schema";
+
+const setEditorMode = (mode) => {
+  const table = getTableVertexLabel();
+  const key = getTableKey();
+  if (mode === "schema") {
+    args.setSearchParams({ table, key, mode: "schema" }, { replace: true });
+  } else {
+    args.setSearchParams({ table, key, mode: null }, { replace: true });
+  }
+};
+
+const onSchemaSaved = () => {
+  const tableKey = args.fns.getTableKey?.();
+  if (!tableKey || String(tableKey).trim() === "") {
+    args.showErrorToast?.("Table key missing. Unable to process schema save.");
+    return;
+  }
+  window.dispatchEvent(new CustomEvent("affiliate-table-schema-saved", { detail: { tableKey } }));
+  args.showSuccessToast?.("Table schema saved");
+};
+
+return {
+  checkAdminRole,
+  getTableVertexLabel,
+  getTableKey,
+  getTableTitle,
+  getTableActionHandlers,
+  getTableActions,
+  openInPageDesigner,
+  isSchemaMode,
+  setEditorMode,
+  onSchemaSaved
+};
+'''
+        title: Table Admin
+        key: PortalTable
+        url: /portal/table
+        updatedAt: 2026-07-17T11:49:43.378Z
+        props:
+          '''
+return {
+  isNoPermissionCheck: true,
+  onMount: () => {
+    if (!args.user) {
+      args.navigate("/auth/signin", { replace: true });
+      return;
+    }
+    if (!args.fns.checkAdminRole?.()) {
+      args.showErrorToast?.("Admin access required");
+      args.navigate("/", { replace: true });
+    }
+  }
+};
+'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "section",
+  hide: !args.fns.checkAdminRole?.()
+};'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid ${args.theme.var.color.border_light_300};
+  background: ${args.theme.var.color.background};
+  flex-shrink: 0;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "header" };
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h1",
+  text: args.fns.getTableTitle?.()
+};'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  gap: 0.5rem;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props: return { as: "motionFragment" };
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''const active = args.fns.isSchemaMode?.() !== true;
+return {
+  text: "Content",
+  variant: active ? "primary" : "secondary",
+  onClick: () => args.fns.setEditorMode?.("content")
+};'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''const active = args.fns.isSchemaMode?.() === true;
+return {
+  text: "Schema",
+  variant: active ? "primary" : "secondary",
+  onClick: () => args.fns.setEditorMode?.("schema")
+};'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  hide: args.fns.isSchemaMode?.() === true
+};'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "motionFragment" };
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: DynamicPage
+        props:
+          '''const tableKey = args.fns.getTableKey?.() || "products";
+const tableVertexLabel = args.fns.getTableVertexLabel?.() || "AffiliateProduct";
+const actionHandlers = args.fns.getTableActionHandlers?.();
+const actions = args.fns.getTableActions?.();
+return {
+  key: tableKey,
+  tableKey,
+  tableVertexLabel,
+  loadFromSetting: true,
+  usePolarisUI: true,
+  embeddedMode: true,
+  hidePageChrome: false,
+  ...(actions ? { actions } : {}),
+  ...(actionHandlers ? { actionHandlers } : {}),
+  ...(actionHandlers ? { onRowClick: (row) => args.fns.openInPageDesigner?.(row) } : {})
+};'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  hide: args.fns.isSchemaMode?.() !== true
+};'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: TableSchemaEditorShell
+        props:
+          '''const tableKey = args.fns.getTableKey?.();
+return {
+  tableKey,
+  embeddedMode: true,
+  onSaved: () => args.fns.onSchemaSaved?.()
+};'''
+      }
+    }
+    {
+      id: "13"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: PortalLayout
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: PageLayout
+      S: "1"
+      E: "13"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "8"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "11"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "5"
+      E: "7"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "11"
+      E: "12"
+    }
+  ]
+}

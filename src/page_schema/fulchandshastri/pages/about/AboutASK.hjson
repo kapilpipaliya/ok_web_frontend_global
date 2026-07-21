@@ -34,19 +34,10 @@ try {
     }
     {
       id: "2"
-      L: PageLayout
-      P: {
-        displayOrder: 1
-        componentName: Layout
-      }
-    }
-    {
-      id: "3"
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   background: linear-gradient(135deg, #8b5a2b 0%, #cd853f 100%);
   color: white;
   padding: 4rem 1rem;
@@ -65,25 +56,21 @@ return `._id {
     opacity: 0.1;
     transform: rotate(-5deg);
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "section"
-};
-'''
+};'''
       }
     }
     {
-      id: "4"
+      id: "3"
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   font-size: 3rem;
   font-weight: 800;
   margin-bottom: 1rem;
@@ -94,27 +81,23 @@ return `._id {
   @media (max-width: 768px) {
     font-size: 2rem;
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const content = args.contextData.aboutAskSettings?.content;
+          '''const content = args.contextData.aboutAskSettings?.content;
 return {
   as: "h1",
   text: content?.heroTitle
-};
-'''
+};'''
       }
     }
     {
-      id: "5"
+      id: "4"
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   font-size: 1.5rem;
   opacity: 0.9;
   position: relative;
@@ -123,18 +106,33 @@ return `._id {
   @media (max-width: 768px) {
     font-size: 1.2rem;
   }
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const content = args.contextData.aboutAskSettings?.content;
+          '''const content = args.contextData.aboutAskSettings?.content;
 return {
   as: "p",
   text: content?.heroSubtitle
-};
-'''
+};'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 4rem 1rem;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "section"
+};'''
       }
     }
     {
@@ -142,30 +140,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 4rem 1rem;
-}`;
-'''
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''
-return {
-  as: "section"
-};
-'''
-      }
-    }
-    {
-      id: "7"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
+          '''return `._id {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 3rem;
@@ -176,62 +151,74 @@ return `._id {
     grid-template-columns: 1fr;
     gap: 2rem;
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
-      id: "8"
+      id: "7"
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   width: 100%;
   height: 400px;
   object-fit: cover;
   border-radius: 1rem;
   box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "img",
   src: "https://fulchandshastri.com/wp-content/uploads/2024/01/Home-banner-1.jpg",
   alt: "Atma Sadhana Kendra Umarala",
   "data-animate": "",
 
   ref: (el) => el && args.fns.animateOnView(el, { x: -32, y: 0 })
-};
-'''
+};'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el, { x: 32, y: 0, delay: 0.1 })
+};'''
       }
     }
     {
       id: "9"
       L: Attr
       P: {
-        displayOrder: 2
+        css:
+          '''return `._id {
+  font-size: 2rem;
+  color: #8b5a2b;
+  margin-bottom: 1rem;
+  font-weight: 700;
+}`;'''
+        displayOrder: 1
         componentName: Html
         props:
-          '''
+          '''const content = args.contextData.aboutAskSettings?.content;
 return {
-  as: "div",
-  "data-animate": "",
-
-  ref: (el) => el && args.fns.animateOnView(el, { x: 32, y: 0, delay: 0.1 })
-};
-'''
+  as: "h2",
+  text: content?.introTitle
+};'''
       }
     }
     {
@@ -239,24 +226,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  font-size: 2rem;
-  color: #8b5a2b;
-  margin-bottom: 1rem;
-  font-weight: 700;
-}`;
-'''
-        displayOrder: 1
+          '''return `._id {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: ${args.theme.mode === 'dark' ? args.theme.var.color.text_light_200 : args.theme.var.color.text_dark_200};
+  margin-bottom: 1.5rem;
+}`;'''
+        displayOrder: 2
         componentName: Html
         props:
-          '''
-const content = args.contextData.aboutAskSettings?.content;
+          '''const content = args.contextData.aboutAskSettings?.content;
 return {
-  as: "h2",
-  text: content?.introTitle
-};
-'''
+  as: "p",
+  text: content?.introText
+};'''
       }
     }
     {
@@ -264,24 +247,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  font-size: 1.1rem;
-  line-height: 1.8;
-  color: ${args.theme.mode === 'dark' ? args.theme.var.color.text_light_200 : args.theme.var.color.text_dark_200};
-  margin-bottom: 1.5rem;
-}`;
-'''
+          '''return `._id {
+  margin-bottom: 4rem;
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const content = args.contextData.aboutAskSettings?.content;
-return {
-  as: "p",
-  text: content?.introText
-};
-'''
+          '''return {
+  as: "div",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el)
+};'''
       }
     }
     {
@@ -289,22 +266,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  margin-bottom: 4rem;
-}`;
-'''
-        displayOrder: 2
+          '''return `._id {
+  font-size: 2.5rem;
+  color: #8b5a2b;
+  margin-bottom: 3rem;
+  font-weight: 700;
+}`;'''
+        displayOrder: 1
         componentName: Html
         props:
-          '''
+          '''const content = args.contextData.aboutAskSettings?.content;
 return {
-  as: "div",
-  "data-animate": "",
-
-  ref: (el) => el && args.fns.animateOnView(el)
-};
-'''
+  as: "h2",
+  text: content?.facilitiesTitle
+};'''
       }
     }
     {
@@ -312,50 +287,21 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  font-size: 2.5rem;
-  color: #8b5a2b;
-  margin-bottom: 3rem;
-  font-weight: 700;
-}`;
-'''
-        displayOrder: 1
+          '''return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+}`;'''
+        displayOrder: 2
         componentName: Html
         props:
-          '''
-const content = args.contextData.aboutAskSettings?.content;
-return {
-  as: "h2",
-  text: content?.facilitiesTitle
-};
-'''
+          '''return {
+  as: "div"
+};'''
       }
     }
     {
       id: "14"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-}`;
-'''
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''
-return {
-  as: "div"
-};
-'''
-      }
-    }
-    {
-      id: "15"
       L: Attr
       P: {
         contextName: facility
@@ -363,30 +309,45 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const items = args.contextData.aboutAskSettings?.facility?.facility ?? [];
+          '''const items = args.contextData.aboutAskSettings?.facility?.facility ?? [];
 return {
   as: "fragment",
   data: items
-};
-'''
+};'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: FeatureCard
+        props:
+          '''const facility = args.contextData.facility;
+return {
+  icon: facility.icon,
+  title: facility.title,
+  description: facility.description
+};'''
       }
     }
     {
       id: "16"
       L: Attr
       P: {
-        displayOrder: 1
-        componentName: FeatureCard
+        css:
+          '''return `._id {
+  margin-bottom: 4rem;
+}`;'''
+        displayOrder: 3
+        componentName: Html
         props:
-          '''
-const facility = args.contextData.facility;
-return {
-  icon: facility.icon,
-  title: facility.title,
-  description: facility.description
-};
-'''
+          '''return {
+  as: "div",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el)
+};'''
       }
     }
     {
@@ -394,22 +355,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  margin-bottom: 4rem;
-}`;
-'''
-        displayOrder: 3
+          '''return `._id {
+  font-size: 2.5rem;
+  color: #8b5a2b;
+  margin-bottom: 3rem;
+  font-weight: 700;
+}`;'''
+        displayOrder: 1
         componentName: Html
         props:
-          '''
+          '''const content = args.contextData.aboutAskSettings?.content;
 return {
-  as: "div",
-  "data-animate": "",
-
-  ref: (el) => el && args.fns.animateOnView(el)
-};
-'''
+  as: "h2",
+  text: content?.galleryTitle
+};'''
       }
     }
     {
@@ -417,33 +376,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  font-size: 2.5rem;
-  color: #8b5a2b;
-  margin-bottom: 3rem;
-  font-weight: 700;
-}`;
-'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''
-const content = args.contextData.aboutAskSettings?.content;
-return {
-  as: "h2",
-  text: content?.galleryTitle
-};
-'''
-      }
-    }
-    {
-      id: "19"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
+          '''return `._id {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
@@ -451,20 +384,17 @@ return `._id {
   @media (max-width: 768px) {
     grid-template-columns: repeat(2, 1fr);
   }
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
-      id: "20"
+      id: "19"
       L: Attr
       P: {
         contextName: image
@@ -472,22 +402,19 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const items = args.contextData.aboutAskSettings?.image?.image ?? [];
+          '''const items = args.contextData.aboutAskSettings?.image?.image ?? [];
 return {
   as: "fragment",
   data: items
-};
-'''
+};'''
       }
     }
     {
-      id: "21"
+      id: "20"
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   width: 100%;
   height: 250px;
   object-fit: cover;
@@ -498,13 +425,11 @@ return `._id {
   &:hover {
     transform: scale(1.05);
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const image = args.contextData.image;
+          '''const image = args.contextData.image;
 const index = args.contextData.index ?? 0;
 return {
   as: "img",
@@ -513,8 +438,29 @@ return {
   "data-animate": "",
 
   ref: (el) => el && args.fns.animateOnView(el, { delay: index * 0.08 })
-};
-'''
+};'''
+      }
+    }
+    {
+      id: "21"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  background: ${args.theme.mode === 'dark' ? args.theme.var.color.background_dark_200 : args.theme.var.color.background_light_100};
+  padding: 3rem;
+  border-radius: 1rem;
+  text-align: center;
+}`;'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el)
+};'''
       }
     }
     {
@@ -522,25 +468,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  background: ${args.theme.mode === 'dark' ? args.theme.var.color.background_dark_200 : args.theme.var.color.background_light_100};
-  padding: 3rem;
-  border-radius: 1rem;
-  text-align: center;
-}`;
-'''
-        displayOrder: 4
+          '''return `._id {
+  font-size: 2rem;
+  color: #8b5a2b;
+  margin-bottom: 2rem;
+  font-weight: 700;
+}`;'''
+        displayOrder: 1
         componentName: Html
         props:
-          '''
+          '''const content = args.contextData.aboutAskSettings?.content;
 return {
-  as: "div",
-  "data-animate": "",
-
-  ref: (el) => el && args.fns.animateOnView(el)
-};
-'''
+  as: "h2",
+  text: content?.contactTitle
+};'''
       }
     }
     {
@@ -548,48 +489,31 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  font-size: 2rem;
-  color: #8b5a2b;
-  margin-bottom: 2rem;
-  font-weight: 700;
-}`;
-'''
-        displayOrder: 1
+          '''return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+}`;'''
+        displayOrder: 2
         componentName: Html
         props:
-          '''
-const content = args.contextData.aboutAskSettings?.content;
-return {
-  as: "h2",
-  text: content?.contactTitle
-};
-'''
+          '''return {
+  as: "div"
+};'''
       }
     }
     {
       id: "24"
       L: Attr
       P: {
-        css:
-          '''
-return `._id {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 2rem;
-  max-width: 800px;
-  margin: 0 auto;
-}`;
-'''
-        displayOrder: 2
+        displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -599,162 +523,136 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
-  as: "div"
-};
-'''
+          '''return {
+  as: "icon",
+  icon: "carbon:location",
+  height: 32,
+  width: 32,
+  style: { color: "#8b5a2b", marginBottom: "0.5rem" }
+};'''
       }
     }
     {
       id: "26"
       L: Attr
       P: {
-        displayOrder: 1
+        css:
+          '''return `._id {
+  white-space: pre-line;
+  line-height: 1.6;
+}`;'''
+        displayOrder: 2
         componentName: Html
         props:
-          '''
+          '''const content = args.contextData.aboutAskSettings?.content;
 return {
-  as: "icon",
-  icon: "carbon:location",
-  height: 32,
-  width: 32,
-  style: { color: "#8b5a2b", marginBottom: "0.5rem" }
-};
-'''
+  as: "p",
+  text: content?.addressText
+};'''
       }
     }
     {
       id: "27"
       L: Attr
       P: {
-        css:
-          '''
-return `._id {
-  white-space: pre-line;
-  line-height: 1.6;
-}`;
-'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const content = args.contextData.aboutAskSettings?.content;
-return {
-  as: "p",
-  text: content?.addressText
-};
-'''
+          '''return {
+  as: "div"
+};'''
       }
     }
     {
       id: "28"
       L: Attr
       P: {
-        displayOrder: 2
+        displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
-  as: "div"
-};
-'''
+          '''return {
+  as: "icon",
+  icon: "carbon:phone",
+  height: 32,
+  width: 32,
+  style: { color: "#8b5a2b", marginBottom: "0.5rem" }
+};'''
       }
     }
     {
       id: "29"
       L: Attr
       P: {
-        displayOrder: 1
+        css:
+          '''return `._id {
+  white-space: pre-line;
+  line-height: 1.6;
+}`;'''
+        displayOrder: 2
         componentName: Html
         props:
-          '''
+          '''const content = args.contextData.aboutAskSettings?.content;
 return {
-  as: "icon",
-  icon: "carbon:phone",
-  height: 32,
-  width: 32,
-  style: { color: "#8b5a2b", marginBottom: "0.5rem" }
-};
-'''
+  as: "p",
+  text: content?.phoneText
+};'''
       }
     }
     {
       id: "30"
       L: Attr
       P: {
-        css:
-          '''
-return `._id {
-  white-space: pre-line;
-  line-height: 1.6;
-}`;
-'''
-        displayOrder: 2
+        displayOrder: 3
         componentName: Html
         props:
-          '''
-const content = args.contextData.aboutAskSettings?.content;
-return {
-  as: "p",
-  text: content?.phoneText
-};
-'''
+          '''return {
+  as: "div"
+};'''
       }
     }
     {
       id: "31"
       L: Attr
       P: {
-        displayOrder: 3
+        displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
-  as: "div"
-};
-'''
+          '''return {
+  as: "icon",
+  icon: "carbon:email",
+  height: 32,
+  width: 32,
+  style: { color: "#8b5a2b", marginBottom: "0.5rem" }
+};'''
       }
     }
     {
       id: "32"
       L: Attr
       P: {
-        displayOrder: 1
+        displayOrder: 2
         componentName: Html
         props:
-          '''
+          '''const content = args.contextData.aboutAskSettings?.content;
 return {
-  as: "icon",
-  icon: "carbon:email",
-  height: 32,
-  width: 32,
-  style: { color: "#8b5a2b", marginBottom: "0.5rem" }
-};
-'''
+  as: "p",
+  text: content?.emailText
+};'''
       }
     }
     {
       id: "33"
-      L: Attr
+      L: PageLayout
       P: {
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''
-const content = args.contextData.aboutAskSettings?.content;
-return {
-  as: "p",
-  text: content?.emailText
-};
-'''
+        displayOrder: 1
+        componentName: Layout
       }
     }
   ]
   edges: [
     {
       id: e1
-      T: PageLayout
+      T: Attr
       S: "1"
       E: "2"
     }
@@ -762,187 +660,187 @@ return {
       id: e2
       T: Attr
       S: "1"
-      E: "3"
+      E: "5"
     }
     {
       id: e3
-      T: Attr
+      T: PageLayout
       S: "1"
-      E: "6"
+      E: "33"
     }
     {
       id: e4
       T: Attr
-      S: "3"
-      E: "4"
+      S: "2"
+      E: "3"
     }
     {
       id: e5
       T: Attr
-      S: "3"
-      E: "5"
+      S: "2"
+      E: "4"
     }
     {
       id: e6
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "5"
+      E: "11"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "5"
+      E: "16"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "5"
+      E: "21"
+    }
+    {
+      id: e10
       T: Attr
       S: "6"
       E: "7"
     }
     {
-      id: e7
-      T: Attr
-      S: "6"
-      E: "12"
-    }
-    {
-      id: e8
-      T: Attr
-      S: "6"
-      E: "17"
-    }
-    {
-      id: e9
-      T: Attr
-      S: "6"
-      E: "22"
-    }
-    {
-      id: e10
-      T: Attr
-      S: "7"
-      E: "8"
-    }
-    {
       id: e11
       T: Attr
-      S: "7"
-      E: "9"
+      S: "6"
+      E: "8"
     }
     {
       id: e12
       T: Attr
-      S: "9"
-      E: "10"
+      S: "8"
+      E: "9"
     }
     {
       id: e13
       T: Attr
-      S: "9"
-      E: "11"
+      S: "8"
+      E: "10"
     }
     {
       id: e14
       T: Attr
-      S: "12"
-      E: "13"
+      S: "11"
+      E: "12"
     }
     {
       id: e15
       T: Attr
-      S: "12"
-      E: "14"
+      S: "11"
+      E: "13"
     }
     {
       id: e16
+      T: Attr
+      S: "13"
+      E: "14"
+    }
+    {
+      id: e17
       T: Attr
       S: "14"
       E: "15"
     }
     {
-      id: e17
-      T: Attr
-      S: "15"
-      E: "16"
-    }
-    {
       id: e18
       T: Attr
-      S: "17"
-      E: "18"
+      S: "16"
+      E: "17"
     }
     {
       id: e19
       T: Attr
-      S: "17"
-      E: "19"
+      S: "16"
+      E: "18"
     }
     {
       id: e20
+      T: Attr
+      S: "18"
+      E: "19"
+    }
+    {
+      id: e21
       T: Attr
       S: "19"
       E: "20"
     }
     {
-      id: e21
-      T: Attr
-      S: "20"
-      E: "21"
-    }
-    {
       id: e22
       T: Attr
-      S: "22"
-      E: "23"
+      S: "21"
+      E: "22"
     }
     {
       id: e23
       T: Attr
-      S: "22"
-      E: "24"
+      S: "21"
+      E: "23"
     }
     {
       id: e24
+      T: Attr
+      S: "23"
+      E: "24"
+    }
+    {
+      id: e25
+      T: Attr
+      S: "23"
+      E: "27"
+    }
+    {
+      id: e26
+      T: Attr
+      S: "23"
+      E: "30"
+    }
+    {
+      id: e27
       T: Attr
       S: "24"
       E: "25"
     }
     {
-      id: e25
-      T: Attr
-      S: "24"
-      E: "28"
-    }
-    {
-      id: e26
-      T: Attr
-      S: "24"
-      E: "31"
-    }
-    {
-      id: e27
-      T: Attr
-      S: "25"
-      E: "26"
-    }
-    {
       id: e28
       T: Attr
-      S: "25"
-      E: "27"
+      S: "24"
+      E: "26"
     }
     {
       id: e29
       T: Attr
-      S: "28"
-      E: "29"
+      S: "27"
+      E: "28"
     }
     {
       id: e30
       T: Attr
-      S: "28"
-      E: "30"
+      S: "27"
+      E: "29"
     }
     {
       id: e31
       T: Attr
-      S: "31"
-      E: "32"
+      S: "30"
+      E: "31"
     }
     {
       id: e32
       T: Attr
-      S: "31"
-      E: "33"
+      S: "30"
+      E: "32"
     }
   ]
 }

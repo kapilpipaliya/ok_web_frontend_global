@@ -325,8 +325,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const layout = args.fns.getLayout();
+          '''const layout = args.fns.getLayout();
 if (layout === "bar") {
   return `._id {
     display: flex;
@@ -344,21 +343,18 @@ return `._id {
   max-width: min(90vw, 320px);
   padding: 0.25rem 0;
   -webkit-tap-highlight-color: transparent;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const layout = args.fns.getLayout();
+          '''const layout = args.fns.getLayout();
 const isRoot = args.fns.getDepth() === 0;
 return {
   as: layout === "bar" ? "nav" : "div",
   "data-menu-root": isRoot ? "true" : undefined,
   "attr:role": layout === "panel" ? "menu" : "navigation",
   onMount: isRoot ? () => args.fns.getController().onMount() : undefined
-};
-'''
+};'''
       }
     }
     {
@@ -370,11 +366,9 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   data: args.fns.getItems()
-};
-'''
+};'''
       }
     }
     {
@@ -382,18 +376,15 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const layout = args.fns.getLayout();
+          '''const layout = args.fns.getLayout();
 return `._id {
   position: relative;
   display: ${layout === "bar" ? "inline-flex" : "block"};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const item = args.contextData.menuItem;
+          '''const item = args.contextData.menuItem;
 const depth = args.fns.getDepth();
 const id = args.fns.getItemId(item);
 const hasChildren = args.fns.getChildren(item).length > 0;
@@ -412,8 +403,7 @@ return {
           ctrl.scheduleClose();
         }
       }
-};
-'''
+};'''
       }
     }
     {
@@ -421,8 +411,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const item = args.contextData.menuItem;
+          '''const item = args.contextData.menuItem;
 const layout = args.fns.getLayout();
 const isActive = args.fns.isItemActive(item);
 const color = args.fns.getTriggerColor();
@@ -504,13 +493,11 @@ return `._id {
     `
     }
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const item = args.contextData.menuItem;
+          '''const item = args.contextData.menuItem;
 const depth = args.fns.getDepth();
 const id = args.fns.getItemId(item);
 const hasChildren = args.fns.getChildren(item).length > 0;
@@ -554,8 +541,7 @@ return {
   "attr:role": layout === "panel" ? "menuitem" : undefined,
   onClick: () => args.fns.onItemClick(item),
   onPointerEnter: () => ctrl.keepOpen()
-};
-'''
+};'''
       }
     }
     {
@@ -565,8 +551,7 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const item = args.contextData.menuItem;
+          '''const item = args.contextData.menuItem;
 const hasChildren = args.fns.getChildren(item).length > 0;
 // NEVER use as:"portal" — Solid Portal SSR returns "" and drops all children.
 // Fixed panels + Floating UI work without portal and SSR correctly.
@@ -576,8 +561,7 @@ const hasChildren = args.fns.getChildren(item).length > 0;
 return {
   as: "div",
   hide: !hasChildren
-};
-'''
+};'''
       }
     }
     {
@@ -585,8 +569,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const item = args.contextData.menuItem;
+          '''const item = args.contextData.menuItem;
 const id = args.fns.getItemId(item);
 const ctrl = args.fns.getController();
 const isOpen = ctrl.isOpen(id);
@@ -608,13 +591,11 @@ return `._id {
   visibility: ${isOpen ? "visible" : "hidden"};
   opacity: ${isOpen ? "1" : "0"};
   pointer-events: ${isOpen ? "auto" : "none"};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const item = args.contextData.menuItem;
+          '''const item = args.contextData.menuItem;
 const id = args.fns.getItemId(item);
 const ctrl = args.fns.getController();
 return {
@@ -628,8 +609,7 @@ return {
     }
   },
   onPointerLeave: (e) => ctrl.onParentPointerLeave(e)
-};
-'''
+};'''
       }
     }
     {
@@ -639,8 +619,7 @@ return {
         displayOrder: 1
         componentName: Menu
         props:
-          '''
-const item = args.contextData.menuItem;
+          '''const item = args.contextData.menuItem;
 const parentProps = args.contextData.props || {};
 const depth = args.fns.getDepth();
 
@@ -658,8 +637,7 @@ return {
   panelBackground: parentProps.panelBackground,
   hoverBackground: parentProps.hoverBackground,
   activeBorderColor: parentProps.activeBorderColor
-};
-'''
+};'''
       }
     }
   ]

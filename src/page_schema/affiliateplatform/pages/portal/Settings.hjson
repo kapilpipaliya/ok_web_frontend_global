@@ -1,0 +1,638 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        fns:
+          '''
+const checkAdminRole = () => {
+  const userRoles = args.user?.OUT?.UserRole || [];
+  return userRoles.some((edgeId) => {
+    const edge = args.graph.edges[edgeId];
+    const role = args.graph.vertexes[edge?.E];
+    return role?.P?.key === "Admin";
+  });
+};
+
+const [pagePreviewUrls, setPagePreviewUrls] = args.createSignal({ global: "/" });
+let pagePreviewUrlsLoadPromise = null;
+
+const loadPagePreviewUrls = async () => {
+  const existing = pagePreviewUrls();
+  if (existing && Object.keys(existing).length > 1) return existing;
+  if (pagePreviewUrlsLoadPromise) return pagePreviewUrlsLoadPromise;
+
+  pagePreviewUrlsLoadPromise = (async () => {
+    try {
+      const result = await args.executeNamedServerFunction({
+        functionName: "getSettingsPagePreviewUrls",
+        contextData: {}
+      });
+      const urls = result?.result?.data?.previewUrls || {};
+      const resolved = { global: "/", ...urls };
+      setPagePreviewUrls(resolved);
+      return resolved;
+    } catch (error) {
+      console.error("Settings loadPagePreviewUrls:", error);
+      return { global: "/" };
+    } finally {
+      pagePreviewUrlsLoadPromise = null;
+    }
+  })();
+
+  return pagePreviewUrlsLoadPromise;
+};
+
+const getPreviewUrl = () => {
+  const settingsPageId = args.searchParams?.page || "home";
+  return pagePreviewUrls()[settingsPageId] || "/";
+};
+
+const refreshPreview = () => {
+  const iframe = document.querySelector("[data-fulchand-settings-preview]");
+  if (iframe && iframe.contentWindow) {
+    iframe.contentWindow.location.reload();
+  }
+};
+
+const onSettingsSaved = () => refreshPreview();
+
+const isSchemaMode = () => args.searchParams?.mode === "schema";
+
+const setEditorMode = (mode) => {
+  const page = args.searchParams?.page || "home";
+  if (mode === "schema") {
+    args.setSearchParams({ page, mode: "schema" }, { replace: true });
+    const minWidth = Math.min(getMaxEditorWidth(), SCHEMA_EDITOR_MIN_WIDTH);
+    if (editorPaneWidth() < minWidth) {
+      setEditorPaneWidth(minWidth);
+      persistEditorWidth(minWidth);
+    }
+  } else {
+    args.setSearchParams({ page, mode: null }, { replace: true });
+  }
+};
+
+const onSchemaSaved = () => {
+  refreshPreview();
+  args.showSuccessToast?.("Schema saved — content editor will use the updated fields");
+};
+
+const DEFAULT_EDITOR_WIDTH = 560;
+const MIN_EDITOR_WIDTH = 360;
+const MAX_EDITOR_WIDTH = 1200;
+const SCHEMA_EDITOR_MIN_WIDTH = 640;
+const EDITOR_WIDTH_STORAGE_KEY = "fulchand-settings-editor-width";
+
+const loadStoredEditorWidth = () => {
+  if (typeof window === "undefined") return DEFAULT_EDITOR_WIDTH;
+  try {
+    const stored = Number(window.localStorage.getItem(EDITOR_WIDTH_STORAGE_KEY));
+    if (Number.isFinite(stored) && stored >= MIN_EDITOR_WIDTH && stored <= MAX_EDITOR_WIDTH) {
+      return stored;
+    }
+  } catch (_) {}
+  return DEFAULT_EDITOR_WIDTH;
+};
+
+const persistEditorWidth = (width) => {
+  try {
+    window.localStorage.setItem(EDITOR_WIDTH_STORAGE_KEY, String(width));
+  } catch (_) {}
+};
+
+const getMaxEditorWidth = () => {
+  if (typeof window === "undefined") return MAX_EDITOR_WIDTH;
+  return Math.min(MAX_EDITOR_WIDTH, Math.floor(window.innerWidth * 0.85));
+};
+
+const [editorPaneWidth, setEditorPaneWidth] = args.createSignal(loadStoredEditorWidth());
+const [isResizingEditor, setIsResizingEditor] = args.createSignal(false);
+
+const syncEditorPaneWidth = () => {
+  const width = editorPaneWidth();
+  document.documentElement.style.setProperty("--fulchand-settings-editor-width", `${width}px`);
+};
+
+const startEditorResize = (event) => {
+  event.preventDefault();
+  event.stopPropagation();
+  setIsResizingEditor(true);
+  const startX = event.clientX;
+  const startWidth = editorPaneWidth();
+
+  const handleMouseMove = (moveEvent) => {
+    const delta = startX - moveEvent.clientX;
+    const next = Math.max(MIN_EDITOR_WIDTH, Math.min(getMaxEditorWidth(), startWidth + delta));
+    setEditorPaneWidth(next);
+  };
+
+  const handleMouseUp = () => {
+    setIsResizingEditor(false);
+    persistEditorWidth(editorPaneWidth());
+    document.body.classList.remove("fulchand-settings-resizing");
+    document.removeEventListener("mousemove", handleMouseMove, true);
+    document.removeEventListener("mouseup", handleMouseUp, true);
+  };
+
+  document.body.classList.add("fulchand-settings-resizing");
+  document.addEventListener("mousemove", handleMouseMove, true);
+  document.addEventListener("mouseup", handleMouseUp, true);
+};
+
+const [siteLanguages, setSiteLanguages] = args.createSignal([]);
+let siteLanguagesLoadPromise = null;
+
+const DEFAULT_SITE_LANGUAGES = [
+  { code: "en", label: "English", isDefault: true },
+  { code: "hi", label: "Hindi", isDefault: false },
+  { code: "gu", label: "Gujarati", isDefault: false }
+];
+
+const loadSiteLanguages = async () => {
+  const existing = siteLanguages();
+  if (Array.isArray(existing) && existing.length > 0) return existing;
+  if (siteLanguagesLoadPromise) return siteLanguagesLoadPromise;
+
+  siteLanguagesLoadPromise = (async () => {
+    try {
+      const result = await args.executeNamedServerFunction({
+        functionName: "getSiteLanguages",
+        contextData: {}
+      });
+      const languages = result?.result?.data?.languages || [];
+      const resolved = languages.length > 0 ? languages : DEFAULT_SITE_LANGUAGES;
+      setSiteLanguages(resolved);
+      return resolved;
+    } catch (error) {
+      console.error("Settings loadSiteLanguages:", error);
+      setSiteLanguages(DEFAULT_SITE_LANGUAGES);
+      return DEFAULT_SITE_LANGUAGES;
+    } finally {
+      siteLanguagesLoadPromise = null;
+    }
+  })();
+
+  return siteLanguagesLoadPromise;
+};
+
+args.createEffect(() => {
+  editorPaneWidth();
+  syncEditorPaneWidth();
+});
+
+return {
+  enabled: () => true,
+  DEFAULT_EDITOR_WIDTH,
+  MIN_EDITOR_WIDTH,
+  MAX_EDITOR_WIDTH,
+  editorPaneWidth,
+  isResizingEditor,
+  startEditorResize,
+  checkAdminRole,
+  getPreviewUrl,
+  refreshPreview,
+  onSettingsSaved,
+  isSchemaMode,
+  setEditorMode,
+  onSchemaSaved,
+  siteLanguages,
+  loadSiteLanguages,
+  pagePreviewUrls,
+  loadPagePreviewUrls,
+  syncEditorPaneWidth,
+  executeYTOFunction: (functionName, contextData) =>
+    args.executeNamedServerFunction({
+      functionName,
+      contextData: contextData || {}
+    })
+};
+'''
+        title: Site Settings
+        url: /settings
+        key: Settings
+        props:
+          '''
+return {
+  isNoPermissionCheck: true,
+  onMount: async () => {
+    if (!args.user) {
+      args.navigate("/auth/signin", { replace: true });
+      return;
+    }
+    if (!args.fns.checkAdminRole?.()) {
+      args.showErrorToast?.("Admin access required");
+      args.navigate("/", { replace: true });
+      return;
+    }
+    await Promise.all([
+      args.fns.loadSiteLanguages?.(),
+      args.fns.loadPagePreviewUrls?.()
+    ]);
+    args.fns.syncEditorPaneWidth?.();
+    window.addEventListener("fulchand-settings-saved", args.fns.onSettingsSaved);
+  },
+  onCleanup: () => {
+    window.removeEventListener("fulchand-settings-saved", args.fns.onSettingsSaved);
+    document.documentElement.style.removeProperty("--fulchand-settings-editor-width");
+  }
+};
+'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 0
+        componentName: Html
+        props:
+          '''return {
+  as: "style",
+  text: `body.fulchand-settings-resizing {
+  cursor: col-resize !important;
+  user-select: none;
+}
+
+body.fulchand-settings-resizing [data-fulchand-settings-preview] {
+  pointer-events: none;
+}`
+};'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "section",
+  hide: !args.fns.checkAdminRole?.()
+};'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+
+  @media (max-width: 1024px) {
+    flex-direction: column;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+};'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: ${args.theme.var.color.background_light_50};
+
+  @media (max-width: 1024px) {
+    min-height: 320px;
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+};'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.background};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+};'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const pageId = args.searchParams?.page || "home";
+return {
+  as: "h2",
+  text: `Live preview — ${pageId}`
+};'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: IconButton
+        props:
+          '''return {
+  icon: "ph:arrow-clockwise",
+  variant: "ghost",
+  size: "sm",
+  title: "Refresh preview",
+  onClick: () => args.fns.refreshPreview?.()
+};'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  border: none;
+  background: ${args.theme.var.color.background};
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "iframe",
+  "data-fulchand-settings-preview": "",
+  src: args.fns.getPreviewUrl?.(),
+  title: "Page preview",
+  loading: "lazy"
+};'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  width: 6px;
+  flex-shrink: 0;
+  cursor: col-resize;
+  touch-action: none;
+  user-select: none;
+  position: relative;
+  z-index: 2;
+  background: transparent;
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 2px;
+    transform: translateX(-50%);
+    background: transparent;
+    transition: background 0.15s ease;
+  }
+
+  &:hover::after,
+  body.fulchand-settings-resizing & {
+    background: ${args.theme.var.color.primary};
+  }
+
+  @media (max-width: 1024px) {
+    display: none;
+  }
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  role: "separator",
+  "aria-orientation": "vertical",
+  "aria-label": "Resize settings editor",
+  title: "Drag to resize settings panel",
+  onMouseDown: (event) => args.fns.startEditorResize?.(event)
+};'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''const resizing = args.fns.isResizingEditor?.();
+return `._id {
+  width: var(--fulchand-settings-editor-width, ${args.fns.DEFAULT_EDITOR_WIDTH}px);
+  flex-shrink: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  border-left: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.background};
+  transition: ${resizing ? "none" : "width 0.25s ease"};
+
+  @media (max-width: 1024px) {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid ${args.theme.var.color.border};
+  }
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+};'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: SettingsEditorShell
+        props:
+          '''const settingsPageId = args.searchParams?.page || "home";
+return {
+  settingsPageId,
+  siteLanguages: args.fns.siteLanguages?.() || [],
+  embeddedMode: true,
+  isSchemaMode: () => args.fns.isSchemaMode?.() === true,
+  onSetContentMode: () => args.fns.setEditorMode?.("content"),
+  onSetSchemaMode: () => args.fns.setEditorMode?.("schema"),
+  onSchemaSaved: () => args.fns.onSchemaSaved?.(),
+  schemaTabLabel: "Field schema",
+  contentTabLabel: "Content",
+  dynamicPageKey: "fullchand_settings_dynamic_page"
+};'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  cursor: col-resize;
+  background: transparent;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  "aria-hidden": true,
+  hide: !args.fns.isResizingEditor?.()
+};'''
+      }
+    }
+    {
+      id: "14"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: PortalLayout
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "1"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "1"
+      E: "13"
+    }
+    {
+      id: e4
+      T: PageLayout
+      S: "1"
+      E: "14"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "4"
+      E: "10"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "4"
+      E: "11"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "5"
+      E: "9"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "6"
+      E: "8"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "11"
+      E: "12"
+    }
+  ]
+}

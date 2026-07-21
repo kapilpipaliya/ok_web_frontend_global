@@ -34,19 +34,10 @@ try {
     }
     {
       id: "2"
-      L: PageLayout
-      P: {
-        displayOrder: 1
-        componentName: Layout
-      }
-    }
-    {
-      id: "3"
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
   color: white;
   padding: 4rem 1rem;
@@ -63,25 +54,21 @@ return `._id {
     left: 50%;
     transform: translate(-50%, -50%);
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "section"
-};
-'''
+};'''
       }
     }
     {
-      id: "4"
+      id: "3"
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   font-size: 3rem;
   font-weight: 800;
   margin-bottom: 1rem;
@@ -92,27 +79,23 @@ return `._id {
   @media (max-width: 768px) {
     font-size: 2rem;
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const content = args.contextData.gyaanDeepakSettings?.content;
+          '''const content = args.contextData.gyaanDeepakSettings?.content;
 return {
   as: "h1",
   text: content?.heroTitle
-};
-'''
+};'''
       }
     }
     {
-      id: "5"
+      id: "4"
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   font-size: 1.5rem;
   opacity: 0.9;
   position: relative;
@@ -121,18 +104,33 @@ return `._id {
   @media (max-width: 768px) {
     font-size: 1.2rem;
   }
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const content = args.contextData.gyaanDeepakSettings?.content;
+          '''const content = args.contextData.gyaanDeepakSettings?.content;
 return {
   as: "p",
   text: content?.heroSubtitle
-};
-'''
+};'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 4rem 1rem;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "section"
+};'''
       }
     }
     {
@@ -140,21 +138,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 4rem 1rem;
-}`;
-'''
-        displayOrder: 2
+          '''return `._id {
+  text-align: center;
+  margin-bottom: 4rem;
+}`;'''
+        displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
-  as: "section"
-};
-'''
+          '''return {
+  as: "div",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el)
+};'''
       }
     }
     {
@@ -162,23 +158,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  text-align: center;
-  margin-bottom: 4rem;
-}`;
-'''
+          '''return `._id {
+  font-size: 2.5rem;
+  color: #ff6b35;
+  margin-bottom: 2rem;
+  font-weight: 700;
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
+          '''const content = args.contextData.gyaanDeepakSettings?.content;
 return {
-  as: "div",
-  "data-animate": "",
-
-  ref: (el) => el && args.fns.animateOnView(el)
-};
-'''
+  as: "h2",
+  text: content?.introTitle
+};'''
       }
     }
     {
@@ -186,24 +179,21 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  font-size: 2.5rem;
-  color: #ff6b35;
-  margin-bottom: 2rem;
-  font-weight: 700;
-}`;
-'''
-        displayOrder: 1
+          '''return `._id {
+  font-size: 1.2rem;
+  line-height: 1.8;
+  max-width: 800px;
+  margin: 0 auto;
+  color: ${args.theme.mode === 'dark' ? args.theme.var.color.text_light_200 : args.theme.var.color.text_dark_200};
+}`;'''
+        displayOrder: 2
         componentName: Html
         props:
-          '''
-const content = args.contextData.gyaanDeepakSettings?.content;
+          '''const content = args.contextData.gyaanDeepakSettings?.content;
 return {
-  as: "h2",
-  text: content?.introTitle
-};
-'''
+  as: "p",
+  text: content?.introText
+};'''
       }
     }
     {
@@ -211,25 +201,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  font-size: 1.2rem;
-  line-height: 1.8;
-  max-width: 800px;
-  margin: 0 auto;
-  color: ${args.theme.mode === 'dark' ? args.theme.var.color.text_light_200 : args.theme.var.color.text_dark_200};
-}`;
-'''
+          '''return `._id {
+  margin-bottom: 4rem;
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const content = args.contextData.gyaanDeepakSettings?.content;
-return {
-  as: "p",
-  text: content?.introText
-};
-'''
+          '''return {
+  as: "div",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el)
+};'''
       }
     }
     {
@@ -237,22 +220,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  margin-bottom: 4rem;
-}`;
-'''
-        displayOrder: 2
+          '''return `._id {
+  font-size: 2.5rem;
+  color: #ff6b35;
+  margin-bottom: 3rem;
+  font-weight: 700;
+}`;'''
+        displayOrder: 1
         componentName: Html
         props:
-          '''
+          '''const content = args.contextData.gyaanDeepakSettings?.content;
 return {
-  as: "div",
-  "data-animate": "",
-
-  ref: (el) => el && args.fns.animateOnView(el)
-};
-'''
+  as: "h2",
+  text: content?.featuresTitle
+};'''
       }
     }
     {
@@ -260,50 +241,21 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  font-size: 2.5rem;
-  color: #ff6b35;
-  margin-bottom: 3rem;
-  font-weight: 700;
-}`;
-'''
-        displayOrder: 1
+          '''return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+}`;'''
+        displayOrder: 2
         componentName: Html
         props:
-          '''
-const content = args.contextData.gyaanDeepakSettings?.content;
-return {
-  as: "h2",
-  text: content?.featuresTitle
-};
-'''
+          '''return {
+  as: "div"
+};'''
       }
     }
     {
       id: "12"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-}`;
-'''
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''
-return {
-  as: "div"
-};
-'''
-      }
-    }
-    {
-      id: "13"
       L: Attr
       P: {
         contextName: feature
@@ -311,30 +263,48 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const items = args.contextData.gyaanDeepakSettings?.feature?.feature ?? [];
+          '''const items = args.contextData.gyaanDeepakSettings?.feature?.feature ?? [];
 return {
   as: "fragment",
   data: items
-};
-'''
+};'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: FeatureCard
+        props:
+          '''const feature = args.contextData.feature;
+return {
+  icon: feature.icon,
+  title: feature.title,
+  description: feature.description
+};'''
       }
     }
     {
       id: "14"
       L: Attr
       P: {
-        displayOrder: 1
-        componentName: FeatureCard
+        css:
+          '''return `._id {
+  background: ${args.theme.mode === 'dark' ? args.theme.var.color.background_dark_200 : args.theme.var.color.background_light_100};
+  padding: 3rem;
+  border-radius: 1rem;
+  margin-bottom: 4rem;
+}`;'''
+        displayOrder: 3
+        componentName: Html
         props:
-          '''
-const feature = args.contextData.feature;
-return {
-  icon: feature.icon,
-  title: feature.title,
-  description: feature.description
-};
-'''
+          '''return {
+  as: "div",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el)
+};'''
       }
     }
     {
@@ -342,25 +312,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  background: ${args.theme.mode === 'dark' ? args.theme.var.color.background_dark_200 : args.theme.var.color.background_light_100};
-  padding: 3rem;
-  border-radius: 1rem;
-  margin-bottom: 4rem;
-}`;
-'''
-        displayOrder: 3
+          '''return `._id {
+  font-size: 2rem;
+  color: #ff6b35;
+  margin-bottom: 2rem;
+  font-weight: 700;
+}`;'''
+        displayOrder: 1
         componentName: Html
         props:
-          '''
+          '''const content = args.contextData.gyaanDeepakSettings?.content;
 return {
-  as: "div",
-  "data-animate": "",
-
-  ref: (el) => el && args.fns.animateOnView(el)
-};
-'''
+  as: "h2",
+  text: content?.scheduleTitle
+};'''
       }
     }
     {
@@ -368,24 +333,15 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  font-size: 2rem;
-  color: #ff6b35;
-  margin-bottom: 2rem;
-  font-weight: 700;
-}`;
-'''
-        displayOrder: 1
+          '''return `._id {
+  overflow-x: auto;
+}`;'''
+        displayOrder: 2
         componentName: Html
         props:
-          '''
-const content = args.contextData.gyaanDeepakSettings?.content;
-return {
-  as: "h2",
-  text: content?.scheduleTitle
-};
-'''
+          '''return {
+  as: "div"
+};'''
       }
     }
     {
@@ -393,28 +349,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  overflow-x: auto;
-}`;
-'''
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''
-return {
-  as: "div"
-};
-'''
-      }
-    }
-    {
-      id: "18"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
+          '''return `._id {
   width: 100%;
   border-collapse: collapse;
 
@@ -433,16 +368,25 @@ return `._id {
   tr:hover {
     background: ${args.theme.mode === 'dark' ? args.theme.var.color.background_dark_300 : args.theme.var.color.background_light_200};
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "table"
-};
-'''
+};'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "thead"
+};'''
       }
     }
     {
@@ -452,11 +396,9 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
-  as: "thead"
-};
-'''
+          '''return {
+  as: "tr"
+};'''
       }
     }
     {
@@ -466,77 +408,55 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
+          '''const content = args.contextData.gyaanDeepakSettings?.content;
 return {
-  as: "tr"
-};
-'''
+  as: "th",
+  text: content?.th1
+};'''
       }
     }
     {
       id: "21"
       L: Attr
       P: {
-        displayOrder: 1
+        displayOrder: 2
         componentName: Html
         props:
-          '''
-const content = args.contextData.gyaanDeepakSettings?.content;
+          '''const content = args.contextData.gyaanDeepakSettings?.content;
 return {
   as: "th",
-  text: content?.th1
-};
-'''
+  text: content?.th2
+};'''
       }
     }
     {
       id: "22"
       L: Attr
       P: {
-        displayOrder: 2
+        displayOrder: 3
         componentName: Html
         props:
-          '''
-const content = args.contextData.gyaanDeepakSettings?.content;
+          '''const content = args.contextData.gyaanDeepakSettings?.content;
 return {
   as: "th",
-  text: content?.th2
-};
-'''
+  text: content?.th3
+};'''
       }
     }
     {
       id: "23"
       L: Attr
       P: {
-        displayOrder: 3
+        displayOrder: 2
         componentName: Html
         props:
-          '''
-const content = args.contextData.gyaanDeepakSettings?.content;
-return {
-  as: "th",
-  text: content?.th3
-};
-'''
+          '''return {
+  as: "tbody"
+};'''
       }
     }
     {
       id: "24"
-      L: Attr
-      P: {
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''
-return {
-  as: "tbody"
-};
-'''
-      }
-    }
-    {
-      id: "25"
       L: Attr
       P: {
         contextName: schedule
@@ -544,13 +464,24 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const items = args.contextData.gyaanDeepakSettings?.schedule?.schedule ?? [];
+          '''const items = args.contextData.gyaanDeepakSettings?.schedule?.schedule ?? [];
 return {
   as: "fragment",
   data: items
-};
-'''
+};'''
+      }
+    }
+    {
+      id: "25"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const schedule = args.contextData.schedule;
+return {
+  as: "tr"
+};'''
       }
     }
     {
@@ -560,60 +491,62 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const schedule = args.contextData.schedule;
+          '''const schedule = args.contextData.schedule;
 return {
-  as: "tr"
-};
-'''
+  as: "td",
+  text: schedule.day
+};'''
       }
     }
     {
       id: "27"
       L: Attr
       P: {
-        displayOrder: 1
+        displayOrder: 2
         componentName: Html
         props:
-          '''
-const schedule = args.contextData.schedule;
+          '''const schedule = args.contextData.schedule;
 return {
   as: "td",
-  text: schedule.day
-};
-'''
+  text: schedule.time
+};'''
       }
     }
     {
       id: "28"
       L: Attr
       P: {
-        displayOrder: 2
+        displayOrder: 3
         componentName: Html
         props:
-          '''
-const schedule = args.contextData.schedule;
+          '''const schedule = args.contextData.schedule;
 return {
   as: "td",
-  text: schedule.time
-};
-'''
+  text: schedule.program
+};'''
       }
     }
     {
       id: "29"
       L: Attr
       P: {
-        displayOrder: 3
+        css:
+          '''return `._id {
+  text-align: center;
+  padding: 3rem;
+  background: linear-gradient(135deg, #f7931e 0%, #ff6b35 100%);
+  color: white;
+  border-radius: 1rem;
+}`;'''
+        displayOrder: 4
         componentName: Html
         props:
-          '''
-const schedule = args.contextData.schedule;
-return {
-  as: "td",
-  text: schedule.program
-};
-'''
+          '''return {
+  as: "div",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el)
+};'''
       }
     }
     {
@@ -621,26 +554,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  text-align: center;
-  padding: 3rem;
-  background: linear-gradient(135deg, #f7931e 0%, #ff6b35 100%);
-  color: white;
-  border-radius: 1rem;
-}`;
-'''
-        displayOrder: 4
+          '''return `._id {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+}`;'''
+        displayOrder: 1
         componentName: Html
         props:
-          '''
+          '''const content = args.contextData.gyaanDeepakSettings?.content;
 return {
-  as: "div",
-  "data-animate": "",
-
-  ref: (el) => el && args.fns.animateOnView(el)
-};
-'''
+  as: "h2",
+  text: content?.joinTitle
+};'''
       }
     }
     {
@@ -648,23 +574,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  font-size: 2rem;
-  margin-bottom: 1rem;
-  font-weight: 700;
-}`;
-'''
-        displayOrder: 1
+          '''return `._id {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  opacity: 0.9;
+}`;'''
+        displayOrder: 2
         componentName: Html
         props:
-          '''
-const content = args.contextData.gyaanDeepakSettings?.content;
+          '''const content = args.contextData.gyaanDeepakSettings?.content;
 return {
-  as: "h2",
-  text: content?.joinTitle
-};
-'''
+  as: "p",
+  text: content?.joinText
+};'''
       }
     }
     {
@@ -672,23 +594,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  font-size: 1.2rem;
-  margin-bottom: 2rem;
-  opacity: 0.9;
-}`;
-'''
-        displayOrder: 2
+          '''return `._id {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}`;'''
+        displayOrder: 3
         componentName: Html
         props:
-          '''
-const content = args.contextData.gyaanDeepakSettings?.content;
-return {
-  as: "p",
-  text: content?.joinText
-};
-'''
+          '''return {
+  as: "div"
+};'''
       }
     }
     {
@@ -696,31 +613,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  flex-wrap: wrap;
-}`;
-'''
-        displayOrder: 3
-        componentName: Html
-        props:
-          '''
-return {
-  as: "div"
-};
-'''
-      }
-    }
-    {
-      id: "34"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
+          '''return `._id {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -736,27 +629,23 @@ return `._id {
     transform: translateY(-2px);
     box-shadow: 0 5px 20px rgba(0,0,0,0.2);
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const content = args.contextData.gyaanDeepakSettings?.content;
+          '''const content = args.contextData.gyaanDeepakSettings?.content;
 return {
   as: "a",
   text: content?.whatsappButton
-};
-'''
+};'''
       }
     }
     {
-      id: "35"
+      id: "34"
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -772,25 +661,30 @@ return `._id {
     transform: translateY(-2px);
     box-shadow: 0 5px 20px rgba(0,0,0,0.2);
   }
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const content = args.contextData.gyaanDeepakSettings?.content;
+          '''const content = args.contextData.gyaanDeepakSettings?.content;
 return {
   as: "a",
   text: content?.telegramButton
-};
-'''
+};'''
+      }
+    }
+    {
+      id: "35"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: Layout
       }
     }
   ]
   edges: [
     {
       id: e1
-      T: PageLayout
+      T: Attr
       S: "1"
       E: "2"
     }
@@ -798,199 +692,199 @@ return {
       id: e2
       T: Attr
       S: "1"
-      E: "3"
+      E: "5"
     }
     {
       id: e3
-      T: Attr
+      T: PageLayout
       S: "1"
-      E: "6"
+      E: "35"
     }
     {
       id: e4
       T: Attr
-      S: "3"
-      E: "4"
+      S: "2"
+      E: "3"
     }
     {
       id: e5
       T: Attr
-      S: "3"
-      E: "5"
+      S: "2"
+      E: "4"
     }
     {
       id: e6
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "5"
+      E: "9"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "5"
+      E: "14"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "5"
+      E: "29"
+    }
+    {
+      id: e10
       T: Attr
       S: "6"
       E: "7"
     }
     {
-      id: e7
-      T: Attr
-      S: "6"
-      E: "10"
-    }
-    {
-      id: e8
-      T: Attr
-      S: "6"
-      E: "15"
-    }
-    {
-      id: e9
-      T: Attr
-      S: "6"
-      E: "30"
-    }
-    {
-      id: e10
-      T: Attr
-      S: "7"
-      E: "8"
-    }
-    {
       id: e11
       T: Attr
-      S: "7"
-      E: "9"
+      S: "6"
+      E: "8"
     }
     {
       id: e12
       T: Attr
-      S: "10"
-      E: "11"
+      S: "9"
+      E: "10"
     }
     {
       id: e13
       T: Attr
-      S: "10"
-      E: "12"
+      S: "9"
+      E: "11"
     }
     {
       id: e14
+      T: Attr
+      S: "11"
+      E: "12"
+    }
+    {
+      id: e15
       T: Attr
       S: "12"
       E: "13"
     }
     {
-      id: e15
-      T: Attr
-      S: "13"
-      E: "14"
-    }
-    {
       id: e16
       T: Attr
-      S: "15"
-      E: "16"
+      S: "14"
+      E: "15"
     }
     {
       id: e17
       T: Attr
-      S: "15"
-      E: "17"
+      S: "14"
+      E: "16"
     }
     {
       id: e18
+      T: Attr
+      S: "16"
+      E: "17"
+    }
+    {
+      id: e19
       T: Attr
       S: "17"
       E: "18"
     }
     {
-      id: e19
+      id: e20
+      T: Attr
+      S: "17"
+      E: "23"
+    }
+    {
+      id: e21
       T: Attr
       S: "18"
       E: "19"
     }
     {
-      id: e20
-      T: Attr
-      S: "18"
-      E: "24"
-    }
-    {
-      id: e21
+      id: e22
       T: Attr
       S: "19"
       E: "20"
     }
     {
-      id: e22
-      T: Attr
-      S: "20"
-      E: "21"
-    }
-    {
       id: e23
       T: Attr
-      S: "20"
-      E: "22"
+      S: "19"
+      E: "21"
     }
     {
       id: e24
       T: Attr
-      S: "20"
-      E: "23"
+      S: "19"
+      E: "22"
     }
     {
       id: e25
+      T: Attr
+      S: "23"
+      E: "24"
+    }
+    {
+      id: e26
       T: Attr
       S: "24"
       E: "25"
     }
     {
-      id: e26
+      id: e27
       T: Attr
       S: "25"
       E: "26"
     }
     {
-      id: e27
-      T: Attr
-      S: "26"
-      E: "27"
-    }
-    {
       id: e28
       T: Attr
-      S: "26"
-      E: "28"
+      S: "25"
+      E: "27"
     }
     {
       id: e29
       T: Attr
-      S: "26"
-      E: "29"
+      S: "25"
+      E: "28"
     }
     {
       id: e30
       T: Attr
-      S: "30"
-      E: "31"
+      S: "29"
+      E: "30"
     }
     {
       id: e31
       T: Attr
-      S: "30"
-      E: "32"
+      S: "29"
+      E: "31"
     }
     {
       id: e32
       T: Attr
-      S: "30"
-      E: "33"
+      S: "29"
+      E: "32"
     }
     {
       id: e33
       T: Attr
-      S: "33"
-      E: "34"
+      S: "32"
+      E: "33"
     }
     {
       id: e34
       T: Attr
-      S: "33"
-      E: "35"
+      S: "32"
+      E: "34"
     }
   ]
 }

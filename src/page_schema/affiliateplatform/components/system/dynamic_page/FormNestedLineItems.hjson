@@ -1,0 +1,697 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: FormNestedLineItems
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''return [
+  `._id.fm-nested-line-items {
+  display: flex;
+  flex-direction: column;
+  gap: ${args.theme.var.spacing.sm};
+  width: 100%;
+}`,
+  `._id.fm-nested-line-items .fm-nested-line-header-row,
+._id.fm-nested-line-items .fm-nested-line-row {
+  display: grid;
+  grid-template-columns: var(--fm-nl-cols, minmax(4rem, 1fr));
+  gap: ${args.theme.var.spacing.sm};
+}`,
+  `._id.fm-nested-line-items .fm-nested-line-header-row {
+  align-items: center;
+}`,
+  `._id.fm-nested-line-items .fm-nested-line-row {
+  align-items: end;
+}`,
+  `._id.fm-nested-line-items .fm-nested-line-cell {
+  min-width: 0;
+  width: 100%;
+}`,
+  `._id.fm-nested-line-items .fm-nested-line-row:focus-within {
+  position: relative;
+  z-index: 4;
+}`,
+  `._id.fm-nested-line-items .ts-dropdown .ts-dropdown-content {
+  max-height: min(50vh, 20rem);
+}`
+];'''
+        displayOrder: 1
+        fns:
+          '''const getProps = () => args.contextData.props || {};
+const getField = () => getProps().field || {};
+const getNestedLineItemsConfig = () => getField().nestedLineItemsConfig || {};
+
+const getColumns = () => {
+  const nestedLineItemsConfig = getNestedLineItemsConfig();
+  const lineColumns = nestedLineItemsConfig.lineColumns;
+  return Array.isArray(lineColumns) ? lineColumns : [];
+};
+
+const gridTemplateColumns = () => {
+  const columnDefinitions = getColumns();
+  if (columnDefinitions.length === 0) return "minmax(4rem, 1fr)";
+  return columnDefinitions
+    .map((columnDef) =>
+      columnDef.gridMinmax != null && String(columnDef.gridMinmax).trim() !== ""
+        ? String(columnDef.gridMinmax).trim()
+        : "minmax(5rem, 1fr)",
+    )
+    .join(" ");
+};
+
+const getColumnSelectOptions = (columnDef) => {
+  if (!columnDef || columnDef.columnType !== "select") return [];
+  const nestedLineItemsConfig = getNestedLineItemsConfig();
+  const optionsSourceKey = columnDef.optionsKey || "options";
+  const optionsFromConfig =
+    nestedLineItemsConfig[optionsSourceKey] != null
+      ? nestedLineItemsConfig[optionsSourceKey]
+      : columnDef.options;
+  return Array.isArray(optionsFromConfig) ? optionsFromConfig : [];
+};
+
+const showInventoryColumn = (columnDef, rowVertex) => {
+  if (!columnDef || columnDef.columnType !== "inventory") return false;
+  const nestedLineItemsConfig = getNestedLineItemsConfig();
+  if (!nestedLineItemsConfig.childToInventoryRelationshipType) return false;
+  const visibilityFieldKey = columnDef.showWhenField;
+  const visibilityValues = columnDef.showWhenValues;
+  if (
+    visibilityFieldKey != null &&
+    String(visibilityFieldKey).trim() !== "" &&
+    Array.isArray(visibilityValues) &&
+    visibilityValues.length > 0
+  ) {
+    const propertyValue = rowVertex?.P?.[visibilityFieldKey];
+    const normalizedPropertyValue = String(propertyValue ?? "").trim().toLowerCase();
+    return visibilityValues.some(
+      (allowedValue) => String(allowedValue).trim().toLowerCase() === normalizedPropertyValue,
+    );
+  }
+  return true;
+};
+
+const resolveLineRowVertex = (lineEntryContext) => {
+  const lineVertexId = lineEntryContext?.row?.id;
+  if (lineVertexId && args.graph.vertexes[lineVertexId]) return args.graph.vertexes[lineVertexId];
+  return lineEntryContext?.row;
+};
+
+const sortedLineVertices = () => getProps().getRows?.() || [];
+
+const rowEntries = () => {
+  const lineVertices = sortedLineVertices();
+  return lineVertices.map((lineVertex, lineIndex) => ({ row: lineVertex, index: lineIndex }));
+};
+
+const ensureTxn = () => getProps().ensureTxn?.();
+
+const detachAndDeleteLineVertex = (lineVertex) => {
+  const txnId = ensureTxn();
+  if (!txnId || !lineVertex?.id) return;
+  const lineVertexId = lineVertex.id;
+  const collectEdgeIds = (vertex) => {
+    const allEdgeIds = [];
+    if (vertex?.OUT) {
+      for (const relationshipType of Object.keys(vertex.OUT)) {
+        const outgoingEdgeIds = vertex.OUT[relationshipType];
+        if (Array.isArray(outgoingEdgeIds)) allEdgeIds.push(...outgoingEdgeIds);
+      }
+    }
+    if (vertex?.IN) {
+      for (const relationshipType of Object.keys(vertex.IN)) {
+        const incomingEdgeIds = vertex.IN[relationshipType];
+        if (Array.isArray(incomingEdgeIds)) allEdgeIds.push(...incomingEdgeIds);
+      }
+    }
+    return allEdgeIds;
+  };
+  let detachPassCount = 0;
+  while (detachPassCount++ < 80) {
+    const vertexFromGraph = args.graph.vertexes[lineVertexId];
+    if (!vertexFromGraph) return;
+    const edgeIdsToRemove = collectEdgeIds(vertexFromGraph);
+    if (edgeIdsToRemove.length === 0) break;
+    for (let edgeIndex = 0; edgeIndex < edgeIdsToRemove.length; edgeIndex++) {
+      args.deleteEdge(txnId, edgeIdsToRemove[edgeIndex], args.graph, args.setGraph);
+    }
+  }
+  args.deleteVertex(txnId, lineVertexId, args.graph, args.setGraph);
+};
+
+const setInventoryItemId = (lineVertex, inventoryItemVertexId) => {
+  const txnId = ensureTxn();
+  if (!txnId || !lineVertex?.id) return;
+  const nestedLineItemsConfig = getNestedLineItemsConfig();
+  const inventoryRelationshipType = nestedLineItemsConfig.childToInventoryRelationshipType;
+  if (!inventoryRelationshipType) return;
+  const lineVertexFresh = args.graph.vertexes[lineVertex.id] || lineVertex;
+  const existingInventoryEdgeIds = lineVertexFresh.OUT?.[inventoryRelationshipType];
+  if (Array.isArray(existingInventoryEdgeIds)) {
+    for (const existingEdgeId of [...existingInventoryEdgeIds]) {
+      args.deleteEdge(txnId, existingEdgeId, args.graph, args.setGraph);
+    }
+  }
+  const trimmedInventoryId = inventoryItemVertexId != null ? String(inventoryItemVertexId).trim() : "";
+  if (trimmedInventoryId && args.graph.vertexes[trimmedInventoryId]) {
+    const newInventoryEdgeId = args.generateNewVertexId(args.graph, args.setGraph);
+    const newInventoryEdge = args.newEdge(
+      newInventoryEdgeId,
+      inventoryRelationshipType,
+      {},
+      lineVertexFresh.id,
+      trimmedInventoryId,
+    );
+    args.addNewEdge(txnId, newInventoryEdge, args.graph, args.setGraph);
+  }
+};
+
+const patchLineP = (lineIndex, patch) => {
+  const lines = sortedLineVertices();
+  const lineVertex = lines[lineIndex];
+  if (!lineVertex?.id) return;
+  const txnId = ensureTxn();
+  if (!txnId) return;
+  if (patch && typeof patch === "object" && Object.keys(patch).length > 0) {
+    args.mergeVertexProperties(txnId, lineVertex.id, args.graph, args.setGraph, patch);
+  }
+};
+
+const patchCell = (lineIndex, columnDef, cellValue) => {
+  if (!columnDef) return;
+  if (columnDef.columnType === "inventory") {
+    const lines = sortedLineVertices();
+    const lineVertex = lines[lineIndex];
+    if (!lineVertex?.id) return;
+    const txnId = ensureTxn();
+    if (!txnId) return;
+    const lineVertexForInventory = args.graph.vertexes[lineVertex.id] || lineVertex;
+    setInventoryItemId(lineVertexForInventory, cellValue);
+    return;
+  }
+  if (columnDef.columnType === "actions") return;
+  if (!columnDef.key || String(columnDef.key).startsWith("_")) return;
+  const propertyPatch = { [columnDef.key]: cellValue };
+  patchLineP(lineIndex, propertyPatch);
+};
+
+const inventoryValueForLine = (rowVertex) => {
+  if (!rowVertex?.id) return "";
+  const lineVertexFromGraph = args.graph.vertexes[rowVertex.id] || rowVertex;
+  const nestedLineItemsConfig = getNestedLineItemsConfig();
+  const inventoryRelationshipType = nestedLineItemsConfig.childToInventoryRelationshipType;
+  const inventoryTargetLabel = nestedLineItemsConfig.inventoryTargetLabel || "InventoryItem";
+  if (!inventoryRelationshipType || !lineVertexFromGraph.OUT?.[inventoryRelationshipType]) return "";
+  const inventoryEdgeIds = lineVertexFromGraph.OUT[inventoryRelationshipType];
+  for (let edgeIndex = 0; edgeIndex < inventoryEdgeIds.length; edgeIndex++) {
+    const edge = args.graph.edges[inventoryEdgeIds[edgeIndex]];
+    if (!edge) continue;
+    const targetVertex = args.graph.vertexes[edge.E];
+    if (targetVertex?.L?.includes(inventoryTargetLabel)) return edge.E;
+  }
+  return "";
+};
+
+const addRow = () => {
+  const parentVertex = getProps().getParentVertex?.();
+  if (!parentVertex?.id) return;
+  const txnId = ensureTxn();
+  if (!txnId) return;
+  const nestedLineItemsConfig = getNestedLineItemsConfig();
+  const childLabel = nestedLineItemsConfig.childLabel;
+  const parentToChildRelationshipType = nestedLineItemsConfig.parentToChildRelationshipType;
+  const parentElementIdPropertyKey = nestedLineItemsConfig.parentElementIdPropOnChild;
+  if (!childLabel || !parentToChildRelationshipType || !parentElementIdPropertyKey) return;
+  const displayOrder = Date.now();
+  const newLineProperties = { [parentElementIdPropertyKey]: parentVertex.id, displayOrder };
+  const columnDefinitions = getColumns();
+  for (let columnIndex = 0; columnIndex < columnDefinitions.length; columnIndex++) {
+    const columnDef = columnDefinitions[columnIndex];
+    if (!columnDef || columnDef.columnType === "actions" || columnDef.columnType === "inventory") continue;
+    if (!columnDef.key || String(columnDef.key).startsWith("_")) continue;
+    if (columnDef.defaultValue !== undefined) newLineProperties[columnDef.key] = columnDef.defaultValue;
+  }
+  const defaultNewLinePropertiesOverlay = nestedLineItemsConfig.defaultNewLineProperties;
+  if (defaultNewLinePropertiesOverlay && typeof defaultNewLinePropertiesOverlay === "object") {
+    for (const propertyKey of Object.keys(defaultNewLinePropertiesOverlay)) {
+      newLineProperties[propertyKey] = defaultNewLinePropertiesOverlay[propertyKey];
+    }
+  }
+  const newLineVertexId = args.generateNewVertexId(args.graph, args.setGraph);
+  const newLineVertex = args.newVertex(newLineVertexId, [childLabel], newLineProperties);
+  args.addNewVertex(txnId, newLineVertex, args.graph, args.setGraph);
+  const newParentToChildEdgeId = args.generateNewVertexId(args.graph, args.setGraph);
+  const parentToChildEdge = args.newEdge(
+    newParentToChildEdgeId,
+    parentToChildRelationshipType,
+    {},
+    parentVertex.id,
+    newLineVertexId,
+  );
+  args.addNewEdge(txnId, parentToChildEdge, args.graph, args.setGraph);
+};
+
+const removeRow = (lineIndex) => {
+  const lines = sortedLineVertices();
+  const lineVertexToRemove = lines[lineIndex];
+  if (!lineVertexToRemove) return;
+  if (lineVertexToRemove.id) getProps().markDeleted?.(lineVertexToRemove.id);
+  detachAndDeleteLineVertex(lineVertexToRemove);
+};
+
+const selectFallback = (columnDef, selectedValueRaw) => {
+  if (selectedValueRaw != null && String(selectedValueRaw).trim() !== "") return String(selectedValueRaw).trim();
+  if (
+    columnDef.selectFallbackValue != null &&
+    String(columnDef.selectFallbackValue).trim() !== ""
+  ) {
+    return String(columnDef.selectFallbackValue).trim();
+  }
+  if (columnDef.defaultValue !== undefined) return String(columnDef.defaultValue);
+  return "";
+};
+
+return {
+  getField,
+  getNestedLineItemsConfig,
+  getColumns,
+  gridTemplateColumns,
+  getColumnSelectOptions,
+  showInventoryColumn,
+  rowEntries,
+  patchCell,
+  patchLineP,
+  inventoryValueForLine,
+  addRow,
+  removeRow,
+  selectFallback,
+  resolveLineRowVertex,
+  isDisabled: () => getProps().disabled === true
+};'''
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  class: "fm-nested-line-items"
+};'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''return {
+  variant: "secondary",
+  text: "Add line",
+  type: "button",
+  disabled: args.fns.isDisabled(),
+  onClick: () => args.fns.addRow()
+};'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''return `._id.fm-nested-line-table {
+  width: 100%;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.375rem;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  class: "fm-nested-line-table",
+  style: { "--fm-nl-cols": args.fns.gridTemplateColumns() }
+};'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''return `._id.fm-nested-line-header-row {
+  padding: ${args.theme.var.spacing.sm};
+  background: ${args.theme.var.color.background_light_100};
+  border-bottom: 1px solid ${args.theme.var.color.border};
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text_light_500};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  class: "fm-nested-line-header-row",
+  role: "row"
+};'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  loop: true,
+  contextName: "nestedLineColumn",
+  data: () => args.fns.getColumns()
+};'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const columnDef = args.contextData.nestedLineColumn;
+const isActionsColumn = columnDef && columnDef.columnType === "actions";
+const headerText = columnDef && columnDef.label != null ? String(columnDef.label) : "";
+const headerLabelProps = { as: "span", text: headerText };
+if (isActionsColumn && headerText === "") headerLabelProps["aria-hidden"] = true;
+return headerLabelProps;'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        contextName: lineEntry
+        css:
+          '''return `._id {
+  width: 100%;
+}`;'''
+        loop: true
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  data: () => args.fns.rowEntries()
+};'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''return `._id.fm-nested-line-row {
+  padding: ${args.theme.var.spacing.sm};
+  border-bottom: 1px solid ${args.theme.var.color.border};
+}
+._id.fm-nested-line-row:last-child {
+  border-bottom: none;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const lineEntryContext = args.contextData.lineEntry;
+return {
+  as: "div",
+  class: "fm-nested-line-row",
+  hide: !lineEntryContext
+};'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  loop: true,
+  contextName: "nestedLineColumn",
+  data: () => args.fns.getColumns()
+};'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  class: "fm-nested-line-cell"
+};'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: TomSelect
+        props:
+          '''const columnDef = args.contextData.nestedLineColumn;
+const lineEntryContext = args.contextData.lineEntry;
+const resolvedLineVertex = args.fns.resolveLineRowVertex(lineEntryContext);
+const lineIndex = lineEntryContext?.index ?? 0;
+return {
+  options: args.fns.getColumnSelectOptions(columnDef),
+  value: resolvedLineVertex?.P?.[columnDef.key] != null ? String(resolvedLineVertex.P[columnDef.key]) : "",
+  onChange: (nextValue) =>
+    args.fns.patchCell(lineIndex, columnDef, args.fns.selectFallback(columnDef, nextValue)),
+  placeholder: columnDef.placeholder || columnDef.label || "",
+  disabled: args.fns.isDisabled(),
+  hide: !columnDef || columnDef.columnType !== "select"
+};'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: TextInput
+        props:
+          '''const columnDef = args.contextData.nestedLineColumn;
+const lineEntryContext = args.contextData.lineEntry;
+const resolvedLineVertex = args.fns.resolveLineRowVertex(lineEntryContext);
+const lineIndex = lineEntryContext?.index ?? 0;
+return {
+  type: "text",
+  value: resolvedLineVertex?.P?.[columnDef.key] != null ? String(resolvedLineVertex.P[columnDef.key]) : "",
+  placeholder: columnDef.placeholder || columnDef.label || "",
+  disabled: args.fns.isDisabled(),
+  hide: !columnDef || columnDef.columnType !== "text",
+  onChange: (inputEvent) => args.fns.patchCell(lineIndex, columnDef, inputEvent.target.value)
+};'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: TextInput
+        props:
+          '''const columnDef = args.contextData.nestedLineColumn;
+const lineEntryContext = args.contextData.lineEntry;
+const resolvedLineVertex = args.fns.resolveLineRowVertex(lineEntryContext);
+const lineIndex = lineEntryContext?.index ?? 0;
+return {
+  type: "number",
+  value: resolvedLineVertex?.P?.[columnDef.key] != null ? resolvedLineVertex.P[columnDef.key] : "",
+  placeholder: columnDef.placeholder || columnDef.label || "",
+  min: columnDef.min != null ? columnDef.min : 0,
+  step: columnDef.step != null ? columnDef.step : 0.01,
+  disabled: args.fns.isDisabled(),
+  hide: !columnDef || columnDef.columnType !== "number",
+  onChange: (inputEvent) =>
+    args.fns.patchCell(
+      lineIndex,
+      columnDef,
+      inputEvent.target.value === "" ? "" : Number(inputEvent.target.value),
+    )
+};'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: TomSelect
+        props:
+          '''const columnDef = args.contextData.nestedLineColumn;
+const lineEntryContext = args.contextData.lineEntry;
+const resolvedLineVertex = args.fns.resolveLineRowVertex(lineEntryContext);
+const lineIndex = lineEntryContext?.index ?? 0;
+const inventorySelectConfig = args.fns.getNestedLineItemsConfig().inventorySelectConfig || {};
+const labelFieldName = inventorySelectConfig.labelField || "partNo";
+const tomSelectLabelKey = String(labelFieldName).includes(".")
+  ? String(labelFieldName)
+  : "P." + labelFieldName;
+const linkedInventoryVertexId = resolvedLineVertex
+  ? args.fns.inventoryValueForLine(resolvedLineVertex)
+  : "";
+return {
+  functionName: "getUserVertices",
+  value: linkedInventoryVertexId ? String(linkedInventoryVertexId) : "",
+  onChange: (nextInventoryId) => args.fns.patchCell(lineIndex, columnDef, nextInventoryId || ""),
+  singularName: inventorySelectConfig.singularName || "Part",
+  pluralName: inventorySelectConfig.pluralName || "Parts",
+  valueKey: "id",
+  labelKey: tomSelectLabelKey,
+  functionContext: {
+    label: inventorySelectConfig.label || "InventoryItem",
+    search: inventorySelectConfig.search || "",
+    limit: inventorySelectConfig.limit || 200,
+    relationshipType: inventorySelectConfig.relationshipType,
+    enableUserScoping: inventorySelectConfig.enableUserScoping === true
+  },
+  placeholder: columnDef.placeholder || inventorySelectConfig.singularName || "Inventory",
+  disabled: args.fns.isDisabled(),
+  hide: (functionArguments) => {
+    const columnDefFromContext = functionArguments.contextData.nestedLineColumn;
+    const lineEntryFromContext = functionArguments.contextData.lineEntry;
+    if (!columnDefFromContext || columnDefFromContext.columnType !== "inventory") return true;
+    const resolvedLineVertexForVisibility =
+      functionArguments.fns.resolveLineRowVertex(lineEntryFromContext);
+    return !functionArguments.fns.showInventoryColumn(columnDefFromContext, resolvedLineVertexForVisibility);
+  }
+};'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Button
+        props:
+          '''const columnDef = args.contextData.nestedLineColumn;
+const lineEntryContext = args.contextData.lineEntry;
+const lineIndex = lineEntryContext?.index ?? 0;
+return {
+  variant: "danger",
+  text: "Remove",
+  type: "button",
+  disabled: args.fns.isDisabled(),
+  hide: !columnDef || columnDef.columnType !== "actions",
+  onClick: () => args.fns.removeRow(lineIndex)
+};'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "4"
+      E: "8"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "10"
+      E: "11"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "11"
+      E: "12"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "11"
+      E: "13"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "11"
+      E: "14"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "11"
+      E: "15"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "11"
+      E: "16"
+    }
+  ]
+}

@@ -79,8 +79,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -88,17 +87,14 @@ return `._id {
   overflow: hidden;
   height: 100%;
   background: ${args.theme.var.color.background};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   onMount: () => { void args.fns.loadTableIds?.(); }
-};
-'''
+};'''
       }
     }
     {
@@ -106,8 +102,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -116,8 +111,7 @@ return `._id {
   border-bottom: 1px solid ${args.theme.var.color.border};
   background: ${args.theme.var.color.background_light_100};
   flex-shrink: 0;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props: return { as: "header" };
@@ -128,25 +122,21 @@ return `._id {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   margin: 0;
   font-size: 1rem;
   font-weight: 700;
   color: ${args.theme.var.color.text};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const ids = args.fns.tableIds?.();
+          '''const ids = args.fns.tableIds?.();
 const tableKey = args.fns.getTableKey?.();
 return {
   as: "h2",
   text: ids?.name ? `Table schema — ${ids.name}` : `Table schema — ${tableKey || ""}`
-};
-'''
+};'''
       }
     }
     {
@@ -154,13 +144,11 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   flex-wrap: wrap;
   gap: 0.375rem;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props: return { as: "nav" };
@@ -184,8 +172,7 @@ return `._id {
         displayOrder: 1
         componentName: Button
         props:
-          '''
-const tab = args.contextData.tsesTab;
+          '''const tab = args.contextData.tsesTab;
 const active = args.fns.isTabActive?.(tab.id);
 return {
   variant: active ? "primary" : "secondary",
@@ -193,8 +180,7 @@ return {
   text: tab.label,
   type: "button",
   onClick: () => args.fns.setActiveTab?.(tab.id)
-};
-'''
+};'''
       }
     }
     {
@@ -211,24 +197,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   flex: 1;
   min-height: 0;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   hide: args.fns.loading?.() === true || !args.fns.tableIds?.()
-};
-'''
+};'''
       }
     }
     {
@@ -238,16 +220,14 @@ return {
         displayOrder: 1
         componentName: TableGeneralSchemaEditor
         props:
-          '''
-return {
+          '''return {
   hide: args.fns.isTabActive?.("general") !== true,
   tableKey: args.fns.getTableKey?.(),
   schemaKey: args.fns.getSchemaKeyForTab?.("general"),
   title: "General",
   embeddedMode: args.fns.isEmbeddedMode?.(),
   onSaved: () => args.fns.onSaved?.()
-};
-'''
+};'''
       }
     }
     {
@@ -257,15 +237,13 @@ return {
         displayOrder: 2
         componentName: TableColumnsSchemaEditor
         props:
-          '''
-return {
+          '''return {
   hide: args.fns.isTabActive?.("columns") !== true,
   tableKey: args.fns.getTableKey?.(),
   schemaKey: args.fns.getSchemaKeyForTab?.("columns"),
   title: "Columns",
   onSaved: () => args.fns.onSaved?.()
-};
-'''
+};'''
       }
     }
     {
@@ -275,8 +253,7 @@ return {
         displayOrder: 3
         componentName: TableFormConfigSchemaEditor
         props:
-          '''
-return {
+          '''return {
   hide: args.fns.isTabActive?.("formConfig") !== true,
   isOpen: args.fns.isTabActive?.("formConfig") === true,
   tableKey: args.fns.getTableKey?.(),
@@ -285,8 +262,7 @@ return {
   embeddedMode: args.fns.isEmbeddedMode?.(),
   siteLanguages: args.contextData.props?.siteLanguages,
   onSaved: () => args.fns.onSaved?.()
-};
-'''
+};'''
       }
     }
     {
@@ -296,16 +272,14 @@ return {
         displayOrder: 4
         componentName: TableSidebarSchemaEditor
         props:
-          '''
-return {
+          '''return {
   hide: args.fns.isTabActive?.("sidebar") !== true,
   tableKey: args.fns.getTableKey?.(),
   schemaKey: args.fns.getSchemaKeyForTab?.("sidebar"),
   title: "Sidebar",
   siteLanguages: args.contextData.props?.siteLanguages,
   onSaved: () => args.fns.onSaved?.()
-};
-'''
+};'''
       }
     }
   ]

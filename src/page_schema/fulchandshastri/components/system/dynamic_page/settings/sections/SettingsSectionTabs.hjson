@@ -38,19 +38,15 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   margin-bottom: ${args.theme.var.spacing.lg};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -59,24 +55,20 @@ return {
       P: {
         contextName: tabItem
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   gap: ${args.theme.var.spacing.xs};
   border-bottom: 1px solid ${args.theme.var.color.border};
   margin-bottom: ${args.theme.var.spacing.md};
-}`;
-'''
+}`;'''
         loop: true
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   data: args.fns.getNestedSections()
-};
-'''
+};'''
       }
     }
     {
@@ -84,8 +76,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const tabItem = args.contextData.tabItem;
+          '''const tabItem = args.contextData.tabItem;
 const active = args.fns.getActiveTabId() === tabItem.id;
 return active
   ? `._id {
@@ -110,20 +101,17 @@ return active
 }
 ._id:hover {
   color: ${args.theme.var.color.text};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const tabItem = args.contextData.tabItem;
+          '''const tabItem = args.contextData.tabItem;
 return {
   as: "button",
   type: "button",
   text: tabItem.title || tabItem.id,
   onClick: () => args.fns.setActiveTabId(tabItem.id)
-};
-'''
+};'''
       }
     }
     {
@@ -135,12 +123,10 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   data: args.fns.getNestedSections()
-};
-'''
+};'''
       }
     }
     {
@@ -150,15 +136,13 @@ return {
         displayOrder: 1
         componentName: SettingsSectionRenderer
         props:
-          '''
-const tabPanel = args.contextData.tabPanel;
+          '''const tabPanel = args.contextData.tabPanel;
 const active = args.fns.getActiveTabId() === tabPanel.id;
 return {
   sectionConfig: tabPanel,
   siteLanguages: args.contextData.props?.siteLanguages || [],
   hide: !active
-};
-'''
+};'''
       }
     }
   ]

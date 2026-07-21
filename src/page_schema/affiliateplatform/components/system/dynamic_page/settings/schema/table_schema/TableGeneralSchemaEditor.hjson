@@ -1,0 +1,838 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        dynamicComponent: Button, TextInput, TextArea, LoadingSpinner, Html
+        description: Visual editor for table general schema flags with load/save.
+        fns:
+          '''
+const getProps = () => args.contextData.props || {};
+const getTableKey = () => {
+  const v = getProps().tableKey;
+  return v != null && String(v).trim() !== "" ? String(v).trim() : null;
+};
+const getSchemaKey = () => {
+  const v = getProps().schemaKey;
+  return v != null && String(v).trim() !== "" ? String(v).trim() : null;
+};
+const executeYTOFunction = (fn, ctx) => args.executeNamedServerFunction({ functionName: fn, contextData: ctx || {} });
+
+const BOOL_KEYS = [
+  "publicRead", "showSelection", "hideExportButtons", "hideImportButtons",
+  "enableUserScopingForContent", "enableLocalFilters", "enableLocalSort", "usePolarisUI"
+];
+
+const defaultGeneral = () => ({
+  part: "general",
+  title: "",
+  label: "",
+  icon: "",
+  publicRead: false,
+  showSelection: true,
+  hideExportButtons: false,
+  hideImportButtons: false,
+  enableUserScopingForContent: false,
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  usePolarisUI: false
+});
+
+const [loading, setLoading] = args.createSignal(false);
+const [saving, setSaving] = args.createSignal(false);
+const [schemaData, setSchemaData] = args.createSignal(defaultGeneral());
+const [configJsonText, setConfigJsonText] = args.createSignal("");
+const [jsonError, setJsonError] = args.createSignal("");
+const [editorMode, setEditorMode] = args.createSignal("visual");
+
+const isJsonMode = () => editorMode() === "json";
+const syncJsonFromData = (data) => {
+  setConfigJsonText(JSON.stringify(data && typeof data === "object" ? { ...data } : defaultGeneral(), null, 2));
+  setJsonError("");
+};
+
+const applyLoadedSetting = (setting) => {
+  if (!setting?.P?.config) {
+    setSchemaData(defaultGeneral());
+    syncJsonFromData(defaultGeneral());
+    return;
+  }
+  try {
+    const data = new Function(setting.P.config)();
+    const merged = { ...defaultGeneral(), ...(data || {}), part: "general" };
+    setSchemaData(merged);
+    syncJsonFromData(merged);
+  } catch (error) {
+    setSchemaData(defaultGeneral());
+    setConfigJsonText(String(setting.P.config || ""));
+    setJsonError("Failed to parse stored config");
+  }
+};
+
+const loadSchema = async () => {
+  const schemaKey = getSchemaKey();
+  if (!schemaKey) return;
+  setLoading(true);
+  try {
+    const result = await executeYTOFunction("getTableSchema", { key: schemaKey });
+    if (!result?.result?.success) {
+      args.showErrorToast?.(result?.result?.message || "Failed to load table schema");
+      return;
+    }
+    applyLoadedSetting(result.result.data?.setting);
+  } catch (error) {
+    args.showErrorToast?.("Failed to load table schema");
+  } finally {
+    setLoading(false);
+  }
+};
+
+const patchGeneral = (partial) => {
+  const next = { ...(schemaData() || defaultGeneral()), ...partial, part: "general" };
+  setSchemaData(next);
+  syncJsonFromData(next);
+};
+
+const getValue = (key) => schemaData()?.[key];
+const getBool = (key) => getValue(key) === true;
+
+const saveSchema = async () => {
+  const schemaKey = getSchemaKey();
+  if (!schemaKey) {
+    args.showErrorToast?.("Schema key is missing");
+    return;
+  }
+  setSaving(true);
+  try {
+    const configObj = isJsonMode() ? JSON.parse(configJsonText()) : schemaData();
+    const configBody = `return ${JSON.stringify(configObj, null, 2)};`;
+    const result = await executeYTOFunction("saveTableSchema", {
+      key: schemaKey,
+      tableKey: getTableKey(),
+      part: "general",
+      config: configBody,
+      name: getProps().title || "Table general schema"
+    });
+    if (!result?.result?.success) {
+      args.showErrorToast?.(result?.result?.message || "Failed to save");
+      return;
+    }
+    args.showSuccessToast?.(result.result.message || "Table schema saved");
+    applyLoadedSetting(result.result.data?.setting);
+    getProps().onSaved?.();
+  } catch (error) {
+    args.showErrorToast?.(isJsonMode() ? "Invalid JSON" : "Failed to save table schema");
+  } finally {
+    setSaving(false);
+  }
+};
+
+const setEditorModeSafe = (mode) => {
+  if (mode === "json") syncJsonFromData(schemaData());
+  setEditorMode(mode);
+};
+
+return {
+  loading, saving, isJsonMode, configJsonText, setConfigJsonText, jsonError,
+  loadSchema, saveSchema, setEditorMode: setEditorModeSafe,
+  patchGeneral, getValue, getBool, BOOL_KEYS
+};
+'''
+        key: TableGeneralSchemaEditor
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; height: 100%;
+  background: ${args.theme.var.color.background};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "div", hide: args.contextData.props?.hide === true, onMount: () => { void args.fns.loadSchema?.(); } };
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
+  padding: 0.75rem 1rem; border-bottom: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.background_light_100}; flex-shrink: 0;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "header" };
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0; font-size: 0.9375rem; font-weight: 700; }`;
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "h3", text: args.contextData.props?.title || "Table general" };
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css: return `._id { display: flex; gap: 0.5rem; }`;
+        displayOrder: 2
+        componentName: Html
+        props: return { as: "div" };
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''return {
+  variant: args.fns.isJsonMode?.() ? "secondary" : "primary", size: "sm", text: "Visual", type: "button",
+  onClick: () => args.fns.setEditorMode?.("visual")
+};'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''return {
+  variant: args.fns.isJsonMode?.() ? "primary" : "secondary", size: "sm", text: "JSON", type: "button",
+  onClick: () => args.fns.setEditorMode?.("json")
+};'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Button
+        props:
+          '''return {
+  variant: "primary", size: "sm", text: args.fns.saving?.() ? "Saving..." : "Save", type: "button",
+  disabled: args.fns.saving?.() === true, onClick: () => { void args.fns.saveSchema?.(); }
+};'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: LoadingSpinner
+        props: return { hide: args.fns.loading?.() !== true };
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css: return `._id { flex: 1; min-height: 0; overflow: auto; }`;
+        displayOrder: 3
+        componentName: Html
+        props: return { as: "div", hide: args.fns.loading?.() === true };
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.625rem;
+  padding: 0.75rem 1rem; align-content: start;
+  @media (max-width: 768px) { grid-template-columns: 1fr; }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "div", hide: args.fns.isJsonMode?.() === true };
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: TextInput
+        props:
+          '''return {
+  label: "Title", value: args.fns.getValue?.("title") || "",
+  onChange: (e) => args.fns.patchGeneral?.({ title: e.target.value })
+};'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: TextInput
+        props:
+          '''return {
+  label: "Label", value: args.fns.getValue?.("label") || "",
+  onChange: (e) => args.fns.patchGeneral?.({ label: e.target.value })
+};'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: TextInput
+        props:
+          '''return {
+  label: "Icon", value: args.fns.getValue?.("icon") || "", placeholder: "ph:book-open",
+  onChange: (e) => args.fns.patchGeneral?.({ icon: e.target.value })
+};'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  grid-column: 1 / -1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem;
+  padding: 0.625rem; border: 1px solid ${args.theme.var.color.border}; border-radius: 0.5rem;
+  @media (max-width: 640px) { grid-template-columns: 1fr; }
+}`;'''
+        displayOrder: 4
+        componentName: Html
+        props: return { as: "div" };
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        css: return `._id.tgse-flag { display: flex; align-items: center; gap: 0.375rem; font-size: 0.8125rem; }`;
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "label", class: "tgse-flag" };
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "input", type: "checkbox", checked: args.fns.getBool?.("publicRead"),
+  onChange: (e) => args.fns.patchGeneral?.({ publicRead: e.target.checked })
+};'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props: return { as: "span", text: "Public read" };
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props: return { as: "label", class: "tgse-flag" };
+      }
+    }
+    {
+      id: "20"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "input", type: "checkbox", checked: args.fns.getBool?.("showSelection"),
+  onChange: (e) => args.fns.patchGeneral?.({ showSelection: e.target.checked })
+};'''
+      }
+    }
+    {
+      id: "21"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props: return { as: "span", text: "Show selection" };
+      }
+    }
+    {
+      id: "22"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props: return { as: "label", class: "tgse-flag" };
+      }
+    }
+    {
+      id: "23"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "input", type: "checkbox", checked: args.fns.getBool?.("hideExportButtons"),
+  onChange: (e) => args.fns.patchGeneral?.({ hideExportButtons: e.target.checked })
+};'''
+      }
+    }
+    {
+      id: "24"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props: return { as: "span", text: "Hide export buttons" };
+      }
+    }
+    {
+      id: "25"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        props: return { as: "label", class: "tgse-flag" };
+      }
+    }
+    {
+      id: "26"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "input", type: "checkbox", checked: args.fns.getBool?.("hideImportButtons"),
+  onChange: (e) => args.fns.patchGeneral?.({ hideImportButtons: e.target.checked })
+};'''
+      }
+    }
+    {
+      id: "27"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props: return { as: "span", text: "Hide import buttons" };
+      }
+    }
+    {
+      id: "28"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        props: return { as: "label", class: "tgse-flag" };
+      }
+    }
+    {
+      id: "29"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "input", type: "checkbox", checked: args.fns.getBool?.("enableUserScopingForContent"),
+  onChange: (e) => args.fns.patchGeneral?.({ enableUserScopingForContent: e.target.checked })
+};'''
+      }
+    }
+    {
+      id: "30"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props: return { as: "span", text: "Enable user scoping" };
+      }
+    }
+    {
+      id: "31"
+      L: Attr
+      P: {
+        displayOrder: 6
+        componentName: Html
+        props: return { as: "label", class: "tgse-flag" };
+      }
+    }
+    {
+      id: "32"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "input", type: "checkbox", checked: args.fns.getBool?.("enableLocalFilters"),
+  onChange: (e) => args.fns.patchGeneral?.({ enableLocalFilters: e.target.checked })
+};'''
+      }
+    }
+    {
+      id: "33"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props: return { as: "span", text: "Enable local filters" };
+      }
+    }
+    {
+      id: "34"
+      L: Attr
+      P: {
+        displayOrder: 7
+        componentName: Html
+        props: return { as: "label", class: "tgse-flag" };
+      }
+    }
+    {
+      id: "35"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "input", type: "checkbox", checked: args.fns.getBool?.("enableLocalSort"),
+  onChange: (e) => args.fns.patchGeneral?.({ enableLocalSort: e.target.checked })
+};'''
+      }
+    }
+    {
+      id: "36"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props: return { as: "span", text: "Enable local sort" };
+      }
+    }
+    {
+      id: "37"
+      L: Attr
+      P: {
+        displayOrder: 8
+        componentName: Html
+        props: return { as: "label", class: "tgse-flag" };
+      }
+    }
+    {
+      id: "38"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "input", type: "checkbox", checked: args.fns.getBool?.("usePolarisUI"),
+  onChange: (e) => args.fns.patchGeneral?.({ usePolarisUI: e.target.checked })
+};'''
+      }
+    }
+    {
+      id: "39"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props: return { as: "span", text: "Use Polaris UI" };
+      }
+    }
+    {
+      id: "40"
+      L: Attr
+      P: {
+        css: return `._id { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 0.75rem 1rem; }`;
+        displayOrder: 2
+        componentName: Html
+        props: return { as: "div", hide: args.fns.isJsonMode?.() !== true };
+      }
+    }
+    {
+      id: "41"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: TextArea
+        props:
+          '''return {
+  value: args.fns.configJsonText?.() || "",
+  onInput: (e) => args.fns.setConfigJsonText?.(e.target.value),
+  rows: 24,
+  style: { flex: "1", "min-height": "200px", "font-family": "monospace", "font-size": "0.8125rem" }
+};'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "9"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "10"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "5"
+      E: "7"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "5"
+      E: "8"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "10"
+      E: "11"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "10"
+      E: "40"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "11"
+      E: "12"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "11"
+      E: "13"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "11"
+      E: "14"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "11"
+      E: "15"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "15"
+      E: "16"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "15"
+      E: "19"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "15"
+      E: "22"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "15"
+      E: "25"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "15"
+      E: "28"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "15"
+      E: "31"
+    }
+    {
+      id: e22
+      T: Attr
+      S: "15"
+      E: "34"
+    }
+    {
+      id: e23
+      T: Attr
+      S: "15"
+      E: "37"
+    }
+    {
+      id: e24
+      T: Attr
+      S: "16"
+      E: "17"
+    }
+    {
+      id: e25
+      T: Attr
+      S: "16"
+      E: "18"
+    }
+    {
+      id: e26
+      T: Attr
+      S: "19"
+      E: "20"
+    }
+    {
+      id: e27
+      T: Attr
+      S: "19"
+      E: "21"
+    }
+    {
+      id: e28
+      T: Attr
+      S: "22"
+      E: "23"
+    }
+    {
+      id: e29
+      T: Attr
+      S: "22"
+      E: "24"
+    }
+    {
+      id: e30
+      T: Attr
+      S: "25"
+      E: "26"
+    }
+    {
+      id: e31
+      T: Attr
+      S: "25"
+      E: "27"
+    }
+    {
+      id: e32
+      T: Attr
+      S: "28"
+      E: "29"
+    }
+    {
+      id: e33
+      T: Attr
+      S: "28"
+      E: "30"
+    }
+    {
+      id: e34
+      T: Attr
+      S: "31"
+      E: "32"
+    }
+    {
+      id: e35
+      T: Attr
+      S: "31"
+      E: "33"
+    }
+    {
+      id: e36
+      T: Attr
+      S: "34"
+      E: "35"
+    }
+    {
+      id: e37
+      T: Attr
+      S: "34"
+      E: "36"
+    }
+    {
+      id: e38
+      T: Attr
+      S: "37"
+      E: "38"
+    }
+    {
+      id: e39
+      T: Attr
+      S: "37"
+      E: "39"
+    }
+    {
+      id: e40
+      T: Attr
+      S: "40"
+      E: "41"
+    }
+  ]
+}

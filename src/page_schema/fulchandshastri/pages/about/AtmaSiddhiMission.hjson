@@ -34,19 +34,10 @@ try {
     }
     {
       id: "2"
-      L: PageLayout
-      P: {
-        displayOrder: 1
-        componentName: Layout
-      }
-    }
-    {
-      id: "3"
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   background: linear-gradient(135deg, #2c5f2d 0%, #97bc62 100%);
   color: white;
   padding: 4rem 1rem;
@@ -63,25 +54,21 @@ return `._id {
     bottom: 0;
     background: radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%);
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "section"
-};
-'''
+};'''
       }
     }
     {
-      id: "4"
+      id: "3"
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   font-size: 3rem;
   font-weight: 800;
   margin-bottom: 1rem;
@@ -92,27 +79,23 @@ return `._id {
   @media (max-width: 768px) {
     font-size: 2rem;
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const content = args.contextData.atmaSiddhiMissionSettings?.content;
+          '''const content = args.contextData.atmaSiddhiMissionSettings?.content;
 return {
   as: "h1",
   text: content?.heroTitle
-};
-'''
+};'''
       }
     }
     {
-      id: "5"
+      id: "4"
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   font-size: 1.5rem;
   opacity: 0.9;
   position: relative;
@@ -121,18 +104,33 @@ return `._id {
   @media (max-width: 768px) {
     font-size: 1.2rem;
   }
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const content = args.contextData.atmaSiddhiMissionSettings?.content;
+          '''const content = args.contextData.atmaSiddhiMissionSettings?.content;
 return {
   as: "p",
   text: content?.heroSubtitle
-};
-'''
+};'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 4rem 1rem;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "section"
+};'''
       }
     }
     {
@@ -140,21 +138,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 4rem 1rem;
-}`;
-'''
-        displayOrder: 2
+          '''return `._id {
+  text-align: center;
+  margin-bottom: 4rem;
+}`;'''
+        displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
-  as: "section"
-};
-'''
+          '''return {
+  as: "div",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el)
+};'''
       }
     }
     {
@@ -162,23 +158,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  text-align: center;
-  margin-bottom: 4rem;
-}`;
-'''
+          '''return `._id {
+  font-size: 2.5rem;
+  color: #2c5f2d;
+  margin-bottom: 2rem;
+  font-weight: 700;
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
+          '''const content = args.contextData.atmaSiddhiMissionSettings?.content;
 return {
-  as: "div",
-  "data-animate": "",
-
-  ref: (el) => el && args.fns.animateOnView(el)
-};
-'''
+  as: "h2",
+  text: content?.missionTitle
+};'''
       }
     }
     {
@@ -186,24 +179,21 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  font-size: 2.5rem;
-  color: #2c5f2d;
-  margin-bottom: 2rem;
-  font-weight: 700;
-}`;
-'''
-        displayOrder: 1
+          '''return `._id {
+  font-size: 1.2rem;
+  line-height: 1.8;
+  max-width: 800px;
+  margin: 0 auto;
+  color: ${args.theme.mode === 'dark' ? args.theme.var.color.text_light_200 : args.theme.var.color.text_dark_200};
+}`;'''
+        displayOrder: 2
         componentName: Html
         props:
-          '''
-const content = args.contextData.atmaSiddhiMissionSettings?.content;
+          '''const content = args.contextData.atmaSiddhiMissionSettings?.content;
 return {
-  as: "h2",
-  text: content?.missionTitle
-};
-'''
+  as: "p",
+  text: content?.missionText
+};'''
       }
     }
     {
@@ -211,25 +201,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  font-size: 1.2rem;
-  line-height: 1.8;
-  max-width: 800px;
-  margin: 0 auto;
-  color: ${args.theme.mode === 'dark' ? args.theme.var.color.text_light_200 : args.theme.var.color.text_dark_200};
-}`;
-'''
+          '''return `._id {
+  margin-bottom: 4rem;
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const content = args.contextData.atmaSiddhiMissionSettings?.content;
-return {
-  as: "p",
-  text: content?.missionText
-};
-'''
+          '''return {
+  as: "div",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el)
+};'''
       }
     }
     {
@@ -237,22 +220,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  margin-bottom: 4rem;
-}`;
-'''
-        displayOrder: 2
+          '''return `._id {
+  font-size: 2.5rem;
+  color: #2c5f2d;
+  margin-bottom: 3rem;
+  font-weight: 700;
+}`;'''
+        displayOrder: 1
         componentName: Html
         props:
-          '''
+          '''const content = args.contextData.atmaSiddhiMissionSettings?.content;
 return {
-  as: "div",
-  "data-animate": "",
-
-  ref: (el) => el && args.fns.animateOnView(el)
-};
-'''
+  as: "h2",
+  text: content?.principlesTitle
+};'''
       }
     }
     {
@@ -260,50 +241,21 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  font-size: 2.5rem;
-  color: #2c5f2d;
-  margin-bottom: 3rem;
-  font-weight: 700;
-}`;
-'''
-        displayOrder: 1
+          '''return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
+}`;'''
+        displayOrder: 2
         componentName: Html
         props:
-          '''
-const content = args.contextData.atmaSiddhiMissionSettings?.content;
-return {
-  as: "h2",
-  text: content?.principlesTitle
-};
-'''
+          '''return {
+  as: "div"
+};'''
       }
     }
     {
       id: "12"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 2rem;
-}`;
-'''
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''
-return {
-  as: "div"
-};
-'''
-      }
-    }
-    {
-      id: "13"
       L: Attr
       P: {
         contextName: principle
@@ -311,22 +263,19 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const items = args.contextData.atmaSiddhiMissionSettings?.principle?.principle ?? [];
+          '''const items = args.contextData.atmaSiddhiMissionSettings?.principle?.principle ?? [];
 return {
   as: "fragment",
   data: items
-};
-'''
+};'''
       }
     }
     {
-      id: "14"
+      id: "13"
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   background: ${args.theme.mode === 'dark' ? args.theme.var.color.background_dark_200 : args.theme.var.color.background_light_100};
   padding: 2rem;
   border-radius: 1rem;
@@ -337,21 +286,39 @@ return `._id {
     transform: translateY(-5px);
     box-shadow: 0 10px 30px rgba(0,0,0,0.1);
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const principle = args.contextData.principle;
+          '''const principle = args.contextData.principle;
 const index = args.contextData.index ?? 0;
 return {
   as: "div",
   "data-animate": "",
 
   ref: (el) => el && args.fns.animateOnView(el, { delay: index * 0.08 })
-};
-'''
+};'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 3rem;
+  color: #97bc62;
+  font-weight: 800;
+  margin-bottom: 1rem;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const principle = args.contextData.principle;
+return {
+  as: "div",
+  text: principle.number
+};'''
       }
     }
     {
@@ -359,24 +326,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  font-size: 3rem;
-  color: #97bc62;
-  font-weight: 800;
+          '''return `._id {
+  font-size: 1.5rem;
+  color: #2c5f2d;
   margin-bottom: 1rem;
-}`;
-'''
-        displayOrder: 1
+  font-weight: 700;
+}`;'''
+        displayOrder: 2
         componentName: Html
         props:
-          '''
-const principle = args.contextData.principle;
+          '''const principle = args.contextData.principle;
 return {
-  as: "div",
-  text: principle.number
-};
-'''
+  as: "h3",
+  text: principle.title
+};'''
       }
     }
     {
@@ -384,24 +347,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  font-size: 1.5rem;
-  color: #2c5f2d;
-  margin-bottom: 1rem;
-  font-weight: 700;
-}`;
-'''
-        displayOrder: 2
+          '''return `._id {
+  line-height: 1.6;
+  color: ${args.theme.mode === 'dark' ? args.theme.var.color.text_light_200 : args.theme.var.color.text_dark_200};
+}`;'''
+        displayOrder: 3
         componentName: Html
         props:
-          '''
-const principle = args.contextData.principle;
+          '''const principle = args.contextData.principle;
 return {
-  as: "h3",
-  text: principle.title
-};
-'''
+  as: "p",
+  text: principle.description
+};'''
       }
     }
     {
@@ -409,22 +366,21 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  line-height: 1.6;
-  color: ${args.theme.mode === 'dark' ? args.theme.var.color.text_light_200 : args.theme.var.color.text_dark_200};
-}`;
-'''
+          '''return `._id {
+  background: ${args.theme.mode === 'dark' ? args.theme.var.color.background_dark_200 : args.theme.var.color.background_light_50};
+  padding: 4rem 2rem;
+  border-radius: 1rem;
+  margin-bottom: 4rem;
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-const principle = args.contextData.principle;
-return {
-  as: "p",
-  text: principle.description
-};
-'''
+          '''return {
+  as: "div",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el)
+};'''
       }
     }
     {
@@ -432,25 +388,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  background: ${args.theme.mode === 'dark' ? args.theme.var.color.background_dark_200 : args.theme.var.color.background_light_50};
-  padding: 4rem 2rem;
-  border-radius: 1rem;
-  margin-bottom: 4rem;
-}`;
-'''
-        displayOrder: 3
+          '''return `._id {
+  font-size: 2.5rem;
+  color: #2c5f2d;
+  margin-bottom: 3rem;
+  font-weight: 700;
+}`;'''
+        displayOrder: 1
         componentName: Html
         props:
-          '''
+          '''const content = args.contextData.atmaSiddhiMissionSettings?.content;
 return {
-  as: "div",
-  "data-animate": "",
-
-  ref: (el) => el && args.fns.animateOnView(el)
-};
-'''
+  as: "h2",
+  text: content?.activitiesTitle
+};'''
       }
     }
     {
@@ -458,33 +409,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  font-size: 2.5rem;
-  color: #2c5f2d;
-  margin-bottom: 3rem;
-  font-weight: 700;
-}`;
-'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''
-const content = args.contextData.atmaSiddhiMissionSettings?.content;
-return {
-  as: "h2",
-  text: content?.activitiesTitle
-};
-'''
-      }
-    }
-    {
-      id: "20"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
+          '''return `._id {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 3rem;
@@ -492,20 +417,17 @@ return `._id {
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
-      id: "21"
+      id: "20"
       L: Attr
       P: {
         contextName: activity
@@ -513,73 +435,84 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const items = args.contextData.atmaSiddhiMissionSettings?.activity?.activity ?? [];
+          '''const items = args.contextData.atmaSiddhiMissionSettings?.activity?.activity ?? [];
 return {
   as: "fragment",
   data: items
-};
-'''
+};'''
       }
     }
     {
-      id: "22"
+      id: "21"
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   align-items: flex-start;
   gap: 1.5rem;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const activity = args.contextData.activity;
+          '''const activity = args.contextData.activity;
 const index = args.contextData.index ?? 0;
 return {
   as: "div",
   "data-animate": "",
 
   ref: (el) => el && args.fns.animateOnView(el, { delay: index * 0.08 })
-};
-'''
+};'''
       }
     }
     {
-      id: "23"
+      id: "22"
       L: Attr
       P: {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const activity = args.contextData.activity;
+          '''const activity = args.contextData.activity;
 return {
   as: "icon",
   icon: activity.icon,
   height: 48,
   width: 48,
   style: { color: "#97bc62", flexShrink: 0 }
-};
-'''
+};'''
+      }
+    }
+    {
+      id: "23"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+};'''
       }
     }
     {
       id: "24"
       L: Attr
       P: {
-        displayOrder: 2
+        css:
+          '''return `._id {
+  font-size: 1.3rem;
+  color: #2c5f2d;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}`;'''
+        displayOrder: 1
         componentName: Html
         props:
-          '''
+          '''const activity = args.contextData.activity;
 return {
-  as: "div"
-};
-'''
+  as: "h3",
+  text: activity.title
+};'''
       }
     }
     {
@@ -587,24 +520,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  font-size: 1.3rem;
-  color: #2c5f2d;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-}`;
-'''
-        displayOrder: 1
+          '''return `._id {
+  line-height: 1.6;
+  color: ${args.theme.mode === 'dark' ? args.theme.var.color.text_light_200 : args.theme.var.color.text_dark_200};
+}`;'''
+        displayOrder: 2
         componentName: Html
         props:
-          '''
-const activity = args.contextData.activity;
+          '''const activity = args.contextData.activity;
 return {
-  as: "h3",
-  text: activity.title
-};
-'''
+  as: "p",
+  text: activity.description
+};'''
       }
     }
     {
@@ -612,22 +539,22 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  line-height: 1.6;
-  color: ${args.theme.mode === 'dark' ? args.theme.var.color.text_light_200 : args.theme.var.color.text_dark_200};
-}`;
-'''
-        displayOrder: 2
+          '''return `._id {
+  text-align: center;
+  padding: 3rem;
+  background: linear-gradient(135deg, #97bc62 0%, #2c5f2d 100%);
+  color: white;
+  border-radius: 1rem;
+}`;'''
+        displayOrder: 4
         componentName: Html
         props:
-          '''
-const activity = args.contextData.activity;
-return {
-  as: "p",
-  text: activity.description
-};
-'''
+          '''return {
+  as: "div",
+  "data-animate": "",
+
+  ref: (el) => el && args.fns.animateOnView(el)
+};'''
       }
     }
     {
@@ -635,26 +562,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  text-align: center;
-  padding: 3rem;
-  background: linear-gradient(135deg, #97bc62 0%, #2c5f2d 100%);
-  color: white;
-  border-radius: 1rem;
-}`;
-'''
-        displayOrder: 4
+          '''return `._id {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+}`;'''
+        displayOrder: 1
         componentName: Html
         props:
-          '''
+          '''const content = args.contextData.atmaSiddhiMissionSettings?.content;
 return {
-  as: "div",
-  "data-animate": "",
-
-  ref: (el) => el && args.fns.animateOnView(el)
-};
-'''
+  as: "h2",
+  text: content?.ctaTitle
+};'''
       }
     }
     {
@@ -662,23 +582,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  font-size: 2rem;
-  margin-bottom: 1rem;
-  font-weight: 700;
-}`;
-'''
-        displayOrder: 1
+          '''return `._id {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  opacity: 0.9;
+}`;'''
+        displayOrder: 2
         componentName: Html
         props:
-          '''
-const content = args.contextData.atmaSiddhiMissionSettings?.content;
+          '''const content = args.contextData.atmaSiddhiMissionSettings?.content;
 return {
-  as: "h2",
-  text: content?.ctaTitle
-};
-'''
+  as: "p",
+  text: content?.ctaText
+};'''
       }
     }
     {
@@ -686,32 +602,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  font-size: 1.2rem;
-  margin-bottom: 2rem;
-  opacity: 0.9;
-}`;
-'''
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''
-const content = args.contextData.atmaSiddhiMissionSettings?.content;
-return {
-  as: "p",
-  text: content?.ctaText
-};
-'''
-      }
-    }
-    {
-      id: "30"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
+          '''return `._id {
   display: inline-block;
   background: white;
   color: #2c5f2d;
@@ -725,25 +616,30 @@ return `._id {
     transform: translateY(-2px);
     box-shadow: 0 5px 20px rgba(0,0,0,0.2);
   }
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-const content = args.contextData.atmaSiddhiMissionSettings?.content;
+          '''const content = args.contextData.atmaSiddhiMissionSettings?.content;
 return {
   as: "a",
   text: content?.ctaButton
-};
-'''
+};'''
+      }
+    }
+    {
+      id: "30"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: Layout
       }
     }
   ]
   edges: [
     {
       id: e1
-      T: PageLayout
+      T: Attr
       S: "1"
       E: "2"
     }
@@ -751,169 +647,169 @@ return {
       id: e2
       T: Attr
       S: "1"
-      E: "3"
+      E: "5"
     }
     {
       id: e3
-      T: Attr
+      T: PageLayout
       S: "1"
-      E: "6"
+      E: "30"
     }
     {
       id: e4
       T: Attr
-      S: "3"
-      E: "4"
+      S: "2"
+      E: "3"
     }
     {
       id: e5
       T: Attr
-      S: "3"
-      E: "5"
+      S: "2"
+      E: "4"
     }
     {
       id: e6
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "5"
+      E: "9"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "5"
+      E: "17"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "5"
+      E: "26"
+    }
+    {
+      id: e10
       T: Attr
       S: "6"
       E: "7"
     }
     {
-      id: e7
-      T: Attr
-      S: "6"
-      E: "10"
-    }
-    {
-      id: e8
-      T: Attr
-      S: "6"
-      E: "18"
-    }
-    {
-      id: e9
-      T: Attr
-      S: "6"
-      E: "27"
-    }
-    {
-      id: e10
-      T: Attr
-      S: "7"
-      E: "8"
-    }
-    {
       id: e11
       T: Attr
-      S: "7"
-      E: "9"
+      S: "6"
+      E: "8"
     }
     {
       id: e12
       T: Attr
-      S: "10"
-      E: "11"
+      S: "9"
+      E: "10"
     }
     {
       id: e13
       T: Attr
-      S: "10"
-      E: "12"
+      S: "9"
+      E: "11"
     }
     {
       id: e14
+      T: Attr
+      S: "11"
+      E: "12"
+    }
+    {
+      id: e15
       T: Attr
       S: "12"
       E: "13"
     }
     {
-      id: e15
+      id: e16
       T: Attr
       S: "13"
       E: "14"
     }
     {
-      id: e16
-      T: Attr
-      S: "14"
-      E: "15"
-    }
-    {
       id: e17
       T: Attr
-      S: "14"
-      E: "16"
+      S: "13"
+      E: "15"
     }
     {
       id: e18
       T: Attr
-      S: "14"
-      E: "17"
+      S: "13"
+      E: "16"
     }
     {
       id: e19
       T: Attr
-      S: "18"
-      E: "19"
+      S: "17"
+      E: "18"
     }
     {
       id: e20
       T: Attr
-      S: "18"
-      E: "20"
+      S: "17"
+      E: "19"
     }
     {
       id: e21
+      T: Attr
+      S: "19"
+      E: "20"
+    }
+    {
+      id: e22
       T: Attr
       S: "20"
       E: "21"
     }
     {
-      id: e22
+      id: e23
       T: Attr
       S: "21"
       E: "22"
     }
     {
-      id: e23
-      T: Attr
-      S: "22"
-      E: "23"
-    }
-    {
       id: e24
       T: Attr
-      S: "22"
-      E: "24"
+      S: "21"
+      E: "23"
     }
     {
       id: e25
       T: Attr
-      S: "24"
-      E: "25"
+      S: "23"
+      E: "24"
     }
     {
       id: e26
       T: Attr
-      S: "24"
-      E: "26"
+      S: "23"
+      E: "25"
     }
     {
       id: e27
       T: Attr
-      S: "27"
-      E: "28"
+      S: "26"
+      E: "27"
     }
     {
       id: e28
       T: Attr
-      S: "27"
-      E: "29"
+      S: "26"
+      E: "28"
     }
     {
       id: e29
       T: Attr
-      S: "27"
-      E: "30"
+      S: "26"
+      E: "29"
     }
   ]
 }

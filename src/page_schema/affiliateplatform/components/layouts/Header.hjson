@@ -1,0 +1,573 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        isNoPermissionCheck: true
+        fns:
+          '''
+return {
+  enabled: () => true
+};
+'''
+        key: Header
+        updatedAt: 2026-07-14T16:28:49.859Z
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        contextName: socialLinks
+        as: div
+        css:
+          '''return `._id {
+  margin-top: 0.1rem;
+  display: flex;
+  flex-wrap: wrap;
+}`;'''
+        displayOrder: 1
+        fns: ""
+        componentName: Html
+        props: ""
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  color: #3a2317;
+  font-weight: bold;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const getCurrentLang = () => {
+  const lang = args.params?.lang;
+  if (lang && /^[a-z]{2,3}$/i.test(String(lang))) return String(lang).toLowerCase();
+  return "en";
+};
+return {
+  as: "a",
+  href: `/${getCurrentLang()}`
+};'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  height: 60px;
+  width: auto;
+
+  @media (max-width: 768px) {
+    height: 40px;
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "img",
+  src: "/api/file/downloadCompanySquareLogo",
+  alt: "Affiliate Store",
+  width: 200,
+  height: 60
+};'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0;
+  align-items: center;
+  justify-content: flex-start;
+  flex: 1;
+  min-width: 0;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+};'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Menu
+        props:
+          '''const getCurrentLang = () => {
+  const lang = args.params?.lang;
+  if (lang && /^[a-z]{2,3}$/i.test(String(lang)))
+    return String(lang).toLowerCase();
+  return "en";
+};
+
+const localizeHref = (path) => {
+  if (
+    !path ||
+    path.startsWith("http") ||
+    path.startsWith("mailto:") ||
+    path === "#"
+  )
+    return path;
+  const lang = getCurrentLang();
+  if (path === "/") return `/${lang}`;
+  const normalized = path.startsWith("/") ? path : `/${path}`;
+  return `/${lang}${normalized}`;
+};
+
+const localizeItem = (item) => ({
+  ...item,
+  href: localizeHref(item.href),
+  baseHref: item.href,
+  children: Array.isArray(item.children)
+    ? item.children.map((child) => localizeItem(child))
+    : Array.isArray(item.submenu)
+      ? item.submenu.map((child) => localizeItem(child))
+      : undefined,
+});
+
+const items = [
+  { id: "home", text: "Home", href: "/" },
+  { id: "products", text: "Products", href: "/products" },
+  { id: "contact", text: "Contact", href: "/contact" }
+];
+
+return {
+  items: items.map((item) => localizeItem(item)),
+  triggerColor: "#3a2317",
+  panelBackground: "#f5e6d3",
+  hoverBackground: "rgba(0, 0, 0, 0.1)",
+  activeBorderColor: "#3a2317",
+};'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  padding: 0.5rem;
+  background: none;
+  border: none;
+  color: #3a2317;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  display: flex;
+  align-items: center;
+
+  &:hover {
+    opacity: 0.7;
+  }
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "button",
+  hide: true
+};'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "icon",
+  icon: "carbon:search",
+  width: 20,
+  height: 20
+};'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: LanguageSelector
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: inline-flex;
+  gap: 1rem;
+  align-items: center;
+
+  @media (max-width: 480px) {
+    gap: 0.5rem;
+  }
+}`;'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+};'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        contextName: social
+        css:
+          '''return `._id {
+  display: flex;
+  gap: 0.4rem;
+}`;'''
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const socialLinks = [
+  {
+    id: 5,
+    icon: "selfhst:zoom",
+    href: "https://zoom.us/j/4399270150?pwd=REZOVHVrdGFOc1U1OVg5dWxCVVl2Zz09",
+    title: "Zoom Meeting",
+  },
+  {
+    id: 3,
+    icon: "selfhst:youtube",
+    href: "https://www.youtube.com/channel/UCDkvYtH9ia8xK2_Q821_ILg?app=desktop",
+    title: "YouTube",
+  },
+  {
+    id: 4,
+    icon: "selfhst:whatsapp",
+    href: "https://chat.whatsapp.com/LO7MR4bNNoBHBrq02sA1CG",
+    title: "WhatsApp Group",
+  },
+  {
+    id: 6,
+    icon: "selfhst:gmail-cleaner",
+    href: "mailto:info@fulchandshastri.com",
+    title: "Email",
+  },
+  {
+    id: 1,
+    icon: "selfhst:facebook",
+    href: "https://www.facebook.com/people/Fulchand-Shastri/100000525786302/",
+    title: "Facebook",
+  },
+  {
+    id: 2,
+    icon: "selfhst:instagram",
+    href: "https://www.instagram.com/fulchand_shastri/?hl=en/",
+    title: "Instagram",
+  },
+];
+return {
+  data: socialLinks,
+};'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  transition: opacity 0.2s ease;
+  display: inline-flex;
+  color: ${args.theme.var.color.primary};
+  &:hover {
+    opacity: 0.7;
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const social = args.contextData.social;
+return {
+  as: "a",
+  href: social.href,
+  target: "_blank",
+  rel: "noopener noreferrer",
+  title: social.title
+};'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const social = args.contextData.social;
+return {
+  as: "icon",
+  icon: social.icon,
+  width: 36,
+  height: 36,
+};'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  background: none;
+  color: ${args.theme.var.color.primary};
+  border: none;
+  cursor: pointer;
+  padding: 0;
+
+  transition: opacity 0.2s ease;
+  display: flex;
+
+  &:hover {
+    opacity: 0.7;
+  }
+}`;'''
+        displayOrder: 2
+        fns:
+          '''const [musicPlaying, setMusicPlaying] = args.createSignal(false);
+const [audioRef, setAudioRef] = args.createSignal(null);
+
+return {
+  musicPlaying,
+  setMusicPlaying,
+  audioRef,
+  setAudioRef,
+};'''
+        componentName: Html
+        props:
+          '''return {
+  as: "button",
+  onClick: async () => {
+    const audioElement = args.fns.audioRef();
+
+    if (audioElement) {
+      try {
+        if (args.fns.musicPlaying()) {
+          audioElement.pause();
+        } else {
+          const playPromise = audioElement.play();
+          if (playPromise !== undefined) {
+            await playPromise;
+          }
+        }
+      } catch (error) {
+        console.error("Audio playback error:", error);
+        args.showErrorToast(
+          "Unable to play audio. Please check your browser settings.",
+        );
+      }
+    }
+  },
+};'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "icon",
+  icon: args.fns.musicPlaying() ? "carbon:stop-filled" : "carbon:play-filled",
+  width: 36,
+  height: 36,
+};'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "audio",
+  src: "/audio/au.mp3", // Using local file to avoid CORS issues
+  // loop: true,
+  preload: "auto",
+  onPlay: () => args.fns.setMusicPlaying(true),
+  onPause: () => args.fns.setMusicPlaying(false),
+  onEnded: () => args.fns.setMusicPlaying(false),
+  ref: (el) => {
+    if (el) {
+      args.fns.setAudioRef(el);
+    }
+  },
+};'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: ThemeToggle
+        props:
+          '''return {
+  currentMode: () => args.theme.mode,
+  toggleTheme: () => {
+    args.theme.mode = args.theme.mode === "dark" ? "light" : "dark";
+  }
+};'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+
+}`;'''
+        displayOrder: 6
+        componentName: Html
+        props:
+          '''return {
+  as: "img",
+  src: "https://www.fulchandshastri.com/wp-content/themes/fulchand/include-files/images/guruji.png",
+  alt: "Guruji",
+  width: 60,
+  height: 60
+};'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "5"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "9"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "10"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "2"
+      E: "17"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "2"
+      E: "18"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "5"
+      E: "7"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "10"
+      E: "11"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "10"
+      E: "14"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "11"
+      E: "12"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "12"
+      E: "13"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "14"
+      E: "15"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "14"
+      E: "16"
+    }
+  ]
+}

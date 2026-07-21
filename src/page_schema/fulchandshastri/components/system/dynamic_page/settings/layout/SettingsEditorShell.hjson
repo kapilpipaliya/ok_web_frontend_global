@@ -14,25 +14,21 @@
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   flex-direction: column;
   flex: 1;
   min-height: 0;
   overflow: hidden;
   height: 100%;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   hide: args.contextData.props?.hide === true
-};
-'''
+};'''
       }
     }
     {
@@ -40,22 +36,17 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   gap: 0.25rem;
   padding: 0.5rem 0.75rem;
   border-bottom: 1px solid ${args.theme.var.color.border};
   background: ${args.theme.var.color.background_light_100};
   flex-shrink: 0;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
-        props:
-          '''
-return { as: "div" };
-'''
+        props: return { as: "div" };
       }
     }
     {
@@ -65,8 +56,7 @@ return { as: "div" };
         displayOrder: 1
         componentName: Button
         props:
-          '''
-const isSchemaMode = args.contextData.props?.isSchemaMode;
+          '''const isSchemaMode = args.contextData.props?.isSchemaMode;
 const active = typeof isSchemaMode === "function" ? !isSchemaMode() : isSchemaMode !== true;
 return {
   variant: active ? "primary" : "secondary",
@@ -74,8 +64,7 @@ return {
   text: args.contextData.props?.contentTabLabel || "Content",
   type: "button",
   onClick: () => args.contextData.props?.onSetContentMode?.()
-};
-'''
+};'''
       }
     }
     {
@@ -85,8 +74,7 @@ return {
         displayOrder: 2
         componentName: Button
         props:
-          '''
-const isSchemaMode = args.contextData.props?.isSchemaMode;
+          '''const isSchemaMode = args.contextData.props?.isSchemaMode;
 const active = typeof isSchemaMode === "function" ? isSchemaMode() === true : isSchemaMode === true;
 return {
   variant: active ? "primary" : "secondary",
@@ -94,8 +82,7 @@ return {
   text: args.contextData.props?.schemaTabLabel || "Field schema",
   type: "button",
   onClick: () => args.contextData.props?.onSetSchemaMode?.()
-};
-'''
+};'''
       }
     }
     {
@@ -103,23 +90,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   flex: 1;
   min-height: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const isSchemaMode = args.contextData.props?.isSchemaMode;
+          '''const isSchemaMode = args.contextData.props?.isSchemaMode;
 const hide = typeof isSchemaMode === "function" ? isSchemaMode() === true : isSchemaMode === true;
-return { as: "div", hide };
-'''
+return { as: "div", hide };'''
       }
     }
     {
@@ -127,8 +110,7 @@ return { as: "div", hide };
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   flex: 1;
   min-height: 0;
   display: flex;
@@ -136,14 +118,10 @@ return `._id {
   overflow: hidden;
   height: 100%;
   position: relative;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
-        props:
-          '''
-return { as: "div" };
-'''
+        props: return { as: "div" };
       }
     }
     {
@@ -153,8 +131,7 @@ return { as: "div" };
         displayOrder: 1
         componentName: DynamicPage
         props:
-          '''
-const settingsPageId = args.contextData.props?.settingsPageId;
+          '''const settingsPageId = args.contextData.props?.settingsPageId;
 return {
   key: args.contextData.props?.dynamicPageKey || "settings_editor_dynamic_page",
   pageMode: "settings",
@@ -170,8 +147,7 @@ return {
     idParam: "scopeId"
   },
   hide: !settingsPageId
-};
-'''
+};'''
       }
     }
     {
@@ -179,24 +155,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   flex: 1;
   min-height: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   position: relative;
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-const isSchemaMode = args.contextData.props?.isSchemaMode;
+          '''const isSchemaMode = args.contextData.props?.isSchemaMode;
 const show = typeof isSchemaMode === "function" ? isSchemaMode() === true : isSchemaMode === true;
-return { as: "div", hide: !show };
-'''
+return { as: "div", hide: !show };'''
       }
     }
     {
@@ -206,15 +178,13 @@ return { as: "div", hide: !show };
         displayOrder: 1
         componentName: SettingsPageSchemaEditor
         props:
-          '''
-const settingsPageId = args.contextData.props?.settingsPageId;
+          '''const settingsPageId = args.contextData.props?.settingsPageId;
 return {
   settingsPageId,
   embeddedMode: true,
   siteLanguages: args.contextData.props?.siteLanguages || [],
   onSaved: () => args.contextData.props?.onSchemaSaved?.()
-};
-'''
+};'''
       }
     }
   ]

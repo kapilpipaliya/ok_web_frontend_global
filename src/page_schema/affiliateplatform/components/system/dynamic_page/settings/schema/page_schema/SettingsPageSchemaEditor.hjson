@@ -1,0 +1,1476 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        dynamicComponent: LoadingSpinner, SettingsSchemaToolbar, SettingsSchemaSectionsList, SettingsSchemaSectionEditor, SettingsSchemaJsonPanel
+        description: Visual drag-and-drop editor for settings page schema — sections and fields.
+        fns:
+          '''
+const getSettingsPageId = () => {
+  const fromProps = args.contextData.props?.settingsPageId;
+  if (fromProps != null && String(fromProps).trim() !== "") return String(fromProps).trim();
+  return args.searchParams?.page || "home";
+};
+
+const getSchemaSettingKey = () => {
+  const fromProps = args.contextData.props?.schemaKey;
+  if (fromProps != null && String(fromProps).trim() !== "") return String(fromProps).trim();
+  return `${getSettingsPageId()}_settings_page`;
+};
+
+const getSingleSectionId = () => {
+  const fromProps = args.contextData.props?.singleSectionId;
+  if (fromProps != null && String(fromProps).trim() !== "") return String(fromProps).trim();
+  return null;
+};
+
+const isSingleSectionMode = () => getSingleSectionId() != null;
+
+const isEmbeddedMode = () => args.contextData.props?.embeddedMode === true;
+
+const executeYTOFunction = (functionName, contextData) =>
+  args.executeNamedServerFunction({
+    functionName,
+    contextData: contextData || {}
+  });
+
+const SECTION_META_FORM_CONFIG = {
+  gridColumns: 2,
+  groups: [{
+    key: "sectionMeta",
+    title: "",
+    gridColumns: 2,
+    fields: [
+      { key: "title", label: "Section title", dataType: "text", renderer: "text", required: true, colSpan: 1 },
+      { key: "description", label: "Section description", dataType: "text", renderer: "textArea", colSpan: 1 }
+    ]
+  }]
+};
+
+const FIELD_EDITOR_FORM_CONFIG = {
+  gridColumns: 2,
+  groups: [{
+    key: "fieldEditor",
+    title: "",
+    gridColumns: 2,
+    fields: [
+      { key: "key", label: "Field key", dataType: "text", renderer: "text", required: true, colSpan: 1 },
+      { key: "label", label: "Label", dataType: "text", renderer: "text", required: true, colSpan: 1 },
+      {
+        key: "renderer",
+        label: "Renderer",
+        dataType: "select",
+        renderer: "text",
+        options: ["text", "textArea", "checkbox", "fieldArray"],
+        colSpan: 1
+      },
+      { key: "required", label: "Required", dataType: "boolean", renderer: "checkbox", colSpan: 1 },
+      {
+        key: "translatable",
+        label: "Translatable",
+        dataType: "boolean",
+        renderer: "checkbox",
+        colSpan: 1,
+        visible: "ctx.values.renderer === 'text' || ctx.values.renderer === 'textArea'"
+      },
+      { key: "colSpan", label: "Column span", dataType: "number", renderer: "text", colSpan: 1 }
+    ]
+  }]
+};
+
+const [loading, setLoading] = args.createSignal(false);
+const [saving, setSaving] = args.createSignal(false);
+const [pageMeta, setPageMeta] = args.createSignal(null);
+const [sections, setSections] = args.createSignal([]);
+const [selectedSectionId, setSelectedSectionId] = args.createSignal(null);
+const [selectedFieldIndex, setSelectedFieldIndex] = args.createSignal(null);
+const [isDirty, setIsDirty] = args.createSignal(false);
+const [editorMode, setEditorModeSignal] = args.createSignal("visual");
+const [configJsonText, setConfigJsonText] = args.createSignal("");
+const [jsonError, setJsonError] = args.createSignal("");
+const [draggedSectionIndex, setDraggedSectionIndex] = args.createSignal(null);
+const [dragOverSectionIndex, setDragOverSectionIndex] = args.createSignal(null);
+const [draggedFieldIndex, setDraggedFieldIndex] = args.createSignal(null);
+const [dragOverFieldIndex, setDragOverFieldIndex] = args.createSignal(null);
+const [fieldDropInstruction, setFieldDropInstruction] = args.createSignal(null);
+const [fieldDragSource, setFieldDragSource] = args.createSignal(null);
+const [dragOverSectionIdForField, setDragOverSectionIdForField] = args.createSignal(null);
+const sectionDragCleanups = new Map();
+const fieldDragCleanups = new Map();
+const [sectionMetaVertex, setSectionMetaVertex] = args.createSignal(null);
+const [fieldEditorVertex, setFieldEditorVertex] = args.createSignal(null);
+
+const buildInitialVertex = (values) => {
+  const vertexId = args.generateNewVertexId(args.graph, args.setGraph);
+  args.addNewVertex(0, {
+    id: vertexId,
+    L: ["SettingsSchemaFormData"],
+    P: { ...(values || {}) },
+    IN: {},
+    OUT: {}
+  }, args.graph, args.setGraph);
+  return args.graph.vertexes[vertexId];
+};
+
+const DEFAULT_SITE_LANGUAGES = [
+  { code: "en", label: "English", isDefault: true },
+  { code: "hi", label: "Hindi", isDefault: false },
+  { code: "gu", label: "Gujarati", isDefault: false }
+];
+
+const getSiteLanguages = () => {
+  const languages = args.contextData.props?.siteLanguages;
+  if (Array.isArray(languages) && languages.length > 0) return languages;
+  return DEFAULT_SITE_LANGUAGES;
+};
+
+const isTextRenderer = (renderer) => renderer === "text" || renderer === "textArea";
+
+const fieldValuesToFormP = (field) => {
+  const renderer = field?.renderer || "text";
+  return {
+    key: field?.key || "",
+    label: field?.label || "",
+    renderer,
+    required: field?.required === true,
+    translatable: field?.translatable === true,
+    colSpan: field?.colSpan ?? 1
+  };
+};
+
+const formPToFieldPatch = (formP, existingField) => {
+  const renderer = formP.renderer || "text";
+  const isTextField = isTextRenderer(renderer);
+  const translatable = isTextField && formP.translatable === true;
+  const patch = {
+    key: formP.key,
+    label: formP.label,
+    renderer,
+    required: formP.required === true,
+    translatable,
+    colSpan: Number(formP.colSpan) || 1,
+    dataType: renderer === "fieldArray" ? "array" : renderer === "checkbox" ? "boolean" : "text"
+  };
+  if (renderer === "fieldArray") {
+    patch.fieldArrayConfig = existingField?.fieldArrayConfig || {
+      itemLabel: "Item",
+      addButtonLabel: "Add item",
+      itemFields: [
+        { key: "title", label: "Title", dataType: "text", renderer: "text", required: true, translatable: true }
+      ]
+    };
+  }
+  return patch;
+};
+
+
+const syncSectionMetaVertex = () => {
+  const section = getSelectedSection();
+  if (!section) {
+    if (sectionMetaVertex()) setSectionMetaVertex(null);
+    return;
+  }
+  const values = {
+    title: section.title || "",
+    description: section.description || ""
+  };
+  const existing = sectionMetaVertex();
+  if (existing?.id) {
+    const current = existing.P || {};
+    if (current.title === values.title && current.description === values.description) return;
+    args.mergeVertexProperties(0, existing.id, args.graph, args.setGraph, values);
+    setSectionMetaVertex({ ...existing, P: { ...values } });
+    return;
+  }
+  setSectionMetaVertex(buildInitialVertex(values));
+};
+
+const syncFieldEditorVertex = () => {
+  const field = getSelectedField();
+  if (!field) {
+    if (fieldEditorVertex()) setFieldEditorVertex(null);
+    return;
+  }
+  const values = fieldValuesToFormP(field);
+  const existing = fieldEditorVertex();
+  if (existing?.id) {
+    const current = existing.P || {};
+    const unchanged = Object.keys(values).every((key) => current[key] === values[key]);
+    if (unchanged) return;
+    args.mergeVertexProperties(0, existing.id, args.graph, args.setGraph, values);
+    setFieldEditorVertex({ ...existing, P: { ...values } });
+    return;
+  }
+  setFieldEditorVertex(buildInitialVertex(values));
+};
+
+const selectSection = (sectionId) => {
+  if (selectedSectionId() === sectionId && selectedFieldIndex() == null) return;
+  setSelectedSectionId(sectionId);
+  setSelectedFieldIndex(null);
+  setFieldEditorVertex(null);
+  syncSectionMetaVertex();
+};
+
+const selectField = (fieldIndex) => {
+  if (selectedFieldIndex() === fieldIndex) return;
+  setSelectedFieldIndex(fieldIndex);
+  syncFieldEditorVertex();
+};
+
+const selectSectionForFieldDrop = (sectionId) => {
+  if (!sectionId || selectedSectionId() === sectionId) return;
+  setSelectedSectionId(sectionId);
+  setSelectedFieldIndex(null);
+  setFieldEditorVertex(null);
+  syncSectionMetaVertex();
+};
+
+const clearFieldDragState = () => {
+  cancelPendingFieldDropClear();
+  setFieldDragSource(null);
+  setDraggedFieldIndex(null);
+  setDragOverFieldIndex(null);
+  setFieldDropInstruction(null);
+  setDragOverSectionIdForField(null);
+};
+
+let pendingFieldDropClearRaf = null;
+
+const cancelPendingFieldDropClear = () => {
+  if (pendingFieldDropClearRaf != null) {
+    cancelAnimationFrame(pendingFieldDropClearRaf);
+    pendingFieldDropClearRaf = null;
+  }
+};
+
+const scheduleFieldDropInstructionClear = () => {
+  cancelPendingFieldDropClear();
+  pendingFieldDropClearRaf = requestAnimationFrame(() => {
+    pendingFieldDropClearRaf = null;
+    setFieldDropInstruction(null);
+  });
+};
+
+const updateFieldDropInstruction = (self, targetIndex) => {
+  if (!args.extractInstruction) return;
+  const instruction = args.extractInstruction(self.data);
+  if (
+    instruction?.operation === "reorder-before" ||
+    instruction?.operation === "reorder-after"
+  ) {
+    setFieldDropInstruction({ index: targetIndex, operation: instruction.operation });
+    return;
+  }
+  setFieldDropInstruction(null);
+};
+
+const resolveFieldInsertIndex = (targetIndex, self) => {
+  if (!args.extractInstruction) return targetIndex;
+  const instruction = args.extractInstruction(self?.data);
+  if (instruction?.operation === "reorder-before") return targetIndex;
+  if (instruction?.operation === "reorder-after") return targetIndex + 1;
+  return targetIndex;
+};
+
+const resolveSameSectionInsertIndex = (fromIndex, targetIndex, self) => {
+  let destinationIndex = resolveFieldInsertIndex(targetIndex, self);
+  if (fromIndex < destinationIndex) destinationIndex -= 1;
+  return destinationIndex;
+};
+
+const isFieldDropBefore = (index) => {
+  const instruction = fieldDropInstruction();
+  return instruction?.index === index && instruction?.operation === "reorder-before";
+};
+
+const isFieldDropAfter = (index) => {
+  const instruction = fieldDropInstruction();
+  return instruction?.index === index && instruction?.operation === "reorder-after";
+};
+
+const isFieldListEmptyDrop = () => {
+  const instruction = fieldDropInstruction();
+  const fieldCount = getFieldIndices().length;
+  return fieldCount === 0 && instruction?.index === 0 && instruction?.operation === "reorder-before";
+};
+
+const buildFieldDropTargetData = (data, input, element) => {
+  if (!args.attachInstruction) return data;
+  return args.attachInstruction(data, {
+    input,
+    element,
+    axis: "vertical",
+    operations: {
+      "reorder-before": "available",
+      "reorder-after": "available",
+      combine: "not-available"
+    }
+  });
+};
+
+const applyFieldDrop = (dragSource, targetIndex, self) => {
+  const toSectionId = selectedSectionId();
+  if (!dragSource || !toSectionId || targetIndex == null || targetIndex < 0) return;
+  if (dragSource.sectionId === toSectionId) {
+    const insertIndex = resolveSameSectionInsertIndex(dragSource.index, targetIndex, self);
+    if (dragSource.index === insertIndex) return;
+    reorderFields(dragSource.index, insertIndex);
+    selectField(insertIndex);
+    return;
+  }
+  const insertIndex = resolveFieldInsertIndex(targetIndex, self);
+  moveFieldBetweenSections(dragSource.sectionId, dragSource.index, toSectionId, insertIndex);
+};
+
+const getFieldDragSourceFromEvent = (source) => {
+  const data = source?.data || {};
+  if (data.sectionId && typeof data.index === "number") {
+    return { sectionId: data.sectionId, index: data.index };
+  }
+  return fieldDragSource();
+};
+
+const syncSectionMetaFromForm = () => {
+  const sectionId = selectedSectionId();
+  const formFns = sectionMetaFormFns();
+  const vertexId = formFns?.formVertexId?.();
+  if (!sectionId || !vertexId) return;
+  const formP = args.graph.vertexes[vertexId]?.P || {};
+  const section = getSelectedSection();
+  if (!section) return;
+  const nextTitle = formP.title ?? "";
+  const nextDescription = formP.description ?? "";
+  if (section.title === nextTitle && section.description === nextDescription) return;
+  updateSectionMeta(sectionId, {
+    title: nextTitle,
+    description: nextDescription
+  });
+};
+
+const fieldSchemaMatches = (field, patch) => {
+  if (!field || !patch) return false;
+  const renderer = patch.renderer || "text";
+  const sameArrayConfig =
+    renderer !== "fieldArray"
+      ? true
+      : JSON.stringify(field.fieldArrayConfig ?? null) === JSON.stringify(patch.fieldArrayConfig ?? null);
+  return (
+    field.key === patch.key &&
+    field.label === patch.label &&
+    (field.renderer || "text") === (patch.renderer || "text") &&
+    field.required === patch.required &&
+    (field.translatable === true) === (patch.translatable === true) &&
+    Number(field.colSpan || 1) === Number(patch.colSpan || 1) &&
+    (field.dataType || "text") === (patch.dataType || "text") &&
+    sameArrayConfig
+  );
+};
+
+const onFieldArraySchemaChange = (patch) => {
+  const fieldIndex = selectedFieldIndex();
+  if (fieldIndex == null || fieldIndex < 0) return;
+  const { defaultValue, ...schemaPatch } = patch || {};
+  updateField(fieldIndex, schemaPatch);
+};
+
+const syncFieldFromForm = () => {
+  const fieldIndex = selectedFieldIndex();
+  if (fieldIndex == null || fieldIndex < 0) return;
+  const formFns = fieldEditorFormFns();
+  const vertexId = formFns?.formVertexId?.();
+  if (!vertexId) return;
+  const formP = args.graph.vertexes[vertexId]?.P || {};
+  const existingField = getSelectedField();
+  const patch = formPToFieldPatch(formP, existingField);
+  if (fieldSchemaMatches(existingField, patch)) return;
+  updateField(fieldIndex, patch);
+};
+
+const [sectionMetaFormFns, setSectionMetaFormFns] = args.createSignal(null);
+const [fieldEditorFormFns, setFieldEditorFormFns] = args.createSignal(null);
+
+const registerSectionMetaFormFns = (formFns) => {
+  setSectionMetaFormFns(formFns);
+};
+
+const registerFieldEditorFormFns = (formFns) => {
+  setFieldEditorFormFns(formFns);
+};
+
+
+const slugify = (value) =>
+  String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "") || "section";
+
+const parseSectionsFromConfig = (config) => {
+  const rawSections = Array.isArray(config?.sections) ? config.sections : [];
+  return rawSections.map((section) => {
+    const fields = section?.form?.groups?.[0]?.fields;
+    return {
+      id: section.id || slugify(section.title),
+      title: section.title || section.id || "Section",
+      description: section.description || "",
+      fields: Array.isArray(fields) ? fields.map((field) => { const { defaultValue, ...rest } = field || {}; return { ...rest }; }) : []
+    };
+  });
+};
+
+const fetchSettingsConfig = async () => {
+  return executeYTOFunction("getSettingsPageConfig", {
+    settingsPageId: getSettingsPageId(),
+    key: getSchemaSettingKey(),
+    allowPublicRead: true
+  });
+};
+
+const applyLoadedSetting = (setting) => {
+  const settingsPageId = getSettingsPageId();
+  if (!setting?.P?.config) {
+    setSections([]);
+    setPageMeta({ id: settingsPageId, title: settingsPageId });
+    syncJsonFromVisual();
+    return false;
+  }
+  const configFn = new Function(setting.P.config);
+  const config = configFn();
+  setPageMeta({
+    id: config.id || settingsPageId,
+    route: config.route || `/settings?page=${settingsPageId}`,
+    title: config.title || setting.P.name || settingsPageId,
+    description: config.description || "",
+    version: config.version || 1,
+    scope: config.scope || {
+      vertexLabel: "GlobalSetting",
+      matchProperty: "key",
+      idParam: "scopeId"
+    },
+    saveStrategy: config.saveStrategy || {
+      mode: "section",
+      debounceMs: 1200,
+      autosave: false,
+      showSaveBar: true,
+      warnOnLeave: true
+    },
+    audit: config.audit || {
+      enabled: true,
+      resource: `settings.${settingsPageId}`,
+      includeDiff: true
+    },
+    sidebar: config.sidebar || null
+  });
+  let parsed = parseSectionsFromConfig(config);
+  const singleSectionId = getSingleSectionId();
+  if (singleSectionId) {
+    const match = parsed.find((section) => section.id === singleSectionId);
+    parsed = [match || {
+      id: singleSectionId,
+      title: singleSectionId === "formConfig" ? "Form config" : singleSectionId,
+      description: "",
+      fields: []
+    }];
+  }
+  setSections(parsed);
+  if (parsed.length > 0) {
+    selectSection(parsed[0].id);
+  } else {
+    setSectionMetaVertex(null);
+    setFieldEditorVertex(null);
+  }
+  syncJsonFromVisual();
+  setIsDirty(false);
+  return true;
+};
+
+args.createEffect(() => {
+  if (args.contextData.props?.isOpen === true) {
+    void loadConfig();
+  }
+});
+
+const loadConfig = async () => {
+  const settingsPageId = getSettingsPageId();
+  setLoading(true);
+  try {
+    const result = await fetchSettingsConfig();
+    applyLoadedSetting(result?.result?.data?.setting);
+  } catch (error) {
+    console.error("Failed to load settings config:", error);
+    args.showErrorToast?.("Failed to load settings schema");
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+const getSelectedSection = () => {
+  const id = selectedSectionId();
+  return sections().find((section) => section.id === id) || null;
+};
+
+const getSelectedField = () => {
+  const section = getSelectedSection();
+  const index = selectedFieldIndex();
+  if (!section || index == null || index < 0) return null;
+  return section.fields[index] || null;
+};
+
+const patchSections = (updater) => {
+  const next = typeof updater === "function" ? updater(sections()) : updater;
+  setSections(next);
+  setIsDirty(true);
+};
+
+const addSection = () => {
+  const title = "New section";
+  const id = `${slugify(title)}-${Date.now()}`;
+  patchSections((current) => [
+    ...current,
+    { id, title, description: "", fields: [] }
+  ]);
+  selectSection(id);
+};
+
+const deleteSection = async (sectionId) => {
+  const confirmed = await args.contextData?.confirmContext?.rbConfirm?.({
+    title: "Delete section",
+    message: "Remove this section and all its fields from the schema?",
+    confirmText: "Delete",
+    cancelText: "Cancel",
+    variant: "danger"
+  });
+  if (!confirmed) return;
+  patchSections((current) => current.filter((section) => section.id !== sectionId));
+  if (selectedSectionId() === sectionId) {
+    const remaining = sections().filter((section) => section.id !== sectionId);
+    const nextId = remaining[0]?.id || null;
+    if (nextId) {
+      selectSection(nextId);
+    } else {
+      setSelectedSectionId(null);
+      setSelectedFieldIndex(null);
+      setSectionMetaVertex(null);
+      setFieldEditorVertex(null);
+    }
+  }
+};
+
+const updateSectionMeta = (sectionId, patch) => {
+  patchSections((current) =>
+    current.map((section) =>
+      section.id === sectionId ? { ...section, ...patch } : section
+    )
+  );
+};
+
+const reorderSections = (fromIndex, toIndex) => {
+  if (fromIndex === toIndex) return;
+  patchSections((current) => {
+    const next = [...current];
+    const [moved] = next.splice(fromIndex, 1);
+    next.splice(toIndex, 0, moved);
+    return next;
+  });
+};
+
+// Stable numeric indices for loop data so Solid <For> does not remount rows on each render.
+const getSectionIndices = () => {
+  const list = sections();
+  const indices = [];
+  for (let index = 0; index < list.length; index++) {
+    indices.push(index);
+  }
+  return indices;
+};
+
+const getSectionAt = (index) => sections()[index] || null;
+
+const getFieldIndices = () => {
+  const section = getSelectedSection();
+  const fields = section?.fields || [];
+  const indices = [];
+  for (let index = 0; index < fields.length; index++) {
+    indices.push(index);
+  }
+  return indices;
+};
+
+const getFieldAt = (index) => {
+  const section = getSelectedSection();
+  return section?.fields?.[index] || null;
+};
+
+const addField = () => {
+  const sectionId = selectedSectionId();
+  if (!sectionId) return;
+  const newField = {
+    key: `field_${Date.now()}`,
+    label: "New field",
+    dataType: "text",
+    renderer: "text",
+    translatable: false,
+    required: false,
+    colSpan: 1
+  };
+  patchSections((current) =>
+    current.map((section) => {
+      if (section.id !== sectionId) return section;
+      const fields = [...(section.fields || []), newField];
+      return { ...section, fields };
+    })
+  );
+  const section = getSelectedSection();
+  if (section?.fields?.length) {
+    selectField(section.fields.length - 1);
+  }
+};
+
+const deleteField = async (fieldIndex) => {
+  const sectionId = selectedSectionId();
+  if (!sectionId) return;
+  const confirmed = await args.contextData?.confirmContext?.rbConfirm?.({
+    title: "Delete field",
+    message: "Remove this field from the schema?",
+    confirmText: "Delete",
+    cancelText: "Cancel",
+    variant: "danger"
+  });
+  if (!confirmed) return;
+  patchSections((current) =>
+    current.map((section) => {
+      if (section.id !== sectionId) return section;
+      const fields = (section.fields || []).filter((_, index) => index !== fieldIndex);
+      return { ...section, fields };
+    })
+  );
+  setSelectedFieldIndex(null);
+  setFieldEditorVertex(null);
+};
+
+const updateField = (fieldIndex, patch) => {
+  const sectionId = selectedSectionId();
+  if (!sectionId) return;
+  patchSections((current) =>
+    current.map((section) => {
+      if (section.id !== sectionId) return section;
+      const fields = (section.fields || []).map((field, index) =>
+        index === fieldIndex ? { ...field, ...patch } : field
+      );
+      return { ...section, fields };
+    })
+  );
+};
+
+const reorderFields = (fromIndex, toIndex) => {
+  const sectionId = selectedSectionId();
+  if (!sectionId || fromIndex === toIndex) return;
+  patchSections((current) =>
+    current.map((section) => {
+      if (section.id !== sectionId) return section;
+      const fields = [...(section.fields || [])];
+      const [moved] = fields.splice(fromIndex, 1);
+      fields.splice(toIndex, 0, moved);
+      return { ...section, fields };
+    })
+  );
+};
+
+const moveFieldBetweenSections = (fromSectionId, fromIndex, toSectionId, toIndex) => {
+  if (!fromSectionId || !toSectionId || fromIndex == null || fromIndex < 0 || toIndex == null || toIndex < 0) {
+    return;
+  }
+
+  if (fromSectionId === toSectionId) {
+    reorderFields(fromIndex, toIndex);
+    selectField(toIndex);
+    return;
+  }
+
+  let movedField = null;
+  let insertAt = toIndex;
+
+  patchSections((current) => {
+    const sourceSection = current.find((section) => section.id === fromSectionId);
+    if (!sourceSection?.fields?.[fromIndex]) return current;
+
+    let next = current.map((section) => {
+      if (section.id !== fromSectionId) return section;
+      const fields = [...(section.fields || [])];
+      [movedField] = fields.splice(fromIndex, 1);
+      return { ...section, fields };
+    });
+
+    if (!movedField) return current;
+
+    next = next.map((section) => {
+      if (section.id !== toSectionId) return section;
+      const fields = [...(section.fields || [])];
+      insertAt = Math.min(Math.max(0, toIndex), fields.length);
+      fields.splice(insertAt, 0, movedField);
+      return { ...section, fields };
+    });
+
+    return next;
+  });
+
+  if (!movedField) return;
+
+  setFieldEditorVertex(null);
+  if (selectedSectionId() !== toSectionId) {
+    setSelectedSectionId(toSectionId);
+    syncSectionMetaVertex();
+  }
+  setSelectedFieldIndex(insertAt);
+  syncFieldEditorVertex();
+};
+
+const buildConfigObject = () => {
+  const meta = pageMeta() || { id: getSettingsPageId() };
+  const visibleSections = isSingleSectionMode()
+    ? sections().filter((section) => section.id === getSingleSectionId())
+    : sections();
+  const sectionConfigs = visibleSections.map((section) => ({
+    id: section.id,
+    type: "card",
+    title: section.title,
+    description: section.description || "",
+    form: {
+      gridColumns: 1,
+      groups: [{
+        key: `${section.id}Form`,
+        title: "",
+        gridColumns: 1,
+        fields: section.fields || []
+      }]
+    }
+  }));
+
+  return {
+    pageMode: "settings",
+    id: meta.id,
+    route: meta.route || `/settings?page=${meta.id}`,
+    title: meta.title || meta.id,
+    description: meta.description || "",
+    version: meta.version || 1,
+    scope: meta.scope || {
+      vertexLabel: "GlobalSetting",
+      matchProperty: "key",
+      idParam: "scopeId"
+    },
+    saveStrategy: meta.saveStrategy || {
+      mode: "section",
+      debounceMs: 1200,
+      autosave: false,
+      showSaveBar: true,
+      warnOnLeave: true
+    },
+    audit: meta.audit || {
+      enabled: true,
+      resource: `settings.${meta.id}`,
+      includeDiff: true
+    },
+    sidebar: meta.sidebar,
+    sections: sectionConfigs
+  };
+};
+
+const buildConfigFunctionBody = () => {
+  return `return ${JSON.stringify(buildConfigObject(), null, 2)};`;
+};
+
+const syncJsonFromVisual = () => {
+  setConfigJsonText(JSON.stringify(buildConfigObject(), null, 2));
+  setJsonError("");
+};
+
+const applyConfigObjectToState = (config) => {
+  if (!config || typeof config !== "object" || Array.isArray(config)) {
+    throw new Error("Config must be a JSON object");
+  }
+  setPageMeta({
+    id: config.id || getSettingsPageId(),
+    route: config.route || `/settings?page=${config.id || getSettingsPageId()}`,
+    title: config.title || config.id || getSettingsPageId(),
+    description: config.description || "",
+    version: config.version || 1,
+    scope: config.scope || {
+      vertexLabel: "GlobalSetting",
+      matchProperty: "key",
+      idParam: "scopeId"
+    },
+    saveStrategy: config.saveStrategy || {
+      mode: "section",
+      debounceMs: 1200,
+      autosave: false,
+      showSaveBar: true,
+      warnOnLeave: true
+    },
+    audit: config.audit || {
+      enabled: true,
+      resource: `settings.${config.id || getSettingsPageId()}`,
+      includeDiff: true
+    },
+    sidebar: config.sidebar || null
+  });
+  const parsed = parseSectionsFromConfig(config);
+  setSections(parsed);
+  const currentSectionId = selectedSectionId();
+  if (parsed.length > 0) {
+    const stillExists = parsed.some((section) => section.id === currentSectionId);
+    selectSection(stillExists ? currentSectionId : parsed[0].id);
+  } else {
+    setSelectedSectionId(null);
+    setSelectedFieldIndex(null);
+    setSectionMetaVertex(null);
+    setFieldEditorVertex(null);
+  }
+};
+
+const applyJsonTextToState = (text) => {
+  try {
+    const config = JSON.parse(text);
+    applyConfigObjectToState(config);
+    setJsonError("");
+    return true;
+  } catch (error) {
+    const message = error?.message || "Invalid JSON";
+    setJsonError(message);
+    return false;
+  }
+};
+
+const isJsonMode = () => editorMode() === "json";
+const isVisualMode = () => editorMode() !== "json";
+
+const setEditorMode = (mode) => {
+  if (mode === "json") {
+    syncJsonFromVisual();
+    setEditorModeSignal("json");
+    return;
+  }
+  if (editorMode() === "json") {
+    const ok = applyJsonTextToState(configJsonText());
+    if (!ok) {
+      args.showErrorToast?.(jsonError() || "Fix JSON errors before switching to visual mode");
+      return;
+    }
+  }
+  setEditorModeSignal("visual");
+};
+
+const onJsonTextChange = (text) => {
+  setConfigJsonText(text);
+  setJsonError("");
+  setIsDirty(true);
+};
+
+
+const stripSchemaConfig = async (configObj) => {
+  try {
+    const result = await executeYTOFunction("settingsSchemaHelpers", {
+      action: "stripConfigSchema",
+      config: configObj
+    });
+    return result?.result?.data?.config || configObj;
+  } catch (_) {
+    return configObj;
+  }
+};
+
+const buildConfigObjectForSave = async () => {
+  if (isJsonMode()) {
+    return JSON.parse(configJsonText());
+  }
+  return buildConfigObject();
+};
+
+const buildConfigFunctionBodyForSave = async () => {
+  const config = await stripSchemaConfig(await buildConfigObjectForSave());
+  return `return ${JSON.stringify(config, null, 2)};`;
+};
+
+const saveConfig = async () => {
+  const settingsPageId = getSettingsPageId();
+  setSaving(true);
+  try {
+    if (isJsonMode()) {
+      const ok = applyJsonTextToState(configJsonText());
+      if (!ok) {
+        args.showErrorToast?.(jsonError() || "Invalid JSON");
+        return;
+      }
+    }
+    let configBody = await buildConfigFunctionBodyForSave();
+    const result = await executeYTOFunction("saveSettingsPageConfig", {
+      settingsPageId,
+      key: getSchemaSettingKey(),
+      config: configBody,
+      name: pageMeta()?.title || settingsPageId,
+      saveAsDefault: true
+    });
+    if (!result?.result?.success) {
+      args.showErrorToast?.(result?.result?.message || "Failed to save schema");
+      return;
+    }
+    args.showSuccessToast?.(result.result.message || "Schema saved");
+    syncJsonFromVisual();
+    setIsDirty(false);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("fulchand-settings-schema-saved", {
+        detail: { pageId: settingsPageId }
+      }));
+    }
+  } catch (error) {
+    console.error("Failed to save settings schema:", error);
+    args.showErrorToast?.("Failed to save schema");
+  } finally {
+    setSaving(false);
+  }
+  const onSavedCb = args.contextData.props?.onSaved;
+  if (typeof onSavedCb === "function") {
+    queueMicrotask(() => { void onSavedCb(); });
+  }
+};
+
+const attachSectionDropTarget = (element, index) => {
+  if (!element || typeof index !== "number") return;
+  if (element.__fsceSectionDropIndex === index && element.__fsceSectionDropCleanup) return;
+
+  const existing = element.__fsceSectionDropCleanup;
+  if (existing) {
+    existing();
+  }
+
+  const attach = (retried = false) => {
+    if (!args.dropTargetForElements) {
+      if (!retried) requestAnimationFrame(() => attach(true));
+      return;
+    }
+
+    const cleanup = args.dropTargetForElements({
+      element,
+      canDrop: ({ source }) => {
+        const type = source.data?.type;
+        return type === "settings-config-section" || type === "settings-config-field";
+      },
+      onDragEnter: ({ source }) => {
+        const type = source.data?.type;
+        if (type === "settings-config-section" && typeof source.data?.index === "number") {
+          setDragOverSectionIndex(index);
+          return;
+        }
+        if (type === "settings-config-field") {
+          const section = getSectionAt(index);
+          if (!section?.id) return;
+          setDragOverSectionIdForField(section.id);
+          selectSectionForFieldDrop(section.id);
+        }
+      },
+      onDragLeave: ({ source }) => {
+        const type = source.data?.type;
+        if (type === "settings-config-section") {
+          setDragOverSectionIndex(null);
+          return;
+        }
+        if (type === "settings-config-field") {
+          setDragOverSectionIdForField(null);
+        }
+      },
+      onDrop: ({ source }) => {
+        const type = source.data?.type;
+        if (type === "settings-config-section") {
+          const fromIndex = source.data?.index;
+          if (typeof fromIndex === "number") reorderSections(fromIndex, index);
+          setDraggedSectionIndex(null);
+          setDragOverSectionIndex(null);
+          return;
+        }
+        if (type === "settings-config-field") {
+          const dragSource = getFieldDragSourceFromEvent(source);
+          const section = getSectionAt(index);
+          if (dragSource && section?.id && dragSource.sectionId !== section.id) {
+            const targetLength = section.fields?.length ?? 0;
+            moveFieldBetweenSections(
+              dragSource.sectionId,
+              dragSource.index,
+              section.id,
+              targetLength
+            );
+          }
+          clearFieldDragState();
+        }
+      }
+    });
+
+    element.__fsceSectionDropIndex = index;
+    element.__fsceSectionDropCleanup = cleanup;
+  };
+
+  attach();
+};
+
+const attachSectionDraggable = (element, index) => {
+  if (!element || typeof index !== "number") return;
+  if (element.__fsceSectionDragIndex === index && element.__fsceSectionDragCleanup) return;
+
+  const existing = element.__fsceSectionDragCleanup;
+  if (existing) {
+    existing();
+    sectionDragCleanups.delete(element);
+  }
+
+  const attach = (retried = false) => {
+    if (!args.draggable) {
+      if (!retried) requestAnimationFrame(() => attach(true));
+      return;
+    }
+
+    const rawCleanup = args.draggable({
+      element,
+      getInitialData: () => ({ type: "settings-config-section", index }),
+      onDragStart: () => setDraggedSectionIndex(index),
+      onDrop: () => {
+        setDraggedSectionIndex(null);
+        setDragOverSectionIndex(null);
+      }
+    });
+
+    const cleanup = () => {
+      rawCleanup();
+      element.__fsceSectionDragIndex = null;
+      element.__fsceSectionDragCleanup = null;
+      sectionDragCleanups.delete(element);
+    };
+
+    element.__fsceSectionDragIndex = index;
+    element.__fsceSectionDragCleanup = cleanup;
+    sectionDragCleanups.set(element, cleanup);
+  };
+
+  attach();
+};
+
+const cleanupSectionDragDrop = (element) => {
+  element?.__fsceSectionDragCleanup?.();
+  element?.__fsceSectionDropCleanup?.();
+  if (element) {
+    element.__fsceSectionDropCleanup = null;
+    element.__fsceSectionDropIndex = null;
+  }
+};
+
+const cleanupFieldDragDrop = (element) => {
+  element?.__fsceFieldDragCleanup?.();
+  element?.__fsceFieldDropCleanup?.();
+  if (element) {
+    element.__fsceFieldDropCleanup = null;
+    element.__fsceFieldDropIndex = null;
+  }
+};
+
+const attachFieldDropTarget = (element, index) => {
+  if (!element || typeof index !== "number") return;
+  if (element.__fsceFieldDropIndex === index && element.__fsceFieldDropCleanup) return;
+
+  const existing = element.__fsceFieldDropCleanup;
+  if (existing) existing();
+
+  const attach = (retried = false) => {
+    if (!args.dropTargetForElements) {
+      if (!retried) requestAnimationFrame(() => attach(true));
+      return;
+    }
+
+    const cleanup = args.dropTargetForElements({
+      element,
+      canDrop: ({ source }) => source.data?.type === "settings-config-field",
+      getData: ({ input, element: dropElement }) =>
+        buildFieldDropTargetData({ type: "field-drop-target", index }, input, dropElement),
+      onDragEnter: ({ self, source }) => {
+        if (source.data?.type !== "settings-config-field") return;
+        cancelPendingFieldDropClear();
+        updateFieldDropInstruction(self, index);
+      },
+      onDrag: ({ self, source }) => {
+        if (source.data?.type !== "settings-config-field") return;
+        cancelPendingFieldDropClear();
+        updateFieldDropInstruction(self, index);
+      },
+      onDragLeave: ({ source }) => {
+        if (source.data?.type !== "settings-config-field") return;
+        scheduleFieldDropInstructionClear();
+      },
+      onDrop: ({ source, self }) => {
+        const dragSource = getFieldDragSourceFromEvent(source);
+        applyFieldDrop(dragSource, index, self);
+        clearFieldDragState();
+      }
+    });
+
+    element.__fsceFieldDropIndex = index;
+    element.__fsceFieldDropCleanup = cleanup;
+  };
+
+  attach();
+};
+
+const attachFieldListDropTarget = (element) => {
+  if (!element) return;
+  if (element.__fsceFieldListDropCleanup) return;
+
+  const attach = (retried = false) => {
+    if (!args.dropTargetForElements) {
+      if (!retried) requestAnimationFrame(() => attach(true));
+      return;
+    }
+
+    const cleanup = args.dropTargetForElements({
+      element,
+      canDrop: ({ source }) =>
+        source.data?.type === "settings-config-field" && getFieldIndices().length === 0,
+      getData: ({ input, element: dropElement }) => {
+        const data = { type: "field-list-drop" };
+        if (!args.attachInstruction) return data;
+        return args.attachInstruction(data, {
+          input,
+          element: dropElement,
+          axis: "vertical",
+          operations: {
+            "reorder-before": "available",
+            "reorder-after": "not-available",
+            combine: "not-available"
+          }
+        });
+      },
+      onDragEnter: ({ self, source }) => {
+        if (source.data?.type !== "settings-config-field") return;
+        cancelPendingFieldDropClear();
+        updateFieldDropInstruction(self, 0);
+      },
+      onDrag: ({ self, source }) => {
+        if (source.data?.type !== "settings-config-field") return;
+        cancelPendingFieldDropClear();
+        updateFieldDropInstruction(self, 0);
+      },
+      onDragLeave: ({ source }) => {
+        if (source.data?.type !== "settings-config-field") return;
+        scheduleFieldDropInstructionClear();
+      },
+      onDrop: ({ source, self }) => {
+        const dragSource = getFieldDragSourceFromEvent(source);
+        if (!dragSource) {
+          clearFieldDragState();
+          return;
+        }
+        applyFieldDrop(dragSource, 0, self);
+        clearFieldDragState();
+      }
+    });
+
+    element.__fsceFieldListDropCleanup = cleanup;
+  };
+
+  attach();
+};
+
+const attachFieldsListBoundary = (element) => {
+  if (!element) return;
+  if (element.__fsceFieldsListBoundaryCleanup) return;
+
+  const attach = (retried = false) => {
+    if (!args.dropTargetForElements) {
+      if (!retried) requestAnimationFrame(() => attach(true));
+      return;
+    }
+
+    const cleanup = args.dropTargetForElements({
+      element,
+      canDrop: ({ source }) => source.data?.type === "settings-config-field",
+      getData: () => ({ type: "field-list-boundary" }),
+      onDragLeave: ({ source }) => {
+        if (source.data?.type !== "settings-config-field") return;
+        scheduleFieldDropInstructionClear();
+      }
+    });
+
+    element.__fsceFieldsListBoundaryCleanup = cleanup;
+  };
+
+  attach();
+};
+
+const attachFieldDraggable = (element, index) => {
+  if (!element || typeof index !== "number") return;
+  if (element.__fsceFieldDragIndex === index && element.__fsceFieldDragCleanup) return;
+
+  const existing = element.__fsceFieldDragCleanup;
+  if (existing) {
+    existing();
+    fieldDragCleanups.delete(element);
+  }
+
+  const attach = (retried = false) => {
+    if (!args.draggable) {
+      if (!retried) requestAnimationFrame(() => attach(true));
+      return;
+    }
+
+    const rawCleanup = args.draggable({
+      element,
+      getInitialData: () => ({
+        type: "settings-config-field",
+        sectionId: selectedSectionId(),
+        index
+      }),
+      onDragStart: () => {
+        setFieldDragSource({ sectionId: selectedSectionId(), index });
+        setDraggedFieldIndex(index);
+      },
+      onDrop: () => clearFieldDragState()
+    });
+
+    const cleanup = () => {
+      rawCleanup();
+      element.__fsceFieldDragIndex = null;
+      element.__fsceFieldDragCleanup = null;
+      fieldDragCleanups.delete(element);
+    };
+
+    element.__fsceFieldDragIndex = index;
+    element.__fsceFieldDragCleanup = cleanup;
+    fieldDragCleanups.set(element, cleanup);
+  };
+
+  attach();
+};
+
+return {
+  getSettingsPageId,
+  isSingleSectionMode,
+  isEmbeddedMode,
+  executeYTOFunction,
+  SECTION_META_FORM_CONFIG,
+  FIELD_EDITOR_FORM_CONFIG,
+  loading,
+  saving,
+  pageMeta,
+  sections,
+  selectedSectionId,
+  selectedFieldIndex,
+  isDirty,
+  editorMode,
+  configJsonText,
+  jsonError,
+  isJsonMode,
+  isVisualMode,
+  setEditorMode,
+  onJsonTextChange,
+  syncJsonFromVisual,
+  applyJsonTextToState,
+  sectionMetaVertex,
+  fieldEditorVertex,
+  draggedSectionIndex,
+  dragOverSectionIndex,
+  draggedFieldIndex,
+  dragOverFieldIndex,
+  fieldDropInstruction,
+  fieldDragSource,
+  dragOverSectionIdForField,
+  loadConfig,
+  getSelectedSection,
+  getSelectedField,
+  getSectionIndices,
+  getSectionAt,
+  getFieldIndices,
+  getFieldAt,
+  addSection,
+  deleteSection,
+  updateSectionMeta,
+  addField,
+  deleteField,
+  updateField,
+  saveConfig,
+  selectSection,
+  selectField,
+  moveFieldBetweenSections,
+  isFieldDropBefore,
+  isFieldDropAfter,
+  isFieldListEmptyDrop,
+  registerSectionMetaFormFns,
+  registerFieldEditorFormFns,
+  syncSectionMetaFromForm,
+  syncFieldFromForm,
+  onFieldArraySchemaChange,
+  getSiteLanguages,
+  attachSectionDropTarget,
+  attachSectionDraggable,
+  cleanupSectionDragDrop,
+  attachFieldDropTarget,
+  attachFieldListDropTarget,
+  attachFieldsListBoundary,
+  attachFieldDraggable,
+  cleanupFieldDragDrop
+};
+'''
+        key: SettingsPageSchemaEditor
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''const embedded = args.fns.isEmbeddedMode?.() === true;
+return `._id {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: ${args.theme.var.color.background};
+  overflow: hidden;
+  ${embedded ? `
+  position: absolute;
+  inset: 0;
+  ` : `
+  height: 100%;
+  `}
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const embedded = args.contextData.props?.embeddedMode === true;
+return {
+  as: "div",
+  ...(embedded ? {} : { "data-fulchand-page-main": "" }),
+  hide: args.contextData.props?.hide === true,
+  onMount: () => { args.fns.loadConfig?.(); }
+};'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: SettingsSchemaToolbar
+        props:
+          '''return {
+  editorApi: args.fns,
+  tableVertexLabel: args.contextData.props?.tableVertexLabel
+};'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''const embedded = args.fns.isEmbeddedMode?.() === true;
+return `._id {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  ${embedded ? "overflow-x: auto;" : ""}
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const loading = args.fns.loading?.();
+return {
+  as: "div",
+  hide: loading
+};'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: SettingsSchemaSectionsList
+        props: return { editorApi: args.fns };
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: SettingsSchemaSectionEditor
+        props: return { editorApi: args.fns };
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: SettingsSchemaJsonPanel
+        props: return { editorApi: args.fns };
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: LoadingSpinner
+        props:
+          '''return {
+  size: "large",
+  color: "primary",
+  hide: !args.fns.loading?.()
+};'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "8"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "4"
+      E: "6"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "4"
+      E: "7"
+    }
+  ]
+}

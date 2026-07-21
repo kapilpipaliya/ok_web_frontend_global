@@ -1,0 +1,218 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        dynamicComponent: Button, Html
+        description: Toolbar for settings page schema editor (visual/JSON modes, save).
+        key: SettingsSchemaToolbar
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.background_light_100};
+  flex-shrink: 0;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "header" };
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const api = args.contextData.props?.editorApi || {};
+
+const pageId = api.getSettingsPageId?.();
+const tableLabel = args.contextData.props?.tableVertexLabel;
+const title = api.isSingleSectionMode?.()
+  ? `Form config schema — ${tableLabel || pageId}`
+  : `Schema editor — ${pageId}`;
+return {
+  as: "h2",
+  text: title
+};'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props: return { as: "div" };
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''const api = args.contextData.props?.editorApi || {};
+
+const active = api.isVisualMode?.() === true;
+return {
+  variant: active ? "primary" : "secondary",
+  size: "sm",
+  text: "Visual",
+  type: "button",
+  onClick: () => api.setEditorMode?.("visual")
+};'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''const api = args.contextData.props?.editorApi || {};
+
+const active = api.isJsonMode?.() === true;
+return {
+  variant: active ? "primary" : "secondary",
+  size: "sm",
+  text: "JSON",
+  type: "button",
+  onClick: () => api.setEditorMode?.("json")
+};'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props: return { as: "div" };
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''const api = args.contextData.props?.editorApi || {};
+
+return {
+  variant: "secondary",
+  size: "sm",
+  text: "Add section",
+  type: "button",
+  hide: api.isSingleSectionMode?.() === true || api.isJsonMode?.() === true,
+  onClick: () => api.addSection?.()
+};'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''const api = args.contextData.props?.editorApi || {};
+
+const dirty = api.isDirty?.();
+const saving = api.saving?.();
+return {
+  variant: "primary",
+  size: "sm",
+  text: saving ? "Saving..." : "Save schema",
+  type: "button",
+  disabled: !dirty || saving,
+  onClick: () => api.saveConfig?.()
+};'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "7"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "4"
+      E: "6"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "7"
+      E: "9"
+    }
+  ]
+}

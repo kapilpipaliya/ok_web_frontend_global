@@ -102,8 +102,7 @@ return {
           '''return {
   value: args.fns.from(),
   onChange: e=>args.fns.from(e.target.value),
-};
-'''
+};'''
       }
     }
     {
@@ -137,8 +136,7 @@ return {
           '''return {
   value: args.fns.to(),
   onChange: e => args.fns.to(e.target.value),
-};
-'''
+};'''
       }
     }
     {
@@ -311,8 +309,7 @@ return {
   as: "div",
   data: args.fns.titles(),
   hide: args.fns.activeFormat() !== "list"
-};
-'''
+};'''
       }
     }
     {
@@ -355,8 +352,7 @@ return {
           '''return {
   as: "div",
   text: args.contextData.title
-};
-'''
+};'''
       }
     }
     {
@@ -397,8 +393,7 @@ return {
   title: copied ? "Copied!" : "Copy title",
   "aria-label": copied ? "Copied!" : "Copy title",
   onClick: () => args.fns.copyTitle(text)
-};
-'''
+};'''
       }
     }
     {
@@ -457,6 +452,20 @@ return {
   readOnly: true,
   hide: args.fns.activeFormat() !== "text"
 };'''
+      }
+    }
+    {
+      id: "20"
+      L: Attr
+      P: {
+        as: icon
+        css:
+          '''return `._id {
+        padding: 10px;
+      }`;'''
+        displayOrder: 5
+        componentName: Html
+        key: unique_18
       }
     }
   ]
@@ -536,35 +545,41 @@ return {
     {
       id: e13
       T: Attr
-      S: "11"
-      E: "12"
+      S: "9"
+      E: "20"
     }
     {
       id: e14
       T: Attr
       S: "11"
-      E: "13"
+      E: "12"
     }
     {
       id: e15
+      T: Attr
+      S: "11"
+      E: "13"
+    }
+    {
+      id: e16
       T: Attr
       S: "14"
       E: "15"
     }
     {
-      id: e16
+      id: e17
       T: Attr
       S: "15"
       E: "16"
     }
     {
-      id: e17
+      id: e18
       T: Attr
       S: "15"
       E: "17"
     }
     {
-      id: e18
+      id: e19
       T: Attr
       S: "17"
       E: "18"

@@ -1,0 +1,307 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        dynamicComponent: TextInput, TextArea
+        description: Multi-language text input with language tabs. Languages passed via props only.
+        fns:
+          '''
+const DEFAULT_SITE_LANGUAGES = [
+  { code: "en", label: "English", isDefault: true },
+  { code: "hi", label: "Hindi", isDefault: false },
+  { code: "gu", label: "Gujarati", isDefault: false }
+];
+
+const getProps = () => args.contextData.props || {};
+
+const getLanguages = () => {
+  const languages = getProps().languages;
+  if (Array.isArray(languages) && languages.length > 0) return languages;
+  return DEFAULT_SITE_LANGUAGES;
+};
+
+const normalizeValue = (value, languages) => {
+  const normalized = {};
+  const defaultCode = (() => {
+    const explicit = languages.find((lang) => lang?.isDefault === true);
+    if (explicit?.code) return explicit.code;
+    return languages[0]?.code || "en";
+  })();
+  for (let i = 0; i < languages.length; i++) {
+    normalized[languages[i].code] = "";
+  }
+  if (value != null && typeof value === "object" && !Array.isArray(value)) {
+    for (const key of Object.keys(value)) {
+      if (Object.prototype.hasOwnProperty.call(normalized, key)) {
+        normalized[key] = value[key] == null ? "" : String(value[key]);
+      }
+    }
+    return normalized;
+  }
+  if (typeof value === "string" && value !== "") {
+    normalized[defaultCode] = value;
+  }
+  return normalized;
+};
+
+const getValue = () => normalizeValue(getProps().value, getLanguages());
+
+const getDefaultTabCode = () => {
+  const languages = getLanguages();
+  const explicit = languages.find((lang) => lang.isDefault === true);
+  if (explicit?.code) return explicit.code;
+  return languages[0]?.code || "";
+};
+
+const [activeTab, setActiveTab] = args.createSignal(getDefaultTabCode());
+
+args.createEffect(() => {
+  const languages = getLanguages();
+  const current = activeTab();
+  if (!languages.some((lang) => lang.code === current)) {
+    setActiveTab(getDefaultTabCode());
+  }
+});
+
+const updateLanguageValue = (code, nextText) => {
+  const languages = getLanguages();
+  const current = getValue();
+  const next = { ...current, [code]: nextText };
+  getProps().onChange?.(next);
+};
+
+const getLanguageValue = (code) => getValue()[code] || "";
+
+const isMultiline = () => getProps().multiline === true;
+const isDisabled = () => getProps().disabled === true;
+const isRequired = () => getProps().required === true;
+
+const getLanguageIndices = () => {
+  const languages = getLanguages();
+  const indices = [];
+  for (let i = 0; i < languages.length; i++) indices.push(i);
+  return indices;
+};
+
+const getLanguageAt = (index) => getLanguages()[index] || null;
+
+return {
+  getLanguages,
+  getLanguageIndices,
+  getLanguageAt,
+  activeTab,
+  setActiveTab,
+  updateLanguageValue,
+  getLanguageValue,
+  isMultiline,
+  isDisabled,
+  isRequired,
+  hasLanguages: () => getLanguages().length > 0
+};
+'''
+        key: FormLocalizedText
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''return `._id.flt-empty {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: ${args.theme.var.color.text_light_500};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  hide: args.fns.hasLanguages?.(),
+  text: "Configure site languages in Global Settings first.",
+  class: "flt-empty"
+};'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''return `._id.flt-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  hide: !args.fns.hasLanguages?.(),
+  class: "flt-shell"
+};'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        contextName: fltLangIndex
+        css:
+          '''return `._id.flt-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}`;'''
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  class: "flt-tabs",
+  data: args.fns.getLanguageIndices?.()
+};'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''const lang = args.fns.getLanguageAt?.(args.contextData.fltLangIndex);
+const active = args.fns.activeTab?.() === lang?.code;
+return `._id.flt-tab {
+  padding: 0.25rem 0.625rem;
+  border: 1px solid ${active ? args.theme.var.color.primary : args.theme.var.color.border};
+  border-radius: 0.375rem;
+  background: ${active ? args.theme.var.color.primary_light_100 : args.theme.var.color.background};
+  color: ${active ? args.theme.var.color.primary_text : args.theme.var.color.text};
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const lang = args.fns.getLanguageAt?.(args.contextData.fltLangIndex);
+const active = args.fns.activeTab?.() === lang?.code;
+return {
+  as: "button",
+  type: "button",
+  text: lang?.label || lang?.code || "Language",
+  class: active ? "flt-tab flt-tab-active" : "flt-tab",
+  disabled: args.fns.isDisabled?.(),
+  onClick: () => lang?.code && args.fns.setActiveTab?.(lang.code)
+};'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''return `._id.flt-input-area {
+  width: 100%;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props: return { as: "div", class: "flt-input-area" };
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: TextArea
+        props:
+          '''const code = args.fns.activeTab?.();
+const hide = !code || !args.fns.isMultiline?.();
+return {
+  hide,
+  value: code ? args.fns.getLanguageValue?.(code) : "",
+  onChange: (e) => code && args.fns.updateLanguageValue?.(code, e.target.value),
+  placeholder: "",
+  required: args.fns.isRequired?.(),
+  disabled: args.fns.isDisabled?.(),
+  rows: 4
+};'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: TextInput
+        props:
+          '''const code = args.fns.activeTab?.();
+const hide = !code || args.fns.isMultiline?.() === true;
+return {
+  hide,
+  type: "text",
+  value: code ? args.fns.getLanguageValue?.(code) : "",
+  onChange: (e) => code && args.fns.updateLanguageValue?.(code, e.target.value),
+  placeholder: "",
+  required: args.fns.isRequired?.(),
+  disabled: args.fns.isDisabled?.()
+};'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "1"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "6"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "6"
+      E: "8"
+    }
+  ]
+}

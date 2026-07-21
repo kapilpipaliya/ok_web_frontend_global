@@ -14,27 +14,23 @@
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   max-width: 600px;
   margin: 0 auto;
   padding: 2rem;
   background: ${args.theme.var.color.background};
   border-radius: 0.75rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   "data-animate": "",
 
   ref: (el) => el && args.fns.animateOnView(el)
-};
-'''
+};'''
       }
     }
     {
@@ -42,18 +38,15 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "form",
   onSubmit: (e) => {
     e.preventDefault();
@@ -63,8 +56,7 @@ return {
     args.showSuccessToast('Thank you for contacting us. We will get back to you soon!');
     e.target.reset();
   }
-};
-'''
+};'''
       }
     }
     {
@@ -72,21 +64,17 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -94,23 +82,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   color: ${args.theme.var.color.text};
   font-weight: 500;
   font-size: 0.875rem;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "label",
   for: "name",
   text: "Your Name *"
-};
-'''
+};'''
       }
     }
     {
@@ -118,8 +102,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   padding: 0.75rem 1rem;
   border: 1px solid ${args.theme.var.color.background_light_300};
   border-radius: 0.375rem;
@@ -137,21 +120,18 @@ return `._id {
   &::placeholder {
     color: ${args.theme.var.color.text_light_300};
   }
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "input",
   type: "text",
   id: "name",
   name: "name",
   placeholder: "Enter your full name",
   required: true
-};
-'''
+};'''
       }
     }
     {
@@ -159,21 +139,17 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -181,23 +157,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   color: ${args.theme.var.color.text};
   font-weight: 500;
   font-size: 0.875rem;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "label",
   for: "email",
   text: "Email Address *"
-};
-'''
+};'''
       }
     }
     {
@@ -205,8 +177,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   padding: 0.75rem 1rem;
   border: 1px solid ${args.theme.var.color.background_light_300};
   border-radius: 0.375rem;
@@ -224,21 +195,18 @@ return `._id {
   &::placeholder {
     color: ${args.theme.var.color.text_light_300};
   }
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "input",
   type: "email",
   id: "email",
   name: "email",
   placeholder: "your@email.com",
   required: true
-};
-'''
+};'''
       }
     }
     {
@@ -246,21 +214,17 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -268,23 +232,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   color: ${args.theme.var.color.text};
   font-weight: 500;
   font-size: 0.875rem;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "label",
   for: "phone",
   text: "Phone Number"
-};
-'''
+};'''
       }
     }
     {
@@ -292,8 +252,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   padding: 0.75rem 1rem;
   border: 1px solid ${args.theme.var.color.background_light_300};
   border-radius: 0.375rem;
@@ -311,20 +270,17 @@ return `._id {
   &::placeholder {
     color: ${args.theme.var.color.text_light_300};
   }
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "input",
   type: "tel",
   id: "phone",
   name: "phone",
   placeholder: "+91 98252 42501"
-};
-'''
+};'''
       }
     }
     {
@@ -332,21 +288,17 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-}`;
-'''
+}`;'''
         displayOrder: 4
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -354,23 +306,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   color: ${args.theme.var.color.text};
   font-weight: 500;
   font-size: 0.875rem;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "label",
   for: "subject",
   text: "Subject *"
-};
-'''
+};'''
       }
     }
     {
@@ -378,8 +326,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   padding: 0.75rem 1rem;
   border: 1px solid ${args.theme.var.color.background_light_300};
   border-radius: 0.375rem;
@@ -397,21 +344,18 @@ return `._id {
   &::placeholder {
     color: ${args.theme.var.color.text_light_300};
   }
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "input",
   type: "text",
   id: "subject",
   name: "subject",
   placeholder: "What is this regarding?",
   required: true
-};
-'''
+};'''
       }
     }
     {
@@ -419,21 +363,17 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-}`;
-'''
+}`;'''
         displayOrder: 5
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -441,23 +381,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   color: ${args.theme.var.color.text};
   font-weight: 500;
   font-size: 0.875rem;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "label",
   for: "message",
   text: "Message *"
-};
-'''
+};'''
       }
     }
     {
@@ -465,8 +401,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   padding: 0.75rem 1rem;
   border: 1px solid ${args.theme.var.color.background_light_300};
   border-radius: 0.375rem;
@@ -486,21 +421,18 @@ return `._id {
   &::placeholder {
     color: ${args.theme.var.color.text_light_300};
   }
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "textarea",
   id: "message",
   name: "message",
   placeholder: "Please enter your message here...",
   rows: 5,
   required: true
-};
-'''
+};'''
       }
     }
     {
@@ -508,8 +440,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   padding: 0.75rem 2rem;
   background: ${args.theme.var.color.primary};
   color: ${args.theme.var.color.primary_text};
@@ -534,17 +465,14 @@ return `._id {
   &:active {
     transform: translateY(0);
   }
-}`;
-'''
+}`;'''
         displayOrder: 6
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "button",
   type: "submit"
-};
-'''
+};'''
       }
     }
     {
@@ -554,14 +482,12 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "icon",
   icon: "carbon:send",
   width: 20,
   height: 20
-};
-'''
+};'''
       }
     }
     {
@@ -571,12 +497,10 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "span",
   text: "Send Message"
-};
-'''
+};'''
       }
     }
   ]

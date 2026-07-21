@@ -14,23 +14,19 @@
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   background: ${args.theme.var.color.background};
   border: 1px solid ${args.theme.var.color.border};
   border-radius: 0.75rem;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -38,19 +34,15 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   overflow-x: auto;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -58,8 +50,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   width: 100%;
   border-collapse: collapse;
   min-width: 600px;
@@ -68,16 +59,13 @@ return `._id {
     border: 1px solid ${args.theme.var.color.border};
     padding: 0.5rem 0.75rem;
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "table"
-};
-'''
+};'''
       }
     }
     {
@@ -85,19 +73,15 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   background: ${args.theme.var.color.primary_light_50};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "thead"
-};
-'''
+};'''
       }
     }
     {
@@ -107,11 +91,9 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "tr"
-};
-'''
+};'''
       }
     }
     {
@@ -121,15 +103,13 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const columns = args.contextData.props?.columns || [];
+          '''const columns = args.contextData.props?.columns || [];
 return {
   as: "fragment",
   data: columns,
   contextName: "column",
   loop: true
-};
-'''
+};'''
       }
     }
     {
@@ -137,26 +117,22 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const column = args.contextData.column || {};
+          '''const column = args.contextData.column || {};
 const align = column.align || "left";
 return `._id {
   text-align: ${align};
   font-weight: 600;
   color: ${args.theme.var.color.text};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const column = args.contextData.column || {};
+          '''const column = args.contextData.column || {};
 return {
   as: "th",
   text: column.label || "",
   style: column.width ? { width: column.width } : undefined
-};
-'''
+};'''
       }
     }
     {
@@ -166,11 +142,9 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "tbody"
-};
-'''
+};'''
       }
     }
     {
@@ -180,8 +154,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const rows = args.contextData.props?.rows || [];
+          '''const rows = args.contextData.props?.rows || [];
 const contextName = args.contextData.props?.contextName || "row";
 const hasRows = Array.isArray(rows);
 
@@ -194,8 +167,7 @@ return {
         loop: true
       }
     : {})
-};
-'''
+};'''
       }
     }
     {
@@ -211,26 +183,22 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   padding: 2rem 1rem;
   text-align: center;
   color: ${args.theme.var.color.text_light_300};
   margin: 0;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const rows = args.contextData.props?.rows || [];
+          '''const rows = args.contextData.props?.rows || [];
 const emptyMessage = args.contextData.props?.emptyMessage || "No items available yet.";
 return {
   as: "p",
   text: emptyMessage,
   hide: () => Array.isArray(rows) && rows.length > 0
-};
-'''
+};'''
       }
     }
   ]

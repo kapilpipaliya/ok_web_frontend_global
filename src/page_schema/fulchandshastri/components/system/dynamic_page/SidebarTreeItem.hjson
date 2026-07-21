@@ -964,19 +964,16 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   flex-direction: column;
   width: 100%;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         key: tree_item_container
         props:
-          '''
-// Watch for expansion changes and fetch children when expanded
+          '''// Watch for expansion changes and fetch children when expanded
 // Access expandedKeys prop directly to make it reactive
 /*args.createEffect(() => {
   const item = args.fns.getItem();
@@ -995,13 +992,11 @@ return `._id {
   }
 });*/
 
-
 return {
   as: "div",
   class: args.contextData.props.class,
   hide: !args.fns.shouldShowItem(),
-};
-'''
+};'''
       }
     }
     {
@@ -1009,8 +1004,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const isHovered = args.fns.isSelected();
+          '''const isHovered = args.fns.isSelected();
 const isDirectMatch = args.fns.isDirectMatch();
 const isAncestorOfMatch = args.fns.isAncestorOfMatch?.() ?? false;
 const isDragOver = args.fns.isDragOver();
@@ -1039,14 +1033,14 @@ if (isDragOver) {
 let backgroundColor = "";
 if (dragOverStyle.includes('background-color')) {
   // The dragOverStyle already sets background color, so don't override
-  // No action needed since dragOverStyle will apply its background 
+  // No action needed since dragOverStyle will apply its background
 } else if (isHovered) {
   backgroundColor = args.theme.var.color.background_dark_150;
 } else if (isDirectMatch) {
   backgroundColor = args.theme.var.color.primary_light_500;
 //} else if (!isDirectMatch && isAncestorOfMatch) {
 //  backgroundColor = args.theme.var.color.primary_light_600;
-} 
+}
 
 // Compose the style string
 return `._id {
@@ -1076,14 +1070,12 @@ return `._id {
     visibility: visible;
     pointer-events: auto;
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         key: tree_item_content
         props:
-          '''
-const item = args.fns.getItem();
+          '''const item = args.fns.getItem();
 const isRoot = args.fns.isUncategorizedTreeNode?.(item) ?? false;
 const isDragging = args.fns.isDragging?.() || false;
 const isDragOver = args.fns.isDragOver?.() || false;
@@ -1115,8 +1107,7 @@ return {
     }
   },
   style: isDragging ? { opacity: 0.5 } : {}
-};
-'''
+};'''
       }
     }
     {
@@ -1124,8 +1115,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const expanded = args.fns.isExpanded();
+          '''const expanded = args.fns.isExpanded();
 return `._id {
   width: 16px;
   height: 16px;
@@ -1134,21 +1124,18 @@ return `._id {
   justify-content: center;
   cursor: pointer;
   ${!args.fns.hasChildren() ? "visibility: hidden;" : ""}
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         key: tree_item_expand_button
         props:
-          '''
-return {
+          '''return {
   as: "div",
   onClick: (e) => {
     e.stopPropagation();
     args.fns.handleToggleExpand();
   }
-};
-'''
+};'''
       }
     }
     {
@@ -1159,14 +1146,12 @@ return {
         componentName: Html
         key: tree_item_expand_icon
         props:
-          '''
-return {
+          '''return {
   as: "icon",
   icon: args.fns.isExpanded() ? "ph:caret-down" : "ph:caret-right",
   height: 12,
   width: 12
-};
-'''
+};'''
       }
     }
     {
@@ -1174,25 +1159,21 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   margin-right: 5px;
   color: ${args.theme.var.color.text};
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         key: tree_item_icon
         props:
-          '''
-return {
+          '''return {
   as: "icon",
   icon: args.fns.getItemIcon(),
   height: 16,
   width: 16,
   hide: args.fns.getItemIcon() === null
-};
-'''
+};'''
       }
     }
     {
@@ -1200,24 +1181,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   flex: 1;
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         key: tree_item_name
         props:
-          '''
-return {
+          '''return {
   as: "span",
   text: args.fns.getItemName()
-};
-'''
+};'''
       }
     }
     {
@@ -1225,21 +1202,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const status = args.fns.getSyncStatus();
+          '''const status = args.fns.getSyncStatus();
 return `._id {
   margin-left: 4px;
   display: flex;
   align-items: center;
   color: ${status === 'queued' ? (args.theme?.var?.color?.primary ?? 'inherit') : (args.theme?.var?.color?.error ?? '#b91c1c')};
-}`;
-'''
+}`;'''
         displayOrder: 4
         componentName: Html
         key: tree_item_sync_status_icon
         props:
-          '''
-const item = args.fns.getItem();
+          '''const item = args.fns.getItem();
 const status = args.fns.getSyncStatus();
 const icon = status === 'queued' ? 'ph:arrows-clockwise' : (status === 'failed' ? 'ph:warning-circle' : null);
 const syncError = item?.P?.syncError;
@@ -1254,8 +1228,7 @@ return {
   width: 14,
   hide: !status || (status !== 'queued' && status !== 'failed'),
   title
-};
-'''
+};'''
       }
     }
     {
@@ -1263,8 +1236,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   position: absolute;
   right: 4px;
   top: 50%;
@@ -1282,14 +1254,12 @@ return `._id {
   border-radius: 4px;
   padding: 0 2px;
   transition: opacity 0.2s ease, visibility 0.2s ease;
-}`;
-'''
+}`;'''
         displayOrder: 5
         componentName: Html
         key: tree_item_actions
         props:
-          '''
-const item = args.fns.getItem();
+          '''const item = args.fns.getItem();
 const isUncatRow = args.fns.isUncategorizedTreeNode?.(item) ?? false;
 const isQueued = args.fns.isQueued?.() ?? false;
 
@@ -1297,8 +1267,7 @@ return {
   as: "div",
   hide: isUncatRow || isQueued,
   class: "tree-item-actions"
-};
-'''
+};'''
       }
     }
     {
@@ -1308,8 +1277,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "s-button",
   "attr:variant": "plain",
   "attr:icon": "plus",
@@ -1317,8 +1285,7 @@ return {
   "attr:size": "slim",
   onClick: args.fns.handleOpenAddModal,
   hide: args.fns.getUsePolarisUI?.() !== true
-};
-'''
+};'''
       }
     }
     {
@@ -1326,8 +1293,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   cursor: pointer;
   color: ${args.theme.var.color.primary};
   opacity: 0.7;
@@ -1335,22 +1301,19 @@ return `._id {
   &:hover {
     opacity: 1;
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         key: tree_item_add_button
         props:
-          '''
-return {
+          '''return {
   as: "icon",
   icon: "ph:plus",
   height: 12,
   width: 12,
   onClick: args.fns.handleOpenAddModal,
   hide: args.fns.getUsePolarisUI?.() === true
-};
-'''
+};'''
       }
     }
     {
@@ -1358,8 +1321,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   cursor: pointer;
   color: ${args.theme.var.color.primary};
   opacity: 0.7;
@@ -1367,22 +1329,19 @@ return `._id {
   &:hover {
     opacity: 1;
   }
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         key: tree_item_edit_button
         props:
-          '''
-return {
+          '''return {
   as: "icon",
   icon: "ph:pencil",
   height: 12,
   width: 12,
   onClick: args.fns.handleOpenEditModal,
   hide: args.fns.getUsePolarisUI?.() === true
-};
-'''
+};'''
       }
     }
     {
@@ -1392,8 +1351,7 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "s-button",
   "attr:variant": "plain",
   "attr:icon": "edit",
@@ -1401,8 +1359,7 @@ return {
   "attr:size": "slim",
   onClick: args.fns.handleOpenEditModal,
   hide: args.fns.getUsePolarisUI?.() !== true
-};
-'''
+};'''
       }
     }
     {
@@ -1410,8 +1367,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   cursor: pointer;
   color: ${args.theme.var.color.error};
   opacity: 0.7;
@@ -1419,14 +1375,12 @@ return `._id {
   &:hover {
     opacity: 1;
   }
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         key: tree_item_delete_button
         props:
-          '''
-const item = args.fns.getItem();
+          '''const item = args.fns.getItem();
 const isRoot = args.fns.isUncategorizedTreeNode?.(item) ?? false;
 
 return {
@@ -1436,8 +1390,7 @@ return {
   width: 12,
   onClick: args.fns.handleDelete,
   hide: isRoot || args.fns.getUsePolarisUI?.() === true
-};
-'''
+};'''
       }
     }
     {
@@ -1447,8 +1400,7 @@ return {
         displayOrder: 3
         componentName: Html
         props:
-          '''
-const item = args.fns.getItem();
+          '''const item = args.fns.getItem();
 const isRoot = args.fns.isUncategorizedTreeNode?.(item) ?? false;
 
 return {
@@ -1460,8 +1412,7 @@ return {
   "attr:size": "slim",
   onClick: args.fns.handleDelete,
   hide: isRoot || args.fns.getUsePolarisUI?.() !== true
-};
-'''
+};'''
       }
     }
     {
@@ -1469,20 +1420,17 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   padding-left: 8px;
   padding-top: 5px;
   list-style: none;
   padding: 0;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         key: tree_item_children
         props:
-          '''
-const expanded = args.fns.isExpanded();
+          '''const expanded = args.fns.isExpanded();
 // Get children reactively - this will update when graph changes
 const childrenList = args.fns.getChildren();
 // Only render if expanded and we have children
@@ -1493,8 +1441,7 @@ return {
   contextName: "childItem",
   data: expanded ? childrenList : [],
   hide: !expanded || childrenList.length === 0
-};
-'''
+};'''
       }
     }
     {
@@ -1509,8 +1456,7 @@ return {
         componentName: SidebarTreeItem
         key: tree_item_child
         props:
-          '''
-const childItem = args.contextData.childItem;
+          '''const childItem = args.contextData.childItem;
 // Get children from graph reactively using parent's getChildren function
 // Access graph reactively by calling getChildren which accesses args.graph
 const getChildrenFn = args.contextData.props?.getChildren;
@@ -1547,8 +1493,7 @@ return {
   onOpenEditModal: args.contextData.props?.onOpenEditModal,
   operationLoading: args.contextData.props?.operationLoading,
   setOperationLoading: args.contextData.props?.setOperationLoading
-};
-'''
+};'''
       }
     }
   ]

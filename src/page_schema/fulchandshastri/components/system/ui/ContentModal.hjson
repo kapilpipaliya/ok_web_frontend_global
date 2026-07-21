@@ -13,8 +13,7 @@
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   position: fixed;
   inset: 0;
   z-index: 20;
@@ -37,8 +36,7 @@ return `._id {
     padding: 0;
     align-items: flex-end;
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
@@ -58,8 +56,7 @@ return `._id {
       L: Attr
       P: {
         css:
-          '''
-const maxWidth = args.contextData.props?.maxWidth || "880px";
+          '''const maxWidth = args.contextData.props?.maxWidth || "880px";
 return `._id {
   background: ${args.theme.var.color.background};
   border-radius: 0.75rem;
@@ -91,8 +88,7 @@ return `._id {
     height: 100vh;
     border-radius: 0;
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
@@ -107,8 +103,7 @@ return `._id {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   padding: 1rem 1.25rem;
   border-bottom: 1px solid ${args.theme.var.color.border};
   display: flex;
@@ -116,8 +111,7 @@ return `._id {
   justify-content: space-between;
   gap: 0.75rem;
   flex-shrink: 0;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
@@ -132,15 +126,13 @@ return `._id {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   font-size: 1.125rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
   margin: 0;
   line-height: 1.35;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
@@ -158,8 +150,7 @@ return `._id {
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const onClose = args.contextData.props?.onClose;
+          '''const onClose = args.contextData.props?.onClose;
 return {
   as: "s-button",
   "attr:variant": "plain",
@@ -177,8 +168,7 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const onClose = args.contextData.props?.onClose;
+          '''const onClose = args.contextData.props?.onClose;
 const usePolaris = args.contextData.props?.usePolarisUI === true;
 return {
   as: "icon",
@@ -195,15 +185,13 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   flex: 1;
   min-height: 0;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:

@@ -14,8 +14,7 @@
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   background: none;
   color: inherit;
   border: none;
@@ -33,13 +32,11 @@ return `._id {
   &:active {
     opacity: 0.5;
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const currentMode = args.currentMode();
+          '''const currentMode = args.currentMode();
 const isDarkMode = currentMode === 'dark';
 return {
   as: "button",
@@ -47,8 +44,7 @@ return {
     args.toggleTheme()
   },
   title: isDarkMode ? "Switch to light mode" : "Switch to dark mode"
-};
-'''
+};'''
       }
     }
     {
@@ -58,16 +54,14 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const currentMode = args.currentMode();
-const isDarkMode = currentMode === 'dark';
+          '''const currentMode = args.currentMode();
+const isDarkMode = currentMode === "dark";
 return {
   as: "icon",
   icon: isDarkMode ? "carbon:sun" : "carbon:moon",
-  width: 24,
-  height: 24
-};
-'''
+  width: 36,
+  height: 36,
+};'''
       }
     }
   ]

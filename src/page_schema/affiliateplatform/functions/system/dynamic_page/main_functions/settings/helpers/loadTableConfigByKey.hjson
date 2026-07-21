@@ -1,0 +1,119 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Loads table_schema part Setting vertices into graph payload with partVertexIds.
+        body:
+          '''
+const { tableKey } = args.contextData || {};
+
+if (!tableKey) {
+  return { success: false, message: "tableKey is required" };
+}
+
+const SCHEMA_PARTS = ["general", "columns", "formConfig", "sidebar"];
+
+const getGraphPayload = (nodes, rels) => ({
+  vertexes: nodes || {},
+  edges: rels || {},
+  deleted_vertexes: Array.isArray(args.context?.deletedVertexes) ? args.context.deletedVertexes : [],
+  deleted_edges: Array.isArray(args.context?.deletedEdges) ? args.context.deletedEdges : []
+});
+
+const loadPartsFromNeo4j = async (ids) => {
+  const keys = SCHEMA_PARTS.map((part) => ids.schemaKeys?.[part]).filter(Boolean);
+  if (keys.length !== SCHEMA_PARTS.length) {
+    return { success: false, message: "Missing schema keys for one or more parts" };
+  }
+
+  const result = await args.session.run(
+    `
+    MATCH (s:Setting {type: 'table_schema', tableKey: $tableKey})
+    WHERE s.part IN $parts
+    RETURN s, s.part AS part
+    `,
+    { tableKey: ids.tableKey || tableKey, parts: SCHEMA_PARTS }
+  );
+
+  if (result.records.length < SCHEMA_PARTS.length) {
+    return { success: false, message: "One or more table schema parts not found in Neo4j" };
+  }
+
+  const vertices = args.processResult(result.records, args.context, "s");
+  const partVertexIds = {};
+  for (let i = 0; i < vertices.length; i++) {
+    const vertex = vertices[i];
+    const part = vertex?.P?.part;
+    if (part && SCHEMA_PARTS.includes(part)) {
+      partVertexIds[part] = vertex.id;
+    }
+  }
+
+  for (let j = 0; j < SCHEMA_PARTS.length; j++) {
+    const part = SCHEMA_PARTS[j];
+    if (!partVertexIds[part]) {
+      return { success: false, message: `Failed to resolve graph vertex for part: ${part}` };
+    }
+  }
+
+  const nodes = args.context.nodes || {};
+  return {
+    success: true,
+    partVertexIds,
+    graph: getGraphPayload(nodes, args.context.relationships || {})
+  };
+};
+
+const idsResult = await args.executeNamedServerFunction({
+  functionName: "getTableIds",
+  contextData: { tableKey }
+});
+
+let ids = idsResult?.result?.data;
+if (!idsResult?.result?.success || !ids?.schemaKeys) {
+  return { success: false, message: idsResult?.result?.message || "Failed to resolve table ids" };
+}
+
+let partsResult = await loadPartsFromNeo4j(ids);
+
+if (!partsResult.success && args.executeNamedServerFunction) {
+  try {
+    await args.executeNamedServerFunction({
+      functionName: "migrateDynamicPageSettings",
+      contextData: { dryRun: false }
+    });
+    const retryIdsResult = await args.executeNamedServerFunction({
+      functionName: "getTableIds",
+      contextData: { tableKey }
+    });
+    ids = retryIdsResult?.result?.data;
+    if (retryIdsResult?.result?.success && ids?.schemaKeys) {
+      partsResult = await loadPartsFromNeo4j(ids);
+    }
+  } catch (migrateError) {
+    console.error("loadTableConfigByKey: migration failed", migrateError);
+  }
+}
+
+if (!partsResult.success) {
+  return { success: false, message: partsResult.message || `No table schema found for ${tableKey}` };
+}
+
+return {
+  success: true,
+  data: {
+    partVertexIds: partsResult.partVertexIds,
+    ids
+  },
+  graph: partsResult.graph,
+  message: "Table schema parts loaded"
+};
+'''
+        key: loadTableConfigByKey
+      }
+    }
+  ]
+  edges: []
+}

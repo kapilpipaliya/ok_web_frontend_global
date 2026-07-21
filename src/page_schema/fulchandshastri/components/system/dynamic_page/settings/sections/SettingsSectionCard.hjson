@@ -323,28 +323,24 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const isDanger = args.fns.isDangerVariant?.() === true;
+          '''const isDanger = args.fns.isDangerVariant?.() === true;
 return `._id {
   background: ${args.theme.var.color.background_light_100};
   border: 1px solid ${isDanger ? args.theme.var.color.error : args.theme.var.color.border};
   border-radius: ${args.theme.var.borderRadius.lg};
   margin-bottom: ${args.theme.var.spacing.lg};
   overflow: hidden;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const sectionConfig = args.fns.getSectionConfig();
+          '''const sectionConfig = args.fns.getSectionConfig();
 if (!sectionConfig) return { hide: true };
 args.fns.ensureInitialVertex();
 return {
   as: "section",
   "attr:data-section-id": sectionConfig.id
-};
-'''
+};'''
       }
     }
     {
@@ -352,22 +348,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   padding: ${args.theme.var.spacing.lg};
   border-bottom: 1px solid ${args.theme.var.color.border};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const sectionConfig = args.fns.getSectionConfig();
+          '''const sectionConfig = args.fns.getSectionConfig();
 return {
   as: "header",
   hide: !sectionConfig?.title && !sectionConfig?.description
-};
-'''
+};'''
       }
     }
     {
@@ -375,25 +367,21 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   font-size: 1.125rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
   margin: 0 0 ${args.theme.var.spacing.xs} 0;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const sectionConfig = args.fns.getSectionConfig();
+          '''const sectionConfig = args.fns.getSectionConfig();
 return {
   as: "h2",
   text: sectionConfig?.title || "",
   hide: !sectionConfig?.title
-};
-'''
+};'''
       }
     }
     {
@@ -401,25 +389,21 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   font-size: 0.875rem;
   color: ${args.theme.var.color.text_light_500};
   margin: 0;
   line-height: 1.5;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const sectionConfig = args.fns.getSectionConfig();
+          '''const sectionConfig = args.fns.getSectionConfig();
 return {
   as: "p",
   text: sectionConfig?.description || "",
   hide: !sectionConfig?.description
-};
-'''
+};'''
       }
     }
     {
@@ -427,16 +411,13 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   padding: ${args.theme.var.spacing.lg};
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: FormManagement
         props:
-          '''
-const sectionConfig = args.fns.getSectionConfig();
+          '''const sectionConfig = args.fns.getSectionConfig();
 const formConfig = args.fns.convertToFormConfig(sectionConfig);
 const initialVertex = args.fns.initialVertex();
 return {
@@ -451,8 +432,7 @@ return {
   onFnsReady: args.fns.registerFormManagementFns,
   onFieldChange: () => args.fns.markDirty(),
   hide: !formConfig || !initialVertex
-};
-'''
+};'''
       }
     }
     {
@@ -460,8 +440,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -469,17 +448,14 @@ return `._id {
   padding: ${args.theme.var.spacing.md} ${args.theme.var.spacing.lg};
   border-top: 1px solid ${args.theme.var.color.border};
   background: ${args.theme.var.color.background_light_50};
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   hide: !args.fns.showSectionActions()
-};
-'''
+};'''
       }
     }
     {
@@ -489,14 +465,12 @@ return {
         displayOrder: 1
         componentName: Button
         props:
-          '''
-return {
+          '''return {
   variant: "secondary",
   text: "Discard",
   onClick: args.fns.handleSectionDiscardClick,
   disabled: !args.fns.isSectionDirty() || args.fns.isSaving()
-};
-'''
+};'''
       }
     }
     {
@@ -506,14 +480,12 @@ return {
         displayOrder: 2
         componentName: Button
         props:
-          '''
-return {
+          '''return {
   variant: "primary",
   text: args.fns.isSaving() ? "Saving..." : "Save",
   onClick: args.fns.handleSectionSaveClick,
   disabled: !args.fns.isSectionDirty() || args.fns.isSaving()
-};
-'''
+};'''
       }
     }
   ]

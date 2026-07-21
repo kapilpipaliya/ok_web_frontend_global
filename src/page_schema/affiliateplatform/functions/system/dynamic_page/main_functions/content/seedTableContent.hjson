@@ -1,0 +1,202 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Seeds default content vertices for a table (generic). Supports Book and ScheduleEvent.
+        body:
+          '''
+const { tableVertexLabel, dryRun = false, replaceExisting = false } = args.contextData || {};
+
+if (!tableVertexLabel) {
+  return { success: false, message: "tableVertexLabel is required" };
+}
+
+const SEED_DATA = {
+  Book: [
+    {
+      title: "Atma Siddhi Shastra",
+      description: "A profound spiritual text offering deep insights into self-realization and the path to liberation. This masterpiece contains 142 verses that guide seekers on their spiritual journey.",
+      language: "English",
+      year: 2018
+    },
+    {
+      title: "आत्मसिद्धि शास्त्र",
+      description: "श्रीमद् राजचंद्र द्वारा रचित यह महान ग्रंथ आत्म-साक्षात्कार और मोक्ष के मार्ग को प्रकाशित करता है। १४२ श्लोकों में आध्यात्मिक ज्ञान का सार।",
+      language: "Hindi",
+      year: 2018
+    },
+    {
+      title: "આત્મસિદ્ધિ શાસ્ત્ર",
+      description: "શ્રીમદ્ રાજચંદ્ર દ્વારા રચાયેલ આ મહાન ગ્રંથ આત્મ-સાક્ષાત્કાર અને મોક્ષના માર્ગને પ્રકાશિત કરે છે.",
+      language: "Gujarati",
+      year: 2018
+    },
+    {
+      title: "Self Realization - A Deep Study",
+      description: "An in-depth exploration of the concept of self-realization, examining various aspects of spiritual awakening and the journey towards enlightenment.",
+      language: "English",
+      year: 2018
+    },
+    {
+      title: "ज्ञान से ज्ञायक तक",
+      description: "ज्ञान की यात्रा से लेकर ज्ञाता बनने तक का मार्ग। यह पुस्तक साधकों को आत्म-बोध की गहराइयों में ले जाती है।",
+      language: "Hindi",
+      year: 2018
+    },
+    {
+      title: "મારણ નો હરણ",
+      description: "મૃત્યુના ભયને કેવી રીતે દૂર કરવો અને આત્માની અમરતાને સમજવી તેના પર આધારિત આધ્યાત્મિક માર્ગદર્શન.",
+      language: "Gujarati",
+      year: 2018
+    },
+    {
+      title: "Multiple Viewpoints on Terrorism",
+      description: "A unique spiritual perspective on terrorism and violence, exploring the roots of hatred and the path to universal compassion and understanding.",
+      language: "English",
+      year: 2018
+    },
+    {
+      title: "वर्धमान से महावीर",
+      description: "भगवान महावीर के जीवन की यात्रा - एक राजकुमार से तीर्थंकर बनने तक की प्रेरणादायक कहानी।",
+      language: "Hindi",
+      year: 2018
+    }
+  ],
+  ScheduleEvent: [
+    {
+      startDate: "2026-01-06",
+      endDate: "2026-01-08",
+      place: "Gajapantha",
+      programme: "Kibauk Ka Bodh Shibar",
+      details: "Contact:\nDharmendra Jain +91-9898245201"
+    },
+    {
+      startDate: "2026-01-18",
+      endDate: "2026-01-21",
+      place: "Singapore",
+      programme: "Dharma Paryatan",
+      details: "Contact:\nDharmendra Jain +91-9898245201"
+    },
+    {
+      startDate: "2026-07-03",
+      endDate: "2026-07-06",
+      place: "Chowai, USA",
+      programme: "JAINA Convention",
+      details: "Contact:\nDharmendra Jain +91-9898245201"
+    },
+    {
+      startDate: "2026-08-16",
+      endDate: "2026-09-03",
+      place: "ASK Umarala",
+      programme: "Chaitanya Samaysar Paryushan Mahaparva 2026",
+      details: "Contact:\nDharmendra Jain +91-9898245201"
+    },
+    {
+      startDate: "2027-03-14",
+      endDate: "2027-03-16",
+      place: "Gajapantha (MP)",
+      programme: "Atma Sadhana",
+      details: "Contact:\nASK Umarala +91-9825242501"
+    },
+    {
+      startDate: "2026-02-15",
+      endDate: "2026-02-15",
+      place: "Delhi",
+      programme: "Dharma Paryatan",
+      details: "ASK Umarala +91-9825242501"
+    },
+    {
+      startDate: "2025-02-12",
+      endDate: "2025-02-14",
+      place: "Jaipur (RJ)",
+      programme: "Dharma Paryatan",
+      details: "Contact for Registration:\nDharmendra Jain +91-9898245201"
+    },
+    {
+      startDate: "2025-02-04",
+      endDate: "2025-02-09",
+      place: "Aurangabad (MH)",
+      programme: "Dharma Paryatan",
+      details: "Contact for Registration:\nSanjay Randhir +91-8329406215"
+    }
+  ]
+};
+
+const rows = SEED_DATA[tableVertexLabel];
+if (!Array.isArray(rows)) {
+  return { success: false, message: `No seed data defined for table ${tableVertexLabel}` };
+}
+
+const countResult = await args.session.run(
+  `MATCH (c:${tableVertexLabel}) RETURN count(c) AS cnt`
+);
+const existingCount = countResult.records[0]?.get("cnt")?.toNumber?.() ?? Number(countResult.records[0]?.get("cnt")) ?? 0;
+
+if (existingCount > 0 && !replaceExisting) {
+  return {
+    success: true,
+    message: `Skipped seed — ${existingCount} ${tableVertexLabel} row(s) already exist`,
+    data: { created: 0, skipped: true, existingCount }
+  };
+}
+
+if (dryRun) {
+  return {
+    success: true,
+    message: `Dry run — would seed ${rows.length} ${tableVertexLabel} row(s)`,
+    data: { created: rows.length, dryRun: true }
+  };
+}
+
+if (replaceExisting && existingCount > 0) {
+  await args.session.run(`MATCH (c:${tableVertexLabel}) DETACH DELETE c`);
+}
+
+const now = new Date().toISOString();
+let created = 0;
+
+for (let i = 0; i < rows.length; i++) {
+  const row = rows[i];
+  const props = tableVertexLabel === "ScheduleEvent"
+    ? {
+        startDate: row.startDate || "",
+        endDate: row.endDate || "",
+        place: row.place || "",
+        programme: row.programme || "",
+        details: row.details || ""
+      }
+    : {
+        title: row.title || "",
+        description: row.description || "",
+        language: row.language || "",
+        year: row.year ?? null
+      };
+  await args.session.run(
+    `
+    CREATE (c:${tableVertexLabel})
+    SET c += $props,
+        c.createdAt = $now,
+        c.updatedAt = $now
+    `,
+    {
+      props,
+      now
+    }
+  );
+  created += 1;
+}
+
+return {
+  success: true,
+  message: `Seeded ${created} ${tableVertexLabel} row(s)`,
+  data: { created }
+};
+'''
+        key: seedTableContent
+      }
+    }
+  ]
+  edges: []
+}

@@ -82,8 +82,7 @@
   text-align: center;
   font-size: 24px;
   font-weight: bold;
-}`;
-'''
+}`;'''
         as: div
         displayOrder: 4
         textType: markdown

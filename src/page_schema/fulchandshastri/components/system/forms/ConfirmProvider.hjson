@@ -13,15 +13,12 @@
       P: {
         contextName: confirmContext
         css:
-          '''
-return `._id {
+          '''return `._id {
   position: relative;
-}`;
-'''
+}`;'''
         displayOrder: 1
         fns:
-          '''
-// Global confirmation dialog state
+          '''// Global confirmation dialog state
 const [isConfirmDialogOpen, setIsConfirmDialogOpen] = args.createSignal(false);
 const [confirmDialogConfig, setConfirmDialogConfig] = args.createStore({
   title: "Confirm Action",
@@ -170,12 +167,10 @@ return {
   isNavigating,
   setIsNavigating,
   navigateTo
-};
-'''
+};'''
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   data: {
     showConfirm: args.fns.showConfirm,
@@ -183,8 +178,7 @@ return {
     confirmDialogConfig: args.fns.confirmDialogConfig,
     rbConfirm: args.fns.rbConfirm
   }
-};
-'''
+};'''
       }
     }
     {
@@ -203,8 +197,7 @@ return {
         displayOrder: 2
         componentName: ConfirmDialog
         props:
-          '''
-const isOpen = args.fns.isConfirmDialogOpen?.();
+          '''const isOpen = args.fns.isConfirmDialogOpen?.();
 const config = args.fns.confirmDialogConfig || {};
 
 return {
@@ -218,8 +211,7 @@ return {
   onConfirm: config.onConfirm,
   onCancel: config.onCancel,
   getUsePolarisUI: args.contextData.props?.getUsePolarisUI?.() === true
-};
-'''
+};'''
       }
     }
   ]

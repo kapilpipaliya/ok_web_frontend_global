@@ -14,8 +14,7 @@
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   background: ${args.theme.var.color.background};
   border: 1px solid ${args.theme.var.color.background_light_300};
   border-radius: 0.5rem;
@@ -35,21 +34,18 @@ return `._id {
     align-items: center;
     text-align: center;
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const book = args.contextData.props || {};
+          '''const book = args.contextData.props || {};
 const index = args.contextData.index ?? 0;
 return {
   as: "div",
   "data-animate": "",
 
   ref: (el) => el && args.fns.animateOnView(el, { delay: index * 0.1 })
-};
-'''
+};'''
       }
     }
     {
@@ -57,29 +53,25 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   width: 120px;
   height: 160px;
   object-fit: cover;
   border-radius: 0.25rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   flex-shrink: 0;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const book = args.contextData.props || {};
+          '''const book = args.contextData.props || {};
 return {
   as: "img",
   src: book.image || "https://www.fulchandshastri.com/wp-content/uploads/2018/01/placeholder-book.jpg",
   alt: book.title || "Book",
   width: 120,
   height: 160
-};
-'''
+};'''
       }
     }
     {
@@ -87,22 +79,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -110,25 +98,21 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   color: ${args.theme.var.color.text};
   font-size: 1.25rem;
   font-weight: 600;
   margin: 0;
   line-height: 1.4;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const book = args.contextData.props || {};
+          '''const book = args.contextData.props || {};
 return {
   as: "h3",
   text: book.title || "Book Title"
-};
-'''
+};'''
       }
     }
     {
@@ -136,24 +120,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   color: ${args.theme.var.color.text_light_200};
   font-size: 0.875rem;
   line-height: 1.6;
   margin: 0;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const book = args.contextData.props || {};
+          '''const book = args.contextData.props || {};
 return {
   as: "p",
   text: book.description || "Book description"
-};
-'''
+};'''
       }
     }
     {
@@ -161,24 +141,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
   align-items: center;
   font-size: 0.875rem;
   color: ${args.theme.var.color.text_light_300};
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -188,13 +164,11 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const book = args.contextData.props || {};
+          '''const book = args.contextData.props || {};
 return {
   as: "span",
   text: book.language || "Language: N/A"
-};
-'''
+};'''
       }
     }
     {
@@ -204,13 +178,11 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const book = args.contextData.props || {};
+          '''const book = args.contextData.props || {};
 return {
   as: "span",
   text: book.pages ? `Pages: ${book.pages}` : ""
-};
-'''
+};'''
       }
     }
     {
@@ -220,13 +192,11 @@ return {
         displayOrder: 3
         componentName: Html
         props:
-          '''
-const book = args.contextData.props || {};
+          '''const book = args.contextData.props || {};
 return {
   as: "span",
   text: book.price || "Price: N/A"
-};
-'''
+};'''
       }
     }
     {
@@ -234,22 +204,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   gap: 1rem;
   margin-top: 0.5rem;
-}`;
-'''
+}`;'''
         displayOrder: 4
         componentName: Html
         props:
-          '''
-const book = args.contextData.props || {};
+          '''const book = args.contextData.props || {};
 return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -257,8 +223,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -274,20 +239,17 @@ return `._id {
     background: ${args.theme.var.color.primary_dark_200};
     transform: translateY(-1px);
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const book = args.contextData.props || {};
+          '''const book = args.contextData.props || {};
 return {
   as: "a",
   href: book.downloadUrl || "#",
   target: "_blank",
   rel: "noopener noreferrer"
-};
-'''
+};'''
       }
     }
     {
@@ -297,14 +259,12 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "icon",
   icon: "carbon:download",
   width: 16,
   height: 16
-};
-'''
+};'''
       }
     }
     {
@@ -314,12 +274,10 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "span",
   text: "Download"
-};
-'''
+};'''
       }
     }
     {
@@ -327,8 +285,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -345,20 +302,17 @@ return `._id {
     background: ${args.theme.var.color.background_light_300};
     transform: translateY(-1px);
   }
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const book = args.contextData.props || {};
+          '''const book = args.contextData.props || {};
 return {
   as: "a",
   href: book.readUrl || "#",
   target: "_blank",
   rel: "noopener noreferrer"
-};
-'''
+};'''
       }
     }
     {
@@ -368,14 +322,12 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "icon",
   icon: "carbon:document",
   width: 16,
   height: 16
-};
-'''
+};'''
       }
     }
     {
@@ -385,12 +337,10 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "span",
   text: "Read Online"
-};
-'''
+};'''
       }
     }
   ]

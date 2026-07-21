@@ -16,32 +16,9 @@
     }
     {
       id: "2"
-      L: Attr
+      L: PageLayout
       P: {
-        css:
-          '''return `._id {
-  padding: 1rem;
-}`;
-'''
-        displayOrder: 2
-        fns:
-          '''
-const [activeTab, setActiveTab] = args.createSignal("by");
-return {
-  activeTab,
-  setActiveTab,
-  isByTab: () => activeTab() === "by",
-  isRecommendedTab: () => activeTab() === "recommended"
-};
-'''
-        componentName: Html
-        key: unique_2
-        props:
-          '''
-return {
-  as: "main"
-};
-'''
+        componentName: Layout
       }
     }
     {
@@ -49,21 +26,24 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
-  max-width: 1200px;
-  margin: 0 auto;
-}`;
-'''
-        displayOrder: 1
-        componentName: Html
-        key: unique_3
-        props:
-          '''
+          '''return `._id {
+  padding: 1rem;
+}`;'''
+        displayOrder: 2
+        fns:
+          '''const [activeTab, setActiveTab] = args.createSignal("by");
 return {
-  as: "div"
-};
-'''
+  activeTab,
+  setActiveTab,
+  isByTab: () => activeTab() === "by",
+  isRecommendedTab: () => activeTab() === "recommended"
+};'''
+        componentName: Html
+        key: unique_2
+        props:
+          '''return {
+  as: "main"
+};'''
       }
     }
     {
@@ -71,8 +51,25 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        key: unique_3
+        props:
+          '''return {
+  as: "div"
+};'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
   color: ${args.theme.var.color.text};
   font-size: 3rem;
   font-weight: 700;
@@ -81,8 +78,7 @@ return `._id {
   @media (max-width: 768px) {
     font-size: 2rem;
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         text: ""
@@ -92,12 +88,11 @@ return `._id {
 return {
   as: "h1",
   text: content?.pageTitle || "छह ढाला-षट्पद विवेचन",
-};
-'''
+};'''
       }
     }
     {
-      id: "5"
+      id: "6"
       L: Attr
       P: {
         as: div
@@ -107,44 +102,37 @@ return {
         key: unique_1
       }
     }
-    {
-      id: "6"
-      L: PageLayout
-      P: {
-        componentName: Layout
-      }
-    }
   ]
   edges: [
     {
       id: e1
-      T: Attr
+      T: PageLayout
       S: "1"
       E: "2"
     }
     {
       id: e2
-      T: PageLayout
-      S: "1"
-      E: "6"
-    }
-    {
-      id: e3
       T: Attr
-      S: "2"
+      S: "1"
       E: "3"
     }
     {
-      id: e4
+      id: e3
       T: Attr
       S: "3"
       E: "4"
     }
     {
+      id: e4
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
       id: e5
       T: Attr
-      S: "3"
-      E: "5"
+      S: "4"
+      E: "6"
     }
   ]
 }

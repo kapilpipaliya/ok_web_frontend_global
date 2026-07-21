@@ -16,8 +16,7 @@
         css:
           '''return `._id {
   width: 100%;
-}`;
-'''
+}`;'''
         displayOrder: 1
         fns:
           '''// https://www.embla-carousel.com/docs/get-started/solid
@@ -100,15 +99,13 @@ return {
   slideSpacing: () => args.contextData.props?.slideSpacing || "0",
   showArrows: () => args.contextData.props?.showArrows !== false,
   showDots: () => args.contextData.props?.showDots !== false
-};
-'''
+};'''
         componentName: Html
         props:
           '''return {
   as: "div",
   class: args.contextData.props.class
-};
-'''
+};'''
       }
     }
     {
@@ -124,8 +121,7 @@ return {
         props:
           '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -142,8 +138,7 @@ return {
         props:
           '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -192,8 +187,7 @@ return {
     }
     return () => args.fns.emblaRef(undefined);
   }
-};
-'''
+};'''
       }
     }
     {
@@ -231,8 +225,7 @@ return {
   contextName: "control",
   loop: true,
   hide: !args.fns.showArrows()
-};
-'''
+};'''
       }
     }
     {
@@ -301,8 +294,7 @@ return {
   disabled,
   onClick: control.onClick,
   "aria-label": control.ariaLabel
-};
-'''
+};'''
       }
     }
     {
@@ -317,8 +309,7 @@ return {
   icon: args.contextData.control.icon,
   width: 18,
   height: 18
-};
-'''
+};'''
       }
     }
     {
@@ -343,8 +334,7 @@ return {
   contextName: "dotIndex",
   loop: true,
   hide: !args.fns.showDots()
-};
-'''
+};'''
       }
     }
     {
@@ -393,8 +383,7 @@ return {
   onClick: () => args.fns.onDotButtonClick(index),
   "aria-label": "Go to slide " + (index + 1),
   "aria-current": selected ? "true" : undefined
-};
-'''
+};'''
       }
     }
   ]

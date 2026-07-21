@@ -1,0 +1,87 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Loads configured site languages from GlobalSetting. Uses a direct document query to avoid recursion via loadSettingsPage/mergeDefaults.
+        body:
+          '''
+const DEFAULT_LANGUAGES = [
+  { code: "en", label: "English", isDefault: true },
+  { code: "hi", label: "Hindi", isDefault: false },
+  { code: "gu", label: "Gujarati", isDefault: false }
+];
+
+const parseJsonSafe = (value, fallback) => {
+  if (value == null) return fallback;
+  if (typeof value === "object") return value;
+  try { return JSON.parse(String(value)); } catch { return fallback; }
+};
+
+const normalizeLanguages = (rawList) => {
+  if (!Array.isArray(rawList) || rawList.length === 0) return DEFAULT_LANGUAGES;
+
+  let languages = rawList
+    .filter((item) => item?.code != null && String(item.code).trim() !== "")
+    .map((item) => ({
+      code: String(item.code).trim(),
+      label: item.label != null ? String(item.label) : String(item.code).trim(),
+      isDefault: item.isDefault === true
+    }));
+
+  if (languages.length === 0) return DEFAULT_LANGUAGES;
+
+  if (!languages.some((lang) => lang.isDefault === true)) {
+    languages = languages.map((lang, index) => ({
+      ...lang,
+      isDefault: index === 0
+    }));
+  }
+
+  return languages;
+};
+
+try {
+  const result = await args.session.run(
+    `
+    MATCH (g:GlobalSetting {key: 'Default'})-[:GlobalSettingHasSettingsSection]->(doc:SettingsSectionDocument {
+      pageId: 'global',
+      sectionId: 'siteLanguages'
+    })
+    RETURN doc.values AS values
+    LIMIT 1
+    `
+  );
+
+  if (result.records.length === 0) {
+    return {
+      success: true,
+      data: { languages: DEFAULT_LANGUAGES },
+      message: "Using default site languages (no document found)"
+    };
+  }
+
+  const values = parseJsonSafe(result.records[0].get("values"), {});
+  const languages = normalizeLanguages(values?.languages);
+
+  return {
+    success: true,
+    data: { languages },
+    message: "Site languages loaded"
+  };
+} catch (error) {
+  console.error("getSiteLanguages:", error);
+  return {
+    success: true,
+    data: { languages: DEFAULT_LANGUAGES },
+    message: "Using default site languages"
+  };
+}
+'''
+        key: getSiteLanguages
+      }
+    }
+  ]
+  edges: []
+}

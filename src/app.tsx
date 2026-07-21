@@ -57,7 +57,24 @@ const ErrorFallback = (props: {
 export default function App() {
   const graph = createAppState();
   const [isHydrated, setIsHydrated] = createSignal(false);
+  // Never SSR a full-screen blur (starts false).
+  const [showLoader, setShowLoader] = createSignal(true);
+  const Toaster = clientOnly(() => import("./Toaster"));
 
+  // Show blur only if hydration is slow; onMount cancels before it fires on fast loads.
+  const cancelHydrationLoader = makeTimer(
+    () => setShowLoader(false),
+    HYDRATION_LOADER_DELAY_MS,
+    setTimeout,
+  );
+
+  onMount(() => {
+    if (isServer) return;
+    setupGlobalErrorHandlers();
+    cancelHydrationLoader?.();
+    // Set isHydrated to true after a short delay to ensure components are ready
+    makeTimer(() => setIsHydrated(true), 100, setTimeout);
+  });
 
   return (
     <ToastProvider {...toastValue}>
@@ -136,7 +153,10 @@ export default function App() {
                     />
                     {/* </Show> */}
                   </Show>
-
+                  <NoHydration>
+                    <NavigationProgressBar />
+                    <HydrationLoader show={showLoader()} />
+                  </NoHydration>
                 </ErrorBoundary>
               </MetaProvider>
             );

@@ -1,0 +1,832 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        dynamicComponent: TextInput, Button, IconButton, Html
+        description: Visual editor for fieldArray schema config and item fields (schema only).
+        fns:
+          '''
+const getProps = () => args.contextData.props || {};
+const getField = () => getProps().field || {};
+const DEFAULT_SITE_LANGUAGES = [
+  { code: "en", label: "English", isDefault: true },
+  { code: "hi", label: "Hindi", isDefault: false },
+  { code: "gu", label: "Gujarati", isDefault: false }
+];
+const getSiteLanguages = () => {
+  const languages = getProps().siteLanguages;
+  if (Array.isArray(languages) && languages.length > 0) return languages;
+  return DEFAULT_SITE_LANGUAGES;
+};
+
+const isTextRenderer = (renderer) => renderer === "text" || renderer === "textArea";
+
+const emitPatch = (patch) => {
+  const onChange = getProps().onChange;
+  if (typeof onChange === "function") onChange(patch);
+};
+
+const defaultConfig = () => ({
+  itemLabel: "Item",
+  addButtonLabel: "Add item",
+  itemFields: [
+    { key: "title", label: "Title", dataType: "text", renderer: "text", required: true, translatable: true }
+  ]
+});
+
+const getConfig = () => {
+  const config = getField().fieldArrayConfig;
+  if (!config || typeof config !== "object") return defaultConfig();
+  return {
+    ...defaultConfig(),
+    ...config,
+    itemFields: Array.isArray(config.itemFields) ? config.itemFields.map((f) => ({ ...f })) : defaultConfig().itemFields
+  };
+};
+
+const getItemFields = () => {
+  const fields = getConfig().itemFields;
+  return Array.isArray(fields) ? fields.map((field) => ({ ...field })) : [];
+};
+
+const getItemFieldIndices = () => {
+  const fields = getItemFields();
+  const indices = [];
+  for (let index = 0; index < fields.length; index++) indices.push(index);
+  return indices;
+};
+
+const getItemFieldAt = (index) => getItemFields()[index] || {};
+
+const updateConfig = (partial) => {
+  emitPatch({ fieldArrayConfig: { ...getConfig(), ...partial } });
+};
+
+const setItemFields = (itemFields) => updateConfig({ itemFields });
+
+const addItemField = () => {
+  const fields = getItemFields();
+  setItemFields([
+    ...fields,
+    {
+      key: `field_${Date.now()}`,
+      label: "New field",
+      dataType: "text",
+      renderer: "text",
+      translatable: false,
+      required: false
+    }
+  ]);
+};
+
+const updateItemFieldAt = (index, partial) => {
+  const fields = getItemFields();
+  setItemFields(fields.map((field, i) => (i === index ? { ...field, ...partial } : field)));
+};
+
+const deleteItemField = (index) => {
+  setItemFields(getItemFields().filter((_, i) => i !== index));
+};
+
+return {
+  getConfig,
+  getSiteLanguages,
+  getItemFieldIndices,
+  getItemFieldAt,
+  updateConfig,
+  addItemField,
+  updateItemFieldAt,
+  deleteItemField
+};
+'''
+        key: FieldArraySchemaEditor
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const field = args.contextData.props?.field;
+return {
+  as: "div",
+  hide: !field || field.renderer !== "fieldArray"
+};'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''return `._id.faf-config-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background_light_50};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "div", class: "faf-config-section" };
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''return `._id.faf-section-title {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h4",
+  text: "Array settings",
+  class: "faf-section-title"
+};'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''return `._id.faf-config-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.625rem;
+  width: 100%;
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props: return { as: "div", class: "faf-config-grid" };
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: TextInput
+        props:
+          '''const config = args.fns.getConfig?.() || {};
+return {
+  label: "Item label",
+  value: config.itemLabel || "",
+  placeholder: "Item",
+  onChange: (e) => args.fns.updateConfig?.({ itemLabel: e.target.value })
+};'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: TextInput
+        props:
+          '''const config = args.fns.getConfig?.() || {};
+return {
+  label: "Add button label",
+  value: config.addButtonLabel || "",
+  placeholder: "Add item",
+  onChange: (e) => args.fns.updateConfig?.({ addButtonLabel: e.target.value })
+};'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: TextInput
+        props:
+          '''const config = args.fns.getConfig?.() || {};
+return {
+  label: "Min items",
+  type: "number",
+  value: config.minItems != null ? String(config.minItems) : "",
+  placeholder: "0",
+  onChange: (e) => {
+    const raw = e.target.value;
+    args.fns.updateConfig?.({
+      minItems: raw === "" ? undefined : Number(raw)
+    });
+  }
+};'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: TextInput
+        props:
+          '''const config = args.fns.getConfig?.() || {};
+return {
+  label: "Max items",
+  type: "number",
+  value: config.maxItems != null ? String(config.maxItems) : "",
+  placeholder: "No limit",
+  onChange: (e) => {
+    const raw = e.target.value;
+    args.fns.updateConfig?.({
+      maxItems: raw === "" ? undefined : Number(raw)
+    });
+  }
+};'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''return `._id.faf-item-fields-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  padding: 0.75rem;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background};
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props: return { as: "div", class: "faf-item-fields-section" };
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''return `._id.faf-item-fields-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "div", class: "faf-item-fields-header" };
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        css:
+          '''return `._id.faf-section-title {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h4",
+  text: "Item fields",
+  class: "faf-section-title"
+};'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''return {
+  variant: "secondary",
+  size: "sm",
+  text: "Add field",
+  type: "button",
+  onClick: () => args.fns.addItemField?.()
+};'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        css:
+          '''return `._id.faf-item-fields-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props: return { as: "div", class: "faf-item-fields-list" };
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        contextName: fafItemFieldIndex
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  data: args.fns.getItemFieldIndices?.() || []
+};'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        css:
+          '''return `._id.faf-item-field-row {
+  display: grid;
+  grid-template-columns: minmax(5rem, 1fr) minmax(6rem, 1.2fr) minmax(6rem, 1fr) auto auto;
+  gap: 0.5rem;
+  align-items: end;
+  padding: 0.625rem;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.375rem;
+  background: ${args.theme.var.color.background_light_50};
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "div", class: "faf-item-field-row" };
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: TextInput
+        props:
+          '''const index = args.contextData.fafItemFieldIndex;
+const itemField = args.fns.getItemFieldAt?.(index) || {};
+return {
+  label: "Key",
+  value: itemField.key || "",
+  onChange: (e) => args.fns.updateItemFieldAt?.(index, { key: e.target.value })
+};'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: TextInput
+        props:
+          '''const index = args.contextData.fafItemFieldIndex;
+const itemField = args.fns.getItemFieldAt?.(index) || {};
+return {
+  label: "Label",
+  value: itemField.label || "",
+  onChange: (e) => args.fns.updateItemFieldAt?.(index, { label: e.target.value })
+};'''
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        css:
+          '''return `._id.faf-renderer-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props: return { as: "div", class: "faf-renderer-wrap" };
+      }
+    }
+    {
+      id: "20"
+      L: Attr
+      P: {
+        css:
+          '''return `._id.faf-field-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: ${args.theme.var.color.text_light_500};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "label",
+  text: "Renderer",
+  class: "faf-field-label"
+};'''
+      }
+    }
+    {
+      id: "21"
+      L: Attr
+      P: {
+        css:
+          '''return `._id.faf-renderer-select {
+  width: 100%;
+  padding: 0.5rem 0.625rem;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.375rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  font-size: 0.8125rem;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const index = args.contextData.fafItemFieldIndex;
+const itemField = args.fns.getItemFieldAt?.(index) || {};
+const renderer = itemField.renderer || "text";
+return {
+  as: "select",
+  class: "faf-renderer-select",
+  value: renderer,
+  onChange: (e) => {
+    const nextRenderer = e.target.value;
+    const dataType = nextRenderer === "checkbox" ? "boolean" : "text";
+    args.fns.updateItemFieldAt?.(index, {
+      renderer: nextRenderer,
+      dataType
+    });
+  }
+};'''
+      }
+    }
+    {
+      id: "22"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "option", text: "Text", value: "text" };
+      }
+    }
+    {
+      id: "23"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props: return { as: "option", text: "Text area", value: "textArea" };
+      }
+    }
+    {
+      id: "24"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props: return { as: "option", text: "Checkbox", value: "checkbox" };
+      }
+    }
+    {
+      id: "25"
+      L: Attr
+      P: {
+        css:
+          '''return `._id.faf-required-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding-bottom: 0.5rem;
+  white-space: nowrap;
+}`;'''
+        displayOrder: 4
+        componentName: Html
+        props: return { as: "div", class: "faf-required-wrap" };
+      }
+    }
+    {
+      id: "26"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const index = args.contextData.fafItemFieldIndex;
+const itemField = args.fns.getItemFieldAt?.(index) || {};
+return {
+  as: "input",
+  type: "checkbox",
+  checked: itemField.required === true,
+  onChange: (e) => args.fns.updateItemFieldAt?.(index, { required: e.target.checked })
+};'''
+      }
+    }
+    {
+      id: "27"
+      L: Attr
+      P: {
+        css:
+          '''return `._id.faf-required-text {
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.text};
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "span",
+  text: "Required",
+  class: "faf-required-text"
+};'''
+      }
+    }
+    {
+      id: "28"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: IconButton
+        props:
+          '''const index = args.contextData.fafItemFieldIndex;
+return {
+  icon: "ph:trash",
+  variant: "danger",
+  size: "sm",
+  title: "Remove item field",
+  onClick: () => args.fns.deleteItemField?.(index)
+};'''
+      }
+    }
+    {
+      id: "29"
+      L: Attr
+      P: {
+        css:
+          '''return `._id.faf-translatable-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding-bottom: 0.5rem;
+  white-space: nowrap;
+}`;'''
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''const index = args.contextData.fafItemFieldIndex;
+const itemField = args.fns.getItemFieldAt?.(index) || {};
+const isTextField = itemField.renderer === "text" || itemField.renderer === "textArea";
+return {
+  as: "div",
+  hide: !isTextField,
+  class: "faf-translatable-wrap"
+};'''
+      }
+    }
+    {
+      id: "30"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const index = args.contextData.fafItemFieldIndex;
+const itemField = args.fns.getItemFieldAt?.(index) || {};
+return {
+  as: "input",
+  type: "checkbox",
+  checked: itemField.translatable === true,
+  onChange: (e) => args.fns.updateItemFieldAt?.(index, { translatable: e.target.checked })
+};'''
+      }
+    }
+    {
+      id: "31"
+      L: Attr
+      P: {
+        css:
+          '''return `._id.faf-translatable-text {
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.text};
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "span",
+  text: "Translatable",
+  class: "faf-translatable-text"
+};'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "10"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "5"
+      E: "7"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "5"
+      E: "8"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "5"
+      E: "9"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "10"
+      E: "11"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "10"
+      E: "14"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "11"
+      E: "12"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "11"
+      E: "13"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "14"
+      E: "15"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "15"
+      E: "16"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "16"
+      E: "17"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "16"
+      E: "18"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "16"
+      E: "19"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "16"
+      E: "25"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "16"
+      E: "28"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "16"
+      E: "29"
+    }
+    {
+      id: e22
+      T: Attr
+      S: "19"
+      E: "20"
+    }
+    {
+      id: e23
+      T: Attr
+      S: "19"
+      E: "21"
+    }
+    {
+      id: e24
+      T: Attr
+      S: "21"
+      E: "22"
+    }
+    {
+      id: e25
+      T: Attr
+      S: "21"
+      E: "23"
+    }
+    {
+      id: e26
+      T: Attr
+      S: "21"
+      E: "24"
+    }
+    {
+      id: e27
+      T: Attr
+      S: "25"
+      E: "26"
+    }
+    {
+      id: e28
+      T: Attr
+      S: "25"
+      E: "27"
+    }
+    {
+      id: e29
+      T: Attr
+      S: "29"
+      E: "30"
+    }
+    {
+      id: e30
+      T: Attr
+      S: "29"
+      E: "31"
+    }
+  ]
+}

@@ -14,23 +14,19 @@
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   background: linear-gradient(135deg, #f5e6d3 0%, #e8d5b7 100%);
   padding: 3rem 1rem;
   min-height: 500px;
   position: relative;
   overflow: hidden;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "section"
-};
-'''
+};'''
       }
     }
     {
@@ -38,8 +34,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   position: absolute;
   top: 0;
   left: 0;
@@ -49,16 +44,13 @@ return `._id {
   background-repeat: repeat;
   opacity: 0.1;
   pointer-events: none;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -66,22 +58,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   max-width: 1200px;
   margin: 0 auto;
   position: relative;
   z-index: 1;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -89,8 +77,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -101,16 +88,13 @@ return `._id {
     flex-direction: column;
     gap: 2rem;
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -118,8 +102,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   width: 400px;
   height: 500px;
   background: #faf8f3;
@@ -148,16 +131,13 @@ return `._id {
     max-width: 350px;
     transform: none;
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -165,20 +145,16 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   text-align: center;
   z-index: 1;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -186,19 +162,15 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   margin-bottom: 1.5rem;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -206,17 +178,14 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   border: 3px solid #8b6914;
   border-radius: 4px;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const hero = args.contextData.props || {};
+          '''const hero = args.contextData.props || {};
 return {
   as: "iframe",
   src: hero.leftVideoUrl || "https://www.youtube.com/embed/dQw4w9WgXcQ",
@@ -224,8 +193,7 @@ return {
   height: 200,
   frameborder: "0",
   allowfullscreen: true
-};
-'''
+};'''
       }
     }
     {
@@ -233,24 +201,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   color: #8b6914;
   font-size: 1.5rem;
   margin-bottom: 1rem;
   font-family: 'Noto Sans Devanagari', sans-serif;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const hero = args.contextData.props || {};
+          '''const hero = args.contextData.props || {};
 return {
   as: "h3",
   text: hero.leftTitle || "आत्मज्ञान की यात्रा"
-};
-'''
+};'''
       }
     }
     {
@@ -258,23 +222,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   color: #5a4a3a;
   font-size: 1rem;
   font-family: 'Noto Sans Devanagari', sans-serif;
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-const hero = args.contextData.props || {};
+          '''const hero = args.contextData.props || {};
 return {
   as: "p",
   text: hero.leftDesc || "श्रीमद् राजचंद्र के उपदेशों का प्रसार"
-};
-'''
+};'''
       }
     }
     {
@@ -282,8 +242,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   width: 400px;
   height: 500px;
   background: #faf8f3;
@@ -312,16 +271,13 @@ return `._id {
     max-width: 350px;
     transform: none;
   }
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -329,20 +285,16 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   text-align: center;
   z-index: 1;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -350,19 +302,15 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   margin-bottom: 1.5rem;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -370,17 +318,14 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   border: 3px solid #8b6914;
   border-radius: 4px;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const hero = args.contextData.props || {};
+          '''const hero = args.contextData.props || {};
 return {
   as: "iframe",
   src: hero.rightVideoUrl || "https://www.youtube.com/embed/dQw4w9WgXcQ",
@@ -388,8 +333,7 @@ return {
   height: 200,
   frameborder: "0",
   allowfullscreen: true
-};
-'''
+};'''
       }
     }
     {
@@ -397,8 +341,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   background: #8b6914;
   color: #faf8f3;
   padding: 0.75rem 1.5rem;
@@ -408,18 +351,15 @@ return `._id {
   margin-bottom: 1rem;
   text-align: center;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const hero = args.contextData.props || {};
+          '''const hero = args.contextData.props || {};
 return {
   as: "h2",
   text: hero.watchButtonText || "WATCH OR LISTEN TO HIM ONLINE"
-};
-'''
+};'''
       }
     }
     {
@@ -427,25 +367,21 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   color: #5a4a3a;
   font-size: 0.875rem;
   line-height: 1.6;
   text-align: justify;
   padding: 0 1rem;
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-const hero = args.contextData.props || {};
+          '''const hero = args.contextData.props || {};
 return {
   as: "p",
   text: hero.rightDesc || ""
-};
-'''
+};'''
       }
     }
   ]

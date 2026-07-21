@@ -117,7 +117,8 @@ return {
 };
 '''
         key: Layout
-        updatedAt: 2026-07-17T11:49:42.503Z
+        props: ""
+        updatedAt: 2026-07-19T01:51:03.397Z
       }
     }
     {
@@ -127,33 +128,33 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "style",
   text: `[data-animate]:not([data-motion-init]) { opacity: 0; }
 
 @media (prefers-reduced-motion: reduce) {
   [data-animate] { opacity: 1; }
 }`
-};
-'''
+};'''
       }
     }
     {
       id: "3"
       L: Attr
       P: {
+        css:
+          '''return `html {
+  font-size: 18px;
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "script",
   type: "module",
   text: `import { animate, scroll, inView } from "https://cdn.jsdelivr.net/npm/motion@latest/+esm";
 window.__motion = { animate, scroll, inView };`
-};
-'''
+};'''
       }
     }
     {
@@ -168,8 +169,7 @@ window.__motion = { animate, scroll, inView };`
   flex-direction: column;
   background: ${args.theme.var.color.background};
   color: ${args.theme.var.color.text};
-}`;
-'''
+}`;'''
         displayOrder: 4
         fns:
           '''// Global state for cookie consent
@@ -361,8 +361,7 @@ return {
   isKeptAwake,
   enableKeepAwake,
   disableKeepAwake
-};
-'''
+};'''
         componentName: Html
         props:
           '''return {
@@ -398,8 +397,7 @@ return {
       document.head.appendChild(script);
     }
   },
-};
-'''
+};'''
       }
     }
     {
@@ -408,10 +406,7 @@ return {
       P: {
         displayOrder: 1
         componentName: Header
-        props:
-          '''
-return {};
-'''
+        props: return {};
       }
     }
     {
@@ -419,21 +414,17 @@ return {};
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   flex: 1;
   width: 100%;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   "data-fulchand-page-main": ""
-};
-'''
+};'''
       }
     }
     {
@@ -451,14 +442,10 @@ return {
         css:
           '''return `._id {
   width:100%;
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Footer
-        props:
-          '''
-return {};
-'''
+        props: return {};
       }
     }
     {
@@ -469,8 +456,7 @@ return {};
         componentName: VideoPlayer
         key: unique_1
         props:
-          '''
-return {
+          '''return {
   playerState: args.fns.playerState,
   currentVideo: args.fns.currentVideo,
   videoQueue: args.fns.videoQueue,
@@ -484,8 +470,7 @@ return {
   removeFromQueue: args.fns.removeFromQueue,
   clearQueue: args.fns.clearQueue,
   openQueueModal: args.fns.openQueueModal
-};
-'''
+};'''
       }
     }
     {
@@ -495,8 +480,7 @@ return {
         displayOrder: 5
         componentName: QueueModal
         props:
-          '''
-return {
+          '''return {
   isOpen: args.fns.isQueueModalOpen,
   onClose: args.fns.closeQueueModal,
   videoQueue: args.fns.videoQueue,
@@ -506,8 +490,7 @@ return {
   clearQueue: args.fns.clearQueue,
   reorderQueue: args.fns.reorderQueue,
   executeYTOFunction: args.fns.executeYTOFunction
-};
-'''
+};'''
       }
     }
   ]

@@ -157,16 +157,14 @@ return {
         displayOrder: 1
         componentName: ContentModal
         props:
-          '''
-const p = args.fns.getProps();
+          '''const p = args.fns.getProps();
 return {
   isOpen: p.isOpen === true,
   title: p.title || "Review items",
   maxWidth: p.maxWidth || "1100px",
   usePolarisUI: p.usePolarisUI === true,
   onClose: () => args.fns.handleCancel?.()
-};
-'''
+};'''
       }
     }
     {
@@ -175,16 +173,14 @@ return {
       P: {
         slotName: children
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
   min-height: 0;
   max-height: calc(90vh - 5rem);
   padding: 1rem 1.25rem 1.25rem;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props: return { as: "div" };
@@ -195,24 +191,20 @@ return `._id {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   margin: 0;
   font-size: 0.875rem;
   color: ${args.theme.var.color.text_dark_400};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const hint = args.fns.getProps()?.hint;
+          '''const hint = args.fns.getProps()?.hint;
 return {
   as: "p",
   text: hint || "",
   hide: !hint
-};
-'''
+};'''
       }
     }
     {
@@ -220,25 +212,21 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   margin: 0;
   padding: 1.5rem 0.5rem;
   text-align: center;
   color: ${args.theme.var.color.text_dark_400};
   font-size: 0.9rem;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "p",
   text: args.fns.getProps()?.emptyHint || "No rows.",
   hide: args.fns.getRows().length > 0
-};
-'''
+};'''
       }
     }
     {
@@ -247,27 +235,23 @@ return {
       P: {
         contextName: draftRow
         css:
-          '''
-return `._id {
+          '''return `._id {
   flex: 1;
   min-height: 0;
   overflow: auto;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-}`;
-'''
+}`;'''
         loop: true
         displayOrder: 3
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div",
   data: args.fns.getRows(),
   hide: args.fns.getRows().length === 0
-};
-'''
+};'''
       }
     }
     {
@@ -275,8 +259,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -284,8 +267,7 @@ return `._id {
   border: 1px solid ${args.theme.var.color.border};
   border-radius: 0.5rem;
   background: ${args.theme.var.color.background};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props: return { as: "article" };
@@ -296,13 +278,11 @@ return `._id {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props: return { as: "div" };
@@ -313,8 +293,7 @@ return `._id {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   width: 72px;
   height: 52px;
   border-radius: 0.375rem;
@@ -325,19 +304,16 @@ return `._id {
   justify-content: center;
   overflow: hidden;
   flex-shrink: 0;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const draftRow = args.contextData.draftRow;
+          '''const draftRow = args.contextData.draftRow;
 const url = args.fns.getPreviewUrl(draftRow);
 return {
   as: "div",
   "attr:aria-label": url ? "File preview" : "No preview"
-};
-'''
+};'''
       }
     }
     {
@@ -345,26 +321,22 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   width: 100%;
   height: 100%;
   object-fit: cover;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const draftRow = args.contextData.draftRow;
+          '''const draftRow = args.contextData.draftRow;
 const url = args.fns.getPreviewUrl(draftRow);
 return {
   as: "img",
   src: url,
   alt: draftRow?.fileName || "Preview",
   hide: !url
-};
-'''
+};'''
       }
     }
     {
@@ -374,8 +346,7 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const draftRow = args.contextData.draftRow;
+          '''const draftRow = args.contextData.draftRow;
 const url = args.fns.getPreviewUrl(draftRow);
 const mime = String(draftRow?.mimeType || draftRow?.fileType || "");
 let icon = "ph:file";
@@ -387,8 +358,7 @@ return {
   width: 22,
   height: 22,
   hide: !!url
-};
-'''
+};'''
       }
     }
     {
@@ -396,8 +366,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   flex: 1;
   min-width: 0;
   font-size: 0.875rem;
@@ -406,18 +375,15 @@ return `._id {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const draftRow = args.contextData.draftRow;
+          '''const draftRow = args.contextData.draftRow;
 return {
   as: "div",
   text: draftRow?.fileName || "File"
-};
-'''
+};'''
       }
     }
     {
@@ -425,8 +391,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   border: none;
   background: transparent;
   color: ${args.theme.var.color.error};
@@ -442,13 +407,11 @@ return `._id {
 ._id:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-const rowIndex = args.contextData.draftRow_index;
+          '''const rowIndex = args.contextData.draftRow_index;
 const draftRow = args.contextData.draftRow;
 const label = args.fns.getProps()?.removeRowLabel || "Remove";
 return {
@@ -458,8 +421,7 @@ return {
   disabled: args.fns.isConfirming(),
   onClick: () => args.fns.removeRow(draftRow, rowIndex),
   "attr:aria-label": label
-};
-'''
+};'''
       }
     }
     {
@@ -469,8 +431,7 @@ return {
         displayOrder: 2
         componentName: FormManagement
         props:
-          '''
-const p = args.fns.getProps();
+          '''const p = args.fns.getProps();
 const draftRow = args.contextData.draftRow;
 const rowIndex = args.contextData.draftRow_index;
 return {
@@ -482,8 +443,7 @@ return {
   onSave: args.fns.buildRowSaveHandler(draftRow, rowIndex),
   onFnsReady: (formApi) => args.fns.registerFormApi(draftRow, rowIndex, formApi),
   hide: !p.formConfig
-};
-'''
+};'''
       }
     }
     {
@@ -491,15 +451,13 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   justify-content: flex-end;
   gap: 0.5rem;
   flex-shrink: 0;
   padding-top: 0.25rem;
-}`;
-'''
+}`;'''
         displayOrder: 4
         componentName: Html
         props: return { as: "div" };
@@ -512,15 +470,13 @@ return `._id {
         displayOrder: 1
         componentName: Button
         props:
-          '''
-const p = args.fns.getProps();
+          '''const p = args.fns.getProps();
 return {
   text: p.cancelLabel || "Cancel",
   variant: "secondary",
   disabled: args.fns.isConfirming(),
   onClick: () => args.fns.handleCancel?.()
-};
-'''
+};'''
       }
     }
     {
@@ -530,16 +486,14 @@ return {
         displayOrder: 2
         componentName: Button
         props:
-          '''
-const p = args.fns.getProps();
+          '''const p = args.fns.getProps();
 const count = args.fns.getRows().length;
 return {
   text: p.confirmLabel || "Create",
   variant: "primary",
   disabled: args.fns.isConfirming() || count === 0,
   onClick: () => void args.fns.handleConfirm?.()
-};
-'''
+};'''
       }
     }
   ]

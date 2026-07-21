@@ -2858,28 +2858,24 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 16rem;
   width: 100%;
   background: ${args.theme.var.color.background};
-}`;
-'''
+}`;'''
         displayOrder: 0
         componentName: Html
         key: config_loading_overlay
         props:
-          '''
-const vid = args.fns.pageStateVertexId;
+          '''const vid = args.fns.pageStateVertexId;
 const configLoading = args.graph.vertexes[vid]?.P?.configLoading !== false;
 return {
   as: "div",
   hide: !configLoading
-};
-'''
+};'''
       }
     }
     {
@@ -2889,12 +2885,10 @@ return {
         displayOrder: 1
         componentName: LoadingSpinner
         props:
-          '''
-return {
+          '''return {
   size: "large",
   color: "primary"
-};
-'''
+};'''
       }
     }
     {
@@ -2902,8 +2896,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const embedded = args.contextData.props?.embeddedMode === true;
+          '''const embedded = args.contextData.props?.embeddedMode === true;
 const hasCompanions = args.fns.hasCompanionPages?.() === true;
 const splitRows = args.fns.getCompanionSplitGridRows?.();
 return `._id {
@@ -2920,21 +2913,18 @@ return `._id {
   flex-direction: column;
   flex: 1 1 auto;
   `}
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         key: dynamic_page_main_shell
         props:
-          '''
-const vid = args.fns.pageStateVertexId;
+          '''const vid = args.fns.pageStateVertexId;
 const configLoading = args.graph.vertexes[vid]?.P?.configLoading !== false;
 const isSettings = args.fns.isSettingsPageMode?.() === true;
 return {
   as: "div",
   hide: configLoading || isSettings || args.fns.isDashboardPageMode?.() === true
-};
-'''
+};'''
       }
     }
     {
@@ -2942,26 +2932,22 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   min-height: 0;
   min-width: 0;
   width: 100%;
   height: 100%;
   overflow: hidden;
   ${args.fns.hasCompanionPages?.() === true ? "" : "flex: 1 1 auto;"}
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         key: dynamic_page_primary_pane
         props:
-          '''
-return {
+          '''return {
   as: "div",
   ref: (el) => args.fns.setPrimaryPaneRef?.(el)
-};
-'''
+};'''
       }
     }
     {
@@ -2969,27 +2955,23 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   width: 100%;
   min-width: 0;
   min-height: 0;
   height: 100%;
   overflow: hidden;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         key: dynamic_page_wrapper
         props:
-          '''
-const hasSidebar = args.fns.hasSidebar();
+          '''const hasSidebar = args.fns.hasSidebar();
 const isSettings = args.fns.isSettingsPageMode?.() === true;
 return {
   as: "div",
   hide: !hasSidebar || isSettings || args.fns.isDashboardPageMode?.() === true
-};
-'''
+};'''
       }
     }
     {
@@ -3000,8 +2982,7 @@ return {
         componentName: Sidebar
         key: sidebar_component
         props:
-          '''
-const tableVertexLabel = args.fns.getTableVertexLabel();
+          '''const tableVertexLabel = args.fns.getTableVertexLabel();
 const tableSettingsLabel = args.fns.getTableSettingsLabel();
 const relationshipType = tableVertexLabel ? `User${tableSettingsLabel}` : null;
 
@@ -3025,8 +3006,7 @@ return {
     : args.contextData.props?.initialCategoryId,
   initialSelectedRowIds: args.fns.getInitialSelectedRowIds?.(),
   contentLabel: args.fns.prop('label')
-};
-'''
+};'''
       }
     }
     {
@@ -3039,8 +3019,7 @@ return {
         componentName: Table
         key: unique_1
         props:
-          '''
-const vid = args.fns.pageStateVertexId;
+          '''const vid = args.fns.pageStateVertexId;
 return {
   selectedSidebarItem: args.fns.selectedSidebarItem,
   getSelectedRows: args.fns.getSelectedRows,
@@ -3059,8 +3038,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -3069,22 +3047,19 @@ return `._id {
   height: 100%;
   overflow: hidden;
   flex: 1 1 auto;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         key: dynamic_page_no_sidebar_wrapper
         props:
-          '''
-const hasSidebar = args.fns.hasSidebar();
+          '''const hasSidebar = args.fns.hasSidebar();
 const vid = args.fns.pageStateVertexId;
 const configLoading = args.graph.vertexes[vid]?.P?.configLoading !== false;
 const isSettings = args.fns.isSettingsPageMode?.() === true;
 return {
   as: "div",
   hide: hasSidebar || configLoading || isSettings || args.fns.isDashboardPageMode?.() === true
-};
-'''
+};'''
       }
     }
     {
@@ -3096,8 +3071,7 @@ return {
         componentName: Table
         key: unique_2
         props:
-          '''
-const vid = args.fns.pageStateVertexId;
+          '''const vid = args.fns.pageStateVertexId;
 return {
   getSelectedRows: args.fns.getSelectedRows,
   setSelectedRows: args.fns.setSelectedRows,
@@ -3115,8 +3089,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const active = args.fns.companionResizeActive?.() === true;
+          '''const active = args.fns.companionResizeActive?.() === true;
 return `._id {
   width: 100%;
   height: 100%;
@@ -3152,14 +3125,12 @@ return `._id {
       background: ${args.theme.var.color.text_light_300};
     }
   }
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         key: dynamic_page_companion_resize
         props:
-          '''
-const active = args.fns.companionResizeActive?.() === true;
+          '''const active = args.fns.companionResizeActive?.() === true;
 return {
   as: "button",
   type: "button",
@@ -3174,8 +3145,7 @@ return {
     }
     args.fns.handleCompanionSplitResize?.(e);
   }
-};
-'''
+};'''
       }
     }
     {
@@ -3184,8 +3154,7 @@ return {
       P: {
         contextName: companionPage
         css:
-          '''
-return `._id {
+          '''return `._id {
   min-height: 0;
   min-width: 0;
   width: 100%;
@@ -3194,21 +3163,18 @@ return `._id {
   flex-direction: column;
   overflow: hidden;
   background: ${args.theme.var.color.background};
-}`;
-'''
+}`;'''
         loop: true
         displayOrder: 3
         componentName: Html
         key: dynamic_page_companion_pane
         props:
-          '''
-return {
+          '''return {
   as: "section",
   data: args.fns.getCompanionPages?.() ?? [],
   hide: args.fns.hasCompanionPages?.() !== true,
   "attr:aria-label": "Companion table"
-};
-'''
+};'''
       }
     }
     {
@@ -3216,26 +3182,22 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   flex-direction: column;
   gap: 0.15rem;
   padding: 0.5rem 0.75rem;
   border-bottom: 1px solid ${args.theme.var.color.border_light_300 || args.theme.var.color.border};
   flex-shrink: 0;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const companion = args.contextData.companionPage || {};
+          '''const companion = args.contextData.companionPage || {};
 return {
   as: "div",
   hide: !companion.title && !companion.hint
-};
-'''
+};'''
       }
     }
     {
@@ -3243,25 +3205,21 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   margin: 0;
   font-size: 0.95rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const companion = args.contextData.companionPage || {};
+          '''const companion = args.contextData.companionPage || {};
 return {
   as: "h2",
   text: companion.title || "",
   hide: !companion.title
-};
-'''
+};'''
       }
     }
     {
@@ -3269,24 +3227,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   margin: 0;
   font-size: 0.75rem;
   color: ${args.theme.var.color.text_dark_400};
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const companion = args.contextData.companionPage || {};
+          '''const companion = args.contextData.companionPage || {};
 return {
   as: "p",
   text: companion.hint || "",
   hide: !companion.hint
-};
-'''
+};'''
       }
     }
     {
@@ -3294,16 +3248,14 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   flex: 1;
   min-height: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   position: relative;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props: return { as: "div" };
@@ -3314,22 +3266,19 @@ return `._id {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   flex: 1;
   min-height: 0;
   height: 100%;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: DynamicPage
         key: companion_dynamic_page
         props:
-          '''
-const companion = args.contextData.companionPage || {};
+          '''const companion = args.contextData.companionPage || {};
 return {
   tableKey: companion.tableKey,
   tableVertexLabel: companion.tableVertexLabel,
@@ -3338,8 +3287,7 @@ return {
   usePolarisUI: companion.usePolarisUI !== false,
   embeddedMode: true,
   disableCompanionPages: true
-};
-'''
+};'''
       }
     }
     {
@@ -3347,8 +3295,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const embedded = args.contextData.props?.embeddedMode === true;
+          '''const embedded = args.contextData.props?.embeddedMode === true;
 return `._id {
   display: flex;
   flex-wrap: wrap;
@@ -3367,22 +3314,19 @@ return `._id {
   @media (min-width: 769px) {
     flex-wrap: nowrap;
   }
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         key: settings_page_layout_wrapper
         props:
-          '''
-const vid = args.fns.pageStateVertexId;
+          '''const vid = args.fns.pageStateVertexId;
 const configLoading = args.graph.vertexes[vid]?.P?.configLoading !== false;
 const isSettings = args.fns.isSettingsPageMode?.() === true;
 const embedded = args.contextData.props?.embeddedMode === true;
 return {
   as: "div",
   hide: !isSettings || configLoading || args.fns.isDashboardPageMode?.() === true
-};
-'''
+};'''
       }
     }
     {
@@ -3393,14 +3337,12 @@ return {
         componentName: SettingsSidebar
         key: settings_sidebar
         props:
-          '''
-const config = args.fns.evaluateConfig?.();
+          '''const config = args.fns.evaluateConfig?.();
 const hideSidebar = args.contextData.props?.hideSettingsSidebar === true;
 return {
   sidebarConfig: config?.sidebar || null,
   hide: hideSidebar
-};
-'''
+};'''
       }
     }
     {
@@ -3408,8 +3350,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   flex: 1;
   min-width: 0;
   min-height: 0;
@@ -3418,17 +3359,14 @@ return `._id {
   flex-direction: column;
   overflow: hidden;
   overscroll-behavior: contain;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         key: settings_page_content_scroll
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -3439,11 +3377,9 @@ return {
         componentName: SettingsPageContent
         key: settings_page_content
         props:
-          '''
-return {
+          '''return {
   siteLanguages: args.fns.getSiteLanguages?.() || []
-};
-'''
+};'''
       }
     }
     {
@@ -3451,24 +3387,20 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   width: 100%;
   min-height: calc(100vh - 4rem);
-}`;
-'''
+}`;'''
         displayOrder: 4
         componentName: Html
         key: dashboard_page_wrapper
         props:
-          '''
-const vid = args.fns.pageStateVertexId;
+          '''const vid = args.fns.pageStateVertexId;
 const configLoading = args.graph.vertexes[vid]?.P?.configLoading !== false;
 return {
   as: "div",
   hide: args.fns.isDashboardPageMode?.() !== true || configLoading
-};
-'''
+};'''
       }
     }
     {
@@ -3479,11 +3411,9 @@ return {
         componentName: DashboardHost
         key: dashboard_host
         props:
-          '''
-return {
+          '''return {
   getDashboardConfig: args.fns.getDashboardConfig
-};
-'''
+};'''
       }
     }
     {
@@ -3493,10 +3423,7 @@ return {
         displayOrder: 99
         componentName: DropCreateReviewModal
         key: drop_create_review_modal
-        props:
-          '''
-return args.fns.getDropCreateReviewModalProps?.() || { isOpen: false };
-'''
+        props: return args.fns.getDropCreateReviewModalProps?.() || { isOpen: false };
       }
     }
   ]

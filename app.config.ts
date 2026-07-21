@@ -11,11 +11,16 @@ export default defineConfig({
     experimental: {
       websocket: true,
     },
-    // Hashed Vinxi assets — long-lived cache for slow/repeat visits
+    // Only hashed static assets may be cached. Pages like /books must not be —
+    // otherwise LiteSpeed/browsers serve stale HTML per custom domain.
+    // Dev: Vite URLs are unhashed; never immutable-cache them.
     routeRules: {
       "/_build/**": {
         headers: {
-          "Cache-Control": "public, max-age=31536000, immutable",
+          "Cache-Control":
+            process.env.NODE_ENV === "production"
+              ? "public, max-age=31536000, immutable"
+              : "no-store",
         },
       },
     },

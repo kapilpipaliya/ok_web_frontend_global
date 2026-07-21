@@ -1,0 +1,93 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Loads public table row ids, schema part vertex ids, and combined graph payload.
+        body:
+          '''
+const { tableKey, tableVertexLabel, locale, categoryId } = args.contextData || {};
+
+if (!tableVertexLabel && !tableKey) {
+  return { success: false, message: "tableKey or tableVertexLabel is required" };
+}
+
+let resolvedTableKey = tableKey && String(tableKey).trim() !== "" ? String(tableKey).trim() : null;
+let resolvedTableVertexLabel = tableVertexLabel && String(tableVertexLabel).trim() !== ""
+  ? String(tableVertexLabel).trim()
+  : null;
+
+if (!resolvedTableKey || !resolvedTableVertexLabel) {
+  const idsResult = await args.executeNamedServerFunction({
+    functionName: "getTableIds",
+    contextData: {
+      ...(resolvedTableKey ? { tableKey: resolvedTableKey } : {}),
+      ...(resolvedTableVertexLabel ? { tableVertexLabel: resolvedTableVertexLabel } : {})
+    }
+  });
+  const ids = idsResult?.result?.data;
+  if (ids) {
+    resolvedTableKey = resolvedTableKey || ids.tableKey || null;
+    resolvedTableVertexLabel = resolvedTableVertexLabel || ids.tableVertexLabel || null;
+  }
+}
+
+if (!resolvedTableKey || !resolvedTableVertexLabel) {
+  return { success: false, message: "Failed to resolve table identity" };
+}
+
+const contentResult = await args.executeNamedServerFunction({
+  functionName: "getUserContent",
+  contextData: {
+    tableKey: resolvedTableKey,
+    tableVertexLabel: resolvedTableVertexLabel,
+    categoryId
+  }
+});
+
+if (!contentResult?.result?.success) {
+  return contentResult?.result || { success: false, message: "Failed to load table content" };
+}
+
+const contentGraph = contentResult.graph || contentResult?.result?.graph || { vertexes: {}, edges: {} };
+const rows = Array.isArray(contentResult.result.data) ? contentResult.result.data : [];
+const rowIds = rows
+  .map((row) => row?.id)
+  .filter((id) => id != null && String(id).trim() !== "");
+
+const configResult = await args.executeNamedServerFunction({
+  functionName: "loadTableConfigByKey",
+  contextData: { tableKey: resolvedTableKey }
+});
+
+if (!configResult?.result?.success) {
+  return configResult?.result || { success: false, message: "Failed to load table schema" };
+}
+
+const schemaGraph = configResult.graph || configResult?.result?.graph || { vertexes: {}, edges: {} };
+const mergedVertexes = Object.assign({}, contentGraph.vertexes || {}, schemaGraph.vertexes || {});
+const mergedEdges = Object.assign({}, contentGraph.edges || {}, schemaGraph.edges || {});
+
+return {
+  success: true,
+  data: {
+    rowIds,
+    partVertexIds: configResult.result.data?.partVertexIds || {},
+    ids: configResult.result.data?.ids || null,
+    graph: {
+      vertexes: mergedVertexes,
+      edges: mergedEdges,
+      deleted_vertexes: [],
+      deleted_edges: []
+    }
+  },
+  message: `Loaded ${rowIds.length} public ${resolvedTableVertexLabel} row(s)`
+};
+'''
+        key: loadPublicTableContent
+      }
+    }
+  ]
+  edges: []
+}

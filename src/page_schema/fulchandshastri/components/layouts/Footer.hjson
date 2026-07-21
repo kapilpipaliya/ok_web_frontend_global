@@ -20,16 +20,13 @@
   padding: 2rem 1rem;
   text-align: center;
 
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "footer"
-};
-'''
+};'''
       }
     }
     {
@@ -37,8 +34,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   max-width: 1200px;
   margin: 0 auto;
   display: flex;
@@ -51,16 +47,13 @@ return `._id {
     flex-direction: column;
     text-align: center;
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -68,8 +61,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -77,16 +69,13 @@ return `._id {
   @media (max-width: 768px) {
     gap: 0.5rem;
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -105,19 +94,16 @@ return {
   &:hover {
     opacity: 0.7;
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "a",
   href: "https://goo.gl/maps/BGEfU8y8wXz",
   target: "_blank",
   rel: "noopener noreferrer"
-};
-'''
+};'''
       }
     }
     {
@@ -127,14 +113,12 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "icon",
   icon: "carbon:location",
   width: 16,
   height: 16
-};
-'''
+};'''
       }
     }
     {
@@ -144,12 +128,10 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "span",
   text: "Umarala"
-};
-'''
+};'''
       }
     }
     {
@@ -163,20 +145,17 @@ return {
   @media (max-width: 480px) {
     display: none;
   }
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-const date = new Date();
+          '''const date = new Date();
 const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
 const formattedDate = date.toLocaleDateString('en-US', options);
 return {
   as: "span",
   text: formattedDate
-};
-'''
+};'''
       }
     }
     {
@@ -184,21 +163,17 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   color: #d4a574;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const currentYear = new Date().getFullYear();
+          '''const currentYear = new Date().getFullYear();
 return {
   as: "div",
   text: `Copyright © ${currentYear} Fulchand Shastri`
-};
-'''
+};'''
       }
     }
     {
@@ -206,22 +181,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   color: #d4a574;
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -241,12 +212,10 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "span",
   text: "Design by"
-};
-'''
+};'''
       }
     }
     {
@@ -265,8 +234,7 @@ return {
     color: #e8c8a0;
     text-decoration: underline;
   }
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
@@ -276,8 +244,7 @@ return {
   text: "ASK Umarala",
   target: "_blank",
   rel: "noopener noreferrer",
-};
-'''
+};'''
       }
     }
   ]

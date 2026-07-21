@@ -790,21 +790,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const sidebarWidth = args.contextData.props?.sidebarWidth?.() || 240;
+          '''const sidebarWidth = args.contextData.props?.sidebarWidth?.() || 240;
 return `._id {
   display: grid;
   grid-template-columns: ${sidebarWidth}px 2px 1fr;
   height: 100%;
   position: relative;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         key: sidebar_container
         props:
-          '''
-return {
+          '''return {
   as: "div",
   onMount: () => {
     args.fns.initialize();
@@ -812,8 +809,7 @@ return {
   onCleanup: () => {
     args.fns.cleanupSidebarPoll?.();
   }
-};
-'''
+};'''
       }
     }
     {
@@ -821,8 +817,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   overflow-y: auto;
   scrollbar-width: thin;
   padding: 8px;
@@ -832,18 +827,15 @@ return `._id {
   min-height: 0;
   max-height: 100vh;
   position: relative;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         key: sidebar_tree
         props:
-          '''
-return {
+          '''return {
   as: "div", // args.fns.getUsePolarisUI?.() === true ? "s-scroll-box" : "div",
   onKeyDown: args.fns.handleSidebarKeyDown
-};
-'''
+};'''
       }
     }
     {
@@ -851,8 +843,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   flex-shrink: 0;
   width: 100%;
   line-height: 28px;
@@ -874,22 +865,19 @@ return `._id {
 }
 ._id::placeholder {
   color: ${args.theme.var.color.text_light_400};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         key: sidebar_search_bar
         props:
-          '''
-return {
+          '''return {
   as: "input",
   type: "search",
   placeholder: "Search...",
   value: args.fns.searchQuery(),
   onInput: (e) => args.fns.onSearchChange(e.target.value),
   hide: args.fns.getUsePolarisUI?.() === true
-};
-'''
+};'''
       }
     }
     {
@@ -897,18 +885,15 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   flex-shrink: 0;
   width: 100%;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         key: sidebar_search_bar_shopify
         props:
-          '''
-return {
+          '''return {
   as: "s-search-field",
   label: "Search",
   "attr:labelAccessibilityVisibility": "exclusive",
@@ -916,8 +901,7 @@ return {
   value: args.fns.searchQuery(),
   onInput: (e) => args.fns.onSearchChange(e?.target?.value ?? ''),
   hide: args.fns.getUsePolarisUI?.() !== true
-};
-'''
+};'''
       }
     }
     {
@@ -925,23 +909,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 8px;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         key: sidebar_add_root_button_container
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -952,16 +932,14 @@ return {
         componentName: Html
         key: sidebar_add_root_button_polaris
         props:
-          '''
-return {
+          '''return {
   as: "s-button",
   "attr:variant": "primary",
   "attr:icon": "plus",
   text: `Add Root ${args.fns.getSidebarLabel()}`,
   onClick: () => args.fns.handleOpenAddRootModal(),
   hide: args.fns.getUsePolarisUI?.() !== true
-};
-'''
+};'''
       }
     }
     {
@@ -972,8 +950,7 @@ return {
         componentName: Button
         key: sidebar_add_root_button
         props:
-          '''
-return {
+          '''return {
   variant: "primary",
   size: "sm",
   text: `Add Root ${args.fns.getSidebarLabel()}`,
@@ -982,8 +959,7 @@ return {
     args.fns.handleOpenAddRootModal();
   },
   hide: args.fns.getUsePolarisUI?.() === true
-};
-'''
+};'''
       }
     }
     {
@@ -991,25 +967,21 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   list-style: none;
   padding: 0;
   margin: 0;
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         key: sidebar_tree_list
         props:
-          '''
-return {
+          '''return {
   as: "ul",
   loop: true,
   contextName: "sidebarItem",
   data: args.fns.getFilteredRoot()
-};
-'''
+};'''
       }
     }
     {
@@ -1020,8 +992,7 @@ return {
         componentName: SidebarTreeItem
         key: sidebar_tree_item
         props:
-          '''
-const item = args.contextData.sidebarItem;
+          '''const item = args.contextData.sidebarItem;
 // Get children from graph (reactive)
 const children = args.fns.getChildren(item?.id);
 const sidebarConfig = args.fns.getSidebarConfig();
@@ -1057,8 +1028,7 @@ return {
   shouldExpandForSearch: (item) => args.fns.shouldExpandVertexForSearch?.(item),
   onOpenAddModal: args.fns.handleOpenAddChildModal,
   onOpenEditModal: args.fns.handleOpenEditModal
-};
-'''
+};'''
       }
     }
     {
@@ -1066,8 +1036,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   position: absolute;
   top: 0;
   left: 0;
@@ -1080,18 +1049,15 @@ return `._id {
   justify-content: center;
   z-index: 1000;
   pointer-events: auto;
-}`;
-'''
+}`;'''
         displayOrder: 5
         componentName: Html
         key: sidebar_loading_overlay
         props:
-          '''
-return {
+          '''return {
   as: "div",
   hide: !args.fns.operationLoading()
-};
-'''
+};'''
       }
     }
     {
@@ -1102,12 +1068,10 @@ return {
         componentName: LoadingSpinner
         key: sidebar_loading_spinner
         props:
-          '''
-return {
+          '''return {
   size: "medium",
   color: "primary"
-};
-'''
+};'''
       }
     }
     {
@@ -1115,8 +1079,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   width: 2px;
   height: 100%;
   cursor: col-resize;
@@ -1131,14 +1094,12 @@ return `._id {
   &:hover {
     background-color: ${args.theme.var.color.primary}40;
   }
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         key: sidebar_resize_handle
         props:
-          '''
-const setSidebarWidth = args.contextData.props?.setSidebarWidth;
+          '''const setSidebarWidth = args.contextData.props?.setSidebarWidth;
 const sidebarWidth = args.contextData.props?.sidebarWidth?.() || 240;
 
 return {
@@ -1165,8 +1126,7 @@ return {
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
   }
-};
-'''
+};'''
       }
     }
     {
@@ -1174,21 +1134,17 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   overflow-y: auto;
   height: 100%;
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         key: sidebar_main_wrapper
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -1200,11 +1156,9 @@ return {
         slot: main
         key: sidebar_main_content
         props:
-          '''
-return {
+          '''return {
 
-};
-'''
+};'''
       }
     }
     {
@@ -1215,8 +1169,7 @@ return {
         componentName: SidebarAddChildModal
         key: sidebar_add_root_modal
         props:
-          '''
-const sidebarConfig = args.fns.getSidebarConfig();
+          '''const sidebarConfig = args.fns.getSidebarConfig();
 
 return {
   isOpen: args.fns.isAddRootModalOpen(),
@@ -1231,8 +1184,7 @@ return {
   onClose: args.fns.handleCloseAddRootModal,
   hooks: args.fns.getHooks(),
   label: args.fns.getSidebarLabel()
-};
-'''
+};'''
       }
     }
     {
@@ -1243,8 +1195,7 @@ return {
         componentName: SidebarAddChildModal
         key: sidebar_item_add_edit_modal
         props:
-          '''
-const state = args.fns.itemModalState?.() ?? null;
+          '''const state = args.fns.itemModalState?.() ?? null;
 const sidebarConfig = args.fns.getSidebarConfig();
 const isOpen = state !== null;
 
@@ -1261,8 +1212,7 @@ return {
   onClose: args.fns.handleCloseItemModal,
   hooks: args.contextData.props?.hooks,
   label: args.fns.getSidebarLabel()
-};
-'''
+};'''
       }
     }
   ]

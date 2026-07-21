@@ -12,8 +12,7 @@
       L: Attr
       P: {
         css:
-          '''
-const hasLeftIcon = !!args.contextData.props?.leftIcon;
+          '''const hasLeftIcon = !!args.contextData.props?.leftIcon;
 const hasRightIcon = !!args.contextData.props?.rightIcon;
 const iconSize = args.contextData.props?.iconSize || 20;
 
@@ -41,16 +40,13 @@ return `._id {
     opacity: 0.6;
     cursor: not-allowed;
   }
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "div"
-};
-'''
+};'''
       }
     }
     {
@@ -58,19 +54,16 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   color: ${args.theme.var.color.text_light_500};
   flex-shrink: 0;
   margin-left: ${args.theme.var.spacing.md};
   margin-right: ${args.theme.var.spacing.sm};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const leftIcon = args.contextData.props?.leftIcon;
+          '''const leftIcon = args.contextData.props?.leftIcon;
 const iconSize = args.contextData.props?.iconSize || 20;
 
 return {
@@ -79,8 +72,7 @@ return {
   width: iconSize,
   height: iconSize,
   hide: !leftIcon
-};
-'''
+};'''
       }
     }
     {
@@ -88,8 +80,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const hasLeftIcon = !!args.contextData.props?.leftIcon;
+          '''const hasLeftIcon = !!args.contextData.props?.leftIcon;
 const hasRightIcon = !!args.contextData.props?.rightIcon;
 
 return `._id {
@@ -112,13 +103,11 @@ return `._id {
   &:disabled {
     cursor: not-allowed;
   }
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "input",
   type: args.contextData.props?.type || "text",
   value: args.contextData.props?.value || "",
@@ -137,8 +126,7 @@ return {
   onInput: args.contextData.props?.onInput || null,
   onKeyDown: args.contextData.props?.onKeyDown || null,
   onMount: args.contextData.props?.onMount || null
-};
-'''
+};'''
       }
     }
     {
@@ -146,19 +134,16 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   color: ${args.theme.var.color.text_light_500};
   flex-shrink: 0;
   margin-left: ${args.theme.var.spacing.sm};
   margin-right: ${args.theme.var.spacing.md};
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''
-const rightIcon = args.contextData.props?.rightIcon;
+          '''const rightIcon = args.contextData.props?.rightIcon;
 const iconSize = args.contextData.props?.iconSize || 20;
 
 return {
@@ -167,8 +152,7 @@ return {
   width: iconSize,
   height: iconSize,
   hide: !rightIcon
-};
-'''
+};'''
       }
     }
     {

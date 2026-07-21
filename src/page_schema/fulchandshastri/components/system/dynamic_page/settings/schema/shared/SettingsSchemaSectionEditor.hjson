@@ -14,15 +14,13 @@
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
@@ -31,8 +29,7 @@ return `._id {
 return {
   as: "div",
   hide: api.isJsonMode?.() === true
-};
-'''
+};'''
       }
     }
     {
@@ -40,12 +37,10 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   padding: 0.75rem 1rem;
   border-bottom: 1px solid ${args.theme.var.color.border};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: FormManagement
         props:
@@ -63,8 +58,7 @@ return {
   hideActionsBar: true,
   onFnsReady: api.registerSectionMetaFormFns,
   onFieldChange: () => api.syncSectionMetaFromForm?.()
-};
-'''
+};'''
       }
     }
     {
@@ -72,15 +66,13 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0.5rem 1rem;
   border-bottom: 1px solid ${args.theme.var.color.border};
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
@@ -90,8 +82,7 @@ const section = api.getSelectedSection?.();
 return {
   as: "div",
   hide: !section
-};
-'''
+};'''
       }
     }
     {
@@ -99,22 +90,18 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   margin: 0;
   font-size: 0.875rem;
   font-weight: 600;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "h3",
   text: "Fields"
-};
-'''
+};'''
       }
     }
     {
@@ -132,8 +119,7 @@ return {
   text: "Add field",
   type: "button",
   onClick: () => api.addField?.()
-};
-'''
+};'''
       }
     }
     {
@@ -141,14 +127,12 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   display: flex;
   flex: 1;
   min-height: 0;
   overflow: hidden;
-}`;
-'''
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
@@ -158,8 +142,7 @@ const section = api.getSelectedSection?.();
 return {
   as: "div",
   hide: !section
-};
-'''
+};'''
       }
     }
     {
@@ -167,8 +150,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   width: 280px;
   flex-shrink: 0;
   overflow-y: auto;
@@ -178,8 +160,7 @@ return `._id {
   min-height: 0;
   border-right: 1px solid ${args.theme.var.color.border};
   background: ${args.theme.var.color.background_light_50};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
@@ -194,8 +175,7 @@ return {
       api.attachFieldsListBoundary(element);
     }
   }
-};
-'''
+};'''
       }
     }
     {
@@ -203,8 +183,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id.fsce-field-items-list {
+          '''return `._id.fsce-field-items-list {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -244,8 +223,7 @@ return `._id.fsce-field-items-list {
   background: ${args.theme.var.color.primary};
   z-index: 2;
   pointer-events: none;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
@@ -265,8 +243,7 @@ return {
       api.attachFieldListDropTarget(element);
     }
   }
-};
-'''
+};'''
       }
     }
     {
@@ -282,8 +259,7 @@ return {
 
 return {
   data: api.getFieldIndices?.() || []
-};
-'''
+};'''
       }
     }
     {
@@ -392,8 +368,7 @@ return `._id.fsce-field-item {
   transform: translateY(50%);
   z-index: 2;
   pointer-events: none;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
@@ -420,8 +395,7 @@ return {
       api.attachFieldDropTarget(element, index);
     }
   }
-};
-'''
+};'''
       }
     }
     {
@@ -429,8 +403,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id.fsce-field-drag-handle {
+          '''return `._id.fsce-field-drag-handle {
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -441,8 +414,7 @@ return `._id.fsce-field-drag-handle {
   cursor: grab;
   touch-action: none;
   user-select: none;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
@@ -460,8 +432,7 @@ return {
       api.attachFieldDraggable(element, index);
     }
   }
-};
-'''
+};'''
       }
     }
     {
@@ -469,23 +440,19 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id.fsce-field-drag-icon {
+          '''return `._id.fsce-field-drag-icon {
   pointer-events: none;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-return {
+          '''return {
   as: "icon",
   icon: "ph:dots-six-vertical",
   height: 14,
   width: 14,
   class: "fsce-field-drag-icon"
-};
-'''
+};'''
       }
     }
     {
@@ -493,8 +460,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id.fsce-field-summary {
+          '''return `._id.fsce-field-summary {
   flex: 1;
   text-align: left;
   overflow: hidden;
@@ -502,8 +468,7 @@ return `._id.fsce-field-summary {
   white-space: nowrap;
   min-width: 0;
   font-size: 0.8125rem;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
@@ -515,8 +480,7 @@ return {
   as: "span",
   class: "fsce-field-summary",
   text: `${field.label || field.key || "Field"} (${field.renderer || "text"})`
-};
-'''
+};'''
       }
     }
     {
@@ -538,8 +502,7 @@ return {
     e?.stopPropagation?.();
     api.deleteField?.(index);
   }
-};
-'''
+};'''
       }
     }
     {
@@ -547,8 +510,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   flex: 1;
   min-width: 0;
   min-height: 0;
@@ -556,8 +518,7 @@ return `._id {
   flex-direction: column;
   overflow: hidden;
   background: ${args.theme.var.color.background};
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
@@ -567,8 +528,7 @@ const section = api.getSelectedSection?.();
 return {
   as: "div",
   hide: !section
-};
-'''
+};'''
       }
     }
     {
@@ -576,16 +536,14 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   flex-shrink: 0;
   min-width: 0;
   overflow-y: auto;
   padding: 0.75rem 1rem;
   border-bottom: 1px solid ${args.theme.var.color.border};
   background: ${args.theme.var.color.background};
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: FormManagement
         props:
@@ -607,8 +565,7 @@ return {
   hideActionsBar: true,
   onFnsReady: api.registerFieldEditorFormFns,
   onFieldChange: () => api.syncFieldFromForm?.()
-};
-'''
+};'''
       }
     }
     {
@@ -616,15 +573,13 @@ return {
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   flex: 1;
   min-height: 0;
   min-width: 0;
   overflow-y: auto;
   padding: 0.75rem 1rem;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: FieldArraySchemaEditor
         props:
@@ -641,8 +596,7 @@ return {
   field,
   siteLanguages: api.getSiteLanguages?.(),
   onChange: (patch) => api.onFieldArraySchemaChange?.(patch)
-};
-'''
+};'''
       }
     }
   ]

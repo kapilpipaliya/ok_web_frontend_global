@@ -1325,8 +1325,7 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const embedded = args.fns.isEmbeddedMode?.() === true;
+          '''const embedded = args.fns.isEmbeddedMode?.() === true;
 return `._id {
   display: flex;
   flex-direction: column;
@@ -1339,20 +1338,17 @@ return `._id {
   ` : `
   height: 100%;
   `}
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const embedded = args.contextData.props?.embeddedMode === true;
+          '''const embedded = args.contextData.props?.embeddedMode === true;
 return {
   as: "div",
   ...(embedded ? {} : { "data-fulchand-page-main": "" }),
   hide: args.contextData.props?.hide === true,
   onMount: () => { args.fns.loadConfig?.(); }
-};
-'''
+};'''
       }
     }
     {
@@ -1362,12 +1358,10 @@ return {
         displayOrder: 1
         componentName: SettingsSchemaToolbar
         props:
-          '''
-return {
+          '''return {
   editorApi: args.fns,
   tableVertexLabel: args.contextData.props?.tableVertexLabel
-};
-'''
+};'''
       }
     }
     {
@@ -1375,26 +1369,22 @@ return {
       L: Attr
       P: {
         css:
-          '''
-const embedded = args.fns.isEmbeddedMode?.() === true;
+          '''const embedded = args.fns.isEmbeddedMode?.() === true;
 return `._id {
   display: flex;
   flex: 1;
   min-height: 0;
   overflow: hidden;
   ${embedded ? "overflow-x: auto;" : ""}
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const loading = args.fns.loading?.();
+          '''const loading = args.fns.loading?.();
 return {
   as: "div",
   hide: loading
-};
-'''
+};'''
       }
     }
     {
@@ -1403,10 +1393,7 @@ return {
       P: {
         displayOrder: 1
         componentName: SettingsSchemaSectionsList
-        props:
-          '''
-return { editorApi: args.fns };
-'''
+        props: return { editorApi: args.fns };
       }
     }
     {
@@ -1415,10 +1402,7 @@ return { editorApi: args.fns };
       P: {
         displayOrder: 2
         componentName: SettingsSchemaSectionEditor
-        props:
-          '''
-return { editorApi: args.fns };
-'''
+        props: return { editorApi: args.fns };
       }
     }
     {
@@ -1427,10 +1411,7 @@ return { editorApi: args.fns };
       P: {
         displayOrder: 3
         componentName: SettingsSchemaJsonPanel
-        props:
-          '''
-return { editorApi: args.fns };
-'''
+        props: return { editorApi: args.fns };
       }
     }
     {
@@ -1440,13 +1421,11 @@ return { editorApi: args.fns };
         displayOrder: 3
         componentName: LoadingSpinner
         props:
-          '''
-return {
+          '''return {
   size: "large",
   color: "primary",
   hide: !args.fns.loading?.()
-};
-'''
+};'''
       }
     }
   ]

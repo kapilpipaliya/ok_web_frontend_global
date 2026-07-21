@@ -9,11 +9,72 @@
     }
     {
       id: "2"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: icon
+        defValue: ""
+      }
+    }
+    {
+      id: "3"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: Menu Item
+        key: text
+      }
+    }
+    {
+      id: "4"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        defValue: false
+        key: disabled
+      }
+    }
+    {
+      id: "5"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: default
+        key: type
+      }
+    }
+    {
+      id: "6"
+      L: ComponentVariantOption
+      P: {
+        description: Default menu item
+        value: default
+        key: default
+      }
+    }
+    {
+      id: "7"
+      L: ComponentVariantOption
+      P: {
+        description: Danger menu item (red)
+        value: danger
+        key: danger
+      }
+    }
+    {
+      id: "8"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: title
+      }
+    }
+    {
+      id: "9"
       L: Attr
       P: {
         css:
-          '''
-const type = args.contextData.props?.type || "default";
+          '''const type = args.contextData.props?.type || "default";
 const isDivider = args.contextData.props?.isDivider;
 
 // Divider styles
@@ -57,13 +118,11 @@ return `._id {
 ._id:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-}`;
-'''
+}`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const text = args.contextData.props?.text || "Menu Item";
+          '''const text = args.contextData.props?.text || "Menu Item";
 const onClick = args.contextData.props?.onClick;
 const href = args.contextData.props?.href;
 const type = args.contextData.props?.type || "default";
@@ -113,19 +172,17 @@ return {
   type: "button",
   class: reasonActive && reasonVariant ? `_reason _reason-${reasonVariant}` : undefined,
   ...reasonAttrs
-};
-'''
+};'''
       }
     }
     {
-      id: "3"
+      id: "10"
       L: Attr
       P: {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const icon = args.contextData.props?.icon;
+          '''const icon = args.contextData.props?.icon;
 const isDivider = args.contextData.props?.isDivider;
 
 // Hide icon for dividers
@@ -138,25 +195,21 @@ return {
   icon: icon,
   width: 16,
   height: 16
-};
-'''
+};'''
       }
     }
     {
-      id: "4"
+      id: "11"
       L: Attr
       P: {
         css:
-          '''
-return `._id {
+          '''return `._id {
   flex: 1;
-}`;
-'''
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''
-const text = args.contextData.props?.text || "Menu Item";
+          '''const text = args.contextData.props?.text || "Menu Item";
 const isDivider = args.contextData.props?.isDivider;
 
 // Hide text for dividers
@@ -167,77 +220,14 @@ if (isDivider) {
 return {
   as: "span",
   text: text
-};
-'''
-      }
-    }
-    {
-      id: "5"
-      L: ComponentVariant
-      P: {
-        type: string
-        key: icon
-        defValue: ""
-      }
-    }
-    {
-      id: "6"
-      L: ComponentVariant
-      P: {
-        type: string
-        defValue: Menu Item
-        key: text
-      }
-    }
-    {
-      id: "7"
-      L: ComponentVariant
-      P: {
-        type: boolean
-        defValue: false
-        key: disabled
-      }
-    }
-    {
-      id: "8"
-      L: ComponentVariant
-      P: {
-        type: string
-        defValue: default
-        key: type
-      }
-    }
-    {
-      id: "9"
-      L: ComponentVariantOption
-      P: {
-        description: Default menu item
-        value: default
-        key: default
-      }
-    }
-    {
-      id: "10"
-      L: ComponentVariantOption
-      P: {
-        description: Danger menu item (red)
-        value: danger
-        key: danger
-      }
-    }
-    {
-      id: "11"
-      L: ComponentVariant
-      P: {
-        type: string
-        key: title
+};'''
       }
     }
   ]
   edges: [
     {
       id: e1
-      T: Attr
+      T: ComponentVariant
       S: "1"
       E: "2"
     }
@@ -245,19 +235,19 @@ return {
       id: e2
       T: ComponentVariant
       S: "1"
-      E: "5"
+      E: "3"
     }
     {
       id: e3
       T: ComponentVariant
       S: "1"
-      E: "6"
+      E: "4"
     }
     {
       id: e4
       T: ComponentVariant
       S: "1"
-      E: "7"
+      E: "5"
     }
     {
       id: e5
@@ -267,33 +257,33 @@ return {
     }
     {
       id: e6
-      T: ComponentVariant
+      T: Attr
       S: "1"
-      E: "11"
-    }
-    {
-      id: e7
-      T: Attr
-      S: "2"
-      E: "3"
-    }
-    {
-      id: e8
-      T: Attr
-      S: "2"
-      E: "4"
-    }
-    {
-      id: e9
-      T: ComponentVariantOption
-      S: "8"
       E: "9"
     }
     {
-      id: e10
+      id: e7
       T: ComponentVariantOption
-      S: "8"
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e8
+      T: ComponentVariantOption
+      S: "5"
+      E: "7"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "9"
       E: "10"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "9"
+      E: "11"
     }
   ]
 }
