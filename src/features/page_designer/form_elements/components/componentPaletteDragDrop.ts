@@ -8,12 +8,16 @@ import {
   PAGE_DESIGNER_DRAG_TYPES,
   isPageDesignerDragSource,
 } from "~/features/page_designer/functions/drag_drop/pragmatic/pageDesignerDragTypes";
+import {
+  registerTouchDragSource,
+  registerTouchDropTarget,
+} from "~/features/page_designer/functions/drag_drop/pragmatic/androidTouchDrag";
 import { getIndicatorPosition } from "~/features/page_designer/functions/drag_drop/ui/getIndicatorPosition";
 import type { PaletteTreeConfig } from "./componentPaletteConfig";
 import type { Id } from "~/lib/graph/type/id";
 import type { Vertex } from "~/lib/graph/type/vertex";
 
-import { isPaletteCategory, isPaletteContent } from "./componentPaletteUtils";
+import { isPaletteContent } from "./componentPaletteUtils";
 
 export type PaletteDropPosition = "before" | "after" | "center";
 
@@ -51,68 +55,117 @@ export function attachComponentPaletteTreeDragDrop(
   // @ts-expect-error used by getIndicatorPosition
   element.useCurrentPosition = true;
 
-  const dragCleanup = draggable({
-    element,
-    getInitialData: () => {
-      if (isPaletteContent(ctx.item, ctx.config)) {
-        const isPage = ctx.config.tableVertexLabel === "Page";
-        const dragType = isPage
-          ? PAGE_DESIGNER_DRAG_TYPES.PALETTE_PAGE
-          : PAGE_DESIGNER_DRAG_TYPES.PALETTE_CONTENT_ITEM;
-        return {
-          type: dragType,
-          itemId: ctx.item.id,
-          compId: ctx.item.id,
-          vertexId: ctx.item.id,
-          vertexIds: [ctx.item.id],
-        };
-      }
+  const getInitialData = () => {
+    if (isPaletteContent(ctx.item, ctx.config)) {
+      const isPage = ctx.config.tableVertexLabel === "Page";
+      const dragType = isPage
+        ? PAGE_DESIGNER_DRAG_TYPES.PALETTE_PAGE
+        : PAGE_DESIGNER_DRAG_TYPES.PALETTE_CONTENT_ITEM;
       return {
-        type: PAGE_DESIGNER_DRAG_TYPES.PALETTE_CATEGORY,
+        type: dragType,
         itemId: ctx.item.id,
-        categoryId: ctx.item.id,
+        compId: ctx.item.id,
+        vertexId: ctx.item.id,
+        vertexIds: [ctx.item.id],
       };
-    },
-    onDrop: () => {
-      ctx.onDragEnd?.();
-      ctx.setDropState(null, null);
-    },
-    onDragStart: () => {
-      ctx.onDragStart?.();
-    },
-  });
+    }
+    return {
+      type: PAGE_DESIGNER_DRAG_TYPES.PALETTE_CATEGORY,
+      itemId: ctx.item.id,
+      categoryId: ctx.item.id,
+    };
+  };
 
-  const dropCleanup = dropTargetForElements({
-    element,
-    canDrop: ({ source }) => canAcceptPaletteDrag(source.data.type),
-    onDragEnter: () => {},
-    onDragLeave: () => {},
-    onDrag: ({ location }) => {
-      const position = getIndicatorPosition(
-        location.current.input as unknown as MouseEvent,
-        element,
-      ) as PaletteDropPosition;
-      ctx.setDropState(ctx.item.id, position);
-    },
-    onDrop: async ({ source, location }) => {
-      const position = getIndicatorPosition(
-        location.current.input as unknown as MouseEvent,
-        element,
-      ) as PaletteDropPosition;
-      const sourceType = String(source.data.type ?? "");
-      const sourceId = (source.data.itemId ??
-        source.data.categoryId ??
-        source.data.compId) as Id;
-      ctx.setDropState(null, null);
-      if (!sourceId || sourceId === ctx.item.id) return;
-      await ctx.onDrop({
-        activeItemId: ctx.item.id,
-        dragPosition: position,
-        sourceType,
-        sourceId,
-      });
-    },
-  });
+  const dragCleanup = combine(
+    draggable({
+      element,
+      getInitialData,
+      onDrop: () => {
+        ctx.onDragEnd?.();
+        ctx.setDropState(null, null);
+      },
+      onDragStart: () => {
+        ctx.onDragStart?.();
+      },
+    }),
+    registerTouchDragSource({
+      element,
+      getData: getInitialData,
+      onDragStart: () => {
+        ctx.onDragStart?.();
+      },
+      onDragEnd: () => {
+        ctx.onDragEnd?.();
+        ctx.setDropState(null, null);
+      },
+    }),
+  );
+
+  const applyPalettePosition = (input: {
+    clientX: number;
+    clientY: number;
+  }) => {
+    const position = getIndicatorPosition(
+      input as unknown as MouseEvent,
+      element,
+    ) as PaletteDropPosition;
+    ctx.setDropState(ctx.item.id, position);
+    return position;
+  };
+
+  const dropCleanup = combine(
+    dropTargetForElements({
+      element,
+      canDrop: ({ source }) => canAcceptPaletteDrag(source.data.type),
+      onDragEnter: () => {},
+      onDragLeave: () => {},
+      onDrag: ({ location }) => {
+        applyPalettePosition(location.current.input);
+      },
+      onDrop: async ({ source, location }) => {
+        const position = applyPalettePosition(location.current.input);
+        const sourceType = String(source.data.type ?? "");
+        const sourceId = (source.data.itemId ??
+          source.data.categoryId ??
+          source.data.compId) as Id;
+        ctx.setDropState(null, null);
+        if (!sourceId || sourceId === ctx.item.id) return;
+        await ctx.onDrop({
+          activeItemId: ctx.item.id,
+          dragPosition: position,
+          sourceType,
+          sourceId,
+        });
+      },
+    }),
+    registerTouchDropTarget({
+      element,
+      canDrop: (data) => canAcceptPaletteDrag(data.type),
+      onDragLeave: (hasNextTarget) => {
+        if (!hasNextTarget) {
+          ctx.setDropState(null, null);
+        }
+      },
+      onDrag: (input) => {
+        applyPalettePosition(input);
+      },
+      onDrop: async (input, data) => {
+        const position = applyPalettePosition(input);
+        const sourceType = String(data.type ?? "");
+        const sourceId = (data.itemId ??
+          data.categoryId ??
+          data.compId) as Id;
+        ctx.setDropState(null, null);
+        if (!sourceId || sourceId === ctx.item.id) return;
+        await ctx.onDrop({
+          activeItemId: ctx.item.id,
+          dragPosition: position,
+          sourceType,
+          sourceId,
+        });
+      },
+    }),
+  );
 
   return combine(dragCleanup, dropCleanup);
 }

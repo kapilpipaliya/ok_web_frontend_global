@@ -15,8 +15,11 @@ export const baseItemStyle = `return \`._id {
   height: 35px;
   margin: 5px;
   padding: 10px;
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
   position: relative;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }\`;`;
 
 export const hoverItemStyle = `return \`._id {

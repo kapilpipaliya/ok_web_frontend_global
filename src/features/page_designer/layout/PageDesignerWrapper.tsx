@@ -33,10 +33,12 @@ import { fetchDataFromDB } from "~/cypher/get/fetchDataFromDB";
 import { isValidResponse } from "~/lib/api/general/isValidResponse";
 import { Title } from "@solidjs/meta";
 import { updateUrlWithOpenedTabs } from "~/features/page_designer/utils/updateUrlWithTabs";
+import { enablePageDesignerTouchDragPolyfill } from "~/features/page_designer/functions/drag_drop/pragmatic/enablePageDesignerTouchDragPolyfill";
 import { ResizeOverlayProvider } from "~/lib/resizable/ResizeOverlayContext";
 
 const RenderMainContent = clientOnly(() => import("./RenderMainContent"));
 
+let touchDragPolyfillEnabled = false;
 export function PageDesignerWrapper(): JSX.Element {
   const params = useParams();
   const [searchParams] = useSearchParams();
@@ -146,6 +148,12 @@ export function PageDesignerWrapper(): JSX.Element {
       setIsDataReady(true);
       return;
     }
+
+    if (!touchDragPolyfillEnabled) {
+      touchDragPolyfillEnabled = true;
+      enablePageDesignerTouchDragPolyfill();
+    }
+
     const openedFormIds: string[] = [newOpenVertex.id];
     const activeFormId = formId;
 

@@ -26,6 +26,10 @@ import {
   PAGE_DESIGNER_DRAG_TYPES,
 } from "~/features/page_designer/functions/drag_drop/pragmatic/pageDesignerDragTypes";
 import {
+  registerTouchDragSource,
+  registerTouchDropTarget,
+} from "~/features/page_designer/functions/drag_drop/pragmatic/androidTouchDrag";
+import {
   getFormDataVertex,
   setDropPositionFromPointer,
   setRootDropPosition,
@@ -245,7 +249,7 @@ function attachElementDropTarget(
     updatePosition,
   });
 
-  return dropTargetForElements({
+  const pdndCleanup = dropTargetForElements({
     element,
     canDrop: ({ source }) => canDropPageDesignerSource(source),
     onDragEnter: ({ location, source }) => {
@@ -296,6 +300,41 @@ function attachElementDropTarget(
       void runLayoutDrop(ctx, getVertexIdsFromSourceData(source.data));
     },
   });
+
+  const touchCleanup = registerTouchDropTarget({
+    element,
+    canDrop: (data) => canDropPageDesignerSource({ data }),
+    onDragEnter: () => {
+      cancelPendingDropPositionClear();
+      ctx.onDragEnter?.();
+      expandStartTime = Date.now();
+    },
+    onDragLeave: (hasNextTarget) => {
+      if (!hasNextTarget) {
+        scheduleDropPositionClear(getLayoutStore(ctx), ctx.graph, ctx.setGraph);
+      }
+      ctx.onDragLeave?.();
+    },
+    onDrag: (input, data) => {
+      cancelPendingDropPositionClear();
+      updatePosition(input, data);
+      const dragPosition = getLayoutStore(ctx).P.dragPosition;
+      if (
+        onExpandChildren &&
+        dragPosition === "center" &&
+        Date.now() - expandStartTime > 1000
+      ) {
+        onExpandChildren(dragPosition);
+      }
+    },
+    onDrop: (input, data) => {
+      cancelPendingDropPositionClear();
+      updatePosition(input, data);
+      void runLayoutDrop(ctx, getVertexIdsFromSourceData(data));
+    },
+  });
+
+  return combine(pdndCleanup, touchCleanup);
 }
 
 function createPaletteDraggable(
@@ -305,21 +344,32 @@ function createPaletteDraggable(
     | typeof PAGE_DESIGNER_DRAG_TYPES.PALETTE_COMPONENT
     | typeof PAGE_DESIGNER_DRAG_TYPES.PALETTE_PAGE,
 ): () => void {
-  return draggable({
-    element,
-    getInitialData: () => {
-      const vertexIds = getPaletteDragVertices(ctx).map((vertex) => vertex.id);
+  const getInitialData = () => {
+    const vertexIds = getPaletteDragVertices(ctx).map((vertex) => vertex.id);
 
-      return {
-        type,
-        vertexId: ctx.vertexId,
-        vertexIds,
-      };
-    },
-    onDragStart: () => {
-      ctx.clearSelectedVertices?.();
-    },
-  });
+    return {
+      type,
+      vertexId: ctx.vertexId,
+      vertexIds,
+    };
+  };
+
+  const onDragStart = () => {
+    ctx.clearSelectedVertices?.();
+  };
+
+  return combine(
+    draggable({
+      element,
+      getInitialData,
+      onDragStart,
+    }),
+    registerTouchDragSource({
+      element,
+      getData: getInitialData,
+      onDragStart,
+    }),
+  );
 }
 
 export function attachPaletteComponentDraggable(
@@ -399,17 +449,30 @@ export function attachLayoutTreeItemDragDrop(
     );
   };
 
-  const dragCleanup = draggable({
-    element,
-    getInitialData: () => ({
-      type: PAGE_DESIGNER_DRAG_TYPES.LAYOUT_ITEM,
-      vertexId: ctx.layoutVertex.id,
-      vertexIds: [ctx.layoutVertex.id],
+  const dragCleanup = combine(
+    draggable({
+      element,
+      getInitialData: () => ({
+        type: PAGE_DESIGNER_DRAG_TYPES.LAYOUT_ITEM,
+        vertexId: ctx.layoutVertex.id,
+        vertexIds: [ctx.layoutVertex.id],
+      }),
+      onDrop: () => {
+        scheduleDropStateCleanup(ctx);
+      },
     }),
-    onDrop: () => {
-      scheduleDropStateCleanup(ctx);
-    },
-  });
+    registerTouchDragSource({
+      element,
+      getData: () => ({
+        type: PAGE_DESIGNER_DRAG_TYPES.LAYOUT_ITEM,
+        vertexId: ctx.layoutVertex.id,
+        vertexIds: [ctx.layoutVertex.id],
+      }),
+      onDragEnd: () => {
+        scheduleDropStateCleanup(ctx);
+      },
+    }),
+  );
 
   return combine(
     dragCleanup,
@@ -468,88 +531,144 @@ export function attachRootDropTarget(
     );
   };
 
-  return dropTargetForElements({
-    element,
-    canDrop: ({ source }) => canDropPageDesignerSource(source),
-    onDragEnter: () => {
-      cancelPendingDropPositionClear();
-      ctx.onDragEnter?.();
-      // Do not set root position here — nested item targets set activeItem.
-    },
-    onDrag: ({ location }) => {
-      if (!isInnermostDropTarget(element, location)) {
-        return;
-      }
+  const tryRootDrop = (data: Record<string, unknown>) => {
+    cancelPendingDropPositionClear();
+    const layoutStore = getLayoutStore(ctx);
+    const formDataId = ctx.formStoreVertex()?.P.formDataId;
 
-      cancelPendingDropPositionClear();
-      const layoutStore = getLayoutStore(ctx);
-      const formDataId = ctx.formStoreVertex()?.P.formDataId;
-      if (isRootDropTargetActive(layoutStore, formDataId)) {
-        setRootPosition();
-      }
-    },
-    onDragLeave: ({ location }) => {
-      if (location.current.dropTargets.length > 0) {
-        return;
-      }
+    if (!isRootDropTargetActive(layoutStore, formDataId)) {
+      return;
+    }
 
-      scheduleDropPositionClear(getLayoutStore(ctx), ctx.graph, ctx.setGraph);
-      ctx.onDragLeave?.();
-    },
-    onDrop: ({ location, source }) => {
-      // Only handle when pointer is over empty preview (no nested item target).
-      if (!isInnermostDropTarget(element, location)) {
-        return;
-      }
+    if (
+      layoutStore.P.activeItem == null ||
+      layoutStore.P.dragPosition == null
+    ) {
+      setRootPosition();
+    }
 
-      cancelPendingDropPositionClear();
-      const layoutStore = getLayoutStore(ctx);
-      const formDataId = ctx.formStoreVertex()?.P.formDataId;
+    void runLayoutDrop(ctx, getVertexIdsFromSourceData(data));
+  };
 
-      if (!isRootDropTargetActive(layoutStore, formDataId)) {
-        return;
-      }
+  return combine(
+    dropTargetForElements({
+      element,
+      canDrop: ({ source }) => canDropPageDesignerSource(source),
+      onDragEnter: () => {
+        cancelPendingDropPositionClear();
+        ctx.onDragEnter?.();
+        // Do not set root position here — nested item targets set activeItem.
+      },
+      onDrag: ({ location }) => {
+        if (!isInnermostDropTarget(element, location)) {
+          return;
+        }
 
-      if (
-        layoutStore.P.activeItem == null ||
-        layoutStore.P.dragPosition == null
-      ) {
-        setRootPosition();
-      }
+        cancelPendingDropPositionClear();
+        const layoutStore = getLayoutStore(ctx);
+        const formDataId = ctx.formStoreVertex()?.P.formDataId;
+        if (isRootDropTargetActive(layoutStore, formDataId)) {
+          setRootPosition();
+        }
+      },
+      onDragLeave: ({ location }) => {
+        if (location.current.dropTargets.length > 0) {
+          return;
+        }
 
-      void runLayoutDrop(ctx, getVertexIdsFromSourceData(source.data));
-    },
-  });
+        scheduleDropPositionClear(getLayoutStore(ctx), ctx.graph, ctx.setGraph);
+        ctx.onDragLeave?.();
+      },
+      onDrop: ({ location, source }) => {
+        // Only handle when pointer is over empty preview (no nested item target).
+        if (!isInnermostDropTarget(element, location)) {
+          return;
+        }
+
+        tryRootDrop(source.data);
+      },
+    }),
+    registerTouchDropTarget({
+      element,
+      canDrop: (data) => canDropPageDesignerSource({ data }),
+      onDragEnter: () => {
+        cancelPendingDropPositionClear();
+        ctx.onDragEnter?.();
+      },
+      onDragLeave: (hasNextTarget) => {
+        if (!hasNextTarget) {
+          scheduleDropPositionClear(
+            getLayoutStore(ctx),
+            ctx.graph,
+            ctx.setGraph,
+          );
+        }
+        ctx.onDragLeave?.();
+      },
+      onDrag: (_input, _data) => {
+        cancelPendingDropPositionClear();
+        const layoutStore = getLayoutStore(ctx);
+        const formDataId = ctx.formStoreVertex()?.P.formDataId;
+        // Touch findTarget already prefers innermost registered targets, so
+        // reaching root onDrag means no nested item is under the pointer.
+        if (isRootDropTargetActive(layoutStore, formDataId)) {
+          setRootPosition();
+        }
+      },
+      onDrop: (_input, data) => {
+        tryRootDrop(data);
+      },
+    }),
+  );
 }
 
 export function attachLayoutItemDraggable(
   element: HTMLElement,
   ctx: LayoutItemDragContext,
 ): () => void {
-  return draggable({
-    element,
-    getInitialData: () => ({
-      type: PAGE_DESIGNER_DRAG_TYPES.LAYOUT_ITEM,
-      vertexId: ctx.layoutVertex.id,
-      vertexIds: [ctx.layoutVertex.id],
-    }),
-    onDrop: () => {
-      scheduleDropStateCleanup(ctx);
-    },
+  const getInitialData = () => ({
+    type: PAGE_DESIGNER_DRAG_TYPES.LAYOUT_ITEM,
+    vertexId: ctx.layoutVertex.id,
+    vertexIds: [ctx.layoutVertex.id],
   });
+
+  return combine(
+    draggable({
+      element,
+      getInitialData,
+      onDrop: () => {
+        scheduleDropStateCleanup(ctx);
+      },
+    }),
+    registerTouchDragSource({
+      element,
+      getData: getInitialData,
+      onDragEnd: () => {
+        scheduleDropStateCleanup(ctx);
+      },
+    }),
+  );
 }
 
 export function attachTabDraggable(
   element: HTMLElement,
   ctx: TabDragContext,
 ): () => void {
-  return draggable({
-    element,
-    getInitialData: () => ({
-      type: PAGE_DESIGNER_DRAG_TYPES.TAB,
-      openedFormId: ctx.openedFormId,
-    }),
+  const getInitialData = () => ({
+    type: PAGE_DESIGNER_DRAG_TYPES.TAB,
+    openedFormId: ctx.openedFormId,
   });
+
+  return combine(
+    draggable({
+      element,
+      getInitialData,
+    }),
+    registerTouchDragSource({
+      element,
+      getData: getInitialData,
+    }),
+  );
 }
 
 function getTabDropOpenedFormId(source: { data: Record<string, unknown> }) {
@@ -578,30 +697,52 @@ export function attachTabPanelDropTarget(
   element: HTMLElement,
   ctx: TabPanelDropContext,
 ): () => void {
-  return dropTargetForElements({
-    element,
-    canDrop: ({ source }) => source.data.type === PAGE_DESIGNER_DRAG_TYPES.TAB,
-    onDrop: ({ location, source }) => {
-      if (!isInnermostDropTarget(element, location)) {
-        return;
-      }
+  return combine(
+    dropTargetForElements({
+      element,
+      canDrop: ({ source }) =>
+        source.data.type === PAGE_DESIGNER_DRAG_TYPES.TAB,
+      onDrop: ({ location, source }) => {
+        if (!isInnermostDropTarget(element, location)) {
+          return;
+        }
 
-      scheduleTabMove(ctx, source);
-    },
-  });
+        scheduleTabMove(ctx, source);
+      },
+    }),
+    registerTouchDropTarget({
+      element,
+      canDrop: (data) => data.type === PAGE_DESIGNER_DRAG_TYPES.TAB,
+      onDrag: () => {},
+      onDrop: (_input, data) => {
+        scheduleTabMove(ctx, { data });
+      },
+    }),
+  );
 }
 
 export function attachTabDropTarget(
   element: HTMLElement,
   ctx: TabPanelDropContext,
 ): () => void {
-  return dropTargetForElements({
-    element,
-    canDrop: ({ source }) => source.data.type === PAGE_DESIGNER_DRAG_TYPES.TAB,
-    onDrop: ({ source }) => {
-      scheduleTabMove(ctx, source);
-    },
-  });
+  return combine(
+    dropTargetForElements({
+      element,
+      canDrop: ({ source }) =>
+        source.data.type === PAGE_DESIGNER_DRAG_TYPES.TAB,
+      onDrop: ({ source }) => {
+        scheduleTabMove(ctx, source);
+      },
+    }),
+    registerTouchDropTarget({
+      element,
+      canDrop: (data) => data.type === PAGE_DESIGNER_DRAG_TYPES.TAB,
+      onDrag: () => {},
+      onDrop: (_input, data) => {
+        scheduleTabMove(ctx, { data });
+      },
+    }),
+  );
 }
 
 export function attachTabDragDrop(
