@@ -12,10 +12,14 @@ import {
   workerState,
 } from "~/server/queue/initWorkersCore";
 import { startWorkerForSubdomainCore } from "~/server/queue/initWorkers";
+import { clearFormMetaDataMemoryCache } from "~/pages/functions/fetchFormMetaData";
+import { clearDynamicPageUrlCache } from "~/pages/functions/resolveDynamicPageUrl";
+import { clearComponentMemoryCache } from "~/server/redis/componentCache";
 import { ClusterCoordinator } from "./ClusterCoordinator";
 import { NodeRegistry } from "./NodeRegistry";
 import {
   CLUSTER_CHANNELS,
+  type ClearFormMetaMemoryRequest,
   type ClusterOperationResult,
   type StartWorkersRequest,
   type StartWorkersResponse,
@@ -88,6 +92,7 @@ export async function initClusterCommunication() {
       CLUSTER_CHANNELS.STOP_WORKERS,
       CLUSTER_CHANNELS.START_WORKERS,
       CLUSTER_CHANNELS.WORKER_STATUS_REQUEST,
+      CLUSTER_CHANNELS.CLEAR_FORM_META_MEMORY,
     );
 
     // Handle incoming commands
@@ -152,9 +157,30 @@ async function handleClusterMessage(
       await handleWorkerStatusRequest(data as WorkerStatusRequest);
       break;
 
+    case CLUSTER_CHANNELS.CLEAR_FORM_META_MEMORY:
+      handleClearFormMetaMemoryRequest(data as ClearFormMetaMemoryRequest);
+      break;
+
     default:
       console.warn(`[Cluster] Unknown channel: ${channel}`);
   }
+}
+
+/**
+ * Clear in-process form-meta caches on this node (L1 only).
+ * Redis L2 is invalidated by the publishing node before broadcast.
+ */
+function handleClearFormMetaMemoryRequest(
+  request: ClearFormMetaMemoryRequest,
+): void {
+  const { subdomain } = request;
+  if (!subdomain) {
+    return;
+  }
+
+  clearDynamicPageUrlCache(subdomain);
+  clearFormMetaDataMemoryCache(subdomain);
+  clearComponentMemoryCache(subdomain);
 }
 
 /**
@@ -457,6 +483,30 @@ export async function broadcastStartWorkers(
   );
 
   return result;
+}
+
+/**
+ * Fire-and-forget: tell other PM2/cluster nodes to drop L1 form-meta memory
+ * for a subdomain. No-ops when cluster communication is not initialized.
+ */
+export async function broadcastClearFormMetaMemoryCache(
+  subdomain: string,
+): Promise<void> {
+  if (!clusterState.coordinator) {
+    return;
+  }
+
+  try {
+    await clusterState.coordinator.broadcastFireAndForget<ClearFormMetaMemoryRequest>(
+      CLUSTER_CHANNELS.CLEAR_FORM_META_MEMORY,
+      { subdomain },
+    );
+  } catch (error) {
+    console.warn(
+      `[Cluster] Failed to broadcast form-meta memory clear for ${subdomain}:`,
+      error,
+    );
+  }
 }
 
 /**

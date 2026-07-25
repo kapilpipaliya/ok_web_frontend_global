@@ -82,6 +82,14 @@ export interface WorkerStatusRequest extends ClusterMessage {
 }
 
 /**
+ * Fire-and-forget: clear in-process (L1) form-meta caches on every node.
+ * Redis (L2) is already invalidated by the source node.
+ */
+export interface ClearFormMetaMemoryRequest extends ClusterMessage {
+  subdomain: string;
+}
+
+/**
  * Worker information
  */
 export interface WorkerInfo {
@@ -123,6 +131,8 @@ export const CLUSTER_CHANNELS = {
   STOP_WORKERS: "cluster:stop-workers",
   START_WORKERS: "cluster:start-workers",
   WORKER_STATUS_REQUEST: "cluster:worker-status:request",
+  /** Fire-and-forget L1 form-meta memory clear (no response expected) */
+  CLEAR_FORM_META_MEMORY: "cluster:clear-form-meta-memory",
 
   // Response channels (append :requestId)
   STOP_WORKERS_RESPONSE: "cluster:stop-workers:response",

@@ -3,6 +3,7 @@ import type { Edge } from "~/lib/graph/type/edge";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { clearDynamicPageUrlCache } from "~/pages/functions/resolveDynamicPageUrl";
 import { clearFormMetaDataMemoryCache } from "~/pages/functions/fetchFormMetaData";
+import { broadcastClearFormMetaMemoryCache } from "~/server/cluster/clusterCommunication";
 import {
   clearComponentMemoryCache,
   invalidateComponentCacheForSubdomain,
@@ -61,16 +62,19 @@ export function mutationAffectsFormMetaData(args: MutationArgs): boolean {
 export async function invalidateFormMetaDataCacheForSubdomain(
   subDomain: string,
 ): Promise<number> {
-  // Also drop the in-process caches (L1) so newly added or renamed pages
-  // resolve immediately in this process.
-  clearDynamicPageUrlCache(subDomain);
-  clearFormMetaDataMemoryCache(subDomain);
-  clearComponentMemoryCache(subDomain);
-
+  // Clear shared Redis (L2) first so other nodes cannot refill L1 from stale keys.
   const [pageDeleted, componentDeleted] = await Promise.all([
     redisCacheDeleteByPattern(`form-meta:${subDomain}:*`),
     invalidateComponentCacheForSubdomain(subDomain),
   ]);
+
+  // Drop in-process caches (L1) on this worker.
+  clearDynamicPageUrlCache(subDomain);
+  clearFormMetaDataMemoryCache(subDomain);
+  clearComponentMemoryCache(subDomain);
+
+  // Tell other PM2/cluster nodes to drop their L1 too (fire-and-forget).
+  await broadcastClearFormMetaMemoryCache(subDomain);
 
   return pageDeleted + componentDeleted;
 }

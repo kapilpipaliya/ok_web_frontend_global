@@ -181,6 +181,28 @@ export class ClusterCoordinator {
   }
 
   /**
+   * Publish a message to all nodes without waiting for acknowledgments.
+   * Use for cheap side effects (e.g. L1 cache clear) where save latency matters.
+   */
+  async broadcastFireAndForget<TRequest extends ClusterMessage>(
+    channel: string,
+    request: Omit<TRequest, "requestId" | "sourceNodeId" | "timestamp">,
+  ): Promise<void> {
+    if (!this.publisher) {
+      throw new Error("ClusterCoordinator not initialized");
+    }
+
+    const fullMessage: TRequest = {
+      ...request,
+      requestId: randomUUID(),
+      sourceNodeId: this.nodeRegistry.getNodeId(),
+      timestamp: Date.now(),
+    } as TRequest;
+
+    await this.publisher.publish(channel, JSON.stringify(fullMessage));
+  }
+
+  /**
    * Send a response to a request
    */
   async sendResponse<TResponse extends ClusterMessage>(
