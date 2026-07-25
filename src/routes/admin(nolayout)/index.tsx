@@ -16,6 +16,7 @@ import { createMemo } from "solid-js";
 import { processCssContent } from "~/lib/styles/processCss";
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import { StyleRenderer } from "~/components/StyleRenderer";
+import { AdminPwa } from "~/lib/pwa/AdminPwa";
 
 export default function Admin() {
   return (
@@ -48,6 +49,7 @@ function AdminLayoutRoute(props: { children: JSX.Element }) {
     <PermissionGuard>
       <StyleRenderer cssContent={adminGlobalCss()} id="admin-global-styles" />
       <AuthRequired>
+        <AdminPwa />
         <Link href={getCompanySquareLogoUrl(graph) || ""} rel="icon" />
         <As as="header" css={SETTINGS_CONSTANTS.HEADER_MENU_CSS}>
           <RedirectUrlIconButton />

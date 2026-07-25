@@ -17,6 +17,7 @@ import { StyleRenderer } from "~/components/StyleRenderer";
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import { processCssContent } from "~/lib/styles/processCss";
 import { useTheme } from "~/lib/theme/ThemeContext";
+import { AdminPwa } from "~/lib/pwa/AdminPwa";
 
 export default function AdminLayoutRoute(props: Readonly<RouteSectionProps>) {
   const [graph] = useGraph();
@@ -41,6 +42,7 @@ export default function AdminLayoutRoute(props: Readonly<RouteSectionProps>) {
     <PermissionGuard>
       <StyleRenderer cssContent={adminGlobalCss()} id="admin-global-styles" />
       <AuthRequired>
+        <AdminPwa />
         <Link href={getCompanySquareLogoUrl(graph) || ""} rel="icon" />
         <As as="header" css={SETTINGS_CONSTANTS.HEADER_MENU_CSS}>
           <HomeIconButton />

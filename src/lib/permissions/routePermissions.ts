@@ -20,6 +20,8 @@ export const routePermissions: RoutePermission[] = [
     requiredPermission: PermissionLevel.PUBLIC,
   },
   { path: "/api/error/logError", requiredPermission: PermissionLevel.PUBLIC },
+  { path: "/admin-pwa/*", requiredPermission: PermissionLevel.PUBLIC },
+  { path: "/api/admin-pwa/*", requiredPermission: PermissionLevel.PUBLIC },
   { path: "/internal/*", requiredPermission: PermissionLevel.PUBLIC },
 
   // Authenticated routes - require signIn

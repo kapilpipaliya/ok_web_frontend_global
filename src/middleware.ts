@@ -125,7 +125,10 @@ export default createMiddleware({
       const url = new URL(event.request.url);
       if (
         url.pathname === "/_server" ||
-        url.pathname.startsWith("/webhooks/")
+        url.pathname.startsWith("/webhooks/") ||
+        url.pathname.startsWith("/admin-pwa/") ||
+        url.pathname.startsWith("/api/admin-pwa/") ||
+        url.pathname === "/admin-sw.js"
       ) {
         return;
       }
@@ -174,6 +177,23 @@ export default createMiddleware({
           writable: false,
           configurable: true,
         });
+      }
+
+      // Ensure PWA service worker can control /admin even if routeRules miss.
+      const pathname = new URL(event.request.url).pathname;
+      if (
+        event.response &&
+        (pathname === "/admin-sw.js" || pathname === "/api/admin-pwa/sw")
+      ) {
+        event.response.headers.set("Service-Worker-Allowed", "/");
+        event.response.headers.set(
+          "Content-Type",
+          "application/javascript; charset=utf-8",
+        );
+        event.response.headers.set(
+          "Cache-Control",
+          "no-cache, no-store, must-revalidate",
+        );
       }
 
       // Log response

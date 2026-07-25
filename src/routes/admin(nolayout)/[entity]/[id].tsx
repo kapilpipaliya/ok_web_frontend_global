@@ -11,6 +11,7 @@ import { createMemo } from "solid-js";
 import { processCssContent } from "~/lib/styles/processCss";
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import { StyleRenderer } from "~/components/StyleRenderer";
+import { AdminPwa } from "~/lib/pwa/AdminPwa";
 
 export default function AdminLayoutRoute(props: Readonly<RouteSectionProps>) {
   const [graph] = useGraph();
@@ -34,6 +35,7 @@ export default function AdminLayoutRoute(props: Readonly<RouteSectionProps>) {
   return (
     <AuthRequired>
       <StyleRenderer cssContent={adminGlobalCss()} id="admin-global-styles" />
+      <AdminPwa />
       <Link href={getCompanySquareLogoUrl(graph) || ""} rel="icon" />
       {props.children}
     </AuthRequired>

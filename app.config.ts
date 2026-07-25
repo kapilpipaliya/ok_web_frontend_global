@@ -23,6 +23,27 @@ export default defineConfig({
               : "no-store",
         },
       },
+      // Static SW at /admin-sw.js must advertise broader scope for /admin.
+      "/admin-sw.js": {
+        headers: {
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          "Service-Worker-Allowed": "/",
+          "Content-Type": "application/javascript; charset=utf-8",
+        },
+      },
+      "/api/admin-pwa/sw": {
+        headers: {
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          "Service-Worker-Allowed": "/",
+          "Content-Type": "application/javascript; charset=utf-8",
+        },
+      },
+      "/api/admin-pwa/manifest": {
+        headers: {
+          "Cache-Control": "no-cache",
+          "Content-Type": "application/manifest+json",
+        },
+      },
     },
     // https: true,
   },
