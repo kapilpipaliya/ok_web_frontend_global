@@ -1,7 +1,6 @@
 import type * as Monaco from "monaco-editor";
 
 import { createEffect, createSignal, For, on, Show } from "solid-js";
-import type { JSX } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
@@ -16,7 +15,11 @@ import {
   resizeContainerStyles,
   topResizeHandleStyles,
 } from "~/components/styled/resizeHandleStyles";
-import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
+import {
+  type PageLayoutObject,
+  useDesignerFormIdContext,
+  useDesignerLayoutStore,
+} from "~/features/page_designer/context/LayoutContext";
 import {
   formatCSSCode,
   formatJavaScriptCode,
@@ -27,39 +30,6 @@ import { As } from "~/components/As";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import type { Id } from "~/lib/graph/type/id";
 import { useGraph } from "~/lib/graph/context/UseGraph";
-
-const buttonStyles = (color: string) => `return \`._id {
-  padding: 1px 6px;
-  background-color: ${color};
-  color: \${args.theme.var.color.primary_text};
-  border-radius: 2px;
-  border: none;
-  font-size: 0.75rem;
-}\`;`;
-
-const EditorButton = (props: {
-  onClick: () => void;
-  color: string;
-  children: JSX.Element;
-  title?: string;
-  disabled?: boolean;
-}) => (
-  <As
-    as="button"
-    css={[
-      buttonStyles(props.color),
-      `return \`._id {
-      opacity: ${props.disabled ? "0.5" : "1"};
-      cursor: ${props.disabled ? "not-allowed" : "pointer"};
-    }\`;`,
-    ]}
-    disabled={props.disabled}
-    onClick={props.onClick}
-    title={props.title}
-  >
-    {props.children}
-  </As>
-);
 
 export function FunctionEditor(props: {
   keyName?: string;
@@ -72,6 +42,10 @@ export function FunctionEditor(props: {
 }) {
   const [graph] = useGraph();
   const formStoreId = useDesignerFormIdContext();
+  const layoutStoreId = useDesignerLayoutStore();
+  const isResizingDisabled = () =>
+    !!(graph.vertexes[layoutStoreId]?.P as PageLayoutObject | undefined)
+      ?.isResizingDisabled;
   const formStoreVertex = () =>
     graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
@@ -375,11 +349,13 @@ export function FunctionEditor(props: {
         }\`;`}
       >
         <As as="div" css={resizeContainerStyles}>
-          <As
-            as="div"
-            css={topResizeHandleStyles}
-            onPointerDown={resize.onTopPointerDown}
-          />
+          <Show when={!isResizingDisabled()}>
+            <As
+              as="div"
+              css={topResizeHandleStyles}
+              onPointerDown={resize.onTopPointerDown}
+            />
+          </Show>
           <MonacoEditorWrapper
             error={!isFunctionValid()}
             height={resize.height()}
@@ -389,11 +365,13 @@ export function FunctionEditor(props: {
             showMinimap={false}
             value={editorValue()}
           />
-          <As
-            as="div"
-            css={bottomResizeHandleStyles}
-            onPointerDown={resize.onBottomPointerDown}
-          />
+          <Show when={!isResizingDisabled()}>
+            <As
+              as="div"
+              css={bottomResizeHandleStyles}
+              onPointerDown={resize.onBottomPointerDown}
+            />
+          </Show>
         </As>
 
         <Show when={!isFunctionValid()}>
@@ -469,21 +447,39 @@ export function FunctionEditor(props: {
               margin-left: auto;
             }\`;`}
           >
-            <EditorButton
-              color={"${args.theme.var.color.success}"}
-              disabled={!hasChanges()}
-              onClick={handleSave}
-            >
-              Submit
-            </EditorButton>
+            <IconButton
+              css={`return \`._id {
+                padding: 2px;
+                background-color: \${args.theme.var.color.success};
+                color: \${args.theme.var.color.success_text};
+                border: none;
+                border-radius: 2px;
 
-            <EditorButton
-              color={"${args.theme.var.color.primary_light_300}"}
+                &:disabled {
+                  opacity: 0.5;
+                  cursor: not-allowed;
+                }
+              }\`;`}
+              disabled={!hasChanges()}
+              icon="ph:check"
+              onClick={handleSave}
+              size={16}
+              title="Submit"
+            />
+
+            <IconButton
+              css={`return \`._id {
+                padding: 2px;
+                background-color: \${args.theme.var.color.primary_light_300};
+                color: \${args.theme.var.color.primary_light_300_text};
+                border: none;
+                border-radius: 2px;
+              }\`;`}
+              icon="ph:magic-wand"
               onClick={formatCode}
+              size={16}
               title="Format Code with Prettier"
-            >
-              Format
-            </EditorButton>
+            />
 
             <IconButton
               css={`return \`._id {

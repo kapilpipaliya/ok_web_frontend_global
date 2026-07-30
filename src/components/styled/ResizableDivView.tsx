@@ -4,6 +4,7 @@ import {
   type JSX,
   on,
   onCleanup,
+  Show,
 } from "solid-js";
 
 import {
@@ -102,6 +103,8 @@ export function ResizableContainer(
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStoreVertex = () =>
     graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
+  const isResizingDisabled = () =>
+    !!layoutStoreVertex()?.P?.isResizingDisabled;
   const formStoreId = useDesignerFormIdContext();
   const formStoreVertex = () =>
     graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
@@ -217,7 +220,16 @@ export function ResizableContainer(
   });
 
   const gridCss = () =>
-    `return \`._id {
+    isResizingDisabled()
+      ? `return \`._id {
+      display: block;
+      border-left: 1px solid \${args.theme.var.color.border};
+      border-top: 1px solid \${args.theme.var.color.border};
+      min-width: 0;
+      min-height: 0;
+      overflow: hidden;
+    }\`;`
+      : `return \`._id {
       display: grid;
       grid-template-columns: ${trackPx()} minmax(0, 1fr) ${trackPx()};
       grid-template-rows: minmax(0, 1fr) ${trackPx()};
@@ -251,16 +263,22 @@ export function ResizableContainer(
           bindRootDrop(element);
         }}
         style={{
-          height: `calc(${height()} + ${trackPx()})`,
-          width: `calc(${width()} + ${2 * resizeTrackSize()}px)`,
+          height: isResizingDisabled()
+            ? height()
+            : `calc(${height()} + ${trackPx()})`,
+          width: isResizingDisabled()
+            ? width()
+            : `calc(${width()} + ${2 * resizeTrackSize()}px)`,
         }}
       >
-        <DesignerResizeHandle
-          active={activeResizeKey() === "width-left"}
-          ariaLabel="Resize preview width from left"
-          axis="x"
-          onPointerDown={handleLeftWidthResize}
-        />
+        <Show when={!isResizingDisabled()}>
+          <DesignerResizeHandle
+            active={activeResizeKey() === "width-left"}
+            ariaLabel="Resize preview width from left"
+            axis="x"
+            onPointerDown={handleLeftWidthResize}
+          />
+        </Show>
         <As
           as="div"
           css={[
@@ -269,25 +287,28 @@ export function ResizableContainer(
               min-width: 0;
               min-height: 0;
               overflow: hidden;
+              ${isResizingDisabled() ? "width: 100%; height: 100%;" : ""}
             }\`;`,
           ]}
         >
           {props.children}
         </As>
-        <DesignerResizeHandle
-          active={activeResizeKey() === "width-right"}
-          ariaLabel="Resize preview width from right"
-          axis="x"
-          onPointerDown={handleRightWidthResize}
-        />
-        <div aria-hidden="true" />
-        <DesignerResizeHandle
-          active={activeResizeKey() === "height"}
-          ariaLabel="Resize preview height"
-          axis="y"
-          onPointerDown={handleHeightResize}
-        />
-        <div aria-hidden="true" />
+        <Show when={!isResizingDisabled()}>
+          <DesignerResizeHandle
+            active={activeResizeKey() === "width-right"}
+            ariaLabel="Resize preview width from right"
+            axis="x"
+            onPointerDown={handleRightWidthResize}
+          />
+          <div aria-hidden="true" />
+          <DesignerResizeHandle
+            active={activeResizeKey() === "height"}
+            ariaLabel="Resize preview height"
+            axis="y"
+            onPointerDown={handleHeightResize}
+          />
+          <div aria-hidden="true" />
+        </Show>
       </As>
     </As>
   );

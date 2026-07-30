@@ -123,6 +123,9 @@ export function RenderMainContent() {
       : layout.mainPanelRow0Height != null
         ? `minmax(${MIN_MAIN_PANEL_ROW_HEIGHT}px, auto)`
         : "1fr";
+    if (layout.isResizingDisabled) {
+      return `${row0Css} ${row1Css}`;
+    }
     return `${row0Css} ${resizeTrackSize()}px ${row1Css} ${resizeTrackSize()}px`;
   };
 
@@ -443,11 +446,13 @@ export function RenderMainContent() {
                 </As>
               </As>
 
-              <DesignerResizeHandle
-                active={activeResizeKey() === "mainPanelRow0Height"}
-                axis="y"
-                onPointerDown={handleRow0HeightResize}
-              />
+              <Show when={!layoutStore().isResizingDisabled}>
+                <DesignerResizeHandle
+                  active={activeResizeKey() === "mainPanelRow0Height"}
+                  axis="y"
+                  onPointerDown={handleRow0HeightResize}
+                />
+              </Show>
 
               <As
                 as="div"
@@ -500,11 +505,13 @@ export function RenderMainContent() {
                 </As>
               </As>
 
-              <DesignerResizeHandle
-                active={activeResizeKey() === "mainPanelRow1Height"}
-                axis="y"
-                onPointerDown={handleRow1HeightResize}
-              />
+              <Show when={!layoutStore().isResizingDisabled}>
+                <DesignerResizeHandle
+                  active={activeResizeKey() === "mainPanelRow1Height"}
+                  axis="y"
+                  onPointerDown={handleRow1HeightResize}
+                />
+              </Show>
           </As>
         </As>
       </As>

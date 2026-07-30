@@ -1,9 +1,12 @@
-import { type Component, Show } from "solid-js";
+import { type Component, type JSX, Show } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
 import type { SetStoreFunction } from "solid-js/store";
 
 import { IconButton } from "~/components/styled/IconButton";
-import type { PageLayoutObject } from "~/features/page_designer/context/LayoutContext";
+import {
+  type PageLayoutObject,
+  useDesignerLayoutStore,
+} from "~/features/page_designer/context/LayoutContext";
 import { As } from "~/components/As";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import type { Id } from "~/lib/graph/type/id";
@@ -12,6 +15,7 @@ import { headerIconButtonCss, STYLES } from "~/pages/settings/constants";
 import { createAxisResizeHandler } from "~/lib/resizable/createAxisResizeHandler";
 import { DesignerResizeHandle } from "~/lib/resizable/DesignerResizeHandle";
 import { useDesignerResizeTrackSize } from "~/lib/resizable/useDesignerResizeTrackSize";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export interface DesignerPanelProps {
   activeResizeKey: null | string;
@@ -30,15 +34,21 @@ export interface DesignerPanelProps {
   scrollContent?: boolean;
   style?: any;
   title?: string;
+  titleActions?: JSX.Element;
   titleIcon?: string;
 }
 
 export const DesignerPanel: Component<DesignerPanelProps> = (props) => {
+  const [graph] = useGraph();
+  const layoutStoreId = useDesignerLayoutStore();
+  const isResizingDisabled = () =>
+    !!(graph.vertexes[layoutStoreId]?.P as PageLayoutObject | undefined)
+      ?.isResizingDisabled;
   const resizeTrackSize = useDesignerResizeTrackSize();
   const trackSize = () => `${resizeTrackSize()}px`;
 
   const leftResizeHandler = () =>
-    props.collapsed
+    props.collapsed || isResizingDisabled()
       ? undefined
       : (props.onResizeLeft ??
         (props.onResize && props.resizePosition === "left"
@@ -46,7 +56,7 @@ export const DesignerPanel: Component<DesignerPanelProps> = (props) => {
           : undefined));
 
   const rightResizeHandler = () =>
-    props.collapsed
+    props.collapsed || isResizingDisabled()
       ? undefined
       : (props.onResizeRight ??
         (props.onResize &&
@@ -155,6 +165,7 @@ export const DesignerPanel: Component<DesignerPanelProps> = (props) => {
               >
                 {props.title}
               </As>
+              {props.titleActions}
               <Show when={props.onToggleCollapse}>
                 <IconButton
                   css={[

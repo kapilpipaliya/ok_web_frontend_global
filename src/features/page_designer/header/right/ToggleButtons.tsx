@@ -22,7 +22,8 @@ export function ToggleButtons() {
       | "isAiOpen"
       | "isLayoutTreeOpen"
       | "isPropertiesOpen"
-      | "isSettingsOpen",
+      | "isSettingsOpen"
+      | "isResizingDisabled",
   ) => {
     mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
       [panel]: !layoutStore()[panel],
@@ -41,6 +42,23 @@ export function ToggleButtons() {
 
   return (
     <>
+      <IconButton
+        css={headerIconButtonCss}
+        icon={
+          layoutStore().isResizingDisabled
+            ? "ph:lock-simple"
+            : "ph:arrows-out-cardinal"
+        }
+        iconCss={`return \`._id {${layoutStore().isResizingDisabled ? "color:${args.theme.var.color.primary}" : "color:${args.theme.var.color.text_light_300}"};}\`;`}
+        onClick={() => togglePanel("isResizingDisabled")}
+        size={22}
+        title={
+          layoutStore().isResizingDisabled
+            ? "Enable resizing"
+            : "Disable resizing"
+        }
+        tooltipGroup="right-buttons"
+      />
       <IconButton
         css={headerIconButtonCss}
         icon="ph:gear"

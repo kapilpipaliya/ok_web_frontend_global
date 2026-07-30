@@ -1,4 +1,4 @@
-import { createEffect, createSignal, on } from "solid-js";
+import { createEffect, createSignal, on, Show } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
@@ -7,7 +7,11 @@ import { createAxisResizeHandler } from "~/lib/resizable/createAxisResizeHandler
 import { DesignerResizeHandle } from "~/lib/resizable/DesignerResizeHandle";
 import { useResizeOverlay } from "~/lib/resizable/ResizeOverlayContext";
 import { useDesignerResizeTrackSize } from "~/lib/resizable/useDesignerResizeTrackSize";
-import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
+import {
+  type PageLayoutObject,
+  useDesignerFormIdContext,
+  useDesignerLayoutStore,
+} from "~/features/page_designer/context/LayoutContext";
 import { As } from "~/components/As";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
@@ -20,6 +24,10 @@ export function JsonEditorFieldComponent(props: {
 }) {
   const [graph] = useGraph();
   const formStoreId = useDesignerFormIdContext();
+  const layoutStoreId = useDesignerLayoutStore();
+  const isResizingDisabled = () =>
+    !!(graph.vertexes[layoutStoreId]?.P as PageLayoutObject | undefined)
+      ?.isResizingDisabled;
   const formStoreVertex = () =>
     graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
   const [isJsonValid, setIsJsonValid] = createSignal(true);
@@ -99,15 +107,23 @@ export function JsonEditorFieldComponent(props: {
       {!props?.hideLabel && "JSON"}
       <As
         as="div"
-        css={`return \`._id {
+        css={
+          isResizingDisabled()
+            ? `return \`._id {
+          display: block;
+          min-height: 0;
+        }\`;`
+            : `return \`._id {
           display: grid;
           grid-template-rows: 1fr ${trackPx()};
           min-height: 0;
-        }\`;`}
+        }\`;`
+        }
         style={{
-          height: manualHeight()
-            ? `calc(${editorHeight()} + ${trackPx()})`
-            : undefined,
+          height:
+            !isResizingDisabled() && manualHeight()
+              ? `calc(${editorHeight()} + ${trackPx()})`
+              : manualHeight() || undefined,
         }}
       >
         <As
@@ -127,11 +143,13 @@ export function JsonEditorFieldComponent(props: {
             maxHeight={800}
           />
         </As>
-        <DesignerResizeHandle
-          active={activeResize()}
-          axis="y"
-          onPointerDown={handleHeightResize}
-        />
+        <Show when={!isResizingDisabled()}>
+          <DesignerResizeHandle
+            active={activeResize()}
+            axis="y"
+            onPointerDown={handleHeightResize}
+          />
+        </Show>
       </As>
       {!isJsonValid() && (
         <As

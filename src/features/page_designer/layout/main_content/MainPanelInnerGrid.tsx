@@ -16,8 +16,9 @@ import {
 } from "../../context/LayoutContext";
 import { PropertiesContent } from "./PropertiesContent";
 import { As } from "~/components/As";
+import { IconButton } from "~/components/styled/IconButton";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
-import { STYLES } from "~/pages/settings/constants";
+import { headerIconButtonCss, STYLES } from "~/pages/settings/constants";
 import type { Id } from "~/lib/graph/type/id";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 
@@ -28,6 +29,19 @@ export function MainPanelInnerGrid(
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStore = () =>
     (graph.vertexes[layoutStoreId]?.P as PageLayoutObject) || {};
+
+  const toggleLayoutTreeFloatingMenu = () => {
+    mergeVertexProperties<PageLayoutObject>(
+      0,
+      layoutStoreId,
+      graph,
+      setGraph,
+      {
+        isLayoutTreeFloatingMenuEnabled:
+          !layoutStore().isLayoutTreeFloatingMenuEnabled,
+      },
+    );
+  };
 
   const activeOpenedFormId = createMemo(() => {
     const layout = layoutStore();
@@ -164,6 +178,29 @@ export function MainPanelInnerGrid(
               resizeKey="layoutTreeWidth"
               resizePosition="right"
               title="Layout Tree"
+              titleActions={
+                <IconButton
+                  css={[
+                    headerIconButtonCss,
+                    "return `._id { flex-shrink: 0; }`;",
+                  ]}
+                  icon="ph:dots-three-vertical"
+                  iconCss={`return \`._id {
+                    color: ${
+                      layoutStore().isLayoutTreeFloatingMenuEnabled
+                        ? "${args.theme.var.color.primary}"
+                        : "${args.theme.var.color.text_light_300}"
+                    };
+                  }\`;`}
+                  onClick={toggleLayoutTreeFloatingMenu}
+                  size={18}
+                  title={
+                    layoutStore().isLayoutTreeFloatingMenuEnabled
+                      ? "Disable selected item floating menu"
+                      : "Enable selected item floating menu"
+                  }
+                />
+              }
               titleIcon="tabler:layout-2"
             >
               <LayoutTreePanel openedFormId={activeOpenedFormId()!} />

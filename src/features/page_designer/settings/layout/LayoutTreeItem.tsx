@@ -86,6 +86,8 @@ export function LayoutTreeItem(
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStoreVertex = () =>
     graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
+  const isSelectedFloatingMenuEnabled = () =>
+    !!layoutStoreVertex()?.P.isLayoutTreeFloatingMenuEnabled;
 
   const formStoreId = useDesignerFormIdContext();
   const formStoreVertex = () =>
@@ -667,7 +669,8 @@ export function LayoutTreeItem(
           </Show>
           <Show
             when={
-              showRowActions() || isSelectedLayoutId(props.metaVertex.id)
+              isSelectedFloatingMenuEnabled() &&
+              (showRowActions() || isSelectedLayoutId(props.metaVertex.id))
             }
           >
             <AttrConfigIcons
