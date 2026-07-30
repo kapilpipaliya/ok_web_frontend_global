@@ -253,12 +253,7 @@ export function RenderMainContent() {
         overflow: hidden;
       }\`;`}
     >
-      <HeaderRow
-        css={`return \`._id {
-          align-items: center;
-          flex-shrink: 0;
-        }}\`;`}
-      />
+      <HeaderRow />
 
       <As
         as="div"
