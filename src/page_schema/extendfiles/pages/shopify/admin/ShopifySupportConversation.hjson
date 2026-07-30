@@ -249,10 +249,10 @@ return `._id {
         componentName: Html
         props:
           '''
-const t = args.fns.ticket?.();
+const _t = args.fns.ticket?.();
 return {
   as: "h1",
-  text: t ? (t.P?.subject || "Support Conversation") : "Support Conversation"
+  text: _t ? (_t.P?.subject || "Support Conversation") : "Support Conversation"
 };
 '''
       }
@@ -273,20 +273,20 @@ return `._id {
         componentName: Html
         props:
           '''
-const t = args.fns.ticket?.();
-if (!t) {
+const _t = args.fns.ticket?.();
+if (!_t) {
   return {
     as: "p",
     text: "Ticket not found."
   };
 }
 
-const createdAt = t.P?.createdAt;
+const createdAt = _t.P?.createdAt;
 const createdText = args.fns.formatTimestamp?.(createdAt) || "";
 
 return {
   as: "p",
-  text: `${t.P?.email || ""} • ${createdText}`
+  text: `${_t.P?.email || ""} • ${createdText}`
 };
 '''
       }

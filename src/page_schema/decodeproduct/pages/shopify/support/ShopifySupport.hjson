@@ -811,16 +811,16 @@ return `._id {
         componentName: Html
         props:
           '''
-const t = args.contextData.ticket;
-if (!t) return {};
+const _t = args.contextData.ticket;
+if (!_t) return {};
 const selectedId = args.fns.selectedTicketId?.();
-const isSelected = selectedId && t.id === selectedId;
-const unread = t.P?.unreadForShop || 0;
+const isSelected = selectedId && _t.id === selectedId;
+const unread = _t.P?.unreadForShop || 0;
 
 return {
   as: "button",
   type: "button",
-  onClick: () => args.fns.handleSelectTicket?.(t),
+  onClick: () => args.fns.handleSelectTicket?.(_t),
   "data-selected": isSelected ? "true" : "false",
   "data-unread": unread > 0 ? "true" : "false"
 };
@@ -842,10 +842,10 @@ return `._id {
         componentName: Html
         props:
           '''
-const t = args.contextData.ticket;
+const _t = args.contextData.ticket;
 return {
   as: "div",
-  text: t?.P?.subject || "[No subject]"
+  text: _t?.P?.subject || "[No subject]"
 };
 '''
       }
@@ -870,12 +870,12 @@ return `._id {
         componentName: Html
         props:
           '''
-const t = args.contextData.ticket;
-if (!t) return {};
+const _t = args.contextData.ticket;
+if (!_t) return {};
 const selectedId = args.fns.selectedTicketId?.();
-const isSelected = selectedId && t.id === selectedId;
-const unread = t?.P?.unreadForShop || 0;
-const createdAt = t?.P?.createdAt;
+const isSelected = selectedId && _t.id === selectedId;
+const unread = _t?.P?.unreadForShop || 0;
+const createdAt = _t?.P?.createdAt;
 const createdText = args.fns.formatTimestamp?.(createdAt) || "";
 
 return {

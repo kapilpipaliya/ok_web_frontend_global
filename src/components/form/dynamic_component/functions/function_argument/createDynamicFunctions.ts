@@ -3,6 +3,7 @@ import type { Vertex } from "~/lib/graph/type/vertex";
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/entity/findVertex";
 import { createMemo, type Accessor, untrack, runWithOwner } from "solid-js";
+import { runArgsFunction } from "~/lib/utils/createArgsFunction";
 
 /**
  * Creates dynamic functions for the component with memoization
@@ -34,7 +35,7 @@ export function createDynamicFunctions(
         }
         if (typeof fns === "string" && fns.trim() !== "") {
           try {
-            return new Function("args", fns)(args);
+            return runArgsFunction(fns, args) as Record<string, unknown>;
           } catch (error) {
             console.error("Error evaluating fns:", error, fns);
             return undefined;

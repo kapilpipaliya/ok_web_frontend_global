@@ -52,6 +52,38 @@ The graph must represent a valid Page Builder Item tree.
 ### Function Arguments
 The `fns`, `props` and `css` properties accept javascript function body strings. You can use `args` key to access function arguments whose type is `FunctionArgumentBaseType`.
 
+#### Shorthand Aliases
+Every function body (`fns`, `props`, `css`, and `${...}` templates in `text`) receives these shorthand parameters alongside `args`:
+
+| Alias | Equivalent |
+| --- | --- |
+| `_` | `args` |
+| `f` | `args.fns` |
+| `c` | `args.contextData` |
+| `t` | `args.theme` |
+| `g` | `args.graph` |
+| `sg` | `args.setGraph` |
+| `s` | `args.executeNamedServerFunction` |
+
+Use them to keep bodies short, e.g. `return \`._id { color: ${t.var.color.primary}; }\`;` instead of `args.theme.var.color.primary`.
+
+**IMPORTANT: `args`, `_`, `f`, `c`, `t`, `g`, `sg` and `s` are reserved identifiers.** They are function parameters, so declaring one at the top level of a body is a `SyntaxError`:
+
+```javascript
+// ❌ WRONG - 'Identifier t has already been declared'
+const t = args.theme.var.color;
+return `._id { color: ${t.text}; }`;
+
+// ✅ CORRECT - use the alias directly
+return `._id { color: ${t.var.color.text}; }`;
+
+// ✅ CORRECT - or pick a meaningful name
+const colors = args.theme.var.color;
+return `._id { color: ${colors.text}; }`;
+```
+
+Shadowing inside a nested function is still fine, but avoid it for clarity.
+
 #### User Settings Functions
 - `args.userSetting` - Get current user settings as an object (e.g., `args.userSetting.themeColorMode`)
 - `args.saveUserSetting({ key: value })` - Save user settings to the database (persists across sessions)
@@ -831,7 +863,7 @@ Use **`hooks.afterCreate` / `hooks.afterUpdate`** on the table config to denorma
 - Do not skip any vertexes or edges
 - Use numeric IDs for the graph
 - The graph must be a directed acyclic graph (DAG) to prevent circular dependencies
-- do not short variable name, use meaningful variable names.
+- do not short variable name, use meaningful variable names. The only exception is the built-in shorthand aliases (`_`, `f`, `c`, `t`, `g`, `sg`, `s`), which must never be redeclared at the top level of a function body.
 - Email templates must use `_hex` theme colors and follow the layout in `baseEmailTemplate.ts` (logo, 600px container, footer).
 
 ## Import Guidelines

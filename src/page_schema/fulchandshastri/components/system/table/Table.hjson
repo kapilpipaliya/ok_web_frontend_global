@@ -4831,13 +4831,13 @@ const rowExpansions = args.fns.getRowExpansionConfigs?.() || [];
 const rowId = rowData?.id;
 const isRowExpansionOpen =
   Array.isArray(rowExpansions) && rowExpansions.length > 0 && rowId && args.fns.isExpansionOpen?.(rowId);
-const t = args.theme.var.color;
+const _t = args.theme.var.color;
 return `._id {
   grid-row: 2;
   grid-column: 1 / -1;
   overflow: auto;
-  background: ${t.background_light_100};
-  border-top: 1px solid ${t.border};
+  background: ${_t.background_light_100};
+  border-top: 1px solid ${_t.border};
   padding: ${args.theme.var.spacing.sm};
   min-height: 0;
   max-height: 100%;
@@ -4874,10 +4874,10 @@ const rowId = rowData?.id;
 const rowExpansions = args.fns.getRowExpansionConfigs?.() || [];
 const isRowExpansionOpen =
   Array.isArray(rowExpansions) && rowExpansions.length > 0 && rowId && args.fns.isExpansionOpen?.(String(rowId));
-const t = args.theme.var.color;
+const _t = args.theme.var.color;
 return `._id {
   padding: ${args.theme.var.spacing.sm} 0;
-  color: ${t.text};
+  color: ${_t.text};
   font-size: 0.875rem;
 }`;'''
         displayOrder: 1

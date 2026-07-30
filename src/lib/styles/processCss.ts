@@ -1,5 +1,6 @@
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import type { CssType } from "~/components/form/type/CssType";
+import { runArgsFunction } from "~/lib/utils/createArgsFunction";
 
 const ID_PLACEHOLDER_REGEX = /\._id/g;
 
@@ -96,12 +97,7 @@ export const processStyle = (
 
   // Handle template string evaluation
   try {
-    // const cssFunction = style.includes("return")
-    //   ? new Function("args", style)
-    //   : new Function("args", `return \`${style}\``);
-    const cssFunction = new Function("args", style);
-
-    const evaluatedStyle = cssFunction(functionArgs);
+    const evaluatedStyle = runArgsFunction(style, functionArgs);
 
     const replaceId = (css: string) =>
       options?.skipIdReplace

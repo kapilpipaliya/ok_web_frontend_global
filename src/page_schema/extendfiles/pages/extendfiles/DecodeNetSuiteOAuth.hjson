@@ -245,9 +245,9 @@ return {
         displayOrder: 3
         componentName: Html
         props:
-          '''const s = args.fns.status?.();
-const connected = !!s?.connected;
-const data = s?.data || {};
+          '''const _s = args.fns.status?.();
+const connected = !!_s?.connected;
+const data = _s?.data || {};
 
 const formatTimeLeft = (ms) => {
   if (ms <= 0) return "0 minutes";

@@ -335,12 +335,12 @@ return {
         componentName: Html
         displayOrder: 1
         css:
-          '''const f = args.contextData.field || {};
+          '''const _f = args.contextData.field || {};
 return `._id {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
-  grid-column: span ${Number(f.colSpan || 1)};
+  grid-column: span ${Number(_f.colSpan || 1)};
 }
 @media (max-width: 640px) {
   ._id {
@@ -365,10 +365,10 @@ return `._id {
   font-weight: 600;
 }`;'''
         props:
-          '''const f = args.contextData.field || {};
+          '''const _f = args.contextData.field || {};
 return {
   as: "span",
-  text: `${f.label || f.key}${f.required ? " *" : ""}`
+  text: `${_f.label || _f.key}${_f.required ? " *" : ""}`
 };'''
       }
     }
@@ -393,19 +393,19 @@ return {
   border-color: ${args.theme.var.color.error};
 }`;'''
         props:
-          '''const f = args.contextData.field || {};
+          '''const _f = args.contextData.field || {};
 const values = args.fns.formValues?.() || {};
 const errors = args.fns.fieldErrors?.() || {};
-const renderer = f.renderer || "text";
+const renderer = _f.renderer || "text";
 const isTextArea = renderer === "textArea" || renderer === "textarea";
 return {
   as: isTextArea ? "textarea" : "input",
   rows: isTextArea ? 5 : undefined,
-  type: f.dataType === "email" ? "email" : f.dataType === "number" ? "number" : "text",
-  value: values[f.key] || "",
-  placeholder: f.placeholder || "",
-  "data-error": errors[f.key] ? "true" : "false",
-  onInput: (event) => args.fns.updateField?.(f.key, event.currentTarget.value)
+  type: _f.dataType === "email" ? "email" : _f.dataType === "number" ? "number" : "text",
+  value: values[_f.key] || "",
+  placeholder: _f.placeholder || "",
+  "data-error": errors[_f.key] ? "true" : "false",
+  onInput: (event) => args.fns.updateField?.(_f.key, event.currentTarget.value)
 };'''
       }
     }
@@ -421,12 +421,12 @@ return {
   font-size: 0.8rem;
 }`;'''
         props:
-          '''const f = args.contextData.field || {};
+          '''const _f = args.contextData.field || {};
 const errors = args.fns.fieldErrors?.() || {};
 return {
   as: "span",
-  text: errors[f.key] || "",
-  hide: !errors[f.key]
+  text: errors[_f.key] || "",
+  hide: !errors[_f.key]
 };'''
       }
     }

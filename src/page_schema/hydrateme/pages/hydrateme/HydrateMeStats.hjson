@@ -115,11 +115,11 @@ return { week, loading, loadWeekly };
         key: hm_stats_goal
         props:
           '''const w = typeof args.fns.week === "function" ? args.fns.week() : null;
-const g = w?.goalMl ?? 2000;
+const _g = w?.goalMl ?? 2000;
 return {
   as: "p",
   class: "hm-stats-goal",
-  text: w ? `Daily goal: ${g} ml (bars scale to the week max)` : "Loading goal from your profile…"
+  text: w ? `Daily goal: ${_g} ml (bars scale to the week max)` : "Loading goal from your profile…"
 };'''
         css:
           '''return `._id.hm-stats-goal {

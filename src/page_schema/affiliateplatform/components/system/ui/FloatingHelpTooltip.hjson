@@ -409,14 +409,14 @@ return {
           '''const row = args.contextData.policyRow;
 const hasInput = Boolean(row?.hasInput);
 const met = Boolean(row?.met);
-const c = !hasInput
+const _c = !hasInput
   ? args.theme.var.color.text
   : met
     ? args.theme.var.color.success
     : args.theme.var.color.error;
 return `._id {
   flex-shrink: 0;
-  color: ${c};
+  color: ${_c};
 }`;'''
         displayOrder: 1
         componentName: Html
@@ -445,14 +445,14 @@ return {
           '''const row = args.contextData.policyRow;
 const hasInput = Boolean(row?.hasInput);
 const met = Boolean(row?.met);
-const c = !hasInput
+const _c = !hasInput
   ? args.theme.var.color.text
   : met
     ? args.theme.var.color.success
     : args.theme.var.color.text_light_500;
 return `._id {
   font-size: 14px;
-  color: ${c};
+  color: ${_c};
 }`;'''
         displayOrder: 2
         componentName: Html

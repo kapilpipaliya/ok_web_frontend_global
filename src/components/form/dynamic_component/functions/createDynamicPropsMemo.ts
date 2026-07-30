@@ -3,6 +3,7 @@ import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import { createMemo } from "solid-js";
 import { getMetaProps } from "~/components/form/functions/getMetaProps";
+import { runArgsFunction } from "~/lib/utils/createArgsFunction";
 
 import type { DynamicPropsType } from "~/components/form/dynamic_component/functions/DynamicPropsType";
 
@@ -34,9 +35,11 @@ export function createDynamicPropsMemo(
       }
       if (typeof props.meta.P.props === "string") {
         try {
-          const propsFunction = new Function("args", props.meta.P.props);
           const dynamicPropsObj =
-            propsFunction(options.getFunctionArgumentWithValue()) || {};
+            (runArgsFunction(
+              props.meta.P.props,
+              options.getFunctionArgumentWithValue(),
+            ) as Record<string, unknown>) || {};
           return getMetaProps(
             dynamicPropsObj,
             [],
