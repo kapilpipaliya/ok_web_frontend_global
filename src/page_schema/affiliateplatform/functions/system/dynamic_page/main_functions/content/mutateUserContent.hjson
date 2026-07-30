@@ -42,6 +42,29 @@ const nestedLineStripFromConfig = Array.isArray(nestedLinePropertyStripKeys)
   : [];
 const NESTED_LINE_STRIP_KEYS = new Set([...Object.keys(nestedLineSync), ...nestedLineStripFromConfig]);
 
+const isNeo4jPrimitive = (value) =>
+  typeof value === "string" || typeof value === "number" || typeof value === "boolean";
+
+const toNeo4jSafePropertyValue = (value) => {
+  if (value === null || value === undefined) return value;
+  if (isNeo4jPrimitive(value)) return value;
+  if (Array.isArray(value)) {
+    if (value.every((item) => isNeo4jPrimitive(item))) return value;
+    return JSON.stringify(value);
+  }
+  if (typeof value === "object") return JSON.stringify(value);
+  return String(value);
+};
+
+const sanitizePropertiesForNeo4j = (properties) => {
+  const safe = {};
+  for (const [key, value] of Object.entries(properties || {})) {
+    if (value === undefined || value === null) continue;
+    safe[key] = toNeo4jSafePropertyValue(value);
+  }
+  return safe;
+};
+
 const TRANSLATABLE_FIELD_KEYS = Array.isArray(translatableFieldKeys)
   ? translatableFieldKeys.map((k) => String(k)).filter(Boolean)
   : [];
@@ -185,22 +208,90 @@ const rowPassesNestedLineSyncRules = (lineRow, nestedLineItemsSyncRules) => {
   return true;
 };
 
-const buildChildLineProps = (lineRow, parentElementIdPropOnChild, parentElementId) => {
+const buildChildLineProps = (lineRow) => {
   const propertyKeysToSkip = new Set([
     "id",
     "inventoryItemId",
     "inventoryId",
+    "imageFileIds",
+    "fileIds",
+    "images",
     "_key",
     "_draft"
   ]);
+  const isNeo4jPrimitive = (value) =>
+    typeof value === "string" || typeof value === "number" || typeof value === "boolean";
+  const toNeo4jSafePropertyValue = (value) => {
+    if (value === null || value === undefined) return value;
+    if (isNeo4jPrimitive(value)) return value;
+    if (Array.isArray(value)) {
+      if (value.every((item) => isNeo4jPrimitive(item))) return value;
+      return JSON.stringify(value);
+    }
+    if (typeof value === "object") return JSON.stringify(value);
+    return String(value);
+  };
   const lineVertexProps = {};
   for (const [propertyKey, propertyValue] of Object.entries(lineRow || {})) {
     if (propertyKeysToSkip.has(propertyKey)) continue;
+    if (String(propertyKey).startsWith("_")) continue;
     if (propertyValue === undefined || propertyValue === null || propertyValue === "") continue;
-    lineVertexProps[propertyKey] = propertyValue;
+    lineVertexProps[propertyKey] = toNeo4jSafePropertyValue(propertyValue);
   }
-  lineVertexProps[parentElementIdPropOnChild] = parentElementId;
   return lineVertexProps;
+};
+
+const getImageFileIdsFromLineRow = (lineRow) => {
+  const raw = lineRow?.imageFileIds != null ? lineRow.imageFileIds : lineRow?.fileIds;
+  if (!Array.isArray(raw)) return [];
+  const ids = [];
+  const seen = new Set();
+  for (let i = 0; i < raw.length; i++) {
+    const id = raw[i] != null ? String(raw[i]).trim() : "";
+    if (!id || id.startsWith("-") || seen.has(id)) continue;
+    seen.add(id);
+    ids.push(id);
+  }
+  return ids;
+};
+
+const syncLineFileEdges = async (
+  session,
+  {
+    lineElementId,
+    childLabel,
+    childToFilesRelationshipType,
+    filesTargetLabel,
+    imageFileIds
+  }
+) => {
+  if (!lineElementId || !childToFilesRelationshipType || !filesTargetLabel) return;
+  await session.run(
+    `MATCH (line:${childLabel})
+     WHERE elementId(line) = $lid
+     OPTIONAL MATCH (line)-[xr:${childToFilesRelationshipType}]->()
+     DELETE xr`,
+    { lid: lineElementId }
+  );
+  const ids = Array.isArray(imageFileIds) ? imageFileIds : [];
+  if (ids.length === 0) return;
+  await session.run(
+    `UNWIND range(0, size($fileIds) - 1) AS idx
+     WITH $fileIds[idx] AS fileId, idx
+     MATCH (line:${childLabel})
+     WHERE elementId(line) = $lid
+     MATCH (file:${filesTargetLabel})
+     WHERE elementId(file) = fileId
+     CREATE (line)-[:${childToFilesRelationshipType} {displayOrder: idx}]->(file)`,
+    { lid: lineElementId, fileIds: ids }
+  );
+};
+
+const isLocalGraphVertexId = (id) => {
+  if (id == null) return true;
+  const trimmed = String(id).trim();
+  if (!trimmed) return true;
+  return trimmed.startsWith("-");
 };
 
 const patchRelationshipFieldPropsOnVertex = (vertex, relationships) => {
@@ -244,11 +335,12 @@ const syncNestedLineCollections = async (session, params) => {
     const parentToChildRelationshipType = spec.parentToChildRelationshipType;
     const childToInventoryRelationshipType = spec.childToInventoryRelationshipType || null;
     const inventoryTargetLabel = spec.inventoryTargetLabel || "InventoryItem";
-    const parentElementIdPropOnChild = spec.parentElementIdPropOnChild;
+    const childToFilesRelationshipType = spec.childToFilesRelationshipType || null;
+    const filesTargetLabel = spec.filesTargetLabel || "File";
     const nestedLineItemsSyncRules = spec.nestedLineItemsSyncRules;
     const rows = Array.isArray(spec.rows) ? spec.rows : [];
     const deletedLineIds = Array.isArray(spec.deletedLineIds) ? spec.deletedLineIds : [];
-    if (!childLabel || !parentToChildRelationshipType || !parentElementIdPropOnChild) continue;
+    if (!childLabel || !parentToChildRelationshipType) continue;
 
     if (enableUserScoping) {
       const ownershipCheck = await session.run(
@@ -262,7 +354,7 @@ const syncNestedLineCollections = async (session, params) => {
 
     for (let deleteIndex = 0; deleteIndex < deletedLineIds.length; deleteIndex++) {
       const lineElementId = deletedLineIds[deleteIndex];
-      if (lineElementId == null || lineElementId === "") continue;
+      if (isLocalGraphVertexId(lineElementId)) continue;
       await session.run(
         `MATCH (p:${parentLabel})-[:${parentToChildRelationshipType}]->(line:${childLabel})
          WHERE elementId(p) = $pid AND elementId(line) = $lid
@@ -277,15 +369,12 @@ const syncNestedLineCollections = async (session, params) => {
       if (!rowPassesNestedLineSyncRules(lineRow, nestedLineItemsSyncRules)) continue;
 
       const inventoryVertexId = getInventoryVertexIdFromLineRow(lineRow);
-      const existingLineElementId =
-        lineRow.id != null && String(lineRow.id).trim() !== "" ? String(lineRow.id).trim() : null;
+      const imageFileIds = getImageFileIdsFromLineRow(lineRow);
+      const rawLineId = lineRow.id != null ? String(lineRow.id).trim() : "";
+      const existingLineElementId = isLocalGraphVertexId(rawLineId) ? null : rawLineId;
 
       if (existingLineElementId) {
-        const lineVertexProps = buildChildLineProps(
-          lineRow,
-          parentElementIdPropOnChild,
-          parentElementId,
-        );
+        const lineVertexProps = buildChildLineProps(lineRow);
         delete lineVertexProps.createdAt;
         await session.run(
           `MATCH (p:${parentLabel})-[:${parentToChildRelationshipType}]->(line:${childLabel})
@@ -312,13 +401,16 @@ const syncNestedLineCollections = async (session, params) => {
             );
           }
         }
+        await syncLineFileEdges(session, {
+          lineElementId: existingLineElementId,
+          childLabel,
+          childToFilesRelationshipType,
+          filesTargetLabel,
+          imageFileIds
+        });
       } else {
         const nowIso = new Date().toISOString();
-        const lineVertexProps = buildChildLineProps(
-          lineRow,
-          parentElementIdPropOnChild,
-          parentElementId,
-        );
+        const lineVertexProps = buildChildLineProps(lineRow);
         lineVertexProps.createdAt = nowIso;
         lineVertexProps.updatedAt = nowIso;
         const createLineResult = await session.run(
@@ -346,7 +438,64 @@ const syncNestedLineCollections = async (session, params) => {
             { lid: newLineElementIdStr, invId: inventoryVertexId }
           );
         }
+        if (newLineElementIdStr) {
+          await syncLineFileEdges(session, {
+            lineElementId: newLineElementIdStr,
+            childLabel,
+            childToFilesRelationshipType,
+            filesTargetLabel,
+            imageFileIds
+          });
+        }
       }
+    }
+
+    // Reload children into API graph so edit forms can rehydrate after save.
+    try {
+      if (childToFilesRelationshipType && childToInventoryRelationshipType) {
+        const reloadResult = await session.run(
+          `MATCH (p:${parentLabel})-[r:${parentToChildRelationshipType}]->(line:${childLabel})
+           WHERE elementId(p) = $pid
+           OPTIONAL MATCH (line)-[ir:${childToInventoryRelationshipType}]->(inv)
+           OPTIONAL MATCH (line)-[fr:${childToFilesRelationshipType}]->(file)
+           RETURN p, r, line, ir, inv, fr, file`,
+          { pid: parentElementId }
+        );
+        args.processResult(
+          reloadResult.records,
+          args.context,
+          ["p", "line", "inv", "file"],
+          ["r", "ir", "fr"]
+        );
+      } else if (childToFilesRelationshipType) {
+        const reloadResult = await session.run(
+          `MATCH (p:${parentLabel})-[r:${parentToChildRelationshipType}]->(line:${childLabel})
+           WHERE elementId(p) = $pid
+           OPTIONAL MATCH (line)-[fr:${childToFilesRelationshipType}]->(file)
+           RETURN p, r, line, fr, file`,
+          { pid: parentElementId }
+        );
+        args.processResult(reloadResult.records, args.context, ["p", "line", "file"], ["r", "fr"]);
+      } else if (childToInventoryRelationshipType) {
+        const reloadResult = await session.run(
+          `MATCH (p:${parentLabel})-[r:${parentToChildRelationshipType}]->(line:${childLabel})
+           WHERE elementId(p) = $pid
+           OPTIONAL MATCH (line)-[ir:${childToInventoryRelationshipType}]->(inv)
+           RETURN p, r, line, ir, inv`,
+          { pid: parentElementId }
+        );
+        args.processResult(reloadResult.records, args.context, ["p", "line", "inv"], ["r", "ir"]);
+      } else {
+        const reloadResult = await session.run(
+          `MATCH (p:${parentLabel})-[r:${parentToChildRelationshipType}]->(line:${childLabel})
+           WHERE elementId(p) = $pid
+           RETURN p, r, line`,
+          { pid: parentElementId }
+        );
+        args.processResult(reloadResult.records, args.context, ["p", "line"], "r");
+      }
+    } catch (reloadErr) {
+      console.error("syncNestedLineCollections reload:", reloadErr);
     }
   }
 };
@@ -479,11 +628,11 @@ try {
 
     // Build properties object (exclude id/elementId from formData)
     const { id, elementId: dataElementId, ...dataWithoutId } = formData;
-    const properties = {
+    const properties = sanitizePropertiesForNeo4j({
       ...dataWithoutId,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
-    };
+    });
     if (vertexLabel === "User" && !properties.uuid) {
       properties.uuid = args.crypto.randomUUID();
     }
@@ -688,13 +837,8 @@ try {
       updatedAt: new Date().toISOString()
     };
 
-    // Remove undefined/null values
-    const cleanProperties = {};
-    for (const [k, v] of Object.entries(updateProperties)) {
-      if (v !== undefined && v !== null) {
-        cleanProperties[k] = v;
-      }
-    }
+    // Remove undefined/null values and stringify nested objects/arrays for Neo4j
+    const cleanProperties = sanitizePropertiesForNeo4j(updateProperties);
     NESTED_LINE_STRIP_KEYS.forEach((k) => {
       delete cleanProperties[k];
     });

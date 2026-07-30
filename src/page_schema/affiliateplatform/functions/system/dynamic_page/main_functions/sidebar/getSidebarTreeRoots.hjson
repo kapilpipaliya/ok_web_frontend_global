@@ -17,7 +17,7 @@ if (!actualUser) {
   };
 }
 
-const { parentVertexLabel, toParentEdgeType, rootKeys, tableVertexLabel, relationshipType, enableUserScoping, hooks, loadFullTree, selectedContentIds } = args.contextData;
+const { parentVertexLabel, toParentEdgeType, rootKeys, tableVertexLabel, relationshipType, enableUserScoping, hooks, loadFullTree, selectedContentIds, imageRelationshipType } = args.contextData;
 
 if (!parentVertexLabel || !toParentEdgeType || !rootKeys) {
   return {
@@ -325,6 +325,33 @@ const resultData = {
   selectedCategoryId,
   message: `Found ${finalVertices.length} root vertices with first-level children`
 };
+
+// Load optional image relations for category edit forms / previews
+const imageRelType =
+  imageRelationshipType != null && String(imageRelationshipType).trim() !== ""
+    ? String(imageRelationshipType).trim()
+    : null;
+if (imageRelType) {
+  const categoryIds = Object.keys(args.context.nodes || {}).filter((id) => {
+    const node = args.context.nodes[id];
+    return node?.L?.includes(parentVertexLabel) && !String(id).startsWith("_");
+  });
+  if (categoryIds.length > 0) {
+    try {
+      const imageResult = await args.session.run(
+        `
+        MATCH (v:${parentVertexLabel})-[r:${imageRelType}]->(file:File)
+        WHERE elementId(v) IN $ids
+        RETURN v, r, file
+        `,
+        { ids: categoryIds }
+      );
+      args.processResult(imageResult.records, args.context, ["v", "file"], "r");
+    } catch (imageError) {
+      console.warn("getSidebarTreeRoots image relation load failed:", imageError);
+    }
+  }
+}
 
 await args.executeHooks(hooks?.afterGetVertexChildren, {
   parentVertexLabel,

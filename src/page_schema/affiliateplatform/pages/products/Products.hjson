@@ -29,7 +29,7 @@ try {
     functionName: "loadPublicProductsFolder",
     contextData: {
       tableKey: "products",
-      tableVertexLabel: "AffiliateProduct",
+      tableVertexLabel: "Product",
       categoryKey: ${JSON.stringify(categoryKey)},
       locale: ${JSON.stringify(locale ?? null)}
     }
@@ -137,7 +137,7 @@ const locale = args.params?.lang ? String(args.params.lang).toLowerCase() : unde
 const langPrefix = locale && /^[a-z]{2,3}$/i.test(locale) ? `/${locale}` : "";
 return {
   tableKey: "products",
-  tableVertexLabel: "AffiliateProduct",
+  tableVertexLabel: "Product",
   locale,
   useUrlState: true,
   basePath: `${langPrefix}/products`,

@@ -162,17 +162,29 @@ return {
         props:
           '''const draftProp = args.contextData.props?.draftVertex;
 const draftVertex = typeof draftProp === "function" ? draftProp() : draftProp;
+const draftVerticesProp = args.contextData.props?.draftVertices;
+const draftVertices =
+  typeof draftVerticesProp === "function" ? draftVerticesProp() : draftVerticesProp;
+const selectedCount = Array.isArray(draftVertices)
+  ? draftVertices.length
+  : draftVertex?.id
+    ? 1
+    : 0;
 const displayName =
   draftVertex?.P?.fileName != null
     ? String(draftVertex.P.fileName)
     : draftVertex?.P?.name != null
       ? String(draftVertex.P.name)
-      : "";
+      : selectedCount > 0
+        ? `${selectedCount} selected`
+        : "";
 const hintEmpty = args.contextData.props?.hintEmpty;
 const hintSelected = args.contextData.props?.hintSelected;
 let hintText = "";
-if (displayName && hintSelected != null && String(hintSelected).trim() !== "") {
-  hintText = String(hintSelected).replace(/\{name\}/g, displayName);
+if (selectedCount > 0 && hintSelected != null && String(hintSelected).trim() !== "") {
+  hintText = String(hintSelected)
+    .replace(/\{name\}/g, displayName)
+    .replace(/\{count\}/g, String(selectedCount));
 } else if (hintEmpty != null && String(hintEmpty).trim() !== "") {
   hintText = String(hintEmpty).trim();
 }

@@ -30,6 +30,7 @@ const {
   toParentEdgeType, 
   rootKeys = {},
   properties = {},
+  relationships = {},
   tableVertexLabel,
   relationshipType,
   enableUserScoping,
@@ -333,6 +334,12 @@ const vertexProperties = {
   name: vertexName,
   key: vertexKey
 };
+// Relation fields are stored as edges, not vertex properties.
+if (relationships && typeof relationships === "object") {
+  for (const fieldKey of Object.keys(relationships)) {
+    delete vertexProperties[fieldKey];
+  }
+}
 
 if (isUpdate) {
   // Get the old vertex data before update for hooks
@@ -523,6 +530,43 @@ if (args.context.nodes[vertexElementId]) {
 } else {
   vertex = args.convertNodeToJson(vertexNode);
   args.context.nodes[vertex.id] = vertex;
+}
+
+// Sync optional relation fields (e.g. category image -> File)
+if (relationships && typeof relationships === "object") {
+  for (const [, relConfig] of Object.entries(relationships)) {
+    if (!relConfig || typeof relConfig !== "object") continue;
+    const relType = relConfig.relationshipType;
+    const targetLabel = relConfig.targetLabel || "File";
+    if (!relType) continue;
+    const targetIds = Array.isArray(relConfig.targetIds)
+      ? relConfig.targetIds.map((x) => String(x).trim()).filter(Boolean)
+      : [];
+    await args.session.run(
+      `MATCH (v:${parentVertexLabel})
+       WHERE elementId(v) = $vid
+       OPTIONAL MATCH (v)-[r:${relType}]->()
+       DELETE r`,
+      { vid: vertexElementId }
+    );
+    if (targetIds.length === 0) continue;
+    await args.session.run(
+      `UNWIND $targetIds AS targetId
+       MATCH (v:${parentVertexLabel})
+       WHERE elementId(v) = $vid
+       MATCH (target:${targetLabel})
+       WHERE elementId(target) = targetId
+       MERGE (v)-[:${relType}]->(target)`,
+      { vid: vertexElementId, targetIds }
+    );
+    const reloadRel = await args.session.run(
+      `MATCH (v:${parentVertexLabel})-[r:${relType}]->(target:${targetLabel})
+       WHERE elementId(v) = $vid
+       RETURN v, r, target`,
+      { vid: vertexElementId }
+    );
+    args.processResult(reloadRel.records, args.context, ["v", "target"], "r");
+  }
 }
 
 // Calculate and add content count if tableVertexLabel and relationshipType are provided

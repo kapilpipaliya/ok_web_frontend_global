@@ -360,8 +360,13 @@ const wrappedOnSave = async (saveData) => {
         properties: (() => {
           const copy = args.klona(vertex.P || {});
           delete copy.key;
+          const rels = saveData.relationships || {};
+          for (const fieldKey of Object.keys(rels)) {
+            delete copy[fieldKey];
+          }
           return copy;
         })(),
+        relationships: saveData.relationships || {},
         tableVertexLabel: tableVertexLabel,
         relationshipType: relationshipType,
         enableUserScoping: args.contextData.props?.enableUserScoping,

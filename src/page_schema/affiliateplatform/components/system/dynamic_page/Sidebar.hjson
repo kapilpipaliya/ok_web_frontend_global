@@ -71,6 +71,7 @@ const fetchRoot = async (options) => {
       relationshipType,
       enableUserScoping,
       loadFullTree: args.fns.getSidebarConfig()?.loadFullTree === true,
+      imageRelationshipType: args.fns.getSidebarConfig()?.imageRelationshipType || null,
       hooks: args.contextData.props?.hooks,
       selectedContentIds: selectedContentIds.length > 0 ? selectedContentIds : undefined
     };
@@ -177,6 +178,7 @@ const fetchChildren = async (parentId, forceRefresh = false) => {
         tableVertexLabel,
         relationshipType,
         enableUserScoping,
+        imageRelationshipType: args.fns.getSidebarConfig()?.imageRelationshipType || null,
         hooks: args.contextData.props?.hooks
       }
     });

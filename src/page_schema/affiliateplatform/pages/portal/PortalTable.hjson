@@ -17,7 +17,7 @@ const checkAdminRole = () => {
 };
 
 const TABLE_KEY_BY_LABEL = {
-  AffiliateProduct: "products",
+  Product: "products",
   File: "files",
   Page: "pages",
   Component: "components",
@@ -26,7 +26,7 @@ const TABLE_KEY_BY_LABEL = {
 };
 
 const TABLE_TITLE_BY_LABEL = {
-  AffiliateProduct: "Products",
+  Product: "Products",
   File: "Files",
   Page: "Pages",
   Component: "Components",
@@ -44,7 +44,7 @@ const getTableVertexLabel = () => {
     if (TABLE_KEY_BY_LABEL[value]) return value;
     return value;
   }
-  return "AffiliateProduct";
+  return "Product";
 };
 
 const getTableKey = () => {
@@ -132,7 +132,7 @@ const getDesignerTableActions = () => [
 
 const getTableActions = () => {
   if (getPageDesignerEntity()) return getDesignerTableActions();
-  if (getTableVertexLabel() === "AffiliateProduct") {
+  if (getTableVertexLabel() === "Product") {
     return [
       { key: "edit", type: "edit" },
       { key: "delete", type: "delete", confirm: makeDeleteConfirm("product") }
@@ -364,7 +364,7 @@ return {
         componentName: DynamicPage
         props:
           '''const tableKey = args.fns.getTableKey?.() || "products";
-const tableVertexLabel = args.fns.getTableVertexLabel?.() || "AffiliateProduct";
+const tableVertexLabel = args.fns.getTableVertexLabel?.() || "Product";
 const actionHandlers = args.fns.getTableActionHandlers?.();
 const actions = args.fns.getTableActions?.();
 return {

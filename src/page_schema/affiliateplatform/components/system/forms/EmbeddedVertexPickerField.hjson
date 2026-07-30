@@ -59,7 +59,18 @@
 }`;'''
         displayOrder: 1
         componentName: Html
-        props: return { as: "div" };
+        props:
+          '''const previewUrl = String(args.contextData.props?.previewUrl || "").trim();
+const showImage = args.contextData.props?.showImagePreview !== false;
+const hasImg = showImage && previewUrl && /\.(png|jpe?g|gif|webp|svg)$/i.test(previewUrl);
+const multiValues = args.contextData.props?.values;
+const isMulti =
+  Array.isArray(multiValues) ||
+  args.contextData.props?.pickerConfiguration?.selectionMode === "multiple";
+return {
+  as: "div",
+  hide: () => !showImage || (isMulti && !hasImg)
+};'''
       }
     }
     {
@@ -220,7 +231,12 @@ return {
         componentName: Html
         props:
           '''const disabled = !!args.contextData.props?.disabled;
-const hasValue = !!(args.contextData.props?.value != null && String(args.contextData.props?.value).trim() !== "");
+const multiValues = args.contextData.props?.values;
+const hasMulti = Array.isArray(multiValues) && multiValues.length > 0;
+const hasSingle = !!(
+  args.contextData.props?.value != null && String(args.contextData.props?.value).trim() !== ""
+);
+const hasValue = hasMulti || hasSingle;
 const usePolaris = args.contextData.props?.usePolarisUI === true;
 if (usePolaris) {
   return {

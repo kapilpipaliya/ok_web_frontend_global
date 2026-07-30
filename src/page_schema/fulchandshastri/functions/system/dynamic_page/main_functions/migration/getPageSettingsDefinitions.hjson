@@ -4536,12 +4536,52 @@ const scheduleTableSidebar = {
   enabled: false
 };
 
+const dravyaMeditationBackgroundVideoPickerConfiguration = {
+  fieldLabel: "Meditation background videos",
+  chooseButtonLabel: "Select videos…",
+  clearButtonLabel: "Clear all",
+  modalTitle: "Choose meditation background videos",
+  modalHintEmpty: "Select one or more video files, then confirm.",
+  modalHintSelected: "Selected {count} video(s) — confirm or choose more.",
+  selectionMode: "multiple",
+  confirmButtonLabel: "Use selection",
+  cancelButtonLabel: "Cancel",
+  closeButtonLabel: "Close",
+  selectRowMessage: "Select at least one video file first.",
+  invalidTypeMessage: "This type does not match the configured selection.",
+  usePolarisUI: true,
+  targetVertexLabels: ["File"],
+  fileDownloadUrlPrefix: "/api/file/download",
+  showImagePreview: false,
+  buildSecondaryLabelFromVertex: true,
+  pickerBodyProps: {
+    tableVertexLabel: "File",
+    tableKey: "files",
+    loadFromSetting: true
+  }
+};
+
 const dravyaDrishtiPrakashVideoTableColumns = [
   { key: "subject", label: "Subject", dataType: "text", renderer: "text", width: "320px", required: true, overflowEllipsis: true },
   { key: "date", label: "Date", dataType: "date", renderer: "date", width: "130px" },
   { key: "time", label: "Time", dataType: "text", renderer: "text", width: "110px" },
   { key: "youtubeUrl", label: "YouTube link", dataType: "text", renderer: "text", width: "320px", required: true, overflowEllipsis: true },
-  { key: "bol", label: "Bol", dataType: "text", renderer: "text", width: "180px", overflowEllipsis: true }
+  { key: "bol", label: "Bol", dataType: "text", renderer: "text", width: "180px", overflowEllipsis: true },
+  {
+    key: "meditationBackgroundVideos",
+    label: "Meditation backgrounds",
+    dataType: "relation",
+    renderer: "text",
+    width: "200px",
+    sortable: false,
+    overflowEllipsis: true,
+    selectConfig: {
+      relationshipType: "DravyaDrishtiPrakashMeditationBackgroundVideo",
+      edgeOnly: true,
+      label: "File",
+      labelField: "fileName"
+    }
+  }
 ];
 
 const dravyaDrishtiPrakashVideoTableGeneral = {
@@ -4567,7 +4607,10 @@ const dravyaDrishtiPrakashVideoTableGeneral = {
     { key: "edit", type: "edit" },
     { key: "delete", type: "delete", confirm: { title: "Delete video?", message: "This cannot be undone.", confirmText: "Delete", cancelText: "Cancel", variant: "danger" } }
   ],
-  hooks: {}
+  hooks: {},
+  companionPages: filesCompanionPages(
+    "Select meditation background video files below. Attach them to a discourse via the form file picker."
+  )
 };
 
 const dravyaDrishtiPrakashVideoTableFormConfig = {
@@ -4582,7 +4625,22 @@ const dravyaDrishtiPrakashVideoTableFormConfig = {
         { key: "date", label: "Date", dataType: "date", renderer: "date", colSpan: 1, translatable: false },
         { key: "time", label: "Time", dataType: "text", renderer: "text", colSpan: 1, translatable: false },
         { key: "youtubeUrl", label: "YouTube link", dataType: "text", renderer: "text", required: true, colSpan: 2, translatable: false },
-        { key: "bol", label: "Bol", dataType: "text", renderer: "textArea", colSpan: 2, translatable: false }
+        { key: "bol", label: "Bol", dataType: "text", renderer: "textArea", colSpan: 2, translatable: false },
+        {
+          key: "meditationBackgroundVideos",
+          label: "Meditation background videos",
+          dataType: "relation",
+          renderer: "embeddedVertexPicker",
+          colSpan: 2,
+          translatable: false,
+          selectConfig: {
+            relationshipType: "DravyaDrishtiPrakashMeditationBackgroundVideo",
+            edgeOnly: true,
+            label: "File",
+            labelField: "fileName"
+          },
+          pickerConfiguration: dravyaMeditationBackgroundVideoPickerConfiguration
+        }
       ]
     }
   ]
@@ -5432,7 +5490,7 @@ const tableDefinitions = [
       sidebar: "dravya_drishti_prakash_videos_schema_sidebar"
     },
     name: "Dravya Drishti Prakash Videos",
-    description: "Video table for public /dravya-drishti-prakash page and portal admin. No content rows are seeded.",
+    description: "Video table for public /dravya-drishti-prakash page and portal admin. Supports multiple meditation background video file attachments. No content rows are seeded.",
     general: dravyaDrishtiPrakashVideoTableGeneral,
     columns: dravyaDrishtiPrakashVideoTableColumns,
     formConfig: dravyaDrishtiPrakashVideoTableFormConfig,

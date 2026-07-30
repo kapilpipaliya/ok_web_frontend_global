@@ -1352,12 +1352,23 @@ const getCellValue = (row, column) => {
     const vxMap = args.graph?.vertexes ?? {};
     const edgesMap = args.graph?.edges ?? {};
     let tid = null;
-    if (row.OUT && rel) {
-      const outArr = row.OUT[rel];
-      if (Array.isArray(outArr) && outArr.length > 0) {
-        const ed = edgesMap[outArr[0]];
-        if (ed && ed.E != null) tid = ed.E;
+    if (rel) {
+      if (sc.incoming === true) {
+        const inArr = row.IN?.[rel];
+        if (Array.isArray(inArr) && inArr.length > 0) {
+          const ed = edgesMap[inArr[0]];
+          if (ed && ed.S != null) tid = ed.S;
+        }
+      } else if (row.OUT) {
+        const outArr = row.OUT[rel];
+        if (Array.isArray(outArr) && outArr.length > 0) {
+          const ed = edgesMap[outArr[0]];
+          if (ed && ed.E != null) tid = ed.E;
+        }
       }
+    }
+    if (tid == null && row.P?.[column.key] != null && String(row.P[column.key]).trim() !== "") {
+      tid = row.P[column.key];
     }
     const resolveLabelFromVertexId = (vertexId) => {
       if (vertexId == null || String(vertexId).trim() === "") return "";

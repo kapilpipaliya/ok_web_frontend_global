@@ -1,0 +1,248 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Load one public Product by key, including optionAxes and ProductVariant child nodes for the product detail page.
+        body:
+          '''
+const {
+  productKey,
+  tableKey = "products",
+  tableVertexLabel = "Product"
+} = args.contextData || {};
+
+const resolvedKey = productKey != null ? String(productKey).trim() : "";
+if (!resolvedKey) {
+  return { success: false, message: "Product key is required" };
+}
+
+const resolvedTableKey = tableKey && String(tableKey).trim() !== "" ? String(tableKey).trim() : "products";
+const resolvedTableVertexLabel =
+  tableVertexLabel && String(tableVertexLabel).trim() !== ""
+    ? String(tableVertexLabel).trim()
+    : "Product";
+
+const configResult = await args.executeNamedServerFunction({
+  functionName: "loadTableConfigByKey",
+  contextData: { tableKey: resolvedTableKey }
+});
+
+if (!configResult?.result?.success) {
+  return configResult?.result || { success: false, message: "Failed to load products table schema" };
+}
+
+const schemaGraph = configResult.graph || configResult?.result?.graph || { vertexes: {}, edges: {} };
+const partVertexIds = configResult.result.data?.partVertexIds || {};
+
+const evalConfigBody = (cfgStr) => {
+  if (cfgStr == null || String(cfgStr).trim() === "") return null;
+  try {
+    const configFn = new Function(String(cfgStr));
+    const value = configFn();
+    return value && typeof value === "object" ? value : null;
+  } catch (e) {
+    console.warn("loadPublicProduct: config eval failed", e);
+    return null;
+  }
+};
+
+const stripPartMeta = (value) => {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  const { part: _part, ...rest } = value;
+  return rest;
+};
+
+const evalPartFromGraph = (graph, partIds, part) => {
+  const vertexId = partIds?.[part];
+  const vertex = graph?.vertexes?.[vertexId];
+  if (!vertex?.P?.config) return null;
+  return evalConfigBody(vertex.P.config);
+};
+
+const generalRaw = evalPartFromGraph(schemaGraph, partVertexIds, "general");
+const general = generalRaw ? stripPartMeta(generalRaw) : {};
+if (general.publicRead !== true) {
+  return { success: false, message: "Products table is not publicly readable" };
+}
+
+if (!args.context.nodes) args.context.nodes = {};
+if (!args.context.relationships) args.context.relationships = {};
+
+const productResult = await args.session.run(
+  `
+  MATCH (v:${resolvedTableVertexLabel})
+  WHERE v.key = $productKey
+  OPTIONAL MATCH (v)-[:ProductThumbnail]->(file:File)
+  OPTIONAL MATCH (v)-[vr:ProductProductVariant]->(variant:ProductVariant)
+  OPTIONAL MATCH (variant)-[fir:ProductVariantImage]->(vfile:File)
+  RETURN v, file, vr, variant, fir, vfile
+  ORDER BY coalesce(variant.displayOrder, 0) ASC, coalesce(fir.displayOrder, 0) ASC
+  `,
+  { productKey: resolvedKey }
+);
+
+const products = args.processResult(productResult.records, args.context, "v") || [];
+const productVertex = products[0] || null;
+if (!productVertex) {
+  return { success: false, message: "Product not found" };
+}
+
+args.processResult(productResult.records, args.context, ["variant", "vfile"], ["vr", "fir"]);
+
+const files = args.processResult(productResult.records, args.context, "file") || [];
+const fileVertex = files.find((file) => file?.P?.fileName) || null;
+let listingImageUrl = "";
+if (fileVertex?.P?.fileName != null && String(fileVertex.P.fileName).trim() !== "") {
+  listingImageUrl = "/api/file/download/" + encodeURIComponent(String(fileVertex.P.fileName).trim());
+}
+
+const parseJsonArray = (raw) => {
+  if (Array.isArray(raw)) return raw;
+  if (typeof raw === "string" && raw.trim() !== "") {
+    try {
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+};
+
+const buildVariantOptionsFromVertex = (variantVertex, axes) => {
+  const options = {};
+  if (Array.isArray(axes) && axes.length > 0) {
+    for (let i = 0; i < axes.length; i++) {
+      const key = axes[i]?.key != null ? String(axes[i].key).trim() : "";
+      if (!key) continue;
+      const raw = variantVertex?.P?.[key];
+      options[key] = raw != null ? String(raw).trim() : "";
+    }
+    return options;
+  }
+  return {};
+};
+
+const getVariantImageFileVertices = (variantVertex) => {
+  const graphNodes = args.context.nodes || {};
+  const graphEdges = args.context.relationships || {};
+  const edgeIds = variantVertex?.OUT?.ProductVariantImage || [];
+  const files = [];
+  const seen = new Set();
+  const sortedEdgeIds = [...edgeIds].sort((leftId, rightId) => {
+    const leftOrder = Number(graphEdges[leftId]?.P?.displayOrder) || 0;
+    const rightOrder = Number(graphEdges[rightId]?.P?.displayOrder) || 0;
+    return leftOrder - rightOrder;
+  });
+  for (const edgeId of sortedEdgeIds) {
+    const edge = graphEdges[edgeId];
+    const fileId = edge?.E;
+    if (!fileId || seen.has(fileId)) continue;
+    const fileVertex = graphNodes[fileId];
+    if (!fileVertex?.L?.includes("File")) continue;
+    seen.add(fileId);
+    files.push(fileVertex);
+  }
+  return files;
+};
+
+const parseVariantImages = (variantVertex, variantIndex) => {
+  return getVariantImageFileVertices(variantVertex)
+    .map((fileVertex, imageIndex) => {
+      const fileName = fileVertex?.P?.fileName != null ? String(fileVertex.P.fileName).trim() : "";
+      if (!fileName) return null;
+      return {
+        id: `${variantIndex}-${imageIndex}`,
+        fileId: fileVertex.id,
+        url: "/api/file/download/" + encodeURIComponent(fileName),
+        alt: variantVertex?.P?.title || productVertex.P?.title || "Product image"
+      };
+    })
+    .filter(Boolean);
+};
+
+const optionAxes = parseJsonArray(productVertex.P?.optionAxes)
+  .map((axis) => {
+    const key = axis?.key != null ? String(axis.key).trim() : "";
+    if (!key) return null;
+    return {
+      key,
+      label: axis?.label != null && String(axis.label).trim() !== "" ? String(axis.label).trim() : key
+    };
+  })
+  .filter(Boolean);
+
+const collectVariantVerticesFromGraph = () => {
+  const graphNodes = args.context.nodes || {};
+  const graphEdges = args.context.relationships || {};
+  const edgeIds = productVertex?.OUT?.ProductProductVariant || [];
+  const variants = [];
+  const seen = new Set();
+  for (const edgeId of edgeIds) {
+    const edge = graphEdges[edgeId];
+    const variantId = edge?.E;
+    if (!variantId || seen.has(variantId)) continue;
+    const variantVertex = graphNodes[variantId];
+    if (!variantVertex?.L?.includes("ProductVariant")) continue;
+    seen.add(variantId);
+    variants.push(variantVertex);
+  }
+  variants.sort(
+    (left, right) => (Number(left.P?.displayOrder) || 0) - (Number(right.P?.displayOrder) || 0)
+  );
+  return variants;
+};
+
+const variantVertices = collectVariantVerticesFromGraph();
+
+const variants = variantVertices
+  .map((variantVertex, index) => {
+    if (!variantVertex) return null;
+    const options = buildVariantOptionsFromVertex(variantVertex, optionAxes);
+    const images = parseVariantImages(variantVertex, index);
+    return {
+      id: String(variantVertex.id),
+      title: variantVertex.P?.title != null ? String(variantVertex.P.title).trim() : "",
+      sku: variantVertex.P?.sku != null ? String(variantVertex.P.sku).trim() : "",
+      options,
+      price: variantVertex.P?.price != null ? String(variantVertex.P.price).trim() : "",
+      amazonUrl: variantVertex.P?.amazonUrl != null ? String(variantVertex.P.amazonUrl).trim() : "",
+      description: variantVertex.P?.description != null ? String(variantVertex.P.description) : "",
+      images
+    };
+  })
+  .filter(Boolean);
+
+const mergedVertexes = Object.assign({}, schemaGraph.vertexes || {}, args.context.nodes || {});
+const mergedEdges = Object.assign({}, schemaGraph.edges || {}, args.context.relationships || {});
+
+return {
+  success: true,
+  data: {
+    product: {
+      id: productVertex.id,
+      key: productVertex.P?.key != null ? String(productVertex.P.key).trim() : resolvedKey,
+      title: productVertex.P?.title || "Untitled",
+      shortDescription: productVertex.P?.shortDescription || "",
+      listingImageUrl,
+      optionAxes,
+      variants
+    },
+    graph: {
+      vertexes: mergedVertexes,
+      edges: mergedEdges,
+      deleted_vertexes: [],
+      deleted_edges: []
+    }
+  },
+  message: `Loaded product ${resolvedKey} with ${variants.length} variant(s)`
+};
+'''
+        key: loadPublicProduct
+      }
+    }
+  ]
+  edges: []
+}

@@ -89,10 +89,106 @@ const getNestedDeletedIdsForField = (fieldKey) =>
 
 // Nested line rows live only as child vertices + edges (see nestedLineItemsConfig.parentToChildRelationshipType).
 // Listed via args.evalExpression(rowsExpression or `->${relationshipType}`, { graph, vertexes: [parent] }).
+// Edit mode: children must already be in the client graph (getUserContent 1-hop). Do not seed blanks on edit.
 const hydrateNestedLineFields = () => {};
 
-// Nested lines are not stored on the parent vertex P[fieldKey]; no placeholder arrays.
-const ensureNestedLineEmptyArrays = () => {};
+// Seed required/minItems nested lines on create only.
+const ensureNestedLineEmptyArrays = () => {
+  const parentVertex = getFormVertex();
+  if (!parentVertex?.id) return;
+  const txnId = ensureFormTxn();
+  if (!txnId) return;
+  const allFields = getAllFields();
+  for (const field of allFields) {
+    if (!isFieldVisible(field)) continue;
+    if (getFieldRenderer(field) !== "nestedLineItems") continue;
+    const nestedLineItemsConfig = field.nestedLineItemsConfig;
+    if (
+      !nestedLineItemsConfig?.childLabel ||
+      !nestedLineItemsConfig?.parentToChildRelationshipType
+    ) {
+      continue;
+    }
+    let rows = getNestedLineVerticesForField(field);
+    const configuredMin =
+      nestedLineItemsConfig.minItems != null ? Number(nestedLineItemsConfig.minItems) : NaN;
+    const minItems = Number.isFinite(configuredMin)
+      ? Math.max(0, configuredMin)
+      : isFieldRequired(field)
+        ? 1
+        : 0;
+    while (rows.length < minItems) {
+      const displayOrder = Date.now() + rows.length;
+      const newLineProperties = { displayOrder };
+      const columnDefinitions = Array.isArray(nestedLineItemsConfig.lineColumns)
+        ? nestedLineItemsConfig.lineColumns
+        : [];
+      for (let columnIndex = 0; columnIndex < columnDefinitions.length; columnIndex++) {
+        const columnDef = columnDefinitions[columnIndex];
+        if (
+          !columnDef ||
+          columnDef.columnType === "actions" ||
+          columnDef.columnType === "inventory" ||
+          columnDef.columnType === "files" ||
+          columnDef.columnType === "optionPairs"
+        ) {
+          continue;
+        }
+        if (!columnDef.key || String(columnDef.key).startsWith("_")) continue;
+        if (columnDef.defaultValue !== undefined) {
+          newLineProperties[columnDef.key] = columnDef.defaultValue;
+        }
+      }
+      const defaultOverlay = nestedLineItemsConfig.defaultNewLineProperties;
+      if (defaultOverlay && typeof defaultOverlay === "object") {
+        for (const propertyKey of Object.keys(defaultOverlay)) {
+          newLineProperties[propertyKey] = defaultOverlay[propertyKey];
+        }
+      }
+      for (let columnIndex = 0; columnIndex < columnDefinitions.length; columnIndex++) {
+        const columnDef = columnDefinitions[columnIndex];
+        if (!columnDef || columnDef.columnType !== "optionPairs") continue;
+        const axesFieldKey =
+          columnDef.optionAxesFieldKey != null && String(columnDef.optionAxesFieldKey).trim() !== ""
+            ? String(columnDef.optionAxesFieldKey).trim()
+            : "optionAxes";
+        let axes = [];
+        const axesRaw = getFieldValue(axesFieldKey);
+        if (Array.isArray(axesRaw)) axes = axesRaw;
+        else if (typeof axesRaw === "string" && axesRaw.trim() !== "") {
+          try {
+            const parsed = JSON.parse(axesRaw);
+            axes = Array.isArray(parsed) ? parsed : [];
+          } catch {
+            axes = [];
+          }
+        }
+        for (let axisIndex = 0; axisIndex < axes.length; axisIndex++) {
+          const key = axes[axisIndex]?.key != null ? String(axes[axisIndex].key).trim() : "";
+          if (!key || String(key).startsWith("_")) continue;
+          if (newLineProperties[key] === undefined) newLineProperties[key] = "";
+        }
+      }
+      const newLineVertexId = args.generateNewVertexId(args.graph, args.setGraph);
+      const newLineVertex = args.newVertex(
+        newLineVertexId,
+        [nestedLineItemsConfig.childLabel],
+        newLineProperties,
+      );
+      args.addNewVertex(txnId, newLineVertex, args.graph, args.setGraph);
+      const newParentToChildEdgeId = args.generateNewVertexId(args.graph, args.setGraph);
+      const parentToChildEdge = args.newEdge(
+        newParentToChildEdgeId,
+        nestedLineItemsConfig.parentToChildRelationshipType,
+        {},
+        parentVertex.id,
+        newLineVertexId,
+      );
+      args.addNewEdge(txnId, parentToChildEdge, args.graph, args.setGraph);
+      rows = getNestedLineVerticesForField(field);
+    }
+  }
+};
 
 // Helper to get form vertex from graph (or initialVertex for view mode)
 const getFormVertex = () => {
@@ -304,9 +400,10 @@ const getNestedLineVerticesForField = (field) => {
 };
 
 const buildNestedLineRowPayload = (rowVertex, nestedLineItemsConfig) => {
-  const parentElementIdProperty = nestedLineItemsConfig.parentElementIdPropOnChild;
   const inventoryRelationshipType = nestedLineItemsConfig.childToInventoryRelationshipType;
   const inventoryTargetLabel = nestedLineItemsConfig.inventoryTargetLabel || "InventoryItem";
+  const filesRelationshipType = nestedLineItemsConfig.childToFilesRelationshipType;
+  const filesTargetLabel = nestedLineItemsConfig.filesTargetLabel || "File";
   let inventoryItemId = "";
   if (
     inventoryRelationshipType &&
@@ -324,12 +421,28 @@ const buildNestedLineRowPayload = (rowVertex, nestedLineItemsConfig) => {
       }
     }
   }
+  const imageFileIds = [];
+  if (filesRelationshipType && rowVertex.OUT && rowVertex.OUT[filesRelationshipType]) {
+    const fileEdgeIds = rowVertex.OUT[filesRelationshipType];
+    const seen = new Set();
+    for (let edgeIndex = 0; edgeIndex < fileEdgeIds.length; edgeIndex++) {
+      const edge = args.graph.edges[fileEdgeIds[edgeIndex]];
+      if (!edge?.E) continue;
+      const targetVertex = args.graph.vertexes[edge.E];
+      if (targetVertex && !targetVertex.L?.includes(filesTargetLabel)) continue;
+      const id = String(edge.E).trim();
+      if (!id || seen.has(id)) continue;
+      seen.add(id);
+      imageFileIds.push(id);
+    }
+  }
   const rowPayload = {
     id: rowVertex.id,
     ...args.klona(rowVertex.P || {}),
-    inventoryItemId
+    inventoryItemId,
+    imageFileIds
   };
-  if (parentElementIdProperty) delete rowPayload[parentElementIdProperty];
+  delete rowPayload.images;
   return rowPayload;
 };
 
@@ -529,13 +642,14 @@ const initializeForm = () => {
       if (!isFieldVisible(field)) continue;
       if (getFieldRenderer(field) === "graphFileUpload") continue;
       if (getFieldRenderer(field) === "embeddedVertexPicker") continue;
+      if (getFieldRenderer(field) === "nestedLineItems") continue;
       if (getFieldRenderer(field) === "fieldArray") {
         if (Array.isArray(field.defaultValue)) {
-          initialProperties[field.key] = field.defaultValue;
+          initialProperties[field.key] = JSON.stringify(field.defaultValue);
         } else if (Array.isArray(field.fieldArrayConfig?.defaultItems)) {
-          initialProperties[field.key] = field.fieldArrayConfig.defaultItems;
+          initialProperties[field.key] = JSON.stringify(field.fieldArrayConfig.defaultItems);
         } else {
-          initialProperties[field.key] = [];
+          initialProperties[field.key] = "[]";
         }
         continue;
       }
@@ -763,6 +877,31 @@ const setFieldValue = (fieldKey, value) => {
       if (typeof onFieldChange === "function") {
         onFieldChange(fieldKey, value);
       }
+    } else {
+      // propertyOnly picker: store id or id[] on the vertex property
+      args.mergeVertexProperties(txnId, vertexId, args.graph, args.setGraph, {
+        [fieldKey]: value
+      });
+      const onFieldChange = args.contextData.props?.onFieldChange;
+      if (typeof onFieldChange === "function") {
+        onFieldChange(fieldKey, value);
+      }
+    }
+    return;
+  }
+
+  if (getFieldRenderer(nestedField) === "fieldArray") {
+    const serialized = Array.isArray(value)
+      ? JSON.stringify(value)
+      : typeof value === "string"
+        ? value
+        : "[]";
+    args.mergeVertexProperties(txnId, vertexId, args.graph, args.setGraph, {
+      [fieldKey]: serialized
+    });
+    const onFieldChange = args.contextData.props?.onFieldChange;
+    if (typeof onFieldChange === "function") {
+      onFieldChange(fieldKey, Array.isArray(value) ? value : []);
     }
     return;
   }
@@ -826,6 +965,85 @@ const validate = () => {
       const rows = getNestedLineVerticesForField(field);
       if (rows.length === 0) {
         newErrors[field.key] = `${field.label || field.key}: add at least one line`;
+        continue;
+      }
+      const lineColumns = Array.isArray(field.nestedLineItemsConfig?.lineColumns)
+        ? field.nestedLineItemsConfig.lineColumns
+        : [];
+      for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
+        const rowVertex = rows[rowIndex];
+        for (let columnIndex = 0; columnIndex < lineColumns.length; columnIndex++) {
+          const columnDef = lineColumns[columnIndex];
+          if (!columnDef?.required || !columnDef.key || String(columnDef.key).startsWith("_")) continue;
+          if (columnDef.columnType === "actions" || columnDef.columnType === "inventory") continue;
+          const cellValue = rowVertex?.P?.[columnDef.key];
+          if (columnDef.columnType === "files") {
+            const filesRelationshipType =
+              field.nestedLineItemsConfig?.childToFilesRelationshipType;
+            const filesTargetLabel =
+              field.nestedLineItemsConfig?.filesTargetLabel || "File";
+            let hasImages = false;
+            if (filesRelationshipType && rowVertex?.OUT?.[filesRelationshipType]) {
+              const fileEdgeIds = rowVertex.OUT[filesRelationshipType];
+              for (let edgeIndex = 0; edgeIndex < fileEdgeIds.length; edgeIndex++) {
+                const edge = args.graph.edges[fileEdgeIds[edgeIndex]];
+                if (!edge?.E) continue;
+                const targetVertex = args.graph.vertexes[edge.E];
+                if (targetVertex && !targetVertex.L?.includes(filesTargetLabel)) continue;
+                hasImages = true;
+                break;
+              }
+            }
+            if (!hasImages) {
+              newErrors[field.key] = `${field.label || field.key} ${rowIndex + 1}: ${columnDef.label || columnDef.key} is required`;
+              break;
+            }
+            continue;
+          }
+          if (columnDef.columnType === "optionPairs") {
+            const axesFieldKey =
+              columnDef.optionAxesFieldKey != null &&
+              String(columnDef.optionAxesFieldKey).trim() !== ""
+                ? String(columnDef.optionAxesFieldKey).trim()
+                : "optionAxes";
+            let axes = [];
+            const axesRaw = getFieldValue(axesFieldKey);
+            if (Array.isArray(axesRaw)) axes = axesRaw;
+            else if (typeof axesRaw === "string" && axesRaw.trim() !== "") {
+              try {
+                const parsed = JSON.parse(axesRaw);
+                axes = Array.isArray(parsed) ? parsed : [];
+              } catch {
+                axes = [];
+              }
+            }
+            if (axes.length === 0) {
+              newErrors[field.key] = `${field.label || field.key} ${rowIndex + 1}: define option types first`;
+              break;
+            }
+            let missingOption = false;
+            for (let axisIndex = 0; axisIndex < axes.length; axisIndex++) {
+              const axisKey =
+                axes[axisIndex]?.key != null ? String(axes[axisIndex].key).trim() : "";
+              if (!axisKey) continue;
+              const optionValue = rowVertex?.P?.[axisKey];
+              if (optionValue === undefined || optionValue === null || String(optionValue).trim() === "") {
+                missingOption = true;
+                break;
+              }
+            }
+            if (missingOption) {
+              newErrors[field.key] = `${field.label || field.key} ${rowIndex + 1}: ${columnDef.label || "Options"} is required`;
+              break;
+            }
+            continue;
+          }
+          if (cellValue === undefined || cellValue === null || String(cellValue).trim() === "") {
+            newErrors[field.key] = `${field.label || field.key} ${rowIndex + 1}: ${columnDef.label || columnDef.key} is required`;
+            break;
+          }
+        }
+        if (newErrors[field.key]) break;
       }
       continue;
     }
@@ -844,6 +1062,39 @@ const validate = () => {
             const itemField = itemFields[fieldIndex];
             if (!itemField?.required || !itemField?.key) continue;
             const itemValue = item[itemField.key];
+            if (itemField.renderer === "fieldArray") {
+              if (!Array.isArray(itemValue) || itemValue.length === 0) {
+                newErrors[field.key] = `${field.label || field.key} ${itemIndex + 1}: ${itemField.label || itemField.key} is required`;
+                break;
+              }
+              const nestedItemFields = itemField.fieldArrayConfig?.itemFields || [];
+              for (let nestedIndex = 0; nestedIndex < itemValue.length; nestedIndex++) {
+                const nestedItem = itemValue[nestedIndex] || {};
+                for (let nestedFieldIndex = 0; nestedFieldIndex < nestedItemFields.length; nestedFieldIndex++) {
+                  const nestedField = nestedItemFields[nestedFieldIndex];
+                  if (!nestedField?.required || !nestedField?.key) continue;
+                  const nestedValue = nestedItem[nestedField.key];
+                  if (nestedValue === undefined || nestedValue === null || String(nestedValue).trim() === "") {
+                    newErrors[field.key] = `${field.label || field.key} ${itemIndex + 1}: ${nestedField.label || nestedField.key} is required`;
+                    break;
+                  }
+                }
+                if (newErrors[field.key]) break;
+              }
+              if (newErrors[field.key]) break;
+              continue;
+            }
+            if (itemField.renderer === "embeddedVertexPicker") {
+              const isMultiple = itemField.pickerConfiguration?.selectionMode === "multiple";
+              const hasImages = isMultiple
+                ? Array.isArray(itemValue) && itemValue.length > 0
+                : itemValue != null && String(itemValue).trim() !== "";
+              if (!hasImages) {
+                newErrors[field.key] = `${field.label || field.key} ${itemIndex + 1}: ${itemField.label || itemField.key} is required`;
+                break;
+              }
+              continue;
+            }
             if (itemValue === undefined || itemValue === null || String(itemValue).trim() === "") {
               newErrors[field.key] = `${field.label || field.key} ${itemIndex + 1}: ${itemField.label || itemField.key} is required`;
               break;
@@ -1013,7 +1264,9 @@ const handleSave = async () => {
         childToInventoryRelationshipType:
           nestedLineItemsConfig.childToInventoryRelationshipType || null,
         inventoryTargetLabel: nestedLineItemsConfig.inventoryTargetLabel || "InventoryItem",
-        parentElementIdPropOnChild: nestedLineItemsConfig.parentElementIdPropOnChild,
+        childToFilesRelationshipType:
+          nestedLineItemsConfig.childToFilesRelationshipType || null,
+        filesTargetLabel: nestedLineItemsConfig.filesTargetLabel || "File",
         nestedLineItemsSyncRules: nestedLineItemsConfig.nestedLineItemsSyncRules || null,
         rows: getNestedLineVerticesForField(field).map((rowVertex) =>
           buildNestedLineRowPayload(rowVertex, nestedLineItemsConfig)
@@ -1597,6 +1850,7 @@ if (args.fns.getFieldRenderer(field) === "fieldArray" && field.fieldArrayConfig)
     value: args.fns.getFieldValue(field.key),
     disabled: fieldDisabled,
     siteLanguages: args.fns.getSiteLanguages?.(),
+    getSiblingFieldValue: (siblingKey) => args.fns.getFieldValue(siblingKey),
     onChange: (nextItems) => args.fns.setFieldValue(field.key, nextItems)
   };
 }
@@ -1609,7 +1863,8 @@ if (args.fns.getFieldRenderer(field) === "nestedLineItems" && field.nestedLineIt
     getRows: () => args.fns.getNestedLineVerticesForField(field),
     getParentVertex: () => args.fns.getFormVertex(),
     ensureTxn: () => args.fns.ensureFormTxn(),
-    markDeleted: (lineId) => args.fns.markNestedLineDeleted(field.key, lineId)
+    markDeleted: (lineId) => args.fns.markNestedLineDeleted(field.key, lineId),
+    getSiblingFieldValue: (siblingKey) => args.fns.getFieldValue(siblingKey)
   };
 }
 

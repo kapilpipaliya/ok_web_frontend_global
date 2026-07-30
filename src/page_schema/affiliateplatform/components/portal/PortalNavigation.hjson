@@ -164,13 +164,13 @@ const portalNavSectionsData = [
       },
       {
         id: "products_table",
-        href: "/portal/table?table=AffiliateProduct&key=products",
+        href: "/portal/table?table=Product&key=products",
         label: "Products",
         icon: "ph:shopping-bag",
         pathCheck: () => {
           if (String(args.location?.pathname || "") !== "/portal/table") return false;
-          const table = String(args.searchParams?.table || "AffiliateProduct").trim();
-          return table === "AffiliateProduct";
+          const table = String(args.searchParams?.table || "Product").trim();
+          return table === "Product";
         }
       },
       {

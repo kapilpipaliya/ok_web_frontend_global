@@ -494,6 +494,9 @@ const initializeForm = () => {
         args.setGraph,
       );
       setFormVertexId(clonedVertex.id);
+      // cloneVertexWithEdges copies OUT only — fill incoming relation fields
+      // from the source vertex's IN edges / hydrated props.
+      hydrateIncomingRelationPropsOntoFormVertex(txnId, clonedVertex, existingVertex);
       hydrateTranslationsOntoFormVertex(txnId, clonedVertex, existingVertex, vertexLabel);
       hydrateNestedLineFields();
     } else {
@@ -510,6 +513,7 @@ const initializeForm = () => {
 
       // Store vertex ID instead of vertex object
       setFormVertexId(vertexId);
+      hydrateIncomingRelationPropsOntoFormVertex(txnId, createdVertex, initialVertex);
       hydrateTranslationsOntoFormVertex(txnId, createdVertex, initialVertex, vertexLabel);
       hydrateNestedLineFields();
     }
@@ -605,16 +609,44 @@ const applyAutoReferenceSequencesAfterAdd = async () => {
   }
 };
 
-const getEdgeRelationshipTargets = (vertex, relationshipType) => {
+const getEdgeRelationshipTargets = (vertex, relationshipType, incoming = false) => {
   if (!vertex || !relationshipType || !args.graph?.edges) return [];
-  const eids = vertex.OUT?.[relationshipType];
+  const eids = incoming
+    ? vertex.IN?.[relationshipType]
+    : vertex.OUT?.[relationshipType];
   if (!Array.isArray(eids) || eids.length === 0) return [];
   const ids = [];
   for (let i = 0; i < eids.length; i++) {
     const ed = args.graph.edges[eids[i]];
-    if (ed && ed.E != null && String(ed.E).trim() !== "") ids.push(String(ed.E).trim());
+    if (!ed) continue;
+    const targetId = incoming ? ed.S : ed.E;
+    if (targetId != null && String(targetId).trim() !== "") ids.push(String(targetId).trim());
   }
   return ids;
+};
+
+// Edit clones omit IN edges — copy incoming relation ids onto form vertex P for TomSelect/etc.
+const hydrateIncomingRelationPropsOntoFormVertex = (txnId, formVertex, sourceVertex) => {
+  if (!formVertex?.id || !sourceVertex) return;
+  const patches = {};
+  const allFields = getAllFields();
+  for (let i = 0; i < allFields.length; i++) {
+    const field = allFields[i];
+    if (!isRelationField(field) || field.selectConfig?.incoming !== true) continue;
+    const rel = field.selectConfig?.relationshipType;
+    if (!rel || !field.key) continue;
+    const existing = formVertex.P?.[field.key];
+    if (existing != null && String(existing).trim() !== "") continue;
+    const fromSourceProp = sourceVertex.P?.[field.key];
+    if (fromSourceProp != null && String(fromSourceProp).trim() !== "") {
+      patches[field.key] = String(fromSourceProp).trim();
+      continue;
+    }
+    const ids = getEdgeRelationshipTargets(sourceVertex, rel, true);
+    if (ids.length > 0) patches[field.key] = ids[0];
+  }
+  if (Object.keys(patches).length === 0) return;
+  args.mergeVertexProperties(txnId, formVertex.id, args.graph, args.setGraph, patches);
 };
 
 const vertexOutEdgeContainsTarget = (vertex, relationshipType, targetVertexId) => {
@@ -692,7 +724,17 @@ const getFieldValue = (fieldKey) => {
     (getFieldRenderer(field) === "multiSelect" || field.multiSelect === true) &&
     fieldUsesEdgeOnlyRelationship(field)
   ) {
-    return getEdgeRelationshipTargets(vertex, field.selectConfig.relationshipType);
+    return getEdgeRelationshipTargets(
+      vertex,
+      field.selectConfig.relationshipType,
+      field.selectConfig.incoming === true
+    );
+  }
+  if (field && isRelationField(field) && field.selectConfig?.incoming === true && field.selectConfig?.relationshipType) {
+    const fromProp = vertex?.P?.[fieldKey];
+    if (fromProp != null && String(fromProp).trim() !== "") return String(fromProp).trim();
+    const ids = getEdgeRelationshipTargets(vertex, field.selectConfig.relationshipType, true);
+    return ids.length > 0 ? ids[0] : "";
   }
   if (field && isRelationField(field) && fieldUsesEdgeOnlyRelationship(field)) {
     const ids = getEdgeRelationshipTargets(vertex, field.selectConfig.relationshipType);
@@ -954,7 +996,8 @@ const handleSave = async () => {
           relationshipData[field.key] = {
             relationshipType: field.selectConfig.relationshipType,
             targetLabel: field.selectConfig.label,
-            targetIds: selectionMode === "multiple" ? fromEdges : fromEdges.slice(0, 1)
+            targetIds: selectionMode === "multiple" ? fromEdges : fromEdges.slice(0, 1),
+            incoming: field.selectConfig.incoming === true
           };
           continue;
         }
@@ -982,7 +1025,8 @@ const handleSave = async () => {
           relationshipData[field.key] = {
             relationshipType: field.selectConfig.relationshipType,
             targetLabel: field.selectConfig.label,
-            targetIds: ids
+            targetIds: ids,
+            incoming: field.selectConfig.incoming === true
           };
           continue;
         }
@@ -995,7 +1039,8 @@ const handleSave = async () => {
           relationshipData[field.key] = {
             relationshipType: field.selectConfig.relationshipType,
             targetLabel: field.selectConfig.label,
-            targetIds: trimmedId ? [trimmedId] : []
+            targetIds: trimmedId ? [trimmedId] : [],
+            incoming: field.selectConfig.incoming === true
           };
         }
       }
@@ -1517,7 +1562,20 @@ if (args.fns.getFieldRenderer(field) === "embeddedVertexPicker") {
   if (pickerConfiguration.usePolarisUI === undefined) {
     pickerConfiguration.usePolarisUI = args.fns.getUsePolarisUI?.() === true;
   }
-  const selectedElementId = value != null && String(value).trim() !== "" ? String(value).trim() : "";
+  const selectionMode =
+    pickerConfiguration.selectionMode === "multiple" ? "multiple" : "single";
+  const selectedValues =
+    selectionMode === "multiple" && Array.isArray(value)
+      ? value.map((id) => String(id)).filter((id) => id.trim() !== "")
+      : selectionMode === "multiple" && value != null && String(value).trim() !== ""
+        ? [String(value).trim()]
+        : [];
+  const selectedElementId =
+    selectionMode === "multiple"
+      ? selectedValues[0] || ""
+      : value != null && String(value).trim() !== ""
+        ? String(value).trim()
+        : "";
   const selectedVertex =
     selectedElementId && args.graph.vertexes[selectedElementId]
       ? args.graph.vertexes[selectedElementId]
@@ -1540,22 +1598,28 @@ if (args.fns.getFieldRenderer(field) === "embeddedVertexPicker") {
   let secondaryLabel = "";
   if (pickerConfiguration.secondaryLabel != null) {
     secondaryLabel = String(pickerConfiguration.secondaryLabel).trim();
-  } else if (pickerConfiguration.buildSecondaryLabelFromVertex === true && selectedVertex) {
-    const label = selectedVertex.P?.[previewFileNamePropertyKey];
-    if (label != null && String(label).trim() !== "") {
-      secondaryLabel = String(label).trim();
+  } else if (pickerConfiguration.buildSecondaryLabelFromVertex === true) {
+    if (selectionMode === "multiple" && selectedValues.length > 0) {
+      const names = selectedValues
+        .map((id) => args.graph.vertexes[id]?.P?.[previewFileNamePropertyKey])
+        .filter((name) => name != null && String(name).trim() !== "")
+        .map((name) => String(name).trim());
+      if (names.length === 0) {
+        secondaryLabel = `${selectedValues.length} selected`;
+      } else if (names.length <= 2) {
+        secondaryLabel = names.join(", ");
+      } else {
+        secondaryLabel = `${names.length} files: ${names.slice(0, 2).join(", ")}…`;
+      }
+    } else if (selectedVertex) {
+      const label = selectedVertex.P?.[previewFileNamePropertyKey];
+      if (label != null && String(label).trim() !== "") {
+        secondaryLabel = String(label).trim();
+      }
     }
   }
   const showImagePreview =
     pickerConfiguration.showImagePreview === true && previewUrl !== "";
-  const selectionMode =
-    pickerConfiguration.selectionMode === "multiple" ? "multiple" : "single";
-  const selectedValues =
-    selectionMode === "multiple" && Array.isArray(value)
-      ? value.map((id) => String(id)).filter((id) => id.trim() !== "")
-      : selectionMode === "multiple" && value != null && String(value).trim() !== ""
-        ? [String(value).trim()]
-        : [];
   return {
     componentName: "VertexPicker",
     value: selectionMode === "single" ? selectedElementId : "",
@@ -1566,13 +1630,12 @@ if (args.fns.getFieldRenderer(field) === "embeddedVertexPicker") {
     disabled: fieldDisabled,
     pickerConfiguration,
     onSelect: (vertexElementId, selectedVertexPayload) => {
-      setFieldValue(field.key, vertexElementId);
       if (selectedVertexPayload && !args.graph.vertexes[vertexElementId]) {
         args.setGraphData(0, { vertexes: { [vertexElementId]: selectedVertexPayload } }, {});
       }
+      setFieldValue(field.key, vertexElementId);
     },
     onSelectMultiple: (vertexElementIds, selectedVertexPayloads) => {
-      setFieldValue(field.key, vertexElementIds);
       if (Array.isArray(selectedVertexPayloads)) {
         const vertexMap = {};
         for (const selectedVertexPayload of selectedVertexPayloads) {
@@ -1584,6 +1647,7 @@ if (args.fns.getFieldRenderer(field) === "embeddedVertexPicker") {
           args.setGraphData(0, { vertexes: vertexMap }, {});
         }
       }
+      setFieldValue(field.key, vertexElementIds);
     },
     onClear: () => setFieldValue(field.key, selectionMode === "multiple" ? [] : ""),
     ...accessibility
@@ -1786,6 +1850,40 @@ if (args.fns.getFieldDataType(field) === "date") {
     disabled: fieldDisabled || args.fns.isSubmitting(),
     onChange: (e) => {
       setFieldValue(field.key, e.target.value);
+    },
+    ...accessibility
+  };
+}
+
+if (
+  args.fns.getFieldRenderer(field) === "isoDateTime"
+) {
+  const toDatetimeLocalValue = (raw) => {
+    if (raw == null || String(raw).trim() === "") return "";
+    const date = new Date(raw);
+    if (Number.isNaN(date.getTime())) return "";
+    const pad = (n) => String(n).padStart(2, "0");
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  };
+  return {
+    componentName: "TextInput",
+    type: "datetime-local",
+    value: toDatetimeLocalValue(value),
+    placeholder: field.placeholder || "",
+    required: fieldRequired,
+    disabled: fieldDisabled || args.fns.isSubmitting(),
+    onChange: (e) => {
+      const next = e.target.value;
+      if (!next) {
+        setFieldValue(field.key, "");
+        return;
+      }
+      const parsed = new Date(next);
+      if (Number.isNaN(parsed.getTime())) {
+        setFieldValue(field.key, next);
+        return;
+      }
+      setFieldValue(field.key, parsed.toISOString());
     },
     ...accessibility
   };

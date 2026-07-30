@@ -877,3 +877,6 @@ Solid documentation warns against calling hooks inside map or For callbacks.
 
 
 on Development server sometimes page not export all the attributes. I have to restart server to export the component schema properly.
+
+
+in affilateplateform instead of using   OPTIONAL MATCH (related)-[r2]->(related2) load form after product form loads.

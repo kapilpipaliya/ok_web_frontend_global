@@ -50,6 +50,26 @@ const prepareVideo = (video) => {
   };
 };
 
+const getFileDownloadUrl = (file) => {
+  if (file?.P?.url != null && String(file.P.url).trim() !== "") {
+    return String(file.P.url).trim();
+  }
+  const fileName = file?.P?.fileName != null ? String(file.P.fileName).trim() : "";
+  return fileName ? `/api/file/download/${encodeURIComponent(fileName)}` : "";
+};
+
+const resolveMeditationBackgroundVideos = (video) => {
+  if (Array.isArray(video?.meditationBackgroundVideos)) {
+    return video.meditationBackgroundVideos;
+  }
+  const byVideoId = args.contextData.dravyaDrishtiPrakashData?.meditationBackgroundsByVideoId;
+  if (video?.id != null && byVideoId && typeof byVideoId === "object") {
+    const fromMap = byVideoId[String(video.id)];
+    if (Array.isArray(fromMap)) return fromMap;
+  }
+  return [];
+};
+
 const isVideoSelected = (video) =>
   video?.id != null && selectedVideoIds().has(String(video.id));
 
@@ -115,6 +135,8 @@ const formatDate = (value) => {
 return {
   selectedVideoIds,
   getYouTubeId,
+  getFileDownloadUrl,
+  resolveMeditationBackgroundVideos,
   isVideoSelected,
   setVideoSelected,
   areAllVideosSelected,
@@ -144,14 +166,73 @@ try {
   const tableData = tableResult?.result?.success ? (tableResult.result.data || {}) : {};
   const graph = tableData.graph || { vertexes: {}, edges: {} };
   const rowIds = Array.isArray(tableData.rowIds) ? tableData.rowIds : [];
-  const videos = rowIds
-    .map((rowId) => graph.vertexes?.[rowId])
-    .filter(Boolean);
 
-  return { videos };
+  const resolveBackgroundFiles = (video) => {
+    const edgeIds = video?.OUT?.DravyaDrishtiPrakashMeditationBackgroundVideo || [];
+    const files = [];
+    const seen = new Set();
+    const pushFile = (file) => {
+      if (!file?.id) return;
+      const fileId = String(file.id);
+      if (seen.has(fileId)) return;
+      const fileName = file?.P?.fileName != null ? String(file.P.fileName).trim() : "";
+      if (!fileName) return;
+      seen.add(fileId);
+      files.push({
+        id: file.id,
+        L: file.L,
+        P: {
+          fileName,
+          mimeType: file.P?.mimeType || file.P?.fileType || "",
+          url: "/api/file/download/" + encodeURIComponent(fileName)
+        },
+        IN: {},
+        OUT: {}
+      });
+    };
+
+    if (Array.isArray(edgeIds) && edgeIds.length > 0) {
+      for (const edgeId of edgeIds) {
+        const edge = graph.edges?.[edgeId];
+        const file = edge?.E != null ? graph.vertexes?.[edge.E] : null;
+        pushFile(file);
+      }
+    } else {
+      const propValue = video?.P?.meditationBackgroundVideos;
+      const propIds = Array.isArray(propValue)
+        ? propValue
+        : propValue != null && String(propValue).trim() !== ""
+          ? [propValue]
+          : [];
+      for (const propId of propIds) {
+        pushFile(graph.vertexes?.[String(propId)]);
+      }
+    }
+    return files;
+  };
+
+  const meditationBackgroundsByVideoId = {};
+  const videos = [];
+  for (const rowId of rowIds) {
+    const video = graph.vertexes?.[rowId];
+    if (!video) continue;
+    const backgrounds = resolveBackgroundFiles(video);
+    meditationBackgroundsByVideoId[String(video.id)] = backgrounds;
+    // Attach on the row object so table cells can read it without page-level fns contextData.
+    videos.push({
+      id: video.id,
+      L: video.L,
+      P: video.P || {},
+      IN: video.IN || {},
+      OUT: video.OUT || {},
+      meditationBackgroundVideos: backgrounds
+    });
+  }
+
+  return { videos, meditationBackgroundsByVideoId };
 } catch (error) {
   console.error("Error loading Dravya Drishti Prakash videos:", error);
-  return { videos: [] };
+  return { videos: [], meditationBackgroundsByVideoId: {} };
 }
 `
 };
@@ -326,10 +407,6 @@ return {
   text-align: center;
 }
 
-._id table {
-  counter-reset: video-row;
-}
-
 ._id th,
 ._id td {
   text-align: center;
@@ -341,18 +418,63 @@ return {
           '''const videos = args.contextData.dravyaDrishtiPrakashData?.videos || [];
 return {
   columns: [
-    { key: "select", label: "Select", width: "72px", align: "center" },
-    { key: "number", label: "No", width: "56px", align: "center" },
-    { key: "thumbnail", label: "YouTube", width: "150px", align: "center" },
-    { key: "date", label: "Date", width: "110px", align: "center" },
+    {
+      key: "select",
+      label: "Select",
+      width: "72px",
+      align: "center",
+      sortType: "number",
+      sortValue: (video) => args.fns.isVideoSelected(video) ? 1 : 0
+    },
+    {
+      key: "number",
+      label: "No",
+      width: "56px",
+      align: "center",
+      sortType: "number"
+    },
+    {
+      key: "thumbnail",
+      label: "YouTube",
+      width: "150px",
+      align: "center",
+      sortValue: (video) => args.fns.getYouTubeId(video)
+    },
+    {
+      key: "date",
+      label: "Date",
+      width: "110px",
+      align: "center",
+      sortType: "date"
+    },
     { key: "time", label: "Time", width: "90px", align: "center" },
     { key: "subject", label: "Subject", align: "center" },
-    { key: "link", label: "YouTube link", width: "130px", align: "center" },
-    { key: "bol", label: "Bol", align: "center" }
+    {
+      key: "link",
+      label: "YouTube link",
+      width: "130px",
+      align: "center",
+      sortValue: (video) => video?.P?.youtubeUrl || video?.P?.youtubeId || ""
+    },
+    { key: "bol", label: "Bol", align: "center" },
+    {
+      key: "meditationBackground",
+      label: "Meditation background",
+      width: "280px",
+      align: "center",
+      sortValue: (video) => {
+        const backgrounds = Array.isArray(video?.meditationBackgroundVideos)
+          ? video.meditationBackgroundVideos
+          : [];
+        return backgrounds.map((file) => file?.P?.fileName || "").join(" ");
+      }
+    }
   ],
   rows: videos,
   contextName: "video",
-  emptyMessage: "No videos are available."
+  emptyMessage: "No videos are available.",
+  defaultSortKey: "date",
+  defaultSortDirection: "asc"
 };'''
       }
     }
@@ -362,7 +484,6 @@ return {
       P: {
         css:
           '''return `._id {
-  counter-increment: video-row;
   transition: background 0.2s ease;
 }
 
@@ -412,18 +533,15 @@ return {
       id: "15"
       L: Attr
       P: {
-        css:
-          '''return `._id {
-  text-align: center;
-  vertical-align: middle;
-}
-
-._id::before {
-  content: counter(video-row);
-}`;'''
+        css: return `._id { text-align: center; vertical-align: middle; }`;
         displayOrder: 2
         componentName: Html
-        props: return { as: "td" };
+        props:
+          '''const videoIndex = args.contextData.videoIndex;
+return {
+  as: "td",
+  text: typeof videoIndex === "number" ? String(videoIndex + 1) : ""
+};'''
       }
     }
     {
@@ -609,6 +727,80 @@ return {
 };'''
       }
     }
+    {
+      id: "25"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  text-align: center;
+  vertical-align: middle;
+}`;'''
+        displayOrder: 9
+        componentName: Html
+        props: return { as: "td" };
+      }
+    }
+    {
+      id: "26"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const video = args.contextData.video;
+const backgrounds = Array.isArray(video?.meditationBackgroundVideos)
+  ? video.meditationBackgroundVideos
+  : (args.contextData.dravyaDrishtiPrakashData?.meditationBackgroundsByVideoId?.[String(video?.id || "")] || []);
+return {
+  as: "div",
+  data: backgrounds,
+  contextName: "meditationBackground",
+  loop: true,
+  hide: () => backgrounds.length === 0
+};'''
+      }
+    }
+    {
+      id: "27"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: block;
+  width: 240px;
+  max-width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 0.375rem;
+  background: ${args.theme.var.color.background_dark_900};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const file = args.contextData.meditationBackground;
+const src = file?.P?.url
+  || (file?.P?.fileName
+    ? `/api/file/download/${encodeURIComponent(String(file.P.fileName).trim())}`
+    : "");
+return {
+  as: "video",
+  src,
+  controls: true,
+  preload: "metadata",
+  "attr:playsinline": true,
+  "attr:aria-label": file?.P?.fileName || "Meditation background video",
+  hide: () => !src
+};'''
+      }
+    }
   ]
   edges: [
     {
@@ -726,6 +918,12 @@ return {
       E: "24"
     }
     {
+      id: e19b
+      T: Attr
+      S: "12"
+      E: "25"
+    }
+    {
       id: e20
       T: Attr
       S: "13"
@@ -748,6 +946,18 @@ return {
       T: Attr
       S: "22"
       E: "23"
+    }
+    {
+      id: e24
+      T: Attr
+      S: "25"
+      E: "26"
+    }
+    {
+      id: e25
+      T: Attr
+      S: "26"
+      E: "27"
     }
   ]
 }

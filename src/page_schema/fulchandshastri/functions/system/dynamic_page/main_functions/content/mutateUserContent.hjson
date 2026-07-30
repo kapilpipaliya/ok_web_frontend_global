@@ -528,8 +528,8 @@ try {
     const createdContent = vertices[0];
     const createdElementId = createdContent.id;
 
-    // Handle relationships if provided (batched by relationshipType + targetLabel)
-    // Format: { fieldKey: { relationshipType, targetLabel, targetIds } }
+    // Handle relationships if provided (batched by relationshipType + targetLabel + direction)
+    // Format: { fieldKey: { relationshipType, targetLabel, targetIds, incoming? } }
     if (relationships && typeof relationships === "object") {
       const validRels = [];
       for (const [fieldKey, relConfig] of Object.entries(relationships)) {
@@ -543,23 +543,34 @@ try {
       }
       const byTypeAndLabel = new Map();
       for (const r of validRels) {
-        const key = `${r.relationshipType}|${r.targetLabel}`;
+        const dir = r.incoming === true ? "in" : "out";
+        const key = `${r.relationshipType}|${r.targetLabel}|${dir}`;
         if (!byTypeAndLabel.has(key)) byTypeAndLabel.set(key, []);
         byTypeAndLabel.get(key).push({ targetId: r.targetId, fieldKey: r.fieldKey });
       }
       for (const [key, items] of byTypeAndLabel) {
-        const [relationshipType, targetLabel] = key.split('|');
+        const [relationshipType, targetLabel, dir] = key.split('|');
         const targetIds = items.map(i => i.targetId);
+        const incoming = dir === "in";
         try {
           const relRes = await args.session.run(
-            `UNWIND $targetIds as targetId
-             MATCH (c:${vertexLabel}) WHERE elementId(c) = $contentId
-             MATCH (target:${targetLabel}) WHERE elementId(target) = targetId
-             MERGE (c)-[r:${relationshipType}]->(target)
-             ON CREATE SET r.createdAt = datetime()
-             RETURN c,
-               [x IN COLLECT(DISTINCT r) WHERE x IS NOT NULL] AS rlist,
-               [x IN COLLECT(DISTINCT target) WHERE x IS NOT NULL] AS tlist`,
+            incoming
+              ? `UNWIND $targetIds as targetId
+                 MATCH (c:${vertexLabel}) WHERE elementId(c) = $contentId
+                 MATCH (target:${targetLabel}) WHERE elementId(target) = targetId
+                 MERGE (target)-[r:${relationshipType}]->(c)
+                 ON CREATE SET r.createdAt = datetime()
+                 RETURN c,
+                   [x IN COLLECT(DISTINCT r) WHERE x IS NOT NULL] AS rlist,
+                   [x IN COLLECT(DISTINCT target) WHERE x IS NOT NULL] AS tlist`
+              : `UNWIND $targetIds as targetId
+                 MATCH (c:${vertexLabel}) WHERE elementId(c) = $contentId
+                 MATCH (target:${targetLabel}) WHERE elementId(target) = targetId
+                 MERGE (c)-[r:${relationshipType}]->(target)
+                 ON CREATE SET r.createdAt = datetime()
+                 RETURN c,
+                   [x IN COLLECT(DISTINCT r) WHERE x IS NOT NULL] AS rlist,
+                   [x IN COLLECT(DISTINCT target) WHERE x IS NOT NULL] AS tlist`,
             { contentId: createdElementId, targetIds }
           );
           args.processResult(relRes.records, args.context, ["c", "tlist"], "rlist");
@@ -742,13 +753,20 @@ try {
     const updatedContent = vertices[0];
 
     // Handle relationships if provided (clear edge type per field, then optionally recreate)
-    // Format: { fieldKey: { relationshipType, targetLabel, targetIds } }
+    // Format: { fieldKey: { relationshipType, targetLabel, targetIds, incoming? } }
     if (relationships && typeof relationships === "object") {
       for (const [fieldKey, relConfig] of Object.entries(relationships)) {
         if (!relConfig?.relationshipType || !relConfig?.targetLabel) continue;
+        const incoming = relConfig.incoming === true;
         try {
           // Capture edge ids so response includes deleted_edges (client can remove stale edges/labels)
-          const captureRelQuery = `
+          const captureRelQuery = incoming
+            ? `
+            MATCH ()-[r:${relConfig.relationshipType}]->(c:${vertexLabel})
+            WHERE elementId(c) = $contentId
+            RETURN c, [x IN COLLECT(DISTINCT r) WHERE x IS NOT NULL] AS rdel
+          `
+            : `
             MATCH (c:${vertexLabel})-[r:${relConfig.relationshipType}]->()
             WHERE elementId(c) = $contentId
             RETURN c, [x IN COLLECT(DISTINCT r) WHERE x IS NOT NULL] AS rdel
@@ -756,18 +774,15 @@ try {
           const captureRes = await args.session.run(captureRelQuery, { contentId: updateElementId });
           args.processResult(captureRes.records, args.context, "c", "rdel");
           const relMap = args.context.relationships || {};
-          const captured = captureRes.records?.[0]?.get?.("rdel");
-          const relArr = Array.isArray(captured) ? captured : captured ? [captured] : [];
-          for (let i = 0; i < relArr.length; i++) {
-            const rel = relArr[i];
-            if (!rel) continue;
-            // processResult stored it into context.relationships keyed by converted edge id
-            // but we don't know the id directly here; push all edges of this type + source that match.
-          }
-          // Safer: compute deleted ids from relationship map using source id + type.
+          // Safer: compute deleted ids from relationship map using source/end id + type.
           const delIds = [];
           for (const [eid, e] of Object.entries(relMap)) {
-            if (e && e.S === updateElementId && e.T === relConfig.relationshipType) delIds.push(eid);
+            if (!e || e.T !== relConfig.relationshipType) continue;
+            if (incoming) {
+              if (e.E === updateElementId) delIds.push(eid);
+            } else if (e.S === updateElementId) {
+              delIds.push(eid);
+            }
           }
           if (!args.context.deletedEdges) args.context.deletedEdges = [];
           for (let i = 0; i < delIds.length; i++) args.context.deletedEdges.push(delIds[i]);
@@ -785,7 +800,13 @@ try {
             delete relMap[delId];
           }
 
-          const deleteRelQuery = `
+          const deleteRelQuery = incoming
+            ? `
+            MATCH ()-[r:${relConfig.relationshipType}]->(c:${vertexLabel})
+            WHERE elementId(c) = $contentId
+            DELETE r
+          `
+            : `
             MATCH (c:${vertexLabel})-[r:${relConfig.relationshipType}]->()
             WHERE elementId(c) = $contentId
             DELETE r
@@ -798,7 +819,21 @@ try {
 
           if (targetIds.length === 0) continue;
 
-          const createRelQuery = `
+          const createRelQuery = incoming
+            ? `
+            UNWIND $targetIds AS targetId
+            MATCH (c:${vertexLabel})
+            WHERE elementId(c) = $contentId
+            MATCH (target:${relConfig.targetLabel})
+            WHERE elementId(target) = targetId
+            MERGE (target)-[r:${relConfig.relationshipType}]->(c)
+            ON CREATE SET r.createdAt = datetime()
+            ON MATCH SET r.updatedAt = datetime()
+            RETURN c,
+              [x IN COLLECT(DISTINCT r) WHERE x IS NOT NULL] AS rlist,
+              [x IN COLLECT(DISTINCT target) WHERE x IS NOT NULL] AS tlist
+          `
+            : `
             UNWIND $targetIds AS targetId
             MATCH (c:${vertexLabel})
             WHERE elementId(c) = $contentId

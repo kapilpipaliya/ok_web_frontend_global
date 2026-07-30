@@ -425,6 +425,23 @@ const productImagePickerConfiguration = {
   pickerBodyProps: { tableVertexLabel: "File", tableKey: "files", loadFromSetting: true }
 };
 
+const DEFAULT_PRODUCT_OPTION_AXES = [
+  { key: "color", label: "Color" },
+  { key: "size", label: "Size" }
+];
+
+const productVariantImagePickerConfiguration = {
+  ...productImagePickerConfiguration,
+  fieldLabel: "Variant images",
+  chooseButtonLabel: "Add images…",
+  clearButtonLabel: "Clear all",
+  modalTitle: "Add variant images",
+  modalHintEmpty: "Select one or more files, then confirm to add them.",
+  modalHintSelected: "Selected {count} file(s) — confirm to add to this variant.",
+  selectionMode: "multiple",
+  confirmButtonLabel: "Add selected images"
+};
+
 const productTableColumns = [
   {
     key: "thumbnail",
@@ -435,16 +452,15 @@ const productTableColumns = [
     sortable: false,
     overflowEllipsis: true,
     selectConfig: {
-      relationshipType: "AffiliateProductThumbnail",
+      relationshipType: "ProductThumbnail",
       edgeOnly: true,
       label: "File",
       labelField: "fileName"
     }
   },
+  { key: "key", label: "Key", dataType: "text", renderer: "text", width: "140px", required: true, overflowEllipsis: true },
   { key: "title", label: "Title", dataType: "text", renderer: "text", width: "220px", required: true, overflowEllipsis: true },
-  { key: "price", label: "Price", dataType: "text", renderer: "text", width: "90px" },
-  { key: "amazonUrl", label: "Amazon URL", dataType: "text", renderer: "text", width: "240px", overflowEllipsis: true },
-  { key: "shortDescription", label: "Short description", dataType: "text", renderer: "text", width: "220px", overflowEllipsis: true }
+  { key: "shortDescription", label: "Short description", dataType: "text", renderer: "text", width: "240px", overflowEllipsis: true }
 ];
 
 const productTableGeneral = {
@@ -471,7 +487,7 @@ const productTableGeneral = {
     { key: "delete", type: "delete", confirm: { title: "Delete product?", message: "This cannot be undone.", confirmText: "Delete", cancelText: "Cancel", variant: "danger" } }
   ],
   hooks: {},
-  companionPages: filesCompanionPages("Upload product images in Files below, then attach them when editing products above.")
+  companionPages: filesCompanionPages("Upload product images in Files below, then attach them with the variant image picker.")
 };
 
 const productTableFormConfig = {
@@ -482,21 +498,18 @@ const productTableFormConfig = {
       title: "Product",
       gridColumns: 2,
       fields: [
-        { key: "title", label: "Title", dataType: "text", renderer: "text", required: true, colSpan: 2, translatable: false },
-        { key: "price", label: "Price label", dataType: "text", renderer: "text", colSpan: 1, translatable: false, placeholder: "e.g. $29.99" },
-        { key: "amazonUrl", label: "Amazon affiliate URL", dataType: "text", renderer: "text", required: true, colSpan: 1, translatable: false },
-        { key: "imageUrl", label: "Image URL (optional)", dataType: "text", renderer: "text", colSpan: 2, translatable: false, placeholder: "https://..." },
+        { key: "title", label: "Title", dataType: "text", renderer: "text", required: true, colSpan: 1, translatable: false },
+        { key: "key", label: "URL key", dataType: "text", renderer: "text", required: true, colSpan: 1, translatable: false, placeholder: "wireless-earbuds" },
         { key: "shortDescription", label: "Short description", dataType: "text", renderer: "textArea", colSpan: 2, translatable: false, placeholder: "Shown on product cards" },
-        { key: "description", label: "Full description (Markdown)", dataType: "text", renderer: "textArea", colSpan: 2, translatable: false, placeholder: "Use Markdown for headings, lists, and links." },
         {
           key: "thumbnail",
-          label: "Product image",
+          label: "Listing image",
           dataType: "relation",
           renderer: "embeddedVertexPicker",
           colSpan: 2,
           translatable: false,
           selectConfig: {
-            relationshipType: "AffiliateProductThumbnail",
+            relationshipType: "ProductThumbnail",
             edgeOnly: true,
             label: "File",
             labelField: "fileName"
@@ -504,8 +517,117 @@ const productTableFormConfig = {
           pickerConfiguration: productImagePickerConfiguration
         }
       ]
+    },
+    {
+      key: "optionAxes",
+      title: "Variant option types",
+      gridColumns: 1,
+      fields: [
+        {
+          key: "optionAxes",
+          label: "Option types",
+          dataType: "array",
+          renderer: "fieldArray",
+          required: true,
+          colSpan: 1,
+          translatable: false,
+          defaultValue: DEFAULT_PRODUCT_OPTION_AXES,
+          fieldArrayConfig: {
+            itemLabel: "Option type",
+            addButtonLabel: "Add option type",
+            minItems: 1,
+            defaultItems: DEFAULT_PRODUCT_OPTION_AXES,
+            itemFields: [
+              { key: "key", label: "Key", dataType: "text", renderer: "text", required: true, placeholder: "color" },
+              { key: "label", label: "Label", dataType: "text", renderer: "text", required: true, placeholder: "Color" }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      key: "variants",
+      title: "Variants",
+      gridColumns: 1,
+      fields: [
+        {
+          key: "variants",
+          label: "Variants",
+          dataType: "json",
+          renderer: "nestedLineItems",
+          required: true,
+          colSpan: 1,
+          translatable: false,
+          tooltip: "Each variant is a ProductVariant node (ProductProductVariant). Option values are stored as properties on the variant (e.g. color, size). Images link via ProductVariantImage edges to File nodes.",
+          nestedLineItemsConfig: {
+            childLabel: "ProductVariant",
+            parentToChildRelationshipType: "ProductProductVariant",
+            childToFilesRelationshipType: "ProductVariantImage",
+            filesTargetLabel: "File",
+            minItems: 1,
+            addButtonLabel: "Add variant",
+            defaultNewLineProperties: {
+              title: "Default",
+              sku: "",
+              price: "",
+              amazonUrl: "",
+              description: ""
+            },
+            lineColumns: [
+              { key: "title", label: "Title", columnType: "text", required: true, placeholder: "Red / Large", defaultValue: "Default", gridMinmax: "minmax(6rem, 1fr)" },
+              { key: "sku", label: "SKU", columnType: "text", placeholder: "SKU", defaultValue: "", gridMinmax: "minmax(4rem, 0.7fr)" },
+              {
+                key: "_options",
+                label: "Options",
+                columnType: "optionPairs",
+                required: true,
+                optionAxesFieldKey: "optionAxes",
+                fieldArrayConfig: {
+                  itemLabel: "Option",
+                  addButtonLabel: "Add",
+                  minItems: 1,
+                  itemFields: [
+                    { key: "key", label: "Key", dataType: "text", renderer: "text", required: true, placeholder: "color" },
+                    { key: "value", label: "Value", dataType: "text", renderer: "text", required: true, placeholder: "Red" }
+                  ]
+                },
+                gridMinmax: "minmax(9rem, 1.2fr)"
+              },
+              { key: "price", label: "Price", columnType: "text", required: true, placeholder: "$29.99", gridMinmax: "minmax(4rem, 0.55fr)" },
+              { key: "amazonUrl", label: "Amazon URL", columnType: "text", required: true, placeholder: "https://www.amazon.com/dp/...", gridMinmax: "minmax(8rem, 1.2fr)" },
+              {
+                key: "description",
+                label: "Description",
+                columnType: "textArea",
+                required: true,
+                placeholder: "## Features",
+                gridMinmax: "minmax(8rem, 1.2fr)"
+              },
+              {
+                key: "_images",
+                label: "Images",
+                columnType: "files",
+                required: true,
+                pickerConfiguration: productVariantImagePickerConfiguration,
+                gridMinmax: "minmax(7rem, 1fr)"
+              },
+              { key: "_actions", label: "", columnType: "actions", gridMinmax: "minmax(3.75rem, auto)" }
+            ]
+          }
+        }
+      ]
     }
   ]
+};
+
+const productCategoryImagePickerConfiguration = {
+  ...productImagePickerConfiguration,
+  fieldLabel: "Category image",
+  chooseButtonLabel: "Select image…",
+  clearButtonLabel: "Clear",
+  modalTitle: "Choose a category image",
+  modalHintEmpty: "Select a file using the checkbox, then confirm.",
+  modalHintSelected: "Selected: {name} — confirm or choose another file."
 };
 
 const productTableSidebar = {
@@ -515,6 +637,7 @@ const productTableSidebar = {
   rootKeys: {},
   loadFullTree: true,
   label: "Categories",
+  imageRelationshipType: "ProductCategoryImage",
   formConfig: {
     gridColumns: 1,
     groups: [
@@ -524,7 +647,22 @@ const productTableSidebar = {
         gridColumns: 2,
         fields: [
           { key: "name", label: "Name", dataType: "text", renderer: "text", required: true, colSpan: 2 },
-          { key: "key", label: "Key", dataType: "text", renderer: "text", colSpan: 2 }
+          { key: "key", label: "Key", dataType: "text", renderer: "text", colSpan: 2 },
+          {
+            key: "image",
+            label: "Category image",
+            dataType: "relation",
+            renderer: "embeddedVertexPicker",
+            colSpan: 2,
+            translatable: false,
+            selectConfig: {
+              relationshipType: "ProductCategoryImage",
+              edgeOnly: true,
+              label: "File",
+              labelField: "fileName"
+            },
+            pickerConfiguration: productCategoryImagePickerConfiguration
+          }
         ]
       }
     ]
@@ -1042,7 +1180,7 @@ function buildTableSchemaPartConfig(part, body) {
 const tableDefinitions = [
   {
     tableKey: "products",
-    tableVertexLabel: "AffiliateProduct",
+    tableVertexLabel: "Product",
     pageId: "table:products",
     schemaKeys: {
       general: "products_schema_general",

@@ -102,6 +102,7 @@ const buildSelectionChangeHandler = (pickerConfiguration) => {
 };
 
 const buildInitialSelectedRowIds = (pickerConfiguration) => {
+  if (pickerConfiguration?.appendMode === true) return [];
   const selectionMode = getSelectionMode(pickerConfiguration);
   const multiValues = args.contextData.props?.values;
   if (selectionMode === "multiple" && Array.isArray(multiValues)) {
@@ -280,14 +281,24 @@ return {
         props:
           '''const pickerConfiguration = args.contextData.props?.pickerConfiguration;
 return {
-  label: pickerConfiguration?.fieldLabel,
+  label: args.contextData.props?.label !== undefined
+    ? args.contextData.props.label
+    : pickerConfiguration?.fieldLabel,
   secondaryLabel: args.contextData.props?.secondaryLabel,
   previewUrl: args.contextData.props?.previewUrl,
   showImagePreview: args.contextData.props?.showImagePreview,
   value: args.contextData.props?.value,
+  values: args.contextData.props?.values,
+  pickerConfiguration,
   disabled: args.contextData.props?.disabled,
-  chooseButtonLabel: pickerConfiguration?.chooseButtonLabel,
-  clearButtonLabel: pickerConfiguration?.clearButtonLabel,
+  chooseButtonLabel:
+    args.contextData.props?.chooseButtonLabel != null
+      ? args.contextData.props.chooseButtonLabel
+      : pickerConfiguration?.chooseButtonLabel,
+  clearButtonLabel:
+    args.contextData.props?.clearButtonLabel != null
+      ? args.contextData.props.clearButtonLabel
+      : pickerConfiguration?.clearButtonLabel,
   usePolarisUI: pickerConfiguration?.usePolarisUI === true,
   onOpenPicker: () => args.fns.openPickerModal?.(),
   onClear: () => args.contextData.props?.onClear?.()

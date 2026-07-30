@@ -34,9 +34,6 @@ const urlParam = () => {
 const [overrideData, setOverrideData] = args.createSignal(null);
 const [loading, setLoading] = args.createSignal(false);
 const [error, setError] = args.createSignal("");
-const [previewItem, setPreviewItem] = args.createSignal(null);
-const [previewIndex, setPreviewIndex] = args.createSignal(0);
-const [previewOpen, setPreviewOpen] = args.createSignal(false);
 
 const getData = () => {
   if (useUrlState()) return props().initialData || {};
@@ -93,7 +90,7 @@ const loadFolder = async (categoryKey) => {
       functionName: "loadPublicProductsFolder",
       contextData: {
         tableKey: props().tableKey || "products",
-        tableVertexLabel: props().tableVertexLabel || "AffiliateProduct",
+        tableVertexLabel: props().tableVertexLabel || "Product",
         categoryKey: categoryKey || null,
         locale: props().locale || null
       }
@@ -110,9 +107,6 @@ const loadFolder = async (categoryKey) => {
       currentCategoryId: data.currentCategoryId || null,
       currentCategoryKey: data.currentCategoryKey || null
     });
-    setPreviewOpen(false);
-    setPreviewItem(null);
-    setPreviewIndex(0);
   } catch (e) {
     console.error("ProductBrowser loadFolder failed:", e);
     setError(e?.message || "Failed to load products");
@@ -133,18 +127,10 @@ const navigateBreadcrumb = (crumb) => {
 };
 
 const openProduct = (item) => {
-  if (!item) return;
-  const list = getItemsForRender();
-  const index = list.findIndex((row) => row?.id === item.id);
-  setPreviewItem(item);
-  setPreviewIndex(index >= 0 ? index : 0);
-  setPreviewOpen(true);
-};
-
-const closePreview = () => {
-  setPreviewOpen(false);
-  setPreviewItem(null);
-  setPreviewIndex(0);
+  if (!item?.key) return;
+  const lang = args.params?.lang ? String(args.params.lang).toLowerCase() : "";
+  const langPrefix = lang && /^[a-z]{2,3}$/i.test(lang) ? `/${lang}` : "";
+  args.navigate(`${langPrefix}/product/${encodeURIComponent(String(item.key).trim())}`);
 };
 
 return {
@@ -155,9 +141,6 @@ return {
   getBreadcrumbForRender,
   loading,
   error,
-  previewItem,
-  previewIndex,
-  previewOpen,
   labels,
   getBasePath,
   folderHref,
@@ -165,7 +148,6 @@ return {
   openFolder,
   navigateBreadcrumb,
   openProduct,
-  closePreview,
   hasFolders: () => getFoldersForRender().length > 0,
   hasItems: () => getItemsForRender().length > 0,
   isEmpty: () => getFoldersForRender().length === 0 && getItemsForRender().length === 0,
@@ -478,25 +460,6 @@ return {
 };'''
       }
     }
-    {
-      id: "18"
-      L: Attr
-      P: {
-        displayOrder: 6
-        componentName: ProductPreviewModal
-        props:
-          '''const items = args.fns.getItemsForRender?.()
-  || args.contextData.props?.initialData?.items
-  || [];
-return {
-  isOpen: args.fns.previewOpen?.() === true,
-  items: Array.isArray(items) ? items : [],
-  startIndex: args.fns.previewIndex?.() || 0,
-  item: args.fns.previewItem?.() || null,
-  onClose: () => args.fns.closePreview?.()
-};'''
-      }
-    }
   ]
   edges: [
     {
@@ -534,12 +497,6 @@ return {
       T: Attr
       S: "2"
       E: "16"
-    }
-    {
-      id: e7
-      T: Attr
-      S: "2"
-      E: "18"
     }
     {
       id: e8

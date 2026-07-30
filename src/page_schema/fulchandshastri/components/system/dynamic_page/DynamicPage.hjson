@@ -425,25 +425,29 @@ const buildRelationshipPropertyBindings = (config) => {
   const fields = collectFormConfigFields(config);
   const seen = new Set();
   const bindings = [];
-  const addBinding = (prop, rel) => {
+  const addBinding = (prop, rel, incoming) => {
     if (!prop || !rel) return;
-    const k = `${prop}\0${rel}`;
+    const k = `${prop}\0${rel}\0${incoming ? "in" : "out"}`;
     if (seen.has(k)) return;
     seen.add(k);
-    bindings.push({ prop, rel });
+    bindings.push({ prop, rel, incoming: !!incoming });
   };
   for (let i = 0; i < fields.length; i++) {
     const f = fields[i];
-    if ((f?.dataType === "select" || f?.dataType === "relation") && f.selectConfig?.relationshipType && f.selectConfig?.edgeOnly === true) {
-      addBinding(f.key, f.selectConfig.relationshipType);
+    if ((f?.dataType === "select" || f?.dataType === "relation") && f.selectConfig?.relationshipType) {
+      if (f.selectConfig.edgeOnly === true || f.selectConfig.incoming === true) {
+        addBinding(f.key, f.selectConfig.relationshipType, f.selectConfig.incoming === true);
+      }
     }
   }
   const cols = config.columns;
   if (Array.isArray(cols)) {
     for (let ci = 0; ci < cols.length; ci++) {
       const c = cols[ci];
-      if (c?.dataType === "relation" && c.selectConfig?.relationshipType && c.selectConfig?.edgeOnly === true) {
-        addBinding(c.key, c.selectConfig.relationshipType);
+      if (c?.dataType === "relation" && c.selectConfig?.relationshipType) {
+        if (c.selectConfig.edgeOnly === true || c.selectConfig.incoming === true) {
+          addBinding(c.key, c.selectConfig.relationshipType, c.selectConfig.incoming === true);
+        }
       }
     }
   }
@@ -451,7 +455,7 @@ const buildRelationshipPropertyBindings = (config) => {
   if (Array.isArray(extra)) {
     for (let j = 0; j < extra.length; j++) {
       const row = extra[j];
-      addBinding(row?.prop, row?.rel);
+      addBinding(row?.prop, row?.rel, row?.incoming === true);
     }
   }
   return bindings;
@@ -1509,11 +1513,14 @@ const getUsePolarisUI = () => {
 // Get category key for selected rows storage
 const getCategoryKey = (item) => {
   const sidebarConfig = getSidebarConfig();
+  // Treat enabled:false the same as no sidebar
+  const sidebarEnabled = !!(sidebarConfig && sidebarConfig.enabled !== false);
   if (!item) {
-    // No sidebar or no item selected - use 'no-sidebar' key
-    return sidebarConfig ? null : 'no-sidebar';
+    // Sidebar on but no category yet → block selection until a folder/category is chosen
+    // No sidebar → shared 'no-sidebar' bucket so checkboxes / Use selection work
+    return sidebarEnabled ? null : 'no-sidebar';
   }
-  if (!sidebarConfig) {
+  if (!sidebarEnabled) {
     return 'no-sidebar';
   }
   const rootKeys = sidebarConfig.rootKeys || {};
@@ -2504,6 +2511,17 @@ const saveDropCreateReviewRow = async (draft, saveData) => {
 
   const vertex = saveData?.vertex;
   const properties = vertex?.P && typeof vertex.P === "object" ? { ...vertex.P } : {};
+  const defaultProps =
+    createCfg.defaultProperties && typeof createCfg.defaultProperties === "object"
+      ? createCfg.defaultProperties
+      : null;
+  if (defaultProps) {
+    for (const [key, value] of Object.entries(defaultProps)) {
+      if (properties[key] === undefined || properties[key] === null || properties[key] === "") {
+        properties[key] = value;
+      }
+    }
+  }
 
   const relationships =
     saveData?.relationships && typeof saveData.relationships === "object"

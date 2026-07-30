@@ -13,6 +13,8 @@ import {
   For,
   createComponent,
   mergeProps,
+  catchError,
+  createResource,
 } from "solid-js";
 import { Dynamic } from "solid-js/web";
 import * as virtua from "~/components/virtua/src/core";
@@ -327,6 +329,14 @@ export function createFunctionArgumentBase(
     },
     updateValue: options.updateValue,
     zIndex: hooks.zIndex,
+    // Short helpers
+    s: createSignal,
+    st: createStore,
+    m: createMemo,
+    r: createResource,
+    e: createEffect,
+    ce: catchError,
+    b: batch,
     createSignal,
     createStore,
     reconcile,

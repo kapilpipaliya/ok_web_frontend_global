@@ -4,7 +4,7 @@
       id: "1"
       L: Component
       P: {
-        description: Folder card for gallery browser. Props: folder {id,name,contentCount,folderCount}, onOpen(folder), index.
+        description: Folder card for gallery browser. Props: folder {id,name,contentCount,folderCount,imageUrl}, onOpen(folder), index.
         key: GalleryFolderCard
         updatedAt: 2026-07-13T18:16:26.920Z
       }
@@ -17,17 +17,18 @@
           '''return `._id {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: stretch;
   gap: 0.75rem;
   width: 100%;
   text-align: left;
-  padding: 1.25rem;
+  padding: 0;
   border: 1px solid ${args.theme.var.color.border};
   border-radius: 0.75rem;
   background: ${args.theme.var.color.background};
   cursor: pointer;
   text-decoration: none;
   color: inherit;
+  overflow: hidden;
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 
   &:hover {
@@ -63,6 +64,32 @@ return {
       }
     }
     {
+      id: "2b"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  display: block;
+  background: ${args.theme.var.color.background_light_200};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const folder = args.contextData.props?.folder || args.contextData.props || {};
+const src = folder.imageUrl || "";
+return {
+  as: src ? "img" : "fragment",
+  src: src || undefined,
+  alt: folder.name || "Category",
+  loading: "lazy",
+  hide: !src
+};'''
+      }
+    }
+    {
       id: "3"
       L: Attr
       P: {
@@ -73,13 +100,19 @@ return {
   justify-content: center;
   width: 3rem;
   height: 3rem;
+  margin: 1.25rem 1.25rem 0;
   border-radius: 0.625rem;
   background: ${args.theme.var.color.primary_light_100};
   color: ${args.theme.var.color.primary};
 }`;'''
-        displayOrder: 1
+        displayOrder: 2
         componentName: Html
-        props: return { as: "div" };
+        props:
+          '''const folder = args.contextData.props?.folder || args.contextData.props || {};
+return {
+  as: "div",
+  hide: !!(folder.imageUrl && String(folder.imageUrl).trim())
+};'''
       }
     }
     {
@@ -108,8 +141,9 @@ return {
   gap: 0.35rem;
   min-width: 0;
   width: 100%;
+  padding: 0 1.25rem 1.25rem;
 }`;'''
-        displayOrder: 2
+        displayOrder: 3
         componentName: Html
         props: return { as: "div" };
       }
@@ -170,6 +204,12 @@ return {
       T: Attr
       S: "1"
       E: "2"
+    }
+    {
+      id: e2b
+      T: Attr
+      S: "2"
+      E: "2b"
     }
     {
       id: e2

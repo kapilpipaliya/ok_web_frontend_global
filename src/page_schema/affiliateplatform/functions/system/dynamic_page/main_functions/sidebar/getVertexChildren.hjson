@@ -18,7 +18,7 @@ if (!actualUser) {
 }
 
 // Extract parameters
-const { parentVertexLabel, toParentEdgeType, parentId, rootKeys, tableVertexLabel, relationshipType, enableUserScoping, hooks } = args.contextData;
+const { parentVertexLabel, toParentEdgeType, parentId, rootKeys, tableVertexLabel, relationshipType, enableUserScoping, hooks, imageRelationshipType } = args.contextData;
 
 if (!parentVertexLabel || !toParentEdgeType) {
   return {
@@ -119,6 +119,26 @@ if (parentId) {
     data: vertices,
     message: `Found ${vertices.length} children`
   };
+
+  const imageRelType =
+    imageRelationshipType != null && String(imageRelationshipType).trim() !== ""
+      ? String(imageRelationshipType).trim()
+      : null;
+  if (imageRelType && Array.isArray(vertices) && vertices.length > 0) {
+    try {
+      const imageResult = await args.session.run(
+        `
+        MATCH (v:${parentVertexLabel})-[r:${imageRelType}]->(file:File)
+        WHERE elementId(v) IN $ids
+        RETURN v, r, file
+        `,
+        { ids: vertices.map((v) => v.id).filter(Boolean) }
+      );
+      args.processResult(imageResult.records, args.context, ["v", "file"], "r");
+    } catch (imageError) {
+      console.warn("getVertexChildren image relation load failed:", imageError);
+    }
+  }
 
   // Execute afterGetVertexChildren hooks
   await args.executeHooks(hooks?.afterGetVertexChildren, {

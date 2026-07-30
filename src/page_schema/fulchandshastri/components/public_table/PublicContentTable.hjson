@@ -13,6 +13,87 @@
       id: "2"
       L: Attr
       P: {
+        fns:
+          '''const columns = () => args.contextData.props?.columns || [];
+const defaultSortKey = args.contextData.props?.defaultSortKey || "";
+const defaultSortDirection = args.contextData.props?.defaultSortDirection === "desc" ? "desc" : "asc";
+const [sortKey, setSortKey] = args.createSignal(defaultSortKey);
+const [sortDirection, setSortDirection] = args.createSignal(defaultSortDirection);
+
+const getSortValue = (row, column, rowIndex) => {
+  if (typeof column?.sortValue === "function") {
+    return column.sortValue(row, rowIndex);
+  }
+  if (column?.key === "number") return rowIndex + 1;
+  return row?.P?.[column?.key] ?? row?.[column?.key];
+};
+
+const compareSortValues = (leftValue, rightValue, sortType) => {
+  const leftIsEmpty = leftValue == null || leftValue === "";
+  const rightIsEmpty = rightValue == null || rightValue === "";
+  if (leftIsEmpty && rightIsEmpty) return 0;
+  if (leftIsEmpty) return 1;
+  if (rightIsEmpty) return -1;
+
+  if (sortType === "date") {
+    const leftDate = new Date(leftValue).getTime();
+    const rightDate = new Date(rightValue).getTime();
+    if (!Number.isNaN(leftDate) && !Number.isNaN(rightDate)) {
+      return leftDate - rightDate;
+    }
+  }
+
+  if (sortType === "number") {
+    const leftNumber = Number(leftValue);
+    const rightNumber = Number(rightValue);
+    if (!Number.isNaN(leftNumber) && !Number.isNaN(rightNumber)) {
+      return leftNumber - rightNumber;
+    }
+  }
+
+  return String(leftValue).localeCompare(String(rightValue), undefined, {
+    numeric: true,
+    sensitivity: "base"
+  });
+};
+
+const getSortedRows = (rows) => {
+  const list = Array.isArray(rows) ? rows : [];
+  const activeColumn = columns().find((column) => column?.key === sortKey());
+  if (!activeColumn || activeColumn.sortable === false) return list;
+  const directionMultiplier = sortDirection() === "desc" ? -1 : 1;
+
+  return list
+    .map((row, rowIndex) => ({ row, rowIndex }))
+    .sort((left, right) => {
+      const comparison = compareSortValues(
+        getSortValue(left.row, activeColumn, left.rowIndex),
+        getSortValue(right.row, activeColumn, right.rowIndex),
+        activeColumn.sortType
+      );
+      return comparison === 0
+        ? left.rowIndex - right.rowIndex
+        : comparison * directionMultiplier;
+    })
+    .map((entry) => entry.row);
+};
+
+const toggleSort = (column) => {
+  if (!column || column.sortable === false) return;
+  if (sortKey() === column.key) {
+    setSortDirection((currentDirection) => currentDirection === "asc" ? "desc" : "asc");
+    return;
+  }
+  setSortKey(column.key);
+  setSortDirection(column.defaultSortDirection === "desc" ? "desc" : "asc");
+};
+
+return {
+  sortKey,
+  sortDirection,
+  getSortedRows,
+  toggleSort
+};'''
         css:
           '''return `._id {
   background: ${args.theme.var.color.background};
@@ -123,15 +204,39 @@ return `._id {
   text-align: ${align};
   font-weight: 600;
   color: ${args.theme.var.color.text};
+  cursor: ${column.sortable === false ? "default" : "pointer"};
+  user-select: none;
+  white-space: nowrap;
+}
+
+._id:focus-visible {
+  outline: 2px solid ${args.theme.var.color.primary};
+  outline-offset: -2px;
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
           '''const column = args.contextData.column || {};
+const sortable = column.sortable !== false;
+const isActiveSort = args.fns.sortKey() === column.key;
+const direction = args.fns.sortDirection();
 return {
   as: "th",
-  text: column.label || "",
-  style: column.width ? { width: column.width } : undefined
+  text: `${column.label || ""}${isActiveSort ? (direction === "asc" ? " ▲" : " ▼") : ""}`,
+  style: column.width ? { width: column.width } : undefined,
+  tabIndex: sortable ? 0 : undefined,
+  onClick: sortable ? () => args.fns.toggleSort(column) : undefined,
+  onKeyDown: sortable
+    ? (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          args.fns.toggleSort(column);
+        }
+      }
+    : undefined,
+  "attr:aria-sort": isActiveSort
+    ? (direction === "asc" ? "ascending" : "descending")
+    : undefined
 };'''
       }
     }
@@ -157,12 +262,13 @@ return {
           '''const rows = args.contextData.props?.rows || [];
 const contextName = args.contextData.props?.contextName || "row";
 const hasRows = Array.isArray(rows);
+const sortedRows = hasRows ? args.fns.getSortedRows(rows) : [];
 
 return {
   as: "fragment",
   ...(hasRows
     ? {
-        data: rows,
+        data: sortedRows,
         contextName,
         loop: true
       }

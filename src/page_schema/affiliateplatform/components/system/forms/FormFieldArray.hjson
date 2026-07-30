@@ -4,7 +4,7 @@
       id: "1"
       L: Component
       P: {
-        dynamicComponent: TextInput, TextArea, Button, FormLocalizedText
+        dynamicComponent: TextInput, TextArea, Button, FormLocalizedText, FormFieldArray, VertexPicker
         key: FormFieldArray
       }
     }
@@ -52,11 +52,34 @@ const commitItems = (items) => {
 const buildDefaultItem = () => {
   const item = {};
   const itemFields = getItemFields();
+  const siblingAxes = getProps().getSiblingFieldValue?.("optionAxes");
   for (let fieldIndex = 0; fieldIndex < itemFields.length; fieldIndex++) {
     const itemField = itemFields[fieldIndex];
     if (!itemField?.key) continue;
     if (itemField.defaultValue !== undefined) {
       item[itemField.key] = itemField.defaultValue;
+    } else if (itemField.renderer === "fieldArray") {
+      if (
+        itemField.key === "options" &&
+        Array.isArray(siblingAxes) &&
+        siblingAxes.length > 0
+      ) {
+        item[itemField.key] = siblingAxes
+          .filter((axis) => axis?.key)
+          .map((axis) => ({
+            key: String(axis.key).trim(),
+            value: ""
+          }));
+      } else if (Array.isArray(itemField.fieldArrayConfig?.defaultItems)) {
+        item[itemField.key] = itemField.fieldArrayConfig.defaultItems.map((row) => ({
+          ...(row || {})
+        }));
+      } else {
+        item[itemField.key] = [];
+      }
+    } else if (itemField.renderer === "embeddedVertexPicker") {
+      item[itemField.key] =
+        itemField.pickerConfiguration?.selectionMode === "multiple" ? [] : "";
     } else if (itemField.dataType === "boolean" || itemField.renderer === "checkbox") {
       item[itemField.key] = false;
     } else if (itemField.translatable === true) {
@@ -180,12 +203,122 @@ const getItemFieldValue = (item, itemField) => {
   if (!itemField?.key) return "";
   const value = item?.[itemField.key];
   if (value == null) {
+    if (itemField.renderer === "fieldArray") return [];
+    if (itemField.renderer === "embeddedVertexPicker") {
+      return itemField.pickerConfiguration?.selectionMode === "multiple" ? [] : "";
+    }
     return itemField.translatable === true ? {} : "";
   }
   return value;
 };
 
 const isItemFieldTranslatable = (itemField) => itemField?.translatable === true;
+
+const isSpecialItemFieldRenderer = (itemField) => {
+  const renderer = itemField?.renderer;
+  return (
+    renderer === "textArea" ||
+    renderer === "fieldArray" ||
+    renderer === "embeddedVertexPicker" ||
+    renderer === "checkbox" ||
+    itemField?.translatable === true
+  );
+};
+
+const buildNestedFieldArrayField = (itemField) => ({
+  key: itemField.key,
+  label: itemField.label || itemField.key,
+  renderer: "fieldArray",
+  dataType: "array",
+  fieldArrayConfig: itemField.fieldArrayConfig || {}
+});
+
+const getVertexPickerProps = (itemIndex, itemField) => {
+  const pickerConfiguration =
+    itemField?.pickerConfiguration != null && typeof itemField.pickerConfiguration === "object"
+      ? { ...itemField.pickerConfiguration }
+      : null;
+  if (!pickerConfiguration) return null;
+  if (pickerConfiguration.usePolarisUI === undefined) {
+    pickerConfiguration.usePolarisUI = true;
+  }
+  const value = getItemFieldValue(getItemAt(itemIndex), itemField);
+  const selectionMode =
+    pickerConfiguration.selectionMode === "multiple" ? "multiple" : "single";
+  const selectedElementId =
+    selectionMode === "single" && value != null && String(value).trim() !== ""
+      ? String(value).trim()
+      : "";
+  const selectedValues =
+    selectionMode === "multiple" && Array.isArray(value)
+      ? value.map((id) => String(id)).filter((id) => id.trim() !== "")
+      : selectionMode === "multiple" && value != null && String(value).trim() !== ""
+        ? [String(value).trim()]
+        : [];
+  const previewFileNamePropertyKey =
+    pickerConfiguration.previewFileNameProperty != null
+      ? String(pickerConfiguration.previewFileNameProperty)
+      : "fileName";
+  const fileDownloadUrlPrefix =
+    pickerConfiguration.fileDownloadUrlPrefix != null
+      ? String(pickerConfiguration.fileDownloadUrlPrefix).trim()
+      : "";
+  const selectedVertex =
+    selectedElementId && args.graph.vertexes[selectedElementId]
+      ? args.graph.vertexes[selectedElementId]
+      : null;
+  let previewUrl = "";
+  if (fileDownloadUrlPrefix !== "" && selectedVertex?.P?.[previewFileNamePropertyKey] != null) {
+    const previewFileName = String(selectedVertex.P[previewFileNamePropertyKey]).trim();
+    if (previewFileName !== "") {
+      previewUrl = `${fileDownloadUrlPrefix}/${encodeURIComponent(previewFileName)}`;
+    }
+  }
+  let secondaryLabel = "";
+  if (selectionMode === "multiple" && selectedValues.length > 0) {
+    secondaryLabel = `${selectedValues.length} file(s) selected`;
+  } else if (pickerConfiguration.buildSecondaryLabelFromVertex === true && selectedVertex) {
+    const label = selectedVertex.P?.[previewFileNamePropertyKey];
+    if (label != null && String(label).trim() !== "") {
+      secondaryLabel = String(label).trim();
+    }
+  }
+  return {
+    value: selectionMode === "single" ? selectedElementId : "",
+    values: selectionMode === "multiple" ? selectedValues : undefined,
+    secondaryLabel,
+    previewUrl,
+    showImagePreview: pickerConfiguration.showImagePreview === true && previewUrl !== "",
+    disabled: isDisabled(),
+    pickerConfiguration,
+    onSelect: (vertexElementId, selectedVertexPayload) => {
+      updateItemField(itemIndex, itemField.key, vertexElementId);
+      if (selectedVertexPayload && !args.graph.vertexes[vertexElementId]) {
+        args.setGraphData(0, { vertexes: { [vertexElementId]: selectedVertexPayload } }, {});
+      }
+    },
+    onSelectMultiple: (vertexElementIds, selectedVertexPayloads) => {
+      updateItemField(itemIndex, itemField.key, vertexElementIds);
+      if (Array.isArray(selectedVertexPayloads)) {
+        const vertexMap = {};
+        for (const selectedVertexPayload of selectedVertexPayloads) {
+          if (selectedVertexPayload?.id && !args.graph.vertexes[selectedVertexPayload.id]) {
+            vertexMap[selectedVertexPayload.id] = selectedVertexPayload;
+          }
+        }
+        if (Object.keys(vertexMap).length > 0) {
+          args.setGraphData(0, { vertexes: vertexMap }, {});
+        }
+      }
+    },
+    onClear: () =>
+      updateItemField(
+        itemIndex,
+        itemField.key,
+        selectionMode === "multiple" ? [] : ""
+      )
+  };
+};
 
 const DEFAULT_SITE_LANGUAGES = [
   { code: "en", label: "English", isDefault: true },
@@ -200,6 +333,25 @@ const getSiteLanguages = () => {
 };
 
 const isDisabled = () => getProps().disabled === true;
+
+const ensureMinItems = () => {
+  if (isDisabled()) return;
+  const config = getConfig();
+  const minItems = Number(config.minItems);
+  if (!Number.isFinite(minItems) || minItems < 1) return;
+  const items = getItems();
+  if (items.length >= minItems) return;
+  const seeded = [];
+  if (Array.isArray(config.defaultItems) && config.defaultItems.length > 0) {
+    for (let i = 0; i < config.defaultItems.length && seeded.length < minItems; i++) {
+      seeded.push({ ...buildDefaultItem(), ...(config.defaultItems[i] || {}) });
+    }
+  }
+  while (seeded.length < minItems) {
+    seeded.push(buildDefaultItem());
+  }
+  commitItems([...items, ...seeded.slice(0, minItems - items.length)]);
+};
 
 return {
   getField,
@@ -216,6 +368,10 @@ return {
   isItemFieldTranslatable,
   getSiteLanguages,
   isDisabled,
+  ensureMinItems,
+  isSpecialItemFieldRenderer,
+  buildNestedFieldArrayField,
+  getVertexPickerProps,
   initFieldArrayDraggable,
   initFieldArrayDropTarget,
   cleanupFieldArrayDraggable,
@@ -226,7 +382,8 @@ return {
         props:
           '''return {
   as: "div",
-  class: "fm-field-array"
+  class: "fm-field-array",
+  onMount: () => args.fns.ensureMinItems?.()
 };'''
       }
     }
@@ -492,7 +649,7 @@ return {
         props:
           '''const itemField = args.contextData.fieldArrayField || {};
 const itemIndex = args.contextData.fieldArrayItem;
-const hide = itemField.renderer === "textArea" || args.fns.isItemFieldTranslatable?.(itemField);
+const hide = args.fns.isSpecialItemFieldRenderer?.(itemField) === true;
 const value = args.fns.getItemFieldValue(args.fns.getItemAt(itemIndex), itemField);
 return {
   hide,
@@ -502,6 +659,42 @@ return {
   required: itemField.required === true,
   disabled: args.fns.isDisabled(),
   type: itemField.dataType === "number" ? "number" : "text"
+};'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: FormFieldArray
+        props:
+          '''const itemField = args.contextData.fieldArrayField || {};
+const itemIndex = args.contextData.fieldArrayItem;
+const value = args.fns.getItemFieldValue(args.fns.getItemAt(itemIndex), itemField);
+return {
+  hide: itemField.renderer !== "fieldArray" || !itemField.fieldArrayConfig,
+  field: args.fns.buildNestedFieldArrayField?.(itemField) || itemField,
+  value: Array.isArray(value) ? value : [],
+  disabled: args.fns.isDisabled(),
+  siteLanguages: args.fns.getSiteLanguages?.(),
+  onChange: (nextItems) => args.fns.updateItemField(itemIndex, itemField.key, nextItems)
+};'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: VertexPicker
+        props:
+          '''const itemField = args.contextData.fieldArrayField || {};
+const itemIndex = args.contextData.fieldArrayItem;
+const pickerProps = args.fns.getVertexPickerProps?.(itemIndex, itemField);
+return {
+  hide: itemField.renderer !== "embeddedVertexPicker" || !pickerProps,
+  ...(pickerProps || {})
 };'''
       }
     }
@@ -606,6 +799,18 @@ return {
       T: Attr
       S: "10"
       E: "14"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "10"
+      E: "16"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "10"
+      E: "17"
     }
   ]
 }

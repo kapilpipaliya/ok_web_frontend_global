@@ -46,20 +46,37 @@ const hydrateRelationshipSelectProps = (items, rels, bindings) => {
   if (!Array.isArray(bindings) || bindings.length === 0 || !Array.isArray(items)) return;
   for (let vi = 0; vi < items.length; vi++) {
     const v = items[vi];
-    if (!v?.P || !v?.OUT) continue;
+    if (!v?.P) continue;
     for (let bi = 0; bi < bindings.length; bi++) {
       const row = bindings[bi];
       const prop = row?.prop;
       const rel = row?.rel;
       if (!prop || !rel) continue;
-      const outArr = v.OUT[rel];
+      if (row.incoming === true) {
+        const inArr = v.IN?.[rel];
+        if (!Array.isArray(inArr) || inArr.length === 0) {
+          v.P[prop] = null;
+          continue;
+        }
+        const ids = [];
+        for (let ei = 0; ei < inArr.length; ei++) {
+          const edgeObj = rels[inArr[ei]];
+          if (edgeObj && edgeObj.S != null) ids.push(edgeObj.S);
+        }
+        v.P[prop] = ids.length > 1 ? ids : (ids[0] ?? null);
+        continue;
+      }
+      const outArr = v.OUT?.[rel];
       if (!Array.isArray(outArr) || outArr.length === 0) {
         v.P[prop] = null;
         continue;
       }
-      const edgeObj = rels[outArr[0]];
-      if (edgeObj && edgeObj.E != null) v.P[prop] = edgeObj.E;
-      else v.P[prop] = null;
+      const ids = [];
+      for (let ei = 0; ei < outArr.length; ei++) {
+        const edgeObj = rels[outArr[ei]];
+        if (edgeObj && edgeObj.E != null) ids.push(edgeObj.E);
+      }
+      v.P[prop] = ids.length > 1 ? ids : (ids[0] ?? null);
     }
   }
 };
@@ -81,30 +98,34 @@ const buildRelationshipPropertyBindingsFromParts = (parts) => {
   }
   const seen = new Set();
   const bindings = [];
-  const addBinding = (prop, rel) => {
+  const addBinding = (prop, rel, incoming) => {
     if (!prop || !rel) return;
-    const k = `${prop}\0${rel}`;
+    const k = `${prop}\0${rel}\0${incoming ? "in" : "out"}`;
     if (seen.has(k)) return;
     seen.add(k);
-    bindings.push({ prop, rel });
+    bindings.push({ prop, rel, incoming: !!incoming });
   };
   for (let i = 0; i < fields.length; i++) {
     const f = fields[i];
-    if ((f?.dataType === "select" || f?.dataType === "relation") && f.selectConfig?.relationshipType && f.selectConfig?.edgeOnly === true) {
-      addBinding(f.key, f.selectConfig.relationshipType);
+    if ((f?.dataType === "select" || f?.dataType === "relation") && f.selectConfig?.relationshipType) {
+      if (f.selectConfig.edgeOnly === true || f.selectConfig.incoming === true) {
+        addBinding(f.key, f.selectConfig.relationshipType, f.selectConfig.incoming === true);
+      }
     }
   }
   for (let ci = 0; ci < columns.length; ci++) {
     const c = columns[ci];
-    if (c?.dataType === "relation" && c.selectConfig?.relationshipType && c.selectConfig?.edgeOnly === true) {
-      addBinding(c.key, c.selectConfig.relationshipType);
+    if (c?.dataType === "relation" && c.selectConfig?.relationshipType) {
+      if (c.selectConfig.edgeOnly === true || c.selectConfig.incoming === true) {
+        addBinding(c.key, c.selectConfig.relationshipType, c.selectConfig.incoming === true);
+      }
     }
   }
   const extra = parts?.relationshipPropertyBindings;
   if (Array.isArray(extra)) {
     for (let j = 0; j < extra.length; j++) {
       const row = extra[j];
-      addBinding(row?.prop, row?.rel);
+      addBinding(row?.prop, row?.rel, row?.incoming === true);
     }
   }
   return bindings;
@@ -227,10 +248,11 @@ if (onlyNotQueued === true && Array.isArray(elementIds) && elementIds.length > 0
   WHERE elementId(c) IN $elementIds
   AND (c.syncStatus IS NULL OR c.syncStatus <> 'queued')
   OPTIONAL MATCH (c)-[r]->(related)
-  RETURN c, r, related
+  OPTIONAL MATCH (relatedIn)-[rin]->(c)
+  RETURN c, r, related, rin, relatedIn
   `;
   const queryResult = await args.session.run(query, { elementIds });
-  args.processResult(queryResult.records, args.context, ['c', 'related'], 'r');
+  args.processResult(queryResult.records, args.context, ['c', 'related', 'relatedIn'], ['r', 'rin']);
   const nodes = args.context.nodes || {};
   const rels = args.context.relationships || {};
   const items = Object.values(nodes).filter(v => v.L && v.L.includes(tableVertexLabel));
@@ -409,24 +431,27 @@ if (!queryEnableUserScoping) {
     MATCH (c)-[:${effectiveToParentEdgeType}]->(cat)
     ${combinedWhereClause}
     OPTIONAL MATCH (c)-[r]->(related)
+    OPTIONAL MATCH (relatedIn)-[rin]->(c)
     ${orderByClause}
-    RETURN c, r, related
+    RETURN c, r, related, rin, relatedIn
     `;
   } else if (hasCustomLeadingMatch) {
     query = `
     ${leadingMatchBlock}
     ${combinedWhereClause}
     OPTIONAL MATCH (c)-[r]->(related)
+    OPTIONAL MATCH (relatedIn)-[rin]->(c)
     ${orderByClause}
-    RETURN c, r, related
+    RETURN c, r, related, rin, relatedIn
     `;
   } else {
     query = `
     MATCH (c:${vertexLabel})
     ${combinedWhereClause}
     OPTIONAL MATCH (c)-[r]->(related)
+    OPTIONAL MATCH (relatedIn)-[rin]->(c)
     ${orderByClause}
-    RETURN c, r, related
+    RETURN c, r, related, rin, relatedIn
     `;
   }
 } else {
@@ -443,8 +468,9 @@ if (!queryEnableUserScoping) {
     MATCH (u)-[:${relationshipType}]->(c)
     ${combinedWhereClause}
     OPTIONAL MATCH (c)-[r]->(related)
+    OPTIONAL MATCH (relatedIn)-[rin]->(c)
     ${orderByClause}
-    RETURN c, r, related
+    RETURN c, r, related, rin, relatedIn
     `;
   } else if (hasCustomLeadingMatch) {
     query = `
@@ -453,8 +479,9 @@ if (!queryEnableUserScoping) {
     MATCH (u)-[:${relationshipType}]->(c)
     ${combinedWhereClause}
     OPTIONAL MATCH (c)-[r]->(related)
+    OPTIONAL MATCH (relatedIn)-[rin]->(c)
     ${orderByClause}
-    RETURN c, r, related
+    RETURN c, r, related, rin, relatedIn
     `;
   } else {
     query = `
@@ -462,8 +489,9 @@ if (!queryEnableUserScoping) {
     MATCH (u)-[:${relationshipType}]->(c:${vertexLabel})
     ${combinedWhereClause}
     OPTIONAL MATCH (c)-[r]->(related)
+    OPTIONAL MATCH (relatedIn)-[rin]->(c)
     ${orderByClause}
-    RETURN c, r, related
+    RETURN c, r, related, rin, relatedIn
     `;
   }
 }
@@ -473,7 +501,7 @@ const queryResult = await args.session.run(query, combinedQueryParameters);
 // Use processResult to populate graph structure (nodes + relationships)
 if (!args.context.nodes) args.context.nodes = {};
 if (!args.context.relationships) args.context.relationships = {};
-args.processResult(queryResult.records, args.context, ['c', 'related'], 'r');
+args.processResult(queryResult.records, args.context, ['c', 'related', 'relatedIn'], ['r', 'rin']);
 const nodes = args.context.nodes || {};
 const rels = args.context.relationships || {};
 const items = Object.values(nodes).filter(v => v.L && v.L.includes(vertexLabel));

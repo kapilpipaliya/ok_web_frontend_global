@@ -25,6 +25,13 @@ const vertexPayloadFromGraph = (graphVertex) => {
   };
 };
 
+const vertexLabelsOf = (graphVertex) => {
+  if (!graphVertex) return [];
+  if (Array.isArray(graphVertex.L)) return graphVertex.L;
+  if (graphVertex.L != null) return [graphVertex.L];
+  return [];
+};
+
 const isAllowedVertex = (graphVertex, pickerConfiguration) => {
   if (!graphVertex) return false;
   const allowedVertexLabels = pickerConfiguration?.targetVertexLabels;
@@ -32,12 +39,19 @@ const isAllowedVertex = (graphVertex, pickerConfiguration) => {
     return true;
   }
   const allowedLabelSet = new Set(allowedVertexLabels.map((label) => String(label)));
-  const vertexLabels = Array.isArray(graphVertex.L) ? graphVertex.L : [];
-  return vertexLabels.some((label) => allowedLabelSet.has(String(label)));
+  return vertexLabelsOf(graphVertex).some((label) => allowedLabelSet.has(String(label)));
+};
+
+const resolveSelectedVertex = (rowElementId, selectedItems, tableEnvironmentArguments) => {
+  const fromGraph = tableEnvironmentArguments?.graph?.vertexes?.[rowElementId];
+  if (fromGraph) return fromGraph;
+  const items = Array.isArray(selectedItems) ? selectedItems : [];
+  const match = items.find((item) => String(item?.id ?? item?.vertex?.id ?? "") === String(rowElementId));
+  return match?.vertex ?? match ?? null;
 };
 
 const buildSelectionChangeHandler = (pickerConfiguration) => {
-  return (selectedRowIds, _selectedItems, tableEnvironmentArguments) => {
+  return (selectedRowIds, selectedItems, tableEnvironmentArguments) => {
     const selectionMode = getSelectionMode(pickerConfiguration);
 
     const selectedIdList =
@@ -51,7 +65,7 @@ const buildSelectionChangeHandler = (pickerConfiguration) => {
       const nextVertices = [];
       let rejected = false;
       for (const rowElementId of selectedIdList) {
-        const graphVertex = tableEnvironmentArguments?.graph?.vertexes?.[rowElementId];
+        const graphVertex = resolveSelectedVertex(rowElementId, selectedItems, tableEnvironmentArguments);
         if (!isAllowedVertex(graphVertex, pickerConfiguration)) {
           rejected = true;
           continue;
@@ -80,7 +94,7 @@ const buildSelectionChangeHandler = (pickerConfiguration) => {
       setDraftVertices([]);
       return;
     }
-    const selectedGraphVertex = tableEnvironmentArguments?.graph?.vertexes?.[rowElementId];
+    const selectedGraphVertex = resolveSelectedVertex(rowElementId, selectedItems, tableEnvironmentArguments);
     if (!isAllowedVertex(selectedGraphVertex, pickerConfiguration)) {
       setDraftVertex(null);
       setDraftVertices([]);
@@ -185,9 +199,8 @@ const confirmPickerSelection = () => {
     if (!Array.isArray(allowedVertexLabels) || allowedVertexLabels.length === 0) {
       return true;
     }
-    const vertexLabels = Array.isArray(selectedDraftVertex.L) ? selectedDraftVertex.L : [];
     const allowedLabelSet = new Set(allowedVertexLabels.map((label) => String(label)));
-    return vertexLabels.some((label) => allowedLabelSet.has(String(label)));
+    return vertexLabelsOf(selectedDraftVertex).some((label) => allowedLabelSet.has(String(label)));
   };
 
   if (selectionMode === "multiple") {
@@ -309,6 +322,7 @@ return {
   hintSelected: pickerConfiguration?.modalHintSelected,
   pickerBodyProps: args.fns.pickerBodyPropsSnapshot?.() ?? {},
   draftVertex: () => args.fns.draftVertex?.() ?? null,
+  draftVertices: () => args.fns.draftVertices?.() ?? [],
   onClose: () => args.fns.closePickerModal?.(),
   onConfirm: () => args.fns.confirmPickerSelection?.(),
   usePolarisUI: pickerConfiguration?.usePolarisUI === true,

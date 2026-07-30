@@ -1,0 +1,186 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        public: true
+        settingsPageId: products
+        isNoPermissionCheck: true
+        fns: return { enabled: () => true }
+        url: /product/:productKey
+        key: ProductDetail
+        props:
+          '''
+const locale = args.params?.lang ? String(args.params.lang).toLowerCase() : undefined;
+const routeParams = args.context?.getParams?.(args.meta) || {};
+const productKey = routeParams.productKey != null && String(routeParams.productKey).trim() !== ""
+  ? String(routeParams.productKey).trim()
+  : null;
+return {
+  contextName: "productDetailSettings",
+  serverFunction: `
+try {
+  if (!${JSON.stringify(productKey)}) {
+    return { product: null, error: "Missing product key" };
+  }
+  const result = await args.executeNamedServerFunction({
+    functionName: "loadPublicProduct",
+    contextData: {
+      productKey: ${JSON.stringify(productKey)},
+      tableKey: "products",
+      tableVertexLabel: "Product",
+      locale: ${JSON.stringify(locale ?? null)}
+    }
+  });
+  if (!result?.result?.success) {
+    return {
+      product: null,
+      error: result?.result?.message || result?.error || "Product not found"
+    };
+  }
+  return {
+    product: result.result.data?.product || null,
+    error: null
+  };
+} catch (error) {
+  console.error("Error loading product detail:", error);
+  return { product: null, error: error?.message || "Failed to load product" };
+}
+`
+};
+'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  padding: 1.5rem 1rem 3rem;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "main" };
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  max-width: 1100px;
+  margin: 0 auto;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "div" };
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0 0 1rem 0;
+  font-size: 0.9rem;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const locale = args.params?.lang ? String(args.params.lang).toLowerCase() : "";
+const langPrefix = locale && /^[a-z]{2,3}$/i.test(locale) ? `/${locale}` : "";
+return {
+  as: "a",
+  href: `${langPrefix}/products`,
+  text: "← Back to products"
+};'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  padding: 2rem;
+  border: 1px dashed ${args.theme.var.color.border};
+  border-radius: 0.75rem;
+  color: ${args.theme.var.color.error};
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const data = args.contextData.productDetailSettings || {};
+return {
+  as: "div",
+  text: data.error || "Product not found",
+  hide: !!data.product
+};'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: ProductDetailView
+        props:
+          '''const data = args.contextData.productDetailSettings || {};
+return {
+  product: data.product,
+  hide: !data.product
+};'''
+      }
+    }
+    {
+      id: "7"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: Layout
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: PageLayout
+      S: "1"
+      E: "7"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "3"
+      E: "6"
+    }
+  ]
+}

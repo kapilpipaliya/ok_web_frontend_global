@@ -71,6 +71,9 @@ import * as path from "path";
 import * as tls from "tls";
 import * as dns from "dns";
 import * as net from "net";
+import * as fs from "fs";
+import * as os from "os";
+import * as child_process from "child_process";
 import { getNeogmaInstance } from "~/cypher/core/driver";
 // Enhanced server function utilities
 import { errors, isAppError, errorToResponse } from "~/lib/utils/errorClasses";
@@ -589,6 +592,9 @@ export async function executeNamedServerFunctionCore(
       tls,
       dns,
       net,
+      fs,
+      os,
+      child_process,
       // Enhanced utilities
       // Error handling
       errors,

@@ -1,0 +1,854 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        description: Product detail with option swatches, availability-aware selection, image carousel, and markdown description.
+        dynamicComponent: Carousel, Button
+        key: ProductDetailView
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}`;'''
+        displayOrder: 1
+        fns:
+          '''const props = () => args.contextData.props || {};
+const product = () => props().product || {};
+
+const normalize = (value) => (value == null ? "" : String(value).trim());
+
+const parseAxes = () => {
+  const axes = product().optionAxes;
+  return Array.isArray(axes) ? axes.filter((axis) => axis?.key) : [];
+};
+
+const parseVariants = () => {
+  const variants = product().variants;
+  return Array.isArray(variants) ? variants : [];
+};
+
+const uniqueValuesForAxis = (axisKey) => {
+  const values = new Set();
+  for (const variant of parseVariants()) {
+    const value = normalize(variant?.options?.[axisKey]);
+    if (value) values.add(value);
+  }
+  return Array.from(values).sort((a, b) => a.localeCompare(b));
+};
+
+const isColorAxis = (axis) => {
+  const key = normalize(axis?.key).toLowerCase();
+  const label = normalize(axis?.label).toLowerCase();
+  return key.includes("color") || key.includes("colour") || label.includes("color") || label.includes("colour");
+};
+
+const looksLikeColor = (value) => {
+  const raw = normalize(value);
+  if (!raw) return false;
+  if (/^#([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(raw)) return true;
+  if (/^(rgb|hsl)a?\(/i.test(raw)) return true;
+  return /^[a-z]{3,20}$/i.test(raw);
+};
+
+const variantMatchesPartial = (variant, selection, skipAxisKey) => {
+  for (const axis of parseAxes()) {
+    if (axis.key === skipAxisKey) continue;
+    const selected = normalize(selection?.[axis.key]);
+    if (!selected) continue;
+    if (normalize(variant?.options?.[axis.key]) !== selected) return false;
+  }
+  return true;
+};
+
+const isValueAvailable = (axisKey, value, selection) => {
+  const target = normalize(value);
+  if (!target) return false;
+  return parseVariants().some((variant) => {
+    if (normalize(variant?.options?.[axisKey]) !== target) return false;
+    return variantMatchesPartial(variant, selection, axisKey);
+  });
+};
+
+const findExactVariant = (selection) => {
+  const axes = parseAxes();
+  if (axes.length === 0) return parseVariants()[0] || null;
+  if (axes.some((axis) => !normalize(selection?.[axis.key]))) return null;
+  return (
+    parseVariants().find((variant) =>
+      axes.every(
+        (axis) => normalize(variant?.options?.[axis.key]) === normalize(selection?.[axis.key])
+      )
+    ) || null
+  );
+};
+
+const scoreVariant = (variant, selection) => {
+  let score = 0;
+  let mismatches = 0;
+  for (const axis of parseAxes()) {
+    const selected = normalize(selection?.[axis.key]);
+    if (!selected) continue;
+    const variantValue = normalize(variant?.options?.[axis.key]);
+    if (!variantValue) {
+      mismatches += 1;
+      continue;
+    }
+    if (variantValue === selected) score += 1;
+    else mismatches += 1;
+  }
+  return { score, mismatches };
+};
+
+const findNearestVariant = (selection, preferredAxisKey) => {
+  const variants = parseVariants();
+  if (variants.length === 0) return null;
+  const preferredValue = preferredAxisKey ? normalize(selection?.[preferredAxisKey]) : "";
+  let pool = variants;
+  if (preferredAxisKey && preferredValue) {
+    const matchingPreferred = variants.filter(
+      (variant) => normalize(variant?.options?.[preferredAxisKey]) === preferredValue
+    );
+    if (matchingPreferred.length > 0) pool = matchingPreferred;
+  }
+  let best = pool[0];
+  let bestScore = -1;
+  let bestMismatches = Number.POSITIVE_INFINITY;
+  for (const variant of pool) {
+    const { score, mismatches } = scoreVariant(variant, selection);
+    if (score > bestScore || (score === bestScore && mismatches < bestMismatches)) {
+      best = variant;
+      bestScore = score;
+      bestMismatches = mismatches;
+    }
+  }
+  return best;
+};
+
+const selectionFromVariant = (variant) => {
+  const next = {};
+  for (const axis of parseAxes()) {
+    next[axis.key] = normalize(variant?.options?.[axis.key]);
+  }
+  return next;
+};
+
+const autoSelectSingletons = (selection) => {
+  let next = { ...selection };
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (const axis of parseAxes()) {
+      const available = uniqueValuesForAxis(axis.key).filter((value) =>
+        isValueAvailable(axis.key, value, next)
+      );
+      const current = normalize(next[axis.key]);
+      if (current && !available.includes(current)) {
+        next = { ...next, [axis.key]: available[0] || "" };
+        changed = true;
+        continue;
+      }
+      if (available.length === 1 && current !== available[0]) {
+        next = { ...next, [axis.key]: available[0] };
+        changed = true;
+      }
+    }
+  }
+  return next;
+};
+
+const reconcileSelection = (selection, preferredAxisKey) => {
+  let next = { ...selection };
+  let exact = findExactVariant(next);
+  if (!exact) {
+    const nearest = findNearestVariant(next, preferredAxisKey);
+    if (nearest) next = selectionFromVariant(nearest);
+  }
+  next = autoSelectSingletons(next);
+  exact = findExactVariant(next);
+  if (!exact) {
+    const nearest = findNearestVariant(next, preferredAxisKey);
+    if (nearest) {
+      next = autoSelectSingletons(selectionFromVariant(nearest));
+      exact = findExactVariant(next);
+    }
+  }
+  return { selection: next, variant: exact };
+};
+
+const buildInitialSelection = () => {
+  const first = parseVariants()[0];
+  const base = first ? selectionFromVariant(first) : {};
+  for (const axis of parseAxes()) {
+    if (!normalize(base[axis.key])) {
+      const values = uniqueValuesForAxis(axis.key);
+      base[axis.key] = values[0] || "";
+    }
+  }
+  return reconcileSelection(base, null);
+};
+
+const initialResolved = buildInitialSelection();
+const [selection, setSelection] = args.createSignal(initialResolved.selection);
+const [activeVariant, setActiveVariant] = args.createSignal(initialResolved.variant);
+
+const applySelection = (nextSelection, preferredAxisKey) => {
+  const reconciled = reconcileSelection(nextSelection, preferredAxisKey);
+  setSelection(reconciled.selection);
+  setActiveVariant(reconciled.variant);
+};
+
+const selectOptionValue = (axisKey, value) => {
+  const nextValue = normalize(value);
+  if (!nextValue || !axisKey) return;
+  // Always allow choosing a known option value; reconcile other axes to the nearest valid variant.
+  applySelection({ ...selection(), [axisKey]: nextValue }, axisKey);
+};
+
+const optionAxesForUi = () =>
+  parseAxes()
+    .map((axis) => {
+      const values = uniqueValuesForAxis(axis.key);
+      if (values.length === 0) return null;
+      return {
+        key: axis.key,
+        label: axis.label || axis.key,
+        isColor: isColorAxis(axis),
+        values
+      };
+    })
+    .filter(Boolean);
+
+const optionValuesForAxis = (axis) => {
+  const currentSelection = selection();
+  const selected = normalize(currentSelection?.[axis.key]);
+  return (axis.values || []).map((value) => {
+    const compatible = isValueAvailable(axis.key, value, currentSelection);
+    return {
+      axisKey: axis.key,
+      value,
+      label: value,
+      compatible,
+      selected: selected === normalize(value),
+      isColor: !!axis.isColor && looksLikeColor(value),
+      swatchColor: looksLikeColor(value) ? value : ""
+    };
+  });
+};
+
+const isOptionCompatible = (axisKey, value) =>
+  isValueAvailable(axisKey, value, selection());
+
+const isOptionSelected = (axisKey, value) =>
+  normalize(selection()?.[axisKey]) === normalize(value);
+
+const hasExactVariant = () => !!activeVariant();
+
+const previewVariant = () =>
+  activeVariant() || findNearestVariant(selection(), null);
+
+const carouselImages = () => {
+  const images = previewVariant()?.images;
+  return Array.isArray(images) ? images : [];
+};
+
+const availabilityLabel = () => {
+  if (!hasExactVariant()) return "Select options to see availability";
+  const variant = activeVariant();
+  if (variant?.stock != null && String(variant.stock).trim() !== "") {
+    return String(variant.stock).trim();
+  }
+  return variant?.amazonUrl ? "In stock" : "Available";
+};
+
+return {
+  product,
+  parseAxes,
+  parseVariants,
+  selection,
+  activeVariant,
+  previewVariant,
+  hasExactVariant,
+  optionAxesForUi,
+  optionValuesForAxis,
+  selectOptionValue,
+  isValueAvailable,
+  isOptionCompatible,
+  isOptionSelected,
+  carouselImages,
+  availabilityLabel,
+  openAmazon: () => {
+    const url = activeVariant()?.amazonUrl;
+    if (url) window.open(url, "_blank", "noopener,noreferrer");
+  }
+};'''
+        componentName: Html
+        props: return { as: "div" };
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0;
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 800;
+  color: ${args.theme.var.color.text};
+  line-height: 1.2;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h1",
+  text: args.fns.product?.()?.title || "Product"
+};'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0;
+  color: ${args.theme.var.color.text_light_300};
+  font-size: 1rem;
+  line-height: 1.6;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const text = args.fns.product?.()?.shortDescription || "";
+return {
+  as: "p",
+  text,
+  hide: !text
+};'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 2rem;
+  align-items: start;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props: return { as: "div" };
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  min-width: 0;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.75rem;
+  overflow: hidden;
+  background: ${args.theme.var.color.background_light_50};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "div" };
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Carousel
+        props:
+          '''const images = args.fns.carouselImages?.() || [];
+const variant = args.fns.previewVariant?.();
+const selection = args.fns.selection?.() || {};
+const selectionKey = Object.keys(selection)
+  .sort()
+  .map((axisKey) => `${axisKey}:${selection[axisKey] ?? ""}`)
+  .join("|");
+return {
+  key: variant?.id != null ? String(variant.id) : selectionKey || "carousel",
+  data: images,
+  contextName: "productImage",
+  loop: images.length > 1,
+  showArrows: images.length > 1,
+  showDots: images.length > 1,
+  hide: images.length === 0
+};'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: contain;
+  display: block;
+  background: ${args.theme.var.color.background};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const image = args.contextData.productImage || {};
+return {
+  as: "img",
+  src: image.url,
+  alt: image.alt || "Product image",
+  loading: "lazy"
+};'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  color: ${args.theme.var.color.text_light_300};
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  text: "No images for this variant",
+  hide: (args.fns.carouselImages?.() || []).length > 0
+};'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  min-width: 0;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props: return { as: "div" };
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const axes = args.fns.optionAxesForUi?.() || [];
+return {
+  as: "div",
+  class: "pd-option-axes",
+  data: axes,
+  loop: true,
+  contextName: "optionAxis",
+  hide: axes.length === 0
+};'''
+      }
+    }
+    {
+      id: "11a"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "div", class: "pd-option-group" };
+      }
+    }
+    {
+      id: "11b"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: ${args.theme.var.color.text_light_200};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const axis = args.contextData.optionAxis || {};
+const selected = args.fns.selection?.()?.[axis.key] || "";
+return {
+  as: "p",
+  text: selected ? `${axis.label}: ${selected}` : axis.label || axis.key
+};'''
+      }
+    }
+    {
+      id: "11c"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const axis = args.contextData.optionAxis || {};
+const values = args.fns.optionValuesForAxis?.(axis) || [];
+return {
+  as: "div",
+  class: "pd-swatch-row",
+  role: "listbox",
+  "aria-label": axis.label || axis.key,
+  data: values,
+  loop: true,
+  contextName: "optionValue"
+};'''
+      }
+    }
+    {
+      id: "11d"
+      L: Attr
+      P: {
+        css:
+          '''const option = args.contextData.optionValue || {};
+const compatible =
+  args.fns.isOptionCompatible?.(option.axisKey, option.value) !== false;
+const selected = !!args.fns.isOptionSelected?.(option.axisKey, option.value);
+const isColor = !!option.isColor;
+return `._id {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: ${isColor ? "2.25rem" : "2.75rem"};
+  min-height: 2.25rem;
+  padding: ${isColor ? "0.2rem" : "0.45rem 0.8rem"};
+  border-radius: ${isColor ? "999px" : "0.5rem"};
+  border: 2px solid ${selected ? args.theme.var.color.primary : args.theme.var.color.border};
+  background: ${selected ? args.theme.var.color.primary_light_100 : args.theme.var.color.background};
+  color: ${compatible ? args.theme.var.color.text : args.theme.var.color.text_light_400};
+  font-size: 0.875rem;
+  font-weight: ${selected ? 700 : 500};
+  line-height: 1.2;
+  cursor: pointer;
+  opacity: ${compatible ? 1 : 0.55};
+  text-decoration: ${compatible ? "none" : "line-through"};
+  transition: border-color 0.15s ease, background 0.15s ease, opacity 0.15s ease, transform 0.15s ease;
+
+  &:hover {
+    border-color: ${args.theme.var.color.primary};
+    transform: translateY(-1px);
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${args.theme.var.color.primary};
+    outline-offset: 2px;
+  }
+
+  ${!compatible ? `
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 45% -8%;
+    height: 1.5px;
+    background: ${args.theme.var.color.text_light_400};
+    transform: rotate(-28deg);
+    pointer-events: none;
+  }
+  ` : ""}
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const option = args.contextData.optionValue || {};
+const compatible =
+  args.fns.isOptionCompatible?.(option.axisKey, option.value) !== false;
+const selected = !!args.fns.isOptionSelected?.(option.axisKey, option.value);
+return {
+  as: "button",
+  type: "button",
+  class: "pd-swatch",
+  role: "option",
+  "aria-selected": selected,
+  title: compatible ? option.label : `${option.label} (switches other options)`,
+  onClick: () => args.fns.selectOptionValue?.(option.axisKey, option.value)
+};'''
+      }
+    }
+    {
+      id: "11e"
+      L: Attr
+      P: {
+        css:
+          '''const option = args.contextData.optionValue || {};
+const color = option.swatchColor || "transparent";
+return `._id {
+  width: 1.55rem;
+  height: 1.55rem;
+  border-radius: 999px;
+  background: ${color};
+  border: 1px solid ${args.theme.var.color.border};
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06);
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const option = args.contextData.optionValue || {};
+return {
+  as: "span",
+  class: "pd-swatch-color",
+  "aria-hidden": true,
+  hide: !option.isColor
+};'''
+      }
+    }
+    {
+      id: "11f"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: inline;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const option = args.contextData.optionValue || {};
+return {
+  as: "span",
+  text: option.label || "",
+  hide: !!option.isColor
+};'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const variant = args.fns.activeVariant?.();
+return {
+  as: "h2",
+  text: variant?.title || "",
+  hide: !args.fns.hasExactVariant?.() || !variant?.title
+};'''
+      }
+    }
+    {
+      id: "12b"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0;
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text_light_200};
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''const sku = args.fns.activeVariant?.()?.sku || "";
+return {
+  as: "p",
+  text: sku ? `SKU: ${sku}` : "",
+  hide: !args.fns.hasExactVariant?.() || !sku
+};'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: ${args.theme.var.color.primary};
+}`;'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''const price = args.fns.activeVariant?.()?.price || "";
+return {
+  as: "p",
+  text: price,
+  hide: !args.fns.hasExactVariant?.() || !price
+};'''
+      }
+    }
+    {
+      id: "13b"
+      L: Attr
+      P: {
+        css:
+          '''const exact = args.fns.hasExactVariant?.();
+return `._id {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: ${exact ? args.theme.var.color.success : args.theme.var.color.text_light_300};
+}`;'''
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: args.fns.availabilityLabel?.() || "",
+  hide: !(args.fns.availabilityLabel?.() || "")
+};'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        displayOrder: 6
+        componentName: Button
+        props:
+          '''const url = args.fns.activeVariant?.()?.amazonUrl || "";
+return {
+  text: "View on Amazon",
+  variant: "primary",
+  hide: !args.fns.hasExactVariant?.() || !url,
+  onClick: () => args.fns.openAmazon?.()
+};'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0;
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.text_light_300};
+}`;'''
+        displayOrder: 7
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "As an Amazon Associate we earn from qualifying purchases.",
+  hide: !args.fns.hasExactVariant?.()
+};'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.text};
+  font-size: 0.975rem;
+  line-height: 1.7;
+
+  h1, h2, h3, h4 {
+    margin: 1.25rem 0 0.5rem;
+  }
+
+  p {
+    margin: 0 0 0.85rem;
+  }
+
+  ul, ol {
+    margin: 0 0 0.85rem 1.25rem;
+  }
+
+  a {
+    color: ${args.theme.var.color.primary};
+  }
+}`;'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''const description = args.fns.activeVariant?.()?.description || "";
+return {
+  as: "div",
+  text: description,
+  textType: "markdown",
+  hide: !args.fns.hasExactVariant?.() || !description
+};'''
+      }
+    }
+  ]
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" }
+    { id: "e2", T: "Attr", S: "2", E: "3" }
+    { id: "e3", T: "Attr", S: "2", E: "4" }
+    { id: "e4", T: "Attr", S: "2", E: "5" }
+    { id: "e5", T: "Attr", S: "2", E: "16" }
+    { id: "e6", T: "Attr", S: "5", E: "6" }
+    { id: "e7", T: "Attr", S: "5", E: "10" }
+    { id: "e8", T: "Attr", S: "6", E: "7" }
+    { id: "e9", T: "Attr", S: "6", E: "9" }
+    { id: "e10", T: "Attr", S: "7", E: "8" }
+    { id: "e11", T: "Attr", S: "10", E: "11" }
+    { id: "e11a", T: "Attr", S: "11", E: "11a" }
+    { id: "e11b", T: "Attr", S: "11a", E: "11b" }
+    { id: "e11c", T: "Attr", S: "11a", E: "11c" }
+    { id: "e11d", T: "Attr", S: "11c", E: "11d" }
+    { id: "e11e", T: "Attr", S: "11d", E: "11e" }
+    { id: "e11f", T: "Attr", S: "11d", E: "11f" }
+    { id: "e12", T: "Attr", S: "10", E: "12" }
+    { id: "e12b", T: "Attr", S: "10", E: "12b" }
+    { id: "e13", T: "Attr", S: "10", E: "13" }
+    { id: "e13b", T: "Attr", S: "10", E: "13b" }
+    { id: "e14", T: "Attr", S: "10", E: "14" }
+    { id: "e15", T: "Attr", S: "10", E: "15" }
+  ]
+}

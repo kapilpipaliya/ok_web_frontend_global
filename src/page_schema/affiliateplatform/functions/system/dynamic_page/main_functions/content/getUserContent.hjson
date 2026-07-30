@@ -227,10 +227,11 @@ if (onlyNotQueued === true && Array.isArray(elementIds) && elementIds.length > 0
   WHERE elementId(c) IN $elementIds
   AND (c.syncStatus IS NULL OR c.syncStatus <> 'queued')
   OPTIONAL MATCH (c)-[r]->(related)
-  RETURN c, r, related
+  OPTIONAL MATCH (related)-[r2]->(related2)
+  RETURN c, r, related, r2, related2
   `;
   const queryResult = await args.session.run(query, { elementIds });
-  args.processResult(queryResult.records, args.context, ['c', 'related'], 'r');
+  args.processResult(queryResult.records, args.context, ['c', 'related', 'related2'], ['r', 'r2']);
   const nodes = args.context.nodes || {};
   const rels = args.context.relationships || {};
   const items = Object.values(nodes).filter(v => v.L && v.L.includes(tableVertexLabel));
@@ -409,24 +410,27 @@ if (!queryEnableUserScoping) {
     MATCH (c)-[:${effectiveToParentEdgeType}]->(cat)
     ${combinedWhereClause}
     OPTIONAL MATCH (c)-[r]->(related)
+    OPTIONAL MATCH (related)-[r2]->(related2)
     ${orderByClause}
-    RETURN c, r, related
+    RETURN c, r, related, r2, related2
     `;
   } else if (hasCustomLeadingMatch) {
     query = `
     ${leadingMatchBlock}
     ${combinedWhereClause}
     OPTIONAL MATCH (c)-[r]->(related)
+    OPTIONAL MATCH (related)-[r2]->(related2)
     ${orderByClause}
-    RETURN c, r, related
+    RETURN c, r, related, r2, related2
     `;
   } else {
     query = `
     MATCH (c:${vertexLabel})
     ${combinedWhereClause}
     OPTIONAL MATCH (c)-[r]->(related)
+    OPTIONAL MATCH (related)-[r2]->(related2)
     ${orderByClause}
-    RETURN c, r, related
+    RETURN c, r, related, r2, related2
     `;
   }
 } else {
@@ -443,8 +447,9 @@ if (!queryEnableUserScoping) {
     MATCH (u)-[:${relationshipType}]->(c)
     ${combinedWhereClause}
     OPTIONAL MATCH (c)-[r]->(related)
+    OPTIONAL MATCH (related)-[r2]->(related2)
     ${orderByClause}
-    RETURN c, r, related
+    RETURN c, r, related, r2, related2
     `;
   } else if (hasCustomLeadingMatch) {
     query = `
@@ -453,8 +458,9 @@ if (!queryEnableUserScoping) {
     MATCH (u)-[:${relationshipType}]->(c)
     ${combinedWhereClause}
     OPTIONAL MATCH (c)-[r]->(related)
+    OPTIONAL MATCH (related)-[r2]->(related2)
     ${orderByClause}
-    RETURN c, r, related
+    RETURN c, r, related, r2, related2
     `;
   } else {
     query = `
@@ -462,8 +468,9 @@ if (!queryEnableUserScoping) {
     MATCH (u)-[:${relationshipType}]->(c:${vertexLabel})
     ${combinedWhereClause}
     OPTIONAL MATCH (c)-[r]->(related)
+    OPTIONAL MATCH (related)-[r2]->(related2)
     ${orderByClause}
-    RETURN c, r, related
+    RETURN c, r, related, r2, related2
     `;
   }
 }
@@ -473,7 +480,7 @@ const queryResult = await args.session.run(query, combinedQueryParameters);
 // Use processResult to populate graph structure (nodes + relationships)
 if (!args.context.nodes) args.context.nodes = {};
 if (!args.context.relationships) args.context.relationships = {};
-args.processResult(queryResult.records, args.context, ['c', 'related'], 'r');
+args.processResult(queryResult.records, args.context, ['c', 'related', 'related2'], ['r', 'r2']);
 const nodes = args.context.nodes || {};
 const rels = args.context.relationships || {};
 const items = Object.values(nodes).filter(v => v.L && v.L.includes(vertexLabel));

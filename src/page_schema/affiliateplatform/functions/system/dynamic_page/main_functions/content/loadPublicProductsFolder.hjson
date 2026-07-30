@@ -9,7 +9,7 @@
           '''
 const {
   tableKey = "products",
-  tableVertexLabel = "AffiliateProduct",
+  tableVertexLabel = "Product",
   categoryKey,
   locale
 } = args.contextData || {};
@@ -18,7 +18,7 @@ const resolvedTableKey = tableKey && String(tableKey).trim() !== "" ? String(tab
 const resolvedTableVertexLabel =
   tableVertexLabel && String(tableVertexLabel).trim() !== ""
     ? String(tableVertexLabel).trim()
-    : "AffiliateProduct";
+    : "Product";
 
 const configResult = await args.executeNamedServerFunction({
   functionName: "loadTableConfigByKey",
@@ -115,12 +115,38 @@ const buildFolderEntry = async (child) => {
     `,
     { categoryId: child.id }
   );
+  const imageRelationshipType =
+    sidebar.imageRelationshipType != null && String(sidebar.imageRelationshipType).trim() !== ""
+      ? String(sidebar.imageRelationshipType).trim()
+      : "ProductCategoryImage";
+  let imageUrl = "";
+  try {
+    const imageResult = await args.session.run(
+      `
+      MATCH (cat:${parentVertexLabel})-[:${imageRelationshipType}]->(file:File)
+      WHERE elementId(cat) = $categoryId
+      RETURN file
+      LIMIT 1
+      `,
+      { categoryId: child.id }
+    );
+    const files = args.processResult(imageResult.records, args.context, "file") || [];
+    const fileVertex = files[0] || null;
+    const fileName =
+      fileVertex?.P?.fileName != null ? String(fileVertex.P.fileName).trim() : "";
+    if (fileName) {
+      imageUrl = "/api/file/download/" + encodeURIComponent(fileName);
+    }
+  } catch (imageError) {
+    console.warn("loadPublicProductsFolder category image load failed:", imageError);
+  }
   return {
     id: child.id,
     name: child.P?.name || child.P?.key || "Folder",
     key: child.P?.key || "",
     contentCount: Number(childCountResult.records[0]?.get("contentCount") || 0),
     folderCount: Number(folderCountResult.records[0]?.get("folderCount") || 0),
+    imageUrl,
     kind: "folder"
   };
 };
@@ -195,19 +221,113 @@ const resolveFileFromRelation = (item, relationshipType, graph) => {
   };
 };
 
+const parseJsonArray = (raw) => {
+  if (Array.isArray(raw)) return raw;
+  if (typeof raw === "string" && raw.trim() !== "") {
+    try {
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+};
+
+const collectVariantImageFileIds = (variantVertices, graph) => {
+  const ids = [];
+  const seen = new Set();
+  for (const variantVertex of variantVertices) {
+    const edgeIds = variantVertex?.OUT?.ProductVariantImage || [];
+    for (const edgeId of edgeIds) {
+      const edge = graph.edges?.[edgeId];
+      const fileId = edge?.E != null ? String(edge.E).trim() : "";
+      if (!fileId || seen.has(fileId)) continue;
+      seen.add(fileId);
+      ids.push(fileId);
+    }
+  }
+  return ids;
+};
+
+const resolveImageUrlMap = async (imageIds) => {
+  const urlById = {};
+  if (!Array.isArray(imageIds) || imageIds.length === 0) return urlById;
+  const fileResult = await args.session.run(
+    `
+    MATCH (file:File)
+    WHERE elementId(file) IN $imageIds
+    RETURN file
+    `,
+    { imageIds }
+  );
+  const files = args.processResult(fileResult.records, args.context, "file") || [];
+  for (const file of files) {
+    if (!file?.id) continue;
+    const fileName = file?.P?.fileName != null ? String(file.P.fileName).trim() : "";
+    if (!fileName) continue;
+    urlById[file.id] = "/api/file/download/" + encodeURIComponent(fileName);
+  }
+  return urlById;
+};
+
+const firstVariantPreviewUrl = (variantVertex, urlById, graph) => {
+  const edgeIds = variantVertex?.OUT?.ProductVariantImage || [];
+  const sortedEdgeIds = [...edgeIds].sort((leftId, rightId) => {
+    const leftOrder = Number(graph.edges?.[leftId]?.P?.displayOrder) || 0;
+    const rightOrder = Number(graph.edges?.[rightId]?.P?.displayOrder) || 0;
+    return leftOrder - rightOrder;
+  });
+  for (const edgeId of sortedEdgeIds) {
+    const edge = graph.edges?.[edgeId];
+    const fileId = edge?.E != null ? String(edge.E).trim() : "";
+    if (fileId && urlById[fileId]) return urlById[fileId];
+  }
+  return "";
+};
+
+const getProductVariantVertices = (item, graph) => {
+  const edgeIds = item?.OUT?.ProductProductVariant || [];
+  const variants = [];
+  const seen = new Set();
+  for (const edgeId of edgeIds) {
+    const edge = graph.edges?.[edgeId];
+    const variantId = edge?.E;
+    if (!variantId || seen.has(variantId)) continue;
+    const variantVertex = graph.vertexes?.[variantId];
+    if (!variantVertex?.L?.includes("ProductVariant")) continue;
+    seen.add(variantId);
+    variants.push(variantVertex);
+  }
+  variants.sort(
+    (left, right) => (Number(left.P?.displayOrder) || 0) - (Number(right.P?.displayOrder) || 0)
+  );
+  return variants;
+};
+
+const allVariantVertices = [];
+for (const item of rows) {
+  if (!item?.id) continue;
+  allVariantVertices.push(...getProductVariantVertices(item, contentGraph));
+}
+const imageUrlById = await resolveImageUrlMap(
+  collectVariantImageFileIds(allVariantVertices, contentGraph)
+);
+
 const items = rows
   .map((item) => {
     if (!item?.id) return null;
-    const thumbnail = resolveFileFromRelation(item, "AffiliateProductThumbnail", contentGraph);
-    const imageUrl = item.P?.imageUrl != null ? String(item.P.imageUrl).trim() : "";
-    const previewUrl = thumbnail?.url || imageUrl || "";
+    const thumbnail = resolveFileFromRelation(item, "ProductThumbnail", contentGraph);
+    const variants = getProductVariantVertices(item, contentGraph);
+    const firstVariant = variants[0] || null;
+    const previewUrl =
+      thumbnail?.url || firstVariantPreviewUrl(firstVariant, imageUrlById, contentGraph) || "";
     return {
       id: item.id,
+      key: item.P?.key != null ? String(item.P.key).trim() : "",
       title: item.P?.title || "Untitled",
       shortDescription: item.P?.shortDescription || "",
-      description: item.P?.description || "",
-      price: item.P?.price != null ? String(item.P.price).trim() : "",
-      amazonUrl: item.P?.amazonUrl != null ? String(item.P.amazonUrl).trim() : "",
+      price: firstVariant?.P?.price != null ? String(firstVariant.P.price).trim() : "",
       icon: "ph:shopping-bag",
       previewUrl,
       kind: "product"
