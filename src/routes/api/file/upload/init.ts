@@ -2,6 +2,7 @@ import type { APIEvent } from "@solidjs/start/server";
 
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
+import { resolveUploadFolderKeyPath } from "~/lib/files/folderOrganize";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
 import { initChunkedUpload } from "../functions/chunkedUpload";
@@ -16,6 +17,14 @@ export async function POST({ request }: APIEvent) {
     }
 
     const body = await request.json();
+    const folderKeyPath = await resolveUploadFolderKeyPath(dbSession, {
+      folderId: body?.folderId,
+      folderKeyPath: Array.isArray(body?.folderKeyPath)
+        ? body.folderKeyPath
+        : null,
+      categoryLabel: body?.categoryLabel,
+      toParentEdgeType: body?.toParentEdgeType,
+    });
     const result = await initChunkedUpload({
       fileName: body?.fileName,
       fileSize: body?.fileSize,
@@ -23,6 +32,7 @@ export async function POST({ request }: APIEvent) {
       chunkSize: body?.chunkSize,
       subDomain,
       neo4jSession: dbSession,
+      folderKeyPath,
     });
 
     return result;

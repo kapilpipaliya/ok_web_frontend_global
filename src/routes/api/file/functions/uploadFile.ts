@@ -1,13 +1,66 @@
 import type { MultiPartData } from "h3";
 import type { Session, Transaction } from "neo4j-driver";
 
+import { resolveUploadFolderKeyPath } from "~/lib/files/folderOrganize";
+
 import { finalizeFileUpload } from "./finalizeFileUpload";
+
+function partText(part: MultiPartData | undefined): string {
+  if (!part?.data) return "";
+  return Buffer.from(part.data).toString("utf8").trim();
+}
+
+export function extractUploadFolderOptions(data: MultiPartData[]) {
+  let folderId = "";
+  let folderKeyPath: string[] | null = null;
+  let categoryLabel = "Folder";
+  let toParentEdgeType = "ParentFolder";
+  const fileParts: MultiPartData[] = [];
+
+  for (const part of data) {
+    if (!part) continue;
+    const name = part.name != null ? String(part.name) : "";
+    if (part.filename) {
+      fileParts.push(part);
+      continue;
+    }
+    if (name === "folderId") {
+      folderId = partText(part);
+    } else if (name === "folderKeyPath") {
+      try {
+        const parsed = JSON.parse(partText(part));
+        if (Array.isArray(parsed)) {
+          folderKeyPath = parsed
+            .map((k) => String(k || "").trim())
+            .filter(Boolean);
+        }
+      } catch {
+        /* ignore invalid JSON */
+      }
+    } else if (name === "categoryLabel") {
+      const v = partText(part);
+      if (v) categoryLabel = v;
+    } else if (name === "toParentEdgeType") {
+      const v = partText(part);
+      if (v) toParentEdgeType = v;
+    }
+  }
+
+  return {
+    fileParts,
+    folderId: folderId || null,
+    folderKeyPath,
+    categoryLabel,
+    toParentEdgeType,
+  };
+}
 
 export async function uploadFiles(
   data: (MultiPartData & { label?: string })[],
   subDomain: string,
   neo4jSession: Session | Transaction,
   linkUserUuid?: string | null,
+  folderKeyPath?: string[] | null,
 ) {
   const fileNodes = await Promise.all(
     data.map(async (file) => {
@@ -27,10 +80,9 @@ export async function uploadFiles(
         neo4jSession,
         linkUserUuid,
         label: others.label,
+        folderKeyPath,
       });
 
-      // Preserve previous shape: callers expect { graph, result } once for all files.
-      // Collect records via result array entries.
       return uploaded;
     }),
   );
@@ -68,9 +120,24 @@ export async function uploadFiles(
   return merged;
 }
 
-// File Repository:
-// https://github.com/massigerardi/File-Manager-Demo/blob/development/src/main/kotlin/com/example/FileManager/repositories/FileRepository.kt
-// implement other API like move, update etc..
-
-// folder repository:
-// https://github.com/massigerardi/File-Manager-Demo/blob/development/src/main/kotlin/com/example/FileManager/repositories/FolderRepository.kt
+export async function uploadFilesWithFolderOptions(
+  data: MultiPartData[],
+  subDomain: string,
+  neo4jSession: Session | Transaction,
+  linkUserUuid?: string | null,
+) {
+  const extracted = extractUploadFolderOptions(data);
+  const folderKeyPath = await resolveUploadFolderKeyPath(neo4jSession, {
+    folderId: extracted.folderId,
+    folderKeyPath: extracted.folderKeyPath,
+    categoryLabel: extracted.categoryLabel,
+    toParentEdgeType: extracted.toParentEdgeType,
+  });
+  return uploadFiles(
+    extracted.fileParts,
+    subDomain,
+    neo4jSession,
+    linkUserUuid,
+    folderKeyPath,
+  );
+}

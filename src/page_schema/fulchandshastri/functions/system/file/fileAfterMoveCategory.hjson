@@ -1,0 +1,78 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: After a Folder sidebar category is moved to a new parent, rename/move its disk directory (keyed by Folder.key path) and rewrite File.filePath prefixes.
+        body:
+          '''
+const {
+  categoryId,
+  newParentId,
+  oldParentId,
+  parentVertexLabel,
+  toParentEdgeType,
+  result
+} = c;
+
+if (parentVertexLabel !== "Folder") return;
+if (!result?.success) return;
+if (!categoryId) return;
+
+const subDomain = _.subDomain;
+if (!subDomain) {
+  console.warn("fileAfterMoveCategory: missing subDomain");
+  return;
+}
+
+const categoryLabel = parentVertexLabel || "Folder";
+const edgeType = toParentEdgeType || "ParentFolder";
+
+async function keyPathUnderParent(folderId, parentId) {
+  const selfResult = await _.session.run(
+    `
+    MATCH (cat:${categoryLabel})
+    WHERE elementId(cat) = $folderId
+    RETURN cat.key AS key
+    `,
+    { folderId }
+  );
+  const selfKey = selfResult.records[0]?.get("key");
+  if (selfKey == null || String(selfKey).trim() === "") return [];
+
+  let parentKeys = [];
+  if (parentId) {
+    parentKeys = await _.resolveFolderKeyPath(_.session, String(parentId), {
+      categoryLabel,
+      toParentEdgeType: edgeType
+    });
+  }
+  return [...parentKeys, String(selfKey).trim()];
+}
+
+try {
+  const oldKeyPath = await keyPathUnderParent(categoryId, oldParentId || null);
+  const newKeyPath = await _.resolveFolderKeyPath(_.session, String(categoryId), {
+    categoryLabel,
+    toParentEdgeType: edgeType
+  });
+
+  if (oldKeyPath.length === 0 || newKeyPath.length === 0) return;
+
+  const oldDir = _.buildFolderDiskDir(subDomain, oldKeyPath);
+  const newDir = _.buildFolderDiskDir(subDomain, newKeyPath);
+  if (oldDir === newDir) return;
+
+  _.relocateDirectoryOnDisk(oldDir, newDir);
+  await _.updateFilePathsWithPrefix(_.session, oldDir, newDir);
+} catch (error) {
+  console.error("fileAfterMoveCategory failed", error);
+}
+'''
+        key: fileAfterMoveCategory
+      }
+    }
+  ]
+  edges: []
+}

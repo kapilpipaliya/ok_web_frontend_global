@@ -164,6 +164,15 @@ import { circuitBreaker } from "~/lib/utils/circuitBreaker";
 import { dataExport, dataImport } from "~/lib/utils/exportImport";
 import { files } from "~/lib/utils/files";
 import {
+  buildFolderDiskDir,
+  buildUncategorizedDiskDir,
+  moveFileVertexToCategoryDir,
+  relocateDirectoryOnDisk,
+  relocateFileOnDisk,
+  resolveFolderKeyPath,
+  updateFilePathsWithPrefix,
+} from "~/lib/files/folderOrganize";
+import {
   clearOldLogs,
   logger,
   Logger,
@@ -662,6 +671,14 @@ export async function executeNamedServerFunctionCore(
       dataImport,
       dataExport,
       files,
+      // File organizer (sidebar Folder key-path ↔ disk)
+      buildFolderDiskDir,
+      buildUncategorizedDiskDir,
+      moveFileVertexToCategoryDir,
+      relocateDirectoryOnDisk,
+      relocateFileOnDisk,
+      resolveFolderKeyPath,
+      updateFilePathsWithPrefix,
       PerformanceTimer,
       Logger,
       logger,

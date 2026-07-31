@@ -1,0 +1,47 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: After a File is linked to a Folder category, move the disk file into that folder key-path directory (upload may have landed in dated dir).
+        body:
+          '''
+const {
+  contentLabel,
+  contentId,
+  categoryId,
+  categoryLabel,
+  relationshipType,
+  result
+} = c;
+
+if (contentLabel !== "File") return;
+if (!result?.success) return;
+if (!contentId || !categoryId) return;
+
+const subDomain = _.subDomain;
+if (!subDomain) {
+  console.warn("fileAfterCreateRelationship: missing subDomain");
+  return;
+}
+
+try {
+  await _.moveFileVertexToCategoryDir(_.session, {
+    fileId: String(contentId),
+    subDomain,
+    categoryId: String(categoryId),
+    categoryLabel: categoryLabel || "Folder",
+    toParentEdgeType: relationshipType || "ParentFolder",
+    contentLabel
+  });
+} catch (error) {
+  console.error("fileAfterCreateRelationship failed for", contentId, error);
+}
+'''
+        key: fileAfterCreateRelationship
+      }
+    }
+  ]
+  edges: []
+}

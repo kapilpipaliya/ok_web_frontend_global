@@ -9,6 +9,7 @@ import type { Edge } from "~/lib/graph/type/edge";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { calculateChecksum } from "~/lib/files/calculateChecksum";
 import { ensureDirectoryExists } from "~/lib/files/ensureDirectoryExists";
+import { buildFolderDiskDir } from "~/lib/files/folderOrganize";
 import { getBaseDir } from "~/lib/files/getBaseDir";
 import { saveFileToDisk } from "~/lib/files/saveFileToDisk";
 import { APIError } from "~/lib/api/server/apiErrorHandler";
@@ -22,6 +23,8 @@ export type FinalizeFileUploadInput = {
   neo4jSession: Session | Transaction;
   linkUserUuid?: string | null;
   label?: string;
+  /** Sidebar Folder key path (root→leaf). When set, save under that directory instead of dated dir. */
+  folderKeyPath?: string[] | null;
 };
 
 export async function assertFileNameAvailable(
@@ -59,6 +62,21 @@ export function buildDatedUserDir(subDomain: string) {
   return userDir;
 }
 
+export function resolveUploadUserDir(
+  subDomain: string,
+  folderKeyPath?: string[] | null,
+) {
+  const segments = Array.isArray(folderKeyPath)
+    ? folderKeyPath.map((k) => String(k || "").trim()).filter(Boolean)
+    : [];
+  if (segments.length > 0) {
+    const userDir = buildFolderDiskDir(subDomain, segments);
+    ensureDirectoryExists(userDir);
+    return userDir;
+  }
+  return buildDatedUserDir(subDomain);
+}
+
 export async function finalizeFileUpload(input: FinalizeFileUploadInput) {
   const {
     data,
@@ -68,13 +86,14 @@ export async function finalizeFileUpload(input: FinalizeFileUploadInput) {
     neo4jSession,
     linkUserUuid,
     label,
+    folderKeyPath,
   } = input;
 
   if (!filename) {
     throw new Error("File name is required");
   }
 
-  const userDir = buildDatedUserDir(subDomain);
+  const userDir = resolveUploadUserDir(subDomain, folderKeyPath);
   const filePath = path.join(userDir, filename);
   await assertFileNameAvailable(neo4jSession, filename, filePath);
 

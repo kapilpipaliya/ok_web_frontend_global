@@ -1532,10 +1532,47 @@ if (f.getFieldRenderer(field) === "graphFileUpload") {
   if (!baseUploadConfiguration) {
     return { as: "motionFragment", hide: true };
   }
+  const selectedSidebarItem =
+    typeof c.props?.selectedSidebarItem === "function"
+      ? c.props.selectedSidebarItem()
+      : c.props?.selectedSidebarItem;
+  const sidebarConfig =
+    c.props?.sidebarConfig != null && typeof c.props.sidebarConfig === "object"
+      ? c.props.sidebarConfig
+      : null;
+  const rootKey = sidebarConfig?.rootKeys?.key;
+  const tableVertexLabel = c.props?.vertexLabel || c.props?.tableVertexLabel;
+  const uncategorizedId = tableVertexLabel
+    ? "_" + tableVertexLabel + "_uncategorized"
+    : null;
+  const isUncat =
+    selectedSidebarItem &&
+    uncategorizedId &&
+    (selectedSidebarItem.id === uncategorizedId ||
+      selectedSidebarItem.P?.key === uncategorizedId);
+  const isRoot =
+    selectedSidebarItem &&
+    rootKey &&
+    selectedSidebarItem.P?.key === rootKey;
+  const folderId =
+    selectedSidebarItem?.id && !isUncat && !isRoot
+      ? String(selectedSidebarItem.id)
+      : "";
   return {
     componentName: "FileUploader",
     disabled: fieldDisabled || f.isSubmitting(),
-    uploadConfiguration: baseUploadConfiguration,
+    uploadConfiguration: {
+      ...baseUploadConfiguration,
+      folderId: folderId || baseUploadConfiguration.folderId || "",
+      categoryLabel:
+        sidebarConfig?.parentVertexLabel ||
+        baseUploadConfiguration.categoryLabel ||
+        "Folder",
+      toParentEdgeType:
+        sidebarConfig?.toParentEdgeType ||
+        baseUploadConfiguration.toParentEdgeType ||
+        "ParentFolder",
+    },
     uploadCallbacks: {
       setFieldValue,
       assignFormVertex: f.assignFormVertex,
@@ -2138,6 +2175,24 @@ return {
         key: initialVertex
       }
     }
+    {
+      id: "27"
+      L: ComponentVariant
+      P: {
+        displayOrder: 7
+        type: function
+        key: selectedSidebarItem
+      }
+    }
+    {
+      id: "28"
+      L: ComponentVariant
+      P: {
+        displayOrder: 8
+        type: object
+        key: sidebarConfig
+      }
+    }
   ]
   edges: [
     {
@@ -2181,6 +2236,18 @@ return {
       T: ComponentVariant
       S: "1"
       E: "26"
+    }
+    {
+      id: e27
+      T: ComponentVariant
+      S: "1"
+      E: "27"
+    }
+    {
+      id: e28
+      T: ComponentVariant
+      S: "1"
+      E: "28"
     }
     {
       id: e8

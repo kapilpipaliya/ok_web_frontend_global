@@ -1,0 +1,51 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: After files are moved to a sidebar Folder category, relocate each file on disk into the category key-path directory and update File.filePath.
+        body:
+          '''
+const {
+  contentLabel,
+  contentIds,
+  categoryId,
+  categoryLabel,
+  relationshipType,
+  result
+} = c;
+
+if (contentLabel !== "File") return;
+if (!result?.success) return;
+if (!Array.isArray(contentIds) || contentIds.length === 0) return;
+
+const subDomain = _.subDomain;
+if (!subDomain) {
+  console.warn("fileAfterMoveItemsToCategory: missing subDomain");
+  return;
+}
+
+for (let i = 0; i < contentIds.length; i++) {
+  const fileId = String(contentIds[i] || "").trim();
+  if (!fileId) continue;
+  try {
+    await _.moveFileVertexToCategoryDir(_.session, {
+      fileId,
+      subDomain,
+      categoryId,
+      categoryLabel: categoryLabel || "Folder",
+      toParentEdgeType: relationshipType || "ParentFolder",
+      contentLabel
+    });
+  } catch (error) {
+    console.error("fileAfterMoveItemsToCategory failed for", fileId, error);
+  }
+}
+'''
+        key: fileAfterMoveItemsToCategory
+      }
+    }
+  ]
+  edges: []
+}

@@ -9,8 +9,8 @@ import { getBaseDir } from "~/lib/files/getBaseDir";
 
 import {
   assertFileNameAvailable,
-  buildDatedUserDir,
   finalizeFileUpload,
+  resolveUploadUserDir,
 } from "./finalizeFileUpload";
 
 export const DEFAULT_CHUNK_SIZE_BYTES = 4 * 1024 * 1024;
@@ -26,6 +26,7 @@ type ChunkSessionMeta = {
   subDomain: string;
   createdAt: string;
   receivedChunks: number[];
+  folderKeyPath?: string[];
 };
 
 function getChunksRoot(subDomain: string) {
@@ -79,6 +80,7 @@ export async function initChunkedUpload(options: {
   chunkSize?: number | null;
   subDomain: string;
   neo4jSession: Session | Transaction;
+  folderKeyPath?: string[] | null;
 }) {
   const fileName = sanitizeFileName(options.fileName);
   const fileSize = Number(options.fileSize);
@@ -99,7 +101,10 @@ export async function initChunkedUpload(options: {
     ),
   );
   const totalChunks = Math.ceil(fileSize / chunkSize);
-  const userDir = buildDatedUserDir(options.subDomain);
+  const folderKeyPath = Array.isArray(options.folderKeyPath)
+    ? options.folderKeyPath.map((k) => String(k || "").trim()).filter(Boolean)
+    : [];
+  const userDir = resolveUploadUserDir(options.subDomain, folderKeyPath);
   const destinationPath = path.join(userDir, fileName);
   await assertFileNameAvailable(
     options.neo4jSession,
@@ -121,6 +126,7 @@ export async function initChunkedUpload(options: {
     subDomain: options.subDomain,
     createdAt: new Date().toISOString(),
     receivedChunks: [],
+    folderKeyPath,
   };
   writeMeta(sessionDir, meta);
 
@@ -253,6 +259,7 @@ export async function completeChunkedUpload(options: {
       neo4jSession: options.neo4jSession,
       linkUserUuid: options.linkUserUuid,
       label: options.label,
+      folderKeyPath: meta.folderKeyPath,
     });
     removeSessionDir(sessionDir);
     return result;

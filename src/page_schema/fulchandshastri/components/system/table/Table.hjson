@@ -5098,7 +5098,9 @@ return {
   initialVertex: g.vertexes[f.tableStateVertexId]?.P?.formData ?? null,
   onSave: f.handleSave,
   label: f.getLabel(),
-  tableVertexLabel: f.getTableVertexLabel?.() ?? c.props?.tableVertexLabel
+  tableVertexLabel: f.getTableVertexLabel?.() ?? c.props?.tableVertexLabel,
+  selectedSidebarItem: c.props?.selectedSidebarItem,
+  sidebarConfig: c.props?.sidebarConfig
 };'''
       }
     }

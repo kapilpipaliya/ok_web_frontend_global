@@ -6,7 +6,7 @@ import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomai
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
-import { uploadFiles } from "../functions/uploadFile";
+import { uploadFilesWithFolderOptions } from "../functions/uploadFile";
 
 export async function POST({ request }: APIEvent) {
   const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
@@ -18,7 +18,12 @@ export async function POST({ request }: APIEvent) {
     }
     const user = await getUserFromSession(request);
     const linkUuid = user?.P?.uuid == null ? null : String(user.P.uuid).trim();
-    return await uploadFiles(data, subDomain, dbSession, linkUuid || undefined);
+    return await uploadFilesWithFolderOptions(
+      data,
+      subDomain,
+      dbSession,
+      linkUuid || undefined,
+    );
   } catch (error) {
     return handleAPIError(error);
   } finally {

@@ -288,7 +288,9 @@ return {
   vertexLabel: tableVertexLabel,
   hide: () => !(c.props?.isOpen === true),
   onSave: wrappedOnSave,
-  onClose: wrappedOnClose
+  onClose: wrappedOnClose,
+  selectedSidebarItem: c.props?.selectedSidebarItem,
+  sidebarConfig: c.props?.sidebarConfig
 };'''
       }
     }
@@ -358,6 +360,22 @@ return {
         key: isOpen
       }
     }
+    {
+      id: "17"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: selectedSidebarItem
+      }
+    }
+    {
+      id: "18"
+      L: ComponentVariant
+      P: {
+        type: object
+        key: sidebarConfig
+      }
+    }
   ]
   edges: [
     {
@@ -413,6 +431,18 @@ return {
       T: ComponentVariant
       S: "1"
       E: "16"
+    }
+    {
+      id: e16
+      T: ComponentVariant
+      S: "1"
+      E: "17"
+    }
+    {
+      id: e17
+      T: ComponentVariant
+      S: "1"
+      E: "18"
     }
     {
       id: e10

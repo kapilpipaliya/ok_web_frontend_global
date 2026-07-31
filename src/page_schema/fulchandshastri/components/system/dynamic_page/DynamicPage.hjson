@@ -3040,6 +3040,7 @@ return {
           '''const vid = f.pageStateVertexId;
 return {
   selectedSidebarItem: f.selectedSidebarItem,
+  sidebarConfig: f.getSidebarConfig?.() || null,
   getSelectedRows: f.getSelectedRows,
   setSelectedRows: f.setSelectedRows,
   clearSelectedRows: f.clearSelectedRows,
