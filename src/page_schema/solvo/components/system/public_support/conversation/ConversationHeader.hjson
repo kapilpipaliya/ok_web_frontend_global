@@ -25,8 +25,8 @@ return `._id {
 '''
         props:
           '''
-const hideHeader = args.contextData.props?.hideHeader === true;
-const ticketVertex = args.fns.ticketVertex?.();
+const hideHeader = c.props?.hideHeader === true;
+const ticketVertex = f.ticketVertex?.();
 return {
   as: "h2",
   hide: hideHeader,
@@ -46,17 +46,17 @@ return {
           '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0;
 }`;
 '''
         props:
           '''
-const hideHeader = args.contextData.props?.hideHeader === true;
+const hideHeader = c.props?.hideHeader === true;
 return {
   as: "p",
-  hide: hideHeader || args.fns.isLoadingConversation?.(),
-  text: args.fns.getMetaLineText?.() || ""
+  hide: hideHeader || f.isLoadingConversation?.(),
+  text: f.getMetaLineText?.() || ""
 };'''
       }
     }

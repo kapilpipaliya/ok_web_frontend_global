@@ -9,7 +9,7 @@
         body: '''
 try {
   // Extract input parameters from the request
-  const { goalId } = args.contextData;
+  const { goalId } = c;
 
   // Validate required fields
   if (!goalId) {
@@ -17,7 +17,7 @@ try {
   }
 
   // Get current authenticated user from session
-  const user = await args.getUserFromSession();
+  const user = await _.getUserFromSession();
   if (!user) {
     throw new Error("User session not found. Please log in and try again.");
   }
@@ -36,7 +36,7 @@ try {
     RETURN rg, r, rc, rs
   `;
 
-  const goalResult = await args.session.run(goalQuery, {
+  const goalResult = await _.session.run(goalQuery, {
     userUuid: user.P.uuid,
     goalId
   });
@@ -51,10 +51,10 @@ try {
   const categoryNode = record.get('rc');
   const streakNode = record.get('rs');
 
-  const goal = args.convertNodeToJson(goalNode);
-  const rule = ruleNode ? args.convertNodeToJson(ruleNode) : null;
-  const category = categoryNode ? args.convertNodeToJson(categoryNode) : null;
-  const streak = streakNode ? args.convertNodeToJson(streakNode) : null;
+  const goal = _.convertNodeToJson(goalNode);
+  const rule = ruleNode ? _.convertNodeToJson(ruleNode) : null;
+  const category = categoryNode ? _.convertNodeToJson(categoryNode) : null;
+  const streak = streakNode ? _.convertNodeToJson(streakNode) : null;
 
   // Calculate progress percentage
   const targetValue = goal.P.targetValue || 1;

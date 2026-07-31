@@ -16,20 +16,20 @@
 return `._id {
   width: 100%;
   z-index: 100;
-  background: ${args.theme.var.color.warning};
-  color: ${args.theme.var.color.warning_text};
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  background: ${t.var.color.warning};
+  color: ${t.var.color.warning_text};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: ${args.theme.var.spacing.md};
+  gap: ${t.var.spacing.md};
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  border-bottom: 2px solid ${args.theme.var.color.warning_dark_200};
+  border-bottom: 2px solid ${t.var.color.warning_dark_200};
 
   @media (max-width: 768px) {
     flex-direction: column;
-    gap: ${args.theme.var.spacing.sm};
-    padding: ${args.theme.var.spacing.sm};
+    gap: ${t.var.spacing.sm};
+    padding: ${t.var.spacing.sm};
   }
 }`;
 '''
@@ -37,8 +37,8 @@ return `._id {
         componentName: Html
         props:
           '''
-const impersonatedUser = args.contextData.props?.impersonatedUser;
-const onExitImpersonation = args.contextData.props?.onExitImpersonation;
+const impersonatedUser = c.props?.impersonatedUser;
+const onExitImpersonation = c.props?.onExitImpersonation;
 
 if (!impersonatedUser) {
   return { as: "div", hide: true };
@@ -59,7 +59,7 @@ return {
 return `._id {
   display: flex;
   align-items: center;
-  gap: ${args.theme.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
   flex: 1;
 
   @media (max-width: 768px) {
@@ -120,7 +120,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const impersonatedUser = args.contextData.props?.impersonatedUser;
+const impersonatedUser = c.props?.impersonatedUser;
 const username = impersonatedUser?.P?.username || "User";
 const email = impersonatedUser?.P?.email || "";
 
@@ -144,7 +144,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const impersonatedUser = args.contextData.props?.impersonatedUser;
+const impersonatedUser = c.props?.impersonatedUser;
 const username = impersonatedUser?.P?.username || "User";
 
 return {
@@ -175,7 +175,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const impersonatedUser = args.contextData.props?.impersonatedUser;
+const impersonatedUser = c.props?.impersonatedUser;
 const email = impersonatedUser?.P?.email || "";
 
 return {
@@ -193,7 +193,7 @@ return {
           '''
 return `._id {
   display: flex;
-  gap: ${args.theme.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
 
   @media (max-width: 768px) {
     width: 100%;
@@ -218,11 +218,11 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.md};
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
-  border: 2px solid ${args.theme.var.color.warning_dark_300};
-  border-radius: ${args.theme.var.borderRadius.sm};
+  padding: ${t.var.spacing.xs} ${t.var.spacing.md};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
+  border: 2px solid ${t.var.color.warning_dark_300};
+  border-radius: ${t.var.borderRadius.sm};
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
@@ -230,7 +230,7 @@ return `._id {
   white-space: nowrap;
 
   &:hover {
-    background: ${args.theme.var.color.background_light_200};
+    background: ${t.var.color.background_light_200};
     transform: translateY(-1px);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
@@ -241,7 +241,7 @@ return `._id {
 
   @media (max-width: 768px) {
     flex: 1;
-    padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+    padding: ${t.var.spacing.sm} ${t.var.spacing.md};
   }
 }`;
 '''
@@ -249,7 +249,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const onExitImpersonation = args.contextData.props?.onExitImpersonation;
+const onExitImpersonation = c.props?.onExitImpersonation;
 
 return {
   as: "button",
@@ -270,11 +270,11 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.xs} ${t.var.spacing.md};
   background: transparent;
-  color: ${args.theme.var.color.warning_text};
-  border: 2px solid ${args.theme.var.color.warning_text};
-  border-radius: ${args.theme.var.borderRadius.sm};
+  color: ${t.var.color.warning_text};
+  border: 2px solid ${t.var.color.warning_text};
+  border-radius: ${t.var.borderRadius.sm};
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
@@ -282,13 +282,13 @@ return `._id {
   white-space: nowrap;
 
   &:hover {
-    background: ${args.theme.var.color.warning_text};
-    color: ${args.theme.var.color.warning};
+    background: ${t.var.color.warning_text};
+    color: ${t.var.color.warning};
   }
 
   @media (max-width: 768px) {
     flex: 1;
-    padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+    padding: ${t.var.spacing.sm} ${t.var.spacing.md};
   }
 }`;
 '''
@@ -300,7 +300,7 @@ return {
   as: "button",
   text: "Manage Users",
   onClick: () => {
-    args.navigate('/yto/admin/users');
+    _.navigate('/yto/admin/users');
   }
 };
 '''

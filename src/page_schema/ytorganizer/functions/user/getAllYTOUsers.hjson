@@ -7,13 +7,13 @@
         description: Get all users with their YTO statistics (channels, playlists, videos counts)
         body:
           '''
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   throw new Error("User session not found");
 }
 
 // Verify admin role
-const adminCheck = await args.session.run(
+const adminCheck = await _.session.run(
   `MATCH (u:User {uuid: $userId})-[:UserRole]->(r:Role {key: "Admin"})
    RETURN u`,
   { userId: actualUser.P.uuid }
@@ -56,21 +56,21 @@ const dataQuery = `
          lastVideoActivity
 `;
 
-const dataResult = await args.session.run(dataQuery, {
-  searchQuery: args.contextData.searchQuery || null
+const dataResult = await _.session.run(dataQuery, {
+  searchQuery: c.searchQuery || null
 });
 
 // Helper to convert Neo4j integers to JS numbers
 const toNumber = (value) => {
   if (value === null || value === undefined) return 0;
   if (typeof value === 'number') return value;
-  if (args.neo4jDriver.isInt(value)) return value.toNumber();
+  if (_.neo4jDriver.isInt(value)) return value.toNumber();
   return Number(value);
 };
 
 // Convert all results to vertex format
 let allUsers = dataResult.records.map(record => {
-  const user = args.convertNodeToJson(record.get('u'));
+  const user = _.convertNodeToJson(record.get('u'));
 
   // Remove sensitive fields from user data
   if (user && user.P) {
@@ -95,7 +95,7 @@ let allUsers = dataResult.records.map(record => {
 });
 
 // Apply status filter if provided (server-side filtering)
-const filterStatus = args.contextData.filterStatus;
+const filterStatus = c.filterStatus;
 if (filterStatus && filterStatus !== 'all') {
   allUsers = allUsers.filter(userdata => {
     const now = Date.now();
@@ -128,8 +128,8 @@ allUsers.sort((a, b) => {
 });
 
 // Apply pagination
-const offset = args.contextData.offset || 0;
-const limit = args.contextData.limit || 50;
+const offset = c.offset || 0;
+const limit = c.limit || 50;
 const users = allUsers.slice(offset, offset + limit);
 
 return {

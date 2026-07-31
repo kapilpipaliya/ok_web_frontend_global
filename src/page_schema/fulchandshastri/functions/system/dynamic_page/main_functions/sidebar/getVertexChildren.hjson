@@ -8,7 +8,7 @@
         body:
           '''
 // Get current authenticated user from session
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return {
     success: false,
@@ -18,7 +18,7 @@ if (!actualUser) {
 }
 
 // Extract parameters
-const { parentVertexLabel, toParentEdgeType, parentId, rootKeys, tableVertexLabel, relationshipType, enableUserScoping, hooks } = args.contextData;
+const { parentVertexLabel, toParentEdgeType, parentId, rootKeys, tableVertexLabel, relationshipType, enableUserScoping, hooks } = c;
 
 if (!parentVertexLabel || !toParentEdgeType) {
   return {
@@ -32,12 +32,12 @@ if (!parentVertexLabel || !toParentEdgeType) {
 let user = null;
 let userUuid = null;
 if (enableUserScoping) {
-  user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+  user = await _.getEffectiveUser(_.session, actualUser, c);
   userUuid = user.P.uuid;
 }
 
 // Execute beforeGetVertexChildren hooks
-await args.executeHooks(hooks?.beforeGetVertexChildren, {
+await _.executeHooks(hooks?.beforeGetVertexChildren, {
   parentVertexLabel,
   toParentEdgeType,
   parentId,
@@ -70,13 +70,13 @@ if (parentId) {
   }
 
   const queryParams = !enableUserScoping ? { parentId } : { parentId, userUuid };
-  const result = await args.session.run(query, queryParams);
+  const result = await _.session.run(query, queryParams);
 
   // Use processResult to populate graph structure (process both child and parent vertices)
   // This will set up IN/OUT relationships correctly:
   // - child.OUT[toParentEdgeType] = [edge.id] (child points to parent)
   // - parent.IN[toParentEdgeType] = [edge.id] (parent receives from children)
-  const vertices = args.processResult(result.records, args.context, ['child', 'parent'], 'r');
+  const vertices = _.processResult(result.records, _.context, ['child', 'parent'], 'r');
 
   // Add count to each vertex if tableVertexLabel and relationshipType are provided
   if (tableVertexLabel && relationshipType) {
@@ -102,12 +102,12 @@ if (parentId) {
         `;
         countParams = { userUuid, categoryId: vertex.id };
       }
-      const countResult = await args.session.run(countQuery, countParams);
+      const countResult = await _.session.run(countQuery, countParams);
       const contentCount = countResult.records[0]?.get('contentCount') || 0;
 
       // Update vertex in context with count
-      if (args.context.nodes[vertex.id]) {
-        args.context.nodes[vertex.id].P.contentCount = contentCount;
+      if (_.context.nodes[vertex.id]) {
+        _.context.nodes[vertex.id].P.contentCount = contentCount;
       }
       // Also update in the returned vertex
       vertex.P.contentCount = contentCount;
@@ -121,7 +121,7 @@ if (parentId) {
   };
 
   // Execute afterGetVertexChildren hooks
-  await args.executeHooks(hooks?.afterGetVertexChildren, {
+  await _.executeHooks(hooks?.afterGetVertexChildren, {
     parentVertexLabel,
     toParentEdgeType,
     parentId,
@@ -177,10 +177,10 @@ if (rootKeys) {
     params.userUuid = userUuid;
   }
 
-  const result = await args.session.run(query, params);
+  const result = await _.session.run(query, params);
 
   // Use processResult to populate graph structure
-  const vertices = args.processResult(result.records, args.context, 'v');
+  const vertices = _.processResult(result.records, _.context, 'v');
 
   // Create 'uncategorized' item as first item (only if tableVertexLabel and relationshipType are provided)
   let uncategorizedVertex = null;
@@ -208,7 +208,7 @@ if (rootKeys) {
       uncategorizedCountParams = { userUuid };
     }
 
-    const uncategorizedCountResult = await args.session.run(uncategorizedCountQuery, uncategorizedCountParams);
+    const uncategorizedCountResult = await _.session.run(uncategorizedCountQuery, uncategorizedCountParams);
     const uncategorizedCount = uncategorizedCountResult.records[0]?.get('contentCount') || 0;
 
     // Create virtual uncategorized vertex (id is namespaced by content table label)
@@ -227,17 +227,17 @@ if (rootKeys) {
     };
 
     // Add to context graph
-    if (!args.context.nodes) {
-      args.context.nodes = {};
+    if (!_.context.nodes) {
+      _.context.nodes = {};
     }
-    args.context.nodes[uncategorizedId] = uncategorizedVertex;
+    _.context.nodes[uncategorizedId] = uncategorizedVertex;
   }
 
   // Add count to each vertex if tableVertexLabel and relationshipType are provided
   if (tableVertexLabel && relationshipType) {
     for (const vertex of vertices) {
       // For root items, count items without any category relationship or items in this root
-      const rootKeys = args.contextData.rootKeys || {};
+      const rootKeys = c.rootKeys || {};
       const rootKey = rootKeys.key;
 
       let countQuery;
@@ -285,12 +285,12 @@ if (rootKeys) {
         }
       }
 
-      const countResult = await args.session.run(countQuery, countParams);
+      const countResult = await _.session.run(countQuery, countParams);
       const contentCount = countResult.records[0]?.get('contentCount') || 0;
 
       // Update vertex in context with count
-      if (args.context.nodes[vertex.id]) {
-        args.context.nodes[vertex.id].P.contentCount = contentCount;
+      if (_.context.nodes[vertex.id]) {
+        _.context.nodes[vertex.id].P.contentCount = contentCount;
       }
       // Also update in the returned vertex
       vertex.P.contentCount = contentCount;
@@ -309,7 +309,7 @@ if (rootKeys) {
   };
 
   // Execute afterGetVertexChildren hooks
-  await args.executeHooks(hooks?.afterGetVertexChildren, {
+  await _.executeHooks(hooks?.afterGetVertexChildren, {
     parentVertexLabel,
     toParentEdgeType,
     parentId: null,
@@ -331,7 +331,7 @@ const defaultResult = {
 };
 
 // Execute afterGetVertexChildren hooks even for default case
-await args.executeHooks(hooks?.afterGetVertexChildren, {
+await _.executeHooks(hooks?.afterGetVertexChildren, {
   parentVertexLabel,
   toParentEdgeType,
   parentId: null,

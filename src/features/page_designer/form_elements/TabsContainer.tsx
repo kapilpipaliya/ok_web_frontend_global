@@ -9,8 +9,8 @@ export function TabsContainer(props: ParentProps) {
         `return \`._id {
   line-height: 1rem;
   border-bottom-width: 1px;
-  border-color: \${args.theme.var.color.border};
-  color: \${args.theme.var.color.text_light_300};
+  border-color: \${t.var.color.border};
+  color: \${t.var.color.text_light_300};
   font-size: 0.875rem;
   font-weight: 500;
   margin-bottom: 10px;

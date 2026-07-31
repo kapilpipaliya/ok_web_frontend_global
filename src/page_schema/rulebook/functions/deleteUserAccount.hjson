@@ -9,14 +9,14 @@
         body: '''
 try {
   // Extract confirmation parameter
-  const { confirmed } = args.contextData;
+  const { confirmed } = c;
 
   if (!confirmed) {
     throw new Error("Account deletion must be confirmed by setting confirmed: true");
   }
 
   // Get current authenticated user from session
-  const user = await args.getUserFromSession();
+  const user = await _.getUserFromSession();
   if (!user) {
     throw new Error("User session not found. Please log in and try again.");
   }
@@ -40,24 +40,24 @@ try {
            u.name as userName
   `;
 
-  const countResult = await args.session.run(countQuery, {
+  const countResult = await _.session.run(countQuery, {
     userUuid: user.P.uuid
   });
 
   const counts = countResult.records[0];
-  const categoryCount = args.neo4jConvert.js(counts.get('categoryCount')) || 0;
-  const ruleCount = args.neo4jConvert.js(counts.get('ruleCount')) || 0;
-  const trackingCount = args.neo4jConvert.js(counts.get('trackingCount')) || 0;
-  const goalCount = args.neo4jConvert.js(counts.get('goalCount')) || 0;
-  const streakCount = args.neo4jConvert.js(counts.get('streakCount')) || 0;
-  const otherDataCount = args.neo4jConvert.js(counts.get('otherDataCount')) || 0;
+  const categoryCount = _.neo4jConvert.js(counts.get('categoryCount')) || 0;
+  const ruleCount = _.neo4jConvert.js(counts.get('ruleCount')) || 0;
+  const trackingCount = _.neo4jConvert.js(counts.get('trackingCount')) || 0;
+  const goalCount = _.neo4jConvert.js(counts.get('goalCount')) || 0;
+  const streakCount = _.neo4jConvert.js(counts.get('streakCount')) || 0;
+  const otherDataCount = _.neo4jConvert.js(counts.get('otherDataCount')) || 0;
   const userEmail = counts.get('userEmail');
   const userName = counts.get('userName');
 
   const totalItems = categoryCount + ruleCount + trackingCount + goalCount + streakCount + otherDataCount;
 
   // Start transaction for atomic deletion
-  const tx = args.session.beginTransaction();
+  const tx = _.session.beginTransaction();
 
   try {
     // Step 1: Delete all rulebook-specific data first

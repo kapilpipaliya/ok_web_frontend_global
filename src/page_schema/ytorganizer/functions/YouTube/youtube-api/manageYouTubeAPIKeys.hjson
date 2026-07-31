@@ -7,10 +7,10 @@
         description: Add, remove, update, or list YouTube API keys
         body:
           '''
-const { action, apiKey, keyId, name, dailyLimit, priority, isActive } = args.contextData;
+const { action, apiKey, keyId, name, dailyLimit, priority, isActive } = c;
 
 // Get current user
-const user = await args.getUserFromSession();
+const user = await _.getUserFromSession();
 if (!user) {
   return {
     success: false,
@@ -40,7 +40,7 @@ if (action === 'add') {
   const uniqueKey = `youtube_api_key_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
   // Create API key vertex
-  await args.session.run(`
+  await _.session.run(`
     CREATE (ak:YouTubeAPIKey {
       key: $key,
       apiKey: $apiKey,
@@ -85,7 +85,7 @@ if (action === 'add') {
   }
 
   // Delete API key
-  await args.session.run(`
+  await _.session.run(`
     MATCH (ak:YouTubeAPIKey {key: $keyId})
     DELETE ak
   `, { keyId });
@@ -124,7 +124,7 @@ if (action === 'add') {
     params.isActive = isActive;
   }
 
-  await args.session.run(`
+  await _.session.run(`
     MATCH (ak:YouTubeAPIKey {key: $keyId})
     ${setClause}
     RETURN ak
@@ -137,14 +137,14 @@ if (action === 'add') {
 
 } else if (action === 'list') {
   // Get all API keys with status
-  const result = await args.session.run(`
+  const result = await _.session.run(`
     MATCH (ak:YouTubeAPIKey)
     RETURN ak
     ORDER BY ak.priority ASC, ak.createdAt ASC
   `);
 
   const apiKeys = result.records.map(record => {
-    const apiKeyData = args.convertNodeToJson(record.get('ak'));
+    const apiKeyData = _.convertNodeToJson(record.get('ak'));
     return apiKeyData;
   });
 
@@ -160,7 +160,7 @@ if (action === 'add') {
   // Reset all API key counts (useful for manual reset or testing)
   const today = new Date().toISOString().split('T')[0];
 
-  await args.session.run(`
+  await _.session.run(`
     MATCH (ak:YouTubeAPIKey)
     SET ak.currentCount = 0,
         ak.resetDate = $today,

@@ -23,7 +23,7 @@ const {
   seedTickets = true,
   seedTicketCount = 1000,
   forceReseedTickets = false
-} = args.contextData || {};
+} = c || {};
 console.log(`Solvo settings migration (dryRun: ${dryRun}, seedTickets: ${seedTickets}, seedTicketCount: ${seedTicketCount})`);
 
 const nowIso = () => new Date().toISOString();
@@ -1065,11 +1065,11 @@ const settingsConfigs = [
   sidebar: {
     enabled: false
   },
-  onRowClick: (row, args) => {
+  onRowClick: (row, _) => {
     if (!row?.id) return;
     const ticketId = row.id;
     const basePath = "/ShopifySupportConversation";
-    const searchParams = args.searchParams || {};
+    const searchParams = _.searchParams || {};
     const nextParams = { ...searchParams, supportId: ticketId };
     const query = Object.entries(nextParams)
       .filter(([, value]) => value != null && value !== "")
@@ -1077,8 +1077,8 @@ const settingsConfigs = [
       .join("&");
     const href = query ? \`\${basePath}?\${query}\` : basePath;
 
-    if (args.navigate) {
-      args.navigate(href);
+    if (_.navigate) {
+      _.navigate(href);
     } else if (typeof window !== "undefined") {
       window.location.href = href;
     }
@@ -1721,7 +1721,7 @@ const defaultSectionDocuments = [
 
 async function ensureGlobalSetting() {
   if (dryRun) return;
-  await args.session.run(
+  await _.session.run(
     `
     MERGE (g:GlobalSetting {key: 'Default'})
     ON CREATE SET g.createdAt = datetime(), g.name = 'Default'
@@ -1733,12 +1733,12 @@ async function ensureGlobalSetting() {
 
 async function processSetting(setting) {
   const { key, tableVertexLabel, icon, name, config } = setting;
-  const checkResult = await args.session.run(`MATCH (s:Setting {key: $key}) RETURN s`, { key });
+  const checkResult = await _.session.run(`MATCH (s:Setting {key: $key}) RETURN s`, { key });
   const exists = checkResult.records.length > 0;
 
   if (!dryRun) {
     if (exists) {
-      await args.session.run(
+      await _.session.run(
         `MATCH (s:Setting {key: $key})
          SET s.config = $config,
              s.type = 'table_config',
@@ -1750,7 +1750,7 @@ async function processSetting(setting) {
         { key, tableVertexLabel, icon, name, config }
       );
     } else {
-      await args.session.run(
+      await _.session.run(
         `CREATE (s:Setting {
           key: $key,
           type: 'table_config',
@@ -1772,12 +1772,12 @@ async function processSetting(setting) {
 
 async function processSettingsPageConfig(setting) {
   const { key, settingsPageId, name, config } = setting;
-  const checkResult = await args.session.run(`MATCH (s:Setting {key: $key}) RETURN s`, { key });
+  const checkResult = await _.session.run(`MATCH (s:Setting {key: $key}) RETURN s`, { key });
   const exists = checkResult.records.length > 0;
 
   if (!dryRun) {
     if (exists) {
-      await args.session.run(
+      await _.session.run(
         `MATCH (s:Setting {key: $key})
          SET s.config = $config,
              s.type = 'settings_page_config',
@@ -1788,7 +1788,7 @@ async function processSettingsPageConfig(setting) {
         { key, settingsPageId, name, config }
       );
     } else {
-      await args.session.run(
+      await _.session.run(
         `CREATE (s:Setting {
           key: $key,
           type: 'settings_page_config',
@@ -1812,7 +1812,7 @@ async function processDefaultSectionDocument(doc) {
     return { created: 1, updated: 0 };
   }
   const valuesJson = JSON.stringify(doc.values || {});
-  const result = await args.session.run(
+  const result = await _.session.run(
     `
     MATCH (g:GlobalSetting {key: 'Default'})
     OPTIONAL MATCH (g)-[:GlobalSettingHasSettingsSection]->(existing:SettingsSectionDocument {pageId: $pageId, sectionId: $sectionId})
@@ -1885,7 +1885,7 @@ async function seedPublicSupportTickets() {
     return { seeded: 0, skipped: true, reason: "disabled" };
   }
 
-  const existingResult = await args.session.run(
+  const existingResult = await _.session.run(
     `MATCH (t:PublicSupportTicket {source: $source}) RETURN count(t) AS c`,
     { source: SEED_TICKET_SOURCE }
   );
@@ -1912,7 +1912,7 @@ async function seedPublicSupportTickets() {
   }
 
   if (forceReseedTickets && existing > 0) {
-    await args.session.run(
+    await _.session.run(
       `
       MATCH (t:PublicSupportTicket {source: $source})
       OPTIONAL MATCH (t)-[:PublicSupportTicketMessage]->(m:PublicSupportMessage)
@@ -1932,7 +1932,7 @@ async function seedPublicSupportTickets() {
     for (let b = 0; b < batchLen; b++) {
       const idx = startIndex + offset + b;
       const serial = `${serialPrefix}-SEED-${String(idx).padStart(6, "0")}`;
-      const token = args.crypto.randomBytes(16).toString("hex");
+      const token = _.crypto.randomBytes(16).toString("hex");
       const status = pick(SEED_STATUSES);
       const createdAt = randomIsoInYear(seedYear);
       const subject = pick(SEED_SUBJECTS);
@@ -1963,7 +1963,7 @@ async function seedPublicSupportTickets() {
       });
     }
 
-    await args.session.run(
+    await _.session.run(
       `
       UNWIND $batch AS row
       CREATE (t:PublicSupportTicket {

@@ -7,8 +7,8 @@
           displayOrder: 1,
           componentName: "Html",
           props: '''
-// Access component props from args.contextData.props
-const props = args.contextData.props || {};
+// Access component props from c.props
+const props = c.props || {};
 
 // Create input element properties
 const as = props.type === "textarea" ? "textarea" : "input";
@@ -16,7 +16,7 @@ const type = props.type === "textarea" ? undefined : (props.type || "text");
 const placeholder = props.placeholder || "";
 const disabled = props.disabled;
 const readOnly = props.readOnly;
-const originalValue = props.value ?? args.data?.P[args.contextData.props.key];
+const originalValue = props.value ?? _.data?.P[c.props.key];
 const value = props.type === "checkbox" 
   ? { checked: !!originalValue } 
   : { value: originalValue !== undefined ? originalValue : "" };

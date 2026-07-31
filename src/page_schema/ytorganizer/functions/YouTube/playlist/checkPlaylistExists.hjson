@@ -7,7 +7,7 @@
         description: Check if a playlist already exists for a specific ownership
         body:
           '''
-const { youtubeId, ownershipId } = args.contextData;
+const { youtubeId, ownershipId } = c;
 
 if (!youtubeId) {
   return {
@@ -26,7 +26,7 @@ if (!ownershipId) {
 }
 
 // Get current authenticated user from session
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return {
     success: false,
@@ -36,11 +36,11 @@ if (!actualUser) {
 }
 
 // Get effective user (handles admin impersonation)
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const user = await _.getEffectiveUser(_.session, actualUser, c);
 
 // Check if playlist exists for this ownership
 // NEW SCHEMA v4.0: Direct ownership + optional settings
-const result = await args.session.run(`
+const result = await _.session.run(`
   MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
   MATCH (o)-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $youtubeId})
   OPTIONAL MATCH (p)-[:PlaylistPlaylistSetting]->(ps:PlaylistSetting)<-[:YouTubeOwnershipPlaylistSetting]-(o)
@@ -60,8 +60,8 @@ if (exists) {
   const record = result.records[0];
   const playlistSettingNode = record.get('ps');
   data = {
-    playlist: args.convertNodeToJson(record.get('p')),
-    playlistSetting: playlistSettingNode ? args.convertNodeToJson(playlistSettingNode) : null
+    playlist: _.convertNodeToJson(record.get('p')),
+    playlistSetting: playlistSettingNode ? _.convertNodeToJson(playlistSettingNode) : null
   };
 }
 

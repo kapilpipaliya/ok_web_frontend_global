@@ -9,7 +9,7 @@
         body:
           '''
 // Add a reply to a Shopify support ticket as an admin.
-// Expected args.contextData:
+// Expected c:
 // - ticketId: string - REQUIRED
 // - message: string - REQUIRED
 // - shop: string (Shopify shop domain) - OPTIONAL safety filter
@@ -18,7 +18,7 @@ const {
   ticketId,
   message,
   shop
-} = args.contextData || {};
+} = c || {};
 
 if (!ticketId || typeof ticketId !== "string") {
   return {
@@ -40,9 +40,9 @@ const safeMessage = rawMessage.slice(0, 4000);
 // Try to get current user for email/name (admin context)
 let safeEmail = "";
 let safeName = "Support";
-if (args.getUserFromSession) {
+if (_.getUserFromSession) {
   try {
-    const currentUser = await args.getUserFromSession();
+    const currentUser = await _.getUserFromSession();
     if (currentUser?.P?.email && typeof currentUser.P.email === "string") {
       safeEmail = currentUser.P.email.slice(0, 320);
     }
@@ -83,7 +83,7 @@ const query = `
   RETURN t, r, tr
 `;
 
-const result = await args.session.run(query, params);
+const result = await _.session.run(query, params);
 
 if (!result.records || result.records.length === 0) {
   return {
@@ -93,9 +93,9 @@ if (!result.records || result.records.length === 0) {
 }
 
 // Populate graph structure
-args.processResult(result.records, args.context, ["t", "r"], "tr");
+_.processResult(result.records, _.context, ["t", "r"], "tr");
 
-const nodes = args.context.nodes || {};
+const nodes = _.context.nodes || {};
 const ticket = Object.values(nodes).find(
   (v) => Array.isArray(v.L) && v.L.includes("Support")
 );

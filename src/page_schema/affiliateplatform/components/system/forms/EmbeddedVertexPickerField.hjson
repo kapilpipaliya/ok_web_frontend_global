@@ -49,8 +49,8 @@
   width: 88px;
   height: 88px;
   border-radius: 0.5rem;
-  border: 1px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background_light_100};
+  border: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background_light_100};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -60,13 +60,13 @@
         displayOrder: 1
         componentName: Html
         props:
-          '''const previewUrl = String(args.contextData.props?.previewUrl || "").trim();
-const showImage = args.contextData.props?.showImagePreview !== false;
+          '''const previewUrl = String(c.props?.previewUrl || "").trim();
+const showImage = c.props?.showImagePreview !== false;
 const hasImg = showImage && previewUrl && /\.(png|jpe?g|gif|webp|svg)$/i.test(previewUrl);
-const multiValues = args.contextData.props?.values;
+const multiValues = c.props?.values;
 const isMulti =
   Array.isArray(multiValues) ||
-  args.contextData.props?.pickerConfiguration?.selectionMode === "multiple";
+  c.props?.pickerConfiguration?.selectionMode === "multiple";
 return {
   as: "div",
   hide: () => !showImage || (isMulti && !hasImg)
@@ -80,8 +80,8 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const previewUrl = String(args.contextData.props?.previewUrl || "").trim();
-const showImage = args.contextData.props?.showImagePreview !== false;
+          '''const previewUrl = String(c.props?.previewUrl || "").trim();
+const showImage = c.props?.showImagePreview !== false;
 const hasImg = showImage && previewUrl && /\.(png|jpe?g|gif|webp|svg)$/i.test(previewUrl);
 return {
   as: "img",
@@ -96,12 +96,12 @@ return {
       id: "6"
       L: Attr
       P: {
-        css: return `._id { color: ${args.theme.var.color.text_dark_400}; }`;
+        css: "return `._id { color: ${t.var.color.text_dark_400}; }`;"
         displayOrder: 2
         componentName: Html
         props:
-          '''const previewUrl = String(args.contextData.props?.previewUrl || "").trim();
-const showImage = args.contextData.props?.showImagePreview !== false;
+          '''const previewUrl = String(c.props?.previewUrl || "").trim();
+const showImage = c.props?.showImagePreview !== false;
 const hasImg = showImage && previewUrl && /\.(png|jpe?g|gif|webp|svg)$/i.test(previewUrl);
 return {
   as: "icon",
@@ -137,12 +137,12 @@ return {
           '''return `._id {
   font-size: 0.8rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const fieldLabel = args.contextData.props?.label;
+          '''const fieldLabel = c.props?.label;
 const labelText =
   fieldLabel != null && String(fieldLabel).trim() !== "" ? String(fieldLabel).trim() : "";
 return {
@@ -159,13 +159,13 @@ return {
         css:
           '''return `._id {
   font-size: 0.85rem;
-  color: ${args.theme.var.color.text_dark_400};
+  color: ${t.var.color.text_dark_400};
   word-break: break-word;
 }`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''const secondaryLabel = args.contextData.props?.secondaryLabel;
+          '''const secondaryLabel = c.props?.secondaryLabel;
 const secondaryText =
   secondaryLabel != null && String(secondaryLabel).trim() !== ""
     ? String(secondaryLabel).trim()
@@ -200,26 +200,26 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const disabled = !!args.contextData.props?.disabled;
-const usePolaris = args.contextData.props?.usePolarisUI === true;
+          '''const disabled = !!c.props?.disabled;
+const usePolaris = c.props?.usePolarisUI === true;
 if (usePolaris) {
   return {
     as: "s-button",
     "attr:variant": "primary",
     text:
-      args.contextData.props?.chooseButtonLabel != null
-        ? String(args.contextData.props.chooseButtonLabel)
+      c.props?.chooseButtonLabel != null
+        ? String(c.props.chooseButtonLabel)
         : "",
     disabled,
-    onClick: () => args.contextData.props?.onOpenPicker?.()
+    onClick: () => c.props?.onOpenPicker?.()
   };
 }
 return {
   as: "button",
   type: "button",
   disabled,
-  text: String(args.contextData.props?.chooseButtonLabel || "Select…"),
-  onClick: () => args.contextData.props?.onOpenPicker?.()
+  text: String(c.props?.chooseButtonLabel || "Select…"),
+  onClick: () => c.props?.onOpenPicker?.()
 };'''
       }
     }
@@ -230,24 +230,24 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const disabled = !!args.contextData.props?.disabled;
-const multiValues = args.contextData.props?.values;
+          '''const disabled = !!c.props?.disabled;
+const multiValues = c.props?.values;
 const hasMulti = Array.isArray(multiValues) && multiValues.length > 0;
 const hasSingle = !!(
-  args.contextData.props?.value != null && String(args.contextData.props?.value).trim() !== ""
+  c.props?.value != null && String(c.props?.value).trim() !== ""
 );
 const hasValue = hasMulti || hasSingle;
-const usePolaris = args.contextData.props?.usePolarisUI === true;
+const usePolaris = c.props?.usePolarisUI === true;
 if (usePolaris) {
   return {
     as: "s-button",
     "attr:variant": "tertiary",
     text:
-    args.contextData.props?.clearButtonLabel != null
-      ? String(args.contextData.props.clearButtonLabel)
+    c.props?.clearButtonLabel != null
+      ? String(c.props.clearButtonLabel)
       : "",
     disabled: disabled || !hasValue,
-    onClick: () => args.contextData.props?.onClear?.()
+    onClick: () => c.props?.onClear?.()
   };
 }
 return {
@@ -255,10 +255,10 @@ return {
   type: "button",
   disabled: disabled || !hasValue,
   text:
-    args.contextData.props?.clearButtonLabel != null
-      ? String(args.contextData.props.clearButtonLabel)
+    c.props?.clearButtonLabel != null
+      ? String(c.props.clearButtonLabel)
       : "",
-  onClick: () => args.contextData.props?.onClear?.()
+  onClick: () => c.props?.onClear?.()
 };'''
       }
     }

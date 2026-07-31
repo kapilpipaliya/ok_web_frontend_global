@@ -9,7 +9,7 @@
         body: '''
 try {
   // Get current authenticated user from session
-  const user = await args.getUserFromSession();
+  const user = await _.getUserFromSession();
   if (!user) {
     throw new Error("User session not found. Please log in and try again.");
   }
@@ -28,7 +28,7 @@ try {
     ORDER BY r.priority DESC, r.createdAt DESC
   `;
 
-  const rulesResult = await args.session.run(rulesQuery, {
+  const rulesResult = await _.session.run(rulesQuery, {
     userUuid: user.P.uuid,
     today: today
   });
@@ -54,10 +54,10 @@ try {
     if (!ruleNode) continue;
 
     try {
-      const rule = args.convertNodeToJson(ruleNode);
-      const category = categoryNode ? args.convertNodeToJson(categoryNode) : null;
-      const todayTracking = trackingNode ? args.convertNodeToJson(trackingNode) : null;
-      const streak = streakNode ? args.convertNodeToJson(streakNode) : null;
+      const rule = _.convertNodeToJson(ruleNode);
+      const category = categoryNode ? _.convertNodeToJson(categoryNode) : null;
+      const todayTracking = trackingNode ? _.convertNodeToJson(trackingNode) : null;
+      const streak = streakNode ? _.convertNodeToJson(streakNode) : null;
 
       totalActiveRules++;
 

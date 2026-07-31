@@ -22,7 +22,7 @@ return {
         css: '''
 return `._id {
   padding: 5rem 0;
-  background: ${args.theme.var.color.background_dark_100};
+  background: ${t.var.color.background_dark_100};
   
   @media (max-width: 768px) {
     padding: 3rem 0;
@@ -90,7 +90,7 @@ return {
 return `._id {
   font-size: 2.5rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 1rem;
   
   @media (max-width: 768px) {
@@ -115,7 +115,7 @@ return {
         css: '''
 return `._id {
   font-size: 1.1rem;
-  color: ${args.theme.var.color.text_dark_300};
+  color: ${t.var.color.text_dark_300};
   max-width: 600px;
   margin: 0 auto;
 }`;
@@ -200,24 +200,24 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const feature = args.contextData.features;
+const feature = c.features;
 return {
   as: "div"
 };
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
   border-radius: 1rem;
   padding: 2rem;
   text-align: center;
   transition: all 0.3s ease;
-  border: 1px solid ${args.theme.var.color.background_dark_200};
+  border: 1px solid ${t.var.color.background_dark_200};
   
   &:hover {
     transform: translateY(-5px);
-    box-shadow: 0 10px 30px ${args.theme.var.color.text_light_900};
-    border-color: ${args.theme.var.color.primary_light_700};
+    box-shadow: 0 10px 30px ${t.var.color.text_light_900};
+    border-color: ${t.var.color.primary_light_700};
   }
 }`;
 '''
@@ -230,7 +230,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const feature = args.contextData.features;
+const feature = c.features;
 return {
   as: "div"
 };
@@ -240,7 +240,7 @@ return `._id {
   width: 64px;
   height: 64px;
   margin: 0 auto 1.5rem;
-  background: ${args.theme.var.color.primary_light_850};
+  background: ${t.var.color.primary_light_850};
   border-radius: 1rem;
   display: flex;
   align-items: center;
@@ -256,7 +256,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const feature = args.contextData.features;
+const feature = c.features;
 return {
   as: "icon",
   icon: feature.icon,
@@ -266,7 +266,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
 }`;
 '''
       }
@@ -278,7 +278,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const feature = args.contextData.features;
+const feature = c.features;
 return {
   as: "h3",
   text: feature.title
@@ -288,7 +288,7 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 0.75rem;
 }`;
 '''
@@ -301,7 +301,7 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const feature = args.contextData.features;
+const feature = c.features;
 return {
   as: "p",
   text: feature.description
@@ -309,7 +309,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_dark_300};
+  color: ${t.var.color.text_dark_300};
   line-height: 1.6;
 }`;
 '''

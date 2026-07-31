@@ -43,7 +43,7 @@ export function FloatingFormDropdown(props: {
         <As
           as="div"
           css={`return \`._id {
-  color: \${args.theme.var.color.error};
+  color: \${t.var.color.error};
   margin-top: 0.5rem;
 }\`;`}
         >

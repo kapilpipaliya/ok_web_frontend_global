@@ -14,14 +14,14 @@
         displayOrder: 1
         fns:
           '''
-const [timezoneData, setTimezoneData] = args.createSignal(null);
-const [selectedTimezone, setSelectedTimezone] = args.createSignal("");
-const [tzLoading, setTzLoading] = args.createSignal(true);
-const [tzSaving, setTzSaving] = args.createSignal(false);
+const [timezoneData, setTimezoneData] = _.createSignal(null);
+const [selectedTimezone, setSelectedTimezone] = _.createSignal("");
+const [tzLoading, setTzLoading] = _.createSignal(true);
+const [tzSaving, setTzSaving] = _.createSignal(false);
 
 const fetchTimezones = async () => {
   try {
-    const response = await args.executeNamedServerFunction({
+    const response = await s({
       functionName: "getAvailableTimezones",
       contextData: {}
     });
@@ -35,22 +35,22 @@ const fetchTimezones = async () => {
 
 const saveTimezoneApi = async (timezone) => {
   try {
-    const response = await args.executeNamedServerFunction({
+    const response = await s({
       functionName: "updateUserTimezone",
       contextData: { timezone }
     });
     if (response?.error) {
-      args.showErrorToast?.(String(response.error));
+      _.showErrorToast?.(String(response.error));
       return false;
     }
     if (response?.result?.success) {
-      args.showSuccessToast?.(response.result.message || "Timezone updated");
+      _.showSuccessToast?.(response.result.message || "Timezone updated");
       return true;
     }
-    args.showErrorToast?.(response?.result?.message || "Failed to update timezone");
+    _.showErrorToast?.(response?.result?.message || "Failed to update timezone");
     return false;
   } catch (error) {
-    args.showErrorToast?.(error?.message || "Error updating timezone");
+    _.showErrorToast?.(error?.message || "Error updating timezone");
     return false;
   }
 };
@@ -103,17 +103,17 @@ return {
 return {
   as: "section",
   onMount: () => {
-    args.fns.loadTz();
+    f.loadTz();
   }
 };
 '''
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.background_light_100};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.lg};
-  padding: ${args.theme.var.spacing.lg};
+  background: ${t.var.color.background_light_100};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.lg};
+  padding: ${t.var.spacing.lg};
 }`;
 '''
       }
@@ -136,8 +136,8 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 ${args.theme.var.spacing.lg} 0;
+  color: ${t.var.color.text};
+  margin: 0 0 ${t.var.spacing.lg} 0;
 }`;
 '''
       }
@@ -158,8 +158,8 @@ return `._id {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: ${args.theme.var.spacing.md} 0;
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  padding: ${t.var.spacing.md} 0;
+  border-bottom: 1px solid ${t.var.color.border};
 }`;
 '''
       }
@@ -194,8 +194,8 @@ return {
           '''
 return `._id.ws-pref-theme-title {
   font-weight: 500;
-  color: ${args.theme.var.color.text};
-  margin-bottom: ${args.theme.var.spacing.xs};
+  color: ${t.var.color.text};
+  margin-bottom: ${t.var.spacing.xs};
 }`;
 '''
       }
@@ -218,7 +218,7 @@ return {
           '''
 return `._id.ws-pref-theme-sub {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
       }
@@ -233,24 +233,24 @@ return `._id.ws-pref-theme-sub {
           '''
 return {
   as: "button",
-  onClick: () => args.toggleTheme(),
-  text: args.currentMode() === "dark" ? "🌙 Dark" : "☀️ Light"
+  onClick: () => _.toggleTheme(),
+  text: _.currentMode() === "dark" ? "🌙 Dark" : "☀️ Light"
 };
 '''
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
   border: none;
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  border-radius: ${args.theme.var.borderRadius.md};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  border-radius: ${t.var.borderRadius.md};
   font-weight: 500;
   cursor: pointer;
   transition: all 150ms ease;
 }
 ._id:hover {
-  background: ${args.theme.var.color.primary_dark_200};
+  background: ${t.var.color.primary_dark_200};
 }`;
 '''
       }
@@ -270,8 +270,8 @@ return { as: "div" };
 return `._id {
   display: flex;
   flex-direction: column;
-  gap: ${args.theme.var.spacing.sm};
-  padding: ${args.theme.var.spacing.md} 0 0 0;
+  gap: ${t.var.spacing.sm};
+  padding: ${t.var.spacing.md} 0 0 0;
 }`;
 '''
       }
@@ -294,7 +294,7 @@ return {
           '''
 return `._id.ws-pref-tz-title {
   font-weight: 500;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -317,7 +317,7 @@ return {
           '''
 return `._id.ws-pref-tz-sub {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
       }
@@ -330,14 +330,14 @@ return `._id.ws-pref-tz-sub {
         componentName: Html
         props:
           '''
-const list = args.fns.tzOptions();
+const list = f.tzOptions();
 return {
   as: "select",
   class: "ws-pref-tz-select",
   disabled:
-    args.fns.tzLoading() || args.fns.tzSaving() || list.length === 0,
-  value: args.fns.selectedTimezone(),
-  onChange: (e) => args.fns.setSelectedTimezone(e.target.value)
+    f.tzLoading() || f.tzSaving() || list.length === 0,
+  value: f.selectedTimezone(),
+  onChange: (e) => f.setSelectedTimezone(e.target.value)
 };
 '''
         css:
@@ -345,11 +345,11 @@ return {
 return `._id.ws-pref-tz-select {
   max-width: 28rem;
   width: 100%;
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  border-radius: ${args.theme.var.borderRadius.md};
-  border: 1px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  border-radius: ${t.var.borderRadius.md};
+  border: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   font-size: 0.875rem;
 }`;
 '''
@@ -366,7 +366,7 @@ return `._id.ws-pref-tz-select {
         props:
           '''
 return {
-  data: args.fns.tzOptions()
+  data: f.tzOptions()
 };
 '''
       }
@@ -379,7 +379,7 @@ return {
         componentName: Html
         props:
           '''
-const o = args.contextData.tzOpt;
+const o = c.tzOpt;
 return {
   as: "option",
   value: o.value,
@@ -398,9 +398,9 @@ return {
           '''
 return {
   as: "button",
-  text: args.fns.tzSaving() ? "Saving…" : "Save timezone",
-  disabled: args.fns.tzLoading() || args.fns.tzSaving() || !args.fns.timezoneData(),
-  onClick: () => args.fns.handleSaveTimezone(),
+  text: f.tzSaving() ? "Saving…" : "Save timezone",
+  disabled: f.tzLoading() || f.tzSaving() || !f.timezoneData(),
+  onClick: () => f.handleSaveTimezone(),
   class: "ws-pref-tz-save"
 };
 '''
@@ -408,11 +408,11 @@ return {
           '''
 return `._id.ws-pref-tz-save {
   align-self: flex-start;
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
   border: none;
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  border-radius: ${args.theme.var.borderRadius.md};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  border-radius: ${t.var.borderRadius.md};
   font-weight: 500;
   cursor: pointer;
 }

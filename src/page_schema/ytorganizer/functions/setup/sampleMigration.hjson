@@ -13,7 +13,7 @@
  * This is a template migration function that demonstrates the structure
  * and pattern for creating database migrations.
  *
- * Parameters (via args.contextData):
+ * Parameters (via c):
  * - dryRun: boolean (optional) - If true, only report what would be migrated without making changes
  * - customParam: any (optional) - Example of custom parameters you can pass
  *
@@ -21,7 +21,7 @@
  * - Statistics about the migration
  */
 
-const { dryRun = false, customParam } = args.contextData;
+const { dryRun = false, customParam } = c;
 
 console.log(`🚀 Starting sample migration (dryRun: ${dryRun})`);
 
@@ -45,7 +45,7 @@ const findQuery = `
   LIMIT 100
 `;
 
-const result = await args.session.run(findQuery);
+const result = await _.session.run(findQuery);
 console.log(`Found ${result.records.length} items to migrate`);
 
 if (result.records.length === 0) {
@@ -76,7 +76,7 @@ if (!dryRun) {
         RETURN item
       `;
 
-      await args.session.run(updateQuery, {
+      await _.session.run(updateQuery, {
         itemId: item.elementId
       });
 
@@ -112,7 +112,7 @@ if (!dryRun && customParam) {
     RETURN item
   `;
 
-  const createResult = await args.session.run(createQuery, {
+  const createResult = await _.session.run(createQuery, {
     key: `migrated_${Date.now()}`
   });
 

@@ -44,8 +44,8 @@ export const variationsGridStyles = () => {
     display: grid;
     grid-template-columns: auto repeat(19, 1fr);
     gap: 0;
-    background: \${args.theme.var.color.background};
-    border: 1px solid \${args.theme.var.color.border};
+    background: \${t.var.color.background};
+    border: 1px solid \${t.var.color.border};
     border-radius: 0.75rem;
     overflow-x: auto;
     padding: 1.5rem;
@@ -70,9 +70,9 @@ export const gridCellStyles = (options: {
     ${
       isBase
         ? `
-      background: \${args.theme.var.color.background_light_50};
-      border-left: 2px solid \${args.theme.var.color.text_light_100};
-      border-right: 2px solid \${args.theme.var.color.text_light_100};
+      background: \${t.var.color.background_light_50};
+      border-left: 2px solid \${t.var.color.text_light_100};
+      border-right: 2px solid \${t.var.color.text_light_100};
     `
         : ""
     }
@@ -243,13 +243,13 @@ export function ColorVariationsGrid(props: ColorVariationsGridProps) {
                   ? `return \`._id {
                     font-size: 0.75rem;
                     font-weight: 800;
-                    color: \${args.theme.var.color.text};
+                    color: \${t.var.color.text};
                     text-transform: none;
                   }\`;`
                   : `return \`._id {
                     font-size: 0.65rem;
                     font-weight: 600;
-                    color: \${args.theme.var.color.text_light_500};
+                    color: \${t.var.color.text_light_500};
                     text-transform: none;
                   }\`;`
               }
@@ -272,7 +272,7 @@ export function ColorVariationsGrid(props: ColorVariationsGridProps) {
                   css={`return \`._id {
                     font-size: 0.9rem;
                     text-transform: capitalize;
-                    color: \${args.theme.var.color.text};
+                    color: \${t.var.color.text};
                   }\`;`}
                 >
                   {colorName}

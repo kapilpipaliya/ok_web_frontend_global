@@ -8,7 +8,7 @@
         body:
           '''
 // Extract parameters
-const { categoryElementId, categoryName, menuId } = args.contextData;
+const { categoryElementId, categoryName, menuId } = c;
 
 if (!categoryElementId || !categoryName || !menuId) {
   return {
@@ -17,9 +17,9 @@ if (!categoryElementId || !categoryName || !menuId) {
   };
 }
 
-const shopify = await args.getShopifyClient();
+const shopify = await _.getShopifyClient();
 let admin;
-const shop = args.contextData.shop;
+const shop = c.shop;
 if (shop) {
   try {
     const authResult = await shopify.unauthenticated.admin(shop);
@@ -37,7 +37,7 @@ try {
   const menuTitle = categoryName;
 
   // Build nested menu structure with all levels of children
-  const nestedResult = await args.executeNamedServerFunction({
+  const nestedResult = await s({
     functionName: "buildNestedMenuItems",
     contextData: {
       parentElementId: categoryElementId
@@ -103,12 +103,12 @@ try {
     if (menuNotFoundError) {
       console.log("Menu does not exist, creating new menu instead...");
       // Create menu instead of updating
-      const createResult = await args.executeNamedServerFunction({
+      const createResult = await s({
         functionName: "createShopifyMenuForCategory",
         contextData: {
           categoryElementId: categoryElementId,
           categoryName: categoryName,
-          shop: args.contextData?.shop
+          shop: c?.shop
         }
       });
 
@@ -146,7 +146,7 @@ try {
   }
 
   // Update parent category with menu info
-  await args.session.run(
+  await _.session.run(
     `MATCH (c:ShopifyProductCategory)
      WHERE elementId(c) = $elementId
      SET c.menuId = $menuId,

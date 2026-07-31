@@ -58,17 +58,17 @@ export const DesignerResizeHandle: Component<DesignerResizeHandleProps> = (
               ? `width: ${DESIGNER_RESIZE_VISIBLE_SIZE}px; height: 100%;`
               : `height: ${DESIGNER_RESIZE_VISIBLE_SIZE}px; width: 100%;`
           }
-          background-color: \${args.theme.var.color.border};
+          background-color: \${t.var.color.border};
           transition: background-color 0.2s;
         }
 
         &[data-active]::before {
-          background-color: \${args.theme.var.color.text_light_300};
+          background-color: \${t.var.color.text_light_300};
         }
 
         @media (hover: hover) {
           &:hover::before {
-            background-color: \${args.theme.var.color.text_light_300};
+            background-color: \${t.var.color.text_light_300};
           }
         }
       }\`;`}

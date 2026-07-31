@@ -49,7 +49,7 @@ export function ToggleButtons() {
             ? "ph:lock-simple"
             : "ph:arrows-out-cardinal"
         }
-        iconCss={`return \`._id {${layoutStore().isResizingDisabled ? "color:${args.theme.var.color.primary}" : "color:${args.theme.var.color.text_light_300}"};}\`;`}
+        iconCss={`return \`._id {${layoutStore().isResizingDisabled ? "color:${t.var.color.primary}" : "color:${t.var.color.text_light_300}"};}\`;`}
         onClick={() => togglePanel("isResizingDisabled")}
         size={22}
         title={
@@ -62,7 +62,7 @@ export function ToggleButtons() {
       <IconButton
         css={headerIconButtonCss}
         icon="ph:gear"
-        iconCss={`return \`._id {${layoutStore().isSettingsOpen ? "color:${args.theme.var.color.primary}" : "color:${args.theme.var.color.text_light_300}"};}\`;`}
+        iconCss={`return \`._id {${layoutStore().isSettingsOpen ? "color:${t.var.color.primary}" : "color:${t.var.color.text_light_300}"};}\`;`}
         onClick={() => togglePanel("isSettingsOpen")}
         size={22}
         title="Toggle Settings Panel"
@@ -71,7 +71,7 @@ export function ToggleButtons() {
       <IconButton
         css={headerIconButtonCss}
         icon="ph:file-text"
-        iconCss={`return \`._id {${layoutStore().isPagesOpen ? "color:${args.theme.var.color.primary}" : "color:${args.theme.var.color.text_light_300}"};}\`;`}
+        iconCss={`return \`._id {${layoutStore().isPagesOpen ? "color:${t.var.color.primary}" : "color:${t.var.color.text_light_300}"};}\`;`}
         onClick={() => togglePanel("isPagesOpen")}
         size={22}
         title="Toggle Pages Panel"
@@ -80,7 +80,7 @@ export function ToggleButtons() {
       <IconButton
         css={headerIconButtonCss}
         icon="ph:squares-four"
-        iconCss={`return \`._id {${layoutStore().isComponentsOpen ? "color:${args.theme.var.color.primary}" : "color:${args.theme.var.color.text_light_300}"};}\`;`}
+        iconCss={`return \`._id {${layoutStore().isComponentsOpen ? "color:${t.var.color.primary}" : "color:${t.var.color.text_light_300}"};}\`;`}
         onClick={() => togglePanel("isComponentsOpen")}
         size={22}
         title="Toggle Components Panel"
@@ -89,7 +89,7 @@ export function ToggleButtons() {
       <IconButton
         css={headerIconButtonCss}
         icon="ph:function"
-        iconCss={`return \`._id {${layoutStore().isFunctionsOpen ? "color:${args.theme.var.color.primary}" : "color:${args.theme.var.color.text_light_300}"};}\`;`}
+        iconCss={`return \`._id {${layoutStore().isFunctionsOpen ? "color:${t.var.color.primary}" : "color:${t.var.color.text_light_300}"};}\`;`}
         onClick={() => togglePanel("isFunctionsOpen")}
         size={22}
         title="Toggle Functions Panel"
@@ -98,7 +98,7 @@ export function ToggleButtons() {
       <IconButton
         css={headerIconButtonCss}
         icon="ph:tree-structure"
-        iconCss={`return \`._id {${layoutStore().isLayoutTreeOpen ? "color:${args.theme.var.color.primary}" : "color:${args.theme.var.color.text_light_300}"};}\`;`}
+        iconCss={`return \`._id {${layoutStore().isLayoutTreeOpen ? "color:${t.var.color.primary}" : "color:${t.var.color.text_light_300}"};}\`;`}
         onClick={() => togglePanel("isLayoutTreeOpen")}
         size={22}
         title="Toggle Layout Tree Panel"
@@ -107,7 +107,7 @@ export function ToggleButtons() {
       <IconButton
         css={headerIconButtonCss}
         icon="ph:sliders"
-        iconCss={`return \`._id {${layoutStore().isPropertiesOpen ? "color:${args.theme.var.color.primary}" : "color:${args.theme.var.color.text_light_300}"};}\`;`}
+        iconCss={`return \`._id {${layoutStore().isPropertiesOpen ? "color:${t.var.color.primary}" : "color:${t.var.color.text_light_300}"};}\`;`}
         onClick={() => togglePanel("isPropertiesOpen")}
         size={22}
         title="Toggle Properties Panel"
@@ -116,7 +116,7 @@ export function ToggleButtons() {
       <IconButton
         css={headerIconButtonCss}
         icon="ph:robot"
-        iconCss={`return \`._id {${layoutStore().isAiOpen ? "color:${args.theme.var.color.primary}" : "color:${args.theme.var.color.text_light_300}"};}\`;`}
+        iconCss={`return \`._id {${layoutStore().isAiOpen ? "color:${t.var.color.primary}" : "color:${t.var.color.text_light_300}"};}\`;`}
         onClick={() => togglePanel("isAiOpen")}
         size={22}
         title="Toggle AI Panel"

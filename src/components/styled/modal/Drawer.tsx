@@ -130,8 +130,8 @@ export function Drawer(props: Readonly<DrawerProps>) {
         as="div"
         css={[
           `return \`._id {
-            background-color: \${args.theme.var.color.background_light_100};
-            color: \${args.theme.var.color.background_light_100_text};
+            background-color: \${t.var.color.background_light_100};
+            color: \${t.var.color.background_light_100_text};
             border-radius: 15px 0 0 15px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.5);
             height: 100%;
@@ -145,7 +145,7 @@ export function Drawer(props: Readonly<DrawerProps>) {
             ? "return `._id { right: 0; }`;"
             : `return \`._id { right: -${drawerWidth()}; }\`;`,
           mainDivHover()
-            ? "return `._id { border-left: 2px solid ${args.theme.var.color.primary}; }`;"
+            ? "return `._id { border-left: 2px solid ${t.var.color.primary}; }`;"
             : "return `._id { border-left: none; }`;",
         ]}
         ref={setFloating}

@@ -49,10 +49,10 @@ export function addEditButtonSchema(label: string) {
   cursor: pointer;
   background-color: transparent;
   border: none;
-  color: \${args.theme.var.color.primary};
+  color: \${t.var.color.primary};
   &:hover {
-    background-color: \${args.theme.var.color.background_light_100};
-    color: \${args.theme.var.color.primary_dark_400};
+    background-color: \${t.var.color.background_light_100};
+    color: \${t.var.color.primary_dark_400};
   }
 }\`;`,
             componentName: "Html",

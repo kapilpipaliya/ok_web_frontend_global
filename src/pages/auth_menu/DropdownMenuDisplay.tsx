@@ -35,13 +35,13 @@ export function UserDropdownMenuDisplay(): JSX.Element {
             width: 36px;
             padding: 6px;
             border-radius: 7px;
-            background-color: \${args.theme.var.color.background_light_100};
+            background-color: \${t.var.color.background_light_100};
             border: none;
             cursor: pointer;
-            color: \${args.theme.var.color.text};
+            color: \${t.var.color.text};
             
             &:hover {
-              background-color: \${args.theme.var.color.background_light_200};
+              background-color: \${t.var.color.background_light_200};
             }
             
             svg {
@@ -61,11 +61,11 @@ export function UserDropdownMenuDisplay(): JSX.Element {
             background-size: cover;
             border: none;
             cursor: pointer;
-            background-color: \${args.theme.var.color.background_light_100};
+            background-color: \${t.var.color.background_light_100};
             background-image: url(${getProfileImageUrl(graph)});
 
             &:hover {
-              background-color: \${args.theme.var.color.background_light_200};
+              background-color: \${t.var.color.background_light_200};
             }
           }\`;`}
           id="user-dropdown-toggle"
@@ -96,7 +96,7 @@ export function UserDropdownMenuDisplay(): JSX.Element {
               <As
                 as="hr"
                 css={`return \`._id {
-  color: \${args.theme.var.color.text};
+  color: \${t.var.color.text};
 }\`;`}
               />
               <MenuItems onClose={handleClose} />

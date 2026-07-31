@@ -25,9 +25,9 @@ export const HoverAttrConfigPopOver = (props: Readonly<{ item: Vertex }>) => {
         css={`return \`._id {
   display: flex;
   align-items: center;
-  background-color: \${args.theme.var.color.primary};
+  background-color: \${t.var.color.primary};
   bottom: 100%;
-  color: \${args.theme.var.color.text_light_100};
+  color: \${t.var.color.text_light_100};
   padding: 0.25rem;
   position: absolute;
   border-radius: 5px 5px 0 0;

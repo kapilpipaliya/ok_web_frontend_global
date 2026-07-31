@@ -17,7 +17,7 @@
         componentName: "Html",
         contextName: "earningsStore",
         fns: '''
-const [store, setStore] = args.createStore({
+const [store, setStore] = _.createStore({
   earnings: {
     available: 1195.00,
     pending: 85.00,
@@ -116,7 +116,7 @@ return {
   processWithdrawal: async () => {
     const amount = parseFloat(store.withdrawAmount) || 0;
     if (amount <= 0 || amount > store.earnings.available) {
-      args.showErrorToast("Invalid withdrawal amount");
+      _.showErrorToast("Invalid withdrawal amount");
       return;
     }
     
@@ -130,7 +130,7 @@ return {
     setStore("showWithdrawDialog", false);
     setStore("isWithdrawing", false);
     
-    args.showSuccessToast(`Successfully withdrew $${amount.toFixed(2)}`);
+    _.showSuccessToast(`Successfully withdrew $${amount.toFixed(2)}`);
   },
   
   filterTransactions: (period) => {
@@ -140,20 +140,20 @@ return {
 };
 ''',
         props: '''
-const fns = args.fns;
-if (args.mounted()) {
+const fns = f;
+if (_.mounted()) {
   fns.loadEarningsData();
 }
 
 return {
   as: "div",
-  data: args.contextData.earningsStore
+  data: c.earningsStore
 };
 ''',
         css: '''
 return `._id {
   min-height: 100vh;
-  background: ${args.theme.var.color.background_dark_50};
+  background: ${t.var.color.background_dark_50};
 }`;
 '''
       }
@@ -171,8 +171,8 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background};
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  background: ${t.var.color.background};
+  border-bottom: 1px solid ${t.var.color.border};
   position: sticky;
   top: 0;
   z-index: 1000;
@@ -239,17 +239,17 @@ return {
   icon: "carbon:arrow-left",
   width: 24,
   height: 24,
-  onClick: () => args.navigate("/assistant/dashboard")
+  onClick: () => _.navigate("/assistant/dashboard")
 };
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   cursor: pointer;
   transition: color 0.2s ease;
   
   &:hover {
-    color: ${args.theme.var.color.primary};
+    color: ${t.var.color.primary};
   }
 }`;
 '''
@@ -271,7 +271,7 @@ return {
 return `._id {
   font-size: 1.5rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0;
   
   @media (max-width: 768px) {
@@ -291,7 +291,7 @@ return `._id {
         size: "medium",
         text: "Withdraw Funds",
         icon: "carbon:wallet",
-        onClick: "() => args.contextData.earningsStore.setStore('showWithdrawDialog', true)"
+        onClick: "() => c.earningsStore.setStore('showWithdrawDialog', true)"
       }
     },
     {
@@ -375,7 +375,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   font-size: 0.875rem;
   margin-bottom: 0.5rem;
 }`;
@@ -389,7 +389,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const available = args.contextData.earningsStore?.earnings?.available || 0;
+const available = c.earningsStore?.earnings?.available || 0;
 return {
   as: "p",
   text: `$${available.toFixed(2)}`
@@ -399,7 +399,7 @@ return {
 return `._id {
   font-size: 2rem;
   font-weight: 700;
-  color: ${args.theme.var.color.success};
+  color: ${t.var.color.success};
   margin: 0;
 }`;
 '''
@@ -420,7 +420,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.success};
+  color: ${t.var.color.success};
   margin-top: 0.25rem;
 }`;
 '''
@@ -462,7 +462,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   font-size: 0.875rem;
   margin-bottom: 0.5rem;
 }`;
@@ -476,7 +476,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const pending = args.contextData.earningsStore?.earnings?.pending || 0;
+const pending = c.earningsStore?.earnings?.pending || 0;
 return {
   as: "p",
   text: `$${pending.toFixed(2)}`
@@ -486,7 +486,7 @@ return {
 return `._id {
   font-size: 2rem;
   font-weight: 700;
-  color: ${args.theme.var.color.warning};
+  color: ${t.var.color.warning};
   margin: 0;
 }`;
 '''
@@ -507,7 +507,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.warning};
+  color: ${t.var.color.warning};
   margin-top: 0.25rem;
 }`;
 '''
@@ -549,7 +549,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   font-size: 0.875rem;
   margin-bottom: 0.5rem;
 }`;
@@ -563,7 +563,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const thisMonth = args.contextData.earningsStore?.earnings?.thisMonth || 0;
+const thisMonth = c.earningsStore?.earnings?.thisMonth || 0;
 return {
   as: "p",
   text: `$${thisMonth.toFixed(2)}`
@@ -573,7 +573,7 @@ return {
 return `._id {
   font-size: 2rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0;
 }`;
 '''
@@ -586,7 +586,7 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const growth = args.contextData.earningsStore?.earnings?.monthlyGrowth || 0;
+const growth = c.earningsStore?.earnings?.monthlyGrowth || 0;
 const isPositive = growth >= 0;
 return {
   as: "p",
@@ -594,11 +594,11 @@ return {
 };
 ''',
         css: '''
-const growth = args.contextData.earningsStore?.earnings?.monthlyGrowth || 0;
+const growth = c.earningsStore?.earnings?.monthlyGrowth || 0;
 const isPositive = growth >= 0;
 return `._id {
   font-size: 0.875rem;
-  color: ${isPositive ? args.theme.var.color.success : args.theme.var.color.error};
+  color: ${isPositive ? t.var.color.success : t.var.color.error};
   margin-top: 0.25rem;
 }`;
 '''
@@ -640,7 +640,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   font-size: 0.875rem;
   margin-bottom: 0.5rem;
 }`;
@@ -654,7 +654,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const lifetime = args.contextData.earningsStore?.earnings?.lifetime || 0;
+const lifetime = c.earningsStore?.earnings?.lifetime || 0;
 return {
   as: "p",
   text: `$${lifetime.toFixed(2)}`
@@ -664,7 +664,7 @@ return {
 return `._id {
   font-size: 2rem;
   font-weight: 700;
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   margin: 0;
 }`;
 '''
@@ -685,7 +685,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   margin-top: 0.25rem;
 }`;
 '''
@@ -716,7 +716,7 @@ return {
 return `._id {
   font-size: 1.5rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 1.5rem;
 }`;
 '''
@@ -753,7 +753,7 @@ return `._id {
         contextName: "chartBars",
         loop: true,
         props: '''
-const chartData = args.contextData.earningsStore?.chartData || [];
+const chartData = c.earningsStore?.chartData || [];
 const maxValue = Math.max(...chartData.map(d => d.earnings));
 return {
   data: chartData.map(d => ({ ...d, height: (d.earnings / maxValue) * 100 }))
@@ -768,7 +768,7 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const bar = args.contextData.chartBars;
+const bar = c.chartBars;
 return {
   as: "div"
 };
@@ -791,24 +791,24 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const bar = args.contextData.chartBars;
+const bar = c.chartBars;
 return {
   as: "div"
 };
 ''',
         css: '''
-const bar = args.contextData.chartBars;
+const bar = c.chartBars;
 return `._id {
   width: 100%;
   height: ${bar.height}%;
-  background: ${args.theme.var.color.primary};
+  background: ${t.var.color.primary};
   border-radius: 0.25rem 0.25rem 0 0;
   transition: all 0.3s ease;
   cursor: pointer;
   position: relative;
   
   &:hover {
-    background: ${args.theme.var.color.primary_dark_200};
+    background: ${t.var.color.primary_dark_200};
     
     &::after {
       content: "$${bar.earnings}";
@@ -816,8 +816,8 @@ return `._id {
       top: -1.5rem;
       left: 50%;
       transform: translateX(-50%);
-      background: ${args.theme.var.color.text};
-      color: ${args.theme.var.color.background};
+      background: ${t.var.color.text};
+      color: ${t.var.color.background};
       padding: 0.25rem 0.5rem;
       border-radius: 0.25rem;
       font-size: 0.75rem;
@@ -836,7 +836,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const bar = args.contextData.chartBars;
+const bar = c.chartBars;
 return {
   as: "span",
   text: bar.day
@@ -845,7 +845,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.75rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
       }
@@ -896,7 +896,7 @@ return {
 return `._id {
   font-size: 1.5rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -947,26 +947,26 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const filter = args.contextData.filterButtons;
-const currentFilter = args.contextData.earningsStore?.filters?.type || "all";
+const filter = c.filterButtons;
+const currentFilter = c.earningsStore?.filters?.type || "all";
 const isActive = filter.key === currentFilter;
 
 return {
   as: "button",
   text: filter.label,
-  onClick: () => args.contextData.earningsStore.setStore("filters", "type", filter.key)
+  onClick: () => c.earningsStore.setStore("filters", "type", filter.key)
 };
 ''',
         css: '''
-const filter = args.contextData.filterButtons;
-const currentFilter = args.contextData.earningsStore?.filters?.type || "all";
+const filter = c.filterButtons;
+const currentFilter = c.earningsStore?.filters?.type || "all";
 const isActive = filter.key === currentFilter;
 
 return `._id {
   padding: 0.375rem 0.75rem;
-  background: ${isActive ? args.theme.var.color.primary : args.theme.var.color.background_dark_100};
-  color: ${isActive ? args.theme.var.color.primary_text : args.theme.var.color.text};
-  border: 1px solid ${isActive ? args.theme.var.color.primary : args.theme.var.color.border};
+  background: ${isActive ? t.var.color.primary : t.var.color.background_dark_100};
+  color: ${isActive ? t.var.color.primary_text : t.var.color.text};
+  border: 1px solid ${isActive ? t.var.color.primary : t.var.color.border};
   border-radius: 0.375rem;
   font-size: 0.875rem;
   font-weight: 500;
@@ -974,7 +974,7 @@ return `._id {
   transition: all 0.2s ease;
   
   &:hover {
-    background: ${isActive ? args.theme.var.color.primary_dark_200 : args.theme.var.color.background_dark_200};
+    background: ${isActive ? t.var.color.primary_dark_200 : t.var.color.background_dark_200};
   }
 }`;
 '''
@@ -1043,7 +1043,7 @@ return {
 ''',
         css: '''
 return `._id {
-  border-bottom: 2px solid ${args.theme.var.color.border};
+  border-bottom: 2px solid ${t.var.color.border};
 }`;
 '''
       }
@@ -1065,7 +1065,7 @@ return `._id {
   text-align: left;
   padding: 0.75rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -1087,7 +1087,7 @@ return `._id {
   text-align: left;
   padding: 0.75rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -1109,7 +1109,7 @@ return `._id {
   text-align: left;
   padding: 0.75rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -1131,7 +1131,7 @@ return `._id {
   text-align: right;
   padding: 0.75rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -1158,8 +1158,8 @@ return {
         contextName: "transactionRows",
         loop: true,
         props: '''
-const transactions = args.contextData.earningsStore?.transactions || [];
-const typeFilter = args.contextData.earningsStore?.filters?.type || "all";
+const transactions = c.earningsStore?.transactions || [];
+const typeFilter = c.earningsStore?.filters?.type || "all";
 const filtered = typeFilter === "all" ? transactions : transactions.filter(t => t.type === typeFilter);
 return {
   data: filtered
@@ -1174,18 +1174,18 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const transaction = args.contextData.transactionRows;
+const transaction = c.transactionRows;
 return {
   as: "tr"
 };
 ''',
         css: '''
 return `._id {
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  border-bottom: 1px solid ${t.var.color.border};
   transition: background 0.2s ease;
   
   &:hover {
-    background: ${args.theme.var.color.background_dark_50};
+    background: ${t.var.color.background_dark_50};
   }
 }`;
 '''
@@ -1198,7 +1198,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const transaction = args.contextData.transactionRows;
+const transaction = c.transactionRows;
 return {
   as: "td",
   text: transaction.date
@@ -1207,7 +1207,7 @@ return {
         css: '''
 return `._id {
   padding: 0.75rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
       }
@@ -1219,7 +1219,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const transaction = args.contextData.transactionRows;
+const transaction = c.transactionRows;
 return {
   as: "td",
   text: transaction.type === "earning" ? transaction.problem : transaction.description
@@ -1228,7 +1228,7 @@ return {
         css: '''
 return `._id {
   padding: 0.75rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -1240,7 +1240,7 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const transaction = args.contextData.transactionRows;
+const transaction = c.transactionRows;
 const statusColors = {
   completed: { bg: "success_light_100", text: "success" },
   pending: { bg: "warning_light_100", text: "warning" }
@@ -1265,17 +1265,17 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const transaction = args.contextData.transactionRows;
+const transaction = c.transactionRows;
 return {
   as: "span",
   text: transaction.status
 };
 ''',
         css: '''
-const transaction = args.contextData.transactionRows;
+const transaction = c.transactionRows;
 const statusColors = {
-  completed: args.theme.var.color.success,
-  pending: args.theme.var.color.warning
+  completed: t.var.color.success,
+  pending: t.var.color.warning
 };
 return `._id {
   padding: 0.25rem 0.5rem;
@@ -1296,7 +1296,7 @@ return `._id {
         displayOrder: 4,
         componentName: "Html",
         props: '''
-const transaction = args.contextData.transactionRows;
+const transaction = c.transactionRows;
 const isPositive = transaction.amount > 0;
 return {
   as: "td",
@@ -1304,13 +1304,13 @@ return {
 };
 ''',
         css: '''
-const transaction = args.contextData.transactionRows;
+const transaction = c.transactionRows;
 const isPositive = transaction.amount > 0;
 return `._id {
   padding: 0.75rem;
   text-align: right;
   font-weight: 600;
-  color: ${isPositive ? args.theme.var.color.success : args.theme.var.color.error};
+  color: ${isPositive ? t.var.color.success : t.var.color.error};
 }`;
 '''
       }
@@ -1322,7 +1322,7 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const showDialog = args.contextData.earningsStore?.showWithdrawDialog;
+const showDialog = c.earningsStore?.showWithdrawDialog;
 if (!showDialog) return { as: "span" };
 
 return {
@@ -1342,7 +1342,7 @@ return {
   as: "div",
   onClick: (e) => {
     if (e.target === e.currentTarget) {
-      args.contextData.earningsStore.setStore("showWithdrawDialog", false);
+      c.earningsStore.setStore("showWithdrawDialog", false);
     }
   }
 };
@@ -1405,7 +1405,7 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 1rem;
 }`;
 '''
@@ -1418,7 +1418,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const available = args.contextData.earningsStore?.earnings?.available || 0;
+const available = c.earningsStore?.earnings?.available || 0;
 return {
   as: "div"
 };
@@ -1426,7 +1426,7 @@ return {
         css: '''
 return `._id {
   padding: 1rem;
-  background: ${args.theme.var.color.background_dark_100};
+  background: ${t.var.color.background_dark_100};
   border-radius: 0.5rem;
   margin-bottom: 1.5rem;
 }`;
@@ -1448,7 +1448,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0 0 0.25rem 0;
 }`;
 '''
@@ -1461,7 +1461,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const available = args.contextData.earningsStore?.earnings?.available || 0;
+const available = c.earningsStore?.earnings?.available || 0;
 return {
   as: "p",
   text: `$${available.toFixed(2)}`
@@ -1471,7 +1471,7 @@ return {
 return `._id {
   font-size: 1.5rem;
   font-weight: 700;
-  color: ${args.theme.var.color.success};
+  color: ${t.var.color.success};
   margin: 0;
 }`;
 '''
@@ -1511,7 +1511,7 @@ return {
 return `._id {
   display: block;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 0.5rem;
 }`;
 '''
@@ -1553,7 +1553,7 @@ return `._id {
   left: 0.75rem;
   top: 50%;
   transform: translateY(-50%);
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   font-weight: 600;
 }`;
 '''
@@ -1566,8 +1566,8 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const amount = args.contextData.earningsStore?.withdrawAmount || "";
-const setWithdrawAmount = args.contextData.earningsStore?.fns?.setWithdrawAmount;
+const amount = c.earningsStore?.withdrawAmount || "";
+const setWithdrawAmount = c.earningsStore?.fns?.setWithdrawAmount;
 
 return {
   as: "input",
@@ -1583,19 +1583,19 @@ return {
 return `._id {
   width: 100%;
   padding: 0.75rem 0.75rem 0.75rem 2rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.5rem;
   font-size: 1rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   
   &:focus {
     outline: none;
-    border-color: ${args.theme.var.color.primary};
+    border-color: ${t.var.color.primary};
   }
   
   &::placeholder {
-    color: ${args.theme.var.color.text_light_500};
+    color: ${t.var.color.text_light_500};
   }
 }`;
 '''
@@ -1635,7 +1635,7 @@ return {
 return `._id {
   display: block;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 0.5rem;
 }`;
 '''
@@ -1650,7 +1650,7 @@ return `._id {
         contextName: "methods",
         loop: true,
         props: '''
-const methods = args.contextData.earningsStore?.withdrawalMethods || [];
+const methods = c.earningsStore?.withdrawalMethods || [];
 return {
   data: methods
 };
@@ -1671,10 +1671,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const method = args.contextData.methods;
-const selectedMethod = args.contextData.earningsStore?.selectedMethod;
+const method = c.methods;
+const selectedMethod = c.earningsStore?.selectedMethod;
 const isSelected = selectedMethod === method.id;
-const selectMethod = args.contextData.earningsStore?.fns?.selectWithdrawMethod;
+const selectMethod = c.earningsStore?.fns?.selectWithdrawMethod;
 
 return {
   as: "div",
@@ -1682,8 +1682,8 @@ return {
 };
 ''',
         css: '''
-const method = args.contextData.methods;
-const selectedMethod = args.contextData.earningsStore?.selectedMethod;
+const method = c.methods;
+const selectedMethod = c.earningsStore?.selectedMethod;
 const isSelected = selectedMethod === method.id;
 
 return `._id {
@@ -1691,14 +1691,14 @@ return `._id {
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem;
-  border: 2px solid ${isSelected ? args.theme.var.color.primary : args.theme.var.color.border};
-  background: ${isSelected ? args.theme.var.color.primary_light_50 : args.theme.var.color.background};
+  border: 2px solid ${isSelected ? t.var.color.primary : t.var.color.border};
+  background: ${isSelected ? t.var.color.primary_light_50 : t.var.color.background};
   border-radius: 0.5rem;
   cursor: pointer;
   transition: all 0.2s ease;
   
   &:hover {
-    border-color: ${args.theme.var.color.primary};
+    border-color: ${t.var.color.primary};
   }
 }`;
 '''
@@ -1711,7 +1711,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const method = args.contextData.methods;
+const method = c.methods;
 const iconMap = {
   bank: "carbon:bank",
   paypal: "carbon:logo-paypal"
@@ -1725,7 +1725,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -1737,7 +1737,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const method = args.contextData.methods;
+const method = c.methods;
 return {
   as: "span",
   text: method.name
@@ -1746,7 +1746,7 @@ return {
         css: '''
 return `._id {
   flex: 1;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -1758,8 +1758,8 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const method = args.contextData.methods;
-const selectedMethod = args.contextData.earningsStore?.selectedMethod;
+const method = c.methods;
+const selectedMethod = c.earningsStore?.selectedMethod;
 const isSelected = selectedMethod === method.id;
 
 return {
@@ -1770,12 +1770,12 @@ return {
 };
 ''',
         css: '''
-const method = args.contextData.methods;
-const selectedMethod = args.contextData.earningsStore?.selectedMethod;
+const method = c.methods;
+const selectedMethod = c.earningsStore?.selectedMethod;
 const isSelected = selectedMethod === method.id;
 
 return `._id {
-  color: ${isSelected ? args.theme.var.color.primary : args.theme.var.color.text_light_500};
+  color: ${isSelected ? t.var.color.primary : t.var.color.text_light_500};
 }`;
 '''
       }
@@ -1809,7 +1809,7 @@ return `._id {
         variant: "secondary",
         size: "medium",
         text: "Cancel",
-        onClick: "() => args.contextData.earningsStore.setStore('showWithdrawDialog', false)"
+        onClick: "() => c.earningsStore.setStore('showWithdrawDialog', false)"
       }
     },
     {
@@ -1822,8 +1822,8 @@ return `._id {
         size: "medium",
         text: "Withdraw",
         icon: "carbon:send",
-        disabled: "args.contextData.earningsStore?.isWithdrawing",
-        onClick: "() => args.contextData.earningsStore.fns.processWithdrawal()"
+        disabled: "c.earningsStore?.isWithdrawing",
+        onClick: "() => c.earningsStore.fns.processWithdrawal()"
       }
     }
   ],

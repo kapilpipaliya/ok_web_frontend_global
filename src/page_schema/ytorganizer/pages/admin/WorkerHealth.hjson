@@ -43,23 +43,23 @@ return `._id {
         fns:
           '''
 // STATE MANAGEMENT
-const [healthData, setHealthData] = args.createSignal(null);
-const [queuesData, setQueuesData] = args.createSignal([]);
-const [loading, setLoading] = args.createSignal(true);
-const [error, setError] = args.createSignal(null);
-const [lastUpdated, setLastUpdated] = args.createSignal(null);
-const [autoRefresh, setAutoRefresh] = args.createSignal(true);
-const [currentTime, setCurrentTime] = args.createSignal(Date.now());
+const [healthData, setHealthData] = _.createSignal(null);
+const [queuesData, setQueuesData] = _.createSignal([]);
+const [loading, setLoading] = _.createSignal(true);
+const [error, setError] = _.createSignal(null);
+const [lastUpdated, setLastUpdated] = _.createSignal(null);
+const [autoRefresh, setAutoRefresh] = _.createSignal(true);
+const [currentTime, setCurrentTime] = _.createSignal(Date.now());
 
 // Expandable sections state
-const [expandedSections, setExpandedSections] = args.createSignal({});
+const [expandedSections, setExpandedSections] = _.createSignal({});
 
 // Job data cache
-const [jobDataCache, setJobDataCache] = args.createSignal({});
-const [loadingSections, setLoadingSections] = args.createSignal({});
+const [jobDataCache, setJobDataCache] = _.createSignal({});
+const [loadingSections, setLoadingSections] = _.createSignal({});
 
 // Selection state: { "queueName-sectionKey": Set<jobId> }
-const [selectedJobs, setSelectedJobs] = args.createSignal({});
+const [selectedJobs, setSelectedJobs] = _.createSignal({});
 
 // Update current time every second
 const timeUpdateInterval = setInterval(() => {
@@ -73,13 +73,13 @@ const fetchHealth = async () => {
     setError(null);
 
     // Fetch worker health
-    const healthResponse = await args.executeNamedServerFunction({
+    const healthResponse = await s({
       functionName: "getWorkerHealth",
       contextData: {}
     });
 
     // Fetch available queues
-    const queuesResponse = await args.executeNamedServerFunction({
+    const queuesResponse = await s({
       functionName: "getAvailableQueues",
       contextData: {}
     });
@@ -140,7 +140,7 @@ const loadSectionData = async (queueName, sectionKey, force = false) => {
   setLoadingSections({ ...loadingSections(), [cacheKey]: true });
 
   try {
-    const response = await args.executeNamedServerFunction({
+    const response = await s({
       functionName: "getQueueJobs",
       contextData: {
         queueName,
@@ -177,7 +177,7 @@ const loadMetrics = async (queueName) => {
   setLoadingSections({ ...loadingSections(), [cacheKey]: true });
 
   try {
-    const response = await args.executeNamedServerFunction({
+    const response = await s({
       functionName: "getQueueMetrics",
       contextData: { queueName }
     });
@@ -252,11 +252,11 @@ const deleteSelectedJobs = async (queueName, sectionKey) => {
   const selected = selectedJobs()[key];
 
   if (!selected || selected.size === 0) {
-    args.showWarningToast('No jobs selected');
+    _.showWarningToast('No jobs selected');
     return;
   }
 
-  const rbConfirm = args.contextData?.confirmContext?.rbConfirm;
+  const rbConfirm = c?.confirmContext?.rbConfirm;
   const confirmed = await rbConfirm({
     title: 'Delete Selected Jobs',
     message: `Are you sure you want to delete ${selected.size} selected job(s)? This action cannot be undone.`,
@@ -268,7 +268,7 @@ const deleteSelectedJobs = async (queueName, sectionKey) => {
   if (!confirmed) return;
 
   try {
-    const response = await args.executeNamedServerFunction({
+    const response = await s({
       functionName: "bulkDeleteQueueJobs",
       contextData: {
         queueName,
@@ -278,7 +278,7 @@ const deleteSelectedJobs = async (queueName, sectionKey) => {
     });
 
     if (response.result?.success) {
-      args.showSuccessToast(response.result.message);
+      _.showSuccessToast(response.result.message);
 
       // Clear selection
       setSelectedJobs({
@@ -290,15 +290,15 @@ const deleteSelectedJobs = async (queueName, sectionKey) => {
       await loadSectionData(queueName, sectionKey, true);
       await fetchHealth();
     } else {
-      args.showErrorToast(response.result?.message || 'Failed to delete jobs');
+      _.showErrorToast(response.result?.message || 'Failed to delete jobs');
     }
   } catch (err) {
-    args.showErrorToast('Error deleting jobs: ' + err.message);
+    _.showErrorToast('Error deleting jobs: ' + err.message);
   }
 };
 
 const deleteAllJobs = async (queueName, sectionKey) => {
-  const rbConfirm = args.contextData?.confirmContext?.rbConfirm;
+  const rbConfirm = c?.confirmContext?.rbConfirm;
   const confirmed = await rbConfirm({
     title: 'Delete All Jobs',
     message: `Are you sure you want to delete ALL ${sectionKey} jobs in ${queueName}? This action cannot be undone.`,
@@ -310,7 +310,7 @@ const deleteAllJobs = async (queueName, sectionKey) => {
   if (!confirmed) return;
 
   try {
-    const response = await args.executeNamedServerFunction({
+    const response = await s({
       functionName: "deleteAllQueueJobs",
       contextData: {
         queueName,
@@ -319,7 +319,7 @@ const deleteAllJobs = async (queueName, sectionKey) => {
     });
 
     if (response.result?.success) {
-      args.showSuccessToast(response.result.message);
+      _.showSuccessToast(response.result.message);
 
       // Clear selection
       const key = `${queueName}-${sectionKey}`;
@@ -332,10 +332,10 @@ const deleteAllJobs = async (queueName, sectionKey) => {
       await loadSectionData(queueName, sectionKey, true);
       await fetchHealth();
     } else {
-      args.showErrorToast(response.result?.message || 'Failed to delete all jobs');
+      _.showErrorToast(response.result?.message || 'Failed to delete all jobs');
     }
   } catch (err) {
-    args.showErrorToast('Error deleting all jobs: ' + err.message);
+    _.showErrorToast('Error deleting all jobs: ' + err.message);
   }
 };
 
@@ -399,7 +399,7 @@ fetchHealth();
 startAutoRefresh();
 
 // Cleanup
-args.onCleanup(() => {
+_.onCleanup(() => {
   clearInterval(timeUpdateInterval);
   stopAutoRefresh();
 });
@@ -476,7 +476,7 @@ return {
 return `._id {
   font-size: 2rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0;
 }`;
 '''
@@ -520,14 +520,14 @@ return {
       P: {
         css:
           '''
-const isAutoRefresh = args.fns.autoRefresh();
+const isAutoRefresh = f.autoRefresh();
 
 return `._id {
   padding: 0.625rem 1.25rem;
   border-radius: 0.5rem;
-  border: 2px solid ${isAutoRefresh ? args.theme.var.color.success : args.theme.var.color.border};
-  background: ${isAutoRefresh ? args.theme.var.color.success_light_100 : args.theme.var.color.background};
-  color: ${isAutoRefresh ? args.theme.var.color.success_light_100_text : args.theme.var.color.text};
+  border: 2px solid ${isAutoRefresh ? t.var.color.success : t.var.color.border};
+  background: ${isAutoRefresh ? t.var.color.success_light_100 : t.var.color.background};
+  color: ${isAutoRefresh ? t.var.color.success_light_100_text : t.var.color.text};
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -542,21 +542,21 @@ return `._id {
         componentName: Html
         props:
           '''
-const isAutoRefresh = args.fns.autoRefresh();
+const isAutoRefresh = f.autoRefresh();
 
 return {
   as: "button",
   text: isAutoRefresh ? "Auto-Refresh: ON" : "Auto-Refresh: OFF",
   onClick: () => {
-    const newValue = !args.fns.autoRefresh();
-    args.fns.setAutoRefresh(newValue);
+    const newValue = !f.autoRefresh();
+    f.setAutoRefresh(newValue);
 
     if (newValue) {
-      args.fns.startAutoRefresh();
-      args.showSuccessToast("Auto-refresh enabled");
+      f.startAutoRefresh();
+      _.showSuccessToast("Auto-refresh enabled");
     } else {
-      args.fns.stopAutoRefresh();
-      args.showWarningToast("Auto-refresh disabled");
+      f.stopAutoRefresh();
+      _.showWarningToast("Auto-refresh disabled");
     }
   }
 };
@@ -569,21 +569,21 @@ return {
       P: {
         css:
           '''
-const isLoading = args.fns.loading();
+const isLoading = f.loading();
 
 return `._id {
   padding: 0.625rem 1.25rem;
   border-radius: 0.5rem;
   border: none;
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
   opacity: ${isLoading ? 0.6 : 1};
 
   &:hover:not(:disabled) {
-    background: ${args.theme.var.color.primary_dark_200};
+    background: ${t.var.color.primary_dark_200};
     transform: translateY(-1px);
   }
 
@@ -600,13 +600,13 @@ return `._id {
         componentName: Html
         props:
           '''
-const isLoading = args.fns.loading();
+const isLoading = f.loading();
 
 return {
   as: "button",
   text: isLoading ? "Refreshing..." : "Refresh Now",
   disabled: isLoading,
-  onClick: () => args.fns.fetchHealth()
+  onClick: () => f.fetchHealth()
 };
 '''
       }
@@ -618,7 +618,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   opacity: 0.7;
   font-size: 0.875rem;
 }`;
@@ -627,8 +627,8 @@ return `._id {
         componentName: Html
         props:
           '''
-const lastUpdated = args.fns.lastUpdated();
-const currentTime = args.fns.currentTime();
+const lastUpdated = f.lastUpdated();
+const currentTime = f.currentTime();
 
 const timeAgo = lastUpdated
   ? Math.floor((currentTime - lastUpdated.getTime()) / 1000)
@@ -675,7 +675,7 @@ return {
 return `._id {
   text-align: center;
   padding: 3rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   opacity: 0.7;
   font-size: 1.125rem;
 }`;
@@ -684,8 +684,8 @@ return `._id {
         componentName: Html
         props:
           '''
-const isLoading = args.fns.loading();
-const hasData = args.fns.healthData() !== null;
+const isLoading = f.loading();
+const hasData = f.healthData() !== null;
 
 return {
   as: "div",
@@ -702,8 +702,8 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.error_light_100};
-  border: 2px solid ${args.theme.var.color.error};
+  background: ${t.var.color.error_light_100};
+  border: 2px solid ${t.var.color.error};
   border-radius: 0.5rem;
   padding: 1.5rem;
   margin-bottom: 2rem;
@@ -713,7 +713,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const error = args.fns.error();
+const error = f.error();
 
 return {
   as: "div",
@@ -729,7 +729,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.error_light_100_text};
+  color: ${t.var.color.error_light_100_text};
   margin: 0 0 0.5rem 0;
   font-size: 1.25rem;
   font-weight: 600;
@@ -753,7 +753,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.error_light_100_text};
+  color: ${t.var.color.error_light_100_text};
   margin: 0;
   opacity: 0.9;
 }`;
@@ -762,7 +762,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const error = args.fns.error();
+const error = f.error();
 
 return {
   as: "p",
@@ -779,7 +779,7 @@ return {
         componentName: Html
         props:
           '''
-const healthData = args.fns.healthData();
+const healthData = f.healthData();
 
 return {
   as: "div",
@@ -794,12 +794,12 @@ return {
       P: {
         css:
           '''
-const healthData = args.fns.healthData();
+const healthData = f.healthData();
 const isHealthy = healthData?.healthy;
 
 return `._id {
-  background: ${isHealthy ? args.theme.var.color.success_light_100 : args.theme.var.color.error_light_100};
-  border: 2px solid ${isHealthy ? args.theme.var.color.success : args.theme.var.color.error};
+  background: ${isHealthy ? t.var.color.success_light_100 : t.var.color.error_light_100};
+  border: 2px solid ${isHealthy ? t.var.color.success : t.var.color.error};
   border-radius: 0.75rem;
   padding: 1.5rem;
   margin-bottom: 2rem;
@@ -821,13 +821,13 @@ return {
       P: {
         css:
           '''
-const healthData = args.fns.healthData();
+const healthData = f.healthData();
 const isHealthy = healthData?.healthy;
 
 return `._id {
   font-size: 1.5rem;
   font-weight: 700;
-  color: ${isHealthy ? args.theme.var.color.success_light_100_text : args.theme.var.color.error_light_100_text};
+  color: ${isHealthy ? t.var.color.success_light_100_text : t.var.color.error_light_100_text};
   margin-bottom: 0.5rem;
 }`;
 '''
@@ -835,7 +835,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const healthData = args.fns.healthData();
+const healthData = f.healthData();
 const isHealthy = healthData?.healthy;
 
 return {
@@ -851,20 +851,20 @@ return {
       P: {
         css:
           '''
-const healthData = args.fns.healthData();
+const healthData = f.healthData();
 const isHealthy = healthData?.healthy;
 
 return `._id {
   font-size: 1rem;
   opacity: 0.9;
-  color: ${isHealthy ? args.theme.var.color.success_light_100_text : args.theme.var.color.error_light_100_text};
+  color: ${isHealthy ? t.var.color.success_light_100_text : t.var.color.error_light_100_text};
 }`;
 '''
         displayOrder: 2
         componentName: Html
         props:
           '''
-const queues = args.fns.queuesData();
+const queues = f.queuesData();
 
 // Calculate totals across all queues
 const totals = queues.reduce((acc, queue) => ({
@@ -923,7 +923,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const queues = args.fns.queuesData();
+const queues = f.queuesData();
 
 return {
   as: "div",
@@ -941,8 +941,8 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.background_light_100};
-  border: 1px solid ${args.theme.var.color.border};
+  background: ${t.var.color.background_light_100};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.75rem;
   padding: 1.5rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
@@ -968,14 +968,14 @@ return `._id {
   margin: 0 0 1.5rem 0;
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 1
         componentName: Html
         props:
           '''
-const queue = args.contextData.queue;
+const queue = c.queue;
 
 return {
   as: "h3",
@@ -1000,7 +1000,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const queue = args.contextData.queue;
+const queue = c.queue;
 
 return {
   as: "div",
@@ -1029,9 +1029,9 @@ return `._id {
   justify-content: space-between;
   align-items: center;
   padding: 0.75rem;
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
   border-radius: 0.5rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
 }`;
 '''
         displayOrder: 1
@@ -1052,14 +1052,14 @@ return {
           '''
 return `._id {
   font-weight: 500;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 1
         componentName: Html
         props:
           '''
-const stat = args.contextData.stat;
+const stat = c.stat;
 
 return {
   as: "span",
@@ -1074,8 +1074,8 @@ return {
       P: {
         css:
           '''
-const stat = args.contextData.stat;
-let color = args.theme.var.color[stat.color] || args.theme.var.color.text;
+const stat = c.stat;
+let color = t.var.color[stat.color] || t.var.color.text;
 
 return `._id {
   font-weight: 700;
@@ -1087,7 +1087,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const stat = args.contextData.stat;
+const stat = c.stat;
 
 return {
   as: "span",
@@ -1113,7 +1113,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const queue = args.contextData.queue;
+const queue = c.queue;
 
 return {
   as: "div",
@@ -1163,15 +1163,15 @@ return `._id {
   justify-content: space-between;
   width: 100%;
   padding: 0.75rem 1rem;
-  background: ${args.theme.var.color.background_light_100};
-  border: 1px solid ${args.theme.var.color.border};
+  background: ${t.var.color.background_light_100};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.5rem;
   cursor: pointer;
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.background_light_200};
-    border-color: ${args.theme.var.color.primary};
+    background: ${t.var.color.background_light_200};
+    border-color: ${t.var.color.primary};
   }
 }`;
 '''
@@ -1179,12 +1179,12 @@ return `._id {
         componentName: Html
         props:
           '''
-const section = args.contextData.section;
-const isExpanded = args.fns.expandedSections()[section.queueName]?.[section.key];
+const section = c.section;
+const isExpanded = f.expandedSections()[section.queueName]?.[section.key];
 
 return {
   as: "button",
-  onClick: () => args.fns.toggleSection(section.queueName, section.key)
+  onClick: () => f.toggleSection(section.queueName, section.key)
 };
 '''
       }
@@ -1197,7 +1197,7 @@ return {
           '''
 return `._id {
   font-weight: 500;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   font-size: 0.9375rem;
 }`;
 '''
@@ -1205,7 +1205,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const section = args.contextData.section;
+const section = c.section;
 const countText = section.count !== null ? ` (${section.count})` : '';
 
 return {
@@ -1222,7 +1222,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   opacity: 0.6;
   font-size: 0.75rem;
 }`;
@@ -1231,10 +1231,10 @@ return `._id {
         componentName: Html
         props:
           '''
-const section = args.contextData.section;
-const isExpanded = args.fns.expandedSections()[section.queueName]?.[section.key];
+const section = c.section;
+const isExpanded = f.expandedSections()[section.queueName]?.[section.key];
 const cacheKey = `${section.queueName}-${section.key}`;
-const isLoading = args.fns.loadingSections()[cacheKey];
+const isLoading = f.loadingSections()[cacheKey];
 
 return {
   as: "span",
@@ -1252,8 +1252,8 @@ return {
 return `._id {
   margin-top: 0.5rem;
   padding: 1rem;
-  background: ${args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.border};
+  background: ${t.var.color.background};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.5rem;
   overflow-x: auto;
 }`;
@@ -1262,10 +1262,10 @@ return `._id {
         componentName: Html
         props:
           '''
-const section = args.contextData.section;
-const isExpanded = args.fns.expandedSections()[section.queueName]?.[section.key];
+const section = c.section;
+const isExpanded = f.expandedSections()[section.queueName]?.[section.key];
 const cacheKey = `${section.queueName}-${section.key}`;
-const hasData = args.fns.jobDataCache()[cacheKey]?.data;
+const hasData = f.jobDataCache()[cacheKey]?.data;
 
 return {
   as: "div",
@@ -1291,8 +1291,8 @@ return `._id {
         componentName: Html
         props:
           '''
-const section = args.contextData.section;
-const selectedCount = args.fns.getSelectedCount(section.queueName, section.key);
+const section = c.section;
+const selectedCount = f.getSelectedCount(section.queueName, section.key);
 
 return {
   as: "div",
@@ -1307,14 +1307,14 @@ return {
       P: {
         css:
           '''
-const section = args.contextData.section;
-const selectedCount = args.fns.getSelectedCount(section.queueName, section.key);
+const section = c.section;
+const selectedCount = f.getSelectedCount(section.queueName, section.key);
 
 return `._id {
   padding: 0.5rem 1rem;
-  background: ${selectedCount > 0 ? args.theme.var.color.error : args.theme.var.color.background_light_200};
-  color: ${selectedCount > 0 ? args.theme.var.color.error_text : args.theme.var.color.text};
-  border: 1px solid ${args.theme.var.color.border};
+  background: ${selectedCount > 0 ? t.var.color.error : t.var.color.background_light_200};
+  color: ${selectedCount > 0 ? t.var.color.error_text : t.var.color.text};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.375rem;
   font-size: 0.875rem;
   font-weight: 500;
@@ -1322,8 +1322,8 @@ return `._id {
   transition: all 0.2s ease;
 
   &:hover:not(:disabled) {
-    background: ${args.theme.var.color.error_dark_200};
-    color: ${args.theme.var.color.error_dark_200_text};
+    background: ${t.var.color.error_dark_200};
+    color: ${t.var.color.error_dark_200_text};
   }
 
   &:disabled {
@@ -1336,14 +1336,14 @@ return `._id {
         componentName: Html
         props:
           '''
-const section = args.contextData.section;
-const selectedCount = args.fns.getSelectedCount(section.queueName, section.key);
+const section = c.section;
+const selectedCount = f.getSelectedCount(section.queueName, section.key);
 
 return {
   as: "button",
   text: `Delete Selected (${selectedCount})`,
   disabled: selectedCount === 0,
-  onClick: () => args.fns.deleteSelectedJobs(section.queueName, section.key)
+  onClick: () => f.deleteSelectedJobs(section.queueName, section.key)
 };
 '''
       }
@@ -1356,9 +1356,9 @@ return {
           '''
 return `._id {
   padding: 0.5rem 1rem;
-  background: ${args.theme.var.color.background_light_200};
-  color: ${args.theme.var.color.text};
-  border: 1px solid ${args.theme.var.color.error};
+  background: ${t.var.color.background_light_200};
+  color: ${t.var.color.text};
+  border: 1px solid ${t.var.color.error};
   border-radius: 0.375rem;
   font-size: 0.875rem;
   font-weight: 500;
@@ -1366,8 +1366,8 @@ return `._id {
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.error};
-    color: ${args.theme.var.color.error_text};
+    background: ${t.var.color.error};
+    color: ${t.var.color.error_text};
   }
 }`;
 '''
@@ -1375,12 +1375,12 @@ return `._id {
         componentName: Html
         props:
           '''
-const section = args.contextData.section;
+const section = c.section;
 
 return {
   as: "button",
   text: "Delete All",
-  onClick: () => args.fns.deleteAllJobs(section.queueName, section.key)
+  onClick: () => f.deleteAllJobs(section.queueName, section.key)
 };
 '''
       }
@@ -1400,7 +1400,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const section = args.contextData.section;
+const section = c.section;
 
 return {
   as: "table",
@@ -1417,9 +1417,9 @@ return {
         componentName: Html
         props:
           '''
-const section = args.contextData.section;
+const section = c.section;
 const cacheKey = `${section.queueName}-${section.key}`;
-const cachedData = args.fns.jobDataCache()[cacheKey];
+const cachedData = f.jobDataCache()[cacheKey];
 const jobs = cachedData?.data?.jobs || [];
 const showActions = ['waiting', 'failed', 'delayed', 'completed'].includes(section.key);
 
@@ -1442,8 +1442,8 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.background_light_200};
-  border-bottom: 2px solid ${args.theme.var.color.border};
+  background: ${t.var.color.background_light_200};
+  border-bottom: 2px solid ${t.var.color.border};
 }`;
 '''
         displayOrder: 1
@@ -1473,7 +1473,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const headerData = args.contextData.headerData;
+const headerData = c.headerData;
 
 return {
   as: "th",
@@ -1498,9 +1498,9 @@ return `._id {
         componentName: Html
         props:
           '''
-const section = args.contextData.section;
-const headerData = args.contextData.headerData;
-const selectedCount = args.fns.getSelectedCount(section.queueName, section.key);
+const section = c.section;
+const headerData = c.headerData;
+const selectedCount = f.getSelectedCount(section.queueName, section.key);
 const totalCount = headerData.jobs.length;
 const jobIds = headerData.jobs.map(j => j.id);
 
@@ -1508,7 +1508,7 @@ return {
   as: "input",
   type: "checkbox",
   checked: selectedCount === totalCount && totalCount > 0,
-  onChange: () => args.fns.toggleSelectAll(section.queueName, section.key, jobIds)
+  onChange: () => f.toggleSelectAll(section.queueName, section.key, jobIds)
 };
 '''
       }
@@ -1521,8 +1521,8 @@ return {
         componentName: Html
         props:
           '''
-const section = args.contextData.section;
-const headerData = args.contextData.headerData;
+const section = c.section;
+const headerData = c.headerData;
 
 let headers = ["Job ID", "Item", "User"];
 
@@ -1559,7 +1559,7 @@ return `._id {
   padding: 0.75rem;
   text-align: left;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   white-space: nowrap;
 }`;
 '''
@@ -1581,7 +1581,7 @@ return {
         componentName: Html
         props:
           '''
-const header = args.contextData.header;
+const header = c.header;
 
 return {
   text: header.text
@@ -1597,9 +1597,9 @@ return {
         componentName: Html
         props:
           '''
-const section = args.contextData.section;
+const section = c.section;
 const cacheKey = `${section.queueName}-${section.key}`;
-const cachedData = args.fns.jobDataCache()[cacheKey];
+const cachedData = f.jobDataCache()[cacheKey];
 const jobs = cachedData?.data?.jobs || [];
 
 return {
@@ -1618,14 +1618,14 @@ return {
         css:
           '''
 return `._id {
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  border-bottom: 1px solid ${t.var.color.border};
 
   &:last-child {
     border-bottom: none;
   }
 
   &:hover {
-    background: ${args.theme.var.color.background_light_100};
+    background: ${t.var.color.background_light_100};
   }
 }`;
 '''
@@ -1653,7 +1653,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const section = args.contextData.section;
+const section = c.section;
 const showCheckbox = ['waiting', 'failed', 'delayed', 'completed'].includes(section.key);
 
 return {
@@ -1679,15 +1679,15 @@ return `._id {
         componentName: Html
         props:
           '''
-const section = args.contextData.section;
-const job = args.contextData.job;
-const isSelected = args.fns.isJobSelected(section.queueName, section.key, job.id);
+const section = c.section;
+const job = c.job;
+const isSelected = f.isJobSelected(section.queueName, section.key, job.id);
 
 return {
   as: "input",
   type: "checkbox",
   checked: isSelected,
-  onChange: () => args.fns.toggleJobSelection(section.queueName, section.key, job.id)
+  onChange: () => f.toggleJobSelection(section.queueName, section.key, job.id)
 };
 '''
       }
@@ -1700,12 +1700,12 @@ return {
         componentName: Html
         props:
           '''
-const job = args.contextData.job;
-const section = args.contextData.section;
+const job = c.job;
+const section = c.section;
 
 // Helper to create YouTube link
 const createYouTubeLink = (job) => {
-  const name = job.channelName || job.playlistName || job.customName || args.fns.truncate(job.channelId || job.playlistId, 20);
+  const name = job.channelName || job.playlistName || job.customName || f.truncate(job.channelId || job.playlistId, 20);
   let url = '';
   if (job.channelId) {
     // For channels, prefer handle format if available
@@ -1735,39 +1735,39 @@ const ytLink = createYouTubeLink(job);
 
 // Common cells
 cellData.push(
-  { value: args.fns.truncate(job.id, 15), label: 'Job ID', type: 'text' },
+  { value: f.truncate(job.id, 15), label: 'Job ID', type: 'text' },
   { value: ytLink.name, url: ytLink.url, label: 'Item', type: 'link' },
-  { value: job.username || args.fns.truncate(job.userUuid, 20), label: 'User', type: 'text' }
+  { value: job.username || f.truncate(job.userUuid, 20), label: 'User', type: 'text' }
 );
 
 // State-specific cells
 if (section.key === 'active') {
   cellData.push(
     { value: `${job.progress || 0}%`, label: 'Progress', type: 'text' },
-    { value: args.fns.formatDuration(job.duration), label: 'Duration', type: 'text' },
-    { value: args.fns.formatJobData(job), label: 'Job Data', type: 'json' }
+    { value: f.formatDuration(job.duration), label: 'Duration', type: 'text' },
+    { value: f.formatJobData(job), label: 'Job Data', type: 'json' }
   );
 } else if (section.key === 'waiting') {
   cellData.push(
-    { value: args.fns.formatTime(job.timestamp), label: 'Queued', type: 'text' },
-    { value: args.fns.formatJobData(job), label: 'Job Data', type: 'json' }
+    { value: f.formatTime(job.timestamp), label: 'Queued', type: 'text' },
+    { value: f.formatJobData(job), label: 'Job Data', type: 'json' }
   );
 } else if (section.key === 'failed') {
   cellData.push(
-    { value: args.fns.truncate(job.failedReason, 30), label: 'Error', type: 'text' },
+    { value: f.truncate(job.failedReason, 30), label: 'Error', type: 'text' },
     { value: `${job.attemptsMade || 0}/3`, label: 'Attempts', type: 'text' },
-    { value: args.fns.formatJobData(job), label: 'Job Data', type: 'json' }
+    { value: f.formatJobData(job), label: 'Job Data', type: 'json' }
   );
 } else if (section.key === 'completed') {
   cellData.push(
-    { value: args.fns.formatDuration(job.duration), label: 'Duration', type: 'text' },
-    { value: args.fns.formatTime(job.finishedOn), label: 'Completed', type: 'text' },
-    { value: args.fns.formatJobData(job), label: 'Job Data', type: 'json' }
+    { value: f.formatDuration(job.duration), label: 'Duration', type: 'text' },
+    { value: f.formatTime(job.finishedOn), label: 'Completed', type: 'text' },
+    { value: f.formatJobData(job), label: 'Job Data', type: 'json' }
   );
 } else if (section.key === 'delayed') {
   cellData.push(
-    { value: args.fns.formatTime(job.timestamp), label: 'Scheduled', type: 'text' },
-    { value: args.fns.formatJobData(job), label: 'Job Data', type: 'json' }
+    { value: f.formatTime(job.timestamp), label: 'Scheduled', type: 'text' },
+    { value: f.formatJobData(job), label: 'Job Data', type: 'json' }
   );
 }
 
@@ -1787,7 +1787,7 @@ return {
           '''
 return `._id {
   padding: 0.75rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 1
@@ -1806,7 +1806,7 @@ return {
       P: {
         css:
           '''
-const cell = args.contextData.cell;
+const cell = c.cell;
 
 if (cell.type === 'json') {
   return `._id {
@@ -1820,7 +1820,7 @@ if (cell.type === 'json') {
 
 if (cell.type === 'link') {
   return `._id {
-    color: ${args.theme.var.color.primary};
+    color: ${t.var.color.primary};
     text-decoration: none;
 
     &:hover {
@@ -1830,14 +1830,14 @@ if (cell.type === 'link') {
 }
 
 return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 1
         componentName: Html
         props:
           '''
-const cell = args.contextData.cell;
+const cell = c.cell;
 
 if (cell.type === 'link' && cell.url) {
   return {
@@ -1872,9 +1872,9 @@ return `._id {
         componentName: Html
         props:
           '''
-const section = args.contextData.section;
+const section = c.section;
 const cacheKey = `${section.queueName}-metrics`;
-const cachedData = args.fns.jobDataCache()[cacheKey];
+const cachedData = f.jobDataCache()[cacheKey];
 const data = cachedData?.data;
 
 return {
@@ -1903,18 +1903,18 @@ return {
           '''
 return `._id {
   padding: 1rem;
-  background: ${args.theme.var.color.background_light_100};
+  background: ${t.var.color.background_light_100};
   border-radius: 0.5rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   font-weight: 500;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 1
         componentName: Html
         props:
           '''
-const metric = args.contextData.metric;
+const metric = c.metric;
 
 return {
   as: "div",

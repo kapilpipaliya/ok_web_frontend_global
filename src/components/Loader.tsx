@@ -36,7 +36,7 @@ export const Loader: Component<{
           left: 0;
           width: 100%;
           height: 100vh;
-          background-color: \${args.theme.var.color.background_light_100};
+          background-color: \${t.var.color.background_light_100};
           z-index: 9999;
         }\`;`
           : "",
@@ -49,9 +49,9 @@ export const Loader: Component<{
             display: inline-block;
             width: ${getSize()?.spinner}px;
             height: ${getSize()?.spinner}px;
-            border: 3px solid \${args.theme.var.color.border};
+            border: 3px solid \${t.var.color.border};
             border-radius: 50%;
-            border-top-color: \${args.theme.var.color.primary};
+            border-top-color: \${t.var.color.primary};
             animation: spinner 1s ease-in-out infinite;
           }\`;`,
           `return \`@keyframes spinner {
@@ -63,7 +63,7 @@ export const Loader: Component<{
         <As
           as="p"
           css={`return \`._id {
-            color: \${args.theme.var.color.text};
+            color: \${t.var.color.text};
             font-size: ${getSize()?.fontSize}px;
             margin: 0;
             text-align: center;

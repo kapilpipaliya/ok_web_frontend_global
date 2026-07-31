@@ -15,16 +15,16 @@
           '''return `._id {
   display: inline-flex;
   align-items: stretch;
-  border-radius: ${args.theme.var.borderRadius.md};
-  border: 1px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background};
+  border-radius: ${t.var.borderRadius.md};
+  border: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background};
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
           '''return {
   as: "div",
-  class: args.contextData.props?.class
+  class: c.props?.class
 };'''
       }
     }
@@ -51,15 +51,15 @@
       P: {
         css:
           '''return `._id {
-  border-radius: ${args.theme.var.borderRadius.md} 0 0 ${args.theme.var.borderRadius.md};
+  border-radius: ${t.var.borderRadius.md} 0 0 ${t.var.borderRadius.md};
 }`;'''
         displayOrder: 1
         componentName: TomSelect
         props:
-          '''const field = args.contextData.props?.field || "";
-const options = args.contextData.props?.options || [];
-const onFieldChange = args.contextData.props?.onFieldChange || (() => {});
-const disabled = args.contextData.props?.disabled || false;
+          '''const field = c.props?.field || "";
+const options = c.props?.options || [];
+const onFieldChange = c.props?.onFieldChange || (() => {});
+const disabled = c.props?.disabled || false;
 
 return {
   value: field,
@@ -80,7 +80,7 @@ return {
         css:
           '''return `._id {
   width: 1px;
-  background: ${args.theme.var.color.border};
+  background: ${t.var.color.border};
 }`;'''
         displayOrder: 2
         componentName: Html
@@ -99,20 +99,20 @@ return {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 ${args.theme.var.spacing.md};
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  padding: 0 ${t.var.spacing.md};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   border: none;
-  border-radius: 0 ${args.theme.var.borderRadius.md} ${args.theme.var.borderRadius.md} 0;
+  border-radius: 0 ${t.var.borderRadius.md} ${t.var.borderRadius.md} 0;
   cursor: pointer;
   transition: all 150ms ease;
 
   &:hover:not(:disabled) {
-    background: ${args.theme.var.color.background_dark_200};
+    background: ${t.var.color.background_dark_200};
   }
 
   &:active:not(:disabled) {
-    background: ${args.theme.var.color.background_dark_300};
+    background: ${t.var.color.background_dark_300};
   }
 
   &:disabled {
@@ -123,9 +123,9 @@ return {
         displayOrder: 3
         componentName: Html
         props:
-          '''const direction = args.contextData.props?.direction || "asc";
-const onDirectionToggle = args.contextData.props?.onDirectionToggle || (() => {});
-const disabled = args.contextData.props?.disabled || false;
+          '''const direction = c.props?.direction || "asc";
+const onDirectionToggle = c.props?.onDirectionToggle || (() => {});
+const disabled = c.props?.disabled || false;
 
 // Determine icon based on direction
 const icon = direction === "asc" ? "arrow-up" : "arrow-down";
@@ -154,7 +154,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const direction = args.contextData.props?.direction || "asc";
+          '''const direction = c.props?.direction || "asc";
 const iconName = direction === "asc" ? "ph:arrow-up" : "ph:arrow-down";
 
 return {

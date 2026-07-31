@@ -97,16 +97,16 @@ const emptyRow = () => {
   return o;
 };
 
-const [rows, setRows] = args.createSignal([{}]);
-const [busy, setBusy] = args.createSignal(false);
-const [pdfTemplate, setPdfTemplate] = args.createSignal(null);
-const [templateFileLabel, setTemplateFileLabel] = args.createSignal("");
+const [rows, setRows] = _.createSignal([{}]);
+const [busy, setBusy] = _.createSignal(false);
+const [pdfTemplate, setPdfTemplate] = _.createSignal(null);
+const [templateFileLabel, setTemplateFileLabel] = _.createSignal("");
 
-const [fieldPatches, setFieldPatches] = args.createSignal({});
-const [origFonts, setOrigFonts] = args.createSignal({});
-const [fontRegKey, setFontRegKey] = args.createSignal("");
-const [pendingFontBytes, setPendingFontBytes] = args.createSignal(null);
-const [customFonts, setCustomFonts] = args.createSignal([]);
+const [fieldPatches, setFieldPatches] = _.createSignal({});
+const [origFonts, setOrigFonts] = _.createSignal({});
+const [fontRegKey, setFontRegKey] = _.createSignal("");
+const [pendingFontBytes, setPendingFontBytes] = _.createSignal(null);
+const [customFonts, setCustomFonts] = _.createSignal([]);
 
 const schemaFieldNames = () => {
   const t = pdfTemplate();
@@ -152,9 +152,9 @@ const onPendingFontFile = async (e) => {
   try {
     const buf = await f.arrayBuffer();
     setPendingFontBytes(new Uint8Array(buf));
-    args.showSuccessToast("Font file ready: " + f.name);
+    _.showSuccessToast("Font file ready: " + f.name);
   } catch (err) {
-    args.showErrorToast(err?.message || "Could not read font file");
+    _.showErrorToast(err?.message || "Could not read font file");
     setPendingFontBytes(null);
   }
   e.target.value = "";
@@ -186,19 +186,19 @@ const fetchGoogleFontBytes = async (familyName) => {
 const registerCustomFont = async () => {
   const key = fontRegKey().trim();
   if (!key) {
-    args.showWarningToast("Enter a font key / family name first");
+    _.showWarningToast("Enter a font key / family name first");
     return;
   }
   let data = pendingFontBytes();
   if (!data || !data.length) {
     try {
       const familyName = key.replace(/[_-]+/g, " ");
-      args.showWarningToast(
+      _.showWarningToast(
         "No file selected. Downloading from Google Fonts: " + familyName,
       );
       data = await fetchGoogleFontBytes(familyName);
     } catch (err) {
-      args.showErrorToast(
+      _.showErrorToast(
         err?.message || "Could not download font from Google Fonts",
       );
       return;
@@ -211,7 +211,7 @@ const registerCustomFont = async () => {
   });
   setFontRegKey("");
   setPendingFontBytes(null);
-  args.showSuccessToast("Registered font: " + clean);
+  _.showSuccessToast("Registered font: " + clean);
 };
 
 const removeCustomFont = (fontKey) => {
@@ -220,10 +220,10 @@ const removeCustomFont = (fontKey) => {
 
 const clearFieldPatches = () => {
   setFieldPatches({});
-  args.showSuccessToast("Typography overrides cleared");
+  _.showSuccessToast("Typography overrides cleared");
 };
 
-const [statusMsg, setStatusMsg] = args.createSignal(
+const [statusMsg, setStatusMsg] = _.createSignal(
   "Choose a pdfme template JSON file (.json). Table columns match the template’s field names after you load it — add/remove rows or import CSV, then download ZIP.",
 );
 
@@ -239,7 +239,7 @@ const onTemplateSelected = async (e) => {
       !parsed.schemas ||
       parsed.basePdf === undefined
     ) {
-      args.showErrorToast("Invalid pdfme template: need schemas and basePdf");
+      _.showErrorToast("Invalid pdfme template: need schemas and basePdf");
       setPdfTemplate(null);
       setTemplateFileLabel("");
       return;
@@ -249,9 +249,9 @@ const onTemplateSelected = async (e) => {
     setOrigFonts(readOriginalFontNames(parsed));
     setFieldPatches({});
     setRows((prev) => reshapeRowsToTemplateKeys(parsed, prev));
-    args.showSuccessToast("Template loaded: " + f.name);
+    _.showSuccessToast("Template loaded: " + f.name);
   } catch (err) {
-    args.showErrorToast(err?.message || "Could not read template JSON");
+    _.showErrorToast(err?.message || "Could not read template JSON");
     setPdfTemplate(null);
     setTemplateFileLabel("");
   }
@@ -286,31 +286,31 @@ const onCsvSelected = async (e) => {
   if (!f) return;
   const keys = schemaFieldNames();
   if (!keys.length) {
-    args.showWarningToast("Load a pdfme template first so CSV headers can be matched to field names");
+    _.showWarningToast("Load a pdfme template first so CSV headers can be matched to field names");
     e.target.value = "";
     return;
   }
   setStatusMsg("Parsing…");
   try {
     const text = await f.text();
-    const response = await args.executeNamedServerFunction({
+    const response = await s({
       functionName: "askDonationReportParseAndNormalizeCsv",
       contextData: { csvText: text, fieldNames: keys },
     });
     if (response?.error) {
-      args.showErrorToast(response.error);
+      _.showErrorToast(response.error);
       setStatusMsg("");
       return;
     }
     const r = response?.result;
     if (!r?.success) {
-      args.showErrorToast(r?.message || "Parse failed");
+      _.showErrorToast(r?.message || "Parse failed");
       setStatusMsg("");
       return;
     }
     const normalized = normalizeRowsLocally(r.data.rows);
     if (!normalized.ok) {
-      args.showErrorToast(normalized.message);
+      _.showErrorToast(normalized.message);
       setStatusMsg("");
       return;
     }
@@ -320,9 +320,9 @@ const onCsvSelected = async (e) => {
         ? " (missing columns filled empty: " + r.data.missingColumns.join(", ") + ")"
         : "";
     setStatusMsg(r.data.rowCount + " row(s) loaded." + warn + " Edit if needed, then download ZIP.");
-    args.showSuccessToast("CSV loaded");
+    _.showSuccessToast("CSV loaded");
   } catch (err) {
-    args.showErrorToast(err?.message || "Failed to read file");
+    _.showErrorToast(err?.message || "Failed to read file");
     setStatusMsg("");
   }
   e.target.value = "";
@@ -339,8 +339,8 @@ const normalizeRowsLocally = (raw) => {
       rows: [],
     };
   }
-  const rowSchema = args.z
-    .record(args.z.string(), args.z.any())
+  const rowSchema = _.z
+    .record(_.z.string(), _.z.any())
     .transform((obj) => {
       const out = {};
       for (const k of keys) {
@@ -349,7 +349,7 @@ const normalizeRowsLocally = (raw) => {
       }
       return out;
     });
-  const arrSchema = args.z.array(rowSchema).max(MAX_ROWS);
+  const arrSchema = _.z.array(rowSchema).max(MAX_ROWS);
   const parsed = arrSchema.safeParse(raw);
   if (!parsed.success) {
     const issues = parsed.error?.issues ?? parsed.error?.errors ?? [];
@@ -364,16 +364,16 @@ const normalizeRowsLocally = (raw) => {
 const downloadZip = async () => {
   const template = pdfTemplate();
   if (!template) {
-    args.showWarningToast("Select a pdfme template JSON file first");
+    _.showWarningToast("Select a pdfme template JSON file first");
     return;
   }
   if (!rows().length) {
-    args.showWarningToast("No rows");
+    _.showWarningToast("No rows");
     return;
   }
   const norm = normalizeRowsLocally(rows());
   if (!norm.ok) {
-    args.showErrorToast(norm.message);
+    _.showErrorToast(norm.message);
     return;
   }
   setRows(norm.rows);
@@ -498,11 +498,11 @@ const downloadZip = async () => {
     a.download = "donation-reports-" + Date.now() + ".zip";
     a.click();
     URL.revokeObjectURL(url);
-    args.showSuccessToast("ZIP download started");
+    _.showSuccessToast("ZIP download started");
     setStatusMsg("Done. " + list.length + " PDF(s) in ZIP.");
   } catch (err) {
     console.error(err);
-    args.showErrorToast(err?.message || "ZIP generation failed");
+    _.showErrorToast(err?.message || "ZIP generation failed");
     setStatusMsg("");
   } finally {
     setBusy(false);
@@ -572,7 +572,7 @@ return {
           '''return `._id {
   font-size: 2rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 0.75rem;
 }`;
 '''
@@ -593,7 +593,7 @@ return {
           '''return `._id {
   font-size: 0.95rem;
   line-height: 1.55;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin-bottom: 1.25rem;
 }`;
 '''
@@ -635,7 +635,7 @@ return {
 ._id .file-field-label {
   font-size: 0.875rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   white-space: nowrap;
 }`;
 '''
@@ -667,7 +667,7 @@ return {
   type: "file",
   accept: ".json,application/json",
   title: "pdfme template JSON",
-  onChange: (e) => args.fns.onTemplateSelected(e),
+  onChange: (e) => f.onTemplateSelected(e),
 };'''
         css:
           '''return `._id {
@@ -695,7 +695,7 @@ return {
 ._id .file-field-label {
   font-size: 0.875rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   white-space: nowrap;
 }`;
 '''
@@ -726,7 +726,7 @@ return {
   as: "input",
   type: "file",
   accept: ".csv,text/csv",
-  onChange: (e) => args.fns.onCsvSelected(e),
+  onChange: (e) => f.onCsvSelected(e),
 };'''
         css:
           '''return `._id {
@@ -747,16 +747,16 @@ return {
   as: "button",
   type: "button",
   text: "Add row",
-  disabled: args.fns.busy(),
-  onClick: () => args.fns.addRow(),
+  disabled: f.busy(),
+  onClick: () => f.addRow(),
 };'''
         css:
           '''return `._id {
   padding: 0.5rem 1rem;
   border-radius: 0.5rem;
-  border: 1px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background_light_100};
-  color: ${args.theme.var.color.text};
+  border: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background_light_100};
+  color: ${t.var.color.text};
   cursor: pointer;
   font-weight: 600;
   &:disabled { opacity: 0.55; cursor: not-allowed; }
@@ -775,16 +775,16 @@ return {
   as: "button",
   type: "button",
   text: "Download ZIP of PDFs",
-  disabled: args.fns.busy() || args.fns.rows().length === 0 || !args.fns.templateFileLabel(),
-  onClick: () => args.fns.downloadZip(),
+  disabled: f.busy() || f.rows().length === 0 || !f.templateFileLabel(),
+  onClick: () => f.downloadZip(),
 };'''
         css:
           '''return `._id {
   padding: 0.5rem 1rem;
   border-radius: 0.5rem;
   border: 1px solid transparent;
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
   cursor: pointer;
   font-weight: 600;
   &:disabled { opacity: 0.55; cursor: not-allowed; }
@@ -803,9 +803,9 @@ return {
           '''return `._id {
   margin: 1rem 0 1.25rem;
   padding: 1rem 1.1rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.5rem;
-  background: ${args.theme.var.color.background_light_50};
+  background: ${t.var.color.background_light_50};
 }`;
 '''
       }
@@ -825,7 +825,7 @@ return {
           '''return `._id {
   font-size: 1.1rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem;
 }`;
 '''
@@ -846,7 +846,7 @@ return {
           '''return `._id {
   font-size: 0.875rem;
   line-height: 1.5;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0 0 0.85rem;
 }`;
 '''
@@ -881,18 +881,18 @@ return {
   as: "input",
   type: "text",
   placeholder: "Font key / Google family (e.g. Inter)",
-  disabled: args.fns.busy(),
-  value: args.fns.fontRegKey(),
-  onInput: (e) => args.fns.setFontRegKey(e.currentTarget.value),
+  disabled: f.busy(),
+  value: f.fontRegKey(),
+  onInput: (e) => f.setFontRegKey(e.currentTarget.value),
 };'''
         css:
           '''return `._id {
   min-width: 10rem;
   padding: 0.35rem 0.5rem;
   border-radius: 0.35rem;
-  border: 1px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  border: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -908,9 +908,9 @@ return {
   as: "input",
   type: "file",
   accept: ".ttf,.otf,font/ttf,font/otf,application/x-font-ttf",
-  disabled: args.fns.busy(),
+  disabled: f.busy(),
   title: "Font file",
-  onChange: (e) => args.fns.onPendingFontFile(e),
+  onChange: (e) => f.onPendingFontFile(e),
 };'''
         css:
           '''return `._id { font-size: 0.85rem; max-width: 14rem; }`;
@@ -928,16 +928,16 @@ return {
   as: "button",
   type: "button",
   text: "Register font",
-  disabled: args.fns.busy(),
-  onClick: () => args.fns.registerCustomFont(),
+  disabled: f.busy(),
+  onClick: () => f.registerCustomFont(),
 };'''
         css:
           '''return `._id {
   padding: 0.4rem 0.75rem;
   border-radius: 0.35rem;
-  border: 1px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background_light_100};
-  color: ${args.theme.var.color.text};
+  border: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background_light_100};
+  color: ${t.var.color.text};
   font-weight: 600;
   cursor: pointer;
   &:disabled { opacity: 0.55; cursor: not-allowed; }
@@ -954,7 +954,7 @@ return {
         props:
           '''return {
   as: "div",
-  data: () => args.fns.customFonts(),
+  data: () => f.customFonts(),
   loop: true,
   contextName: "cf",
 };'''
@@ -994,12 +994,12 @@ return {
         props:
           '''return {
   as: "span",
-  text: "Registered: " + args.contextData.cf.key,
+  text: "Registered: " + c.cf.key,
 };'''
         css:
           '''return `._id {
   font-family: monospace;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -1015,16 +1015,16 @@ return {
   as: "button",
   type: "button",
   text: "Remove",
-  disabled: args.fns.busy(),
-  onClick: () => args.fns.removeCustomFont(args.contextData.cf.key),
+  disabled: f.busy(),
+  onClick: () => f.removeCustomFont(c.cf.key),
 };'''
         css:
           '''return `._id {
   padding: 0.2rem 0.45rem;
   font-size: 0.8rem;
   border-radius: 0.3rem;
-  border: 1px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background};
+  border: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background};
   cursor: pointer;
   &:disabled { opacity: 0.55; cursor: not-allowed; }
 }`;
@@ -1046,7 +1046,7 @@ return {
           '''return `._id {
   font-size: 0.8rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0.35rem 0 0.4rem;
 }`;
 '''
@@ -1061,7 +1061,7 @@ return {
         props:
           '''return {
   as: "div",
-  data: () => args.fns.styleRows(),
+  data: () => f.styleRows(),
   loop: true,
   contextName: "sty",
 };'''
@@ -1107,12 +1107,12 @@ return {
         props:
           '''return {
   as: "span",
-  text: args.contextData.sty.name,
+  text: c.sty.name,
 };'''
         css:
           '''return `._id {
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   word-break: break-all;
 }`;
 '''
@@ -1128,12 +1128,12 @@ return {
           '''return {
   as: "input",
   type: "text",
-  disabled: args.fns.busy(),
+  disabled: f.busy(),
   placeholder:
-    "def: " + (args.fns.origFonts()[args.contextData.sty.name] || "Roboto"),
-  value: String(args.fns.getFieldPatch(args.contextData.sty.name).fontName ?? ""),
+    "def: " + (f.origFonts()[c.sty.name] || "Roboto"),
+  value: String(f.getFieldPatch(c.sty.name).fontName ?? ""),
   onInput: (e) =>
-    args.fns.patchFieldPatch(args.contextData.sty.name, "fontName", e.currentTarget.value),
+    f.patchFieldPatch(c.sty.name, "fontName", e.currentTarget.value),
 };'''
         css:
           '''return `._id {
@@ -1141,10 +1141,10 @@ return {
   min-width: 0;
   box-sizing: border-box;
   padding: 0.25rem 0.35rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.25rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -1161,10 +1161,10 @@ return {
   type: "text",
   inputMode: "decimal",
   placeholder: "size",
-  disabled: args.fns.busy(),
-  value: String(args.fns.getFieldPatch(args.contextData.sty.name).fontSize ?? ""),
+  disabled: f.busy(),
+  value: String(f.getFieldPatch(c.sty.name).fontSize ?? ""),
   onInput: (e) =>
-    args.fns.patchFieldPatch(args.contextData.sty.name, "fontSize", e.currentTarget.value),
+    f.patchFieldPatch(c.sty.name, "fontSize", e.currentTarget.value),
 };'''
         css:
           '''return `._id {
@@ -1172,10 +1172,10 @@ return {
   min-width: 0;
   box-sizing: border-box;
   padding: 0.25rem 0.35rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.25rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -1191,11 +1191,11 @@ return {
   as: "input",
   type: "checkbox",
   title: "Underline",
-  disabled: args.fns.busy(),
-  checked: args.fns.getFieldPatch(args.contextData.sty.name).underline === true,
+  disabled: f.busy(),
+  checked: f.getFieldPatch(c.sty.name).underline === true,
   onChange: (e) =>
-    args.fns.patchFieldPatch(
-      args.contextData.sty.name,
+    f.patchFieldPatch(
+      c.sty.name,
       "underline",
       e.currentTarget.checked,
     ),
@@ -1213,11 +1213,11 @@ return {
   as: "input",
   type: "checkbox",
   title: "Strikethrough",
-  disabled: args.fns.busy(),
-  checked: args.fns.getFieldPatch(args.contextData.sty.name).strikethrough === true,
+  disabled: f.busy(),
+  checked: f.getFieldPatch(c.sty.name).strikethrough === true,
   onChange: (e) =>
-    args.fns.patchFieldPatch(
-      args.contextData.sty.name,
+    f.patchFieldPatch(
+      c.sty.name,
       "strikethrough",
       e.currentTarget.checked,
     ),
@@ -1235,17 +1235,17 @@ return {
   as: "button",
   type: "button",
   text: "Clear typography overrides",
-  disabled: args.fns.busy(),
-  onClick: () => args.fns.clearFieldPatches(),
+  disabled: f.busy(),
+  onClick: () => f.clearFieldPatches(),
 };'''
         css:
           '''return `._id {
   padding: 0.35rem 0.65rem;
   font-size: 0.8rem;
   border-radius: 0.35rem;
-  border: 1px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  border: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   cursor: pointer;
   &:disabled { opacity: 0.55; cursor: not-allowed; }
 }`;
@@ -1261,12 +1261,12 @@ return {
         props:
           '''return {
   as: "p",
-  text: args.fns.statusMsg(),
+  text: f.statusMsg(),
 };'''
         css:
           '''return `._id {
   font-size: 0.9rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   min-height: 1.25rem;
   margin-bottom: 1rem;
 }`;
@@ -1283,7 +1283,7 @@ return {
         css:
           '''return `._id {
   overflow-x: auto;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.5rem;
 }`;
 '''
@@ -1307,12 +1307,12 @@ return {
   border-collapse: collapse;
   font-size: 0.85rem;
   th, td {
-    border: 1px solid ${args.theme.var.color.border};
+    border: 1px solid ${t.var.color.border};
     padding: 0.35rem 0.5rem;
     vertical-align: middle;
   }
   th {
-    background: ${args.theme.var.color.background_light_100};
+    background: ${t.var.color.background_light_100};
     text-align: left;
     font-weight: 600;
     white-space: nowrap;
@@ -1322,18 +1322,18 @@ return {
     min-width: 6rem;
     box-sizing: border-box;
     padding: 0.25rem 0.35rem;
-    border: 1px solid ${args.theme.var.color.border};
+    border: 1px solid ${t.var.color.border};
     border-radius: 0.25rem;
-    background: ${args.theme.var.color.background};
-    color: ${args.theme.var.color.text};
+    background: ${t.var.color.background};
+    color: ${t.var.color.text};
   }
   ._id .row-remove {
     padding: 0.25rem 0.5rem;
     font-size: 0.8rem;
     border-radius: 0.35rem;
-    border: 1px solid ${args.theme.var.color.border};
-    background: ${args.theme.var.color.background_light_100};
-    color: ${args.theme.var.color.text};
+    border: 1px solid ${t.var.color.border};
+    background: ${t.var.color.background_light_100};
+    color: ${t.var.color.text};
     cursor: pointer;
     white-space: nowrap;
   }
@@ -1371,7 +1371,7 @@ return {
         componentName: Html
         props:
           '''return {
-  data: () => args.fns.schemaFieldNames().map((key) => ({ key })),
+  data: () => f.schemaFieldNames().map((key) => ({ key })),
   loop: true,
   contextName: "hdr",
 };'''
@@ -1386,7 +1386,7 @@ return {
         props:
           '''return {
   as: "th",
-  text: args.contextData.hdr.key,
+  text: c.hdr.key,
 };'''
       }
     }
@@ -1414,7 +1414,7 @@ return {
         props:
           '''return {
   as: "tbody",
-  data: () => args.fns.rows(),
+  data: () => f.rows(),
   loop: true,
   contextName: "row",
 };'''
@@ -1438,7 +1438,7 @@ return {
         props:
           '''return {
   data: () =>
-    args.fns.schemaFieldNames().map((columnKey) => ({ columnKey })),
+    f.schemaFieldNames().map((columnKey) => ({ columnKey })),
   loop: true,
   contextName: "col",
 };'''
@@ -1463,11 +1463,11 @@ return {
           '''return {
   as: "input",
   type: "text",
-  value: args.contextData.row[args.contextData.col.columnKey],
+  value: c.row[c.col.columnKey],
   onInput: (e) =>
-    args.fns.updateCell(
-      args.contextData.rowIndex,
-      args.contextData.col.columnKey,
+    f.updateCell(
+      c.rowIndex,
+      c.col.columnKey,
       e.currentTarget.value,
     ),
 };'''
@@ -1500,8 +1500,8 @@ return {
   type: "button",
   text: "Remove",
   class: "row-remove",
-  disabled: args.fns.busy(),
-  onClick: () => args.fns.deleteRow(args.contextData.rowIndex),
+  disabled: f.busy(),
+  onClick: () => f.deleteRow(c.rowIndex),
 };'''
       }
     }

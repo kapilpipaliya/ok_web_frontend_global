@@ -7,12 +7,12 @@
         description: Enqueues background job to delete a file in Shopify when a ShopifyFile is deleted.
         body:
           '''
-const { tableVertexLabel, operation, elementId, result, fromWebhook, payload } = args.contextData;
+const { tableVertexLabel, operation, elementId, result, fromWebhook, payload } = c;
 
-const shop = args.contextData.shop;
+const shop = c.shop;
 if (!shop) { console.log('shopifyFileAfterDelete: shop not available in contextData'); return; }
 
-const helpers = await args.executeNamedServerFunction(
+const helpers = await s(
   { functionName: 'shopifyQueueHelpers', contextData: {} },
   { functionLookupSubDomain: 'decodefile' }
 );
@@ -22,7 +22,7 @@ const queueName = 'processShopifyFileAfterDelete';
 
 if (fromWebhook && payload) {
   try {
-    const queue = helpers.result.data.createShopifyQueue(args, queueName);
+    const queue = helpers.result.data.createShopifyQueue(_, queueName);
     await helpers.result.data.addShopifyJob(queue, queueName, { shop, payload, fromWebhook: true });
     await queue.close();
     console.log('shopifyFileAfterDelete: webhook job enqueued for', shop);
@@ -40,7 +40,7 @@ const fileData = deletedData?.P || {};
 if (!fileData.id) return;
 
 try {
-  const queue = helpers.result.data.createShopifyQueue(args, queueName);
+  const queue = helpers.result.data.createShopifyQueue(_, queueName);
   const job = await helpers.result.data.addShopifyJob(queue, queueName, {
     shop,
     tableVertexLabel,
@@ -51,7 +51,7 @@ try {
   await queue.close();
   const jobId = job?.id;
   if (elementId && jobId) {
-    await args.session.run(
+    await _.session.run(
       `MATCH (n:ShopifyFile) WHERE elementId(n) = $elementId SET n.syncStatus = $status, n.syncJobId = $jobId, n.updatedAt = datetime()`,
       { elementId, status: 'queued', jobId }
     );

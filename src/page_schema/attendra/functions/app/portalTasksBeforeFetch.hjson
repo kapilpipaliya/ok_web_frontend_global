@@ -12,7 +12,7 @@ const {
   tableVertexLabel,
   queryModification,
   sessionUser
-} = args.contextData || {};
+} = c || {};
 
 if (tableVertexLabel !== "Task") {
   return { success: true, message: "Skip: not Task" };

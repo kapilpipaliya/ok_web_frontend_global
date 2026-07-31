@@ -11,8 +11,8 @@ import {
 // Styles
 const containerStyles = `return \`._id {
   padding: 1.5rem;
-  background: \${args.theme.var.color.background};
-  border: 1px solid \${args.theme.var.color.border};
+  background: \${t.var.color.background};
+  border: 1px solid \${t.var.color.border};
   border-radius: 0.75rem;
   margin-top: 1rem;
 }\`;`;
@@ -20,7 +20,7 @@ const containerStyles = `return \`._id {
 const titleStyles = `return \`._id {
   font-size: 1.125rem;
   font-weight: 600;
-  color: \${args.theme.var.color.text};
+  color: \${t.var.color.text};
   margin: 0 0 1rem 0;
 }\`;`;
 
@@ -49,7 +49,7 @@ export function ThemeColorVariantsPreview(props: { themeVertex: Vertex }) {
           <As
             as="p"
             css={`return \`._id {
-          color: \${args.theme.var.color.text_light_500};
+          color: \${t.var.color.text_light_500};
           font-style: italic;
         }\`;`}
           >

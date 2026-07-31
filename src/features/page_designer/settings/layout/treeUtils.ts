@@ -46,8 +46,8 @@ export const getTreeItemBorder = (index: number) => {
  */
 export const getHoveredItemStyle = () => {
   return `
-    background-color: \${args.theme.var.color.primary_light_400};
-    color: \${args.theme.var.color.primary_light_400_text};
+    background-color: \${t.var.color.primary_light_400};
+    color: \${t.var.color.primary_light_400_text};
   `;
 };
 
@@ -57,9 +57,9 @@ export const getHoveredItemStyle = () => {
  */
 export const getSelectedItemStyle = () => {
   return `
-    background-color: \${args.theme.var.color.primary_light_100}; 
-    color: \${args.theme.var.color.primary_light_100_text};
-    border-left: 3px solid \${args.theme.var.color.primary}; 
-    box-shadow: 0 0 4px \${args.theme.var.color.primary_light_600};
+    background-color: \${t.var.color.primary_light_100}; 
+    color: \${t.var.color.primary_light_100_text};
+    border-left: 3px solid \${t.var.color.primary}; 
+    box-shadow: 0 0 4px \${t.var.color.primary_light_600};
   `;
 };

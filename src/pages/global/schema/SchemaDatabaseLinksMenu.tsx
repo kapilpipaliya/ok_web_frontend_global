@@ -78,13 +78,13 @@ export function SchemaDatabaseLinksMenu(props: SchemaDatabaseLinksMenuProps) {
   padding: 0.45rem 0.75rem;
   font-size: 0.75rem;
   font-weight: 500;
-  color: \${args.theme.var.color.text};
+  color: \${t.var.color.text};
   text-decoration: none;
   white-space: nowrap;
 }
 ._id:hover {
-  background: \${args.theme.var.color.background_light_200};
-  color: \${args.theme.var.color.primary};
+  background: \${t.var.color.background_light_200};
+  color: \${t.var.color.primary};
 }\`;`}
                       >
                         <As
@@ -101,7 +101,7 @@ export function SchemaDatabaseLinksMenu(props: SchemaDatabaseLinksMenuProps) {
                           css={`return \`._id {
   display: block;
   font-size: 0.65rem;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
   font-family: ui-monospace, monospace;
 }\`;`}
                         >

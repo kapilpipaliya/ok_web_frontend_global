@@ -7,7 +7,7 @@
         description: Retrieves the user's sidebar collapsed/expanded preference
         body:
           '''
-const userId = args.user?.id;
+const userId = _.user?.id;
 
 if (!userId) {
   return {
@@ -17,7 +17,7 @@ if (!userId) {
 }
 
 // Fetch user preference for sidebar state
-const result = await args.session.run(
+const result = await _.session.run(
   `MATCH (u:User {id: $userId})-[:UserUserPreference]->(p:UserPreference {key: 'sidebarCollapsed'})
    RETURN p.value as isCollapsed`,
   {

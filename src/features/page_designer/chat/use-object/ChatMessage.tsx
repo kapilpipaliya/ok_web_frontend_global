@@ -20,10 +20,10 @@ export function ChatMessage(props: ChatMessageProps) {
       css={[
         `return \`._id {
   padding: 16px;
-  background: \${args.theme.var.color.background_light_100};
+  background: \${t.var.color.background_light_100};
   border-radius: 10px;
   margin-bottom: 12px;
-  border: 1px solid \${args.theme.var.color.border};
+  border: 1px solid \${t.var.color.border};
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
   transition: transform 0.2s ease;
   width: 100%;
@@ -61,9 +61,9 @@ export function ChatMessage(props: ChatMessageProps) {
           align-items: center;
           margin-top: 8px;
           padding-top: 8px;
-          border-top: 1px solid \${args.theme.var.color.border};
+          border-top: 1px solid \${t.var.color.border};
           font-size: 11px;
-          color: \${args.theme.var.color.text_light_200};
+          color: \${t.var.color.text_light_200};
           width: 100%;
         }\`;`}
       >
@@ -173,7 +173,7 @@ function MessageHeader(props: {
   display: flex;
   gap: 8px;
   align-items: center;
-  background: \${args.theme.var.color.background_light_100};
+  background: \${t.var.color.background_light_100};
   padding: 4px 10px;
   border-radius: 16px;
   font-size: 13px;
@@ -183,7 +183,7 @@ function MessageHeader(props: {
           as="span"
           css={`return \`._id {
             font-size: 16px;
-            color: \${args.theme.var.color.text_light_300};
+            color: \${t.var.color.text_light_300};
             display: flex;
             align-items: center;
           }\`;`}
@@ -196,7 +196,7 @@ function MessageHeader(props: {
             as="span"
             css={`return \`._id {
               font-size: 14px;
-              color: \${args.theme.var.color.text_light_300};
+              color: \${t.var.color.text_light_300};
               display: flex;
               align-items: center;
             }\`;`}
@@ -209,13 +209,13 @@ function MessageHeader(props: {
         css={[
           headerIconButtonCss,
           `return \`._id {
-  color: \${args.theme.var.color.text_light_200};
+  color: \${t.var.color.text_light_200};
   background-color: transparent;
   border: none;
   transition: color 0.2s;
   
   &:hover {
-    color: \${args.theme.var.color.error};
+    color: \${t.var.color.error};
   }
 }\`;`,
         ]}

@@ -6,7 +6,7 @@
       P: {
         signinRequired: true
         fns:
-          '''const isLoading = args.atom(false);
+          '''const isLoading = _.atom(false);
 
 const onMount = () => undefined;
 return {
@@ -55,7 +55,7 @@ return {
           '''
 return {
   as: "div",
-  onMount: args.fns.onMount
+  onMount: f.onMount
 };
 '''
       }
@@ -101,7 +101,7 @@ return `._id {
           '''
 return {
   as: "div",
-  hide: () => !args.fns.isLoading?.()
+  hide: () => !f.isLoading?.()
 };
 '''
       }
@@ -132,7 +132,7 @@ return {
           '''
 return {
   as: "div",
-  hide: () => args.fns.isLoading?.()
+  hide: () => f.isLoading?.()
 };
 '''
       }
@@ -173,7 +173,7 @@ if (hour < 12) greeting = "Good Morning";
 else if (hour < 18) greeting = "Good Afternoon";
 
 return {
-  text: `${greeting} ${args.user.P.username}!`
+  text: `${greeting} ${_.user.P.username}!`
 };
 '''
       }
@@ -186,7 +186,7 @@ return {
           '''
 return `._id {
   font-size: 1.125rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0.5rem 0 0 0;
 }`;
 '''

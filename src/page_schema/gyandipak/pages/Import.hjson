@@ -6,20 +6,20 @@
       P: {
         signinRequired: true
         fns:
-          '''const contacts = args.atom("");
-const isSubmitting = args.atom(false);
+          '''const contacts = _.atom("");
+const isSubmitting = _.atom(false);
 const importContacts = async () => {
-  const response = await args.executeNamedServerFunction({
+  const response = await s({
     functionName: "importContacts",
     contextData: { contacts: contacts() }
   });
   if (response?.error) {
-    args.showErrorToast(response.error);
+    _.showErrorToast(response.error);
   } else if (response?.result?.success) {
     location.href = response.result.success;
   } else {
     const msg = response?.result?.message || "Operation failed";
-    args.showErrorToast(msg);
+    _.showErrorToast(msg);
   }
 }
 return {
@@ -77,7 +77,7 @@ return {
 return `._id {
   font-size: 2.5rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 1rem;
   text-align: center;
 }
@@ -109,7 +109,7 @@ return {
 return `._id {
   font-size: 1.1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin-bottom: 1rem;
   text-align: center;
 }`;
@@ -135,7 +135,7 @@ return {
 return `._id {
   font-size: 0.95rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 3rem;
   text-align: center;
   font-weight: 600;
@@ -160,8 +160,8 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.background_light_100};
-  border: 1px solid ${args.theme.var.color.border};
+  background: ${t.var.color.background_light_100};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.75rem;
   padding: 2.5rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -176,39 +176,39 @@ return `._id {
         displayOrder: 4
         fns:
           '''
-const [isSubmitting, setIsSubmitting] = args.createSignal(false);
-const [isSubmitted, setIsSubmitted] = args.createSignal(false);
+const [isSubmitting, setIsSubmitting] = _.createSignal(false);
+const [isSubmitted, setIsSubmitted] = _.createSignal(false);
 
 async function handleSubmit(e) {
   e.preventDefault();
 
-  if (!args.fns.contacts()) {
-    args.showErrorToast('Please fill in all fields');
+  if (!f.contacts()) {
+    _.showErrorToast('Please fill in all fields');
     return;
   }
 
   setIsSubmitting(true);
 
   try {
-    const response = await args.executeNamedServerFunction({
+    const response = await s({
       functionName: 'importContacts',
       contextData: {
-        contacts: args.fns.contacts()
+        contacts: f.contacts()
       }
     });
 
     if (response?.error) {
-      args.showErrorToast(response.error);
+      _.showErrorToast(response.error);
     } else if (response?.result?.success) {
-      args.showSuccessToast('Message sent successfully! We will get back to you soon.');
+      _.showSuccessToast('Message sent successfully! We will get back to you soon.');
       setIsSubmitted(true);
     } else {
       const msg = response?.result?.message || "Operation failed";
-      args.showErrorToast(msg);
+      _.showErrorToast(msg);
     }
   } catch (error) {
     console.error('Import form error:', error);
-    args.showErrorToast('An error occurred. Please try again.');
+    _.showErrorToast('An error occurred. Please try again.');
   } finally {
     setIsSubmitting(false);
   }
@@ -222,7 +222,7 @@ return { handleSubmit, isSubmitting, isSubmitted };
           '''
 return {
   as: "form",
-  onSubmit: args.fns.handleSubmit
+  onSubmit: f.handleSubmit
 };
 '''
       }
@@ -257,7 +257,7 @@ return {
 return `._id {
   display: block;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 0.5rem;
   font-size: 0.95rem;
 }`;
@@ -285,10 +285,10 @@ return `._id {
   width: 100%;
   padding: 0.75rem 1rem;
   font-size: 1rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.5rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   transition: all 0.2s ease;
   resize: vertical;
   font-family: inherit;
@@ -297,12 +297,12 @@ return `._id {
 
 ._id:focus {
   outline: none;
-  border-color: ${args.theme.var.color.primary};
-  box-shadow: 0 0 0 3px ${args.theme.var.color.primary_light_800};
+  border-color: ${t.var.color.primary};
+  box-shadow: 0 0 0 3px ${t.var.color.primary_light_800};
 }
 
 ._id::placeholder {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
         displayOrder: 2
@@ -316,8 +316,8 @@ return `._id {
   placeholder: "Enter All Contacts you want to import to database",
   rows: 15,
   required: true,
-  value: args.fns.contacts(),
-  onChange: (e) => args.fns.contacts(e.target.value),
+  value: f.contacts(),
+  onChange: (e) => f.contacts(e.target.value),
 };
 '''
       }
@@ -333,8 +333,8 @@ return `._id {
   padding: 1rem 2rem;
   font-size: 1.05rem;
   font-weight: 600;
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
   border: none;
   border-radius: 0.5rem;
   cursor: pointer;
@@ -342,9 +342,9 @@ return `._id {
 }
 
 ._id:hover:not(:disabled) {
-  background: ${args.theme.var.color.primary_dark_200};
+  background: ${t.var.color.primary_dark_200};
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px ${args.theme.var.color.primary_light_600};
+  box-shadow: 0 4px 12px ${t.var.color.primary_light_600};
 }
 
 ._id:active:not(:disabled) {
@@ -364,8 +364,8 @@ return `._id {
 return {
   as: "button",
   type: "submit",
-  disabled: args.fns.isSubmitting(),
-  text: args.fns.isSubmitting() ? "Saving..." : "Save"
+  disabled: f.isSubmitting(),
+  text: f.isSubmitting() ? "Saving..." : "Save"
 };
 '''
       }

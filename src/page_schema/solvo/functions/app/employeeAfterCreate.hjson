@@ -8,19 +8,19 @@
         description: After staff User create — shop DB cleanup (transient shop/invite fields), optional invited status, send invitation email (same as global UserManagement invite flow).
         body:
           '''
-const { tableVertexLabel, operation } = args.contextData || {};
+const { tableVertexLabel, operation } = c || {};
 if (tableVertexLabel !== "User" || operation !== "create") {
   return { success: true, message: "Skip: not User create" };
 }
 
-const result = args.contextData?.result;
+const result = c?.result;
 const employee = result?.data;
 const elementId = employee?.id;
 if (!elementId) return { success: true, message: "Skip: missing employee elementId" };
 
-const uuid = args.uuidv7();
+const uuid = _.uuidv7();
 
-await args.session.run(
+await _.session.run(
   `MATCH (e:User) WHERE elementId(e) = $id
    SET e.status = "invited",
        e.updatedAt = $nowIso,
@@ -48,12 +48,12 @@ try {
 }
 
 try {
-  const sendInvitationEmail = args.sendInvitationEmail;
+  const sendInvitationEmail = _.sendInvitationEmail;
   if (typeof sendInvitationEmail === "function" && employee && employee.P?.email) {
-    const req = args.getRequestEvent?.()?.request;
-    const portalSubDomain = String(args.subDomain || "").trim();
-    if (req && args.session && portalSubDomain) {
-      await sendInvitationEmail(req, employee, portalSubDomain, args.session, `${portalSubDomain}.decodecommerce.com`);
+    const req = _.getRequestEvent?.()?.request;
+    const portalSubDomain = String(_.subDomain || "").trim();
+    if (req && _.session && portalSubDomain) {
+      await sendInvitationEmail(req, employee, portalSubDomain, _.session, `${portalSubDomain}.decodecommerce.com`);
     } else {
       console.warn(
         "employeeAfterCreate: skip invitation email — missing request, session, or subDomain",

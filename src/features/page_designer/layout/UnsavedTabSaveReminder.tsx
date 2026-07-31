@@ -69,7 +69,7 @@ export function UnsavedTabSaveReminder() {
           css={`return \`._id {
               margin: 12px 0 0;
               padding-left: 20px;
-              color: \${args.theme.var.color.text};
+              color: \${t.var.color.text};
             }\`;`}
         >
           <For each={tabsToRemind()}>

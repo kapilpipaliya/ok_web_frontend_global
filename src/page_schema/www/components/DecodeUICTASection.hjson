@@ -14,7 +14,7 @@ return {
         css: '''
 return `._id {
   padding: 5rem 2rem;
-  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background : args.theme.var.color.background};
+  background: ${_.currentMode() === 'dark' ? t.var.color.background : t.var.color.background};
   
   @media (max-width: 768px) {
     padding: 3rem 1rem;
@@ -38,7 +38,7 @@ return {
 return `._id {
   max-width: 1000px;
   margin: 0 auto;
-  background: linear-gradient(135deg, ${args.theme.var.color.primary}, ${args.theme.var.color.info});
+  background: linear-gradient(135deg, ${t.var.color.primary}, ${t.var.color.info});
   border-radius: 1.5rem;
   padding: 4rem;
   text-align: center;
@@ -181,14 +181,14 @@ return `._id {
 return {
   as: "button",
   text: "Get Started Free",
-  onClick: () => args.navigate("/signup")
+  onClick: () => _.navigate("/signup")
 };
 ''',
         css: '''
 return `._id {
   padding: 1rem 2rem;
   background: white;
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   border: none;
   border-radius: 0.5rem;
   font-size: 1.125rem;
@@ -219,7 +219,7 @@ return `._id {
 return {
   as: "button",
   text: "Schedule Demo",
-  onClick: () => args.navigate("/contact")
+  onClick: () => _.navigate("/contact")
 };
 ''',
         css: '''
@@ -236,7 +236,7 @@ return `._id {
   
   &:hover {
     background: white;
-    color: ${args.theme.var.color.primary};
+    color: ${t.var.color.primary};
     transform: translateY(-2px);
   }
   

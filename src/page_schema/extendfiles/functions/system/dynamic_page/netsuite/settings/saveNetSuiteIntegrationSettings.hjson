@@ -8,10 +8,10 @@
         description: Saves NetSuite OAuth app credentials to Setting (type netsuite_integration). Admin only. Encrypts client secret. Empty secret preserves existing when already stored.
         body:
           '''
-const user = await args.getUserFromSession();
+const user = await _.getUserFromSession();
 if (
   !user ||
-  !(await args.checkRole(args.SYSTEM_ROLES.ADMIN, args.session, user))
+  !(await _.checkRole(_.SYSTEM_ROLES.ADMIN, _.session, user))
 ) {
   return {
     success: false,
@@ -19,7 +19,7 @@ if (
   };
 }
 
-const cd = args.contextData || {};
+const cd = c || {};
 const accountId = String(cd.accountId || "").trim();
 const clientId = String(cd.clientId || "").trim();
 const redirectUri = String(cd.redirectUri || "").trim();
@@ -34,16 +34,16 @@ if (!accountId || !clientId || !redirectUri) {
   };
 }
 
-const existing = await args.session.run(
+const existing = await _.session.run(
   `MATCH (s:Setting {type: $t}) RETURN s LIMIT 1`,
   { t: "netsuite_integration" }
 );
 
 let clientSecretStored = null;
 if (secretInput) {
-  clientSecretStored = args.encryptToken(secretInput);
+  clientSecretStored = _.encryptToken(secretInput);
 } else if (existing.records.length) {
-  const ex = args.convertNodeToJson(existing.records[0].get("s"));
+  const ex = _.convertNodeToJson(existing.records[0].get("s"));
   if (ex?.P?.clientSecret) {
     clientSecretStored = ex.P.clientSecret;
   }
@@ -58,7 +58,7 @@ if (!clientSecretStored) {
 
 const nowIso = new Date().toISOString();
 
-await args.session.run(
+await _.session.run(
   `MERGE (s:Setting {type: $type})
    ON CREATE SET s.createdAt = datetime($nowIso), s.key = $key
    SET s.accountId = $accountId,

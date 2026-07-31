@@ -8,14 +8,14 @@
         description: Adds an admin/staff reply to a public support ticket and queues a customer notification.
         body:
           '''
-const { ticketId, serial, message, attachments } = args.contextData || {};
+const { ticketId, serial, message, attachments } = c || {};
 const safeMessage = String(message || "").trim().slice(0, 8000);
 
 if (!safeMessage) {
   return { success: false, message: "Reply message is required." };
 }
 
-const user = args.getUserFromSession ? await args.getUserFromSession() : null;
+const user = _.getUserFromSession ? await _.getUserFromSession() : null;
 if (!user) {
   return { success: false, message: "Admin access is required." };
 }
@@ -25,7 +25,7 @@ const authorName = String(user.P?.name || user.P?.username || "Support").slice(0
 
 let result;
 if (ticketId) {
-  result = await args.session.run(
+  result = await _.session.run(
     `
     MATCH (t:PublicSupportTicket)
     WHERE elementId(t) = $ticketId
@@ -49,7 +49,7 @@ if (ticketId) {
     { ticketId: String(ticketId), authorName, authorEmail, message: safeMessage, attachmentsJson: JSON.stringify(attachments || []), now: new Date().toISOString() }
   );
 } else if (serial) {
-  result = await args.session.run(
+  result = await _.session.run(
     `
     MATCH (t:PublicSupportTicket {serial: $serial})
     CREATE (m:PublicSupportMessage {
@@ -79,11 +79,11 @@ if (!result.records || result.records.length === 0) {
   return { success: false, message: "Support ticket not found." };
 }
 
-const ticket = args.convertNodeToJson(result.records[0].get("t"));
-const reply = args.convertNodeToJson(result.records[0].get("m"));
+const ticket = _.convertNodeToJson(result.records[0].get("t"));
+const reply = _.convertNodeToJson(result.records[0].get("m"));
 
 try {
-  await args.executeNamedServerFunction({
+  await s({
     functionName: "publicSupportQueueNotification",
     contextData: {
       eventType: "admin_replied",

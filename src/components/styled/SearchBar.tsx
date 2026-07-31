@@ -24,7 +24,7 @@ export function SearchBar(
       <As
         as={Icon}
         css={`return \`._id {
-  color: \${args.theme.var.color.text_light_200};
+  color: \${t.var.color.text_light_200};
   padding-left: 6px;
   position: absolute;
 }\`;`}
@@ -37,9 +37,9 @@ export function SearchBar(
         as="input"
         css={`return \`._id {
   line-height: 28px;
-  border: 1px solid \${args.theme.var.color.border};
-  background-color: \${args.theme.var.color.background_light_100};
-  color: \${args.theme.var.color.text};
+  border: 1px solid \${t.var.color.border};
+  background-color: \${t.var.color.background_light_100};
+  color: \${t.var.color.text};
   font-size: 14px;
   height: 40px;
   padding: 0 1rem 0 1.8rem;
@@ -48,11 +48,11 @@ export function SearchBar(
   width: 100%;
   &:focus {
     outline: none;
-    border-color: \${args.theme.var.color.primary};
-    background-color: \${args.theme.var.color.background_light_100};
+    border-color: \${t.var.color.primary};
+    background-color: \${t.var.color.background_light_100};
   }
   &::placeholder {
-    color: \${args.theme.var.color.text_light_400};
+    color: \${t.var.color.text_light_400};
   }
 }\`;`}
         onInput={(e) => props.handleChange(e.target.value)}

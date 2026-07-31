@@ -8,12 +8,12 @@
         key: FileUploader
         fns:
           '''
-const [files, setFiles] = args.createSignal([]);
-const [previewUrls, setPreviewUrls] = args.createSignal([]);
-const [uploadError, setUploadError] = args.createSignal("");
-const [isUploading, setIsUploading] = args.createSignal(false);
-const [uploadProgress, setUploadProgress] = args.createSignal(0);
-const [uploadStatusText, setUploadStatusText] = args.createSignal("");
+const [files, setFiles] = _.createSignal([]);
+const [previewUrls, setPreviewUrls] = _.createSignal([]);
+const [uploadError, setUploadError] = _.createSignal("");
+const [isUploading, setIsUploading] = _.createSignal(false);
+const [uploadProgress, setUploadProgress] = _.createSignal(0);
+const [uploadStatusText, setUploadStatusText] = _.createSignal("");
 
 let inputRef = null;
 const DEFAULT_CHUNK_THRESHOLD_BYTES = 5 * 1024 * 1024;
@@ -36,7 +36,7 @@ const compileUploadHook = (source) => {
     trimmed.includes("=>");
   try {
     if (isFnExpr) {
-      return new Function("ctx", "args", `return (${sourceText});`)({}, args);
+      return new Function("ctx", "_", `return (${sourceText});`)({}, _);
     }
     const hasLeadingReturn =
       trimmed.startsWith("return ") ||
@@ -44,7 +44,7 @@ const compileUploadHook = (source) => {
       trimmed.startsWith("return\n") ||
       trimmed === "return;";
     const body = hasLeadingReturn ? sourceText : `return (${sourceText});`;
-    return new Function("ctx", "args", body)({}, args);
+    return new Function("ctx", "_", body)({}, _);
   } catch (error) {
     console.warn("FileUploader: invalid upload hook", error);
     return null;
@@ -52,7 +52,7 @@ const compileUploadHook = (source) => {
 };
 
 const getUploadConfiguration = () => {
-  const raw = args.contextData.props?.uploadConfiguration;
+  const raw = c.props?.uploadConfiguration;
   if (raw == null || typeof raw !== "object" || Array.isArray(raw)) {
     return {
       accept: "*/*",
@@ -182,7 +182,7 @@ const getUploadConfiguration = () => {
 };
 
 const getUploadCallbacks = () => {
-  const raw = args.contextData.props?.uploadCallbacks;
+  const raw = c.props?.uploadCallbacks;
   return raw != null && typeof raw === "object" && !Array.isArray(raw) ? raw : {};
 };
 
@@ -233,7 +233,7 @@ const getFormVertexMime = () => {
   const callbacks = getUploadCallbacks();
   const vertexId =
     typeof callbacks.formVertexId === "function" ? callbacks.formVertexId() : null;
-  const vertex = vertexId ? args.graph.vertexes[vertexId] : null;
+  const vertex = vertexId ? g.vertexes[vertexId] : null;
   const p = vertex?.P;
   if (!p) return "";
   if (p.fileType != null && String(p.fileType).trim() !== "") return String(p.fileType);
@@ -244,7 +244,7 @@ const getFormVertexMime = () => {
 const syncPreviewFromVertex = (vertexId) => {
   const cfg = getUploadConfiguration();
   if (cfg.hidePreview === true) return;
-  const vertex = args.graph.vertexes[vertexId];
+  const vertex = g.vertexes[vertexId];
   const url = buildDownloadUrlFromVertex(vertex, cfg);
   if (url === "") return;
   const current = previewUrls();
@@ -255,7 +255,7 @@ const syncPreviewFromVertex = (vertexId) => {
 };
 
 const syncFormFieldsFromVertex = (vertexId, callbacks) => {
-  const vertex = args.graph.vertexes[vertexId];
+  const vertex = g.vertexes[vertexId];
   if (!vertex?.P || typeof callbacks.setFieldValue !== "function") return;
   const p = vertex.P;
   if (p.fileName != null && String(p.fileName).trim() !== "") {
@@ -435,7 +435,7 @@ const buildUploadHookContext = (uploadedId, uploadedVertex, file, fileList, resp
   response,
   configuration: cfg,
   callbacks,
-  args,
+  _,
   syncPreview: (vertexId) => {
     const id =
       vertexId != null && String(vertexId).trim() !== ""
@@ -444,7 +444,7 @@ const buildUploadHookContext = (uploadedId, uploadedVertex, file, fileList, resp
     syncPreviewFromVertex(id);
   },
   showSuccess: (message) => {
-    args.showSuccessToast?.(
+    _.showSuccessToast?.(
       message != null && String(message).trim() !== ""
         ? String(message).trim()
         : cfg.successToastMessage,
@@ -457,7 +457,7 @@ const buildUploadHookContext = (uploadedId, uploadedVertex, file, fileList, resp
         : cfg.uploadFailedMessage;
     setUploadErrorMessage(text);
     if (cfg.showUploadErrorToast !== false) {
-      args.showErrorToast?.(text);
+      _.showErrorToast?.(text);
     }
   },
   syncFormFields: (vertexId) => syncFormFieldsFromVertex(vertexId, callbacks),
@@ -465,7 +465,7 @@ const buildUploadHookContext = (uploadedId, uploadedVertex, file, fileList, resp
 
 const handleUploadedResponse = async (data, file, fileList, cfg, callbacks) => {
   if (data?.graph && typeof data.graph === "object") {
-    args.setGraphData(0, data.graph, {});
+    _.setGraphData(0, data.graph, {});
   }
 
   const rows = data?.result;
@@ -476,7 +476,7 @@ const handleUploadedResponse = async (data, file, fileList, cfg, callbacks) => {
   }
 
   await Promise.resolve();
-  const uploadedVertex = args.graph.vertexes[uploadedId];
+  const uploadedVertex = g.vertexes[uploadedId];
   if (!uploadedVertex) {
     throw new Error(cfg.notInGraphMessage);
   }
@@ -503,10 +503,10 @@ const handleUploadedResponse = async (data, file, fileList, cfg, callbacks) => {
       callbacks.setFieldValue(cfg.attachUploadedFileToFieldKey, uploadedId);
     }
     syncPreviewFromVertex(uploadedId);
-    args.showSuccessToast?.(cfg.successToastMessage);
+    _.showSuccessToast?.(cfg.successToastMessage);
   } else {
     syncPreviewFromVertex(uploadedId);
-    args.showSuccessToast?.(cfg.successToastMessage);
+    _.showSuccessToast?.(cfg.successToastMessage);
   }
 };
 
@@ -578,7 +578,7 @@ const processUpload = async (fileList) => {
     if (typeof cfg.onFileSelect === "function") {
       notifyUploading(true, 0, cfg.uploadingMessage);
       await cfg.onFileSelect(fileList, {
-        args,
+        _,
         configuration: cfg,
         callbacks,
         syncPreview: (vertexId) => {
@@ -610,7 +610,7 @@ const processUpload = async (fileList) => {
     // Keep selected file visible so the user can see what failed; only reset input for retry.
     resetFileInput();
     if (cfg.showUploadErrorToast !== false) {
-      args.showErrorToast?.(message);
+      _.showErrorToast?.(message);
     }
   } finally {
     uploadInProgress = false;
@@ -637,13 +637,13 @@ const applyFileList = async (fileList) => {
   await processUpload(filesArray);
 };
 
-args.onCleanup(() => {
+_.onCleanup(() => {
   revokePreviewUrls(previewUrls());
   // Do not notify parent FormManagement here — it may already be disposing.
 });
 
 const openPicker = () => {
-  if (args.contextData.props?.disabled === true || isUploading()) return;
+  if (c.props?.disabled === true || isUploading()) return;
   inputRef?.click?.();
 };
 
@@ -677,7 +677,7 @@ const previewItems = () => {
         const callbacks = getUploadCallbacks();
         const vertexId =
           typeof callbacks.formVertexId === "function" ? callbacks.formVertexId() : null;
-        const vertex = vertexId ? args.graph.vertexes[vertexId] : null;
+        const vertex = vertexId ? g.vertexes[vertexId] : null;
         return vertex?.P?.fileName != null ? String(vertex.P.fileName) : "";
       })();
     const resolvedMime = mime || mimeFromFileName(fileName);
@@ -739,11 +739,11 @@ return {
         componentName: Html
         css:
           '''
-const cfg = args.fns.getUploadConfiguration?.() ?? {};
+const cfg = f.getUploadConfiguration?.() ?? {};
 return `._id {
   display: flex;
   flex-direction: column;
-  gap: ${args.theme.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
   width: ${cfg.fullWidth === true ? "100%" : "auto"};
   max-width: 100%;
   align-self: ${cfg.fullWidth === true ? "stretch" : "flex-start"};
@@ -761,34 +761,34 @@ return `._id {
         componentName: Html
         css:
           '''
-const cfg = args.fns.getUploadConfiguration?.() ?? {};
+const cfg = f.getUploadConfiguration?.() ?? {};
 const variant = cfg.pickButtonVariant || "primary";
 
 let variantStyles = "";
 if (variant === "secondary") {
   variantStyles = `
     background: none;
-    color: ${args.theme.var.color.text};
-    border: 1px solid ${args.theme.var.color.border};
+    color: ${t.var.color.text};
+    border: 1px solid ${t.var.color.border};
     &:not(:disabled):hover {
-      background: ${args.theme.var.color.background_light_200};
+      background: ${t.var.color.background_light_200};
     }
   `;
 } else if (variant === "tertiary") {
   variantStyles = `
     background: transparent;
-    color: ${args.theme.var.color.primary};
+    color: ${t.var.color.primary};
     border: 1px solid transparent;
     &:not(:disabled):hover {
-      background: ${args.theme.var.color.background_light_100};
+      background: ${t.var.color.background_light_100};
     }
   `;
 } else {
   variantStyles = `
-    background: ${args.theme.var.color.primary};
-    color: ${args.theme.var.color.primary_text};
+    background: ${t.var.color.primary};
+    color: ${t.var.color.primary_text};
     &:not(:disabled):hover {
-      background: ${args.theme.var.color.primary_dark_200};
+      background: ${t.var.color.primary_dark_200};
     }
   `;
 }
@@ -797,8 +797,8 @@ return `._id {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  border-radius: ${args.theme.var.borderRadius.md};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  border-radius: ${t.var.borderRadius.md};
   font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
@@ -813,17 +813,17 @@ return `._id {
 '''
         props:
           '''
-const cfg = args.fns.getUploadConfiguration?.() ?? {};
+const cfg = f.getUploadConfiguration?.() ?? {};
 const usePolaris = cfg.usePolarisUI === true;
-const uploading = args.fns.isUploading?.() === true;
+const uploading = f.isUploading?.() === true;
 const label = uploading
-  ? args.fns.getUploadStatusLabel?.() || cfg.uploadingMessage || "Uploading…"
+  ? f.getUploadStatusLabel?.() || cfg.uploadingMessage || "Uploading…"
   : cfg.pickButtonLabel || "Select file";
-const disabled = args.contextData.props?.disabled === true || uploading;
+const disabled = c.props?.disabled === true || uploading;
 const onClick = (event) => {
   event?.stopPropagation?.();
   event?.preventDefault?.();
-  args.fns.openPicker?.();
+  f.openPicker?.();
 };
 
 if (usePolaris) {
@@ -860,18 +860,18 @@ return {
         componentName: Html
         props:
           '''
-const cfg = args.fns.getUploadConfiguration?.() ?? {};
+const cfg = f.getUploadConfiguration?.() ?? {};
 return {
   as: "input",
   type: "file",
   accept: cfg.accept || "*/*",
   multiple: cfg.multiple === true,
-  disabled: args.contextData.props?.disabled === true || args.fns.isUploading?.() === true,
+  disabled: c.props?.disabled === true || f.isUploading?.() === true,
   style: "display: none;",
-  ref: (el) => args.fns.setInputRef?.(el),
+  ref: (el) => f.setInputRef?.(el),
   onChange: (event) => {
     const input = event?.target;
-    void args.fns.applyFileList?.(input?.files ?? null);
+    void f.applyFileList?.(input?.files ?? null);
   }
 };'''
       }
@@ -887,12 +887,12 @@ return {
 return `._id {
   display: flex;
   align-items: center;
-  gap: ${args.theme.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
   width: 100%;
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  border-radius: ${args.theme.var.borderRadius.md};
-  background: ${args.theme.var.color.background_light_100};
-  border: 1px solid ${args.theme.var.color.border};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  border-radius: ${t.var.borderRadius.md};
+  background: ${t.var.color.background_light_100};
+  border: 1px solid ${t.var.color.border};
   box-sizing: border-box;
 }`;
 '''
@@ -902,7 +902,7 @@ return {
   as: "div",
   role: "status",
   "aria-live": "polite",
-  hide: () => !args.fns.showUploadStatus?.()
+  hide: () => !f.showUploadStatus?.()
 };
 '''
       }
@@ -924,8 +924,8 @@ return [
     width: 1rem;
     height: 1rem;
     border-radius: 9999px;
-    border: 2px solid ${args.theme.var.color.background_light_400};
-    border-top-color: ${args.theme.var.color.primary};
+    border: 2px solid ${t.var.color.background_light_400};
+    border-top-color: ${t.var.color.primary};
     animation: fuUploadSpin 0.8s linear infinite;
     flex-shrink: 0;
   }`
@@ -951,7 +951,7 @@ return {
 return `._id {
   font-size: 0.875rem;
   line-height: 1.4;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   flex: 1;
   min-width: 0;
 }`;
@@ -960,7 +960,7 @@ return `._id {
           '''
 return {
   as: "div",
-  text: () => args.fns.getUploadStatusLabel?.() || "Uploading…"
+  text: () => f.getUploadStatusLabel?.() || "Uploading…"
 };
 '''
       }
@@ -977,16 +977,16 @@ return `._id {
   width: 100%;
   height: 0.375rem;
   border-radius: 9999px;
-  background: ${args.theme.var.color.background_light_300};
+  background: ${t.var.color.background_light_300};
   overflow: hidden;
-  margin-top: ${args.theme.var.spacing.xs};
+  margin-top: ${t.var.spacing.xs};
 }`;
 '''
         props:
           '''
 return {
   as: "div",
-  hide: () => !args.fns.showUploadStatus?.()
+  hide: () => !f.showUploadStatus?.()
 };
 '''
       }
@@ -1001,13 +1001,13 @@ return {
           '''
 return `._id {
   height: 100%;
-  background: ${args.theme.var.color.primary};
+  background: ${t.var.color.primary};
   transition: width 150ms ease;
 }`;
 '''
         props:
           '''
-const pct = Math.max(0, Math.min(100, Number(args.fns.uploadProgress?.() || 0)));
+const pct = Math.max(0, Math.min(100, Number(f.uploadProgress?.() || 0)));
 return {
   as: "div",
   style: `width: ${pct}%;`
@@ -1023,10 +1023,10 @@ return {
         componentName: Html
         css:
           '''
-const cfg = args.fns.getUploadConfiguration?.() ?? {};
+const cfg = f.getUploadConfiguration?.() ?? {};
 const minHeight = cfg.previewMinHeight || "12.5rem";
 return `._id {
-  border-radius: ${args.theme.var.borderRadius.md};
+  border-radius: ${t.var.borderRadius.md};
   min-height: ${minHeight};
   width: ${cfg.fullWidth === true ? "100%" : "auto"};
   position: relative;
@@ -1035,14 +1035,14 @@ return `._id {
   align-items: stretch;
   text-align: center;
   cursor: pointer;
-  border: 2px dashed ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background_light_50};
+  border: 2px dashed ${t.var.color.border};
+  background: ${t.var.color.background_light_50};
   overflow: hidden;
 }`;
 '''
         props:
           '''
-return { as: "motionFragment", hide: () => !args.fns.showPreview?.() };
+return { as: "motionFragment", hide: () => !f.showPreview?.() };
 '''
       }
     }
@@ -1054,7 +1054,7 @@ return { as: "motionFragment", hide: () => !args.fns.showPreview?.() };
         componentName: Html
         css:
           '''
-const cfg = args.fns.getUploadConfiguration?.() ?? {};
+const cfg = f.getUploadConfiguration?.() ?? {};
 const minHeight = cfg.previewMinHeight || "12.5rem";
 return `._id {
   display: flex;
@@ -1068,7 +1068,7 @@ return `._id {
 '''
         props:
           '''
-const cfg = args.fns.getUploadConfiguration?.() ?? {};
+const cfg = f.getUploadConfiguration?.() ?? {};
 const dragEnabled = cfg.enableDragDrop !== false;
 return {
   as: "div",
@@ -1081,7 +1081,7 @@ return {
         event?.stopPropagation?.();
         const dropped = event?.dataTransfer?.files ?? null;
         if (!dropped || dropped.length === 0) return;
-        void args.fns.applyFileList?.(dropped);
+        void f.applyFileList?.(dropped);
       }
     : undefined
 };
@@ -1099,7 +1099,7 @@ return {
         props:
           '''return {
   as: "motionFragment",
-  data: () => args.fns.previewItems?.() ?? []
+  data: () => f.previewItems?.() ?? []
 };'''
       }
     }
@@ -1111,7 +1111,7 @@ return {
         componentName: Html
         css:
           '''
-const cfg = args.fns.getUploadConfiguration?.() ?? {};
+const cfg = f.getUploadConfiguration?.() ?? {};
 const minHeight = cfg.previewMinHeight || "12.5rem";
 const maxH = cfg.previewMaxItemHeight || "12.5rem";
 return `._id {
@@ -1125,7 +1125,7 @@ return `._id {
 }`;
 '''
         props:
-          '''const item = args.contextData.previewItem;
+          '''const item = c.previewItem;
 return { as: "motionFragment", hide: !item };'''
       }
     }
@@ -1137,7 +1137,7 @@ return { as: "motionFragment", hide: !item };'''
         componentName: Html
         css:
           '''
-const cfg = args.fns.getUploadConfiguration?.() ?? {};
+const cfg = f.getUploadConfiguration?.() ?? {};
 const minHeight = cfg.previewMinHeight || "12.5rem";
 const maxH = cfg.previewMaxItemHeight || "12.5rem";
 const fit = cfg.previewObjectFit || "contain";
@@ -1149,11 +1149,11 @@ return `._id {
   max-height: ${maxH};
   object-fit: ${fit};
   object-position: center;
-  border-radius: ${args.theme.var.borderRadius.md};
+  border-radius: ${t.var.borderRadius.md};
 }`;
 '''
         props:
-          '''const item = args.contextData.previewItem;
+          '''const item = c.previewItem;
 return {
   as: "img",
   alt: "Upload preview",
@@ -1170,7 +1170,7 @@ return {
         componentName: Html
         css:
           '''
-const cfg = args.fns.getUploadConfiguration?.() ?? {};
+const cfg = f.getUploadConfiguration?.() ?? {};
 const minHeight = cfg.previewMinHeight || "12.5rem";
 const maxH = cfg.previewMaxItemHeight || "12.5rem";
 const fit = cfg.previewObjectFit || "contain";
@@ -1182,11 +1182,11 @@ return `._id {
   max-height: ${maxH};
   object-fit: ${fit};
   object-position: center;
-  border-radius: ${args.theme.var.borderRadius.md};
+  border-radius: ${t.var.borderRadius.md};
 }`;
 '''
         props:
-          '''const item = args.contextData.previewItem;
+          '''const item = c.previewItem;
 return {
   as: "video",
   src: item?.url ?? "",
@@ -1205,15 +1205,15 @@ return {
           '''return `._id {
   font-size: 0.875rem;
   line-height: 1.4;
-  color: ${args.theme.var.color.error};
-  margin-top: ${args.theme.var.spacing.xs};
+  color: ${t.var.color.error};
+  margin-top: ${t.var.spacing.xs};
   width: 100%;
 }`;'''
         props:
           '''return {
   as: "div",
-  hide: () => !args.fns.showUploadError?.(),
-  text: args.fns.uploadError?.() ?? ""
+  hide: () => !f.showUploadError?.(),
+  text: f.uploadError?.() ?? ""
 };'''
       }
     }
@@ -1228,12 +1228,12 @@ return {
 return `._id {
   padding: 0.75rem 1rem;
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   word-break: break-word;
 }`;
 '''
         props:
-          '''const item = args.contextData.previewItem;
+          '''const item = c.previewItem;
 return {
   as: "div",
   text: item?.fileName || "Selected file",

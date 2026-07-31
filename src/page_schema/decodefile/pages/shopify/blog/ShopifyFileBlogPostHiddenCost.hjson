@@ -23,13 +23,13 @@
           '''return `._id {
   max-width: 800px;
   margin: 0 auto;
-  padding: ${args.theme.var.spacing?.lg || "2rem"};
-  color: ${args.theme.var.color.text};
+  padding: ${t.var.spacing?.lg || "2rem"};
+  color: ${t.var.color.text};
 }
 
 @media (max-width: 768px) {
   ._id {
-    padding: ${args.theme.var.spacing?.md || "1rem"};
+    padding: ${t.var.spacing?.md || "1rem"};
   }
 }`;'''
         displayOrder: 1
@@ -48,7 +48,7 @@
           '''return `._id {
   font-size: 1.75rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 1.5rem 0;
   line-height: 1.3;
 }
@@ -75,7 +75,7 @@
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 1.5rem 0;
 }`;'''
         displayOrder: 2
@@ -95,7 +95,7 @@
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 1.5rem 0;
 }`;'''
         displayOrder: 3
@@ -117,7 +117,7 @@
   font-size: 1rem;
   line-height: 1.6;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 1.5rem 0;
 }`;'''
         displayOrder: 4
@@ -138,7 +138,7 @@
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 1.5rem 0;
 }`;'''
         displayOrder: 5
@@ -169,7 +169,7 @@ When structure breaks, everything slows down.
           '''return `._id {
   font-size: 1.35rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 2rem 0 1rem 0;
   line-height: 1.3;
 }`;'''
@@ -190,7 +190,7 @@ When structure breaks, everything slows down.
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 7
@@ -210,7 +210,7 @@ When structure breaks, everything slows down.
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 8
@@ -230,7 +230,7 @@ When structure breaks, everything slows down.
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 9
@@ -252,7 +252,7 @@ When structure breaks, everything slows down.
   padding-left: 1.5rem;
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         displayOrder: 10
         componentName: Html
@@ -340,7 +340,7 @@ When structure breaks, everything slows down.
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 11
@@ -360,7 +360,7 @@ When structure breaks, everything slows down.
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 1rem 0;
 }`;'''
         displayOrder: 12
@@ -380,7 +380,7 @@ When structure breaks, everything slows down.
           '''return `._id {
   font-size: 1.35rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 2rem 0 1rem 0;
   line-height: 1.3;
 }`;'''
@@ -401,7 +401,7 @@ When structure breaks, everything slows down.
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 14
@@ -423,7 +423,7 @@ When structure breaks, everything slows down.
   padding-left: 1.5rem;
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         displayOrder: 15
         componentName: Html
@@ -497,7 +497,7 @@ When structure breaks, everything slows down.
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 16
@@ -519,7 +519,7 @@ When structure breaks, everything slows down.
   padding-left: 1.5rem;
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         displayOrder: 17
         componentName: Html
@@ -593,7 +593,7 @@ When structure breaks, everything slows down.
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 18
@@ -613,7 +613,7 @@ When structure breaks, everything slows down.
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 1rem 0;
 }`;'''
         displayOrder: 19
@@ -633,7 +633,7 @@ When structure breaks, everything slows down.
           '''return `._id {
   font-size: 1.35rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 2rem 0 1rem 0;
   line-height: 1.3;
 }`;'''
@@ -654,7 +654,7 @@ When structure breaks, everything slows down.
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 21
@@ -674,7 +674,7 @@ When structure breaks, everything slows down.
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 22
@@ -695,7 +695,7 @@ When structure breaks, everything slows down.
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 23
@@ -717,7 +717,7 @@ When structure breaks, everything slows down.
   padding-left: 1.5rem;
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         displayOrder: 24
         componentName: Html
@@ -791,7 +791,7 @@ When structure breaks, everything slows down.
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 25
@@ -811,7 +811,7 @@ When structure breaks, everything slows down.
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 1rem 0;
 }`;'''
         displayOrder: 26
@@ -831,7 +831,7 @@ When structure breaks, everything slows down.
           '''return `._id {
   font-size: 1.35rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 2rem 0 1rem 0;
   line-height: 1.3;
 }`;'''
@@ -852,7 +852,7 @@ When structure breaks, everything slows down.
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 28
@@ -877,7 +877,7 @@ It was structured architecture.
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 29
@@ -899,7 +899,7 @@ It was structured architecture.
   padding-left: 1.5rem;
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         displayOrder: 30
         componentName: Html
@@ -987,7 +987,7 @@ It was structured architecture.
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 1rem 0;
 }`;'''
         displayOrder: 31
@@ -1007,7 +1007,7 @@ It was structured architecture.
           '''return `._id {
   font-size: 1.35rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 2rem 0 1rem 0;
   line-height: 1.3;
 }`;'''
@@ -1028,7 +1028,7 @@ It was structured architecture.
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 1rem 0;
 }`;'''
         displayOrder: 33
@@ -1048,7 +1048,7 @@ It was structured architecture.
           '''return `._id {
   font-size: 1.15rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 1rem 0 0.5rem 0;
 }`;'''
         displayOrder: 34
@@ -1068,7 +1068,7 @@ It was structured architecture.
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 35
@@ -1088,7 +1088,7 @@ It was structured architecture.
           '''return `._id {
   font-size: 1.15rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 1rem 0 0.5rem 0;
 }`;'''
         displayOrder: 36
@@ -1108,7 +1108,7 @@ It was structured architecture.
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 37
@@ -1128,7 +1128,7 @@ It was structured architecture.
           '''return `._id {
   font-size: 1.15rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 1rem 0 0.5rem 0;
 }`;'''
         displayOrder: 38
@@ -1148,7 +1148,7 @@ It was structured architecture.
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 39
@@ -1168,7 +1168,7 @@ It was structured architecture.
           '''return `._id {
   font-size: 1.15rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 1rem 0 0.5rem 0;
 }`;'''
         displayOrder: 40
@@ -1188,7 +1188,7 @@ It was structured architecture.
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 41
@@ -1208,7 +1208,7 @@ It was structured architecture.
           '''return `._id {
   font-size: 1.15rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 1rem 0 0.5rem 0;
 }`;'''
         displayOrder: 42
@@ -1228,7 +1228,7 @@ It was structured architecture.
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 1rem 0;
 }`;'''
         displayOrder: 43
@@ -1248,7 +1248,7 @@ It was structured architecture.
           '''return `._id {
   font-size: 1.35rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 2rem 0 1rem 0;
   line-height: 1.3;
 }`;'''
@@ -1269,7 +1269,7 @@ It was structured architecture.
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 45
@@ -1291,7 +1291,7 @@ It was structured architecture.
   padding-left: 1.5rem;
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         displayOrder: 46
         componentName: Html
@@ -1351,7 +1351,7 @@ It was structured architecture.
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 1rem 0;
 }`;'''
         displayOrder: 47
@@ -1371,7 +1371,7 @@ It was structured architecture.
           '''return `._id {
   font-size: 1.35rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 2rem 0 1rem 0;
   line-height: 1.3;
 }`;'''
@@ -1392,7 +1392,7 @@ It was structured architecture.
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 49
@@ -1419,7 +1419,7 @@ Scaling stores cannot.
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 50
@@ -1441,7 +1441,7 @@ Scaling stores cannot.
   padding-left: 1.5rem;
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         displayOrder: 51
         componentName: Html
@@ -1501,7 +1501,7 @@ Scaling stores cannot.
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 1rem 0;
 }`;'''
         displayOrder: 52
@@ -1521,7 +1521,7 @@ Scaling stores cannot.
           '''return `._id {
   font-size: 1.35rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 2rem 0 1rem 0;
   line-height: 1.3;
 }`;'''
@@ -1542,7 +1542,7 @@ Scaling stores cannot.
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 54
@@ -1568,7 +1568,7 @@ But structure drives scalability.'''
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 55
@@ -1593,7 +1593,7 @@ It must become systematic.
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 1rem 0;
 }`;'''
         displayOrder: 56

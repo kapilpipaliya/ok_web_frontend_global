@@ -8,7 +8,7 @@
         body:
           '''
 // Get current authenticated user from session
-const actualUser = await args.getUserFromSession(args.request);
+const actualUser = await _.getUserFromSession(_.request);
 if (!actualUser) {
   return {
     success: false,
@@ -17,10 +17,10 @@ if (!actualUser) {
 }
 
 // Get effective user (handles admin impersonation)
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const user = await _.getEffectiveUser(_.session, actualUser, c);
 
 // Get ownershipId from contextData
-const { ownershipId } = args.contextData;
+const { ownershipId } = c;
 
 if (!ownershipId) {
   return {
@@ -30,7 +30,7 @@ if (!ownershipId) {
 }
 
 // Verify ownership belongs to user
-const ownershipCheck = await args.session.run(`
+const ownershipCheck = await _.session.run(`
   MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
   RETURN o
 `, {
@@ -46,7 +46,7 @@ if (ownershipCheck.records.length === 0) {
 }
 
 // Delete all queue entries for this ownership
-const deleteResult = await args.session.run(`
+const deleteResult = await _.session.run(`
   MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideoQueue]->(vq:VideoQueue)
   WITH vq, count(vq) as deletedCount
   DETACH DELETE vq

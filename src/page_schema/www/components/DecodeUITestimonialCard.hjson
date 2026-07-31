@@ -56,8 +56,8 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background_dark_100 : args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.background_dark_200};
+  background: ${_.currentMode() === 'dark' ? t.var.color.background_dark_100 : t.var.color.background};
+  border: 1px solid ${t.var.color.background_dark_200};
   border-radius: 1rem;
   padding: 2rem;
   transition: all 0.3s ease;
@@ -106,7 +106,7 @@ return `._id {
         contextName: "stars",
         loop: true,
         props: '''
-const rating = args.contextData.props?.rating || 5;
+const rating = c.props?.rating || 5;
 return {
   data: Array(5).fill(0).map((_, i) => ({ filled: i < rating }))
 };
@@ -120,7 +120,7 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const star = args.contextData.stars;
+const star = c.stars;
 return {
   as: "icon",
   icon: star.filled ? "carbon:star-filled" : "carbon:star",
@@ -129,9 +129,9 @@ return {
 };
 ''',
         css: '''
-const star = args.contextData.stars;
+const star = c.stars;
 return `._id {
-  color: ${star.filled ? args.theme.var.color.warning : args.theme.var.color.background_dark_300};
+  color: ${star.filled ? t.var.color.warning : t.var.color.background_dark_300};
 }`;
 '''
       }
@@ -192,7 +192,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   opacity: 0.3;
   flex-shrink: 0;
   margin-top: -0.25rem;
@@ -209,13 +209,13 @@ return `._id {
         props: '''
 return {
   as: "blockquote",
-  text: args.contextData.props?.quote || "This is an amazing product!"
+  text: c.props?.quote || "This is an amazing product!"
 };
 ''',
         css: '''
 return `._id {
   font-size: 1.125rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   line-height: 1.6;
   margin: 0;
   font-style: italic;
@@ -243,7 +243,7 @@ return `._id {
   display: flex;
   align-items: center;
   gap: 1rem;
-  border-top: 1px solid ${args.theme.var.color.background_dark_100};
+  border-top: 1px solid ${t.var.color.background_dark_100};
   padding-top: 1rem;
 }`;
 '''
@@ -264,13 +264,13 @@ return {
 return `._id {
   width: 48px;
   height: 48px;
-  background: ${args.theme.var.color.primary};
+  background: ${t.var.color.primary};
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 600;
-  color: ${args.theme.var.color.primary_text};
+  color: ${t.var.color.primary_text};
   font-size: 1.25rem;
 }`;
 '''
@@ -283,7 +283,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const author = args.contextData.props?.author || "John Doe";
+const author = c.props?.author || "John Doe";
 return {
   as: "span",
   text: author.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
@@ -313,13 +313,13 @@ return {
         props: '''
 return {
   as: "p",
-  text: args.contextData.props?.author || "John Doe"
+  text: c.props?.author || "John Doe"
 };
 ''',
         css: '''
 return `._id {
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0;
 }`;
 '''
@@ -334,13 +334,13 @@ return `._id {
         props: '''
 return {
   as: "p",
-  text: args.contextData.props?.role || "CEO, Company"
+  text: c.props?.role || "CEO, Company"
 };
 ''',
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   opacity: 0.7;
   margin: 0;
 }`;

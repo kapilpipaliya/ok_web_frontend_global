@@ -25,7 +25,7 @@ export function Table(
           ...ensureArray(props.css),
           `return \`._id {
           display: grid;
-          border-bottom: 2px solid \${args.theme.var.color.primary};
+          border-bottom: 2px solid \${t.var.color.primary};
           font-size: 0.9em;
           grid-template-columns: repeat(${props.headers}, 1fr);
           border-radius: 10px;
@@ -60,7 +60,7 @@ export function TableBodyCell(
         
         /* Thin scrollbar styling */
         scrollbar-width: thin;
-        scrollbar-color: \${args.theme.var.color.border} transparent;
+        scrollbar-color: \${t.var.color.border} transparent;
         
         &::-webkit-scrollbar {
           width: 4px;
@@ -72,16 +72,16 @@ export function TableBodyCell(
         }
         
         &::-webkit-scrollbar-thumb {
-          background: \${args.theme.var.color.border};
+          background: \${t.var.color.border};
           border-radius: 2px;
         }
         
         &::-webkit-scrollbar-thumb:hover {
-          background: \${args.theme.var.color.border_dark_200};
+          background: \${t.var.color.border_dark_200};
         }
       }\`;`,
         props.index && props.index % 2 !== 0
-          ? "return `._id { background-color: ${args.theme.var.color.primary_light_800}; color: ${args.theme.var.color.primary_light_800_text}; }`;"
+          ? "return `._id { background-color: ${t.var.color.primary_light_800}; color: ${t.var.color.primary_light_800_text}; }`;"
           : "",
         ...ensureArray(props.css),
       ]}
@@ -96,9 +96,9 @@ export function TableHeadCell(props: Readonly<{ children: JSX.Element }>) {
     <As
       as="div"
       css={`return \`._id {
-      background-color: \${args.theme.var.color.primary};
-      border: 1px solid \${args.theme.var.color.primary_dark_100};
-      color: \${args.theme.var.color.primary_text};
+      background-color: \${t.var.color.primary};
+      border: 1px solid \${t.var.color.primary_dark_100};
+      color: \${t.var.color.primary_text};
       font-weight: 600;
       padding: 10px;
       text-align: center;

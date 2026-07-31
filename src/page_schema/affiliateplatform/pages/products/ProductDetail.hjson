@@ -12,8 +12,8 @@
         key: ProductDetail
         props:
           '''
-const locale = args.params?.lang ? String(args.params.lang).toLowerCase() : undefined;
-const routeParams = args.context?.getParams?.(args.meta) || {};
+const locale = _.params?.lang ? String(_.params.lang).toLowerCase() : undefined;
+const routeParams = _.context?.getParams?.(_.meta) || {};
 const productKey = routeParams.productKey != null && String(routeParams.productKey).trim() !== ""
   ? String(routeParams.productKey).trim()
   : null;
@@ -24,7 +24,7 @@ try {
   if (!${JSON.stringify(productKey)}) {
     return { product: null, error: "Missing product key" };
   }
-  const result = await args.executeNamedServerFunction({
+  const result = await s({
     functionName: "loadPublicProduct",
     contextData: {
       productKey: ${JSON.stringify(productKey)},
@@ -91,7 +91,7 @@ try {
         displayOrder: 1
         componentName: Html
         props:
-          '''const locale = args.params?.lang ? String(args.params.lang).toLowerCase() : "";
+          '''const locale = _.params?.lang ? String(_.params.lang).toLowerCase() : "";
 const langPrefix = locale && /^[a-z]{2,3}$/i.test(locale) ? `/${locale}` : "";
 return {
   as: "a",
@@ -107,14 +107,14 @@ return {
         css:
           '''return `._id {
   padding: 2rem;
-  border: 1px dashed ${args.theme.var.color.border};
+  border: 1px dashed ${t.var.color.border};
   border-radius: 0.75rem;
-  color: ${args.theme.var.color.error};
+  color: ${t.var.color.error};
 }`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''const data = args.contextData.productDetailSettings || {};
+          '''const data = c.productDetailSettings || {};
 return {
   as: "div",
   text: data.error || "Product not found",
@@ -129,7 +129,7 @@ return {
         displayOrder: 3
         componentName: ProductDetailView
         props:
-          '''const data = args.contextData.productDetailSettings || {};
+          '''const data = c.productDetailSettings || {};
 return {
   product: data.product,
   hide: !data.product

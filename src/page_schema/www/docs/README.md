@@ -61,8 +61,8 @@ Components support variants for customization:
 
 ## Styling Guidelines
 
-1. **Colors**: Use theme variables (e.g., `args.theme.var.color.primary`)
-2. **Dark Mode**: Check mode with `args.currentMode()`
+1. **Colors**: Use theme variables (e.g., `_.theme.var.color.primary`)
+2. **Dark Mode**: Check mode with `_.currentMode()`
 3. **Backgrounds**: Use `background_dark_*` shades for dark mode
 4. **Spacing**: Use rem units for consistency
 5. **Transitions**: Include smooth transitions for interactions

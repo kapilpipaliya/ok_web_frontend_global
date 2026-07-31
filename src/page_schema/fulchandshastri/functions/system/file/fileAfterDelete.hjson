@@ -7,7 +7,7 @@
         description: After a File vertex is deleted, remove the corresponding file from disk (same as DELETE /api/file).
         body:
           '''
-const { tableVertexLabel, operation, result } = args.contextData;
+const { tableVertexLabel, operation, result } = c;
 
 if (tableVertexLabel !== "File" || operation !== "delete") return;
 

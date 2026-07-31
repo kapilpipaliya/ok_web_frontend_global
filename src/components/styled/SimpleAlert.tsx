@@ -64,10 +64,10 @@ export function SimpleAlert(props: Readonly<SimpleAlertProps>): JSX.Element {
         }\`;`,
         props.backgroundColor
           ? `return \`._id { background-color: ${props.backgroundColor}; }\`;`
-          : `return \`._id { background-color: \${args.theme.var.color.${config().defaultBg}}; color: \${args.theme.var.color.${config().defaultBg}_text}; }\`;`,
+          : `return \`._id { background-color: \${t.var.color.${config().defaultBg}}; color: \${t.var.color.${config().defaultBg}_text}; }\`;`,
         props.borderColor
           ? `return \`._id { border-color: ${props.borderColor}; }\`;`
-          : `return \`._id { border-color: \${args.theme.var.color.${config().defaultBorder}}; }\`;`,
+          : `return \`._id { border-color: \${t.var.color.${config().defaultBorder}}; }\`;`,
         props.padding
           ? `return \`._id { padding: ${props.padding}; }\`;`
           : "return `._id { padding: 1rem; }`;",
@@ -95,7 +95,7 @@ export function SimpleAlert(props: Readonly<SimpleAlertProps>): JSX.Element {
               }\`;`,
               props.iconColor
                 ? `return \`._id { color: ${props.iconColor}; }\`;`
-                : `return \`._id { color: \${args.theme.var.color.${config().defaultIcon}}; }\`;`,
+                : `return \`._id { color: \${t.var.color.${config().defaultIcon}}; }\`;`,
             ]}
           />
         </As>
@@ -110,7 +110,7 @@ export function SimpleAlert(props: Readonly<SimpleAlertProps>): JSX.Element {
             css={`return \`._id {
   line-height: 1.25rem;
   font-size: 0.875rem;
-  color: \${args.theme.var.color.text};
+  color: \${t.var.color.text};
   font-weight: 500;
 }\`;`}
           >
@@ -122,13 +122,13 @@ export function SimpleAlert(props: Readonly<SimpleAlertProps>): JSX.Element {
                   as="a"
                   css={[
                     `return \`._id {
-                      color: \${args.theme.var.color.${config().defaultLink}};
+                      color: \${t.var.color.${config().defaultLink}};
                       font-weight: 600;
                       text-decoration: underline;
                     }\`;`,
                     props.linkHoverColor
                       ? `return \`._id:hover { color: ${props.linkHoverColor}; }\`;`
-                      : `return \`._id:hover { color: \${args.theme.var.color.${config().defaultLinkHover}}; }\`;`,
+                      : `return \`._id:hover { color: \${t.var.color.${config().defaultLinkHover}}; }\`;`,
                   ]}
                   href={props.linkHref || "#"}
                 >

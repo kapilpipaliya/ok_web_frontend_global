@@ -32,8 +32,8 @@ return { navItems };
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
 }`;'''
       }
     },
@@ -53,10 +53,10 @@ return { navItems };
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: ${args.theme.var.spacing.md};
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  border-bottom: 1px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background};
+  gap: ${t.var.spacing.md};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  border-bottom: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background};
 }`;'''
       }
     },
@@ -71,7 +71,7 @@ return { navItems };
   as: "button",
   type: "button",
   text: "HydrateMe",
-  onClick: () => args.navigate("/hydrateme")
+  onClick: () => _.navigate("/hydrateme")
 };'''
         css:
           '''return `._id {
@@ -79,9 +79,9 @@ return { navItems };
   background: transparent;
   font-weight: 700;
   font-size: 1.875rem;
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   cursor: pointer;
-  padding: ${args.theme.var.spacing.xs} 0;
+  padding: ${t.var.spacing.xs} 0;
 }`;'''
       }
     },
@@ -96,7 +96,7 @@ return { navItems };
           '''return `._id {
   display: flex;
   flex-wrap: wrap;
-  gap: ${args.theme.var.spacing.xs};
+  gap: ${t.var.spacing.xs};
   align-items: center;
 }`;'''
       }
@@ -111,7 +111,7 @@ return { navItems };
           '''return {
   loop: true,
   contextName: "navItem",
-  data: args.fns.navItems
+  data: f.navItems
 };'''
       }
     },
@@ -122,35 +122,35 @@ return { navItems };
         displayOrder: 1
         componentName: Html
         props:
-          '''const item = args.contextData.navItem;
-const pathname = args.location?.pathname || "";
+          '''const item = c.navItem;
+const pathname = _.location?.pathname || "";
 const active = item?.pathCheck?.(pathname) === true;
 return {
   as: "button",
   type: "button",
   text: item?.label || "",
-  onClick: () => args.navigate(item?.href || "/hydrateme"),
+  onClick: () => _.navigate(item?.href || "/hydrateme"),
   class: active ? "hm-nav-link hm-nav-link-active" : "hm-nav-link"
 };'''
         css:
           '''return `._id.hm-nav-link {
-  border-radius: ${args.theme.var.borderRadius.md};
+  border-radius: ${t.var.borderRadius.md};
   border: 1px solid transparent;
   background: transparent;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   font-size: 0.875rem;
   font-weight: 500;
-  padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.sm};
+  padding: ${t.var.spacing.xs} ${t.var.spacing.sm};
   cursor: pointer;
   transition: background 150ms ease, border-color 150ms ease;
 }
 ._id.hm-nav-link:hover {
-  background: ${args.theme.var.color.background_light_200};
+  background: ${t.var.color.background_light_200};
 }
 ._id.hm-nav-link-active {
-  border-color: ${args.theme.var.color.primary};
-  background: ${args.theme.var.color.background_light_100};
-  color: ${args.theme.var.color.primary};
+  border-color: ${t.var.color.primary};
+  background: ${t.var.color.background_light_100};
+  color: ${t.var.color.primary};
 }`;'''
       }
     },
@@ -167,8 +167,8 @@ return {
   width: 100%;
   max-width: 56rem;
   margin: 0 auto;
-  padding: ${args.theme.var.spacing.md};
-  padding-bottom: calc(${args.theme.var.spacing.xxl} + env(safe-area-inset-bottom, 0px));
+  padding: ${t.var.spacing.md};
+  padding-bottom: calc(${t.var.spacing.xxl} + env(safe-area-inset-bottom, 0px));
 }`;'''
       }
     },

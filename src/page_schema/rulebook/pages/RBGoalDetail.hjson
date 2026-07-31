@@ -7,18 +7,18 @@
         key: "RBGoalDetail",
         url: "/rb/goal-detail",
         fns: '''
-const [showGoalModal, setShowGoalModal] = args.createSignal(false);
-const [goalModalMode, setGoalModalMode] = args.createSignal("edit");
-const [selectedGoal, setSelectedGoal] = args.createSignal(null);
+const [showGoalModal, setShowGoalModal] = _.createSignal(false);
+const [goalModalMode, setGoalModalMode] = _.createSignal("edit");
+const [selectedGoal, setSelectedGoal] = _.createSignal(null);
 
 // Goal data state
-const [goalData, setGoalData] = args.createSignal(null);
-const [isGoalLoading, setIsGoalLoading] = args.createSignal(true);
-const [goalError, setGoalError] = args.createSignal(null);
+const [goalData, setGoalData] = _.createSignal(null);
+const [isGoalLoading, setIsGoalLoading] = _.createSignal(true);
+const [goalError, setGoalError] = _.createSignal(null);
 
 // Load goal data
 const loadGoalData = async () => {
-  const goalId = args.searchParams?.goalId;
+  const goalId = _.searchParams?.goalId;
   if (!goalId) {
     setGoalError("Goal ID is required");
     setIsGoalLoading(false);
@@ -29,7 +29,7 @@ const loadGoalData = async () => {
   setGoalError(null);
 
   try {
-    const response = await args.executeNamedServerFunction({
+    const response = await s({
       functionName: "getGoalById",
       contextData: { goalId }
     });
@@ -47,7 +47,7 @@ const loadGoalData = async () => {
   } catch (err) {
     console.error("Error loading goal data:", err);
     setGoalError(err.message);
-    args.showErrorToast(err.message);
+    _.showErrorToast(err.message);
   } finally {
     setIsGoalLoading(false);
   }
@@ -78,7 +78,7 @@ return {
         props: '''
 return {
   isNoPermissionCheck: true,
-  onMount: args.fns.onMount
+  onMount: f.onMount
 };
 '''
       }
@@ -104,14 +104,14 @@ return {
 ''',
         css: '''
 return `._id {
-  padding: ${args.theme.var.spacing.lg};
+  padding: ${t.var.spacing.lg};
   max-width: 800px;
   margin: 0 auto;
 }
 
 @media (max-width: 768px) {
   ._id {
-    padding: ${args.theme.var.spacing.md};
+    padding: ${t.var.spacing.md};
   }
 }`;
 '''
@@ -143,16 +143,16 @@ return {
 return `._id {
   background: none;
   border: none;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   cursor: pointer;
-  padding: ${args.theme.var.spacing.sm};
-  border-radius: ${args.theme.var.borderRadius.sm};
+  padding: ${t.var.spacing.sm};
+  border-radius: ${t.var.borderRadius.sm};
   transition: all 150ms ease;
   text-decoration: none;
 
   &:hover {
-    background: ${args.theme.var.color.background_dark_200};
-    color: ${args.theme.var.color.text};
+    background: ${t.var.color.background_dark_200};
+    color: ${t.var.color.text};
   }
 }`;
 '''
@@ -181,7 +181,7 @@ return {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const isGoalLoading = args.fns.isGoalLoading?.();
+const isGoalLoading = f.isGoalLoading?.();
 
 return {
   as: "div",
@@ -194,8 +194,8 @@ return `._id {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: ${args.theme.var.spacing.xxxl};
-  gap: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.xxxl};
+  gap: ${t.var.spacing.md};
 }`;
 '''
       }
@@ -223,7 +223,7 @@ return {
         componentName: "RBPageTitle",
         slotName: "center",
         props: '''
-const goalData = args.fns.goalData?.()?.goal;
+const goalData = f.goalData?.()?.goal;
 
 return {
   text: goalData?.P?.title || "Goal Details"
@@ -239,7 +239,7 @@ return {
         componentName: "Html",
         slotName: "subtitle",
         props: '''
-const goalData = args.fns.goalData?.()?.goal;
+const goalData = f.goalData?.()?.goal;
 const statusText = goalData?.P?.isCompleted ? "Completed" : "Active";
 const targetText = goalData?.P?.targetDateFormatted ? `Target: ${goalData.P.targetDateFormatted}` : "";
 const valueText = goalData?.P?.targetValue ? `${goalData.P.targetValue} ${goalData.P.unit || 'units'}` : "";
@@ -253,7 +253,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   font-size: 1rem;
   margin: 0;
 }`;
@@ -268,11 +268,11 @@ return `._id {
         componentName: "Html",
         slotName: "right",
         props: '''
-const [showMenu, setShowMenu] = args.createSignal(false);
+const [showMenu, setShowMenu] = _.createSignal(false);
 
 // Global close event handler
 const handleCloseAllMenus = (e) => {
-  const ref = args.ref();
+  const ref = _.ref();
   if (ref && !ref.contains(e.target)) {
     setShowMenu(false);
   }
@@ -306,8 +306,8 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const showMenu = args.contextData?.menuState?.showMenu;
-const setShowMenu = args.contextData?.menuState?.setShowMenu;
+const showMenu = c?.menuState?.showMenu;
+const setShowMenu = c?.menuState?.setShowMenu;
 
 return {
   as: "button",
@@ -323,15 +323,15 @@ return {
 return `._id {
   background: none;
   border: none;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   cursor: pointer;
-  padding: ${args.theme.var.spacing.sm};
-  border-radius: ${args.theme.var.borderRadius.sm};
+  padding: ${t.var.spacing.sm};
+  border-radius: ${t.var.borderRadius.sm};
   transition: all 150ms ease;
 
   &:hover {
-    background: ${args.theme.var.color.background_dark_200};
-    color: ${args.theme.var.color.text};
+    background: ${t.var.color.background_dark_200};
+    color: ${t.var.color.text};
   }
 }`;
 '''
@@ -360,7 +360,7 @@ return {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const showMenu = args.contextData?.menuState?.showMenu;
+const showMenu = c?.menuState?.showMenu;
 
 return {
   as: "div",
@@ -373,9 +373,9 @@ return `._id {
   top: 100%;
   right: 0;
   min-width: 160px;
-  background: ${args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.md};
+  background: ${t.var.color.background};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.md};
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   z-index: 1000;
   overflow: hidden;
@@ -390,12 +390,12 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const fullGoalData = args.fns.goalData?.();
+const fullGoalData = f.goalData?.();
 const goalData = fullGoalData?.goal;
 const ruleData = fullGoalData?.rule;
-const setShowGoalModal = args.fns.setShowGoalModal;
-const setGoalModalMode = args.fns.setGoalModalMode;
-const setSelectedGoal = args.fns.setSelectedGoal;
+const setShowGoalModal = f.setShowGoalModal;
+const setGoalModalMode = f.setGoalModalMode;
+const setSelectedGoal = f.setSelectedGoal;
 
 return {
   as: "button",
@@ -405,7 +405,7 @@ return {
     e.stopPropagation();
 
     if (!goalData) {
-      args.showErrorToast("Goal data not available");
+      _.showErrorToast("Goal data not available");
       return;
     }
 
@@ -436,14 +436,14 @@ return `._id {
   text-align: left;
   background: none;
   border: none;
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  color: ${args.theme.var.color.text};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  color: ${t.var.color.text};
   font-size: 0.875rem;
   cursor: pointer;
   transition: all 150ms ease;
 
   &:hover {
-    background: ${args.theme.var.color.background_light_200};
+    background: ${t.var.color.background_light_200};
   }
 }`;
 '''
@@ -456,7 +456,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const goalData = args.fns.goalData?.()?.goal;
+const goalData = f.goalData?.()?.goal;
 
 return {
   as: "button",
@@ -467,7 +467,7 @@ return {
     e.stopPropagation();
 
     if (!goalData) {
-      args.showErrorToast("Goal data not available");
+      _.showErrorToast("Goal data not available");
       return;
     }
 
@@ -475,9 +475,9 @@ return {
       return; // Already completed
     }
 
-    const rbConfirm = args.contextData?.confirmContext?.rbConfirm;
+    const rbConfirm = c?.confirmContext?.rbConfirm;
     if (!rbConfirm) {
-      args.showErrorToast("Confirmation dialog not available");
+      _.showErrorToast("Confirmation dialog not available");
       return;
     }
 
@@ -491,7 +491,7 @@ return {
 
     if (confirmed) {
       try {
-        const response = await args.executeNamedServerFunction({
+        const response = await s({
           functionName: "updateGoalProgress",
           contextData: {
             goalId: goalData.id,
@@ -500,20 +500,20 @@ return {
         });
 
         if (response.error) {
-          args.showErrorToast(response.error);
+          _.showErrorToast(response.error);
           return;
         }
 
         const result = response.result;
         if (result.success) {
-          args.showSuccessToast(result.message || "Goal marked as complete!");
+          _.showSuccessToast(result.message || "Goal marked as complete!");
           // Refresh the page data
           window.location.reload();
         } else {
-          args.showErrorToast(result.message || "Failed to mark goal as complete");
+          _.showErrorToast(result.message || "Failed to mark goal as complete");
         }
       } catch (error) {
-        args.showErrorToast("Error completing goal: " + error.message);
+        _.showErrorToast("Error completing goal: " + error.message);
       }
     }
   }
@@ -526,14 +526,14 @@ return `._id {
   text-align: left;
   background: none;
   border: none;
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  color: ${args.theme.var.color.text};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  color: ${t.var.color.text};
   font-size: 0.875rem;
   cursor: pointer;
   transition: all 150ms ease;
 
   &:hover {
-    background: ${args.theme.var.color.background_light_200};
+    background: ${t.var.color.background_light_200};
   }
 }`;
 '''
@@ -546,7 +546,7 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const goalData = args.fns.goalData?.()?.goal;
+const goalData = f.goalData?.()?.goal;
 
 return {
   as: "button",
@@ -556,13 +556,13 @@ return {
     e.stopPropagation();
 
     if (!goalData) {
-      args.showErrorToast("Goal data not available");
+      _.showErrorToast("Goal data not available");
       return;
     }
 
-    const rbConfirm = args.contextData?.confirmContext?.rbConfirm;
+    const rbConfirm = c?.confirmContext?.rbConfirm;
     if (!rbConfirm) {
-      args.showErrorToast("Confirmation dialog not available");
+      _.showErrorToast("Confirmation dialog not available");
       return;
     }
 
@@ -576,25 +576,25 @@ return {
 
     if (confirmed) {
       try {
-        const response = await args.executeNamedServerFunction({
+        const response = await s({
           functionName: "deleteGoal",
           contextData: { goalId: goalData.id }
         });
 
         if (response.error) {
-          args.showErrorToast(response.error);
+          _.showErrorToast(response.error);
           return;
         }
 
         const result = response.result;
         if (result.success) {
-          args.showSuccessToast(result.message || "Goal deleted successfully!");
-          args.navigate("/rb/goals");
+          _.showSuccessToast(result.message || "Goal deleted successfully!");
+          _.navigate("/rb/goals");
         } else {
-          args.showErrorToast(result.message || "Failed to delete goal");
+          _.showErrorToast(result.message || "Failed to delete goal");
         }
       } catch (error) {
-        args.showErrorToast("Error deleting goal: " + error.message);
+        _.showErrorToast("Error deleting goal: " + error.message);
       }
     }
   }
@@ -607,15 +607,15 @@ return `._id {
   text-align: left;
   background: none;
   border: none;
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  color: ${args.theme.var.color.error};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  color: ${t.var.color.error};
   font-size: 0.875rem;
   cursor: pointer;
   transition: all 150ms ease;
 
   &:hover {
-    background: ${args.theme.var.color.error_light_100};
-    color: ${args.theme.var.color.error_dark_200};
+    background: ${t.var.color.error_light_100};
+    color: ${t.var.color.error_dark_200};
   }
 }`;
 '''
@@ -628,7 +628,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const isGoalLoading = args.fns.isGoalLoading?.();
+const isGoalLoading = f.isGoalLoading?.();
 
 return {
   as: "section",
@@ -637,11 +637,11 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background_light_100};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.lg};
-  padding: ${args.theme.var.spacing.xl};
-  margin-bottom: ${args.theme.var.spacing.xl};
+  background: ${t.var.color.background_light_100};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.lg};
+  padding: ${t.var.spacing.xl};
+  margin-bottom: ${t.var.spacing.xl};
   position: relative;
   overflow: hidden;
 
@@ -652,7 +652,7 @@ return `._id {
     left: 0;
     right: 0;
     height: 4px;
-    background: ${args.theme.var.color.primary};
+    background: ${t.var.color.primary};
   }
 }`;
 '''
@@ -671,7 +671,7 @@ return {
 ''',
         css: '''
 return `._id {
-  margin-bottom: ${args.theme.var.spacing.lg};
+  margin-bottom: ${t.var.spacing.lg};
 }`;
 '''
       }
@@ -692,8 +692,8 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 ${args.theme.var.spacing.sm} 0;
+  color: ${t.var.color.text};
+  margin: 0 0 ${t.var.spacing.sm} 0;
 }`;
 '''
       }
@@ -712,7 +712,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0;
 }`;
 '''
@@ -733,8 +733,8 @@ return {
 return `._id {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: ${args.theme.var.spacing.lg};
-  margin-bottom: ${args.theme.var.spacing.xl};
+  gap: ${t.var.spacing.lg};
+  margin-bottom: ${t.var.spacing.xl};
 }`;
 '''
       }
@@ -764,7 +764,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const goalData = args.fns.goalData?.()?.goal;
+const goalData = f.goalData?.()?.goal;
 
 return {
   as: "div",
@@ -775,7 +775,7 @@ return {
 return `._id {
   font-size: 2.5rem;
   font-weight: 700;
-  color: ${args.theme.var.color.success};
+  color: ${t.var.color.success};
   line-height: 1;
 }`;
 '''
@@ -795,9 +795,9 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   font-size: 0.875rem;
-  margin-top: ${args.theme.var.spacing.xs};
+  margin-top: ${t.var.spacing.xs};
 }`;
 '''
       }
@@ -827,7 +827,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const goalData = args.fns.goalData?.()?.goal;
+const goalData = f.goalData?.()?.goal;
 
 return {
   as: "div",
@@ -838,7 +838,7 @@ return {
 return `._id {
   font-size: 2.5rem;
   font-weight: 700;
-  color: ${args.theme.var.color.warning};
+  color: ${t.var.color.warning};
   line-height: 1;
 }`;
 '''
@@ -858,9 +858,9 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   font-size: 0.875rem;
-  margin-top: ${args.theme.var.spacing.xs};
+  margin-top: ${t.var.spacing.xs};
 }`;
 '''
       }
@@ -890,7 +890,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const goalData = args.fns.goalData?.()?.goal;
+const goalData = f.goalData?.()?.goal;
 
 return {
   as: "div",
@@ -901,7 +901,7 @@ return {
 return `._id {
   font-size: 2.5rem;
   font-weight: 700;
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   line-height: 1;
 }`;
 '''
@@ -921,9 +921,9 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   font-size: 0.875rem;
-  margin-top: ${args.theme.var.spacing.xs};
+  margin-top: ${t.var.spacing.xs};
 }`;
 '''
       }
@@ -941,10 +941,10 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background_dark_200};
-  border-radius: ${args.theme.var.borderRadius.full};
-  padding: ${args.theme.var.spacing.xs};
-  margin-bottom: ${args.theme.var.spacing.md};
+  background: ${t.var.color.background_dark_200};
+  border-radius: ${t.var.borderRadius.full};
+  padding: ${t.var.spacing.xs};
+  margin-bottom: ${t.var.spacing.md};
 }`;
 '''
       }
@@ -961,22 +961,22 @@ return {
 };
 ''',
         css: '''
-const goalData = args.fns.goalData?.()?.goal;
+const goalData = f.goalData?.()?.goal;
 const progressPercentage = goalData?.P?.progressPercentage || 0;
-const textColor = progressPercentage <= 5 ? args.theme.var.color.text : 'white';
+const textColor = progressPercentage <= 5 ? t.var.color.text : 'white';
 
 return `._id {
   width: ${progressPercentage}%;
   height: 16px;
-  background: linear-gradient(90deg, ${args.theme.var.color.success}, ${args.theme.var.color.primary});
-  border-radius: ${args.theme.var.borderRadius.full};
+  background: linear-gradient(90deg, ${t.var.color.success}, ${t.var.color.primary});
+  border-radius: ${t.var.borderRadius.full};
   transition: width 500ms ease;
   position: relative;
 
   &:after {
     content: '${progressPercentage}%';
     position: absolute;
-    right: ${args.theme.var.spacing.sm};
+    right: ${t.var.spacing.sm};
     top: 50%;
     transform: translateY(-50%);
     font-size: 0.75rem;
@@ -995,7 +995,7 @@ return `._id {
         displayOrder: 4,
         componentName: "Html",
         props: '''
-const goalData = args.fns.goalData?.()?.goal;
+const goalData = f.goalData?.()?.goal;
 
 return {
   as: "div",
@@ -1004,10 +1004,10 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.warning_light_200};
-  color: ${args.theme.var.color.warning_dark_200};
-  padding: ${args.theme.var.spacing.lg};
-  border-radius: ${args.theme.var.borderRadius.md};
+  background: ${t.var.color.warning_light_200};
+  color: ${t.var.color.warning_dark_200};
+  padding: ${t.var.spacing.lg};
+  border-radius: ${t.var.borderRadius.md};
   text-align: center;
 }`;
 '''
@@ -1020,7 +1020,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const goalData = args.fns.goalData?.()?.goal;
+const goalData = f.goalData?.()?.goal;
 const rewardText = goalData?.P?.reward ? `🏆 Reward: ${goalData.P.reward}` : "🏆 No reward set";
 
 return {
@@ -1043,7 +1043,7 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const isGoalLoading = args.fns.isGoalLoading?.();
+const isGoalLoading = f.isGoalLoading?.();
 
 return {
   as: "section",
@@ -1052,11 +1052,11 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background_light_100};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.lg};
-  padding: ${args.theme.var.spacing.xl};
-  margin-bottom: ${args.theme.var.spacing.xl};
+  background: ${t.var.color.background_light_100};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.lg};
+  padding: ${t.var.spacing.xl};
+  margin-bottom: ${t.var.spacing.xl};
 }`;
 '''
       }
@@ -1077,8 +1077,8 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 ${args.theme.var.spacing.md} 0;
+  color: ${t.var.color.text};
+  margin: 0 0 ${t.var.spacing.md} 0;
 }`;
 '''
       }
@@ -1090,7 +1090,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const goalData = args.fns.goalData?.()?.goal;
+const goalData = f.goalData?.()?.goal;
 
 return {
   as: "p",
@@ -1099,7 +1099,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   line-height: 1.6;
   margin: 0;
   font-size: 1rem;
@@ -1114,7 +1114,7 @@ return `._id {
         displayOrder: 4,
         componentName: "Html",
         props: '''
-const isGoalLoading = args.fns.isGoalLoading?.();
+const isGoalLoading = f.isGoalLoading?.();
 
 return {
   as: "section",
@@ -1123,10 +1123,10 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background_light_100};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.lg};
-  padding: ${args.theme.var.spacing.xl};
+  background: ${t.var.color.background_light_100};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.lg};
+  padding: ${t.var.spacing.xl};
 }`;
 '''
       }
@@ -1147,8 +1147,8 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 ${args.theme.var.spacing.md} 0;
+  color: ${t.var.color.text};
+  margin: 0 0 ${t.var.spacing.md} 0;
 }`;
 '''
       }
@@ -1160,7 +1160,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const ruleData = args.fns.goalData?.()?.rule;
+const ruleData = f.goalData?.()?.rule;
 
 return {
   as: ruleData ? "a" : "div",
@@ -1171,16 +1171,16 @@ return {
 return `._id {
   display: flex;
   align-items: center;
-  gap: ${args.theme.var.spacing.md};
-  padding: ${args.theme.var.spacing.md};
-  background: ${args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.md};
+  gap: ${t.var.spacing.md};
+  padding: ${t.var.spacing.md};
+  background: ${t.var.color.background};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.md};
   text-decoration: none;
   transition: all 150ms ease;
 
   &:hover {
-    border-color: ${args.theme.var.color.primary};
+    border-color: ${t.var.color.primary};
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
 }`;
@@ -1194,7 +1194,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const ruleData = args.fns.goalData?.()?.rule;
+const ruleData = f.goalData?.()?.rule;
 
 return {
   as: "div",
@@ -1205,9 +1205,9 @@ return {
 return `._id {
   width: 20px;
   height: 20px;
-  border: 2px solid ${args.theme.var.color.success};
-  border-radius: ${args.theme.var.borderRadius.sm};
-  background: ${args.theme.var.color.success};
+  border: 2px solid ${t.var.color.success};
+  border-radius: ${t.var.borderRadius.sm};
+  background: ${t.var.color.success};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1232,7 +1232,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.success_text};
+  color: ${t.var.color.success_text};
 }`;
 '''
       }
@@ -1262,7 +1262,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const ruleData = args.fns.goalData?.()?.rule;
+const ruleData = f.goalData?.()?.rule;
 
 return {
   as: "div",
@@ -1272,8 +1272,8 @@ return {
         css: '''
 return `._id {
   font-weight: 500;
-  color: ${args.theme.var.color.text};
-  margin-bottom: ${args.theme.var.spacing.xs};
+  color: ${t.var.color.text};
+  margin-bottom: ${t.var.spacing.xs};
 }`;
 '''
       }
@@ -1285,8 +1285,8 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const ruleData = args.fns.goalData?.()?.rule;
-const streakData = args.fns.goalData?.()?.streak;
+const ruleData = f.goalData?.()?.rule;
+const streakData = f.goalData?.()?.streak;
 
 if (!ruleData) {
   return {
@@ -1308,7 +1308,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
       }
@@ -1320,7 +1320,7 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const ruleData = args.fns.goalData?.()?.rule;
+const ruleData = f.goalData?.()?.rule;
 
 return {
   as: "div",
@@ -1330,10 +1330,10 @@ return {
 ''',
         css: '''
 return `._id {
-  padding: ${args.theme.var.spacing.lg};
-  background: ${args.theme.var.color.info_light_100};
-  color: ${args.theme.var.color.info_dark_200};
-  border-radius: ${args.theme.var.borderRadius.md};
+  padding: ${t.var.spacing.lg};
+  background: ${t.var.color.info_light_100};
+  color: ${t.var.color.info_dark_200};
+  border-radius: ${t.var.borderRadius.md};
   font-style: italic;
   text-align: center;
 }`;
@@ -1347,10 +1347,10 @@ return `._id {
         displayOrder: 6,
         componentName: "RBGoalFormModal",
         props: '''
-const showGoalModal = args.fns.showGoalModal;
-const goalModalMode = args.fns.goalModalMode;
-const selectedGoal = args.fns.selectedGoal;
-const setShowGoalModal = args.fns.setShowGoalModal;
+const showGoalModal = f.showGoalModal;
+const goalModalMode = f.goalModalMode;
+const selectedGoal = f.selectedGoal;
+const setShowGoalModal = f.setShowGoalModal;
 
 return {
   isOpen: showGoalModal?.(),
@@ -1361,14 +1361,14 @@ return {
   },
   onSave: (result) => {
     // Refresh goal data after successful save
-    const refreshData = args.fns.loadGoalData;
+    const refreshData = f.loadGoalData;
     if (refreshData) {
       refreshData();
     }
   },
   onDelete: (result) => {
     // Navigate back to goals page after deletion
-    args.navigate("/rb/goals");
+    _.navigate("/rb/goals");
   }
 };
 '''

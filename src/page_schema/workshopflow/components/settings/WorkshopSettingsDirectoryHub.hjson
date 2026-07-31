@@ -47,7 +47,7 @@ return {
 return `._id {
   display: flex;
   flex-direction: column;
-  gap: ${args.theme.var.spacing.lg};
+  gap: ${t.var.spacing.lg};
   max-width: 40rem;
 }`;
 '''
@@ -73,7 +73,7 @@ return `._id {
   font-size: 1.25rem;
   font-weight: 700;
   margin: 0;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -97,7 +97,7 @@ return {
 return `._id {
   margin: 0;
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   line-height: 1.5;
 }`;
 '''
@@ -116,7 +116,7 @@ return `._id {
 return {
   as: "div",
   class: "workshop-dir-hub-cards",
-  data: args.fns.links
+  data: f.links
 };
 '''
         css:
@@ -124,7 +124,7 @@ return {
 return `._id.workshop-dir-hub-cards {
   display: flex;
   flex-direction: column;
-  gap: ${args.theme.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
 }`;
 '''
       }
@@ -137,30 +137,30 @@ return `._id.workshop-dir-hub-cards {
         componentName: Html
         props:
           '''
-const item = args.contextData.dirLink;
+const item = c.dirLink;
 return {
   as: "button",
   type: "button",
   class: "workshop-dir-hub-card",
-  onClick: () => args.navigate(item.href)
+  onClick: () => _.navigate(item.href)
 };
 '''
         css:
           '''
 return `._id.workshop-dir-hub-card {
   text-align: left;
-  padding: ${args.theme.var.spacing.md};
-  border-radius: ${args.theme.var.borderRadius.lg};
-  border: 1px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  padding: ${t.var.spacing.md};
+  border-radius: ${t.var.borderRadius.lg};
+  border: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   cursor: pointer;
   transition: border-color 150ms ease,
     background 150ms ease;
 }
 ._id.workshop-dir-hub-card:hover {
-  border-color: ${args.theme.var.color.primary};
-  background: ${args.theme.var.color.background_light_100};
+  border-color: ${t.var.color.primary};
+  background: ${t.var.color.background_light_100};
 }`;
 '''
       }
@@ -173,7 +173,7 @@ return `._id.workshop-dir-hub-card {
         componentName: Html
         props:
           '''
-const item = args.contextData.dirLink;
+const item = c.dirLink;
 return {
   as: "div",
   text: item.label,
@@ -185,7 +185,7 @@ return {
 return `._id {
   font-weight: 600;
   font-size: 1rem;
-  margin-bottom: ${args.theme.var.spacing.xs};
+  margin-bottom: ${t.var.spacing.xs};
 }`;
 '''
       }
@@ -198,7 +198,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const item = args.contextData.dirLink;
+const item = c.dirLink;
 return {
   as: "div",
   text: item.hint,
@@ -209,7 +209,7 @@ return {
           '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
       }

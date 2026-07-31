@@ -90,7 +90,7 @@ export function ImportMenu(
         <As
           as="label"
           css={`return \`._id {
-  color: \${args.theme.var.color.primary};
+  color: \${t.var.color.primary};
   display: block;
   font-size: 0.875rem;
   font-weight: 500;
@@ -111,7 +111,7 @@ export function ImportMenu(
   border-radius: 0.375rem;
   border-width: 0;
   box-shadow: 0 0 0 1px rgba(0,0,0,0.5);
-  color: \${args.theme.var.color.primary};
+  color: \${t.var.color.primary};
   display: block;
   font-size: 0.875rem;
   padding-left: 0.75rem; padding-right: 0.75rem;

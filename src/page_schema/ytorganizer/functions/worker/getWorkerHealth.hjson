@@ -20,11 +20,11 @@
  * - Display worker status in admin UI
  */
 
-  const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
+  const helpers = await s({ functionName: 'queueHelpers', contextData: {} });
 
   // Connect to both worker queues
-  const channelQueue = helpers.result.data.createChannelQueue(args);
-  const playlistQueue = helpers.result.data.createPlaylistQueue(args);
+  const channelQueue = helpers.result.data.createChannelQueue(_);
+  const playlistQueue = helpers.result.data.createPlaylistQueue(_);
 
   // Get job counts for both queues
   // This includes: waiting, active, completed, failed, delayed, and paused jobs

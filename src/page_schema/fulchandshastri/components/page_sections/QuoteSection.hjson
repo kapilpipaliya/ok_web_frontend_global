@@ -15,7 +15,7 @@
       P: {
         css:
           '''return `._id {
-  background: linear-gradient(135deg, ${args.theme.var.color.background_light_50} 0%, ${args.theme.var.color.background_light_100} 100%);
+  background: linear-gradient(135deg, ${t.var.color.background_light_50} 0%, ${t.var.color.background_light_100} 100%);
   padding: 3rem 1rem;
   margin: 2rem 0;
   position: relative;
@@ -24,12 +24,12 @@
         displayOrder: 1
         componentName: Html
         props:
-          '''const quote = args.contextData.props || {};
+          '''const quote = c.props || {};
 return {
   as: "section",
   "data-animate": "",
 
-  ref: (el) => el && args.fns.animateOnView?.(el),
+  ref: (el) => el && f.animateOnView?.(el),
 };'''
       }
     }
@@ -43,7 +43,7 @@ return {
   top: 1rem;
   left: 1rem;
   font-size: 4rem;
-  color: ${args.theme.var.color.primary_light_300};
+  color: ${t.var.color.primary_light_300};
   opacity: 0.3;
   font-family: serif;
   line-height: 1;
@@ -97,7 +97,7 @@ return {
           '''return `._id {
   font-size: 1.5rem;
   font-style: italic;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   line-height: 1.8;
   margin: 0 0 1.5rem 0;
   padding: 0 2rem;
@@ -110,7 +110,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const quote = args.contextData.props || {};
+          '''const quote = c.props || {};
 return {
   as: "blockquote",
   text: quote.text || "The soul's journey towards enlightenment begins with a single step of self-realization."
@@ -127,7 +127,7 @@ return {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  color: ${args.theme.var.color.text_light_300};
+  color: ${t.var.color.text_light_300};
 }`;'''
         displayOrder: 2
         componentName: Html
@@ -167,7 +167,7 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const quote = args.contextData.props || {};
+          '''const quote = c.props || {};
 return {
   as: "cite",
   text: quote.author || "Fulchand Shastri"
@@ -184,7 +184,7 @@ return {
   bottom: 1rem;
   right: 1rem;
   font-size: 4rem;
-  color: ${args.theme.var.color.primary_light_300};
+  color: ${t.var.color.primary_light_300};
   opacity: 0.3;
   font-family: serif;
   line-height: 1;

@@ -14,7 +14,7 @@ const {
   version,
   sectionConfig,
   pageConfig
-} = args.contextData || {};
+} = c || {};
 
 if (!tableKey) {
   return { success: false, message: "tableKey is required" };
@@ -23,7 +23,7 @@ if (!sectionId) {
   return { success: false, message: "sectionId is required" };
 }
 
-const idsResult = await args.executeNamedServerFunction({
+const idsResult = await s({
   functionName: "getTableIds",
   contextData: { tableKey }
 });
@@ -32,7 +32,7 @@ if (!ids?.pageId) {
   return { success: false, message: idsResult?.result?.message || "Failed to resolve table ids" };
 }
 
-const saveResult = await args.executeNamedServerFunction({
+const saveResult = await s({
   functionName: "saveSettingsSection",
   contextData: {
     pageId: ids.pageId,
@@ -52,7 +52,7 @@ if (!saveResult?.result?.success) {
   return saveResult?.result || { success: false, message: "Failed to save table section" };
 }
 
-const mergeResult = await args.executeNamedServerFunction({
+const mergeResult = await s({
   functionName: "mergeTableConfigFromSections",
   contextData: { tableKey }
 });

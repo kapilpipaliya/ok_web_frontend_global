@@ -12,7 +12,7 @@ const {
   tableVertexLabel,
   queryModification,
   sessionUser
-} = args.contextData || {};
+} = c || {};
 
 if (tableVertexLabel !== "File") {
   return { success: true, message: "Skip: not File" };
@@ -30,7 +30,7 @@ if (sessionUserUuid === "") {
   return { success: true, message: "No session user - empty file result" };
 }
 
-const roleResult = await args.session.run(
+const roleResult = await _.session.run(
   `
   MATCH (u:User {uuid: $uuid})
   OPTIONAL MATCH (u)-[:UserRole]->(role:Role)

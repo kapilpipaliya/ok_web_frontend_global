@@ -7,9 +7,9 @@
         key: DashboardWidgetRenderer
         fns:
           '''
-const getWidgetConfig = () => args.contextData.props?.widgetConfig || null;
+const getWidgetConfig = () => c.props?.widgetConfig || null;
 const getRuntime = () => {
-  const fromProps = args.contextData.props?.dashboardRuntime;
+  const fromProps = c.props?.dashboardRuntime;
   if (typeof fromProps === "function") return fromProps();
   return null;
 };
@@ -38,8 +38,8 @@ return { getWidgetConfig, getRuntime, getWidgetUi };
         componentName: DashboardMetricCard
         props:
           '''
-const widgetConfig = args.fns.getWidgetConfig();
-const ui = args.fns.getWidgetUi();
+const widgetConfig = f.getWidgetConfig();
+const ui = f.getWidgetUi();
 return {
   widgetConfig,
   widgetData: ui.widgetData || {},
@@ -60,10 +60,10 @@ return {
         componentName: DashboardChartWidget
         props:
           '''
-const widgetConfig = args.fns.getWidgetConfig();
-const ui = args.fns.getWidgetUi();
-const runtime = args.fns.getRuntime();
-const graphVertexCount = Object.keys(args.graph?.vertexes || {}).length;
+const widgetConfig = f.getWidgetConfig();
+const ui = f.getWidgetUi();
+const runtime = f.getRuntime();
+const graphVertexCount = Object.keys(g?.vertexes || {}).length;
 return {
   widgetConfig,
   widgetData: ui.widgetData || {},
@@ -87,7 +87,7 @@ return {
         componentName: DashboardMarkdownWidget
         props:
           '''
-const widgetConfig = args.fns.getWidgetConfig();
+const widgetConfig = f.getWidgetConfig();
 return {
   widgetConfig,
   hide: widgetConfig?.type !== "markdown" && widgetConfig?.type !== "html"
@@ -103,7 +103,7 @@ return {
         componentName: DashboardQuickActionsWidget
         props:
           '''
-const widgetConfig = args.fns.getWidgetConfig();
+const widgetConfig = f.getWidgetConfig();
 return {
   widgetConfig,
   hide: widgetConfig?.type !== "quickActions"
@@ -119,8 +119,8 @@ return {
         componentName: DashboardActivityFeedWidget
         props:
           '''
-const widgetConfig = args.fns.getWidgetConfig();
-const ui = args.fns.getWidgetUi();
+const widgetConfig = f.getWidgetConfig();
+const ui = f.getWidgetUi();
 return {
   widgetConfig,
   widgetData: ui.widgetData || {},
@@ -140,8 +140,8 @@ return {
         componentName: DashboardTimelineWidget
         props:
           '''
-const widgetConfig = args.fns.getWidgetConfig();
-const ui = args.fns.getWidgetUi();
+const widgetConfig = f.getWidgetConfig();
+const ui = f.getWidgetUi();
 return {
   widgetConfig,
   widgetData: ui.widgetData || {},
@@ -161,8 +161,8 @@ return {
         componentName: DashboardKanbanWidget
         props:
           '''
-const widgetConfig = args.fns.getWidgetConfig();
-const ui = args.fns.getWidgetUi();
+const widgetConfig = f.getWidgetConfig();
+const ui = f.getWidgetUi();
 return {
   widgetConfig,
   widgetData: ui.widgetData || {},
@@ -183,9 +183,9 @@ return {
         key: crud_embed
         props:
           '''
-const widgetConfig = args.fns.getWidgetConfig();
-const runtime = args.fns.getRuntime();
-const ui = args.fns.getWidgetUi();
+const widgetConfig = f.getWidgetConfig();
+const runtime = f.getRuntime();
+const ui = f.getWidgetUi();
 return {
   widgetConfig,
   dashboardRuntime: () => runtime,

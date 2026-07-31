@@ -8,7 +8,7 @@
         body:
           '''
 // Get current authenticated user from session
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return {
     success: false,
@@ -24,10 +24,10 @@ if (!actualUser) {
 }
 
 // Get effective user (handles admin impersonation)
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const user = await _.getEffectiveUser(_.session, actualUser, c);
 
 // Extract parameters
-const { video, playlistIds, ownershipId } = args.contextData;
+const { video, playlistIds, ownershipId } = c;
 
 if (!video) {
   return {
@@ -94,7 +94,7 @@ const errors = [];
 for (const playlistId of playlistIds) {
   try {
     // Call the existing addVideoToPlaylist function for each playlist
-    const result = await args.executeNamedServerFunction({
+    const result = await s({
       functionName: "addVideoToPlaylist",
       contextData: {
         playlistId: playlistId,

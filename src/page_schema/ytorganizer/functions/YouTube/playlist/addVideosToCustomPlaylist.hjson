@@ -8,7 +8,7 @@
         body:
           '''
 // Extract input parameters
-const { playlistId, videoIds, ownershipId } = args.contextData;
+const { playlistId, videoIds, ownershipId } = c;
 
 if (!playlistId) {
   return {
@@ -32,7 +32,7 @@ if (!ownershipId) {
 }
 
 // Get current authenticated user
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return {
     success: false,
@@ -41,10 +41,10 @@ if (!actualUser) {
 }
 
 // Get effective user (handles admin impersonation)
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const user = await _.getEffectiveUser(_.session, actualUser, c);
 
 // Verify ownership belongs to user
-const ownershipCheck = await args.session.run(`
+const ownershipCheck = await _.session.run(`
   MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
   RETURN o
 `, { userUuid: user.P.uuid, ownershipId });
@@ -58,7 +58,7 @@ if (ownershipCheck.records.length === 0) {
 
 // Verify playlist exists for this ownership and is custom
 // NEW SCHEMA v4.0: Direct ownership + optional settings
-const playlistCheck = await args.session.run(`
+const playlistCheck = await _.session.run(`
   MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
   WHERE p.isCustom = true
   OPTIONAL MATCH (p)-[:PlaylistPlaylistSetting]->(ps:PlaylistSetting)<-[:YouTubeOwnershipPlaylistSetting]-(o)
@@ -72,12 +72,12 @@ if (playlistCheck.records.length === 0) {
   };
 }
 
-const playlistSetting = playlistCheck.records[0].get('ps') ? args.convertNodeToJson(playlistCheck.records[0].get('ps')) : null;
-const playlist = args.convertNodeToJson(playlistCheck.records[0].get('p'));
+const playlistSetting = playlistCheck.records[0].get('ps') ? _.convertNodeToJson(playlistCheck.records[0].get('ps')) : null;
+const playlist = _.convertNodeToJson(playlistCheck.records[0].get('p'));
 
 // Get current max position for global playlist (verify ownership first)
 // NEW SCHEMA v4.0: Global playlist membership with ownership verification
-const maxPositionResult = await args.session.run(`
+const maxPositionResult = await _.session.run(`
   MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
   OPTIONAL MATCH (p)-[r:PlaylistVideo]->(v:Video)
   RETURN COALESCE(MAX(r.position), -1) as maxPosition
@@ -95,7 +95,7 @@ for (const videoId of videoIds) {
 
   // Check if video exists and is owned by this ownership
   // NEW SCHEMA v4.0: Verify ownership before accessing video
-  const videoCheck = await args.session.run(`
+  const videoCheck = await _.session.run(`
     MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideo]->(v:Video {youtubeId: $videoId})
     RETURN v
   `, { ownershipId, videoId });
@@ -108,7 +108,7 @@ for (const videoId of videoIds) {
 
   // Check if video already exists in playlist (verify ownership)
   // NEW SCHEMA v4.0: Global playlist membership with ownership verification
-  const existsCheck = await args.session.run(`
+  const existsCheck = await _.session.run(`
     MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
     MATCH (p)-[:PlaylistVideo]->(v:Video {youtubeId: $videoId})
     RETURN v
@@ -123,7 +123,7 @@ for (const videoId of videoIds) {
   // Add video to playlist via global PlaylistVideo relationship (verify ownership for both)
   // Position is stored on the relationship edge
   // NEW SCHEMA v4.0: Global playlist membership with ownership verification for both playlist and video
-  await args.session.run(`
+  await _.session.run(`
     MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
     MATCH (o)-[:YouTubeOwnershipVideo]->(v:Video {youtubeId: $videoId})
     CREATE (p)-[r:PlaylistVideo {
@@ -145,14 +145,14 @@ for (const videoId of videoIds) {
 
 // Update playlist item count (verify ownership)
 // NEW SCHEMA v4.0: Update Playlist vertex directly with ownership verification
-await args.session.run(`
+await _.session.run(`
   MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
   SET p.itemCount = COALESCE(p.itemCount, 0) + $addedCount,
       p.updatedAt = datetime()
 `, { ownershipId, playlistId, addedCount });
 
 // Also update PlaylistSetting if it exists (verify ownership)
-await args.session.run(`
+await _.session.run(`
   MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
   OPTIONAL MATCH (p)-[:PlaylistPlaylistSetting]->(ps:PlaylistSetting)<-[:YouTubeOwnershipPlaylistSetting]-(o)
   WHERE ps IS NOT NULL

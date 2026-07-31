@@ -8,7 +8,7 @@
         body:
           '''
 // Get authenticated user
-const user = await args.getUserFromSession();
+const user = await _.getUserFromSession();
 if (!user) {
   return {
     success: false,
@@ -21,10 +21,10 @@ if (!user) {
   };
 }
 
-const { videosToAdd = 1 } = args.contextData;
+const { videosToAdd = 1 } = c;
 
 // Fetch user's quota information
-const userResult = await args.session.run(
+const userResult = await _.session.run(
   `MATCH (u:User {uuid: $userId})
    RETURN u`,
   { userId: user.P.uuid }
@@ -43,7 +43,7 @@ if (userResult.records.length === 0) {
 }
 
 const userNode = userResult.records[0].get("u");
-const userVertex = args.convertNodeToJson(userNode);
+const userVertex = _.convertNodeToJson(userNode);
 
 const currentPlan = userVertex.P.currentPlan || "free";
 const videoQuotaLimit = userVertex.P.videoQuotaLimit || 10000;

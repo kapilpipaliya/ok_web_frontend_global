@@ -185,13 +185,13 @@ sudo chown -R neo4j:neo4j /var/lib/neo4j/data/databases
 **Option 2: Via TypeScript Function**
 
 ```typescript
-const restoreResult = await args.restoreFromBackup({
+const restoreResult = await _.restoreFromBackup({
   filename: 'admin-20250111-020000-daily.dump.gz',  // Use actual filename from Step 3
   sourceDatabaseName: 'admin',
   targetDatabaseName: 'admin',
   confirmed: true,  // ⚠️ REQUIRED - Data will be deleted!
-  sendEmail: args.sendEmail,
-  subDomain: args.subDomain
+  sendEmail: _.sendEmail,
+  subDomain: _.subDomain
 });
 
 console.log('Restore result:', restoreResult);
@@ -428,13 +428,13 @@ const latestBackup = dbBackups.sort((a, b) =>
 console.log('Restoring from:', latestBackup.filename);
 
 // Restore
-const restoreResult = await args.restoreFromBackup({
+const restoreResult = await _.restoreFromBackup({
   filename: latestBackup.filename,
   sourceDatabaseName: 'corrupted_db_name',
   targetDatabaseName: 'corrupted_db_name',
   confirmed: true,
-  sendEmail: args.sendEmail,
-  subDomain: args.subDomain
+  sendEmail: _.sendEmail,
+  subDomain: _.subDomain
 });
 
 console.log('Restore result:', restoreResult);
@@ -951,13 +951,13 @@ Select backup timestamp before deletion: `___________________________`
 
 ```typescript
 // Restore to test database
-const restoreResult = await args.restoreFromBackup({
+const restoreResult = await _.restoreFromBackup({
   filename: 'affected_database-20250110-020000-daily.dump.gz',
   sourceDatabaseName: 'affected_database',
   targetDatabaseName: 'affected_database_test',  // Test database!
   confirmed: true,
-  sendEmail: args.sendEmail,
-  subDomain: args.subDomain
+  sendEmail: _.sendEmail,
+  subDomain: _.subDomain
 });
 
 console.log('Test restore result:', restoreResult);
@@ -1167,25 +1167,25 @@ Document selected backup:
 
 ```typescript
 // Restore admin database to test
-const adminRestore = await args.restoreFromBackup({
+const adminRestore = await _.restoreFromBackup({
   filename: 'admin-YYYYMMDD-HHMMSS-daily.dump.gz',
   sourceDatabaseName: 'admin',
   targetDatabaseName: 'admin_restore_test',
   confirmed: true,
-  sendEmail: args.sendEmail,
-  subDomain: args.subDomain
+  sendEmail: _.sendEmail,
+  subDomain: _.subDomain
 });
 
 console.log('Admin restore:', adminRestore);
 
 // Restore one subdomain database
-const subdomainRestore = await args.restoreFromBackup({
+const subdomainRestore = await _.restoreFromBackup({
   filename: 'subdomain-YYYYMMDD-HHMMSS-daily.dump.gz',
   sourceDatabaseName: 'subdomain',
   targetDatabaseName: 'subdomain_restore_test',
   confirmed: true,
-  sendEmail: args.sendEmail,
-  subDomain: args.subDomain
+  sendEmail: _.sendEmail,
+  subDomain: _.subDomain
 });
 
 console.log('Subdomain restore:', subdomainRestore);

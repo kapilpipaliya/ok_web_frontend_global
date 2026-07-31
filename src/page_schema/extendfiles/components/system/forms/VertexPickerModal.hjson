@@ -27,9 +27,9 @@
   background: rgba(0, 0, 0, 0.45);
 }`;'''
         props:
-          '''const isOpenProp = args.contextData.props?.isOpen;
+          '''const isOpenProp = c.props?.isOpen;
 const modalIsOpen = typeof isOpenProp === "function" ? isOpenProp() : !!isOpenProp;
-const modalTitle = args.contextData.props?.title;
+const modalTitle = c.props?.title;
 return {
   as: "div",
   role: "dialog",
@@ -37,7 +37,7 @@ return {
   "attr:aria-label": modalTitle != null ? String(modalTitle) : "",
   hide: () => !modalIsOpen,
   onClick: (event) => {
-    if (event.target === event.currentTarget) args.contextData.props?.onClose?.();
+    if (event.target === event.currentTarget) c.props?.onClose?.();
   }
 };'''
       }
@@ -54,9 +54,9 @@ return {
   height: min(720px, 90vh);
   display: flex;
   flex-direction: column;
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
   border-radius: 0.5rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
   overflow: hidden;
 }`;'''
@@ -78,8 +78,8 @@ return {
   justify-content: space-between;
   gap: 0.75rem;
   padding: 0.85rem 1rem;
-  border-bottom: 1px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background_light_100};
+  border-bottom: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background_light_100};
 }`;'''
         props:
           '''return { as: "div" };'''
@@ -96,12 +96,12 @@ return {
   margin: 0;
   font-size: 1.05rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         props:
           '''return {
   as: "h2",
-  text: args.contextData.props?.title != null ? String(args.contextData.props.title) : ""
+  text: c.props?.title != null ? String(c.props.title) : ""
 };'''
       }
     }
@@ -112,8 +112,8 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const usePolaris = args.contextData.props?.usePolarisUI === true;
-const closeButtonLabel = args.contextData.props?.closeButtonLabel;
+          '''const usePolaris = c.props?.usePolarisUI === true;
+const closeButtonLabel = c.props?.closeButtonLabel;
 const closeLabel =
   closeButtonLabel != null && String(closeButtonLabel).trim() !== ""
     ? String(closeButtonLabel).trim()
@@ -124,14 +124,14 @@ if (usePolaris) {
     "attr:variant": "tertiary",
     "attr:icon": "x",
     "attr:accessibilityLabel": closeLabel,
-    onClick: () => args.contextData.props?.onClose?.()
+    onClick: () => c.props?.onClose?.()
   };
 }
 return {
   as: "button",
   type: "button",
   text: closeLabel,
-  onClick: () => args.contextData.props?.onClose?.()
+  onClick: () => c.props?.onClose?.()
 };'''
       }
     }
@@ -145,11 +145,11 @@ return {
           '''return `._id {
   padding: 0.5rem 1rem;
   font-size: 0.85rem;
-  color: ${args.theme.var.color.text_dark_400};
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  color: ${t.var.color.text_dark_400};
+  border-bottom: 1px solid ${t.var.color.border};
 }`;'''
         props:
-          '''const draftProp = args.contextData.props?.draftVertex;
+          '''const draftProp = c.props?.draftVertex;
 const draftVertex = typeof draftProp === "function" ? draftProp() : draftProp;
 const displayName =
   draftVertex?.P?.fileName != null
@@ -157,8 +157,8 @@ const displayName =
     : draftVertex?.P?.name != null
       ? String(draftVertex.P.name)
       : "";
-const hintEmpty = args.contextData.props?.hintEmpty;
-const hintSelected = args.contextData.props?.hintSelected;
+const hintEmpty = c.props?.hintEmpty;
+const hintSelected = c.props?.hintSelected;
 let hintText = "";
 if (displayName && hintSelected != null && String(hintSelected).trim() !== "") {
   hintText = String(hintSelected).replace(/\{name\}/g, displayName);
@@ -201,10 +201,10 @@ return {
   min-height: 0;
   width: 100%;
   overflow: auto;
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
 }`;'''
         props:
-          '''const pickerBodyProps = args.contextData.props?.pickerBodyProps;
+          '''const pickerBodyProps = c.props?.pickerBodyProps;
 return pickerBodyProps != null && typeof pickerBodyProps === "object" ? pickerBodyProps : {};'''
       }
     }
@@ -222,8 +222,8 @@ return pickerBodyProps != null && typeof pickerBodyProps === "object" ? pickerBo
   justify-content: flex-end;
   gap: 0.5rem;
   padding: 0.75rem 1rem;
-  border-top: 1px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background_light_100};
+  border-top: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background_light_100};
 }`;'''
         props:
           '''return { as: "div" };'''
@@ -236,8 +236,8 @@ return pickerBodyProps != null && typeof pickerBodyProps === "object" ? pickerBo
         displayOrder: 1
         componentName: Html
         props:
-          '''const usePolaris = args.contextData.props?.usePolarisUI === true;
-const cancelButtonLabel = args.contextData.props?.cancelButtonLabel;
+          '''const usePolaris = c.props?.usePolarisUI === true;
+const cancelButtonLabel = c.props?.cancelButtonLabel;
 const cancelLabel =
   cancelButtonLabel != null && String(cancelButtonLabel).trim() !== ""
     ? String(cancelButtonLabel).trim()
@@ -247,14 +247,14 @@ if (usePolaris) {
     as: "s-button",
     "attr:variant": "secondary",
     text: cancelLabel,
-    onClick: () => args.contextData.props?.onClose?.()
+    onClick: () => c.props?.onClose?.()
   };
 }
 return {
   as: "button",
   type: "button",
   text: cancelLabel,
-  onClick: () => args.contextData.props?.onClose?.()
+  onClick: () => c.props?.onClose?.()
 };'''
       }
     }
@@ -265,11 +265,11 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const usePolaris = args.contextData.props?.usePolarisUI === true;
-const draftProp = args.contextData.props?.draftVertex;
+          '''const usePolaris = c.props?.usePolarisUI === true;
+const draftProp = c.props?.draftVertex;
 const draftVertex = typeof draftProp === "function" ? draftProp() : draftProp;
 const hasSelection = !!(draftVertex && draftVertex.id);
-const confirmButtonLabel = args.contextData.props?.confirmButtonLabel;
+const confirmButtonLabel = c.props?.confirmButtonLabel;
 const confirmLabel =
   confirmButtonLabel != null && String(confirmButtonLabel).trim() !== ""
     ? String(confirmButtonLabel).trim()
@@ -280,7 +280,7 @@ if (usePolaris) {
     "attr:variant": "primary",
     text: confirmLabel,
     disabled: !hasSelection,
-    onClick: () => args.contextData.props?.onConfirm?.()
+    onClick: () => c.props?.onConfirm?.()
   };
 }
 return {
@@ -288,7 +288,7 @@ return {
   type: "button",
   text: confirmLabel,
   disabled: !hasSelection,
-  onClick: () => args.contextData.props?.onConfirm?.()
+  onClick: () => c.props?.onConfirm?.()
 };'''
       }
     }

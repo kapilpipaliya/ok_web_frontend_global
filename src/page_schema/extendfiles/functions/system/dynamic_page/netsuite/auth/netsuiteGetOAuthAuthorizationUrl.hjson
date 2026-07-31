@@ -21,7 +21,7 @@ const readNetSuiteIntegrationFromDb = async (neoSession) => {
       { t: "netsuite_integration" }
     );
     if (r.records.length) {
-      const j = args.convertNodeToJson(r.records[0].get("s"));
+      const j = _.convertNodeToJson(r.records[0].get("s"));
       const P = j?.P || {};
       accountId = String(P.accountId || "").trim();
       clientId = String(P.clientId || "").trim();
@@ -30,7 +30,7 @@ const readNetSuiteIntegrationFromDb = async (neoSession) => {
       environment = String(P.environment || "production").trim().toLowerCase();
       if (P.clientSecret) {
         try {
-          clientSecret = args.decryptToken(String(P.clientSecret));
+          clientSecret = _.decryptToken(String(P.clientSecret));
         } catch (e) {
           clientSecret = "";
         }
@@ -42,7 +42,7 @@ const readNetSuiteIntegrationFromDb = async (neoSession) => {
   return { accountId, clientId, clientSecret, redirectUri, scope, environment };
 };
 
-const cfg = await readNetSuiteIntegrationFromDb(args.session);
+const cfg = await readNetSuiteIntegrationFromDb(_.session);
 const accountId = cfg.accountId;
 const clientId = cfg.clientId;
 const redirectUri = cfg.redirectUri;
@@ -57,11 +57,11 @@ if (!accountId || !clientId || !redirectUri) {
   };
 }
 
-const state = args.crypto.randomBytes(24).toString("hex");
+const state = _.crypto.randomBytes(24).toString("hex");
 const nowIso = new Date().toISOString();
 const expiresAtIso = new Date(Date.now() + 10 * 60 * 1000).toISOString();
 
-await args.session.run(
+await _.session.run(
   `MERGE (s:OAuthState {provider: "netsuite", state: $state})
    SET s.createdAt = datetime($nowIso),
        s.expiresAt = datetime($expiresAtIso),

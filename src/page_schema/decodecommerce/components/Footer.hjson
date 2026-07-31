@@ -20,8 +20,8 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background_dark_200};
-  border-top: 1px solid ${args.theme.var.color.background_dark_300};
+  background: ${t.var.color.background_dark_200};
+  border-top: 1px solid ${t.var.color.background_dark_300};
   padding: 3rem 0 1rem;
   
   @media (max-width: 768px) {
@@ -114,7 +114,7 @@ return {
 return `._id {
   font-size: 1.5rem;
   font-weight: 700;
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   margin-bottom: 1rem;
 }`;
 '''
@@ -134,7 +134,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_dark_300};
+  color: ${t.var.color.text_dark_300};
   line-height: 1.6;
   margin-bottom: 1.5rem;
   max-width: 300px;
@@ -187,7 +187,7 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const social = args.contextData.socialLinks;
+const social = c.socialLinks;
 return {
   as: "a",
   href: social.href,
@@ -202,12 +202,12 @@ return `._id {
   justify-content: center;
   width: 40px;
   height: 40px;
-  background: ${args.theme.var.color.background_dark_300};
+  background: ${t.var.color.background_dark_300};
   border-radius: 0.5rem;
   transition: all 0.2s ease;
   
   &:hover {
-    background: ${args.theme.var.color.primary};
+    background: ${t.var.color.primary};
     transform: translateY(-2px);
   }
 }`;
@@ -221,7 +221,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const social = args.contextData.socialLinks;
+const social = c.socialLinks;
 return {
   as: "icon",
   icon: social.icon,
@@ -231,7 +231,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -264,7 +264,7 @@ return {
         css: '''
 return `._id {
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 1rem;
 }`;
 '''
@@ -317,7 +317,7 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const link = args.contextData.productLinks;
+const link = c.productLinks;
 return {
   as: "li"
 };
@@ -336,7 +336,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const link = args.contextData.productLinks;
+const link = c.productLinks;
 return {
   as: "a",
   href: link.href,
@@ -345,12 +345,12 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_dark_300};
+  color: ${t.var.color.text_dark_300};
   text-decoration: none;
   transition: all 0.2s ease;
   
   &:hover {
-    color: ${args.theme.var.color.primary};
+    color: ${t.var.color.primary};
   }
 }`;
 '''
@@ -384,7 +384,7 @@ return {
         css: '''
 return `._id {
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 1rem;
 }`;
 '''
@@ -437,7 +437,7 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const link = args.contextData.companyLinks;
+const link = c.companyLinks;
 return {
   as: "li"
 };
@@ -456,7 +456,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const link = args.contextData.companyLinks;
+const link = c.companyLinks;
 return {
   as: "a",
   href: link.href,
@@ -465,12 +465,12 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_dark_300};
+  color: ${t.var.color.text_dark_300};
   text-decoration: none;
   transition: all 0.2s ease;
   
   &:hover {
-    color: ${args.theme.var.color.primary};
+    color: ${t.var.color.primary};
   }
 }`;
 '''
@@ -504,7 +504,7 @@ return {
         css: '''
 return `._id {
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 1rem;
 }`;
 '''
@@ -524,7 +524,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_dark_300};
+  color: ${t.var.color.text_dark_300};
   margin-bottom: 0.5rem;
 }`;
 '''
@@ -544,7 +544,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_dark_300};
+  color: ${t.var.color.text_dark_300};
   margin-bottom: 1rem;
 }`;
 '''
@@ -564,7 +564,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_dark_300};
+  color: ${t.var.color.text_dark_300};
   font-size: 0.9rem;
 }`;
 '''
@@ -584,7 +584,7 @@ return {
         css: '''
 return `._id {
   padding-top: 2rem;
-  border-top: 1px solid ${args.theme.var.color.background_dark_300};
+  border-top: 1px solid ${t.var.color.background_dark_300};
   text-align: center;
 }`;
 '''
@@ -605,7 +605,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_dark_300};
+  color: ${t.var.color.text_dark_300};
   font-size: 0.9rem;
   margin-bottom: 1rem;
 }`;
@@ -626,7 +626,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_dark_400};
+  color: ${t.var.color.text_dark_400};
   font-size: 0.85rem;
   font-style: italic;
 }`;

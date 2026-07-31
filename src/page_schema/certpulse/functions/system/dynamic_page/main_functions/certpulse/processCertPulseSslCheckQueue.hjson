@@ -8,7 +8,7 @@
         key: processCertPulseSslCheckQueue
         body:
           '''
-if (args.contextData?.action !== "start") {
+if (c?.action !== "start") {
   return { success: true, message: "CertPulse SSL queue worker is ready" };
 }
 
@@ -26,7 +26,7 @@ const normalizeHost = (host) => {
 };
 
 const getRedisConnection = () => {
-  return args.bullmq.redisConnection || {
+  return _.bullmq.redisConnection || {
     host: process.env.REDIS_HOST || "localhost",
     port: parseInt(process.env.REDIS_PORT || "6379"),
     maxRetriesPerRequest: null,
@@ -59,7 +59,7 @@ const tlsCheck = async ({ host, port }) => {
       resolve(payload);
     };
 
-    const socket = args.tls.connect(
+    const socket = _.tls.connect(
       {
         host: cleanHost,
         port: cleanPort,
@@ -134,12 +134,12 @@ const sendExpiredEmail = async ({ to, host, port, sslNotAfter }) => {
       </p>
     </div>
   `;
-  await args.sendEmail({ to, subject, content, subDomain: args.subDomain });
+  await _.sendEmail({ to, subject, content, subDomain: _.subDomain });
 };
 
 const processOne = async (job) => {
-  // IMPORTANT: worker is long-lived; do not use args.session (it will be closed).
-  const dbSession = await args.getSession();
+  // IMPORTANT: worker is long-lived; do not use _.session (it will be closed).
+  const dbSession = await _.getSession();
   try {
   const payload = job?.data || {};
   const domainElementId = payload.domainElementId;
@@ -158,8 +158,8 @@ const processOne = async (job) => {
 
   const dNode = res.records[0].get("d");
   const uNode = res.records[0].get("u");
-  const d = args.convertNodeToJson(dNode);
-  const u = uNode ? args.convertNodeToJson(uNode) : null;
+  const d = _.convertNodeToJson(dNode);
+  const u = uNode ? _.convertNodeToJson(uNode) : null;
 
   const enabled = d?.P?.enabled !== false;
   if (!enabled) {
@@ -224,7 +224,7 @@ const processOne = async (job) => {
   }
 };
 
-const { Worker, QueueEvents } = args.bullmq;
+const { Worker, QueueEvents } = _.bullmq;
 const connection = getRedisConnection();
 
 const worker = new Worker(

@@ -8,7 +8,7 @@
         body:
           '''
 // Get the playlist ID and ownershipId from the context
-const { playlistId, ownershipId } = args.contextData;
+const { playlistId, ownershipId } = c;
 
 if (!playlistId) {
   return {
@@ -25,7 +25,7 @@ if (!ownershipId) {
 }
 
 // Get current authenticated user from session
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return {
     success: false,
@@ -34,10 +34,10 @@ if (!actualUser) {
 }
 
 // Get effective user (handles admin impersonation)
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const user = await _.getEffectiveUser(_.session, actualUser, c);
 
 // Verify ownership belongs to user
-const ownershipCheck = await args.session.run(`
+const ownershipCheck = await _.session.run(`
   MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
   RETURN o
 `, { userUuid: user.P.uuid, ownershipId });
@@ -49,7 +49,7 @@ if (ownershipCheck.records.length === 0) {
   };
 }
 
-const ownership = args.convertNodeToJson(ownershipCheck.records[0].get('o'));
+const ownership = _.convertNodeToJson(ownershipCheck.records[0].get('o'));
 
 // Check if the playlist exists and ownership has access to it
 // NEW SCHEMA v4.0: Direct ownership + optional settings (verify ownership first)
@@ -59,7 +59,7 @@ const playlistQuery = `
   RETURN p, ps
 `;
 
-const playlistResult = await args.session.run(playlistQuery, {
+const playlistResult = await _.session.run(playlistQuery, {
   playlistId: playlistId,
   ownershipId
 });
@@ -97,7 +97,7 @@ const deleteQuery = `
   RETURN count(ps) as deletedCount
 `;
 
-const deleteResult = await args.session.run(deleteQuery, {
+const deleteResult = await _.session.run(deleteQuery, {
   playlistId: playlistId,
   ownershipId
 });

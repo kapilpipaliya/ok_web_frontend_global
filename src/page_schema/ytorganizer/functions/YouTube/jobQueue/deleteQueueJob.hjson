@@ -15,7 +15,7 @@
  * - jobId: string - The ID of the job to delete
  */
 
-const { queueName, jobId } = args.contextData;
+const { queueName, jobId } = c;
 
 // Validate parameters
 if (!queueName || !jobId) {
@@ -26,8 +26,8 @@ if (!queueName || !jobId) {
 }
 
 // Get the queue
-const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} }, { functionLookupSubDomain: args.subDomain });
-const { Queue } = args.bullmq;
+const helpers = await s({ functionName: 'queueHelpers', contextData: {} }, { functionLookupSubDomain: _.subDomain });
+const { Queue } = _.bullmq;
 const connection = helpers.result.data.getRedisConnection();
 
 const queue = new Queue(queueName, { connection });

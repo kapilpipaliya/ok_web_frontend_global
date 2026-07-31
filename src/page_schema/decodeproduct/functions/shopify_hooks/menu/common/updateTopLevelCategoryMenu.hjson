@@ -8,7 +8,7 @@
         body:
           '''
 // Extract parameters
-const { categoryElementId } = args.contextData;
+const { categoryElementId } = c;
 
 if (!categoryElementId) {
   return {
@@ -19,7 +19,7 @@ if (!categoryElementId) {
 
 try {
   // Find the top-level parent category (single query with isTopLevel check)
-  const topLevelResult = await args.session.run(
+  const topLevelResult = await _.session.run(
     `MATCH (category:ShopifyProductCategory)
      WHERE elementId(category) = $categoryElementId
      OPTIONAL MATCH path = (category)-[:ProductCategory*]->(topLevel:ShopifyProductCategory)
@@ -61,12 +61,12 @@ try {
     // This category is no longer top-level, delete its menu if it exists
     if (topLevelMenuId) {
       console.log(`📋 Category "${topLevelName}" is no longer top-level, deleting its menu...`);
-      const deleteResult = await args.executeNamedServerFunction({
+      const deleteResult = await s({
         functionName: "deleteShopifyMenu",
         contextData: {
           menuId: topLevelMenuId,
           categoryElementId: topLevelId,
-          shop: args.contextData?.shop
+          shop: c?.shop
         }
       });
       if (deleteResult.result?.success) {
@@ -95,13 +95,13 @@ try {
   // Update or create menu for top-level category (even if it has no children)
   if (topLevelMenuId) {
     console.log(`Updating menu for top-level category: ${topLevelName}`);
-    const updateResult = await args.executeNamedServerFunction({
+    const updateResult = await s({
       functionName: "updateShopifyMenuForCategory",
       contextData: {
         categoryElementId: topLevelId,
         categoryName: topLevelName,
         menuId: topLevelMenuId,
-        shop: args.contextData?.shop
+        shop: c?.shop
       }
     });
     if (updateResult.result?.success) {
@@ -121,12 +121,12 @@ try {
   } else {
     // Create menu for top-level category
     console.log(`Creating menu for top-level category: ${topLevelName}`);
-    const createResult = await args.executeNamedServerFunction({
+    const createResult = await s({
       functionName: "createShopifyMenuForCategory",
       contextData: {
         categoryElementId: topLevelId,
         categoryName: topLevelName,
-        shop: args.contextData?.shop
+        shop: c?.shop
       }
     });
     if (createResult.result?.success) {

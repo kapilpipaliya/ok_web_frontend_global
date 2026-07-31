@@ -7,7 +7,7 @@
         dynamicComponent: FormManagement
         fns:
           '''
-const getSectionConfig = () => args.contextData.props?.sectionConfig || null;
+const getSectionConfig = () => c.props?.sectionConfig || null;
 
 const DEFAULT_SITE_LANGUAGES = [
   { code: "en", label: "English", isDefault: true },
@@ -16,7 +16,7 @@ const DEFAULT_SITE_LANGUAGES = [
 ];
 
 const getSiteLanguages = () => {
-  const languages = args.contextData.props?.siteLanguages;
+  const languages = c.props?.siteLanguages;
   if (Array.isArray(languages) && languages.length > 0) return languages;
   return DEFAULT_SITE_LANGUAGES;
 };
@@ -69,15 +69,15 @@ const convertToFormConfig = (sectionConfig) => {
 
 const buildInitialVertex = (values) => {
   const sectionValues = values || {};
-  const vertexId = args.generateNewVertexId(args.graph, args.setGraph);
-  args.addNewVertex(0, {
+  const vertexId = _.generateNewVertexId(g, sg);
+  _.addNewVertex(0, {
     id: vertexId,
     L: ["SettingsFormData"],
     P: { ...sectionValues },
     IN: {},
     OUT: {}
-  }, args.graph, args.setGraph);
-  return args.graph.vertexes[vertexId];
+  }, g, sg);
+  return g.vertexes[vertexId];
 };
 
 const collectFormFields = (sectionConfig) => {
@@ -138,18 +138,18 @@ const buildValuesFromSnapshot = (snapshot = {}) => {
   return values;
 };
 
-const [initialVertex, setInitialVertex] = args.createSignal(null);
-const [formManagementFns, setFormManagementFns] = args.createSignal(null);
-const [isSaving, setIsSaving] = args.createSignal(false);
-const [isDirty, setIsDirty] = args.createSignal(false);
-const [initialValuesSnapshot, setInitialValuesSnapshot] = args.createSignal(null);
+const [initialVertex, setInitialVertex] = _.createSignal(null);
+const [formManagementFns, setFormManagementFns] = _.createSignal(null);
+const [isSaving, setIsSaving] = _.createSignal(false);
+const [isDirty, setIsDirty] = _.createSignal(false);
+const [initialValuesSnapshot, setInitialValuesSnapshot] = _.createSignal(null);
 
 const syncInitialVertexFromValues = (values) => {
   if (!values) return;
   const normalized = buildValuesFromSnapshot(values);
   const existing = initialVertex();
   if (existing?.id) {
-    args.mergeVertexProperties(0, existing.id, args.graph, args.setGraph, normalized);
+    _.mergeVertexProperties(0, existing.id, g, sg, normalized);
     setInitialVertex({ ...existing, P: { ...normalized } });
   } else {
     setInitialVertex(buildInitialVertex(normalized));
@@ -162,7 +162,7 @@ const syncInitialVertexFromValues = (values) => {
 const getSectionState = () => {
   const sectionId = getSectionConfig()?.id;
   if (!sectionId) return null;
-  return args.fns.getSectionState?.(sectionId) || args.contextData.props?.sectionState || null;
+  return f.getSectionState?.(sectionId) || c.props?.sectionState || null;
 };
 
 let dirtyWatchRegistered = false;
@@ -175,8 +175,8 @@ const isSectionDirty = () => isDirty();
 const markDirty = () => {
   const sectionId = getSectionId();
   setIsDirty(true);
-  if (sectionId && args.fns.markSectionDirty) {
-    args.fns.markSectionDirty(sectionId);
+  if (sectionId && f.markSectionDirty) {
+    f.markSectionDirty(sectionId);
   }
 };
 
@@ -187,8 +187,8 @@ const markClean = (savedValues, meta) => {
   if (normalizedValues) {
     syncInitialVertexFromValues(normalizedValues);
   }
-  if (sectionId && args.fns.markSectionClean) {
-    args.fns.markSectionClean(sectionId, normalizedValues, meta);
+  if (sectionId && f.markSectionClean) {
+    f.markSectionClean(sectionId, normalizedValues, meta);
   }
 };
 
@@ -196,7 +196,7 @@ const captureBaselineIfNeeded = (formFns) => {
   if (baselineCaptured || !formFns?.formVertexId) return;
   const vertexId = formFns.formVertexId();
   if (!vertexId) return;
-  const liveProperties = args.graph.vertexes[vertexId]?.P || {};
+  const liveProperties = g.vertexes[vertexId]?.P || {};
   const snapshot = buildValuesFromSnapshot(liveProperties);
   setInitialValuesSnapshot(snapshot);
   baselineCaptured = true;
@@ -206,13 +206,13 @@ const captureBaselineIfNeeded = (formFns) => {
 const registerFormManagementFns = (formFns) => {
   setFormManagementFns(formFns);
   const sectionId = getSectionId();
-  if (sectionId && args.fns.registerSectionFormFns) {
-    args.fns.registerSectionFormFns(sectionId, formFns);
+  if (sectionId && f.registerSectionFormFns) {
+    f.registerSectionFormFns(sectionId, formFns);
   }
 
   if (!dirtyWatchRegistered && typeof formFns?.formVertexId === "function") {
     dirtyWatchRegistered = true;
-    args.createEffect(() => {
+    _.createEffect(() => {
       const vertexId = formFns.formVertexId();
       if (!vertexId) return;
       captureBaselineIfNeeded(formFns);
@@ -252,14 +252,14 @@ const handleSectionDiscardClick = () => {
     || buildValuesFromSnapshot(sectionState?.initialValues || sectionState?.values || {});
   const resetValues = buildValuesFromSnapshot(snapshot);
 
-  args.mergeVertexProperties(0, formVertex.id, args.graph, args.setGraph, resetValues);
+  _.mergeVertexProperties(0, formVertex.id, g, sg, resetValues);
   markClean(resetValues);
 };
 
 const showSectionActions = () => {
   const sectionConfig = getSectionConfig();
   if (!sectionConfig?.form) return false;
-  const saveStrategy = sectionConfig.saveStrategy || args.fns.getSaveStrategy?.() || {};
+  const saveStrategy = sectionConfig.saveStrategy || f.getSaveStrategy?.() || {};
   return saveStrategy.mode !== "page";
 };
 
@@ -270,7 +270,7 @@ const handleSectionSave = async (savePayload) => {
 
   const values = savePayload?.vertex?.P || {};
   const sectionState = getSectionState();
-  const saveHandler = args.fns.saveSettingsSection || args.contextData.props?.onSectionSave;
+  const saveHandler = f.saveSettingsSection || c.props?.onSectionSave;
 
   if (typeof saveHandler !== "function") {
     return { success: false, message: "Save handler not configured" };
@@ -323,20 +323,20 @@ return {
       L: Attr
       P: {
         css:
-          '''const isDanger = args.fns.isDangerVariant?.() === true;
+          '''const isDanger = f.isDangerVariant?.() === true;
 return `._id {
-  background: ${args.theme.var.color.background_light_100};
-  border: 1px solid ${isDanger ? args.theme.var.color.error : args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.lg};
-  margin-bottom: ${args.theme.var.spacing.lg};
+  background: ${t.var.color.background_light_100};
+  border: 1px solid ${isDanger ? t.var.color.error : t.var.color.border};
+  border-radius: ${t.var.borderRadius.lg};
+  margin-bottom: ${t.var.spacing.lg};
   overflow: hidden;
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const sectionConfig = args.fns.getSectionConfig();
+          '''const sectionConfig = f.getSectionConfig();
 if (!sectionConfig) return { hide: true };
-args.fns.ensureInitialVertex();
+f.ensureInitialVertex();
 return {
   as: "section",
   "attr:data-section-id": sectionConfig.id
@@ -349,13 +349,13 @@ return {
       P: {
         css:
           '''return `._id {
-  padding: ${args.theme.var.spacing.lg};
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  padding: ${t.var.spacing.lg};
+  border-bottom: 1px solid ${t.var.color.border};
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const sectionConfig = args.fns.getSectionConfig();
+          '''const sectionConfig = f.getSectionConfig();
 return {
   as: "header",
   hide: !sectionConfig?.title && !sectionConfig?.description
@@ -370,13 +370,13 @@ return {
           '''return `._id {
   font-size: 1.125rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 ${args.theme.var.spacing.xs} 0;
+  color: ${t.var.color.text};
+  margin: 0 0 ${t.var.spacing.xs} 0;
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const sectionConfig = args.fns.getSectionConfig();
+          '''const sectionConfig = f.getSectionConfig();
 return {
   as: "h2",
   text: sectionConfig?.title || "",
@@ -391,14 +391,14 @@ return {
         css:
           '''return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0;
   line-height: 1.5;
 }`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''const sectionConfig = args.fns.getSectionConfig();
+          '''const sectionConfig = f.getSectionConfig();
 return {
   as: "p",
   text: sectionConfig?.description || "",
@@ -412,25 +412,25 @@ return {
       P: {
         css:
           '''return `._id {
-  padding: ${args.theme.var.spacing.lg};
+  padding: ${t.var.spacing.lg};
 }`;'''
         displayOrder: 2
         componentName: FormManagement
         props:
-          '''const sectionConfig = args.fns.getSectionConfig();
-const formConfig = args.fns.convertToFormConfig(sectionConfig);
-const initialVertex = args.fns.initialVertex();
+          '''const sectionConfig = f.getSectionConfig();
+const formConfig = f.convertToFormConfig(sectionConfig);
+const initialVertex = f.initialVertex();
 return {
   formConfig,
   initialVertex,
-  siteLanguages: args.fns.getSiteLanguages?.() || [],
+  siteLanguages: f.getSiteLanguages?.() || [],
   mode: "edit",
   vertexLabel: "SettingsFormData",
   hideActionsBar: true,
   afterSuccessfulSave: "reinitialize",
-  onSave: args.fns.handleSectionSave,
-  onFnsReady: args.fns.registerFormManagementFns,
-  onFieldChange: () => args.fns.markDirty(),
+  onSave: f.handleSectionSave,
+  onFnsReady: f.registerFormManagementFns,
+  onFieldChange: () => f.markDirty(),
   hide: !formConfig || !initialVertex
 };'''
       }
@@ -444,17 +444,17 @@ return {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: ${args.theme.var.spacing.sm};
-  padding: ${args.theme.var.spacing.md} ${args.theme.var.spacing.lg};
-  border-top: 1px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background_light_50};
+  gap: ${t.var.spacing.sm};
+  padding: ${t.var.spacing.md} ${t.var.spacing.lg};
+  border-top: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background_light_50};
 }`;'''
         displayOrder: 3
         componentName: Html
         props:
           '''return {
   as: "div",
-  hide: !args.fns.showSectionActions()
+  hide: !f.showSectionActions()
 };'''
       }
     }
@@ -468,8 +468,8 @@ return {
           '''return {
   variant: "secondary",
   text: "Discard",
-  onClick: args.fns.handleSectionDiscardClick,
-  disabled: !args.fns.isSectionDirty() || args.fns.isSaving()
+  onClick: f.handleSectionDiscardClick,
+  disabled: !f.isSectionDirty() || f.isSaving()
 };'''
       }
     }
@@ -482,9 +482,9 @@ return {
         props:
           '''return {
   variant: "primary",
-  text: args.fns.isSaving() ? "Saving..." : "Save",
-  onClick: args.fns.handleSectionSaveClick,
-  disabled: !args.fns.isSectionDirty() || args.fns.isSaving()
+  text: f.isSaving() ? "Saving..." : "Save",
+  onClick: f.handleSectionSaveClick,
+  disabled: !f.isSectionDirty() || f.isSaving()
 };'''
       }
     }

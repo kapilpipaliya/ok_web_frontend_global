@@ -45,7 +45,7 @@ const fetchPlaylistMetadata = async (playlistId, youtube, ownershipId, session) 
   });
 
   // Log API usage: playlists.list operation (1 unit) - shared quota
-  await args.logSharedAPIUsage(ownershipId, 'playlists.list', args.YOUTUBE_API_COSTS['playlists.list'], session);
+  await _.logSharedAPIUsage(ownershipId, 'playlists.list', _.YOUTUBE_API_COSTS['playlists.list'], session);
 
   if (!playlistResponse.data.items || playlistResponse.data.items.length === 0) {
     return null;
@@ -62,7 +62,7 @@ const fetchPlaylistMetadata = async (playlistId, youtube, ownershipId, session) 
 };
 
   // Extract input parameters from the request
-  const { url, name, channelId, refresh = false, priority = 'normal', ownershipId } = args.contextData;
+  const { url, name, channelId, refresh = false, priority = 'normal', ownershipId } = c;
 
   if (!url) {
     return {
@@ -83,7 +83,7 @@ const fetchPlaylistMetadata = async (playlistId, youtube, ownershipId, session) 
   const playlistPriority = validPriorities.includes(priority) ? priority : 'normal';
 
   // Get current authenticated user from session
-  const actualUser = await args.getUserFromSession();
+  const actualUser = await _.getUserFromSession();
   if (!actualUser) {
     return {
       success: false,
@@ -92,10 +92,10 @@ const fetchPlaylistMetadata = async (playlistId, youtube, ownershipId, session) 
   }
 
   // Get effective user (handles admin impersonation)
-  const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+  const user = await _.getEffectiveUser(_.session, actualUser, c);
 
   // Verify ownership belongs to user and get channel ID
-  const ownershipCheck = await args.session.run(`
+  const ownershipCheck = await _.session.run(`
     MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
     RETURN o
   `, { userUuid: user.P.uuid, ownershipId });
@@ -108,7 +108,7 @@ const fetchPlaylistMetadata = async (playlistId, youtube, ownershipId, session) 
   }
 
   const ownershipNode = ownershipCheck.records[0].get('o');
-  const ownership = args.convertNodeToJson(ownershipNode);
+  const ownership = _.convertNodeToJson(ownershipNode);
   const ownershipChannelId = ownership.P.channelId;
 
   if (!ownershipChannelId) {
@@ -145,7 +145,7 @@ const fetchPlaylistMetadata = async (playlistId, youtube, ownershipId, session) 
   // and potentially cause data inconsistencies
   // REFRESH MODE: If refresh=true, skip this check to allow re-processing completed playlists
   if (!refresh) {
-    const existingPlaylistResult = await args.session.run(`
+    const existingPlaylistResult = await _.session.run(`
       MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
       WHERE p.queueStatus IN ['queued', 'processing']
       RETURN p.youtubeId as playlistId, p.queueStatus as status, p.title as title
@@ -171,7 +171,7 @@ const fetchPlaylistMetadata = async (playlistId, youtube, ownershipId, session) 
   // Get authenticated YouTube client for this ownership
   let youtube;
   try {
-    youtube = await args.getYouTubeClient(ownershipId, args.session, args.request);
+    youtube = await _.getYouTubeClient(ownershipId, _.session, _.request);
   } catch (error) {
     // Check if this is an OAuth authorization error
     if (error.message.includes('No YouTube authorization') ||
@@ -197,7 +197,7 @@ const fetchPlaylistMetadata = async (playlistId, youtube, ownershipId, session) 
     isSpecialPlaylist ? originalPlaylistId : playlistId,
     youtube,
     ownershipId,
-    args.session
+    _.session
   );
 
   if (!playlistData) {
@@ -219,7 +219,7 @@ const fetchPlaylistMetadata = async (playlistId, youtube, ownershipId, session) 
   }
 
   // Use write transaction for atomicity - prevents race conditions
-  const { playlist, channelWasCreated, apiChannelId } = await args.session.executeWrite(async (tx) => {
+  const { playlist, channelWasCreated, apiChannelId } = await _.session.executeWrite(async (tx) => {
     // CHECK AGAIN WITHIN TRANSACTION: Prevent duplicate from another tab
     // NEW ARCHITECTURE: Status stored directly on Playlist vertex
     if (!refresh) {
@@ -296,7 +296,7 @@ const fetchPlaylistMetadata = async (playlistId, youtube, ownershipId, session) 
 
     // Extract the Playlist vertex from the result
     const playlistNode = playlistResult.records[0].get('p');
-    const playlistVertex = args.convertNodeToJson(playlistNode);
+    const playlistVertex = _.convertNodeToJson(playlistNode);
 
     // Create Channel->Playlist relationship using channel ID from YouTube API
     // This represents YouTube's data model (which channel owns the playlist)
@@ -338,7 +338,7 @@ const fetchPlaylistMetadata = async (playlistId, youtube, ownershipId, session) 
 
       // Call saveChannel with skipPlaylists parameter to avoid processing playlists
       // This ensures channel metadata is saved without triggering playlist processing
-      const saveChannelResult = await args.executeNamedServerFunction({
+      const saveChannelResult = await s({
         functionName: 'saveChannel',
         contextData: {
           url: channelUrl,
@@ -354,8 +354,8 @@ const fetchPlaylistMetadata = async (playlistId, youtube, ownershipId, session) 
   }
 
   // STEP 4: Add to background processing queue using BullMQ
-  const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
-  const playlistQueue = helpers.result.data.createPlaylistQueue(args);
+  const helpers = await s({ functionName: 'queueHelpers', contextData: {} });
+  const playlistQueue = helpers.result.data.createPlaylistQueue(_);
 
   try {
     // Map priority string to BullMQ priority number (lower = higher priority)

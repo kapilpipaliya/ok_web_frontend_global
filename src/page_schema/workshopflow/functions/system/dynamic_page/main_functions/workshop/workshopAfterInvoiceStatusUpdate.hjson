@@ -8,10 +8,10 @@
         description: Hook that updates linked repair order when an invoice is created or updated (payment status vs repair workflow).
         body:
           '''
-const elementId = args.contextData?.elementId;
+const elementId = c?.elementId;
 if (!elementId) return { success: true, message: "No invoice id provided" };
 
-const invoiceResult = await args.session.run(
+const invoiceResult = await _.session.run(
   `
   MATCH (i:WorkshopInvoice)
   WHERE elementId(i) = $elementId
@@ -35,7 +35,7 @@ if (!invoiceNode || !repairNode) {
 const paymentStatus = String(invoiceNode.properties.paymentStatus || "unpaid").toLowerCase();
 const repairStatus = paymentStatus === "paid" ? "closed" : "ready-billing";
 
-await args.session.run(
+await _.session.run(
   `
   MATCH (r:RepairOrder)
   WHERE elementId(r) = $repairId

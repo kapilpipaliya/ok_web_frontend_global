@@ -223,8 +223,8 @@ export function ResizableContainer(
     isResizingDisabled()
       ? `return \`._id {
       display: block;
-      border-left: 1px solid \${args.theme.var.color.border};
-      border-top: 1px solid \${args.theme.var.color.border};
+      border-left: 1px solid \${t.var.color.border};
+      border-top: 1px solid \${t.var.color.border};
       min-width: 0;
       min-height: 0;
       overflow: hidden;
@@ -233,8 +233,8 @@ export function ResizableContainer(
       display: grid;
       grid-template-columns: ${trackPx()} minmax(0, 1fr) ${trackPx()};
       grid-template-rows: minmax(0, 1fr) ${trackPx()};
-      border-left: 1px solid \${args.theme.var.color.border};
-      border-top: 1px solid \${args.theme.var.color.border};
+      border-left: 1px solid \${t.var.color.border};
+      border-top: 1px solid \${t.var.color.border};
       min-width: 0;
       min-height: 0;
     }\`;`;
@@ -254,7 +254,7 @@ export function ResizableContainer(
         css={[
           gridCss(),
           isDraggingOver()
-            ? "return `._id { background-color: ${args.theme.var.color.primary_light_150}; }`;"
+            ? "return `._id { background-color: ${t.var.color.primary_light_150}; }`;"
             : "",
           activeResizeKey() ? "return `._id { user-select: none; }`;" : "",
         ]}

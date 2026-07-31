@@ -12,12 +12,12 @@
         key: HisInspiration
         props:
           '''
-const locale = args.params?.lang ? String(args.params.lang).toLowerCase() : undefined;
+const locale = _.params?.lang ? String(_.params.lang).toLowerCase() : undefined;
 return {
   contextName: "hisInspirationSettings",
   serverFunction: `
 try {
-  const result = await args.executeNamedServerFunction({
+  const result = await s({
     functionName: "loadPublicPageSettings",
     contextData: { pageId: "his-inspiration", allowPublicRead: true, locale: ${JSON.stringify(locale ?? null)} }
   });
@@ -86,7 +86,7 @@ try {
         displayOrder: 1
         componentName: Html
         props:
-          '''const content = args.contextData.hisInspirationSettings?.content;
+          '''const content = c.hisInspirationSettings?.content;
 return {
   as: "h1",
   text: content?.pageTitle
@@ -108,7 +108,7 @@ return {
   as: "section",
   "data-animate": "",
 
-  ref: (el) => el && args.fns.animateOnView(el)
+  ref: (el) => el && f.animateOnView(el)
 };'''
       }
     }
@@ -118,7 +118,7 @@ return {
       P: {
         css:
           '''return `._id {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   font-size: 2.5rem;
   font-weight: 600;
   margin-bottom: 2rem;
@@ -126,7 +126,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const content = args.contextData.hisInspirationSettings?.content;
+          '''const content = c.hisInspirationSettings?.content;
 return {
   as: "h2",
   text: content?.shrimadTitle
@@ -164,7 +164,7 @@ return {
           '''return `._id {
   font-size: 1.125rem;
   line-height: 1.8;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         displayOrder: 1
         componentName: Html
@@ -173,7 +173,7 @@ return {
   as: "div",
   "data-animate": "",
 
-  ref: (el) => el && args.fns.animateOnView(el, { x: -32, y: 0, delay: 0.1 })
+  ref: (el) => el && f.animateOnView(el, { x: -32, y: 0, delay: 0.1 })
 };'''
       }
     }
@@ -188,7 +188,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const content = args.contextData.hisInspirationSettings?.content;
+          '''const content = c.hisInspirationSettings?.content;
 return {
   as: "p",
   text: content?.shrimadPara1
@@ -206,7 +206,7 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const content = args.contextData.hisInspirationSettings?.content;
+          '''const content = c.hisInspirationSettings?.content;
 return {
   as: "p",
   text: content?.shrimadPara2
@@ -228,7 +228,7 @@ return {
   as: "div",
   "data-animate": "",
 
-  ref: (el) => el && args.fns.animateOnView(el, { x: 32, y: 0 })
+  ref: (el) => el && f.animateOnView(el, { x: 32, y: 0 })
 };'''
       }
     }
@@ -266,7 +266,7 @@ return {
   as: "section",
   "data-animate": "",
 
-  ref: (el) => el && args.fns.animateOnView(el)
+  ref: (el) => el && f.animateOnView(el)
 };'''
       }
     }
@@ -276,7 +276,7 @@ return {
       P: {
         css:
           '''return `._id {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   font-size: 2.5rem;
   font-weight: 600;
   margin-bottom: 2rem;
@@ -284,7 +284,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const content = args.contextData.hisInspirationSettings?.content;
+          '''const content = c.hisInspirationSettings?.content;
 return {
   as: "h2",
   text: content?.kanjiTitle
@@ -322,7 +322,7 @@ return {
           '''return `._id {
   font-size: 1.125rem;
   line-height: 1.8;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         displayOrder: 1
         componentName: Html
@@ -331,7 +331,7 @@ return {
   as: "div",
   "data-animate": "",
 
-  ref: (el) => el && args.fns.animateOnView(el, { x: -32, y: 0 })
+  ref: (el) => el && f.animateOnView(el, { x: -32, y: 0 })
 };'''
       }
     }
@@ -346,7 +346,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const content = args.contextData.hisInspirationSettings?.content;
+          '''const content = c.hisInspirationSettings?.content;
 return {
   as: "p",
   text: content?.kanjiPara1
@@ -364,7 +364,7 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const content = args.contextData.hisInspirationSettings?.content;
+          '''const content = c.hisInspirationSettings?.content;
 return {
   as: "p",
   text: content?.kanjiPara2
@@ -382,7 +382,7 @@ return {
         displayOrder: 3
         componentName: Html
         props:
-          '''const content = args.contextData.hisInspirationSettings?.content;
+          '''const content = c.hisInspirationSettings?.content;
 return {
   as: "p",
   text: content?.kanjiPara3
@@ -408,7 +408,7 @@ return {
   as: "div",
   "data-animate": "",
 
-  ref: (el) => el && args.fns.animateOnView(el, { x: 32, y: 0, delay: 0.1 })
+  ref: (el) => el && f.animateOnView(el, { x: 32, y: 0, delay: 0.1 })
 };'''
       }
     }

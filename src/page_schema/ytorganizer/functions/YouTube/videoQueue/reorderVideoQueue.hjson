@@ -8,7 +8,7 @@
         body:
           '''
 // Get current authenticated user from session
-const actualUser = await args.getUserFromSession(args.request);
+const actualUser = await _.getUserFromSession(_.request);
 if (!actualUser) {
   return {
     success: false,
@@ -17,10 +17,10 @@ if (!actualUser) {
 }
 
 // Get effective user (handles admin impersonation)
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const user = await _.getEffectiveUser(_.session, actualUser, c);
 
 // Get ownershipId, fromPosition, and toPosition from contextData
-const { ownershipId, fromPosition, toPosition } = args.contextData;
+const { ownershipId, fromPosition, toPosition } = c;
 
 if (!ownershipId) {
   return {
@@ -45,7 +45,7 @@ if (toPosition === undefined || toPosition === null || toPosition < 0) {
 
 if (fromPosition === toPosition) {
   // No change needed, just return current queue
-  const queueResult = await args.session.run(`
+  const queueResult = await _.session.run(`
     MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideoQueue]->(vq:VideoQueue)-[:VideoQueueVideo]->(v:Video)
     RETURN v
     ORDER BY vq.position ASC
@@ -54,7 +54,7 @@ if (fromPosition === toPosition) {
   });
 
   const queue = queueResult.records.map(record => {
-    return args.convertNodeToJson(record.get('v'));
+    return _.convertNodeToJson(record.get('v'));
   });
 
   return {
@@ -65,7 +65,7 @@ if (fromPosition === toPosition) {
 }
 
 // Verify ownership belongs to user
-const ownershipCheck = await args.session.run(`
+const ownershipCheck = await _.session.run(`
   MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
   RETURN o
 `, {
@@ -88,7 +88,7 @@ if (ownershipCheck.records.length === 0) {
 const tempPosition = -1;
 
 // Step 1: Move video at fromPosition to temporary position
-await args.session.run(`
+await _.session.run(`
   MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideoQueue]->(vq:VideoQueue)
   WHERE vq.position = $fromPosition
   SET vq.position = $tempPosition, vq.updatedAt = datetime()
@@ -101,7 +101,7 @@ await args.session.run(`
 // Step 2: Shift other videos
 if (fromPosition < toPosition) {
   // Moving down: shift videos between fromPosition+1 and toPosition down by 1
-  await args.session.run(`
+  await _.session.run(`
     MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideoQueue]->(vq:VideoQueue)
     WHERE vq.position > $fromPosition AND vq.position <= $toPosition
     SET vq.position = vq.position - 1, vq.updatedAt = datetime()
@@ -112,7 +112,7 @@ if (fromPosition < toPosition) {
   });
 } else {
   // Moving up: shift videos between toPosition and fromPosition-1 up by 1
-  await args.session.run(`
+  await _.session.run(`
     MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideoQueue]->(vq:VideoQueue)
     WHERE vq.position >= $toPosition AND vq.position < $fromPosition
     SET vq.position = vq.position + 1, vq.updatedAt = datetime()
@@ -124,7 +124,7 @@ if (fromPosition < toPosition) {
 }
 
 // Step 3: Move video from temporary position to final position
-await args.session.run(`
+await _.session.run(`
   MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideoQueue]->(vq:VideoQueue)
   WHERE vq.position = $tempPosition
   SET vq.position = $toPosition, vq.updatedAt = datetime()
@@ -135,7 +135,7 @@ await args.session.run(`
 });
 
 // Return updated queue
-const queueResult = await args.session.run(`
+const queueResult = await _.session.run(`
   MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideoQueue]->(vq:VideoQueue)-[:VideoQueueVideo]->(v:Video)
   RETURN v
   ORDER BY vq.position ASC
@@ -144,7 +144,7 @@ const queueResult = await args.session.run(`
 });
 
 const queue = queueResult.records.map(record => {
-  return args.convertNodeToJson(record.get('v'));
+  return _.convertNodeToJson(record.get('v'));
 });
 
 return {

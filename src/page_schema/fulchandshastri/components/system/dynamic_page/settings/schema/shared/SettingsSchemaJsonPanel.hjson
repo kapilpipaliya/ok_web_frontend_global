@@ -21,12 +21,12 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
 }`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''const api = args.contextData.props?.editorApi || {};
+          '''const api = c.props?.editorApi || {};
 
 return {
   as: "div",
@@ -45,8 +45,8 @@ return {
   justify-content: space-between;
   gap: 0.75rem;
   padding: 0.5rem 1rem;
-  border-bottom: 1px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background_light_100};
+  border-bottom: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background_light_100};
   flex-shrink: 0;
 }`;'''
         displayOrder: 1
@@ -65,7 +65,7 @@ return {
           '''return `._id {
   margin: 0;
   font-size: 0.8125rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;'''
         displayOrder: 1
         componentName: Html
@@ -83,7 +83,7 @@ return {
         displayOrder: 2
         componentName: Button
         props:
-          '''const api = args.contextData.props?.editorApi || {};
+          '''const api = c.props?.editorApi || {};
 
 return {
   variant: "secondary",
@@ -103,15 +103,15 @@ return {
           '''return `._id {
   padding: 0.5rem 1rem;
   font-size: 0.8125rem;
-  color: ${args.theme.var.color.error_text};
-  background: ${args.theme.var.color.error_light_100};
-  border-bottom: 1px solid ${args.theme.var.color.error};
+  color: ${t.var.color.error_text};
+  background: ${t.var.color.error_light_100};
+  border-bottom: 1px solid ${t.var.color.error};
   flex-shrink: 0;
 }`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''const api = args.contextData.props?.editorApi || {};
+          '''const api = c.props?.editorApi || {};
 
 const error = api.jsonError?.();
 return {
@@ -162,7 +162,7 @@ return {
         displayOrder: 1
         componentName: TextArea
         props:
-          '''const api = args.contextData.props?.editorApi || {};
+          '''const api = c.props?.editorApi || {};
 
 return {
   label: "Config JSON",

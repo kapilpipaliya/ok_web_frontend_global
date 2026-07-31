@@ -25,8 +25,8 @@ return {
         css: '''
 return `._id {
   min-height: 100vh;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
 }`;
 '''
       }

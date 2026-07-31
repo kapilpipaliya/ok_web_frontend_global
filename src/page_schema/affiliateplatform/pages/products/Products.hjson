@@ -12,8 +12,8 @@
         key: Products
         props:
           '''
-const locale = args.params?.lang ? String(args.params.lang).toLowerCase() : undefined;
-const routeParams = args.context?.getParams?.(args.meta) || {};
+const locale = _.params?.lang ? String(_.params.lang).toLowerCase() : undefined;
+const routeParams = _.context?.getParams?.(_.meta) || {};
 const categoryKey = routeParams.category != null && String(routeParams.category).trim() !== ""
   ? String(routeParams.category).trim()
   : null;
@@ -21,11 +21,11 @@ return {
   contextName: "productsSettings",
   serverFunction: `
 try {
-  const pageResult = await args.executeNamedServerFunction({
+  const pageResult = await s({
     functionName: "loadPublicPageSettings",
     contextData: { pageId: "products", allowPublicRead: true, locale: ${JSON.stringify(locale ?? null)} }
   });
-  const folderResult = await args.executeNamedServerFunction({
+  const folderResult = await s({
     functionName: "loadPublicProductsFolder",
     contextData: {
       tableKey: "products",
@@ -90,12 +90,12 @@ try {
   margin: 0 0 1.5rem 0;
   font-size: 2rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const content = args.contextData.productsSettings?.content || {};
+          '''const content = c.productsSettings?.content || {};
 return {
   as: "h1",
   text: content.pageTitle || "Products"
@@ -109,14 +109,14 @@ return {
         css:
           '''return `._id {
   margin: -0.75rem 0 1.5rem 0;
-  color: ${args.theme.var.color.text_light_300};
+  color: ${t.var.color.text_light_300};
   font-size: 1rem;
   line-height: 1.5;
 }`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''const content = args.contextData.productsSettings?.content || {};
+          '''const content = c.productsSettings?.content || {};
 return {
   as: "p",
   text: content.pageSubtitle || "Browse our curated Amazon product picks",
@@ -131,9 +131,9 @@ return {
         displayOrder: 3
         componentName: ProductBrowser
         props:
-          '''const content = args.contextData.productsSettings?.content || {};
-const folderData = args.contextData.productsSettings?.folderData || {};
-const locale = args.params?.lang ? String(args.params.lang).toLowerCase() : undefined;
+          '''const content = c.productsSettings?.content || {};
+const folderData = c.productsSettings?.folderData || {};
+const locale = _.params?.lang ? String(_.params.lang).toLowerCase() : undefined;
 const langPrefix = locale && /^[a-z]{2,3}$/i.test(locale) ? `/${locale}` : "";
 return {
   tableKey: "products",

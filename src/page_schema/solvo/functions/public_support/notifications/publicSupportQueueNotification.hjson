@@ -9,14 +9,14 @@
         body:
           '''
 const queueName = "solvo-public-support-notifications";
-const { eventType, ticketId, messageId, serial, assigneeUserId } = args.contextData || {};
+const { eventType, ticketId, messageId, serial, assigneeUserId } = c || {};
 
 if (!eventType || !ticketId) {
   return { success: false, message: "eventType and ticketId are required" };
 }
 
 const getRedisConnection = () => {
-  return args.bullmq.redisConnection || {
+  return _.bullmq.redisConnection || {
     host: process.env.REDIS_HOST || "localhost",
     port: parseInt(process.env.REDIS_PORT || "6379"),
     maxRetriesPerRequest: null,
@@ -29,7 +29,7 @@ const getRedisConnection = () => {
   };
 };
 
-const { Queue } = args.bullmq;
+const { Queue } = _.bullmq;
 const queue = new Queue(queueName, { connection: getRedisConnection() });
 
 try {
@@ -42,8 +42,8 @@ try {
       messageId: messageId || null,
       serial: serial || null,
       assigneeUserId: assigneeUserId || null,
-      subDomain: args.subDomain,
-      rawSubDomain: args.rawSubDomain || null
+      subDomain: _.subDomain,
+      rawSubDomain: _.rawSubDomain || null
     },
     {
       attempts: 3,

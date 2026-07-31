@@ -48,7 +48,7 @@ function VariantInputRow(props: {
             <As
               as="span"
               css={`return \`._id {
-                    color: \${args.theme.var.color.text_light_300};
+                    color: \${t.var.color.text_light_300};
                     font-size: 13px;
                   }\`;`}
             >
@@ -78,7 +78,7 @@ function VariantInputRow(props: {
   padding-right: 2px;
   padding-top: 1px;
   padding-bottom: 1px;
-  border: 1px solid \${args.theme.var.color.border};
+  border: 1px solid \${t.var.color.border};
   border-radius: 4px;
 }\`;`,
               ]}
@@ -107,7 +107,7 @@ function VariantInputRow(props: {
                     css: `return \`._id {
                               flex: 1;
                               padding: 1px 2px;
-                              border: 1px solid \${args.theme.var.color.border};
+                              border: 1px solid \${t.var.color.border};
                               border-radius: 4px;
                             }\`;`,
                     onChange: (value: any) =>
@@ -134,7 +134,7 @@ function VariantInputRow(props: {
         >
           <IconButton
             css={`return \`._id {
-  color: \${args.theme.var.color.error};
+  color: \${t.var.color.error};
   border: none;
   background-color: transparent;
 }\`;`}

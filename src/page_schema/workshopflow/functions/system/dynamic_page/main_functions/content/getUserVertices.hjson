@@ -8,7 +8,7 @@
         body:
           '''
 // Get current authenticated user from session
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return {
     success: false,
@@ -18,10 +18,10 @@ if (!actualUser) {
 }
 
 // Get effective user (handles admin impersonation)
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const user = await _.getEffectiveUser(_.session, actualUser, c);
 
 // Extract parameters
-const { label, userUuid, search = "", limit = 100, relationshipType, enableUserScoping, hooks } = args.contextData;
+const { label, userUuid, search = "", limit = 100, relationshipType, enableUserScoping, hooks } = c;
 
 if (!label) {
   return {
@@ -35,7 +35,7 @@ if (!label) {
 const targetUserUuid = enableUserScoping ? (userUuid || user.P.uuid) : null;
 
 // Execute beforeGetUserVertices hooks
-await args.executeHooks(hooks?.beforeGetUserVertices, {
+await _.executeHooks(hooks?.beforeGetUserVertices, {
   label,
   userUuid: targetUserUuid,
   search,
@@ -46,7 +46,7 @@ await args.executeHooks(hooks?.beforeGetUserVertices, {
 
 // Build query
 let query;
-let params = { limit: args.neo4jDriver.int(limit) };
+let params = { limit: _.neo4jDriver.int(limit) };
 
 if (!enableUserScoping) {
   // No user scoping - fetch all vertices of the label
@@ -89,10 +89,10 @@ query += `
   LIMIT $limit
 `;
 
-const result = await args.session.run(query, params);
+const result = await _.session.run(query, params);
 
 // Use processResult to populate graph structure
-const vertices = args.processResult(result.records, args.context, 'v');
+const vertices = _.processResult(result.records, _.context, 'v');
 
 const resultData = {
   success: true,
@@ -101,7 +101,7 @@ const resultData = {
 };
 
 // Execute afterGetUserVertices hooks
-await args.executeHooks(hooks?.afterGetUserVertices, {
+await _.executeHooks(hooks?.afterGetUserVertices, {
   label,
   userUuid: targetUserUuid,
   search,

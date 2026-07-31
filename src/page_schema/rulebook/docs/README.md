@@ -371,7 +371,7 @@ WHERE rt.date = date($targetDate)
 
 ## State Management
 
-The system uses `args.createStore` for reactive state management:
+The system uses `_.createStore` for reactive state management:
 
 ## Internationalization (i18n)
 
@@ -1310,7 +1310,7 @@ These wireframes provide a comprehensive visual guide for implementing the Perso
 2. Tap "Add Rule" floating button
 3. Fill in rule details: title, description, category, frequency, priority
 4. Set optional reminder time and difficulty level
-5. Component calls `args.executeNamedServerFunction` with `saveRule` function
+5. Component calls `_.executeNamedServerFunction` with `saveRule` function
 6. Server function validates input and creates rule structure
 7. Creates initial tracking setup and default goals if specified
 8. Establishes relationships following the database schema
@@ -1320,7 +1320,7 @@ These wireframes provide a comprehensive visual guide for implementing the Perso
 2. View list of rules for the selected date
 3. Mark each rule as completed, partial, missed, or skipped
 4. Add optional notes and completion percentage
-5. Component calls `args.executeNamedServerFunction` with `trackRule` function
+5. Component calls `_.executeNamedServerFunction` with `trackRule` function
 6. Server function records tracking entry and updates streaks
 7. Real-time updates to dashboard statistics and progress charts
 
@@ -1369,10 +1369,10 @@ Each page that needs modal functionality includes:
 4. **Trigger Elements**: Buttons or UI elements that open modals with appropriate data
 
 #### Context Data Structure
-Modal components access their data through `args.contextData.[contextName]`:
+Modal components access their data through `_.contextData.[contextName]`:
 ```javascript
 // Single modal context (e.g., RBRules page)
-args.contextData.ruleModal = {
+_.contextData.ruleModal = {
   showRuleModal: signal,
   setShowRuleModal: setter,
   modalMode: signal,
@@ -1382,7 +1382,7 @@ args.contextData.ruleModal = {
 }
 
 // Single goal modal context (e.g., RBGoals page)
-args.contextData.goalModal = {
+_.contextData.goalModal = {
   showGoalModal: signal,
   setShowGoalModal: setter,
   modalMode: signal,
@@ -1392,7 +1392,7 @@ args.contextData.goalModal = {
 }
 
 // Multiple modal contexts (e.g., RBCategoryDetail page)
-args.contextData.modals = {
+_.contextData.modals = {
   ruleModal: { /* rule modal state */ },
   categoryModal: { /* category modal state */ }
 }
@@ -1421,7 +1421,7 @@ The system uses specialized modal components for creating and editing rules, cat
   - Real-time preview of tracking frequency
   - Delete functionality in edit mode with confirmation
   - Handles loading states and success feedback
-- **Context Integration**: Uses `args.contextData.ruleModal` for state management
+- **Context Integration**: Uses `_.contextData.ruleModal` for state management
 - **Usage**: Integrated into pages with proper context setup
 
 #### RBCategoryFormModal
@@ -1440,7 +1440,7 @@ The system uses specialized modal components for creating and editing rules, cat
   - Visual color and icon previews
   - Delete functionality in edit mode with confirmation
   - Handles loading states and success feedback
-- **Context Integration**: Uses `args.contextData.categoryModal` for state management
+- **Context Integration**: Uses `_.contextData.categoryModal` for state management
 - **Usage**: Integrated into pages with proper context setup
 
 #### RBGoalFormModal
@@ -1463,7 +1463,7 @@ The system uses specialized modal components for creating and editing rules, cat
   - Delete functionality in edit mode with confirmation
   - Progress preservation warnings when editing
   - Handles loading states and success feedback
-- **Context Integration**: Uses `args.contextData.goalModal` for state management
+- **Context Integration**: Uses `_.contextData.goalModal` for state management
 - **Usage**: Integrated into pages with proper context setup
 
 ### Tracking Components
@@ -1566,7 +1566,7 @@ The system uses specialized modal components for creating and editing rules, cat
   - Streak: `carbon:fire`
 
 ### Data Management
-- **Use contextData for data passing**: Pass data to server functions via `args.executeNamedServerFunction` contextData parameter
+- **Use contextData for data passing**: Pass data to server functions via `_.executeNamedServerFunction` contextData parameter
 - **Maintain vertex format**: Always use raw vertex data without transformation
 - **Batch operations**: Use batch functions for multiple tracking entries
 - **Optimistic updates**: Update UI immediately, rollback on server error

@@ -8,7 +8,7 @@
         body:
           '''
 // Extract playlist ID, ownership, sort, and public access parameters
-const { playlistId, ownershipId: initialOwnershipId, sortBy = "position_asc", username, isPublicAccess = false } = args.contextData;
+const { playlistId, ownershipId: initialOwnershipId, sortBy = "position_asc", username, isPublicAccess = false } = c;
 
 if (!playlistId) {
   return {
@@ -52,7 +52,7 @@ if (isPublicAccess) {
   }
 
   // Find user by username
-  const userResult = await args.session.run(
+  const userResult = await _.session.run(
     `MATCH (u:User {username: $username}) RETURN u`,
     { username }
   );
@@ -75,12 +75,12 @@ if (isPublicAccess) {
   }
 
   const userNode = userResult.records[0].get('u');
-  user = args.convertNodeToJson(userNode);
+  user = _.convertNodeToJson(userNode);
   targetUserUuid = user.P.uuid;
 
   // Verify playlist is public OR belongs to a public channel
   // If channel is public, all its playlists and videos are accessible
-  const playlistCheck = await args.session.run(
+  const playlistCheck = await _.session.run(
     `MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
      MATCH (o)-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
      OPTIONAL MATCH (c:Channel)-[:ChannelPlaylist]->(p)
@@ -145,7 +145,7 @@ if (isPublicAccess) {
 
   // If allowUnauthenticatedAccess is false, still require authentication
   if (!allowUnauthenticatedAccess) {
-    const actualUser = await args.getUserFromSession();
+    const actualUser = await _.getUserFromSession();
     if (!actualUser) {
       return {
         success: false,
@@ -188,7 +188,7 @@ if (isPublicAccess) {
   }
 
   // Get current authenticated user from session
-  const actualUser = await args.getUserFromSession();
+  const actualUser = await _.getUserFromSession();
   if (!actualUser) {
     return {
       success: false,
@@ -207,12 +207,12 @@ if (isPublicAccess) {
   }
 
   // Get effective user (handles admin impersonation)
-  user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+  user = await _.getEffectiveUser(_.session, actualUser, c);
   targetUserUuid = user.P.uuid;
 }
 
 // Parse sortBy parameter using shared utility
-const parseSortResult = await args.executeNamedServerFunction({
+const parseSortResult = await s({
   functionName: "parseSortByUtil",
   contextData: { sortBy, contentType: "videos" }
 });
@@ -239,7 +239,7 @@ const { orderBy, orderDirection, secondaryOrderBy } = parseSortResult.result;
 // Verify user has access to this playlist and get video count using helper function
 // Note: When accessing via public channel, don't filter by playlist public status
 // The channel's public status is what matters here
-const playlistResult = await args.executeNamedServerFunction({
+const playlistResult = await s({
   functionName: "getPlaylistsWithVideoCount",
   contextData: {
     userUuid: targetUserUuid,
@@ -275,7 +275,7 @@ const parentChannel = playlistData.channel; // Channel info is already included 
 
 // Fetch all videos in this playlist using helper function
 // Note: When accessing via public channel, show all videos (channel's public status applies)
-const videosResult = await args.executeNamedServerFunction({
+const videosResult = await s({
   functionName: "getVideosWithDetails",
   contextData: {
     userUuid: targetUserUuid,

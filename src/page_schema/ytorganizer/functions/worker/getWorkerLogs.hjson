@@ -8,10 +8,10 @@
         body:
           '''
 // Fetch worker logs from database
-const filterWorker = args.contextData?.filterWorker || 'all';
-const filterLevel = args.contextData?.filterLevel || 'all';
+const filterWorker = c?.filterWorker || 'all';
+const filterLevel = c?.filterLevel || 'all';
 
-const session = args.session;
+const session = _.session;
 
 // Build query based on filters
 let query = 'MATCH (log:WorkerLog) ';
@@ -37,7 +37,7 @@ const result = await session.run(query, params);
 
 const logs = result.records.map(record => {
   const logNode = record.get('log');
-  return args.convertNodeToJson(logNode);
+  return _.convertNodeToJson(logNode);
 });
 
 return logs;

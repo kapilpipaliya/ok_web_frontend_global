@@ -176,7 +176,7 @@ decodecommerce/
 ## Development Notes
 
 1. All components use the `._id` CSS selector pattern
-2. Theme variables accessed via `args.theme.var.color.*`
+2. Theme variables accessed via `_.theme.var.color.*`
 3. Responsive CSS using media queries
 4. SolidJS reactive features for interactive components
 5. Data components used for repeating patterns

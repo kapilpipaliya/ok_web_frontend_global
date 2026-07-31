@@ -15,8 +15,8 @@
         displayOrder: 1
         css:
           '''
-const messageItem = args.contextData.message;
-const rowJustify = messageItem ? args.fns.getRowJustify?.(messageItem) : "flex-start";
+const messageItem = c.message;
+const rowJustify = messageItem ? f.getRowJustify?.(messageItem) : "flex-start";
 return `._id {
   display: flex;
   margin-bottom: 0.35rem;
@@ -25,10 +25,10 @@ return `._id {
 '''
         props:
           '''
-const messageItem = args.contextData.message;
+const messageItem = c.message;
 if (!messageItem) return { as: "div" };
-const messageType = args.fns.getMessageType?.(messageItem) || "customer_message";
-const ownMessage = args.fns.isOwnMessage?.(messageItem) === true;
+const messageType = f.getMessageType?.(messageItem) || "customer_message";
+const ownMessage = f.isOwnMessage?.(messageItem) === true;
 return {
   as: "div",
   "data-message-type": messageType,
@@ -44,9 +44,9 @@ return {
         displayOrder: 1
         css:
           '''
-const messageItem = args.contextData.message;
-const messageType = messageItem ? args.fns.getMessageType?.(messageItem) : "customer_message";
-const ownMessage = messageItem ? args.fns.isOwnMessage?.(messageItem) === true : false;
+const messageItem = c.message;
+const messageType = messageItem ? f.getMessageType?.(messageItem) : "customer_message";
+const ownMessage = messageItem ? f.isOwnMessage?.(messageItem) === true : false;
 return `._id {
   max-width: 80%;
   padding: 0.5rem 0.75rem;
@@ -58,27 +58,27 @@ return `._id {
 }
 
 ._id[data-message-type="internal_note"] {
-  background: ${args.theme.var.color.background_light_300};
-  color: ${args.theme.var.color.text};
-  border: 1px dashed ${args.theme.var.color.warning};
+  background: ${t.var.color.background_light_300};
+  color: ${t.var.color.text};
+  border: 1px dashed ${t.var.color.warning};
 }
 
 ._id[data-own="true"]:not([data-message-type="internal_note"]) {
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
 }
 
 ._id[data-own="false"]:not([data-message-type="internal_note"]) {
-  background: ${args.theme.var.color.background_light_200};
-  color: ${args.theme.var.color.background_light_200_text};
+  background: ${t.var.color.background_light_200};
+  color: ${t.var.color.background_light_200_text};
 }`;
 '''
         props:
           '''
-const messageItem = args.contextData.message;
+const messageItem = c.message;
 if (!messageItem) return { as: "div" };
-const messageType = args.fns.getMessageType?.(messageItem) || "customer_message";
-const ownMessage = args.fns.isOwnMessage?.(messageItem) === true;
+const messageType = f.getMessageType?.(messageItem) || "customer_message";
+const ownMessage = f.isOwnMessage?.(messageItem) === true;
 return {
   as: "div",
   "data-message-type": messageType,
@@ -94,7 +94,7 @@ return {
         displayOrder: 1
         props:
           '''
-const messageItem = args.contextData.message;
+const messageItem = c.message;
 return {
   as: "div",
   text: messageItem?.P?.message || ""
@@ -117,16 +117,16 @@ return `._id {
 '''
         props:
           '''
-const messageItem = args.contextData.message;
+const messageItem = c.message;
 const createdAt = messageItem?.P?.createdAt;
-const messageType = messageItem ? args.fns.getMessageType?.(messageItem) : "";
+const messageType = messageItem ? f.getMessageType?.(messageItem) : "";
 const label = messageType === "internal_note" ? "Internal • " : "";
 return {
   as: "div",
   text:
     label +
-    (args.fns.formatMessageTime?.(createdAt) ||
-      args.fns.formatTimestamp?.(createdAt) ||
+    (f.formatMessageTime?.(createdAt) ||
+      f.formatTimestamp?.(createdAt) ||
       "")
 };'''
       }

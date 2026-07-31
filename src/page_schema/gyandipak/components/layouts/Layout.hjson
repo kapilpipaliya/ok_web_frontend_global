@@ -8,10 +8,10 @@
           '''
 // Check if user is admin
 const checkAdminRole = () => {
-  const userRoles = args.user?.OUT?.UserRole || [];
+  const userRoles = _.user?.OUT?.UserRole || [];
   return userRoles.some(edgeId => {
-    const edge = args.graph.edges[edgeId];
-    const role = args.graph.vertexes[edge.E];
+    const edge = g.edges[edgeId];
+    const role = g.vertexes[edge.E];
     return role?.P?.key === "Admin";
   });
 };

@@ -8,7 +8,7 @@
         body:
           '''
 // Get current authenticated user
-const user = await args.getUserFromSession();
+const user = await _.getUserFromSession();
 if (!user) {
   return {
     success: false,
@@ -16,11 +16,11 @@ if (!user) {
   };
 }
 
-const { ownershipId } = args.contextData;
+const { ownershipId } = c;
 
 // Use helper functions to fetch channels and playlists with video counts
 // ownershipId is optional - if omitted, aggregates across all ownerships
-const channelResult = await args.executeNamedServerFunction({
+const channelResult = await s({
   functionName: "getChannelsWithVideoCount",
   contextData: {
     userUuid: user.P.uuid,
@@ -29,7 +29,7 @@ const channelResult = await args.executeNamedServerFunction({
   }
 });
 
-const playlistResult = await args.executeNamedServerFunction({
+const playlistResult = await s({
   functionName: "getPlaylistsWithVideoCount",
   contextData: {
     userUuid: user.P.uuid,

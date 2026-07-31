@@ -9,10 +9,10 @@
         body: '''
 try {
   // Extract input parameters from the request
-  const { categoryId, includeInactive, includeTracking, trackingDate } = args.contextData || {};
+  const { categoryId, includeInactive, includeTracking, trackingDate } = c || {};
 
   // Get current authenticated user from session
-  const user = await args.getUserFromSession();
+  const user = await _.getUserFromSession();
   if (!user) {
     throw new Error("User session not found. Please log in and try again.");
   }
@@ -64,7 +64,7 @@ try {
     }
   }
 
-  const rulesResult = await args.session.run(rulesQuery, queryParams);
+  const rulesResult = await _.session.run(rulesQuery, queryParams);
 
   // Format the results
   const rules = [];
@@ -76,17 +76,17 @@ try {
     if (!ruleNode) continue;
 
     const categoryNode = record.get('rc');
-    const trackingCount = args.neo4jConvert.js(record.get('trackingCount')) || 0;
-    const streakCount = args.neo4jConvert.js(record.get('streakCount')) || 0;
-    const goalCount = args.neo4jConvert.js(record.get('goalCount')) || 0;
+    const trackingCount = _.neo4jConvert.js(record.get('trackingCount')) || 0;
+    const streakCount = _.neo4jConvert.js(record.get('streakCount')) || 0;
+    const goalCount = _.neo4jConvert.js(record.get('goalCount')) || 0;
 
     // Convert Neo4j nodes to proper Vertex format
     let rule;
     let category = null;
 
     try {
-      rule = args.convertNodeToJson(ruleNode);
-      category = categoryNode ? args.convertNodeToJson(categoryNode) : null;
+      rule = _.convertNodeToJson(ruleNode);
+      category = categoryNode ? _.convertNodeToJson(categoryNode) : null;
     } catch (e) {
       console.warn('Failed to convert rule or category node:', e);
       continue; // Skip this rule if conversion fails
@@ -104,7 +104,7 @@ try {
             .filter(node => node !== null && node !== undefined)
             .map(node => {
               try {
-                return args.convertNodeToJson(node);
+                return _.convertNodeToJson(node);
               } catch (e) {
                 console.warn('Failed to convert tracking node:', e);
                 return null;
@@ -129,7 +129,7 @@ try {
             RETURN rs
           `;
 
-          const streakResult = await args.session.run(streakQuery, {
+          const streakResult = await _.session.run(streakQuery, {
             userUuid: user.P.uuid,
             ruleElementId,
           });
@@ -140,7 +140,7 @@ try {
               const streakNode = record.get('rs');
               if (streakNode) {
                 try {
-                  streak = args.convertNodeToJson(streakNode);
+                  streak = _.convertNodeToJson(streakNode);
                 } catch (e) {
                   console.warn('Failed to convert streak node:', e);
                   streak = null;

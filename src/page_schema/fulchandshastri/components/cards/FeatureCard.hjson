@@ -15,8 +15,8 @@
       P: {
         css:
           '''return `._id {
-  background: ${args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.background_light_300};
+  background: ${t.var.color.background};
+  border: 1px solid ${t.var.color.background_light_300};
   border-radius: 0.75rem;
   padding: 2rem;
   transition: all 0.3s ease;
@@ -24,19 +24,19 @@
   &:hover {
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
     transform: translateY(-4px);
-    border-color: ${args.theme.var.color.primary_light_300};
+    border-color: ${t.var.color.primary_light_300};
   }
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const feature = args.contextData.props || {};
-const index = args.contextData.index ?? 0;
+          '''const feature = c.props || {};
+const index = c.index ?? 0;
 return {
   as: "div",
   "data-animate": "",
 
-  ref: (el) => el && args.fns.animateOnView(el, { delay: index * 0.08 })
+  ref: (el) => el && f.animateOnView(el, { delay: index * 0.08 })
 };'''
       }
     }
@@ -48,7 +48,7 @@ return {
           '''return `._id {
   width: 4rem;
   height: 4rem;
-  background: ${args.theme.var.color.primary_light_100};
+  background: ${t.var.color.primary_light_100};
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -58,7 +58,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const feature = args.contextData.props || {};
+          '''const feature = c.props || {};
 const showIcon = feature.icon ? true : false;
 return {
   as: showIcon ? "div" : "fragment"
@@ -71,12 +71,12 @@ return {
       P: {
         css:
           '''return `._id {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const feature = args.contextData.props || {};
+          '''const feature = c.props || {};
 return {
   as: "icon",
   icon: feature.icon || "carbon:star",
@@ -98,7 +98,7 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const feature = args.contextData.props || {};
+          '''const feature = c.props || {};
 const showImage = feature.image ? true : false;
 return {
   as: showImage ? "div" : "fragment"
@@ -118,7 +118,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const feature = args.contextData.props || {};
+          '''const feature = c.props || {};
 return {
   as: "img",
   src: feature.image || "",
@@ -133,7 +133,7 @@ return {
       P: {
         css:
           '''return `._id {
-  text-align: ${args.contextData.props?.align || 'left'};
+  text-align: ${c.props?.align || 'left'};
 }`;'''
         displayOrder: 3
         componentName: Html
@@ -149,7 +149,7 @@ return {
       P: {
         css:
           '''return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   font-size: 1.5rem;
   font-weight: 600;
   margin: 0 0 1rem 0;
@@ -158,7 +158,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const feature = args.contextData.props || {};
+          '''const feature = c.props || {};
 return {
   as: "h3",
   text: feature.title || "Feature Title"
@@ -171,7 +171,7 @@ return {
       P: {
         css:
           '''return `._id {
-  color: ${args.theme.var.color.text_light_200};
+  color: ${t.var.color.text_light_200};
   font-size: 1rem;
   line-height: 1.7;
   margin: 0 0 1rem 0;
@@ -179,7 +179,7 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const feature = args.contextData.props || {};
+          '''const feature = c.props || {};
 return {
   as: "p",
   text: feature.description || "Feature description goes here."
@@ -197,7 +197,7 @@ return {
         displayOrder: 3
         componentName: Html
         props:
-          '''const feature = args.contextData.props || {};
+          '''const feature = c.props || {};
 const showLink = feature.link ? true : false;
 return {
   as: showLink ? "div" : "fragment"
@@ -213,7 +213,7 @@ return {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   text-decoration: none;
   font-weight: 500;
   transition: all 0.2s ease;
@@ -226,10 +226,10 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const feature = args.contextData.props || {};
+          '''const feature = c.props || {};
 const localizeHref = (path) => {
   if (!path || path.startsWith("http") || path.startsWith("mailto:") || path === "#") return path || "#";
-  const lang = args.params?.lang;
+  const lang = _.params?.lang;
   const code = lang && /^[a-z]{2,3}$/i.test(String(lang)) ? String(lang).toLowerCase() : "en";
   if (path === "/") return `/${code}`;
   const normalized = path.startsWith("/") ? path : `/${path}`;

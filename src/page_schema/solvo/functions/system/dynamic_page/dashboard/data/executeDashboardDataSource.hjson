@@ -8,12 +8,12 @@
         description: Executes abstract dashboard dataSource queries (no raw Cypher from client). Returns adapter-shaped widget data.
         body:
           '''
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return { success: false, message: "Authentication required", data: null };
 }
 
-await args.getEffectiveUser(args.session, actualUser, args.contextData);
+await _.getEffectiveUser(_.session, actualUser, c);
 
 const {
   widgetId,
@@ -25,7 +25,7 @@ const {
   timeRange,
   widgetTrend,
   timestampField: timestampFieldInput
-} = args.contextData || {};
+} = c || {};
 
 const RESERVED_FILTER_KEYS = new Set(["dateRange"]);
 
@@ -247,8 +247,8 @@ const adaptForWidget = (widgetType, payload) => {
 };
 
 const ensureContextNodes = () => {
-  if (!args.context.nodes) args.context.nodes = {};
-  return args.context.nodes;
+  if (!_.context.nodes) _.context.nodes = {};
+  return _.context.nodes;
 };
 
 const staticRowsToVertices = (rows) => {
@@ -321,7 +321,7 @@ const UNSUPPORTED_SOURCE_TYPES = new Set([
 const runAggregateCount = async (queryConfig, rangeOptions) => {
   const built = compileAbstractQuery(queryConfig, dashboardFilters, rangeOptions);
   if (!built || built.mode !== "aggregate") return 0;
-  const result = await args.session.run(built.query, built.params);
+  const result = await _.session.run(built.query, built.params);
   return Number(result.records[0]?.get("value") || 0);
 };
 
@@ -352,7 +352,7 @@ const runNeo4jSource = async () => {
   }
 
   const startedAt = Date.now();
-  const result = await args.session.run(built.query, built.params);
+  const result = await _.session.run(built.query, built.params);
   const durationMs = Date.now() - startedAt;
 
   if (built.mode === "aggregate") {
@@ -388,7 +388,7 @@ const runNeo4jSource = async () => {
             }
           }
           const prevQuery = `MATCH (v:${rootVertex}) WHERE ${whereParts.join(" AND ")} RETURN count(v) AS value`;
-          const prevResult = await args.session.run(prevQuery, params);
+          const prevResult = await _.session.run(prevQuery, params);
           const previousValue = Number(prevResult.records[0]?.get("value") || 0);
           trend = buildTrendPayload(aggregateValue, previousValue);
         }
@@ -407,11 +407,11 @@ const runNeo4jSource = async () => {
     });
   }
 
-  if (!args.context) {
+  if (!_.context) {
     return { success: false, message: "Server context unavailable", data: null };
   }
 
-  const vertices = args.processResult(result.records, args.context, "v");
+  const vertices = _.processResult(result.records, _.context, "v");
   let rows = Array.isArray(vertices) ? vertices : [];
   rows = applyTransforms(rows, dataSource.transform || []);
 
@@ -426,7 +426,7 @@ const runNeo4jSource = async () => {
 };
 
 const runStaticSource = () => {
-  if (!args.context) {
+  if (!_.context) {
     return { success: false, message: "Server context unavailable", data: null };
   }
   const rawRows = Array.isArray(dataSource.rows) ? dataSource.rows : [];
@@ -446,7 +446,7 @@ const runStaticSource = () => {
 };
 
 const runCrudSource = () => {
-  if (!args.context) {
+  if (!_.context) {
     return { success: false, message: "Server context unavailable", data: null };
   }
   const adapted = adaptForWidget(widgetType, {

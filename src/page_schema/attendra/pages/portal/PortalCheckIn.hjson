@@ -6,9 +6,9 @@
       P: {
         fns:
           '''
-const [loading, setLoading] = args.createSignal(true);
-const [openLog, setOpenLog] = args.createSignal(null);
-const [elapsedLabel, setElapsedLabel] = args.createSignal("");
+const [loading, setLoading] = _.createSignal(true);
+const [openLog, setOpenLog] = _.createSignal(null);
+const [elapsedLabel, setElapsedLabel] = _.createSignal("");
 
 const formatElapsed = (ms) => {
   const totalSec = Math.max(0, Math.floor(ms / 1000));
@@ -51,7 +51,7 @@ const tickElapsed = () => {
   setElapsedLabel(formatElapsed(Date.now() - start));
 };
 
-args.createEffect(() => {
+_.createEffect(() => {
   const ol = openLog();
   if (!ol) {
     setElapsedLabel("");
@@ -70,13 +70,13 @@ const isClockedIn = () => {
 const loadState = async () => {
   try {
     setLoading(true);
-    const res = await args.executeNamedServerFunction({
+    const res = await s({
       functionName: "portalGetMyTime",
       contextData: {}
     });
     const ok = res?.result?.success !== false && !res?.error;
     if (!ok) {
-      args.showErrorToast?.(res?.result?.error || res?.error || "Failed to load time status");
+      _.showErrorToast?.(res?.result?.error || res?.error || "Failed to load time status");
       setOpenLog(null);
       return;
     }
@@ -89,17 +89,17 @@ const loadState = async () => {
 const toggleClock = async () => {
   try {
     setLoading(true);
-    const res = await args.executeNamedServerFunction({
+    const res = await s({
       functionName: "portalClockToggle",
       contextData: {}
     });
     const ok = res?.result?.success !== false && !res?.error;
     if (!ok) {
-      args.showErrorToast?.(res?.result?.error || res?.error || "Clock action failed");
+      _.showErrorToast?.(res?.result?.error || res?.error || "Clock action failed");
       return;
     }
     const action = res?.result?.data?.action;
-    args.showSuccessToast?.(action === "clocked_out" ? "Clocked out" : "Clocked in");
+    _.showSuccessToast?.(action === "clocked_out" ? "Clocked out" : "Clocked in");
     await loadState();
   } finally {
     setLoading(false);
@@ -123,11 +123,11 @@ return {
           '''return {
   isNoPermissionCheck: true,
   onMount: () => {
-    if (!args.user) {
-      args.navigate("/auth/signin", { replace: true });
+    if (!_.user) {
+      _.navigate("/auth/signin", { replace: true });
       return;
     }
-    args.fns.loadState();
+    f.loadState();
   }
 };'''
       }
@@ -141,7 +141,7 @@ return {
         css:
           '''return `._id {
   width: 100%;
-  padding: ${args.theme.var.spacing?.md || "1rem"};
+  padding: ${t.var.spacing?.md || "1rem"};
   max-width: none;
   margin: 0;
   text-align: left;
@@ -163,7 +163,7 @@ return {
   font-size: 1.75rem;
   font-weight: 700;
   margin: 0 0 0.5rem 0;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         props:
           '''return {
@@ -180,20 +180,20 @@ return {
         componentName: Html
         css:
           '''return `._id {
-  color: ${args.theme.var.color.text_dark_400};
+  color: ${t.var.color.text_dark_400};
   margin: 0 0 1.25rem 0;
   font-size: 0.95rem;
   line-height: 1.5;
 }`;'''
         props:
-          '''const loading = args.fns.loading();
+          '''const loading = f.loading();
 let text = "Loading…";
-if (!loading && !args.fns.isClockedIn()) {
+if (!loading && !f.isClockedIn()) {
   text = "You are clocked out. Clock in to start recording your time.";
 }
 return {
   as: "p",
-  hide: () => loading || args.fns.isClockedIn(),
+  hide: () => loading || f.isClockedIn(),
   text
 };'''
       }
@@ -209,18 +209,18 @@ return {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: ${args.theme.var.spacing?.sm || "0.5rem"};
+  gap: ${t.var.spacing?.sm || "0.5rem"};
   padding: 1.5rem 1rem;
   margin-bottom: 1.25rem;
   border-radius: 0.75rem;
-  border: 1px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background_light_100};
+  border: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background_light_100};
   text-align: center;
 }`;'''
         props:
           '''return {
   as: "motionFragment",
-  hide: () => args.fns.loading() || !args.fns.isClockedIn()
+  hide: () => f.loading() || !f.isClockedIn()
 };'''
       }
     }
@@ -232,7 +232,7 @@ return {
         componentName: Html
         css:
           '''return `._id {
-  color: ${args.theme.var.color.success};
+  color: ${t.var.color.success};
 }`;'''
         props:
           '''return {
@@ -257,12 +257,12 @@ return {
   letter-spacing: 0.02em;
   line-height: 1.1;
   margin: 0;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         props:
           '''return {
   as: "p",
-  text: args.fns.elapsedLabel() || "0:00"
+  text: f.elapsedLabel() || "0:00"
 };'''
       }
     }
@@ -276,7 +276,7 @@ return {
           '''return `._id {
   margin: 0;
   font-size: 0.9rem;
-  color: ${args.theme.var.color.text_dark_400};
+  color: ${t.var.color.text_dark_400};
 }`;'''
         props:
           '''return {
@@ -295,15 +295,15 @@ return {
           '''return `._id {
   margin: 0.25rem 0 0 0;
   font-size: 0.85rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;'''
         props:
-          '''const ol = args.fns.openLog();
+          '''const ol = f.openLog();
 const started = ol?.P?.clockInAt;
 return {
   as: "p",
   text: started
-    ? `Clocked in at ${args.fns.formatClockInAt(started)}`
+    ? `Clocked in at ${f.formatClockInAt(started)}`
     : ""
 };'''
       }
@@ -322,8 +322,8 @@ return {
   font-weight: 600;
   cursor: pointer;
   border: none;
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
 }
 ._id:disabled {
   opacity: 0.55;
@@ -334,9 +334,9 @@ return {
   as: "button",
   type: "button",
   text: "Clock in",
-  hide: () => args.fns.loading() || args.fns.isClockedIn(),
-  disabled: !!args.fns.loading(),
-  onClick: () => args.fns.toggleClock()
+  hide: () => f.loading() || f.isClockedIn(),
+  disabled: !!f.loading(),
+  onClick: () => f.toggleClock()
 };'''
       }
     }
@@ -354,8 +354,8 @@ return {
   font-weight: 600;
   cursor: pointer;
   border: none;
-  background: ${args.theme.var.color.error};
-  color: ${args.theme.var.color.error_text};
+  background: ${t.var.color.error};
+  color: ${t.var.color.error_text};
 }
 ._id:disabled {
   opacity: 0.55;
@@ -366,9 +366,9 @@ return {
   as: "button",
   type: "button",
   text: "Clock out",
-  hide: () => args.fns.loading() || !args.fns.isClockedIn(),
-  disabled: !!args.fns.loading(),
-  onClick: () => args.fns.toggleClock()
+  hide: () => f.loading() || !f.isClockedIn(),
+  disabled: !!f.loading(),
+  onClick: () => f.toggleClock()
 };'''
       }
     }

@@ -14,9 +14,9 @@
         displayOrder: 1
         fns:
           '''
-const [keysFilter, setKeysFilter] = args.createSignal("");
-const [lastMessage, setLastMessage] = args.createSignal("");
-const [busy, setBusy] = args.createSignal(false);
+const [keysFilter, setKeysFilter] = _.createSignal("");
+const [lastMessage, setLastMessage] = _.createSignal("");
+const [busy, setBusy] = _.createSignal(false);
 
 const parseKeys = () => {
   const raw = keysFilter().trim();
@@ -32,29 +32,29 @@ const runSeed = async (mode) => {
   setLastMessage("");
   try {
     const keys = parseKeys();
-    const res = await args.executeNamedServerFunction({
+    const res = await s({
       functionName: "seedWorkshopPicklists",
       contextData: keys && keys.length ? { mode, keys } : { mode }
     });
     if (res?.error) {
       setLastMessage("Error: " + String(res.error));
-      args.showErrorToast?.(String(res.error));
+      _.showErrorToast?.(String(res.error));
       return;
     }
     const inner = res?.result;
     if (!inner?.success) {
       const msg = inner?.message || "Seed failed";
       setLastMessage(msg);
-      args.showErrorToast?.(msg);
+      _.showErrorToast?.(msg);
       return;
     }
     const d = inner.data || {};
     const summary = `Created: ${d.created ?? 0}, updated: ${d.updated ?? 0}, skipped: ${d.skipped ?? 0}`;
     setLastMessage((inner.message || "Done") + " — " + summary);
-    args.showSuccessToast?.(inner.message || "Picklists updated");
+    _.showSuccessToast?.(inner.message || "Picklists updated");
   } catch (e) {
     setLastMessage(e?.message || "Seed failed");
-    args.showErrorToast?.(e?.message || "Seed failed");
+    _.showErrorToast?.(e?.message || "Seed failed");
   } finally {
     setBusy(false);
   }
@@ -81,7 +81,7 @@ return {
 return `._id {
   display: flex;
   flex-direction: column;
-  gap: ${args.theme.var.spacing.md};
+  gap: ${t.var.spacing.md};
   max-width: 720px;
 }`;
 '''
@@ -107,7 +107,7 @@ return `._id.workshop-seed-title {
   font-size: 1.25rem;
   font-weight: 700;
   margin: 0;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -131,7 +131,7 @@ return {
 return `._id.workshop-seed-desc {
   margin: 0;
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   line-height: 1.5;
 }`;
 '''
@@ -156,7 +156,7 @@ return {
 return `._id.workshop-seed-label {
   font-size: 0.875rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -170,11 +170,11 @@ return `._id.workshop-seed-label {
         props:
           '''
 return {
-  value: args.fns.keysFilter(),
+  value: f.keysFilter(),
   placeholder:
     "e.g. appointment_status, repair_status — leave empty for all",
-  disabled: args.fns.busy(),
-  onChange: (e) => args.fns.setKeysFilter(e.target.value)
+  disabled: f.busy(),
+  onChange: (e) => f.setKeysFilter(e.target.value)
 };
 '''
       }
@@ -197,7 +197,7 @@ return {
 return `._id.workshop-seed-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: ${args.theme.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
 }`;
 '''
       }
@@ -212,9 +212,9 @@ return `._id.workshop-seed-actions {
           '''
 return {
   variant: "primary",
-  text: args.fns.busy() ? "Working…" : "Seed missing only",
-  disabled: args.fns.busy(),
-  onClick: () => args.fns.runSeed("missingOnly")
+  text: f.busy() ? "Working…" : "Seed missing only",
+  disabled: f.busy(),
+  onClick: () => f.runSeed("missingOnly")
 };
 '''
       }
@@ -230,7 +230,7 @@ return {
 return {
   variant: "danger",
   text: "Force / replace",
-  disabled: args.fns.busy(),
+  disabled: f.busy(),
   onClick: () => {
     if (
       typeof window !== "undefined" &&
@@ -240,7 +240,7 @@ return {
     ) {
       return;
     }
-    args.fns.runSeed("force");
+    f.runSeed("force");
   }
 };
 '''
@@ -256,23 +256,23 @@ return {
           '''
 return {
   as: "pre",
-  text: args.fns.lastMessage() || " ",
+  text: f.lastMessage() || " ",
   class: "workshop-seed-log",
-  hide: !args.fns.lastMessage()
+  hide: !f.lastMessage()
 };
 '''
         css:
           '''
 return `._id.workshop-seed-log {
   margin: 0;
-  padding: ${args.theme.var.spacing.md};
-  background: ${args.theme.var.color.background_light_100};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.md};
+  padding: ${t.var.spacing.md};
+  background: ${t.var.color.background_light_100};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.md};
   font-size: 0.875rem;
   white-space: pre-wrap;
   word-break: break-word;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }

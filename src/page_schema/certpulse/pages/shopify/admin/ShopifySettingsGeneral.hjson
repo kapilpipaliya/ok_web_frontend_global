@@ -9,7 +9,7 @@
 return {
   enabled: () => true,
   executeYTOFunction: (functionName, contextData) =>
-    args.executeNamedServerFunction({
+    s({
       functionName,
       contextData: contextData || {}
     })
@@ -33,7 +33,7 @@ return {
         key: settings_dynamic_page
         props:
           '''
-const settingsPageId = args.searchParams?.page;
+const settingsPageId = _.searchParams?.page;
 
 return {
   pageMode: "settings",

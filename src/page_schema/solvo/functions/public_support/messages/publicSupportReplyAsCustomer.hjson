@@ -8,7 +8,7 @@
         description: Adds a customer reply to a public support ticket using serial and access token.
         body:
           '''
-const { serial, token, message, attachments } = args.contextData || {};
+const { serial, token, message, attachments } = c || {};
 const safeSerial = String(serial || "").trim();
 const safeToken = String(token || "").trim();
 const safeMessage = String(message || "").trim().slice(0, 8000);
@@ -20,7 +20,7 @@ if (!safeMessage) {
   return { success: false, message: "Reply message is required." };
 }
 
-const result = await args.session.run(
+const result = await _.session.run(
   `
   MATCH (t:PublicSupportTicket {serial: $serial, ticketAccessToken: $token})
   WHERE coalesce(t.status, 'open') <> 'closed'
@@ -54,11 +54,11 @@ if (!result.records || result.records.length === 0) {
   return { success: false, message: "Ticket not found or already closed." };
 }
 
-const ticket = args.convertNodeToJson(result.records[0].get("t"));
-const reply = args.convertNodeToJson(result.records[0].get("m"));
+const ticket = _.convertNodeToJson(result.records[0].get("t"));
+const reply = _.convertNodeToJson(result.records[0].get("m"));
 
 try {
-  await args.executeNamedServerFunction({
+  await s({
     functionName: "publicSupportQueueNotification",
     contextData: {
       eventType: "customer_replied",

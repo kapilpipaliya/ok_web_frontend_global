@@ -65,7 +65,7 @@ const fetchVideoFromYouTube = async (videoId) => {
 };
 
   // Extract input parameters from the request
-  const { videoUrl, ownershipId } = args.contextData;
+  const { videoUrl, ownershipId } = c;
 
   if (!videoUrl) {
     return {
@@ -82,7 +82,7 @@ const fetchVideoFromYouTube = async (videoId) => {
   }
 
   // Get current authenticated user from session
-  const actualUser = await args.getUserFromSession();
+  const actualUser = await _.getUserFromSession();
   if (!actualUser) {
     return {
       success: false,
@@ -91,10 +91,10 @@ const fetchVideoFromYouTube = async (videoId) => {
   }
 
   // Get effective user (handles admin impersonation)
-  const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+  const user = await _.getEffectiveUser(_.session, actualUser, c);
 
   // Verify ownership belongs to user
-  const ownershipCheck = await args.session.run(`
+  const ownershipCheck = await _.session.run(`
     MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
     RETURN o
   `, { userUuid: user.P.uuid, ownershipId });
@@ -121,7 +121,7 @@ const fetchVideoFromYouTube = async (videoId) => {
     RETURN v
   `;
 
-  const ownedVideoResult = await args.session.run(ownedVideoQuery, {
+  const ownedVideoResult = await _.session.run(ownedVideoQuery, {
     ownershipId,
     videoId
   });
@@ -131,7 +131,7 @@ const fetchVideoFromYouTube = async (videoId) => {
 
   if (ownedVideoResult.records.length > 0) {
     // Video already owned by this ownership
-    video = args.convertNodeToJson(ownedVideoResult.records[0].get('v'));
+    video = _.convertNodeToJson(ownedVideoResult.records[0].get('v'));
   } else {
     // Video not owned by this ownership, fetch from YouTube API and save
     const youtubeVideo = await fetchVideoFromYouTube(videoId);
@@ -168,7 +168,7 @@ const fetchVideoFromYouTube = async (videoId) => {
       RETURN v
     `;
 
-    const createVideoResult = await args.session.run(createVideoQuery, {
+    const createVideoResult = await _.session.run(createVideoQuery, {
       ownershipId,
       key: videoKey,
       videoId: videoId,
@@ -186,7 +186,7 @@ const fetchVideoFromYouTube = async (videoId) => {
       commentCount: parseInt(youtubeVideo.statistics?.commentCount || "0")
     });
 
-    video = args.convertNodeToJson(createVideoResult.records[0].get('v'));
+    video = _.convertNodeToJson(createVideoResult.records[0].get('v'));
     isNewVideo = true;
   }
 
@@ -197,13 +197,13 @@ const fetchVideoFromYouTube = async (videoId) => {
     RETURN vs
   `;
 
-  const videoSettingResult = await args.session.run(videoSettingQuery, {
+  const videoSettingResult = await _.session.run(videoSettingQuery, {
     ownershipId,
     videoId: videoId
   });
 
   const videoSetting = videoSettingResult.records.length > 0
-    ? args.convertNodeToJson(videoSettingResult.records[0].get('vs'))
+    ? _.convertNodeToJson(videoSettingResult.records[0].get('vs'))
     : null;
 
   return {

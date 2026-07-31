@@ -84,7 +84,7 @@ const fetchChannelMetadata = async (channelInfo, youtube, ownershipId, session) 
     });
 
     // Log API usage: channels.list with forHandle (1 unit) - shared quota
-    await args.logSharedAPIUsage(ownershipId, 'channels.list', args.YOUTUBE_API_COSTS['channels.list'], session);
+    await _.logSharedAPIUsage(ownershipId, 'channels.list', _.YOUTUBE_API_COSTS['channels.list'], session);
   } else if (channelInfo.type === 'channelId') {
     // Direct channel ID lookup (/channel/UCxxx)
     channelResponse = await youtube.channels.list({
@@ -93,7 +93,7 @@ const fetchChannelMetadata = async (channelInfo, youtube, ownershipId, session) 
     });
 
     // Log API usage: channels.list operation (1 unit) - shared quota
-    await args.logSharedAPIUsage(ownershipId, 'channels.list', args.YOUTUBE_API_COSTS['channels.list'], session);
+    await _.logSharedAPIUsage(ownershipId, 'channels.list', _.YOUTUBE_API_COSTS['channels.list'], session);
   } else if (channelInfo.type === 'username') {
     // Legacy username format (/user/username)
     channelResponse = await youtube.channels.list({
@@ -102,7 +102,7 @@ const fetchChannelMetadata = async (channelInfo, youtube, ownershipId, session) 
     });
 
     // Log API usage: channels.list with forUsername (1 unit) - shared quota
-    await args.logSharedAPIUsage(ownershipId, 'channels.list', args.YOUTUBE_API_COSTS['channels.list'], session);
+    await _.logSharedAPIUsage(ownershipId, 'channels.list', _.YOUTUBE_API_COSTS['channels.list'], session);
   } else if (channelInfo.type === 'custom') {
     // Custom URL format (/c/customname) or malformed /channel/ URL
     // YouTube API doesn't support custom URLs directly
@@ -126,7 +126,7 @@ const fetchChannelMetadata = async (channelInfo, youtube, ownershipId, session) 
 };
 
   // Extract input parameters from the request
-  const { url, name, refresh = false, priority = 'normal', ownershipId, skipPlaylists = false } = args.contextData;
+  const { url, name, refresh = false, priority = 'normal', ownershipId, skipPlaylists = false } = c;
 
   if (!url) {
     return {
@@ -147,7 +147,7 @@ const fetchChannelMetadata = async (channelInfo, youtube, ownershipId, session) 
   const channelPriority = validPriorities.includes(priority) ? priority : 'normal';
 
   // Get current authenticated user from session
-  const actualUser = await args.getUserFromSession();
+  const actualUser = await _.getUserFromSession();
   if (!actualUser) {
     return {
       success: false,
@@ -156,10 +156,10 @@ const fetchChannelMetadata = async (channelInfo, youtube, ownershipId, session) 
   }
 
   // Get effective user (handles admin impersonation)
-  const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+  const user = await _.getEffectiveUser(_.session, actualUser, c);
 
   // Verify ownership belongs to user
-  const ownershipCheck = await args.session.run(`
+  const ownershipCheck = await _.session.run(`
     MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
     RETURN o
   `, { userUuid: user.P.uuid, ownershipId });
@@ -184,7 +184,7 @@ const fetchChannelMetadata = async (channelInfo, youtube, ownershipId, session) 
   // NEW ARCHITECTURE: Status stored directly on Channel vertex
   // For handles and usernames, we can't check by ID yet, so we'll check after fetching
   if (!refresh && channelInfo.type === 'channelId') {
-    const existingChannelResult = await args.session.run(`
+    const existingChannelResult = await _.session.run(`
       MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $channelId})
       WHERE c.queueStatus IN ['queued', 'processing']
       RETURN c.youtubeId as channelId, c.queueStatus as status, c.title as title
@@ -209,7 +209,7 @@ const fetchChannelMetadata = async (channelInfo, youtube, ownershipId, session) 
 
   // Get authenticated YouTube client for this ownership
   let youtube;
-  youtube = await args.getYouTubeClient(ownershipId, args.session, args.request);
+  youtube = await _.getYouTubeClient(ownershipId, _.session, _.request);
   if (!youtube) {
     return {
       success: false,
@@ -218,7 +218,7 @@ const fetchChannelMetadata = async (channelInfo, youtube, ownershipId, session) 
   }
 
   // Fetch ONLY basic channel metadata using ownership's OAuth
-  const channelData = await fetchChannelMetadata(channelInfo, youtube, ownershipId, args.session);
+  const channelData = await fetchChannelMetadata(channelInfo, youtube, ownershipId, _.session);
 
   if (!channelData) {
     if (channelInfo.type === 'custom') {
@@ -235,7 +235,7 @@ const fetchChannelMetadata = async (channelInfo, youtube, ownershipId, session) 
   }
 
   // Use write transaction for atomicity - prevents race conditions
-  await args.session.executeWrite(async (tx) => {
+  await _.session.executeWrite(async (tx) => {
     // CHECK AGAIN WITHIN TRANSACTION: Prevent duplicate from another tab
     // NEW SCHEMA v4.0: This check happens after we know the actual channelId
     if (!refresh) {
@@ -322,8 +322,8 @@ const fetchChannelMetadata = async (channelInfo, youtube, ownershipId, session) 
 
   // STEP 4: Add to background processing queue using BullMQ (skip if skipPlaylists is true)
   if (!skipPlaylists) {
-    const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
-    const channelQueue = helpers.result.data.createChannelQueue(args);
+    const helpers = await s({ functionName: 'queueHelpers', contextData: {} });
+    const channelQueue = helpers.result.data.createChannelQueue(_);
 
     try {
       // Map priority string to BullMQ priority number (lower = higher priority)

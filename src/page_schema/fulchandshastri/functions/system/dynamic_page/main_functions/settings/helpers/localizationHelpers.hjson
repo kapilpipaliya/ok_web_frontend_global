@@ -16,7 +16,7 @@
  *   collectTranslatableFieldKeys
  */
 
-const action = args.contextData?.action;
+const action = c?.action;
 if (!action) {
   return { success: false, message: "action is required" };
 }
@@ -189,25 +189,25 @@ const applyTranslatableDefaultsToField = (field) => {
 };
 
 if (action === "isTranslatableField") {
-  return { success: true, data: { translatable: isTranslatableField(args.contextData.field) } };
+  return { success: true, data: { translatable: isTranslatableField(c.field) } };
 }
 
 if (action === "getDefaultLanguageCode") {
   return {
     success: true,
-    data: { defaultCode: getDefaultLanguageCode(args.contextData.languages) }
+    data: { defaultCode: getDefaultLanguageCode(c.languages) }
   };
 }
 
 if (action === "normalizeLanguageList") {
   return {
     success: true,
-    data: { languages: normalizeLanguageList(args.contextData.languages) }
+    data: { languages: normalizeLanguageList(c.languages) }
   };
 }
 
 if (action === "normalizeLocalizedValue") {
-  const { value, languages, defaultCode } = args.contextData;
+  const { value, languages, defaultCode } = c;
   return {
     success: true,
     data: { value: normalizeLocalizedValue(value, languages, defaultCode) }
@@ -215,7 +215,7 @@ if (action === "normalizeLocalizedValue") {
 }
 
 if (action === "firstNonEmptyLanguage") {
-  const { value, languages } = args.contextData;
+  const { value, languages } = c;
   return {
     success: true,
     data: { text: firstNonEmptyLanguage(value, languages) }
@@ -223,7 +223,7 @@ if (action === "firstNonEmptyLanguage") {
 }
 
 if (action === "resolveLocalizedValue") {
-  const { value, locale, languages } = args.contextData;
+  const { value, locale, languages } = c;
   return {
     success: true,
     data: { text: resolveLocalizedValue(value, locale, languages) }
@@ -231,14 +231,14 @@ if (action === "resolveLocalizedValue") {
 }
 
 if (action === "validateLocalizedField") {
-  const { field, value, languages } = args.contextData;
+  const { field, value, languages } = c;
   const error = validateLocalizedField(field, value, languages);
   if (error) return { success: false, message: error };
   return { success: true, data: { valid: true } };
 }
 
 if (action === "localizeSectionValues") {
-  const { sectionConfig, values, mode, languages, locale } = args.contextData;
+  const { sectionConfig, values, mode, languages, locale } = c;
   return {
     success: true,
     data: {
@@ -248,7 +248,7 @@ if (action === "localizeSectionValues") {
 }
 
 if (action === "applyTranslatableDefaults") {
-  const { field } = args.contextData;
+  const { field } = c;
   return {
     success: true,
     data: { field: applyTranslatableDefaultsToField(field) }
@@ -360,7 +360,7 @@ const mergeTranslationsOntoProps = (params) => {
 };
 
 if (action === "getTranslationMeta") {
-  const rootLabel = args.contextData.rootLabel || args.contextData.tableVertexLabel;
+  const rootLabel = c.rootLabel || c.tableVertexLabel;
   if (!rootLabel) return { success: false, message: "rootLabel is required" };
   return { success: true, data: getTranslationMeta(rootLabel) };
 }
@@ -368,12 +368,12 @@ if (action === "getTranslationMeta") {
 if (action === "collectTranslatableFieldKeys") {
   return {
     success: true,
-    data: { keys: collectTranslatableFieldKeys(args.contextData.formConfig) }
+    data: { keys: collectTranslatableFieldKeys(c.formConfig) }
   };
 }
 
 if (action === "splitTranslatableProps") {
-  const { props, fieldKeys, languages } = args.contextData;
+  const { props, fieldKeys, languages } = c;
   return {
     success: true,
     data: splitTranslatableProps(props, fieldKeys, languages)
@@ -384,7 +384,7 @@ if (action === "mergeTranslationsOntoProps") {
   return {
     success: true,
     data: {
-      maps: mergeTranslationsOntoProps(args.contextData)
+      maps: mergeTranslationsOntoProps(c)
     }
   };
 }

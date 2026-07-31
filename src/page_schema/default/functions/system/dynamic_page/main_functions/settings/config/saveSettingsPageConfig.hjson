@@ -7,14 +7,14 @@
         key: "saveSettingsPageConfig",
         description: "Saves settings_page_config function body for a page. Admin only; updates the default Setting vertex.",
         body: '''
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return { success: false, message: "User session not found. Please log in and try again." };
 }
 
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
-const { settingsPageId, name, saveAsDefault = true, key: schemaKey } = args.contextData || {};
-let { config } = args.contextData || {};
+const user = await _.getEffectiveUser(_.session, actualUser, c);
+const { settingsPageId, name, saveAsDefault = true, key: schemaKey } = c || {};
+let { config } = c || {};
 
 if (!settingsPageId) {
   return { success: false, message: "settingsPageId is required" };
@@ -33,7 +33,7 @@ try {
   if (evaluated.pageMode !== "settings" && evaluated.pageMode !== "table") {
     return { success: false, message: "Config pageMode must be settings or table" };
   }
-  const stripResult = await args.executeNamedServerFunction({
+  const stripResult = await s({
     functionName: "settingsSchemaHelpers",
     contextData: { action: "stripConfigSchema", config: evaluated }
   });
@@ -73,7 +73,7 @@ if (saveAsDefault === false && user) {
       s.updatedAt = datetime()
     RETURN s
   `;
-  const userResult = await args.session.run(userQuery, {
+  const userResult = await _.session.run(userQuery, {
     userUuid: user.P.uuid,
     settingKey,
     settingsPageId,
@@ -83,7 +83,7 @@ if (saveAsDefault === false && user) {
   if (userResult.records.length === 0) {
     return { success: false, message: "Failed to save user settings page config" };
   }
-  const vertices = args.processResult(userResult.records, args.context, "s");
+  const vertices = _.processResult(userResult.records, _.context, "s");
   return {
     success: true,
     data: { setting: vertices[0], key: settingKey },
@@ -109,7 +109,7 @@ const defaultQuery = `
   RETURN s
 `;
 
-const defaultResult = await args.session.run(defaultQuery, {
+const defaultResult = await _.session.run(defaultQuery, {
   siteSettingKey,
   settingsPageId,
   name: settingName,
@@ -120,7 +120,7 @@ if (defaultResult.records.length === 0) {
   return { success: false, message: "Failed to save default settings page config" };
 }
 
-const defaultVertices = args.processResult(defaultResult.records, args.context, "s");
+const defaultVertices = _.processResult(defaultResult.records, _.context, "s");
 return {
   success: true,
   data: { setting: defaultVertices[0], key: siteSettingKey },

@@ -1,7 +1,7 @@
 /**
  * Server Function Utilities
  *
- * Common utilities available in all server functions via args object
+ * Common utilities available in all server functions via _ object
  */
 
 import { randomUUID } from "crypto";

@@ -3,16 +3,22 @@ import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaTyp
 /**
  * Compiles a schema-authored function body (props, css, fns, text) and runs it.
  *
- * Besides `args`, the body receives shorthand aliases for the most used
- * members. Adding a name here makes it a reserved identifier for every schema
- * body, so a top-level `const` of the same name becomes a SyntaxError.
+ * Bodies receive shorthand parameters:
+ *   _  → full function argument object
+ *   f  → _.fns
+ *   c  → _.contextData
+ *   t  → _.theme
+ *   g  → _.graph
+ *   sg → _.setGraph
+ *   s  → _.executeNamedServerFunction
+ *
+ * These names are reserved: a top-level `const` of the same name is a SyntaxError.
  */
 export const runArgsFunction = (
   body: string,
-  args: FunctionArgumentType,
+  _: FunctionArgumentType,
 ): unknown =>
   new Function(
-    "args",
     "_",
     "f",
     "c",
@@ -22,12 +28,11 @@ export const runArgsFunction = (
     "s",
     body,
   )(
-    args,
-    args,
-    args.fns,
-    args.contextData,
-    args.theme,
-    args.graph,
-    args.setGraph,
-    args.executeNamedServerFunction,
+    _,
+    _.fns,
+    _.contextData,
+    _.theme,
+    _.graph,
+    _.setGraph,
+    _.executeNamedServerFunction,
   );

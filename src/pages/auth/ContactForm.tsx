@@ -200,10 +200,10 @@ export function ContactForm() {
               let trap = null;
 
               const initializeFocusTrap = () => {
-                const element = args.ref();
+                const element = _.ref();
                 if (!element) return;
 
-                trap = args.focusTrap.createFocusTrap(element, {
+                trap = _.focusTrap.createFocusTrap(element, {
                   initialFocus: () => document.getElementsByTagName("input")[0],
                   fallbackFocus: () => element,
                   escapeDeactivates: false,

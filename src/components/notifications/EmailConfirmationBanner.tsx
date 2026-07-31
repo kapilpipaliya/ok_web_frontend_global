@@ -23,8 +23,8 @@ export function EmailConfirmationBanner() {
       {
         as: "icon",
         icon: "ph:warning-circle-fill",
-        css: (args: FunctionArgumentType) => `return \`._id {
-color: ${args.theme.var.color.warning_dark_500};
+        css: (_: FunctionArgumentType) => `return \`._id {
+color: ${_.theme.var.color.warning_dark_500};
 font-size: 24px;
 margin-right: 12px;
 }\`;`,
@@ -35,7 +35,7 @@ margin-right: 12px;
         attributes: [
           {
             as: "span",
-            css: (args: FunctionArgumentType) => `return \`._id {
+            css: (_: FunctionArgumentType) => `return \`._id {
 font-weight: 600;
 display: block;
 }\`;`,
@@ -44,7 +44,7 @@ display: block;
           },
           {
             as: "span",
-            css: (args: FunctionArgumentType) => `return \`._id {
+            css: (_: FunctionArgumentType) => `return \`._id {
 margin-top: 4px;
 display: block;
 }\`;`,
@@ -53,13 +53,13 @@ display: block;
           },
           {
             as: "button",
-            css: (args: FunctionArgumentType) => `return \`._id {
+            css: (_: FunctionArgumentType) => `return \`._id {
 display: inline-flex;
 align-items: center;
 margin-top: 12px;
 padding: 6px 12px;
-background-color: ${args.theme.var.color.warning};
-color: ${args.theme.var.color.warning_text};
+background-color: ${_.theme.var.color.warning};
+color: ${_.theme.var.color.warning_text};
 border-radius: 4px;
 border: none;
 font-size: 14px;
@@ -108,13 +108,13 @@ margin-right: 8px;
         componentName: "Html",
       },
     ],
-    css: (args: FunctionArgumentType) => `return \`._id {
+    css: (_: FunctionArgumentType) => `return \`._id {
 margin: 16px;
 padding: 16px;
-background-color: ${args.theme.var.color.warning_light_150};
-color: ${args.theme.var.color.warning_light_150_text};
+background-color: ${_.theme.var.color.warning_light_150};
+color: ${_.theme.var.color.warning_light_150_text};
 border-radius: 8px;
-border: 1px solid ${args.theme.var.color.warning_light_200};
+border: 1px solid ${_.theme.var.color.warning_light_200};
 display: flex;
 align-items: flex-start;
 }\`;`,

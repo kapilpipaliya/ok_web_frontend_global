@@ -16,7 +16,7 @@
 return `._id {
   font-size: 1.875rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0;
 }`;
 '''
@@ -26,7 +26,7 @@ return `._id {
           '''
 return {
   as: "h1",
-  text: args.contextData.props?.text || "Page Title"
+  text: c.props?.text || "Page Title"
 };
 '''
       }

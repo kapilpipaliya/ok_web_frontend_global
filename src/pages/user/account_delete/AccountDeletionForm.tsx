@@ -95,8 +95,8 @@ export function AccountDeletionForm() {
       {
         as: "button",
         css: `return \`._id {
-  background-color: \${args.theme.var.color.error};
-  color: \${args.theme.var.color.error_text};
+  background-color: \${t.var.color.error};
+  color: \${t.var.color.error_text};
   padding: 8px 16px;
   border-radius: 4px;
   border: none;
@@ -132,7 +132,7 @@ export function AccountDeletionForm() {
   font-size: 1.25rem;
   font-weight: bold;
   margin-bottom: 4px;
-  color: \${args.theme.var.color.error};
+  color: \${t.var.color.error};
 }\`;`,
             componentName: "Html",
             text: "Delete Your Account",
@@ -141,7 +141,7 @@ export function AccountDeletionForm() {
             as: "p",
             css: `return \`._id {
   margin-bottom: 4px;
-  color: \${args.theme.var.color.error_light_200};
+  color: \${t.var.color.error_light_200};
 }\`;`,
             componentName: "Html",
             text: "Once you delete your account, all your data will be permanently removed after 48 hours. This action cannot be undone.",
@@ -150,7 +150,7 @@ export function AccountDeletionForm() {
             as: "p",
             css: `return \`._id {
   margin-bottom: 6px;
-  color: \${args.theme.var.color.error_light_200};
+  color: \${t.var.color.error_light_200};
 }\`;`,
             componentName: "Html",
             text: "During the 48-hour period, you will not be able to log in to your account. If you change your mind, please contact our support team immediately.",
@@ -172,9 +172,9 @@ export function AccountDeletionForm() {
         css: `return \`._id {
   margin-bottom: 4px;
   padding: 12px;
-  background-color: \${args.theme.var.color.error_light_100};
-  border: 1px solid \${args.theme.var.color.error_light_150};
-  color: \${args.theme.var.color.error_light_100_text};
+  background-color: \${t.var.color.error_light_100};
+  border: 1px solid \${t.var.color.error_light_150};
+  color: \${t.var.color.error_light_100_text};
   border-radius: 8px;
 }\`;`,
         componentName: "Html",
@@ -196,9 +196,9 @@ export function AccountDeletionForm() {
         css: `return \`._id {
   margin-bottom: 4px;
   padding: 12px;
-  background-color: \${args.theme.var.color.primary};
-  border: 1px solid \${args.theme.var.color.primary};
-  color: \${args.theme.var.color.primary_text};
+  background-color: \${t.var.color.primary};
+  border: 1px solid \${t.var.color.primary};
+  color: \${t.var.color.primary_text};
   border-radius: 8px;
 }\`;`,
         componentName: "Html",
@@ -212,8 +212,8 @@ export function AccountDeletionForm() {
           {
             as: "button",
             css: `return \`._id {
-  background-color: \${args.theme.var.color.error};
-  color: \${args.theme.var.color.error_text};
+  background-color: \${t.var.color.error};
+  color: \${t.var.color.error_text};
   border: none;
   padding: 8px 16px;
   border-radius: 4px;
@@ -306,8 +306,8 @@ export function AccountDeletionForm() {
     css: `return \`._id {
   padding: 24px;
   border-radius: 8px;
-  background-color: \${args.theme.var.color.background_light_100};
-  border: 1px solid \${args.theme.var.color.background};  
+  background-color: \${t.var.color.background_light_100};
+  border: 1px solid \${t.var.color.background};  
 }\`;`,
     componentName: "Html",
   };

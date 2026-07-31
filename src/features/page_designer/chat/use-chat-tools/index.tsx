@@ -54,7 +54,7 @@ export function UseChatTools() {
                         <As
                           as="div"
                           css={`return \`._id {
-  color: \${args.theme.var.color.gray};
+  color: \${t.var.color.gray};
 }\`;`}
                         >
                           Calling {toolInvocation.toolName}...
@@ -67,7 +67,7 @@ export function UseChatTools() {
                         <As
                           as="div"
                           css={`return \`._id {
-  color: \${args.theme.var.color.gray};
+  color: \${t.var.color.gray};
 }\`;`}
                         >
                           Tool call {`${toolInvocation.toolName}: `}
@@ -86,7 +86,7 @@ export function UseChatTools() {
                     <As
                       as="div"
                       css={`return \`._id {
-  color: \${args.theme.var.color.gray};
+  color: \${t.var.color.gray};
 }\`;`}
                     >
                       {toolInvocation.args.message}
@@ -105,8 +105,8 @@ export function UseChatTools() {
                                 css={`return \`._id {
   padding: 4px;
   font-weight: bold;
-  color: \${args.theme.var.color.white};
-  background-color: \${args.theme.var.color.blue};
+  color: \${t.var.color.white};
+  background-color: \${t.var.color.blue};
   border-radius: 4px;
 }\`;`}
                                 onClick={() =>
@@ -123,8 +123,8 @@ export function UseChatTools() {
                                 css={`return \`._id {
   padding: 4px;
   font-weight: bold;
-  color: \${args.theme.var.color.white};
-  background-color: \${args.theme.var.color.red};
+  color: \${t.var.color.white};
+  background-color: \${t.var.color.red};
   border-radius: 4px;
 }\`;`}
                                 onClick={() =>
@@ -164,7 +164,7 @@ export function UseChatTools() {
   width: 100%;
   max-width: 300px;
   padding: 2px;
-  border: 1px solid \${args.theme.var.color.gray_light_400};
+  border: 1px solid \${t.var.color.gray_light_400};
   border-radius: 4px;
   box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
 }\`;`}

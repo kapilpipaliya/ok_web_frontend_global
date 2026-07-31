@@ -6,12 +6,12 @@
       P: {
         fns:
           '''
-const [files, setFiles] = args.createSignal([]);
-const [previewUrls, setPreviewUrls] = args.createSignal([]);
-const [uploadError, setUploadError] = args.createSignal("");
-const [isUploading, setIsUploading] = args.createSignal(false);
-const [uploadProgress, setUploadProgress] = args.createSignal(0);
-const [uploadStatusText, setUploadStatusText] = args.createSignal("");
+const [files, setFiles] = _.createSignal([]);
+const [previewUrls, setPreviewUrls] = _.createSignal([]);
+const [uploadError, setUploadError] = _.createSignal("");
+const [isUploading, setIsUploading] = _.createSignal(false);
+const [uploadProgress, setUploadProgress] = _.createSignal(0);
+const [uploadStatusText, setUploadStatusText] = _.createSignal("");
 
 let inputRef = null;
 const DEFAULT_CHUNK_THRESHOLD_BYTES = 5 * 1024 * 1024;
@@ -34,7 +34,7 @@ const compileUploadHook = (source) => {
     trimmed.includes("=>");
   try {
     if (isFnExpr) {
-      return new Function("ctx", "args", `return (${sourceText});`)({}, args);
+      return new Function("ctx", "_", `return (${sourceText});`)({}, _);
     }
     const hasLeadingReturn =
       trimmed.startsWith("return ") ||
@@ -42,7 +42,7 @@ const compileUploadHook = (source) => {
       trimmed.startsWith("return\n") ||
       trimmed === "return;";
     const body = hasLeadingReturn ? sourceText : `return (${sourceText});`;
-    return new Function("ctx", "args", body)({}, args);
+    return new Function("ctx", "_", body)({}, _);
   } catch (error) {
     console.warn("FileUploader: invalid upload hook", error);
     return null;
@@ -50,7 +50,7 @@ const compileUploadHook = (source) => {
 };
 
 const getUploadConfiguration = () => {
-  const raw = args.contextData.props?.uploadConfiguration;
+  const raw = c.props?.uploadConfiguration;
   if (raw == null || typeof raw !== "object" || Array.isArray(raw)) {
     return {
       accept: "*/*",
@@ -185,7 +185,7 @@ const getUploadConfiguration = () => {
 };
 
 const getUploadCallbacks = () => {
-  const raw = args.contextData.props?.uploadCallbacks;
+  const raw = c.props?.uploadCallbacks;
   return raw != null && typeof raw === "object" && !Array.isArray(raw) ? raw : {};
 };
 
@@ -236,7 +236,7 @@ const getFormVertexMime = () => {
   const callbacks = getUploadCallbacks();
   const vertexId =
     typeof callbacks.formVertexId === "function" ? callbacks.formVertexId() : null;
-  const vertex = vertexId ? args.graph.vertexes[vertexId] : null;
+  const vertex = vertexId ? g.vertexes[vertexId] : null;
   const p = vertex?.P;
   if (!p) return "";
   if (p.fileType != null && String(p.fileType).trim() !== "") return String(p.fileType);
@@ -247,7 +247,7 @@ const getFormVertexMime = () => {
 const syncPreviewFromVertex = (vertexId) => {
   const cfg = getUploadConfiguration();
   if (cfg.hidePreview === true) return;
-  const vertex = args.graph.vertexes[vertexId];
+  const vertex = g.vertexes[vertexId];
   const url = buildDownloadUrlFromVertex(vertex, cfg);
   if (url === "") return;
   const current = previewUrls();
@@ -258,7 +258,7 @@ const syncPreviewFromVertex = (vertexId) => {
 };
 
 const syncFormFieldsFromVertex = (vertexId, callbacks) => {
-  const vertex = args.graph.vertexes[vertexId];
+  const vertex = g.vertexes[vertexId];
   if (!vertex?.P || typeof callbacks.setFieldValue !== "function") return;
   const p = vertex.P;
   if (p.fileName != null && String(p.fileName).trim() !== "") {
@@ -447,7 +447,7 @@ const buildUploadHookContext = (
   response,
   configuration: cfg,
   callbacks,
-  args,
+  _,
   fileIndex: batchMeta?.fileIndex ?? 0,
   fileCount: batchMeta?.fileCount ?? (Array.isArray(fileList) ? fileList.length : 1),
   isLastFile: batchMeta?.isLastFile !== false,
@@ -460,7 +460,7 @@ const buildUploadHookContext = (
     syncPreviewFromVertex(id);
   },
   showSuccess: (message) => {
-    args.showSuccessToast?.(
+    _.showSuccessToast?.(
       message != null && String(message).trim() !== ""
         ? String(message).trim()
         : cfg.successToastMessage,
@@ -473,7 +473,7 @@ const buildUploadHookContext = (
         : cfg.uploadFailedMessage;
     setUploadErrorMessage(text);
     if (cfg.showUploadErrorToast !== false) {
-      args.showErrorToast?.(text);
+      _.showErrorToast?.(text);
     }
   },
   syncFormFields: (vertexId) => syncFormFieldsFromVertex(vertexId, callbacks),
@@ -481,7 +481,7 @@ const buildUploadHookContext = (
 
 const handleUploadedResponse = async (data, file, fileList, cfg, callbacks, batchMeta) => {
   if (data?.graph && typeof data.graph === "object") {
-    args.setGraphData(0, data.graph, {});
+    _.setGraphData(0, data.graph, {});
   }
 
   const rows = data?.result;
@@ -490,7 +490,7 @@ const handleUploadedResponse = async (data, file, fileList, cfg, callbacks, batc
   if (uploadedId === "") throw new Error(cfg.noFileReturnedMessage);
 
   await Promise.resolve();
-  const uploadedVertex = args.graph.vertexes[uploadedId];
+  const uploadedVertex = g.vertexes[uploadedId];
   if (!uploadedVertex) throw new Error(cfg.notInGraphMessage);
 
   clearUploadError();
@@ -531,7 +531,7 @@ const handleUploadedResponse = async (data, file, fileList, cfg, callbacks, batc
       );
     }
     syncPreviewFromVertex(uploadedId);
-    args.showSuccessToast?.(
+    _.showSuccessToast?.(
       fileCount > 1 ? `${fileCount} files uploaded` : cfg.successToastMessage,
     );
   }
@@ -623,7 +623,7 @@ const processUpload = async (fileList) => {
     if (typeof cfg.onFileSelect === "function") {
       notifyUploading(true, 0, cfg.uploadingMessage);
       await cfg.onFileSelect(fileList, {
-        args,
+        _,
         configuration: cfg,
         callbacks,
         syncPreview: (vertexId) => {
@@ -679,7 +679,7 @@ const processUpload = async (fileList) => {
     // Keep selected file visible so the user can see what failed; only reset input for retry.
     resetFileInput();
     if (cfg.showUploadErrorToast !== false) {
-      args.showErrorToast?.(message);
+      _.showErrorToast?.(message);
     }
   } finally {
     uploadInProgress = false;
@@ -703,7 +703,7 @@ const applyFileList = async (fileList) => {
   } else if (cfg.maxFiles > 0 && filesArray.length > cfg.maxFiles) {
     setUploadErrorMessage(`Select at most ${cfg.maxFiles} files`);
     if (cfg.showUploadErrorToast !== false) {
-      args.showErrorToast?.(`Select at most ${cfg.maxFiles} files`);
+      _.showErrorToast?.(`Select at most ${cfg.maxFiles} files`);
     }
     resetFileInput();
     return;
@@ -717,13 +717,13 @@ const applyFileList = async (fileList) => {
   await processUpload(filesArray);
 };
 
-args.onCleanup(() => {
+_.onCleanup(() => {
   revokePreviewUrls(previewUrls());
   // Do not notify parent FormManagement here — it may already be disposing.
 });
 
 const openPicker = () => {
-  if (args.contextData.props?.disabled === true || isUploading()) return;
+  if (c.props?.disabled === true || isUploading()) return;
   inputRef?.click?.();
 };
 
@@ -759,7 +759,7 @@ const previewItems = () => {
         const callbacks = getUploadCallbacks();
         const vertexId =
           typeof callbacks.formVertexId === "function" ? callbacks.formVertexId() : null;
-        const vertex = vertexId ? args.graph.vertexes[vertexId] : null;
+        const vertex = vertexId ? g.vertexes[vertexId] : null;
         return vertex?.P?.fileName != null ? String(vertex.P.fileName) : "";
       })();
     const resolvedMime = mime || mimeFromFileName(fileName);
@@ -838,11 +838,11 @@ return {
       L: Attr
       P: {
         css:
-          '''const cfg = args.fns.getUploadConfiguration?.() ?? {};
+          '''const cfg = f.getUploadConfiguration?.() ?? {};
 return `._id {
   display: flex;
   flex-direction: column;
-  gap: ${args.theme.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
   width: ${cfg.fullWidth === true ? "100%" : "auto"};
   max-width: 100%;
   align-self: ${cfg.fullWidth === true ? "stretch" : "flex-start"};
@@ -857,34 +857,34 @@ return `._id {
       L: Attr
       P: {
         css:
-          '''const cfg = args.fns.getUploadConfiguration?.() ?? {};
+          '''const cfg = f.getUploadConfiguration?.() ?? {};
 const variant = cfg.pickButtonVariant || "primary";
 
 let variantStyles = "";
 if (variant === "secondary") {
   variantStyles = `
     background: none;
-    color: ${args.theme.var.color.text};
-    border: 1px solid ${args.theme.var.color.border};
+    color: ${t.var.color.text};
+    border: 1px solid ${t.var.color.border};
     &:not(:disabled):hover {
-      background: ${args.theme.var.color.background_light_200};
+      background: ${t.var.color.background_light_200};
     }
   `;
 } else if (variant === "tertiary") {
   variantStyles = `
     background: transparent;
-    color: ${args.theme.var.color.primary};
+    color: ${t.var.color.primary};
     border: 1px solid transparent;
     &:not(:disabled):hover {
-      background: ${args.theme.var.color.background_light_100};
+      background: ${t.var.color.background_light_100};
     }
   `;
 } else {
   variantStyles = `
-    background: ${args.theme.var.color.primary};
-    color: ${args.theme.var.color.primary_text};
+    background: ${t.var.color.primary};
+    color: ${t.var.color.primary_text};
     &:not(:disabled):hover {
-      background: ${args.theme.var.color.primary_dark_200};
+      background: ${t.var.color.primary_dark_200};
     }
   `;
 }
@@ -893,8 +893,8 @@ return `._id {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  border-radius: ${args.theme.var.borderRadius.md};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  border-radius: ${t.var.borderRadius.md};
   font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
@@ -909,17 +909,17 @@ return `._id {
         displayOrder: 1
         componentName: Html
         props:
-          '''const cfg = args.fns.getUploadConfiguration?.() ?? {};
+          '''const cfg = f.getUploadConfiguration?.() ?? {};
 const usePolaris = cfg.usePolarisUI === true;
-const uploading = args.fns.isUploading?.() === true;
+const uploading = f.isUploading?.() === true;
 const label = uploading
-  ? args.fns.getUploadStatusLabel?.() || cfg.uploadingMessage || "Uploading…"
+  ? f.getUploadStatusLabel?.() || cfg.uploadingMessage || "Uploading…"
   : cfg.pickButtonLabel || (cfg.multiple === true ? "Select files" : "Select file");
-const disabled = args.contextData.props?.disabled === true || uploading;
+const disabled = c.props?.disabled === true || uploading;
 const onClick = (event) => {
   event?.stopPropagation?.();
   event?.preventDefault?.();
-  args.fns.openPicker?.();
+  f.openPicker?.();
 };
 
 if (usePolaris) {
@@ -954,18 +954,18 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const cfg = args.fns.getUploadConfiguration?.() ?? {};
+          '''const cfg = f.getUploadConfiguration?.() ?? {};
 return {
   as: "input",
   type: "file",
   accept: cfg.accept || "*/*",
   multiple: cfg.multiple === true,
-  disabled: args.contextData.props?.disabled === true || args.fns.isUploading?.() === true,
+  disabled: c.props?.disabled === true || f.isUploading?.() === true,
   style: "display: none;",
-  ref: (el) => args.fns.setInputRef?.(el),
+  ref: (el) => f.setInputRef?.(el),
   onChange: (event) => {
     const input = event?.target;
-    void args.fns.applyFileList?.(input?.files ?? null);
+    void f.applyFileList?.(input?.files ?? null);
   }
 };'''
       }
@@ -978,12 +978,12 @@ return {
           '''return `._id {
   display: flex;
   align-items: center;
-  gap: ${args.theme.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
   width: 100%;
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  border-radius: ${args.theme.var.borderRadius.md};
-  background: ${args.theme.var.color.background_light_100};
-  border: 1px solid ${args.theme.var.color.border};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  border-radius: ${t.var.borderRadius.md};
+  background: ${t.var.color.background_light_100};
+  border: 1px solid ${t.var.color.border};
   box-sizing: border-box;
 }`;'''
         displayOrder: 2.5
@@ -993,7 +993,7 @@ return {
   as: "div",
   role: "status",
   "aria-live": "polite",
-  hide: () => !args.fns.showUploadStatus?.()
+  hide: () => !f.showUploadStatus?.()
 };'''
       }
     }
@@ -1011,8 +1011,8 @@ return {
     width: 1rem;
     height: 1rem;
     border-radius: 9999px;
-    border: 2px solid ${args.theme.var.color.background_light_400};
-    border-top-color: ${args.theme.var.color.primary};
+    border: 2px solid ${t.var.color.background_light_400};
+    border-top-color: ${t.var.color.primary};
     animation: fuUploadSpin 0.8s linear infinite;
     flex-shrink: 0;
   }`
@@ -1034,7 +1034,7 @@ return {
           '''return `._id {
   font-size: 0.875rem;
   line-height: 1.4;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   flex: 1;
   min-width: 0;
 }`;'''
@@ -1043,7 +1043,7 @@ return {
         props:
           '''return {
   as: "div",
-  text: () => args.fns.getUploadStatusLabel?.() || "Uploading…"
+  text: () => f.getUploadStatusLabel?.() || "Uploading…"
 };'''
       }
     }
@@ -1052,10 +1052,10 @@ return {
       L: Attr
       P: {
         css:
-          '''const cfg = args.fns.getUploadConfiguration?.() ?? {};
+          '''const cfg = f.getUploadConfiguration?.() ?? {};
 const minHeight = cfg.previewMinHeight || "12.5rem";
 return `._id {
-  border-radius: ${args.theme.var.borderRadius.md};
+  border-radius: ${t.var.borderRadius.md};
   min-height: ${minHeight};
   width: ${cfg.fullWidth === true ? "100%" : "auto"};
   position: relative;
@@ -1064,15 +1064,15 @@ return `._id {
   align-items: stretch;
   text-align: center;
   cursor: default;
-  border: 2px dashed ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background_light_50};
+  border: 2px dashed ${t.var.color.border};
+  background: ${t.var.color.background_light_50};
   overflow: hidden;
-  padding: ${args.theme.var.spacing.sm};
+  padding: ${t.var.spacing.sm};
   box-sizing: border-box;
 }`;'''
         displayOrder: 3
         componentName: Html
-        props: return { as: "motionFragment", hide: () => !args.fns.showPreview?.() };
+        props: "return { as: \"motionFragment\", hide: () => !f.showPreview?.() };"
       }
     }
     {
@@ -1083,8 +1083,8 @@ return `._id {
           '''return `._id {
   font-size: 0.8125rem;
   font-weight: 500;
-  color: ${args.theme.var.color.text_light_400};
-  padding: 0 ${args.theme.var.spacing.xs} ${args.theme.var.spacing.xs};
+  color: ${t.var.color.text_light_400};
+  padding: 0 ${t.var.spacing.xs} ${t.var.spacing.xs};
   text-align: left;
 }`;'''
         displayOrder: 0.5
@@ -1092,8 +1092,8 @@ return `._id {
         props:
           '''return {
   as: "div",
-  hide: () => !args.fns.showSelectionSummary?.(),
-  text: () => args.fns.getSelectionSummary?.() || ""
+  hide: () => !f.showSelectionSummary?.(),
+  text: () => f.getSelectionSummary?.() || ""
 };'''
       }
     }
@@ -1102,13 +1102,13 @@ return `._id {
       L: Attr
       P: {
         css:
-          '''const cfg = args.fns.getUploadConfiguration?.() ?? {};
+          '''const cfg = f.getUploadConfiguration?.() ?? {};
 const minHeight = cfg.previewMinHeight || "12.5rem";
 const maxW = cfg.previewMaxItemWidth || "12.5rem";
 return `._id {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, ${maxW}), 1fr));
-  gap: ${args.theme.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
   width: 100%;
   min-height: ${minHeight};
   flex: 1;
@@ -1118,7 +1118,7 @@ return `._id {
         displayOrder: 1
         componentName: Html
         props:
-          '''const cfg = args.fns.getUploadConfiguration?.() ?? {};
+          '''const cfg = f.getUploadConfiguration?.() ?? {};
 const dragEnabled = cfg.enableDragDrop !== false;
 return {
   as: "div",
@@ -1131,7 +1131,7 @@ return {
         event?.stopPropagation?.();
         const dropped = event?.dataTransfer?.files ?? null;
         if (!dropped || dropped.length === 0) return;
-        void args.fns.applyFileList?.(dropped);
+        void f.applyFileList?.(dropped);
       }
     : undefined
 };'''
@@ -1148,7 +1148,7 @@ return {
         props:
           '''return {
   as: "motionFragment",
-  data: () => args.fns.previewItems?.() ?? []
+  data: () => f.previewItems?.() ?? []
 };'''
       }
     }
@@ -1157,7 +1157,7 @@ return {
       L: Attr
       P: {
         css:
-          '''const cfg = args.fns.getUploadConfiguration?.() ?? {};
+          '''const cfg = f.getUploadConfiguration?.() ?? {};
 const maxH = cfg.previewMaxItemHeight || "12.5rem";
 return `._id {
   display: flex;
@@ -1167,16 +1167,16 @@ return `._id {
   width: 100%;
   max-height: none;
   box-sizing: border-box;
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.md};
-  background: ${args.theme.var.color.background};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.md};
+  background: ${t.var.color.background};
   overflow: hidden;
   min-height: 0;
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const item = args.contextData.previewItem;
+          '''const item = c.previewItem;
 return { as: "div", hide: !item };'''
       }
     }
@@ -1185,7 +1185,7 @@ return { as: "div", hide: !item };'''
       L: Attr
       P: {
         css:
-          '''const cfg = args.fns.getUploadConfiguration?.() ?? {};
+          '''const cfg = f.getUploadConfiguration?.() ?? {};
 const maxH = cfg.previewMaxItemHeight || "12.5rem";
 const fit = cfg.previewObjectFit || "contain";
 return `._id {
@@ -1196,12 +1196,12 @@ return `._id {
   aspect-ratio: 4 / 3;
   object-fit: ${fit};
   object-position: center;
-  background: ${args.theme.var.color.background_light_100};
+  background: ${t.var.color.background_light_100};
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const item = args.contextData.previewItem;
+          '''const item = c.previewItem;
 return {
   as: "img",
   alt: item?.fileName || "Upload preview",
@@ -1215,7 +1215,7 @@ return {
       L: Attr
       P: {
         css:
-          '''const cfg = args.fns.getUploadConfiguration?.() ?? {};
+          '''const cfg = f.getUploadConfiguration?.() ?? {};
 const maxH = cfg.previewMaxItemHeight || "12.5rem";
 const fit = cfg.previewObjectFit || "contain";
 return `._id {
@@ -1226,12 +1226,12 @@ return `._id {
   aspect-ratio: 4 / 3;
   object-fit: ${fit};
   object-position: center;
-  background: ${args.theme.var.color.background_light_100};
+  background: ${t.var.color.background_light_100};
 }`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''const item = args.contextData.previewItem;
+          '''const item = c.previewItem;
 return {
   as: "video",
   src: item?.url ?? "",
@@ -1249,16 +1249,16 @@ return {
   padding: 0.5rem 0.75rem;
   font-size: 0.75rem;
   line-height: 1.35;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   word-break: break-word;
   text-align: left;
-  border-top: 1px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background_light_50};
+  border-top: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background_light_50};
 }`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''const item = args.contextData.previewItem;
+          '''const item = c.previewItem;
 const showName = Boolean(item?.fileName) || !(item?.isImage || item?.isVideo);
 return {
   as: "div",
@@ -1277,16 +1277,16 @@ return {
   width: 100%;
   height: 0.375rem;
   border-radius: 9999px;
-  background: ${args.theme.var.color.background_light_300};
+  background: ${t.var.color.background_light_300};
   overflow: hidden;
-  margin-top: ${args.theme.var.spacing.xs};
+  margin-top: ${t.var.spacing.xs};
 }`;'''
         displayOrder: 3
         componentName: Html
         props:
           '''return {
   as: "div",
-  hide: () => !args.fns.showUploadStatus?.()
+  hide: () => !f.showUploadStatus?.()
 };'''
       }
     }
@@ -1297,13 +1297,13 @@ return {
         css:
           '''return `._id {
   height: 100%;
-  background: ${args.theme.var.color.primary};
+  background: ${t.var.color.primary};
   transition: width 150ms ease;
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const pct = Math.max(0, Math.min(100, Number(args.fns.uploadProgress?.() || 0)));
+          '''const pct = Math.max(0, Math.min(100, Number(f.uploadProgress?.() || 0)));
 return {
   as: "div",
   style: `width: ${pct}%;`
@@ -1318,8 +1318,8 @@ return {
           '''return `._id {
   font-size: 0.875rem;
   line-height: 1.4;
-  color: ${args.theme.var.color.error};
-  margin-top: ${args.theme.var.spacing.xs};
+  color: ${t.var.color.error};
+  margin-top: ${t.var.spacing.xs};
   width: 100%;
 }`;'''
         displayOrder: 4
@@ -1327,8 +1327,8 @@ return {
         props:
           '''return {
   as: "div",
-  hide: () => !args.fns.showUploadError?.(),
-  text: args.fns.uploadError?.() ?? ""
+  hide: () => !f.showUploadError?.(),
+  text: f.uploadError?.() ?? ""
 };'''
       }
     }

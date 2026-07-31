@@ -7,21 +7,21 @@
         description: Enqueues background job to add category tag to Shopify product when product is added to a category.
         body:
           '''
-const { contentLabel, contentId, categoryId, categoryLabel } = args.contextData;
+const { contentLabel, contentId, categoryId, categoryLabel } = c;
 
 if (contentLabel !== 'ShopifyProduct') return;
 if (!categoryId || categoryId === 'uncategorized') return;
 
-const shop = args.contextData.shop;
+const shop = c.shop;
 if (!shop) { console.log('shopifyProductAfterCreateRelationship: shop not available in contextData'); return; }
 
 try {
-  const helpers = await args.executeNamedServerFunction(
+  const helpers = await s(
     { functionName: 'shopifyQueueHelpers', contextData: {} }
   );
   if (!helpers.result?.success) return;
   const queueName = 'processShopifyProductAfterCreateRelationship';
-  const queue = helpers.result.data.createShopifyQueue(args, queueName);
+  const queue = helpers.result.data.createShopifyQueue(_, queueName);
   const job = await helpers.result.data.addShopifyJob(queue, queueName, {
     shop,
     contentLabel,
@@ -32,12 +32,12 @@ try {
   await queue.close();
   const jobId = job?.id;
   if (contentId && jobId) {
-    await args.session.run(
+    await _.session.run(
       `MATCH (n:ShopifyProduct) WHERE elementId(n) = $elementId SET n.syncStatus = $status, n.syncJobId = $jobId, n.updatedAt = datetime()`,
       { elementId: contentId, status: 'queued', jobId }
     );
   }
-  const r = args.contextData?.result;
+  const r = c?.result;
   if (r?.data?.P && typeof r.data.P === 'object') {
     r.data.P.syncStatus = 'queued';
     if (jobId) r.data.P.syncJobId = jobId;

@@ -8,22 +8,22 @@
         description: After staff User update in shop DB — strips obsolete shop/invite properties from persisted User rows.
         body:
           '''
-const { tableVertexLabel, operation } = args.contextData || {};
+const { tableVertexLabel, operation } = c || {};
 if (tableVertexLabel !== "User" || operation !== "update") {
   return { success: true, message: "Skip: not User update" };
 }
 
-const shop = String(args.contextData?.shop || args.shop || "").trim().toLowerCase();
+const shop = String(c?.shop || _.shop || "").trim().toLowerCase();
 if (!shop) {
   return { success: true, message: "Skip: no shop in context" };
 }
 
-const result = args.contextData?.result;
+const result = c?.result;
 const employee = result?.data;
 const elementId = employee?.id;
 if (!elementId) return { success: true, message: "Skip: missing employee elementId" };
 
-const { dbSession } = await args.getDBSessionForShop(shop, args.rawSubDomain);
+const { dbSession } = await _.getDBSessionForShop(shop, _.rawSubDomain);
 try {
   await dbSession.run(
     `MATCH (e:User) WHERE elementId(e) = $id

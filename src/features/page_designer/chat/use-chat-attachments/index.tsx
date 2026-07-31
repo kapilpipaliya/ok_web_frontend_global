@@ -65,7 +65,7 @@ export function UseChatAttachments() {
                 as="div"
                 css={`return \`._id {
   width: 24px;
-  color: \${args.theme.var.color.gray};
+  color: \${t.var.color.gray};
   flex-shrink: 0;
 }\`;`}
               >
@@ -111,8 +111,8 @@ export function UseChatAttachments() {
   border-radius: 4px;
   overflow: hidden;
   padding: 2px;
-  color: \${args.theme.var.color.gray};
-  border: 1px solid \${args.theme.var.color.gray_dark_600};
+  color: \${t.var.color.gray};
+  border: 1px solid \${t.var.color.gray_dark_600};
 }\`;`}
                         >
                           {getTextFromDataUrl(attachment.url)}
@@ -132,7 +132,7 @@ export function UseChatAttachments() {
           as="div"
           css={`return \`._id {
   margin-top: 4px;
-  color: \${args.theme.var.color.gray};
+  color: \${t.var.color.gray};
 }\`;`}
         >
           <As as="div">Loading...</As>
@@ -141,8 +141,8 @@ export function UseChatAttachments() {
             css={`return \`._id {
   padding: 4px;
   margin-top: 4px;
-  color: \${args.theme.var.color.blue};
-  border: 1px solid \${args.theme.var.color.blue};
+  color: \${t.var.color.blue};
+  border: 1px solid \${t.var.color.blue};
   border-radius: 4px;
 }\`;`}
             onClick={stop}
@@ -163,7 +163,7 @@ export function UseChatAttachments() {
           <As
             as="div"
             css={`return \`._id {
-  color: \${args.theme.var.color.red};
+  color: \${t.var.color.red};
 }\`;`}
           >
             An error occurred.
@@ -173,8 +173,8 @@ export function UseChatAttachments() {
             css={`return \`._id {
   padding: 4px;
   margin-top: 4px;
-  color: \${args.theme.var.color.blue};
-  border: 1px solid \${args.theme.var.color.blue};
+  color: \${t.var.color.blue};
+  border: 1px solid \${t.var.color.blue};
   border-radius: 4px;
 }\`;`}
             onClick={() => reload()}
@@ -195,7 +195,7 @@ export function UseChatAttachments() {
   bottom: 0;
   padding:   2px;
   width: 100%;
-  background-color: \${args.theme.var.color.white};
+  background-color: \${t.var.color.white};
 }\`;`}
         onSubmit={onSend}
       >
@@ -229,7 +229,7 @@ export function UseChatAttachments() {
                     as="span"
                     css={`return \`._id {
   font-size: 12px;
-  color: \${args.theme.var.color.gray};
+  color: \${t.var.color.gray};
 }\`;`}
                   >
                     {attachment.name}
@@ -240,7 +240,7 @@ export function UseChatAttachments() {
                   as="div"
                   css={`return \`._id {
   width: 24px;
-  color: \${args.theme.var.color.gray};
+  color: \${t.var.color.gray};
   flex-shrink: 0;
   font-size: 12px;
   display: flex;
@@ -253,7 +253,7 @@ export function UseChatAttachments() {
                     css={`return \`._id {
   width: 16px;
   height: 20px;
-  background-color: \${args.theme.var.color.gray_light_200};
+  background-color: \${t.var.color.gray_light_200};
   border-radius: 4px;
 }\`;`}
                   />
@@ -274,7 +274,7 @@ export function UseChatAttachments() {
         <As
           as="input"
           css={`return \`._id {
-  background-color: \${args.theme.var.color.gray_light_200};
+  background-color: \${t.var.color.gray_light_200};
   width: 100%;
   padding: 2px;
 }\`;`}

@@ -130,7 +130,7 @@ export const roleFormSchema = {
             {
               as: "button",
               componentName: "Html",
-              css: (args: RoleFormFunctionArgumentType) => {
+              css: (_: RoleFormFunctionArgumentType) => {
                 return [
                   `return \`._id {
                 cursor: pointer;
@@ -140,8 +140,8 @@ export const roleFormSchema = {
                 border-right: none;
                 border-top: none;
                 }\`;`,
-                  args.contextData.tabState[0]?.activeTab === "Perm"
-                    ? "return `._id {border-bottom: 2px solid ${args.theme.var.color.primary};}`;"
+                  _.contextData.tabState[0]?.activeTab === "Perm"
+                    ? "return `._id {border-bottom: 2px solid ${t.var.color.primary};}`;"
                     : "return `._id {border-bottom: 2px solid transparent;}`;",
                 ];
               },
@@ -192,7 +192,7 @@ export const roleFormSchema = {
           ],
           css: `return \`._id {
   display: flex;
-  border-bottom: 1px solid \${args.theme.var.color.background_light_200};
+  border-bottom: 1px solid \${t.var.color.background_light_200};
 }\`;`,
           componentName: "Html",
         },
@@ -404,10 +404,10 @@ export const getRoleFormSchema = (onSuccess: () => void) => {
                       let trap = null;
 
                       const initializeFocusTrap = () => {
-                        const element = args.ref();
-                        if (!element || !args.contextData.modalState[0]?.showModal) return;
+                        const element = _.ref();
+                        if (!element || !c.modalState[0]?.showModal) return;
 
-                        trap = args.focusTrap.createFocusTrap(element, {
+                        trap = _.focusTrap.createFocusTrap(element, {
                           fallbackFocus: () => element,
                           escapeDeactivates: false,
                           allowOutsideClick: true,

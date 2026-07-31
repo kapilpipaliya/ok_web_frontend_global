@@ -8,14 +8,14 @@
         description: Polls backend change watermarks using dashboard realtime.entities config and returns invalidation targets for the realtime bridge.
         body:
           '''
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return { success: false, message: "Authentication required", data: null };
 }
 
-await args.getEffectiveUser(args.session, actualUser, args.contextData);
+await _.getEffectiveUser(_.session, actualUser, c);
 
-const { dashboardKey, channel, watermark, realtimeConfig } = args.contextData || {};
+const { dashboardKey, channel, watermark, realtimeConfig } = c || {};
 const channelKey = String(channel || realtimeConfig?.channel || "").trim();
 if (!channelKey) {
   return { success: false, message: "channel is required", data: null };
@@ -75,7 +75,7 @@ for (let entityIndex = 0; entityIndex < entities.length; entityIndex++) {
 
   let records = [];
   try {
-    const result = await args.session.run(cypher, { sinceIso });
+    const result = await _.session.run(cypher, { sinceIso });
     records = result.records || [];
   } catch (error) {
     console.error("pollDashboardRealtimeEvents query error:", vertexLabel, error);

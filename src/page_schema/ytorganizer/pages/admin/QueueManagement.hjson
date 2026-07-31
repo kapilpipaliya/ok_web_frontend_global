@@ -9,7 +9,7 @@
         fns:
           '''
 // Message state for displaying success/error messages in UI
-const [messageState, setMessageState] = args.createStore({
+const [messageState, setMessageState] = _.createStore({
   type: null, // 'success' or 'error'
   text: '',
   visible: false
@@ -28,14 +28,14 @@ const hideMessage = () => {
 };
 
 // Queue Management state
-const [isPausing, setIsPausing] = args.createSignal(false);
-const [isResuming, setIsResuming] = args.createSignal(false);
+const [isPausing, setIsPausing] = _.createSignal(false);
+const [isResuming, setIsResuming] = _.createSignal(false);
 
 // Pause all channels and playlists
 const pauseAllChannels = async () => {
   setIsPausing(true);
   try {
-    const result = await args.fns.executeYTOFunction("pauseAllChannels", {});
+    const result = await f.executeYTOFunction("pauseAllChannels", {});
 
     if (result?.result?.success) {
       showMessage('success', result.result.message || "All processing paused successfully");
@@ -54,7 +54,7 @@ const pauseAllChannels = async () => {
 const resumePendingChannels = async () => {
   setIsResuming(true);
   try {
-    const result = await args.fns.executeYTOFunction("resumePendingChannels", {});
+    const result = await f.executeYTOFunction("resumePendingChannels", {});
 
     if (result?.result?.success) {
       showMessage('success', result.result.message || "All items resumed successfully");
@@ -147,7 +147,7 @@ return {
 return `._id {
   font-size: 2rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 
   @media (max-width: 768px) {
@@ -174,7 +174,7 @@ return {
           '''
 return `._id {
   font-size: 1rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0;
 }`;
 '''
@@ -195,22 +195,22 @@ return {
       P: {
         css:
           '''
-const messageState = args.fns.messageState;
+const messageState = f.messageState;
 const isSuccess = messageState?.type === 'success';
 const isError = messageState?.type === 'error';
 
-let bgColor = args.theme.var.color.background_light_100;
-let borderColor = args.theme.var.color.border;
-let textColor = args.theme.var.color.text;
+let bgColor = t.var.color.background_light_100;
+let borderColor = t.var.color.border;
+let textColor = t.var.color.text;
 
 if (isSuccess) {
-  bgColor = args.theme.var.color.success_light_50;
-  borderColor = args.theme.var.color.success;
-  textColor = args.theme.var.color.success_light_50_text;
+  bgColor = t.var.color.success_light_50;
+  borderColor = t.var.color.success;
+  textColor = t.var.color.success_light_50_text;
 } else if (isError) {
-  bgColor = args.theme.var.color.error_light_50;
-  borderColor = args.theme.var.color.error;
-  textColor = args.theme.var.color.error_light_50_text;
+  bgColor = t.var.color.error_light_50;
+  borderColor = t.var.color.error;
+  textColor = t.var.color.error_light_50_text;
 }
 
 return `._id {
@@ -241,7 +241,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const messageState = args.fns.messageState;
+const messageState = f.messageState;
 
 return {
   as: "div",
@@ -256,13 +256,13 @@ return {
       P: {
         css:
           '''
-const messageState = args.fns.messageState;
+const messageState = f.messageState;
 const isSuccess = messageState?.type === 'success';
 
-let iconColor = args.theme.var.color.success;
+let iconColor = t.var.color.success;
 
 if (!isSuccess) {
-  iconColor = args.theme.var.color.error;
+  iconColor = t.var.color.error;
 }
 
 return `._id {
@@ -291,7 +291,7 @@ return {
         componentName: Html
         props:
           '''
-const messageState = args.fns.messageState;
+const messageState = f.messageState;
 const isSuccess = messageState?.type === 'success';
 
 return {
@@ -309,13 +309,13 @@ return {
       P: {
         css:
           '''
-const messageState = args.fns.messageState;
+const messageState = f.messageState;
 const isSuccess = messageState?.type === 'success';
 
-let textColor = args.theme.var.color.success_light_50_text;
+let textColor = t.var.color.success_light_50_text;
 
 if (!isSuccess) {
-  textColor = args.theme.var.color.error_light_50_text;
+  textColor = t.var.color.error_light_50_text;
 }
 
 return `._id {
@@ -331,7 +331,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const messageState = args.fns.messageState;
+const messageState = f.messageState;
 
 return {
   as: "p",
@@ -346,15 +346,15 @@ return {
       P: {
         css:
           '''
-const messageState = args.fns.messageState;
+const messageState = f.messageState;
 const isSuccess = messageState?.type === 'success';
 
-let iconColor = args.theme.var.color.success_light_50_text;
-let hoverBg = args.theme.var.color.success_light_100;
+let iconColor = t.var.color.success_light_50_text;
+let hoverBg = t.var.color.success_light_100;
 
 if (!isSuccess) {
-  iconColor = args.theme.var.color.error_light_50_text;
-  hoverBg = args.theme.var.color.error_light_100;
+  iconColor = t.var.color.error_light_50_text;
+  hoverBg = t.var.color.error_light_100;
 }
 
 return `._id {
@@ -386,7 +386,7 @@ return `._id {
           '''
 return {
   as: "button",
-  onClick: () => args.fns.hideMessage()
+  onClick: () => f.hideMessage()
 };
 '''
       }
@@ -437,7 +437,7 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 1rem 0;
 }`;
 '''
@@ -459,8 +459,8 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.background_dark_50};
-  border: 1px solid ${args.theme.var.color.border};
+  background: ${t.var.color.background_dark_50};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.75rem;
   padding: 1.5rem;
 }`;
@@ -483,7 +483,7 @@ return {
           '''
 return `._id {
   font-size: 0.9375rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0 0 1.25rem 0;
   line-height: 1.6;
 }`;
@@ -535,12 +535,12 @@ return {
         componentName: Button
         props:
           '''
-const isPausing = args.fns.isPausing?.();
+const isPausing = f.isPausing?.();
 
 return {
   text: isPausing ? "Pausing..." : "⏸️ Pause All Processing",
   variant: "secondary",
-  onClick: args.fns.pauseAllChannels,
+  onClick: f.pauseAllChannels,
   disabled: isPausing
 };
 '''
@@ -554,12 +554,12 @@ return {
         componentName: Button
         props:
           '''
-const isResuming = args.fns.isResuming?.();
+const isResuming = f.isResuming?.();
 
 return {
   text: isResuming ? "Resuming..." : "▶️ Resume All",
   variant: "primary",
-  onClick: args.fns.resumePendingChannels,
+  onClick: f.resumePendingChannels,
   disabled: isResuming
 };
 '''
@@ -574,8 +574,8 @@ return {
 return `._id {
   margin-top: 1rem;
   padding: 1rem;
-  background: ${args.theme.var.color.info_light_50};
-  border-left: 3px solid ${args.theme.var.color.info};
+  background: ${t.var.color.info_light_50};
+  border-left: 3px solid ${t.var.color.info};
   border-radius: 0.5rem;
 }`;
 '''
@@ -597,7 +597,7 @@ return {
           '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.info_light_50_text};
+  color: ${t.var.color.info_light_50_text};
   margin: 0;
   line-height: 1.5;
 }`;

@@ -9,10 +9,10 @@
         body: '''
 try {
   // Extract input parameters from the request
-  const { timePeriod, categoryIds, ruleIds, includeInactive } = args.contextData;
+  const { timePeriod, categoryIds, ruleIds, includeInactive } = c;
 
   // Get current authenticated user from session
-  const user = await args.getUserFromSession();
+  const user = await _.getUserFromSession();
   if (!user) {
     throw new Error("User session not found. Please log in and try again.");
   }
@@ -86,7 +86,7 @@ try {
       AVG(rs.totalCompletions) as avgCompletions
   `;
 
-  const overallResult = await args.session.run(overallStreakQuery, queryParams);
+  const overallResult = await _.session.run(overallStreakQuery, queryParams);
   const overallStats = overallResult.records[0];
 
   // STEP 2: Get top current streaks
@@ -99,7 +99,7 @@ try {
     LIMIT 10
   `;
 
-  const topCurrentResult = await args.session.run(topCurrentStreaksQuery, queryParams);
+  const topCurrentResult = await _.session.run(topCurrentStreaksQuery, queryParams);
 
   // STEP 3: Get top longest streaks (all-time records)
   const topLongestStreaksQuery = `
@@ -111,7 +111,7 @@ try {
     LIMIT 10
   `;
 
-  const topLongestResult = await args.session.run(topLongestStreaksQuery, queryParams);
+  const topLongestResult = await _.session.run(topLongestStreaksQuery, queryParams);
 
   // STEP 4: Get category-wise streak performance
   const categoryStreakQuery = `
@@ -131,7 +131,7 @@ try {
     ORDER BY avgCurrentStreak DESC
   `;
 
-  const categoryStreakResult = await args.session.run(categoryStreakQuery, queryParams);
+  const categoryStreakResult = await _.session.run(categoryStreakQuery, queryParams);
 
   // STEP 5: Get streak distribution analysis
   const streakDistributionQuery = `
@@ -147,7 +147,7 @@ try {
       COUNT(CASE WHEN streak > 30 THEN 1 END) as longStreak
   `;
 
-  const distributionResult = await args.session.run(streakDistributionQuery, queryParams);
+  const distributionResult = await _.session.run(streakDistributionQuery, queryParams);
 
   // STEP 6: Get recent streak achievements (rules that hit milestone streaks)
   const achievementsQuery = `
@@ -158,7 +158,7 @@ try {
     ORDER BY rs.currentStreak DESC
   `;
 
-  const achievementsResult = await args.session.run(achievementsQuery, queryParams);
+  const achievementsResult = await _.session.run(achievementsQuery, queryParams);
 
   // STEP 7: Get streak trends (rules gaining/losing momentum)
   const trendQuery = `
@@ -182,11 +182,11 @@ try {
     LIMIT 15
   `;
 
-  const trendResult = await args.session.run(trendQuery, queryParams);
+  const trendResult = await _.session.run(trendQuery, queryParams);
 
   // Process results
-  const totalRules = args.neo4jConvert.js(overallStats.get('totalRules')) || 0;
-  const activeStreaks = args.neo4jConvert.js(overallStats.get('activeStreaks')) || 0;
+  const totalRules = _.neo4jConvert.js(overallStats.get('totalRules')) || 0;
+  const activeStreaks = _.neo4jConvert.js(overallStats.get('activeStreaks')) || 0;
   const streakEngagementRate = totalRules > 0 ? (activeStreaks / totalRules) * 100 : 0;
 
   // Process top current streaks using vertex format
@@ -195,9 +195,9 @@ try {
     const categoryNode = record.get('rc');
     const streakNode = record.get('rs');
 
-    const rule = args.convertNodeToJson(ruleNode);
-    const category = categoryNode ? args.convertNodeToJson(categoryNode) : null;
-    const streak = args.convertNodeToJson(streakNode);
+    const rule = _.convertNodeToJson(ruleNode);
+    const category = categoryNode ? _.convertNodeToJson(categoryNode) : null;
+    const streak = _.convertNodeToJson(streakNode);
 
     return {
       rule,     // Full vertex format
@@ -212,9 +212,9 @@ try {
     const categoryNode = record.get('rc');
     const streakNode = record.get('rs');
 
-    const rule = args.convertNodeToJson(ruleNode);
-    const category = categoryNode ? args.convertNodeToJson(categoryNode) : null;
-    const streak = args.convertNodeToJson(streakNode);
+    const rule = _.convertNodeToJson(ruleNode);
+    const category = categoryNode ? _.convertNodeToJson(categoryNode) : null;
+    const streak = _.convertNodeToJson(streakNode);
 
     return {
       rule,     // Full vertex format
@@ -226,15 +226,15 @@ try {
   // Process category streaks using vertex format
   const categoryAnalysis = categoryStreakResult.records.map(record => {
     const categoryNode = record.get('rc');
-    const category = args.convertNodeToJson(categoryNode);
+    const category = _.convertNodeToJson(categoryNode);
 
-    const totalRules = args.neo4jConvert.js(record.get('totalRules')) || 0;
-    const activeStreaks = args.neo4jConvert.js(record.get('activeStreaks')) || 0;
+    const totalRules = _.neo4jConvert.js(record.get('totalRules')) || 0;
+    const activeStreaks = _.neo4jConvert.js(record.get('activeStreaks')) || 0;
     const avgCurrentStreak = Math.round(record.get('avgCurrentStreak') || 0);
     const avgLongestStreak = Math.round(record.get('avgLongestStreak') || 0);
-    const maxCurrentStreak = args.neo4jConvert.js(record.get('maxCurrentStreak')) || 0;
-    const maxLongestStreak = args.neo4jConvert.js(record.get('maxLongestStreak')) || 0;
-    const totalCompletions = args.neo4jConvert.js(record.get('totalCompletions')) || 0;
+    const maxCurrentStreak = _.neo4jConvert.js(record.get('maxCurrentStreak')) || 0;
+    const maxLongestStreak = _.neo4jConvert.js(record.get('maxLongestStreak')) || 0;
+    const totalCompletions = _.neo4jConvert.js(record.get('totalCompletions')) || 0;
     const engagementRate = totalRules > 0 ?
       Math.round((activeStreaks / totalRules) * 100) : 0;
 
@@ -256,11 +256,11 @@ try {
   // Process streak distribution
   const distribution = distributionResult.records[0];
   const streakDistribution = {
-    noStreak: args.neo4jConvert.js(distribution.get('noStreak')) || 0,
-    shortStreak: args.neo4jConvert.js(distribution.get('shortStreak')) || 0,
-    weekStreak: args.neo4jConvert.js(distribution.get('weekStreak')) || 0,
-    monthStreak: args.neo4jConvert.js(distribution.get('monthStreak')) || 0,
-    longStreak: args.neo4jConvert.js(distribution.get('longStreak')) || 0
+    noStreak: _.neo4jConvert.js(distribution.get('noStreak')) || 0,
+    shortStreak: _.neo4jConvert.js(distribution.get('shortStreak')) || 0,
+    weekStreak: _.neo4jConvert.js(distribution.get('weekStreak')) || 0,
+    monthStreak: _.neo4jConvert.js(distribution.get('monthStreak')) || 0,
+    longStreak: _.neo4jConvert.js(distribution.get('longStreak')) || 0
   };
 
   // Process achievements using vertex format
@@ -269,9 +269,9 @@ try {
     const categoryNode = record.get('rc');
     const streakNode = record.get('rs');
 
-    const rule = args.convertNodeToJson(ruleNode);
-    const category = categoryNode ? args.convertNodeToJson(categoryNode) : null;
-    const streak = args.convertNodeToJson(streakNode);
+    const rule = _.convertNodeToJson(ruleNode);
+    const category = categoryNode ? _.convertNodeToJson(categoryNode) : null;
+    const streak = _.convertNodeToJson(streakNode);
 
     const milestone = streak.P.currentStreak || 0;
 
@@ -289,12 +289,12 @@ try {
     const ruleNode = record.get('r');
     const categoryNode = record.get('rc');
 
-    const rule = args.convertNodeToJson(ruleNode);
-    const category = categoryNode ? args.convertNodeToJson(categoryNode) : null;
+    const rule = _.convertNodeToJson(ruleNode);
+    const category = categoryNode ? _.convertNodeToJson(categoryNode) : null;
 
-    const recentSuccesses = args.neo4jConvert.js(record.get('recentSuccesses')) || 0;
-    const recentTotal = args.neo4jConvert.js(record.get('recentTotal')) || 0;
-    const recentSuccessRate = args.neo4jConvert.js(record.get('recentSuccessRate')) || 0;
+    const recentSuccesses = _.neo4jConvert.js(record.get('recentSuccesses')) || 0;
+    const recentTotal = _.neo4jConvert.js(record.get('recentTotal')) || 0;
+    const recentSuccessRate = _.neo4jConvert.js(record.get('recentSuccessRate')) || 0;
 
     return {
       rule,     // Full vertex format
@@ -336,7 +336,7 @@ try {
     insights.push(`🔥 You have ${activeStreaks} active streak${activeStreaks > 1 ? 's' : ''} running!`);
   }
 
-  const maxCurrent = args.neo4jConvert.js(overallStats.get('maxCurrentStreak')) || 0;
+  const maxCurrent = _.neo4jConvert.js(overallStats.get('maxCurrentStreak')) || 0;
   if (maxCurrent >= 30) {
     insights.push(`🏆 Amazing! Your longest current streak is ${maxCurrent} days.`);
   } else if (maxCurrent >= 7) {
@@ -371,9 +371,9 @@ try {
         streakEngagementRate: Math.round(streakEngagementRate),
         avgCurrentStreak: Math.round(overallStats.get('avgCurrentStreak') || 0),
         avgLongestStreak: Math.round(overallStats.get('avgLongestStreak') || 0),
-        maxCurrentStreak: args.neo4jConvert.js(overallStats.get('maxCurrentStreak')) || 0,
-        maxLongestStreak: args.neo4jConvert.js(overallStats.get('maxLongestStreak')) || 0,
-        totalCompletions: args.neo4jConvert.js(overallStats.get('totalCompletions')) || 0
+        maxCurrentStreak: _.neo4jConvert.js(overallStats.get('maxCurrentStreak')) || 0,
+        maxLongestStreak: _.neo4jConvert.js(overallStats.get('maxLongestStreak')) || 0,
+        totalCompletions: _.neo4jConvert.js(overallStats.get('totalCompletions')) || 0
       },
       topCurrentStreaks,
       topLongestStreaks,

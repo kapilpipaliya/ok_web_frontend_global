@@ -74,10 +74,10 @@ export function FormConfig() {
         class="transaction-debug"
         style={{
           "margin-top": "20px",
-          border: `1px solid ${(args) => args.theme.var.color.gray_light_700}`,
+          border: `1px solid ${(_) => _.theme.var.color.gray_light_700}`,
           "border-radius": "4px",
           padding: "12px",
-          "background-color": `${(args) => args.theme.var.color.gray_light_900}`,
+          "background-color": `${(_) => _.theme.var.color.gray_light_900}`,
           "font-family": "monospace",
         }}
       >
@@ -96,7 +96,7 @@ export function FormConfig() {
               padding: "3px 8px",
               "border-radius": "12px",
               "font-size": "12px",
-              "background-color": `${(args) => args.theme.var.color[getStatusColor().split(".").pop() || ""]}`,
+              "background-color": `${(_) => _.theme.var.color[getStatusColor().split(".").pop() || ""]}`,
               color: "white",
             }}
           >
@@ -123,8 +123,8 @@ export function FormConfig() {
             <span
               style={{
                 color: txnStats().undoAvailable
-                  ? `${(args) => args.theme.var.color.blue_dark_600}`
-                  : `${(args) => args.theme.var.color.gray_light_500}`,
+                  ? `${(_) => _.theme.var.color.blue_dark_600}`
+                  : `${(_) => _.theme.var.color.gray_light_500}`,
               }}
             >
               {txnStats().undoAvailable ? " Undo" : " No Undo"}
@@ -133,8 +133,8 @@ export function FormConfig() {
             <span
               style={{
                 color: txnStats().redoAvailable
-                  ? `${(args) => args.theme.var.color.blue_dark_600}`
-                  : `${(args) => args.theme.var.color.gray_light_500}`,
+                  ? `${(_) => _.theme.var.color.blue_dark_600}`
+                  : `${(_) => _.theme.var.color.gray_light_500}`,
               }}
             >
               {txnStats().redoAvailable ? "Redo" : "No Redo"}

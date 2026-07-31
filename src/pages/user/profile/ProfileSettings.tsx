@@ -64,7 +64,7 @@ export function ProfileSettings() {
         as: "icon",
         icon: "ph:info-fill",
         css: `return \`._id {
-color: \${args.theme.var.color.primary};
+color: \${t.var.color.primary};
 font-size: 24px;
 margin-right: 12px;
 }\`;`,
@@ -76,7 +76,7 @@ margin-right: 12px;
           {
             as: "span",
             css: `return \`._id {
-color: \${args.theme.var.color.text};
+color: \${t.var.color.text};
 font-weight: 600;
 display: block;
 }\`;`,
@@ -87,7 +87,7 @@ display: block;
             as: "span",
             css: `return \`._id {
 margin-top: 4px;
-color: \${args.theme.var.color.text};
+color: \${t.var.color.text};
 }\`;`,
             componentName: "Html",
             text: "Changing your username or email will update them across all your projects.",
@@ -98,9 +98,9 @@ color: \${args.theme.var.color.text};
     ],
     css: `return \`._id {
 padding: 16px;
-background-color: \${args.theme.var.color.primary_light_150};
+background-color: \${t.var.color.primary_light_150};
 border-radius: 8px;
-border: 1px solid \${args.theme.var.color.primary_light_200};
+border: 1px solid \${t.var.color.primary_light_200};
 display: flex;
 align-items: flex-start;
 }\`;`,
@@ -114,7 +114,7 @@ align-items: flex-start;
         as: "icon",
         icon: "ph:warning-circle-fill",
         css: `return \`._id {
-color: \${args.theme.var.color.warning};
+color: \${t.var.color.warning};
 font-size: 24px;
 margin-right: 12px;
 }\`;`,
@@ -126,7 +126,7 @@ margin-right: 12px;
           {
             as: "span",
             css: `return \`._id {
-color: \${args.theme.var.color.warning};
+color: \${t.var.color.warning};
 font-weight: 600;
 display: block;
 }\`;`,
@@ -137,7 +137,7 @@ display: block;
             as: "span",
             css: `return \`._id {
 margin-top: 4px;
-color: \${args.theme.var.color.text};
+color: \${t.var.color.text};
 display: block;
 }\`;`,
             componentName: "Html",
@@ -149,7 +149,7 @@ display: block;
 display: block;
 margin-top: 8px;
 font-weight: 600;
-color: \${args.theme.var.color.text};
+color: \${t.var.color.text};
 }\`;`,
             componentName: "Html",
             props: () => ({
@@ -165,8 +165,8 @@ display: inline-flex;
 align-items: center;
 margin-top: 12px;
 padding: 6px 12px;
-background-color: \${args.theme.var.color.warning};
-color: \${args.theme.var.color.primary_text};
+background-color: \${t.var.color.warning};
+color: \${t.var.color.primary_text};
 border-radius: 4px;
 border: none;
 font-size: 14px;
@@ -217,9 +217,9 @@ margin-right: 8px;
     ],
     css: `return \`._id {
 padding: 16px;
-background-color: \${args.theme.var.color.warning_light_150};
+background-color: \${t.var.color.warning_light_150};
 border-radius: 8px;
-border: 1px solid \${args.theme.var.color.warning_light_200};
+border: 1px solid \${t.var.color.warning_light_200};
 margin-bottom: 16px;
 display: flex;
 align-items: flex-start;
@@ -346,7 +346,7 @@ align-items: flex-start;
                 as: "icon",
                 icon: "ph:check-circle-fill",
                 css: `return \`._id {
-color: \${args.theme.var.color.primary_text};
+color: \${t.var.color.primary_text};
 font-size: 20px;
 margin-right: 8px;
 }\`;`,

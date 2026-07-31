@@ -8,7 +8,7 @@
         body:
           '''
 // Get current authenticated user from session
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return {
     success: false,
@@ -17,9 +17,9 @@ if (!actualUser) {
 }
 
 // Get effective user (handles admin impersonation)
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const user = await _.getEffectiveUser(_.session, actualUser, c);
 
-const { youtubeId, customName, ownershipId } = args.contextData;
+const { youtubeId, customName, ownershipId } = c;
 
 if (!youtubeId) {
   return {
@@ -36,7 +36,7 @@ if (!ownershipId) {
 }
 
 // Verify ownership belongs to user
-const ownershipCheck = await args.session.run(`
+const ownershipCheck = await _.session.run(`
   MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
   RETURN o
 `, { userUuid: user.P.uuid, ownershipId });
@@ -62,7 +62,7 @@ const updateQuery = `
   RETURN v.youtubeId as youtubeId
 `;
 
-const updateResult = await args.session.run(updateQuery, {
+const updateResult = await _.session.run(updateQuery, {
   ownershipId,
   youtubeId,
   customName: customName || null,
@@ -77,7 +77,7 @@ if (updateResult.records.length === 0) {
 }
 
 // Fetch updated video data with details using helper function
-const fetchResult = await args.executeNamedServerFunction({
+const fetchResult = await s({
   functionName: "getVideosWithDetails",
   contextData: {
     userUuid: user.P.uuid,

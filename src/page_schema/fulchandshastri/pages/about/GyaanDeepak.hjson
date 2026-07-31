@@ -12,12 +12,12 @@
         key: GyaanDeepak
         props:
           '''
-const locale = args.params?.lang ? String(args.params.lang).toLowerCase() : undefined;
+const locale = _.params?.lang ? String(_.params.lang).toLowerCase() : undefined;
 return {
   contextName: "gyaanDeepakSettings",
   serverFunction: `
 try {
-  const result = await args.executeNamedServerFunction({
+  const result = await s({
     functionName: "loadPublicPageSettings",
     contextData: { pageId: "gyaan-deepak", allowPublicRead: true, locale: ${JSON.stringify(locale ?? null)} }
   });
@@ -83,7 +83,7 @@ try {
         displayOrder: 1
         componentName: Html
         props:
-          '''const content = args.contextData.gyaanDeepakSettings?.content;
+          '''const content = c.gyaanDeepakSettings?.content;
 return {
   as: "h1",
   text: content?.heroTitle
@@ -108,7 +108,7 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const content = args.contextData.gyaanDeepakSettings?.content;
+          '''const content = c.gyaanDeepakSettings?.content;
 return {
   as: "p",
   text: content?.heroSubtitle
@@ -149,7 +149,7 @@ return {
   as: "div",
   "data-animate": "",
 
-  ref: (el) => el && args.fns.animateOnView(el)
+  ref: (el) => el && f.animateOnView(el)
 };'''
       }
     }
@@ -167,7 +167,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const content = args.contextData.gyaanDeepakSettings?.content;
+          '''const content = c.gyaanDeepakSettings?.content;
 return {
   as: "h2",
   text: content?.introTitle
@@ -184,12 +184,12 @@ return {
   line-height: 1.8;
   max-width: 800px;
   margin: 0 auto;
-  color: ${args.theme.mode === 'dark' ? args.theme.var.color.text_light_200 : args.theme.var.color.text_dark_200};
+  color: ${t.mode === 'dark' ? t.var.color.text_light_200 : t.var.color.text_dark_200};
 }`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''const content = args.contextData.gyaanDeepakSettings?.content;
+          '''const content = c.gyaanDeepakSettings?.content;
 return {
   as: "p",
   text: content?.introText
@@ -211,7 +211,7 @@ return {
   as: "div",
   "data-animate": "",
 
-  ref: (el) => el && args.fns.animateOnView(el)
+  ref: (el) => el && f.animateOnView(el)
 };'''
       }
     }
@@ -229,7 +229,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const content = args.contextData.gyaanDeepakSettings?.content;
+          '''const content = c.gyaanDeepakSettings?.content;
 return {
   as: "h2",
   text: content?.featuresTitle
@@ -263,7 +263,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const items = args.contextData.gyaanDeepakSettings?.feature?.feature ?? [];
+          '''const items = c.gyaanDeepakSettings?.feature?.feature ?? [];
 return {
   as: "fragment",
   data: items
@@ -277,7 +277,7 @@ return {
         displayOrder: 1
         componentName: FeatureCard
         props:
-          '''const feature = args.contextData.feature;
+          '''const feature = c.feature;
 return {
   icon: feature.icon,
   title: feature.title,
@@ -291,7 +291,7 @@ return {
       P: {
         css:
           '''return `._id {
-  background: ${args.theme.mode === 'dark' ? args.theme.var.color.background_dark_200 : args.theme.var.color.background_light_100};
+  background: ${t.mode === 'dark' ? t.var.color.background_dark_200 : t.var.color.background_light_100};
   padding: 3rem;
   border-radius: 1rem;
   margin-bottom: 4rem;
@@ -303,7 +303,7 @@ return {
   as: "div",
   "data-animate": "",
 
-  ref: (el) => el && args.fns.animateOnView(el)
+  ref: (el) => el && f.animateOnView(el)
 };'''
       }
     }
@@ -321,7 +321,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const content = args.contextData.gyaanDeepakSettings?.content;
+          '''const content = c.gyaanDeepakSettings?.content;
 return {
   as: "h2",
   text: content?.scheduleTitle
@@ -356,7 +356,7 @@ return {
   th, td {
     padding: 1rem;
     text-align: left;
-    border-bottom: 1px solid ${args.theme.mode === 'dark' ? args.theme.var.color.background_dark_400 : args.theme.var.color.background_light_300};
+    border-bottom: 1px solid ${t.mode === 'dark' ? t.var.color.background_dark_400 : t.var.color.background_light_300};
   }
 
   th {
@@ -366,7 +366,7 @@ return {
   }
 
   tr:hover {
-    background: ${args.theme.mode === 'dark' ? args.theme.var.color.background_dark_300 : args.theme.var.color.background_light_200};
+    background: ${t.mode === 'dark' ? t.var.color.background_dark_300 : t.var.color.background_light_200};
   }
 }`;'''
         displayOrder: 1
@@ -408,7 +408,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const content = args.contextData.gyaanDeepakSettings?.content;
+          '''const content = c.gyaanDeepakSettings?.content;
 return {
   as: "th",
   text: content?.th1
@@ -422,7 +422,7 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const content = args.contextData.gyaanDeepakSettings?.content;
+          '''const content = c.gyaanDeepakSettings?.content;
 return {
   as: "th",
   text: content?.th2
@@ -436,7 +436,7 @@ return {
         displayOrder: 3
         componentName: Html
         props:
-          '''const content = args.contextData.gyaanDeepakSettings?.content;
+          '''const content = c.gyaanDeepakSettings?.content;
 return {
   as: "th",
   text: content?.th3
@@ -464,7 +464,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const items = args.contextData.gyaanDeepakSettings?.schedule?.schedule ?? [];
+          '''const items = c.gyaanDeepakSettings?.schedule?.schedule ?? [];
 return {
   as: "fragment",
   data: items
@@ -478,7 +478,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const schedule = args.contextData.schedule;
+          '''const schedule = c.schedule;
 return {
   as: "tr"
 };'''
@@ -491,7 +491,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const schedule = args.contextData.schedule;
+          '''const schedule = c.schedule;
 return {
   as: "td",
   text: schedule.day
@@ -505,7 +505,7 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const schedule = args.contextData.schedule;
+          '''const schedule = c.schedule;
 return {
   as: "td",
   text: schedule.time
@@ -519,7 +519,7 @@ return {
         displayOrder: 3
         componentName: Html
         props:
-          '''const schedule = args.contextData.schedule;
+          '''const schedule = c.schedule;
 return {
   as: "td",
   text: schedule.program
@@ -545,7 +545,7 @@ return {
   as: "div",
   "data-animate": "",
 
-  ref: (el) => el && args.fns.animateOnView(el)
+  ref: (el) => el && f.animateOnView(el)
 };'''
       }
     }
@@ -562,7 +562,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const content = args.contextData.gyaanDeepakSettings?.content;
+          '''const content = c.gyaanDeepakSettings?.content;
 return {
   as: "h2",
   text: content?.joinTitle
@@ -582,7 +582,7 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const content = args.contextData.gyaanDeepakSettings?.content;
+          '''const content = c.gyaanDeepakSettings?.content;
 return {
   as: "p",
   text: content?.joinText
@@ -633,7 +633,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const content = args.contextData.gyaanDeepakSettings?.content;
+          '''const content = c.gyaanDeepakSettings?.content;
 return {
   as: "a",
   text: content?.whatsappButton
@@ -665,7 +665,7 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const content = args.contextData.gyaanDeepakSettings?.content;
+          '''const content = c.gyaanDeepakSettings?.content;
 return {
   as: "a",
   text: content?.telegramButton

@@ -9,6 +9,7 @@ import { SelectThemeButton } from "~/pages/theme_menu/SelectThemeButton";
 import { IconButton } from "~/components/styled/IconButton";
 
 import { HomeIconButton } from "../../../../components/styled/buttons/HomeIconButton";
+import { RedirectUrlIconButton } from "../../../../components/styled/buttons/RedirectUrlIconButton";
 import { ExportOpenedButton } from "../right/ExportOpenedButton";
 import { ImportOpenedButton } from "../right/ImportOpenedButton";
 import { SaveAllButton } from "../right/SaveAllButton";
@@ -71,8 +72,8 @@ export function HeaderRow(props: HeaderProps) {
           gap: 2px;
           padding: 4px;
           box-shadow: 0 2px 10px oklch(0 0 0 / 0.12);
-          background-color: \${args.theme.var.color.background_light_100};
-          border: 1px solid \${args.theme.var.color.border};
+          background-color: \${t.var.color.background_light_100};
+          border: 1px solid \${t.var.color.border};
           border-radius: 8px;
           justify-content: flex-start;
           width: auto;
@@ -93,6 +94,7 @@ export function HeaderRow(props: HeaderProps) {
       />
       <Show when={expanded()}>
         <HomeIconButton />
+        <RedirectUrlIconButton />
         <RightSection />
       </Show>
     </Header>

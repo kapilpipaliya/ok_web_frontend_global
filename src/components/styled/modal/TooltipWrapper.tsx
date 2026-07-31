@@ -382,8 +382,8 @@ export function TooltipWrapper(props: {
                 transform: translate(${position().x}px, ${position().y}px);
                 opacity: 1;
                 animation: tooltipFadeIn 200ms ease-out;
-                background-color: \${args.theme.var.color.background_dark_800};
-                color: \${args.theme.var.color.background_dark_800_text};
+                background-color: \${t.var.color.background_dark_800};
+                color: \${t.var.color.background_dark_800_text};
                 padding: 0.5rem 0.75rem;
                 border-radius: 0.375rem;
                 font-size: 0.875rem;
@@ -415,7 +415,7 @@ export function TooltipWrapper(props: {
                   position: absolute;
                   width: 10px;
                   height: 10px;
-                  background-color: \${args.theme.var.color.background_dark_800};
+                  background-color: \${t.var.color.background_dark_800};
                   transform: rotate(45deg);
                   z-index: -1;
                   

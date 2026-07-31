@@ -25,7 +25,7 @@ export const wrapWithTitle = (
               {
                 as: "span",
                 css: `return \`._id {
-  color: \${args.theme.var.color.error};
+  color: \${t.var.color.error};
 }\`;`,
                 componentName: "Html",
                 text: " *",
@@ -279,9 +279,9 @@ date`,
           css: PROPERTIES.Css.TextFieldCss,
           props: `return {
               componentName: "SystemTextInput",
-              type: args.data?.P.type === "number" ? "number" : 
-                   args.data?.P.type === "boolean" ? "checkbox" :
-                   args.data?.P.type === "date" ? "date" : "text",
+              type: _.data?.P.type === "number" ? "number" : 
+                   _.data?.P.type === "boolean" ? "checkbox" :
+                   _.data?.P.type === "date" ? "date" : "text",
             };`,
         },
         {
@@ -299,7 +299,7 @@ date`,
   align-items: center;
   justify-content: center;
   gap: 4px;
-  color: \${args.theme.var.color.error};
+  color: \${t.var.color.error};
   background-color: transparent;
   border-radius: 4px;
   padding: 4px;
@@ -307,8 +307,8 @@ date`,
   transition: all 0.2s ease;
   border: none;
   &:hover {
-    background-color: \${args.theme.var.color.error_light_100};
-    color: \${args.theme.var.color.error};
+    background-color: \${t.var.color.error_light_100};
+    color: \${t.var.color.error};
   }
 }\`;`,
           componentName: "Html",
@@ -316,16 +316,16 @@ date`,
           props: `return {
               hide: () => {
                 return (
-                  args.data?.P.defValue === undefined ||
-                  args.data?.P.defValue === null
+                  _.data?.P.defValue === undefined ||
+                  _.data?.P.defValue === null
                 );
               },
               onClick: () => {
-                args.mergeVertexProperties(
-                  args.txnId,
-                  args.data?.id,
-                  args.graph,
-                  args.setGraph,
+                _.mergeVertexProperties(
+                  _.txnId,
+                  _.data?.id,
+                  g,
+                  sg,
                   {
                     defValue: null,
                   },
@@ -357,10 +357,10 @@ date`,
           displayName: "Value",
           key: "value",
           css: PROPERTIES.Css.TextFieldCss,
-          props: `const type = args.evalExpression("<-$0::'P.type'", {
-              graph: args.graph,
-              setGraph: args.setGraph,
-              vertexes: [args.data],
+          props: `const type = _.evalExpression("<-$0::'P.type'", {
+              graph: g,
+              setGraph: sg,
+              vertexes: [_.data],
             });
             return {
               componentName: "SystemTextInput",

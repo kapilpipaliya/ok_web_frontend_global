@@ -36,9 +36,9 @@
         displayOrder: 1
         componentName: Html
         props:
-          '''const getIsOpen = args.contextData.props?.isOpen;
+          '''const getIsOpen = c.props?.isOpen;
 const isOpen = getIsOpen?.() || false;
-const onClose = args.contextData.props?.onClose;
+const onClose = c.props?.onClose;
 
 return {
   as: "div",
@@ -57,7 +57,7 @@ return {
       P: {
         css:
           '''return `._id {
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
   border-radius: 0.75rem;
   width: 100%;
   max-width: 600px;
@@ -80,15 +80,15 @@ return {
 }`;'''
         displayOrder: 1
         fns:
-          '''const [searchTerm, setSearchTerm] = args.createSignal("");
-const [selectedVideos, setSelectedVideos] = args.createSignal(new Set());
-const [showPlaylistSelector, setShowPlaylistSelector] = args.createSignal(false);
-const [customPlaylists, setCustomPlaylists] = args.createSignal([]);
-const [playlistsLoading, setPlaylistsLoading] = args.createSignal(false);
-const [savingToPlaylist, setSavingToPlaylist] = args.createSignal(false);
-const [newPlaylistName, setNewPlaylistName] = args.createSignal("");
-const [selectedPlaylistId, setSelectedPlaylistId] = args.createSignal(null);
-const [showCreateNew, setShowCreateNew] = args.createSignal(false);
+          '''const [searchTerm, setSearchTerm] = _.createSignal("");
+const [selectedVideos, setSelectedVideos] = _.createSignal(new Set());
+const [showPlaylistSelector, setShowPlaylistSelector] = _.createSignal(false);
+const [customPlaylists, setCustomPlaylists] = _.createSignal([]);
+const [playlistsLoading, setPlaylistsLoading] = _.createSignal(false);
+const [savingToPlaylist, setSavingToPlaylist] = _.createSignal(false);
+const [newPlaylistName, setNewPlaylistName] = _.createSignal("");
+const [selectedPlaylistId, setSelectedPlaylistId] = _.createSignal(null);
+const [showCreateNew, setShowCreateNew] = _.createSignal(false);
 
 const toggleVideoSelection = (videoId) => {
   setSelectedVideos(prev => {
@@ -103,7 +103,7 @@ const toggleVideoSelection = (videoId) => {
 };
 
 const selectAll = () => {
-  const queue = args.contextData.props?.videoQueue?.() || [];
+  const queue = c.props?.videoQueue?.() || [];
   const allIds = queue.map(v => v?.P?.youtubeId).filter(Boolean);
   setSelectedVideos(new Set(allIds));
 };
@@ -113,11 +113,11 @@ const clearSelection = () => {
 };
 
 // Get executeYTOFunction from context
-const executeYTOFunction = args.contextData.props?.executeYTOFunction;
+const executeYTOFunction = c.props?.executeYTOFunction;
 
 // Load custom playlists
 const loadCustomPlaylists = async () => {
-  const getOwnershipId = args.contextData.props?.getOwnershipId;
+  const getOwnershipId = c.props?.getOwnershipId;
   const ownershipId = getOwnershipId?.();
 
   if (!ownershipId || !executeYTOFunction) return;
@@ -128,11 +128,11 @@ const loadCustomPlaylists = async () => {
     if (result?.result?.success) {
       setCustomPlaylists(result.result.data || []);
     } else {
-      args.showErrorToast(result?.result?.message || result?.error || "Failed to load playlists");
+      _.showErrorToast(result?.result?.message || result?.error || "Failed to load playlists");
     }
   } catch (error) {
     console.error("Error loading playlists:", error);
-    args.showErrorToast("Failed to load playlists");
+    _.showErrorToast("Failed to load playlists");
   } finally {
     setPlaylistsLoading(false);
   }
@@ -140,8 +140,8 @@ const loadCustomPlaylists = async () => {
 
 // Save queue to new playlist
 const saveToNewPlaylist = async (playlistName) => {
-  const queue = args.contextData.props?.videoQueue?.() || [];
-  const getOwnershipId = args.contextData.props?.getOwnershipId;
+  const queue = c.props?.videoQueue?.() || [];
+  const getOwnershipId = c.props?.getOwnershipId;
   const ownershipId = getOwnershipId?.();
 
   if (!ownershipId || !executeYTOFunction) return;
@@ -156,7 +156,7 @@ const saveToNewPlaylist = async (playlistName) => {
     });
 
     if (!createResult?.result?.success || createResult?.error) {
-      args.showErrorToast(createResult?.result?.message || createResult?.error || "Failed to create playlist");
+      _.showErrorToast(createResult?.result?.message || createResult?.error || "Failed to create playlist");
       return;
     }
 
@@ -172,18 +172,18 @@ const saveToNewPlaylist = async (playlistName) => {
       });
 
       if (addResult?.result?.success) {
-        args.showSuccessToast(`Playlist "${playlistName}" created with ${addResult.result.data.addedCount} videos`);
+        _.showSuccessToast(`Playlist "${playlistName}" created with ${addResult.result.data.addedCount} videos`);
         setShowPlaylistSelector(false);
       } else {
-        args.showErrorToast(addResult?.result?.message || addResult?.error || "Playlist created but failed to add videos");
+        _.showErrorToast(addResult?.result?.message || addResult?.error || "Playlist created but failed to add videos");
       }
     } else {
-      args.showSuccessToast(`Playlist "${playlistName}" created`);
+      _.showSuccessToast(`Playlist "${playlistName}" created`);
       setShowPlaylistSelector(false);
     }
   } catch (error) {
     console.error("Error saving to new playlist:", error);
-    args.showErrorToast("Failed to create playlist");
+    _.showErrorToast("Failed to create playlist");
   } finally {
     setSavingToPlaylist(false);
   }
@@ -191,8 +191,8 @@ const saveToNewPlaylist = async (playlistName) => {
 
 // Save queue to existing playlist
 const saveToExistingPlaylist = async (playlistId) => {
-  const queue = args.contextData.props?.videoQueue?.() || [];
-  const getOwnershipId = args.contextData.props?.getOwnershipId;
+  const queue = c.props?.videoQueue?.() || [];
+  const getOwnershipId = c.props?.getOwnershipId;
   const ownershipId = getOwnershipId?.();
 
   if (!ownershipId || !executeYTOFunction) return;
@@ -201,7 +201,7 @@ const saveToExistingPlaylist = async (playlistId) => {
   try {
     const videoIds = queue.map(v => v?.P?.youtubeId).filter(Boolean);
     if (videoIds.length === 0) {
-      args.showWarningToast("Queue is empty");
+      _.showWarningToast("Queue is empty");
       return;
     }
 
@@ -214,14 +214,14 @@ const saveToExistingPlaylist = async (playlistId) => {
     if (addResult?.result?.success) {
       const playlist = customPlaylists().find(p => p.playlist.P.youtubeId === playlistId);
       const playlistName = playlist?.playlist?.P?.title || "playlist";
-      args.showSuccessToast(`Added ${addResult.result.data.addedCount} videos to "${playlistName}"`);
+      _.showSuccessToast(`Added ${addResult.result.data.addedCount} videos to "${playlistName}"`);
       setShowPlaylistSelector(false);
     } else {
-      args.showErrorToast(addResult?.result?.message || addResult?.error || "Failed to add videos to playlist");
+      _.showErrorToast(addResult?.result?.message || addResult?.error || "Failed to add videos to playlist");
     }
   } catch (error) {
     console.error("Error saving to existing playlist:", error);
-    args.showErrorToast("Failed to add videos to playlist");
+    _.showErrorToast("Failed to add videos to playlist");
   } finally {
     setSavingToPlaylist(false);
   }
@@ -268,7 +268,7 @@ return {
   align-items: center;
   justify-content: space-between;
   padding: 1.5rem;
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  border-bottom: 1px solid ${t.var.color.border};
 }`;'''
         displayOrder: 1
         componentName: Html
@@ -286,13 +286,13 @@ return {
           '''return `._id {
   font-size: 1.5rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0;
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const queue = args.contextData.props?.videoQueue?.() || [];
+          '''const queue = c.props?.videoQueue?.() || [];
 
 return {
   as: "h2",
@@ -308,7 +308,7 @@ return {
           '''return `._id {
   background: none;
   border: none;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   cursor: pointer;
   padding: 0.5rem;
   border-radius: 0.375rem;
@@ -318,14 +318,14 @@ return {
   justify-content: center;
 
   &:hover {
-    background: ${args.theme.var.color.background_light_200};
-    color: ${args.theme.var.color.text};
+    background: ${t.var.color.background_light_200};
+    color: ${t.var.color.text};
   }
 }`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''const onClose = args.contextData.props?.onClose;
+          '''const onClose = c.props?.onClose;
 
 return {
   as: "button",
@@ -375,12 +375,12 @@ return {
         css:
           '''return `._id {
   padding: 1rem;
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  border-bottom: 1px solid ${t.var.color.border};
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const queue = args.contextData.props?.videoQueue?.() || [];
+          '''const queue = c.props?.videoQueue?.() || [];
 
 return {
   as: "div",
@@ -396,28 +396,28 @@ return {
           '''return `._id {
   width: 100%;
   padding: 0.625rem 1rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.5rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   font-size: 0.875rem;
   outline: none;
   transition: all 0.2s ease;
 
   &:focus {
-    border-color: ${args.theme.var.color.primary};
-    box-shadow: 0 0 0 3px ${args.theme.var.color.primary_light_100};
+    border-color: ${t.var.color.primary};
+    box-shadow: 0 0 0 3px ${t.var.color.primary_light_100};
   }
 
   &::placeholder {
-    color: ${args.theme.var.color.text_light_500};
+    color: ${t.var.color.text_light_500};
   }
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const searchTerm = args.fns.searchTerm?.() || "";
-const setSearchTerm = args.fns.setSearchTerm;
+          '''const searchTerm = f.searchTerm?.() || "";
+const setSearchTerm = f.setSearchTerm;
 
 return {
   as: "input",
@@ -438,14 +438,14 @@ return {
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1rem;
-  background: ${args.theme.var.color.background_light_100};
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  background: ${t.var.color.background_light_100};
+  border-bottom: 1px solid ${t.var.color.border};
 }`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''const selectedVideos = args.fns.selectedVideos?.() || new Set();
-const queue = args.contextData.props?.videoQueue?.() || [];
+          '''const selectedVideos = f.selectedVideos?.() || new Set();
+const queue = c.props?.videoQueue?.() || [];
 
 return {
   as: "div",
@@ -466,8 +466,8 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const selectedVideos = args.fns.selectedVideos?.() || new Set();
-const queue = args.contextData.props?.videoQueue?.() || [];
+          '''const selectedVideos = f.selectedVideos?.() || new Set();
+const queue = c.props?.videoQueue?.() || [];
 const allSelected = queue.length > 0 && selectedVideos.size === queue.length;
 const someSelected = selectedVideos.size > 0 && selectedVideos.size < queue.length;
 
@@ -478,9 +478,9 @@ return {
   indeterminate: someSelected,
   onClick: () => {
     if (allSelected || someSelected) {
-      args.fns.clearSelection?.();
+      f.clearSelection?.();
     } else {
-      args.fns.selectAll?.();
+      f.selectAll?.();
     }
   }
 };'''
@@ -493,13 +493,13 @@ return {
         css:
           '''return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   flex: 1;
 }`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''const selectedVideos = args.fns.selectedVideos?.() || new Set();
+          '''const selectedVideos = f.selectedVideos?.() || new Set();
 
 return {
   as: "span",
@@ -514,8 +514,8 @@ return {
         css:
           '''return `._id {
   padding: 0.5rem 1rem;
-  background: ${args.theme.var.color.error};
-  color: ${args.theme.var.color.error_text};
+  background: ${t.var.color.error};
+  color: ${t.var.color.error_text};
   border: none;
   border-radius: 0.375rem;
   font-size: 0.875rem;
@@ -524,22 +524,22 @@ return {
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.error_dark_200};
+    background: ${t.var.color.error_dark_200};
   }
 }`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''const selectedVideos = args.fns.selectedVideos?.() || new Set();
+          '''const selectedVideos = f.selectedVideos?.() || new Set();
 
 return {
   as: "button",
   hide: selectedVideos.size === 0,
   onClick: async () => {
-    const queue = args.contextData.props?.videoQueue?.() || [];
-    const setVideoQueue = args.contextData.props?.setVideoQueue;
-    const executeYTOFunction = args.fns.executeYTOFunction;
-    const getOwnershipId = args.contextData.props?.getOwnershipId;
+    const queue = c.props?.videoQueue?.() || [];
+    const setVideoQueue = c.props?.setVideoQueue;
+    const executeYTOFunction = f.executeYTOFunction;
+    const getOwnershipId = c.props?.getOwnershipId;
 
     if (!setVideoQueue || !executeYTOFunction || selectedVideos.size === 0) return;
 
@@ -557,11 +557,11 @@ return {
     setVideoQueue(newQueue);
 
     // Clear selection immediately
-    args.fns.clearSelection?.();
+    f.clearSelection?.();
 
     // Make single API call to remove all videos
     const ownershipId = getOwnershipId?.();
-    if (ownershipId && args.user) {
+    if (ownershipId && _.user) {
       try {
         const result = await executeYTOFunction("bulkRemoveFromQueue", {
           positions: positions
@@ -570,20 +570,20 @@ return {
         if (result?.result?.success) {
           // Update with server response to ensure consistency
           setVideoQueue(result.result.data || newQueue);
-          args.showSuccessToast(result.result.message || `Removed ${positions.length} video(s) from queue`);
+          _.showSuccessToast(result.result.message || `Removed ${positions.length} video(s) from queue`);
         } else {
           // Rollback on error
           setVideoQueue(queue);
-          args.showErrorToast(result?.result?.message || result?.error || "Failed to remove videos from queue");
+          _.showErrorToast(result?.result?.message || result?.error || "Failed to remove videos from queue");
         }
       } catch (error) {
         // Rollback on error
         setVideoQueue(queue);
-        args.showErrorToast("Failed to remove videos from queue");
+        _.showErrorToast("Failed to remove videos from queue");
         console.error("Error removing videos:", error);
       }
     } else {
-      args.showSuccessToast(`Removed ${positions.length} video(s) from queue`);
+      _.showSuccessToast(`Removed ${positions.length} video(s) from queue`);
     }
   },
   text: "Remove"
@@ -597,8 +597,8 @@ return {
         css:
           '''return `._id {
   padding: 0.5rem 1rem;
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
   border: none;
   border-radius: 0.375rem;
   font-size: 0.875rem;
@@ -607,20 +607,20 @@ return {
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.primary_dark_200};
+    background: ${t.var.color.primary_dark_200};
   }
 }`;'''
         displayOrder: 4
         componentName: Html
         props:
-          '''const selectedVideos = args.fns.selectedVideos?.() || new Set();
+          '''const selectedVideos = f.selectedVideos?.() || new Set();
 
 return {
   as: "button",
   hide: selectedVideos.size === 0,
   onClick: async () => {
-    const queue = args.contextData.props?.videoQueue?.() || [];
-    const setVideoQueue = args.contextData.props?.setVideoQueue;
+    const queue = c.props?.videoQueue?.() || [];
+    const setVideoQueue = c.props?.setVideoQueue;
 
     if (!setVideoQueue || selectedVideos.size === 0) return;
 
@@ -629,8 +629,8 @@ return {
     const unselected = queue.filter(v => !selectedVideos.has(v?.P?.youtubeId));
     setVideoQueue([...selected, ...unselected]);
 
-    args.fns.clearSelection?.();
-    args.showSuccessToast("Selected videos moved to top");
+    f.clearSelection?.();
+    _.showSuccessToast("Selected videos moved to top");
   },
   text: "Move to Top"
 };'''
@@ -680,12 +680,12 @@ return {
           '''return `._id {
   text-align: center;
   padding: 3rem 1rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const queue = args.contextData.props?.videoQueue?.() || [];
+          '''const queue = c.props?.videoQueue?.() || [];
 
 return {
   as: "div",
@@ -744,7 +744,7 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const queue = args.contextData.props?.videoQueue?.() || [];
+          '''const queue = c.props?.videoQueue?.() || [];
 
 return {
   as: "div",
@@ -761,8 +761,8 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const queue = args.contextData.props?.videoQueue?.() || [];
-const searchTerm = args.fns.searchTerm?.() || "";
+          '''const queue = c.props?.videoQueue?.() || [];
+const searchTerm = f.searchTerm?.() || "";
 
 // Filter queue based on search term
 let filteredQueue = queue;
@@ -794,15 +794,15 @@ return {
   display: flex;
   align-items: flex-start;
   gap: 0.75rem;
-  background: ${args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.border};
+  background: ${t.var.color.background};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.5rem;
   padding: 0.75rem;
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.background_light_50};
-    border-color: ${args.theme.var.color.primary_light_200};
+    background: ${t.var.color.background_light_50};
+    border-color: ${t.var.color.primary_light_200};
   }
 }`;'''
         displayOrder: 1
@@ -828,9 +828,9 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const video = args.contextData.loopItem;
+          '''const video = c.loopItem;
 const videoId = video?.P?.youtubeId;
-const selectedVideos = args.fns.selectedVideos?.() || new Set();
+const selectedVideos = f.selectedVideos?.() || new Set();
 const isSelected = selectedVideos.has(videoId);
 
 return {
@@ -839,7 +839,7 @@ return {
   checked: isSelected,
   onClick: (e) => {
     e?.stopPropagation();
-    args.fns.toggleVideoSelection?.(videoId);
+    f.toggleVideoSelection?.(videoId);
   }
 };'''
       }
@@ -850,8 +850,8 @@ return {
       P: {
         css:
           '''return `._id {
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
   width: 32px;
   height: 32px;
   border-radius: 50%;
@@ -866,8 +866,8 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const video = args.contextData.loopItem;
-const queue = args.contextData.props?.videoQueue?.() || [];
+          '''const video = c.loopItem;
+const queue = c.props?.videoQueue?.() || [];
 const index = queue.indexOf(video);
 
 return {
@@ -895,7 +895,7 @@ return {
         displayOrder: 3
         componentName: VideoCard
         props:
-          '''const video = args.contextData.loopItem;
+          '''const video = c.loopItem;
 
 return {
   item: video,
@@ -930,8 +930,8 @@ return {
       P: {
         css:
           '''return `._id {
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
   border: none;
   border-radius: 0.375rem;
   padding: 0.375rem;
@@ -944,16 +944,16 @@ return {
   height: 32px;
 
   &:hover {
-    background: ${args.theme.var.color.primary_dark_200};
+    background: ${t.var.color.primary_dark_200};
     transform: scale(1.05);
   }
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const video = args.contextData.loopItem;
-const playVideo = args.contextData.props?.playVideo;
-const onClose = args.contextData.props?.onClose;
+          '''const video = c.loopItem;
+const playVideo = c.props?.playVideo;
+const onClose = c.props?.onClose;
 
 return {
   as: "button",
@@ -988,13 +988,13 @@ return {
       L: Attr
       P: {
         css:
-          '''const video = args.contextData.loopItem;
-const queue = args.contextData.props?.videoQueue?.() || [];
+          '''const video = c.loopItem;
+const queue = c.props?.videoQueue?.() || [];
 const isFirst = queue.indexOf(video) === 0;
 
 return `._id {
-  background: ${args.theme.var.color.background_light_300};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background_light_300};
+  color: ${t.var.color.text};
   border: none;
   border-radius: 0.375rem;
   padding: 0.375rem;
@@ -1008,17 +1008,17 @@ return `._id {
   height: 32px;
 
   &:hover:not(:disabled) {
-    background: ${args.theme.var.color.primary};
-    color: ${args.theme.var.color.primary_text};
+    background: ${t.var.color.primary};
+    color: ${t.var.color.primary_text};
     transform: scale(1.05);
   }
 }`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''const video = args.contextData.loopItem;
-const queue = args.contextData.props?.videoQueue?.() || [];
-const reorderQueue = args.contextData.props?.reorderQueue;
+          '''const video = c.loopItem;
+const queue = c.props?.videoQueue?.() || [];
+const reorderQueue = c.props?.reorderQueue;
 const index = queue.indexOf(video);
 const isFirst = index === 0;
 
@@ -1055,14 +1055,14 @@ return {
       L: Attr
       P: {
         css:
-          '''const video = args.contextData.loopItem;
-const queue = args.contextData.props?.videoQueue?.() || [];
+          '''const video = c.loopItem;
+const queue = c.props?.videoQueue?.() || [];
 const index = queue.indexOf(video);
 const isLast = index === queue.length - 1;
 
 return `._id {
-  background: ${args.theme.var.color.background_light_300};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background_light_300};
+  color: ${t.var.color.text};
   border: none;
   border-radius: 0.375rem;
   padding: 0.375rem;
@@ -1076,17 +1076,17 @@ return `._id {
   height: 32px;
 
   &:hover:not(:disabled) {
-    background: ${args.theme.var.color.primary};
-    color: ${args.theme.var.color.primary_text};
+    background: ${t.var.color.primary};
+    color: ${t.var.color.primary_text};
     transform: scale(1.05);
   }
 }`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''const video = args.contextData.loopItem;
-const queue = args.contextData.props?.videoQueue?.() || [];
-const reorderQueue = args.contextData.props?.reorderQueue;
+          '''const video = c.loopItem;
+const queue = c.props?.videoQueue?.() || [];
+const reorderQueue = c.props?.reorderQueue;
 const index = queue.indexOf(video);
 const isLast = index === queue.length - 1;
 
@@ -1124,8 +1124,8 @@ return {
       P: {
         css:
           '''return `._id {
-  background: ${args.theme.var.color.background_light_300};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background_light_300};
+  color: ${t.var.color.text};
   border: none;
   border-radius: 0.375rem;
   padding: 0.375rem;
@@ -1138,17 +1138,17 @@ return {
   height: 32px;
 
   &:hover {
-    background: ${args.theme.var.color.error};
-    color: ${args.theme.var.color.error_text};
+    background: ${t.var.color.error};
+    color: ${t.var.color.error_text};
     transform: scale(1.05);
   }
 }`;'''
         displayOrder: 4
         componentName: Html
         props:
-          '''const video = args.contextData.loopItem;
-const queue = args.contextData.props?.videoQueue?.() || [];
-const removeFromQueue = args.contextData.props?.removeFromQueue;
+          '''const video = c.loopItem;
+const queue = c.props?.videoQueue?.() || [];
+const removeFromQueue = c.props?.removeFromQueue;
 const index = queue.indexOf(video);
 
 return {
@@ -1199,14 +1199,14 @@ return {
         displayOrder: 6
         componentName: Html
         props:
-          '''const showPlaylistSelector = args.fns.showPlaylistSelector?.() || false;
+          '''const showPlaylistSelector = f.showPlaylistSelector?.() || false;
 
 return {
   as: "div",
   hide: !showPlaylistSelector,
   onClick: (e) => {
     if (e.target === e.currentTarget) {
-      args.fns.setShowPlaylistSelector?.(false);
+      f.setShowPlaylistSelector?.(false);
     }
   }
 };'''
@@ -1218,7 +1218,7 @@ return {
       P: {
         css:
           '''return `._id {
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
   border-radius: 0.75rem;
   max-width: 500px;
   width: 100%;
@@ -1243,7 +1243,7 @@ return {
         css:
           '''return `._id {
   padding: 1.5rem;
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  border-bottom: 1px solid ${t.var.color.border};
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1265,7 +1265,7 @@ return {
   font-size: 1.25rem;
   font-weight: 600;
   margin: 0;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         displayOrder: 1
         componentName: Html
@@ -1286,7 +1286,7 @@ return {
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   padding: 0;
   width: 2rem;
   height: 2rem;
@@ -1297,8 +1297,8 @@ return {
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.background_light_200};
-    color: ${args.theme.var.color.text};
+    background: ${t.var.color.background_light_200};
+    color: ${t.var.color.text};
   }
 }`;'''
         displayOrder: 2
@@ -1306,7 +1306,7 @@ return {
         props:
           '''return {
   as: "button",
-  onClick: () => args.fns.setShowPlaylistSelector?.(false)
+  onClick: () => f.setShowPlaylistSelector?.(false)
 };'''
       }
     }
@@ -1352,7 +1352,7 @@ return {
   display: flex;
   gap: 0.5rem;
   margin-bottom: 1.5rem;
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  border-bottom: 1px solid ${t.var.color.border};
 }`;'''
         displayOrder: 1
         componentName: Html
@@ -1367,13 +1367,13 @@ return {
       L: Attr
       P: {
         css:
-          '''const showCreateNew = args.fns.showCreateNew?.() || false;
+          '''const showCreateNew = f.showCreateNew?.() || false;
 
 return `._id {
   background: none;
   border: none;
-  border-bottom: 2px solid ${!showCreateNew ? args.theme.var.color.primary : 'transparent'};
-  color: ${!showCreateNew ? args.theme.var.color.primary : args.theme.var.color.text_light_500};
+  border-bottom: 2px solid ${!showCreateNew ? t.var.color.primary : 'transparent'};
+  color: ${!showCreateNew ? t.var.color.primary : t.var.color.text_light_500};
   padding: 0.75rem 1rem;
   font-size: 0.875rem;
   font-weight: 500;
@@ -1381,17 +1381,17 @@ return `._id {
   transition: all 0.2s ease;
 
   &:hover {
-    color: ${args.theme.var.color.primary};
+    color: ${t.var.color.primary};
   }
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const showCreateNew = args.fns.showCreateNew?.() || false;
+          '''const showCreateNew = f.showCreateNew?.() || false;
 
 return {
   as: "button",
-  onClick: () => args.fns.setShowCreateNew?.(false),
+  onClick: () => f.setShowCreateNew?.(false),
   text: "Add to Existing"
 };'''
       }
@@ -1401,13 +1401,13 @@ return {
       L: Attr
       P: {
         css:
-          '''const showCreateNew = args.fns.showCreateNew?.() || false;
+          '''const showCreateNew = f.showCreateNew?.() || false;
 
 return `._id {
   background: none;
   border: none;
-  border-bottom: 2px solid ${showCreateNew ? args.theme.var.color.primary : 'transparent'};
-  color: ${showCreateNew ? args.theme.var.color.primary : args.theme.var.color.text_light_500};
+  border-bottom: 2px solid ${showCreateNew ? t.var.color.primary : 'transparent'};
+  color: ${showCreateNew ? t.var.color.primary : t.var.color.text_light_500};
   padding: 0.75rem 1rem;
   font-size: 0.875rem;
   font-weight: 500;
@@ -1415,17 +1415,17 @@ return `._id {
   transition: all 0.2s ease;
 
   &:hover {
-    color: ${args.theme.var.color.primary};
+    color: ${t.var.color.primary};
   }
 }`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''const showCreateNew = args.fns.showCreateNew?.() || false;
+          '''const showCreateNew = f.showCreateNew?.() || false;
 
 return {
   as: "button",
-  onClick: () => args.fns.setShowCreateNew?.(true),
+  onClick: () => f.setShowCreateNew?.(true),
   text: "Create New"
 };'''
       }
@@ -1443,7 +1443,7 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const showCreateNew = args.fns.showCreateNew?.() || false;
+          '''const showCreateNew = f.showCreateNew?.() || false;
 
 return {
   as: "div",
@@ -1459,12 +1459,12 @@ return {
           '''return `._id {
   text-align: center;
   padding: 2rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const playlistsLoading = args.fns.playlistsLoading?.() || false;
+          '''const playlistsLoading = f.playlistsLoading?.() || false;
 
 return {
   as: "div",
@@ -1481,13 +1481,13 @@ return {
           '''return `._id {
   text-align: center;
   padding: 2rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''const playlistsLoading = args.fns.playlistsLoading?.() || false;
-const customPlaylists = args.fns.customPlaylists?.() || [];
+          '''const playlistsLoading = f.playlistsLoading?.() || false;
+const customPlaylists = f.customPlaylists?.() || [];
 
 return {
   as: "div",
@@ -1505,8 +1505,8 @@ return {
         displayOrder: 3
         componentName: Html
         props:
-          '''const playlistsLoading = args.fns.playlistsLoading?.() || false;
-const customPlaylists = args.fns.customPlaylists?.() || [];
+          '''const playlistsLoading = f.playlistsLoading?.() || false;
+const customPlaylists = f.customPlaylists?.() || [];
 
 return {
   hide: playlistsLoading || customPlaylists.length === 0,
@@ -1519,10 +1519,10 @@ return {
       L: Attr
       P: {
         css:
-          '''const item = args.contextData.playlistItem;
+          '''const item = c.playlistItem;
 const playlist = item?.playlist;
 const playlistId = playlist?.P?.youtubeId;
-const selectedPlaylistId = args.fns.selectedPlaylistId?.();
+const selectedPlaylistId = f.selectedPlaylistId?.();
 const isSelected = selectedPlaylistId === playlistId;
 
 return `._id {
@@ -1530,29 +1530,29 @@ return `._id {
   align-items: center;
   gap: 0.75rem;
   padding: 1rem;
-  border: 2px solid ${isSelected ? args.theme.var.color.primary : args.theme.var.color.border};
+  border: 2px solid ${isSelected ? t.var.color.primary : t.var.color.border};
   border-radius: 0.5rem;
   cursor: pointer;
   transition: all 0.2s ease;
-  background: ${isSelected ? args.theme.var.color.primary_light_100 : args.theme.var.color.background};
+  background: ${isSelected ? t.var.color.primary_light_100 : t.var.color.background};
 
   &:hover {
-    border-color: ${args.theme.var.color.primary};
-    background: ${args.theme.var.color.primary_light_100};
+    border-color: ${t.var.color.primary};
+    background: ${t.var.color.primary_light_100};
   }
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const item = args.contextData.playlistItem;
+          '''const item = c.playlistItem;
 const playlist = item?.playlist;
 const playlistId = playlist?.P?.youtubeId;
-const selectedPlaylistId = args.fns.selectedPlaylistId?.();
+const selectedPlaylistId = f.selectedPlaylistId?.();
 const isSelected = selectedPlaylistId === playlistId;
 
 return {
   as: "label",
-  onClick: () => args.fns.setSelectedPlaylistId?.(playlistId)
+  onClick: () => f.setSelectedPlaylistId?.(playlistId)
 };'''
       }
     }
@@ -1570,17 +1570,17 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const item = args.contextData.playlistItem;
+          '''const item = c.playlistItem;
 const playlist = item?.playlist;
 const playlistId = playlist?.P?.youtubeId;
-const selectedPlaylistId = args.fns.selectedPlaylistId?.();
+const selectedPlaylistId = f.selectedPlaylistId?.();
 
 return {
   as: "input",
   type: "radio",
   name: "playlist_selector",
   checked: selectedPlaylistId === playlistId,
-  onChange: () => args.fns.setSelectedPlaylistId?.(playlistId)
+  onChange: () => f.setSelectedPlaylistId?.(playlistId)
 };'''
       }
     }
@@ -1608,13 +1608,13 @@ return {
         css:
           '''return `._id {
   font-weight: 500;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 0.25rem;
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const item = args.contextData.playlistItem;
+          '''const item = c.playlistItem;
 const playlist = item?.playlist;
 
 return {
@@ -1630,12 +1630,12 @@ return {
         css:
           '''return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''const item = args.contextData.playlistItem;
+          '''const item = c.playlistItem;
 const playlist = item?.playlist;
 const itemCount = playlist?.P?.itemCount || 0;
 
@@ -1658,7 +1658,7 @@ return {
         displayOrder: 3
         componentName: Html
         props:
-          '''const showCreateNew = args.fns.showCreateNew?.() || false;
+          '''const showCreateNew = f.showCreateNew?.() || false;
 
 return {
   as: "div",
@@ -1673,7 +1673,7 @@ return {
         css:
           '''return `._id {
   font-weight: 500;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   font-size: 0.875rem;
   margin-bottom: 0.5rem;
 }`;'''
@@ -1694,34 +1694,34 @@ return {
           '''return `._id {
   width: 100%;
   padding: 0.75rem 1rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.5rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   font-size: 1rem;
   outline: none;
   transition: all 0.2s ease;
 
   &:focus {
-    border-color: ${args.theme.var.color.primary};
-    box-shadow: 0 0 0 3px ${args.theme.var.color.primary_light_100};
+    border-color: ${t.var.color.primary};
+    box-shadow: 0 0 0 3px ${t.var.color.primary_light_100};
   }
 
   &::placeholder {
-    color: ${args.theme.var.color.text_light_500};
+    color: ${t.var.color.text_light_500};
   }
 }`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''const newPlaylistName = args.fns.newPlaylistName?.() || "";
+          '''const newPlaylistName = f.newPlaylistName?.() || "";
 
 return {
   as: "input",
   type: "text",
   placeholder: "Enter playlist name...",
   value: newPlaylistName,
-  onInput: (e) => args.fns.setNewPlaylistName?.(e.target.value)
+  onInput: (e) => f.setNewPlaylistName?.(e.target.value)
 };'''
       }
     }
@@ -1732,7 +1732,7 @@ return {
         css:
           '''return `._id {
   padding: 1.5rem;
-  border-top: 1px solid ${args.theme.var.color.border};
+  border-top: 1px solid ${t.var.color.border};
   display: flex;
   gap: 0.75rem;
   justify-content: flex-end;
@@ -1752,9 +1752,9 @@ return {
         css:
           '''return `._id {
   padding: 0.625rem 1.25rem;
-  background: ${args.theme.var.color.background_light_200};
-  color: ${args.theme.var.color.text};
-  border: 1px solid ${args.theme.var.color.border};
+  background: ${t.var.color.background_light_200};
+  color: ${t.var.color.text};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.5rem;
   font-size: 0.875rem;
   font-weight: 500;
@@ -1762,7 +1762,7 @@ return {
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.background_light_300};
+    background: ${t.var.color.background_light_300};
   }
 }`;'''
         displayOrder: 1
@@ -1770,7 +1770,7 @@ return {
         props:
           '''return {
   as: "button",
-  onClick: () => args.fns.setShowPlaylistSelector?.(false),
+  onClick: () => f.setShowPlaylistSelector?.(false),
   text: "Cancel"
 };'''
       }
@@ -1782,8 +1782,8 @@ return {
         css:
           '''return `._id {
   padding: 0.625rem 1.25rem;
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
   border: none;
   border-radius: 0.5rem;
   font-size: 0.875rem;
@@ -1792,7 +1792,7 @@ return {
   transition: all 0.2s ease;
 
   &:hover:not(:disabled) {
-    background: ${args.theme.var.color.primary_dark_200};
+    background: ${t.var.color.primary_dark_200};
   }
 
   &:disabled {
@@ -1803,10 +1803,10 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const showCreateNew = args.fns.showCreateNew?.() || false;
-const savingToPlaylist = args.fns.savingToPlaylist?.() || false;
-const newPlaylistName = args.fns.newPlaylistName?.() || "";
-const selectedPlaylistId = args.fns.selectedPlaylistId?.();
+          '''const showCreateNew = f.showCreateNew?.() || false;
+const savingToPlaylist = f.savingToPlaylist?.() || false;
+const newPlaylistName = f.newPlaylistName?.() || "";
+const selectedPlaylistId = f.selectedPlaylistId?.();
 
 const isDisabled = savingToPlaylist || (showCreateNew ? !newPlaylistName.trim() : !selectedPlaylistId);
 
@@ -1817,9 +1817,9 @@ return {
     if (isDisabled) return;
 
     if (showCreateNew) {
-      await args.fns.saveToNewPlaylist?.(newPlaylistName.trim());
+      await f.saveToNewPlaylist?.(newPlaylistName.trim());
     } else {
-      await args.fns.saveToExistingPlaylist?.(selectedPlaylistId);
+      await f.saveToExistingPlaylist?.(selectedPlaylistId);
     }
   },
   text: savingToPlaylist ? "Saving..." : "Save"
@@ -1833,7 +1833,7 @@ return {
         css:
           '''return `._id {
   padding: 1rem 1.5rem;
-  border-top: 1px solid ${args.theme.var.color.border};
+  border-top: 1px solid ${t.var.color.border};
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1841,7 +1841,7 @@ return {
         displayOrder: 3
         componentName: Html
         props:
-          '''const queue = args.contextData.props?.videoQueue?.() || [];
+          '''const queue = c.props?.videoQueue?.() || [];
 
 return {
   as: "div",
@@ -1856,12 +1856,12 @@ return {
         css:
           '''return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const queue = args.contextData.props?.videoQueue?.() || [];
+          '''const queue = c.props?.videoQueue?.() || [];
 
 return {
   as: "div",
@@ -1892,8 +1892,8 @@ return {
       P: {
         css:
           '''return `._id {
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
   border: none;
   border-radius: 0.375rem;
   padding: 0.5rem 1rem;
@@ -1903,40 +1903,40 @@ return {
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.primary_dark_200};
+    background: ${t.var.color.primary_dark_200};
   }
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const queue = args.contextData.props?.videoQueue?.() || [];
-const savingToPlaylist = args.fns.savingToPlaylist?.() || false;
+          '''const queue = c.props?.videoQueue?.() || [];
+const savingToPlaylist = f.savingToPlaylist?.() || false;
 
 return {
   as: "button",
   disabled: queue.length === 0 || savingToPlaylist,
   onClick: async () => {
     if (queue.length === 0) {
-      args.showWarningToast("Queue is empty");
+      _.showWarningToast("Queue is empty");
       return;
     }
 
-    const getOwnershipId = args.contextData.props?.getOwnershipId;
+    const getOwnershipId = c.props?.getOwnershipId;
     const ownershipId = getOwnershipId?.();
 
     if (!ownershipId) {
-      args.showErrorToast("Please select a YouTube account");
+      _.showErrorToast("Please select a YouTube account");
       return;
     }
 
     // Reset state
-    args.fns.setNewPlaylistName?.("");
-    args.fns.setSelectedPlaylistId?.(null);
-    args.fns.setShowCreateNew?.(false);
+    f.setNewPlaylistName?.("");
+    f.setSelectedPlaylistId?.(null);
+    f.setShowCreateNew?.(false);
 
     // Load existing playlists and show selector
-    await args.fns.loadCustomPlaylists?.();
-    args.fns.setShowPlaylistSelector?.(true);
+    await f.loadCustomPlaylists?.();
+    f.setShowPlaylistSelector?.(true);
   },
   text: savingToPlaylist ? "Saving..." : "Save as Playlist"
 };'''
@@ -1948,8 +1948,8 @@ return {
       P: {
         css:
           '''return `._id {
-  background: ${args.theme.var.color.error};
-  color: ${args.theme.var.color.error_text};
+  background: ${t.var.color.error};
+  color: ${t.var.color.error_text};
   border: none;
   border-radius: 0.375rem;
   padding: 0.5rem 1rem;
@@ -1959,13 +1959,13 @@ return {
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.error_dark_200};
+    background: ${t.var.color.error_dark_200};
   }
 }`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''const clearQueue = args.contextData.props?.clearQueue;
+          '''const clearQueue = c.props?.clearQueue;
 
 return {
   as: "button",

@@ -16,8 +16,8 @@
         contextName: "confirmContext",
         fns: '''
 // Global confirmation dialog state
-const [isConfirmDialogOpen, setIsConfirmDialogOpen] = args.createSignal(false);
-const [confirmDialogConfig, setConfirmDialogConfig] = args.createStore({
+const [isConfirmDialogOpen, setIsConfirmDialogOpen] = _.createSignal(false);
+const [confirmDialogConfig, setConfirmDialogConfig] = _.createStore({
   title: "Confirm Action",
   message: "Are you sure you want to proceed?",
   confirmText: "Confirm",
@@ -29,7 +29,7 @@ const [confirmDialogConfig, setConfirmDialogConfig] = args.createStore({
 });
 
 // Navigation state
-const [isNavigating, setIsNavigating] = args.createSignal(false);
+const [isNavigating, setIsNavigating] = _.createSignal(false);
 
 // Global confirm function that can be called from anywhere
 const showConfirm = (config) => {
@@ -74,7 +74,7 @@ const navigateTo = async (path, options = {}) => {
   try {
     // Capture current pathname before navigation
     // This is our reference point to detect when route actually changes
-    const currentPath = args.location.pathname;
+    const currentPath = _.location.pathname;
 
     // Check if we're navigating to the same route
     // If so, skip animation entirely to avoid infinite overlay
@@ -91,7 +91,7 @@ const navigateTo = async (path, options = {}) => {
     await new Promise(resolve => setTimeout(resolve, 100));
 
     // Fire the navigation - this may be async and take variable time
-    args.navigate(path, options);
+    _.navigate(path, options);
 
     // Smart pathname monitoring system
     // Polls until the actual route change is detected
@@ -104,7 +104,7 @@ const navigateTo = async (path, options = {}) => {
           pollCount++;
 
           // Check if pathname has actually changed from original
-          if (args.location.pathname !== currentPath) {
+          if (_.location.pathname !== currentPath) {
             // Success! Route has changed
             // Add small buffer time for new route components to fully render
             setTimeout(resolve, 100);
@@ -154,10 +154,10 @@ return {
 return {
   as: "div",
   data: {
-    showConfirm: args.fns.showConfirm,
-    isConfirmDialogOpen: args.fns.isConfirmDialogOpen,
-    confirmDialogConfig: args.fns.confirmDialogConfig,
-    rbConfirm: args.fns.rbConfirm
+    showConfirm: f.showConfirm,
+    isConfirmDialogOpen: f.isConfirmDialogOpen,
+    confirmDialogConfig: f.confirmDialogConfig,
+    rbConfirm: f.rbConfirm
   }
 };
 ''',
@@ -184,8 +184,8 @@ return `._id {
         displayOrder: 2,
         componentName: "RBConfirmDialog",
         props: '''
-const isOpen = args.fns.isConfirmDialogOpen?.();
-const config = args.fns.confirmDialogConfig || {};
+const isOpen = f.isConfirmDialogOpen?.();
+const config = f.confirmDialogConfig || {};
 
 return {
   isOpen: isOpen,

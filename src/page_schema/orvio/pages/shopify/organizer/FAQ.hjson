@@ -23,19 +23,19 @@
           '''return `._id {
   max-width: 800px;
   margin: 0 auto;
-  padding: ${args.theme.var.spacing?.lg || "2rem"};
-  color: ${args.theme.var.color.text};
+  padding: ${t.var.spacing?.lg || "2rem"};
+  color: ${t.var.color.text};
 }
 
 @media (max-width: 768px) {
   ._id {
-    padding: ${args.theme.var.spacing?.md || "1rem"};
+    padding: ${t.var.spacing?.md || "1rem"};
   }
 }`;'''
         displayOrder: 1
         fns:
           '''
-const [expandedIndex, setExpandedIndex] = args.createSignal(null);
+const [expandedIndex, setExpandedIndex] = _.createSignal(null);
 const toggleExpanded = (index) => {
   setExpandedIndex((prev) => (prev === index ? null : index));
 };
@@ -61,7 +61,7 @@ return {
           '''return `._id {
   font-size: 2rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 1rem 0;
 }
 
@@ -87,7 +87,7 @@ return {
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin-bottom: 1.5rem;
 }`;'''
         displayOrder: 2
@@ -128,8 +128,8 @@ return {
         css:
           '''return `._id {
   border-radius: 0.75rem;
-  border: 1px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background_light_100};
+  border: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background_light_100};
   overflow: hidden;
 }`;'''
         loop: true
@@ -159,7 +159,7 @@ return `._id {
   text-align: left;
   font-size: 1rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0;
   padding: 1rem 2.5rem 1rem 1rem;
   border: none;
@@ -176,8 +176,8 @@ return `._id {
   transform: translateY(-50%) rotate(45deg);
   width: 0.5rem;
   height: 0.5rem;
-  border-right: 2px solid ${args.theme.var.color.text};
-  border-bottom: 2px solid ${args.theme.var.color.text};
+  border-right: 2px solid ${t.var.color.text};
+  border-bottom: 2px solid ${t.var.color.text};
   transition: transform 0.2s ease;
 }
 
@@ -189,15 +189,15 @@ return `._id {
         componentName: Html
         props:
           '''
-const item = args.contextData.faqItem;
+const item = c.faqItem;
 const index = item?.index ?? -1;
-const isExpanded = args.fns.expandedIndex?.() === index;
+const isExpanded = f.expandedIndex?.() === index;
 return {
   as: "button",
   type: "button",
   text: item?.q || "",
   "data-expanded": isExpanded ? "true" : "false",
-  onClick: () => args.fns.toggleExpanded?.(index)
+  onClick: () => f.toggleExpanded?.(index)
 };
 '''
       }
@@ -211,22 +211,22 @@ return {
 return `._id {
   font-size: 0.9375rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0;
   padding: 0 1rem 1rem 1rem;
-  border-top: 1px solid ${args.theme.var.color.border};
+  border-top: 1px solid ${t.var.color.border};
 }`;
 '''
         displayOrder: 2
         componentName: Html
         props:
           '''
-const item = args.contextData.faqItem;
+const item = c.faqItem;
 const index = item?.index ?? -1;
 return {
   as: "p",
   text: item?.a || "",
-  show: () => args.fns.expandedIndex?.() === index
+  show: () => f.expandedIndex?.() === index
 };
 '''
       }
@@ -239,7 +239,7 @@ return {
           '''return `._id {
   font-size: 0.9375rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin-top: 1.5rem;
 }`;'''
         displayOrder: 4

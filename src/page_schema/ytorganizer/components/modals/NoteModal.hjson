@@ -37,20 +37,20 @@ return `._id {
         displayOrder: 1
         fns:
           '''
-const [note, setNote] = args.createSignal("");
-const [isSubmitting, setIsSubmitting] = args.createSignal(false);
+const [note, setNote] = _.createSignal("");
+const [isSubmitting, setIsSubmitting] = _.createSignal(false);
 
 const initializeNote = () => {
-  const existingNote = args.contextData.props?.existingNote || "";
+  const existingNote = c.props?.existingNote || "";
   setNote(existingNote);
   setIsSubmitting(false);
 };
 
 const handleSave = async () => {
   const noteValue = note().trim();
-  const item = args.contextData.props?.item;
-  const onSave = args.contextData.props?.onSave;
-  const onClose = args.contextData.props?.onClose;
+  const item = c.props?.item;
+  const onSave = c.props?.onSave;
+  const onClose = c.props?.onClose;
 
   setIsSubmitting(true);
 
@@ -83,9 +83,9 @@ return {
         componentName: Html
         props:
           '''
-const isOpen = args.contextData.props?.isOpen;
+const isOpen = c.props?.isOpen;
 const getIsOpen = isOpen?.() || false;
-const onClose = args.contextData.props?.onClose;
+const onClose = c.props?.onClose;
 
 return {
   as: "div",
@@ -96,7 +96,7 @@ return {
     }
   },
   onMount: () => {
-    args.fns.initializeNote();
+    f.initializeNote();
   }
 };
 '''
@@ -109,7 +109,7 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
   border-radius: 0.75rem;
   width: 100%;
   max-width: 500px;
@@ -152,7 +152,7 @@ return `._id {
   align-items: center;
   justify-content: space-between;
   padding: 1.5rem;
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  border-bottom: 1px solid ${t.var.color.border};
 }`;
 '''
         displayOrder: 1
@@ -174,7 +174,7 @@ return {
 return `._id {
   font-size: 1.5rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0;
   text-transform: capitalize;
 }`;
@@ -183,8 +183,8 @@ return `._id {
         componentName: Html
         props:
           '''
-const item = args.contextData.props?.item;
-const existingNote = args.contextData.props?.existingNote || "";
+const item = c.props?.item;
+const existingNote = c.props?.existingNote || "";
 const hasNote = existingNote.length > 0;
 const action = hasNote ? "Edit" : "Add";
 
@@ -216,7 +216,7 @@ return {
 return `._id {
   background: none;
   border: none;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   cursor: pointer;
   padding: 0.5rem;
   border-radius: 0.375rem;
@@ -226,8 +226,8 @@ return `._id {
   justify-content: center;
 
   &:hover {
-    background: ${args.theme.var.color.background_light_200};
-    color: ${args.theme.var.color.text};
+    background: ${t.var.color.background_light_200};
+    color: ${t.var.color.text};
   }
 }`;
 '''
@@ -235,7 +235,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const onClose = args.contextData.props?.onClose;
+const onClose = c.props?.onClose;
 
 return {
   as: "button",
@@ -303,7 +303,7 @@ return {
   as: "form",
   onSubmit: (e) => {
     e.preventDefault();
-    args.fns.handleSave();
+    f.handleSave();
   }
 };
 '''
@@ -340,7 +340,7 @@ return {
 return `._id {
   font-size: 0.875rem;
   font-weight: 500;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 1
@@ -363,10 +363,10 @@ return {
 return `._id {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.375rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   font-family: inherit;
   font-size: 0.875rem;
   resize: vertical;
@@ -375,7 +375,7 @@ return `._id {
 
   &:focus {
     outline: none;
-    border-color: ${args.theme.var.color.primary};
+    border-color: ${t.var.color.primary};
   }
 
   &:disabled {
@@ -390,12 +390,12 @@ return `._id {
           '''
 return {
   as: "textarea",
-  value: args.fns.note(),
-  onInput: (e) => args.fns.setNote(e.target.value),
+  value: f.note(),
+  onInput: (e) => f.setNote(e.target.value),
   placeholder: "Add your note here (max 500 characters)...",
   rows: 5,
   maxlength: 500,
-  disabled: args.fns.isSubmitting()
+  disabled: f.isSubmitting()
 };
 '''
       }
@@ -408,7 +408,7 @@ return {
           '''
 return `._id {
   font-size: 0.75rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   text-align: right;
 }`;
 '''
@@ -416,7 +416,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const charCount = args.fns.note().length;
+const charCount = f.note().length;
 const maxChars = 500;
 
 return {
@@ -434,7 +434,7 @@ return {
           '''
 return `._id {
   padding: 1.5rem;
-  border-top: 1px solid ${args.theme.var.color.border};
+  border-top: 1px solid ${t.var.color.border};
   display: flex;
   gap: 1rem;
   justify-content: flex-end;
@@ -458,13 +458,13 @@ return {
         componentName: Button
         props:
           '''
-const onClose = args.contextData.props?.onClose;
+const onClose = c.props?.onClose;
 
 return {
   text: "Cancel",
   variant: "secondary",
   onClick: onClose,
-  disabled: args.fns.isSubmitting()
+  disabled: f.isSubmitting()
 };
 '''
       }
@@ -477,12 +477,12 @@ return {
         componentName: Button
         props:
           '''
-const isSubmitting = args.fns.isSubmitting();
+const isSubmitting = f.isSubmitting();
 
 return {
   text: isSubmitting ? "Saving..." : "Save Note",
   variant: "primary",
-  onClick: args.fns.handleSave,
+  onClick: f.handleSave,
   disabled: isSubmitting
 };
 '''

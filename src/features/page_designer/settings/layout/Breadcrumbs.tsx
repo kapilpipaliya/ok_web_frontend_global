@@ -88,8 +88,8 @@ export function Breadcrumbs(props: BreadcrumbsProps) {
           display: flex;
           align-items: center;
           padding: 0.5rem 0.75rem;
-          background-color: \${args.theme.var.color.background_light_50};
-          border-bottom: 1px solid \${args.theme.var.color.border};
+          background-color: \${t.var.color.background_light_50};
+          border-bottom: 1px solid \${t.var.color.border};
           gap: 0.25rem;
           min-height: 2rem;
           overflow-x: auto;
@@ -111,7 +111,7 @@ export function Breadcrumbs(props: BreadcrumbsProps) {
                 <Icon
                   icon="tabler:chevron-right"
                   css={`return \`._id {
-                    color: \${args.theme.var.color.text_light_300};
+                    color: \${t.var.color.text_light_300};
                     width: 1rem;
                     height: 1rem;
                     flex-shrink: 0;
@@ -130,8 +130,8 @@ export function Breadcrumbs(props: BreadcrumbsProps) {
                   };
                   color: ${
                     index() === parentPath().length - 1
-                      ? "${args.theme.var.color.text}"
-                      : "${args.theme.var.color.text_light_200}"
+                      ? "${t.var.color.text}"
+                      : "${t.var.color.text_light_200}"
                   };
                   background-color: transparent;
                   border: none;
@@ -140,12 +140,12 @@ export function Breadcrumbs(props: BreadcrumbsProps) {
                   white-space: nowrap;
                   
                   &:hover {
-                    background-color: \${args.theme.var.color.background_light_100};
-                    color: \${args.theme.var.color.text};
+                    background-color: \${t.var.color.background_light_100};
+                    color: \${t.var.color.text};
                   }
                   
                   &:focus-visible {
-                    outline: 2px solid \${args.theme.var.color.primary};
+                    outline: 2px solid \${t.var.color.primary};
                     outline-offset: 2px;
                   }
                 }\`;`}

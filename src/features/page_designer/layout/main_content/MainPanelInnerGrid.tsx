@@ -188,8 +188,8 @@ export function MainPanelInnerGrid(
                   iconCss={`return \`._id {
                     color: ${
                       layoutStore().isLayoutTreeFloatingMenuEnabled
-                        ? "${args.theme.var.color.primary}"
-                        : "${args.theme.var.color.text_light_300}"
+                        ? "${t.var.color.primary}"
+                        : "${t.var.color.text_light_300}"
                     };
                   }\`;`}
                   onClick={toggleLayoutTreeFloatingMenu}

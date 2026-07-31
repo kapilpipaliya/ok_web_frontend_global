@@ -7,7 +7,7 @@
         key: DashboardLayoutRenderer
         fns:
           '''
-const getRuntime = () => args.contextData.props?.dashboardRuntime?.() || null;
+const getRuntime = () => c.props?.dashboardRuntime?.() || null;
 
 const getLayoutStyle = (widgetConfig) => {
   const runtime = getRuntime();
@@ -120,7 +120,7 @@ return { getRuntime, getLayoutStyle, isEditMode, startLayoutDrag, startLayoutRes
         key: dashboard_grid
         props:
           '''
-const runtime = args.fns.getRuntime();
+const runtime = f.getRuntime();
 const widgets = runtime?.getDisplayWidgets?.() || runtime?.widgets || [];
 return {
   as: "div",
@@ -133,17 +133,17 @@ return {
 '''
         css:
           '''
-const runtime = args.fns.getRuntime();
+const runtime = f.getRuntime();
 const columns = Number(runtime?.config?.layout?.columns || 12);
 const gap = Number(runtime?.config?.layout?.gap || 16);
-const editMode = args.fns.isEditMode?.() === true;
+const editMode = f.isEditMode?.() === true;
 return `._id {
   display: grid;
   grid-template-columns: repeat(${columns}, minmax(0, 1fr));
   gap: ${gap}px;
   width: 100%;
   align-items: stretch;
-  ${editMode ? "outline: 1px dashed " + args.theme.var.color.border + ";" : ""}
+  ${editMode ? "outline: 1px dashed " + t.var.color.border + ";" : ""}
 }`;
 '''
       }
@@ -157,24 +157,24 @@ return `._id {
         key: widget_grid_item
         props:
           '''
-const widgetConfig = args.contextData.dashboardWidget;
-const editMode = args.fns.isEditMode?.() === true;
+const widgetConfig = c.dashboardWidget;
+const editMode = f.isEditMode?.() === true;
 return {
   as: "div",
-  style: args.fns.getLayoutStyle(widgetConfig),
+  style: f.getLayoutStyle(widgetConfig),
   class: editMode ? "dashboard-widget-edit-item" : ""
 };
 '''
         css:
           '''
-const editMode = args.fns.isEditMode?.() === true;
+const editMode = f.isEditMode?.() === true;
 return `._id {
   position: relative;
   display: flex;
   flex-direction: column;
   min-height: 0;
   ${editMode ? `
-    outline: 1px solid ${args.theme.var.color.primary_light_300};
+    outline: 1px solid ${t.var.color.primary_light_300};
     border-radius: 0.5rem;
   ` : ""}
 }`;
@@ -190,13 +190,13 @@ return `._id {
         key: edit_drag_handle
         props:
           '''
-const widgetConfig = args.contextData.dashboardWidget;
+const widgetConfig = c.dashboardWidget;
 return {
   as: "button",
   type: "button",
   text: "Drag",
-  hide: args.fns.isEditMode?.() !== true,
-  onMouseDown: (event) => args.fns.startLayoutDrag(widgetConfig, event)
+  hide: f.isEditMode?.() !== true,
+  onMouseDown: (event) => f.startLayoutDrag(widgetConfig, event)
 };
 '''
         css:
@@ -209,9 +209,9 @@ return `._id {
   font-size: 0.65rem;
   padding: 0.125rem 0.375rem;
   border-radius: 0.25rem;
-  border: 1px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text_light_500};
+  border: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text_light_500};
   cursor: grab;
 }`;
 '''
@@ -226,12 +226,12 @@ return `._id {
         key: edit_resize_handle
         props:
           '''
-const widgetConfig = args.contextData.dashboardWidget;
+const widgetConfig = c.dashboardWidget;
 return {
   as: "span",
   text: "",
-  hide: args.fns.isEditMode?.() !== true,
-  onMouseDown: (event) => args.fns.startLayoutResize(widgetConfig, event)
+  hide: f.isEditMode?.() !== true,
+  onMouseDown: (event) => f.startLayoutResize(widgetConfig, event)
 };
 '''
         css:
@@ -244,7 +244,7 @@ return `._id {
   width: 0.875rem;
   height: 0.875rem;
   border-radius: 0.125rem;
-  background: ${args.theme.var.color.primary};
+  background: ${t.var.color.primary};
   cursor: nwse-resize;
 }`;
 '''
@@ -259,8 +259,8 @@ return `._id {
         key: widget_shell
         props:
           '''
-const widgetConfig = args.contextData.dashboardWidget;
-const runtime = args.contextData.props?.dashboardRuntime?.() || args.fns.getRuntime();
+const widgetConfig = c.dashboardWidget;
+const runtime = c.props?.dashboardRuntime?.() || f.getRuntime();
 return {
   widgetConfig,
   dashboardRuntime: () => runtime

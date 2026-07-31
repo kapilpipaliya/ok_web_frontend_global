@@ -13,20 +13,20 @@
         updatedAt: 2026-07-14T15:36:48.893Z
         props:
           '''
-const locale = args.params?.lang ? String(args.params.lang).toLowerCase() : undefined;
+const locale = _.params?.lang ? String(_.params.lang).toLowerCase() : undefined;
 return {
   contextName: "booksSettings",
   serverFunction: `
 try {
-  const pageResult = await args.executeNamedServerFunction({
+  const pageResult = await s({
     functionName: "loadPublicPageSettings",
     contextData: { pageId: "books", allowPublicRead: true, locale: ${JSON.stringify(locale ?? null)} }
   });
-  const tableResult = await args.executeNamedServerFunction({
+  const tableResult = await s({
     functionName: "loadPublicTableContent",
     contextData: { tableKey: "books", tableVertexLabel: "Book", locale: ${JSON.stringify(locale ?? null)} }
   });
-  const recommendedResult = await args.executeNamedServerFunction({
+  const recommendedResult = await s({
     functionName: "loadPublicTableContent",
     contextData: { tableKey: "recommended_books", tableVertexLabel: "RecommendedBook", locale: ${JSON.stringify(locale ?? null)} }
   });
@@ -85,7 +85,7 @@ try {
 }`;'''
         displayOrder: 2
         fns:
-          '''const [activeTab, setActiveTab] = args.createSignal("by");
+          '''const [activeTab, setActiveTab] = _.createSignal("by");
 return {
   activeTab,
   setActiveTab,
@@ -122,7 +122,7 @@ return {
       P: {
         css:
           '''return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   font-size: 3rem;
   font-weight: 700;
   margin: 0;
@@ -134,7 +134,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const content = args.contextData.booksSettings?.content;
+          '''const content = c.booksSettings?.content;
 return {
   as: "h1",
   text: content?.pageTitle || "Books"
@@ -167,21 +167,21 @@ return {
       L: Attr
       P: {
         css:
-          '''const active = args.fns.isByTab?.() === true;
+          '''const active = f.isByTab?.() === true;
 return `._id.books-tab {
   padding: 0.625rem 1.25rem;
-  border: 1px solid ${active ? args.theme.var.color.primary : args.theme.var.color.border};
+  border: 1px solid ${active ? t.var.color.primary : t.var.color.border};
   border-radius: 0.5rem;
-  background: ${active ? args.theme.var.color.primary : args.theme.var.color.background};
-  color: ${active ? args.theme.var.color.primary_text : args.theme.var.color.text};
+  background: ${active ? t.var.color.primary : t.var.color.background};
+  color: ${active ? t.var.color.primary_text : t.var.color.text};
   font-size: 0.9375rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 
   &:hover {
-    border-color: ${args.theme.var.color.primary};
-    background: ${active ? args.theme.var.color.primary : args.theme.var.color.primary_light_50};
+    border-color: ${t.var.color.primary};
+    background: ${active ? t.var.color.primary : t.var.color.primary_light_50};
   }
 
   @media (max-width: 768px) {
@@ -192,7 +192,7 @@ return `._id.books-tab {
         displayOrder: 2
         componentName: Html
         props:
-          '''const active = args.fns.isByTab?.() === true;
+          '''const active = f.isByTab?.() === true;
 return {
   as: "button",
   type: "button",
@@ -200,7 +200,7 @@ return {
   "aria-selected": active ? "true" : "false",
   text: "Books By Fulchand",
   class: active ? "books-tab books-tab-active" : "books-tab",
-  onClick: () => args.fns.setActiveTab?.("by")
+  onClick: () => f.setActiveTab?.("by")
 };'''
       }
     }
@@ -209,21 +209,21 @@ return {
       L: Attr
       P: {
         css:
-          '''const active = args.fns.isRecommendedTab?.() === true;
+          '''const active = f.isRecommendedTab?.() === true;
 return `._id.books-tab {
   padding: 0.625rem 1.25rem;
-  border: 1px solid ${active ? args.theme.var.color.primary : args.theme.var.color.border};
+  border: 1px solid ${active ? t.var.color.primary : t.var.color.border};
   border-radius: 0.5rem;
-  background: ${active ? args.theme.var.color.primary : args.theme.var.color.background};
-  color: ${active ? args.theme.var.color.primary_text : args.theme.var.color.text};
+  background: ${active ? t.var.color.primary : t.var.color.background};
+  color: ${active ? t.var.color.primary_text : t.var.color.text};
   font-size: 0.9375rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 
   &:hover {
-    border-color: ${args.theme.var.color.primary};
-    background: ${active ? args.theme.var.color.primary : args.theme.var.color.primary_light_50};
+    border-color: ${t.var.color.primary};
+    background: ${active ? t.var.color.primary : t.var.color.primary_light_50};
   }
 
   @media (max-width: 768px) {
@@ -234,7 +234,7 @@ return `._id.books-tab {
         displayOrder: 3
         componentName: Html
         props:
-          '''const active = args.fns.isRecommendedTab?.() === true;
+          '''const active = f.isRecommendedTab?.() === true;
 return {
   as: "button",
   type: "button",
@@ -242,7 +242,7 @@ return {
   "aria-selected": active ? "true" : "false",
   text: "Books Recommended by Fulchand",
   class: active ? "books-tab books-tab-active" : "books-tab",
-  onClick: () => args.fns.setActiveTab?.("recommended")
+  onClick: () => f.setActiveTab?.("recommended")
 };'''
       }
     }
@@ -253,10 +253,10 @@ return {
         displayOrder: 3
         componentName: PublicContentTable
         props:
-          '''const isRecommended = args.fns.isRecommendedTab?.() === true;
+          '''const isRecommended = f.isRecommendedTab?.() === true;
 const books = isRecommended
-  ? (args.contextData.booksSettings?.recommendedBooks ?? [])
-  : (args.contextData.booksSettings?.books ?? []);
+  ? (c.booksSettings?.recommendedBooks ?? [])
+  : (c.booksSettings?.books ?? []);
 return {
   columns: [
     { key: "serial", label: "S.No.", width: "48px" },
@@ -283,7 +283,7 @@ return {
   transition: background 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.background_light_50};
+    background: ${t.var.color.background_light_50};
   }
 }`;'''
         displayOrder: 1
@@ -302,12 +302,12 @@ return {
           '''return `._id {
   text-align: left;
   vertical-align: middle;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const row = args.contextData.row || {};
+          '''const row = c.row || {};
 return {
   as: "td",
   text: row.serial != null && row.serial !== "" ? String(row.serial) : "",
@@ -359,7 +359,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const row = args.contextData.row || {};
+          '''const row = c.row || {};
 const src = row.preview || "";
 return {
   as: "img",
@@ -377,13 +377,13 @@ return {
           '''return `._id {
   text-align: left;
   vertical-align: middle;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   font-weight: 600;
 }`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''const row = args.contextData.row || {};
+          '''const row = c.row || {};
 return {
   as: "td",
   text: row.name || ""
@@ -398,13 +398,13 @@ return {
           '''return `._id {
   text-align: left;
   vertical-align: middle;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   max-width: 320px;
 }`;'''
         displayOrder: 4
         componentName: Html
         props:
-          '''const row = args.contextData.row || {};
+          '''const row = c.row || {};
 return {
   as: "td",
   text: row.description || ""
@@ -419,12 +419,12 @@ return {
           '''return `._id {
   text-align: left;
   vertical-align: middle;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         displayOrder: 5
         componentName: Html
         props:
-          '''const row = args.contextData.row || {};
+          '''const row = c.row || {};
 return {
   as: "td",
   text: row.year != null && row.year !== "" ? String(row.year) : "",
@@ -440,12 +440,12 @@ return {
           '''return `._id {
   text-align: left;
   vertical-align: middle;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         displayOrder: 6
         componentName: Html
         props:
-          '''const row = args.contextData.row || {};
+          '''const row = c.row || {};
 return {
   as: "td",
   text: row.language || "",
@@ -481,8 +481,8 @@ return {
   align-items: center;
   justify-content: center;
   padding: 0.25rem 0.5rem;
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
   border-radius: 0.25rem;
   text-decoration: none;
   font-size: 0.8125rem;
@@ -490,13 +490,13 @@ return {
   transition: background 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.primary_dark_200};
+    background: ${t.var.color.primary_dark_200};
   }
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const row = args.contextData.row || {};
+          '''const row = c.row || {};
 const href = row.downloadUrl || "";
 return {
   as: "a",

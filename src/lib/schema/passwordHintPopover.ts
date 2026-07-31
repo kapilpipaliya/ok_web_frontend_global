@@ -64,7 +64,7 @@ export function createPasswordHintPopoverContent(
         as: "h3",
         css: `return \`._id {
   font-size: 16px;
-  color: \${args.theme.var.color.primary};
+  color: \${t.var.color.primary};
   margin: 0px;
   margin-bottom: 8px;
 }\`;`,
@@ -90,7 +90,7 @@ export function createPasswordHintPopoverContent(
                     : "error"
                   : "grey";
                 return `return \`._id {
-  color: \${args.theme.var.color.${iconColor}};
+  color: \${t.var.color.${iconColor}};
 }\`;`;
               },
               props: (options: ValidationStateFunctionArgumentType) => {
@@ -124,7 +124,7 @@ export function createPasswordHintPopoverContent(
                   : "text_dark_400";
 
                 return `return \`._id {
-  color: \${args.theme.var.color.${textColor}};
+  color: \${t.var.color.${textColor}};
 }\`;`;
               },
               props: () => {
@@ -173,7 +173,7 @@ export function createPasswordHintPopoverContent(
     ],
     css: `return \`._id {
   padding: 12px;
-  background-color: \${args.theme.var.color.background};
+  background-color: \${t.var.color.background};
   border-radius: 4px;
   max-width: 300px;
 }\`;`,
@@ -209,7 +209,7 @@ export function createPasswordLabelWithHint(label: string): FieldAttribute {
                   ? "warning"
                   : "grey";
               return `return \`._id {
-  color: \${args.theme.var.color.${iconColor}};
+  color: \${t.var.color.${iconColor}};
 }\`;`;
             },
             props: (options: HelpIconStateFunctionArgumentType) => {

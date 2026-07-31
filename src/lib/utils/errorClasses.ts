@@ -120,7 +120,7 @@ export class BusinessLogicError extends AppError {
 }
 
 /**
- * Error class factory for args.errors
+ * Error class factory for _.errors
  */
 export const errors = {
   /**

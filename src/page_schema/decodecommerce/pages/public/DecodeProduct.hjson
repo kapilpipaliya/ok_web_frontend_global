@@ -24,8 +24,8 @@ return {
         css: '''
 return `._id {
   min-height: 100vh;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -65,7 +65,7 @@ return {
         css: '''
 return `._id {
   padding: 5rem 0 3rem;
-  background: linear-gradient(135deg, ${args.theme.var.color.background} 0%, ${args.theme.var.color.background_dark_100} 100%);
+  background: linear-gradient(135deg, ${t.var.color.background} 0%, ${t.var.color.background_dark_100} 100%);
   
   @media (max-width: 768px) {
     padding: 3rem 0 2rem;
@@ -115,7 +115,7 @@ return {
 return `._id {
   font-size: 3rem;
   font-weight: 800;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 1.5rem;
   
   @media (max-width: 768px) {
@@ -140,7 +140,7 @@ return {
         css: '''
 return `._id {
   font-size: 1.25rem;
-  color: ${args.theme.var.color.text_dark_300};
+  color: ${t.var.color.text_dark_300};
   max-width: 700px;
   margin: 0 auto;
   
@@ -165,7 +165,7 @@ return {
         css: '''
 return `._id {
   padding: 4rem 0 5rem;
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
 }`;
 '''
       }
@@ -230,7 +230,7 @@ return {
         css: '''
 return `._id {
   line-height: 1.7;
-  color: ${args.theme.var.color.text_dark_300};
+  color: ${t.var.color.text_dark_300};
 }`;
 '''
       }

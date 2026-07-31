@@ -704,7 +704,7 @@ export function LayoutTree() {
             ICON_BUTTON_STYLES.defaultCss,
             ICON_BUTTON_STYLES.spacingCss,
             `return \`._id {
-              ${formStoreVertex()?.P.showAllJsonEditors ? "color: ${args.theme.var.color.primary};" : ""}
+              ${formStoreVertex()?.P.showAllJsonEditors ? "color: ${t.var.color.primary};" : ""}
               background-color: transparent;
               border: none;
               flex-shrink: 0;

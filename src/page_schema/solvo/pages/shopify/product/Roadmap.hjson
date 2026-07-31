@@ -23,13 +23,13 @@
           '''return `._id {
   max-width: 800px;
   margin: 0 auto;
-  padding: ${args.theme.var.spacing?.lg || "2rem"};
-  color: ${args.theme.var.color.text};
+  padding: ${t.var.spacing?.lg || "2rem"};
+  color: ${t.var.color.text};
 }
 
 @media (max-width: 768px) {
   ._id {
-    padding: ${args.theme.var.spacing?.md || "1rem"};
+    padding: ${t.var.spacing?.md || "1rem"};
   }
 }`;'''
         displayOrder: 1
@@ -49,7 +49,7 @@
           '''return `._id {
   font-size: 2rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }
 
@@ -94,7 +94,7 @@
           '''return `._id {
   font-size: 0.9375rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0;
 }`;'''
         displayOrder: 1

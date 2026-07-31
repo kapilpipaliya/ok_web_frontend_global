@@ -12,7 +12,7 @@ const {
   tableVertexLabel = "GalleryItem",
   categoryKey,
   locale
-} = args.contextData || {};
+} = c || {};
 
 const resolvedTableKey = tableKey && String(tableKey).trim() !== "" ? String(tableKey).trim() : "gallery";
 const resolvedTableVertexLabel =
@@ -20,7 +20,7 @@ const resolvedTableVertexLabel =
     ? String(tableVertexLabel).trim()
     : "GalleryItem";
 
-const configResult = await args.executeNamedServerFunction({
+const configResult = await s({
   functionName: "loadTableConfigByKey",
   contextData: { tableKey: resolvedTableKey }
 });
@@ -68,8 +68,8 @@ const sidebar = sidebarRaw ? stripPartMeta(sidebarRaw) : {};
 const parentVertexLabel = sidebar.parentVertexLabel || "GalleryCategory";
 const toParentEdgeType = sidebar.toParentEdgeType || "ParentGalleryCategory";
 
-if (!args.context.nodes) args.context.nodes = {};
-if (!args.context.relationships) args.context.relationships = {};
+if (!_.context.nodes) _.context.nodes = {};
+if (!_.context.relationships) _.context.relationships = {};
 
 const currentCategoryKey =
   categoryKey != null && String(categoryKey).trim() !== ""
@@ -80,7 +80,7 @@ const isRootView = !currentCategoryKey;
 let currentCategory = null;
 let currentCategoryId = null;
 if (currentCategoryKey) {
-  const catResult = await args.session.run(
+  const catResult = await _.session.run(
     `
     MATCH (v:${parentVertexLabel})
     WHERE v.key = $categoryKey
@@ -89,7 +89,7 @@ if (currentCategoryKey) {
     `,
     { categoryKey: currentCategoryKey }
   );
-  const cats = args.processResult(catResult.records, args.context, "v") || [];
+  const cats = _.processResult(catResult.records, _.context, "v") || [];
   currentCategory = cats[0] || null;
   if (!currentCategory) {
     return { success: false, message: "Gallery folder not found" };
@@ -99,7 +99,7 @@ if (currentCategoryKey) {
 
 const buildFolderEntry = async (child) => {
   if (!child?.id) return null;
-  const childCountResult = await args.session.run(
+  const childCountResult = await _.session.run(
     `
     MATCH (content:${resolvedTableVertexLabel})-[:${toParentEdgeType}]->(cat:${parentVertexLabel})
     WHERE elementId(cat) = $categoryId
@@ -107,7 +107,7 @@ const buildFolderEntry = async (child) => {
     `,
     { categoryId: child.id }
   );
-  const folderCountResult = await args.session.run(
+  const folderCountResult = await _.session.run(
     `
     MATCH (nested:${parentVertexLabel})-[:${toParentEdgeType}]->(parent:${parentVertexLabel})
     WHERE elementId(parent) = $categoryId
@@ -128,7 +128,7 @@ const buildFolderEntry = async (child) => {
 const folders = [];
 if (isRootView) {
   // Top-level folders = categories with no parent
-  const topResult = await args.session.run(
+  const topResult = await _.session.run(
     `
     MATCH (v:${parentVertexLabel})
     WHERE NOT EXISTS { MATCH (v)-[:${toParentEdgeType}]->(:${parentVertexLabel}) }
@@ -136,13 +136,13 @@ if (isRootView) {
     ORDER BY COALESCE(v.displayOrder, 0), COALESCE(v.name, v.key, '') ASC
     `
   );
-  const topFolders = args.processResult(topResult.records, args.context, "v") || [];
+  const topFolders = _.processResult(topResult.records, _.context, "v") || [];
   for (const child of topFolders) {
     const entry = await buildFolderEntry(child);
     if (entry) folders.push(entry);
   }
 } else {
-  const childrenResult = await args.session.run(
+  const childrenResult = await _.session.run(
     `
     MATCH (child:${parentVertexLabel})-[r:${toParentEdgeType}]->(parent:${parentVertexLabel})
     WHERE elementId(parent) = $parentId
@@ -151,14 +151,14 @@ if (isRootView) {
     `,
     { parentId: currentCategoryId }
   );
-  const childVertices = args.processResult(childrenResult.records, args.context, ["child", "parent"], "r") || [];
+  const childVertices = _.processResult(childrenResult.records, _.context, ["child", "parent"], "r") || [];
   for (const child of childVertices) {
     const entry = await buildFolderEntry(child);
     if (entry) folders.push(entry);
   }
 }
 
-const contentResult = await args.executeNamedServerFunction({
+const contentResult = await s({
   functionName: "getUserContent",
   contextData: {
     tableKey: resolvedTableKey,
@@ -244,9 +244,9 @@ if (currentCategoryId) {
     if (seen.has(walkId)) break;
     seen.add(walkId);
 
-    let walkVertex = args.context.nodes[walkId];
+    let walkVertex = _.context.nodes[walkId];
     if (!walkVertex) {
-      const walkResult = await args.session.run(
+      const walkResult = await _.session.run(
         `
         MATCH (v:${parentVertexLabel})
         WHERE elementId(v) = $id
@@ -255,7 +255,7 @@ if (currentCategoryId) {
         `,
         { id: walkId }
       );
-      const walked = args.processResult(walkResult.records, args.context, "v") || [];
+      const walked = _.processResult(walkResult.records, _.context, "v") || [];
       walkVertex = walked[0] || null;
     }
     if (!walkVertex) break;
@@ -267,7 +267,7 @@ if (currentCategoryId) {
       isRoot: false
     });
 
-    const parentResult = await args.session.run(
+    const parentResult = await _.session.run(
       `
       MATCH (child:${parentVertexLabel})-[:${toParentEdgeType}]->(parent:${parentVertexLabel})
       WHERE elementId(child) = $id
@@ -276,7 +276,7 @@ if (currentCategoryId) {
       `,
       { id: walkId }
     );
-    const parents = args.processResult(parentResult.records, args.context, "parent") || [];
+    const parents = _.processResult(parentResult.records, _.context, "parent") || [];
     walkId = parents[0]?.id || null;
   }
   for (const node of ancestors) {
@@ -284,8 +284,8 @@ if (currentCategoryId) {
   }
 }
 
-const mergedVertexes = Object.assign({}, contentGraph.vertexes || {}, schemaGraph.vertexes || {}, args.context.nodes || {});
-const mergedEdges = Object.assign({}, contentGraph.edges || {}, schemaGraph.edges || {}, args.context.relationships || {});
+const mergedVertexes = Object.assign({}, contentGraph.vertexes || {}, schemaGraph.vertexes || {}, _.context.nodes || {});
+const mergedEdges = Object.assign({}, contentGraph.edges || {}, schemaGraph.edges || {}, _.context.relationships || {});
 
 return {
   success: true,

@@ -8,14 +8,14 @@
         description: "Background worker that automatically backs up all Neo4j databases on schedule and uploads to cloud storage",
         body: '''
 // This is a background worker function that runs on a schedule
-if (args.contextData.action === 'start') {
+if (c.action === 'start') {
   // Helper function to log messages to database
   const logMessage = async (level, message, metadata = {}) => {
     try {
-      await args.executeNamedServerFunction({
+      await s({
         functionName: 'logWorkerMessage',
         contextData: {
-          functionLookupSubDomain: args.subDomain,
+          functionLookupSubDomain: _.subDomain,
           workerName: 'backgroundBackupDatabase',
           level,
           message,
@@ -31,9 +31,9 @@ if (args.contextData.action === 'start') {
   await logMessage('info', 'Starting background database backup worker');
 
   // Initialize queue helpers and Redis connection (lookup in admin DB)
-  const helpers = await args.executeNamedServerFunction(
+  const helpers = await s(
     { functionName: 'queueHelpers', contextData: {} },
-    { functionLookupSubDomain: args.subDomain }
+    { functionLookupSubDomain: _.subDomain }
   );
 
   if (helpers.error || !helpers.result?.success) {
@@ -43,7 +43,7 @@ if (args.contextData.action === 'start') {
     throw new Error('Queue helpers initialization failed');
   }
 
-  const { Worker, Queue } = args.bullmq;
+  const { Worker, Queue } = _.bullmq;
   const connection = helpers.result.data.getRedisConnection();
 
   // Validate Redis connection config
@@ -115,7 +115,7 @@ if (args.contextData.action === 'start') {
       });
 
       // Create a new session for this job execution
-      const adminSession = await args.getSession();
+      const adminSession = await _.getSession();
 
       const startTime = Date.now();
       let totalDatabases = 0;
@@ -147,7 +147,7 @@ if (args.contextData.action === 'start') {
             await logMessage('info', `Starting backup for database: ${databaseName}`);
 
             // Call backup utilities to create and upload backup
-            const backupResult = await args.createDatabaseBackup({
+            const backupResult = await _.createDatabaseBackup({
               databaseName,
               backupType: scheduledBackupType,
               jobId: job.id
@@ -203,11 +203,11 @@ if (args.contextData.action === 'start') {
         // Apply retention policy to clean up old backups
         try {
           await logMessage('info', 'Applying backup retention policy');
-          const retentionResult = await args.executeNamedServerFunction({
+          const retentionResult = await s({
             functionName: 'applyBackupRetentionPolicy',
             contextData: {
               jobId: job.id,
-              functionLookupSubDomain: args.subDomain
+              functionLookupSubDomain: _.subDomain
             }
           });
 
@@ -231,10 +231,10 @@ if (args.contextData.action === 'start') {
 
         if ((failedBackups > 0 && alertOnFailure) || (failedBackups === 0 && alertOnSuccess)) {
           try {
-            await args.executeNamedServerFunction({
+            await s({
               functionName: 'sendBackupAlertEmail',
               contextData: {
-                functionLookupSubDomain: args.subDomain,
+                functionLookupSubDomain: _.subDomain,
                 totalDatabases,
                 successfulBackups,
                 failedBackups,
@@ -309,10 +309,10 @@ if (args.contextData.action === 'start') {
 
       // Send alert email on job failure
       try {
-        await args.executeNamedServerFunction({
+        await s({
           functionName: 'sendBackupAlertEmail',
           contextData: {
-            functionLookupSubDomain: args.subDomain,
+            functionLookupSubDomain: _.subDomain,
             jobFailed: true,
             error: err.message,
             jobId: job?.id

@@ -27,7 +27,7 @@ export const popoverWrapperSchemaExample = () => {
     as: "button",
     css: `return \`._id {
   padding: 8px 16px;
-  background-color: \${args.theme.var.color.primary};
+  background-color: \${t.var.color.primary};
   color: white;
   border-radius: 4px;
   cursor: pointer;
@@ -44,7 +44,7 @@ export const popoverWrapperSchemaExample = () => {
         as: "h3",
         css: `return \`._id {
   font-size: 18px;
-  color: \${args.theme.var.color.primary};
+  color: \${t.var.color.primary};
   margin: 0px;
   margin-bottom: 8px;
 }\`;`,
@@ -55,7 +55,7 @@ export const popoverWrapperSchemaExample = () => {
         as: "p",
         css: `return \`._id {
   font-size: 14px;
-  color: \${args.theme.var.color.text};
+  color: \${t.var.color.text};
   margin: 0px;
 }\`;`,
         componentName: "Html",
@@ -84,7 +84,7 @@ export const dynamicPopoverExample = () => {
     as: "button",
     css: `return \`._id {
   padding: 8px 16px;
-  background-color: \${args.theme.var.color.primary};
+  background-color: \${t.var.color.primary};
   color: white;
   border-radius: 4px;
   cursor: pointer;
@@ -101,7 +101,7 @@ export const dynamicPopoverExample = () => {
         as: "h3",
         css: `return \`._id {
   font-size: 18px;
-  color: \${args.theme.var.color.primary};
+  color: \${t.var.color.primary};
   margin: 0px;
   margin-bottom: 8px;
 }\`;`,
@@ -112,7 +112,7 @@ export const dynamicPopoverExample = () => {
         as: "p",
         css: `return \`._id {
   font-size: 14px;
-  color: \${args.theme.var.color.text};
+  color: \${t.var.color.text};
   margin: 0px;
 }\`;`,
         componentName: "Html",

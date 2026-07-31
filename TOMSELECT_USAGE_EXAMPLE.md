@@ -122,8 +122,8 @@ result.result = [
 
 ### Before (Manual Loading):
 ```javascript
-const rules = args.fns.rules?.() || [];
-const rulesLoading = args.fns.rulesLoading?.() || false;
+const rules = f.rules?.() || [];
+const rulesLoading = f.rulesLoading?.() || false;
 let options = [];
 if (rulesLoading) {
   options = [{ value: "", label: "Loading rules...", disabled: true }];

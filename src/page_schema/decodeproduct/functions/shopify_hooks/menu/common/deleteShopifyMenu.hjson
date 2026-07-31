@@ -8,7 +8,7 @@
         body:
           '''
 // Extract parameters
-const { menuId, categoryElementId } = args.contextData;
+const { menuId, categoryElementId } = c;
 
 if (!menuId) {
   return {
@@ -17,9 +17,9 @@ if (!menuId) {
   };
 }
 
-const shopify = await args.getShopifyClient();
+const shopify = await _.getShopifyClient();
 let admin;
-const shop = args.contextData.shop;
+const shop = c.shop;
 if (shop) {
   try {
     const authResult = await shopify.unauthenticated.admin(shop);
@@ -78,7 +78,7 @@ try {
 
   // Remove menu info from category if categoryElementId is provided
   if (categoryElementId) {
-    await args.session.run(
+    await _.session.run(
       `MATCH (c:ShopifyProductCategory)
        WHERE elementId(c) = $elementId
        REMOVE c.menuId, c.menuHandle`,

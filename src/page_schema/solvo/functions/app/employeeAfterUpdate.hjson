@@ -8,17 +8,17 @@
         description: After staff User update in shop DB — strips obsolete shop/invite properties from persisted User rows.
         body:
           '''
-const { tableVertexLabel, operation } = args.contextData || {};
+const { tableVertexLabel, operation } = c || {};
 if (tableVertexLabel !== "User" || operation !== "update") {
   return { success: true, message: "Skip: not User update" };
 }
 
-const result = args.contextData?.result;
+const result = c?.result;
 const employee = result?.data;
 const elementId = employee?.id;
 if (!elementId) return { success: true, message: "Skip: missing employee elementId" };
 
-await args.session.run(
+await _.session.run(
   `MATCH (e:User) WHERE elementId(e) = $id
    SET e.updatedAt = $nowIso
    REMOVE e.shop, e.shopDomain, e.inviteCode, e.inviteLink

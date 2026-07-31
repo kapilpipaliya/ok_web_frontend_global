@@ -13,7 +13,7 @@
  * contextData: { dryRun?: boolean }
  */
 
-const { dryRun = false } = args.contextData || {};
+const { dryRun = false } = c || {};
 
 console.log(`CertPulse settings migration (dryRun: ${dryRun})`);
 
@@ -167,11 +167,11 @@ const settingsConfigs = [
   sidebar: {
     enabled: false
   },
-  onRowClick: (row, args) => {
+  onRowClick: (row, _) => {
     if (!row?.id) return;
     const ticketId = row.id;
     const basePath = "/ShopifySupportConversation";
-    const searchParams = args.searchParams || {};
+    const searchParams = _.searchParams || {};
     const nextParams = { ...searchParams, supportId: ticketId };
     const query = Object.entries(nextParams)
       .filter(([, value]) => value != null && value !== "")
@@ -179,8 +179,8 @@ const settingsConfigs = [
       .join("&");
     const href = query ? \`\${basePath}?\${query}\` : basePath;
 
-    if (args.navigate) {
-      args.navigate(href);
+    if (_.navigate) {
+      _.navigate(href);
     } else if (typeof window !== "undefined") {
       window.location.href = href;
     }
@@ -441,12 +441,12 @@ async function processSetting(setting) {
   const { key, tableVertexLabel, icon, name, config } = setting;
   console.log(`Processing ${name} (${icon})...`);
 
-  const checkResult = await args.session.run(`MATCH (s:Setting {key: $key}) RETURN s`, { key });
+  const checkResult = await _.session.run(`MATCH (s:Setting {key: $key}) RETURN s`, { key });
   const exists = checkResult.records.length > 0;
 
   if (!dryRun) {
     if (exists) {
-      await args.session.run(
+      await _.session.run(
         `MATCH (s:Setting {key: $key})
          SET s.config = $config,
              s.type = 'table_config',
@@ -459,7 +459,7 @@ async function processSetting(setting) {
       return { created: 0, updated: 1 };
     }
 
-    await args.session.run(
+    await _.session.run(
       `CREATE (s:Setting {
         key: $key,
         type: 'table_config',
@@ -481,12 +481,12 @@ async function processSettingsPageConfig(setting) {
   const { key, settingsPageId, name, config } = setting;
   console.log(`Processing settings page ${name}...`);
 
-  const checkResult = await args.session.run(`MATCH (s:Setting {key: $key}) RETURN s`, { key });
+  const checkResult = await _.session.run(`MATCH (s:Setting {key: $key}) RETURN s`, { key });
   const exists = checkResult.records.length > 0;
 
   if (!dryRun) {
     if (exists) {
-      await args.session.run(
+      await _.session.run(
         `MATCH (s:Setting {key: $key})
          SET s.config = $config,
              s.type = 'settings_page_config',
@@ -499,7 +499,7 @@ async function processSettingsPageConfig(setting) {
       return { created: 0, updated: 1 };
     }
 
-    await args.session.run(
+    await _.session.run(
       `CREATE (s:Setting {
         key: $key,
         type: 'settings_page_config',

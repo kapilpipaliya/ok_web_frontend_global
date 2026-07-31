@@ -13,7 +13,7 @@
  * contextData: { dryRun?: boolean }
  */
 
-const { dryRun = false } = args.contextData || {};
+const { dryRun = false } = c || {};
 console.log(`Attendra settings migration (dryRun: ${dryRun})`);
 
 const settingsConfigs = [
@@ -1108,11 +1108,11 @@ const settingsConfigs = [
   sidebar: {
     enabled: false
   },
-  onRowClick: (row, args) => {
+  onRowClick: (row, _) => {
     if (!row?.id) return;
     const ticketId = row.id;
     const basePath = "/ShopifySupportConversation";
-    const searchParams = args.searchParams || {};
+    const searchParams = _.searchParams || {};
     const nextParams = { ...searchParams, supportId: ticketId };
     const query = Object.entries(nextParams)
       .filter(([, value]) => value != null && value !== "")
@@ -1120,8 +1120,8 @@ const settingsConfigs = [
       .join("&");
     const href = query ? \`\${basePath}?\${query}\` : basePath;
 
-    if (args.navigate) {
-      args.navigate(href);
+    if (_.navigate) {
+      _.navigate(href);
     } else if (typeof window !== "undefined") {
       window.location.href = href;
     }
@@ -1133,12 +1133,12 @@ const settingsConfigs = [
 async function processSetting(setting) {
   const { key, tableVertexLabel, name, config } = setting;
   console.log(`Processing ${name} (${key})...`);
-  const checkResult = await args.session.run(`MATCH (s:Setting {key: $key}) RETURN s`, { key });
+  const checkResult = await _.session.run(`MATCH (s:Setting {key: $key}) RETURN s`, { key });
   const exists = checkResult.records.length > 0;
 
   if (!dryRun) {
     if (exists) {
-      await args.session.run(
+      await _.session.run(
         `MATCH (s:Setting {key: $key})
          SET s.config = $config,
              s.type = 'table_config',
@@ -1150,7 +1150,7 @@ async function processSetting(setting) {
       return { created: 0, updated: 1 };
     }
 
-    await args.session.run(
+    await _.session.run(
       `CREATE (s:Setting {
         key: $key,
         type: 'table_config',
@@ -1177,12 +1177,12 @@ for (let i = 0; i < settingsConfigs.length; i++) {
 
 // Seed a single default settings row (Setting { key: "default" }) so Settings page has something to edit.
 if (!dryRun) {
-  const seedRes = await args.session.run(
+  const seedRes = await _.session.run(
     `MATCH (s:Setting {key: 'default'}) RETURN s LIMIT 1`,
     {}
   );
   if (seedRes.records.length === 0) {
-    await args.session.run(
+    await _.session.run(
       `CREATE (s:Setting {
         key: 'default',
         timezone: 'UTC',

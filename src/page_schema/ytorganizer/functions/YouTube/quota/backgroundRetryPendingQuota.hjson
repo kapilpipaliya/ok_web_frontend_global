@@ -8,11 +8,11 @@
         body:
           '''
 // This is a background worker function that runs on a schedule
-if (args.contextData.action === 'start') {
+if (c.action === 'start') {
   // Helper function to log messages to database
   const logMessage = async (level, message, metadata = {}) => {
     try {
-      await args.executeNamedServerFunction({
+      await s({
         functionName: 'logWorkerMessage',
         contextData: {
           workerName: 'backgroundRetryPendingQuota',
@@ -20,7 +20,7 @@ if (args.contextData.action === 'start') {
           message,
           metadata
         }
-      }, { functionLookupSubDomain: args.subDomain });
+      }, { functionLookupSubDomain: _.subDomain });
     } catch (error) {
       // Silent failure - don't break worker if logging fails
     }
@@ -29,14 +29,14 @@ if (args.contextData.action === 'start') {
   await logMessage('info', 'Starting background retry pending quota worker (scheduled for midnight Pacific Time)');
 
   // Initialize queue helpers and Redis connection
-  const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} }, { functionLookupSubDomain: args.subDomain });
+  const helpers = await s({ functionName: 'queueHelpers', contextData: {} }, { functionLookupSubDomain: _.subDomain });
 
   if (!helpers.result?.success) {
     await logMessage('error', 'Failed to initialize queue helpers', { error: helpers.result?.error });
     throw new Error('Queue helpers initialization failed');
   }
 
-  const { Worker, Queue } = args.bullmq;
+  const { Worker, Queue } = _.bullmq;
   const connection = helpers.result.data.getRedisConnection();
 
   // Validate Redis connection config
@@ -87,10 +87,10 @@ if (args.contextData.action === 'start') {
 
     try {
       // Call the retry function
-      const result = await args.executeNamedServerFunction({
+      const result = await s({
         functionName: 'retryPendingQuotaJobs',
         contextData: {}
-      }, { functionLookupSubDomain: args.subDomain });
+      }, { functionLookupSubDomain: _.subDomain });
 
       if (result.result?.success) {
         await logMessage('info', 'Successfully completed scheduled quota retry', {

@@ -46,12 +46,12 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.lg};
+  padding: ${t.var.spacing.lg};
   max-width: 100%;
   margin: 0 auto;
 
   @media (max-width: 768px) {
-    padding: ${args.theme.var.spacing.md};
+    padding: ${t.var.spacing.md};
   }
 }`;
 '''
@@ -59,7 +59,7 @@ return `._id {
         fns:
           '''
 // State management
-const [store, setStore] = args.createStore({
+const [store, setStore] = _.createStore({
   submissions: [],
   loading: true,
   tableLoading: false,
@@ -84,7 +84,7 @@ const loadSubmissions = async (page = store.currentPage, isRefresh = false) => {
   setStore('error', null);
 
   try {
-    const response = await args.executeNamedServerFunction({
+    const response = await s({
       functionName: 'getContactSubmissions',
       contextData: {}
     });
@@ -137,7 +137,7 @@ const updateStatus = async (submissionVertex, newStatus) => {
   setStore('tableLoading', true);
 
   try {
-    const response = await args.executeNamedServerFunction({
+    const response = await s({
       functionName: 'updateContactStatus',
       contextData: {
         contactId: submissionVertex.id,
@@ -148,15 +148,15 @@ const updateStatus = async (submissionVertex, newStatus) => {
     const result = response.result;
 
     if (result.success) {
-      args.showSuccessToast(`Status updated to ${newStatus}`);
+      _.showSuccessToast(`Status updated to ${newStatus}`);
       await loadSubmissions(store.currentPage, true);
     } else {
       console.error('Update status failed:', result.error);
-      args.showErrorToast(result.error || 'Failed to update status');
+      _.showErrorToast(result.error || 'Failed to update status');
     }
   } catch (error) {
     console.error('Update status error:', error);
-    args.showErrorToast('An error occurred while updating status');
+    _.showErrorToast('An error occurred while updating status');
   } finally {
     setStore('tableLoading', false);
   }
@@ -180,11 +180,11 @@ const formatDate = (dateStr) => {
 // Get status color
 const getStatusColor = (status) => {
   switch (status) {
-    case 'new': return args.theme.var.color.primary;
-    case 'read': return args.theme.var.color.info;
-    case 'responded': return args.theme.var.color.success;
-    case 'closed': return args.theme.var.color.text_light_500;
-    default: return args.theme.var.color.text;
+    case 'new': return t.var.color.primary;
+    case 'read': return t.var.color.info;
+    case 'responded': return t.var.color.success;
+    case 'closed': return t.var.color.text_light_500;
+    default: return t.var.color.text;
   }
 };
 
@@ -302,7 +302,7 @@ return {
           '''
 return {
   as: "div",
-  onMount: args.fns.loadSubmissions
+  onMount: f.loadSubmissions
 };
 '''
       }
@@ -317,8 +317,8 @@ return `._id {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: ${args.theme.var.spacing.lg};
-  gap: ${args.theme.var.spacing.md};
+  margin-bottom: ${t.var.spacing.lg};
+  gap: ${t.var.spacing.md};
 
   @media (max-width: 768px) {
     flex-direction: column;
@@ -358,8 +358,8 @@ return {
 return `._id {
   font-size: 1.5rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 ${args.theme.var.spacing.xs} 0;
+  color: ${t.var.color.text};
+  margin: 0 0 ${t.var.spacing.xs} 0;
 }`;
 '''
         displayOrder: 1
@@ -381,7 +381,7 @@ return {
           '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0;
 }`;
 '''
@@ -389,16 +389,16 @@ return `._id {
         componentName: Html
         props:
           '''
-const totalCount = args.fns.store.totalCount;
-const currentPage = args.fns.store.currentPage;
-const pageSize = args.fns.store.pageSize;
+const totalCount = f.store.totalCount;
+const currentPage = f.store.currentPage;
+const pageSize = f.store.pageSize;
 const startIndex = (currentPage - 1) * pageSize + 1;
 const endIndex = Math.min(currentPage * pageSize, totalCount);
 
 return {
   as: "p",
   text: totalCount > 0 ? `Showing ${startIndex}-${endIndex} of ${totalCount} submissions` : `${totalCount} submissions`,
-  hide: () => args.fns.store.loading
+  hide: () => f.store.loading
 };
 '''
       }
@@ -412,7 +412,7 @@ return {
           '''
 return `._id {
   display: flex;
-  gap: ${args.theme.var.spacing.md};
+  gap: ${t.var.spacing.md};
   flex-wrap: wrap;
 
   @media (max-width: 768px) {
@@ -426,7 +426,7 @@ return `._id {
           '''
 return {
   getStatsData: () => {
-    const submissions = args.fns.store.submissions;
+    const submissions = f.store.submissions;
     const newCount = submissions.filter(sub => (sub.P.status || 'new') === 'new').length;
     const readCount = submissions.filter(sub => sub.P.status === 'read').length;
     const respondedCount = submissions.filter(sub => sub.P.status === 'responded').length;
@@ -446,8 +446,8 @@ return {
           '''
 return {
   as: "div",
-  data: args.fns.getStatsData(),
-  hide: () => args.fns.store.loading
+  data: f.getStatsData(),
+  hide: () => f.store.loading
 };
 '''
       }
@@ -461,11 +461,11 @@ return {
 return `._id {
   display: flex;
   align-items: center;
-  gap: ${args.theme.var.spacing.xs};
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  background: ${args.theme.var.color.background_dark_100};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.md};
+  gap: ${t.var.spacing.xs};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  background: ${t.var.color.background_dark_100};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.md};
   white-space: nowrap;
 }`;
 '''
@@ -485,16 +485,16 @@ return {
       P: {
         css:
           '''
-const stat = args.contextData.stat;
+const stat = c.stat;
 return `._id {
-  color: ${args.theme.var.color[stat.color]};
+  color: ${t.var.color[stat.color]};
 }`;
 '''
         displayOrder: 1
         componentName: Html
         props:
           '''
-const stat = args.contextData.stat;
+const stat = c.stat;
 return {
   as: "icon",
   icon: stat.icon,
@@ -527,14 +527,14 @@ return {
 return `._id {
   font-size: 1.125rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 1
         componentName: Html
         props:
           '''
-const stat = args.contextData.stat;
+const stat = c.stat;
 return {
   as: "span",
   text: stat.value
@@ -550,14 +550,14 @@ return {
           '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
         displayOrder: 2
         componentName: Html
         props:
           '''
-const stat = args.contextData.stat;
+const stat = c.stat;
 return {
   as: "span",
   text: ` ${stat.label}`
@@ -572,7 +572,7 @@ return {
         css:
           '''
 return `._id {
-  margin-bottom: ${args.theme.var.spacing.lg};
+  margin-bottom: ${t.var.spacing.lg};
 }`;
 '''
         displayOrder: 2
@@ -581,7 +581,7 @@ return `._id {
           '''
 return {
   as: "div",
-  hide: () => args.fns.store.loading || args.fns.store.error
+  hide: () => f.store.loading || f.store.error
 };
 '''
       }
@@ -594,8 +594,8 @@ return {
           '''
 return `._id {
   display: flex;
-  gap: ${args.theme.var.spacing.md};
-  margin-bottom: ${args.theme.var.spacing.md};
+  gap: ${t.var.spacing.md};
+  margin-bottom: ${t.var.spacing.md};
   flex-wrap: wrap;
 }`;
 '''
@@ -627,10 +627,10 @@ return `._id {
 return {
   type: "search",
   placeholder: "Search by name, email, or message...",
-  value: args.fns.store.searchQuery,
+  value: f.store.searchQuery,
   leftIcon: "carbon:search",
   onInput: (e) => {
-    args.fns.handleSearch(e.target.value);
+    f.handleSearch(e.target.value);
   }
 };
 '''
@@ -651,7 +651,7 @@ return `._id {
         props:
           '''
 return {
-  value: args.fns.store.filterStatus,
+  value: f.store.filterStatus,
   options: [
     { value: "all", label: "All Status" },
     { value: "new", label: "New" },
@@ -662,7 +662,7 @@ return {
   placeholder: "Filter by status...",
   search: false,
   onChange: (value) => {
-    args.fns.handleFilterChange(value);
+    f.handleFilterChange(value);
   }
 };
 '''
@@ -677,11 +677,11 @@ return {
 return `._id {
   display: flex;
   align-items: center;
-  gap: ${args.theme.var.spacing.md};
-  padding: ${args.theme.var.spacing.md};
-  background: ${args.theme.var.color.primary_light_100};
-  border: 1px solid ${args.theme.var.color.primary_light_300};
-  border-radius: ${args.theme.var.borderRadius.md};
+  gap: ${t.var.spacing.md};
+  padding: ${t.var.spacing.md};
+  background: ${t.var.color.primary_light_100};
+  border: 1px solid ${t.var.color.primary_light_300};
+  border-radius: ${t.var.borderRadius.md};
 }`;
 '''
         displayOrder: 2
@@ -690,7 +690,7 @@ return `._id {
           '''
 return {
   as: "div",
-  hide: () => args.fns.store.selectedSubmissions.length === 0
+  hide: () => f.store.selectedSubmissions.length === 0
 };
 '''
       }
@@ -704,14 +704,14 @@ return {
 return `._id {
   font-size: 0.875rem;
   font-weight: 600;
-  color: ${args.theme.var.color.primary_light_100_text};
+  color: ${t.var.color.primary_light_100_text};
 }`;
 '''
         displayOrder: 1
         componentName: Html
         props:
           '''
-const count = args.fns.store.selectedSubmissions.length;
+const count = f.store.selectedSubmissions.length;
 return {
   as: "span",
   text: `${count} submission${count === 1 ? '' : 's'} selected`
@@ -726,17 +726,17 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.sm};
+  padding: ${t.var.spacing.xs} ${t.var.spacing.sm};
   background: transparent;
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.sm};
-  color: ${args.theme.var.color.text};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.sm};
+  color: ${t.var.color.text};
   font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.background_dark_100};
+    background: ${t.var.color.background_dark_100};
   }
 }`;
 '''
@@ -747,7 +747,7 @@ return `._id {
 return {
   as: "button",
   text: "Clear",
-  onClick: args.fns.clearSelection
+  onClick: f.clearSelection
 };
 '''
       }
@@ -760,8 +760,8 @@ return {
           '''
 return `._id {
   text-align: center;
-  padding: ${args.theme.var.spacing.xl};
-  color: ${args.theme.var.color.text_light_500};
+  padding: ${t.var.spacing.xl};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
         displayOrder: 3
@@ -771,7 +771,7 @@ return `._id {
 return {
   as: "div",
   text: "Loading submissions...",
-  hide: () => !args.fns.store.loading
+  hide: () => !f.store.loading
 };
 '''
       }
@@ -784,10 +784,10 @@ return {
           '''
 return `._id {
   text-align: center;
-  padding: ${args.theme.var.spacing.xl};
-  color: ${args.theme.var.color.error_light_50_text};
-  background: ${args.theme.var.color.error_light_50};
-  border-radius: ${args.theme.var.borderRadius.md};
+  padding: ${t.var.spacing.xl};
+  color: ${t.var.color.error_light_50_text};
+  background: ${t.var.color.error_light_50};
+  border-radius: ${t.var.borderRadius.md};
 }`;
 '''
         displayOrder: 4
@@ -796,8 +796,8 @@ return `._id {
           '''
 return {
   as: "div",
-  text: args.fns.store.error || "An error occurred",
-  hide: () => !args.fns.store.error
+  text: f.store.error || "An error occurred",
+  hide: () => !f.store.error
 };
 '''
       }
@@ -809,9 +809,9 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.lg};
+  background: ${t.var.color.background};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.lg};
   overflow: hidden;
   position: relative;
 }`;
@@ -822,7 +822,7 @@ return `._id {
           '''
 return {
   as: "div",
-  hide: () => args.fns.store.loading || args.fns.store.error
+  hide: () => f.store.loading || f.store.error
 };
 '''
       }
@@ -845,7 +845,7 @@ return `._id {
   align-items: center;
   justify-content: center;
   z-index: 10;
-  border-radius: ${args.theme.var.borderRadius.lg};
+  border-radius: ${t.var.borderRadius.lg};
 }`;
 '''
         displayOrder: 1
@@ -854,7 +854,7 @@ return `._id {
           '''
 return {
   as: "div",
-  hide: () => !args.fns.store.tableLoading
+  hide: () => !f.store.tableLoading
 };
 '''
       }
@@ -922,8 +922,8 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.background_dark_100};
-  border-bottom: 2px solid ${args.theme.var.color.border};
+  background: ${t.var.color.background_dark_100};
+  border-bottom: 2px solid ${t.var.color.border};
 }`;
 '''
         displayOrder: 1
@@ -957,10 +957,10 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   text-align: left;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   width: 40px;
 }`;
 '''
@@ -990,8 +990,8 @@ return `._id {
         componentName: Html
         props:
           '''
-const submissions = args.fns.store.submissions;
-const allSelected = submissions.length > 0 && submissions.every(sub => args.fns.store.selectedSubmissions.includes(sub.id));
+const submissions = f.store.submissions;
+const allSelected = submissions.length > 0 && submissions.every(sub => f.store.selectedSubmissions.includes(sub.id));
 
 return {
   as: "input",
@@ -999,9 +999,9 @@ return {
   checked: allSelected,
   onChange: () => {
     if (allSelected) {
-      args.fns.clearSelection();
+      f.clearSelection();
     } else {
-      args.fns.selectAll();
+      f.selectAll();
     }
   }
 };
@@ -1015,10 +1015,10 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   text-align: left;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   min-width: 200px;
 }`;
 '''
@@ -1040,10 +1040,10 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   text-align: left;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   min-width: 300px;
 }`;
 '''
@@ -1065,10 +1065,10 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   text-align: center;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   min-width: 120px;
 }`;
 '''
@@ -1090,10 +1090,10 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   text-align: left;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   min-width: 110px;
 }`;
 '''
@@ -1115,10 +1115,10 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   text-align: center;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   min-width: 200px;
 }`;
 '''
@@ -1145,7 +1145,7 @@ return {
           '''
 return {
   as: "tbody",
-  data: args.fns.store.submissions
+  data: f.store.submissions
 };
 '''
       }
@@ -1156,19 +1156,19 @@ return {
       P: {
         css:
           '''
-const submission = args.contextData.submission;
-const isSelected = args.fns.store.selectedSubmissions.includes(submission.id);
+const submission = c.submission;
+const isSelected = f.store.selectedSubmissions.includes(submission.id);
 
 return `._id {
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  border-bottom: 1px solid ${t.var.color.border};
   transition: background 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.background_dark_100};
+    background: ${t.var.color.background_dark_100};
   }
 
   ${isSelected ? `
-    background: ${args.theme.var.color.primary_light_100} !important;
+    background: ${t.var.color.primary_light_100} !important;
   ` : ''}
 }`;
 '''
@@ -1176,8 +1176,8 @@ return `._id {
         componentName: Html
         props:
           '''
-const submission = args.contextData.submission;
-const isSelected = args.fns.store.selectedSubmissions.includes(submission.id);
+const submission = c.submission;
+const isSelected = f.store.selectedSubmissions.includes(submission.id);
 
 return {
   as: "tr",
@@ -1193,7 +1193,7 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
 }`;
 '''
         displayOrder: 1
@@ -1222,14 +1222,14 @@ return `._id {
         componentName: Html
         props:
           '''
-const submission = args.contextData.submission;
-const isSelected = args.fns.store.selectedSubmissions.includes(submission.id);
+const submission = c.submission;
+const isSelected = f.store.selectedSubmissions.includes(submission.id);
 
 return {
   as: "input",
   type: "checkbox",
   checked: isSelected,
-  onChange: () => args.fns.toggleSelection(submission.id)
+  onChange: () => f.toggleSelection(submission.id)
 };
 '''
       }
@@ -1241,7 +1241,7 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
 }`;
 '''
         displayOrder: 2
@@ -1262,15 +1262,15 @@ return {
           '''
 return `._id {
   font-weight: 600;
-  color: ${args.theme.var.color.text};
-  margin-bottom: ${args.theme.var.spacing.xs};
+  color: ${t.var.color.text};
+  margin-bottom: ${t.var.spacing.xs};
 }`;
 '''
         displayOrder: 1
         componentName: Html
         props:
           '''
-const submission = args.contextData.submission;
+const submission = c.submission;
 return {
   as: "div",
   text: submission.P.name || 'N/A'
@@ -1286,14 +1286,14 @@ return {
           '''
 return `._id {
   font-size: 0.75rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
         displayOrder: 2
         componentName: Html
         props:
           '''
-const submission = args.contextData.submission;
+const submission = c.submission;
 return {
   as: "div",
   text: submission.P.email || 'N/A'
@@ -1308,8 +1308,8 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
-  color: ${args.theme.var.color.text};
+  padding: ${t.var.spacing.md};
+  color: ${t.var.color.text};
   max-width: 400px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1320,7 +1320,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const submission = args.contextData.submission;
+const submission = c.submission;
 const message = submission.P.message || '';
 const truncated = message.length > 100 ? message.substring(0, 100) + '...' : message;
 
@@ -1339,7 +1339,7 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   text-align: center;
 }`;
 '''
@@ -1359,24 +1359,24 @@ return {
       P: {
         css:
           '''
-const submission = args.contextData.submission;
+const submission = c.submission;
 const status = submission.P.status || 'new';
 
 const colors = {
-  new: { bg: args.theme.var.color.primary_light_100, text: args.theme.var.color.primary_light_100_text },
-  read: { bg: args.theme.var.color.info_light_100, text: args.theme.var.color.info_light_100_text },
-  responded: { bg: args.theme.var.color.success_light_100, text: args.theme.var.color.success_light_100_text },
-  closed: { bg: args.theme.var.color.background_dark_200, text: args.theme.var.color.background_dark_200_text }
+  new: { bg: t.var.color.primary_light_100, text: t.var.color.primary_light_100_text },
+  read: { bg: t.var.color.info_light_100, text: t.var.color.info_light_100_text },
+  responded: { bg: t.var.color.success_light_100, text: t.var.color.success_light_100_text },
+  closed: { bg: t.var.color.background_dark_200, text: t.var.color.background_dark_200_text }
 };
 
 const color = colors[status] || colors.new;
 
 return `._id {
   display: inline-block;
-  padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.sm};
+  padding: ${t.var.spacing.xs} ${t.var.spacing.sm};
   background: ${color.bg};
   color: ${color.text};
-  border-radius: ${args.theme.var.borderRadius.sm};
+  border-radius: ${t.var.borderRadius.sm};
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: capitalize;
@@ -1386,7 +1386,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const submission = args.contextData.submission;
+const submission = c.submission;
 const status = submission.P.status || 'new';
 const statusText = status.charAt(0).toUpperCase() + status.slice(1);
 
@@ -1404,16 +1404,16 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
-  color: ${args.theme.var.color.text};
+  padding: ${t.var.spacing.md};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 5
         componentName: Html
         props:
           '''
-const submission = args.contextData.submission;
-const submittedText = args.fns.formatDate(submission.P.submittedAt);
+const submission = c.submission;
+const submittedText = f.formatDate(submission.P.submittedAt);
 
 return {
   as: "td",
@@ -1429,7 +1429,7 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
 }`;
 '''
         displayOrder: 6
@@ -1451,7 +1451,7 @@ return {
           '''
 return `._id {
   display: flex;
-  gap: ${args.theme.var.spacing.xs};
+  gap: ${t.var.spacing.xs};
   justify-content: center;
   flex-wrap: wrap;
 }`;
@@ -1474,18 +1474,18 @@ return {
       P: {
         css:
           '''
-const submission = args.contextData.submission;
-const status = args.contextData.statusOption;
+const submission = c.submission;
+const status = c.statusOption;
 const isCurrentStatus = (submission.P.status || 'new') === status;
 
 return `._id {
-  padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.sm};
+  padding: ${t.var.spacing.xs} ${t.var.spacing.sm};
   font-size: 0.75rem;
   font-weight: 600;
-  background: ${isCurrentStatus ? args.fns.getStatusColor(status) : args.theme.var.color.background};
-  color: ${isCurrentStatus ? 'white' : args.theme.var.color.text};
-  border: 1px solid ${isCurrentStatus ? args.fns.getStatusColor(status) : args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.sm};
+  background: ${isCurrentStatus ? f.getStatusColor(status) : t.var.color.background};
+  color: ${isCurrentStatus ? 'white' : t.var.color.text};
+  border: 1px solid ${isCurrentStatus ? f.getStatusColor(status) : t.var.color.border};
+  border-radius: ${t.var.borderRadius.sm};
   cursor: ${isCurrentStatus ? 'not-allowed' : 'pointer'};
   opacity: ${isCurrentStatus ? '0.7' : '1'};
   text-transform: capitalize;
@@ -1493,8 +1493,8 @@ return `._id {
 
   ${!isCurrentStatus ? `
     &:hover {
-      background: ${args.theme.var.color.background_dark_100};
-      border-color: ${args.fns.getStatusColor(status)};
+      background: ${t.var.color.background_dark_100};
+      border-color: ${f.getStatusColor(status)};
     }
   ` : ''}
 }`;
@@ -1503,8 +1503,8 @@ return `._id {
         componentName: Html
         props:
           '''
-const submission = args.contextData.submission;
-const status = args.contextData.statusOption;
+const submission = c.submission;
+const status = c.statusOption;
 const isCurrentStatus = (submission.P.status || 'new') === status;
 const statusText = status.charAt(0).toUpperCase() + status.slice(1);
 
@@ -1515,7 +1515,7 @@ return {
   onClick: (e) => {
     e.stopPropagation();
     if (!isCurrentStatus) {
-      args.fns.updateStatus(submission, status);
+      f.updateStatus(submission, status);
     }
   }
 };
@@ -1532,11 +1532,11 @@ return `._id {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: ${args.theme.var.spacing.lg};
-  border-top: 1px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background};
+  padding: ${t.var.spacing.lg};
+  border-top: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background};
   flex-wrap: wrap;
-  gap: ${args.theme.var.spacing.md};
+  gap: ${t.var.spacing.md};
 }`;
 '''
         displayOrder: 6
@@ -1545,7 +1545,7 @@ return `._id {
           '''
 return {
   as: "div",
-  hide: () => args.fns.store.loading || args.fns.store.error || args.fns.store.totalPages <= 1
+  hide: () => f.store.loading || f.store.error || f.store.totalPages <= 1
 };
 '''
       }
@@ -1558,16 +1558,16 @@ return {
           '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
         displayOrder: 1
         componentName: Html
         props:
           '''
-const currentPage = args.fns.store.currentPage;
-const totalPages = args.fns.store.totalPages;
-const totalCount = args.fns.store.totalCount;
+const currentPage = f.store.currentPage;
+const totalPages = f.store.totalPages;
+const totalCount = f.store.totalCount;
 
 return {
   as: "div",
@@ -1584,7 +1584,7 @@ return {
           '''
 return `._id {
   display: flex;
-  gap: ${args.theme.var.spacing.xs};
+  gap: ${t.var.spacing.xs};
   align-items: center;
 }`;
 '''
@@ -1604,23 +1604,23 @@ return {
       P: {
         css:
           '''
-const currentPage = args.fns.store.currentPage;
+const currentPage = f.store.currentPage;
 const isDisabled = currentPage <= 1;
 
 return `._id {
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  background: ${args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.sm};
-  color: ${args.theme.var.color.text};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  background: ${t.var.color.background};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.sm};
+  color: ${t.var.color.text};
   font-size: 0.875rem;
   cursor: ${isDisabled ? 'not-allowed' : 'pointer'};
   opacity: ${isDisabled ? '0.5' : '1'};
   transition: all 0.2s ease;
 
   &:hover:not(:disabled) {
-    background: ${args.theme.var.color.background_dark_100};
-    border-color: ${args.theme.var.color.primary};
+    background: ${t.var.color.background_dark_100};
+    border-color: ${t.var.color.primary};
   }
 }`;
 '''
@@ -1628,13 +1628,13 @@ return `._id {
         componentName: Html
         props:
           '''
-const currentPage = args.fns.store.currentPage;
+const currentPage = f.store.currentPage;
 const isDisabled = currentPage <= 1;
 
 return {
   as: "button",
   text: "← Previous",
-  onClick: args.fns.goToPreviousPage,
+  onClick: f.goToPreviousPage,
   disabled: isDisabled
 };
 '''
@@ -1649,7 +1649,7 @@ return {
           '''
 return `._id {
   display: flex;
-  gap: ${args.theme.var.spacing.xs};
+  gap: ${t.var.spacing.xs};
 }`;
 '''
         loop: true
@@ -1659,7 +1659,7 @@ return `._id {
           '''
 return {
   as: "div",
-  data: args.fns.getVisiblePages()
+  data: f.getVisiblePages()
 };
 '''
       }
@@ -1670,18 +1670,18 @@ return {
       P: {
         css:
           '''
-const pageNum = args.contextData.pageNum;
-const currentPage = args.fns.store.currentPage;
+const pageNum = c.pageNum;
+const currentPage = f.store.currentPage;
 const isEllipsis = pageNum === '...';
 const isActive = pageNum === currentPage;
 
 return `._id {
   min-width: 40px;
-  padding: ${args.theme.var.spacing.sm};
-  background: ${isActive ? args.theme.var.color.primary : args.theme.var.color.background};
-  border: 1px solid ${isActive ? args.theme.var.color.primary : args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.sm};
-  color: ${isActive ? args.theme.var.color.primary_text : args.theme.var.color.text};
+  padding: ${t.var.spacing.sm};
+  background: ${isActive ? t.var.color.primary : t.var.color.background};
+  border: 1px solid ${isActive ? t.var.color.primary : t.var.color.border};
+  border-radius: ${t.var.borderRadius.sm};
+  color: ${isActive ? t.var.color.primary_text : t.var.color.text};
   font-size: 0.875rem;
   font-weight: ${isActive ? '700' : '400'};
   cursor: ${isEllipsis || isActive ? 'default' : 'pointer'};
@@ -1690,8 +1690,8 @@ return `._id {
 
   ${!isEllipsis && !isActive ? `
     &:hover {
-      background: ${args.theme.var.color.background_dark_100};
-      border-color: ${args.theme.var.color.primary};
+      background: ${t.var.color.background_dark_100};
+      border-color: ${t.var.color.primary};
     }
   ` : ''}
 }`;
@@ -1700,15 +1700,15 @@ return `._id {
         componentName: Html
         props:
           '''
-const pageNum = args.contextData.pageNum;
-const currentPage = args.fns.store.currentPage;
+const pageNum = c.pageNum;
+const currentPage = f.store.currentPage;
 const isEllipsis = pageNum === '...';
 const isActive = pageNum === currentPage;
 
 return {
   as: isEllipsis ? "span" : "button",
   text: pageNum,
-  onClick: isEllipsis ? undefined : () => args.fns.goToPage(pageNum),
+  onClick: isEllipsis ? undefined : () => f.goToPage(pageNum),
   disabled: isActive
 };
 '''
@@ -1720,24 +1720,24 @@ return {
       P: {
         css:
           '''
-const currentPage = args.fns.store.currentPage;
-const totalPages = args.fns.store.totalPages;
+const currentPage = f.store.currentPage;
+const totalPages = f.store.totalPages;
 const isDisabled = currentPage >= totalPages;
 
 return `._id {
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  background: ${args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.sm};
-  color: ${args.theme.var.color.text};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  background: ${t.var.color.background};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.sm};
+  color: ${t.var.color.text};
   font-size: 0.875rem;
   cursor: ${isDisabled ? 'not-allowed' : 'pointer'};
   opacity: ${isDisabled ? '0.5' : '1'};
   transition: all 0.2s ease;
 
   &:hover:not(:disabled) {
-    background: ${args.theme.var.color.background_dark_100};
-    border-color: ${args.theme.var.color.primary};
+    background: ${t.var.color.background_dark_100};
+    border-color: ${t.var.color.primary};
   }
 }`;
 '''
@@ -1745,14 +1745,14 @@ return `._id {
         componentName: Html
         props:
           '''
-const currentPage = args.fns.store.currentPage;
-const totalPages = args.fns.store.totalPages;
+const currentPage = f.store.currentPage;
+const totalPages = f.store.totalPages;
 const isDisabled = currentPage >= totalPages;
 
 return {
   as: "button",
   text: "Next →",
-  onClick: args.fns.goToNextPage,
+  onClick: f.goToNextPage,
   disabled: isDisabled
 };
 '''
@@ -1766,19 +1766,19 @@ return {
           '''
 return `._id {
   text-align: center;
-  padding: ${args.theme.var.spacing.xl};
-  color: ${args.theme.var.color.text_light_500};
+  padding: ${t.var.spacing.xl};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
         displayOrder: 7
         componentName: Html
         props:
           '''
-const submissions = args.fns.store.submissions;
+const submissions = f.store.submissions;
 return {
   as: "div",
   text: "No submissions found matching your filters",
-  hide: () => submissions.length > 0 || args.fns.store.loading || args.fns.store.error
+  hide: () => submissions.length > 0 || f.store.loading || f.store.error
 };
 '''
       }

@@ -234,7 +234,7 @@ export interface NamedServerFunctionRequest {
  *
  * Note: When calling from client code, access the actual result via `response.result`:
  * ```javascript
- * const response = await args.executeNamedServerFunction({
+ * const response = await _.executeNamedServerFunction({
  *   functionName: 'myFunction',
  *   contextData: { ... }
  * });
@@ -268,7 +268,7 @@ export async function executeNamedServerFunctionCore(
     | { dbSession: Session; subDomain: string }
     | undefined;
 
-  // Request for Shopify auth and getShopifyClient (used when building args)
+  // Request for Shopify auth and getShopifyClient (used when building _)
   let rawRequest: Request | undefined;
   /** App subdomain from request for Shopify shop DB namespacing and getShopifyClient */
   let rawSubDomain: string | undefined;
@@ -419,9 +419,10 @@ export async function executeNamedServerFunctionCore(
       };
     }
 
-    // Create the async function from the body stored in the database
+    // Create the async function from the body stored in the database.
+    // Shorthand params: _ (full bag), c (contextData), g (graph), s (executeNamedServerFunction)
     const AsyncFunction = Object.getPrototypeOf(async () => {}).constructor;
-    const serverFunction = new AsyncFunction("args", functionBody);
+    const serverFunction = new AsyncFunction("_", "c", "g", "s", functionBody);
 
     // Parent context (e.g. shop) to merge into hook contextData so hooks receive it without callers passing it explicitly
     const parentContextDataForHooks = {
@@ -508,8 +509,8 @@ export async function executeNamedServerFunctionCore(
       }
     };
 
-    // Prepare the args object that will be available in the function
-    const args = {
+    // Prepare the _ object that will be available in the function
+    const _ = {
       session: dbSession,
       getSession: async () => {
         return (await getDriver()).session({
@@ -682,7 +683,7 @@ export async function executeNamedServerFunctionCore(
       rawSubDomain: rawSubDomain,
       getDBSessionForShop,
       getDatabaseNameForShop,
-      /** Same as POST `/api/users/invite`: `sendInvitationEmail(request, userVertex, subDomain, dbSession)` — use `args.request` / `getRequestEvent`, `args.subDomain`, `args.session`. */
+      /** Same as POST `/api/users/invite`: `sendInvitationEmail(request, userVertex, subDomain, dbSession)` — use `_.request` / `getRequestEvent`, `_.subDomain`, `_.session`. */
       sendInvitationEmail,
       getShopifyClient: () => getShopify(rawSubDomain!),
       getSessionUser,
@@ -696,7 +697,12 @@ export async function executeNamedServerFunctionCore(
     };
 
     // Execute the function
-    const executionResult = await serverFunction(args);
+    const executionResult = await serverFunction(
+      _,
+      _.contextData,
+      _.graph,
+      _.executeNamedServerFunction,
+    );
 
     return {
       result: executionResult,

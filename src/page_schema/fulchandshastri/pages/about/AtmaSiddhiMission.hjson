@@ -12,12 +12,12 @@
         key: AtmaSiddhiMission
         props:
           '''
-const locale = args.params?.lang ? String(args.params.lang).toLowerCase() : undefined;
+const locale = _.params?.lang ? String(_.params.lang).toLowerCase() : undefined;
 return {
   contextName: "atmaSiddhiMissionSettings",
   serverFunction: `
 try {
-  const result = await args.executeNamedServerFunction({
+  const result = await s({
     functionName: "loadPublicPageSettings",
     contextData: { pageId: "atma-siddhi-mission", allowPublicRead: true, locale: ${JSON.stringify(locale ?? null)} }
   });
@@ -83,7 +83,7 @@ try {
         displayOrder: 1
         componentName: Html
         props:
-          '''const content = args.contextData.atmaSiddhiMissionSettings?.content;
+          '''const content = c.atmaSiddhiMissionSettings?.content;
 return {
   as: "h1",
   text: content?.heroTitle
@@ -108,7 +108,7 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const content = args.contextData.atmaSiddhiMissionSettings?.content;
+          '''const content = c.atmaSiddhiMissionSettings?.content;
 return {
   as: "p",
   text: content?.heroSubtitle
@@ -149,7 +149,7 @@ return {
   as: "div",
   "data-animate": "",
 
-  ref: (el) => el && args.fns.animateOnView(el)
+  ref: (el) => el && f.animateOnView(el)
 };'''
       }
     }
@@ -167,7 +167,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const content = args.contextData.atmaSiddhiMissionSettings?.content;
+          '''const content = c.atmaSiddhiMissionSettings?.content;
 return {
   as: "h2",
   text: content?.missionTitle
@@ -184,12 +184,12 @@ return {
   line-height: 1.8;
   max-width: 800px;
   margin: 0 auto;
-  color: ${args.theme.mode === 'dark' ? args.theme.var.color.text_light_200 : args.theme.var.color.text_dark_200};
+  color: ${t.mode === 'dark' ? t.var.color.text_light_200 : t.var.color.text_dark_200};
 }`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''const content = args.contextData.atmaSiddhiMissionSettings?.content;
+          '''const content = c.atmaSiddhiMissionSettings?.content;
 return {
   as: "p",
   text: content?.missionText
@@ -211,7 +211,7 @@ return {
   as: "div",
   "data-animate": "",
 
-  ref: (el) => el && args.fns.animateOnView(el)
+  ref: (el) => el && f.animateOnView(el)
 };'''
       }
     }
@@ -229,7 +229,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const content = args.contextData.atmaSiddhiMissionSettings?.content;
+          '''const content = c.atmaSiddhiMissionSettings?.content;
 return {
   as: "h2",
   text: content?.principlesTitle
@@ -263,7 +263,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const items = args.contextData.atmaSiddhiMissionSettings?.principle?.principle ?? [];
+          '''const items = c.atmaSiddhiMissionSettings?.principle?.principle ?? [];
 return {
   as: "fragment",
   data: items
@@ -276,7 +276,7 @@ return {
       P: {
         css:
           '''return `._id {
-  background: ${args.theme.mode === 'dark' ? args.theme.var.color.background_dark_200 : args.theme.var.color.background_light_100};
+  background: ${t.mode === 'dark' ? t.var.color.background_dark_200 : t.var.color.background_light_100};
   padding: 2rem;
   border-radius: 1rem;
   text-align: center;
@@ -290,13 +290,13 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const principle = args.contextData.principle;
-const index = args.contextData.index ?? 0;
+          '''const principle = c.principle;
+const index = c.index ?? 0;
 return {
   as: "div",
   "data-animate": "",
 
-  ref: (el) => el && args.fns.animateOnView(el, { delay: index * 0.08 })
+  ref: (el) => el && f.animateOnView(el, { delay: index * 0.08 })
 };'''
       }
     }
@@ -314,7 +314,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const principle = args.contextData.principle;
+          '''const principle = c.principle;
 return {
   as: "div",
   text: principle.number
@@ -335,7 +335,7 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const principle = args.contextData.principle;
+          '''const principle = c.principle;
 return {
   as: "h3",
   text: principle.title
@@ -349,12 +349,12 @@ return {
         css:
           '''return `._id {
   line-height: 1.6;
-  color: ${args.theme.mode === 'dark' ? args.theme.var.color.text_light_200 : args.theme.var.color.text_dark_200};
+  color: ${t.mode === 'dark' ? t.var.color.text_light_200 : t.var.color.text_dark_200};
 }`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''const principle = args.contextData.principle;
+          '''const principle = c.principle;
 return {
   as: "p",
   text: principle.description
@@ -367,7 +367,7 @@ return {
       P: {
         css:
           '''return `._id {
-  background: ${args.theme.mode === 'dark' ? args.theme.var.color.background_dark_200 : args.theme.var.color.background_light_50};
+  background: ${t.mode === 'dark' ? t.var.color.background_dark_200 : t.var.color.background_light_50};
   padding: 4rem 2rem;
   border-radius: 1rem;
   margin-bottom: 4rem;
@@ -379,7 +379,7 @@ return {
   as: "div",
   "data-animate": "",
 
-  ref: (el) => el && args.fns.animateOnView(el)
+  ref: (el) => el && f.animateOnView(el)
 };'''
       }
     }
@@ -397,7 +397,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const content = args.contextData.atmaSiddhiMissionSettings?.content;
+          '''const content = c.atmaSiddhiMissionSettings?.content;
 return {
   as: "h2",
   text: content?.activitiesTitle
@@ -435,7 +435,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const items = args.contextData.atmaSiddhiMissionSettings?.activity?.activity ?? [];
+          '''const items = c.atmaSiddhiMissionSettings?.activity?.activity ?? [];
 return {
   as: "fragment",
   data: items
@@ -455,13 +455,13 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const activity = args.contextData.activity;
-const index = args.contextData.index ?? 0;
+          '''const activity = c.activity;
+const index = c.index ?? 0;
 return {
   as: "div",
   "data-animate": "",
 
-  ref: (el) => el && args.fns.animateOnView(el, { delay: index * 0.08 })
+  ref: (el) => el && f.animateOnView(el, { delay: index * 0.08 })
 };'''
       }
     }
@@ -472,7 +472,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const activity = args.contextData.activity;
+          '''const activity = c.activity;
 return {
   as: "icon",
   icon: activity.icon,
@@ -508,7 +508,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const activity = args.contextData.activity;
+          '''const activity = c.activity;
 return {
   as: "h3",
   text: activity.title
@@ -522,12 +522,12 @@ return {
         css:
           '''return `._id {
   line-height: 1.6;
-  color: ${args.theme.mode === 'dark' ? args.theme.var.color.text_light_200 : args.theme.var.color.text_dark_200};
+  color: ${t.mode === 'dark' ? t.var.color.text_light_200 : t.var.color.text_dark_200};
 }`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''const activity = args.contextData.activity;
+          '''const activity = c.activity;
 return {
   as: "p",
   text: activity.description
@@ -553,7 +553,7 @@ return {
   as: "div",
   "data-animate": "",
 
-  ref: (el) => el && args.fns.animateOnView(el)
+  ref: (el) => el && f.animateOnView(el)
 };'''
       }
     }
@@ -570,7 +570,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const content = args.contextData.atmaSiddhiMissionSettings?.content;
+          '''const content = c.atmaSiddhiMissionSettings?.content;
 return {
   as: "h2",
   text: content?.ctaTitle
@@ -590,7 +590,7 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const content = args.contextData.atmaSiddhiMissionSettings?.content;
+          '''const content = c.atmaSiddhiMissionSettings?.content;
 return {
   as: "p",
   text: content?.ctaText
@@ -620,7 +620,7 @@ return {
         displayOrder: 3
         componentName: Html
         props:
-          '''const content = args.contextData.atmaSiddhiMissionSettings?.content;
+          '''const content = c.atmaSiddhiMissionSettings?.content;
 return {
   as: "a",
   text: content?.ctaButton

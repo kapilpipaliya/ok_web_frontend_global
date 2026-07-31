@@ -392,16 +392,16 @@ const createChart = async (container, data, chartType, width, height, theme) => 
 };
 
 const renderChart = async () => {
-  const container = args.ref();
+  const container = _.ref();
   if (!container) return;
 
-  const chartType = args.contextData.props?.chartType || "line";
-  const data = args.contextData.props?.data;
+  const chartType = c.props?.chartType || "line";
+  const data = c.props?.data;
 
   if (!data) {
     container.innerHTML =
       '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: ' +
-      args.theme.var.color.text_light_500 +
+      t.var.color.text_light_500 +
       ';">No data available</div>';
     return;
   }
@@ -410,7 +410,7 @@ const renderChart = async () => {
   if (!echarts) {
     container.innerHTML =
       '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: ' +
-      args.theme.var.color.error +
+      t.var.color.error +
       ';">Failed to load ECharts library</div>';
     return;
   }
@@ -418,7 +418,7 @@ const renderChart = async () => {
   const containerWidth = container.offsetWidth || container.clientWidth || 800;
   const containerHeight = container.offsetHeight || container.clientHeight || 400;
 
-  await createChart(container, data, chartType, containerWidth, containerHeight, args.theme);
+  await createChart(container, data, chartType, containerWidth, containerHeight, t);
 };
 
 let resizeTimeout;
@@ -438,23 +438,23 @@ return {
 return {
   as: "div",
   onMount: () => {
-    args.fns.renderChart();
-    window.addEventListener("resize", args.fns.handleResize);
+    f.renderChart();
+    window.addEventListener("resize", f.handleResize);
   },
   onCleanup: () => {
-    window.removeEventListener("resize", args.fns.handleResize);
+    window.removeEventListener("resize", f.handleResize);
   }
 };
 ''',
         css: '''
-const height = args.contextData.props?.height || 400;
+const height = c.props?.height || 400;
 
 return `._id {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: ${args.theme.var.color.background};
-  border-radius: ${args.theme.var.borderRadius.md};
+  background: ${t.var.color.background};
+  border-radius: ${t.var.borderRadius.md};
   position: relative;
   width: 100%;
   height: ${height}px;

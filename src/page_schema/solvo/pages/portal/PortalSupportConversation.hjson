@@ -12,19 +12,19 @@
 return {
   enabled: () => true,
   executeYTOFunction: (functionName, contextData) =>
-    args.executeNamedServerFunction({ functionName, contextData: contextData || {} })
+    s({ functionName, contextData: contextData || {} })
 };
 '''
         props:
           '''return {
   isNoPermissionCheck: true,
   onMount: () => {
-    if (!args.user) {
-      const ticketId = String(args.searchParams?.ticketId || "").trim();
+    if (!_.user) {
+      const ticketId = String(_.searchParams?.ticketId || "").trim();
       const returnPath = ticketId
         ? `/portal/support/conversation?ticketId=${encodeURIComponent(ticketId)}`
         : "/portal/tickets";
-      args.navigate(
+      _.navigate(
         `/auth/signin?redirectUrl=${encodeURIComponent(returnPath)}`,
         { replace: true }
       );
@@ -45,8 +45,8 @@ return {
   width: 100%;
   max-width: 960px;
   margin: 0;
-  padding: ${args.theme.var.spacing?.md || "1rem"};
-  color: ${args.theme.var.color.text};
+  padding: ${t.var.spacing?.md || "1rem"};
+  color: ${t.var.color.text};
   min-height: 50vh;
   display: flex;
   flex-direction: column;
@@ -72,22 +72,22 @@ return {
   gap: 0.35rem;
   padding: 0.35rem 0.75rem;
   border-radius: 0.375rem;
-  border: 1px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  border: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   font-size: 0.875rem;
   cursor: pointer;
   align-self: flex-start;
 }
 ._id:hover {
-  background: ${args.theme.var.color.background_light_200};
+  background: ${t.var.color.background_light_200};
 }`;'''
         props:
           '''return {
   as: "button",
   type: "button",
   text: "← Back to tickets",
-  onClick: () => args.navigate("/portal/tickets")
+  onClick: () => _.navigate("/portal/tickets")
 };'''
       }
     }
@@ -101,7 +101,7 @@ return {
         props:
           '''return {
   viewerRole: "admin",
-  ticketId: args.searchParams?.ticketId || args.searchParams?.supportId || "",
+  ticketId: _.searchParams?.ticketId || _.searchParams?.supportId || "",
   compact: false,
   showCloseButton: false
 };'''

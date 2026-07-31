@@ -8,23 +8,23 @@
         description: Records a gentle Hydrate Circle reminder (Phase 2) — updates member lastRemindedAt and stores a ping row.
         body:
           '''
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return { success: false, message: "Sign in to send a reminder." };
 }
 
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const user = await _.getEffectiveUser(_.session, actualUser, c);
 const uuid = user?.P?.uuid;
 if (!uuid) {
   return { success: false, message: "User uuid missing." };
 }
 
-const memberElementId = args.contextData?.circleMemberElementId;
+const memberElementId = c?.circleMemberElementId;
 if (!memberElementId || String(memberElementId).trim() === "") {
   return { success: false, message: "circleMemberElementId is required." };
 }
 
-const check = await args.session.run(
+const check = await _.session.run(
   `MATCH (u:User {uuid: $uuid})-[:UserHydrateMeCircleMember]->(m:HydrateMeCircleMember)
    WHERE elementId(m) = $memberElementId
    RETURN m, coalesce(m.displayName, m.friendEmail, "friend") AS label
@@ -38,11 +38,11 @@ if (!check.records[0]) {
 
 const label = check.records[0].get("label");
 const message =
-  args.contextData?.message != null && String(args.contextData.message).trim() !== ""
-    ? String(args.contextData.message).trim()
+  c?.message != null && String(c.message).trim() !== ""
+    ? String(c.message).trim()
     : "Time to hydrate";
 
-await args.session.run(
+await _.session.run(
   `MATCH (u:User {uuid: $uuid})-[:UserHydrateMeCircleMember]->(m:HydrateMeCircleMember)
    WHERE elementId(m) = $memberElementId
    SET m.lastRemindedAt = datetime(),

@@ -16,7 +16,7 @@
   parentVertexLabel,
   toParentEdgeType,
   enableUserScoping
-} = args.contextData;
+} = c;
 const isDraftOrderTable = tableVertexLabel === "ShopifyDraftOrder";
 const isDraftLineTable = tableVertexLabel === "ShopifyDraftOrderLineItem";
 if (!isDraftOrderTable && !isDraftLineTable) return;
@@ -30,7 +30,7 @@ if (isDraftLineTable && hasDraftOrderIdFilter) {
   return;
 }
 
-const shop = contextShop || args.shop;
+const shop = contextShop || _.shop;
 if (!shop) {
   console.warn("shopifyDraftOrderBeforeFetchData: shop is required");
   return;
@@ -38,7 +38,7 @@ if (!shop) {
 
 console.log("[shopifyDraftOrderBeforeFetchData] contextData:", { shop, filters, sort });
 
-const shopify = await args.getShopifyClient();
+const shopify = await _.getShopifyClient();
 let admin;
 try {
   const authResult = await shopify.unauthenticated.admin(shop);
@@ -59,7 +59,7 @@ const isUncategorized = showUnassigned === true || categoryId === uncategorizedV
 let categoryDraftOrderGids = [];
 if (!isUncategorized && categoryId && parentVertexLabel && toParentEdgeType) {
   try {
-    const fetchResult = await args.executeNamedServerFunction(
+    const fetchResult = await s(
       {
         functionName: "getUserContent",
         contextData: {
@@ -685,7 +685,7 @@ const jstr = (v) => {
 const strJoin = (arr) =>
   Array.isArray(arr) ? arr.filter((x) => x != null && x !== "").join(", ") : "";
 
-const session = args.session;
+const session = _.session;
 for (const draft of allDrafts) {
   const draftOrderId = draft.id || "";
   const draftName = draft.name || "";

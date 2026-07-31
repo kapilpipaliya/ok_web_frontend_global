@@ -43,10 +43,10 @@ return `._id {
         props:
           '''return {
   as: "div",
-  hide: args.contextData.props?.isOpen !== true,
+  hide: c.props?.isOpen !== true,
   onClick: (e) => {
     if (e.target === e.currentTarget) {
-      args.contextData.props?.onClose?.();
+      c.props?.onClose?.();
     }
   }
 };'''
@@ -60,9 +60,9 @@ return `._id {
         componentName: Html
         css:
           '''
-const maxWidth = args.contextData.props?.maxWidth || "880px";
+const maxWidth = c.props?.maxWidth || "880px";
 return `._id {
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
   border-radius: 0.75rem;
   width: 100%;
   max-width: ${maxWidth};
@@ -111,7 +111,7 @@ return `._id {
           '''
 return `._id {
   padding: 1rem 1.25rem;
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  border-bottom: 1px solid ${t.var.color.border};
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -122,7 +122,7 @@ return `._id {
         props:
           '''return {
   as: "header",
-  hide: args.contextData.props?.showTitle === false
+  hide: c.props?.showTitle === false
 };'''
       }
     }
@@ -137,7 +137,7 @@ return `._id {
 return `._id {
   font-size: 1.125rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0;
   line-height: 1.35;
 }`;
@@ -145,8 +145,8 @@ return `._id {
         props:
           '''return {
   as: "h2",
-  hide: args.contextData.props?.showTitle === false,
-  text: args.contextData.props?.title || "Dialog"
+  hide: c.props?.showTitle === false,
+  text: c.props?.title || "Dialog"
 };'''
       }
     }
@@ -158,8 +158,8 @@ return `._id {
         componentName: Html
         props:
           '''
-const onClose = args.contextData.props?.onClose;
-const usePolaris = args.contextData.props?.usePolarisUI === true;
+const onClose = c.props?.onClose;
+const usePolaris = c.props?.usePolarisUI === true;
 return {
   as: "icon",
   icon: "carbon:close",
@@ -178,13 +178,13 @@ return {
         componentName: Html
         props:
           '''
-const onClose = args.contextData.props?.onClose;
+const onClose = c.props?.onClose;
 return {
   as: "s-button",
   "attr:variant": "plain",
   "attr:icon": "x",
   "attr:accessibilityLabel": "Close",
-  hide: args.contextData.props?.usePolarisUI !== true,
+  hide: c.props?.usePolarisUI !== true,
   onClick: () => onClose?.()
 };'''
       }

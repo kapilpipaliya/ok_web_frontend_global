@@ -10,7 +10,7 @@
 // Sync when tableVertexLabel is 'ShopifyProduct'
 // For uncategorized: sync all products
 // For specific category: fetch existing data first, then sync products in that category
-const { tableVertexLabel, showUnassigned, categoryId, parentVertexLabel, toParentEdgeType, enableUserScoping } = args.contextData;
+const { tableVertexLabel, showUnassigned, categoryId, parentVertexLabel, toParentEdgeType, enableUserScoping } = c;
 
 if (tableVertexLabel !== 'ShopifyProduct') {
   // Not Shopify products, skip sync
@@ -28,7 +28,7 @@ let categoryProductIds = new Set();
 if (!isUncategorized && categoryId && parentVertexLabel && toParentEdgeType) {
   console.log(`📋 Fetching existing products for category ${categoryId}...`);
   try {
-    const fetchResult = await args.executeNamedServerFunction({
+    const fetchResult = await s({
       functionName: "getUserContent",
       contextData: {
         tableVertexLabel: 'ShopifyProduct',
@@ -59,13 +59,13 @@ if (!isUncategorized && categoryId && parentVertexLabel && toParentEdgeType) {
 
 console.log('🔄 Syncing Shopify products with database...');
 
-const shop = args.contextData.shop;
+const shop = c.shop;
 if (!shop) {
   console.warn("shopifyProductBeforeFetchData: Shop domain is missing, skipping sync");
   return;
 }
 
-const shopify = await args.getShopifyClient();
+const shopify = await _.getShopifyClient();
 let admin;
 try {
   const authResult = await shopify.unauthenticated.admin(shop);
@@ -330,7 +330,7 @@ const productsWithoutId = []; // Track products without Shopify ID
 
 if (isUncategorized) {
   // For uncategorized, fetch all products from database
-  const existingProductsResult = await args.session.run(
+  const existingProductsResult = await _.session.run(
     `MATCH (p:ShopifyProduct)
      RETURN elementId(p) as elementId, p.id as id`,
     {}
@@ -398,7 +398,7 @@ if (productsToDelete.length > 0) {
   if (deletedWithoutIdCount > 0) {
     console.log(`   - ${deletedWithoutIdCount} products without Shopify ID`);
   }
-  await args.session.run(
+  await _.session.run(
     `MATCH (p:ShopifyProduct)
      WHERE elementId(p) IN $ids
      DETACH DELETE p`,
@@ -445,7 +445,7 @@ for (const shopifyProduct of allShopifyProducts) {
 }
 
 if (toUpdate.length > 0) {
-  await args.session.run(
+  await _.session.run(
     `UNWIND $items as item
      MATCH (p:ShopifyProduct) WHERE elementId(p) = item.elementId
      SET p += item.props, p.updatedAt = datetime()`,
@@ -453,7 +453,7 @@ if (toUpdate.length > 0) {
   );
 }
 if (toCreate.length > 0) {
-  await args.session.run(
+  await _.session.run(
     `UNWIND $items as item
      CREATE (p:ShopifyProduct)
      SET p = item.props, p.createdAt = datetime(), p.updatedAt = datetime()`,

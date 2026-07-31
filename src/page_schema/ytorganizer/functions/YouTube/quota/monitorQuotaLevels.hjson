@@ -8,15 +8,15 @@
         body:
           '''
 // This background worker checks quota levels every 5 minutes and sends alerts
-if (args.contextData.action === 'start') {
+if (c.action === 'start') {
   console.log('[Quota Monitor] Starting quota level monitoring worker');
 
-  const { Worker } = args.bullmq;
-  const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
+  const { Worker } = _.bullmq;
+  const helpers = await s({ functionName: 'queueHelpers', contextData: {} });
   const connection = helpers.result.data.getRedisConnection();
 
   // Create a dedicated queue for quota monitoring
-  const { Queue } = args.bullmq;
+  const { Queue } = _.bullmq;
   const quotaMonitorQueue = new Queue('quotaMonitor', { connection });
 
   // Schedule quota check every 5 minutes
@@ -40,11 +40,11 @@ if (args.contextData.action === 'start') {
 
     try {
       // Get a new database session for this job
-      const session = await args.getSession();
+      const session = await _.getSession();
 
       try {
         // Get current quota status
-        const usage = await args.getTodaySharedAPIUsage(session);
+        const usage = await _.getTodaySharedAPIUsage(session);
         const percentUsed = usage.quotaPercentUsed;
 
         console.log(`[Quota Monitor] Current usage: ${percentUsed}% (${usage.totalCost}/${usage.remainingQuota + usage.totalCost} units)`);
@@ -64,7 +64,7 @@ if (args.contextData.action === 'start') {
           console.log(`[Quota Monitor] Alert level ${alertLevel} detected, sending email...`);
 
           // Send alert email
-          const alertResult = await args.executeNamedServerFunction({
+          const alertResult = await s({
             functionName: 'sendQuotaAlertEmail',
             contextData: { level: alertLevel }
           });

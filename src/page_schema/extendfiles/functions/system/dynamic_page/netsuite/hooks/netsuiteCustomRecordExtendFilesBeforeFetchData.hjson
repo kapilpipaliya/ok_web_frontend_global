@@ -15,7 +15,7 @@ const {
   showUnassigned,
   parentVertexLabel,
   toParentEdgeType,
-} = args.contextData || {};
+} = c || {};
 if (tableVertexLabel !== "NetSuiteExtendFile") return;
 
 // Match getUserContent: synthetic uncategorized category id is "_" + tableVertexLabel + "_uncategorized"
@@ -29,7 +29,7 @@ const isUncategorized =
   !categoryId ||
   categoryId === uncategorizedVertexId;
 
-const oauthResult = await args.session.run(
+const oauthResult = await _.session.run(
   `MATCH (n:OAuthConnection {integrationKey: "netsuite"})
    RETURN n
    LIMIT 1`
@@ -41,7 +41,7 @@ if (!oauthResult.records.length) {
 }
 
 const oauthNode = oauthResult.records[0].get("n");
-const oauthData = args.convertNodeToJson(oauthNode);
+const oauthData = _.convertNodeToJson(oauthNode);
 const accountId = String(oauthData?.P?.accountId || "").trim();
 const accessTokenEncrypted = oauthData?.P?.accessTokenEncrypted;
 
@@ -52,7 +52,7 @@ if (!accountId || !accessTokenEncrypted) {
 
 let accessToken = "";
 try {
-  accessToken = args.decryptToken(accessTokenEncrypted);
+  accessToken = _.decryptToken(accessTokenEncrypted);
 } catch (error) {
   console.warn("[netsuiteExtendFilesBeforeFetchData] Unable to decrypt NetSuite access token.");
   return;
@@ -77,7 +77,7 @@ let contentIdsToSync = [];
 if (parentVertexLabel && toParentEdgeType) {
   if (!isUncategorized && categoryId) {
     // Categorized: content linked to selected category
-    const rs = await args.session.run(
+    const rs = await _.session.run(
       `MATCH (c:${tableVertexLabel})-[:${toParentEdgeType}]->(cat:${parentVertexLabel})
        WHERE elementId(cat) = $categoryId
        RETURN DISTINCT c.id AS id`,
@@ -89,7 +89,7 @@ if (parentVertexLabel && toParentEdgeType) {
       .map((v) => String(v));
   } else {
     // Uncategorized: content with no category relationship
-    const rs = await args.session.run(
+    const rs = await _.session.run(
       `MATCH (c:${tableVertexLabel})
        WHERE NOT EXISTS {
          MATCH (c)-[:${toParentEdgeType}]->(:${parentVertexLabel})
@@ -145,7 +145,7 @@ let offset = 0;
 const limit = 1000;
 let hasMore = true;
 let total = 0;
-const session = args.session;
+const session = _.session;
 
 const BATCH_SIZE = 150;
 const pendingRows = [];

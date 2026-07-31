@@ -34,9 +34,9 @@ return {
         displayOrder: 1,
         componentName: "Html",
         fns: '''
-const [isDashboardLoading, setIsDashboardLoading] = args.createSignal(true);
-const [dashboardError, setDashboardError] = args.createSignal(null);
-const [dashboardData, setDashboardData] = args.createSignal(null);
+const [isDashboardLoading, setIsDashboardLoading] = _.createSignal(true);
+const [dashboardError, setDashboardError] = _.createSignal(null);
+const [dashboardData, setDashboardData] = _.createSignal(null);
 
 // Function to fetch dashboard data
 const fetchDashboardData = async () => {
@@ -45,7 +45,7 @@ const fetchDashboardData = async () => {
     setDashboardError(null);
 
     // Fetch all dashboard data with a single function call
-    const result = await args.executeNamedServerFunction({
+    const result = await s({
       functionName: 'getDashboardData',
       contextData: {}
     });
@@ -92,19 +92,19 @@ return {
         props: '''
 return {
   as: "div",
-  onMount: args.fns.onMount
+  onMount: f.onMount
 };
 ''',
         css: '''
 return `._id {
-  padding: ${args.theme.var.spacing.lg};
+  padding: ${t.var.spacing.lg};
   max-width: 1200px;
   margin: 0 auto;
 }
 
 @media (max-width: 768px) {
   ._id {
-    padding: ${args.theme.var.spacing.md};
+    padding: ${t.var.spacing.md};
   }
 }`;
 '''
@@ -117,9 +117,9 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const dashboardData = args.fns.dashboardData?.();
-const isDashboardLoading = args.fns.isDashboardLoading?.();
-const dashboardError = args.fns.dashboardError?.();
+const dashboardData = f.dashboardData?.();
+const isDashboardLoading = f.isDashboardLoading?.();
+const dashboardError = f.dashboardError?.();
 
 // Show loading state
 if (isDashboardLoading) {
@@ -155,7 +155,7 @@ return `._id {
         props: '''
 return {
   as: "div",
-  hide: () => !args.fns.isDashboardLoading?.()
+  hide: () => !f.isDashboardLoading?.()
 };
 ''',
         css: '''
@@ -164,7 +164,7 @@ return `._id {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: ${args.theme.var.spacing.xxl};
+  padding: ${t.var.spacing.xxl};
   text-align: center;
 }`;
 '''
@@ -185,7 +185,7 @@ return {
 ''',
         css: '''
 return `._id {
-  margin-bottom: ${args.theme.var.spacing.lg};
+  margin-bottom: ${t.var.spacing.lg};
 }`;
 '''
       }
@@ -199,7 +199,7 @@ return `._id {
         props: '''
 return {
   as: "div",
-  hide: () => !args.fns.dashboardError?.()
+  hide: () => !f.dashboardError?.()
 };
 ''',
         css: '''
@@ -208,12 +208,12 @@ return `._id {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: ${args.theme.var.spacing.xxl};
+  padding: ${t.var.spacing.xxl};
   text-align: center;
-  background: ${args.theme.var.color.error_light_100};
-  border: 1px solid ${args.theme.var.color.error_light_200};
-  border-radius: ${args.theme.var.borderRadius.lg};
-  margin: ${args.theme.var.spacing.lg} 0;
+  background: ${t.var.color.error_light_100};
+  border: 1px solid ${t.var.color.error_light_200};
+  border-radius: ${t.var.borderRadius.lg};
+  margin: ${t.var.spacing.lg} 0;
 }`;
 '''
       }
@@ -234,8 +234,8 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.error};
-  margin-bottom: ${args.theme.var.spacing.md};
+  color: ${t.var.color.error};
+  margin-bottom: ${t.var.spacing.md};
 }`;
 '''
       }
@@ -254,10 +254,10 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.error};
+  color: ${t.var.color.error};
   font-size: 1.25rem;
   font-weight: 600;
-  margin: 0 0 ${args.theme.var.spacing.sm} 0;
+  margin: 0 0 ${t.var.spacing.sm} 0;
 }`;
 '''
       }
@@ -269,7 +269,7 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const dashboardError = args.fns.dashboardError?.();
+const dashboardError = f.dashboardError?.();
 
 return {
   as: "p",
@@ -278,8 +278,8 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.error_dark_200};
-  margin: 0 0 ${args.theme.var.spacing.lg} 0;
+  color: ${t.var.color.error_dark_200};
+  margin: 0 0 ${t.var.spacing.lg} 0;
   max-width: 400px;
 }`;
 '''
@@ -292,7 +292,7 @@ return `._id {
         displayOrder: 4,
         componentName: "RBButton",
         props: '''
-const fetchDashboardData = args.fns.fetchDashboardData;
+const fetchDashboardData = f.fetchDashboardData;
 
 return {
   text: "Try Again",
@@ -311,7 +311,7 @@ return {
         props: '''
 return {
   as: "div",
-  hide: () => args.fns.isDashboardLoading?.() || args.fns.dashboardError?.()
+  hide: () => f.isDashboardLoading?.() || f.dashboardError?.()
 };
 '''
       }
@@ -367,7 +367,7 @@ return {
         css: '''
 return `._id {
   font-size: 1.125rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0;
 }`;
 '''
@@ -386,11 +386,11 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background_light_100};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.lg};
-  padding: ${args.theme.var.spacing.lg};
-  margin-bottom: ${args.theme.var.spacing.xl};
+  background: ${t.var.color.background_light_100};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.lg};
+  padding: ${t.var.spacing.lg};
+  margin-bottom: ${t.var.spacing.xl};
 }`;
 '''
       }
@@ -411,8 +411,8 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 ${args.theme.var.spacing.lg} 0;
+  color: ${t.var.color.text};
+  margin: 0 0 ${t.var.spacing.lg} 0;
 }`;
 '''
       }
@@ -430,10 +430,10 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background_light_200};
-  border-radius: ${args.theme.var.borderRadius.full};
-  padding: ${args.theme.var.spacing.xs};
-  margin-bottom: ${args.theme.var.spacing.lg};
+  background: ${t.var.color.background_light_200};
+  border-radius: ${t.var.borderRadius.full};
+  padding: ${t.var.spacing.xs};
+  margin-bottom: ${t.var.spacing.lg};
 }`;
 '''
       }
@@ -445,7 +445,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const dashboardData = args.fns.dashboardData?.();
+const dashboardData = f.dashboardData?.();
 const progressData = dashboardData?.progress;
 
 // Calculate completion stats from real data
@@ -462,7 +462,7 @@ return {
 };
 ''',
         css: '''
-const dashboardData = args.fns.dashboardData?.();
+const dashboardData = f.dashboardData?.();
 const progress = dashboardData?.progress || {};
 
 const percentage = progress.completionRate || 0;
@@ -471,8 +471,8 @@ const hasRules = progress.totalActiveRules > 0;
 return `._id {
   width: ${Math.max(percentage, hasRules ? 2 : 0)}%;
   height: 12px;
-  background: ${percentage === 0 ? args.theme.var.color.text_light_500 : args.theme.var.color.success};
-  border-radius: ${args.theme.var.borderRadius.full};
+  background: ${percentage === 0 ? t.var.color.text_light_500 : t.var.color.success};
+  border-radius: ${t.var.borderRadius.full};
   transition: width 500ms ease;
 }`;
 '''
@@ -485,7 +485,7 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const dashboardData = args.fns.dashboardData?.();
+const dashboardData = f.dashboardData?.();
 const progressText = dashboardData?.progressText || "Loading...";
 
 return {
@@ -497,7 +497,7 @@ return {
 return `._id {
   font-size: 1.125rem;
   font-weight: 500;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0;
   text-align: center;
 }`;
@@ -519,8 +519,8 @@ return {
 return `._id {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: ${args.theme.var.spacing.md};
-  margin-top: ${args.theme.var.spacing.lg};
+  gap: ${t.var.spacing.md};
+  margin-top: ${t.var.spacing.lg};
 }`;
 '''
       }
@@ -539,10 +539,10 @@ return {
         css: '''
 return `._id {
   text-align: center;
-  padding: ${args.theme.var.spacing.md};
-  background: ${args.theme.var.color.background};
-  border-radius: ${args.theme.var.borderRadius.md};
-  border: 1px solid ${args.theme.var.color.border};
+  padding: ${t.var.spacing.md};
+  background: ${t.var.color.background};
+  border-radius: ${t.var.borderRadius.md};
+  border: 1px solid ${t.var.color.border};
 }`;
 '''
       }
@@ -554,7 +554,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const dashboardData = args.fns.dashboardData?.();
+const dashboardData = f.dashboardData?.();
 const progress = dashboardData?.progress || {};
 
 const longestStreak = progress.longestStreak || 0;
@@ -568,8 +568,8 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 700;
-  color: ${args.theme.var.color.streak};
-  margin-bottom: ${args.theme.var.spacing.xs};
+  color: ${t.var.color.streak};
+  margin-bottom: ${t.var.spacing.xs};
 }`;
 '''
       }
@@ -589,7 +589,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
       }
@@ -608,10 +608,10 @@ return {
         css: '''
 return `._id {
   text-align: center;
-  padding: ${args.theme.var.spacing.md};
-  background: ${args.theme.var.color.background};
-  border-radius: ${args.theme.var.borderRadius.md};
-  border: 1px solid ${args.theme.var.color.border};
+  padding: ${t.var.spacing.md};
+  background: ${t.var.color.background};
+  border-radius: ${t.var.borderRadius.md};
+  border: 1px solid ${t.var.color.border};
 }`;
 '''
       }
@@ -623,7 +623,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const dashboardData = args.fns.dashboardData?.();
+const dashboardData = f.dashboardData?.();
 const progress = dashboardData?.progress || {};
 
 const completed = progress.completedToday || 0;
@@ -637,8 +637,8 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 700;
-  color: ${args.theme.var.color.completed};
-  margin-bottom: ${args.theme.var.spacing.xs};
+  color: ${t.var.color.completed};
+  margin-bottom: ${t.var.spacing.xs};
 }`;
 '''
       }
@@ -658,7 +658,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
       }
@@ -677,10 +677,10 @@ return {
         css: '''
 return `._id {
   text-align: center;
-  padding: ${args.theme.var.spacing.md};
-  background: ${args.theme.var.color.background};
-  border-radius: ${args.theme.var.borderRadius.md};
-  border: 1px solid ${args.theme.var.color.border};
+  padding: ${t.var.spacing.md};
+  background: ${t.var.color.background};
+  border-radius: ${t.var.borderRadius.md};
+  border: 1px solid ${t.var.color.border};
 }`;
 '''
       }
@@ -692,7 +692,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const dashboardData = args.fns.dashboardData?.();
+const dashboardData = f.dashboardData?.();
 const progress = dashboardData?.progress || {};
 
 const completionRate = progress.completionRate || 0;
@@ -706,8 +706,8 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 700;
-  color: ${args.theme.var.color.info};
-  margin-bottom: ${args.theme.var.spacing.xs};
+  color: ${t.var.color.info};
+  margin-bottom: ${t.var.spacing.xs};
 }`;
 '''
       }
@@ -727,7 +727,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
       }
@@ -745,7 +745,7 @@ return {
 ''',
         css: '''
 return `._id {
-  margin-bottom: ${args.theme.var.spacing.xl};
+  margin-bottom: ${t.var.spacing.xl};
 }`;
 '''
       }
@@ -766,8 +766,8 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 ${args.theme.var.spacing.lg} 0;
+  color: ${t.var.color.text};
+  margin: 0 0 ${t.var.spacing.lg} 0;
 }`;
 '''
       }
@@ -781,7 +781,7 @@ return `._id {
         loop: true,
         componentName: "Html",
         props: '''
-const dashboardData = args.fns.dashboardData?.();
+const dashboardData = f.dashboardData?.();
 const rules = dashboardData?.rules || [];
 
 return {
@@ -793,7 +793,7 @@ return {
 return `._id {
   display: flex;
   flex-direction: column;
-  gap: ${args.theme.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
 }`;
 '''
       }
@@ -805,7 +805,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const ruleData = args.contextData.rulesList;
+const ruleData = c.rulesList;
 
 if (!ruleData?.rule?.P) {
   return {
@@ -824,10 +824,10 @@ return `._id {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: ${args.theme.var.spacing.md};
-  background: ${args.theme.var.color.background_light_100};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.md};
+  padding: ${t.var.spacing.md};
+  background: ${t.var.color.background_light_100};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.md};
 }`;
 '''
       }
@@ -852,7 +852,7 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const ruleData = args.contextData.rulesList;
+const ruleData = c.rulesList;
 const rule = ruleData?.rule;
 const category = ruleData?.category;
 
@@ -867,8 +867,8 @@ return {
         css: '''
 return `._id {
   font-weight: 500;
-  color: ${args.theme.var.color.text};
-  margin-bottom: ${args.theme.var.spacing.xs};
+  color: ${t.var.color.text};
+  margin-bottom: ${t.var.spacing.xs};
 }`;
 '''
       }
@@ -880,7 +880,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const ruleData = args.contextData.rulesList;
+const ruleData = c.rulesList;
 const todayTracking = ruleData?.todayTracking;
 const streak = ruleData?.streak;
 
@@ -914,7 +914,7 @@ return {
 };
 ''',
         css: '''
-const ruleData = args.contextData.rulesList;
+const ruleData = c.rulesList;
 const todayTracking = ruleData?.todayTracking;
 
 let colorKey = "text";
@@ -941,7 +941,7 @@ if (todayTracking) {
 
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color[colorKey]};
+  color: ${t.var.color[colorKey]};
 }`;
 '''
       }
@@ -953,7 +953,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const ruleData = args.contextData.rulesList;
+const ruleData = c.rulesList;
 const todayTracking = ruleData?.todayTracking;
 
 if (todayTracking?.P?.status === "completed") {
@@ -976,23 +976,23 @@ if (todayTracking?.P?.status === "completed") {
 }
 ''',
         css: '''
-const ruleData = args.contextData.rulesList;
+const ruleData = c.rulesList;
 const todayTracking = ruleData?.todayTracking;
 const isCompleted = todayTracking?.P?.status === "completed";
 
 if (isCompleted) {
   return `._id {
-    color: ${args.theme.var.color.completed};
+    color: ${t.var.color.completed};
     font-weight: 500;
-    padding: ${args.theme.var.spacing.sm};
+    padding: ${t.var.spacing.sm};
   }`;
 } else {
   return `._id {
-    background: ${args.theme.var.color.primary};
-    color: ${args.theme.var.color.primary_text};
+    background: ${t.var.color.primary};
+    color: ${t.var.color.primary_text};
     border: none;
-    padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-    border-radius: ${args.theme.var.borderRadius.sm};
+    padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+    border-radius: ${t.var.borderRadius.sm};
     font-weight: 500;
     cursor: pointer;
     min-height: 44px;
@@ -1001,7 +1001,7 @@ if (isCompleted) {
     display: inline-block;
 
     &:hover {
-      background: ${args.theme.var.color.primary_dark_200};
+      background: ${t.var.color.primary_dark_200};
     }
 
     &:active {

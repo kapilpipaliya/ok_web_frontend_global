@@ -1,6 +1,6 @@
 # Server Function Args Reference
 
-Complete reference of all utilities and functions available in server functions via the `args` object.
+Complete reference of all utilities and functions available in server functions via the `_` object.
 
 ## Table of Contents
 
@@ -32,10 +32,10 @@ Complete reference of all utilities and functions available in server functions 
 
 ```javascript
 // Current database session (multi-tenant)
-args.session
+_.session
 
 // Get a new session
-const newSession = await args.getSession();
+const newSession = await _.getSession();
 
 // Always close sessions you create!
 try {
@@ -45,40 +45,40 @@ try {
 }
 
 // Get Neo4j driver
-const driver = await args.getDriver();
+const driver = await _.getDriver();
 ```
 
 ### Context Data
 
 ```javascript
 // Request data passed from client
-args.contextData
+_.contextData
 
 // Example: accessing parameters
-const { userId, action, filters } = args.contextData;
+const { userId, action, filters } = _.contextData;
 
 // Current subdomain (database name)
-args.subDomain
+_.subDomain
 
 // Full context object
-args.context
+_.context
 
 // Function name being executed
-args.functionName
+_.functionName
 
 // HTTP request object (if available)
-args.request
+_.request
 ```
 
 ### Graph Data
 
 ```javascript
 // Node/vertex data
-args.graph.nodes
-args.graph.relationships
+_.graph.nodes
+_.graph.relationships
 
 // Vertex list
-args.vertexes
+_.vertexes
 ```
 
 ---
@@ -89,7 +89,7 @@ args.vertexes
 
 ```javascript
 // Run Cypher query
-const result = await args.session.run(query, params);
+const result = await _.session.run(query, params);
 
 // Process results
 const records = result.records.map(record => {
@@ -107,20 +107,20 @@ const count = result.records[0]?.get('count')?.toNumber() || 0;
 
 ```javascript
 // Convert Neo4j node to JSON
-const vertex = args.convertNodeToJson(node);
+const vertex = _.convertNodeToJson(node);
 
 // Neo4j conversion utilities
-const value = args.neo4jConvert.toNumber(neo4jInt);
+const value = _.neo4jConvert.toNumber(neo4jInt);
 
 // Neo4j driver module
-const { int, Date, DateTime } = args.neo4jDriver;
+const { int, Date, DateTime } = _.neo4jDriver;
 ```
 
 ### Execute Other Server Functions
 
 ```javascript
 // Call another server function
-const result = await args.executeNamedServerFunction({
+const result = await _.executeNamedServerFunction({
   functionName: "getUserData",
   contextData: { userId: "123" }
 });
@@ -135,35 +135,35 @@ if (result.result.success) {
 
 ## Neogma OGM Models
 
-Full OGM support for type-safe database operations. All model utilities are available directly via `args` - no imports required!
+Full OGM support for type-safe database operations. All model utilities are available directly via `_` - no imports required!
 
 See `/src/lib/models/README.md` for complete documentation.
 
 ### Available Model Functions
 
 ```javascript
-args.Models                  // OGM model registry
-args.registerModel()         // Register models globally
-args.hasModel()             // Check if model exists
-args.getRegisteredModels()  // Get all model names
-args.getNeogmaInstance()    // Get neogma instance
-args.modelToVertex()        // Convert single instance to Vertex
-args.modelsToVertices()     // Convert array to Vertex format
+_.Models                  // OGM model registry
+_.registerModel()         // Register models globally
+_.hasModel()             // Check if model exists
+_.getRegisteredModels()  // Get all model names
+_.getNeogmaInstance()    // Get neogma instance
+_.modelToVertex()        // Convert single instance to Vertex
+_.modelsToVertices()     // Convert array to Vertex format
 ```
 
 ### Quick Example: Using Existing Model
 
 ```javascript
 // Create
-const notification = await args.Models.Notification.createOne({
+const notification = await _.Models.Notification.createOne({
   userId: "user123",
   type: "info",
   title: "Hello",
   message: "Welcome!"
-}, { session: args.session });
+}, { session: _.session });
 
 // Convert to Vertex format (no import needed!)
-const vertexFormat = args.modelToVertex(notification);
+const vertexFormat = _.modelToVertex(notification);
 
 return { success: true, data: { notification: vertexFormat } };
 ```
@@ -172,23 +172,23 @@ return { success: true, data: { notification: vertexFormat } };
 
 ```javascript
 // Create
-const item = await args.Models.MyModel.createOne(data, { session: args.session });
+const item = await _.Models.MyModel.createOne(data, { session: _.session });
 
 // Read
-const items = await args.Models.MyModel.findMany(
+const items = await _.Models.MyModel.findMany(
   { where: { status: "active" } },
-  args.session
+  _.session
 );
 
 // Update
-await item.update({ status: "completed" }, args.session);
+await item.update({ status: "completed" }, _.session);
 
 // Delete
-await item.delete(args.session);
+await item.delete(_.session);
 
 // Convert for UI
-return args.utils.createSuccessResponse({
-  items: args.modelsToVertices(items)
+return _.utils.createSuccessResponse({
+  items: _.modelsToVertices(items)
 });
 ```
 
@@ -196,15 +196,15 @@ return args.utils.createSuccessResponse({
 
 ```javascript
 // Single instance
-const vertexFormat = args.modelToVertex(notification);
+const vertexFormat = _.modelToVertex(notification);
 
 // Multiple instances
-const vertexArray = args.modelsToVertices(notifications);
+const vertexArray = _.modelsToVertices(notifications);
 
 // In response
-return args.utils.createSuccessResponse({
-  notification: args.modelToVertex(notification),
-  notifications: args.modelsToVertices(notifications)
+return _.utils.createSuccessResponse({
+  notification: _.modelToVertex(notification),
+  notifications: _.modelsToVertices(notifications)
 });
 ```
 
@@ -217,10 +217,10 @@ Register a model once, use everywhere:
 const { ModelFactory } = await import("neogma");
 
 // Get neogma instance
-const neogma = await args.getNeogmaInstance();
+const neogma = await _.getNeogmaInstance();
 
 // Check if already registered (avoid duplicates)
-if (!args.hasModel("Cache")) {
+if (!_.hasModel("Cache")) {
   // Create model
   const CacheModel = ModelFactory({
     label: "Cache",
@@ -231,13 +231,13 @@ if (!args.hasModel("Cache")) {
   }, neogma);
 
   // Register globally
-  args.registerModel("Cache", () => CacheModel);
+  _.registerModel("Cache", () => CacheModel);
 }
 
-// Now available in ALL functions via args.Models
-const cache = await args.Models.Cache.findOne(
+// Now available in ALL functions via _.Models
+const cache = await _.Models.Cache.findOne(
   { where: { key: "mykey" } },
-  args.session
+  _.session
 );
 ```
 
@@ -245,22 +245,22 @@ const cache = await args.Models.Cache.findOne(
 
 ```javascript
 // Check specific model
-if (!args.hasModel("MyModel")) {
-  return args.utils.createErrorResponse(
+if (!_.hasModel("MyModel")) {
+  return _.utils.createErrorResponse(
     "Model not registered",
     "ModelNotFoundError"
   );
 }
 
 // Use the model
-const data = await args.Models.MyModel.findMany(...);
+const data = await _.Models.MyModel.findMany(...);
 ```
 
 ### List All Models
 
 ```javascript
 // Get all registered models
-const allModels = args.getRegisteredModels();
+const allModels = _.getRegisteredModels();
 console.log("Available models:", allModels);
 // ["Notification", "Cache", "UserActivity", ...]
 ```
@@ -271,20 +271,20 @@ Combine OGM for simple operations with raw Cypher for complex queries:
 
 ```javascript
 // OGM for simple operations
-const user = await args.Models.User.findOne(
+const user = await _.Models.User.findOne(
   { where: { email } },
-  args.session
+  _.session
 );
 
 // Raw Cypher for complex aggregations
-const stats = await args.session.run(`
+const stats = await _.session.run(`
   MATCH (u:User {uuid: $userId})-[:OWNS]->(p:Post)
   RETURN count(p) as postCount
 `, { userId: user.dataValues.uuid });
 
 // Combine results
-return args.utils.createSuccessResponse({
-  user: args.modelToVertex(user),
+return _.utils.createSuccessResponse({
+  user: _.modelToVertex(user),
   postCount: stats.records[0].get("postCount").toNumber()
 });
 ```
@@ -293,9 +293,9 @@ return args.utils.createSuccessResponse({
 
 ```javascript
 // Function 1: Register (do this once)
-if (!args.hasModel("Session")) {
+if (!_.hasModel("Session")) {
   const { ModelFactory } = await import("neogma");
-  const neogma = await args.getNeogmaInstance();
+  const neogma = await _.getNeogmaInstance();
 
   const SessionModel = ModelFactory({
     label: "Session",
@@ -306,29 +306,29 @@ if (!args.hasModel("Session")) {
     }
   }, neogma);
 
-  args.registerModel("Session", () => SessionModel);
+  _.registerModel("Session", () => SessionModel);
 }
 
 // Function 2, 3, 4, etc.: Use anywhere
-const session = await args.Models.Session.findOne(
+const session = await _.Models.Session.findOne(
   { where: { sessionId } },
-  args.session
+  _.session
 );
 ```
 
 ### Tips
 
-1. **Always use `args.session`**: Multi-tenant architecture requires session
+1. **Always use `_.session`**: Multi-tenant architecture requires session
 2. **Register once, use everywhere**: Global registration persists across function calls
-3. **Check before creating**: Use `args.hasModel()` to avoid duplicate registrations
-4. **Convert for UI**: Use `args.modelToVertex()` / `args.modelsToVertices()` for UI compatibility
+3. **Check before creating**: Use `_.hasModel()` to avoid duplicate registrations
+4. **Convert for UI**: Use `_.modelToVertex()` / `_.modelsToVertices()` for UI compatibility
 5. **Combine approaches**: Use OGM for CRUD, raw Cypher for complex queries
 
 ### Performance
 
 - **Lazy initialization**: Models created only when first accessed
 - **Global registry**: Avoid recreating models
-- **Session reuse**: Pass `args.session` to all operations
+- **Session reuse**: Pass `_.session` to all operations
 - **Connection pooling**: Driver handles connection lifecycle
 
 ---
@@ -339,69 +339,69 @@ const session = await args.Models.Session.findOne(
 
 ```javascript
 // Get YouTube client for ownership
-const youtube = await args.getYouTubeClient(ownershipId, args.session);
+const youtube = await _.getYouTubeClient(ownershipId, _.session);
 
 // Get valid token
-const token = await args.getValidYouTubeToken(ownershipId, args.session);
+const token = await _.getValidYouTubeToken(ownershipId, _.session);
 
 // Check connection status
-const status = await args.getYouTubeConnectionStatus(
+const status = await _.getYouTubeConnectionStatus(
   ownershipId,
-  args.session
+  _.session
 );
 
 // Check if connected
-const isConnected = await args.hasYouTubeConnection(
+const isConnected = await _.hasYouTubeConnection(
   ownershipId,
-  args.session
+  _.session
 );
 
 // Disconnect
-await args.disconnectYouTube(ownershipId, args.session);
+await _.disconnectYouTube(ownershipId, _.session);
 
 // Get redirect URI
-const redirectUri = args.getRedirectUriFromRequest(args.request);
+const redirectUri = _.getRedirectUriFromRequest(_.request);
 ```
 
 ### API Quota Management
 
 ```javascript
 // API operation costs
-const cost = args.calculateOperationCost("channels.list", { part: ["snippet"] });
-const quotaCosts = args.YOUTUBE_API_COSTS;
+const cost = _.calculateOperationCost("channels.list", { part: ["snippet"] });
+const quotaCosts = _.YOUTUBE_API_COSTS;
 
 // Quota limits
-const dailyLimit = args.DAILY_QUOTA_LIMIT;
-const reservationExpiry = args.RESERVATION_EXPIRY_MS;
+const dailyLimit = _.DAILY_QUOTA_LIMIT;
+const reservationExpiry = _.RESERVATION_EXPIRY_MS;
 
 // Log API usage
-await args.logSharedAPIUsage(
-  args.session,
+await _.logSharedAPIUsage(
+  _.session,
   cost,
   "channels.list",
   ownershipId
 );
 
 // Get usage stats
-const todayUsage = await args.getTodaySharedAPIUsage(args.session);
-const ownershipUsage = await args.getSharedAPIUsageByOwnership(
+const todayUsage = await _.getTodaySharedAPIUsage(_.session);
+const ownershipUsage = await _.getSharedAPIUsageByOwnership(
   ownershipId,
-  args.session
+  _.session
 );
 
 // Reserve quota
-const reservation = await args.reserveQuota(
-  args.session,
+const reservation = await _.reserveQuota(
+  _.session,
   cost,
   priority,
   ownershipId
 );
 
 // Release quota
-await args.releaseQuota(args.session, reservation.id);
+await _.releaseQuota(_.session, reservation.id);
 
 // Cleanup expired reservations
-await args.cleanupExpiredReservations(args.session);
+await _.cleanupExpiredReservations(_.session);
 ```
 
 ---
@@ -412,56 +412,56 @@ await args.cleanupExpiredReservations(args.session);
 
 ```javascript
 // Get current user from session
-const user = await args.getUserFromSession();
+const user = await _.getUserFromSession();
 
 // Get effective user (handles admin impersonation)
-const effectiveUser = await args.getEffectiveUser(
-  args.session,
+const effectiveUser = await _.getEffectiveUser(
+  _.session,
   actualUser,
-  args.contextData
+  _.contextData
 );
 
 // Admin impersonation
-await args.setImpersonation(
-  args.session,
+await _.setImpersonation(
+  _.session,
   adminUserId,
   targetUserId
 );
 
-await args.clearImpersonation(args.session, adminUserId);
+await _.clearImpersonation(_.session, adminUserId);
 ```
 
 ### Token Encryption
 
 ```javascript
 // Encrypt/decrypt OAuth tokens
-const encrypted = await args.encryptToken(token);
-const decrypted = await args.decryptToken(encryptedToken);
+const encrypted = await _.encryptToken(token);
+const decrypted = await _.decryptToken(encryptedToken);
 
 // Client secret encryption
-const encryptedSecret = await args.encryptClientSecret(secret);
-const decryptedSecret = await args.decryptClientSecret(encryptedSecret);
+const encryptedSecret = await _.encryptClientSecret(secret);
+const decryptedSecret = await _.decryptClientSecret(encryptedSecret);
 ```
 
 ---
 
 ## Server Function Utilities
 
-Available via `args.utils`. All utilities from `/src/lib/utils/serverFunctionUtils.ts`.
+Available via `_.utils`. All utilities from `/src/lib/utils/serverFunctionUtils.ts`.
 
 ### ID Generation
 
 ```javascript
 // Generate UUID v4
-const id = args.utils.generateUUID();
+const id = _.utils.generateUUID();
 // "550e8400-e29b-41d4-a716-446655440000"
 
 // Short ID (8 characters)
-const shortId = args.utils.generateShortId();
+const shortId = _.utils.generateShortId();
 // "550e8400"
 
 // Generate key from string
-const key = args.utils.generateKey("Hello World 123!");
+const key = _.utils.generateKey("Hello World 123!");
 // "hello_world_123"
 ```
 
@@ -469,51 +469,51 @@ const key = args.utils.generateKey("Hello World 123!");
 
 ```javascript
 // Current ISO timestamp
-const timestamp = args.utils.now();
+const timestamp = _.utils.now();
 // "2025-12-01T10:30:00.000Z"
 
 // Days ago
-const weekAgo = args.utils.daysAgo(7);
-const monthAgo = args.utils.daysAgo(30);
+const weekAgo = _.utils.daysAgo(7);
+const monthAgo = _.utils.daysAgo(30);
 
 // Days from now
-const tomorrow = args.utils.daysFromNow(1);
-const nextWeek = args.utils.daysFromNow(7);
+const tomorrow = _.utils.daysFromNow(1);
+const nextWeek = _.utils.daysFromNow(7);
 
 // Format date
-const formatted = args.utils.formatDate(new Date());
+const formatted = _.utils.formatDate(new Date());
 // "2025-12-01"
 
 // Parse and validate
-const date = args.utils.parseDate("2025-12-01T10:30:00.000Z");
-const isValid = args.utils.isValidDate("2025-12-01");
+const date = _.utils.parseDate("2025-12-01T10:30:00.000Z");
+const isValid = _.utils.isValidDate("2025-12-01");
 ```
 
 ### String Operations
 
 ```javascript
 // Slugify (URL-friendly)
-const slug = args.utils.slugify("Hello World!");
+const slug = _.utils.slugify("Hello World!");
 // "hello-world"
 
 // Truncate
-const short = args.utils.truncate("Long text here", 10);
+const short = _.utils.truncate("Long text here", 10);
 // "Long te..."
 
 // Capitalize
-const cap = args.utils.capitalize("hello");
+const cap = _.utils.capitalize("hello");
 // "Hello"
 
 // Title case
-const title = args.utils.titleCase("hello world");
+const title = _.utils.titleCase("hello world");
 // "Hello World"
 
 // Strip HTML
-const text = args.utils.stripHtml("<p>Hello</p>");
+const text = _.utils.stripHtml("<p>Hello</p>");
 // "Hello"
 
 // Escape HTML
-const safe = args.utils.escapeHtml("<script>alert('xss')</script>");
+const safe = _.utils.escapeHtml("<script>alert('xss')</script>");
 // "&lt;script&gt;alert(&#39;xss&#39;)&lt;/script&gt;"
 ```
 
@@ -521,23 +521,23 @@ const safe = args.utils.escapeHtml("<script>alert('xss')</script>");
 
 ```javascript
 // Email validation
-const validEmail = args.utils.isValidEmail("user@example.com");
+const validEmail = _.utils.isValidEmail("user@example.com");
 // true
 
 // URL validation
-const validUrl = args.utils.isValidUrl("https://example.com");
+const validUrl = _.utils.isValidUrl("https://example.com");
 // true
 
 // UUID validation
-const validUUID = args.utils.isValidUUID("550e8400-e29b-41d4-a716-446655440000");
+const validUUID = _.utils.isValidUUID("550e8400-e29b-41d4-a716-446655440000");
 // true
 
 // Empty check
-const isEmpty = args.utils.isEmpty("  ");
+const isEmpty = _.utils.isEmpty("  ");
 // true
 
 // Null/undefined check
-const isNull = args.utils.isNullOrUndefined(null);
+const isNull = _.utils.isNullOrUndefined(null);
 // true
 ```
 
@@ -545,14 +545,14 @@ const isNull = args.utils.isNullOrUndefined(null);
 
 ```javascript
 // Create vertex
-const vertex = args.utils.createVertex(
+const vertex = _.utils.createVertex(
   "id123",
   ["User"],
   { name: "John", email: "john@example.com" }
 );
 
 // Create edge
-const edge = args.utils.createEdge(
+const edge = _.utils.createEdge(
   "edge123",
   "FOLLOWS",
   "user1",
@@ -561,20 +561,20 @@ const edge = args.utils.createEdge(
 );
 
 // Get property safely
-const name = args.utils.getVertexProperty(vertex, "name", "Unknown");
+const name = _.utils.getVertexProperty(vertex, "name", "Unknown");
 
 // Check label
-const isUser = args.utils.hasLabel(vertex, "User");
+const isUser = _.utils.hasLabel(vertex, "User");
 
 // Filter by label
-const users = args.utils.filterByLabel(vertices, "User");
+const users = _.utils.filterByLabel(vertices, "User");
 ```
 
 ### Pagination
 
 ```javascript
 // Calculate pagination
-const pagination = args.utils.calculatePagination({
+const pagination = _.utils.calculatePagination({
   total: 100,
   page: 2,
   limit: 10
@@ -592,7 +592,7 @@ const pagination = args.utils.calculatePagination({
 // }
 
 // Create paginated response
-return args.utils.createPaginatedResponse({
+return _.utils.createPaginatedResponse({
   data: items,
   total: 100,
   page: 2,
@@ -606,89 +606,89 @@ return args.utils.createPaginatedResponse({
 
 ```javascript
 // Error response
-return args.utils.createErrorResponse(
+return _.utils.createErrorResponse(
   "User not found",
   "NotFoundError",
   { userId }
 );
 
 // Success response
-return args.utils.createSuccessResponse(
+return _.utils.createSuccessResponse(
   { user: userData },
   "User retrieved successfully",
   { timestamp: Date.now() }
 );
 
 // Safe JSON operations
-const parsed = args.utils.safeJsonParse(jsonString, {});
-const stringified = args.utils.safeJsonStringify(object, "{}");
+const parsed = _.utils.safeJsonParse(jsonString, {});
+const stringified = _.utils.safeJsonStringify(object, "{}");
 ```
 
 ### Array Operations
 
 ```javascript
 // Remove duplicates
-const unique = args.utils.unique([1, 2, 2, 3]);
+const unique = _.utils.unique([1, 2, 2, 3]);
 // [1, 2, 3]
 
 // Chunk array
-const chunks = args.utils.chunk([1, 2, 3, 4, 5], 2);
+const chunks = _.utils.chunk([1, 2, 3, 4, 5], 2);
 // [[1, 2], [3, 4], [5]]
 
 // Group by key
-const grouped = args.utils.groupBy(users, user => user.role);
+const grouped = _.utils.groupBy(users, user => user.role);
 // { admin: [...], user: [...] }
 
 // Sort by key
-const sorted = args.utils.sortBy(users, user => user.name, "asc");
+const sorted = _.utils.sortBy(users, user => user.name, "asc");
 ```
 
 ### Object Operations
 
 ```javascript
 // Pick keys
-const picked = args.utils.pick(user, ["id", "name", "email"]);
+const picked = _.utils.pick(user, ["id", "name", "email"]);
 
 // Omit keys
-const omitted = args.utils.omit(user, ["password", "salt"]);
+const omitted = _.utils.omit(user, ["password", "salt"]);
 
 // Deep merge
-const merged = args.utils.deepMerge(defaults, userSettings);
+const merged = _.utils.deepMerge(defaults, userSettings);
 ```
 
 ### Number Operations
 
 ```javascript
 // Clamp
-const clamped = args.utils.clamp(150, 0, 100);
+const clamped = _.utils.clamp(150, 0, 100);
 // 100
 
 // Format with commas
-const formatted = args.utils.formatNumber(1234567);
+const formatted = _.utils.formatNumber(1234567);
 // "1,234,567"
 
 // Round to decimals
-const rounded = args.utils.roundTo(3.14159, 2);
+const rounded = _.utils.roundTo(3.14159, 2);
 // 3.14
 
 // Random integer
-const random = args.utils.randomInt(1, 100);
+const random = _.utils.randomInt(1, 100);
 ```
 
 ### Async Operations
 
 ```javascript
 // Sleep
-await args.utils.sleep(1000); // Wait 1 second
+await _.utils.sleep(1000); // Wait 1 second
 
 // Retry with backoff
-const result = await args.utils.retry(
+const result = await _.utils.retry(
   async () => await fetchData(),
   { maxAttempts: 3, delayMs: 1000, backoff: true }
 );
 
 // Batch execute with concurrency
-const results = await args.utils.batchExecute(
+const results = await _.utils.batchExecute(
   items,
   async (item) => await processItem(item),
   5 // Concurrency limit
@@ -699,13 +699,13 @@ const results = await args.utils.batchExecute(
 
 ## Cypher Query Utilities
 
-Available via `args.cypher`. All utilities from `/src/lib/utils/cypherUtils.ts`.
+Available via `_.cypher`. All utilities from `/src/lib/utils/cypherUtils.ts`.
 
 ### Query Building
 
 ```javascript
 // Build WHERE clause
-const { clause, params } = args.cypher.buildWhereClause(
+const { clause, params } = _.cypher.buildWhereClause(
   { userId: "123", status: "active" },
   "u"
 );
@@ -713,12 +713,12 @@ const { clause, params } = args.cypher.buildWhereClause(
 // params: { userId: "123", status: "active" }
 
 // Build ORDER BY
-const orderBy = args.cypher.buildOrderByClause("createdAt", "DESC", "n");
+const orderBy = _.cypher.buildOrderByClause("createdAt", "DESC", "n");
 // "ORDER BY n.createdAt DESC"
 
 // Build pagination
 const { skipClause, limitClause, params: paginationParams } =
-  args.cypher.buildPaginationClauses({ page: 2, limit: 10 });
+  _.cypher.buildPaginationClauses({ page: 2, limit: 10 });
 // skipClause: "SKIP $skip"
 // limitClause: "LIMIT $limit"
 // params: { skip: 10, limit: 10 }
@@ -728,7 +728,7 @@ const { skipClause, limitClause, params: paginationParams } =
 
 ```javascript
 // Build MATCH pattern
-const { pattern, params } = args.cypher.buildMatchPattern(
+const { pattern, params } = _.cypher.buildMatchPattern(
   "User",
   "u",
   { email: "user@example.com" }
@@ -737,7 +737,7 @@ const { pattern, params } = args.cypher.buildMatchPattern(
 // params: { u_email: "user@example.com" }
 
 // Build relationship pattern
-const { pattern, params } = args.cypher.buildRelationshipPattern({
+const { pattern, params } = _.cypher.buildRelationshipPattern({
   startAlias: "u",
   endAlias: "p",
   relType: "OWNS",
@@ -750,11 +750,11 @@ const { pattern, params } = args.cypher.buildRelationshipPattern({
 
 ```javascript
 // Build regex pattern
-const pattern = args.cypher.buildRegexPattern("search term", true);
+const pattern = _.cypher.buildRegexPattern("search term", true);
 // "(?i).*search term.*"
 
 // Build search condition
-const { condition, params } = args.cypher.buildSearchCondition(
+const { condition, params } = _.cypher.buildSearchCondition(
   ["title", "description"],
   "keyword",
   "n"
@@ -763,7 +763,7 @@ const { condition, params } = args.cypher.buildSearchCondition(
 // params: { searchPattern: "(?i).*keyword.*" }
 
 // Escape string
-const safe = args.cypher.escapeCypherString("It's a test");
+const safe = _.cypher.escapeCypherString("It's a test");
 // "It\\'s a test"
 ```
 
@@ -771,25 +771,25 @@ const safe = args.cypher.escapeCypherString("It's a test");
 
 ```javascript
 // Count query
-const { query, params } = args.cypher.buildCountQuery(
+const { query, params } = _.cypher.buildCountQuery(
   "User",
   { status: "active" },
   "u"
 );
-const result = await args.session.run(query, params);
+const result = await _.session.run(query, params);
 const count = result.records[0].get("count").toNumber();
 
 // Exists query
-const { query, params } = args.cypher.buildExistsQuery(
+const { query, params } = _.cypher.buildExistsQuery(
   "User",
   { email: "user@example.com" },
   "u"
 );
-const result = await args.session.run(query, params);
+const result = await _.session.run(query, params);
 const exists = result.records[0].get("exists");
 
 // Delete query
-const { query, params } = args.cypher.buildDeleteQuery(
+const { query, params } = _.cypher.buildDeleteQuery(
   "TempData",
   { createdAt: "<somedate>" },
   "t",
@@ -800,7 +800,7 @@ const { query, params } = args.cypher.buildDeleteQuery(
 ### Complete Query Builder
 
 ```javascript
-const query = args.cypher.buildQuery({
+const query = _.cypher.buildQuery({
   match: "(u:User {status: 'active'})",
   where: "u.age > 18",
   optionalMatch: [
@@ -821,14 +821,14 @@ const query = args.cypher.buildQuery({
 ### Crypto Module
 
 ```javascript
-// Available via args.crypto
-const { randomBytes, createHash, createCipheriv } = args.crypto;
+// Available via _.crypto
+const { randomBytes, createHash, createCipheriv } = _.crypto;
 
 // Generate random bytes
-const token = args.crypto.randomBytes(32).toString('hex');
+const token = _.crypto.randomBytes(32).toString('hex');
 
 // Hash
-const hash = args.crypto
+const hash = _.crypto
   .createHash('sha256')
   .update('data')
   .digest('hex');
@@ -837,23 +837,23 @@ const hash = args.crypto
 ### Path Module
 
 ```javascript
-// Available via args.path
-const { join, basename, dirname, extname } = args.path;
+// Available via _.path
+const { join, basename, dirname, extname } = _.path;
 
 // Join paths
-const fullPath = args.path.join('/usr', 'local', 'bin');
+const fullPath = _.path.join('/usr', 'local', 'bin');
 // "/usr/local/bin"
 
 // Get basename
-const filename = args.path.basename('/path/to/file.txt');
+const filename = _.path.basename('/path/to/file.txt');
 // "file.txt"
 
 // Get directory
-const dir = args.path.dirname('/path/to/file.txt');
+const dir = _.path.dirname('/path/to/file.txt');
 // "/path/to"
 
 // Get extension
-const ext = args.path.extname('file.txt');
+const ext = _.path.extname('file.txt');
 // ".txt"
 ```
 
@@ -864,11 +864,11 @@ const ext = args.path.extname('file.txt');
 ### BullMQ (Job Queue)
 
 ```javascript
-// Available via args.bullmq
-const { Queue, Worker, QueueScheduler } = args.bullmq;
+// Available via _.bullmq
+const { Queue, Worker, QueueScheduler } = _.bullmq;
 
 // Create queue
-const myQueue = new args.bullmq.Queue('my-queue');
+const myQueue = new _.bullmq.Queue('my-queue');
 
 // Add job
 await myQueue.add('process-data', { userId: '123' });
@@ -878,7 +878,7 @@ await myQueue.add('process-data', { userId: '123' });
 
 ```javascript
 // Send email
-await args.sendEmail({
+await _.sendEmail({
   to: "user@example.com",
   subject: "Welcome!",
   html: "<p>Hello!</p>",
@@ -890,10 +890,10 @@ await args.sendEmail({
 
 ```javascript
 // Create database backup
-const backup = await args.createDatabaseBackup(args.subDomain);
+const backup = await _.createDatabaseBackup(_.subDomain);
 
 // Restore from backup
-await args.restoreFromBackup(backupPath, args.subDomain);
+await _.restoreFromBackup(backupPath, _.subDomain);
 ```
 
 ---
@@ -908,22 +908,22 @@ Structured error classes that automatically format responses:
 
 ```javascript
 // Throw specific errors
-throw args.errors.Validation("Email is required");
-throw args.errors.Authentication("Please log in");
-throw args.errors.Forbidden("Admin access required");
-throw args.errors.NotFound("User", userId);
-throw args.errors.Conflict("Email already exists");
-throw args.errors.RateLimit("Too many requests", 60); // retry after 60s
-throw args.errors.Database("Query failed", { query });
-throw args.errors.BusinessLogic("Insufficient balance", { balance });
+throw _.errors.Validation("Email is required");
+throw _.errors.Authentication("Please log in");
+throw _.errors.Forbidden("Admin access required");
+throw _.errors.NotFound("User", userId);
+throw _.errors.Conflict("Email already exists");
+throw _.errors.RateLimit("Too many requests", 60); // retry after 60s
+throw _.errors.Database("Query failed", { query });
+throw _.errors.BusinessLogic("Insufficient balance", { balance });
 
 // Check if error is AppError
-if (args.isAppError(error)) {
+if (_.isAppError(error)) {
   return error.toJSON();
 }
 
 // Convert any error to response
-return args.errorToResponse(error);
+return _.errorToResponse(error);
 ```
 
 ### Schema Validation (Zod)
@@ -932,31 +932,31 @@ Type-safe runtime validation:
 
 ```javascript
 // Define schema
-const userSchema = args.schema.object({
-  email: args.schema.email(),
-  name: args.schema.string().min(2).max(100),
-  age: args.schema.number().int().positive().optional()
+const userSchema = _.schema.object({
+  email: _.schema.email(),
+  name: _.schema.string().min(2).max(100),
+  age: _.schema.number().int().positive().optional()
 });
 
 // Validate
-const validation = args.validate(userData, userSchema);
+const validation = _.validate(userData, userSchema);
 if (!validation.success) {
-  return args.responses.badRequest(validation.error, { errors: validation.errors });
+  return _.responses.badRequest(validation.error, { errors: validation.errors });
 }
 
 // Or validate and throw
-const validData = args.validateOrThrow(userData, userSchema);
+const validData = _.validateOrThrow(userData, userSchema);
 
 // Built-in patterns
-const paginationSchema = args.commonSchemas.pagination;
-const idSchema = args.commonSchemas.idParam;
+const paginationSchema = _.commonSchemas.pagination;
+const idSchema = _.commonSchemas.idParam;
 
 // Schema builders
-const customSchema = args.schema.object({
-  userId: args.schema.uuid(),
-  status: args.schema.enum(["active", "inactive"]),
-  tags: args.schema.array(args.schema.string()),
-  metadata: args.schema.record(args.schema.string(), args.schema.any())
+const customSchema = _.schema.object({
+  userId: _.schema.uuid(),
+  status: _.schema.enum(["active", "inactive"]),
+  tags: _.schema.array(_.schema.string()),
+  metadata: _.schema.record(_.schema.string(), _.schema.any())
 });
 ```
 
@@ -966,9 +966,9 @@ Chainable operations for clean function structure:
 
 ```javascript
 // Basic pipeline
-const result = await args.createPipeline(args.contextData, {
-  session: args.session,
-  getUserFromSession: args.getUserFromSession,
+const result = await _.createPipeline(_.contextData, {
+  session: _.session,
+  getUserFromSession: _.getUserFromSession,
 })
   .validate(userSchema)           // Validate input
   .authenticate()                  // Require authentication
@@ -981,7 +981,7 @@ const result = await args.createPipeline(args.contextData, {
   .custom(async (ctx) => {        // Custom middleware
     // Custom checks or processing
     if (ctx.data.amount > 1000) {
-      throw args.errors.BusinessLogic("Amount exceeds limit");
+      throw _.errors.BusinessLogic("Amount exceeds limit");
     }
   })
   .execute(async (ctx) => {       // Execute main logic
@@ -1001,10 +1001,10 @@ Auto-commit/rollback with retry logic:
 
 ```javascript
 // Simple transaction (auto-commits on success, rolls back on error)
-const result = await args.transaction(args.session, async (tx) => {
+const result = await _.transaction(_.session, async (tx) => {
   const userResult = await tx.run(
     "CREATE (u:User {id: $id, name: $name}) RETURN u",
-    { id: args.utils.uuid(), name: "John" }
+    { id: _.utils.uuid(), name: "John" }
   );
 
   const profileResult = await tx.run(
@@ -1016,8 +1016,8 @@ const result = await args.transaction(args.session, async (tx) => {
 });
 
 // Transaction with retry (for deadlocks/timeouts)
-const retryResult = await args.transactionWithRetry(
-  args.session,
+const retryResult = await _.transactionWithRetry(
+  _.session,
   async (tx) => {
     // Operations that might have transient failures
     return await someOperation(tx);
@@ -1027,7 +1027,7 @@ const retryResult = await args.transactionWithRetry(
 );
 
 // Batch transaction
-const batchResult = await args.transactionBatch(args.session, [
+const batchResult = await _.transactionBatch(_.session, [
   (tx) => tx.run("CREATE (n:Node1) RETURN n"),
   (tx) => tx.run("CREATE (n:Node2) RETURN n"),
   (tx) => tx.run("CREATE (n:Node3) RETURN n")
@@ -1040,26 +1040,26 @@ Clean permission checking:
 
 ```javascript
 // Require authentication
-const { user } = await args.requirePermissions(
+const { user } = await _.requirePermissions(
   { authenticated: true },
   {
-    getUserFromSession: args.getUserFromSession,
-    session: args.session,
-    contextData: args.contextData
+    getUserFromSession: _.getUserFromSession,
+    session: _.session,
+    contextData: _.contextData
   }
 );
 
 // Require specific role
-await args.requirePermissions(
+await _.requirePermissions(
   {
     authenticated: true,
     roles: ["admin", "moderator"]
   },
-  { getUserFromSession: args.getUserFromSession, session: args.session, contextData: args.contextData }
+  { getUserFromSession: _.getUserFromSession, session: _.session, contextData: _.contextData }
 );
 
 // Require ownership
-await args.requirePermissions(
+await _.requirePermissions(
   {
     authenticated: true,
     ownership: {
@@ -1068,15 +1068,15 @@ await args.requirePermissions(
       resourceId: postId
     }
   },
-  { getUserFromSession: args.getUserFromSession, session: args.session, contextData: args.contextData }
+  { getUserFromSession: _.getUserFromSession, session: _.session, contextData: _.contextData }
 );
 
 // Helper functions
-const user = await args.getUserFromSession();
-if (args.hasRole(user, "admin", "moderator")) { /* ... */ }
-if (args.hasPermission(user, "posts.edit")) { /* ... */ }
-if (args.isAdmin(user)) { /* ... */ }
-const isOwner = await args.isOwner(args.session, user.P.uuid, postId, "authorId");
+const user = await _.getUserFromSession();
+if (_.hasRole(user, "admin", "moderator")) { /* ... */ }
+if (_.hasPermission(user, "posts.edit")) { /* ... */ }
+if (_.isAdmin(user)) { /* ... */ }
+const isOwner = await _.isOwner(_.session, user.P.uuid, postId, "authorId");
 ```
 
 ### Response Transformers
@@ -1085,28 +1085,28 @@ Consistent response formatting:
 
 ```javascript
 // Success responses
-return args.responses.ok({ user: userData });
-return args.responses.created({ id: "123" }); // 201
-return args.responses.noContent(); // 204
+return _.responses.ok({ user: userData });
+return _.responses.created({ id: "123" }); // 201
+return _.responses.noContent(); // 204
 
 // Error responses
-return args.responses.badRequest("Invalid input");
-return args.responses.unauthorized();
-return args.responses.forbidden();
-return args.responses.notFound("User", userId);
-return args.responses.conflict("Email exists");
-return args.responses.serverError("Something went wrong");
+return _.responses.badRequest("Invalid input");
+return _.responses.unauthorized();
+return _.responses.forbidden();
+return _.responses.notFound("User", userId);
+return _.responses.conflict("Email exists");
+return _.responses.serverError("Something went wrong");
 
 // Paginated response
-return args.responses.paginated(items, page, limit, total);
+return _.responses.paginated(items, page, limit, total);
 
 // Data formatters
-const obj = args.formatters.vertex(vertex);
-const objects = args.formatters.vertices(vertices);
-const picked = args.formatters.pick(vertex, ["id", "name"]);
-const omitted = args.formatters.omit(vertex, ["password"]);
-const grouped = args.formatters.groupBy(items, item => item.category);
-const lookup = args.formatters.keyBy(items, item => item.id);
+const obj = _.formatters.vertex(vertex);
+const objects = _.formatters.vertices(vertices);
+const picked = _.formatters.pick(vertex, ["id", "name"]);
+const omitted = _.formatters.omit(vertex, ["password"]);
+const grouped = _.formatters.groupBy(items, item => item.category);
+const lookup = _.formatters.keyBy(items, item => item.id);
 ```
 
 ### Caching Layer
@@ -1115,47 +1115,47 @@ In-memory cache with TTL:
 
 ```javascript
 // Simple cache
-args.cacheSet("user:123", userData, { ttl: 300 }); // 5 minutes
-const cachedUser = args.cacheGet("user:123");
-args.cacheDelete("user:123");
+_.cacheSet("user:123", userData, { ttl: 300 }); // 5 minutes
+const cachedUser = _.cacheGet("user:123");
+_.cacheDelete("user:123");
 
 // With namespace
-args.cacheSet("sessions", sessionData, { ttl: 3600, namespace: "auth" });
-const session = args.cacheGet("sessions", { namespace: "auth" });
-args.cacheClear("auth"); // Clear namespace
+_.cacheSet("sessions", sessionData, { ttl: 3600, namespace: "auth" });
+const session = _.cacheGet("sessions", { namespace: "auth" });
+_.cacheClear("auth"); // Clear namespace
 
 // Get or set (fetch if not cached)
-const userData = await args.cacheGetOrSet(
+const userData = await _.cacheGetOrSet(
   "user:" + userId,
   async () => {
     // This runs only on cache miss
-    const result = await args.session.run(
+    const result = await _.session.run(
       "MATCH (u:User {id: $id}) RETURN u",
       { id: userId }
     );
-    return args.neo4jConvert(result.records[0].get("u"));
+    return _.neo4jConvert(result.records[0].get("u"));
   },
   { ttl: 600 }
 );
 
 // Memoize function
-const expensiveOp = args.cacheMemoize(
+const expensiveOp = _.cacheMemoize(
   async (userId) => await calculateStats(userId),
   { ttl: 300 }
 );
 
 // Cache manager with namespace
-const userCache = args.createCacheManager("users");
+const userCache = _.createCacheManager("users");
 userCache.set("profile:123", profileData);
 const profile = userCache.get("profile:123");
 userCache.clear();
 
 // Factory
-args.cache.get(key);
-args.cache.set(key, value, options);
-args.cache.delete(key);
-args.cache.clear();
-args.cache.stats(); // Get statistics
+_.cache.get(key);
+_.cache.set(key, value, options);
+_.cache.delete(key);
+_.cache.clear();
+_.cache.stats(); // Get statistics
 ```
 
 ### Background Jobs
@@ -1164,8 +1164,8 @@ Simple job queue for async operations:
 
 ```javascript
 // Register job handler (do this once)
-args.registerJobHandler("sendWelcomeEmail", async (data, job) => {
-  await args.sendEmail({
+_.registerJobHandler("sendWelcomeEmail", async (data, job) => {
+  await _.sendEmail({
     to: data.email,
     subject: "Welcome!",
     html: `<h1>Welcome ${data.name}</h1>`
@@ -1174,7 +1174,7 @@ args.registerJobHandler("sendWelcomeEmail", async (data, job) => {
 });
 
 // Add job to queue
-const jobId = await args.addJob(
+const jobId = await _.addJob(
   "sendWelcomeEmail",
   { email: "user@example.com", name: "John" },
   {
@@ -1185,22 +1185,22 @@ const jobId = await args.addJob(
 );
 
 // Wait for completion
-const job = await args.waitForJob(jobId, 30000); // 30s timeout
+const job = await _.waitForJob(jobId, 30000); // 30s timeout
 
 // Get status
-const status = args.getJobStatus(jobId);
+const status = _.getJobStatus(jobId);
 
 // Get all jobs
-const pendingJobs = args.jobs.getAll("pending");
-const stats = args.jobs.stats();
+const pendingJobs = _.jobs.getAll("pending");
+const stats = _.jobs.stats();
 
 // Factory
-args.jobs.register(name, handler);
-args.jobs.add(name, data, options);
-args.jobs.get(jobId);
-args.jobs.wait(jobId);
-args.jobs.cancel(jobId);
-args.jobs.clearCompleted();
+_.jobs.register(name, handler);
+_.jobs.add(name, data, options);
+_.jobs.get(jobId);
+_.jobs.wait(jobId);
+_.jobs.cancel(jobId);
+_.jobs.clearCompleted();
 ```
 
 ### Batch Operations
@@ -1209,7 +1209,7 @@ Process large datasets efficiently:
 
 ```javascript
 // Process items in batches
-const result = await args.batchProcess(
+const result = await _.batchProcess(
   items,
   async (item, index) => {
     // Process each item
@@ -1227,8 +1227,8 @@ const result = await args.batchProcess(
 // result: { success, results, errors, successCount, errorCount }
 
 // Batch create vertices
-const createResult = await args.batchCreateVertices(
-  args.session,
+const createResult = await _.batchCreateVertices(
+  _.session,
   "User",
   [
     { name: "John", email: "john@example.com" },
@@ -1238,8 +1238,8 @@ const createResult = await args.batchCreateVertices(
 );
 
 // Batch update
-await args.batchUpdateVertices(
-  args.session,
+await _.batchUpdateVertices(
+  _.session,
   "User",
   [
     { id: "user1", updates: { name: "New Name" } },
@@ -1248,17 +1248,17 @@ await args.batchUpdateVertices(
 );
 
 // Batch delete
-await args.batchDeleteVertices(args.session, "TempData", ["id1", "id2"]);
+await _.batchDeleteVertices(_.session, "TempData", ["id1", "id2"]);
 
 // Parallel map with concurrency
-const results = await args.parallelMap(
+const results = await _.parallelMap(
   userIds,
   async (userId) => await fetchUser(userId),
   5 // Process 5 in parallel
 );
 
 // Process in chunks
-const chunkResult = await args.processInChunks(
+const chunkResult = await _.processInChunks(
   largeArray,
   async (chunk, chunkIndex) => {
     // Process entire chunk
@@ -1268,7 +1268,7 @@ const chunkResult = await args.processInChunks(
 );
 
 // Retry with exponential backoff
-const retryResult = await args.retry(
+const retryResult = await _.retry(
   async () => await fetchFromAPI(),
   {
     maxAttempts: 5,
@@ -1281,13 +1281,13 @@ const retryResult = await args.retry(
 );
 
 // Factory
-args.batch.process(items, processor, options);
-args.batch.createVertices(session, label, items);
-args.batch.updateVertices(session, label, items);
-args.batch.deleteVertices(session, label, ids);
-args.batch.map(items, mapper, concurrency);
-args.batch.chunk(array, size);
-args.batch.retry(operation, options);
+_.batch.process(items, processor, options);
+_.batch.createVertices(session, label, items);
+_.batch.updateVertices(session, label, items);
+_.batch.deleteVertices(session, label, ids);
+_.batch.map(items, mapper, concurrency);
+_.batch.chunk(array, size);
+_.batch.retry(operation, options);
 ```
 
 ### Complete Real-World Example
@@ -1296,15 +1296,15 @@ Combining all enhanced utilities:
 
 ```javascript
 // User management with pipeline, validation, cache, and transactions
-const createUserSchema = args.schema.object({
-  name: args.schema.string().min(2).max(100),
-  email: args.schema.email(),
-  password: args.schema.string().min(8)
+const createUserSchema = _.schema.object({
+  name: _.schema.string().min(2).max(100),
+  email: _.schema.email(),
+  password: _.schema.string().min(8)
 });
 
-const result = await args.createPipeline(args.contextData, {
-  session: args.session,
-  getUserFromSession: args.getUserFromSession,
+const result = await _.createPipeline(_.contextData, {
+  session: _.session,
+  getUserFromSession: _.getUserFromSession,
 })
   // Validate input
   .validate(createUserSchema)
@@ -1318,7 +1318,7 @@ const result = await args.createPipeline(args.contextData, {
 
   // Check email doesn't exist (with cache)
   .custom(async (ctx) => {
-    const exists = await args.cacheGetOrSet(
+    const exists = await _.cacheGetOrSet(
       `user:email:${ctx.data.email}`,
       async () => {
         const result = await ctx.session.run(
@@ -1331,13 +1331,13 @@ const result = await args.createPipeline(args.contextData, {
     );
 
     if (exists) {
-      throw args.errors.Conflict("Email already exists");
+      throw _.errors.Conflict("Email already exists");
     }
   })
 
   // Execute with transaction
   .execute(async (ctx) => {
-    const result = await args.transaction(ctx.session, async (tx) => {
+    const result = await _.transaction(ctx.session, async (tx) => {
       // Create user
       const userResult = await tx.run(
         `CREATE (u:User {
@@ -1348,18 +1348,18 @@ const result = await args.createPipeline(args.contextData, {
           createdAt: $createdAt
         }) RETURN u`,
         {
-          id: args.utils.uuid(),
+          id: _.utils.uuid(),
           name: ctx.data.name,
           email: ctx.data.email,
-          password: args.crypto.createHash("sha256").update(ctx.data.password).digest("hex"),
-          createdAt: args.utils.now()
+          password: _.crypto.createHash("sha256").update(ctx.data.password).digest("hex"),
+          createdAt: _.utils.now()
         }
       );
 
-      const user = args.neo4jConvert(userResult.records[0].get("u"));
+      const user = _.neo4jConvert(userResult.records[0].get("u"));
 
       // Send welcome email as background job
-      await args.addJob("sendWelcomeEmail", {
+      await _.addJob("sendWelcomeEmail", {
         email: user.P.email,
         name: user.P.name
       });
@@ -1368,11 +1368,11 @@ const result = await args.createPipeline(args.contextData, {
     });
 
     // Clear cache
-    args.cacheDelete(`user:email:${ctx.data.email}`);
+    _.cacheDelete(`user:email:${ctx.data.email}`);
 
     // Return formatted response (omit password)
-    return args.responses.created(
-      args.formatters.omit(result, ["password"])
+    return _.responses.created(
+      _.formatters.omit(result, ["password"])
     );
   });
 
@@ -1387,11 +1387,11 @@ Here's a complete example using multiple utilities:
 
 ```javascript
 try {
-  const { userId, page = 1, limit = 10, searchTerm } = args.contextData;
+  const { userId, page = 1, limit = 10, searchTerm } = _.contextData;
 
   // Validate inputs
-  if (!userId || !args.utils.isValidUUID(userId)) {
-    return args.utils.createErrorResponse(
+  if (!userId || !_.utils.isValidUUID(userId)) {
+    return _.utils.createErrorResponse(
       "Valid user ID is required",
       "ValidationError"
     );
@@ -1399,18 +1399,18 @@ try {
 
   // Build search condition
   const searchCondition = searchTerm
-    ? args.cypher.buildSearchCondition(["title", "description"], searchTerm, "n")
+    ? _.cypher.buildSearchCondition(["title", "description"], searchTerm, "n")
     : null;
 
   // Build WHERE clause
-  const { clause: whereClause, params: whereParams } = args.cypher.buildWhereClause(
+  const { clause: whereClause, params: whereParams } = _.cypher.buildWhereClause(
     { userId, status: "active" },
     "n"
   );
 
   // Build pagination
   const { skipClause, limitClause, params: paginationParams } =
-    args.cypher.buildPaginationClauses({ page, limit });
+    _.cypher.buildPaginationClauses({ page, limit });
 
   // Combine search if needed
   const finalWhere = searchCondition
@@ -1429,7 +1429,7 @@ try {
     ${finalWhere}
     RETURN count(n) as total
   `;
-  const countResult = await args.session.run(countQuery, finalParams);
+  const countResult = await _.session.run(countQuery, finalParams);
   const total = countResult.records[0].get("total").toNumber();
 
   // Data query
@@ -1441,11 +1441,11 @@ try {
     ${skipClause}
     ${limitClause}
   `;
-  const dataResult = await args.session.run(dataQuery, finalParams);
-  const notifications = dataResult.records.map(r => args.convertNodeToJson(r.get("n")));
+  const dataResult = await _.session.run(dataQuery, finalParams);
+  const notifications = dataResult.records.map(r => _.convertNodeToJson(r.get("n")));
 
   // Return paginated response
-  return args.utils.createPaginatedResponse({
+  return _.utils.createPaginatedResponse({
     data: notifications,
     total,
     page,
@@ -1456,7 +1456,7 @@ try {
 
 } catch (error) {
   console.error("Error:", error);
-  return args.utils.createErrorResponse(error, "ServerError");
+  return _.utils.createErrorResponse(error, "ServerError");
 }
 ```
 
@@ -1464,27 +1464,27 @@ try {
 
 ## Summary
 
-All utilities are organized under these namespaces in `args`:
+All utilities are organized under these namespaces in `_`:
 
 ### Core Namespaces
-- **`args.utils`** - General-purpose utilities (strings, dates, arrays, etc.)
-- **`args.cypher`** - Cypher query building utilities
-- **`args.Models`** - Neogma OGM models
-- **`args.crypto`** - Node.js crypto module
-- **`args.path`** - Node.js path module
+- **`_.utils`** - General-purpose utilities (strings, dates, arrays, etc.)
+- **`_.cypher`** - Cypher query building utilities
+- **`_.Models`** - Neogma OGM models
+- **`_.crypto`** - Node.js crypto module
+- **`_.path`** - Node.js path module
 
 ### Enhanced Utilities (New!)
-- **`args.errors`** - Structured error classes (Validation, Authentication, NotFound, etc.)
-- **`args.schema`** - Zod schema validation builders
-- **`args.validate`** / **`args.validateOrThrow`** - Input validation
-- **`args.createPipeline`** - Chainable middleware/pipeline for clean code
-- **`args.transaction`** - Smart transaction helpers with auto-commit/rollback
-- **`args.requirePermissions`** - Declarative permission checking
-- **`args.responses`** - Response formatters (ok, created, badRequest, etc.)
-- **`args.formatters`** - Data transformers (vertex, vertices, omit, pick, etc.)
-- **`args.cache`** - In-memory caching with TTL
-- **`args.jobs`** - Background job queue
-- **`args.batch`** - Batch operations and parallel processing
+- **`_.errors`** - Structured error classes (Validation, Authentication, NotFound, etc.)
+- **`_.schema`** - Zod schema validation builders
+- **`_.validate`** / **`_.validateOrThrow`** - Input validation
+- **`_.createPipeline`** - Chainable middleware/pipeline for clean code
+- **`_.transaction`** - Smart transaction helpers with auto-commit/rollback
+- **`_.requirePermissions`** - Declarative permission checking
+- **`_.responses`** - Response formatters (ok, created, badRequest, etc.)
+- **`_.formatters`** - Data transformers (vertex, vertices, omit, pick, etc.)
+- **`_.cache`** - In-memory caching with TTL
+- **`_.jobs`** - Background job queue
+- **`_.batch`** - Batch operations and parallel processing
 
 ### Direct Properties
 - Session, context, YouTube, auth, etc.

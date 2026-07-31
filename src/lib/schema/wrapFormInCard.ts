@@ -19,11 +19,11 @@ export const wrapFormInCard = (formSchema: FieldAttribute) => {
           },
         ],
         css: `return \`._id {
-  background-color: \${args.theme.var.color.background_light_100};
+  background-color: \${t.var.color.background_light_100};
   padding: 16px;
   padding: 32px;
   border-radius: 8px;
-  box-shadow: 1px 2px 3px \${args.theme.var.color.primary};
+  box-shadow: 1px 2px 3px \${t.var.color.primary};
   max-width: 450px;
 }\`;`, // max-width:700px width:90%
         componentName: "Html",
@@ -31,7 +31,7 @@ export const wrapFormInCard = (formSchema: FieldAttribute) => {
     ],
     css: `return \`._id {
   min-height: 100vh;
-  background-color: \${args.theme.var.color.background_light_200};
+  background-color: \${t.var.color.background_light_200};
   padding: 24px;
   display: flex;
   align-items: center;

@@ -7,12 +7,12 @@
         description: Fetches category and content children for a Page Designer palette category parent.
         body:
           '''
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return { success: false, message: "User session not found. Please log in and try again.", data: [] };
 }
 
-const { parentVertexLabel, toParentEdgeType, parentId, tableVertexLabel } = args.contextData;
+const { parentVertexLabel, toParentEdgeType, parentId, tableVertexLabel } = c;
 
 if (!parentVertexLabel || !toParentEdgeType || !parentId) {
   return {
@@ -22,26 +22,26 @@ if (!parentVertexLabel || !toParentEdgeType || !parentId) {
   };
 }
 
-if (!args.context.nodes) args.context.nodes = {};
+if (!_.context.nodes) _.context.nodes = {};
 
-const categoryResult = await args.session.run(
+const categoryResult = await _.session.run(
   `MATCH (child:${parentVertexLabel})-[r:${toParentEdgeType}]->(parent:${parentVertexLabel})
    WHERE elementId(parent) = $parentId
    RETURN child, parent, r
    ORDER BY COALESCE(child.displayOrder, 0), COALESCE(child.key, '') ASC`,
   { parentId }
 );
-const categoryVertices = args.processResult(categoryResult.records, args.context, ['child', 'parent'], 'r');
+const categoryVertices = _.processResult(categoryResult.records, _.context, ['child', 'parent'], 'r');
 
 if (tableVertexLabel) {
-  const contentResult = await args.session.run(
+  const contentResult = await _.session.run(
     `MATCH (content:${tableVertexLabel})-[r:${toParentEdgeType}]->(cat:${parentVertexLabel})
      WHERE elementId(cat) = $parentId
      RETURN content, cat, r
      ORDER BY COALESCE(content.displayOrder, 0), COALESCE(content.key, '') ASC`,
     { parentId }
   );
-  args.processResult(contentResult.records, args.context, ['content', 'cat'], 'r');
+  _.processResult(contentResult.records, _.context, ['content', 'cat'], 'r');
 }
 
 return {

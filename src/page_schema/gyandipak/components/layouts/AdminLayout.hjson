@@ -22,9 +22,9 @@ return `._id {
         description: Admin layout container
         fns:
           '''
-if (!args.fns.checkAdminRole()) {
-  args.navigate('/home');
-  args.showErrorToast("Admin access required");
+if (!f.checkAdminRole()) {
+  _.navigate('/home');
+  _.showErrorToast("Admin access required");
   return {};
 }
 '''
@@ -35,8 +35,8 @@ return {
   as: "div",
   onMount: () => {
     // Add admin navigation sections only if not already added
-    if (args.fns.setNavigationSections && args.fns.navigationSections) {
-      const currentSections = args.fns.navigationSections();
+    if (f.setNavigationSections && f.navigationSections) {
+      const currentSections = f.navigationSections();
       const hasAdminSection = currentSections.some(section => section.id === "admin");
 
       if (!hasAdminSection) {
@@ -123,7 +123,7 @@ return {
                 label: "Global Settings",
                 icon: "carbon:settings",
                 title: "Configure system-wide settings",
-                pathCheck: (pathname) => pathname.startsWith("/admin/GlobalSettings") && !args.searchParams?.tab,
+                pathCheck: (pathname) => pathname.startsWith("/admin/GlobalSettings") && !_.searchParams?.tab,
                 openInNewTab: true
               },
               {
@@ -132,14 +132,14 @@ return {
                 label: "Workers",
                 icon: "carbon:task",
                 title: "Manage background workers and scheduled tasks",
-                pathCheck: (pathname) => pathname.startsWith("/admin/GlobalSettings") && args.searchParams?.tab === "workers",
+                pathCheck: (pathname) => pathname.startsWith("/admin/GlobalSettings") && _.searchParams?.tab === "workers",
                 openInNewTab: true
               }
             ]
           }
         ];
 
-        args.fns.setNavigationSections(v => [...v, ...adminNavigationSections]);
+        f.setNavigationSections(v => [...v, ...adminNavigationSections]);
       }
     }
   }

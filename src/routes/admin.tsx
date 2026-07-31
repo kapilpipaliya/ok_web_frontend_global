@@ -30,8 +30,8 @@ export default function AdminLayoutRoute(props: Readonly<RouteSectionProps>) {
 
     return processCssContent(
       `return \`body {
-        background-color: \${args.theme.var.color?.background};
-        color: \${args.theme.var.color?.text};
+        background-color: \${t.var.color?.background};
+        color: \${t.var.color?.text};
       }\`;`,
       functionArgs,
       "admin-global",

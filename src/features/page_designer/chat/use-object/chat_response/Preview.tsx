@@ -73,7 +73,7 @@ function ComponentPreviewItem(props: {
   padding: 4px;
   border-radius: 4px;
   hover: {
-    background-color: \${args.theme.var.color.primary_light_800};
+    background-color: \${t.var.color.primary_light_800};
   }
 }\`;`}
             icon="ph:arrows-clockwise"
@@ -104,7 +104,7 @@ function ComponentPreviewItem(props: {
   padding: 4px;
   border-radius: 4px;
   hover: {
-    background-color: \${args.theme.var.color.primary_light_800};
+    background-color: \${t.var.color.primary_light_800};
   }
 }\`;`}
             disabled={
@@ -175,7 +175,7 @@ export function Preview(props: {
           <As
             as="div"
             css={[
-              "return `._id {text-align: center; padding: 16px; color: ${args.theme.var.color.primary};}`;",
+              "return `._id {text-align: center; padding: 16px; color: ${t.var.color.primary};}`;",
             ]}
           >
             No Preview Available
@@ -253,7 +253,7 @@ export function Preview(props: {
                 as="select"
                 css={`return \`._id {
   padding: 8px;
-  border: 1px solid \${args.theme.var.color.border};
+  border: 1px solid \${t.var.color.border};
   border-radius: 6px;
 }\`;`}
                 onChange={(e) =>
@@ -274,7 +274,7 @@ export function Preview(props: {
   padding: 4px;
   border-radius: 4px;
   hover: {
-    background-color: \${args.theme.var.color.primary_light_800};
+    background-color: \${t.var.color.primary_light_800};
   }
 }\`;`}
                 disabled={
@@ -333,7 +333,7 @@ export function Preview(props: {
               `return \`._id {
   text-align: center;
   padding: 16px;
-  color: \${args.theme.var.color.primary};
+  color: \${t.var.color.primary};
 }\`;`,
             ]}
           >

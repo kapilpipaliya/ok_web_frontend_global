@@ -20,18 +20,18 @@ export function setGraphDataWithTransaction(
   txnId: number,
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
-  args: GraphData,
+  graphData: GraphData,
   options: UpdateOptions = {},
 ): { error: boolean | string; txnDetailIndex?: number } {
   let error: boolean | string = false;
   let txnDetailIndex: number | undefined;
 
   batch(() => {
-    for (const vertexId in args.vertexes) {
+    for (const vertexId in graphData.vertexes) {
       const result = updateVertexWithTransaction(
         txnId,
         vertexId,
-        args.vertexes[vertexId],
+        graphData.vertexes[vertexId],
         graph,
         setGraph,
         options,
@@ -44,11 +44,11 @@ export function setGraphDataWithTransaction(
       }
     }
 
-    for (const edgeId in args.edges) {
+    for (const edgeId in graphData.edges) {
       const result = updateEdgeWithTransaction(
         txnId,
         edgeId,
-        args.edges[edgeId],
+        graphData.edges[edgeId],
         graph,
         setGraph,
         options,
@@ -61,11 +61,11 @@ export function setGraphDataWithTransaction(
       }
     }
 
-    if (args.deleted_edges || args.deleted_vertexes) {
+    if (graphData.deleted_edges || graphData.deleted_vertexes) {
       const result = handleDeletionsWithTransaction(
         txnId,
-        args.deleted_edges,
-        args.deleted_vertexes,
+        graphData.deleted_edges,
+        graphData.deleted_vertexes,
         graph,
         setGraph,
         options,

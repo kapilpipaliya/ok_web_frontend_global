@@ -46,10 +46,10 @@ return `._id {
         displayOrder: 1
         fns:
           '''
-const [feedback, setFeedback] = args.createSignal("");
-const [category, setCategory] = args.createSignal("general");
-const [email, setEmail] = args.createSignal("");
-const [isSubmitting, setIsSubmitting] = args.createSignal(false);
+const [feedback, setFeedback] = _.createSignal("");
+const [category, setCategory] = _.createSignal("general");
+const [email, setEmail] = _.createSignal("");
+const [isSubmitting, setIsSubmitting] = _.createSignal(false);
 
 const initializeFeedback = () => {
   setFeedback("");
@@ -60,10 +60,10 @@ const initializeFeedback = () => {
 
 const handleSubmit = async () => {
   const feedbackValue = feedback().trim();
-  const isAnonymous = args.contextData.props?.isAnonymous;
+  const isAnonymous = c.props?.isAnonymous;
 
   if (!feedbackValue) {
-    args.showErrorToast("Please enter your feedback");
+    _.showErrorToast("Please enter your feedback");
     return;
   }
 
@@ -71,19 +71,19 @@ const handleSubmit = async () => {
   if (isAnonymous) {
     const emailValue = email().trim();
     if (!emailValue) {
-      args.showErrorToast("Please enter your email address");
+      _.showErrorToast("Please enter your email address");
       return;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(emailValue)) {
-      args.showErrorToast("Please enter a valid email address");
+      _.showErrorToast("Please enter a valid email address");
       return;
     }
   }
 
-  const onSubmit = args.contextData.props?.onSubmit;
-  const onClose = args.contextData.props?.onClose;
+  const onSubmit = c.props?.onSubmit;
+  const onClose = c.props?.onClose;
 
   setIsSubmitting(true);
 
@@ -125,9 +125,9 @@ return {
         componentName: Html
         props:
           '''
-const isOpen = args.contextData.props?.isOpen;
+const isOpen = c.props?.isOpen;
 const getIsOpen = isOpen?.() || false;
-const onClose = args.contextData.props?.onClose;
+const onClose = c.props?.onClose;
 
 return {
   as: "div",
@@ -138,7 +138,7 @@ return {
     }
   },
   onMount: () => {
-    args.fns.initializeFeedback();
+    f.initializeFeedback();
   }
 };
 '''
@@ -151,7 +151,7 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
   border-radius: 0.75rem;
   width: 100%;
   max-width: 600px;
@@ -204,7 +204,7 @@ return `._id {
   align-items: center;
   justify-content: space-between;
   padding: 1.5rem;
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  border-bottom: 1px solid ${t.var.color.border};
 }
 
 @media (max-width: 768px) {
@@ -232,7 +232,7 @@ return {
 return `._id {
   font-size: 1.5rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0;
 }`;
 '''
@@ -256,7 +256,7 @@ return {
 return `._id {
   background: none;
   border: none;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   cursor: pointer;
   padding: 0.5rem;
   border-radius: 0.375rem;
@@ -266,8 +266,8 @@ return `._id {
   justify-content: center;
 
   &:hover {
-    background: ${args.theme.var.color.background_light_200};
-    color: ${args.theme.var.color.text};
+    background: ${t.var.color.background_light_200};
+    color: ${t.var.color.text};
   }
 }`;
 '''
@@ -275,7 +275,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const onClose = args.contextData.props?.onClose;
+const onClose = c.props?.onClose;
 
 return {
   as: "button",
@@ -351,7 +351,7 @@ return {
   as: "form",
   onSubmit: (e) => {
     e.preventDefault();
-    args.fns.handleSubmit();
+    f.handleSubmit();
   }
 };
 '''
@@ -365,7 +365,7 @@ return {
           '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0;
   line-height: 1.5;
 }`;
@@ -412,7 +412,7 @@ return {
 return `._id {
   font-size: 0.875rem;
   font-weight: 500;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 1
@@ -434,10 +434,10 @@ return {
           '''
 return `._id {
   padding: 0.625rem 0.75rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.375rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   font-family: inherit;
   font-size: 0.875rem;
   cursor: pointer;
@@ -445,7 +445,7 @@ return `._id {
 
   &:focus {
     outline: none;
-    border-color: ${args.theme.var.color.primary};
+    border-color: ${t.var.color.primary};
   }
 
   &:disabled {
@@ -460,9 +460,9 @@ return `._id {
           '''
 return {
   as: "select",
-  value: args.fns.category(),
-  onChange: (e) => args.fns.setCategory(e.target.value),
-  disabled: args.fns.isSubmitting()
+  value: f.category(),
+  onChange: (e) => f.setCategory(e.target.value),
+  disabled: f.isSubmitting()
 };
 '''
       }
@@ -563,7 +563,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const isAnonymous = args.contextData.props?.isAnonymous;
+const isAnonymous = c.props?.isAnonymous;
 
 return {
   as: "div",
@@ -581,7 +581,7 @@ return {
 return `._id {
   font-size: 0.875rem;
   font-weight: 500;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 1
@@ -604,17 +604,17 @@ return {
 return `._id {
   width: 100%;
   padding: 0.625rem 0.75rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.375rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   font-family: inherit;
   font-size: 0.875rem;
   transition: border-color 0.2s ease;
 
   &:focus {
     outline: none;
-    border-color: ${args.theme.var.color.primary};
+    border-color: ${t.var.color.primary};
   }
 
   &:disabled {
@@ -630,10 +630,10 @@ return `._id {
 return {
   as: "input",
   type: "email",
-  value: args.fns.email(),
-  onInput: (e) => args.fns.setEmail(e.target.value),
+  value: f.email(),
+  onInput: (e) => f.setEmail(e.target.value),
   placeholder: "your.email@example.com",
-  disabled: args.fns.isSubmitting(),
+  disabled: f.isSubmitting(),
   required: true
 };
 '''
@@ -647,7 +647,7 @@ return {
           '''
 return `._id {
   font-size: 0.75rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0;
 }`;
 '''
@@ -693,7 +693,7 @@ return {
 return `._id {
   font-size: 0.875rem;
   font-weight: 500;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 1
@@ -716,10 +716,10 @@ return {
 return `._id {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.375rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   font-family: inherit;
   font-size: 0.875rem;
   resize: vertical;
@@ -728,7 +728,7 @@ return `._id {
 
   &:focus {
     outline: none;
-    border-color: ${args.theme.var.color.primary};
+    border-color: ${t.var.color.primary};
   }
 
   &:disabled {
@@ -743,12 +743,12 @@ return `._id {
           '''
 return {
   as: "textarea",
-  value: args.fns.feedback(),
-  onInput: (e) => args.fns.setFeedback(e.target.value),
+  value: f.feedback(),
+  onInput: (e) => f.setFeedback(e.target.value),
   placeholder: "Share your thoughts, report a bug, or suggest improvements...",
   rows: 6,
   maxlength: 1000,
-  disabled: args.fns.isSubmitting(),
+  disabled: f.isSubmitting(),
   required: true
 };
 '''
@@ -762,7 +762,7 @@ return {
           '''
 return `._id {
   font-size: 0.75rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   text-align: right;
 }`;
 '''
@@ -770,7 +770,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const charCount = args.fns.feedback().length;
+const charCount = f.feedback().length;
 const maxChars = 1000;
 
 return {
@@ -788,7 +788,7 @@ return {
           '''
 return `._id {
   padding: 1.5rem;
-  border-top: 1px solid ${args.theme.var.color.border};
+  border-top: 1px solid ${t.var.color.border};
   display: flex;
   gap: 1rem;
   justify-content: flex-end;
@@ -820,13 +820,13 @@ return {
         componentName: Button
         props:
           '''
-const onClose = args.contextData.props?.onClose;
+const onClose = c.props?.onClose;
 
 return {
   text: "Cancel",
   variant: "secondary",
   onClick: onClose,
-  disabled: args.fns.isSubmitting()
+  disabled: f.isSubmitting()
 };
 '''
       }
@@ -839,12 +839,12 @@ return {
         componentName: Button
         props:
           '''
-const isSubmitting = args.fns.isSubmitting();
+const isSubmitting = f.isSubmitting();
 
 return {
   text: isSubmitting ? "Submitting..." : "Submit Feedback",
   variant: "primary",
-  onClick: args.fns.handleSubmit,
+  onClick: f.handleSubmit,
   disabled: isSubmitting
 };
 '''

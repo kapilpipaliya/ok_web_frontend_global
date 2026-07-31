@@ -66,7 +66,7 @@ const filteredNavigationSections = navigationSectionsData.filter(section => {
 });
 
 // Create signal for navigation sections
-const [navigationSections, setNavigationSections] = args.createSignal(filteredNavigationSections);
+const [navigationSections, setNavigationSections] = _.createSignal(filteredNavigationSections);
 
 // Define mobile navigation items (subset of desktop items)
 const mobileNavigationItemsData = [
@@ -98,7 +98,7 @@ const mobileNavigationItemsData = [
 
 // Create reactive memo for mobile navigation items
 // Automatically updates when isInIframe changes
-const mobileNavigationItems = args.createMemo(() => {
+const mobileNavigationItems = _.createMemo(() => {
   return mobileNavigationItemsData.filter(item => {
     if (item.showIf && typeof item.showIf === 'function') {
       return item.showIf();
@@ -107,7 +107,7 @@ const mobileNavigationItems = args.createMemo(() => {
   });
 });
 // Sidebar collapse state management
-const [isSidebarCollapsed, setIsSidebarCollapsed] = args.createSignal(false);
+const [isSidebarCollapsed, setIsSidebarCollapsed] = _.createSignal(false);
 
 const toggleSidebar = async () => {
   const newState = !isSidebarCollapsed();
@@ -115,7 +115,7 @@ const toggleSidebar = async () => {
 
   // Save to database
   try {
-    await args.executeServerFunction('saveSidebarPreference', {
+    await _.executeServerFunction('saveSidebarPreference', {
       isCollapsed: newState
     });
   } catch (error) {
@@ -125,7 +125,7 @@ const toggleSidebar = async () => {
 
 const loadSidebarState = async () => {
   try {
-    const result = await args.executeServerFunction('getSidebarPreference', {});
+    const result = await _.executeServerFunction('getSidebarPreference', {});
 
     if (result.success && result.data) {
       setIsSidebarCollapsed(result.data.isCollapsed);
@@ -154,7 +154,7 @@ return {
 return {
   onMount: async () => {
     // Load sidebar state from database
-    await args.fns.loadSidebarState();
+    await f.loadSidebarState();
   }
 };
 '''
@@ -172,8 +172,8 @@ return `._id {
   display: grid;
   grid-template-rows: 1fr auto;
   grid-template-columns: 1fr;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
 }
 
 @media (min-width: 768px) {
@@ -200,7 +200,7 @@ return {
       P: {
         css:
           '''
-const isCollapsed = args.fns.isSidebarCollapsed?.();
+const isCollapsed = f.isSidebarCollapsed?.();
 const sidebarWidth = isCollapsed ? '72px' : '240px';
 
 return `._id {
@@ -212,8 +212,8 @@ return `._id {
     display: flex;
     width: ${sidebarWidth};
     height: 100vh;
-    background: ${args.theme.var.color.background};
-    border-right: 1px solid ${args.theme.var.color.border};
+    background: ${t.var.color.background};
+    border-right: 1px solid ${t.var.color.border};
     flex-direction: column;
     box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
     transition: width 300ms ease;
@@ -253,13 +253,13 @@ return `._id {
   /* Only apply hover on devices that support hover (not touch devices) */
   @media (hover: hover) and (pointer: fine) {
     &:hover {
-      background: ${args.theme.var.color.primary};
+      background: ${t.var.color.primary};
       opacity: 0.3;
     }
   }
 
   &:active {
-    background: ${args.theme.var.color.primary};
+    background: ${t.var.color.primary};
     opacity: 0.5;
   }
 }`;
@@ -270,8 +270,8 @@ return `._id {
           '''
 return {
   as: "div",
-  onClick: args.fns.toggleSidebar,
-  title: args.fns.isSidebarCollapsed?.() ? "Expand sidebar" : "Collapse sidebar"
+  onClick: f.toggleSidebar,
+  title: f.isSidebarCollapsed?.() ? "Expand sidebar" : "Collapse sidebar"
 };
 '''
       }
@@ -282,8 +282,8 @@ return {
       P: {
         css:
           '''
-const isCollapsed = args.fns.isSidebarCollapsed?.();
-const sidebarPadding = isCollapsed ? `${args.theme.var.spacing?.md || "1rem"} ${args.theme.var.spacing?.sm || "0.5rem"}` : `${args.theme.var.spacing?.xl || "2rem"} ${args.theme.var.spacing?.lg || "1.5rem"}`;
+const isCollapsed = f.isSidebarCollapsed?.();
+const sidebarPadding = isCollapsed ? `${t.var.spacing?.md || "1rem"} ${t.var.spacing?.sm || "0.5rem"}` : `${t.var.spacing?.xl || "2rem"} ${t.var.spacing?.lg || "1.5rem"}`;
 
 return `._id {
   display: flex;
@@ -309,12 +309,12 @@ return {
       P: {
         css:
           '''
-const isCollapsed = args.fns.isSidebarCollapsed?.();
+const isCollapsed = f.isSidebarCollapsed?.();
 
 return `._id {
-  margin-bottom: ${args.theme.var.spacing.md};
-  padding-bottom: ${args.theme.var.spacing.md};
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  margin-bottom: ${t.var.spacing.md};
+  padding-bottom: ${t.var.spacing.md};
+  border-bottom: 1px solid ${t.var.color.border};
   display: ${isCollapsed ? 'none' : 'block'};
 }`;
 '''
@@ -322,7 +322,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const isCollapsed = args.fns.isSidebarCollapsed?.();
+const isCollapsed = f.isSidebarCollapsed?.();
 
 return {
   as: "div"
@@ -387,16 +387,16 @@ return `._id {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: ${args.theme.var.spacing?.md || '1rem'} 0;
-  margin-bottom: ${args.theme.var.spacing?.md || '1rem'};
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  padding: ${t.var.spacing?.md || '1rem'} 0;
+  margin-bottom: ${t.var.spacing?.md || '1rem'};
+  border-bottom: 1px solid ${t.var.color.border};
 }`;
 '''
         displayOrder: 1.3
         componentName: Html
         props:
           '''
-const isCollapsed = args.fns.isSidebarCollapsed?.();
+const isCollapsed = f.isSidebarCollapsed?.();
 
 return {
   as: "div",
@@ -426,7 +426,7 @@ return {
   as: "img",
   src: "/api/file/downloadCompanySquareLogo",
   alt: "Logo",
-  onClick: () => args.navigate?.('/home')
+  onClick: () => _.navigate?.('/home')
 };
 '''
       }
@@ -440,7 +440,7 @@ return {
 return `._id {
   display: flex;
   flex-direction: column;
-  gap: ${args.theme.var.spacing.lg};
+  gap: ${t.var.spacing.lg};
   flex: 1;
 }`;
 '''
@@ -470,7 +470,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const sections = args.fns.navigationSections();
+const sections = f.navigationSections();
 return {
   as: "div",
   data: sections
@@ -486,7 +486,7 @@ return {
         componentName: Html
         props:
           '''
-const section = args.contextData.navSection;
+const section = c.navSection;
 const hasBorder = section.hasBorder;
 return {
   as: "div"
@@ -503,20 +503,20 @@ return {
 return `._id {
   font-size: 0.875rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin: 0 0 ${args.theme.var.spacing.sm} 0;
-  padding: 0 ${args.theme.var.spacing.md};
+  margin: 0 0 ${t.var.spacing.sm} 0;
+  padding: 0 ${t.var.spacing.md};
 }`;
 '''
         displayOrder: 1
         componentName: Html
         props:
           '''
-const section = args.contextData.navSection;
+const section = c.navSection;
 const title = section.title;
-const isCollapsed = args.fns.isSidebarCollapsed?.();
+const isCollapsed = f.isSidebarCollapsed?.();
 
 return {
   as: "h3",
@@ -532,7 +532,7 @@ return {
       P: {
         css:
           '''
-const section = args.contextData.navSection;
+const section = c.navSection;
 const hasBorder = section.hasBorder;
 return `._id {
   list-style: none;
@@ -540,15 +540,15 @@ return `._id {
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: ${args.theme.var.spacing.xs};
-  ${hasBorder ? `padding-top: ${args.theme.var.spacing.md}; border-top: 1px solid ${args.theme.var.color.border};` : ''}
+  gap: ${t.var.spacing.xs};
+  ${hasBorder ? `padding-top: ${t.var.spacing.md}; border-top: 1px solid ${t.var.color.border};` : ''}
 }`;
 '''
         displayOrder: 2
         componentName: Html
         props:
           '''
-const section = args.contextData.navSection;
+const section = c.navSection;
 return {
   as: "ul"
 };
@@ -571,7 +571,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const section = args.contextData.navSection;
+const section = c.navSection;
 const items = section.items;
 return {
   as: "li",
@@ -586,20 +586,20 @@ return {
       P: {
         css:
           '''
-const item = args.contextData.navItem;
-const isActive = item.pathCheck ? item.pathCheck(args.location.pathname) : false;
+const item = c.navItem;
+const isActive = item.pathCheck ? item.pathCheck(_.location.pathname) : false;
 const isButton = item.isButton;
 const isDanger = item.isDanger;
-const isCollapsed = args.fns.isSidebarCollapsed?.();
+const isCollapsed = f.isSidebarCollapsed?.();
 
 return `._id {
   display: flex;
   align-items: center;
-  gap: ${args.theme.var.spacing.md};
-  padding: ${args.theme.var.spacing.sm} ${isCollapsed ? args.theme.var.spacing.sm : args.theme.var.spacing.md};
-  border-radius: ${args.theme.var.borderRadius.md};
-  background: ${isActive ? args.theme.var.color.background_light_200 : 'transparent'};
-  color: ${isDanger ? args.theme.var.color.error : (isActive ? args.theme.var.color.primary : args.theme.var.color.text)};
+  gap: ${t.var.spacing.md};
+  padding: ${t.var.spacing.sm} ${isCollapsed ? t.var.spacing.sm : t.var.spacing.md};
+  border-radius: ${t.var.borderRadius.md};
+  background: ${isActive ? t.var.color.background_light_200 : 'transparent'};
+  color: ${isDanger ? t.var.color.error : (isActive ? t.var.color.primary : t.var.color.text)};
   text-decoration: none;
   font-weight: ${isActive ? '600' : '500'};
   transition: all 150ms ease;
@@ -614,8 +614,8 @@ return `._id {
   ` : ''}
 
   &:hover {
-    background: ${isDanger ? args.theme.var.color.error_light_100 : args.theme.var.color.background_light_200};
-    color: ${isDanger ? args.theme.var.color.error_light_100_text : args.theme.var.color.primary};
+    background: ${isDanger ? t.var.color.error_light_100 : t.var.color.background_light_200};
+    color: ${isDanger ? t.var.color.error_light_100_text : t.var.color.primary};
   }
 
   ${isButton ? `
@@ -629,8 +629,8 @@ return `._id {
         componentName: Html
         props:
           '''
-const item = args.contextData.navItem;
-const isActive = item.pathCheck ? item.pathCheck(args.location.pathname) : false;
+const item = c.navItem;
+const isActive = item.pathCheck ? item.pathCheck(_.location.pathname) : false;
 const isButton = item.isButton;
 const isDanger = item.isDanger;
 const openInNewTab = item.openInNewTab;
@@ -648,7 +648,7 @@ return {
       return;
     }
     e.preventDefault();
-    args.fns.navigateTo?.(item.href);
+    f.navigateTo?.(item.href);
   }
 };
 '''
@@ -662,7 +662,7 @@ return {
         componentName: Html
         props:
           '''
-const item = args.contextData.navItem;
+const item = c.navItem;
 return {
   as: "icon",
   icon: item.icon,
@@ -678,7 +678,7 @@ return {
       P: {
         css:
           '''
-const isCollapsed = args.fns.isSidebarCollapsed?.();
+const isCollapsed = f.isSidebarCollapsed?.();
 
 return `._id {
   display: ${isCollapsed ? 'none' : 'inline'};
@@ -691,7 +691,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const item = args.contextData.navItem;
+const item = c.navItem;
 return {
   as: "span",
   text: item.label
@@ -707,11 +707,11 @@ return {
           '''
 return `._id {
   margin-top: auto;
-  padding-top: ${args.theme.var.spacing.md};
-  border-top: 1px solid ${args.theme.var.color.border};
+  padding-top: ${t.var.spacing.md};
+  border-top: 1px solid ${t.var.color.border};
   display: flex;
   flex-direction: column;
-  gap: ${args.theme.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
 }`;
 '''
         displayOrder: 3
@@ -732,7 +732,7 @@ return {
         componentName: Html
         props:
           '''
-const isCollapsed = args.fns.isSidebarCollapsed?.();
+const isCollapsed = f.isSidebarCollapsed?.();
 
 return {
   as: "div",
@@ -750,11 +750,11 @@ return {
 return `._id {
   display: flex;
   align-items: center;
-  gap: ${args.theme.var.spacing.md};
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  border-radius: ${args.theme.var.borderRadius.md};
+  gap: ${t.var.spacing.md};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  border-radius: ${t.var.borderRadius.md};
   background: transparent;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   text-decoration: none;
   font-weight: 500;
   border: none;
@@ -766,8 +766,8 @@ return `._id {
   transition: all 150ms ease;
 
   &:hover {
-    background: ${args.theme.var.color.background_light_200};
-    color: ${args.theme.var.color.primary};
+    background: ${t.var.color.background_light_200};
+    color: ${t.var.color.primary};
   }
 
   &:active {
@@ -783,7 +783,7 @@ return {
   as: "button",
   hide: true,
   onClick: () => {
-    args.fns.openFeedbackModal();
+    f.openFeedbackModal();
   },
   title: "Send Feedback"
 };
@@ -836,7 +836,7 @@ return {
       P: {
         css:
           '''
-const isCollapsed = args.fns.isSidebarCollapsed?.();
+const isCollapsed = f.isSidebarCollapsed?.();
 const sidebarWidth = isCollapsed ? '72px' : '240px';
 
 return `._id {
@@ -892,13 +892,13 @@ return `._id {
   bottom: 0;
 
   /* Match theme background for seamless appearance */
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
 
   /* Position spinner at top instead of center */
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding-top: ${args.theme.var.spacing.xxl};
+  padding-top: ${t.var.spacing.xxl};
 
   /* High z-index to appear above all content */
   z-index: 1;
@@ -921,7 +921,7 @@ return `._id {
           '''
 // Get navigation state from ConfirmProvider context
 // This controls when the overlay should be visible
-const isNavigating = args.fns.isNavigating?.();
+const isNavigating = f.isNavigating?.();
 
 return {
   as: "div",
@@ -957,10 +957,10 @@ return {
           '''
 return `._id {
   height: 72px;
-  background: ${args.theme.var.color.background};
-  border-top: 1px solid ${args.theme.var.color.border};
+  background: ${t.var.color.background};
+  border-top: 1px solid ${t.var.color.border};
   box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
-  padding: ${args.theme.var.spacing.sm} 0;
+  padding: ${t.var.spacing.sm} 0;
   grid-row: 2;
 }
 
@@ -969,7 +969,7 @@ return `._id {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 ${args.theme.var.spacing.sm};
+  padding: 0 ${t.var.spacing.sm};
   width: 100%;
 }
 
@@ -1029,7 +1029,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const items = args.fns.mobileNavigationItems();
+const items = f.mobileNavigationItems();
 return {
   as: "div",
   data: items
@@ -1043,28 +1043,28 @@ return {
       P: {
         css:
           '''
-const item = args.contextData.mobileNavItem;
-const isActive = item.pathCheck ? item.pathCheck(args.location.pathname) : false;
+const item = c.mobileNavItem;
+const isActive = item.pathCheck ? item.pathCheck(_.location.pathname) : false;
 
 return `._id {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: ${args.theme.var.spacing.xs};
-  padding: ${args.theme.var.spacing.xs};
-  border-radius: ${args.theme.var.borderRadius.sm};
+  gap: ${t.var.spacing.xs};
+  padding: ${t.var.spacing.xs};
+  border-radius: ${t.var.borderRadius.sm};
   background: none;
   text-decoration: none;
   cursor: pointer;
   min-height: 44px;
-  color: ${isActive ? args.theme.var.color.primary : args.theme.var.color.text_light_500};
+  color: ${isActive ? t.var.color.primary : t.var.color.text_light_500};
   transition: all 150ms ease;
   width: 100%;
   position: relative;
 
   &:hover {
-    background: ${args.theme.var.color.background_light_200};
-    color: ${args.theme.var.color.primary};
+    background: ${t.var.color.background_light_200};
+    color: ${t.var.color.primary};
   }
 
   &:active {
@@ -1076,8 +1076,8 @@ return `._id {
         componentName: Html
         props:
           '''
-const item = args.contextData.mobileNavItem;
-const isActive = item.pathCheck ? item.pathCheck(args.location.pathname) : false;
+const item = c.mobileNavItem;
+const isActive = item.pathCheck ? item.pathCheck(_.location.pathname) : false;
 const openInNewTab = item.openInNewTab;
 
 return {
@@ -1093,7 +1093,7 @@ return {
       return;
     }
     e.preventDefault();
-    args.fns.navigateTo?.(item.href);
+    f.navigateTo?.(item.href);
   }
 };
 '''
@@ -1107,7 +1107,7 @@ return {
         componentName: Html
         props:
           '''
-const item = args.contextData.mobileNavItem;
+const item = c.mobileNavItem;
 const iconSize = item.iconSize || 24;
 return {
   as: "icon",
@@ -1134,7 +1134,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const item = args.contextData.mobileNavItem;
+const item = c.mobileNavItem;
 return {
   as: "span",
   text: item.label

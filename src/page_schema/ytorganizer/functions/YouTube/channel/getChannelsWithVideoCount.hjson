@@ -10,7 +10,7 @@
 /**
  * Get Channels with Video Counts - Multi-Ownership Support
  *
- * Parameters (via args.contextData):
+ * Parameters (via c):
  * - userUuid: string (required) - User UUID
  * - ownershipId: string (optional) - Filter by specific YouTube ownership. If omitted, returns channels across all ownerships.
  * - channelIds: string[] (optional) - Filter by specific channel IDs
@@ -43,7 +43,7 @@
     limit = null,
     skip = 0,
     isPublicAccess = false  // Public access mode - only return public channels
-  } = args.contextData;
+  } = c;
 
   if (!userUuid) {
     return {
@@ -133,7 +133,7 @@
   `;
 
   // Execute the query
-  const result = await args.session.run(query, {
+  const result = await _.session.run(query, {
     userUuid,
     ownershipId,
     channelIds,
@@ -145,9 +145,9 @@
   const channels = result.records.map(record => {
     // Handle optional ChannelSetting (might be null if user hasn't customized)
     const channelSettingNode = record.get('cs');
-    const channelSetting = channelSettingNode ? args.convertNodeToJson(channelSettingNode) : null;
+    const channelSetting = channelSettingNode ? _.convertNodeToJson(channelSettingNode) : null;
     const videoCount = record.get('videoCount');
-    const channel = args.convertNodeToJson(record.get('c'));
+    const channel = _.convertNodeToJson(record.get('c'));
 
     // Add ownership-specific video count to channel setting if it exists
     channel.P.videoCount = videoCount ? (typeof videoCount.toNumber === 'function' ? videoCount.toNumber() : Number(videoCount)) : 0;

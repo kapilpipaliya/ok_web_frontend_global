@@ -37,7 +37,7 @@ export function DeleteButton(props: Readonly<DeleteButtonProps>) {
         ICON_BUTTON_STYLES.deleteCss,
         ...ensureArray(props.css),
         `return \`._id {
-        color: \${args.theme.var.color.error};
+        color: \${t.var.color.error};
         background-color: transparent;
         border: none;
       }\`;`,

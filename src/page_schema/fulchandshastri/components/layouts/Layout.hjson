@@ -110,7 +110,7 @@ const animateOnView = (el, options = {}) => {
 return {
   animateOnView,
   executeYTOFunction: (functionName, contextData) =>
-    args.executeNamedServerFunction({
+    s({
       functionName,
       contextData: contextData || {}
     })
@@ -167,40 +167,40 @@ window.__motion = { animate, scroll, inView };`
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
 }`;'''
         displayOrder: 4
         fns:
           '''// Global state for cookie consent
-const [hasCookieConsent, setHasCookieConsent] = args.createSignal(false);
+const [hasCookieConsent, setHasCookieConsent] = _.createSignal(false);
 
 // Global state for video player
-const [playerState, setPlayerState] = args.createSignal("closed"); // "closed", "minimized", "maximized"
-const [currentVideo, setCurrentVideo] = args.createSignal(null);
-const [videoQueue, setVideoQueue] = args.createSignal([]);
-const [playerPosition, setPlayerPosition] = args.createStore({ x: null, y: null });
-const [playerSize, setPlayerSize] = args.createStore({ width: 480, height: 270 });
+const [playerState, setPlayerState] = _.createSignal("closed"); // "closed", "minimized", "maximized"
+const [currentVideo, setCurrentVideo] = _.createSignal(null);
+const [videoQueue, setVideoQueue] = _.createSignal([]);
+const [playerPosition, setPlayerPosition] = _.createStore({ x: null, y: null });
+const [playerSize, setPlayerSize] = _.createStore({ width: 480, height: 270 });
 
 // Queue modal state (client-only; clears on reload)
-const [isQueueModalOpen, setIsQueueModalOpen] = args.createSignal(false);
+const [isQueueModalOpen, setIsQueueModalOpen] = _.createSignal(false);
 
 // Keep Awake wrapper functions
 const keepAwake = async () => {
-  await args.KeepAwake.keepAwake();
+  await _.KeepAwake.keepAwake();
 };
 
 const allowSleep = async () => {
-  await args.KeepAwake.allowSleep();
+  await _.KeepAwake.allowSleep();
 };
 
 const isSupported = async () => {
-  const result = await args.KeepAwake.isSupported();
+  const result = await _.KeepAwake.isSupported();
   return result.isSupported;
 };
 
 const isKeptAwake = async () => {
-  const result = await args.KeepAwake.isKeptAwake();
+  const result = await _.KeepAwake.isKeptAwake();
   return result.isKeptAwake;
 };
 
@@ -249,12 +249,12 @@ const addToQueue = async (video) => {
 
   const alreadyInQueue = queue.some(v => v?.P?.youtubeId === videoId);
   if (alreadyInQueue) {
-    args.showWarningToast("Video already in queue");
+    _.showWarningToast("Video already in queue");
     return;
   }
 
   setVideoQueue([...queue, video]);
-  args.showSuccessToast("Added to queue");
+  _.showSuccessToast("Added to queue");
 };
 
 // Play video and add to queue
@@ -295,19 +295,19 @@ const removeFromQueue = async (index) => {
   const queue = videoQueue();
   const newQueue = [...queue.slice(0, index), ...queue.slice(index + 1)];
   setVideoQueue(newQueue);
-  args.showSuccessToast("Removed from queue");
+  _.showSuccessToast("Removed from queue");
 };
 
 const clearQueue = async () => {
   setVideoQueue([]);
-  args.showSuccessToast("Queue cleared");
+  _.showSuccessToast("Queue cleared");
 };
 
 const reorderQueue = async (fromIndex, toIndex) => {
   const queue = videoQueue();
 
   if (fromIndex < 0 || fromIndex >= queue.length || toIndex < 0 || toIndex >= queue.length) {
-    args.showErrorToast("Invalid queue position");
+    _.showErrorToast("Invalid queue position");
     return;
   }
 
@@ -319,7 +319,7 @@ const reorderQueue = async (fromIndex, toIndex) => {
   const [movedVideo] = newQueue.splice(fromIndex, 1);
   newQueue.splice(toIndex, 0, movedVideo);
   setVideoQueue(newQueue);
-  args.showSuccessToast("Queue reordered");
+  _.showSuccessToast("Queue reordered");
 };
 
 const openQueueModal = () => {
@@ -370,7 +370,7 @@ return {
     // Check localStorage for cookie consent
     const hasAccepted =
       localStorage.getItem("cookie_consent_accepted") === "true";
-    args.fns.setHasCookieConsent(hasAccepted);
+    f.setHasCookieConsent(hasAccepted);
 
     // Load Google Analytics gtag.js
     if (!window.dataLayer) {
@@ -457,19 +457,19 @@ return {
         key: unique_1
         props:
           '''return {
-  playerState: args.fns.playerState,
-  currentVideo: args.fns.currentVideo,
-  videoQueue: args.fns.videoQueue,
-  playerPosition: args.fns.playerPosition,
-  playerSize: args.fns.playerSize,
-  setPlayerPosition: args.fns.setPlayerPosition,
-  setPlayerSize: args.fns.setPlayerSize,
-  closePlayer: args.fns.closePlayer,
-  togglePlayerState: args.fns.togglePlayerState,
-  playNext: args.fns.playNext,
-  removeFromQueue: args.fns.removeFromQueue,
-  clearQueue: args.fns.clearQueue,
-  openQueueModal: args.fns.openQueueModal
+  playerState: f.playerState,
+  currentVideo: f.currentVideo,
+  videoQueue: f.videoQueue,
+  playerPosition: f.playerPosition,
+  playerSize: f.playerSize,
+  setPlayerPosition: f.setPlayerPosition,
+  setPlayerSize: f.setPlayerSize,
+  closePlayer: f.closePlayer,
+  togglePlayerState: f.togglePlayerState,
+  playNext: f.playNext,
+  removeFromQueue: f.removeFromQueue,
+  clearQueue: f.clearQueue,
+  openQueueModal: f.openQueueModal
 };'''
       }
     }
@@ -481,15 +481,15 @@ return {
         componentName: QueueModal
         props:
           '''return {
-  isOpen: args.fns.isQueueModalOpen,
-  onClose: args.fns.closeQueueModal,
-  videoQueue: args.fns.videoQueue,
-  setVideoQueue: args.fns.setVideoQueue,
-  playVideo: args.fns.playVideo,
-  removeFromQueue: args.fns.removeFromQueue,
-  clearQueue: args.fns.clearQueue,
-  reorderQueue: args.fns.reorderQueue,
-  executeYTOFunction: args.fns.executeYTOFunction
+  isOpen: f.isQueueModalOpen,
+  onClose: f.closeQueueModal,
+  videoQueue: f.videoQueue,
+  setVideoQueue: f.setVideoQueue,
+  playVideo: f.playVideo,
+  removeFromQueue: f.removeFromQueue,
+  clearQueue: f.clearQueue,
+  reorderQueue: f.reorderQueue,
+  executeYTOFunction: f.executeYTOFunction
 };'''
       }
     }

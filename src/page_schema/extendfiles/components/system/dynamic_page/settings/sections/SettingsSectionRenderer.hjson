@@ -15,7 +15,7 @@ const SECTION_RENDERER_REGISTRY = {
   group: "SettingsSectionCard"
 };
 
-const getSectionConfig = () => args.contextData.props?.sectionConfig || null;
+const getSectionConfig = () => c.props?.sectionConfig || null;
 
 const resolveRendererComponent = () => {
   const sectionConfig = getSectionConfig();
@@ -26,8 +26,8 @@ const resolveRendererComponent = () => {
 
 const checkPermissions = (permissionConfig) => {
   if (!permissionConfig) return true;
-  if (args.isNoPermissionCheck === true) return true;
-  if (args.hasFullPermission || args.hasEditPermission || args.hasViewPermission) return true;
+  if (_.isNoPermissionCheck === true) return true;
+  if (_.hasFullPermission || _.hasEditPermission || _.hasViewPermission) return true;
   return false;
 };
 
@@ -47,7 +47,7 @@ const isSectionVisible = () => {
 const getSectionState = () => {
   const sectionId = getSectionConfig()?.id;
   if (!sectionId) return null;
-  return args.fns.getSectionState?.(sectionId) || null;
+  return f.getSectionState?.(sectionId) || null;
 };
 
 return {
@@ -69,7 +69,7 @@ return {
           '''
 return {
   as: "div",
-  hide: !args.fns.isSectionVisible()
+  hide: !f.isSectionVisible()
 };
 '''
       }
@@ -82,11 +82,11 @@ return {
         componentName: SettingsSectionCard
         props:
           '''
-const sectionConfig = args.fns.getSectionConfig();
-const renderer = args.fns.resolveRendererComponent();
+const sectionConfig = f.getSectionConfig();
+const renderer = f.resolveRendererComponent();
 return {
   sectionConfig,
-  sectionState: args.fns.getSectionState(),
+  sectionState: f.getSectionState(),
   hide: renderer !== "SettingsSectionCard"
 };
 '''
@@ -100,8 +100,8 @@ return {
         componentName: SettingsSectionAccordion
         props:
           '''
-const sectionConfig = args.fns.getSectionConfig();
-const renderer = args.fns.resolveRendererComponent();
+const sectionConfig = f.getSectionConfig();
+const renderer = f.resolveRendererComponent();
 return {
   sectionConfig,
   hide: renderer !== "SettingsSectionAccordion"
@@ -117,8 +117,8 @@ return {
         componentName: SettingsSectionTabs
         props:
           '''
-const sectionConfig = args.fns.getSectionConfig();
-const renderer = args.fns.resolveRendererComponent();
+const sectionConfig = f.getSectionConfig();
+const renderer = f.resolveRendererComponent();
 return {
   sectionConfig,
   hide: renderer !== "SettingsSectionTabs"

@@ -9,9 +9,9 @@
           '''
 const QUEUE_NAME = 'processCreateAllCategoriesMenu';
 
-const doJob = async (args, jobData, dbSession, subDomain, h) => {
+const doJob = async (_, jobData, dbSession, subDomain, h) => {
   const { menuTitle = "Categories", menuHandle = "categories", shop } = jobData;
-  const shopify = await args.getShopifyClient();
+  const shopify = await _.getShopifyClient();
   let admin;
   try {
     const authResult = await shopify.unauthenticated.admin(shop);
@@ -123,9 +123,9 @@ const doJob = async (args, jobData, dbSession, subDomain, h) => {
   }
 };
 
-const helpers = await args.executeNamedServerFunction(
+const helpers = await s(
   { functionName: 'shopifyQueueHelpers', contextData: {} },
-  { functionLookupSubDomain: args.subDomain }
+  { functionLookupSubDomain: _.subDomain }
 );
 if (!helpers.result?.success) {
   console.error('Shopify queue helpers init failed', helpers.result?.error);
@@ -134,15 +134,15 @@ if (!helpers.result?.success) {
 const h = helpers.result.data;
 const runWithSession = h.runWithSession;
 
-if (args.contextData?.action === 'start') {
-  const { Worker } = args.bullmq;
+if (c?.action === 'start') {
+  const { Worker } = _.bullmq;
   const connection = h.getRedisConnection();
   if (!connection || !connection.host) throw new Error('Invalid Redis connection for Shopify jobs');
   let workerInstance;
   try {
     workerInstance = new Worker(QUEUE_NAME, async (job) => {
-      await runWithSession(args, job.data.shop, async (dbSession, subDomain) => {
-        await doJob(args, job.data, dbSession, subDomain, h);
+      await runWithSession(_, job.data.shop, async (dbSession, subDomain) => {
+        await doJob(_, job.data, dbSession, subDomain, h);
       });
     }, { connection, concurrency: 2, lockDuration: 120000 });
     workerInstance.on('failed', (job, err) => console.error('processCreateAllCategoriesMenu: Job failed', job?.id, err?.message));

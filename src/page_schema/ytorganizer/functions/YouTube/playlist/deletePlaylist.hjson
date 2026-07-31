@@ -8,7 +8,7 @@
         body:
           '''
 // Get current authenticated user from session
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return {
     success: false,
@@ -17,10 +17,10 @@ if (!actualUser) {
 }
 
 // Get effective user (handles admin impersonation)
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const user = await _.getEffectiveUser(_.session, actualUser, c);
 
 // Extract parameters - accepts array of items, 'all', or 'allInContext'
-const { items, itemType, contextItems, ownershipId, skipOwnershipCheck } = args.contextData;
+const { items, itemType, contextItems, ownershipId, skipOwnershipCheck } = c;
 
 if (itemType !== "playlist") {
   return {
@@ -38,7 +38,7 @@ if (!ownershipId) {
 
 // Verify ownership belongs to user (skip if called internally)
 if (!skipOwnershipCheck) {
-  const ownershipCheck = await args.session.run(`
+  const ownershipCheck = await _.session.run(`
     MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
     RETURN o
   `, { userUuid: user.P.uuid, ownershipId });
@@ -95,7 +95,7 @@ if (items === 'all') {
 
 // Step 1: Check for active playlist jobs in BullMQ queue
 // Prevent deletion if any playlist is actively being processed
-const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
+const helpers = await s({ functionName: 'queueHelpers', contextData: {} });
 if (!helpers.result?.success) {
   return {
     success: false,
@@ -104,7 +104,7 @@ if (!helpers.result?.success) {
 }
 
 const { QUEUE_NAMES, createJobId } = helpers.result.data;
-const { Queue } = args.bullmq;
+const { Queue } = _.bullmq;
 const connection = helpers.result.data.getRedisConnection();
 const playlistQueue = new Queue(QUEUE_NAMES.PLAYLIST, { connection });
 
@@ -115,7 +115,7 @@ try {
   if (items === 'all') {
     // Get all playlist IDs for this ownership
     // NEW SCHEMA v4.0: Direct ownership
-    const allPlaylistsResult = await args.session.run(`
+    const allPlaylistsResult = await _.session.run(`
       MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist)
       RETURN p.youtubeId as playlistId
     `, { ownershipId });
@@ -124,7 +124,7 @@ try {
   } else if (items === 'allInContext') {
     // Get all playlist IDs in the context channels (verify ownership)
     // NEW SCHEMA v4.0: Verify both channel and playlist ownership
-    const contextPlaylistsResult = await args.session.run(`
+    const contextPlaylistsResult = await _.session.run(`
       MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannel]->(c:Channel)
       WHERE c.youtubeId IN $channelIds
       MATCH (c)-[:ChannelPlaylist]->(p:Playlist)
@@ -148,7 +148,7 @@ try {
 
       if (state === 'active') {
         // Get playlist title for better error message (verify ownership)
-        const playlistResult = await args.session.run(`
+        const playlistResult = await _.session.run(`
           MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
           RETURN p.title as title
         `, { ownershipId, playlistId });
@@ -221,7 +221,7 @@ if (items === 'all' || items === 'allInContext') {
 }
 
 try {
-  const deleteResult = await args.executeNamedServerFunction({
+  const deleteResult = await s({
     functionName: 'deleteVideo',
     contextData: {
       videos: 'allInContext',  // Use allInContext to delete all videos in these playlists
@@ -285,7 +285,7 @@ const deleteQuery = `
   RETURN collect(DISTINCT playlistNodeId) as playlistIds, count(DISTINCT p) as deletedOwnershipLinks
 `;
 
-const deleteResult = await args.session.run(deleteQuery, queryParams);
+const deleteResult = await _.session.run(deleteQuery, queryParams);
 
 const deletedLinksRaw = deleteResult.records[0]?.get('deletedOwnershipLinks');
 const deletedOwnershipLinks = deletedLinksRaw ? (typeof deletedLinksRaw.toNumber === 'function' ? deletedLinksRaw.toNumber() : Number(deletedLinksRaw)) : 0;
@@ -328,7 +328,7 @@ const deleteOrphanPlaylistsQuery = `
   RETURN count(p) as deletedPlaylists
 `;
 
-const playlistResult = await args.session.run(deleteOrphanPlaylistsQuery, { playlistNodeIds });
+const playlistResult = await _.session.run(deleteOrphanPlaylistsQuery, { playlistNodeIds });
 
 const deletedPlaylistsRaw = playlistResult.records[0]?.get('deletedPlaylists');
 const deletedPlaylists = deletedPlaylistsRaw ? (typeof deletedPlaylistsRaw.toNumber === 'function' ? deletedPlaylistsRaw.toNumber() : Number(deletedPlaylistsRaw)) : 0;

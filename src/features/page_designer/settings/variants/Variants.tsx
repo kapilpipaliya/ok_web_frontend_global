@@ -63,7 +63,7 @@ export function Variants() {
         <As
           as="h3"
           css={`return \`._id {
-            color: \${args.theme.var.color.text};
+            color: \${t.var.color.text};
             font-size: 1rem;
             font-weight: 600;
             line-height: 1.5rem;
@@ -78,13 +78,13 @@ export function Variants() {
         <IconButton
           icon="ph:pencil"
           css={`return \`._id {
-            background-color: \${args.theme.var.color.primary_light_150};
+            background-color: \${t.var.color.primary_light_150};
             border: none;
             cursor: pointer;
             padding: 4px;
             border-radius: 4px;
             &:hover {
-              background-color: \${args.theme.var.color.primary_light_200};
+              background-color: \${t.var.color.primary_light_200};
             }
           }\`;`}
           size="18"

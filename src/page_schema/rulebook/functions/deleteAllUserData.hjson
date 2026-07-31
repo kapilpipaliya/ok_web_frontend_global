@@ -9,7 +9,7 @@
         body: '''
 try {
   // Get current authenticated user from session
-  const user = await args.getUserFromSession();
+  const user = await _.getUserFromSession();
   if (!user) {
     throw new Error("User session not found. Please log in and try again.");
   }
@@ -29,16 +29,16 @@ try {
            count(DISTINCT rs) as streakCount
   `;
 
-  const countResult = await args.session.run(countQuery, {
+  const countResult = await _.session.run(countQuery, {
     userUuid: user.P.uuid
   });
 
   const counts = countResult.records[0];
-  const categoryCount = args.neo4jConvert.js(counts.get('categoryCount')) || 0;
-  const ruleCount = args.neo4jConvert.js(counts.get('ruleCount')) || 0;
-  const trackingCount = args.neo4jConvert.js(counts.get('trackingCount')) || 0;
-  const goalCount = args.neo4jConvert.js(counts.get('goalCount')) || 0;
-  const streakCount = args.neo4jConvert.js(counts.get('streakCount')) || 0;
+  const categoryCount = _.neo4jConvert.js(counts.get('categoryCount')) || 0;
+  const ruleCount = _.neo4jConvert.js(counts.get('ruleCount')) || 0;
+  const trackingCount = _.neo4jConvert.js(counts.get('trackingCount')) || 0;
+  const goalCount = _.neo4jConvert.js(counts.get('goalCount')) || 0;
+  const streakCount = _.neo4jConvert.js(counts.get('streakCount')) || 0;
 
   const totalItems = categoryCount + ruleCount + trackingCount + goalCount + streakCount;
 
@@ -61,7 +61,7 @@ try {
   }
 
   // Start transaction for atomic deletion
-  const tx = args.session.beginTransaction();
+  const tx = _.session.beginTransaction();
 
   try {
     // Step 1: Delete all goals

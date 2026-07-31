@@ -21,7 +21,7 @@ const readNetSuiteIntegrationFromDb = async (neoSession) => {
       { t: "netsuite_integration" }
     );
     if (r.records.length) {
-      const j = args.convertNodeToJson(r.records[0].get("s"));
+      const j = _.convertNodeToJson(r.records[0].get("s"));
       const P = j?.P || {};
       accountId = String(P.accountId || "").trim();
       clientId = String(P.clientId || "").trim();
@@ -30,7 +30,7 @@ const readNetSuiteIntegrationFromDb = async (neoSession) => {
       environment = String(P.environment || "production").trim().toLowerCase();
       if (P.clientSecret) {
         try {
-          clientSecret = args.decryptToken(String(P.clientSecret));
+          clientSecret = _.decryptToken(String(P.clientSecret));
         } catch (e) {
           clientSecret = "";
         }
@@ -42,7 +42,7 @@ const readNetSuiteIntegrationFromDb = async (neoSession) => {
   return { accountId, clientId, clientSecret, redirectUri, scope, environment };
 };
 
-const cfg = await readNetSuiteIntegrationFromDb(args.session);
+const cfg = await readNetSuiteIntegrationFromDb(_.session);
 const accountId = cfg.accountId;
 const clientId = cfg.clientId;
 const clientSecret = cfg.clientSecret;
@@ -57,10 +57,10 @@ if (!accountId || !clientId || !clientSecret || !redirectUri) {
   };
 }
 
-const code = (args.contextData?.code || "").trim();
-const state = (args.contextData?.state || "").trim();
-const oauthError = (args.contextData?.error || "").trim();
-const oauthErrorDescription = (args.contextData?.error_description || "").trim();
+const code = (c?.code || "").trim();
+const state = (c?.state || "").trim();
+const oauthError = (c?.error || "").trim();
+const oauthErrorDescription = (c?.error_description || "").trim();
 
 if (oauthError) {
   return {
@@ -76,7 +76,7 @@ if (!code || !state) {
   };
 }
 
-const stateResult = await args.session.run(
+const stateResult = await _.session.run(
   `MATCH (s:OAuthState {provider: "netsuite", state: $state})
    RETURN s
    LIMIT 1`,
@@ -91,11 +91,11 @@ if (!stateResult.records.length) {
 }
 
 const stateNode = stateResult.records[0].get("s");
-const stateJson = args.convertNodeToJson(stateNode);
+const stateJson = _.convertNodeToJson(stateNode);
 const expiresAt = stateJson?.P?.expiresAt ? new Date(stateJson.P.expiresAt).getTime() : 0;
 
 if (!expiresAt || Number.isNaN(expiresAt) || expiresAt < Date.now()) {
-  await args.session.run(
+  await _.session.run(
     `MATCH (s:OAuthState {provider: "netsuite", state: $state}) DELETE s`,
     { state }
   );
@@ -152,11 +152,11 @@ const scope = tokenJson.scope || null;
 const expiresIn = Number(tokenJson.expires_in || 0);
 const now = Date.now();
 const expiresAtIso = expiresIn > 0 ? new Date(now + expiresIn * 1000).toISOString() : null;
-const encryptedAccessToken = args.encryptToken(accessToken);
-const encryptedRefreshToken = refreshToken ? args.encryptToken(refreshToken) : null;
+const encryptedAccessToken = _.encryptToken(accessToken);
+const encryptedRefreshToken = refreshToken ? _.encryptToken(refreshToken) : null;
 const nowIso = new Date(now).toISOString();
 
-await args.session.run(
+await _.session.run(
   `MERGE (n:OAuthConnection {integrationKey: "netsuite"})
    ON CREATE SET n.createdAt = datetime($nowIso)
    SET n.updatedAt = datetime($nowIso),
@@ -179,7 +179,7 @@ await args.session.run(
   }
 );
 
-await args.session.run(
+await _.session.run(
   `MATCH (s:OAuthState {provider: "netsuite", state: $state}) DELETE s`,
   { state }
 );

@@ -10,13 +10,13 @@
 let tx;
 try {
   // Get current authenticated user from session
-  const user = await args.getUserFromSession();
+  const user = await _.getUserFromSession();
   if (!user) {
     throw new Error("User session not found. Please log in and try again.");
   }
 
   // Start a transaction for all database operations
-  tx = args.session.beginTransaction();
+  tx = _.session.beginTransaction();
 
   // Sample categories data
   const sampleCategories = [
@@ -299,7 +299,7 @@ try {
 
     if (ruleResult.records.length > 0) {
       const ruleId = ruleResult.records[0].get('ruleId');
-      const streakData = args.convertNodeToJson(ruleResult.records[0].get('rs'));
+      const streakData = _.convertNodeToJson(ruleResult.records[0].get('rs'));
       createdRules.push({
         id: ruleId,
         title: rule.title,

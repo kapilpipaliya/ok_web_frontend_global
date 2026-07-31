@@ -26,7 +26,7 @@
   max-width: 960px;
   margin: 0 auto;
   padding: 2rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   min-height: 60vh;
   display: flex;
   flex-direction: column;
@@ -48,7 +48,7 @@
   margin-bottom: 1rem;
   padding: 0.35rem 0.8rem;
   border-radius: 9999px;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   background: transparent;
   font-size: 0.875rem;
   cursor: pointer;
@@ -59,7 +59,7 @@
   as: "button",
   type: "button",
   text: "← Back to tickets",
-  onClick: () => args.navigate?.("/public-support/tickets")
+  onClick: () => _.navigate?.("/public-support/tickets")
 };'''
       }
     },
@@ -72,7 +72,7 @@
         props:
           '''return {
   viewerRole: "admin",
-  ticketId: args.searchParams?.ticketId || args.searchParams?.supportId || ""
+  ticketId: _.searchParams?.ticketId || _.searchParams?.supportId || ""
 };'''
       }
     },

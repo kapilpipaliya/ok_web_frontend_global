@@ -95,9 +95,9 @@
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const size = args.contextData.props?.size || "medium";
-const color = args.contextData.props?.color || "primary";
-const text = args.contextData.props?.text || "";
+const size = c.props?.size || "medium";
+const color = c.props?.color || "primary";
+const text = c.props?.text || "";
 
 return {
   as: "div",
@@ -110,7 +110,7 @@ return `._id {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: ${args.theme.var.spacing.md};
+  gap: ${t.var.spacing.md};
 }`;
 '''
       }
@@ -122,16 +122,16 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const size = args.contextData.props?.size || "medium";
-const color = args.contextData.props?.color || "primary";
+const size = c.props?.size || "medium";
+const color = c.props?.color || "primary";
 
 return {
   as: "div"
 };
 ''',
         css: '''
-const size = args.contextData.props?.size || "medium";
-const color = args.contextData.props?.color || "primary";
+const size = c.props?.size || "medium";
+const color = c.props?.color || "primary";
 
 const sizeConfig = {
   small: { diameter: 24, borderWidth: 2 },
@@ -143,12 +143,12 @@ const config = sizeConfig[size] || sizeConfig.medium;
 
 const colorConfig = {
   primary: {
-    border: args.theme.var.color.background_light_300,
-    accent: args.theme.var.color.primary
+    border: t.var.color.background_light_300,
+    accent: t.var.color.primary
   },
   text: {
-    border: args.theme.var.color.background_light_200,
-    accent: args.theme.var.color.text_light_500
+    border: t.var.color.background_light_200,
+    accent: t.var.color.text_light_500
   },
   white: {
     border: "rgba(255, 255, 255, 0.3)",
@@ -192,7 +192,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const text = args.contextData.props?.text || "";
+const text = c.props?.text || "";
 
 return {
   as: "div",
@@ -202,7 +202,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   font-size: 1rem;
   text-align: center;
 }`;

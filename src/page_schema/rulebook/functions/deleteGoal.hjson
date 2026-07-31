@@ -9,7 +9,7 @@
         body: '''
 try {
   // Extract input parameters from the request
-  const { goalId } = args.contextData;
+  const { goalId } = c;
 
   // Validate required fields
   if (!goalId) {
@@ -17,7 +17,7 @@ try {
   }
 
   // Get current authenticated user from session
-  const user = await args.getUserFromSession();
+  const user = await _.getUserFromSession();
   if (!user) {
     throw new Error("User session not found. Please log in and try again.");
   }
@@ -33,7 +33,7 @@ try {
     RETURN rg, r.title as ruleTitle
   `;
 
-  const goalResult = await args.session.run(goalCheckQuery, {
+  const goalResult = await _.session.run(goalCheckQuery, {
     userUuid: user.P.uuid,
     goalId
   });
@@ -43,11 +43,11 @@ try {
   }
 
   const goalNode = goalResult.records[0].get('rg');
-  const goal = args.convertNodeToJson(goalNode);
+  const goal = _.convertNodeToJson(goalNode);
   const ruleTitle = goalResult.records[0].get('ruleTitle');
 
   // Start transaction for atomic deletion
-  const tx = args.session.beginTransaction();
+  const tx = _.session.beginTransaction();
 
   try {
     // Delete the goal and all its relationships (both User-direct and Rule-connected)

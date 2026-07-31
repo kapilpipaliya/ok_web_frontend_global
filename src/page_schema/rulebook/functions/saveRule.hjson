@@ -9,7 +9,7 @@
         body: '''
 try {
   // Extract input parameters from the request
-  const { ruleId, title, description, categoryId, frequency, priority, difficulty, reminderTime, isActive } = args.contextData;
+  const { ruleId, title, description, categoryId, frequency, priority, difficulty, reminderTime, isActive } = c;
 
   // Validate required fields
   if (!title?.trim()) {
@@ -25,7 +25,7 @@ try {
   }
 
   // Get current authenticated user from session
-  const user = await args.getUserFromSession();
+  const user = await _.getUserFromSession();
   if (!user) {
     throw new Error("User session not found. Please log in and try again.");
   }
@@ -61,7 +61,7 @@ try {
     RETURN rc
   `;
 
-  const categoryResult = await args.session.run(categoryCheckQuery, {
+  const categoryResult = await _.session.run(categoryCheckQuery, {
     userUuid: user.P.uuid,
     categoryId
   });
@@ -92,7 +92,7 @@ try {
       RETURN r
     `;
 
-    ruleResult = await args.session.run(updateRuleQuery, {
+    ruleResult = await _.session.run(updateRuleQuery, {
       userUuid: user.P.uuid,
       ruleId,
       title: title.trim(),
@@ -124,7 +124,7 @@ try {
       RETURN r, elementId(r) as ruleElementId
     `;
 
-    ruleResult = await args.session.run(createRuleQuery, {
+    ruleResult = await _.session.run(createRuleQuery, {
       userUuid: user.P.uuid,
       ruleId: finalRuleId,
       title: title.trim(),
@@ -140,7 +140,7 @@ try {
 
 
   const ruleNode = ruleResult.records[0].get('r');
-  const rule = args.convertNodeToJson(ruleNode);
+  const rule = _.convertNodeToJson(ruleNode);
 
   // STEP 2: Update Rule -> Category relationship
   if (isUpdate) {
@@ -151,7 +151,7 @@ try {
       RETURN elementId(rc) as currentCategoryId
     `;
 
-    const currentCategoryResult = await args.session.run(currentCategoryQuery, {
+    const currentCategoryResult = await _.session.run(currentCategoryQuery, {
       ruleElementId
     });
 
@@ -167,7 +167,7 @@ try {
         DELETE rel
       `;
 
-      await args.session.run(removeOldCategoryQuery, {
+      await _.session.run(removeOldCategoryQuery, {
         ruleElementId
       });
 
@@ -178,7 +178,7 @@ try {
         MERGE (r)-[:RuleCategory]->(rc)
       `;
 
-      await args.session.run(ruleCategoryQuery, {
+      await _.session.run(ruleCategoryQuery, {
         ruleElementId,
         categoryId
       });
@@ -191,7 +191,7 @@ try {
       MERGE (r)-[:RuleCategory]->(rc)
     `;
 
-    await args.session.run(ruleCategoryQuery, {
+    await _.session.run(ruleCategoryQuery, {
       ruleElementId,
       categoryId
     });
@@ -215,7 +215,7 @@ try {
       RETURN rs
     `;
 
-    await args.session.run(createStreakQuery, {
+    await _.session.run(createStreakQuery, {
       ruleElementId
     });
   }

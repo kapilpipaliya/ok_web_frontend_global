@@ -106,21 +106,21 @@ const buildOption = (data, chartType, theme) => {
 };
 
 const renderChart = async () => {
-  const container = args.ref();
+  const container = _.ref();
   if (!container) return;
 
-  const widgetData = args.contextData.props?.widgetData || {};
-  const widgetConfig = args.contextData.props?.widgetConfig || {};
+  const widgetData = c.props?.widgetData || {};
+  const widgetConfig = c.props?.widgetConfig || {};
   const chart = widgetData.chart || { labels: [], datasets: [{ data: [] }] };
   const chartType = String(widgetConfig.chartType || "bar");
-  const runtime = args.contextData.props?.dashboardRuntime?.();
+  const runtime = c.props?.dashboardRuntime?.();
   const interactions = widgetConfig.interactions || [];
   const clickInteraction = interactions.find((item) => item?.trigger === "click");
 
   if (!chart.labels?.length) {
     container.innerHTML =
       '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:' +
-      args.theme.var.color.text_light_500 +
+      t.var.color.text_light_500 +
       '">No chart data</div>';
     return;
   }
@@ -128,7 +128,7 @@ const renderChart = async () => {
   const lib = await loadECharts();
   if (!lib) {
     container.innerHTML =
-      '<div style="color:' + args.theme.var.color.error + '">Failed to load chart library</div>';
+      '<div style="color:' + t.var.color.error + '">Failed to load chart library</div>';
     return;
   }
 
@@ -145,7 +145,7 @@ const renderChart = async () => {
   }
 
   chartInstance = lib.init(chartDiv);
-  chartInstance.setOption(buildOption(chart, chartType, args.theme));
+  chartInstance.setOption(buildOption(chart, chartType, t));
 
   if (clickInteraction && runtime) {
     chartInstance.off("click");
@@ -177,10 +177,10 @@ const disposeChart = () => {
 };
 
 const setupReactiveRender = () => {
-  if (typeof args.createEffect !== "function") return;
-  args.createEffect(() => {
-    const data = args.contextData.props?.widgetData;
-    const version = args.contextData.props?.dataVersion;
+  if (typeof _.createEffect !== "function") return;
+  _.createEffect(() => {
+    const data = c.props?.widgetData;
+    const version = c.props?.dataVersion;
     void data;
     void version;
     void renderChart();
@@ -194,16 +194,16 @@ return { renderChart, handleResize, disposeChart, setupReactiveRender };
 return {
   as: "div",
   onMount: () => {
-    args.fns.setupReactiveRender?.();
-    void args.fns.renderChart();
+    f.setupReactiveRender?.();
+    void f.renderChart();
     if (typeof window !== "undefined") {
-      window.addEventListener("resize", args.fns.handleResize);
+      window.addEventListener("resize", f.handleResize);
     }
   },
   onCleanup: () => {
-    args.fns.disposeChart?.();
+    f.disposeChart?.();
     if (typeof window !== "undefined") {
-      window.removeEventListener("resize", args.fns.handleResize);
+      window.removeEventListener("resize", f.handleResize);
     }
   }
 };

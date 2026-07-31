@@ -9,7 +9,7 @@
         body: '''
 try {
   // Extract input parameters from the request
-  const { goalId, manualProgress, ruleId } = args.contextData;
+  const { goalId, manualProgress, ruleId } = c;
 
   // Validate required fields
   if (!goalId && !ruleId) {
@@ -17,7 +17,7 @@ try {
   }
 
   // Get current authenticated user from session
-  const user = await args.getUserFromSession();
+  const user = await _.getUserFromSession();
   if (!user) {
     throw new Error("User session not found. Please log in and try again.");
   }
@@ -46,7 +46,7 @@ try {
     queryParams.ruleId = ruleId;
   }
 
-  const goalResult = await args.session.run(goalQuery, queryParams);
+  const goalResult = await _.session.run(goalQuery, queryParams);
 
   if (goalResult.records.length === 0) {
     throw new Error("No goals found for the specified criteria");
@@ -58,8 +58,8 @@ try {
   for (const record of goalResult.records) {
     const goalNode = record.get('rg');
     const ruleNode = record.get('r');
-    const goal = args.convertNodeToJson(goalNode);
-    const rule = args.convertNodeToJson(ruleNode);
+    const goal = _.convertNodeToJson(goalNode);
+    const rule = _.convertNodeToJson(ruleNode);
 
     // Skip if goal is already completed (unless manual progress is provided)
     if (goal.P.isCompleted && manualProgress === undefined) {
@@ -89,13 +89,13 @@ try {
             RETURN COALESCE(rs.currentStreak, 0) as streakValue
           `;
 
-          const streakResult = await args.session.run(streakQuery, {
+          const streakResult = await _.session.run(streakQuery, {
             userUuid: user.P.uuid,
             ruleId: rule.id
           });
 
           if (streakResult.records.length > 0) {
-            currentValue = args.neo4jConvert.js(streakResult.records[0].get('streakValue')) || 0;
+            currentValue = _.neo4jConvert.js(streakResult.records[0].get('streakValue')) || 0;
           }
           break;
 
@@ -107,13 +107,13 @@ try {
             RETURN COALESCE(rs.totalCompletions, 0) as completionValue
           `;
 
-          const completionResult = await args.session.run(completionQuery, {
+          const completionResult = await _.session.run(completionQuery, {
             userUuid: user.P.uuid,
             ruleId: rule.id
           });
 
           if (completionResult.records.length > 0) {
-            currentValue = args.neo4jConvert.js(completionResult.records[0].get('completionValue')) || 0;
+            currentValue = _.neo4jConvert.js(completionResult.records[0].get('completionValue')) || 0;
           }
           break;
 
@@ -154,14 +154,14 @@ try {
             END as percentageValue
           `;
 
-          const percentageResult = await args.session.run(percentageQuery, {
+          const percentageResult = await _.session.run(percentageQuery, {
             userUuid: user.P.uuid,
             ruleId: rule.id,
             startDate: thirtyDaysAgoStr
           });
 
           if (percentageResult.records.length > 0) {
-            currentValue = args.neo4jConvert.js(percentageResult.records[0].get('percentageValue')) || 0;
+            currentValue = _.neo4jConvert.js(percentageResult.records[0].get('percentageValue')) || 0;
           }
           break;
       }
@@ -185,7 +185,7 @@ try {
       RETURN rg
     `;
 
-    await args.session.run(updateQuery, {
+    await _.session.run(updateQuery, {
       goalId: goal.id,
       currentValue,
       isCompleted

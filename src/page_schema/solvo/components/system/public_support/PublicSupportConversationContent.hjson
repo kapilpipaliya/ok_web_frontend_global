@@ -8,18 +8,18 @@
         dynamicComponent: ConversationCredentialsNotice, ConversationHeader, ConversationTimeline, ConversationComposer, ConversationStatusBar, ConversationInternalNoteComposer
         fns:
           '''
-const [ticketVertex, setTicketVertex] = args.createSignal(null);
-const [messages, setMessages] = args.createSignal([]);
-const [isLoadingConversation, setIsLoadingConversation] = args.createSignal(false);
-const [replyMessageText, setReplyMessageText] = args.createSignal("");
-const [internalNoteText, setInternalNoteText] = args.createSignal("");
-const [isSendingReply, setIsSendingReply] = args.createSignal(false);
-const [isSendingInternalNote, setIsSendingInternalNote] = args.createSignal(false);
-const [isBusyStatus, setIsBusyStatus] = args.createSignal(false);
-const [showInternalNoteForm, setShowInternalNoteForm] = args.createSignal(false);
+const [ticketVertex, setTicketVertex] = _.createSignal(null);
+const [messages, setMessages] = _.createSignal([]);
+const [isLoadingConversation, setIsLoadingConversation] = _.createSignal(false);
+const [replyMessageText, setReplyMessageText] = _.createSignal("");
+const [internalNoteText, setInternalNoteText] = _.createSignal("");
+const [isSendingReply, setIsSendingReply] = _.createSignal(false);
+const [isSendingInternalNote, setIsSendingInternalNote] = _.createSignal(false);
+const [isBusyStatus, setIsBusyStatus] = _.createSignal(false);
+const [showInternalNoteForm, setShowInternalNoteForm] = _.createSignal(false);
 
-// --- capabilities (flat fns for children via args.fns) ---
-const viewerRole = () => (args.contextData.props?.viewerRole === "customer" ? "customer" : "admin");
+// --- capabilities (flat fns for children via f) ---
+const viewerRole = () => (c.props?.viewerRole === "customer" ? "customer" : "admin");
 const usesTokenAuth = () => viewerRole() === "customer";
 const usesTicketIdAuth = () => viewerRole() === "admin";
 const markAsReadFor = () => (viewerRole() === "customer" ? "customer" : "admin");
@@ -27,17 +27,17 @@ const canReply = () => true;
 const canReplyWhenClosed = () => false;
 const canCloseTicketCapability = () => true;
 const canReopenTicketCapability = () => viewerRole() === "customer";
-const canInternalNote = () => viewerRole() === "admin" && args.contextData.props?.showInternalNote !== false;
+const canInternalNote = () => viewerRole() === "admin" && c.props?.showInternalNote !== false;
 const canSeeInternalNotes = () => viewerRole() === "admin";
 const getReplyPlaceholder = () => (usesTokenAuth() ? "Write a reply..." : "Type your reply...");
 
 // --- useConversationAuth ---
 const getTicketId = () => {
-  const ticketIdFromProps = args.contextData.props?.ticketId;
+  const ticketIdFromProps = c.props?.ticketId;
   if (ticketIdFromProps != null && ticketIdFromProps !== "") {
     return String(ticketIdFromProps);
   }
-  const ticketIdFromSearch = args.searchParams?.ticketId || args.searchParams?.supportId;
+  const ticketIdFromSearch = _.searchParams?.ticketId || _.searchParams?.supportId;
   if (ticketIdFromSearch != null && ticketIdFromSearch !== "") {
     return String(ticketIdFromSearch);
   }
@@ -45,14 +45,14 @@ const getTicketId = () => {
 };
 
 const getSerial = () => {
-  const serialFromProps = args.contextData.props?.serial;
+  const serialFromProps = c.props?.serial;
   if (serialFromProps != null && serialFromProps !== "") {
     return String(serialFromProps).trim();
   }
-  if (args.searchParams?.serial) {
-    return String(args.searchParams.serial).trim();
+  if (_.searchParams?.serial) {
+    return String(_.searchParams.serial).trim();
   }
-  const path = args.location?.pathname || "";
+  const path = _.location?.pathname || "";
   const prefix = "/support/ticket/";
   if (path.startsWith(prefix)) {
     return decodeURIComponent(path.slice(prefix.length).split("/")[0] || "").trim();
@@ -61,11 +61,11 @@ const getSerial = () => {
 };
 
 const getToken = () => {
-  const tokenFromProps = args.contextData.props?.token;
+  const tokenFromProps = c.props?.token;
   if (tokenFromProps != null && tokenFromProps !== "") {
     return String(tokenFromProps).trim();
   }
-  return String(args.searchParams?.token || "").trim();
+  return String(_.searchParams?.token || "").trim();
 };
 
 const buildAuthContext = () => {
@@ -206,7 +206,7 @@ const canShowInternalNoteTools = () => canInternalNote();
 
 // --- server helpers ---
 const executeServer = (functionName, contextData) =>
-  args.executeNamedServerFunction({ functionName, contextData });
+  s({ functionName, contextData });
 
 const parseServerResult = (response) => {
   const result = response?.result || response;
@@ -219,7 +219,7 @@ const parseServerResult = (response) => {
   return { ok: true, data: result?.data || {} };
 };
 
-// --- server API (internal; not exported on args.fns) ---
+// --- server API (internal; not exported on f) ---
 const fetchConversation = async () =>
   executeServer("publicSupportGetConversation", {
     ...buildAuthContext(),
@@ -275,7 +275,7 @@ const loadConversation = async () => {
     const response = await fetchConversation();
     const parsed = parseServerResult(response);
     if (!parsed.ok) {
-      args.showErrorToast?.(parsed.message || "Failed to load conversation.");
+      _.showErrorToast?.(parsed.message || "Failed to load conversation.");
       return;
     }
 
@@ -311,7 +311,7 @@ const loadConversation = async () => {
     setMessages(allMessages);
   } catch (error) {
     console.error("PublicSupportConversationContent.loadConversation", error);
-    args.showErrorToast?.("Failed to load conversation.");
+    _.showErrorToast?.("Failed to load conversation.");
   } finally {
     setIsLoadingConversation(false);
   }
@@ -326,7 +326,7 @@ const sendReply = async () => {
     const response = await sendConversationReply(message);
     const parsed = parseServerResult(response);
     if (!parsed.ok) {
-      args.showErrorToast?.(parsed.message || "Failed to send reply.");
+      _.showErrorToast?.(parsed.message || "Failed to send reply.");
       return;
     }
 
@@ -337,7 +337,7 @@ const sendReply = async () => {
       await loadConversation();
     }
     setReplyMessageText("");
-    args.showSuccessToast?.("Reply sent.");
+    _.showSuccessToast?.("Reply sent.");
   } finally {
     setIsSendingReply(false);
   }
@@ -354,13 +354,13 @@ const addInternalNote = async () => {
     const response = await sendInternalNoteToServer(message);
     const parsed = parseServerResult(response);
     if (!parsed.ok) {
-      args.showErrorToast?.(parsed.message || "Failed to add note.");
+      _.showErrorToast?.(parsed.message || "Failed to add note.");
       return;
     }
     setInternalNoteText("");
     setShowInternalNoteForm(false);
     await loadConversation();
-    args.showSuccessToast?.("Internal note added.");
+    _.showSuccessToast?.("Internal note added.");
   } finally {
     setIsSendingInternalNote(false);
   }
@@ -375,7 +375,7 @@ const closeTicket = async () => {
     const response = await closeConversationOnServer();
     const parsed = parseServerResult(response);
     if (!parsed.ok) {
-      args.showErrorToast?.(parsed.message || "Failed to close ticket.");
+      _.showErrorToast?.(parsed.message || "Failed to close ticket.");
       return;
     }
 
@@ -384,7 +384,7 @@ const closeTicket = async () => {
     } else {
       await loadConversation();
     }
-    args.showSuccessToast?.("Ticket closed.");
+    _.showSuccessToast?.("Ticket closed.");
   } finally {
     setIsBusyStatus(false);
     setIsSendingReply(false);
@@ -399,7 +399,7 @@ const reopenTicket = async () => {
     const response = await reopenConversationOnServer();
     const parsed = parseServerResult(response);
     if (!parsed.ok) {
-      args.showErrorToast?.(parsed.message || "Failed to reopen ticket.");
+      _.showErrorToast?.(parsed.message || "Failed to reopen ticket.");
       return;
     }
 
@@ -408,13 +408,13 @@ const reopenTicket = async () => {
     } else {
       await loadConversation();
     }
-    args.showSuccessToast?.("Ticket reopened.");
+    _.showSuccessToast?.("Ticket reopened.");
   } finally {
     setIsBusyStatus(false);
   }
 };
 
-args.createEffect(() => {
+_.createEffect(() => {
   if (!hasCredentials()) {
     setTicketVertex(null);
     setMessages([]);
@@ -478,8 +478,8 @@ return `._id {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  padding: ${args.contextData.props?.compact === true ? "0.75rem 1rem 1rem" : "0 0 0.25rem"};
-  color: ${args.theme.var.color.text};
+  padding: ${c.props?.compact === true ? "0.75rem 1rem 1rem" : "0 0 0.25rem"};
+  color: ${t.var.color.text};
   overflow: hidden;
   position: relative;
 }`;
@@ -498,7 +498,7 @@ return `._id {
           '''return {
   size: "medium",
   color: "primary",
-  hide: !args.fns.isLoadingConversation?.()
+  hide: !f.isLoadingConversation?.()
 };'''
       }
     },
@@ -519,9 +519,9 @@ return `._id {
 '''
         props:
           '''
-const onClose = args.contextData.props?.onClose;
+const onClose = c.props?.onClose;
 return {
-  hide: args.contextData.props?.showCloseButton !== true,
+  hide: c.props?.showCloseButton !== true,
   icon: "carbon:close",
   width: 22,
   height: 22,
@@ -548,7 +548,7 @@ return {
         displayOrder: 2
         props:
           '''return {
-  hideHeader: args.contextData.props?.hideHeader === true
+  hideHeader: c.props?.hideHeader === true
 };'''
       }
     },

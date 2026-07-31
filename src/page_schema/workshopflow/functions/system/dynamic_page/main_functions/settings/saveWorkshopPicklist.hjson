@@ -7,12 +7,12 @@
         description: Upserts option vertices by value (MERGE on value) for the domain label; DETACH DELETE only nodes whose value is not in the saved list. No Setting vertex.
         body:
           '''
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return { success: false, message: "Not authenticated" };
 }
 
-const { picklistKey, options } = args.contextData || {};
+const { picklistKey, options } = c || {};
 if (!picklistKey || typeof picklistKey !== "string") {
   return { success: false, message: "picklistKey is required" };
 }
@@ -67,7 +67,7 @@ normalized.sort((a, b) => a.displayOrder - b.displayOrder);
 const keepValues = normalized.map((r) => r.value);
 
 if (normalized.length > 0) {
-  await args.session.run(
+  await _.session.run(
     `UNWIND $opts AS row
      MERGE (o:\`${neoLabel}\` {value: row.value})
      ON CREATE SET o.createdAt = datetime()
@@ -78,7 +78,7 @@ if (normalized.length > 0) {
   );
 }
 
-await args.session.run(
+await _.session.run(
   `MATCH (o:\`${neoLabel}\`)
    WHERE NOT o.value IN $keep
    DETACH DELETE o`,

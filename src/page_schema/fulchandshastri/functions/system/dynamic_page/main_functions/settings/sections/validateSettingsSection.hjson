@@ -7,17 +7,17 @@
         description: Server-side validation for a settings section using config-driven field rules.
         body:
           '''
-const { sectionConfig, values } = args.contextData;
+const { sectionConfig, values } = c;
 
 if (!sectionConfig) {
   return { success: false, message: "sectionConfig is required" };
 }
 
-if (!args.executeNamedServerFunction) {
+if (!s) {
   return { success: false, message: "Validation engine unavailable" };
 }
 
-const validateResult = await args.executeNamedServerFunction({
+const validateResult = await s({
   functionName: "settingsEngineHelpers",
   contextData: { action: "validateSection", sectionConfig, values: values || {} }
 });

@@ -44,7 +44,7 @@ function Backdrop() {
     <As
       as="div"
       css={`return \`._id {
-  background-color: \${args.theme.var.color.overlay};
+  background-color: \${t.var.color.overlay};
   inset: 0px;
   position: fixed;
 }\`;`}
@@ -72,15 +72,15 @@ function DismissButton() {
       <As
         as="button"
         css={`return \`._id {
-  background-color: \${args.theme.var.color.background_light_50};
+  background-color: \${t.var.color.background_light_50};
   border-radius: 0.375rem;
   box-shadow: 0 0 0 2px rgba(0,0,0,0.5);
-  color: \${args.theme.var.color.text_light_300};
-  color: \${args.theme.var.color.overlay};
+  color: \${t.var.color.text_light_300};
+  color: \${t.var.color.overlay};
   outline-offset: 2px;
   outline: 2px solid transparent;
   &:hover {
-    color: \${args.theme.var.color.overlay};
+    color: \${t.var.color.overlay};
   }
 }\`;`}
         onClick={props.onClose}
@@ -167,10 +167,10 @@ function ModalFooter() {
         <As
           as="button"
           css={`return \`._id {
-              background-color: \${args.theme.var.color.error};
+              background-color: \${t.var.color.error};
               border-radius: 0.375rem;
               box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-              color: \${args.theme.var.color.background_light_50};
+              color: \${t.var.color.background_light_50};
               display: inline-flex;
               font-size: 0.875rem;
               font-weight: 600;
@@ -179,7 +179,7 @@ function ModalFooter() {
               width: 100%;
 
               &:hover {
-                  background-color: \${args.theme.var.color.error_light_200};
+                  background-color: \${t.var.color.error_light_200};
               }
 
               @media (width >= 52.125rem) {
@@ -197,10 +197,10 @@ function ModalFooter() {
         <As
           as="button"
           css={`return \`._id {
-  background-color: $\{args.theme.var.color.background_light_50};
+  background-color: \${t.var.color.background_light_50};
   border-radius: 0.375rem;
   box-shadow: 0 0 0 1px rgba(0,0,0,0.5);
-  color: \${args.theme.var.color.text};
+  color: \${t.var.color.text};
   display: inline-flex;
   font-size: 0.875rem;
   font-weight: 600;
@@ -210,7 +210,7 @@ function ModalFooter() {
   padding-top: 0.5rem; padding-bottom: 0.5rem;
   width: 100%;
   &:hover {
-    background-color: \${args.theme.var.color.background_light_100};
+    background-color: \${t.var.color.background_light_100};
   }
   @media (width >= 52.125rem) {
     margin-top: 0;
@@ -244,8 +244,8 @@ function ModalHeader() {
         css={`return \`._id {
   display: flex;
   align-items: center;
-  background-color: \${args.theme.var.color.error_light_50};
-  color: \${args.theme.var.color.error_light_50_text};
+  background-color: \${t.var.color.error_light_50};
+  color: \${t.var.color.error_light_50_text};
   border-radius: 9999px;
   height: 3rem;
   justify-content: center;
@@ -261,7 +261,7 @@ function ModalHeader() {
           as="svg"
           aria-hidden="true"
           css={`return \`._id {
-  color: \${args.theme.var.color.error};
+  color: \${t.var.color.error};
   height: 1.5rem;
   width: 1.5rem;
 }\`;`}
@@ -293,7 +293,7 @@ function ModalHeader() {
         <As
           as="h3"
           css={`return \`._id {
-  color: \${args.theme.var.color.text};
+  color: \${t.var.color.text};
   font-size: 1rem;
   font-weight: 600;
 }\`;`}
@@ -310,7 +310,7 @@ function ModalHeader() {
           <As
             as="p"
             css={`return \`._id {
-  color: \${args.theme.var.color.overlay};
+  color: \${t.var.color.overlay};
   font-size: 0.875rem;
 }\`;`}
           >
@@ -327,7 +327,7 @@ function ModalPanel() {
     <As
       as="div"
       css={`return \`._id {
-          background-color: \${args.theme.var.color.background_light_50};
+          background-color: \${t.var.color.background_light_50};
           border-radius: 0.5rem;
           box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
           overflow: hidden;

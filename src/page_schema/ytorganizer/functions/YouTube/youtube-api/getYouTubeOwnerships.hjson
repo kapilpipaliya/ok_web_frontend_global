@@ -8,13 +8,13 @@
         body:
           '''
 // Get user from session
-const user = await args.getUserFromSession(args.request);
+const user = await _.getUserFromSession(_.request);
 if (!user) {
   throw new Error('User not authenticated');
 }
 
 // Get all ownerships for the user with active tokens
-const result = await args.session.run(`
+const result = await _.session.run(`
   MATCH (u:User {uuid: $userId})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
         -[:YouTubeOwnershipToken]->(token:YouTubeToken)
   WHERE token.isRevoked = false
@@ -27,7 +27,7 @@ const result = await args.session.run(`
 // Convert Neo4j nodes to vertex format
 const ownerships = result.records.map((record) => {
   const ownershipNode = record.get('o');
-  return args.convertNodeToJson(ownershipNode);
+  return _.convertNodeToJson(ownershipNode);
 });
 
 return {

@@ -6,11 +6,11 @@
       P: {
         fns:
           '''
-const isInIframe = args.atom(false);
+const isInIframe = _.atom(false);
 return {
   enabled: () => true,
   executeYTOFunction: (functionName, contextData) =>
-    args.executeNamedServerFunction({ functionName, contextData: contextData || {} }),
+    s({ functionName, contextData: contextData || {} }),
   isInIframe
 };
 '''
@@ -20,7 +20,7 @@ return {
         props:
           '''return {
   isNoPermissionCheck: true,
-  onMount: () => args.fns.isInIframe(window.self !== window.top)
+  onMount: () => f.isInIframe(window.self !== window.top)
 }'''
       }
     }
@@ -36,7 +36,7 @@ return {
   tableVertexLabel: "File",
   tableSettingsLabel: "File",
   loadFromSetting: true,
-  hide: !args.fns.isInIframe()
+  hide: !f.isInIframe()
 };'''
       }
     }
@@ -48,8 +48,8 @@ return {
         componentName: Html
         key: unique_outside
         as: "div"
-        css: "return `._id { font-size: 1rem; line-height: 1.6; color: ${args.theme.var.color.text}; padding: 1rem; }`;"
-        props: "return { show: args.fns.isInIframe() === false };"
+        css: "return `._id { font-size: 1rem; line-height: 1.6; color: ${t.var.color.text}; padding: 1rem; }`;"
+        props: "return { show: f.isInIframe() === false };"
       }
     }
     {

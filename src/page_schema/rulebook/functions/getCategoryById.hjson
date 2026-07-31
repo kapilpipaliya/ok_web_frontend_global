@@ -9,7 +9,7 @@
         body: '''
 try {
   // Extract input parameters from the request
-  const { categoryId } = args.contextData;
+  const { categoryId } = c;
 
   // Validate required fields
   if (!categoryId) {
@@ -17,7 +17,7 @@ try {
   }
 
   // Get current authenticated user from session
-  const user = await args.getUserFromSession();
+  const user = await _.getUserFromSession();
   if (!user) {
     throw new Error("User session not found. Please log in and try again.");
   }
@@ -49,7 +49,7 @@ try {
            ruleStats
   `;
 
-  const categoryResult = await args.session.run(categoryQuery, {
+  const categoryResult = await _.session.run(categoryQuery, {
     userUuid: user.P.uuid,
     categoryId
   });
@@ -61,11 +61,11 @@ try {
   // Format the result
   const categoryRecord = categoryResult.records[0];
   const categoryNode = categoryRecord.get('rc');
-  const ruleCount = args.neo4jConvert.js(categoryRecord.get('ruleCount')) || 0;
-  const ruleStats = args.neo4jConvert.js(categoryRecord.get('ruleStats')) || [];
+  const ruleCount = _.neo4jConvert.js(categoryRecord.get('ruleCount')) || 0;
+  const ruleStats = _.neo4jConvert.js(categoryRecord.get('ruleStats')) || [];
 
   // Convert Neo4j node to proper Vertex format
-  const category = args.convertNodeToJson(categoryNode);
+  const category = _.convertNodeToJson(categoryNode);
 
   // Calculate category-level statistics
   let totalCompletionRate = 0;

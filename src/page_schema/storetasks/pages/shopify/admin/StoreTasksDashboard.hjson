@@ -6,11 +6,11 @@
       P: {
         fns:
           '''
-const isInIframe = args.atom(false);
+const isInIframe = _.atom(false);
 return {
   enabled: () => true,
   executeYTOFunction: (functionName, contextData) =>
-    args.executeNamedServerFunction({
+    s({
       functionName,
       contextData: contextData || {}
     }),
@@ -24,7 +24,7 @@ return {
           '''return {
   isNoPermissionCheck: true,
   onMount: () => {
-    args.fns.isInIframe(window.self !== window.top);
+    f.isInIframe(window.self !== window.top);
   }
 };'''
       }
@@ -39,7 +39,7 @@ return {
         props: '''return {
   tableVertexLabel: "StoreTask",
   loadFromSetting: true,
-  hide: !args.fns.isInIframe()
+  hide: !f.isInIframe()
 };'''
       }
     },
@@ -51,8 +51,8 @@ return {
         componentName: "Html",
         key: "unique_1",
         as: "div",
-        css: "return `._id { font-size: 1rem; line-height: 1.6; color: ${args.theme.var.color.text}; padding: 1rem; }`;",
-        props: "return { show: args.fns.isInIframe() === false };"
+        css: "return `._id { font-size: 1rem; line-height: 1.6; color: ${t.var.color.text}; padding: 1rem; }`;",
+        props: "return { show: f.isInIframe() === false };"
       }
     },
     {

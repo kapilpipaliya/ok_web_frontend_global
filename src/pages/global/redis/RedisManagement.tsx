@@ -436,11 +436,11 @@ export function RedisManagement() {
   align-items: center;
   gap: 0.5rem;
   transition: all 0.2s;
-  background: \${args.theme.var.color.background_dark_300};
-  color: \${args.theme.var.color.background_dark_300_text};
+  background: \${t.var.color.background_dark_300};
+  color: \${t.var.color.background_dark_300_text};
 }
 ._id:hover {
-  background: \${args.theme.var.color.background_dark_400};
+  background: \${t.var.color.background_dark_400};
 }\`;`}
         >
           {"🔄 Refresh"}
@@ -466,8 +466,8 @@ export function RedisManagement() {
                 css={`return \`._id {
   padding: 1.5rem;
   border-radius: 0.5rem;
-  border: 1px solid \${args.theme.var.color.border};
-  background: \${args.theme.var.color.background};
+  border: 1px solid \${t.var.color.border};
+  background: \${t.var.color.background};
 }\`;`}
               >
                 <As
@@ -475,7 +475,7 @@ export function RedisManagement() {
                   css={`return \`._id {
   font-size: 0.875rem;
   font-weight: 500;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
   margin: 0 0 0.5rem 0;
   text-transform: uppercase;
 }\`;`}
@@ -498,8 +498,8 @@ export function RedisManagement() {
                 css={`return \`._id {
   padding: 1.5rem;
   border-radius: 0.5rem;
-  border: 1px solid \${args.theme.var.color.border};
-  background: \${args.theme.var.color.background};
+  border: 1px solid \${t.var.color.border};
+  background: \${t.var.color.background};
 }\`;`}
               >
                 <As
@@ -507,7 +507,7 @@ export function RedisManagement() {
                   css={`return \`._id {
   font-size: 0.875rem;
   font-weight: 500;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
   margin: 0 0 0.5rem 0;
   text-transform: uppercase;
 }\`;`}
@@ -530,8 +530,8 @@ export function RedisManagement() {
                 css={`return \`._id {
   padding: 1.5rem;
   border-radius: 0.5rem;
-  border: 1px solid \${args.theme.var.color.border};
-  background: \${args.theme.var.color.background};
+  border: 1px solid \${t.var.color.border};
+  background: \${t.var.color.background};
 }\`;`}
               >
                 <As
@@ -539,7 +539,7 @@ export function RedisManagement() {
                   css={`return \`._id {
   font-size: 0.875rem;
   font-weight: 500;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
   margin: 0 0 0.5rem 0;
   text-transform: uppercase;
 }\`;`}
@@ -581,15 +581,15 @@ export function RedisManagement() {
           css={`return \`._id {
   flex: 1;
   padding: 0.625rem 1rem;
-  border: 1px solid \${args.theme.var.color.border};
+  border: 1px solid \${t.var.color.border};
   border-radius: 0.375rem;
   font-size: 0.875rem;
-  background: \${args.theme.var.color.background};
-  color: \${args.theme.var.color.text};
+  background: \${t.var.color.background};
+  color: \${t.var.color.text};
 }
 ._id:focus {
   outline: none;
-  border-color: \${args.theme.var.color.primary};
+  border-color: \${t.var.color.primary};
 }\`;`}
         />
         <As
@@ -604,11 +604,11 @@ export function RedisManagement() {
   cursor: pointer;
   border: none;
   transition: all 0.2s;
-  background: \${args.theme.var.color.error};
-  color: \${args.theme.var.color.error_text};
+  background: \${t.var.color.error};
+  color: \${t.var.color.error_text};
 }
 ._id:hover:not(:disabled) {
-  background: \${args.theme.var.color.error_dark_200};
+  background: \${t.var.color.error_dark_200};
 }
 ._id:disabled {
   opacity: 0.5;
@@ -628,7 +628,7 @@ export function RedisManagement() {
             css={`return \`._id {
   padding: 3rem;
   text-align: center;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
 }\`;`}
           >
             {queues()?.error || "Loading queues..."}
@@ -643,7 +643,7 @@ export function RedisManagement() {
               css={`return \`._id {
   padding: 3rem;
   text-align: center;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
 }\`;`}
             >
               No queues found
@@ -653,7 +653,7 @@ export function RedisManagement() {
           <As
             as="div"
             css={`return \`._id {
-  border: 1px solid \${args.theme.var.color.border};
+  border: 1px solid \${t.var.color.border};
   border-radius: 0.5rem;
   overflow: hidden;
 }\`;`}
@@ -661,7 +661,7 @@ export function RedisManagement() {
             <As
               as="div"
               css={`return \`._id {
-  background: \${args.theme.var.color.background_light_200};
+  background: \${t.var.color.background_light_200};
   padding: 1rem 1.5rem;
   font-weight: 600;
   font-size: 0.875rem;
@@ -685,16 +685,16 @@ export function RedisManagement() {
                   as="div"
                   css={`return \`._id {
   padding: 1rem 1.5rem;
-  border-top: 1px solid \${args.theme.var.color.border};
+  border-top: 1px solid \${t.var.color.border};
   display: grid;
   grid-template-columns: 2fr 80px 80px 80px 80px 80px 80px 200px;
   gap: 1rem;
   align-items: center;
-  background: \${args.theme.var.color.background};
+  background: \${t.var.color.background};
   transition: background 0.2s;
 }
 ._id:hover {
-  background: \${args.theme.var.color.background_light_200};
+  background: \${t.var.color.background_light_200};
 }\`;`}
                 >
                   <As
@@ -703,7 +703,7 @@ export function RedisManagement() {
   font-weight: 500;
   font-family: monospace;
   cursor: pointer;
-  color: \${args.theme.var.color.primary};
+  color: \${t.var.color.primary};
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -724,7 +724,7 @@ export function RedisManagement() {
                   <As
                     as="div"
                     css={`return \`._id {
-  color: ${queue.failed > 0 ? "${args.theme.var.color.error}" : "inherit"};
+  color: ${queue.failed > 0 ? "${t.var.color.error}" : "inherit"};
   font-weight: ${queue.failed > 0 ? "600" : "normal"};
 }\`;`}
                   >
@@ -740,8 +740,8 @@ export function RedisManagement() {
   border-radius: 9999px;
   font-size: 0.75rem;
   font-weight: 500;
-  background: ${queue.paused ? "${args.theme.var.color.warning_light_900}" : "${args.theme.var.color.success_light_900}"};
-  color: ${queue.paused ? "${args.theme.var.color.warning_dark_300}" : "${args.theme.var.color.success_dark_300}"};
+  background: ${queue.paused ? "${t.var.color.warning_light_900}" : "${t.var.color.success_light_900}"};
+  color: ${queue.paused ? "${t.var.color.warning_dark_300}" : "${t.var.color.success_dark_300}"};
 }\`;`}
                     >
                       {queue.paused ? "Paused" : "Active"}
@@ -767,11 +767,11 @@ export function RedisManagement() {
   border: none;
   font-weight: 500;
   transition: all 0.2s;
-  background: \${args.theme.var.color.warning};
-  color: \${args.theme.var.color.warning_text};
+  background: \${t.var.color.warning};
+  color: \${t.var.color.warning_text};
 }
 ._id:hover {
-  background: \${args.theme.var.color.warning_dark_200};
+  background: \${t.var.color.warning_dark_200};
 }\`;`}
                       >
                         Pause
@@ -789,11 +789,11 @@ export function RedisManagement() {
   border: none;
   font-weight: 500;
   transition: all 0.2s;
-  background: \${args.theme.var.color.success};
-  color: \${args.theme.var.color.success_text};
+  background: \${t.var.color.success};
+  color: \${t.var.color.success_text};
 }
 ._id:hover {
-  background: \${args.theme.var.color.success_dark_200};
+  background: \${t.var.color.success_dark_200};
 }\`;`}
                       >
                         Resume
@@ -810,11 +810,11 @@ export function RedisManagement() {
   border: none;
   font-weight: 500;
   transition: all 0.2s;
-  background: \${args.theme.var.color.background_dark_300};
-  color: \${args.theme.var.color.background_dark_300_text};
+  background: \${t.var.color.background_dark_300};
+  color: \${t.var.color.background_dark_300_text};
 }
 ._id:hover {
-  background: \${args.theme.var.color.background_dark_400};
+  background: \${t.var.color.background_dark_400};
 }\`;`}
                     >
                       Empty
@@ -830,11 +830,11 @@ export function RedisManagement() {
   border: none;
   font-weight: 500;
   transition: all 0.2s;
-  background: \${args.theme.var.color.error};
-  color: \${args.theme.var.color.error_text};
+  background: \${t.var.color.error};
+  color: \${t.var.color.error_text};
 }
 ._id:hover {
-  background: \${args.theme.var.color.error_dark_200};
+  background: \${t.var.color.error_dark_200};
 }\`;`}
                     >
                       Delete
@@ -848,8 +848,8 @@ export function RedisManagement() {
                       css={`return \`._id {
   grid-column: 1 / -1;
   padding: 1.5rem;
-  background: \${args.theme.var.color.background_light_100};
-  border-top: 1px solid \${args.theme.var.color.border};
+  background: \${t.var.color.background_light_100};
+  border-top: 1px solid \${t.var.color.border};
   margin-top: 1rem;
 }\`;`}
                     >
@@ -858,8 +858,8 @@ export function RedisManagement() {
                         <As
                           as="div"
                           css={`return \`._id {
-  background: \${args.theme.var.color.primary_light_900};
-  border: 1px solid \${args.theme.var.color.primary};
+  background: \${t.var.color.primary_light_900};
+  border: 1px solid \${t.var.color.primary};
   border-radius: 0.375rem;
   padding: 1rem 1.5rem;
   margin-bottom: 1.5rem;
@@ -873,7 +873,7 @@ export function RedisManagement() {
                             as="div"
                             css={`return \`._id {
   font-weight: 500;
-  color: \${args.theme.var.color.primary_dark_300};
+  color: \${t.var.color.primary_dark_300};
 }\`;`}
                           >
                             {selectedJobs().size} job(s) selected
@@ -899,11 +899,11 @@ export function RedisManagement() {
   border: none;
   font-weight: 500;
   transition: all 0.2s;
-  background: \${args.theme.var.color.success};
-  color: \${args.theme.var.color.success_text};
+  background: \${t.var.color.success};
+  color: \${t.var.color.success_text};
 }
 ._id:hover {
-  background: \${args.theme.var.color.success_dark_200};
+  background: \${t.var.color.success_dark_200};
 }\`;`}
                               >
                                 Retry Selected
@@ -922,11 +922,11 @@ export function RedisManagement() {
   border: none;
   font-weight: 500;
   transition: all 0.2s;
-  background: \${args.theme.var.color.error};
-  color: \${args.theme.var.color.error_text};
+  background: \${t.var.color.error};
+  color: \${t.var.color.error_text};
 }
 ._id:hover {
-  background: \${args.theme.var.color.error_dark_200};
+  background: \${t.var.color.error_dark_200};
 }\`;`}
                             >
                               Delete Selected
@@ -939,14 +939,14 @@ export function RedisManagement() {
   font-size: 0.875rem;
   border-radius: 0.375rem;
   cursor: pointer;
-  border: 1px solid \${args.theme.var.color.border};
-  background: \${args.theme.var.color.background};
-  color: \${args.theme.var.color.text};
+  border: 1px solid \${t.var.color.border};
+  background: \${t.var.color.background};
+  color: \${t.var.color.text};
   font-weight: 500;
   transition: all 0.2s;
 }
 ._id:hover {
-  background: \${args.theme.var.color.background_light_200};
+  background: \${t.var.color.background_light_200};
 }\`;`}
                             >
                               Clear Selection
@@ -978,15 +978,15 @@ export function RedisManagement() {
   flex: 1;
   min-width: 250px;
   padding: 0.625rem 1rem;
-  border: 1px solid \${args.theme.var.color.border};
+  border: 1px solid \${t.var.color.border};
   border-radius: 0.375rem;
   font-size: 0.875rem;
-  background: \${args.theme.var.color.background};
-  color: \${args.theme.var.color.text};
+  background: \${t.var.color.background};
+  color: \${t.var.color.text};
 }
 ._id:focus {
   outline: none;
-  border-color: \${args.theme.var.color.primary};
+  border-color: \${t.var.color.primary};
 }\`;`}
                         />
                         <As
@@ -1005,15 +1005,15 @@ export function RedisManagement() {
                           css={`return \`._id {
   width: 120px;
   padding: 0.625rem 1rem;
-  border: 1px solid \${args.theme.var.color.border};
+  border: 1px solid \${t.var.color.border};
   border-radius: 0.375rem;
   font-size: 0.875rem;
-  background: \${args.theme.var.color.background};
-  color: \${args.theme.var.color.text};
+  background: \${t.var.color.background};
+  color: \${t.var.color.text};
 }
 ._id:focus {
   outline: none;
-  border-color: \${args.theme.var.color.primary};
+  border-color: \${t.var.color.primary};
 }\`;`}
                         />
                         <As
@@ -1032,15 +1032,15 @@ export function RedisManagement() {
                           css={`return \`._id {
   width: 120px;
   padding: 0.625rem 1rem;
-  border: 1px solid \${args.theme.var.color.border};
+  border: 1px solid \${t.var.color.border};
   border-radius: 0.375rem;
   font-size: 0.875rem;
-  background: \${args.theme.var.color.background};
-  color: \${args.theme.var.color.text};
+  background: \${t.var.color.background};
+  color: \${t.var.color.text};
 }
 ._id:focus {
   outline: none;
-  border-color: \${args.theme.var.color.primary};
+  border-color: \${t.var.color.primary};
 }\`;`}
                         />
                         <Show
@@ -1061,15 +1061,15 @@ export function RedisManagement() {
   font-size: 0.875rem;
   border-radius: 0.375rem;
   cursor: pointer;
-  border: 1px solid \${args.theme.var.color.border};
-  background: \${args.theme.var.color.background};
-  color: \${args.theme.var.color.text};
+  border: 1px solid \${t.var.color.border};
+  background: \${t.var.color.background};
+  color: \${t.var.color.text};
   font-weight: 500;
   transition: all 0.2s;
   white-space: nowrap;
 }
 ._id:hover {
-  background: \${args.theme.var.color.background_light_200};
+  background: \${t.var.color.background_light_200};
 }\`;`}
                           >
                             Clear Filters
@@ -1085,7 +1085,7 @@ export function RedisManagement() {
                             as="div"
                             css={`return \`._id {
   font-size: 0.875rem;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
   white-space: nowrap;
 }\`;`}
                           >
@@ -1102,7 +1102,7 @@ export function RedisManagement() {
   display: flex;
   gap: 0.5rem;
   margin-bottom: 1.5rem;
-  border-bottom: 2px solid \${args.theme.var.color.border};
+  border-bottom: 2px solid \${t.var.color.border};
 }\`;`}
                       >
                         <For
@@ -1131,14 +1131,14 @@ export function RedisManagement() {
   cursor: pointer;
   font-weight: 500;
   font-size: 0.875rem;
-  color: ${selectedState() === state ? "${args.theme.var.color.primary}" : "${args.theme.var.color.text_light_500}"};
-  border-bottom: 2px solid ${selectedState() === state ? "${args.theme.var.color.primary}" : "transparent"};
+  color: ${selectedState() === state ? "${t.var.color.primary}" : "${t.var.color.text_light_500}"};
+  border-bottom: 2px solid ${selectedState() === state ? "${t.var.color.primary}" : "transparent"};
   margin-bottom: -2px;
   transition: all 0.2s;
   text-transform: capitalize;
 }
 ._id:hover {
-  color: \${args.theme.var.color.primary};
+  color: \${t.var.color.primary};
 }\`;`}
                             >
                               {state}
@@ -1156,7 +1156,7 @@ export function RedisManagement() {
                             css={`return \`._id {
   padding: 2rem;
   text-align: center;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
 }\`;`}
                           >
                             Loading jobs...
@@ -1171,7 +1171,7 @@ export function RedisManagement() {
                               css={`return \`._id {
   padding: 2rem;
   text-align: center;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
 }\`;`}
                             >
                               No {selectedState()} jobs found
@@ -1181,7 +1181,7 @@ export function RedisManagement() {
                           <As
                             as="div"
                             css={`return \`._id {
-  border: 1px solid \${args.theme.var.color.border};
+  border: 1px solid \${t.var.color.border};
   border-radius: 0.375rem;
   overflow: hidden;
 }\`;`}
@@ -1190,14 +1190,14 @@ export function RedisManagement() {
                             <As
                               as="div"
                               css={`return \`._id {
-  background: \${args.theme.var.color.background_light_300};
+  background: \${t.var.color.background_light_300};
   padding: 0.75rem 1rem;
   font-weight: 600;
   font-size: 0.8125rem;
   display: grid;
   grid-template-columns: 40px 150px 120px 2fr 120px 80px 200px;
   gap: 1rem;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
   align-items: center;
 }\`;`}
                             >
@@ -1242,17 +1242,17 @@ export function RedisManagement() {
                                   as="div"
                                   css={`return \`._id {
   padding: 0.75rem 1rem;
-  border-top: 1px solid \${args.theme.var.color.border};
+  border-top: 1px solid \${t.var.color.border};
   display: grid;
   grid-template-columns: 40px 150px 120px 2fr 120px 80px 200px;
   gap: 1rem;
   align-items: center;
-  background: \${args.theme.var.color.background};
+  background: \${t.var.color.background};
   transition: background 0.2s;
   font-size: 0.8125rem;
 }
 ._id:hover {
-  background: \${args.theme.var.color.background_light_200};
+  background: \${t.var.color.background_light_200};
 }\`;`}
                                 >
                                   <As
@@ -1296,7 +1296,7 @@ export function RedisManagement() {
                                     css={`return \`._id {
   font-family: monospace;
   font-size: 0.75rem;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1307,7 +1307,7 @@ export function RedisManagement() {
                                   <As
                                     as="div"
                                     css={`return \`._id {
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
   font-size: 0.75rem;
 }\`;`}
                                   >
@@ -1332,11 +1332,11 @@ export function RedisManagement() {
   border: none;
   font-weight: 500;
   transition: all 0.2s;
-  background: \${args.theme.var.color.info};
-  color: \${args.theme.var.color.info_text};
+  background: \${t.var.color.info};
+  color: \${t.var.color.info_text};
 }
 ._id:hover {
-  background: \${args.theme.var.color.info_dark_200};
+  background: \${t.var.color.info_dark_200};
 }\`;`}
                                     >
                                       View
@@ -1355,11 +1355,11 @@ export function RedisManagement() {
   border: none;
   font-weight: 500;
   transition: all 0.2s;
-  background: \${args.theme.var.color.success};
-  color: \${args.theme.var.color.success_text};
+  background: \${t.var.color.success};
+  color: \${t.var.color.success_text};
 }
 ._id:hover {
-  background: \${args.theme.var.color.success_dark_200};
+  background: \${t.var.color.success_dark_200};
 }\`;`}
                                       >
                                         Retry
@@ -1378,11 +1378,11 @@ export function RedisManagement() {
   border: none;
   font-weight: 500;
   transition: all 0.2s;
-  background: \${args.theme.var.color.error};
-  color: \${args.theme.var.color.error_text};
+  background: \${t.var.color.error};
+  color: \${t.var.color.error_text};
 }
 ._id:hover {
-  background: \${args.theme.var.color.error_dark_200};
+  background: \${t.var.color.error_dark_200};
 }\`;`}
                                     >
                                       Delete
@@ -1398,13 +1398,13 @@ export function RedisManagement() {
                             as="div"
                             css={`return \`._id {
   padding: 1rem 1.5rem;
-  border-top: 1px solid \${args.theme.var.color.border};
+  border-top: 1px solid \${t.var.color.border};
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
   flex-wrap: wrap;
-  background: \${args.theme.var.color.background_light_200};
+  background: \${t.var.color.background_light_200};
 }\`;`}
                           >
                             <As
@@ -1414,7 +1414,7 @@ export function RedisManagement() {
   align-items: center;
   gap: 1rem;
   font-size: 0.875rem;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
 }\`;`}
                             >
                               <As as="span">
@@ -1435,16 +1435,16 @@ export function RedisManagement() {
                                 }
                                 css={`return \`._id {
   padding: 0.375rem 0.75rem;
-  border: 1px solid \${args.theme.var.color.border};
+  border: 1px solid \${t.var.color.border};
   border-radius: 0.375rem;
   font-size: 0.875rem;
-  background: \${args.theme.var.color.background};
-  color: \${args.theme.var.color.text};
+  background: \${t.var.color.background};
+  color: \${t.var.color.text};
   cursor: pointer;
 }
 ._id:focus {
   outline: none;
-  border-color: \${args.theme.var.color.primary};
+  border-color: \${t.var.color.primary};
 }\`;`}
                               >
                                 <As as="option" value="25">
@@ -1477,14 +1477,14 @@ export function RedisManagement() {
   font-size: 0.875rem;
   border-radius: 0.375rem;
   cursor: pointer;
-  border: 1px solid \${args.theme.var.color.border};
-  background: \${args.theme.var.color.background};
-  color: \${args.theme.var.color.text};
+  border: 1px solid \${t.var.color.border};
+  background: \${t.var.color.background};
+  color: \${t.var.color.text};
   font-weight: 500;
   transition: all 0.2s;
 }
 ._id:hover:not(:disabled) {
-  background: \${args.theme.var.color.background_light_200};
+  background: \${t.var.color.background_light_200};
 }
 ._id:disabled {
   opacity: 0.5;
@@ -1500,7 +1500,7 @@ export function RedisManagement() {
   font-size: 0.875rem;
   display: flex;
   align-items: center;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
 }\`;`}
                               >
                                 Page {currentPage()} of{" "}
@@ -1522,14 +1522,14 @@ export function RedisManagement() {
   font-size: 0.875rem;
   border-radius: 0.375rem;
   cursor: pointer;
-  border: 1px solid \${args.theme.var.color.border};
-  background: \${args.theme.var.color.background};
-  color: \${args.theme.var.color.text};
+  border: 1px solid \${t.var.color.border};
+  background: \${t.var.color.background};
+  color: \${t.var.color.text};
   font-weight: 500;
   transition: all 0.2s;
 }
 ._id:hover:not(:disabled) {
-  background: \${args.theme.var.color.background_light_200};
+  background: \${t.var.color.background_light_200};
 }
 ._id:disabled {
   opacity: 0.5;
@@ -1577,8 +1577,8 @@ export function RedisManagement() {
               <As
                 as="div"
                 css={`return \`._id {
-  background: \${args.theme.var.color.background};
-  border: 1px solid \${args.theme.var.color.border};
+  background: \${t.var.color.background};
+  border: 1px solid \${t.var.color.border};
   border-radius: 0.5rem;
   padding: 2rem;
   max-width: 500px;
@@ -1600,7 +1600,7 @@ export function RedisManagement() {
                   as="p"
                   css={`return \`._id {
   margin: 0 0 1.5rem 0;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
 }\`;`}
                 >
                   {type === "delete" &&
@@ -1631,12 +1631,12 @@ export function RedisManagement() {
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
-  border: 1px solid \${args.theme.var.color.border};
-  background: \${args.theme.var.color.background};
-  color: \${args.theme.var.color.text};
+  border: 1px solid \${t.var.color.border};
+  background: \${t.var.color.background};
+  color: \${t.var.color.text};
 }
 ._id:hover {
-  background: \${args.theme.var.color.background_light_200};
+  background: \${t.var.color.background_light_200};
 }\`;`}
                   >
                     Cancel
@@ -1663,11 +1663,11 @@ export function RedisManagement() {
   font-weight: 500;
   cursor: pointer;
   border: none;
-  background: \${args.theme.var.color.error};
-  color: \${args.theme.var.color.error_text};
+  background: \${t.var.color.error};
+  color: \${t.var.color.error_text};
 }
 ._id:hover {
-  background: \${args.theme.var.color.error_dark_200};
+  background: \${t.var.color.error_dark_200};
 }\`;`}
                   >
                     Confirm
@@ -1706,8 +1706,8 @@ export function RedisManagement() {
               <As
                 as="div"
                 css={`return \`._id {
-  background: \${args.theme.var.color.background};
-  border: 1px solid \${args.theme.var.color.border};
+  background: \${t.var.color.background};
+  border: 1px solid \${t.var.color.border};
   border-radius: 0.5rem;
   max-width: 800px;
   width: 100%;
@@ -1721,13 +1721,13 @@ export function RedisManagement() {
                   as="div"
                   css={`return \`._id {
   padding: 1.5rem 2rem;
-  border-bottom: 1px solid \${args.theme.var.color.border};
+  border-bottom: 1px solid \${t.var.color.border};
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   position: sticky;
   top: 0;
-  background: \${args.theme.var.color.background};
+  background: \${t.var.color.background};
   z-index: 1;
 }\`;`}
                 >
@@ -1755,7 +1755,7 @@ export function RedisManagement() {
                         css={`return \`._id {
   font-family: monospace;
   font-size: 0.8125rem;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
 }\`;`}
                       >
                         ID: {job.id}
@@ -1780,12 +1780,12 @@ export function RedisManagement() {
   background: none;
   cursor: pointer;
   font-size: 1.5rem;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
   line-height: 1;
   transition: color 0.2s;
 }
 ._id:hover {
-  color: \${args.theme.var.color.text};
+  color: \${t.var.color.text};
 }\`;`}
                   >
                     ×
@@ -1810,7 +1810,7 @@ export function RedisManagement() {
   font-size: 1rem;
   font-weight: 600;
   margin: 0 0 1rem 0;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
   text-transform: uppercase;
   font-size: 0.8125rem;
 }\`;`}
@@ -1829,7 +1829,7 @@ export function RedisManagement() {
                         as="div"
                         css={`return \`._id {
   padding: 1rem;
-  background: \${args.theme.var.color.background_light_200};
+  background: \${t.var.color.background_light_200};
   border-radius: 0.375rem;
 }\`;`}
                       >
@@ -1837,7 +1837,7 @@ export function RedisManagement() {
                           as="div"
                           css={`return \`._id {
   font-size: 0.75rem;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
   margin-bottom: 0.25rem;
 }\`;`}
                         >
@@ -1858,7 +1858,7 @@ export function RedisManagement() {
                           as="div"
                           css={`return \`._id {
   font-size: 0.75rem;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
   margin-top: 0.25rem;
 }\`;`}
                         >
@@ -1870,7 +1870,7 @@ export function RedisManagement() {
                           as="div"
                           css={`return \`._id {
   padding: 1rem;
-  background: \${args.theme.var.color.background_light_200};
+  background: \${t.var.color.background_light_200};
   border-radius: 0.375rem;
 }\`;`}
                         >
@@ -1878,7 +1878,7 @@ export function RedisManagement() {
                             as="div"
                             css={`return \`._id {
   font-size: 0.75rem;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
   margin-bottom: 0.25rem;
 }\`;`}
                           >
@@ -1897,7 +1897,7 @@ export function RedisManagement() {
                             as="div"
                             css={`return \`._id {
   font-size: 0.75rem;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
   margin-top: 0.25rem;
 }\`;`}
                           >
@@ -1910,7 +1910,7 @@ export function RedisManagement() {
                           as="div"
                           css={`return \`._id {
   padding: 1rem;
-  background: \${args.theme.var.color.background_light_200};
+  background: \${t.var.color.background_light_200};
   border-radius: 0.375rem;
 }\`;`}
                         >
@@ -1918,7 +1918,7 @@ export function RedisManagement() {
                             as="div"
                             css={`return \`._id {
   font-size: 0.75rem;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
   margin-bottom: 0.25rem;
 }\`;`}
                           >
@@ -1937,7 +1937,7 @@ export function RedisManagement() {
                             as="div"
                             css={`return \`._id {
   font-size: 0.75rem;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
   margin-top: 0.25rem;
 }\`;`}
                           >
@@ -1956,7 +1956,7 @@ export function RedisManagement() {
   font-size: 1rem;
   font-weight: 600;
   margin: 0 0 1rem 0;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
   text-transform: uppercase;
   font-size: 0.8125rem;
 }\`;`}
@@ -1967,7 +1967,7 @@ export function RedisManagement() {
                       as="div"
                       css={`return \`._id {
   padding: 1rem;
-  background: \${args.theme.var.color.background_light_200};
+  background: \${t.var.color.background_light_200};
   border-radius: 0.375rem;
   font-size: 0.875rem;
 }\`;`}
@@ -1991,7 +1991,7 @@ export function RedisManagement() {
   font-size: 1rem;
   font-weight: 600;
   margin: 0 0 1rem 0;
-  color: \${args.theme.var.color.error};
+  color: \${t.var.color.error};
   text-transform: uppercase;
   font-size: 0.8125rem;
 }\`;`}
@@ -2002,9 +2002,9 @@ export function RedisManagement() {
                         as="pre"
                         css={`return \`._id {
   padding: 1rem;
-  background: \${args.theme.var.color.error_light_900};
-  color: \${args.theme.var.color.error_dark_300};
-  border: 1px solid \${args.theme.var.color.error};
+  background: \${t.var.color.error_light_900};
+  color: \${t.var.color.error_dark_300};
+  border: 1px solid \${t.var.color.error};
   border-radius: 0.375rem;
   font-family: monospace;
   font-size: 0.8125rem;
@@ -2028,7 +2028,7 @@ export function RedisManagement() {
   font-size: 1rem;
   font-weight: 600;
   margin: 0 0 1rem 0;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
   text-transform: uppercase;
   font-size: 0.8125rem;
 }\`;`}
@@ -2039,8 +2039,8 @@ export function RedisManagement() {
                         as="pre"
                         css={`return \`._id {
   padding: 1rem;
-  background: \${args.theme.var.color.background_light_200};
-  border: 1px solid \${args.theme.var.color.border};
+  background: \${t.var.color.background_light_200};
+  border: 1px solid \${t.var.color.border};
   border-radius: 0.375rem;
   font-family: monospace;
   font-size: 0.8125rem;
@@ -2063,7 +2063,7 @@ export function RedisManagement() {
   font-size: 1rem;
   font-weight: 600;
   margin: 0 0 1rem 0;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
   text-transform: uppercase;
   font-size: 0.8125rem;
 }\`;`}
@@ -2074,8 +2074,8 @@ export function RedisManagement() {
                       as="pre"
                       css={`return \`._id {
   padding: 1rem;
-  background: \${args.theme.var.color.background_light_200};
-  border: 1px solid \${args.theme.var.color.border};
+  background: \${t.var.color.background_light_200};
+  border: 1px solid \${t.var.color.border};
   border-radius: 0.375rem;
   font-family: monospace;
   font-size: 0.8125rem;
@@ -2095,13 +2095,13 @@ export function RedisManagement() {
                   as="div"
                   css={`return \`._id {
   padding: 1.5rem 2rem;
-  border-top: 1px solid \${args.theme.var.color.border};
+  border-top: 1px solid \${t.var.color.border};
   display: flex;
   gap: 1rem;
   justify-content: flex-end;
   position: sticky;
   bottom: 0;
-  background: \${args.theme.var.color.background};
+  background: \${t.var.color.background};
 }\`;`}
                 >
                   <Show when={job.failedReason}>
@@ -2118,11 +2118,11 @@ export function RedisManagement() {
   font-weight: 500;
   cursor: pointer;
   border: none;
-  background: \${args.theme.var.color.success};
-  color: \${args.theme.var.color.success_text};
+  background: \${t.var.color.success};
+  color: \${t.var.color.success_text};
 }
 ._id:hover {
-  background: \${args.theme.var.color.success_dark_200};
+  background: \${t.var.color.success_dark_200};
 }\`;`}
                     >
                       Retry Job
@@ -2141,11 +2141,11 @@ export function RedisManagement() {
   font-weight: 500;
   cursor: pointer;
   border: none;
-  background: \${args.theme.var.color.error};
-  color: \${args.theme.var.color.error_text};
+  background: \${t.var.color.error};
+  color: \${t.var.color.error_text};
 }
 ._id:hover {
-  background: \${args.theme.var.color.error_dark_200};
+  background: \${t.var.color.error_dark_200};
 }\`;`}
                   >
                     Delete Job
@@ -2159,12 +2159,12 @@ export function RedisManagement() {
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
-  border: 1px solid \${args.theme.var.color.border};
-  background: \${args.theme.var.color.background};
-  color: \${args.theme.var.color.text};
+  border: 1px solid \${t.var.color.border};
+  background: \${t.var.color.background};
+  color: \${t.var.color.text};
 }
 ._id:hover {
-  background: \${args.theme.var.color.background_light_200};
+  background: \${t.var.color.background_light_200};
 }\`;`}
                   >
                     Close

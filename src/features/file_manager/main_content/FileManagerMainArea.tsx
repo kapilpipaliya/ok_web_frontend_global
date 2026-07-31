@@ -75,7 +75,7 @@ export function FileManagerMainArea(props: Readonly<{ item: Vertex }>) {
               as="button"
               css={[
                 `return \`._id {
-  color: \${args.theme.var.color.primary};
+  color: \${t.var.color.primary};
   background-color: transparent;
   border: none;
   ${index() === 0 ? "font-weight:600" : ""} cursor:pointer}\`;`,

@@ -5,8 +5,8 @@
       L: Component
       P: {
         fns:
-          '''const pageStateVertexId = args.generateNewVertexId(args.graph, args.setGraph);
-args.addNewVertex(0, {
+          '''const pageStateVertexId = _.generateNewVertexId(g, sg);
+_.addNewVertex(0, {
   id: pageStateVertexId,
   L: ["DynamicPageUiState"],
   P: {
@@ -41,27 +41,27 @@ args.addNewVertex(0, {
   },
   IN: {},
   OUT: {}
-}, args.graph, args.setGraph);
+}, g, sg);
 
 const patchPageP = (partial) => {
-  args.mergeVertexProperties(0, pageStateVertexId, args.graph, args.setGraph, partial);
+  _.mergeVertexProperties(0, pageStateVertexId, g, sg, partial);
 };
-const pageP = () => args.graph.vertexes[pageStateVertexId]?.P;
+const pageP = () => g.vertexes[pageStateVertexId]?.P;
 
 const selectedSidebarItem = () => {
   const id = pageP()?.selectedSidebarCategoryId;
   if (id == null) return null;
-  return args.graph.vertexes[id] ?? null;
+  return g.vertexes[id] ?? null;
 };
 
 // Basic context/prop accessors
 // Resolve settings page id without touching getCachedConfig (avoids cycle with isTableSchemaMode → getTableKey).
 const getSettingsPageIdWithoutConfig = () => {
-  const fromProps = args.contextData.props?.settingsPageId;
+  const fromProps = c.props?.settingsPageId;
   if (fromProps != null && String(fromProps).trim() !== "") return String(fromProps).trim();
-  const useUrl = args.contextData.props?.useUrlQueryParams !== false;
+  const useUrl = c.props?.useUrlQueryParams !== false;
   if (useUrl) {
-    const fromQuery = args.searchParams?.page;
+    const fromQuery = _.searchParams?.page;
     if (fromQuery != null && String(fromQuery).trim() !== "") return String(fromQuery).trim();
   }
   const fromState = pageP()?.settingsPageId;
@@ -70,7 +70,7 @@ const getSettingsPageIdWithoutConfig = () => {
 };
 
 const getTableKey = () => {
-  const raw = args.contextData.props?.tableKey;
+  const raw = c.props?.tableKey;
   if (raw != null && String(raw).trim() !== "") return String(raw).trim();
   // Do not call getSettingsPageId() here: it falls back to getCachedConfig → isTableSchemaMode → getTableKey.
   const settingsPageId = getSettingsPageIdWithoutConfig();
@@ -79,11 +79,11 @@ const getTableKey = () => {
   }
   return null;
 };
-const getTableVertexLabel = () => args.contextData.props?.tableVertexLabel;
+const getTableVertexLabel = () => c.props?.tableVertexLabel;
 const getTableSettingsLabel = () => {
   const tableKey = getTableKey();
   if (tableKey) return tableKey;
-  const raw = args.contextData.props?.tableSettingsLabel;
+  const raw = c.props?.tableSettingsLabel;
   const fallback = getTableVertexLabel();
   if (raw != null && String(raw).trim() !== "") return String(raw).trim();
   return fallback;
@@ -106,7 +106,7 @@ const getPageResizeStorageKey = () => {
   const settingsPageId = getSettingsPageIdWithoutConfig();
   if (settingsPageId) return `${PAGE_RESIZE_STORAGE_PREFIX}settings:${settingsPageId}`;
   if (label) return `${PAGE_RESIZE_STORAGE_PREFIX}label:${label}`;
-  const pathname = typeof window !== "undefined" ? (args.location?.pathname || "") : "";
+  const pathname = typeof window !== "undefined" ? (_.location?.pathname || "") : "";
   if (pathname) return `${PAGE_RESIZE_STORAGE_PREFIX}path:${pathname}`;
   return `${PAGE_RESIZE_STORAGE_PREFIX}default`;
 };
@@ -139,7 +139,7 @@ const getSidebarWidth = () => {
   return typeof width === "number" && width > 0 ? width : DEFAULT_SIDEBAR_WIDTH;
 };
 
-const persistSidebarWidthDebounced = args.debounce((width) => {
+const persistSidebarWidthDebounced = _.debounce((width) => {
   persistPageResize({ sidebarWidth: width });
 }, 250);
 
@@ -165,9 +165,9 @@ const restorePageResizeFromLocalStorage = () => {
   }
 };
 
-const getLoadFromSetting = () => args.contextData.props?.loadFromSetting === true;
+const getLoadFromSetting = () => c.props?.loadFromSetting === true;
 const isTableSchemaMode = () => {
-  const pageMode = args.contextData.props?.pageMode;
+  const pageMode = c.props?.pageMode;
   if (pageMode === "settings" || pageMode === "dashboard") return false;
   return getLoadFromSetting() && !!getTableKey();
 };
@@ -196,7 +196,7 @@ const evalSchemaPart = (part) => {
   const ids = getTableSchemaPartVertexIds();
   const vertexId = ids?.[part];
   if (!vertexId) return null;
-  const vertex = args.graph?.vertexes?.[vertexId];
+  const vertex = g?.vertexes?.[vertexId];
   if (!vertex?.P?.config) return null;
   const raw = evalConfigBody(vertex.P.config);
   if (part === "columns") return raw;
@@ -251,7 +251,7 @@ const loadTableSchemaParts = async () => {
   const tableKey = getTableKey();
   if (!tableKey) return false;
   try {
-    const result = await args.fns.executeYTOFunction("loadTableConfigByKey", { tableKey });
+    const result = await f.executeYTOFunction("loadTableConfigByKey", { tableKey });
     const errorMessage = extractError(result, true, "Failed to load table schema");
     if (errorMessage) return false;
     applyServerGraphToLocalGraph(result);
@@ -268,13 +268,13 @@ const loadTableSchemaParts = async () => {
     return true;
   } catch (error) {
     console.error("loadTableSchemaParts failed:", error);
-    args.showErrorToast?.(error?.message || "Failed to load table schema");
+    _.showErrorToast?.(error?.message || "Failed to load table schema");
     return false;
   }
 };
 
 const getPageMode = () => {
-  const fromProps = args.contextData.props?.pageMode;
+  const fromProps = c.props?.pageMode;
   if (fromProps === "settings" || fromProps === "table" || fromProps === "dashboard") return fromProps;
   const { config } = getCachedConfig();
   if (config?.pageMode === "settings") return "settings";
@@ -306,10 +306,10 @@ const getDefaultSettingsPageId = () => {
 const useUrlQueryParams = () => prop("useUrlQueryParams") !== false;
 
 const getSettingsPageId = () => {
-  const fromProps = args.contextData.props?.settingsPageId;
+  const fromProps = c.props?.settingsPageId;
   if (fromProps != null && String(fromProps).trim() !== "") return String(fromProps).trim();
   if (useUrlQueryParams()) {
-    const fromQuery = args.searchParams?.page;
+    const fromQuery = _.searchParams?.page;
     if (fromQuery != null && String(fromQuery).trim() !== "") return String(fromQuery).trim();
   }
   const fromState = pageP()?.settingsPageId;
@@ -318,22 +318,22 @@ const getSettingsPageId = () => {
 };
 const getScopeConfig = () => {
   const { config } = getCachedConfig();
-  return config?.scope || args.contextData.props?.scope || {
+  return config?.scope || c.props?.scope || {
     vertexLabel: "User",
     idParam: "scopeId"
   };
 };
 const getScopeId = () => {
   const scopeConfig = getScopeConfig();
-  const fromProps = args.contextData.props?.scopeId;
+  const fromProps = c.props?.scopeId;
   if (fromProps != null && String(fromProps).trim() !== "") return String(fromProps).trim();
   if (useUrlQueryParams()) {
-    const fromSearch = args.searchParams?.[scopeConfig.idParam || "scopeId"];
+    const fromSearch = _.searchParams?.[scopeConfig.idParam || "scopeId"];
     if (fromSearch != null && String(fromSearch).trim() !== "") return String(fromSearch).trim();
   }
-  return args.user?.P?.uuid || null;
+  return _.user?.P?.uuid || null;
 };
-const getConfigFunction = () => args.contextData.props?.configFunction;
+const getConfigFunction = () => c.props?.configFunction;
 
 // Helper to get cached config (and trigger memo evaluation if needed)
 const getCachedConfig = () => {
@@ -383,7 +383,7 @@ const prop = (key, localProps) => {
   if (fromLocalProps !== undefined) {
     return fromLocalProps;
   }
-  const fromProps = args.contextData.props?.[key];
+  const fromProps = c.props?.[key];
   if (fromProps !== undefined) {
     return fromProps;
   }
@@ -488,7 +488,7 @@ const extractError = (result, showToast = false, defaultMessage = null) => {
   // Check top-level error
   if (result.error) {
     if (showToast) {
-      args.showErrorToast?.(result.error);
+      _.showErrorToast?.(result.error);
     }
     return result.error;
   }
@@ -496,7 +496,7 @@ const extractError = (result, showToast = false, defaultMessage = null) => {
   // Check result-level error
   if (result.result?.error) {
     if (showToast) {
-      args.showErrorToast?.(result.result.error);
+      _.showErrorToast?.(result.result.error);
     }
     return result.result.error;
   }
@@ -505,7 +505,7 @@ const extractError = (result, showToast = false, defaultMessage = null) => {
   if (result.result && result.result.success === false) {
     const errorMessage = result.result.message || result.result.error || defaultMessage;
     if (errorMessage && showToast) {
-      args.showErrorToast?.(errorMessage);
+      _.showErrorToast?.(errorMessage);
     }
     return errorMessage;
   }
@@ -526,7 +526,7 @@ const applyServerGraphToLocalGraph = (response) => {
     (Array.isArray(deleted_vertexes) && deleted_vertexes.length > 0) ||
     (Array.isArray(deleted_edges) && deleted_edges.length > 0);
   if (!hasWork) return;
-  args.setGraphData(0, { vertexes, edges, deleted_vertexes, deleted_edges }, {});
+  _.setGraphData(0, { vertexes, edges, deleted_vertexes, deleted_edges }, {});
 };
 
 // Functions invoked by "get*" which must be defined before their usages
@@ -539,7 +539,7 @@ const getGenericSettingsFunction = () => {
   return async () => {
     try {
       const tableSettingsLabel = getTableSettingsLabel();
-      const result = await args.fns.executeYTOFunction("getUserContentSetting", {
+      const result = await f.executeYTOFunction("getUserContentSetting", {
         tableVertexLabel: tableVertexLabel || tableKey,
         settingsLabel: tableSettingsLabel,
         key: `${tableSettingsLabel}_settings`
@@ -555,7 +555,7 @@ const getGenericSettingsFunction = () => {
       }
     } catch (error) {
       console.error("Error loading settings:", error);
-      args.showErrorToast?.(error?.message || "Failed to load settings");
+      _.showErrorToast?.(error?.message || "Failed to load settings");
     }
     return { success: false, data: { setting: null } };
   };
@@ -569,7 +569,7 @@ const getGenericDashboardSettingsFunction = () => {
   return async () => {
     try {
       const tableSettingsLabel = getTableSettingsLabel();
-      const result = await args.fns.executeYTOFunction("getUserContentSetting", {
+      const result = await f.executeYTOFunction("getUserContentSetting", {
         tableVertexLabel,
         settingsLabel: tableSettingsLabel,
         key: getDashboardSettingKey()
@@ -585,7 +585,7 @@ const getGenericDashboardSettingsFunction = () => {
       }
     } catch (error) {
       console.error("Error loading dashboard config:", error);
-      args.showErrorToast?.(error?.message || "Failed to load dashboard config");
+      _.showErrorToast?.(error?.message || "Failed to load dashboard config");
     }
     return { success: false, data: { setting: null } };
   };
@@ -595,7 +595,7 @@ const getGenericSettingsPageConfigFunction = () => {
   return async () => {
     const settingsPageId = getSettingsPageId();
     try {
-      const result = await args.fns.executeYTOFunction("getSettingsPageConfig", {
+      const result = await f.executeYTOFunction("getSettingsPageConfig", {
         settingsPageId: settingsPageId || undefined,
         settingsLabel: settingsPageId || undefined
       });
@@ -604,7 +604,7 @@ const getGenericSettingsPageConfigFunction = () => {
       if (result?.result?.success && result.result.data?.setting) return result.result;
     } catch (error) {
       console.error("Error loading settings page config:", error);
-      args.showErrorToast?.(error?.message || "Failed to load settings page config");
+      _.showErrorToast?.(error?.message || "Failed to load settings page config");
     }
     return { success: false, data: { setting: null } };
   };
@@ -663,7 +663,7 @@ const getGenericDataFunction = () => {
       filterParams.hooks = getConfigHooks();
       filterParams.relationshipPropertyBindings = buildRelationshipPropertyBindings(config);
 
-      const result = await args.fns.executeYTOFunction("getUserContent", filterParams);
+      const result = await f.executeYTOFunction("getUserContent", filterParams);
       applyServerGraphToLocalGraph(result);
 
       // Check for errors and show toast
@@ -672,7 +672,7 @@ const getGenericDataFunction = () => {
         return { data: [], relatedVertexIds: [] };
       }
 
-      // Return successful result — only related vertex ids (full vertices live in args.graph after applyServerGraphToLocalGraph)
+      // Return successful result — only related vertex ids (full vertices live in g after applyServerGraphToLocalGraph)
       if (result?.result?.success && result.result.data) {
         const data = Array.isArray(result.result.data) ? result.result.data : [];
         const relatedVerticesRaw = Array.isArray(result.result.relatedVertices) ? result.result.relatedVertices : [];
@@ -685,7 +685,7 @@ const getGenericDataFunction = () => {
       return { data: [], relatedVertexIds: [] };
   } catch (error) {
     console.error("Error fetching data:", error);
-    args.showErrorToast?.("Failed to load data");
+    _.showErrorToast?.("Failed to load data");
     return { data: [], relatedVertexIds: [] };
   }
   };
@@ -697,7 +697,7 @@ const refreshQueuedRows = async (elementIds) => {
   if (!tableVertexLabel || !Array.isArray(elementIds) || elementIds.length === 0) return { success: true, data: [] };
   try {
     const { config } = getCachedConfig();
-    const result = await args.fns.executeYTOFunction("getUserContent", {
+    const result = await f.executeYTOFunction("getUserContent", {
       tableVertexLabel,
       elementIds,
       onlyNotQueued: true,
@@ -717,7 +717,7 @@ const fetchUserContentRows = async (params = {}) => {
   const { config } = getCachedConfig();
   const enableUserScopingForContent = getConfigGeneralValue("enableUserScopingForContent") === true;
   try {
-    const result = await args.fns.executeYTOFunction("getUserContent", {
+    const result = await f.executeYTOFunction("getUserContent", {
       tableVertexLabel,
       search,
       filters,
@@ -746,7 +746,7 @@ const getSidebarConfigForCount = () => {
   if (loadFromSetting) {
     return config?.sidebar;
   }
-  return args.contextData.props?.sidebar || config?.sidebar;
+  return c.props?.sidebar || config?.sidebar;
 };
 
 // Update sidebar category count after adding/deleting items
@@ -764,11 +764,11 @@ const updateSidebarCategoryCount = (categoryId, increment = 1) => {
   const uCat = getUncategorizedVertexId();
   if (categoryId === rootKey || (uCat && categoryId === uCat)) {
     if (uCat) {
-      const uncategorizedVertex = args.graph?.vertexes?.[uCat];
+      const uncategorizedVertex = g?.vertexes?.[uCat];
       if (uncategorizedVertex) {
         const currentCount = uncategorizedVertex.P?.contentCount ?? 0;
         const newCount = Math.max(0, currentCount + increment);
-        args.mergeVertexProperties(0, uCat, args.graph, args.setGraph, {
+        _.mergeVertexProperties(0, uCat, g, sg, {
           contentCount: newCount
         });
       }
@@ -777,11 +777,11 @@ const updateSidebarCategoryCount = (categoryId, increment = 1) => {
   }
 
   // For regular categories, update the count directly
-  const categoryVertex = args.graph?.vertexes?.[categoryId];
+  const categoryVertex = g?.vertexes?.[categoryId];
   if (categoryVertex) {
     const currentCount = categoryVertex.P?.contentCount ?? 0;
     const newCount = Math.max(0, currentCount + increment);
-    args.mergeVertexProperties(0, categoryId, args.graph, args.setGraph, {
+    _.mergeVertexProperties(0, categoryId, g, sg, {
       contentCount: newCount
     });
   }
@@ -791,8 +791,8 @@ const updateSidebarCategoryCount = (categoryId, increment = 1) => {
 const isContentInTableData = (contentId) => {
   if (contentId == null || contentId === "") return false;
   const cid = String(contentId);
-  for (const vid in args.graph.vertexes) {
-    const v = args.graph.vertexes[vid];
+  for (const vid in g.vertexes) {
+    const v = g.vertexes[vid];
     if (!v?.L?.includes("TableUiState")) continue;
     const data = v.P?.data;
     if (Array.isArray(data) && data.includes(cid)) return true;
@@ -871,7 +871,7 @@ const getGenericSaveFunction = () => {
         operation = "update";
       }
 
-      const result = await args.fns.executeYTOFunction("mutateUserContent", {
+      const result = await f.executeYTOFunction("mutateUserContent", {
         tableVertexLabel,
         tableSettingsLabel: getTableSettingsLabel(),
         operation,
@@ -927,7 +927,7 @@ const getGenericSaveFunction = () => {
               getConfigGeneralValue("enableUserScopingForContent") === true;
             for (let ci = 0; ci < pendingSidebarIds.length; ci++) {
               try {
-                const relResult = await args.fns.executeYTOFunction(
+                const relResult = await f.executeYTOFunction(
                   "createSidebarContentRelationship",
                   {
                     categoryId: sidebarItem.id,
@@ -1004,7 +1004,7 @@ const getGenericSaveSettingsFunction = () => {
     return async (configText) => {
       try {
         const settingsPageId = getSettingsPageId();
-        const result = await args.fns.executeYTOFunction("saveSettingsPageConfig", {
+        const result = await f.executeYTOFunction("saveSettingsPageConfig", {
           settingsPageId,
           config: configText,
           saveAsDefault: true
@@ -1032,7 +1032,7 @@ const getGenericSaveSettingsFunction = () => {
   return async (configText) => {
     try {
       const tableSettingsLabel = getTableSettingsLabel();
-      const result = await args.fns.executeYTOFunction("saveUserContentSetting", {
+      const result = await f.executeYTOFunction("saveUserContentSetting", {
         tableVertexLabel: tableVertexLabel || tableKey,
         settingsLabel: tableSettingsLabel,
         key: `${tableSettingsLabel}_settings`,
@@ -1066,7 +1066,7 @@ const getGenericImportFunction = () => {
       const { config } = getCachedConfig();
       const enableUserScopingForContent = getConfigGeneralValue("enableUserScopingForContent") === true;
 
-      const result = await args.fns.executeYTOFunction("importUserContent", {
+      const result = await f.executeYTOFunction("importUserContent", {
         tableVertexLabel,
         data,
         enableUserScoping: enableUserScopingForContent,
@@ -1102,7 +1102,7 @@ const getGenericExportFunction = () => {
       const { config } = getCachedConfig();
       const enableUserScopingForContent = getConfigGeneralValue("enableUserScopingForContent") === true;
 
-      const result = await args.fns.executeYTOFunction("exportUserContent", {
+      const result = await f.executeYTOFunction("exportUserContent", {
         tableVertexLabel,
         format: "csv",
         data: data,
@@ -1262,16 +1262,16 @@ const evaluateConfig = () => {
 
   // Fallback to props
   config = {
-    columns: args.contextData.props?.columns || [],
-    formConfig: args.contextData.props?.formConfig,
+    columns: c.props?.columns || [],
+    formConfig: c.props?.formConfig,
     uniqueKeys: [],
-    hooks: args.contextData.props?.hooks,
-    usePolarisUI: args.contextData.props?.usePolarisUI,
-    enableUserScopingForSidebar: args.contextData.props?.enableUserScopingForSidebar,
-    enableUserScopingForContent: args.contextData.props?.enableUserScopingForContent,
-    enableLocalFilters: args.contextData.props?.enableLocalFilters,
-    enableLocalSort: args.contextData.props?.enableLocalSort,
-    sidebar: args.contextData.props?.sidebar
+    hooks: c.props?.hooks,
+    usePolarisUI: c.props?.usePolarisUI,
+    enableUserScopingForSidebar: c.props?.enableUserScopingForSidebar,
+    enableUserScopingForContent: c.props?.enableUserScopingForContent,
+    enableLocalFilters: c.props?.enableLocalFilters,
+    enableLocalSort: c.props?.enableLocalSort,
+    sidebar: c.props?.sidebar
   };
   patchPageP({ evaluatedConfig: config });
   return config;
@@ -1309,7 +1309,7 @@ const fetchData = async (searchTerm, columnFilters, sortConfig, callback) => {
     }
   } catch (error) {
     console.error("Error fetching table data:", error);
-    args.showErrorToast?.("Failed to load table data");
+    _.showErrorToast?.("Failed to load table data");
   } finally {
     patchPageP({ loading: false });
   }
@@ -1320,26 +1320,26 @@ const fetchData = async (searchTerm, columnFilters, sortConfig, callback) => {
 const handleImport = async (dataToImport, callback) => {
   const importFn = getImportFunction();
   if (!importFn) {
-    args.showErrorToast?.("Import function not configured");
+    _.showErrorToast?.("Import function not configured");
     return;
   }
   if (!dataToImport) {
-    args.showErrorToast?.("Please provide data to import");
+    _.showErrorToast?.("Please provide data to import");
     return;
   }
   try {
     patchPageP({ loading: true });
     const result = await importFn({ data: dataToImport });
     if (result?.success) {
-      args.showSuccessToast?.(result.message || "Import completed successfully");
+      _.showSuccessToast?.(result.message || "Import completed successfully");
       // Refresh data
       callback?.();
     } else {
-      args.showErrorToast?.(result?.message || result?.error || "Failed to import data");
+      _.showErrorToast?.(result?.message || result?.error || "Failed to import data");
     }
   } catch (error) {
     console.error("Error importing:", error);
-    args.showErrorToast?.(error?.message || "Failed to import data");
+    _.showErrorToast?.(error?.message || "Failed to import data");
   } finally {
     patchPageP({ loading: false });
   }
@@ -1349,7 +1349,7 @@ const handleImport = async (dataToImport, callback) => {
 const handleExport = async (data = null) => {
   const exportFn = getExportFunction();
   if (!exportFn) {
-    args.showErrorToast?.("Export function not configured");
+    _.showErrorToast?.("Export function not configured");
     return;
   }
   try {
@@ -1375,13 +1375,13 @@ const handleExport = async (data = null) => {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      args.showSuccessToast?.("Export completed successfully");
+      _.showSuccessToast?.("Export completed successfully");
     } else {
-      args.showErrorToast?.(result?.message || "Failed to export data");
+      _.showErrorToast?.(result?.message || "Failed to export data");
     }
   } catch (error) {
     console.error("Error exporting:", error);
-    args.showErrorToast?.("Failed to export data");
+    _.showErrorToast?.("Failed to export data");
   } finally {
     patchPageP({ loading: false });
   }
@@ -1401,7 +1401,7 @@ const loadSettings = async (options = {}) => {
     // Handle error cases (result from settingsFn is already processed, check success flag)
     if (result && result.success === false) {
       if (result.message) {
-        args.showErrorToast?.(result.message);
+        _.showErrorToast?.(result.message);
       }
       return null;
     }
@@ -1419,7 +1419,7 @@ const loadSettings = async (options = {}) => {
     }
   } catch (error) {
     console.error("Error loading settings:", error);
-    args.showErrorToast?.(error?.message || "Failed to load settings");
+    _.showErrorToast?.(error?.message || "Failed to load settings");
   }
   return null;
 };
@@ -1458,7 +1458,7 @@ const handleOpenSettings = async () => {
 const handleSaveSettings = async (configText, callback) => {
   const saveFn = getSaveSettingsFunction();
   if (!saveFn) {
-    args.showErrorToast?.("Save settings function not configured");
+    _.showErrorToast?.("Save settings function not configured");
     return;
   }
   try {
@@ -1466,7 +1466,7 @@ const handleSaveSettings = async (configText, callback) => {
     // Save the raw function body text, not the evaluated config
     const result = await saveFn(configText);
     if (result?.success) {
-      args.showSuccessToast?.(result.message || "Settings saved successfully");
+      _.showSuccessToast?.(result.message || "Settings saved successfully");
       patchPageP({
         isSettingsModalOpen: false,
         settings: configText,
@@ -1476,11 +1476,11 @@ const handleSaveSettings = async (configText, callback) => {
       // Reload data to apply new settings
       callback?.();
     } else {
-      args.showErrorToast?.(result?.message || "Failed to save settings");
+      _.showErrorToast?.(result?.message || "Failed to save settings");
     }
   } catch (error) {
     console.error("Error saving settings:", error);
-    args.showErrorToast?.("Failed to save settings");
+    _.showErrorToast?.("Failed to save settings");
   } finally {
     patchPageP({ loading: false });
   }
@@ -1495,7 +1495,7 @@ const getSidebarConfig = () => {
   if (loadFromSetting) {
     return config?.sidebar;
   }
-  return args.contextData.props?.sidebar || config?.sidebar;
+  return c.props?.sidebar || config?.sidebar;
 };
 
 // Check if sidebar is enabled
@@ -1566,20 +1566,20 @@ const handleSidebarItemSelect = (item) => {
   patchPageP({ selectedSidebarCategoryId: item?.id ?? null });
 
   // Persist selected category in URL (modals set useUrlQueryParams: false).
-  if (useUrlQueryParams() && item?.id != null && args.setSearchParams) {
-    const current = args.searchParams || {};
-    args.setSearchParams({ ...current, sidebarCategory: item.id }, { replace: true });
+  if (useUrlQueryParams() && item?.id != null && _.setSearchParams) {
+    const current = _.searchParams || {};
+    _.setSearchParams({ ...current, sidebarCategory: item.id }, { replace: true });
   }
 
   // Opt-in: treat sidebar category click as the picker selection value.
-  if (args.contextData.props?.allowSidebarSelection === true && item?.id) {
+  if (c.props?.allowSidebarSelection === true && item?.id) {
     const onSidebarItemSelect = prop("onSidebarItemSelect");
     if (typeof onSidebarItemSelect === "function") {
-      onSidebarItemSelect(item, args);
+      onSidebarItemSelect(item, _);
     }
     const onSelectionChange = getOnSelectionChange();
     if (typeof onSelectionChange === "function") {
-      onSelectionChange(new Set([String(item.id)]), [{ id: item.id, vertex: item }], args);
+      onSelectionChange(new Set([String(item.id)]), [{ id: item.id, vertex: item }], _);
     }
   }
 };
@@ -1612,7 +1612,7 @@ const handleMoveItemsToCategory = async (contentIds, categoryId, sidebarConfig) 
       const label = prop('label') || 'Item';
       const plural = label.endsWith('y') ? label.slice(0, -1) + 'ies' : label + (label.endsWith('s') ? '' : 's');
       const msg = `${plural} are already in this category`;
-      args.showWarningToast?.(msg);
+      _.showWarningToast?.(msg);
       return { success: false, message: msg };
     }
 
@@ -1630,7 +1630,7 @@ const handleMoveItemsToCategory = async (contentIds, categoryId, sidebarConfig) 
       hooks: getConfigHooks()
     };
 
-    const result = await args.executeNamedServerFunction({
+    const result = await s({
       functionName: "moveItemsToCategory",
       contextData: contextData
     });
@@ -1659,7 +1659,7 @@ const handleMoveItemsToCategory = async (contentIds, categoryId, sidebarConfig) 
     // Process graph data if available
     if (result?.result?.success && result.result.data) {
       if (result.graph && result.graph.vertexes) {
-        args.setGraphData(0, result.graph, {});
+        _.setGraphData(0, result.graph, {});
       }
     }
 
@@ -1667,7 +1667,7 @@ const handleMoveItemsToCategory = async (contentIds, categoryId, sidebarConfig) 
   } catch (error) {
     console.error("Error moving items:", error);
     const errorMessage = error.message || "Failed to move items";
-    args.showErrorToast?.(errorMessage);
+    _.showErrorToast?.(errorMessage);
     return { success: false, message: errorMessage };
   } finally {
     patchPageP({ loading: false });
@@ -1693,8 +1693,8 @@ const getInitialSelectedRowIds = () => {
 };
 
 const getCompanionPages = () => {
-  if (args.contextData.props?.disableCompanionPages === true) return [];
-  const pageMode = args.contextData.props?.pageMode || getPageMode?.();
+  if (c.props?.disableCompanionPages === true) return [];
+  const pageMode = c.props?.pageMode || getPageMode?.();
   if (pageMode === "settings" || pageMode === "dashboard") return [];
   const fromProps = prop("companionPages");
   if (Array.isArray(fromProps) && fromProps.length > 0) return fromProps;
@@ -1770,7 +1770,7 @@ const setCompanionPaneHeight = (height) => {
   patchPageP({ companionPaneHeight: next, companionMainHeight: null });
 };
 
-const [companionResizeActive, setCompanionResizeActive] = args.createSignal(false);
+const [companionResizeActive, setCompanionResizeActive] = _.createSignal(false);
 let primaryPaneRef = null;
 
 const applyCompanionMainRatio = (ratio) => {
@@ -1982,7 +1982,7 @@ const settingsAdapter = {
 
     patchPageP({ settingsLoading: true });
     try {
-      const result = await args.fns.executeYTOFunction("loadSettingsPage", {
+      const result = await f.executeYTOFunction("loadSettingsPage", {
         pageId: settingsPageId,
         scopeVertexLabel: scopeConfig.vertexLabel,
         scopeId,
@@ -2010,7 +2010,7 @@ const settingsAdapter = {
       }
     } catch (error) {
       console.error("settingsAdapter.loadPage:", error);
-      args.showErrorToast?.(error?.message || "Failed to load settings");
+      _.showErrorToast?.(error?.message || "Failed to load settings");
     } finally {
       patchPageP({ settingsLoading: false });
     }
@@ -2025,7 +2025,7 @@ const settingsAdapter = {
 
     if (String(settingsPageId || "").startsWith("table:")) {
       const tableKey = getTableKey() || String(settingsPageId).slice("table:".length).trim();
-      const result = await args.fns.executeYTOFunction("saveTableConfigSection", {
+      const result = await f.executeYTOFunction("saveTableConfigSection", {
         tableKey,
         sectionId,
         values,
@@ -2035,11 +2035,11 @@ const settingsAdapter = {
       });
       const errorMessage = extractError(result, false, "Failed to save table section");
       if (errorMessage) {
-        args.showErrorToast?.(errorMessage);
+        _.showErrorToast?.(errorMessage);
         return { success: false, message: errorMessage };
       }
       if (result?.result?.success) {
-        args.showSuccessToast?.(result.result.message || "Table section saved");
+        _.showSuccessToast?.(result.result.message || "Table section saved");
         markSectionClean(sectionId, result.result.data?.values, {
           version: result.result.data?.version,
           documentId: result.result.data?.documentId
@@ -2048,14 +2048,14 @@ const settingsAdapter = {
         if (isTableSchemaMode()) {
           await loadTableSchemaParts();
         } else {
-          await args.fns.initializeSettings?.();
+          await f.initializeSettings?.();
         }
         return result.result;
       }
       return { success: false, message: "Failed to save table section" };
     }
 
-    const result = await args.fns.executeYTOFunction("saveSettingsSection", {
+    const result = await f.executeYTOFunction("saveSettingsSection", {
       pageId: settingsPageId,
       sectionId,
       values,
@@ -2070,12 +2070,12 @@ const settingsAdapter = {
 
     const errorMessage = extractError(result, false, "Failed to save settings");
     if (errorMessage) {
-      args.showErrorToast?.(errorMessage);
+      _.showErrorToast?.(errorMessage);
       return { success: false, message: errorMessage };
     }
 
     if (result?.result?.success) {
-      args.showSuccessToast?.(result.result.message || "Settings saved");
+      _.showSuccessToast?.(result.result.message || "Settings saved");
       markSectionClean(sectionId, result.result.data?.values, {
         version: result.result.data?.version,
         documentId: result.result.data?.documentId
@@ -2095,7 +2095,7 @@ const settingsAdapter = {
     const scopeConfig = getScopeConfig();
     const scopeId = getScopeId();
 
-    const result = await args.fns.executeYTOFunction("resetSettingsSection", {
+    const result = await f.executeYTOFunction("resetSettingsSection", {
       pageId: settingsPageId,
       sectionId,
       scopeVertexLabel: scopeConfig.vertexLabel,
@@ -2110,7 +2110,7 @@ const settingsAdapter = {
         version: result.result.data?.version,
         documentId: result.result.data?.documentId
       });
-      args.showSuccessToast?.(result.result.message || "Settings reset");
+      _.showSuccessToast?.(result.result.message || "Settings reset");
     }
     return result?.result || { success: false };
   }
@@ -2146,7 +2146,7 @@ const handleSaveAllDirtySections = async () => {
 
 const handleDiscardChanges = async () => {
   await loadSettingsPageData();
-  args.showSuccessToast?.("Changes discarded");
+  _.showSuccessToast?.("Changes discarded");
 };
 
 const initializeSettingsPage = async () => {
@@ -2171,7 +2171,7 @@ const initializeSettingsPage = async () => {
 };
 
 const syncSiteLanguagesFromProps = () => {
-  const fromProps = args.contextData.props?.siteLanguages;
+  const fromProps = c.props?.siteLanguages;
   if (!Array.isArray(fromProps) || fromProps.length === 0) return;
   const cached = pageP()?.siteLanguages;
   if (JSON.stringify(cached) === JSON.stringify(fromProps)) return;
@@ -2179,7 +2179,7 @@ const syncSiteLanguagesFromProps = () => {
 };
 
 const getSiteLanguages = () => {
-  const fromProps = args.contextData.props?.siteLanguages;
+  const fromProps = c.props?.siteLanguages;
   if (Array.isArray(fromProps) && fromProps.length > 0) return fromProps;
   const cached = pageP()?.siteLanguages;
   if (Array.isArray(cached) && cached.length > 0) return cached;
@@ -2190,19 +2190,19 @@ const getSiteLanguages = () => {
   ];
 };
 
-args.createEffect(() => {
+_.createEffect(() => {
   syncSiteLanguagesFromProps();
 });
 
 const ensureSettingsPageQueryParam = () => {
   if (!useUrlQueryParams()) return;
-  const fromProps = args.contextData.props?.settingsPageId;
+  const fromProps = c.props?.settingsPageId;
   if (fromProps != null && String(fromProps).trim() !== "") return;
-  const fromQuery = args.searchParams?.page;
+  const fromQuery = _.searchParams?.page;
   if (fromQuery != null && String(fromQuery).trim() !== "") return;
   const defaultId = getDefaultSettingsPageId();
   if (defaultId) {
-    args.setSearchParams({ page: defaultId }, { replace: true });
+    _.setSearchParams({ page: defaultId }, { replace: true });
   }
 };
 
@@ -2219,7 +2219,7 @@ const resetSettingsPageData = () => {
   });
 };
 
-args.createEffect(() => {
+_.createEffect(() => {
   if (typeof window === "undefined") return;
   const handleTableSchemaSaved = (event) => {
     const savedTableKey = event?.detail?.tableKey;
@@ -2231,7 +2231,7 @@ args.createEffect(() => {
   return () => window.removeEventListener("fulchand-table-schema-saved", handleTableSchemaSaved);
 });
 
-args.createEffect(() => {
+_.createEffect(() => {
   if (!isSettingsPageMode()) return;
   getCachedConfig();
 
@@ -2263,14 +2263,14 @@ const getDashboardConfig = () => {
   const dashboard =
     config?.dashboardConfig && typeof config.dashboardConfig === "object"
       ? config.dashboardConfig
-      : args.contextData.props?.dashboardConfig && typeof args.contextData.props.dashboardConfig === "object"
-        ? args.contextData.props.dashboardConfig
+      : c.props?.dashboardConfig && typeof c.props.dashboardConfig === "object"
+        ? c.props.dashboardConfig
         : null;
   return dashboard;
 };
 
 const isDashboardPageMode = () => {
-  if (args.contextData.props?.pageMode === "dashboard") return true;
+  if (c.props?.pageMode === "dashboard") return true;
   const config = evaluateConfig();
   return config?.pageMode === "dashboard" || !!(config?.dashboardConfig && typeof config.dashboardConfig === "object");
 };
@@ -2305,7 +2305,7 @@ const resolveMediaTypeFromFile = (fileVertex, rules) => {
 
 const getOutgoingTargetIds = (vertex, relationshipType) => {
   if (!vertex || !relationshipType) return [];
-  const edgesMap = args.graph?.edges || {};
+  const edgesMap = g?.edges || {};
   const outArr = vertex.OUT?.[relationshipType];
   if (!Array.isArray(outArr)) return [];
   const ids = [];
@@ -2336,7 +2336,7 @@ const getMainTableRowVertices = () => {
   for (let i = 0; i < ids.length; i++) {
     const id = ids[i] != null ? String(ids[i]).trim() : "";
     if (!id) continue;
-    const vertex = args.graph.vertexes[id];
+    const vertex = g.vertexes[id];
     if (vertex) rows.push(vertex);
   }
   return rows;
@@ -2372,7 +2372,7 @@ const findDuplicateDroppedFilesInCurrentTable = (fileIds, dropConfig) => {
       for (let fi = 0; fi < targets.length; fi++) {
         const fileId = targets[fi];
         if (!wanted.has(fileId) || duplicatesByFileId.has(fileId)) continue;
-        const fileVertex = args.graph.vertexes[fileId];
+        const fileVertex = g.vertexes[fileId];
         duplicatesByFileId.set(fileId, {
           fileId,
           fileName:
@@ -2396,13 +2396,13 @@ const notifyDropCreateDuplicates = (duplicates, messages) => {
     const template =
       messages?.duplicateInCategory ||
       '"{fileName}" is already associated in this category';
-    args.showWarningToast?.(template.replace("{fileName}", duplicates[0].fileName));
+    _.showWarningToast?.(template.replace("{fileName}", duplicates[0].fileName));
     return;
   }
   const template =
     messages?.duplicatesInCategory ||
     "{count} file(s) already associated in this category: {names}";
-  args.showWarningToast?.(
+  _.showWarningToast?.(
     template.replace("{count}", String(duplicates.length)).replace("{names}", names)
   );
 };
@@ -2414,7 +2414,7 @@ const buildDropCreateDraftRows = (fileIds, dropConfig) => {
   for (let i = 0; i < fileIds.length; i++) {
     const fileId = String(fileIds[i] || "").trim();
     if (!fileId) continue;
-    const fileVertex = args.graph.vertexes[fileId];
+    const fileVertex = g.vertexes[fileId];
     if (!fileVertex) continue;
     const fileName =
       fileVertex.P?.fileName != null ? String(fileVertex.P.fileName).trim() : "";
@@ -2499,7 +2499,7 @@ const saveDropCreateReviewRow = async (draft, saveData) => {
 
   const fileId = String(draft?.fileId || "").trim();
   if (!fileId) {
-    args.showErrorToast?.("File is required");
+    _.showErrorToast?.("File is required");
     return false;
   }
 
@@ -2553,7 +2553,7 @@ const saveDropCreateReviewRow = async (draft, saveData) => {
     }
   }
 
-  const result = await args.fns.executeYTOFunction("mutateUserContent", {
+  const result = await f.executeYTOFunction("mutateUserContent", {
     tableVertexLabel,
     tableSettingsLabel: getTableSettingsLabel(),
     operation: "create",
@@ -2577,7 +2577,7 @@ const saveDropCreateReviewRow = async (draft, saveData) => {
 
   const errorMessage = extractError(result, false, "Failed to create");
   if (errorMessage || result?.result?.success !== true) {
-    args.showErrorToast?.(errorMessage || "Failed to create gallery item");
+    _.showErrorToast?.(errorMessage || "Failed to create gallery item");
     return false;
   }
 
@@ -2598,7 +2598,7 @@ const saveDropCreateReviewRow = async (draft, saveData) => {
         const enableUserScopingForSidebar =
           getConfigGeneralValue("enableUserScopingForSidebar") === true;
         try {
-          const relResult = await args.fns.executeYTOFunction(
+          const relResult = await f.executeYTOFunction(
             "createSidebarContentRelationship",
             {
               categoryId: sidebarItem.id,
@@ -2640,7 +2640,7 @@ const finishDropCreateReview = (createdIds) => {
     mergeMainTableRowIds(ids);
     patchPageP({ rowsToAddVertexIds: ids });
     const successTemplate = messages.success || "Created {count} item(s)";
-    args.showSuccessToast?.(
+    _.showSuccessToast?.(
       successTemplate.replace("{count}", String(ids.length))
     );
   }
@@ -2715,7 +2715,7 @@ const handleTableDropCreateFrom = async (payload) => {
   const labelOk = sourceLabels.length === 0 || sourceLabels.includes(sourceLabel);
   const keyOk = sourceKeys.length === 0 || sourceKeys.includes(sourceKey);
   if (!labelOk || !keyOk) {
-    args.showErrorToast?.(messages.wrongSource || "This drop source is not allowed");
+    _.showErrorToast?.(messages.wrongSource || "This drop source is not allowed");
     return { success: false };
   }
 
@@ -2723,13 +2723,13 @@ const handleTableDropCreateFrom = async (payload) => {
     ? payload.itemIds.map((id) => String(id || "").trim()).filter(Boolean)
     : [];
   if (itemIds.length === 0) {
-    args.showErrorToast?.(messages.emptySelection || "Select one or more items first");
+    _.showErrorToast?.(messages.emptySelection || "Select one or more items first");
     return { success: false };
   }
 
   const drafts = buildDropCreateDraftRows(itemIds, dropConfig);
   if (drafts.length === 0) {
-    args.showErrorToast?.(messages.emptySelection || "No valid files to add");
+    _.showErrorToast?.(messages.emptySelection || "No valid files to add");
     return { success: false };
   }
 
@@ -2849,12 +2849,12 @@ return {
           '''
 return {
   onMount: async () => {
-    if (!args.fns.isSettingsPageMode?.()) {
-      await args.fns.initializeSettings();
+    if (!f.isSettingsPageMode?.()) {
+      await f.initializeSettings();
     }
   },
   onCleanup: () => {
-    args.deleteVertex(0, args.fns.pageStateVertexId, args.graph, args.setGraph);
+    _.deleteVertex(0, f.pageStateVertexId, g, sg);
   }
 }'''
         updatedAt: 2026-07-17T11:49:41.565Z
@@ -2871,14 +2871,14 @@ return {
   justify-content: center;
   min-height: 16rem;
   width: 100%;
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
 }`;'''
         displayOrder: 0
         componentName: Html
         key: config_loading_overlay
         props:
-          '''const vid = args.fns.pageStateVertexId;
-const configLoading = args.graph.vertexes[vid]?.P?.configLoading !== false;
+          '''const vid = f.pageStateVertexId;
+const configLoading = g.vertexes[vid]?.P?.configLoading !== false;
 return {
   as: "div",
   hide: !configLoading
@@ -2903,9 +2903,9 @@ return {
       L: Attr
       P: {
         css:
-          '''const embedded = args.contextData.props?.embeddedMode === true;
-const hasCompanions = args.fns.hasCompanionPages?.() === true;
-const splitRows = args.fns.getCompanionSplitGridRows?.();
+          '''const embedded = c.props?.embeddedMode === true;
+const hasCompanions = f.hasCompanionPages?.() === true;
+const splitRows = f.getCompanionSplitGridRows?.();
 return `._id {
   width: 100%;
   min-width: 0;
@@ -2925,12 +2925,12 @@ return `._id {
         componentName: Html
         key: dynamic_page_main_shell
         props:
-          '''const vid = args.fns.pageStateVertexId;
-const configLoading = args.graph.vertexes[vid]?.P?.configLoading !== false;
-const isSettings = args.fns.isSettingsPageMode?.() === true;
+          '''const vid = f.pageStateVertexId;
+const configLoading = g.vertexes[vid]?.P?.configLoading !== false;
+const isSettings = f.isSettingsPageMode?.() === true;
 return {
   as: "div",
-  hide: configLoading || isSettings || args.fns.isDashboardPageMode?.() === true
+  hide: configLoading || isSettings || f.isDashboardPageMode?.() === true
 };'''
       }
     }
@@ -2945,7 +2945,7 @@ return {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  ${args.fns.hasCompanionPages?.() === true ? "" : "flex: 1 1 auto;"}
+  ${f.hasCompanionPages?.() === true ? "" : "flex: 1 1 auto;"}
 }`;'''
         displayOrder: 1
         componentName: Html
@@ -2953,7 +2953,7 @@ return {
         props:
           '''return {
   as: "div",
-  ref: (el) => args.fns.setPrimaryPaneRef?.(el)
+  ref: (el) => f.setPrimaryPaneRef?.(el)
 };'''
       }
     }
@@ -2973,11 +2973,11 @@ return {
         componentName: Html
         key: dynamic_page_wrapper
         props:
-          '''const hasSidebar = args.fns.hasSidebar();
-const isSettings = args.fns.isSettingsPageMode?.() === true;
+          '''const hasSidebar = f.hasSidebar();
+const isSettings = f.isSettingsPageMode?.() === true;
 return {
   as: "div",
-  hide: !hasSidebar || isSettings || args.fns.isDashboardPageMode?.() === true
+  hide: !hasSidebar || isSettings || f.isDashboardPageMode?.() === true
 };'''
       }
     }
@@ -2989,30 +2989,30 @@ return {
         componentName: Sidebar
         key: sidebar_component
         props:
-          '''const tableVertexLabel = args.fns.getTableVertexLabel();
-const tableSettingsLabel = args.fns.getTableSettingsLabel();
+          '''const tableVertexLabel = f.getTableVertexLabel();
+const tableSettingsLabel = f.getTableSettingsLabel();
 const relationshipType = tableVertexLabel ? `User${tableSettingsLabel}` : null;
 
 // Get config to check user scoping settings and hooks
-const { config } = args.fns.getCachedConfig();
-const enableUserScopingForSidebar = args.fns.getConfigGeneralValue?.("enableUserScopingForSidebar") === true;
+const { config } = f.getCachedConfig();
+const enableUserScopingForSidebar = f.getConfigGeneralValue?.("enableUserScopingForSidebar") === true;
 
-const vid = args.fns.pageStateVertexId;
+const vid = f.pageStateVertexId;
 return {
-  onItemSelect: args.fns.handleSidebarItemSelect,
+  onItemSelect: f.handleSidebarItemSelect,
   tableVertexLabel: tableVertexLabel,
   relationshipType: relationshipType,
   enableUserScoping: enableUserScopingForSidebar,
-  onMoveItemsToCategory: args.fns.handleMoveItemsToCategory,
-  sidebarWidth: () => args.fns.getSidebarWidth?.() ?? 240,
-  setSidebarWidth: (w) => args.fns.setSidebarWidth?.(w),
-  fetchRoot: args.fns.fetchRoot,
+  onMoveItemsToCategory: f.handleMoveItemsToCategory,
+  sidebarWidth: () => f.getSidebarWidth?.() ?? 240,
+  setSidebarWidth: (w) => f.setSidebarWidth?.(w),
+  fetchRoot: f.fetchRoot,
   hooks: config?.sidebar?.hooks,
-  initialCategoryId: args.fns.useUrlQueryParams?.() !== false
-    ? args.searchParams?.sidebarCategory
-    : args.contextData.props?.initialCategoryId,
-  initialSelectedRowIds: args.fns.getInitialSelectedRowIds?.(),
-  contentLabel: args.fns.prop('label')
+  initialCategoryId: f.useUrlQueryParams?.() !== false
+    ? _.searchParams?.sidebarCategory
+    : c.props?.initialCategoryId,
+  initialSelectedRowIds: f.getInitialSelectedRowIds?.(),
+  contentLabel: f.prop('label')
 };'''
       }
     }
@@ -3026,17 +3026,17 @@ return {
         componentName: Table
         key: unique_1
         props:
-          '''const vid = args.fns.pageStateVertexId;
+          '''const vid = f.pageStateVertexId;
 return {
-  selectedSidebarItem: args.fns.selectedSidebarItem,
-  getSelectedRows: args.fns.getSelectedRows,
-  setSelectedRows: args.fns.setSelectedRows,
-  clearSelectedRows: args.fns.clearSelectedRows,
-  rowsToRemove: () => args.graph.vertexes[vid]?.P?.rowsToRemoveVertexIds ?? null,
-  setRowsToRemove: (ids) => args.mergeVertexProperties(0, vid, args.graph, args.setGraph, { rowsToRemoveVertexIds: ids }),
-  rowsToAdd: () => args.graph.vertexes[vid]?.P?.rowsToAddVertexIds ?? null,
-  setRowsToAdd: (ids) => args.mergeVertexProperties(0, vid, args.graph, args.setGraph, { rowsToAddVertexIds: ids }),
-  ...args.fns.getTablePassthroughProps()
+  selectedSidebarItem: f.selectedSidebarItem,
+  getSelectedRows: f.getSelectedRows,
+  setSelectedRows: f.setSelectedRows,
+  clearSelectedRows: f.clearSelectedRows,
+  rowsToRemove: () => g.vertexes[vid]?.P?.rowsToRemoveVertexIds ?? null,
+  setRowsToRemove: (ids) => _.mergeVertexProperties(0, vid, g, sg, { rowsToRemoveVertexIds: ids }),
+  rowsToAdd: () => g.vertexes[vid]?.P?.rowsToAddVertexIds ?? null,
+  setRowsToAdd: (ids) => _.mergeVertexProperties(0, vid, g, sg, { rowsToAddVertexIds: ids }),
+  ...f.getTablePassthroughProps()
 }'''
       }
     }
@@ -3059,13 +3059,13 @@ return {
         componentName: Html
         key: dynamic_page_no_sidebar_wrapper
         props:
-          '''const hasSidebar = args.fns.hasSidebar();
-const vid = args.fns.pageStateVertexId;
-const configLoading = args.graph.vertexes[vid]?.P?.configLoading !== false;
-const isSettings = args.fns.isSettingsPageMode?.() === true;
+          '''const hasSidebar = f.hasSidebar();
+const vid = f.pageStateVertexId;
+const configLoading = g.vertexes[vid]?.P?.configLoading !== false;
+const isSettings = f.isSettingsPageMode?.() === true;
 return {
   as: "div",
-  hide: hasSidebar || configLoading || isSettings || args.fns.isDashboardPageMode?.() === true
+  hide: hasSidebar || configLoading || isSettings || f.isDashboardPageMode?.() === true
 };'''
       }
     }
@@ -3078,16 +3078,16 @@ return {
         componentName: Table
         key: unique_2
         props:
-          '''const vid = args.fns.pageStateVertexId;
+          '''const vid = f.pageStateVertexId;
 return {
-  getSelectedRows: args.fns.getSelectedRows,
-  setSelectedRows: args.fns.setSelectedRows,
-  clearSelectedRows: args.fns.clearSelectedRows,
-  rowsToRemove: () => args.graph.vertexes[vid]?.P?.rowsToRemoveVertexIds ?? null,
-  setRowsToRemove: (ids) => args.mergeVertexProperties(0, vid, args.graph, args.setGraph, { rowsToRemoveVertexIds: ids }),
-  rowsToAdd: () => args.graph.vertexes[vid]?.P?.rowsToAddVertexIds ?? null,
-  setRowsToAdd: (ids) => args.mergeVertexProperties(0, vid, args.graph, args.setGraph, { rowsToAddVertexIds: ids }),
-  ...args.fns.getTablePassthroughProps()
+  getSelectedRows: f.getSelectedRows,
+  setSelectedRows: f.setSelectedRows,
+  clearSelectedRows: f.clearSelectedRows,
+  rowsToRemove: () => g.vertexes[vid]?.P?.rowsToRemoveVertexIds ?? null,
+  setRowsToRemove: (ids) => _.mergeVertexProperties(0, vid, g, sg, { rowsToRemoveVertexIds: ids }),
+  rowsToAdd: () => g.vertexes[vid]?.P?.rowsToAddVertexIds ?? null,
+  setRowsToAdd: (ids) => _.mergeVertexProperties(0, vid, g, sg, { rowsToAddVertexIds: ids }),
+  ...f.getTablePassthroughProps()
 }'''
       }
     }
@@ -3096,7 +3096,7 @@ return {
       L: Attr
       P: {
         css:
-          '''const active = args.fns.companionResizeActive?.() === true;
+          '''const active = f.companionResizeActive?.() === true;
 return `._id {
   width: 100%;
   height: 100%;
@@ -3117,19 +3117,19 @@ return `._id {
     right: 0;
     transform: translateY(-50%);
     height: 2px;
-    background: ${args.theme.var.color.border};
+    background: ${t.var.color.border};
     transition: background-color 0.2s;
   }
 
   ${active ? `
   &::before {
-    background: ${args.theme.var.color.text_light_300};
+    background: ${t.var.color.text_light_300};
   }
   ` : ""}
 
   @media (hover: hover) {
     &:hover::before {
-      background: ${args.theme.var.color.text_light_300};
+      background: ${t.var.color.text_light_300};
     }
   }
 }`;'''
@@ -3137,11 +3137,11 @@ return `._id {
         componentName: Html
         key: dynamic_page_companion_resize
         props:
-          '''const active = args.fns.companionResizeActive?.() === true;
+          '''const active = f.companionResizeActive?.() === true;
 return {
   as: "button",
   type: "button",
-  hide: args.fns.hasCompanionPages?.() !== true,
+  hide: f.hasCompanionPages?.() !== true,
   "attr:aria-label": "Resize main and companion tables",
   "attr:aria-orientation": "horizontal",
   "attr:role": "separator",
@@ -3150,7 +3150,7 @@ return {
     if (e.currentTarget?.setPointerCapture) {
       e.currentTarget.setPointerCapture(e.pointerId);
     }
-    args.fns.handleCompanionSplitResize?.(e);
+    f.handleCompanionSplitResize?.(e);
   }
 };'''
       }
@@ -3169,7 +3169,7 @@ return {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
 }`;'''
         loop: true
         displayOrder: 3
@@ -3178,8 +3178,8 @@ return {
         props:
           '''return {
   as: "section",
-  data: args.fns.getCompanionPages?.() ?? [],
-  hide: args.fns.hasCompanionPages?.() !== true,
+  data: f.getCompanionPages?.() ?? [],
+  hide: f.hasCompanionPages?.() !== true,
   "attr:aria-label": "Companion table"
 };'''
       }
@@ -3194,13 +3194,13 @@ return {
   flex-direction: column;
   gap: 0.15rem;
   padding: 0.5rem 0.75rem;
-  border-bottom: 1px solid ${args.theme.var.color.border_light_300 || args.theme.var.color.border};
+  border-bottom: 1px solid ${t.var.color.border_light_300 || t.var.color.border};
   flex-shrink: 0;
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const companion = args.contextData.companionPage || {};
+          '''const companion = c.companionPage || {};
 return {
   as: "div",
   hide: !companion.title && !companion.hint
@@ -3216,12 +3216,12 @@ return {
   margin: 0;
   font-size: 0.95rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const companion = args.contextData.companionPage || {};
+          '''const companion = c.companionPage || {};
 return {
   as: "h2",
   text: companion.title || "",
@@ -3237,12 +3237,12 @@ return {
           '''return `._id {
   margin: 0;
   font-size: 0.75rem;
-  color: ${args.theme.var.color.text_dark_400};
+  color: ${t.var.color.text_dark_400};
 }`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''const companion = args.contextData.companionPage || {};
+          '''const companion = c.companionPage || {};
 return {
   as: "p",
   text: companion.hint || "",
@@ -3285,7 +3285,7 @@ return {
         componentName: DynamicPage
         key: companion_dynamic_page
         props:
-          '''const companion = args.contextData.companionPage || {};
+          '''const companion = c.companionPage || {};
 return {
   tableKey: companion.tableKey,
   tableVertexLabel: companion.tableVertexLabel,
@@ -3302,12 +3302,12 @@ return {
       L: Attr
       P: {
         css:
-          '''const embedded = args.contextData.props?.embeddedMode === true;
+          '''const embedded = c.props?.embeddedMode === true;
 return `._id {
   display: flex;
   flex-wrap: wrap;
   width: 100%;
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
   overflow: hidden;
   ${embedded ? `
   position: absolute;
@@ -3326,13 +3326,13 @@ return `._id {
         componentName: Html
         key: settings_page_layout_wrapper
         props:
-          '''const vid = args.fns.pageStateVertexId;
-const configLoading = args.graph.vertexes[vid]?.P?.configLoading !== false;
-const isSettings = args.fns.isSettingsPageMode?.() === true;
-const embedded = args.contextData.props?.embeddedMode === true;
+          '''const vid = f.pageStateVertexId;
+const configLoading = g.vertexes[vid]?.P?.configLoading !== false;
+const isSettings = f.isSettingsPageMode?.() === true;
+const embedded = c.props?.embeddedMode === true;
 return {
   as: "div",
-  hide: !isSettings || configLoading || args.fns.isDashboardPageMode?.() === true
+  hide: !isSettings || configLoading || f.isDashboardPageMode?.() === true
 };'''
       }
     }
@@ -3344,8 +3344,8 @@ return {
         componentName: SettingsSidebar
         key: settings_sidebar
         props:
-          '''const config = args.fns.evaluateConfig?.();
-const hideSidebar = args.contextData.props?.hideSettingsSidebar === true;
+          '''const config = f.evaluateConfig?.();
+const hideSidebar = c.props?.hideSettingsSidebar === true;
 return {
   sidebarConfig: config?.sidebar || null,
   hide: hideSidebar
@@ -3385,7 +3385,7 @@ return {
         key: settings_page_content
         props:
           '''return {
-  siteLanguages: args.fns.getSiteLanguages?.() || []
+  siteLanguages: f.getSiteLanguages?.() || []
 };'''
       }
     }
@@ -3402,11 +3402,11 @@ return {
         componentName: Html
         key: dashboard_page_wrapper
         props:
-          '''const vid = args.fns.pageStateVertexId;
-const configLoading = args.graph.vertexes[vid]?.P?.configLoading !== false;
+          '''const vid = f.pageStateVertexId;
+const configLoading = g.vertexes[vid]?.P?.configLoading !== false;
 return {
   as: "div",
-  hide: args.fns.isDashboardPageMode?.() !== true || configLoading
+  hide: f.isDashboardPageMode?.() !== true || configLoading
 };'''
       }
     }
@@ -3419,7 +3419,7 @@ return {
         key: dashboard_host
         props:
           '''return {
-  getDashboardConfig: args.fns.getDashboardConfig
+  getDashboardConfig: f.getDashboardConfig
 };'''
       }
     }
@@ -3430,7 +3430,7 @@ return {
         displayOrder: 99
         componentName: DropCreateReviewModal
         key: drop_create_review_modal
-        props: return args.fns.getDropCreateReviewModalProps?.() || { isOpen: false };
+        props: "return f.getDropCreateReviewModalProps?.() || { isOpen: false };"
       }
     }
   ]

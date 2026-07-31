@@ -16,14 +16,14 @@
   `._id.fm-nested-line-items {
   display: flex;
   flex-direction: column;
-  gap: ${args.theme.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
   width: 100%;
 }`,
   `._id.fm-nested-line-items .fm-nested-line-header-row,
 ._id.fm-nested-line-items .fm-nested-line-row {
   display: grid;
   grid-template-columns: var(--fm-nl-cols, minmax(4rem, 1fr));
-  gap: ${args.theme.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
 }`,
   `._id.fm-nested-line-items .fm-nested-line-header-row {
   align-items: center;
@@ -44,7 +44,7 @@
   display: none;
   font-size: 0.75rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin-bottom: 0.25rem;
 }`,
   `._id.fm-nested-line-items.is-stack .fm-nested-line-header-row {
@@ -54,11 +54,11 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: ${args.theme.var.spacing.sm};
-  border: 1px solid ${args.theme.var.color.border};
+  gap: ${t.var.spacing.sm};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.375rem;
-  padding: ${args.theme.var.spacing.md};
-  margin-bottom: ${args.theme.var.spacing.sm};
+  padding: ${t.var.spacing.md};
+  margin-bottom: ${t.var.spacing.sm};
 }`,
   `._id.fm-nested-line-items.is-stack .fm-nested-line-cell-label {
   display: block;
@@ -73,7 +73,7 @@
 ];'''
         displayOrder: 1
         fns:
-          '''const getProps = () => args.contextData.props || {};
+          '''const getProps = () => c.props || {};
 const getField = () => getProps().field || {};
 const getNestedLineItemsConfig = () => getField().nestedLineItemsConfig || {};
 
@@ -132,7 +132,7 @@ const showInventoryColumn = (columnDef, rowVertex) => {
 
 const resolveLineRowVertex = (lineEntryContext) => {
   const lineVertexId = lineEntryContext?.row?.id;
-  if (lineVertexId && args.graph.vertexes[lineVertexId]) return args.graph.vertexes[lineVertexId];
+  if (lineVertexId && g.vertexes[lineVertexId]) return g.vertexes[lineVertexId];
   return lineEntryContext?.row;
 };
 
@@ -225,7 +225,7 @@ const patchOptionPairs = (lineIndex, columnDef, nextItems) => {
     if (!key || RESERVED_VARIANT_PROPERTY_KEYS.has(key)) continue;
     if (!nextKeys.has(key) && patch[key] === undefined) patch[key] = "";
   }
-  args.mergeVertexProperties(txnId, lineVertex.id, args.graph, args.setGraph, patch);
+  _.mergeVertexProperties(txnId, lineVertex.id, g, sg, patch);
 };
 
 const getFilesValue = (rowVertex, columnDef) => {
@@ -233,15 +233,15 @@ const getFilesValue = (rowVertex, columnDef) => {
   const filesRelationshipType = nestedLineItemsConfig.childToFilesRelationshipType;
   const filesTargetLabel = nestedLineItemsConfig.filesTargetLabel || "File";
   if (!filesRelationshipType || !rowVertex?.id) return [];
-  const lineVertexFromGraph = args.graph.vertexes[rowVertex.id] || rowVertex;
+  const lineVertexFromGraph = g.vertexes[rowVertex.id] || rowVertex;
   const fileEdgeIds = lineVertexFromGraph.OUT?.[filesRelationshipType];
   if (!Array.isArray(fileEdgeIds) || fileEdgeIds.length === 0) return [];
   const ids = [];
   const seen = new Set();
   for (let edgeIndex = 0; edgeIndex < fileEdgeIds.length; edgeIndex++) {
-    const edge = args.graph.edges[fileEdgeIds[edgeIndex]];
+    const edge = g.edges[fileEdgeIds[edgeIndex]];
     if (!edge?.E) continue;
-    const targetVertex = args.graph.vertexes[edge.E];
+    const targetVertex = g.vertexes[edge.E];
     if (targetVertex && !targetVertex.L?.includes(filesTargetLabel)) continue;
     const id = String(edge.E).trim();
     if (!id || seen.has(id)) continue;
@@ -268,7 +268,7 @@ const getFilePreviewEntries = (rowVertex, columnDef) => {
       ? String(pickerConfiguration.previewFileNameProperty)
       : "fileName";
   return ids.map((fileId) => {
-    const fileVertex = args.graph.vertexes[fileId];
+    const fileVertex = g.vertexes[fileId];
     const fileName =
       fileVertex?.P?.[previewFileNamePropertyKey] != null
         ? String(fileVertex.P[previewFileNamePropertyKey]).trim()
@@ -304,27 +304,27 @@ const setFileIds = (lineVertex, fileVertexIds) => {
   const nestedLineItemsConfig = getNestedLineItemsConfig();
   const filesRelationshipType = nestedLineItemsConfig.childToFilesRelationshipType;
   if (!filesRelationshipType) return;
-  const lineVertexFresh = args.graph.vertexes[lineVertex.id] || lineVertex;
+  const lineVertexFresh = g.vertexes[lineVertex.id] || lineVertex;
   const existingFileEdgeIds = lineVertexFresh.OUT?.[filesRelationshipType];
   if (Array.isArray(existingFileEdgeIds)) {
     for (const existingEdgeId of [...existingFileEdgeIds]) {
-      args.deleteEdge(txnId, existingEdgeId, args.graph, args.setGraph);
+      _.deleteEdge(txnId, existingEdgeId, g, sg);
     }
   }
   const ids = Array.isArray(fileVertexIds) ? fileVertexIds : [];
   for (let fileIndex = 0; fileIndex < ids.length; fileIndex++) {
     const trimmedFileId = ids[fileIndex] != null ? String(ids[fileIndex]).trim() : "";
     if (!trimmedFileId) continue;
-    if (!args.graph.vertexes[trimmedFileId]) continue;
-    const newFileEdgeId = args.generateNewVertexId(args.graph, args.setGraph);
-    const newFileEdge = args.newEdge(
+    if (!g.vertexes[trimmedFileId]) continue;
+    const newFileEdgeId = _.generateNewVertexId(g, sg);
+    const newFileEdge = _.newEdge(
       newFileEdgeId,
       filesRelationshipType,
       { displayOrder: fileIndex },
       lineVertexFresh.id,
       trimmedFileId,
     );
-    args.addNewEdge(txnId, newFileEdge, args.graph, args.setGraph);
+    _.addNewEdge(txnId, newFileEdge, g, sg);
   }
 };
 
@@ -368,19 +368,19 @@ const getFilesPickerProps = (lineIndex, columnDef, rowVertex) => {
       if (Array.isArray(selectedVertexPayloads)) {
         const vertexMap = {};
         for (const selectedVertexPayload of selectedVertexPayloads) {
-          if (selectedVertexPayload?.id && !args.graph.vertexes[selectedVertexPayload.id]) {
+          if (selectedVertexPayload?.id && !g.vertexes[selectedVertexPayload.id]) {
             vertexMap[selectedVertexPayload.id] = selectedVertexPayload;
           }
         }
         if (Object.keys(vertexMap).length > 0) {
-          args.setGraphData(0, { vertexes: vertexMap }, {});
+          _.setGraphData(0, { vertexes: vertexMap }, {});
         }
       }
       const incomingIds = Array.isArray(vertexElementIds)
         ? vertexElementIds.map((id) => String(id)).filter((id) => id.trim() !== "")
         : [];
       const existingIds = getFilesValue(
-        args.graph.vertexes[rowVertex?.id] || rowVertex,
+        g.vertexes[rowVertex?.id] || rowVertex,
         columnDef,
       );
       const mergedIds = [...existingIds];
@@ -419,15 +419,15 @@ const detachAndDeleteLineVertex = (lineVertex) => {
   };
   let detachPassCount = 0;
   while (detachPassCount++ < 80) {
-    const vertexFromGraph = args.graph.vertexes[lineVertexId];
+    const vertexFromGraph = g.vertexes[lineVertexId];
     if (!vertexFromGraph) return;
     const edgeIdsToRemove = collectEdgeIds(vertexFromGraph);
     if (edgeIdsToRemove.length === 0) break;
     for (let edgeIndex = 0; edgeIndex < edgeIdsToRemove.length; edgeIndex++) {
-      args.deleteEdge(txnId, edgeIdsToRemove[edgeIndex], args.graph, args.setGraph);
+      _.deleteEdge(txnId, edgeIdsToRemove[edgeIndex], g, sg);
     }
   }
-  args.deleteVertex(txnId, lineVertexId, args.graph, args.setGraph);
+  _.deleteVertex(txnId, lineVertexId, g, sg);
 };
 
 const setInventoryItemId = (lineVertex, inventoryItemVertexId) => {
@@ -436,24 +436,24 @@ const setInventoryItemId = (lineVertex, inventoryItemVertexId) => {
   const nestedLineItemsConfig = getNestedLineItemsConfig();
   const inventoryRelationshipType = nestedLineItemsConfig.childToInventoryRelationshipType;
   if (!inventoryRelationshipType) return;
-  const lineVertexFresh = args.graph.vertexes[lineVertex.id] || lineVertex;
+  const lineVertexFresh = g.vertexes[lineVertex.id] || lineVertex;
   const existingInventoryEdgeIds = lineVertexFresh.OUT?.[inventoryRelationshipType];
   if (Array.isArray(existingInventoryEdgeIds)) {
     for (const existingEdgeId of [...existingInventoryEdgeIds]) {
-      args.deleteEdge(txnId, existingEdgeId, args.graph, args.setGraph);
+      _.deleteEdge(txnId, existingEdgeId, g, sg);
     }
   }
   const trimmedInventoryId = inventoryItemVertexId != null ? String(inventoryItemVertexId).trim() : "";
-  if (trimmedInventoryId && args.graph.vertexes[trimmedInventoryId]) {
-    const newInventoryEdgeId = args.generateNewVertexId(args.graph, args.setGraph);
-    const newInventoryEdge = args.newEdge(
+  if (trimmedInventoryId && g.vertexes[trimmedInventoryId]) {
+    const newInventoryEdgeId = _.generateNewVertexId(g, sg);
+    const newInventoryEdge = _.newEdge(
       newInventoryEdgeId,
       inventoryRelationshipType,
       {},
       lineVertexFresh.id,
       trimmedInventoryId,
     );
-    args.addNewEdge(txnId, newInventoryEdge, args.graph, args.setGraph);
+    _.addNewEdge(txnId, newInventoryEdge, g, sg);
   }
 };
 
@@ -464,7 +464,7 @@ const patchLineP = (lineIndex, patch) => {
   const txnId = ensureTxn();
   if (!txnId) return;
   if (patch && typeof patch === "object" && Object.keys(patch).length > 0) {
-    args.mergeVertexProperties(txnId, lineVertex.id, args.graph, args.setGraph, patch);
+    _.mergeVertexProperties(txnId, lineVertex.id, g, sg, patch);
   }
 };
 
@@ -476,7 +476,7 @@ const patchCell = (lineIndex, columnDef, cellValue) => {
     if (!lineVertex?.id) return;
     const txnId = ensureTxn();
     if (!txnId) return;
-    const lineVertexForInventory = args.graph.vertexes[lineVertex.id] || lineVertex;
+    const lineVertexForInventory = g.vertexes[lineVertex.id] || lineVertex;
     setInventoryItemId(lineVertexForInventory, cellValue);
     return;
   }
@@ -486,7 +486,7 @@ const patchCell = (lineIndex, columnDef, cellValue) => {
     if (!lineVertex?.id) return;
     const txnId = ensureTxn();
     if (!txnId) return;
-    const lineVertexForFiles = args.graph.vertexes[lineVertex.id] || lineVertex;
+    const lineVertexForFiles = g.vertexes[lineVertex.id] || lineVertex;
     setFileIds(lineVertexForFiles, cellValue);
     return;
   }
@@ -498,16 +498,16 @@ const patchCell = (lineIndex, columnDef, cellValue) => {
 
 const inventoryValueForLine = (rowVertex) => {
   if (!rowVertex?.id) return "";
-  const lineVertexFromGraph = args.graph.vertexes[rowVertex.id] || rowVertex;
+  const lineVertexFromGraph = g.vertexes[rowVertex.id] || rowVertex;
   const nestedLineItemsConfig = getNestedLineItemsConfig();
   const inventoryRelationshipType = nestedLineItemsConfig.childToInventoryRelationshipType;
   const inventoryTargetLabel = nestedLineItemsConfig.inventoryTargetLabel || "InventoryItem";
   if (!inventoryRelationshipType || !lineVertexFromGraph.OUT?.[inventoryRelationshipType]) return "";
   const inventoryEdgeIds = lineVertexFromGraph.OUT[inventoryRelationshipType];
   for (let edgeIndex = 0; edgeIndex < inventoryEdgeIds.length; edgeIndex++) {
-    const edge = args.graph.edges[inventoryEdgeIds[edgeIndex]];
+    const edge = g.edges[inventoryEdgeIds[edgeIndex]];
     if (!edge) continue;
-    const targetVertex = args.graph.vertexes[edge.E];
+    const targetVertex = g.vertexes[edge.E];
     if (targetVertex?.L?.includes(inventoryTargetLabel)) return edge.E;
   }
   return "";
@@ -556,18 +556,18 @@ const addRow = () => {
       newLineProperties[propertyKey] = defaultNewLinePropertiesOverlay[propertyKey];
     }
   }
-  const newLineVertexId = args.generateNewVertexId(args.graph, args.setGraph);
-  const newLineVertex = args.newVertex(newLineVertexId, [childLabel], newLineProperties);
-  args.addNewVertex(txnId, newLineVertex, args.graph, args.setGraph);
-  const newParentToChildEdgeId = args.generateNewVertexId(args.graph, args.setGraph);
-  const parentToChildEdge = args.newEdge(
+  const newLineVertexId = _.generateNewVertexId(g, sg);
+  const newLineVertex = _.newVertex(newLineVertexId, [childLabel], newLineProperties);
+  _.addNewVertex(txnId, newLineVertex, g, sg);
+  const newParentToChildEdgeId = _.generateNewVertexId(g, sg);
+  const parentToChildEdge = _.newEdge(
     newParentToChildEdgeId,
     parentToChildRelationshipType,
     {},
     parentVertex.id,
     newLineVertexId,
   );
-  args.addNewEdge(txnId, parentToChildEdge, args.graph, args.setGraph);
+  _.addNewEdge(txnId, parentToChildEdge, g, sg);
 };
 
 const removeRow = (lineIndex) => {
@@ -620,7 +620,7 @@ return {
         props:
           '''return {
   as: "div",
-  class: args.fns.isStackLayout() ? "fm-nested-line-items is-stack" : "fm-nested-line-items"
+  class: f.isStackLayout() ? "fm-nested-line-items is-stack" : "fm-nested-line-items"
 };'''
       }
     }
@@ -633,10 +633,10 @@ return {
         props:
           '''return {
   variant: "secondary",
-  text: args.fns.getNestedLineItemsConfig().addButtonLabel || "Add line",
+  text: f.getNestedLineItemsConfig().addButtonLabel || "Add line",
   type: "button",
-  disabled: args.fns.isDisabled(),
-  onClick: () => args.fns.addRow()
+  disabled: f.isDisabled(),
+  onClick: () => f.addRow()
 };'''
       }
     }
@@ -647,7 +647,7 @@ return {
         css:
           '''return `._id.fm-nested-line-table {
   width: 100%;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.375rem;
   overflow: visible;
   display: flex;
@@ -659,7 +659,7 @@ return {
           '''return {
   as: "div",
   class: "fm-nested-line-table",
-  style: { "--fm-nl-cols": args.fns.gridTemplateColumns() }
+  style: { "--fm-nl-cols": f.gridTemplateColumns() }
 };'''
       }
     }
@@ -669,12 +669,12 @@ return {
       P: {
         css:
           '''return `._id.fm-nested-line-header-row {
-  padding: ${args.theme.var.spacing.sm};
-  background: ${args.theme.var.color.background_light_100};
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  padding: ${t.var.spacing.sm};
+  background: ${t.var.color.background_light_100};
+  border-bottom: 1px solid ${t.var.color.border};
   font-size: 0.75rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;'''
         displayOrder: 1
         componentName: Html
@@ -696,7 +696,7 @@ return {
           '''return {
   loop: true,
   contextName: "nestedLineColumn",
-  data: () => args.fns.getColumns()
+  data: () => f.getColumns()
 };'''
       }
     }
@@ -707,7 +707,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const columnDef = args.contextData.nestedLineColumn;
+          '''const columnDef = c.nestedLineColumn;
 const isActionsColumn = columnDef && columnDef.columnType === "actions";
 const headerText = columnDef && columnDef.label != null ? String(columnDef.label) : "";
 const headerLabelProps = { as: "span", text: headerText };
@@ -729,7 +729,7 @@ return headerLabelProps;'''
         componentName: Html
         props:
           '''return {
-  data: () => args.fns.rowEntries()
+  data: () => f.rowEntries()
 };'''
       }
     }
@@ -739,8 +739,8 @@ return headerLabelProps;'''
       P: {
         css:
           '''return `._id.fm-nested-line-row {
-  padding: ${args.theme.var.spacing.sm};
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  padding: ${t.var.spacing.sm};
+  border-bottom: 1px solid ${t.var.color.border};
 }
 ._id.fm-nested-line-row:last-child {
   border-bottom: none;
@@ -748,7 +748,7 @@ return headerLabelProps;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const lineEntryContext = args.contextData.lineEntry;
+          '''const lineEntryContext = c.lineEntry;
 return {
   as: "div",
   class: "fm-nested-line-row",
@@ -766,7 +766,7 @@ return {
           '''return {
   loop: true,
   contextName: "nestedLineColumn",
-  data: () => args.fns.getColumns()
+  data: () => f.getColumns()
 };'''
       }
     }
@@ -790,7 +790,7 @@ return {
         displayOrder: 0
         componentName: Html
         props:
-          '''const columnDef = args.contextData.nestedLineColumn;
+          '''const columnDef = c.nestedLineColumn;
 const labelText =
   columnDef && columnDef.columnType !== "actions" && columnDef.label != null
     ? String(columnDef.label)
@@ -799,7 +799,7 @@ return {
   as: "div",
   class: "fm-nested-line-cell-label",
   text: labelText,
-  hide: !args.fns.isStackLayout() || !labelText
+  hide: !f.isStackLayout() || !labelText
 };'''
       }
     }
@@ -810,17 +810,17 @@ return {
         displayOrder: 1
         componentName: TomSelect
         props:
-          '''const columnDef = args.contextData.nestedLineColumn;
-const lineEntryContext = args.contextData.lineEntry;
-const resolvedLineVertex = args.fns.resolveLineRowVertex(lineEntryContext);
+          '''const columnDef = c.nestedLineColumn;
+const lineEntryContext = c.lineEntry;
+const resolvedLineVertex = f.resolveLineRowVertex(lineEntryContext);
 const lineIndex = lineEntryContext?.index ?? 0;
 return {
-  options: args.fns.getColumnSelectOptions(columnDef),
+  options: f.getColumnSelectOptions(columnDef),
   value: resolvedLineVertex?.P?.[columnDef.key] != null ? String(resolvedLineVertex.P[columnDef.key]) : "",
   onChange: (nextValue) =>
-    args.fns.patchCell(lineIndex, columnDef, args.fns.selectFallback(columnDef, nextValue)),
+    f.patchCell(lineIndex, columnDef, f.selectFallback(columnDef, nextValue)),
   placeholder: columnDef.placeholder || columnDef.label || "",
-  disabled: args.fns.isDisabled(),
+  disabled: f.isDisabled(),
   hide: !columnDef || columnDef.columnType !== "select"
 };'''
       }
@@ -832,17 +832,17 @@ return {
         displayOrder: 2
         componentName: TextInput
         props:
-          '''const columnDef = args.contextData.nestedLineColumn;
-const lineEntryContext = args.contextData.lineEntry;
-const resolvedLineVertex = args.fns.resolveLineRowVertex(lineEntryContext);
+          '''const columnDef = c.nestedLineColumn;
+const lineEntryContext = c.lineEntry;
+const resolvedLineVertex = f.resolveLineRowVertex(lineEntryContext);
 const lineIndex = lineEntryContext?.index ?? 0;
 return {
   type: "text",
   value: resolvedLineVertex?.P?.[columnDef.key] != null ? String(resolvedLineVertex.P[columnDef.key]) : "",
   placeholder: columnDef.placeholder || columnDef.label || "",
-  disabled: args.fns.isDisabled(),
+  disabled: f.isDisabled(),
   hide: !columnDef || columnDef.columnType !== "text",
-  onChange: (inputEvent) => args.fns.patchCell(lineIndex, columnDef, inputEvent.target.value)
+  onChange: (inputEvent) => f.patchCell(lineIndex, columnDef, inputEvent.target.value)
 };'''
       }
     }
@@ -853,9 +853,9 @@ return {
         displayOrder: 3
         componentName: TextInput
         props:
-          '''const columnDef = args.contextData.nestedLineColumn;
-const lineEntryContext = args.contextData.lineEntry;
-const resolvedLineVertex = args.fns.resolveLineRowVertex(lineEntryContext);
+          '''const columnDef = c.nestedLineColumn;
+const lineEntryContext = c.lineEntry;
+const resolvedLineVertex = f.resolveLineRowVertex(lineEntryContext);
 const lineIndex = lineEntryContext?.index ?? 0;
 return {
   type: "number",
@@ -863,10 +863,10 @@ return {
   placeholder: columnDef.placeholder || columnDef.label || "",
   min: columnDef.min != null ? columnDef.min : 0,
   step: columnDef.step != null ? columnDef.step : 0.01,
-  disabled: args.fns.isDisabled(),
+  disabled: f.isDisabled(),
   hide: !columnDef || columnDef.columnType !== "number",
   onChange: (inputEvent) =>
-    args.fns.patchCell(
+    f.patchCell(
       lineIndex,
       columnDef,
       inputEvent.target.value === "" ? "" : Number(inputEvent.target.value),
@@ -881,22 +881,22 @@ return {
         displayOrder: 4
         componentName: TomSelect
         props:
-          '''const columnDef = args.contextData.nestedLineColumn;
-const lineEntryContext = args.contextData.lineEntry;
-const resolvedLineVertex = args.fns.resolveLineRowVertex(lineEntryContext);
+          '''const columnDef = c.nestedLineColumn;
+const lineEntryContext = c.lineEntry;
+const resolvedLineVertex = f.resolveLineRowVertex(lineEntryContext);
 const lineIndex = lineEntryContext?.index ?? 0;
-const inventorySelectConfig = args.fns.getNestedLineItemsConfig().inventorySelectConfig || {};
+const inventorySelectConfig = f.getNestedLineItemsConfig().inventorySelectConfig || {};
 const labelFieldName = inventorySelectConfig.labelField || "partNo";
 const tomSelectLabelKey = String(labelFieldName).includes(".")
   ? String(labelFieldName)
   : "P." + labelFieldName;
 const linkedInventoryVertexId = resolvedLineVertex
-  ? args.fns.inventoryValueForLine(resolvedLineVertex)
+  ? f.inventoryValueForLine(resolvedLineVertex)
   : "";
 return {
   functionName: "getUserVertices",
   value: linkedInventoryVertexId ? String(linkedInventoryVertexId) : "",
-  onChange: (nextInventoryId) => args.fns.patchCell(lineIndex, columnDef, nextInventoryId || ""),
+  onChange: (nextInventoryId) => f.patchCell(lineIndex, columnDef, nextInventoryId || ""),
   singularName: inventorySelectConfig.singularName || "Part",
   pluralName: inventorySelectConfig.pluralName || "Parts",
   valueKey: "id",
@@ -909,7 +909,7 @@ return {
     enableUserScoping: inventorySelectConfig.enableUserScoping === true
   },
   placeholder: columnDef.placeholder || inventorySelectConfig.singularName || "Inventory",
-  disabled: args.fns.isDisabled(),
+  disabled: f.isDisabled(),
   hide: (functionArguments) => {
     const columnDefFromContext = functionArguments.contextData.nestedLineColumn;
     const lineEntryFromContext = functionArguments.contextData.lineEntry;
@@ -928,16 +928,16 @@ return {
         displayOrder: 5
         componentName: Button
         props:
-          '''const columnDef = args.contextData.nestedLineColumn;
-const lineEntryContext = args.contextData.lineEntry;
+          '''const columnDef = c.nestedLineColumn;
+const lineEntryContext = c.lineEntry;
 const lineIndex = lineEntryContext?.index ?? 0;
 return {
   variant: "danger",
   text: "Remove",
   type: "button",
-  disabled: args.fns.isDisabled(),
+  disabled: f.isDisabled(),
   hide: !columnDef || columnDef.columnType !== "actions",
-  onClick: () => args.fns.removeRow(lineIndex)
+  onClick: () => f.removeRow(lineIndex)
 };'''
       }
     }
@@ -948,16 +948,16 @@ return {
         displayOrder: 6
         componentName: TextArea
         props:
-          '''const columnDef = args.contextData.nestedLineColumn;
-const lineEntryContext = args.contextData.lineEntry;
-const resolvedLineVertex = args.fns.resolveLineRowVertex(lineEntryContext);
+          '''const columnDef = c.nestedLineColumn;
+const lineEntryContext = c.lineEntry;
+const resolvedLineVertex = f.resolveLineRowVertex(lineEntryContext);
 const lineIndex = lineEntryContext?.index ?? 0;
 return {
   value: resolvedLineVertex?.P?.[columnDef.key] != null ? String(resolvedLineVertex.P[columnDef.key]) : "",
   placeholder: columnDef.placeholder || columnDef.label || "",
-  disabled: args.fns.isDisabled(),
+  disabled: f.isDisabled(),
   hide: !columnDef || columnDef.columnType !== "textArea",
-  onChange: (inputEvent) => args.fns.patchCell(lineIndex, columnDef, inputEvent.target.value)
+  onChange: (inputEvent) => f.patchCell(lineIndex, columnDef, inputEvent.target.value)
 };'''
       }
     }
@@ -968,11 +968,11 @@ return {
         displayOrder: 7
         componentName: FormFieldArray
         props:
-          '''const columnDef = args.contextData.nestedLineColumn;
-const lineEntryContext = args.contextData.lineEntry;
-const resolvedLineVertex = args.fns.resolveLineRowVertex(lineEntryContext);
+          '''const columnDef = c.nestedLineColumn;
+const lineEntryContext = c.lineEntry;
+const resolvedLineVertex = f.resolveLineRowVertex(lineEntryContext);
 const lineIndex = lineEntryContext?.index ?? 0;
-const optionPairs = args.fns.getOptionPairsValue(resolvedLineVertex, columnDef);
+const optionPairs = f.getOptionPairsValue(resolvedLineVertex, columnDef);
 return {
   hide: !columnDef || columnDef.columnType !== "optionPairs" || !columnDef.fieldArrayConfig,
   field: {
@@ -980,9 +980,9 @@ return {
     fieldArrayConfig: columnDef?.fieldArrayConfig
   },
   value: optionPairs,
-  disabled: args.fns.isDisabled(),
+  disabled: f.isDisabled(),
   onChange: (nextItems) =>
-    args.fns.patchOptionPairs(lineIndex, columnDef, Array.isArray(nextItems) ? nextItems : [])
+    f.patchOptionPairs(lineIndex, columnDef, Array.isArray(nextItems) ? nextItems : [])
 };'''
       }
     }
@@ -995,7 +995,7 @@ return {
   `._id.fm-nested-files {
   display: flex;
   flex-direction: column;
-  gap: ${args.theme.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
   width: 100%;
 }`,
   `._id.fm-nested-files .fm-nested-files-gallery {
@@ -1008,8 +1008,8 @@ return {
   width: 4.5rem;
   height: 4.5rem;
   border-radius: 0.375rem;
-  border: 1px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background_light_100};
+  border: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background_light_100};
   overflow: hidden;
   flex-shrink: 0;
 }`,
@@ -1025,7 +1025,7 @@ return {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   font-size: 0.65rem;
   padding: 0.25rem;
   text-align: center;
@@ -1041,7 +1041,7 @@ return {
         displayOrder: 8
         componentName: Html
         props:
-          '''const columnDef = args.contextData.nestedLineColumn;
+          '''const columnDef = c.nestedLineColumn;
 return {
   as: "div",
   class: "fm-nested-files",
@@ -1060,10 +1060,10 @@ return {
   as: "div",
   class: "fm-nested-files-gallery",
   hide: () => {
-    const columnDef = args.contextData.nestedLineColumn;
-    const lineEntryContext = args.contextData.lineEntry;
-    const resolvedLineVertex = args.fns.resolveLineRowVertex(lineEntryContext);
-    const entries = args.fns.getFilePreviewEntries(resolvedLineVertex, columnDef);
+    const columnDef = c.nestedLineColumn;
+    const lineEntryContext = c.lineEntry;
+    const resolvedLineVertex = f.resolveLineRowVertex(lineEntryContext);
+    const entries = f.getFilePreviewEntries(resolvedLineVertex, columnDef);
     return !entries || entries.length === 0;
   }
 };'''
@@ -1078,11 +1078,11 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const columnDef = args.contextData.nestedLineColumn;
-const lineEntryContext = args.contextData.lineEntry;
-const resolvedLineVertex = args.fns.resolveLineRowVertex(lineEntryContext);
+          '''const columnDef = c.nestedLineColumn;
+const lineEntryContext = c.lineEntry;
+const resolvedLineVertex = f.resolveLineRowVertex(lineEntryContext);
 return {
-  data: () => args.fns.getFilePreviewEntries(resolvedLineVertex, columnDef)
+  data: () => f.getFilePreviewEntries(resolvedLineVertex, columnDef)
 };'''
       }
     }
@@ -1106,12 +1106,12 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const entry = args.contextData.nestedLineFile || {};
+          '''const entry = c.nestedLineFile || {};
 return {
   as: "img",
   src: entry.hasImage ? entry.url : "",
   alt: entry.fileName || "Variant image",
-  hide: () => !args.contextData.nestedLineFile?.hasImage
+  hide: () => !c.nestedLineFile?.hasImage
 };'''
       }
     }
@@ -1122,12 +1122,12 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const entry = args.contextData.nestedLineFile || {};
+          '''const entry = c.nestedLineFile || {};
 return {
   as: "div",
   class: "fm-nested-files-thumb-fallback",
   text: entry.fileName || "File",
-  hide: () => !!args.contextData.nestedLineFile?.hasImage
+  hide: () => !!c.nestedLineFile?.hasImage
 };'''
       }
     }
@@ -1138,10 +1138,10 @@ return {
         displayOrder: 3
         componentName: Button
         props:
-          '''const columnDef = args.contextData.nestedLineColumn;
-const lineEntryContext = args.contextData.lineEntry;
+          '''const columnDef = c.nestedLineColumn;
+const lineEntryContext = c.lineEntry;
 const lineIndex = lineEntryContext?.index ?? 0;
-const entry = args.contextData.nestedLineFile || {};
+const entry = c.nestedLineFile || {};
 return {
   class: "fm-nested-files-remove",
   style: "position:absolute;top:0.15rem;right:0.15rem;z-index:2;min-width:1.5rem;padding:0.05rem 0.35rem;line-height:1.2;",
@@ -1151,8 +1151,8 @@ return {
   type: "button",
   title: "Remove image",
   "aria-label": "Remove image",
-  disabled: args.fns.isDisabled(),
-  onClick: () => args.fns.removeFileId(lineIndex, columnDef, entry.fileId || entry.id)
+  disabled: f.isDisabled(),
+  onClick: () => f.removeFileId(lineIndex, columnDef, entry.fileId || entry.id)
 };'''
       }
     }
@@ -1163,11 +1163,11 @@ return {
         displayOrder: 2
         componentName: VertexPicker
         props:
-          '''const columnDef = args.contextData.nestedLineColumn;
-const lineEntryContext = args.contextData.lineEntry;
-const resolvedLineVertex = args.fns.resolveLineRowVertex(lineEntryContext);
+          '''const columnDef = c.nestedLineColumn;
+const lineEntryContext = c.lineEntry;
+const resolvedLineVertex = f.resolveLineRowVertex(lineEntryContext);
 const lineIndex = lineEntryContext?.index ?? 0;
-const pickerProps = args.fns.getFilesPickerProps(lineIndex, columnDef, resolvedLineVertex);
+const pickerProps = f.getFilesPickerProps(lineIndex, columnDef, resolvedLineVertex);
 return {
   hide: !columnDef || columnDef.columnType !== "files" || !pickerProps,
   ...(pickerProps || {})

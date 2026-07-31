@@ -31,7 +31,7 @@ export function LoadingSpinner() {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: \${args.theme.var.color.background_light_200};
+  background: \${t.var.color.background_light_200};
   position: relative;
 }\`;`,
                 ],
@@ -44,7 +44,7 @@ export function LoadingSpinner() {
                     height: 32,
                     css: `return \`._id {
   animation: spin 1s linear infinite;
-  color: \${args.theme.var.color.primary};
+  color: \${t.var.color.primary};
 }\`;`,
                   },
                 ],

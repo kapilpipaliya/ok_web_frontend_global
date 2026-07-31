@@ -8,13 +8,13 @@
         description: Syncs table section documents into table_schema part Settings (general, columns, formConfig, sidebar).
         body:
           '''
-const { tableKey, dryRun = false } = args.contextData || {};
+const { tableKey, dryRun = false } = c || {};
 
 if (!tableKey) {
   return { success: false, message: "tableKey is required" };
 }
 
-const idsResult = await args.executeNamedServerFunction({
+const idsResult = await s({
   functionName: "getTableIds",
   contextData: { tableKey }
 });
@@ -35,7 +35,7 @@ const parseValues = (raw) => {
   try { return JSON.parse(String(raw)); } catch { return {}; }
 };
 
-const docsResult = await args.session.run(
+const docsResult = await _.session.run(
   `
   MATCH (g:GlobalSetting {key: 'Default'})-[:GlobalSettingHasSettingsSection]->(d:SettingsSectionDocument {pageId: $pageId})
   RETURN d.sectionId AS sectionId, d.values AS values
@@ -118,7 +118,7 @@ for (let i = 0; i < partNames.length; i++) {
   const payload = partPayloads[part];
   const configBody = `return ${JSON.stringify(payload, null, 2)};`;
 
-  await args.session.run(
+  await _.session.run(
     `
     MERGE (s:Setting {key: $key})
     ON CREATE SET

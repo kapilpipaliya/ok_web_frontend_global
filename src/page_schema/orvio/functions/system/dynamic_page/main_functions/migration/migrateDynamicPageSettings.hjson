@@ -13,14 +13,14 @@
  * This migration creates or updates default table configuration settings
  * for Book and AudioVideo content types.
  *
- * Parameters (via args.contextData):
+ * Parameters (via c):
  * - dryRun: boolean (optional) - If true, only report what would be migrated without making changes
  *
  * Returns:
  * - Statistics about the migration
  */
 
-const { dryRun = false } = args.contextData;
+const { dryRun = false } = c;
 
 console.log(`🚀 Starting content table settings migration (dryRun: ${dryRun})`);
 
@@ -209,30 +209,30 @@ const settingsConfigs = [
     rel: "noopener noreferrer",
     style: "color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; font-size: 14px;"
   },
-  onEdit: (row, args) => {
+  onEdit: (row, _) => {
     var productId = row && row.P && row.P.id
     if (productId && typeof window !== "undefined" && window.shopify && window.shopify.intents && window.shopify.intents.invoke) {
       window.shopify.intents.invoke("edit:shopify/Product", { value: productId })
     }
   },
-  onAfterAdd: (result, args) => {
+  onAfterAdd: (result, _) => {
     if (result?.success && result?.data) {
       const productId = result.data.P?.id;
       if (productId && typeof window !== 'undefined' && window.shopify?.config?.shop) {
         const shopDomain = window.shopify.config.shop;
-        if (window.shopify?.environment?.embedded && args?.navigate) {
-          args.navigate(\`/admin/products/\${productId}\`);
+        if (window.shopify?.environment?.embedded && _?.navigate) {
+          _.navigate(\`/admin/products/\${productId}\`);
         } else {
           window.open(\`https://\${shopDomain}/admin/products/\${productId}\`, '_blank');
         }
       }
     }
   },
-  onAfterEdit: (result, args) => {
+  onAfterEdit: (result, _) => {
     // Optional: Handle after edit action
     // For example, refresh data or navigate
   },
-  onAfterDelete: (result, row, args) => {
+  onAfterDelete: (result, row, _) => {
     // Optional: Handle after delete action
     // For example, refresh data or navigate
   },
@@ -453,13 +453,13 @@ const settingsConfigs = [
   sidebar: {
     enabled: false
   },
-  onRowClick: (row, args) => {
+  onRowClick: (row, _) => {
     const supportTicketVertexId = row?.id;
     if (!supportTicketVertexId) {
       return;
     }
     const basePath = "/ShopifySupportConversation";
-    const searchParams = args.searchParams || {};
+    const searchParams = _.searchParams || {};
     const nextParams = { ...searchParams, supportId: supportTicketVertexId };
     const query = Object.entries(nextParams)
       .filter(([, value]) => value != null && value !== "")
@@ -467,8 +467,8 @@ const settingsConfigs = [
       .join("&");
     const href = query ? \`\${basePath}?\${query}\` : basePath;
 
-    if (args.navigate) {
-      args.navigate(href);
+    if (_.navigate) {
+      _.navigate(href);
     } else if (typeof window !== "undefined") {
       window.location.href = href;
     }
@@ -488,7 +488,7 @@ const settingsConfigs = [
   hideExportButtons: true,
   hideSettingsButton: false,
   actions: [],
-  onRowClick: (row, args) => {
+  onRowClick: (row, _) => {
     const orderVertexId = row?.P?.id ?? row?.id;
     if (!orderVertexId || typeof window === "undefined") {
       return;
@@ -1080,7 +1080,7 @@ const settingsConfigs = [
   hideExportButtons: true,
   hideSettingsButton: false,
   actions: [],
-  onRowClick: (row, args) => {
+  onRowClick: (row, _) => {
     const draftOrderVertexId = row?.P?.id ?? row?.id;
     if (!draftOrderVertexId || typeof window === "undefined") {
       return;
@@ -1534,7 +1534,7 @@ const settingsConfigs = [
   hideExportButtons: true,
   hideSettingsButton: false,
   actions: [],
-  onRowClick: (row, args) => {
+  onRowClick: (row, _) => {
     const productGraphId = row?.P?.productGraphId;
     if (!productGraphId || typeof window === "undefined") return;
     const shopifyNumericSuffix = /([0-9]+)$/;
@@ -1604,7 +1604,7 @@ const settingsConfigs = [
   hideExportButtons: true,
   hideSettingsButton: false,
   actions: [],
-  onRowClick: (row, args) => {
+  onRowClick: (row, _) => {
     const vertexId = row?.P?.id ?? row?.id;
     if (!vertexId || typeof window === "undefined") return;
     const shopifyNumericSuffix = /([0-9]+)$/;
@@ -1755,7 +1755,7 @@ const settingsConfigs = [
   hideExportButtons: true,
   hideSettingsButton: false,
   actions: [],
-  onRowClick: (row, args) => {
+  onRowClick: (row, _) => {
     const orderGid = row?.P?.orderId;
     const returnGid = row?.P?.id ?? row?.id;
     if (!orderGid || !returnGid || typeof window === "undefined") return;
@@ -1972,7 +1972,7 @@ async function processSetting(setting) {
   console.log(`\n${icon} Processing ${name} settings...`);
 
   // Check if setting exists
-  const checkResult = await args.session.run(
+  const checkResult = await _.session.run(
     `MATCH (s:Setting {key: $key}) RETURN s`,
     { key }
   );
@@ -1982,7 +1982,7 @@ async function processSetting(setting) {
   if (!dryRun) {
     if (exists) {
       // Update existing
-      await args.session.run(
+      await _.session.run(
         `MATCH (s:Setting {key: $key})
          SET s.config = $config,
              s.type = 'table_config',
@@ -1995,7 +1995,7 @@ async function processSetting(setting) {
       return { created: 0, updated: 1 };
     } else {
       // Create new
-      await args.session.run(
+      await _.session.run(
         `CREATE (s:Setting {
           key: $key,
           type: 'table_config',

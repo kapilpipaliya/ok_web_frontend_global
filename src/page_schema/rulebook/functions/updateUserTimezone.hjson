@@ -9,7 +9,7 @@
         body: '''
 try {
   // Extract timezone from request
-  const { timezone } = args.contextData;
+  const { timezone } = c;
 
   // Validate required fields
   if (!timezone) {
@@ -17,7 +17,7 @@ try {
   }
 
   // Get current authenticated user from session
-  const user = await args.getUserFromSession();
+  const user = await _.getUserFromSession();
   if (!user) {
     throw new Error("User session not found. Please log in and try again.");
   }
@@ -40,7 +40,7 @@ try {
     RETURN u.timeZone as newTimezone
   `;
 
-  const result = await args.session.run(updateQuery, {
+  const result = await _.session.run(updateQuery, {
     userUuid: user.P.uuid,
     timezone
   });

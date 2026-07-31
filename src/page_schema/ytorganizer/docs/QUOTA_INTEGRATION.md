@@ -26,7 +26,7 @@ The system uses a **soft limit** approach: users can see they're over the limit 
 
 ```javascript
 // Check quota before adding channel
-const quotaCheck = await args.executeNamedServerFunction({
+const quotaCheck = await _.executeNamedServerFunction({
   functionName: "checkQuotaLimit",
   contextData: {
     videosToAdd: 1 // Estimate, will be updated after channel is fetched
@@ -51,7 +51,7 @@ if (quotaCheck.success && quotaCheck.data.shouldShowUpgradePrompt) {
 const videoCount = channelMetadata.statistics?.videoCount || 0;
 
 // Update user's video quota
-await args.session.run(
+await _.session.run(
   `MATCH (u:User {uuid: $userId})
    SET u.videoQuotaUsed = COALESCE(u.videoQuotaUsed, 0) + $videoCount
    RETURN u`,
@@ -74,7 +74,7 @@ await args.session.run(
 
 ```javascript
 // Check quota before adding playlist
-const quotaCheck = await args.executeNamedServerFunction({
+const quotaCheck = await _.executeNamedServerFunction({
   functionName: "checkQuotaLimit",
   contextData: {
     videosToAdd: 1 // Will be updated after playlist is fetched
@@ -98,7 +98,7 @@ if (quotaCheck.success && quotaCheck.data.shouldShowUpgradePrompt) {
 const itemCount = playlistMetadata.contentDetails?.itemCount || 0;
 
 // Update user's video quota
-await args.session.run(
+await _.session.run(
   `MATCH (u:User {uuid: $userId})
    SET u.videoQuotaUsed = COALESCE(u.videoQuotaUsed, 0) + $itemCount
    RETURN u`,
@@ -124,7 +124,7 @@ await args.session.run(
 // In the onClick handler for "Add Channel" button
 onClick: async () => {
   try {
-    const result = await args.executeNamedServerFunction({
+    const result = await _.executeNamedServerFunction({
       functionName: "saveChannel",
       contextData: {
         channelUrl: channelUrl,
@@ -141,20 +141,20 @@ onClick: async () => {
         );
 
         if (shouldUpgrade) {
-          args.navigate("/checkout?plan=basic&cycle=monthly");
+          _.navigate("/checkout?plan=basic&cycle=monthly");
         }
         return;
       }
 
       // Other error handling
-      args.showErrorToast(result.message);
+      _.showErrorToast(result.message);
       return;
     }
 
     // Success - channel added
-    args.showSuccessToast("Channel added successfully!");
+    _.showSuccessToast("Channel added successfully!");
   } catch (error) {
-    args.showErrorToast(error.message);
+    _.showErrorToast(error.message);
   }
 }
 ```
@@ -215,7 +215,7 @@ When channels auto-refresh and new videos are detected:
 const newVideosCount = newVideos.length;
 
 // Update user's quota
-await args.session.run(
+await _.session.run(
   `MATCH (u:User)-[:UserChannel]->(c:Channel {youtubeId: $channelId})
    SET u.videoQuotaUsed = COALESCE(u.videoQuotaUsed, 0) + $newVideosCount
    RETURN u`,
@@ -233,7 +233,7 @@ await args.session.run(
 const videoCount = channel.videoCount || 0;
 
 // Decrease quota when deleting
-await args.session.run(
+await _.session.run(
   `MATCH (u:User {uuid: $userId})
    SET u.videoQuotaUsed = COALESCE(u.videoQuotaUsed, 0) - $videoCount
    RETURN u`,
@@ -336,11 +336,11 @@ ORDER BY percentageUsed DESC
 ```javascript
 // In QuotaWarning component
 onClick: () => {
-  const currentPlan = args.fns.quotaData()?.currentPlan || "free";
-  const suggestedPlan = args.fns.quotaData()?.suggestedPlan || "basic";
+  const currentPlan = _.fns.quotaData()?.currentPlan || "free";
+  const suggestedPlan = _.fns.quotaData()?.suggestedPlan || "basic";
 
   // Navigate to checkout with suggested plan
-  args.navigate(`/checkout?plan=${suggestedPlan}&cycle=monthly&from=${currentPlan}`);
+  _.navigate(`/checkout?plan=${suggestedPlan}&cycle=monthly&from=${currentPlan}`);
 }
 ```
 

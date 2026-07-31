@@ -23,7 +23,7 @@ export const baseItemStyle = `return \`._id {
 }\`;`;
 
 export const hoverItemStyle = `return \`._id {
-  background-color: \${args.theme.var.color.background_light_150};
+  background-color: \${t.var.color.background_light_150};
   box-shadow: 1px 1px 1px;
   cursor: move;
 }\`;`;
@@ -33,7 +33,7 @@ export const buttonStyle = `return \`._id {
   background-color: transparent;
   border: none;
   cursor: pointer;
-  color: \${args.theme.var.color.text};
+  color: \${t.var.color.text};
   opacity: 0.7;
   touch-action: manipulation;
   transition: opacity 0.2s ease;

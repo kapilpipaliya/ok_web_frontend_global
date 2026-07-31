@@ -14,11 +14,11 @@
       L: Attr
       P: {
         fns:
-          '''const columns = () => args.contextData.props?.columns || [];
-const defaultSortKey = args.contextData.props?.defaultSortKey || "";
-const defaultSortDirection = args.contextData.props?.defaultSortDirection === "desc" ? "desc" : "asc";
-const [sortKey, setSortKey] = args.createSignal(defaultSortKey);
-const [sortDirection, setSortDirection] = args.createSignal(defaultSortDirection);
+          '''const columns = () => c.props?.columns || [];
+const defaultSortKey = c.props?.defaultSortKey || "";
+const defaultSortDirection = c.props?.defaultSortDirection === "desc" ? "desc" : "asc";
+const [sortKey, setSortKey] = _.createSignal(defaultSortKey);
+const [sortDirection, setSortDirection] = _.createSignal(defaultSortDirection);
 
 const getSortValue = (row, column, rowIndex) => {
   if (typeof column?.sortValue === "function") {
@@ -96,8 +96,8 @@ return {
 };'''
         css:
           '''return `._id {
-  background: ${args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.border};
+  background: ${t.var.color.background};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.75rem;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
@@ -137,7 +137,7 @@ return {
   min-width: 600px;
 
   th, td {
-    border: 1px solid ${args.theme.var.color.border};
+    border: 1px solid ${t.var.color.border};
     padding: 0.5rem 0.75rem;
   }
 }`;'''
@@ -155,7 +155,7 @@ return {
       P: {
         css:
           '''return `._id {
-  background: ${args.theme.var.color.primary_light_50};
+  background: ${t.var.color.primary_light_50};
 }`;'''
         displayOrder: 1
         componentName: Html
@@ -184,7 +184,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const columns = args.contextData.props?.columns || [];
+          '''const columns = c.props?.columns || [];
 return {
   as: "fragment",
   data: columns,
@@ -198,39 +198,39 @@ return {
       L: Attr
       P: {
         css:
-          '''const column = args.contextData.column || {};
+          '''const column = c.column || {};
 const align = column.align || "left";
 return `._id {
   text-align: ${align};
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   cursor: ${column.sortable === false ? "default" : "pointer"};
   user-select: none;
   white-space: nowrap;
 }
 
 ._id:focus-visible {
-  outline: 2px solid ${args.theme.var.color.primary};
+  outline: 2px solid ${t.var.color.primary};
   outline-offset: -2px;
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const column = args.contextData.column || {};
+          '''const column = c.column || {};
 const sortable = column.sortable !== false;
-const isActiveSort = args.fns.sortKey() === column.key;
-const direction = args.fns.sortDirection();
+const isActiveSort = f.sortKey() === column.key;
+const direction = f.sortDirection();
 return {
   as: "th",
   text: `${column.label || ""}${isActiveSort ? (direction === "asc" ? " ▲" : " ▼") : ""}`,
   style: column.width ? { width: column.width } : undefined,
   tabIndex: sortable ? 0 : undefined,
-  onClick: sortable ? () => args.fns.toggleSort(column) : undefined,
+  onClick: sortable ? () => f.toggleSort(column) : undefined,
   onKeyDown: sortable
     ? (event) => {
         if (event.key === "Enter" || event.key === " ") {
           event.preventDefault();
-          args.fns.toggleSort(column);
+          f.toggleSort(column);
         }
       }
     : undefined,
@@ -259,10 +259,10 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const rows = args.contextData.props?.rows || [];
-const contextName = args.contextData.props?.contextName || "row";
+          '''const rows = c.props?.rows || [];
+const contextName = c.props?.contextName || "row";
 const hasRows = Array.isArray(rows);
-const sortedRows = hasRows ? args.fns.getSortedRows(rows) : [];
+const sortedRows = hasRows ? f.getSortedRows(rows) : [];
 
 return {
   as: "fragment",
@@ -292,14 +292,14 @@ return {
           '''return `._id {
   padding: 2rem 1rem;
   text-align: center;
-  color: ${args.theme.var.color.text_light_300};
+  color: ${t.var.color.text_light_300};
   margin: 0;
 }`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''const rows = args.contextData.props?.rows || [];
-const emptyMessage = args.contextData.props?.emptyMessage || "No items available yet.";
+          '''const rows = c.props?.rows || [];
+const emptyMessage = c.props?.emptyMessage || "No items available yet.";
 return {
   as: "p",
   text: emptyMessage,

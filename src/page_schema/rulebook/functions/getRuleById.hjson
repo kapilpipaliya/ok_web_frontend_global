@@ -9,7 +9,7 @@
         body: '''
 try {
   // Extract input parameters from the request
-  const { ruleId } = args.contextData;
+  const { ruleId } = c;
 
   // Validate required fields
   if (!ruleId) {
@@ -17,7 +17,7 @@ try {
   }
 
   // Get current authenticated user from session
-  const user = await args.getUserFromSession();
+  const user = await _.getUserFromSession();
   if (!user) {
     throw new Error("User session not found. Please log in and try again.");
   }
@@ -44,7 +44,7 @@ try {
            size(streaks) as streakCount
   `;
 
-  const ruleResult = await args.session.run(ruleQuery, {
+  const ruleResult = await _.session.run(ruleQuery, {
     userUuid: user.P.uuid,
     ruleId
   });
@@ -60,13 +60,13 @@ try {
   const trackingRecords = ruleRecord.get('trackingRecords') || [];
   const goals = ruleRecord.get('goals') || [];
   const streaks = ruleRecord.get('streaks') || [];
-  const trackingCount = args.neo4jConvert.js(ruleRecord.get('trackingCount')) || 0;
-  const goalCount = args.neo4jConvert.js(ruleRecord.get('goalCount')) || 0;
-  const streakCount = args.neo4jConvert.js(ruleRecord.get('streakCount')) || 0;
+  const trackingCount = _.neo4jConvert.js(ruleRecord.get('trackingCount')) || 0;
+  const goalCount = _.neo4jConvert.js(ruleRecord.get('goalCount')) || 0;
+  const streakCount = _.neo4jConvert.js(ruleRecord.get('streakCount')) || 0;
 
   // Convert Neo4j nodes to proper Vertex format
-  const rule = args.convertNodeToJson(ruleNode);
-  const category = categoryNode ? args.convertNodeToJson(categoryNode) : null;
+  const rule = _.convertNodeToJson(ruleNode);
+  const category = categoryNode ? _.convertNodeToJson(categoryNode) : null;
 
   // Calculate statistics
   const completionRate = trackingCount > 0 ? Math.min(100, (trackingCount / 30) * 100) : 0;
@@ -78,7 +78,7 @@ try {
   let lastCompletionDate = null;
 
   if (streaks.length > 0) {
-    const streakData = args.convertNodeToJson(streaks[0]);
+    const streakData = _.convertNodeToJson(streaks[0]);
     currentStreak = streakData.P.currentStreak || 0;
     longestStreak = streakData.P.longestStreak || 0;
     totalCompletions = streakData.P.totalCompletions || 0;
@@ -89,15 +89,15 @@ try {
     rule,
     category,
     tracking: {
-      records: trackingRecords.map(t => args.convertNodeToJson(t)),
+      records: trackingRecords.map(t => _.convertNodeToJson(t)),
       count: trackingCount
     },
     goals: {
-      records: goals.map(g => args.convertNodeToJson(g)),
+      records: goals.map(g => _.convertNodeToJson(g)),
       count: goalCount
     },
     streaks: {
-      records: streaks.map(s => args.convertNodeToJson(s)),
+      records: streaks.map(s => _.convertNodeToJson(s)),
       count: streakCount,
       current: currentStreak,
       longest: longestStreak,

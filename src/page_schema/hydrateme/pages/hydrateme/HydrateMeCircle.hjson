@@ -12,7 +12,7 @@
 return {
   enabled: () => true,
   executeYTOFunction: (functionName, contextData) =>
-    args.executeNamedServerFunction({
+    s({
       functionName,
       contextData: contextData || {},
     }),
@@ -50,7 +50,7 @@ return {
   margin: 0 0 1rem;
   font-size: 1rem;
   line-height: 1.5;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;'''
       }
     }

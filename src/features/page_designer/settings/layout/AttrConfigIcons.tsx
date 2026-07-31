@@ -55,7 +55,7 @@ export function AttrConfigIcons(
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: \${args.theme.var.color.background_light_100};
+  background-color: \${t.var.color.background_light_100};
 }\`;`}
       >
         <Show when={showActionButtons()}>

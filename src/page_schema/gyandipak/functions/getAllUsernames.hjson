@@ -12,7 +12,7 @@
   ORDER BY u.username ASC
 `;
 
-const result = await args.session.run(query);
+const result = await _.session.run(query);
 
 const usernames = result.records.map(record => record.get('username'));
 

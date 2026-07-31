@@ -8,7 +8,7 @@
         dynamicComponent: SettingsSectionRenderer, SettingsSaveBar
         fns:
           '''
-const getPageConfig = () => args.fns.getEvaluatedSettingsConfig?.() || args.fns.evaluateConfig?.() || null;
+const getPageConfig = () => f.getEvaluatedSettingsConfig?.() || f.evaluateConfig?.() || null;
 
 const DEFAULT_SITE_LANGUAGES = [
   { code: "en", label: "English", isDefault: true },
@@ -17,7 +17,7 @@ const DEFAULT_SITE_LANGUAGES = [
 ];
 
 const getSiteLanguages = () => {
-  const languages = args.contextData.props?.siteLanguages;
+  const languages = c.props?.siteLanguages;
   if (Array.isArray(languages) && languages.length > 0) return languages;
   return DEFAULT_SITE_LANGUAGES;
 };
@@ -28,14 +28,14 @@ const getVisibleSections = () => {
   if (!Array.isArray(sections)) return [];
   return sections.filter((section) => {
     if (!section.permissions?.anyOf) return true;
-    if (args.isNoPermissionCheck === true) return true;
-    if (args.hasFullPermission || args.hasEditPermission || args.hasViewPermission) return true;
+    if (_.isNoPermissionCheck === true) return true;
+    if (_.hasFullPermission || _.hasEditPermission || _.hasViewPermission) return true;
     return false;
   });
 };
 
 const filterSectionsForUrl = () => {
-  const urlSection = args.searchParams?.section;
+  const urlSection = _.searchParams?.section;
   const sections = getVisibleSections();
   if (urlSection) {
     const matched = sections.filter((section) => section.id === urlSection);
@@ -87,15 +87,15 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.lg};
-  border-bottom: 1px solid ${args.theme.var.color.border};
-  margin-bottom: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.lg};
+  border-bottom: 1px solid ${t.var.color.border};
+  margin-bottom: ${t.var.spacing.md};
 }`;
 '''
         componentName: Html
         props:
           '''
-const pageConfig = args.fns.getPageConfig();
+const pageConfig = f.getPageConfig();
 return {
   as: "header",
   hide: !pageConfig?.title && !pageConfig?.description
@@ -113,14 +113,14 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 ${args.theme.var.spacing.xs} 0;
+  color: ${t.var.color.text};
+  margin: 0 0 ${t.var.spacing.xs} 0;
 }`;
 '''
         componentName: Html
         props:
           '''
-const pageConfig = args.fns.getPageConfig();
+const pageConfig = f.getPageConfig();
 return {
   as: "h1",
   text: pageConfig?.title || "Settings"
@@ -137,7 +137,7 @@ return {
           '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0;
   line-height: 1.5;
 }`;
@@ -145,7 +145,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const pageConfig = args.fns.getPageConfig();
+const pageConfig = f.getPageConfig();
 return {
   as: "p",
   text: pageConfig?.description || "",
@@ -165,14 +165,14 @@ return `._id {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: ${args.theme.var.spacing.xl};
+  padding: ${t.var.spacing.xl};
   min-height: 12rem;
 }`;
 '''
         componentName: Html
         props:
           '''
-const loading = args.fns.isSettingsLoading?.() === true;
+const loading = f.isSettingsLoading?.() === true;
 return {
   as: "div",
   hide: !loading
@@ -205,7 +205,7 @@ return {
 return `._id {
   flex: 1;
   min-height: 0;
-  padding: 0 ${args.theme.var.spacing.lg} ${args.theme.var.spacing.lg};
+  padding: 0 ${t.var.spacing.lg} ${t.var.spacing.lg};
   overflow-y: auto;
   overflow-x: hidden;
   overscroll-behavior: contain;
@@ -215,7 +215,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const loading = args.fns.isSettingsLoading?.() === true;
+const loading = f.isSettingsLoading?.() === true;
 return {
   as: "div",
   hide: loading
@@ -235,7 +235,7 @@ return {
           '''
 return {
   as: "div",
-  data: args.fns.filterSectionsForUrl()
+  data: f.filterSectionsForUrl()
 };
 '''
       }
@@ -248,10 +248,10 @@ return {
         componentName: SettingsSectionRenderer
         props:
           '''
-const sectionItem = args.contextData.sectionItem;
+const sectionItem = c.sectionItem;
 return {
   sectionConfig: sectionItem,
-  siteLanguages: args.fns.getSiteLanguages?.() || []
+  siteLanguages: f.getSiteLanguages?.() || []
 };
 '''
       }

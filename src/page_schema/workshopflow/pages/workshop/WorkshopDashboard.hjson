@@ -52,18 +52,18 @@ return `._id {
         displayOrder: 1
         fns:
           '''
-const [stats, setStats] = args.createSignal({
+const [stats, setStats] = _.createSignal({
   appointments: 0,
   openRepairs: 0,
   lowStockItems: 0,
   unpaidInvoices: 0
 });
-const [loading, setLoading] = args.createSignal(false);
+const [loading, setLoading] = _.createSignal(false);
 
 const loadStats = async () => {
   setLoading(true);
   try {
-    const result = await args.executeNamedServerFunction({
+    const result = await s({
       functionName: "getWorkshopDashboardStats",
       contextData: {}
     });
@@ -71,7 +71,7 @@ const loadStats = async () => {
       setStats(result.data);
     }
   } catch (error) {
-    args.showErrorToast(error?.message || "Failed to load workshop dashboard stats");
+    _.showErrorToast(error?.message || "Failed to load workshop dashboard stats");
   } finally {
     setLoading(false);
   }
@@ -90,7 +90,7 @@ return {
 return {
   as: "div",
   onMount: () => {
-    args.fns.loadStats();
+    f.loadStats();
   }
 };
 '''
@@ -105,9 +105,9 @@ return {
 return `._id {
   padding: 1rem;
   border-radius: 0.75rem;
-  border: 1px solid ${args.theme.var.color.border_light_200};
-  background: ${args.theme.var.color.background_light_100};
-  color: ${args.theme.var.color.text};
+  border: 1px solid ${t.var.color.border_light_200};
+  background: ${t.var.color.background_light_100};
+  color: ${t.var.color.text};
   font-size: 1rem;
   font-weight: 600;
 }`;
@@ -119,9 +119,9 @@ return `._id {
           '''
 return {
   as: "div",
-  text: args.fns.loading()
+  text: f.loading()
     ? "Loading appointments..."
-    : `Scheduled or in-progress appointments: ${args.fns.stats().appointments}`
+    : `Scheduled or in-progress appointments: ${f.stats().appointments}`
 };
 '''
       }
@@ -135,9 +135,9 @@ return {
 return `._id {
   padding: 1rem;
   border-radius: 0.75rem;
-  border: 1px solid ${args.theme.var.color.border_light_200};
-  background: ${args.theme.var.color.background_light_100};
-  color: ${args.theme.var.color.text};
+  border: 1px solid ${t.var.color.border_light_200};
+  background: ${t.var.color.background_light_100};
+  color: ${t.var.color.text};
   font-size: 1rem;
   font-weight: 600;
 }`;
@@ -149,9 +149,9 @@ return `._id {
           '''
 return {
   as: "div",
-  text: args.fns.loading()
+  text: f.loading()
     ? "Loading open repairs..."
-    : `Open repair orders: ${args.fns.stats().openRepairs}`
+    : `Open repair orders: ${f.stats().openRepairs}`
 };
 '''
       }
@@ -165,9 +165,9 @@ return {
 return `._id {
   padding: 1rem;
   border-radius: 0.75rem;
-  border: 1px solid ${args.theme.var.color.border_light_200};
-  background: ${args.theme.var.color.background_light_100};
-  color: ${args.theme.var.color.text};
+  border: 1px solid ${t.var.color.border_light_200};
+  background: ${t.var.color.background_light_100};
+  color: ${t.var.color.text};
   font-size: 1rem;
   font-weight: 600;
 }`;
@@ -179,9 +179,9 @@ return `._id {
           '''
 return {
   as: "div",
-  text: args.fns.loading()
+  text: f.loading()
     ? "Loading stock alerts..."
-    : `Low stock inventory items: ${args.fns.stats().lowStockItems}`
+    : `Low stock inventory items: ${f.stats().lowStockItems}`
 };
 '''
       }
@@ -195,9 +195,9 @@ return {
 return `._id {
   padding: 1rem;
   border-radius: 0.75rem;
-  border: 1px solid ${args.theme.var.color.border_light_200};
-  background: ${args.theme.var.color.background_light_100};
-  color: ${args.theme.var.color.text};
+  border: 1px solid ${t.var.color.border_light_200};
+  background: ${t.var.color.background_light_100};
+  color: ${t.var.color.text};
   font-size: 1rem;
   font-weight: 600;
 }`;
@@ -209,9 +209,9 @@ return `._id {
           '''
 return {
   as: "div",
-  text: args.fns.loading()
+  text: f.loading()
     ? "Loading invoices..."
-    : `Invoices not fully paid: ${args.fns.stats().unpaidInvoices}`
+    : `Invoices not fully paid: ${f.stats().unpaidInvoices}`
 };
 '''
       }

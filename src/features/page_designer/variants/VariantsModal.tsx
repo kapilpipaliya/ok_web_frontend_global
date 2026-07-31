@@ -127,7 +127,7 @@ export function VariantsModal(
             <As
               as="div"
               css={`return \`._id {
-                  background-color: \${args.theme.var.color.background_light_50};
+                  background-color: \${t.var.color.background_light_50};
                   border-radius: 0.5rem;
                   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
                   overflow: hidden;
@@ -151,7 +151,7 @@ export function VariantsModal(
                     as="h3"
                     css={`return \`._id {
   line-height: 1.5rem;
-  color: \${args.theme.var.color.text};
+  color: \${t.var.color.text};
   font-size: 1rem;
   font-weight: 600;
 }\`;`}
@@ -194,7 +194,7 @@ export function VariantsModal(
                   <As
                     as="div"
                     css={`return \`._id {
-  color: \${args.theme.var.color.error};
+  color: \${t.var.color.error};
 }\`;`}
                   >
                     {error()}

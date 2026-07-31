@@ -263,12 +263,12 @@ export function AdminNodeManagement() {
       <As
         as="div"
         css={`return \`._id {
-  background: \${args.theme.var.color.info_light_900};
-  border: 1px solid \${args.theme.var.color.info_light_700};
+  background: \${t.var.color.info_light_900};
+  border: 1px solid \${t.var.color.info_light_700};
   border-radius: 0.5rem;
   padding: 1rem 1.25rem;
   margin-bottom: 1.5rem;
-  color: \${args.theme.var.color.info_dark_300};
+  color: \${t.var.color.info_dark_300};
 }\`;`}
       >
         <As
@@ -338,8 +338,8 @@ export function AdminNodeManagement() {
   gap: 0.5rem;
   padding: 0.5rem 1rem;
   border-radius: 0.375rem;
-  border: 1px solid \${args.theme.var.color.border};
-  background: \${args.theme.var.color.background};
+  border: 1px solid \${t.var.color.border};
+  background: \${t.var.color.background};
 }\`;`}
           >
             <As
@@ -374,8 +374,8 @@ export function AdminNodeManagement() {
                 css={`return \`._id {
   padding: 0.25rem 0.5rem;
   border-radius: 0.25rem;
-  border: 1px solid \${args.theme.var.color.border};
-  background: \${args.theme.var.color.background};
+  border: 1px solid \${t.var.color.border};
+  background: \${t.var.color.background};
   font-size: 0.875rem;
   cursor: pointer;
 }\`;`}
@@ -411,11 +411,11 @@ export function AdminNodeManagement() {
   align-items: center;
   gap: 0.5rem;
   transition: all 0.2s;
-  background: \${args.theme.var.color.background_dark_300};
-  color: \${args.theme.var.color.background_dark_300_text};
+  background: \${t.var.color.background_dark_300};
+  color: \${t.var.color.background_dark_300_text};
 }
 ._id:hover {
-  background: \${args.theme.var.color.background_dark_400};
+  background: \${t.var.color.background_dark_400};
 }\`;`}
           >
             {"🔄 Refresh"}
@@ -430,8 +430,8 @@ export function AdminNodeManagement() {
           css={`return \`._id {
   padding: 1.5rem;
   border-radius: 0.5rem;
-  border: 1px solid \${args.theme.var.color.error};
-  background: \${args.theme.var.color.error_light_900};
+  border: 1px solid \${t.var.color.error};
+  background: \${t.var.color.error_light_900};
   margin-bottom: 2rem;
 }\`;`}
         >
@@ -457,7 +457,7 @@ export function AdminNodeManagement() {
                 as="div"
                 css={`return \`._id {
   font-weight: 600;
-  color: \${args.theme.var.color.error_dark_300};
+  color: \${t.var.color.error_dark_300};
   margin-bottom: 0.5rem;
 }\`;`}
               >
@@ -466,7 +466,7 @@ export function AdminNodeManagement() {
               <As
                 as="div"
                 css={`return \`._id {
-  color: \${args.theme.var.color.error_dark_300};
+  color: \${t.var.color.error_dark_300};
   font-size: 0.875rem;
 }\`;`}
               >
@@ -486,7 +486,7 @@ export function AdminNodeManagement() {
               css={`return \`._id {
   padding: 3rem;
   text-align: center;
-  color: \${args.theme.var.color.text_light_600};
+  color: \${t.var.color.text_light_600};
 }\`;`}
             >
               Loading cluster node status...
@@ -520,8 +520,8 @@ export function AdminNodeManagement() {
                   css={`return \`._id {
   padding: 1.5rem;
   border-radius: 0.5rem;
-  border: 1px solid \${args.theme.var.color.border};
-  background: \${args.theme.var.color.background};
+  border: 1px solid \${t.var.color.border};
+  background: \${t.var.color.background};
 }\`;`}
                 >
                   <As
@@ -529,7 +529,7 @@ export function AdminNodeManagement() {
                     css={`return \`._id {
   font-size: 0.875rem;
   font-weight: 500;
-  color: \${args.theme.var.color.text_light_600};
+  color: \${t.var.color.text_light_600};
   margin: 0 0 0.5rem 0;
   text-transform: uppercase;
 }\`;`}
@@ -553,8 +553,8 @@ export function AdminNodeManagement() {
                   css={`return \`._id {
   padding: 1.5rem;
   border-radius: 0.5rem;
-  border: 1px solid \${args.theme.var.color.border};
-  background: \${args.theme.var.color.background};
+  border: 1px solid \${t.var.color.border};
+  background: \${t.var.color.background};
 }\`;`}
                 >
                   <As
@@ -562,7 +562,7 @@ export function AdminNodeManagement() {
                     css={`return \`._id {
   font-size: 0.875rem;
   font-weight: 500;
-  color: \${args.theme.var.color.text_light_600};
+  color: \${t.var.color.text_light_600};
   margin: 0 0 0.5rem 0;
   text-transform: uppercase;
 }\`;`}
@@ -586,8 +586,8 @@ export function AdminNodeManagement() {
                   css={`return \`._id {
   padding: 1.5rem;
   border-radius: 0.5rem;
-  border: 1px solid \${args.theme.var.color.border};
-  background: \${args.theme.var.color.background};
+  border: 1px solid \${t.var.color.border};
+  background: \${t.var.color.background};
 }\`;`}
                 >
                   <As
@@ -595,7 +595,7 @@ export function AdminNodeManagement() {
                     css={`return \`._id {
   font-size: 0.875rem;
   font-weight: 500;
-  color: \${args.theme.var.color.text_light_600};
+  color: \${t.var.color.text_light_600};
   margin: 0 0 0.5rem 0;
   text-transform: uppercase;
 }\`;`}
@@ -625,7 +625,7 @@ export function AdminNodeManagement() {
                     css={`return \`._id {
   padding: 3rem;
   text-align: center;
-  color: \${args.theme.var.color.text_light_600};
+  color: \${t.var.color.text_light_600};
 }\`;`}
                   >
                     <As
@@ -645,7 +645,7 @@ export function AdminNodeManagement() {
                 <As
                   as="div"
                   css={`return \`._id {
-  border: 1px solid \${args.theme.var.color.border};
+  border: 1px solid \${t.var.color.border};
   border-radius: 0.5rem;
   overflow: hidden;
 }\`;`}
@@ -654,14 +654,14 @@ export function AdminNodeManagement() {
                   <As
                     as="div"
                     css={`return \`._id {
-  background: \${args.theme.var.color.background_light_200};
+  background: \${t.var.color.background_light_200};
   padding: 0.75rem 1.5rem;
   font-weight: 600;
   font-size: 0.875rem;
   display: grid;
   grid-template-columns: 2fr 1fr 120px 150px 150px 150px 100px;
   gap: 1rem;
-  border-bottom: 1px solid \${args.theme.var.color.border};
+  border-bottom: 1px solid \${t.var.color.border};
 }\`;`}
                   >
                     <As as="div">Node ID / Hostname</As>
@@ -687,17 +687,17 @@ export function AdminNodeManagement() {
                             as="div"
                             css={`return \`._id {
   padding: 1rem 1.5rem;
-  border-top: 1px solid \${args.theme.var.color.border};
+  border-top: 1px solid \${t.var.color.border};
   display: grid;
   grid-template-columns: 2fr 1fr 120px 150px 150px 150px 100px;
   gap: 1rem;
   align-items: center;
-  background: \${args.theme.var.color.background};
+  background: \${t.var.color.background};
   transition: background 0.2s;
   cursor: pointer;
 }
 ._id:hover {
-  background: \${args.theme.var.color.background_light_200};
+  background: \${t.var.color.background_light_200};
 }\`;`}
                             onClick={() => toggleNodeDetails(node.nodeId)}
                           >
@@ -724,8 +724,8 @@ export function AdminNodeManagement() {
                                   <As
                                     as="span"
                                     css={`return \`._id {
-  background: \${args.theme.var.color.info_light_900};
-  color: \${args.theme.var.color.info_dark_300};
+  background: \${t.var.color.info_light_900};
+  color: \${t.var.color.info_dark_300};
   padding: 0.125rem 0.5rem;
   border-radius: 0.25rem;
   font-size: 0.75rem;
@@ -741,7 +741,7 @@ export function AdminNodeManagement() {
                                 css={`return \`._id {
   font-family: monospace;
   font-size: 0.75rem;
-  color: \${args.theme.var.color.text_light_600};
+  color: \${t.var.color.text_light_600};
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -775,8 +775,8 @@ export function AdminNodeManagement() {
   border-radius: 9999px;
   font-size: 0.875rem;
   font-weight: 500;
-  background: ${healthy ? "${args.theme.var.color.success_light_900}" : "${args.theme.var.color.warning_light_900}"};
-  color: ${healthy ? "${args.theme.var.color.success_dark_300}" : "${args.theme.var.color.warning_dark_300}"};
+  background: ${healthy ? "${t.var.color.success_light_900}" : "${t.var.color.warning_light_900}"};
+  color: ${healthy ? "${t.var.color.success_dark_300}" : "${t.var.color.warning_dark_300}"};
 }\`;`}
                               >
                                 <As
@@ -785,7 +785,7 @@ export function AdminNodeManagement() {
   width: 6px;
   height: 6px;
   border-radius: 9999px;
-  background: ${healthy ? "${args.theme.var.color.success}" : "${args.theme.var.color.warning}"};
+  background: ${healthy ? "${t.var.color.success}" : "${t.var.color.warning}"};
   ${healthy ? "animation: pulse-dot 2s ease-in-out infinite;" : ""}
 }\`;`}
                                 />
@@ -810,7 +810,7 @@ export function AdminNodeManagement() {
                               as="div"
                               css={`return \`._id {
   font-size: 0.875rem;
-  color: \${args.theme.var.color.text_light_600};
+  color: \${t.var.color.text_light_600};
 }\`;`}
                             >
                               {formatTimestamp(node.startedAt)}
@@ -821,7 +821,7 @@ export function AdminNodeManagement() {
                               as="div"
                               css={`return \`._id {
   font-size: 0.875rem;
-  color: \${args.theme.var.color.text_light_600};
+  color: \${t.var.color.text_light_600};
 }\`;`}
                             >
                               {formatLastSeen(node.lastHeartbeat)}
@@ -855,8 +855,8 @@ export function AdminNodeManagement() {
                               as="div"
                               css={`return \`._id {
   padding: 1.5rem;
-  border-top: 1px solid \${args.theme.var.color.border};
-  background: \${args.theme.var.color.background_light_100};
+  border-top: 1px solid \${t.var.color.border};
+  background: \${t.var.color.background_light_100};
   animation: slideDown 0.2s ease-out;
 }
 @keyframes slideDown {
@@ -899,15 +899,15 @@ export function AdminNodeManagement() {
                                   css={`return \`._id {
   padding: 1rem;
   border-radius: 0.375rem;
-  background: \${args.theme.var.color.background};
-  border: 1px solid \${args.theme.var.color.border};
+  background: \${t.var.color.background};
+  border: 1px solid \${t.var.color.border};
 }\`;`}
                                 >
                                   <As
                                     as="div"
                                     css={`return \`._id {
   font-size: 0.75rem;
-  color: \${args.theme.var.color.text_light_600};
+  color: \${t.var.color.text_light_600};
   margin-bottom: 0.25rem;
   text-transform: uppercase;
 }\`;`}
@@ -931,15 +931,15 @@ export function AdminNodeManagement() {
                                   css={`return \`._id {
   padding: 1rem;
   border-radius: 0.375rem;
-  background: \${args.theme.var.color.background};
-  border: 1px solid \${args.theme.var.color.border};
+  background: \${t.var.color.background};
+  border: 1px solid \${t.var.color.border};
 }\`;`}
                                 >
                                   <As
                                     as="div"
                                     css={`return \`._id {
   font-size: 0.75rem;
-  color: \${args.theme.var.color.text_light_600};
+  color: \${t.var.color.text_light_600};
   margin-bottom: 0.25rem;
   text-transform: uppercase;
 }\`;`}
@@ -966,7 +966,7 @@ export function AdminNodeManagement() {
   font-size: 0.875rem;
   font-weight: 600;
   margin: 0 0 0.75rem 0;
-  color: \${args.theme.var.color.text_light_600};
+  color: \${t.var.color.text_light_600};
   text-transform: uppercase;
 }\`;`}
                                 >
@@ -986,8 +986,8 @@ export function AdminNodeManagement() {
                                         css={`return \`._id {
   padding: 0.75rem 1rem;
   border-radius: 0.375rem;
-  background: \${args.theme.var.color.background};
-  border: 1px solid \${args.theme.var.color.border};
+  background: \${t.var.color.background};
+  border: 1px solid \${t.var.color.border};
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1009,8 +1009,8 @@ export function AdminNodeManagement() {
   border-radius: 9999px;
   font-size: 0.75rem;
   font-weight: 500;
-  background: ${worker.status === "running" ? "${args.theme.var.color.success_light_900}" : "${args.theme.var.color.error_light_900}"};
-  color: ${worker.status === "running" ? "${args.theme.var.color.success_dark_300}" : "${args.theme.var.color.error_dark_300}"};
+  background: ${worker.status === "running" ? "${t.var.color.success_light_900}" : "${t.var.color.error_light_900}"};
+  color: ${worker.status === "running" ? "${t.var.color.success_dark_300}" : "${t.var.color.error_dark_300}"};
 }\`;`}
                                         >
                                           {worker.status}
@@ -1027,7 +1027,7 @@ export function AdminNodeManagement() {
                                   css={`return \`._id {
   padding: 2rem;
   text-align: center;
-  color: \${args.theme.var.color.text_light_600};
+  color: \${t.var.color.text_light_600};
   font-size: 0.875rem;
 }\`;`}
                                 >
@@ -1049,9 +1049,9 @@ export function AdminNodeManagement() {
                 css={`return \`._id {
   margin-top: 2rem;
   padding: 1.5rem;
-  border: 1px solid \${args.theme.var.color.border};
+  border: 1px solid \${t.var.color.border};
   border-radius: 0.5rem;
-  background: \${args.theme.var.color.background_light_100};
+  background: \${t.var.color.background_light_100};
 }\`;`}
               >
                 <As
@@ -1088,7 +1088,7 @@ export function AdminNodeManagement() {
                     <As
                       as="span"
                       css={`return \`._id {
-  color: \${args.theme.var.color.success};
+  color: \${t.var.color.success};
   font-weight: 600;
 }\`;`}
                     >
@@ -1110,7 +1110,7 @@ export function AdminNodeManagement() {
                     <As
                       as="span"
                       css={`return \`._id {
-  color: \${args.theme.var.color.warning};
+  color: \${t.var.color.warning};
   font-weight: 600;
 }\`;`}
                     >
@@ -1126,8 +1126,8 @@ export function AdminNodeManagement() {
                     css={`return \`._id {
   margin-top: 0.5rem;
   padding-top: 0.75rem;
-  border-top: 1px solid \${args.theme.var.color.border};
-  color: \${args.theme.var.color.text_light_600};
+  border-top: 1px solid \${t.var.color.border};
+  color: \${t.var.color.text_light_600};
 }\`;`}
                   >
                     Nodes automatically register when they start and send

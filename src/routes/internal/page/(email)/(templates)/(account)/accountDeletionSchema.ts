@@ -4,7 +4,7 @@ const content = [
   {
     as: "h1",
     css: `return \`._id {
-      color: \${args.theme.var.color.text_hex};
+      color: \${t.var.color.text_hex};
       font-size: 24px;
       font-weight: bold;
       margin-bottom: 16px;
@@ -16,7 +16,7 @@ const content = [
   {
     as: "p",
     css: `return \`._id {
-      color: \${args.theme.var.color.text_hex};
+      color: \${t.var.color.text_hex};
       margin-bottom: 16px;
     }\`;`,
     componentName: "Html",
@@ -26,7 +26,7 @@ const content = [
   {
     as: "p",
     css: `return \`._id {
-      color: \${args.theme.var.color.text_hex};
+      color: \${t.var.color.text_hex};
       margin-bottom: 16px;
     }\`;`,
     componentName: "Html",
@@ -36,7 +36,7 @@ const content = [
   {
     as: "p",
     css: `return \`._id {
-      color: \${args.theme.var.color.text_hex};
+      color: \${t.var.color.text_hex};
       margin-bottom: 16px;
     }\`;`,
     componentName: "Html",
@@ -46,10 +46,10 @@ const content = [
   {
     as: "a",
     css: `return \`._id {
-      background-color: \${args.theme.var.color.primary_hex};
+      background-color: \${t.var.color.primary_hex};
       border: none;
       border-radius: 4px;
-      color: \${args.theme.var.color.primary_text_hex};
+      color: \${t.var.color.primary_text_hex};
       cursor: pointer;
       display: inline-block;
       margin-top: 16px;

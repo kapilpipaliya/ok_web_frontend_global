@@ -11,7 +11,7 @@
 // Admin: remove shop record and dedicated shop database (same as shop/redact webhook).
 // contextData: { shop: string } — Shopify shop domain (e.g. my-store.myshopify.com)
 
-const { shop } = args.contextData || {};
+const { shop } = c || {};
 
 if (!shop || typeof shop !== "string") {
   return {
@@ -20,7 +20,7 @@ if (!shop || typeof shop !== "string") {
   };
 }
 
-const appSubDomain = args.rawSubDomain;
+const appSubDomain = _.rawSubDomain;
 if (!appSubDomain) {
   return {
     success: false,
@@ -28,8 +28,8 @@ if (!appSubDomain) {
   };
 }
 
-const shopDatabaseName = args.getDatabaseNameForShop(shop, appSubDomain);
-const driver = await args.getDriver();
+const shopDatabaseName = _.getDatabaseNameForShop(shop, appSubDomain);
+const driver = await _.getDriver();
 const systemSession = driver.session();
 
 try {
@@ -46,7 +46,7 @@ try {
 }
 
 try {
-  await args.session.run(
+  await _.session.run(
     `MATCH (s:ShopifyShop {shop: $shop}) DELETE s`,
     { shop }
   );

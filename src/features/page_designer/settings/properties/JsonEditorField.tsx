@@ -155,7 +155,7 @@ export function JsonEditorFieldComponent(props: {
         <As
           as="span"
           css={`return \`._id {
-  color: \${args.theme.var.color.error};
+  color: \${t.var.color.error};
 }\`;`}
         >
           Invalid JSON

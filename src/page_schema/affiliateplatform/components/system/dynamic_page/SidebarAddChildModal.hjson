@@ -14,14 +14,14 @@ const cleanup = () => {
   const getTxnId = formTxnIdRef.current;
   const txnId = getTxnId && typeof getTxnId === 'function' ? getTxnId() : null;
   if (txnId && txnId > 0) {
-    args.revertTransaction(txnId);
+    _.revertTransaction(txnId);
   }
 };
 
 // Close on backdrop click: revert (remove unsaved vertex) then close
 const handleBackdropClick = () => {
   cleanup();
-  const onClose = args.contextData.props?.onClose;
+  const onClose = c.props?.onClose;
   if (onClose) onClose();
 };
 
@@ -29,7 +29,7 @@ return {
   formTxnIdRef,
   cleanup,
   handleBackdropClick,
-  getUsePolarisUI: () => args.fns.getUsePolarisUI?.() === true
+  getUsePolarisUI: () => f.getUsePolarisUI?.() === true
 };
 '''
         key: SidebarAddChildModal
@@ -70,14 +70,14 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const isOpen = args.contextData.props?.isOpen || false;
+          '''const isOpen = c.props?.isOpen || false;
 
 return {
   as: "div",
   hide: !isOpen,
   onClick: (e) => {
     if (e.target === e.currentTarget) {
-      args.fns?.handleBackdropClick?.();
+      f?.handleBackdropClick?.();
     }
   },
 };'''
@@ -89,7 +89,7 @@ return {
       P: {
         css:
           '''return `._id {
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
   border-radius: 0.75rem;
   width: 100%;
   max-width: 600px;
@@ -135,8 +135,8 @@ return {
         fns:
           '''// Use component-level cleanup and formTxnIdRef
 return {
-  cleanup: () => args.fns?.cleanup?.(),
-  formTxnIdRef: args.fns?.formTxnIdRef
+  cleanup: () => f?.cleanup?.(),
+  formTxnIdRef: f?.formTxnIdRef
 };'''
         componentName: Html
         props:
@@ -144,7 +144,7 @@ return {
   as: "div",
   onClick: (e) => e.stopPropagation(),
   onCleanup: () => {
-    args.fns.cleanup();
+    f.cleanup();
   }
 };'''
       }
@@ -155,8 +155,8 @@ return {
       P: {
         css:
           '''return `._id {
-  padding: ${args.theme.var.spacing.lg};
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  padding: ${t.var.spacing.lg};
+  border-bottom: 1px solid ${t.var.color.border};
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -177,14 +177,14 @@ return {
           '''return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const mode = args.contextData.props?.mode || "add";
-const parentId = args.contextData.props?.parentId;
-const label = args.contextData.props?.label || "Item";
+          '''const mode = c.props?.mode || "add";
+const parentId = c.props?.parentId;
+const label = c.props?.label || "Item";
 
 let title;
 if (mode === "add") {
@@ -207,8 +207,8 @@ return {
         componentName: Html
         props:
           '''const wrappedOnClose = () => {
-  args.fns.cleanup();
-  const onClose = args.contextData.props?.onClose;
+  f.cleanup();
+  const onClose = c.props?.onClose;
   if (onClose) onClose();
 };
 
@@ -218,7 +218,7 @@ return {
   "attr:icon": "x",
   "attr:accessibilityLabel": "Close",
   onClick: wrappedOnClose,
-  hide: args.fns.getUsePolarisUI?.() !== true
+  hide: f.getUsePolarisUI?.() !== true
 };'''
       }
     }
@@ -229,19 +229,19 @@ return {
         css:
           '''return `._id {
   cursor: pointer;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   transition: color 0.2s ease;
 
   &:hover {
-    color: ${args.theme.var.color.text};
+    color: ${t.var.color.text};
   }
 }`;'''
         displayOrder: 2
         componentName: Html
         props:
           '''const wrappedOnClose = () => {
-  args.fns.cleanup();
-  const onClose = args.contextData.props?.onClose;
+  f.cleanup();
+  const onClose = c.props?.onClose;
   if (onClose) onClose();
 };
 
@@ -251,7 +251,7 @@ return {
   width: 24,
   height: 24,
   onClick: wrappedOnClose,
-  hide: args.fns.getUsePolarisUI?.() === true
+  hide: f.getUsePolarisUI?.() === true
 };'''
       }
     }
@@ -263,24 +263,24 @@ return {
           '''return `._id {
   flex: 1;
   overflow-y: auto;
-  padding: ${args.theme.var.spacing.lg};
+  padding: ${t.var.spacing.lg};
 }`;'''
         displayOrder: 2
         componentName: FormManagement
         props:
-          '''const sidebarConfig = args.contextData.props?.sidebarConfig || {};
+          '''const sidebarConfig = c.props?.sidebarConfig || {};
 const formConfig = sidebarConfig?.formConfig;
-const parentId = args.contextData.props?.parentId;
-const vertexId = args.contextData.props?.vertexId;
-const initialVertex = args.contextData.props?.initialVertex;
-const mode = args.contextData.props?.mode || "add";
+const parentId = c.props?.parentId;
+const vertexId = c.props?.vertexId;
+const initialVertex = c.props?.initialVertex;
+const mode = c.props?.mode || "add";
 const parentVertexLabel = sidebarConfig?.parentVertexLabel;
 const toParentEdgeType = sidebarConfig?.toParentEdgeType;
 const rootKeys = sidebarConfig?.rootKeys || {};
-const tableVertexLabel = args.contextData.props?.tableVertexLabel;
-const relationshipType = args.contextData.props?.relationshipType;
-const onSave = args.contextData.props?.onSave;
-const onClose = args.contextData.props?.onClose;
+const tableVertexLabel = c.props?.tableVertexLabel;
+const relationshipType = c.props?.relationshipType;
+const onSave = c.props?.onSave;
+const onClose = c.props?.onClose;
 
 const formHasKeyField = (cfg) => {
   if (!cfg || !Array.isArray(cfg.groups)) return false;
@@ -297,7 +297,7 @@ const formHasKeyField = (cfg) => {
 const ensureSidebarFormConfigWithKeyField = (cfg) => {
   if (!cfg) return cfg;
   if (formHasKeyField(cfg)) return cfg;
-  const out = args.klona(cfg);
+  const out = _.klona(cfg);
   const keyField = {
     key: "key",
     label: "Key",
@@ -332,22 +332,22 @@ const wrappedOnSave = async (saveData) => {
   // Extract vertex and properties from saveData
   const vertex = saveData.vertex;
   if (!vertex) {
-    args.showErrorToast?.("No vertex data to save");
+    _.showErrorToast?.("No vertex data to save");
     return false;
   }
 
   const keyVal = String(vertex.P?.key ?? "").trim();
   if (!keyVal) {
-    args.showErrorToast?.("Key is Required");
+    _.showErrorToast?.("Key is Required");
     return false;
   }
   const nameVal = String(vertex.P?.name || vertex.P?.title || "").trim();
   const nameForServer = nameVal || keyVal;
 
   // Call saveSidebarVertex function
-  const label = args.contextData.props?.label || "Item";
+  const label = c.props?.label || "Item";
   try {
-    const result = await args.executeNamedServerFunction({
+    const result = await s({
       functionName: "saveSidebarVertex",
       contextData: {
         vertexId: vertexId || null,
@@ -358,7 +358,7 @@ const wrappedOnSave = async (saveData) => {
         toParentEdgeType: toParentEdgeType,
         rootKeys: rootKeys,
         properties: (() => {
-          const copy = args.klona(vertex.P || {});
+          const copy = _.klona(vertex.P || {});
           delete copy.key;
           const rels = saveData.relationships || {};
           for (const fieldKey of Object.keys(rels)) {
@@ -369,20 +369,20 @@ const wrappedOnSave = async (saveData) => {
         relationships: saveData.relationships || {},
         tableVertexLabel: tableVertexLabel,
         relationshipType: relationshipType,
-        enableUserScoping: args.contextData.props?.enableUserScoping,
-        hooks: args.contextData.props?.hooks,
+        enableUserScoping: c.props?.enableUserScoping,
+        hooks: c.props?.hooks,
         label: label
       }
     });
 
     // Check for errors and show toast
-    const errorMessage = args.fns.extractError?.(result, true, `Failed to ${mode === "edit" ? "update" : "create"} ${label}`);
+    const errorMessage = f.extractError?.(result, true, `Failed to ${mode === "edit" ? "update" : "create"} ${label}`);
     if (errorMessage) {
       return false;
     }
 
     if (result?.result?.success) {
-      args.showSuccessToast?.(result.result.message || `${label} ${mode === "edit" ? "updated" : "created"} successfully`);
+      _.showSuccessToast?.(result.result.message || `${label} ${mode === "edit" ? "updated" : "created"} successfully`);
       // Call original onSave if provided
       if (onSave) {
         await onSave(result.result.data);
@@ -396,14 +396,14 @@ const wrappedOnSave = async (saveData) => {
     return false;
   } catch (error) {
     console.error("Error saving vertex:", error);
-    args.showErrorToast?.(`Failed to ${mode === "edit" ? "update" : "create"} ${label}`);
+    _.showErrorToast?.(`Failed to ${mode === "edit" ? "update" : "create"} ${label}`);
     return false;
   }
 };
 
 // Wrap onClose to cleanup transaction
 const wrappedOnClose = () => {
-  args.fns.cleanup();
+  f.cleanup();
   if (onClose) {
     onClose();
   }
@@ -414,12 +414,12 @@ return {
   initialVertex: initialVertex || null,
   mode: mode,
   vertexLabel: null,
-  hide: () => !(args.contextData.props?.isOpen === true),
+  hide: () => !(c.props?.isOpen === true),
   onSave: wrappedOnSave,
   onClose: wrappedOnClose,
   inModal: true,
   onFnsReady: (fns) => {
-    if (args.fns?.formTxnIdRef) args.fns.formTxnIdRef.current = fns.formTxnId;
+    if (f?.formTxnIdRef) f.formTxnIdRef.current = fns.formTxnId;
   }
 };'''
       }

@@ -13,7 +13,7 @@
  * contextData.action: "validateSection" | "mergeDefaults" | "transformValues" | "buildAuditDiff" | "runHookPipeline"
  */
 
-const action = args.contextData?.action;
+const action = c?.action;
 if (!action) {
   return { success: false, message: "action is required" };
 }
@@ -214,7 +214,7 @@ const mergeSectionDefaults = async (sectionConfig, values, languages) => {
     }
   }
 
-  const normalizeResult = await args.executeNamedServerFunction({
+  const normalizeResult = await s({
     functionName: "localizationHelpers",
     contextData: {
       action: "localizeSectionValues",
@@ -265,7 +265,7 @@ const buildAuditDiff = (beforeValues, afterValues) => {
 };
 
 if (action === "validateSection") {
-  const { sectionConfig, values, languages: inputLanguages } = args.contextData;
+  const { sectionConfig, values, languages: inputLanguages } = c;
   const languages = resolveLanguages(inputLanguages);
   const fieldErrors = await validateSectionValues(sectionConfig, values, languages);
   if (Object.keys(fieldErrors).length > 0) {
@@ -275,24 +275,24 @@ if (action === "validateSection") {
 }
 
 if (action === "mergeDefaults") {
-  const { sectionConfig, values, languages: inputLanguages } = args.contextData;
+  const { sectionConfig, values, languages: inputLanguages } = c;
   const languages = resolveLanguages(inputLanguages);
   const mergedValues = await mergeSectionDefaults(sectionConfig, values, languages);
   return { success: true, data: { values: mergedValues } };
 }
 
 if (action === "transformValues") {
-  const { sectionConfig, values } = args.contextData;
+  const { sectionConfig, values } = c;
   return { success: true, data: { values: transformSectionValues(sectionConfig, values) } };
 }
 
 if (action === "buildAuditDiff") {
-  const { beforeValues, afterValues } = args.contextData;
+  const { beforeValues, afterValues } = c;
   return { success: true, data: buildAuditDiff(beforeValues, afterValues) };
 }
 
 if (action === "collectFormFields") {
-  const { sectionConfig } = args.contextData;
+  const { sectionConfig } = c;
   return { success: true, data: { fields: collectFormFields(sectionConfig) } };
 }
 

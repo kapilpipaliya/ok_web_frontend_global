@@ -38,93 +38,93 @@ The graph must represent a valid Page Builder Item tree.
 ### Optional Properties
 - `componentName`: string - name of the component any of: 'Html', 'Slot' or Custom Component name if specified in prompt.
 - `fns`: Function Body string - function definitions for the Item e.g. "return {fn1: () => {}}". Its the place where you add javascript code to define state and functions that can be shared with current or child components. It will be inherited to all the children of the Item. **Prefer using `fns` for defining state and functions (instead of passing them through context in props function).**
-  - Functions defined in parent `fns` are automatically available to all children via `args.fns`
+  - Functions defined in parent `fns` are automatically available to all children via `f`
 - `props`: Function Body string - dynamic properties for the Item, it returns an object with key-value pairs e.g. "return {key: value}". Its the place where you add javascript code to generate dynamic properties for the Item.
   - Use 'props' for dynamic props. It is a Function Body string that should return an object with key-value pairs.
   - You can add static props directly to the vertex properties, prefer the 'props' when value is dynamic.
-- `css`: Function Body string - css for the Item e.g. "return \`._id {color: \${args.theme.var.color.primary}}\`;" Its the place where you add javascript code to generate css for the Item.
-- `hide`: boolean - controls visibility of the Item. If true, the Item will be hidden.It should returned from 'props' function either boolean or function returning boolean, function is preferred: e.g. "return { hide: () => args.contextData.someCondition === true }"
-- `show`: boolean - controls visibility of the Item. If false, the Item will be hidden.It should returned from 'props' function either boolean or function returning boolean, function is preferred: e.g. "return { show: () => args.contextData.someCondition === true }"
+- `css`: Function Body string - css for the Item e.g. "return \`._id {color: \${t.var.color.primary}}\`;" Its the place where you add javascript code to generate css for the Item.
+- `hide`: boolean - controls visibility of the Item. If true, the Item will be hidden.It should returned from 'props' function either boolean or function returning boolean, function is preferred: e.g. "return { hide: () => c.someCondition === true }"
+- `show`: boolean - controls visibility of the Item. If false, the Item will be hidden.It should returned from 'props' function either boolean or function returning boolean, function is preferred: e.g. "return { show: () => c.someCondition === true }"
 
 ### Property Types
 **Important**: All vertex properties should be primitives (string, number, boolean, null) and not complex types like arrays or objects. For complex data structures, use the 'props' function body to return them dynamically.
 
 ### Function Arguments
-The `fns`, `props` and `css` properties accept javascript function body strings. You can use `args` key to access function arguments whose type is `FunctionArgumentBaseType`.
+The `fns`, `props`, `css`, and `${...}` templates in `text` are javascript function body strings. They do receive an `_` parameter. Use the shorthand parameters below (type of `_` is `FunctionArgumentBaseType`).
 
-#### Shorthand Aliases
-Every function body (`fns`, `props`, `css`, and `${...}` templates in `text`) receives these shorthand parameters alongside `args`:
-
-| Alias | Equivalent |
+#### Shorthand Parameters (required)
+| Alias | Binds to |
 | --- | --- |
-| `_` | `args` |
-| `f` | `args.fns` |
-| `c` | `args.contextData` |
-| `t` | `args.theme` |
-| `g` | `args.graph` |
-| `sg` | `args.setGraph` |
-| `s` | `args.executeNamedServerFunction` |
+| `_` | Full function-argument object |
+| `f` | `_.fns` |
+| `c` | `_.contextData` |
+| `t` | `_.theme` |
+| `g` | `_.graph` |
+| `sg` | `_.setGraph` |
+| `s` | `_.executeNamedServerFunction` |
 
-Use them to keep bodies short, e.g. `return \`._id { color: ${t.var.color.primary}; }\`;` instead of `args.theme.var.color.primary`.
+**Prefer aliases over `_.`** — e.g. `t.var.color.primary`, `f.myFn()`, `c.props`, `s({ functionName: "..." })`.
 
-**IMPORTANT: `args`, `_`, `f`, `c`, `t`, `g`, `sg` and `s` are reserved identifiers.** They are function parameters, so declaring one at the top level of a body is a `SyntaxError`:
+**Do not write `_.theme` / `_.fns` / etc.; use `t` / `f` / `_`.
+
+**Reserved identifiers:** `_`, `f`, `c`, `t`, `g`, `sg`, `s` are function parameters. Declaring one at the top level of a body is a `SyntaxError`:
 
 ```javascript
 // ❌ WRONG - 'Identifier t has already been declared'
-const t = args.theme.var.color;
+const t = _.theme.var.color;
 return `._id { color: ${t.text}; }`;
 
 // ✅ CORRECT - use the alias directly
 return `._id { color: ${t.var.color.text}; }`;
 
 // ✅ CORRECT - or pick a meaningful name
-const colors = args.theme.var.color;
+const colors = t.var.color;
 return `._id { color: ${colors.text}; }`;
 ```
 
 Shadowing inside a nested function is still fine, but avoid it for clarity.
 
 #### User Settings Functions
-- `args.userSetting` - Get current user settings as an object (e.g., `args.userSetting.themeColorMode`)
-- `args.saveUserSetting({ key: value })` - Save user settings to the database (persists across sessions)
-- `args.postAPI(url, body, action?)` - Call JSON app API routes (same as `~/lib/api/general/postApi`; throws on HTTP or `{ error }` responses; use in `onMount` / click handlers for `/api/...` endpoints)
+- `_.userSetting` - Get current user settings as an object (e.g., `_.userSetting.themeColorMode`)
+- `_.saveUserSetting({ key: value })` - Save user settings to the database (persists across sessions)
+- `_.postAPI(url, body, action?)` - Call JSON app API routes (same as `~/lib/api/general/postApi`; throws on HTTP or `{ error }` responses; use in `onMount` / click handlers for `/api/...` endpoints)
 
 Example usage in props:
 ```javascript
 return {
   onClick: () => {
     // Save a custom user preference
-    args.saveUserSetting({ preferredLayout: 'grid' });
+    _.saveUserSetting({ preferredLayout: 'grid' });
   },
-  currentLayout: args.userSetting?.preferredLayout || 'list'
+  currentLayout: _.userSetting?.preferredLayout || 'list'
 };
 ```
 
 #### Current User Access
-- `args.user` - Get the current authenticated user as a Vertex object (or `undefined` if not logged in)
-- Access user properties via the `P` field following vertex format: `args.user?.P?.propertyName`
+- `_.user` - Get the current authenticated user as a Vertex object (or `undefined` if not logged in)
+- Access user properties via the `P` field following vertex format: `_.user?.P?.propertyName`
 
 Example usage in props:
 ```javascript
 return {
-  text: `Welcome, ${args.user?.P?.username || 'Guest'}`,
+  text: `Welcome, ${_.user?.P?.username || 'Guest'}`,
   onClick: () => {
-    if (args.user) {
-      console.log('User email:', args.user.P.email);
-      console.log('User role:', args.user.P.role);
+    if (_.user) {
+      console.log('User email:', _.user.P.email);
+      console.log('User role:', _.user.P.role);
     } else {
-      args.showWarningToast('Please sign in to continue');
+      _.showWarningToast('Please sign in to continue');
     }
   },
-  hide: !args.user // Hide if not logged in
+  hide: !_.user // Hide if not logged in
 };
 ```
 
 The user vertex contains all user properties including:
-- `args.user?.P?.username` - User's username
-- `args.user?.P?.email` - User's email
-- `args.user?.P?.uuid` - User's unique identifier
-- `args.user?.id` - Vertex ID in the graph
+- `_.user?.P?.username` - User's username
+- `_.user?.P?.email` - User's email
+- `_.user?.P?.uuid` - User's unique identifier
+- `_.user?.id` - Vertex ID in the graph
 
 #### Browser-Specific Code and Lifecycle Methods
 
@@ -142,7 +142,7 @@ if (typeof window !== 'undefined' && !window.YT) {
   document.head.appendChild(script);
 }
 
-const [width, setWidth] = args.createSignal(
+const [width, setWidth] = _.createSignal(
   typeof window !== 'undefined' ? window.innerWidth : 768
 );
 '''
@@ -152,7 +152,7 @@ const [width, setWidth] = args.createSignal(
 ```javascript
 // ✅ CORRECT - Use onMount for browser APIs
 fns: '''
-const [width, setWidth] = args.createSignal(768); // Default value
+const [width, setWidth] = _.createSignal(768); // Default value
 
 const initializeAPI = () => {
   if (window.YT) return;
@@ -175,12 +175,12 @@ return {
   as: "div",
   onMount: () => {
     // Browser APIs are safe to use here
-    args.fns.initializeAPI();
-    args.fns.updateWidth();
-    window.addEventListener('resize', args.fns.updateWidth);
+    f.initializeAPI();
+    f.updateWidth();
+    window.addEventListener('resize', f.updateWidth);
   },
   onCleanup: () => {
-    window.removeEventListener('resize', args.fns.updateWidth);
+    window.removeEventListener('resize', f.updateWidth);
   }
 };
 '''
@@ -213,7 +213,7 @@ export interface FunctionArgumentBaseType {
   ensureData: () => null | string;
   error: (key?: string) => string | undefined;
   evalExpression: (expression: string, options: object) => unknown;
-  fns: Record<string, ((...args: unknown[]) => unknown) | undefined>;
+  fns: Record<string, ((...params: unknown[]) => unknown) | undefined>;
   graph: GraphInterface;
   hasFullPermission: boolean | null | undefined;
   hasEditPermission: boolean | null | undefined;
@@ -255,7 +255,7 @@ export interface FunctionArgumentBaseType {
   setGraph: SetStoreFunction<GraphInterface>;
   setGraphData: (
           txnId: number,
-          args: GraphData,
+          graphData: GraphData,
           options: UpdateOptions,
   ) => void;
   setSearchParams?: (
@@ -297,7 +297,7 @@ export interface FunctionArgumentBaseType {
   executeNamedServerFunction: (request: {functionName: string; contextData?: any}, context?: Record<string, unknown>) => Promise<ServerResult>;
   /** JSON POST/PUT/DELETE to app routes (same as ~/lib/api/general/postApi). */
   postAPI: (url: string, data: object | FormData, action?: "DELETE" | "POST" | "PUT") => Promise<Record<string, unknown>>;
-  // Zod (same as ~/lib/utils/schemaValidation); use args.z in props/fns/css for client-side schemas
+  // Zod (same as ~/lib/utils/schemaValidation); use _.z in props/fns/css for client-side schemas
   z: typeof import("zod").z;
 }
 ```
@@ -334,16 +334,16 @@ The HTML component can also includes data handling capabilities for repeating pa
 - For looping over data:
   - Set 'loop' to true and provide a 'contextName'
   - In the 'props' function body, pass the 'data' key with an array of values to iterate over
-  - In child components, access the current iteration item using 'args.contextData.contextName' within 'props', 'fns', or 'css' function bodies
+  - In child components, access the current iteration item using 'c.contextName' within 'props', 'fns', or 'css' function bodies
 - For state management:
-  - **Preferred**: Define state management functions in the 'fns' property using solid-js functions like 'args.createSignal' or 'args.createStore'
-  - For nested store updates (e.g. one key in a large object), prefer `setStore("bucket", "fieldKey", value)` or `setStore("bucket", args.reconcile(nextObject))` — do not spread-clone the whole bucket on every keystroke
-  - Access state functions in the same item or child components within 'props', 'fns', or 'css' function bodies using 'args.fns' when defined in parent's fns
+  - **Preferred**: Define state management functions in the 'fns' property using solid-js functions like '_.createSignal' or '_.createStore'
+  - For nested store updates (e.g. one key in a large object), prefer `setStore("bucket", "fieldKey", value)` or `setStore("bucket", _.reconcile(nextObject))` — do not spread-clone the whole bucket on every keystroke
+  - Access state functions in the same item or child components within 'props', 'fns', or 'css' function bodies using 'f' when defined in parent's fns
   - Example:
     ```javascript
     // Parent fns - define state and functions:
     fns: `
-      const [count, setCount] = args.createSignal(0);
+      const [count, setCount] = _.createSignal(0);
       return {
         count,
         setCount,
@@ -352,52 +352,48 @@ The HTML component can also includes data handling capabilities for repeating pa
       };
     `
     
-    // Child props - access via args.fns:
+    // Child props - access via f:
     props: `return {
-      text: args.fns.count(),
-      onClick: args.fns.increment
+      text: f.count(),
+      onClick: f.increment
     };`
     ```
 - For data passing:
   - return value from 'props' function body with 'data' key
-  - Access it in child components using 'args.contextData.contextName' within 'props', 'fns', or 'css' function bodies
-  - Example: In 'props' property, return value like "return {data: {count: 10}};" and access it in children via 'args.contextData.contextName.count'
+  - Access it in child components using 'c.contextName' within 'props', 'fns', or 'css' function bodies
+  - Example: In 'props' property, return value like "return {data: {count: 10}};" and access it in children via 'c.contextName.count'
 
 ### Server Function Usage
-The `serverFunction` property allows executing server-side code with database access:
-- The function body has access to an `args` object containing:
-  - `session`: Neo4j database session for running queries
-  - `context`: Evaluation context with nodes and relationships
-  - `contextData`: Data passed from the component
-  - `vertexes`: Current vertex data array
-  - `graph`: Object with nodes and relationships
-  - `processResult`: Function to process query results and populate graph structure
-- Example usage:
+The `serverFunction` property / Function schema `body` runs server-side with database access.
+Bodies receive shorthand parameters:
+- `_` — full bag (`session`, `context`, `contextData`, `vertexes`, `graph`, `processResult`, …)
+- `c` — `_.contextData`
+- `g` — `_.graph` (`{ nodes, relationships }`)
+- `s` — `_.executeNamedServerFunction`
+
+Example:
   ```javascript
   serverFunction: `
-    // Query the database
-    const result = await args.session.run(
+    const result = await _.session.run(
       'MATCH (u:User) WHERE u.active = true RETURN u.name as name, u.email as email LIMIT 10'
     );
-
-    // Process and return the data
     return result.records.map(record => ({
       name: record.get('name'),
       email: record.get('email')
     }));
   `
   ```
-- The returned data is available to child components via `args.contextData.contextName`
+- The returned data is available to child components via `c.contextName`
 - Server functions are executed asynchronously and results are cached
 
-#### Using `args.processResult` for Graph Structure
-When querying Neo4j and returning vertices/relationships, **always use `args.processResult`** to properly populate the graph structure. This ensures vertices and edges are correctly added to `args.context.nodes` and `args.context.relationships`, which are automatically returned in the graph response.
+#### Using `_.processResult` for Graph Structure
+When querying Neo4j and returning vertices/relationships, **always use `_.processResult`** to properly populate the graph structure. This ensures vertices and edges are correctly added to `_.context.nodes` and `_.context.relationships`, which are automatically returned in the graph response.
 
 **Function Signature:**
 ```javascript
-args.processResult(
+_.processResult(
   records: Record[],           // Query result records from session.run()
-  context: EvalExpressionContext,  // args.context
+  context: EvalExpressionContext,  // _.context
   nodeLabel: string | string[],    // Label(s) used in RETURN clause (e.g., 'v', 'child', ['child', 'parent'])
   typeLabel?: string | string[]    // Optional: Relationship label(s) from RETURN clause (e.g., 'r', 'rel')
 )
@@ -412,10 +408,10 @@ serverFunction: `
     ORDER BY v.name ASC
   \`;
   
-  const result = await args.session.run(query);
+  const result = await _.session.run(query);
   
   // Use processResult to populate graph structure
-  const vertices = args.processResult(result.records, args.context, 'v');
+  const vertices = _.processResult(result.records, _.context, 'v');
   
   return {
     success: true,
@@ -434,14 +430,14 @@ serverFunction: `
     RETURN child, parent, r
   \`;
   
-  const result = await args.session.run(query, { parentId });
+  const result = await _.session.run(query, { parentId });
   
   // Process both nodes and relationships
   // First parameter: records
-  // Second parameter: context (args.context)
+  // Second parameter: context (_.context)
   // Third parameter: node labels from RETURN clause
   // Fourth parameter: relationship labels from RETURN clause
-  const vertices = args.processResult(result.records, args.context, ['child', 'parent'], 'r');
+  const vertices = _.processResult(result.records, _.context, ['child', 'parent'], 'r');
   
   return {
     success: true,
@@ -452,16 +448,16 @@ serverFunction: `
 ```
 
 **Key Benefits:**
-- Automatically populates `args.context.nodes` and `args.context.relationships`
+- Automatically populates `_.context.nodes` and `_.context.relationships`
 - Updates vertex `OUT` and `IN` relationship arrays correctly
 - Graph structure is automatically included in the response via `executeNamedServerFunctionCore`
 - Ensures reactive graph updates on the client side
 - Handles both single nodes and arrays of nodes (from `collect()`)
 
 **Important Notes:**
-- Always use `processResult` instead of manually calling `args.convertNodeToJson` and adding to context
-- The graph structure (`args.context.nodes` and `args.context.relationships`) is automatically returned in the response
-- Client code can use `args.setGraphData()` to merge the returned graph into the reactive graph store
+- Always use `processResult` instead of manually calling `_.convertNodeToJson` and adding to context
+- The graph structure (`_.context.nodes` and `_.context.relationships`) is automatically returned in the response
+- Client code can use `_.setGraphData()` to merge the returned graph into the reactive graph store
 - For deletions, return `deleted_vertexes` and `deleted_edges` arrays in the result (not in graph structure)
 
 #### Using Transactions for Atomic Operations
@@ -472,7 +468,7 @@ When you need to perform multiple database operations that must succeed or fail 
 ```javascript
 serverFunction: `
   // Use executeWrite for write operations that need to be atomic
-  const result = await args.session.executeWrite(async (tx) => {
+  const result = await _.session.executeWrite(async (tx) => {
     // Create a user
     const userResult = await tx.run(
       'CREATE (u:User {uuid: $uuid, email: $email, createdAt: datetime()}) RETURN u',
@@ -521,7 +517,7 @@ Worker functions must have keys starting with `'process'` or `'background'`:
     description: "Processes pending emails from queue",
     body: `
       // Check if this is a start action
-      if (args.contextData.action === 'start') {
+      if (c.action === 'start') {
         console.log('Starting email queue worker');
 
         // Your worker initialization code here
@@ -541,13 +537,13 @@ Worker functions must have keys starting with `'process'` or `'background'`:
 ```
 
 **Available in Worker Body:**
-- `args.session` - Neo4j database session
-- `args.contextData` - Contains `{action: 'start'}` when initializing
-- `args.bullmq` - Access to BullMQ queues (channelQueue, playlistQueue)
-- `args.graph` - Graph nodes and relationships
-- `args.executeNamedServerFunction` - Call other server functions
-- `args.getUserFromSession` - Get current user
-- `args.convertNodeToJson` - Convert Neo4j nodes to JSON
+- `_.session` - Neo4j database session
+- `c` - Contains `{action: 'start'}` when initializing
+- `_.bullmq` - Access to BullMQ queues (channelQueue, playlistQueue)
+- `g` - Graph nodes and relationships
+- `s` - Call other server functions
+- `_.getUserFromSession` - Get current user
+- `_.convertNodeToJson` - Convert Neo4j nodes to JSON
 
 **Worker Lifecycle:**
 1. Worker functions are discovered by their key prefix
@@ -558,10 +554,10 @@ Worker functions must have keys starting with `'process'` or `'background'`:
 **Example Worker:**
 ```javascript
 body: `
-  if (args.contextData.action === 'start') {
+  if (c.action === 'start') {
     // Set up a recurring task
     const intervalId = setInterval(async () => {
-      const result = await args.session.run(
+      const result = await _.session.run(
         'MATCH (t:Task {status: "pending"}) RETURN t LIMIT 10'
       );
 
@@ -598,11 +594,11 @@ Use the 'css' property for styling. It is a function body string that returns a 
 - Include responsive breakpoints for mobile/desktop
 - Use responsive css states to adjust padding, text sizes, and spacing for mobile and desktop viewports
 - Reduce text sizes and padding on mobile while maintaining larger sizes on desktop screens using responsive css states
-- Never use css variables like 'var(--color-primary)', instead use variables like '${args.theme.var.color.primary}'
+- Never use css variables like 'var(--color-primary)', instead use variables like '${t.var.color.primary}'
 
 ### Theme System and Dark Mode
 - The application supports light and dark themes with automatic color adjustments
-- Check current mode with `args.currentMode()` which returns "light", "dark", or "system"
+- Check current mode with `_.currentMode()` which returns "light", "dark", or "system"
 - **Important Dark Mode Guidelines**:
   - Avoid using primary colors as backgrounds in dark mode - they often lack sufficient contrast
   - Use dark background shades for backgrounds: `background_dark_200`, `background_dark_300`, etc as background color is white in light mode and black in dark mode
@@ -611,11 +607,11 @@ Use the 'css' property for styling. It is a function body string that returns a 
   - Prefer using `background_dark_` shades or opacity-based overlays for dark mode styling
 
 ### Theme Variable Access
-The theme system supports any custom variables, not just colors. Access all theme variables via `args.theme.var`.
+The theme system supports any custom variables, not just colors. Access all theme variables via `t.var`.
 
 **Color Variables:**
-- Base colors: `args.theme.var.color.primary`, `args.theme.var.color.info`, `args.theme.var.color.success`, `args.theme.var.color.warning`, `args.theme.var.color.error`, `args.theme.var.color.text`, `args.theme.var.color.background`, `args.theme.var.color.border`
-- Standard colors: `args.theme.var.color.red`, `args.theme.var.color.blue`, `args.theme.var.color.green`, etc.
+- Base colors: `t.var.color.primary`, `t.var.color.info`, `t.var.color.success`, `t.var.color.warning`, `t.var.color.error`, `t.var.color.text`, `t.var.color.background`, `t.var.color.border`
+- Standard colors: `t.var.color.red`, `t.var.color.blue`, `t.var.color.green`, etc.
 - Light shades: `_light_100` to `_light_900` (light_100 = close to base, light_900 = close to white)
 - Dark shades: `_dark_100` to `_dark_900` (dark_100 = close to base, dark_900 = close to black)
 - Text colors: Automatic with `_text` suffix (e.g., `primary_text`, `background_light_200_text`)
@@ -624,20 +620,20 @@ The theme system supports any custom variables, not just colors. Access all them
 
 **Custom Theme Variables:**
 You can define and use any custom variables in your theme:
-- Spacing: `args.theme.var.spacing.xs`, `args.theme.var.spacing.sm`, `args.theme.var.spacing.md`, `args.theme.var.spacing.lg`, `args.theme.var.spacing.xl`
-- Border radius: `args.theme.var.borderRadius.sm`, `args.theme.var.borderRadius.md`, `args.theme.var.borderRadius.lg`, `args.theme.var.borderRadius.full`
-- Any other custom values: `args.theme.var.customCategory.customValue`
+- Spacing: `t.var.spacing.xs`, `t.var.spacing.sm`, `t.var.spacing.md`, `t.var.spacing.lg`, `t.var.spacing.xl`
+- Border radius: `t.var.borderRadius.sm`, `t.var.borderRadius.md`, `t.var.borderRadius.lg`, `t.var.borderRadius.full`
+- Any other custom values: `t.var.customCategory.customValue`
 
 **Example Usage:**
 ```javascript
 css: '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   font-size: 1.125rem;
-  border-radius: ${args.theme.var.borderRadius.md};
+  border-radius: ${t.var.borderRadius.md};
   transition: all 300ms ease;
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
 }`;
 '''
 ```
@@ -655,10 +651,10 @@ Email templates are defined as hjson schemas under `src/page_schema/[website]/em
 2. **Inner container** — `max-width: 600px`, centered, `background_light_100_hex`, `padding: 32px`
 3. **Logo section** — linked company logo (`/api/file/downloadCompanyRectangularLogo`) + `<hr>` with `border_hex`
 4. **Content** — headings, paragraphs, highlight boxes, links
-5. **Footer** — centered copyright using `text_light_200_hex`, `font-size: 12px`, `args.globalSetting?.P?.appName`
+5. **Footer** — centered copyright using `text_light_200_hex`, `font-size: 12px`, `_.globalSetting?.P?.appName`
 
 **Color rules for email CSS:**
-- Use **only** `_hex` theme variables (e.g. `${args.theme.var.color.text_hex}`), not OKLCH values like `text` or `primary`
+- Use **only** `_hex` theme variables (e.g. `${t.var.color.text_hex}`), not OKLCH values like `text` or `primary`
 - Body text: `text_hex`
 - Headings: `text_hex`, `font-size: 24px`, `font-weight: bold`, `margin-bottom: 16px`
 - Links: `primary_hex`
@@ -666,7 +662,7 @@ Email templates are defined as hjson schemas under `src/page_schema/[website]/em
 - OTP / emphasis boxes (when needed): `primary_hex` border, `background_light_100_hex` background
 - Buttons (when needed): `primary_hex` background, `primary_text_hex` text
 
-**Dynamic values:** Read runtime data from `args.searchParams` (e.g. ticket serial, message, tracking URL). Use `hide: () => !value` to omit optional rows.
+**Dynamic values:** Read runtime data from `_.searchParams` (e.g. ticket serial, message, tracking URL). Use `hide: () => !value` to omit optional rows.
 
 **Example EmailTemplate root vertex:**
 ```javascript
@@ -795,7 +791,7 @@ To grant a role permission to a page, create the following structure:
 
 ### Attr Vertex
 1. "Attr" vertex join with Component using "Attr" edge
-2. Read Component props by using 'props' property in the function body with 'args.contextData.props["key"]' property
+2. Read Component props by using 'props' property in the function body with 'c.props["key"]' property
 3. When using component in the Item tree, in the direct children of the component use 'Slot' key to specify the slot name. If not specified, it will render all unnamed slots.
 
 ## Workshop reference sequences (FormManagement + settings)
@@ -805,7 +801,7 @@ Workshop apps can auto-generate stable reference strings (appointment numbers, i
 **Form field flags** (in `formConfig.groups[].fields[]`):
 
 - `autoReferenceSequenceKey`: string — must match a `WorkshopReferenceSequence.key`. In **add** mode, `FormManagement` calls `reserveWorkshopReferenceNumber` after creating the draft vertex and writes the returned `value` into that field (one HTTP call per distinct key; fields sharing a key receive the same value without double increment).
-- `disabled`: boolean, `(ctx) => boolean`, or a string body compiled as `(ctx, args) => boolean` with `ctx.mode` in `"create"` | `"edit"` | `"view"` (add/create both map to `"create"`). Example for auto-filled reference fields: `disabled: (ctx) => ctx.mode === "create"` so the value cannot be edited until the row exists; view mode still disables inputs via FormManagement.
+- `disabled`: boolean, `(ctx) => boolean`, or a string body compiled as `(ctx, _) => boolean` with `ctx.mode` in `"create"` | `"edit"` | `"view"` (add/create both map to `"create"`). Example for auto-filled reference fields: `disabled: (ctx) => ctx.mode === "create"` so the value cannot be edited until the row exists; view mode still disables inputs via FormManagement. String predicates/validators may use `_` (full function-argument bag).
 
 **String validation** (generic; any field key): optional on each field or under **`formConfig.fieldValidationByKey[fieldKey]`** (preset merged first; **per-field properties override** when they are not `undefined`). Supported keys: **`pattern`** (RegExp source, no `/` delimiters), **`patternMessage`**, **`minLength`**, **`maxLength`**, **`minLengthMessage`**, **`maxLengthMessage`**. Order of checks: required / type rules, then email format, then length, then pattern. Only one error message per field per submit (first failing rule wins among length/pattern).
 
@@ -863,7 +859,7 @@ Use **`hooks.afterCreate` / `hooks.afterUpdate`** on the table config to denorma
 - Do not skip any vertexes or edges
 - Use numeric IDs for the graph
 - The graph must be a directed acyclic graph (DAG) to prevent circular dependencies
-- do not short variable name, use meaningful variable names. The only exception is the built-in shorthand aliases (`_`, `f`, `c`, `t`, `g`, `sg`, `s`), which must never be redeclared at the top level of a function body.
+- Prefer shorthand aliases (`_`, `f`, `c`, `t`, `g`, `sg`, `s`) in schema bodies; otherwise use meaningful variable names. Never redeclare those aliases at the top level of a function body.
 - Email templates must use `_hex` theme colors and follow the layout in `baseEmailTemplate.ts` (logo, 600px container, footer).
 
 ## Import Guidelines

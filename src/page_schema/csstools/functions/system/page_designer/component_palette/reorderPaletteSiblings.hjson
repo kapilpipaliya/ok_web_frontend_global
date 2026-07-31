@@ -8,7 +8,7 @@
         description: Updates displayOrder for sibling category or content vertices in the Page Designer palette tree.
         body:
           '''
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return { success: false, message: "User session not found. Please log in and try again." };
 }
@@ -20,7 +20,7 @@ const {
   toParentEdgeType,
   vertexLabel,
   tableVertexLabel
-} = args.contextData;
+} = c;
 
 if (!orderedItemIds || !Array.isArray(orderedItemIds) || orderedItemIds.length === 0) {
   return { success: false, message: "orderedItemIds array is required and must not be empty" };
@@ -34,7 +34,7 @@ try {
   for (let i = 0; i < orderedItemIds.length; i++) {
     const itemId = orderedItemIds[i];
     const displayOrder = i + 1;
-    const result = await args.session.run(
+    const result = await _.session.run(
       `MATCH (v:${vertexLabel})
        WHERE elementId(v) = $itemId
        SET v.displayOrder = $displayOrder, v.updatedAt = datetime()
@@ -42,7 +42,7 @@ try {
       { itemId, displayOrder }
     );
     if (result.records.length > 0) {
-      args.processResult(result.records, args.context, 'v');
+      _.processResult(result.records, _.context, 'v');
     }
   }
 

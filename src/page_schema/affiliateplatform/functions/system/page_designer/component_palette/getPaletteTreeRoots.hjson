@@ -7,7 +7,7 @@
         description: Loads category + content tree roots for Page Designer palette (components, pages, functions).
         body:
           '''
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return { success: false, message: "User session not found. Please log in and try again.", data: [] };
 }
@@ -18,7 +18,7 @@ const {
   rootKeys = {},
   tableVertexLabel,
   relationshipType
-} = args.contextData;
+} = c;
 
 if (!parentVertexLabel || !toParentEdgeType || !rootKeys) {
   return {
@@ -28,44 +28,44 @@ if (!parentVertexLabel || !toParentEdgeType || !rootKeys) {
   };
 }
 
-if (!args.context.nodes) args.context.nodes = {};
+if (!_.context.nodes) _.context.nodes = {};
 
-const allCategories = await args.session.run(
+const allCategories = await _.session.run(
   `MATCH (v:${parentVertexLabel})
    RETURN v
    ORDER BY COALESCE(v.displayOrder, 0), COALESCE(v.key, '') ASC`
 );
-args.processResult(allCategories.records, args.context, 'v');
+_.processResult(allCategories.records, _.context, 'v');
 
-const allCategoryEdges = await args.session.run(
+const allCategoryEdges = await _.session.run(
   `MATCH (child:${parentVertexLabel})-[r:${toParentEdgeType}]->(parent:${parentVertexLabel})
    RETURN child, parent, r
    ORDER BY COALESCE(child.displayOrder, 0), COALESCE(child.key, '') ASC`
 );
-args.processResult(allCategoryEdges.records, args.context, ['child', 'parent'], 'r');
+_.processResult(allCategoryEdges.records, _.context, ['child', 'parent'], 'r');
 
 if (tableVertexLabel) {
-  const allContent = await args.session.run(
+  const allContent = await _.session.run(
     `MATCH (c:${tableVertexLabel})
      RETURN c
      ORDER BY COALESCE(c.displayOrder, 0), COALESCE(c.key, '') ASC`
   );
-  args.processResult(allContent.records, args.context, 'c');
+  _.processResult(allContent.records, _.context, 'c');
 
-  const allContentEdges = await args.session.run(
+  const allContentEdges = await _.session.run(
     `MATCH (content:${tableVertexLabel})-[r:${toParentEdgeType}]->(cat:${parentVertexLabel})
      RETURN content, cat, r
      ORDER BY COALESCE(content.displayOrder, 0), COALESCE(content.key, '') ASC`
   );
-  args.processResult(allContentEdges.records, args.context, ['content', 'cat'], 'r');
+  _.processResult(allContentEdges.records, _.context, ['content', 'cat'], 'r');
 }
 
-const nodes = args.context.nodes;
+const nodes = _.context.nodes;
 const syntheticUncategorizedId = tableVertexLabel ? '_' + tableVertexLabel + '_uncategorized' : null;
 
 let uncategorizedCount = 0;
 if (tableVertexLabel) {
-  const uncatResult = await args.session.run(
+  const uncatResult = await _.session.run(
     `MATCH (content:${tableVertexLabel})
      WHERE NOT EXISTS { MATCH (content)-[:${toParentEdgeType}]->(:${parentVertexLabel}) }
      RETURN count(DISTINCT content) as contentCount`
@@ -112,7 +112,7 @@ if (tableVertexLabel && relationshipType) {
   const categoryIds = Object.keys(nodes).filter(id => id !== syntheticUncategorizedId);
   const countByCategoryId = {};
   if (categoryIds.length > 0) {
-    const batchResult = await args.session.run(
+    const batchResult = await _.session.run(
       `UNWIND $categoryIds AS catId
        OPTIONAL MATCH (cat:${parentVertexLabel}) WHERE elementId(cat) = catId
        WITH catId, cat

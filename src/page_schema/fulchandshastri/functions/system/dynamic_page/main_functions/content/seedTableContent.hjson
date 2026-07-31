@@ -7,7 +7,7 @@
         description: Seeds default content vertices for a table (generic). Supports Book and ScheduleEvent.
         body:
           '''
-const { tableVertexLabel, dryRun = false, replaceExisting = false } = args.contextData || {};
+const { tableVertexLabel, dryRun = false, replaceExisting = false } = c || {};
 
 if (!tableVertexLabel) {
   return { success: false, message: "tableVertexLabel is required" };
@@ -129,7 +129,7 @@ if (!Array.isArray(rows)) {
   return { success: false, message: `No seed data defined for table ${tableVertexLabel}` };
 }
 
-const countResult = await args.session.run(
+const countResult = await _.session.run(
   `MATCH (c:${tableVertexLabel}) RETURN count(c) AS cnt`
 );
 const existingCount = countResult.records[0]?.get("cnt")?.toNumber?.() ?? Number(countResult.records[0]?.get("cnt")) ?? 0;
@@ -151,7 +151,7 @@ if (dryRun) {
 }
 
 if (replaceExisting && existingCount > 0) {
-  await args.session.run(`MATCH (c:${tableVertexLabel}) DETACH DELETE c`);
+  await _.session.run(`MATCH (c:${tableVertexLabel}) DETACH DELETE c`);
 }
 
 const now = new Date().toISOString();
@@ -173,7 +173,7 @@ for (let i = 0; i < rows.length; i++) {
         language: row.language || "",
         year: row.year ?? null
       };
-  await args.session.run(
+  await _.session.run(
     `
     CREATE (c:${tableVertexLabel})
     SET c += $props,

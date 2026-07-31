@@ -8,9 +8,9 @@
         fns:
           '''
 // Shared CRUD runtime (no page chrome) — used by DashboardCrudEmbed and future standalone embeds.
-const getWidgetConfig = () => args.contextData.props?.widgetConfig || null;
+const getWidgetConfig = () => c.props?.widgetConfig || null;
 const getRuntime = () => {
-  const fromProps = args.contextData.props?.dashboardRuntime;
+  const fromProps = c.props?.dashboardRuntime;
   if (typeof fromProps === "function") return fromProps();
   return null;
 };
@@ -49,8 +49,8 @@ const getWidgetStore = () => {
 };
 
 const getTableMode = () => {
-  const mode = args.contextData.props?.mode || args.contextData.props?.tableMode;
-  return mode === "embedded" || args.contextData.props?.embeddedMode === true ? "embedded" : "standalone";
+  const mode = c.props?.mode || c.props?.tableMode;
+  return mode === "embedded" || c.props?.embeddedMode === true ? "embedded" : "standalone";
 };
 
 const isEmbeddedMode = () => getTableMode() === "embedded";
@@ -91,20 +91,20 @@ const dispatchRowInteraction = (interaction, row) => {
   const action = String(interaction.action || interaction.type || "").toUpperCase();
   if (action === "NAVIGATE") {
     let href = payload.href || interaction.to;
-    if (href && row && args.dashboardPlatform?.interaction?.substitutePayload) {
-      href = args.dashboardPlatform.interaction.substitutePayload(
+    if (href && row && _.dashboardPlatform?.interaction?.substitutePayload) {
+      href = _.dashboardPlatform.interaction.substitutePayload(
         { href },
         { row }
       ).href;
     } else if (href && row) {
       href = String(href).replace(/\{\{row\.id\}\}/g, String(row.id || ""));
     }
-    if (href) args.navigate(href);
+    if (href) _.navigate(href);
     return;
   }
   if (action === "OPEN_ENTITY_DRAWER") {
-    const drawerPayload = args.dashboardPlatform?.interaction?.substitutePayload
-      ? args.dashboardPlatform.interaction.substitutePayload(payload, { row })
+    const drawerPayload = _.dashboardPlatform?.interaction?.substitutePayload
+      ? _.dashboardPlatform.interaction.substitutePayload(payload, { row })
       : payload;
     if (runtime.platformApi?.openEntity) {
       void runtime.platformApi.openEntity(drawerPayload);

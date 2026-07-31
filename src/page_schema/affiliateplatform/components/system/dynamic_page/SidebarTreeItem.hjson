@@ -7,16 +7,16 @@
         fns:
           '''
 // Get props from context
-const getItem = () => args.contextData.props?.item;
-const getExpandedKeys = () => args.contextData.props?.expandedKeys || [];
-const getSelectedItem = () => args.contextData.props?.selectedItem;
-const getOnToggleExpand = () => args.contextData.props?.onToggleExpand;
-const getOnItemSelect = () => args.contextData.props?.onItemSelect;
-const getFetchChildren = () => args.contextData.props?.fetchChildren;
-const getParentVertexLabel = () => args.contextData.props?.sidebarConfig?.parentVertexLabel;
-const getToParentEdgeType = () => args.contextData.props?.sidebarConfig?.toParentEdgeType;
+const getItem = () => c.props?.item;
+const getExpandedKeys = () => c.props?.expandedKeys || [];
+const getSelectedItem = () => c.props?.selectedItem;
+const getOnToggleExpand = () => c.props?.onToggleExpand;
+const getOnItemSelect = () => c.props?.onItemSelect;
+const getFetchChildren = () => c.props?.fetchChildren;
+const getParentVertexLabel = () => c.props?.sidebarConfig?.parentVertexLabel;
+const getToParentEdgeType = () => c.props?.sidebarConfig?.toParentEdgeType;
 const getUncategorizedVertexId = () => {
-  const label = args.contextData.props?.tableVertexLabel;
+  const label = c.props?.tableVertexLabel;
   return label ? '_' + label + '_uncategorized' : null;
 };
 const isUncategorizedTreeNode = (node) => {
@@ -33,7 +33,7 @@ const getItemSortName = (item) => {
 
 // Get children and loading from props (from graph)
 const getChildren = () => {
-  const children = args.contextData.props?.childItems || [];
+  const children = c.props?.childItems || [];
   // Sort children by name alphabetically
   return children.sort((a, b) => {
     const nameA = getItemSortName(a);
@@ -43,13 +43,13 @@ const getChildren = () => {
 };
 
 const getLoading = () => {
-  return args.contextData.props?.loading || false;
+  return c.props?.loading || false;
 };
 
 // Search: getters from props
-const getSearchActive = () => args.contextData.props?.searchActive ?? false;
-const getFilterTree = () => args.contextData.props?.filterTree;
-const getShouldExpandForSearch = () => args.contextData.props?.shouldExpandForSearch;
+const getSearchActive = () => c.props?.searchActive ?? false;
+const getFilterTree = () => c.props?.filterTree;
+const getShouldExpandForSearch = () => c.props?.shouldExpandForSearch;
 
 // Search: show item when no search or when item/children match
 const shouldShowItem = () => {
@@ -184,7 +184,7 @@ const getItemIcon = () => {
   }
 
   // Then check for default icon in sidebarConfig
-  const sidebarConfig = args.contextData.props?.sidebarConfig;
+  const sidebarConfig = c.props?.sidebarConfig;
   if (sidebarConfig?.defaultIcon) {
     return sidebarConfig.defaultIcon;
   }
@@ -231,19 +231,19 @@ const hasChildren = () => {
 };
 
 // Get onItemUpdate callback from props
-const getOnItemUpdate = () => args.contextData.props?.onItemUpdate;
+const getOnItemUpdate = () => c.props?.onItemUpdate;
 
 // Get onItemDelete callback from props
-const getOnItemDelete = () => args.contextData.props?.onItemDelete;
+const getOnItemDelete = () => c.props?.onItemDelete;
 
 // Get fetchRoot function from props
-const getFetchRoot = () => args.contextData.props?.fetchRoot;
+const getFetchRoot = () => c.props?.fetchRoot;
 
 // Open add/edit modals (handled by parent Sidebar - single modal for one item at a time)
 const handleOpenAddModal = (e) => {
   e.stopPropagation();
   const item = getItem();
-  const onOpenAddModal = args.contextData.props?.onOpenAddModal;
+  const onOpenAddModal = c.props?.onOpenAddModal;
   if (item && onOpenAddModal) {
     onOpenAddModal(item);
   }
@@ -252,17 +252,17 @@ const handleOpenAddModal = (e) => {
 const handleOpenEditModal = (e) => {
   e.stopPropagation();
   const item = getItem();
-  const onOpenEditModal = args.contextData.props?.onOpenEditModal;
+  const onOpenEditModal = c.props?.onOpenEditModal;
   if (item && onOpenEditModal) {
     onOpenEditModal(item);
   }
 };
 
 // Drag and drop handlers using @atlaskit/pragmatic-drag-and-drop
-const [isDragOver, setIsDragOver] = args.createSignal(false);
-const [isDragging, setIsDragging] = args.createSignal(false);
-const [isValidDrop, setIsValidDrop] = args.createSignal(true);
-const [draggedCategoryId, setDraggedCategoryId] = args.createSignal(null);
+const [isDragOver, setIsDragOver] = _.createSignal(false);
+const [isDragging, setIsDragging] = _.createSignal(false);
+const [isValidDrop, setIsValidDrop] = _.createSignal(true);
+const [draggedCategoryId, setDraggedCategoryId] = _.createSignal(null);
 const draggableCleanup = { current: null };
 const dropTargetCleanup = { current: null };
 
@@ -279,15 +279,15 @@ const isDescendantOf = (targetId, categoryId) => {
 
   try {
     // Get target vertex from graph
-    const targetVertex = args.graph?.vertexes?.[targetId];
+    const targetVertex = g?.vertexes?.[targetId];
     if (!targetVertex) return false;
 
     // Traverse up the parent chain to see if we reach categoryId
     // Use evalExpression to follow the toParentEdgeType relationship backwards
     // Since child-[toParentEdgeType]->parent, we use ->toParentEdgeType to go from child to parent
-    const parent = args.evalExpression(
+    const parent = _.evalExpression(
       `->${toParentEdgeType}`,
-      { graph: args.graph, setGraph: args.setGraph, vertexes: [targetVertex] }
+      { graph: g, setGraph: sg, vertexes: [targetVertex] }
     );
 
     if (!parent || parent.length === 0) {
@@ -337,7 +337,7 @@ const validateDropTarget = (categoryId, targetId) => {
 
 // Initialize draggable for sidebar item using pragmatic-drag-and-drop
 const initDraggable = (element) => {
-  if (!element || !args.draggable) return;
+  if (!element || !_.draggable) return;
 
   const item = getItem();
   if (!item) return;
@@ -351,7 +351,7 @@ const initDraggable = (element) => {
     draggableCleanup.current();
   }
 
-  const cleanup = args.draggable({
+  const cleanup = _.draggable({
     element,
     canDrag: () => !isQueued(),
     getInitialData: () => ({
@@ -362,17 +362,17 @@ const initDraggable = (element) => {
     onGenerateDragPreview: ({ nativeSetDragImage }) => {
       // If available, render a custom native drag preview so it doesn't disappear
       // when the default preview is disabled by pragmatic-drag-and-drop.
-      if (!args.setCustomNativeDragPreview || !nativeSetDragImage) return;
+      if (!_.setCustomNativeDragPreview || !nativeSetDragImage) return;
       const item = getItem();
       if (!item) return;
 
       const label = item.P?.name || item.P?.title || item.P?.key || "Category";
       const count = item.P?.contentCount ?? null;
 
-      return args.setCustomNativeDragPreview({
+      return _.setCustomNativeDragPreview({
         nativeSetDragImage,
-        getOffset: args.pointerOutsideOfPreview
-          ? args.pointerOutsideOfPreview({ x: "8px", y: "8px" })
+        getOffset: _.pointerOutsideOfPreview
+          ? _.pointerOutsideOfPreview({ x: "8px", y: "8px" })
           : undefined,
         render: ({ container }) => {
           // Basic "pill" preview that mirrors sidebar row content.
@@ -382,9 +382,9 @@ const initDraggable = (element) => {
           container.style.gap = "8px";
           container.style.padding = "8px 10px";
           container.style.borderRadius = "10px";
-          container.style.border = `1px solid ${args.theme?.var?.color?.border ?? "rgba(0,0,0,0.2)"}`;
-          container.style.background = `${args.theme?.var?.color?.background_light_200 ?? "#fff"}`;
-          container.style.color = `${args.theme?.var?.color?.text ?? "#111"}`;
+          container.style.border = `1px solid ${t?.var?.color?.border ?? "rgba(0,0,0,0.2)"}`;
+          container.style.background = `${t?.var?.color?.background_light_200 ?? "#fff"}`;
+          container.style.color = `${t?.var?.color?.text ?? "#111"}`;
           container.style.boxShadow = "0 8px 24px rgba(0,0,0,0.18)";
           container.style.maxWidth = "280px";
           container.style.pointerEvents = "none";
@@ -399,7 +399,7 @@ const initDraggable = (element) => {
           dot.style.width = "10px";
           dot.style.height = "10px";
           dot.style.borderRadius = "9999px";
-          dot.style.background = `${args.theme?.var?.color?.primary ?? "#4f46e5"}`;
+          dot.style.background = `${t?.var?.color?.primary ?? "#4f46e5"}`;
           dot.style.flex = "0 0 auto";
 
           const text = document.createElement("div");
@@ -438,7 +438,7 @@ const initDraggable = (element) => {
 
 // Initialize drop target for sidebar item using pragmatic-drag-and-drop
 const initDropTarget = (element) => {
-  if (!element || !args.dropTargetForElements) return;
+  if (!element || !_.dropTargetForElements) return;
 
   const item = getItem();
   if (!item) return;
@@ -448,14 +448,13 @@ const initDropTarget = (element) => {
     dropTargetCleanup.current();
   }
 
-  const cleanup = args.dropTargetForElements({
+  const cleanup = _.dropTargetForElements({
     element,
     getData: () => ({}),
     canDrop: ({ source }) => {
       // Note: Don't return false for isQueued here - we need drop target to stay active
       // so onDrag fires and we can show red highlight; onDrop will reject the drop.
-      // Parameter must not be named `args` — that shadows component args and breaks
-      // args.contextData when validating table-items drops onto the sidebar.
+      // c when validating table-items drops onto the sidebar.
       const data = source.data;
 
       // Validate table items drop
@@ -465,8 +464,8 @@ const initDropTarget = (element) => {
           return false;
         }
         // Reject drops from a different table (e.g. Files onto Gallery sidebar)
-        const contentLabel = args.contextData?.props?.tableVertexLabel
-          || args.contextData?.props?.contentLabel
+        const contentLabel = c?.props?.tableVertexLabel
+          || c?.props?.contentLabel
           || null;
         const sourceLabel = data.sourceTableVertexLabel != null
           ? String(data.sourceTableVertexLabel)
@@ -521,7 +520,7 @@ const initDropTarget = (element) => {
 
       // Cannot drop onto a queued (syncing) item
       if (isQueued()) {
-        args.showWarningToast?.("Cannot drop here: item is syncing");
+        _.showWarningToast?.("Cannot drop here: item is syncing");
         return;
       }
 
@@ -533,7 +532,7 @@ const initDropTarget = (element) => {
         // Re-validate before proceeding
         const validation = validateDropTarget(data.categoryId, item.id);
         if (!validation.valid) {
-          args.showWarningToast?.(validation.reason || "Cannot drop here");
+          _.showWarningToast?.(validation.reason || "Cannot drop here");
           return;
         }
 
@@ -550,9 +549,9 @@ const initDropTarget = (element) => {
         // Re-check same-active-category guard (vertex id only)
         const currentSelected = getSelectedItem();
         if (currentSelected && item && currentSelected.id === item.id) {
-          const contentLabel = args.contextData.props?.contentLabel || "Item";
+          const contentLabel = c.props?.contentLabel || "Item";
           const plural = contentLabel.endsWith('y') ? contentLabel.slice(0, -1) + 'ies' : contentLabel + (contentLabel.endsWith('s') ? '' : 's');
-          args.showWarningToast?.(`${plural} are already in this category`);
+          _.showWarningToast?.(`${plural} are already in this category`);
           return;
         }
         await handleTableItemsDrop(data.itemIds);
@@ -583,10 +582,10 @@ const cleanupDragAndDrop = () => {
 const handleMoveSidebarItem = async (categoryId, newParentId) => {
   const parentVertexLabel = getParentVertexLabel();
   const toParentEdgeType = getToParentEdgeType();
-  const rootKeys = args.contextData.props?.sidebarConfig?.rootKeys || {};
-  const enableUserScoping = args.contextData.props?.enableUserScoping === true;
-  const hooks = args.contextData.props?.hooks;
-  const label = args.contextData.props?.label || "Item";
+  const rootKeys = c.props?.sidebarConfig?.rootKeys || {};
+  const enableUserScoping = c.props?.enableUserScoping === true;
+  const hooks = c.props?.hooks;
+  const label = c.props?.label || "Item";
 
   const moveContextData = {
     categoryId,
@@ -597,19 +596,19 @@ const handleMoveSidebarItem = async (categoryId, newParentId) => {
     enableUserScoping,
     hooks: hooks,
     label: label,
-    tableVertexLabel: args.contextData.props?.tableVertexLabel
+    tableVertexLabel: c.props?.tableVertexLabel
   };
 
   try {
-    args.fns.setOperationLoading?.(true);
+    f.setOperationLoading?.(true);
 
-    const result = await args.executeNamedServerFunction({
+    const result = await s({
       functionName: "moveSidebarItem",
       contextData: moveContextData
     });
 
     // Check for errors and show toast
-    const errorMessage = args.fns.extractError?.(result, true, `Failed to move ${label}`);
+    const errorMessage = f.extractError?.(result, true, `Failed to move ${label}`);
     if (errorMessage) {
       return false;
     }
@@ -617,50 +616,50 @@ const handleMoveSidebarItem = async (categoryId, newParentId) => {
     if (result?.result?.success) {
       // Apply graph update from move (edge change); getRoot() is computed from graph so roots update automatically
       if (result.graph && (result.graph.vertexes || result.graph.edges)) {
-        args.setGraphData(0, result.graph, {});
+        _.setGraphData(0, result.graph, {});
       }
       // Preserve expanded state: keep moved item and new parent expanded after move
-      const setExpandedKeysFn = args.contextData.props?.setExpandedKeys;
+      const setExpandedKeysFn = c.props?.setExpandedKeys;
       if (setExpandedKeysFn) {
         setExpandedKeysFn(keys => [...new Set([...(Array.isArray(keys) ? keys : []), categoryId, newParentId].filter(Boolean))]);
       }
-      args.showSuccessToast?.(result.result.message || `${label} moved successfully`);
+      _.showSuccessToast?.(result.result.message || `${label} moved successfully`);
       return true;
     }
 
     return false;
   } catch (error) {
     console.error("Error moving sidebar item:", error);
-    args.showErrorToast?.(`Failed to move ${label}`);
+    _.showErrorToast?.(`Failed to move ${label}`);
     return false;
   } finally {
-    args.fns.setOperationLoading?.(false);
+    f.setOperationLoading?.(false);
   }
 };
 
 // Handle table items drop (extracted from handleDrop)
 const handleTableItemsDrop = async (itemIds) => {
-  args.fns.setOperationLoading?.(true);
+  f.setOperationLoading?.(true);
   try {
     const item = getItem();
     if (!item) return;
 
-    const onMoveItemsToCategory = args.contextData.props?.onMoveItemsToCategory;
+    const onMoveItemsToCategory = c.props?.onMoveItemsToCategory;
     if (!onMoveItemsToCategory) {
-      args.showErrorToast?.("Move function not available");
+      _.showErrorToast?.("Move function not available");
       return;
     }
 
     const parentVertexLabel = getParentVertexLabel();
     const toParentEdgeType = getToParentEdgeType();
-    const rootKeys = args.contextData.props?.sidebarConfig?.rootKeys || {};
+    const rootKeys = c.props?.sidebarConfig?.rootKeys || {};
 
     // Prevent dropping into the same active category (vertex id only)
     const currentSelected = getSelectedItem();
     if (currentSelected && item && currentSelected.id === item.id) {
-      const contentLabel = args.contextData.props?.contentLabel || "Item";
+      const contentLabel = c.props?.contentLabel || "Item";
       const plural = contentLabel.endsWith('y') ? contentLabel.slice(0, -1) + 'ies' : contentLabel + (contentLabel.endsWith('s') ? '' : 's');
-      args.showWarningToast?.(`${plural} are already in this category`);
+      _.showWarningToast?.(`${plural} are already in this category`);
       return;
     }
 
@@ -678,9 +677,9 @@ const handleTableItemsDrop = async (itemIds) => {
     const result = await onMoveItemsToCategory(itemIds, categoryId, sidebarConfig);
 
     if (result?.success) {
-      const contentLabel = args.contextData.props?.contentLabel || "item";
+      const contentLabel = c.props?.contentLabel || "item";
       const plural = contentLabel.endsWith('y') ? contentLabel.slice(0, -1) + 'ies' : contentLabel + (contentLabel.endsWith('s') ? '' : 's');
-      args.showSuccessToast?.(result.message || `Moved ${itemIds.length} ${itemIds.length !== 1 ? plural : contentLabel} successfully`);
+      _.showSuccessToast?.(result.message || `Moved ${itemIds.length} ${itemIds.length !== 1 ? plural : contentLabel} successfully`);
 
       // Determine source category (where items were moved FROM); use vertex id only
       const sourceCategory = currentSelected;
@@ -694,14 +693,14 @@ const handleTableItemsDrop = async (itemIds) => {
       if (updatedCounts) {
         // Update target category count (if not uncategorized)
         if (updatedCounts.targetCategoryId && !isTargetUncategorized && item.id === updatedCounts.targetCategoryId) {
-          args.mergeVertexProperties(0, item.id, args.graph, args.setGraph, {
+          _.mergeVertexProperties(0, item.id, g, sg, {
             contentCount: updatedCounts.targetCount
           });
         }
 
         // Update source category count (if not uncategorized)
         if (updatedCounts.sourceCategoryId && !isSourceUncategorized && currentSelected && currentSelected.id === updatedCounts.sourceCategoryId) {
-          args.mergeVertexProperties(0, currentSelected.id, args.graph, args.setGraph, {
+          _.mergeVertexProperties(0, currentSelected.id, g, sg, {
             contentCount: updatedCounts.sourceCount
           });
         }
@@ -714,9 +713,9 @@ const handleTableItemsDrop = async (itemIds) => {
           updatedCounts.targetCategoryId === tgtUncatId &&
           updatedCounts.targetCount !== undefined
         ) {
-          const uncategorizedVertex = args.graph?.vertexes?.[tgtUncatId];
+          const uncategorizedVertex = g?.vertexes?.[tgtUncatId];
           if (uncategorizedVertex) {
-            args.mergeVertexProperties(0, tgtUncatId, args.graph, args.setGraph, {
+            _.mergeVertexProperties(0, tgtUncatId, g, sg, {
               contentCount: updatedCounts.targetCount
             });
           } else {
@@ -735,9 +734,9 @@ const handleTableItemsDrop = async (itemIds) => {
           updatedCounts.sourceCategoryId === tgtUncatId &&
           updatedCounts.sourceCount !== undefined
         ) {
-          const uncategorizedVertex = args.graph?.vertexes?.[tgtUncatId];
+          const uncategorizedVertex = g?.vertexes?.[tgtUncatId];
           if (uncategorizedVertex) {
-            args.mergeVertexProperties(0, tgtUncatId, args.graph, args.setGraph, {
+            _.mergeVertexProperties(0, tgtUncatId, g, sg, {
               contentCount: updatedCounts.sourceCount
             });
           } else {
@@ -759,14 +758,14 @@ const handleTableItemsDrop = async (itemIds) => {
       }
 
       // Keep drop target and its ancestors expanded so the parent item does not collapse
-      const setExpandedKeysFn = args.contextData.props?.setExpandedKeys;
+      const setExpandedKeysFn = c.props?.setExpandedKeys;
       if (setExpandedKeysFn && item?.id) {
         const toParentEdgeType = getToParentEdgeType();
         const ancestorIds = [];
         let current = item;
         while (current?.id) {
           ancestorIds.push(current.id);
-          const parent = args.evalExpression?.(`->${toParentEdgeType}`, { graph: args.graph, setGraph: args.setGraph, vertexes: [current] })?.[0];
+          const parent = _.evalExpression?.(`->${toParentEdgeType}`, { graph: g, setGraph: sg, vertexes: [current] })?.[0];
           current = parent || null;
         }
         if (ancestorIds.length > 0) {
@@ -776,13 +775,13 @@ const handleTableItemsDrop = async (itemIds) => {
     } else {
       // Check for errors and show toast (result is from onMoveItemsToCategory, not executeNamedServerFunction)
       if (result && result.success === false) {
-        args.showErrorToast?.(result.message || "Failed to move items");
+        _.showErrorToast?.(result.message || "Failed to move items");
       } else {
-        args.showErrorToast?.("Failed to move items");
+        _.showErrorToast?.("Failed to move items");
       }
     }
   } finally {
-    args.fns.setOperationLoading?.(false);
+    f.setOperationLoading?.(false);
   }
 };
 
@@ -792,23 +791,23 @@ const handleDelete = async (e) => {
   const item = getItem();
   if (!item) return;
   if (isQueued()) {
-    args.showWarningToast?.("Cannot delete: item is syncing");
+    _.showWarningToast?.("Cannot delete: item is syncing");
     return;
   }
 
   const parentVertexLabel = getParentVertexLabel();
   const toParentEdgeType = getToParentEdgeType();
-  const rootKeys = args.contextData.props?.sidebarConfig?.rootKeys || {};
+  const rootKeys = c.props?.sidebarConfig?.rootKeys || {};
 
   if (isUncategorizedTreeNode(item)) {
-    args.showErrorToast?.("Root item cannot be deleted");
+    _.showErrorToast?.("Root item cannot be deleted");
     return;
   }
 
   // Confirm deletion using rbConfirm
-  const rbConfirm = args.fns?.rbConfirm;
+  const rbConfirm = f?.rbConfirm;
   if (!rbConfirm) {
-    args.showErrorToast?.("Delete confirmation not available");
+    _.showErrorToast?.("Delete confirmation not available");
     return;
   }
 
@@ -826,10 +825,10 @@ const handleDelete = async (e) => {
 
   // Delete the vertex (use label from getSidebarLabel: config?.label || config?.parentVertexLabel)
   try {
-    args.fns.setOperationLoading?.(true);
+    f.setOperationLoading?.(true);
 
-    const label = args.contextData.props?.label || "Item";
-    const result = await args.executeNamedServerFunction({
+    const label = c.props?.label || "Item";
+    const result = await s({
       functionName: "saveSidebarVertex",
       contextData: {
         vertexId: item.id,
@@ -841,19 +840,19 @@ const handleDelete = async (e) => {
         rootKeys: rootKeys,
         properties: item.P || {},
         operation: "delete",
-        tableVertexLabel: args.contextData.props?.tableVertexLabel,
-        relationshipType: args.contextData.props?.relationshipType,
-        enableUserScoping: args.contextData.props?.enableUserScoping,
-        hooks: args.contextData.props?.hooks,
+        tableVertexLabel: c.props?.tableVertexLabel,
+        relationshipType: c.props?.relationshipType,
+        enableUserScoping: c.props?.enableUserScoping,
+        hooks: c.props?.hooks,
         label: label
       }
     });
 
     if (result?.result?.success) {
-      args.showSuccessToast?.(`${label} deleted successfully`);
+      _.showSuccessToast?.(`${label} deleted successfully`);
 
       // Get vertex from graph to collect all connected edges
-      const vertex = args.graph.vertexes[item.id];
+      const vertex = g.vertexes[item.id];
       const edgeIdsToDelete = [];
 
       if (vertex) {
@@ -876,7 +875,7 @@ const handleDelete = async (e) => {
 
       // Delete all edges before calling setGraphData
       for (const edgeId of edgeIdsToDelete) {
-        args.deleteEdge(0, edgeId, args.graph, args.setGraph);
+        _.deleteEdge(0, edgeId, g, sg);
       }
 
       // Use setGraphData to handle vertex deletion from graph
@@ -887,7 +886,7 @@ const handleDelete = async (e) => {
           deleted_vertexes: result.result.deleted_vertexes || [item.id],
           deleted_edges: []
         };
-        args.setGraphData(0, graphData, {});
+        _.setGraphData(0, graphData, {});
       }
 
       // Notify parent to remove item from tree
@@ -897,17 +896,17 @@ const handleDelete = async (e) => {
       }
     } else {
       // Check for errors and show toast
-      const errorMessage = args.fns.extractError?.(result, true, "Failed to delete item");
+      const errorMessage = f.extractError?.(result, true, "Failed to delete item");
       if (!errorMessage) {
         // If extractError didn't find an error but success is false, show default message
-        args.showErrorToast?.("Failed to delete item");
+        _.showErrorToast?.("Failed to delete item");
       }
     }
   } catch (error) {
     console.error("Error deleting item:", error);
-    args.showErrorToast?.("Failed to delete item");
+    _.showErrorToast?.("Failed to delete item");
   } finally {
-    args.fns.setOperationLoading?.(false);
+    f.setOperationLoading?.(false);
   }
 };
 
@@ -950,7 +949,7 @@ return {
   cleanupDragAndDrop,
   handleMoveSidebarItem,
   handleTableItemsDrop,
-  getUsePolarisUI: () => args.fns.getUsePolarisUI?.() === true,
+  getUsePolarisUI: () => f.getUsePolarisUI?.() === true,
   isUncategorizedTreeNode,
   getUncategorizedVertexId
 };
@@ -976,27 +975,27 @@ return {
         props:
           '''// Watch for expansion changes and fetch children when expanded
 // Access expandedKeys prop directly to make it reactive
-/*args.createEffect(() => {
-  const item = args.fns.getItem();
+/*_.createEffect(() => {
+  const item = f.getItem();
   if (!item) return;
-  if (args.fns.isUncategorizedTreeNode?.(item)) return;
+  if (f.isUncategorizedTreeNode?.(item)) return;
 
   // Access expandedKeys prop to make effect reactive to prop changes
-  const expandedKeys = args.contextData.props?.expandedKeys || [];
+  const expandedKeys = c.props?.expandedKeys || [];
   const isExpanded = Array.isArray(expandedKeys) && expandedKeys.includes(item.id);
 
-  const childrenList = args.fns.getChildren();
+  const childrenList = f.getChildren();
 
   // If expanded and we haven't fetched children yet, fetch them
   if (isExpanded && childrenList.length === 0) {
-    args.fns.fetchChildrenIfNeeded();
+    f.fetchChildrenIfNeeded();
   }
 });*/
 
 return {
   as: "div",
-  class: args.contextData.props.class,
-  hide: !args.fns.shouldShowItem(),
+  class: c.props.class,
+  hide: !f.shouldShowItem(),
 };'''
       }
     }
@@ -1005,28 +1004,28 @@ return {
       L: Attr
       P: {
         css:
-          '''const isHovered = args.fns.isSelected();
-const isDirectMatch = args.fns.isDirectMatch();
-const isAncestorOfMatch = args.fns.isAncestorOfMatch?.() ?? false;
-const isDragOver = args.fns.isDragOver();
-const isValidDrop = args.fns.isValidDrop?.() ?? true;
-const isDragging = args.fns.isDragging?.() || false;
-const item = args.fns.getItem();
-const rootKeys = args.contextData.props?.sidebarConfig?.rootKeys || {};
+          '''const isHovered = f.isSelected();
+const isDirectMatch = f.isDirectMatch();
+const isAncestorOfMatch = f.isAncestorOfMatch?.() ?? false;
+const isDragOver = f.isDragOver();
+const isValidDrop = f.isValidDrop?.() ?? true;
+const isDragging = f.isDragging?.() || false;
+const item = f.getItem();
+const rootKeys = c.props?.sidebarConfig?.rootKeys || {};
 const rootKey = rootKeys.key;
 const isRoot =
-  item?.P?.key === rootKey || (args.fns.isUncategorizedTreeNode?.(item) ?? false);
-const isQueued = args.fns.isQueued?.() ?? false;
+  item?.P?.key === rootKey || (f.isUncategorizedTreeNode?.(item) ?? false);
+const isQueued = f.isQueued?.() ?? false;
 
 // Determine drag over styling based on validation
 let dragOverStyle = "";
 if (isDragOver) {
   if (isValidDrop) {
     // Valid drop: green border and subtle green background
-    dragOverStyle = `background-color: ${args.theme.var.color.success_light_200}; border: 2px dashed ${args.theme.var.color.success_light_200};`;
+    dragOverStyle = `background-color: ${t.var.color.success_light_200}; border: 2px dashed ${t.var.color.success_light_200};`;
   } else {
     // Invalid drop: red border and red background with opacity
-    dragOverStyle = `background-color: ${args.theme.var.color.error_light_200}; border: 2px dashed ${args.theme.var.color.error_light_200}; cursor: not-allowed;`;
+    dragOverStyle = `background-color: ${t.var.color.error_light_200}; border: 2px dashed ${t.var.color.error_light_200}; cursor: not-allowed;`;
   }
 }
 
@@ -1036,11 +1035,11 @@ if (dragOverStyle.includes('background-color')) {
   // The dragOverStyle already sets background color, so don't override
   // No action needed since dragOverStyle will apply its background
 } else if (isHovered) {
-  backgroundColor = args.theme.var.color.background_dark_150;
+  backgroundColor = t.var.color.background_dark_150;
 } else if (isDirectMatch) {
-  backgroundColor = args.theme.var.color.primary_light_500;
+  backgroundColor = t.var.color.primary_light_500;
 //} else if (!isDirectMatch && isAncestorOfMatch) {
-//  backgroundColor = args.theme.var.color.primary_light_600;
+//  backgroundColor = t.var.color.primary_light_600;
 }
 
 // Compose the style string
@@ -1050,20 +1049,20 @@ return `._id {
   display: flex;
   gap: 0.375rem;
   font-size: 14px;
-  font-weight: ${args.fns.hasChildren() ? "bold" : "normal"};
+  font-weight: ${f.hasChildren() ? "bold" : "normal"};
   width: 100%;
   position: relative;
-  border-radius: ${args.fns.hasChildren() ? "5px" : "0 5px 5px 0"};
+  border-radius: ${f.hasChildren() ? "5px" : "0 5px 5px 0"};
   ${backgroundColor ? `background-color: ${backgroundColor};
   ${isDirectMatch ? " font-weight: bold;" : ""}` : ""}
   ${dragOverStyle}
   ${isDragging ? `opacity: 0.5;` : ""}
   padding: 2px 0;
   transition: background-color 0.15s ease-in-out;
-  ${args.fns.hasChildren() ? "" : `border-left: 1px dashed ${args.theme.var.color.border};`}
+  ${f.hasChildren() ? "" : `border-left: 1px dashed ${t.var.color.border};`}
 
   &:hover {
-    background-color: ${args.theme.var.color.background_dark_150};
+    background-color: ${t.var.color.background_dark_150};
   }
 
   &:hover .tree-item-actions {
@@ -1076,35 +1075,35 @@ return `._id {
         componentName: Html
         key: tree_item_content
         props:
-          '''const item = args.fns.getItem();
-const isRoot = args.fns.isUncategorizedTreeNode?.(item) ?? false;
-const isDragging = args.fns.isDragging?.() || false;
-const isDragOver = args.fns.isDragOver?.() || false;
-const isValidDrop = args.fns.isValidDrop?.() ?? true;
+          '''const item = f.getItem();
+const isRoot = f.isUncategorizedTreeNode?.(item) ?? false;
+const isDragging = f.isDragging?.() || false;
+const isDragOver = f.isDragOver?.() || false;
+const isValidDrop = f.isValidDrop?.() ?? true;
 
 return {
   as: "div",
-  onClick: args.fns.handleItemClick,
+  onClick: f.handleItemClick,
   ref: (el) => {
     if (el) {
       // Initialize both draggable and drop target on the same element
-      if (!isRoot && args.fns.initDraggable) {
-        args.fns.initDraggable(el);
+      if (!isRoot && f.initDraggable) {
+        f.initDraggable(el);
       }
-      if (args.fns.initDropTarget) {
-        args.fns.initDropTarget(el);
+      if (f.initDropTarget) {
+        f.initDropTarget(el);
       }
     } else {
       // Cleanup on unmount (ref called with null)
-      if (args.fns.cleanupDragAndDrop) {
-        args.fns.cleanupDragAndDrop();
+      if (f.cleanupDragAndDrop) {
+        f.cleanupDragAndDrop();
       }
     }
   },
   onCleanup: () => {
     // Ensure drag-and-drop listeners are removed on unmount (backup if ref(null) not called)
-    if (args.fns.cleanupDragAndDrop) {
-      args.fns.cleanupDragAndDrop();
+    if (f.cleanupDragAndDrop) {
+      f.cleanupDragAndDrop();
     }
   },
   style: isDragging ? { opacity: 0.5 } : {}
@@ -1116,7 +1115,7 @@ return {
       L: Attr
       P: {
         css:
-          '''const expanded = args.fns.isExpanded();
+          '''const expanded = f.isExpanded();
 return `._id {
   width: 16px;
   height: 16px;
@@ -1124,7 +1123,7 @@ return `._id {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  ${!args.fns.hasChildren() ? "visibility: hidden;" : ""}
+  ${!f.hasChildren() ? "visibility: hidden;" : ""}
 }`;'''
         displayOrder: 1
         componentName: Html
@@ -1134,7 +1133,7 @@ return `._id {
   as: "div",
   onClick: (e) => {
     e.stopPropagation();
-    args.fns.handleToggleExpand();
+    f.handleToggleExpand();
   }
 };'''
       }
@@ -1149,7 +1148,7 @@ return `._id {
         props:
           '''return {
   as: "icon",
-  icon: args.fns.isExpanded() ? "ph:caret-down" : "ph:caret-right",
+  icon: f.isExpanded() ? "ph:caret-down" : "ph:caret-right",
   height: 12,
   width: 12
 };'''
@@ -1162,7 +1161,7 @@ return `._id {
         css:
           '''return `._id {
   margin-right: 5px;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         displayOrder: 2
         componentName: Html
@@ -1170,10 +1169,10 @@ return `._id {
         props:
           '''return {
   as: "icon",
-  icon: args.fns.getItemIcon(),
+  icon: f.getItemIcon(),
   height: 16,
   width: 16,
-  hide: args.fns.getItemIcon() === null
+  hide: f.getItemIcon() === null
 };'''
       }
     }
@@ -1194,7 +1193,7 @@ return `._id {
         props:
           '''return {
   as: "span",
-  text: args.fns.getItemName()
+  text: f.getItemName()
 };'''
       }
     }
@@ -1203,19 +1202,19 @@ return `._id {
       L: Attr
       P: {
         css:
-          '''const status = args.fns.getSyncStatus();
+          '''const status = f.getSyncStatus();
 return `._id {
   margin-left: 4px;
   display: flex;
   align-items: center;
-  color: ${status === 'queued' ? (args.theme?.var?.color?.primary ?? 'inherit') : (args.theme?.var?.color?.error ?? '#b91c1c')};
+  color: ${status === 'queued' ? (t?.var?.color?.primary ?? 'inherit') : (t?.var?.color?.error ?? '#b91c1c')};
 }`;'''
         displayOrder: 4
         componentName: Html
         key: tree_item_sync_status_icon
         props:
-          '''const item = args.fns.getItem();
-const status = args.fns.getSyncStatus();
+          '''const item = f.getItem();
+const status = f.getSyncStatus();
 const icon = status === 'queued' ? 'ph:arrows-clockwise' : (status === 'failed' ? 'ph:warning-circle' : null);
 const syncError = item?.P?.syncError;
 const syncJobId = item?.P?.syncJobId;
@@ -1244,14 +1243,14 @@ return {
   transform: translateY(-50%);
   margin-left: 0;
   cursor: pointer;
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
   display: flex;
   gap: 2px;
   align-items: center;
-  background-color: ${args.theme.var.color.background_dark_150};
+  background-color: ${t.var.color.background_dark_150};
   border-radius: 4px;
   padding: 0 2px;
   transition: opacity 0.2s ease, visibility 0.2s ease;
@@ -1260,9 +1259,9 @@ return {
         componentName: Html
         key: tree_item_actions
         props:
-          '''const item = args.fns.getItem();
-const isUncatRow = args.fns.isUncategorizedTreeNode?.(item) ?? false;
-const isQueued = args.fns.isQueued?.() ?? false;
+          '''const item = f.getItem();
+const isUncatRow = f.isUncategorizedTreeNode?.(item) ?? false;
+const isQueued = f.isQueued?.() ?? false;
 
 return {
   as: "div",
@@ -1284,8 +1283,8 @@ return {
   "attr:icon": "plus",
   "attr:accessibilityLabel": "Add child",
   "attr:size": "slim",
-  onClick: args.fns.handleOpenAddModal,
-  hide: args.fns.getUsePolarisUI?.() !== true
+  onClick: f.handleOpenAddModal,
+  hide: f.getUsePolarisUI?.() !== true
 };'''
       }
     }
@@ -1296,7 +1295,7 @@ return {
         css:
           '''return `._id {
   cursor: pointer;
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   opacity: 0.7;
   transition: opacity 0.2s ease;
   &:hover {
@@ -1312,8 +1311,8 @@ return {
   icon: "ph:plus",
   height: 12,
   width: 12,
-  onClick: args.fns.handleOpenAddModal,
-  hide: args.fns.getUsePolarisUI?.() === true
+  onClick: f.handleOpenAddModal,
+  hide: f.getUsePolarisUI?.() === true
 };'''
       }
     }
@@ -1324,7 +1323,7 @@ return {
         css:
           '''return `._id {
   cursor: pointer;
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   opacity: 0.7;
   transition: opacity 0.2s ease;
   &:hover {
@@ -1340,8 +1339,8 @@ return {
   icon: "ph:pencil",
   height: 12,
   width: 12,
-  onClick: args.fns.handleOpenEditModal,
-  hide: args.fns.getUsePolarisUI?.() === true
+  onClick: f.handleOpenEditModal,
+  hide: f.getUsePolarisUI?.() === true
 };'''
       }
     }
@@ -1358,8 +1357,8 @@ return {
   "attr:icon": "edit",
   "attr:accessibilityLabel": "Edit",
   "attr:size": "slim",
-  onClick: args.fns.handleOpenEditModal,
-  hide: args.fns.getUsePolarisUI?.() !== true
+  onClick: f.handleOpenEditModal,
+  hide: f.getUsePolarisUI?.() !== true
 };'''
       }
     }
@@ -1370,7 +1369,7 @@ return {
         css:
           '''return `._id {
   cursor: pointer;
-  color: ${args.theme.var.color.error};
+  color: ${t.var.color.error};
   opacity: 0.7;
   transition: opacity 0.2s ease;
   &:hover {
@@ -1381,16 +1380,16 @@ return {
         componentName: Html
         key: tree_item_delete_button
         props:
-          '''const item = args.fns.getItem();
-const isRoot = args.fns.isUncategorizedTreeNode?.(item) ?? false;
+          '''const item = f.getItem();
+const isRoot = f.isUncategorizedTreeNode?.(item) ?? false;
 
 return {
   as: "icon",
   icon: "ph:trash",
   height: 12,
   width: 12,
-  onClick: args.fns.handleDelete,
-  hide: isRoot || args.fns.getUsePolarisUI?.() === true
+  onClick: f.handleDelete,
+  hide: isRoot || f.getUsePolarisUI?.() === true
 };'''
       }
     }
@@ -1401,8 +1400,8 @@ return {
         displayOrder: 3
         componentName: Html
         props:
-          '''const item = args.fns.getItem();
-const isRoot = args.fns.isUncategorizedTreeNode?.(item) ?? false;
+          '''const item = f.getItem();
+const isRoot = f.isUncategorizedTreeNode?.(item) ?? false;
 
 return {
   as: "s-button",
@@ -1411,8 +1410,8 @@ return {
   "attr:icon": "delete",
   "attr:accessibilityLabel": "Delete",
   "attr:size": "slim",
-  onClick: args.fns.handleDelete,
-  hide: isRoot || args.fns.getUsePolarisUI?.() !== true
+  onClick: f.handleDelete,
+  hide: isRoot || f.getUsePolarisUI?.() !== true
 };'''
       }
     }
@@ -1431,9 +1430,9 @@ return {
         componentName: Html
         key: tree_item_children
         props:
-          '''const expanded = args.fns.isExpanded();
+          '''const expanded = f.isExpanded();
 // Get children reactively - this will update when graph changes
-const childrenList = args.fns.getChildren();
+const childrenList = f.getChildren();
 // Only render if expanded and we have children
 // If expanded but no children yet, they might be fetching
 return {
@@ -1457,43 +1456,43 @@ return {
         componentName: SidebarTreeItem
         key: tree_item_child
         props:
-          '''const childItem = args.contextData.childItem;
+          '''const childItem = c.childItem;
 // Get children from graph reactively using parent's getChildren function
-// Access graph reactively by calling getChildren which accesses args.graph
-const getChildrenFn = args.contextData.props?.getChildren;
-// Call getChildren to get children reactively (it accesses args.graph which is reactive)
+// Access graph reactively by calling getChildren which accesses g
+const getChildrenFn = c.props?.getChildren;
+// Call getChildren to get children reactively (it accesses g which is reactive)
 const children = getChildrenFn ? getChildrenFn(childItem?.id) : [];
 
 return {
   item: childItem,
-  expandedKeys: args.contextData.props?.expandedKeys || [],
-  selectedItem: args.contextData.props?.selectedItem,
-  onToggleExpand: args.contextData.props?.onToggleExpand,
-  onItemSelect: args.contextData.props?.onItemSelect,
-  fetchChildren: args.contextData.props?.fetchChildren,
-  sidebarConfig: args.contextData.props?.sidebarConfig,
-  onItemUpdate: args.contextData.props?.onItemUpdate,
-  onItemDelete: args.contextData.props?.onItemDelete,
+  expandedKeys: c.props?.expandedKeys || [],
+  selectedItem: c.props?.selectedItem,
+  onToggleExpand: c.props?.onToggleExpand,
+  onItemSelect: c.props?.onItemSelect,
+  fetchChildren: c.props?.fetchChildren,
+  sidebarConfig: c.props?.sidebarConfig,
+  onItemUpdate: c.props?.onItemUpdate,
+  onItemDelete: c.props?.onItemDelete,
   childItems: children,
   loading: false,
   getChildren: getChildrenFn,
-  tableVertexLabel: args.contextData.props?.tableVertexLabel,
-  relationshipType: args.contextData.props?.relationshipType,
-  onMoveItemsToCategory: args.contextData.props?.onMoveItemsToCategory,
-  fetchRoot: args.contextData.props?.fetchRoot,
-  getRoot: args.contextData.props?.getRoot,
-  startSidebarQueuedPollIfNeeded: args.contextData.props?.startSidebarQueuedPollIfNeeded,
-  hooks: args.contextData.props?.hooks,
-  label: args.contextData.props?.label,
-  contentLabel: args.contextData.props?.contentLabel,
-  setExpandedKeys: args.contextData.props?.setExpandedKeys,
-  searchActive: args.contextData.props?.searchActive,
-  filterTree: args.contextData.props?.filterTree,
-  shouldExpandForSearch: args.contextData.props?.shouldExpandForSearch,
-  onOpenAddModal: args.contextData.props?.onOpenAddModal,
-  onOpenEditModal: args.contextData.props?.onOpenEditModal,
-  operationLoading: args.contextData.props?.operationLoading,
-  setOperationLoading: args.contextData.props?.setOperationLoading
+  tableVertexLabel: c.props?.tableVertexLabel,
+  relationshipType: c.props?.relationshipType,
+  onMoveItemsToCategory: c.props?.onMoveItemsToCategory,
+  fetchRoot: c.props?.fetchRoot,
+  getRoot: c.props?.getRoot,
+  startSidebarQueuedPollIfNeeded: c.props?.startSidebarQueuedPollIfNeeded,
+  hooks: c.props?.hooks,
+  label: c.props?.label,
+  contentLabel: c.props?.contentLabel,
+  setExpandedKeys: c.props?.setExpandedKeys,
+  searchActive: c.props?.searchActive,
+  filterTree: c.props?.filterTree,
+  shouldExpandForSearch: c.props?.shouldExpandForSearch,
+  onOpenAddModal: c.props?.onOpenAddModal,
+  onOpenEditModal: c.props?.onOpenEditModal,
+  operationLoading: c.props?.operationLoading,
+  setOperationLoading: c.props?.setOperationLoading
 };'''
       }
     }

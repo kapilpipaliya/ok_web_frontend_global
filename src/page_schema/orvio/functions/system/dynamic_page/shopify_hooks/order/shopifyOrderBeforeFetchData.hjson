@@ -16,7 +16,7 @@
   parentVertexLabel,
   toParentEdgeType,
   enableUserScoping
-} = args.contextData;
+} = c;
 const isReturnTable = tableVertexLabel === "ShopifyReturn";
 const isReturnLineTable = tableVertexLabel === "ShopifyReturnLineItem";
 if (isReturnTable || isReturnLineTable) {
@@ -38,7 +38,7 @@ if (isLineTable && hasOrderIdFilter) {
   return;
 }
 
-const shop = contextShop || args.shop;
+const shop = contextShop || _.shop;
 if (!shop) {
   console.warn("shopifyOrderBeforeFetchData: shop is required");
   return;
@@ -57,7 +57,7 @@ const fulfillmentStatusFromRemaining = (remainingUnfulfilledUnits, sellableLineQ
 
 console.log("[shopifyOrderBeforeFetchData] contextData:", { shop, filters, sort });
 
-const shopify = await args.getShopifyClient();
+const shopify = await _.getShopifyClient();
 let admin;
 try {
   const authResult = await shopify.unauthenticated.admin(shop);
@@ -79,7 +79,7 @@ const isUncategorized = showUnassigned === true || categoryId === uncategorizedV
 let categoryOrderGids = [];
 if (!isUncategorized && categoryId && parentVertexLabel && toParentEdgeType) {
   try {
-    const fetchResult = await args.executeNamedServerFunction(
+    const fetchResult = await s(
       {
         functionName: "getUserContent",
         contextData: {
@@ -1464,7 +1464,7 @@ const safeJson = (v) => {
 const strJoin = (arr) =>
   Array.isArray(arr) ? arr.filter((x) => x != null && x !== "").join(", ") : "";
 
-const session = args.session;
+const session = _.session;
 for (const order of allOrders) {
   const orderId = order.id || "";
   const orderName = order.name || "";

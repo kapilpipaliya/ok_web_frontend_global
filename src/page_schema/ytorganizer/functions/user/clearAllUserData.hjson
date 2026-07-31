@@ -9,22 +9,22 @@
           '''
 try {
   // Get current authenticated user from session
-  const actualUser = await args.getUserFromSession();
+  const actualUser = await _.getUserFromSession();
   if (!actualUser) {
     throw new Error("User session not found. Please log in and try again.");
   }
 
   // Get effective user (handles admin impersonation)
-  const currentUser = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+  const currentUser = await _.getEffectiveUser(_.session, actualUser, c);
 
   // Check if this is an admin clearing another user's data
-  const targetUserId = args.contextData.userId;
+  const targetUserId = c.userId;
   let userToClear;
   let isAdminClear = false;
 
   if (targetUserId) {
     // Admin deletion - verify admin role (use actualUser for admin check, not impersonated user)
-    const adminCheck = await args.session.run(
+    const adminCheck = await _.session.run(
       `MATCH (u:User {uuid: $userId})-[:UserRole]->(r:Role {key: "Admin"})
        RETURN u`,
       { userId: actualUser.P.uuid }
@@ -41,7 +41,7 @@ try {
       RETURN u
     `;
 
-    const targetUserResult = await args.session.run(targetUserQuery, {
+    const targetUserResult = await _.session.run(targetUserQuery, {
       userId: targetUserId
     });
 
@@ -49,7 +49,7 @@ try {
       throw new Error("Target user not found");
     }
 
-    userToClear = args.convertNodeToJson(targetUserResult.records[0].get('u'));
+    userToClear = _.convertNodeToJson(targetUserResult.records[0].get('u'));
     isAdminClear = true;
   } else {
     // Self-clearing
@@ -65,7 +65,7 @@ try {
     DETACH DELETE cs
   `;
 
-  const channelSettingResult = await args.session.run(deleteChannelSettingQuery, {
+  const channelSettingResult = await _.session.run(deleteChannelSettingQuery, {
     userUuid: userToClear.P.uuid
   });
 
@@ -76,7 +76,7 @@ try {
     DETACH DELETE ps
   `;
 
-  const playlistSettingResult = await args.session.run(deletePlaylistSettingQuery, {
+  const playlistSettingResult = await _.session.run(deletePlaylistSettingQuery, {
     userUuid: userToClear.P.uuid
   });
 
@@ -87,7 +87,7 @@ try {
     DETACH DELETE vs
   `;
 
-  const videoSettingResult = await args.session.run(deleteVideoSettingQuery, {
+  const videoSettingResult = await _.session.run(deleteVideoSettingQuery, {
     userUuid: userToClear.P.uuid
   });
 
@@ -101,7 +101,7 @@ try {
     RETURN count(cr) + count(pr) + count(vr) as deletedRelationships
   `;
 
-  const ownershipRelResult = await args.session.run(deleteOwnershipRelQuery, {
+  const ownershipRelResult = await _.session.run(deleteOwnershipRelQuery, {
     userUuid: userToClear.P.uuid
   });
 

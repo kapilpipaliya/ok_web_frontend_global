@@ -7,7 +7,7 @@
         description: Check if a channel already exists for a specific ownership
         body:
           '''
-const { youtubeId, ownershipId } = args.contextData;
+const { youtubeId, ownershipId } = c;
 
 if (!youtubeId) {
   return {
@@ -26,7 +26,7 @@ if (!ownershipId) {
 }
 
 // Get current authenticated user from session
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return {
     success: false,
@@ -36,7 +36,7 @@ if (!actualUser) {
 }
 
 // Get effective user (handles admin impersonation)
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const user = await _.getEffectiveUser(_.session, actualUser, c);
 
 // Determine if youtubeId is a handle (doesn't start with UC) or actual channel ID
 const isHandle = !youtubeId.startsWith('UC');
@@ -63,7 +63,7 @@ if (isHandle) {
     handleWithAt: '@' + youtubeId
   };
 
-  const handleResult = await args.session.run(handleQuery, handleParams);
+  const handleResult = await _.session.run(handleQuery, handleParams);
 
   if (handleResult.records.length > 0) {
     // Handle optional ChannelSetting (might be null if user hasn't customized)
@@ -73,8 +73,8 @@ if (isHandle) {
       success: true,
       exists: true,
       data: {
-        channel: args.convertNodeToJson(record.get('c')),
-        channelSetting: channelSettingNode ? args.convertNodeToJson(channelSettingNode) : null
+        channel: _.convertNodeToJson(record.get('c')),
+        channelSetting: channelSettingNode ? _.convertNodeToJson(channelSettingNode) : null
       }
     };
   }
@@ -103,7 +103,7 @@ const params = {
   youtubeId: actualChannelId
 };
 
-const result = await args.session.run(query, params);
+const result = await _.session.run(query, params);
 
 const exists = result.records.length > 0;
 
@@ -113,8 +113,8 @@ if (exists) {
   const record = result.records[0];
   const channelSettingNode = record.get('cs');
   data = {
-    channel: args.convertNodeToJson(record.get('c')),
-    channelSetting: channelSettingNode ? args.convertNodeToJson(channelSettingNode) : null
+    channel: _.convertNodeToJson(record.get('c')),
+    channelSetting: channelSettingNode ? _.convertNodeToJson(channelSettingNode) : null
   };
 }
 

@@ -9,16 +9,16 @@
         body:
           '''
 // Get Shopify support conversation for a single ticket.
-// shop is automatically available via args.shop (extracted from request query params or Shopify auth)
-// Expected args.contextData:
+// shop is automatically available via _.shop (extracted from request query params or Shopify auth)
+// Expected c:
 // - ticketId: string (Neo4j elementId of Support vertex) - REQUIRED
 // - markAsReadFor: "shop" | "admin" | undefined - OPTIONAL
 
-const shop = args.shop;
+const shop = _.shop;
 const {
   ticketId,
   markAsReadFor
-} = args.contextData || {};
+} = c || {};
 
 if (!ticketId || typeof ticketId !== "string") {
   return {
@@ -44,7 +44,7 @@ const query = `
   RETURN t, r, tr
 `;
 
-const result = await args.session.run(query, params);
+const result = await _.session.run(query, params);
 
 if (!result.records || result.records.length === 0) {
   return {
@@ -54,9 +54,9 @@ if (!result.records || result.records.length === 0) {
 }
 
 // Populate graph structure
-args.processResult(result.records, args.context, ["t", "r"], "tr");
+_.processResult(result.records, _.context, ["t", "r"], "tr");
 
-const nodes = args.context.nodes || {};
+const nodes = _.context.nodes || {};
 const ticket = Object.values(nodes).find(
   (v) => Array.isArray(v.L) && v.L.includes("Support")
 );
@@ -71,7 +71,7 @@ const messages = Object.values(nodes)
 // Best-effort update of unread counters
 try {
   if (markAsReadFor === "shop") {
-    await args.session.run(
+    await _.session.run(
       `
       MATCH (t:Support)
       WHERE elementId(t) = $ticketId AND t.source = 'shopify'
@@ -81,7 +81,7 @@ try {
       { ticketId }
     );
   } else if (markAsReadFor === "admin") {
-    await args.session.run(
+    await _.session.run(
       `
       MATCH (t:Support)
       WHERE elementId(t) = $ticketId AND t.source = 'shopify'

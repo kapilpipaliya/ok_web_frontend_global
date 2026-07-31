@@ -8,12 +8,12 @@
         description: Atomically increments WorkshopReferenceSequence counter for key and returns formatted value (single write statement).
         body:
           '''
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return { success: false, message: "Not authenticated" };
 }
 
-const sequenceKey = args.contextData?.sequenceKey;
+const sequenceKey = c?.sequenceKey;
 if (!sequenceKey || typeof sequenceKey !== "string") {
   return { success: false, message: "sequenceKey is required" };
 }
@@ -50,7 +50,7 @@ const applyFormat = (template, ctx) => {
     .replace(/\{day\}/g, String(ctx.day).padStart(2, "0"));
 };
 
-const metaRes = await args.session.run(
+const metaRes = await _.session.run(
   `MATCH (s:WorkshopReferenceSequence {key: $key}) RETURN coalesce(s.resetRule, 'never') AS rr LIMIT 1`,
   { key }
 );
@@ -60,7 +60,7 @@ if (metaRes.records.length === 0) {
 const rrRaw = metaRes.records[0].get("rr");
 const periodKey = periodKeyForRule(rrRaw != null ? String(rrRaw) : "never");
 
-const incRes = await args.session.run(
+const incRes = await _.session.run(
   `
   MATCH (s:WorkshopReferenceSequence {key: $key})
   WITH s, $periodKey AS pkey,

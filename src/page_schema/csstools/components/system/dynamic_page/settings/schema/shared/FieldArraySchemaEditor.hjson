@@ -8,7 +8,7 @@
         description: "Visual editor for fieldArray schema config and item fields (schema only).",
         dynamicComponent: "TextInput, Button, IconButton, Html",
         fns: '''
-const getProps = () => args.contextData.props || {};
+const getProps = () => c.props || {};
 const getField = () => getProps().field || {};
 const DEFAULT_SITE_LANGUAGES = [
   { code: "en", label: "English", isDefault: true },
@@ -110,7 +110,7 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const field = args.contextData.props?.field;
+const field = c.props?.field;
 return {
   as: "div",
   hide: !field || field.renderer !== "fieldArray"
@@ -141,9 +141,9 @@ return `._id.faf-config-section {
   flex-direction: column;
   gap: 0.75rem;
   padding: 0.75rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.5rem;
-  background: ${args.theme.var.color.background_light_50};
+  background: ${t.var.color.background_light_50};
 }`;
 '''
       }
@@ -166,7 +166,7 @@ return `._id.faf-section-title {
   margin: 0;
   font-size: 0.8125rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -201,12 +201,12 @@ return `._id.faf-config-grid {
         displayOrder: 1,
         componentName: "TextInput",
         props: '''
-const config = args.fns.getConfig?.() || {};
+const config = f.getConfig?.() || {};
 return {
   label: "Item label",
   value: config.itemLabel || "",
   placeholder: "Item",
-  onChange: (e) => args.fns.updateConfig?.({ itemLabel: e.target.value })
+  onChange: (e) => f.updateConfig?.({ itemLabel: e.target.value })
 };
 '''
       }
@@ -218,12 +218,12 @@ return {
         displayOrder: 2,
         componentName: "TextInput",
         props: '''
-const config = args.fns.getConfig?.() || {};
+const config = f.getConfig?.() || {};
 return {
   label: "Add button label",
   value: config.addButtonLabel || "",
   placeholder: "Add item",
-  onChange: (e) => args.fns.updateConfig?.({ addButtonLabel: e.target.value })
+  onChange: (e) => f.updateConfig?.({ addButtonLabel: e.target.value })
 };
 '''
       }
@@ -235,7 +235,7 @@ return {
         displayOrder: 3,
         componentName: "TextInput",
         props: '''
-const config = args.fns.getConfig?.() || {};
+const config = f.getConfig?.() || {};
 return {
   label: "Min items",
   type: "number",
@@ -243,7 +243,7 @@ return {
   placeholder: "0",
   onChange: (e) => {
     const raw = e.target.value;
-    args.fns.updateConfig?.({
+    f.updateConfig?.({
       minItems: raw === "" ? undefined : Number(raw)
     });
   }
@@ -258,7 +258,7 @@ return {
         displayOrder: 4,
         componentName: "TextInput",
         props: '''
-const config = args.fns.getConfig?.() || {};
+const config = f.getConfig?.() || {};
 return {
   label: "Max items",
   type: "number",
@@ -266,7 +266,7 @@ return {
   placeholder: "No limit",
   onChange: (e) => {
     const raw = e.target.value;
-    args.fns.updateConfig?.({
+    f.updateConfig?.({
       maxItems: raw === "" ? undefined : Number(raw)
     });
   }
@@ -289,9 +289,9 @@ return `._id.faf-item-fields-section {
   flex-direction: column;
   gap: 0.625rem;
   padding: 0.75rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.5rem;
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
 }`;
 '''
       }
@@ -349,7 +349,7 @@ return {
   size: "sm",
   text: "Add field",
   type: "button",
-  onClick: () => args.fns.addItemField?.()
+  onClick: () => f.addItemField?.()
 };
 '''
       }
@@ -383,7 +383,7 @@ return `._id.faf-item-fields-list {
         loop: true,
         props: '''
 return {
-  data: args.fns.getItemFieldIndices?.() || []
+  data: f.getItemFieldIndices?.() || []
 };
 '''
       }
@@ -404,9 +404,9 @@ return `._id.faf-item-field-row {
   gap: 0.5rem;
   align-items: end;
   padding: 0.625rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.375rem;
-  background: ${args.theme.var.color.background_light_50};
+  background: ${t.var.color.background_light_50};
 
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
@@ -422,12 +422,12 @@ return `._id.faf-item-field-row {
         displayOrder: 1,
         componentName: "TextInput",
         props: '''
-const index = args.contextData.fafItemFieldIndex;
-const itemField = args.fns.getItemFieldAt?.(index) || {};
+const index = c.fafItemFieldIndex;
+const itemField = f.getItemFieldAt?.(index) || {};
 return {
   label: "Key",
   value: itemField.key || "",
-  onChange: (e) => args.fns.updateItemFieldAt?.(index, { key: e.target.value })
+  onChange: (e) => f.updateItemFieldAt?.(index, { key: e.target.value })
 };
 '''
       }
@@ -439,12 +439,12 @@ return {
         displayOrder: 2,
         componentName: "TextInput",
         props: '''
-const index = args.contextData.fafItemFieldIndex;
-const itemField = args.fns.getItemFieldAt?.(index) || {};
+const index = c.fafItemFieldIndex;
+const itemField = f.getItemFieldAt?.(index) || {};
 return {
   label: "Label",
   value: itemField.label || "",
-  onChange: (e) => args.fns.updateItemFieldAt?.(index, { label: e.target.value })
+  onChange: (e) => f.updateItemFieldAt?.(index, { label: e.target.value })
 };
 '''
       }
@@ -484,7 +484,7 @@ return {
 return `._id.faf-field-label {
   font-size: 0.75rem;
   font-weight: 500;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
       }
@@ -496,8 +496,8 @@ return `._id.faf-field-label {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const index = args.contextData.fafItemFieldIndex;
-const itemField = args.fns.getItemFieldAt?.(index) || {};
+const index = c.fafItemFieldIndex;
+const itemField = f.getItemFieldAt?.(index) || {};
 const renderer = itemField.renderer || "text";
 return {
   as: "select",
@@ -506,7 +506,7 @@ return {
   onChange: (e) => {
     const nextRenderer = e.target.value;
     const dataType = nextRenderer === "checkbox" ? "boolean" : "text";
-    args.fns.updateItemFieldAt?.(index, {
+    f.updateItemFieldAt?.(index, {
       renderer: nextRenderer,
       dataType
     });
@@ -517,10 +517,10 @@ return {
 return `._id.faf-renderer-select {
   width: 100%;
   padding: 0.5rem 0.625rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.375rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   font-size: 0.8125rem;
 }`;
 '''
@@ -586,13 +586,13 @@ return `._id.faf-required-wrap {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const index = args.contextData.fafItemFieldIndex;
-const itemField = args.fns.getItemFieldAt?.(index) || {};
+const index = c.fafItemFieldIndex;
+const itemField = f.getItemFieldAt?.(index) || {};
 return {
   as: "input",
   type: "checkbox",
   checked: itemField.required === true,
-  onChange: (e) => args.fns.updateItemFieldAt?.(index, { required: e.target.checked })
+  onChange: (e) => f.updateItemFieldAt?.(index, { required: e.target.checked })
 };
 '''
       }
@@ -613,7 +613,7 @@ return {
         css: '''
 return `._id.faf-required-text {
   font-size: 0.75rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -625,8 +625,8 @@ return `._id.faf-required-text {
         displayOrder: 5,
         componentName: "Html",
         props: '''
-const index = args.contextData.fafItemFieldIndex;
-const itemField = args.fns.getItemFieldAt?.(index) || {};
+const index = c.fafItemFieldIndex;
+const itemField = f.getItemFieldAt?.(index) || {};
 const isTextField = itemField.renderer === "text" || itemField.renderer === "textArea";
 return {
   as: "div",
@@ -652,13 +652,13 @@ return `._id.faf-translatable-wrap {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const index = args.contextData.fafItemFieldIndex;
-const itemField = args.fns.getItemFieldAt?.(index) || {};
+const index = c.fafItemFieldIndex;
+const itemField = f.getItemFieldAt?.(index) || {};
 return {
   as: "input",
   type: "checkbox",
   checked: itemField.translatable === true,
-  onChange: (e) => args.fns.updateItemFieldAt?.(index, { translatable: e.target.checked })
+  onChange: (e) => f.updateItemFieldAt?.(index, { translatable: e.target.checked })
 };
 '''
       }
@@ -679,7 +679,7 @@ return {
         css: '''
 return `._id.faf-translatable-text {
   font-size: 0.75rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -691,13 +691,13 @@ return `._id.faf-translatable-text {
         displayOrder: 5,
         componentName: "IconButton",
         props: '''
-const index = args.contextData.fafItemFieldIndex;
+const index = c.fafItemFieldIndex;
 return {
   icon: "ph:trash",
   variant: "danger",
   size: "sm",
   title: "Remove item field",
-  onClick: () => args.fns.deleteItemField?.(index)
+  onClick: () => f.deleteItemField?.(index)
 };
 '''
       }

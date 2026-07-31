@@ -7,12 +7,12 @@
         description: Enqueues background job to delete a product in Shopify when a ShopifyProduct is deleted.
         body:
           '''
-const { tableVertexLabel, operation, elementId, result, fromWebhook, payload } = args.contextData;
+const { tableVertexLabel, operation, elementId, result, fromWebhook, payload } = c;
 
-const shop = args.contextData.shop;
+const shop = c.shop;
 if (!shop) { console.log('shopifyProductAfterDelete: shop not available in contextData'); return; }
 
-const helpers = await args.executeNamedServerFunction(
+const helpers = await s(
   { functionName: 'shopifyQueueHelpers', contextData: {} }
 );
 if (!helpers.result?.success) return;
@@ -21,7 +21,7 @@ const queueName = 'processShopifyProductAfterDelete';
 
 if (fromWebhook && payload) {
   try {
-    const queue = helpers.result.data.createShopifyQueue(args, queueName);
+    const queue = helpers.result.data.createShopifyQueue(_, queueName);
     await helpers.result.data.addShopifyJob(queue, queueName, { shop, payload, fromWebhook: true });
     await queue.close();
     console.log('shopifyProductAfterDelete: webhook job enqueued for', shop);
@@ -39,7 +39,7 @@ const productData = deletedData?.P || {};
 if (!productData.id) return;
 
 try {
-  const queue = helpers.result.data.createShopifyQueue(args, queueName);
+  const queue = helpers.result.data.createShopifyQueue(_, queueName);
   const job = await helpers.result.data.addShopifyJob(queue, queueName, {
     shop,
     tableVertexLabel,
@@ -50,7 +50,7 @@ try {
   await queue.close();
   const jobId = job?.id;
   if (elementId && jobId) {
-    await args.session.run(
+    await _.session.run(
       `MATCH (n:ShopifyProduct) WHERE elementId(n) = $elementId SET n.syncStatus = $status, n.syncJobId = $jobId, n.updatedAt = datetime()`,
       { elementId, status: 'queued', jobId }
     );

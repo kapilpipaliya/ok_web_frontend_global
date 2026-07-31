@@ -116,14 +116,14 @@ export function CreateGridHeaders(
                   <As
                     as="div"
                     css={`return \`._id {
-                    border: 2px solid \${args.theme.var.color.border};
+                    border: 2px solid \${t.var.color.border};
                   }\`;`}
                   >
                     <As
                       as="div"
                       css={`return \`._id {
-                      background: \${args.theme.var.color.background_light_50};
-                      color: \${args.theme.var.color.background_light_50_text};
+                      background: \${t.var.color.background_light_50};
+                      color: \${t.var.color.background_light_50_text};
                       padding: 8px;
                     }\`;`}
                     >
@@ -229,7 +229,7 @@ export function CreateGridHeaders(
                     target="_blank"
                     rel="noopener noreferrer"
                     css={`return \`._id {
-                      color: \${args.theme.var.color.primary};
+                      color: \${t.var.color.primary};
                       text-decoration: none;
                       &:hover {
                         text-decoration: underline;
@@ -241,7 +241,7 @@ export function CreateGridHeaders(
                   <IconButton
                     icon="ph:copy"
                     css={`return \`._id {
-                      color: \${args.theme.var.color.primary};
+                      color: \${t.var.color.primary};
                       background-color: transparent;
                       border: none;
                       padding: 1px;
@@ -253,7 +253,7 @@ export function CreateGridHeaders(
                         opacity: 1;
                       }
                       &:hover {
-                        color: \${args.theme.var.color.primary_dark_400};
+                        color: \${t.var.color.primary_dark_400};
                       }
                     }\`;`}
                     onClick={(e) => {
@@ -384,16 +384,16 @@ export function CreateGridHeaders(
                     }
                     icon="ph:pen"
                     css={`return \`._id {
-                      color: \${args.theme.var.color.primary};
+                      color: \${t.var.color.primary};
                       background-color: transparent;
                       border: none;
                       padding: 1px;
                       cursor: pointer;
                       &:hover {
-                        color: \${args.theme.var.color.primary_dark_400};
+                        color: \${t.var.color.primary_dark_400};
                       }
                       &:disabled {
-                        color: \${args.theme.var.color.text_light_600};
+                        color: \${t.var.color.text_light_600};
                         cursor: not-allowed;
                       }
                     }\`;`}
@@ -424,13 +424,13 @@ export function CreateGridHeaders(
                   !gridState.hasFullPermission()
                 }
                 icon="ph:trash"
-                css={`return \`._id {color: \${args.theme.var.color.error};
+                css={`return \`._id {color: \${t.var.color.error};
                   background-color: transparent;
                   border: none;
                   padding: 1px;
                   cursor: pointer;
                   &:hover {
-                    color: \${args.theme.var.color.error_dark_400};
+                    color: \${t.var.color.error_dark_400};
                   }
                 }\`;`}
                 onClick={() => setDeleteRowId(info.row.original.id)}
@@ -442,13 +442,13 @@ export function CreateGridHeaders(
               <IconButton
                 icon="ph:database"
                 css={`return \`._id {
-                  color: \${args.theme.var.color.primary};
+                  color: \${t.var.color.primary};
                   background-color: transparent;
                   border: none;
                   padding: 1px;
                   cursor: pointer;
                   &:hover {
-                    color: \${args.theme.var.color.primary_dark_400};
+                    color: \${t.var.color.primary_dark_400};
                   }
                 }\`;`}
                 onClick={() => {
@@ -461,13 +461,13 @@ export function CreateGridHeaders(
             <Show when={!(hideEditJsonAction || FormMetaData[tableId])}>
               <ModifyJsonButton
                 css={`return \`._id {
-                  color: \${args.theme.var.color.warning};
+                  color: \${t.var.color.warning};
                   background-color: transparent;
                   border: none;
                   padding: 1px;
                   cursor: pointer;
                   &:hover {
-                    color: \${args.theme.var.color.warning_dark_400};
+                    color: \${t.var.color.warning_dark_400};
                   }
                 }\`;`}
                 item={info.row.original}
@@ -515,16 +515,16 @@ function InlineEditButton(props: {
         disabled={props.disabled}
         icon="ph:pen"
         css={`return \`._id {
-          color: \${args.theme.var.color.primary};
+          color: \${t.var.color.primary};
           background-color: transparent;
           border: none;
           padding: 1px;
           cursor: pointer;
           &:hover {
-            color: \${args.theme.var.color.primary_dark_400};
+            color: \${t.var.color.primary_dark_400};
           }
           &:disabled {
-            color: \${args.theme.var.color.text_light_600};
+            color: \${t.var.color.text_light_600};
             cursor: not-allowed;
           }
         }\`;`}

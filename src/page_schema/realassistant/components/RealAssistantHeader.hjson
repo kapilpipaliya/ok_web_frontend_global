@@ -29,8 +29,8 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background};
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  background: ${t.var.color.background};
+  border-bottom: 1px solid ${t.var.color.border};
   position: sticky;
   top: 0;
   z-index: 1000;
@@ -75,7 +75,7 @@ return `._id {
         props: '''
 return {
   as: "div",
-  onClick: () => args.navigate("/")
+  onClick: () => _.navigate("/")
 };
 ''',
         css: '''
@@ -104,7 +104,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
 }`;
 '''
       }
@@ -125,7 +125,7 @@ return {
 return `._id {
   font-size: 1.5rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0;
   
   @media (max-width: 768px) {
@@ -142,8 +142,8 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const showBalance = args.contextData.props?.showBalance !== false;
-const userStore = args.contextData.userStore || {};
+const showBalance = c.props?.showBalance !== false;
+const userStore = c.userStore || {};
 const balance = userStore.balance || 0;
 
 return {
@@ -166,8 +166,8 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const showBalance = args.contextData.props?.showBalance !== false;
-const userStore = args.contextData.userStore || {};
+const showBalance = c.props?.showBalance !== false;
+const userStore = c.userStore || {};
 const balance = userStore.balance || 0;
 
 if (!showBalance) return { as: "span" };
@@ -181,7 +181,7 @@ return `._id {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: ${args.theme.var.color.background_dark_100};
+  background: ${t.var.color.background_dark_100};
   padding: 0.5rem 1rem;
   border-radius: 0.5rem;
   
@@ -208,7 +208,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.success};
+  color: ${t.var.color.success};
 }`;
 '''
       }
@@ -220,7 +220,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const userStore = args.contextData.userStore || {};
+const userStore = c.userStore || {};
 const balance = userStore.balance || 0;
 
 return {
@@ -231,7 +231,7 @@ return {
         css: '''
 return `._id {
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   
   @media (max-width: 768px) {
     font-size: 0.875rem;
@@ -247,7 +247,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const userStore = args.contextData.userStore || {};
+const userStore = c.userStore || {};
 const isLoggedIn = userStore.isLoggedIn || false;
 
 return {
@@ -255,17 +255,17 @@ return {
   icon: isLoggedIn ? "carbon:user-avatar-filled" : "carbon:login",
   width: 24,
   height: 24,
-  onClick: () => args.navigate(isLoggedIn ? "/dashboard" : "/login")
+  onClick: () => _.navigate(isLoggedIn ? "/dashboard" : "/login")
 };
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   cursor: pointer;
   transition: color 0.2s ease;
   
   &:hover {
-    color: ${args.theme.var.color.primary_dark_200};
+    color: ${t.var.color.primary_dark_200};
   }
 }`;
 '''

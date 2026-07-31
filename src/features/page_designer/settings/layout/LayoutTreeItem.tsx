@@ -247,7 +247,7 @@ export function LayoutTreeItem(
 
     const boxShadowProps = getDnDBoxShadowArgs(
       layoutStoreVertex()?.P.dragPosition,
-      "${args.theme.var.color.success}",
+      "${t.var.color.success}",
     );
     return `box-shadow:${generateBoxShadow([boxShadowProps])};`;
   });
@@ -363,7 +363,7 @@ export function LayoutTreeItem(
     if (isDirectMatch()) {
       return `return \`._id {
         font-weight: bold;
-        background-color: \${args.theme.var.color.primary_light_100};
+        background-color: \${t.var.color.primary_light_100};
       }\`;`;
     }
     return "";
@@ -468,7 +468,7 @@ export function LayoutTreeItem(
             `return \`._id {
               background-color: transparent;
               border: none;
-              ${hasSpecialContent() ? "color: ${args.theme.var.color.warning};" : ""}
+              ${hasSpecialContent() ? "color: ${t.var.color.warning};" : ""}
             }\`;`,
           ]}
           icon={props.icon}
@@ -640,7 +640,7 @@ export function LayoutTreeItem(
                 `return \`._id {
                 background-color: transparent;
                 border: none;
-                ${showJsonEditor() ? "color: ${args.theme.var.color.primary};" : ""}
+                ${showJsonEditor() ? "color: ${t.var.color.primary};" : ""}
               }\`;`,
               ]}
               icon="tabler:json"

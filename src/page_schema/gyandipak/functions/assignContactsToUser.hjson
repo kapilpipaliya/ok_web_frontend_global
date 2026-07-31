@@ -6,7 +6,7 @@
       P: {
         description: Assign selected contacts to a user
         body:
-          '''const { username, contactIds } = args.contextData;
+          '''const { username, contactIds } = c;
 
 if (!username || !username.trim()) {
   throw new Error("Username is required");
@@ -33,7 +33,7 @@ if (!isNumberOnly(username)) {
   throw new Error("Username should be number only");
 }
 
-const result = await args.session.executeWrite(async (tx) => {
+const result = await _.session.executeWrite(async (tx) => {
   // Find or create user
   let user;
   const userResult = await tx.run(
@@ -57,10 +57,10 @@ const result = await args.session.executeWrite(async (tx) => {
       }
     );
     const node = createUserResult.records[0].get('u');
-    user = args.convertNodeToJson(node);
+    user = _.convertNodeToJson(node);
   } else {
     const node = userResult.records[0].get('u');
-    user = args.convertNodeToJson(node);
+    user = _.convertNodeToJson(node);
   }
 
   // Get contacts by IDs

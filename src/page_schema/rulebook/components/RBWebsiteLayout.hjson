@@ -23,7 +23,7 @@ return `._id {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
 }`;
 '''
       }
@@ -41,13 +41,13 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background};
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  background: ${t.var.color.background};
+  border-bottom: 1px solid ${t.var.color.border};
   position: sticky;
   top: 0;
   z-index: 100;
   backdrop-filter: blur(10px);
-  background: ${args.theme.var.color.background}CC;
+  background: ${t.var.color.background}CC;
 }`;
 '''
       }
@@ -67,7 +67,7 @@ return {
 return `._id {
   max-width: 1200px;
   margin: 0 auto;
-  padding: ${args.theme.var.spacing.lg} ${args.theme.var.spacing.xl};
+  padding: ${t.var.spacing.lg} ${t.var.spacing.xl};
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -75,7 +75,7 @@ return `._id {
 
 @media (max-width: 768px) {
   ._id {
-    padding: ${args.theme.var.spacing.md};
+    padding: ${t.var.spacing.md};
   }
 }`;
 '''
@@ -96,24 +96,24 @@ return {
 return `._id {
   display: flex;
   align-items: center;
-  gap: ${args.theme.var.spacing.md};
+  gap: ${t.var.spacing.md};
 }
 
 ._id .icon {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
 }
 
 ._id h1 {
   font-size: 1.25rem;
   font-weight: 700;
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   margin: 0;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 ._id h1:hover {
-  color: ${args.theme.var.color.primary_dark_200};
+  color: ${t.var.color.primary_dark_200};
 }
 
 @media (max-width: 768px) {
@@ -151,7 +151,7 @@ return {
   as: "h1",
   text: "Personal Rulebook",
   onClick: () => {
-    args.navigate("/");
+    _.navigate("/");
   }
 };
 '''
@@ -171,23 +171,23 @@ return {
         css: '''
 return `._id {
   display: flex;
-  gap: ${args.theme.var.spacing.xl};
+  gap: ${t.var.spacing.xl};
   align-items: center;
 }
 
 ._id a {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   text-decoration: none;
   font-weight: 500;
-  padding: ${args.theme.var.spacing.sm} 0;
+  padding: ${t.var.spacing.sm} 0;
   border-bottom: 2px solid transparent;
   transition: all 0.2s ease;
   cursor: pointer;
 }
 
 ._id a:hover {
-  color: ${args.theme.var.color.primary};
-  border-bottom-color: ${args.theme.var.color.primary_light_200};
+  color: ${t.var.color.primary};
+  border-bottom-color: ${t.var.color.primary_light_200};
 }
 
 @media (max-width: 768px) {
@@ -209,7 +209,7 @@ return {
   as: "a",
   text: "About",
   onClick: () => {
-    args.navigate("/about");
+    _.navigate("/about");
   }
 };
 '''
@@ -226,7 +226,7 @@ return {
   as: "a",
   text: "Features",
   onClick: () => {
-    args.navigate("/features");
+    _.navigate("/features");
   }
 };
 '''
@@ -243,7 +243,7 @@ return {
   as: "a",
   text: "Contact",
   onClick: () => {
-    args.navigate("/contact");
+    _.navigate("/contact");
   }
 };
 '''
@@ -263,13 +263,13 @@ return {
         css: '''
 return `._id {
   display: flex;
-  gap: ${args.theme.var.spacing.md};
+  gap: ${t.var.spacing.md};
   align-items: center;
 }
 
 ._id button {
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.lg};
-  border-radius: ${args.theme.var.borderRadius.md};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.lg};
+  border-radius: ${t.var.borderRadius.md};
   font-weight: 600;
   font-size: 0.875rem;
   cursor: pointer;
@@ -279,32 +279,32 @@ return `._id {
 
 ._id .login-btn {
   background: transparent;
-  color: ${args.theme.var.color.text};
-  border-color: ${args.theme.var.color.border};
+  color: ${t.var.color.text};
+  border-color: ${t.var.color.border};
 }
 
 ._id .login-btn:hover {
-  background: ${args.theme.var.color.background_light_100};
-  border-color: ${args.theme.var.color.primary_light_200};
-  color: ${args.theme.var.color.primary};
+  background: ${t.var.color.background_light_100};
+  border-color: ${t.var.color.primary_light_200};
+  color: ${t.var.color.primary};
 }
 
 ._id .signup-btn {
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
-  border-color: ${args.theme.var.color.primary};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
+  border-color: ${t.var.color.primary};
 }
 
 ._id .signup-btn:hover {
-  background: ${args.theme.var.color.primary_dark_200};
-  border-color: ${args.theme.var.color.primary_dark_200};
+  background: ${t.var.color.primary_dark_200};
+  border-color: ${t.var.color.primary_dark_200};
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px ${args.theme.var.color.primary_light_400};
+  box-shadow: 0 4px 12px ${t.var.color.primary_light_400};
 }
 
 @media (max-width: 768px) {
   ._id button {
-    padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.md};
+    padding: ${t.var.spacing.xs} ${t.var.spacing.md};
     font-size: 0.75rem;
   }
 }`;
@@ -322,7 +322,7 @@ return {
   as: "button",
   text: "Log In",
   onClick: () => {
-    args.navigate("/auth/signin");
+    _.navigate("/auth/signin");
   }
 };
 '''
@@ -339,7 +339,7 @@ return {
   as: "button",
   text: "Sign Up",
   onClick: () => {
-    args.navigate("/auth/signup");
+    _.navigate("/auth/signup");
   }
 };
 '''
@@ -385,9 +385,9 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background_light_100};
-  border-top: 1px solid ${args.theme.var.color.border};
-  margin-top: ${args.theme.var.spacing.xxl};
+  background: ${t.var.color.background_light_100};
+  border-top: 1px solid ${t.var.color.border};
+  margin-top: ${t.var.spacing.xxl};
 }`;
 '''
       }
@@ -407,12 +407,12 @@ return {
 return `._id {
   max-width: 1200px;
   margin: 0 auto;
-  padding: ${args.theme.var.spacing.xxl} ${args.theme.var.spacing.xl};
+  padding: ${t.var.spacing.xxl} ${t.var.spacing.xl};
 }
 
 @media (max-width: 768px) {
   ._id {
-    padding: ${args.theme.var.spacing.xl} ${args.theme.var.spacing.md};
+    padding: ${t.var.spacing.xl} ${t.var.spacing.md};
   }
 }`;
 '''
@@ -433,14 +433,14 @@ return {
 return `._id {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr 1fr;
-  gap: ${args.theme.var.spacing.xxl};
-  margin-bottom: ${args.theme.var.spacing.xl};
+  gap: ${t.var.spacing.xxl};
+  margin-bottom: ${t.var.spacing.xl};
 }
 
 @media (max-width: 768px) {
   ._id {
     grid-template-columns: 1fr;
-    gap: ${args.theme.var.spacing.xl};
+    gap: ${t.var.spacing.xl};
   }
 }`;
 '''
@@ -461,21 +461,21 @@ return {
 return `._id h3 {
   font-size: 1.25rem;
   font-weight: 700;
-  color: ${args.theme.var.color.primary};
-  margin-bottom: ${args.theme.var.spacing.md};
+  color: ${t.var.color.primary};
+  margin-bottom: ${t.var.spacing.md};
   display: flex;
   align-items: center;
-  gap: ${args.theme.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
 }
 
 ._id .icon {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
 }
 
 ._id p {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   line-height: 1.6;
-  margin-bottom: ${args.theme.var.spacing.lg};
+  margin-bottom: ${t.var.spacing.lg};
 }`;
 '''
       }
@@ -549,9 +549,9 @@ return {
 ''',
         css: '''
 return `._id h4 {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   font-weight: 600;
-  margin-bottom: ${args.theme.var.spacing.lg};
+  margin-bottom: ${t.var.spacing.lg};
   font-size: 1rem;
 }
 
@@ -562,11 +562,11 @@ return `._id h4 {
 }
 
 ._id li {
-  margin-bottom: ${args.theme.var.spacing.sm};
+  margin-bottom: ${t.var.spacing.sm};
 }
 
 ._id a {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   text-decoration: none;
   font-size: 0.875rem;
   transition: color 0.2s ease;
@@ -574,7 +574,7 @@ return `._id h4 {
 }
 
 ._id a:hover {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
 }`;
 '''
       }
@@ -630,7 +630,7 @@ return {
   as: "a",
   text: "Features",
   onClick: () => {
-    args.navigate("/features");
+    _.navigate("/features");
   }
 };
 '''
@@ -660,7 +660,7 @@ return {
   as: "a",
   text: "Pricing",
   onClick: () => {
-    args.navigate("/pricing");
+    _.navigate("/pricing");
   }
 };
 '''
@@ -690,7 +690,7 @@ return {
   as: "a",
   text: "Docs",
   onClick: () => {
-    args.navigate("/docs");
+    _.navigate("/docs");
   }
 };
 '''
@@ -709,9 +709,9 @@ return {
 ''',
         css: '''
 return `._id h4 {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   font-weight: 600;
-  margin-bottom: ${args.theme.var.spacing.lg};
+  margin-bottom: ${t.var.spacing.lg};
   font-size: 1rem;
 }
 
@@ -722,11 +722,11 @@ return `._id h4 {
 }
 
 ._id li {
-  margin-bottom: ${args.theme.var.spacing.sm};
+  margin-bottom: ${t.var.spacing.sm};
 }
 
 ._id a {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   text-decoration: none;
   font-size: 0.875rem;
   transition: color 0.2s ease;
@@ -734,7 +734,7 @@ return `._id h4 {
 }
 
 ._id a:hover {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
 }`;
 '''
       }
@@ -790,7 +790,7 @@ return {
   as: "a",
   text: "About",
   onClick: () => {
-    args.navigate("/about");
+    _.navigate("/about");
   }
 };
 '''
@@ -820,7 +820,7 @@ return {
   as: "a",
   text: "Contact",
   onClick: () => {
-    args.navigate("/contact");
+    _.navigate("/contact");
   }
 };
 '''
@@ -839,9 +839,9 @@ return {
 ''',
         css: '''
 return `._id h4 {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   font-weight: 600;
-  margin-bottom: ${args.theme.var.spacing.lg};
+  margin-bottom: ${t.var.spacing.lg};
   font-size: 1rem;
 }
 
@@ -852,11 +852,11 @@ return `._id h4 {
 }
 
 ._id li {
-  margin-bottom: ${args.theme.var.spacing.sm};
+  margin-bottom: ${t.var.spacing.sm};
 }
 
 ._id a {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   text-decoration: none;
   font-size: 0.875rem;
   transition: color 0.2s ease;
@@ -864,7 +864,7 @@ return `._id h4 {
 }
 
 ._id a:hover {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
 }`;
 '''
       }
@@ -920,7 +920,7 @@ return {
   as: "a",
   text: "Documentation",
   onClick: () => {
-    args.navigate("/docs");
+    _.navigate("/docs");
   }
 };
 '''
@@ -939,40 +939,40 @@ return {
 ''',
         css: '''
 return `._id {
-  padding-top: ${args.theme.var.spacing.xl};
-  border-top: 1px solid ${args.theme.var.color.border};
+  padding-top: ${t.var.spacing.xl};
+  border-top: 1px solid ${t.var.color.border};
   display: flex;
   justify-content: space-between;
   align-items: center;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   font-size: 0.875rem;
 }
 
 ._id .legal-links {
   display: flex;
-  gap: ${args.theme.var.spacing.lg};
+  gap: ${t.var.spacing.lg};
 }
 
 ._id a {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   text-decoration: none;
   transition: color 0.2s ease;
   cursor: pointer;
 }
 
 ._id a:hover {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
 }
 
 @media (max-width: 768px) {
   ._id {
     flex-direction: column;
-    gap: ${args.theme.var.spacing.lg};
+    gap: ${t.var.spacing.lg};
     text-align: center;
   }
 
   ._id .legal-links {
-    gap: ${args.theme.var.spacing.md};
+    gap: ${t.var.spacing.md};
   }
 }`;
 '''
@@ -1006,14 +1006,14 @@ return {
         css: '''
 return `._id {
   display: flex;
-  gap: ${args.theme.var.spacing.lg};
+  gap: ${t.var.spacing.lg};
   align-items: center;
 }
 
 @media (max-width: 768px) {
   ._id {
     flex-direction: column;
-    gap: ${args.theme.var.spacing.md};
+    gap: ${t.var.spacing.md};
     align-items: flex-start;
   }
 }`;
@@ -1031,7 +1031,7 @@ return {
   as: "a",
   text: "Privacy Policy",
   onClick: () => {
-    args.navigate("/privacy");
+    _.navigate("/privacy");
   }
 };
 '''
@@ -1048,7 +1048,7 @@ return {
   as: "a",
   text: "Terms of Service",
   onClick: () => {
-    args.navigate("/terms");
+    _.navigate("/terms");
   }
 };
 '''
@@ -1065,7 +1065,7 @@ return {
   as: "a",
   text: "Cookie Policy",
   onClick: () => {
-    args.navigate("/cookies");
+    _.navigate("/cookies");
   }
 };
 '''

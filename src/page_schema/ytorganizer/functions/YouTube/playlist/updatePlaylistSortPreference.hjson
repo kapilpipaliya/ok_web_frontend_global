@@ -8,7 +8,7 @@
         body:
           '''
 // Get the parameters from the context
-const { playlistId, sortBy, customOrder, ownershipId } = args.contextData;
+const { playlistId, sortBy, customOrder, ownershipId } = c;
 
 if (!playlistId || !sortBy) {
   return {
@@ -25,7 +25,7 @@ if (!ownershipId) {
 }
 
 // Get current authenticated user from session
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return {
     success: false,
@@ -34,10 +34,10 @@ if (!actualUser) {
 }
 
 // Get effective user (handles admin impersonation)
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const user = await _.getEffectiveUser(_.session, actualUser, c);
 
 // Verify ownership belongs to user
-const ownershipCheck = await args.session.run(`
+const ownershipCheck = await _.session.run(`
   MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
   RETURN o
 `, { userUuid: user.P.uuid, ownershipId });
@@ -67,7 +67,7 @@ const updateQuery = `
   RETURN ps
 `;
 
-const updateResult = await args.session.run(updateQuery, {
+const updateResult = await _.session.run(updateQuery, {
   playlistId: playlistId,
   ownershipId: ownershipId,
   settingKey: playlistSettingKey,
@@ -83,7 +83,7 @@ if (updateResult.records.length === 0) {
 }
 
 // Fetch updated playlist data with video count using helper function
-const fetchResult = await args.executeNamedServerFunction({
+const fetchResult = await s({
   functionName: "getPlaylistsWithVideoCount",
   contextData: {
     userUuid: user.P.uuid,

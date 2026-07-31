@@ -14,7 +14,7 @@
         displayOrder: 1
         fns:
           '''
-const sequenceKey = () => String(args.contextData.props?.sequenceKey || "").trim();
+const sequenceKey = () => String(c.props?.sequenceKey || "").trim();
 
 const neoStr = (v) => {
   if (v == null) return "";
@@ -22,39 +22,39 @@ const neoStr = (v) => {
   return String(v);
 };
 
-const [prefix, setPrefix] = args.createSignal("");
-const [suffix, setSuffix] = args.createSignal("");
-const [startingNumber, setStartingNumber] = args.createSignal("1000");
-const [incrementStep, setIncrementStep] = args.createSignal("1");
-const [formatStr, setFormatStr] = args.createSignal("{prefix}{number}{suffix}");
-const [resetRule, setResetRule] = args.createSignal("never");
-const [numberPadding, setNumberPadding] = args.createSignal("0");
-const [currentNumberDisp, setCurrentNumberDisp] = args.createSignal("—");
-const [loading, setLoading] = args.createSignal(false);
-const [saving, setSaving] = args.createSignal(false);
+const [prefix, setPrefix] = _.createSignal("");
+const [suffix, setSuffix] = _.createSignal("");
+const [startingNumber, setStartingNumber] = _.createSignal("1000");
+const [incrementStep, setIncrementStep] = _.createSignal("1");
+const [formatStr, setFormatStr] = _.createSignal("{prefix}{number}{suffix}");
+const [resetRule, setResetRule] = _.createSignal("never");
+const [numberPadding, setNumberPadding] = _.createSignal("0");
+const [currentNumberDisp, setCurrentNumberDisp] = _.createSignal("—");
+const [loading, setLoading] = _.createSignal(false);
+const [saving, setSaving] = _.createSignal(false);
 
 const loadSequence = async () => {
   const key = sequenceKey();
   if (!key) return;
   setLoading(true);
   try {
-    const res = await args.executeNamedServerFunction({
+    const res = await s({
       functionName: "getWorkshopReferenceSequences",
       contextData: {}
     });
     if (res?.error) {
-      args.showErrorToast?.(String(res.error));
+      _.showErrorToast?.(String(res.error));
       return;
     }
     const inner = res?.result;
     if (!inner?.success) {
-      args.showErrorToast?.(inner?.message || "Failed to load sequences");
+      _.showErrorToast?.(inner?.message || "Failed to load sequences");
       return;
     }
     const list = inner.data?.sequences || [];
     const row = list.find((v) => String(v?.P?.key || "") === key);
     if (!row) {
-      args.showErrorToast?.("Sequence not found: " + key);
+      _.showErrorToast?.("Sequence not found: " + key);
       return;
     }
     const P = row.P || {};
@@ -72,7 +72,7 @@ const loadSequence = async () => {
       setCurrentNumberDisp(neoStr(cn));
     }
   } catch (err) {
-    args.showErrorToast?.(err?.message || "Failed to load sequence");
+    _.showErrorToast?.(err?.message || "Failed to load sequence");
   } finally {
     setLoading(false);
   }
@@ -83,7 +83,7 @@ const saveSequence = async (opts) => {
   if (!key) return;
   setSaving(true);
   try {
-    const res = await args.executeNamedServerFunction({
+    const res = await s({
       functionName: "saveWorkshopReferenceSequence",
       contextData: {
         key,
@@ -98,18 +98,18 @@ const saveSequence = async (opts) => {
       }
     });
     if (res?.error) {
-      args.showErrorToast?.(String(res.error));
+      _.showErrorToast?.(String(res.error));
       return;
     }
     const inner = res?.result;
     if (!inner?.success) {
-      args.showErrorToast?.(inner?.message || "Save failed");
+      _.showErrorToast?.(inner?.message || "Save failed");
       return;
     }
-    args.showSuccessToast?.(inner.message || "Saved");
+    _.showSuccessToast?.(inner.message || "Saved");
     await loadSequence();
   } catch (err) {
-    args.showErrorToast?.(err?.message || "Save failed");
+    _.showErrorToast?.(err?.message || "Save failed");
   } finally {
     setSaving(false);
   }
@@ -128,8 +128,8 @@ const onResetCounter = () => {
 return {
   sequenceKey,
   sectionTitle: () =>
-    String(args.contextData.props?.sectionTitle || "").trim() || "Reference number",
-  description: () => String(args.contextData.props?.description || "").trim(),
+    String(c.props?.sectionTitle || "").trim() || "Reference number",
+  description: () => String(c.props?.description || "").trim(),
   prefix,
   setPrefix,
   suffix,
@@ -157,24 +157,24 @@ return {
         css:
           '''
 return `._id.workshop-refseq-editor {
-  background: ${args.theme.var.color.background_light_100};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.lg};
-  padding: ${args.theme.var.spacing.lg};
-  margin-bottom: ${args.theme.var.spacing.lg};
+  background: ${t.var.color.background_light_100};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.lg};
+  padding: ${t.var.spacing.lg};
+  margin-bottom: ${t.var.spacing.lg};
   max-width: 960px;
 }`;
 '''
         componentName: Html
         props:
           '''
-const sk = String(args.contextData.props?.sequenceKey || "").trim();
+const sk = String(c.props?.sequenceKey || "").trim();
 return {
   as: "div",
   class: "workshop-refseq-editor",
   hide: !sk,
   onMount: () => {
-    if (sk) args.fns.loadSequence();
+    if (sk) f.loadSequence();
   }
 };
 '''
@@ -190,7 +190,7 @@ return {
           '''
 return {
   as: "h2",
-  text: args.fns.sectionTitle(),
+  text: f.sectionTitle(),
   class: "workshop-refseq-editor-title"
 };
 '''
@@ -199,8 +199,8 @@ return {
 return `._id.workshop-refseq-editor-title {
   font-size: 1.125rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 ${args.theme.var.spacing.sm} 0;
+  color: ${t.var.color.text};
+  margin: 0 0 ${t.var.spacing.sm} 0;
 }`;
 '''
       }
@@ -213,7 +213,7 @@ return `._id.workshop-refseq-editor-title {
         componentName: Html
         props:
           '''
-const d = args.fns.description();
+const d = f.description();
 return {
   as: "p",
   text: d,
@@ -224,9 +224,9 @@ return {
         css:
           '''
 return `._id.workshop-refseq-editor-desc {
-  margin: 0 0 ${args.theme.var.spacing.md} 0;
+  margin: 0 0 ${t.var.spacing.md} 0;
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   line-height: 1.45;
 }`;
 '''
@@ -243,15 +243,15 @@ return `._id.workshop-refseq-editor-desc {
 return {
   as: "div",
   class: "workshop-refseq-meta",
-  text: `Key: ${args.fns.sequenceKey()} · Last counter: ${args.fns.currentNumberDisp()}`
+  text: `Key: ${f.sequenceKey()} · Last counter: ${f.currentNumberDisp()}`
 };
 '''
         css:
           '''
 return `._id.workshop-refseq-meta {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text};
-  margin-bottom: ${args.theme.var.spacing.md};
+  color: ${t.var.color.text};
+  margin-bottom: ${t.var.spacing.md};
 }`;
 '''
       }
@@ -271,8 +271,8 @@ return { as: "div", class: "workshop-refseq-grid" };
 return `._id.workshop-refseq-grid {
   display: grid;
   grid-template-columns: minmax(7rem, 0.35fr) 1fr;
-  gap: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  margin-bottom: ${args.theme.var.spacing.md};
+  gap: ${t.var.spacing.sm} ${t.var.spacing.md};
+  margin-bottom: ${t.var.spacing.md};
   align-items: center;
 }
 @media (max-width: 640px) {
@@ -280,7 +280,7 @@ return `._id.workshop-refseq-grid {
     grid-template-columns: 1fr;
   }
   ._id.workshop-refseq-grid .workshop-refseq-label {
-    margin-top: ${args.theme.var.spacing.sm};
+    margin-top: ${t.var.spacing.sm};
   }
   ._id.workshop-refseq-grid .workshop-refseq-label:nth-child(1) {
     margin-top: 0;
@@ -304,7 +304,7 @@ return { as: "div", text: "Prefix", class: "workshop-refseq-label" };
 return `._id.workshop-refseq-label {
   font-size: 0.875rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   line-height: 1.3;
 }`;
 '''
@@ -320,9 +320,9 @@ return `._id.workshop-refseq-label {
           '''
 return {
   title: "Prefix",
-  value: args.fns.prefix(),
-  onChange: (e) => args.fns.setPrefix(e.target.value),
-  disabled: args.fns.isLoading() || args.fns.isSaving()
+  value: f.prefix(),
+  onChange: (e) => f.setPrefix(e.target.value),
+  disabled: f.isLoading() || f.isSaving()
 };
 '''
       }
@@ -342,7 +342,7 @@ return { as: "div", text: "Suffix", class: "workshop-refseq-label" };
 return `._id.workshop-refseq-label {
   font-size: 0.875rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   line-height: 1.3;
 }`;
 '''
@@ -358,9 +358,9 @@ return `._id.workshop-refseq-label {
           '''
 return {
   title: "Suffix",
-  value: args.fns.suffix(),
-  onChange: (e) => args.fns.setSuffix(e.target.value),
-  disabled: args.fns.isLoading() || args.fns.isSaving()
+  value: f.suffix(),
+  onChange: (e) => f.setSuffix(e.target.value),
+  disabled: f.isLoading() || f.isSaving()
 };
 '''
       }
@@ -380,7 +380,7 @@ return { as: "div", text: "Starting number", class: "workshop-refseq-label" };
 return `._id.workshop-refseq-label {
   font-size: 0.875rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   line-height: 1.3;
 }`;
 '''
@@ -397,9 +397,9 @@ return `._id.workshop-refseq-label {
 return {
   title: "Starting number",
   type: "number",
-  value: args.fns.startingNumber(),
-  onChange: (e) => args.fns.setStartingNumber(e.target.value),
-  disabled: args.fns.isLoading() || args.fns.isSaving()
+  value: f.startingNumber(),
+  onChange: (e) => f.setStartingNumber(e.target.value),
+  disabled: f.isLoading() || f.isSaving()
 };
 '''
       }
@@ -419,7 +419,7 @@ return { as: "div", text: "Increment step", class: "workshop-refseq-label" };
 return `._id.workshop-refseq-label {
   font-size: 0.875rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   line-height: 1.3;
 }`;
 '''
@@ -436,9 +436,9 @@ return `._id.workshop-refseq-label {
 return {
   title: "Increment step",
   type: "number",
-  value: args.fns.incrementStep(),
-  onChange: (e) => args.fns.setIncrementStep(e.target.value),
-  disabled: args.fns.isLoading() || args.fns.isSaving()
+  value: f.incrementStep(),
+  onChange: (e) => f.setIncrementStep(e.target.value),
+  disabled: f.isLoading() || f.isSaving()
 };
 '''
       }
@@ -458,7 +458,7 @@ return { as: "div", text: "Format template", class: "workshop-refseq-label" };
 return `._id.workshop-refseq-label {
   font-size: 0.875rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   line-height: 1.3;
 }`;
 '''
@@ -474,9 +474,9 @@ return `._id.workshop-refseq-label {
           '''
 return {
   title: "Format template",
-  value: args.fns.formatStr(),
-  onChange: (e) => args.fns.setFormatStr(e.target.value),
-  disabled: args.fns.isLoading() || args.fns.isSaving(),
+  value: f.formatStr(),
+  onChange: (e) => f.setFormatStr(e.target.value),
+  disabled: f.isLoading() || f.isSaving(),
   placeholder: "{prefix}{number}{suffix}"
 };
 '''
@@ -497,7 +497,7 @@ return { as: "div", text: "Number padding", class: "workshop-refseq-label" };
 return `._id.workshop-refseq-label {
   font-size: 0.875rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   line-height: 1.3;
 }`;
 '''
@@ -514,9 +514,9 @@ return `._id.workshop-refseq-label {
 return {
   title: "Number padding (0 = no zero-padding)",
   type: "number",
-  value: args.fns.numberPadding(),
-  onChange: (e) => args.fns.setNumberPadding(e.target.value),
-  disabled: args.fns.isLoading() || args.fns.isSaving(),
+  value: f.numberPadding(),
+  onChange: (e) => f.setNumberPadding(e.target.value),
+  disabled: f.isLoading() || f.isSaving(),
   placeholder: "0"
 };
 '''
@@ -541,7 +541,7 @@ return {
 return `._id.workshop-refseq-label {
   font-size: 0.875rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   line-height: 1.3;
 }`;
 '''
@@ -557,9 +557,9 @@ return `._id.workshop-refseq-label {
           '''
 return {
   title: "Reset rule: never, daily, monthly, or yearly",
-  value: args.fns.resetRule(),
-  onChange: (e) => args.fns.setResetRule(e.target.value),
-  disabled: args.fns.isLoading() || args.fns.isSaving(),
+  value: f.resetRule(),
+  onChange: (e) => f.setResetRule(e.target.value),
+  disabled: f.isLoading() || f.isSaving(),
   placeholder: "never"
 };
 '''
@@ -580,7 +580,7 @@ return { as: "div", class: "workshop-refseq-toolbar" };
 return `._id.workshop-refseq-toolbar {
   display: flex;
   flex-wrap: wrap;
-  gap: ${args.theme.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
   align-items: center;
 }`;
 '''
@@ -596,9 +596,9 @@ return `._id.workshop-refseq-toolbar {
           '''
 return {
   variant: "primary",
-  text: args.fns.isSaving() ? "Saving…" : "Save",
-  disabled: args.fns.isLoading() || args.fns.isSaving(),
-  onClick: () => args.fns.saveSequence({})
+  text: f.isSaving() ? "Saving…" : "Save",
+  disabled: f.isLoading() || f.isSaving(),
+  onClick: () => f.saveSequence({})
 };
 '''
       }
@@ -614,8 +614,8 @@ return {
 return {
   variant: "secondary",
   text: "Reset counter",
-  disabled: args.fns.isLoading() || args.fns.isSaving(),
-  onClick: () => args.fns.onResetCounter()
+  disabled: f.isLoading() || f.isSaving(),
+  onClick: () => f.onResetCounter()
 };
 '''
       }

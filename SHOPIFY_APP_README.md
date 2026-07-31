@@ -85,7 +85,7 @@ When a merchant loads the embedded app, Shopify sends a request with query param
 If the shop hasn't been authorized yet, redirect to OAuth:
 
 ```javascript
-const shopify = await args.getShopifyClient();
+const shopify = await _.getShopifyClient();
 const authUrl = await shopify.auth.begin({
   shop: "example.myshopify.com",
   callbackPath: "/api/shopify/auth",
@@ -208,10 +208,10 @@ props: '''
 return {
   onClick: async () => {
     // Fetch products
-    const response = await args.executeNamedServerFunction({
+    const response = await _.executeNamedServerFunction({
       functionName: "fetchFirst25Products",
       contextData: {
-        shop: args.searchParams?.shop
+        shop: _.searchParams?.shop
       }
     });
     
@@ -229,8 +229,8 @@ return {
 
 ```javascript
 // In a server function
-const shopify = await args.getShopifyClient();
-const sessionStore = args.getNeo4jSessionStore();
+const shopify = await _.getShopifyClient();
+const sessionStore = _.getNeo4jSessionStore();
 
 // Get session
 const sessionId = shopify.session.getOfflineId(shop);
@@ -264,7 +264,7 @@ Returns the configured Shopify API object. This is a singleton instance with Neo
 
 **Usage**:
 ```javascript
-const shopify = await args.getShopifyClient();
+const shopify = await _.getShopifyClient();
 ```
 
 ### `getNeo4jSessionStore()`
@@ -273,7 +273,7 @@ Returns the Neo4j session store instance for direct session management.
 
 **Usage**:
 ```javascript
-const sessionStore = args.getNeo4jSessionStore();
+const sessionStore = _.getNeo4jSessionStore();
 const session = await sessionStore.loadSession(sessionId);
 await sessionStore.storeSession(session);
 await sessionStore.deleteSession(sessionId);
@@ -285,7 +285,7 @@ Validates Shopify admin app request using HMAC signature.
 
 **Usage**:
 ```javascript
-const { valid, shop, error } = args.verifyShopifyAdminRequest(searchParams);
+const { valid, shop, error } = _.verifyShopifyAdminRequest(searchParams);
 ```
 
 ### `getDatabaseNameForShop(shop)`
@@ -294,7 +294,7 @@ Converts shop domain to Neo4j database name.
 
 **Usage**:
 ```javascript
-const dbName = args.getDatabaseNameForShop("example.myshopify.com");
+const dbName = _.getDatabaseNameForShop("example.myshopify.com");
 // Returns: "shopproductsmanagestoremyshopifycom"
 ```
 
@@ -304,7 +304,7 @@ Ensures a Neo4j database exists for the shop and optionally runs migration.
 
 **Usage**:
 ```javascript
-const { dbSession, subDomain } = await args.ensureShopDatabaseAndMigrate(shop, {
+const { dbSession, subDomain } = await _.ensureShopDatabaseAndMigrate(shop, {
   dryRun: false,
   contextData: { ... }
 });
@@ -316,7 +316,7 @@ Gets a Neo4j database session for an authenticated shop.
 
 **Usage**:
 ```javascript
-const { dbSession, subDomain } = await args.getDBSessionForShop(shop);
+const { dbSession, subDomain } = await _.getDBSessionForShop(shop);
 ```
 
 ## Session Management
@@ -337,7 +337,7 @@ Sessions are stored automatically during:
 
 You can also manually store sessions:
 ```javascript
-const sessionStore = args.getNeo4jSessionStore();
+const sessionStore = _.getNeo4jSessionStore();
 await sessionStore.storeSession(session);
 ```
 

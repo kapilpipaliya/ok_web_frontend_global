@@ -11,13 +11,13 @@
  * Example: Global Model Registration
  *
  * This demonstrates:
- * - Registering models dynamically via args.registerModel
- * - Using args.getNeogmaInstance instead of global access
- * - Using args.modelToVertex / args.modelsToVertices (no import needed)
- * - Checking model existence with args.hasModel
- * - Getting all models with args.getRegisteredModels
+ * - Registering models dynamically via _.registerModel
+ * - Using _.getNeogmaInstance instead of global access
+ * - Using _.modelToVertex / _.modelsToVertices (no import needed)
+ * - Checking model existence with _.hasModel
+ * - Getting all models with _.getRegisteredModels
  *
- * Parameters (via args.contextData):
+ * Parameters (via c):
  * - action: string - Action to perform:
  *   - "register" - Register the UserActivity model
  *   - "create" - Create a user activity log
@@ -34,13 +34,13 @@ try {
     userId,
     activityType,
     metadata
-  } = args.contextData;
+  } = c;
 
   // ==================== ACTION: REGISTER ====================
   if (action === "register") {
     // Check if already registered
-    if (args.hasModel("UserActivity")) {
-      return args.utils.createSuccessResponse(
+    if (_.hasModel("UserActivity")) {
+      return _.utils.createSuccessResponse(
         { alreadyRegistered: true },
         "UserActivity model was already registered"
       );
@@ -49,8 +49,8 @@ try {
     // Import ModelFactory
     const { ModelFactory } = await import("neogma");
 
-    // Get neogma instance via args (new pattern!)
-    const neogma = await args.getNeogmaInstance();
+    // Get neogma instance via _ (new pattern!)
+    const neogma = await _.getNeogmaInstance();
 
     // Create UserActivity model
     const UserActivityModel = ModelFactory({
@@ -83,13 +83,13 @@ try {
     };
 
     // Register globally
-    args.registerModel("UserActivity", () => UserActivityModel);
+    _.registerModel("UserActivity", () => UserActivityModel);
 
-    return args.utils.createSuccessResponse(
+    return _.utils.createSuccessResponse(
       {
         modelName: "UserActivity",
         registered: true,
-        availableModels: args.getRegisteredModels()
+        availableModels: _.getRegisteredModels()
       },
       "UserActivity model registered successfully"
     );
@@ -98,42 +98,42 @@ try {
   // ==================== ACTION: CREATE ====================
   if (action === "create") {
     // Ensure model is registered
-    if (!args.hasModel("UserActivity")) {
-      return args.utils.createErrorResponse(
+    if (!_.hasModel("UserActivity")) {
+      return _.utils.createErrorResponse(
         "UserActivity model not registered. Call with action=register first.",
         "ModelNotFoundError"
       );
     }
 
     // Validate inputs
-    if (!userId || !args.utils.isValidUUID(userId)) {
-      return args.utils.createErrorResponse(
+    if (!userId || !_.utils.isValidUUID(userId)) {
+      return _.utils.createErrorResponse(
         "Valid user ID is required",
         "ValidationError"
       );
     }
 
-    if (args.utils.isEmpty(activityType)) {
-      return args.utils.createErrorResponse(
+    if (_.utils.isEmpty(activityType)) {
+      return _.utils.createErrorResponse(
         "Activity type is required",
         "ValidationError"
       );
     }
 
     // Create activity log using registered model
-    const activity = await args.Models.UserActivity.createOne({
+    const activity = await _.Models.UserActivity.createOne({
       userId,
       activityType,
-      timestamp: args.utils.now(),
-      metadata: metadata ? args.utils.safeJsonStringify(metadata) : null,
-      ipAddress: args.request?.headers?.get("x-forwarded-for") || null,
-      userAgent: args.request?.headers?.get("user-agent") || null
-    }, { session: args.session });
+      timestamp: _.utils.now(),
+      metadata: metadata ? _.utils.safeJsonStringify(metadata) : null,
+      ipAddress: _.request?.headers?.get("x-forwarded-for") || null,
+      userAgent: _.request?.headers?.get("user-agent") || null
+    }, { session: _.session });
 
-    // Convert to Vertex format using args (no import needed!)
-    const vertexFormat = args.modelToVertex(activity);
+    // Convert to Vertex format using _ (no import needed!)
+    const vertexFormat = _.modelToVertex(activity);
 
-    return args.utils.createSuccessResponse(
+    return _.utils.createSuccessResponse(
       { activity: vertexFormat },
       "Activity logged successfully"
     );
@@ -142,44 +142,44 @@ try {
   // ==================== ACTION: LIST ====================
   if (action === "list") {
     // Ensure model is registered
-    if (!args.hasModel("UserActivity")) {
-      return args.utils.createErrorResponse(
+    if (!_.hasModel("UserActivity")) {
+      return _.utils.createErrorResponse(
         "UserActivity model not registered",
         "ModelNotFoundError"
       );
     }
 
     // Validate user ID
-    if (!userId || !args.utils.isValidUUID(userId)) {
-      return args.utils.createErrorResponse(
+    if (!userId || !_.utils.isValidUUID(userId)) {
+      return _.utils.createErrorResponse(
         "Valid user ID is required",
         "ValidationError"
       );
     }
 
     // Use custom static method
-    const activities = await args.Models.UserActivity.findByUser(
+    const activities = await _.Models.UserActivity.findByUser(
       userId,
       {
-        session: args.session,
+        session: _.session,
         limit: 20,
         activityType: activityType || undefined
       }
     );
 
-    // Convert to Vertex format using args (no import needed!)
-    const vertexArray = args.modelsToVertices(activities);
+    // Convert to Vertex format using _ (no import needed!)
+    const vertexArray = _.modelsToVertices(activities);
 
     // Get count using raw Cypher for demonstration
-    const countQuery = args.cypher.buildCountQuery(
+    const countQuery = _.cypher.buildCountQuery(
       "UserActivity",
       { userId },
       "a"
     );
-    const countResult = await args.session.run(countQuery.query, countQuery.params);
+    const countResult = await _.session.run(countQuery.query, countQuery.params);
     const total = countResult.records[0]?.get("count")?.toNumber() || 0;
 
-    return args.utils.createPaginatedResponse({
+    return _.utils.createPaginatedResponse({
       data: vertexArray,
       total,
       page: 1,
@@ -192,22 +192,22 @@ try {
   // ==================== ACTION: STATS ====================
   if (action === "stats") {
     // Get all registered models
-    const allModels = args.getRegisteredModels();
+    const allModels = _.getRegisteredModels();
 
     // Check each model
     const modelStatus = {};
     for (const modelName of ["Notification", "UserActivity", "Cache"]) {
-      modelStatus[modelName] = args.hasModel(modelName);
+      modelStatus[modelName] = _.hasModel(modelName);
     }
 
-    return args.utils.createSuccessResponse(
+    return _.utils.createSuccessResponse(
       {
         totalModels: allModels.length,
         registeredModels: allModels,
         modelStatus,
         // Show that UserActivity has custom methods if registered
-        hasUserActivityCustomMethods: args.hasModel("UserActivity")
-          ? typeof args.Models.UserActivity?.findByUser === "function"
+        hasUserActivityCustomMethods: _.hasModel("UserActivity")
+          ? typeof _.Models.UserActivity?.findByUser === "function"
           : false
       },
       "Model registry statistics"
@@ -215,7 +215,7 @@ try {
   }
 
   // ==================== INVALID ACTION ====================
-  return args.utils.createErrorResponse(
+  return _.utils.createErrorResponse(
     `Invalid action: ${action}`,
     "ValidationError",
     {
@@ -226,12 +226,12 @@ try {
 } catch (error) {
   console.error("Error in exampleGlobalModelRegistration:", error);
 
-  return args.utils.createErrorResponse(
+  return _.utils.createErrorResponse(
     error.message || "An unexpected error occurred",
     error.name || "ServerError",
     {
       stack: error.stack,
-      functionName: args.functionName
+      functionName: _.functionName
     }
   );
 }

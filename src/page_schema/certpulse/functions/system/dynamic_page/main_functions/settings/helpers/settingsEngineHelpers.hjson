@@ -13,7 +13,7 @@
  * contextData.action: "validateSection" | "mergeDefaults" | "transformValues" | "buildAuditDiff" | "runHookPipeline"
  */
 
-const action = args.contextData?.action;
+const action = c?.action;
 if (!action) {
   return { success: false, message: "action is required" };
 }
@@ -162,7 +162,7 @@ const buildAuditDiff = (beforeValues, afterValues) => {
 };
 
 if (action === "validateSection") {
-  const { sectionConfig, values } = args.contextData;
+  const { sectionConfig, values } = c;
   const fieldErrors = validateSectionValues(sectionConfig, values);
   if (Object.keys(fieldErrors).length > 0) {
     return { success: false, message: "Validation failed", data: { fieldErrors } };
@@ -171,22 +171,22 @@ if (action === "validateSection") {
 }
 
 if (action === "mergeDefaults") {
-  const { sectionConfig, values } = args.contextData;
+  const { sectionConfig, values } = c;
   return { success: true, data: { values: mergeSectionDefaults(sectionConfig, values) } };
 }
 
 if (action === "transformValues") {
-  const { sectionConfig, values } = args.contextData;
+  const { sectionConfig, values } = c;
   return { success: true, data: { values: transformSectionValues(sectionConfig, values) } };
 }
 
 if (action === "buildAuditDiff") {
-  const { beforeValues, afterValues } = args.contextData;
+  const { beforeValues, afterValues } = c;
   return { success: true, data: buildAuditDiff(beforeValues, afterValues) };
 }
 
 if (action === "collectFormFields") {
-  const { sectionConfig } = args.contextData;
+  const { sectionConfig } = c;
   return { success: true, data: { fields: collectFormFields(sectionConfig) } };
 }
 

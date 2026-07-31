@@ -185,7 +185,7 @@
         displayOrder: 1
         componentName: Html
         props:
-          '''const hero = args.contextData.props || {};
+          '''const hero = c.props || {};
 return {
   as: "iframe",
   src: hero.leftVideoUrl || "https://www.youtube.com/embed/dQw4w9WgXcQ",
@@ -210,7 +210,7 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const hero = args.contextData.props || {};
+          '''const hero = c.props || {};
 return {
   as: "h3",
   text: hero.leftTitle || "आत्मज्ञान की यात्रा"
@@ -230,7 +230,7 @@ return {
         displayOrder: 3
         componentName: Html
         props:
-          '''const hero = args.contextData.props || {};
+          '''const hero = c.props || {};
 return {
   as: "p",
   text: hero.leftDesc || "श्रीमद् राजचंद्र के उपदेशों का प्रसार"
@@ -325,7 +325,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const hero = args.contextData.props || {};
+          '''const hero = c.props || {};
 return {
   as: "iframe",
   src: hero.rightVideoUrl || "https://www.youtube.com/embed/dQw4w9WgXcQ",
@@ -355,7 +355,7 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const hero = args.contextData.props || {};
+          '''const hero = c.props || {};
 return {
   as: "h2",
   text: hero.watchButtonText || "WATCH OR LISTEN TO HIM ONLINE"
@@ -377,7 +377,7 @@ return {
         displayOrder: 3
         componentName: Html
         props:
-          '''const hero = args.contextData.props || {};
+          '''const hero = c.props || {};
 return {
   as: "p",
   text: hero.rightDesc || ""

@@ -52,7 +52,7 @@ components/public_support/
 | `hideHeader` | boolean | Hide title/meta inside the component. |
 | `showInternalNote` | boolean | Admin-only internal note tools (default `true`). |
 
-Child components call flat helpers on **`args.fns`** (e.g. `usesTokenAuth()`, `canShowComposer()`, `isOwnMessage(message)`). See `conversation/hooks/README.md`.
+Child components call flat helpers on **`_.fns`** (e.g. `usesTokenAuth()`, `canShowComposer()`, `isOwnMessage(message)`). See `conversation/hooks/README.md`.
 
 `components/shopify/ShopifyNavigation.hjson` links to public tickets and support settings.
 
@@ -69,7 +69,7 @@ Child components call flat helpers on **`args.fns`** (e.g. `usesTokenAuth()`, `c
 Run the migration after importing schemas:
 
 ```js
-await args.executeNamedServerFunction({
+await _.executeNamedServerFunction({
   functionName: "migrateDynamicPageSettings",
   contextData: { dryRun: false }
 });
@@ -181,7 +181,7 @@ Email templates live under `email_templates/support/`.
 
 Templates read dynamic values from query parameters such as `serial`, `trackingUrl`, `subject`, `message`, and `customerEmail`.
 
-The current queue worker sends HTML directly via `args.sendEmail`, while keeping the template keys documented for import/editing and future rendered-template integration.
+The current queue worker sends HTML directly via `_.sendEmail`, while keeping the template keys documented for import/editing and future rendered-template integration.
 
 Subjects include the ticket serial. When `keepSameSubjectThread` is enabled, replies reuse `ticket.P.emailThreadSubject`.
 
@@ -222,6 +222,6 @@ Public tracking links must use:
 ## Related Files
 
 - Page/Attr/function authoring rules: `src/routes/api/chat/SYSTEM_PROMPT.md`
-- Server function args: `src/cypher/get/executeNamedServerFunctionCore.ts`
-- Client HJSON args: `src/components/form/dynamic_component/functions/function_argument/createFunctionArgumentBase.ts`
+- Server function _: `src/cypher/get/executeNamedServerFunctionCore.ts`
+- Client HJSON _: `src/components/form/dynamic_component/functions/function_argument/createFunctionArgumentBase.ts`
 - Shared DynamicPage docs: `components/dynamic_page/README.md`

@@ -8,7 +8,7 @@
         body:
           '''
 // Extract parameters
-const { categoryElementId, categoryName } = args.contextData;
+const { categoryElementId, categoryName } = c;
 
 if (!categoryElementId || !categoryName) {
   return {
@@ -17,9 +17,9 @@ if (!categoryElementId || !categoryName) {
   };
 }
 
-const shopify = await args.getShopifyClient();
+const shopify = await _.getShopifyClient();
 let admin;
-const shop = args.contextData.shop;
+const shop = c.shop;
 if (shop) {
   try {
     const authResult = await shopify.unauthenticated.admin(shop);
@@ -38,7 +38,7 @@ try {
   const menuHandle = categoryName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 
   // Build nested menu structure with all levels of children
-  const nestedResult = await args.executeNamedServerFunction({
+  const nestedResult = await s({
     functionName: "buildNestedMenuItems",
     contextData: {
       parentElementId: categoryElementId
@@ -120,7 +120,7 @@ try {
   }
 
   // Update parent category with menu info
-  await args.session.run(
+  await _.session.run(
     `MATCH (c:ShopifyProductCategory)
      WHERE elementId(c) = $elementId
      SET c.menuId = $menuId,

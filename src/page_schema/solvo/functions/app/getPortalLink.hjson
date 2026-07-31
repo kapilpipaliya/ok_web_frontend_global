@@ -8,7 +8,7 @@
         description: Resolves staff portal sign-in link from GlobalSetting supportGlobal (portal link settings).
         body:
           '''
-const dbName = String(args.subDomain || args.rawSubDomain || "").trim();
+const dbName = String(_.subDomain || _.rawSubDomain || "").trim();
 
 const parseJsonSafe = (value, fallback) => {
   if (value == null || value === "") return fallback;
@@ -20,7 +20,7 @@ const parseJsonSafe = (value, fallback) => {
   }
 };
 
-const result = await args.session.run(
+const result = await _.session.run(
   `
   MATCH (g:GlobalSetting {key: 'Default'})
   OPTIONAL MATCH (g)-[:GlobalSettingHasSettingsSection]->(doc:SettingsSectionDocument {pageId: 'support', sectionId: 'supportGlobal'})
@@ -31,7 +31,7 @@ const result = await args.session.run(
 let supportGlobal = {};
 const node = result.records[0]?.get("doc");
 if (node) {
-  const doc = args.convertNodeToJson(node);
+  const doc = _.convertNodeToJson(node);
   supportGlobal = parseJsonSafe(doc?.P?.values, {});
 }
 

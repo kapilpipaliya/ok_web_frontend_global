@@ -21,7 +21,7 @@
 }`;'''
         displayOrder: 1
         fns:
-          '''const props = () => args.contextData.props || {};
+          '''const props = () => c.props || {};
 const product = () => props().product || {};
 
 const normalize = (value) => (value == null ? "" : String(value).trim());
@@ -197,8 +197,8 @@ const buildInitialSelection = () => {
 };
 
 const initialResolved = buildInitialSelection();
-const [selection, setSelection] = args.createSignal(initialResolved.selection);
-const [activeVariant, setActiveVariant] = args.createSignal(initialResolved.variant);
+const [selection, setSelection] = _.createSignal(initialResolved.selection);
+const [activeVariant, setActiveVariant] = _.createSignal(initialResolved.variant);
 
 const applySelection = (nextSelection, preferredAxisKey) => {
   const reconciled = reconcileSelection(nextSelection, preferredAxisKey);
@@ -303,7 +303,7 @@ return {
   margin: 0;
   font-size: clamp(1.75rem, 4vw, 2.5rem);
   font-weight: 800;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   line-height: 1.2;
 }`;'''
         displayOrder: 1
@@ -311,7 +311,7 @@ return {
         props:
           '''return {
   as: "h1",
-  text: args.fns.product?.()?.title || "Product"
+  text: f.product?.()?.title || "Product"
 };'''
       }
     }
@@ -322,14 +322,14 @@ return {
         css:
           '''return `._id {
   margin: 0;
-  color: ${args.theme.var.color.text_light_300};
+  color: ${t.var.color.text_light_300};
   font-size: 1rem;
   line-height: 1.6;
 }`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''const text = args.fns.product?.()?.shortDescription || "";
+          '''const text = f.product?.()?.shortDescription || "";
 return {
   as: "p",
   text,
@@ -364,10 +364,10 @@ return {
         css:
           '''return `._id {
   min-width: 0;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.75rem;
   overflow: hidden;
-  background: ${args.theme.var.color.background_light_50};
+  background: ${t.var.color.background_light_50};
 }`;'''
         displayOrder: 1
         componentName: Html
@@ -381,9 +381,9 @@ return {
         displayOrder: 1
         componentName: Carousel
         props:
-          '''const images = args.fns.carouselImages?.() || [];
-const variant = args.fns.previewVariant?.();
-const selection = args.fns.selection?.() || {};
+          '''const images = f.carouselImages?.() || [];
+const variant = f.previewVariant?.();
+const selection = f.selection?.() || {};
 const selectionKey = Object.keys(selection)
   .sort()
   .map((axisKey) => `${axisKey}:${selection[axisKey] ?? ""}`)
@@ -409,12 +409,12 @@ return {
   aspect-ratio: 1;
   object-fit: contain;
   display: block;
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const image = args.contextData.productImage || {};
+          '''const image = c.productImage || {};
 return {
   as: "img",
   src: image.url,
@@ -431,7 +431,7 @@ return {
           '''return `._id {
   padding: 2.5rem 1.5rem;
   text-align: center;
-  color: ${args.theme.var.color.text_light_300};
+  color: ${t.var.color.text_light_300};
 }`;'''
         displayOrder: 2
         componentName: Html
@@ -439,7 +439,7 @@ return {
           '''return {
   as: "div",
   text: "No images for this variant",
-  hide: (args.fns.carouselImages?.() || []).length > 0
+  hide: (f.carouselImages?.() || []).length > 0
 };'''
       }
     }
@@ -472,7 +472,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const axes = args.fns.optionAxesForUi?.() || [];
+          '''const axes = f.optionAxesForUi?.() || [];
 return {
   as: "div",
   class: "pd-option-axes",
@@ -509,13 +509,13 @@ return {
   font-weight: 600;
   letter-spacing: 0.02em;
   text-transform: uppercase;
-  color: ${args.theme.var.color.text_light_200};
+  color: ${t.var.color.text_light_200};
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const axis = args.contextData.optionAxis || {};
-const selected = args.fns.selection?.()?.[axis.key] || "";
+          '''const axis = c.optionAxis || {};
+const selected = f.selection?.()?.[axis.key] || "";
 return {
   as: "p",
   text: selected ? `${axis.label}: ${selected}` : axis.label || axis.key
@@ -535,8 +535,8 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const axis = args.contextData.optionAxis || {};
-const values = args.fns.optionValuesForAxis?.(axis) || [];
+          '''const axis = c.optionAxis || {};
+const values = f.optionValuesForAxis?.(axis) || [];
 return {
   as: "div",
   class: "pd-swatch-row",
@@ -553,10 +553,10 @@ return {
       L: Attr
       P: {
         css:
-          '''const option = args.contextData.optionValue || {};
+          '''const option = c.optionValue || {};
 const compatible =
-  args.fns.isOptionCompatible?.(option.axisKey, option.value) !== false;
-const selected = !!args.fns.isOptionSelected?.(option.axisKey, option.value);
+  f.isOptionCompatible?.(option.axisKey, option.value) !== false;
+const selected = !!f.isOptionSelected?.(option.axisKey, option.value);
 const isColor = !!option.isColor;
 return `._id {
   position: relative;
@@ -567,9 +567,9 @@ return `._id {
   min-height: 2.25rem;
   padding: ${isColor ? "0.2rem" : "0.45rem 0.8rem"};
   border-radius: ${isColor ? "999px" : "0.5rem"};
-  border: 2px solid ${selected ? args.theme.var.color.primary : args.theme.var.color.border};
-  background: ${selected ? args.theme.var.color.primary_light_100 : args.theme.var.color.background};
-  color: ${compatible ? args.theme.var.color.text : args.theme.var.color.text_light_400};
+  border: 2px solid ${selected ? t.var.color.primary : t.var.color.border};
+  background: ${selected ? t.var.color.primary_light_100 : t.var.color.background};
+  color: ${compatible ? t.var.color.text : t.var.color.text_light_400};
   font-size: 0.875rem;
   font-weight: ${selected ? 700 : 500};
   line-height: 1.2;
@@ -579,12 +579,12 @@ return `._id {
   transition: border-color 0.15s ease, background 0.15s ease, opacity 0.15s ease, transform 0.15s ease;
 
   &:hover {
-    border-color: ${args.theme.var.color.primary};
+    border-color: ${t.var.color.primary};
     transform: translateY(-1px);
   }
 
   &:focus-visible {
-    outline: 2px solid ${args.theme.var.color.primary};
+    outline: 2px solid ${t.var.color.primary};
     outline-offset: 2px;
   }
 
@@ -594,7 +594,7 @@ return `._id {
     position: absolute;
     inset: 45% -8%;
     height: 1.5px;
-    background: ${args.theme.var.color.text_light_400};
+    background: ${t.var.color.text_light_400};
     transform: rotate(-28deg);
     pointer-events: none;
   }
@@ -603,10 +603,10 @@ return `._id {
         displayOrder: 1
         componentName: Html
         props:
-          '''const option = args.contextData.optionValue || {};
+          '''const option = c.optionValue || {};
 const compatible =
-  args.fns.isOptionCompatible?.(option.axisKey, option.value) !== false;
-const selected = !!args.fns.isOptionSelected?.(option.axisKey, option.value);
+  f.isOptionCompatible?.(option.axisKey, option.value) !== false;
+const selected = !!f.isOptionSelected?.(option.axisKey, option.value);
 return {
   as: "button",
   type: "button",
@@ -614,7 +614,7 @@ return {
   role: "option",
   "aria-selected": selected,
   title: compatible ? option.label : `${option.label} (switches other options)`,
-  onClick: () => args.fns.selectOptionValue?.(option.axisKey, option.value)
+  onClick: () => f.selectOptionValue?.(option.axisKey, option.value)
 };'''
       }
     }
@@ -623,20 +623,20 @@ return {
       L: Attr
       P: {
         css:
-          '''const option = args.contextData.optionValue || {};
+          '''const option = c.optionValue || {};
 const color = option.swatchColor || "transparent";
 return `._id {
   width: 1.55rem;
   height: 1.55rem;
   border-radius: 999px;
   background: ${color};
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06);
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const option = args.contextData.optionValue || {};
+          '''const option = c.optionValue || {};
 return {
   as: "span",
   class: "pd-swatch-color",
@@ -656,7 +656,7 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const option = args.contextData.optionValue || {};
+          '''const option = c.optionValue || {};
 return {
   as: "span",
   text: option.label || "",
@@ -673,16 +673,16 @@ return {
   margin: 0;
   font-size: 1.05rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''const variant = args.fns.activeVariant?.();
+          '''const variant = f.activeVariant?.();
 return {
   as: "h2",
   text: variant?.title || "",
-  hide: !args.fns.hasExactVariant?.() || !variant?.title
+  hide: !f.hasExactVariant?.() || !variant?.title
 };'''
       }
     }
@@ -694,16 +694,16 @@ return {
           '''return `._id {
   margin: 0;
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_200};
+  color: ${t.var.color.text_light_200};
 }`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''const sku = args.fns.activeVariant?.()?.sku || "";
+          '''const sku = f.activeVariant?.()?.sku || "";
 return {
   as: "p",
   text: sku ? `SKU: ${sku}` : "",
-  hide: !args.fns.hasExactVariant?.() || !sku
+  hide: !f.hasExactVariant?.() || !sku
 };'''
       }
     }
@@ -716,16 +716,16 @@ return {
   margin: 0;
   font-size: 1.75rem;
   font-weight: 800;
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
 }`;'''
         displayOrder: 4
         componentName: Html
         props:
-          '''const price = args.fns.activeVariant?.()?.price || "";
+          '''const price = f.activeVariant?.()?.price || "";
 return {
   as: "p",
   text: price,
-  hide: !args.fns.hasExactVariant?.() || !price
+  hide: !f.hasExactVariant?.() || !price
 };'''
       }
     }
@@ -734,20 +734,20 @@ return {
       L: Attr
       P: {
         css:
-          '''const exact = args.fns.hasExactVariant?.();
+          '''const exact = f.hasExactVariant?.();
 return `._id {
   margin: 0;
   font-size: 0.875rem;
   font-weight: 600;
-  color: ${exact ? args.theme.var.color.success : args.theme.var.color.text_light_300};
+  color: ${exact ? t.var.color.success : t.var.color.text_light_300};
 }`;'''
         displayOrder: 5
         componentName: Html
         props:
           '''return {
   as: "p",
-  text: args.fns.availabilityLabel?.() || "",
-  hide: !(args.fns.availabilityLabel?.() || "")
+  text: f.availabilityLabel?.() || "",
+  hide: !(f.availabilityLabel?.() || "")
 };'''
       }
     }
@@ -758,12 +758,12 @@ return `._id {
         displayOrder: 6
         componentName: Button
         props:
-          '''const url = args.fns.activeVariant?.()?.amazonUrl || "";
+          '''const url = f.activeVariant?.()?.amazonUrl || "";
 return {
   text: "View on Amazon",
   variant: "primary",
-  hide: !args.fns.hasExactVariant?.() || !url,
-  onClick: () => args.fns.openAmazon?.()
+  hide: !f.hasExactVariant?.() || !url,
+  onClick: () => f.openAmazon?.()
 };'''
       }
     }
@@ -775,7 +775,7 @@ return {
           '''return `._id {
   margin: 0;
   font-size: 0.75rem;
-  color: ${args.theme.var.color.text_light_300};
+  color: ${t.var.color.text_light_300};
 }`;'''
         displayOrder: 7
         componentName: Html
@@ -783,7 +783,7 @@ return {
           '''return {
   as: "p",
   text: "As an Amazon Associate we earn from qualifying purchases.",
-  hide: !args.fns.hasExactVariant?.()
+  hide: !f.hasExactVariant?.()
 };'''
       }
     }
@@ -793,7 +793,7 @@ return {
       P: {
         css:
           '''return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   font-size: 0.975rem;
   line-height: 1.7;
 
@@ -810,18 +810,18 @@ return {
   }
 
   a {
-    color: ${args.theme.var.color.primary};
+    color: ${t.var.color.primary};
   }
 }`;'''
         displayOrder: 4
         componentName: Html
         props:
-          '''const description = args.fns.activeVariant?.()?.description || "";
+          '''const description = f.activeVariant?.()?.description || "";
 return {
   as: "div",
   text: description,
   textType: "markdown",
-  hide: !args.fns.hasExactVariant?.() || !description
+  hide: !f.hasExactVariant?.() || !description
 };'''
       }
     }

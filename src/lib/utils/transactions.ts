@@ -32,9 +32,9 @@ export interface TransactionOptions {
  *
  * @example
  * ```javascript
- * const result = await args.transaction(async (tx) => {
- *   const user = await args.Models.User.createOne(data, { session: tx });
- *   const profile = await args.Models.Profile.createOne(profileData, { session: tx });
+ * const result = await _.transaction(async (tx) => {
+ *   const user = await _.Models.User.createOne(data, { session: tx });
+ *   const profile = await _.Models.Profile.createOne(profileData, { session: tx });
  *   return { user, profile };
  * });
  * // Auto-commits on success, auto-rolls back on error
@@ -76,9 +76,9 @@ export async function transaction<T>(
  *
  * @example
  * ```javascript
- * const results = await args.transactionBatch([
- *   (tx) => args.Models.User.createOne(userData1, { session: tx }),
- *   (tx) => args.Models.User.createOne(userData2, { session: tx }),
+ * const results = await _.transactionBatch([
+ *   (tx) => _.Models.User.createOne(userData1, { session: tx }),
+ *   (tx) => _.Models.User.createOne(userData2, { session: tx }),
  *   (tx) => tx.run('MATCH (n) RETURN count(n)', {})
  * ]);
  * ```

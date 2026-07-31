@@ -21,7 +21,7 @@
 }`;'''
         displayOrder: 1
         fns:
-          '''const props = () => args.contextData.props || {};
+          '''const props = () => c.props || {};
 
 // useUrlState true  → real links; page reloads initialData from ?category=
 // useUrlState false → local loadFolder (no URL)
@@ -31,9 +31,9 @@ const urlParam = () => {
   return key != null && String(key).trim() !== "" ? String(key).trim() : "category";
 };
 
-const [overrideData, setOverrideData] = args.createSignal(null);
-const [loading, setLoading] = args.createSignal(false);
-const [error, setError] = args.createSignal("");
+const [overrideData, setOverrideData] = _.createSignal(null);
+const [loading, setLoading] = _.createSignal(false);
+const [error, setError] = _.createSignal("");
 
 const getData = () => {
   if (useUrlState()) return props().initialData || {};
@@ -64,7 +64,7 @@ const labels = () => ({
 const getBasePath = () => {
   const fromProps = props().basePath;
   if (fromProps != null && String(fromProps).trim() !== "") return String(fromProps).trim();
-  const lang = args.params?.lang ? String(args.params.lang).toLowerCase() : "";
+  const lang = _.params?.lang ? String(_.params.lang).toLowerCase() : "";
   if (lang && /^[a-z]{2,3}$/i.test(lang)) return `/${lang}/products`;
   return "/products";
 };
@@ -86,7 +86,7 @@ const loadFolder = async (categoryKey) => {
   setLoading(true);
   setError("");
   try {
-    const result = await args.executeNamedServerFunction({
+    const result = await s({
       functionName: "loadPublicProductsFolder",
       contextData: {
         tableKey: props().tableKey || "products",
@@ -128,9 +128,9 @@ const navigateBreadcrumb = (crumb) => {
 
 const openProduct = (item) => {
   if (!item?.key) return;
-  const lang = args.params?.lang ? String(args.params.lang).toLowerCase() : "";
+  const lang = _.params?.lang ? String(_.params.lang).toLowerCase() : "";
   const langPrefix = lang && /^[a-z]{2,3}$/i.test(lang) ? `/${lang}` : "";
-  args.navigate(`${langPrefix}/product/${encodeURIComponent(String(item.key).trim())}`);
+  _.navigate(`${langPrefix}/product/${encodeURIComponent(String(item.key).trim())}`);
 };
 
 return {
@@ -167,20 +167,20 @@ return {
         displayOrder: 1
         componentName: GalleryBreadcrumb
         props:
-          '''const crumbs = args.fns.getBreadcrumbForRender?.()
-  || args.contextData.props?.initialData?.breadcrumb
+          '''const crumbs = f.getBreadcrumbForRender?.()
+  || c.props?.initialData?.breadcrumb
   || [];
-const withUrl = args.fns.useUrlState?.() === true
-  || args.contextData.props?.useUrlState === true;
-const basePath = args.fns.getBasePath?.() || args.contextData.props?.basePath || "/products";
+const withUrl = f.useUrlState?.() === true
+  || c.props?.useUrlState === true;
+const basePath = f.getBasePath?.() || c.props?.basePath || "/products";
 return {
   items: Array.isArray(crumbs) ? crumbs : [],
-  rootLabel: args.fns.labels?.()?.rootBreadcrumbLabel || "Products",
+  rootLabel: f.labels?.()?.rootBreadcrumbLabel || "Products",
   rootHref: withUrl ? basePath : null,
   hrefFor: withUrl
-    ? (crumb) => args.fns.crumbHref?.(crumb) || basePath
+    ? (crumb) => f.crumbHref?.(crumb) || basePath
     : null,
-  onNavigate: withUrl ? undefined : (crumb) => args.fns.navigateBreadcrumb?.(crumb)
+  onNavigate: withUrl ? undefined : (crumb) => f.navigateBreadcrumb?.(crumb)
 };'''
       }
     }
@@ -195,16 +195,16 @@ return {
   gap: 0.5rem;
   padding: 0.75rem 1rem;
   border-radius: 0.5rem;
-  border: 1px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background_light_50};
-  color: ${args.theme.var.color.text};
+  border: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background_light_50};
+  color: ${t.var.color.text};
   font-size: 0.875rem;
 }`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''const loading = args.fns.loading?.();
-const error = args.fns.error?.();
+          '''const loading = f.loading?.();
+const error = f.error?.();
 return {
   as: "div",
   hide: !loading && !error
@@ -216,18 +216,18 @@ return {
       L: Attr
       P: {
         css:
-          '''const error = args.fns.error?.();
+          '''const error = f.error?.();
 return `._id {
-  color: ${error ? args.theme.var.color.error : args.theme.var.color.text_light_200};
+  color: ${error ? t.var.color.error : t.var.color.text_light_200};
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const loading = args.fns.loading?.();
-const error = args.fns.error?.();
+          '''const loading = f.loading?.();
+const error = f.error?.();
 return {
   as: "span",
-  text: error || args.fns.labels?.()?.loadingText || "Loading…"
+  text: error || f.labels?.()?.loadingText || "Loading…"
 };'''
       }
     }
@@ -238,8 +238,8 @@ return {
         displayOrder: 3
         componentName: Html
         props:
-          '''const folders = args.fns.getFoldersForRender?.()
-  || args.contextData.props?.initialData?.folders
+          '''const folders = f.getFoldersForRender?.()
+  || c.props?.initialData?.folders
   || [];
 return {
   as: "section",
@@ -256,7 +256,7 @@ return {
   margin: 0 0 1rem 0;
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         displayOrder: 1
         componentName: Html
@@ -294,8 +294,8 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const folders = args.fns.getFoldersForRender?.()
-  || args.contextData.props?.initialData?.folders
+          '''const folders = f.getFoldersForRender?.()
+  || c.props?.initialData?.folders
   || [];
 return {
   as: "fragment",
@@ -310,16 +310,16 @@ return {
         displayOrder: 1
         componentName: GalleryFolderCard
         props:
-          '''const folder = args.contextData.folderRow || {};
-const index = args.contextData.index ?? 0;
-const withUrl = args.fns.useUrlState?.() === true
-  || args.contextData.props?.useUrlState === true;
-const href = withUrl ? (args.fns.folderHref?.(folder.key) || null) : null;
+          '''const folder = c.folderRow || {};
+const index = c.index ?? 0;
+const withUrl = f.useUrlState?.() === true
+  || c.props?.useUrlState === true;
+const href = withUrl ? (f.folderHref?.(folder.key) || null) : null;
 return {
   folder,
   index,
   href,
-  onOpen: withUrl ? undefined : (f) => args.fns.openFolder?.(f)
+  onOpen: withUrl ? undefined : (f) => f.openFolder?.(f)
 };'''
       }
     }
@@ -330,8 +330,8 @@ return {
         displayOrder: 4
         componentName: Html
         props:
-          '''const items = args.fns.getItemsForRender?.()
-  || args.contextData.props?.initialData?.items
+          '''const items = f.getItemsForRender?.()
+  || c.props?.initialData?.items
   || [];
 return {
   as: "section",
@@ -348,7 +348,7 @@ return {
   margin: 0 0 1rem 0;
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         displayOrder: 1
         componentName: Html
@@ -386,8 +386,8 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const items = args.fns.getItemsForRender?.()
-  || args.contextData.props?.initialData?.items
+          '''const items = f.getItemsForRender?.()
+  || c.props?.initialData?.items
   || [];
 return {
   as: "fragment",
@@ -402,13 +402,13 @@ return {
         displayOrder: 1
         componentName: ProductCard
         props:
-          '''const item = args.contextData.fileRow || {};
-const index = args.contextData.index ?? 0;
+          '''const item = c.fileRow || {};
+const index = c.index ?? 0;
 return {
   item,
   index,
   href: item.fileUrl || "",
-  onOpen: (f) => args.fns.openProduct?.(f)
+  onOpen: (f) => f.openProduct?.(f)
 };'''
       }
     }
@@ -420,21 +420,21 @@ return {
           '''return `._id {
   padding: 2.5rem 1.5rem;
   text-align: center;
-  border: 1px dashed ${args.theme.var.color.border};
+  border: 1px dashed ${t.var.color.border};
   border-radius: 0.75rem;
-  background: ${args.theme.var.color.background_light_50};
-  color: ${args.theme.var.color.text_light_300};
+  background: ${t.var.color.background_light_50};
+  color: ${t.var.color.text_light_300};
 }`;'''
         displayOrder: 5
         componentName: Html
         props:
-          '''const folders = args.fns.getFoldersForRender?.()
-  || args.contextData.props?.initialData?.folders
+          '''const folders = f.getFoldersForRender?.()
+  || c.props?.initialData?.folders
   || [];
-const items = args.fns.getItemsForRender?.()
-  || args.contextData.props?.initialData?.items
+const items = f.getItemsForRender?.()
+  || c.props?.initialData?.items
   || [];
-const loading = args.fns.loading?.();
+const loading = f.loading?.();
 return {
   as: "div",
   hide: loading || (Array.isArray(folders) && folders.length > 0) || (Array.isArray(items) && items.length > 0)
@@ -453,7 +453,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const labels = args.fns.labels?.() || args.contextData.props?.labels || {};
+          '''const labels = f.labels?.() || c.props?.labels || {};
 return {
   as: "p",
   text: labels.emptyProductsText || "No products in this category."

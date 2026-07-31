@@ -7,7 +7,7 @@
         description: Send email alert to admins when shared YouTube API quota reaches critical levels (80%, 95%, or 100%)
         body:
           '''
-const { level } = args.contextData;  // 'warning' (80%), 'critical' (95%), or 'exhausted' (100%)
+const { level } = c;  // 'warning' (80%), 'critical' (95%), or 'exhausted' (100%)
 
 if (!level || !['warning', 'critical', 'exhausted'].includes(level)) {
   return {
@@ -17,13 +17,13 @@ if (!level || !['warning', 'critical', 'exhausted'].includes(level)) {
 }
 
 // Get current quota status
-const usage = await args.getTodaySharedAPIUsage(args.session);
+const usage = await _.getTodaySharedAPIUsage(_.session);
 
 // Check if we already sent an alert for this level today
 const today = new Date().toISOString().split('T')[0];
 const alertCheckKey = `quota_alert_${level}_${today}`;
 
-const existingAlert = await args.session.run(`
+const existingAlert = await _.session.run(`
   MATCH (setting:Setting {type: 'oauth'})-[:QuotaAlert]->(alert:QuotaAlertSent {alertKey: $alertKey})
   RETURN alert
 `, { alertKey: alertCheckKey });
@@ -37,7 +37,7 @@ if (existingAlert.records.length > 0) {
 }
 
 // Get all admin users
-const adminsResult = await args.session.run(`
+const adminsResult = await _.session.run(`
   MATCH (u:User)-[:UserRole]->(r:Role)
   WHERE r.name = 'Admin'
   RETURN u.email as email, u.username as username
@@ -60,7 +60,7 @@ if (level === 'exhausted') {
     <p>The shared YouTube API quota has been <strong>completely exhausted</strong>.</p>
     <p><strong>Current Status:</strong></p>
     <ul>
-      <li>Used: ${usage.totalCost.toLocaleString()} / ${args.DAILY_QUOTA_LIMIT.toLocaleString()} units (${Math.round(usage.quotaPercentUsed)}%)</li>
+      <li>Used: ${usage.totalCost.toLocaleString()} / ${_.DAILY_QUOTA_LIMIT.toLocaleString()} units (${Math.round(usage.quotaPercentUsed)}%)</li>
       <li>Remaining: ${usage.remainingQuota} units</li>
       <li>Effective Remaining: ${usage.effectiveRemaining} units (after reservations)</li>
     </ul>
@@ -77,7 +77,7 @@ if (level === 'exhausted') {
     <p>The shared YouTube API quota has reached <strong>95% usage</strong>.</p>
     <p><strong>Current Status:</strong></p>
     <ul>
-      <li>Used: ${usage.totalCost.toLocaleString()} / ${args.DAILY_QUOTA_LIMIT.toLocaleString()} units (${Math.round(usage.quotaPercentUsed)}%)</li>
+      <li>Used: ${usage.totalCost.toLocaleString()} / ${_.DAILY_QUOTA_LIMIT.toLocaleString()} units (${Math.round(usage.quotaPercentUsed)}%)</li>
       <li>Remaining: ${usage.remainingQuota} units</li>
       <li>Effective Remaining: ${usage.effectiveRemaining} units (after reservations)</li>
     </ul>
@@ -99,7 +99,7 @@ if (level === 'exhausted') {
     <p>The shared YouTube API quota has reached <strong>80% usage</strong>.</p>
     <p><strong>Current Status:</strong></p>
     <ul>
-      <li>Used: ${usage.totalCost.toLocaleString()} / ${args.DAILY_QUOTA_LIMIT.toLocaleString()} units (${Math.round(usage.quotaPercentUsed)}%)</li>
+      <li>Used: ${usage.totalCost.toLocaleString()} / ${_.DAILY_QUOTA_LIMIT.toLocaleString()} units (${Math.round(usage.quotaPercentUsed)}%)</li>
       <li>Remaining: ${usage.remainingQuota} units</li>
       <li>Effective Remaining: ${usage.effectiveRemaining} units (after reservations)</li>
     </ul>
@@ -120,7 +120,7 @@ for (const record of adminsResult.records) {
   if (!email) continue;
 
   // Add to email queue (simplified - using direct email sending or queue)
-  const emailResult = await args.executeServerFunction('sendEmail', {
+  const emailResult = await _.executeServerFunction('sendEmail', {
     to: email,
     subject: subject,
     html: message,
@@ -135,7 +135,7 @@ for (const record of adminsResult.records) {
 }
 
 // Mark alert as sent
-await args.session.run(`
+await _.session.run(`
   MATCH (setting:Setting {type: 'oauth'})
   WHERE setting.googleEnabled = true
   WITH setting LIMIT 1

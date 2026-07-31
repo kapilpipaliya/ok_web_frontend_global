@@ -8,7 +8,7 @@
         description: Loads table_schema part Setting vertices into graph payload with partVertexIds.
         body:
           '''
-const { tableKey } = args.contextData || {};
+const { tableKey } = c || {};
 
 if (!tableKey) {
   return { success: false, message: "tableKey is required" };
@@ -19,8 +19,8 @@ const SCHEMA_PARTS = ["general", "columns", "formConfig", "sidebar"];
 const getGraphPayload = (nodes, rels) => ({
   vertexes: nodes || {},
   edges: rels || {},
-  deleted_vertexes: Array.isArray(args.context?.deletedVertexes) ? args.context.deletedVertexes : [],
-  deleted_edges: Array.isArray(args.context?.deletedEdges) ? args.context.deletedEdges : []
+  deleted_vertexes: Array.isArray(_.context?.deletedVertexes) ? _.context.deletedVertexes : [],
+  deleted_edges: Array.isArray(_.context?.deletedEdges) ? _.context.deletedEdges : []
 });
 
 const loadPartsFromNeo4j = async (ids) => {
@@ -29,7 +29,7 @@ const loadPartsFromNeo4j = async (ids) => {
     return { success: false, message: "Missing schema keys for one or more parts" };
   }
 
-  const result = await args.session.run(
+  const result = await _.session.run(
     `
     MATCH (s:Setting {type: 'table_schema', tableKey: $tableKey})
     WHERE s.part IN $parts
@@ -42,7 +42,7 @@ const loadPartsFromNeo4j = async (ids) => {
     return { success: false, message: "One or more table schema parts not found in Neo4j" };
   }
 
-  const vertices = args.processResult(result.records, args.context, "s");
+  const vertices = _.processResult(result.records, _.context, "s");
   const partVertexIds = {};
   for (let i = 0; i < vertices.length; i++) {
     const vertex = vertices[i];
@@ -59,15 +59,15 @@ const loadPartsFromNeo4j = async (ids) => {
     }
   }
 
-  const nodes = args.context.nodes || {};
+  const nodes = _.context.nodes || {};
   return {
     success: true,
     partVertexIds,
-    graph: getGraphPayload(nodes, args.context.relationships || {})
+    graph: getGraphPayload(nodes, _.context.relationships || {})
   };
 };
 
-const idsResult = await args.executeNamedServerFunction({
+const idsResult = await s({
   functionName: "getTableIds",
   contextData: { tableKey }
 });
@@ -79,13 +79,13 @@ if (!idsResult?.result?.success || !ids?.schemaKeys) {
 
 let partsResult = await loadPartsFromNeo4j(ids);
 
-if (!partsResult.success && args.executeNamedServerFunction) {
+if (!partsResult.success && s) {
   try {
-    await args.executeNamedServerFunction({
+    await s({
       functionName: "migrateDynamicPageSettings",
       contextData: { dryRun: false }
     });
-    const retryIdsResult = await args.executeNamedServerFunction({
+    const retryIdsResult = await s({
       functionName: "getTableIds",
       contextData: { tableKey }
     });

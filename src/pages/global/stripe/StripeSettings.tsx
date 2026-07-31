@@ -95,7 +95,7 @@ export function StripeSettings() {
             css: `return \`._id {
   font-size: 1.125rem;
   font-weight: 600;
-  color: \${args.theme.var.color.text};
+  color: \${t.var.color.text};
   margin-bottom: 0.5rem;
 }\`;`,
             componentName: "Html",
@@ -105,7 +105,7 @@ export function StripeSettings() {
             as: "p",
             css: `return \`._id {
   font-size: 0.875rem;
-  color: \${args.theme.var.color.text_dark_300};
+  color: \${t.var.color.text_dark_300};
   margin-bottom: 1.5rem;
 }\`;`,
             componentName: "Html",
@@ -132,7 +132,7 @@ export function StripeSettings() {
           },
           getErrorSchema(
             "stripeEnabled",
-            "return `._id {color: ${args.theme.var.color.error}; margin-top: -20px;}`;",
+            "return `._id {color: ${t.var.color.error}; margin-top: -20px;}`;",
           ),
           {
             as: "div",
@@ -162,7 +162,7 @@ export function StripeSettings() {
           },
           getErrorSchema(
             "stripePublishableKey",
-            "return `._id {color: ${args.theme.var.color.error}; margin-top: -20px;}`;",
+            "return `._id {color: ${t.var.color.error}; margin-top: -20px;}`;",
           ),
           {
             as: "div",
@@ -193,7 +193,7 @@ export function StripeSettings() {
           },
           getErrorSchema(
             "stripeSecretKey",
-            "return `._id {color: ${args.theme.var.color.error}; margin-top: -20px;}`;",
+            "return `._id {color: ${t.var.color.error}; margin-top: -20px;}`;",
           ),
           {
             as: "div",
@@ -220,7 +220,7 @@ export function StripeSettings() {
           },
           getErrorSchema(
             "stripeWebhookSecret",
-            "return `._id {color: ${args.theme.var.color.error}; margin-top: -20px;}`;",
+            "return `._id {color: ${t.var.color.error}; margin-top: -20px;}`;",
           ),
           {
             as: "div",

@@ -7,7 +7,7 @@
         description: Soft deletes a feedback submission by setting deletedAt timestamp
         body:
           '''
-const { feedbackId } = args.contextData;
+const { feedbackId } = c;
 
 // Validate input
 if (!feedbackId) {
@@ -23,7 +23,7 @@ const query = `
   RETURN f
 `;
 
-const result = await args.session.run(query, {
+const result = await _.session.run(query, {
   feedbackId
 });
 

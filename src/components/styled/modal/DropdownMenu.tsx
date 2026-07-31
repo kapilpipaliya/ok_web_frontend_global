@@ -61,7 +61,7 @@ export function DropdownMenu(
 
   const [local, rest] = splitProps(props, ["ref", "parentRef", "css"]);
   const borderClass = `border-radius: 0.375rem;
-border: 1px solid \${args.theme.var.color.border};
+border: 1px solid \${t.var.color.border};
 box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 outline-offset: 2px;
 outline: 2px solid transparent;
@@ -77,8 +77,8 @@ transform-origin: top right`;
             ? `return \`._id {
                 ${borderClass};
                 align-items: flex-start;
-                background: \${args.theme.var.color.background_light_100};
-                color: \${args.theme.var.color.background_light_100_text};
+                background: \${t.var.color.background_light_100};
+                color: \${t.var.color.background_light_100_text};
                 display: flex;
                 flex-direction: column;
                 gap: 0.25rem;

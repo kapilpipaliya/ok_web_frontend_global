@@ -9,7 +9,7 @@
         body: '''
 try {
   // Extract input parameters from the request
-  const { categoryId } = args.contextData;
+  const { categoryId } = c;
 
   // Validate required fields
   if (!categoryId) {
@@ -17,7 +17,7 @@ try {
   }
 
   // Get current authenticated user from session
-  const user = await args.getUserFromSession();
+  const user = await _.getUserFromSession();
   if (!user) {
     throw new Error("User session not found. Please log in and try again.");
   }
@@ -36,7 +36,7 @@ try {
            count(DISTINCT rg) + count(DISTINCT urg) as goalCount
   `;
 
-  const categoryResult = await args.session.run(categoryCheckQuery, {
+  const categoryResult = await _.session.run(categoryCheckQuery, {
     userUuid: user.P.uuid,
     categoryId
   });
@@ -46,10 +46,10 @@ try {
   }
 
   const categoryNode = categoryResult.records[0].get('rc');
-  const category = args.convertNodeToJson(categoryNode);
-  const ruleCount = args.neo4jConvert.js(categoryResult.records[0].get('ruleCount')) || 0;
-  const trackingCount = args.neo4jConvert.js(categoryResult.records[0].get('trackingCount')) || 0;
-  const goalCount = args.neo4jConvert.js(categoryResult.records[0].get('goalCount')) || 0;
+  const category = _.convertNodeToJson(categoryNode);
+  const ruleCount = _.neo4jConvert.js(categoryResult.records[0].get('ruleCount')) || 0;
+  const trackingCount = _.neo4jConvert.js(categoryResult.records[0].get('trackingCount')) || 0;
+  const goalCount = _.neo4jConvert.js(categoryResult.records[0].get('goalCount')) || 0;
 
   // Warn user about cascading deletes if there are related items
   const cascadeInfo = {
@@ -60,7 +60,7 @@ try {
   };
 
   // Start transaction for atomic deletion
-  const tx = args.session.beginTransaction();
+  const tx = _.session.beginTransaction();
 
   try {
     // Step 1: Delete all goals associated with rules in this category

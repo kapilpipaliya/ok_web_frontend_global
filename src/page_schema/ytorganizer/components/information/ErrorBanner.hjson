@@ -14,9 +14,9 @@
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.error_light_100};
-  border: 1px solid ${args.theme.var.color.error};
-  border-radius: ${args.theme.var.borderRadius.md};
+  background: ${t.var.color.error_light_100};
+  border: 1px solid ${t.var.color.error};
+  border-radius: ${t.var.borderRadius.md};
   padding: 1rem;
   margin: 0 0 1rem 0;
   display: flex;
@@ -35,7 +35,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const error = args.contextData.props?.error;
+const error = c.props?.error;
 
 return {
   as: "div",
@@ -60,7 +60,7 @@ return `._id {
 
 ._id icon {
   flex-shrink: 0;
-  color: ${args.theme.var.color.error};
+  color: ${t.var.color.error};
 }`;
 '''
         displayOrder: 1
@@ -97,7 +97,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.error_text};
+  color: ${t.var.color.error_text};
   font-size: 1rem;
   margin: 0;
   flex: 1;
@@ -114,7 +114,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const error = args.contextData.props?.error || "";
+const error = c.props?.error || "";
 
 return {
   as: "p",
@@ -133,7 +133,7 @@ return `._id {
   flex-shrink: 0;
   padding: 0.25rem;
   cursor: pointer;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   opacity: 0.7;
   transition: opacity 150ms ease;
   display: flex;
@@ -153,7 +153,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const onClose = args.contextData.props?.onClose;
+const onClose = c.props?.onClose;
 
 return {
   as: "button",

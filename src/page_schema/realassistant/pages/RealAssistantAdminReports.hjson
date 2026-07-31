@@ -7,7 +7,7 @@
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const store = args.createStore({
+const store = _.createStore({
   dateRange: "7days",
   reportType: "overview",
   chartData: {
@@ -47,14 +47,14 @@ const store = args.createStore({
   }
 });
 
-args.contextData.store = store;
+c.store = store;
 return { as: "div" };
 ''',
         css: '''
 return `._id {
   min-height: 100vh;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -138,7 +138,7 @@ return {
 return `._id {
   font-size: 2rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0;
 }`;
 '''
@@ -171,7 +171,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const store = args.contextData.store;
+const store = c.store;
 return {
   as: "select",
   value: store.dateRange,
@@ -183,16 +183,16 @@ return {
         css: '''
 return `._id {
   padding: 0.75rem 1rem;
-  border: 1px solid ${args.theme.var.color.background_light_300};
+  border: 1px solid ${t.var.color.background_light_300};
   border-radius: 0.5rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   font-size: 0.875rem;
   cursor: pointer;
   
   &:focus {
     outline: none;
-    border-color: ${args.theme.var.color.primary};
+    border-color: ${t.var.color.primary};
   }
 }`;
 '''
@@ -275,7 +275,7 @@ return {
   variant: "primary",
   icon: "carbon:download",
   onClick: () => {
-    args.showSuccessToast("Generating report...");
+    _.showSuccessToast("Generating report...");
   }
 };
 '''
@@ -314,7 +314,7 @@ return { as: "div" };
 ''',
         css: '''
 return `._id {
-  background: linear-gradient(135deg, ${args.theme.var.color.primary}, ${args.theme.var.color.primary_dark_200});
+  background: linear-gradient(135deg, ${t.var.color.primary}, ${t.var.color.primary_dark_200});
   color: white;
   padding: 1.5rem;
   border-radius: 0.75rem;
@@ -364,7 +364,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const store = args.contextData.store;
+const store = c.store;
 const total = store.chartData.revenue.reduce((a, b) => a + b, 0);
 return {
   as: "div",
@@ -413,7 +413,7 @@ return { as: "div" };
 ''',
         css: '''
 return `._id {
-  background: linear-gradient(135deg, ${args.theme.var.color.success}, ${args.theme.var.color.success_dark_200});
+  background: linear-gradient(135deg, ${t.var.color.success}, ${t.var.color.success_dark_200});
   color: white;
   padding: 1.5rem;
   border-radius: 0.75rem;
@@ -463,7 +463,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const store = args.contextData.store;
+const store = c.store;
 const total = store.chartData.problems.reduce((a, b) => a + b, 0);
 return {
   as: "div",
@@ -512,7 +512,7 @@ return { as: "div" };
 ''',
         css: '''
 return `._id {
-  background: linear-gradient(135deg, ${args.theme.var.color.info}, ${args.theme.var.color.info_dark_200});
+  background: linear-gradient(135deg, ${t.var.color.info}, ${t.var.color.info_dark_200});
   color: white;
   padding: 1.5rem;
   border-radius: 0.75rem;
@@ -562,7 +562,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const store = args.contextData.store;
+const store = c.store;
 const latest = store.chartData.users[store.chartData.users.length - 1];
 return {
   as: "div",
@@ -611,7 +611,7 @@ return { as: "div" };
 ''',
         css: '''
 return `._id {
-  background: linear-gradient(135deg, ${args.theme.var.color.warning}, ${args.theme.var.color.warning_dark_200});
+  background: linear-gradient(135deg, ${t.var.color.warning}, ${t.var.color.warning_dark_200});
   color: white;
   padding: 1.5rem;
   border-radius: 0.75rem;
@@ -661,7 +661,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const store = args.contextData.store;
+const store = c.store;
 return {
   as: "div",
   text: store.performanceMetrics.satisfactionRate
@@ -750,7 +750,7 @@ return { as: "div" };
         css: '''
 return `._id {
   padding: 1.5rem 1.5rem 1rem;
-  border-bottom: 1px solid ${args.theme.var.color.background_light_200};
+  border-bottom: 1px solid ${t.var.color.background_light_200};
 }`;
 '''
       }
@@ -772,7 +772,7 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0;
 }`;
 '''
@@ -809,7 +809,7 @@ return `._id {
         contextName: "bar",
         loop: true,
         props: '''
-const store = args.contextData.store;
+const store = c.store;
 const maxValue = Math.max(...store.chartData.revenue);
 const data = store.chartData.revenue.map((value, index) => ({
   value,
@@ -851,18 +851,18 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const bar = args.contextData.bar;
+const bar = c.bar;
 return {
   as: "div",
   title: `$${bar.value}`
 };
 ''',
         css: '''
-const bar = args.contextData.bar;
+const bar = c.bar;
 return `._id {
   width: 100%;
   height: ${bar.height}%;
-  background: linear-gradient(to top, ${args.theme.var.color.primary}, ${args.theme.var.color.primary_light_300});
+  background: linear-gradient(to top, ${t.var.color.primary}, ${t.var.color.primary_light_300});
   border-radius: 0.25rem 0.25rem 0 0;
   position: relative;
   cursor: pointer;
@@ -870,7 +870,7 @@ return `._id {
   
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px ${args.theme.var.color.primary_light_200};
+    box-shadow: 0 4px 8px ${t.var.color.primary_light_200};
   }
 }`;
 '''
@@ -884,7 +884,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const bar = args.contextData.bar;
+const bar = c.bar;
 return {
   as: "div",
   text: bar.label
@@ -893,7 +893,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.75rem;
-  color: ${args.theme.var.color.text_light_600};
+  color: ${t.var.color.text_light_600};
   margin-top: 0.5rem;
 }`;
 '''
@@ -927,7 +927,7 @@ return { as: "div" };
         css: '''
 return `._id {
   padding: 1.5rem 1.5rem 1rem;
-  border-bottom: 1px solid ${args.theme.var.color.background_light_200};
+  border-bottom: 1px solid ${t.var.color.background_light_200};
 }`;
 '''
       }
@@ -949,7 +949,7 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0;
 }`;
 '''
@@ -982,7 +982,7 @@ return `._id {
         contextName: "category",
         loop: true,
         props: '''
-const store = args.contextData.store;
+const store = c.store;
 return {
   data: store.topCategories
 };
@@ -1002,7 +1002,7 @@ return { as: "div" };
         css: '''
 return `._id {
   padding: 0.75rem;
-  border-bottom: 1px solid ${args.theme.var.color.background_light_100};
+  border-bottom: 1px solid ${t.var.color.background_light_100};
   
   &:last-child {
     border-bottom: none;
@@ -1039,7 +1039,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const category = args.contextData.category;
+const category = c.category;
 return {
   as: "div",
   text: category.name
@@ -1048,7 +1048,7 @@ return {
         css: '''
 return `._id {
   font-weight: 500;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -1061,7 +1061,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const category = args.contextData.category;
+const category = c.category;
 return {
   as: "div",
   text: `$${category.revenue.toLocaleString()}`
@@ -1070,7 +1070,7 @@ return {
         css: '''
 return `._id {
   font-weight: 600;
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
 }`;
 '''
       }
@@ -1088,7 +1088,7 @@ return { as: "div" };
         css: '''
 return `._id {
   height: 0.5rem;
-  background: ${args.theme.var.color.background_light_200};
+  background: ${t.var.color.background_light_200};
   border-radius: 0.25rem;
   overflow: hidden;
 }`;
@@ -1103,8 +1103,8 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const category = args.contextData.category;
-const store = args.contextData.store;
+const category = c.category;
+const store = c.store;
 const maxRevenue = Math.max(...store.topCategories.map(c => c.revenue));
 const width = (category.revenue / maxRevenue) * 100;
 return {
@@ -1112,14 +1112,14 @@ return {
 };
 ''',
         css: '''
-const category = args.contextData.category;
-const store = args.contextData.store;
+const category = c.category;
+const store = c.store;
 const maxRevenue = Math.max(...store.topCategories.map(c => c.revenue));
 const width = (category.revenue / maxRevenue) * 100;
 return `._id {
   height: 100%;
   width: ${width}%;
-  background: ${args.theme.var.color.primary};
+  background: ${t.var.color.primary};
   transition: width 0.3s ease;
 }`;
 '''
@@ -1133,7 +1133,7 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const category = args.contextData.category;
+const category = c.category;
 return {
   as: "div",
   text: `${category.count} problems`
@@ -1142,7 +1142,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.75rem;
-  color: ${args.theme.var.color.text_light_600};
+  color: ${t.var.color.text_light_600};
   margin-top: 0.25rem;
 }`;
 '''
@@ -1200,7 +1200,7 @@ return { as: "div" };
         css: '''
 return `._id {
   padding: 1.5rem 1.5rem 1rem;
-  border-bottom: 1px solid ${args.theme.var.color.background_light_200};
+  border-bottom: 1px solid ${t.var.color.background_light_200};
 }`;
 '''
       }
@@ -1222,7 +1222,7 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0;
 }`;
 '''
@@ -1258,7 +1258,7 @@ return { as: "thead" };
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background_light_50};
+  background: ${t.var.color.background_light_50};
 }`;
 '''
       }
@@ -1294,7 +1294,7 @@ return `._id {
   text-align: left;
   font-weight: 600;
   font-size: 0.75rem;
-  color: ${args.theme.var.color.text_light_600};
+  color: ${t.var.color.text_light_600};
   text-transform: uppercase;
 }`;
 '''
@@ -1319,7 +1319,7 @@ return `._id {
   text-align: center;
   font-weight: 600;
   font-size: 0.75rem;
-  color: ${args.theme.var.color.text_light_600};
+  color: ${t.var.color.text_light_600};
   text-transform: uppercase;
 }`;
 '''
@@ -1344,7 +1344,7 @@ return `._id {
   text-align: center;
   font-weight: 600;
   font-size: 0.75rem;
-  color: ${args.theme.var.color.text_light_600};
+  color: ${t.var.color.text_light_600};
   text-transform: uppercase;
 }`;
 '''
@@ -1369,7 +1369,7 @@ return `._id {
   text-align: right;
   font-weight: 600;
   font-size: 0.75rem;
-  color: ${args.theme.var.color.text_light_600};
+  color: ${t.var.color.text_light_600};
   text-transform: uppercase;
 }`;
 '''
@@ -1397,7 +1397,7 @@ return { as: "tbody" };
         contextName: "assistant",
         loop: true,
         props: '''
-const store = args.contextData.store;
+const store = c.store;
 return {
   data: store.assistantPerformance
 };
@@ -1416,7 +1416,7 @@ return { as: "tr" };
 ''',
         css: '''
 return `._id {
-  border-bottom: 1px solid ${args.theme.var.color.background_light_100};
+  border-bottom: 1px solid ${t.var.color.background_light_100};
   
   &:last-child {
     border-bottom: none;
@@ -1433,7 +1433,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const assistant = args.contextData.assistant;
+const assistant = c.assistant;
 return {
   as: "td",
   text: assistant.name
@@ -1443,7 +1443,7 @@ return {
 return `._id {
   padding: 0.75rem;
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -1456,7 +1456,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const assistant = args.contextData.assistant;
+const assistant = c.assistant;
 return {
   as: "td",
   text: assistant.solved
@@ -1468,7 +1468,7 @@ return `._id {
   text-align: center;
   font-size: 0.875rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -1481,7 +1481,7 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const assistant = args.contextData.assistant;
+const assistant = c.assistant;
 return {
   as: "td",
   text: `⭐ ${assistant.rating}`
@@ -1492,7 +1492,7 @@ return `._id {
   padding: 0.75rem;
   text-align: center;
   font-size: 0.875rem;
-  color: ${args.theme.var.color.warning};
+  color: ${t.var.color.warning};
 }`;
 '''
       }
@@ -1505,7 +1505,7 @@ return `._id {
         displayOrder: 4,
         componentName: "Html",
         props: '''
-const assistant = args.contextData.assistant;
+const assistant = c.assistant;
 return {
   as: "td",
   text: `$${assistant.earnings.toLocaleString()}`
@@ -1517,7 +1517,7 @@ return `._id {
   text-align: right;
   font-size: 0.875rem;
   font-weight: 600;
-  color: ${args.theme.var.color.success};
+  color: ${t.var.color.success};
 }`;
 '''
       }
@@ -1550,7 +1550,7 @@ return { as: "div" };
         css: '''
 return `._id {
   padding: 1.5rem 1.5rem 1rem;
-  border-bottom: 1px solid ${args.theme.var.color.background_light_200};
+  border-bottom: 1px solid ${t.var.color.background_light_200};
 }`;
 '''
       }
@@ -1572,7 +1572,7 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0;
 }`;
 '''
@@ -1605,7 +1605,7 @@ return `._id {
         contextName: "metric",
         loop: true,
         props: '''
-const store = args.contextData.store;
+const store = c.store;
 const metrics = [
   { label: "Avg Resolution Time", value: store.performanceMetrics.avgResolutionTime, icon: "⏱" },
   { label: "Completion Rate", value: store.performanceMetrics.completionRate, icon: "✅" },
@@ -1635,7 +1635,7 @@ return `._id {
   justify-content: space-between;
   align-items: center;
   padding: 0.75rem;
-  border-bottom: 1px solid ${args.theme.var.color.background_light_100};
+  border-bottom: 1px solid ${t.var.color.background_light_100};
   
   &:last-child {
     border-bottom: none;
@@ -1671,7 +1671,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const metric = args.contextData.metric;
+const metric = c.metric;
 return {
   as: "span",
   text: metric.icon
@@ -1687,7 +1687,7 @@ return {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const metric = args.contextData.metric;
+const metric = c.metric;
 return {
   as: "span",
   text: metric.label
@@ -1696,7 +1696,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_600};
+  color: ${t.var.color.text_light_600};
 }`;
 '''
       }
@@ -1709,7 +1709,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const metric = args.contextData.metric;
+const metric = c.metric;
 return {
   as: "div",
   text: metric.value
@@ -1718,7 +1718,7 @@ return {
         css: '''
 return `._id {
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }

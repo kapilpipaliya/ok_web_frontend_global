@@ -8,7 +8,7 @@
         description: Background worker (BullMQ) — repeatable job refreshes NetSuite OAuth access tokens per shop DB using the stored refresh token
         body:
           '''
-if (args.contextData?.action !== "start") {
+if (c?.action !== "start") {
   return;
 }
 
@@ -25,7 +25,7 @@ const readNetSuiteIntegrationFromDb = async (neoSession) => {
       { t: "netsuite_integration" }
     );
     if (r.records.length) {
-      const j = args.convertNodeToJson(r.records[0].get("s"));
+      const j = _.convertNodeToJson(r.records[0].get("s"));
       const P = j?.P || {};
       accountId = String(P.accountId || "").trim();
       clientId = String(P.clientId || "").trim();
@@ -34,7 +34,7 @@ const readNetSuiteIntegrationFromDb = async (neoSession) => {
       environment = String(P.environment || "production").trim().toLowerCase();
       if (P.clientSecret) {
         try {
-          clientSecret = args.decryptToken(String(P.clientSecret));
+          clientSecret = _.decryptToken(String(P.clientSecret));
         } catch (e) {
           clientSecret = "";
         }
@@ -46,27 +46,27 @@ const readNetSuiteIntegrationFromDb = async (neoSession) => {
   return { accountId, clientId, clientSecret, redirectUri, scope, environment };
 };
 
-const cfgBootstrap = await readNetSuiteIntegrationFromDb(args.session);
+const cfgBootstrap = await readNetSuiteIntegrationFromDb(_.session);
 if (!cfgBootstrap.clientId || !cfgBootstrap.clientSecret) {
   console.warn(
     "[processNetSuiteOAuthTokenRefresh] No NetSuite app credentials in database; refreshes will skip until Settings are saved."
   );
 }
 
-const intervalMs = Number(args.contextData?.intervalMs) > 0
-  ? Number(args.contextData.intervalMs)
+const intervalMs = Number(c?.intervalMs) > 0
+  ? Number(c.intervalMs)
   : 5 * 60 * 1000;
 
-const refreshSkewMs = Number(args.contextData?.refreshSkewMs) > 0
-  ? Number(args.contextData.refreshSkewMs)
+const refreshSkewMs = Number(c?.refreshSkewMs) > 0
+  ? Number(c.refreshSkewMs)
   : 120 * 1000;
 
 const QUEUE_NAME = "processNetSuiteOAuthTokenRefresh";
 const REPEATABLE_JOB_ID = "netsuite-oauth-refresh-repeatable";
 
-const helpers = await args.executeNamedServerFunction(
+const helpers = await s(
   { functionName: "shopifyQueueHelpers", contextData: {} },
-  { functionLookupSubDomain: args.subDomain }
+  { functionLookupSubDomain: _.subDomain }
 );
 
 if (!helpers.result?.success) {
@@ -81,7 +81,7 @@ if (!connection || !connection.host) {
   throw new Error("Invalid Redis connection for NetSuite token refresh worker");
 }
 
-const { Worker, Queue } = args.bullmq;
+const { Worker, Queue } = _.bullmq;
 const tokenQueue = new Queue(QUEUE_NAME, { connection });
 
 await tokenQueue.add(
@@ -101,7 +101,7 @@ await tokenQueue.add(
   { removeOnComplete: 20, removeOnFail: 5 }
 );
 
-const appSubDomain = args.rawSubDomain;
+const appSubDomain = _.rawSubDomain;
 
 const parseExpiresMs = (p) => {
   const raw = p?.expiresAt;
@@ -133,7 +133,7 @@ const refreshTokensInSession = async (shopLabel, dbSession) => {
   }
 
   const oauthNode = oauthResult.records[0].get("n");
-  const oauthData = args.convertNodeToJson(oauthNode);
+  const oauthData = _.convertNodeToJson(oauthNode);
   const P = oauthData?.P || {};
 
   const accountId = String(P.accountId || "").trim();
@@ -155,7 +155,7 @@ const refreshTokensInSession = async (shopLabel, dbSession) => {
 
   let refreshToken;
   try {
-    refreshToken = args.decryptToken(refreshEnc);
+    refreshToken = _.decryptToken(refreshEnc);
   } catch (e) {
     console.warn(
       `[processNetSuiteOAuthTokenRefresh] ${shopLabel || "session"}: decrypt refresh token failed`
@@ -219,9 +219,9 @@ const refreshTokensInSession = async (shopLabel, dbSession) => {
   const expiresAtIso =
     expiresIn > 0 ? new Date(Date.now() + expiresIn * 1000).toISOString() : null;
 
-  const encryptedAccessToken = args.encryptToken(accessToken);
+  const encryptedAccessToken = _.encryptToken(accessToken);
   const encryptedRefreshToken = newRefresh
-    ? args.encryptToken(newRefresh)
+    ? _.encryptToken(newRefresh)
     : refreshEnc;
 
   const nowIso = new Date().toISOString();
@@ -268,13 +268,13 @@ const runCycle = async (mainSession) => {
     console.warn("[processNetSuiteOAuthTokenRefresh] Could not list ShopifyShop:", e?.message || e);
   }
 
-  const driver = args.getDriver();
+  const driver = _.getDriver();
 
   for (const shop of shops) {
     const shopStr = String(shop).trim();
     let dbName;
     try {
-      dbName = args.getDatabaseNameForShop(shopStr, appSubDomain);
+      dbName = _.getDatabaseNameForShop(shopStr, appSubDomain);
     } catch (e) {
       console.warn("[processNetSuiteOAuthTokenRefresh] getDatabaseNameForShop failed:", shopStr, e);
       continue;
@@ -299,7 +299,7 @@ try {
   workerInstance = new Worker(
     QUEUE_NAME,
     async () => {
-      const mainSession = await args.getSession();
+      const mainSession = await _.getSession();
       try {
         await runCycle(mainSession);
       } finally {

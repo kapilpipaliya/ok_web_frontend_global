@@ -28,7 +28,7 @@ export function validateFunction(
     return { isValid: true };
 
     /* Original validation code:
-    const func = new Function("args", `${value}`);
+    const func = new Function("_", `${value}`);
     if (typeof func === "function") {
       const result = func({});
       if (typeof result === "object") {

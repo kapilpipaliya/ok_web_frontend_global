@@ -8,9 +8,9 @@
         description: Closes a public support ticket by customer token or admin ticket id.
         body:
           '''
-const { serial, token, ticketId, closedBy } = args.contextData || {};
+const { serial, token, ticketId, closedBy } = c || {};
 
-const settingsResult = await args.executeNamedServerFunction({
+const settingsResult = await s({
   functionName: "publicSupportGetSettings",
   contextData: {}
 });
@@ -19,9 +19,9 @@ const supportSystem = (settingsResult?.result?.data || settingsResult?.data || {
 let result;
 const now = new Date().toISOString();
 if (ticketId) {
-  const user = args.getUserFromSession ? await args.getUserFromSession() : null;
+  const user = _.getUserFromSession ? await _.getUserFromSession() : null;
   if (!user) return { success: false, message: "Admin access is required." };
-  result = await args.session.run(
+  result = await _.session.run(
     `
     MATCH (t:PublicSupportTicket)
     WHERE elementId(t) = $ticketId
@@ -40,7 +40,7 @@ if (ticketId) {
   if (!serial || !token) {
     return { success: false, message: "Ticket serial and token are required." };
   }
-  result = await args.session.run(
+  result = await _.session.run(
     `
     MATCH (t:PublicSupportTicket {serial: $serial, ticketAccessToken: $token})
     SET t.status = 'closed',
@@ -57,9 +57,9 @@ if (!result.records || result.records.length === 0) {
   return { success: false, message: "Support ticket not found." };
 }
 
-const ticket = args.convertNodeToJson(result.records[0].get("t"));
+const ticket = _.convertNodeToJson(result.records[0].get("t"));
 try {
-  await args.executeNamedServerFunction({
+  await s({
     functionName: "publicSupportQueueNotification",
     contextData: {
       eventType: "ticket_closed",

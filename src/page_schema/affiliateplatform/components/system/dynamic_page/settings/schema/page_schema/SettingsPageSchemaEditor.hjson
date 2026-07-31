@@ -9,29 +9,29 @@
         fns:
           '''
 const getSettingsPageId = () => {
-  const fromProps = args.contextData.props?.settingsPageId;
+  const fromProps = c.props?.settingsPageId;
   if (fromProps != null && String(fromProps).trim() !== "") return String(fromProps).trim();
-  return args.searchParams?.page || "home";
+  return _.searchParams?.page || "home";
 };
 
 const getSchemaSettingKey = () => {
-  const fromProps = args.contextData.props?.schemaKey;
+  const fromProps = c.props?.schemaKey;
   if (fromProps != null && String(fromProps).trim() !== "") return String(fromProps).trim();
   return `${getSettingsPageId()}_settings_page`;
 };
 
 const getSingleSectionId = () => {
-  const fromProps = args.contextData.props?.singleSectionId;
+  const fromProps = c.props?.singleSectionId;
   if (fromProps != null && String(fromProps).trim() !== "") return String(fromProps).trim();
   return null;
 };
 
 const isSingleSectionMode = () => getSingleSectionId() != null;
 
-const isEmbeddedMode = () => args.contextData.props?.embeddedMode === true;
+const isEmbeddedMode = () => c.props?.embeddedMode === true;
 
 const executeYTOFunction = (functionName, contextData) =>
-  args.executeNamedServerFunction({
+  s({
     functionName,
     contextData: contextData || {}
   });
@@ -80,38 +80,38 @@ const FIELD_EDITOR_FORM_CONFIG = {
   }]
 };
 
-const [loading, setLoading] = args.createSignal(false);
-const [saving, setSaving] = args.createSignal(false);
-const [pageMeta, setPageMeta] = args.createSignal(null);
-const [sections, setSections] = args.createSignal([]);
-const [selectedSectionId, setSelectedSectionId] = args.createSignal(null);
-const [selectedFieldIndex, setSelectedFieldIndex] = args.createSignal(null);
-const [isDirty, setIsDirty] = args.createSignal(false);
-const [editorMode, setEditorModeSignal] = args.createSignal("visual");
-const [configJsonText, setConfigJsonText] = args.createSignal("");
-const [jsonError, setJsonError] = args.createSignal("");
-const [draggedSectionIndex, setDraggedSectionIndex] = args.createSignal(null);
-const [dragOverSectionIndex, setDragOverSectionIndex] = args.createSignal(null);
-const [draggedFieldIndex, setDraggedFieldIndex] = args.createSignal(null);
-const [dragOverFieldIndex, setDragOverFieldIndex] = args.createSignal(null);
-const [fieldDropInstruction, setFieldDropInstruction] = args.createSignal(null);
-const [fieldDragSource, setFieldDragSource] = args.createSignal(null);
-const [dragOverSectionIdForField, setDragOverSectionIdForField] = args.createSignal(null);
+const [loading, setLoading] = _.createSignal(false);
+const [saving, setSaving] = _.createSignal(false);
+const [pageMeta, setPageMeta] = _.createSignal(null);
+const [sections, setSections] = _.createSignal([]);
+const [selectedSectionId, setSelectedSectionId] = _.createSignal(null);
+const [selectedFieldIndex, setSelectedFieldIndex] = _.createSignal(null);
+const [isDirty, setIsDirty] = _.createSignal(false);
+const [editorMode, setEditorModeSignal] = _.createSignal("visual");
+const [configJsonText, setConfigJsonText] = _.createSignal("");
+const [jsonError, setJsonError] = _.createSignal("");
+const [draggedSectionIndex, setDraggedSectionIndex] = _.createSignal(null);
+const [dragOverSectionIndex, setDragOverSectionIndex] = _.createSignal(null);
+const [draggedFieldIndex, setDraggedFieldIndex] = _.createSignal(null);
+const [dragOverFieldIndex, setDragOverFieldIndex] = _.createSignal(null);
+const [fieldDropInstruction, setFieldDropInstruction] = _.createSignal(null);
+const [fieldDragSource, setFieldDragSource] = _.createSignal(null);
+const [dragOverSectionIdForField, setDragOverSectionIdForField] = _.createSignal(null);
 const sectionDragCleanups = new Map();
 const fieldDragCleanups = new Map();
-const [sectionMetaVertex, setSectionMetaVertex] = args.createSignal(null);
-const [fieldEditorVertex, setFieldEditorVertex] = args.createSignal(null);
+const [sectionMetaVertex, setSectionMetaVertex] = _.createSignal(null);
+const [fieldEditorVertex, setFieldEditorVertex] = _.createSignal(null);
 
 const buildInitialVertex = (values) => {
-  const vertexId = args.generateNewVertexId(args.graph, args.setGraph);
-  args.addNewVertex(0, {
+  const vertexId = _.generateNewVertexId(g, sg);
+  _.addNewVertex(0, {
     id: vertexId,
     L: ["SettingsSchemaFormData"],
     P: { ...(values || {}) },
     IN: {},
     OUT: {}
-  }, args.graph, args.setGraph);
-  return args.graph.vertexes[vertexId];
+  }, g, sg);
+  return g.vertexes[vertexId];
 };
 
 const DEFAULT_SITE_LANGUAGES = [
@@ -121,7 +121,7 @@ const DEFAULT_SITE_LANGUAGES = [
 ];
 
 const getSiteLanguages = () => {
-  const languages = args.contextData.props?.siteLanguages;
+  const languages = c.props?.siteLanguages;
   if (Array.isArray(languages) && languages.length > 0) return languages;
   return DEFAULT_SITE_LANGUAGES;
 };
@@ -180,7 +180,7 @@ const syncSectionMetaVertex = () => {
   if (existing?.id) {
     const current = existing.P || {};
     if (current.title === values.title && current.description === values.description) return;
-    args.mergeVertexProperties(0, existing.id, args.graph, args.setGraph, values);
+    _.mergeVertexProperties(0, existing.id, g, sg, values);
     setSectionMetaVertex({ ...existing, P: { ...values } });
     return;
   }
@@ -199,7 +199,7 @@ const syncFieldEditorVertex = () => {
     const current = existing.P || {};
     const unchanged = Object.keys(values).every((key) => current[key] === values[key]);
     if (unchanged) return;
-    args.mergeVertexProperties(0, existing.id, args.graph, args.setGraph, values);
+    _.mergeVertexProperties(0, existing.id, g, sg, values);
     setFieldEditorVertex({ ...existing, P: { ...values } });
     return;
   }
@@ -255,8 +255,8 @@ const scheduleFieldDropInstructionClear = () => {
 };
 
 const updateFieldDropInstruction = (self, targetIndex) => {
-  if (!args.extractInstruction) return;
-  const instruction = args.extractInstruction(self.data);
+  if (!_.extractInstruction) return;
+  const instruction = _.extractInstruction(self.data);
   if (
     instruction?.operation === "reorder-before" ||
     instruction?.operation === "reorder-after"
@@ -268,8 +268,8 @@ const updateFieldDropInstruction = (self, targetIndex) => {
 };
 
 const resolveFieldInsertIndex = (targetIndex, self) => {
-  if (!args.extractInstruction) return targetIndex;
-  const instruction = args.extractInstruction(self?.data);
+  if (!_.extractInstruction) return targetIndex;
+  const instruction = _.extractInstruction(self?.data);
   if (instruction?.operation === "reorder-before") return targetIndex;
   if (instruction?.operation === "reorder-after") return targetIndex + 1;
   return targetIndex;
@@ -298,8 +298,8 @@ const isFieldListEmptyDrop = () => {
 };
 
 const buildFieldDropTargetData = (data, input, element) => {
-  if (!args.attachInstruction) return data;
-  return args.attachInstruction(data, {
+  if (!_.attachInstruction) return data;
+  return _.attachInstruction(data, {
     input,
     element,
     axis: "vertical",
@@ -338,7 +338,7 @@ const syncSectionMetaFromForm = () => {
   const formFns = sectionMetaFormFns();
   const vertexId = formFns?.formVertexId?.();
   if (!sectionId || !vertexId) return;
-  const formP = args.graph.vertexes[vertexId]?.P || {};
+  const formP = g.vertexes[vertexId]?.P || {};
   const section = getSelectedSection();
   if (!section) return;
   const nextTitle = formP.title ?? "";
@@ -382,15 +382,15 @@ const syncFieldFromForm = () => {
   const formFns = fieldEditorFormFns();
   const vertexId = formFns?.formVertexId?.();
   if (!vertexId) return;
-  const formP = args.graph.vertexes[vertexId]?.P || {};
+  const formP = g.vertexes[vertexId]?.P || {};
   const existingField = getSelectedField();
   const patch = formPToFieldPatch(formP, existingField);
   if (fieldSchemaMatches(existingField, patch)) return;
   updateField(fieldIndex, patch);
 };
 
-const [sectionMetaFormFns, setSectionMetaFormFns] = args.createSignal(null);
-const [fieldEditorFormFns, setFieldEditorFormFns] = args.createSignal(null);
+const [sectionMetaFormFns, setSectionMetaFormFns] = _.createSignal(null);
+const [fieldEditorFormFns, setFieldEditorFormFns] = _.createSignal(null);
 
 const registerSectionMetaFormFns = (formFns) => {
   setSectionMetaFormFns(formFns);
@@ -487,8 +487,8 @@ const applyLoadedSetting = (setting) => {
   return true;
 };
 
-args.createEffect(() => {
-  if (args.contextData.props?.isOpen === true) {
+_.createEffect(() => {
+  if (c.props?.isOpen === true) {
     void loadConfig();
   }
 });
@@ -501,7 +501,7 @@ const loadConfig = async () => {
     applyLoadedSetting(result?.result?.data?.setting);
   } catch (error) {
     console.error("Failed to load settings config:", error);
-    args.showErrorToast?.("Failed to load settings schema");
+    _.showErrorToast?.("Failed to load settings schema");
   } finally {
     setLoading(false);
   }
@@ -537,7 +537,7 @@ const addSection = () => {
 };
 
 const deleteSection = async (sectionId) => {
-  const confirmed = await args.contextData?.confirmContext?.rbConfirm?.({
+  const confirmed = await c?.confirmContext?.rbConfirm?.({
     title: "Delete section",
     message: "Remove this section and all its fields from the schema?",
     confirmText: "Delete",
@@ -633,7 +633,7 @@ const addField = () => {
 const deleteField = async (fieldIndex) => {
   const sectionId = selectedSectionId();
   if (!sectionId) return;
-  const confirmed = await args.contextData?.confirmContext?.rbConfirm?.({
+  const confirmed = await c?.confirmContext?.rbConfirm?.({
     title: "Delete field",
     message: "Remove this field from the schema?",
     confirmText: "Delete",
@@ -856,7 +856,7 @@ const setEditorMode = (mode) => {
   if (editorMode() === "json") {
     const ok = applyJsonTextToState(configJsonText());
     if (!ok) {
-      args.showErrorToast?.(jsonError() || "Fix JSON errors before switching to visual mode");
+      _.showErrorToast?.(jsonError() || "Fix JSON errors before switching to visual mode");
       return;
     }
   }
@@ -901,7 +901,7 @@ const saveConfig = async () => {
     if (isJsonMode()) {
       const ok = applyJsonTextToState(configJsonText());
       if (!ok) {
-        args.showErrorToast?.(jsonError() || "Invalid JSON");
+        _.showErrorToast?.(jsonError() || "Invalid JSON");
         return;
       }
     }
@@ -914,10 +914,10 @@ const saveConfig = async () => {
       saveAsDefault: true
     });
     if (!result?.result?.success) {
-      args.showErrorToast?.(result?.result?.message || "Failed to save schema");
+      _.showErrorToast?.(result?.result?.message || "Failed to save schema");
       return;
     }
-    args.showSuccessToast?.(result.result.message || "Schema saved");
+    _.showSuccessToast?.(result.result.message || "Schema saved");
     syncJsonFromVisual();
     setIsDirty(false);
     if (typeof window !== "undefined") {
@@ -927,11 +927,11 @@ const saveConfig = async () => {
     }
   } catch (error) {
     console.error("Failed to save settings schema:", error);
-    args.showErrorToast?.("Failed to save schema");
+    _.showErrorToast?.("Failed to save schema");
   } finally {
     setSaving(false);
   }
-  const onSavedCb = args.contextData.props?.onSaved;
+  const onSavedCb = c.props?.onSaved;
   if (typeof onSavedCb === "function") {
     queueMicrotask(() => { void onSavedCb(); });
   }
@@ -947,12 +947,12 @@ const attachSectionDropTarget = (element, index) => {
   }
 
   const attach = (retried = false) => {
-    if (!args.dropTargetForElements) {
+    if (!_.dropTargetForElements) {
       if (!retried) requestAnimationFrame(() => attach(true));
       return;
     }
 
-    const cleanup = args.dropTargetForElements({
+    const cleanup = _.dropTargetForElements({
       element,
       canDrop: ({ source }) => {
         const type = source.data?.type;
@@ -1025,12 +1025,12 @@ const attachSectionDraggable = (element, index) => {
   }
 
   const attach = (retried = false) => {
-    if (!args.draggable) {
+    if (!_.draggable) {
       if (!retried) requestAnimationFrame(() => attach(true));
       return;
     }
 
-    const rawCleanup = args.draggable({
+    const rawCleanup = _.draggable({
       element,
       getInitialData: () => ({ type: "settings-config-section", index }),
       onDragStart: () => setDraggedSectionIndex(index),
@@ -1081,12 +1081,12 @@ const attachFieldDropTarget = (element, index) => {
   if (existing) existing();
 
   const attach = (retried = false) => {
-    if (!args.dropTargetForElements) {
+    if (!_.dropTargetForElements) {
       if (!retried) requestAnimationFrame(() => attach(true));
       return;
     }
 
-    const cleanup = args.dropTargetForElements({
+    const cleanup = _.dropTargetForElements({
       element,
       canDrop: ({ source }) => source.data?.type === "settings-config-field",
       getData: ({ input, element: dropElement }) =>
@@ -1124,19 +1124,19 @@ const attachFieldListDropTarget = (element) => {
   if (element.__fsceFieldListDropCleanup) return;
 
   const attach = (retried = false) => {
-    if (!args.dropTargetForElements) {
+    if (!_.dropTargetForElements) {
       if (!retried) requestAnimationFrame(() => attach(true));
       return;
     }
 
-    const cleanup = args.dropTargetForElements({
+    const cleanup = _.dropTargetForElements({
       element,
       canDrop: ({ source }) =>
         source.data?.type === "settings-config-field" && getFieldIndices().length === 0,
       getData: ({ input, element: dropElement }) => {
         const data = { type: "field-list-drop" };
-        if (!args.attachInstruction) return data;
-        return args.attachInstruction(data, {
+        if (!_.attachInstruction) return data;
+        return _.attachInstruction(data, {
           input,
           element: dropElement,
           axis: "vertical",
@@ -1183,12 +1183,12 @@ const attachFieldsListBoundary = (element) => {
   if (element.__fsceFieldsListBoundaryCleanup) return;
 
   const attach = (retried = false) => {
-    if (!args.dropTargetForElements) {
+    if (!_.dropTargetForElements) {
       if (!retried) requestAnimationFrame(() => attach(true));
       return;
     }
 
-    const cleanup = args.dropTargetForElements({
+    const cleanup = _.dropTargetForElements({
       element,
       canDrop: ({ source }) => source.data?.type === "settings-config-field",
       getData: () => ({ type: "field-list-boundary" }),
@@ -1215,12 +1215,12 @@ const attachFieldDraggable = (element, index) => {
   }
 
   const attach = (retried = false) => {
-    if (!args.draggable) {
+    if (!_.draggable) {
       if (!retried) requestAnimationFrame(() => attach(true));
       return;
     }
 
-    const rawCleanup = args.draggable({
+    const rawCleanup = _.draggable({
       element,
       getInitialData: () => ({
         type: "settings-config-field",
@@ -1325,12 +1325,12 @@ return {
       L: Attr
       P: {
         css:
-          '''const embedded = args.fns.isEmbeddedMode?.() === true;
+          '''const embedded = f.isEmbeddedMode?.() === true;
 return `._id {
   display: flex;
   flex-direction: column;
   min-height: 0;
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
   overflow: hidden;
   ${embedded ? `
   position: absolute;
@@ -1342,12 +1342,12 @@ return `._id {
         displayOrder: 1
         componentName: Html
         props:
-          '''const embedded = args.contextData.props?.embeddedMode === true;
+          '''const embedded = c.props?.embeddedMode === true;
 return {
   as: "div",
   ...(embedded ? {} : { "data-fulchand-page-main": "" }),
-  hide: args.contextData.props?.hide === true,
-  onMount: () => { args.fns.loadConfig?.(); }
+  hide: c.props?.hide === true,
+  onMount: () => { f.loadConfig?.(); }
 };'''
       }
     }
@@ -1359,8 +1359,8 @@ return {
         componentName: SettingsSchemaToolbar
         props:
           '''return {
-  editorApi: args.fns,
-  tableVertexLabel: args.contextData.props?.tableVertexLabel
+  editorApi: f,
+  tableVertexLabel: c.props?.tableVertexLabel
 };'''
       }
     }
@@ -1369,7 +1369,7 @@ return {
       L: Attr
       P: {
         css:
-          '''const embedded = args.fns.isEmbeddedMode?.() === true;
+          '''const embedded = f.isEmbeddedMode?.() === true;
 return `._id {
   display: flex;
   flex: 1;
@@ -1380,7 +1380,7 @@ return `._id {
         displayOrder: 2
         componentName: Html
         props:
-          '''const loading = args.fns.loading?.();
+          '''const loading = f.loading?.();
 return {
   as: "div",
   hide: loading
@@ -1393,7 +1393,7 @@ return {
       P: {
         displayOrder: 1
         componentName: SettingsSchemaSectionsList
-        props: return { editorApi: args.fns };
+        props: "return { editorApi: f };"
       }
     }
     {
@@ -1402,7 +1402,7 @@ return {
       P: {
         displayOrder: 2
         componentName: SettingsSchemaSectionEditor
-        props: return { editorApi: args.fns };
+        props: "return { editorApi: f };"
       }
     }
     {
@@ -1411,7 +1411,7 @@ return {
       P: {
         displayOrder: 3
         componentName: SettingsSchemaJsonPanel
-        props: return { editorApi: args.fns };
+        props: "return { editorApi: f };"
       }
     }
     {
@@ -1424,7 +1424,7 @@ return {
           '''return {
   size: "large",
   color: "primary",
-  hide: !args.fns.loading?.()
+  hide: !f.loading?.()
 };'''
       }
     }

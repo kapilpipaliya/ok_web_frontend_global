@@ -10,7 +10,7 @@
 // Log worker messages to database
 // contextData: { workerName, level, message, metadata }
 
-const { workerName, level = 'info', message, metadata = {} } = args.contextData;
+const { workerName, level = 'info', message, metadata = {} } = c;
 
   if (!workerName || !message) {
     return {
@@ -19,7 +19,7 @@ const { workerName, level = 'info', message, metadata = {} } = args.contextData;
     };
   }
 
-  const session = args.session;
+  const session = _.session;
 
   // Create a WorkerLog node
   await session.run(`

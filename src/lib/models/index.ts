@@ -5,7 +5,7 @@
  * Uses lazy initialization to ensure neogma is ready before models are created.
  *
  * Usage in server functions:
- *   const notification = await args.Models.Notification.findByUserId(userId, args.session);
+ *   const notification = await _.Models.Notification.findByUserId(userId, _.session);
  *
  * Usage in TypeScript files:
  *   import { Models } from "~/lib/models";
@@ -62,15 +62,15 @@ export type ModelRegistry = typeof Models;
  * ```javascript
  * // In hjson server function
  * const { ModelFactory } = await import("neogma");
- * const neogma = await args.getNeogmaInstance();
+ * const neogma = await _.getNeogmaInstance();
  *
  * const CacheModel = ModelFactory({ ... }, neogma);
  *
  * // Register for reuse
- * args.registerModel("Cache", () => CacheModel);
+ * _.registerModel("Cache", () => CacheModel);
  *
  * // Now available globally
- * const cache = await args.Models.Cache.findOne(...);
+ * const cache = await _.Models.Cache.findOne(...);
  * ```
  */
 

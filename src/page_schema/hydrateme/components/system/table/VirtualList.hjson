@@ -16,13 +16,13 @@
           '''
 // Get props from context reactively. Prefer getItems (function) so parent can pass a getter and subscription stays in VirtualList (avoids parent re-render on expand/collapse).
 const getItems = () => {
-  const getter = args.contextData.props?.getItems;
+  const getter = c.props?.getItems;
   if (typeof getter === 'function') return getter() || [];
-  return args.contextData.props?.items || [];
+  return c.props?.items || [];
 };
-const getItemHeight = () => args.contextData.props?.itemHeight || 90;
+const getItemHeight = () => c.props?.itemHeight || 90;
 const getHeightAtIndex = (i, items) => {
-  const fn = args.contextData.props?.getItemHeightAt;
+  const fn = c.props?.getItemHeightAt;
   if (typeof fn === 'function') {
     const h = fn(i, items[i]);
     if (typeof h === 'number' && !isNaN(h) && h >= 0) return h;
@@ -30,8 +30,8 @@ const getHeightAtIndex = (i, items) => {
   const uniform = getItemHeight();
   return typeof uniform === 'function' ? uniform() : uniform;
 };
-const getOverscan = () => args.contextData.props?.overscan || 5;
-const getOnScrollCallback = () => args.contextData.props?.onScroll;
+const getOverscan = () => c.props?.overscan || 5;
+const getOnScrollCallback = () => c.props?.onScroll;
 
 // Prefix offsets for variable row heights: offsets[i] = start Y of item i
 const getOffsetsAndTotal = () => {
@@ -58,8 +58,8 @@ const findStartIndex = (scroll, offsets, n) => {
 };
 
 // Virtualization state
-const [scrollTop, setScrollTop] = args.createSignal(0);
-const [scrollElement, setScrollElement] = args.createSignal(null);
+const [scrollTop, setScrollTop] = _.createSignal(0);
+const [scrollElement, setScrollElement] = _.createSignal(null);
 
 // Calculate visible range from items (parent passes final display list)
 const getVisibleRange = () => {
@@ -141,10 +141,10 @@ const handleScroll = (e) => {
 };
 
 // Optional keyboard nav: when getActiveIndex/setActiveIndex/getItemRef are provided, handle Arrow keys and Space
-const getActiveIndex = () => args.contextData.props?.getActiveIndex?.() ?? -1;
-const setActiveIndex = (n) => args.contextData.props?.setActiveIndex?.(n);
+const getActiveIndex = () => c.props?.getActiveIndex?.() ?? -1;
+const setActiveIndex = (n) => c.props?.setActiveIndex?.(n);
 const getItemCount = () => (getItems()?.length ?? 0);
-const getItemRef = (index) => args.contextData.props?.getItemRef?.(index);
+const getItemRef = (index) => c.props?.getItemRef?.(index);
 const getScrollToItemHeight = () => {
   const h = getItemHeight();
   return typeof h === 'function' ? h() : h;
@@ -191,10 +191,10 @@ const handleListKeyDown = (e) => {
     e.preventDefault();
     const nextIndex = len === 0 ? -1 : Math.min(current + 1, len - 1);
     if (e.shiftKey) {
-      const onShiftArrow = args.contextData.props?.onShiftArrow;
+      const onShiftArrow = c.props?.onShiftArrow;
       if (onShiftArrow && nextIndex >= 0) onShiftArrow(current, nextIndex);
     } else {
-      args.contextData.props?.clearSelectionAnchor?.();
+      c.props?.clearSelectionAnchor?.();
     }
     setActiveIndex(nextIndex);
     if (nextIndex >= 0) scrollToIndexAndFocus(nextIndex);
@@ -205,10 +205,10 @@ const handleListKeyDown = (e) => {
     e.preventDefault();
     const nextIndex = Math.max(-1, current - 1);
     if (e.shiftKey) {
-      const onShiftArrow = args.contextData.props?.onShiftArrow;
+      const onShiftArrow = c.props?.onShiftArrow;
       if (onShiftArrow && nextIndex >= 0) onShiftArrow(current, nextIndex);
     } else {
-      args.contextData.props?.clearSelectionAnchor?.();
+      c.props?.clearSelectionAnchor?.();
     }
     setActiveIndex(nextIndex);
     if (nextIndex >= 0) scrollToIndexAndFocus(nextIndex);
@@ -216,7 +216,7 @@ const handleListKeyDown = (e) => {
     return;
   }
   if (key === " " || key === "Spacebar") {
-    const onSpaceKey = args.contextData.props?.onSpaceKey;
+    const onSpaceKey = c.props?.onSpaceKey;
     if (onSpaceKey && current >= 0) {
       e.preventDefault();
       onSpaceKey(current);
@@ -224,12 +224,12 @@ const handleListKeyDown = (e) => {
     return;
   }
   if (key === "ArrowLeft" || key === "ArrowRight") {
-    const onExpandCollapse = args.contextData.props?.onExpandCollapse;
+    const onExpandCollapse = c.props?.onExpandCollapse;
     if (onExpandCollapse && current >= 0) {
       const items = getItems();
       const row = items[current];
       const expandableGroup = row?._isParent === true && row._parentKey != null;
-      const expandableRow = row?.id && args.contextData.props?.rowHasExpansion?.(row) === true;
+      const expandableRow = row?.id && c.props?.rowHasExpansion?.(row) === true;
       if (expandableGroup || expandableRow) {
         e.preventDefault();
         onExpandCollapse(current, key === "ArrowLeft" ? "collapse" : "expand");
@@ -240,20 +240,20 @@ const handleListKeyDown = (e) => {
 };
 
 const useListKeyNav = () =>
-  typeof args.contextData.props?.setActiveIndex === 'function' &&
-  typeof args.contextData.props?.getItemRef === 'function';
+  typeof c.props?.setActiveIndex === 'function' &&
+  typeof c.props?.getItemRef === 'function';
 
 // Table passes getScrollContainerElement (40wrap): attach scroll listener there so scrollTop matches virtualization.
 // When unset, the list uses its own root ref + onScroll (default VirtualList behavior).
-args.createEffect(() => {
-  const getter = args.contextData.props?.getScrollContainerElement;
+_.createEffect(() => {
+  const getter = c.props?.getScrollContainerElement;
   if (typeof getter !== "function") return;
   const el = getter();
   if (!el) return;
   setScrollElement(el);
   const handler = (e) => handleScroll(e);
   el.addEventListener("scroll", handler, { passive: true });
-  args.onCleanup(() => {
+  _.onCleanup(() => {
     el.removeEventListener("scroll", handler);
   });
 });
@@ -275,26 +275,26 @@ return {
         componentName: Html
         props:
           '''
-const containerClass = args.contextData.props?.class || "";
-const tabIndex = args.contextData.props?.tabIndex;
-const externalOnKeyDown = args.contextData.props?.onKeyDown;
-const role = args.contextData.props?.role;
-const ariaLabel = args.contextData.props?.["attr:aria-label"];
-const useKeyNav = args.fns.useListKeyNav?.();
+const containerClass = c.props?.class || "";
+const tabIndex = c.props?.tabIndex;
+const externalOnKeyDown = c.props?.onKeyDown;
+const role = c.props?.role;
+const ariaLabel = c.props?.["attr:aria-label"];
+const useKeyNav = f.useListKeyNav?.();
 
-const onKeyDown = useKeyNav ? args.fns.handleListKeyDown : externalOnKeyDown;
-const extScroll = args.contextData.props?.getScrollContainerElement;
+const onKeyDown = useKeyNav ? f.handleListKeyDown : externalOnKeyDown;
+const extScroll = c.props?.getScrollContainerElement;
 const useExternalVerticalScroll = typeof extScroll === "function";
 // Table: min width so the scrollport gets horizontal overflow (absolute rows do not widen the flow).
-const mw = args.contextData.props?.contentMinWidthPx;
+const mw = c.props?.contentMinWidthPx;
 const minWStyle =
   typeof mw === "number" && mw > 0 ? `min-width: ${mw}px;width:100%;box-sizing:border-box;` : undefined;
 
 return {
   as: "div",
   class: containerClass,
-  ref: useExternalVerticalScroll ? undefined : args.fns.setScrollElement,
-  onScroll: useExternalVerticalScroll ? undefined : args.fns.handleScroll,
+  ref: useExternalVerticalScroll ? undefined : f.setScrollElement,
+  onScroll: useExternalVerticalScroll ? undefined : f.handleScroll,
   //...(tabIndex !== undefined && { tabIndex }),
   ...(onKeyDown && { onKeyDown }),
   ...(role && { role }),
@@ -313,7 +313,7 @@ return {
 return `._id {
   position: relative;
   width: 100%;
-  height: ${args.fns.getTotalSize()}px;
+  height: ${f.getTotalSize()}px;
 }`;
 '''
         displayOrder: 1
@@ -321,7 +321,7 @@ return `._id {
         props:
           '''
 // Inner height spacer: optional min-width from parent so total scroll width includes wide grids.
-const mw = args.contextData.props?.contentMinWidthPx;
+const mw = c.props?.contentMinWidthPx;
 const spacerMin = typeof mw === "number" && mw > 0 ? `min-width: ${mw}px;` : "";
 return {
   as: "div",
@@ -341,7 +341,7 @@ return {
         props:
           '''
 return {
-  data: args.fns.getVirtualItems()
+  data: f.getVirtualItems()
 };
 '''
       }

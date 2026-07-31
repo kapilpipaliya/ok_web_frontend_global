@@ -16,7 +16,7 @@
  * - Proper session management
  * - Converting OGM results to Vertex format for UI compatibility
  *
- * Parameters (via args.contextData):
+ * Parameters (via c):
  * - userId: string (required) - User UUID
  * - action: string (optional) - Action to perform: "list", "create", "markRead", "delete"
  * - notificationId: string (optional) - For markRead and delete actions
@@ -34,7 +34,7 @@
  */
 
 try {
-  const { userId, action = "list", notificationId, notificationData } = args.contextData;
+  const { userId, action = "list", notificationId, notificationData } = c;
 
   // Validate user ID
   if (!userId) {
@@ -59,7 +59,7 @@ try {
     }
 
     // Use OGM to create notification (simple CRUD)
-    const notification = await args.Models.Notification.createOne({
+    const notification = await _.Models.Notification.createOne({
       userId,
       type: notificationData.type || "info",
       title: notificationData.title,
@@ -69,7 +69,7 @@ try {
       read: false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
-    }, { session: args.session });
+    }, { session: _.session });
 
     // Convert to Vertex format for UI
     const vertexFormat = modelToVertex(notification);
@@ -94,9 +94,9 @@ try {
     }
 
     // Use OGM to find and update (simple CRUD)
-    const notification = await args.Models.Notification.findOne(
+    const notification = await _.Models.Notification.findOne(
       { where: { id: notificationId } },
-      args.session
+      _.session
     );
 
     if (!notification) {
@@ -117,7 +117,7 @@ try {
     }
 
     // Use OGM instance method
-    await notification.markAsRead(args.session);
+    await notification.markAsRead(_.session);
 
     return {
       success: true,
@@ -139,7 +139,7 @@ try {
     }
 
     // Use raw Cypher for delete with ownership check (more control)
-    const deleteResult = await args.session.run(`
+    const deleteResult = await _.session.run(`
       MATCH (n:Notification {id: $notificationId, userId: $userId})
       DELETE n
       RETURN count(n) as deletedCount
@@ -169,24 +169,24 @@ try {
   // HYBRID APPROACH: Mix OGM and raw Cypher
 
   // 1. Use OGM for simple notification query
-  const recentNotifications = await args.Models.Notification.findByUserId(
+  const recentNotifications = await _.Models.Notification.findByUserId(
     userId,
     {
-      session: args.session,
+      session: _.session,
       unreadOnly: false,
       limit: 20
     }
   );
 
   // 2. Use OGM static method for unread count
-  const unreadCount = await args.Models.Notification.getUnreadCount(
+  const unreadCount = await _.Models.Notification.getUnreadCount(
     userId,
-    args.session
+    _.session
   );
 
   // 3. Use raw Cypher for complex aggregation stats
   // Example: Get notification stats by type and time period
-  const statsResult = await args.session.run(`
+  const statsResult = await _.session.run(`
     MATCH (n:Notification {userId: $userId})
     WITH n,
       datetime(n.createdAt) as createdDateTime,

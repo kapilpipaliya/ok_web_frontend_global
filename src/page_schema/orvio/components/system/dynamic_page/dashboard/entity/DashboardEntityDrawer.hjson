@@ -9,7 +9,7 @@
         fns:
           '''
 const getRuntime = () => {
-  const fromProps = args.contextData.props?.dashboardRuntime;
+  const fromProps = c.props?.dashboardRuntime;
   if (typeof fromProps === "function") return fromProps();
   return null;
 };
@@ -48,8 +48,8 @@ return { getRuntime, getDrawerState, closeDrawer, getFullPageHref };
           '''
 return {
   as: "div",
-  hide: args.fns.getDrawerState().open !== true,
-  onClick: () => args.fns.closeDrawer()
+  hide: f.getDrawerState().open !== true,
+  onClick: () => f.closeDrawer()
 };
 '''
         css:
@@ -75,7 +75,7 @@ return `._id {
           '''
 return {
   as: "aside",
-  hide: args.fns.getDrawerState().open !== true,
+  hide: f.getDrawerState().open !== true,
   onClick: (e) => e.stopPropagation()
 };
 '''
@@ -90,8 +90,8 @@ return `._id {
   width: min(520px, 100vw);
   display: flex;
   flex-direction: column;
-  background: ${args.theme.var.color.background};
-  border-left: 1px solid ${args.theme.var.color.border};
+  background: ${t.var.color.background};
+  border-left: 1px solid ${t.var.color.border};
   box-shadow: -8px 0 24px rgba(0, 0, 0, 0.12);
   animation: dashboardDrawerSlideIn 0.25s ease;
 }
@@ -111,7 +111,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const fullPageHref = args.fns.getFullPageHref?.();
+const fullPageHref = f.getFullPageHref?.();
 return {
   as: "a",
   hide: !fullPageHref,
@@ -120,7 +120,7 @@ return {
   onClick: (e) => {
     if (fullPageHref) {
       e?.preventDefault?.();
-      args.navigate(fullPageHref);
+      _.navigate(fullPageHref);
     }
   }
 };
@@ -133,7 +133,7 @@ return `._id {
   left: 0.75rem;
   z-index: 2;
   font-size: 0.75rem;
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   text-decoration: none;
   &:hover { text-decoration: underline; }
 }`;
@@ -152,7 +152,7 @@ return {
   as: "button",
   type: "button",
   text: "Close",
-  onClick: () => args.fns.closeDrawer()
+  onClick: () => f.closeDrawer()
 };
 '''
         css:
@@ -162,8 +162,8 @@ return `._id {
   top: 0.75rem;
   right: 0.75rem;
   z-index: 2;
-  border: 1px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background};
+  border: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background};
   border-radius: 0.375rem;
   padding: 0.25rem 0.5rem;
   font-size: 0.75rem;
@@ -182,9 +182,9 @@ return `._id {
         props:
           '''
 return {
-  dashboardRuntime: args.contextData.props?.dashboardRuntime,
+  dashboardRuntime: c.props?.dashboardRuntime,
   hideHeader: false,
-  onClose: () => args.fns.closeDrawer()
+  onClose: () => f.closeDrawer()
 };
 '''
       }

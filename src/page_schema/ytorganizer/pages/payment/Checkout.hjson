@@ -7,12 +7,12 @@
         signinRequired: true
         fns:
           '''
-const [orderData, setOrderData] = args.createSignal(null);
-const [isLoading, setIsLoading] = args.createSignal(false);
-const [errorMessage, setErrorMessage] = args.createSignal("");
-const [razorpayLoaded, setRazorpayLoaded] = args.createSignal(false);
-const [selectedPlan, setSelectedPlan] = args.createSignal(args.searchParams?.plan || "basic");
-const [billingCycle, setBillingCycle] = args.createSignal(args.searchParams?.cycle || "monthly");
+const [orderData, setOrderData] = _.createSignal(null);
+const [isLoading, setIsLoading] = _.createSignal(false);
+const [errorMessage, setErrorMessage] = _.createSignal("");
+const [razorpayLoaded, setRazorpayLoaded] = _.createSignal(false);
+const [selectedPlan, setSelectedPlan] = _.createSignal(_.searchParams?.plan || "basic");
+const [billingCycle, setBillingCycle] = _.createSignal(_.searchParams?.cycle || "monthly");
 
 // Load Razorpay script
 const loadRazorpayScript = () => {
@@ -63,7 +63,7 @@ const createOrder = async () => {
     setIsLoading(true);
     setErrorMessage("");
 
-    const result = await args.executeNamedServerFunction({
+    const result = await s({
       functionName: "createPaymentOrder",
       contextData: {
         plan: selectedPlan(),
@@ -79,7 +79,7 @@ const createOrder = async () => {
     return result.data;
   } catch (error) {
     setErrorMessage(error.message);
-    args.showErrorToast(error.message);
+    _.showErrorToast(error.message);
     return null;
   } finally {
     setIsLoading(false);
@@ -110,7 +110,7 @@ const initiatePayment = async () => {
           setIsLoading(true);
 
           // Verify payment
-          const verifyResult = await args.executeNamedServerFunction({
+          const verifyResult = await s({
             functionName: "verifyPaymentSignature",
             contextData: {
               orderId: response.razorpay_order_id,
@@ -120,23 +120,23 @@ const initiatePayment = async () => {
           });
 
           if (verifyResult.success) {
-            args.showSuccessToast("Payment successful! Your subscription is now active.");
+            _.showSuccessToast("Payment successful! Your subscription is now active.");
             setTimeout(() => {
-              args.navigate("/subscription");
+              _.navigate("/subscription");
             }, 1500);
           } else {
             throw new Error(verifyResult.message || "Payment verification failed");
           }
         } catch (error) {
-          args.showErrorToast(error.message);
+          _.showErrorToast(error.message);
           setErrorMessage(error.message);
         } finally {
           setIsLoading(false);
         }
       },
       prefill: {
-        name: args.user?.P?.username || "",
-        email: args.user?.P?.email || ""
+        name: _.user?.P?.username || "",
+        email: _.user?.P?.email || ""
       },
       theme: {
         color: "#3399cc"
@@ -144,7 +144,7 @@ const initiatePayment = async () => {
       modal: {
         ondismiss: function() {
           setIsLoading(false);
-          args.showWarningToast("Payment cancelled");
+          _.showWarningToast("Payment cancelled");
         }
       }
     };
@@ -154,7 +154,7 @@ const initiatePayment = async () => {
 
   } catch (error) {
     setErrorMessage(error.message);
-    args.showErrorToast(error.message);
+    _.showErrorToast(error.message);
   }
 };
 
@@ -190,7 +190,7 @@ return {
           '''
 return `._id {
   min-height: 100vh;
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
   padding: 2rem;
 }
 
@@ -261,7 +261,7 @@ return {
 return `._id {
   font-size: 2rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 0.5rem;
 }
 
@@ -290,7 +290,7 @@ return {
           '''
 return `._id {
   font-size: 1rem;
-  color: ${args.theme.var.color.text_dark_300};
+  color: ${t.var.color.text_dark_300};
 }`;
 '''
         displayOrder: 2
@@ -311,8 +311,8 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.background_dark_100};
-  border: 1px solid ${args.theme.var.color.border};
+  background: ${t.var.color.background_dark_100};
+  border: 1px solid ${t.var.color.border};
   border-radius: 1rem;
   padding: 2rem;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
@@ -344,7 +344,7 @@ return `._id {
   display: block;
   font-size: 0.875rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 0.5rem;
 }`;
 '''
@@ -368,10 +368,10 @@ return {
 return `._id {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.5rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   font-size: 1rem;
   margin-bottom: 1.5rem;
   cursor: pointer;
@@ -379,8 +379,8 @@ return `._id {
 
 ._id:focus {
   outline: none;
-  border-color: ${args.theme.var.color.primary};
-  box-shadow: 0 0 0 3px ${args.theme.var.color.primary_light_800};
+  border-color: ${t.var.color.primary};
+  box-shadow: 0 0 0 3px ${t.var.color.primary_light_800};
 }`;
 '''
         displayOrder: 2
@@ -389,8 +389,8 @@ return `._id {
           '''
 return {
   as: "select",
-  value: args.fns.selectedPlan(),
-  onChange: (e) => args.fns.setSelectedPlan(e.target.value)
+  value: f.selectedPlan(),
+  onChange: (e) => f.setSelectedPlan(e.target.value)
 };
 '''
       }
@@ -453,7 +453,7 @@ return `._id {
   display: block;
   font-size: 0.875rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 0.5rem;
 }`;
 '''
@@ -496,33 +496,33 @@ return {
       P: {
         css:
           '''
-const isSelected = args.fns.billingCycle() === "monthly";
+const isSelected = f.billingCycle() === "monthly";
 return `._id {
   flex: 1;
   padding: 0.75rem;
-  border: 2px solid ${isSelected ? args.theme.var.color.primary : args.theme.var.color.border};
+  border: 2px solid ${isSelected ? t.var.color.primary : t.var.color.border};
   border-radius: 0.5rem;
-  background: ${isSelected ? args.theme.var.color.primary_light_800 : args.theme.var.color.background};
-  color: ${isSelected ? args.theme.var.color.primary : args.theme.var.color.text};
+  background: ${isSelected ? t.var.color.primary_light_800 : t.var.color.background};
+  color: ${isSelected ? t.var.color.primary : t.var.color.text};
   font-weight: ${isSelected ? '600' : '400'};
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 ._id:hover {
-  border-color: ${args.theme.var.color.primary};
-  background: ${args.theme.var.color.primary_light_900};
+  border-color: ${t.var.color.primary};
+  background: ${t.var.color.primary_light_900};
 }`;
 '''
         displayOrder: 1
         componentName: Html
         props:
           '''
-const isSelected = args.fns.billingCycle() === "monthly";
+const isSelected = f.billingCycle() === "monthly";
 return {
   as: "button",
   text: "Monthly",
-  onClick: () => args.fns.setBillingCycle("monthly")
+  onClick: () => f.setBillingCycle("monthly")
 };
 '''
       }
@@ -533,33 +533,33 @@ return {
       P: {
         css:
           '''
-const isSelected = args.fns.billingCycle() === "annual";
+const isSelected = f.billingCycle() === "annual";
 return `._id {
   flex: 1;
   padding: 0.75rem;
-  border: 2px solid ${isSelected ? args.theme.var.color.primary : args.theme.var.color.border};
+  border: 2px solid ${isSelected ? t.var.color.primary : t.var.color.border};
   border-radius: 0.5rem;
-  background: ${isSelected ? args.theme.var.color.primary_light_800 : args.theme.var.color.background};
-  color: ${isSelected ? args.theme.var.color.primary : args.theme.var.color.text};
+  background: ${isSelected ? t.var.color.primary_light_800 : t.var.color.background};
+  color: ${isSelected ? t.var.color.primary : t.var.color.text};
   font-weight: ${isSelected ? '600' : '400'};
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 ._id:hover {
-  border-color: ${args.theme.var.color.primary};
-  background: ${args.theme.var.color.primary_light_900};
+  border-color: ${t.var.color.primary};
+  background: ${t.var.color.primary_light_900};
 }`;
 '''
         displayOrder: 2
         componentName: Html
         props:
           '''
-const isSelected = args.fns.billingCycle() === "annual";
+const isSelected = f.billingCycle() === "annual";
 return {
   as: "button",
   text: "Annual (Save 2 months)",
-  onClick: () => args.fns.setBillingCycle("annual")
+  onClick: () => f.setBillingCycle("annual")
 };
 '''
       }
@@ -571,7 +571,7 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.background_dark_200};
+  background: ${t.var.color.background_dark_200};
   border-radius: 0.5rem;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
@@ -596,7 +596,7 @@ return {
 return `._id {
   font-size: 1.125rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 1rem;
 }`;
 '''
@@ -621,7 +621,7 @@ return `._id {
   display: flex;
   justify-content: space-between;
   margin-bottom: 0.5rem;
-  color: ${args.theme.var.color.text_dark_300};
+  color: ${t.var.color.text_dark_300};
 }`;
 '''
         displayOrder: 2
@@ -657,7 +657,7 @@ return {
         componentName: Html
         props:
           '''
-const plan = args.fns.selectedPlan();
+const plan = f.selectedPlan();
 return {
   as: "span",
   text: plan.charAt(0).toUpperCase() + plan.slice(1)
@@ -675,7 +675,7 @@ return `._id {
   display: flex;
   justify-content: space-between;
   margin-bottom: 0.5rem;
-  color: ${args.theme.var.color.text_dark_300};
+  color: ${t.var.color.text_dark_300};
 }`;
 '''
         displayOrder: 3
@@ -713,7 +713,7 @@ return {
           '''
 return {
   as: "span",
-  text: args.fns.planQuotas[args.fns.selectedPlan()]
+  text: f.planQuotas[f.selectedPlan()]
 };
 '''
       }
@@ -728,7 +728,7 @@ return `._id {
   display: flex;
   justify-content: space-between;
   margin-bottom: 1rem;
-  color: ${args.theme.var.color.text_dark_300};
+  color: ${t.var.color.text_dark_300};
 }`;
 '''
         displayOrder: 4
@@ -764,7 +764,7 @@ return {
         componentName: Html
         props:
           '''
-const cycle = args.fns.billingCycle();
+const cycle = f.billingCycle();
 return {
   as: "span",
   text: cycle.charAt(0).toUpperCase() + cycle.slice(1)
@@ -780,7 +780,7 @@ return {
           '''
 return `._id {
   height: 1px;
-  background: ${args.theme.var.color.border};
+  background: ${t.var.color.border};
   margin: 1rem 0;
 }`;
 '''
@@ -805,7 +805,7 @@ return `._id {
   justify-content: space-between;
   font-size: 1.25rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 6
@@ -843,7 +843,7 @@ return {
           '''
 return {
   as: "span",
-  text: "$" + args.fns.calculatePrice().toFixed(2)
+  text: "$" + f.calculatePrice().toFixed(2)
 };
 '''
       }
@@ -855,12 +855,12 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.error_light_800};
-  border: 1px solid ${args.theme.var.color.error};
+  background: ${t.var.color.error_light_800};
+  border: 1px solid ${t.var.color.error};
   border-radius: 0.5rem;
   padding: 1rem;
   margin-bottom: 1.5rem;
-  color: ${args.theme.var.color.error};
+  color: ${t.var.color.error};
   font-size: 0.875rem;
 }`;
 '''
@@ -870,8 +870,8 @@ return `._id {
           '''
 return {
   as: "div",
-  text: args.fns.errorMessage(),
-  hide: () => !args.fns.errorMessage()
+  text: f.errorMessage(),
+  hide: () => !f.errorMessage()
 };
 '''
       }
@@ -885,8 +885,8 @@ return {
 return `._id {
   width: 100%;
   padding: 1rem;
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
   border: none;
   border-radius: 0.5rem;
   font-size: 1.125rem;
@@ -896,7 +896,7 @@ return `._id {
 }
 
 ._id:hover:not(:disabled) {
-  background: ${args.theme.var.color.primary_dark_200};
+  background: ${t.var.color.primary_dark_200};
   transform: translateY(-1px);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
 }
@@ -912,9 +912,9 @@ return `._id {
           '''
 return {
   as: "button",
-  text: args.fns.isLoading() ? "Processing..." : "Proceed to Payment",
-  disabled: args.fns.isLoading(),
-  onClick: args.fns.initiatePayment
+  text: f.isLoading() ? "Processing..." : "Proceed to Payment",
+  disabled: f.isLoading(),
+  onClick: f.initiatePayment
 };
 '''
       }
@@ -932,14 +932,14 @@ return `._id {
   padding: 0.75rem;
   background: transparent;
   border: none;
-  color: ${args.theme.var.color.text_dark_300};
+  color: ${t.var.color.text_dark_300};
   font-size: 0.875rem;
   cursor: pointer;
   transition: color 0.2s ease;
 }
 
 ._id:hover {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 8
@@ -949,7 +949,7 @@ return `._id {
 return {
   as: "button",
   text: "← Back to Pricing",
-  onClick: () => args.navigate("/")
+  onClick: () => _.navigate("/")
 };
 '''
       }

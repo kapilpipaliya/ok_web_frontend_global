@@ -8,12 +8,12 @@
         body:
           '''
 // Get current authenticated user from session
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 let user = null;
 let isPublicRead = false;
 
 if (actualUser) {
-  user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+  user = await _.getEffectiveUser(_.session, actualUser, c);
 }
 
 // Extract parameters
@@ -32,13 +32,13 @@ const {
   elementIds,
   onlyNotQueued,
   relationshipPropertyBindings
-} = args.contextData;
+} = c;
 
 const getGraphPayload = (nodes, rels) => ({
   vertexes: nodes || {},
   edges: rels || {},
-  deleted_vertexes: Array.isArray(args.context?.deletedVertexes) ? args.context.deletedVertexes : [],
-  deleted_edges: Array.isArray(args.context?.deletedEdges) ? args.context.deletedEdges : []
+  deleted_vertexes: Array.isArray(_.context?.deletedVertexes) ? _.context.deletedVertexes : [],
+  deleted_edges: Array.isArray(_.context?.deletedEdges) ? _.context.deletedEdges : []
 });
 
 // Optional: client passes bindings from table config (form fields with selectConfig.edgeOnly + relationshipType, plus config.relationshipPropertyBindings).
@@ -154,7 +154,7 @@ if (!tableVertexLabel || typeof tableVertexLabel !== "string") {
 
 let resolvedTableKey = tableKey && String(tableKey).trim() !== "" ? String(tableKey).trim() : null;
 if (!resolvedTableKey) {
-  const idsResult = await args.executeNamedServerFunction({
+  const idsResult = await s({
     functionName: "getTableIds",
     contextData: { tableVertexLabel }
   });
@@ -169,7 +169,7 @@ if (!resolvedTableKey) {
   };
 }
 
-const tableConfigResult = await args.executeNamedServerFunction({
+const tableConfigResult = await s({
   functionName: "loadTableConfigByKey",
   contextData: { tableKey: resolvedTableKey }
 });
@@ -229,10 +229,10 @@ if (onlyNotQueued === true && Array.isArray(elementIds) && elementIds.length > 0
   OPTIONAL MATCH (c)-[r]->(related)
   RETURN c, r, related
   `;
-  const queryResult = await args.session.run(query, { elementIds });
-  args.processResult(queryResult.records, args.context, ['c', 'related'], 'r');
-  const nodes = args.context.nodes || {};
-  const rels = args.context.relationships || {};
+  const queryResult = await _.session.run(query, { elementIds });
+  _.processResult(queryResult.records, _.context, ['c', 'related'], 'r');
+  const nodes = _.context.nodes || {};
+  const rels = _.context.relationships || {};
   const items = Object.values(nodes).filter(v => v.L && v.L.includes(tableVertexLabel));
   hydrateRelationshipSelectProps(items, rels, effectiveRelationshipPropertyBindings);
   return {
@@ -341,7 +341,7 @@ const queryModification = {
   forceEmptyResult: false
 };
 
-await args.executeHooks(effectiveHooks?.beforeFetchData, {
+await _.executeHooks(effectiveHooks?.beforeFetchData, {
   tableVertexLabel,
   search,
   filters,
@@ -468,14 +468,14 @@ if (!queryEnableUserScoping) {
   }
 }
 
-const queryResult = await args.session.run(query, combinedQueryParameters);
+const queryResult = await _.session.run(query, combinedQueryParameters);
 
 // Use processResult to populate graph structure (nodes + relationships)
-if (!args.context.nodes) args.context.nodes = {};
-if (!args.context.relationships) args.context.relationships = {};
-args.processResult(queryResult.records, args.context, ['c', 'related'], 'r');
-const nodes = args.context.nodes || {};
-const rels = args.context.relationships || {};
+if (!_.context.nodes) _.context.nodes = {};
+if (!_.context.relationships) _.context.relationships = {};
+_.processResult(queryResult.records, _.context, ['c', 'related'], 'r');
+const nodes = _.context.nodes || {};
+const rels = _.context.relationships || {};
 const items = Object.values(nodes).filter(v => v.L && v.L.includes(vertexLabel));
 hydrateRelationshipSelectProps(items, rels, effectiveRelationshipPropertyBindings);
 
@@ -488,7 +488,7 @@ const result = {
 };
 
 // Execute afterFetchData hooks
-await args.executeHooks(effectiveHooks?.afterFetchData, {
+await _.executeHooks(effectiveHooks?.afterFetchData, {
   tableVertexLabel,
   search,
   filters,

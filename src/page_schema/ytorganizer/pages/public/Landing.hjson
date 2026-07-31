@@ -58,8 +58,8 @@ return {
         css:
           '''
 return `._id {
-  background: linear-gradient(135deg, ${args.theme.var.color.primary} 0%, ${args.theme.var.color.primary_dark_300} 100%);
-  color: ${args.theme.var.color.primary_text};
+  background: linear-gradient(135deg, ${t.var.color.primary} 0%, ${t.var.color.primary_dark_300} 100%);
+  color: ${t.var.color.primary_text};
   padding: 6rem 2rem;
   text-align: center;
   position: relative;
@@ -139,7 +139,7 @@ return `._id {
   font-size: 3.5rem;
   font-weight: 800;
   margin: 0 0 1.5rem 0;
-  color: ${args.theme.var.color.primary_text};
+  color: ${t.var.color.primary_text};
   line-height: 1.1;
   letter-spacing: -0.02em;
 }
@@ -176,7 +176,7 @@ return {
           '''
 return `._id {
   font-size: 1.25rem;
-  color: ${args.theme.var.color.primary_text};
+  color: ${t.var.color.primary_text};
   margin: 0 0 2.5rem 0;
   max-width: 600px;
   margin-left: auto;
@@ -241,9 +241,9 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.primary};
-  border: 3px solid ${args.theme.var.color.background};
+  background: ${t.var.color.background};
+  color: ${t.var.color.primary};
+  border: 3px solid ${t.var.color.background};
   padding: 1rem 2.5rem;
   border-radius: 0.75rem;
   font-size: 1.125rem;
@@ -255,10 +255,10 @@ return `._id {
 }
 
 ._id:hover {
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
   transform: translateY(-3px) scale(1.02);
   box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25), 0 0 0 3px rgba(255, 255, 255, 0.15);
-  border-color: ${args.theme.var.color.background};
+  border-color: ${t.var.color.background};
 }
 
 ._id:active {
@@ -291,7 +291,7 @@ return {
         'currency': 'INR'
       });
     }
-    args.navigate('/auth/signup');
+    _.navigate('/auth/signup');
   }
 };
 '''
@@ -305,8 +305,8 @@ return {
           '''
 return `._id {
   background: transparent;
-  color: ${args.theme.var.color.primary_text};
-  border: 3px solid ${args.theme.var.color.background};
+  color: ${t.var.color.primary_text};
+  border: 3px solid ${t.var.color.background};
   padding: 1rem 2.5rem;
   border-radius: 0.75rem;
   font-size: 1.125rem;
@@ -363,7 +363,7 @@ return {
         title: "YSaar Signup Demo"
       }
     };
-    args.fns.openPlayer(demoVideo);
+    f.openPlayer(demoVideo);
   }
 };
 '''
@@ -405,7 +405,7 @@ return [
   }`,
   `._id {
     padding: 4rem 2rem;
-    background: ${args.theme.var.color.background_dark_50};
+    background: ${t.var.color.background_dark_50};
     animation: fadeInUp 0.8s ease-out;
   }
 
@@ -513,17 +513,17 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
   padding: 2rem;
   border-radius: 1rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   text-align: center;
   transition: all 0.2s ease;
   animation: fadeInUp 0.8s ease-out 0.2s both;
 }
 
 ._id:hover {
-  border-color: ${args.theme.var.color.primary};
+  border-color: ${t.var.color.primary};
   transform: translateY(-4px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
 }`;
@@ -545,7 +545,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   margin-bottom: 1rem;
 }`;
 '''
@@ -592,7 +592,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0;
   line-height: 1.6;
 }`;
@@ -615,17 +615,17 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
   padding: 2rem;
   border-radius: 1rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   text-align: center;
   transition: all 0.2s ease;
   animation: fadeInUp 0.8s ease-out 0.4s both;
 }
 
 ._id:hover {
-  border-color: ${args.theme.var.color.primary};
+  border-color: ${t.var.color.primary};
   transform: translateY(-4px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
 }`;
@@ -647,7 +647,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.success};
+  color: ${t.var.color.success};
   margin-bottom: 1rem;
 }`;
 '''
@@ -694,7 +694,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0;
   line-height: 1.6;
 }`;
@@ -717,17 +717,17 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
   padding: 2rem;
   border-radius: 1rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   text-align: center;
   transition: all 0.2s ease;
   animation: fadeInUp 0.8s ease-out 0.6s both;
 }
 
 ._id:hover {
-  border-color: ${args.theme.var.color.primary};
+  border-color: ${t.var.color.primary};
   transform: translateY(-4px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
 }`;
@@ -749,7 +749,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.error};
+  color: ${t.var.color.error};
   margin-bottom: 1rem;
 }`;
 '''
@@ -796,7 +796,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0;
   line-height: 1.6;
 }`;
@@ -880,7 +880,7 @@ return {
           '''
 return `._id {
   text-align: center;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0 0 3rem 0;
   font-size: 1.125rem;
 }`;
@@ -1032,13 +1032,13 @@ return {
       P: {
         css:
           '''
-const tier = args.contextData.tier;
+const tier = c.tier;
 const isPopular = tier?.popular;
 
 return `._id {
   width: 100%;
-  background: ${args.theme.var.color.background};
-  border: ${isPopular ? `2px solid ${args.theme.var.color.primary}` : `1px solid ${args.theme.var.color.border}`};
+  background: ${t.var.color.background};
+  border: ${isPopular ? `2px solid ${t.var.color.primary}` : `1px solid ${t.var.color.border}`};
   border-radius: 1rem;
   padding: ${isPopular ? '2.5rem 1.75rem' : '2rem 1.5rem'};
   display: flex;
@@ -1048,14 +1048,14 @@ return `._id {
   box-sizing: border-box;
   position: relative;
   transform: ${isPopular ? 'scale(1.05)' : 'scale(1)'};
-  box-shadow: ${isPopular ? `0 12px 32px rgba(0, 0, 0, 0.15), 0 0 0 1px ${args.theme.var.color.primary}` : '0 2px 8px rgba(0, 0, 0, 0.05)'};
+  box-shadow: ${isPopular ? `0 12px 32px rgba(0, 0, 0, 0.15), 0 0 0 1px ${t.var.color.primary}` : '0 2px 8px rgba(0, 0, 0, 0.05)'};
   z-index: ${isPopular ? '10' : '1'};
 }
 
 ._id:hover {
   transform: ${isPopular ? 'scale(1.05) translateY(-8px)' : 'translateY(-8px)'};
   box-shadow: 0 20px 48px rgba(0, 0, 0, 0.2);
-  border-color: ${args.theme.var.color.primary};
+  border-color: ${t.var.color.primary};
 }
 
 @media (max-width: 1200px) {
@@ -1079,7 +1079,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const tier = args.contextData.tier;
+const tier = c.tier;
 const isPopular = tier?.popular;
 
 return {
@@ -1098,8 +1098,8 @@ return `._id {
   position: absolute;
   top: -12px;
   right: 1.5rem;
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
   padding: 0.375rem 0.875rem;
   border-radius: 9999px;
   font-size: 0.75rem;
@@ -1112,7 +1112,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const tier = args.contextData.tier;
+const tier = c.tier;
 return {
   as: "div",
   text: "Most Popular",
@@ -1131,7 +1131,7 @@ return `._id {
   font-size: 1.5rem;
   font-weight: 700;
   margin: 0;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }
 
 @media (max-width: 768px) {
@@ -1144,7 +1144,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const tier = args.contextData.tier;
+const tier = c.tier;
 return {
   as: "h4",
   text: tier?.name || ""
@@ -1190,7 +1190,7 @@ return {
 return `._id {
   font-size: 2.5rem;
   font-weight: 800;
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   line-height: 1;
 }`;
 '''
@@ -1198,7 +1198,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const tier = args.contextData.tier;
+const tier = c.tier;
 return {
   as: "span",
   text: tier?.priceAmount || ""
@@ -1215,7 +1215,7 @@ return {
 return `._id {
   font-size: 1rem;
   font-weight: 500;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   line-height: 1;
 }`;
 '''
@@ -1223,7 +1223,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const tier = args.contextData.tier;
+const tier = c.tier;
 return {
   as: "span",
   text: tier?.pricePeriod || ""
@@ -1238,21 +1238,21 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.primary_light_100};
-  color: ${args.theme.var.color.primary_light_100_text};
+  background: ${t.var.color.primary_light_100};
+  color: ${t.var.color.primary_light_100_text};
   padding: 0.5rem 1rem;
   border-radius: 0.5rem;
   font-size: 0.875rem;
   font-weight: 600;
   text-align: center;
-  border: 1px solid ${args.theme.var.color.primary_light_200};
+  border: 1px solid ${t.var.color.primary_light_200};
 }`;
 '''
         displayOrder: 4
         componentName: Html
         props:
           '''
-const tier = args.contextData.tier;
+const tier = c.tier;
 return {
   as: "div",
   text: tier?.channels || ""
@@ -1268,7 +1268,7 @@ return {
           '''
 return `._id {
   height: 1px;
-  background: ${args.theme.var.color.border};
+  background: ${t.var.color.border};
   margin: 0.5rem 0;
 }`;
 '''
@@ -1306,7 +1306,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const tier = args.contextData.tier;
+const tier = c.tier;
 return {
   as: "div",
   data: tier?.features || []
@@ -1344,7 +1344,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   flex-shrink: 0;
   margin-top: 0.125rem;
 }`;
@@ -1370,7 +1370,7 @@ return {
           '''
 return `._id {
   font-size: 0.9375rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   line-height: 1.5;
 }`;
 '''
@@ -1378,7 +1378,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const feature = args.contextData.feature;
+const feature = c.feature;
 return {
   as: "span",
   text: feature || ""
@@ -1414,8 +1414,8 @@ return {
           '''
 return `._id {
   width: 100%;
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
   border: none;
   padding: 0.875rem 1.5rem;
   border-radius: 0.5rem;
@@ -1428,7 +1428,7 @@ return `._id {
 }
 
 ._id:hover {
-  background: ${args.theme.var.color.primary_dark_200};
+  background: ${t.var.color.primary_dark_200};
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
@@ -1442,7 +1442,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const tier = args.contextData.tier;
+const tier = c.tier;
 const planName = tier?.name?.toLowerCase() || "basic";
 
 return {
@@ -1460,13 +1460,13 @@ return {
 
     if (planName === "free") {
       // Free plan - just sign up
-      args.navigate('/auth/signup');
-    } else if (args.user) {
+      _.navigate('/auth/signup');
+    } else if (_.user) {
       // User is logged in - go to checkout
-      args.navigate(`/checkout?plan=${planName}&cycle=monthly`);
+      _.navigate(`/checkout?plan=${planName}&cycle=monthly`);
     } else {
       // User not logged in - go to signup with redirect
-      args.navigate(`/auth/signup?redirect=/checkout?plan=${planName}&cycle=monthly`);
+      _.navigate(`/auth/signup?redirect=/checkout?plan=${planName}&cycle=monthly`);
     }
   }
 };
@@ -1482,8 +1482,8 @@ return {
           '''
 return `._id {
   padding: 4rem 2rem;
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
   text-align: center;
   animation: fadeInUp 0.8s ease-out 0.4s both;
 }
@@ -1500,7 +1500,7 @@ return `._id {
           '''
 try {
   // Execute the getUserCount function
-  const result = await args.executeNamedServerFunction({
+  const result = await s({
     functionName: "getUserCount",
     contextData: {}
   });
@@ -1649,7 +1649,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const userCount = args.contextData.userStats?.totalUsers || 0;
+const userCount = c.userStats?.totalUsers || 0;
 return {
   as: "div",
   text: `${userCount.toLocaleString()}+`
@@ -1831,7 +1831,7 @@ return {
           '''
 return `._id {
   padding: 5rem 2rem;
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
   text-align: center;
   animation: fadeInUp 0.8s ease-out 0.45s both;
 }
@@ -1881,15 +1881,15 @@ return {
           '''
 return `._id {
   display: inline-block;
-  background: ${args.theme.var.color.primary_light_100};
-  color: ${args.theme.var.color.primary_light_100_text};
+  background: ${t.var.color.primary_light_100};
+  color: ${t.var.color.primary_light_100_text};
   padding: 0.5rem 1.5rem;
   border-radius: 9999px;
   font-size: 0.875rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   margin-bottom: 1.5rem;
-  border: 2px solid ${args.theme.var.color.primary};
+  border: 2px solid ${t.var.color.primary};
 }`;
 '''
         displayOrder: 1
@@ -1913,7 +1913,7 @@ return `._id {
   font-size: 2.5rem;
   font-weight: 700;
   margin: 0 0 1rem 0;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }
 
 @media (max-width: 768px) {
@@ -1941,7 +1941,7 @@ return {
           '''
 return `._id {
   font-size: 1.25rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0 0 3rem 0;
   max-width: 700px;
   margin-left: auto;
@@ -2012,9 +2012,9 @@ return `._id {
   align-items: center;
   gap: 0.75rem;
   padding: 1.5rem;
-  background: ${args.theme.var.color.background_dark_50};
+  background: ${t.var.color.background_dark_50};
   border-radius: 0.75rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
 }`;
 '''
         displayOrder: 1
@@ -2034,7 +2034,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
 }`;
 '''
         displayOrder: 1
@@ -2059,7 +2059,7 @@ return {
 return `._id {
   font-size: 1rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   text-align: center;
 }`;
 '''
@@ -2082,7 +2082,7 @@ return {
           '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   text-align: center;
   line-height: 1.5;
 }`;
@@ -2110,9 +2110,9 @@ return `._id {
   align-items: center;
   gap: 0.75rem;
   padding: 1.5rem;
-  background: ${args.theme.var.color.background_dark_50};
+  background: ${t.var.color.background_dark_50};
   border-radius: 0.75rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
 }`;
 '''
         displayOrder: 2
@@ -2132,7 +2132,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.success};
+  color: ${t.var.color.success};
 }`;
 '''
         displayOrder: 1
@@ -2157,7 +2157,7 @@ return {
 return `._id {
   font-size: 1rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   text-align: center;
 }`;
 '''
@@ -2180,7 +2180,7 @@ return {
           '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   text-align: center;
   line-height: 1.5;
 }`;
@@ -2208,9 +2208,9 @@ return `._id {
   align-items: center;
   gap: 0.75rem;
   padding: 1.5rem;
-  background: ${args.theme.var.color.background_dark_50};
+  background: ${t.var.color.background_dark_50};
   border-radius: 0.75rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
 }`;
 '''
         displayOrder: 3
@@ -2230,7 +2230,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.info};
+  color: ${t.var.color.info};
 }`;
 '''
         displayOrder: 1
@@ -2255,7 +2255,7 @@ return {
 return `._id {
   font-size: 1rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   text-align: center;
 }`;
 '''
@@ -2278,7 +2278,7 @@ return {
           '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   text-align: center;
   line-height: 1.5;
 }`;
@@ -2328,8 +2328,8 @@ return `._id {
   align-items: center;
   gap: 0.75rem;
   padding: 1rem 2.5rem;
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
   border: none;
   border-radius: 0.75rem;
   font-size: 1.125rem;
@@ -2341,7 +2341,7 @@ return `._id {
 }
 
 ._id:hover {
-  background: ${args.theme.var.color.primary_dark_200};
+  background: ${t.var.color.primary_dark_200};
   transform: translateY(-3px);
   box-shadow: 0 12px 36px rgba(0, 0, 0, 0.2);
 }
@@ -2410,7 +2410,7 @@ return {
           '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0;
 }`;
 '''
@@ -2433,7 +2433,7 @@ return {
           '''
 return `._id {
   padding: 5rem 2rem;
-  background: ${args.theme.var.color.background_dark_50};
+  background: ${t.var.color.background_dark_50};
   text-align: center;
   animation: fadeInUp 0.8s ease-out 0.5s both;
 }
@@ -2483,15 +2483,15 @@ return {
           '''
 return `._id {
   display: inline-block;
-  background: ${args.theme.var.color.success_light_100};
-  color: ${args.theme.var.color.success_light_100_text};
+  background: ${t.var.color.success_light_100};
+  color: ${t.var.color.success_light_100_text};
   padding: 0.5rem 1.5rem;
   border-radius: 9999px;
   font-size: 0.875rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   margin-bottom: 1.5rem;
-  border: 2px solid ${args.theme.var.color.success};
+  border: 2px solid ${t.var.color.success};
 }`;
 '''
         displayOrder: 1
@@ -2515,7 +2515,7 @@ return `._id {
   font-size: 2.5rem;
   font-weight: 700;
   margin: 0 0 1rem 0;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }
 
 @media (max-width: 768px) {
@@ -2543,7 +2543,7 @@ return {
           '''
 return `._id {
   font-size: 1.25rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0 0 3rem 0;
   max-width: 700px;
   margin-left: auto;
@@ -2611,8 +2611,8 @@ return `._id {
   align-items: center;
   gap: 1rem;
   padding: 2rem;
-  background: ${args.theme.var.color.background};
-  border: 2px solid ${args.theme.var.color.success};
+  background: ${t.var.color.background};
+  border: 2px solid ${t.var.color.success};
   border-radius: 1rem;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -2622,7 +2622,7 @@ return `._id {
 ._id:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-  border-color: ${args.theme.var.color.success_dark_200};
+  border-color: ${t.var.color.success_dark_200};
 }
 
 ._id:active {
@@ -2649,7 +2649,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.success};
+  color: ${t.var.color.success};
 }`;
 '''
         displayOrder: 1
@@ -2674,7 +2674,7 @@ return {
 return `._id {
   font-size: 1.125rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 2
@@ -2700,8 +2700,8 @@ return `._id {
   align-items: center;
   gap: 1rem;
   padding: 2rem;
-  background: ${args.theme.var.color.background_dark_100};
-  border: 2px dashed ${args.theme.var.color.border};
+  background: ${t.var.color.background_dark_100};
+  border: 2px dashed ${t.var.color.border};
   border-radius: 1rem;
   opacity: 0.6;
 }`;
@@ -2723,7 +2723,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   filter: grayscale(100%);
 }`;
 '''
@@ -2749,7 +2749,7 @@ return {
 return `._id {
   font-size: 1.125rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
         displayOrder: 2
@@ -2771,7 +2771,7 @@ return {
           '''
 return `._id {
   font-size: 1rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0;
 }`;
 '''

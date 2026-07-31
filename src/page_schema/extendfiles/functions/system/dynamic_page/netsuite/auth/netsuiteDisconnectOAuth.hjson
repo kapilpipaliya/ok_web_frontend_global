@@ -8,7 +8,7 @@
         description: Remove persisted NetSuite OAuth connection for current shop
         body:
           '''
-await args.session.run(
+await _.session.run(
   `MATCH (n:OAuthConnection {integrationKey: "netsuite"})
    DELETE n`
 );

@@ -89,7 +89,7 @@
   gap: 0.25rem;
   text-decoration: none;
   transition: opacity 0.2s ease;
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
 
   &:hover {
     opacity: 0.7;
@@ -140,7 +140,7 @@
       P: {
         css:
           '''return `._id {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
 
   @media (max-width: 480px) {
     display: none;

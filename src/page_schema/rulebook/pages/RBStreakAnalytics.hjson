@@ -35,7 +35,7 @@ return {
         contextName: "analyticsData"
         serverFunction: '''
 // Get current authenticated user from session
-const user = await args.getUserFromSession();
+const user = await _.getUserFromSession();
 if (!user) {
   throw new Error("User session not found. Please log in and try again.");
 }
@@ -67,7 +67,7 @@ const overallStreakQuery = `
     AVG(rs.totalCompletions) as avgCompletions
 `;
 
-const overallResult = await args.session.run(overallStreakQuery, queryParams);
+const overallResult = await _.session.run(overallStreakQuery, queryParams);
 const overallStats = overallResult.records[0];
 
 // STEP 2: Get top current streaks
@@ -80,7 +80,7 @@ const topCurrentStreaksQuery = `
   LIMIT 5
 `;
 
-const topCurrentResult = await args.session.run(topCurrentStreaksQuery, queryParams);
+const topCurrentResult = await _.session.run(topCurrentStreaksQuery, queryParams);
 
 // STEP 3: Get category-wise streak performance
 const categoryStreakQuery = `
@@ -100,11 +100,11 @@ const categoryStreakQuery = `
   ORDER BY avgCurrentStreak DESC
 `;
 
-const categoryStreakResult = await args.session.run(categoryStreakQuery, queryParams);
+const categoryStreakResult = await _.session.run(categoryStreakQuery, queryParams);
 
 // Process results
-const totalRules = args.neo4jConvert.js(overallStats.get('totalRules')) || 0;
-const activeStreaks = args.neo4jConvert.js(overallStats.get('activeStreaks')) || 0;
+const totalRules = _.neo4jConvert.js(overallStats.get('totalRules')) || 0;
+const activeStreaks = _.neo4jConvert.js(overallStats.get('activeStreaks')) || 0;
 const streakEngagementRate = totalRules > 0 ? (activeStreaks / totalRules) * 100 : 0;
 
 // Process top current streaks using vertex format
@@ -113,9 +113,9 @@ const topCurrentStreaks = topCurrentResult.records.map(record => {
   const categoryNode = record.get('rc');
   const streakNode = record.get('rs');
 
-  const rule = args.convertNodeToJson(ruleNode);
-  const category = categoryNode ? args.convertNodeToJson(categoryNode) : null;
-  const streak = args.convertNodeToJson(streakNode);
+  const rule = _.convertNodeToJson(ruleNode);
+  const category = categoryNode ? _.convertNodeToJson(categoryNode) : null;
+  const streak = _.convertNodeToJson(streakNode);
 
   return {
     rule,     // Full vertex format
@@ -127,15 +127,15 @@ const topCurrentStreaks = topCurrentResult.records.map(record => {
 // Process category streaks using vertex format
 const categoryAnalysis = categoryStreakResult.records.map(record => {
   const categoryNode = record.get('rc');
-  const category = args.convertNodeToJson(categoryNode);
+  const category = _.convertNodeToJson(categoryNode);
 
-  const totalRules = args.neo4jConvert.js(record.get('totalRules')) || 0;
-  const activeStreaks = args.neo4jConvert.js(record.get('activeStreaks')) || 0;
+  const totalRules = _.neo4jConvert.js(record.get('totalRules')) || 0;
+  const activeStreaks = _.neo4jConvert.js(record.get('activeStreaks')) || 0;
   const avgCurrentStreak = Math.round(record.get('avgCurrentStreak') || 0);
   const avgLongestStreak = Math.round(record.get('avgLongestStreak') || 0);
-  const maxCurrentStreak = args.neo4jConvert.js(record.get('maxCurrentStreak')) || 0;
-  const maxLongestStreak = args.neo4jConvert.js(record.get('maxLongestStreak')) || 0;
-  const totalCompletions = args.neo4jConvert.js(record.get('totalCompletions')) || 0;
+  const maxCurrentStreak = _.neo4jConvert.js(record.get('maxCurrentStreak')) || 0;
+  const maxLongestStreak = _.neo4jConvert.js(record.get('maxLongestStreak')) || 0;
+  const totalCompletions = _.neo4jConvert.js(record.get('totalCompletions')) || 0;
   const engagementRate = totalRules > 0 ?
     Math.round((activeStreaks / totalRules) * 100) : 0;
 
@@ -161,7 +161,7 @@ if (activeStreaks > 0) {
   insights.push(`🔥 You have ${activeStreaks} active streak${activeStreaks > 1 ? 's' : ''} running!`);
 }
 
-const maxCurrent = args.neo4jConvert.js(overallStats.get('maxCurrentStreak')) || 0;
+const maxCurrent = _.neo4jConvert.js(overallStats.get('maxCurrentStreak')) || 0;
 if (maxCurrent >= 30) {
   insights.push(`🏆 Amazing! Your longest current streak is ${maxCurrent} days.`);
 } else if (maxCurrent >= 7) {
@@ -197,9 +197,9 @@ return {
     streakEngagementRate: Math.round(streakEngagementRate),
     avgCurrentStreak: Math.round(overallStats.get('avgCurrentStreak') || 0),
     avgLongestStreak: Math.round(overallStats.get('avgLongestStreak') || 0),
-    maxCurrentStreak: args.neo4jConvert.js(overallStats.get('maxCurrentStreak')) || 0,
-    maxLongestStreak: args.neo4jConvert.js(overallStats.get('maxLongestStreak')) || 0,
-    totalCompletions: args.neo4jConvert.js(overallStats.get('totalCompletions')) || 0
+    maxCurrentStreak: _.neo4jConvert.js(overallStats.get('maxCurrentStreak')) || 0,
+    maxLongestStreak: _.neo4jConvert.js(overallStats.get('maxLongestStreak')) || 0,
+    totalCompletions: _.neo4jConvert.js(overallStats.get('totalCompletions')) || 0
   },
   topCurrentStreaks,
   topLongestStreaks: topCurrentStreaks, // Same as current for now
@@ -226,11 +226,11 @@ return {
         css: '''
 return `._id {
   min-height: 100vh;
-  background: ${args.theme.var.color.background};
-  padding: ${args.theme.var.spacing.md};
+  background: ${t.var.color.background};
+  padding: ${t.var.spacing.md};
   
   @media (max-width: 768px) {
-    padding: ${args.theme.var.spacing.sm};
+    padding: ${t.var.spacing.sm};
   }
 }`;
         '''
@@ -244,7 +244,7 @@ return `._id {
         componentName: "RBHeader"
         css: '''
 return `._id {
-  margin-bottom: ${args.theme.var.spacing.xl};
+  margin-bottom: ${t.var.spacing.xl};
 }`;
         '''
       }
@@ -279,7 +279,7 @@ return {
         css: '''
 return `._id {
   font-size: 1.125rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0;
   
   @media (max-width: 768px) {
@@ -296,14 +296,14 @@ return `._id {
         displayOrder: 2
         componentName: "Html"
         props: '''
-const data = args.contextData.analyticsData;
+const data = c.analyticsData;
 return {
   as: "div"
 };
         '''
         css: '''
 return `._id {
-  margin-bottom: ${args.theme.var.spacing.xl};
+  margin-bottom: ${t.var.spacing.xl};
 }`;
         '''
       }
@@ -324,8 +324,8 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 ${args.theme.var.spacing.md} 0;
+  color: ${t.var.color.text};
+  margin: 0 0 ${t.var.spacing.md} 0;
 }`;
         '''
       }
@@ -345,12 +345,12 @@ return {
 return `._id {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: ${args.theme.var.spacing.md};
-  margin-bottom: ${args.theme.var.spacing.lg};
+  gap: ${t.var.spacing.md};
+  margin-bottom: ${t.var.spacing.lg};
   
   @media (max-width: 768px) {
     grid-template-columns: repeat(2, 1fr);
-    gap: ${args.theme.var.spacing.sm};
+    gap: ${t.var.spacing.sm};
   }
 }`;
         '''
@@ -363,17 +363,17 @@ return `._id {
         displayOrder: 1
         componentName: "Html"
         props: '''
-const data = args.contextData.analyticsData;
+const data = c.analyticsData;
 return {
   as: "div"
 };
         '''
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background_light_100};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.lg};
-  padding: ${args.theme.var.spacing.md};
+  background: ${t.var.color.background_light_100};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.lg};
+  padding: ${t.var.spacing.md};
   text-align: center;
   transition: transform 300ms ease;
   
@@ -383,7 +383,7 @@ return `._id {
   }
   
   @media (max-width: 768px) {
-    padding: ${args.theme.var.spacing.sm};
+    padding: ${t.var.spacing.sm};
   }
 }`;
         '''
@@ -396,7 +396,7 @@ return `._id {
         displayOrder: 1
         componentName: "Html"
         props: '''
-const data = args.contextData.analyticsData;
+const data = c.analyticsData;
 return {
   as: "div",
   text: data.summary.totalRules.toString()
@@ -406,8 +406,8 @@ return {
 return `._id {
   font-size: 1.875rem;
   font-weight: 700;
-  color: ${args.theme.var.color.primary};
-  margin-bottom: ${args.theme.var.spacing.xs};
+  color: ${t.var.color.primary};
+  margin-bottom: ${t.var.spacing.xs};
 }`;
         '''
       }
@@ -427,7 +427,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   font-weight: 500;
 }`;
         '''
@@ -446,10 +446,10 @@ return {
         '''
         css: '''
 return `._id {
-  background: ${args.theme.var.color.success_light_100};
-  border: 1px solid ${args.theme.var.color.success_light_400};
-  border-radius: ${args.theme.var.borderRadius.lg};
-  padding: ${args.theme.var.spacing.md};
+  background: ${t.var.color.success_light_100};
+  border: 1px solid ${t.var.color.success_light_400};
+  border-radius: ${t.var.borderRadius.lg};
+  padding: ${t.var.spacing.md};
   text-align: center;
   transition: transform 300ms ease;
   
@@ -459,7 +459,7 @@ return `._id {
   }
   
   @media (max-width: 768px) {
-    padding: ${args.theme.var.spacing.sm};
+    padding: ${t.var.spacing.sm};
   }
 }`;
         '''
@@ -472,7 +472,7 @@ return `._id {
         displayOrder: 1
         componentName: "Html"
         props: '''
-const data = args.contextData.analyticsData;
+const data = c.analyticsData;
 return {
   as: "div",
   text: data.summary.activeStreaks.toString()
@@ -482,8 +482,8 @@ return {
 return `._id {
   font-size: 1.875rem;
   font-weight: 700;
-  color: ${args.theme.var.color.success};
-  margin-bottom: ${args.theme.var.spacing.xs};
+  color: ${t.var.color.success};
+  margin-bottom: ${t.var.spacing.xs};
 }`;
         '''
       }
@@ -503,7 +503,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   font-weight: 500;
 }`;
         '''
@@ -522,10 +522,10 @@ return {
         '''
         css: '''
 return `._id {
-  background: ${args.theme.var.color.streak_light_100};
-  border: 1px solid ${args.theme.var.color.streak_light_400};
-  border-radius: ${args.theme.var.borderRadius.lg};
-  padding: ${args.theme.var.spacing.md};
+  background: ${t.var.color.streak_light_100};
+  border: 1px solid ${t.var.color.streak_light_400};
+  border-radius: ${t.var.borderRadius.lg};
+  padding: ${t.var.spacing.md};
   text-align: center;
   transition: transform 300ms ease;
   
@@ -535,7 +535,7 @@ return `._id {
   }
   
   @media (max-width: 768px) {
-    padding: ${args.theme.var.spacing.sm};
+    padding: ${t.var.spacing.sm};
   }
 }`;
         '''
@@ -548,7 +548,7 @@ return `._id {
         displayOrder: 1
         componentName: "Html"
         props: '''
-const data = args.contextData.analyticsData;
+const data = c.analyticsData;
 return {
   as: "div",
   text: data.summary.maxCurrentStreak.toString()
@@ -558,8 +558,8 @@ return {
 return `._id {
   font-size: 1.875rem;
   font-weight: 700;
-  color: ${args.theme.var.color.streak};
-  margin-bottom: ${args.theme.var.spacing.xs};
+  color: ${t.var.color.streak};
+  margin-bottom: ${t.var.spacing.xs};
 }`;
         '''
       }
@@ -579,7 +579,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   font-weight: 500;
 }`;
         '''
@@ -598,10 +598,10 @@ return {
         '''
         css: '''
 return `._id {
-  background: ${args.theme.var.color.info_light_100};
-  border: 1px solid ${args.theme.var.color.info_light_400};
-  border-radius: ${args.theme.var.borderRadius.lg};
-  padding: ${args.theme.var.spacing.md};
+  background: ${t.var.color.info_light_100};
+  border: 1px solid ${t.var.color.info_light_400};
+  border-radius: ${t.var.borderRadius.lg};
+  padding: ${t.var.spacing.md};
   text-align: center;
   transition: transform 300ms ease;
   
@@ -611,7 +611,7 @@ return `._id {
   }
   
   @media (max-width: 768px) {
-    padding: ${args.theme.var.spacing.sm};
+    padding: ${t.var.spacing.sm};
   }
 }`;
         '''
@@ -624,7 +624,7 @@ return `._id {
         displayOrder: 1
         componentName: "Html"
         props: '''
-const data = args.contextData.analyticsData;
+const data = c.analyticsData;
 return {
   as: "div",
   text: data.summary.streakEngagementRate + "%"
@@ -634,8 +634,8 @@ return {
 return `._id {
   font-size: 1.875rem;
   font-weight: 700;
-  color: ${args.theme.var.color.info};
-  margin-bottom: ${args.theme.var.spacing.xs};
+  color: ${t.var.color.info};
+  margin-bottom: ${t.var.spacing.xs};
 }`;
         '''
       }
@@ -655,7 +655,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   font-weight: 500;
 }`;
         '''
@@ -668,7 +668,7 @@ return `._id {
         displayOrder: 3
         componentName: "Html"
         props: '''
-const data = args.contextData.analyticsData;
+const data = c.analyticsData;
 return {
   as: "div",
   show: () => data.insights && data.insights.length > 0
@@ -676,7 +676,7 @@ return {
         '''
         css: '''
 return `._id {
-  margin-bottom: ${args.theme.var.spacing.xl};
+  margin-bottom: ${t.var.spacing.xl};
 }`;
         '''
       }
@@ -697,8 +697,8 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 ${args.theme.var.spacing.md} 0;
+  color: ${t.var.color.text};
+  margin: 0 0 ${t.var.spacing.md} 0;
 }`;
         '''
       }
@@ -712,7 +712,7 @@ return `._id {
         contextName: "insight"
         loop: true
         props: '''
-const data = args.contextData.analyticsData;
+const data = c.analyticsData;
 return {
   as: "div",
   data: data.insights || []
@@ -722,7 +722,7 @@ return {
 return `._id {
   display: flex;
   flex-direction: column;
-  gap: ${args.theme.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
 }`;
         '''
       }
@@ -734,7 +734,7 @@ return `._id {
         displayOrder: 1
         componentName: "Html"
         props: '''
-const insight = args.contextData.insight;
+const insight = c.insight;
 return {
   as: "div",
   text: insight
@@ -742,16 +742,16 @@ return {
         '''
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background_light_100};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.md};
-  padding: ${args.theme.var.spacing.md};
+  background: ${t.var.color.background_light_100};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.md};
+  padding: ${t.var.spacing.md};
   font-size: 1rem;
-  color: ${args.theme.var.color.text};
-  border-left: 4px solid ${args.theme.var.color.primary};
+  color: ${t.var.color.text};
+  border-left: 4px solid ${t.var.color.primary};
   
   @media (max-width: 768px) {
-    padding: ${args.theme.var.spacing.sm};
+    padding: ${t.var.spacing.sm};
     font-size: 0.875rem;
   }
 }`;
@@ -765,7 +765,7 @@ return `._id {
         displayOrder: 4
         componentName: "Html"
         props: '''
-const data = args.contextData.analyticsData;
+const data = c.analyticsData;
 return {
   as: "div",
   show: () => data.topCurrentStreaks && data.topCurrentStreaks.length > 0
@@ -773,7 +773,7 @@ return {
         '''
         css: '''
 return `._id {
-  margin-bottom: ${args.theme.var.spacing.xl};
+  margin-bottom: ${t.var.spacing.xl};
 }`;
         '''
       }
@@ -794,8 +794,8 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 ${args.theme.var.spacing.md} 0;
+  color: ${t.var.color.text};
+  margin: 0 0 ${t.var.spacing.md} 0;
 }`;
         '''
       }
@@ -809,7 +809,7 @@ return `._id {
         contextName: "streakItem"
         loop: true
         props: '''
-const data = args.contextData.analyticsData;
+const data = c.analyticsData;
 return {
   as: "div",
   data: data.topCurrentStreaks || []
@@ -819,11 +819,11 @@ return {
 return `._id {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: ${args.theme.var.spacing.md};
+  gap: ${t.var.spacing.md};
   
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
-    gap: ${args.theme.var.spacing.sm};
+    gap: ${t.var.spacing.sm};
   }
 }`;
         '''
@@ -836,17 +836,17 @@ return `._id {
         displayOrder: 1
         componentName: "Html"
         props: '''
-const streakItem = args.contextData.streakItem;
+const streakItem = c.streakItem;
 return {
   as: "div"
 };
         '''
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background_light_100};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.lg};
-  padding: ${args.theme.var.spacing.md};
+  background: ${t.var.color.background_light_100};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.lg};
+  padding: ${t.var.spacing.md};
   transition: transform 300ms ease;
   
   &:hover {
@@ -855,7 +855,7 @@ return `._id {
   }
   
   @media (max-width: 768px) {
-    padding: ${args.theme.var.spacing.sm};
+    padding: ${t.var.spacing.sm};
   }
 }`;
         '''
@@ -877,8 +877,8 @@ return `._id {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: ${args.theme.var.spacing.sm};
-  gap: ${args.theme.var.spacing.sm};
+  margin-bottom: ${t.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
 }`;
         '''
       }
@@ -890,7 +890,7 @@ return `._id {
         displayOrder: 1
         componentName: "Html"
         props: '''
-const streakItem = args.contextData.streakItem;
+const streakItem = c.streakItem;
 return {
   as: "h3",
   text: streakItem.rule.P.title
@@ -900,7 +900,7 @@ return {
 return `._id {
   font-size: 1.125rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0;
   flex: 1;
   line-height: 1.4;
@@ -919,7 +919,7 @@ return `._id {
         displayOrder: 2
         componentName: "Html"
         props: '''
-const streakItem = args.contextData.streakItem;
+const streakItem = c.streakItem;
 return {
   as: "div",
   text: streakItem.streak.P.currentStreak + " days"
@@ -927,10 +927,10 @@ return {
         '''
         css: '''
 return `._id {
-  background: ${args.theme.var.color.streak};
-  color: ${args.theme.var.color.streak_text};
-  padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.sm};
-  border-radius: ${args.theme.var.borderRadius.full};
+  background: ${t.var.color.streak};
+  color: ${t.var.color.streak_text};
+  padding: ${t.var.spacing.xs} ${t.var.spacing.sm};
+  border-radius: ${t.var.borderRadius.full};
   font-size: 0.875rem;
   font-weight: 600;
   white-space: nowrap;
@@ -945,7 +945,7 @@ return `._id {
         displayOrder: 2
         componentName: "Html"
         props: '''
-const streakItem = args.contextData.streakItem;
+const streakItem = c.streakItem;
 return {
   as: "div",
   text: streakItem.category ? streakItem.category.P.name : "No Category",
@@ -955,8 +955,8 @@ return {
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
-  margin-bottom: ${args.theme.var.spacing.xs};
+  color: ${t.var.color.text_light_500};
+  margin-bottom: ${t.var.spacing.xs};
 }`;
         '''
       }
@@ -968,7 +968,7 @@ return `._id {
         displayOrder: 3
         componentName: "Html"
         props: '''
-const streakItem = args.contextData.streakItem;
+const streakItem = c.streakItem;
 return {
   as: "div",
   text: `Longest: ${streakItem.streak.P.longestStreak} days • Total: ${streakItem.streak.P.totalCompletions} completions`
@@ -977,8 +977,8 @@ return {
         css: '''
 return `._id {
   font-size: 0.75rem;
-  color: ${args.theme.var.color.text_light_500};
-  margin-top: ${args.theme.var.spacing.xs};
+  color: ${t.var.color.text_light_500};
+  margin-top: ${t.var.spacing.xs};
 }`;
         '''
       }
@@ -990,7 +990,7 @@ return `._id {
         displayOrder: 5
         componentName: "Html"
         props: '''
-const data = args.contextData.analyticsData;
+const data = c.analyticsData;
 return {
   as: "div",
   show: () => data.categoryAnalysis && data.categoryAnalysis.length > 0
@@ -998,7 +998,7 @@ return {
         '''
         css: '''
 return `._id {
-  margin-bottom: ${args.theme.var.spacing.xl};
+  margin-bottom: ${t.var.spacing.xl};
 }`;
         '''
       }
@@ -1019,8 +1019,8 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 ${args.theme.var.spacing.md} 0;
+  color: ${t.var.color.text};
+  margin: 0 0 ${t.var.spacing.md} 0;
 }`;
         '''
       }
@@ -1034,7 +1034,7 @@ return `._id {
         contextName: "categoryItem"
         loop: true
         props: '''
-const data = args.contextData.analyticsData;
+const data = c.analyticsData;
 return {
   as: "div",
   data: data.categoryAnalysis || []
@@ -1044,7 +1044,7 @@ return {
 return `._id {
   display: flex;
   flex-direction: column;
-  gap: ${args.theme.var.spacing.md};
+  gap: ${t.var.spacing.md};
 }`;
         '''
       }
@@ -1062,10 +1062,10 @@ return {
         '''
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background_light_100};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.lg};
-  padding: ${args.theme.var.spacing.md};
+  background: ${t.var.color.background_light_100};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.lg};
+  padding: ${t.var.spacing.md};
   transition: transform 300ms ease;
   
   &:hover {
@@ -1074,7 +1074,7 @@ return `._id {
   }
   
   @media (max-width: 768px) {
-    padding: ${args.theme.var.spacing.sm};
+    padding: ${t.var.spacing.sm};
   }
 }`;
         '''
@@ -1096,8 +1096,8 @@ return `._id {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: ${args.theme.var.spacing.sm};
-  gap: ${args.theme.var.spacing.sm};
+  margin-bottom: ${t.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
 }`;
         '''
       }
@@ -1109,7 +1109,7 @@ return `._id {
         displayOrder: 1
         componentName: "Html"
         props: '''
-const categoryItem = args.contextData.categoryItem;
+const categoryItem = c.categoryItem;
 return {
   as: "h3",
   text: `${categoryItem.category.P.icon || "📋"} ${categoryItem.category.P.name}`
@@ -1119,7 +1119,7 @@ return {
 return `._id {
   font-size: 1.125rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0;
   flex: 1;
 }`;
@@ -1133,7 +1133,7 @@ return `._id {
         displayOrder: 2
         componentName: "Html"
         props: '''
-const categoryItem = args.contextData.categoryItem;
+const categoryItem = c.categoryItem;
 return {
   as: "div",
   text: categoryItem.stats.engagementRate + "%"
@@ -1141,10 +1141,10 @@ return {
         '''
         css: '''
 return `._id {
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
-  padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.sm};
-  border-radius: ${args.theme.var.borderRadius.full};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
+  padding: ${t.var.spacing.xs} ${t.var.spacing.sm};
+  border-radius: ${t.var.borderRadius.full};
   font-size: 0.875rem;
   font-weight: 600;
 }`;
@@ -1166,7 +1166,7 @@ return {
 return `._id {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: ${args.theme.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
   
   @media (max-width: 768px) {
     grid-template-columns: repeat(2, 1fr);
@@ -1182,7 +1182,7 @@ return `._id {
         displayOrder: 1
         componentName: "Html"
         props: '''
-const categoryItem = args.contextData.categoryItem;
+const categoryItem = c.categoryItem;
 return {
   as: "div"
 };
@@ -1201,7 +1201,7 @@ return `._id {
         displayOrder: 1
         componentName: "Html"
         props: '''
-const categoryItem = args.contextData.categoryItem;
+const categoryItem = c.categoryItem;
 return {
   as: "div",
   text: categoryItem.stats.avgCurrentStreak.toString()
@@ -1211,7 +1211,7 @@ return {
 return `._id {
   font-size: 1.125rem;
   font-weight: 600;
-  color: ${args.theme.var.color.success};
+  color: ${t.var.color.success};
 }`;
         '''
       }
@@ -1231,7 +1231,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.75rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
         '''
       }
@@ -1261,7 +1261,7 @@ return `._id {
         displayOrder: 1
         componentName: "Html"
         props: '''
-const categoryItem = args.contextData.categoryItem;
+const categoryItem = c.categoryItem;
 return {
   as: "div",
   text: categoryItem.stats.maxCurrentStreak.toString()
@@ -1271,7 +1271,7 @@ return {
 return `._id {
   font-size: 1.125rem;
   font-weight: 600;
-  color: ${args.theme.var.color.streak};
+  color: ${t.var.color.streak};
 }`;
         '''
       }
@@ -1291,7 +1291,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.75rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
         '''
       }
@@ -1321,7 +1321,7 @@ return `._id {
         displayOrder: 1
         componentName: "Html"
         props: '''
-const categoryItem = args.contextData.categoryItem;
+const categoryItem = c.categoryItem;
 return {
   as: "div",
   text: categoryItem.stats.activeStreaks.toString()
@@ -1331,7 +1331,7 @@ return {
 return `._id {
   font-size: 1.125rem;
   font-weight: 600;
-  color: ${args.theme.var.color.info};
+  color: ${t.var.color.info};
 }`;
         '''
       }
@@ -1351,7 +1351,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.75rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
         '''
       }
@@ -1381,7 +1381,7 @@ return `._id {
         displayOrder: 1
         componentName: "Html"
         props: '''
-const categoryItem = args.contextData.categoryItem;
+const categoryItem = c.categoryItem;
 return {
   as: "div",
   text: categoryItem.stats.totalRules.toString()
@@ -1391,7 +1391,7 @@ return {
 return `._id {
   font-size: 1.125rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
         '''
       }
@@ -1411,7 +1411,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.75rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
         '''
       }

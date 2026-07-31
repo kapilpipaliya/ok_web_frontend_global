@@ -79,7 +79,7 @@ return `._id {
   font-size: 2.5rem;
   font-weight: 700;
   margin-bottom: 0.5rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }
 
 @media (max-width: 768px) {
@@ -106,7 +106,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin-bottom: 2rem;
   font-size: 0.875rem;
 }`;
@@ -155,7 +155,7 @@ return {
           '''
 return `._id {
   line-height: 1.7;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 1rem;
   font-size: 1.05rem;
 }`;
@@ -180,8 +180,8 @@ return {
 return `._id {
   margin-bottom: 2.5rem;
   padding: 1.5rem;
-  background: ${args.theme.var.color.info_light_100};
-  border-left: 4px solid ${args.theme.var.color.info};
+  background: ${t.var.color.info_light_100};
+  border-left: 4px solid ${t.var.color.info};
   border-radius: 0.5rem;
 }`;
 '''
@@ -205,7 +205,7 @@ return `._id {
   font-size: 1.25rem;
   font-weight: 700;
   margin-bottom: 1rem;
-  color: ${args.theme.var.color.info_text};
+  color: ${t.var.color.info_text};
 }`;
 '''
         displayOrder: 1
@@ -230,13 +230,13 @@ return {
 return {
   as: "div",
   innerHTML: `
-    <p style="line-height: 1.7; color: ${args.theme.var.color.primary_text}; margin-bottom: 1rem; font-size: 1.05rem;">YSaar uses <strong>YouTube API Services</strong> to access and organize your YouTube content. By using our service, you agree to be bound by:</p>
-    <ul style="line-height: 1.7; color: ${args.theme.var.color.primary_text}; margin-bottom: 1rem; padding-left: 1.5rem;">
-      <li style="margin-bottom: 0.5rem;"><strong><a href="https://www.youtube.com/t/terms" target="_blank" rel="noopener noreferrer" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">YouTube Terms of Service</a></strong></li>
-      <li style="margin-bottom: 0.5rem;"><strong><a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">Google Privacy Policy</a></strong></li>
-      <li style="margin-bottom: 0.5rem;"><strong><a href="https://developers.google.com/youtube/terms/developer-policies" target="_blank" rel="noopener noreferrer" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">YouTube API Services Developer Policies</a></strong></li>
+    <p style="line-height: 1.7; color: ${t.var.color.primary_text}; margin-bottom: 1rem; font-size: 1.05rem;">YSaar uses <strong>YouTube API Services</strong> to access and organize your YouTube content. By using our service, you agree to be bound by:</p>
+    <ul style="line-height: 1.7; color: ${t.var.color.primary_text}; margin-bottom: 1rem; padding-left: 1.5rem;">
+      <li style="margin-bottom: 0.5rem;"><strong><a href="https://www.youtube.com/t/terms" target="_blank" rel="noopener noreferrer" style="color: ${t.var.color.primary}; text-decoration: underline;">YouTube Terms of Service</a></strong></li>
+      <li style="margin-bottom: 0.5rem;"><strong><a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" style="color: ${t.var.color.primary}; text-decoration: underline;">Google Privacy Policy</a></strong></li>
+      <li style="margin-bottom: 0.5rem;"><strong><a href="https://developers.google.com/youtube/terms/developer-policies" target="_blank" rel="noopener noreferrer" style="color: ${t.var.color.primary}; text-decoration: underline;">YouTube API Services Developer Policies</a></strong></li>
     </ul>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.primary_text}; font-size: 1.05rem;"><strong>You can revoke YSaar's access to your data at any time</strong> via the <a href="https://security.google.com/settings/security/permissions" target="_blank" rel="noopener noreferrer" style="color: ${args.theme.var.color.primary}; text-decoration: underline; font-weight: 600;">Google security settings page</a>.</p>
+    <p style="line-height: 1.7; color: ${t.var.color.primary_text}; font-size: 1.05rem;"><strong>You can revoke YSaar's access to your data at any time</strong> via the <a href="https://security.google.com/settings/security/permissions" target="_blank" rel="noopener noreferrer" style="color: ${t.var.color.primary}; text-decoration: underline; font-weight: 600;">Google security settings page</a>.</p>
   `
 };
 '''
@@ -272,8 +272,8 @@ return `._id {
   font-size: 1.75rem;
   font-weight: 600;
   margin-bottom: 1rem;
-  color: ${args.theme.var.color.text};
-  border-bottom: 2px solid ${args.theme.var.color.border};
+  color: ${t.var.color.text};
+  border-bottom: 2px solid ${t.var.color.border};
   padding-bottom: 0.5rem;
 }`;
 '''
@@ -299,30 +299,30 @@ return {
 return {
   as: "div",
   innerHTML: `
-    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: ${args.theme.var.color.text};">1.1 YouTube Data We Access</h3>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">When you connect your YouTube account through <strong>per-user Google OAuth 2.0</strong>, we access and temporarily store the following YouTube data via YouTube API Services:</p>
-    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
+    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: ${t.var.color.text};">1.1 YouTube Data We Access</h3>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;">When you connect your YouTube account through <strong>per-user Google OAuth 2.0</strong>, we access and temporarily store the following YouTube data via YouTube API Services:</p>
+    <ul style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
       <li style="margin-bottom: 0.5rem;"><strong>Channel Information:</strong> Channel name, description, thumbnail, subscriber count, video count, upload dates</li>
       <li style="margin-bottom: 0.5rem;"><strong>Playlist Information:</strong> Playlist titles, descriptions, thumbnails, video counts, privacy status</li>
       <li style="margin-bottom: 0.5rem;"><strong>Video Metadata:</strong> Video titles, descriptions, thumbnails, channel information, publication dates</li>
       <li style="margin-bottom: 0.5rem;"><strong>Public Statistics:</strong> View counts, like counts, and other publicly available metrics</li>
       <li style="margin-bottom: 0.5rem;"><strong>OAuth Tokens:</strong> We securely store your encrypted Google OAuth access and refresh tokens to maintain your YouTube connection. Tokens are encrypted using AES-256-GCM encryption and stored securely in our database.</li>
     </ul>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.info_light_100_text}; margin-bottom: 1rem; padding: 1rem; background: ${args.theme.var.color.info_light_100}; border-radius: 0.375rem; border-left: 3px solid ${args.theme.var.color.info};"><strong>Per-User OAuth:</strong> Each user connects their own YouTube account with their personal API quota. Your OAuth connection is independent and private to your account only.</p>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.warning_light_100_text}; margin-bottom: 1.5rem; padding: 1rem; background: ${args.theme.var.color.warning_light_100}; border-radius: 0.375rem; border-left: 3px solid ${args.theme.var.color.warning};"><strong>Important:</strong> We only access publicly available YouTube data. We do <strong>not</strong> access your private videos, watch history, or any data you have not explicitly made public on YouTube. We never download or cache actual video files.</p>
+    <p style="line-height: 1.7; color: ${t.var.color.info_light_100_text}; margin-bottom: 1rem; padding: 1rem; background: ${t.var.color.info_light_100}; border-radius: 0.375rem; border-left: 3px solid ${t.var.color.info};"><strong>Per-User OAuth:</strong> Each user connects their own YouTube account with their personal API quota. Your OAuth connection is independent and private to your account only.</p>
+    <p style="line-height: 1.7; color: ${t.var.color.warning_light_100_text}; margin-bottom: 1.5rem; padding: 1rem; background: ${t.var.color.warning_light_100}; border-radius: 0.375rem; border-left: 3px solid ${t.var.color.warning};"><strong>Important:</strong> We only access publicly available YouTube data. We do <strong>not</strong> access your private videos, watch history, or any data you have not explicitly made public on YouTube. We never download or cache actual video files.</p>
 
-    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: ${args.theme.var.color.text};">1.2 Account Information</h3>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">When you create an account with YSaar, we collect:</p>
-    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
+    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: ${t.var.color.text};">1.2 Account Information</h3>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;">When you create an account with YSaar, we collect:</p>
+    <ul style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
       <li style="margin-bottom: 0.5rem;">Email address (for authentication and notifications)</li>
       <li style="margin-bottom: 0.5rem;">Username (for your account identification)</li>
       <li style="margin-bottom: 0.5rem;">Password (encrypted using industry-standard bcrypt hashing)</li>
       <li style="margin-bottom: 0.5rem;">Profile preferences and settings</li>
     </ul>
 
-    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: ${args.theme.var.color.text};">1.3 User-Generated Organization Data</h3>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">We store your personal organization preferences and notes:</p>
-    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; padding-left: 1.5rem;">
+    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: ${t.var.color.text};">1.3 User-Generated Organization Data</h3>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;">We store your personal organization preferences and notes:</p>
+    <ul style="line-height: 1.7; color: ${t.var.color.text}; padding-left: 1.5rem;">
       <li style="margin-bottom: 0.5rem;">Custom names and tags for channels and playlists</li>
       <li style="margin-bottom: 0.5rem;">Personal notes and comments on videos</li>
       <li style="margin-bottom: 0.5rem;">Favorite/bookmark selections</li>
@@ -364,8 +364,8 @@ return `._id {
   font-size: 1.75rem;
   font-weight: 600;
   margin-bottom: 1rem;
-  color: ${args.theme.var.color.text};
-  border-bottom: 2px solid ${args.theme.var.color.border};
+  color: ${t.var.color.text};
+  border-bottom: 2px solid ${t.var.color.border};
   padding-bottom: 0.5rem;
 }`;
 '''
@@ -391,8 +391,8 @@ return {
 return {
   as: "div",
   innerHTML: `
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">We use the collected information <strong>solely</strong> for the following legitimate purposes:</p>
-    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem; padding-left: 1.5rem;">
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;">We use the collected information <strong>solely</strong> for the following legitimate purposes:</p>
+    <ul style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem; padding-left: 1.5rem;">
       <li style="margin-bottom: 0.75rem;"><strong>Service Provision:</strong> To provide, operate, and maintain the YSaar service, including displaying and organizing your YouTube channels, playlists, and videos</li>
       <li style="margin-bottom: 0.75rem;"><strong>Data Synchronization:</strong> To periodically refresh your YouTube data (channels, playlists, video metadata) to keep your collection up-to-date</li>
       <li style="margin-bottom: 0.75rem;"><strong>Organization Features:</strong> To enable you to add custom names, tags, notes, and organize your YouTube content according to your preferences</li>
@@ -401,7 +401,7 @@ return {
       <li style="margin-bottom: 0.75rem;"><strong>Communication:</strong> To send you service-related notifications, updates about new features, and respond to your inquiries</li>
       <li style="margin-bottom: 0.75rem;"><strong>Security:</strong> To detect, prevent, and address technical issues, fraud, abuse, and unauthorized access</li>
     </ul>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; padding: 1rem; background: ${args.theme.var.color.success_light_100}; border-radius: 0.375rem; border-left: 3px solid ${args.theme.var.color.success};"><strong>We do NOT:</strong> Use your YouTube data for advertising, sell your data to third parties, train AI models on your content, or use your data for any purpose other than providing you with the YSaar service.</p>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; padding: 1rem; background: ${t.var.color.success_light_100}; border-radius: 0.375rem; border-left: 3px solid ${t.var.color.success};"><strong>We do NOT:</strong> Use your YouTube data for advertising, sell your data to third parties, train AI models on your content, or use your data for any purpose other than providing you with the YSaar service.</p>
   `
 };
 '''
@@ -437,8 +437,8 @@ return `._id {
   font-size: 1.75rem;
   font-weight: 600;
   margin-bottom: 1rem;
-  color: ${args.theme.var.color.text};
-  border-bottom: 2px solid ${args.theme.var.color.border};
+  color: ${t.var.color.text};
+  border-bottom: 2px solid ${t.var.color.border};
   padding-bottom: 0.5rem;
 }`;
 '''
@@ -464,9 +464,9 @@ return {
 return {
   as: "div",
   innerHTML: `
-    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: ${args.theme.var.color.text};">3.1 YouTube API Data Retention</h3>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;"><strong>In compliance with YouTube API Services Terms:</strong></p>
-    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
+    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: ${t.var.color.text};">3.1 YouTube API Data Retention</h3>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;"><strong>In compliance with YouTube API Services Terms:</strong></p>
+    <ul style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
       <li style="margin-bottom: 0.5rem;"><strong>Maximum Storage Period:</strong> YouTube data (channel info, playlist metadata, video details) is stored for a maximum of 30 calendar days before being refreshed or deleted</li>
       <li style="margin-bottom: 0.5rem;"><strong>Authorization Verification:</strong> We verify that your YouTube authorization remains valid every 30 days</li>
       <li style="margin-bottom: 0.5rem;"><strong>Automatic Deletion:</strong> If you revoke access through Google security settings, we delete all your YouTube data within 30 calendar days</li>
@@ -474,18 +474,18 @@ return {
       <li style="margin-bottom: 0.5rem;"><strong>No Permanent Caching:</strong> We do not permanently cache YouTube videos, thumbnails, or other media files beyond the necessary display period</li>
     </ul>
 
-    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: ${args.theme.var.color.text};">3.2 Your Personal Data Retention</h3>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">Your account information and personal notes are retained as follows:</p>
-    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
+    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: ${t.var.color.text};">3.2 Your Personal Data Retention</h3>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;">Your account information and personal notes are retained as follows:</p>
+    <ul style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
       <li style="margin-bottom: 0.5rem;"><strong>Account Data:</strong> Retained as long as your account is active</li>
       <li style="margin-bottom: 0.5rem;"><strong>Custom Notes & Tags:</strong> Retained indefinitely as part of your personal data until you delete them or close your account</li>
       <li style="margin-bottom: 0.5rem;"><strong>Inactive Accounts:</strong> Accounts inactive for more than 2 years may be deleted after email notification</li>
       <li style="margin-bottom: 0.5rem;"><strong>Account Deletion:</strong> When you delete your account, all your personal data is permanently deleted within 30 days</li>
     </ul>
 
-    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: ${args.theme.var.color.text};">3.3 Security Measures</h3>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">We implement industry-standard security measures to protect your data:</p>
-    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; padding-left: 1.5rem;">
+    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: ${t.var.color.text};">3.3 Security Measures</h3>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;">We implement industry-standard security measures to protect your data:</p>
+    <ul style="line-height: 1.7; color: ${t.var.color.text}; padding-left: 1.5rem;">
       <li style="margin-bottom: 0.5rem;"><strong>Encryption in Transit:</strong> All data transmission uses HTTPS/TLS encryption</li>
       <li style="margin-bottom: 0.5rem;"><strong>Encryption at Rest:</strong> Sensitive data is encrypted in our Neo4j database</li>
       <li style="margin-bottom: 0.5rem;"><strong>Password Security:</strong> Passwords are hashed using bcrypt with salt</li>
@@ -536,8 +536,8 @@ return `._id {
   font-size: 1.75rem;
   font-weight: 600;
   margin-bottom: 1rem;
-  color: ${args.theme.var.color.text};
-  border-bottom: 2px solid ${args.theme.var.color.border};
+  color: ${t.var.color.text};
+  border-bottom: 2px solid ${t.var.color.border};
   padding-bottom: 0.5rem;
 }`;
 '''
@@ -563,33 +563,33 @@ return {
 return {
   as: "div",
   innerHTML: `
-    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: ${args.theme.var.color.text};">4.1 YouTube API Services</h3>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem;">YSaar uses <strong>YouTube API Services</strong> provided by Google LLC. When you connect your YouTube account:</p>
-    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
+    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: ${t.var.color.text};">4.1 YouTube API Services</h3>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1.5rem;">YSaar uses <strong>YouTube API Services</strong> provided by Google LLC. When you connect your YouTube account:</p>
+    <ul style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
       <li style="margin-bottom: 0.5rem;">Your authentication is handled directly by Google through OAuth 2.0</li>
       <li style="margin-bottom: 0.5rem;">We access your YouTube data only through official Google APIs</li>
-      <li style="margin-bottom: 0.5rem;">By using our service, you agree to <a href="https://www.youtube.com/t/terms" target="_blank" rel="noopener noreferrer" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">YouTube's Terms of Service</a> and <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">Google's Privacy Policy</a></li>
-      <li style="margin-bottom: 0.5rem;">You can revoke our access at any time through <a href="https://security.google.com/settings/security/permissions" target="_blank" rel="noopener noreferrer" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">Google's security settings</a></li>
+      <li style="margin-bottom: 0.5rem;">By using our service, you agree to <a href="https://www.youtube.com/t/terms" target="_blank" rel="noopener noreferrer" style="color: ${t.var.color.primary}; text-decoration: underline;">YouTube's Terms of Service</a> and <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" style="color: ${t.var.color.primary}; text-decoration: underline;">Google's Privacy Policy</a></li>
+      <li style="margin-bottom: 0.5rem;">You can revoke our access at any time through <a href="https://security.google.com/settings/security/permissions" target="_blank" rel="noopener noreferrer" style="color: ${t.var.color.primary}; text-decoration: underline;">Google's security settings</a></li>
     </ul>
 
-    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: ${args.theme.var.color.text};">4.2 No Third-Party Data Sharing</h3>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;"><strong>We do NOT share, sell, rent, or trade your YouTube data or personal information with third parties for their marketing or advertising purposes.</strong></p>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">We may share your data only in the following limited circumstances:</p>
-    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
+    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: ${t.var.color.text};">4.2 No Third-Party Data Sharing</h3>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;"><strong>We do NOT share, sell, rent, or trade your YouTube data or personal information with third parties for their marketing or advertising purposes.</strong></p>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;">We may share your data only in the following limited circumstances:</p>
+    <ul style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
       <li style="margin-bottom: 0.5rem;"><strong>With Your Consent:</strong> When you explicitly authorize us to share specific information</li>
       <li style="margin-bottom: 0.5rem;"><strong>Service Providers:</strong> With trusted hosting and infrastructure providers who help us operate the service (e.g., cloud hosting) under strict data protection agreements. These providers cannot use your data for their own purposes.</li>
       <li style="margin-bottom: 0.5rem;"><strong>Legal Requirements:</strong> When required by law, court order, or government regulation, or to protect our legal rights, prevent fraud, or ensure user safety</li>
       <li style="margin-bottom: 0.5rem;"><strong>Business Transfers:</strong> In the event of a merger, acquisition, or sale of assets, with advance notice to you</li>
     </ul>
 
-    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: ${args.theme.var.color.text};">4.3 Analytics and Cookies</h3>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">We use essential cookies for:</p>
-    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; padding-left: 1.5rem;">
+    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: ${t.var.color.text};">4.3 Analytics and Cookies</h3>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;">We use essential cookies for:</p>
+    <ul style="line-height: 1.7; color: ${t.var.color.text}; padding-left: 1.5rem;">
       <li style="margin-bottom: 0.5rem;"><strong>Authentication:</strong> Keeping you signed in securely</li>
       <li style="margin-bottom: 0.5rem;"><strong>Preferences:</strong> Remembering your settings and theme choices</li>
       <li style="margin-bottom: 0.5rem;"><strong>Performance:</strong> Understanding how users interact with our service to improve functionality</li>
     </ul>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-top: 1rem;">You can control cookies through your browser settings, but disabling certain cookies may affect service functionality.</p>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-top: 1rem;">You can control cookies through your browser settings, but disabling certain cookies may affect service functionality.</p>
   `
 };
 '''
@@ -625,8 +625,8 @@ return `._id {
   font-size: 1.75rem;
   font-weight: 600;
   margin-bottom: 1rem;
-  color: ${args.theme.var.color.text};
-  border-bottom: 2px solid ${args.theme.var.color.border};
+  color: ${t.var.color.text};
+  border-bottom: 2px solid ${t.var.color.border};
   padding-bottom: 0.5rem;
 }`;
 '''
@@ -652,29 +652,29 @@ return {
 return {
   as: "div",
   innerHTML: `
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">You have comprehensive rights regarding your personal data:</p>
-    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;">You have comprehensive rights regarding your personal data:</p>
+    <ul style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
       <li style="margin-bottom: 1rem;"><strong>Access:</strong> Request a copy of all personal data we hold about you in a portable format (JSON or CSV)</li>
       <li style="margin-bottom: 1rem;"><strong>Correction:</strong> Update or correct any inaccurate information in your account settings at any time</li>
       <li style="margin-bottom: 1rem;"><strong>Deletion:</strong> Request deletion of your account and all associated data. We will permanently delete your data within 7 calendar days (YouTube data) or 30 days (account data)</li>
-      <li style="margin-bottom: 1rem;"><strong>YouTube Access Revocation:</strong> Revoke YSaar's access to your YouTube data at any time through <a href="https://security.google.com/settings/security/permissions" target="_blank" rel="noopener noreferrer" style="color: ${args.theme.var.color.primary}; text-decoration: underline; font-weight: 600;">Google's security settings page</a>. We will delete all YouTube data within 30 days of revocation.</li>
+      <li style="margin-bottom: 1rem;"><strong>YouTube Access Revocation:</strong> Revoke YSaar's access to your YouTube data at any time through <a href="https://security.google.com/settings/security/permissions" target="_blank" rel="noopener noreferrer" style="color: ${t.var.color.primary}; text-decoration: underline; font-weight: 600;">Google's security settings page</a>. We will delete all YouTube data within 30 days of revocation.</li>
       <li style="margin-bottom: 1rem;"><strong>Data Portability:</strong> Export your custom notes, tags, and organization preferences to take them to another service</li>
       <li style="margin-bottom: 1rem;"><strong>Objection:</strong> Object to processing of your personal data for specific purposes</li>
       <li style="margin-bottom: 1rem;"><strong>Restriction:</strong> Request that we limit how we use your data while maintaining your account</li>
       <li style="margin-bottom: 1rem;"><strong>Withdraw Consent:</strong> Withdraw consent for data processing at any time (note: this may limit service functionality)</li>
     </ul>
 
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem; padding: 1rem; background: ${args.theme.var.color.primary_light_100}; border-radius: 0.375rem; border-left: 3px solid ${args.theme.var.color.primary};"><strong>Important for EU Users:</strong> These rights are guaranteed under the General Data Protection Regulation (GDPR). If you are located in the European Economic Area (EEA), you have additional rights including the right to lodge a complaint with your local data protection authority.</p>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem; padding: 1rem; background: ${t.var.color.primary_light_100}; border-radius: 0.375rem; border-left: 3px solid ${t.var.color.primary};"><strong>Important for EU Users:</strong> These rights are guaranteed under the General Data Protection Regulation (GDPR). If you are located in the European Economic Area (EEA), you have additional rights including the right to lodge a complaint with your local data protection authority.</p>
 
-    <h3 style="font-size: 1.25rem; font-weight: 600; margin-top: 2rem; margin-bottom: 0.75rem; color: ${args.theme.var.color.text};">How to Exercise Your Rights</h3>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">To exercise any of these rights, you can:</p>
-    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; padding-left: 1.5rem;">
+    <h3 style="font-size: 1.25rem; font-weight: 600; margin-top: 2rem; margin-bottom: 0.75rem; color: ${t.var.color.text};">How to Exercise Your Rights</h3>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;">To exercise any of these rights, you can:</p>
+    <ul style="line-height: 1.7; color: ${t.var.color.text}; padding-left: 1.5rem;">
       <li style="margin-bottom: 0.5rem;">Use the settings and data management tools in your account dashboard</li>
-      <li style="margin-bottom: 0.5rem;"><strong>Disconnect YouTube:</strong> Visit <a href="/settings" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">Settings → YouTube Connection</a> to disconnect your YouTube account. This will delete your OAuth tokens and stop all access to your YouTube data.</li>
-      <li style="margin-bottom: 0.5rem;">Contact us at <a href="mailto:support@ysaar.com" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">privacy@ysaar.com</a></li>
+      <li style="margin-bottom: 0.5rem;"><strong>Disconnect YouTube:</strong> Visit <a href="/settings" style="color: ${t.var.color.primary}; text-decoration: underline;">Settings → YouTube Connection</a> to disconnect your YouTube account. This will delete your OAuth tokens and stop all access to your YouTube data.</li>
+      <li style="margin-bottom: 0.5rem;">Contact us at <a href="mailto:support@ysaar.com" style="color: ${t.var.color.primary}; text-decoration: underline;">privacy@ysaar.com</a></li>
       <li style="margin-bottom: 0.5rem;">Submit a data request through our support system</li>
     </ul>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-top: 1rem;">We will respond to your request within 30 days and may verify your identity before processing sensitive requests.</p>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-top: 1rem;">We will respond to your request within 30 days and may verify your identity before processing sensitive requests.</p>
   `
 };
 '''
@@ -710,8 +710,8 @@ return `._id {
   font-size: 1.75rem;
   font-weight: 600;
   margin-bottom: 1rem;
-  color: ${args.theme.var.color.text};
-  border-bottom: 2px solid ${args.theme.var.color.border};
+  color: ${t.var.color.text};
+  border-bottom: 2px solid ${t.var.color.border};
   padding-bottom: 0.5rem;
 }`;
 '''
@@ -737,16 +737,16 @@ return {
 return {
   as: "div",
   innerHTML: `
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">YSaar may store and process your data in various locations to provide our service globally. If you are located in the European Economic Area (EEA), United Kingdom, or Switzerland, please be aware that:</p>
-    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;">YSaar may store and process your data in various locations to provide our service globally. If you are located in the European Economic Area (EEA), United Kingdom, or Switzerland, please be aware that:</p>
+    <ul style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
       <li style="margin-bottom: 0.5rem;">Your data may be transferred to and processed in countries outside the EEA</li>
       <li style="margin-bottom: 0.5rem;">We ensure appropriate safeguards are in place for international transfers, including standard contractual clauses</li>
       <li style="margin-bottom: 0.5rem;">Your data is protected by this Privacy Policy regardless of where it is processed</li>
     </ul>
 
-    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: ${args.theme.var.color.text};">EU User Consent Policy</h3>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">In compliance with YouTube API Services requirements and GDPR:</p>
-    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; padding-left: 1.5rem;">
+    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: ${t.var.color.text};">EU User Consent Policy</h3>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;">In compliance with YouTube API Services requirements and GDPR:</p>
+    <ul style="line-height: 1.7; color: ${t.var.color.text}; padding-left: 1.5rem;">
       <li style="margin-bottom: 0.5rem;">We obtain your explicit consent before accessing your YouTube data</li>
       <li style="margin-bottom: 0.5rem;">You have the right to withdraw consent at any time through Google's security settings</li>
       <li style="margin-bottom: 0.5rem;">We comply with all GDPR requirements for lawful data processing</li>
@@ -787,8 +787,8 @@ return `._id {
   font-size: 1.75rem;
   font-weight: 600;
   margin-bottom: 1rem;
-  color: ${args.theme.var.color.text};
-  border-bottom: 2px solid ${args.theme.var.color.border};
+  color: ${t.var.color.text};
+  border-bottom: 2px solid ${t.var.color.border};
   padding-bottom: 0.5rem;
 }`;
 '''
@@ -811,7 +811,7 @@ return {
           '''
 return `._id {
   line-height: 1.7;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 2
@@ -855,8 +855,8 @@ return `._id {
   font-size: 1.75rem;
   font-weight: 600;
   margin-bottom: 1rem;
-  color: ${args.theme.var.color.text};
-  border-bottom: 2px solid ${args.theme.var.color.border};
+  color: ${t.var.color.text};
+  border-bottom: 2px solid ${t.var.color.border};
   padding-bottom: 0.5rem;
 }`;
 '''
@@ -882,13 +882,13 @@ return {
 return {
   as: "div",
   innerHTML: `
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">If you have any questions, concerns, or requests regarding this Privacy Policy or our data practices, please contact us:</p>
-    <div style="padding: 1.5rem; background: ${args.theme.var.color.background_light_100}; border-radius: 0.5rem; margin-top: 1rem;">
-      <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 0.75rem;"><strong>Email:</strong> <a href="mailto:support@ysaar.com" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">privacy@ysaar.com</a></p>
-      <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 0.75rem;"><strong>Website:</strong> <a href="https://ysaar.com" target="_blank" rel="noopener noreferrer" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">ysaar.com</a></p>
-      <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin: 0;"><strong>Support:</strong> Available through your account dashboard</p>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;">If you have any questions, concerns, or requests regarding this Privacy Policy or our data practices, please contact us:</p>
+    <div style="padding: 1.5rem; background: ${t.var.color.background_light_100}; border-radius: 0.5rem; margin-top: 1rem;">
+      <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 0.75rem;"><strong>Email:</strong> <a href="mailto:support@ysaar.com" style="color: ${t.var.color.primary}; text-decoration: underline;">privacy@ysaar.com</a></p>
+      <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 0.75rem;"><strong>Website:</strong> <a href="https://ysaar.com" target="_blank" rel="noopener noreferrer" style="color: ${t.var.color.primary}; text-decoration: underline;">ysaar.com</a></p>
+      <p style="line-height: 1.7; color: ${t.var.color.text}; margin: 0;"><strong>Support:</strong> Available through your account dashboard</p>
     </div>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-top: 1.5rem;">We are committed to resolving any privacy concerns you may have and will respond to your inquiry within 30 days.</p>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-top: 1.5rem;">We are committed to resolving any privacy concerns you may have and will respond to your inquiry within 30 days.</p>
   `
 };
 '''
@@ -903,9 +903,9 @@ return {
 return `._id {
   margin-bottom: 3rem;
   padding: 1.5rem;
-  background: ${args.theme.var.color.background_light_50};
+  background: ${t.var.color.background_light_50};
   border-radius: 0.5rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
 }`;
 '''
         displayOrder: 13
@@ -928,7 +928,7 @@ return `._id {
   font-size: 1.5rem;
   font-weight: 600;
   margin-bottom: 1rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 1
@@ -953,22 +953,22 @@ return {
 return {
   as: "div",
   innerHTML: `
-    <ul style="line-height: 1.8; color: ${args.theme.var.color.text}; padding-left: 0; list-style: none;">
+    <ul style="line-height: 1.8; color: ${t.var.color.text}; padding-left: 0; list-style: none;">
       <li style="margin-bottom: 0.75rem;">
         <strong style="display: inline-block; width: 200px;">YouTube Terms:</strong>
-        <a href="https://www.youtube.com/t/terms" target="_blank" rel="noopener noreferrer" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">youtube.com/t/terms</a>
+        <a href="https://www.youtube.com/t/terms" target="_blank" rel="noopener noreferrer" style="color: ${t.var.color.primary}; text-decoration: underline;">youtube.com/t/terms</a>
       </li>
       <li style="margin-bottom: 0.75rem;">
         <strong style="display: inline-block; width: 200px;">Google Privacy Policy:</strong>
-        <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">policies.google.com/privacy</a>
+        <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" style="color: ${t.var.color.primary}; text-decoration: underline;">policies.google.com/privacy</a>
       </li>
       <li style="margin-bottom: 0.75rem;">
         <strong style="display: inline-block; width: 200px;">Developer Policies:</strong>
-        <a href="https://developers.google.com/youtube/terms/developer-policies" target="_blank" rel="noopener noreferrer" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">developers.google.com/youtube/terms/developer-policies</a>
+        <a href="https://developers.google.com/youtube/terms/developer-policies" target="_blank" rel="noopener noreferrer" style="color: ${t.var.color.primary}; text-decoration: underline;">developers.google.com/youtube/terms/developer-policies</a>
       </li>
       <li style="margin-bottom: 0.75rem;">
         <strong style="display: inline-block; width: 200px;">Revoke Access:</strong>
-        <a href="https://security.google.com/settings/security/permissions" target="_blank" rel="noopener noreferrer" style="color: ${args.theme.var.color.primary}; text-decoration: underline; font-weight: 600;">security.google.com/settings/security/permissions</a>
+        <a href="https://security.google.com/settings/security/permissions" target="_blank" rel="noopener noreferrer" style="color: ${t.var.color.primary}; text-decoration: underline; font-weight: 600;">security.google.com/settings/security/permissions</a>
       </li>
     </ul>
   `

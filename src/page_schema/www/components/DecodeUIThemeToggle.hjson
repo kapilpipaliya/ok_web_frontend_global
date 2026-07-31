@@ -7,17 +7,17 @@
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const currentMode = args.currentMode();
+const currentMode = _.currentMode();
 const isDark = currentMode === 'dark';
 return {
   as: "button",
-  onClick: () => args.toggleTheme()
+  onClick: () => _.toggleTheme()
 };
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background_dark_100};
-  border: 1px solid ${args.theme.var.color.background_dark_200};
+  background: ${t.var.color.background_dark_100};
+  border: 1px solid ${t.var.color.background_dark_200};
   border-radius: 2rem;
   padding: 0.375rem;
   cursor: pointer;
@@ -27,7 +27,7 @@ return `._id {
   transition: all 0.3s ease;
   
   &:hover {
-    background: ${args.theme.var.color.background_dark_200};
+    background: ${t.var.color.background_dark_200};
   }
   
   @media (max-width: 768px) {
@@ -46,20 +46,20 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const isDark = args.currentMode() === 'dark';
+const isDark = _.currentMode() === 'dark';
 return {
   as: "div"
 };
 ''',
         css: '''
-const isDark = args.currentMode() === 'dark';
+const isDark = _.currentMode() === 'dark';
 return `._id {
   position: absolute;
   top: 0.25rem;
   left: ${isDark ? '1.75rem' : '0.25rem'};
   width: 1.5rem;
   height: 1.5rem;
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
   border-radius: 50%;
   transition: all 0.3s ease;
   display: flex;
@@ -84,7 +84,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const isDark = args.currentMode() === 'dark';
+const isDark = _.currentMode() === 'dark';
 return {
   as: "icon",
   icon: isDark ? "carbon:moon" : "carbon:sun",
@@ -94,7 +94,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }

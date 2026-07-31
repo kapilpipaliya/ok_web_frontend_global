@@ -17,7 +17,7 @@ return `._id {
   display: flex;
   align-items: center;
   padding: 6rem 2rem 4rem;
-  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background : args.theme.var.color.background};
+  background: ${_.currentMode() === 'dark' ? t.var.color.background : t.var.color.background};
   position: relative;
   overflow: hidden;
   
@@ -33,7 +33,7 @@ return `._id {
     right: -30%;
     width: 60%;
     height: 60%;
-    background: radial-gradient(circle, ${args.theme.var.color.primary}, transparent);
+    background: radial-gradient(circle, ${t.var.color.primary}, transparent);
     opacity: 0.05;
     filter: blur(100px);
   }
@@ -45,7 +45,7 @@ return `._id {
     left: -30%;
     width: 60%;
     height: 60%;
-    background: radial-gradient(circle, ${args.theme.var.color.info}, transparent);
+    background: radial-gradient(circle, ${t.var.color.info}, transparent);
     opacity: 0.05;
     filter: blur(100px);
   }
@@ -130,13 +130,13 @@ return {
 return `._id {
   display: inline-block;
   padding: 0.5rem 1rem;
-  background: ${args.currentMode() === 'dark' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(59, 130, 246, 0.1)'};
-  color: ${args.theme.var.color.primary};
+  background: ${_.currentMode() === 'dark' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(59, 130, 246, 0.1)'};
+  color: ${t.var.color.primary};
   border-radius: 2rem;
   font-size: 0.875rem;
   font-weight: 600;
   margin-bottom: 1.5rem;
-  border: 1px solid ${args.currentMode() === 'dark' ? 'rgba(59, 130, 246, 0.2)' : 'rgba(59, 130, 246, 0.2)'};
+  border: 1px solid ${_.currentMode() === 'dark' ? 'rgba(59, 130, 246, 0.2)' : 'rgba(59, 130, 246, 0.2)'};
 }`;
 '''
       }
@@ -157,7 +157,7 @@ return {
 return `._id {
   font-size: 3.5rem;
   font-weight: 800;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 1.5rem;
   line-height: 1.2;
   
@@ -183,7 +183,7 @@ return {
         css: '''
 return `._id {
   font-size: 1.25rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   opacity: 0.8;
   margin-bottom: 2rem;
   line-height: 1.6;
@@ -230,14 +230,14 @@ return `._id {
 return {
   as: "button",
   text: "Start Building Free",
-  onClick: () => args.navigate("/signup")
+  onClick: () => _.navigate("/signup")
 };
 ''',
         css: '''
 return `._id {
   padding: 1rem 2rem;
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
   border: none;
   border-radius: 0.5rem;
   font-size: 1.125rem;
@@ -288,15 +288,15 @@ return `._id {
 return {
   as: "button",
   text: "View Pricing",
-  onClick: () => args.navigate("/pricing")
+  onClick: () => _.navigate("/pricing")
 };
 ''',
         css: '''
 return `._id {
   padding: 1rem 2rem;
   background: transparent;
-  color: ${args.theme.var.color.text};
-  border: 2px solid ${args.theme.var.color.background_dark_300};
+  color: ${t.var.color.text};
+  border: 2px solid ${t.var.color.background_dark_300};
   border-radius: 0.5rem;
   font-size: 1.125rem;
   font-weight: 600;
@@ -304,8 +304,8 @@ return `._id {
   transition: all 0.3s ease;
   
   &:hover {
-    background: ${args.theme.var.color.background_dark_100};
-    border-color: ${args.theme.var.color.background_dark_400};
+    background: ${t.var.color.background_dark_100};
+    border-color: ${t.var.color.background_dark_400};
     transform: translateY(-2px);
   }
   
@@ -368,7 +368,7 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const stat = args.contextData.stats;
+const stat = c.stats;
 return {
   as: "div"
 };
@@ -389,7 +389,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const stat = args.contextData.stats;
+const stat = c.stats;
 return {
   as: "icon",
   icon: stat.icon,
@@ -399,7 +399,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   opacity: 0.8;
 }`;
 '''
@@ -412,7 +412,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const stat = args.contextData.stats;
+const stat = c.stats;
 return {
   as: "div"
 };
@@ -426,7 +426,7 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const stat = args.contextData.stats;
+const stat = c.stats;
 return {
   as: "span",
   text: stat.value
@@ -437,7 +437,7 @@ return `._id {
   display: block;
   font-size: 1.25rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -449,7 +449,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const stat = args.contextData.stats;
+const stat = c.stats;
 return {
   as: "span",
   text: stat.label
@@ -459,7 +459,7 @@ return {
 return `._id {
   display: block;
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   opacity: 0.7;
 }`;
 '''
@@ -515,11 +515,11 @@ return `._id {
   position: relative;
   width: 100%;
   height: 500px;
-  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background_dark_200 : args.theme.var.color.background_dark_50};
+  background: ${_.currentMode() === 'dark' ? t.var.color.background_dark_200 : t.var.color.background_dark_50};
   border-radius: 1rem;
   overflow: hidden;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
-  border: 1px solid ${args.theme.var.color.background_dark_200};
+  border: 1px solid ${t.var.color.background_dark_200};
   
   @media (max-width: 768px) {
     height: 350px;
@@ -532,8 +532,8 @@ return `._id {
     left: 0;
     right: 0;
     height: 40px;
-    background: ${args.currentMode() === 'dark' ? args.theme.var.color.background_dark_300 : args.theme.var.color.background_dark_100};
-    border-bottom: 1px solid ${args.theme.var.color.background_dark_200};
+    background: ${_.currentMode() === 'dark' ? t.var.color.background_dark_300 : t.var.color.background_dark_100};
+    border-bottom: 1px solid ${t.var.color.background_dark_200};
     display: flex;
     align-items: center;
     padding: 0 1rem;
@@ -590,7 +590,7 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const color = args.contextData.dots;
+const color = c.dots;
 const colors = {
   red: "#FF5F56",
   yellow: "#FFBD2E",
@@ -601,7 +601,7 @@ return {
 };
 ''',
         css: '''
-const color = args.contextData.dots;
+const color = c.dots;
 const colors = {
   red: "#FF5F56",
   yellow: "#FFBD2E",
@@ -676,7 +676,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   opacity: 0.3;
   margin-bottom: 1rem;
 }`;
@@ -697,7 +697,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   opacity: 0.6;
   font-size: 1.125rem;
 }`;

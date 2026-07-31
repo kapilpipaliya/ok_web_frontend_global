@@ -8,7 +8,7 @@
         description: Visual editor for formConfig groups[].fields[] schema.
         fns:
           '''
-const getProps = () => args.contextData.props || {};
+const getProps = () => c.props || {};
 const DEFAULT_SITE_LANGUAGES = [
   { code: "en", label: "English", isDefault: true },
   { code: "hi", label: "Hindi", isDefault: false },
@@ -35,8 +35,8 @@ const emitGroups = (groups) => {
   if (typeof onChange === "function") onChange({ groups });
 };
 
-const [selectedGroupIndex, setSelectedGroupIndex] = args.createSignal(0);
-const [selectedFieldIndex, setSelectedFieldIndex] = args.createSignal(null);
+const [selectedGroupIndex, setSelectedGroupIndex] = _.createSignal(0);
+const [selectedFieldIndex, setSelectedFieldIndex] = _.createSignal(null);
 
 const getSelectedGroupIndex = () => {
   const groups = getGroups();
@@ -219,9 +219,9 @@ return {
   flex-direction: column;
   gap: 0.5rem;
   padding: 0.625rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.5rem;
-  background: ${args.theme.var.color.background_light_50};
+  background: ${t.var.color.background_light_50};
   overflow: auto;
 }`;'''
         displayOrder: 1
@@ -272,7 +272,7 @@ return {
   size: "sm",
   text: "Add",
   type: "button",
-  onClick: () => args.fns.addGroup?.()
+  onClick: () => f.addGroup?.()
 };'''
       }
     }
@@ -284,7 +284,7 @@ return {
         loop: true
         displayOrder: 2
         componentName: Html
-        props: return { data: args.fns.getGroupIndices?.() || [] };
+        props: "return { data: f.getGroupIndices?.() || [] };"
       }
     }
     {
@@ -297,33 +297,33 @@ return {
   width: 100%;
   padding: 0.5rem 0.625rem;
   text-align: left;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.375rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   font-size: 0.8125rem;
   cursor: pointer;
 
   &:hover {
-    background: ${args.theme.var.color.background_light_200};
+    background: ${t.var.color.background_light_200};
   }
 }
 
 ._id.fcg-group-card-selected {
-  border-color: ${args.theme.var.color.primary};
-  background: ${args.theme.var.color.primary_light_100};
+  border-color: ${t.var.color.primary};
+  background: ${t.var.color.primary_light_100};
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const index = args.contextData.fcgGroupIndex;
-const group = args.fns.getGroupAt?.(index) || {};
-const selected = args.fns.isGroupSelected?.(index);
+          '''const index = c.fcgGroupIndex;
+const group = f.getGroupAt?.(index) || {};
+const selected = f.isGroupSelected?.(index);
 return {
   as: "button",
   type: "button",
   class: selected ? "fcg-group-card fcg-group-card-selected" : "fcg-group-card",
-  onClick: () => args.fns.selectGroup?.(index),
+  onClick: () => f.selectGroup?.(index),
   text: group.title || group.key || `Group ${index + 1}`
 };'''
       }
@@ -346,7 +346,7 @@ return {
           '''return {
   as: "div",
   class: "fcg-detail-panel",
-  hide: args.fns.getSelectedGroupIndex?.() < 0
+  hide: f.getSelectedGroupIndex?.() < 0
 };'''
       }
     }
@@ -360,9 +360,9 @@ return {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.5rem;
   padding: 0.625rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.5rem;
-  background: ${args.theme.var.color.background_light_50};
+  background: ${t.var.color.background_light_50};
 
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
@@ -380,11 +380,11 @@ return {
         displayOrder: 1
         componentName: TextInput
         props:
-          '''const group = args.fns.getSelectedGroup?.() || {};
+          '''const group = f.getSelectedGroup?.() || {};
 return {
   label: "Group key",
   value: group.key || "",
-  onChange: (e) => args.fns.updateSelectedGroup?.({ key: e.target.value })
+  onChange: (e) => f.updateSelectedGroup?.({ key: e.target.value })
 };'''
       }
     }
@@ -395,11 +395,11 @@ return {
         displayOrder: 2
         componentName: TextInput
         props:
-          '''const group = args.fns.getSelectedGroup?.() || {};
+          '''const group = f.getSelectedGroup?.() || {};
 return {
   label: "Group title",
   value: group.title || "",
-  onChange: (e) => args.fns.updateSelectedGroup?.({ title: e.target.value })
+  onChange: (e) => f.updateSelectedGroup?.({ title: e.target.value })
 };'''
       }
     }
@@ -410,12 +410,12 @@ return {
         displayOrder: 3
         componentName: TextInput
         props:
-          '''const group = args.fns.getSelectedGroup?.() || {};
+          '''const group = f.getSelectedGroup?.() || {};
 return {
   label: "Grid columns",
   type: "number",
   value: group.gridColumns != null ? String(group.gridColumns) : "2",
-  onChange: (e) => args.fns.updateSelectedGroup?.({ gridColumns: Number(e.target.value) || 1 })
+  onChange: (e) => f.updateSelectedGroup?.({ gridColumns: Number(e.target.value) || 1 })
 };'''
       }
     }
@@ -449,9 +449,9 @@ return {
   flex-direction: column;
   gap: 0.375rem;
   padding: 0.625rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.5rem;
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
 }`;'''
         displayOrder: 1
         componentName: Html
@@ -495,7 +495,7 @@ return {
   size: "sm",
   text: "Add field",
   type: "button",
-  onClick: () => args.fns.addField?.()
+  onClick: () => f.addField?.()
 };'''
       }
     }
@@ -507,7 +507,7 @@ return {
         loop: true
         displayOrder: 2
         componentName: Html
-        props: return { data: args.fns.getFieldIndices?.() || [] };
+        props: "return { data: f.getFieldIndices?.() || [] };"
       }
     }
     {
@@ -520,28 +520,28 @@ return {
   width: 100%;
   padding: 0.375rem 0.5rem;
   text-align: left;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.375rem;
-  background: ${args.theme.var.color.background_light_50};
+  background: ${t.var.color.background_light_50};
   font-size: 0.75rem;
   cursor: pointer;
 }
 
 ._id.fcg-field-card-selected {
-  border-color: ${args.theme.var.color.primary};
-  background: ${args.theme.var.color.primary_light_100};
+  border-color: ${t.var.color.primary};
+  background: ${t.var.color.primary_light_100};
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const index = args.contextData.fcgFieldIndex;
-const field = args.fns.getFieldAt?.(index) || {};
-const selected = args.fns.isFieldSelected?.(index);
+          '''const index = c.fcgFieldIndex;
+const field = f.getFieldAt?.(index) || {};
+const selected = f.isFieldSelected?.(index);
 return {
   as: "button",
   type: "button",
   class: selected ? "fcg-field-card fcg-field-card-selected" : "fcg-field-card",
-  onClick: () => args.fns.setSelectedFieldIndex?.(index),
+  onClick: () => f.setSelectedFieldIndex?.(index),
   text: field.label || field.key || `Field ${index + 1}`
 };'''
       }
@@ -556,9 +556,9 @@ return {
   flex-direction: column;
   gap: 0.5rem;
   padding: 0.625rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.5rem;
-  background: ${args.theme.var.color.background_light_50};
+  background: ${t.var.color.background_light_50};
 }`;'''
         displayOrder: 2
         componentName: Html
@@ -566,7 +566,7 @@ return {
           '''return {
   as: "div",
   class: "fcg-field-detail",
-  hide: args.fns.selectedFieldIndex?.() == null
+  hide: f.selectedFieldIndex?.() == null
 };'''
       }
     }
@@ -596,12 +596,12 @@ return {
         displayOrder: 1
         componentName: TextInput
         props:
-          '''const index = args.fns.selectedFieldIndex?.();
-const field = args.fns.getFieldAt?.(index) || {};
+          '''const index = f.selectedFieldIndex?.();
+const field = f.getFieldAt?.(index) || {};
 return {
   label: "Key",
   value: field.key || "",
-  onChange: (e) => args.fns.updateFieldAt?.(index, { key: e.target.value })
+  onChange: (e) => f.updateFieldAt?.(index, { key: e.target.value })
 };'''
       }
     }
@@ -612,12 +612,12 @@ return {
         displayOrder: 2
         componentName: TextInput
         props:
-          '''const index = args.fns.selectedFieldIndex?.();
-const field = args.fns.getFieldAt?.(index) || {};
+          '''const index = f.selectedFieldIndex?.();
+const field = f.getFieldAt?.(index) || {};
 return {
   label: "Label",
   value: field.label || "",
-  onChange: (e) => args.fns.updateFieldAt?.(index, { label: e.target.value })
+  onChange: (e) => f.updateFieldAt?.(index, { label: e.target.value })
 };'''
       }
     }
@@ -638,7 +638,7 @@ return {
           '''return `._id.fcg-field-label {
   font-size: 0.75rem;
   font-weight: 500;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;'''
         displayOrder: 1
         componentName: Html
@@ -653,23 +653,23 @@ return {
           '''return `._id.fcg-renderer-select {
   width: 100%;
   padding: 0.5rem 0.625rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.375rem;
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
   font-size: 0.8125rem;
 }`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''const index = args.fns.selectedFieldIndex?.();
-const field = args.fns.getFieldAt?.(index) || {};
+          '''const index = f.selectedFieldIndex?.();
+const field = f.getFieldAt?.(index) || {};
 return {
   as: "select",
   class: "fcg-renderer-select",
   value: field.renderer || "text",
   onChange: (e) => {
     const renderer = e.target.value;
-    args.fns.updateFieldAt?.(index, {
+    f.updateFieldAt?.(index, {
       renderer,
       dataType: renderer === "checkbox" ? "boolean" : renderer === "fieldArray" ? "array" : "text"
     });
@@ -711,13 +711,13 @@ return {
         displayOrder: 4
         componentName: TextInput
         props:
-          '''const index = args.fns.selectedFieldIndex?.();
-const field = args.fns.getFieldAt?.(index) || {};
+          '''const index = f.selectedFieldIndex?.();
+const field = f.getFieldAt?.(index) || {};
 return {
   label: "Column span",
   type: "number",
   value: field.colSpan != null ? String(field.colSpan) : "1",
-  onChange: (e) => args.fns.updateFieldAt?.(index, { colSpan: Number(e.target.value) || 1 })
+  onChange: (e) => f.updateFieldAt?.(index, { colSpan: Number(e.target.value) || 1 })
 };'''
       }
     }
@@ -760,13 +760,13 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const index = args.fns.selectedFieldIndex?.();
-const field = args.fns.getFieldAt?.(index) || {};
+          '''const index = f.selectedFieldIndex?.();
+const field = f.getFieldAt?.(index) || {};
 return {
   as: "input",
   type: "checkbox",
   checked: field.required === true,
-  onChange: (e) => args.fns.updateFieldAt?.(index, { required: e.target.checked })
+  onChange: (e) => f.updateFieldAt?.(index, { required: e.target.checked })
 };'''
       }
     }
@@ -786,8 +786,8 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const index = args.fns.selectedFieldIndex?.();
-const field = args.fns.getFieldAt?.(index) || {};
+          '''const index = f.selectedFieldIndex?.();
+const field = f.getFieldAt?.(index) || {};
 const isText = field.renderer === "text" || field.renderer === "textArea";
 return { as: "label", class: "fcg-flag-wrap", hide: !isText };'''
       }
@@ -799,13 +799,13 @@ return { as: "label", class: "fcg-flag-wrap", hide: !isText };'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const index = args.fns.selectedFieldIndex?.();
-const field = args.fns.getFieldAt?.(index) || {};
+          '''const index = f.selectedFieldIndex?.();
+const field = f.getFieldAt?.(index) || {};
 return {
   as: "input",
   type: "checkbox",
   checked: field.translatable === true,
-  onChange: (e) => args.fns.updateFieldAt?.(index, { translatable: e.target.checked })
+  onChange: (e) => f.updateFieldAt?.(index, { translatable: e.target.checked })
 };'''
       }
     }
@@ -840,14 +840,14 @@ return {
         displayOrder: 1
         componentName: Button
         props:
-          '''const index = args.fns.selectedFieldIndex?.();
+          '''const index = f.selectedFieldIndex?.();
 return {
   variant: "secondary",
   size: "sm",
   text: "Move up",
   type: "button",
   disabled: index == null || index <= 0,
-  onClick: () => args.fns.moveField?.(index, -1)
+  onClick: () => f.moveField?.(index, -1)
 };'''
       }
     }
@@ -858,15 +858,15 @@ return {
         displayOrder: 2
         componentName: Button
         props:
-          '''const index = args.fns.selectedFieldIndex?.();
-const count = args.fns.getFieldIndices?.().length || 0;
+          '''const index = f.selectedFieldIndex?.();
+const count = f.getFieldIndices?.().length || 0;
 return {
   variant: "secondary",
   size: "sm",
   text: "Move down",
   type: "button",
   disabled: index == null || index >= count - 1,
-  onClick: () => args.fns.moveField?.(index, 1)
+  onClick: () => f.moveField?.(index, 1)
 };'''
       }
     }
@@ -877,13 +877,13 @@ return {
         displayOrder: 3
         componentName: Button
         props:
-          '''const index = args.fns.selectedFieldIndex?.();
+          '''const index = f.selectedFieldIndex?.();
 return {
   variant: "danger",
   size: "sm",
   text: "Delete field",
   type: "button",
-  onClick: () => args.fns.deleteField?.(index)
+  onClick: () => f.deleteField?.(index)
 };'''
       }
     }

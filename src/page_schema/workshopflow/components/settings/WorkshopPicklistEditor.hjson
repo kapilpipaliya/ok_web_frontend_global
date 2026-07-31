@@ -14,12 +14,12 @@
         displayOrder: 1
         fns:
           '''
-const picklistKey = () => String(args.contextData.props?.picklistKey || "").trim();
+const picklistKey = () => String(c.props?.picklistKey || "").trim();
 
-const [options, setOptions] = args.createSignal([]);
-const [optionVertexLabel, setOptionVertexLabel] = args.createSignal(null);
-const [loading, setLoading] = args.createSignal(false);
-const [saving, setSaving] = args.createSignal(false);
+const [options, setOptions] = _.createSignal([]);
+const [optionVertexLabel, setOptionVertexLabel] = _.createSignal(null);
+const [loading, setLoading] = _.createSignal(false);
+const [saving, setSaving] = _.createSignal(false);
 
 const getRows = () =>
   options().map((v, i) => ({
@@ -33,34 +33,34 @@ const loadPicklist = async () => {
   if (!key) return;
   setLoading(true);
   try {
-    const res = await args.executeNamedServerFunction({
+    const res = await s({
       functionName: "getWorkshopPicklist",
       contextData: { picklistKey: key }
     });
     if (res?.error) {
-      args.showErrorToast?.(String(res.error));
+      _.showErrorToast?.(String(res.error));
       return;
     }
     const inner = res?.result;
     if (!inner?.success) {
-      args.showErrorToast?.(inner?.message || "Failed to load picklist");
+      _.showErrorToast?.(inner?.message || "Failed to load picklist");
       return;
     }
     const d = inner.data || {};
     const verts = Array.isArray(d.optionVertexes) ? d.optionVertexes : [];
-    setOptions(args.klona(verts));
+    setOptions(_.klona(verts));
     const srvLbl =
       d.optionVertexLabel != null && String(d.optionVertexLabel).trim()
         ? String(d.optionVertexLabel).trim()
         : "";
     if (!srvLbl) {
-      args.showErrorToast?.("Missing optionVertexLabel from server");
+      _.showErrorToast?.("Missing optionVertexLabel from server");
       setOptionVertexLabel(null);
     } else {
       setOptionVertexLabel(srvLbl);
     }
   } catch (err) {
-    args.showErrorToast?.(err?.message || "Failed to load picklist");
+    _.showErrorToast?.(err?.message || "Failed to load picklist");
   } finally {
     setLoading(false);
   }
@@ -76,7 +76,7 @@ const savePicklist = async () => {
       label: String(row.label != null ? row.label : "").trim(),
       displayOrder: (i + 1) * 10
     }));
-    const res = await args.executeNamedServerFunction({
+    const res = await s({
       functionName: "saveWorkshopPicklist",
       contextData: {
         picklistKey: key,
@@ -84,18 +84,18 @@ const savePicklist = async () => {
       }
     });
     if (res?.error) {
-      args.showErrorToast?.(String(res.error));
+      _.showErrorToast?.(String(res.error));
       return;
     }
     const inner = res?.result;
     if (!inner?.success) {
-      args.showErrorToast?.(inner?.message || "Save failed");
+      _.showErrorToast?.(inner?.message || "Save failed");
       return;
     }
-    args.showSuccessToast?.(inner.message || "Picklist saved");
+    _.showSuccessToast?.(inner.message || "Picklist saved");
     await loadPicklist();
   } catch (err) {
-    args.showErrorToast?.(err?.message || "Save failed");
+    _.showErrorToast?.(err?.message || "Save failed");
   } finally {
     setSaving(false);
   }
@@ -104,7 +104,7 @@ const savePicklist = async () => {
 const addRow = () => {
   const lbl = optionVertexLabel();
   if (!lbl) {
-    args.showErrorToast?.("Load the picklist before adding rows");
+    _.showErrorToast?.("Load the picklist before adding rows");
     return;
   }
   setOptions([
@@ -173,7 +173,7 @@ return {
   moveRowDown,
   rowCount,
   picklistHeading: () =>
-    String(args.contextData.props?.defaultTitle || args.contextData.props?.pageTitle || "")
+    String(c.props?.defaultTitle || c.props?.pageTitle || "")
       .trim() || picklistKey(),
   optionVertexLabelStr: () => optionVertexLabel() || "",
   loading,
@@ -187,7 +187,7 @@ return {
 return `._id {
   display: flex;
   flex-direction: column;
-  gap: ${args.theme.var.spacing.md};
+  gap: ${t.var.spacing.md};
   max-width: 960px;
 }`;
 '''
@@ -198,7 +198,7 @@ return {
   as: "div",
   class: "workshop-picklist-editor",
   onMount: () => {
-    args.fns.loadPicklist();
+    f.loadPicklist();
   }
 };
 '''
@@ -214,7 +214,7 @@ return {
           '''
 return {
   as: "h1",
-  text: args.contextData.props?.pageTitle || "Picklist",
+  text: c.props?.pageTitle || "Picklist",
   class: "workshop-picklist-editor-title"
 };
 '''
@@ -223,7 +223,7 @@ return {
 return `._id.workshop-picklist-editor-title {
   font-size: 1.25rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0;
 }`;
 '''
@@ -237,7 +237,7 @@ return `._id.workshop-picklist-editor-title {
         componentName: Html
         props:
           '''
-const d = args.contextData.props?.description;
+const d = c.props?.description;
 return {
   as: "p",
   text: d || "",
@@ -250,7 +250,7 @@ return {
 return `._id.workshop-picklist-editor-desc {
   margin: 0;
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   max-width: 52rem;
 }`;
 '''
@@ -274,7 +274,7 @@ return {
 return `._id.workshop-picklist-meta {
   display: flex;
   flex-direction: column;
-  gap: ${args.theme.var.spacing.xs};
+  gap: ${t.var.spacing.xs};
 }`;
 '''
       }
@@ -298,7 +298,7 @@ return {
 return `._id {
   font-size: 0.875rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -315,9 +315,9 @@ return {
   as: "div",
   class: "workshop-picklist-meta-summary",
   text: [
-    args.fns.picklistHeading(),
-    args.fns.optionVertexLabelStr()
-      ? " — graph label: " + args.fns.optionVertexLabelStr()
+    f.picklistHeading(),
+    f.optionVertexLabelStr()
+      ? " — graph label: " + f.optionVertexLabelStr()
       : ""
   ].join("")
 };
@@ -326,7 +326,7 @@ return {
           '''
 return `._id.workshop-picklist-meta-summary {
   font-size: 1rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   line-height: 1.4;
 }`;
 '''
@@ -350,7 +350,7 @@ return {
 return `._id.workshop-picklist-toolbar {
   display: flex;
   flex-wrap: wrap;
-  gap: ${args.theme.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
   align-items: center;
 }`;
 '''
@@ -366,9 +366,9 @@ return `._id.workshop-picklist-toolbar {
           '''
 return {
   variant: "primary",
-  text: args.fns.isSaving() ? "Saving…" : "Save",
-  disabled: args.fns.isLoading() || args.fns.isSaving(),
-  onClick: () => args.fns.savePicklist()
+  text: f.isSaving() ? "Saving…" : "Save",
+  disabled: f.isLoading() || f.isSaving(),
+  onClick: () => f.savePicklist()
 };
 '''
       }
@@ -384,8 +384,8 @@ return {
 return {
   variant: "secondary",
   text: "Add option",
-  disabled: args.fns.isLoading() || args.fns.isSaving(),
-  onClick: () => args.fns.addRow()
+  disabled: f.isLoading() || f.isSaving(),
+  onClick: () => f.addRow()
 };
 '''
       }
@@ -401,8 +401,8 @@ return {
 return {
   variant: "secondary",
   text: "Reload",
-  disabled: args.fns.isLoading() || args.fns.isSaving(),
-  onClick: () => args.fns.loadPicklist()
+  disabled: f.isLoading() || f.isSaving(),
+  onClick: () => f.loadPicklist()
 };
 '''
       }
@@ -417,8 +417,8 @@ return {
           '''
 return {
   as: "p",
-  text: args.fns.isLoading() ? "Loading options…" : "",
-  hide: !args.fns.isLoading(),
+  text: f.isLoading() ? "Loading options…" : "",
+  hide: !f.isLoading(),
   class: "workshop-picklist-loading"
 };
 '''
@@ -426,7 +426,7 @@ return {
           '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0;
 }`;
 '''
@@ -449,9 +449,9 @@ return {
           '''
 return `._id {
   overflow-x: auto;
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.lg};
-  background: ${args.theme.var.color.background};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.lg};
+  background: ${t.var.color.background};
 }`;
 '''
       }
@@ -478,14 +478,14 @@ return `._id {
 }
 ._id th {
   text-align: left;
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  background: ${args.theme.var.color.background_light_100};
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  background: ${t.var.color.background_light_100};
+  border-bottom: 1px solid ${t.var.color.border};
   font-weight: 600;
 }
 ._id td {
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  border-bottom: 1px solid ${args.theme.var.color.border_light_200};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  border-bottom: 1px solid ${t.var.color.border_light_200};
   vertical-align: middle;
 }`;
 '''
@@ -575,7 +575,7 @@ return { as: "th", text: "" };
           '''
 return {
   as: "tbody",
-  data: args.fns.getRows()
+  data: f.getRows()
 };
 '''
       }
@@ -612,12 +612,12 @@ return { as: "td" };
         componentName: TextInput
         props:
           '''
-const row = args.contextData.pickRow;
+const row = c.pickRow;
 return {
   value: row.value,
   placeholder: "e.g. scheduled",
-  disabled: args.fns.isLoading() || args.fns.isSaving(),
-  onChange: (e) => args.fns.updateRow(row._idx, { value: e.target.value })
+  disabled: f.isLoading() || f.isSaving(),
+  onChange: (e) => f.updateRow(row._idx, { value: e.target.value })
 };
 '''
       }
@@ -642,12 +642,12 @@ return { as: "td" };
         componentName: TextInput
         props:
           '''
-const row = args.contextData.pickRow;
+const row = c.pickRow;
 return {
   value: row.label,
   placeholder: "e.g. Scheduled",
-  disabled: args.fns.isLoading() || args.fns.isSaving(),
-  onChange: (e) => args.fns.updateRow(row._idx, { label: e.target.value })
+  disabled: f.isLoading() || f.isSaving(),
+  onChange: (e) => f.updateRow(row._idx, { label: e.target.value })
 };
 '''
       }
@@ -668,7 +668,7 @@ return `._id {
   white-space: nowrap;
   display: inline-flex;
   flex-wrap: wrap;
-  gap: ${args.theme.var.spacing.xs};
+  gap: ${t.var.spacing.xs};
   align-items: center;
 }`;
 '''
@@ -682,13 +682,13 @@ return `._id {
         componentName: Button
         props:
           '''
-const row = args.contextData.pickRow;
+const row = c.pickRow;
 return {
   variant: "secondary",
   text: "↑",
   disabled:
-    args.fns.isLoading() || args.fns.isSaving() || row._idx === 0,
-  onClick: () => args.fns.moveRowUp(row._idx)
+    f.isLoading() || f.isSaving() || row._idx === 0,
+  onClick: () => f.moveRowUp(row._idx)
 };
 '''
       }
@@ -701,15 +701,15 @@ return {
         componentName: Button
         props:
           '''
-const row = args.contextData.pickRow;
+const row = c.pickRow;
 return {
   variant: "secondary",
   text: "↓",
   disabled:
-    args.fns.isLoading() ||
-    args.fns.isSaving() ||
-    row._idx >= args.fns.rowCount() - 1,
-  onClick: () => args.fns.moveRowDown(row._idx)
+    f.isLoading() ||
+    f.isSaving() ||
+    row._idx >= f.rowCount() - 1,
+  onClick: () => f.moveRowDown(row._idx)
 };
 '''
       }
@@ -734,12 +734,12 @@ return { as: "td" };
         componentName: Button
         props:
           '''
-const row = args.contextData.pickRow;
+const row = c.pickRow;
 return {
   variant: "secondary",
   text: "Remove",
-  disabled: args.fns.isLoading() || args.fns.isSaving(),
-  onClick: () => args.fns.removeRow(row._idx)
+  disabled: f.isLoading() || f.isSaving(),
+  onClick: () => f.removeRow(row._idx)
 };
 '''
       }

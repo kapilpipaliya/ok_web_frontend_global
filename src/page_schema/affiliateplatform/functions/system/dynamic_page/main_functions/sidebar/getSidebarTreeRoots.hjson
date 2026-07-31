@@ -8,7 +8,7 @@
         body:
           '''
 // Get current authenticated user from session
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return {
     success: false,
@@ -17,7 +17,7 @@ if (!actualUser) {
   };
 }
 
-const { parentVertexLabel, toParentEdgeType, rootKeys, tableVertexLabel, relationshipType, enableUserScoping, hooks, loadFullTree, selectedContentIds, imageRelationshipType } = args.contextData;
+const { parentVertexLabel, toParentEdgeType, rootKeys, tableVertexLabel, relationshipType, enableUserScoping, hooks, loadFullTree, selectedContentIds, imageRelationshipType } = c;
 
 if (!parentVertexLabel || !toParentEdgeType || !rootKeys) {
   return {
@@ -31,11 +31,11 @@ const fetchFullTree = loadFullTree === true;
 let user = null;
 let userUuid = null;
 if (enableUserScoping) {
-  user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+  user = await _.getEffectiveUser(_.session, actualUser, c);
   userUuid = user.P.uuid;
 }
 
-await args.executeHooks(hooks?.beforeGetVertexChildren, {
+await _.executeHooks(hooks?.beforeGetVertexChildren, {
   parentVertexLabel,
   toParentEdgeType,
   parentId: null,
@@ -66,7 +66,7 @@ let rootVertices;
 
 if (fetchFullTree) {
   // Full tree: fetch all vertices and all edges in two queries
-  if (!args.context.nodes) args.context.nodes = {};
+  if (!_.context.nodes) _.context.nodes = {};
   let allVerticesQuery;
   const allVerticesParams = { ...rootKeyFilterParams };
   if (!enableUserScoping) {
@@ -86,8 +86,8 @@ if (fetchFullTree) {
     `;
     allVerticesParams.userUuid = userUuid;
   }
-  const allVerticesResult = await args.session.run(allVerticesQuery, allVerticesParams);
-  args.processResult(allVerticesResult.records, args.context, 'v');
+  const allVerticesResult = await _.session.run(allVerticesQuery, allVerticesParams);
+  _.processResult(allVerticesResult.records, _.context, 'v');
 
   let allEdgesQuery;
   const allEdgesParams = { ...rootKeyFilterParams };
@@ -106,11 +106,11 @@ if (fetchFullTree) {
     `;
     allEdgesParams.userUuid = userUuid;
   }
-  const allEdgesResult = await args.session.run(allEdgesQuery, allEdgesParams);
-  args.processResult(allEdgesResult.records, args.context, ['child', 'parent'], 'r');
+  const allEdgesResult = await _.session.run(allEdgesQuery, allEdgesParams);
+  _.processResult(allEdgesResult.records, _.context, ['child', 'parent'], 'r');
 
   // Roots = vertices with no incoming toParentEdgeType
-  const nodes = args.context.nodes;
+  const nodes = _.context.nodes;
   rootVertices = Object.keys(nodes)
     .filter(id => {
       const node = nodes[id];
@@ -158,8 +158,8 @@ if (fetchFullTree) {
     `;
     params.userUuid = userUuid;
   }
-  const rootResult = await args.session.run(rootQuery, params);
-  rootVertices = args.processResult(rootResult.records, args.context, 'v');
+  const rootResult = await _.session.run(rootQuery, params);
+  rootVertices = _.processResult(rootResult.records, _.context, 'v');
   const rootIds = rootVertices.map(v => v.id).filter(Boolean);
 
   if (rootIds.length > 0) {
@@ -182,8 +182,8 @@ if (fetchFullTree) {
     }
     const childrenParams = { rootIds };
     if (enableUserScoping) childrenParams.userUuid = userUuid;
-    const childrenResult = await args.session.run(childrenQuery, childrenParams);
-    args.processResult(childrenResult.records, args.context, ['child', 'parent'], 'r');
+    const childrenResult = await _.session.run(childrenQuery, childrenParams);
+    _.processResult(childrenResult.records, _.context, ['child', 'parent'], 'r');
   }
 }
 
@@ -207,7 +207,7 @@ if (tableVertexLabel && relationshipType) {
     `;
     uncatParams.userUuid = userUuid;
   }
-  const uncatResult = await args.session.run(uncatQuery, uncatParams);
+  const uncatResult = await _.session.run(uncatQuery, uncatParams);
   uncategorizedCount = uncatResult.records[0]?.get('contentCount') || 0;
   const uncategorizedId = '_' + tableVertexLabel + '_uncategorized';
   uncategorizedVertex = {
@@ -222,15 +222,15 @@ if (tableVertexLabel && relationshipType) {
     IN: {},
     OUT: {}
   };
-  if (!args.context.nodes) args.context.nodes = {};
-  args.context.nodes[uncategorizedId] = uncategorizedVertex;
+  if (!_.context.nodes) _.context.nodes = {};
+  _.context.nodes[uncategorizedId] = uncategorizedVertex;
 }
 
 // 4) Batch content count for all categories (roots + children) in one query
 const rootKey = rootKeys.key || null;
-if (tableVertexLabel && relationshipType && args.context.nodes) {
+if (tableVertexLabel && relationshipType && _.context.nodes) {
   const syntheticUncategorizedId = '_' + tableVertexLabel + '_uncategorized';
-  const categoryIds = Object.keys(args.context.nodes).filter(
+  const categoryIds = Object.keys(_.context.nodes).filter(
     id => id !== syntheticUncategorizedId
   );
   const countByCategoryId = {};
@@ -257,15 +257,15 @@ if (tableVertexLabel && relationshipType && args.context.nodes) {
       `;
       batchParams.userUuid = userUuid;
     }
-    const batchResult = await args.session.run(batchQuery, batchParams);
+    const batchResult = await _.session.run(batchQuery, batchParams);
     for (const rec of batchResult.records) {
       const catId = rec.get('catId');
       const contentCount = rec.get('contentCount')?.toNumber?.() ?? rec.get('contentCount') ?? 0;
       countByCategoryId[catId] = contentCount;
     }
   }
-  for (const id of Object.keys(args.context.nodes)) {
-    const node = args.context.nodes[id];
+  for (const id of Object.keys(_.context.nodes)) {
+    const node = _.context.nodes[id];
     if (!node || !node.P) continue;
     if (id === syntheticUncategorizedId) continue;
     const useUncategorizedCount = rootKey && node.P.key === rootKey;
@@ -305,7 +305,7 @@ if (selectedIds.length > 0 && tableVertexLabel && toParentEdgeType && parentVert
   }
   if (selectedCategoryQuery) {
     try {
-      const selectedCategoryResult = await args.session.run(selectedCategoryQuery, selectedCategoryParams);
+      const selectedCategoryResult = await _.session.run(selectedCategoryQuery, selectedCategoryParams);
       if (selectedCategoryResult.records.length > 0) {
         const categoryId = selectedCategoryResult.records[0].get("categoryId");
         selectedCategoryId =
@@ -332,13 +332,13 @@ const imageRelType =
     ? String(imageRelationshipType).trim()
     : null;
 if (imageRelType) {
-  const categoryIds = Object.keys(args.context.nodes || {}).filter((id) => {
-    const node = args.context.nodes[id];
+  const categoryIds = Object.keys(_.context.nodes || {}).filter((id) => {
+    const node = _.context.nodes[id];
     return node?.L?.includes(parentVertexLabel) && !String(id).startsWith("_");
   });
   if (categoryIds.length > 0) {
     try {
-      const imageResult = await args.session.run(
+      const imageResult = await _.session.run(
         `
         MATCH (v:${parentVertexLabel})-[r:${imageRelType}]->(file:File)
         WHERE elementId(v) IN $ids
@@ -346,14 +346,14 @@ if (imageRelType) {
         `,
         { ids: categoryIds }
       );
-      args.processResult(imageResult.records, args.context, ["v", "file"], "r");
+      _.processResult(imageResult.records, _.context, ["v", "file"], "r");
     } catch (imageError) {
       console.warn("getSidebarTreeRoots image relation load failed:", imageError);
     }
   }
 }
 
-await args.executeHooks(hooks?.afterGetVertexChildren, {
+await _.executeHooks(hooks?.afterGetVertexChildren, {
   parentVertexLabel,
   toParentEdgeType,
   parentId: null,

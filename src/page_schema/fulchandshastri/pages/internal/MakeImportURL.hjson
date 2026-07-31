@@ -30,12 +30,12 @@
 }`;'''
         displayOrder: 1
         fns:
-          '''const [generatedImportUrl, setGeneratedImportUrl] = args.createSignal("");
-const [generatedExportUrl, setGeneratedExportUrl] = args.createSignal("");
-const [formManagementFns, setFormManagementFns] = args.createSignal(null);
-const [previewModalOpen, setPreviewModalOpen] = args.createSignal(false);
-const [previewUrl, setPreviewUrl] = args.createSignal("");
-const [previewTitle, setPreviewTitle] = args.createSignal("");
+          '''const [generatedImportUrl, setGeneratedImportUrl] = _.createSignal("");
+const [generatedExportUrl, setGeneratedExportUrl] = _.createSignal("");
+const [formManagementFns, setFormManagementFns] = _.createSignal(null);
+const [previewModalOpen, setPreviewModalOpen] = _.createSignal(false);
+const [previewUrl, setPreviewUrl] = _.createSignal("");
+const [previewTitle, setPreviewTitle] = _.createSignal("");
 
 const parseKeyList = (value) => {
   return String(value ?? "")
@@ -83,7 +83,7 @@ const handleGenerate = async ({ vertex }) => {
   const values = vertex?.P || {};
   const baseUrl = normalizeBaseUrl(values?.baseUrl);
   if (!baseUrl) {
-    args.showErrorToast?.("Base URL is required");
+    _.showErrorToast?.("Base URL is required");
     return false;
   }
 
@@ -93,10 +93,10 @@ const handleGenerate = async ({ vertex }) => {
 
   try {
     await navigator.clipboard.writeText(importUrl);
-    args.showSuccessToast?.("URLs generated. Import URL copied to clipboard");
+    _.showSuccessToast?.("URLs generated. Import URL copied to clipboard");
   } catch (error) {
     console.error("Clipboard copy failed:", error);
-    args.showSuccessToast?.("URLs generated");
+    _.showSuccessToast?.("URLs generated");
   }
 
   // Return false so FormManagement does not reinitialize / clear the form.
@@ -114,7 +114,7 @@ const registerFormManagementFns = (formFns) => {
 const runGenerate = () => {
   const formFns = formManagementFns();
   if (!formFns?.handleSave) {
-    args.showErrorToast?.("Form is not ready yet");
+    _.showErrorToast?.("Form is not ready yet");
     return;
   }
   formFns.handleSave();
@@ -123,22 +123,22 @@ const runGenerate = () => {
 const copyUrl = async (kind) => {
   const url = getUrlByKind(kind);
   if (!url) {
-    args.showWarningToast?.("Generate URLs first");
+    _.showWarningToast?.("Generate URLs first");
     return;
   }
   try {
     await navigator.clipboard.writeText(url);
-    args.showSuccessToast?.("Copied to clipboard");
+    _.showSuccessToast?.("Copied to clipboard");
   } catch (error) {
     console.error("Clipboard copy failed:", error);
-    args.showErrorToast?.("Could not copy to clipboard");
+    _.showErrorToast?.("Could not copy to clipboard");
   }
 };
 
 const openUrlInNewTab = (kind) => {
   const url = getUrlByKind(kind);
   if (!url) {
-    args.showWarningToast?.("Generate URLs first");
+    _.showWarningToast?.("Generate URLs first");
     return;
   }
   window.open(url, "_blank", "noopener,noreferrer");
@@ -147,7 +147,7 @@ const openUrlInNewTab = (kind) => {
 const openUrlInModal = (kind) => {
   const url = getUrlByKind(kind);
   if (!url) {
-    args.showWarningToast?.("Generate URLs first");
+    _.showWarningToast?.("Generate URLs first");
     return;
   }
   setPreviewTitle(kind === "export" ? "Export URL preview" : "Import URL preview");
@@ -203,7 +203,7 @@ return {
   margin: 0;
   font-size: 1.75rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         displayOrder: 1
         componentName: Html
@@ -220,7 +220,7 @@ return {
       P: {
         css:
           '''return `._id {
-  color: ${args.theme.var.color.text_light_400};
+  color: ${t.var.color.text_light_400};
   line-height: 1.5;
   font-size: 0.95rem;
 
@@ -261,9 +261,9 @@ return {
       P: {
         css:
           '''return `._id {
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.5rem;
-  background: ${args.theme.var.color.background_light_50};
+  background: ${t.var.color.background_light_50};
   overflow: hidden;
 }`;'''
         displayOrder: 3
@@ -273,8 +273,8 @@ return {
   mode: "add",
   vertexLabel: "SchemaImportUrl",
   hideActionsBar: true,
-  onSave: args.fns.handleGenerate,
-  onFnsReady: args.fns.registerFormManagementFns,
+  onSave: f.handleGenerate,
+  onFnsReady: f.registerFormManagementFns,
   formConfig: {
     gridColumns: 2,
     groups: [
@@ -378,7 +378,7 @@ return {
           '''return {
   variant: "primary",
   text: "Generate URLs",
-  onClick: args.fns.runGenerate
+  onClick: f.runGenerate
 };'''
       }
     }
@@ -397,7 +397,7 @@ return {
         props:
           '''return {
   as: "div",
-  show: () => !!args.fns.generatedImportUrl()
+  show: () => !!f.generatedImportUrl()
 };'''
       }
     }
@@ -411,9 +411,9 @@ return {
   flex-direction: column;
   gap: 0.75rem;
   padding: 1rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.5rem;
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
 }`;'''
         displayOrder: 1
         componentName: Html
@@ -452,7 +452,7 @@ return {
   margin: 0;
   font-size: 0.95rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         displayOrder: 1
         componentName: Html
@@ -491,7 +491,7 @@ return {
           '''return {
   variant: "secondary",
   text: "Copy",
-  onClick: args.fns.copyImportUrl
+  onClick: f.copyImportUrl
 };'''
       }
     }
@@ -505,7 +505,7 @@ return {
           '''return {
   variant: "secondary",
   text: "Open",
-  onClick: args.fns.openImportInNewTab
+  onClick: f.openImportInNewTab
 };'''
       }
     }
@@ -519,7 +519,7 @@ return {
           '''return {
   variant: "secondary",
   text: "Modal",
-  onClick: args.fns.openImportInModal
+  onClick: f.openImportInModal
 };'''
       }
     }
@@ -532,8 +532,8 @@ return {
   margin: 0;
   padding: 0.875rem 1rem;
   border-radius: 0.375rem;
-  background: ${args.theme.var.color.background_dark_800};
-  color: ${args.theme.var.color.background_dark_800_text};
+  background: ${t.var.color.background_dark_800};
+  color: ${t.var.color.background_dark_800_text};
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   font-size: 0.875rem;
   line-height: 1.5;
@@ -545,7 +545,7 @@ return {
         props:
           '''return {
   as: "pre",
-  text: args.fns.generatedImportUrl()
+  text: f.generatedImportUrl()
 };'''
       }
     }
@@ -559,9 +559,9 @@ return {
   flex-direction: column;
   gap: 0.75rem;
   padding: 1rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.5rem;
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
 }`;'''
         displayOrder: 2
         componentName: Html
@@ -600,7 +600,7 @@ return {
   margin: 0;
   font-size: 0.95rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         displayOrder: 1
         componentName: Html
@@ -639,7 +639,7 @@ return {
           '''return {
   variant: "secondary",
   text: "Copy",
-  onClick: args.fns.copyExportUrl
+  onClick: f.copyExportUrl
 };'''
       }
     }
@@ -653,7 +653,7 @@ return {
           '''return {
   variant: "secondary",
   text: "Open",
-  onClick: args.fns.openExportInNewTab
+  onClick: f.openExportInNewTab
 };'''
       }
     }
@@ -667,7 +667,7 @@ return {
           '''return {
   variant: "secondary",
   text: "Modal",
-  onClick: args.fns.openExportInModal
+  onClick: f.openExportInModal
 };'''
       }
     }
@@ -680,8 +680,8 @@ return {
   margin: 0;
   padding: 0.875rem 1rem;
   border-radius: 0.375rem;
-  background: ${args.theme.var.color.background_dark_800};
-  color: ${args.theme.var.color.background_dark_800_text};
+  background: ${t.var.color.background_dark_800};
+  color: ${t.var.color.background_dark_800_text};
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   font-size: 0.875rem;
   line-height: 1.5;
@@ -693,7 +693,7 @@ return {
         props:
           '''return {
   as: "pre",
-  text: args.fns.generatedExportUrl()
+  text: f.generatedExportUrl()
 };'''
       }
     }
@@ -705,10 +705,10 @@ return {
         componentName: ContentModal
         props:
           '''return {
-  isOpen: args.fns.previewModalOpen() === true,
-  title: args.fns.previewTitle() || "URL preview",
+  isOpen: f.previewModalOpen() === true,
+  title: f.previewTitle() || "URL preview",
   maxWidth: "96vw",
-  onClose: args.fns.closePreviewModal
+  onClose: f.closePreviewModal
 };'''
       }
     }
@@ -723,15 +723,15 @@ return {
   height: min(80vh, 900px);
   border: 0;
   display: block;
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
           '''return {
   as: "iframe",
-  src: args.fns.previewUrl() || "about:blank",
-  title: args.fns.previewTitle() || "URL preview",
+  src: f.previewUrl() || "about:blank",
+  title: f.previewTitle() || "URL preview",
   loading: "lazy"
 };'''
       }

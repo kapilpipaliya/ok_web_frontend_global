@@ -17,8 +17,8 @@ return `._id {
   height: calc(100vh - 5rem);
   position: sticky;
   top: 5rem;
-  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background_dark_100 : args.theme.var.color.background};
-  border-right: 1px solid ${args.theme.var.color.background_dark_200};
+  background: ${_.currentMode() === 'dark' ? t.var.color.background_dark_100 : t.var.color.background};
+  border-right: 1px solid ${t.var.color.background_dark_200};
   padding: 2rem;
   overflow-y: auto;
   
@@ -31,11 +31,11 @@ return `._id {
   }
   
   &::-webkit-scrollbar-track {
-    background: ${args.theme.var.color.background_dark_100};
+    background: ${t.var.color.background_dark_100};
   }
   
   &::-webkit-scrollbar-thumb {
-    background: ${args.theme.var.color.background_dark_300};
+    background: ${t.var.color.background_dark_300};
     border-radius: 3px;
   }
 }`;
@@ -71,7 +71,7 @@ return `._id {
         contextName: "docSections",
         loop: true,
         props: '''
-const currentPath = args.searchParams?.page || "home";
+const currentPath = _.searchParams?.page || "home";
 return {
   data: [
     {
@@ -123,7 +123,7 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const section = args.contextData.docSections;
+const section = c.docSections;
 return {
   as: "div"
 };
@@ -137,7 +137,7 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const section = args.contextData.docSections;
+const section = c.docSections;
 return {
   as: "h3",
   text: section.title
@@ -147,7 +147,7 @@ return {
 return `._id {
   font-size: 0.875rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   opacity: 0.7;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -188,8 +188,8 @@ return `._id {
         contextName: "navItems",
         loop: true,
         props: '''
-const section = args.contextData.docSections;
-const currentPath = args.contextData.docSections.currentPath;
+const section = c.docSections;
+const currentPath = c.docSections.currentPath;
 return {
   data: section.items.map(item => ({
     ...item,
@@ -206,7 +206,7 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const item = args.contextData.navItems;
+const item = c.navItems;
 return {
   as: "li"
 };
@@ -220,24 +220,24 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const item = args.contextData.navItems;
+const item = c.navItems;
 return {
   as: "a",
   onClick: (e) => {
     e.preventDefault();
-    args.setSearchParams({ page: item.path });
+    _.setSearchParams({ page: item.path });
   }
 };
 ''',
         css: '''
-const item = args.contextData.navItems;
+const item = c.navItems;
 return `._id {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   padding: 0.625rem 1rem;
-  color: ${item.isActive ? args.theme.var.color.primary : args.theme.var.color.text};
-  background: ${item.isActive ? (args.currentMode() === 'dark' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(59, 130, 246, 0.1)') : 'transparent'};
+  color: ${item.isActive ? t.var.color.primary : t.var.color.text};
+  background: ${item.isActive ? (_.currentMode() === 'dark' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(59, 130, 246, 0.1)') : 'transparent'};
   border-radius: 0.5rem;
   text-decoration: none;
   font-size: 0.9375rem;
@@ -253,15 +253,15 @@ return `._id {
     transform: translateY(-50%);
     width: 3px;
     height: 1.5rem;
-    background: ${args.theme.var.color.primary};
+    background: ${t.var.color.primary};
     border-radius: 0 2px 2px 0;
     opacity: ${item.isActive ? '1' : '0'};
     transition: opacity 0.2s ease;
   }
   
   &:hover {
-    background: ${args.currentMode() === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)'};
-    color: ${args.theme.var.color.primary};
+    background: ${_.currentMode() === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)'};
+    color: ${t.var.color.primary};
   }
 }`;
 '''
@@ -274,7 +274,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const item = args.contextData.navItems;
+const item = c.navItems;
 return {
   as: "icon",
   icon: item.icon,
@@ -297,7 +297,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const item = args.contextData.navItems;
+const item = c.navItems;
 return {
   as: "span",
   text: item.label

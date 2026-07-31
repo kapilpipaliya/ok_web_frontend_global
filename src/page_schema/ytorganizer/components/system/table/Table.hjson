@@ -8,11 +8,11 @@
         fns:
           '''
 
-const isNestedLinesTable = () => args.contextData.props?.nestedLinesMode === true;
+const isNestedLinesTable = () => c.props?.nestedLinesMode === true;
 
 const getRowExpansionConfigs = () => {
   if (isNestedLinesTable()) return [];
-  const tableConfig = args.fns.evaluateConfig?.() || {};
+  const tableConfig = f.evaluateConfig?.() || {};
   const rawExpansion = tableConfig.rowExpansion;
   if (Array.isArray(rawExpansion)) {
     return rawExpansion.filter((cfg) => cfg && typeof cfg === 'object');
@@ -88,11 +88,11 @@ const getColumnFilterKind = (col) => {
 
 const getColumns = () => {
   if (isNestedLinesTable()) {
-    return args.contextData.props?.nestedTableColumns || [];
+    return c.props?.nestedTableColumns || [];
   }
   // Do not pass contextData.props here: merged props often include columns: [] which
   // would override loadFromSetting config (empty array is !== undefined).
-  const base = args.fns.prop('columns') || [];
+  const base = f.prop('columns') || [];
   const groupBy = getGroupByConfig();
   if (groupBy) return [{ key: '__expand', renderer: 'expand', width: '32px', label: '' }, ...base];
   if (getRowExpansionConfigs().length > 0) return [{ key: '__expand', renderer: 'expand', width: '32px', label: '' }, ...base];
@@ -100,41 +100,41 @@ const getColumns = () => {
 };
 
 const getRowHeight = () => {
-  if (isNestedLinesTable()) return args.contextData.props?.nestedRowHeight ?? 36;
-  return args.fns.prop('rowHeight', args.contextData.props) || 36;
+  if (isNestedLinesTable()) return c.props?.nestedRowHeight ?? 36;
+  return f.prop('rowHeight', c.props) || 36;
 };
 const getTitle = () => {
-  if (isNestedLinesTable()) return args.contextData.props?.nestedTableTitle ?? '';
-  return args.fns.prop('title', args.contextData.props);
+  if (isNestedLinesTable()) return c.props?.nestedTableTitle ?? '';
+  return f.prop('title', c.props);
 };
 const getSubtitle = () => {
-  if (isNestedLinesTable()) return args.contextData.props?.nestedTableSubtitle ?? '';
-  return args.fns.prop('subtitle', args.contextData.props);
+  if (isNestedLinesTable()) return c.props?.nestedTableSubtitle ?? '';
+  return f.prop('subtitle', c.props);
 };
-const getSearchPlaceholder = () => args.fns.prop('searchPlaceholder', args.contextData.props) || "Search...";
-const getAdditionalFilters = () => args.fns.prop('additionalFilters', args.contextData.props) || [];
-const getCustomActions = () => args.fns.prop('customActions', args.contextData.props) || [];
-const getBatchActions = () => args.fns.prop('batchActions', args.contextData.props) || [];
+const getSearchPlaceholder = () => f.prop('searchPlaceholder', c.props) || "Search...";
+const getAdditionalFilters = () => f.prop('additionalFilters', c.props) || [];
+const getCustomActions = () => f.prop('customActions', c.props) || [];
+const getBatchActions = () => f.prop('batchActions', c.props) || [];
 const getShowRowNumber = () => {
-  if (isNestedLinesTable()) return args.contextData.props?.showRowNumber !== false;
+  if (isNestedLinesTable()) return c.props?.showRowNumber !== false;
   // When loadFromSetting (DynamicPage), do not pass contextData.props: Table ComponentVariant
   // defValue is showRowNumber: false, so merged props would override saved config (same as getColumns).
-  const loadFromSetting = args.fns.getLoadFromSetting?.() === true;
+  const loadFromSetting = f.getLoadFromSetting?.() === true;
   if (loadFromSetting) {
-    return args.fns.prop('showRowNumber') || false;
+    return f.prop('showRowNumber') || false;
   }
-  return args.fns.prop('showRowNumber', args.contextData.props) || false;
+  return f.prop('showRowNumber', c.props) || false;
 };
-const getHideColumns = () => args.fns.prop('hideColumns', args.contextData.props) || [];
+const getHideColumns = () => f.prop('hideColumns', c.props) || [];
 
-const getUniqueKeys = () => args.fns.prop('uniqueKeys', args.contextData.props) || [];
+const getUniqueKeys = () => f.prop('uniqueKeys', c.props) || [];
 const getShowAddButton = () => {
-  if (isNestedLinesTable()) return args.contextData.props?.showAddButton ?? false;
-  return args.fns.prop('showAddButton', args.contextData.props) ?? true;
+  if (isNestedLinesTable()) return c.props?.showAddButton ?? false;
+  return f.prop('showAddButton', c.props) ?? true;
 };
 const getShowSelection = () => {
-  if (isNestedLinesTable()) return args.contextData.props?.showSelection ?? false;
-  return args.fns.prop('showSelection', args.contextData.props);
+  if (isNestedLinesTable()) return c.props?.showSelection ?? false;
+  return f.prop('showSelection', c.props);
 };
 const DEFAULT_ACTION_META = {
   edit: { icon: "carbon:edit", variant: "ghost", title: "Edit", ariaLabel: "Edit" },
@@ -142,7 +142,7 @@ const DEFAULT_ACTION_META = {
 };
 
 const getActionHandlers = () => {
-  const handlers = args.fns.prop("actionHandlers", args.contextData.props);
+  const handlers = f.prop("actionHandlers", c.props);
   return handlers && typeof handlers === "object" ? handlers : {};
 };
 
@@ -175,7 +175,7 @@ const normalizeAction = (action, index) => {
 
 /** Row actions from settings `actions` array; handlers merged from props `actionHandlers`. */
 const getActions = () => {
-  const configured = args.fns.prop("actions", args.contextData.props);
+  const configured = f.prop("actions", c.props);
   if (!Array.isArray(configured)) return [];
   const handlers = getActionHandlers();
   const out = [];
@@ -193,7 +193,7 @@ const getActions = () => {
 /** Actions column when `actions.length > 0`, or explicit `showActionsColumn` override. */
 const getShowActionsColumn = () => {
   if (isNestedLinesTable()) return false;
-  const configured = args.fns.prop("showActionsColumn", args.contextData.props);
+  const configured = f.prop("showActionsColumn", c.props);
   if (configured !== undefined) return configured === true;
   return getActions().length > 0;
 };
@@ -202,7 +202,7 @@ const getShowActionsColumn = () => {
 const buildActionContext = (action, row) => ({
   row,
   action,
-  graph: args.graph,
+  graph: g,
   tableStateVertexId,
   getSelectedRows: () => getSelectedRows(),
   getDisplayData: () => getDisplayData()
@@ -221,7 +221,7 @@ const invokeActionPredicate = (fn, action, row, label) => {
 /** `visible`: boolean | `({ row, action, … }) => boolean` — false hides; omitted => shown. */
 const isActionVisible = (action, row) => {
   if (!action) return false;
-  if (action.type === "edit" && !args.fns.getFormConfig?.()) return false;
+  if (action.type === "edit" && !f.getFormConfig?.()) return false;
   if (action.visible === false) return false;
   if (action.visible === true) return true;
   if (typeof action.visible === "function") {
@@ -270,9 +270,9 @@ const resolveActionReasonCode = (action, row) => {
 
 /** Table/settings map: reason code → display string (localization). */
 const getActionReasonCodeMap = () => {
-  const fromProps = args.fns.prop("reasonCodeMap", args.contextData.props);
+  const fromProps = f.prop("reasonCodeMap", c.props);
   if (fromProps && typeof fromProps === "object" && !Array.isArray(fromProps)) return fromProps;
-  const config = args.fns.evaluateConfig?.() || {};
+  const config = f.evaluateConfig?.() || {};
   const fromConfig = config.reasonCodeMap;
   if (fromConfig && typeof fromConfig === "object" && !Array.isArray(fromConfig)) return fromConfig;
   return {};
@@ -365,7 +365,7 @@ const getSecondaryActionsForRow = (row) =>
 const hasSecondaryActionsForRow = (row) => getSecondaryActionsForRow(row).length > 0;
 
 /** Per-row async loading: runningAction[rowId][actionKey] */
-const [runningAction, setRunningAction] = args.createSignal({});
+const [runningAction, setRunningAction] = _.createSignal({});
 
 const isActionRunning = (action, row) => {
   const rowId = row?.id != null ? String(row.id) : "";
@@ -395,7 +395,7 @@ const confirmRowAction = async (confirmCfg, action, row) => {
     typeof confirmCfg?.message === "function"
       ? confirmCfg.message(buildActionContext(action, row))
       : confirmCfg?.message ?? "";
-  const rbConfirm = args.contextData?.confirmContext?.rbConfirm || args.fns?.rbConfirm;
+  const rbConfirm = c?.confirmContext?.rbConfirm || f?.rbConfirm;
   if (rbConfirm) {
     return rbConfirm({
       title,
@@ -442,10 +442,10 @@ const runRowAction = async (action, row) => {
       await handleDelete(row, { skipConfirm: !!action.confirm, confirm: action.confirm });
       return;
     }
-    args.showErrorToast?.("Action handler not configured");
+    _.showErrorToast?.("Action handler not configured");
   } catch (error) {
     console.error("runRowAction:", error);
-    args.showErrorToast?.(error?.message || "Action failed");
+    _.showErrorToast?.(error?.message || "Action failed");
     throw error;
   } finally {
     setActionRunning(action, row, false);
@@ -461,46 +461,46 @@ const runBulkAction = async (action, rows) => {
     await runRowAction(action, row);
   }
 };
-const getResizableColumns = () => args.fns.prop('resizableColumns', args.contextData.props) ?? true;
+const getResizableColumns = () => f.prop('resizableColumns', c.props) ?? true;
 const getHideExportButtons = () => {
   if (isNestedLinesTable()) return true;
-  return args.fns.prop('hideExportButtons', args.contextData.props) ?? false;
+  return f.prop('hideExportButtons', c.props) ?? false;
 };
 const getHideImportButtons = () => {
   if (isNestedLinesTable()) return true;
-  return args.fns.prop('hideImportButtons', args.contextData.props) ?? false;
+  return f.prop('hideImportButtons', c.props) ?? false;
 };
 const getHideSettingsButton = () => {
   if (isNestedLinesTable()) return true;
-  return args.fns.prop('hideSettingsButton', args.contextData.props) ?? false;
+  return f.prop('hideSettingsButton', c.props) ?? false;
 };
 const getIcon = () => {
   if (isNestedLinesTable()) {
-    const showNestedIcon = args.contextData.props?.nestedShowIcon === true;
+    const showNestedIcon = c.props?.nestedShowIcon === true;
     if (!showNestedIcon) return undefined;
-    return args.contextData.props?.nestedIcon || args.fns.prop('icon', args.contextData.props);
+    return c.props?.nestedIcon || f.prop('icon', c.props);
   }
-  return args.fns.prop('icon', args.contextData.props);
+  return f.prop('icon', c.props);
 };
-const getLabel = () => args.fns.prop('label', args.contextData.props);
+const getLabel = () => f.prop('label', c.props);
 const getAddButtonLabel = () => {
   const label = getLabel();
   return label ? `Add new ${label}` : "Add New Item";
 };
-const getOnEdit = () => args.fns.prop('onEdit', args.contextData.props);
-const getOnAfterAdd = () => args.fns.prop('onAfterAdd', args.contextData.props);
-const getOnAfterEdit = () => args.fns.prop('onAfterEdit', args.contextData.props);
-const getOnAdd = () => args.fns.prop('onAdd', args.contextData.props);
-const getOnAfterDelete = () => args.fns.prop('onAfterDelete', args.contextData.props);
-const getRowClickable = () => args.fns.prop('rowClickable', args.contextData.props) === true;
-const getOnRowClick = () => args.fns.prop('onRowClick', args.contextData.props);
+const getOnEdit = () => f.prop('onEdit', c.props);
+const getOnAfterAdd = () => f.prop('onAfterAdd', c.props);
+const getOnAfterEdit = () => f.prop('onAfterEdit', c.props);
+const getOnAdd = () => f.prop('onAdd', c.props);
+const getOnAfterDelete = () => f.prop('onAfterDelete', c.props);
+const getRowClickable = () => f.prop('rowClickable', c.props) === true;
+const getOnRowClick = () => f.prop('onRowClick', c.props);
 const getSelectionMode = () => {
-  const mode = args.fns.prop('selectionMode', args.contextData.props);
+  const mode = f.prop('selectionMode', c.props);
   return mode === 'single' ? 'single' : 'multiple';
 };
-const getOnSelectionChange = () => args.fns.prop('onSelectionChange', args.contextData.props);
+const getOnSelectionChange = () => f.prop('onSelectionChange', c.props);
 const getInitialSelectedRowIds = () => {
-  const raw = args.fns.prop('initialSelectedRowIds', args.contextData.props);
+  const raw = f.prop('initialSelectedRowIds', c.props);
   return Array.isArray(raw) ? raw.map((id) => String(id)).filter(Boolean) : [];
 };
 
@@ -512,7 +512,7 @@ const notifySelectionChange = () => {
   const selectedItems = [];
   selectedIds.forEach((rowElementId) => {
     const rowData = displayed.find((row) => row?.id === rowElementId);
-    const graphVertex = args.graph?.vertexes?.[rowElementId];
+    const graphVertex = g?.vertexes?.[rowElementId];
     if (graphVertex) {
       selectedItems.push({
         id: graphVertex.id,
@@ -521,16 +521,16 @@ const notifySelectionChange = () => {
       });
     }
   });
-  onSelectionChange(selectedIds, selectedItems, args);
+  onSelectionChange(selectedIds, selectedItems, _);
 };
 
-const propsTableStateVertexId = args.contextData.props?.tableStateVertexId;
+const propsTableStateVertexId = c.props?.tableStateVertexId;
 let tableStateVertexId = propsTableStateVertexId;
 let ownTableStateVertex = false;
 if (!tableStateVertexId) {
-  tableStateVertexId = args.generateNewVertexId(args.graph, args.setGraph);
+  tableStateVertexId = _.generateNewVertexId(g, sg);
   ownTableStateVertex = true;
-  args.addNewVertex(0, {
+  _.addNewVertex(0, {
     id: tableStateVertexId,
     L: ["TableUiState"],
     P: {
@@ -540,7 +540,7 @@ if (!tableStateVertexId) {
       expansionOpen: [],
       expansionRows: [],
       expansionLoading: [],
-      // Parent id → child line-item vertex ids (from main fetch); resolve bodies via args.graph.vertexes[id].
+      // Parent id → child line-item vertex ids (from main fetch); resolve bodies via g.vertexes[id].
       expansionPrefetchIdsByParentId: null,
       activeRowId: null,
       searchTerm: "",
@@ -559,15 +559,15 @@ if (!tableStateVertexId) {
     },
     IN: {},
     OUT: {}
-  }, args.graph, args.setGraph);
+  }, g, sg);
 }
 
 const patchTableP = (partial) => {
-  args.mergeVertexProperties(0, tableStateVertexId, args.graph, args.setGraph, partial);
+  _.mergeVertexProperties(0, tableStateVertexId, g, sg, partial);
 };
-const tableP = () => args.graph.vertexes[tableStateVertexId]?.P;
+const tableP = () => g.vertexes[tableStateVertexId]?.P;
 
-/** TableUiState: P.data / P.filteredData are string[] vertex ids only. Resolve bodies via args.graph.vertexes[id]. */
+/** TableUiState: P.data / P.filteredData are string[] vertex ids only. Resolve bodies via g.vertexes[id]. */
 const normalizeRowIds = (entries) => {
   const seen = new Set();
   const out = [];
@@ -595,7 +595,7 @@ const rowIdsFromVertices = (rows) => {
 
 const vertexFromRowId = (id) => {
   if (typeof id !== 'string' || id === '') return null;
-  return args.graph?.vertexes?.[id] || null;
+  return g?.vertexes?.[id] || null;
 };
 
 const verticesFromRowIds = (ids) => {
@@ -610,7 +610,7 @@ const verticesFromRowIds = (ids) => {
 
 const resolvedFilteredVertices = () => verticesFromRowIds(tableP()?.filteredData ?? []);
 
-const getGroupByConfig = () => args.fns.prop('groupBy', args.contextData.props) || null;
+const getGroupByConfig = () => f.prop('groupBy', c.props) || null;
 const toggleExpanded = (key) => {
   const sk = String(key);
   const p = tableP();
@@ -633,7 +633,7 @@ const buildExpansionPrefetchIdMapFromGraph = (relatedVertexIds, rowExpansion, pa
   const idsByParentKey = {};
   for (const lineItemVertexId of relatedVertexIds) {
     if (lineItemVertexId == null || lineItemVertexId === '') continue;
-    const lineItemVertex = args.graph?.vertexes?.[lineItemVertexId];
+    const lineItemVertex = g?.vertexes?.[lineItemVertexId];
     if (!lineItemVertex?.L?.includes(childLabel)) continue;
     const parentFilterValue = lineItemVertex.P?.[filterKey];
     if (parentFilterValue == null) continue;
@@ -659,7 +659,7 @@ const lineItemVerticesFromIds = (ids) => {
   if (!Array.isArray(ids)) return [];
   const out = [];
   for (const vertexId of ids) {
-    const vertex = args.graph?.vertexes?.[vertexId];
+    const vertex = g?.vertexes?.[vertexId];
     if (vertex) out.push(vertex);
   }
   return out;
@@ -742,7 +742,7 @@ const toggleRowExpansion = async (row) => {
       const filters = { [filterKey]: parentVal };
       const sort = rowExpansion.nestedSort || null;
       const hooks = rowExpansion.nestedHooks;
-      const fetchFn = args.fns.fetchUserContentRows;
+      const fetchFn = f.fetchUserContentRows;
       const fetchedRows = typeof fetchFn === 'function' ? await fetchFn({
         tableVertexLabel: childLabel,
         filters,
@@ -854,14 +854,14 @@ const getSelectableVisibleRowIds = () => {
 let lastNestedLinesSyncKey = "";
 const syncNestedLinesTableData = () => {
   if (!isNestedLinesTable()) return;
-  const getRows = args.contextData.props?.getNestedLineRows;
+  const getRows = c.props?.getNestedLineRows;
   const rows = typeof getRows === "function" ? getRows() : [];
   const ids = rowIdsFromVertices(rows);
   const syncKey = ids.join("\0");
   if (syncKey === lastNestedLinesSyncKey) return;
   lastNestedLinesSyncKey = syncKey;
   patchTableP({ data: ids });
-  const config = args.fns.evaluateConfig?.() || {};
+  const config = f.evaluateConfig?.() || {};
   const enableLocalFilters = config?.enableLocalFilters === true;
   const enableLocalSort = config?.enableLocalSort === true;
   if (enableLocalFilters || enableLocalSort) {
@@ -873,7 +873,7 @@ const syncNestedLinesTableData = () => {
 
 // Get selected rows functions from props (always provided by parent)
 const getSelectedRows = () => {
-  const propFn = args.contextData.props?.getSelectedRows;
+  const propFn = c.props?.getSelectedRows;
   if (!propFn) {
     console.warn("getSelectedRows not provided to Table component");
     return new Set();
@@ -890,7 +890,7 @@ const getEffectiveSelectedRows = () => {
   return new Set([...selected].filter(id => currentIds.has(id)));
 };
 const setSelectedRows = (newSelected) => {
-  const propFn = args.contextData.props?.setSelectedRows;
+  const propFn = c.props?.setSelectedRows;
   if (!propFn) {
     console.warn("setSelectedRows not provided to Table component");
     return;
@@ -898,7 +898,7 @@ const setSelectedRows = (newSelected) => {
   propFn(newSelected);
 };
 const clearSelectedRows = () => {
-  const propFn = args.contextData.props?.clearSelectedRows;
+  const propFn = c.props?.clearSelectedRows;
   if (!propFn) {
     console.warn("clearSelectedRows not provided to Table component");
     return;
@@ -1001,14 +1001,14 @@ const getRowRef = (index) => rowRefs[index];
 
 // Initialize from query parameters
 const initializeFromQueryParams = () => {
-  const searchParams = args.searchParams || {};
+  const searchParams = _.searchParams || {};
   if (searchParams.search) {
     patchTableP({ searchTerm: searchParams.search });
   }
   if (searchParams.filters) {
     try {
       const filters = JSON.parse(searchParams.filters);
-      args.setGraph("vertexes", tableStateVertexId, "P", { columnFilters: filters });
+      sg("vertexes", tableStateVertexId, "P", { columnFilters: filters });
       // Apply filters after restoring from URL
       // Use setTimeout to ensure store update is complete
       setTimeout(() => {
@@ -1057,7 +1057,7 @@ const updateQueryParams = () => {
     // Clear sort param if no sort
     params.sort = undefined;
   }
-  args.setSearchParams?.(params, { replace: true });
+  _.setSearchParams?.(params, { replace: true });
 };
 
 
@@ -1197,14 +1197,14 @@ const updateCategoryCountFromFetchedData = (fetchedData, categoryItem) => {
   // This ensures we update the count for the category that was actually fetched
   if (!categoryItem) return;
   
-  const config = args.fns.evaluateConfig?.() || {};
+  const config = f.evaluateConfig?.() || {};
   const sidebarConfig = config?.sidebar;
   if (!sidebarConfig) return;
   
   const rootKeys = sidebarConfig.rootKeys || {};
   const rootKey = rootKeys.key;
   
-  const tableLabel = args.fns.getTableVertexLabel?.();
+  const tableLabel = f.getTableVertexLabel?.();
   const uncategorizedVertexId = tableLabel ? '_' + tableLabel + '_uncategorized' : null;
   const isSyntheticUncat =
     uncategorizedVertexId &&
@@ -1217,26 +1217,26 @@ const updateCategoryCountFromFetchedData = (fetchedData, categoryItem) => {
   
   let currentCount = 0;
   if (isUncategorized) {
-    const uncategorizedVertex = args.graph?.vertexes?.[uncategorizedVertexId];
+    const uncategorizedVertex = g?.vertexes?.[uncategorizedVertexId];
     currentCount = uncategorizedVertex?.P?.contentCount ?? 0;
   } else {
-    const categoryVertex = args.graph?.vertexes?.[categoryId];
+    const categoryVertex = g?.vertexes?.[categoryId];
     currentCount = categoryVertex?.P?.contentCount ?? 0;
   }
   
   const fetchedLength = fetchedData?.length ?? 0;
   if (currentCount !== fetchedLength) {
     if (isUncategorized) {
-      const uncategorizedVertex = args.graph?.vertexes?.[uncategorizedVertexId];
+      const uncategorizedVertex = g?.vertexes?.[uncategorizedVertexId];
       if (uncategorizedVertex) {
-        args.mergeVertexProperties(0, uncategorizedVertexId, args.graph, args.setGraph, {
+        _.mergeVertexProperties(0, uncategorizedVertexId, g, sg, {
           contentCount: fetchedLength
         });
       }
     } else {
-      const categoryVertex = args.graph?.vertexes?.[categoryId];
+      const categoryVertex = g?.vertexes?.[categoryId];
       if (categoryVertex) {
-        args.mergeVertexProperties(0, categoryId, args.graph, args.setGraph, {
+        _.mergeVertexProperties(0, categoryId, g, sg, {
           contentCount: fetchedLength
         });
       }
@@ -1244,11 +1244,11 @@ const updateCategoryCountFromFetchedData = (fetchedData, categoryItem) => {
   }
 };
 
-const debouncedSetSearchTerm = args.debounce(value => {
+const debouncedSetSearchTerm = _.debounce(value => {
   patchTableP({ searchTerm: value });
   
   // Check if local filters are enabled
-  const config = args.fns.evaluateConfig?.() || {};
+  const config = f.evaluateConfig?.() || {};
   const enableLocalFilters = config?.enableLocalFilters === true;
   
   if (enableLocalFilters) {
@@ -1270,8 +1270,8 @@ const getCellValue = (row, column) => {
     const sc = column.selectConfig;
     const rel = sc.relationshipType;
     const lf = sc.labelField;
-    const vxMap = args.graph?.vertexes ?? {};
-    const edgesMap = args.graph?.edges ?? {};
+    const vxMap = g?.vertexes ?? {};
+    const edgesMap = g?.edges ?? {};
     let tid = null;
     if (row.OUT && rel) {
       const outArr = row.OUT[rel];
@@ -1480,7 +1480,7 @@ const handleSort = (column) => {
   }
 
   // Check if local sort is enabled
-  const config = args.fns.evaluateConfig?.() || {};
+  const config = f.evaluateConfig?.() || {};
   const enableLocalSort = config?.enableLocalSort === true;
   
   if (enableLocalSort) {
@@ -1561,7 +1561,7 @@ const handleColumnFilterChange = (columnKey, value) => {
     filterValue = value === "_All_VALUES_" || value === "" || value === null || value === undefined ? undefined : value;
   }
 
-  args.setGraph(
+  sg(
     "vertexes",
     tableStateVertexId,
     "P",
@@ -1571,7 +1571,7 @@ const handleColumnFilterChange = (columnKey, value) => {
   );
 
   // Check if local filters are enabled
-  const config = args.fns.evaluateConfig?.() || {};
+  const config = f.evaluateConfig?.() || {};
   const enableLocalFilters = config?.enableLocalFilters === true;
   
   if (enableLocalFilters) {
@@ -1586,7 +1586,7 @@ const handleColumnFilterChange = (columnKey, value) => {
 
 // Background poll: fetch only queued row ids and merge updates (no full reload, no loader)
 const pollQueuedRows = async () => {
-  const config = args.fns.evaluateConfig?.() || {};
+  const config = f.evaluateConfig?.() || {};
   const intervalMs = config?.refetchIntervalWhenQueued;
   const ids = normalizeRowIds(tableP()?.data ?? []);
   const queuedIds = [];
@@ -1595,7 +1595,7 @@ const pollQueuedRows = async () => {
     if (vx?.P?.syncStatus === 'queued') queuedIds.push(ids[i]);
   }
   if (queuedIds.length === 0 || !intervalMs) return;
-  const refresh = args.fns.refreshQueuedRows;
+  const refresh = f.refreshQueuedRows;
   if (!refresh || typeof refresh !== 'function') return;
   try {
     const result = await refresh(queuedIds);
@@ -1637,9 +1637,9 @@ const startPollIfQueued = (dataToCheck) => {
     clearTimeout(pollRef.id);
     pollRef.id = null;
   }
-  const config = args.fns.evaluateConfig?.() || {};
+  const config = f.evaluateConfig?.() || {};
   const intervalMs = config?.refetchIntervalWhenQueued;
-  const refresh = args.fns.refreshQueuedRows;
+  const refresh = f.refreshQueuedRows;
   const hasQueued = Array.isArray(rows) && rows.some(r => (r.P?.syncStatus) === 'queued');
   if (intervalMs && refresh && typeof refresh === 'function' && hasQueued) {
     pollRef.id = setTimeout(() => {
@@ -1655,19 +1655,19 @@ const handleSearch = () => {
     syncNestedLinesTableData();
     return;
   }
-  const config = args.fns.evaluateConfig?.() || {};
+  const config = f.evaluateConfig?.() || {};
   const enableLocalFilters = config?.enableLocalFilters === true;
   const enableLocalSort = config?.enableLocalSort === true;
   
   // If local filters/sort are enabled, fetch all data and apply locally
   // Otherwise, pass filters/sort to server
-  args.fns.fetchData(
+  f.fetchData(
     enableLocalFilters ? undefined : (tableP()?.searchTerm ?? ""), 
     enableLocalFilters ? undefined : (tableP()?.columnFilters ?? {}), 
     enableLocalSort ? undefined : (tableP()?.sortConfig ?? { column: null, direction: null }), 
     (fetchedRows, categoryItem, relatedVertexIds) => {
       clearExpansionStoresForDataReload();
-      const rowExpansionRaw = (args.fns.evaluateConfig?.() || {}).rowExpansion;
+      const rowExpansionRaw = (f.evaluateConfig?.() || {}).rowExpansion;
       const rowExpansion = Array.isArray(rowExpansionRaw) ? rowExpansionRaw.find((cfg) => cfg?.childVertexLabel) : rowExpansionRaw;
       if (rowExpansion && rowExpansion.childVertexLabel && Array.isArray(relatedVertexIds)) {
         patchTableP({
@@ -1753,8 +1753,8 @@ const applyInitialSelectedRowIds = () => {
   }
 };
 
-const [initialSelectionAppliedKey, setInitialSelectionAppliedKey] = args.createSignal("");
-args.createEffect(() => {
+const [initialSelectionAppliedKey, setInitialSelectionAppliedKey] = _.createSignal("");
+_.createEffect(() => {
   const initialIds = getInitialSelectedRowIds();
   const nextKey = initialIds.join("|");
   if (initialSelectionAppliedKey() === nextKey) return;
@@ -1812,7 +1812,7 @@ const handleAdd = async () => {
       return;
     } catch (error) {
       console.error("Error in onAdd function:", error);
-      args.showErrorToast?.(error?.message || "Failed to execute add action");
+      _.showErrorToast?.(error?.message || "Failed to execute add action");
       return;
     }
   }
@@ -1827,11 +1827,11 @@ const handleEdit = async (row) => {
   // If onEdit function is provided, call it instead of opening modal
   if (onEdit && typeof onEdit === 'function') {
     try {
-      await onEdit(row, args);
+      await onEdit(row, _);
       return;
     } catch (error) {
       console.error("Error in onEdit function:", error);
-      args.showErrorToast?.(error?.message || "Failed to execute edit action");
+      _.showErrorToast?.(error?.message || "Failed to execute edit action");
       return;
     }
   }
@@ -1845,14 +1845,14 @@ const handleViewRow = (row) => {
 };
 
 const handleSave = async (formDataToSave) => {
-  const formConfig = args.fns.getFormConfig();
+  const formConfig = f.getFormConfig();
   if (!formConfig?.saveFunction) {
-    args.showErrorToast?.("Save function not configured");
+    _.showErrorToast?.("Save function not configured");
     return;
   }
 
   try {
-    args.mergeVertexProperties(0, args.fns.pageStateVertexId, args.graph, args.setGraph, { loading: true });
+    _.mergeVertexProperties(0, f.pageStateVertexId, g, sg, { loading: true });
     const mode = tableP()?.modalMode ?? "add";
     const originalRow = tableP()?.editingRow ?? null;
     const result = await formConfig.saveFunction({
@@ -1862,7 +1862,7 @@ const handleSave = async (formDataToSave) => {
     });
 
     if (result?.success) {
-      args.showSuccessToast?.(
+      _.showSuccessToast?.(
         mode === "add" ? "Item added successfully" : "Item updated successfully"
       );
       patchTableP({ isModalOpen: false });
@@ -1877,10 +1877,10 @@ const handleSave = async (formDataToSave) => {
         const onAfterAdd = getOnAfterAdd();
         if (onAfterAdd && typeof onAfterAdd === 'function') {
           try {
-            await onAfterAdd(result, args);
+            await onAfterAdd(result, _);
           } catch (error) {
             console.error("Error in onAfterAdd function:", error);
-            args.showErrorToast?.(error?.message || "Failed to execute after add action");
+            _.showErrorToast?.(error?.message || "Failed to execute after add action");
           }
         }
       } else {
@@ -1896,10 +1896,10 @@ const handleSave = async (formDataToSave) => {
         const onAfterEdit = getOnAfterEdit();
         if (onAfterEdit && typeof onAfterEdit === 'function') {
           try {
-            await onAfterEdit(result, args);
+            await onAfterEdit(result, _);
           } catch (error) {
             console.error("Error in onAfterEdit function:", error);
-            args.showErrorToast?.(error?.message || "Failed to execute after edit action");
+            _.showErrorToast?.(error?.message || "Failed to execute after edit action");
           }
         }
       }
@@ -1908,16 +1908,16 @@ const handleSave = async (formDataToSave) => {
       return true;
     } else {
       const errorMsg = result?.message || result?.error || "Failed to save";
-      args.showErrorToast?.(errorMsg);
+      _.showErrorToast?.(errorMsg);
       return false;
     }
   } catch (error) {
     console.error("Error saving:", error);
     const errorMsg = error?.message || error?.error || "Failed to save item";
-    args.showErrorToast?.(errorMsg);
+    _.showErrorToast?.(errorMsg);
     return false;
   } finally {
-    args.mergeVertexProperties(0, args.fns.pageStateVertexId, args.graph, args.setGraph, { loading: false });
+    _.mergeVertexProperties(0, f.pageStateVertexId, g, sg, { loading: false });
   }
 };
 
@@ -1932,14 +1932,14 @@ const handleDelete = async (row, options = {}) => {
       return;
     } catch (error) {
       console.error("Error in delete handler:", error);
-      args.showErrorToast?.(error?.message || "Failed to execute delete action");
+      _.showErrorToast?.(error?.message || "Failed to execute delete action");
       return;
     }
   }
 
-  const formConfig = args.fns.getFormConfig();
+  const formConfig = f.getFormConfig();
   if (!formConfig?.saveFunction) {
-    args.showErrorToast?.("Delete function not configured");
+    _.showErrorToast?.("Delete function not configured");
     return;
   }
 
@@ -1960,7 +1960,7 @@ const handleDelete = async (row, options = {}) => {
   }
 
   try {
-    args.mergeVertexProperties(0, args.fns.pageStateVertexId, args.graph, args.setGraph, { loading: true });
+    _.mergeVertexProperties(0, f.pageStateVertexId, g, sg, { loading: true });
     // For delete, pass the row as vertex in the new data format
     const deleteData = {
       vertex: row,
@@ -1974,7 +1974,7 @@ const handleDelete = async (row, options = {}) => {
 
     if (result?.success) {
       const label = getLabel();
-      args.showSuccessToast?.(label ? `${label} deleted successfully` : "Item deleted successfully");
+      _.showSuccessToast?.(label ? `${label} deleted successfully` : "Item deleted successfully");
       const rid = String(row?.id ?? "");
       const updated = normalizeRowIds(tableP()?.data ?? []).filter((id) => id !== rid);
       patchTableP({ data: updated });
@@ -1984,22 +1984,22 @@ const handleDelete = async (row, options = {}) => {
       const onAfterDelete = getOnAfterDelete();
       if (onAfterDelete && typeof onAfterDelete === 'function') {
         try {
-          await onAfterDelete(result, row, args);
+          await onAfterDelete(result, row, _);
         } catch (error) {
           console.error("Error in onAfterDelete function:", error);
-          args.showErrorToast?.(error?.message || "Failed to execute after delete action");
+          _.showErrorToast?.(error?.message || "Failed to execute after delete action");
         }
       }
     } else {
       const errorMsg = result?.message || result?.error || "Failed to delete";
-      args.showErrorToast?.(errorMsg);
+      _.showErrorToast?.(errorMsg);
     }
   } catch (error) {
     console.error("Error deleting:", error);
     const errorMsg = error?.message || error?.error || "Failed to delete item";
-    args.showErrorToast?.(errorMsg);
+    _.showErrorToast?.(errorMsg);
   } finally {
-    args.mergeVertexProperties(0, args.fns.pageStateVertexId, args.graph, args.setGraph, { loading: false });
+    _.mergeVertexProperties(0, f.pageStateVertexId, g, sg, { loading: false });
   }
 };
 
@@ -2022,7 +2022,7 @@ const getColumnWidth = (columnKey) => {
   if (storedWidth) {
     return storedWidth;
   }
-  const configWidths = args.fns.prop('columnWidths', args.contextData.props);
+  const configWidths = f.prop('columnWidths', c.props);
   if (configWidths && configWidths[columnKey]) {
     return configWidths[columnKey];
   }
@@ -2089,7 +2089,7 @@ const createResizeHandler = (columnKey) => {
       const clientX = moveEvent.clientX || moveEvent.touches?.[0]?.clientX || startX;
       const deltaX = clientX - startX;
       const newWidth = Math.max(minWidth, startWidth + deltaX);
-      args.setGraph("vertexes", tableStateVertexId, "P", "columnWidths", columnKey, `${newWidth}px`);
+      sg("vertexes", tableStateVertexId, "P", "columnWidths", columnKey, `${newWidth}px`);
     };
 
     const handleMouseUp = () => {
@@ -2115,8 +2115,8 @@ const createResizeHandler = (columnKey) => {
   };
 };
 // Watch for sidebar selection changes and refresh table
-const selectedSidebarItem = args.fns.selectedSidebarItem;
-args.createEffect(() => {
+const selectedSidebarItem = f.selectedSidebarItem;
+_.createEffect(() => {
   const item = selectedSidebarItem?.();
   patchTableP({ activeRowId: null });
   // When sidebar selection changes, refresh table data
@@ -2126,10 +2126,10 @@ args.createEffect(() => {
 });
 
 // React to parent's rowsToRemove signal (parent-owned state, no reload after move-to-category)
-const rowsToRemove = args.contextData.props?.rowsToRemove;
-const setRowsToRemove = args.contextData.props?.setRowsToRemove;
+const rowsToRemove = c.props?.rowsToRemove;
+const setRowsToRemove = c.props?.setRowsToRemove;
 if (rowsToRemove && setRowsToRemove) {
-  args.createEffect(() => {
+  _.createEffect(() => {
     const idsToRemove = rowsToRemove?.();
     if (!idsToRemove || !Array.isArray(idsToRemove) || idsToRemove.length === 0) return;
     const idSet = new Set(idsToRemove.map((x) => String(x)));
@@ -2160,7 +2160,7 @@ const canDragRow = (rowId) => {
 
 // Initialize draggable for table row - rowId read from element data-row-id
 const initTableDraggable = (element) => {
-  if (!element || !args.draggable) return;
+  if (!element || !_.draggable) return;
   
   // Clean up existing draggable for this element if any
   const existingCleanup = tableDraggableCleanups.get(element);
@@ -2168,7 +2168,7 @@ const initTableDraggable = (element) => {
     existingCleanup();
   }
   
-  const cleanup = args.draggable({
+  const cleanup = _.draggable({
     element,
     getInitialData: () => {
       const currentRowId = getRowIdFromElement(element);
@@ -2187,7 +2187,7 @@ const initTableDraggable = (element) => {
     },
     onGenerateDragPreview: ({ nativeSetDragImage }) => {
       // Provide a stable custom preview (pragmatic disables default preview in some setups)
-      if (!args.setCustomNativeDragPreview || !nativeSetDragImage) return;
+      if (!_.setCustomNativeDragPreview || !nativeSetDragImage) return;
       const currentRowId = getRowIdFromElement(element);
       if (!currentRowId || !canDragRow(currentRowId)) return;
 
@@ -2196,10 +2196,10 @@ const initTableDraggable = (element) => {
 
       if (!count) return;
 
-      return args.setCustomNativeDragPreview({
+      return _.setCustomNativeDragPreview({
         nativeSetDragImage,
-        getOffset: args.pointerOutsideOfPreview
-          ? args.pointerOutsideOfPreview({ x: "8px", y: "8px" })
+        getOffset: _.pointerOutsideOfPreview
+          ? _.pointerOutsideOfPreview({ x: "8px", y: "8px" })
           : undefined,
         render: ({ container }) => {
           container.style.boxSizing = "border-box";
@@ -2208,9 +2208,9 @@ const initTableDraggable = (element) => {
           container.style.gap = "10px";
           container.style.padding = "10px 12px";
           container.style.borderRadius = "10px";
-          container.style.border = `1px solid ${args.theme?.var?.color?.border ?? "rgba(0,0,0,0.2)"}`;
-          container.style.background = `${args.theme?.var?.color?.background_light_200 ?? "#fff"}`;
-          container.style.color = `${args.theme?.var?.color?.text ?? "#111"}`;
+          container.style.border = `1px solid ${t?.var?.color?.border ?? "rgba(0,0,0,0.2)"}`;
+          container.style.background = `${t?.var?.color?.background_light_200 ?? "#fff"}`;
+          container.style.color = `${t?.var?.color?.text ?? "#111"}`;
           container.style.boxShadow = "0 10px 28px rgba(0,0,0,0.18)";
           container.style.pointerEvents = "none";
           container.style.fontSize = "14px";
@@ -2221,8 +2221,8 @@ const initTableDraggable = (element) => {
           badge.style.flex = "0 0 auto";
           badge.style.padding = "2px 8px";
           badge.style.borderRadius = "9999px";
-          badge.style.background = `${args.theme?.var?.color?.primary ?? "#4f46e5"}`;
-          badge.style.color = `${args.theme?.var?.color?.primary_text ?? "#fff"}`;
+          badge.style.background = `${t?.var?.color?.primary ?? "#4f46e5"}`;
+          badge.style.color = `${t?.var?.color?.primary_text ?? "#fff"}`;
           badge.style.fontSize = "12px";
           badge.style.fontWeight = "700";
           badge.textContent = String(count);
@@ -2302,7 +2302,7 @@ const hasActiveFilters = () => {
 // - Body scrolls in one viewport-sized box (40wrap): overflow:auto so vertical and horizontal scrollbars stay visible.
 // - Header/filter strips wrap the same grid width; overflow-x:hidden hides scrollbars there; scrollLeft is synced from body on scroll.
 // - tableBodyVScrollEl and tableBodyHScrollEl both point at 40wrap after mount (same element for VirtualList + scrollLeft sync).
-const [tableBodyVScrollEl, setTableBodyVScrollEl] = args.createSignal(null);
+const [tableBodyVScrollEl, setTableBodyVScrollEl] = _.createSignal(null);
 let tableHeaderHScrollEl = null;
 let tableFilterHScrollEl = null;
 let tableBodyHScrollEl = null;
@@ -2403,8 +2403,8 @@ return {
   confirmRowAction,
   getOnAfterDelete,
   getUsePolarisUI: () => {
-    if (isNestedLinesTable()) return args.contextData.props?.usePolarisUI === true;
-    return args.fns.getUsePolarisUI?.() === true;
+    if (isNestedLinesTable()) return c.props?.usePolarisUI === true;
+    return f.getUsePolarisUI?.() === true;
   },
   getColumnWidth,
   createResizeHandler,
@@ -2496,28 +2496,28 @@ return {
         props:
           '''return {
   onMount: async () => {
-    if (args.fns.isNestedLinesTable?.()) {
-      args.fns.syncNestedLinesTableData?.();
-      if (typeof args.createEffect === "function") {
-        args.createEffect(() => {
-          const getRows = args.contextData.props?.getNestedLineRows;
-          const getLoading = args.contextData.props?.getNestedLinesLoading;
+    if (f.isNestedLinesTable?.()) {
+      f.syncNestedLinesTableData?.();
+      if (typeof _.createEffect === "function") {
+        _.createEffect(() => {
+          const getRows = c.props?.getNestedLineRows;
+          const getLoading = c.props?.getNestedLinesLoading;
           if (typeof getRows === "function") getRows();
           if (typeof getLoading === "function") getLoading();
-          args.fns.syncNestedLinesTableData?.();
+          f.syncNestedLinesTableData?.();
         });
       }
       return;
     }
-    args.fns.initializeFromQueryParams();
+    f.initializeFromQueryParams();
     // If sidebar is configured, don't fetch on mount
-    const hasSidebar = args.fns.hasSidebar?.();
+    const hasSidebar = f.hasSidebar?.();
     if (!hasSidebar) {
-      args.fns.handleSearch();
+      f.handleSearch();
     }
   },
   onCleanup: () => {
-    args.deleteVertex(0, args.fns.tableStateVertexId, args.graph, args.setGraph);
+    _.deleteVertex(0, f.tableStateVertexId, g, sg);
   }
 }'''
       }
@@ -2528,7 +2528,7 @@ return {
       P: {
         css:
           '''
-return args.contextData.props?.nestedLinesMode === true
+return c.props?.nestedLinesMode === true
   ? `._id {
   display: flex;
   flex-direction: column;
@@ -2536,7 +2536,7 @@ return args.contextData.props?.nestedLinesMode === true
   min-height: 0;
   height: ${
     (() => {
-      const rawHeight = args.contextData.props?.nestedLinesContainerHeight;
+      const rawHeight = c.props?.nestedLinesContainerHeight;
       if (typeof rawHeight === "number" && !Number.isNaN(rawHeight) && rawHeight > 0) return `${rawHeight}px`;
       if (typeof rawHeight === "string" && rawHeight.trim() !== "") return rawHeight;
       return "280px";
@@ -2544,7 +2544,7 @@ return args.contextData.props?.nestedLinesMode === true
   };
   max-height: ${
     (() => {
-      const rawMaxHeight = args.contextData.props?.nestedLinesContainerMaxHeight;
+      const rawMaxHeight = c.props?.nestedLinesContainerMaxHeight;
       if (typeof rawMaxHeight === "number" && !Number.isNaN(rawMaxHeight) && rawMaxHeight > 0) return `${rawMaxHeight}px`;
       if (typeof rawMaxHeight === "string" && rawMaxHeight.trim() !== "") return rawMaxHeight;
       return "100%";
@@ -2585,10 +2585,10 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.sm};
+  padding: ${t.var.spacing.sm};
   display: flex;
   flex-direction: column;
-  gap: ${args.theme.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
   /* Toolbar keeps natural height; flex row below (table) gets remaining space */
   flex-shrink: 0;
 }`;
@@ -2613,7 +2613,7 @@ return `._id {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: ${args.theme.var.spacing.md};
+  gap: ${t.var.spacing.md};
   flex-wrap: wrap;
 }`;
 '''
@@ -2636,17 +2636,17 @@ return {
 return `._id {
   display: flex;
   align-items: center;
-  gap: ${args.theme.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 1
         componentName: Html
         props:
           '''
-const title = args.fns.getTitle();
+const title = f.getTitle();
 const displayTitle = title;
 return {
   as: "div",
@@ -2663,7 +2663,7 @@ return {
         componentName: Html
         props:
           '''
-const icon = args.fns.getIcon();
+const icon = f.getIcon();
 return {
   as: "icon",
   icon: icon,
@@ -2688,7 +2688,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const title = args.fns.getTitle();
+const title = f.getTitle();
 const displayTitle = title;
 return {
   as: "span",
@@ -2731,14 +2731,14 @@ return `._id {
   margin: 0;
   font-size: 0.875rem;
   line-height: 1.5;
-  color: ${args.theme.var.color.text_dark_400};
+  color: ${t.var.color.text_dark_400};
 }`;
 '''
         displayOrder: 2
         componentName: Html
         props:
           '''
-const subtitle = args.fns.getSubtitle?.();
+const subtitle = f.getSubtitle?.();
 const displaySubtitle =
   subtitle != null && String(subtitle).trim() !== "" ? String(subtitle).trim() : "";
 return {
@@ -2758,7 +2758,7 @@ return {
 return `._id {
   display: flex;
   align-items: center;
-  gap: ${args.theme.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
   flex-wrap: wrap;
 }`;
 '''
@@ -2766,7 +2766,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const customActions = args.fns.getCustomActions?.() || [];
+const customActions = f.getCustomActions?.() || [];
 const hasCustomActions = Array.isArray(customActions) ? customActions.length > 0 : !!customActions;
 return {
   as: "div",
@@ -2793,7 +2793,7 @@ return {
 return `._id {
   display: flex;
   align-items: center;
-  gap: ${args.theme.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
   flex-wrap: wrap;
 }`;
 '''
@@ -2825,15 +2825,15 @@ return {
 return `._id {
   display: flex;
   align-items: center;
-  gap: ${args.theme.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
 }`;
 '''
         displayOrder: 2
         componentName: Html
         props:
           '''
-const showAddButton = args.fns.getShowAddButton();
-const formConfig = args.fns.getFormConfig();
+const showAddButton = f.getShowAddButton();
+const formConfig = f.getFormConfig();
 
 return {
   as: "div",
@@ -2852,10 +2852,10 @@ return {
           '''
 return {
   variant: "primary",
-  onClick: args.fns.handleAdd,
+  onClick: f.handleAdd,
   text: "Add",
   leftIcon: "carbon:add",
-  hide: args.fns.getUsePolarisUI?.() === true
+  hide: f.getUsePolarisUI?.() === true
 };
 '''
       }
@@ -2873,8 +2873,8 @@ return {
   "attr:variant": "primary",
   "attr:icon": "plus",
   text: "Add",
-  onClick: args.fns.handleAdd,
-  hide: args.fns.getUsePolarisUI?.() !== true
+  onClick: f.handleAdd,
+  hide: f.getUsePolarisUI?.() !== true
 };
 '''
       }
@@ -2888,17 +2888,17 @@ return {
 return `._id {
   display: flex;
   align-items: center;
-  gap: ${args.theme.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
 }`;
 '''
         displayOrder: 6
         componentName: Html
         props:
           '''
-const hasImport = !!args.fns.getImportFunction();
-const hasExport = !!args.fns.getExportFunction();
-const hideImportButtons = args.fns.getHideImportButtons();
-const hideExportButtons = args.fns.getHideExportButtons();
+const hasImport = !!f.getImportFunction();
+const hasExport = !!f.getExportFunction();
+const hideImportButtons = f.getHideImportButtons();
+const hideExportButtons = f.getHideExportButtons();
 
 return {
   as: "div",
@@ -2917,11 +2917,11 @@ return {
           '''
 return {
   variant: "secondary",
-  onClick: () => args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { isImportModalOpen: true }),
+  onClick: () => _.mergeVertexProperties(0, f.tableStateVertexId, g, sg, { isImportModalOpen: true }),
   text: "Import",
   leftIcon: "carbon:upload",
-  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
-  hide: !args.fns.getImportFunction() || args.fns.getHideImportButtons() || args.fns.getUsePolarisUI?.() === true
+  disabled: g.vertexes[f.pageStateVertexId]?.P?.loading === true,
+  hide: !f.getImportFunction() || f.getHideImportButtons() || f.getUsePolarisUI?.() === true
 };
 '''
       }
@@ -2939,9 +2939,9 @@ return {
   "attr:variant": "secondary",
   "attr:icon": "upload",
   text: "Import",
-  onClick: () => args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { isImportModalOpen: true }),
-  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
-  hide: !args.fns.getImportFunction() || args.fns.getHideImportButtons() || args.fns.getUsePolarisUI?.() !== true
+  onClick: () => _.mergeVertexProperties(0, f.tableStateVertexId, g, sg, { isImportModalOpen: true }),
+  disabled: g.vertexes[f.pageStateVertexId]?.P?.loading === true,
+  hide: !f.getImportFunction() || f.getHideImportButtons() || f.getUsePolarisUI?.() !== true
 };
 '''
       }
@@ -2956,11 +2956,11 @@ return {
           '''
 return {
   variant: "secondary",
-  onClick: args.fns.handleExport,
+  onClick: f.handleExport,
   text: "Export All",
   leftIcon: "carbon:download",
-  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
-  hide: !args.fns.getExportFunction() || args.fns.getHideExportButtons() || args.fns.getUsePolarisUI?.() === true
+  disabled: g.vertexes[f.pageStateVertexId]?.P?.loading === true,
+  hide: !f.getExportFunction() || f.getHideExportButtons() || f.getUsePolarisUI?.() === true
 };
 '''
       }
@@ -2978,9 +2978,9 @@ return {
   "attr:variant": "secondary",
   "attr:icon": "download",
   text: "Export All",
-  onClick: args.fns.handleExport,
-  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
-  hide: !args.fns.getExportFunction() || args.fns.getHideExportButtons() || args.fns.getUsePolarisUI?.() !== true
+  onClick: f.handleExport,
+  disabled: g.vertexes[f.pageStateVertexId]?.P?.loading === true,
+  hide: !f.getExportFunction() || f.getHideExportButtons() || f.getUsePolarisUI?.() !== true
 };
 '''
       }
@@ -2995,11 +2995,11 @@ return {
           '''
 return {
   variant: "secondary",
-  onClick: () => args.fns.handleExport(args.fns.resolveFilteredVerticesForExport?.() ?? []),
+  onClick: () => f.handleExport(f.resolveFilteredVerticesForExport?.() ?? []),
   text: "Export Filtered",
   leftIcon: "carbon:filter",
-  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
-  hide: !args.fns.getExportFunction() || args.fns.getHideExportButtons() || args.fns.getUsePolarisUI?.() === true
+  disabled: g.vertexes[f.pageStateVertexId]?.P?.loading === true,
+  hide: !f.getExportFunction() || f.getHideExportButtons() || f.getUsePolarisUI?.() === true
 };
 '''
       }
@@ -3017,9 +3017,9 @@ return {
   "attr:variant": "secondary",
   "attr:icon": "filter",
   text: "Export Filtered",
-  onClick: () => args.fns.handleExport(args.fns.resolveFilteredVerticesForExport?.() ?? []),
-  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
-  hide: !args.fns.getExportFunction() || args.fns.getHideExportButtons() || args.fns.getUsePolarisUI?.() !== true
+  onClick: () => f.handleExport(f.resolveFilteredVerticesForExport?.() ?? []),
+  disabled: g.vertexes[f.pageStateVertexId]?.P?.loading === true,
+  hide: !f.getExportFunction() || f.getHideExportButtons() || f.getUsePolarisUI?.() !== true
 };
 '''
       }
@@ -3033,7 +3033,7 @@ return {
 return `._id {
   display: flex;
   align-items: center;
-  gap: ${args.theme.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
   flex: 1;
   min-width: 200px;
 }`;
@@ -3057,13 +3057,13 @@ return {
         props:
           '''
 return {
-  placeholder: args.fns.getSearchPlaceholder(),
-  value: args.graph.vertexes[args.fns.tableStateVertexId]?.P?.searchTerm ?? "",
+  placeholder: f.getSearchPlaceholder(),
+  value: g.vertexes[f.tableStateVertexId]?.P?.searchTerm ?? "",
   onInput: (e) => {
-    args.fns.debouncedSetSearchTerm(e.target.value);
+    f.debouncedSetSearchTerm(e.target.value);
   },
   leftIcon: "carbon:search",
-  hide: args.fns.getUsePolarisUI?.() === true
+  hide: f.getUsePolarisUI?.() === true
 };
 '''
       }
@@ -3087,10 +3087,10 @@ return {
   as: "s-search-field",
   label: "Search",
   "attr:labelAccessibilityVisibility": "exclusive",
-  placeholder: args.fns.getSearchPlaceholder(),
-  value: args.graph.vertexes[args.fns.tableStateVertexId]?.P?.searchTerm ?? "",
-  onInput: (e) => args.fns.debouncedSetSearchTerm(e?.target?.value ?? ''),
-  hide: args.fns.getUsePolarisUI?.() !== true
+  placeholder: f.getSearchPlaceholder(),
+  value: g.vertexes[f.tableStateVertexId]?.P?.searchTerm ?? "",
+  onInput: (e) => f.debouncedSetSearchTerm(e?.target?.value ?? ''),
+  hide: f.getUsePolarisUI?.() !== true
 };
 '''
       }
@@ -3105,11 +3105,11 @@ return {
           '''
 return {
   variant: "primary",
-  onClick: args.fns.handleSearch,
+  onClick: f.handleSearch,
   text: "Search",
   leftIcon: "carbon:search",
   hide: true,
-  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true
+  disabled: g.vertexes[f.pageStateVertexId]?.P?.loading === true
 };
 '''
       }
@@ -3124,11 +3124,11 @@ return {
           '''
 return {
   variant: "secondary",
-  onClick: args.fns.handleOpenSettings,
+  onClick: f.handleOpenSettings,
   text: "Settings",
   leftIcon: "carbon:settings",
-  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
-  hide: !args.fns.getSettingsFunction() || args.fns.getHideSettingsButton() || args.fns.getUsePolarisUI?.() === true
+  disabled: g.vertexes[f.pageStateVertexId]?.P?.loading === true,
+  hide: !f.getSettingsFunction() || f.getHideSettingsButton() || f.getUsePolarisUI?.() === true
 };
 '''
       }
@@ -3146,9 +3146,9 @@ return {
   "attr:variant": "secondary",
   "attr:icon": "settings",
   text: "Settings",
-  onClick: args.fns.handleOpenSettings,
-  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
-  hide: !args.fns.getSettingsFunction() || args.fns.getHideSettingsButton() || args.fns.getUsePolarisUI?.() !== true
+  onClick: f.handleOpenSettings,
+  disabled: g.vertexes[f.pageStateVertexId]?.P?.loading === true,
+  hide: !f.getSettingsFunction() || f.getHideSettingsButton() || f.getUsePolarisUI?.() !== true
 };
 '''
       }
@@ -3159,7 +3159,7 @@ return {
       P: {
         css:
           '''
-const isResizing = args.graph.vertexes[args.fns.tableStateVertexId]?.P?.isResizing === true;
+const isResizing = g.vertexes[f.tableStateVertexId]?.P?.isResizing === true;
 
 return [`._id {
   display: flex;
@@ -3204,7 +3204,7 @@ return `._id {
 return {
   as: "div",
   ref: (el) => {
-    args.fns.setTableHeaderHScrollEl(el);
+    f.setTableHeaderHScrollEl(el);
   }
 };
 '''
@@ -3232,7 +3232,7 @@ return `._id {
 return {
   as: "div",
   ref: (el) => {
-    args.fns.setTableFilterHScrollEl(el);
+    f.setTableFilterHScrollEl(el);
   }
 };
 '''
@@ -3244,15 +3244,15 @@ return {
       P: {
         css:
           '''
-const usePolaris = args.fns.getUsePolarisUI?.() === true
+const usePolaris = f.getUsePolarisUI?.() === true
 return `._id {
   display: grid;
-  grid-template-columns: ${args.fns.getGridTemplateColumns()};
+  grid-template-columns: ${f.getGridTemplateColumns()};
   min-width: min-content;
   width: 100%;
-  background: ${usePolaris ? "#f7f7f7" : args.theme.var.color.background_light_100};
-  border-top: 1px solid ${args.theme.var.color.border};
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  background: ${usePolaris ? "#f7f7f7" : t.var.color.background_light_100};
+  border-top: 1px solid ${t.var.color.border};
+  border-bottom: 1px solid ${t.var.color.border};
 }`;
 '''
         displayOrder: 1
@@ -3271,13 +3271,13 @@ return {
       P: {
         css:
           '''
-const showSelection = args.fns.getShowSelection();
+const showSelection = f.getShowSelection();
 
 return `._id {
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
   font-weight: 600;
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3288,8 +3288,8 @@ return `._id {
         componentName: Html
         props:
           '''
-const showSelection = args.fns.getShowSelection();
-const selectionMode = args.fns.getSelectionMode?.();
+const showSelection = f.getShowSelection();
+const selectionMode = f.getSelectionMode?.();
 
 return {
   as: "div",
@@ -3309,7 +3309,7 @@ return `._id {
   cursor: pointer;
   width: 1rem;
   height: 1rem;
-  accent-color: ${args.theme.var.color.text};
+  accent-color: ${t.var.color.text};
   flex-shrink: 0;
 }`;
 '''
@@ -3317,12 +3317,12 @@ return `._id {
         componentName: Html
         props:
           '''
-const showSelection = args.fns.getShowSelection();
-const selectionMode = args.fns.getSelectionMode?.();
-const selected = args.fns.getSelectedRows();
-const visibleIds = args.fns.getSelectableVisibleRowIds?.() ?? [];
+const showSelection = f.getShowSelection();
+const selectionMode = f.getSelectionMode?.();
+const selected = f.getSelectedRows();
+const visibleIds = f.getSelectableVisibleRowIds?.() ?? [];
 const allSelected = visibleIds.length > 0 && visibleIds.every((id) => selected.has(id));
-// const usePolaris = args.fns.getUsePolarisUI?.() === true;
+// const usePolaris = f.getUsePolarisUI?.() === true;
 const usePolaris = false;
 
 return {
@@ -3333,13 +3333,13 @@ return {
   checked: usePolaris ? undefined : allSelected,
   onChange: usePolaris ? (e) => {
     const checked = e.target?.checked ?? e.detail?.checked ?? !allSelected;
-    if (checked) args.fns.selectAllRows();
-    else args.fns.clearSelection();
+    if (checked) f.selectAllRows();
+    else f.clearSelection();
   } : () => {
-    if (allSelected) args.fns.clearSelection();
-    else args.fns.selectAllRows();
+    if (allSelected) f.clearSelection();
+    else f.selectAllRows();
   },
-  hide: !showSelection || args.fns.getSelectionMode?.() === "single"
+  hide: !showSelection || f.getSelectionMode?.() === "single"
 };
 '''
       }
@@ -3350,8 +3350,8 @@ return {
       P: {
         css:
           '''
-const showSelection = args.fns.getShowSelection();
-const resizableColumns = args.fns.getResizableColumns();
+const showSelection = f.getShowSelection();
+const resizableColumns = f.getResizableColumns();
 
 return `._id {
   position: absolute;
@@ -3363,20 +3363,20 @@ return `._id {
   z-index: 20;
   touch-action: none;
   transition: background 150ms ease, border-color 150ms ease;
-  border-left: 1px solid ${args.theme.var.color.border_light_400};
+  border-left: 1px solid ${t.var.color.border_light_400};
 
   @media (hover: hover) and (pointer: fine) {
     &:hover {
-      background: ${args.theme.var.color.primary_light_200};
+      background: ${t.var.color.primary_light_200};
       opacity: 0.6;
-      border-left-color: ${args.theme.var.color.primary_light_300};
+      border-left-color: ${t.var.color.primary_light_300};
     }
   }
 
   &:active {
-    background: ${args.theme.var.color.primary_light_200};
+    background: ${t.var.color.primary_light_200};
     opacity: 0.8;
-    border-left-color: ${args.theme.var.color.primary_light_300};
+    border-left-color: ${t.var.color.primary_light_300};
   }
 
 }`;
@@ -3385,10 +3385,10 @@ return `._id {
         componentName: Html
         props:
           '''
-const showSelection = args.fns.getShowSelection();
-const resizableColumns = args.fns.getResizableColumns();
+const showSelection = f.getShowSelection();
+const resizableColumns = f.getResizableColumns();
 
-const resizeHandler = args.fns.createResizeHandler("__selection");
+const resizeHandler = f.createResizeHandler("__selection");
 
 return {
   as: "div",
@@ -3405,16 +3405,16 @@ return {
       P: {
         css:
           '''
-const hasFormConfig = !!args.fns.getFormConfig();
+const hasFormConfig = !!f.getFormConfig();
 
 return `._id {
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
   font-weight: 600;
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   display: flex;
   align-items: center;
-  gap: ${args.theme.var.spacing.xs};
+  gap: ${t.var.spacing.xs};
   cursor: default;
   user-select: none;
   position: relative;
@@ -3424,11 +3424,11 @@ return `._id {
         componentName: Html
         props:
           '''
-const hasFormConfig = !!args.fns.getFormConfig();
+const hasFormConfig = !!f.getFormConfig();
 
 return {
   as: "div",
-  hide: !args.fns.getShowActionsColumn()
+  hide: !f.getShowActionsColumn()
 };
 '''
       }
@@ -3442,7 +3442,7 @@ return {
 const column = { key: "__actions", label: "Actions" };
 
 return `._id {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   font-size: 0.75rem;
 }`;
 '''
@@ -3450,12 +3450,12 @@ return `._id {
         componentName: Html
         props:
           '''
-const hasFormConfig = !!args.fns.getFormConfig();
+const hasFormConfig = !!f.getFormConfig();
 
 return {
   as: "div",
   text: "Actions",
-  hide: !args.fns.getShowActionsColumn()
+  hide: !f.getShowActionsColumn()
 };
 '''
       }
@@ -3466,8 +3466,8 @@ return {
       P: {
         css:
           '''
-const hasFormConfig = !!args.fns.getFormConfig();
-const resizableColumns = args.fns.getResizableColumns();
+const hasFormConfig = !!f.getFormConfig();
+const resizableColumns = f.getResizableColumns();
 
 return `._id {
   position: absolute;
@@ -3479,20 +3479,20 @@ return `._id {
   z-index: 20;
   touch-action: none;
   transition: background 150ms ease, border-color 150ms ease;
-  border-left: 1px solid ${args.theme.var.color.border_light_400};
+  border-left: 1px solid ${t.var.color.border_light_400};
 
   @media (hover: hover) and (pointer: fine) {
     &:hover {
-      background: ${args.theme.var.color.primary_light_200};
+      background: ${t.var.color.primary_light_200};
       opacity: 0.6;
-      border-left-color: ${args.theme.var.color.primary_light_300};
+      border-left-color: ${t.var.color.primary_light_300};
     }
   }
 
   &:active {
-    background: ${args.theme.var.color.primary_light_200};
+    background: ${t.var.color.primary_light_200};
     opacity: 0.8;
-    border-left-color: ${args.theme.var.color.primary_light_300};
+    border-left-color: ${t.var.color.primary_light_300};
   }
 
 }`;
@@ -3501,14 +3501,14 @@ return `._id {
         componentName: Html
         props:
           '''
-const hasFormConfig = !!args.fns.getFormConfig();
-const resizableColumns = args.fns.getResizableColumns();
+const hasFormConfig = !!f.getFormConfig();
+const resizableColumns = f.getResizableColumns();
 
-const resizeHandler = args.fns.createResizeHandler("__actions");
+const resizeHandler = f.createResizeHandler("__actions");
 
 return {
   as: "div",
-  hide: !resizableColumns || !args.fns.getShowActionsColumn(),
+  hide: !resizableColumns || !f.getShowActionsColumn(),
   onMouseDown: resizeHandler,
   onTouchStart: resizeHandler
 };
@@ -3525,8 +3525,8 @@ return {
         componentName: Html
         props:
           '''
-const columns = args.fns.getColumns();
-const showRowNumber = args.fns.getShowRowNumber();
+const columns = f.getColumns();
+const showRowNumber = f.getShowRowNumber();
 
 return {
   data: showRowNumber 
@@ -3542,18 +3542,18 @@ return {
       P: {
         css:
           '''
-const column = args.contextData.column;
-const shouldHide = args.fns.shouldHideColumn(column);
+const column = c.column;
+const shouldHide = f.shouldHideColumn(column);
 
 return `._id {
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
   font-weight: 600;
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   display: flex;
   align-items: center;
-  gap: ${args.theme.var.spacing.xs};
-  cursor: ${(column.sortable !== false && !args.fns.isStructuralColumn(column)) ? "pointer" : "default"};
+  gap: ${t.var.spacing.xs};
+  cursor: ${(column.sortable !== false && !f.isStructuralColumn(column)) ? "pointer" : "default"};
   user-select: none;
   position: relative;
 }`;
@@ -3562,17 +3562,17 @@ return `._id {
         componentName: Html
         props:
           '''
-const column = args.contextData.column;
-const shouldHide = args.fns.shouldHideColumn(column);
-const isRowNumber = args.fns.getColumnRenderer(column) === "rowNumber";
-const isExpandColumn = args.fns.getColumnRenderer(column) === "expand";
+const column = c.column;
+const shouldHide = f.shouldHideColumn(column);
+const isRowNumber = f.getColumnRenderer(column) === "rowNumber";
+const isExpandColumn = f.getColumnRenderer(column) === "expand";
 
 return {
   as: "div",
   hide: shouldHide,
   onClick: () => {
     if (!isRowNumber && !isExpandColumn && column.sortable !== false) {
-      args.fns.handleSort(column);
+      f.handleSort(column);
     }
   }
 };
@@ -3585,10 +3585,10 @@ return {
       P: {
         css:
           '''
-const column = args.contextData.column;
+const column = c.column;
 
 return `._id {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   font-size: 0.75rem;
 }`;
 '''
@@ -3596,16 +3596,16 @@ return `._id {
         componentName: Html
         props:
           '''
-const column = args.contextData.column;
-const sortConfig = args.graph.vertexes[args.fns.tableStateVertexId]?.P?.sortConfig ?? { column: null, direction: null };
+const column = c.column;
+const sortConfig = g.vertexes[f.tableStateVertexId]?.P?.sortConfig ?? { column: null, direction: null };
 const isSorted = sortConfig.column === column.key;
 
 return {
   as: "div",
-  text: args.fns.getColumnRenderer(column) === "iconAction" || args.fns.getColumnRenderer(column) === "expand"
+  text: f.getColumnRenderer(column) === "iconAction" || f.getColumnRenderer(column) === "expand"
     ? ""
     : (column.label || column.key),
-  hide: args.fns.isStructuralColumn(column)
+  hide: f.isStructuralColumn(column)
 };
 '''
       }
@@ -3616,8 +3616,8 @@ return {
       P: {
         css:
           '''
-const sortConfig = args.graph.vertexes[args.fns.tableStateVertexId]?.P?.sortConfig ?? { column: null, direction: null };
-const column = args.contextData.column;
+const sortConfig = g.vertexes[f.tableStateVertexId]?.P?.sortConfig ?? { column: null, direction: null };
+const column = c.column;
 const isSorted = sortConfig.column === column.key;
 const direction = sortConfig.direction;
 
@@ -3632,19 +3632,19 @@ return `._id {
         componentName: Html
         props:
           '''
-const column = args.contextData.column;
-const sortConfig = args.graph.vertexes[args.fns.tableStateVertexId]?.P?.sortConfig ?? { column: null, direction: null };
+const column = c.column;
+const sortConfig = g.vertexes[f.tableStateVertexId]?.P?.sortConfig ?? { column: null, direction: null };
 const isSorted = sortConfig.column === column.key;
 const direction = sortConfig.direction;
-const isRowNumber = args.fns.getColumnRenderer(column) === "rowNumber";
-const isExpandColumn = args.fns.getColumnRenderer(column) === "expand";
+const isRowNumber = f.getColumnRenderer(column) === "rowNumber";
+const isExpandColumn = f.getColumnRenderer(column) === "expand";
 
 return {
   as: "icon",
   icon: direction === "asc" ? "carbon:chevron-up" : "carbon:chevron-down",
   width: 16,
   height: 16,
-  hide: !isSorted || column.sortable === false || isRowNumber || args.fns.getColumnRenderer(column) === "iconAction" || isExpandColumn
+  hide: !isSorted || column.sortable === false || isRowNumber || f.getColumnRenderer(column) === "iconAction" || isExpandColumn
 };
 '''
       }
@@ -3655,7 +3655,7 @@ return {
       P: {
         css:
           '''
-const column = args.contextData.column;
+const column = c.column;
 
 return `._id {
   display: flex;
@@ -3668,19 +3668,19 @@ return `._id {
         componentName: Html
         props:
           '''
-const column = args.contextData.column;
-const columnFilters = args.graph.vertexes[args.fns.tableStateVertexId]?.P?.columnFilters ?? {};
+const column = c.column;
+const columnFilters = g.vertexes[f.tableStateVertexId]?.P?.columnFilters ?? {};
 const filterValue = columnFilters[column.key];
 const hasFilter = filterValue !== undefined && filterValue !== null && filterValue !== "" && (!Array.isArray(filterValue) || (filterValue.length > 0 && !(filterValue.length === 1 && filterValue[0] === "_All_VALUES_")));
-const isRowNumber = args.fns.getColumnRenderer(column) === "rowNumber";
-const isExpandColumn = args.fns.getColumnRenderer(column) === "expand";
+const isRowNumber = f.getColumnRenderer(column) === "rowNumber";
+const isExpandColumn = f.getColumnRenderer(column) === "expand";
 
 return {
   as: "icon",
   icon: "carbon:filter",
   width: 14,
   height: 14,
-  hide: !hasFilter || isRowNumber || args.fns.getColumnRenderer(column) === "iconAction" || isExpandColumn,
+  hide: !hasFilter || isRowNumber || f.getColumnRenderer(column) === "iconAction" || isExpandColumn,
   title: "Filter applied"
 };
 '''
@@ -3692,9 +3692,9 @@ return {
       P: {
         css:
           '''
-const column = args.contextData.column;
-const resizableColumns = args.fns.getResizableColumns();
-const shouldHide = args.fns.shouldHideColumn(column);
+const column = c.column;
+const resizableColumns = f.getResizableColumns();
+const shouldHide = f.shouldHideColumn(column);
 
 return `._id {
   position: absolute;
@@ -3706,20 +3706,20 @@ return `._id {
   z-index: 20;
   touch-action: none;
   transition: background 150ms ease, border-color 150ms ease;
-  border-left: 1px solid ${args.theme.var.color.border_light_400};
+  border-left: 1px solid ${t.var.color.border_light_400};
 
   @media (hover: hover) and (pointer: fine) {
     &:hover {
-      background: ${args.theme.var.color.primary_light_200};
+      background: ${t.var.color.primary_light_200};
       opacity: 0.6;
-      border-left-color: ${args.theme.var.color.primary_light_300};
+      border-left-color: ${t.var.color.primary_light_300};
     }
   }
 
   &:active {
-    background: ${args.theme.var.color.primary_light_200};
+    background: ${t.var.color.primary_light_200};
     opacity: 0.8;
-    border-left-color: ${args.theme.var.color.primary_light_300};
+    border-left-color: ${t.var.color.primary_light_300};
   }
 
 }`;
@@ -3728,20 +3728,20 @@ return `._id {
         componentName: Html
         props:
           '''
-const column = args.contextData.column;
-const resizableColumns = args.fns.getResizableColumns();
-const shouldHide = args.fns.shouldHideColumn(column);
+const column = c.column;
+const resizableColumns = f.getResizableColumns();
+const shouldHide = f.shouldHideColumn(column);
 
 // Determine column key for resize
 const getColumnKey = () => {
-  if (args.fns.getColumnRenderer(column) === "rowNumber") {
+  if (f.getColumnRenderer(column) === "rowNumber") {
     return column.key;
   }
   return column.key;
 };
 
 const columnKey = getColumnKey();
-const resizeHandler = args.fns.createResizeHandler(columnKey);
+const resizeHandler = f.createResizeHandler(columnKey);
 
 return {
   as: "div",
@@ -3760,10 +3760,10 @@ return {
           '''
 return `._id {
   display: grid;
-  grid-template-columns: ${args.fns.getGridTemplateColumns()};
+  grid-template-columns: ${f.getGridTemplateColumns()};
   min-width: min-content;
   width: 100%;
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  border-bottom: 1px solid ${t.var.color.border};
 }`;
 '''
         displayOrder: 2
@@ -3782,17 +3782,17 @@ return {
       P: {
         css:
           '''
-const showSelection = args.fns.getShowSelection();
+const showSelection = f.getShowSelection();
 
 return `._id {
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
 }`;
 '''
         displayOrder: 0.5
         componentName: Html
         props:
           '''
-const showSelection = args.fns.getShowSelection();
+const showSelection = f.getShowSelection();
 
 return {
   as: "div",
@@ -3807,21 +3807,21 @@ return {
       P: {
         css:
           '''
-const hasFormConfig = !!args.fns.getFormConfig();
+const hasFormConfig = !!f.getFormConfig();
 
 return `._id {
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
 }`;
 '''
         displayOrder: 0.6
         componentName: Html
         props:
           '''
-const hasFormConfig = !!args.fns.getFormConfig();
+const hasFormConfig = !!f.getFormConfig();
 
 return {
   as: "div",
-  hide: !args.fns.getShowActionsColumn()
+  hide: !f.getShowActionsColumn()
 };
 '''
       }
@@ -3836,8 +3836,8 @@ return {
         componentName: Html
         props:
           '''
-const columns = args.fns.getColumns();
-const showRowNumber = args.fns.getShowRowNumber();
+const columns = f.getColumns();
+const showRowNumber = f.getShowRowNumber();
 
 return {
   data: showRowNumber 
@@ -3853,19 +3853,19 @@ return {
       P: {
         css:
           '''
-const column = args.contextData.column;
-const shouldHide = args.fns.shouldHideColumn(column);
+const column = c.column;
+const shouldHide = f.shouldHideColumn(column);
 
 return `._id {
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
 }`;
 '''
         displayOrder: 1
         componentName: Html
         props:
           '''
-const column = args.contextData.column;
-const shouldHide = args.fns.shouldHideColumn(column);
+const column = c.column;
+const shouldHide = f.shouldHideColumn(column);
 
 return {
   as: "div",
@@ -3880,10 +3880,10 @@ return {
       P: {
         css:
           '''
-const column = args.contextData.column;
-const columnFilters = args.graph.vertexes[args.fns.tableStateVertexId]?.P?.columnFilters ?? {};
+const column = c.column;
+const columnFilters = g.vertexes[f.tableStateVertexId]?.P?.columnFilters ?? {};
 // Preserve array values from URL - don't default to empty string for select filters
-const filterValue = columnFilters[column.key] !== undefined ? columnFilters[column.key] : (args.fns.getColumnFilterKind(column) === "select" ? [] : "");
+const filterValue = columnFilters[column.key] !== undefined ? columnFilters[column.key] : (f.getColumnFilterKind(column) === "select" ? [] : "");
 
 return `._id {
   width: 100%;
@@ -3893,8 +3893,8 @@ return `._id {
         componentName: Html
         props:
           '''
-const column = args.contextData.column;
-const columnFilters = args.graph.vertexes[args.fns.tableStateVertexId]?.P?.columnFilters ?? {};
+const column = c.column;
+const columnFilters = g.vertexes[f.tableStateVertexId]?.P?.columnFilters ?? {};
 // Access store reactively - ensure we get the current value
 const getFilterValue = () => {
   const value = columnFilters[column.key];
@@ -3902,33 +3902,33 @@ const getFilterValue = () => {
     return value;
   }
   // Default to empty array for select filters, empty string for others
-  return args.fns.getColumnFilterKind(column) === "select" ? [] : "";
+  return f.getColumnFilterKind(column) === "select" ? [] : "";
 };
 const filterValue = getFilterValue();
 
 // Skip filter for rowNumber
-if (args.fns.getColumnRenderer(column) === "rowNumber") {
+if (f.getColumnRenderer(column) === "rowNumber") {
   return { as: "div", hide: true };
 }
 
 // Skip filter for preview / image columns
-if (column.key === "preview" || args.fns.getColumnRenderer(column) === "imagePreview" || args.fns.getColumnRenderer(column) === "image") {
+if (column.key === "preview" || f.getColumnRenderer(column) === "imagePreview" || f.getColumnRenderer(column) === "image") {
   return { as: "div", hide: true };
 }
 
 // Skip filter for iconAction column
-if (args.fns.getColumnRenderer(column) === "iconAction") {
+if (f.getColumnRenderer(column) === "iconAction") {
   return { as: "div", hide: true };
 }
 
 // Skip filter for expand column
-if (args.fns.getColumnRenderer(column) === "expand") {
+if (f.getColumnRenderer(column) === "expand") {
   return { as: "div", hide: true };
 }
 
 // Render appropriate filter component based on column type
-if (args.fns.getColumnFilterKind(column) === "select" && column.options) {
-  const usePolaris = args.fns.getUsePolarisUI?.() === true;
+if (f.getColumnFilterKind(column) === "select" && column.options) {
+  const usePolaris = f.getUsePolarisUI?.() === true;
   if (usePolaris) {
     const displayValue = Array.isArray(filterValue) ? filterValue.join(", ") : (filterValue || "");
     return {
@@ -3940,19 +3940,19 @@ if (args.fns.getColumnFilterKind(column) === "select" && column.options) {
       onInput: (e) => {
         const v = e?.target?.value ?? e?.detail?.value ?? "";
         const arr = v ? v.split(",").map(s => s.trim()).filter(Boolean) : undefined;
-        args.fns.handleColumnFilterChange(column.key, arr && arr.length ? arr : undefined);
+        f.handleColumnFilterChange(column.key, arr && arr.length ? arr : undefined);
       }
     };
   }
-  return args.fns.getSelectFilterProps(
+  return f.getSelectFilterProps(
     column.key,
     filterValue,
     [{ value: "_All_VALUES_", label: "All" }, ...column.options]
   );
 }
 
-if (args.fns.getColumnFilterKind(column) === "checkbox") {
-  // const usePolaris = args.fns.getUsePolarisUI?.() === true;
+if (f.getColumnFilterKind(column) === "checkbox") {
+  // const usePolaris = f.getUsePolarisUI?.() === true;
   const usePolaris = false;
   const isChecked = filterValue === true || filterValue === "true";
   return {
@@ -3964,14 +3964,14 @@ if (args.fns.getColumnFilterKind(column) === "checkbox") {
     checked: usePolaris ? undefined : isChecked,
     onChange: (e) => {
       const checked = usePolaris ? (e.target?.checked ?? e.detail?.checked ?? !isChecked) : e.target.checked;
-      args.fns.handleColumnFilterChange(column.key, checked);
+      f.handleColumnFilterChange(column.key, checked);
     },
-    css: usePolaris ? undefined : "return `._id { pointer-events: auto; cursor: pointer; width: 1rem; height: 1rem; accent-color: ${args.theme?.var?.color?.text ?? 'inherit'}; flex-shrink: 0; }`;"
+    css: usePolaris ? undefined : "return `._id { pointer-events: auto; cursor: pointer; width: 1rem; height: 1rem; accent-color: ${t?.var?.color?.text ?? 'inherit'}; flex-shrink: 0; }`;"
   };
 }
 
-if (args.fns.getColumnFilterKind(column) === "date") {
-  const usePolaris = args.fns.getUsePolarisUI?.() === true;
+if (f.getColumnFilterKind(column) === "date") {
+  const usePolaris = f.getUsePolarisUI?.() === true;
   if (usePolaris) {
     return {
       componentName: "Html",
@@ -3979,21 +3979,21 @@ if (args.fns.getColumnFilterKind(column) === "date") {
       "attr:label": column.label || "Filter",
       "attr:labelAccessibilityVisibility": "exclusive",
       value: filterValue || "",
-      onInput: (e) => args.fns.handleColumnFilterChange(column.key, e?.target?.value ?? e?.detail?.value ?? "")
+      onInput: (e) => f.handleColumnFilterChange(column.key, e?.target?.value ?? e?.detail?.value ?? "")
     };
   }
   return {
     componentName: "TextInput",
     type: "date",
     value: filterValue || "",
-    onChange: (e) => args.fns.handleColumnFilterChange(column.key, e.target.value)
+    onChange: (e) => f.handleColumnFilterChange(column.key, e.target.value)
   };
 }
 
 // Badge columns: show select from badgeToneMap when available, so filter works by raw value
-if (args.fns.getColumnRenderer(column) === "badge" && column.badgeToneMap) {
+if (f.getColumnRenderer(column) === "badge" && column.badgeToneMap) {
   const options = [{ value: "_All_VALUES_", label: "All" }, ...Object.entries(column.badgeToneMap).map(([val, arr]) => ({ value: val, label: Array.isArray(arr) ? arr[0] : String(arr) }))];
-  const usePolaris = args.fns.getUsePolarisUI?.() === true;
+  const usePolaris = f.getUsePolarisUI?.() === true;
   if (usePolaris) {
     const displayValue = Array.isArray(filterValue) ? filterValue.join(", ") : (filterValue || "");
     return {
@@ -4005,19 +4005,19 @@ if (args.fns.getColumnRenderer(column) === "badge" && column.badgeToneMap) {
       onInput: (e) => {
         const v = e?.target?.value ?? e?.detail?.value ?? "";
         const arr = v ? v.split(",").map(s => s.trim()).filter(Boolean) : undefined;
-        args.fns.handleColumnFilterChange(column.key, arr && arr.length ? arr : undefined);
+        f.handleColumnFilterChange(column.key, arr && arr.length ? arr : undefined);
       }
     };
   }
-  return args.fns.getSelectFilterProps(column.key, filterValue, options);
+  return f.getSelectFilterProps(column.key, filterValue, options);
 }
 
 // Determine filter type (default: "select" for text columns)
-const filterType = column.filterType || (args.fns.getColumnFilterKind(column) === "text" ? "text" : "select");
+const filterType = column.filterType || (f.getColumnFilterKind(column) === "text" ? "text" : "select");
 
 // If filterType is "select", show select with unique values
 if (filterType === "select") {
-  const usePolaris = args.fns.getUsePolarisUI?.() === true;
+  const usePolaris = f.getUsePolarisUI?.() === true;
   if (usePolaris) {
     const displayValue = Array.isArray(filterValue) ? filterValue.join(", ") : (filterValue || "");
     return {
@@ -4029,13 +4029,13 @@ if (filterType === "select") {
       onInput: (e) => {
         const v = e?.target?.value ?? e?.detail?.value ?? "";
         const arr = v ? v.split(",").map(s => s.trim()).filter(Boolean) : undefined;
-        args.fns.handleColumnFilterChange(column.key, arr && arr.length ? arr : undefined);
+        f.handleColumnFilterChange(column.key, arr && arr.length ? arr : undefined);
       }
     };
   }
-  const uniqueValues = args.fns.getUniqueColumnValues(column);
+  const uniqueValues = f.getUniqueColumnValues(column);
   const options = [{ value: "_All_VALUES_", label: "All" }, ...uniqueValues.map(val => ({ value: val, label: val }))];
-  return args.fns.getSelectFilterProps(
+  return f.getSelectFilterProps(
     column.key,
     filterValue,
     options
@@ -4043,7 +4043,7 @@ if (filterType === "select") {
 }
 
 // Default: text input (applies filter immediately on change)
-const usePolaris = args.fns.getUsePolarisUI?.() === true;
+const usePolaris = f.getUsePolarisUI?.() === true;
 if (usePolaris) {
   return {
     componentName: "Html",
@@ -4051,14 +4051,14 @@ if (usePolaris) {
     "attr:label": column.label || "Filter",
     "attr:labelAccessibilityVisibility": "exclusive",
     value: filterValue || "",
-    onInput: (e) => args.fns.handleColumnFilterChange(column.key, e?.target?.value ?? e?.detail?.value ?? "")
+    onInput: (e) => f.handleColumnFilterChange(column.key, e?.target?.value ?? e?.detail?.value ?? "")
   };
 }
 return {
   componentName: "TextInput",
   type: "text",
   value: filterValue || "",
-  onChange: (e) => args.fns.handleColumnFilterChange(column.key, e.target.value)
+  onChange: (e) => f.handleColumnFilterChange(column.key, e.target.value)
 };
 '''
       }
@@ -4087,10 +4087,10 @@ return {
   as: "div",
   ref: (el) => {
     // Same node for VirtualList scroll metrics (vertical) and scrollLeft sync to header/filter (horizontal)
-    args.fns.setTableBodyVScrollEl(el);
-    args.fns.setTableBodyHScrollEl(el);
+    f.setTableBodyVScrollEl(el);
+    f.setTableBodyHScrollEl(el);
   },
-  onScroll: (e) => args.fns.handleTableHorizontalScroll(e)
+  onScroll: (e) => f.handleTableHorizontalScroll(e)
 };
 '''
       }
@@ -4114,34 +4114,34 @@ return `._id {
         componentName: VirtualList
         props:
           '''
-const isLoading = args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true;
+const isLoading = g.vertexes[f.pageStateVertexId]?.P?.loading === true;
 return {
-  getItems: args.fns.getDisplayData,
-  itemHeight: args.fns.getRowHeight(),
-  getItemHeightAt: args.fns.getVirtualRowHeight,
-  rowHasExpansion: (row) => ((args.fns.getRowExpansionConfigs?.() || []).length > 0) && !!row?.id,
+  getItems: f.getDisplayData,
+  itemHeight: f.getRowHeight(),
+  getItemHeightAt: f.getVirtualRowHeight,
+  rowHasExpansion: (row) => ((f.getRowExpansionConfigs?.() || []).length > 0) && !!row?.id,
   containerClass: "table-body-list",
   hide: isLoading,
   tabIndex: 0,
   role: "listbox",
   "attr:aria-label": "Table rows; Arrow keys to move, Shift+Arrow Up/Down to select range, Left/Right to collapse/expand group, Space to toggle selection",
   // VirtualList reads scrollTop from 40wrap (parent), not the list root div
-  getScrollContainerElement: () => args.fns.getScrollContainerElementForVirtualList(),
-  getActiveIndex: () => args.fns.activeRowIndex?.(),
-  setActiveIndex: (n) => args.fns.setActiveRowIndex?.(n),
-  getItemRef: (index) => args.fns.getRowRef?.(index),
+  getScrollContainerElement: () => f.getScrollContainerElementForVirtualList(),
+  getActiveIndex: () => f.activeRowIndex?.(),
+  setActiveIndex: (n) => f.setActiveRowIndex?.(n),
+  getItemRef: (index) => f.getRowRef?.(index),
   onSpaceKey: (index) => {
-    if (!args.fns.getShowSelection?.()) return;
-    const displayData = args.fns.getDisplayData();
+    if (!f.getShowSelection?.()) return;
+    const displayData = f.getDisplayData();
     const row = displayData[index];
-    if (row?.id) args.fns.toggleRowSelection?.(row.id);
+    if (row?.id) f.toggleRowSelection?.(row.id);
   },
   onExpandCollapse: (index, action) => {
-    const displayData = args.fns.getDisplayData?.() ?? [];
+    const displayData = f.getDisplayData?.() ?? [];
     const row = displayData[index];
     if (row?._isParent === true && row._parentKey != null) {
       const parentKey = row._parentKey;
-      const setCollapsedKeysFn = args.fns.setCollapsedKeys;
+      const setCollapsedKeysFn = f.setCollapsedKeys;
       if (!setCollapsedKeysFn) return;
       if (action === "collapse") {
         setCollapsedKeysFn(parentKey, true);
@@ -4150,17 +4150,17 @@ return {
       }
       return;
     }
-    const rowExpansions = args.fns.getRowExpansionConfigs?.() || [];
+    const rowExpansions = f.getRowExpansionConfigs?.() || [];
     if (Array.isArray(rowExpansions) && rowExpansions.length > 0 && row?.id) {
-      const isRowExpanded = args.fns.isExpansionOpen?.(row.id);
-      if (action === "collapse" && isRowExpanded) args.fns.toggleRowExpansion?.(row);
-      if (action === "expand" && !isRowExpanded) args.fns.toggleRowExpansion?.(row);
+      const isRowExpanded = f.isExpansionOpen?.(row.id);
+      if (action === "collapse" && isRowExpanded) f.toggleRowExpansion?.(row);
+      if (action === "expand" && !isRowExpanded) f.toggleRowExpansion?.(row);
     }
   },
-  onShiftArrow: (currentIndex, nextIndex) => args.fns.handleShiftArrow?.(currentIndex, nextIndex),
-  clearSelectionAnchor: () => args.fns.clearSelectionAnchor?.(),
+  onShiftArrow: (currentIndex, nextIndex) => f.handleShiftArrow?.(currentIndex, nextIndex),
+  clearSelectionAnchor: () => f.clearSelectionAnchor?.(),
   // Ensures body scrollWidth matches column grid (absolute rows do not expand it)
-  contentMinWidthPx: args.fns.getTableBodyMinWidthPx()
+  contentMinWidthPx: f.getTableBodyMinWidthPx()
 };
 '''
       }
@@ -4178,7 +4178,7 @@ return `._id {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
   z-index: 2;
 }
 `;
@@ -4187,7 +4187,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const isLoading = args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true;
+const isLoading = g.vertexes[f.pageStateVertexId]?.P?.loading === true;
 return {
   as: "div",
   hide: !isLoading
@@ -4217,18 +4217,18 @@ return {
         slotName: children
         css:
           '''
-const virtualItem = args.contextData.virtualItem;
+const virtualItem = c.virtualItem;
 if (!virtualItem) return {};
 const rowIndex = virtualItem.index;
 const rowData = virtualItem.rowData;
-const selectedRows = args.fns.getSelectedRows();
+const selectedRows = f.getSelectedRows();
 const isSelected = rowData?.id ? selectedRows.has(rowData.id) : false;
-const isActive = args.fns.activeRowId?.() === rowData?.id;
-const rowExpansions = args.fns.getRowExpansionConfigs?.() || [];
-const rowHeightPx = args.fns.getRowHeight();
+const isActive = f.activeRowId?.() === rowData?.id;
+const rowExpansions = f.getRowExpansionConfigs?.() || [];
+const rowHeightPx = f.getRowHeight();
 const expansionPanelHeightPx =
-  Array.isArray(rowExpansions) && rowExpansions.length > 0 && rowData?.id && args.fns.isExpansionOpen?.(rowData.id)
-    ? args.fns.getExpansionPanelHeight(rowExpansions)
+  Array.isArray(rowExpansions) && rowExpansions.length > 0 && rowData?.id && f.isExpansionOpen?.(rowData.id)
+    ? f.getExpansionPanelHeight(rowExpansions)
     : 0;
 const gridRows =
   expansionPanelHeightPx > 0
@@ -4249,16 +4249,16 @@ return [
 }`,
 `._id {
   display: grid;
-  grid-template-columns: ${args.fns.getGridTemplateColumns()};
+  grid-template-columns: ${f.getGridTemplateColumns()};
   grid-template-rows: ${gridRows};
   grid-column: 1 / -1;
-  border-bottom: 1px solid ${args.theme.var.color.border};
-  background: ${isSelected ? args.theme.var.color.background_light_200 : "transparent"};
+  border-bottom: 1px solid ${t.var.color.border};
+  background: ${isSelected ? t.var.color.background_light_200 : "transparent"};
   transition: background 0.2s ease;
-  ${isActive ? `outline: 2px solid ${args.theme.var.color.primary}; outline-offset: -2px;` : ""}
+  ${isActive ? `outline: 2px solid ${t.var.color.primary}; outline-offset: -2px;` : ""}
 
   &:hover {
-    background: ${isSelected ? args.theme.var.color.background_light_200 : args.theme.var.color.background_light_100};
+    background: ${isSelected ? t.var.color.background_light_200 : t.var.color.background_light_100};
   }
 }`];
 '''
@@ -4266,25 +4266,25 @@ return [
         componentName: Html
         props:
           '''
-const virtualItem = args.contextData.virtualItem;
+const virtualItem = c.virtualItem;
 if (!virtualItem) return {};
 const rowIndex = virtualItem.index;
 const rowData = virtualItem.rowData;
 
-const showSelection = args.fns.getShowSelection();
-const rowClickable = args.fns.getRowClickable?.();
-const onRowClick = args.fns.getOnRowClick?.();
+const showSelection = f.getShowSelection();
+const rowClickable = f.getRowClickable?.();
+const onRowClick = f.getOnRowClick?.();
 
-const selected = args.fns.getSelectedRows();
+const selected = f.getSelectedRows();
 const hasSelection = selected.size > 0;
 
 const handleRowClick = (e) => {
   if (onRowClick && typeof onRowClick === "function") {
-    onRowClick(rowData, args);
+    onRowClick(rowData, _);
   } else if (rowClickable) {
-    args.fns.handleEdit?.(rowData);
+    f.handleEdit?.(rowData);
   } else {
-    args.fns.handleViewRow?.(rowData);
+    f.handleViewRow?.(rowData);
   }
 };
 
@@ -4295,23 +4295,23 @@ return {
   as: "div",
   role: "option",
   tabIndex: -1,
-  "attr:aria-selected": args.fns.activeRowId?.() === rowData?.id,
+  "attr:aria-selected": f.activeRowId?.() === rowData?.id,
   "data-row-id": rowData?.id ?? undefined,
   ref: (el) => {
-    args.fns.setRowRef?.(rowIndex, el ?? null);
-    if (el && args.fns.initTableDraggable) {
-      args.fns.initTableDraggable(el);
+    f.setRowRef?.(rowIndex, el ?? null);
+    if (el && f.initTableDraggable) {
+      f.initTableDraggable(el);
     }
   },
   onCleanup: () => {
-    const el = args.fns.getRowRef?.(rowIndex) ?? args.ref?.();
-    args.fns.setRowRef?.(rowIndex, null);
-    if (args.fns.cleanupTableDraggable && el) {
-      args.fns.cleanupTableDraggable(el);
+    const el = f.getRowRef?.(rowIndex) ?? _.ref?.();
+    f.setRowRef?.(rowIndex, null);
+    if (f.cleanupTableDraggable && el) {
+      f.cleanupTableDraggable(el);
     }
   },
   onClick: (event) => {
-    args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { activeRowId: rowData?.id ?? null });
+    _.mergeVertexProperties(0, f.tableStateVertexId, g, sg, { activeRowId: rowData?.id ?? null });
     if (isRowClickable) handleRowClick(event);
   },
   style: cursorStyle
@@ -4326,21 +4326,21 @@ return {
         displayOrder: 5
         css:
           '''
-const virtualItem = args.contextData.virtualItem;
+const virtualItem = c.virtualItem;
 if (!virtualItem) return {};
 const rowData = virtualItem.rowData;
-const rowExpansions = args.fns.getRowExpansionConfigs?.() || [];
+const rowExpansions = f.getRowExpansionConfigs?.() || [];
 const rowId = rowData?.id;
 const isRowExpansionOpen =
-  Array.isArray(rowExpansions) && rowExpansions.length > 0 && rowId && args.fns.isExpansionOpen?.(rowId);
-const _t = args.theme.var.color;
+  Array.isArray(rowExpansions) && rowExpansions.length > 0 && rowId && f.isExpansionOpen?.(rowId);
+const _t = t.var.color;
 return `._id {
   grid-row: 2;
   grid-column: 1 / -1;
   overflow: auto;
   background: ${_t.background_light_100};
   border-top: 1px solid ${_t.border};
-  padding: ${args.theme.var.spacing.sm};
+  padding: ${t.var.spacing.sm};
   min-height: 0;
   max-height: 100%;
   display: ${isRowExpansionOpen ? 'block' : 'none'};
@@ -4350,14 +4350,14 @@ return `._id {
         componentName: Html
         props:
           '''
-const virtualItem = args.contextData.virtualItem;
+const virtualItem = c.virtualItem;
 if (!virtualItem) return { as: 'div', hide: true };
 const rowData = virtualItem.rowData;
 const rowId = rowData?.id;
-const rowExpansions = args.fns.getRowExpansionConfigs?.() || [];
+const rowExpansions = f.getRowExpansionConfigs?.() || [];
 if (!Array.isArray(rowExpansions) || rowExpansions.length === 0 || !rowId) return { as: 'div', hide: true };
 const expansionRowKey = String(rowId);
-const isRowExpansionOpen = args.fns.isExpansionOpen?.(expansionRowKey);
+const isRowExpansionOpen = f.isExpansionOpen?.(expansionRowKey);
 return {
   as: 'div',
   hide: !isRowExpansionOpen,
@@ -4373,16 +4373,16 @@ return {
         displayOrder: 1
         css:
           '''
-const virtualItem = args.contextData.virtualItem;
+const virtualItem = c.virtualItem;
 if (!virtualItem) return {};
 const rowData = virtualItem.rowData;
 const rowId = rowData?.id;
-const rowExpansions = args.fns.getRowExpansionConfigs?.() || [];
+const rowExpansions = f.getRowExpansionConfigs?.() || [];
 const isRowExpansionOpen =
-  Array.isArray(rowExpansions) && rowExpansions.length > 0 && rowId && args.fns.isExpansionOpen?.(String(rowId));
-const _t = args.theme.var.color;
+  Array.isArray(rowExpansions) && rowExpansions.length > 0 && rowId && f.isExpansionOpen?.(String(rowId));
+const _t = t.var.color;
 return `._id {
-  padding: ${args.theme.var.spacing.sm} 0;
+  padding: ${t.var.spacing.sm} 0;
   color: ${_t.text};
   font-size: 0.875rem;
 }`;
@@ -4390,18 +4390,18 @@ return `._id {
         componentName: Html
         props:
           '''
-const virtualItem = args.contextData.virtualItem;
+const virtualItem = c.virtualItem;
 if (!virtualItem) return { as: 'div', hide: true };
 const rowData = virtualItem.rowData;
 const rowId = rowData?.id;
-const rowExpansions = args.fns.getRowExpansionConfigs?.() || [];
+const rowExpansions = f.getRowExpansionConfigs?.() || [];
 const rowExpansion = Array.isArray(rowExpansions) && rowExpansions.length > 0 ? rowExpansions[0] : null;
 if (!rowExpansion || !rowId) return { as: 'div', hide: true };
 const expansionRowKey = String(rowId);
 const expansionKey = "exp_0";
-const isRowExpansionOpen = args.fns.isExpansionOpen?.(expansionRowKey);
+const isRowExpansionOpen = f.isExpansionOpen?.(expansionRowKey);
 if (!isRowExpansionOpen) return { as: 'div', hide: true };
-const expP = args.graph.vertexes[args.fns.tableStateVertexId]?.P;
+const expP = g.vertexes[f.tableStateVertexId]?.P;
 let rows;
 const expRows = expP?.expansionRows;
 if (Array.isArray(expRows)) {
@@ -4447,14 +4447,14 @@ return {
         componentName: Html
         props:
           '''
-const virtualItem = args.contextData.virtualItem;
+const virtualItem = c.virtualItem;
 if (!virtualItem) return { as: "div", hide: true };
 const rowData = virtualItem.rowData;
 const rowId = rowData?.id;
-const rowExpansions = args.fns.getRowExpansionConfigs?.() || [];
+const rowExpansions = f.getRowExpansionConfigs?.() || [];
 if (!rowId || !Array.isArray(rowExpansions) || rowExpansions.length === 0) return { as: "div", hide: true };
 const expansionRowKey = String(rowId);
-const isRowExpansionOpen = args.fns.isExpansionOpen?.(expansionRowKey);
+const isRowExpansionOpen = f.isExpansionOpen?.(expansionRowKey);
 return {
   hide: !isRowExpansionOpen,
   data: rowExpansions.map((cfg, idx) => ({ ...cfg, _expansionIndex: idx }))
@@ -4471,14 +4471,14 @@ return {
         key: nested_order_returns_table
         props:
           '''
-const virtualItem = args.contextData.virtualItem;
+const virtualItem = c.virtualItem;
 if (!virtualItem) return { hide: true };
 const rowData = virtualItem.rowData;
 const rowId = rowData?.id;
-const rowExpansion = args.contextData.expansionTable || {};
+const rowExpansion = c.expansionTable || {};
 if (!rowId || !rowExpansion || typeof rowExpansion !== "object") return { hide: true };
 const expansionRowKey = String(rowId);
-const outerArgs = args;
+const outerArgs = _;
 const tableVid = outerArgs.fns.tableStateVertexId;
 const expansionIndex = rowExpansion._expansionIndex != null ? Number(rowExpansion._expansionIndex) : 0;
 const expansionKey = "exp_" + expansionIndex;
@@ -4486,7 +4486,7 @@ let rows = [];
 let loading = false;
 
 if (rowExpansion.childVertexLabel) {
-  const expP = args.graph.vertexes[tableVid]?.P;
+  const expP = g.vertexes[tableVid]?.P;
   const expRows = expP?.expansionRows;
   if (Array.isArray(expRows)) {
     for (let i = 0; i < expRows.length; i++) {
@@ -4515,7 +4515,7 @@ if (rowExpansion.childVertexLabel) {
   }
 } else if (typeof rowExpansion.getNestedRows === "function") {
   try {
-    const computedRows = rowExpansion.getNestedRows(rowData, args);
+    const computedRows = rowExpansion.getNestedRows(rowData, _);
     rows = Array.isArray(computedRows) ? computedRows : [];
   } catch (e) {
     rows = [];
@@ -4553,17 +4553,17 @@ return {
       P: {
         css:
           '''
-const showSelection = args.fns.getShowSelection();
-const virtualItem = args.contextData.virtualItem;
+const showSelection = f.getShowSelection();
+const virtualItem = c.virtualItem;
 if (!virtualItem) return {};
 const rowIndex = virtualItem.index;
 const rowData = virtualItem.rowData;
-const selectedRows = args.fns.getSelectedRows();
+const selectedRows = f.getSelectedRows();
 const isSelected = rowData?.id ? selectedRows.has(rowData.id) : false;
 
 return `._id {
   grid-row: 1;
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -4574,8 +4574,8 @@ return `._id {
         componentName: Html
         props:
           '''
-const showSelection = args.fns.getShowSelection();
-const virtualItem = args.contextData.virtualItem;
+const showSelection = f.getShowSelection();
+const virtualItem = c.virtualItem;
 if (!virtualItem) return {};
 const rowIndex = virtualItem.index;
 const rowData = virtualItem.rowData;
@@ -4585,8 +4585,8 @@ return {
   hide: !showSelection,
   onClick: (e) => {
     e.stopPropagation();
-    args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { activeRowId: rowData?.id ?? null });
-    if (rowData?.id) args.fns.toggleRowSelection(rowData.id);
+    _.mergeVertexProperties(0, f.tableStateVertexId, g, sg, { activeRowId: rowData?.id ?? null });
+    if (rowData?.id) f.toggleRowSelection(rowData.id);
   }
 };
 '''
@@ -4599,7 +4599,7 @@ return {
         css:
           '''
 // s-checkbox has issue so always use native checkbox
-// const usePolaris = args.fns.getUsePolarisUI?.() === true;
+// const usePolaris = f.getUsePolarisUI?.() === true;
 const usePolaris = false;
 if (usePolaris) return '';
 return `._id {
@@ -4607,7 +4607,7 @@ return `._id {
   cursor: pointer;
   width: 1rem;
   height: 1rem;
-  accent-color: ${args.theme.var.color.text};
+  accent-color: ${t.var.color.text};
   flex-shrink: 0;
 }
 `;
@@ -4616,15 +4616,15 @@ return `._id {
         componentName: Html
         props:
           '''
-const showSelection = args.fns.getShowSelection();
-const virtualItem = args.contextData.virtualItem;
+const showSelection = f.getShowSelection();
+const virtualItem = c.virtualItem;
 if (!virtualItem) return {};
 const rowIndex = virtualItem.index;
 const rowData = virtualItem.rowData;
-const selectedRows = args.fns.getSelectedRows();
+const selectedRows = f.getSelectedRows();
 const isSelected = rowData?.id ? selectedRows.has(rowData.id) : false;
 
-// const usePolaris = args.fns.getUsePolarisUI?.() === true;
+// const usePolaris = f.getUsePolarisUI?.() === true;
 const usePolaris = false;
 
 return {
@@ -4635,8 +4635,8 @@ return {
   checked: usePolaris ? undefined : isSelected,
   onChange: (e) => {
     e.stopPropagation();
-    args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { activeRowId: rowData?.id ?? null });
-    if (rowData?.id) args.fns.toggleRowSelection(rowData.id);
+    _.mergeVertexProperties(0, f.tableStateVertexId, g, sg, { activeRowId: rowData?.id ?? null });
+    if (rowData?.id) f.toggleRowSelection(rowData.id);
   },
   onClick: (e) => e.stopPropagation(),
   hide: !showSelection
@@ -4650,30 +4650,30 @@ return {
       P: {
         css:
           '''
-const hasFormConfig = !!args.fns.getFormConfig();
-const virtualItem = args.contextData.virtualItem;
+const hasFormConfig = !!f.getFormConfig();
+const virtualItem = c.virtualItem;
 if (!virtualItem) return {};
 
 return `._id {
   grid-row: 1;
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
   display: flex;
   align-items: center;
-  gap: ${args.theme.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
 }`;
 '''
         displayOrder: 0.6
         componentName: Html
         props:
           '''
-const hasFormConfig = !!args.fns.getFormConfig();
-const virtualItem = args.contextData.virtualItem;
+const hasFormConfig = !!f.getFormConfig();
+const virtualItem = c.virtualItem;
 if (!virtualItem) return {};
 const rowData = virtualItem.rowData;
 
 return {
   as: "div",
-  hide: !args.fns.getShowActionsColumn()
+  hide: !f.getShowActionsColumn()
 };
 '''
       }
@@ -4688,9 +4688,9 @@ return {
         componentName: Html
         props:
           '''
-const virtualItem = args.contextData.virtualItem;
+const virtualItem = c.virtualItem;
 if (!virtualItem) return {};
-return { data: args.fns.getPrimaryActionsForRow(virtualItem.rowData) };
+return { data: f.getPrimaryActionsForRow(virtualItem.rowData) };
 '''
       }
     }
@@ -4702,14 +4702,14 @@ return { data: args.fns.getPrimaryActionsForRow(virtualItem.rowData) };
         componentName: IconButton
         props:
           '''
-const action = args.contextData.tableAction;
-const virtualItem = args.contextData.virtualItem;
+const action = c.tableAction;
+const virtualItem = c.virtualItem;
 if (!virtualItem || !action) return { hide: true };
 const rowData = virtualItem.rowData;
-const disabled = args.fns.isActionDisabled(action, rowData);
-const loading = args.fns.isActionRunning(action, rowData);
-const reason = args.fns.getActionReasonState(action, rowData);
-const reasonAttrs = args.fns.getActionReasonDataAttrs(action, rowData);
+const disabled = f.isActionDisabled(action, rowData);
+const loading = f.isActionRunning(action, rowData);
+const reason = f.getActionReasonState(action, rowData);
+const reasonAttrs = f.getActionReasonDataAttrs(action, rowData);
 return {
   icon: loading ? (action.loadingIcon || "carbon:renew") : (action.icon || "carbon:overflow-menu-horizontal"),
   variant: action.variant || "ghost",
@@ -4723,7 +4723,7 @@ return {
   onClick: (e) => {
     e.stopPropagation();
     if (disabled || loading) return;
-    args.fns.runRowAction(action, rowData);
+    f.runRowAction(action, rowData);
   }
 };
 '''
@@ -4737,13 +4737,13 @@ return {
         componentName: FloatingMenu
         props:
           '''
-const virtualItem = args.contextData.virtualItem;
+const virtualItem = c.virtualItem;
 if (!virtualItem) return { hide: true };
 const rowData = virtualItem.rowData;
 return {
   placement: "bottom-end",
   triggerIcon: "carbon:overflow-menu-horizontal",
-  hide: !args.fns.hasSecondaryActionsForRow(rowData)
+  hide: !f.hasSecondaryActionsForRow(rowData)
 };
 '''
       }
@@ -4759,9 +4759,9 @@ return {
         componentName: Html
         props:
           '''
-const virtualItem = args.contextData.virtualItem;
+const virtualItem = c.virtualItem;
 if (!virtualItem) return {};
-return { data: args.fns.getSecondaryActionsForRow(virtualItem.rowData) };
+return { data: f.getSecondaryActionsForRow(virtualItem.rowData) };
 '''
       }
     }
@@ -4773,14 +4773,14 @@ return { data: args.fns.getSecondaryActionsForRow(virtualItem.rowData) };
         componentName: MenuItem
         props:
           '''
-const action = args.contextData.tableMenuAction;
-const virtualItem = args.contextData.virtualItem;
+const action = c.tableMenuAction;
+const virtualItem = c.virtualItem;
 if (!virtualItem || !action) return { hide: true };
 const rowData = virtualItem.rowData;
-const disabled = args.fns.isActionDisabled(action, rowData);
-const loading = args.fns.isActionRunning(action, rowData);
-const reason = args.fns.getActionReasonState(action, rowData);
-const reasonAttrs = args.fns.getActionReasonDataAttrs(action, rowData);
+const disabled = f.isActionDisabled(action, rowData);
+const loading = f.isActionRunning(action, rowData);
+const reason = f.getActionReasonState(action, rowData);
+const reasonAttrs = f.getActionReasonDataAttrs(action, rowData);
 const isDanger = action.type === "delete" || action.variant === "danger";
 return {
   text: action.label || action.title || action.key,
@@ -4793,8 +4793,8 @@ return {
   onClick: (e) => {
     e?.stopPropagation();
     if (disabled || loading) return;
-    void args.fns.runRowAction(action, rowData);
-    args.contextData.floatingMenuContext?.closeMenu?.();
+    void f.runRowAction(action, rowData);
+    c.floatingMenuContext?.closeMenu?.();
   }
 };
 '''
@@ -4810,9 +4810,9 @@ return {
         componentName: Html
         props:
           '''
-const columns = args.fns.getColumns();
-const showRowNumber = args.fns.getShowRowNumber();
-const virtualItem = args.contextData.virtualItem;
+const columns = f.getColumns();
+const showRowNumber = f.getShowRowNumber();
+const virtualItem = c.virtualItem;
 if (!virtualItem) return {};
 const rowIndex = virtualItem.index;
 const rowData = virtualItem.rowData;
@@ -4831,13 +4831,13 @@ return {
       P: {
         css:
           '''
-const column = args.contextData.column;
-const shouldHide = args.fns.shouldHideColumn(column);
-const isExpandColumn = args.fns.getColumnRenderer(column) === "expand";
+const column = c.column;
+const shouldHide = f.shouldHideColumn(column);
+const isExpandColumn = f.getColumnRenderer(column) === "expand";
 
 return `._id {
   grid-row: 1;
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
   display: flex;
   align-items: ${isExpandColumn ? "stretch" : "center"};
   justify-content: ${isExpandColumn ? "stretch" : "flex-start"};
@@ -4848,12 +4848,12 @@ return `._id {
         componentName: Html
         props:
           '''
-const column = args.contextData.column;
-const virtualItem = args.contextData.virtualItem;
+const column = c.column;
+const virtualItem = c.virtualItem;
 if (!virtualItem) return {};
 const rowIndex = virtualItem.index;
 const rowData = virtualItem.rowData;
-const shouldHide = args.fns.shouldHideColumn(column);
+const shouldHide = f.shouldHideColumn(column);
 
 return {
   as: "div",
@@ -4871,12 +4871,12 @@ return {
         componentName: Html
         props:
           '''
-const column = args.contextData.column;
-const virtualItem = args.contextData.virtualItem;
+const column = c.column;
+const virtualItem = c.virtualItem;
 if (!virtualItem) return {};
 const rowIndex = virtualItem.index;
 const rowData = virtualItem.rowData;
-const cellContent = args.fns.renderCellContent(rowData, column, rowIndex);
+const cellContent = f.renderCellContent(rowData, column, rowIndex);
 
 // Handle different content types
 if (typeof cellContent === "object" && cellContent !== null) {
@@ -4885,9 +4885,9 @@ if (typeof cellContent === "object" && cellContent !== null) {
     const isExpanded = cellContent.isExpanded === true;
     const onToggle = cellContent.onToggle;
     if (!isParent) return { as: "div", style: "width: 16px; flex-shrink: 0;" };
-    const spacingSm = args.theme.var.spacing.sm;
-    const spacingMd = args.theme.var.spacing.md;
-    const textColor = args.theme.var.color.text;
+    const spacingSm = t.var.spacing.sm;
+    const spacingMd = t.var.spacing.md;
+    const textColor = t.var.color.text;
     return {
       as: "button",
       type: "button",
@@ -4919,7 +4919,7 @@ if (typeof cellContent === "object" && cellContent !== null) {
       target: "_blank",
       rel: "noopener noreferrer",
       text: "Watch",
-      style: "color: " + args.theme.var.color.primary + "; text-decoration: none;"
+      style: "color: " + t.var.color.primary + "; text-decoration: none;"
     };
   }
   if (cellContent.type === "downloadLink") {
@@ -4927,7 +4927,7 @@ if (typeof cellContent === "object" && cellContent !== null) {
       as: "a",
       href: cellContent.url,
       download: true,
-      style: "color: " + args.theme.var.color.primary + "; text-decoration: none; display: flex; align-items: center; gap: 4px;"
+      style: "color: " + t.var.color.primary + "; text-decoration: none; display: flex; align-items: center; gap: 4px;"
     };
   }
   if (cellContent.type === "textLink") {
@@ -4935,7 +4935,7 @@ if (typeof cellContent === "object" && cellContent !== null) {
     const hrefCandidate = cellContent.href;
     const resolvedHref =
       hrefCandidate != null && hrefCandidate !== "" ? String(hrefCandidate) : "";
-    const themeColors = args.theme.var.color;
+    const themeColors = t.var.color;
     const useEllipsis = column.overflowEllipsis === true;
     const ellipsisStyle =
       "min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;";
@@ -4968,9 +4968,9 @@ if (typeof cellContent === "object" && cellContent !== null) {
   if (cellContent.type === "iconAction") {
     const col = cellContent.actionColumn;
     const cfg = col.iconAction || {};
-    const rowKey = args.fns.getIconActionRowKey(rowData, rowIndex);
+    const rowKey = f.getIconActionRowKey(rowData, rowIndex);
     const stateKey = col.key + ":" + (rowKey != null ? rowKey : "idx-" + rowIndex);
-    const isActive = args.fns.iconActionActiveKey() === stateKey;
+    const isActive = f.iconActionActiveKey() === stateKey;
     const isCarbonStr = (s) => typeof s === "string" && s.trim().length > 0 && !/\s/.test(s) && s.includes(":");
     const iconIdle = cfg.icon;
     const iconBusy = cfg.activeIcon;
@@ -4979,7 +4979,7 @@ if (typeof cellContent === "object" && cellContent !== null) {
     const ariaLabel = title || col.label || col.key || "Action";
     const onAct = (e) => {
       e.stopPropagation();
-      args.fns.handleIconAction(col, rowData, rowIndex);
+      f.handleIconAction(col, rowData, rowIndex);
     };
     if (useIconButton) {
       const iconName = isActive && isCarbonStr(iconBusy) ? iconBusy : (isCarbonStr(iconIdle) ? iconIdle : "carbon:link");
@@ -4993,8 +4993,8 @@ if (typeof cellContent === "object" && cellContent !== null) {
         onClick: onAct
       };
     }
-    const t = args.theme.var.color;
-    const br = args.theme.var.borderRadius.md;
+    const t = t.var.color;
+    const br = t.var.borderRadius.md;
     const border = t.border_light_400;
     const bg = isActive ? (cfg.activeButtonBg || t.success_light_200) : (cfg.buttonBg || t.background);
     const fg = isActive ? (cfg.activeButtonFg || t.success_dark_300) : (cfg.buttonFg || t.primary);
@@ -5022,7 +5022,7 @@ if (typeof cellContent === "object" && cellContent !== null) {
     if (!text) {
       return { as: "div", text: "", hide: true };
     }
-    const usePolaris = args.fns.getUsePolarisUI?.() === true;
+    const usePolaris = f.getUsePolarisUI?.() === true;
     const tone = cellContent.tone || "neutral";
     const title = column.badgeTitleAccessor ? column.badgeTitleAccessor(rowData) : undefined;
     if (usePolaris) {
@@ -5033,8 +5033,8 @@ if (typeof cellContent === "object" && cellContent !== null) {
         title
       };
     }
-    const t = args.theme.var.color;
-    const br = args.theme.var.borderRadius.full;
+    const t = t.var.color;
+    const br = t.var.borderRadius.full;
     const fs = "0.75rem";
     const tones = {
       success: { bg: t.success_light_200, fg: t.success_dark_300 },
@@ -5055,7 +5055,7 @@ if (typeof cellContent === "object" && cellContent !== null) {
   }
 }
 
-if (args.fns.getColumnRenderer(column) === "actions" && args.fns.getActions().some((a) => a.type === "edit")) {
+if (f.getColumnRenderer(column) === "actions" && f.getActions().some((a) => a.type === "edit")) {
   return {
     as: "div",
     style: "display: flex; gap: 8px; align-items: center;"
@@ -5095,14 +5095,14 @@ return out;
         props:
           '''
 return {
-  isOpen: args.graph.vertexes[args.fns.tableStateVertexId]?.P?.isModalOpen === true,
-  onClose: () => args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { isModalOpen: false }),
-  mode: args.graph.vertexes[args.fns.tableStateVertexId]?.P?.modalMode ?? "add",
-  formConfig: args.fns.getFormConfig(),
-  initialVertex: args.graph.vertexes[args.fns.tableStateVertexId]?.P?.formData ?? null,
-  onSave: args.fns.handleSave,
-  label: args.fns.getLabel(),
-  tableVertexLabel: args.fns.getTableVertexLabel?.() ?? args.contextData.props?.tableVertexLabel
+  isOpen: g.vertexes[f.tableStateVertexId]?.P?.isModalOpen === true,
+  onClose: () => _.mergeVertexProperties(0, f.tableStateVertexId, g, sg, { isModalOpen: false }),
+  mode: g.vertexes[f.tableStateVertexId]?.P?.modalMode ?? "add",
+  formConfig: f.getFormConfig(),
+  initialVertex: g.vertexes[f.tableStateVertexId]?.P?.formData ?? null,
+  onSave: f.handleSave,
+  label: f.getLabel(),
+  tableVertexLabel: f.getTableVertexLabel?.() ?? c.props?.tableVertexLabel
 };
 '''
       }
@@ -5132,8 +5132,8 @@ return `._id {
           '''
 return {
   as: "div",
-  hide: !args.graph.vertexes[args.fns.tableStateVertexId]?.P?.isImportModalOpen,
-  onClick: () => args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { isImportModalOpen: false })
+  hide: !g.vertexes[f.tableStateVertexId]?.P?.isImportModalOpen,
+  onClick: () => _.mergeVertexProperties(0, f.tableStateVertexId, g, sg, { isImportModalOpen: false })
 };
 '''
       }
@@ -5145,9 +5145,9 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.background};
-  border-radius: ${args.theme.var.borderRadius.md};
-  padding: ${args.theme.var.spacing.xl};
+  background: ${t.var.color.background};
+  border-radius: ${t.var.borderRadius.md};
+  padding: ${t.var.spacing.xl};
   max-width: 600px;
   width: 90%;
   max-height: 80vh;
@@ -5161,7 +5161,7 @@ return `._id {
           '''
 return {
   as: "div",
-  hide: !args.graph.vertexes[args.fns.tableStateVertexId]?.P?.isImportModalOpen,
+  hide: !g.vertexes[f.tableStateVertexId]?.P?.isImportModalOpen,
   onClick: (e) => e.stopPropagation()
 };
 '''
@@ -5176,8 +5176,8 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  margin-bottom: ${args.theme.var.spacing.md};
-  color: ${args.theme.var.color.text};
+  margin-bottom: ${t.var.spacing.md};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 1
@@ -5198,13 +5198,13 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.info_light_100};
-  border-left: 3px solid ${args.theme.var.color.info};
-  padding: ${args.theme.var.spacing.md};
-  margin-bottom: ${args.theme.var.spacing.md};
-  border-radius: ${args.theme.var.borderRadius.sm};
+  background: ${t.var.color.info_light_100};
+  border-left: 3px solid ${t.var.color.info};
+  padding: ${t.var.spacing.md};
+  margin-bottom: ${t.var.spacing.md};
+  border-radius: ${t.var.borderRadius.sm};
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   line-height: 1.6;
 }`;
 '''
@@ -5240,7 +5240,7 @@ return {
         css:
           '''
 return `._id {
-  margin-top: ${args.theme.var.spacing.sm};
+  margin-top: ${t.var.spacing.sm};
   font-weight: 600;
 }`;
 '''
@@ -5261,20 +5261,20 @@ return {
       P: {
         css:
           '''
-const columns = args.fns.getColumns();
+const columns = f.getColumns();
 const getSampleCSVHeader = () => {
   if (!columns || columns.length === 0) return "";
-  const headers = columns.filter(col => args.fns.getColumnRenderer(col) !== "rowNumber").map(col => col.key);
+  const headers = columns.filter(col => f.getColumnRenderer(col) !== "rowNumber").map(col => col.key);
   return headers.join(",");
 };
 
 const sampleHeader = getSampleCSVHeader();
 
 return `._id {
-  margin-top: ${args.theme.var.spacing.xs};
+  margin-top: ${t.var.spacing.xs};
   background: rgba(0,0,0,0.1);
-  padding: ${args.theme.var.spacing.sm};
-  border-radius: ${args.theme.var.borderRadius.sm};
+  padding: ${t.var.spacing.sm};
+  border-radius: ${t.var.borderRadius.sm};
   font-family: monospace;
   font-size: 0.75rem;
   word-break: break-all;
@@ -5284,10 +5284,10 @@ return `._id {
         componentName: Html
         props:
           '''
-const columns = args.fns.getColumns();
+const columns = f.getColumns();
 const getSampleCSVHeader = () => {
   if (!columns || columns.length === 0) return "";
-  const headers = columns.filter(col => args.fns.getColumnRenderer(col) !== "rowNumber").map(col => col.key);
+  const headers = columns.filter(col => f.getColumnRenderer(col) !== "rowNumber").map(col => col.key);
   return headers.join(",");
 };
 
@@ -5307,8 +5307,8 @@ return {
         props:
           '''
 return {
-  value: args.graph.vertexes[args.fns.tableStateVertexId]?.P?.importData ?? "",
-  onChange: (e) => args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { importData: e.target.value }),
+  value: g.vertexes[f.tableStateVertexId]?.P?.importData ?? "",
+  onChange: (e) => _.mergeVertexProperties(0, f.tableStateVertexId, g, sg, { importData: e.target.value }),
   placeholder: "Paste your data here (CSV or JSON format)...",
   rows: 10,
   style: "font-family: monospace; font-size: 12px;"
@@ -5324,9 +5324,9 @@ return {
           '''
 return `._id {
   display: flex;
-  gap: ${args.theme.var.spacing.md};
+  gap: ${t.var.spacing.md};
   justify-content: flex-end;
-  margin-top: ${args.theme.var.spacing.md};
+  margin-top: ${t.var.spacing.md};
 }`;
 '''
         displayOrder: 4
@@ -5350,11 +5350,11 @@ return {
 return {
   variant: "secondary",
   onClick: () => {
-    args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { isImportModalOpen: false, importData: "" });
+    _.mergeVertexProperties(0, f.tableStateVertexId, g, sg, { isImportModalOpen: false, importData: "" });
   },
   text: "Cancel",
-  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
-  hide: args.fns.getUsePolarisUI?.() === true
+  disabled: g.vertexes[f.pageStateVertexId]?.P?.loading === true,
+  hide: f.getUsePolarisUI?.() === true
 };
 '''
       }
@@ -5372,10 +5372,10 @@ return {
   "attr:variant": "secondary",
   text: "Cancel",
   onClick: () => {
-    args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { isImportModalOpen: false, importData: "" });
+    _.mergeVertexProperties(0, f.tableStateVertexId, g, sg, { isImportModalOpen: false, importData: "" });
   },
-  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
-  hide: args.fns.getUsePolarisUI?.() !== true
+  disabled: g.vertexes[f.pageStateVertexId]?.P?.loading === true,
+  hide: f.getUsePolarisUI?.() !== true
 };
 '''
       }
@@ -5390,13 +5390,13 @@ return {
           '''
 return {
   variant: "primary",
-  onClick: () => args.fns.handleImport((args.graph.vertexes[args.fns.tableStateVertexId]?.P?.importData ?? "").trim(), () => {
-    args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { isImportModalOpen: false, importData: "" });
-    args.fns.handleSearch();
+  onClick: () => f.handleImport((g.vertexes[f.tableStateVertexId]?.P?.importData ?? "").trim(), () => {
+    _.mergeVertexProperties(0, f.tableStateVertexId, g, sg, { isImportModalOpen: false, importData: "" });
+    f.handleSearch();
   }),
   text: "Import",
-  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true || !(args.graph.vertexes[args.fns.tableStateVertexId]?.P?.importData ?? "").trim(),
-  hide: args.fns.getUsePolarisUI?.() === true
+  disabled: g.vertexes[f.pageStateVertexId]?.P?.loading === true || !(g.vertexes[f.tableStateVertexId]?.P?.importData ?? "").trim(),
+  hide: f.getUsePolarisUI?.() === true
 };
 '''
       }
@@ -5413,12 +5413,12 @@ return {
   as: "s-button",
   "attr:variant": "primary",
   text: "Import",
-  onClick: () => args.fns.handleImport((args.graph.vertexes[args.fns.tableStateVertexId]?.P?.importData ?? "").trim(), () => {
-    args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { isImportModalOpen: false, importData: "" });
-    args.fns.handleSearch();
+  onClick: () => f.handleImport((g.vertexes[f.tableStateVertexId]?.P?.importData ?? "").trim(), () => {
+    _.mergeVertexProperties(0, f.tableStateVertexId, g, sg, { isImportModalOpen: false, importData: "" });
+    f.handleSearch();
   }),
-  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true || !(args.graph.vertexes[args.fns.tableStateVertexId]?.P?.importData ?? "").trim(),
-  hide: args.fns.getUsePolarisUI?.() !== true
+  disabled: g.vertexes[f.pageStateVertexId]?.P?.loading === true || !(g.vertexes[f.tableStateVertexId]?.P?.importData ?? "").trim(),
+  hide: f.getUsePolarisUI?.() !== true
 };
 '''
       }
@@ -5431,11 +5431,11 @@ return {
         componentName: TableSettingsModal
         props:
           '''
-const evaluateConfig = args.fns.evaluateConfig;
+const evaluateConfig = f.evaluateConfig;
 const config = evaluateConfig();
-const getConfigFunction = args.fns.getConfigFunction;
-const vid = args.fns.pageStateVertexId;
-const pageDp = () => args.graph.vertexes[vid]?.P;
+const getConfigFunction = f.getConfigFunction;
+const vid = f.pageStateVertexId;
+const pageDp = () => g.vertexes[vid]?.P;
 
 // Get initial config as function body string (from settingsModalInitialConfig, settings, or configFunction)
 let initialConfig = "";
@@ -5480,14 +5480,14 @@ try {
 return {
   isOpen: pageDp()?.isSettingsModalOpen === true,
   onClose: () => {
-    args.mergeVertexProperties(0, vid, args.graph, args.setGraph, {
+    _.mergeVertexProperties(0, vid, g, sg, {
       settingsModalInitialConfig: null,
       isSettingsModalOpen: false
     });
   },
   initialConfig: initialConfig,
-  onSave: args.fns.handleSaveSettings,
-  tableVertexLabel: args.fns.getTableVertexLabel()
+  onSave: f.handleSaveSettings,
+  tableVertexLabel: f.getTableVertexLabel()
 };
 '''
       }

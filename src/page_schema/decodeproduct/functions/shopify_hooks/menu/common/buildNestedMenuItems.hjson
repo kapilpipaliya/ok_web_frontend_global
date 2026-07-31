@@ -8,7 +8,7 @@
         body:
           '''
 // Extract parameters
-const { parentElementId } = args.contextData;
+const { parentElementId } = c;
 
 if (!parentElementId) {
   return {
@@ -17,13 +17,13 @@ if (!parentElementId) {
   };
 }
 
-const helpers = await args.executeNamedServerFunction(
+const helpers = await s(
   { functionName: 'shopifyQueueHelpers', contextData: {} }
 );
 if (!helpers.result?.success) {
   return { success: false, error: "Failed to load shopifyQueueHelpers", menuItems: [] };
 }
-const batchResult = await helpers.result.data.buildNestedMenuItemsBatch(args.session, [parentElementId]);
+const batchResult = await helpers.result.data.buildNestedMenuItemsBatch(_.session, [parentElementId]);
 const menuItems = batchResult.get(parentElementId) || [];
 return { success: true, menuItems };
 '''

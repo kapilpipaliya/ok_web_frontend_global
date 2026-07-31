@@ -37,10 +37,10 @@ const getMaxPanelWidth = () => {
 };
 
 const checkAdminRole = () => {
-  const userRoles = args.user?.OUT?.UserRole || [];
+  const userRoles = _.user?.OUT?.UserRole || [];
   return userRoles.some((edgeId) => {
-    const edge = args.graph.edges[edgeId];
-    const role = args.graph.vertexes[edge?.E];
+    const edge = g.edges[edgeId];
+    const role = g.vertexes[edge?.E];
     return role?.P?.key === "Admin";
   });
 };
@@ -68,22 +68,22 @@ const isLangCode = (value) =>
   value != null && /^[a-z]{2,3}$/i.test(String(value).trim());
 
 const getPagePathWithoutLang = () => {
-  const parts = String(args.location?.pathname || "").split("/").filter(Boolean);
+  const parts = String(_.location?.pathname || "").split("/").filter(Boolean);
   if (parts.length > 0 && isLangCode(parts[0])) {
     return parts.length > 1 ? "/" + parts.slice(1).join("/") : "/";
   }
-  return args.location?.pathname || "/";
+  return _.location?.pathname || "/";
 };
 
 const getSettingsPageId = () => {
-  const fromProps = args.contextData.props?.settingsPageId;
+  const fromProps = c.props?.settingsPageId;
   if (fromProps != null && String(fromProps).trim() !== "") {
     return String(fromProps).trim();
   }
 
   const pathname = getPagePathWithoutLang();
-  for (const vertexId in args.graph.vertexes) {
-    const vertex = args.graph.vertexes[vertexId];
+  for (const vertexId in g.vertexes) {
+    const vertex = g.vertexes[vertexId];
     if (!vertex?.L?.includes("Page")) continue;
     const pageUrl = vertex.P?.url || "/";
     if (pageUrl === pathname && vertex.P?.settingsPageId) {
@@ -95,17 +95,17 @@ const getSettingsPageId = () => {
 };
 
 const isOnSettingsRoute = () => {
-  const pathname = args.location?.pathname || "";
+  const pathname = _.location?.pathname || "";
   return pathname === "/settings" || pathname.startsWith("/settings/");
 };
 
-const [isPanelOpen, setIsPanelOpen] = args.createSignal(false);
-const [panelWidth, setPanelWidth] = args.createSignal(loadStoredPanelWidth());
-const [isResizingPanel, setIsResizingPanel] = args.createSignal(false);
-const [editorMode, setEditorMode] = args.createSignal("content");
-const [sectionNav, setSectionNav] = args.createSignal([]);
-const [activeSectionId, setActiveSectionId] = args.createSignal(null);
-const [siteLanguages, setSiteLanguages] = args.createSignal([]);
+const [isPanelOpen, setIsPanelOpen] = _.createSignal(false);
+const [panelWidth, setPanelWidth] = _.createSignal(loadStoredPanelWidth());
+const [isResizingPanel, setIsResizingPanel] = _.createSignal(false);
+const [editorMode, setEditorMode] = _.createSignal("content");
+const [sectionNav, setSectionNav] = _.createSignal([]);
+const [activeSectionId, setActiveSectionId] = _.createSignal(null);
+const [siteLanguages, setSiteLanguages] = _.createSignal([]);
 let siteLanguagesLoadPromise = null;
 
 const DEFAULT_SITE_LANGUAGES = [
@@ -139,7 +139,7 @@ const loadSiteLanguages = async () => {
 };
 
 const executeYTOFunction = (functionName, contextData) =>
-  args.executeNamedServerFunction({
+  s({
     functionName,
     contextData: contextData || {}
   });
@@ -178,9 +178,9 @@ const loadSectionNav = async () => {
 };
 
 const refreshPagePreview = () => {
-  const path = args.location?.pathname || "/";
-  const search = args.location?.search || "";
-  args.navigate(path + search, { replace: true });
+  const path = _.location?.pathname || "/";
+  const search = _.location?.search || "";
+  _.navigate(path + search, { replace: true });
 };
 
 const togglePanel = async () => {
@@ -282,7 +282,7 @@ const onEditorMount = async () => {
   };
 };
 
-args.createEffect(() => {
+_.createEffect(() => {
   panelWidth();
   isPanelOpen();
   syncBodyPanelClass();
@@ -349,7 +349,7 @@ body.fulchand-settings-panel-resizing [data-fulchand-page-main] {
       L: Attr
       P: {
         css:
-          '''const panelOpen = args.fns.isPanelOpen?.();
+          '''const panelOpen = f.isPanelOpen?.();
 return `._id {
   position: fixed;
   bottom: 1.5rem;
@@ -361,8 +361,8 @@ return `._id {
   padding: 0.75rem 1rem;
   border: none;
   border-radius: 9999px;
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
@@ -370,23 +370,23 @@ return `._id {
   transition: all 0.25s ease;
 
   &:hover {
-    background: ${args.theme.var.color.primary_dark_200};
+    background: ${t.var.color.primary_dark_200};
     transform: translateY(-1px);
   }
 }`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''const isAdmin = args.fns.checkAdminRole?.();
-const onSettingsRoute = args.fns.isOnSettingsRoute?.();
-const panelOpen = args.fns.isPanelOpen?.();
+          '''const isAdmin = f.checkAdminRole?.();
+const onSettingsRoute = f.isOnSettingsRoute?.();
+const panelOpen = f.isPanelOpen?.();
 return {
   as: "button",
   type: "button",
   "aria-label": panelOpen ? "Close page settings" : "Edit page settings",
   title: panelOpen ? "Close settings" : "Edit page settings",
   hide: !isAdmin || onSettingsRoute,
-  onClick: () => (panelOpen ? args.fns.closePanel?.() : args.fns.togglePanel?.())
+  onClick: () => (panelOpen ? f.closePanel?.() : f.togglePanel?.())
 };'''
       }
     }
@@ -397,7 +397,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const panelOpen = args.fns.isPanelOpen?.();
+          '''const panelOpen = f.isPanelOpen?.();
 return {
   as: "icon",
   icon: panelOpen ? "ph:x" : "ph:gear-six",
@@ -413,7 +413,7 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const panelOpen = args.fns.isPanelOpen?.();
+          '''const panelOpen = f.isPanelOpen?.();
 return {
   as: "span",
   text: panelOpen ? "Close" : "Edit page"
@@ -425,32 +425,32 @@ return {
       L: Attr
       P: {
         css:
-          '''const resizing = args.fns.isResizingPanel?.();
+          '''const resizing = f.isResizingPanel?.();
 return `._id {
   position: fixed;
   top: 0;
   right: 0;
-  width: var(--fulchand-settings-panel-width, ${args.fns.DEFAULT_PANEL_WIDTH}px);
+  width: var(--fulchand-settings-panel-width, ${f.DEFAULT_PANEL_WIDTH}px);
   max-width: 100vw;
   height: 100vh;
   z-index: 9999;
   display: flex;
   flex-direction: column;
-  background: ${args.theme.var.color.background};
-  border-left: 1px solid ${args.theme.var.color.border};
+  background: ${t.var.color.background};
+  border-left: 1px solid ${t.var.color.border};
   box-shadow: -8px 0 32px oklch(0 0 0 / 0.12);
   transition: ${resizing ? "none" : "width 0.25s ease"};
 }`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''const isAdmin = args.fns.checkAdminRole?.();
-const panelOpen = args.fns.isPanelOpen?.();
+          '''const isAdmin = f.checkAdminRole?.();
+const panelOpen = f.isPanelOpen?.();
 return {
   as: "aside",
   "data-fulchand-settings-panel": "",
   hide: !isAdmin || !panelOpen,
-  onMount: () => args.fns.onEditorMount?.()
+  onMount: () => f.onEditorMount?.()
 };'''
       }
     }
@@ -485,7 +485,7 @@ return {
 
   &:hover::after,
   body.fulchand-settings-panel-resizing & {
-    background: ${args.theme.var.color.primary};
+    background: ${t.var.color.primary};
   }
 }`;'''
         displayOrder: 0
@@ -497,7 +497,7 @@ return {
   "aria-orientation": "vertical",
   "aria-label": "Resize settings panel",
   title: "Drag to resize panel",
-  onMouseDown: (event) => args.fns.startPanelResize?.(event)
+  onMouseDown: (event) => f.startPanelResize?.(event)
 };'''
       }
     }
@@ -511,8 +511,8 @@ return {
   flex-direction: column;
   gap: 0.75rem;
   padding: 1rem;
-  border-bottom: 1px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background_light_100};
+  border-bottom: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background_light_100};
   flex-shrink: 0;
   position: relative;
   z-index: 2;
@@ -553,7 +553,7 @@ return {
   margin: 0;
   font-size: 1rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         displayOrder: 1
         componentName: Html
@@ -594,7 +594,7 @@ return {
   variant: "ghost",
   size: "sm",
   title: "Refresh page preview",
-  onClick: () => args.fns.refreshPagePreview?.()
+  onClick: () => f.refreshPagePreview?.()
 };'''
       }
     }
@@ -610,7 +610,7 @@ return {
   variant: "ghost",
   size: "sm",
   title: "Close settings panel",
-  onClick: () => args.fns.closePanel?.()
+  onClick: () => f.closePanel?.()
 };'''
       }
     }
@@ -621,11 +621,11 @@ return {
         displayOrder: 3
         componentName: SettingsSectionNav
         props:
-          '''const isSchema = args.fns.editorMode?.() === "schema";
+          '''const isSchema = f.editorMode?.() === "schema";
 return {
-  sections: args.fns.sectionNav?.() || [],
-  activeSectionId: args.fns.activeSectionId?.(),
-  onSectionClick: (sectionId) => args.fns.scrollToSection?.(sectionId),
+  sections: f.sectionNav?.() || [],
+  activeSectionId: f.activeSectionId?.(),
+  onSectionClick: (sectionId) => f.scrollToSection?.(sectionId),
   hide: isSchema
 };'''
       }
@@ -637,17 +637,17 @@ return {
         displayOrder: 2
         componentName: SettingsEditorShell
         props:
-          '''const settingsPageId = args.fns.getSettingsPageId?.();
+          '''const settingsPageId = f.getSettingsPageId?.();
 return {
   settingsPageId,
-  siteLanguages: args.fns.siteLanguages?.() || [],
+  siteLanguages: f.siteLanguages?.() || [],
   embeddedMode: true,
   hideSettingsSidebar: true,
   hide: !settingsPageId,
-  isSchemaMode: () => args.fns.editorMode?.() === "schema",
-  onSetContentMode: () => args.fns.setEditorMode?.("content"),
-  onSetSchemaMode: () => args.fns.switchEditorMode?.("schema"),
-  onSchemaSaved: () => args.fns.onSchemaSaved?.(),
+  isSchemaMode: () => f.editorMode?.() === "schema",
+  onSetContentMode: () => f.setEditorMode?.("content"),
+  onSetSchemaMode: () => f.switchEditorMode?.("schema"),
+  onSchemaSaved: () => f.onSchemaSaved?.(),
   schemaTabLabel: "Fields",
   contentTabLabel: "Content",
   dynamicPageKey: "fulchand_embedded_settings_editor"

@@ -6,7 +6,7 @@
       P: {
         description: Update all details of a contact
         body:
-          '''const { contactId, name, phoneNumber, country, countryCode, remark, called, isUnavailable, notInterested } = args.contextData;
+          '''const { contactId, name, phoneNumber, country, countryCode, remark, called, isUnavailable, notInterested } = c;
 
 if (!contactId) {
   throw new Error("Contact ID is required");
@@ -20,7 +20,7 @@ if (!phoneNumber || !phoneNumber.trim()) {
   throw new Error("Phone number is required");
 }
 
-const result = await args.session.executeWrite(async (tx) => {
+const result = await _.session.executeWrite(async (tx) => {
   // Check if phone number is being changed and if it already exists
   if (phoneNumber) {
     const existingResult = await tx.run(
@@ -71,7 +71,7 @@ const result = await args.session.executeWrite(async (tx) => {
   }
 
   const node = updateResult.records[0].get('c');
-  const contact = args.convertNodeToJson(node);
+  const contact = _.convertNodeToJson(node);
 
   return contact;
 });

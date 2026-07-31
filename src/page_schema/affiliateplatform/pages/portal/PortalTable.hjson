@@ -8,10 +8,10 @@
         fns:
           '''
 const checkAdminRole = () => {
-  const userRoles = args.user?.OUT?.UserRole || [];
+  const userRoles = _.user?.OUT?.UserRole || [];
   return userRoles.some((edgeId) => {
-    const edge = args.graph.edges[edgeId];
-    const role = args.graph.vertexes[edge?.E];
+    const edge = g.edges[edgeId];
+    const role = g.vertexes[edge?.E];
     return role?.P?.key === "Admin";
   });
 };
@@ -38,7 +38,7 @@ const PAGE_DESIGNER_ENTITIES = new Set(["Page", "Component", "Function", "EmailT
 const PAGE_DESIGNER_KEY_ENTITIES = new Set(["Page", "Component"]);
 
 const getTableVertexLabel = () => {
-  const table = args.searchParams?.table;
+  const table = _.searchParams?.table;
   if (table) {
     const value = String(table).trim();
     if (TABLE_KEY_BY_LABEL[value]) return value;
@@ -48,7 +48,7 @@ const getTableVertexLabel = () => {
 };
 
 const getTableKey = () => {
-  const fromQuery = args.searchParams?.key;
+  const fromQuery = _.searchParams?.key;
   if (fromQuery != null && String(fromQuery).trim() !== "") return String(fromQuery).trim();
   const label = getTableVertexLabel();
   return TABLE_KEY_BY_LABEL[label] || "products";
@@ -71,7 +71,7 @@ const openInPageDesigner = (row) => {
   const entity = getPageDesignerEntity();
   if (!entity) return;
   const path = getPageDesignerPath(entity, row);
-  if (path) args.navigate(path);
+  if (path) _.navigate(path);
 };
 
 const deleteDesignerEntity = async (row) => {
@@ -79,22 +79,22 @@ const deleteDesignerEntity = async (row) => {
   if (!entity) return;
   const id = row?.id;
   if (!id) return;
-  const result = await args.postAPI("/api/page/delete", { id }, "DELETE");
+  const result = await _.postAPI("/api/page/delete", { id }, "DELETE");
   if (result?.success) {
     if (result.graph) {
-      args.setGraphData(0, result.graph, {});
+      _.setGraphData(0, result.graph, {});
     }
-    args.showSuccessToast?.(`${getTableTitle()} entry deleted successfully`);
+    _.showSuccessToast?.(`${getTableTitle()} entry deleted successfully`);
     const table = getTableVertexLabel();
     const key = getTableKey();
     if (isSchemaMode()) {
-      args.setSearchParams({ table, key, mode: "schema" }, { replace: true });
+      _.setSearchParams({ table, key, mode: "schema" }, { replace: true });
     } else {
-      args.setSearchParams({ table, key, mode: null }, { replace: true });
+      _.setSearchParams({ table, key, mode: null }, { replace: true });
     }
     return;
   }
-  args.showErrorToast?.(result?.error || `Failed to delete ${entity}`);
+  _.showErrorToast?.(result?.error || `Failed to delete ${entity}`);
   throw new Error(result?.error || "Delete failed");
 };
 
@@ -152,26 +152,26 @@ const getTableTitle = () => {
   return TABLE_TITLE_BY_LABEL[label] || `${label} table`;
 };
 
-const isSchemaMode = () => args.searchParams?.mode === "schema";
+const isSchemaMode = () => _.searchParams?.mode === "schema";
 
 const setEditorMode = (mode) => {
   const table = getTableVertexLabel();
   const key = getTableKey();
   if (mode === "schema") {
-    args.setSearchParams({ table, key, mode: "schema" }, { replace: true });
+    _.setSearchParams({ table, key, mode: "schema" }, { replace: true });
   } else {
-    args.setSearchParams({ table, key, mode: null }, { replace: true });
+    _.setSearchParams({ table, key, mode: null }, { replace: true });
   }
 };
 
 const onSchemaSaved = () => {
-  const tableKey = args.fns.getTableKey?.();
+  const tableKey = f.getTableKey?.();
   if (!tableKey || String(tableKey).trim() === "") {
-    args.showErrorToast?.("Table key missing. Unable to process schema save.");
+    _.showErrorToast?.("Table key missing. Unable to process schema save.");
     return;
   }
   window.dispatchEvent(new CustomEvent("affiliate-table-schema-saved", { detail: { tableKey } }));
-  args.showSuccessToast?.("Table schema saved");
+  _.showSuccessToast?.("Table schema saved");
 };
 
 return {
@@ -196,13 +196,13 @@ return {
 return {
   isNoPermissionCheck: true,
   onMount: () => {
-    if (!args.user) {
-      args.navigate("/auth/signin", { replace: true });
+    if (!_.user) {
+      _.navigate("/auth/signin", { replace: true });
       return;
     }
-    if (!args.fns.checkAdminRole?.()) {
-      args.showErrorToast?.("Admin access required");
-      args.navigate("/", { replace: true });
+    if (!f.checkAdminRole?.()) {
+      _.showErrorToast?.("Admin access required");
+      _.navigate("/", { replace: true });
     }
   }
 };
@@ -227,7 +227,7 @@ return {
         props:
           '''return {
   as: "section",
-  hide: !args.fns.checkAdminRole?.()
+  hide: !f.checkAdminRole?.()
 };'''
       }
     }
@@ -242,8 +242,8 @@ return {
   justify-content: space-between;
   gap: 1rem;
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid ${args.theme.var.color.border_light_300};
-  background: ${args.theme.var.color.background};
+  border-bottom: 1px solid ${t.var.color.border_light_300};
+  background: ${t.var.color.background};
   flex-shrink: 0;
 }`;'''
         displayOrder: 1
@@ -260,14 +260,14 @@ return {
   margin: 0;
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
           '''return {
   as: "h1",
-  text: args.fns.getTableTitle?.()
+  text: f.getTableTitle?.()
 };'''
       }
     }
@@ -292,11 +292,11 @@ return {
         displayOrder: 1
         componentName: Button
         props:
-          '''const active = args.fns.isSchemaMode?.() !== true;
+          '''const active = f.isSchemaMode?.() !== true;
 return {
   text: "Content",
   variant: active ? "primary" : "secondary",
-  onClick: () => args.fns.setEditorMode?.("content")
+  onClick: () => f.setEditorMode?.("content")
 };'''
       }
     }
@@ -307,11 +307,11 @@ return {
         displayOrder: 2
         componentName: Button
         props:
-          '''const active = args.fns.isSchemaMode?.() === true;
+          '''const active = f.isSchemaMode?.() === true;
 return {
   text: "Schema",
   variant: active ? "primary" : "secondary",
-  onClick: () => args.fns.setEditorMode?.("schema")
+  onClick: () => f.setEditorMode?.("schema")
 };'''
       }
     }
@@ -332,7 +332,7 @@ return {
         props:
           '''return {
   as: "div",
-  hide: args.fns.isSchemaMode?.() === true
+  hide: f.isSchemaMode?.() === true
 };'''
       }
     }
@@ -363,10 +363,10 @@ return {
         displayOrder: 1
         componentName: DynamicPage
         props:
-          '''const tableKey = args.fns.getTableKey?.() || "products";
-const tableVertexLabel = args.fns.getTableVertexLabel?.() || "Product";
-const actionHandlers = args.fns.getTableActionHandlers?.();
-const actions = args.fns.getTableActions?.();
+          '''const tableKey = f.getTableKey?.() || "products";
+const tableVertexLabel = f.getTableVertexLabel?.() || "Product";
+const actionHandlers = f.getTableActionHandlers?.();
+const actions = f.getTableActions?.();
 return {
   key: tableKey,
   tableKey,
@@ -377,7 +377,7 @@ return {
   hidePageChrome: false,
   ...(actions ? { actions } : {}),
   ...(actionHandlers ? { actionHandlers } : {}),
-  ...(actionHandlers ? { onRowClick: (row) => args.fns.openInPageDesigner?.(row) } : {})
+  ...(actionHandlers ? { onRowClick: (row) => f.openInPageDesigner?.(row) } : {})
 };'''
       }
     }
@@ -398,7 +398,7 @@ return {
         props:
           '''return {
   as: "div",
-  hide: args.fns.isSchemaMode?.() !== true
+  hide: f.isSchemaMode?.() !== true
 };'''
       }
     }
@@ -409,11 +409,11 @@ return {
         displayOrder: 1
         componentName: TableSchemaEditorShell
         props:
-          '''const tableKey = args.fns.getTableKey?.();
+          '''const tableKey = f.getTableKey?.();
 return {
   tableKey,
   embeddedMode: true,
-  onSaved: () => args.fns.onSchemaSaved?.()
+  onSaved: () => f.onSchemaSaved?.()
 };'''
       }
     }

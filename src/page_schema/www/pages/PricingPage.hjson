@@ -27,7 +27,7 @@ return `._id {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
 }`;
 '''
       }
@@ -77,7 +77,7 @@ return {
         css: '''
 return `._id {
   padding: 3rem 2rem;
-  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background_dark_50 : args.theme.var.color.background_dark_50};
+  background: ${_.currentMode() === 'dark' ? t.var.color.background_dark_50 : t.var.color.background_dark_50};
   
   @media (max-width: 768px) {
     padding: 2rem 1rem;
@@ -122,7 +122,7 @@ return {
 return `._id {
   font-size: 3rem;
   font-weight: 800;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 1.5rem;
   
   @media (max-width: 768px) {
@@ -147,7 +147,7 @@ return {
         css: '''
 return `._id {
   font-size: 1.25rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   opacity: 0.8;
   max-width: 700px;
   margin: 0 auto;
@@ -182,7 +182,7 @@ return {
         css: '''
 return `._id {
   padding: 5rem 2rem;
-  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background_dark_50 : args.theme.var.color.background_dark_50};
+  background: ${_.currentMode() === 'dark' ? t.var.color.background_dark_50 : t.var.color.background_dark_50};
   
   @media (max-width: 768px) {
     padding: 3rem 1rem;
@@ -226,7 +226,7 @@ return {
 return `._id {
   font-size: 2.5rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   text-align: center;
   margin-bottom: 3rem;
   
@@ -250,8 +250,8 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background_dark_100 : args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.background_dark_200};
+  background: ${_.currentMode() === 'dark' ? t.var.color.background_dark_100 : t.var.color.background};
+  border: 1px solid ${t.var.color.background_dark_200};
   border-radius: 1rem;
   overflow: hidden;
 }`;
@@ -277,17 +277,17 @@ return `._id {
   th, td {
     padding: 1.5rem;
     text-align: left;
-    border-bottom: 1px solid ${args.theme.var.color.background_dark_200};
+    border-bottom: 1px solid ${t.var.color.background_dark_200};
   }
   
   th {
-    background: ${args.currentMode() === 'dark' ? args.theme.var.color.background_dark_200 : args.theme.var.color.background_dark_50};
+    background: ${_.currentMode() === 'dark' ? t.var.color.background_dark_200 : t.var.color.background_dark_50};
     font-weight: 600;
-    color: ${args.theme.var.color.text};
+    color: ${t.var.color.text};
   }
   
   td {
-    color: ${args.theme.var.color.text};
+    color: ${t.var.color.text};
   }
   
   tr:last-child td {
@@ -467,7 +467,7 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const row = args.contextData.comparisonRows;
+const row = c.comparisonRows;
 return {
   as: "tr"
 };
@@ -481,7 +481,7 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const row = args.contextData.comparisonRows;
+const row = c.comparisonRows;
 return {
   as: "td",
   text: row.feature
@@ -501,7 +501,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const row = args.contextData.comparisonRows;
+const row = c.comparisonRows;
 return {
   as: "td"
 };
@@ -515,7 +515,7 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const row = args.contextData.comparisonRows;
+const row = c.comparisonRows;
 if (row.free === "✓") {
   return {
     as: "icon",
@@ -538,9 +538,9 @@ if (row.free === "✓") {
 }
 ''',
         css: '''
-const row = args.contextData.comparisonRows;
+const row = c.comparisonRows;
 return `._id {
-  color: ${row.free === "✓" ? args.theme.var.color.success : args.theme.var.color.text};
+  color: ${row.free === "✓" ? t.var.color.success : t.var.color.text};
   opacity: ${row.free === "—" ? "0.3" : "1"};
 }`;
 '''
@@ -553,7 +553,7 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const row = args.contextData.comparisonRows;
+const row = c.comparisonRows;
 return {
   as: "td"
 };
@@ -567,7 +567,7 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const row = args.contextData.comparisonRows;
+const row = c.comparisonRows;
 if (row.pro === "✓") {
   return {
     as: "icon",
@@ -590,9 +590,9 @@ if (row.pro === "✓") {
 }
 ''',
         css: '''
-const row = args.contextData.comparisonRows;
+const row = c.comparisonRows;
 return `._id {
-  color: ${row.pro === "✓" ? args.theme.var.color.success : args.theme.var.color.text};
+  color: ${row.pro === "✓" ? t.var.color.success : t.var.color.text};
   opacity: ${row.pro === "—" ? "0.3" : "1"};
 }`;
 '''
@@ -605,7 +605,7 @@ return `._id {
         displayOrder: 4,
         componentName: "Html",
         props: '''
-const row = args.contextData.comparisonRows;
+const row = c.comparisonRows;
 return {
   as: "td"
 };
@@ -619,7 +619,7 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const row = args.contextData.comparisonRows;
+const row = c.comparisonRows;
 if (row.custom === "✓") {
   return {
     as: "icon",
@@ -642,9 +642,9 @@ if (row.custom === "✓") {
 }
 ''',
         css: '''
-const row = args.contextData.comparisonRows;
+const row = c.comparisonRows;
 return `._id {
-  color: ${row.custom === "✓" ? args.theme.var.color.success : args.theme.var.color.text};
+  color: ${row.custom === "✓" ? t.var.color.success : t.var.color.text};
   opacity: ${row.custom === "—" ? "0.3" : "1"};
 }`;
 '''
@@ -669,7 +669,7 @@ return `._id {
     display: block;
     text-align: center;
     padding: 1rem;
-    background: ${args.currentMode() === 'dark' ? args.theme.var.color.background_dark_100 : args.theme.var.color.background_dark_50};
+    background: ${_.currentMode() === 'dark' ? t.var.color.background_dark_100 : t.var.color.background_dark_50};
     border-radius: 0.5rem;
   }
 }`;
@@ -690,7 +690,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   opacity: 0.7;
 }`;
 '''

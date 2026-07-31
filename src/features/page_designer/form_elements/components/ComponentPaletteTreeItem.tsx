@@ -228,26 +228,26 @@ export function ComponentPaletteTreeItem(
       if (props.dropPosition !== "after") {
         const boxShadowProps = getDnDBoxShadowArgs(
           props.dropPosition,
-          "${args.theme.var.color.success}",
+          "${t.var.color.success}",
         );
         boxShadow = `box-shadow:${generateBoxShadow([boxShadowProps])};`;
       }
     }
     if (isSelected()) {
       boxShadow +=
-        " background-color:${args.theme.var.color.primary_light_300}; color:${args.theme.var.color.primary_light_300_text};";
+        " background-color:${t.var.color.primary_light_300}; color:${t.var.color.primary_light_300_text};";
     } else if (row.isHighlighted()) {
       boxShadow +=
-        " background-color:${args.theme.var.color.primary_light_750}; color:${args.theme.var.color.primary_light_750_text};";
+        " background-color:${t.var.color.primary_light_750}; color:${t.var.color.primary_light_750_text};";
     } else if (isNegative(props.item.id)) {
       boxShadow +=
-        " background-color:${args.theme.var.color.success_light_600}; color:${args.theme.var.color.success_light_600_text};";
+        " background-color:${t.var.color.success_light_600}; color:${t.var.color.success_light_600_text};";
     }
     return [
       baseItemStyle,
       `return \`._id {
-        background-color: \${args.theme.var.color.background_light_50};
-        color: \${args.theme.var.color.background_light_50_text};
+        background-color: \${t.var.color.background_light_50};
+        color: \${t.var.color.background_light_50_text};
         cursor: ${contentCursor()};
         ${boxShadow}
       }\`;`,
@@ -415,7 +415,7 @@ export function ComponentPaletteTreeItem(
               as="span"
               css={[
                 isMissingComp()
-                  ? "return `._id { color: ${args.theme.var.color.error}; }`;"
+                  ? "return `._id { color: ${t.var.color.error}; }`;"
                   : "",
                 `return \`._id {
   flex: 1;
@@ -614,7 +614,7 @@ export function ComponentPaletteTreeItem(
             as="div"
             css={`return \`._id {
   height: 2px;
-  background: \${args.theme.var.color.primary};
+  background: \${t.var.color.primary};
   margin: 1px 0;
 }\`;`}
           />

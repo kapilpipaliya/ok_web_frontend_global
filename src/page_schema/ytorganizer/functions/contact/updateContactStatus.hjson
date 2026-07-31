@@ -8,15 +8,15 @@
         body:
           '''
 // This function runs on the server
-// It has access to args object with:
-// - args.contextData: Request parameters (contactId, status)
-// - args.session: Current neo4j Database session
-// - args.getUserFromSession: Function to get current authenticated user
+// It has access to _ object with:
+// - c: Request parameters (contactId, status)
+// - _.session: Current neo4j Database session
+// - _.getUserFromSession: Function to get current authenticated user
 
-const { contactId, status } = args.contextData;
+const { contactId, status } = c;
 
 // Get current user
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return {
     success: false,
@@ -25,7 +25,7 @@ if (!actualUser) {
 }
 
 // Verify admin role
-const adminCheck = await args.session.run(
+const adminCheck = await _.session.run(
   `MATCH (u:User {uuid: $userId})-[:UserRole]->(r:Role {key: "Admin"})
    RETURN u`,
   { userId: actualUser.P.uuid }
@@ -65,7 +65,7 @@ if (!validStatuses.includes(status)) {
     RETURN c
   `;
 
-  const result = await args.session.run(query, {
+  const result = await _.session.run(query, {
     contactId,
     status,
     updatedAt: new Date().toISOString(),
@@ -80,7 +80,7 @@ if (!validStatuses.includes(status)) {
   }
 
   const node = result.records[0].get('c');
-  const updatedVertex = args.convertNodeToJson(node);
+  const updatedVertex = _.convertNodeToJson(node);
 
   return {
     success: true,

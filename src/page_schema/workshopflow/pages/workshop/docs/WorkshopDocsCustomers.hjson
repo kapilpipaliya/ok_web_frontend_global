@@ -42,7 +42,7 @@
         props:
           '''return { as: "h1", text: "Customers", class: "workshop-doc-h1" };'''
         css:
-          '''return `._id.workshop-doc-h1 { font-size: 1.5rem; font-weight: 700; margin: 0 0 0.75rem; color: ${args.theme.var.color.text}; }`;'''
+          '''return `._id.workshop-doc-h1 { font-size: 1.5rem; font-weight: 700; margin: 0 0 0.75rem; color: ${t.var.color.text}; }`;'''
       }
     }
     {
@@ -57,10 +57,10 @@
   href: "/workshop/docs",
   text: "Back to user guide",
   class: "workshop-doc-back",
-  onClick: (e) => { e.preventDefault(); args.navigate("/workshop/docs"); }
+  onClick: (e) => { e.preventDefault(); _.navigate("/workshop/docs"); }
 };'''
         css:
-          '''return `._id.workshop-doc-back { display: inline-block; margin-bottom: 1rem; color: ${args.theme.var.color.primary}; font-weight: 600; text-decoration: none; cursor: pointer; }`;'''
+          '''return `._id.workshop-doc-back { display: inline-block; margin-bottom: 1rem; color: ${t.var.color.primary}; font-weight: 600; text-decoration: none; cursor: pointer; }`;'''
       }
     }
     {
@@ -76,7 +76,7 @@
   text: "Master list of vehicle owners. Customer number is unique; email may also be unique. These records are linked from Appointments and Repairs via Customer Record selects."
 };'''
         css:
-          '''return `._id.workshop-doc-body { margin: 0 0 1rem; line-height: 1.6; color: ${args.theme.var.color.text}; }`;'''
+          '''return `._id.workshop-doc-body { margin: 0 0 1rem; line-height: 1.6; color: ${t.var.color.text}; }`;'''
       }
     }
     {
@@ -92,7 +92,7 @@
   class: "workshop-doc-h2"
 };'''
         css:
-          '''return `._id.workshop-doc-h2 { font-size: 1.125rem; font-weight: 700; margin: 1rem 0 0.5rem; color: ${args.theme.var.color.text}; }`;'''
+          '''return `._id.workshop-doc-h2 { font-size: 1.125rem; font-weight: 700; margin: 1rem 0 0.5rem; color: ${t.var.color.text}; }`;'''
       }
     }
     {
@@ -115,11 +115,11 @@
 | Address | Full address | 123 Main St, Springfield |`
 };'''
         css:
-          '''return `._id.workshop-doc-body { margin: 0; line-height: 1.6; color: ${args.theme.var.color.text}; }
+          '''return `._id.workshop-doc-body { margin: 0; line-height: 1.6; color: ${t.var.color.text}; }
 ._id.workshop-doc-table {
   margin: 0;
-  background: ${args.theme.var.color.background_light_100};
-  border: 1px solid ${args.theme.var.color.border_light_200};
+  background: ${t.var.color.background_light_100};
+  border: 1px solid ${t.var.color.border_light_200};
   border-radius: 0.5rem;
   padding: 0.75rem;
 }
@@ -131,13 +131,13 @@
 }
 ._id.workshop-doc-table th,
 ._id.workshop-doc-table td {
-  border: 1px solid ${args.theme.var.color.border_light_200};
+  border: 1px solid ${t.var.color.border_light_200};
   padding: 0.35rem 0.5rem;
   text-align: left;
   vertical-align: top;
 }
 ._id.workshop-doc-table th {
-  background: ${args.theme.var.color.background_light_200};
+  background: ${t.var.color.background_light_200};
   font-weight: 600;
 }`;'''
       }

@@ -8,7 +8,7 @@
         body:
           '''
 // Extract search parameters from request
-const { query, type, isRegex = false, ownershipId, sortBy = "relevance" } = args.contextData;
+const { query, type, isRegex = false, ownershipId, sortBy = "relevance" } = c;
 
 if (!query || query.trim().length === 0) {
   return {
@@ -24,7 +24,7 @@ if (!query || query.trim().length === 0) {
 }
 
 // Get current authenticated user from session
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return {
     success: false,
@@ -39,11 +39,11 @@ if (!actualUser) {
 }
 
 // Get effective user (handles admin impersonation)
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const user = await _.getEffectiveUser(_.session, actualUser, c);
 
 // Helper function to parse sortBy using shared utility
 const parseSortBy = async (sortBy, contentType) => {
-  const parseSortResult = await args.executeNamedServerFunction({
+  const parseSortResult = await s({
     functionName: "parseSortByUtil",
     contextData: { sortBy, contentType }
   });
@@ -96,7 +96,7 @@ if (!type || type === 'all' || type === 'channels') {
   const { orderBy, orderDirection, secondaryOrderBy } = sortParams;
 
   // Use helper function with custom filter for regex search
-  const channelsResult = await args.executeNamedServerFunction({
+  const channelsResult = await s({
     functionName: "getChannelsWithVideoCount",
     contextData: {
       userUuid: user.P.uuid,
@@ -134,7 +134,7 @@ if (!type || type === 'all' || type === 'playlists') {
   const { orderBy, orderDirection, secondaryOrderBy } = sortParams;
 
   // Use helper function with custom filter for regex search
-  const playlistsResult = await args.executeNamedServerFunction({
+  const playlistsResult = await s({
     functionName: "getPlaylistsWithVideoCount",
     contextData: {
       userUuid: user.P.uuid,
@@ -172,7 +172,7 @@ if (!type || type === 'all' || type === 'videos') {
   const { orderBy, orderDirection, secondaryOrderBy } = sortParams;
 
   // Use helper function with custom filter for regex search
-  const videosResult = await args.executeNamedServerFunction({
+  const videosResult = await s({
     functionName: "getVideosWithDetails",
     contextData: {
       userUuid: user.P.uuid,

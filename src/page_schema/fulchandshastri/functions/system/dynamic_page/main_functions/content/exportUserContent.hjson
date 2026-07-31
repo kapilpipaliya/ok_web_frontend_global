@@ -8,7 +8,7 @@
         body:
           '''
 // Get current authenticated user from session
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return {
     success: false,
@@ -17,10 +17,10 @@ if (!actualUser) {
 }
 
 // Get effective user (handles admin impersonation)
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const user = await _.getEffectiveUser(_.session, actualUser, c);
 
 // Extract parameters
-const { tableVertexLabel, format = "csv", data, columns, enableUserScoping, hooks, relationshipPropertyBindings } = args.contextData;
+const { tableVertexLabel, format = "csv", data, columns, enableUserScoping, hooks, relationshipPropertyBindings } = c;
 
 if (!tableVertexLabel) {
   return {
@@ -37,7 +37,7 @@ if (data && Array.isArray(data) && data.length > 0) {
   items = data;
 } else {
   // Fetch all data using getUserContent function
-  const getUserContentResult = await args.executeNamedServerFunction({
+  const getUserContentResult = await s({
     functionName: "getUserContent",
     contextData: {
       tableVertexLabel,
@@ -67,7 +67,7 @@ if (items.length === 0) {
 }
 
 // Execute beforeExport hooks
-await args.executeHooks(hooks?.beforeExport, {
+await _.executeHooks(hooks?.beforeExport, {
   tableVertexLabel,
   format,
   itemsCount: items.length,
@@ -150,7 +150,7 @@ if (format === "csv") {
   };
 
   // Execute afterExport hooks
-  await args.executeHooks(hooks?.afterExport, {
+  await _.executeHooks(hooks?.afterExport, {
     tableVertexLabel,
     format,
     itemsCount: items.length,
@@ -181,7 +181,7 @@ if (format === "json") {
   };
 
   // Execute afterExport hooks
-  await args.executeHooks(hooks?.afterExport, {
+  await _.executeHooks(hooks?.afterExport, {
     tableVertexLabel,
     format,
     itemsCount: items.length,
@@ -199,7 +199,7 @@ const unsupportedResult = {
 };
 
 // Execute afterExport hooks even on failure
-await args.executeHooks(hooks?.afterExport, {
+await _.executeHooks(hooks?.afterExport, {
   tableVertexLabel,
   format,
   itemsCount: items.length,

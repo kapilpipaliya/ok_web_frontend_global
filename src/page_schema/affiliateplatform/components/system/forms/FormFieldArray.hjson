@@ -16,12 +16,12 @@
           '''return `._id.fm-field-array {
   display: flex;
   flex-direction: column;
-  gap: ${args.theme.var.spacing.md};
+  gap: ${t.var.spacing.md};
   width: 100%;
 }`;'''
         displayOrder: 1
         fns:
-          '''const getProps = () => args.contextData.props || {};
+          '''const getProps = () => c.props || {};
 const getField = () => getProps().field || {};
 const getConfig = () => getField().fieldArrayConfig || {};
 
@@ -125,16 +125,16 @@ const reorderItems = (fromIndex, toIndex) => {
 };
 
 const fieldArrayDraggableCleanups = new Map();
-const [draggedItemIndex, setDraggedItemIndex] = args.createSignal(null);
-const [dragOverItemIndex, setDragOverItemIndex] = args.createSignal(null);
+const [draggedItemIndex, setDraggedItemIndex] = _.createSignal(null);
+const [dragOverItemIndex, setDragOverItemIndex] = _.createSignal(null);
 
 const initFieldArrayDraggable = (element, itemIndex) => {
-  if (!element || !args.draggable || args.fns.isDisabled?.()) return;
+  if (!element || !_.draggable || f.isDisabled?.()) return;
 
   const existingCleanup = fieldArrayDraggableCleanups.get(element);
   if (existingCleanup) existingCleanup();
 
-  const cleanup = args.draggable({
+  const cleanup = _.draggable({
     element,
     getInitialData: () => ({
       type: "field-array-item",
@@ -151,9 +151,9 @@ const initFieldArrayDraggable = (element, itemIndex) => {
 };
 
 const initFieldArrayDropTarget = (element, itemIndex) => {
-  if (!element || !args.dropTargetForElements || args.fns.isDisabled?.()) return null;
+  if (!element || !_.dropTargetForElements || f.isDisabled?.()) return null;
 
-  return args.dropTargetForElements({
+  return _.dropTargetForElements({
     element,
     canDrop: ({ source }) => source.data?.type === "field-array-item",
     onDragEnter: ({ source }) => {
@@ -264,8 +264,8 @@ const getVertexPickerProps = (itemIndex, itemField) => {
       ? String(pickerConfiguration.fileDownloadUrlPrefix).trim()
       : "";
   const selectedVertex =
-    selectedElementId && args.graph.vertexes[selectedElementId]
-      ? args.graph.vertexes[selectedElementId]
+    selectedElementId && g.vertexes[selectedElementId]
+      ? g.vertexes[selectedElementId]
       : null;
   let previewUrl = "";
   if (fileDownloadUrlPrefix !== "" && selectedVertex?.P?.[previewFileNamePropertyKey] != null) {
@@ -293,8 +293,8 @@ const getVertexPickerProps = (itemIndex, itemField) => {
     pickerConfiguration,
     onSelect: (vertexElementId, selectedVertexPayload) => {
       updateItemField(itemIndex, itemField.key, vertexElementId);
-      if (selectedVertexPayload && !args.graph.vertexes[vertexElementId]) {
-        args.setGraphData(0, { vertexes: { [vertexElementId]: selectedVertexPayload } }, {});
+      if (selectedVertexPayload && !g.vertexes[vertexElementId]) {
+        _.setGraphData(0, { vertexes: { [vertexElementId]: selectedVertexPayload } }, {});
       }
     },
     onSelectMultiple: (vertexElementIds, selectedVertexPayloads) => {
@@ -302,12 +302,12 @@ const getVertexPickerProps = (itemIndex, itemField) => {
       if (Array.isArray(selectedVertexPayloads)) {
         const vertexMap = {};
         for (const selectedVertexPayload of selectedVertexPayloads) {
-          if (selectedVertexPayload?.id && !args.graph.vertexes[selectedVertexPayload.id]) {
+          if (selectedVertexPayload?.id && !g.vertexes[selectedVertexPayload.id]) {
             vertexMap[selectedVertexPayload.id] = selectedVertexPayload;
           }
         }
         if (Object.keys(vertexMap).length > 0) {
-          args.setGraphData(0, { vertexes: vertexMap }, {});
+          _.setGraphData(0, { vertexes: vertexMap }, {});
         }
       }
     },
@@ -383,7 +383,7 @@ return {
           '''return {
   as: "div",
   class: "fm-field-array",
-  onMount: () => args.fns.ensureMinItems?.()
+  onMount: () => f.ensureMinItems?.()
 };'''
       }
     }
@@ -397,7 +397,7 @@ return {
         componentName: Html
         props:
           '''return {
-  data: args.fns.getItemIndices()
+  data: f.getItemIndices()
 };'''
       }
     }
@@ -406,30 +406,30 @@ return {
       L: Attr
       P: {
         css:
-          '''const itemIndex = args.contextData.fieldArrayItem;
-const dragOver = args.fns.isItemDragOver?.(itemIndex);
-const dragging = args.fns.isItemDragging?.(itemIndex);
+          '''const itemIndex = c.fieldArrayItem;
+const dragOver = f.isItemDragOver?.(itemIndex);
+const dragging = f.isItemDragging?.(itemIndex);
 return `._id.fm-field-array-item {
   display: flex;
   flex-direction: column;
-  gap: ${args.theme.var.spacing.sm};
-  padding: ${args.theme.var.spacing.md};
-  border: 1px solid ${dragOver ? args.theme.var.color.primary : args.theme.var.color.border};
+  gap: ${t.var.spacing.sm};
+  padding: ${t.var.spacing.md};
+  border: 1px solid ${dragOver ? t.var.color.primary : t.var.color.border};
   border-radius: 0.5rem;
-  background: ${args.theme.var.color.background_light_50};
+  background: ${t.var.color.background_light_50};
   ${dragging ? "opacity: 0.55;" : ""}
-  ${dragOver ? `outline: 2px dashed ${args.theme.var.color.primary};` : ""}
+  ${dragOver ? `outline: 2px dashed ${t.var.color.primary};` : ""}
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const itemIndex = args.contextData.fieldArrayItem;
+          '''const itemIndex = c.fieldArrayItem;
 return {
   as: "div",
   class: "fm-field-array-item",
   ref: (element) => {
-    if (element && args.fns.initFieldArrayDropTarget) {
-      const dropCleanup = args.fns.initFieldArrayDropTarget(element, itemIndex);
+    if (element && f.initFieldArrayDropTarget) {
+      const dropCleanup = f.initFieldArrayDropTarget(element, itemIndex);
       element.__fmFieldArrayDropCleanup = dropCleanup;
     } else if (element?.__fmFieldArrayDropCleanup) {
       element.__fmFieldArrayDropCleanup();
@@ -447,7 +447,7 @@ return {
           '''return `._id.fm-field-array-item-header {
   display: flex;
   align-items: flex-start;
-  gap: ${args.theme.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
 }`;'''
         displayOrder: 1
         componentName: Html
@@ -465,26 +465,26 @@ return {
         css:
           '''return `._id.fm-field-array-drag-handle {
   flex-shrink: 0;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   cursor: grab;
 }`;'''
         displayOrder: 0
         componentName: Html
         props:
-          '''const itemIndex = args.contextData.fieldArrayItem;
+          '''const itemIndex = c.fieldArrayItem;
 return {
   as: "icon",
   icon: "ph:dots-six-vertical",
   height: 16,
   width: 16,
   class: "fm-field-array-drag-handle",
-  hide: args.fns.isDisabled?.(),
+  hide: f.isDisabled?.(),
   ref: (element) => {
-    const index = args.contextData.fieldArrayItem;
-    if (element && args.fns.initFieldArrayDraggable) {
-      args.fns.initFieldArrayDraggable(element, index);
-    } else if (element === null && args.fns.cleanupFieldArrayDraggable) {
-      args.fns.cleanupFieldArrayDraggable(element);
+    const index = c.fieldArrayItem;
+    if (element && f.initFieldArrayDraggable) {
+      f.initFieldArrayDraggable(element, index);
+    } else if (element === null && f.cleanupFieldArrayDraggable) {
+      f.cleanupFieldArrayDraggable(element);
     }
   }
 };'''
@@ -499,7 +499,7 @@ return {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: ${args.theme.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
   flex: 1;
   min-width: 0;
 }`;'''
@@ -520,15 +520,15 @@ return {
           '''return `._id.fm-field-array-item-title {
   font-size: 0.875rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const itemIndex = args.contextData.fieldArrayItem;
+          '''const itemIndex = c.fieldArrayItem;
 return {
   as: "div",
-  text: args.fns.getItemLabel(itemIndex),
+  text: f.getItemLabel(itemIndex),
   class: "fm-field-array-item-title"
 };'''
       }
@@ -540,14 +540,14 @@ return {
         displayOrder: 2
         componentName: Button
         props:
-          '''const itemIndex = args.contextData.fieldArrayItem;
+          '''const itemIndex = c.fieldArrayItem;
 return {
   variant: "danger",
   size: "sm",
   text: "Remove",
   type: "button",
-  disabled: args.fns.isDisabled(),
-  onClick: () => args.fns.removeItem(itemIndex)
+  disabled: f.isDisabled(),
+  onClick: () => f.removeItem(itemIndex)
 };'''
       }
     }
@@ -560,7 +560,7 @@ return {
           '''return `._id.fm-field-array-field {
   display: flex;
   flex-direction: column;
-  gap: ${args.theme.var.spacing.xs};
+  gap: ${t.var.spacing.xs};
   width: 100%;
 }`;'''
         loop: true
@@ -570,7 +570,7 @@ return {
           '''return {
   as: "div",
   class: "fm-field-array-field",
-  data: args.fns.getItemFields()
+  data: f.getItemFields()
 };'''
       }
     }
@@ -582,12 +582,12 @@ return {
           '''return `._id.fm-field-array-field-label {
   font-size: 0.875rem;
   font-weight: 500;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const itemField = args.contextData.fieldArrayField || {};
+          '''const itemField = c.fieldArrayField || {};
 return {
   as: "label",
   text: itemField.label || itemField.key || "Field",
@@ -602,20 +602,20 @@ return {
         displayOrder: 2
         componentName: FormLocalizedText
         props:
-          '''const itemField = args.contextData.fieldArrayField || {};
-const itemIndex = args.contextData.fieldArrayItem;
-const isTranslatable = args.fns.isItemFieldTranslatable?.(itemField);
+          '''const itemField = c.fieldArrayField || {};
+const itemIndex = c.fieldArrayItem;
+const isTranslatable = f.isItemFieldTranslatable?.(itemField);
 const isTextArea = itemField.renderer === "textArea";
 const hide = !isTranslatable;
-const value = args.fns.getItemFieldValue(args.fns.getItemAt(itemIndex), itemField);
+const value = f.getItemFieldValue(f.getItemAt(itemIndex), itemField);
 return {
   hide,
-  languages: args.fns.getSiteLanguages?.(),
+  languages: f.getSiteLanguages?.(),
   value: typeof value === "object" && value != null ? value : {},
   multiline: isTextArea,
-  onChange: (nextValue) => args.fns.updateItemField(itemIndex, itemField.key, nextValue),
+  onChange: (nextValue) => f.updateItemField(itemIndex, itemField.key, nextValue),
   required: itemField.required === true,
-  disabled: args.fns.isDisabled()
+  disabled: f.isDisabled()
 };'''
       }
     }
@@ -626,17 +626,17 @@ return {
         displayOrder: 2
         componentName: TextArea
         props:
-          '''const itemField = args.contextData.fieldArrayField || {};
-const itemIndex = args.contextData.fieldArrayItem;
-const hide = itemField.renderer !== "textArea" || args.fns.isItemFieldTranslatable?.(itemField);
-const value = args.fns.getItemFieldValue(args.fns.getItemAt(itemIndex), itemField);
+          '''const itemField = c.fieldArrayField || {};
+const itemIndex = c.fieldArrayItem;
+const hide = itemField.renderer !== "textArea" || f.isItemFieldTranslatable?.(itemField);
+const value = f.getItemFieldValue(f.getItemAt(itemIndex), itemField);
 return {
   hide,
   value: typeof value === "string" ? value : "",
-  onChange: (e) => args.fns.updateItemField(itemIndex, itemField.key, e.target.value),
+  onChange: (e) => f.updateItemField(itemIndex, itemField.key, e.target.value),
   placeholder: itemField.placeholder || "",
   required: itemField.required === true,
-  disabled: args.fns.isDisabled()
+  disabled: f.isDisabled()
 };'''
       }
     }
@@ -647,17 +647,17 @@ return {
         displayOrder: 3
         componentName: TextInput
         props:
-          '''const itemField = args.contextData.fieldArrayField || {};
-const itemIndex = args.contextData.fieldArrayItem;
-const hide = args.fns.isSpecialItemFieldRenderer?.(itemField) === true;
-const value = args.fns.getItemFieldValue(args.fns.getItemAt(itemIndex), itemField);
+          '''const itemField = c.fieldArrayField || {};
+const itemIndex = c.fieldArrayItem;
+const hide = f.isSpecialItemFieldRenderer?.(itemField) === true;
+const value = f.getItemFieldValue(f.getItemAt(itemIndex), itemField);
 return {
   hide,
   value: typeof value === "string" ? value : "",
-  onChange: (e) => args.fns.updateItemField(itemIndex, itemField.key, e.target.value),
+  onChange: (e) => f.updateItemField(itemIndex, itemField.key, e.target.value),
   placeholder: itemField.placeholder || "",
   required: itemField.required === true,
-  disabled: args.fns.isDisabled(),
+  disabled: f.isDisabled(),
   type: itemField.dataType === "number" ? "number" : "text"
 };'''
       }
@@ -669,16 +669,16 @@ return {
         displayOrder: 2
         componentName: FormFieldArray
         props:
-          '''const itemField = args.contextData.fieldArrayField || {};
-const itemIndex = args.contextData.fieldArrayItem;
-const value = args.fns.getItemFieldValue(args.fns.getItemAt(itemIndex), itemField);
+          '''const itemField = c.fieldArrayField || {};
+const itemIndex = c.fieldArrayItem;
+const value = f.getItemFieldValue(f.getItemAt(itemIndex), itemField);
 return {
   hide: itemField.renderer !== "fieldArray" || !itemField.fieldArrayConfig,
-  field: args.fns.buildNestedFieldArrayField?.(itemField) || itemField,
+  field: f.buildNestedFieldArrayField?.(itemField) || itemField,
   value: Array.isArray(value) ? value : [],
-  disabled: args.fns.isDisabled(),
-  siteLanguages: args.fns.getSiteLanguages?.(),
-  onChange: (nextItems) => args.fns.updateItemField(itemIndex, itemField.key, nextItems)
+  disabled: f.isDisabled(),
+  siteLanguages: f.getSiteLanguages?.(),
+  onChange: (nextItems) => f.updateItemField(itemIndex, itemField.key, nextItems)
 };'''
       }
     }
@@ -689,9 +689,9 @@ return {
         displayOrder: 2
         componentName: VertexPicker
         props:
-          '''const itemField = args.contextData.fieldArrayField || {};
-const itemIndex = args.contextData.fieldArrayItem;
-const pickerProps = args.fns.getVertexPickerProps?.(itemIndex, itemField);
+          '''const itemField = c.fieldArrayField || {};
+const itemIndex = c.fieldArrayItem;
+const pickerProps = f.getVertexPickerProps?.(itemIndex, itemField);
 return {
   hide: itemField.renderer !== "embeddedVertexPicker" || !pickerProps,
   ...(pickerProps || {})
@@ -707,10 +707,10 @@ return {
         props:
           '''return {
   variant: "secondary",
-  text: args.fns.getConfig()?.addButtonLabel || "Add item",
+  text: f.getConfig()?.addButtonLabel || "Add item",
   type: "button",
-  disabled: args.fns.isDisabled(),
-  onClick: () => args.fns.addItem()
+  disabled: f.isDisabled(),
+  onClick: () => f.addItem()
 };'''
       }
     }

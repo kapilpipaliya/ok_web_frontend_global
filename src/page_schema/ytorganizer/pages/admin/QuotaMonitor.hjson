@@ -42,8 +42,8 @@ return `._id {
         displayOrder: 1
         fns:
           '''
-const [quotaData, setQuotaData] = args.createSignal(null);
-const [loading, setLoading] = args.createSignal(true);
+const [quotaData, setQuotaData] = _.createSignal(null);
+const [loading, setLoading] = _.createSignal(true);
 
 // Auto-refresh interval state
 let refreshInterval = null;
@@ -51,10 +51,10 @@ let refreshInterval = null;
 const fetchQuotaData = async () => {
   setLoading(true);
   try {
-    const result = await args.fns.executeYTOFunction("getSharedQuotaStatus", {});
+    const result = await f.executeYTOFunction("getSharedQuotaStatus", {});
 
     if (result.error) {
-      args.showErrorToast(result.error);
+      _.showErrorToast(result.error);
       return;
     }
 
@@ -64,7 +64,7 @@ const fetchQuotaData = async () => {
     }
   } catch (error) {
     console.error('Error fetching quota data:', error);
-    args.showErrorToast('Failed to load quota data');
+    _.showErrorToast('Failed to load quota data');
   } finally {
     setLoading(false);
   }
@@ -97,9 +97,9 @@ return {
         componentName: Html
         props:
           '''
-const fetchQuotaData = args.fns.fetchQuotaData;
-const startAutoRefresh = args.fns.startAutoRefresh;
-const stopAutoRefresh = args.fns.stopAutoRefresh;
+const fetchQuotaData = f.fetchQuotaData;
+const startAutoRefresh = f.startAutoRefresh;
+const stopAutoRefresh = f.stopAutoRefresh;
 
 return {
   as: "div",
@@ -123,7 +123,7 @@ return {
 return `._id {
   font-size: 2.5rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 1rem;
 
   @media (max-width: 768px) {
@@ -150,7 +150,7 @@ return {
           '''
 return `._id {
   font-size: 1.125rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0.5rem 0 3rem 0;
 }`;
 '''
@@ -200,7 +200,7 @@ return {
         componentName: SimpleCard
         props:
           '''
-const data = args.fns.quotaData?.();
+const data = f.quotaData?.();
 const status = data?.status;
 
 let variant = 'default';
@@ -226,7 +226,7 @@ return {
         componentName: Html
         props:
           '''
-const loading = args.fns.loading?.();
+const loading = f.loading?.();
 
 if (loading) {
   return { as: "div", text: "Loading..." };
@@ -242,14 +242,14 @@ return { as: "div" };
       P: {
         css:
           '''
-const data = args.fns.quotaData?.();
+const data = f.quotaData?.();
 const status = data?.status;
 
 const color = status?.level === 'critical' || status?.level === 'danger'
-  ? args.theme.var.color.error
+  ? t.var.color.error
   : status?.level === 'warning'
-    ? args.theme.var.color.warning
-    : args.theme.var.color.success;
+    ? t.var.color.warning
+    : t.var.color.success;
 
 return `._id {
   font-size: 2.5rem;
@@ -262,7 +262,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const data = args.fns.quotaData?.();
+const data = f.quotaData?.();
 const quota = data?.quota;
 const status = data?.status;
 
@@ -271,10 +271,10 @@ if (!data || !quota) {
 }
 
 const color = status?.level === 'critical' || status?.level === 'danger'
-  ? args.theme.var.color.error
+  ? t.var.color.error
   : status?.level === 'warning'
-    ? args.theme.var.color.warning
-    : args.theme.var.color.success;
+    ? t.var.color.warning
+    : t.var.color.success;
 
 return {
   as: "div",
@@ -291,7 +291,7 @@ return {
           '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin-bottom: 1rem;
 }`;
 '''
@@ -299,7 +299,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const data = args.fns.quotaData?.();
+const data = f.quotaData?.();
 const quota = data?.quota;
 
 return {
@@ -316,7 +316,7 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.background_light_200};
+  background: ${t.var.color.background_light_200};
   height: 8px;
   border-radius: 4px;
   overflow: hidden;
@@ -337,15 +337,15 @@ return { as: "div" };
       P: {
         css:
           '''
-const data = args.fns.quotaData?.();
+const data = f.quotaData?.();
 const quota = data?.quota;
 const status = data?.status;
 
 const color = status?.level === 'critical' || status?.level === 'danger'
-  ? args.theme.var.color.error
+  ? t.var.color.error
   : status?.level === 'warning'
-    ? args.theme.var.color.warning
-    : args.theme.var.color.success;
+    ? t.var.color.warning
+    : t.var.color.success;
 
 const width = Math.min(100, quota?.percentUsed || 0);
 
@@ -373,7 +373,7 @@ return { as: "div" };
 return `._id {
   margin-top: 1rem;
   padding-top: 1rem;
-  border-top: 1px solid ${args.theme.var.color.background_light_300};
+  border-top: 1px solid ${t.var.color.background_light_300};
 }`;
 '''
         displayOrder: 4
@@ -392,7 +392,7 @@ return { as: "div" };
           '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   font-weight: 600;
   margin-bottom: 0.5rem;
 }`;
@@ -401,7 +401,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const data = args.fns.quotaData?.();
+const data = f.quotaData?.();
 const status = data?.status;
 
 return {
@@ -419,14 +419,14 @@ return {
           '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
         displayOrder: 2
         componentName: Html
         props:
           '''
-const data = args.fns.quotaData?.();
+const data = f.quotaData?.();
 const quota = data?.quota;
 
 return {
@@ -459,8 +459,8 @@ return {
         componentName: Html
         props:
           '''
-const loading = args.fns.loading?.();
-const data = args.fns.quotaData?.();
+const loading = f.loading?.();
+const data = f.quotaData?.();
 
 if (loading || !data?.reset) {
   return { as: "div", text: loading ? "Loading..." : "No data available" };
@@ -479,7 +479,7 @@ return { as: "div" };
 return `._id {
   font-size: 2rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 0.5rem;
 }`;
 '''
@@ -487,7 +487,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const data = args.fns.quotaData?.();
+const data = f.quotaData?.();
 const reset = data?.reset;
 
 return {
@@ -505,7 +505,7 @@ return {
           '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin-bottom: 1rem;
 }`;
 '''
@@ -528,14 +528,14 @@ return {
           '''
 return `._id {
   font-size: 0.75rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
         displayOrder: 3
         componentName: Html
         props:
           '''
-const data = args.fns.quotaData?.();
+const data = f.quotaData?.();
 const reset = data?.reset;
 
 const timestamp = reset?.time ? new Date(reset.time).toLocaleString() : '';
@@ -577,8 +577,8 @@ return `._id {
         componentName: Html
         props:
           '''
-const loading = args.fns.loading?.();
-const data = args.fns.quotaData?.();
+const loading = f.loading?.();
+const data = f.quotaData?.();
 
 if (loading || !data?.stats) {
   return { as: "div", text: loading ? "Loading..." : "No data available" };
@@ -609,14 +609,14 @@ return { as: "div" };
 return `._id {
   font-size: 1.5rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 1
         componentName: Html
         props:
           '''
-const data = args.fns.quotaData?.();
+const data = f.quotaData?.();
 const stats = data?.stats;
 
 return {
@@ -634,7 +634,7 @@ return {
           '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
         displayOrder: 2
@@ -669,14 +669,14 @@ return { as: "div" };
 return `._id {
   font-size: 1.5rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 1
         componentName: Html
         props:
           '''
-const data = args.fns.quotaData?.();
+const data = f.quotaData?.();
 const stats = data?.stats;
 
 return {
@@ -694,7 +694,7 @@ return {
           '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
         displayOrder: 2
@@ -729,11 +729,11 @@ return {
       P: {
         css:
           '''
-const loading = args.fns.loading?.();
+const loading = f.loading?.();
 
 if (loading) {
   return `._id {
-    color: ${args.theme.var.color.text_light_500};
+    color: ${t.var.color.text_light_500};
     padding: 1rem 0;
   }`;
 }
@@ -746,7 +746,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const loading = args.fns.loading?.();
+const loading = f.loading?.();
 
 if (loading) {
   return { as: "div", text: "Loading..." };
@@ -794,7 +794,7 @@ return { as: "thead" };
         css:
           '''
 return `._id {
-  border-bottom: 2px solid ${args.theme.var.color.background_light_400};
+  border-bottom: 2px solid ${t.var.color.background_light_400};
 }`;
 '''
         displayOrder: 1
@@ -815,7 +815,7 @@ return `._id {
   padding: 0.75rem 0;
   text-align: left;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 1
@@ -839,7 +839,7 @@ return `._id {
   padding: 0.75rem 0;
   text-align: right;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 2
@@ -863,7 +863,7 @@ return `._id {
   padding: 0.75rem 0;
   text-align: right;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 3
@@ -897,7 +897,7 @@ return { as: "tbody" };
         componentName: Html
         props:
           '''
-const data = args.fns.quotaData?.();
+const data = f.quotaData?.();
 
 // Only show when there's no breakdown data
 if (data?.breakdown && data.breakdown.length > 0) {
@@ -917,7 +917,7 @@ return { as: "tr" };
 return `._id {
   padding: 1.5rem 0;
   text-align: center;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   font-style: italic;
 }`;
 '''
@@ -942,7 +942,7 @@ return {
         componentName: Html
         props:
           '''
-const data = args.fns.quotaData?.();
+const data = f.quotaData?.();
 
 // Only loop when there's data
 if (!data?.breakdown || data.breakdown.length === 0) {
@@ -963,7 +963,7 @@ return {
         css:
           '''
 return `._id {
-  border-bottom: 1px solid ${args.theme.var.color.background_light_300};
+  border-bottom: 1px solid ${t.var.color.background_light_300};
 }`;
 '''
         displayOrder: 1
@@ -1000,14 +1000,14 @@ return { as: "td" };
           '''
 return `._id {
   font-weight: 500;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 1
         componentName: Html
         props:
           '''
-const item = args.contextData.breakdownItem;
+const item = c.breakdownItem;
 
 return {
   as: "div",
@@ -1024,14 +1024,14 @@ return {
           '''
 return `._id {
   font-size: 0.75rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
         displayOrder: 2
         componentName: Html
         props:
           '''
-const item = args.contextData.breakdownItem;
+const item = c.breakdownItem;
 
 if (!item.customName || !item.channelName) {
   return { hide: true };
@@ -1071,14 +1071,14 @@ return { as: "td" };
           '''
 return `._id {
   font-weight: 500;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 1
         componentName: Html
         props:
           '''
-const item = args.contextData.breakdownItem;
+const item = c.breakdownItem;
 
 return {
   as: "div",
@@ -1095,14 +1095,14 @@ return {
           '''
 return `._id {
   font-size: 0.75rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
         displayOrder: 2
         componentName: Html
         props:
           '''
-const item = args.contextData.breakdownItem;
+const item = c.breakdownItem;
 
 return {
   as: "div",
@@ -1121,14 +1121,14 @@ return `._id {
   padding: 0.75rem 0;
   text-align: right;
   font-weight: 500;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 3
         componentName: Html
         props:
           '''
-const item = args.contextData.breakdownItem;
+const item = c.breakdownItem;
 
 return {
   as: "td",

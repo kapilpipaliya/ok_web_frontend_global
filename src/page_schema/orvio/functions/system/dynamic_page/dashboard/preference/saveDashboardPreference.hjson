@@ -8,12 +8,12 @@
         description: Persists per-user dashboard layout and filter state (DashboardPreference vertex).
         body:
           '''
-const user = await args.getUserFromSession();
+const user = await _.getUserFromSession();
 if (!user) {
   return { success: false, message: "Authentication required" };
 }
 
-const { dashboardKey, state } = args.contextData || {};
+const { dashboardKey, state } = c || {};
 if (!dashboardKey) {
   return { success: false, message: "dashboardKey is required" };
 }
@@ -26,7 +26,7 @@ if (!userUuid) {
 const stateJson = JSON.stringify(state || {});
 const now = new Date().toISOString();
 
-const result = await args.session.executeWrite(async (tx) => {
+const result = await _.session.executeWrite(async (tx) => {
   const write = await tx.run(
     `
     MATCH (u:User {uuid: $userUuid})
@@ -46,7 +46,7 @@ return {
   data: {
     dashboardKey,
     updatedAt: now,
-    preference: result ? args.convertNodeToJson(result) : null
+    preference: result ? _.convertNodeToJson(result) : null
   }
 };
 '''

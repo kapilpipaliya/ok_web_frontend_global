@@ -43,26 +43,26 @@
   max-width: 640px;
   margin: 0 auto;
   padding: 2rem 1rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         fns:
           '''
-const [accountId, setAccountId] = args.createSignal("");
-const [clientId, setClientId] = args.createSignal("");
-const [clientSecret, setClientSecret] = args.createSignal("");
-const [redirectUri, setRedirectUri] = args.createSignal("");
-const [scope, setScope] = args.createSignal("rest_webservices");
-const [environment, setEnvironment] = args.createSignal("production");
-const [hasClientSecret, setHasClientSecret] = args.createSignal(false);
-const [loading, setLoading] = args.createSignal(true);
-const [saving, setSaving] = args.createSignal(false);
-const [formError, setFormError] = args.createSignal("");
+const [accountId, setAccountId] = _.createSignal("");
+const [clientId, setClientId] = _.createSignal("");
+const [clientSecret, setClientSecret] = _.createSignal("");
+const [redirectUri, setRedirectUri] = _.createSignal("");
+const [scope, setScope] = _.createSignal("rest_webservices");
+const [environment, setEnvironment] = _.createSignal("production");
+const [hasClientSecret, setHasClientSecret] = _.createSignal(false);
+const [loading, setLoading] = _.createSignal(true);
+const [saving, setSaving] = _.createSignal(false);
+const [formError, setFormError] = _.createSignal("");
 
 const loadSettings = async () => {
   setLoading(true);
   setFormError("");
   try {
-    const res = await args.executeNamedServerFunction({
+    const res = await s({
       functionName: "getNetSuiteIntegrationSettings",
       contextData: {}
     });
@@ -100,23 +100,23 @@ const saveSettings = async () => {
     if (secretTrim) {
       payload.clientSecret = secretTrim;
     }
-    const res = await args.executeNamedServerFunction({
+    const res = await s({
       functionName: "saveNetSuiteIntegrationSettings",
       contextData: payload
     });
     if (res?.error || res?.result?.success === false) {
       const msg = res?.error || res?.result?.message || "Save failed.";
       setFormError(msg);
-      args.showErrorToast?.(msg);
+      _.showErrorToast?.(msg);
       return;
     }
-    args.showSuccessToast?.(res?.result?.message || "Saved.");
+    _.showSuccessToast?.(res?.result?.message || "Saved.");
     setClientSecret("");
     await loadSettings();
   } catch (e) {
     const msg = e?.message || "Save failed.";
     setFormError(msg);
-    args.showErrorToast?.(msg);
+    _.showErrorToast?.(msg);
   } finally {
     setSaving(false);
   }
@@ -147,7 +147,7 @@ return {
           '''return {
   as: "div",
   onMount: async () => {
-    await args.fns.loadSettings?.();
+    await f.loadSettings?.();
   }
 };'''
       }
@@ -174,7 +174,7 @@ return {
         css:
           '''return `._id {
   font-size: 0.9375rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0 0 1.5rem 0;
   line-height: 1.5;
 }`;'''
@@ -190,7 +190,7 @@ return {
       P: {
         css:
           '''return `._id {
-  color: ${args.theme.var.color.error};
+  color: ${t.var.color.error};
   font-size: 0.875rem;
   margin-bottom: 1rem;
 }`;'''
@@ -199,8 +199,8 @@ return {
         props:
           '''return {
   as: "div",
-  text: args.fns.formError?.() || "",
-  hide: !args.fns.formError?.()
+  text: f.formError?.() || "",
+  hide: !f.formError?.()
 };'''
       }
     }
@@ -219,7 +219,7 @@ return {
         props:
           '''return {
   as: "div",
-  hide: args.fns.loading?.()
+  hide: f.loading?.()
 };'''
       }
     }
@@ -242,8 +242,8 @@ return {
           '''return `._id {
   width: 100%;
   padding: 0.5rem 0.75rem;
-  border-radius: ${args.theme.var.borderRadius.sm};
-  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${t.var.borderRadius.sm};
+  border: 1px solid ${t.var.color.border};
   font-size: 0.9375rem;
 }`;'''
         displayOrder: 2
@@ -253,8 +253,8 @@ return {
   as: "input",
   type: "text",
   autocomplete: "off",
-  value: args.fns.accountId?.() ?? "",
-  onInput: (e) => args.fns.setAccountId?.(e.target.value)
+  value: f.accountId?.() ?? "",
+  onInput: (e) => f.setAccountId?.(e.target.value)
 };'''
       }
     }
@@ -277,8 +277,8 @@ return {
           '''return `._id {
   width: 100%;
   padding: 0.5rem 0.75rem;
-  border-radius: ${args.theme.var.borderRadius.sm};
-  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${t.var.borderRadius.sm};
+  border: 1px solid ${t.var.color.border};
   font-size: 0.9375rem;
 }`;'''
         displayOrder: 4
@@ -288,8 +288,8 @@ return {
   as: "input",
   type: "text",
   autocomplete: "off",
-  value: args.fns.clientId?.() ?? "",
-  onInput: (e) => args.fns.setClientId?.(e.target.value)
+  value: f.clientId?.() ?? "",
+  onInput: (e) => f.setClientId?.(e.target.value)
 };'''
       }
     }
@@ -304,7 +304,7 @@ return {
         props:
           '''return {
   as: "label",
-  text: args.fns.hasClientSecret?.()
+  text: f.hasClientSecret?.()
     ? "Client secret (enter only to set or rotate; never shown after save)"
     : "Client secret (stored encrypted; never shown after save)"
 };'''
@@ -318,8 +318,8 @@ return {
           '''return `._id {
   width: 100%;
   padding: 0.5rem 0.75rem;
-  border-radius: ${args.theme.var.borderRadius.sm};
-  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${t.var.borderRadius.sm};
+  border: 1px solid ${t.var.color.border};
   font-size: 0.9375rem;
 }`;'''
         displayOrder: 6
@@ -331,11 +331,11 @@ return {
   autocomplete: "off",
   "attr:data-1p-ignore": true,
   "attr:data-form-type": "other",
-  placeholder: args.fns.hasClientSecret?.()
+  placeholder: f.hasClientSecret?.()
     ? "Leave empty to keep existing secret"
     : "Required on first save",
-  value: args.fns.clientSecret?.() ?? "",
-  onInput: (e) => args.fns.setClientSecret?.(e.target.value)
+  value: f.clientSecret?.() ?? "",
+  onInput: (e) => f.setClientSecret?.(e.target.value)
 };'''
       }
     }
@@ -357,7 +357,7 @@ return {
         css:
           '''return `._id {
   font-size: 0.8125rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   line-height: 1.45;
   margin: 0 0 0.35rem 0;
 }`;'''
@@ -378,8 +378,8 @@ return {
           '''return `._id {
   width: 100%;
   padding: 0.5rem 0.75rem;
-  border-radius: ${args.theme.var.borderRadius.sm};
-  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${t.var.borderRadius.sm};
+  border: 1px solid ${t.var.color.border};
   font-size: 0.9375rem;
 }`;'''
         displayOrder: 9
@@ -389,8 +389,8 @@ return {
   as: "input",
   type: "url",
   autocomplete: "off",
-  value: args.fns.redirectUri?.() ?? "",
-  onInput: (e) => args.fns.setRedirectUri?.(e.target.value)
+  value: f.redirectUri?.() ?? "",
+  onInput: (e) => f.setRedirectUri?.(e.target.value)
 };'''
       }
     }
@@ -413,8 +413,8 @@ return {
           '''return `._id {
   width: 100%;
   padding: 0.5rem 0.75rem;
-  border-radius: ${args.theme.var.borderRadius.sm};
-  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${t.var.borderRadius.sm};
+  border: 1px solid ${t.var.color.border};
   font-size: 0.9375rem;
 }`;'''
         displayOrder: 11
@@ -423,8 +423,8 @@ return {
           '''return {
   as: "input",
   type: "text",
-  value: args.fns.scope?.() ?? "",
-  onInput: (e) => args.fns.setScope?.(e.target.value)
+  value: f.scope?.() ?? "",
+  onInput: (e) => f.setScope?.(e.target.value)
 };'''
       }
     }
@@ -447,8 +447,8 @@ return {
           '''return `._id {
   width: 100%;
   padding: 0.5rem 0.75rem;
-  border-radius: ${args.theme.var.borderRadius.sm};
-  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${t.var.borderRadius.sm};
+  border: 1px solid ${t.var.color.border};
   font-size: 0.9375rem;
 }`;'''
         displayOrder: 13
@@ -457,8 +457,8 @@ return {
           '''return {
   as: "input",
   type: "text",
-  value: args.fns.environment?.() ?? "",
-  onInput: (e) => args.fns.setEnvironment?.(e.target.value)
+  value: f.environment?.() ?? "",
+  onInput: (e) => f.setEnvironment?.(e.target.value)
 };'''
       }
     }
@@ -471,14 +471,14 @@ return {
         displayOrder: 14
         componentName: Html
         props:
-          '''const saving = args.fns.saving?.();
+          '''const saving = f.saving?.();
 return {
   as: "s-button",
   "attr:variant": "primary",
   "attr:disabled": saving ? true : undefined,
   text: saving ? "Saving…" : "Save settings",
   onClick: async () => {
-    await args.fns.saveSettings?.();
+    await f.saveSettings?.();
   }
 };'''
       }
@@ -488,14 +488,14 @@ return {
       L: Attr
       P: {
         css:
-          '''return `._id { padding: 2rem; text-align: center; color: ${args.theme.var.color.text_light_500}; }`;'''
+          '''return `._id { padding: 2rem; text-align: center; color: ${t.var.color.text_light_500}; }`;'''
         displayOrder: 5
         componentName: Html
         props:
           '''return {
   as: "div",
   text: "Loading…",
-  hide: !args.fns.loading?.()
+  hide: !f.loading?.()
 };'''
       }
     }

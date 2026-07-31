@@ -88,14 +88,14 @@ function SelectedTag(props: {
       as="div"
       css={`return \`._id {
   align-items: center;
-  background-color: \${args.theme.var.color.primary};
+  background-color: \${t.var.color.primary};
   cursor: default;
   display: flex;
   font-size: 14px;
   gap: 6px;
   padding: 4px 10px;
   border-radius: 4px;
-  color: \${args.theme.var.color.primary_text};
+  color: \${t.var.color.primary_text};
   font-weight: 500;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   transition: all 0.2s ease;
@@ -121,7 +121,7 @@ function SelectedTag(props: {
     justify-content: center;
     padding: 2px;
     border-radius: 50%;
-    color: \${args.theme.var.color.primary_text};
+    color: \${t.var.color.primary_text};
     transition: all 0.2s ease;
     &:hover {
       background-color: rgba(255, 255, 255, 0.2);
@@ -168,13 +168,13 @@ function SingleOption(props: SingleOptionProps) {
   transition: background-color 0.2s ease;
   ${
     props.isSelected
-      ? `background-color: \${args.theme.var.color.primary_light_200};
-         color: \${args.theme.var.color.primary_light_200_text};`
+      ? `background-color: \${t.var.color.primary_light_200};
+         color: \${t.var.color.primary_light_200_text};`
       : ""
   }
   &:hover {
-    background-color: \${args.theme.var.color.primary_light_200};
-    color: \${args.theme.var.color.primary_light_200_text};
+    background-color: \${t.var.color.primary_light_200};
+    color: \${t.var.color.primary_light_200_text};
   }
 }\`;`}
           onClick={() => props.onSelect(props.option)}
@@ -198,9 +198,9 @@ function SingleOption(props: SingleOptionProps) {
   margin: 3px;
   padding: 8px;
   border-radius: 5px;
-  ${props.isSelected ? "background-color: ${args.theme.var.color.primary_light_200};" : ""}
+  ${props.isSelected ? "background-color: ${t.var.color.primary_light_200};" : ""}
   &:hover {
-    background-color: \${args.theme.var.color.primary_light_200};
+    background-color: \${t.var.color.primary_light_200};
   }
 }\`;`}
           onClick={() => props.onToggleExpand(props.option)}
@@ -440,7 +440,7 @@ function OptionsList(props: OptionsListProps) {
         `return \`._id {
           border-radius: 8px;
           display: flex;
-          background-color: \${args.theme.var.color.background_light_100};
+          background-color: \${t.var.color.background_light_100};
           flex-direction: column;
           max-height: 250px;
           width: 100%;
@@ -460,7 +460,7 @@ function OptionsList(props: OptionsListProps) {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: \${args.theme.var.color.text_light_200};
+  color: \${t.var.color.text_light_200};
   font-style: italic;
 }\`;`}
           >
@@ -481,7 +481,7 @@ function OptionsList(props: OptionsListProps) {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: \${args.theme.var.color.text_light_200};
+  color: \${t.var.color.text_light_200};
   font-style: italic;
 }\`;`}
             >
@@ -556,17 +556,17 @@ export function MultiSelectField(props: MultiSelectFieldProps) {
       css={[
         ensureArray(props.css),
         `return \`._id {
-  border: 1px solid \${args.theme.var.color.border};
+  border: 1px solid \${t.var.color.border};
   padding: 0;
   border-radius: 6px;
   text-align: left;
   width: 100%;
   transition: all 0.2s ease;
   &:focus-within {
-    border-color: \${args.theme.var.color.primary};
-    box-shadow: 0 0 0 2px \${args.theme.var.color.primary_light_100};
+    border-color: \${t.var.color.primary};
+    box-shadow: 0 0 0 2px \${t.var.color.primary_light_100};
   }
-  ${props.error ? "border: 1px solid \\${args.theme.var.color.error};" : ""}
+  ${props.error ? "border: 1px solid \\${t.var.color.error};" : ""}
 }\`;`,
       ]}
       ref={mergeRefs<HTMLDivElement>(props.ref, setReference)}
@@ -638,7 +638,7 @@ export function MultiSelectField(props: MultiSelectFieldProps) {
   padding: 5px;
   font-size: 14px;
   background: transparent;
-  color: \${args.theme.var.color.text};
+  color: \${t.var.color.text};
 }\`;`,
               ]}
               data-lpignore="true"
@@ -667,7 +667,7 @@ export function MultiSelectField(props: MultiSelectFieldProps) {
           <As
             as={Icon}
             css={`return \`._id {
-  color: \${args.theme.var.color.text};
+  color: \${t.var.color.text};
   cursor: pointer;
   transition: transform 0.2s ease;
   transform: rotate(${dropdownVisible() ? "180deg" : "0deg"});
@@ -694,7 +694,7 @@ export function MultiSelectField(props: MultiSelectFieldProps) {
         <As
           as="div"
           css={`return \`._id {
-  color: \${args.theme.var.color.error};
+  color: \${t.var.color.error};
   font-size: 12px;
   padding: 2px;
 }\`;`}

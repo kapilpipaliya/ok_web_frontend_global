@@ -8,7 +8,7 @@
         body:
           '''
 // Get current authenticated user from session
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return {
     success: false,
@@ -17,13 +17,13 @@ if (!actualUser) {
 }
 
 // Get effective user (handles admin impersonation)
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const user = await _.getEffectiveUser(_.session, actualUser, c);
 
-const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
+const helpers = await s({ functionName: 'queueHelpers', contextData: {} });
 
 // Get all paused/pending_quota channels across all ownerships
 // NEW ARCHITECTURE: Queue status on Channel vertex
-const channelsResult = await args.session.run(`
+const channelsResult = await _.session.run(`
   MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
   MATCH (o)-[:YouTubeOwnershipChannel]->(c:Channel)
   WHERE c.queueStatus IN ['paused', 'pending_quota']
@@ -32,7 +32,7 @@ const channelsResult = await args.session.run(`
 
 // Get all paused/pending_quota playlists across all ownerships
 // NEW ARCHITECTURE: Queue status on Playlist vertex
-const playlistsResult = await args.session.run(`
+const playlistsResult = await _.session.run(`
   MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
   MATCH (o)-[:YouTubeOwnershipPlaylist]->(p:Playlist)
   WHERE p.queueStatus IN ['paused', 'pending_quota']
@@ -44,7 +44,7 @@ let playlistsResumed = 0;
 
 // Resume channels
 if (channelsResult.records.length > 0) {
-  const channelQueue = helpers.result.data.createChannelQueue(args);
+  const channelQueue = helpers.result.data.createChannelQueue(_);
 
   try {
     for (const record of channelsResult.records) {
@@ -81,7 +81,7 @@ if (channelsResult.records.length > 0) {
 
       // Update status to queued
       // NEW ARCHITECTURE: Update queue status on Channel vertex
-      await args.session.run(`
+      await _.session.run(`
         MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $channelId})
         SET c.queueStatus = 'queued',
             c.error = null,
@@ -99,7 +99,7 @@ if (channelsResult.records.length > 0) {
 
 // Resume playlists
 if (playlistsResult.records.length > 0) {
-  const playlistQueue = helpers.result.data.createPlaylistQueue(args);
+  const playlistQueue = helpers.result.data.createPlaylistQueue(_);
 
   try {
     for (const record of playlistsResult.records) {
@@ -136,7 +136,7 @@ if (playlistsResult.records.length > 0) {
 
       // Update status to queued
       // NEW ARCHITECTURE: Update queue status on Playlist vertex
-      await args.session.run(`
+      await _.session.run(`
         MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
         SET p.queueStatus = 'queued',
             p.error = null,

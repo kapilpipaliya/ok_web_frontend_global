@@ -8,7 +8,7 @@
         description: Hook after PublicSupportTicket create/update — queues assignee notification email when assignee changes.
         body:
           '''
-const { tableVertexLabel, operation, elementId, data, result } = args.contextData || {};
+const { tableVertexLabel, operation, elementId, data, result } = c || {};
 
 if (tableVertexLabel !== "PublicSupportTicket") {
   return { success: true, message: "Skip: not PublicSupportTicket" };
@@ -34,7 +34,7 @@ const newAssigneeId = Array.isArray(assigneeRel.targetIds)
 if (!newAssigneeId) {
   if (operation === "update") {
     try {
-      await args.session.run(
+      await _.session.run(
         `MATCH (t:PublicSupportTicket) WHERE elementId(t) = $elementId REMOVE t._prevAssigneeId RETURN t`,
         { elementId: ticketElementId }
       );
@@ -46,7 +46,7 @@ if (!newAssigneeId) {
 let previousAssigneeId = null;
 if (operation === "update") {
   try {
-    const prevRes = await args.session.run(
+    const prevRes = await _.session.run(
       `
       MATCH (t:PublicSupportTicket)
       WHERE elementId(t) = $elementId
@@ -61,7 +61,7 @@ if (operation === "update") {
   }
 
   try {
-    await args.session.run(
+    await _.session.run(
       `MATCH (t:PublicSupportTicket) WHERE elementId(t) = $elementId REMOVE t._prevAssigneeId RETURN t`,
       { elementId: ticketElementId }
     );
@@ -75,7 +75,7 @@ if (operation === "update") {
 const serial = result?.data?.P?.serial || data?.vertex?.P?.serial || null;
 
 try {
-  await args.executeNamedServerFunction({
+  await s({
     functionName: "publicSupportQueueNotification",
     contextData: {
       eventType: "ticket_assigned",

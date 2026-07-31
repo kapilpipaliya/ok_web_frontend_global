@@ -10,7 +10,7 @@
 /**
  * Get Playlists with Video Counts - Multi-Ownership Support
  *
- * Parameters (via args.contextData):
+ * Parameters (via c):
  * - userUuid: string (required) - User UUID
  * - ownershipId: string (optional) - Filter by specific YouTube ownership. If omitted, returns playlists across all ownerships.
  * - playlistIds: string[] (optional) - Filter by specific playlist IDs
@@ -43,7 +43,7 @@
     limit = null,
     skip = 0,
     isPublicAccess = false  // Public access mode - only return playlists from public channels
-  } = args.contextData;
+  } = c;
 
   if (!userUuid) {
     return {
@@ -136,7 +136,7 @@
   `;
 
   // Execute the query
-  const result = await args.session.run(query, {
+  const result = await _.session.run(query, {
     userUuid,
     ownershipId,
     playlistIds,
@@ -148,16 +148,16 @@
   const playlists = result.records.map((record) => {
     // Handle optional PlaylistSetting (might be null if user hasn't customized)
     const playlistSettingNode = record.get('ps');
-    const playlistSetting = playlistSettingNode ? args.convertNodeToJson(playlistSettingNode) : null;
+    const playlistSetting = playlistSettingNode ? _.convertNodeToJson(playlistSettingNode) : null;
     const videoCount = record.get('videoCount');
-    const ownership = args.convertNodeToJson(record.get('o'));
-    const playlist = args.convertNodeToJson(record.get('p'));
+    const ownership = _.convertNodeToJson(record.get('o'));
+    const playlist = _.convertNodeToJson(record.get('p'));
     playlist.P.itemCount = videoCount ? (typeof videoCount.toNumber === 'function' ? videoCount.toNumber() : Number(videoCount)) : 0;
 
     return {
       playlist,
       playlistSetting,
-      channel: record.get('c') ? args.convertNodeToJson(record.get('c')) : null,
+      channel: record.get('c') ? _.convertNodeToJson(record.get('c')) : null,
       ownership
     };
   });

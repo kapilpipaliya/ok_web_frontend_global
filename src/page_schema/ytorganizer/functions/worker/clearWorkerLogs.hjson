@@ -8,7 +8,7 @@
         body:
           '''
 // Clear all worker logs
-const session = args.session;
+const session = _.session;
 
 // Count and delete all WorkerLog nodes
 const result = await session.run(`

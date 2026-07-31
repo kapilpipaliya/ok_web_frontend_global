@@ -7,7 +7,7 @@ export function VersionDisplay() {
       as="div"
       css={[
         `return \`._id {
-  color: \${args.theme.var.color.primary};
+  color: \${t.var.color.primary};
   font-size: 12px;
   opacity: 0.8;
 }\`;`,

@@ -143,12 +143,12 @@ export function WorkerManagement() {
       <As
         as="div"
         css={`return \`._id {
-  background: \${args.theme.var.color.info_light_900};
-  border: 1px solid \${args.theme.var.color.info_light_700};
+  background: \${t.var.color.info_light_900};
+  border: 1px solid \${t.var.color.info_light_700};
   border-radius: 0.5rem;
   padding: 1rem 1.25rem;
   margin-bottom: 1.5rem;
-  color: \${args.theme.var.color.info_dark_300};
+  color: \${t.var.color.info_dark_300};
 }\`;`}
       >
         <As
@@ -211,11 +211,11 @@ export function WorkerManagement() {
   align-items: center;
   gap: 0.5rem;
   transition: all 0.2s;
-  background: \${args.theme.var.color.background_dark_300};
-  color: \${args.theme.var.color.background_dark_300_text};
+  background: \${t.var.color.background_dark_300};
+  color: \${t.var.color.background_dark_300_text};
 }
 ._id:hover {
-  background: \${args.theme.var.color.background_dark_400};
+  background: \${t.var.color.background_dark_400};
 }\`;`}
         >
           {"🔄 Refresh"}
@@ -229,8 +229,8 @@ export function WorkerManagement() {
           css={`return \`._id {
   padding: 1.5rem;
   border-radius: 0.5rem;
-  border: 1px solid \${args.theme.var.color.error};
-  background: \${args.theme.var.color.error_light_900};
+  border: 1px solid \${t.var.color.error};
+  background: \${t.var.color.error_light_900};
   margin-bottom: 2rem;
 }\`;`}
         >
@@ -256,7 +256,7 @@ export function WorkerManagement() {
                 as="div"
                 css={`return \`._id {
   font-weight: 600;
-  color: \${args.theme.var.color.error_dark_300};
+  color: \${t.var.color.error_dark_300};
   margin-bottom: 0.5rem;
 }\`;`}
               >
@@ -265,7 +265,7 @@ export function WorkerManagement() {
               <As
                 as="div"
                 css={`return \`._id {
-  color: \${args.theme.var.color.error_dark_300};
+  color: \${t.var.color.error_dark_300};
   font-size: 0.875rem;
 }\`;`}
               >
@@ -285,7 +285,7 @@ export function WorkerManagement() {
               css={`return \`._id {
   padding: 3rem;
   text-align: center;
-  color: \${args.theme.var.color.text_light_600};
+  color: \${t.var.color.text_light_600};
 }\`;`}
             >
               Loading worker status...
@@ -309,8 +309,8 @@ export function WorkerManagement() {
                 css={`return \`._id {
   padding: 1.5rem;
   border-radius: 0.5rem;
-  border: 1px solid \${args.theme.var.color.border};
-  background: \${args.theme.var.color.background};
+  border: 1px solid \${t.var.color.border};
+  background: \${t.var.color.background};
 }\`;`}
               >
                 <As
@@ -318,7 +318,7 @@ export function WorkerManagement() {
                   css={`return \`._id {
   font-size: 0.875rem;
   font-weight: 500;
-  color: \${args.theme.var.color.text_light_600};
+  color: \${t.var.color.text_light_600};
   margin: 0 0 0.5rem 0;
   text-transform: uppercase;
 }\`;`}
@@ -341,8 +341,8 @@ export function WorkerManagement() {
   border-radius: 9999px;
   font-size: 0.875rem;
   font-weight: 500;
-  background: ${status().enabled ? "${args.theme.var.color.success_light_900}" : "${args.theme.var.color.error_light_900}"};
-  color: ${status().enabled ? "${args.theme.var.color.success_dark_300}" : "${args.theme.var.color.error_dark_300}"};
+  background: ${status().enabled ? "${t.var.color.success_light_900}" : "${t.var.color.error_light_900}"};
+  color: ${status().enabled ? "${t.var.color.success_dark_300}" : "${t.var.color.error_dark_300}"};
 }\`;`}
                   >
                     {status().enabled ? "Enabled" : "Disabled"}
@@ -354,8 +354,8 @@ export function WorkerManagement() {
                 css={`return \`._id {
   padding: 1.5rem;
   border-radius: 0.5rem;
-  border: 1px solid \${args.theme.var.color.border};
-  background: \${args.theme.var.color.background};
+  border: 1px solid \${t.var.color.border};
+  background: \${t.var.color.background};
 }\`;`}
               >
                 <As
@@ -363,7 +363,7 @@ export function WorkerManagement() {
                   css={`return \`._id {
   font-size: 0.875rem;
   font-weight: 500;
-  color: \${args.theme.var.color.text_light_600};
+  color: \${t.var.color.text_light_600};
   margin: 0 0 0.5rem 0;
   text-transform: uppercase;
 }\`;`}
@@ -386,8 +386,8 @@ export function WorkerManagement() {
   border-radius: 9999px;
   font-size: 0.875rem;
   font-weight: 500;
-  background: ${status().initialized ? "${args.theme.var.color.info_light_900}" : "${args.theme.var.color.background_light_300}"};
-  color: ${status().initialized ? "${args.theme.var.color.info_dark_300}" : "${args.theme.var.color.text_light_600}"};
+  background: ${status().initialized ? "${t.var.color.info_light_900}" : "${t.var.color.background_light_300}"};
+  color: ${status().initialized ? "${t.var.color.info_dark_300}" : "${t.var.color.text_light_600}"};
 }\`;`}
                   >
                     {status().initialized ? "Yes" : "No"}
@@ -399,8 +399,8 @@ export function WorkerManagement() {
                 css={`return \`._id {
   padding: 1.5rem;
   border-radius: 0.5rem;
-  border: 1px solid \${args.theme.var.color.border};
-  background: \${args.theme.var.color.background};
+  border: 1px solid \${t.var.color.border};
+  background: \${t.var.color.background};
 }\`;`}
               >
                 <As
@@ -408,7 +408,7 @@ export function WorkerManagement() {
                   css={`return \`._id {
   font-size: 0.875rem;
   font-weight: 500;
-  color: \${args.theme.var.color.text_light_600};
+  color: \${t.var.color.text_light_600};
   margin: 0 0 0.5rem 0;
   text-transform: uppercase;
 }\`;`}
@@ -431,8 +431,8 @@ export function WorkerManagement() {
                 css={`return \`._id {
   padding: 1.5rem;
   border-radius: 0.5rem;
-  border: 1px solid \${args.theme.var.color.border};
-  background: \${args.theme.var.color.background};
+  border: 1px solid \${t.var.color.border};
+  background: \${t.var.color.background};
 }\`;`}
               >
                 <As
@@ -440,7 +440,7 @@ export function WorkerManagement() {
                   css={`return \`._id {
   font-size: 0.875rem;
   font-weight: 500;
-  color: \${args.theme.var.color.text_light_600};
+  color: \${t.var.color.text_light_600};
   margin: 0 0 0.5rem 0;
   text-transform: uppercase;
 }\`;`}
@@ -463,8 +463,8 @@ export function WorkerManagement() {
                 css={`return \`._id {
   padding: 1.5rem;
   border-radius: 0.5rem;
-  border: 1px solid \${args.theme.var.color.border};
-  background: \${args.theme.var.color.background};
+  border: 1px solid \${t.var.color.border};
+  background: \${t.var.color.background};
 }\`;`}
               >
                 <As
@@ -472,7 +472,7 @@ export function WorkerManagement() {
                   css={`return \`._id {
   font-size: 0.875rem;
   font-weight: 500;
-  color: \${args.theme.var.color.text_light_600};
+  color: \${t.var.color.text_light_600};
   margin: 0 0 0.5rem 0;
   text-transform: uppercase;
 }\`;`}
@@ -535,8 +535,8 @@ export function WorkerManagement() {
                           css={`return \`._id {
   padding: 1rem 1.5rem;
   border-radius: 0.5rem;
-  border: 1px solid \${args.theme.var.color.border};
-  background: \${args.theme.var.color.background};
+  border: 1px solid \${t.var.color.border};
+  background: \${t.var.color.background};
   display: grid;
   grid-template-columns: 1fr auto auto auto;
   gap: 2rem;
@@ -561,8 +561,8 @@ export function WorkerManagement() {
   padding: 0.125rem 0.5rem;
   border-radius: 9999px;
   font-size: 0.75rem;
-  background: \${args.theme.var.color.primary_light_900};
-  color: \${args.theme.var.color.primary_dark_300};
+  background: \${t.var.color.primary_light_900};
+  color: \${t.var.color.primary_dark_300};
 }\`;`}
                                 >
                                   Current
@@ -573,7 +573,7 @@ export function WorkerManagement() {
                               as="div"
                               css={`return \`._id {
   font-size: 0.75rem;
-  color: \${args.theme.var.color.text_light_600};
+  color: \${t.var.color.text_light_600};
   font-family: monospace;
   margin-top: 0.25rem;
 }\`;`}
@@ -591,7 +591,7 @@ export function WorkerManagement() {
                               as="div"
                               css={`return \`._id {
   font-size: 0.875rem;
-  color: \${args.theme.var.color.text_light_600};
+  color: \${t.var.color.text_light_600};
 }\`;`}
                             >
                               PID: {node.pid}
@@ -607,7 +607,7 @@ export function WorkerManagement() {
                               as="div"
                               css={`return \`._id {
   font-size: 0.875rem;
-  color: \${args.theme.var.color.text_light_600};
+  color: \${t.var.color.text_light_600};
 }\`;`}
                             >
                               Uptime: {uptimeStr}
@@ -624,8 +624,8 @@ export function WorkerManagement() {
   border-radius: 9999px;
   font-size: 0.875rem;
   font-weight: 500;
-  background: \${args.theme.var.color.success_light_900};
-  color: \${args.theme.var.color.success_dark_300};
+  background: \${t.var.color.success_light_900};
+  color: \${t.var.color.success_dark_300};
 }\`;`}
                             >
                               <As
@@ -634,7 +634,7 @@ export function WorkerManagement() {
   width: 0.5rem;
   height: 0.5rem;
   border-radius: 50%;
-  background: \${args.theme.var.color.success};
+  background: \${t.var.color.success};
 }\`;`}
                               />
                               Online
@@ -671,11 +671,11 @@ export function WorkerManagement() {
   align-items: center;
   gap: 0.5rem;
   transition: all 0.2s;
-  background: \${args.theme.var.color.primary};
-  color: \${args.theme.var.color.primary_text};
+  background: \${t.var.color.primary};
+  color: \${t.var.color.primary_text};
 }
 ._id:hover:not(:disabled) {
-  background: \${args.theme.var.color.primary_dark_200};
+  background: \${t.var.color.primary_dark_200};
 }
 ._id:disabled {
   opacity: 0.5;
@@ -699,11 +699,11 @@ export function WorkerManagement() {
   align-items: center;
   gap: 0.5rem;
   transition: all 0.2s;
-  background: \${args.theme.var.color.error};
-  color: \${args.theme.var.color.error_text};
+  background: \${t.var.color.error};
+  color: \${t.var.color.error_text};
 }
 ._id:hover:not(:disabled) {
-  background: \${args.theme.var.color.error_dark_200};
+  background: \${t.var.color.error_dark_200};
 }
 ._id:disabled {
   opacity: 0.5;
@@ -722,7 +722,7 @@ export function WorkerManagement() {
                   css={`return \`._id {
   padding: 3rem;
   text-align: center;
-  color: \${args.theme.var.color.text_light_600};
+  color: \${t.var.color.text_light_600};
 }\`;`}
                 >
                   <As
@@ -751,7 +751,7 @@ export function WorkerManagement() {
                     css={`return \`._id {
   font-size: 0.875rem;
   margin-top: 0.5rem;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
 }\`;`}
                   >
                     Note: Platform-level workers (like email worker) are managed
@@ -763,7 +763,7 @@ export function WorkerManagement() {
               <As
                 as="div"
                 css={`return \`._id {
-  border: 1px solid \${args.theme.var.color.border};
+  border: 1px solid \${t.var.color.border};
   border-radius: 0.5rem;
   overflow: hidden;
 }\`;`}
@@ -771,7 +771,7 @@ export function WorkerManagement() {
                 <As
                   as="div"
                   css={`return \`._id {
-  background: \${args.theme.var.color.background_light_200};
+  background: \${t.var.color.background_light_200};
   padding: 1rem 1.5rem;
   font-weight: 600;
   font-size: 0.875rem;
@@ -793,16 +793,16 @@ export function WorkerManagement() {
                       as="div"
                       css={`return \`._id {
   padding: 1rem 1.5rem;
-  border-top: 1px solid \${args.theme.var.color.border};
+  border-top: 1px solid \${t.var.color.border};
   display: grid;
   grid-template-columns: 1.5fr 2fr 1fr 1fr 100px 150px;
   gap: 1rem;
   align-items: center;
-  background: \${args.theme.var.color.background};
+  background: \${t.var.color.background};
   transition: background 0.2s;
 }
 ._id:hover {
-  background: \${args.theme.var.color.background_light_200};
+  background: \${t.var.color.background_light_200};
 }\`;`}
                     >
                       <As
@@ -817,7 +817,7 @@ export function WorkerManagement() {
                       <As
                         as="div"
                         css={`return \`._id {
-  color: \${args.theme.var.color.text_light_600};
+  color: \${t.var.color.text_light_600};
   font-size: 0.875rem;
 }\`;`}
                       >
@@ -827,7 +827,7 @@ export function WorkerManagement() {
                         as="div"
                         css={`return \`._id {
   font-size: 0.875rem;
-  color: \${args.theme.var.color.text};
+  color: \${t.var.color.text};
 }\`;`}
                       >
                         {worker.hostname}
@@ -836,7 +836,7 @@ export function WorkerManagement() {
                         as="div"
                         css={`return \`._id {
   font-size: 0.75rem;
-  color: \${args.theme.var.color.text_light_600};
+  color: \${t.var.color.text_light_600};
   font-family: monospace;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -856,8 +856,8 @@ export function WorkerManagement() {
   border-radius: 9999px;
   font-size: 0.875rem;
   font-weight: 500;
-  background: ${worker.active ? "${args.theme.var.color.success_light_900}" : "${args.theme.var.color.error_light_900}"};
-  color: ${worker.active ? "${args.theme.var.color.success_dark_300}" : "${args.theme.var.color.error_dark_300}"};
+  background: ${worker.active ? "${t.var.color.success_light_900}" : "${t.var.color.error_light_900}"};
+  color: ${worker.active ? "${t.var.color.success_dark_300}" : "${t.var.color.error_dark_300}"};
 }\`;`}
                         >
                           {worker.active ? "Active" : "Inactive"}
@@ -883,14 +883,14 @@ export function WorkerManagement() {
   border: none;
   font-weight: 500;
   transition: all 0.2s;
-  background: \${args.theme.var.color.success};
-  color: \${args.theme.var.color.success_text};
+  background: \${t.var.color.success};
+  color: \${t.var.color.success_text};
 }
 ._id:hover:not(:disabled) {
-  background: \${args.theme.var.color.success_dark_200};
+  background: \${t.var.color.success_dark_200};
 }
 ._id:disabled {
-  background: \${args.theme.var.color.background_dark_200};
+  background: \${t.var.color.background_dark_200};
   cursor: not-allowed;
 }\`;`}
                         >
@@ -908,14 +908,14 @@ export function WorkerManagement() {
   border: none;
   font-weight: 500;
   transition: all 0.2s;
-  background: \${args.theme.var.color.warning};
-  color: \${args.theme.var.color.warning_text};
+  background: \${t.var.color.warning};
+  color: \${t.var.color.warning_text};
 }
 ._id:hover:not(:disabled) {
-  background: \${args.theme.var.color.warning_dark_200};
+  background: \${t.var.color.warning_dark_200};
 }
 ._id:disabled {
-  background: \${args.theme.var.color.background_dark_200};
+  background: \${t.var.color.background_dark_200};
   cursor: not-allowed;
 }\`;`}
                         >

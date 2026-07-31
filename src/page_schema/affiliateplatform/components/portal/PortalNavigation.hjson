@@ -6,10 +6,10 @@
       P: {
         fns:
           '''
-const [userMenuOpen, setUserMenuOpen] = args.createSignal(false);
-const [userMenuTriggerRef, setUserMenuTriggerRef] = args.createSignal(null);
-const [userMenuPanelRef, setUserMenuPanelRef] = args.createSignal(null);
-const [menuHoverKey, setMenuHoverKey] = args.createSignal(null);
+const [userMenuOpen, setUserMenuOpen] = _.createSignal(false);
+const [userMenuTriggerRef, setUserMenuTriggerRef] = _.createSignal(null);
+const [userMenuPanelRef, setUserMenuPanelRef] = _.createSignal(null);
+const [menuHoverKey, setMenuHoverKey] = _.createSignal(null);
 let userMenuFloatingCleanup = null;
 
 const syncUserMenuWidth = (triggerElement, menuElement) => {
@@ -28,9 +28,9 @@ const clearMenuItemHover = () => setMenuHoverKey(null);
 const setupUserMenuFloating = async () => {
   const triggerElement = userMenuTriggerRef();
   const menuElement = userMenuPanelRef();
-  if (!triggerElement || !menuElement || !args.floatingUI) return;
+  if (!triggerElement || !menuElement || !_.floatingUI) return;
   syncUserMenuWidth(triggerElement, menuElement);
-  const { computePosition, flip, shift, offset, autoUpdate } = args.floatingUI;
+  const { computePosition, flip, shift, offset, autoUpdate } = _.floatingUI;
   const updatePosition = async () => {
     syncUserMenuWidth(triggerElement, menuElement);
     const { x, y } = await computePosition(triggerElement, menuElement, {
@@ -81,7 +81,7 @@ const handleUserMenuDocumentClick = (clickEvent) => {
 
 const navigateFromUserMenu = (path) => {
   closeUserMenu();
-  args.fns.navigateTo?.(path);
+  f.navigateTo?.(path);
 };
 
 const navigateToLogout = () => {
@@ -89,10 +89,10 @@ const navigateToLogout = () => {
 };
 
 const checkAdminRole = () => {
-  const userRoles = args.user?.OUT?.UserRole || [];
+  const userRoles = _.user?.OUT?.UserRole || [];
   return userRoles.some((edgeId) => {
-    const edge = args.graph.edges[edgeId];
-    const role = args.graph.vertexes[edge?.E];
+    const edge = g.edges[edgeId];
+    const role = g.vertexes[edge?.E];
     return role?.P?.key === "Admin";
   });
 };
@@ -106,7 +106,7 @@ const portalNavSectionsData = [
         href: "/",
         label: "View site",
         icon: "ph:house",
-        pathCheck: () => String(args.location?.pathname || "") === "/"
+        pathCheck: () => String(_.location?.pathname || "") === "/"
       }
     ]
   },
@@ -120,7 +120,7 @@ const portalNavSectionsData = [
         href: "/settings?page=home",
         label: "Home page",
         icon: "ph:gear-six",
-        pathCheck: () => String(args.location?.pathname || "").startsWith("/settings")
+        pathCheck: () => String(_.location?.pathname || "").startsWith("/settings")
       },
       {
         id: "pages_organizer",
@@ -128,8 +128,8 @@ const portalNavSectionsData = [
         label: "Page organizer",
         icon: "ph:file",
         pathCheck: () => {
-          if (String(args.location?.pathname || "") !== "/portal/table") return false;
-          return String(args.searchParams?.table || "").trim() === "Page";
+          if (String(_.location?.pathname || "") !== "/portal/table") return false;
+          return String(_.searchParams?.table || "").trim() === "Page";
         }
       },
       {
@@ -138,8 +138,8 @@ const portalNavSectionsData = [
         label: "Component organizer",
         icon: "ph:puzzle-piece",
         pathCheck: () => {
-          if (String(args.location?.pathname || "") !== "/portal/table") return false;
-          return String(args.searchParams?.table || "").trim() === "Component";
+          if (String(_.location?.pathname || "") !== "/portal/table") return false;
+          return String(_.searchParams?.table || "").trim() === "Component";
         }
       },
       {
@@ -148,8 +148,8 @@ const portalNavSectionsData = [
         label: "Function organizer",
         icon: "ph:function",
         pathCheck: () => {
-          if (String(args.location?.pathname || "") !== "/portal/table") return false;
-          return String(args.searchParams?.table || "").trim() === "Function";
+          if (String(_.location?.pathname || "") !== "/portal/table") return false;
+          return String(_.searchParams?.table || "").trim() === "Function";
         }
       },
       {
@@ -158,8 +158,8 @@ const portalNavSectionsData = [
         label: "Email templates organizer",
         icon: "ph:envelope",
         pathCheck: () => {
-          if (String(args.location?.pathname || "") !== "/portal/table") return false;
-          return String(args.searchParams?.table || "").trim() === "EmailTemplate";
+          if (String(_.location?.pathname || "") !== "/portal/table") return false;
+          return String(_.searchParams?.table || "").trim() === "EmailTemplate";
         }
       },
       {
@@ -168,8 +168,8 @@ const portalNavSectionsData = [
         label: "Products",
         icon: "ph:shopping-bag",
         pathCheck: () => {
-          if (String(args.location?.pathname || "") !== "/portal/table") return false;
-          const table = String(args.searchParams?.table || "Product").trim();
+          if (String(_.location?.pathname || "") !== "/portal/table") return false;
+          const table = String(_.searchParams?.table || "Product").trim();
           return table === "Product";
         }
       },
@@ -179,15 +179,15 @@ const portalNavSectionsData = [
         label: "Files",
         icon: "ph:folder",
         pathCheck: () => {
-          if (String(args.location?.pathname || "") !== "/portal/table") return false;
-          return String(args.searchParams?.table || "").trim() === "File";
+          if (String(_.location?.pathname || "") !== "/portal/table") return false;
+          return String(_.searchParams?.table || "").trim() === "File";
         }
       }
     ]
   }
 ];
 
-const portalNavSections = args.createMemo(() =>
+const portalNavSections = _.createMemo(() =>
   portalNavSectionsData.filter(
     (section) => !section.showIf || section.showIf(),
   ),
@@ -236,18 +236,28 @@ return {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  border-right: 1px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background_light_100};
+  border-right: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background_light_100};
   padding: 0.65rem;
   gap: 0.15rem;
   box-sizing: border-box;
+  flex-shrink: 0;
+  @media (max-width: 768px) {
+    width: 100%;
+    min-height: 0;
+    max-height: 140px;
+    overflow-x: auto;
+    overflow-y: auto;
+    border-right: none;
+    border-bottom: 1px solid ${t.var.color.border};
+  }
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
           '''return {
   as: "aside",
-  onMount: () => args.fns.onUserMenuMount?.()
+  onMount: () => f.onUserMenuMount?.()
 };'''
       }
     }
@@ -266,7 +276,7 @@ return {
   padding: 0.35rem 0.4rem;
   padding-bottom: 0.5rem;
   border: none;
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  border-bottom: 1px solid ${t.var.color.border};
   border-radius: 0.375rem;
   background: transparent;
   cursor: pointer;
@@ -274,7 +284,7 @@ return {
   transition: background 0.15s ease;
 }
 ._id:hover {
-  background: ${args.theme.var.color.background_light_200};
+  background: ${t.var.color.background_light_200};
 }`;'''
         displayOrder: 1
         componentName: Html
@@ -282,7 +292,7 @@ return {
           '''return {
   as: "button",
   type: "button",
-  onClick: () => args.fns.navigateTo?.("/"),
+  onClick: () => f.navigateTo?.("/"),
   "attr:aria-label": "Go to home"
 };'''
       }
@@ -298,7 +308,7 @@ return {
   border-radius: 0.375rem;
   object-fit: contain;
   flex-shrink: 0;
-  background: ${args.theme.var.color.background_light_100};
+  background: ${t.var.color.background_light_100};
 }`;'''
         displayOrder: 1
         componentName: Html
@@ -318,7 +328,7 @@ return {
           '''return `._id {
   font-size: 1.1rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   line-height: 1.2;
 }`;'''
         displayOrder: 2
@@ -346,7 +356,7 @@ return {
           '''return {
   as: "nav",
   "attr:aria-label": "Portal navigation",
-  data: args.fns.portalNavSections?.() ?? []
+  data: f.portalNavSections?.() ?? []
 };'''
       }
     }
@@ -376,14 +386,14 @@ return {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: ${args.theme.var.color.text_dark_400};
+  color: ${t.var.color.text_dark_400};
   margin: 0.5rem 0 0.15rem 0;
   padding: 0 0.4rem;
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const section = args.contextData.navSection;
+          '''const section = c.navSection;
 return {
   as: "h3",
   text: section?.title ?? "",
@@ -400,7 +410,7 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const section = args.contextData.navSection;
+          '''const section = c.navSection;
 return {
   as: "div",
   data: section?.items ?? []
@@ -412,8 +422,8 @@ return {
       L: Attr
       P: {
         css:
-          '''const item = args.contextData.navItem;
-const active = args.fns.isNavItemActive?.(item);
+          '''const item = c.navItem;
+const active = f.isNavItemActive?.(item);
 return `._id {
   display: inline-flex;
   flex-direction: row;
@@ -423,27 +433,27 @@ return `._id {
   text-align: left;
   padding: 0.35rem 0.5rem;
   border-radius: 0.375rem;
-  border: 1px solid ${active ? args.theme.var.color.primary : "transparent"};
-  background: ${active ? args.theme.var.color.primary_light_900 : "transparent"};
-  color: ${active ? args.theme.var.color.primary : args.theme.var.color.text};
+  border: 1px solid ${active ? t.var.color.primary : "transparent"};
+  background: ${active ? t.var.color.primary_light_900 : "transparent"};
+  color: ${active ? t.var.color.primary : t.var.color.text};
   font-size: 0.95rem;
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 ._id:hover {
-  background: ${active ? args.theme.var.color.primary_light_800 : args.theme.var.color.background_light_300};
-  color: ${active ? args.theme.var.color.primary : args.theme.var.color.text};
-  border-color: ${active ? args.theme.var.color.primary_light_600 : args.theme.var.color.border};
+  background: ${active ? t.var.color.primary_light_800 : t.var.color.background_light_300};
+  color: ${active ? t.var.color.primary : t.var.color.text};
+  border-color: ${active ? t.var.color.primary_light_600 : t.var.color.border};
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const item = args.contextData.navItem;
+          '''const item = c.navItem;
 return {
   as: "button",
   type: "button",
-  onClick: () => args.fns.navigateTo?.(item.href),
-  "attr:aria-current": args.fns.isNavItemActive?.(item) ? "page" : undefined
+  onClick: () => f.navigateTo?.(item.href),
+  "attr:aria-current": f.isNavItemActive?.(item) ? "page" : undefined
 };'''
       }
     }
@@ -461,7 +471,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const item = args.contextData.navItem;
+          '''const item = c.navItem;
 return {
   as: "icon",
   icon: item.icon,
@@ -478,7 +488,7 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const item = args.contextData.navItem;
+          '''const item = c.navItem;
 return { as: "span", text: item.label };'''
       }
     }
@@ -513,13 +523,13 @@ return { as: "span", text: item.label };'''
   margin-top: auto;
   padding: 0.45rem 0.5rem;
   border-radius: 0.375rem;
-  border: 1px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background};
+  border: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background};
   cursor: pointer;
   text-align: left;
 }
 ._id:hover {
-  background: ${args.theme.var.color.background_light_200};
+  background: ${t.var.color.background_light_200};
 }`;'''
         displayOrder: 10
         componentName: Html
@@ -527,9 +537,9 @@ return { as: "span", text: item.label };'''
           '''return {
   as: "button",
   type: "button",
-  ref: args.fns.setUserMenuTriggerRef,
-  onClick: args.fns.toggleUserMenu,
-  "attr:aria-expanded": args.fns.userMenuOpen?.() === true,
+  ref: f.setUserMenuTriggerRef,
+  onClick: f.toggleUserMenu,
+  "attr:aria-expanded": f.userMenuOpen?.() === true,
   "attr:aria-haspopup": "menu",
   "attr:aria-label": "Account menu"
 };'''
@@ -544,18 +554,18 @@ return { as: "span", text: item.label };'''
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  border: 2px solid ${args.theme.var.color.border};
+  border: 2px solid ${t.var.color.border};
   background-size: cover;
   background-position: center;
-  background-color: ${args.theme.var.color.background_light_200};
+  background-color: ${t.var.color.background_light_200};
   flex-shrink: 0;
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const imageFileVertex = args.evalExpression("->UserProfileImage", {
-  graph: args.graph,
-  vertexes: [args.user]
+          '''const imageFileVertex = _.evalExpression("->UserProfileImage", {
+  graph: g,
+  vertexes: [_.user]
 })?.[0];
 const fileName =
   imageFileVertex?.P?.fileName != null ? String(imageFileVertex.P.fileName).trim() : "";
@@ -583,20 +593,20 @@ return {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  border: 2px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background_light_200};
+  border: 2px solid ${t.var.color.border};
+  background: ${t.var.color.background_light_200};
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  color: ${args.theme.var.color.text_dark_400};
+  color: ${t.var.color.text_dark_400};
 }`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''const imageFileVertex = args.evalExpression("->UserProfileImage", {
-  graph: args.graph,
-  vertexes: [args.user]
+          '''const imageFileVertex = _.evalExpression("->UserProfileImage", {
+  graph: g,
+  vertexes: [_.user]
 })?.[0];
 const fileName =
   imageFileVertex?.P?.fileName != null ? String(imageFileVertex.P.fileName).trim() : "";
@@ -623,7 +633,7 @@ return {
   min-width: 0;
   font-size: 0.9rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   line-height: 1.3;
   word-break: break-word;
 }`;'''
@@ -631,10 +641,10 @@ return {
         componentName: Html
         props:
           '''const username =
-  args.user?.P?.username != null && String(args.user.P.username).trim() !== ""
-    ? String(args.user.P.username).trim()
-    : args.user?.P?.email != null && String(args.user.P.email).trim() !== ""
-      ? String(args.user.P.email).trim()
+  _.user?.P?.username != null && String(_.user.P.username).trim() !== ""
+    ? String(_.user.P.username).trim()
+    : _.user?.P?.email != null && String(_.user.P.email).trim() !== ""
+      ? String(_.user.P.email).trim()
       : "";
 return {
   as: "div",
@@ -662,8 +672,8 @@ return {
   box-sizing: border-box;
   padding: 0.35rem;
   border-radius: 0.5rem;
-  border: 1px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background};
+  border: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background};
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
   overflow: hidden;
 }`;'''
@@ -672,8 +682,8 @@ return {
         props:
           '''return {
   as: "div",
-  hide: args.fns.userMenuOpen?.() !== true,
-  ref: args.fns.setUserMenuPanelRef,
+  hide: f.userMenuOpen?.() !== true,
+  ref: f.setUserMenuPanelRef,
   "attr:role": "menu"
 };'''
       }
@@ -683,9 +693,9 @@ return {
       L: Attr
       P: {
         css:
-          '''const active = String(args.location?.pathname || "") === "/portal/profile";
-const hovered = args.fns.menuHoverKey?.() === "profile";
-const hoverBg = args.theme.var.color.background_light_400;
+          '''const active = String(_.location?.pathname || "") === "/portal/profile";
+const hovered = f.menuHoverKey?.() === "profile";
+const hoverBg = t.var.color.background_light_400;
 return `._id {
   display: inline-flex;
   flex-direction: row;
@@ -697,8 +707,8 @@ return `._id {
   padding: 0.4rem 0.55rem;
   border-radius: 0.375rem;
   border: none;
-  background: ${active ? args.theme.var.color.primary_light_900 : hovered ? hoverBg : "transparent"};
-  color: ${active || hovered ? args.theme.var.color.primary : args.theme.var.color.text};
+  background: ${active ? t.var.color.primary_light_900 : hovered ? hoverBg : "transparent"};
+  color: ${active || hovered ? t.var.color.primary : t.var.color.text};
   font-size: 0.9rem;
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease;
@@ -711,9 +721,9 @@ return `._id {
   type: "button",
   role: "menuitem",
   hide: true,
-  onMouseEnter: () => args.fns.setMenuItemHover?.("profile"),
-  onMouseLeave: () => args.fns.clearMenuItemHover?.(),
-  onClick: () => args.fns.navigateFromUserMenu?.("/portal/profile")
+  onMouseEnter: () => f.setMenuItemHover?.("profile"),
+  onMouseLeave: () => f.clearMenuItemHover?.(),
+  onClick: () => f.navigateFromUserMenu?.("/portal/profile")
 };'''
       }
     }
@@ -755,9 +765,9 @@ return `._id {
       L: Attr
       P: {
         css:
-          '''const active = String(args.location?.pathname || "") === "/portal/password";
-const hovered = args.fns.menuHoverKey?.() === "password";
-const hoverBg = args.theme.var.color.background_light_400;
+          '''const active = String(_.location?.pathname || "") === "/portal/password";
+const hovered = f.menuHoverKey?.() === "password";
+const hoverBg = t.var.color.background_light_400;
 return `._id {
   display: inline-flex;
   flex-direction: row;
@@ -769,8 +779,8 @@ return `._id {
   padding: 0.4rem 0.55rem;
   border-radius: 0.375rem;
   border: none;
-  background: ${active ? args.theme.var.color.primary_light_900 : hovered ? hoverBg : "transparent"};
-  color: ${active || hovered ? args.theme.var.color.primary : args.theme.var.color.text};
+  background: ${active ? t.var.color.primary_light_900 : hovered ? hoverBg : "transparent"};
+  color: ${active || hovered ? t.var.color.primary : t.var.color.text};
   font-size: 0.9rem;
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease;
@@ -783,9 +793,9 @@ return `._id {
   type: "button",
   role: "menuitem",
   hide: true,
-  onMouseEnter: () => args.fns.setMenuItemHover?.("password"),
-  onMouseLeave: () => args.fns.clearMenuItemHover?.(),
-  onClick: () => args.fns.navigateFromUserMenu?.("/portal/password")
+  onMouseEnter: () => f.setMenuItemHover?.("password"),
+  onMouseLeave: () => f.clearMenuItemHover?.(),
+  onClick: () => f.navigateFromUserMenu?.("/portal/password")
 };'''
       }
     }
@@ -827,9 +837,9 @@ return `._id {
       L: Attr
       P: {
         css:
-          '''const active = String(args.location?.pathname || "") === "/portal/files";
-const hovered = args.fns.menuHoverKey?.() === "files";
-const hoverBg = args.theme.var.color.background_light_400;
+          '''const active = String(_.location?.pathname || "") === "/portal/files";
+const hovered = f.menuHoverKey?.() === "files";
+const hoverBg = t.var.color.background_light_400;
 return `._id {
   display: inline-flex;
   flex-direction: row;
@@ -841,8 +851,8 @@ return `._id {
   padding: 0.4rem 0.55rem;
   border-radius: 0.375rem;
   border: none;
-  background: ${active ? args.theme.var.color.primary_light_900 : hovered ? hoverBg : "transparent"};
-  color: ${active || hovered ? args.theme.var.color.primary : args.theme.var.color.text};
+  background: ${active ? t.var.color.primary_light_900 : hovered ? hoverBg : "transparent"};
+  color: ${active || hovered ? t.var.color.primary : t.var.color.text};
   font-size: 0.9rem;
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease;
@@ -855,9 +865,9 @@ return `._id {
   type: "button",
   role: "menuitem",
   hide: true,
-  onMouseEnter: () => args.fns.setMenuItemHover?.("files"),
-  onMouseLeave: () => args.fns.clearMenuItemHover?.(),
-  onClick: () => args.fns.navigateFromUserMenu?.("/portal/files")
+  onMouseEnter: () => f.setMenuItemHover?.("files"),
+  onMouseLeave: () => f.clearMenuItemHover?.(),
+  onClick: () => f.navigateFromUserMenu?.("/portal/files")
 };'''
       }
     }
@@ -910,13 +920,13 @@ return `._id {
   border-radius: 0.375rem;
   border: none;
   background: transparent;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   font-size: 0.9rem;
   cursor: pointer;
 }
 ._id:hover {
-  background: ${args.theme.var.color.error_light_900};
-  color: ${args.theme.var.color.error};
+  background: ${t.var.color.error_light_900};
+  color: ${t.var.color.error};
 }`;'''
         displayOrder: 4
         componentName: Html
@@ -925,7 +935,7 @@ return `._id {
   as: "button",
   type: "button",
   role: "menuitem",
-  onClick: args.fns.navigateToLogout
+  onClick: f.navigateToLogout
 };'''
       }
     }

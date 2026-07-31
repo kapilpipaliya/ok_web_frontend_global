@@ -27,7 +27,7 @@
         props:
           '''return {
   as: "div",
-  hide: args.contextData.props?.hide === true
+  hide: c.props?.hide === true
 };'''
       }
     }
@@ -40,8 +40,8 @@
   display: flex;
   gap: 0.25rem;
   padding: 0.5rem 0.75rem;
-  border-bottom: 1px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background_light_100};
+  border-bottom: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background_light_100};
   flex-shrink: 0;
 }`;'''
         displayOrder: 1
@@ -56,14 +56,14 @@
         displayOrder: 1
         componentName: Button
         props:
-          '''const isSchemaMode = args.contextData.props?.isSchemaMode;
+          '''const isSchemaMode = c.props?.isSchemaMode;
 const active = typeof isSchemaMode === "function" ? !isSchemaMode() : isSchemaMode !== true;
 return {
   variant: active ? "primary" : "secondary",
   size: "sm",
-  text: args.contextData.props?.contentTabLabel || "Content",
+  text: c.props?.contentTabLabel || "Content",
   type: "button",
-  onClick: () => args.contextData.props?.onSetContentMode?.()
+  onClick: () => c.props?.onSetContentMode?.()
 };'''
       }
     }
@@ -74,14 +74,14 @@ return {
         displayOrder: 2
         componentName: Button
         props:
-          '''const isSchemaMode = args.contextData.props?.isSchemaMode;
+          '''const isSchemaMode = c.props?.isSchemaMode;
 const active = typeof isSchemaMode === "function" ? isSchemaMode() === true : isSchemaMode === true;
 return {
   variant: active ? "primary" : "secondary",
   size: "sm",
-  text: args.contextData.props?.schemaTabLabel || "Field schema",
+  text: c.props?.schemaTabLabel || "Field schema",
   type: "button",
-  onClick: () => args.contextData.props?.onSetSchemaMode?.()
+  onClick: () => c.props?.onSetSchemaMode?.()
 };'''
       }
     }
@@ -100,7 +100,7 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const isSchemaMode = args.contextData.props?.isSchemaMode;
+          '''const isSchemaMode = c.props?.isSchemaMode;
 const hide = typeof isSchemaMode === "function" ? isSchemaMode() === true : isSchemaMode === true;
 return { as: "div", hide };'''
       }
@@ -131,17 +131,17 @@ return { as: "div", hide };'''
         displayOrder: 1
         componentName: DynamicPage
         props:
-          '''const settingsPageId = args.contextData.props?.settingsPageId;
+          '''const settingsPageId = c.props?.settingsPageId;
 return {
-  key: args.contextData.props?.dynamicPageKey || "settings_editor_dynamic_page",
+  key: c.props?.dynamicPageKey || "settings_editor_dynamic_page",
   pageMode: "settings",
   settingsPageId,
   loadFromSetting: true,
-  embeddedMode: args.contextData.props?.embeddedMode !== false,
-  hideSettingsSidebar: args.contextData.props?.hideSettingsSidebar === true,
-  scopeId: args.contextData.props?.scopeId || "Default",
-  siteLanguages: args.contextData.props?.siteLanguages || [],
-  scope: args.contextData.props?.scope || {
+  embeddedMode: c.props?.embeddedMode !== false,
+  hideSettingsSidebar: c.props?.hideSettingsSidebar === true,
+  scopeId: c.props?.scopeId || "Default",
+  siteLanguages: c.props?.siteLanguages || [],
+  scope: c.props?.scope || {
     vertexLabel: "GlobalSetting",
     matchProperty: "key",
     idParam: "scopeId"
@@ -166,7 +166,7 @@ return {
         displayOrder: 3
         componentName: Html
         props:
-          '''const isSchemaMode = args.contextData.props?.isSchemaMode;
+          '''const isSchemaMode = c.props?.isSchemaMode;
 const show = typeof isSchemaMode === "function" ? isSchemaMode() === true : isSchemaMode === true;
 return { as: "div", hide: !show };'''
       }
@@ -178,12 +178,12 @@ return { as: "div", hide: !show };'''
         displayOrder: 1
         componentName: SettingsPageSchemaEditor
         props:
-          '''const settingsPageId = args.contextData.props?.settingsPageId;
+          '''const settingsPageId = c.props?.settingsPageId;
 return {
   settingsPageId,
   embeddedMode: true,
-  siteLanguages: args.contextData.props?.siteLanguages || [],
-  onSaved: () => args.contextData.props?.onSchemaSaved?.()
+  siteLanguages: c.props?.siteLanguages || [],
+  onSaved: () => c.props?.onSchemaSaved?.()
 };'''
       }
     }

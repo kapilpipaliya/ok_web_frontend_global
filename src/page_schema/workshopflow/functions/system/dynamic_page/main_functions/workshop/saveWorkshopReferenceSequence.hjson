@@ -8,7 +8,7 @@
         description: Upserts sequence definition by key; does not change currentNumber unless resetCounter is true.
         body:
           '''
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return { success: false, message: "Not authenticated" };
 }
@@ -23,7 +23,7 @@ const {
   resetRule = "never",
   resetCounter = false,
   numberPadding = 0
-} = args.contextData || {};
+} = c || {};
 
 if (!key || typeof key !== "string") {
   return { success: false, message: "key is required" };
@@ -47,7 +47,7 @@ if (!allowed.has(safeRule)) {
 const padN = Number(numberPadding);
 const safePad = Number.isFinite(padN) && padN >= 0 ? Math.min(32, Math.floor(padN)) : 0;
 
-await args.session.run(
+await _.session.run(
   `
   MERGE (s:WorkshopReferenceSequence {key: $key})
   ON CREATE SET s.createdAt = datetime()
@@ -73,7 +73,7 @@ await args.session.run(
 );
 
 if (resetCounter === true) {
-  await args.session.run(
+  await _.session.run(
     `
     MATCH (s:WorkshopReferenceSequence {key: $key})
     SET s.currentNumber = toInteger($startingNumber) - toInteger($incrementStep),

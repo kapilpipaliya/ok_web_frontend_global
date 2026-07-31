@@ -12,12 +12,12 @@
         key: AtmaSadhanaNityaKram
         props:
           '''
-const locale = args.params?.lang ? String(args.params.lang).toLowerCase() : undefined;
+const locale = _.params?.lang ? String(_.params.lang).toLowerCase() : undefined;
 return {
   contextName: "atmaSadhanaSettings",
   serverFunction: `
 try {
-  const result = await args.executeNamedServerFunction({
+  const result = await s({
     functionName: "loadPublicPageSettings",
     contextData: { pageId: "atma-sadhana-nitya-kram", allowPublicRead: true, locale: ${JSON.stringify(locale ?? null)} }
   });
@@ -70,7 +70,7 @@ try {
         displayOrder: 1
         componentName: Html
         props:
-          '''const content = args.contextData.atmaSadhanaSettings?.content;
+          '''const content = c.atmaSadhanaSettings?.content;
 return {
   as: "h1",
   text: content?.heroTitle
@@ -93,7 +93,7 @@ return {
   as: "div",
   "data-animate": "",
 
-  ref: (el) => el && args.fns.animateOnView(el)
+  ref: (el) => el && f.animateOnView(el)
 };'''
       }
     }
@@ -111,7 +111,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const content = args.contextData.atmaSadhanaSettings?.content;
+          '''const content = c.atmaSadhanaSettings?.content;
 return {
   as: "h2",
   text: content?.introTitle
@@ -128,12 +128,12 @@ return {
   line-height: 1.8;
   max-width: 800px;
   margin: 0 auto;
-  color: ${args.theme.mode === 'dark' ? args.theme.var.color.text_light_200 : args.theme.var.color.text_dark_200};
+  color: ${t.mode === 'dark' ? t.var.color.text_light_200 : t.var.color.text_dark_200};
 }`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''const content = args.contextData.atmaSadhanaSettings?.content;
+          '''const content = c.atmaSadhanaSettings?.content;
 return {
   as: "p",
   text: content?.introText
@@ -155,7 +155,7 @@ return {
   as: "div",
   "data-animate": "",
 
-  ref: (el) => el && args.fns.animateOnView(el)
+  ref: (el) => el && f.animateOnView(el)
 };'''
       }
     }
@@ -185,7 +185,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const items = args.contextData.atmaSadhanaSettings?.schedule?.schedule ?? [];
+          '''const items = c.atmaSadhanaSettings?.schedule?.schedule ?? [];
 return {
   as: "fragment",
   data: items
@@ -198,7 +198,7 @@ return {
       P: {
         css:
           '''return `._id {
-  background: ${args.theme.mode === 'dark' ? args.theme.var.color.background_dark_200 : args.theme.var.color.background_light_100};
+  background: ${t.mode === 'dark' ? t.var.color.background_dark_200 : t.var.color.background_light_100};
   padding: 2rem;
   border-radius: 1rem;
   border-left: 4px solid #7b1fa2;
@@ -206,13 +206,13 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const schedule = args.contextData.schedule;
-const index = args.contextData.index ?? 0;
+          '''const schedule = c.schedule;
+const index = c.index ?? 0;
 return {
   as: "div",
   "data-animate": "",
 
-  ref: (el) => el && args.fns.animateOnView(el, { delay: index * 0.08 })
+  ref: (el) => el && f.animateOnView(el, { delay: index * 0.08 })
 };'''
       }
     }
@@ -252,7 +252,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const schedule = args.contextData.schedule;
+          '''const schedule = c.schedule;
 return {
   as: "span",
   text: schedule.time
@@ -272,7 +272,7 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const schedule = args.contextData.schedule;
+          '''const schedule = c.schedule;
 return {
   as: "h3",
   text: schedule.title
@@ -306,7 +306,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const schedule = args.contextData.schedule;
+          '''const schedule = c.schedule;
 return {
   data: schedule.activities.map((activity, index) => ({
     id: index + 1,
@@ -336,7 +336,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const activity = args.contextData.activity;
+          '''const activity = c.activity;
 return {
   as: "li",
   text: activity.text
@@ -358,7 +358,7 @@ return {
   as: "div",
   "data-animate": "",
 
-  ref: (el) => el && args.fns.animateOnView(el)
+  ref: (el) => el && f.animateOnView(el)
 };'''
       }
     }
@@ -376,7 +376,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const content = args.contextData.atmaSadhanaSettings?.content;
+          '''const content = c.atmaSadhanaSettings?.content;
 return {
   as: "h2",
   text: content?.benefitsTitle
@@ -410,7 +410,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const items = args.contextData.atmaSadhanaSettings?.benefit?.benefit ?? [];
+          '''const items = c.atmaSadhanaSettings?.benefit?.benefit ?? [];
 return {
   as: "fragment",
   data: items
@@ -424,7 +424,7 @@ return {
         displayOrder: 1
         componentName: FeatureCard
         props:
-          '''const benefit = args.contextData.benefit;
+          '''const benefit = c.benefit;
 return {
   icon: benefit.icon,
   title: benefit.title,
@@ -438,7 +438,7 @@ return {
       P: {
         css:
           '''return `._id {
-  background: ${args.theme.mode === 'dark' ? args.theme.var.color.background_dark_200 : args.theme.var.color.background_light_50};
+  background: ${t.mode === 'dark' ? t.var.color.background_dark_200 : t.var.color.background_light_50};
   padding: 3rem;
   border-radius: 1rem;
   text-align: center;
@@ -450,7 +450,7 @@ return {
   as: "div",
   "data-animate": "",
 
-  ref: (el) => el && args.fns.animateOnView(el)
+  ref: (el) => el && f.animateOnView(el)
 };'''
       }
     }
@@ -468,7 +468,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const content = args.contextData.atmaSadhanaSettings?.content;
+          '''const content = c.atmaSadhanaSettings?.content;
 return {
   as: "h2",
   text: content?.guidelinesTitle
@@ -502,7 +502,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const items = args.contextData.atmaSadhanaSettings?.guideline?.guideline ?? [];
+          '''const items = c.atmaSadhanaSettings?.guideline?.guideline ?? [];
 return {
   as: "fragment",
   data: items
@@ -523,13 +523,13 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const guideline = args.contextData.guideline;
-const index = args.contextData.index ?? 0;
+          '''const guideline = c.guideline;
+const index = c.index ?? 0;
 return {
   as: "div",
   "data-animate": "",
 
-  ref: (el) => el && args.fns.animateOnView(el, { delay: index * 0.08 })
+  ref: (el) => el && f.animateOnView(el, { delay: index * 0.08 })
 };'''
       }
     }
@@ -556,12 +556,12 @@ return {
         css:
           '''return `._id {
   line-height: 1.6;
-  color: ${args.theme.mode === 'dark' ? args.theme.var.color.text_light_200 : args.theme.var.color.text_dark_200};
+  color: ${t.mode === 'dark' ? t.var.color.text_light_200 : t.var.color.text_dark_200};
 }`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''const guideline = args.contextData.guideline;
+          '''const guideline = c.guideline;
 return {
   as: "p",
   text: guideline.text

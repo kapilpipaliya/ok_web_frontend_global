@@ -23,8 +23,8 @@ return `._id {
   position: sticky;
   top: 0;
   z-index: 1000;
-  background: ${args.theme.var.color.background};
-  border-bottom: 1px solid ${args.theme.var.color.background_dark_200};
+  background: ${t.var.color.background};
+  border-bottom: 1px solid ${t.var.color.background_dark_200};
   transition: all 0.3s ease;
 }`;
 '''
@@ -74,12 +74,12 @@ return {
 return `._id {
   font-size: 1.5rem;
   font-weight: 700;
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   text-decoration: none;
   transition: all 0.2s ease;
   
   &:hover {
-    color: ${args.theme.var.color.primary_dark_200};
+    color: ${t.var.color.primary_dark_200};
   }
   
   @media (max-width: 768px) {
@@ -96,7 +96,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         fns: '''
-const [openDropdown, setOpenDropdown] = args.createSignal(null);
+const [openDropdown, setOpenDropdown] = _.createSignal(null);
 return {
   openDropdown,
   setOpenDropdown,
@@ -118,9 +118,9 @@ return {
   onMount: () => {
     const handleClickOutside = (event) => {
       const target = event.target;
-      const navContainer = args.ref();
+      const navContainer = _.ref();
       if (navContainer && !navContainer.contains(target)) {
-        args.fns.closeDropdown();
+        f.closeDropdown();
       }
     };
     document.addEventListener('click', handleClickOutside);
@@ -182,16 +182,16 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const item = args.contextData.navItem;
+const item = c.navItem;
 const itemId = item.href || item.text;
 return {
   as: "div"
 };
 ''',
         css: '''
-const item = args.contextData.navItem;
+const item = c.navItem;
 const itemId = item.href || item.text;
-const isOpen = args.fns.isDropdownOpen(itemId);
+const isOpen = f.isDropdownOpen(itemId);
 return `._id {
   position: relative;
 }`;
@@ -205,8 +205,8 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const item = args.contextData.navItem;
-const currentPath = args.location.pathname;
+const item = c.navItem;
+const currentPath = _.location.pathname;
 const isActive =
   item.href === currentPath ||
   (item.href === "/" && currentPath === "/") ||
@@ -232,8 +232,8 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const item = args.contextData.navItem;
-const currentPath = args.location.pathname;
+const item = c.navItem;
+const currentPath = _.location.pathname;
 const isActive =
   item.href === currentPath ||
   (item.href === "/" && currentPath === "/") ||
@@ -246,20 +246,20 @@ return {
   onClick: (e) => {
     if (item.submenu && item.submenu.length > 0) {
       e.preventDefault();
-      args.fns.toggleDropdown(itemId);
+      f.toggleDropdown(itemId);
     }
   }
 };
 ''',
         css: '''
-const item = args.contextData.navItem;
-const currentPath = args.location.pathname;
+const item = c.navItem;
+const currentPath = _.location.pathname;
 const isActive =
   item.href === currentPath ||
   (item.href === "/" && currentPath === "/") ||
   (item.submenu && item.submenu.some((sub) => sub.href === currentPath));
 return `._id {
-  color: ${isActive ? args.theme.var.color.primary : args.theme.var.color.text};
+  color: ${isActive ? t.var.color.primary : t.var.color.text};
   text-decoration: none;
   font-weight: ${isActive ? '600' : '500'};
   transition: all 0.2s ease;
@@ -274,13 +274,13 @@ return `._id {
       left: 0;
       right: 0;
       height: 2px;
-      background: ${args.theme.var.color.primary};
+      background: ${t.var.color.primary};
       border-radius: 1px;
     }
   ` : ''}
   
   &:hover {
-    color: ${args.theme.var.color.primary};
+    color: ${t.var.color.primary};
   }
 }`;
 '''
@@ -293,9 +293,9 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const item = args.contextData.navItem;
+const item = c.navItem;
 const itemId = item.href || item.text;
-const isOpen = args.fns.isDropdownOpen(itemId);
+const isOpen = f.isDropdownOpen(itemId);
 return {
   as: "icon",
   icon: "carbon:chevron-down",
@@ -305,16 +305,16 @@ return {
   onClick: (e) => {
     e.preventDefault();
     e.stopPropagation();
-    args.fns.toggleDropdown(itemId);
+    f.toggleDropdown(itemId);
   }
 };
 ''',
         css: '''
-const item = args.contextData.navItem;
+const item = c.navItem;
 const itemId = item.href || item.text;
-const isOpen = args.fns.isDropdownOpen(itemId);
+const isOpen = f.isDropdownOpen(itemId);
 return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   transition: transform 0.2s ease;
   transform: ${isOpen ? 'rotate(180deg)' : 'rotate(0deg)'};
   cursor: pointer;
@@ -330,9 +330,9 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const item = args.contextData.navItem;
+const item = c.navItem;
 const itemId = item.href || item.text;
-const isOpen = args.fns.isDropdownOpen(itemId);
+const isOpen = f.isDropdownOpen(itemId);
 return {
   as: "div",
   hide: !item.submenu || item.submenu.length === 0 || !isOpen
@@ -343,8 +343,8 @@ return `._id {
   position: absolute;
   top: 100%;
   left: 0;
-  background: ${args.theme.var.color.background};
-  box-shadow: 0 4px 12px ${args.theme.var.color.text_light_900};
+  background: ${t.var.color.background};
+  box-shadow: 0 4px 12px ${t.var.color.text_light_900};
   min-width: 220px;
   border-radius: 0.5rem;
   padding: 0.5rem 0;
@@ -363,7 +363,7 @@ return `._id {
         contextName: "submenuItem",
         loop: true,
         props: '''
-const item = args.contextData.navItem;
+const item = c.navItem;
 return {
   data: item.submenu || []
 };
@@ -377,7 +377,7 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const submenuItem = args.contextData.submenuItem;
+const submenuItem = c.submenuItem;
 return {
   as: "a",
   href: submenuItem.href,
@@ -385,21 +385,21 @@ return {
 };
 ''',
         css: '''
-const submenuItem = args.contextData.submenuItem;
-const currentPath = args.location.pathname;
+const submenuItem = c.submenuItem;
+const currentPath = _.location.pathname;
 const isActive = currentPath === submenuItem.href;
 return `._id {
   display: block;
   padding: 0.5rem 1rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   text-decoration: none;
   white-space: nowrap;
   font-size: 0.95rem;
   transition: all 0.15s ease;
   
   &:hover {
-    background: ${args.theme.var.color.background_dark_100};
-    color: ${args.theme.var.color.primary};
+    background: ${t.var.color.background_dark_100};
+    color: ${t.var.color.primary};
   }
   
   ${isActive ? `
@@ -416,17 +416,17 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const currentMode = args.currentMode();
+const currentMode = _.currentMode();
 const isDark = currentMode === "dark";
 return {
   as: "button",
-  onClick: args.toggleTheme
+  onClick: _.toggleTheme
 };
 ''',
         css: '''
 return `._id {
   background: transparent;
-  border: 1px solid ${args.theme.var.color.background_dark_200};
+  border: 1px solid ${t.var.color.background_dark_200};
   border-radius: 0.5rem;
   padding: 0.5rem;
   cursor: pointer;
@@ -436,8 +436,8 @@ return `._id {
   transition: all 0.2s ease;
   
   &:hover {
-    background: ${args.theme.var.color.background_dark_100};
-    border-color: ${args.theme.var.color.background_dark_300};
+    background: ${t.var.color.background_dark_100};
+    border-color: ${t.var.color.background_dark_300};
   }
 }`;
 '''
@@ -450,7 +450,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const currentMode = args.currentMode();
+const currentMode = _.currentMode();
 const isDark = currentMode === "dark";
 return {
   as: "icon",
@@ -461,7 +461,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }

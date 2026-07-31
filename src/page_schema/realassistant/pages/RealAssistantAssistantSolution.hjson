@@ -17,7 +17,7 @@
         componentName: "Html",
         contextName: "solutionStore",
         fns: '''
-const [store, setStore] = args.createStore({
+const [store, setStore] = _.createStore({
   problem: {
     id: "1",
     title: "Help with Excel Formula",
@@ -73,7 +73,7 @@ return {
     setStore("newMessage", "");
     setStore("showMessageDialog", false);
     
-    args.showSuccessToast("Message sent to user");
+    _.showSuccessToast("Message sent to user");
   },
   
   validateSolution: () => {
@@ -90,42 +90,42 @@ return {
   },
   
   submitSolution: async () => {
-    if (!args.fns.validateSolution()) return;
+    if (!f.validateSolution()) return;
     
     setStore("isSubmitting", true);
     
     // Submit solution to database
     await new Promise(resolve => setTimeout(resolve, 1500));
     
-    args.showSuccessToast("Solution submitted successfully!");
-    args.navigate("/assistant/dashboard");
+    _.showSuccessToast("Solution submitted successfully!");
+    _.navigate("/assistant/dashboard");
   },
   
   skipProblem: () => {
     if (confirm("Are you sure you want to skip this problem? It will be reassigned to another assistant.")) {
-      args.showWarningToast("Problem skipped");
-      args.navigate("/assistant/dashboard");
+      _.showWarningToast("Problem skipped");
+      _.navigate("/assistant/dashboard");
     }
   }
 };
 ''',
         props: '''
-const fns = args.fns;
-const problemId = args.location.pathname.split("/").pop();
+const fns = f;
+const problemId = _.location.pathname.split("/").pop();
 
-if (args.mounted()) {
+if (_.mounted()) {
   fns.loadProblemData(problemId);
 }
 
 return {
   as: "div",
-  data: args.contextData.solutionStore
+  data: c.solutionStore
 };
 ''',
         css: '''
 return `._id {
   min-height: 100vh;
-  background: ${args.theme.var.color.background_dark_50};
+  background: ${t.var.color.background_dark_50};
 }`;
 '''
       }
@@ -143,8 +143,8 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background};
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  background: ${t.var.color.background};
+  border-bottom: 1px solid ${t.var.color.border};
   position: sticky;
   top: 0;
   z-index: 1000;
@@ -211,17 +211,17 @@ return {
   icon: "carbon:arrow-left",
   width: 24,
   height: 24,
-  onClick: () => args.navigate("/assistant/dashboard")
+  onClick: () => _.navigate("/assistant/dashboard")
 };
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   cursor: pointer;
   transition: color 0.2s ease;
   
   &:hover {
-    color: ${args.theme.var.color.primary};
+    color: ${t.var.color.primary};
   }
 }`;
 '''
@@ -243,7 +243,7 @@ return {
 return `._id {
   font-size: 1.5rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0;
   
   @media (max-width: 768px) {
@@ -260,7 +260,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const earning = args.contextData.solutionStore?.problem?.estimatedEarning || 0;
+const earning = c.solutionStore?.problem?.estimatedEarning || 0;
 return {
   as: "div"
 };
@@ -271,7 +271,7 @@ return `._id {
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 1rem;
-  background: ${args.theme.var.color.success_light_100};
+  background: ${t.var.color.success_light_100};
   border-radius: 0.5rem;
 }`;
 '''
@@ -293,7 +293,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.success};
+  color: ${t.var.color.success};
 }`;
 '''
       }
@@ -305,7 +305,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const earning = args.contextData.solutionStore?.problem?.estimatedEarning || 0;
+const earning = c.solutionStore?.problem?.estimatedEarning || 0;
 return {
   as: "span",
   text: `Earning: $${earning.toFixed(2)}`
@@ -314,7 +314,7 @@ return {
         css: '''
 return `._id {
   font-weight: 600;
-  color: ${args.theme.var.color.success};
+  color: ${t.var.color.success};
 }`;
 '''
       }
@@ -411,7 +411,7 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 1rem;
 }`;
 '''
@@ -424,7 +424,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const problem = args.contextData.solutionStore?.problem;
+const problem = c.solutionStore?.problem;
 return {
   as: "h3",
   text: problem?.title
@@ -434,7 +434,7 @@ return {
 return `._id {
   font-size: 1.125rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 0.5rem;
 }`;
 '''
@@ -457,7 +457,7 @@ return `._id {
   gap: 1rem;
   margin-bottom: 1rem;
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
       }
@@ -469,7 +469,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const problem = args.contextData.solutionStore?.problem;
+const problem = c.solutionStore?.problem;
 return {
   as: "span",
   text: problem?.category
@@ -484,7 +484,7 @@ return {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const problem = args.contextData.solutionStore?.problem;
+const problem = c.solutionStore?.problem;
 return {
   as: "span",
   text: `• ${problem?.urgency === "urgent" ? "Urgent" : "Normal"} Priority`
@@ -499,7 +499,7 @@ return {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const problem = args.contextData.solutionStore?.problem;
+const problem = c.solutionStore?.problem;
 return {
   as: "span",
   text: `• Submitted ${problem?.submittedAt}`
@@ -514,7 +514,7 @@ return {
         displayOrder: 4,
         componentName: "Html",
         props: '''
-const problem = args.contextData.solutionStore?.problem;
+const problem = c.solutionStore?.problem;
 return {
   as: "div"
 };
@@ -522,7 +522,7 @@ return {
         css: '''
 return `._id {
   padding: 1rem;
-  background: ${args.theme.var.color.background_dark_100};
+  background: ${t.var.color.background_dark_100};
   border-radius: 0.5rem;
   margin-bottom: 1rem;
 }`;
@@ -536,7 +536,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const problem = args.contextData.solutionStore?.problem;
+const problem = c.solutionStore?.problem;
 return {
   as: "p",
   text: problem?.description
@@ -544,7 +544,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   line-height: 1.6;
   white-space: pre-wrap;
 }`;
@@ -564,7 +564,7 @@ return {
 ''',
         css: '''
 return `._id {
-  border-top: 1px solid ${args.theme.var.color.border};
+  border-top: 1px solid ${t.var.color.border};
   padding-top: 1rem;
 }`;
 '''
@@ -585,7 +585,7 @@ return {
         css: '''
 return `._id {
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 0.75rem;
 }`;
 '''
@@ -598,7 +598,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const user = args.contextData.solutionStore?.problem?.user;
+const user = c.solutionStore?.problem?.user;
 return {
   as: "div"
 };
@@ -628,7 +628,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
 }`;
 '''
       }
@@ -640,7 +640,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const user = args.contextData.solutionStore?.problem?.user;
+const user = c.solutionStore?.problem?.user;
 return {
   as: "div"
 };
@@ -659,7 +659,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const user = args.contextData.solutionStore?.problem?.user;
+const user = c.solutionStore?.problem?.user;
 return {
   as: "p",
   text: user?.name
@@ -668,7 +668,7 @@ return {
         css: '''
 return `._id {
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0;
 }`;
 '''
@@ -681,7 +681,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const user = args.contextData.solutionStore?.problem?.user;
+const user = c.solutionStore?.problem?.user;
 return {
   as: "p",
   text: `${user?.problemsSubmitted} problems • ${user?.rating} ★ rating`
@@ -689,7 +689,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0;
 }`;
 '''
@@ -702,7 +702,7 @@ return `._id {
         displayOrder: 6,
         componentName: "Html",
         props: '''
-const messages = args.contextData.solutionStore?.problem?.messages || [];
+const messages = c.solutionStore?.problem?.messages || [];
 if (messages.length === 0) return { as: "span" };
 
 return {
@@ -712,7 +712,7 @@ return {
         css: '''
 return `._id {
   margin-top: 1rem;
-  border-top: 1px solid ${args.theme.var.color.border};
+  border-top: 1px solid ${t.var.color.border};
   padding-top: 1rem;
 }`;
 '''
@@ -733,7 +733,7 @@ return {
         css: '''
 return `._id {
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 0.75rem;
 }`;
 '''
@@ -748,7 +748,7 @@ return `._id {
         contextName: "messages",
         loop: true,
         props: '''
-const messages = args.contextData.solutionStore?.problem?.messages || [];
+const messages = c.solutionStore?.problem?.messages || [];
 return {
   data: messages
 };
@@ -769,21 +769,21 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const message = args.contextData.messages;
+const message = c.messages;
 const isUser = message.sender === "user";
 return {
   as: "div"
 };
 ''',
         css: '''
-const message = args.contextData.messages;
+const message = c.messages;
 const isUser = message.sender === "user";
 return `._id {
   display: flex;
   align-items: start;
   gap: 0.5rem;
   padding: 0.5rem;
-  background: ${isUser ? args.theme.var.color.primary_light_50 : args.theme.var.color.background_dark_50};
+  background: ${isUser ? t.var.color.primary_light_50 : t.var.color.background_dark_50};
   border-radius: 0.5rem;
 }`;
 '''
@@ -796,7 +796,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const message = args.contextData.messages;
+const message = c.messages;
 const isUser = message.sender === "user";
 return {
   as: "icon",
@@ -806,10 +806,10 @@ return {
 };
 ''',
         css: '''
-const message = args.contextData.messages;
+const message = c.messages;
 const isUser = message.sender === "user";
 return `._id {
-  color: ${isUser ? args.theme.var.color.primary : args.theme.var.color.success};
+  color: ${isUser ? t.var.color.primary : t.var.color.success};
   margin-top: 0.125rem;
 }`;
 '''
@@ -822,7 +822,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const message = args.contextData.messages;
+const message = c.messages;
 return {
   as: "div"
 };
@@ -841,7 +841,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const message = args.contextData.messages;
+const message = c.messages;
 return {
   as: "p",
   text: message.text
@@ -850,7 +850,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.25rem 0;
 }`;
 '''
@@ -863,7 +863,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const message = args.contextData.messages;
+const message = c.messages;
 return {
   as: "span",
   text: message.time
@@ -872,7 +872,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.75rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
       }
@@ -902,7 +902,7 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 1rem;
 }`;
 '''
@@ -943,7 +943,7 @@ return {
         css: '''
 return `._id {
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -955,8 +955,8 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const content = args.contextData.solutionStore?.solution?.content || "";
-const updateSolution = args.contextData.solutionStore?.fns?.updateSolution;
+const content = c.solutionStore?.solution?.content || "";
+const updateSolution = c.solutionStore?.fns?.updateSolution;
 
 return {
   as: "textarea",
@@ -967,26 +967,26 @@ return {
 };
 ''',
         css: '''
-const hasError = args.contextData.solutionStore?.errors?.solution;
+const hasError = c.solutionStore?.errors?.solution;
 return `._id {
   padding: 0.75rem;
-  border: 1px solid ${hasError ? args.theme.var.color.error : args.theme.var.color.border};
+  border: 1px solid ${hasError ? t.var.color.error : t.var.color.border};
   border-radius: 0.5rem;
   font-size: 1rem;
   font-family: inherit;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   resize: vertical;
   min-height: 200px;
   transition: border-color 0.2s ease;
   
   &:focus {
     outline: none;
-    border-color: ${args.theme.var.color.primary};
+    border-color: ${t.var.color.primary};
   }
   
   &::placeholder {
-    color: ${args.theme.var.color.text_light_500};
+    color: ${t.var.color.text_light_500};
   }
 }`;
 '''
@@ -999,8 +999,8 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const content = args.contextData.solutionStore?.solution?.content || "";
-const error = args.contextData.solutionStore?.errors?.solution;
+const content = c.solutionStore?.solution?.content || "";
+const error = c.solutionStore?.errors?.solution;
 const charCount = content.length;
 
 return {
@@ -1023,7 +1023,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const error = args.contextData.solutionStore?.errors?.solution;
+const error = c.solutionStore?.errors?.solution;
 if (!error) return { as: "span" };
 
 return {
@@ -1034,7 +1034,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.error};
+  color: ${t.var.color.error};
 }`;
 '''
       }
@@ -1046,7 +1046,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const content = args.contextData.solutionStore?.solution?.content || "";
+const content = c.solutionStore?.solution?.content || "";
 const charCount = content.length;
 
 return {
@@ -1055,11 +1055,11 @@ return {
 };
 ''',
         css: '''
-const content = args.contextData.solutionStore?.solution?.content || "";
+const content = c.solutionStore?.solution?.content || "";
 const charCount = content.length;
 return `._id {
   font-size: 0.875rem;
-  color: ${charCount < 50 ? args.theme.var.color.error : args.theme.var.color.text_light_500};
+  color: ${charCount < 50 ? t.var.color.error : t.var.color.text_light_500};
 }`;
 '''
       }
@@ -1078,8 +1078,8 @@ return {
         css: '''
 return `._id {
   padding: 1rem;
-  background: ${args.theme.var.color.info_light_50};
-  border: 1px solid ${args.theme.var.color.info_light_300};
+  background: ${t.var.color.info_light_50};
+  border: 1px solid ${t.var.color.info_light_300};
   border-radius: 0.5rem;
 }`;
 '''
@@ -1121,7 +1121,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.info};
+  color: ${t.var.color.info};
   margin-top: 0.125rem;
 }`;
 '''
@@ -1155,7 +1155,7 @@ return {
         css: '''
 return `._id {
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;
 '''
@@ -1177,7 +1177,7 @@ return `._id {
   margin: 0;
   padding-left: 1.25rem;
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -1269,8 +1269,8 @@ return `._id {
         text: "Submit Solution",
         icon: "carbon:send",
         fullWidth: true,
-        disabled: "args.contextData.solutionStore?.isSubmitting",
-        onClick: "() => args.contextData.solutionStore.fns.submitSolution()"
+        disabled: "c.solutionStore?.isSubmitting",
+        onClick: "() => c.solutionStore.fns.submitSolution()"
       }
     },
     {
@@ -1283,7 +1283,7 @@ return `._id {
         size: "large",
         text: "Ask User",
         icon: "carbon:chat",
-        onClick: "() => args.contextData.solutionStore.setStore('showMessageDialog', true)"
+        onClick: "() => c.solutionStore.setStore('showMessageDialog', true)"
       }
     },
     {
@@ -1296,7 +1296,7 @@ return `._id {
         size: "large",
         text: "Skip",
         icon: "carbon:skip-forward",
-        onClick: "() => args.contextData.solutionStore.fns.skipProblem()"
+        onClick: "() => c.solutionStore.fns.skipProblem()"
       }
     },
     {
@@ -1306,7 +1306,7 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const showDialog = args.contextData.solutionStore?.showMessageDialog;
+const showDialog = c.solutionStore?.showMessageDialog;
 if (!showDialog) return { as: "span" };
 
 return {
@@ -1326,7 +1326,7 @@ return {
   as: "div",
   onClick: (e) => {
     if (e.target === e.currentTarget) {
-      args.contextData.solutionStore.setStore("showMessageDialog", false);
+      c.solutionStore.setStore("showMessageDialog", false);
     }
   }
 };
@@ -1389,7 +1389,7 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 1rem;
 }`;
 '''
@@ -1402,8 +1402,8 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const newMessage = args.contextData.solutionStore?.newMessage || "";
-const setStore = args.contextData.solutionStore?.setStore;
+const newMessage = c.solutionStore?.newMessage || "";
+const setStore = c.solutionStore?.setStore;
 
 return {
   as: "textarea",
@@ -1417,21 +1417,21 @@ return {
 return `._id {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.5rem;
   font-size: 1rem;
   font-family: inherit;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   resize: vertical;
   
   &:focus {
     outline: none;
-    border-color: ${args.theme.var.color.primary};
+    border-color: ${t.var.color.primary};
   }
   
   &::placeholder {
-    color: ${args.theme.var.color.text_light_500};
+    color: ${t.var.color.text_light_500};
   }
 }`;
 '''
@@ -1467,7 +1467,7 @@ return `._id {
         variant: "secondary",
         size: "medium",
         text: "Cancel",
-        onClick: "() => args.contextData.solutionStore.setStore('showMessageDialog', false)"
+        onClick: "() => c.solutionStore.setStore('showMessageDialog', false)"
       }
     },
     {
@@ -1480,7 +1480,7 @@ return `._id {
         size: "medium",
         text: "Send Message",
         icon: "carbon:send",
-        onClick: "() => args.contextData.solutionStore.fns.sendMessage()"
+        onClick: "() => c.solutionStore.fns.sendMessage()"
       }
     }
   ],

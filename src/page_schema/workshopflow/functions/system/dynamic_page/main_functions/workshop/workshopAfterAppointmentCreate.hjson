@@ -8,17 +8,17 @@
         description: Hook that auto-creates a repair order after appointment creation.
         body:
           '''
-const elementId = args.contextData?.elementId;
+const elementId = c?.elementId;
 if (!elementId) {
   return { success: true, message: "No appointment id provided" };
 }
 
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) return { success: true, message: "No session user, skip hook" };
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
-const enableUserScoping = args.contextData?.enableUserScoping !== false;
+const user = await _.getEffectiveUser(_.session, actualUser, c);
+const enableUserScoping = c?.enableUserScoping !== false;
 
-const lookup = await args.session.run(
+const lookup = await _.session.run(
   `
   MATCH (a:WorkshopAppointment)
   WHERE elementId(a) = $elementId
@@ -38,7 +38,7 @@ if (!appointmentNo) {
   return { success: true, message: "Appointment has no number, skip repair creation" };
 }
 
-const existingRepair = await args.session.run(
+const existingRepair = await _.session.run(
   `
   MATCH (r:RepairOrder {appointmentNo: $appointmentNo})
   RETURN r
@@ -51,7 +51,7 @@ if (existingRepair.records.length > 0) {
   return { success: true, message: "Repair order already exists for appointment" };
 }
 
-const resNo = await args.executeNamedServerFunction({
+const resNo = await s({
   functionName: "reserveWorkshopReferenceNumber",
   contextData: { sequenceKey: "RepairOrder.repairNo" }
 });
@@ -70,7 +70,7 @@ if (!repairNo) {
 }
 
 if (enableUserScoping) {
-  await args.session.run(
+  await _.session.run(
     `
     MATCH (u:User {uuid: $userUuid})
     MATCH (a:WorkshopAppointment) WHERE elementId(a) = $elementId
@@ -103,7 +103,7 @@ if (enableUserScoping) {
     }
   );
 } else {
-  await args.session.run(
+  await _.session.run(
     `
     MATCH (a:WorkshopAppointment) WHERE elementId(a) = $elementId
     OPTIONAL MATCH (a)-[:AppointmentCustomer]->(cust:WorkshopCustomer)

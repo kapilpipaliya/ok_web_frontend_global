@@ -20,7 +20,7 @@ export const Function: IFormMetaData = {
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 500;
-  color: \${args.theme.var.color.text};
+  color: \${t.var.color.text};
 }\`;`,
         } as FieldAttribute,
         {
@@ -30,22 +30,22 @@ export const Function: IFormMetaData = {
           props: `return {
   type: "text",
   placeholder: "Enter function key",
-  value: args.data?.P?.key || "",
-  onChange: (e) => args.onChange(e.target.value)
+  value: _.data?.P?.key || "",
+  onChange: (e) => _.onChange(e.target.value)
 };`,
           css: `return \`._id {
   width: 100%;
   padding: 0.75rem;
   font-size: 1rem;
-  background: \${args.theme.var.color.background};
-  color: \${args.theme.var.color.text};
-  border: 1px solid \${args.theme.var.color.border};
+  background: \${t.var.color.background};
+  color: \${t.var.color.text};
+  border: 1px solid \${t.var.color.border};
   border-radius: 0.375rem;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
   &:focus {
     outline: none;
-    border-color: \${args.theme.var.color.primary};
-    box-shadow: 0 0 0 2px \${args.theme.var.color.primary_light_100};
+    border-color: \${t.var.color.primary};
+    box-shadow: 0 0 0 2px \${t.var.color.primary_light_100};
   }
 }\`;`,
         } as FieldAttribute,
@@ -67,7 +67,7 @@ export const Function: IFormMetaData = {
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 500;
-  color: \${args.theme.var.color.text};
+  color: \${t.var.color.text};
 }\`;`,
         } as FieldAttribute,
         {
@@ -76,24 +76,24 @@ export const Function: IFormMetaData = {
           key: "description",
           props: `return {
   placeholder: "Enter function description",
-  value: args.data?.P?.description || "",
-  onChange: (e) => args.onChange(e.target.value)
+  value: _.data?.P?.description || "",
+  onChange: (e) => _.onChange(e.target.value)
 };`,
           css: `return \`._id {
   width: 100%;
   padding: 0.75rem;
   min-height: 80px;
   font-size: 1rem;
-  background: \${args.theme.var.color.background};
-  color: \${args.theme.var.color.text};
-  border: 1px solid \${args.theme.var.color.border};
+  background: \${t.var.color.background};
+  color: \${t.var.color.text};
+  border: 1px solid \${t.var.color.border};
   border-radius: 0.375rem;
   resize: vertical;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
   &:focus {
     outline: none;
-    border-color: \${args.theme.var.color.primary};
-    box-shadow: 0 0 0 2px \${args.theme.var.color.primary_light_100};
+    border-color: \${t.var.color.primary};
+    box-shadow: 0 0 0 2px \${t.var.color.primary_light_100};
   }
 }\`;`,
         } as FieldAttribute,
@@ -115,7 +115,7 @@ export const Function: IFormMetaData = {
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 500;
-  color: \${args.theme.var.color.text};
+  color: \${t.var.color.text};
 }\`;`,
         } as FieldAttribute,
         {
@@ -124,8 +124,8 @@ export const Function: IFormMetaData = {
           key: "body",
           props: `return {
   placeholder: "// Enter your function body here...",
-  value: args.data?.P?.body || "",
-  onChange: (e) => args.onChange(e.target.value)
+  value: _.data?.P?.body || "",
+  onChange: (e) => _.onChange(e.target.value)
 };`,
           css: `return \`._id {
   width: 100%;
@@ -134,17 +134,17 @@ export const Function: IFormMetaData = {
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
   font-size: 14px;
   line-height: 1.5;
-  background: \${args.theme.var.color.background};
-  color: \${args.theme.var.color.text};
-  border: 1px solid \${args.theme.var.color.border};
+  background: \${t.var.color.background};
+  color: \${t.var.color.text};
+  border: 1px solid \${t.var.color.border};
   border-radius: 0.375rem;
   resize: vertical;
   tab-size: 2;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
   &:focus {
     outline: none;
-    border-color: \${args.theme.var.color.primary};
-    box-shadow: 0 0 0 2px \${args.theme.var.color.primary_light_100};
+    border-color: \${t.var.color.primary};
+    box-shadow: 0 0 0 2px \${t.var.color.primary_light_100};
   }
 }\`;`,
         } as FieldAttribute,
@@ -157,8 +157,8 @@ export const Function: IFormMetaData = {
       css: `return \`._id {
   margin-top: 1.5rem;
   padding: 1rem;
-  background: \${args.theme.var.color.background_light_200};
-  color: \${args.theme.var.color.background_light_200_text};
+  background: \${t.var.color.background_light_200};
+  color: \${t.var.color.background_light_200_text};
   border-radius: 0.375rem;
   font-size: 0.875rem;
 }\`;`,
@@ -168,7 +168,7 @@ export const Function: IFormMetaData = {
           as: "strong",
           text: "Available in function body:",
           css: `return \`._id {
-  color: \${args.theme.var.color.text};
+  color: \${t.var.color.text};
   display: block;
   margin-bottom: 0.5rem;
 }\`;`,
@@ -185,22 +185,22 @@ export const Function: IFormMetaData = {
             {
               componentName: "Html",
               as: "li",
-              text: "args.params - Request parameters sent from the client",
+              text: "_.params - Request parameters sent from the client",
             } as FieldAttribute,
             {
               componentName: "Html",
               as: "li",
-              text: "args.session - Current user session",
+              text: "_.session - Current user session",
             } as FieldAttribute,
             {
               componentName: "Html",
               as: "li",
-              text: "args.graph - Graph interface for database operations",
+              text: "g / _.graph - Graph interface for database operations",
             } as FieldAttribute,
             {
               componentName: "Html",
               as: "li",
-              text: "args.user - Current authenticated user (if available)",
+              text: "_.user - Current authenticated user (if available)",
             } as FieldAttribute,
           ],
         } as FieldAttribute,

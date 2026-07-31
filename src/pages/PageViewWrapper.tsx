@@ -205,15 +205,15 @@ export function PageViewWrapper(props: Readonly<PageViewWrapperProps>) {
               css={`return \`._id {
                 margin-top: 0.75rem;
                 padding: 0.5rem 1rem;
-                background: \${args.theme.var.color.primary};
-                color: \${args.theme.var.color.primary_text};
+                background: \${t.var.color.primary};
+                color: \${t.var.color.primary_text};
                 border: none;
                 border-radius: 0.375rem;
                 cursor: pointer;
                 font-size: 0.875rem;
                 font-weight: 500;
                 &:hover {
-                  background: \${args.theme.var.color.primary_dark_200};
+                  background: \${t.var.color.primary_dark_200};
                 }
               }\`;`}
               onClick={() => {

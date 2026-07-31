@@ -10,14 +10,14 @@
 // Example 1: Basic Pipeline with Authentication
 // ==============================================
 
-const userSchema = args.schema.object({
-  name: args.schema.string().min(2),
-  email: args.schema.email()
+const userSchema = _.schema.object({
+  name: _.schema.string().min(2),
+  email: _.schema.email()
 });
 
-const result = await args.createPipeline(args.contextData, {
-  session: args.session,
-  getUserFromSession: args.getUserFromSession,
+const result = await _.createPipeline(c, {
+  session: _.session,
+  getUserFromSession: _.getUserFromSession,
 })
   .validate(userSchema)           // Validate input
   .authenticate()                  // Require authentication
@@ -37,14 +37,14 @@ return result;
 // Example 2: Pipeline with Authorization
 // =======================================
 
-const adminSchema = args.schema.object({
-  action: args.schema.string(),
-  targetId: args.schema.uuid()
+const adminSchema = _.schema.object({
+  action: _.schema.string(),
+  targetId: _.schema.uuid()
 });
 
-const adminResult = await args.createPipeline(args.contextData, {
-  session: args.session,
-  getUserFromSession: args.getUserFromSession,
+const adminResult = await _.createPipeline(c, {
+  session: _.session,
+  getUserFromSession: _.getUserFromSession,
 })
   .validate(adminSchema)
   .authenticate()
@@ -62,9 +62,9 @@ return adminResult;
 // Example 3: Pipeline with Rate Limiting
 // =======================================
 
-const apiResult = await args.createPipeline(args.contextData, {
-  session: args.session,
-  getUserFromSession: args.getUserFromSession,
+const apiResult = await _.createPipeline(c, {
+  session: _.session,
+  getUserFromSession: _.getUserFromSession,
 })
   .authenticate()
   .rateLimit({
@@ -82,8 +82,8 @@ return apiResult;
 // Example 4: Pipeline with Data Transformation
 // ============================================
 
-const transformResult = await args.createPipeline(args.contextData, {
-  session: args.session,
+const transformResult = await _.createPipeline(c, {
+  session: _.session,
 })
   .transform((data) => {
     // Transform input data
@@ -103,15 +103,15 @@ return transformResult;
 // Example 5: Pipeline with Custom Middleware
 // ===========================================
 
-const customResult = await args.createPipeline(args.contextData, {
-  session: args.session,
-  getUserFromSession: args.getUserFromSession,
+const customResult = await _.createPipeline(c, {
+  session: _.session,
+  getUserFromSession: _.getUserFromSession,
 })
   .authenticate()
   .custom(async (ctx) => {
     // Custom validation or processing
     if (ctx.data.amount > 1000) {
-      throw args.errors.BusinessLogic("Amount exceeds limit");
+      throw _.errors.BusinessLogic("Amount exceeds limit");
     }
 
     // Add data to context metadata
@@ -129,15 +129,15 @@ return customResult;
 // Example 6: Complex Pipeline Chain
 // ==================================
 
-const updateProfileSchema = args.schema.object({
-  userId: args.schema.uuid(),
-  name: args.schema.string().min(2).max(100).optional(),
-  bio: args.schema.string().max(500).optional()
+const updateProfileSchema = _.schema.object({
+  userId: _.schema.uuid(),
+  name: _.schema.string().min(2).max(100).optional(),
+  bio: _.schema.string().max(500).optional()
 });
 
-const complexResult = await args.createPipeline(args.contextData, {
-  session: args.session,
-  getUserFromSession: args.getUserFromSession,
+const complexResult = await _.createPipeline(c, {
+  session: _.session,
+  getUserFromSession: _.getUserFromSession,
 })
   // Step 1: Validate input
   .validate(updateProfileSchema)
@@ -151,10 +151,10 @@ const complexResult = await args.createPipeline(args.contextData, {
   // Step 4: Custom authorization (ownership check)
   .custom(async (ctx) => {
     const isOwner = ctx.user.P.uuid === ctx.data.userId;
-    const isAdmin = args.hasRole(ctx.user, "admin");
+    const isAdmin = _.hasRole(ctx.user, "admin");
 
     if (!isOwner && !isAdmin) {
-      throw args.errors.Forbidden("Can only update own profile");
+      throw _.errors.Forbidden("Can only update own profile");
     }
   })
 
@@ -178,8 +178,8 @@ const complexResult = await args.createPipeline(args.contextData, {
 
     const updatedUser = result.records[0]?.get("u");
 
-    return args.responses.ok({
-      user: args.formatters.vertex(updatedUser),
+    return _.responses.ok({
+      user: _.formatters.vertex(updatedUser),
       message: "Profile updated successfully"
     });
   });

@@ -7,12 +7,12 @@
         description: Enqueues background job to create a file in Shopify when a new ShopifyFile is added.
         body:
           '''
-const { tableVertexLabel, operation, elementId, data, result, fromWebhook, payload } = args.contextData;
+const { tableVertexLabel, operation, elementId, data, result, fromWebhook, payload } = c;
 
-const shop = args.contextData.shop;
+const shop = c.shop;
 if (!shop) { console.log('shopifyFileAfterCreate: shop not available in contextData'); return; }
 
-const helpers = await args.executeNamedServerFunction(
+const helpers = await s(
   { functionName: 'shopifyQueueHelpers', contextData: {} },
   { functionLookupSubDomain: 'decodefile' }
 );
@@ -22,7 +22,7 @@ const queueName = 'processShopifyFileAfterCreate';
 
 if (fromWebhook && payload) {
   try {
-    const queue = helpers.result.data.createShopifyQueue(args, queueName);
+    const queue = helpers.result.data.createShopifyQueue(_, queueName);
     await helpers.result.data.addShopifyJob(queue, queueName, { shop, payload, fromWebhook: true });
     await queue.close();
     console.log('shopifyFileAfterCreate: webhook job enqueued for', shop);
@@ -40,7 +40,7 @@ const formData = vertex?.P || {};
 if (formData.id) return;
 
 try {
-  const queue = helpers.result.data.createShopifyQueue(args, queueName);
+  const queue = helpers.result.data.createShopifyQueue(_, queueName);
   const job = await helpers.result.data.addShopifyJob(queue, queueName, {
     shop,
     tableVertexLabel,
@@ -52,12 +52,12 @@ try {
   await queue.close();
   const jobId = job?.id;
   if (elementId && jobId) {
-    await args.session.run(
+    await _.session.run(
       `MATCH (n:ShopifyFile) WHERE elementId(n) = $elementId SET n.syncStatus = $status, n.syncJobId = $jobId, n.updatedAt = datetime()`,
       { elementId, status: 'queued', jobId }
     );
   }
-  const r = args.contextData?.result;
+  const r = c?.result;
   if (r?.data?.P && typeof r.data.P === 'object') {
     r.data.P.syncStatus = 'queued';
     if (jobId) r.data.P.syncJobId = jobId;

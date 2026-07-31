@@ -7,7 +7,7 @@
         description: Update the lastSelected timestamp for a YouTube ownership
         body:
           '''
-const { ownershipId } = args.contextData;
+const { ownershipId } = c;
 
 if (!ownershipId) {
   return {
@@ -17,7 +17,7 @@ if (!ownershipId) {
 }
 
 // Get current authenticated user from session
-const user = await args.getUserFromSession();
+const user = await _.getUserFromSession();
 if (!user) {
   return {
     success: false,
@@ -26,7 +26,7 @@ if (!user) {
 }
 
 // Verify ownership belongs to user and update lastSelected
-const result = await args.session.run(`
+const result = await _.session.run(`
   MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
   SET o.lastSelected = datetime()
   RETURN o

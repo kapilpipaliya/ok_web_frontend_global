@@ -28,12 +28,12 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.lg};
+  padding: ${t.var.spacing.lg};
   max-width: 100%;
   margin: 0 auto;
 
   @media (max-width: 768px) {
-    padding: ${args.theme.var.spacing.md};
+    padding: ${t.var.spacing.md};
   }
 }`;
 '''
@@ -41,7 +41,7 @@ return `._id {
         fns:
           '''
 // State management
-const [store, setStore] = args.createStore({
+const [store, setStore] = _.createStore({
   contacts: [],
   usernames: [],
   countries: [],
@@ -75,19 +75,19 @@ const [store, setStore] = args.createStore({
 // Execute server function helper
 const executeFunction = async (functionName, contextData) => {
   try {
-    const result = await args.executeNamedServerFunction({
+    const result = await s({
       functionName,
       contextData
     });
 
     if (result.error) {
-      args.showErrorToast(result.error);
+      _.showErrorToast(result.error);
       return null;
     }
 
     return result.result;
   } catch (error) {
-    args.showErrorToast(error.message || "An error occurred");
+    _.showErrorToast(error.message || "An error occurred");
     return null;
   }
 };
@@ -269,7 +269,7 @@ const getVisiblePages = () => {
 // Show assign modal
 const showAssignModal = () => {
   if (store.selectedContacts.length === 0) {
-    args.showWarningToast("Please select at least one contact");
+    _.showWarningToast("Please select at least one contact");
     return;
   }
   setStore('showAssignModal', true);
@@ -285,7 +285,7 @@ const hideAssignModal = () => {
 // Assign contacts to user
 const assignContacts = async () => {
   if (!store.assignUsername.trim()) {
-    args.showWarningToast("Please enter a username");
+    _.showWarningToast("Please enter a username");
     return;
   }
 
@@ -299,7 +299,7 @@ const assignContacts = async () => {
   setStore('assignLoading', false);
 
   if (result?.success) {
-    args.showSuccessToast(result.message || "Contacts assigned successfully");
+    _.showSuccessToast(result.message || "Contacts assigned successfully");
     hideAssignModal();
     clearSelection();
     await loadContacts(store.currentPage);
@@ -330,9 +330,9 @@ const toggleContactField = async (contactId, field, currentValue) => {
 
 // Delete contact
 const handleDeleteContact = async (contactId, contactName) => {
-  const rbConfirm = args.contextData?.confirmContext?.rbConfirm;
+  const rbConfirm = c?.confirmContext?.rbConfirm;
   if (!rbConfirm) {
-    args.showErrorToast("Confirmation dialog not available");
+    _.showErrorToast("Confirmation dialog not available");
     return;
   }
 
@@ -353,7 +353,7 @@ const handleDeleteContact = async (contactId, contactName) => {
   });
 
   if (result?.success) {
-    args.showSuccessToast(result.message || "Contact deleted successfully");
+    _.showSuccessToast(result.message || "Contact deleted successfully");
     await loadContacts(store.currentPage);
   }
 };
@@ -401,11 +401,11 @@ const hideContactModal = () => {
 // Save contact (create or update)
 const saveContact = async () => {
   if (!store.editingContact?.name?.trim()) {
-    args.showWarningToast("Name is required");
+    _.showWarningToast("Name is required");
     return;
   }
   if (!store.editingContact?.phoneNumber?.trim()) {
-    args.showWarningToast("Phone number is required");
+    _.showWarningToast("Phone number is required");
     return;
   }
 
@@ -429,7 +429,7 @@ const saveContact = async () => {
   const result = await executeFunction(functionName, payload);
 
   if (result?.success) {
-    args.showSuccessToast(result.message || (isEdit ? "Contact updated successfully" : "Contact created successfully"));
+    _.showSuccessToast(result.message || (isEdit ? "Contact updated successfully" : "Contact created successfully"));
 
     if (isEdit) {
       // Update contact in store
@@ -454,7 +454,7 @@ const saveContact = async () => {
 // Export PDF
 const exportPDF = () => {
   if (store.selectedContacts.length === 0) {
-    args.showWarningToast("Please select at least one contact to export");
+    _.showWarningToast("Please select at least one contact to export");
     return;
   }
 
@@ -484,7 +484,7 @@ const exportPDF = () => {
   link.click();
   document.body.removeChild(link);
 
-  args.showSuccessToast("Contacts exported successfully");
+  _.showSuccessToast("Contacts exported successfully");
 };
 
 // Initialize
@@ -529,7 +529,7 @@ return {
           '''
 return {
   as: "div",
-  onMount: args.fns.initialize
+  onMount: f.initialize
 };
 '''
       }
@@ -544,8 +544,8 @@ return `._id {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: ${args.theme.var.spacing.lg};
-  gap: ${args.theme.var.spacing.md};
+  margin-bottom: ${t.var.spacing.lg};
+  gap: ${t.var.spacing.md};
   flex-wrap: wrap;
 
   @media (max-width: 768px) {
@@ -586,8 +586,8 @@ return {
 return `._id {
   font-size: 1.5rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 ${args.theme.var.spacing.xs} 0;
+  color: ${t.var.color.text};
+  margin: 0 0 ${t.var.spacing.xs} 0;
 }`;
 '''
         displayOrder: 1
@@ -610,7 +610,7 @@ return {
 return `._id {
   display: flex;
   align-items: center;
-  gap: ${args.theme.var.spacing.md};
+  gap: ${t.var.spacing.md};
 }`;
 '''
         displayOrder: 2
@@ -619,7 +619,7 @@ return `._id {
           '''
 return {
   as: "div",
-  hide: () => args.fns.store.loading
+  hide: () => f.store.loading
 };
 '''
       }
@@ -632,7 +632,7 @@ return {
           '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0;
 }`;
 '''
@@ -640,9 +640,9 @@ return `._id {
         componentName: Html
         props:
           '''
-const totalCount = args.fns.store.totalCount;
-const currentPage = args.fns.store.currentPage;
-const pageSize = args.fns.store.pageSize;
+const totalCount = f.store.totalCount;
+const currentPage = f.store.currentPage;
+const pageSize = f.store.pageSize;
 const startIndex = (currentPage - 1) * pageSize + 1;
 const endIndex = Math.min(currentPage * pageSize, totalCount);
 
@@ -660,20 +660,20 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.sm};
-  background: ${args.theme.var.color.primary};
+  padding: ${t.var.spacing.xs} ${t.var.spacing.sm};
+  background: ${t.var.color.primary};
   border: none;
-  border-radius: ${args.theme.var.borderRadius.sm};
-  color: ${args.theme.var.color.primary_text};
+  border-radius: ${t.var.borderRadius.sm};
+  color: ${t.var.color.primary_text};
   font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
-  gap: ${args.theme.var.spacing.xs};
+  gap: ${t.var.spacing.xs};
 
   &:hover {
-    background: ${args.theme.var.color.primary_dark_200};
+    background: ${t.var.color.primary_dark_200};
   }
 }`;
 '''
@@ -683,7 +683,7 @@ return `._id {
           '''
 return {
   as: "button",
-  onClick: () => args.fns.loadContacts(args.fns.store.currentPage)
+  onClick: () => f.loadContacts(f.store.currentPage)
 };
 '''
       }
@@ -727,21 +727,21 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  background: ${args.theme.var.color.success};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  background: ${t.var.color.success};
   border: none;
-  border-radius: ${args.theme.var.borderRadius.sm};
-  color: ${args.theme.var.color.success_text};
+  border-radius: ${t.var.borderRadius.sm};
+  color: ${t.var.color.success_text};
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
-  gap: ${args.theme.var.spacing.xs};
+  gap: ${t.var.spacing.xs};
 
   &:hover {
-    background: ${args.theme.var.color.success_dark_200};
+    background: ${t.var.color.success_dark_200};
   }
 }`;
 '''
@@ -751,7 +751,7 @@ return `._id {
           '''
 return {
   as: "button",
-  onClick: args.fns.showAddModal
+  onClick: f.showAddModal
 };
 '''
       }
@@ -795,7 +795,7 @@ return {
         css:
           '''
 return `._id {
-  margin-bottom: ${args.theme.var.spacing.lg};
+  margin-bottom: ${t.var.spacing.lg};
 }`;
 '''
         displayOrder: 2
@@ -804,7 +804,7 @@ return `._id {
           '''
 return {
   as: "div",
-  hide: () => args.fns.store.loading || args.fns.store.error
+  hide: () => f.store.loading || f.store.error
 };
 '''
       }
@@ -817,8 +817,8 @@ return {
           '''
 return `._id {
   display: flex;
-  gap: ${args.theme.var.spacing.md};
-  margin-bottom: ${args.theme.var.spacing.md};
+  gap: ${t.var.spacing.md};
+  margin-bottom: ${t.var.spacing.md};
   flex-wrap: wrap;
 }`;
 '''
@@ -842,7 +842,7 @@ return `._id {
   flex: 1;
   min-width: 250px;
   display: flex;
-  gap: ${args.theme.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
 }`;
 '''
         displayOrder: 1
@@ -872,13 +872,13 @@ return `._id {
 return {
   type: "search",
   placeholder: "Search by name, phone, or country...",
-  value: args.fns.store.searchQuery,
+  value: f.store.searchQuery,
   onInput: (e) => {
-    args.fns.setStore('searchQuery', e.target.value);
+    f.setStore('searchQuery', e.target.value);
   },
   onKeyPress: (e) => {
     if (e.key === 'Enter') {
-      args.fns.handleSearch();
+      f.handleSearch();
     }
   }
 };
@@ -892,18 +892,18 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.md};
-  background: ${args.theme.var.color.primary};
+  padding: ${t.var.spacing.xs} ${t.var.spacing.md};
+  background: ${t.var.color.primary};
   border: none;
-  border-radius: ${args.theme.var.borderRadius.sm};
-  color: ${args.theme.var.color.primary_text};
+  border-radius: ${t.var.borderRadius.sm};
+  color: ${t.var.color.primary_text};
   font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
 
   &:hover {
-    background: ${args.theme.var.color.primary_dark_200};
+    background: ${t.var.color.primary_dark_200};
   }
 }`;
 '''
@@ -914,7 +914,7 @@ return `._id {
 return {
   as: "button",
   text: "Search",
-  onClick: args.fns.handleSearch
+  onClick: f.handleSearch
 };
 '''
       }
@@ -941,12 +941,12 @@ const pageSizeOptions = [
 ];
 
 return {
-  value: String(args.fns.store.pageSize),
+  value: String(f.store.pageSize),
   options: pageSizeOptions,
   placeholder: "Page size...",
   search: false,
   onChange: (value) => {
-    args.fns.handlePageSizeChange(parseInt(value));
+    f.handlePageSizeChange(parseInt(value));
   }
 };
 '''
@@ -969,19 +969,19 @@ return `._id {
 const usernameOptions = [
   { value: "", label: "All Contacts" },
   { value: "unassigned", label: "Unassigned Contacts" },
-  ...args.fns.store.usernames.map(username => ({
+  ...f.store.usernames.map(username => ({
     value: username,
     label: username
   }))
 ];
 
 return {
-  value: args.fns.store.filterUsername,
+  value: f.store.filterUsername,
   options: usernameOptions,
   placeholder: "Filter by user...",
   search: false,
   onChange: (value) => {
-    args.fns.handleFilterChange(value);
+    f.handleFilterChange(value);
   }
 };
 '''
@@ -1003,19 +1003,19 @@ return `._id {
           '''
 const countryOptions = [
   { value: "", label: "All Countries" },
-  ...args.fns.store.countries.map(country => ({
+  ...f.store.countries.map(country => ({
     value: country,
     label: country
   }))
 ];
 
 return {
-  value: args.fns.store.filterCountry,
+  value: f.store.filterCountry,
   options: countryOptions,
   placeholder: "Filter by country...",
   search: false,
   onChange: (value) => {
-    args.fns.handleCountryFilterChange(value);
+    f.handleCountryFilterChange(value);
   }
 };
 '''
@@ -1030,11 +1030,11 @@ return {
 return `._id {
   display: flex;
   align-items: center;
-  gap: ${args.theme.var.spacing.md};
-  padding: ${args.theme.var.spacing.md};
-  background: ${args.theme.var.color.primary_light_100};
-  border: 1px solid ${args.theme.var.color.primary_light_300};
-  border-radius: ${args.theme.var.borderRadius.md};
+  gap: ${t.var.spacing.md};
+  padding: ${t.var.spacing.md};
+  background: ${t.var.color.primary_light_100};
+  border: 1px solid ${t.var.color.primary_light_300};
+  border-radius: ${t.var.borderRadius.md};
   flex-wrap: wrap;
 }`;
 '''
@@ -1044,7 +1044,7 @@ return `._id {
           '''
 return {
   as: "div",
-  hide: () => args.fns.store.selectedContacts.length === 0
+  hide: () => f.store.selectedContacts.length === 0
 };
 '''
       }
@@ -1058,14 +1058,14 @@ return {
 return `._id {
   font-size: 0.875rem;
   font-weight: 600;
-  color: ${args.theme.var.color.primary_light_100_text};
+  color: ${t.var.color.primary_light_100_text};
 }`;
 '''
         displayOrder: 1
         componentName: Html
         props:
           '''
-const count = args.fns.store.selectedContacts.length;
+const count = f.store.selectedContacts.length;
 return {
   as: "span",
   text: `${count} contact${count === 1 ? '' : 's'} selected`
@@ -1080,17 +1080,17 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.sm};
+  padding: ${t.var.spacing.xs} ${t.var.spacing.sm};
   background: transparent;
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.sm};
-  color: ${args.theme.var.color.text};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.sm};
+  color: ${t.var.color.text};
   font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.background_dark_100};
+    background: ${t.var.color.background_dark_100};
   }
 }`;
 '''
@@ -1101,7 +1101,7 @@ return `._id {
 return {
   as: "button",
   text: "Select All",
-  onClick: args.fns.selectAllContacts
+  onClick: f.selectAllContacts
 };
 '''
       }
@@ -1113,17 +1113,17 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.sm};
+  padding: ${t.var.spacing.xs} ${t.var.spacing.sm};
   background: transparent;
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.sm};
-  color: ${args.theme.var.color.text};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.sm};
+  color: ${t.var.color.text};
   font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.background_dark_100};
+    background: ${t.var.color.background_dark_100};
   }
 }`;
 '''
@@ -1134,7 +1134,7 @@ return `._id {
 return {
   as: "button",
   text: "Select First X",
-  onClick: args.fns.showSelectXModal
+  onClick: f.showSelectXModal
 };
 '''
       }
@@ -1146,17 +1146,17 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.sm};
+  padding: ${t.var.spacing.xs} ${t.var.spacing.sm};
   background: transparent;
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.sm};
-  color: ${args.theme.var.color.text};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.sm};
+  color: ${t.var.color.text};
   font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.background_dark_100};
+    background: ${t.var.color.background_dark_100};
   }
 }`;
 '''
@@ -1167,7 +1167,7 @@ return `._id {
 return {
   as: "button",
   text: "Clear",
-  onClick: args.fns.clearSelection
+  onClick: f.clearSelection
 };
 '''
       }
@@ -1179,17 +1179,17 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.sm};
-  background: ${args.theme.var.color.primary};
+  padding: ${t.var.spacing.xs} ${t.var.spacing.sm};
+  background: ${t.var.color.primary};
   border: none;
-  border-radius: ${args.theme.var.borderRadius.sm};
-  color: ${args.theme.var.color.primary_text};
+  border-radius: ${t.var.borderRadius.sm};
+  color: ${t.var.color.primary_text};
   font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.primary_dark_200};
+    background: ${t.var.color.primary_dark_200};
   }
 }`;
 '''
@@ -1200,7 +1200,7 @@ return `._id {
 return {
   as: "button",
   text: "Assign to User",
-  onClick: args.fns.showAssignModal
+  onClick: f.showAssignModal
 };
 '''
       }
@@ -1212,17 +1212,17 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.sm};
-  background: ${args.theme.var.color.info};
+  padding: ${t.var.spacing.xs} ${t.var.spacing.sm};
+  background: ${t.var.color.info};
   border: none;
-  border-radius: ${args.theme.var.borderRadius.sm};
-  color: ${args.theme.var.color.info_text};
+  border-radius: ${t.var.borderRadius.sm};
+  color: ${t.var.color.info_text};
   font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.info_dark_200};
+    background: ${t.var.color.info_dark_200};
   }
 }`;
 '''
@@ -1233,7 +1233,7 @@ return `._id {
 return {
   as: "button",
   text: "Export CSV",
-  onClick: args.fns.exportPDF
+  onClick: f.exportPDF
 };
 '''
       }
@@ -1246,8 +1246,8 @@ return {
           '''
 return `._id {
   text-align: center;
-  padding: ${args.theme.var.spacing.xl};
-  color: ${args.theme.var.color.text_light_500};
+  padding: ${t.var.spacing.xl};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
         displayOrder: 3
@@ -1257,7 +1257,7 @@ return `._id {
 return {
   as: "div",
   text: "Loading contacts...",
-  hide: () => !args.fns.store.loading
+  hide: () => !f.store.loading
 };
 '''
       }
@@ -1270,10 +1270,10 @@ return {
           '''
 return `._id {
   text-align: center;
-  padding: ${args.theme.var.spacing.xl};
-  color: ${args.theme.var.color.error_light_50_text};
-  background: ${args.theme.var.color.error_light_50};
-  border-radius: ${args.theme.var.borderRadius.md};
+  padding: ${t.var.spacing.xl};
+  color: ${t.var.color.error_light_50_text};
+  background: ${t.var.color.error_light_50};
+  border-radius: ${t.var.borderRadius.md};
 }`;
 '''
         displayOrder: 4
@@ -1282,8 +1282,8 @@ return `._id {
           '''
 return {
   as: "div",
-  text: args.fns.store.error || "An error occurred",
-  hide: () => !args.fns.store.error
+  text: f.store.error || "An error occurred",
+  hide: () => !f.store.error
 };
 '''
       }
@@ -1295,9 +1295,9 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.lg};
+  background: ${t.var.color.background};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.lg};
   overflow: hidden;
 }`;
 '''
@@ -1307,7 +1307,7 @@ return `._id {
           '''
 return {
   as: "div",
-  hide: () => args.fns.store.loading || args.fns.store.error
+  hide: () => f.store.loading || f.store.error
 };
 '''
       }
@@ -1361,8 +1361,8 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.background_dark_100};
-  border-bottom: 2px solid ${args.theme.var.color.border};
+  background: ${t.var.color.background_dark_100};
+  border-bottom: 2px solid ${t.var.color.border};
 }`;
 '''
         displayOrder: 1
@@ -1396,10 +1396,10 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   text-align: left;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   width: 40px;
 }`;
 '''
@@ -1429,8 +1429,8 @@ return `._id {
         componentName: Html
         props:
           '''
-const contacts = args.fns.store.contacts;
-const allSelected = contacts.length > 0 && contacts.every(cd => args.fns.store.selectedContacts.includes(cd.contact?.id));
+const contacts = f.store.contacts;
+const allSelected = contacts.length > 0 && contacts.every(cd => f.store.selectedContacts.includes(cd.contact?.id));
 
 return {
   as: "input",
@@ -1438,9 +1438,9 @@ return {
   checked: allSelected,
   onChange: () => {
     if (allSelected) {
-      args.fns.clearSelection();
+      f.clearSelection();
     } else {
-      args.fns.selectAllContacts();
+      f.selectAllContacts();
     }
   }
 };
@@ -1454,10 +1454,10 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   text-align: center;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   min-width: 140px;
 }`;
 '''
@@ -1479,16 +1479,16 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   text-align: left;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   cursor: pointer;
   user-select: none;
   min-width: 150px;
 
   &:hover {
-    background: ${args.theme.var.color.background_dark_200};
+    background: ${t.var.color.background_dark_200};
   }
 }`;
 '''
@@ -1498,7 +1498,7 @@ return `._id {
           '''
 return {
   as: "th",
-  onClick: () => args.fns.handleSort('name')
+  onClick: () => f.handleSort('name')
 };
 '''
       }
@@ -1511,8 +1511,8 @@ return {
         componentName: Html
         props:
           '''
-const sortIcon = args.fns.store.sortBy === 'name'
-  ? (args.fns.store.sortOrder === 'asc' ? ' ↑' : ' ↓')
+const sortIcon = f.store.sortBy === 'name'
+  ? (f.store.sortOrder === 'asc' ? ' ↑' : ' ↓')
   : '';
 return {
   as: "span",
@@ -1528,16 +1528,16 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   text-align: left;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   cursor: pointer;
   user-select: none;
   min-width: 130px;
 
   &:hover {
-    background: ${args.theme.var.color.background_dark_200};
+    background: ${t.var.color.background_dark_200};
   }
 }`;
 '''
@@ -1547,7 +1547,7 @@ return `._id {
           '''
 return {
   as: "th",
-  onClick: () => args.fns.handleSort('phoneNumber')
+  onClick: () => f.handleSort('phoneNumber')
 };
 '''
       }
@@ -1560,8 +1560,8 @@ return {
         componentName: Html
         props:
           '''
-const sortIcon = args.fns.store.sortBy === 'phoneNumber'
-  ? (args.fns.store.sortOrder === 'asc' ? ' ↑' : ' ↓')
+const sortIcon = f.store.sortBy === 'phoneNumber'
+  ? (f.store.sortOrder === 'asc' ? ' ↑' : ' ↓')
   : '';
 return {
   as: "span",
@@ -1577,16 +1577,16 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   text-align: left;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   cursor: pointer;
   user-select: none;
   min-width: 100px;
 
   &:hover {
-    background: ${args.theme.var.color.background_dark_200};
+    background: ${t.var.color.background_dark_200};
   }
 }`;
 '''
@@ -1596,7 +1596,7 @@ return `._id {
           '''
 return {
   as: "th",
-  onClick: () => args.fns.handleSort('country')
+  onClick: () => f.handleSort('country')
 };
 '''
       }
@@ -1609,8 +1609,8 @@ return {
         componentName: Html
         props:
           '''
-const sortIcon = args.fns.store.sortBy === 'country'
-  ? (args.fns.store.sortOrder === 'asc' ? ' ↑' : ' ↓')
+const sortIcon = f.store.sortBy === 'country'
+  ? (f.store.sortOrder === 'asc' ? ' ↑' : ' ↓')
   : '';
 return {
   as: "span",
@@ -1626,16 +1626,16 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   text-align: center;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   cursor: pointer;
   user-select: none;
   min-width: 80px;
 
   &:hover {
-    background: ${args.theme.var.color.background_dark_200};
+    background: ${t.var.color.background_dark_200};
   }
 }`;
 '''
@@ -1645,7 +1645,7 @@ return `._id {
           '''
 return {
   as: "th",
-  onClick: () => args.fns.handleSort('called')
+  onClick: () => f.handleSort('called')
 };
 '''
       }
@@ -1658,8 +1658,8 @@ return {
         componentName: Html
         props:
           '''
-const sortIcon = args.fns.store.sortBy === 'called'
-  ? (args.fns.store.sortOrder === 'asc' ? ' ↑' : ' ↓')
+const sortIcon = f.store.sortBy === 'called'
+  ? (f.store.sortOrder === 'asc' ? ' ↑' : ' ↓')
   : '';
 return {
   as: "span",
@@ -1675,16 +1675,16 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   text-align: center;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   cursor: pointer;
   user-select: none;
   min-width: 100px;
 
   &:hover {
-    background: ${args.theme.var.color.background_dark_200};
+    background: ${t.var.color.background_dark_200};
   }
 }`;
 '''
@@ -1694,7 +1694,7 @@ return `._id {
           '''
 return {
   as: "th",
-  onClick: () => args.fns.handleSort('isUnavailable')
+  onClick: () => f.handleSort('isUnavailable')
 };
 '''
       }
@@ -1707,8 +1707,8 @@ return {
         componentName: Html
         props:
           '''
-const sortIcon = args.fns.store.sortBy === 'isUnavailable'
-  ? (args.fns.store.sortOrder === 'asc' ? ' ↑' : ' ↓')
+const sortIcon = f.store.sortBy === 'isUnavailable'
+  ? (f.store.sortOrder === 'asc' ? ' ↑' : ' ↓')
   : '';
 return {
   as: "span",
@@ -1724,16 +1724,16 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   text-align: center;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   cursor: pointer;
   user-select: none;
   min-width: 110px;
 
   &:hover {
-    background: ${args.theme.var.color.background_dark_200};
+    background: ${t.var.color.background_dark_200};
   }
 }`;
 '''
@@ -1743,7 +1743,7 @@ return `._id {
           '''
 return {
   as: "th",
-  onClick: () => args.fns.handleSort('notInterested')
+  onClick: () => f.handleSort('notInterested')
 };
 '''
       }
@@ -1756,8 +1756,8 @@ return {
         componentName: Html
         props:
           '''
-const sortIcon = args.fns.store.sortBy === 'notInterested'
-  ? (args.fns.store.sortOrder === 'asc' ? ' ↑' : ' ↓')
+const sortIcon = f.store.sortBy === 'notInterested'
+  ? (f.store.sortOrder === 'asc' ? ' ↑' : ' ↓')
   : '';
 return {
   as: "span",
@@ -1773,10 +1773,10 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   text-align: left;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   min-width: 120px;
 }`;
 '''
@@ -1798,10 +1798,10 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   text-align: left;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   min-width: 150px;
 }`;
 '''
@@ -1828,7 +1828,7 @@ return {
           '''
 return {
   as: "tbody",
-  data: args.fns.store.contacts
+  data: f.store.contacts
 };
 '''
       }
@@ -1839,19 +1839,19 @@ return {
       P: {
         css:
           '''
-const contactdata = args.contextData.contactdata;
-const isSelected = args.fns.store.selectedContacts.includes(contactdata.contact?.id);
+const contactdata = c.contactdata;
+const isSelected = f.store.selectedContacts.includes(contactdata.contact?.id);
 
 return `._id {
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  border-bottom: 1px solid ${t.var.color.border};
   transition: background 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.background_dark_100};
+    background: ${t.var.color.background_dark_100};
   }
 
   ${isSelected ? `
-    background: ${args.theme.var.color.primary_light_100} !important;
+    background: ${t.var.color.primary_light_100} !important;
   ` : ''}
 }`;
 '''
@@ -1859,8 +1859,8 @@ return `._id {
         componentName: Html
         props:
           '''
-const contactdata = args.contextData.contactdata;
-const isSelected = args.fns.store.selectedContacts.includes(contactdata.contact?.id);
+const contactdata = c.contactdata;
+const isSelected = f.store.selectedContacts.includes(contactdata.contact?.id);
 
 return {
   as: "tr",
@@ -1876,7 +1876,7 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
 }`;
 '''
         displayOrder: 1
@@ -1905,15 +1905,15 @@ return `._id {
         componentName: Html
         props:
           '''
-const contactdata = args.contextData.contactdata;
+const contactdata = c.contactdata;
 const contactId = contactdata.contact?.id;
-const isSelected = args.fns.store.selectedContacts.includes(contactId);
+const isSelected = f.store.selectedContacts.includes(contactId);
 
 return {
   as: "input",
   type: "checkbox",
   checked: isSelected,
-  onChange: () => args.fns.toggleContactSelection(contactId)
+  onChange: () => f.toggleContactSelection(contactId)
 };
 '''
       }
@@ -1925,7 +1925,7 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
 }`;
 '''
         displayOrder: 2
@@ -1946,7 +1946,7 @@ return {
           '''
 return `._id {
   display: flex;
-  gap: ${args.theme.var.spacing.xs};
+  gap: ${t.var.spacing.xs};
   justify-content: center;
 }`;
 '''
@@ -1967,11 +1967,11 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.xs};
-  background: ${args.theme.var.color.info};
+  padding: ${t.var.spacing.xs};
+  background: ${t.var.color.info};
   border: none;
-  border-radius: ${args.theme.var.borderRadius.sm};
-  color: ${args.theme.var.color.info_text};
+  border-radius: ${t.var.borderRadius.sm};
+  color: ${t.var.color.info_text};
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -1979,7 +1979,7 @@ return `._id {
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.info_dark_200};
+    background: ${t.var.color.info_dark_200};
   }
 }`;
 '''
@@ -1987,12 +1987,12 @@ return `._id {
         componentName: Html
         props:
           '''
-const contactdata = args.contextData.contactdata;
+const contactdata = c.contactdata;
 
 return {
   as: "button",
   title: "Edit Contact",
-  onClick: () => args.fns.showEditModal(contactdata)
+  onClick: () => f.showEditModal(contactdata)
 };
 '''
       }
@@ -2021,11 +2021,11 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.xs};
-  background: ${args.theme.var.color.error};
+  padding: ${t.var.spacing.xs};
+  background: ${t.var.color.error};
   border: none;
-  border-radius: ${args.theme.var.borderRadius.sm};
-  color: ${args.theme.var.color.error_text};
+  border-radius: ${t.var.borderRadius.sm};
+  color: ${t.var.color.error_text};
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -2033,7 +2033,7 @@ return `._id {
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.error_dark_200};
+    background: ${t.var.color.error_dark_200};
   }
 }`;
 '''
@@ -2041,14 +2041,14 @@ return `._id {
         componentName: Html
         props:
           '''
-const contactdata = args.contextData.contactdata;
+const contactdata = c.contactdata;
 const contactId = contactdata.contact?.id;
 const contactName = contactdata.contact?.P?.name || 'Unknown';
 
 return {
   as: "button",
   title: "Delete Contact",
-  onClick: () => args.fns.handleDeleteContact(contactId, contactName)
+  onClick: () => f.handleDeleteContact(contactId, contactName)
 };
 '''
       }
@@ -2077,15 +2077,15 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
-  color: ${args.theme.var.color.text};
+  padding: ${t.var.spacing.md};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 3
         componentName: Html
         props:
           '''
-const contactdata = args.contextData.contactdata;
+const contactdata = c.contactdata;
 return {
   as: "td",
   text: contactdata.contact?.P?.name || 'N/A'
@@ -2100,15 +2100,15 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
-  color: ${args.theme.var.color.text};
+  padding: ${t.var.spacing.md};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 4
         componentName: Html
         props:
           '''
-const contactdata = args.contextData.contactdata;
+const contactdata = c.contactdata;
 return {
   as: "td",
   text: contactdata.contact?.P?.phoneNumber || 'N/A'
@@ -2123,15 +2123,15 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
-  color: ${args.theme.var.color.text};
+  padding: ${t.var.spacing.md};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 5
         componentName: Html
         props:
           '''
-const contactdata = args.contextData.contactdata;
+const contactdata = c.contactdata;
 return {
   as: "td",
   text: contactdata.contact?.P?.country || 'N/A'
@@ -2146,7 +2146,7 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   text-align: center;
 }`;
 '''
@@ -2176,7 +2176,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const contactdata = args.contextData.contactdata;
+const contactdata = c.contactdata;
 const contactId = contactdata.contact?.id;
 const called = contactdata.contact?.P?.called || false;
 
@@ -2184,7 +2184,7 @@ return {
   as: "input",
   type: "checkbox",
   checked: called,
-  onChange: () => args.fns.toggleContactField(contactId, 'called', called)
+  onChange: () => f.toggleContactField(contactId, 'called', called)
 };
 '''
       }
@@ -2196,7 +2196,7 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   text-align: center;
 }`;
 '''
@@ -2226,7 +2226,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const contactdata = args.contextData.contactdata;
+const contactdata = c.contactdata;
 const contactId = contactdata.contact?.id;
 const isUnavailable = contactdata.contact?.P?.isUnavailable || false;
 
@@ -2234,7 +2234,7 @@ return {
   as: "input",
   type: "checkbox",
   checked: isUnavailable,
-  onChange: () => args.fns.toggleContactField(contactId, 'isUnavailable', isUnavailable)
+  onChange: () => f.toggleContactField(contactId, 'isUnavailable', isUnavailable)
 };
 '''
       }
@@ -2246,7 +2246,7 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   text-align: center;
 }`;
 '''
@@ -2276,7 +2276,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const contactdata = args.contextData.contactdata;
+const contactdata = c.contactdata;
 const contactId = contactdata.contact?.id;
 const notInterested = contactdata.contact?.P?.notInterested || false;
 
@@ -2284,7 +2284,7 @@ return {
   as: "input",
   type: "checkbox",
   checked: notInterested,
-  onChange: () => args.fns.toggleContactField(contactId, 'notInterested', notInterested)
+  onChange: () => f.toggleContactField(contactId, 'notInterested', notInterested)
 };
 '''
       }
@@ -2296,15 +2296,15 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
-  color: ${args.theme.var.color.text};
+  padding: ${t.var.spacing.md};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 9
         componentName: Html
         props:
           '''
-const contactdata = args.contextData.contactdata;
+const contactdata = c.contactdata;
 const users = contactdata.users || [];
 const usernames = users.map(u => u?.P?.username).filter(Boolean).join(', ');
 
@@ -2322,8 +2322,8 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
-  color: ${args.theme.var.color.text};
+  padding: ${t.var.spacing.md};
+  color: ${t.var.color.text};
   max-width: 200px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2334,7 +2334,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const contactdata = args.contextData.contactdata;
+const contactdata = c.contactdata;
 return {
   as: "td",
   text: contactdata.contact?.P?.remark || '-',
@@ -2353,11 +2353,11 @@ return `._id {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: ${args.theme.var.spacing.lg};
-  border-top: 1px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background};
+  padding: ${t.var.spacing.lg};
+  border-top: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background};
   flex-wrap: wrap;
-  gap: ${args.theme.var.spacing.md};
+  gap: ${t.var.spacing.md};
 }`;
 '''
         displayOrder: 6
@@ -2366,7 +2366,7 @@ return `._id {
           '''
 return {
   as: "div",
-  hide: () => args.fns.store.loading || args.fns.store.error
+  hide: () => f.store.loading || f.store.error
 };
 '''
       }
@@ -2379,7 +2379,7 @@ return {
           '''
 return `._id {
   display: flex;
-  gap: ${args.theme.var.spacing.lg};
+  gap: ${t.var.spacing.lg};
   flex-wrap: wrap;
 }`;
 '''
@@ -2401,14 +2401,14 @@ return {
           '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
         displayOrder: 1
         componentName: Html
         props:
           '''
-const stats = args.fns.store.stats;
+const stats = f.store.stats;
 return {
   as: "div",
   text: `Total Called: ${stats.totalCalled}`
@@ -2424,14 +2424,14 @@ return {
           '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
         displayOrder: 2
         componentName: Html
         props:
           '''
-const stats = args.fns.store.stats;
+const stats = f.store.stats;
 return {
   as: "div",
   text: `Total Joined: ${stats.totalJoined}`
@@ -2447,7 +2447,7 @@ return {
           '''
 return `._id {
   display: flex;
-  gap: ${args.theme.var.spacing.xs};
+  gap: ${t.var.spacing.xs};
   align-items: center;
 }`;
 '''
@@ -2457,7 +2457,7 @@ return `._id {
           '''
 return {
   as: "div",
-  hide: () => args.fns.store.totalPages <= 1
+  hide: () => f.store.totalPages <= 1
 };
 '''
       }
@@ -2468,23 +2468,23 @@ return {
       P: {
         css:
           '''
-const currentPage = args.fns.store.currentPage;
+const currentPage = f.store.currentPage;
 const isDisabled = currentPage <= 1;
 
 return `._id {
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  background: ${args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.sm};
-  color: ${args.theme.var.color.text};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  background: ${t.var.color.background};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.sm};
+  color: ${t.var.color.text};
   font-size: 0.875rem;
   cursor: ${isDisabled ? 'not-allowed' : 'pointer'};
   opacity: ${isDisabled ? '0.5' : '1'};
   transition: all 0.2s ease;
 
   &:hover:not(:disabled) {
-    background: ${args.theme.var.color.background_dark_100};
-    border-color: ${args.theme.var.color.primary};
+    background: ${t.var.color.background_dark_100};
+    border-color: ${t.var.color.primary};
   }
 }`;
 '''
@@ -2492,13 +2492,13 @@ return `._id {
         componentName: Html
         props:
           '''
-const currentPage = args.fns.store.currentPage;
+const currentPage = f.store.currentPage;
 const isDisabled = currentPage <= 1;
 
 return {
   as: "button",
   text: "← Previous",
-  onClick: args.fns.goToPreviousPage,
+  onClick: f.goToPreviousPage,
   disabled: isDisabled
 };
 '''
@@ -2513,7 +2513,7 @@ return {
           '''
 return `._id {
   display: flex;
-  gap: ${args.theme.var.spacing.xs};
+  gap: ${t.var.spacing.xs};
 }`;
 '''
         loop: true
@@ -2523,7 +2523,7 @@ return `._id {
           '''
 return {
   as: "div",
-  data: args.fns.getVisiblePages()
+  data: f.getVisiblePages()
 };
 '''
       }
@@ -2534,18 +2534,18 @@ return {
       P: {
         css:
           '''
-const pageNum = args.contextData.pageNum;
-const currentPage = args.fns.store.currentPage;
+const pageNum = c.pageNum;
+const currentPage = f.store.currentPage;
 const isEllipsis = pageNum === '...';
 const isActive = pageNum === currentPage;
 
 return `._id {
   min-width: 40px;
-  padding: ${args.theme.var.spacing.sm};
-  background: ${isActive ? args.theme.var.color.primary : args.theme.var.color.background};
-  border: 1px solid ${isActive ? args.theme.var.color.primary : args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.sm};
-  color: ${isActive ? args.theme.var.color.primary_text : args.theme.var.color.text};
+  padding: ${t.var.spacing.sm};
+  background: ${isActive ? t.var.color.primary : t.var.color.background};
+  border: 1px solid ${isActive ? t.var.color.primary : t.var.color.border};
+  border-radius: ${t.var.borderRadius.sm};
+  color: ${isActive ? t.var.color.primary_text : t.var.color.text};
   font-size: 0.875rem;
   font-weight: ${isActive ? '700' : '400'};
   cursor: ${isEllipsis || isActive ? 'default' : 'pointer'};
@@ -2554,8 +2554,8 @@ return `._id {
 
   ${!isEllipsis && !isActive ? `
     &:hover {
-      background: ${args.theme.var.color.background_dark_100};
-      border-color: ${args.theme.var.color.primary};
+      background: ${t.var.color.background_dark_100};
+      border-color: ${t.var.color.primary};
     }
   ` : ''}
 }`;
@@ -2564,15 +2564,15 @@ return `._id {
         componentName: Html
         props:
           '''
-const pageNum = args.contextData.pageNum;
-const currentPage = args.fns.store.currentPage;
+const pageNum = c.pageNum;
+const currentPage = f.store.currentPage;
 const isEllipsis = pageNum === '...';
 const isActive = pageNum === currentPage;
 
 return {
   as: isEllipsis ? "span" : "button",
   text: pageNum,
-  onClick: isEllipsis ? undefined : () => args.fns.goToPage(pageNum),
+  onClick: isEllipsis ? undefined : () => f.goToPage(pageNum),
   disabled: isActive
 };
 '''
@@ -2584,24 +2584,24 @@ return {
       P: {
         css:
           '''
-const currentPage = args.fns.store.currentPage;
-const totalPages = args.fns.store.totalPages;
+const currentPage = f.store.currentPage;
+const totalPages = f.store.totalPages;
 const isDisabled = currentPage >= totalPages;
 
 return `._id {
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  background: ${args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.sm};
-  color: ${args.theme.var.color.text};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  background: ${t.var.color.background};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.sm};
+  color: ${t.var.color.text};
   font-size: 0.875rem;
   cursor: ${isDisabled ? 'not-allowed' : 'pointer'};
   opacity: ${isDisabled ? '0.5' : '1'};
   transition: all 0.2s ease;
 
   &:hover:not(:disabled) {
-    background: ${args.theme.var.color.background_dark_100};
-    border-color: ${args.theme.var.color.primary};
+    background: ${t.var.color.background_dark_100};
+    border-color: ${t.var.color.primary};
   }
 }`;
 '''
@@ -2609,14 +2609,14 @@ return `._id {
         componentName: Html
         props:
           '''
-const currentPage = args.fns.store.currentPage;
-const totalPages = args.fns.store.totalPages;
+const currentPage = f.store.currentPage;
+const totalPages = f.store.totalPages;
 const isDisabled = currentPage >= totalPages;
 
 return {
   as: "button",
   text: "Next →",
-  onClick: args.fns.goToNextPage,
+  onClick: f.goToNextPage,
   disabled: isDisabled
 };
 '''
@@ -2630,19 +2630,19 @@ return {
           '''
 return `._id {
   text-align: center;
-  padding: ${args.theme.var.spacing.xl};
-  color: ${args.theme.var.color.text_light_500};
+  padding: ${t.var.spacing.xl};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
         displayOrder: 7
         componentName: Html
         props:
           '''
-const contacts = args.fns.store.contacts;
+const contacts = f.store.contacts;
 return {
   as: "div",
   text: "No contacts found",
-  hide: () => contacts.length > 0 || args.fns.store.loading || args.fns.store.error
+  hide: () => contacts.length > 0 || f.store.loading || f.store.error
 };
 '''
       }
@@ -2664,7 +2664,7 @@ return `._id {
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
 }`;
 '''
         displayOrder: 8
@@ -2673,10 +2673,10 @@ return `._id {
           '''
 return {
   as: "div",
-  hide: () => !args.fns.store.showAssignModal,
+  hide: () => !f.store.showAssignModal,
   onClick: (e) => {
     if (e.target === e.currentTarget) {
-      args.fns.hideAssignModal();
+      f.hideAssignModal();
     }
   }
 };
@@ -2690,9 +2690,9 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.background};
-  border-radius: ${args.theme.var.borderRadius.lg};
-  padding: ${args.theme.var.spacing.lg};
+  background: ${t.var.color.background};
+  border-radius: ${t.var.borderRadius.lg};
+  padding: ${t.var.spacing.lg};
   max-width: 500px;
   width: 100%;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
@@ -2717,8 +2717,8 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 ${args.theme.var.spacing.md} 0;
+  color: ${t.var.color.text};
+  margin: 0 0 ${t.var.spacing.md} 0;
 }`;
 '''
         displayOrder: 1
@@ -2739,7 +2739,7 @@ return {
         css:
           '''
 return `._id {
-  margin-bottom: ${args.theme.var.spacing.md};
+  margin-bottom: ${t.var.spacing.md};
 }`;
 '''
         displayOrder: 2
@@ -2749,9 +2749,9 @@ return `._id {
 return {
   label: "Username (3 or 6 digits)",
   placeholder: "Enter username...",
-  value: args.fns.store.assignUsername,
+  value: f.store.assignUsername,
   onInput: (e) => {
-    args.fns.setStore('assignUsername', e.target.value);
+    f.setStore('assignUsername', e.target.value);
   }
 };
 '''
@@ -2765,7 +2765,7 @@ return {
           '''
 return `._id {
   display: flex;
-  gap: ${args.theme.var.spacing.md};
+  gap: ${t.var.spacing.md};
   justify-content: flex-end;
 }`;
 '''
@@ -2786,17 +2786,17 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
   background: transparent;
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.sm};
-  color: ${args.theme.var.color.text};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.sm};
+  color: ${t.var.color.text};
   font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.background_dark_100};
+    background: ${t.var.color.background_dark_100};
   }
 }`;
 '''
@@ -2807,7 +2807,7 @@ return `._id {
 return {
   as: "button",
   text: "Cancel",
-  onClick: args.fns.hideAssignModal
+  onClick: f.hideAssignModal
 };
 '''
       }
@@ -2818,21 +2818,21 @@ return {
       P: {
         css:
           '''
-const loading = args.fns.store.assignLoading;
+const loading = f.store.assignLoading;
 
 return `._id {
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  background: ${args.theme.var.color.primary};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  background: ${t.var.color.primary};
   border: none;
-  border-radius: ${args.theme.var.borderRadius.sm};
-  color: ${args.theme.var.color.primary_text};
+  border-radius: ${t.var.borderRadius.sm};
+  color: ${t.var.color.primary_text};
   font-size: 0.875rem;
   cursor: ${loading ? 'not-allowed' : 'pointer'};
   opacity: ${loading ? '0.6' : '1'};
   transition: all 0.2s ease;
 
   &:hover:not(:disabled) {
-    background: ${args.theme.var.color.primary_dark_200};
+    background: ${t.var.color.primary_dark_200};
   }
 }`;
 '''
@@ -2840,12 +2840,12 @@ return `._id {
         componentName: Html
         props:
           '''
-const loading = args.fns.store.assignLoading;
+const loading = f.store.assignLoading;
 
 return {
   as: "button",
   text: loading ? "Assigning..." : "Assign",
-  onClick: args.fns.assignContacts,
+  onClick: f.assignContacts,
   disabled: loading
 };
 '''
@@ -2868,7 +2868,7 @@ return `._id {
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
 }`;
 '''
         displayOrder: 9
@@ -2877,10 +2877,10 @@ return `._id {
           '''
 return {
   as: "div",
-  hide: () => !args.fns.store.showSelectModal,
+  hide: () => !f.store.showSelectModal,
   onClick: (e) => {
     if (e.target === e.currentTarget) {
-      args.fns.hideSelectXModal();
+      f.hideSelectXModal();
     }
   }
 };
@@ -2894,9 +2894,9 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.background};
-  border-radius: ${args.theme.var.borderRadius.lg};
-  padding: ${args.theme.var.spacing.lg};
+  background: ${t.var.color.background};
+  border-radius: ${t.var.borderRadius.lg};
+  padding: ${t.var.spacing.lg};
   max-width: 400px;
   width: 100%;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
@@ -2921,8 +2921,8 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 ${args.theme.var.spacing.md} 0;
+  color: ${t.var.color.text};
+  margin: 0 0 ${t.var.spacing.md} 0;
 }`;
 '''
         displayOrder: 1
@@ -2943,7 +2943,7 @@ return {
         css:
           '''
 return `._id {
-  margin-bottom: ${args.theme.var.spacing.md};
+  margin-bottom: ${t.var.spacing.md};
 }`;
 '''
         displayOrder: 2
@@ -2954,11 +2954,11 @@ return {
   label: "Number of contacts",
   placeholder: "Enter number...",
   type: "number",
-  value: args.fns.store.selectCount,
+  value: f.store.selectCount,
   onInput: (e) => {
     const value = parseInt(e.target.value);
     if (!isNaN(value) && value > 0) {
-      args.fns.setStore('selectCount', value);
+      f.setStore('selectCount', value);
     }
   }
 };
@@ -2973,7 +2973,7 @@ return {
           '''
 return `._id {
   display: flex;
-  gap: ${args.theme.var.spacing.md};
+  gap: ${t.var.spacing.md};
   justify-content: flex-end;
 }`;
 '''
@@ -2994,17 +2994,17 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
   background: transparent;
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.sm};
-  color: ${args.theme.var.color.text};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.sm};
+  color: ${t.var.color.text};
   font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.background_dark_100};
+    background: ${t.var.color.background_dark_100};
   }
 }`;
 '''
@@ -3015,7 +3015,7 @@ return `._id {
 return {
   as: "button",
   text: "Cancel",
-  onClick: args.fns.hideSelectXModal
+  onClick: f.hideSelectXModal
 };
 '''
       }
@@ -3027,17 +3027,17 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  background: ${args.theme.var.color.primary};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  background: ${t.var.color.primary};
   border: none;
-  border-radius: ${args.theme.var.borderRadius.sm};
-  color: ${args.theme.var.color.primary_text};
+  border-radius: ${t.var.borderRadius.sm};
+  color: ${t.var.color.primary_text};
   font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.primary_dark_200};
+    background: ${t.var.color.primary_dark_200};
   }
 }`;
 '''
@@ -3049,8 +3049,8 @@ return {
   as: "button",
   text: "Select",
   onClick: () => {
-    args.fns.selectFirstX(args.fns.store.selectCount);
-    args.fns.hideSelectXModal();
+    f.selectFirstX(f.store.selectCount);
+    f.hideSelectXModal();
   }
 };
 '''
@@ -3073,7 +3073,7 @@ return `._id {
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   overflow-y: auto;
 }`;
 '''
@@ -3083,10 +3083,10 @@ return `._id {
           '''
 return {
   as: "div",
-  hide: () => !args.fns.store.showContactModal,
+  hide: () => !f.store.showContactModal,
   onClick: (e) => {
     if (e.target === e.currentTarget) {
-      args.fns.hideContactModal();
+      f.hideContactModal();
     }
   }
 };
@@ -3100,9 +3100,9 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.background};
-  border-radius: ${args.theme.var.borderRadius.lg};
-  padding: ${args.theme.var.spacing.lg};
+  background: ${t.var.color.background};
+  border-radius: ${t.var.borderRadius.lg};
+  padding: ${t.var.spacing.lg};
   max-width: 600px;
   width: 100%;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
@@ -3129,15 +3129,15 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 ${args.theme.var.spacing.lg} 0;
+  color: ${t.var.color.text};
+  margin: 0 0 ${t.var.spacing.lg} 0;
 }`;
 '''
         displayOrder: 1
         componentName: Html
         props:
           '''
-const isEditMode = args.fns.store.isEditMode;
+const isEditMode = f.store.isEditMode;
 return {
   as: "h2",
   text: isEditMode ? "Edit Contact" : "Add New Contact"
@@ -3153,8 +3153,8 @@ return {
           '''
 return `._id {
   display: grid;
-  gap: ${args.theme.var.spacing.md};
-  margin-bottom: ${args.theme.var.spacing.lg};
+  gap: ${t.var.spacing.md};
+  margin-bottom: ${t.var.spacing.lg};
 }`;
 '''
         displayOrder: 2
@@ -3178,9 +3178,9 @@ return {
 return {
   label: "Name *",
   placeholder: "Enter name...",
-  value: args.fns.store.editingContact?.name || '',
+  value: f.store.editingContact?.name || '',
   onInput: (e) => {
-    args.fns.setStore('editingContact', 'name', e.target.value);
+    f.setStore('editingContact', 'name', e.target.value);
   }
 };
 '''
@@ -3197,9 +3197,9 @@ return {
 return {
   label: "Phone Number *",
   placeholder: "Enter phone number...",
-  value: args.fns.store.editingContact?.phoneNumber || '',
+  value: f.store.editingContact?.phoneNumber || '',
   onInput: (e) => {
-    args.fns.setStore('editingContact', 'phoneNumber', e.target.value);
+    f.setStore('editingContact', 'phoneNumber', e.target.value);
   }
 };
 '''
@@ -3216,9 +3216,9 @@ return {
 return {
   label: "Country",
   placeholder: "Enter country...",
-  value: args.fns.store.editingContact?.country || '',
+  value: f.store.editingContact?.country || '',
   onInput: (e) => {
-    args.fns.setStore('editingContact', 'country', e.target.value);
+    f.setStore('editingContact', 'country', e.target.value);
   }
 };
 '''
@@ -3235,9 +3235,9 @@ return {
 return {
   label: "Country Code",
   placeholder: "Enter country code...",
-  value: args.fns.store.editingContact?.countryCode || '',
+  value: f.store.editingContact?.countryCode || '',
   onInput: (e) => {
-    args.fns.setStore('editingContact', 'countryCode', e.target.value);
+    f.setStore('editingContact', 'countryCode', e.target.value);
   }
 };
 '''
@@ -3254,11 +3254,11 @@ return {
 return {
   label: "Remark",
   placeholder: "Enter remark...",
-  value: args.fns.store.editingContact?.remark || '',
+  value: f.store.editingContact?.remark || '',
   as: "textarea",
   rows: 3,
   onInput: (e) => {
-    args.fns.setStore('editingContact', 'remark', e.target.value);
+    f.setStore('editingContact', 'remark', e.target.value);
   }
 };
 '''
@@ -3273,8 +3273,8 @@ return {
 return `._id {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: ${args.theme.var.spacing.md};
-  margin-bottom: ${args.theme.var.spacing.lg};
+  gap: ${t.var.spacing.md};
+  margin-bottom: ${t.var.spacing.lg};
 }`;
 '''
         displayOrder: 6
@@ -3296,7 +3296,7 @@ return {
 return `._id {
   display: flex;
   align-items: center;
-  gap: ${args.theme.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
 }`;
 '''
         displayOrder: 1
@@ -3328,9 +3328,9 @@ return `._id {
 return {
   as: "input",
   type: "checkbox",
-  checked: args.fns.store.editingContact?.called || false,
+  checked: f.store.editingContact?.called || false,
   onChange: (e) => {
-    args.fns.setStore('editingContact', 'called', e.target.checked);
+    f.setStore('editingContact', 'called', e.target.checked);
   }
 };
 '''
@@ -3344,7 +3344,7 @@ return {
           '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 2
@@ -3367,7 +3367,7 @@ return {
 return `._id {
   display: flex;
   align-items: center;
-  gap: ${args.theme.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
 }`;
 '''
         displayOrder: 2
@@ -3399,9 +3399,9 @@ return `._id {
 return {
   as: "input",
   type: "checkbox",
-  checked: args.fns.store.editingContact?.isUnavailable || false,
+  checked: f.store.editingContact?.isUnavailable || false,
   onChange: (e) => {
-    args.fns.setStore('editingContact', 'isUnavailable', e.target.checked);
+    f.setStore('editingContact', 'isUnavailable', e.target.checked);
   }
 };
 '''
@@ -3415,7 +3415,7 @@ return {
           '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 2
@@ -3438,7 +3438,7 @@ return {
 return `._id {
   display: flex;
   align-items: center;
-  gap: ${args.theme.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
 }`;
 '''
         displayOrder: 3
@@ -3470,9 +3470,9 @@ return `._id {
 return {
   as: "input",
   type: "checkbox",
-  checked: args.fns.store.editingContact?.notInterested || false,
+  checked: f.store.editingContact?.notInterested || false,
   onChange: (e) => {
-    args.fns.setStore('editingContact', 'notInterested', e.target.checked);
+    f.setStore('editingContact', 'notInterested', e.target.checked);
   }
 };
 '''
@@ -3486,7 +3486,7 @@ return {
           '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 2
@@ -3508,7 +3508,7 @@ return {
           '''
 return `._id {
   display: flex;
-  gap: ${args.theme.var.spacing.md};
+  gap: ${t.var.spacing.md};
   justify-content: flex-end;
 }`;
 '''
@@ -3529,17 +3529,17 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
   background: transparent;
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.sm};
-  color: ${args.theme.var.color.text};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.sm};
+  color: ${t.var.color.text};
   font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.background_dark_100};
+    background: ${t.var.color.background_dark_100};
   }
 }`;
 '''
@@ -3550,7 +3550,7 @@ return `._id {
 return {
   as: "button",
   text: "Cancel",
-  onClick: args.fns.hideContactModal
+  onClick: f.hideContactModal
 };
 '''
       }
@@ -3561,20 +3561,20 @@ return {
       P: {
         css:
           '''
-const isEditMode = args.fns.store.isEditMode;
+const isEditMode = f.store.isEditMode;
 
 return `._id {
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  background: ${isEditMode ? args.theme.var.color.primary : args.theme.var.color.success};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  background: ${isEditMode ? t.var.color.primary : t.var.color.success};
   border: none;
-  border-radius: ${args.theme.var.borderRadius.sm};
-  color: ${isEditMode ? args.theme.var.color.primary_text : args.theme.var.color.success_text};
+  border-radius: ${t.var.borderRadius.sm};
+  color: ${isEditMode ? t.var.color.primary_text : t.var.color.success_text};
   font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${isEditMode ? args.theme.var.color.primary_dark_200 : args.theme.var.color.success_dark_200};
+    background: ${isEditMode ? t.var.color.primary_dark_200 : t.var.color.success_dark_200};
   }
 }`;
 '''
@@ -3582,12 +3582,12 @@ return `._id {
         componentName: Html
         props:
           '''
-const isEditMode = args.fns.store.isEditMode;
+const isEditMode = f.store.isEditMode;
 
 return {
   as: "button",
   text: isEditMode ? "Save Changes" : "Create Contact",
-  onClick: args.fns.saveContact
+  onClick: f.saveContact
 };
 '''
       }

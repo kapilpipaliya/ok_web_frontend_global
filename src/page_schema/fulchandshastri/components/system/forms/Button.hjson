@@ -13,35 +13,35 @@
       P: {
         css:
           '''// Access props reactively
-const variant = args.contextData.props?.variant || "primary";
-const fullWidth = args.contextData.props?.fullWidth || false;
-const size = args.contextData.props?.size || "md";
+const variant = c.props?.variant || "primary";
+const fullWidth = c.props?.fullWidth || false;
+const size = c.props?.size || "md";
 
 // Size styles using existing theme values
 const sizeStyles = {
   xs: {
-    padding: `${args.theme.var.spacing.xxs} ${args.theme.var.spacing.xs}`,
+    padding: `${t.var.spacing.xxs} ${t.var.spacing.xs}`,
     fontSize: "0.75rem",
-    borderRadius: args.theme.var.borderRadius.sm,
-    gap: args.theme.var.spacing.xxs
+    borderRadius: t.var.borderRadius.sm,
+    gap: t.var.spacing.xxs
   },
   sm: {
-    padding: `${args.theme.var.spacing.xs} ${args.theme.var.spacing.sm}`,
+    padding: `${t.var.spacing.xs} ${t.var.spacing.sm}`,
     fontSize: "0.875rem",
-    borderRadius: args.theme.var.borderRadius.sm,
-    gap: args.theme.var.spacing.xs
+    borderRadius: t.var.borderRadius.sm,
+    gap: t.var.spacing.xs
   },
   md: {
-    padding: `${args.theme.var.spacing.sm} ${args.theme.var.spacing.md}`,
+    padding: `${t.var.spacing.sm} ${t.var.spacing.md}`,
     fontSize: "1rem",
-    borderRadius: args.theme.var.borderRadius.md,
-    gap: args.theme.var.spacing.sm
+    borderRadius: t.var.borderRadius.md,
+    gap: t.var.spacing.sm
   },
   lg: {
-    padding: `${args.theme.var.spacing.md} ${args.theme.var.spacing.lg}`,
+    padding: `${t.var.spacing.md} ${t.var.spacing.lg}`,
     fontSize: "1.125rem",
-    borderRadius: args.theme.var.borderRadius.md,
-    gap: args.theme.var.spacing.md
+    borderRadius: t.var.borderRadius.md,
+    gap: t.var.spacing.md
   }
 };
 
@@ -77,43 +77,43 @@ let variantStyles = '';
 
 if (variant === 'primary') {
   variantStyles = `
-    background: ${args.theme.var.color.primary};
-    color: ${args.theme.var.color.primary_text};
+    background: ${t.var.color.primary};
+    color: ${t.var.color.primary_text};
 
     &:not(:disabled):hover {
-      background: ${args.theme.var.color.primary_dark_200};
+      background: ${t.var.color.primary_dark_200};
     }
   `;
 } else if (variant === 'success') {
   variantStyles = `
-    background: ${args.theme.var.color.success};
-    color: ${args.theme.var.color.success_text};
+    background: ${t.var.color.success};
+    color: ${t.var.color.success_text};
 
     &:not(:disabled):hover {
-      background: ${args.theme.var.color.success_dark_200};
-      color: ${args.theme.var.color.success_dark_200_text};
+      background: ${t.var.color.success_dark_200};
+      color: ${t.var.color.success_dark_200_text};
     }
   `;
 } else if (variant === 'secondary') {
   variantStyles = `
     background: none;
-    color: ${args.theme.var.color.text_light_500};
-    border: 1px solid ${args.theme.var.color.border};
+    color: ${t.var.color.text_light_500};
+    border: 1px solid ${t.var.color.border};
 
     &:not(:disabled):hover {
-      background: ${args.theme.var.color.background_dark_200};
-      color: ${args.theme.var.color.text};
+      background: ${t.var.color.background_dark_200};
+      color: ${t.var.color.text};
     }
   `;
 } else if (variant === 'danger') {
   variantStyles = `
-    background: ${args.theme.var.color.background};
-    color: ${args.theme.var.color.error};
-    border: 1px solid ${args.theme.var.color.error};
+    background: ${t.var.color.background};
+    color: ${t.var.color.error};
+    border: 1px solid ${t.var.color.error};
 
     &:not(:disabled):hover {
-      background: ${args.theme.var.color.error};
-      color: ${args.theme.var.color.error_text};
+      background: ${t.var.color.error};
+      color: ${t.var.color.error_text};
     }
   `;
 }
@@ -126,12 +126,12 @@ return `._id {
         componentName: Html
         props:
           '''// Access props reactively
-const text = args.contextData.props?.text || "Button";
-const type = args.contextData.props?.type || "button";
-const disabled = args.contextData.props?.disabled || args.contextData.props?.loading || false;
-const onClick = args.contextData.props?.onClick || (() => {});
-const loading = args.contextData.props?.loading || false;
-const className = args.contextData.props?.class
+const text = c.props?.text || "Button";
+const type = c.props?.type || "button";
+const disabled = c.props?.disabled || c.props?.loading || false;
+const onClick = c.props?.onClick || (() => {});
+const loading = c.props?.loading || false;
+const className = c.props?.class
 
 return {
   as: "button",
@@ -150,9 +150,9 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const leftIcon = args.contextData.props?.leftIcon;
-const iconSize = args.contextData.props?.iconSize;
-const buttonSize = args.contextData.props?.size || "md";
+          '''const leftIcon = c.props?.leftIcon;
+const iconSize = c.props?.iconSize;
+const buttonSize = c.props?.size || "md";
 // Use iconSize if provided, otherwise use button size
 const effectiveSize = iconSize || buttonSize;
 
@@ -181,7 +181,7 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const text = args.contextData.props?.text || "Button";
+          '''const text = c.props?.text || "Button";
 
 return {
   as: "span",
@@ -197,9 +197,9 @@ return {
         displayOrder: 3
         componentName: Html
         props:
-          '''const rightIcon = args.contextData.props?.rightIcon;
-const iconSize = args.contextData.props?.iconSize;
-const buttonSize = args.contextData.props?.size || "md";
+          '''const rightIcon = c.props?.rightIcon;
+const iconSize = c.props?.iconSize;
+const buttonSize = c.props?.size || "md";
 // Use iconSize if provided, otherwise use button size
 const effectiveSize = iconSize || buttonSize;
 

@@ -8,7 +8,7 @@
         body:
           '''
 // Get current authenticated user from session
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return {
     success: false,
@@ -17,15 +17,15 @@ if (!actualUser) {
 }
 
 // Get effective user (handles admin impersonation)
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const user = await _.getEffectiveUser(_.session, actualUser, c);
 
 // Extract parameters
 // Format: data is an object with { vertex, relationships, nestedLineSync? }
-const inputData = args.contextData.data || {};
+const inputData = c.data || {};
 const vertex = inputData.vertex;
 const relationships = inputData.relationships || {};
 const nestedLineSync = inputData.nestedLineSync || {};
-const { tableVertexLabel, operation, elementId, uniqueKeys = [], enableUserScoping, hooks, nestedLinePropertyStripKeys = [] } = args.contextData;
+const { tableVertexLabel, operation, elementId, uniqueKeys = [], enableUserScoping, hooks, nestedLinePropertyStripKeys = [] } = c;
 
 const nestedLineStripFromConfig = Array.isArray(nestedLinePropertyStripKeys)
   ? nestedLinePropertyStripKeys.map((k) => String(k))
@@ -261,7 +261,7 @@ const syncNestedLineCollections = async (session, params) => {
   }
 };
 
-// Note: The returned API graph is built from args.context.nodes/relationships.
+// Note: The returned API graph is built from _.context.nodes/relationships.
 // Relationship writes must RETURN nodes/edges and run processResult to appear in the response.
 
 // Extract form data from vertex
@@ -295,7 +295,7 @@ const relationshipType = `User${vertexLabel}`;
 
 // Execute before hooks based on operation
 if (operation === "create") {
-  await args.executeHooks(hooks?.beforeCreate, {
+  await _.executeHooks(hooks?.beforeCreate, {
     tableVertexLabel,
     operation,
     elementId,
@@ -304,7 +304,7 @@ if (operation === "create") {
     enableUserScoping
   });
 } else if (operation === "update") {
-  await args.executeHooks(hooks?.beforeUpdate, {
+  await _.executeHooks(hooks?.beforeUpdate, {
     tableVertexLabel,
     operation,
     elementId,
@@ -313,7 +313,7 @@ if (operation === "create") {
     enableUserScoping
   });
 } else if (operation === "delete") {
-  await args.executeHooks(hooks?.beforeDelete, {
+  await _.executeHooks(hooks?.beforeDelete, {
     tableVertexLabel,
     operation,
     elementId,
@@ -363,7 +363,7 @@ try {
           }
         });
 
-        const checkResult = await args.session.run(checkQuery, checkParams);
+        const checkResult = await _.session.run(checkQuery, checkParams);
         if (checkResult.records.length > 0) {
           const conflictingKeys = uniqueKeys.filter(key => 
             formData[key] !== null && formData[key] !== undefined && formData[key] !== ""
@@ -384,7 +384,7 @@ try {
       updatedAt: new Date().toISOString()
     };
     if (vertexLabel === "User" && !properties.uuid) {
-      properties.uuid = args.crypto.randomUUID();
+      properties.uuid = _.crypto.randomUUID();
     }
     NESTED_LINE_STRIP_KEYS.forEach((k) => {
       delete properties[k];
@@ -413,7 +413,7 @@ try {
       };
     }
 
-    const result = await args.session.run(createQuery, createParams);
+    const result = await _.session.run(createQuery, createParams);
 
     if (result.records.length === 0) {
       return {
@@ -423,7 +423,7 @@ try {
     }
 
     // Use processResult to populate graph structure
-    const vertices = args.processResult(result.records, args.context, 'c');
+    const vertices = _.processResult(result.records, _.context, 'c');
     const createdContent = vertices[0];
     const createdElementId = createdContent.id;
 
@@ -450,7 +450,7 @@ try {
         const [relationshipType, targetLabel] = key.split('|');
         const targetIds = items.map(i => i.targetId);
         try {
-          const relRes = await args.session.run(
+          const relRes = await _.session.run(
             `UNWIND $targetIds as targetId
              MATCH (c:${vertexLabel}) WHERE elementId(c) = $contentId
              MATCH (target:${targetLabel}) WHERE elementId(target) = targetId
@@ -461,7 +461,7 @@ try {
                [x IN COLLECT(DISTINCT target) WHERE x IS NOT NULL] AS tlist`,
             { contentId: createdElementId, targetIds }
           );
-          args.processResult(relRes.records, args.context, ["c", "tlist"], "rlist");
+          _.processResult(relRes.records, _.context, ["c", "tlist"], "rlist");
         } catch (relError) {
           console.error(`Error creating relationships for ${relationshipType}->${targetLabel}:`, relError);
         }
@@ -471,7 +471,7 @@ try {
     patchRelationshipFieldPropsOnVertex(createdContent, relationships);
 
     try {
-      await syncNestedLineCollections(args.session, {
+      await syncNestedLineCollections(_.session, {
         parentElementId: createdElementId,
         parentLabel: vertexLabel,
         nestedLineSync,
@@ -490,7 +490,7 @@ try {
     };
     
     // Execute afterCreate hooks
-    await args.executeHooks(hooks?.afterCreate, {
+    await _.executeHooks(hooks?.afterCreate, {
       tableVertexLabel,
       operation,
       elementId: createdElementId,
@@ -550,7 +550,7 @@ try {
           }
         });
 
-        const checkResult = await args.session.run(checkQuery, checkParams);
+        const checkResult = await _.session.run(checkQuery, checkParams);
         if (checkResult.records.length > 0) {
           const conflictingKeys = uniqueKeys.filter(key => 
             formData[key] !== null && formData[key] !== undefined && formData[key] !== ""
@@ -610,7 +610,7 @@ try {
       };
     }
 
-    const result = await args.session.run(updateQuery, updateParams);
+    const result = await _.session.run(updateQuery, updateParams);
 
     if (result.records.length === 0) {
       return {
@@ -620,7 +620,7 @@ try {
     }
 
     // Use processResult to populate graph structure
-    const vertices = args.processResult(result.records, args.context, 'c');
+    const vertices = _.processResult(result.records, _.context, 'c');
     const updatedContent = vertices[0];
 
     // Handle relationships if provided (clear edge type per field, then optionally recreate)
@@ -635,9 +635,9 @@ try {
             WHERE elementId(c) = $contentId
             RETURN c, [x IN COLLECT(DISTINCT r) WHERE x IS NOT NULL] AS rdel
           `;
-          const captureRes = await args.session.run(captureRelQuery, { contentId: updateElementId });
-          args.processResult(captureRes.records, args.context, "c", "rdel");
-          const relMap = args.context.relationships || {};
+          const captureRes = await _.session.run(captureRelQuery, { contentId: updateElementId });
+          _.processResult(captureRes.records, _.context, "c", "rdel");
+          const relMap = _.context.relationships || {};
           const captured = captureRes.records?.[0]?.get?.("rdel");
           const relArr = Array.isArray(captured) ? captured : captured ? [captured] : [];
           for (let i = 0; i < relArr.length; i++) {
@@ -651,10 +651,10 @@ try {
           for (const [eid, e] of Object.entries(relMap)) {
             if (e && e.S === updateElementId && e.T === relConfig.relationshipType) delIds.push(eid);
           }
-          if (!args.context.deletedEdges) args.context.deletedEdges = [];
-          for (let i = 0; i < delIds.length; i++) args.context.deletedEdges.push(delIds[i]);
+          if (!_.context.deletedEdges) _.context.deletedEdges = [];
+          for (let i = 0; i < delIds.length; i++) _.context.deletedEdges.push(delIds[i]);
           // Do not return deleted edges in graph.edges; also remove them from node IN/OUT so UI reads the latest edge.
-          const nodesMap = args.context.nodes || {};
+          const nodesMap = _.context.nodes || {};
           for (let i = 0; i < delIds.length; i++) {
             const delId = delIds[i];
             const ed = relMap[delId];
@@ -672,7 +672,7 @@ try {
             WHERE elementId(c) = $contentId
             DELETE r
           `;
-          await args.session.run(deleteRelQuery, { contentId: updateElementId });
+          await _.session.run(deleteRelQuery, { contentId: updateElementId });
 
           const targetIds = Array.isArray(relConfig.targetIds)
             ? relConfig.targetIds.map((x) => String(x).trim()).filter(Boolean)
@@ -694,11 +694,11 @@ try {
               [x IN COLLECT(DISTINCT target) WHERE x IS NOT NULL] AS tlist
           `;
 
-          const createRes = await args.session.run(createRelQuery, {
+          const createRes = await _.session.run(createRelQuery, {
             contentId: updateElementId,
             targetIds,
           });
-          args.processResult(createRes.records, args.context, ["c", "tlist"], "rlist");
+          _.processResult(createRes.records, _.context, ["c", "tlist"], "rlist");
         } catch (relError) {
           console.error(`Error updating relationship for ${fieldKey}:`, relError);
         }
@@ -708,7 +708,7 @@ try {
     patchRelationshipFieldPropsOnVertex(updatedContent, relationships);
 
     try {
-      await syncNestedLineCollections(args.session, {
+      await syncNestedLineCollections(_.session, {
         parentElementId: updateElementId,
         parentLabel: vertexLabel,
         nestedLineSync,
@@ -727,7 +727,7 @@ try {
     };
     
     // Execute afterUpdate hooks
-    await args.executeHooks(hooks?.afterUpdate, {
+    await _.executeHooks(hooks?.afterUpdate, {
       tableVertexLabel,
       operation,
       elementId: updateElementId,
@@ -757,10 +757,10 @@ try {
         ? `MATCH (c:${vertexLabel}) WHERE elementId(c) = $elementId RETURN c`
         : `MATCH (u:User {uuid: $userUuid})-[:${relationshipType}]->(c:${vertexLabel}) WHERE elementId(c) = $elementId RETURN c`;
       const fetchParams = enableUserScoping ? { elementId: deleteElementId, userUuid: user.P.uuid } : { elementId: deleteElementId };
-      const fetchResult = await args.session.run(fetchQuery, fetchParams);
+      const fetchResult = await _.session.run(fetchQuery, fetchParams);
       if (fetchResult.records.length > 0) {
         const vertexNode = fetchResult.records[0].get('c');
-        deletedVertexData = args.convertNodeToJson(vertexNode);
+        deletedVertexData = _.convertNodeToJson(vertexNode);
       }
     } catch (e) {
       console.warn("Failed to fetch vertex data before deletion for hooks:", e);
@@ -790,7 +790,7 @@ try {
       };
     }
 
-    const result = await args.session.run(deleteQuery, deleteParams);
+    const result = await _.session.run(deleteQuery, deleteParams);
 
     const deleted = result.records[0]?.get('deleted') || 0;
 
@@ -808,7 +808,7 @@ try {
     };
     
     // Execute afterDelete hooks
-    await args.executeHooks(hooks?.afterDelete, {
+    await _.executeHooks(hooks?.afterDelete, {
       tableVertexLabel,
       operation,
       elementId: deleteElementId,

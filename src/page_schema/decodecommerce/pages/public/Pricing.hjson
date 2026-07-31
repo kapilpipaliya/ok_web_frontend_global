@@ -25,8 +25,8 @@ return {
         css: '''
 return `._id {
   min-height: 100vh;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -66,7 +66,7 @@ return {
         css: '''
 return `._id {
   padding: 5rem 0 3rem;
-  background: linear-gradient(135deg, ${args.theme.var.color.background} 0%, ${args.theme.var.color.background_dark_100} 100%);
+  background: linear-gradient(135deg, ${t.var.color.background} 0%, ${t.var.color.background_dark_100} 100%);
   
   @media (max-width: 768px) {
     padding: 3rem 0 2rem;
@@ -116,7 +116,7 @@ return {
 return `._id {
   font-size: 3rem;
   font-weight: 800;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 1.5rem;
   
   @media (max-width: 768px) {
@@ -141,7 +141,7 @@ return {
         css: '''
 return `._id {
   font-size: 1.25rem;
-  color: ${args.theme.var.color.text_dark_300};
+  color: ${t.var.color.text_dark_300};
   max-width: 600px;
   margin: 0 auto;
   
@@ -174,7 +174,7 @@ return {
         css: '''
 return `._id {
   padding: 5rem 0;
-  background: ${args.theme.var.color.background_dark_100};
+  background: ${t.var.color.background_dark_100};
   
   @media (max-width: 768px) {
     padding: 3rem 0;
@@ -223,7 +223,7 @@ return {
 return `._id {
   font-size: 2.5rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   text-align: center;
   margin-bottom: 3rem;
   
@@ -267,10 +267,10 @@ return {
 return `._id {
   width: 100%;
   border-collapse: collapse;
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
   border-radius: 1rem;
   overflow: hidden;
-  box-shadow: 0 5px 20px ${args.theme.var.color.text_light_900};
+  box-shadow: 0 5px 20px ${t.var.color.text_light_900};
   
   @media (max-width: 768px) {
     min-width: 600px;
@@ -292,7 +292,7 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background_dark_100};
+  background: ${t.var.color.background_dark_100};
 }`;
 '''
       }
@@ -327,8 +327,8 @@ return `._id {
   padding: 1.5rem;
   text-align: left;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
-  border-bottom: 2px solid ${args.theme.var.color.background_dark_200};
+  color: ${t.var.color.text};
+  border-bottom: 2px solid ${t.var.color.background_dark_200};
 }`;
 '''
       }
@@ -355,7 +355,7 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const plan = args.contextData.planHeaders;
+const plan = c.planHeaders;
 return {
   as: "th",
   text: plan
@@ -366,8 +366,8 @@ return `._id {
   padding: 1.5rem;
   text-align: center;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
-  border-bottom: 2px solid ${args.theme.var.color.background_dark_200};
+  color: ${t.var.color.text};
+  border-bottom: 2px solid ${t.var.color.background_dark_200};
 }`;
 '''
       }
@@ -468,20 +468,20 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const feature = args.contextData.features;
+const feature = c.features;
 const index = feature.index;
 return {
   as: "tr"
 };
 ''',
         css: '''
-const feature = args.contextData.features;
+const feature = c.features;
 const index = feature.index;
 return `._id {
-  border-bottom: 1px solid ${args.theme.var.color.background_dark_100};
+  border-bottom: 1px solid ${t.var.color.background_dark_100};
   
   &:hover {
-    background: ${args.theme.var.color.background_dark_50};
+    background: ${t.var.color.background_dark_50};
   }
 }`;
 '''
@@ -494,7 +494,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const feature = args.contextData.features;
+const feature = c.features;
 return {
   as: "td",
   text: feature.feature
@@ -504,7 +504,7 @@ return {
 return `._id {
   padding: 1rem 1.5rem;
   font-weight: 500;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -516,7 +516,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const feature = args.contextData.features;
+const feature = c.features;
 return {
   as: "td",
   text: feature.starter
@@ -526,7 +526,7 @@ return {
 return `._id {
   padding: 1rem 1.5rem;
   text-align: center;
-  color: ${args.theme.var.color.text_dark_300};
+  color: ${t.var.color.text_dark_300};
 }`;
 '''
       }
@@ -538,19 +538,19 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const feature = args.contextData.features;
+const feature = c.features;
 return {
   as: "td",
   text: feature.professional
 };
 ''',
         css: '''
-const feature = args.contextData.features;
+const feature = c.features;
 const hasCheck = feature.professional === "✓";
 return `._id {
   padding: 1rem 1.5rem;
   text-align: center;
-  color: ${hasCheck ? args.theme.var.color.success : args.theme.var.color.text_dark_300};
+  color: ${hasCheck ? t.var.color.success : t.var.color.text_dark_300};
   font-weight: ${hasCheck ? '600' : '400'};
 }`;
 '''
@@ -563,19 +563,19 @@ return `._id {
         displayOrder: 4,
         componentName: "Html",
         props: '''
-const feature = args.contextData.features;
+const feature = c.features;
 return {
   as: "td",
   text: feature.enterprise
 };
 ''',
         css: '''
-const feature = args.contextData.features;
+const feature = c.features;
 const hasCheck = feature.enterprise === "✓";
 return `._id {
   padding: 1rem 1.5rem;
   text-align: center;
-  color: ${hasCheck ? args.theme.var.color.success : args.theme.var.color.text_dark_300};
+  color: ${hasCheck ? t.var.color.success : t.var.color.text_dark_300};
   font-weight: ${hasCheck ? '600' : '400'};
 }`;
 '''

@@ -28,7 +28,7 @@ const AttributeList = (
     <As
       as="div"
       css={`return \`._id {
-  color: \${args.theme.var.color.error};
+  color: \${t.var.color.error};
   font-size: 0.875rem;
   margin-top: 0.5rem;
 }\`;`}
@@ -110,7 +110,7 @@ export function DeleteAttributeDialog() {
           <As
             as="div"
             css={`return \`._id {
-  color: \${args.theme.var.color.error};
+  color: \${t.var.color.error};
   font-size: 0.875rem;
   margin-top: 0.5rem;
 }\`;`}

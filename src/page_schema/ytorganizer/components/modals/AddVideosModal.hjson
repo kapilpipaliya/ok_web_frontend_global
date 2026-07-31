@@ -37,17 +37,17 @@ return `._id {
         displayOrder: 1
         fns:
           '''
-const [videoUrlsInput, setVideoUrlsInput] = args.createSignal("");
-const [selectedPlaylistId, setSelectedPlaylistId] = args.createSignal("");
-const [selectedOwnershipId, setSelectedOwnershipId] = args.createSignal("");
-const [playlists, setPlaylists] = args.createSignal([]);
-const [isLoadingPlaylists, setIsLoadingPlaylists] = args.createSignal(false);
-const [isAddingVideos, setIsAddingVideos] = args.createSignal(false);
-const [formError, setFormError] = args.createSignal(null);
+const [videoUrlsInput, setVideoUrlsInput] = _.createSignal("");
+const [selectedPlaylistId, setSelectedPlaylistId] = _.createSignal("");
+const [selectedOwnershipId, setSelectedOwnershipId] = _.createSignal("");
+const [playlists, setPlaylists] = _.createSignal([]);
+const [isLoadingPlaylists, setIsLoadingPlaylists] = _.createSignal(false);
+const [isAddingVideos, setIsAddingVideos] = _.createSignal(false);
+const [formError, setFormError] = _.createSignal(null);
 
 // Check if playlist is provided or needs to be selected
 const needsPlaylistSelection = () => {
-  const playlist = args.contextData.props?.playlist;
+  const playlist = c.props?.playlist;
   return !playlist;
 };
 
@@ -57,13 +57,13 @@ const fetchPlaylists = async () => {
 
   setIsLoadingPlaylists(true);
   try {
-    const result = await args.fns.executeYTOFunction("getUserPlaylists", {
+    const result = await f.executeYTOFunction("getUserPlaylists", {
       sortBy: "title_asc"
     });
 
     if (result?.error) {
       console.error("Error loading playlists:", result.error);
-      args.showErrorToast(result.error);
+      _.showErrorToast(result.error);
       setPlaylists([]);
     } else if (result?.result?.success && result?.result?.data) {
       const playlistsData = result.result.data.playlists || [];
@@ -80,12 +80,12 @@ const fetchPlaylists = async () => {
     } else {
       const errorMessage = result?.result?.message || "Failed to load playlists";
       console.error("Error loading playlists:", errorMessage);
-      args.showErrorToast(errorMessage);
+      _.showErrorToast(errorMessage);
       setPlaylists([]);
     }
   } catch (error) {
     console.error("Unexpected error fetching playlists:", error);
-    args.showErrorToast("Failed to load playlists");
+    _.showErrorToast("Failed to load playlists");
     setPlaylists([]);
   } finally {
     setIsLoadingPlaylists(false);
@@ -93,8 +93,8 @@ const fetchPlaylists = async () => {
 };
 
 // Load playlists when modal opens (if needed)
-args.createEffect(() => {
-  const isOpen = args.contextData.props?.isOpen;
+_.createEffect(() => {
+  const isOpen = c.props?.isOpen;
   const getIsOpen = isOpen?.() || false;
 
   if (getIsOpen) {
@@ -104,7 +104,7 @@ args.createEffect(() => {
       setSelectedOwnershipId("");
     }
     // Pre-fill video URL if provided
-    const videoUrl = args.contextData.props?.videoUrl || "";
+    const videoUrl = c.props?.videoUrl || "";
     setVideoUrlsInput(videoUrl);
     setFormError(null);
   }
@@ -115,12 +115,12 @@ const closeModal = () => {
   setSelectedPlaylistId("");
   setSelectedOwnershipId("");
   setFormError(null);
-  const onClose = args.contextData.props?.onClose;
+  const onClose = c.props?.onClose;
   onClose?.();
 };
 
 const addVideosToPlaylist = async () => {
-  const playlist = args.contextData.props?.playlist;
+  const playlist = c.props?.playlist;
 
   // Determine playlistId and ownershipId
   let playlistId, ownershipId;
@@ -145,14 +145,14 @@ const addVideosToPlaylist = async () => {
     if (!playlistId) {
       const errorMsg = "Please select a playlist";
       setFormError(errorMsg);
-      args.showErrorToast(errorMsg);
+      _.showErrorToast(errorMsg);
       return;
     }
 
     if (!ownershipId || ownershipId === "") {
       const errorMsg = "Ownership information not found for this playlist. Please try another playlist.";
       setFormError(errorMsg);
-      args.showErrorToast(errorMsg);
+      _.showErrorToast(errorMsg);
       console.error("Selected playlist missing ownership:", { playlistId, ownershipId });
       return;
     }
@@ -162,7 +162,7 @@ const addVideosToPlaylist = async () => {
   if (!urlsText) {
     const errorMsg = "Please enter at least one video URL";
     setFormError(errorMsg);
-    args.showErrorToast(errorMsg);
+    _.showErrorToast(errorMsg);
     return;
   }
 
@@ -170,27 +170,27 @@ const addVideosToPlaylist = async () => {
   setIsAddingVideos(true);
 
   try {
-    const result = await args.fns.executeYTOFunction("addVideoToPlaylist", {
+    const result = await f.executeYTOFunction("addVideoToPlaylist", {
       ownershipId: ownershipId,
       playlistId: playlistId,
       videoUrl: urlsText
     });
 
     if (result?.result?.success) {
-      args.showSuccessToast(result.result.message || "Videos added successfully");
-      const onSuccess = args.contextData.props?.onSuccess;
+      _.showSuccessToast(result.result.message || "Videos added successfully");
+      const onSuccess = c.props?.onSuccess;
       onSuccess?.();
       closeModal();
     } else {
       const errorMsg = result?.result?.message || result?.error || "Failed to add videos to playlist";
       setFormError(errorMsg);
-      args.showErrorToast(errorMsg);
+      _.showErrorToast(errorMsg);
     }
   } catch (error) {
     console.error("Error adding videos:", error);
     const errorMsg = error?.message || "An error occurred while adding videos";
     setFormError(errorMsg);
-    args.showErrorToast(errorMsg);
+    _.showErrorToast(errorMsg);
   } finally {
     setIsAddingVideos(false);
   }
@@ -216,7 +216,7 @@ return {
         componentName: Html
         props:
           '''
-const isOpen = args.contextData.props?.isOpen;
+const isOpen = c.props?.isOpen;
 const getIsOpen = isOpen?.() || false;
 
 return {
@@ -224,7 +224,7 @@ return {
   hide: !getIsOpen,
   onClick: (e) => {
     if (e.target === e.currentTarget) {
-      args.fns.closeModal();
+      f.closeModal();
     }
   }
 };
@@ -238,7 +238,7 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
   border-radius: 0.75rem;
   width: 100%;
   max-width: 600px;
@@ -282,7 +282,7 @@ return `._id {
   align-items: center;
   justify-content: space-between;
   padding: 1.5rem;
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  border-bottom: 1px solid ${t.var.color.border};
 }`;
 '''
         displayOrder: 1
@@ -304,7 +304,7 @@ return {
 return `._id {
   font-size: 1.5rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0;
 }`;
 '''
@@ -328,7 +328,7 @@ return {
 return `._id {
   background: none;
   border: none;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   cursor: pointer;
   padding: 0.5rem;
   border-radius: 0.375rem;
@@ -338,8 +338,8 @@ return `._id {
   justify-content: center;
 
   &:hover {
-    background: ${args.theme.var.color.background_light_200};
-    color: ${args.theme.var.color.text};
+    background: ${t.var.color.background_light_200};
+    color: ${t.var.color.text};
   }
 }`;
 '''
@@ -349,7 +349,7 @@ return `._id {
           '''
 return {
   as: "button",
-  onClick: args.fns.closeModal,
+  onClick: f.closeModal,
   "aria-label": "Close modal"
 };
 '''
@@ -402,7 +402,7 @@ return {
           '''
 return `._id {
   margin: 0 0 1rem 0;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   font-size: 0.875rem;
 }`;
 '''
@@ -428,8 +428,8 @@ return `._id {
   gap: 0.75rem;
   align-items: flex-start;
   padding: 1rem;
-  background: ${args.theme.var.color.error_light_50};
-  border: 2px solid ${args.theme.var.color.error_light_200};
+  background: ${t.var.color.error_light_50};
+  border: 2px solid ${t.var.color.error_light_200};
   border-radius: 0.5rem;
   margin-bottom: 1rem;
 }`;
@@ -438,7 +438,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const error = args.fns.formError();
+const error = f.formError();
 
 return {
   as: "div",
@@ -454,7 +454,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.error_light_50_text};
+  color: ${t.var.color.error_light_50_text};
   flex-shrink: 0;
   margin-top: 0.125rem;
 }`;
@@ -502,7 +502,7 @@ return `._id {
   margin: 0 0 0.25rem 0;
   font-size: 0.9375rem;
   font-weight: 600;
-  color: ${args.theme.var.color.error_light_50_text};
+  color: ${t.var.color.error_light_50_text};
 }`;
 '''
         displayOrder: 1
@@ -526,14 +526,14 @@ return `._id {
   margin: 0;
   font-size: 0.875rem;
   line-height: 1.5;
-  color: ${args.theme.var.color.error_light_50_text};
+  color: ${t.var.color.error_light_50_text};
 }`;
 '''
         displayOrder: 2
         componentName: Html
         props:
           '''
-const error = args.fns.formError();
+const error = f.formError();
 
 return {
   as: "p",
@@ -551,7 +551,7 @@ return {
 return `._id {
   background: none;
   border: none;
-  color: ${args.theme.var.color.error};
+  color: ${t.var.color.error};
   cursor: pointer;
   padding: 0.25rem;
   border-radius: 0.25rem;
@@ -562,7 +562,7 @@ return `._id {
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.error_light_100};
+    background: ${t.var.color.error_light_100};
   }
 }`;
 '''
@@ -572,7 +572,7 @@ return `._id {
           '''
 return {
   as: "button",
-  onClick: () => args.fns.setFormError(null),
+  onClick: () => f.setFormError(null),
   "aria-label": "Dismiss error"
 };
 '''
@@ -604,8 +604,8 @@ return {
         props:
           '''
 return {
-  value: args.fns.videoUrlsInput(),
-  onChange: (e) => args.fns.setVideoUrlsInput(e.target.value),
+  value: f.videoUrlsInput(),
+  onChange: (e) => f.setVideoUrlsInput(e.target.value),
   placeholder: "https://www.youtube.com/watch?v=...\nhttps://www.youtube.com/watch?v=...",
   rows: 4
 };
@@ -626,7 +626,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const needsSelection = args.fns.needsPlaylistSelection();
+const needsSelection = f.needsPlaylistSelection();
 
 return {
   as: "div",
@@ -645,7 +645,7 @@ return `._id {
   display: block;
   font-size: 0.875rem;
   font-weight: 500;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 0.5rem;
 }`;
 '''
@@ -668,8 +668,8 @@ return {
         componentName: TomSelect
         props:
           '''
-const playlists = args.fns.playlists();
-const isLoadingPlaylists = args.fns.isLoadingPlaylists();
+const playlists = f.playlists();
+const isLoadingPlaylists = f.isLoadingPlaylists();
 
 // Convert playlists to options format
 const options = playlists.map(playlistData => {
@@ -689,16 +689,16 @@ const options = playlists.map(playlistData => {
 });
 
 return {
-  value: args.fns.selectedPlaylistId(),
+  value: f.selectedPlaylistId(),
   options: options,
   placeholder: isLoadingPlaylists ? "Loading playlists..." : "Select a playlist",
   disabled: isLoadingPlaylists,
   onChange: (value, optionData) => {
-    args.fns.setSelectedPlaylistId(value);
+    f.setSelectedPlaylistId(value);
 
     // Get ownershipId from the option data passed by TomSelect
     const ownershipKey = optionData?.ownershipId || "";
-    args.fns.setSelectedOwnershipId(ownershipKey);
+    f.setSelectedOwnershipId(ownershipKey);
 
     if (!ownershipKey) {
       console.error("Playlist selection missing ownershipId:", value);
@@ -718,7 +718,7 @@ return {
           '''
 return `._id {
   padding: 1.5rem;
-  border-top: 1px solid ${args.theme.var.color.border};
+  border-top: 1px solid ${t.var.color.border};
   display: flex;
   gap: 1rem;
   justify-content: flex-end;
@@ -745,8 +745,8 @@ return {
 return {
   text: "Cancel",
   variant: "secondary",
-  onClick: args.fns.closeModal,
-  disabled: args.fns.isAddingVideos()
+  onClick: f.closeModal,
+  disabled: f.isAddingVideos()
 };
 '''
       }
@@ -759,12 +759,12 @@ return {
         componentName: Button
         props:
           '''
-const isAddingVideos = args.fns.isAddingVideos();
+const isAddingVideos = f.isAddingVideos();
 
 return {
   text: isAddingVideos ? "Adding..." : "Add Videos",
   variant: "primary",
-  onClick: args.fns.addVideosToPlaylist,
+  onClick: f.addVideosToPlaylist,
   disabled: isAddingVideos
 };
 '''

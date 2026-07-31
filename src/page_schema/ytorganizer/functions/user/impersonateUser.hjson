@@ -7,22 +7,22 @@
         description: Start impersonating a user (admin only)
         body:
           '''
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   throw new Error("User session not found");
 }
 
 // Verification of admin role is done by setImpersonation
 
-const targetUserUuid = args.contextData.targetUserUuid;
+const targetUserUuid = c.targetUserUuid;
 
 if (!targetUserUuid) {
   throw new Error("targetUserUuid is required");
 }
 
-// Call platform function (from args)
-const result = await args.setImpersonation(
-  args.session,
+// Call platform function (from _)
+const result = await _.setImpersonation(
+  _.session,
   actualUser,
   targetUserUuid
 );

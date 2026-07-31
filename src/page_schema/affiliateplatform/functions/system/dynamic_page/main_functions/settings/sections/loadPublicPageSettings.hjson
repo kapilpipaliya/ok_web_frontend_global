@@ -7,14 +7,14 @@
         description: Loads public Fulchand Shastri page settings from GlobalSetting scope. Returns section values keyed by section id.
         body:
           '''
-const { pageId, allowPublicRead = true, locale } = args.contextData || {};
+const { pageId, allowPublicRead = true, locale } = c || {};
 
 if (!pageId) {
   return { success: false, message: "pageId is required" };
 }
 
 try {
-  const languagesResult = await args.executeNamedServerFunction({
+  const languagesResult = await s({
     functionName: "getSiteLanguages",
     contextData: {}
   });
@@ -22,7 +22,7 @@ try {
   const defaultLang = languages.find((lang) => lang?.isDefault === true);
   const resolvedLocale = locale || defaultLang?.code || languages[0]?.code || "en";
 
-  const configResult = await args.executeNamedServerFunction({
+  const configResult = await s({
     functionName: "getSettingsPageConfig",
     contextData: { settingsPageId: pageId, allowPublicRead }
   });
@@ -35,7 +35,7 @@ try {
     sections = pageConfig?.sections || [];
   }
 
-  const loadResult = await args.executeNamedServerFunction({
+  const loadResult = await s({
     functionName: "loadSettingsPage",
     contextData: {
       pageId,
@@ -59,7 +59,7 @@ try {
     const sectionConfig = sections.find((section) => section.id === sectionId) || null;
 
     if (sectionConfig) {
-      const resolveResult = await args.executeNamedServerFunction({
+      const resolveResult = await s({
         functionName: "localizationHelpers",
         contextData: {
           action: "localizeSectionValues",

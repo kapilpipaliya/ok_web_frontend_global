@@ -12,7 +12,7 @@
 return {
   enabled: () => true,
   executeYTOFunction: (functionName, contextData) =>
-    args.executeNamedServerFunction({ functionName, contextData: contextData || {} })
+    s({ functionName, contextData: contextData || {} })
 };
 '''
         props:
@@ -30,10 +30,10 @@ return {
         displayOrder: 1
         fns:
           '''
-const [conversationTicketId, setConversationTicketId] = args.createSignal(null);
-const [conversationTicketSerial, setConversationTicketSerial] = args.createSignal("");
-const [conversationTicketSubject, setConversationTicketSubject] = args.createSignal("");
-const [conversationModalOpen, setConversationModalOpen] = args.createSignal(false);
+const [conversationTicketId, setConversationTicketId] = _.createSignal(null);
+const [conversationTicketSerial, setConversationTicketSerial] = _.createSignal("");
+const [conversationTicketSubject, setConversationTicketSubject] = _.createSignal("");
+const [conversationModalOpen, setConversationModalOpen] = _.createSignal(false);
 
 const openConversationForRow = (ticketRow) => {
   const ticketId = ticketRow?.id;
@@ -66,7 +66,7 @@ return {
       window.open(url, "_blank", "noopener,noreferrer");
       return;
     }
-    args.navigate?.(url);
+    _.navigate?.(url);
   }
 };
 '''
@@ -89,10 +89,10 @@ return {
   tableSettingsLabel: "PublicSupportTicket",
   loadFromSetting: true,
   rowClickable: true,
-  onRowClick: (ticketRow) => args.fns.openConversationForRow?.(ticketRow),
+  onRowClick: (ticketRow) => f.openConversationForRow?.(ticketRow),
   actionHandlers: {
     conversation: async (ticketRow) => {
-      args.fns.openConversationForRow?.(ticketRow);
+      f.openConversationForRow?.(ticketRow);
     }
   }
 };'''
@@ -107,18 +107,18 @@ return {
         displayOrder: 2
         props:
           '''
-const ticketSerial = args.fns.conversationTicketSerial?.();
-const ticketSubject = args.fns.conversationTicketSubject?.();
+const ticketSerial = f.conversationTicketSerial?.();
+const ticketSubject = f.conversationTicketSubject?.();
 const title = ticketSerial && ticketSubject
   ? `${ticketSerial}: ${ticketSubject}`
   : ticketSerial || "Support conversation";
 
 return {
-  isOpen: args.fns.conversationModalOpen?.() === true,
+  isOpen: f.conversationModalOpen?.() === true,
   title,
   showTitle: false,
   usePolarisUI: true,
-  onClose: () => args.fns.closeConversationModal?.()
+  onClose: () => f.closeConversationModal?.()
 };'''
       }
     }
@@ -133,10 +133,10 @@ return {
         props:
           '''return {
   viewerRole: "admin",
-  ticketId: args.fns.conversationTicketId?.(),
+  ticketId: f.conversationTicketId?.(),
   compact: true,
   showCloseButton: true,
-  onClose: () => args.fns.closeConversationModal?.()
+  onClose: () => f.closeConversationModal?.()
 };'''
       }
     }

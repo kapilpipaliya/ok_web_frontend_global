@@ -7,12 +7,12 @@
         description: Seeds option vertices per domain label only (no Setting). Upserts by value (MERGE), removes nodes not in the seed list. missingOnly skips picklists that already have options; force reapplies defaults the same way.
         body:
           '''
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return { success: false, message: "Not authenticated" };
 }
 
-const { mode = "missingOnly", keys } = args.contextData || {};
+const { mode = "missingOnly", keys } = c || {};
 const force = mode === "force" || mode === "replace";
 
 const DEFAULTS = [
@@ -129,7 +129,7 @@ async function writePicklistVertices(picklistKeyRaw, optionRows) {
 
   const keepValues = optionRows.map((r) => String(r.value != null ? r.value : ""));
   if (optionRows.length > 0) {
-    await args.session.run(
+    await _.session.run(
       `UNWIND $opts AS row
        MERGE (o:\`${neoLabel}\` {value: row.value})
        ON CREATE SET o.createdAt = datetime()
@@ -139,7 +139,7 @@ async function writePicklistVertices(picklistKeyRaw, optionRows) {
       { opts: optionRows }
     );
   }
-  await args.session.run(
+  await _.session.run(
     `MATCH (o:\`${neoLabel}\`)
      WHERE NOT o.value IN $keep
      DETACH DELETE o`,
@@ -153,7 +153,7 @@ async function countOptionsForPicklist(picklistKeyRaw) {
     .toLowerCase();
   const neoLabel = WORKSHOP_PICKLIST_LABEL_BY_KEY[safe];
   if (!neoLabel) return -1;
-  const r = await args.session.run(
+  const r = await _.session.run(
     `MATCH (o:\`${neoLabel}\`) RETURN count(o) AS c`,
     {}
   );

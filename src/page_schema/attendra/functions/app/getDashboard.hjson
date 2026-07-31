@@ -8,16 +8,16 @@
         description: Returns today dashboard KPI counts + recent activity for Attendra. Uses getDBSessionForShop from context shop (Shopify session).
         body:
           '''
-const shop = String(args.contextData?.shop || args.shop || "").trim().toLowerCase();
+const shop = String(c?.shop || _.shop || "").trim().toLowerCase();
 if (!shop) {
   return { success: false, error: "Shop is required." };
 }
 
-const dbName = args.getDatabaseNameForShop(shop, args.rawSubDomain);
+const dbName = _.getDatabaseNameForShop(shop, _.rawSubDomain);
 const portalSignInPath = `/auth/signin`;
 const portalSignInUrl = `https://${dbName}.decodecommerce.com${portalSignInPath}`;
 
-const { dbSession } = await args.getDBSessionForShop(shop, args.rawSubDomain);
+const { dbSession } = await _.getDBSessionForShop(shop, _.rawSubDomain);
 
 const now = new Date();
 
@@ -26,7 +26,7 @@ try {
     `MATCH (s:Setting {key: 'default'}) RETURN s LIMIT 1`,
     {}
   );
-  const settingVertex = args.processResult(settingRes.records, args.context, "s")?.[0];
+  const settingVertex = _.processResult(settingRes.records, _.context, "s")?.[0];
   const tz = settingVertex?.P?.timezone || "UTC";
   const lateThresholdMinutes = Number(settingVertex?.P?.lateThresholdMinutes ?? 10);
   const workdayStart = String(settingVertex?.P?.workdayStart || "09:00");

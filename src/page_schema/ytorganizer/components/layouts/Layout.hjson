@@ -8,19 +8,19 @@
           '''
 // Check if user is admin
 const checkAdminRole = () => {
-  const userRoles = args.user?.OUT?.UserRole || [];
+  const userRoles = _.user?.OUT?.UserRole || [];
   return userRoles.some(edgeId => {
-    const edge = args.graph.edges[edgeId];
-    const role = args.graph.vertexes[edge.E];
+    const edge = g.edges[edgeId];
+    const role = g.vertexes[edge.E];
     return role?.P?.key === "Admin";
   });
 };
 
 // Impersonation state management
-const [impersonatedUser, setImpersonatedUser] = args.createSignal(null);
+const [impersonatedUser, setImpersonatedUser] = _.createSignal(null);
 
 // Check if running in iframe (initialized on mount to avoid hydration issues)
-const [isInIframe, setIsInIframe] = args.createSignal(false);
+const [isInIframe, setIsInIframe] = _.createSignal(false);
 
 // Load impersonation state from sessionStorage (client-side only)
 // This is called from onMount to avoid SSR/hydration mismatch
@@ -40,23 +40,23 @@ const exitImpersonation = async () => {
   const impersonated = impersonatedUser();
   if (!impersonated) return;
 
-  const result = await args.executeNamedServerFunction({
+  const result = await s({
     functionName: "clearImpersonation",
     contextData: { impersonatedUserUuid: impersonated.P.uuid }
   });
 
   setImpersonatedUser(null);
   sessionStorage.removeItem('yto_impersonatedUser');
-  args.showSuccessToast("Stopped viewing as user");
+  _.showSuccessToast("Stopped viewing as user");
 
   // Reload current page to refresh data
   window.location.reload();
 };
 
 // YouTube Ownership state management (multi-account support)
-const [ownerships, setOwnerships] = args.createSignal([]);
-const [selectedOwnership, setSelectedOwnership] = args.createSignal(null);
-const [ownershipsLoading, setOwnershipsLoading] = args.createSignal(false);
+const [ownerships, setOwnerships] = _.createSignal([]);
+const [selectedOwnership, setSelectedOwnership] = _.createSignal(null);
+const [ownershipsLoading, setOwnershipsLoading] = _.createSignal(false);
 
 // Get selected ownershipId for contextData
 const getSelectedOwnershipId = () => {
@@ -75,7 +75,7 @@ const executeYTOFunction = async (functionName, contextData = {}) => {
   const impersonatedUserUuid = getImpersonatedUserUuid();
   const ownershipId = getSelectedOwnershipId();
 
-  return await args.executeNamedServerFunction({
+  return await s({
     functionName,
     contextData: {
       ...contextData,
@@ -91,13 +91,13 @@ const executeYTOFunction = async (functionName, contextData = {}) => {
 const fetchOwnerships = async () => {
   setOwnershipsLoading(true);
   try {
-    const result = await args.executeNamedServerFunction({
+    const result = await s({
       functionName: "getAllYouTubeOwnerships",
       contextData: {}
     });
 
     if (result?.error) {
-      args.showErrorToast(result.error);
+      _.showErrorToast(result.error);
     } else if (result?.result?.success && result?.result?.data) {
       // Extract ownership objects and connection status
       const ownershipsData = result.result.data;
@@ -130,7 +130,7 @@ const fetchOwnerships = async () => {
     }
   } catch (error) {
     console.error('Error fetching ownerships:', error);
-    args.showErrorToast('Failed to load YouTube accounts');
+    _.showErrorToast('Failed to load YouTube accounts');
   } finally {
     setOwnershipsLoading(false);
   }
@@ -147,7 +147,7 @@ const selectOwnership = async (ownership) => {
 
   // Update lastSelected on server
   try {
-    await args.executeNamedServerFunction({
+    await s({
       functionName: "updateOwnershipLastSelected",
       contextData: { ownershipId: ownership.P.key }
     });
@@ -172,28 +172,28 @@ const loadOwnershipState = () => {
 };
 
 // Automatically load queue when ownership changes
-args.createEffect(args.on(selectedOwnership, async (ownership) => {
-  if (ownership && args.user) {
+_.createEffect(_.on(selectedOwnership, async (ownership) => {
+  if (ownership && _.user) {
     await loadQueueFromDatabase();
   }
 }, { defer: true }));
 
 // Keep Awake wrapper functions
 const keepAwake = async () => {
-  await args.KeepAwake.keepAwake();
+  await _.KeepAwake.keepAwake();
 };
 
 const allowSleep = async () => {
-  await args.KeepAwake.allowSleep();
+  await _.KeepAwake.allowSleep();
 };
 
 const isSupported = async () => {
-  const result = await args.KeepAwake.isSupported();
+  const result = await _.KeepAwake.isSupported();
   return result.isSupported;
 };
 
 const isKeptAwake = async () => {
-  const result = await args.KeepAwake.isKeptAwake();
+  const result = await _.KeepAwake.isKeptAwake();
   return result.isKeptAwake;
 };
 
@@ -229,17 +229,17 @@ const disableKeepAwake = async () => {
 };
 
 // Video player state management
-const [playerState, setPlayerState] = args.createSignal("closed"); // closed, minimized, maximized
-const [currentVideo, setCurrentVideo] = args.createSignal(null);
+const [playerState, setPlayerState] = _.createSignal("closed"); // closed, minimized, maximized
+const [currentVideo, setCurrentVideo] = _.createSignal(null);
 
 // Player position and size state
-const [playerPosition, setPlayerPosition] = args.createStore({ x: null, y: null });
-const [playerSize, setPlayerSize] = args.createStore({ width: 400, height: 250 });
+const [playerPosition, setPlayerPosition] = _.createStore({ x: null, y: null });
+const [playerSize, setPlayerSize] = _.createStore({ width: 400, height: 250 });
 
 // Video queue state
-const [videoQueue, setVideoQueue] = args.createSignal([]);
-const [queueLoading, setQueueLoading] = args.createSignal(false);
-const [queueOperationLoading, setQueueOperationLoading] = args.createSignal(false);
+const [videoQueue, setVideoQueue] = _.createSignal([]);
+const [queueLoading, setQueueLoading] = _.createSignal(false);
+const [queueOperationLoading, setQueueOperationLoading] = _.createSignal(false);
 
 // Get ownership ID helper
 const getOwnershipId = () => {
@@ -249,7 +249,7 @@ const getOwnershipId = () => {
 // Load queue from database
 const loadQueueFromDatabase = async () => {
   const ownershipId = getOwnershipId();
-  if (!ownershipId || !args.user) return;
+  if (!ownershipId || !_.user) return;
 
   setQueueLoading(true);
   try {
@@ -286,7 +286,7 @@ const addToQueue = async (video) => {
   // Check if video already in queue
   const alreadyInQueue = queue.some(v => v?.P?.youtubeId === videoId);
   if (alreadyInQueue) {
-    args.showWarningToast("Video already in queue");
+    _.showWarningToast("Video already in queue");
     return;
   }
 
@@ -295,7 +295,7 @@ const addToQueue = async (video) => {
 
   // Save to database
   const ownershipId = getOwnershipId();
-  if (ownershipId && args.user) {
+  if (ownershipId && _.user) {
     setQueueOperationLoading(true);
     try {
       const result = await executeYTOFunction("addVideoToQueue", { video });
@@ -303,22 +303,22 @@ const addToQueue = async (video) => {
       if (result?.result?.success) {
         // Update with server response to ensure consistency
         setVideoQueue(result.result.data || [...queue, video]);
-        args.showSuccessToast("Added to queue");
+        _.showSuccessToast("Added to queue");
       } else {
         // Rollback on error
         setVideoQueue(queue);
-        args.showErrorToast(result?.result?.message || result?.error || "Failed to add to queue");
+        _.showErrorToast(result?.result?.message || result?.error || "Failed to add to queue");
       }
     } catch (error) {
       // Rollback on error
       setVideoQueue(queue);
-      args.showErrorToast("Failed to add to queue");
+      _.showErrorToast("Failed to add to queue");
       console.error("Error saving to queue:", error);
     } finally {
       setQueueOperationLoading(false);
     }
   } else {
-    args.showSuccessToast("Added to queue");
+    _.showSuccessToast("Added to queue");
   }
 };
 
@@ -341,12 +341,12 @@ const playNext = async () => {
 
   // Save to database (remove first video)
   const ownershipId = getOwnershipId();
-  if (ownershipId && args.user) {
+  if (ownershipId && _.user) {
     try {
       const result = await executeYTOFunction("removeVideoFromQueue", { position: 0 });
 
       if (result?.error) {
-        args.showErrorToast(result.error);
+        _.showErrorToast(result.error);
       } else if (result?.result?.success) {
         // Update with server response to ensure consistency
         setVideoQueue(result.result.data || newQueue);
@@ -367,7 +367,7 @@ const removeFromQueue = async (index) => {
 
   // Save to database
   const ownershipId = getOwnershipId();
-  if (ownershipId && args.user) {
+  if (ownershipId && _.user) {
     setQueueOperationLoading(true);
     try {
       const result = await executeYTOFunction("removeVideoFromQueue", { position: index });
@@ -375,22 +375,22 @@ const removeFromQueue = async (index) => {
       if (result?.result?.success) {
         // Update with server response to ensure consistency
         setVideoQueue(result.result.data || newQueue);
-        args.showSuccessToast("Removed from queue");
+        _.showSuccessToast("Removed from queue");
       } else {
         // Rollback on error
         setVideoQueue(queue);
-        args.showErrorToast(result?.result?.message || result?.error || "Failed to remove from queue");
+        _.showErrorToast(result?.result?.message || result?.error || "Failed to remove from queue");
       }
     } catch (error) {
       // Rollback on error
       setVideoQueue(queue);
-      args.showErrorToast("Failed to remove from queue");
+      _.showErrorToast("Failed to remove from queue");
       console.error("Error removing from queue:", error);
     } finally {
       setQueueOperationLoading(false);
     }
   } else {
-    args.showSuccessToast("Removed from queue");
+    _.showSuccessToast("Removed from queue");
   }
 };
 
@@ -403,28 +403,28 @@ const clearQueue = async () => {
 
   // Save to database
   const ownershipId = getOwnershipId();
-  if (ownershipId && args.user) {
+  if (ownershipId && _.user) {
     setQueueOperationLoading(true);
     try {
       const result = await executeYTOFunction("clearVideoQueue");
 
       if (result?.result?.success) {
-        args.showSuccessToast("Queue cleared");
+        _.showSuccessToast("Queue cleared");
       } else {
         // Rollback on error
         setVideoQueue(previousQueue);
-        args.showErrorToast(result?.result?.message || result?.error || "Failed to clear queue");
+        _.showErrorToast(result?.result?.message || result?.error || "Failed to clear queue");
       }
     } catch (error) {
       // Rollback on error
       setVideoQueue(previousQueue);
-      args.showErrorToast("Failed to clear queue");
+      _.showErrorToast("Failed to clear queue");
       console.error("Error clearing queue:", error);
     } finally {
       setQueueOperationLoading(false);
     }
   } else {
-    args.showSuccessToast("Queue cleared");
+    _.showSuccessToast("Queue cleared");
   }
 };
 
@@ -434,7 +434,7 @@ const reorderQueue = async (fromIndex, toIndex) => {
 
   // Validate indices
   if (fromIndex < 0 || fromIndex >= queue.length || toIndex < 0 || toIndex >= queue.length) {
-    args.showErrorToast("Invalid queue position");
+    _.showErrorToast("Invalid queue position");
     return;
   }
 
@@ -450,7 +450,7 @@ const reorderQueue = async (fromIndex, toIndex) => {
 
   // Save to database
   const ownershipId = getOwnershipId();
-  if (ownershipId && args.user) {
+  if (ownershipId && _.user) {
     setQueueOperationLoading(true);
     try {
       const result = await executeYTOFunction("reorderVideoQueue", { fromPosition: fromIndex, toPosition: toIndex });
@@ -458,27 +458,27 @@ const reorderQueue = async (fromIndex, toIndex) => {
       if (result?.result?.success) {
         // Update with server response to ensure consistency
         setVideoQueue(result.result.data || newQueue);
-        args.showSuccessToast("Queue reordered");
+        _.showSuccessToast("Queue reordered");
       } else {
         // Rollback on error
         setVideoQueue(queue);
-        args.showErrorToast(result?.result?.message || result?.error || "Failed to reorder queue");
+        _.showErrorToast(result?.result?.message || result?.error || "Failed to reorder queue");
       }
     } catch (error) {
       // Rollback on error
       setVideoQueue(queue);
-      args.showErrorToast("Failed to reorder queue");
+      _.showErrorToast("Failed to reorder queue");
       console.error("Error reordering queue:", error);
     } finally {
       setQueueOperationLoading(false);
     }
   } else {
-    args.showSuccessToast("Queue reordered");
+    _.showSuccessToast("Queue reordered");
   }
 };
 
 // Queue modal state
-const [isQueueModalOpen, setIsQueueModalOpen] = args.createSignal(false);
+const [isQueueModalOpen, setIsQueueModalOpen] = _.createSignal(false);
 
 const openQueueModal = () => {
   setIsQueueModalOpen(true);
@@ -506,7 +506,7 @@ const closePlayer = async () => {
 };
 
 // Feedback modal state management
-const [isFeedbackModalOpen, setIsFeedbackModalOpen] = args.createSignal(false);
+const [isFeedbackModalOpen, setIsFeedbackModalOpen] = _.createSignal(false);
 
 const openFeedbackModal = () => {
   setIsFeedbackModalOpen(true);
@@ -518,21 +518,21 @@ const closeFeedbackModal = () => {
 
 const submitFeedback = async (data) => {
   try {
-    const result = await args.executeNamedServerFunction({
+    const result = await s({
       functionName: "saveFeedback",
       contextData: data
     });
 
     if (result?.result?.success) {
-      args.showSuccessToast(result.result.message || "Feedback submitted successfully");
+      _.showSuccessToast(result.result.message || "Feedback submitted successfully");
       return result.result;
     } else {
-      args.showErrorToast(result?.result?.message || "Failed to submit feedback");
+      _.showErrorToast(result?.result?.message || "Failed to submit feedback");
       return result?.result;
     }
   } catch (error) {
     console.error("Error submitting feedback:", error);
-    args.showErrorToast("An error occurred while submitting feedback");
+    _.showErrorToast("An error occurred while submitting feedback");
     return { success: false };
   }
 };
@@ -624,17 +624,17 @@ return {
 return {
   onMount: async () => {
     if (typeof window !== 'undefined') {
-      args.fns.setIsInIframe?.(window.self !== window.top);
+      f.setIsInIframe?.(window.self !== window.top);
     }
 
     // Load saved impersonation state from sessionStorage
-    args.fns.loadImpersonationState?.();
+    f.loadImpersonationState?.();
 
     // Load saved ownership state from sessionStorage
-    args.fns.loadOwnershipState?.();
+    f.loadOwnershipState?.();
 
     // Fetch ownerships (will auto-select and load queue)
-    await args.fns.fetchOwnerships?.();
+    await f.fetchOwnerships?.();
   }
 };
 '''
@@ -682,19 +682,19 @@ return {
         props:
           '''
 return {
-  playerState: args.fns.playerState,
-  currentVideo: args.fns.currentVideo,
-  togglePlayerState: args.fns.togglePlayerState,
-  closePlayer: args.fns.closePlayer,
-  playerPosition: args.fns.playerPosition,
-  setPlayerPosition: args.fns.setPlayerPosition,
-  playerSize: args.fns.playerSize,
-  setPlayerSize: args.fns.setPlayerSize,
-  videoQueue: args.fns.videoQueue,
-  playNext: args.fns.playNext,
-  removeFromQueue: args.fns.removeFromQueue,
-  clearQueue: args.fns.clearQueue,
-  openQueueModal: args.fns.openQueueModal
+  playerState: f.playerState,
+  currentVideo: f.currentVideo,
+  togglePlayerState: f.togglePlayerState,
+  closePlayer: f.closePlayer,
+  playerPosition: f.playerPosition,
+  setPlayerPosition: f.setPlayerPosition,
+  playerSize: f.playerSize,
+  setPlayerSize: f.setPlayerSize,
+  videoQueue: f.videoQueue,
+  playNext: f.playNext,
+  removeFromQueue: f.removeFromQueue,
+  clearQueue: f.clearQueue,
+  openQueueModal: f.openQueueModal
 };
 '''
       }
@@ -708,16 +708,16 @@ return {
         props:
           '''
 return {
-  isOpen: args.fns.isQueueModalOpen,
-  onClose: args.fns.closeQueueModal,
-  videoQueue: args.fns.videoQueue,
-  setVideoQueue: args.fns.setVideoQueue,
-  playVideo: args.fns.playVideo,
-  removeFromQueue: args.fns.removeFromQueue,
-  clearQueue: args.fns.clearQueue,
-  reorderQueue: args.fns.reorderQueue,
-  getOwnershipId: args.fns.getOwnershipId,
-  executeYTOFunction: args.fns.executeYTOFunction
+  isOpen: f.isQueueModalOpen,
+  onClose: f.closeQueueModal,
+  videoQueue: f.videoQueue,
+  setVideoQueue: f.setVideoQueue,
+  playVideo: f.playVideo,
+  removeFromQueue: f.removeFromQueue,
+  clearQueue: f.clearQueue,
+  reorderQueue: f.reorderQueue,
+  getOwnershipId: f.getOwnershipId,
+  executeYTOFunction: f.executeYTOFunction
 };
 '''
       }
@@ -731,9 +731,9 @@ return {
         props:
           '''
 return {
-  isOpen: args.fns.isFeedbackModalOpen,
-  onClose: args.fns.closeFeedbackModal,
-  onSubmit: args.fns.submitFeedback
+  isOpen: f.isFeedbackModalOpen,
+  onClose: f.closeFeedbackModal,
+  onSubmit: f.submitFeedback
 };
 '''
       }

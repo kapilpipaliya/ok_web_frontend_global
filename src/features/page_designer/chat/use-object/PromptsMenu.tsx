@@ -27,8 +27,8 @@ export function PromptsMenu(props: PromptsMenuProps) {
           padding: 16px;
           max-height: 420px;
           overflow-y: auto;
-          background: \${args.theme.var.color.background_light_100};
-          border: 1px solid \${args.theme.var.color.border};
+          background: \${t.var.color.background_light_100};
+          border: 1px solid \${t.var.color.border};
           border-radius: 8px;
           box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
           width: 420px;
@@ -40,16 +40,16 @@ export function PromptsMenu(props: PromptsMenuProps) {
           }
           
           &::-webkit-scrollbar-track {
-            background: \${args.theme.var.color.background_light_50};
+            background: \${t.var.color.background_light_50};
             border-radius: 4px;
           }
           
           &::-webkit-scrollbar-thumb {
-            background: \${args.theme.var.color.border};
+            background: \${t.var.color.border};
             border-radius: 4px;
             
             &:hover {
-              background: \${args.theme.var.color.text_light_200};
+              background: \${t.var.color.text_light_200};
             }
           }
         }\`;`}
@@ -58,10 +58,10 @@ export function PromptsMenu(props: PromptsMenuProps) {
           as="div"
           css={`return \`._id {
             font-weight: 600;
-            color: \${args.theme.var.color.text};
+            color: \${t.var.color.text};
             font-size: 14px;
             padding-bottom: 8px;
-            border-bottom: 1px solid \${args.theme.var.color.border};
+            border-bottom: 1px solid \${t.var.color.border};
             margin-bottom: 8px;
           }\`;`}
         >
@@ -82,7 +82,7 @@ export function PromptsMenu(props: PromptsMenuProps) {
                 as="div"
                 css={`return \`._id {
                   font-weight: 600;
-                  color: \${args.theme.var.color.text_light_200};
+                  color: \${t.var.color.text_light_200};
                   font-size: 13px;
                   margin-top: 4px;
                 }\`;`}
@@ -96,19 +96,19 @@ export function PromptsMenu(props: PromptsMenuProps) {
                     css={`return \`._id {
                       text-align: left;
                       padding: 10px 12px;
-                      background: \${args.theme.var.color.background_light_50};
-                      color: \${args.theme.var.color.text};
+                      background: \${t.var.color.background_light_50};
+                      color: \${t.var.color.text};
                       border-radius: 6px;
-                      border: 1px solid \${args.theme.var.color.border};
+                      border: 1px solid \${t.var.color.border};
                       transition: all 0.2s;
                       font-size: 13px;
                       width: 100%;
                       cursor: pointer;
                       
                       &:hover {
-                        background: \${args.theme.var.color.primary_light_100};
-                        color: \${args.theme.var.color.primary_light_100_text};
-                        border-color: \${args.theme.var.color.primary_light_200};
+                        background: \${t.var.color.primary_light_100};
+                        color: \${t.var.color.primary_light_100_text};
+                        border-color: \${t.var.color.primary_light_200};
                         transform: translateX(2px);
                       }
                       

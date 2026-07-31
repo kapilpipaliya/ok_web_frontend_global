@@ -17,8 +17,8 @@
       L: Attr
       P: {
         css:
-          '''return `._id{ max-width: 800px; margin: 0 auto; padding: ${args.theme.var.spacing?.lg || "2rem"}; color:${args.theme.var.color.text}; }
-@media (max-width: 768px){ ._id{ padding:${args.theme.var.spacing?.md || "1rem"}; } }`;'''
+          '''return `._id{ max-width: 800px; margin: 0 auto; padding: ${t.var.spacing?.lg || "2rem"}; color:${t.var.color.text}; }
+@media (max-width: 768px){ ._id{ padding:${t.var.spacing?.md || "1rem"}; } }`;'''
         displayOrder: 1
         componentName: Html
         props: '''return { as: "main" };'''
@@ -40,7 +40,7 @@
         displayOrder: 2
         componentName: Html
         textType: markdown
-        css: '''return `._id{ color:${args.theme.var.color.text_light_500}; line-height:1.6; margin:0 0 1rem 0; }`;'''
+        css: '''return `._id{ color:${t.var.color.text_light_500}; line-height:1.6; margin:0 0 1rem 0; }`;'''
         text: Billing for **Attendra** is managed through your Shopify admin. Your plan and invoices are available in Shopify billing settings.
         props: '''return { as: "div" };'''
       }

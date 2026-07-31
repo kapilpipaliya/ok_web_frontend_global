@@ -25,8 +25,8 @@ return {
         css: '''
 return `._id {
   min-height: 100vh;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -66,7 +66,7 @@ return {
         css: '''
 return `._id {
   padding: 5rem 0;
-  background: linear-gradient(135deg, ${args.theme.var.color.background} 0%, ${args.theme.var.color.background_dark_100} 100%);
+  background: linear-gradient(135deg, ${t.var.color.background} 0%, ${t.var.color.background_dark_100} 100%);
   
   @media (max-width: 768px) {
     padding: 3rem 0;
@@ -134,7 +134,7 @@ return {
 return `._id {
   font-size: 3rem;
   font-weight: 800;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 1.5rem;
   
   @media (max-width: 768px) {
@@ -159,7 +159,7 @@ return {
         css: '''
 return `._id {
   font-size: 1.25rem;
-  color: ${args.theme.var.color.text_dark_300};
+  color: ${t.var.color.text_dark_300};
   max-width: 600px;
   margin: 0 auto;
   
@@ -208,10 +208,10 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
   border-radius: 1rem;
   padding: 3rem;
-  box-shadow: 0 10px 40px ${args.theme.var.color.text_light_900};
+  box-shadow: 0 10px 40px ${t.var.color.text_light_900};
   
   @media (max-width: 768px) {
     padding: 2rem;
@@ -236,7 +236,7 @@ return {
 return `._id {
   font-size: 2rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 2rem;
 }`;
 '''
@@ -250,14 +250,14 @@ return `._id {
         componentName: "Html",
         contextName: "formState",
         props: '''
-const [formData, setFormData] = args.createStore({
+const [formData, setFormData] = _.createStore({
   name: "",
   email: "",
   company: "",
   message: ""
 });
 
-const [isSubmitting, setIsSubmitting] = args.createSignal(false);
+const [isSubmitting, setIsSubmitting] = _.createSignal(false);
 
 const handleSubmit = async (e) => {
   e.preventDefault();
@@ -266,7 +266,7 @@ const handleSubmit = async (e) => {
   // Simulate form submission
   await new Promise(resolve => setTimeout(resolve, 2000));
   
-  args.showSuccessToast("Thank you! We'll be in touch within 24 hours.");
+  _.showSuccessToast("Thank you! We'll be in touch within 24 hours.");
   
   // Reset form
   setFormData({
@@ -296,7 +296,7 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const formState = args.contextData.formState;
+const formState = c.formState;
 return {
   as: "form",
   onSubmit: formState.handleSubmit
@@ -364,7 +364,7 @@ return {
 return `._id {
   display: block;
   font-weight: 500;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 0.5rem;
 }`;
 '''
@@ -377,7 +377,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const formState = args.contextData.formState;
+const formState = c.formState;
 return {
   as: "input",
   type: "text",
@@ -390,16 +390,16 @@ return {
 return `._id {
   width: 100%;
   padding: 0.75rem 1rem;
-  border: 1px solid ${args.theme.var.color.background_dark_200};
+  border: 1px solid ${t.var.color.background_dark_200};
   border-radius: 0.5rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   transition: all 0.2s ease;
   
   &:focus {
     outline: none;
-    border-color: ${args.theme.var.color.primary};
-    box-shadow: 0 0 0 3px ${args.theme.var.color.primary_light_800};
+    border-color: ${t.var.color.primary};
+    box-shadow: 0 0 0 3px ${t.var.color.primary_light_800};
   }
 }`;
 '''
@@ -434,7 +434,7 @@ return {
 return `._id {
   display: block;
   font-weight: 500;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 0.5rem;
 }`;
 '''
@@ -447,7 +447,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const formState = args.contextData.formState;
+const formState = c.formState;
 return {
   as: "input",
   type: "email",
@@ -460,16 +460,16 @@ return {
 return `._id {
   width: 100%;
   padding: 0.75rem 1rem;
-  border: 1px solid ${args.theme.var.color.background_dark_200};
+  border: 1px solid ${t.var.color.background_dark_200};
   border-radius: 0.5rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   transition: all 0.2s ease;
   
   &:focus {
     outline: none;
-    border-color: ${args.theme.var.color.primary};
-    box-shadow: 0 0 0 3px ${args.theme.var.color.primary_light_800};
+    border-color: ${t.var.color.primary};
+    box-shadow: 0 0 0 3px ${t.var.color.primary_light_800};
   }
 }`;
 '''
@@ -504,7 +504,7 @@ return {
 return `._id {
   display: block;
   font-weight: 500;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 0.5rem;
 }`;
 '''
@@ -517,7 +517,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const formState = args.contextData.formState;
+const formState = c.formState;
 return {
   as: "input",
   type: "text",
@@ -529,16 +529,16 @@ return {
 return `._id {
   width: 100%;
   padding: 0.75rem 1rem;
-  border: 1px solid ${args.theme.var.color.background_dark_200};
+  border: 1px solid ${t.var.color.background_dark_200};
   border-radius: 0.5rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   transition: all 0.2s ease;
   
   &:focus {
     outline: none;
-    border-color: ${args.theme.var.color.primary};
-    box-shadow: 0 0 0 3px ${args.theme.var.color.primary_light_800};
+    border-color: ${t.var.color.primary};
+    box-shadow: 0 0 0 3px ${t.var.color.primary_light_800};
   }
 }`;
 '''
@@ -573,7 +573,7 @@ return {
 return `._id {
   display: block;
   font-weight: 500;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 0.5rem;
 }`;
 '''
@@ -586,7 +586,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const formState = args.contextData.formState;
+const formState = c.formState;
 return {
   as: "textarea",
   required: true,
@@ -599,17 +599,17 @@ return {
 return `._id {
   width: 100%;
   padding: 0.75rem 1rem;
-  border: 1px solid ${args.theme.var.color.background_dark_200};
+  border: 1px solid ${t.var.color.background_dark_200};
   border-radius: 0.5rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   resize: vertical;
   transition: all 0.2s ease;
   
   &:focus {
     outline: none;
-    border-color: ${args.theme.var.color.primary};
-    box-shadow: 0 0 0 3px ${args.theme.var.color.primary_light_800};
+    border-color: ${t.var.color.primary};
+    box-shadow: 0 0 0 3px ${t.var.color.primary_light_800};
   }
 }`;
 '''
@@ -622,7 +622,7 @@ return `._id {
         displayOrder: 4,
         componentName: "Html",
         props: '''
-const formState = args.contextData.formState;
+const formState = c.formState;
 return {
   as: "button",
   type: "submit",
@@ -631,12 +631,12 @@ return {
 };
 ''',
         css: '''
-const formState = args.contextData.formState;
+const formState = c.formState;
 return `._id {
   width: 100%;
   padding: 1rem 2rem;
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
   border: none;
   border-radius: 0.5rem;
   font-weight: 600;
@@ -645,9 +645,9 @@ return `._id {
   transition: all 0.2s ease;
   
   &:hover:not(:disabled) {
-    background: ${args.theme.var.color.primary_dark_200};
+    background: ${t.var.color.primary_dark_200};
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px ${args.theme.var.color.primary_light_600};
+    box-shadow: 0 5px 15px ${t.var.color.primary_light_600};
   }
   
   &:disabled {
@@ -687,7 +687,7 @@ return {
 return `._id {
   font-size: 2rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 2rem;
 }`;
 '''
@@ -760,7 +760,7 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const method = args.contextData.contactMethods;
+const method = c.contactMethods;
 return {
   as: "div"
 };
@@ -770,12 +770,12 @@ return `._id {
   display: flex;
   gap: 1rem;
   padding: 1.5rem;
-  background: ${args.theme.var.color.background_dark_100};
+  background: ${t.var.color.background_dark_100};
   border-radius: 0.75rem;
   transition: all 0.2s ease;
   
   &:hover {
-    background: ${args.theme.var.color.background_dark_200};
+    background: ${t.var.color.background_dark_200};
   }
 }`;
 '''
@@ -788,7 +788,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const method = args.contextData.contactMethods;
+const method = c.contactMethods;
 return {
   as: "div"
 };
@@ -797,7 +797,7 @@ return {
 return `._id {
   width: 48px;
   height: 48px;
-  background: ${args.theme.var.color.primary_light_850};
+  background: ${t.var.color.primary_light_850};
   border-radius: 0.5rem;
   display: flex;
   align-items: center;
@@ -814,7 +814,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const method = args.contextData.contactMethods;
+const method = c.contactMethods;
 return {
   as: "icon",
   icon: method.icon,
@@ -824,7 +824,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
 }`;
 '''
       }
@@ -849,7 +849,7 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const method = args.contextData.contactMethods;
+const method = c.contactMethods;
 return {
   as: "h3",
   text: method.title
@@ -858,7 +858,7 @@ return {
         css: '''
 return `._id {
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 0.25rem;
 }`;
 '''
@@ -871,7 +871,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const method = args.contextData.contactMethods;
+const method = c.contactMethods;
 return method.link ? {
   as: "a",
   href: method.link,
@@ -882,15 +882,15 @@ return method.link ? {
 };
 ''',
         css: '''
-const method = args.contextData.contactMethods;
+const method = c.contactMethods;
 return `._id {
-  color: ${args.theme.var.color.text_dark_300};
+  color: ${t.var.color.text_dark_300};
   text-decoration: none;
   transition: all 0.2s ease;
   
   ${method.link ? `
     &:hover {
-      color: ${args.theme.var.color.primary};
+      color: ${t.var.color.primary};
     }
   ` : ''}
 }`;

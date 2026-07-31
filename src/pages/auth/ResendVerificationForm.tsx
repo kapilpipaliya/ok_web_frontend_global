@@ -117,7 +117,7 @@ export function ResendVerificationForm() {
                   ._id:disabled {
                     opacity: 0.5;
                     cursor: not-allowed;
-                    background-color: \${args.theme.var.color.border};
+                    background-color: \${t.var.color.border};
                   }\`;`,
             ],
             componentName: "Html",
@@ -146,7 +146,7 @@ export function ResendVerificationForm() {
               {
                 as: "a",
                 css: `return \`._id {
-  color: \${args.theme.var.color.primary};
+  color: \${t.var.color.primary};
   font-size: 14px;
   cursor: pointer;
 }\`;`,
@@ -168,7 +168,7 @@ export function ResendVerificationForm() {
             css: `return \`._id {
   text-align: center;
   margin-top: 16px;
-  border-top: 1px solid \${args.theme.var.color.border};
+  border-top: 1px solid \${t.var.color.border};
   padding-top: 16px;
 }\`;`,
             componentName: "Html",
@@ -211,10 +211,10 @@ export function ResendVerificationForm() {
               let trap = null;
 
               const initializeFocusTrap = () => {
-                const element = args.ref();
+                const element = _.ref();
                 if (!element) return;
 
-                trap = args.focusTrap.createFocusTrap(element, {
+                trap = _.focusTrap.createFocusTrap(element, {
                   initialFocus: () => document.getElementsByTagName("input")[0],
                   fallbackFocus: () => element,
                   escapeDeactivates: false,

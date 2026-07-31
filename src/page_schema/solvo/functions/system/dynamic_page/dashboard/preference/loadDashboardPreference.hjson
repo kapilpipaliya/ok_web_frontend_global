@@ -8,18 +8,18 @@
         description: Loads per-user dashboard preference state for a dashboard key.
         body:
           '''
-const user = await args.getUserFromSession();
+const user = await _.getUserFromSession();
 if (!user) {
   return { success: false, message: "Authentication required", data: { state: null } };
 }
 
-const { dashboardKey } = args.contextData || {};
+const { dashboardKey } = c || {};
 if (!dashboardKey) {
   return { success: false, message: "dashboardKey is required", data: { state: null } };
 }
 
 const userUuid = user.properties?.uuid || user.P?.uuid;
-const result = await args.session.run(
+const result = await _.session.run(
   `
   MATCH (u:User {uuid: $userUuid})-[:HAS_DASHBOARD_STATE]->(p:DashboardPreference {dashboardKey: $dashboardKey, userUuid: $userUuid})
   RETURN p
@@ -32,11 +32,11 @@ if (result.records.length === 0) {
   return { success: true, data: { state: null } };
 }
 
-if (!args.context) {
+if (!_.context) {
   return { success: false, message: "Server context unavailable", data: { state: null } };
 }
 
-const preferenceVertices = args.processResult(result.records, args.context, "p");
+const preferenceVertices = _.processResult(result.records, _.context, "p");
 const preference = preferenceVertices?.[0] || null;
 let parsedState = null;
 try {

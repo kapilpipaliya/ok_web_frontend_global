@@ -8,12 +8,12 @@
         description: Generic settings section save with version concurrency check, validation, transforms, hooks, and audit logging.
         body:
           '''
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return { success: false, message: "User session not found" };
 }
 
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const user = await _.getEffectiveUser(_.session, actualUser, c);
 const {
   pageId,
   sectionId,
@@ -24,7 +24,7 @@ const {
   sectionConfig,
   pageConfig,
   auditEnabled
-} = args.contextData;
+} = c;
 
 if (!pageId || !sectionId) {
   return { success: false, message: "pageId and sectionId are required" };
@@ -37,7 +37,7 @@ if (!values || typeof values !== "object") {
 const effectiveScopeLabel = scopeVertexLabel || "User";
 const effectiveScopeId = scopeId || user.P.uuid;
 const edgeType = `${effectiveScopeLabel}HasSettingsSection`;
-const scopeMatchProperty = args.contextData.scopeMatchProperty || "uuid";
+const scopeMatchProperty = c.scopeMatchProperty || "uuid";
 
 const parseJsonSafe = (value, fallback) => {
   if (value == null) return fallback;
@@ -46,8 +46,8 @@ const parseJsonSafe = (value, fallback) => {
 };
 
 let transformedValues = values;
-if (sectionConfig && args.executeNamedServerFunction) {
-  const transformResult = await args.executeNamedServerFunction({
+if (sectionConfig && s) {
+  const transformResult = await s({
     functionName: "settingsEngineHelpers",
     contextData: { action: "transformValues", sectionConfig, values }
   });
@@ -55,7 +55,7 @@ if (sectionConfig && args.executeNamedServerFunction) {
     transformedValues = transformResult.result.data?.values || values;
   }
 
-  const validateResult = await args.executeNamedServerFunction({
+  const validateResult = await s({
     functionName: "settingsEngineHelpers",
     contextData: { action: "validateSection", sectionConfig, values: transformedValues }
   });
@@ -82,14 +82,14 @@ if (effectiveScopeLabel === "User") {
   `;
 }
 
-const existingResult = await args.session.run(existingQuery, {
+const existingResult = await _.session.run(existingQuery, {
   scopeId: effectiveScopeId,
   pageId,
   sectionId
 });
 
 if (existingResult.records.length > 0) {
-  const existingVertices = args.processResult(existingResult.records, args.context, "doc");
+  const existingVertices = _.processResult(existingResult.records, _.context, "doc");
   existingDocument = existingVertices[0];
 }
 
@@ -185,17 +185,17 @@ if (existingDocument) {
   };
 }
 
-const saveResult = await args.session.run(saveQuery, saveParams);
+const saveResult = await _.session.run(saveQuery, saveParams);
 if (saveResult.records.length === 0) {
   return { success: false, message: "Failed to persist settings section" };
 }
 
-const savedVertices = args.processResult(saveResult.records, args.context, "doc");
+const savedVertices = _.processResult(saveResult.records, _.context, "doc");
 const savedDocument = savedVertices[0];
 
 let auditEntry = null;
-if (auditEnabled !== false && args.executeNamedServerFunction) {
-  const diffResult = await args.executeNamedServerFunction({
+if (auditEnabled !== false && s) {
+  const diffResult = await s({
     functionName: "settingsEngineHelpers",
     contextData: { action: "buildAuditDiff", beforeValues, afterValues: transformedValues }
   });

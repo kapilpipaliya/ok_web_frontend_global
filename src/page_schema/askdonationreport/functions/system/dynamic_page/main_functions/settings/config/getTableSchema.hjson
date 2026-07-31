@@ -8,10 +8,10 @@
         description: Loads a table_schema Setting vertex by explicit key or tableKey + part.
         body:
           '''
-let { key, tableKey, part } = args.contextData || {};
+let { key, tableKey, part } = c || {};
 
 if ((!key || !String(key).trim()) && tableKey && part) {
-  const idsResult = await args.executeNamedServerFunction({
+  const idsResult = await s({
     functionName: "getTableIds",
     contextData: { tableKey: String(tableKey).trim() }
   });
@@ -31,18 +31,18 @@ if (!key || !String(key).trim()) {
 
 key = String(key).trim();
 
-let result = await args.session.run(
+let result = await _.session.run(
   `MATCH (s:Setting {key: $key}) RETURN s LIMIT 1`,
   { key }
 );
 
-if (result.records.length === 0 && args.executeNamedServerFunction) {
+if (result.records.length === 0 && s) {
   try {
-    await args.executeNamedServerFunction({
+    await s({
       functionName: "migrateDynamicPageSettings",
       contextData: { dryRun: false }
     });
-    result = await args.session.run(
+    result = await _.session.run(
       `MATCH (s:Setting {key: $key}) RETURN s LIMIT 1`,
       { key }
     );
@@ -55,7 +55,7 @@ if (result.records.length === 0) {
   return { success: false, message: `No table schema found for key: ${key}` };
 }
 
-const vertices = args.processResult(result.records, args.context, "s");
+const vertices = _.processResult(result.records, _.context, "s");
 const setting = vertices[0];
 
 return {

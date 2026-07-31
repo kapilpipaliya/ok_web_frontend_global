@@ -12,12 +12,12 @@
         key: Bhakti
         props:
           '''
-const locale = args.params?.lang ? String(args.params.lang).toLowerCase() : undefined;
+const locale = _.params?.lang ? String(_.params.lang).toLowerCase() : undefined;
 return {
   contextName: "bhaktiSettings",
   serverFunction: `
 try {
-  const result = await args.executeNamedServerFunction({
+  const result = await s({
     functionName: "loadPublicPageSettings",
     contextData: { pageId: "bhakti", allowPublicRead: true, locale: ${JSON.stringify(locale ?? null)} }
   });
@@ -62,7 +62,7 @@ try {
       P: {
         css:
           '''return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   font-size: 3rem;
   font-weight: 700;
   margin: 0;
@@ -74,7 +74,7 @@ try {
         displayOrder: 1
         componentName: Html
         props:
-          '''const content = args.contextData.bhaktiSettings?.content;
+          '''const content = c.bhaktiSettings?.content;
 return {
   as: "h1",
   text: content?.pageTitle
@@ -107,7 +107,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const items = args.contextData.bhaktiSettings?.bhakti_items?.bhaktiItems ?? [];
+          '''const items = c.bhaktiSettings?.bhakti_items?.bhaktiItems ?? [];
 return {
   as: "fragment",
   data: items
@@ -138,8 +138,8 @@ return {
       P: {
         css:
           '''return `._id {
-  background: ${args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.background_light_300};
+  background: ${t.var.color.background};
+  border: 1px solid ${t.var.color.background_light_300};
   border-radius: 0.75rem;
   padding: 1.5rem;
   transition: all 0.3s ease;
@@ -152,13 +152,13 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const item = args.contextData.bhaktiItems;
-const index = args.contextData.index ?? 0;
+          '''const item = c.bhaktiItems;
+const index = c.index ?? 0;
 return {
   as: "div",
   "data-animate": "",
 
-  ref: (el) => el && args.fns.animateOnView(el, { delay: index * 0.08 })
+  ref: (el) => el && f.animateOnView(el, { delay: index * 0.08 })
 };'''
       }
     }
@@ -203,7 +203,7 @@ return {
       P: {
         css:
           '''return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   font-size: 1.25rem;
   font-weight: 600;
   margin: 0 0 0.5rem 0;
@@ -211,7 +211,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const item = args.contextData.bhaktiItems;
+          '''const item = c.bhaktiItems;
 return {
   as: "h3",
   text: item.title
@@ -226,8 +226,8 @@ return {
           '''return `._id {
   display: inline-block;
   padding: 0.25rem 0.75rem;
-  background: ${args.theme.var.color.primary_light_100};
-  color: ${args.theme.var.color.primary};
+  background: ${t.var.color.primary_light_100};
+  color: ${t.var.color.primary};
   border-radius: 9999px;
   font-size: 0.75rem;
   font-weight: 500;
@@ -235,7 +235,7 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const item = args.contextData.bhaktiItems;
+          '''const item = c.bhaktiItems;
 return {
   as: "span",
   text: item.language
@@ -248,13 +248,13 @@ return {
       P: {
         css:
           '''return `._id {
-  color: ${args.theme.var.color.text_light_300};
+  color: ${t.var.color.text_light_300};
   font-size: 0.875rem;
 }`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''const item = args.contextData.bhaktiItems;
+          '''const item = c.bhaktiItems;
 return {
   as: "span",
   text: item.duration
@@ -267,7 +267,7 @@ return {
       P: {
         css:
           '''return `._id {
-  color: ${args.theme.var.color.text_light_200};
+  color: ${t.var.color.text_light_200};
   font-size: 0.875rem;
   line-height: 1.6;
   margin: 1rem 0;
@@ -275,7 +275,7 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const item = args.contextData.bhaktiItems;
+          '''const item = c.bhaktiItems;
 return {
   as: "p",
   text: item.description
@@ -294,7 +294,7 @@ return {
         displayOrder: 3
         componentName: Html
         props:
-          '''const item = args.contextData.bhaktiItems;
+          '''const item = c.bhaktiItems;
 return {
   as: "audio",
   controls: true,
@@ -330,8 +330,8 @@ return {
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 1rem;
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
   border-radius: 0.375rem;
   text-decoration: none;
   font-weight: 500;
@@ -339,14 +339,14 @@ return {
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.primary_dark_200};
+    background: ${t.var.color.primary_dark_200};
     transform: translateY(-1px);
   }
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const item = args.contextData.bhaktiItems;
+          '''const item = c.bhaktiItems;
 return {
   as: "a",
   href: item.audioUrl,
@@ -376,7 +376,7 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const content = args.contextData.bhaktiSettings?.content;
+          '''const content = c.bhaktiSettings?.content;
 return {
   as: "span",
   text: content?.downloadAudioText
@@ -393,9 +393,9 @@ return {
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 1rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
-  border: 1px solid ${args.theme.var.color.background_light_400};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
+  border: 1px solid ${t.var.color.background_light_400};
   border-radius: 0.375rem;
   text-decoration: none;
   font-weight: 500;
@@ -403,14 +403,14 @@ return {
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.background_light_200};
+    background: ${t.var.color.background_light_200};
     transform: translateY(-1px);
   }
 }`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''const item = args.contextData.bhaktiItems;
+          '''const item = c.bhaktiItems;
 return {
   as: "a",
   href: item.downloadUrl,
@@ -440,7 +440,7 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const content = args.contextData.bhaktiSettings?.content;
+          '''const content = c.bhaktiSettings?.content;
 return {
   as: "span",
   text: content?.downloadLyricsText

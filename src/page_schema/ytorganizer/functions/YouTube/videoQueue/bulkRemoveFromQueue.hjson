@@ -8,7 +8,7 @@
         body:
           '''
 // Get current authenticated user from session
-const actualUser = await args.getUserFromSession(args.request);
+const actualUser = await _.getUserFromSession(_.request);
 if (!actualUser) {
   return {
     success: false,
@@ -17,10 +17,10 @@ if (!actualUser) {
 }
 
 // Get effective user (handles admin impersonation)
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const user = await _.getEffectiveUser(_.session, actualUser, c);
 
 // Get ownershipId and positions from contextData
-const { ownershipId, positions } = args.contextData;
+const { ownershipId, positions } = c;
 
 if (!ownershipId) {
   return {
@@ -37,7 +37,7 @@ if (!positions || !Array.isArray(positions) || positions.length === 0) {
 }
 
 // Verify ownership belongs to user
-const ownershipCheck = await args.session.run(`
+const ownershipCheck = await _.session.run(`
   MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
   RETURN o
 `, {
@@ -53,7 +53,7 @@ if (ownershipCheck.records.length === 0) {
 }
 
 // Delete all videos at the specified positions
-await args.session.run(`
+await _.session.run(`
   MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideoQueue]->(vq:VideoQueue)
   WHERE vq.position IN $positions
   DETACH DELETE vq
@@ -66,7 +66,7 @@ await args.session.run(`
 // For each deleted position (from highest to lowest), decrement positions greater than it
 const sortedPositions = positions.sort((a, b) => b - a); // Sort descending
 for (const position of sortedPositions) {
-  await args.session.run(`
+  await _.session.run(`
     MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideoQueue]->(vq:VideoQueue)
     WHERE vq.position > $position
     SET vq.position = vq.position - 1, vq.updatedAt = datetime()
@@ -77,7 +77,7 @@ for (const position of sortedPositions) {
 }
 
 // Return updated queue
-const queueResult = await args.session.run(`
+const queueResult = await _.session.run(`
   MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideoQueue]->(vq:VideoQueue)-[:VideoQueueVideo]->(v:Video)
   RETURN v
   ORDER BY vq.position ASC
@@ -86,7 +86,7 @@ const queueResult = await args.session.run(`
 });
 
 const queue = queueResult.records.map(record => {
-  return args.convertNodeToJson(record.get('v'));
+  return _.convertNodeToJson(record.get('v'));
 });
 
 return {

@@ -7,7 +7,7 @@
         description: Enqueues background job to delete a collection in Shopify when a ShopifyProductCategory is deleted.
         body:
           '''
-const { parentVertexLabel, vertexId, operation, result } = args.contextData;
+const { parentVertexLabel, vertexId, operation, result } = c;
 
 if (parentVertexLabel !== 'ShopifyProductCategory' || operation !== 'delete') return;
 
@@ -15,16 +15,16 @@ const deletedData = result?.data;
 const categoryData = deletedData?.P || {};
 if (!categoryData.id) return;
 
-const shop = args.contextData.shop;
+const shop = c.shop;
 if (!shop) { console.log('shopifyProductCategoryAfterDelete: shop not available in contextData'); return; }
 
 try {
-  const helpers = await args.executeNamedServerFunction(
+  const helpers = await s(
     { functionName: 'shopifyQueueHelpers', contextData: {} }
   );
   if (!helpers.result?.success) return;
   const queueName = 'processShopifyProductCategoryAfterDelete';
-  const queue = helpers.result.data.createShopifyQueue(args, queueName);
+  const queue = helpers.result.data.createShopifyQueue(_, queueName);
   const job = await helpers.result.data.addShopifyJob(queue, queueName, {
     shop,
     parentVertexLabel,
@@ -35,7 +35,7 @@ try {
   await queue.close();
   const jobId = job?.id;
   if (vertexId && jobId) {
-    await args.session.run(
+    await _.session.run(
       `MATCH (n:ShopifyProductCategory) WHERE elementId(n) = $elementId SET n.syncStatus = $status, n.syncJobId = $jobId, n.updatedAt = datetime()`,
       { elementId: vertexId, status: 'queued', jobId }
     );

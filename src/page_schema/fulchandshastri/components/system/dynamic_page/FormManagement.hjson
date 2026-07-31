@@ -32,14 +32,14 @@ const isRelationField = (field) => {
 };
 
 // Form state management using Vertex format
-const getFormConfig = () => args.contextData.props?.formConfig;
-const getInitialVertex = () => args.contextData.props?.initialVertex;
-const getMode = () => args.contextData.props?.mode || "add";
+const getFormConfig = () => c.props?.formConfig;
+const getInitialVertex = () => c.props?.initialVertex;
+const getMode = () => c.props?.mode || "add";
 const getVertexLabel = () => {
-  return args.contextData.props?.vertexLabel || "FormData";
+  return c.props?.vertexLabel || "FormData";
 };
 const getClonePropertyOverrides = () => {
-  const overrides = args.contextData.props?.clonePropertyOverrides;
+  const overrides = c.props?.clonePropertyOverrides;
   return overrides != null && typeof overrides === "object" && !Array.isArray(overrides)
     ? overrides
     : {};
@@ -52,19 +52,19 @@ const DEFAULT_SITE_LANGUAGES = [
 ];
 
 const getSiteLanguages = () => {
-  const languages = args.contextData.props?.siteLanguages;
+  const languages = c.props?.siteLanguages;
   if (Array.isArray(languages) && languages.length > 0) return languages;
   return DEFAULT_SITE_LANGUAGES;
 };
 
 // Form vertex ID - vertex will be read from graph
-const [formVertexId, setFormVertexId] = args.createSignal(null);
-const [formTxnId, setFormTxnId] = args.createSignal(0);
-const [errors, setErrors] = args.createStore({});
-const [isSubmitting, setIsSubmitting] = args.createSignal(false);
-const [isFileUploading, setIsFileUploading] = args.createSignal(false);
-const [uploadedContentIds, setUploadedContentIds] = args.createSignal([]);
-const [nestedLineMeta, setNestedLineMeta] = args.createSignal({ deletedIdsByField: {} });
+const [formVertexId, setFormVertexId] = _.createSignal(null);
+const [formTxnId, setFormTxnId] = _.createSignal(0);
+const [errors, setErrors] = _.createStore({});
+const [isSubmitting, setIsSubmitting] = _.createSignal(false);
+const [isFileUploading, setIsFileUploading] = _.createSignal(false);
+const [uploadedContentIds, setUploadedContentIds] = _.createSignal([]);
+const [nestedLineMeta, setNestedLineMeta] = _.createSignal({ deletedIdsByField: {} });
 const resetNestedLineMeta = () => setNestedLineMeta({ deletedIdsByField: {} });
 const rememberUploadedContentIds = (ids) => {
   const list = (Array.isArray(ids) ? ids : ids != null ? [ids] : [])
@@ -88,7 +88,7 @@ const getNestedDeletedIdsForField = (fieldKey) =>
   nestedLineMeta().deletedIdsByField[fieldKey] || [];
 
 // Nested line rows live only as child vertices + edges (see nestedLineItemsConfig.parentToChildRelationshipType).
-// Listed via args.evalExpression(rowsExpression or `->${relationshipType}`, { graph, vertexes: [parent] }).
+// Listed via _.evalExpression(rowsExpression or `->${relationshipType}`, { graph, vertexes: [parent] }).
 const hydrateNestedLineFields = () => {};
 
 // Nested lines are not stored on the parent vertex P[fieldKey]; no placeholder arrays.
@@ -103,13 +103,13 @@ const getFormVertex = () => {
   }
   const vertexId = formVertexId();
   if (!vertexId) return null;
-  return args.graph.vertexes[vertexId] || null;
+  return g.vertexes[vertexId] || null;
 };
 
 // --- Generic field rules (FormContext: { mode, values, user }) ---
 // props.mode accepts "add" | "create" | "edit" | "view"; ctx.mode uses "create" | "edit" | "view".
-// Field rules: visible | disabled | required as boolean, (ctx) => boolean, or string body compiled as (ctx, args) => ...
-// Optional validate: (value, ctx) => string | null, or string body (value, ctx, args).
+// Field rules: visible | disabled | required as boolean, (ctx) => boolean, or string body compiled as (ctx, _) => ...
+// Optional validate: (value, ctx) => string | null, or string body (value, ctx, _).
 const normalizeFormMode = () => {
   const propsMode = getMode();
   if (propsMode === "add" || propsMode === "create") return "create";
@@ -124,7 +124,7 @@ const buildFormContext = () => {
   return {
     mode: normalizeFormMode(),
     values,
-    user: args.user
+    user: _.user
   };
 };
 
@@ -139,7 +139,7 @@ const compileCtxPredicate = (source) => {
     trimmed === "return;";
   const body = hasLeadingReturn ? sourceText : `return (${sourceText});`;
   try {
-    return new Function("ctx", "args", body);
+    return new Function("ctx", "_", body);
   } catch (e) {
     console.warn("FormManagement: invalid predicate string", e);
     return null;
@@ -157,7 +157,7 @@ const compileValueCtxValidate = (source) => {
     trimmed === "return;";
   const body = hasLeadingReturn ? sourceText : `return (${sourceText});`;
   try {
-    return new Function("value", "ctx", "args", body);
+    return new Function("value", "ctx", "_", body);
   } catch (e) {
     console.warn("FormManagement: invalid validate string", e);
     return null;
@@ -182,7 +182,7 @@ const evalFieldRule = (field, key, legacyFallback) => {
     const fn = compileCtxPredicate(raw);
     if (!fn) return legacyFallback;
     try {
-      return Boolean(fn(buildFormContext(), args));
+      return Boolean(fn(buildFormContext(), _));
     } catch (e) {
       console.warn("FormManagement: field rule string", key, field?.key, e);
       return legacyFallback;
@@ -257,7 +257,7 @@ const evalFieldCustomValidate = (field, value) => {
     const fn = compileValueCtxValidate(raw);
     if (!fn) return null;
     try {
-      const msg = fn(value, ctx, args);
+      const msg = fn(value, ctx, _);
       if (msg == null || msg === "") return null;
       return String(msg);
     } catch (e) {
@@ -271,7 +271,7 @@ const evalFieldCustomValidate = (field, value) => {
 const ensureFormTxn = () => {
   let txnId = formTxnId();
   if (!txnId || txnId === 0) {
-    txnId = args.generateNewTxnId(args.graph, args.setGraph);
+    txnId = _.generateNewTxnId(g, sg);
     setFormTxnId(txnId);
   }
   return txnId;
@@ -292,7 +292,7 @@ const getNestedLineVerticesForField = (field) => {
     nestedLineItemsConfig.rowsExpression ||
     `->${nestedLineItemsConfig.parentToChildRelationshipType}`;
   const expressionResult =
-    args.evalExpression(rowsExpression, { graph: args.graph, vertexes: [parent] }) || [];
+    _.evalExpression(rowsExpression, { graph: g, vertexes: [parent] }) || [];
   const rowVertices = Array.isArray(expressionResult) ? expressionResult : [];
   const sortedRowVertices = rowVertices.filter(
     (rowVertex) => rowVertex && typeof rowVertex.id === "string"
@@ -315,9 +315,9 @@ const buildNestedLineRowPayload = (rowVertex, nestedLineItemsConfig) => {
   ) {
     const outgoingEdgeIds = rowVertex.OUT[inventoryRelationshipType];
     for (let edgeIndex = 0; edgeIndex < outgoingEdgeIds.length; edgeIndex++) {
-      const edge = args.graph.edges[outgoingEdgeIds[edgeIndex]];
+      const edge = g.edges[outgoingEdgeIds[edgeIndex]];
       if (!edge) continue;
-      const targetVertex = args.graph.vertexes[edge.E];
+      const targetVertex = g.vertexes[edge.E];
       if (targetVertex?.L?.includes(inventoryTargetLabel)) {
         inventoryItemId = edge.E;
         break;
@@ -326,7 +326,7 @@ const buildNestedLineRowPayload = (rowVertex, nestedLineItemsConfig) => {
   }
   const rowPayload = {
     id: rowVertex.id,
-    ...args.klona(rowVertex.P || {}),
+    ..._.klona(rowVertex.P || {}),
     inventoryItemId
   };
   if (parentElementIdProperty) delete rowPayload[parentElementIdProperty];
@@ -430,9 +430,9 @@ const hydrateTranslationsOntoFormVertex = (txnId, formVertex, sourceVertex, vert
 
   const edgeIds = sourceVertex.OUT?.[edgeType] || [];
   for (let ei = 0; ei < edgeIds.length; ei++) {
-    const edge = args.graph.edges[edgeIds[ei]];
+    const edge = g.edges[edgeIds[ei]];
     if (!edge?.E) continue;
-    const translationVertex = args.graph.vertexes[edge.E];
+    const translationVertex = g.vertexes[edge.E];
     if (!translationVertex?.L?.includes(translationLabel)) continue;
     const locale = translationVertex.P?.locale;
     if (locale == null || String(locale).trim() === "") continue;
@@ -445,14 +445,14 @@ const hydrateTranslationsOntoFormVertex = (txnId, formVertex, sourceVertex, vert
     }
   }
 
-  args.mergeVertexProperties(txnId, formVertex.id, args.graph, args.setGraph, maps);
+  _.mergeVertexProperties(txnId, formVertex.id, g, sg, maps);
 };
 
 // Initialize form from vertex
 const initializeForm = () => {
   const pendingTxn = formTxnId();
   if (pendingTxn && pendingTxn > 0) {
-    args.revertTransaction(pendingTxn);
+    _.revertTransaction(pendingTxn);
     setFormTxnId(0);
   }
 
@@ -480,18 +480,18 @@ const initializeForm = () => {
 
   if (mode === "edit" && initialVertex) {
     // Check if vertex exists in graph
-    const existingVertex = args.graph.vertexes[initialVertex.id];
+    const existingVertex = g.vertexes[initialVertex.id];
 
     if (existingVertex) {
       // Clone vertex before editing so edits don't mutate the original until save
-      const txnId = args.generateNewTxnId(args.graph, args.setGraph);
+      const txnId = _.generateNewTxnId(g, sg);
       setFormTxnId(txnId);
-      const clonedVertex = args.cloneVertexWithEdges(
+      const clonedVertex = _.cloneVertexWithEdges(
         txnId,
         existingVertex,
         getClonePropertyOverrides(),
-        args.graph,
-        args.setGraph,
+        g,
+        sg,
       );
       setFormVertexId(clonedVertex.id);
       // cloneVertexWithEdges copies OUT only — fill incoming relation fields
@@ -501,15 +501,15 @@ const initializeForm = () => {
       hydrateNestedLineFields();
     } else {
       // Vertex doesn't exist in graph, create new vertex with initialVertex properties
-      const txnId = args.generateNewTxnId(args.graph, args.setGraph);
+      const txnId = _.generateNewTxnId(g, sg);
       setFormTxnId(txnId);
 
-      const vertexId = args.generateNewVertexId(args.graph, args.setGraph);
+      const vertexId = _.generateNewVertexId(g, sg);
 
-      const createdVertex = args.newVertex(vertexId, initialVertex.L || [vertexLabel], args.klona(initialVertex.P));
+      const createdVertex = _.newVertex(vertexId, initialVertex.L || [vertexLabel], _.klona(initialVertex.P));
 
       // Add vertex to graph using addNewVertex
-      args.addNewVertex(txnId, createdVertex, args.graph, args.setGraph);
+      _.addNewVertex(txnId, createdVertex, g, sg);
 
       // Store vertex ID instead of vertex object
       setFormVertexId(vertexId);
@@ -520,10 +520,10 @@ const initializeForm = () => {
   } else {
     // Create new vertex using newVertex and generateNewVertexId
     // Generate a new transaction ID (separate from vertex properties)
-    const txnId = args.generateNewTxnId(args.graph, args.setGraph);
+    const txnId = _.generateNewTxnId(g, sg);
     setFormTxnId(txnId);
 
-    const vertexId = args.generateNewVertexId(args.graph, args.setGraph);
+    const vertexId = _.generateNewVertexId(g, sg);
     const initialProperties = {};
 
     // Initialize with default values from all fields
@@ -550,10 +550,10 @@ const initializeForm = () => {
       }
     }
 
-    const createdVertex = args.newVertex(vertexId, [vertexLabel], initialProperties);
+    const createdVertex = _.newVertex(vertexId, [vertexLabel], initialProperties);
 
     // Add vertex to graph using addNewVertex
-    args.addNewVertex(txnId, createdVertex, args.graph, args.setGraph);
+    _.addNewVertex(txnId, createdVertex, g, sg);
 
     // Store vertex ID instead of vertex object
     setFormVertexId(vertexId);
@@ -584,17 +584,17 @@ const applyAutoReferenceSequencesAfterAdd = async () => {
 
   for (const [seqKey, fieldKeys] of bySeqKey.entries()) {
     try {
-      const res = await args.executeNamedServerFunction({
+      const res = await s({
         functionName: "reserveWorkshopReferenceNumber",
         contextData: { sequenceKey: seqKey }
       });
       if (res?.error) {
-        args.showErrorToast?.(String(res.error));
+        _.showErrorToast?.(String(res.error));
         continue;
       }
       const inner = res?.result;
       if (!inner?.success) {
-        args.showErrorToast?.(inner?.message || "Failed to reserve reference number");
+        _.showErrorToast?.(inner?.message || "Failed to reserve reference number");
         continue;
       }
       const val = inner.data?.value;
@@ -604,20 +604,20 @@ const applyAutoReferenceSequencesAfterAdd = async () => {
         setFieldValue(fieldKeys[ki], sval);
       }
     } catch (e) {
-      args.showErrorToast?.(e?.message || "Failed to reserve reference number");
+      _.showErrorToast?.(e?.message || "Failed to reserve reference number");
     }
   }
 };
 
 const getEdgeRelationshipTargets = (vertex, relationshipType, incoming = false) => {
-  if (!vertex || !relationshipType || !args.graph?.edges) return [];
+  if (!vertex || !relationshipType || !g?.edges) return [];
   const eids = incoming
     ? vertex.IN?.[relationshipType]
     : vertex.OUT?.[relationshipType];
   if (!Array.isArray(eids) || eids.length === 0) return [];
   const ids = [];
   for (let i = 0; i < eids.length; i++) {
-    const ed = args.graph.edges[eids[i]];
+    const ed = g.edges[eids[i]];
     if (!ed) continue;
     const targetId = incoming ? ed.S : ed.E;
     if (targetId != null && String(targetId).trim() !== "") ids.push(String(targetId).trim());
@@ -646,15 +646,15 @@ const hydrateIncomingRelationPropsOntoFormVertex = (txnId, formVertex, sourceVer
     if (ids.length > 0) patches[field.key] = ids[0];
   }
   if (Object.keys(patches).length === 0) return;
-  args.mergeVertexProperties(txnId, formVertex.id, args.graph, args.setGraph, patches);
+  _.mergeVertexProperties(txnId, formVertex.id, g, sg, patches);
 };
 
 const vertexOutEdgeContainsTarget = (vertex, relationshipType, targetVertexId) => {
   const outEdges = vertex?.OUT?.[relationshipType];
-  if (!Array.isArray(outEdges) || !args.graph?.edges) return false;
+  if (!Array.isArray(outEdges) || !g?.edges) return false;
   const target = String(targetVertexId).trim();
   for (let i = 0; i < outEdges.length; i++) {
-    const edge = args.graph.edges[outEdges[i]];
+    const edge = g.edges[outEdges[i]];
     if (edge && String(edge.E).trim() === target) return true;
   }
   return false;
@@ -676,27 +676,27 @@ const setEdgeRelationshipTargets = (txnId, vertex, relationshipType, targetIds) 
     : [];
   for (let i = 0; i < previousEdgeIds.length; i++) {
     const edgeId = previousEdgeIds[i];
-    const edge = args.graph.edges[edgeId];
+    const edge = g.edges[edgeId];
     if (!edge) continue;
     if (normalizedIds.includes(String(edge.E).trim())) continue;
-    args.deleteEdge(txnId, edgeId, args.graph, args.setGraph);
+    _.deleteEdge(txnId, edgeId, g, sg);
   }
-  const liveVertex = args.graph.vertexes[vertex.id] || vertex;
+  const liveVertex = g.vertexes[vertex.id] || vertex;
   for (let j = 0; j < normalizedIds.length; j++) {
     const targetVertexId = normalizedIds[j];
-    if (!args.graph.vertexes[targetVertexId]) continue;
+    if (!g.vertexes[targetVertexId]) continue;
     if (vertexOutEdgeContainsTarget(liveVertex, relationshipType, targetVertexId)) continue;
-    args.addNewEdge(
+    _.addNewEdge(
       txnId,
-      args.newEdge(
-        args.generateNewVertexId(args.graph, args.setGraph),
+      _.newEdge(
+        _.generateNewVertexId(g, sg),
         relationshipType,
         {},
         liveVertex.id,
         targetVertexId
       ),
-      args.graph,
-      args.setGraph
+      g,
+      sg
     );
   }
 };
@@ -777,13 +777,13 @@ const setFieldValue = (fieldKey, value) => {
   // Get or generate txnId (separate variable, not stored in vertex)
   let txnId = formTxnId();
   if (!txnId || txnId === 0) {
-    txnId = args.generateNewTxnId(args.graph, args.setGraph);
+    txnId = _.generateNewTxnId(g, sg);
     setFormTxnId(txnId);
   }
 
   if (getFieldRenderer(nestedField) === "embeddedVertexPicker") {
     if (embeddedVertexPickerUsesRelationshipEdge(nestedField)) {
-      const formVertex = args.graph.vertexes[vertexId];
+      const formVertex = g.vertexes[vertexId];
       if (!formVertex) return;
       const selectionMode =
         nestedField.pickerConfiguration?.selectionMode === "multiple" ? "multiple" : "single";
@@ -801,7 +801,7 @@ const setFieldValue = (fieldKey, value) => {
         nestedField.selectConfig.relationshipType,
         targetIds
       );
-      const onFieldChange = args.contextData.props?.onFieldChange;
+      const onFieldChange = c.props?.onFieldChange;
       if (typeof onFieldChange === "function") {
         onFieldChange(fieldKey, value);
       }
@@ -811,9 +811,9 @@ const setFieldValue = (fieldKey, value) => {
 
   // Use mergeVertexProperties to update vertex in graph
   // The vertex will be automatically updated in the graph
-  args.mergeVertexProperties(txnId, vertexId, args.graph, args.setGraph, { [fieldKey]: value });
+  _.mergeVertexProperties(txnId, vertexId, g, sg, { [fieldKey]: value });
 
-  const onFieldChange = args.contextData.props?.onFieldChange;
+  const onFieldChange = c.props?.onFieldChange;
   if (typeof onFieldChange === "function") {
     onFieldChange(fieldKey, value);
   }
@@ -954,24 +954,24 @@ const validate = () => {
 // Handle save
 const handleSave = async () => {
   if (isFileUploading()) {
-    args.showErrorToast?.("Please wait for the file upload to finish");
+    _.showErrorToast?.("Please wait for the file upload to finish");
     return;
   }
 
   if (!validate()) {
-    args.showErrorToast?.("Please fix form errors");
+    _.showErrorToast?.("Please fix form errors");
     return;
   }
 
-  const onSave = args.contextData.props?.onSave;
+  const onSave = c.props?.onSave;
   if (!onSave) {
-    args.showErrorToast?.("Save function not provided");
+    _.showErrorToast?.("Save function not provided");
     return;
   }
 
   const vertex = getFormVertex();
   if (!vertex) {
-    args.showErrorToast?.("Form data not initialized");
+    _.showErrorToast?.("Form data not initialized");
     return;
   }
 
@@ -1078,10 +1078,10 @@ const handleSave = async () => {
     if (result) {
       const txnId = formTxnId();
       if (txnId && txnId > 0) {
-        args.revertTransaction(txnId);
+        _.revertTransaction(txnId);
         setFormTxnId(0);
       }
-      const afterSuccessfulSave = args.contextData.props?.afterSuccessfulSave;
+      const afterSuccessfulSave = c.props?.afterSuccessfulSave;
       if (afterSuccessfulSave === "reinitialize") {
         initializeForm();
       } else {
@@ -1091,7 +1091,7 @@ const handleSave = async () => {
     return result;
   } catch (error) {
     console.error("Error saving:", error);
-    args.showErrorToast?.("Failed to save");
+    _.showErrorToast?.("Failed to save");
     return false;
   } finally {
     setIsSubmitting(false);
@@ -1151,10 +1151,10 @@ const getFieldTooltipMeta = (field) => {
 };
 
 // Expose fns to parent if onFnsReady callback is provided
-const onFnsReady = args.contextData.props?.onFnsReady;
+const onFnsReady = c.props?.onFnsReady;
 let lastReadyVertexId = null;
 if (onFnsReady && typeof onFnsReady === "function") {
-  args.createEffect(() => {
+  _.createEffect(() => {
     const vertexId = formVertexId();
     if (vertexId == null || vertexId === lastReadyVertexId) return;
     lastReadyVertexId = vertexId;
@@ -1200,7 +1200,7 @@ return {
   isFieldDisabled,
   isFieldVisible,
   getFieldTooltipMeta,
-  getUsePolarisUI: () => args.fns.getUsePolarisUI?.() === true,
+  getUsePolarisUI: () => f.getUsePolarisUI?.() === true,
   markNestedLineDeleted,
   getNestedDeletedIdsForField,
   ensureFormTxn,
@@ -1218,13 +1218,13 @@ return {
 };'''
         componentName: Html
         props:
-          '''const containerClass = args.contextData.props?.class || "";
+          '''const containerClass = c.props?.class || "";
 return {
   as: "div",
   class: containerClass,
   onMount: () => {
-    args.fns.initializeForm();
-    void args.fns.applyAutoReferenceSequencesAfterAdd();
+    f.initializeForm();
+    void f.applyAutoReferenceSequencesAfterAdd();
   }
 };'''
       }
@@ -1237,7 +1237,7 @@ return {
           '''return `._id {
   display: flex;
   flex-direction: column;
-  gap: ${args.theme.var.spacing.lg};
+  gap: ${t.var.spacing.lg};
 }`;'''
         displayOrder: 1
         componentName: Html
@@ -1256,7 +1256,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const formConfig = args.fns.getFormConfig();
+          '''const formConfig = f.getFormConfig();
 
 const fieldGroups =
   formConfig?.groups && Array.isArray(formConfig.groups)
@@ -1278,18 +1278,18 @@ return {
       L: Attr
       P: {
         css:
-          '''const group = args.contextData.fieldGroup;
+          '''const group = c.fieldGroup;
 const gridColumns = group?.gridColumns || 1;
 
 return `._id {
   display: grid;
   grid-template-columns: repeat(${gridColumns}, 1fr);
-  gap: ${args.theme.var.spacing.md};
+  gap: ${t.var.spacing.md};
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const group = args.contextData.fieldGroup;
+          '''const group = c.fieldGroup;
 return {
   as: "div",
   hide: !group || group.fields.length === 0
@@ -1301,22 +1301,22 @@ return {
       L: Attr
       P: {
         css:
-          '''const group = args.contextData.fieldGroup;
+          '''const group = c.fieldGroup;
 const gridColumns = group?.gridColumns || 1;
 
 return `._id {
   font-size: 1.125rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
-  padding-bottom: ${args.theme.var.spacing.sm};
-  margin-bottom: ${args.theme.var.spacing.sm};
-  border-bottom: 2px solid ${args.theme.var.color.border};
+  color: ${t.var.color.text};
+  padding-bottom: ${t.var.spacing.sm};
+  margin-bottom: ${t.var.spacing.sm};
+  border-bottom: 2px solid ${t.var.color.border};
   grid-column: 1 / -1;
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const group = args.contextData.fieldGroup;
+          '''const group = c.fieldGroup;
 
 return {
   as: "div",
@@ -1334,14 +1334,14 @@ return {
         displayOrder: 3
         componentName: Html
         props:
-          '''const group = args.contextData.fieldGroup;
+          '''const group = c.fieldGroup;
 const fields = group?.fields || [];
 
 return {
   data: fields,
   contextData: {
     fieldIndex: () => {
-      const index = fields.indexOf(args.contextData.field);
+      const index = fields.indexOf(c.field);
       return index;
     }
   }
@@ -1356,16 +1356,16 @@ return {
           '''return `._id {
   width: 100%;
   height: 1px;
-  background: ${args.theme.var.color.border};
-  margin: ${args.theme.var.spacing.md} 0;
+  background: ${t.var.color.border};
+  margin: ${t.var.spacing.md} 0;
   grid-column: 1 / -1;
 }`;'''
         displayOrder: 0
         componentName: Html
         props:
-          '''const group = args.contextData.fieldGroup;
-const fieldIndex = args.contextData.fieldIndex || 0;
-const field = args.contextData.field;
+          '''const group = c.fieldGroup;
+const fieldIndex = c.fieldIndex || 0;
+const field = c.field;
 
 // Show horizontal line if field has startNewLine (but not for first field if there's a title)
 const showLine = field?.startNewLine && !(fieldIndex === 0 && group?.title);
@@ -1381,8 +1381,8 @@ return {
       L: Attr
       P: {
         css:
-          '''const field = args.contextData.field;
-const group = args.contextData.fieldGroup;
+          '''const field = c.field;
+const group = c.fieldGroup;
 const fieldSpan = field?.colSpan || 1;
 const gridColumns = group?.gridColumns || 1;
 const startNewLine = field?.startNewLine;
@@ -1390,14 +1390,14 @@ const startNewLine = field?.startNewLine;
 return `._id {
   display: flex;
   flex-direction: column;
-  gap: ${args.theme.var.spacing.xs};
+  gap: ${t.var.spacing.xs};
   grid-column: ${startNewLine ? "1 / -1" : `span ${Math.min(fieldSpan, gridColumns)}`};
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const field = args.contextData.field;
-const isVisible = args.fns.isFieldVisible(field);
+          '''const field = c.field;
+const isVisible = f.isFieldVisible(field);
 
 return {
   as: "div",
@@ -1420,10 +1420,10 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const field = args.contextData.field;
+          '''const field = c.field;
 return {
   as: "div",
-  hide: args.fns.getFieldRenderer(field) === "graphFileUpload"
+  hide: f.getFieldRenderer(field) === "graphFileUpload"
 };'''
       }
     }
@@ -1435,17 +1435,17 @@ return {
           '''return `._id {
   font-size: 0.875rem;
   font-weight: 500;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const field = args.contextData.field;
+          '''const field = c.field;
 const label = field.label || field.key;
 
 return {
   as: "label",
-  text: label + (args.fns.isFieldRequired(field) ? " *" : "")
+  text: label + (f.isFieldRequired(field) ? " *" : "")
 };'''
       }
     }
@@ -1456,8 +1456,8 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const field = args.contextData.field;
-const tooltipMeta = args.fns.getFieldTooltipMeta(field);
+          '''const field = c.field;
+const tooltipMeta = f.getFieldTooltipMeta(field);
 
 return {
   componentName: "FloatingHelpTooltip",
@@ -1476,19 +1476,19 @@ return {
           '''return `._id {
   font-size: 0.75rem;
   line-height: 1.35;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin-top: 0;
 }`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''const field = args.contextData.field;
-const tooltipMeta = args.fns.getFieldTooltipMeta(field);
+          '''const field = c.field;
+const tooltipMeta = f.getFieldTooltipMeta(field);
 return {
   as: "div",
   id: `fm-field-hint-${field.key}`,
   text: tooltipMeta.body,
-  hide: args.fns.getFieldRenderer(field) === "graphFileUpload" || !tooltipMeta.showBelow,
+  hide: f.getFieldRenderer(field) === "graphFileUpload" || !tooltipMeta.showBelow,
   "aria-live": "polite"
 };'''
       }
@@ -1498,8 +1498,8 @@ return {
       L: Attr
       P: {
         css:
-          '''const field = args.contextData.field;
-if (args.fns.getFieldRenderer(field) === "graphFileUpload") {
+          '''const field = c.field;
+if (f.getFieldRenderer(field) === "graphFileUpload") {
   return `._id {
   width: auto;
   max-width: 100%;
@@ -1512,17 +1512,17 @@ return `._id {
         displayOrder: 3
         componentName: Html
         props:
-          '''const field = args.contextData.field;
-const value = args.fns.getFieldValue(field.key);
-const setFieldValue = args.fns.setFieldValue;
-const fieldDisabled = args.fns.isFieldDisabled(field);
-const fieldRequired = args.fns.isFieldRequired(field);
-const tooltipMeta = args.fns.getFieldTooltipMeta(field);
+          '''const field = c.field;
+const value = f.getFieldValue(field.key);
+const setFieldValue = f.setFieldValue;
+const fieldDisabled = f.isFieldDisabled(field);
+const fieldRequired = f.isFieldRequired(field);
+const tooltipMeta = f.getFieldTooltipMeta(field);
 const hintId = `fm-field-hint-${field.key}`;
 const accessibility = tooltipMeta.showBelow && tooltipMeta.body ? { "aria-describedby": hintId } : {};
 
 // Render appropriate input from field renderer (+ dataType for validation/input kind)
-if (args.fns.getFieldRenderer(field) === "graphFileUpload") {
+if (f.getFieldRenderer(field) === "graphFileUpload") {
   const baseUploadConfiguration =
     field.uploadConfiguration != null &&
     typeof field.uploadConfiguration === "object" &&
@@ -1534,24 +1534,24 @@ if (args.fns.getFieldRenderer(field) === "graphFileUpload") {
   }
   return {
     componentName: "FileUploader",
-    disabled: fieldDisabled || args.fns.isSubmitting(),
+    disabled: fieldDisabled || f.isSubmitting(),
     uploadConfiguration: baseUploadConfiguration,
     uploadCallbacks: {
       setFieldValue,
-      assignFormVertex: args.fns.assignFormVertex,
-      setFormVertexId: args.fns.setFormVertexId,
-      formVertexId: args.fns.formVertexId,
-      setFormTxnId: args.fns.setFormTxnId,
-      formTxnId: args.fns.formTxnId,
-      revertTransaction: args.revertTransaction,
-      setIsFileUploading: args.fns.setIsFileUploading,
-      onFilesUploaded: args.fns.rememberUploadedContentIds,
+      assignFormVertex: f.assignFormVertex,
+      setFormVertexId: f.setFormVertexId,
+      formVertexId: f.formVertexId,
+      setFormTxnId: f.setFormTxnId,
+      formTxnId: f.formTxnId,
+      revertTransaction: _.revertTransaction,
+      setIsFileUploading: f.setIsFileUploading,
+      onFilesUploaded: f.rememberUploadedContentIds,
     },
     ...accessibility
   };
 }
 
-if (args.fns.getFieldRenderer(field) === "embeddedVertexPicker") {
+if (f.getFieldRenderer(field) === "embeddedVertexPicker") {
   const pickerConfiguration =
     field.pickerConfiguration != null && typeof field.pickerConfiguration === "object"
       ? field.pickerConfiguration
@@ -1560,7 +1560,7 @@ if (args.fns.getFieldRenderer(field) === "embeddedVertexPicker") {
     return { as: "motionFragment", hide: true };
   }
   if (pickerConfiguration.usePolarisUI === undefined) {
-    pickerConfiguration.usePolarisUI = args.fns.getUsePolarisUI?.() === true;
+    pickerConfiguration.usePolarisUI = f.getUsePolarisUI?.() === true;
   }
   const selectionMode =
     pickerConfiguration.selectionMode === "multiple" ? "multiple" : "single";
@@ -1577,8 +1577,8 @@ if (args.fns.getFieldRenderer(field) === "embeddedVertexPicker") {
         ? String(value).trim()
         : "";
   const selectedVertex =
-    selectedElementId && args.graph.vertexes[selectedElementId]
-      ? args.graph.vertexes[selectedElementId]
+    selectedElementId && g.vertexes[selectedElementId]
+      ? g.vertexes[selectedElementId]
       : null;
   const previewFileNamePropertyKey =
     pickerConfiguration.previewFileNameProperty != null
@@ -1601,7 +1601,7 @@ if (args.fns.getFieldRenderer(field) === "embeddedVertexPicker") {
   } else if (pickerConfiguration.buildSecondaryLabelFromVertex === true) {
     if (selectionMode === "multiple" && selectedValues.length > 0) {
       const names = selectedValues
-        .map((id) => args.graph.vertexes[id]?.P?.[previewFileNamePropertyKey])
+        .map((id) => g.vertexes[id]?.P?.[previewFileNamePropertyKey])
         .filter((name) => name != null && String(name).trim() !== "")
         .map((name) => String(name).trim());
       if (names.length === 0) {
@@ -1630,8 +1630,8 @@ if (args.fns.getFieldRenderer(field) === "embeddedVertexPicker") {
     disabled: fieldDisabled,
     pickerConfiguration,
     onSelect: (vertexElementId, selectedVertexPayload) => {
-      if (selectedVertexPayload && !args.graph.vertexes[vertexElementId]) {
-        args.setGraphData(0, { vertexes: { [vertexElementId]: selectedVertexPayload } }, {});
+      if (selectedVertexPayload && !g.vertexes[vertexElementId]) {
+        _.setGraphData(0, { vertexes: { [vertexElementId]: selectedVertexPayload } }, {});
       }
       setFieldValue(field.key, vertexElementId);
     },
@@ -1639,12 +1639,12 @@ if (args.fns.getFieldRenderer(field) === "embeddedVertexPicker") {
       if (Array.isArray(selectedVertexPayloads)) {
         const vertexMap = {};
         for (const selectedVertexPayload of selectedVertexPayloads) {
-          if (selectedVertexPayload?.id && !args.graph.vertexes[selectedVertexPayload.id]) {
+          if (selectedVertexPayload?.id && !g.vertexes[selectedVertexPayload.id]) {
             vertexMap[selectedVertexPayload.id] = selectedVertexPayload;
           }
         }
         if (Object.keys(vertexMap).length > 0) {
-          args.setGraphData(0, { vertexes: vertexMap }, {});
+          _.setGraphData(0, { vertexes: vertexMap }, {});
         }
       }
       setFieldValue(field.key, vertexElementIds);
@@ -1654,34 +1654,34 @@ if (args.fns.getFieldRenderer(field) === "embeddedVertexPicker") {
   };
 }
 
-if (args.fns.getFieldRenderer(field) === "fieldArray" && field.fieldArrayConfig) {
+if (f.getFieldRenderer(field) === "fieldArray" && field.fieldArrayConfig) {
   return {
     componentName: "FormFieldArray",
     field,
-    value: args.fns.getFieldValue(field.key),
+    value: f.getFieldValue(field.key),
     disabled: fieldDisabled,
-    siteLanguages: args.fns.getSiteLanguages?.(),
-    onChange: (nextItems) => args.fns.setFieldValue(field.key, nextItems)
+    siteLanguages: f.getSiteLanguages?.(),
+    onChange: (nextItems) => f.setFieldValue(field.key, nextItems)
   };
 }
 
-if (args.fns.getFieldRenderer(field) === "nestedLineItems" && field.nestedLineItemsConfig) {
+if (f.getFieldRenderer(field) === "nestedLineItems" && field.nestedLineItemsConfig) {
   return {
     componentName: "FormNestedLineItems",
     field,
     disabled: fieldDisabled,
-    getRows: () => args.fns.getNestedLineVerticesForField(field),
-    getParentVertex: () => args.fns.getFormVertex(),
-    ensureTxn: () => args.fns.ensureFormTxn(),
-    markDeleted: (lineId) => args.fns.markNestedLineDeleted(field.key, lineId)
+    getRows: () => f.getNestedLineVerticesForField(field),
+    getParentVertex: () => f.getFormVertex(),
+    ensureTxn: () => f.ensureFormTxn(),
+    markDeleted: (lineId) => f.markNestedLineDeleted(field.key, lineId)
   };
 }
 
-if (args.fns.getFieldRenderer(field) === "textArea") {
-  if (args.fns.isTranslatableTextField(field)) {
+if (f.getFieldRenderer(field) === "textArea") {
+  if (f.isTranslatableTextField(field)) {
     return {
       componentName: "FormLocalizedText",
-      languages: args.fns.getSiteLanguages?.(),
+      languages: f.getSiteLanguages?.(),
       value: value,
       multiline: true,
       onChange: (nextValue) => setFieldValue(field.key, nextValue),
@@ -1702,7 +1702,7 @@ if (args.fns.getFieldRenderer(field) === "textArea") {
 }
 
 if (
-  (args.fns.getFieldRenderer(field) === "multiSelect" || field.multiSelect === true) &&
+  (f.getFieldRenderer(field) === "multiSelect" || field.multiSelect === true) &&
   field.selectConfig &&
   !field.selectConfig.propertyOnly
 ) {
@@ -1747,7 +1747,7 @@ if (
   };
 }
 
-if (args.fns.isRelationField(field) && field.optionsPicklist?.picklistKey) {
+if (f.isRelationField(field) && field.optionsPicklist?.picklistKey) {
   const picklistKey = String(field.optionsPicklist.picklistKey || "").trim();
   return {
     componentName: "TomSelect",
@@ -1769,7 +1769,7 @@ if (args.fns.isRelationField(field) && field.optionsPicklist?.picklistKey) {
   };
 }
 
-if (args.fns.isRelationField(field) && field.selectConfig) {
+if (f.isRelationField(field) && field.selectConfig) {
   const labelFieldName = field.selectConfig.labelField || "name";
   const labelKey = String(labelFieldName).includes(".")
     ? String(labelFieldName)
@@ -1804,7 +1804,7 @@ if (args.fns.isRelationField(field) && field.selectConfig) {
   };
 }
 
-if (args.fns.isRelationField(field) && Array.isArray(field.options)) {
+if (f.isRelationField(field) && Array.isArray(field.options)) {
   return {
     componentName: "TomSelect",
     value: value,
@@ -1819,7 +1819,7 @@ if (args.fns.isRelationField(field) && Array.isArray(field.options)) {
   };
 }
 
-if (args.fns.getFieldDataType(field) === "boolean" || args.fns.getFieldRenderer(field) === "checkbox") {
+if (f.getFieldDataType(field) === "boolean" || f.getFieldRenderer(field) === "checkbox") {
   return {
     as: "input",
     type: "checkbox",
@@ -1832,7 +1832,7 @@ if (args.fns.getFieldDataType(field) === "boolean" || args.fns.getFieldRenderer(
   };
 }
 
-if (args.fns.getFieldDataType(field) === "date") {
+if (f.getFieldDataType(field) === "date") {
   let dateValue = value;
   if (typeof dateValue === "string") {
     if (dateValue.includes("T")) {
@@ -1847,7 +1847,7 @@ if (args.fns.getFieldDataType(field) === "date") {
     value: dateValue || "",
     placeholder: field.placeholder || "",
     required: fieldRequired,
-    disabled: fieldDisabled || args.fns.isSubmitting(),
+    disabled: fieldDisabled || f.isSubmitting(),
     onChange: (e) => {
       setFieldValue(field.key, e.target.value);
     },
@@ -1856,7 +1856,7 @@ if (args.fns.getFieldDataType(field) === "date") {
 }
 
 if (
-  args.fns.getFieldRenderer(field) === "isoDateTime"
+  f.getFieldRenderer(field) === "isoDateTime"
 ) {
   const toDatetimeLocalValue = (raw) => {
     if (raw == null || String(raw).trim() === "") return "";
@@ -1871,7 +1871,7 @@ if (
     value: toDatetimeLocalValue(value),
     placeholder: field.placeholder || "",
     required: fieldRequired,
-    disabled: fieldDisabled || args.fns.isSubmitting(),
+    disabled: fieldDisabled || f.isSubmitting(),
     onChange: (e) => {
       const next = e.target.value;
       if (!next) {
@@ -1889,7 +1889,7 @@ if (
   };
 }
 
-if (args.fns.getFieldDataType(field) === "number") {
+if (f.getFieldDataType(field) === "number") {
   return {
     componentName: "TextInput",
     type: "number",
@@ -1907,10 +1907,10 @@ if (args.fns.getFieldDataType(field) === "number") {
 }
 
 // Default: text input
-if (args.fns.isTranslatableTextField(field) && args.fns.getFieldRenderer(field) === "text") {
+if (f.isTranslatableTextField(field) && f.getFieldRenderer(field) === "text") {
   return {
     componentName: "FormLocalizedText",
-    languages: args.fns.getSiteLanguages?.(),
+    languages: f.getSiteLanguages?.(),
     value: value,
     multiline: false,
     onChange: (nextValue) => setFieldValue(field.key, nextValue),
@@ -1921,7 +1921,7 @@ if (args.fns.isTranslatableTextField(field) && args.fns.getFieldRenderer(field) 
 
 return {
   componentName: "TextInput",
-  type: args.fns.getFieldDataType(field) === "email" ? "email" : "text",
+  type: f.getFieldDataType(field) === "email" ? "email" : "text",
   value: value,
   onChange: (e) => {
     setFieldValue(field.key, e.target.value);
@@ -1942,14 +1942,14 @@ return {
         css:
           '''return `._id {
   font-size: 0.75rem;
-  color: ${args.theme.var.color.error};
+  color: ${t.var.color.error};
   min-height: 1.25rem;
 }`;'''
         displayOrder: 4
         componentName: Html
         props:
-          '''const field = args.contextData.field;
-const error = args.fns.errors[field.key];
+          '''const field = c.field;
+const error = f.errors[field.key];
 
 return {
   as: "div",
@@ -1963,12 +1963,12 @@ return {
       L: Attr
       P: {
         css:
-          '''const inModal = args.contextData.props?.inModal === true;
-const lg = args.theme.var.spacing.lg;
-const md = args.theme.var.spacing.md;
+          '''const inModal = c.props?.inModal === true;
+const lg = t.var.spacing.lg;
+const md = t.var.spacing.md;
 return `._id {
   padding: ${md} ${lg};
-  border-top: 1px solid ${args.theme.var.color.border};
+  border-top: 1px solid ${t.var.color.border};
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -1987,7 +1987,7 @@ return `._id {
         props:
           '''return {
   as: "div",
-  hide: args.fns.getMode?.() === "view" || args.contextData.props?.hideActionsBar === true
+  hide: f.getMode?.() === "view" || c.props?.hideActionsBar === true
 };'''
       }
     }
@@ -1998,13 +1998,13 @@ return `._id {
         displayOrder: 1
         componentName: Html
         props:
-          '''const onClose = args.contextData.props?.onClose;
+          '''const onClose = c.props?.onClose;
 
 const handleCancel = () => {
-  const txnId = args.fns.formTxnId();
+  const txnId = f.formTxnId();
   if (txnId && txnId > 0) {
-    args.revertTransaction(txnId);
-    args.fns.setFormTxnId(0);
+    _.revertTransaction(txnId);
+    f.setFormTxnId(0);
   }
   if (onClose) onClose();
 };
@@ -2014,8 +2014,8 @@ return {
   "attr:variant": "secondary",
   text: "Cancel",
   onClick: handleCancel,
-  disabled: args.fns.isSubmitting() || args.fns.isFileUploading?.() === true,
-  hide: args.fns.getUsePolarisUI?.() !== true
+  disabled: f.isSubmitting() || f.isFileUploading?.() === true,
+  hide: f.getUsePolarisUI?.() !== true
 };'''
       }
     }
@@ -2026,14 +2026,14 @@ return {
         displayOrder: 1
         componentName: Button
         props:
-          '''const onClose = args.contextData.props?.onClose;
+          '''const onClose = c.props?.onClose;
 
 const handleCancel = () => {
   // Cleanup transaction if needed
-  const txnId = args.fns.formTxnId();
+  const txnId = f.formTxnId();
   if (txnId && txnId > 0) {
-    args.revertTransaction(txnId);
-    args.fns.setFormTxnId(0);
+    _.revertTransaction(txnId);
+    f.setFormTxnId(0);
   }
 
   if (onClose) {
@@ -2045,8 +2045,8 @@ return {
   variant: "secondary",
   onClick: handleCancel,
   text: "Cancel",
-  disabled: args.fns.isSubmitting(),
-  hide: args.fns.getUsePolarisUI?.() === true
+  disabled: f.isSubmitting(),
+  hide: f.getUsePolarisUI?.() === true
 };'''
       }
     }
@@ -2060,10 +2060,10 @@ return {
           '''return {
   as: "s-button",
   "attr:variant": "primary",
-  text: args.fns.isFileUploading?.() === true ? "Uploading…" : "Save",
-  onClick: args.fns.handleSave,
-  disabled: args.fns.isSubmitting() || args.fns.isFileUploading?.() === true,
-  hide: args.fns.getUsePolarisUI?.() !== true
+  text: f.isFileUploading?.() === true ? "Uploading…" : "Save",
+  onClick: f.handleSave,
+  disabled: f.isSubmitting() || f.isFileUploading?.() === true,
+  hide: f.getUsePolarisUI?.() !== true
 };'''
       }
     }
@@ -2076,10 +2076,10 @@ return {
         props:
           '''return {
   variant: "primary",
-  onClick: args.fns.handleSave,
-  text: args.fns.isFileUploading?.() === true ? "Uploading…" : "Save",
-  disabled: args.fns.isSubmitting() || args.fns.isFileUploading?.() === true,
-  hide: args.fns.getUsePolarisUI?.() === true
+  onClick: f.handleSave,
+  text: f.isFileUploading?.() === true ? "Uploading…" : "Save",
+  disabled: f.isSubmitting() || f.isFileUploading?.() === true,
+  hide: f.getUsePolarisUI?.() === true
 };'''
       }
     }

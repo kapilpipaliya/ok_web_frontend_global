@@ -14,14 +14,14 @@ const resizeHandleShared = `
     left: 0;
     right: 0;
     height: 1px;
-    background-color: \${args.theme.var.color.border};
+    background-color: \${t.var.color.border};
     transition: all 0.2s ease;
     opacity: 0.5;
   }
 
   &:hover::before {
     height: 2px;
-    background-color: \${args.theme.var.color.primary};
+    background-color: \${t.var.color.primary};
     opacity: 1;
   }
 
@@ -32,14 +32,14 @@ const resizeHandleShared = `
     transform: translateX(-50%);
     width: 40px;
     height: 3px;
-    background-color: \${args.theme.var.color.border};
+    background-color: \${t.var.color.border};
     border-radius: 2px;
     transition: all 0.2s ease;
     opacity: 0;
   }
 
   &:hover::after {
-    background-color: \${args.theme.var.color.primary};
+    background-color: \${t.var.color.primary};
     height: 4px;
     opacity: 1;
   }

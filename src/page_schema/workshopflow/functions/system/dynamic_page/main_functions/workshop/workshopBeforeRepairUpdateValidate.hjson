@@ -8,8 +8,8 @@
         description: Validates repair status transitions and required data before update.
         body:
           '''
-const elementId = args.contextData?.elementId || args.contextData?.data?.vertex?.id;
-const nextData = args.contextData?.data?.vertex?.P || {};
+const elementId = c?.elementId || c?.data?.vertex?.id;
+const nextData = c?.data?.vertex?.P || {};
 const nextStatus = String(nextData.status || "").toLowerCase().trim();
 
 if (!elementId) {
@@ -20,7 +20,7 @@ if (!nextStatus) {
   return { success: true, message: "No status change requested" };
 }
 
-const lookup = await args.session.run(
+const lookup = await _.session.run(
   `
   MATCH (r:RepairOrder)
   WHERE elementId(r) = $elementId
@@ -65,7 +65,7 @@ if (nextStatus === "ready-billing") {
 }
 
 if (nextStatus === "closed") {
-  const invoiceCheck = await args.session.run(
+  const invoiceCheck = await _.session.run(
     `
     MATCH (r:RepairOrder)-[:RepairOrderInvoice]->(i:WorkshopInvoice)
     WHERE elementId(r) = $elementId

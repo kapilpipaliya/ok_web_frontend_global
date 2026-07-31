@@ -87,9 +87,9 @@ export function TabsWithUnderline(
             @media (width >= 52.125rem) {
               line-height: 1.25rem;
             }
-            border-color: \${args.theme.var.color.border};
+            border-color: \${t.var.color.border};
             &:focus {
-              border-color: \${args.theme.var.color.primary};
+              border-color: \${t.var.color.primary};
             }
             border-radius: 0.375rem;
             display: block;
@@ -130,7 +130,7 @@ export function TabsWithUnderline(
           as="div"
           css={`return \`._id {
           border-bottom-width: 1px;
-          border-color: \${args.theme.var.color.border};
+          border-color: \${t.var.color.border};
         }\`;`}
         >
           <As
@@ -166,16 +166,16 @@ export function TabsWithUnderline(
                     }\`;`,
                     tab.id === props.selectedKey
                       ? `return \`._id {
-                          border-color: \${args.theme.var.color.primary};
-                          color: \${args.theme.var.color.primary_dark_200};
+                          border-color: \${t.var.color.primary};
+                          color: \${t.var.color.primary_dark_200};
                         }\`;`
                       : `return \`._id {
                           border-color: transparent;
                           &:hover {
-                            border-color: \${args.theme.var.color.background_light_400};
-                            color: \${args.theme.var.color.primary_dark_400};
+                            border-color: \${t.var.color.background_light_400};
+                            color: \${t.var.color.primary_dark_400};
                           }
-                          color: \${args.theme.var.color.primary};
+                          color: \${t.var.color.primary};
                         }\`;`,
                   ]}
                   onClick={() => props.onTabClick(tab.id)}

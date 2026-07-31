@@ -22,8 +22,8 @@ return `._id {
         fns:
           '''
 // Global confirmation dialog state
-const [isConfirmDialogOpen, setIsConfirmDialogOpen] = args.createSignal(false);
-const [confirmDialogConfig, setConfirmDialogConfig] = args.createStore({
+const [isConfirmDialogOpen, setIsConfirmDialogOpen] = _.createSignal(false);
+const [confirmDialogConfig, setConfirmDialogConfig] = _.createStore({
   title: "Confirm Action",
   message: "Are you sure you want to proceed?",
   confirmText: "Confirm",
@@ -35,13 +35,13 @@ const [confirmDialogConfig, setConfirmDialogConfig] = args.createStore({
 });
 
 // Navigation state
-const [isNavigating, setIsNavigating] = args.createSignal(false);
+const [isNavigating, setIsNavigating] = _.createSignal(false);
 
 // Global confirm function that can be called from anywhere
 const showConfirm = (config) => {
   return new Promise((resolve, reject) => {
     // Use batch to update both config and open state atomically
-    args.batch(() => {
+    _.batch(() => {
       setConfirmDialogConfig({
         title: config.title || "Confirm Action",
         message: config.message || "Are you sure you want to proceed?",
@@ -89,8 +89,8 @@ const navigateTo = async (path, options = {}) => {
   try {
     // Capture current location before navigation
     // This is our reference point to detect when route actually changes
-    const currentPath = args.location.pathname;
-    const currentSearch = args.location.search;
+    const currentPath = _.location.pathname;
+    const currentSearch = _.location.search;
     const currentFull = currentPath + currentSearch;
 
     // Parse the target path to get pathname and search
@@ -112,7 +112,7 @@ const navigateTo = async (path, options = {}) => {
     await new Promise(resolve => setTimeout(resolve, 100));
 
     // Fire the navigation - this may be async and take variable time
-    args.navigate(path, options);
+    _.navigate(path, options);
 
     // Smart location monitoring system
     // Polls until the actual route change is detected (pathname OR search params)
@@ -125,7 +125,7 @@ const navigateTo = async (path, options = {}) => {
           pollCount++;
 
           // Check if pathname OR search params have changed from original
-          const newFull = args.location.pathname + args.location.search;
+          const newFull = _.location.pathname + _.location.search;
           if (newFull !== currentFull) {
             // Success! Route has changed
             // Add small buffer time for new route components to fully render
@@ -178,10 +178,10 @@ return {
 return {
   as: "div",
   data: {
-    showConfirm: args.fns.showConfirm,
-    isConfirmDialogOpen: args.fns.isConfirmDialogOpen,
-    confirmDialogConfig: args.fns.confirmDialogConfig,
-    rbConfirm: args.fns.rbConfirm
+    showConfirm: f.showConfirm,
+    isConfirmDialogOpen: f.isConfirmDialogOpen,
+    confirmDialogConfig: f.confirmDialogConfig,
+    rbConfirm: f.rbConfirm
   }
 };
 '''
@@ -204,8 +204,8 @@ return {
         componentName: ConfirmDialog
         props:
           '''
-const isOpen = args.fns.isConfirmDialogOpen?.();
-const config = args.fns.confirmDialogConfig || {};
+const isOpen = f.isConfirmDialogOpen?.();
+const config = f.confirmDialogConfig || {};
 
 return {
   isOpen: isOpen,
@@ -217,7 +217,7 @@ return {
   loading: config.loading,
   onConfirm: config.onConfirm,
   onCancel: config.onCancel,
-  getUsePolarisUI: args.contextData.props?.getUsePolarisUI?.() === true
+  getUsePolarisUI: c.props?.getUsePolarisUI?.() === true
 };
 '''
       }

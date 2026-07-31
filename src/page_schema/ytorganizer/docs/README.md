@@ -282,7 +282,7 @@ const executeYTOFunction = async (functionName, contextData = {}) => {
   const impersonatedUserUuid = getImpersonatedUserUuid();
   const ownershipId = getSelectedOwnershipId();
 
-  return await args.executeNamedServerFunction({
+  return await _.executeNamedServerFunction({
     functionName,
     contextData: {
       ...contextData,
@@ -302,7 +302,7 @@ const executeYTOFunction = async (functionName, contextData = {}) => {
 **Usage in Pages:**
 ```javascript
 // In any YTO page component - ownershipId is automatically included
-const result = await args.fns.executeYTOFunction('getChannels', {
+const result = await _.fns.executeYTOFunction('getChannels', {
   // Only pass page-specific data, ownershipId auto-injected
 });
 ```
@@ -439,15 +439,15 @@ The system uses the `googleapis` library dynamically imported in server function
 const { google } = await import('googleapis');
 
 // Get user and ownership from context
-const user = await args.getUserFromSession();
-const { ownershipId } = args.contextData;
+const user = await _.getUserFromSession();
+const { ownershipId } = _.contextData;
 
 if (!ownershipId) {
   throw new Error('YouTube Ownership ID is required. Please select a YouTube account.');
 }
 
 // Verify ownership belongs to user and get OAuth token
-const tokenResult = await args.session.run(`
+const tokenResult = await _.session.run(`
   MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
   MATCH (o)-[:YouTubeOwnershipToken]->(token:YouTubeToken)
   RETURN token, o
@@ -477,7 +477,7 @@ const youtube = google.youtube({
 });
 
 // Log API usage for this ownership after each call
-await logAPIUsage(ownershipId, 'channels.list', 1, args.session);
+await logAPIUsage(ownershipId, 'channels.list', 1, _.session);
 ```
 
 ##### Functions
@@ -489,7 +489,7 @@ await logAPIUsage(ownershipId, 'channels.list', 1, args.session);
   - Fetches ALL channel playlists with unlimited pagination
   - Stores `uploadsPlaylistId` in Channel node for accessing all channel videos
   - Creates comprehensive database structure with proper relationships
-  - Implements user authentication with `args.getUserFromSession()`
+  - Implements user authentication with `_.getUserFromSession()`
   - Reuses existing `savePlaylist` function for each channel playlist
   - Videos are accessible through playlists (no direct Channel->Video relationships)
   - Creates user-specific ChannelSetting for channel preferences
@@ -503,17 +503,17 @@ await logAPIUsage(ownershipId, 'channels.list', 1, args.session);
   - Creates user-specific playlist and video settings
   - Implements proper database structure: (User)-[:UserPlaylistSetting]->(PlaylistSetting)-[:PlaylistSettingPlaylist]->(Playlist)
   - Handles playlist-video relationships: (Playlist)-[:PlaylistVideo]->(Video)
-  - Uses `args.getUserFromSession()` for user authentication
+  - Uses `_.getUserFromSession()` for user authentication
   - Comprehensive error handling for YouTube API issues
   - Support for custom playlist names and user preferences
 
 
 ##### Server Function Implementation
 Server functions have access to:
-- `args.session`: Neo4j database session for queries
-- `args.context`: Evaluation context with current data
-- `args.contextData`: Data passed from the component
-- `args.graph`: Graph interface for database operations
+- `_.session`: Neo4j database session for queries
+- `_.context`: Evaluation context with current data
+- `_.contextData`: Data passed from the component
+- `_.graph`: Graph interface for database operations
 - Node.js environment for dynamic imports
 
 ### Theme
@@ -561,11 +561,11 @@ Server functions have access to:
 
 ## State Management
 
-The system uses `args.createStore` for reactive state management:
+The system uses `_.createStore` for reactive state management:
 
 ```javascript
 // Example store usage in component props:
-const [store, setStore] = args.createStore({
+const [store, setStore] = _.createStore({
   channels: [],
   playlists: [],
   videos: [],
@@ -728,8 +728,8 @@ Users can set their preferred language through LanguageSetting vertex:
 1. Navigate to Channels page
 2. Tap floating button
 3. Enter YouTube channel URL or ID and optional custom name
-4. Component calls `args.executeNamedServerFunction` with `saveChannel` function
-5. Server function authenticates user with `args.getUserFromSession()`
+4. Component calls `_.executeNamedServerFunction` with `saveChannel` function
+5. Server function authenticates user with `_.getUserFromSession()`
 6. Extracts channel ID from URL using multiple URL pattern support
 7. Fetches complete channel data from YouTube Data API v3
 8. Fetches ALL channel playlists with unlimited pagination
@@ -743,8 +743,8 @@ Users can set their preferred language through LanguageSetting vertex:
 1. Navigate to Playlists page
 2. Tap floating button
 3. Enter YouTube playlist URL or ID and optional custom name
-4. Component calls `args.executeNamedServerFunction` with `savePlaylist` function
-5. Server function authenticates user with `args.getUserFromSession()`
+4. Component calls `_.executeNamedServerFunction` with `savePlaylist` function
+5. Server function authenticates user with `_.getUserFromSession()`
 6. Extracts playlist ID from URL using multiple URL pattern support
 7. Fetches complete playlist data from YouTube Data API v3 with pagination
 8. Creates/updates Playlist vertex with YouTube metadata
@@ -859,7 +859,7 @@ The VirtualList component uses a child-based rendering pattern where you define 
         componentName: "VirtualList",
         props: '''
 // Filtered items from parent context
-const filteredItems = args.fns.filteredItems();
+const filteredItems = _.fns.filteredItems();
 
 return {
   items: filteredItems,
@@ -879,7 +879,7 @@ return {
         slotName: "children",
         props: '''
 // VirtualList provides item context with {item, virtualItem, index}
-const itemContext = args.contextData.item;
+const itemContext = _.contextData.item;
 const itemData = itemContext.item;
 
 // Access your item data (e.g., channel, playlist, video)
@@ -896,12 +896,12 @@ return `._id {
   display: flex;
   align-items: center;
   padding: 1rem;
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  border-bottom: 1px solid ${_.theme.var.color.border};
   cursor: pointer;
   transition: background 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.background_light_100};
+    background: ${_.theme.var.color.background_light_100};
   }
 }`;
 '''
@@ -914,7 +914,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const itemContext = args.contextData.item;
+const itemContext = _.contextData.item;
 const itemData = itemContext.item;
 const channel = itemData.channel;
 
@@ -942,7 +942,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const itemContext = args.contextData.item;
+const itemContext = _.contextData.item;
 const itemData = itemContext.item;
 const channel = itemData.channel;
 const channelSetting = itemData.channelSetting;
@@ -963,7 +963,7 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const itemContext = args.contextData.item;
+const itemContext = _.contextData.item;
 const itemData = itemContext.item;
 const channel = itemData.channel;
 const channelSetting = itemData.channelSetting;
@@ -979,7 +979,7 @@ return {
 return `._id {
   font-size: 1rem;
   font-weight: 500;
-  color: ${args.theme.var.color.text};
+  color: ${_.theme.var.color.text};
   margin-bottom: 0.25rem;
 }`;
 '''
@@ -992,7 +992,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const itemContext = args.contextData.item;
+const itemContext = _.contextData.item;
 const itemData = itemContext.item;
 const channel = itemData.channel;
 
@@ -1006,7 +1006,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${_.theme.var.color.text_light_500};
 }`;
 '''
       }
@@ -1030,15 +1030,15 @@ return `._id {
    - Virtual items array containing only visible items with their positions
    - Total container height calculation
 
-2. **Context Data** provided to children via `args.contextData.item`:
+2. **Context Data** provided to children via `_.contextData.item`:
    - `item`: The actual data item from the array
    - `virtualItem`: Object with `{ index, start, size }` for positioning
    - `index`: The item's index in the array
 
 3. **Child Components** define rendering:
    - Use `slotName: "children"` to render inside VirtualList's Slot
-   - Access item data via `args.contextData.item.item`
-   - Access positioning info via `args.contextData.item.virtualItem`
+   - Access item data via `_.contextData.item.item`
+   - Access positioning info via `_.contextData.item.virtualItem`
    - Define custom layout and styling
 
 **Performance Benefits:**
@@ -1074,7 +1074,7 @@ return {
   items: myItems,
   itemHeight: () => {
     // Return dynamic height based on state
-    return args.fns.isCompactMode() ? 60 : 90;
+    return _.fns.isCompactMode() ? 60 : 90;
   }
 };
 '''
@@ -1124,7 +1124,7 @@ This is the most important security principle in the YTO codebase. Every databas
 ❌ **WRONG - Global Access:**
 ```javascript
 // BAD: Accessing playlist without ownership verification
-const result = await args.session.run(`
+const result = await _.session.run(`
   MATCH (p:Playlist {youtubeId: $playlistId})
   RETURN p
 `, { playlistId });
@@ -1133,7 +1133,7 @@ const result = await args.session.run(`
 ✅ **CORRECT - Ownership-Verified Access:**
 ```javascript
 // GOOD: Always verify ownership first
-const result = await args.session.run(`
+const result = await _.session.run(`
   MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
   RETURN p
 `, { ownershipId, playlistId });
@@ -1155,7 +1155,7 @@ const result = await args.session.run(`
 **Example from Real Function:**
 ```javascript
 // In deletePlaylist.hjson - even when checking active jobs, verify ownership
-const playlistResult = await args.session.run(`
+const playlistResult = await _.session.run(`
   MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
   RETURN p.title as title
 `, { ownershipId, playlistId });
@@ -1354,7 +1354,7 @@ for (const job of jobs) {
 }
 
 // Step 2: Batch fetch with ownership verification using UNWIND
-const channelResult = await args.session.run(
+const channelResult = await _.session.run(
   `UNWIND $channelRequests AS req
    MATCH (o:YouTubeOwnership {key: req.ownershipId})-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: req.channelId})
    RETURN req.ownershipId as ownershipId, c`,
@@ -1365,7 +1365,7 @@ const channelResult = await args.session.run(
 const channelNameMap = {};
 for (const record of channelResult.records) {
   const ownershipId = record.get('ownershipId');
-  const channel = args.convertNodeToJson(record.get('c'));
+  const channel = _.convertNodeToJson(record.get('c'));
   const key = `${ownershipId}:${channel.P.youtubeId}`;
   channelNameMap[key] = channel.P.title;
 }
@@ -1393,27 +1393,27 @@ Before deploying any new function, verify:
 - Provide offline fallbacks where possible
 - Implement proper error handling
 - Use dynamic imports for external libraries in server functions
-- **Use contextData for data passing**: Pass data to server functions via `args.executeNamedServerFunction` contextData parameter
+- **Use contextData for data passing**: Pass data to server functions via `_.executeNamedServerFunction` contextData parameter
 
 #### Component Integration Examples
 ```javascript
 // RECOMMENDED: Use executeYTOFunction wrapper (automatically includes ownershipId)
 // In YTOAddChannelButton - calling saveChannel server function:
-const result = await args.fns.executeYTOFunction('saveChannel', {
+const result = await _.fns.executeYTOFunction('saveChannel', {
   url: channelUrl,
   name: customName
   // ownershipId automatically injected by wrapper
 });
 
 // In YTOAddPlaylistButton - calling savePlaylist server function:
-const result = await args.fns.executeYTOFunction('savePlaylist', {
+const result = await _.fns.executeYTOFunction('savePlaylist', {
   url: playlistUrl,
   name: customName
   // ownershipId automatically injected by wrapper
 });
 
 // ALTERNATIVE: Direct call (must manually include ownershipId)
-const result = await args.executeNamedServerFunction({
+const result = await _.executeNamedServerFunction({
   functionName: "saveChannel",
   contextData: {
     url: channelUrl,
@@ -1423,7 +1423,7 @@ const result = await args.executeNamedServerFunction({
 });
 
 // Navigate to page with query parameters:
-args.navigate('/channel-detail', {
+_.navigate('/channel-detail', {
   search: '?channelId=UCxyz123'
 });
 ```
@@ -1433,7 +1433,7 @@ args.navigate('/channel-detail', {
 // In server functions - accessing contextData with ownership validation:
 try {
   // Extract data from contextData
-  const { url, name, ownershipId } = args.contextData;
+  const { url, name, ownershipId } = _.contextData;
 
   // Validate ownershipId is provided
   if (!ownershipId) {
@@ -1441,13 +1441,13 @@ try {
   }
 
   // Authenticate user
-  const user = await args.getUserFromSession();
+  const user = await _.getUserFromSession();
   if (!user) {
     throw new Error("User session not found. Please log in and try again.");
   }
 
   // Verify ownership belongs to user
-  const ownershipCheck = await args.session.run(`
+  const ownershipCheck = await _.session.run(`
     MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
     RETURN o
   `, {
@@ -1459,10 +1459,10 @@ try {
     throw new Error("YouTube ownership not found or access denied");
   }
 
-  const ownership = args.convertNodeToJson(ownershipCheck.records[0].get('o'));
+  const ownership = _.convertNodeToJson(ownershipCheck.records[0].get('o'));
 
   // Perform operation with validated ownership
-  const result = await args.session.run(`
+  const result = await _.session.run(`
     MATCH (o:YouTubeOwnership {key: $ownershipId})
     // ... your query here
     RETURN result
@@ -1575,10 +1575,10 @@ const fetchChannelData = async (channelIdentifier) => {
 };
 
 try {
-  const { url, name } = args.contextData;
+  const { url, name } = _.contextData;
 
   // Authenticate user
-  const user = await args.getUserFromSession();
+  const user = await _.getUserFromSession();
   if (!user) throw new Error("User session not found");
 
   // Extract and validate channel identifier
@@ -1589,7 +1589,7 @@ try {
   const channelData = await fetchChannelData(channelIdentifier);
 
   // STEP 1: Create or update the main Channel vertex
-  await args.session.run(\`
+  await _.session.run(\`
     MERGE (c:Channel {youtubeId: $channelId})
     ON CREATE SET c.key = $key, c.createdAt = datetime()
     SET c.title = $title, c.description = $description,
@@ -1601,7 +1601,7 @@ try {
   \`, { /* channel properties including uploadsPlaylistId */ });
 
   // STEP 2: Create ownership -> channel relationship
-  await args.session.run(\`
+  await _.session.run(\`
     MATCH (o:YouTubeOwnership {key: $ownershipId})
     MATCH (c:Channel {youtubeId: $channelId})
     MERGE (o)-[:YouTubeOwnershipChannel]->(c)
@@ -1609,7 +1609,7 @@ try {
 
   // STEP 3: Create optional ChannelSetting if customName provided
   if (customName) {
-    await args.session.run(\`
+    await _.session.run(\`
       MATCH (o:YouTubeOwnership {key: $ownershipId})
       MATCH (c:Channel {youtubeId: $channelId})
       MERGE (c)-[:ChannelChannelSetting]->(cs:ChannelSetting {key: $channelSettingKey})
@@ -1622,13 +1622,13 @@ try {
   // STEP 4: Process all channel playlists using existing savePlaylist function
   for (const playlist of channelData.playlists) {
     const playlistUrl = \`https://www.youtube.com/playlist?list=\${playlist.id}\`;
-    const result = await args.executeNamedServerFunction({
+    const result = await _.executeNamedServerFunction({
       functionName: "savePlaylist",
       contextData: { url: playlistUrl, name: null }
     });
 
     // Create Channel -> Playlist relationship
-    await args.session.run(\`
+    await _.session.run(\`
       MATCH (c:Channel {youtubeId: $channelId})
       MATCH (p:Playlist {youtubeId: $playlistId})
       MERGE (c)-[:ChannelPlaylist]->(p)
@@ -1664,7 +1664,7 @@ try {
 
 **Key Database Structure Features:**
 - **Complete Channel Coverage**: Fetches ALL playlists from the channel
-- **User Authentication**: Uses `args.getUserFromSession()` for secure user identification
+- **User Authentication**: Uses `_.getUserFromSession()` for secure user identification
 - **Comprehensive Relationships**:
   - `(YouTubeOwnership)-[:YouTubeOwnershipChannel]->(Channel)` - Direct ownership
   - `(Channel)-[:ChannelChannelSetting]->(ChannelSetting)` - Optional settings
@@ -1682,7 +1682,7 @@ try {
 **Component Integration:**
 ```javascript
 // In YTOAddChannelButton component:
-const result = await args.executeNamedServerFunction({
+const result = await _.executeNamedServerFunction({
   functionName: "saveChannel",
   contextData: { url: channelUrl, name: customName }
 });
@@ -1710,10 +1710,10 @@ const extractPlaylistId = (url) => {
 };
 
 try {
-  const { url, name } = args.contextData;
+  const { url, name } = _.contextData;
 
   // Authenticate user
-  const user = await args.getUserFromSession();
+  const user = await _.getUserFromSession();
   if (!user) {
     throw new Error("User session not found. Please log in and try again.");
   }
@@ -1749,7 +1749,7 @@ try {
   } while (nextPageToken);
 
   // Create/update Playlist vertex (global YouTube data)
-  await args.session.run(\`
+  await _.session.run(\`
     MERGE (p:Playlist {youtubeId: $playlistId})
     ON CREATE SET p.key = $key, p.createdAt = datetime()
     SET p.title = $title, p.description = $description,
@@ -1769,7 +1769,7 @@ try {
   });
 
   // Create ownership -> playlist relationship
-  await args.session.run(\`
+  await _.session.run(\`
     MATCH (o:YouTubeOwnership {key: $ownershipId})
     MATCH (p:Playlist {youtubeId: $playlistId})
     MERGE (o)-[:YouTubeOwnershipPlaylist]->(p)
@@ -1777,7 +1777,7 @@ try {
 
   // Create optional PlaylistSetting if customName or preferences provided
   if (customName || customOrder) {
-    await args.session.run(\`
+    await _.session.run(\`
       MATCH (o:YouTubeOwnership {key: $ownershipId})
       MATCH (p:Playlist {youtubeId: $playlistId})
       MERGE (p)-[:PlaylistPlaylistSetting]->(ps:PlaylistSetting {key: $playlistSettingKey})
@@ -1799,7 +1799,7 @@ try {
   // Process each video
   for (const video of allVideos) {
     // Create/update Video vertex (global YouTube data)
-    await args.session.run(\`
+    await _.session.run(\`
       MERGE (v:Video {youtubeId: $videoId})
       ON CREATE SET v.key = $key, v.createdAt = datetime()
       SET v.title = $title, v.description = $description,
@@ -1816,7 +1816,7 @@ try {
     });
 
     // Create Playlist -> Video relationship (global playlist membership with position)
-    await args.session.run(\`
+    await _.session.run(\`
       MATCH (p:Playlist {youtubeId: $playlistId})
       MATCH (v:Video {youtubeId: $videoId})
       MERGE (p)-[r:PlaylistVideo]->(v)
@@ -1869,7 +1869,7 @@ try {
 ```
 
 **Key Database Structure Features:**
-- **User Authentication**: Uses `args.getUserFromSession()` for secure user identification
+- **User Authentication**: Uses `_.getUserFromSession()` for secure user identification
 - **Proper Relationships**:
   - `(YouTubeOwnership)-[:YouTubeOwnershipPlaylist]->(Playlist)` - Direct ownership
   - `(Playlist)-[:PlaylistPlaylistSetting]->(PlaylistSetting)` - Optional settings
@@ -1883,7 +1883,7 @@ try {
 **Component Integration:**
 ```javascript
 // In YTOAddPlaylistButton component:
-const result = await args.executeNamedServerFunction({
+const result = await _.executeNamedServerFunction({
   functionName: "savePlaylist",
   contextData: { url: playlistUrl, name: customName }
 });
@@ -1896,7 +1896,7 @@ The system provides reusable helper functions for fetching channels and playlist
 **getChannelsWithVideoCount** - Fetches channels with user-specific video counts:
 ```javascript
 // Basic usage - get all user's channels
-const result = await args.executeNamedServerFunction({
+const result = await _.executeNamedServerFunction({
   functionName: "getChannelsWithVideoCount",
   contextData: {
     userUuid: user.P.uuid
@@ -1904,7 +1904,7 @@ const result = await args.executeNamedServerFunction({
 });
 
 // Filter by specific channel IDs
-const result = await args.executeNamedServerFunction({
+const result = await _.executeNamedServerFunction({
   functionName: "getChannelsWithVideoCount",
   contextData: {
     userUuid: user.P.uuid,
@@ -1913,7 +1913,7 @@ const result = await args.executeNamedServerFunction({
 });
 
 // Filter by status
-const result = await args.executeNamedServerFunction({
+const result = await _.executeNamedServerFunction({
   functionName: "getChannelsWithVideoCount",
   contextData: {
     userUuid: user.P.uuid,
@@ -1922,7 +1922,7 @@ const result = await args.executeNamedServerFunction({
 });
 
 // Custom ordering
-const result = await args.executeNamedServerFunction({
+const result = await _.executeNamedServerFunction({
   functionName: "getChannelsWithVideoCount",
   contextData: {
     userUuid: user.P.uuid,
@@ -1941,7 +1941,7 @@ const result = await args.executeNamedServerFunction({
 **getPlaylistsWithVideoCount** - Fetches playlists with user-specific video counts:
 ```javascript
 // Basic usage - get all user's playlists
-const result = await args.executeNamedServerFunction({
+const result = await _.executeNamedServerFunction({
   functionName: "getPlaylistsWithVideoCount",
   contextData: {
     userUuid: user.P.uuid
@@ -1949,7 +1949,7 @@ const result = await args.executeNamedServerFunction({
 });
 
 // Filter by specific playlist IDs
-const result = await args.executeNamedServerFunction({
+const result = await _.executeNamedServerFunction({
   functionName: "getPlaylistsWithVideoCount",
   contextData: {
     userUuid: user.P.uuid,
@@ -1958,7 +1958,7 @@ const result = await args.executeNamedServerFunction({
 });
 
 // Filter by status with custom ordering
-const result = await args.executeNamedServerFunction({
+const result = await _.executeNamedServerFunction({
   functionName: "getPlaylistsWithVideoCount",
   contextData: {
     userUuid: user.P.uuid,
@@ -2164,7 +2164,7 @@ This documentation serves as the foundation for implementing the YSaar system an
 - ✅ **Quota Reservation System**: Reserve/release quota to prevent race conditions
 - ✅ **Usage Breakdown**: View quota consumption by ownership in admin panel
 - ✅ **Auto-Expiry**: Reservations auto-expire after 5 minutes with quota auto-release
-- ✅ **Shared Functions in Args**: Added to executeNamedServerFunctionCore args object
+- ✅ **Shared Functions in Args**: Added to executeNamedServerFunctionCore _ object
 
 ### Version 3.0 - Multi-Ownership Support
 - ✅ **Multi-Account Support**: Users can connect multiple YouTube accounts to one application account

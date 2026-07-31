@@ -43,7 +43,7 @@ const normalizeLanguages = (rawList) => {
 };
 
 try {
-  const result = await args.session.run(
+  const result = await _.session.run(
     `
     MATCH (g:GlobalSetting {key: 'Default'})-[:GlobalSettingHasSettingsSection]->(doc:SettingsSectionDocument {
       pageId: 'global',

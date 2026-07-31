@@ -51,7 +51,7 @@ export function FileManagerTreeItemContent(
   border: none;
   padding: 0;
   &:hover {
-    color: \${args.theme.var.color.gray_light_110};
+    color: \${t.var.color.gray_light_110};
   }
 }\`;`}
         icon={

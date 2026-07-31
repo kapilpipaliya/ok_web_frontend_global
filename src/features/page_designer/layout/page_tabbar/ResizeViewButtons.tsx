@@ -132,13 +132,13 @@ export const ResizeViewButtons = (props: {
   };
 
   const commonInputCss = `return \`._id {
-    border: 1px solid \${args.theme.var.color.border};
+    border: 1px solid \${t.var.color.border};
     border-radius: 5px;
     padding: 0.15rem;
     width: 4.5rem;
     height: 28px;
-    background-color: \${args.theme.var.color.background_light_100};
-    color: \${args.theme.var.color.text};
+    background-color: \${t.var.color.background_light_100};
+    color: \${t.var.color.text};
   }\`;`;
 
   return (
@@ -154,12 +154,12 @@ export const ResizeViewButtons = (props: {
       <As
         as="select"
         css={`return \`._id {
-  border: 1px solid \${args.theme.var.color.border};
+  border: 1px solid \${t.var.color.border};
   border-radius: 5px;
   padding: 0.15rem;
   height: 28px;
-  background-color: \${args.theme.var.color.background_light_100};
-  color: \${args.theme.var.color.text};
+  background-color: \${t.var.color.background_light_100};
+  color: \${t.var.color.text};
 }\`;`}
         onChange={(e) => handleDimensionSelect(e.target.value)}
         title="Select size"

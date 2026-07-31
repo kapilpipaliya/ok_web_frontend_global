@@ -13,15 +13,15 @@
       P: {
         css:
           '''
-const data = args.fns.quotaData();
+const data = f.quotaData();
 const isOverLimit = data?.isOverLimit || false;
 return `._id {
   position: fixed;
   bottom: 2rem;
   right: 2rem;
   max-width: 400px;
-  background: ${isOverLimit ? args.theme.var.color.error_light_800 : args.theme.var.color.warning_light_800};
-  border: 1px solid ${isOverLimit ? args.theme.var.color.error : args.theme.var.color.warning};
+  background: ${isOverLimit ? t.var.color.error_light_800 : t.var.color.warning_light_800};
+  border: 1px solid ${isOverLimit ? t.var.color.error : t.var.color.warning};
   border-radius: 0.75rem;
   padding: 1.25rem;
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
@@ -52,15 +52,15 @@ return `._id {
         displayOrder: 1
         fns:
           '''
-const [quotaData, setQuotaData] = args.createSignal(null);
-const [isLoading, setIsLoading] = args.createSignal(false);
-const [showWarning, setShowWarning] = args.createSignal(false);
+const [quotaData, setQuotaData] = _.createSignal(null);
+const [isLoading, setIsLoading] = _.createSignal(false);
+const [showWarning, setShowWarning] = _.createSignal(false);
 
 // Check quota
 const checkQuota = async () => {
   try {
     setIsLoading(true);
-    const response = await args.executeNamedServerFunction({
+    const response = await s({
       functionName: "getUserSubscription",
       contextData: {}
     });
@@ -97,8 +97,8 @@ return {
           '''
 return {
   as: "div",
-  hide: () => !args.fns.showWarning(),
-  onMount: args.fns.checkQuota
+  hide: () => !f.showWarning(),
+  onMount: f.checkQuota
 };
 '''
       }
@@ -132,19 +132,19 @@ return {
       P: {
         css:
           '''
-const data = args.fns.quotaData();
+const data = f.quotaData();
 const isOverLimit = data?.isOverLimit || false;
 return `._id {
   font-size: 1rem;
   font-weight: 700;
-  color: ${isOverLimit ? args.theme.var.color.error : args.theme.var.color.warning_dark_300};
+  color: ${isOverLimit ? t.var.color.error : t.var.color.warning_dark_300};
 }`;
 '''
         displayOrder: 1
         componentName: Html
         props:
           '''
-const data = args.fns.quotaData();
+const data = f.quotaData();
 const isOverLimit = data?.isOverLimit || false;
 return {
   as: "div",
@@ -159,12 +159,12 @@ return {
       P: {
         css:
           '''
-const data = args.fns.quotaData();
+const data = f.quotaData();
 const isOverLimit = data?.isOverLimit || false;
 return `._id {
   background: transparent;
   border: none;
-  color: ${isOverLimit ? args.theme.var.color.error : args.theme.var.color.warning_dark_300};
+  color: ${isOverLimit ? t.var.color.error : t.var.color.warning_dark_300};
   font-size: 1.5rem;
   line-height: 1;
   cursor: pointer;
@@ -188,7 +188,7 @@ return `._id {
 return {
   as: "button",
   text: "×",
-  onClick: args.fns.dismissWarning
+  onClick: f.dismissWarning
 };
 '''
       }
@@ -199,11 +199,11 @@ return {
       P: {
         css:
           '''
-const data = args.fns.quotaData();
+const data = f.quotaData();
 const isOverLimit = data?.isOverLimit || false;
 return `._id {
   font-size: 0.875rem;
-  color: ${isOverLimit ? args.theme.var.color.error_dark_300 : args.theme.var.color.warning_dark_300};
+  color: ${isOverLimit ? t.var.color.error_dark_300 : t.var.color.warning_dark_300};
   margin-bottom: 1rem;
   line-height: 1.4;
 }`;
@@ -212,7 +212,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const data = args.fns.quotaData();
+const data = f.quotaData();
 const isOverLimit = data?.isOverLimit || false;
 const used = (data?.videoQuotaUsed || 0).toLocaleString();
 const limit = (data?.videoQuotaLimit || 0).toLocaleString();
@@ -260,13 +260,13 @@ return {
       P: {
         css:
           '''
-const data = args.fns.quotaData();
+const data = f.quotaData();
 const percentage = Math.min(data?.quotaPercentage || 0, 100);
 const isOverLimit = data?.isOverLimit || false;
 return `._id {
   width: ${percentage}%;
   height: 100%;
-  background: ${isOverLimit ? args.theme.var.color.error : args.theme.var.color.warning};
+  background: ${isOverLimit ? t.var.color.error : t.var.color.warning};
   transition: width 0.3s ease;
 }`;
 '''
@@ -307,13 +307,13 @@ return {
       P: {
         css:
           '''
-const data = args.fns.quotaData();
+const data = f.quotaData();
 const isOverLimit = data?.isOverLimit || false;
 return `._id {
   flex: 1;
   padding: 0.625rem 1rem;
-  background: ${isOverLimit ? args.theme.var.color.error : args.theme.var.color.warning};
-  color: ${isOverLimit ? args.theme.var.color.error_text : args.theme.var.color.warning_text};
+  background: ${isOverLimit ? t.var.color.error : t.var.color.warning};
+  color: ${isOverLimit ? t.var.color.error_text : t.var.color.warning_text};
   border: none;
   border-radius: 0.375rem;
   font-size: 0.875rem;
@@ -335,8 +335,8 @@ return {
   as: "button",
   text: "Upgrade Plan",
   onClick: () => {
-    args.navigate("/checkout");
-    args.fns.dismissWarning();
+    _.navigate("/checkout");
+    f.dismissWarning();
   }
 };
 '''
@@ -348,14 +348,14 @@ return {
       P: {
         css:
           '''
-const data = args.fns.quotaData();
+const data = f.quotaData();
 const isOverLimit = data?.isOverLimit || false;
 return `._id {
   flex: 1;
   padding: 0.625rem 1rem;
   background: transparent;
-  color: ${isOverLimit ? args.theme.var.color.error : args.theme.var.color.warning_dark_300};
-  border: 1px solid ${isOverLimit ? args.theme.var.color.error : args.theme.var.color.warning};
+  color: ${isOverLimit ? t.var.color.error : t.var.color.warning_dark_300};
+  border: 1px solid ${isOverLimit ? t.var.color.error : t.var.color.warning};
   border-radius: 0.375rem;
   font-size: 0.875rem;
   font-weight: 600;
@@ -375,8 +375,8 @@ return {
   as: "button",
   text: "View Details",
   onClick: () => {
-    args.navigate("/subscription");
-    args.fns.dismissWarning();
+    _.navigate("/subscription");
+    f.dismissWarning();
   }
 };
 '''

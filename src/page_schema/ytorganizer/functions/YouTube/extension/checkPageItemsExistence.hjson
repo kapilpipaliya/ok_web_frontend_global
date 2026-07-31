@@ -7,22 +7,22 @@
         description: Checks if channels, playlists, and videos from extension page exist in user's collection
         body:
           '''
-const { channels = [], playlists = [], videos = [] } = args.contextData;
+const { channels = [], playlists = [], videos = [] } = c;
 
 // Get current authenticated user from session
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   throw new Error("User session not found. Please log in and try again.");
 }
 
 // Get effective user (handles admin impersonation)
-const effectiveUser = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const effectiveUser = await _.getEffectiveUser(_.session, actualUser, c);
 if (!effectiveUser) {
   throw new Error("User not authenticated");
 }
 
 // Get ownership ID - try from context first, then fetch from user's ownerships
-const ownershipId = args.contextData.ownershipId;
+const ownershipId = c.ownershipId;
 
 if (!ownershipId) {
   throw new Error("YouTube ownership not found. Please connect a YouTube account.");
@@ -65,7 +65,7 @@ if (uniqueChannels.length > 0) {
     .filter(id => id.startsWith('UC')); // Only actual YouTube IDs
 
   // Use existing helper function to fetch channels with video counts
-  const channelsResult = await args.executeNamedServerFunction({
+  const channelsResult = await s({
     functionName: "getChannelsWithVideoCount",
     contextData: {
       userUuid: effectiveUser.P.uuid,
@@ -120,7 +120,7 @@ if (uniquePlaylists.length > 0) {
   const playlistIds = uniquePlaylists.map(p => p.id);
 
   // Use existing helper function to fetch playlists with video counts
-  const playlistsResult = await args.executeNamedServerFunction({
+  const playlistsResult = await s({
     functionName: "getPlaylistsWithVideoCount",
     contextData: {
       userUuid: effectiveUser.P.uuid,
@@ -170,7 +170,7 @@ if (uniqueVideos.length > 0) {
   const videoIds = uniqueVideos.map(v => v.id);
 
   // Use existing helper function to fetch videos with details
-  const videosResult = await args.executeNamedServerFunction({
+  const videosResult = await s({
     functionName: "getVideosWithDetails",
     contextData: {
       userUuid: effectiveUser.P.uuid,

@@ -13,10 +13,10 @@ return {
 ''',
         props: '''
 // Create signals for state management
-const [reportType, setReportType] = args.createSignal('week');
-const [reportsData, setReportsData] = args.createSignal(null);
-const [isLoading, setIsLoading] = args.createSignal(true);
-const [error, setError] = args.createSignal(null);
+const [reportType, setReportType] = _.createSignal('week');
+const [reportsData, setReportsData] = _.createSignal(null);
+const [isLoading, setIsLoading] = _.createSignal(true);
+const [error, setError] = _.createSignal(null);
 
 // Function to fetch reports data
 const fetchReportsData = async (type) => {
@@ -24,7 +24,7 @@ const fetchReportsData = async (type) => {
     setIsLoading(true);
     setError(null);
 
-    const response = await args.executeNamedServerFunction({
+    const response = await s({
       functionName: 'getReportsData',
       contextData: {
         reportType: type,
@@ -36,7 +36,7 @@ const fetchReportsData = async (type) => {
     // Handle error response
     if (response.error) {
       setError(response.error);
-      args.showErrorToast(response.error);
+      _.showErrorToast(response.error);
       return;
     }
 
@@ -46,12 +46,12 @@ const fetchReportsData = async (type) => {
     } else {
       const message = response.result?.message || 'Failed to load reports data';
       setError(message);
-      args.showErrorToast(message);
+      _.showErrorToast(message);
     }
   } catch (err) {
     console.error('Error fetching reports data:', err);
     setError('Failed to load reports data. Please try again.');
-    args.showErrorToast('Failed to load reports data');
+    _.showErrorToast('Failed to load reports data');
   } finally {
     setIsLoading(false);
   }
@@ -102,7 +102,7 @@ return {
 ''',
         css: '''
 return `._id {
-  padding: ${args.theme.var.spacing.xl};
+  padding: ${t.var.spacing.xl};
   max-width: 1200px;
   margin: 0 auto;
   min-height: calc(100vh - 120px);
@@ -110,7 +110,7 @@ return `._id {
 
 @media (max-width: 768px) {
   ._id {
-    padding: ${args.theme.var.spacing.md};
+    padding: ${t.var.spacing.md};
   }
 }`;
 '''
@@ -124,12 +124,12 @@ return `._id {
         componentName: "RBHeader",
         css: '''
 return `._id {
-  margin-bottom: ${args.theme.var.spacing.xxl};
+  margin-bottom: ${t.var.spacing.xxl};
 }
 
 @media (max-width: 768px) {
   ._id {
-    margin-bottom: ${args.theme.var.spacing.xl};
+    margin-bottom: ${t.var.spacing.xl};
   }
 }`;
 '''
@@ -158,7 +158,7 @@ return {
         slotName: "right",
         props: '''
 const exportData = () => {
-  const data = args.contextData?.reportsPageContext?.reportsData?.();
+  const data = c?.reportsPageContext?.reportsData?.();
   if (data) {
     const jsonStr = JSON.stringify(data, null, 2);
     const blob = new Blob([jsonStr], { type: 'application/json' });
@@ -168,7 +168,7 @@ const exportData = () => {
     a.download = `rulebook-report-${data.reportType}-${new Date().toISOString().split('T')[0]}.json`;
     a.click();
     URL.revokeObjectURL(url);
-    args.showSuccessToast('Report exported successfully!');
+    _.showSuccessToast('Report exported successfully!');
   }
 };
 
@@ -180,22 +180,22 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.border};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  border: 1px solid ${t.var.color.border};
+  color: ${t.var.color.text};
   cursor: pointer;
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  border-radius: ${args.theme.var.borderRadius.md};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  border-radius: ${t.var.borderRadius.md};
   transition: all 300ms ease;
   display: flex;
   align-items: center;
-  gap: ${args.theme.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
   font-weight: 500;
 }
 
 ._id:hover {
-  background: ${args.theme.var.color.background_dark_200};
-  border-color: ${args.theme.var.color.primary};
+  background: ${t.var.color.background_dark_200};
+  border-color: ${t.var.color.primary};
   transform: translateY(-1px);
 }
 
@@ -253,9 +253,9 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const reportType = args.contextData?.reportsPageContext?.reportType?.();
-const setReportType = args.contextData?.reportsPageContext?.setReportType;
-const fetchReportsData = args.contextData?.reportsPageContext?.fetchReportsData;
+const reportType = c?.reportsPageContext?.reportType?.();
+const setReportType = c?.reportsPageContext?.setReportType;
+const fetchReportsData = c?.reportsPageContext?.fetchReportsData;
 
 return {
   as: "div",
@@ -267,11 +267,11 @@ return {
 return `._id {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: ${args.theme.var.spacing.xs};
-  margin-bottom: ${args.theme.var.spacing.xxl};
-  background: ${args.theme.var.color.background_dark_200};
-  padding: ${args.theme.var.spacing.xs};
-  border-radius: ${args.theme.var.borderRadius.lg};
+  gap: ${t.var.spacing.xs};
+  margin-bottom: ${t.var.spacing.xxl};
+  background: ${t.var.color.background_dark_200};
+  padding: ${t.var.spacing.xs};
+  border-radius: ${t.var.borderRadius.lg};
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
@@ -290,9 +290,9 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const reportType = args.contextData?.timeTabs?.reportType;
-const setReportType = args.contextData?.timeTabs?.setReportType;
-const fetchReportsData = args.contextData?.timeTabs?.fetchReportsData;
+const reportType = c?.timeTabs?.reportType;
+const setReportType = c?.timeTabs?.setReportType;
+const fetchReportsData = c?.timeTabs?.fetchReportsData;
 const isActive = reportType === "day";
 
 const handleClick = () => {
@@ -309,15 +309,15 @@ return {
 };
 ''',
         css: '''
-const reportType = args.contextData?.timeTabs?.reportType;
+const reportType = c?.timeTabs?.reportType;
 const isActive = reportType === "day";
 
 return `._id {
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  background: ${isActive ? args.theme.var.color.background : 'transparent'};
-  color: ${isActive ? args.theme.var.color.text : args.theme.var.color.text_light_500};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  background: ${isActive ? t.var.color.background : 'transparent'};
+  color: ${isActive ? t.var.color.text : t.var.color.text_light_500};
   border: none;
-  border-radius: ${args.theme.var.borderRadius.sm};
+  border-radius: ${t.var.borderRadius.sm};
   font-weight: ${isActive ? '600' : '500'};
   cursor: pointer;
   transition: all 300ms ease;
@@ -325,7 +325,7 @@ return `._id {
 }
 
 ._id:hover:not(:disabled) {
-  background: ${isActive ? args.theme.var.color.background : args.theme.var.color.background_dark_100};
+  background: ${isActive ? t.var.color.background : t.var.color.background_dark_100};
 }`;
 '''
       }
@@ -337,9 +337,9 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const reportType = args.contextData?.timeTabs?.reportType;
-const setReportType = args.contextData?.timeTabs?.setReportType;
-const fetchReportsData = args.contextData?.timeTabs?.fetchReportsData;
+const reportType = c?.timeTabs?.reportType;
+const setReportType = c?.timeTabs?.setReportType;
+const fetchReportsData = c?.timeTabs?.fetchReportsData;
 const isActive = reportType === "week";
 
 const handleClick = () => {
@@ -356,15 +356,15 @@ return {
 };
 ''',
         css: '''
-const reportType = args.contextData?.timeTabs?.reportType;
+const reportType = c?.timeTabs?.reportType;
 const isActive = reportType === "week";
 
 return `._id {
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  background: ${isActive ? args.theme.var.color.background : 'transparent'};
-  color: ${isActive ? args.theme.var.color.text : args.theme.var.color.text_light_500};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  background: ${isActive ? t.var.color.background : 'transparent'};
+  color: ${isActive ? t.var.color.text : t.var.color.text_light_500};
   border: none;
-  border-radius: ${args.theme.var.borderRadius.sm};
+  border-radius: ${t.var.borderRadius.sm};
   font-weight: ${isActive ? '600' : '500'};
   cursor: pointer;
   transition: all 300ms ease;
@@ -372,7 +372,7 @@ return `._id {
 }
 
 ._id:hover:not(:disabled) {
-  background: ${isActive ? args.theme.var.color.background : args.theme.var.color.background_dark_100};
+  background: ${isActive ? t.var.color.background : t.var.color.background_dark_100};
 }`;
 '''
       }
@@ -384,9 +384,9 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const reportType = args.contextData?.timeTabs?.reportType;
-const setReportType = args.contextData?.timeTabs?.setReportType;
-const fetchReportsData = args.contextData?.timeTabs?.fetchReportsData;
+const reportType = c?.timeTabs?.reportType;
+const setReportType = c?.timeTabs?.setReportType;
+const fetchReportsData = c?.timeTabs?.fetchReportsData;
 const isActive = reportType === "month";
 
 const handleClick = () => {
@@ -403,15 +403,15 @@ return {
 };
 ''',
         css: '''
-const reportType = args.contextData?.timeTabs?.reportType;
+const reportType = c?.timeTabs?.reportType;
 const isActive = reportType === "month";
 
 return `._id {
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  background: ${isActive ? args.theme.var.color.background : 'transparent'};
-  color: ${isActive ? args.theme.var.color.text : args.theme.var.color.text_light_500};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  background: ${isActive ? t.var.color.background : 'transparent'};
+  color: ${isActive ? t.var.color.text : t.var.color.text_light_500};
   border: none;
-  border-radius: ${args.theme.var.borderRadius.sm};
+  border-radius: ${t.var.borderRadius.sm};
   font-weight: ${isActive ? '600' : '500'};
   cursor: pointer;
   transition: all 300ms ease;
@@ -419,7 +419,7 @@ return `._id {
 }
 
 ._id:hover:not(:disabled) {
-  background: ${isActive ? args.theme.var.color.background : args.theme.var.color.background_dark_100};
+  background: ${isActive ? t.var.color.background : t.var.color.background_dark_100};
 }`;
 '''
       }
@@ -431,9 +431,9 @@ return `._id {
         displayOrder: 4,
         componentName: "Html",
         props: '''
-const reportType = args.contextData?.timeTabs?.reportType;
-const setReportType = args.contextData?.timeTabs?.setReportType;
-const fetchReportsData = args.contextData?.timeTabs?.fetchReportsData;
+const reportType = c?.timeTabs?.reportType;
+const setReportType = c?.timeTabs?.setReportType;
+const fetchReportsData = c?.timeTabs?.fetchReportsData;
 const isActive = reportType === "year";
 
 const handleClick = () => {
@@ -450,15 +450,15 @@ return {
 };
 ''',
         css: '''
-const reportType = args.contextData?.timeTabs?.reportType;
+const reportType = c?.timeTabs?.reportType;
 const isActive = reportType === "year";
 
 return `._id {
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  background: ${isActive ? args.theme.var.color.background : 'transparent'};
-  color: ${isActive ? args.theme.var.color.text : args.theme.var.color.text_light_500};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  background: ${isActive ? t.var.color.background : 'transparent'};
+  color: ${isActive ? t.var.color.text : t.var.color.text_light_500};
   border: none;
-  border-radius: ${args.theme.var.borderRadius.sm};
+  border-radius: ${t.var.borderRadius.sm};
   font-weight: ${isActive ? '600' : '500'};
   cursor: pointer;
   transition: all 300ms ease;
@@ -466,7 +466,7 @@ return `._id {
 }
 
 ._id:hover:not(:disabled) {
-  background: ${isActive ? args.theme.var.color.background : args.theme.var.color.background_dark_100};
+  background: ${isActive ? t.var.color.background : t.var.color.background_dark_100};
 }`;
 '''
       }
@@ -478,7 +478,7 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const isLoading = args.contextData?.reportsPageContext?.isLoading?.();
+const isLoading = c?.reportsPageContext?.isLoading?.();
 
 return {
   as: "div",
@@ -491,7 +491,7 @@ return `._id {
   justify-content: center;
   align-items: center;
   min-height: 400px;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
       }
@@ -518,7 +518,7 @@ return {
         displayOrder: 4,
         componentName: "Html",
         props: '''
-const error = args.contextData?.reportsPageContext?.error?.();
+const error = c?.reportsPageContext?.error?.();
 
 return {
   as: "div",
@@ -527,12 +527,12 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.error_light_100};
-  border: 1px solid ${args.theme.var.color.error_light_300};
-  color: ${args.theme.var.color.error_dark_700};
-  padding: ${args.theme.var.spacing.md};
-  border-radius: ${args.theme.var.borderRadius.md};
-  margin-bottom: ${args.theme.var.spacing.xl};
+  background: ${t.var.color.error_light_100};
+  border: 1px solid ${t.var.color.error_light_300};
+  color: ${t.var.color.error_dark_700};
+  padding: ${t.var.spacing.md};
+  border-radius: ${t.var.borderRadius.md};
+  margin-bottom: ${t.var.spacing.xl};
 }`;
 '''
       }
@@ -544,7 +544,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const error = args.contextData?.reportsPageContext?.error?.();
+const error = c?.reportsPageContext?.error?.();
 
 return {
   as: "p",
@@ -565,8 +565,8 @@ return `._id {
         displayOrder: 5,
         componentName: "Html",
         props: '''
-const isLoading = args.contextData?.reportsPageContext?.isLoading?.();
-const error = args.contextData?.reportsPageContext?.error?.();
+const isLoading = c?.reportsPageContext?.isLoading?.();
+const error = c?.reportsPageContext?.error?.();
 
 return {
   as: "div",
@@ -576,7 +576,7 @@ return {
         css: '''
 return `._id {
   display: grid;
-  gap: ${args.theme.var.spacing.xl};
+  gap: ${t.var.spacing.xl};
 }`;
 '''
       }
@@ -596,8 +596,8 @@ return {
 return `._id {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: ${args.theme.var.spacing.md};
-  margin-bottom: ${args.theme.var.spacing.xl};
+  gap: ${t.var.spacing.md};
+  margin-bottom: ${t.var.spacing.xl};
 }
 
 @media (max-width: 640px) {
@@ -620,18 +620,18 @@ return {
 };
 ''',
         css: '''
-const data = args.contextData?.reportsPageContext?.reportsData?.();
+const data = c?.reportsPageContext?.reportsData?.();
 const rate = data?.summary?.completionRate || 0;
-const color = rate >= 80 ? args.theme.var.color.success :
-              rate >= 60 ? args.theme.var.color.info :
-              rate >= 40 ? args.theme.var.color.warning :
-              args.theme.var.color.error;
+const color = rate >= 80 ? t.var.color.success :
+              rate >= 60 ? t.var.color.info :
+              rate >= 40 ? t.var.color.warning :
+              t.var.color.error;
 
 return `._id {
-  background: ${args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.lg};
-  padding: ${args.theme.var.spacing.lg};
+  background: ${t.var.color.background};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.lg};
+  padding: ${t.var.spacing.lg};
   text-align: center;
   transition: all 300ms ease;
 }
@@ -659,8 +659,8 @@ return {
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
-  margin: 0 0 ${args.theme.var.spacing.sm} 0;
+  color: ${t.var.color.text_light_500};
+  margin: 0 0 ${t.var.spacing.sm} 0;
   font-weight: 500;
 }`;
 '''
@@ -673,7 +673,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const data = args.contextData?.reportsPageContext?.reportsData?.();
+const data = c?.reportsPageContext?.reportsData?.();
 const rate = data?.summary?.completionRate || 0;
 
 return {
@@ -682,12 +682,12 @@ return {
 };
 ''',
         css: '''
-const data = args.contextData?.reportsPageContext?.reportsData?.();
+const data = c?.reportsPageContext?.reportsData?.();
 const rate = data?.summary?.completionRate || 0;
-const color = rate >= 80 ? args.theme.var.color.success :
-              rate >= 60 ? args.theme.var.color.info :
-              rate >= 40 ? args.theme.var.color.warning :
-              args.theme.var.color.error;
+const color = rate >= 80 ? t.var.color.success :
+              rate >= 60 ? t.var.color.info :
+              rate >= 40 ? t.var.color.warning :
+              t.var.color.error;
 
 return `._id {
   font-size: 2.25rem;
@@ -711,10 +711,10 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.lg};
-  padding: ${args.theme.var.spacing.lg};
+  background: ${t.var.color.background};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.lg};
+  padding: ${t.var.spacing.lg};
   text-align: center;
   transition: all 300ms ease;
 }
@@ -722,7 +722,7 @@ return `._id {
 ._id:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border-color: ${args.theme.var.color.success};
+  border-color: ${t.var.color.success};
 }`;
 '''
       }
@@ -742,8 +742,8 @@ return {
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
-  margin: 0 0 ${args.theme.var.spacing.sm} 0;
+  color: ${t.var.color.text_light_500};
+  margin: 0 0 ${t.var.spacing.sm} 0;
   font-weight: 500;
 }`;
 '''
@@ -756,7 +756,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const data = args.contextData?.reportsPageContext?.reportsData?.();
+const data = c?.reportsPageContext?.reportsData?.();
 const value = data?.summary?.completed || 0;
 
 return {
@@ -768,7 +768,7 @@ return {
 return `._id {
   font-size: 2.25rem;
   font-weight: 700;
-  color: ${args.theme.var.color.success};
+  color: ${t.var.color.success};
   margin: 0;
 }`;
 '''
@@ -787,10 +787,10 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.lg};
-  padding: ${args.theme.var.spacing.lg};
+  background: ${t.var.color.background};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.lg};
+  padding: ${t.var.spacing.lg};
   text-align: center;
   transition: all 300ms ease;
 }
@@ -798,7 +798,7 @@ return `._id {
 ._id:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border-color: ${args.theme.var.color.warning};
+  border-color: ${t.var.color.warning};
 }`;
 '''
       }
@@ -818,8 +818,8 @@ return {
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
-  margin: 0 0 ${args.theme.var.spacing.sm} 0;
+  color: ${t.var.color.text_light_500};
+  margin: 0 0 ${t.var.spacing.sm} 0;
   font-weight: 500;
 }`;
 '''
@@ -832,7 +832,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const data = args.contextData?.reportsPageContext?.reportsData?.();
+const data = c?.reportsPageContext?.reportsData?.();
 const value = data?.summary?.partial || 0;
 
 return {
@@ -844,7 +844,7 @@ return {
 return `._id {
   font-size: 2.25rem;
   font-weight: 700;
-  color: ${args.theme.var.color.warning};
+  color: ${t.var.color.warning};
   margin: 0;
 }`;
 '''
@@ -863,10 +863,10 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.lg};
-  padding: ${args.theme.var.spacing.lg};
+  background: ${t.var.color.background};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.lg};
+  padding: ${t.var.spacing.lg};
   text-align: center;
   transition: all 300ms ease;
 }
@@ -874,7 +874,7 @@ return `._id {
 ._id:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border-color: ${args.theme.var.color.error};
+  border-color: ${t.var.color.error};
 }`;
 '''
       }
@@ -894,8 +894,8 @@ return {
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
-  margin: 0 0 ${args.theme.var.spacing.sm} 0;
+  color: ${t.var.color.text_light_500};
+  margin: 0 0 ${t.var.spacing.sm} 0;
   font-weight: 500;
 }`;
 '''
@@ -908,7 +908,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const data = args.contextData?.reportsPageContext?.reportsData?.();
+const data = c?.reportsPageContext?.reportsData?.();
 const value = data?.summary?.missed || 0;
 
 return {
@@ -920,7 +920,7 @@ return {
 return `._id {
   font-size: 2.25rem;
   font-weight: 700;
-  color: ${args.theme.var.color.error};
+  color: ${t.var.color.error};
   margin: 0;
 }`;
 '''
@@ -939,15 +939,15 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.xl};
-  padding: ${args.theme.var.spacing.xl};
+  background: ${t.var.color.background};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.xl};
+  padding: ${t.var.spacing.xl};
 }
 
 @media (max-width: 768px) {
   ._id {
-    padding: ${args.theme.var.spacing.md};
+    padding: ${t.var.spacing.md};
   }
 }`;
 '''
@@ -969,8 +969,8 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 ${args.theme.var.spacing.xl} 0;
+  color: ${t.var.color.text};
+  margin: 0 0 ${t.var.spacing.xl} 0;
 }`;
 '''
       }
@@ -1012,7 +1012,7 @@ return `._id {
         displayOrder: 1,
         componentName: "RBD3Chart",
         props: '''
-const reportsData = args.contextData?.reportsPageContext?.reportsData?.();
+const reportsData = c?.reportsPageContext?.reportsData?.();
 
 if (!reportsData?.chartData) {
   const isMobile = window.innerWidth <= 768;
@@ -1033,20 +1033,20 @@ const chartData = {
     {
       label: 'Completed',
       data: reportsData.chartData?.completedData || [],
-      backgroundColor: args.theme.var.color.success + '80',
-      borderColor: args.theme.var.color.success
+      backgroundColor: t.var.color.success + '80',
+      borderColor: t.var.color.success
     },
     {
       label: 'Partial',
       data: reportsData.chartData?.partialData || [],
-      backgroundColor: args.theme.var.color.warning + '60',
-      borderColor: args.theme.var.color.warning
+      backgroundColor: t.var.color.warning + '60',
+      borderColor: t.var.color.warning
     },
     {
       label: 'Missed',
       data: reportsData.chartData?.missedData || [],
-      backgroundColor: args.theme.var.color.error + '40',
-      borderColor: args.theme.var.color.error
+      backgroundColor: t.var.color.error + '40',
+      borderColor: t.var.color.error
     }
   ]
 };
@@ -1080,8 +1080,8 @@ return {
 return `._id {
   display: grid;
   grid-template-columns: 2fr 1fr;
-  gap: ${args.theme.var.spacing.xl};
-  margin-bottom: ${args.theme.var.spacing.xl};
+  gap: ${t.var.spacing.xl};
+  margin-bottom: ${t.var.spacing.xl};
 }
 
 @media (max-width: 1024px) {
@@ -1105,15 +1105,15 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.xl};
-  padding: ${args.theme.var.spacing.xl};
+  background: ${t.var.color.background};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.xl};
+  padding: ${t.var.spacing.xl};
 }
 
 @media (max-width: 768px) {
   ._id {
-    padding: ${args.theme.var.spacing.md};
+    padding: ${t.var.spacing.md};
   }
 }`;
 '''
@@ -1132,10 +1132,10 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.xl};
-  padding: ${args.theme.var.spacing.xl};
+  background: ${t.var.color.background};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.xl};
+  padding: ${t.var.spacing.xl};
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1143,7 +1143,7 @@ return `._id {
 
 @media (max-width: 768px) {
   ._id {
-    padding: ${args.theme.var.spacing.md};
+    padding: ${t.var.spacing.md};
   }
 }`;
 '''
@@ -1165,8 +1165,8 @@ return {
 return `._id {
   font-size: 1.125rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 ${args.theme.var.spacing.lg} 0;
+  color: ${t.var.color.text};
+  margin: 0 0 ${t.var.spacing.lg} 0;
 }`;
 '''
       }
@@ -1178,7 +1178,7 @@ return `._id {
         displayOrder: 2,
         componentName: "RBD3Chart",
         props: '''
-const reportsData = args.contextData?.reportsPageContext?.reportsData?.();
+const reportsData = c?.reportsPageContext?.reportsData?.();
 
 if (!reportsData?.categories || reportsData.categories.length === 0) {
   const isMobile = window.innerWidth <= 768;
@@ -1202,8 +1202,8 @@ const chartData = {
     {
       label: 'Completion Rate (%)',
       data: categories.map(cat => cat.stats?.completionRate || 0),
-      backgroundColor: categories.map(cat => cat.category?.P?.color || args.theme.var.color.primary + "80"),
-      borderColor: categories.map(cat => cat.category?.P?.color || args.theme.var.color.primary)
+      backgroundColor: categories.map(cat => cat.category?.P?.color || t.var.color.primary + "80"),
+      borderColor: categories.map(cat => cat.category?.P?.color || t.var.color.primary)
     }
   ]
 };
@@ -1238,8 +1238,8 @@ return {
 return `._id {
   font-size: 1.125rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 ${args.theme.var.spacing.lg} 0;
+  color: ${t.var.color.text};
+  margin: 0 0 ${t.var.spacing.lg} 0;
   text-align: center;
 }`;
 '''
@@ -1252,7 +1252,7 @@ return `._id {
         displayOrder: 2,
         componentName: "RBD3Chart",
         props: '''
-const reportsData = args.contextData?.reportsPageContext?.reportsData?.();
+const reportsData = c?.reportsPageContext?.reportsData?.();
 
 if (!reportsData?.summary) {
   const isMobile = window.innerWidth <= 768;
@@ -1278,14 +1278,14 @@ const chartData = {
       label: "Status Distribution",
       data: [completed, partial, missed],
       backgroundColor: [
-        args.theme.var.color.success + "80",
-        args.theme.var.color.warning + "80",
-        args.theme.var.color.error + "80"
+        t.var.color.success + "80",
+        t.var.color.warning + "80",
+        t.var.color.error + "80"
       ],
       borderColor: [
-        args.theme.var.color.success,
-        args.theme.var.color.warning,
-        args.theme.var.color.error
+        t.var.color.success,
+        t.var.color.warning,
+        t.var.color.error
       ]
     }
   ]
@@ -1311,7 +1311,7 @@ return {
         displayOrder: 4,
         componentName: "Html",
         props: '''
-const data = args.contextData?.reportsPageContext?.reportsData?.();
+const data = c?.reportsPageContext?.reportsData?.();
 const hasStreaks = data?.topStreaks && data.topStreaks.length > 0;
 
 return {
@@ -1321,15 +1321,15 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.xl};
-  padding: ${args.theme.var.spacing.xl};
+  background: ${t.var.color.background};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.xl};
+  padding: ${t.var.spacing.xl};
 }
 
 @media (max-width: 768px) {
   ._id {
-    padding: ${args.theme.var.spacing.md};
+    padding: ${t.var.spacing.md};
   }
 }`;
 '''
@@ -1351,8 +1351,8 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 ${args.theme.var.spacing.xl} 0;
+  color: ${t.var.color.text};
+  margin: 0 0 ${t.var.spacing.xl} 0;
 }`;
 '''
       }
@@ -1364,7 +1364,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const data = args.contextData?.reportsPageContext?.reportsData?.();
+const data = c?.reportsPageContext?.reportsData?.();
 const streaks = data?.topStreaks || [];
 
 return {
@@ -1381,7 +1381,7 @@ return `._id {
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: ${args.theme.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
 }`;
 '''
       }
@@ -1393,7 +1393,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const streak = args.contextData?.streaksList;
+const streak = c?.streaksList;
 
 return {
   as: "li",
@@ -1405,16 +1405,16 @@ return `._id {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: ${args.theme.var.spacing.md};
-  background: ${args.theme.var.color.background_dark_100};
-  border-radius: ${args.theme.var.borderRadius.lg};
-  border: 1px solid ${args.theme.var.color.border};
+  padding: ${t.var.spacing.md};
+  background: ${t.var.color.background_dark_100};
+  border-radius: ${t.var.borderRadius.lg};
+  border: 1px solid ${t.var.color.border};
   transition: all 300ms ease;
 }
 
 ._id:hover {
   transform: translateX(4px);
-  border-color: ${args.theme.var.color.streak};
+  border-color: ${t.var.color.streak};
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }`;
 '''
@@ -1435,7 +1435,7 @@ return {
 return `._id {
   display: flex;
   flex-direction: column;
-  gap: ${args.theme.var.spacing.xs};
+  gap: ${t.var.spacing.xs};
   flex: 1;
 }`;
 '''
@@ -1448,7 +1448,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const streak = args.contextData?.streaksList;
+const streak = c?.streaksList;
 
 return {
   as: "span",
@@ -1458,7 +1458,7 @@ return {
         css: '''
 return `._id {
   font-weight: 500;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   font-size: 1rem;
 }`;
 '''
@@ -1471,7 +1471,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const streak = args.contextData?.streaksList;
+const streak = c?.streaksList;
 
 return {
   as: "span",
@@ -1480,8 +1480,8 @@ return {
 };
 ''',
         css: '''
-const streak = args.contextData?.streaksList;
-const color = streak?.category?.P?.color || args.theme.var.color.text_light_500;
+const streak = c?.streaksList;
+const color = streak?.category?.P?.color || t.var.color.text_light_500;
 
 return `._id {
   font-size: 0.875rem;
@@ -1497,7 +1497,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const streak = args.contextData?.streaksList;
+const streak = c?.streaksList;
 const count = streak?.streak?.P?.currentStreak || 0;
 
 return {
@@ -1508,7 +1508,7 @@ return {
         css: '''
 return `._id {
   font-weight: 700;
-  color: ${args.theme.var.color.streak};
+  color: ${t.var.color.streak};
   font-size: 1.125rem;
   white-space: nowrap;
 }`;
@@ -1522,7 +1522,7 @@ return `._id {
         displayOrder: 5,
         componentName: "Html",
         props: '''
-const data = args.contextData?.reportsPageContext?.reportsData?.();
+const data = c?.reportsPageContext?.reportsData?.();
 const hasInsights = data?.insights && data.insights.length > 0;
 
 return {
@@ -1534,8 +1534,8 @@ return {
 return `._id {
   display: flex;
   flex-direction: column;
-  gap: ${args.theme.var.spacing.sm};
-  margin-top: ${args.theme.var.spacing.md};
+  gap: ${t.var.spacing.sm};
+  margin-top: ${t.var.spacing.md};
 }`;
 '''
       }
@@ -1556,8 +1556,8 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 ${args.theme.var.spacing.sm} 0;
+  color: ${t.var.color.text};
+  margin: 0 0 ${t.var.spacing.sm} 0;
 }`;
 '''
       }
@@ -1569,7 +1569,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const data = args.contextData?.reportsPageContext?.reportsData?.();
+const data = c?.reportsPageContext?.reportsData?.();
 const insights = data?.insights || [];
 
 return {
@@ -1583,7 +1583,7 @@ return {
 return `._id {
   display: flex;
   flex-direction: column;
-  gap: ${args.theme.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
 }`;
 '''
       }
@@ -1595,7 +1595,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const insight = args.contextData?.insightsList;
+const insight = c?.insightsList;
 
 return {
   as: "div",
@@ -1603,27 +1603,27 @@ return {
 };
 ''',
         css: '''
-const insight = args.contextData?.insightsList;
+const insight = c?.insightsList;
 const type = insight?.type || 'info';
-const bgColor = type === 'success' ? args.theme.var.color.success_light_100 :
-                 type === 'warning' ? args.theme.var.color.warning_light_100 :
-                 type === 'error' ? args.theme.var.color.error_light_100 :
-                 args.theme.var.color.info_light_100;
-const borderColor = type === 'success' ? args.theme.var.color.success_light_300 :
-                    type === 'warning' ? args.theme.var.color.warning_light_300 :
-                    type === 'error' ? args.theme.var.color.error_light_300 :
-                    args.theme.var.color.info_light_300;
-const textColor = type === 'success' ? args.theme.var.color.success_dark_700 :
-                  type === 'warning' ? args.theme.var.color.warning_dark_700 :
-                  type === 'error' ? args.theme.var.color.error_dark_700 :
-                  args.theme.var.color.info_dark_700;
+const bgColor = type === 'success' ? t.var.color.success_light_100 :
+                 type === 'warning' ? t.var.color.warning_light_100 :
+                 type === 'error' ? t.var.color.error_light_100 :
+                 t.var.color.info_light_100;
+const borderColor = type === 'success' ? t.var.color.success_light_300 :
+                    type === 'warning' ? t.var.color.warning_light_300 :
+                    type === 'error' ? t.var.color.error_light_300 :
+                    t.var.color.info_light_300;
+const textColor = type === 'success' ? t.var.color.success_dark_700 :
+                  type === 'warning' ? t.var.color.warning_dark_700 :
+                  type === 'error' ? t.var.color.error_dark_700 :
+                  t.var.color.info_dark_700;
 
 return `._id {
   background: ${bgColor};
   border: 1px solid ${borderColor};
   color: ${textColor};
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  border-radius: ${args.theme.var.borderRadius.md};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  border-radius: ${t.var.borderRadius.md};
   font-size: 1rem;
   line-height: 1.5;
 }`;
@@ -1637,7 +1637,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const insight = args.contextData?.insightsList;
+const insight = c?.insightsList;
 
 return {
   as: "p",

@@ -38,9 +38,9 @@ export function PublicPageAdminFloatingButton(props: Readonly<{
   left: 16px;
   bottom: 16px;
   z-index: 9999;
-  background-color: \${args.theme.var.color.primary};
-  color: \${args.theme.var.color.primary_text};
-  border: 1px solid \${args.theme.var.color.border};
+  background-color: \${t.var.color.primary};
+  color: \${t.var.color.primary_text};
+  border: 1px solid \${t.var.color.border};
   border-radius: 9999px;
   width: 44px;
   height: 44px;
@@ -51,7 +51,7 @@ export function PublicPageAdminFloatingButton(props: Readonly<{
   text-decoration: none;
 
   &:hover:not(:disabled) {
-    background-color: \${args.theme.var.color.primary_dark_100};
+    background-color: \${t.var.color.primary_dark_100};
   }
 }\`;`}
       />

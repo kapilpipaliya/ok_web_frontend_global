@@ -22,9 +22,9 @@
   width: 100%;
   text-align: left;
   padding: 1.25rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.75rem;
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
   cursor: pointer;
   text-decoration: none;
   color: inherit;
@@ -32,28 +32,28 @@
 
   &:hover {
     transform: translateY(-2px);
-    border-color: ${args.theme.var.color.primary_light_300};
+    border-color: ${t.var.color.primary_light_300};
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
   }
 
   &:focus-visible {
-    outline: 2px solid ${args.theme.var.color.primary};
+    outline: 2px solid ${t.var.color.primary};
     outline-offset: 2px;
   }
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const folder = args.contextData.props?.folder || args.contextData.props || {};
-const index = args.contextData.props?.index ?? args.contextData.index ?? 0;
-const href = args.contextData.props?.href;
-const onOpen = args.contextData.props?.onOpen;
+          '''const folder = c.props?.folder || c.props || {};
+const index = c.props?.index ?? c.index ?? 0;
+const href = c.props?.href;
+const onOpen = c.props?.onOpen;
 return {
   as: href ? "a" : "button",
   type: href ? undefined : "button",
   href: href || undefined,
   "data-animate": "",
-  ref: (el) => el && args.fns.animateOnView?.(el, { delay: index * 0.05 }),
+  ref: (el) => el && f.animateOnView?.(el, { delay: index * 0.05 }),
   onClick: (e) => {
     if (!onOpen) return;
     if (href) e.preventDefault();
@@ -74,8 +74,8 @@ return {
   width: 3rem;
   height: 3rem;
   border-radius: 0.625rem;
-  background: ${args.theme.var.color.primary_light_100};
-  color: ${args.theme.var.color.primary};
+  background: ${t.var.color.primary_light_100};
+  color: ${t.var.color.primary};
 }`;'''
         displayOrder: 1
         componentName: Html
@@ -91,7 +91,7 @@ return {
         props:
           '''return {
   as: "icon",
-  icon: args.contextData.props?.icon || "ph:folder",
+  icon: c.props?.icon || "ph:folder",
   width: 28,
   height: 28
 };'''
@@ -123,7 +123,7 @@ return {
   margin: 0;
   font-size: 1.0625rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -131,7 +131,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const folder = args.contextData.props?.folder || args.contextData.props || {};
+          '''const folder = c.props?.folder || c.props || {};
 return {
   as: "h3",
   text: folder.name || "Folder"
@@ -146,12 +146,12 @@ return {
           '''return `._id {
   margin: 0;
   font-size: 0.8125rem;
-  color: ${args.theme.var.color.text_light_300};
+  color: ${t.var.color.text_light_300};
 }`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''const folder = args.contextData.props?.folder || args.contextData.props || {};
+          '''const folder = c.props?.folder || c.props || {};
 const folders = Number(folder.folderCount || 0);
 const files = Number(folder.contentCount || 0);
 const parts = [];

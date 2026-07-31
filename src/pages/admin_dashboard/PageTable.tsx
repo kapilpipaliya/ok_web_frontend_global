@@ -34,7 +34,7 @@ export function PageTable() {
           font-size: 1.5rem;
           font-weight: 600;
           margin-bottom: 20px;
-          color: \${args.theme.var.color.text};
+          color: \${t.var.color.text};
         }\`;`}
       >
         All Pages
@@ -52,7 +52,7 @@ export function PageTable() {
                   <As
                     as="span"
                     css={`return \`._id {
-                      font-family: \${args.theme.var.fontFamily.mono};
+                      font-family: \${t.var.fontFamily.mono};
                       font-size: 0.9em;
                     }\`;`}
                   >
@@ -66,15 +66,15 @@ export function PageTable() {
                     as="a"
                     href={`/admin/Page/${page.id}`}
                     css={`return \`._id {
-                      color: \${args.theme.var.color.primary};
+                      color: \${t.var.color.primary};
                       text-decoration: none;
                       padding: 4px 8px;
                       border-radius: 4px;
                       transition: all 0.2s ease;
                       
                       &:hover {
-                        background-color: \${args.theme.var.color.primary_light_100};
-                        color: \${args.theme.var.color.primary_dark_200};
+                        background-color: \${t.var.color.primary_light_100};
+                        color: \${t.var.color.primary_dark_200};
                       }
                     }\`;`}
                   >

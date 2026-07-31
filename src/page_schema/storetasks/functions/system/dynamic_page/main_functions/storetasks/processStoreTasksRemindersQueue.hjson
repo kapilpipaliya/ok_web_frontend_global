@@ -8,7 +8,7 @@
         key: processStoreTasksRemindersQueue
         body:
           '''
-if (args.contextData?.action !== "start") {
+if (c?.action !== "start") {
   return { success: true, message: "StoreTasks reminders queue worker is ready" };
 }
 
@@ -16,7 +16,7 @@ const queueName = "storeTasksReminders";
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 const getRedisConnection = () => {
-  return args.bullmq.redisConnection || {
+  return _.bullmq.redisConnection || {
     host: process.env.REDIS_HOST || "localhost",
     port: parseInt(process.env.REDIS_PORT || "6379"),
     maxRetriesPerRequest: null,
@@ -45,11 +45,11 @@ const shouldSendReminder = (taskP) => {
 
 const sendReminderEmail = async ({ to, subject, html }) => {
   if (!to) return;
-  await args.sendEmail({ to, subject, content: html, subDomain: args.subDomain });
+  await _.sendEmail({ to, subject, content: html, subDomain: _.subDomain });
 };
 
 const processOne = async (job) => {
-  const dbSession = await args.getSession();
+  const dbSession = await _.getSession();
   try {
     const payload = job?.data || {};
     const taskElementId = payload.taskElementId;
@@ -81,9 +81,9 @@ const processOne = async (job) => {
     const uNode = res.records[0].get("u");
     const oNode = res.records[0].get("o");
 
-    const task = args.convertNodeToJson(tNode);
-    const user = uNode ? args.convertNodeToJson(uNode) : null;
-    const order = oNode ? args.convertNodeToJson(oNode) : null;
+    const task = _.convertNodeToJson(tNode);
+    const user = uNode ? _.convertNodeToJson(uNode) : null;
+    const order = oNode ? _.convertNodeToJson(oNode) : null;
 
     const taskP = task?.P || {};
     const email = user?.P?.email || null;
@@ -168,7 +168,7 @@ const processOne = async (job) => {
   }
 };
 
-const { Worker, QueueEvents } = args.bullmq;
+const { Worker, QueueEvents } = _.bullmq;
 const connection = getRedisConnection();
 
 const worker = new Worker(queueName, async (job) => await processOne(job), { connection });

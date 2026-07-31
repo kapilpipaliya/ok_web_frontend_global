@@ -14,28 +14,28 @@
       P: {
         css:
           '''
-const variant = args.contextData.props?.variant || "default";
-const noPadding = args.contextData.props?.noPadding || false;
+const variant = c.props?.variant || "default";
+const noPadding = c.props?.noPadding || false;
 
-let borderColor = args.theme.var.color.border;
-let backgroundColor = args.theme.var.color.background_dark_50;
+let borderColor = t.var.color.border;
+let backgroundColor = t.var.color.background_dark_50;
 
 if (variant === 'error') {
-  borderColor = args.theme.var.color.error;
-  backgroundColor = args.theme.var.color.error_light_50;
+  borderColor = t.var.color.error;
+  backgroundColor = t.var.color.error_light_50;
 } else if (variant === 'warning') {
-  borderColor = args.theme.var.color.warning;
-  backgroundColor = args.theme.var.color.warning_light_50;
+  borderColor = t.var.color.warning;
+  backgroundColor = t.var.color.warning_light_50;
 } else if (variant === 'success') {
-  borderColor = args.theme.var.color.success;
-  backgroundColor = args.theme.var.color.success_light_50;
+  borderColor = t.var.color.success;
+  backgroundColor = t.var.color.success_light_50;
 }
 
 return `._id {
   background: ${backgroundColor};
   border: 1px solid ${borderColor};
-  border-radius: ${args.theme.var.borderRadius.lg};
-  ${noPadding ? '' : `padding: ${args.theme.var.spacing.lg};`}
+  border-radius: ${t.var.borderRadius.lg};
+  ${noPadding ? '' : `padding: ${t.var.spacing.lg};`}
   transition: box-shadow 300ms ease;
 
   &:hover {
@@ -47,7 +47,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const className = args.contextData.props?.class;
+const className = c.props?.class;
 return {
   as: "div",
   class: className
@@ -61,23 +61,23 @@ return {
       P: {
         css:
           '''
-const noPadding = args.contextData.props?.noPadding || false;
+const noPadding = c.props?.noPadding || false;
 
 return `._id {
   display: flex;
   align-items: center;
-  gap: ${args.theme.var.spacing.sm};
-  margin-bottom: ${args.theme.var.spacing.md};
-  ${noPadding ? `padding: ${args.theme.var.spacing.lg} ${args.theme.var.spacing.lg} 0 ${args.theme.var.spacing.lg};` : ''}
+  gap: ${t.var.spacing.sm};
+  margin-bottom: ${t.var.spacing.md};
+  ${noPadding ? `padding: ${t.var.spacing.lg} ${t.var.spacing.lg} 0 ${t.var.spacing.lg};` : ''}
 }`;
 '''
         displayOrder: 1
         componentName: Html
         props:
           '''
-const title = args.contextData.props?.title || "";
-const icon = args.contextData.props?.icon || "";
-const noPadding = args.contextData.props?.noPadding || false;
+const title = c.props?.title || "";
+const icon = c.props?.icon || "";
+const noPadding = c.props?.noPadding || false;
 
 return {
   as: "div",
@@ -93,7 +93,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   flex-shrink: 0;
 }`;
 '''
@@ -101,7 +101,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const icon = args.contextData.props?.icon || "";
+const icon = c.props?.icon || "";
 
 return {
   as: "icon",
@@ -122,7 +122,7 @@ return {
 return `._id {
   font-size: 1.125rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0;
 }`;
 '''
@@ -130,7 +130,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const title = args.contextData.props?.title || "";
+const title = c.props?.title || "";
 
 return {
   as: "h3",
@@ -146,17 +146,17 @@ return {
       P: {
         css:
           '''
-const noPadding = args.contextData.props?.noPadding || false;
+const noPadding = c.props?.noPadding || false;
 
 return `._id {
-  ${noPadding ? `padding: ${args.theme.var.spacing.lg};` : ''}
+  ${noPadding ? `padding: ${t.var.spacing.lg};` : ''}
 }`;
 '''
         displayOrder: 2
         componentName: Slot
         props:
           '''
-const noPadding = args.contextData.props?.noPadding || false;
+const noPadding = c.props?.noPadding || false;
 
 return {
 };

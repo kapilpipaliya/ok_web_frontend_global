@@ -9,12 +9,12 @@
         body:
           '''
 // Worker lifecycle
-if (args.contextData?.action !== "start") {
+if (c?.action !== "start") {
   return { success: true, message: "CertPulse SSL worker is ready" };
 }
 
 const DAY_MS = 24 * 60 * 60 * 1000;
-const RUN_EVERY_MS = args.contextData?.intervalMs || DAY_MS;
+const RUN_EVERY_MS = c?.intervalMs || DAY_MS;
 
 const nowIso = () => new Date().toISOString();
 const dayKey = (d = new Date()) => d.toISOString().slice(0, 10);
@@ -47,7 +47,7 @@ const tlsCheck = async ({ host, port }) => {
       resolve(payload);
     };
 
-    const socket = args.tls.connect(
+    const socket = _.tls.connect(
       {
         host: cleanHost,
         port: cleanPort,
@@ -138,17 +138,17 @@ const sendExpiredEmail = async ({ to, host, port, sslNotAfter }) => {
     </div>
   `;
 
-  await args.sendEmail({
+  await _.sendEmail({
     to,
     subject,
     content,
-    subDomain: args.subDomain
+    subDomain: _.subDomain
   });
 };
 
 const runOnce = async () => {
-  // IMPORTANT: worker is long-lived; do not use args.session (it will be closed).
-  const session = await args.getSession();
+  // IMPORTANT: worker is long-lived; do not use _.session (it will be closed).
+  const session = await _.getSession();
   try {
   const startedAt = nowIso();
   console.log(`[CertPulse] SSL daily check start ${startedAt}`);
@@ -175,8 +175,8 @@ const runOnce = async () => {
     const dNode = record.get("d");
     const uNode = record.get("u");
 
-    const d = args.convertNodeToJson(dNode);
-    const u = uNode ? args.convertNodeToJson(uNode) : null;
+    const d = _.convertNodeToJson(dNode);
+    const u = uNode ? _.convertNodeToJson(uNode) : null;
 
     const domainId = d?.id;
     const host = normalizeHost(d?.P?.host);

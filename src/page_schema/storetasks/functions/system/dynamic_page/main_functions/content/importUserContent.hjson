@@ -8,7 +8,7 @@
         body:
           '''
 // Get current authenticated user from session
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return {
     success: false,
@@ -17,10 +17,10 @@ if (!actualUser) {
 }
 
 // Get effective user (handles admin impersonation)
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const user = await _.getEffectiveUser(_.session, actualUser, c);
 
 // Extract parameters
-const { tableVertexLabel, data, enableUserScoping, hooks } = args.contextData;
+const { tableVertexLabel, data, enableUserScoping, hooks } = c;
 
 if (!tableVertexLabel) {
   return {
@@ -87,7 +87,7 @@ if (items.length === 0) {
 }
 
 // Execute beforeImport hooks
-await args.executeHooks(hooks?.beforeImport, {
+await _.executeHooks(hooks?.beforeImport, {
   tableVertexLabel,
   data: dataTrimmed,
   itemsCount: items.length,
@@ -135,10 +135,10 @@ try {
     };
   }
 
-  const result = await args.session.run(batchQuery, batchParams);
+  const result = await _.session.run(batchQuery, batchParams);
 
   const createdValue = result.records[0]?.get('created');
-  successCount = createdValue ? args.neo4jConvert.toNumber(createdValue) : 0;
+  successCount = createdValue ? _.neo4jConvert.toNumber(createdValue) : 0;
 } catch (error) {
   errorCount = items.length;
   errors.push(`Batch import failed: ${error.message}`);
@@ -155,7 +155,7 @@ const result = {
 };
 
 // Execute afterImport hooks
-await args.executeHooks(hooks?.afterImport, {
+await _.executeHooks(hooks?.afterImport, {
   tableVertexLabel,
   data: dataTrimmed,
   itemsCount: items.length,

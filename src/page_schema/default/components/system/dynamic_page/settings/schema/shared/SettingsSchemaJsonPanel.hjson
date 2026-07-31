@@ -15,7 +15,7 @@
       P: {
         displayOrder: 3,
         componentName: "Html",
-        props: '''const api = args.contextData.props?.editorApi || {};
+        props: '''const api = c.props?.editorApi || {};
 
 return {
   as: "div",
@@ -30,7 +30,7 @@ return `._id {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
 }`;
 '''
       }
@@ -53,8 +53,8 @@ return `._id {
   justify-content: space-between;
   gap: 0.75rem;
   padding: 0.5rem 1rem;
-  border-bottom: 1px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background_light_100};
+  border-bottom: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background_light_100};
   flex-shrink: 0;
 }`;
 '''
@@ -76,7 +76,7 @@ return {
 return `._id {
   margin: 0;
   font-size: 0.8125rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
       }
@@ -87,7 +87,7 @@ return `._id {
       P: {
         displayOrder: 2,
         componentName: "Button",
-        props: '''const api = args.contextData.props?.editorApi || {};
+        props: '''const api = c.props?.editorApi || {};
 
 return {
   variant: "secondary",
@@ -106,7 +106,7 @@ return {
       P: {
         displayOrder: 2,
         componentName: "Html",
-        props: '''const api = args.contextData.props?.editorApi || {};
+        props: '''const api = c.props?.editorApi || {};
 
 const error = api.jsonError?.();
 return {
@@ -120,9 +120,9 @@ return {
 return `._id {
   padding: 0.5rem 1rem;
   font-size: 0.8125rem;
-  color: ${args.theme.var.color.error_text};
-  background: ${args.theme.var.color.error_light_100};
-  border-bottom: 1px solid ${args.theme.var.color.error};
+  color: ${t.var.color.error_text};
+  background: ${t.var.color.error_light_100};
+  border-bottom: 1px solid ${t.var.color.error};
   flex-shrink: 0;
 }`;
 '''
@@ -154,7 +154,7 @@ return `._id {
       P: {
         displayOrder: 1,
         componentName: "TextArea",
-        props: '''const api = args.contextData.props?.editorApi || {};
+        props: '''const api = c.props?.editorApi || {};
 
 return {
   label: "Config JSON",

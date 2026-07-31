@@ -8,7 +8,7 @@
         body:
           '''
 // Get current authenticated user from session
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return {
     success: false,
@@ -17,10 +17,10 @@ if (!actualUser) {
 }
 
 // Get effective user (handles admin impersonation)
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const user = await _.getEffectiveUser(_.session, actualUser, c);
 
 // Extract parameters - accepts array of items, 'all', or 'allInContext'
-const { items, itemType, contextItems, ownershipId, skipOwnershipCheck } = args.contextData;
+const { items, itemType, contextItems, ownershipId, skipOwnershipCheck } = c;
 
 if (itemType !== "channel") {
   return {
@@ -38,7 +38,7 @@ if (!ownershipId) {
 
 // Verify ownership belongs to user (skip if called internally)
 if (!skipOwnershipCheck) {
-  const ownershipCheck = await args.session.run(`
+  const ownershipCheck = await _.session.run(`
     MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
     RETURN o
   `, { userUuid: user.P.uuid, ownershipId });
@@ -81,7 +81,7 @@ if (items === 'all' || items === 'allInContext') {
 
 // Step 1: Check for active channel jobs in BullMQ queue
 // Prevent deletion if any channel is actively being processed
-const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
+const helpers = await s({ functionName: 'queueHelpers', contextData: {} });
 if (!helpers.result?.success) {
   return {
     success: false,
@@ -90,7 +90,7 @@ if (!helpers.result?.success) {
 }
 
 const { QUEUE_NAMES, createJobId } = helpers.result.data;
-const { Queue } = args.bullmq;
+const { Queue } = _.bullmq;
 const connection = helpers.result.data.getRedisConnection();
 const channelQueue = new Queue(QUEUE_NAMES.CHANNEL, { connection });
 
@@ -101,7 +101,7 @@ try {
   if (items === 'all' || items === 'allInContext') {
     // Get all channel IDs for this ownership
     // NEW SCHEMA v4.0: Direct ownership
-    const allChannelsResult = await args.session.run(`
+    const allChannelsResult = await _.session.run(`
       MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannel]->(c:Channel)
       RETURN c.youtubeId as channelId
     `, { ownershipId });
@@ -123,7 +123,7 @@ try {
       if (state === 'active') {
         // Get channel title for better error message (verify ownership)
         // NEW SCHEMA v4.0: Verify ownership before accessing channel
-        const channelResult = await args.session.run(`
+        const channelResult = await _.session.run(`
           MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $channelId})
           RETURN c.title as title
         `, { ownershipId, channelId });
@@ -202,7 +202,7 @@ if (items === 'all' || items === 'allInContext') {
 }
 
 try {
-  const deleteResult = await args.executeNamedServerFunction({
+  const deleteResult = await s({
     functionName: 'deletePlaylist',
     contextData: {
       items: playlistDeleteMode,
@@ -259,7 +259,7 @@ const deleteQuery = `
   RETURN collect(DISTINCT channelNodeId) as channelIds, count(DISTINCT c) as deletedOwnershipLinks
 `;
 
-const deleteResult = await args.session.run(deleteQuery, queryParams);
+const deleteResult = await _.session.run(deleteQuery, queryParams);
 
 const deletedLinksRaw = deleteResult.records[0]?.get('deletedOwnershipLinks');
 const deletedOwnershipLinks = deletedLinksRaw ? (typeof deletedLinksRaw.toNumber === 'function' ? deletedLinksRaw.toNumber() : Number(deletedLinksRaw)) : 0;
@@ -298,7 +298,7 @@ const deleteOrphanChannelsQuery = `
   RETURN count(c) as deletedChannels
 `;
 
-const channelResult = await args.session.run(deleteOrphanChannelsQuery, { channelNodeIds });
+const channelResult = await _.session.run(deleteOrphanChannelsQuery, { channelNodeIds });
 
 const deletedCRaw = channelResult.records[0]?.get('deletedChannels');
 const deletedChannels = deletedCRaw ? (typeof deletedCRaw.toNumber === 'function' ? deletedCRaw.toNumber() : Number(deletedCRaw)) : 0;

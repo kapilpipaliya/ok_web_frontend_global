@@ -56,7 +56,7 @@ return {
 return {
   as: "div",
   onMount: () => {
-    args.fns.loadCharts();
+    f.loadCharts();
   }
 };
 '''
@@ -71,15 +71,15 @@ return `._id {
 '''
         fns:
           '''
-const [rangePreset, setRangePreset] = args.createSignal("30d");
-const [chartsBundle, setChartsBundle] = args.createSignal(null);
-const [loading, setLoading] = args.createSignal(false);
+const [rangePreset, setRangePreset] = _.createSignal("30d");
+const [chartsBundle, setChartsBundle] = _.createSignal(null);
+const [loading, setLoading] = _.createSignal(false);
 
 const loadCharts = async (presetOverride) => {
   const preset = presetOverride != null ? presetOverride : rangePreset();
   setLoading(true);
   try {
-    const raw = await args.executeNamedServerFunction({
+    const raw = await s({
       functionName: "getConfigurableGraphData",
       contextData: {
         rangePreset: preset,
@@ -91,7 +91,7 @@ const loadCharts = async (presetOverride) => {
     });
     if (raw?.error) {
       setChartsBundle(null);
-      args.showErrorToast(typeof raw.error === "string" ? raw.error : "Failed to load workshop reports");
+      _.showErrorToast(typeof raw.error === "string" ? raw.error : "Failed to load workshop reports");
       return;
     }
     const result = raw?.result != null ? raw.result : raw;
@@ -99,11 +99,11 @@ const loadCharts = async (presetOverride) => {
       setChartsBundle(result.data.charts);
     } else {
       setChartsBundle(null);
-      args.showErrorToast(result?.message || "Failed to load workshop reports");
+      _.showErrorToast(result?.message || "Failed to load workshop reports");
     }
   } catch (error) {
     setChartsBundle(null);
-    args.showErrorToast(error?.message || "Failed to load workshop reports");
+    _.showErrorToast(error?.message || "Failed to load workshop reports");
   } finally {
     setLoading(false);
   }
@@ -125,12 +125,12 @@ const tabStyle = (preset) => {
     padding: "0.4rem 0.75rem",
     "border-radius": "0.375rem",
     border: active
-      ? `1px solid ${args.theme.var.color.primary}`
-      : `1px solid ${args.theme.var.color.border_light_200}`,
+      ? `1px solid ${t.var.color.primary}`
+      : `1px solid ${t.var.color.border_light_200}`,
     background: active
-      ? args.theme.var.color.background_light_200
-      : args.theme.var.color.background,
-    color: args.theme.var.color.text,
+      ? t.var.color.background_light_200
+      : t.var.color.background,
+    color: t.var.color.text,
     cursor: "pointer"
   };
 };
@@ -159,7 +159,7 @@ return {
 return {
   as: "h1",
   text: "Workshop reports",
-  style: { margin: "0 0 0.5rem 0", "font-size": "1.5rem", "font-weight": "700", color: args.theme.var.color.text }
+  style: { margin: "0 0 0.5rem 0", "font-size": "1.5rem", "font-weight": "700", color: t.var.color.text }
 };
 '''
       }
@@ -175,7 +175,7 @@ return {
 return {
   as: "p",
   text: "Charts load from the WorkshopReports_charts_default setting (see migrateDynamicPageSettings).",
-  style: { margin: 0, color: args.theme.var.color.text_light_500, "font-size": "0.875rem" }
+  style: { margin: 0, color: t.var.color.text_light_500, "font-size": "0.875rem" }
 };
 '''
       }
@@ -207,8 +207,8 @@ return {
   as: "button",
   type: "button",
   text: "7 days",
-  onClick: () => args.fns.setRangeAndLoad("7d"),
-  style: args.fns.tabStyle("7d")
+  onClick: () => f.setRangeAndLoad("7d"),
+  style: f.tabStyle("7d")
 };
 '''
       }
@@ -225,8 +225,8 @@ return {
   as: "button",
   type: "button",
   text: "30 days",
-  onClick: () => args.fns.setRangeAndLoad("30d"),
-  style: args.fns.tabStyle("30d")
+  onClick: () => f.setRangeAndLoad("30d"),
+  style: f.tabStyle("30d")
 };
 '''
       }
@@ -243,8 +243,8 @@ return {
   as: "button",
   type: "button",
   text: "90 days",
-  onClick: () => args.fns.setRangeAndLoad("90d"),
-  style: args.fns.tabStyle("90d")
+  onClick: () => f.setRangeAndLoad("90d"),
+  style: f.tabStyle("90d")
 };
 '''
       }
@@ -261,8 +261,8 @@ return {
   as: "button",
   type: "button",
   text: "12 months",
-  onClick: () => args.fns.setRangeAndLoad("365d"),
-  style: args.fns.tabStyle("365d")
+  onClick: () => f.setRangeAndLoad("365d"),
+  style: f.tabStyle("365d")
 };
 '''
       }
@@ -277,7 +277,7 @@ return {
           '''
 return {
   as: "div",
-  hide: () => !args.fns.loading(),
+  hide: () => !f.loading(),
   style: { display: "flex", "justify-content": "center", padding: "2rem" }
 };
 '''
@@ -308,7 +308,7 @@ return {
           '''
 return {
   as: "div",
-  hide: () => args.fns.loading(),
+  hide: () => f.loading(),
   style: {
     display: "grid",
     "grid-template-columns": "repeat(auto-fit, minmax(320px, 1fr))",
@@ -330,10 +330,10 @@ return {
 return {
   as: "div",
   style: {
-    border: `1px solid ${args.theme.var.color.border_light_200}`,
+    border: `1px solid ${t.var.color.border_light_200}`,
     "border-radius": "0.75rem",
     padding: "0.75rem",
-    background: args.theme.var.color.background_light_100
+    background: t.var.color.background_light_100
   }
 };
 '''
@@ -347,11 +347,11 @@ return {
         componentName: Html
         props:
           '''
-const e = args.fns.chartEntry("workshopAppointmentsByStatus");
+const e = f.chartEntry("workshopAppointmentsByStatus");
 return {
   as: "div",
   text: e?.title || "Appointments by status",
-  style: { "font-weight": "600", "margin-bottom": "0.5rem", color: args.theme.var.color.text }
+  style: { "font-weight": "600", "margin-bottom": "0.5rem", color: t.var.color.text }
 };
 '''
       }
@@ -364,12 +364,12 @@ return {
         componentName: Html
         props:
           '''
-const e = args.fns.chartEntry("workshopAppointmentsByStatus");
+const e = f.chartEntry("workshopAppointmentsByStatus");
 return {
   as: "div",
   hide: () => !e?.error,
   text: e?.error || "",
-  style: { color: args.theme.var.color.error, "font-size": "0.8rem", "margin-bottom": "0.25rem" }
+  style: { color: t.var.color.error, "font-size": "0.8rem", "margin-bottom": "0.25rem" }
 };
 '''
       }
@@ -382,7 +382,7 @@ return {
         componentName: WorkshopD3Chart
         props:
           '''
-const e = args.fns.chartEntry("workshopAppointmentsByStatus");
+const e = f.chartEntry("workshopAppointmentsByStatus");
 return {
   chartType: e?.chartType || "pie",
   data: e?.chartData,
@@ -402,10 +402,10 @@ return {
 return {
   as: "div",
   style: {
-    border: `1px solid ${args.theme.var.color.border_light_200}`,
+    border: `1px solid ${t.var.color.border_light_200}`,
     "border-radius": "0.75rem",
     padding: "0.75rem",
-    background: args.theme.var.color.background_light_100
+    background: t.var.color.background_light_100
   }
 };
 '''
@@ -419,11 +419,11 @@ return {
         componentName: Html
         props:
           '''
-const e = args.fns.chartEntry("workshopRepairsByStatus");
+const e = f.chartEntry("workshopRepairsByStatus");
 return {
   as: "div",
   text: e?.title || "Repair orders by status",
-  style: { "font-weight": "600", "margin-bottom": "0.5rem", color: args.theme.var.color.text }
+  style: { "font-weight": "600", "margin-bottom": "0.5rem", color: t.var.color.text }
 };
 '''
       }
@@ -436,12 +436,12 @@ return {
         componentName: Html
         props:
           '''
-const e = args.fns.chartEntry("workshopRepairsByStatus");
+const e = f.chartEntry("workshopRepairsByStatus");
 return {
   as: "div",
   hide: () => !e?.error,
   text: e?.error || "",
-  style: { color: args.theme.var.color.error, "font-size": "0.8rem", "margin-bottom": "0.25rem" }
+  style: { color: t.var.color.error, "font-size": "0.8rem", "margin-bottom": "0.25rem" }
 };
 '''
       }
@@ -454,7 +454,7 @@ return {
         componentName: WorkshopD3Chart
         props:
           '''
-const e = args.fns.chartEntry("workshopRepairsByStatus");
+const e = f.chartEntry("workshopRepairsByStatus");
 return {
   chartType: e?.chartType || "bar",
   data: e?.chartData,
@@ -474,10 +474,10 @@ return {
 return {
   as: "div",
   style: {
-    border: `1px solid ${args.theme.var.color.border_light_200}`,
+    border: `1px solid ${t.var.color.border_light_200}`,
     "border-radius": "0.75rem",
     padding: "0.75rem",
-    background: args.theme.var.color.background_light_100
+    background: t.var.color.background_light_100
   }
 };
 '''
@@ -491,11 +491,11 @@ return {
         componentName: Html
         props:
           '''
-const e = args.fns.chartEntry("workshopInvoiceTotalsByMonth");
+const e = f.chartEntry("workshopInvoiceTotalsByMonth");
 return {
   as: "div",
   text: e?.title || "Invoice totals by month",
-  style: { "font-weight": "600", "margin-bottom": "0.5rem", color: args.theme.var.color.text }
+  style: { "font-weight": "600", "margin-bottom": "0.5rem", color: t.var.color.text }
 };
 '''
       }
@@ -508,12 +508,12 @@ return {
         componentName: Html
         props:
           '''
-const e = args.fns.chartEntry("workshopInvoiceTotalsByMonth");
+const e = f.chartEntry("workshopInvoiceTotalsByMonth");
 return {
   as: "div",
   hide: () => !e?.error,
   text: e?.error || "",
-  style: { color: args.theme.var.color.error, "font-size": "0.8rem", "margin-bottom": "0.25rem" }
+  style: { color: t.var.color.error, "font-size": "0.8rem", "margin-bottom": "0.25rem" }
 };
 '''
       }
@@ -526,7 +526,7 @@ return {
         componentName: WorkshopD3Chart
         props:
           '''
-const e = args.fns.chartEntry("workshopInvoiceTotalsByMonth");
+const e = f.chartEntry("workshopInvoiceTotalsByMonth");
 return {
   chartType: e?.chartType || "bar",
   data: e?.chartData,
@@ -546,10 +546,10 @@ return {
 return {
   as: "div",
   style: {
-    border: `1px solid ${args.theme.var.color.border_light_200}`,
+    border: `1px solid ${t.var.color.border_light_200}`,
     "border-radius": "0.75rem",
     padding: "0.75rem",
-    background: args.theme.var.color.background_light_100
+    background: t.var.color.background_light_100
   }
 };
 '''
@@ -563,11 +563,11 @@ return {
         componentName: Html
         props:
           '''
-const e = args.fns.chartEntry("workshopPaymentsByMethod");
+const e = f.chartEntry("workshopPaymentsByMethod");
 return {
   as: "div",
   text: e?.title || "Payments by method",
-  style: { "font-weight": "600", "margin-bottom": "0.5rem", color: args.theme.var.color.text }
+  style: { "font-weight": "600", "margin-bottom": "0.5rem", color: t.var.color.text }
 };
 '''
       }
@@ -580,12 +580,12 @@ return {
         componentName: Html
         props:
           '''
-const e = args.fns.chartEntry("workshopPaymentsByMethod");
+const e = f.chartEntry("workshopPaymentsByMethod");
 return {
   as: "div",
   hide: () => !e?.error,
   text: e?.error || "",
-  style: { color: args.theme.var.color.error, "font-size": "0.8rem", "margin-bottom": "0.25rem" }
+  style: { color: t.var.color.error, "font-size": "0.8rem", "margin-bottom": "0.25rem" }
 };
 '''
       }
@@ -598,7 +598,7 @@ return {
         componentName: WorkshopD3Chart
         props:
           '''
-const e = args.fns.chartEntry("workshopPaymentsByMethod");
+const e = f.chartEntry("workshopPaymentsByMethod");
 return {
   chartType: e?.chartType || "pie",
   data: e?.chartData,

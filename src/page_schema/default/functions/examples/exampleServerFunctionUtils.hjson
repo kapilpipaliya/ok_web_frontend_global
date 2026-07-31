@@ -5,19 +5,19 @@
       L: "Function",
       P: {
         key: "exampleServerFunctionUtils",
-        description: "Comprehensive example showcasing all server function utilities available via args object",
+        description: "Comprehensive example showcasing all server function utilities available via _ object",
         body: '''
 /**
  * Example: Advanced Server Function with All Utilities
  *
- * This demonstrates how to use the comprehensive utilities available in args:
- * - args.utils - General-purpose utilities
- * - args.cypher - Cypher query building
- * - args.Models - Neogma OGM models
- * - args.crypto - Cryptographic operations
- * - args.path - Path operations
+ * This demonstrates how to use the comprehensive utilities available in _:
+ * - _.utils - General-purpose utilities
+ * - _.cypher - Cypher query building
+ * - _.Models - Neogma OGM models
+ * - _.crypto - Cryptographic operations
+ * - _.path - Path operations
  *
- * Parameters (via args.contextData):
+ * Parameters (via c):
  * - action: string - Action to perform:
  *   - "search" - Search with pagination and filters
  *   - "create" - Create with validation
@@ -38,39 +38,39 @@ try {
     page = 1,
     limit = 10,
     days = 7
-  } = args.contextData;
+  } = c;
 
   // ==================== ACTION: SEARCH ====================
   if (action === "search") {
-    // 1. INPUT VALIDATION using args.utils
+    // 1. INPUT VALIDATION using _.utils
     if (!userId) {
-      return args.utils.createErrorResponse(
+      return _.utils.createErrorResponse(
         "User ID is required",
         "ValidationError"
       );
     }
 
-    if (!args.utils.isValidUUID(userId)) {
-      return args.utils.createErrorResponse(
+    if (!_.utils.isValidUUID(userId)) {
+      return _.utils.createErrorResponse(
         "Invalid user ID format",
         "ValidationError",
         { userId }
       );
     }
 
-    // 2. BUILD QUERY using args.cypher
+    // 2. BUILD QUERY using _.cypher
     const baseFilters = { userId };
 
     // Build WHERE clause
     const { clause: whereClause, params: whereParams } =
-      args.cypher.buildWhereClause(baseFilters, "n");
+      _.cypher.buildWhereClause(baseFilters, "n");
 
     // Add search condition if provided
     let finalWhere = whereClause;
     let searchParams = {};
 
-    if (searchTerm && !args.utils.isEmpty(searchTerm)) {
-      const { condition, params } = args.cypher.buildSearchCondition(
+    if (searchTerm && !_.utils.isEmpty(searchTerm)) {
+      const { condition, params } = _.cypher.buildSearchCondition(
         ["title", "message"],
         searchTerm,
         "n"
@@ -81,10 +81,10 @@ try {
 
     // Build pagination
     const { skipClause, limitClause, params: paginationParams } =
-      args.cypher.buildPaginationClauses({ page, limit });
+      _.cypher.buildPaginationClauses({ page, limit });
 
     // Build ORDER BY
-    const orderByClause = args.cypher.buildOrderByClause(
+    const orderByClause = _.cypher.buildOrderByClause(
       "createdAt",
       "DESC",
       "n"
@@ -103,7 +103,7 @@ try {
       ...paginationParams
     };
 
-    const countResult = await args.session.run(countQuery, allParams);
+    const countResult = await _.session.run(countQuery, allParams);
     const total = countResult.records[0]?.get("total")?.toNumber() || 0;
 
     // 4. GET DATA
@@ -116,13 +116,13 @@ try {
       ${limitClause}
     `;
 
-    const dataResult = await args.session.run(dataQuery, allParams);
+    const dataResult = await _.session.run(dataQuery, allParams);
     const notifications = dataResult.records.map(record =>
-      args.convertNodeToJson(record.get("n"))
+      _.convertNodeToJson(record.get("n"))
     );
 
-    // 5. CREATE PAGINATED RESPONSE using args.utils
-    return args.utils.createPaginatedResponse({
+    // 5. CREATE PAGINATED RESPONSE using _.utils
+    return _.utils.createPaginatedResponse({
       data: notifications,
       total,
       page,
@@ -136,20 +136,20 @@ try {
 
   // ==================== ACTION: CREATE ====================
   if (action === "create") {
-    const { title, message, type = "info", actionUrl, actionText } = args.contextData;
+    const { title, message, type = "info", actionUrl, actionText } = c;
 
-    // 1. VALIDATE using args.utils
+    // 1. VALIDATE using _.utils
     const validationErrors = [];
 
-    if (!userId || !args.utils.isValidUUID(userId)) {
+    if (!userId || !_.utils.isValidUUID(userId)) {
       validationErrors.push("Valid user ID is required");
     }
 
-    if (args.utils.isEmpty(title)) {
+    if (_.utils.isEmpty(title)) {
       validationErrors.push("Title is required");
     }
 
-    if (args.utils.isEmpty(message)) {
+    if (_.utils.isEmpty(message)) {
       validationErrors.push("Message is required");
     }
 
@@ -157,30 +157,30 @@ try {
       validationErrors.push("Invalid notification type");
     }
 
-    if (actionUrl && !args.utils.isValidUrl(actionUrl)) {
+    if (actionUrl && !_.utils.isValidUrl(actionUrl)) {
       validationErrors.push("Invalid action URL");
     }
 
     if (validationErrors.length > 0) {
-      return args.utils.createErrorResponse(
+      return _.utils.createErrorResponse(
         "Validation failed",
         "ValidationError",
         { errors: validationErrors }
       );
     }
 
-    // 2. SANITIZE INPUT using args.utils
-    const sanitizedTitle = args.utils.truncate(
-      args.utils.stripHtml(title),
+    // 2. SANITIZE INPUT using _.utils
+    const sanitizedTitle = _.utils.truncate(
+      _.utils.stripHtml(title),
       100
     );
-    const sanitizedMessage = args.utils.stripHtml(message);
+    const sanitizedMessage = _.utils.stripHtml(message);
 
-    // 3. GENERATE ID using args.utils
-    const notificationId = args.utils.generateUUID();
+    // 3. GENERATE ID using _.utils
+    const notificationId = _.utils.generateUUID();
 
-    // 4. CREATE NOTIFICATION using args.Models
-    const notification = await args.Models.Notification.createOne({
+    // 4. CREATE NOTIFICATION using _.Models
+    const notification = await _.Models.Notification.createOne({
       id: notificationId,
       userId,
       type,
@@ -189,15 +189,15 @@ try {
       actionUrl: actionUrl || null,
       actionText: actionText || null,
       read: false,
-      createdAt: args.utils.now(),
-      updatedAt: args.utils.now()
-    }, { session: args.session });
+      createdAt: _.utils.now(),
+      updatedAt: _.utils.now()
+    }, { session: _.session });
 
     // 5. CONVERT TO VERTEX FORMAT
     const { modelToVertex } = await import("~/lib/models");
     const vertexFormat = modelToVertex(notification);
 
-    return args.utils.createSuccessResponse(
+    return _.utils.createSuccessResponse(
       { notification: vertexFormat },
       "Notification created successfully"
     );
@@ -205,17 +205,17 @@ try {
 
   // ==================== ACTION: STATS ====================
   if (action === "stats") {
-    if (!userId || !args.utils.isValidUUID(userId)) {
-      return args.utils.createErrorResponse(
+    if (!userId || !_.utils.isValidUUID(userId)) {
+      return _.utils.createErrorResponse(
         "Valid user ID is required",
         "ValidationError"
       );
     }
 
-    // 1. GET DATE RANGE using args.utils
-    const now = args.utils.now();
-    const weekAgo = args.utils.daysAgo(7);
-    const monthAgo = args.utils.daysAgo(30);
+    // 1. GET DATE RANGE using _.utils
+    const now = _.utils.now();
+    const weekAgo = _.utils.daysAgo(7);
+    const monthAgo = _.utils.daysAgo(30);
 
     // 2. BUILD COMPLEX STATS QUERY
     const statsQuery = `
@@ -240,11 +240,11 @@ try {
         max(n.createdAt) as latestNotification
     `;
 
-    const result = await args.session.run(statsQuery, { userId, now });
+    const result = await _.session.run(statsQuery, { userId, now });
 
     const record = result.records[0];
     if (!record) {
-      return args.utils.createSuccessResponse({
+      return _.utils.createSuccessResponse({
         total: 0,
         unread: 0,
         read: 0,
@@ -254,7 +254,7 @@ try {
       }, "No notifications found");
     }
 
-    // 3. FORMAT STATS using args.utils
+    // 3. FORMAT STATS using _.utils
     const stats = {
       total: record.get("total")?.toNumber() || 0,
       unread: record.get("unread")?.toNumber() || 0,
@@ -274,10 +274,10 @@ try {
         first: record.get("firstNotification"),
         latest: record.get("latestNotification")
       },
-      formattedTotal: args.utils.formatNumber(record.get("total")?.toNumber() || 0)
+      formattedTotal: _.utils.formatNumber(record.get("total")?.toNumber() || 0)
     };
 
-    return args.utils.createSuccessResponse(
+    return _.utils.createSuccessResponse(
       stats,
       "Statistics retrieved successfully"
     );
@@ -286,18 +286,18 @@ try {
   // ==================== ACTION: CLEANUP ====================
   if (action === "cleanup") {
     // 1. VALIDATE ADMIN PERMISSION
-    const currentUser = await args.getUserFromSession();
+    const currentUser = await _.getUserFromSession();
     if (!currentUser || !currentUser.P.isAdmin) {
-      return args.utils.createErrorResponse(
+      return _.utils.createErrorResponse(
         "Admin permission required",
         "PermissionError"
       );
     }
 
-    // 2. CALCULATE CUTOFF DATE using args.utils
-    const cutoffDate = args.utils.daysAgo(days);
+    // 2. CALCULATE CUTOFF DATE using _.utils
+    const cutoffDate = _.utils.daysAgo(days);
 
-    // 3. BUILD DELETE QUERY using args.cypher
+    // 3. BUILD DELETE QUERY using _.cypher
     const deleteQuery = `
       MATCH (n:Notification {read: true})
       WHERE n.createdAt < $cutoffDate
@@ -305,18 +305,18 @@ try {
       RETURN count(n) as deletedCount
     `;
 
-    const result = await args.session.run(deleteQuery, { cutoffDate });
+    const result = await _.session.run(deleteQuery, { cutoffDate });
     const deletedCount = result.records[0]?.get("deletedCount")?.toNumber() || 0;
 
-    // 4. LOG ACTIVITY using args.crypto for hashing
-    const activityId = args.crypto.randomBytes(16).toString('hex');
-    const activityHash = args.crypto
+    // 4. LOG ACTIVITY using _.crypto for hashing
+    const activityId = _.crypto.randomBytes(16).toString('hex');
+    const activityHash = _.crypto
       .createHash('sha256')
-      .update(`cleanup-${currentUser.P.uuid}-${args.utils.now()}`)
+      .update(`cleanup-${currentUser.P.uuid}-${_.utils.now()}`)
       .digest('hex');
 
     // Log to database
-    await args.session.run(`
+    await _.session.run(`
       CREATE (log:ActivityLog {
         id: $activityId,
         userId: $userId,
@@ -331,23 +331,23 @@ try {
       userId: currentUser.P.uuid,
       deletedCount,
       days,
-      timestamp: args.utils.now(),
+      timestamp: _.utils.now(),
       hash: activityHash
     });
 
-    return args.utils.createSuccessResponse(
+    return _.utils.createSuccessResponse(
       {
         deletedCount,
         cutoffDate,
         activityId,
-        formattedCount: args.utils.formatNumber(deletedCount)
+        formattedCount: _.utils.formatNumber(deletedCount)
       },
       `Successfully deleted ${deletedCount} old read notifications`
     );
   }
 
   // ==================== INVALID ACTION ====================
-  return args.utils.createErrorResponse(
+  return _.utils.createErrorResponse(
     `Invalid action: ${action}`,
     "ValidationError",
     {
@@ -359,12 +359,12 @@ try {
   console.error("Error in exampleServerFunctionUtils:", error);
 
   // Use utils for consistent error response
-  return args.utils.createErrorResponse(
+  return _.utils.createErrorResponse(
     error.message || "An unexpected error occurred",
     error.name || "ServerError",
     {
       stack: error.stack,
-      functionName: args.functionName
+      functionName: _.functionName
     }
   );
 }

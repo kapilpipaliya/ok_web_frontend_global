@@ -12,7 +12,7 @@
 return {
   enabled: () => true,
   executeYTOFunction: (functionName, contextData) =>
-    args.executeNamedServerFunction({
+    s({
       functionName,
       contextData: contextData || {},
     }),
@@ -41,47 +41,47 @@ return {
         key: hm_home_root
         fns:
           '''
-const [dash, setDash] = args.createSignal(null);
+const [dash, setDash] = _.createSignal(null);
 
 const loadDashboard = async () => {
-  if (!args.user) {
+  if (!_.user) {
     setDash(null);
     return;
   }
   try {
-    const result = await args.executeNamedServerFunction({
+    const result = await s({
       functionName: "hydrateMeGetDashboard",
       contextData: {},
     });
     if (result?.error || result?.result?.success === false) {
       const msg = result?.error || result?.result?.message || "Could not load dashboard.";
-      args.showErrorToast?.(msg);
+      _.showErrorToast?.(msg);
       setDash(null);
       return;
     }
     setDash(result?.result?.data ?? null);
   } catch (e) {
     console.error(e);
-    args.showErrorToast?.("Could not load dashboard.");
+    _.showErrorToast?.("Could not load dashboard.");
   }
 };
 
 const logQuick = async (amountMl) => {
   try {
-    const result = await args.executeNamedServerFunction({
+    const result = await s({
       functionName: "hydrateMeLogWater",
       contextData: { amountMl },
     });
     if (result?.error || result?.result?.success === false) {
       const msg = result?.error || result?.result?.message || "Could not log water.";
-      args.showErrorToast?.(msg);
+      _.showErrorToast?.(msg);
       return;
     }
-    args.showSuccessToast?.(result?.result?.message || "Logged");
+    _.showSuccessToast?.(result?.result?.message || "Logged");
     await loadDashboard();
   } catch (e) {
     console.error(e);
-    args.showErrorToast?.("Could not log water.");
+    _.showErrorToast?.("Could not log water.");
   }
 };
 
@@ -92,14 +92,14 @@ return { dash, loadDashboard, logQuick };
   as: "div",
   class: "hm-home-root",
   onMount: () => {
-    args.fns.loadDashboard();
+    f.loadDashboard();
   }
 };'''
         css:
           '''return `._id.hm-home-root {
   display: flex;
   flex-direction: column;
-  gap: ${args.theme.var.spacing.lg};
+  gap: ${t.var.spacing.lg};
 }`;'''
       }
     }
@@ -121,7 +121,7 @@ return { dash, loadDashboard, logQuick };
   margin: 0;
   font-size: clamp(1.5rem, 4vw, 2rem);
   font-weight: 800;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
       }
     }
@@ -143,7 +143,7 @@ return { dash, loadDashboard, logQuick };
   margin: 0;
   font-size: 1rem;
   line-height: 1.55;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;'''
       }
     }
@@ -159,14 +159,14 @@ return { dash, loadDashboard, logQuick };
   as: "div",
   class: "hm-guest",
   text: "Sign in to track intake, streaks, and your Hydrate Circle.",
-  show: () => !args.user
+  show: () => !_.user
 };'''
         css:
           '''return `._id.hm-guest {
-  padding: ${args.theme.var.spacing.md};
-  border-radius: ${args.theme.var.borderRadius.lg};
-  border: 1px dashed ${args.theme.var.color.border};
-  color: ${args.theme.var.color.text_light_500};
+  padding: ${t.var.spacing.md};
+  border-radius: ${t.var.borderRadius.lg};
+  border: 1px dashed ${t.var.color.border};
+  color: ${t.var.color.text_light_500};
 }`;'''
       }
     }
@@ -181,13 +181,13 @@ return { dash, loadDashboard, logQuick };
           '''return {
   as: "section",
   class: "hm-dash",
-  hide: () => !args.user
+  hide: () => !_.user
 };'''
         css:
           '''return `._id.hm-dash {
   display: flex;
   flex-direction: column;
-  gap: ${args.theme.var.spacing.md};
+  gap: ${t.var.spacing.md};
 }`;'''
       }
     }
@@ -202,14 +202,14 @@ return { dash, loadDashboard, logQuick };
           '''return {
   as: "div",
   class: "hm-prog",
-  hide: () => !args.user
+  hide: () => !_.user
 };'''
         css:
           '''return `._id.hm-prog {
-  padding: ${args.theme.var.spacing.md};
-  border-radius: ${args.theme.var.borderRadius.lg};
-  border: 1px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background_light_200};
+  padding: ${t.var.spacing.md};
+  border-radius: ${t.var.borderRadius.lg};
+  border: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background_light_200};
 }`;'''
       }
     }
@@ -221,7 +221,7 @@ return { dash, loadDashboard, logQuick };
         componentName: Html
         key: hm_home_prog_label
         props:
-          '''const d = typeof args.fns.dash === "function" ? args.fns.dash() : null;
+          '''const d = typeof f.dash === "function" ? f.dash() : null;
 const today = Number(d?.todayMl) || 0;
 const goal = Math.max(1, Number(d?.goalMl) || 2000);
 const streak = Number(d?.streakDays) || 0;
@@ -229,13 +229,13 @@ return {
   as: "p",
   class: "hm-prog-label",
   text: `Today: ${today} ml / ${goal} ml · Streak: ${streak} day(s)`,
-  hide: () => !args.user
+  hide: () => !_.user
 };'''
         css:
           '''return `._id.hm-prog-label {
-  margin: 0 0 ${args.theme.var.spacing.sm};
+  margin: 0 0 ${t.var.spacing.sm};
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
       }
     }
@@ -250,13 +250,13 @@ return {
           '''return {
   as: "div",
   class: "hm-prog-track",
-  hide: () => !args.user
+  hide: () => !_.user
 };'''
         css:
           '''return `._id.hm-prog-track {
   height: 0.75rem;
-  border-radius: ${args.theme.var.borderRadius.full};
-  background: ${args.theme.var.color.border};
+  border-radius: ${t.var.borderRadius.full};
+  background: ${t.var.color.border};
   overflow: hidden;
 }`;'''
       }
@@ -269,7 +269,7 @@ return {
         componentName: Html
         key: hm_home_prog_fill
         props:
-          '''const d = typeof args.fns.dash === "function" ? args.fns.dash() : null;
+          '''const d = typeof f.dash === "function" ? f.dash() : null;
 const today = Number(d?.todayMl) || 0;
 const goal = Math.max(1, Number(d?.goalMl) || 2000);
 const pct = Math.min(100, Math.round((today / goal) * 100));
@@ -277,13 +277,13 @@ return {
   as: "div",
   class: "hm-prog-fill",
   style: { width: `${pct}%` },
-  hide: () => !args.user
+  hide: () => !_.user
 };'''
         css:
           '''return `._id.hm-prog-fill {
   height: 100%;
-  border-radius: ${args.theme.var.borderRadius.full};
-  background: ${args.theme.var.color.primary};
+  border-radius: ${t.var.borderRadius.full};
+  background: ${t.var.color.primary};
   transition: width 300ms ease;
 }`;'''
       }
@@ -299,13 +299,13 @@ return {
           '''return {
   as: "div",
   class: "hm-actions",
-  hide: () => !args.user
+  hide: () => !_.user
 };'''
         css:
           '''return `._id.hm-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: ${args.theme.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
   align-items: center;
 }`;'''
       }
@@ -322,19 +322,19 @@ return {
   as: "button",
   type: "button",
   text: "+ 250 ml",
-  hide: () => !args.user,
-  onClick: () => args.fns.logQuick(250)
+  hide: () => !_.user,
+  onClick: () => f.logQuick(250)
 };'''
         css:
           '''return `._id {
   min-height: 44px;
-  padding: 0 ${args.theme.var.spacing.md};
-  border-radius: ${args.theme.var.borderRadius.md};
+  padding: 0 ${t.var.spacing.md};
+  border-radius: ${t.var.borderRadius.md};
   border: none;
   cursor: pointer;
   font-weight: 600;
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
 }`;'''
       }
     }
@@ -350,19 +350,19 @@ return {
   as: "button",
   type: "button",
   text: "+ 500 ml",
-  hide: () => !args.user,
-  onClick: () => args.fns.logQuick(500)
+  hide: () => !_.user,
+  onClick: () => f.logQuick(500)
 };'''
         css:
           '''return `._id {
   min-height: 44px;
-  padding: 0 ${args.theme.var.spacing.md};
-  border-radius: ${args.theme.var.borderRadius.md};
-  border: 1px solid ${args.theme.var.color.border};
+  padding: 0 ${t.var.spacing.md};
+  border-radius: ${t.var.borderRadius.md};
+  border: 1px solid ${t.var.color.border};
   cursor: pointer;
   font-weight: 600;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
 }`;'''
       }
     }
@@ -378,19 +378,19 @@ return {
   as: "button",
   type: "button",
   text: "Open full logbook",
-  hide: () => !args.user,
-  onClick: () => args.navigate("/hydrateme/logs")
+  hide: () => !_.user,
+  onClick: () => _.navigate("/hydrateme/logs")
 };'''
         css:
           '''return `._id {
   min-height: 44px;
-  padding: 0 ${args.theme.var.spacing.md};
-  border-radius: ${args.theme.var.borderRadius.md};
+  padding: 0 ${t.var.spacing.md};
+  border-radius: ${t.var.borderRadius.md};
   border: none;
   cursor: pointer;
   font-weight: 600;
   background: transparent;
-  color: ${args.theme.var.color.info};
+  color: ${t.var.color.info};
   text-decoration: underline;
 }`;'''
       }
@@ -407,7 +407,7 @@ return {
   as: "h2",
   class: "hm-recent-h",
   text: "Recent logs",
-  hide: () => !args.user
+  hide: () => !_.user
 };'''
         css:
           '''return `._id.hm-recent-h {
@@ -425,13 +425,13 @@ return {
         componentName: Html
         key: hm_recent_loop
         props:
-          '''const d = typeof args.fns.dash === "function" ? args.fns.dash() : null;
+          '''const d = typeof f.dash === "function" ? f.dash() : null;
 const rows = Array.isArray(d?.recentLogs) ? d.recentLogs : [];
 return {
   loop: true,
   contextName: "logRow",
   data: rows,
-  hide: () => !args.user
+  hide: () => !_.user
 };'''
       }
     }
@@ -443,7 +443,7 @@ return {
         componentName: Html
         key: hm_recent_row
         props:
-          '''const v = args.contextData.logRow;
+          '''const v = c.logRow;
 const ml = v?.P?.amountMl ?? "";
 const when = v?.P?.loggedAt || v?.P?.loggedDate || "";
 return {
@@ -453,10 +453,10 @@ return {
 };'''
         css:
           '''return `._id.hm-recent-row {
-  padding: ${args.theme.var.spacing.xs} 0;
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  padding: ${t.var.spacing.xs} 0;
+  border-bottom: 1px solid ${t.var.color.border};
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
       }
     }
@@ -472,13 +472,13 @@ return {
   as: "p",
   class: "hm-tip",
   text: "After quick adds, open Logbook for the full DynamicPage table (edit, filter, export).",
-  hide: () => !args.user
+  hide: () => !_.user
 };'''
         css:
           '''return `._id.hm-tip {
   margin: 0;
   font-size: 0.75rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;'''
       }
     }
@@ -494,7 +494,7 @@ return {
 return {
   tableVertexLabel: "HydrateMeWaterLog",
   loadFromSetting: true,
-  hide: () => !args.user
+  hide: () => !_.user
 };
 '''
       }

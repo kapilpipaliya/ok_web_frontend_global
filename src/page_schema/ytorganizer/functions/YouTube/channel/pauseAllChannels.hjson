@@ -8,7 +8,7 @@
         body:
           '''
 // Get current authenticated user from session
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return {
     success: false,
@@ -17,13 +17,13 @@ if (!actualUser) {
 }
 
 // Get effective user (handles admin impersonation)
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const user = await _.getEffectiveUser(_.session, actualUser, c);
 
-const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
+const helpers = await s({ functionName: 'queueHelpers', contextData: {} });
 
 // Get all channels that will be paused across all ownerships (need IDs before updating status)
 // NEW ARCHITECTURE: Queue status on Channel vertex
-const channelsToDelete = await args.session.run(`
+const channelsToDelete = await _.session.run(`
   MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
   MATCH (o)-[:YouTubeOwnershipChannel]->(c:Channel)
   WHERE c.queueStatus IN ['queued', 'processing']
@@ -32,7 +32,7 @@ const channelsToDelete = await args.session.run(`
 
 // Get all playlists that will be paused across all ownerships
 // NEW ARCHITECTURE: Queue status on Playlist vertex
-const playlistsToDelete = await args.session.run(`
+const playlistsToDelete = await _.session.run(`
   MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
   MATCH (o)-[:YouTubeOwnershipPlaylist]->(p:Playlist)
   WHERE p.queueStatus IN ['queued', 'processing']
@@ -52,7 +52,7 @@ let jobsRemoved = 0;
 
 // Remove channel jobs from BullMQ queue
 if (channelJobs.length > 0) {
-  const channelQueue = helpers.result.data.createChannelQueue(args);
+  const channelQueue = helpers.result.data.createChannelQueue(_);
 
   try {
     // Get all waiting and delayed jobs
@@ -77,7 +77,7 @@ if (channelJobs.length > 0) {
 
 // Remove playlist jobs from BullMQ queue
 if (playlistJobs.length > 0) {
-  const playlistQueue = helpers.result.data.createPlaylistQueue(args);
+  const playlistQueue = helpers.result.data.createPlaylistQueue(_);
 
   try{
     // Get all waiting and delayed jobs
@@ -102,7 +102,7 @@ if (playlistJobs.length > 0) {
 
 // Now update database status to paused across all ownerships
 // NEW ARCHITECTURE: Update queue status on Channel vertex
-const result = await args.session.run(`
+const result = await _.session.run(`
   MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
   MATCH (o)-[:YouTubeOwnershipChannel]->(c:Channel)
   WHERE c.queueStatus IN ['queued', 'processing']
@@ -112,7 +112,7 @@ const result = await args.session.run(`
   RETURN count(c) as pausedCount
 `, { userUuid: user.P.uuid });
 
-const playlistResult = await args.session.run(`
+const playlistResult = await _.session.run(`
   MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
   MATCH (o)-[:YouTubeOwnershipPlaylist]->(p:Playlist)
   WHERE p.queueStatus IN ['queued', 'processing']

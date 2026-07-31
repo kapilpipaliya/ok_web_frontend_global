@@ -189,7 +189,7 @@ export function SignupForm() {
   padding: 0.75rem 1rem;
   background: white;
   color: #1f1f1f;
-  border: 1px solid \${args.theme.var.color.border};
+  border: 1px solid \${t.var.color.border};
   border-radius: 0.375rem;
   font-size: 0.95rem;
   font-weight: 500;
@@ -203,7 +203,7 @@ export function SignupForm() {
 }
 ._id:hover {
   background: #f8f9fa;
-  border-color: \${args.theme.var.color.border_dark_200};
+  border-color: \${t.var.color.border_dark_200};
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 ._id:active {
@@ -225,7 +225,7 @@ export function SignupForm() {
                     css: `return \`._id {
   flex: 1;
   height: 1px;
-  background: \${args.theme.var.color.border};
+  background: \${t.var.color.border};
 }\`;`,
                   },
                   {
@@ -233,7 +233,7 @@ export function SignupForm() {
                     componentName: "Html",
                     css: `return \`._id {
   padding: 0 1rem;
-  color: \${args.theme.var.color.text_dark_300};
+  color: \${t.var.color.text_dark_300};
   font-size: 0.875rem;
 }\`;`,
                     text: "OR",
@@ -244,7 +244,7 @@ export function SignupForm() {
                     css: `return \`._id {
   flex: 1;
   height: 1px;
-  background: \${args.theme.var.color.border};
+  background: \${t.var.color.border};
 }\`;`,
                   },
                 ],
@@ -391,7 +391,7 @@ export function SignupForm() {
                         as: "span",
                         componentName: "Html",
                         css: `return \`._id {
-  color: \${args.theme.var.color.text};
+  color: \${t.var.color.text};
 }\`;`,
                         text: "I agree to the ",
                       },
@@ -399,7 +399,7 @@ export function SignupForm() {
                         as: "a",
                         componentName: "Html",
                         css: `return \`._id {
-  color: \${args.theme.var.color.primary};
+  color: \${t.var.color.primary};
   cursor: pointer;
 }\`;`,
                         props: () => ({
@@ -460,7 +460,7 @@ export function SignupForm() {
               {
                 as: "span",
                 css: `return \`._id {
-  color: \${args.theme.var.color.text};
+  color: \${t.var.color.text};
 }\`;`,
                 componentName: "Html",
                 text: "Already have an account? ",
@@ -468,7 +468,7 @@ export function SignupForm() {
               {
                 as: "a",
                 css: `return \`._id {
-  color: \${args.theme.var.color.primary};
+  color: \${t.var.color.primary};
   cursor: pointer;
 }\`;`,
                 componentName: "Html",
@@ -489,7 +489,7 @@ export function SignupForm() {
             css: `return \`._id {
   text-align: center;
   margin-top: 16px;
-  border-top: 1px solid \${args.theme.var.color.border};
+  border-top: 1px solid \${t.var.color.border};
   padding-top: 16px;
 }\`;`,
             componentName: "Html",
@@ -511,10 +511,10 @@ export function SignupForm() {
               let trap = null;
 
               const initializeFocusTrap = () => {
-                const element = args.ref();
+                const element = _.ref();
                 if (!element) return;
 
-                trap = args.focusTrap.createFocusTrap(element, {
+                trap = _.focusTrap.createFocusTrap(element, {
                   initialFocus: () => document.getElementsByTagName("input")[0],
                   fallbackFocus: () => element,
                   escapeDeactivates: false,

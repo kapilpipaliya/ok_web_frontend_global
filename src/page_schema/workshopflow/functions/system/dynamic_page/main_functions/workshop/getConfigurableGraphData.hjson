@@ -7,12 +7,12 @@
         key: "getConfigurableGraphData",
         description: "Runs predefined Cypher from a Setting config (graphs map) and returns Chart.js-style datasets. Supports batch (graphKeys all|array), manifest (metadata only), and user scoping via optional cypherScoped.",
         body: '''
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return { success: false, message: "User session not found", data: null };
 }
 
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const user = await _.getEffectiveUser(_.session, actualUser, c);
 
 const {
   settingKey = "WorkshopReports_charts_default",
@@ -22,7 +22,7 @@ const {
   enableUserScoping = false,
   operation = "data",
   extraParams = null
-} = args.contextData || {};
+} = c || {};
 
 const rangeDaysMap = { "7d": 7, "30d": 30, "90d": 90, "365d": 365, year: 365 };
 const days = rangeDaysMap[rangePreset] ?? 30;
@@ -31,21 +31,21 @@ sinceDate.setUTCDate(sinceDate.getUTCDate() - days);
 const since = sinceDate.toISOString().slice(0, 10);
 
 async function loadGraphConfig() {
-  let sr = await args.session.run(
+  let sr = await _.session.run(
     `MATCH (s:Setting {key: $key}) RETURN s.config AS cfg LIMIT 1`,
     { key: settingKey }
   );
 
-  if (sr.records.length === 0 && args.executeNamedServerFunction) {
+  if (sr.records.length === 0 && s) {
     try {
-      await args.executeNamedServerFunction({
+      await s({
         functionName: "migrateDynamicPageSettings",
         contextData: { dryRun: false }
       });
     } catch (e) {
       console.error("getConfigurableGraphData: migration failed", e);
     }
-    sr = await args.session.run(
+    sr = await _.session.run(
       `MATCH (s:Setting {key: $key}) RETURN s.config AS cfg LIMIT 1`,
       { key: settingKey }
     );
@@ -200,7 +200,7 @@ for (let i = 0; i < keysToRun.length; i++) {
   }
 
   try {
-    const result = await args.session.run(cypher, params);
+    const result = await _.session.run(cypher, params);
     const labelField = spec.labelField || "label";
     const valueField = spec.valueField || "value";
     const chartData = buildChartData(

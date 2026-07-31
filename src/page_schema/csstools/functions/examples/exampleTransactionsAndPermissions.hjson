@@ -11,16 +11,16 @@
 // =========================================================
 
 // Simple transaction (auto-commits on success, auto-rollback on error)
-const createUserResult = await args.transaction(
-  args.session,
+const createUserResult = await _.transaction(
+  _.session,
   async (tx) => {
     // Create user
     const userResult = await tx.run(
       "CREATE (u:User {id: $id, name: $name, email: $email}) RETURN u",
       {
-        id: args.utils.uuid(),
-        name: args.contextData.name,
-        email: args.contextData.email
+        id: _.utils.uuid(),
+        name: c.name,
+        email: c.email
       }
     );
 
@@ -30,14 +30,14 @@ const createUserResult = await args.transaction(
     const profileResult = await tx.run(
       "CREATE (p:Profile {id: $id, userId: $userId}) RETURN p",
       {
-        id: args.utils.uuid(),
+        id: _.utils.uuid(),
         userId: user.properties.id
       }
     );
 
     return {
-      user: args.neo4jConvert(user),
-      profile: args.neo4jConvert(profileResult.records[0].get("p"))
+      user: _.neo4jConvert(user),
+      profile: _.neo4jConvert(profileResult.records[0].get("p"))
     };
   }
 );
@@ -47,16 +47,16 @@ const createUserResult = await args.transaction(
 // Example 2: Transaction with Retry (for transient failures)
 // ===========================================================
 
-const retryResult = await args.transactionWithRetry(
-  args.session,
+const retryResult = await _.transactionWithRetry(
+  _.session,
   async (tx) => {
     // This will retry up to 3 times if deadlock or timeout occurs
     const result = await tx.run(
       "MATCH (u:User {id: $id}) SET u.lastAccess = $timestamp RETURN u",
-      { id: args.contextData.userId, timestamp: Date.now() }
+      { id: c.userId, timestamp: Date.now() }
     );
 
-    return args.neo4jConvert(result.records[0].get("u"));
+    return _.neo4jConvert(result.records[0].get("u"));
   },
   3,      // maxRetries
   1000    // retryDelay (ms)
@@ -65,8 +65,8 @@ const retryResult = await args.transactionWithRetry(
 // Example 3: Batch Transaction
 // =============================
 
-const batchResult = await args.transactionBatch(
-  args.session,
+const batchResult = await _.transactionBatch(
+  _.session,
   [
     (tx) => tx.run("CREATE (n:Node1) RETURN n"),
     (tx) => tx.run("CREATE (n:Node2) RETURN n"),
@@ -79,89 +79,89 @@ const batchResult = await args.transactionBatch(
 // ===================================
 
 // Require authentication
-const authCheck = await args.requirePermissions(
+const authCheck = await _.requirePermissions(
   { authenticated: true },
   {
-    getUserFromSession: args.getUserFromSession,
-    session: args.session,
-    contextData: args.contextData
+    getUserFromSession: _.getUserFromSession,
+    session: _.session,
+    contextData: c
   }
 );
 // authCheck.user contains authenticated user
 
 // Require specific role
-const adminCheck = await args.requirePermissions(
+const adminCheck = await _.requirePermissions(
   {
     authenticated: true,
     roles: ["admin", "moderator"]
   },
   {
-    getUserFromSession: args.getUserFromSession,
-    session: args.session,
-    contextData: args.contextData
+    getUserFromSession: _.getUserFromSession,
+    session: _.session,
+    contextData: c
   }
 );
 
 // Require ownership
-const ownershipCheck = await args.requirePermissions(
+const ownershipCheck = await _.requirePermissions(
   {
     authenticated: true,
     ownership: {
       resource: "Post",
       field: "authorId",
-      resourceId: args.contextData.postId
+      resourceId: c.postId
     }
   },
   {
-    getUserFromSession: args.getUserFromSession,
-    session: args.session,
-    contextData: args.contextData
+    getUserFromSession: _.getUserFromSession,
+    session: _.session,
+    contextData: c
   }
 );
 
 // Multiple requirements (authenticated + admin + ownership)
-const complexPermissions = await args.requirePermissions(
+const complexPermissions = await _.requirePermissions(
   {
     authenticated: true,
     roles: ["admin"],
     ownership: {
       resource: "Post",
       field: "authorId",
-      resourceId: args.contextData.postId
+      resourceId: c.postId
     }
   },
   {
-    getUserFromSession: args.getUserFromSession,
-    session: args.session,
-    contextData: args.contextData
+    getUserFromSession: _.getUserFromSession,
+    session: _.session,
+    contextData: c
   }
 );
 
 // Example 5: Permission Helper Functions
 // =======================================
 
-const user = await args.getUserFromSession();
+const user = await _.getUserFromSession();
 
 // Check if user has role
-if (args.hasRole(user, "admin", "moderator")) {
+if (_.hasRole(user, "admin", "moderator")) {
   // User is admin or moderator
 }
 
 // Check if user has permission
-if (args.hasPermission(user, "posts.edit", "posts.delete")) {
+if (_.hasPermission(user, "posts.edit", "posts.delete")) {
   // User can edit or delete posts
 }
 
 // Check if user is admin
-if (args.isAdmin(user)) {
+if (_.isAdmin(user)) {
   // User is admin
 }
 
 // Check ownership in database
-const isOwner = await args.isOwner(
-  args.session,
+const isOwner = await _.isOwner(
+  _.session,
   user.P.uuid,
-  args.contextData.postId,
+  c.postId,
   "authorId"
 );
 
@@ -169,29 +169,29 @@ const isOwner = await args.isOwner(
 // =========================
 
 // Simple cache get/set
-args.cacheSet("user:123", { name: "John" }, { ttl: 300 }); // 5 minutes
-const cachedUser = args.cacheGet("user:123");
+_.cacheSet("user:123", { name: "John" }, { ttl: 300 }); // 5 minutes
+const cachedUser = _.cacheGet("user:123");
 
 // Cache with namespace
-args.cacheSet("sessions", { id: "abc" }, { ttl: 3600, namespace: "auth" });
-const session = args.cacheGet("sessions", { namespace: "auth" });
+_.cacheSet("sessions", { id: "abc" }, { ttl: 3600, namespace: "auth" });
+const session = _.cacheGet("sessions", { namespace: "auth" });
 
 // Get or set (fetch if not cached)
-const userData = await args.cacheGetOrSet(
-  "user:" + args.contextData.userId,
+const userData = await _.cacheGetOrSet(
+  "user:" + c.userId,
   async () => {
     // This function runs only if cache miss
-    const result = await args.session.run(
+    const result = await _.session.run(
       "MATCH (u:User {id: $id}) RETURN u",
-      { id: args.contextData.userId }
+      { id: c.userId }
     );
-    return args.neo4jConvert(result.records[0].get("u"));
+    return _.neo4jConvert(result.records[0].get("u"));
   },
   { ttl: 600 }
 );
 
 // Memoize expensive function
-const expensiveOperation = args.cacheMemoize(
+const expensiveOperation = _.cacheMemoize(
   async (userId) => {
     // Complex calculation
     return await calculateUserStats(userId);
@@ -199,10 +199,10 @@ const expensiveOperation = args.cacheMemoize(
   { ttl: 300 }
 );
 
-const stats = await expensiveOperation(args.contextData.userId);
+const stats = await expensiveOperation(c.userId);
 
 // Cache manager with namespace
-const userCache = args.createCacheManager("users");
+const userCache = _.createCacheManager("users");
 userCache.set("profile:123", { name: "John" });
 const profile = userCache.get("profile:123");
 
@@ -210,8 +210,8 @@ const profile = userCache.get("profile:123");
 // ===========================
 
 // Register job handler
-args.registerJobHandler("sendWelcomeEmail", async (data) => {
-  await args.sendEmail({
+_.registerJobHandler("sendWelcomeEmail", async (data) => {
+  await _.sendEmail({
     to: data.email,
     subject: "Welcome!",
     html: `<h1>Welcome ${data.name}</h1>`
@@ -220,11 +220,11 @@ args.registerJobHandler("sendWelcomeEmail", async (data) => {
 });
 
 // Add job to queue
-const jobId = await args.addJob(
+const jobId = await _.addJob(
   "sendWelcomeEmail",
   {
-    email: args.contextData.email,
-    name: args.contextData.name
+    email: c.email,
+    name: c.name
   },
   {
     priority: 5,        // Higher priority
@@ -234,13 +234,13 @@ const jobId = await args.addJob(
 );
 
 // Wait for job completion
-const job = await args.waitForJob(jobId, 30000); // 30 second timeout
+const job = await _.waitForJob(jobId, 30000); // 30 second timeout
 
 // Get job status
-const status = args.getJobStatus(jobId);
+const status = _.getJobStatus(jobId);
 
 // Get queue statistics
-const queueStats = args.jobs.stats();
+const queueStats = _.jobs.stats();
 
 // Example 8: Batch Operations
 // ============================
@@ -248,7 +248,7 @@ const queueStats = args.jobs.stats();
 // Process items in batches with progress
 const items = Array.from({ length: 1000 }, (_, i) => ({ id: i }));
 
-const batchResult = await args.batchProcess(
+const batchResult = await _.batchProcess(
   items,
   async (item) => {
     // Process each item
@@ -272,8 +272,8 @@ const newUsers = [
   { name: "Jane", email: "jane@example.com" }
 ];
 
-const createResult = await args.batchCreateVertices(
-  args.session,
+const createResult = await _.batchCreateVertices(
+  _.session,
   "User",
   newUsers,
   { batchSize: 100 }
@@ -285,8 +285,8 @@ const updates = [
   { id: "user2", updates: { name: "New Name 2" } }
 ];
 
-const updateResult = await args.batchUpdateVertices(
-  args.session,
+const updateResult = await _.batchUpdateVertices(
+  _.session,
   "User",
   updates
 );
@@ -294,14 +294,14 @@ const updateResult = await args.batchUpdateVertices(
 // Parallel map with concurrency
 const userIds = ["user1", "user2", "user3"];
 
-const userDetails = await args.parallelMap(
+const userDetails = await _.parallelMap(
   userIds,
   async (userId) => {
-    const result = await args.session.run(
+    const result = await _.session.run(
       "MATCH (u:User {id: $id}) RETURN u",
       { id: userId }
     );
-    return args.neo4jConvert(result.records[0].get("u"));
+    return _.neo4jConvert(result.records[0].get("u"));
   },
   3 // Process 3 in parallel
 );
@@ -309,7 +309,7 @@ const userDetails = await args.parallelMap(
 // Process in chunks
 const largeArray = Array.from({ length: 10000 }, (_, i) => i);
 
-const chunkResult = await args.processInChunks(
+const chunkResult = await _.processInChunks(
   largeArray,
   async (chunk) => {
     // Process entire chunk
@@ -319,7 +319,7 @@ const chunkResult = await args.processInChunks(
 );
 
 // Retry with exponential backoff
-const retryOperation = await args.retry(
+const retryOperation = await _.retry(
   async () => {
     // Operation that might fail
     const result = await fetch("https://api.example.com/data");
@@ -335,7 +335,7 @@ const retryOperation = await args.retry(
   }
 );
 
-return args.responses.ok({
+return _.responses.ok({
   message: "All examples completed",
   results: {
     transaction: createUserResult,

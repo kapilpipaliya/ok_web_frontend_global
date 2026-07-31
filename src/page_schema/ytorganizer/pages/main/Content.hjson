@@ -6,67 +6,67 @@
       P: {
         fns:
           '''
-const contentType = args.createMemo(() => args.searchParams?.type || "channels");
-const detailId = args.createMemo(() => args.searchParams?.id || null);
-const searchQuery = args.createMemo(() => args.searchParams?.q || "");
+const contentType = _.createMemo(() => _.searchParams?.type || "channels");
+const detailId = _.createMemo(() => _.searchParams?.id || null);
+const searchQuery = _.createMemo(() => _.searchParams?.q || "");
 
-const isPublicView = args.createMemo(() => args.searchParams?.page === "public");
-const publicUsername = args.createMemo(() => args.searchParams?.username || null);
+const isPublicView = _.createMemo(() => _.searchParams?.page === "public");
+const publicUsername = _.createMemo(() => _.searchParams?.username || null);
 
-const isSearchView = args.createMemo(() => contentType() === "search");
-const isFavouritesView = args.createMemo(() => contentType() === "favourites");
-const isExtensionView = args.createMemo(() => contentType() === "extension");
-const isChannelDetail = args.createMemo(() => contentType() === "channels" && args.searchParams?.id);
-const isPlaylistDetail = args.createMemo(() => contentType() === "playlists" && args.searchParams?.id);
-const isPlaylists = args.createMemo(() => !args.searchParams?.id && contentType() === "playlists");
-const isChannels = args.createMemo(() => !args.searchParams?.id && contentType() === "channels");
+const isSearchView = _.createMemo(() => contentType() === "search");
+const isFavouritesView = _.createMemo(() => contentType() === "favourites");
+const isExtensionView = _.createMemo(() => contentType() === "extension");
+const isChannelDetail = _.createMemo(() => contentType() === "channels" && _.searchParams?.id);
+const isPlaylistDetail = _.createMemo(() => contentType() === "playlists" && _.searchParams?.id);
+const isPlaylists = _.createMemo(() => !_.searchParams?.id && contentType() === "playlists");
+const isChannels = _.createMemo(() => !_.searchParams?.id && contentType() === "channels");
 
-const items = args.atom([]);
-const loading = args.atom(true);
-const searchTerm = args.atom("");
-const searchInput = args.atom(searchQuery());
-const pageContent = args.atom(null);
-const userSetting = args.atom(null);
-const settingLoaded = args.atom(false);
-const isInitialLoad = args.atom(true);
-const loadError = args.atom(null);
+const items = _.atom([]);
+const loading = _.atom(true);
+const searchTerm = _.atom("");
+const searchInput = _.atom(searchQuery());
+const pageContent = _.atom(null);
+const userSetting = _.atom(null);
+const settingLoaded = _.atom(false);
+const isInitialLoad = _.atom(true);
+const loadError = _.atom(null);
 // Track if URL params changed to prevent duplicate loads when sort updates as a consequence
-const urlParamsChangedFlag = args.atom(false);
+const urlParamsChangedFlag = _.atom(false);
 // Store the combined string of contentType, detailId, and searchQuery when data is loaded
-const loadedDataKey = args.atom(null);
+const loadedDataKey = _.atom(null);
 
-const isModalOpen = args.atom(false);
-const [modalData, setModalData] = args.createStore({ editMode: false, itemData: null });
+const isModalOpen = _.atom(false);
+const [modalData, setModalData] = _.createStore({ editMode: false, itemData: null });
 
 // Add videos to playlist modal
-const isAddVideosModalOpen = args.atom(false);
+const isAddVideosModalOpen = _.atom(false);
 
 // Add single video to playlist modal (for extension)
-const isAddVideoToPlaylistModalOpen = args.atom(false);
-const [addVideoToPlaylistData, setAddVideoToPlaylistData] = args.createStore({ videoId: null, videoTitle: null });
+const isAddVideoToPlaylistModalOpen = _.atom(false);
+const [addVideoToPlaylistData, setAddVideoToPlaylistData] = _.createStore({ videoId: null, videoTitle: null });
 
 // Sync current channel or playlist
-const isSyncing = args.atom(false);
+const isSyncing = _.atom(false);
 
-const isNoteModalOpen = args.atom(false);
-const [noteModalData, setNoteModalData] = args.createStore({ item: null, existingNote: "" });
+const isNoteModalOpen = _.atom(false);
+const [noteModalData, setNoteModalData] = _.createStore({ item: null, existingNote: "" });
 
 // Common sort state - updates based on current view
-const sortField = args.atom("title");
-const sortDirection = args.atom("asc");
+const sortField = _.atom("title");
+const sortDirection = _.atom("asc");
 
 // Computed sort value for backend calls
-const sortBy = args.createMemo(() =>
+const sortBy = _.createMemo(() =>
   sortField() === "relevance" ? "relevance" : `${sortField()}_${sortDirection()}`
 );
 
 // Polling state for processing status
-const [processingStatuses, setProcessingStatuses] = args.createSignal({
+const [processingStatuses, setProcessingStatuses] = _.createSignal({
   channels: {},
   playlists: {}
 });
-const pollingInterval = args.atom(null);
-const isPolling = args.atom(false);
+const pollingInterval = _.atom(null);
+const isPolling = _.atom(false);
 
 // Helper function to generate combined string from contentType, detailId, and searchQuery
 const getDataKey = () => {
@@ -142,10 +142,10 @@ const updateSortForCurrentView = () => {
 // Function to load user setting
 const loadUserSetting = async (skipSortUpdate = false) => {
   try {
-    const result = await args.fns.executeYTOFunction("getYTOUserSetting", {});
+    const result = await f.executeYTOFunction("getYTOUserSetting", {});
 
     if (result?.error) {
-      args.showErrorToast(result.error);
+      _.showErrorToast(result.error);
       settingLoaded(true);
     } else if (result?.result?.success && result?.result?.data?.setting) {
       const settingVertex = result.result.data.setting;
@@ -168,7 +168,7 @@ const loadUserSetting = async (skipSortUpdate = false) => {
 
 // Initialize sort from URL if present (highest priority)
 const initializeSortFromURL = () => {
-  const urlSort = args.searchParams?.sort;
+  const urlSort = _.searchParams?.sort;
   if (!urlSort) return false;
 
   // Handle "relevance" special case
@@ -248,7 +248,7 @@ const saveUserSortPreference = async () => {
       sortPreferences: JSON.stringify(prefsObj)
     };
 
-    await args.fns.executeYTOFunction("saveYTOUserSetting", {
+    await f.executeYTOFunction("saveYTOUserSetting", {
       setting: updatedSettingProps
     });
 
@@ -263,14 +263,14 @@ const saveUserSortPreference = async () => {
 };
 
 // Debounced version for user actions
-const debouncedSaveSetting = args.debounce(saveUserSortPreference, 1000);
+const debouncedSaveSetting = _.debounce(saveUserSortPreference, 1000);
 
 // Note: Sort preferences are saved explicitly when user changes sort
 // via handleSortFieldChange or handleSortDirectionToggle, not reactively
 
 // Update sort when view changes
-args.createEffect(
-  args.on(
+_.createEffect(
+  _.on(
     () => [
       contentType(),
       detailId(),
@@ -334,7 +334,7 @@ const favouritesSortOptions = [
 ];
 
 // Get current sort options based on view and content type
-const getCurrentSortOptions = args.createMemo(() => {
+const getCurrentSortOptions = _.createMemo(() => {
   if (isFavouritesView()) {
     return favouritesSortOptions;
   }
@@ -352,7 +352,7 @@ const getCurrentSortOptions = args.createMemo(() => {
 });
 
 // Get current sort value
-const getCurrentSortValue = args.createMemo(() => sortBy());
+const getCurrentSortValue = _.createMemo(() => sortBy());
 
 // Set current sort value
 const setCurrentSortValue = (value) => {
@@ -364,10 +364,10 @@ const setCurrentSortValue = (value) => {
 };
 
 // Get current sort field
-const getCurrentSortField = args.createMemo(() => sortField());
+const getCurrentSortField = _.createMemo(() => sortField());
 
 // Get current sort direction
-const getCurrentSortDirection = args.createMemo(() => sortDirection());
+const getCurrentSortDirection = _.createMemo(() => sortDirection());
 
 // Handle field change (keeps direction the same)
 const handleSortFieldChange = (newField) => {
@@ -489,7 +489,7 @@ const loadData = async () => {
       return;
     }
 
-    const response = await args.fns.executeYTOFunction(fnName, fnArgs);
+    const response = await f.executeYTOFunction(fnName, fnArgs);
     if (response?.error) {
       loadError(response.error);
       onSuccess(null);
@@ -530,8 +530,8 @@ const requestPageContent = () => {
 };
 
 // Watch for extension view and request page content
-args.createEffect(
-  args.on([isExtensionView], () => {
+_.createEffect(
+  _.on([isExtensionView], () => {
     if (isExtensionView()) {
       requestPageContent();
     }
@@ -540,17 +540,17 @@ args.createEffect(
 
 // Consolidated effect to watch URL params and sort changes
 // This prevents duplicate data loads by tracking both in a single effect
-args.createEffect(
-  args.on(
+_.createEffect(
+  _.on(
     () => [
-      args.searchParams?.type,
-      args.searchParams?.id,
-      args.searchParams?.q,
-      args.searchParams?.page,
-      args.searchParams?.username,
+      _.searchParams?.type,
+      _.searchParams?.id,
+      _.searchParams?.q,
+      _.searchParams?.page,
+      _.searchParams?.username,
       sortBy(),
-      args.fns.selectedOwnership?.(),
-      args.fns.ownershipsLoading?.(),
+      f.selectedOwnership?.(),
+      f.ownershipsLoading?.(),
       pageContent(),
       settingLoaded()
     ],
@@ -590,7 +590,7 @@ args.createEffect(
 
       // If ownerships are loaded but none exist (and no ownership selected), stop loading
       if (!currentOwnership) {
-        const ownerships = args.fns.ownerships?.() || [];
+        const ownerships = f.ownerships?.() || [];
         if (ownerships.length === 0) {
           loading(false);
         }
@@ -678,8 +678,8 @@ const extractProcessingItems = (channelsArray, playlistsArray, channelsMap, play
 };
 
 // Reactive effect to automatically update all visible items when data changes
-args.createEffect(
-  args.on(
+_.createEffect(
+  _.on(
     [items],
     () => {
       const channelsMap = {};
@@ -819,13 +819,13 @@ const pollProcessingStatus = async () => {
 
   isPolling(true);
   try {
-    const result = await args.fns.executeYTOFunction("getProcessingStatusByIds", {
+    const result = await f.executeYTOFunction("getProcessingStatusByIds", {
       channelIds,
       playlistIds
     });
 
     if (result?.error) {
-      args.showErrorToast(result.error);
+      _.showErrorToast(result.error);
     } else if (result?.result?.success && result?.result?.data) {
       const data = result.result.data;
 
@@ -891,8 +891,8 @@ const stopPolling = () => {
 };
 
 // Watch for processing status changes and start/stop polling as needed
-args.createEffect(
-  args.on([processingStatuses, pollingInterval], () => {
+_.createEffect(
+  _.on([processingStatuses, pollingInterval], () => {
     const statuses = processingStatuses();
 
     // Check if any items are actually being processed (queued or processing status)
@@ -922,18 +922,18 @@ args.createEffect(
 
     // Start polling if there's active processing
     if (hasActiveProcessing && !pollingInterval()) {
-      args.untrack(() => startPolling());
+      _.untrack(() => startPolling());
     }
     // Stop polling if there's no active processing
     else if (!hasActiveProcessing && pollingInterval()) {
-      args.untrack(() => stopPolling());
+      _.untrack(() => stopPolling());
     }
   })
 );
 
 // Cleanup on unmount
-args.onCleanup(() => {
-  args.untrack(() => stopPolling());
+_.onCleanup(() => {
+  _.untrack(() => stopPolling());
 });
 
 // Get processing status for a specific channel
@@ -1005,7 +1005,7 @@ const syncCurrentItem = async () => {
   const data = items();
 
   if (!data) {
-    args.showErrorToast("No item to sync");
+    _.showErrorToast("No item to sync");
     return;
   }
 
@@ -1015,43 +1015,43 @@ const syncCurrentItem = async () => {
     if (isPlaylistDetail()) {
       const playlist = data.playlist?.playlist;
       if (!playlist) {
-        args.showErrorToast("Playlist not found");
+        _.showErrorToast("Playlist not found");
         isSyncing(false);
         return;
       }
 
       const url = `https://www.youtube.com/playlist?list=${playlist.P.youtubeId}`;
 
-      const result = await args.fns.executeYTOFunction("savePlaylist", { url });
+      const result = await f.executeYTOFunction("savePlaylist", { url });
 
       if (result?.result?.success) {
-        args.showSuccessToast(result.result.message || "Playlist synced successfully");
+        _.showSuccessToast(result.result.message || "Playlist synced successfully");
         await loadData();
       } else {
-        args.showErrorToast(result?.result?.message || result?.error || "Failed to sync playlist");
+        _.showErrorToast(result?.result?.message || result?.error || "Failed to sync playlist");
       }
     } else if (isChannelDetail()) {
       const channel = data.channel?.channel;
       if (!channel) {
-        args.showErrorToast("Channel not found");
+        _.showErrorToast("Channel not found");
         isSyncing(false);
         return;
       }
 
       const url = `https://www.youtube.com/channel/${channel.P.youtubeId}`;
 
-      const result = await args.fns.executeYTOFunction("saveChannel", { url });
+      const result = await f.executeYTOFunction("saveChannel", { url });
 
       if (result?.result?.success) {
-        args.showSuccessToast(result.result.message || "Channel synced successfully");
+        _.showSuccessToast(result.result.message || "Channel synced successfully");
         await loadData();
       } else {
-        args.showErrorToast(result?.result?.message || result?.error || "Failed to sync channel");
+        _.showErrorToast(result?.result?.message || result?.error || "Failed to sync channel");
       }
     }
   } catch (error) {
     console.error("Error syncing:", error);
-    args.showErrorToast("An error occurred while syncing");
+    _.showErrorToast("An error occurred while syncing");
   } finally {
     isSyncing(false);
   }
@@ -1144,11 +1144,11 @@ const processExtensionItem = (itemData, type) => {
   }
 };
 
-const filteredItems = args.createMemo(() => {
+const filteredItems = _.createMemo(() => {
   const data = items();
   // Check if current combined string matches the saved state
   const currentKey = getDataKey();
-  const savedKey = args.untrack(loadedDataKey);
+  const savedKey = _.untrack(loadedDataKey);
   if (savedKey !== null && currentKey !== savedKey) {
     return [];
   }
@@ -1261,7 +1261,7 @@ const handleSearchSubmit = async (e) => {
   if (e) e.preventDefault();
   const query = searchInput().trim();
   if (query) {
-    args.navigate(`/content?type=search&q=${encodeURIComponent(query)}`);
+    _.navigate(`/content?type=search&q=${encodeURIComponent(query)}`);
   }
 };
 
@@ -1383,25 +1383,25 @@ return {
           '''
 return {
   isNoPermissionCheck: true,
-  signinRequired: !args.fns.isPublicView(),
+  signinRequired: !f.isPublicView(),
   onMount: () => {
     // Initialize sort from URL (highest priority)
-    const hasURLSort = args.fns.initializeSortFromURL();
+    const hasURLSort = f.initializeSortFromURL();
 
     // Load user setting (skip sort update if URL sort was set)
-    args.fns.loadUserSetting(hasURLSort);
+    f.loadUserSetting(hasURLSort);
 
     // Add message listener for extension view
-    window.addEventListener('message', args.fns.handleMessage);
+    window.addEventListener('message', f.handleMessage);
 
     // Request page content if already in extension view
-    if (args.fns.isExtensionView()) {
-      args.fns.requestPageContent();
+    if (f.isExtensionView()) {
+      f.requestPageContent();
     }
   },
   onCleanup: () => {
     // Remove message listener for extension view
-    window.removeEventListener('message', args.fns.handleMessage);
+    window.removeEventListener('message', f.handleMessage);
   }
 };
 '''
@@ -1479,7 +1479,7 @@ return {
 return `._id {
   font-size: 1.875rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }
 
@@ -1495,21 +1495,21 @@ return `._id {
           '''
 // Determine title based on view
 let title = "";
-if (args.fns.isSearchView()) {
+if (f.isSearchView()) {
   title = "Search";
-} else if (args.fns.isFavouritesView()) {
+} else if (f.isFavouritesView()) {
   title = "Favourites";
-} else if (args.fns.isExtensionView()) {
+} else if (f.isExtensionView()) {
   title = "Quick Add Channel, Playlist or Video";
-} else if (args.fns.isChannelDetail()) {
-  const data = args.fns.items();
+} else if (f.isChannelDetail()) {
+  const data = f.items();
   title = data?.channel?.channel?.P?.title || "Channel Details";
-} else if (args.fns.isPlaylistDetail()) {
-  const data = args.fns.items();
+} else if (f.isPlaylistDetail()) {
+  const data = f.items();
   title = data?.playlist?.playlist?.P?.title || "Playlist Details";
-} else if (args.fns.isChannels()) {
+} else if (f.isChannels()) {
   title = "Channels";
-} else if (args.fns.isPlaylists()) {
+} else if (f.isPlaylists()) {
   title = "Playlists";
 }
 
@@ -1528,11 +1528,11 @@ return {
         componentName: ErrorBanner
         props:
           '''
-const error = args.fns.loadError?.();
+const error = f.loadError?.();
 
 return {
   error: error || null,
-  onClose: () => args.fns.clearLoadError()
+  onClose: () => f.clearLoadError()
 };
 '''
       }
@@ -1545,26 +1545,26 @@ return {
         componentName: ProcessingStatus
         props:
           '''
-const data = args.fns.items();
+const data = f.items();
 
-if (!(args.fns.isChannelDetail() || args.fns.isPlaylistDetail()) || !data) {
+if (!(f.isChannelDetail() || f.isPlaylistDetail()) || !data) {
   return { hide: true };
 }
 
-const itemId = args.fns.isPlaylistDetail()
+const itemId = f.isPlaylistDetail()
   ? data.playlist?.playlist?.P?.youtubeId
   : data.channel?.channel?.P?.youtubeId;
 
-const processingData = args.fns.isPlaylistDetail()
-  ? args.fns.getPlaylistProcessingStatus(itemId)
-  : args.fns.getChannelProcessingStatus(itemId);
+const processingData = f.isPlaylistDetail()
+  ? f.getPlaylistProcessingStatus(itemId)
+  : f.getChannelProcessingStatus(itemId);
 
 if (!processingData) {
   return { hide: true };
 }
 
 // Extract data from vertex format
-const item = args.fns.isPlaylistDetail()
+const item = f.isPlaylistDetail()
   ? processingData.playlist
   : processingData.channel;
 
@@ -1573,7 +1573,7 @@ if (!item?.P) {
 }
 
 let details = '';
-if (args.fns.isChannelDetail()) {
+if (f.isChannelDetail()) {
   const processedPlaylists = item.P.processedPlaylists || 0;
   const totalPlaylists = item.P.totalPlaylists || 0;
   const processedVideos = item.P.processedVideos || 0;
@@ -1588,7 +1588,7 @@ if (args.fns.isChannelDetail()) {
 return {
   queueStatus: item.P.queueStatus,
   progress: item.P.progress || 0,
-  type: args.fns.isPlaylistDetail() ? "playlist" : "channel",
+  type: f.isPlaylistDetail() ? "playlist" : "channel",
   details,
   error: item.P.error || ''
 };
@@ -1620,7 +1620,7 @@ return `._id {
         props:
           '''
 // Check if no ownerships exist - hide search and actions when no accounts connected
-const ownerships = args.fns.ownerships?.() || [];
+const ownerships = f.ownerships?.() || [];
 const hasNoOwnerships = ownerships.length === 0;
 
 return {
@@ -1651,8 +1651,8 @@ return `._id {
         props:
           '''
 // Use form for search view to handle Enter key, div for others
-const as = args.fns.isSearchView() ? "form" : "div";
-const onSubmit = args.fns.isSearchView() ? args.fns.handleSearchSubmit : undefined;
+const as = f.isSearchView() ? "form" : "div";
+const onSubmit = f.isSearchView() ? f.handleSearchSubmit : undefined;
 
 return {
   as,
@@ -1675,35 +1675,35 @@ let value = "";
 let onInput = null;
 let autofocus = false;
 
-if (args.fns.isSearchView()) {
+if (f.isSearchView()) {
   placeholder = "Search channels, playlists, and videos...";
-  value = args.fns.searchInput();
-  onInput = (e) => args.fns.searchInput(e.target.value);
+  value = f.searchInput();
+  onInput = (e) => f.searchInput(e.target.value);
   autofocus = true;
-} else if (args.fns.isFavouritesView()) {
+} else if (f.isFavouritesView()) {
   placeholder = "Filter favourites...";
-  value = args.fns.searchTerm();
-  onInput = (e) => args.fns.searchTerm(e.target.value);
-} else if (args.fns.isExtensionView()) {
+  value = f.searchTerm();
+  onInput = (e) => f.searchTerm(e.target.value);
+} else if (f.isExtensionView()) {
   placeholder = "Filter items...";
-  value = args.fns.searchTerm();
-  onInput = (e) => args.fns.searchTerm(e.target.value);
-} else if (args.fns.isPlaylistDetail()) {
+  value = f.searchTerm();
+  onInput = (e) => f.searchTerm(e.target.value);
+} else if (f.isPlaylistDetail()) {
   placeholder = "Search videos...";
-  value = args.fns.searchTerm();
-  onInput = (e) => args.fns.searchTerm(e.target.value);
-} else if (args.fns.isChannelDetail()) {
+  value = f.searchTerm();
+  onInput = (e) => f.searchTerm(e.target.value);
+} else if (f.isChannelDetail()) {
   placeholder = "Search playlists...";
-  value = args.fns.searchTerm();
-  onInput = (e) => args.fns.searchTerm(e.target.value);
-} else if (args.fns.isPlaylists()) {
+  value = f.searchTerm();
+  onInput = (e) => f.searchTerm(e.target.value);
+} else if (f.isPlaylists()) {
   placeholder = "Search playlists...";
-  value = args.fns.searchTerm();
-  onInput = (e) => args.fns.searchTerm(e.target.value);
-} else if (args.fns.isChannels()) {
+  value = f.searchTerm();
+  onInput = (e) => f.searchTerm(e.target.value);
+} else if (f.isChannels()) {
   placeholder = "Search channels...";
-  value = args.fns.searchTerm();
-  onInput = (e) => args.fns.searchTerm(e.target.value);
+  value = f.searchTerm();
+  onInput = (e) => f.searchTerm(e.target.value);
 }
 
 return {
@@ -1731,8 +1731,8 @@ return `._id {
         props:
           '''
 const text = (() => {
-  if (args.fns.isPlaylists()) return "Add Playlist";
-  if (args.fns.isChannels()) return "Add Channel";
+  if (f.isPlaylists()) return "Add Playlist";
+  if (f.isChannels()) return "Add Channel";
   return "";
 })();
 
@@ -1740,8 +1740,8 @@ return {
   text,
   variant: "primary",
   leftIcon: "carbon:add",
-  onClick: args.fns.openModal,
-  show: () => args.fns.isPlaylists() || args.fns.isChannels()
+  onClick: f.openModal,
+  show: () => f.isPlaylists() || f.isChannels()
 };
 '''
       }
@@ -1765,7 +1765,7 @@ return `._id {
           '''
 return {
   as: "div",
-  show: () => args.fns.isChannelDetail() || args.fns.isPlaylistDetail()
+  show: () => f.isChannelDetail() || f.isPlaylistDetail()
 };
 '''
       }
@@ -1778,13 +1778,13 @@ return {
         componentName: Button
         props:
           '''
-const isSyncing = args.fns.isSyncing();
+const isSyncing = f.isSyncing();
 
 return {
   text: isSyncing ? "Syncing..." : "Sync",
   variant: "secondary",
   leftIcon: "carbon:refresh",
-  onClick: args.fns.syncCurrentItem,
+  onClick: f.syncCurrentItem,
   disabled: isSyncing
 };
 '''
@@ -1803,22 +1803,22 @@ return {
   variant: "primary",
   leftIcon: "carbon:add",
   onClick: () => {
-    const data = args.fns.items();
+    const data = f.items();
     const channel = data?.channel?.channel;
 
     if (!channel) {
-      args.showErrorToast("Channel data not loaded");
+      _.showErrorToast("Channel data not loaded");
       return;
     }
 
-    args.fns.setModalData({
+    f.setModalData({
       editMode: false,
       contentType: "playlists",
       channelId: channel.P.youtubeId
     });
-    args.fns.isModalOpen(true);
+    f.isModalOpen(true);
   },
-  show: args.fns.isChannelDetail() || args.fns.isPlaylists()
+  show: f.isChannelDetail() || f.isPlaylists()
 };
 '''
       }
@@ -1835,8 +1835,8 @@ return {
   text: "Add Videos",
   variant: "primary",
   leftIcon: "carbon:add",
-  onClick: () => args.fns.isAddVideosModalOpen(true),
-  show: args.fns.isPlaylistDetail()
+  onClick: () => f.isAddVideosModalOpen(true),
+  show: f.isPlaylistDetail()
 };
 '''
       }
@@ -1852,7 +1852,7 @@ return `._id {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  margin: 0 0 ${args.theme.var.spacing.lg} 0;
+  margin: 0 0 ${t.var.spacing.lg} 0;
 }
 
 @media (max-width: 768px) {
@@ -1860,7 +1860,7 @@ return `._id {
     /*flex-direction: column;*/
     /*align-items: flex-start;*/
     gap: 0.5rem;
-    margin: 0 0 ${args.theme.var.spacing.md} 0;
+    margin: 0 0 ${t.var.spacing.md} 0;
   }
 }`;
 '''
@@ -1869,12 +1869,12 @@ return `._id {
         props:
           '''
 // Check if no ownerships exist - hide sort controls when no accounts connected
-const ownerships = args.fns.ownerships?.() || [];
+const ownerships = f.ownerships?.() || [];
 const hasNoOwnerships = ownerships.length === 0;
 
 return {
   as: "div",
-  hide: args.fns.loading() || hasNoOwnerships
+  hide: f.loading() || hasNoOwnerships
 };
 '''
       }
@@ -1887,7 +1887,7 @@ return {
           '''
 return `._id {
   font-size: 1rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0;
   flex: 1;
 }
@@ -1904,29 +1904,29 @@ return `._id {
           '''
 // Determine description based on view
 let description = "";
-if (args.fns.isSearchView()) {
-  const results = args.fns.items();
+if (f.isSearchView()) {
+  const results = f.items();
   const totalCount = results?.totalCount || 0;
   description = results ? `Found ${totalCount} result${totalCount !== 1 ? 's' : ''}` : "";
-} else if (args.fns.isFavouritesView()) {
-  const items = args.fns.filteredItems();
+} else if (f.isFavouritesView()) {
+  const items = f.filteredItems();
   const totalCount = items.length;
   description = `${totalCount} favourite item${totalCount !== 1 ? 's' : ''}`;
-} else if (args.fns.isExtensionView()) {
-  const items = args.fns.filteredItems();
+} else if (f.isExtensionView()) {
+  const items = f.filteredItems();
   const totalCount = items.length;
   description = `${totalCount} item${totalCount !== 1 ? 's' : ''}`;
-} else if (args.fns.isChannelDetail()) {
-  const count = args.fns.filteredItems().length;
+} else if (f.isChannelDetail()) {
+  const count = f.filteredItems().length;
   description = `${count} playlist${count !== 1 ? 's' : ''}`;
-} else if (args.fns.isPlaylistDetail()) {
-  const count = args.fns.filteredItems().length;
+} else if (f.isPlaylistDetail()) {
+  const count = f.filteredItems().length;
   description = `${count} video${count !== 1 ? 's' : ''}`;
-} else if (args.fns.isChannels()) {
-  const count = args.fns.filteredItems().length;
+} else if (f.isChannels()) {
+  const count = f.filteredItems().length;
   description = `${count} channel${count !== 1 ? 's' : ''}`;
-} else if (args.fns.isPlaylists()) {
-  const count = args.fns.filteredItems().length;
+} else if (f.isPlaylists()) {
+  const count = f.filteredItems().length;
   description = `${count} playlist${count !== 1 ? 's' : ''}`;
 }
 
@@ -1959,25 +1959,25 @@ return `._id {
         props:
           '''
 // Hide sort controls on extension page
-const isExtension = args.fns.isExtensionView();
+const isExtension = f.isExtensionView();
 if (isExtension) {
   return { hide: true };
 }
 
 // Get sort field, direction, and options from fns
-const currentField = args.fns.getCurrentSortField();
-const currentDirection = args.fns.getCurrentSortDirection();
-const options = args.fns.getCurrentSortOptions();
+const currentField = f.getCurrentSortField();
+const currentDirection = f.getCurrentSortDirection();
+const options = f.getCurrentSortOptions();
 
 return {
   field: currentField,
   direction: currentDirection,
   options: options,
   onFieldChange: (newField) => {
-    args.fns.handleSortFieldChange(newField);
+    f.handleSortFieldChange(newField);
   },
   onDirectionToggle: () => {
-    args.fns.handleSortDirectionToggle();
+    f.handleSortDirectionToggle();
   }
 };
 '''
@@ -2032,7 +2032,7 @@ return `._id {
           '''
 return {
   as: "div",
-  hide: !args.fns.loading()
+  hide: !f.loading()
 };
 '''
       }
@@ -2058,7 +2058,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   font-size: 1rem;
   margin: 0;
 }
@@ -2074,19 +2074,19 @@ return `._id {
         props:
           '''
 let text;
-if (args.fns.isPlaylists()) {
+if (f.isPlaylists()) {
   text = "Loading playlists...";
-} else if (args.fns.isChannels()) {
+} else if (f.isChannels()) {
   text = "Loading channels...";
-} else if (args.fns.isChannelDetail()) {
+} else if (f.isChannelDetail()) {
   text = "Loading playlists...";
-} else if (args.fns.isPlaylistDetail()) {
+} else if (f.isPlaylistDetail()) {
   text = "Loading videos...";
-} else if (args.fns.isSearchView()) {
+} else if (f.isSearchView()) {
   text = "Searching...";
-} else if (args.fns.isFavouritesView()) {
+} else if (f.isFavouritesView()) {
   text = "Loading favourites...";
-} else if (args.fns.isExtensionView()) {
+} else if (f.isExtensionView()) {
   text = "Loading page content...";
 }
 
@@ -2106,11 +2106,11 @@ return {
         props:
           '''
 // Check if no ownerships exist
-const ownerships = args.fns.ownerships?.() || [];
+const ownerships = f.ownerships?.() || [];
 const hasNoOwnerships = ownerships.length === 0;
 
 return {
-  hide: args.fns.loading() || !hasNoOwnerships || args.fns.isPublicView()
+  hide: f.loading() || !hasNoOwnerships || f.isPublicView()
 };
 '''
       }
@@ -2122,8 +2122,8 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.background_light_100};
-  border: 1px solid ${args.theme.var.color.border};
+  background: ${t.var.color.background_light_100};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.75rem;
   padding: 3rem 2rem;
   text-align: center;
@@ -2134,14 +2134,14 @@ return `._id {
         props:
           '''
 // Check if no ownerships exist - don't show this state if no accounts
-const ownerships = args.fns.ownerships?.() || [];
+const ownerships = f.ownerships?.() || [];
 const hasNoOwnerships = ownerships.length === 0;
 
-const hasItems =  args.fns.filteredItems().length > 0;
+const hasItems =  f.filteredItems().length > 0;
 
 return {
   as: "div",
-  hide: args.fns.loading() || hasItems || hasNoOwnerships
+  hide: f.loading() || hasItems || hasNoOwnerships
 };
 '''
       }
@@ -2153,7 +2153,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin-bottom: 1rem;
   opacity: 0.5;
 }`;
@@ -2163,19 +2163,19 @@ return `._id {
         props:
           '''
 let icon;
-if (args.fns.isPlaylists()) {
+if (f.isPlaylists()) {
   icon = "mdi:playlist-play";
-} else if (args.fns.isChannels()) {
+} else if (f.isChannels()) {
   icon = "mdi:youtube";
-} else if (args.fns.isChannelDetail()) {
+} else if (f.isChannelDetail()) {
   icon = "mdi:playlist-remove";
-} else if (args.fns.isPlaylistDetail()) {
+} else if (f.isPlaylistDetail()) {
   icon = "mdi:video-off";
-} else if (args.fns.isSearchView()) {
+} else if (f.isSearchView()) {
   icon = "mdi:magnify";
-} else if (args.fns.isFavouritesView()) {
+} else if (f.isFavouritesView()) {
   icon = "carbon:favorite";
-} else if (args.fns.isExtensionView()) {
+} else if (f.isExtensionView()) {
   icon = "carbon:data-1";
 }
 
@@ -2197,7 +2197,7 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;
 '''
@@ -2205,25 +2205,25 @@ return `._id {
         componentName: Html
         props:
           '''
-const hasSearchTerm = args.fns.searchTerm().length > 0;
-const query = args.searchParams?.q || "";
+const hasSearchTerm = f.searchTerm().length > 0;
+const query = _.searchParams?.q || "";
 
 let title;
 if (hasSearchTerm) {
   title = "No results found";
-} else if (args.fns.isChannels()) {
+} else if (f.isChannels()) {
   title = "No channels yet";
-} else if (args.fns.isPlaylists()) {
+} else if (f.isPlaylists()) {
   title = "No playlists yet";
-} else if (args.fns.isChannelDetail()) {
+} else if (f.isChannelDetail()) {
   title = "No playlists found";
-} else if (args.fns.isPlaylistDetail()) {
+} else if (f.isPlaylistDetail()) {
   title = "No videos found";
-} else if (args.fns.isSearchView()) {
+} else if (f.isSearchView()) {
   title = "Enter a search query";
-} else if (args.fns.isFavouritesView()) {
+} else if (f.isFavouritesView()) {
   title = "No favourite items yet";
-} else if (args.fns.isExtensionView()) {
+} else if (f.isExtensionView()) {
   title = "No Content Found";
 }
 
@@ -2241,7 +2241,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0;
 }`;
 '''
@@ -2249,28 +2249,28 @@ return `._id {
         componentName: Html
         props:
           '''
-const hasSearchTerm = args.fns.searchTerm().length > 0;
+const hasSearchTerm = f.searchTerm().length > 0;
 let text;
 if (hasSearchTerm) {
   text = "Try adjusting your search terms";
-} else if (args.fns.isChannels()) {
+} else if (f.isChannels()) {
   text = "Start by adding some YouTube channels to track your content";
-} else if (args.fns.isPlaylists()) {
+} else if (f.isPlaylists()) {
   text = "Start by adding some YouTube playlists to organize your content";
-} else if (args.fns.isChannelDetail() || args.fns.isPlaylistDetail()) {
+} else if (f.isChannelDetail() || f.isPlaylistDetail()) {
   text = ""; // Detail view doesn't show description (only has 2 children)
-} else if (args.fns.isSearchView()) {
+} else if (f.isSearchView()) {
   text = "to find channels, playlists, and videos";
-} else if (args.fns.isFavouritesView()) {
+} else if (f.isFavouritesView()) {
   text = "Start by adding channels, playlists, or videos to your favourites!";
-} else if (args.fns.isExtensionView()) {
+} else if (f.isExtensionView()) {
   text = "Open this page on a YouTube video, channel, or playlist page to see content here.";
 }
 
 return {
   as: "p",
   text,
-  hide: args.fns.isChannelDetail() || args.fns.isPlaylistDetail()
+  hide: f.isChannelDetail() || f.isPlaylistDetail()
 };
 '''
       }
@@ -2310,97 +2310,97 @@ const updateAllViews = (itemInfo) => {
   const { itemKey, settingKey, arrayKey } = typeMap[type];
 
   // Update list view
-  if ((args.fns.isChannels() || args.fns.isPlaylists()) && args.fns.contentType() === arrayKey) {
-    args.fns.items(updateItemInArrayById(args.fns.items(), itemId, itemKey, settingKey, setting));
+  if ((f.isChannels() || f.isPlaylists()) && f.contentType() === arrayKey) {
+    f.items(updateItemInArrayById(f.items(), itemId, itemKey, settingKey, setting));
   }
 
   // Update detail view
-  if (args.fns.isChannelDetail() || args.fns.isPlaylistDetail()) {
-    const detail = args.fns.items();
+  if (f.isChannelDetail() || f.isPlaylistDetail()) {
+    const detail = f.items();
     if (!detail) return;
 
     // Update arrays in detail view
     if (detail[arrayKey]) {
       const updated = updateItemInArrayById(detail[arrayKey], itemId, itemKey, settingKey, setting);
-      args.fns.items({ ...detail, [arrayKey]: updated });
+      f.items({ ...detail, [arrayKey]: updated });
     }
 
     // Update single item in detail view (channel/playlist object)
     if (detail[type]?.[itemKey]?.P?.youtubeId === itemId) {
-      args.fns.items({ ...detail, [type]: { ...detail[type], [settingKey]: setting } });
+      f.items({ ...detail, [type]: { ...detail[type], [settingKey]: setting } });
     }
   }
 
   // Update search results
-  if (args.fns.isSearchView()) {
-    const results = args.fns.items();
+  if (f.isSearchView()) {
+    const results = f.items();
     if (results?.[arrayKey]) {
       const updated = updateItemInArrayById(results[arrayKey], itemId, itemKey, settingKey, setting);
-      args.fns.items({ ...results, [arrayKey]: updated });
+      f.items({ ...results, [arrayKey]: updated });
     }
   }
 
   // Update favourites
-  if (args.fns.isFavouritesView()) {
-    const favourites = args.fns.items();
+  if (f.isFavouritesView()) {
+    const favourites = f.items();
     if (favourites?.[arrayKey]) {
       const updated = updateItemInArrayById(favourites[arrayKey], itemId, itemKey, settingKey, setting);
-      args.fns.items({ ...favourites, [arrayKey]: updated });
+      f.items({ ...favourites, [arrayKey]: updated });
     }
   }
 
   // Update extension view
-  if (args.fns.isExtensionView()) {
-    const extension = args.fns.items();
+  if (f.isExtensionView()) {
+    const extension = f.items();
     if (extension?.[arrayKey]) {
       const updated = updateItemInArrayById(extension[arrayKey], itemId, itemKey, settingKey, setting);
-      args.fns.items({ ...extension, [arrayKey]: updated });
+      f.items({ ...extension, [arrayKey]: updated });
     }
   }
 };
 
 // Update item data after toggle favourite
 const updateItemDataAfterToggleFavourite = (updatedData) => {
-  const itemInfo = args.fns.inferItemType(updatedData);
+  const itemInfo = f.inferItemType(updatedData);
   updateAllViews(itemInfo);
 };
 
 // Update item data after note is saved
 const updateItemDataAfterNoteSave = (updatedData) => {
-  const itemInfo = args.fns.inferItemType(updatedData);
+  const itemInfo = f.inferItemType(updatedData);
   updateAllViews(itemInfo);
 };
 
 
 const handleModalSave = async (saveData) => {
-  args.fns.closeModal();
+  f.closeModal();
 
   if (saveData?.editMode && saveData?.result) {
     // Edit mode - update local data instead of refetching
     updateItemDataAfterNoteSave(saveData.result);
   } else {
     // Add mode, reload all data
-    await args.fns.loadData();
+    await f.loadData();
   }
 };
 
 // Note modal functions
 const openNoteModal = (item, existingNote = "") => {
-  args.fns.setNoteModalData({ item, existingNote });
-  args.fns.isNoteModalOpen(true);
+  f.setNoteModalData({ item, existingNote });
+  f.isNoteModalOpen(true);
 };
 
 const closeNoteModal = () => {
-  args.fns.isNoteModalOpen(false);
-  args.fns.setNoteModalData({ item: null, existingNote: "" });
+  f.isNoteModalOpen(false);
+  f.setNoteModalData({ item: null, existingNote: "" });
 };
 
 const saveNote = async (data) => {
   try {
-    const result = await args.fns.executeYTOFunction("saveNote", data);
+    const result = await f.executeYTOFunction("saveNote", data);
 
     if (result?.result?.success) {
-      args.showSuccessToast(result.result.message);
+      _.showSuccessToast(result.result.message);
 
       // Update item data locally
       updateItemDataAfterNoteSave(result.result.data);
@@ -2408,7 +2408,7 @@ const saveNote = async (data) => {
       return result.result;
     } else {
       const errorMessage = result?.result?.message || result?.error || "Failed to save note";
-      args.showErrorToast(errorMessage);
+      _.showErrorToast(errorMessage);
       const error = new Error(errorMessage);
       error.toastShown = true;
       throw error;
@@ -2417,7 +2417,7 @@ const saveNote = async (data) => {
     // Only show toast for unexpected errors (network, etc.)
     if (!error.toastShown) {
       console.error("Unexpected error saving note:", error);
-      args.showErrorToast("Failed to save note");
+      _.showErrorToast("Failed to save note");
     }
     throw error;
   }
@@ -2426,10 +2426,10 @@ const saveNote = async (data) => {
 // Toggle favourite function
 const toggleFavourite = async (item) => {
   try {
-    const result = await args.fns.executeYTOFunction("toggleFavourite", { item });
+    const result = await f.executeYTOFunction("toggleFavourite", { item });
 
     if (result?.result?.success) {
-      args.showSuccessToast(result.result.message);
+      _.showSuccessToast(result.result.message);
 
       // Update item data locally
       updateItemDataAfterToggleFavourite(result.result.data);
@@ -2437,7 +2437,7 @@ const toggleFavourite = async (item) => {
       return result.result;
     } else {
       const errorMessage = result?.result?.message || result?.error || "Failed to toggle favourite";
-      args.showErrorToast(errorMessage);
+      _.showErrorToast(errorMessage);
       const error = new Error(errorMessage);
       error.toastShown = true;
       throw error;
@@ -2446,44 +2446,44 @@ const toggleFavourite = async (item) => {
     // Only show toast for unexpected errors (network, etc.)
     if (!error.toastShown) {
       console.error("Unexpected error toggling favourite:", error);
-      args.showErrorToast("Failed to toggle favourite");
+      _.showErrorToast("Failed to toggle favourite");
     }
     throw error;
   }
 };
 
 const openInYouTube = (item) => {
-  const data = args.fns.contentType() === "playlists" ? item.playlist : item.channel;
+  const data = f.contentType() === "playlists" ? item.playlist : item.channel;
   const youtubeId = data?.P?.youtubeId || "";
-  const url = args.fns.contentType() === "playlists"
+  const url = f.contentType() === "playlists"
     ? `https://www.youtube.com/playlist?list=${youtubeId}`
     : `https://www.youtube.com/channel/${youtubeId}`;
   window.open(url, "_blank");
 };
 
 const editCustomName = async (item) => {
-  args.fns.setModalData({ editMode: true, itemData: item });
-  args.fns.isModalOpen(true);
+  f.setModalData({ editMode: true, itemData: item });
+  f.isModalOpen(true);
 };
 
 const openCustomNameModal = (itemData) => {
-  args.fns.setModalData({ editMode: true, itemData });
-  args.fns.isModalOpen(true);
+  f.setModalData({ editMode: true, itemData });
+  f.isModalOpen(true);
 };
 
 // Unified delete function for channels, playlists, and videos
 const deleteItem = async (item) => {
-  const rbConfirm = args.contextData?.confirmContext?.rbConfirm;
+  const rbConfirm = c?.confirmContext?.rbConfirm;
   if (!rbConfirm) {
-    args.showErrorToast("Confirmation dialog not available");
+    _.showErrorToast("Confirmation dialog not available");
 
     return;
   }
 
   // Infer item type and extract data
-  const itemInfo = args.fns.inferItemType(item);
+  const itemInfo = f.inferItemType(item);
   if (!itemInfo) {
-    args.showErrorToast("Cannot determine item type");
+    _.showErrorToast("Cannot determine item type");
 
     return;
   }
@@ -2496,7 +2496,7 @@ const deleteItem = async (item) => {
     channel: "\n\nThis will also delete:\n• All playlists in this channel\n• All videos that are only in this channel's playlists",
     playlist: "\n\nThis will also delete:\n• All videos that are only in this playlist",
     video: () => {
-      const detail = args.fns.items();
+      const detail = f.items();
       const contextItem = detail?.playlist?.playlist;
       const contextName = contextItem?.P?.title || "current view";
       return `\n\nRemoving from ${contextName}.\n\nNote: This video will only be deleted if it doesn't exist in other playlists or the channel.`;
@@ -2523,41 +2523,41 @@ const deleteItem = async (item) => {
         channel: {
           functionName: 'deleteChannel',
           params: { items: [data], itemType, contextItems: [] },
-          onSuccess: args.fns.loadData
+          onSuccess: f.loadData
         },
         playlist: {
           functionName: 'deletePlaylist',
           params: { items: [data], itemType, contextItems: [] },
-          onSuccess: args.fns.loadData
+          onSuccess: f.loadData
         },
         video: {
           functionName: 'deleteVideo',
           params: () => {
-            const detail = args.fns.items();
+            const detail = f.items();
             const contextItem = detail?.playlist?.playlist;
             if (!contextItem) {
               throw new Error("Playlist information not found");
             }
             return { videos: [data], contextType: 'playlist', contextItems: [contextItem] };
           },
-          onSuccess: args.fns.loadData
+          onSuccess: f.loadData
         }
       };
 
       const config = deleteConfig[itemType];
       const params = typeof config.params === 'function' ? config.params() : config.params;
 
-      const result = await args.fns.executeYTOFunction(config.functionName, params);
+      const result = await f.executeYTOFunction(config.functionName, params);
 
       if (result?.result?.success) {
-        args.showSuccessToast(result.result.message);
+        _.showSuccessToast(result.result.message);
         await config.onSuccess();
       } else {
-        args.showErrorToast(result?.result?.message || result?.error || `Failed to delete ${itemType}`);
+        _.showErrorToast(result?.result?.message || result?.error || `Failed to delete ${itemType}`);
       }
     } catch (error) {
       console.error(`Error deleting ${itemType}:`, error);
-      args.showErrorToast(error.message || `An error occurred while deleting ${itemType}`);
+      _.showErrorToast(error.message || `An error occurred while deleting ${itemType}`);
     }
   }
 };
@@ -2609,14 +2609,14 @@ return `._id {
         componentName: VirtualList
         props:
           '''
-const items = args.fns.filteredItems();
-const hasItems = args.fns.filteredItems().length > 0;
+const items = f.filteredItems();
+const hasItems = f.filteredItems().length > 0;
 
 return {
   items: items || [],
   itemHeight: 90,
   overscan: 5,
-  hide: args.fns.loading() || !hasItems
+  hide: f.loading() || !hasItems
 };
 '''
       }
@@ -2628,7 +2628,7 @@ return {
         slotName: children
         css:
           '''
-const virtualItem = args.contextData.virtualItem;
+const virtualItem = c.virtualItem;
 
 return `._id {
   position: absolute;
@@ -2643,49 +2643,49 @@ return `._id {
         props:
           '''
 // VirtualList provides item context with {item, virtualItem, index}
-const virtualItem = args.contextData.virtualItem;
+const virtualItem = c.virtualItem;
 if (!virtualItem) return {};
-const itemData = args.fns.getItems()[virtualItem.index];
+const itemData = f.getItems()[virtualItem.index];
 if (!itemData) return {};
 
 let item, itemSetting, itemType, processingStatus, showTypeBadge, itemId;
 
-if (args.fns.isPlaylists()) {
+if (f.isPlaylists()) {
   item = itemData.playlist;
   itemId = item?.P?.youtubeId;
-  processingStatus = args.fns.getPlaylistProcessingStatus(itemId);
+  processingStatus = f.getPlaylistProcessingStatus(itemId);
   itemSetting = itemData.playlistSetting;
   itemType = "playlist";
   showTypeBadge = false;
-} else if (args.fns.isChannels()) {
+} else if (f.isChannels()) {
   item = itemData.channel;
   itemId = item?.P?.youtubeId;
-  processingStatus = args.fns.getChannelProcessingStatus(itemId);
+  processingStatus = f.getChannelProcessingStatus(itemId);
   itemSetting = itemData.channelSetting;
   itemType = "channel";
   showTypeBadge = false;
-} else if (args.fns.isChannelDetail()) {
+} else if (f.isChannelDetail()) {
   item = itemData.playlist;
   itemId = item?.P?.youtubeId;
-  processingStatus = args.fns.getPlaylistProcessingStatus(itemId);
+  processingStatus = f.getPlaylistProcessingStatus(itemId);
   itemSetting = itemData.playlistSetting;
   itemType = "playlist";
   showTypeBadge = false;
-} else if (args.fns.isPlaylistDetail()) {
+} else if (f.isPlaylistDetail()) {
   item = itemData.video;
   itemId = item?.P?.youtubeId;
   processingStatus = null;
   itemSetting = itemData.videoSetting;
   itemType = "video";
   showTypeBadge = false;
-} else if (args.fns.isSearchView() || args.fns.isFavouritesView() || args.fns.isExtensionView()) {
+} else if (f.isSearchView() || f.isFavouritesView() || f.isExtensionView()) {
   const resultType = itemData.resultType;
   item = resultType === "channel" ? itemData.channel : (resultType === "playlist" ? itemData.playlist : itemData.video);
   itemId = item?.P?.youtubeId;
   processingStatus = resultType === "channel"
-    ? args.fns.getChannelProcessingStatus(itemId)
+    ? f.getChannelProcessingStatus(itemId)
     : resultType === "playlist"
-    ? args.fns.getPlaylistProcessingStatus(itemId)
+    ? f.getPlaylistProcessingStatus(itemId)
     : null;
   itemSetting = resultType === "channel" ? itemData.channelSetting : (resultType === "playlist" ? itemData.playlistSetting : itemData.videoSetting);
   itemType = resultType;
@@ -2693,7 +2693,7 @@ if (args.fns.isPlaylists()) {
 }
 
 // Format processing queueStatus with detailed information
-processingStatus = args.fns.formatProcessingStatus(processingStatus, itemType);
+processingStatus = f.formatProcessingStatus(processingStatus, itemType);
 
 return {
   item,
@@ -2715,8 +2715,8 @@ return {
         props:
           '''
 
-const modalData = args.fns.modalData;
-const isOpen = args.fns.isModalOpen();
+const modalData = f.modalData;
+const isOpen = f.isModalOpen();
 
 return {
   isOpen: isOpen,
@@ -2725,8 +2725,8 @@ return {
   itemData: modalData.itemData,
   channelId: modalData.channelId,
   initialUrl: modalData.initialUrl,
-  onClose: args.fns.closeModal,
-  onSave: args.fns.handleModalSave
+  onClose: f.closeModal,
+  onSave: f.handleModalSave
 };
 '''
       }
@@ -2740,11 +2740,11 @@ return {
         props:
           '''
 return {
-  isOpen: args.fns.isNoteModalOpen,
-  onClose: args.fns.closeNoteModal,
-  item: args.fns.noteModalData.item,
-  existingNote: args.fns.noteModalData.existingNote,
-  onSave: args.fns.saveNote
+  isOpen: f.isNoteModalOpen,
+  onClose: f.closeNoteModal,
+  item: f.noteModalData.item,
+  existingNote: f.noteModalData.existingNote,
+  onSave: f.saveNote
 };
 '''
       }
@@ -2758,8 +2758,8 @@ return {
         props:
           '''
 // Check which modal should be open and return function for isOpen
-const isDetailModalOpen = args.fns.isAddVideosModalOpen;
-const isExtensionModalOpen = args.fns.isAddVideoToPlaylistModalOpen;
+const isDetailModalOpen = f.isAddVideosModalOpen;
+const isExtensionModalOpen = f.isAddVideoToPlaylistModalOpen;
 
 // Determine if any modal is open
 const getIsDetailOpen = isDetailModalOpen?.() || false;
@@ -2772,7 +2772,7 @@ let onSuccess = null;
 
 if (getIsDetailOpen) {
   // Detail view: adding videos to specific playlist
-  const data = args.fns.items();
+  const data = f.items();
   const playlistData = data?.playlist;
   const playlistVertex = playlistData?.playlist;
   const ownership = playlistData?.ownership;
@@ -2783,15 +2783,15 @@ if (getIsDetailOpen) {
     ownershipId: ownership?.P?.key
   } : null;
 
-  onClose = () => args.fns.isAddVideosModalOpen(false);
-  onSuccess = args.fns.loadData;
+  onClose = () => f.isAddVideosModalOpen(false);
+  onSuccess = f.loadData;
 } else if (getIsExtensionOpen) {
   // Extension view: user selects playlist, pre-filled video URL
-  const videoData = args.fns.addVideoToPlaylistData;
+  const videoData = f.addVideoToPlaylistData;
   videoUrl = videoData.videoId ? `https://www.youtube.com/watch?v=${videoData.videoId}` : "";
   playlist = null; // User will select from dropdown
-  onClose = () => args.fns.isAddVideoToPlaylistModalOpen(false);
-  onSuccess = args.fns.loadData;
+  onClose = () => f.isAddVideoToPlaylistModalOpen(false);
+  onSuccess = f.loadData;
 }
 
 // Return isOpen as a function that checks both modal states

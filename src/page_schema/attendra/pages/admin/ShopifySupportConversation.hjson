@@ -23,21 +23,21 @@
 return `._id {
   max-width: 960px;
   margin: 0 auto;
-  padding: ${args.theme.var.spacing?.lg || "2rem"};
-  color: ${args.theme.var.color.text};
+  padding: ${t.var.spacing?.lg || "2rem"};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 1
         fns:
           '''
-const [ticket, setTicket] = args.createSignal(null);
-const [messages, setMessages] = args.createSignal([]);
-const [loading, setLoading] = args.createSignal(false);
-const [sendingReply, setSendingReply] = args.createSignal(false);
-const [replyText, setReplyText] = args.createSignal("");
+const [ticket, setTicket] = _.createSignal(null);
+const [messages, setMessages] = _.createSignal([]);
+const [loading, setLoading] = _.createSignal(false);
+const [sendingReply, setSendingReply] = _.createSignal(false);
+const [replyText, setReplyText] = _.createSignal("");
 
 const getSupportId = () => {
-  const id = args.searchParams?.supportId;
+  const id = _.searchParams?.supportId;
   return typeof id === "string" && id ? id : null;
 };
 
@@ -49,7 +49,7 @@ const loadConversation = async () => {
 
   setLoading(true);
   try {
-    const result = await args.executeNamedServerFunction({
+    const result = await s({
       functionName: "shopifySupportGetConversation",
       contextData: {
         ticketId,
@@ -62,7 +62,7 @@ const loadConversation = async () => {
         result?.error ||
         result?.result?.message ||
         "Failed to load conversation.";
-      args.showErrorToast?.(message);
+      _.showErrorToast?.(message);
       return;
     }
 
@@ -89,7 +89,7 @@ const loadConversation = async () => {
     setMessages(allMessages);
   } catch (error) {
     console.error("AdminSupportConversation.loadConversation error:", error);
-    args.showErrorToast?.("Failed to load conversation.");
+    _.showErrorToast?.("Failed to load conversation.");
   } finally {
     setLoading(false);
   }
@@ -104,7 +104,7 @@ const sendReply = async () => {
 
   setSendingReply(true);
   try {
-    const result = await args.executeNamedServerFunction({
+    const result = await s({
       functionName: "shopifySupportReplyAsAdmin",
       contextData: {
         ticketId,
@@ -117,7 +117,7 @@ const sendReply = async () => {
         result?.error ||
         result?.result?.message ||
         "Failed to send reply.";
-      args.showErrorToast?.(message);
+      _.showErrorToast?.(message);
       return;
     }
 
@@ -130,10 +130,10 @@ const sendReply = async () => {
     }
 
     setReplyText("");
-    args.showSuccessToast?.("Reply sent.");
+    _.showSuccessToast?.("Reply sent.");
   } catch (error) {
     console.error("AdminSupportConversation.sendReply error:", error);
-    args.showErrorToast?.("Failed to send reply.");
+    _.showErrorToast?.("Failed to send reply.");
   } finally {
     setSendingReply(false);
   }
@@ -192,7 +192,7 @@ return {
 return {
   as: "div",
   onMount: async () => {
-    await args.fns.initializeConversation();
+    await f.initializeConversation();
   }
 };
 '''
@@ -208,7 +208,7 @@ return `._id {
   margin-bottom: 1rem;
   padding: 0.35rem 0.8rem;
   border-radius: 9999px;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   background: transparent;
   font-size: 0.875rem;
   cursor: pointer;
@@ -223,8 +223,8 @@ return {
   type: "button",
   text: "← Back to tickets",
   onClick: () => {
-    if (args.navigate) {
-      args.navigate("/ShopifySupportTickets");
+    if (_.navigate) {
+      _.navigate("/ShopifySupportTickets");
     } else if (typeof window !== "undefined") {
       window.location.href = "/ShopifySupportTickets";
     }
@@ -249,7 +249,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const _t = args.fns.ticket?.();
+const _t = f.ticket?.();
 return {
   as: "h1",
   text: _t ? (_t.P?.subject || "Support Conversation") : "Support Conversation"
@@ -265,7 +265,7 @@ return {
           '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0 0 1rem 0;
 }`;
 '''
@@ -273,7 +273,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const _t = args.fns.ticket?.();
+const _t = f.ticket?.();
 if (!_t) {
   return {
     as: "p",
@@ -282,7 +282,7 @@ if (!_t) {
 }
 
 const createdAt = _t.P?.createdAt;
-const createdText = args.fns.formatTimestamp?.(createdAt) || "";
+const createdText = f.formatTimestamp?.(createdAt) || "";
 
 return {
   as: "p",
@@ -299,7 +299,7 @@ return {
           '''
 return `._id {
   border-radius: 0.75rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   padding: 0.75rem;
   min-height: 220px;
   display: flex;
@@ -315,7 +315,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const loading = args.fns.loading?.();
+const loading = f.loading?.();
 return {
   as: "div",
   "data-loading": loading ? "true" : "false"
@@ -335,7 +335,7 @@ return {
           '''
 return {
   as: "div",
-  data: args.fns.messages?.() || []
+  data: f.messages?.() || []
 };
 '''
       }
@@ -363,7 +363,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const m = args.contextData.message;
+const m = c.message;
 if (!m) return {};
 const sender = m.P?.senderType || (m.P?.email === "Support" ? "admin" : "shop");
 const isShop = sender === "shop";
@@ -390,20 +390,20 @@ return `._id {
 }
 
 ._id[data-sender="shop"] {
-  background: ${args.theme.var.color.background_light_200};
-  color: ${args.theme.var.color.background_light_200_text};
+  background: ${t.var.color.background_light_200};
+  color: ${t.var.color.background_light_200_text};
 }
 
 ._id[data-sender="admin"] {
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
 }`;
 '''
         displayOrder: 1
         componentName: Html
         props:
           '''
-const m = args.contextData.message;
+const m = c.message;
 if (!m) return {};
 const sender = m.P?.senderType || (m.P?.email === "Support" ? "admin" : "shop");
 const isShop = sender === "shop";
@@ -423,7 +423,7 @@ return {
         componentName: Html
         props:
           '''
-const m = args.contextData.message;
+const m = c.message;
 return {
   as: "div",
   text: m?.P?.message || ""
@@ -447,7 +447,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const m = args.contextData.message;
+const m = c.message;
 const createdAt = m?.P?.createdAt;
 let createdText = "";
 if (createdAt) {
@@ -508,7 +508,7 @@ return `._id {
   flex: 1;
   padding: 0.5rem 0.75rem;
   border-radius: 0.5rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   font-size: 0.875rem;
   resize: vertical;
 }`;
@@ -517,13 +517,13 @@ return `._id {
         componentName: Html
         props:
           '''
-const value = args.fns.replyText?.() || "";
+const value = f.replyText?.() || "";
 return {
   as: "textarea",
   rows: 2,
   placeholder: "Type your reply...",
   value,
-  onInput: (e) => args.fns.setReplyText?.(e.target.value)
+  onInput: (e) => f.setReplyText?.(e.target.value)
 };
 '''
       }
@@ -538,8 +538,8 @@ return `._id {
   padding: 0.45rem 0.9rem;
   border-radius: 9999px;
   border: none;
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
   font-size: 0.875rem;
   font-weight: 500;
   align-self: flex-end;
@@ -550,8 +550,8 @@ return `._id {
         componentName: Html
         props:
           '''
-const sending = args.fns.sendingReply?.();
-const disabled = !(args.fns.replyText?.() || "").trim();
+const sending = f.sendingReply?.();
+const disabled = !(f.replyText?.() || "").trim();
 
 return {
   as: "button",
@@ -559,7 +559,7 @@ return {
   text: sending ? "Sending..." : "Send",
   disabled,
   onClick: async () => {
-    await args.fns.sendReply?.();
+    await f.sendReply?.();
   }
 };
 '''

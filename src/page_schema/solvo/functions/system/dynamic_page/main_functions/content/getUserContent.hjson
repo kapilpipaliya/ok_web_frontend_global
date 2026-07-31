@@ -8,7 +8,7 @@
         body:
           '''
 // Get current authenticated user from session
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return {
     success: false,
@@ -18,7 +18,7 @@ if (!actualUser) {
 }
 
 // Get effective user (handles admin impersonation)
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const user = await _.getEffectiveUser(_.session, actualUser, c);
 
 // Extract parameters
 const { 
@@ -35,13 +35,13 @@ const {
   elementIds,
   onlyNotQueued,
   relationshipPropertyBindings
-} = args.contextData;
+} = c;
 
 const getGraphPayload = (nodes, rels) => ({
   vertexes: nodes || {},
   edges: rels || {},
-  deleted_vertexes: Array.isArray(args.context?.deletedVertexes) ? args.context.deletedVertexes : [],
-  deleted_edges: Array.isArray(args.context?.deletedEdges) ? args.context.deletedEdges : []
+  deleted_vertexes: Array.isArray(_.context?.deletedVertexes) ? _.context.deletedVertexes : [],
+  deleted_edges: Array.isArray(_.context?.deletedEdges) ? _.context.deletedEdges : []
 });
 
 // Optional: client passes bindings from table config (form fields with selectConfig.edgeOnly + relationshipType, plus config.relationshipPropertyBindings).
@@ -116,14 +116,14 @@ const fetchTableSettingConfigObject = async (label) => {
   const uuid = user?.P?.uuid;
   if (!uuid || !label) return null;
   const userKey = `${label}_settings`;
-  let res = await args.session.run(
+  let res = await _.session.run(
     `MATCH (u:User {uuid: $uuid})-[:UserSetting]->(s:Setting {key: $key}) RETURN s.config AS cfg LIMIT 1`,
     { uuid, key: userKey }
   );
   let cfg = res.records[0]?.get("cfg");
   if (cfg == null) {
     const defaultKey = `${label}_settings_default`;
-    res = await args.session.run(
+    res = await _.session.run(
       `MATCH (s:Setting {key: $key}) RETURN s.config AS cfg LIMIT 1`,
       { key: defaultKey }
     );
@@ -169,10 +169,10 @@ if (onlyNotQueued === true && Array.isArray(elementIds) && elementIds.length > 0
   OPTIONAL MATCH (c)-[r]->(related)
   RETURN c, r, related
   `;
-  const queryResult = await args.session.run(query, { elementIds });
-  args.processResult(queryResult.records, args.context, ['c', 'related'], 'r');
-  const nodes = args.context.nodes || {};
-  const rels = args.context.relationships || {};
+  const queryResult = await _.session.run(query, { elementIds });
+  _.processResult(queryResult.records, _.context, ['c', 'related'], 'r');
+  const nodes = _.context.nodes || {};
+  const rels = _.context.relationships || {};
   const items = Object.values(nodes).filter(v => v.L && v.L.includes(tableVertexLabel));
   hydrateRelationshipSelectProps(items, rels, effectiveRelationshipPropertyBindings);
   return {
@@ -281,7 +281,7 @@ const queryModification = {
   forceEmptyResult: false
 };
 
-await args.executeHooks(hooks?.beforeFetchData, {
+await _.executeHooks(hooks?.beforeFetchData, {
   tableVertexLabel,
   search,
   filters,
@@ -407,14 +407,14 @@ if (!effectiveEnableUserScoping) {
   }
 }
 
-const queryResult = await args.session.run(query, combinedQueryParameters);
+const queryResult = await _.session.run(query, combinedQueryParameters);
 
 // Use processResult to populate graph structure (nodes + relationships)
-if (!args.context.nodes) args.context.nodes = {};
-if (!args.context.relationships) args.context.relationships = {};
-args.processResult(queryResult.records, args.context, ['c', 'related'], 'r');
-const nodes = args.context.nodes || {};
-const rels = args.context.relationships || {};
+if (!_.context.nodes) _.context.nodes = {};
+if (!_.context.relationships) _.context.relationships = {};
+_.processResult(queryResult.records, _.context, ['c', 'related'], 'r');
+const nodes = _.context.nodes || {};
+const rels = _.context.relationships || {};
 const items = Object.values(nodes).filter(v => v.L && v.L.includes(vertexLabel));
 hydrateRelationshipSelectProps(items, rels, effectiveRelationshipPropertyBindings);
 
@@ -427,7 +427,7 @@ const result = {
 };
 
 // Execute afterFetchData hooks
-await args.executeHooks(hooks?.afterFetchData, {
+await _.executeHooks(hooks?.afterFetchData, {
   tableVertexLabel,
   search,
   filters,

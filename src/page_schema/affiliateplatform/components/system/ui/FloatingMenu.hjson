@@ -19,9 +19,9 @@
         displayOrder: 1
         fns:
           '''// Menu state management
-const [isMenuOpen, setIsMenuOpen] = args.createSignal(false);
-const [triggerRef, setTriggerRef] = args.createSignal(null);
-const [menuRef, setMenuRef] = args.createSignal(null);
+const [isMenuOpen, setIsMenuOpen] = _.createSignal(false);
+const [triggerRef, setTriggerRef] = _.createSignal(null);
+const [menuRef, setMenuRef] = _.createSignal(null);
 let cleanup = null;
 
 // Setup floating UI positioning with auto-update
@@ -30,10 +30,10 @@ const setupFloatingUI = async () => {
   const menu = menuRef();
   if (!trigger || !menu) return;
 
-  const placement = args.contextData.props?.placement || "bottom-end";
+  const placement = c.props?.placement || "bottom-end";
 
   try {
-    const { computePosition, flip, shift, offset, autoUpdate } = args.floatingUI;
+    const { computePosition, flip, shift, offset, autoUpdate } = _.floatingUI;
 
     // Function to update position
     const updatePosition = async () => {
@@ -131,7 +131,7 @@ return {
         props:
           '''return {
   as: "div",
-  onMount: args.fns.onMount
+  onMount: f.onMount
 };'''
       }
     }
@@ -143,10 +143,10 @@ return {
           '''return `._id {
   background: none;
   border: none;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   cursor: pointer;
-  padding: ${args.theme.var.spacing.xs};
-  border-radius: ${args.theme.var.borderRadius.sm};
+  padding: ${t.var.spacing.xs};
+  border-radius: ${t.var.borderRadius.sm};
   transition: all 150ms ease;
   display: flex;
   align-items: center;
@@ -156,25 +156,25 @@ return {
 }
 
 ._id:hover {
-  background: ${args.theme.var.color.background_light_200};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background_light_200};
+  color: ${t.var.color.text};
 }
 
 ._id:focus {
-  outline: 2px solid ${args.theme.var.color.primary};
+  outline: 2px solid ${t.var.color.primary};
   outline-offset: 2px;
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const triggerIcon = args.contextData.props?.triggerIcon || "carbon:overflow-menu-vertical";
+          '''const triggerIcon = c.props?.triggerIcon || "carbon:overflow-menu-vertical";
 
 return {
   as: "button",
   "aria-label": "Open menu",
-  "aria-expanded": args.fns.isMenuOpen?.() || false,
-  onClick: args.fns.toggleMenu,
-  ref: args.fns.setTriggerRef
+  "aria-expanded": f.isMenuOpen?.() || false,
+  onClick: f.toggleMenu,
+  ref: f.setTriggerRef
 };'''
       }
     }
@@ -185,7 +185,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const triggerIcon = args.contextData.props?.triggerIcon || "carbon:overflow-menu-vertical";
+          '''const triggerIcon = c.props?.triggerIcon || "carbon:overflow-menu-vertical";
 
 return {
   as: "icon",
@@ -215,10 +215,10 @@ return {
           '''return `._id {
   position: fixed;
   z-index: 1000;
-  background: ${args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.lg};
-  padding: ${args.theme.var.spacing.xs};
+  background: ${t.var.color.background};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.lg};
+  padding: ${t.var.spacing.xs};
   min-width: 160px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   animation: fadeIn 0.15s ease-out;
@@ -239,8 +239,8 @@ return {
         props:
           '''return {
   as: "div",
-  hide: !args.fns.isMenuOpen?.(),
-  ref: args.fns.setMenuRef
+  hide: !f.isMenuOpen?.(),
+  ref: f.setMenuRef
 };'''
       }
     }
@@ -256,7 +256,7 @@ return {
 return {
   contextName: "floatingMenuContext",
   data: {
-    closeMenu: args.fns.closeMenu
+    closeMenu: f.closeMenu
   }
 };'''
       }

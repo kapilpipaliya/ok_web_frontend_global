@@ -22,12 +22,12 @@ export function UnauthenticatedMenu(
           css={`return \`._id {
   display: flex;
   align-items: center;
-  color: \${args.theme.var.color.text};
+  color: \${t.var.color.text};
   padding: 5px 7px;
   border-radius: 5px;
   text-decoration: none;
   &:hover {
-    background-color: \${args.theme.var.color.background_light_100};
+    background-color: \${t.var.color.background_light_100};
   }
 }\`;`}
           href={API.urls.admin.signIn}
@@ -48,12 +48,12 @@ export function UnauthenticatedMenu(
           css={`return \`._id {
   display: flex;
   align-items: center;
-  color: \${args.theme.var.color.text};
+  color: \${t.var.color.text};
   padding: 5px 7px;
   border-radius: 5px;
   text-decoration: none;
   &:hover {
-    background-color: \${args.theme.var.color.background_light_100};
+    background-color: \${t.var.color.background_light_100};
   }
 }\`;`}
           href={API.urls.user.signUp}

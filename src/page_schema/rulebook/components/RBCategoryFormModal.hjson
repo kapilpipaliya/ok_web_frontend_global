@@ -33,9 +33,9 @@
         componentName: "Html",
         fns: '''
 // Form state management
-const [isSaving, setIsSaving] = args.createSignal(false);
-const [isDeleting, setIsDeleting] = args.createSignal(false);
-const [formData, setFormData] = args.createStore({
+const [isSaving, setIsSaving] = _.createSignal(false);
+const [isDeleting, setIsDeleting] = _.createSignal(false);
+const [formData, setFormData] = _.createStore({
   name: "",
   description: "",
   color: "blue",
@@ -44,8 +44,8 @@ const [formData, setFormData] = args.createStore({
 
 // Initialize form data based on props
 const initializeFormData = () => {
-  const categoryData = args.contextData.props?.categoryData;
-  const mode = args.contextData.props?.mode || "create";
+  const categoryData = c.props?.categoryData;
+  const mode = c.props?.mode || "create";
 
   if (mode === "edit" && categoryData) {
     // CategoryData comes as { category: vertex, ruleCount: number }
@@ -69,21 +69,21 @@ const initializeFormData = () => {
 };
 
 // Initialize form data when component mounts or props change
-const categoryData = args.contextData.props?.categoryData;
-const mode = args.contextData.props?.mode;
+const categoryData = c.props?.categoryData;
+const mode = c.props?.mode;
 initializeFormData();
 
 // Handle form submission
 const handleSave = async () => {
   const data = formData;
-  const mode = args.contextData.props?.mode || "create";
-  const categoryData = args.contextData.props?.categoryData;
-  const onSaveCallback = args.contextData.props?.onSave;
-  const onClose = args.contextData.props?.onClose || (() => {});
+  const mode = c.props?.mode || "create";
+  const categoryData = c.props?.categoryData;
+  const onSaveCallback = c.props?.onSave;
+  const onClose = c.props?.onClose || (() => {});
 
   // Validate required fields
   if (!data.name.trim()) {
-    args.showErrorToast("Category name is required");
+    _.showErrorToast("Category name is required");
     return;
   }
 
@@ -111,15 +111,15 @@ const handleSave = async () => {
     }
 
     // Call the saveCategory server function
-    const result = await args.executeNamedServerFunction({
+    const result = await s({
       functionName: "saveCategory",
       contextData
     });
 
     if (result.error) {
-      args.showErrorToast(result.error);
+      _.showErrorToast(result.error);
     } else if (result.result && result.result.success) {
-      args.showSuccessToast(result.result.message);
+      _.showSuccessToast(result.result.message);
 
       // Call parent callback if provided
       if (onSaveCallback) {
@@ -132,11 +132,11 @@ const handleSave = async () => {
 
       onClose();
     } else {
-      args.showErrorToast(result.result?.message || "Failed to save category");
+      _.showErrorToast(result.result?.message || "Failed to save category");
     }
   } catch (error) {
     console.error("Error saving category:", error);
-    args.showErrorToast("An error occurred while saving the category. Please try again.");
+    _.showErrorToast("An error occurred while saving the category. Please try again.");
   } finally {
     setIsSaving(false);
   }
@@ -144,10 +144,10 @@ const handleSave = async () => {
 
 // Handle delete
 const handleDelete = async () => {
-  const mode = args.contextData.props?.mode || "create";
-  const categoryData = args.contextData.props?.categoryData;
-  const onDeleteCallback = args.contextData.props?.onDelete;
-  const onClose = args.contextData.props?.onClose || (() => {});
+  const mode = c.props?.mode || "create";
+  const categoryData = c.props?.categoryData;
+  const onDeleteCallback = c.props?.onDelete;
+  const onClose = c.props?.onClose || (() => {});
 
   if (mode !== "edit" || !categoryData) {
     return;
@@ -158,7 +158,7 @@ const handleDelete = async () => {
   try {
     // Call the deleteCategory server function
     const category = categoryData.category || categoryData; // Handle both formats
-    const result = await args.executeNamedServerFunction({
+    const result = await s({
       functionName: "deleteCategory",
       contextData: {
         categoryId: category.id
@@ -166,9 +166,9 @@ const handleDelete = async () => {
     });
 
     if (result.error) {
-      args.showErrorToast(result.error);
+      _.showErrorToast(result.error);
     } else if (result.result && result.result.success) {
-      args.showSuccessToast(result.result.message);
+      _.showSuccessToast(result.result.message);
 
       // Call parent callback if provided
       if (onDeleteCallback) {
@@ -182,11 +182,11 @@ const handleDelete = async () => {
 
       onClose();
     } else {
-      args.showErrorToast(result.result?.message || "Failed to delete category");
+      _.showErrorToast(result.result?.message || "Failed to delete category");
     }
   } catch (error) {
     console.error("Error deleting category:", error);
-    args.showErrorToast("An error occurred while deleting the category. Please try again.");
+    _.showErrorToast("An error occurred while deleting the category. Please try again.");
   } finally {
     setIsDeleting(false);
   }
@@ -211,10 +211,10 @@ return {
 };
 ''',
         props: '''
-const isOpen = args.contextData.props?.isOpen || false;
-const mode = args.contextData.props?.mode || "create"; // "create" or "edit"
-const categoryData = args.contextData.props?.categoryData;
-const onClose = args.contextData.props?.onClose || (() => {});
+const isOpen = c.props?.isOpen || false;
+const mode = c.props?.mode || "create"; // "create" or "edit"
+const categoryData = c.props?.categoryData;
+const onClose = c.props?.onClose || (() => {});
 
 return {
   as: "div",
@@ -239,7 +239,7 @@ return `._id {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   animation: fadeIn 300ms ease;
 }
 
@@ -270,8 +270,8 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background};
-  border-radius: ${args.theme.var.borderRadius.lg};
+  background: ${t.var.color.background};
+  border-radius: ${t.var.borderRadius.lg};
   width: 100%;
   max-width: 500px;
   max-height: 90vh;
@@ -330,8 +330,8 @@ return `._id {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: ${args.theme.var.spacing.xl};
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  padding: ${t.var.spacing.xl};
+  border-bottom: 1px solid ${t.var.color.border};
 }`;
 '''
       }
@@ -343,7 +343,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const mode = args.contextData.props?.mode || "create";
+const mode = c.props?.mode || "create";
 const title = mode === "edit" ? "Edit Category" : "Create New Category";
 
 return {
@@ -355,7 +355,7 @@ return {
 return `._id {
   font-size: 1.875rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0;
 }`;
 '''
@@ -368,7 +368,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const onClose = args.contextData.props?.onClose || (() => {});
+const onClose = c.props?.onClose || (() => {});
 
 return {
   as: "button",
@@ -380,15 +380,15 @@ return {
 return `._id {
   background: none;
   border: none;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   cursor: pointer;
-  padding: ${args.theme.var.spacing.sm};
-  border-radius: ${args.theme.var.borderRadius.sm};
+  padding: ${t.var.spacing.sm};
+  border-radius: ${t.var.borderRadius.sm};
   transition: all 150ms ease;
 
   &:hover {
-    background: ${args.theme.var.color.background_dark_200};
-    color: ${args.theme.var.color.text};
+    background: ${t.var.color.background_dark_200};
+    color: ${t.var.color.text};
   }
 }`;
 '''
@@ -423,7 +423,7 @@ return {
 ''',
         css: '''
 return `._id {
-  padding: ${args.theme.var.spacing.xl};
+  padding: ${t.var.spacing.xl};
 }`;
 '''
       }
@@ -454,7 +454,7 @@ return {
 ''',
         css: '''
 return `._id {
-  margin-bottom: ${args.theme.var.spacing.lg};
+  margin-bottom: ${t.var.spacing.lg};
 }`;
 '''
       }
@@ -475,8 +475,8 @@ return {
 return `._id {
   display: block;
   font-weight: 500;
-  color: ${args.theme.var.color.text};
-  margin-bottom: ${args.theme.var.spacing.sm};
+  color: ${t.var.color.text};
+  margin-bottom: ${t.var.spacing.sm};
 }`;
 '''
       }
@@ -490,11 +490,11 @@ return `._id {
         props: '''
 return {
   type: "text",
-  value: args.fns.formData.name,
+  value: f.formData.name,
   placeholder: "e.g. Health & Fitness, Learning & Growth",
   required: true,
-  disabled: args.fns.isSubmitting(),
-  onChange: (e) => args.fns.updateField('name', e.target.value)
+  disabled: f.isSubmitting(),
+  onChange: (e) => f.updateField('name', e.target.value)
 };
 '''
       }
@@ -512,7 +512,7 @@ return {
 ''',
         css: '''
 return `._id {
-  margin-bottom: ${args.theme.var.spacing.lg};
+  margin-bottom: ${t.var.spacing.lg};
 }`;
 '''
       }
@@ -533,8 +533,8 @@ return {
 return `._id {
   display: block;
   font-weight: 500;
-  color: ${args.theme.var.color.text};
-  margin-bottom: ${args.theme.var.spacing.sm};
+  color: ${t.var.color.text};
+  margin-bottom: ${t.var.spacing.sm};
 }`;
 '''
       }
@@ -547,11 +547,11 @@ return `._id {
         componentName: "RBTextArea",
         props: '''
 return {
-  value: args.fns.formData.description,
+  value: f.formData.description,
   placeholder: "Brief description of this category",
   rows: 3,
-  disabled: args.fns.isSubmitting(),
-  onChange: (e) => args.fns.updateField('description', e.target.value)
+  disabled: f.isSubmitting(),
+  onChange: (e) => f.updateField('description', e.target.value)
 };
 '''
       }
@@ -571,8 +571,8 @@ return {
 return `._id {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: ${args.theme.var.spacing.md};
-  margin-bottom: ${args.theme.var.spacing.xl};
+  gap: ${t.var.spacing.md};
+  margin-bottom: ${t.var.spacing.xl};
 }
 
 @media (max-width: 480px) {
@@ -612,8 +612,8 @@ return {
 return `._id {
   display: block;
   font-weight: 500;
-  color: ${args.theme.var.color.text};
-  margin-bottom: ${args.theme.var.spacing.sm};
+  color: ${t.var.color.text};
+  margin-bottom: ${t.var.spacing.sm};
 }`;
 '''
       }
@@ -626,12 +626,12 @@ return `._id {
         componentName: "RBTomSelect",
         props: '''
 return {
-  value: args.fns.formData.color || 'blue',
+  value: f.formData.color || 'blue',
   optionType: 'color',
   placeholder: 'Select color...',
-  disabled: args.fns.isSubmitting(),
+  disabled: f.isSubmitting(),
   search: false,
-  onChange: (value) => args.fns.updateField('color', value)
+  onChange: (value) => f.updateField('color', value)
 };
 '''
       }
@@ -665,8 +665,8 @@ return {
 return `._id {
   display: block;
   font-weight: 500;
-  color: ${args.theme.var.color.text};
-  margin-bottom: ${args.theme.var.spacing.sm};
+  color: ${t.var.color.text};
+  margin-bottom: ${t.var.spacing.sm};
 }`;
 '''
       }
@@ -679,12 +679,12 @@ return `._id {
         componentName: "RBTomSelect",
         props: '''
 return {
-  value: args.fns.formData.icon || '📝',
+  value: f.formData.icon || '📝',
   optionType: 'icon',
   placeholder: 'Select icon...',
-  disabled: args.fns.isSubmitting(),
+  disabled: f.isSubmitting(),
   search: false,
-  onChange: (value) => args.fns.updateField('icon', value)
+  onChange: (value) => f.updateField('icon', value)
 };
 '''
       }
@@ -703,9 +703,9 @@ return {
         css: '''
 return `._id {
   display: flex;
-  gap: ${args.theme.var.spacing.md};
-  padding: ${args.theme.var.spacing.xl};
-  border-top: 1px solid ${args.theme.var.color.border};
+  gap: ${t.var.spacing.md};
+  padding: ${t.var.spacing.xl};
+  border-top: 1px solid ${t.var.color.border};
 }`;
 '''
       }
@@ -717,14 +717,14 @@ return `._id {
         displayOrder: 1,
         componentName: "RBButton",
         props: '''
-const onClose = args.contextData.props?.onClose || (() => {});
+const onClose = c.props?.onClose || (() => {});
 
 return {
   text: "Cancel",
   type: "button",
   variant: "secondary",
   fullWidth: true,
-  disabled: args.fns.isSubmitting(),
+  disabled: f.isSubmitting(),
   onClick: onClose
 };
 ''',
@@ -742,8 +742,8 @@ return `._id {
         displayOrder: 2,
         componentName: "RBButton",
         props: '''
-const mode = args.contextData.props?.mode || "create";
-const isSaving = args.fns.isSaving();
+const mode = c.props?.mode || "create";
+const isSaving = f.isSaving();
 
 const buttonText = isSaving
   ? (mode === "edit" ? "Saving..." : "Creating...")
@@ -758,7 +758,7 @@ return {
   disabled: isSaving,
   onClick: (e) => {
     e.preventDefault();
-    args.fns.handleSave();
+    f.handleSave();
   }
 };
 ''',
@@ -776,7 +776,7 @@ return `._id {
         displayOrder: 4,
         componentName: "Html",
         props: '''
-const mode = args.contextData.props?.mode || "create";
+const mode = c.props?.mode || "create";
 
 return {
   as: "div",
@@ -785,8 +785,8 @@ return {
 ''',
         css: '''
 return `._id {
-  padding: ${args.theme.var.spacing.xl};
-  border-top: 1px solid ${args.theme.var.color.border};
+  padding: ${t.var.spacing.xl};
+  border-top: 1px solid ${t.var.color.border};
 }`;
 '''
       }
@@ -799,15 +799,15 @@ return `._id {
         componentName: "RBButton",
         props: '''
 return {
-  text: args.fns.isDeleting() ? "Deleting..." : "🗑️ Delete Category",
+  text: f.isDeleting() ? "Deleting..." : "🗑️ Delete Category",
   type: "button",
   variant: "danger",
-  loading: args.fns.isDeleting(),
-  disabled: args.fns.isDeleting(),
+  loading: f.isDeleting(),
+  disabled: f.isDeleting(),
   onClick: async () => {
-    const rbConfirm = args.contextData?.confirmContext?.rbConfirm;
+    const rbConfirm = c?.confirmContext?.rbConfirm;
     if (!rbConfirm) {
-      args.showErrorToast("Confirmation dialog not available");
+      _.showErrorToast("Confirmation dialog not available");
       return;
     }
 
@@ -820,7 +820,7 @@ return {
     });
 
     if (confirmed) {
-      args.fns.handleDelete();
+      f.handleDelete();
     }
   }
 };

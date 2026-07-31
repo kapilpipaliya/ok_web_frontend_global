@@ -27,9 +27,9 @@ return `._id {
 return {
   as: "div",
   hide:
-    args.fns.isLoadingConversation?.() ||
-    !args.fns.hasCredentials?.() ||
-    !args.fns.canShowComposer?.()
+    f.isLoadingConversation?.() ||
+    !f.hasCredentials?.() ||
+    !f.canShowComposer?.()
 };'''
       }
     },
@@ -45,28 +45,28 @@ return `._id {
   flex: 1;
   padding: 0.5rem 0.75rem;
   border-radius: 0.5rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   font-size: 0.875rem;
   resize: vertical;
-  color: ${args.theme.var.color.text};
-  background: ${args.theme.var.color.background};
+  color: ${t.var.color.text};
+  background: ${t.var.color.background};
   min-width: 0;
 }`;
 '''
         props:
           '''
-const replyText = args.fns.replyMessageText?.() || "";
+const replyText = f.replyMessageText?.() || "";
 return {
   as: "textarea",
   rows: 2,
-  placeholder: args.fns.getReplyPlaceholder?.() || "Type your reply...",
+  placeholder: f.getReplyPlaceholder?.() || "Type your reply...",
   value: replyText,
-  disabled: args.fns.isSendingReply?.(),
-  onInput: (event) => args.fns.setReplyMessageText?.(event.currentTarget.value),
+  disabled: f.isSendingReply?.(),
+  onInput: (event) => f.setReplyMessageText?.(event.currentTarget.value),
   onKeyDown: (event) => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
-      void args.fns.sendReply?.();
+      void f.sendReply?.();
     }
   }
 };'''
@@ -84,8 +84,8 @@ return `._id {
   padding: 0.45rem 0.9rem;
   border-radius: 9999px;
   border: none;
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
   font-size: 0.875rem;
   font-weight: 500;
   align-self: flex-end;
@@ -101,14 +101,14 @@ return `._id {
 '''
         props:
           '''
-const isSending = args.fns.isSendingReply?.();
-const hasText = Boolean((args.fns.replyMessageText?.() || "").trim());
+const isSending = f.isSendingReply?.();
+const hasText = Boolean((f.replyMessageText?.() || "").trim());
 return {
   as: "button",
   type: "button",
   text: isSending ? "Sending..." : "Send",
   disabled: isSending || !hasText,
-  onClick: () => void args.fns.sendReply?.()
+  onClick: () => void f.sendReply?.()
 };'''
       }
     }

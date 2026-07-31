@@ -13,7 +13,7 @@
  * delete: parentElementId, rootLabel
  */
 
-const action = args.contextData?.action;
+const action = c?.action;
 if (!action) {
   return { success: false, message: "action is required" };
 }
@@ -30,9 +30,9 @@ const getTranslationMeta = (rootLabel) => {
 
 const trackDeletedVertexId = (vertexId) => {
   if (vertexId == null || vertexId === "") return;
-  if (!args.context.deletedVertexes) args.context.deletedVertexes = [];
+  if (!_.context.deletedVertexes) _.context.deletedVertexes = [];
   const id = String(vertexId);
-  if (!args.context.deletedVertexes.includes(id)) args.context.deletedVertexes.push(id);
+  if (!_.context.deletedVertexes.includes(id)) _.context.deletedVertexes.push(id);
 };
 
 const translationHasContent = (props, fieldKeys) => {
@@ -46,7 +46,7 @@ const translationHasContent = (props, fieldKeys) => {
 
 const deleteAllTranslations = async (parentElementId, rootLabel) => {
   const { translationLabel, edgeType } = getTranslationMeta(rootLabel);
-  const existingRes = await args.session.run(
+  const existingRes = await _.session.run(
     `MATCH (c:${rootLabel})-[:${edgeType}]->(t:${translationLabel})
      WHERE elementId(c) = $pid
      RETURN elementId(t) AS tid`,
@@ -57,7 +57,7 @@ const deleteAllTranslations = async (parentElementId, rootLabel) => {
     if (tid != null) trackDeletedVertexId(tid);
   }
   if (existingRes.records.length === 0) return { deleted: 0 };
-  await args.session.run(
+  await _.session.run(
     `MATCH (c:${rootLabel})-[:${edgeType}]->(t:${translationLabel})
      WHERE elementId(c) = $pid
      DETACH DELETE t`,
@@ -81,7 +81,7 @@ const syncTranslations = async (params) => {
   const { translationLabel, edgeType } = getTranslationMeta(rootLabel);
   const nowIso = new Date().toISOString();
 
-  const existingRes = await args.session.run(
+  const existingRes = await _.session.run(
     `MATCH (c:${rootLabel})-[:${edgeType}]->(t:${translationLabel})
      WHERE elementId(c) = $pid
      RETURN elementId(t) AS tid, t.locale AS locale`,
@@ -133,7 +133,7 @@ const syncTranslations = async (params) => {
 
   if (toDeleteIds.length > 0) {
     for (let i = 0; i < toDeleteIds.length; i++) trackDeletedVertexId(toDeleteIds[i]);
-    await args.session.run(
+    await _.session.run(
       `MATCH (c:${rootLabel})-[:${edgeType}]->(t:${translationLabel})
        WHERE elementId(c) = $pid AND elementId(t) IN $tids
        DETACH DELETE t`,
@@ -145,7 +145,7 @@ const syncTranslations = async (params) => {
   const toCreate = toUpsert.filter((row) => row.isNew);
 
   if (toUpdate.length > 0) {
-    const updateRes = await args.session.run(
+    const updateRes = await _.session.run(
       `UNWIND $rows AS row
        MATCH (c:${rootLabel})-[r:${edgeType}]->(t:${translationLabel})
        WHERE elementId(c) = $pid AND elementId(t) = row.tid
@@ -156,11 +156,11 @@ const syncTranslations = async (params) => {
         rows: toUpdate.map((row) => ({ tid: row.tid, props: row.props }))
       }
     );
-    args.processResult(updateRes.records, args.context, ["c", "t"], "r");
+    _.processResult(updateRes.records, _.context, ["c", "t"], "r");
   }
 
   if (toCreate.length > 0) {
-    const createRes = await args.session.run(
+    const createRes = await _.session.run(
       `UNWIND $rows AS row
        MATCH (c:${rootLabel})
        WHERE elementId(c) = $pid
@@ -173,14 +173,14 @@ const syncTranslations = async (params) => {
         rows: toCreate.map((row) => ({ props: row.props }))
       }
     );
-    args.processResult(createRes.records, args.context, ["c", "t"], "r");
+    _.processResult(createRes.records, _.context, ["c", "t"], "r");
   }
 
   return { upserted: toUpsert.length, deleted: toDeleteIds.length };
 };
 
 if (action === "delete") {
-  const { parentElementId, rootLabel } = args.contextData;
+  const { parentElementId, rootLabel } = c;
   if (!parentElementId || !rootLabel) {
     return { success: false, message: "parentElementId and rootLabel are required" };
   }
@@ -202,7 +202,7 @@ if (action === "sync") {
     rootLabel,
     translationsByLocale,
     fieldKeys
-  } = args.contextData;
+  } = c;
   if (!parentElementId || !rootLabel) {
     return { success: false, message: "parentElementId and rootLabel are required" };
   }

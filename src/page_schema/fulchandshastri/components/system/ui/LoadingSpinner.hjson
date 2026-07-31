@@ -16,15 +16,15 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: ${args.theme.var.spacing.md};
+  gap: ${t.var.spacing.md};
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
           '''// Get variant props with defaults
-const size = args.contextData.props?.size || "medium";
-const color = args.contextData.props?.color || "primary";
-const text = args.contextData.props?.text || "";
+const size = c.props?.size || "medium";
+const color = c.props?.color || "primary";
+const text = c.props?.text || "";
 
 return {
   as: "div",
@@ -39,8 +39,8 @@ return {
       P: {
         css:
           '''// Get variant props with defaults
-const size = args.contextData.props?.size || "medium";
-const color = args.contextData.props?.color || "primary";
+const size = c.props?.size || "medium";
+const color = c.props?.color || "primary";
 
 // Size configurations
 const sizeConfig = {
@@ -54,12 +54,12 @@ const config = sizeConfig[size] || sizeConfig.medium;
 // Color configurations
 const colorConfig = {
   primary: {
-    border: args.theme.var.color.background_light_300,
-    accent: args.theme.var.color.primary
+    border: t.var.color.background_light_300,
+    accent: t.var.color.primary
   },
   muted: {
-    border: args.theme.var.color.background_light_200,
-    accent: args.theme.var.color.text_light_500
+    border: t.var.color.background_light_200,
+    accent: t.var.color.text_light_500
   },
   white: {
     border: "rgba(255, 255, 255, 0.3)",
@@ -104,8 +104,8 @@ return `._id {
         componentName: Html
         props:
           '''// Get variant props with defaults
-const size = args.contextData.props?.size || "medium";
-const color = args.contextData.props?.color || "primary";
+const size = c.props?.size || "medium";
+const color = c.props?.color || "primary";
 
 return {
   as: "div"
@@ -118,7 +118,7 @@ return {
       P: {
         css:
           '''return `._id {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   font-size: 1rem;
   text-align: center;
 }`;'''
@@ -126,7 +126,7 @@ return {
         componentName: Html
         props:
           '''// Get variant props with defaults
-const text = args.contextData.props?.text || "";
+const text = c.props?.text || "";
 
 return {
   as: "div",

@@ -8,10 +8,10 @@
         body:
           '''
 // Get overall shared quota status
-const usage = await args.getTodaySharedAPIUsage(args.session);
+const usage = await _.getTodaySharedAPIUsage(_.session);
 
 // Get breakdown by ownership (for analytics/admin view)
-const breakdown = await args.getSharedAPIUsageByOwnership(args.session);
+const breakdown = await _.getSharedAPIUsageByOwnership(_.session);
 
 // Calculate quota status indicators
 const percentUsed = usage.quotaPercentUsed;
@@ -43,7 +43,7 @@ return {
   data: {
     // Overall quota status
     quota: {
-      limit: args.DAILY_QUOTA_LIMIT,
+      limit: _.DAILY_QUOTA_LIMIT,
       used: usage.totalCost,
       remaining: usage.remainingQuota,
       effectiveRemaining: usage.effectiveRemaining,

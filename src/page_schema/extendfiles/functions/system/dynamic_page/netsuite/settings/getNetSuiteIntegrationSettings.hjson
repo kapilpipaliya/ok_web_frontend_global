@@ -8,10 +8,10 @@
         description: Returns NetSuite OAuth app settings for the integration form (admin only). Client secret is never returned in plaintext.
         body:
           '''
-const user = await args.getUserFromSession();
+const user = await _.getUserFromSession();
 if (
   !user ||
-  !(await args.checkRole(args.SYSTEM_ROLES.ADMIN, args.session, user))
+  !(await _.checkRole(_.SYSTEM_ROLES.ADMIN, _.session, user))
 ) {
   return {
     success: false,
@@ -19,7 +19,7 @@ if (
   };
 }
 
-const result = await args.session.run(
+const result = await _.session.run(
   `MATCH (s:Setting {type: $t}) RETURN s LIMIT 1`,
   { t: "netsuite_integration" }
 );
@@ -38,7 +38,7 @@ if (!result.records.length) {
   };
 }
 
-const j = args.convertNodeToJson(result.records[0].get("s"));
+const j = _.convertNodeToJson(result.records[0].get("s"));
 const P = j?.P || {};
 
 return {

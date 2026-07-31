@@ -13,12 +13,12 @@
         key: Home
         props:
           '''
-const locale = args.params?.lang ? String(args.params.lang).toLowerCase() : undefined;
+const locale = _.params?.lang ? String(_.params.lang).toLowerCase() : undefined;
 return {
   contextName: "homeSettings",
   serverFunction: `
 try {
-  const result = await args.executeNamedServerFunction({
+  const result = await s({
     functionName: "loadPublicPageSettings",
     contextData: { pageId: "home", allowPublicRead: true, locale: ${JSON.stringify(locale ?? null)} }
   });
@@ -42,8 +42,8 @@ try {
   padding: 4rem 1rem 3rem;
   background: linear-gradient(
     180deg,
-    ${args.theme.var.color.primary_light_100} 0%,
-    ${args.theme.var.color.background} 100%
+    ${t.var.color.primary_light_100} 0%,
+    ${t.var.color.background} 100%
   );
 }`;'''
         displayOrder: 1
@@ -79,12 +79,12 @@ try {
   font-size: clamp(2rem, 5vw, 3rem);
   font-weight: 800;
   line-height: 1.15;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const content = args.contextData.homeSettings || {};
+          '''const content = c.homeSettings || {};
 return {
   as: "h1",
   text: content.pageTitle || "Amazon Product Picks"
@@ -100,7 +100,7 @@ return {
   margin: 0;
   font-size: 1.125rem;
   line-height: 1.7;
-  color: ${args.theme.var.color.text_light_200};
+  color: ${t.var.color.text_light_200};
   max-width: 42rem;
   margin-left: auto;
   margin-right: auto;
@@ -108,7 +108,7 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const content = args.contextData.homeSettings || {};
+          '''const content = c.homeSettings || {};
 return {
   as: "p",
   text: content.pageSubtitle || "Curated affiliate recommendations with honest reviews and buying guides."
@@ -137,16 +137,16 @@ return {
         displayOrder: 1
         componentName: Button
         props:
-          '''const content = args.contextData.homeSettings || {};
-const lang = args.params?.lang && /^[a-z]{2,3}$/i.test(String(args.params.lang))
-  ? String(args.params.lang).toLowerCase()
+          '''const content = c.homeSettings || {};
+const lang = _.params?.lang && /^[a-z]{2,3}$/i.test(String(_.params.lang))
+  ? String(_.params.lang).toLowerCase()
   : "en";
 const path = content.ctaHref || "/products";
 const target = path === "/" ? `/${lang}` : `/${lang}${path.startsWith("/") ? path : `/${path}`}`;
 return {
   text: content.ctaText || "Browse products",
   variant: "primary",
-  onClick: () => args.navigate(target)
+  onClick: () => _.navigate(target)
 };'''
       }
     }
@@ -158,7 +158,7 @@ return {
           '''return `._id {
   margin: 0;
   font-size: 0.8125rem;
-  color: ${args.theme.var.color.text_light_300};
+  color: ${t.var.color.text_light_300};
   max-width: 40rem;
   margin-left: auto;
   margin-right: auto;
@@ -166,7 +166,7 @@ return {
         displayOrder: 4
         componentName: Html
         props:
-          '''const content = args.contextData.homeSettings || {};
+          '''const content = c.homeSettings || {};
 return {
   as: "p",
   text: content.disclosureText || "As an Amazon Associate we earn from qualifying purchases."

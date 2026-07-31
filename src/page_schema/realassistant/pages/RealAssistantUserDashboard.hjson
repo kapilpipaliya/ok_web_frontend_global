@@ -17,7 +17,7 @@
         componentName: "Html",
         contextName: "userStore",
         fns: '''
-const [store, setStore] = args.createStore({
+const [store, setStore] = _.createStore({
   isLoggedIn: true,
   balance: 45.50,
   userName: "John Doe",
@@ -81,20 +81,20 @@ return {
 };
 ''',
         props: '''
-const fns = args.fns;
-if (args.mounted()) {
+const fns = f;
+if (_.mounted()) {
   fns.loadDashboardData();
 }
 
 return {
   as: "div",
-  data: args.contextData.userStore
+  data: c.userStore
 };
 ''',
         css: '''
 return `._id {
   min-height: 100vh;
-  background: ${args.theme.var.color.background_dark_50};
+  background: ${t.var.color.background_dark_50};
 }`;
 '''
       }
@@ -139,7 +139,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const userName = args.contextData.userStore?.userName || "User";
+const userName = c.userStore?.userName || "User";
 return {
   as: "h1",
   text: `Welcome back, ${userName}!`
@@ -149,7 +149,7 @@ return {
 return `._id {
   font-size: 2rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 2rem;
   
   @media (max-width: 768px) {
@@ -240,7 +240,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   font-size: 0.875rem;
   margin-bottom: 0.25rem;
 }`;
@@ -254,7 +254,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const balance = args.contextData.userStore?.balance || 0;
+const balance = c.userStore?.balance || 0;
 return {
   as: "p",
   text: `$${balance.toFixed(2)}`
@@ -264,7 +264,7 @@ return {
 return `._id {
   font-size: 2rem;
   font-weight: 700;
-  color: ${args.theme.var.color.success};
+  color: ${t.var.color.success};
 }`;
 '''
       }
@@ -285,7 +285,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.success_light_300};
+  color: ${t.var.color.success_light_300};
 }`;
 '''
       }
@@ -346,7 +346,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   font-size: 0.875rem;
   margin-bottom: 0.25rem;
 }`;
@@ -360,7 +360,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const pending = args.contextData.userStore?.stats?.pendingProblems || 0;
+const pending = c.userStore?.stats?.pendingProblems || 0;
 return {
   as: "p",
   text: pending.toString()
@@ -370,7 +370,7 @@ return {
 return `._id {
   font-size: 2rem;
   font-weight: 700;
-  color: ${args.theme.var.color.warning};
+  color: ${t.var.color.warning};
 }`;
 '''
       }
@@ -391,7 +391,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.warning_light_300};
+  color: ${t.var.color.warning_light_300};
 }`;
 '''
       }
@@ -452,7 +452,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   font-size: 0.875rem;
   margin-bottom: 0.25rem;
 }`;
@@ -466,7 +466,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const solved = args.contextData.userStore?.stats?.solvedProblems || 0;
+const solved = c.userStore?.stats?.solvedProblems || 0;
 return {
   as: "p",
   text: solved.toString()
@@ -476,7 +476,7 @@ return {
 return `._id {
   font-size: 2rem;
   font-weight: 700;
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
 }`;
 '''
       }
@@ -497,7 +497,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.primary_light_300};
+  color: ${t.var.color.primary_light_300};
 }`;
 '''
       }
@@ -533,7 +533,7 @@ return `._id {
         size: "large",
         text: "Submit New Problem",
         icon: "carbon:add",
-        onClick: "() => args.navigate('/problem/new')"
+        onClick: "() => _.navigate('/problem/new')"
       }
     },
     {
@@ -546,7 +546,7 @@ return `._id {
         size: "large",
         text: "Recharge Balance",
         icon: "carbon:currency-dollar",
-        onClick: "() => args.navigate('/recharge')"
+        onClick: "() => _.navigate('/recharge')"
       }
     },
     {
@@ -599,7 +599,7 @@ return {
 return `._id {
   font-size: 1.5rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 1.5rem;
 }`;
 '''
@@ -614,7 +614,7 @@ return `._id {
         contextName: "problems",
         loop: true,
         props: '''
-const problems = args.contextData.userStore?.activeProblems || [];
+const problems = c.userStore?.activeProblems || [];
 return {
   data: problems
 };
@@ -635,22 +635,22 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const problem = args.contextData.problems;
+const problem = c.problems;
 return {
   as: "div",
-  onClick: () => args.navigate(`/problem/${problem.id}`)
+  onClick: () => _.navigate(`/problem/${problem.id}`)
 };
 ''',
         css: '''
 return `._id {
   padding: 1rem;
-  background: ${args.theme.var.color.background_dark_100};
+  background: ${t.var.color.background_dark_100};
   border-radius: 0.5rem;
   cursor: pointer;
   transition: all 0.2s ease;
   
   &:hover {
-    background: ${args.theme.var.color.background_dark_200};
+    background: ${t.var.color.background_dark_200};
     transform: translateX(4px);
   }
 }`;
@@ -664,7 +664,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const problem = args.contextData.problems;
+const problem = c.problems;
 return {
   as: "div"
 };
@@ -686,7 +686,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const problem = args.contextData.problems;
+const problem = c.problems;
 return {
   as: "h3",
   text: problem.title
@@ -696,7 +696,7 @@ return {
 return `._id {
   font-size: 1.125rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0;
 }`;
 '''
@@ -709,11 +709,11 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const problem = args.contextData.problems;
+const problem = c.problems;
 const statusColors = {
-  pending: args.theme.var.color.warning,
-  in_progress: args.theme.var.color.info,
-  completed: args.theme.var.color.success
+  pending: t.var.color.warning,
+  in_progress: t.var.color.info,
+  completed: t.var.color.success
 };
 return {
   as: "span",
@@ -721,16 +721,16 @@ return {
 };
 ''',
         css: '''
-const problem = args.contextData.problems;
+const problem = c.problems;
 const statusColors = {
-  pending: args.theme.var.color.warning,
-  in_progress: args.theme.var.color.info,
-  completed: args.theme.var.color.success
+  pending: t.var.color.warning,
+  in_progress: t.var.color.info,
+  completed: t.var.color.success
 };
 return `._id {
   font-size: 0.875rem;
   font-weight: 500;
-  color: ${statusColors[problem.status] || args.theme.var.color.text};
+  color: ${statusColors[problem.status] || t.var.color.text};
   text-transform: capitalize;
 }`;
 '''
@@ -743,7 +743,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const problem = args.contextData.problems;
+const problem = c.problems;
 return {
   as: "div"
 };
@@ -753,7 +753,7 @@ return `._id {
   display: flex;
   gap: 1rem;
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
       }
@@ -765,7 +765,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const problem = args.contextData.problems;
+const problem = c.problems;
 return {
   as: "span",
   text: problem.assignedTo ? `Assigned to: ${problem.assignedTo}` : "Awaiting assignment"
@@ -780,7 +780,7 @@ return {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const problem = args.contextData.problems;
+const problem = c.problems;
 return {
   as: "span",
   text: `Est. Cost: $${problem.estimatedCost.toFixed(2)}`
@@ -813,7 +813,7 @@ return {
 return `._id {
   font-size: 1.5rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 1.5rem;
 }`;
 '''
@@ -828,7 +828,7 @@ return `._id {
         contextName: "transactions",
         loop: true,
         props: '''
-const transactions = args.contextData.userStore?.recentTransactions || [];
+const transactions = c.userStore?.recentTransactions || [];
 return {
   data: transactions
 };
@@ -849,7 +849,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const transaction = args.contextData.transactions;
+const transaction = c.transactions;
 return {
   as: "div"
 };
@@ -860,7 +860,7 @@ return `._id {
   justify-content: space-between;
   align-items: center;
   padding: 0.75rem 0;
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  border-bottom: 1px solid ${t.var.color.border};
   
   &:last-child {
     border-bottom: none;
@@ -876,7 +876,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const transaction = args.contextData.transactions;
+const transaction = c.transactions;
 return {
   as: "div"
 };
@@ -890,7 +890,7 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const transaction = args.contextData.transactions;
+const transaction = c.transactions;
 return {
   as: "p",
   text: transaction.description
@@ -899,7 +899,7 @@ return {
         css: '''
 return `._id {
   font-weight: 500;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.25rem 0;
 }`;
 '''
@@ -912,7 +912,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const transaction = args.contextData.transactions;
+const transaction = c.transactions;
 return {
   as: "p",
   text: transaction.date
@@ -921,7 +921,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0;
 }`;
 '''
@@ -934,7 +934,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const transaction = args.contextData.transactions;
+const transaction = c.transactions;
 const isPositive = transaction.amount > 0;
 return {
   as: "span",
@@ -942,11 +942,11 @@ return {
 };
 ''',
         css: '''
-const transaction = args.contextData.transactions;
+const transaction = c.transactions;
 const isPositive = transaction.amount > 0;
 return `._id {
   font-weight: 600;
-  color: ${isPositive ? args.theme.var.color.success : args.theme.var.color.error};
+  color: ${isPositive ? t.var.color.success : t.var.color.error};
 }`;
 '''
       }

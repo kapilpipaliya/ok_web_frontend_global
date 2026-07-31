@@ -103,22 +103,22 @@ export function SettingsLayout(props: SettingsLayoutProps) {
                                 as: "div",
                                 css: `return \`._id {
   font-size: 14px;
-  color: \${args.theme.var.color.text_light_300};
+  color: \${t.var.color.text_light_300};
   font-weight: 500;
   margin-bottom: 8px;
 }\`;`,
                                 componentName: "Html",
-                                props: (args: FunctionArgumentType) => ({
+                                props: (_: FunctionArgumentType) => ({
                                   text: (
-                                    args.contextData.menuGroups as DataType
+                                    _.contextData.menuGroups as DataType
                                   )[0],
                                 }),
                               },
                             ],
                             componentName: "Html",
-                            props: (args: FunctionArgumentType) => ({
+                            props: (_: FunctionArgumentType) => ({
                               hide:
-                                (args.contextData.menuGroups as DataType)[0] ===
+                                (_.contextData.menuGroups as DataType)[0] ===
                                 "default",
                             }),
                           },
@@ -127,7 +127,7 @@ export function SettingsLayout(props: SettingsLayoutProps) {
                               {
                                 as: "div",
                                 componentName: "Html",
-                                css: (args) => [
+                                css: (_) => [
                                   `return \`._id {
                                     padding: 12px;
                                     cursor: pointer;
@@ -138,25 +138,25 @@ export function SettingsLayout(props: SettingsLayoutProps) {
                                     gap: 8px;
                                   }\`;`,
                                   selectedMenu() ===
-                                  (args.contextData.menuItems as MenuItem).id
+                                  (_.contextData.menuItems as MenuItem).id
                                     ? `return \`._id {
-                                        background-color: \${args.theme.var.color.primary};
-                                        color: \${args.theme.var.color.primary_text};
+                                        background-color: \${t.var.color.primary};
+                                        color: \${t.var.color.primary_text};
                                       }\`;`
                                     : `return \`._id {
-                                        color: \${args.theme.var.color.text_dark_700};
+                                        color: \${t.var.color.text_dark_700};
                                         &:hover {
-                                          background-color: \${args.theme.var.color.primary_light_800};
+                                          background-color: \${t.var.color.primary_light_800};
                                         }
                                       }\`;`,
                                 ],
-                                props: (args: FunctionArgumentType) => ({
+                                props: (_: FunctionArgumentType) => ({
                                   hide:
-                                    (args.contextData.menuItems as MenuItem)
+                                    (_.contextData.menuItems as MenuItem)
                                       .adminOnly && !isAdminRole(graph),
                                   onClick: () =>
                                     handleMenuSelect(
-                                      (args.contextData.menuItems as MenuItem)
+                                      (_.contextData.menuItems as MenuItem)
                                         .id,
                                     ),
                                 }),
@@ -164,20 +164,20 @@ export function SettingsLayout(props: SettingsLayoutProps) {
                                   {
                                     componentName: "Html",
                                     as: "icon",
-                                    props: (args: FunctionArgumentType) => ({
+                                    props: (_: FunctionArgumentType) => ({
                                       icon: (
-                                        args.contextData.menuItems as MenuItem
+                                        _.contextData.menuItems as MenuItem
                                       ).icon,
                                       hide: !(
-                                        args.contextData.menuItems as MenuItem
+                                        _.contextData.menuItems as MenuItem
                                       ).icon,
                                     }),
                                   },
                                   {
                                     componentName: "Html",
-                                    props: (args: FunctionArgumentType) => ({
+                                    props: (_: FunctionArgumentType) => ({
                                       text: (
-                                        args.contextData.menuItems as MenuItem
+                                        _.contextData.menuItems as MenuItem
                                       ).label,
                                     }),
                                   },
@@ -187,9 +187,9 @@ export function SettingsLayout(props: SettingsLayoutProps) {
                             componentName: "Html",
                             loop: true,
                             contextName: "menuItems",
-                            props: (args: FunctionArgumentType) => ({
+                            props: (_: FunctionArgumentType) => ({
                               data: (
-                                args.contextData.menuGroups as DataType
+                                _.contextData.menuGroups as DataType
                               )[1],
                             }),
                           },
@@ -198,9 +198,9 @@ export function SettingsLayout(props: SettingsLayoutProps) {
   margin-bottom: 16px;
 }\`;`,
                         componentName: "Html",
-                        props: (args: FunctionArgumentType) => ({
+                        props: (_: FunctionArgumentType) => ({
                           show: (
-                            args.contextData.menuGroups as DataType
+                            _.contextData.menuGroups as DataType
                           )[1].some(
                             (item: MenuItem) =>
                               !item.adminOnly || isAdminRole(graph),
@@ -220,7 +220,7 @@ export function SettingsLayout(props: SettingsLayoutProps) {
                   STYLES.overflowCss,
                   `return \`._id {
   height:calc(100vh - 140px);
-  border-right:1px solid \${args.theme.var.color.border};
+  border-right:1px solid \${t.var.color.border};
 }\`;`,
                 ],
                 componentName: "Html",

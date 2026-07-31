@@ -22,7 +22,7 @@
   console.log('[Manual Retry] Starting manual retry of pending_quota jobs');
 
   // Call the retry function
-  const result = await args.executeNamedServerFunction({
+  const result = await s({
     functionName: 'retryPendingQuotaJobs',
     contextData: {}
   });

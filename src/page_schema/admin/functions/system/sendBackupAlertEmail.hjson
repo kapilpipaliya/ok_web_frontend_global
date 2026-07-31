@@ -17,7 +17,7 @@ const {
   jobFailed,
   error,
   jobId
-} = args.contextData;
+} = c;
 
 const alertEmail = process.env.BACKUP_ALERT_EMAIL || process.env.ADMIN_EMAIL;
 
@@ -161,11 +161,11 @@ try {
 
   // Send email using the application's email system
   try {
-    await args.sendEmail({
+    await _.sendEmail({
       to: alertEmail,
       subject,
       content: emailBody,
-      subDomain: args.subDomain
+      subDomain: _.subDomain
     });
 
     console.log('[Backup Alert] Alert email sent successfully');

@@ -8,7 +8,7 @@
         body:
           '''
 // Get current authenticated user from session
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return {
     success: false,
@@ -17,10 +17,10 @@ if (!actualUser) {
 }
 
 // Get effective user (handles admin impersonation)
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const user = await _.getEffectiveUser(_.session, actualUser, c);
 
 // Extract parameters
-const { item, note, ownershipId } = args.contextData;
+const { item, note, ownershipId } = c;
 
 if (!item) {
   return {
@@ -52,7 +52,7 @@ if (item.L?.includes('Video')) {
 }
 
 // Verify ownership belongs to user
-const ownershipCheck = await args.session.run(`
+const ownershipCheck = await _.session.run(`
   MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
   RETURN o
 `, { userUuid: user.P.uuid, ownershipId });
@@ -110,7 +110,7 @@ const query = `
 `;
 
 // Execute the query
-const result = await args.session.run(query, {
+const result = await _.session.run(query, {
   ownershipId,
   itemId: itemId,
   note: note || "",
@@ -128,7 +128,7 @@ if (result.records.length === 0) {
 let itemData;
 
 if (itemType === 'channel') {
-  const channelResult = await args.executeNamedServerFunction({
+  const channelResult = await s({
     functionName: "getChannelsWithVideoCount",
     contextData: {
       userUuid: user.P.uuid,
@@ -141,7 +141,7 @@ if (itemType === 'channel') {
     itemData = channelResult.result.data[0];
   }
 } else if (itemType === 'playlist') {
-  const playlistResult = await args.executeNamedServerFunction({
+  const playlistResult = await s({
     functionName: "getPlaylistsWithVideoCount",
     contextData: {
       userUuid: user.P.uuid,
@@ -155,7 +155,7 @@ if (itemType === 'channel') {
   }
 } else {
   // For videos, fetch using helper
-  const videoResult = await args.executeNamedServerFunction({
+  const videoResult = await s({
     functionName: "getVideosWithDetails",
     contextData: {
       userUuid: user.P.uuid,

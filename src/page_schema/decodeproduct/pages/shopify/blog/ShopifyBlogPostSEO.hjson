@@ -23,13 +23,13 @@
           '''return `._id {
   max-width: 800px;
   margin: 0 auto;
-  padding: ${args.theme.var.spacing?.lg || "2rem"};
-  color: ${args.theme.var.color.text};
+  padding: ${t.var.spacing?.lg || "2rem"};
+  color: ${t.var.color.text};
 }
 
 @media (max-width: 768px) {
   ._id {
-    padding: ${args.theme.var.spacing?.md || "1rem"};
+    padding: ${t.var.spacing?.md || "1rem"};
   }
 }`;'''
         displayOrder: 1
@@ -48,7 +48,7 @@
           '''return `._id {
   font-size: 1.75rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 1.5rem 0;
   line-height: 1.3;
 }
@@ -75,7 +75,7 @@
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 2
@@ -97,7 +97,7 @@
   padding-left: 1.5rem;
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         displayOrder: 3
         componentName: Html
@@ -171,7 +171,7 @@
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 4
@@ -191,7 +191,7 @@
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 5
@@ -215,7 +215,7 @@
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 6
@@ -237,7 +237,7 @@
   padding-left: 1.5rem;
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         displayOrder: 7
         componentName: Html
@@ -325,7 +325,7 @@
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 1rem 0;
 }`;'''
         displayOrder: 8
@@ -345,7 +345,7 @@
           '''return `._id {
   font-size: 1.35rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 2rem 0 1rem 0;
   line-height: 1.3;
 }`;'''
@@ -366,7 +366,7 @@
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 10
@@ -386,7 +386,7 @@
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 11
@@ -408,7 +408,7 @@
   padding-left: 1.5rem;
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         displayOrder: 12
         componentName: Html
@@ -496,7 +496,7 @@
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 13
@@ -522,7 +522,7 @@
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 1rem 0;
 }`;'''
         displayOrder: 14
@@ -542,7 +542,7 @@
           '''return `._id {
   font-size: 1.35rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 2rem 0 1rem 0;
   line-height: 1.3;
 }`;'''
@@ -563,7 +563,7 @@
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 16
@@ -585,7 +585,7 @@
   padding-left: 1.5rem;
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         displayOrder: 17
         componentName: Html
@@ -673,7 +673,7 @@
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 18
@@ -695,7 +695,7 @@
   padding-left: 1.5rem;
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         displayOrder: 19
         componentName: Html
@@ -769,7 +769,7 @@
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 1rem 0;
 }`;'''
         displayOrder: 20
@@ -789,7 +789,7 @@
           '''return `._id {
   font-size: 1.35rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 2rem 0 1rem 0;
   line-height: 1.3;
 }`;'''
@@ -810,7 +810,7 @@
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 22
@@ -832,7 +832,7 @@
   padding-left: 1.5rem;
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         displayOrder: 23
         componentName: Html
@@ -892,7 +892,7 @@
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 24
@@ -914,7 +914,7 @@
   padding-left: 1.5rem;
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         displayOrder: 25
         componentName: Html
@@ -974,7 +974,7 @@
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 1rem 0;
 }`;'''
         displayOrder: 26
@@ -994,7 +994,7 @@
           '''return `._id {
   font-size: 1.35rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 2rem 0 1rem 0;
   line-height: 1.3;
 }`;'''
@@ -1015,7 +1015,7 @@
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 28
@@ -1037,7 +1037,7 @@
   padding-left: 1.5rem;
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         displayOrder: 29
         componentName: Html
@@ -1111,7 +1111,7 @@
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 1rem 0;
 }`;'''
         displayOrder: 30
@@ -1131,7 +1131,7 @@
           '''return `._id {
   font-size: 1.35rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 2rem 0 1rem 0;
   line-height: 1.3;
 }`;'''
@@ -1152,7 +1152,7 @@
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 1rem 0;
 }`;'''
         displayOrder: 32
@@ -1177,7 +1177,7 @@ Here's how:'''
           '''return `._id {
   font-size: 1.15rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 1rem 0 0.5rem 0;
 }`;'''
         displayOrder: 33
@@ -1197,7 +1197,7 @@ Here's how:'''
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 34
@@ -1219,7 +1219,7 @@ Here's how:'''
   padding-left: 1.5rem;
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         displayOrder: 35
         componentName: Html
@@ -1279,7 +1279,7 @@ Here's how:'''
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 1rem 0;
 }`;'''
         displayOrder: 36
@@ -1299,7 +1299,7 @@ Here's how:'''
           '''return `._id {
   font-size: 1.15rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 1rem 0 0.5rem 0;
 }`;'''
         displayOrder: 37
@@ -1319,7 +1319,7 @@ Here's how:'''
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 38
@@ -1341,7 +1341,7 @@ Here's how:'''
   padding-left: 1.5rem;
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         displayOrder: 39
         componentName: Html
@@ -1401,7 +1401,7 @@ Here's how:'''
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 1rem 0;
 }`;'''
         displayOrder: 40
@@ -1421,7 +1421,7 @@ Here's how:'''
           '''return `._id {
   font-size: 1.15rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 1rem 0 0.5rem 0;
 }`;'''
         displayOrder: 41
@@ -1441,7 +1441,7 @@ Here's how:'''
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 42
@@ -1472,7 +1472,7 @@ A structured menu:
   padding-left: 1.5rem;
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         displayOrder: 43
         componentName: Html
@@ -1490,7 +1490,7 @@ A structured menu:
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 1rem 0;
 }`;'''
         displayOrder: 44
@@ -1510,7 +1510,7 @@ A structured menu:
           '''return `._id {
   font-size: 1.15rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 1rem 0 0.5rem 0;
 }`;'''
         displayOrder: 45
@@ -1530,7 +1530,7 @@ A structured menu:
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 46
@@ -1552,7 +1552,7 @@ A structured menu:
   padding-left: 1.5rem;
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         displayOrder: 47
         componentName: Html
@@ -1612,7 +1612,7 @@ A structured menu:
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 1rem 0;
 }`;'''
         displayOrder: 48
@@ -1632,7 +1632,7 @@ A structured menu:
           '''return `._id {
   font-size: 1.35rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 2rem 0 1rem 0;
   line-height: 1.3;
 }`;'''
@@ -1653,7 +1653,7 @@ A structured menu:
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 50
@@ -1680,7 +1680,7 @@ But ignore structural SEO.'''
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 1rem 0;
 }`;'''
         displayOrder: 51
@@ -1708,7 +1708,7 @@ Structure is the foundation.'''
           '''return `._id {
   font-size: 1.35rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 2rem 0 1rem 0;
   line-height: 1.3;
 }`;'''
@@ -1729,7 +1729,7 @@ Structure is the foundation.'''
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 53
@@ -1751,7 +1751,7 @@ Structure is the foundation.'''
   padding-left: 1.5rem;
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         displayOrder: 54
         componentName: Html
@@ -1825,7 +1825,7 @@ Structure is the foundation.'''
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 1rem 0;
 }`;'''
         displayOrder: 55
@@ -1845,7 +1845,7 @@ Structure is the foundation.'''
           '''return `._id {
   font-size: 1.35rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 2rem 0 1rem 0;
   line-height: 1.3;
 }`;'''
@@ -1866,7 +1866,7 @@ Structure is the foundation.'''
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 57
@@ -1894,7 +1894,7 @@ But if your site structure and category hierarchy are weak, your SEO growth will
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 58
@@ -1914,7 +1914,7 @@ But if your site structure and category hierarchy are weak, your SEO growth will
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 1rem 0;
 }`;'''
         displayOrder: 59

@@ -20,7 +20,7 @@ const {
   sort,
   parentVertexLabel,
   toParentEdgeType
-} = args.contextData || {};
+} = c || {};
 
 if (!tableVertexLabel && !tableKey) {
   return { success: false, message: "tableKey or tableVertexLabel is required" };
@@ -39,7 +39,7 @@ let resolvedTableVertexLabel = tableVertexLabel && String(tableVertexLabel).trim
   : null;
 
 if (!resolvedTableKey || !resolvedTableVertexLabel) {
-  const idsResult = await args.executeNamedServerFunction({
+  const idsResult = await s({
     functionName: "getTableIds",
     contextData: {
       ...(resolvedTableKey ? { tableKey: resolvedTableKey } : {}),
@@ -57,7 +57,7 @@ if (!resolvedTableKey || !resolvedTableVertexLabel) {
   return { success: false, message: "Failed to resolve table identity" };
 }
 
-const configResult = await args.executeNamedServerFunction({
+const configResult = await s({
   functionName: "loadTableConfigByKey",
   contextData: { tableKey: resolvedTableKey }
 });
@@ -125,7 +125,7 @@ if (!useShowUnassigned && !resolvedCategoryId && categoryKey) {
     return { success: false, message: "categoryKey is empty" };
   }
 
-  const categoryResult = await args.session.run(
+  const categoryResult = await _.session.run(
     `
     MATCH (cat:${effectiveParentVertexLabel})
     WHERE toLower(COALESCE(cat.key, '')) = toLower($categoryKey)
@@ -136,7 +136,7 @@ if (!useShowUnassigned && !resolvedCategoryId && categoryKey) {
     { categoryKey: key }
   );
 
-  const categories = args.processResult(categoryResult.records, args.context, "cat") || [];
+  const categories = _.processResult(categoryResult.records, _.context, "cat") || [];
   resolvedCategory = categories[0] || null;
   resolvedCategoryId = resolvedCategory?.id || null;
 
@@ -179,7 +179,7 @@ if (useShowUnassigned) {
   contentContextData.categoryId = resolvedCategoryId;
 }
 
-const contentResult = await args.executeNamedServerFunction({
+const contentResult = await s({
   functionName: "getUserContent",
   contextData: contentContextData
 });

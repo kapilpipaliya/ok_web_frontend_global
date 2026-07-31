@@ -8,7 +8,7 @@
         key: storeTasksQueueTaskReminder
         body:
           '''
-const { elementId, tableVertexLabel, operation } = args.contextData || {};
+const { elementId, tableVertexLabel, operation } = c || {};
 
 if (tableVertexLabel !== "StoreTask") {
   return { success: true, message: "Skip: not StoreTask" };
@@ -23,7 +23,7 @@ if (operation !== "create" && operation !== "update") {
 const queueName = "storeTasksReminders";
 
 const getRedisConnection = () => {
-  return args.bullmq.redisConnection || {
+  return _.bullmq.redisConnection || {
     host: process.env.REDIS_HOST || "localhost",
     port: parseInt(process.env.REDIS_PORT || "6379"),
     maxRetriesPerRequest: null,
@@ -41,15 +41,15 @@ const getRedisConnection = () => {
 };
 
 const safe = (v) => String(v || "").replace(/[^a-z0-9_-]/gi, "-");
-const jobId = `${safe(queueName)}-${safe(args.subDomain)}-${safe(elementId)}-${Date.now()}`;
+const jobId = `${safe(queueName)}-${safe(_.subDomain)}-${safe(elementId)}-${Date.now()}`;
 
-const { Queue } = args.bullmq;
+const { Queue } = _.bullmq;
 const queue = new Queue(queueName, { connection: getRedisConnection() });
 
 await queue.add(
   queueName,
   {
-    subDomain: args.subDomain,
+    subDomain: _.subDomain,
     taskElementId: elementId,
     requestedAt: new Date().toISOString()
   },
@@ -64,7 +64,7 @@ await queue.add(
 
 // Mark queued in DB (best-effort)
 try {
-  await args.session.run(
+  await _.session.run(
     `MATCH (t:StoreTask) WHERE elementId(t) = $id
      SET t.syncStatus = 'queued', t.updatedAt = datetime()
      RETURN t`,
@@ -74,7 +74,7 @@ try {
 
 // Patch returned vertex payload so Table polling starts immediately
 try {
-  const v = args.contextData?.result?.data;
+  const v = c?.result?.data;
   if (v && v.P) v.P.syncStatus = "queued";
 } catch {}
 

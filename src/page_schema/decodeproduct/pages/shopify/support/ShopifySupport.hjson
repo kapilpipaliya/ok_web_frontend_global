@@ -23,13 +23,13 @@
 return `._id {
   max-width: 960px;
   margin: 0 auto;
-  padding: ${args.theme.var.spacing?.lg || "2rem"};
-  color: ${args.theme.var.color.text};
+  padding: ${t.var.spacing?.lg || "2rem"};
+  color: ${t.var.color.text};
 }
 
 @media (max-width: 768px) {
   ._id {
-    padding: ${args.theme.var.spacing?.md || "1rem"};
+    padding: ${t.var.spacing?.md || "1rem"};
   }
 }`;
 '''
@@ -37,30 +37,30 @@ return `._id {
         fns:
           '''
 // Signals for support tickets and conversation
-const [tickets, setTickets] = args.createSignal([]);
-const [selectedTicketId, setSelectedTicketId] = args.createSignal(null);
-const [selectedTicket, setSelectedTicket] = args.createSignal(null);
-const [messages, setMessages] = args.createSignal([]);
+const [tickets, setTickets] = _.createSignal([]);
+const [selectedTicketId, setSelectedTicketId] = _.createSignal(null);
+const [selectedTicket, setSelectedTicket] = _.createSignal(null);
+const [messages, setMessages] = _.createSignal([]);
 
 // UI state
-const [loadingTickets, setLoadingTickets] = args.createSignal(false);
-const [loadingConversation, setLoadingConversation] = args.createSignal(false);
-const [creatingTicket, setCreatingTicket] = args.createSignal(false);
-const [sendingReply, setSendingReply] = args.createSignal(false);
+const [loadingTickets, setLoadingTickets] = _.createSignal(false);
+const [loadingConversation, setLoadingConversation] = _.createSignal(false);
+const [creatingTicket, setCreatingTicket] = _.createSignal(false);
+const [sendingReply, setSendingReply] = _.createSignal(false);
 
 // New ticket form
-const [newName, setNewName] = args.createSignal("");
-const [newEmail, setNewEmail] = args.createSignal("");
-const [newSubject, setNewSubject] = args.createSignal("");
-const [newMessage, setNewMessage] = args.createSignal("");
+const [newName, setNewName] = _.createSignal("");
+const [newEmail, setNewEmail] = _.createSignal("");
+const [newSubject, setNewSubject] = _.createSignal("");
+const [newMessage, setNewMessage] = _.createSignal("");
 
 // Reply box
-const [replyText, setReplyText] = args.createSignal("");
+const [replyText, setReplyText] = _.createSignal("");
 
 const loadTickets = async () => {
   setLoadingTickets(true);
   try {
-    const result = await args.executeNamedServerFunction({
+    const result = await s({
       functionName: "shopifySupportListTickets",
       contextData: {}
     });
@@ -70,7 +70,7 @@ const loadTickets = async () => {
         result?.error ||
         result?.result?.message ||
         "Failed to load support requests.";
-      args.showErrorToast?.(message);
+      _.showErrorToast?.(message);
       return;
     }
 
@@ -82,7 +82,7 @@ const loadTickets = async () => {
     }
   } catch (error) {
     console.error("Support.loadTickets error:", error);
-    args.showErrorToast?.("Failed to load support requests.");
+    _.showErrorToast?.("Failed to load support requests.");
   } finally {
     setLoadingTickets(false);
   }
@@ -93,7 +93,7 @@ const loadConversation = async (ticketId) => {
 
   setLoadingConversation(true);
   try {
-    const result = await args.executeNamedServerFunction({
+    const result = await s({
       functionName: "shopifySupportGetConversation",
       contextData: {
         ticketId,
@@ -106,7 +106,7 @@ const loadConversation = async (ticketId) => {
         result?.error ||
         result?.result?.message ||
         "Failed to load conversation.";
-      args.showErrorToast?.(message);
+      _.showErrorToast?.(message);
       return;
     }
 
@@ -134,7 +134,7 @@ const loadConversation = async (ticketId) => {
     setMessages(allMessages);
   } catch (error) {
     console.error("Support.loadConversation error:", error);
-    args.showErrorToast?.("Failed to load conversation.");
+    _.showErrorToast?.("Failed to load conversation.");
   } finally {
     setLoadingConversation(false);
   }
@@ -147,9 +147,9 @@ const handleSelectTicket = async (ticket) => {
 
   await loadConversation(ticketId);
 
-  if (args.setSearchParams) {
-    const current = args.searchParams || {};
-    args.setSearchParams(
+  if (_.setSearchParams) {
+    const current = _.searchParams || {};
+    _.setSearchParams(
       { ...current, supportId: ticketId },
       { replace: true }
     );
@@ -158,7 +158,7 @@ const handleSelectTicket = async (ticket) => {
 
 const initializeSupport = async () => {
   await loadTickets();
-  const supportId = args.searchParams?.supportId;
+  const supportId = _.searchParams?.supportId;
   if (supportId && typeof supportId === "string") {
     await loadConversation(supportId);
   }
@@ -171,13 +171,13 @@ const createTicket = async () => {
   const email = (newEmail() || "").trim();
 
   if (!message) {
-    args.showErrorToast?.("Please enter a message.");
+    _.showErrorToast?.("Please enter a message.");
     return;
   }
 
   setCreatingTicket(true);
   try {
-    const result = await args.executeNamedServerFunction({
+    const result = await s({
       functionName: "shopifySupportCreateTicket",
       contextData: {
         subject,
@@ -192,11 +192,11 @@ const createTicket = async () => {
         result?.error ||
         result?.result?.message ||
         "Failed to create support request.";
-      args.showErrorToast?.(errorMessage);
+      _.showErrorToast?.(errorMessage);
       return;
     }
 
-    args.showSuccessToast?.("Support request created.");
+    _.showSuccessToast?.("Support request created.");
 
     // Clear form
     setNewSubject("");
@@ -208,9 +208,9 @@ const createTicket = async () => {
 
     if (ticket && ticket.id) {
       await loadConversation(ticket.id);
-      if (args.setSearchParams) {
-        const current = args.searchParams || {};
-        args.setSearchParams(
+      if (_.setSearchParams) {
+        const current = _.searchParams || {};
+        _.setSearchParams(
           { ...current, supportId: ticket.id },
           { replace: true }
         );
@@ -218,7 +218,7 @@ const createTicket = async () => {
     }
   } catch (error) {
     console.error("Support.createTicket error:", error);
-    args.showErrorToast?.("Failed to create support request.");
+    _.showErrorToast?.("Failed to create support request.");
   } finally {
     setCreatingTicket(false);
   }
@@ -229,7 +229,7 @@ const sendReply = async () => {
   const text = (replyText() || "").trim();
 
   if (!ticketId) {
-    args.showErrorToast?.("Please select a request first.");
+    _.showErrorToast?.("Please select a request first.");
     return;
   }
   if (!text) {
@@ -238,7 +238,7 @@ const sendReply = async () => {
 
   setSendingReply(true);
   try {
-    const result = await args.executeNamedServerFunction({
+    const result = await s({
       functionName: "shopifySupportReplyAsShop",
       contextData: {
         ticketId,
@@ -251,7 +251,7 @@ const sendReply = async () => {
         result?.error ||
         result?.result?.message ||
         "Failed to send reply.";
-      args.showErrorToast?.(errorMessage);
+      _.showErrorToast?.(errorMessage);
       return;
     }
 
@@ -268,10 +268,10 @@ const sendReply = async () => {
     }
 
     setReplyText("");
-    args.showSuccessToast?.("Reply sent.");
+    _.showSuccessToast?.("Reply sent.");
   } catch (error) {
     console.error("Support.sendReply error:", error);
-    args.showErrorToast?.("Failed to send reply.");
+    _.showErrorToast?.("Failed to send reply.");
   } finally {
     setSendingReply(false);
   }
@@ -341,11 +341,11 @@ return {
 return {
   as: "div",
   onMount: async () => {
-    if (args.fns.isInIframe()) {
-      await args.fns.initializeSupport();
+    if (f.isInIframe()) {
+      await f.initializeSupport();
     }
   },
-  hide: !args.fns.isInIframe()
+  hide: !f.isInIframe()
 };
 '''
       }
@@ -358,7 +358,7 @@ return {
           '''return `._id {
   font-size: 2rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 1rem 0;
 }
 
@@ -384,7 +384,7 @@ return {
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin-bottom: 1.5rem;
 }`;'''
         displayOrder: 2
@@ -420,7 +420,7 @@ return {
           '''return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 1
@@ -467,9 +467,9 @@ return `._id {
           '''
 return `._id {
   border-radius: 0.75rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   padding: 1rem;
-  background: ${args.theme.var.color.background_light_100};
+  background: ${t.var.color.background_light_100};
 }`;
 '''
         displayOrder: 1
@@ -491,7 +491,7 @@ return {
 return `._id {
   font-size: 0.9375rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0 0 0.75rem 0;
 }`;
 '''
@@ -517,7 +517,7 @@ return `._id {
   margin-bottom: 0.5rem;
   padding: 0.5rem 0.75rem;
   border-radius: 0.5rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   font-size: 0.9375rem;
 }`;
 '''
@@ -529,8 +529,8 @@ return {
   as: "input",
   type: "text",
   placeholder: "Your name (optional)",
-  value: args.fns.newName?.() || "",
-  onInput: (e) => args.fns.setNewName?.(e.target.value)
+  value: f.newName?.() || "",
+  onInput: (e) => f.setNewName?.(e.target.value)
 };
 '''
       }
@@ -546,7 +546,7 @@ return `._id {
   margin-bottom: 0.5rem;
   padding: 0.5rem 0.75rem;
   border-radius: 0.5rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   font-size: 0.9375rem;
 }`;
 '''
@@ -558,8 +558,8 @@ return {
   as: "input",
   type: "email",
   placeholder: "Your email (optional, used for context)",
-  value: args.fns.newEmail?.() || "",
-  onInput: (e) => args.fns.setNewEmail?.(e.target.value)
+  value: f.newEmail?.() || "",
+  onInput: (e) => f.setNewEmail?.(e.target.value)
 };
 '''
       }
@@ -575,7 +575,7 @@ return `._id {
   margin-bottom: 0.5rem;
   padding: 0.5rem 0.75rem;
   border-radius: 0.5rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   font-size: 0.9375rem;
 }`;
 '''
@@ -587,8 +587,8 @@ return {
   as: "input",
   type: "text",
   placeholder: "Subject (optional)",
-  value: args.fns.newSubject?.() || "",
-  onInput: (e) => args.fns.setNewSubject?.(e.target.value)
+  value: f.newSubject?.() || "",
+  onInput: (e) => f.setNewSubject?.(e.target.value)
 };
 '''
       }
@@ -604,7 +604,7 @@ return `._id {
   margin-bottom: 0.75rem;
   padding: 0.5rem 0.75rem;
   border-radius: 0.5rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   font-size: 0.9375rem;
   resize: vertical;
   min-height: 120px;
@@ -618,8 +618,8 @@ return {
   as: "textarea",
   rows: 4,
   placeholder: "Describe your issue or question (required)",
-  value: args.fns.newMessage?.() || "",
-  onInput: (e) => args.fns.setNewMessage?.(e.target.value)
+  value: f.newMessage?.() || "",
+  onInput: (e) => f.setNewMessage?.(e.target.value)
 };
 '''
       }
@@ -634,8 +634,8 @@ return `._id {
   padding: 0.5rem 1rem;
   border-radius: 9999px;
   border: none;
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
   font-size: 0.9375rem;
   font-weight: 500;
   cursor: pointer;
@@ -645,14 +645,14 @@ return `._id {
         componentName: Html
         props:
           '''
-const creating = args.fns.creatingTicket?.();
+const creating = f.creatingTicket?.();
 return {
   as: "s-button",
   "attr:variant": "primary",
   "attr:disabled": creating ? true : undefined,
   text: creating ? "Sending..." : "Send request",
   onClick: async () => {
-    await args.fns.createTicket?.();
+    await f.createTicket?.();
   }
 };
 '''
@@ -666,9 +666,9 @@ return {
           '''
 return `._id {
   border-radius: 0.75rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   padding: 1rem;
-  background: ${args.theme.var.color.background_light_50};
+  background: ${t.var.color.background_light_50};
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -746,8 +746,8 @@ return `._id {
   max-height: 260px;
   overflow-y: auto;
   border-radius: 0.5rem;
-  border: 1px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background};
+  border: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background};
 }`;
 '''
         displayOrder: 1
@@ -768,7 +768,7 @@ return {
         css:
           '''
 return `._id {
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  border-bottom: 1px solid ${t.var.color.border};
 }`;
 '''
         loop: true
@@ -778,7 +778,7 @@ return `._id {
           '''
 return {
   as: "div",
-  data: args.fns.tickets?.() || []
+  data: f.tickets?.() || []
 };
 '''
       }
@@ -799,8 +799,8 @@ return `._id {
 }
 
 ._id[data-selected="true"] {
-  background: ${args.theme.var.color.primary_light_200};
-  color: ${args.theme.var.color.primary_light_200_text};
+  background: ${t.var.color.primary_light_200};
+  color: ${t.var.color.primary_light_200_text};
 }
 
 ._id[data-unread="true"] {
@@ -811,16 +811,16 @@ return `._id {
         componentName: Html
         props:
           '''
-const _t = args.contextData.ticket;
+const _t = c.ticket;
 if (!_t) return {};
-const selectedId = args.fns.selectedTicketId?.();
+const selectedId = f.selectedTicketId?.();
 const isSelected = selectedId && _t.id === selectedId;
 const unread = _t.P?.unreadForShop || 0;
 
 return {
   as: "button",
   type: "button",
-  onClick: () => args.fns.handleSelectTicket?.(_t),
+  onClick: () => f.handleSelectTicket?.(_t),
   "data-selected": isSelected ? "true" : "false",
   "data-unread": unread > 0 ? "true" : "false"
 };
@@ -842,7 +842,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const _t = args.contextData.ticket;
+const _t = c.ticket;
 return {
   as: "div",
   text: _t?.P?.subject || "[No subject]"
@@ -858,11 +858,11 @@ return {
           '''
 return `._id {
   font-size: 0.8125rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }
 
 ._id[data-selected="true"] {
-  color: ${args.theme.var.color.primary_light_200_text};
+  color: ${t.var.color.primary_light_200_text};
   opacity: 0.9;
 }`;
 '''
@@ -870,13 +870,13 @@ return `._id {
         componentName: Html
         props:
           '''
-const _t = args.contextData.ticket;
+const _t = c.ticket;
 if (!_t) return {};
-const selectedId = args.fns.selectedTicketId?.();
+const selectedId = f.selectedTicketId?.();
 const isSelected = selectedId && _t.id === selectedId;
 const unread = _t?.P?.unreadForShop || 0;
 const createdAt = _t?.P?.createdAt;
-const createdText = args.fns.formatTimestamp?.(createdAt) || "";
+const createdText = f.formatTimestamp?.(createdAt) || "";
 
 return {
   as: "div",
@@ -896,8 +896,8 @@ return {
           '''
 return `._id {
   border-radius: 0.5rem;
-  border: 1px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background};
+  border: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background};
   display: flex;
   flex-direction: column;
   padding: 0.75rem;
@@ -930,7 +930,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const ticket = args.fns.selectedTicket?.();
+const ticket = f.selectedTicket?.();
 return {
   as: "div",
   text: ticket
@@ -962,7 +962,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const loading = args.fns.loadingConversation?.();
+const loading = f.loadingConversation?.();
 return {
   as: "div",
   "data-loading": loading ? "true" : "false"
@@ -982,7 +982,7 @@ return {
           '''
 return {
   as: "div",
-  data: args.fns.messages?.() || []
+  data: f.messages?.() || []
 };
 '''
       }
@@ -1010,7 +1010,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const m = args.contextData.message;
+const m = c.message;
 if (!m) return {};
 const sender = m.P?.senderType || (m.P?.email === "Support" ? "admin" : "shop");
 const isShop = sender === "shop";
@@ -1037,20 +1037,20 @@ return `._id {
 }
 
 ._id[data-sender="shop"] {
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
 }
 
 ._id[data-sender="admin"] {
-  background: ${args.theme.var.color.background_light_200};
-  color: ${args.theme.var.color.background_light_200_text};
+  background: ${t.var.color.background_light_200};
+  color: ${t.var.color.background_light_200_text};
 }`;
 '''
         displayOrder: 1
         componentName: Html
         props:
           '''
-const m = args.contextData.message;
+const m = c.message;
 if (!m) return {};
 const sender = m.P?.senderType || (m.P?.email === "Support" ? "admin" : "shop");
 const isShop = sender === "shop";
@@ -1081,7 +1081,7 @@ return {
         componentName: Html
         props:
           '''
-const m = args.contextData.message;
+const m = c.message;
 return {
   as: "div",
   text: m?.P?.message || ""
@@ -1105,7 +1105,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const m = args.contextData.message;
+const m = c.message;
 const createdAt = m?.P?.createdAt;
 let createdText = "";
 if (createdAt) {
@@ -1154,7 +1154,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const hasTicket = !!args.fns.selectedTicketId?.();
+const hasTicket = !!f.selectedTicketId?.();
 return {
   as: "div",
   "data-disabled": hasTicket ? "false" : "true"
@@ -1172,7 +1172,7 @@ return `._id {
   flex: 1;
   padding: 0.5rem 0.75rem;
   border-radius: 0.5rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   font-size: 0.875rem;
   resize: vertical;
 }`;
@@ -1181,15 +1181,15 @@ return `._id {
         componentName: Html
         props:
           '''
-const value = args.fns.replyText?.() || "";
-const disabled = !args.fns.selectedTicketId?.();
+const value = f.replyText?.() || "";
+const disabled = !f.selectedTicketId?.();
 return {
   as: "textarea",
   rows: 2,
   placeholder: disabled ? "Select a request to reply" : "Type your reply...",
   disabled,
   value,
-  onInput: (e) => args.fns.setReplyText?.(e.target.value)
+  onInput: (e) => f.setReplyText?.(e.target.value)
 };
 '''
       }
@@ -1204,8 +1204,8 @@ return `._id {
   padding: 0.45rem 0.9rem;
   border-radius: 9999px;
   border: none;
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
   font-size: 0.875rem;
   font-weight: 500;
   align-self: flex-end;
@@ -1217,9 +1217,9 @@ return `._id {
         props:
           '''
 const disabled =
-  !args.fns.selectedTicketId?.() ||
-  !(args.fns.replyText?.() || "").trim();
-const sending = args.fns.sendingReply?.();
+  !f.selectedTicketId?.() ||
+  !(f.replyText?.() || "").trim();
+const sending = f.sendingReply?.();
 
 return {
   as: "s-button",
@@ -1227,7 +1227,7 @@ return {
   "attr:disabled": disabled ? true : undefined,
   text: sending ? "Sending..." : "Send",
   onClick: async () => {
-    await args.fns.sendReply?.();
+    await f.sendReply?.();
   }
 };
 '''
@@ -1241,19 +1241,19 @@ return {
           '''return `._id {
   max-width: 800px;
   margin: 0 auto;
-  padding: ${args.theme.var.spacing?.lg || "2rem"};
-  color: ${args.theme.var.color.text};
+  padding: ${t.var.spacing?.lg || "2rem"};
+  color: ${t.var.color.text};
 }
 
 @media (max-width: 768px) {
   ._id {
-    padding: ${args.theme.var.spacing?.md || "1rem"};
+    padding: ${t.var.spacing?.md || "1rem"};
   }
 }`;'''
         displayOrder: 3
         fns:
           '''
-const [expandedIndex, setExpandedIndex] = args.createSignal(null);
+const [expandedIndex, setExpandedIndex] = _.createSignal(null);
 const toggleExpanded = (index) => {
   setExpandedIndex((prev) => (prev === index ? null : index));
 };
@@ -1268,7 +1268,7 @@ return {
         props:
           '''return {
   as: "div",
-  hide: args.fns.isInIframe()
+  hide: f.isInIframe()
 }'''
       }
     }
@@ -1280,7 +1280,7 @@ return {
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin-bottom: 1.5rem;
 }`;'''
         displayOrder: 2

@@ -9,7 +9,7 @@
         body: '''
 try {
   // Extract input parameters from the request
-  const { categoryId } = args.contextData;
+  const { categoryId } = c;
 
   // Validate required fields
   if (!categoryId) {
@@ -17,7 +17,7 @@ try {
   }
 
   // Get current authenticated user from session
-  const user = await args.getUserFromSession();
+  const user = await _.getUserFromSession();
   if (!user) {
     throw new Error("User session not found. Please log in and try again.");
   }
@@ -29,7 +29,7 @@ try {
     RETURN rc
   `;
 
-  const categoryResult = await args.session.run(categoryCheckQuery, {
+  const categoryResult = await _.session.run(categoryCheckQuery, {
     userUuid: user.P.uuid,
     categoryId
   });
@@ -60,7 +60,7 @@ try {
     ORDER BY r.displayOrder ASC, r.createdAt ASC
   `;
 
-  const rulesResult = await args.session.run(rulesQuery, {
+  const rulesResult = await _.session.run(rulesQuery, {
     userUuid: user.P.uuid,
     categoryId
   });
@@ -71,30 +71,30 @@ try {
     const trackingRecords = record.get('trackingRecords') || [];
     const goals = record.get('goals') || [];
     const streaks = record.get('streaks') || [];
-    const trackingCount = args.neo4jConvert.js(record.get('trackingCount')) || 0;
-    const goalCount = args.neo4jConvert.js(record.get('goalCount')) || 0;
-    const streakCount = args.neo4jConvert.js(record.get('streakCount')) || 0;
+    const trackingCount = _.neo4jConvert.js(record.get('trackingCount')) || 0;
+    const goalCount = _.neo4jConvert.js(record.get('goalCount')) || 0;
+    const streakCount = _.neo4jConvert.js(record.get('streakCount')) || 0;
 
     // Convert Neo4j node to proper Vertex format
-    const rule = args.convertNodeToJson(ruleNode);
+    const rule = _.convertNodeToJson(ruleNode);
 
     // Calculate completion stats (example logic - can be enhanced)
     const completionRate = trackingCount > 0 ? Math.min(100, (trackingCount / 30) * 100) : 0;
     const bestStreak = streaks.length > 0 ?
-      Math.max(...streaks.map(s => args.convertNodeToJson(s).P.currentStreak || 0)) : 0;
+      Math.max(...streaks.map(s => _.convertNodeToJson(s).P.currentStreak || 0)) : 0;
 
     return {
       rule,
       tracking: {
-        records: trackingRecords.map(t => args.convertNodeToJson(t)),
+        records: trackingRecords.map(t => _.convertNodeToJson(t)),
         count: trackingCount
       },
       goals: {
-        records: goals.map(g => args.convertNodeToJson(g)),
+        records: goals.map(g => _.convertNodeToJson(g)),
         count: goalCount
       },
       streaks: {
-        records: streaks.map(s => args.convertNodeToJson(s)),
+        records: streaks.map(s => _.convertNodeToJson(s)),
         count: streakCount,
         best: bestStreak
       },

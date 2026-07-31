@@ -12,7 +12,7 @@ export function ResponsePreview(props: { message: Vertex<DBMessage> }) {
       css={[
         `return \`._id {
   margin-top: 20px;
-  border-top: 1px solid \${args.theme.var.color.border};
+  border-top: 1px solid \${t.var.color.border};
   padding-top: 16px;
   width: 100%;
 }\`;`,
@@ -24,7 +24,7 @@ export function ResponsePreview(props: { message: Vertex<DBMessage> }) {
           `return \`._id {
   font-weight: 600;
   margin-bottom: 12px;
-  color: \${args.theme.var.color.text_dark_600};
+  color: \${t.var.color.text_dark_600};
   display: flex;
   align-items: center;
   gap: 6px;
@@ -47,16 +47,16 @@ export function ResponsePreview(props: { message: Vertex<DBMessage> }) {
         as="div"
         css={[
           `return \`._id {
-  border: 1px solid \${args.theme.var.color.border};
+  border: 1px solid \${t.var.color.border};
   padding: 16px;
   border-radius: 8px;
   min-height: 120px;
-  background-color: \${args.theme.var.color.background_light_50};
+  background-color: \${t.var.color.background_light_50};
   transition: border-color 0.2s;
   width: 100%;
   
   &:hover {
-    border-color: \${args.theme.var.color.primary};
+    border-color: \${t.var.color.primary};
   }
 }\`;`,
         ]}

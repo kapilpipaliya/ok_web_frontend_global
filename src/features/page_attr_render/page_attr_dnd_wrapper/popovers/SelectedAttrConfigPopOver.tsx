@@ -76,15 +76,15 @@ export function SelectedAttrConfigPopOver(
         css={`return \`._id {
   display: flex;
   align-items: center;
-  background-color: \${args.theme.var.color.primary};
+  background-color: \${t.var.color.primary};
   bottom: 100%;
-  color: \${args.theme.var.color.primary_text};
+  color: \${t.var.color.primary_text};
   gap: 5px;
   padding: 0.25rem;
   position: absolute;
   border-radius: 5px;
   button {
-    color: \${args.theme.var.color.primary_text};
+    color: \${t.var.color.primary_text};
   }
 }\`;`}
       >

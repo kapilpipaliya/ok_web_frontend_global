@@ -51,7 +51,7 @@ return {
         componentName: Html
         props:
           '''const getCurrentLang = () => {
-  const lang = args.params?.lang;
+  const lang = _.params?.lang;
   if (lang && /^[a-z]{2,3}$/i.test(String(lang))) return String(lang).toLowerCase();
   return "en";
 };
@@ -116,7 +116,7 @@ return {
         componentName: Menu
         props:
           '''const getCurrentLang = () => {
-  const lang = args.params?.lang;
+  const lang = _.params?.lang;
   if (lang && /^[a-z]{2,3}$/i.test(String(lang)))
     return String(lang).toLowerCase();
   return "en";
@@ -300,7 +300,7 @@ return {
           '''return `._id {
   transition: opacity 0.2s ease;
   display: inline-flex;
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   &:hover {
     opacity: 0.7;
   }
@@ -308,7 +308,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const social = args.contextData.social;
+          '''const social = c.social;
 return {
   as: "a",
   href: social.href,
@@ -325,7 +325,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const social = args.contextData.social;
+          '''const social = c.social;
 return {
   as: "icon",
   icon: social.icon,
@@ -341,7 +341,7 @@ return {
         css:
           '''return `._id {
   background: none;
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   border: none;
   cursor: pointer;
   padding: 0;
@@ -355,8 +355,8 @@ return {
 }`;'''
         displayOrder: 2
         fns:
-          '''const [musicPlaying, setMusicPlaying] = args.createSignal(false);
-const [audioRef, setAudioRef] = args.createSignal(null);
+          '''const [musicPlaying, setMusicPlaying] = _.createSignal(false);
+const [audioRef, setAudioRef] = _.createSignal(null);
 
 return {
   musicPlaying,
@@ -369,11 +369,11 @@ return {
           '''return {
   as: "button",
   onClick: async () => {
-    const audioElement = args.fns.audioRef();
+    const audioElement = f.audioRef();
 
     if (audioElement) {
       try {
-        if (args.fns.musicPlaying()) {
+        if (f.musicPlaying()) {
           audioElement.pause();
         } else {
           const playPromise = audioElement.play();
@@ -383,7 +383,7 @@ return {
         }
       } catch (error) {
         console.error("Audio playback error:", error);
-        args.showErrorToast(
+        _.showErrorToast(
           "Unable to play audio. Please check your browser settings.",
         );
       }
@@ -401,7 +401,7 @@ return {
         props:
           '''return {
   as: "icon",
-  icon: args.fns.musicPlaying() ? "carbon:stop-filled" : "carbon:play-filled",
+  icon: f.musicPlaying() ? "carbon:stop-filled" : "carbon:play-filled",
   width: 36,
   height: 36,
 };'''
@@ -419,12 +419,12 @@ return {
   src: "/audio/au.mp3", // Using local file to avoid CORS issues
   // loop: true,
   preload: "auto",
-  onPlay: () => args.fns.setMusicPlaying(true),
-  onPause: () => args.fns.setMusicPlaying(false),
-  onEnded: () => args.fns.setMusicPlaying(false),
+  onPlay: () => f.setMusicPlaying(true),
+  onPause: () => f.setMusicPlaying(false),
+  onEnded: () => f.setMusicPlaying(false),
   ref: (el) => {
     if (el) {
-      args.fns.setAudioRef(el);
+      f.setAudioRef(el);
     }
   },
 };'''
@@ -438,9 +438,9 @@ return {
         componentName: ThemeToggle
         props:
           '''return {
-  currentMode: () => args.theme.mode,
+  currentMode: () => t.mode,
   toggleTheme: () => {
-    args.theme.mode = args.theme.mode === "dark" ? "light" : "dark";
+    t.mode = t.mode === "dark" ? "light" : "dark";
   }
 };'''
       }

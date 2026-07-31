@@ -21,7 +21,7 @@
  * Any partially completed playlists will be re-processed
  */
 
-  const { channelId, ownershipId } = args.contextData;
+  const { channelId, ownershipId } = c;
 
   if (!channelId) {
     return {
@@ -46,7 +46,7 @@
   }
 
   // Get current authenticated user from session
-  const actualUser = await args.getUserFromSession();
+  const actualUser = await _.getUserFromSession();
   if (!actualUser) {
     return {
       success: false,
@@ -59,10 +59,10 @@
   }
 
   // Get effective user (handles admin impersonation)
-  const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+  const user = await _.getEffectiveUser(_.session, actualUser, c);
 
   // Verify ownership belongs to user
-  const ownershipCheck = await args.session.run(`
+  const ownershipCheck = await _.session.run(`
     MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
     RETURN o
   `, { userUuid: user.P.uuid, ownershipId });
@@ -80,7 +80,7 @@
 
   // Check if channel exists and get its current queue status
   // NEW ARCHITECTURE: Queue tracking on Channel, user customization on ChannelSetting (optional)
-  const checkResult = await args.session.run(`
+  const checkResult = await _.session.run(`
     MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
     MATCH (o)-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $channelId})
     OPTIONAL MATCH (c)-[:ChannelChannelSetting]->(cs:ChannelSetting)<-[:YouTubeOwnershipChannelSetting]-(o)
@@ -96,8 +96,8 @@
 
   const channelSettingNode = checkResult.records[0].get('cs');
   const channelNode = checkResult.records[0].get('c');
-  const channelSetting = channelSettingNode ? args.convertNodeToJson(channelSettingNode) : null;
-  const channel = args.convertNodeToJson(channelNode);
+  const channelSetting = channelSettingNode ? _.convertNodeToJson(channelSettingNode) : null;
+  const channel = _.convertNodeToJson(channelNode);
 
   const currentStatus = channel.P.queueStatus;
 
@@ -118,7 +118,7 @@
   // NEW SCHEMA v4.0: Create setting if it doesn't exist
   // Reset channel queue status
   // NEW ARCHITECTURE: Queue tracking on Channel vertex directly
-  await args.session.run(`
+  await _.session.run(`
     MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $channelId})
 
     SET c.queueStatus = 'queued',
@@ -132,7 +132,7 @@
   // Also reset all playlists for this channel to queued
   // This ensures playlists are re-processed even if some were completed before
   // NEW ARCHITECTURE: Queue tracking on Playlist vertex directly
-  await args.session.run(`
+  await _.session.run(`
     MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $channelId})
     MATCH (c)-[:ChannelPlaylist]->(p:Playlist)
     MATCH (o)-[:YouTubeOwnershipPlaylist]->(p)
@@ -146,8 +146,8 @@
   `, { ownershipId, channelId });
 
   // Re-add channel to processing queue
-  const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
-  const channelQueue = helpers.result.data.createChannelQueue(args);
+  const helpers = await s({ functionName: 'queueHelpers', contextData: {} });
+  const channelQueue = helpers.result.data.createChannelQueue(_);
 
   try {
     // Get priority from Channel (queue tracking property)

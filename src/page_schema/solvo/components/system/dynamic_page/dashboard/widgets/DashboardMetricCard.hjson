@@ -15,7 +15,7 @@
         componentName: Html
         props:
           '''
-const widgetData = args.contextData.props?.widgetData || {};
+const widgetData = c.props?.widgetData || {};
 const value = widgetData.value != null ? widgetData.value : 0;
 return {
   as: "div",
@@ -28,7 +28,7 @@ return `._id {
   font-size: 2rem;
   font-weight: 700;
   line-height: 1.1;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -41,8 +41,8 @@ return `._id {
         componentName: Html
         props:
           '''
-const widgetConfig = args.contextData.props?.widgetConfig || {};
-const widgetData = args.contextData.props?.widgetData || {};
+const widgetConfig = c.props?.widgetConfig || {};
+const widgetData = c.props?.widgetData || {};
 const trend = widgetData.trend;
 const subtitle = widgetConfig.subtitle || "";
 const hideTrend = !trend || trend.deltaPercent == null;
@@ -60,15 +60,15 @@ return {
 '''
         css:
           '''
-const widgetData = args.contextData.props?.widgetData || {};
+const widgetData = c.props?.widgetData || {};
 const trend = widgetData.trend;
 const direction = trend?.direction || "flat";
 const color =
   direction === "up"
-    ? args.theme.var.color.success
+    ? t.var.color.success
     : direction === "down"
-      ? args.theme.var.color.error
-      : args.theme.var.color.text_light_500;
+      ? t.var.color.error
+      : t.var.color.text_light_500;
 return `._id {
   margin: 0.5rem 0 0;
   font-size: 0.8rem;

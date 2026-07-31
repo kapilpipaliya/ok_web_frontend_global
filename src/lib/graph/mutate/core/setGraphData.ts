@@ -21,15 +21,15 @@ export interface UpdateOptions {
 export function setGraphData(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
-  args: GraphData,
+  graphData: GraphData,
   options: UpdateOptions = {},
 ) {
-  if (args.vertexes) {
-    if (args.edges && Object.keys(args.edges).length > 0) {
-      restoreVertexAdjacencyFromEdges(args);
+  if (graphData.vertexes) {
+    if (graphData.edges && Object.keys(graphData.edges).length > 0) {
+      restoreVertexAdjacencyFromEdges(graphData);
     } else {
       // Stripped wire payloads may omit IN/OUT even when there are no edges.
-      for (const vertex of Object.values(args.vertexes)) {
+      for (const vertex of Object.values(graphData.vertexes)) {
         if (!vertex.IN) vertex.IN = {};
         if (!vertex.OUT) vertex.OUT = {};
       }
@@ -37,17 +37,17 @@ export function setGraphData(
   }
 
   batch(() => {
-    for (const vertexId in args.vertexes) {
-      updateVertex(vertexId, args.vertexes[vertexId], graph, setGraph, options);
+    for (const vertexId in graphData.vertexes) {
+      updateVertex(vertexId, graphData.vertexes[vertexId], graph, setGraph, options);
     }
 
-    for (const edgeId in args.edges) {
-      updateEdge(edgeId, args.edges[edgeId], graph, setGraph, options);
+    for (const edgeId in graphData.edges) {
+      updateEdge(edgeId, graphData.edges[edgeId], graph, setGraph, options);
     }
 
     handleDeletions(
-      args.deleted_edges,
-      args.deleted_vertexes,
+      graphData.deleted_edges,
+      graphData.deleted_vertexes,
       graph,
       setGraph,
       options,

@@ -45,8 +45,8 @@ return `._id {
         componentName: Html
         props:
           '''
-const isOpen = args.contextData.props?.isOpen || false;
-const onClose = args.contextData.props?.onClose;
+const isOpen = c.props?.isOpen || false;
+const onClose = c.props?.onClose;
 
 return {
   as: "div",
@@ -67,7 +67,7 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
   border-radius: 0.75rem;
   width: 100%;
   max-width: 800px;
@@ -101,15 +101,15 @@ return `._id {
         displayOrder: 1
         fns:
           '''
-const getInitialConfig = () => args.contextData.props?.initialConfig || "";
-const getTableVertexLabel = () => args.contextData.props?.tableVertexLabel;
-const onSave = args.contextData.props?.onSave;
-const rbConfirm = args.contextData?.confirmContext?.rbConfirm;
+const getInitialConfig = () => c.props?.initialConfig || "";
+const getTableVertexLabel = () => c.props?.tableVertexLabel;
+const onSave = c.props?.onSave;
+const rbConfirm = c?.confirmContext?.rbConfirm;
 
 // State
-const [configText, setConfigText] = args.createSignal("");
-const [isLoadingDefault, setIsLoadingDefault] = args.createSignal(false);
-const [isExampleExpanded, setIsExampleExpanded] = args.createSignal(false);
+const [configText, setConfigText] = _.createSignal("");
+const [isLoadingDefault, setIsLoadingDefault] = _.createSignal(false);
+const [isExampleExpanded, setIsExampleExpanded] = _.createSignal(false);
 
 // Initialize from props
 const initialize = () => {
@@ -135,16 +135,16 @@ const initialize = () => {
 // Load default settings
 const handleLoadDefault = async () => {
   if (!rbConfirm) {
-    if (args.showErrorToast) {
-      args.showErrorToast("Confirmation dialog not available");
+    if (_.showErrorToast) {
+      _.showErrorToast("Confirmation dialog not available");
     }
     return;
   }
 
   const tableVertexLabel = getTableVertexLabel();
   if (!tableVertexLabel) {
-    if (args.showErrorToast) {
-      args.showErrorToast("Content type not available");
+    if (_.showErrorToast) {
+      _.showErrorToast("Content type not available");
     }
     return;
   }
@@ -166,14 +166,14 @@ const handleLoadDefault = async () => {
     setIsLoadingDefault(true);
 
     // Fetch default settings
-    const result = await args.fns.executeYTOFunction("getUserContentSetting", {
+    const result = await f.executeYTOFunction("getUserContentSetting", {
       tableVertexLabel,
       key: `${tableVertexLabel}_settings_default`
     });
 
     if (result?.error) {
-      if (args.showErrorToast) {
-        args.showErrorToast(result.error);
+      if (_.showErrorToast) {
+        _.showErrorToast(result.error);
       }
       return;
     }
@@ -184,23 +184,23 @@ const handleLoadDefault = async () => {
 
       if (typeof configText === 'string') {
         setConfigText(configText);
-        if (args.showSuccessToast) {
-          args.showSuccessToast("Default settings loaded successfully");
+        if (_.showSuccessToast) {
+          _.showSuccessToast("Default settings loaded successfully");
         }
       } else {
-        if (args.showErrorToast) {
-          args.showErrorToast("Default settings not found or invalid");
+        if (_.showErrorToast) {
+          _.showErrorToast("Default settings not found or invalid");
         }
       }
     } else {
-      if (args.showErrorToast) {
-        args.showErrorToast("Default settings not found");
+      if (_.showErrorToast) {
+        _.showErrorToast("Default settings not found");
       }
     }
   } catch (error) {
     console.error("Error loading default settings:", error);
-    if (args.showErrorToast) {
-      args.showErrorToast(error.message || "Failed to load default settings");
+    if (_.showErrorToast) {
+      _.showErrorToast(error.message || "Failed to load default settings");
     }
   } finally {
     setIsLoadingDefault(false);
@@ -230,12 +230,12 @@ const handleSave = () => {
     }
 
     // Save the raw text (function body), not the evaluated result
-    onSave(text, args.fns.handleSearch());
+    onSave(text, f.handleSearch());
   } catch (error) {
     console.error("Error validating config:", error);
     // Use alert as fallback if showErrorToast is not available
-    if (args.showErrorToast) {
-      args.showErrorToast(error.message || "Invalid configuration syntax");
+    if (_.showErrorToast) {
+      _.showErrorToast(error.message || "Invalid configuration syntax");
     } else {
       alert(error.message || "Invalid configuration syntax");
     }
@@ -487,7 +487,7 @@ return {
   isExampleExpanded,
   toggleExample,
   getDetailedExample,
-  getUsePolarisUI: () => args.fns.getUsePolarisUI?.() === true
+  getUsePolarisUI: () => f.getUsePolarisUI?.() === true
 };
 '''
         componentName: Html
@@ -497,7 +497,7 @@ return {
   as: "div",
   onClick: (e) => e.stopPropagation(),
   onMount: () => {
-    args.fns.initialize();
+    f.initialize();
   }
 };
 '''
@@ -510,8 +510,8 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.lg};
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  padding: ${t.var.spacing.lg};
+  border-bottom: 1px solid ${t.var.color.border};
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -536,7 +536,7 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 1
@@ -558,11 +558,11 @@ return {
           '''
 return `._id {
   cursor: pointer;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   transition: color 0.2s ease;
 
   &:hover {
-    color: ${args.theme.var.color.text};
+    color: ${t.var.color.text};
   }
 }`;
 '''
@@ -570,7 +570,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const onClose = args.contextData.props?.onClose;
+const onClose = c.props?.onClose;
 
 return {
   as: "icon",
@@ -578,7 +578,7 @@ return {
   width: 24,
   height: 24,
   onClick: onClose,
-  hide: args.fns.getUsePolarisUI?.() === true
+  hide: f.getUsePolarisUI?.() === true
 };
 '''
       }
@@ -591,7 +591,7 @@ return {
         componentName: Html
         props:
           '''
-const onClose = args.contextData.props?.onClose;
+const onClose = c.props?.onClose;
 
 return {
   as: "s-button",
@@ -599,7 +599,7 @@ return {
   "attr:icon": "x",
   "attr:accessibilityLabel": "Close",
   onClick: onClose,
-  hide: args.fns.getUsePolarisUI?.() !== true
+  hide: f.getUsePolarisUI?.() !== true
 };
 '''
       }
@@ -613,10 +613,10 @@ return {
 return `._id {
   flex: 1;
   overflow-y: auto;
-  padding: ${args.theme.var.spacing.lg};
+  padding: ${t.var.spacing.lg};
   display: flex;
   flex-direction: column;
-  gap: ${args.theme.var.spacing.md};
+  gap: ${t.var.spacing.md};
 }`;
 '''
         displayOrder: 2
@@ -638,8 +638,8 @@ return {
 return `._id {
   font-size: 1.125rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
-  margin-bottom: ${args.theme.var.spacing.sm};
+  color: ${t.var.color.text};
+  margin-bottom: ${t.var.spacing.sm};
 }`;
 '''
         displayOrder: 1
@@ -661,8 +661,8 @@ return {
           '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
-  margin-bottom: ${args.theme.var.spacing.sm};
+  color: ${t.var.color.text_light_500};
+  margin-bottom: ${t.var.spacing.sm};
 }`;
 '''
         displayOrder: 2
@@ -685,9 +685,9 @@ return {
 return `._id {
   display: flex;
   flex-direction: column;
-  margin-bottom: ${args.theme.var.spacing.md};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.md};
+  margin-bottom: ${t.var.spacing.md};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.md};
   overflow: hidden;
 }`;
 '''
@@ -713,14 +713,14 @@ return `._id {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: ${args.theme.var.spacing.md};
-  background: ${args.theme.var.color.background_light_100};
+  padding: ${t.var.spacing.md};
+  background: ${t.var.color.background_light_100};
   cursor: pointer;
   user-select: none;
   transition: background-color 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.background_light_200};
+    background: ${t.var.color.background_light_200};
   }
 }`;
 '''
@@ -730,7 +730,7 @@ return `._id {
           '''
 return {
   as: "div",
-  onClick: args.fns.toggleExample
+  onClick: f.toggleExample
 };
 '''
       }
@@ -744,7 +744,7 @@ return {
 return `._id {
   font-size: 0.875rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 1
@@ -765,10 +765,10 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   font-size: 1.125rem;
   transition: transform 0.2s ease;
-  transform: ${args.fns.isExampleExpanded() ? 'rotate(180deg)' : 'rotate(0deg)'};
+  transform: ${f.isExampleExpanded() ? 'rotate(180deg)' : 'rotate(0deg)'};
 }`;
 '''
         displayOrder: 2
@@ -789,14 +789,14 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
-  background: ${args.theme.var.color.background};
-  border-top: 1px solid ${args.theme.var.color.border};
-  max-height: ${args.fns.isExampleExpanded() ? '600px' : '0'};
-  overflow: ${args.fns.isExampleExpanded() ? 'auto' : 'hidden'};
+  padding: ${t.var.spacing.md};
+  background: ${t.var.color.background};
+  border-top: 1px solid ${t.var.color.border};
+  max-height: ${f.isExampleExpanded() ? '600px' : '0'};
+  overflow: ${f.isExampleExpanded() ? 'auto' : 'hidden'};
   transition: max-height 0.3s ease, padding 0.3s ease;
-  padding-top: ${args.fns.isExampleExpanded() ? args.theme.var.spacing.md : '0'};
-  padding-bottom: ${args.fns.isExampleExpanded() ? args.theme.var.spacing.md : '0'};
+  padding-top: ${f.isExampleExpanded() ? t.var.spacing.md : '0'};
+  padding-bottom: ${f.isExampleExpanded() ? t.var.spacing.md : '0'};
 }`;
 '''
         displayOrder: 2
@@ -819,7 +819,7 @@ return `._id {
   font-family: monospace;
   font-size: 11px;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   white-space: pre;
   overflow-x: auto;
 }`;
@@ -830,8 +830,8 @@ return `._id {
           '''
 return {
   as: "pre",
-  text: args.fns.getDetailedExample(),
-  hide: !args.fns.isExampleExpanded()
+  text: f.getDetailedExample(),
+  hide: !f.isExampleExpanded()
 };
 '''
       }
@@ -846,8 +846,8 @@ return `._id {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  margin-bottom: ${args.theme.var.spacing.sm};
-  gap: ${args.theme.var.spacing.sm};
+  margin-bottom: ${t.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
 }`;
 '''
         displayOrder: 2.5
@@ -870,10 +870,10 @@ return {
           '''
 return {
   variant: "secondary",
-  onClick: args.fns.handleLoadDefault,
+  onClick: f.handleLoadDefault,
   text: "Load Default Settings",
-  disabled: args.fns.isLoadingDefault(),
-  hide: args.fns.getUsePolarisUI?.() === true
+  disabled: f.isLoadingDefault(),
+  hide: f.getUsePolarisUI?.() === true
 };
 '''
       }
@@ -890,9 +890,9 @@ return {
   as: "s-button",
   "attr:variant": "secondary",
   text: "Load Default Settings",
-  onClick: args.fns.handleLoadDefault,
-  disabled: args.fns.isLoadingDefault(),
-  hide: args.fns.getUsePolarisUI?.() !== true
+  onClick: f.handleLoadDefault,
+  disabled: f.isLoadingDefault(),
+  hide: f.getUsePolarisUI?.() !== true
 };
 '''
       }
@@ -917,7 +917,7 @@ return `._id {
           '''
 return {
   size: "small",
-  hide: !args.fns.isLoadingDefault()
+  hide: !f.isLoadingDefault()
 };
 '''
       }
@@ -931,8 +931,8 @@ return {
         props:
           '''
 return {
-  value: args.fns.configText(),
-  onChange: (e) => args.fns.setConfigText(e.target.value),
+  value: f.configText(),
+  onChange: (e) => f.setConfigText(e.target.value),
   placeholder: `return {
   columns: [...],
   formConfig: { ... },
@@ -940,7 +940,7 @@ return {
 };`,
   rows: 20,
   style: "font-family: monospace; font-size: 12px;",
-  disabled: args.fns.isLoadingDefault()
+  disabled: f.isLoadingDefault()
 };
 '''
       }
@@ -952,12 +952,12 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.lg};
-  border-top: 1px solid ${args.theme.var.color.border};
+  padding: ${t.var.spacing.lg};
+  border-top: 1px solid ${t.var.color.border};
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: ${args.theme.var.spacing.md};
+  gap: ${t.var.spacing.md};
 }`;
 '''
         displayOrder: 3
@@ -978,13 +978,13 @@ return {
         componentName: Button
         props:
           '''
-const onClose = args.contextData.props?.onClose;
+const onClose = c.props?.onClose;
 
 return {
   variant: "secondary",
   onClick: onClose,
   text: "Cancel",
-  hide: args.fns.getUsePolarisUI?.() === true
+  hide: f.getUsePolarisUI?.() === true
 };
 '''
       }
@@ -997,14 +997,14 @@ return {
         componentName: Html
         props:
           '''
-const onClose = args.contextData.props?.onClose;
+const onClose = c.props?.onClose;
 
 return {
   as: "s-button",
   "attr:variant": "secondary",
   text: "Cancel",
   onClick: onClose,
-  hide: args.fns.getUsePolarisUI?.() !== true
+  hide: f.getUsePolarisUI?.() !== true
 };
 '''
       }
@@ -1019,9 +1019,9 @@ return {
           '''
 return {
   variant: "primary",
-  onClick: args.fns.handleSave,
+  onClick: f.handleSave,
   text: "Save Settings",
-  hide: args.fns.getUsePolarisUI?.() === true
+  hide: f.getUsePolarisUI?.() === true
 };
 '''
       }
@@ -1038,8 +1038,8 @@ return {
   as: "s-button",
   "attr:variant": "primary",
   text: "Save Settings",
-  onClick: args.fns.handleSave,
-  hide: args.fns.getUsePolarisUI?.() !== true
+  onClick: f.handleSave,
+  hide: f.getUsePolarisUI?.() !== true
 };
 '''
       }

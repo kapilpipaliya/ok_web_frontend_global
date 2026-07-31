@@ -8,7 +8,7 @@
         body:
           '''
 // Extract input parameters from the request
-const { name, description, ownershipId } = args.contextData;
+const { name, description, ownershipId } = c;
 
 if (!name || name.trim().length === 0) {
   return {
@@ -25,7 +25,7 @@ if (!ownershipId) {
 }
 
 // Get current authenticated user from session
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return {
     success: false,
@@ -34,10 +34,10 @@ if (!actualUser) {
 }
 
 // Get effective user (handles admin impersonation)
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const user = await _.getEffectiveUser(_.session, actualUser, c);
 
 // Verify ownership belongs to user
-const ownershipCheck = await args.session.run(`
+const ownershipCheck = await _.session.run(`
   MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
   RETURN o
 `, { userUuid: user.P.uuid, ownershipId });
@@ -49,7 +49,7 @@ if (ownershipCheck.records.length === 0) {
   };
 }
 
-const ownership = args.convertNodeToJson(ownershipCheck.records[0].get('o'));
+const ownership = _.convertNodeToJson(ownershipCheck.records[0].get('o'));
 
 // Generate unique playlist ID for custom playlists
 // Use timestamp + random string to ensure uniqueness
@@ -85,7 +85,7 @@ const createPlaylistWithOwnershipQuery = `
   RETURN p
 `;
 
-const result = await args.session.run(createPlaylistWithOwnershipQuery, {
+const result = await _.session.run(createPlaylistWithOwnershipQuery, {
   ownershipId,
   key: playlistKey,
   playlistId: customPlaylistId,
@@ -95,7 +95,7 @@ const result = await args.session.run(createPlaylistWithOwnershipQuery, {
   userId: user.id
 });
 
-const playlist = args.convertNodeToJson(result.records[0].get('p'));
+const playlist = _.convertNodeToJson(result.records[0].get('p'));
 
 return {
   success: true,

@@ -7,17 +7,17 @@
         description: Enqueues background job to update a collection in Shopify when a ShopifyProductCategory is modified.
         body:
           '''
-const { parentVertexLabel, name, vertexId, operation, result, oldData, shop } = args.contextData;
+const { parentVertexLabel, name, vertexId, operation, result, oldData, shop } = c;
 if (parentVertexLabel !== 'ShopifyProductCategory' || operation !== 'update') return;
 if (!shop) { console.log('shopifyProductCategoryAfterUpdate: shop not available in contextData'); return; }
 
 try {
-  const helpers = await args.executeNamedServerFunction(
+  const helpers = await s(
     { functionName: 'shopifyQueueHelpers', contextData: {} }
   );
   if (!helpers.result?.success) return;
   const queueName = 'processShopifyProductCategoryAfterUpdate';
-  const queue = helpers.result.data.createShopifyQueue(args, queueName);
+  const queue = helpers.result.data.createShopifyQueue(_, queueName);
   const job = await helpers.result.data.addShopifyJob(queue, queueName, {
     shop,
     parentVertexLabel,
@@ -30,12 +30,12 @@ try {
   await queue.close();
   const jobId = job?.id;
   if (vertexId && jobId) {
-    await args.session.run(
+    await _.session.run(
       `MATCH (n:ShopifyProductCategory) WHERE elementId(n) = $elementId SET n.syncStatus = $status, n.syncJobId = $jobId, n.updatedAt = datetime()`,
       { elementId: vertexId, status: 'queued', jobId }
     );
   }
-  const r = args.contextData?.result;
+  const r = c?.result;
   if (r?.data?.P && typeof r.data.P === 'object') {
     r.data.P.syncStatus = 'queued';
     if (jobId) r.data.P.syncJobId = jobId;

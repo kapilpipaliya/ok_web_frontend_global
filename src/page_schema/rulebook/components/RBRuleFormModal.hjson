@@ -33,8 +33,8 @@
         componentName: "Html",
         fns: '''
 // Form state management
-const [isSubmitting, setIsSubmitting] = args.createSignal(false);
-const [formData, setFormData] = args.createStore({
+const [isSubmitting, setIsSubmitting] = _.createSignal(false);
+const [formData, setFormData] = _.createStore({
   title: "",
   description: "",
   categoryId: "",
@@ -45,14 +45,14 @@ const [formData, setFormData] = args.createStore({
 });
 
 // Categories state
-const [categories, setCategories] = args.createSignal([]);
-const [categoriesLoading, setCategoriesLoading] = args.createSignal(true);
+const [categories, setCategories] = _.createSignal([]);
+const [categoriesLoading, setCategoriesLoading] = _.createSignal(true);
 
 // Load categories
 const loadCategories = async () => {
   setCategoriesLoading(true);
   try {
-    const result = await args.executeNamedServerFunction({
+    const result = await s({
       functionName: "getCategories",
       contextData: {}
     });
@@ -69,7 +69,7 @@ const loadCategories = async () => {
     }
   } catch (err) {
     console.error("Error loading categories:", err);
-    args.showErrorToast("Failed to load categories. Please try again.");
+    _.showErrorToast("Failed to load categories. Please try again.");
     setCategories([]);
   } finally {
     setCategoriesLoading(false);
@@ -78,8 +78,8 @@ const loadCategories = async () => {
 
 // Initialize form data based on props
 const initializeFormData = () => {
-  const ruleData = args.contextData.props?.ruleData;
-  const mode = args.contextData.props?.mode || "create";
+  const ruleData = c.props?.ruleData;
+  const mode = c.props?.mode || "create";
 
   if (mode === "edit" && ruleData) {
     setFormData({
@@ -110,19 +110,19 @@ const initializeFormData = () => {
 // Handle form submission
 const handleSave = async () => {
   const data = formData;
-  const mode = args.contextData.props?.mode || "create";
-  const ruleData = args.contextData.props?.ruleData;
-  const onSaveCallback = args.contextData.props?.onSave;
-  const onClose = args.contextData.props?.onClose || (() => {});
+  const mode = c.props?.mode || "create";
+  const ruleData = c.props?.ruleData;
+  const onSaveCallback = c.props?.onSave;
+  const onClose = c.props?.onClose || (() => {});
 
   // Validate required fields
   if (!data.title.trim()) {
-    args.showErrorToast("Rule title is required");
+    _.showErrorToast("Rule title is required");
     return;
   }
 
   if (!data.categoryId) {
-    args.showErrorToast("Category is required");
+    _.showErrorToast("Category is required");
     return;
   }
 
@@ -146,15 +146,15 @@ const handleSave = async () => {
     }
 
     // Call the saveRule server function
-    const result = await args.executeNamedServerFunction({
+    const result = await s({
       functionName: "saveRule",
       contextData
     });
 
     if (result.error) {
-      args.showErrorToast(result.error);
+      _.showErrorToast(result.error);
     } else if (result.result && result.result.success) {
-      args.showSuccessToast(result.result.message);
+      _.showSuccessToast(result.result.message);
 
       // Call parent callback if provided
       if (onSaveCallback) {
@@ -167,11 +167,11 @@ const handleSave = async () => {
 
       onClose();
     } else {
-      args.showErrorToast(result.result?.message || "Failed to save rule");
+      _.showErrorToast(result.result?.message || "Failed to save rule");
     }
   } catch (error) {
     console.error("Error saving rule:", error);
-    args.showErrorToast("An error occurred while saving the rule. Please try again.");
+    _.showErrorToast("An error occurred while saving the rule. Please try again.");
   } finally {
     setIsSubmitting(false);
   }
@@ -179,10 +179,10 @@ const handleSave = async () => {
 
 // Handle delete
 const handleDelete = async () => {
-  const mode = args.contextData.props?.mode || "create";
-  const ruleData = args.contextData.props?.ruleData;
-  const onDeleteCallback = args.contextData.props?.onDelete;
-  const onClose = args.contextData.props?.onClose || (() => {});
+  const mode = c.props?.mode || "create";
+  const ruleData = c.props?.ruleData;
+  const onDeleteCallback = c.props?.onDelete;
+  const onClose = c.props?.onClose || (() => {});
 
   if (mode !== "edit" || !ruleData) {
     return;
@@ -192,7 +192,7 @@ const handleDelete = async () => {
 
   try {
     // Call the deleteRule server function
-    const result = await args.executeNamedServerFunction({
+    const result = await s({
       functionName: "deleteRule",
       contextData: {
         ruleId: ruleData.id
@@ -200,9 +200,9 @@ const handleDelete = async () => {
     });
 
     if (result.error) {
-      args.showErrorToast(result.error);
+      _.showErrorToast(result.error);
     } else if (result.result && result.result.success) {
-      args.showSuccessToast(result.result.message);
+      _.showSuccessToast(result.result.message);
 
       // Call parent callback if provided
       if (onDeleteCallback) {
@@ -215,11 +215,11 @@ const handleDelete = async () => {
 
       onClose();
     } else {
-      args.showErrorToast(result.result?.message || "Failed to delete rule");
+      _.showErrorToast(result.result?.message || "Failed to delete rule");
     }
   } catch (error) {
     console.error("Error deleting rule:", error);
-    args.showErrorToast("An error occurred while deleting the rule. Please try again.");
+    _.showErrorToast("An error occurred while deleting the rule. Please try again.");
   } finally {
     setIsSubmitting(false);
   }
@@ -243,10 +243,10 @@ return {
 };
 ''',
         props: '''
-const isOpen = args.contextData.props?.isOpen || false;
-const mode = args.contextData.props?.mode || "create"; // "create" or "edit"
-const ruleData = args.contextData.props?.ruleData;
-const onClose = args.contextData.props?.onClose || (() => {});
+const isOpen = c.props?.isOpen || false;
+const mode = c.props?.mode || "create"; // "create" or "edit"
+const ruleData = c.props?.ruleData;
+const onClose = c.props?.onClose || (() => {});
 
 return {
   as: "div",
@@ -257,8 +257,8 @@ return {
     }
   },
   onMount: () => {
-    args.fns.initializeFormData();
-    args.fns.loadCategories();
+    f.initializeFormData();
+    f.loadCategories();
   }
 };
 ''',
@@ -275,7 +275,7 @@ return `._id {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   animation: fadeIn 300ms ease;
 }
 
@@ -306,8 +306,8 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background};
-  border-radius: ${args.theme.var.borderRadius.lg};
+  background: ${t.var.color.background};
+  border-radius: ${t.var.borderRadius.lg};
   width: 100%;
   max-width: 600px;
   max-height: 90vh;
@@ -366,8 +366,8 @@ return `._id {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: ${args.theme.var.spacing.xl};
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  padding: ${t.var.spacing.xl};
+  border-bottom: 1px solid ${t.var.color.border};
 }`;
 '''
       }
@@ -379,7 +379,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const mode = args.contextData.props?.mode || "create";
+const mode = c.props?.mode || "create";
 const title = mode === "edit" ? "Edit Rule" : "Create New Rule";
 
 return {
@@ -391,7 +391,7 @@ return {
 return `._id {
   font-size: 1.875rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0;
 }`;
 '''
@@ -404,7 +404,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const onClose = args.contextData.props?.onClose || (() => {});
+const onClose = c.props?.onClose || (() => {});
 
 return {
   as: "button",
@@ -416,15 +416,15 @@ return {
 return `._id {
   background: none;
   border: none;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   cursor: pointer;
-  padding: ${args.theme.var.spacing.sm};
-  border-radius: ${args.theme.var.borderRadius.sm};
+  padding: ${t.var.spacing.sm};
+  border-radius: ${t.var.borderRadius.sm};
   transition: all 150ms ease;
 
   &:hover {
-    background: ${args.theme.var.color.background_dark_200};
-    color: ${args.theme.var.color.text};
+    background: ${t.var.color.background_dark_200};
+    color: ${t.var.color.text};
   }
 }`;
 '''
@@ -459,7 +459,7 @@ return {
 ''',
         css: '''
 return `._id {
-  padding: ${args.theme.var.spacing.xl};
+  padding: ${t.var.spacing.xl};
 }`;
 '''
       }
@@ -490,7 +490,7 @@ return {
 ''',
         css: '''
 return `._id {
-  margin-bottom: ${args.theme.var.spacing.lg};
+  margin-bottom: ${t.var.spacing.lg};
 }`;
 '''
       }
@@ -511,8 +511,8 @@ return {
 return `._id {
   display: block;
   font-weight: 500;
-  color: ${args.theme.var.color.text};
-  margin-bottom: ${args.theme.var.spacing.sm};
+  color: ${t.var.color.text};
+  margin-bottom: ${t.var.spacing.sm};
 }`;
 '''
       }
@@ -526,11 +526,11 @@ return `._id {
         props: '''
 return {
   type: "text",
-  value: args.fns.formData.title,
+  value: f.formData.title,
   placeholder: "e.g. Exercise for 30 minutes daily",
   required: true,
-  disabled: args.fns.isSubmitting(),
-  onChange: (e) => args.fns.updateField('title', e.target.value)
+  disabled: f.isSubmitting(),
+  onChange: (e) => f.updateField('title', e.target.value)
 };
 ''',
       }
@@ -548,7 +548,7 @@ return {
 ''',
         css: '''
 return `._id {
-  margin-bottom: ${args.theme.var.spacing.lg};
+  margin-bottom: ${t.var.spacing.lg};
 }`;
 '''
       }
@@ -569,8 +569,8 @@ return {
 return `._id {
   display: block;
   font-weight: 500;
-  color: ${args.theme.var.color.text};
-  margin-bottom: ${args.theme.var.spacing.sm};
+  color: ${t.var.color.text};
+  margin-bottom: ${t.var.spacing.sm};
 }`;
 '''
       }
@@ -583,11 +583,11 @@ return `._id {
         componentName: "RBTextArea",
         props: '''
 return {
-  value: args.fns.formData.description,
+  value: f.formData.description,
   placeholder: "Detailed description and reasoning for this rule",
   rows: 3,
-  disabled: args.fns.isSubmitting(),
-  onChange: (e) => args.fns.updateField('description', e.target.value)
+  disabled: f.isSubmitting(),
+  onChange: (e) => f.updateField('description', e.target.value)
 };
 '''
       }
@@ -605,7 +605,7 @@ return {
 ''',
         css: '''
 return `._id {
-  margin-bottom: ${args.theme.var.spacing.lg};
+  margin-bottom: ${t.var.spacing.lg};
 }`;
 '''
       }
@@ -626,8 +626,8 @@ return {
 return `._id {
   display: block;
   font-weight: 500;
-  color: ${args.theme.var.color.text};
-  margin-bottom: ${args.theme.var.spacing.sm};
+  color: ${t.var.color.text};
+  margin-bottom: ${t.var.spacing.sm};
 }`;
 '''
       }
@@ -639,21 +639,21 @@ return `._id {
         displayOrder: 2,
         componentName: "RBTomSelect",
         props: '''
-const categories = args.fns.categories() || [];
+const categories = f.categories() || [];
 const categoryOptions = categories.map(cat => ({
   value: cat.category?.id || '',
   label: cat.category?.P?.name || 'Unknown Category'
 }));
 
 return {
-  value: args.fns.formData.categoryId || '',
+  value: f.formData.categoryId || '',
   options: categoryOptions,
   placeholder: 'Select a category...',
-  disabled: args.fns.isSubmitting(),
+  disabled: f.isSubmitting(),
   required: true,
   search: true,
   noResultsText: 'No categories found',
-  onChange: (value) => args.fns.updateField('categoryId', value)
+  onChange: (value) => f.updateField('categoryId', value)
 };
 '''
       }
@@ -673,8 +673,8 @@ return {
 return `._id {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: ${args.theme.var.spacing.md};
-  margin-bottom: ${args.theme.var.spacing.lg};
+  gap: ${t.var.spacing.md};
+  margin-bottom: ${t.var.spacing.lg};
 }
 
 @media (max-width: 480px) {
@@ -714,8 +714,8 @@ return {
 return `._id {
   display: block;
   font-weight: 500;
-  color: ${args.theme.var.color.text};
-  margin-bottom: ${args.theme.var.spacing.sm};
+  color: ${t.var.color.text};
+  margin-bottom: ${t.var.spacing.sm};
 }`;
 '''
       }
@@ -728,30 +728,30 @@ return `._id {
         componentName: "RBTomSelect",
         props: '''
 return {
-  value: args.fns.formData.frequency || 'daily',
+  value: f.formData.frequency || 'daily',
   optionType: 'frequency',
   placeholder: 'Select frequency...',
-  disabled: args.fns.isSubmitting(),
+  disabled: f.isSubmitting(),
   required: true,
   search: false,
-  onChange: (value) => args.fns.updateField('frequency', value)
+  onChange: (value) => f.updateField('frequency', value)
 };
 ''',
         css: '''
 return `._id {
   width: 100%;
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   font-size: 1rem;
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.md};
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.md};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   transition: all 150ms ease;
 
   &:focus {
     outline: none;
-    border-color: ${args.theme.var.color.primary};
-    box-shadow: 0 0 0 3px ${args.theme.var.color.primary}33;
+    border-color: ${t.var.color.primary};
+    box-shadow: 0 0 0 3px ${t.var.color.primary}33;
   }
 }`;
 '''
@@ -786,8 +786,8 @@ return {
 return `._id {
   display: block;
   font-weight: 500;
-  color: ${args.theme.var.color.text};
-  margin-bottom: ${args.theme.var.spacing.sm};
+  color: ${t.var.color.text};
+  margin-bottom: ${t.var.spacing.sm};
 }`;
 '''
       }
@@ -800,30 +800,30 @@ return `._id {
         componentName: "RBTomSelect",
         props: '''
 return {
-  value: args.fns.formData.priority || 'medium',
+  value: f.formData.priority || 'medium',
   optionType: 'priority',
   placeholder: 'Select priority...',
-  disabled: args.fns.isSubmitting(),
+  disabled: f.isSubmitting(),
   required: true,
   search: false,
-  onChange: (value) => args.fns.updateField('priority', value)
+  onChange: (value) => f.updateField('priority', value)
 };
 ''',
         css: '''
 return `._id {
   width: 100%;
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   font-size: 1rem;
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.md};
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.md};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   transition: all 150ms ease;
 
   &:focus {
     outline: none;
-    border-color: ${args.theme.var.color.primary};
-    box-shadow: 0 0 0 3px ${args.theme.var.color.primary}33;
+    border-color: ${t.var.color.primary};
+    box-shadow: 0 0 0 3px ${t.var.color.primary}33;
   }
 }`;
 '''
@@ -842,7 +842,7 @@ return {
 ''',
         css: '''
 return `._id {
-  margin-bottom: ${args.theme.var.spacing.lg};
+  margin-bottom: ${t.var.spacing.lg};
 }`;
 '''
       }
@@ -863,8 +863,8 @@ return {
 return `._id {
   display: block;
   font-weight: 500;
-  color: ${args.theme.var.color.text};
-  margin-bottom: ${args.theme.var.spacing.sm};
+  color: ${t.var.color.text};
+  margin-bottom: ${t.var.spacing.sm};
 }`;
 '''
       }
@@ -877,29 +877,29 @@ return `._id {
         componentName: "RBTomSelect",
         props: '''
 return {
-  value: String(args.fns.formData.difficulty || '3'),
+  value: String(f.formData.difficulty || '3'),
   optionType: 'difficulty',
   placeholder: 'Select difficulty...',
-  disabled: args.fns.isSubmitting(),
+  disabled: f.isSubmitting(),
   search: false,
-  onChange: (value) => args.fns.updateField('difficulty', value)
+  onChange: (value) => f.updateField('difficulty', value)
 };
 ''',
         css: '''
 return `._id {
   width: 100%;
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   font-size: 1rem;
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.md};
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.md};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   transition: all 150ms ease;
 
   &:focus {
     outline: none;
-    border-color: ${args.theme.var.color.primary};
-    box-shadow: 0 0 0 3px ${args.theme.var.color.primary}33;
+    border-color: ${t.var.color.primary};
+    box-shadow: 0 0 0 3px ${t.var.color.primary}33;
   }
 }`;
 '''
@@ -918,7 +918,7 @@ return {
 ''',
         css: '''
 return `._id {
-  margin-bottom: ${args.theme.var.spacing.xl};
+  margin-bottom: ${t.var.spacing.xl};
 }`;
 '''
       }
@@ -939,8 +939,8 @@ return {
 return `._id {
   display: block;
   font-weight: 500;
-  color: ${args.theme.var.color.text};
-  margin-bottom: ${args.theme.var.spacing.sm};
+  color: ${t.var.color.text};
+  margin-bottom: ${t.var.spacing.sm};
 }`;
 '''
       }
@@ -954,9 +954,9 @@ return `._id {
         props: '''
 return {
   type: "time",
-  value: args.fns.formData.reminderTime,
-  disabled: args.fns.isSubmitting(),
-  onChange: (e) => args.fns.updateField('reminderTime', e.target.value)
+  value: f.formData.reminderTime,
+  disabled: f.isSubmitting(),
+  onChange: (e) => f.updateField('reminderTime', e.target.value)
 };
 '''
       }
@@ -975,9 +975,9 @@ return {
         css: '''
 return `._id {
   display: flex;
-  gap: ${args.theme.var.spacing.md};
-  padding: ${args.theme.var.spacing.xl};
-  border-top: 1px solid ${args.theme.var.color.border};
+  gap: ${t.var.spacing.md};
+  padding: ${t.var.spacing.xl};
+  border-top: 1px solid ${t.var.color.border};
 }`;
 '''
       }
@@ -989,14 +989,14 @@ return `._id {
         displayOrder: 1,
         componentName: "RBButton",
         props: '''
-const onClose = args.contextData.props?.onClose || (() => {});
+const onClose = c.props?.onClose || (() => {});
 
 return {
   text: "Cancel",
   type: "button",
   variant: "secondary",
   fullWidth: true,
-  disabled: args.fns.isSubmitting(),
+  disabled: f.isSubmitting(),
   onClick: onClose
 };
 ''',
@@ -1014,8 +1014,8 @@ return `._id {
         displayOrder: 2,
         componentName: "RBButton",
         props: '''
-const mode = args.contextData.props?.mode || "create";
-const isSubmitting = args.fns.isSubmitting();
+const mode = c.props?.mode || "create";
+const isSubmitting = f.isSubmitting();
 
 const buttonText = isSubmitting
   ? (mode === "edit" ? "Saving..." : "Creating...")
@@ -1030,7 +1030,7 @@ return {
   disabled: isSubmitting,
   onClick: (e) => {
     e.preventDefault();
-    args.fns.handleSave();
+    f.handleSave();
   }
 };
 ''',
@@ -1048,7 +1048,7 @@ return `._id {
         displayOrder: 4,
         componentName: "Html",
         props: '''
-const mode = args.contextData.props?.mode || "create";
+const mode = c.props?.mode || "create";
 
 return {
   as: "div",
@@ -1057,8 +1057,8 @@ return {
 ''',
         css: '''
 return `._id {
-  padding: ${args.theme.var.spacing.xl};
-  border-top: 1px solid ${args.theme.var.color.border};
+  padding: ${t.var.spacing.xl};
+  border-top: 1px solid ${t.var.color.border};
 }`;
 '''
       }
@@ -1071,13 +1071,13 @@ return `._id {
         componentName: "RBButton",
         props: '''
 return {
-  text: args.fns.isSubmitting() ? "Deleting..." : "🗑️ Delete Rule",
+  text: f.isSubmitting() ? "Deleting..." : "🗑️ Delete Rule",
   type: "button",
   variant: "danger",
-  loading: args.fns.isSubmitting(),
-  disabled: args.fns.isSubmitting(),
+  loading: f.isSubmitting(),
+  disabled: f.isSubmitting(),
   onClick: async () => {
-    const rbConfirm = args.contextData?.confirmContext?.rbConfirm;
+    const rbConfirm = c?.confirmContext?.rbConfirm;
     const confirmed = await rbConfirm({
       title: "Delete Rule",
       message: "Are you sure you want to delete this rule?\n\n⚠️ WARNING: This will permanently delete:\n• This rule\n• All tracking data for this rule\n• All streak data for this rule\n• All goals linked to this rule\n\nThis action cannot be undone!",
@@ -1086,7 +1086,7 @@ return {
       variant: "danger"
     });
     if (confirmed) {
-      args.fns.handleDelete();
+      f.handleDelete();
     }
   }
 };

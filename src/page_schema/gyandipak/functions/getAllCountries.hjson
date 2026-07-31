@@ -13,7 +13,7 @@
   ORDER BY c.country ASC
 `;
 
-const result = await args.session.run(query);
+const result = await _.session.run(query);
 
 const countries = result.records.map(record => record.get('country'));
 

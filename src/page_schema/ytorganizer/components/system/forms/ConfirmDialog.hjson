@@ -25,7 +25,7 @@ return `._id {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   animation: fadeIn 150ms ease-out;
 }
 
@@ -36,7 +36,7 @@ return `._id {
 
 @media (max-width: 768px) {
   ._id {
-    padding: ${args.theme.var.spacing.sm};
+    padding: ${t.var.spacing.sm};
     align-items: flex-end;
   }
 }`;
@@ -45,8 +45,8 @@ return `._id {
         componentName: Html
         props:
           '''
-const isOpen = args.contextData.props?.isOpen || false;
-const onCancel = args.contextData.props?.onCancel;
+const isOpen = c.props?.isOpen || false;
+const onCancel = c.props?.onCancel;
 
 return {
   as: "div",
@@ -65,9 +65,9 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.lg};
+  background: ${t.var.color.background};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.lg};
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   max-width: 400px;
   width: 100%;
@@ -127,8 +127,8 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.xl} ${args.theme.var.spacing.xl} ${args.theme.var.spacing.md};
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  padding: ${t.var.spacing.xl} ${t.var.spacing.xl} ${t.var.spacing.md};
+  border-bottom: 1px solid ${t.var.color.border};
 }`;
 '''
         displayOrder: 1
@@ -147,19 +147,19 @@ return {
       P: {
         css:
           '''
-const variant = args.contextData.props?.variant || "danger";
+const variant = c.props?.variant || "danger";
 
 const iconConfig = {
-  danger: args.theme.var.color.error,
-  warning: args.theme.var.color.warning,
-  primary: args.theme.var.color.primary
+  danger: t.var.color.error,
+  warning: t.var.color.warning,
+  primary: t.var.color.primary
 };
 
 const iconColor = iconConfig[variant] || iconConfig.danger;
 
 return `._id {
   color: ${iconColor};
-  margin-bottom: ${args.theme.var.spacing.sm};
+  margin-bottom: ${t.var.spacing.sm};
   display: block;
 }`;
 '''
@@ -167,20 +167,20 @@ return `._id {
         componentName: Html
         props:
           '''
-const variant = args.contextData.props?.variant || "danger";
+const variant = c.props?.variant || "danger";
 
 const iconConfig = {
   danger: {
     icon: "carbon:warning-filled",
-    color: args.theme.var.color.error
+    color: t.var.color.error
   },
   warning: {
     icon: "carbon:warning-alt-filled",
-    color: args.theme.var.color.warning
+    color: t.var.color.warning
   },
   primary: {
     icon: "carbon:help-filled",
-    color: args.theme.var.color.primary
+    color: t.var.color.primary
   }
 };
 
@@ -204,7 +204,7 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0;
   line-height: 1.4;
 }`;
@@ -213,7 +213,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const title = args.contextData.props?.title || "Confirm Action";
+const title = c.props?.title || "Confirm Action";
 
 return {
   as: "h2",
@@ -229,8 +229,8 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.xl};
-  padding-top: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.xl};
+  padding-top: ${t.var.spacing.md};
 }`;
 '''
         displayOrder: 2
@@ -250,7 +250,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   font-size: 1rem;
   line-height: 1.6;
   margin: 0;
@@ -261,7 +261,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const message = args.contextData.props?.message || "Are you sure you want to proceed?";
+const message = c.props?.message || "Are you sure you want to proceed?";
 
 return {
   as: "p",
@@ -278,15 +278,15 @@ return {
           '''
 return `._id {
   display: flex;
-  gap: ${args.theme.var.spacing.md};
-  padding: ${args.theme.var.spacing.md} ${args.theme.var.spacing.xl} ${args.theme.var.spacing.xl};
+  gap: ${t.var.spacing.md};
+  padding: ${t.var.spacing.md} ${t.var.spacing.xl} ${t.var.spacing.xl};
   justify-content: flex-end;
 }
 
 @media (max-width: 768px) {
   ._id {
     flex-direction: column-reverse;
-    gap: ${args.theme.var.spacing.sm};
+    gap: ${t.var.spacing.sm};
   }
 }`;
 '''
@@ -308,26 +308,26 @@ return {
           '''
 return `._id {
   min-height: 48px;
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.lg};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.lg};
   font-size: 1rem;
   font-weight: 500;
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.md};
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.md};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   cursor: pointer;
   transition: all 150ms ease;
   flex: 1;
 
   &:hover:not(:disabled) {
-    background: ${args.theme.var.color.background_dark_100};
-    border-color: ${args.theme.var.color.border_dark_200};
+    background: ${t.var.color.background_dark_100};
+    border-color: ${t.var.color.border_dark_200};
   }
 
   &:focus {
     outline: none;
-    border-color: ${args.theme.var.color.primary};
-    box-shadow: 0 0 0 3px ${args.theme.var.color.primary_light_200};
+    border-color: ${t.var.color.primary};
+    box-shadow: 0 0 0 3px ${t.var.color.primary_light_200};
   }
 
   &:disabled {
@@ -338,7 +338,7 @@ return `._id {
 
 @media (max-width: 768px) {
   ._id {
-    padding: ${args.theme.var.spacing.md};
+    padding: ${t.var.spacing.md};
     font-size: 1rem;
   }
 }`;
@@ -347,10 +347,10 @@ return `._id {
         componentName: Html
         props:
           '''
-const cancelText = args.contextData.props?.cancelText || "Cancel";
-const onCancel = args.contextData.props?.onCancel;
-const loading = args.contextData.props?.loading || false;
-const usePolaris = args.contextData.props?.getUsePolarisUI === true;
+const cancelText = c.props?.cancelText || "Cancel";
+const onCancel = c.props?.onCancel;
+const loading = c.props?.loading || false;
+const usePolaris = c.props?.getUsePolarisUI === true;
 
 return {
   as: "button",
@@ -373,9 +373,9 @@ return {
         componentName: Html
         props:
           '''
-const cancelText = args.contextData.props?.cancelText || "Cancel";
-const onCancel = args.contextData.props?.onCancel;
-const loading = args.contextData.props?.loading || false;
+const cancelText = c.props?.cancelText || "Cancel";
+const onCancel = c.props?.onCancel;
+const loading = c.props?.loading || false;
 
 return {
   as: "s-button",
@@ -385,7 +385,7 @@ return {
   onClick: () => {
     if (onCancel && !loading) onCancel();
   },
-  hide: args.contextData.props?.getUsePolarisUI !== true
+  hide: c.props?.getUsePolarisUI !== true
 };
 '''
       }
@@ -396,26 +396,26 @@ return {
       P: {
         css:
           '''
-const variant = args.contextData.props?.variant || "danger";
+const variant = c.props?.variant || "danger";
 
 const variantStyles = {
   danger: {
-    background: args.theme.var.color.error,
-    backgroundHover: args.theme.var.color.error_dark_200,
-    text: args.theme.var.color.error_text,
-    focus: args.theme.var.color.error_light_200
+    background: t.var.color.error,
+    backgroundHover: t.var.color.error_dark_200,
+    text: t.var.color.error_text,
+    focus: t.var.color.error_light_200
   },
   warning: {
-    background: args.theme.var.color.warning,
-    backgroundHover: args.theme.var.color.warning_dark_200,
-    text: args.theme.var.color.warning_text,
-    focus: args.theme.var.color.warning_light_200
+    background: t.var.color.warning,
+    backgroundHover: t.var.color.warning_dark_200,
+    text: t.var.color.warning_text,
+    focus: t.var.color.warning_light_200
   },
   primary: {
-    background: args.theme.var.color.primary,
-    backgroundHover: args.theme.var.color.primary_dark_200,
-    text: args.theme.var.color.primary_text,
-    focus: args.theme.var.color.primary_light_200
+    background: t.var.color.primary,
+    backgroundHover: t.var.color.primary_dark_200,
+    text: t.var.color.primary_text,
+    focus: t.var.color.primary_light_200
   }
 };
 
@@ -423,11 +423,11 @@ const style = variantStyles[variant] || variantStyles.danger;
 
 return `._id {
   min-height: 48px;
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.lg};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.lg};
   font-size: 1rem;
   font-weight: 500;
   border: 1px solid transparent;
-  border-radius: ${args.theme.var.borderRadius.md};
+  border-radius: ${t.var.borderRadius.md};
   background: ${style.background};
   color: ${style.text};
   cursor: pointer;
@@ -453,7 +453,7 @@ return `._id {
 
 @media (max-width: 768px) {
   ._id {
-    padding: ${args.theme.var.spacing.md};
+    padding: ${t.var.spacing.md};
     font-size: 1rem;
   }
 }`;
@@ -462,11 +462,11 @@ return `._id {
         componentName: Html
         props:
           '''
-const confirmText = args.contextData.props?.confirmText || "Confirm";
-const onConfirm = args.contextData.props?.onConfirm;
-const loading = args.contextData.props?.loading || false;
-const usePolaris = args.contextData.props?.getUsePolarisUI === true;
-const variant = args.contextData.props?.variant || "danger";
+const confirmText = c.props?.confirmText || "Confirm";
+const onConfirm = c.props?.onConfirm;
+const loading = c.props?.loading || false;
+const usePolaris = c.props?.getUsePolarisUI === true;
+const variant = c.props?.variant || "danger";
 
 return {
   as: "button",
@@ -489,10 +489,10 @@ return {
         componentName: Html
         props:
           '''
-const confirmText = args.contextData.props?.confirmText || "Confirm";
-const onConfirm = args.contextData.props?.onConfirm;
-const loading = args.contextData.props?.loading || false;
-const variant = args.contextData.props?.variant || "danger";
+const confirmText = c.props?.confirmText || "Confirm";
+const onConfirm = c.props?.onConfirm;
+const loading = c.props?.loading || false;
+const variant = c.props?.variant || "danger";
 
 const polarisVariant = variant === "danger" ? "primary" : variant === "warning" ? "primary" : "primary";
 const polarisTone = variant === "danger" ? "critical" : undefined;
@@ -506,7 +506,7 @@ return {
   onClick: async () => {
     if (onConfirm && !loading) await onConfirm();
   },
-  hide: args.contextData.props?.getUsePolarisUI !== true
+  hide: c.props?.getUsePolarisUI !== true
 };
 '''
       }

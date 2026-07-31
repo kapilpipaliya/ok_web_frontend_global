@@ -71,23 +71,23 @@ export const SortableRow = (
       <As
         as="tr"
         css={`return \`._id {
-        border-bottom: 1px solid \${args.theme.var.color.background_light_400};
+        border-bottom: 1px solid \${t.var.color.background_light_400};
         border-radius: 10px;
         text-align: center;
         transition: background-color 0.2s ease;
         width: 50px;
         background-color: ${
           props.rowIndex === props.dragFromIndex()
-            ? "${args.theme.var.color.background_light_300}"
+            ? "${t.var.color.background_light_300}"
             : props.rowIndex === props.dragToIndex()
-              ? "${args.theme.var.color.background_light_200}"
-              : "${args.theme.var.color.background}"
+              ? "${t.var.color.background_light_200}"
+              : "${t.var.color.background}"
         };
-        color: \${args.theme.var.color.text};
+        color: \${t.var.color.text};
         border: ${
           props.rowIndex === props.dragToIndex()
-            ? "2px solid ${args.theme.var.color.success}"
-            : "1px solid ${args.theme.var.color.background_light_400}"
+            ? "2px solid ${t.var.color.success}"
+            : "1px solid ${t.var.color.background_light_400}"
         };
       }\`;`}
         draggable={true}
@@ -132,7 +132,7 @@ export const SortableRow = (
             </Show>
             <IconButton
               css={`return \`._id {
-  color: \${args.theme.var.color.error};
+  color: \${t.var.color.error};
   cursor: pointer;
   margin: 5px;
   background-color: transparent;
@@ -145,7 +145,7 @@ export const SortableRow = (
             <Show when={expandVertex()}>
               <IconButton
                 css={`return \`._id {
-  color: \${args.theme.var.color.success};
+  color: \${t.var.color.success};
   cursor: pointer;
   background-color: transparent;
   border: none;
@@ -183,7 +183,7 @@ export const SortableRow = (
         <As
           as="tr"
           css={`return \`._id {
-  border-bottom: 1px solid \${args.theme.var.color.background_light_400};
+  border-bottom: 1px solid \${t.var.color.background_light_400};
   border-radius: 10px;
 }\`;`}
         >

@@ -8,11 +8,11 @@
         body:
           '''
 try {
-  const { Queue } = args.bullmq;
+  const { Queue } = _.bullmq;
 
   // Get standard Redis connection configuration
   const getRedisConnection = () => {
-    return args.bullmq.redisConnection || {
+    return _.bullmq.redisConnection || {
       host: process.env.REDIS_HOST || 'localhost',
       port: parseInt(process.env.REDIS_PORT || '6379'),
       maxRetriesPerRequest: null,
@@ -57,13 +57,13 @@ try {
   };
 
   // Create channel queue
-  const createChannelQueue = (args) => {
+  const createChannelQueue = (_) => {
     const connection = getRedisConnection();
     return new Queue(QUEUE_NAMES.CHANNEL, { connection });
   };
 
   // Create playlist queue
-  const createPlaylistQueue = (args) => {
+  const createPlaylistQueue = (_) => {
     const connection = getRedisConnection();
     return new Queue(QUEUE_NAMES.PLAYLIST, { connection });
   };

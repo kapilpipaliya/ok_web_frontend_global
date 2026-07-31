@@ -8,8 +8,8 @@
         dynamicComponent: SettingsSectionRenderer
         fns:
           '''
-const getSectionConfig = () => args.contextData.props?.sectionConfig || null;
-const [expandedSectionIds, setExpandedSectionIds] = args.createSignal([]);
+const getSectionConfig = () => c.props?.sectionConfig || null;
+const [expandedSectionIds, setExpandedSectionIds] = _.createSignal([]);
 
 const toggleSection = (sectionId) => {
   setExpandedSectionIds((current) => {
@@ -42,7 +42,7 @@ return {
         css:
           '''
 return `._id {
-  margin-bottom: ${args.theme.var.spacing.lg};
+  margin-bottom: ${t.var.spacing.lg};
 }`;
 '''
         componentName: Html
@@ -64,14 +64,14 @@ return {
 return `._id {
   font-size: 1.125rem;
   font-weight: 600;
-  margin-bottom: ${args.theme.var.spacing.md};
-  color: ${args.theme.var.color.text};
+  margin-bottom: ${t.var.spacing.md};
+  color: ${t.var.color.text};
 }`;
 '''
         componentName: Html
         props:
           '''
-const sectionConfig = args.fns.getSectionConfig();
+const sectionConfig = f.getSectionConfig();
 return {
   as: "h2",
   text: sectionConfig?.title || "",
@@ -88,9 +88,9 @@ return {
         css:
           '''
 return `._id {
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.md};
-  margin-bottom: ${args.theme.var.spacing.sm};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.md};
+  margin-bottom: ${t.var.spacing.sm};
   overflow: hidden;
 }`;
 '''
@@ -101,7 +101,7 @@ return `._id {
           '''
 return {
   as: "div",
-  data: args.fns.getNestedSections()
+  data: f.getNestedSections()
 };
 '''
       }
@@ -113,42 +113,42 @@ return {
         displayOrder: 1
         css:
           '''
-const nestedSection = args.contextData.nestedSection;
-const expanded = args.fns.isExpanded(nestedSection.id);
+const nestedSection = c.nestedSection;
+const expanded = f.isExpanded(nestedSection.id);
 return expanded
   ? `._id {
   width: 100%;
   text-align: left;
-  padding: ${args.theme.var.spacing.md};
-  background: ${args.theme.var.color.background_light_200};
+  padding: ${t.var.spacing.md};
+  background: ${t.var.color.background_light_200};
   border: none;
   font-weight: 600;
   cursor: pointer;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`
   : `._id {
   width: 100%;
   text-align: left;
-  padding: ${args.theme.var.spacing.md};
-  background: ${args.theme.var.color.background_light_100};
+  padding: ${t.var.spacing.md};
+  background: ${t.var.color.background_light_100};
   border: none;
   font-weight: 600;
   cursor: pointer;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }
 ._id:hover {
-  background: ${args.theme.var.color.background_light_200};
+  background: ${t.var.color.background_light_200};
 }`;
 '''
         componentName: Html
         props:
           '''
-const nestedSection = args.contextData.nestedSection;
+const nestedSection = c.nestedSection;
 return {
   as: "button",
   type: "button",
   text: nestedSection.title || nestedSection.id,
-  onClick: () => args.fns.toggleSection(nestedSection.id)
+  onClick: () => f.toggleSection(nestedSection.id)
 };
 '''
       }
@@ -161,8 +161,8 @@ return {
         componentName: SettingsSectionRenderer
         props:
           '''
-const nestedSection = args.contextData.nestedSection;
-const expanded = args.fns.isExpanded(nestedSection.id);
+const nestedSection = c.nestedSection;
+const expanded = f.isExpanded(nestedSection.id);
 return {
   sectionConfig: nestedSection,
   hide: !expanded

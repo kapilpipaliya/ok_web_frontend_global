@@ -12,12 +12,12 @@
         key: Contact
         props:
           '''
-const locale = args.params?.lang ? String(args.params.lang).toLowerCase() : undefined;
+const locale = _.params?.lang ? String(_.params.lang).toLowerCase() : undefined;
 return {
   contextName: "contactSettings",
   serverFunction: `
 try {
-  const result = await args.executeNamedServerFunction({
+  const result = await s({
     functionName: "loadPublicPageSettings",
     contextData: { pageId: "contact", allowPublicRead: true, locale: ${JSON.stringify(locale ?? null)} }
   });
@@ -100,7 +100,7 @@ try {
   as: "div",
   "data-animate": "",
 
-  ref: (el) => el && args.fns.animateOnView(el, { x: -32, y: 0 })
+  ref: (el) => el && f.animateOnView(el, { x: -32, y: 0 })
 };'''
       }
     }
@@ -110,7 +110,7 @@ try {
       P: {
         css:
           '''return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   font-size: 2rem;
   font-weight: 600;
   margin-bottom: 2rem;
@@ -118,7 +118,7 @@ try {
         displayOrder: 1
         componentName: Html
         props:
-          '''const content = args.contextData.contactSettings?.content;
+          '''const content = c.contactSettings?.content;
 return {
   as: "h2",
   text: content?.infoTitle
@@ -169,7 +169,7 @@ return {
           '''return `._id {
   width: 3rem;
   height: 3rem;
-  background: ${args.theme.var.color.primary_light_100};
+  background: ${t.var.color.primary_light_100};
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -190,7 +190,7 @@ return {
       P: {
         css:
           '''return `._id {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
 }`;'''
         displayOrder: 1
         componentName: Html
@@ -221,7 +221,7 @@ return {
       P: {
         css:
           '''return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
@@ -229,7 +229,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const content = args.contextData.contactSettings?.content;
+          '''const content = c.contactSettings?.content;
 return {
   as: "h3",
   text: content?.addressTitle
@@ -242,14 +242,14 @@ return {
       P: {
         css:
           '''return `._id {
-  color: ${args.theme.var.color.text_light_200};
+  color: ${t.var.color.text_light_200};
   line-height: 1.6;
   white-space: pre-line;
 }`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''const content = args.contextData.contactSettings?.content;
+          '''const content = c.contactSettings?.content;
 return {
   as: "p",
   text: content?.addressText
@@ -282,7 +282,7 @@ return {
           '''return `._id {
   width: 3rem;
   height: 3rem;
-  background: ${args.theme.var.color.primary_light_100};
+  background: ${t.var.color.primary_light_100};
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -303,7 +303,7 @@ return {
       P: {
         css:
           '''return `._id {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
 }`;'''
         displayOrder: 1
         componentName: Html
@@ -334,7 +334,7 @@ return {
       P: {
         css:
           '''return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
@@ -342,7 +342,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const content = args.contextData.contactSettings?.content;
+          '''const content = c.contactSettings?.content;
 return {
   as: "h3",
   text: content?.phoneTitle
@@ -373,19 +373,19 @@ return {
       P: {
         css:
           '''return `._id {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   text-decoration: none;
   transition: color 0.2s ease;
 
   &:hover {
-    color: ${args.theme.var.color.primary_dark_200};
+    color: ${t.var.color.primary_dark_200};
     text-decoration: underline;
   }
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const content = args.contextData.contactSettings?.content;
+          '''const content = c.contactSettings?.content;
 return {
   as: "a",
   text: content?.phone1
@@ -398,19 +398,19 @@ return {
       P: {
         css:
           '''return `._id {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   text-decoration: none;
   transition: color 0.2s ease;
 
   &:hover {
-    color: ${args.theme.var.color.primary_dark_200};
+    color: ${t.var.color.primary_dark_200};
     text-decoration: underline;
   }
 }`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''const content = args.contextData.contactSettings?.content;
+          '''const content = c.contactSettings?.content;
 return {
   as: "a",
   text: content?.phone2
@@ -443,7 +443,7 @@ return {
           '''return `._id {
   width: 3rem;
   height: 3rem;
-  background: ${args.theme.var.color.primary_light_100};
+  background: ${t.var.color.primary_light_100};
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -464,7 +464,7 @@ return {
       P: {
         css:
           '''return `._id {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
 }`;'''
         displayOrder: 1
         componentName: Html
@@ -495,7 +495,7 @@ return {
       P: {
         css:
           '''return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
@@ -503,7 +503,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const content = args.contextData.contactSettings?.content;
+          '''const content = c.contactSettings?.content;
 return {
   as: "h3",
   text: content?.emailTitle
@@ -516,19 +516,19 @@ return {
       P: {
         css:
           '''return `._id {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   text-decoration: none;
   transition: color 0.2s ease;
 
   &:hover {
-    color: ${args.theme.var.color.primary_dark_200};
+    color: ${t.var.color.primary_dark_200};
     text-decoration: underline;
   }
 }`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''const content = args.contextData.contactSettings?.content;
+          '''const content = c.contactSettings?.content;
 return {
   as: "a",
   text: content?.emailLink
@@ -546,7 +546,7 @@ return {
   as: "div",
   "data-animate": "",
 
-  ref: (el) => el && args.fns.animateOnView(el, { x: 32, y: 0, delay: 0.1 })
+  ref: (el) => el && f.animateOnView(el, { x: 32, y: 0, delay: 0.1 })
 };'''
       }
     }
@@ -556,7 +556,7 @@ return {
       P: {
         css:
           '''return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   font-size: 2rem;
   font-weight: 600;
   margin-bottom: 2rem;
@@ -564,7 +564,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const content = args.contextData.contactSettings?.content;
+          '''const content = c.contactSettings?.content;
 return {
   as: "h2",
   text: content?.formTitle
@@ -586,7 +586,7 @@ return {
       P: {
         css:
           '''return `._id {
-  background: ${args.theme.var.color.background_light_50};
+  background: ${t.var.color.background_light_50};
   padding: 3rem 0;
   margin-top: 4rem;
 }`;'''
@@ -597,7 +597,7 @@ return {
   as: "section",
   "data-animate": "",
 
-  ref: (el) => el && args.fns.animateOnView(el)
+  ref: (el) => el && f.animateOnView(el)
 };'''
       }
     }
@@ -625,7 +625,7 @@ return {
       P: {
         css:
           '''return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   font-size: 2rem;
   font-weight: 600;
   text-align: center;
@@ -634,7 +634,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const content = args.contextData.contactSettings?.content;
+          '''const content = c.contactSettings?.content;
 return {
   as: "h2",
   text: content?.mapTitle

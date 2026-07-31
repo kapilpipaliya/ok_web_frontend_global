@@ -12,7 +12,7 @@
  *
  * Converts frontend sortBy format ("field_direction") to database ordering parameters.
  *
- * Parameters (via args.contextData):
+ * Parameters (via c):
  * - sortBy: string (required) - Sort format: "field_direction" (e.g., "title_asc", "created_desc", "relevance")
  * - contentType: string (required) - Content type: "channels", "playlists", "videos", "favourites"
  *
@@ -31,7 +31,7 @@
  * - Special: "relevance" - Uses default sorting for the content type
  */
 
-const { sortBy, contentType } = args.contextData;
+const { sortBy, contentType } = c;
 
 if (!sortBy) {
   throw new Error("sortBy parameter is required");

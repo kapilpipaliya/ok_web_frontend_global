@@ -68,7 +68,7 @@ return `._id {
         contextName: "breadcrumbItems",
         loop: true,
         props: '''
-const items = (args.contextData.props?.items || "Home,Documentation").split(",");
+const items = (c.props?.items || "Home,Documentation").split(",");
 return {
   data: items.map((item, index) => ({
     label: item.trim(),
@@ -86,7 +86,7 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const item = args.contextData.breadcrumbItems;
+const item = c.breadcrumbItems;
 return {
   as: "li"
 };
@@ -107,22 +107,22 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const item = args.contextData.breadcrumbItems;
+const item = c.breadcrumbItems;
 return {
   as: item.isLast ? "span" : "a",
   text: item.label,
   onClick: item.isLast ? undefined : (e) => {
     e.preventDefault();
     if (item.href === "/") {
-      args.navigate("/");
+      _.navigate("/");
     }
   }
 };
 ''',
         css: '''
-const item = args.contextData.breadcrumbItems;
+const item = c.breadcrumbItems;
 return `._id {
-  color: ${item.isLast ? args.theme.var.color.text : args.theme.var.color.primary};
+  color: ${item.isLast ? t.var.color.text : t.var.color.primary};
   text-decoration: none;
   font-size: 0.875rem;
   ${item.isLast ? 'font-weight: 500;' : 'cursor: pointer;'}
@@ -142,14 +142,14 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const item = args.contextData.breadcrumbItems;
+const item = c.breadcrumbItems;
 return {
   as: item.isLast ? "" : "span"
 };
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   opacity: 0.4;
   font-size: 0.875rem;
 }`;
@@ -163,7 +163,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const item = args.contextData.breadcrumbItems;
+const item = c.breadcrumbItems;
 return {
   as: item.isLast ? "" : "icon",
   icon: "carbon:chevron-right",

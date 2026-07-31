@@ -12,12 +12,12 @@
         key: Videos
         props:
           '''
-const locale = args.params?.lang ? String(args.params.lang).toLowerCase() : undefined;
+const locale = _.params?.lang ? String(_.params.lang).toLowerCase() : undefined;
 return {
   contextName: "videosSettings",
   serverFunction: `
 try {
-  const result = await args.executeNamedServerFunction({
+  const result = await s({
     functionName: "loadPublicPageSettings",
     contextData: { pageId: "videos", allowPublicRead: true, locale: ${JSON.stringify(locale ?? null)} }
   });
@@ -38,7 +38,7 @@ try {
       P: {
         css:
           '''return `._id {
-  background: linear-gradient(135deg, ${args.theme.var.color.primary_light_100} 0%, ${args.theme.var.color.primary_light_50} 100%);
+  background: linear-gradient(135deg, ${t.var.color.primary_light_100} 0%, ${t.var.color.primary_light_50} 100%);
   padding: 3rem 1rem;
   text-align: center;
 }`;'''
@@ -56,7 +56,7 @@ try {
       P: {
         css:
           '''return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   font-size: 3rem;
   font-weight: 700;
   margin: 0;
@@ -68,7 +68,7 @@ try {
         displayOrder: 1
         componentName: Html
         props:
-          '''const content = args.contextData.videosSettings?.content;
+          '''const content = c.videosSettings?.content;
 return {
   as: "h1",
   text: content?.pageTitle
@@ -127,7 +127,7 @@ return {
   as: "div",
   "data-animate": "",
 
-  ref: (el) => el && args.fns.animateOnView(el)
+  ref: (el) => el && f.animateOnView(el)
 };'''
       }
     }
@@ -138,8 +138,8 @@ return {
         css:
           '''return `._id {
   padding: 0.5rem 1.5rem;
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
   border: none;
   border-radius: 9999px;
   font-weight: 500;
@@ -147,7 +147,7 @@ return {
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.primary_dark_200};
+    background: ${t.var.color.primary_dark_200};
     transform: translateY(-1px);
   }
 }`;'''
@@ -166,7 +166,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const content = args.contextData.videosSettings?.content;
+          '''const content = c.videosSettings?.content;
 return {
   as: "span",
   text: content?.category1Text
@@ -180,16 +180,16 @@ return {
         css:
           '''return `._id {
   padding: 0.5rem 1.5rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
-  border: 1px solid ${args.theme.var.color.background_light_300};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
+  border: 1px solid ${t.var.color.background_light_300};
   border-radius: 9999px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.background_light_100};
+    background: ${t.var.color.background_light_100};
   }
 }`;'''
         displayOrder: 2
@@ -207,7 +207,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const content = args.contextData.videosSettings?.content;
+          '''const content = c.videosSettings?.content;
 return {
   as: "span",
   text: content?.category2Text
@@ -221,16 +221,16 @@ return {
         css:
           '''return `._id {
   padding: 0.5rem 1.5rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
-  border: 1px solid ${args.theme.var.color.background_light_300};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
+  border: 1px solid ${t.var.color.background_light_300};
   border-radius: 9999px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.background_light_100};
+    background: ${t.var.color.background_light_100};
   }
 }`;'''
         displayOrder: 3
@@ -248,7 +248,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const content = args.contextData.videosSettings?.content;
+          '''const content = c.videosSettings?.content;
 return {
   as: "span",
   text: content?.category3Text
@@ -262,16 +262,16 @@ return {
         css:
           '''return `._id {
   padding: 0.5rem 1.5rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
-  border: 1px solid ${args.theme.var.color.background_light_300};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
+  border: 1px solid ${t.var.color.background_light_300};
   border-radius: 9999px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.background_light_100};
+    background: ${t.var.color.background_light_100};
   }
 }`;'''
         displayOrder: 4
@@ -289,7 +289,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const content = args.contextData.videosSettings?.content;
+          '''const content = c.videosSettings?.content;
 return {
   as: "span",
   text: content?.category4Text
@@ -305,7 +305,7 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const items = args.contextData.videosSettings?.videos?.videos ?? [];
+          '''const items = c.videosSettings?.videos?.videos ?? [];
 return {
   as: "fragment",
   data: items
@@ -337,7 +337,7 @@ return {
         css:
           '''return `._id {
   display: block;
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
   border-radius: 0.75rem;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -352,8 +352,8 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const video = args.contextData.videos;
-const index = args.contextData.index ?? 0;
+          '''const video = c.videos;
+const index = c.index ?? 0;
 return {
   as: "a",
   href: `https://www.youtube.com/watch?v=${video.videoId}`,
@@ -361,7 +361,7 @@ return {
   rel: "noopener noreferrer",
   "data-animate": "",
 
-  ref: (el) => el && args.fns.animateOnView(el, { delay: index * 0.08 })
+  ref: (el) => el && f.animateOnView(el, { delay: index * 0.08 })
 };'''
       }
     }
@@ -374,7 +374,7 @@ return {
   position: relative;
   padding-bottom: 56.25%;
   overflow: hidden;
-  background: ${args.theme.var.color.background_light_200};
+  background: ${t.var.color.background_light_200};
 }`;'''
         displayOrder: 1
         componentName: Html
@@ -400,7 +400,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const video = args.contextData.videos;
+          '''const video = c.videos;
 return {
   as: "img",
   src: video.thumbnail,
@@ -479,7 +479,7 @@ return {
         displayOrder: 3
         componentName: Html
         props:
-          '''const video = args.contextData.videos;
+          '''const video = c.videos;
 return {
   as: "span",
   text: video.duration
@@ -508,7 +508,7 @@ return {
       P: {
         css:
           '''return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   font-size: 1.125rem;
   font-weight: 600;
   margin: 0 0 0.75rem 0;
@@ -517,7 +517,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const video = args.contextData.videos;
+          '''const video = c.videos;
 return {
   as: "h3",
   text: video.title
@@ -534,7 +534,7 @@ return {
   align-items: center;
   gap: 1rem;
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_300};
+  color: ${t.var.color.text_light_300};
 }`;'''
         displayOrder: 2
         componentName: Html
@@ -551,7 +551,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const video = args.contextData.videos;
+          '''const video = c.videos;
 return {
   as: "span",
   text: `${video.views} views`
@@ -565,7 +565,7 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const content = args.contextData.videosSettings?.content;
+          '''const content = c.videosSettings?.content;
 return {
   as: "span",
   text: content?.separator
@@ -579,7 +579,7 @@ return {
         displayOrder: 3
         componentName: Html
         props:
-          '''const video = args.contextData.videos;
+          '''const video = c.videos;
 return {
   as: "span",
   text: video.date
@@ -602,7 +602,7 @@ return {
   as: "div",
   "data-animate": "",
 
-  ref: (el) => el && args.fns.animateOnView(el)
+  ref: (el) => el && f.animateOnView(el)
 };'''
       }
     }
@@ -613,17 +613,17 @@ return {
         css:
           '''return `._id {
   padding: 0.75rem 2rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
-  border: 2px solid ${args.theme.var.color.primary};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
+  border: 2px solid ${t.var.color.primary};
   border-radius: 0.375rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.primary};
-    color: ${args.theme.var.color.primary_text};
+    background: ${t.var.color.primary};
+    color: ${t.var.color.primary_text};
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
@@ -643,7 +643,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const content = args.contextData.videosSettings?.content;
+          '''const content = c.videosSettings?.content;
 return {
   as: "span",
   text: content?.loadMoreText

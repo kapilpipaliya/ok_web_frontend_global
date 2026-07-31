@@ -14,7 +14,7 @@
         displayOrder: 1
         fns:
           '''
-const getProps = () => args.contextData.props || {};
+const getProps = () => c.props || {};
 const getField = () => getProps().field || {};
 const getNestedLineItemsConfig = () => getField().nestedLineItemsConfig || {};
 
@@ -70,7 +70,7 @@ const showInventoryColumn = (columnDef, rowVertex) => {
 
 const resolveLineRowVertex = (lineEntryContext) => {
   const lineVertexId = lineEntryContext?.row?.id;
-  if (lineVertexId && args.graph.vertexes[lineVertexId]) return args.graph.vertexes[lineVertexId];
+  if (lineVertexId && g.vertexes[lineVertexId]) return g.vertexes[lineVertexId];
   return lineEntryContext?.row;
 };
 
@@ -105,15 +105,15 @@ const detachAndDeleteLineVertex = (lineVertex) => {
   };
   let detachPassCount = 0;
   while (detachPassCount++ < 80) {
-    const vertexFromGraph = args.graph.vertexes[lineVertexId];
+    const vertexFromGraph = g.vertexes[lineVertexId];
     if (!vertexFromGraph) return;
     const edgeIdsToRemove = collectEdgeIds(vertexFromGraph);
     if (edgeIdsToRemove.length === 0) break;
     for (let edgeIndex = 0; edgeIndex < edgeIdsToRemove.length; edgeIndex++) {
-      args.deleteEdge(txnId, edgeIdsToRemove[edgeIndex], args.graph, args.setGraph);
+      _.deleteEdge(txnId, edgeIdsToRemove[edgeIndex], g, sg);
     }
   }
-  args.deleteVertex(txnId, lineVertexId, args.graph, args.setGraph);
+  _.deleteVertex(txnId, lineVertexId, g, sg);
 };
 
 const setInventoryItemId = (lineVertex, inventoryItemVertexId) => {
@@ -122,24 +122,24 @@ const setInventoryItemId = (lineVertex, inventoryItemVertexId) => {
   const nestedLineItemsConfig = getNestedLineItemsConfig();
   const inventoryRelationshipType = nestedLineItemsConfig.childToInventoryRelationshipType;
   if (!inventoryRelationshipType) return;
-  const lineVertexFresh = args.graph.vertexes[lineVertex.id] || lineVertex;
+  const lineVertexFresh = g.vertexes[lineVertex.id] || lineVertex;
   const existingInventoryEdgeIds = lineVertexFresh.OUT?.[inventoryRelationshipType];
   if (Array.isArray(existingInventoryEdgeIds)) {
     for (const existingEdgeId of [...existingInventoryEdgeIds]) {
-      args.deleteEdge(txnId, existingEdgeId, args.graph, args.setGraph);
+      _.deleteEdge(txnId, existingEdgeId, g, sg);
     }
   }
   const trimmedInventoryId = inventoryItemVertexId != null ? String(inventoryItemVertexId).trim() : "";
-  if (trimmedInventoryId && args.graph.vertexes[trimmedInventoryId]) {
-    const newInventoryEdgeId = args.generateNewVertexId(args.graph, args.setGraph);
-    const newInventoryEdge = args.newEdge(
+  if (trimmedInventoryId && g.vertexes[trimmedInventoryId]) {
+    const newInventoryEdgeId = _.generateNewVertexId(g, sg);
+    const newInventoryEdge = _.newEdge(
       newInventoryEdgeId,
       inventoryRelationshipType,
       {},
       lineVertexFresh.id,
       trimmedInventoryId,
     );
-    args.addNewEdge(txnId, newInventoryEdge, args.graph, args.setGraph);
+    _.addNewEdge(txnId, newInventoryEdge, g, sg);
   }
 };
 
@@ -150,7 +150,7 @@ const patchLineP = (lineIndex, patch) => {
   const txnId = ensureTxn();
   if (!txnId) return;
   if (patch && typeof patch === "object" && Object.keys(patch).length > 0) {
-    args.mergeVertexProperties(txnId, lineVertex.id, args.graph, args.setGraph, patch);
+    _.mergeVertexProperties(txnId, lineVertex.id, g, sg, patch);
   }
 };
 
@@ -162,7 +162,7 @@ const patchCell = (lineIndex, columnDef, cellValue) => {
     if (!lineVertex?.id) return;
     const txnId = ensureTxn();
     if (!txnId) return;
-    const lineVertexForInventory = args.graph.vertexes[lineVertex.id] || lineVertex;
+    const lineVertexForInventory = g.vertexes[lineVertex.id] || lineVertex;
     setInventoryItemId(lineVertexForInventory, cellValue);
     return;
   }
@@ -174,16 +174,16 @@ const patchCell = (lineIndex, columnDef, cellValue) => {
 
 const inventoryValueForLine = (rowVertex) => {
   if (!rowVertex?.id) return "";
-  const lineVertexFromGraph = args.graph.vertexes[rowVertex.id] || rowVertex;
+  const lineVertexFromGraph = g.vertexes[rowVertex.id] || rowVertex;
   const nestedLineItemsConfig = getNestedLineItemsConfig();
   const inventoryRelationshipType = nestedLineItemsConfig.childToInventoryRelationshipType;
   const inventoryTargetLabel = nestedLineItemsConfig.inventoryTargetLabel || "InventoryItem";
   if (!inventoryRelationshipType || !lineVertexFromGraph.OUT?.[inventoryRelationshipType]) return "";
   const inventoryEdgeIds = lineVertexFromGraph.OUT[inventoryRelationshipType];
   for (let edgeIndex = 0; edgeIndex < inventoryEdgeIds.length; edgeIndex++) {
-    const edge = args.graph.edges[inventoryEdgeIds[edgeIndex]];
+    const edge = g.edges[inventoryEdgeIds[edgeIndex]];
     if (!edge) continue;
-    const targetVertex = args.graph.vertexes[edge.E];
+    const targetVertex = g.vertexes[edge.E];
     if (targetVertex?.L?.includes(inventoryTargetLabel)) return edge.E;
   }
   return "";
@@ -214,18 +214,18 @@ const addRow = () => {
       newLineProperties[propertyKey] = defaultNewLinePropertiesOverlay[propertyKey];
     }
   }
-  const newLineVertexId = args.generateNewVertexId(args.graph, args.setGraph);
-  const newLineVertex = args.newVertex(newLineVertexId, [childLabel], newLineProperties);
-  args.addNewVertex(txnId, newLineVertex, args.graph, args.setGraph);
-  const newParentToChildEdgeId = args.generateNewVertexId(args.graph, args.setGraph);
-  const parentToChildEdge = args.newEdge(
+  const newLineVertexId = _.generateNewVertexId(g, sg);
+  const newLineVertex = _.newVertex(newLineVertexId, [childLabel], newLineProperties);
+  _.addNewVertex(txnId, newLineVertex, g, sg);
+  const newParentToChildEdgeId = _.generateNewVertexId(g, sg);
+  const parentToChildEdge = _.newEdge(
     newParentToChildEdgeId,
     parentToChildRelationshipType,
     {},
     parentVertex.id,
     newLineVertexId,
   );
-  args.addNewEdge(txnId, parentToChildEdge, args.graph, args.setGraph);
+  _.addNewEdge(txnId, parentToChildEdge, g, sg);
 };
 
 const removeRow = (lineIndex) => {
@@ -280,14 +280,14 @@ return [
   `._id.fm-nested-line-items {
   display: flex;
   flex-direction: column;
-  gap: ${args.theme.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
   width: 100%;
 }`,
   `._id.fm-nested-line-items .fm-nested-line-header-row,
 ._id.fm-nested-line-items .fm-nested-line-row {
   display: grid;
   grid-template-columns: var(--fm-nl-cols, minmax(4rem, 1fr));
-  gap: ${args.theme.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
 }`,
   `._id.fm-nested-line-items .fm-nested-line-header-row {
   align-items: center;
@@ -322,8 +322,8 @@ return {
   variant: "secondary",
   text: "Add line",
   type: "button",
-  disabled: args.fns.isDisabled(),
-  onClick: () => args.fns.addRow()
+  disabled: f.isDisabled(),
+  onClick: () => f.addRow()
 };
 '''
       }
@@ -339,14 +339,14 @@ return {
 return {
   as: "div",
   class: "fm-nested-line-table",
-  style: { "--fm-nl-cols": args.fns.gridTemplateColumns() }
+  style: { "--fm-nl-cols": f.gridTemplateColumns() }
 };
 '''
         css:
           '''
 return `._id.fm-nested-line-table {
   width: 100%;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.375rem;
   overflow: visible;
   display: flex;
@@ -372,12 +372,12 @@ return {
         css:
           '''
 return `._id.fm-nested-line-header-row {
-  padding: ${args.theme.var.spacing.sm};
-  background: ${args.theme.var.color.background_light_100};
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  padding: ${t.var.spacing.sm};
+  background: ${t.var.color.background_light_100};
+  border-bottom: 1px solid ${t.var.color.border};
   font-size: 0.75rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
       }
@@ -393,7 +393,7 @@ return `._id.fm-nested-line-header-row {
 return {
   loop: true,
   contextName: "nestedLineColumn",
-  data: () => args.fns.getColumns()
+  data: () => f.getColumns()
 };
 '''
       }
@@ -406,7 +406,7 @@ return {
         componentName: Html
         props:
           '''
-const columnDef = args.contextData.nestedLineColumn;
+const columnDef = c.nestedLineColumn;
 const isActionsColumn = columnDef && columnDef.columnType === "actions";
 const headerText = columnDef && columnDef.label != null ? String(columnDef.label) : "";
 const headerLabelProps = { as: "span", text: headerText };
@@ -426,7 +426,7 @@ return headerLabelProps;
         props:
           '''
 return {
-  data: () => args.fns.rowEntries()
+  data: () => f.rowEntries()
 };
 '''
         css:
@@ -445,7 +445,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const lineEntryContext = args.contextData.lineEntry;
+const lineEntryContext = c.lineEntry;
 return {
   as: "div",
   class: "fm-nested-line-row",
@@ -455,8 +455,8 @@ return {
         css:
           '''
 return `._id.fm-nested-line-row {
-  padding: ${args.theme.var.spacing.sm};
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  padding: ${t.var.spacing.sm};
+  border-bottom: 1px solid ${t.var.color.border};
 }
 ._id.fm-nested-line-row:last-child {
   border-bottom: none;
@@ -475,7 +475,7 @@ return `._id.fm-nested-line-row {
 return {
   loop: true,
   contextName: "nestedLineColumn",
-  data: () => args.fns.getColumns()
+  data: () => f.getColumns()
 };
 '''
       }
@@ -503,17 +503,17 @@ return {
         componentName: TomSelect
         props:
           '''
-const columnDef = args.contextData.nestedLineColumn;
-const lineEntryContext = args.contextData.lineEntry;
-const resolvedLineVertex = args.fns.resolveLineRowVertex(lineEntryContext);
+const columnDef = c.nestedLineColumn;
+const lineEntryContext = c.lineEntry;
+const resolvedLineVertex = f.resolveLineRowVertex(lineEntryContext);
 const lineIndex = lineEntryContext?.index ?? 0;
 return {
-  options: args.fns.getColumnSelectOptions(columnDef),
+  options: f.getColumnSelectOptions(columnDef),
   value: resolvedLineVertex?.P?.[columnDef.key] != null ? String(resolvedLineVertex.P[columnDef.key]) : "",
   onChange: (nextValue) =>
-    args.fns.patchCell(lineIndex, columnDef, args.fns.selectFallback(columnDef, nextValue)),
+    f.patchCell(lineIndex, columnDef, f.selectFallback(columnDef, nextValue)),
   placeholder: columnDef.placeholder || columnDef.label || "",
-  disabled: args.fns.isDisabled(),
+  disabled: f.isDisabled(),
   hide: !columnDef || columnDef.columnType !== "select"
 };
 '''
@@ -527,17 +527,17 @@ return {
         componentName: TextInput
         props:
           '''
-const columnDef = args.contextData.nestedLineColumn;
-const lineEntryContext = args.contextData.lineEntry;
-const resolvedLineVertex = args.fns.resolveLineRowVertex(lineEntryContext);
+const columnDef = c.nestedLineColumn;
+const lineEntryContext = c.lineEntry;
+const resolvedLineVertex = f.resolveLineRowVertex(lineEntryContext);
 const lineIndex = lineEntryContext?.index ?? 0;
 return {
   type: "text",
   value: resolvedLineVertex?.P?.[columnDef.key] != null ? String(resolvedLineVertex.P[columnDef.key]) : "",
   placeholder: columnDef.placeholder || columnDef.label || "",
-  disabled: args.fns.isDisabled(),
+  disabled: f.isDisabled(),
   hide: !columnDef || columnDef.columnType !== "text",
-  onChange: (inputEvent) => args.fns.patchCell(lineIndex, columnDef, inputEvent.target.value)
+  onChange: (inputEvent) => f.patchCell(lineIndex, columnDef, inputEvent.target.value)
 };
 '''
       }
@@ -550,9 +550,9 @@ return {
         componentName: TextInput
         props:
           '''
-const columnDef = args.contextData.nestedLineColumn;
-const lineEntryContext = args.contextData.lineEntry;
-const resolvedLineVertex = args.fns.resolveLineRowVertex(lineEntryContext);
+const columnDef = c.nestedLineColumn;
+const lineEntryContext = c.lineEntry;
+const resolvedLineVertex = f.resolveLineRowVertex(lineEntryContext);
 const lineIndex = lineEntryContext?.index ?? 0;
 return {
   type: "number",
@@ -560,10 +560,10 @@ return {
   placeholder: columnDef.placeholder || columnDef.label || "",
   min: columnDef.min != null ? columnDef.min : 0,
   step: columnDef.step != null ? columnDef.step : 0.01,
-  disabled: args.fns.isDisabled(),
+  disabled: f.isDisabled(),
   hide: !columnDef || columnDef.columnType !== "number",
   onChange: (inputEvent) =>
-    args.fns.patchCell(
+    f.patchCell(
       lineIndex,
       columnDef,
       inputEvent.target.value === "" ? "" : Number(inputEvent.target.value),
@@ -580,22 +580,22 @@ return {
         componentName: TomSelect
         props:
           '''
-const columnDef = args.contextData.nestedLineColumn;
-const lineEntryContext = args.contextData.lineEntry;
-const resolvedLineVertex = args.fns.resolveLineRowVertex(lineEntryContext);
+const columnDef = c.nestedLineColumn;
+const lineEntryContext = c.lineEntry;
+const resolvedLineVertex = f.resolveLineRowVertex(lineEntryContext);
 const lineIndex = lineEntryContext?.index ?? 0;
-const inventorySelectConfig = args.fns.getNestedLineItemsConfig().inventorySelectConfig || {};
+const inventorySelectConfig = f.getNestedLineItemsConfig().inventorySelectConfig || {};
 const labelFieldName = inventorySelectConfig.labelField || "partNo";
 const tomSelectLabelKey = String(labelFieldName).includes(".")
   ? String(labelFieldName)
   : "P." + labelFieldName;
 const linkedInventoryVertexId = resolvedLineVertex
-  ? args.fns.inventoryValueForLine(resolvedLineVertex)
+  ? f.inventoryValueForLine(resolvedLineVertex)
   : "";
 return {
   functionName: "getUserVertices",
   value: linkedInventoryVertexId ? String(linkedInventoryVertexId) : "",
-  onChange: (nextInventoryId) => args.fns.patchCell(lineIndex, columnDef, nextInventoryId || ""),
+  onChange: (nextInventoryId) => f.patchCell(lineIndex, columnDef, nextInventoryId || ""),
   singularName: inventorySelectConfig.singularName || "Part",
   pluralName: inventorySelectConfig.pluralName || "Parts",
   valueKey: "id",
@@ -608,7 +608,7 @@ return {
     enableUserScoping: inventorySelectConfig.enableUserScoping === true
   },
   placeholder: columnDef.placeholder || inventorySelectConfig.singularName || "Inventory",
-  disabled: args.fns.isDisabled(),
+  disabled: f.isDisabled(),
   hide: (functionArguments) => {
     const columnDefFromContext = functionArguments.contextData.nestedLineColumn;
     const lineEntryFromContext = functionArguments.contextData.lineEntry;
@@ -629,16 +629,16 @@ return {
         componentName: Button
         props:
           '''
-const columnDef = args.contextData.nestedLineColumn;
-const lineEntryContext = args.contextData.lineEntry;
+const columnDef = c.nestedLineColumn;
+const lineEntryContext = c.lineEntry;
 const lineIndex = lineEntryContext?.index ?? 0;
 return {
   variant: "danger",
   text: "Remove",
   type: "button",
-  disabled: args.fns.isDisabled(),
+  disabled: f.isDisabled(),
   hide: !columnDef || columnDef.columnType !== "actions",
-  onClick: () => args.fns.removeRow(lineIndex)
+  onClick: () => f.removeRow(lineIndex)
 };
 '''
       }

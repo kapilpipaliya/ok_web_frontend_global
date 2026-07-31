@@ -9,7 +9,7 @@
         body:
           '''const MAX_ROWS = 2000;
 
-const { csvText, fieldNames } = args.contextData || {};
+const { csvText, fieldNames } = c || {};
 
 if (!csvText || typeof csvText !== "string") {
   return { success: false, message: "csvText is required", data: null };

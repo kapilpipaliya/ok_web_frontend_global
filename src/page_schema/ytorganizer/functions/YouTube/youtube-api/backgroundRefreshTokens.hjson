@@ -8,11 +8,11 @@
         body:
           '''
 // This is a background worker function that runs on a schedule
-if (args.contextData.action === 'start') {
+if (c.action === 'start') {
   // Helper function to log messages to database
   const logMessage = async (level, message, metadata = {}) => {
     try {
-      await args.executeNamedServerFunction({
+      await s({
         functionName: 'logWorkerMessage',
         contextData: {
           workerName: 'backgroundRefreshTokens',
@@ -20,7 +20,7 @@ if (args.contextData.action === 'start') {
           message,
           metadata
         }
-      }, { functionLookupSubDomain: args.subDomain });
+      }, { functionLookupSubDomain: _.subDomain });
     } catch (error) {
       // Silent failure - don't break worker if logging fails
     }
@@ -29,14 +29,14 @@ if (args.contextData.action === 'start') {
   await logMessage('info', 'Starting background token refresh worker (runs every 6 hours)');
 
   // Initialize queue helpers and Redis connection
-  const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} }, { functionLookupSubDomain: args.subDomain });
+  const helpers = await s({ functionName: 'queueHelpers', contextData: {} }, { functionLookupSubDomain: _.subDomain });
 
   if (!helpers.result?.success) {
     await logMessage('error', 'Failed to initialize queue helpers', { error: helpers.result?.error });
     throw new Error('Queue helpers initialization failed');
   }
 
-  const { Worker, Queue } = args.bullmq;
+  const { Worker, Queue } = _.bullmq;
   const connection = helpers.result.data.getRedisConnection();
 
   // Validate Redis connection config
@@ -85,7 +85,7 @@ if (args.contextData.action === 'start') {
     });
 
     // Create a new session for this job execution
-    const session = await args.getSession();
+    const session = await _.getSession();
 
     try {
       // Get all users with YouTube OAuth tokens
@@ -154,12 +154,12 @@ if (args.contextData.action === 'start') {
           await logMessage('info', `Refreshing token for user ${userEmail}`, { userUuid });
 
           // Call the refresh token function
-          const refreshResult = await args.executeNamedServerFunction({
+          const refreshResult = await s({
             functionName: 'refreshYouTubeToken',
             contextData: {
               userUuid: userUuid
             }
-          }, { functionLookupSubDomain: args.subDomain });
+          }, { functionLookupSubDomain: _.subDomain });
 
           if (refreshResult.result?.success) {
             tokensRefreshed++;

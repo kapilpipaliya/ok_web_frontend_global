@@ -14,7 +14,7 @@ return {
         css: '''
 return `._id {
   padding: 5rem 2rem;
-  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background : args.theme.var.color.background};
+  background: ${_.currentMode() === 'dark' ? t.var.color.background : t.var.color.background};
   
   @media (max-width: 768px) {
     padding: 3rem 1rem;
@@ -77,7 +77,7 @@ return {
 return `._id {
   font-size: 2.5rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 1rem;
   
   @media (max-width: 768px) {
@@ -102,7 +102,7 @@ return {
         css: '''
 return `._id {
   font-size: 1.125rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   opacity: 0.7;
   max-width: 600px;
   margin: 0 auto;
@@ -209,7 +209,7 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background_dark_100 : args.theme.var.color.background_dark_50};
+  background: ${_.currentMode() === 'dark' ? t.var.color.background_dark_100 : t.var.color.background_dark_50};
   border-radius: 1rem;
   padding: 2rem;
   text-align: center;
@@ -237,7 +237,7 @@ return {
 return `._id {
   font-size: 1.5rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 1.5rem;
 }`;
 '''
@@ -297,7 +297,7 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const feature = args.contextData.features;
+const feature = c.features;
 return {
   as: "div"
 };
@@ -318,7 +318,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const feature = args.contextData.features;
+const feature = c.features;
 return {
   as: "icon",
   icon: feature.icon,
@@ -328,7 +328,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.success};
+  color: ${t.var.color.success};
 }`;
 '''
       }
@@ -340,7 +340,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const feature = args.contextData.features;
+const feature = c.features;
 return {
   as: "span",
   text: feature.text
@@ -348,7 +348,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   font-size: 0.875rem;
 }`;
 '''

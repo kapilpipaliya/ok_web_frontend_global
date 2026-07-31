@@ -8,7 +8,7 @@
         body:
           '''
 // Get authenticated user
-const user = await args.getUserFromSession();
+const user = await _.getUserFromSession();
 if (!user) {
   return {
     success: false,
@@ -17,7 +17,7 @@ if (!user) {
 }
 
 // Fetch user's current active subscription
-const subscriptionResult = await args.session.run(
+const subscriptionResult = await _.session.run(
   `MATCH (u:User {uuid: $userId})-[:UserSubscription]->(s:UserSubscription)
    WHERE s.status = 'active'
    RETURN s
@@ -27,7 +27,7 @@ const subscriptionResult = await args.session.run(
 );
 
 // Fetch user's current plan and quota info
-const userResult = await args.session.run(
+const userResult = await _.session.run(
   `MATCH (u:User {uuid: $userId})
    RETURN u`,
   { userId: user.P.uuid }
@@ -35,7 +35,7 @@ const userResult = await args.session.run(
 
 // Convert user node to vertex interface format
 const userNode = userResult.records[0]?.get("u");
-const userVertex = userNode ? args.convertNodeToJson(userNode) : null;
+const userVertex = userNode ? _.convertNodeToJson(userNode) : null;
 
 const currentPlan = userVertex?.P?.currentPlan || "free";
 const videoQuotaLimit = userVertex?.P?.videoQuotaLimit || 10000;
@@ -48,7 +48,7 @@ let subscription = null;
 if (subscriptionResult.records.length > 0) {
   const subNode = subscriptionResult.records[0].get("s");
   // Convert Neo4j node to vertex interface format
-  subscription = args.convertNodeToJson(subNode);
+  subscription = _.convertNodeToJson(subNode);
 }
 
 // Calculate quota percentage

@@ -18,7 +18,7 @@ Use `type: "nestedLineItems"` on a form field with `nestedLineItemsConfig` so **
 - For `inventory`: optional `showWhenField` + `showWhenValues` (array) to show the picker only when `lineVertex.P[showWhenField]` matches one of the values; omit both to always show when `childToInventoryRelationshipType` is set.
 - `childToInventoryRelationshipType`, `inventoryTargetLabel`, `inventorySelectConfig` — same as before for linking lines to inventory vertices.
 
-**Optional:** `defaultNewLineProperties` — object merged onto the new line vertex `P` after column defaults. Optional: `rowsExpression` — override for `args.evalExpression` when listing lines (default `->${parentToChildRelationshipType}`).
+**Optional:** `defaultNewLineProperties` — object merged onto the new line vertex `P` after column defaults. Optional: `rowsExpression` — override for `_.evalExpression` when listing lines (default `->${parentToChildRelationshipType}`).
 
 **Server persist (`mutateUserContent` / `nestedLineSync`):** optional `nestedLineItemsSyncRules` on the same config object (copied into each sync entry by the form). If omitted, every submitted row is persisted (no quantity/inventory gating). If set, it is an object:
 
@@ -26,4 +26,4 @@ Use `type: "nestedLineItems"` on a form field with `nestedLineItemsConfig` so **
 - `rowRequiredFields` — array of property keys; each must be non-empty after trim or the row is skipped.
 - `inventoryRequiredMode` — `never` (default), `always` (row skipped without `inventoryItemId` / `inventoryId`), or `when` (require inventory only if `inventoryRequiredWhenField` matches one of `inventoryRequiredWhenValues`, case-insensitive).
 
-**Html loop pattern:** header and body use `loop: true`, `contextName: "nestedLineColumn"`, `data: () => args.fns.getColumns()` (or equivalent) so each column renders once per row; read the current column in children as `args.contextData.nestedLineColumn`. Do not pass a **function** as `class` on Html — return a **string** (see `getMetaProps` behavior).
+**Html loop pattern:** header and body use `loop: true`, `contextName: "nestedLineColumn"`, `data: () => _.fns.getColumns()` (or equivalent) so each column renders once per row; read the current column in children as `_.contextData.nestedLineColumn`. Do not pass a **function** as `class` on Html — return a **string** (see `getMetaProps` behavior).

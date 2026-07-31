@@ -6,7 +6,7 @@
       P: {
         description: Import contacts form submission to database
         body:
-          '''const { contacts } = args.contextData;
+          '''const { contacts } = c;
 
 if (!contacts || typeof contacts !== 'string') {
   throw new Error("Contacts data is required and must be a CSV string");
@@ -108,7 +108,7 @@ for (let i = 1; i < lines.length; i++) {
 }
 
 // Use transaction for batch creation
-const result = await args.session.executeWrite(async (tx) => {
+const result = await _.session.executeWrite(async (tx) => {
   const contactsArray = Array.from(contactsMap.values());
   let createdCount = 0;
   let skippedCount = 0;

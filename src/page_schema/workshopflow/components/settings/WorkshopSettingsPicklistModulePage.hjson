@@ -28,7 +28,7 @@ return `._id.workshop-settings-layout {
   gap: 0;
   width: 100%;
   min-height: 60vh;
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
 }
 
 @media (min-width: 769px) {
@@ -65,7 +65,7 @@ return {
 return `._id.workshop-settings-main {
   flex: 1;
   min-width: 0;
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
 }`;
 '''
       }
@@ -78,7 +78,7 @@ return `._id.workshop-settings-main {
         componentName: WorkshopReferenceSequenceEditor
         props:
           '''
-const p = args.contextData.props || {};
+const p = c.props || {};
 return {
   sequenceKey: String(p.referenceSequenceKey || "").trim(),
   sectionTitle: p.referenceSectionTitle || "",
@@ -95,7 +95,7 @@ return {
         componentName: WorkshopPicklistEditor
         props:
           '''
-const p = args.contextData.props || {};
+const p = c.props || {};
 return {
   picklistKey: p.picklistKey || "",
   pageTitle: p.pageTitle || "Options",

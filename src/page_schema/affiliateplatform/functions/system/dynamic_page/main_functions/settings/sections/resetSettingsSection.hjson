@@ -7,12 +7,12 @@
         description: Resets a settings section to config defaults. Deletes persisted document or sets default values.
         body:
           '''
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return { success: false, message: "User session not found" };
 }
 
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const user = await _.getEffectiveUser(_.session, actualUser, c);
 const {
   pageId,
   sectionId,
@@ -20,7 +20,7 @@ const {
   scopeId,
   sectionConfig,
   deleteDocument
-} = args.contextData;
+} = c;
 
 if (!pageId || !sectionId) {
   return { success: false, message: "pageId and sectionId are required" };
@@ -29,11 +29,11 @@ if (!pageId || !sectionId) {
 const effectiveScopeLabel = scopeVertexLabel || "User";
 const effectiveScopeId = scopeId || user.P.uuid;
 const edgeType = `${effectiveScopeLabel}HasSettingsSection`;
-const scopeMatchProperty = args.contextData.scopeMatchProperty || "uuid";
+const scopeMatchProperty = c.scopeMatchProperty || "uuid";
 
 let defaultValues = {};
-if (sectionConfig && args.executeNamedServerFunction) {
-  const mergeResult = await args.executeNamedServerFunction({
+if (sectionConfig && s) {
+  const mergeResult = await s({
     functionName: "settingsEngineHelpers",
     contextData: { action: "mergeDefaults", sectionConfig, values: {} }
   });
@@ -55,7 +55,7 @@ if (effectiveScopeLabel === "User") {
   `;
 }
 
-const existingResult = await args.session.run(existingQuery, {
+const existingResult = await _.session.run(existingQuery, {
   scopeId: effectiveScopeId,
   pageId,
   sectionId
@@ -69,12 +69,12 @@ if (existingResult.records.length === 0) {
   };
 }
 
-const existingVertices = args.processResult(existingResult.records, args.context, "doc");
+const existingVertices = _.processResult(existingResult.records, _.context, "doc");
 const existingDocument = existingVertices[0];
 const elementId = existingDocument.id;
 
 if (deleteDocument === true) {
-  await args.session.run(
+  await _.session.run(
     `MATCH (doc:SettingsSectionDocument) WHERE elementId(doc) = $elementId DETACH DELETE doc`,
     { elementId }
   );
@@ -87,7 +87,7 @@ if (deleteDocument === true) {
 
 const valuesJson = JSON.stringify(defaultValues);
 const now = new Date().toISOString();
-await args.session.run(
+await _.session.run(
   `MATCH (doc:SettingsSectionDocument) WHERE elementId(doc) = $elementId
    SET doc.values = $valuesJson, doc.version = 1, doc.updatedAt = $now, doc.updatedBy = $updatedBy
    RETURN doc`,

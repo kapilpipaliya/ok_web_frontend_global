@@ -24,7 +24,7 @@
 return {
   enabled: true,
   executeYTOFunction: (functionName, contextData) =>
-    args.executeNamedServerFunction({
+    s({
       functionName,
       contextData: contextData || {}
     })

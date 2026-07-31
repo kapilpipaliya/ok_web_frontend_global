@@ -8,23 +8,23 @@
         fns:
           '''
 // Filter and refresh state
-const [filterWorker, setFilterWorker] = args.createSignal('all');
-const [filterLevel, setFilterLevel] = args.createSignal('all');
-const [logs, setLogs] = args.createSignal([]);
-const [logsLoading, setLogsLoading] = args.createSignal(false);
+const [filterWorker, setFilterWorker] = _.createSignal('all');
+const [filterLevel, setFilterLevel] = _.createSignal('all');
+const [logs, setLogs] = _.createSignal([]);
+const [logsLoading, setLogsLoading] = _.createSignal(false);
 
 // Fetch logs function
 const fetchLogs = async () => {
   setLogsLoading(true);
 
   try {
-    const result = await args.fns.executeYTOFunction('getWorkerLogs', {
+    const result = await f.executeYTOFunction('getWorkerLogs', {
       filterWorker: filterWorker(),
       filterLevel: filterLevel()
     });
 
     if (result?.error) {
-      args.showErrorToast(result.error);
+      _.showErrorToast(result.error);
       setLogs([]);
     } else if (result?.result) {
       setLogs(result.result);
@@ -33,7 +33,7 @@ const fetchLogs = async () => {
     }
   } catch (error) {
     console.error('Error fetching logs:', error);
-    args.showErrorToast('Failed to load worker logs');
+    _.showErrorToast('Failed to load worker logs');
     setLogs([]);
   } finally {
     setLogsLoading(false);
@@ -47,9 +47,9 @@ const refreshLogs = () => {
 
 // Clear all logs
 const clearAllLogs = async () => {
-  const rbConfirm = args.contextData?.confirmContext?.rbConfirm;
+  const rbConfirm = c?.confirmContext?.rbConfirm;
   if (!rbConfirm) {
-    args.showErrorToast('Confirmation dialog not available');
+    _.showErrorToast('Confirmation dialog not available');
     return;
   }
 
@@ -64,22 +64,22 @@ const clearAllLogs = async () => {
   if (!confirmed) return;
 
   try {
-    const result = await args.fns.executeYTOFunction('clearWorkerLogs', {});
+    const result = await f.executeYTOFunction('clearWorkerLogs', {});
 
     if (result?.result?.success) {
-      args.showSuccessToast(result.result.message || 'All worker logs cleared successfully');
+      _.showSuccessToast(result.result.message || 'All worker logs cleared successfully');
       refreshLogs();
     } else {
-      args.showErrorToast(result?.error || result?.result?.error || 'Failed to clear logs');
+      _.showErrorToast(result?.error || result?.result?.error || 'Failed to clear logs');
     }
   } catch (error) {
     console.error('Error clearing logs:', error);
-    args.showErrorToast('An error occurred while clearing logs');
+    _.showErrorToast('An error occurred while clearing logs');
   }
 };
 
 // Watch for filter changes and reload logs
-args.createEffect(args.on(
+_.createEffect(_.on(
   () => [filterWorker(), filterLevel()],
   () => {
     // Fetch logs when filters change
@@ -217,7 +217,7 @@ return {
 return {
   text: "Refresh",
   variant: "secondary",
-  onClick: args.fns.refreshLogs
+  onClick: f.refreshLogs
 };
 '''
       }
@@ -233,7 +233,7 @@ return {
 return {
   text: "Clear All Logs",
   variant: "danger",
-  onClick: args.fns.clearAllLogs
+  onClick: f.clearAllLogs
 };
 '''
       }
@@ -245,8 +245,8 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.background_dark_50};
-  border: 1px solid ${args.theme.var.color.border};
+  background: ${t.var.color.background_dark_50};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.75rem;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
@@ -302,7 +302,7 @@ return `._id {
   display: block;
   font-size: 0.875rem;
   font-weight: 500;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 0.5rem;
 }`;
 '''
@@ -325,7 +325,7 @@ return {
         componentName: TomSelect
         props:
           '''
-const filterWorker = args.fns.filterWorker?.();
+const filterWorker = f.filterWorker?.();
 
 return {
   value: filterWorker || 'all',
@@ -337,7 +337,7 @@ return {
   placeholder: "Select worker type...",
   search: false,
   onChange: (value) => {
-    args.fns.setFilterWorker?.(value);
+    f.setFilterWorker?.(value);
   }
 };
 '''
@@ -374,7 +374,7 @@ return `._id {
   display: block;
   font-size: 0.875rem;
   font-weight: 500;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 0.5rem;
 }`;
 '''
@@ -397,7 +397,7 @@ return {
         componentName: TomSelect
         props:
           '''
-const filterLevel = args.fns.filterLevel?.();
+const filterLevel = f.filterLevel?.();
 
 return {
   value: filterLevel || 'all',
@@ -409,7 +409,7 @@ return {
   placeholder: "Select log level...",
   search: false,
   onChange: (value) => {
-    args.fns.setFilterLevel?.(value);
+    f.setFilterLevel?.(value);
   }
 };
 '''
@@ -445,7 +445,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const logs = args.fns.logs?.() || [];
+const logs = f.logs?.() || [];
 
 return {
   as: "div",
@@ -464,7 +464,7 @@ return {
         componentName: Html
         props:
           '''
-const logs = args.fns.logs?.() || [];
+const logs = f.logs?.() || [];
 
 return {
   as: "div",
@@ -479,15 +479,15 @@ return {
       P: {
         css:
           '''
-const log = args.contextData.logItem;
+const log = c.logItem;
 const level = log?.P?.level || 'info';
 
-let borderColor = args.theme.var.color.border;
-let bgColor = args.theme.var.color.background_dark_50;
+let borderColor = t.var.color.border;
+let bgColor = t.var.color.background_dark_50;
 
 if (level === 'error') {
-  borderColor = args.theme.var.color.error;
-  bgColor = args.theme.var.color.error_light_50;
+  borderColor = t.var.color.error;
+  bgColor = t.var.color.error_light_50;
 }
 
 return `._id {
@@ -550,12 +550,12 @@ return {
       P: {
         css:
           '''
-const log = args.contextData.logItem;
+const log = c.logItem;
 const level = log?.P?.level || 'info';
 
-let color = args.theme.var.color.primary;
+let color = t.var.color.primary;
 if (level === 'error') {
-  color = args.theme.var.color.error;
+  color = t.var.color.error;
 }
 
 return `._id {
@@ -563,7 +563,7 @@ return `._id {
   font-size: 0.875rem;
   color: ${color};
   padding: 0.25rem 0.75rem;
-  background: ${args.theme.var.color.background_light_100};
+  background: ${t.var.color.background_light_100};
   border-radius: 0.375rem;
 }`;
 '''
@@ -571,7 +571,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const log = args.contextData.logItem;
+const log = c.logItem;
 const workerName = log?.P?.workerName || 'Unknown';
 
 const displayName = workerName === 'processChannelQueue' ? 'Channel Queue'
@@ -591,15 +591,15 @@ return {
       P: {
         css:
           '''
-const log = args.contextData.logItem;
+const log = c.logItem;
 const level = log?.P?.level || 'info';
 
-let bgColor = args.theme.var.color.info_light_100;
-let textColor = args.theme.var.color.info_light_100_text;
+let bgColor = t.var.color.info_light_100;
+let textColor = t.var.color.info_light_100_text;
 
 if (level === 'error') {
-  bgColor = args.theme.var.color.error_light_100;
-  textColor = args.theme.var.color.error_light_100_text;
+  bgColor = t.var.color.error_light_100;
+  textColor = t.var.color.error_light_100_text;
 }
 
 return `._id {
@@ -618,7 +618,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const log = args.contextData.logItem;
+const log = c.logItem;
 const level = log?.P?.level || 'info';
 
 return {
@@ -634,12 +634,12 @@ return {
       P: {
         css:
           '''
-const log = args.contextData.logItem;
+const log = c.logItem;
 const level = log?.P?.level || 'info';
 
-let color = args.theme.var.color.text_light_500;
+let color = t.var.color.text_light_500;
 if (level === 'error') {
-  color = args.theme.var.color.error_light_50_text;
+  color = t.var.color.error_light_50_text;
 }
 
 return `._id {
@@ -652,7 +652,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const log = args.contextData.logItem;
+const log = c.logItem;
 const createdAt = log?.P?.createdAt;
 
 let timeText = 'Unknown';
@@ -678,12 +678,12 @@ return {
       P: {
         css:
           '''
-const log = args.contextData.logItem;
+const log = c.logItem;
 const level = log?.P?.level || 'info';
 
-let color = args.theme.var.color.text;
+let color = t.var.color.text;
 if (level === 'error') {
-  color = args.theme.var.color.error_light_50_text;
+  color = t.var.color.error_light_50_text;
 }
 
 return `._id {
@@ -697,7 +697,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const log = args.contextData.logItem;
+const log = c.logItem;
 const message = log?.P?.message || 'No message';
 
 return {
@@ -713,15 +713,15 @@ return {
       P: {
         css:
           '''
-const log = args.contextData.logItem;
+const log = c.logItem;
 const level = log?.P?.level || 'info';
 
-let bgColor = args.theme.var.color.background_light_100;
-let textColor = args.theme.var.color.text_light_500;
+let bgColor = t.var.color.background_light_100;
+let textColor = t.var.color.text_light_500;
 
 if (level === 'error') {
-  bgColor = args.theme.var.color.error_light_100;
-  textColor = args.theme.var.color.error_light_100_text;
+  bgColor = t.var.color.error_light_100;
+  textColor = t.var.color.error_light_100_text;
 }
 
 return `._id {
@@ -742,7 +742,7 @@ return `._id {
 ._id pre {
   margin: 0.5rem 0 0 0;
   padding: 0.5rem;
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
   border-radius: 0.25rem;
   overflow-x: auto;
   font-family: 'Courier New', monospace;
@@ -755,7 +755,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const log = args.contextData.logItem;
+const log = c.logItem;
 const metadata = log?.P?.metadata;
 
 if (!metadata) {
@@ -800,7 +800,7 @@ return {
         componentName: Html
         props:
           '''
-const log = args.contextData.logItem;
+const log = c.logItem;
 const metadata = log?.P?.metadata;
 
 if (!metadata) {
@@ -830,8 +830,8 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.background_dark_50};
-  border: 2px dashed ${args.theme.var.color.border};
+  background: ${t.var.color.background_dark_50};
+  border: 2px dashed ${t.var.color.border};
   border-radius: 0.75rem;
   padding: 3rem 2rem;
   text-align: center;
@@ -841,7 +841,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const logs = args.fns.logs?.() || [];
+const logs = f.logs?.() || [];
 
 return {
   as: "div",
@@ -857,7 +857,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   opacity: 0.5;
   margin-bottom: 1rem;
 }`;
@@ -884,7 +884,7 @@ return {
 return `._id {
   font-size: 1.125rem;
   font-weight: 500;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0;
 }`;
 '''

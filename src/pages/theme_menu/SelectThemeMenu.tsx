@@ -133,7 +133,7 @@ export function SelectThemeMenu(props: { isStandalone?: boolean }) {
           as="div"
           css={`return \`._id {
   padding: 0.5rem;
-  color: \${args.theme.var.color.error};
+  color: \${t.var.color.error};
 }\`;`}
         >
           {error()}
@@ -168,16 +168,16 @@ export function SelectThemeMenu(props: { isStandalone?: boolean }) {
                 <As
                   as="li"
                   css={`return \`._id {
-  ${isSelected() ? "background-color: ${args.theme.var.color.primary_light_400}; color: ${args.theme.var.color.primary_light_400_text};" : ""}
+  ${isSelected() ? "background-color: ${t.var.color.primary_light_400}; color: ${t.var.color.primary_light_400_text};" : ""}
   display: flex;
   align-items: center;  
   justify-content: space-between;
   padding: 0.5rem;
   cursor: pointer;
-  border-bottom: 1px solid \${args.theme.var.color.border};
+  border-bottom: 1px solid \${t.var.color.border};
   &:hover {
-    background-color: \${args.theme.var.color.primary_light_200};
-    color: \${args.theme.var.color.primary_light_200_text};
+    background-color: \${t.var.color.primary_light_200};
+    color: \${t.var.color.primary_light_200_text};
   }
 }\`;`}
                   onClick={() => handleThemeSelect(theme)}
@@ -195,7 +195,7 @@ export function SelectThemeMenu(props: { isStandalone?: boolean }) {
                       <As
                         as="span"
                         css={`return \`._id {
-  color: \${args.theme.var.color.primary};
+  color: \${t.var.color.primary};
   font-size: 1.2rem;
 }\`;`}
                       >
@@ -222,13 +222,13 @@ export function SelectThemeMenu(props: { isStandalone?: boolean }) {
                     <Show when={!isSelected()}>
                       <IconButton
                         css={`return \`._id {
-  color: \${args.theme.var.color.error};
+  color: \${t.var.color.error};
   background-color: transparent;
   border: none;
   padding: 1px;
   cursor: pointer;
   &:hover {
-    color: \${args.theme.var.color.error_dark_400};
+    color: \${t.var.color.error_dark_400};
 }\`;`}
                         icon="ph:trash"
                         onClick={(e) => {

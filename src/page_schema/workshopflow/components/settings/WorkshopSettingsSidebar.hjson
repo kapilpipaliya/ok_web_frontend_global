@@ -16,9 +16,9 @@
 return `._id {
   width: 240px;
   flex-shrink: 0;
-  border-right: 1px solid ${args.theme.var.color.border};
-  padding: ${args.theme.var.spacing.md};
-  background: ${args.theme.var.color.background_light_100};
+  border-right: 1px solid ${t.var.color.border};
+  padding: ${t.var.spacing.md};
+  background: ${t.var.color.background_light_100};
   min-height: 280px;
 }
 
@@ -26,7 +26,7 @@ return `._id {
   ._id {
     width: 100%;
     border-right: none;
-    border-bottom: 1px solid ${args.theme.var.color.border};
+    border-bottom: 1px solid ${t.var.color.border};
   }
 }`;
 '''
@@ -49,7 +49,7 @@ const items = [
 ];
 
 const isActive = (href) => {
-  const path = args.location?.pathname || "";
+  const path = _.location?.pathname || "";
   if (href === "/workshop/settings") {
     return path === "/workshop/settings" || path === "/workshop/settings/";
   }
@@ -87,8 +87,8 @@ return {
 return `._id.workshop-settings-sidebar-title {
   font-size: 1.125rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
-  margin-bottom: ${args.theme.var.spacing.md};
+  color: ${t.var.color.text};
+  margin-bottom: ${t.var.spacing.md};
 }`;
 '''
       }
@@ -105,7 +105,7 @@ return `._id.workshop-settings-sidebar-title {
           '''
 return {
   as: "nav",
-  data: args.fns.items
+  data: f.items
 };
 '''
         css:
@@ -113,7 +113,7 @@ return {
 return `._id {
   display: flex;
   flex-direction: column;
-  gap: ${args.theme.var.spacing.xs};
+  gap: ${t.var.spacing.xs};
 }`;
 '''
       }
@@ -126,8 +126,8 @@ return `._id {
         componentName: Html
         props:
           '''
-const item = args.contextData.navItem;
-const active = args.fns.isActive(item.href);
+const item = c.navItem;
+const active = f.isActive(item.href);
 return {
   as: "a",
   href: item.href,
@@ -135,7 +135,7 @@ return {
   class: "workshop-settings-nav-link" + (active ? " is-active" : ""),
   onClick: (e) => {
     e.preventDefault();
-    args.navigate(item.href);
+    _.navigate(item.href);
   }
 };
 '''
@@ -143,19 +143,19 @@ return {
           '''
 return `._id.workshop-settings-nav-link {
   display: block;
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  border-radius: ${args.theme.var.borderRadius.md};
-  color: ${args.theme.var.color.text};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  border-radius: ${t.var.borderRadius.md};
+  color: ${t.var.color.text};
   text-decoration: none;
   font-size: 0.875rem;
   font-weight: 500;
 }
 ._id.workshop-settings-nav-link:hover {
-  background: ${args.theme.var.color.background_light_200};
+  background: ${t.var.color.background_light_200};
 }
 ._id.workshop-settings-nav-link.is-active {
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
 }`;
 '''
       }

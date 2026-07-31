@@ -8,10 +8,10 @@
         description: Creates a public Shopify customer support ticket with serial number and non-guessable tracking token.
         body:
           '''
-const input = args.contextData || {};
+const input = c || {};
 const fields = input.fields && typeof input.fields === "object" ? input.fields : input;
 
-const settingsResult = await args.executeNamedServerFunction({
+const settingsResult = await s({
   functionName: "publicSupportGetSettings",
   contextData: {}
 });
@@ -24,7 +24,7 @@ if (supportSystem.enabled === false) {
 }
 
 if (supportSystem.allowGuestTickets === false) {
-  const user = args.getUserFromSession ? await args.getUserFromSession() : null;
+  const user = _.getUserFromSession ? await _.getUserFromSession() : null;
   if (!user) {
     return { success: false, message: "Please sign in before creating a support request." };
   }
@@ -88,7 +88,7 @@ if (!initialMessage) {
 const prefix = normalize(supportSystem.serialPrefix || "SOL", 20).replace(/[^A-Z0-9]/gi, "").toUpperCase() || "SOL";
 const datePart = new Date().toISOString().slice(0, 10).replace(/-/g, "");
 const seqKey = `${prefix}-${datePart}`;
-const seqResult = await args.session.run(
+const seqResult = await _.session.run(
   `
   MERGE (seq:PublicSupportTicketSequence {key: $seqKey})
   ON CREATE SET seq.value = 0, seq.createdAt = $now
@@ -101,19 +101,19 @@ const seqResult = await args.session.run(
 const rawSeq = seqResult.records[0]?.get("value");
 const nextNumber = typeof rawSeq?.toNumber === "function" ? rawSeq.toNumber() : Number(rawSeq || 1);
 const serial = `${prefix}-${datePart}-${String(nextNumber).padStart(6, "0")}`;
-const token = args.crypto.randomBytes(32).toString("hex");
+const token = _.crypto.randomBytes(32).toString("hex");
 const now = new Date().toISOString();
 
 let origin = "";
 try {
-  origin = args.request?.url ? new URL(args.request.url).origin : "";
+  origin = _.request?.url ? new URL(_.request.url).origin : "";
 } catch {}
 const trackingPath = `/support/ticket?serial=${encodeURIComponent(serial)}&token=${encodeURIComponent(token)}`;
 const trackingUrl = origin ? `${origin}${trackingPath}` : trackingPath;
 const emailThreadSubject = `[${serial}] ${subject}`;
 const status = normalize(supportSystem.defaultTicketStatus || "open", 80).toLowerCase() || "open";
 
-const createResult = await args.session.run(
+const createResult = await _.session.run(
   `
   CREATE (t:PublicSupportTicket {
     serial: $serial,
@@ -167,11 +167,11 @@ const createResult = await args.session.run(
   }
 );
 
-const ticket = args.convertNodeToJson(createResult.records[0].get("t"));
-const message = args.convertNodeToJson(createResult.records[0].get("m"));
+const ticket = _.convertNodeToJson(createResult.records[0].get("t"));
+const message = _.convertNodeToJson(createResult.records[0].get("m"));
 
 try {
-  await args.executeNamedServerFunction({
+  await s({
     functionName: "publicSupportQueueNotification",
     contextData: {
       eventType: "ticket_created",

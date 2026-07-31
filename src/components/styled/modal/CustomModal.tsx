@@ -61,10 +61,10 @@ export function CustomModal(props: Readonly<CustomModalProps>) {
   border-radius: 5px;
   background-color: transparent;
   border: none;
-  color: \${args.theme.var.color.text};
+  color: \${t.var.color.text};
   cursor: pointer;
   &:hover {
-    background-color: \${args.theme.var.color.background_light_200};
+    background-color: \${t.var.color.background_light_200};
   }
 }\`;`}
               onClick={() => setOpen(false)}
@@ -93,7 +93,7 @@ export function CustomModal(props: Readonly<CustomModalProps>) {
         <As
           as="hr"
           css={`return \`._id {
-  color: \${args.theme.var.color.background_light_300};
+  color: \${t.var.color.background_light_300};
 }\`;`}
         />
         <As

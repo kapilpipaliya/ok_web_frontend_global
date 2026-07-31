@@ -8,7 +8,7 @@
         body:
           '''
 // Get current authenticated user from session
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return {
     success: false,
@@ -23,13 +23,13 @@ if (!actualUser) {
 }
 
 // Get effective user (handles admin impersonation)
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const user = await _.getEffectiveUser(_.session, actualUser, c);
 
-const { ownershipId, sortBy = "favourited_desc" } = args.contextData;
+const { ownershipId, sortBy = "favourited_desc" } = c;
 
 // Helper function to parse sortBy using shared utility
 const parseSortBy = async (sortBy, contentType) => {
-  const parseSortResult = await args.executeNamedServerFunction({
+  const parseSortResult = await s({
     functionName: "parseSortByUtil",
     contextData: { sortBy, contentType }
   });
@@ -55,7 +55,7 @@ if (!channelSort) {
     }
   };
 }
-const channelsResult = await args.executeNamedServerFunction({
+const channelsResult = await s({
   functionName: "getChannelsWithVideoCount",
   contextData: {
     userUuid: user.P.uuid,
@@ -85,7 +85,7 @@ if (!playlistSort) {
     }
   };
 }
-const playlistsResult = await args.executeNamedServerFunction({
+const playlistsResult = await s({
   functionName: "getPlaylistsWithVideoCount",
   contextData: {
     userUuid: user.P.uuid,
@@ -115,7 +115,7 @@ if (!videoSort) {
     }
   };
 }
-const videosResult = await args.executeNamedServerFunction({
+const videosResult = await s({
   functionName: "getVideosWithDetails",
   contextData: {
     userUuid: user.P.uuid,

@@ -8,7 +8,7 @@
         body:
           '''
 // Extract input parameters
-const { ownershipId } = args.contextData;
+const { ownershipId } = c;
 
 if (!ownershipId) {
   return {
@@ -18,7 +18,7 @@ if (!ownershipId) {
 }
 
 // Get current authenticated user
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return {
     success: false,
@@ -27,10 +27,10 @@ if (!actualUser) {
 }
 
 // Get effective user (handles admin impersonation)
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const user = await _.getEffectiveUser(_.session, actualUser, c);
 
 // Verify ownership belongs to user
-const ownershipCheck = await args.session.run(`
+const ownershipCheck = await _.session.run(`
   MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
   RETURN o
 `, { userUuid: user.P.uuid, ownershipId });
@@ -44,7 +44,7 @@ if (ownershipCheck.records.length === 0) {
 
 // Get all custom playlists for this ownership
 // NEW SCHEMA v4.0: Direct ownership + optional settings
-const playlistsResult = await args.session.run(`
+const playlistsResult = await _.session.run(`
   MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist)
   WHERE p.isCustom = true
   OPTIONAL MATCH (p)-[:PlaylistPlaylistSetting]->(ps:PlaylistSetting)<-[:YouTubeOwnershipPlaylistSetting]-(o)
@@ -55,10 +55,10 @@ const playlistsResult = await args.session.run(`
 const playlists = playlistsResult.records.map(record => {
   // Handle optional PlaylistSetting (might be null if user hasn't customized)
   const playlistSettingNode = record.get('ps');
-  const playlistSetting = playlistSettingNode ? args.convertNodeToJson(playlistSettingNode) : null;
+  const playlistSetting = playlistSettingNode ? _.convertNodeToJson(playlistSettingNode) : null;
 
   return {
-    playlist: args.convertNodeToJson(record.get('p')),
+    playlist: _.convertNodeToJson(record.get('p')),
     playlistSetting
   };
 });

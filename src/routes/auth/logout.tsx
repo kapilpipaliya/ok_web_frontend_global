@@ -40,7 +40,7 @@ export default function Logout() {
       as="div"
       css={`return \`._id {
         min-height: 100vh;
-        background-color: \${args.theme.var.color.background};
+        background-color: \${t.var.color.background};
         padding: 24px;
         display: flex;
         align-items: center;
@@ -50,10 +50,10 @@ export default function Logout() {
       <As
         as="div"
         css={`return \`._id {
-          background-color: \${args.theme.var.color.background_light_100};
+          background-color: \${t.var.color.background_light_100};
           padding: 32px;
           border-radius: 8px;
-          box-shadow: 1px 2px 3px \${args.theme.var.color.primary};
+          box-shadow: 1px 2px 3px \${t.var.color.primary};
           text-align: center;
         }\`;`}
       >
@@ -61,7 +61,7 @@ export default function Logout() {
           as="h2"
           css={`return \`._id {
             margin-bottom: 16px;
-            color: \${args.theme.var.color.text};
+            color: \${t.var.color.text};
           }\`;`}
         >
           Logging out...

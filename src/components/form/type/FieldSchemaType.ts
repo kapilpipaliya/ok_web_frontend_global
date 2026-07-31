@@ -26,7 +26,7 @@ export interface FunctionArgumentBaseType {
   ensureData: () => null | string;
   error: (key?: string) => string | undefined;
   evalExpression: (expression: string, options: object) => unknown;
-  fns: Record<string, ((...args: unknown[]) => unknown) | undefined>;
+  fns: Record<string, ((...params: unknown[]) => unknown) | undefined>;
   graph: GraphInterface;
   hasFullPermission: boolean | null | undefined;
   hasEditPermission: boolean | null | undefined;
@@ -70,7 +70,7 @@ export interface FunctionArgumentBaseType {
   setGraph: SetStoreFunction<GraphInterface>;
   setGraphData: (
     txnId: number,
-    args: GraphData,
+    graphData: GraphData,
     options: UpdateOptions,
   ) => void;
   setSearchParams?: (
@@ -114,9 +114,9 @@ export interface FunctionArgumentBaseType {
     data: object | FormData,
     action?: "DELETE" | "POST" | "PUT",
   ) => Promise<Record<string, unknown>>;
-  /** Zod namespace (`import { z } from "zod"`); exposed on dynamic component / page `args`. */
+  /** Zod namespace (`import { z } from "zod"`); exposed on dynamic component / page `_`. */
   z: typeof import("zod").z;
-  /** date-fns namespace (`import * as dateFns from "date-fns"`); exposed on dynamic component / page `args`. */
+  /** date-fns namespace (`import * as dateFns from "date-fns"`); exposed on dynamic component / page `_`. */
   dateFns: typeof import("date-fns");
   /** Build a virtua/render-prop row renderer from the loop + Slot graph template. */
   createLoopRowRenderer: (

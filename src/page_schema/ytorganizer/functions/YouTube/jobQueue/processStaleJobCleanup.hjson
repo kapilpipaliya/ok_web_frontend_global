@@ -24,11 +24,11 @@
  */
 
 // This is a background worker function that cleans up stale jobs
-if (args.contextData.action === 'start') {
+if (c.action === 'start') {
   // Helper function to log messages to database
   const logMessage = async (level, message, metadata = {}) => {
     try {
-      await args.executeNamedServerFunction({
+      await s({
         functionName: 'logWorkerMessage',
         contextData: {
           workerName: 'processStaleJobCleanup',
@@ -36,7 +36,7 @@ if (args.contextData.action === 'start') {
           message,
           metadata
         }
-      }, { functionLookupSubDomain: args.subDomain });
+      }, { functionLookupSubDomain: _.subDomain });
     } catch (error) {
       // Silent failure - don't break worker if logging fails
     }
@@ -53,7 +53,7 @@ if (args.contextData.action === 'start') {
   let cleanupInterval = null;
 
   const runCleanup = async () => {
-    const session = await args.getSession();
+    const session = await _.getSession();
 
     try {
       await logMessage('info', 'Running cleanup check');

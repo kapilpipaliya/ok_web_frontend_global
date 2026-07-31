@@ -15,7 +15,7 @@
  * - state: string - Job state (waiting, delayed, failed, completed)
  */
 
-const { queueName, state } = args.contextData;
+const { queueName, state } = c;
 
 // Validate parameters
 if (!queueName || !state) {
@@ -26,8 +26,8 @@ if (!queueName || !state) {
 }
 
 // Get the queue
-const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} }, { functionLookupSubDomain: args.subDomain });
-const { Queue } = args.bullmq;
+const helpers = await s({ functionName: 'queueHelpers', contextData: {} }, { functionLookupSubDomain: _.subDomain });
+const { Queue } = _.bullmq;
 const connection = helpers.result.data.getRedisConnection();
 
 const queue = new Queue(queueName, { connection });

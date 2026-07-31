@@ -22,7 +22,7 @@
 console.log('[Manual Token Refresh] Starting manual refresh of YouTube OAuth tokens');
 
 // Get all users with YouTube OAuth tokens
-const usersResult = await args.session.run(`
+const usersResult = await _.session.run(`
   MATCH (u:User)-[r:UserYouTubeToken]->(token:YouTubeToken)
   WHERE token.accessToken IS NOT NULL
     AND token.isRevoked = false
@@ -83,7 +83,7 @@ for (const record of usersResult.records) {
   console.log(`[Manual Token Refresh] Refreshing token for user ${userEmail}`);
 
   // Call the refresh token function
-  const refreshResult = await args.executeNamedServerFunction({
+  const refreshResult = await s({
     functionName: 'refreshYouTubeToken',
     contextData: {
       userUuid: userUuid

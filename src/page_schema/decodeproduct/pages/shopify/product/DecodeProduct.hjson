@@ -25,7 +25,7 @@
           '''return {
   tableVertexLabel: "ShopifyProduct",
   loadFromSetting: true,
-  hide: !args.fns.isInIframe()
+  hide: !f.isInIframe()
 };
 '''
       }
@@ -38,7 +38,7 @@
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   padding: 1rem;
 }`;'''
         as: div
@@ -47,7 +47,7 @@
         key: unique_1
         props:
           '''return {
-  show: args.fns.isInIframe() === false
+  show: f.isInIframe() === false
 }'''
       }
     }

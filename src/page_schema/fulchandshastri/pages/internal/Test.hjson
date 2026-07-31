@@ -22,7 +22,7 @@
         css:
           '''return `._id {
         padding: 10px;
-        color: ${args.theme.var.color.text};
+        color: ${t.var.color.text};
       }`;'''
         displayOrder: 4
         componentName: Html
@@ -101,9 +101,9 @@
         componentName: Html
         key: unique_5
         props:
-          '''const params = args.context?.getParams?.(args.meta) || {};
+          '''const params = _.context?.getParams?.(_.meta) || {};
 return {
-  text: "Matched URL IS: " + (params.url ?? args.context?.url ?? "")
+  text: "Matched URL IS: " + (params.url ?? _.context?.url ?? "")
 }'''
       }
     }

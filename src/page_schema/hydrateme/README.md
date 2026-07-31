@@ -20,7 +20,7 @@
 
 All app routes use **`HydrateMeLayout`** (`components/layout/HydrateMeLayout.hjson`): `ConfirmProvider`, sticky nav, `Slot` with `slot: "1children"` for page body.
 
-Pages expose **`executeYTOFunction`** on the `Page` vertex `fns`, implemented as `args.executeNamedServerFunction({ functionName, contextData })`, so **DynamicPage** can call `getUserContent` / `mutateUserContent` etc. under `hydrateme/functions/dynamic_page/main_functions/`.
+Pages expose **`executeYTOFunction`** on the `Page` vertex `fns`, implemented as `_.executeNamedServerFunction({ functionName, contextData })`, so **DynamicPage** can call `getUserContent` / `mutateUserContent` etc. under `hydrateme/functions/dynamic_page/main_functions/`.
 
 ## Theme
 
@@ -71,5 +71,5 @@ Under `functions/dynamic_page/main_functions/hydrate/`:
 ## Related repo docs
 
 - Page/Attr/function authoring rules: `src/routes/api/chat/SYSTEM_PROMPT.md`
-- Server `args` surface: `src/cypher/get/executeNamedServerFunctionCore.ts`
+- Server `_` surface: `src/cypher/get/executeNamedServerFunctionCore.ts`
 - App-wide schema notes: `CLAUDE.md`

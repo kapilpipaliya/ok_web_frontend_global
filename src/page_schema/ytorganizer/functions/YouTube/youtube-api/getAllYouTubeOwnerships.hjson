@@ -8,16 +8,16 @@
         body:
           '''
 // Get current authenticated user from session
-const actualUser = await args.getUserFromSession(args.request);
+const actualUser = await _.getUserFromSession(_.request);
 if (!actualUser) {
   throw new Error('User not authenticated');
 }
 
 // Get effective user (handles admin impersonation)
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const user = await _.getEffectiveUser(_.session, actualUser, c);
 
 // Get all ownerships for the user (including revoked)
-const result = await args.session.run(`
+const result = await _.session.run(`
   MATCH (u:User {uuid: $userId})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
   OPTIONAL MATCH (o)-[:YouTubeOwnershipToken]->(token:YouTubeToken)
   WITH o, token
@@ -32,8 +32,8 @@ const ownerships = result.records.map((record) => {
   const ownershipNode = record.get('o');
   const tokenNode = record.get('token');
 
-  const ownership = args.convertNodeToJson(ownershipNode);
-  const token = tokenNode ? args.convertNodeToJson(tokenNode) : null;
+  const ownership = _.convertNodeToJson(ownershipNode);
+  const token = tokenNode ? _.convertNodeToJson(tokenNode) : null;
 
   // Remove sensitive token fields before sending to client
   if (token && token.P) {

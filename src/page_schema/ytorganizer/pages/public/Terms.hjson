@@ -77,7 +77,7 @@ return {
           '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin-bottom: 2rem;
   font-style: italic;
 }`;
@@ -107,7 +107,7 @@ return {
           '''
 return `._id {
   line-height: 1.7;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 2.5rem;
   font-size: 1.05rem;
 }`;
@@ -152,10 +152,10 @@ return {
 return `._id {
   font-size: 1.75rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 1.5rem 0;
   padding-bottom: 0.5rem;
-  border-bottom: 2px solid ${args.theme.var.color.primary};
+  border-bottom: 2px solid ${t.var.color.primary};
 }`;
 '''
         displayOrder: 1
@@ -180,15 +180,15 @@ return {
 return {
   as: "div",
   innerHTML: `
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">By creating an account, accessing, or using YSaar, you acknowledge that you have read, understood, and agree to be bound by:</p>
-    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;">By creating an account, accessing, or using YSaar, you acknowledge that you have read, understood, and agree to be bound by:</p>
+    <ul style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
       <li style="margin-bottom: 0.5rem;">These Terms of Service</li>
-      <li style="margin-bottom: 0.5rem;">Our <a href="/privacy" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">Privacy Policy</a></li>
-      <li style="margin-bottom: 0.5rem;"><a href="https://www.youtube.com/t/terms" target="_blank" rel="noopener noreferrer" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">YouTube Terms of Service</a></li>
-      <li style="margin-bottom: 0.5rem;"><a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">Google Privacy Policy</a></li>
-      <li style="margin-bottom: 0.5rem;"><a href="https://developers.google.com/youtube/terms/developer-policies" target="_blank" rel="noopener noreferrer" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">YouTube API Services Developer Policies</a></li>
+      <li style="margin-bottom: 0.5rem;">Our <a href="/privacy" style="color: ${t.var.color.primary}; text-decoration: underline;">Privacy Policy</a></li>
+      <li style="margin-bottom: 0.5rem;"><a href="https://www.youtube.com/t/terms" target="_blank" rel="noopener noreferrer" style="color: ${t.var.color.primary}; text-decoration: underline;">YouTube Terms of Service</a></li>
+      <li style="margin-bottom: 0.5rem;"><a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" style="color: ${t.var.color.primary}; text-decoration: underline;">Google Privacy Policy</a></li>
+      <li style="margin-bottom: 0.5rem;"><a href="https://developers.google.com/youtube/terms/developer-policies" target="_blank" rel="noopener noreferrer" style="color: ${t.var.color.primary}; text-decoration: underline;">YouTube API Services Developer Policies</a></li>
     </ul>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">If you do not agree to all of these terms, you must immediately stop using YSaar.</p>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;">If you do not agree to all of these terms, you must immediately stop using YSaar.</p>
   `
 };
 '''
@@ -223,10 +223,10 @@ return {
 return `._id {
   font-size: 1.75rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 1.5rem 0;
   padding-bottom: 0.5rem;
-  border-bottom: 2px solid ${args.theme.var.color.primary};
+  border-bottom: 2px solid ${t.var.color.primary};
 }`;
 '''
         displayOrder: 1
@@ -251,14 +251,14 @@ return {
 return {
   as: "div",
   innerHTML: `
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">YSaar (KAPIL MULJIBHAI PIPALIYA) provides a platform to help you organize and manage your YouTube content including:</p>
-    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;">YSaar (KAPIL MULJIBHAI PIPALIYA) provides a platform to help you organize and manage your YouTube content including:</p>
+    <ul style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
       <li style="margin-bottom: 0.5rem;"><strong>Channel Management:</strong> Track and organize YouTube channels you follow</li>
       <li style="margin-bottom: 0.5rem;"><strong>Playlist Organization:</strong> Manage and categorize YouTube playlists</li>
       <li style="margin-bottom: 0.5rem;"><strong>Video Tracking:</strong> Keep notes and track watch progress on videos</li>
       <li style="margin-bottom: 0.5rem;"><strong>Custom Tags & Notes:</strong> Add personal organization and annotations</li>
     </ul>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem; padding: 1rem; background: ${args.theme.var.color.info_light_100}; border-radius: 0.375rem; border-left: 3px solid ${args.theme.var.color.info};"><strong>Important:</strong> YSaar (KAPIL MULJIBHAI PIPALIYA) uses <strong>YouTube API Services</strong> to access publicly available YouTube data on your behalf through your personal Google OAuth authorization. We do not download, store, or redistribute YouTube video files.</p>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem; padding: 1rem; background: ${t.var.color.info_light_100}; border-radius: 0.375rem; border-left: 3px solid ${t.var.color.info};"><strong>Important:</strong> YSaar (KAPIL MULJIBHAI PIPALIYA) uses <strong>YouTube API Services</strong> to access publicly available YouTube data on your behalf through your personal Google OAuth authorization. We do not download, store, or redistribute YouTube video files.</p>
   `
 };
 '''
@@ -293,10 +293,10 @@ return {
 return `._id {
   font-size: 1.75rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 1.5rem 0;
   padding-bottom: 0.5rem;
-  border-bottom: 2px solid ${args.theme.var.color.primary};
+  border-bottom: 2px solid ${t.var.color.primary};
 }`;
 '''
         displayOrder: 1
@@ -321,20 +321,20 @@ return {
 return {
   as: "div",
   innerHTML: `
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">Our service uses <strong>YouTube API Services</strong>. By using YSaar, you are also agreeing to be bound by the <a href="https://www.youtube.com/t/terms" target="_blank" rel="noopener noreferrer" style="color: ${args.theme.var.color.primary}; text-decoration: underline; font-weight: 600;">YouTube Terms of Service</a>.</p>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;">Our service uses <strong>YouTube API Services</strong>. By using YSaar, you are also agreeing to be bound by the <a href="https://www.youtube.com/t/terms" target="_blank" rel="noopener noreferrer" style="color: ${t.var.color.primary}; text-decoration: underline; font-weight: 600;">YouTube Terms of Service</a>.</p>
 
-    <h3 style="font-size: 1.25rem; font-weight: 600; margin: 1.5rem 0 0.75rem 0; color: ${args.theme.var.color.text};">3.1 OAuth Authorization</h3>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">To use our service, you must authorize YSaar to access your YouTube data through Google OAuth 2.0. This authorization:</p>
-    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
+    <h3 style="font-size: 1.25rem; font-weight: 600; margin: 1.5rem 0 0.75rem 0; color: ${t.var.color.text};">3.1 OAuth Authorization</h3>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;">To use our service, you must authorize YSaar to access your YouTube data through Google OAuth 2.0. This authorization:</p>
+    <ul style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
       <li style="margin-bottom: 0.5rem;">Grants read-only access to publicly available YouTube data</li>
       <li style="margin-bottom: 0.5rem;">Uses your personal YouTube API quota</li>
-      <li style="margin-bottom: 0.5rem;">Can be revoked at any time through <a href="https://security.google.com/settings/security/permissions" target="_blank" rel="noopener noreferrer" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">Google security settings</a></li>
+      <li style="margin-bottom: 0.5rem;">Can be revoked at any time through <a href="https://security.google.com/settings/security/permissions" target="_blank" rel="noopener noreferrer" style="color: ${t.var.color.primary}; text-decoration: underline;">Google security settings</a></li>
       <li style="margin-bottom: 0.5rem;">Stores encrypted OAuth tokens securely in our database</li>
     </ul>
 
-    <h3 style="font-size: 1.25rem; font-weight: 600; margin: 1.5rem 0 0.75rem 0; color: ${args.theme.var.color.text};">3.2 API Usage Limits</h3>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">You acknowledge that:</p>
-    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
+    <h3 style="font-size: 1.25rem; font-weight: 600; margin: 1.5rem 0 0.75rem 0; color: ${t.var.color.text};">3.2 API Usage Limits</h3>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;">You acknowledge that:</p>
+    <ul style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
       <li style="margin-bottom: 0.5rem;">YouTube API usage is subject to quota limits imposed by Google</li>
       <li style="margin-bottom: 0.5rem;">Each user has their own personal API quota</li>
       <li style="margin-bottom: 0.5rem;">Service functionality may be limited if quota is exceeded</li>
@@ -374,10 +374,10 @@ return {
 return `._id {
   font-size: 1.75rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 1.5rem 0;
   padding-bottom: 0.5rem;
-  border-bottom: 2px solid ${args.theme.var.color.primary};
+  border-bottom: 2px solid ${t.var.color.primary};
 }`;
 '''
         displayOrder: 1
@@ -402,27 +402,27 @@ return {
 return {
   as: "div",
   innerHTML: `
-    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: ${args.theme.var.color.text};">4.1 Account Creation</h3>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">To use YSaar (KAPIL MULJIBHAI PIPALIYA), you must:</p>
-    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
+    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: ${t.var.color.text};">4.1 Account Creation</h3>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;">To use YSaar (KAPIL MULJIBHAI PIPALIYA), you must:</p>
+    <ul style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
       <li style="margin-bottom: 0.5rem;">Be at least 13 years old (or the minimum age in your country)</li>
       <li style="margin-bottom: 0.5rem;">Provide accurate and complete registration information</li>
       <li style="margin-bottom: 0.5rem;">Maintain the security of your account credentials</li>
       <li style="margin-bottom: 0.5rem;">Be responsible for all activities that occur under your account</li>
     </ul>
 
-    <h3 style="font-size: 1.25rem; font-weight: 600; margin: 1.5rem 0 0.75rem 0; color: ${args.theme.var.color.text};">4.2 Account Security</h3>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">You are responsible for:</p>
-    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
+    <h3 style="font-size: 1.25rem; font-weight: 600; margin: 1.5rem 0 0.75rem 0; color: ${t.var.color.text};">4.2 Account Security</h3>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;">You are responsible for:</p>
+    <ul style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
       <li style="margin-bottom: 0.5rem;">Keeping your password confidential</li>
       <li style="margin-bottom: 0.5rem;">Notifying us immediately of any unauthorized use</li>
       <li style="margin-bottom: 0.5rem;">Using strong, unique passwords</li>
       <li style="margin-bottom: 0.5rem;">Not sharing your account with others</li>
     </ul>
 
-    <h3 style="font-size: 1.25rem; font-weight: 600; margin: 1.5rem 0 0.75rem 0; color: ${args.theme.var.color.text};">4.3 Your Content</h3>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">When you add custom notes, tags, or other content to YSaar (KAPIL MULJIBHAI PIPALIYA):</p>
-    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; padding-left: 1.5rem;">
+    <h3 style="font-size: 1.25rem; font-weight: 600; margin: 1.5rem 0 0.75rem 0; color: ${t.var.color.text};">4.3 Your Content</h3>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;">When you add custom notes, tags, or other content to YSaar (KAPIL MULJIBHAI PIPALIYA):</p>
+    <ul style="line-height: 1.7; color: ${t.var.color.text}; padding-left: 1.5rem;">
       <li style="margin-bottom: 0.5rem;">You retain all ownership rights to your content</li>
       <li style="margin-bottom: 0.5rem;">You grant us a license to store and display your content as part of the service</li>
       <li style="margin-bottom: 0.5rem;">You are responsible for ensuring your content doesn't violate any laws or third-party rights</li>
@@ -462,10 +462,10 @@ return {
 return `._id {
   font-size: 1.75rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 1.5rem 0;
   padding-bottom: 0.5rem;
-  border-bottom: 2px solid ${args.theme.var.color.primary};
+  border-bottom: 2px solid ${t.var.color.primary};
 }`;
 '''
         displayOrder: 1
@@ -490,8 +490,8 @@ return {
 return {
   as: "div",
   innerHTML: `
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">You agree NOT to:</p>
-    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;">You agree NOT to:</p>
+    <ul style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
       <li style="margin-bottom: 0.5rem;">Violate any laws or regulations</li>
       <li style="margin-bottom: 0.5rem;">Abuse, harass, or harm other users</li>
       <li style="margin-bottom: 0.5rem;">Attempt to access unauthorized areas of the service</li>
@@ -503,7 +503,7 @@ return {
       <li style="margin-bottom: 0.5rem;">Violate YouTube Terms of Service or Developer Policies</li>
       <li style="margin-bottom: 0.5rem;">Use the service for any illegal or unauthorized purpose</li>
     </ul>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.error_light_100_text}; margin-bottom: 1rem; padding: 1rem; background: ${args.theme.var.color.error_light_100}; border-radius: 0.375rem; border-left: 3px solid ${args.theme.var.color.error};"><strong>Warning:</strong> Violation of these terms may result in immediate account suspension or termination without refund.</p>
+    <p style="line-height: 1.7; color: ${t.var.color.error_light_100_text}; margin-bottom: 1rem; padding: 1rem; background: ${t.var.color.error_light_100}; border-radius: 0.375rem; border-left: 3px solid ${t.var.color.error};"><strong>Warning:</strong> Violation of these terms may result in immediate account suspension or termination without refund.</p>
   `
 };
 '''
@@ -538,10 +538,10 @@ return {
 return `._id {
   font-size: 1.75rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 1.5rem 0;
   padding-bottom: 0.5rem;
-  border-bottom: 2px solid ${args.theme.var.color.primary};
+  border-bottom: 2px solid ${t.var.color.primary};
 }`;
 '''
         displayOrder: 1
@@ -566,24 +566,24 @@ return {
 return {
   as: "div",
   innerHTML: `
-    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: ${args.theme.var.color.text};">6.1 Our Intellectual Property</h3>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">YSaar (KAPIL MULJIBHAI PIPALIYA), including its design, code, features, and content, is owned by us and protected by copyright, trademark, and other intellectual property laws. You may not:</p>
-    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
+    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: ${t.var.color.text};">6.1 Our Intellectual Property</h3>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;">YSaar (KAPIL MULJIBHAI PIPALIYA), including its design, code, features, and content, is owned by us and protected by copyright, trademark, and other intellectual property laws. You may not:</p>
+    <ul style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
       <li style="margin-bottom: 0.5rem;">Copy, modify, or create derivative works</li>
       <li style="margin-bottom: 0.5rem;">Sell, license, or distribute the service</li>
       <li style="margin-bottom: 0.5rem;">Remove copyright or proprietary notices</li>
     </ul>
 
-    <h3 style="font-size: 1.25rem; font-weight: 600; margin: 1.5rem 0 0.75rem 0; color: ${args.theme.var.color.text};">6.2 YouTube Content</h3>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">All YouTube content accessed through our service remains the property of YouTube and the respective content creators. You must:</p>
-    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
+    <h3 style="font-size: 1.25rem; font-weight: 600; margin: 1.5rem 0 0.75rem 0; color: ${t.var.color.text};">6.2 YouTube Content</h3>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;">All YouTube content accessed through our service remains the property of YouTube and the respective content creators. You must:</p>
+    <ul style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
       <li style="margin-bottom: 0.5rem;">Respect YouTube content creators' intellectual property rights</li>
       <li style="margin-bottom: 0.5rem;">Comply with YouTube's Terms of Service when accessing content</li>
       <li style="margin-bottom: 0.5rem;">Not download, redistribute, or commercialize YouTube videos</li>
     </ul>
 
-    <h3 style="font-size: 1.25rem; font-weight: 600; margin: 1.5rem 0 0.75rem 0; color: ${args.theme.var.color.text};">6.3 Trademarks</h3>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">YouTube, Google, and their logos are trademarks of Google LLC. We use these marks in compliance with <a href="https://developers.google.com/youtube/terms/branding-guidelines" target="_blank" rel="noopener noreferrer" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">YouTube Branding Guidelines</a>.</p>
+    <h3 style="font-size: 1.25rem; font-weight: 600; margin: 1.5rem 0 0.75rem 0; color: ${t.var.color.text};">6.3 Trademarks</h3>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;">YouTube, Google, and their logos are trademarks of Google LLC. We use these marks in compliance with <a href="https://developers.google.com/youtube/terms/branding-guidelines" target="_blank" rel="noopener noreferrer" style="color: ${t.var.color.primary}; text-decoration: underline;">YouTube Branding Guidelines</a>.</p>
   `
 };
 '''
@@ -618,10 +618,10 @@ return {
 return `._id {
   font-size: 1.75rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 1.5rem 0;
   padding-bottom: 0.5rem;
-  border-bottom: 2px solid ${args.theme.var.color.primary};
+  border-bottom: 2px solid ${t.var.color.primary};
 }`;
 '''
         displayOrder: 1
@@ -646,20 +646,20 @@ return {
 return {
   as: "div",
   innerHTML: `
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem; font-weight: 600; text-transform: uppercase;">The service is provided "as is" without warranties of any kind.</p>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem; font-weight: 600; text-transform: uppercase;">The service is provided "as is" without warranties of any kind.</p>
 
-    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: ${args.theme.var.color.text};">7.1 No Warranties</h3>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">We do not guarantee that:</p>
-    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
+    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: ${t.var.color.text};">7.1 No Warranties</h3>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;">We do not guarantee that:</p>
+    <ul style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
       <li style="margin-bottom: 0.5rem;">The service will be uninterrupted, secure, or error-free</li>
       <li style="margin-bottom: 0.5rem;">YouTube data will always be accurate or up-to-date</li>
       <li style="margin-bottom: 0.5rem;">All features will work as expected at all times</li>
       <li style="margin-bottom: 0.5rem;">The service will meet your specific requirements</li>
     </ul>
 
-    <h3 style="font-size: 1.25rem; font-weight: 600; margin: 1.5rem 0 0.75rem 0; color: ${args.theme.var.color.text};">7.2 Limitation of Liability</h3>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">To the maximum extent permitted by law, we are not liable for:</p>
-    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
+    <h3 style="font-size: 1.25rem; font-weight: 600; margin: 1.5rem 0 0.75rem 0; color: ${t.var.color.text};">7.2 Limitation of Liability</h3>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;">To the maximum extent permitted by law, we are not liable for:</p>
+    <ul style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
       <li style="margin-bottom: 0.5rem;">Any indirect, incidental, special, or consequential damages</li>
       <li style="margin-bottom: 0.5rem;">Loss of profits, data, or business opportunities</li>
       <li style="margin-bottom: 0.5rem;">Service interruptions or data loss</li>
@@ -667,9 +667,9 @@ return {
       <li style="margin-bottom: 0.5rem;">Unauthorized access to your account or data</li>
     </ul>
 
-    <h3 style="font-size: 1.25rem; font-weight: 600; margin: 1.5rem 0 0.75rem 0; color: ${args.theme.var.color.text};">7.3 Third-Party Services</h3>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">YSaar (KAPIL MULJIBHAI PIPALIYA) relies on YouTube API Services. We are not responsible for:</p>
-    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; padding-left: 1.5rem;">
+    <h3 style="font-size: 1.25rem; font-weight: 600; margin: 1.5rem 0 0.75rem 0; color: ${t.var.color.text};">7.3 Third-Party Services</h3>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;">YSaar (KAPIL MULJIBHAI PIPALIYA) relies on YouTube API Services. We are not responsible for:</p>
+    <ul style="line-height: 1.7; color: ${t.var.color.text}; padding-left: 1.5rem;">
       <li style="margin-bottom: 0.5rem;">YouTube/Google API changes, outages, or discontinuation</li>
       <li style="margin-bottom: 0.5rem;">YouTube API quota limitations</li>
       <li style="margin-bottom: 0.5rem;">Changes to YouTube Terms of Service or policies</li>
@@ -708,10 +708,10 @@ return {
 return `._id {
   font-size: 1.75rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 1.5rem 0;
   padding-bottom: 0.5rem;
-  border-bottom: 2px solid ${args.theme.var.color.primary};
+  border-bottom: 2px solid ${t.var.color.primary};
 }`;
 '''
         displayOrder: 1
@@ -736,29 +736,29 @@ return {
 return {
   as: "div",
   innerHTML: `
-    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: ${args.theme.var.color.text};">8.1 Payment Processing</h3>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">When you subscribe to our paid services:</p>
-    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
+    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: ${t.var.color.text};">8.1 Payment Processing</h3>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;">When you subscribe to our paid services:</p>
+    <ul style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
       <li style="margin-bottom: 0.5rem;">Payments are processed securely through our third-party payment processor</li>
       <li style="margin-bottom: 0.5rem;">You authorize us to charge your chosen payment method</li>
       <li style="margin-bottom: 0.5rem;">All fees are quoted in the currency displayed at checkout</li>
       <li style="margin-bottom: 0.5rem;">You are responsible for all applicable taxes</li>
     </ul>
 
-    <h3 style="font-size: 1.25rem; font-weight: 600; margin: 1.5rem 0 0.75rem 0; color: ${args.theme.var.color.text};">8.2 No Cancellation or Refund Policy</h3>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.error_light_100_text}; margin-bottom: 1rem; padding: 1rem; background: ${args.theme.var.color.error_light_100}; border-radius: 0.375rem; border-left: 3px solid ${args.theme.var.color.error};"><strong>Important:</strong> All payments are final. Once a payment is processed, we do not provide cancellations or refunds under any circumstances.</p>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">This policy applies to:</p>
-    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
+    <h3 style="font-size: 1.25rem; font-weight: 600; margin: 1.5rem 0 0.75rem 0; color: ${t.var.color.text};">8.2 No Cancellation or Refund Policy</h3>
+    <p style="line-height: 1.7; color: ${t.var.color.error_light_100_text}; margin-bottom: 1rem; padding: 1rem; background: ${t.var.color.error_light_100}; border-radius: 0.375rem; border-left: 3px solid ${t.var.color.error};"><strong>Important:</strong> All payments are final. Once a payment is processed, we do not provide cancellations or refunds under any circumstances.</p>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;">This policy applies to:</p>
+    <ul style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
       <li style="margin-bottom: 0.5rem;">Subscription fees</li>
       <li style="margin-bottom: 0.5rem;">One-time purchases</li>
       <li style="margin-bottom: 0.5rem;">Upgrades or additional features</li>
       <li style="margin-bottom: 0.5rem;">Any other payments made to YSaar</li>
     </ul>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">Please ensure you understand the service features before making a payment. We encourage you to use any free trial periods or free tiers to evaluate the service before subscribing.</p>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;">Please ensure you understand the service features before making a payment. We encourage you to use any free trial periods or free tiers to evaluate the service before subscribing.</p>
 
-    <h3 style="font-size: 1.25rem; font-weight: 600; margin: 1.5rem 0 0.75rem 0; color: ${args.theme.var.color.text};">8.3 Subscription Management</h3>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">For recurring subscriptions:</p>
-    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; padding-left: 1.5rem;">
+    <h3 style="font-size: 1.25rem; font-weight: 600; margin: 1.5rem 0 0.75rem 0; color: ${t.var.color.text};">8.3 Subscription Management</h3>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;">For recurring subscriptions:</p>
+    <ul style="line-height: 1.7; color: ${t.var.color.text}; padding-left: 1.5rem;">
       <li style="margin-bottom: 0.5rem;">You may cancel your subscription at any time to prevent future charges</li>
       <li style="margin-bottom: 0.5rem;">Cancellation stops future billing but does not provide a refund for the current period</li>
       <li style="margin-bottom: 0.5rem;">You will retain access to paid features until the end of your current billing period</li>
@@ -798,10 +798,10 @@ return {
 return `._id {
   font-size: 1.75rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 1.5rem 0;
   padding-bottom: 0.5rem;
-  border-bottom: 2px solid ${args.theme.var.color.primary};
+  border-bottom: 2px solid ${t.var.color.primary};
 }`;
 '''
         displayOrder: 1
@@ -826,9 +826,9 @@ return {
 return {
   as: "div",
   innerHTML: `
-    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: ${args.theme.var.color.text};">9.1 By You</h3>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">You may delete your account at any time through your account settings. Upon deletion:</p>
-    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
+    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: ${t.var.color.text};">9.1 By You</h3>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;">You may delete your account at any time through your account settings. Upon deletion:</p>
+    <ul style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
       <li style="margin-bottom: 0.5rem;">Your account will be immediately deactivated</li>
       <li style="margin-bottom: 0.5rem;">Your data will be deleted within 30 days</li>
       <li style="margin-bottom: 0.5rem;">YouTube OAuth tokens will be revoked</li>
@@ -836,9 +836,9 @@ return {
       <li style="margin-bottom: 0.5rem;">No refunds will be provided for any remaining subscription period</li>
     </ul>
 
-    <h3 style="font-size: 1.25rem; font-weight: 600; margin: 1.5rem 0 0.75rem 0; color: ${args.theme.var.color.text};">9.2 By Us</h3>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">We may suspend or terminate your account if:</p>
-    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
+    <h3 style="font-size: 1.25rem; font-weight: 600; margin: 1.5rem 0 0.75rem 0; color: ${t.var.color.text};">9.2 By Us</h3>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;">We may suspend or terminate your account if:</p>
+    <ul style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
       <li style="margin-bottom: 0.5rem;">You violate these Terms of Service</li>
       <li style="margin-bottom: 0.5rem;">You violate YouTube Terms of Service or policies</li>
       <li style="margin-bottom: 0.5rem;">Your account has been inactive for over 2 years</li>
@@ -846,7 +846,7 @@ return {
       <li style="margin-bottom: 0.5rem;">We discontinue the service</li>
     </ul>
 
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">We will provide reasonable notice before termination unless legally prohibited or in cases of severe violations. No refunds will be provided for account terminations due to violations of these Terms.</p>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;">We will provide reasonable notice before termination unless legally prohibited or in cases of severe violations. No refunds will be provided for account terminations due to violations of these Terms.</p>
   `
 };
 '''
@@ -881,10 +881,10 @@ return {
 return `._id {
   font-size: 1.75rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 1.5rem 0;
   padding-bottom: 0.5rem;
-  border-bottom: 2px solid ${args.theme.var.color.primary};
+  border-bottom: 2px solid ${t.var.color.primary};
 }`;
 '''
         displayOrder: 1
@@ -909,14 +909,14 @@ return {
 return {
   as: "div",
   innerHTML: `
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">We may update these Terms from time to time. When we do:</p>
-    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;">We may update these Terms from time to time. When we do:</p>
+    <ul style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
       <li style="margin-bottom: 0.5rem;">We will update the "Last Updated" date at the top of this page</li>
       <li style="margin-bottom: 0.5rem;">We will notify you of significant changes via email or in-app notification</li>
       <li style="margin-bottom: 0.5rem;">Your continued use after changes constitutes acceptance</li>
       <li style="margin-bottom: 0.5rem;">If you don't agree to changes, you must stop using the service</li>
     </ul>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">We encourage you to review these Terms periodically to stay informed of updates.</p>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;">We encourage you to review these Terms periodically to stay informed of updates.</p>
   `
 };
 '''
@@ -951,10 +951,10 @@ return {
 return `._id {
   font-size: 1.75rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 1.5rem 0;
   padding-bottom: 0.5rem;
-  border-bottom: 2px solid ${args.theme.var.color.primary};
+  border-bottom: 2px solid ${t.var.color.primary};
 }`;
 '''
         displayOrder: 1
@@ -979,47 +979,47 @@ return {
 return {
   as: "div",
   innerHTML: `
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">These Terms and Conditions constitute a binding agreement between KAPIL MULJIBHAI PIPALIYA ("Website Owner" or "we" or "us" or "our") and you ("you" or "your") relating to your use of our website, goods, or services.</p>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;">These Terms and Conditions constitute a binding agreement between KAPIL MULJIBHAI PIPALIYA ("Website Owner" or "we" or "us" or "our") and you ("you" or "your") relating to your use of our website, goods, or services.</p>
 
-    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: ${args.theme.var.color.text};">11.1 Registration and Account Responsibility</h3>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">To access and use the Services:</p>
-    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
+    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: ${t.var.color.text};">11.1 Registration and Account Responsibility</h3>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;">To access and use the Services:</p>
+    <ul style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
       <li style="margin-bottom: 0.5rem;">You agree to provide true, accurate and complete information during and after registration</li>
       <li style="margin-bottom: 0.5rem;">You shall be responsible for all acts done through the use of your registered account</li>
       <li style="margin-bottom: 0.5rem;">You are required to independently assess and ensure that the Services meet your requirements</li>
     </ul>
 
-    <h3 style="font-size: 1.25rem; font-weight: 600; margin: 1.5rem 0 0.75rem 0; color: ${args.theme.var.color.text};">11.2 No Warranties</h3>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">Neither we nor any third parties provide any warranty or guarantee as to the accuracy, timeliness, performance, completeness or suitability of the information and materials offered on this website or through the Services. You acknowledge that:</p>
-    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
+    <h3 style="font-size: 1.25rem; font-weight: 600; margin: 1.5rem 0 0.75rem 0; color: ${t.var.color.text};">11.2 No Warranties</h3>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;">Neither we nor any third parties provide any warranty or guarantee as to the accuracy, timeliness, performance, completeness or suitability of the information and materials offered on this website or through the Services. You acknowledge that:</p>
+    <ul style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
       <li style="margin-bottom: 0.5rem;">Such information and materials may contain inaccuracies or errors</li>
       <li style="margin-bottom: 0.5rem;">We expressly exclude liability for any such inaccuracies or errors to the fullest extent permitted by law</li>
       <li style="margin-bottom: 0.5rem;">Your use of our Services and the website is solely at your own risk and discretion</li>
     </ul>
 
-    <h3 style="font-size: 1.25rem; font-weight: 600; margin: 1.5rem 0 0.75rem 0; color: ${args.theme.var.color.text};">11.3 Intellectual Property and Proprietary Rights</h3>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">The contents of the Website and the Services are proprietary to us. You acknowledge that:</p>
-    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
+    <h3 style="font-size: 1.25rem; font-weight: 600; margin: 1.5rem 0 0.75rem 0; color: ${t.var.color.text};">11.3 Intellectual Property and Proprietary Rights</h3>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;">The contents of the Website and the Services are proprietary to us. You acknowledge that:</p>
+    <ul style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
       <li style="margin-bottom: 0.5rem;">You will not have any authority to claim any intellectual property rights, title, or interest in its contents</li>
       <li style="margin-bottom: 0.5rem;">Unauthorized use of the Website or the Services may lead to action against you as per these Terms or applicable laws</li>
     </ul>
 
-    <h3 style="font-size: 1.25rem; font-weight: 600; margin: 1.5rem 0 0.75rem 0; color: ${args.theme.var.color.text};">11.4 Payment and Charges</h3>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">You agree to pay us the charges associated with availing the Services. Upon initiating a transaction, you understand that you are entering into a legally binding and enforceable contract with us for the Services.</p>
+    <h3 style="font-size: 1.25rem; font-weight: 600; margin: 1.5rem 0 0.75rem 0; color: ${t.var.color.text};">11.4 Payment and Charges</h3>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;">You agree to pay us the charges associated with availing the Services. Upon initiating a transaction, you understand that you are entering into a legally binding and enforceable contract with us for the Services.</p>
 
-    <h3 style="font-size: 1.25rem; font-weight: 600; margin: 1.5rem 0 0.75rem 0; color: ${args.theme.var.color.text};">11.5 Lawful Use</h3>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">You agree not to use the website and/or Services for any purpose that is unlawful, illegal or forbidden by these Terms, or Indian or local laws that might apply to you.</p>
+    <h3 style="font-size: 1.25rem; font-weight: 600; margin: 1.5rem 0 0.75rem 0; color: ${t.var.color.text};">11.5 Lawful Use</h3>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;">You agree not to use the website and/or Services for any purpose that is unlawful, illegal or forbidden by these Terms, or Indian or local laws that might apply to you.</p>
 
-    <h3 style="font-size: 1.25rem; font-weight: 600; margin: 1.5rem 0 0.75rem 0; color: ${args.theme.var.color.text};">11.6 Third-Party Links</h3>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">You agree and acknowledge that the website and the Services may contain links to other third party websites. On accessing these links, you will be governed by the terms of use, privacy policy and such other policies of such third party websites.</p>
+    <h3 style="font-size: 1.25rem; font-weight: 600; margin: 1.5rem 0 0.75rem 0; color: ${t.var.color.text};">11.6 Third-Party Links</h3>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;">You agree and acknowledge that the website and the Services may contain links to other third party websites. On accessing these links, you will be governed by the terms of use, privacy policy and such other policies of such third party websites.</p>
 
-    <h3 style="font-size: 1.25rem; font-weight: 600; margin: 1.5rem 0 0.75rem 0; color: ${args.theme.var.color.text};">11.7 Force Majeure</h3>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">Notwithstanding anything contained in these Terms, the parties shall not be liable for any failure to perform an obligation under these Terms if performance is prevented or delayed by a force majeure event.</p>
+    <h3 style="font-size: 1.25rem; font-weight: 600; margin: 1.5rem 0 0.75rem 0; color: ${t.var.color.text};">11.7 Force Majeure</h3>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;">Notwithstanding anything contained in these Terms, the parties shall not be liable for any failure to perform an obligation under these Terms if performance is prevented or delayed by a force majeure event.</p>
 
-    <h3 style="font-size: 1.25rem; font-weight: 600; margin: 1.5rem 0 0.75rem 0; color: ${args.theme.var.color.text};">11.8 Governing Law and Jurisdiction</h3>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">These Terms and any dispute or claim relating to it, or its enforceability, shall be governed by and construed in accordance with the laws of India. All disputes arising out of or in connection with these Terms shall be subject to the exclusive jurisdiction of the courts in Surat, Gujarat.</p>
+    <h3 style="font-size: 1.25rem; font-weight: 600; margin: 1.5rem 0 0.75rem 0; color: ${t.var.color.text};">11.8 Governing Law and Jurisdiction</h3>
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;">These Terms and any dispute or claim relating to it, or its enforceability, shall be governed by and construed in accordance with the laws of India. All disputes arising out of or in connection with these Terms shall be subject to the exclusive jurisdiction of the courts in Surat, Gujarat.</p>
 
-    <p style="line-height: 1.7; color: ${args.theme.var.color.info_light_100_text}; margin-bottom: 1rem; padding: 1rem; background: ${args.theme.var.color.info_light_100}; border-radius: 0.375rem; border-left: 3px solid ${args.theme.var.color.info};"><strong>Note:</strong> All concerns or communications relating to these Terms must be communicated to us using the contact information provided on this website.</p>
+    <p style="line-height: 1.7; color: ${t.var.color.info_light_100_text}; margin-bottom: 1rem; padding: 1rem; background: ${t.var.color.info_light_100}; border-radius: 0.375rem; border-left: 3px solid ${t.var.color.info};"><strong>Note:</strong> All concerns or communications relating to these Terms must be communicated to us using the contact information provided on this website.</p>
   `
 };
 '''
@@ -1054,10 +1054,10 @@ return {
 return `._id {
   font-size: 1.75rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 1.5rem 0;
   padding-bottom: 0.5rem;
-  border-bottom: 2px solid ${args.theme.var.color.primary};
+  border-bottom: 2px solid ${t.var.color.primary};
 }`;
 '''
         displayOrder: 1
@@ -1082,15 +1082,15 @@ return {
 return {
   as: "div",
   innerHTML: `
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">If you have questions about these Terms of Service, please contact us:</p>
-    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; padding-left: 1.5rem;">
+    <p style="line-height: 1.7; color: ${t.var.color.text}; margin-bottom: 1rem;">If you have questions about these Terms of Service, please contact us:</p>
+    <ul style="line-height: 1.7; color: ${t.var.color.text}; padding-left: 1.5rem;">
       <li style="margin-bottom: 0.75rem;">
         <strong style="display: inline-block; width: 100px;">Email:</strong>
-        <a href="mailto:support@ysaar.com" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">legal@ysaar.com</a>
+        <a href="mailto:support@ysaar.com" style="color: ${t.var.color.primary}; text-decoration: underline;">legal@ysaar.com</a>
       </li>
       <li style="margin-bottom: 0.75rem;">
         <strong style="display: inline-block; width: 100px;">Support:</strong>
-        <a href="mailto:support@ysaar.com" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">support@ysaar.com</a>
+        <a href="mailto:support@ysaar.com" style="color: ${t.var.color.primary}; text-decoration: underline;">support@ysaar.com</a>
       </li>
     </ul>
   `

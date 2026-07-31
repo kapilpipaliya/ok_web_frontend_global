@@ -8,7 +8,7 @@
         isNoPermissionCheck: true
         fns:
           '''
-const [selectedVideoIds, setSelectedVideoIds] = args.createSignal(new Set());
+const [selectedVideoIds, setSelectedVideoIds] = _.createSignal(new Set());
 
 const getYouTubeId = (video) => {
   const rawValue = video?.P?.youtubeId || video?.P?.youtubeUrl || "";
@@ -62,7 +62,7 @@ const resolveMeditationBackgroundVideos = (video) => {
   if (Array.isArray(video?.meditationBackgroundVideos)) {
     return video.meditationBackgroundVideos;
   }
-  const byVideoId = args.contextData.dravyaDrishtiPrakashData?.meditationBackgroundsByVideoId;
+  const byVideoId = c.dravyaDrishtiPrakashData?.meditationBackgroundsByVideoId;
   if (video?.id != null && byVideoId && typeof byVideoId === "object") {
     const fromMap = byVideoId[String(video.id)];
     if (Array.isArray(fromMap)) return fromMap;
@@ -108,15 +108,15 @@ const playVideos = async (videos) => {
     .map(prepareVideo)
     .filter(Boolean);
   if (playlist.length === 0) {
-    args.showWarningToast("Select at least one video with a valid YouTube link.");
+    _.showWarningToast("Select at least one video with a valid YouTube link.");
     return;
   }
-  args.fns.setVideoQueue?.(playlist.slice(1));
-  await args.fns.openPlayer?.(playlist[0]);
+  f.setVideoQueue?.(playlist.slice(1));
+  await f.openPlayer?.(playlist[0]);
 };
 
 const playSingleVideo = async (video) => {
-  args.fns.setVideoQueue?.([]);
+  f.setVideoQueue?.([]);
   await playVideos([video]);
 };
 
@@ -155,7 +155,7 @@ return {
   contextName: "dravyaDrishtiPrakashData",
   serverFunction: `
 try {
-  const tableResult = await args.executeNamedServerFunction({
+  const tableResult = await s({
     functionName: "loadPublicTableContent",
     contextData: {
       tableKey: "dravya_drishti_prakash_videos",
@@ -279,7 +279,7 @@ try {
         css:
           '''return `._id {
   margin: 0;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   font-size: 3rem;
   font-weight: 700;
   line-height: 1.2;
@@ -311,7 +311,7 @@ try {
         displayOrder: 2
         componentName: Html
         props:
-          '''const videos = args.contextData.dravyaDrishtiPrakashData?.videos || [];
+          '''const videos = c.dravyaDrishtiPrakashData?.videos || [];
 return {
   as: "div",
   hide: videos.length === 0
@@ -328,7 +328,7 @@ return {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   cursor: pointer;
 }`;'''
         displayOrder: 1
@@ -344,12 +344,12 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const videos = args.contextData.dravyaDrishtiPrakashData?.videos || [];
+          '''const videos = c.dravyaDrishtiPrakashData?.videos || [];
 return {
   as: "input",
   type: "checkbox",
-  checked: args.fns.areAllVideosSelected(videos),
-  onChange: (event) => args.fns.setAllVideosSelected(videos, event.target.checked),
+  checked: f.areAllVideosSelected(videos),
+  onChange: (event) => f.setAllVideosSelected(videos, event.target.checked),
   "attr:aria-label": "Select all videos"
 };'''
       }
@@ -370,10 +370,10 @@ return {
         css:
           '''return `._id {
   padding: 0.625rem 1rem;
-  border: 1px solid ${args.theme.var.color.primary};
+  border: 1px solid ${t.var.color.primary};
   border-radius: 0.5rem;
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
   font-weight: 600;
   cursor: pointer;
 }
@@ -385,8 +385,8 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const videos = args.contextData.dravyaDrishtiPrakashData?.videos || [];
-const selectedCount = videos.filter((video) => args.fns.isVideoSelected(video)).length;
+          '''const videos = c.dravyaDrishtiPrakashData?.videos || [];
+const selectedCount = videos.filter((video) => f.isVideoSelected(video)).length;
 return {
   as: "button",
   type: "button",
@@ -394,7 +394,7 @@ return {
     ? `Add ${selectedCount} to playlist & play`
     : "Add selected to playlist & play",
   disabled: selectedCount === 0,
-  onClick: () => args.fns.playSelectedVideos(videos)
+  onClick: () => f.playSelectedVideos(videos)
 };'''
       }
     }
@@ -415,7 +415,7 @@ return {
         displayOrder: 3
         componentName: PublicContentTable
         props:
-          '''const videos = args.contextData.dravyaDrishtiPrakashData?.videos || [];
+          '''const videos = c.dravyaDrishtiPrakashData?.videos || [];
 return {
   columns: [
     {
@@ -424,7 +424,7 @@ return {
       width: "72px",
       align: "center",
       sortType: "number",
-      sortValue: (video) => args.fns.isVideoSelected(video) ? 1 : 0
+      sortValue: (video) => f.isVideoSelected(video) ? 1 : 0
     },
     {
       key: "number",
@@ -438,7 +438,7 @@ return {
       label: "YouTube",
       width: "150px",
       align: "center",
-      sortValue: (video) => args.fns.getYouTubeId(video)
+      sortValue: (video) => f.getYouTubeId(video)
     },
     {
       key: "date",
@@ -489,15 +489,15 @@ return {
 
 ._id:hover,
 ._id.selected-video-row {
-  background: ${args.theme.var.color.primary_light_900};
+  background: ${t.var.color.primary_light_900};
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const video = args.contextData.video;
+          '''const video = c.video;
 return {
   as: "tr",
-  class: args.fns.isVideoSelected(video) ? "selected-video-row" : ""
+  class: f.isVideoSelected(video) ? "selected-video-row" : ""
 };'''
       }
     }
@@ -519,12 +519,12 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const video = args.contextData.video;
+          '''const video = c.video;
 return {
   as: "input",
   type: "checkbox",
-  checked: args.fns.isVideoSelected(video),
-  onChange: (event) => args.fns.setVideoSelected(video, event.target.checked),
+  checked: f.isVideoSelected(video),
+  onChange: (event) => f.setVideoSelected(video, event.target.checked),
   "attr:aria-label": `Select ${video?.P?.subject || "video"}`
 };'''
       }
@@ -537,7 +537,7 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const videoIndex = args.contextData.videoIndex;
+          '''const videoIndex = c.videoIndex;
 return {
   as: "td",
   text: typeof videoIndex === "number" ? String(videoIndex + 1) : ""
@@ -576,13 +576,13 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const video = args.contextData.video;
-const youtubeId = args.fns.getYouTubeId(video);
+          '''const video = c.video;
+const youtubeId = f.getYouTubeId(video);
 return {
   as: "button",
   type: "button",
   disabled: !youtubeId,
-  onClick: () => args.fns.playSingleVideo(video),
+  onClick: () => f.playSingleVideo(video),
   "attr:aria-label": `Play ${video?.P?.subject || "video"}`
 };'''
       }
@@ -601,8 +601,8 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const video = args.contextData.video;
-const youtubeId = args.fns.getYouTubeId(video);
+          '''const video = c.video;
+const youtubeId = f.getYouTubeId(video);
 return {
   as: "img",
   src: youtubeId ? `https://img.youtube.com/vi/${youtubeId}/mqdefault.jpg` : "",
@@ -620,10 +620,10 @@ return {
         displayOrder: 4
         componentName: Html
         props:
-          '''const video = args.contextData.video;
+          '''const video = c.video;
 return {
   as: "td",
-  text: args.fns.formatDate(video?.P?.date)
+  text: f.formatDate(video?.P?.date)
 };'''
       }
     }
@@ -635,7 +635,7 @@ return {
         displayOrder: 5
         componentName: Html
         props:
-          '''const video = args.contextData.video;
+          '''const video = c.video;
 return {
   as: "td",
   text: video?.P?.time || ""
@@ -655,7 +655,7 @@ return {
         displayOrder: 6
         componentName: Html
         props:
-          '''const video = args.contextData.video;
+          '''const video = c.video;
 return {
   as: "td",
   text: video?.P?.subject || ""
@@ -681,28 +681,28 @@ return {
   padding: 0;
   border: none;
   background: transparent;
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   font: inherit;
   text-decoration: underline;
   cursor: pointer;
 }
 
 ._id:disabled {
-  color: ${args.theme.var.color.text_light_300};
+  color: ${t.var.color.text_light_300};
   cursor: not-allowed;
   text-decoration: none;
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const video = args.contextData.video;
-const youtubeId = args.fns.getYouTubeId(video);
+          '''const video = c.video;
+const youtubeId = f.getYouTubeId(video);
 return {
   as: "button",
   type: "button",
   text: "Watch",
   disabled: !youtubeId,
-  onClick: () => args.fns.playSingleVideo(video),
+  onClick: () => f.playSingleVideo(video),
   "attr:aria-label": `Play ${video?.P?.subject || "video"}`
 };'''
       }
@@ -720,7 +720,7 @@ return {
         displayOrder: 8
         componentName: Html
         props:
-          '''const video = args.contextData.video;
+          '''const video = c.video;
 return {
   as: "td",
   text: video?.P?.bol || ""
@@ -755,10 +755,10 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const video = args.contextData.video;
+          '''const video = c.video;
 const backgrounds = Array.isArray(video?.meditationBackgroundVideos)
   ? video.meditationBackgroundVideos
-  : (args.contextData.dravyaDrishtiPrakashData?.meditationBackgroundsByVideoId?.[String(video?.id || "")] || []);
+  : (c.dravyaDrishtiPrakashData?.meditationBackgroundsByVideoId?.[String(video?.id || "")] || []);
 return {
   as: "div",
   data: backgrounds,
@@ -780,12 +780,12 @@ return {
   aspect-ratio: 16 / 9;
   object-fit: cover;
   border-radius: 0.375rem;
-  background: ${args.theme.var.color.background_dark_900};
+  background: ${t.var.color.background_dark_900};
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const file = args.contextData.meditationBackground;
+          '''const file = c.meditationBackground;
 const src = file?.P?.url
   || (file?.P?.fileName
     ? `/api/file/download/${encodeURIComponent(String(file.P.fileName).trim())}`

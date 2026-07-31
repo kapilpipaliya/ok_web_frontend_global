@@ -52,7 +52,7 @@ Settings Engine (server) → SettingsSectionDocument (Neo4j)
 return {
   enabled: () => true,
   executeYTOFunction: (functionName, contextData) =>
-    args.executeNamedServerFunction({ functionName, contextData: contextData || {} })
+    _.executeNamedServerFunction({ functionName, contextData: contextData || {} })
 };
 '''
       }
@@ -64,7 +64,7 @@ return {
         displayOrder: 1,
         componentName: "DynamicPage",
         props: '''
-const settingsPageId = args.searchParams?.page;
+const settingsPageId = _.searchParams?.page;
 return {
   pageMode: "settings",
   settingsPageId,
@@ -367,7 +367,7 @@ Hide SaveBar
 fetch("/api/settings?page=general&section=regionalDefaults", { method: "POST", body: JSON.stringify(values) });
 
 // CORRECT — via DynamicPage fns
-await args.fns.settingsAdapter.saveSection({
+await _.fns.settingsAdapter.saveSection({
   sectionId: "regionalDefaults",
   sectionConfig,
   values,
@@ -375,7 +375,7 @@ await args.fns.settingsAdapter.saveSection({
 });
 ```
 
-Available on DynamicPage `args.fns`:
+Available on DynamicPage `_.fns`:
 - `settingsAdapter.loadPage()`
 - `settingsAdapter.saveSection(payload)`
 - `settingsAdapter.resetSection(payload)`
@@ -394,10 +394,10 @@ Each section registers via `FormManagement.onFnsReady`. A reactive effect compar
 
 ```javascript
 // Automatic in SettingsSectionCard
-args.createEffect(() => {
+_.createEffect(() => {
   const currentJson = JSON.stringify(formVertex.P);
   const initialJson = JSON.stringify(sectionState.initialValues);
-  if (currentJson !== initialJson) args.fns.markSectionDirty(sectionId);
+  if (currentJson !== initialJson) _.fns.markSectionDirty(sectionId);
 });
 ```
 
@@ -568,7 +568,7 @@ if (dbVersion !== payloadVersion) {
 ## Adding a New Settings Page
 
 1. Add config to `migrateDynamicPageSettings.hjson` → `settingsPageConfigs` array
-2. Use a Page HJSON with `pageMode: "settings"` and `settingsPageId` from `args.searchParams?.page`
+2. Use a Page HJSON with `pageMode: "settings"` and `settingsPageId` from `_.searchParams?.page`
 3. Add sidebar navigation item pointing to `/settings?page=<settingsPageId>`
 4. Run migration
 5. (Optional) Add domain accessor for runtime consumption

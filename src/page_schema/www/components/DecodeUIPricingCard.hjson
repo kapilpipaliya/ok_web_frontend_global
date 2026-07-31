@@ -68,16 +68,16 @@
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const isPopular = args.contextData.props?.isPopular || false;
+const isPopular = c.props?.isPopular || false;
 return {
   as: "div"
 };
 ''',
         css: '''
-const isPopular = args.contextData.props?.isPopular || false;
+const isPopular = c.props?.isPopular || false;
 return `._id {
-  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background_dark_100 : args.theme.var.color.background};
-  border: 2px solid ${isPopular ? args.theme.var.color.primary : args.theme.var.color.background_dark_200};
+  background: ${_.currentMode() === 'dark' ? t.var.color.background_dark_100 : t.var.color.background};
+  border: 2px solid ${isPopular ? t.var.color.primary : t.var.color.background_dark_200};
   border-radius: 1rem;
   padding: 2rem;
   position: relative;
@@ -94,7 +94,7 @@ return `._id {
   &:hover {
     transform: translateY(-4px) ${isPopular ? 'scale(1.05)' : ''};
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
-    border-color: ${args.theme.var.color.primary};
+    border-color: ${t.var.color.primary};
   }
   
   @media (max-width: 768px) {
@@ -112,20 +112,20 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const isPopular = args.contextData.props?.isPopular || false;
+const isPopular = c.props?.isPopular || false;
 return {
   as: isPopular ? "div" : ""
 };
 ''',
         css: '''
-const isPopular = args.contextData.props?.isPopular || false;
+const isPopular = c.props?.isPopular || false;
 return isPopular ? `._id {
   position: absolute;
   top: -1rem;
   left: 50%;
   transform: translateX(-50%);
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
   padding: 0.25rem 1rem;
   border-radius: 2rem;
   font-size: 0.875rem;
@@ -141,7 +141,7 @@ return isPopular ? `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const isPopular = args.contextData.props?.isPopular || false;
+const isPopular = c.props?.isPopular || false;
 return {
   as: isPopular ? "span" : "",
   text: isPopular ? "Most Popular" : ""
@@ -158,14 +158,14 @@ return {
         props: '''
 return {
   as: "h3",
-  text: args.contextData.props?.name || "Starter"
+  text: c.props?.name || "Starter"
 };
 ''',
         css: '''
 return `._id {
   font-size: 1.5rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 0.5rem;
   
   @media (max-width: 768px) {
@@ -202,14 +202,14 @@ return `._id {
         props: '''
 return {
   as: "span",
-  text: args.contextData.props?.price || "$0"
+  text: c.props?.price || "$0"
 };
 ''',
         css: '''
 return `._id {
   font-size: 3rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   
   @media (max-width: 768px) {
     font-size: 2.5rem;
@@ -227,13 +227,13 @@ return `._id {
         props: '''
 return {
   as: "span",
-  text: " / " + (args.contextData.props?.period || "forever")
+  text: " / " + (c.props?.period || "forever")
 };
 ''',
         css: '''
 return `._id {
   font-size: 1rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   opacity: 0.7;
 }`;
 '''
@@ -269,7 +269,7 @@ return `._id {
         contextName: "featureList",
         loop: true,
         props: '''
-const features = args.contextData.props?.features || "Feature 1,Feature 2,Feature 3";
+const features = c.props?.features || "Feature 1,Feature 2,Feature 3";
 return {
   data: features.split(",").map(f => f.trim())
 };
@@ -283,7 +283,7 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const feature = args.contextData.featureList;
+const feature = c.featureList;
 return {
   as: "li"
 };
@@ -294,7 +294,7 @@ return `._id {
   align-items: center;
   gap: 0.75rem;
   margin-bottom: 0.75rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   opacity: 0.8;
 }`;
 '''
@@ -316,7 +316,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.success};
+  color: ${t.var.color.success};
   flex-shrink: 0;
 }`;
 '''
@@ -329,7 +329,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const feature = args.contextData.featureList;
+const feature = c.featureList;
 return {
   as: "span",
   text: feature
@@ -344,21 +344,21 @@ return {
         displayOrder: 5,
         componentName: "Html",
         props: '''
-const isPopular = args.contextData.props?.isPopular || false;
+const isPopular = c.props?.isPopular || false;
 return {
   as: "button",
-  text: args.contextData.props?.ctaText || "Get Started",
-  onClick: () => args.navigate("/signup")
+  text: c.props?.ctaText || "Get Started",
+  onClick: () => _.navigate("/signup")
 };
 ''',
         css: '''
-const isPopular = args.contextData.props?.isPopular || false;
+const isPopular = c.props?.isPopular || false;
 return `._id {
   width: 100%;
   padding: 1rem;
-  background: ${isPopular ? args.theme.var.color.primary : 'transparent'};
-  color: ${isPopular ? args.theme.var.color.primary_text : args.theme.var.color.primary};
-  border: 2px solid ${args.theme.var.color.primary};
+  background: ${isPopular ? t.var.color.primary : 'transparent'};
+  color: ${isPopular ? t.var.color.primary_text : t.var.color.primary};
+  border: 2px solid ${t.var.color.primary};
   border-radius: 0.5rem;
   font-size: 1rem;
   font-weight: 600;
@@ -366,8 +366,8 @@ return `._id {
   transition: all 0.3s ease;
   
   &:hover {
-    background: ${args.theme.var.color.primary};
-    color: ${args.theme.var.color.primary_text};
+    background: ${t.var.color.primary};
+    color: ${t.var.color.primary_text};
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }

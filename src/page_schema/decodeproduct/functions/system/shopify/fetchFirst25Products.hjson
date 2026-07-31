@@ -11,14 +11,14 @@
 // For embedded apps, uses shopify session management to get session from request.
 
 // Get Shopify API object (configured via env vars with Neo4j session store)
-const shopify = await args.getShopifyClient();
+const shopify = await _.getShopifyClient();
 
 // Authenticate the request using Shopify's admin authentication
 // This verifies the OAuth session and ensures the user has proper permissions
 let admin;
 let shop;
 try {
-  const event = args.getRequestEvent();
+  const event = _.getRequestEvent();
   if (!event) {
     throw new Error("No request context available");
   }
@@ -31,7 +31,7 @@ try {
   console.error("fetchFirst25Products: Shopify authentication failed", authError);
   // Build OAuth begin URL for redirect
   // Try to get shop from request URL if available
-  const event = args.getRequestEvent();
+  const event = _.getRequestEvent();
   const origin = event ? new URL(event.request.url).origin : "https://localhost:3000";
   const urlParams = event ? new URL(event.request.url).searchParams : new URLSearchParams();
   const shopFromUrl = urlParams.get("shop") || "";

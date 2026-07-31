@@ -23,18 +23,18 @@
         displayOrder: 1
         fns:
           '''
-const [settings, setSettings] = args.createSignal(null);
-const [formValues, setFormValues] = args.createSignal({});
-const [fieldErrors, setFieldErrors] = args.createSignal({});
-const [loading, setLoading] = args.createSignal(true);
-const [submitting, setSubmitting] = args.createSignal(false);
-const [createdTicket, setCreatedTicket] = args.createSignal(null);
-const [trackingUrl, setTrackingUrl] = args.createSignal("");
+const [settings, setSettings] = _.createSignal(null);
+const [formValues, setFormValues] = _.createSignal({});
+const [fieldErrors, setFieldErrors] = _.createSignal({});
+const [loading, setLoading] = _.createSignal(true);
+const [submitting, setSubmitting] = _.createSignal(false);
+const [createdTicket, setCreatedTicket] = _.createSignal(null);
+const [trackingUrl, setTrackingUrl] = _.createSignal("");
 
 const loadSettings = async () => {
   setLoading(true);
   try {
-    const response = await args.executeNamedServerFunction({
+    const response = await s({
       functionName: "publicSupportGetSettings",
       contextData: {}
     });
@@ -45,13 +45,13 @@ const loadSettings = async () => {
     for (let i = 0; i < fields.length; i++) {
       if (fields[i]?.defaultValue !== undefined) initial[fields[i].key] = fields[i].defaultValue;
     }
-    if (args.searchParams?.email) initial.customerEmail = args.searchParams.email;
-    if (args.searchParams?.name) initial.customerName = args.searchParams.name;
-    if (args.searchParams?.order) initial.orderNumber = args.searchParams.order;
+    if (_.searchParams?.email) initial.customerEmail = _.searchParams.email;
+    if (_.searchParams?.name) initial.customerName = _.searchParams.name;
+    if (_.searchParams?.order) initial.orderNumber = _.searchParams.order;
     setFormValues(initial);
   } catch (e) {
     console.error("SolvoPublicSupportRequest.loadSettings", e);
-    args.showErrorToast?.("Failed to load support settings.");
+    _.showErrorToast?.("Failed to load support settings.");
   } finally {
     setLoading(false);
   }
@@ -82,30 +82,30 @@ const updateField = (key, value) => {
 
 const submitTicket = async () => {
   if (supportSystem().enabled === false) {
-    args.showErrorToast?.("Support is currently disabled.");
+    _.showErrorToast?.("Support is currently disabled.");
     return;
   }
   setSubmitting(true);
   setFieldErrors({});
   try {
-    const response = await args.executeNamedServerFunction({
+    const response = await s({
       functionName: "publicSupportCreateTicket",
       contextData: {
         fields: formValues(),
-        sourceUrl: args.searchParams?.sourceUrl || args.searchParams?.url
+        sourceUrl: _.searchParams?.sourceUrl || _.searchParams?.url
       }
     });
     const result = response?.result || response;
     if (response?.error || result?.success === false) {
       const errors = result?.data?.fieldErrors || {};
       setFieldErrors(errors);
-      args.showErrorToast?.(response?.error || result?.message || "Failed to create support request.");
+      _.showErrorToast?.(response?.error || result?.message || "Failed to create support request.");
       return;
     }
     const ticket = result?.data?.ticket || null;
     setCreatedTicket(ticket);
     setTrackingUrl(result?.data?.trackingUrl || ticket?.P?.trackingUrl || "");
-    args.showSuccessToast?.("Support request created.");
+    _.showSuccessToast?.("Support request created.");
     try {
       window.parent?.postMessage?.({
         type: "solvo:support-ticket-created",
@@ -115,7 +115,7 @@ const submitTicket = async () => {
     } catch {}
   } catch (e) {
     console.error("SolvoPublicSupportRequest.submitTicket", e);
-    args.showErrorToast?.("Failed to create support request.");
+    _.showErrorToast?.("Failed to create support request.");
   } finally {
     setSubmitting(false);
   }
@@ -139,14 +139,14 @@ return {
 '''
         css:
           '''
-const theme = args.fns.supportTheme?.() || {};
+const theme = f.supportTheme?.() || {};
 return `._id {
   width: 100%;
   max-width: ${Number(theme.modalWidth || 640)}px;
   margin: 0 auto;
   padding: 1.5rem;
-  color: ${args.theme.var.color.text};
-  background: ${args.theme.var.color.background_light_100};
+  color: ${t.var.color.text};
+  background: ${t.var.color.background_light_100};
   border-radius: 1rem;
   box-sizing: border-box;
 }
@@ -156,7 +156,7 @@ ${theme.customCss || ""}`;
           '''return {
   as: "main",
   onMount: async () => {
-    await args.fns.loadSettings();
+    await f.loadSettings();
   }
 };'''
       }
@@ -177,7 +177,7 @@ ${theme.customCss || ""}`;
           '''return {
   as: "h1",
   text: "Create a support request",
-  hide: !!args.fns.createdTicket?.()
+  hide: !!f.createdTicket?.()
 };'''
       }
     }
@@ -190,14 +190,14 @@ ${theme.customCss || ""}`;
         css:
           '''return `._id {
   margin: 0 0 1.25rem 0;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   line-height: 1.5;
 }`;'''
         props:
           '''return {
   as: "p",
   text: "Tell us what happened. We will email you a tracking link after the request is created.",
-  hide: !!args.fns.createdTicket?.()
+  hide: !!f.createdTicket?.()
 };'''
       }
     }
@@ -210,15 +210,15 @@ ${theme.customCss || ""}`;
         css:
           '''return `._id {
   padding: 1rem;
-  border: 1px solid ${args.theme.var.color.warning || args.theme.var.color.border};
+  border: 1px solid ${t.var.color.warning || t.var.color.border};
   border-radius: 0.75rem;
-  background: ${args.theme.var.color.background_light_200};
+  background: ${t.var.color.background_light_200};
 }`;'''
         props:
           '''return {
   as: "div",
   text: "Support requests are currently disabled.",
-  hide: args.fns.loading?.() || args.fns.supportSystem?.().enabled !== false
+  hide: f.loading?.() || f.supportSystem?.().enabled !== false
 };'''
       }
     }
@@ -231,12 +231,12 @@ ${theme.customCss || ""}`;
         css:
           '''return `._id {
   padding: 1rem;
-  border: 1px solid ${args.theme.var.color.success || args.theme.var.color.border};
+  border: 1px solid ${t.var.color.success || t.var.color.border};
   border-radius: 0.75rem;
-  background: ${args.theme.var.color.background_light_200};
+  background: ${t.var.color.background_light_200};
 }`;'''
         props:
-          '''const ticket = args.fns.createdTicket?.();
+          '''const ticket = f.createdTicket?.();
 return {
   as: "div",
   hide: !ticket
@@ -250,7 +250,7 @@ return {
         componentName: Html
         displayOrder: 1
         props:
-          '''const ticket = args.fns.createdTicket?.();
+          '''const ticket = f.createdTicket?.();
 return {
   as: "h2",
   text: ticket ? `Request ${ticket.P?.serial} created` : "Request created"
@@ -279,7 +279,7 @@ return {
         props:
           '''return {
   as: "a",
-  href: args.fns.trackingUrl?.() || "#",
+  href: f.trackingUrl?.() || "#",
   target: "_blank",
   text: "Open tracking link"
 };'''
@@ -307,9 +307,9 @@ return {
   as: "form",
   onSubmit: (event) => {
     event.preventDefault();
-    args.fns.submitTicket?.();
+    f.submitTicket?.();
   },
-  hide: args.fns.loading?.() || args.fns.createdTicket?.() || args.fns.supportSystem?.().enabled === false
+  hide: f.loading?.() || f.createdTicket?.() || f.supportSystem?.().enabled === false
 };'''
       }
     }
@@ -324,7 +324,7 @@ return {
         props:
           '''return {
   as: "div",
-  data: args.fns.formFields?.() || []
+  data: f.formFields?.() || []
 };'''
       }
     }
@@ -335,7 +335,7 @@ return {
         componentName: Html
         displayOrder: 1
         css:
-          '''const _f = args.contextData.field || {};
+          '''const _f = c.field || {};
 return `._id {
   display: flex;
   flex-direction: column;
@@ -365,7 +365,7 @@ return `._id {
   font-weight: 600;
 }`;'''
         props:
-          '''const _f = args.contextData.field || {};
+          '''const _f = c.field || {};
 return {
   as: "span",
   text: `${_f.label || _f.key}${_f.required ? " *" : ""}`
@@ -383,19 +383,19 @@ return {
   width: 100%;
   min-height: 2.5rem;
   padding: 0.65rem 0.75rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.5rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   box-sizing: border-box;
 }
 ._id[data-error="true"] {
-  border-color: ${args.theme.var.color.error};
+  border-color: ${t.var.color.error};
 }`;'''
         props:
-          '''const _f = args.contextData.field || {};
-const values = args.fns.formValues?.() || {};
-const errors = args.fns.fieldErrors?.() || {};
+          '''const _f = c.field || {};
+const values = f.formValues?.() || {};
+const errors = f.fieldErrors?.() || {};
 const renderer = _f.renderer || "text";
 const isTextArea = renderer === "textArea" || renderer === "textarea";
 return {
@@ -405,7 +405,7 @@ return {
   value: values[_f.key] || "",
   placeholder: _f.placeholder || "",
   "data-error": errors[_f.key] ? "true" : "false",
-  onInput: (event) => args.fns.updateField?.(_f.key, event.currentTarget.value)
+  onInput: (event) => f.updateField?.(_f.key, event.currentTarget.value)
 };'''
       }
     }
@@ -417,12 +417,12 @@ return {
         displayOrder: 3
         css:
           '''return `._id {
-  color: ${args.theme.var.color.error};
+  color: ${t.var.color.error};
   font-size: 0.8rem;
 }`;'''
         props:
-          '''const _f = args.contextData.field || {};
-const errors = args.fns.fieldErrors?.() || {};
+          '''const _f = c.field || {};
+const errors = f.fieldErrors?.() || {};
 return {
   as: "span",
   text: errors[_f.key] || "",
@@ -442,8 +442,8 @@ return {
   border: 0;
   border-radius: 0.6rem;
   padding: 0.75rem 1rem;
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
   font-weight: 700;
   cursor: pointer;
 }
@@ -452,7 +452,7 @@ return {
   cursor: not-allowed;
 }`;'''
         props:
-          '''const submitting = args.fns.submitting?.();
+          '''const submitting = f.submitting?.();
 return {
   as: "button",
   type: "submit",

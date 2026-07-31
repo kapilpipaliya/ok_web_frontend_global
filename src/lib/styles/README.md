@@ -24,7 +24,7 @@ Define CSS using functions that return CSS strings with the `._id` selector:
 ```tsx
 const buttonCss = () => `
   ._id {
-    background-color: \${args.theme.var.color.primary};
+    background-color: \${_.theme.var.color.primary};
     color: white;
     padding: 0.5rem 1rem;
     border-radius: 0.25rem;
@@ -46,7 +46,7 @@ import { css, mergeCss, responsive, withStates } from "~/lib/styles";
 // Define CSS using template literals
 const myCss = () => css`
   ._id {
-    color: \${args.theme.var.color.primary};
+    color: \${_.theme.var.color.primary};
   }
 `;
 ```
@@ -68,7 +68,7 @@ const containerCss = () => `
 
 const labelCss = () => `
   ._id {
-    color: \${args.theme.var.color.primary};
+    color: \${_.theme.var.color.primary};
     font-weight: 500;
     font-size: 15px;
   }

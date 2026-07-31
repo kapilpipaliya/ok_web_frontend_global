@@ -28,12 +28,12 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.lg};
+  padding: ${t.var.spacing.lg};
   max-width: 100%;
   margin: 0 auto;
 
   @media (max-width: 768px) {
-    padding: ${args.theme.var.spacing.md};
+    padding: ${t.var.spacing.md};
   }
 }`;
 '''
@@ -41,7 +41,7 @@ return `._id {
         fns:
           '''
 // State management
-const [store, setStore] = args.createStore({
+const [store, setStore] = _.createStore({
   users: [],
   loading: true,
   error: null,
@@ -64,7 +64,7 @@ const loadUsers = async (page = store.currentPage) => {
 
   const offset = (page - 1) * store.pageSize;
 
-  const result = await args.fns.executeYTOFunction("getAllYTOUsers", {
+  const result = await f.executeYTOFunction("getAllYTOUsers", {
     searchQuery: store.searchQuery,
     filterStatus: store.filterStatus,
     limit: store.pageSize,
@@ -136,12 +136,12 @@ const getFilteredUsers = () => {
 // Start impersonation
 const startImpersonation = async (userUuid) => {
   try {
-    const result = await args.fns.executeYTOFunction("impersonateUser", {
+    const result = await f.executeYTOFunction("impersonateUser", {
       targetUserUuid: userUuid
     });
 
     if (result.error) {
-      args.showErrorToast(result.error);
+      _.showErrorToast(result.error);
       return;
     }
 
@@ -154,17 +154,17 @@ const startImpersonation = async (userUuid) => {
       sessionStorage.setItem('yto_impersonatedUser', JSON.stringify(impersonatedUser));
 
       // Reload the impersonation state in Layout
-      args.fns.loadImpersonationState?.();
+      f.loadImpersonationState?.();
 
-      args.showSuccessToast(serverResult.message || "Now viewing as user");
+      _.showSuccessToast(serverResult.message || "Now viewing as user");
 
       // Navigate to content page
-      args.navigate('/content');
+      _.navigate('/content');
     } else {
-      args.showErrorToast(serverResult?.message || "Failed to start impersonation");
+      _.showErrorToast(serverResult?.message || "Failed to start impersonation");
     }
   } catch (error) {
-    args.showErrorToast("Error starting impersonation: " + error.message);
+    _.showErrorToast("Error starting impersonation: " + error.message);
     console.error("Impersonation error:", error);
   }
 };
@@ -220,9 +220,9 @@ const handleFilterChange = (status) => {
 
 // Delete user handler
 const handleDeleteUser = async (userId, username) => {
-  const rbConfirm = args.contextData?.confirmContext?.rbConfirm;
+  const rbConfirm = c?.confirmContext?.rbConfirm;
   if (!rbConfirm) {
-    args.showErrorToast("Confirmation dialog not available");
+    _.showErrorToast("Confirmation dialog not available");
     return;
   }
 
@@ -239,26 +239,26 @@ const handleDeleteUser = async (userId, username) => {
   }
 
   try {
-    const result = await args.fns.executeYTOFunction("deleteAccount", {
+    const result = await f.executeYTOFunction("deleteAccount", {
       userId: userId
     });
 
     if (result.error) {
-      args.showErrorToast(result.error);
+      _.showErrorToast(result.error);
       return;
     }
 
     const serverResult = result.result;
 
     if (serverResult?.success) {
-      args.showSuccessToast(serverResult.message || "User deleted successfully");
+      _.showSuccessToast(serverResult.message || "User deleted successfully");
       // Reload users from current page
       await loadUsers(store.currentPage);
     } else {
-      args.showErrorToast(serverResult?.message || "Failed to delete user");
+      _.showErrorToast(serverResult?.message || "Failed to delete user");
     }
   } catch (error) {
-    args.showErrorToast("Error deleting user: " + error.message);
+    _.showErrorToast("Error deleting user: " + error.message);
   }
 };
 
@@ -361,7 +361,7 @@ return {
           '''
 return {
   as: "div",
-  onMount: args.fns.loadUsers
+  onMount: f.loadUsers
 };
 '''
       }
@@ -376,8 +376,8 @@ return `._id {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: ${args.theme.var.spacing.lg};
-  gap: ${args.theme.var.spacing.md};
+  margin-bottom: ${t.var.spacing.lg};
+  gap: ${t.var.spacing.md};
 
   @media (max-width: 768px) {
     flex-direction: column;
@@ -417,8 +417,8 @@ return {
 return `._id {
   font-size: 1.5rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 ${args.theme.var.spacing.xs} 0;
+  color: ${t.var.color.text};
+  margin: 0 0 ${t.var.spacing.xs} 0;
 }`;
 '''
         displayOrder: 1
@@ -440,7 +440,7 @@ return {
           '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0;
 }`;
 '''
@@ -448,16 +448,16 @@ return `._id {
         componentName: Html
         props:
           '''
-const totalCount = args.fns.store.totalCount;
-const currentPage = args.fns.store.currentPage;
-const pageSize = args.fns.store.pageSize;
+const totalCount = f.store.totalCount;
+const currentPage = f.store.currentPage;
+const pageSize = f.store.pageSize;
 const startIndex = (currentPage - 1) * pageSize + 1;
 const endIndex = Math.min(currentPage * pageSize, totalCount);
 
 return {
   as: "p",
   text: totalCount > 0 ? `Showing ${startIndex}-${endIndex} of ${totalCount} users` : `${totalCount} users`,
-  hide: () => args.fns.store.loading
+  hide: () => f.store.loading
 };
 '''
       }
@@ -471,7 +471,7 @@ return {
           '''
 return `._id {
   display: flex;
-  gap: ${args.theme.var.spacing.md};
+  gap: ${t.var.spacing.md};
   flex-wrap: wrap;
 
   @media (max-width: 768px) {
@@ -485,8 +485,8 @@ return `._id {
           '''
 return {
   getStatsData: () => {
-    const users = args.fns.store.users;
-    const activeUsers = users.filter(ud => args.fns.getUserStatus(ud.stats) === 'active').length;
+    const users = f.store.users;
+    const activeUsers = users.filter(ud => f.getUserStatus(ud.stats) === 'active').length;
     const totalChannels = users.reduce((sum, ud) => sum + (ud.stats?.channelCount || 0), 0);
     const totalPlaylists = users.reduce((sum, ud) => sum + (ud.stats?.playlistCount || 0), 0);
     const totalVideos = users.reduce((sum, ud) => sum + (ud.stats?.videoCount || 0), 0);
@@ -505,8 +505,8 @@ return {
           '''
 return {
   as: "div",
-  data: args.fns.getStatsData(),
-  hide: () => args.fns.store.loading
+  data: f.getStatsData(),
+  hide: () => f.store.loading
 };
 '''
       }
@@ -520,11 +520,11 @@ return {
 return `._id {
   display: flex;
   align-items: center;
-  gap: ${args.theme.var.spacing.xs};
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  background: ${args.theme.var.color.background_dark_100};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.md};
+  gap: ${t.var.spacing.xs};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  background: ${t.var.color.background_dark_100};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.md};
   white-space: nowrap;
 }`;
 '''
@@ -532,7 +532,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const stat = args.contextData.stat;
+const stat = c.stat;
 return {
   as: "div"
 };
@@ -546,14 +546,14 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
 }`;
 '''
         displayOrder: 1
         componentName: Html
         props:
           '''
-const stat = args.contextData.stat;
+const stat = c.stat;
 return {
   as: "icon",
   icon: stat.icon,
@@ -571,7 +571,7 @@ return {
         componentName: Html
         props:
           '''
-const stat = args.contextData.stat;
+const stat = c.stat;
 return {
   as: "div"
 };
@@ -587,14 +587,14 @@ return {
 return `._id {
   font-size: 1.125rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 1
         componentName: Html
         props:
           '''
-const stat = args.contextData.stat;
+const stat = c.stat;
 return {
   as: "span",
   text: stat.value
@@ -610,14 +610,14 @@ return {
           '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
         displayOrder: 2
         componentName: Html
         props:
           '''
-const stat = args.contextData.stat;
+const stat = c.stat;
 return {
   as: "span",
   text: ` ${stat.label}`
@@ -632,7 +632,7 @@ return {
         css:
           '''
 return `._id {
-  margin-bottom: ${args.theme.var.spacing.lg};
+  margin-bottom: ${t.var.spacing.lg};
 }`;
 '''
         displayOrder: 2
@@ -641,7 +641,7 @@ return `._id {
           '''
 return {
   as: "div",
-  hide: () => args.fns.store.loading || args.fns.store.error
+  hide: () => f.store.loading || f.store.error
 };
 '''
       }
@@ -654,8 +654,8 @@ return {
           '''
 return `._id {
   display: flex;
-  gap: ${args.theme.var.spacing.md};
-  margin-bottom: ${args.theme.var.spacing.md};
+  gap: ${t.var.spacing.md};
+  margin-bottom: ${t.var.spacing.md};
   flex-wrap: wrap;
 }`;
 '''
@@ -687,10 +687,10 @@ return `._id {
 return {
   type: "search",
   placeholder: "Search by username or email...",
-  value: args.fns.store.searchQuery,
+  value: f.store.searchQuery,
   leftIcon: "carbon:search",
   onInput: (e) => {
-    args.fns.handleSearch(e.target.value);
+    f.handleSearch(e.target.value);
   }
 };
 '''
@@ -711,7 +711,7 @@ return `._id {
         props:
           '''
 return {
-  value: args.fns.store.filterStatus,
+  value: f.store.filterStatus,
   options: [
     { value: "all", label: "All Users" },
     { value: "active", label: "Active (7 days)" },
@@ -721,7 +721,7 @@ return {
   placeholder: "Filter by status...",
   search: false,
   onChange: (value) => {
-    args.fns.handleFilterChange(value);
+    f.handleFilterChange(value);
   }
 };
 '''
@@ -736,11 +736,11 @@ return {
 return `._id {
   display: flex;
   align-items: center;
-  gap: ${args.theme.var.spacing.md};
-  padding: ${args.theme.var.spacing.md};
-  background: ${args.theme.var.color.primary_light_100};
-  border: 1px solid ${args.theme.var.color.primary_light_300};
-  border-radius: ${args.theme.var.borderRadius.md};
+  gap: ${t.var.spacing.md};
+  padding: ${t.var.spacing.md};
+  background: ${t.var.color.primary_light_100};
+  border: 1px solid ${t.var.color.primary_light_300};
+  border-radius: ${t.var.borderRadius.md};
 }`;
 '''
         displayOrder: 2
@@ -749,7 +749,7 @@ return `._id {
           '''
 return {
   as: "div",
-  hide: () => args.fns.store.selectedUsers.length === 0
+  hide: () => f.store.selectedUsers.length === 0
 };
 '''
       }
@@ -763,14 +763,14 @@ return {
 return `._id {
   font-size: 0.875rem;
   font-weight: 600;
-  color: ${args.theme.var.color.primary_light_100_text};
+  color: ${t.var.color.primary_light_100_text};
 }`;
 '''
         displayOrder: 1
         componentName: Html
         props:
           '''
-const count = args.fns.store.selectedUsers.length;
+const count = f.store.selectedUsers.length;
 return {
   as: "span",
   text: `${count} user${count === 1 ? '' : 's'} selected`
@@ -785,17 +785,17 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.sm};
+  padding: ${t.var.spacing.xs} ${t.var.spacing.sm};
   background: transparent;
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.sm};
-  color: ${args.theme.var.color.text};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.sm};
+  color: ${t.var.color.text};
   font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.background_dark_100};
+    background: ${t.var.color.background_dark_100};
   }
 }`;
 '''
@@ -806,7 +806,7 @@ return `._id {
 return {
   as: "button",
   text: "Clear",
-  onClick: args.fns.clearSelection
+  onClick: f.clearSelection
 };
 '''
       }
@@ -818,17 +818,17 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.sm};
-  background: ${args.theme.var.color.primary};
+  padding: ${t.var.spacing.xs} ${t.var.spacing.sm};
+  background: ${t.var.color.primary};
   border: none;
-  border-radius: ${args.theme.var.borderRadius.sm};
-  color: ${args.theme.var.color.primary_text};
+  border-radius: ${t.var.borderRadius.sm};
+  color: ${t.var.color.primary_text};
   font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.primary_dark_200};
+    background: ${t.var.color.primary_dark_200};
   }
 }`;
 '''
@@ -840,7 +840,7 @@ return {
   as: "button",
   text: "Export Selected",
   onClick: () => {
-    args.showWarningToast("Export functionality coming soon");
+    _.showWarningToast("Export functionality coming soon");
   }
 };
 '''
@@ -854,8 +854,8 @@ return {
           '''
 return `._id {
   text-align: center;
-  padding: ${args.theme.var.spacing.xl};
-  color: ${args.theme.var.color.text_light_500};
+  padding: ${t.var.spacing.xl};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
         displayOrder: 3
@@ -865,7 +865,7 @@ return `._id {
 return {
   as: "div",
   text: "Loading users...",
-  hide: () => !args.fns.store.loading
+  hide: () => !f.store.loading
 };
 '''
       }
@@ -878,10 +878,10 @@ return {
           '''
 return `._id {
   text-align: center;
-  padding: ${args.theme.var.spacing.xl};
-  color: ${args.theme.var.color.error_light_50_text};
-  background: ${args.theme.var.color.error_light_50};
-  border-radius: ${args.theme.var.borderRadius.md};
+  padding: ${t.var.spacing.xl};
+  color: ${t.var.color.error_light_50_text};
+  background: ${t.var.color.error_light_50};
+  border-radius: ${t.var.borderRadius.md};
 }`;
 '''
         displayOrder: 4
@@ -890,8 +890,8 @@ return `._id {
           '''
 return {
   as: "div",
-  text: args.fns.store.error || "An error occurred",
-  hide: () => !args.fns.store.error
+  text: f.store.error || "An error occurred",
+  hide: () => !f.store.error
 };
 '''
       }
@@ -903,9 +903,9 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.lg};
+  background: ${t.var.color.background};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.lg};
   overflow: hidden;
 }`;
 '''
@@ -915,7 +915,7 @@ return `._id {
           '''
 return {
   as: "div",
-  hide: () => args.fns.store.loading || args.fns.store.error
+  hide: () => f.store.loading || f.store.error
 };
 '''
       }
@@ -969,8 +969,8 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.background_dark_100};
-  border-bottom: 2px solid ${args.theme.var.color.border};
+  background: ${t.var.color.background_dark_100};
+  border-bottom: 2px solid ${t.var.color.border};
 }`;
 '''
         displayOrder: 1
@@ -1004,10 +1004,10 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   text-align: left;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   width: 40px;
 }`;
 '''
@@ -1037,8 +1037,8 @@ return `._id {
         componentName: Html
         props:
           '''
-const filteredUsers = args.fns.getFilteredUsers();
-const allSelected = filteredUsers.length > 0 && filteredUsers.every(ud => args.fns.store.selectedUsers.includes(ud.user?.id));
+const filteredUsers = f.getFilteredUsers();
+const allSelected = filteredUsers.length > 0 && filteredUsers.every(ud => f.store.selectedUsers.includes(ud.user?.id));
 
 return {
   as: "input",
@@ -1046,9 +1046,9 @@ return {
   checked: allSelected,
   onChange: () => {
     if (allSelected) {
-      args.fns.clearSelection();
+      f.clearSelection();
     } else {
-      args.fns.selectAllUsers();
+      f.selectAllUsers();
     }
   }
 };
@@ -1062,16 +1062,16 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   text-align: left;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   cursor: pointer;
   user-select: none;
   min-width: 200px;
 
   &:hover {
-    background: ${args.theme.var.color.background_dark_200};
+    background: ${t.var.color.background_dark_200};
   }
 }`;
 '''
@@ -1081,7 +1081,7 @@ return `._id {
           '''
 return {
   as: "th",
-  onClick: () => args.fns.handleSort('username')
+  onClick: () => f.handleSort('username')
 };
 '''
       }
@@ -1094,8 +1094,8 @@ return {
         componentName: Html
         props:
           '''
-const sortIcon = args.fns.store.sortBy === 'username'
-  ? (args.fns.store.sortOrder === 'asc' ? ' ↑' : ' ↓')
+const sortIcon = f.store.sortBy === 'username'
+  ? (f.store.sortOrder === 'asc' ? ' ↑' : ' ↓')
   : '';
 return {
   as: "span",
@@ -1111,10 +1111,10 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   text-align: left;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   min-width: 100px;
 }`;
 '''
@@ -1136,16 +1136,16 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   text-align: left;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   cursor: pointer;
   user-select: none;
   min-width: 110px;
 
   &:hover {
-    background: ${args.theme.var.color.background_dark_200};
+    background: ${t.var.color.background_dark_200};
   }
 }`;
 '''
@@ -1155,7 +1155,7 @@ return `._id {
           '''
 return {
   as: "th",
-  onClick: () => args.fns.handleSort('createdAt')
+  onClick: () => f.handleSort('createdAt')
 };
 '''
       }
@@ -1168,8 +1168,8 @@ return {
         componentName: Html
         props:
           '''
-const sortIcon = args.fns.store.sortBy === 'createdAt'
-  ? (args.fns.store.sortOrder === 'asc' ? ' ↑' : ' ↓')
+const sortIcon = f.store.sortBy === 'createdAt'
+  ? (f.store.sortOrder === 'asc' ? ' ↑' : ' ↓')
   : '';
 return {
   as: "span",
@@ -1185,16 +1185,16 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   text-align: center;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   cursor: pointer;
   user-select: none;
   min-width: 90px;
 
   &:hover {
-    background: ${args.theme.var.color.background_dark_200};
+    background: ${t.var.color.background_dark_200};
   }
 }`;
 '''
@@ -1204,7 +1204,7 @@ return `._id {
           '''
 return {
   as: "th",
-  onClick: () => args.fns.handleSort('channels')
+  onClick: () => f.handleSort('channels')
 };
 '''
       }
@@ -1217,8 +1217,8 @@ return {
         componentName: Html
         props:
           '''
-const sortIcon = args.fns.store.sortBy === 'channels'
-  ? (args.fns.store.sortOrder === 'asc' ? ' ↑' : ' ↓')
+const sortIcon = f.store.sortBy === 'channels'
+  ? (f.store.sortOrder === 'asc' ? ' ↑' : ' ↓')
   : '';
 return {
   as: "span",
@@ -1234,16 +1234,16 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   text-align: center;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   cursor: pointer;
   user-select: none;
   min-width: 90px;
 
   &:hover {
-    background: ${args.theme.var.color.background_dark_200};
+    background: ${t.var.color.background_dark_200};
   }
 }`;
 '''
@@ -1253,7 +1253,7 @@ return `._id {
           '''
 return {
   as: "th",
-  onClick: () => args.fns.handleSort('playlists')
+  onClick: () => f.handleSort('playlists')
 };
 '''
       }
@@ -1266,8 +1266,8 @@ return {
         componentName: Html
         props:
           '''
-const sortIcon = args.fns.store.sortBy === 'playlists'
-  ? (args.fns.store.sortOrder === 'asc' ? ' ↑' : ' ↓')
+const sortIcon = f.store.sortBy === 'playlists'
+  ? (f.store.sortOrder === 'asc' ? ' ↑' : ' ↓')
   : '';
 return {
   as: "span",
@@ -1283,16 +1283,16 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   text-align: center;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   cursor: pointer;
   user-select: none;
   min-width: 80px;
 
   &:hover {
-    background: ${args.theme.var.color.background_dark_200};
+    background: ${t.var.color.background_dark_200};
   }
 }`;
 '''
@@ -1302,7 +1302,7 @@ return `._id {
           '''
 return {
   as: "th",
-  onClick: () => args.fns.handleSort('videos')
+  onClick: () => f.handleSort('videos')
 };
 '''
       }
@@ -1315,8 +1315,8 @@ return {
         componentName: Html
         props:
           '''
-const sortIcon = args.fns.store.sortBy === 'videos'
-  ? (args.fns.store.sortOrder === 'asc' ? ' ↑' : ' ↓')
+const sortIcon = f.store.sortBy === 'videos'
+  ? (f.store.sortOrder === 'asc' ? ' ↑' : ' ↓')
   : '';
 return {
   as: "span",
@@ -1332,10 +1332,10 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   text-align: center;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   min-width: 90px;
 }`;
 '''
@@ -1357,16 +1357,16 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   text-align: left;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   cursor: pointer;
   user-select: none;
   min-width: 120px;
 
   &:hover {
-    background: ${args.theme.var.color.background_dark_200};
+    background: ${t.var.color.background_dark_200};
   }
 }`;
 '''
@@ -1376,7 +1376,7 @@ return `._id {
           '''
 return {
   as: "th",
-  onClick: () => args.fns.handleSort('lastActivity')
+  onClick: () => f.handleSort('lastActivity')
 };
 '''
       }
@@ -1389,8 +1389,8 @@ return {
         componentName: Html
         props:
           '''
-const sortIcon = args.fns.store.sortBy === 'lastActivity'
-  ? (args.fns.store.sortOrder === 'asc' ? ' ↑' : ' ↓')
+const sortIcon = f.store.sortBy === 'lastActivity'
+  ? (f.store.sortOrder === 'asc' ? ' ↑' : ' ↓')
   : '';
 return {
   as: "span",
@@ -1406,16 +1406,16 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   text-align: center;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   cursor: pointer;
   user-select: none;
   min-width: 110px;
 
   &:hover {
-    background: ${args.theme.var.color.background_dark_200};
+    background: ${t.var.color.background_dark_200};
   }
 }`;
 '''
@@ -1425,7 +1425,7 @@ return `._id {
           '''
 return {
   as: "th",
-  onClick: () => args.fns.handleSort('engagement')
+  onClick: () => f.handleSort('engagement')
 };
 '''
       }
@@ -1438,8 +1438,8 @@ return {
         componentName: Html
         props:
           '''
-const sortIcon = args.fns.store.sortBy === 'engagement'
-  ? (args.fns.store.sortOrder === 'asc' ? ' ↑' : ' ↓')
+const sortIcon = f.store.sortBy === 'engagement'
+  ? (f.store.sortOrder === 'asc' ? ' ↑' : ' ↓')
   : '';
 return {
   as: "span",
@@ -1455,10 +1455,10 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   text-align: center;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   min-width: 120px;
 }`;
 '''
@@ -1485,7 +1485,7 @@ return {
           '''
 return {
   as: "tbody",
-  data: args.fns.getFilteredUsers()
+  data: f.getFilteredUsers()
 };
 '''
       }
@@ -1496,19 +1496,19 @@ return {
       P: {
         css:
           '''
-const userdata = args.contextData.userdata;
-const isSelected = args.fns.store.selectedUsers.includes(userdata.user?.id);
+const userdata = c.userdata;
+const isSelected = f.store.selectedUsers.includes(userdata.user?.id);
 
 return `._id {
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  border-bottom: 1px solid ${t.var.color.border};
   transition: background 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.background_dark_100};
+    background: ${t.var.color.background_dark_100};
   }
 
   ${isSelected ? `
-    background: ${args.theme.var.color.primary_light_100} !important;
+    background: ${t.var.color.primary_light_100} !important;
   ` : ''}
 }`;
 '''
@@ -1516,8 +1516,8 @@ return `._id {
         componentName: Html
         props:
           '''
-const userdata = args.contextData.userdata;
-const isSelected = args.fns.store.selectedUsers.includes(userdata.user?.id);
+const userdata = c.userdata;
+const isSelected = f.store.selectedUsers.includes(userdata.user?.id);
 
 return {
   as: "tr",
@@ -1533,7 +1533,7 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
 }`;
 '''
         displayOrder: 1
@@ -1562,15 +1562,15 @@ return `._id {
         componentName: Html
         props:
           '''
-const userdata = args.contextData.userdata;
+const userdata = c.userdata;
 const userId = userdata.user?.id;
-const isSelected = args.fns.store.selectedUsers.includes(userId);
+const isSelected = f.store.selectedUsers.includes(userId);
 
 return {
   as: "input",
   type: "checkbox",
   checked: isSelected,
-  onChange: () => args.fns.toggleUserSelection(userId)
+  onChange: () => f.toggleUserSelection(userId)
 };
 '''
       }
@@ -1582,7 +1582,7 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
 }`;
 '''
         displayOrder: 2
@@ -1617,15 +1617,15 @@ return {
           '''
 return `._id {
   font-weight: 600;
-  color: ${args.theme.var.color.text};
-  margin-bottom: ${args.theme.var.spacing.xs};
+  color: ${t.var.color.text};
+  margin-bottom: ${t.var.spacing.xs};
 }`;
 '''
         displayOrder: 1
         componentName: Html
         props:
           '''
-const userdata = args.contextData.userdata;
+const userdata = c.userdata;
 return {
   as: "div",
   text: userdata.user?.P?.username || 'N/A'
@@ -1641,14 +1641,14 @@ return {
           '''
 return `._id {
   font-size: 0.75rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
         displayOrder: 2
         componentName: Html
         props:
           '''
-const userdata = args.contextData.userdata;
+const userdata = c.userdata;
 return {
   as: "div",
   text: userdata.user?.P?.email || 'N/A'
@@ -1663,15 +1663,15 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
 }`;
 '''
         displayOrder: 3
         componentName: Html
         props:
           '''
-const userdata = args.contextData.userdata;
-const status = args.fns.getUserStatus(userdata.stats);
+const userdata = c.userdata;
+const status = f.getUserStatus(userdata.stats);
 const statusText = status === 'active' ? 'Active' : status === 'new' ? 'New' : 'Dormant';
 
 return {
@@ -1686,23 +1686,23 @@ return {
       P: {
         css:
           '''
-const userdata = args.contextData.userdata;
-const status = args.fns.getUserStatus(userdata.stats);
+const userdata = c.userdata;
+const status = f.getUserStatus(userdata.stats);
 
 const colors = {
-  active: { bg: args.theme.var.color.success_light_100, text: args.theme.var.color.success_light_100_text },
-  new: { bg: args.theme.var.color.info_light_100, text: args.theme.var.color.info_light_100_text },
-  dormant: { bg: args.theme.var.color.background_dark_200, text: args.theme.var.color.background_dark_200_text }
+  active: { bg: t.var.color.success_light_100, text: t.var.color.success_light_100_text },
+  new: { bg: t.var.color.info_light_100, text: t.var.color.info_light_100_text },
+  dormant: { bg: t.var.color.background_dark_200, text: t.var.color.background_dark_200_text }
 };
 
 const color = colors[status] || colors.dormant;
 
 return `._id {
   display: inline-block;
-  padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.sm};
+  padding: ${t.var.spacing.xs} ${t.var.spacing.sm};
   background: ${color.bg};
   color: ${color.text};
-  border-radius: ${args.theme.var.borderRadius.sm};
+  border-radius: ${t.var.borderRadius.sm};
   font-size: 0.75rem;
   font-weight: 600;
 }`;
@@ -1711,8 +1711,8 @@ return `._id {
         componentName: Html
         props:
           '''
-const userdata = args.contextData.userdata;
-const status = args.fns.getUserStatus(userdata.stats);
+const userdata = c.userdata;
+const status = f.getUserStatus(userdata.stats);
 const statusText = status === 'active' ? 'Active' : status === 'new' ? 'New' : 'Dormant';
 
 return {
@@ -1729,16 +1729,16 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
-  color: ${args.theme.var.color.text};
+  padding: ${t.var.spacing.md};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 4
         componentName: Html
         props:
           '''
-const userdata = args.contextData.userdata;
-const joinedText = args.fns.formatDate(userdata.user?.P?.createdAt);
+const userdata = c.userdata;
+const joinedText = f.formatDate(userdata.user?.P?.createdAt);
 
 return {
   as: "td",
@@ -1754,7 +1754,7 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   text-align: center;
 }`;
 '''
@@ -1762,7 +1762,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const userdata = args.contextData.userdata;
+const userdata = c.userdata;
 const channelCount = userdata.stats?.channelCount || 0;
 const favCount = userdata.stats?.favoriteChannelCount || 0;
 
@@ -1780,7 +1780,7 @@ return {
         componentName: Html
         props:
           '''
-const userdata = args.contextData.userdata;
+const userdata = c.userdata;
 const channelCount = userdata.stats?.channelCount || 0;
 const favCount = userdata.stats?.favoriteChannelCount || 0;
 
@@ -1798,14 +1798,14 @@ return {
           '''
 return `._id {
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 1
         componentName: Html
         props:
           '''
-const userdata = args.contextData.userdata;
+const userdata = c.userdata;
 const channelCount = userdata.stats?.channelCount || 0;
 
 return {
@@ -1823,14 +1823,14 @@ return {
           '''
 return `._id {
   font-size: 0.75rem;
-  color: ${args.theme.var.color.warning};
+  color: ${t.var.color.warning};
 }`;
 '''
         displayOrder: 2
         componentName: Html
         props:
           '''
-const userdata = args.contextData.userdata;
+const userdata = c.userdata;
 const favCount = userdata.stats?.favoriteChannelCount || 0;
 
 return {
@@ -1848,7 +1848,7 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   text-align: center;
 }`;
 '''
@@ -1856,7 +1856,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const userdata = args.contextData.userdata;
+const userdata = c.userdata;
 const playlistCount = userdata.stats?.playlistCount || 0;
 const favCount = userdata.stats?.favoritePlaylistCount || 0;
 
@@ -1874,7 +1874,7 @@ return {
         componentName: Html
         props:
           '''
-const userdata = args.contextData.userdata;
+const userdata = c.userdata;
 const playlistCount = userdata.stats?.playlistCount || 0;
 const favCount = userdata.stats?.favoritePlaylistCount || 0;
 
@@ -1892,14 +1892,14 @@ return {
           '''
 return `._id {
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 1
         componentName: Html
         props:
           '''
-const userdata = args.contextData.userdata;
+const userdata = c.userdata;
 const playlistCount = userdata.stats?.playlistCount || 0;
 
 return {
@@ -1917,14 +1917,14 @@ return {
           '''
 return `._id {
   font-size: 0.75rem;
-  color: ${args.theme.var.color.warning};
+  color: ${t.var.color.warning};
 }`;
 '''
         displayOrder: 2
         componentName: Html
         props:
           '''
-const userdata = args.contextData.userdata;
+const userdata = c.userdata;
 const favCount = userdata.stats?.favoritePlaylistCount || 0;
 
 return {
@@ -1942,7 +1942,7 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   text-align: center;
 }`;
 '''
@@ -1950,7 +1950,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const userdata = args.contextData.userdata;
+const userdata = c.userdata;
 const videoCount = userdata.stats?.videoCount || 0;
 const favCount = userdata.stats?.favoriteVideoCount || 0;
 
@@ -1968,7 +1968,7 @@ return {
         componentName: Html
         props:
           '''
-const userdata = args.contextData.userdata;
+const userdata = c.userdata;
 const videoCount = userdata.stats?.videoCount || 0;
 const favCount = userdata.stats?.favoriteVideoCount || 0;
 
@@ -1986,14 +1986,14 @@ return {
           '''
 return `._id {
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 1
         componentName: Html
         props:
           '''
-const userdata = args.contextData.userdata;
+const userdata = c.userdata;
 const videoCount = userdata.stats?.videoCount || 0;
 
 return {
@@ -2011,14 +2011,14 @@ return {
           '''
 return `._id {
   font-size: 0.75rem;
-  color: ${args.theme.var.color.warning};
+  color: ${t.var.color.warning};
 }`;
 '''
         displayOrder: 2
         componentName: Html
         props:
           '''
-const userdata = args.contextData.userdata;
+const userdata = c.userdata;
 const favCount = userdata.stats?.favoriteVideoCount || 0;
 
 return {
@@ -2036,17 +2036,17 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   text-align: center;
   font-weight: 600;
-  color: ${args.theme.var.color.warning};
+  color: ${t.var.color.warning};
 }`;
 '''
         displayOrder: 8
         componentName: Html
         props:
           '''
-const userdata = args.contextData.userdata;
+const userdata = c.userdata;
 const totalFavorites = (userdata.stats?.favoriteChannelCount || 0) +
                        (userdata.stats?.favoritePlaylistCount || 0) +
                        (userdata.stats?.favoriteVideoCount || 0);
@@ -2065,22 +2065,22 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
-  color: ${args.theme.var.color.text};
+  padding: ${t.var.spacing.md};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 9
         componentName: Html
         props:
           '''
-const userdata = args.contextData.userdata;
+const userdata = c.userdata;
 const lastActivities = [
   userdata.stats?.lastChannelAdded ? new Date(userdata.stats.lastChannelAdded) : null,
   userdata.stats?.lastPlaylistAdded ? new Date(userdata.stats.lastPlaylistAdded) : null,
   userdata.stats?.lastVideoActivity ? new Date(userdata.stats.lastVideoActivity) : null
 ].filter(d => d).sort((a, b) => b - a)[0];
 
-const activityText = args.fns.formatDate(lastActivities?.toISOString());
+const activityText = f.formatDate(lastActivities?.toISOString());
 
 return {
   as: "td",
@@ -2096,7 +2096,7 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   text-align: center;
 }`;
 '''
@@ -2104,8 +2104,8 @@ return `._id {
         componentName: Html
         props:
           '''
-const userdata = args.contextData.userdata;
-const score = args.fns.calculateEngagementScore(userdata.stats);
+const userdata = c.userdata;
+const score = f.calculateEngagementScore(userdata.stats);
 
 return {
   as: "td"
@@ -2119,14 +2119,14 @@ return {
       P: {
         css:
           '''
-const userdata = args.contextData.userdata;
-const score = args.fns.calculateEngagementScore(userdata.stats);
+const userdata = c.userdata;
+const score = f.calculateEngagementScore(userdata.stats);
 
 const getColor = () => {
-  if (score >= 100) return args.theme.var.color.success;
-  if (score >= 50) return args.theme.var.color.info;
-  if (score >= 20) return args.theme.var.color.warning;
-  return args.theme.var.color.text_light_500;
+  if (score >= 100) return t.var.color.success;
+  if (score >= 50) return t.var.color.info;
+  if (score >= 20) return t.var.color.warning;
+  return t.var.color.text_light_500;
 };
 
 return `._id {
@@ -2139,8 +2139,8 @@ return `._id {
         componentName: Html
         props:
           '''
-const userdata = args.contextData.userdata;
-const score = args.fns.calculateEngagementScore(userdata.stats);
+const userdata = c.userdata;
+const score = f.calculateEngagementScore(userdata.stats);
 
 return {
   as: "div",
@@ -2156,7 +2156,7 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
 }`;
 '''
         displayOrder: 11
@@ -2177,7 +2177,7 @@ return {
           '''
 return `._id {
   display: flex;
-  gap: ${args.theme.var.spacing.xs};
+  gap: ${t.var.spacing.xs};
   justify-content: center;
 }`;
 '''
@@ -2198,11 +2198,11 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.xs};
-  background: ${args.theme.var.color.primary};
+  padding: ${t.var.spacing.xs};
+  background: ${t.var.color.primary};
   border: none;
-  border-radius: ${args.theme.var.borderRadius.sm};
-  color: ${args.theme.var.color.primary_text};
+  border-radius: ${t.var.borderRadius.sm};
+  color: ${t.var.color.primary_text};
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -2210,7 +2210,7 @@ return `._id {
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.primary_dark_200};
+    background: ${t.var.color.primary_dark_200};
   }
 }`;
 '''
@@ -2218,13 +2218,13 @@ return `._id {
         componentName: Html
         props:
           '''
-const userdata = args.contextData.userdata;
+const userdata = c.userdata;
 const userUuid = userdata.user?.P?.uuid;
 
 return {
   as: "button",
   title: "Impersonate User",
-  onClick: () => args.fns.startImpersonation(userUuid)
+  onClick: () => f.startImpersonation(userUuid)
 };
 '''
       }
@@ -2253,11 +2253,11 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.xs};
-  background: ${args.theme.var.color.info};
+  padding: ${t.var.spacing.xs};
+  background: ${t.var.color.info};
   border: none;
-  border-radius: ${args.theme.var.borderRadius.sm};
-  color: ${args.theme.var.color.info_text};
+  border-radius: ${t.var.borderRadius.sm};
+  color: ${t.var.color.info_text};
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -2265,7 +2265,7 @@ return `._id {
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.info_dark_200};
+    background: ${t.var.color.info_dark_200};
   }
 }`;
 '''
@@ -2273,13 +2273,13 @@ return `._id {
         componentName: Html
         props:
           '''
-const userdata = args.contextData.userdata;
+const userdata = c.userdata;
 
 return {
   as: "button",
   title: "Edit User",
   onClick: () => {
-    args.showWarningToast("Edit functionality coming soon");
+    _.showWarningToast("Edit functionality coming soon");
   }
 };
 '''
@@ -2309,11 +2309,11 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.xs};
-  background: ${args.theme.var.color.error};
+  padding: ${t.var.spacing.xs};
+  background: ${t.var.color.error};
   border: none;
-  border-radius: ${args.theme.var.borderRadius.sm};
-  color: ${args.theme.var.color.error_text};
+  border-radius: ${t.var.borderRadius.sm};
+  color: ${t.var.color.error_text};
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -2321,7 +2321,7 @@ return `._id {
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.error_dark_200};
+    background: ${t.var.color.error_dark_200};
   }
 }`;
 '''
@@ -2329,7 +2329,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const userdata = args.contextData.userdata;
+const userdata = c.userdata;
 const userId = userdata.user?.id;
 const username = userdata.user?.P?.username || 'Unknown User';
 
@@ -2337,7 +2337,7 @@ return {
   as: "button",
   title: "Delete User",
   onClick: () => {
-    args.fns.handleDeleteUser(userId, username);
+    f.handleDeleteUser(userId, username);
   }
 };
 '''
@@ -2370,11 +2370,11 @@ return `._id {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: ${args.theme.var.spacing.lg};
-  border-top: 1px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background};
+  padding: ${t.var.spacing.lg};
+  border-top: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background};
   flex-wrap: wrap;
-  gap: ${args.theme.var.spacing.md};
+  gap: ${t.var.spacing.md};
 }`;
 '''
         displayOrder: 6
@@ -2383,7 +2383,7 @@ return `._id {
           '''
 return {
   as: "div",
-  hide: () => args.fns.store.loading || args.fns.store.error || args.fns.store.totalPages <= 1
+  hide: () => f.store.loading || f.store.error || f.store.totalPages <= 1
 };
 '''
       }
@@ -2396,16 +2396,16 @@ return {
           '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
         displayOrder: 1
         componentName: Html
         props:
           '''
-const currentPage = args.fns.store.currentPage;
-const totalPages = args.fns.store.totalPages;
-const totalCount = args.fns.store.totalCount;
+const currentPage = f.store.currentPage;
+const totalPages = f.store.totalPages;
+const totalCount = f.store.totalCount;
 
 return {
   as: "div",
@@ -2422,7 +2422,7 @@ return {
           '''
 return `._id {
   display: flex;
-  gap: ${args.theme.var.spacing.xs};
+  gap: ${t.var.spacing.xs};
   align-items: center;
 }`;
 '''
@@ -2442,23 +2442,23 @@ return {
       P: {
         css:
           '''
-const currentPage = args.fns.store.currentPage;
+const currentPage = f.store.currentPage;
 const isDisabled = currentPage <= 1;
 
 return `._id {
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  background: ${args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.sm};
-  color: ${args.theme.var.color.text};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  background: ${t.var.color.background};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.sm};
+  color: ${t.var.color.text};
   font-size: 0.875rem;
   cursor: ${isDisabled ? 'not-allowed' : 'pointer'};
   opacity: ${isDisabled ? '0.5' : '1'};
   transition: all 0.2s ease;
 
   &:hover:not(:disabled) {
-    background: ${args.theme.var.color.background_dark_100};
-    border-color: ${args.theme.var.color.primary};
+    background: ${t.var.color.background_dark_100};
+    border-color: ${t.var.color.primary};
   }
 }`;
 '''
@@ -2466,13 +2466,13 @@ return `._id {
         componentName: Html
         props:
           '''
-const currentPage = args.fns.store.currentPage;
+const currentPage = f.store.currentPage;
 const isDisabled = currentPage <= 1;
 
 return {
   as: "button",
   text: "← Previous",
-  onClick: args.fns.goToPreviousPage,
+  onClick: f.goToPreviousPage,
   disabled: isDisabled
 };
 '''
@@ -2487,7 +2487,7 @@ return {
           '''
 return `._id {
   display: flex;
-  gap: ${args.theme.var.spacing.xs};
+  gap: ${t.var.spacing.xs};
 }`;
 '''
         loop: true
@@ -2497,7 +2497,7 @@ return `._id {
           '''
 return {
   as: "div",
-  data: args.fns.getVisiblePages()
+  data: f.getVisiblePages()
 };
 '''
       }
@@ -2508,18 +2508,18 @@ return {
       P: {
         css:
           '''
-const pageNum = args.contextData.pageNum;
-const currentPage = args.fns.store.currentPage;
+const pageNum = c.pageNum;
+const currentPage = f.store.currentPage;
 const isEllipsis = pageNum === '...';
 const isActive = pageNum === currentPage;
 
 return `._id {
   min-width: 40px;
-  padding: ${args.theme.var.spacing.sm};
-  background: ${isActive ? args.theme.var.color.primary : args.theme.var.color.background};
-  border: 1px solid ${isActive ? args.theme.var.color.primary : args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.sm};
-  color: ${isActive ? args.theme.var.color.primary_text : args.theme.var.color.text};
+  padding: ${t.var.spacing.sm};
+  background: ${isActive ? t.var.color.primary : t.var.color.background};
+  border: 1px solid ${isActive ? t.var.color.primary : t.var.color.border};
+  border-radius: ${t.var.borderRadius.sm};
+  color: ${isActive ? t.var.color.primary_text : t.var.color.text};
   font-size: 0.875rem;
   font-weight: ${isActive ? '700' : '400'};
   cursor: ${isEllipsis || isActive ? 'default' : 'pointer'};
@@ -2528,8 +2528,8 @@ return `._id {
 
   ${!isEllipsis && !isActive ? `
     &:hover {
-      background: ${args.theme.var.color.background_dark_100};
-      border-color: ${args.theme.var.color.primary};
+      background: ${t.var.color.background_dark_100};
+      border-color: ${t.var.color.primary};
     }
   ` : ''}
 }`;
@@ -2538,15 +2538,15 @@ return `._id {
         componentName: Html
         props:
           '''
-const pageNum = args.contextData.pageNum;
-const currentPage = args.fns.store.currentPage;
+const pageNum = c.pageNum;
+const currentPage = f.store.currentPage;
 const isEllipsis = pageNum === '...';
 const isActive = pageNum === currentPage;
 
 return {
   as: isEllipsis ? "span" : "button",
   text: pageNum,
-  onClick: isEllipsis ? undefined : () => args.fns.goToPage(pageNum),
+  onClick: isEllipsis ? undefined : () => f.goToPage(pageNum),
   disabled: isActive
 };
 '''
@@ -2558,24 +2558,24 @@ return {
       P: {
         css:
           '''
-const currentPage = args.fns.store.currentPage;
-const totalPages = args.fns.store.totalPages;
+const currentPage = f.store.currentPage;
+const totalPages = f.store.totalPages;
 const isDisabled = currentPage >= totalPages;
 
 return `._id {
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  background: ${args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.sm};
-  color: ${args.theme.var.color.text};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  background: ${t.var.color.background};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.sm};
+  color: ${t.var.color.text};
   font-size: 0.875rem;
   cursor: ${isDisabled ? 'not-allowed' : 'pointer'};
   opacity: ${isDisabled ? '0.5' : '1'};
   transition: all 0.2s ease;
 
   &:hover:not(:disabled) {
-    background: ${args.theme.var.color.background_dark_100};
-    border-color: ${args.theme.var.color.primary};
+    background: ${t.var.color.background_dark_100};
+    border-color: ${t.var.color.primary};
   }
 }`;
 '''
@@ -2583,14 +2583,14 @@ return `._id {
         componentName: Html
         props:
           '''
-const currentPage = args.fns.store.currentPage;
-const totalPages = args.fns.store.totalPages;
+const currentPage = f.store.currentPage;
+const totalPages = f.store.totalPages;
 const isDisabled = currentPage >= totalPages;
 
 return {
   as: "button",
   text: "Next →",
-  onClick: args.fns.goToNextPage,
+  onClick: f.goToNextPage,
   disabled: isDisabled
 };
 '''
@@ -2604,19 +2604,19 @@ return {
           '''
 return `._id {
   text-align: center;
-  padding: ${args.theme.var.spacing.xl};
-  color: ${args.theme.var.color.text_light_500};
+  padding: ${t.var.spacing.xl};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
         displayOrder: 7
         componentName: Html
         props:
           '''
-const filteredUsers = args.fns.getFilteredUsers();
+const filteredUsers = f.getFilteredUsers();
 return {
   as: "div",
   text: "No users found matching your filters",
-  hide: () => filteredUsers.length > 0 || args.fns.store.loading || args.fns.store.error
+  hide: () => filteredUsers.length > 0 || f.store.loading || f.store.error
 };
 '''
       }

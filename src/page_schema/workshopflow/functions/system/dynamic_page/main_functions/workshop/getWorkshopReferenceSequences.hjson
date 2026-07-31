@@ -8,19 +8,19 @@
         description: Returns all WorkshopReferenceSequence nodes as vertex-shaped rows (ordered by key).
         body:
           '''
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return { success: false, message: "Not authenticated", data: { sequences: [] } };
 }
 
-const res = await args.session.run(
+const res = await _.session.run(
   `MATCH (s:WorkshopReferenceSequence)
    RETURN s
    ORDER BY coalesce(s.key, "") ASC`,
   {}
 );
 
-const sequences = args.processResult(res.records, args.context, "s");
+const sequences = _.processResult(res.records, _.context, "s");
 
 return {
   success: true,

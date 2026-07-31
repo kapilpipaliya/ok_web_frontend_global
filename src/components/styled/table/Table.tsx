@@ -330,11 +330,11 @@ function LoadMoreButton(props: Readonly<{ onClick: () => void }>) {
       <As
         as="button"
         css={`return \`._id {
-  background-color: \${args.theme.var.color.primary};
+  background-color: \${t.var.color.primary};
   border-right: 5px solid;
   cursor: pointer;
   padding: 10px;
-  color: \${args.theme.var.color.primary_text};
+  color: \${t.var.color.primary_text};
 }\`;`}
         onClick={props.onClick}
       >
@@ -376,7 +376,7 @@ function TableBody(
             <TableBodyCell
               css={
                 props.selectedRows.includes(row)
-                  ? "return `._id {background-color: ${args.theme.var.color.primary_light_600}; color: ${args.theme.var.color.primary_light_600_text};}`;"
+                  ? "return `._id {background-color: ${t.var.color.primary_light_600}; color: ${t.var.color.primary_light_600_text};}`;"
                   : ""
               }
               index={index()}
@@ -399,7 +399,7 @@ function TableBody(
               <TableBodyCell
                 css={
                   props.selectedRows.includes(row)
-                    ? "return `._id {background-color: ${args.theme.var.color.primary_light_600}; color: ${args.theme.var.color.primary_light_600_text};}`;"
+                    ? "return `._id {background-color: ${t.var.color.primary_light_600}; color: ${t.var.color.primary_light_600_text};}`;"
                     : ""
                 }
                 index={index()}

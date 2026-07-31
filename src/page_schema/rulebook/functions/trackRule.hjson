@@ -9,7 +9,7 @@
         body: '''
 try {
   // Extract input parameters from the request
-  const { ruleId, date, status, completionPercentage, notes, mood, difficulty, timeSpent } = args.contextData;
+  const { ruleId, date, status, completionPercentage, notes, mood, difficulty, timeSpent } = c;
 
   // Validate required fields
   if (!ruleId) {
@@ -25,7 +25,7 @@ try {
   }
 
   // Get current authenticated user from session
-  const user = await args.getUserFromSession();
+  const user = await _.getUserFromSession();
   if (!user) {
     throw new Error("User session not found. Please log in and try again.");
   }
@@ -84,7 +84,7 @@ try {
     RETURN r
   `;
 
-  const ruleResult = await args.session.run(ruleCheckQuery, {
+  const ruleResult = await _.session.run(ruleCheckQuery, {
     userUuid: user.P.uuid,
     ruleId
   });
@@ -94,7 +94,7 @@ try {
   }
 
   const ruleNode = ruleResult.records[0].get('r');
-  const rule = args.convertNodeToJson(ruleNode);
+  const rule = _.convertNodeToJson(ruleNode);
   // No longer need tracking key - will use unique properties for MERGE
 
   // STEP 1: Create or update the RuleTracking entry
@@ -133,7 +133,7 @@ try {
     RETURN finalTracking as rt, r
   `;
 
-  const trackingResult = await args.session.run(mergeTrackingQuery, {
+  const trackingResult = await _.session.run(mergeTrackingQuery, {
     userUuid: user.P.uuid,
     ruleId,
     date,
@@ -146,7 +146,7 @@ try {
   });
 
   const trackingNode = trackingResult.records[0].get('rt');
-  const tracking = args.convertNodeToJson(trackingNode);
+  const tracking = _.convertNodeToJson(trackingNode);
 
   // STEP 2: Update streak information
   // No longer need streak key - will use unique properties
@@ -158,7 +158,7 @@ try {
     RETURN rs
   `;
 
-  const currentStreakResult = await args.session.run(currentStreakQuery, {
+  const currentStreakResult = await _.session.run(currentStreakQuery, {
     userUuid: user.P.uuid,
     ruleId
   });
@@ -175,7 +175,7 @@ try {
 
   if (currentStreakResult.records.length > 0) {
     const currentStreakNode = currentStreakResult.records[0].get('rs');
-    const currentStreak = args.convertNodeToJson(currentStreakNode);
+    const currentStreak = _.convertNodeToJson(currentStreakNode);
     streakData = {
       currentStreak: currentStreak.P.currentStreak || 0,
       longestStreak: currentStreak.P.longestStreak || 0,
@@ -258,7 +258,7 @@ try {
     RETURN finalStreak as rs
   `;
 
-  const streakResult = await args.session.run(updateStreakQuery, {
+  const streakResult = await _.session.run(updateStreakQuery, {
     userUuid: user.P.uuid,
     ruleId,
     currentStreak: newStreakData.currentStreak,
@@ -271,7 +271,7 @@ try {
   });
 
   const streakNode = streakResult.records[0].get('rs');
-  const streak = args.convertNodeToJson(streakNode);
+  const streak = _.convertNodeToJson(streakNode);
 
   return {
     success: true,

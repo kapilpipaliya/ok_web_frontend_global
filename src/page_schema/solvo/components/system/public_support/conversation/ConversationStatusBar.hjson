@@ -28,7 +28,7 @@ return `._id {
           '''
 return {
   as: "div",
-  hide: !args.fns.hasCredentials?.() || args.fns.isLoadingConversation?.()
+  hide: !f.hasCredentials?.() || f.isLoadingConversation?.()
 };'''
       }
     },
@@ -43,27 +43,27 @@ return {
 return `._id {
   padding: 0.35rem 0.75rem;
   border-radius: 9999px;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   background: transparent;
   font-size: 0.8125rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   cursor: pointer;
 }
 
 ._id:hover {
-  background: ${args.theme.var.color.background_light_100};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background_light_100};
+  color: ${t.var.color.text};
 }`;
 '''
         props:
           '''
-const showForm = args.fns.showInternalNoteForm?.() === true;
+const showForm = f.showInternalNoteForm?.() === true;
 return {
   as: "button",
   type: "button",
-  hide: !args.fns.canShowInternalNoteTools?.(),
+  hide: !f.canShowInternalNoteTools?.(),
   text: showForm ? "Cancel note" : "Add internal note",
-  onClick: () => args.fns.setShowInternalNoteForm?.(!showForm)
+  onClick: () => f.setShowInternalNoteForm?.(!showForm)
 };'''
       }
     },
@@ -75,15 +75,15 @@ return {
         displayOrder: 2
         css:
           '''
-const useToken = args.fns.usesTokenAuth?.() === true;
+const useToken = f.usesTokenAuth?.() === true;
 return useToken
   ? `._id {
   padding: 0.35rem 0.75rem;
   border-radius: 0.5rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   background: transparent;
   font-size: 0.8125rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   cursor: pointer;
   margin-left: auto;
 }
@@ -95,10 +95,10 @@ return useToken
   : `._id {
   padding: 0.35rem 0.75rem;
   border-radius: 9999px;
-  border: 1px solid ${args.theme.var.color.error};
+  border: 1px solid ${t.var.color.error};
   background: transparent;
   font-size: 0.8125rem;
-  color: ${args.theme.var.color.error};
+  color: ${t.var.color.error};
   cursor: pointer;
   margin-left: auto;
 }
@@ -110,18 +110,18 @@ return useToken
 '''
         props:
           '''
-const ticket = args.fns.ticketVertex?.();
-const hideForCustomer = args.fns.usesTokenAuth?.() && !args.fns.canCloseTicketNow?.();
+const ticket = f.ticketVertex?.();
+const hideForCustomer = f.usesTokenAuth?.() && !f.canCloseTicketNow?.();
 return {
   as: "button",
   type: "button",
   hide: !ticket || hideForCustomer,
-  text: args.fns.isTicketClosed?.() && !args.fns.usesTokenAuth?.() ? "Closed" : "Close ticket",
+  text: f.isTicketClosed?.() && !f.usesTokenAuth?.() ? "Closed" : "Close ticket",
   disabled:
-    args.fns.isSendingReply?.() ||
-    args.fns.isBusyStatus?.() ||
-    (args.fns.isTicketClosed?.() && !args.fns.usesTokenAuth?.()),
-  onClick: () => void args.fns.closeTicket?.()
+    f.isSendingReply?.() ||
+    f.isBusyStatus?.() ||
+    (f.isTicketClosed?.() && !f.usesTokenAuth?.()),
+  onClick: () => void f.closeTicket?.()
 };'''
       }
     },
@@ -136,10 +136,10 @@ return {
 return `._id {
   padding: 0.35rem 0.75rem;
   border-radius: 0.5rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   background: transparent;
   font-size: 0.8125rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   cursor: pointer;
 }
 
@@ -150,14 +150,14 @@ return `._id {
 '''
         props:
           '''
-const ticket = args.fns.ticketVertex?.();
+const ticket = f.ticketVertex?.();
 return {
   as: "button",
   type: "button",
-  hide: !ticket || !args.fns.canReopenTicketNow?.(),
+  hide: !ticket || !f.canReopenTicketNow?.(),
   text: "Reopen ticket",
-  disabled: args.fns.isBusyStatus?.(),
-  onClick: () => void args.fns.reopenTicket?.()
+  disabled: f.isBusyStatus?.(),
+  onClick: () => void f.reopenTicket?.()
 };'''
       }
     }

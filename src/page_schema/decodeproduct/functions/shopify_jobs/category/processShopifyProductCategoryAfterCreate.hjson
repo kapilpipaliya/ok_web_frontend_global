@@ -9,9 +9,9 @@
           '''
 const QUEUE_NAME = 'processShopifyProductCategoryAfterCreate';
 
-const helpers = await args.executeNamedServerFunction(
+const helpers = await s(
   { functionName: 'shopifyQueueHelpers', contextData: {} },
-  { functionLookupSubDomain: args.subDomain }
+  { functionLookupSubDomain: _.subDomain }
 );
 if (!helpers.result?.success) {
   console.error('Shopify queue helpers init failed', helpers.result?.error);
@@ -20,7 +20,7 @@ if (!helpers.result?.success) {
 const h = helpers.result.data;
 const runWithSession = h.runWithSession;
 
-const doJob = async (args, jobData, dbSession) => {
+const doJob = async (_, jobData, dbSession) => {
   const { parentVertexLabel, name, vertexId, result, shop } = jobData;
   if (parentVertexLabel !== 'ShopifyProductCategory') return;
 
@@ -32,7 +32,7 @@ const doJob = async (args, jobData, dbSession) => {
     return;
   }
 
-  const shopify = await args.getShopifyClient();
+  const shopify = await _.getShopifyClient();
   let admin;
   try {
     const authResult = await shopify.unauthenticated.admin(shop);
@@ -108,7 +108,7 @@ const doJob = async (args, jobData, dbSession) => {
       console.log(`✅ Created collection in Shopify: ${shopifyCollectionId} (${createdCollection.title})`);
       if (h && shop) {
         try {
-          const qMenu = h.createShopifyQueue(args, 'processShopifyMenuAfterCreate');
+          const qMenu = h.createShopifyQueue(_, 'processShopifyMenuAfterCreate');
           await h.addShopifyJob(qMenu, 'processShopifyMenuAfterCreate', {
             shop,
             parentVertexLabel: 'ShopifyProductCategory',
@@ -122,7 +122,7 @@ const doJob = async (args, jobData, dbSession) => {
           console.error('processShopifyMenuAfterCreate enqueue:', e);
         }
         try {
-          const q = h.createShopifyQueue(args, 'processCreateAllCategoriesMenu');
+          const q = h.createShopifyQueue(_, 'processCreateAllCategoriesMenu');
           await h.addShopifyJob(q, 'processCreateAllCategoriesMenu', { shop, menuTitle: 'Categories', menuHandle: 'categories' });
           await q.close();
         } catch (e) {
@@ -137,15 +137,15 @@ const doJob = async (args, jobData, dbSession) => {
   }
 };
 
-if (args.contextData?.action === 'start') {
-  const { Worker } = args.bullmq;
+if (c?.action === 'start') {
+  const { Worker } = _.bullmq;
   const connection = h.getRedisConnection();
   if (!connection || !connection.host) throw new Error('Invalid Redis connection for Shopify jobs');
   let workerInstance;
   try {
     workerInstance = new Worker(QUEUE_NAME, async (job) => {
-      await runWithSession(args, job.data.shop, async (dbSession) => {
-        await doJob(args, job.data, dbSession);
+      await runWithSession(_, job.data.shop, async (dbSession) => {
+        await doJob(_, job.data, dbSession);
       });
     }, { connection, concurrency: 2, lockDuration: 120000 });
     workerInstance.on('failed', (job, err) => console.error('processShopifyProductCategoryAfterCreate: Job failed', job?.id, err?.message));

@@ -13,7 +13,7 @@
       P: {
         css:
           '''
-const hasCustomClass = args.contextData.props?.class;
+const hasCustomClass = c.props?.class;
 
 return `._id {
   ${!hasCustomClass ? 'width: 100%;' : ''}
@@ -23,9 +23,9 @@ return `._id {
 }
 
 ._id .ts-control {
-  background: ${args.theme.var.color.background_dark_30} !important;
-  border: 1px solid ${args.theme.var.color.border};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background_dark_30} !important;
+  border: 1px solid ${t.var.color.border};
+  color: ${t.var.color.text};
   border-radius: 0.375rem;
   min-height: 52px;
   padding: 0.5rem 0.75rem;
@@ -37,33 +37,33 @@ return `._id {
 }
 
 ._id .ts-control:hover:not(.disabled) {
-  border-color: ${args.theme.var.color.border_dark_200};
+  border-color: ${t.var.color.border_dark_200};
 }
 
 ._id .ts-control.focus {
   outline: none;
-  border-color: ${args.theme.var.color.primary};
-  box-shadow: 0 0 0 3px ${args.theme.var.color.primary};
+  border-color: ${t.var.color.primary};
+  box-shadow: 0 0 0 3px ${t.var.color.primary};
 }
 
 ._id .ts-control.disabled {
-  background: ${args.theme.var.color.background_light_100};
+  background: ${t.var.color.background_light_100};
   opacity: 0.6;
   cursor: not-allowed;
 }
 
 ._id .ts-control.single .ts-control-input {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }
 
 ._id .ts-control.single .ts-control-input::placeholder {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }
 
 /* Dropdown */
 ._id .ts-dropdown {
-  background: ${args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.border};
+  background: ${t.var.color.background};
+  border: 1px solid ${t.var.color.border};
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   border-radius: 0.375rem;
   margin-top: 2px;
@@ -76,7 +76,7 @@ return `._id {
 
 /* Options */
 ._id .ts-dropdown .option {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   padding: 0.5rem 0.75rem;
   transition: background 0.15s ease;
   min-height: 40px;
@@ -86,17 +86,17 @@ return `._id {
 
 ._id .ts-dropdown .option:hover,
 ._id .ts-dropdown .option.active {
-  background: ${args.theme.var.color.primary_light_600};
-  color: ${args.theme.var.color.primary_light_600_text};
+  background: ${t.var.color.primary_light_600};
+  color: ${t.var.color.primary_light_600_text};
 }
 
 ._id .ts-dropdown .option.selected {
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
 }
 
 ._id .ts-dropdown .option.selected:hover {
-  background: ${args.theme.var.color.primary_dark_100};
+  background: ${t.var.color.primary_dark_100};
 }
 
 /* Option content with descriptions */
@@ -114,8 +114,8 @@ return `._id {
 
 /* Multiple selection items */
 ._id .ts-control.multi .item {
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
   border-radius: 0.25rem;
   padding: 0.25rem 0.5rem;
   margin: 0.125rem;
@@ -123,13 +123,13 @@ return `._id {
 }
 
 ._id .ts-control.multi .item .remove {
-  color: ${args.theme.var.color.primary_text};
+  color: ${t.var.color.primary_text};
   margin-left: 0.25rem;
   cursor: pointer;
 }
 
 ._id .ts-control.multi .item .remove:hover {
-  color: ${args.theme.var.color.error};
+  color: ${t.var.color.error};
 }
 
 /* Arrow/Caret */
@@ -139,7 +139,7 @@ return `._id {
   right: 0.75rem;
   top: 50%;
   transform: translateY(-50%);
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   font-size: 0.75rem;
   pointer-events: none;
   transition: transform 0.15s ease;
@@ -162,7 +162,7 @@ return `._id {
 
 /* No results */
 ._id .ts-dropdown .no-results {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   padding: 0.75rem;
   text-align: center;
   font-style: italic;
@@ -188,12 +188,12 @@ return `._id {
   }
 
   ._id .ts-dropdown .ts-dropdown-content {
-    background: ${args.theme.var.color.background};
+    background: ${t.var.color.background};
     border-radius: 0.5rem;
     max-height: 80vh;
     width: 100%;
     max-width: 100%;
-    border: 1px solid ${args.theme.var.color.border};
+    border: 1px solid ${t.var.color.border};
   }
 
   ._id .ts-dropdown .option {
@@ -208,16 +208,16 @@ return `._id {
 }
 
 ._id .ts-dropdown-content::-webkit-scrollbar-track {
-  background: ${args.theme.var.color.background_light_100};
+  background: ${t.var.color.background_light_100};
 }
 
 ._id .ts-dropdown-content::-webkit-scrollbar-thumb {
-  background: ${args.theme.var.color.border};
+  background: ${t.var.color.border};
   border-radius: 3px;
 }
 
 ._id .ts-dropdown-content::-webkit-scrollbar-thumb:hover {
-  background: ${args.theme.var.color.border_dark_200};
+  background: ${t.var.color.border_dark_200};
 }`;
 '''
         displayOrder: 1
@@ -226,10 +226,10 @@ return `._id {
 let tomSelectInstance = null;
 
 // Create signals for options, loading state, and error state
-const [options, setOptions] = args.createSignal([]);
-const [optionsLoading, setOptionsLoading] = args.createSignal(false);
-const [optionsError, setOptionsError] = args.createSignal(null);
-const [selectRef, setSelectRef] = args.createSignal(null);
+const [options, setOptions] = _.createSignal([]);
+const [optionsLoading, setOptionsLoading] = _.createSignal(false);
+const [optionsError, setOptionsError] = _.createSignal(null);
+const [selectRef, setSelectRef] = _.createSignal(null);
 
 const setPlaceholder = (tomSelectInstance, placeholder) => {
   if (!tomSelectInstance) {
@@ -254,7 +254,7 @@ const loadOptionsFromFunction = async (optionType, subType) => {
       params.subType = subType;
     }
 
-    const result = await args.fns.executeYTOFunction("getSelectOptions", { params });
+    const result = await f.executeYTOFunction("getSelectOptions", { params });
 
     if (result.error) {
       throw new Error(result.error);
@@ -296,7 +296,7 @@ const loadOptionsFromCustomFunction = async (functionName, singularName, pluralN
   setPlaceholder(tomSelectInstance, `Loading ${itemName.toLowerCase()}...`);
 
   try {
-    const result = await args.fns.executeYTOFunction(functionName, functionContext || {});
+    const result = await f.executeYTOFunction(functionName, functionContext || {});
 
     if (result.error) {
       throw new Error(result.error);
@@ -513,7 +513,7 @@ const formatOptions = (opts, value, multiple, loading = false, error = null) => 
 };
 
 const initializeTomSelect = () => {
-  const props = args.contextData.props || {};
+  const props = c.props || {};
   const placeholder = props.placeholder || "Select an option...";
   const disabled = props.disabled || false;
   const required = props.required || false;
@@ -623,7 +623,7 @@ const initializeTomSelect = () => {
 
 const setupEffects = () => {
   // Create effect to update options when they change (including loading and error states)
-  args.createEffect(() => {
+  _.createEffect(() => {
     const currentOptions = options();
     const loading = optionsLoading();
     const error = optionsError();
@@ -677,7 +677,7 @@ const setupEffects = () => {
         tomSelectInstance.refreshOptions(false);
 
         // Re-set the current value after options are updated to ensure it's selected
-        const currentValue = args.contextData.props?.value;
+        const currentValue = c.props?.value;
         if (currentValue) {
           setTomSelectValue(currentValue);
         }
@@ -688,23 +688,23 @@ const setupEffects = () => {
   });
 
   // Create effect to watch for changes in props options (when not using optionType)
-  args.createEffect(() => {
-    const newPropsOptions = args.contextData.props?.options || [];
-    const optionType = args.contextData.props?.optionType || "";
+  _.createEffect(() => {
+    const newPropsOptions = c.props?.options || [];
+    const optionType = c.props?.optionType || "";
     if (!optionType && newPropsOptions.length > 0) {
       setOptions(newPropsOptions);
     }
   });
 
   // Create effect to update value when props change
-  args.createEffect(() => {
-    const newValue = args.contextData.props?.value;
+  _.createEffect(() => {
+    const newValue = c.props?.value;
     setTomSelectValue(newValue);
   });
 
   // Create effect to reload options when optionType or subType changes
-  args.createEffect(args.on(
-    () => [args.contextData.props?.optionType || "", args.contextData.props?.subType || ""],
+  _.createEffect(_.on(
+    () => [c.props?.optionType || "", c.props?.subType || ""],
     ([currentOptionType, currentSubType], prev) => {
       // Handle first run when prev is undefined
       const [prevOptionType, prevSubType] = prev || ["", ""];
@@ -719,15 +719,15 @@ const setupEffects = () => {
   ));
 
   // Create effect to reload options when custom function properties change
-  args.createEffect(args.on(
+  _.createEffect(_.on(
     () => [
-      args.contextData.props?.functionName || "",
-      args.contextData.props?.singularName || "",
-      args.contextData.props?.pluralName || "",
-      args.contextData.props?.valueKey || "id",
-      args.contextData.props?.labelKey || "title",
-      args.contextData.props?.dataKey || "",
-      args.contextData.props?.functionContext || null
+      c.props?.functionName || "",
+      c.props?.singularName || "",
+      c.props?.pluralName || "",
+      c.props?.valueKey || "id",
+      c.props?.labelKey || "title",
+      c.props?.dataKey || "",
+      c.props?.functionContext || null
     ],
     ([currentFunctionName, currentSingularName, currentPluralName, currentValueKey, currentLabelKey, currentDataKey, currentFunctionContext], prev) => {
       // Handle first run when prev is undefined
@@ -749,8 +749,8 @@ const setupEffects = () => {
   ));
 
   // Create effect to update disabled state when props change
-  args.createEffect(() => {
-    const isDisabled = args.contextData.props?.disabled || false;
+  _.createEffect(() => {
+    const isDisabled = c.props?.disabled || false;
     if (tomSelectInstance) {
       if (isDisabled) {
         tomSelectInstance.disable();
@@ -824,31 +824,31 @@ return {
         componentName: Html
         props:
           '''
-const selectRef = args.fns.selectRef();
+const selectRef = f.selectRef();
 
 // Get props
-const initialOptions = args.contextData.props?.options || [];
-const optionType = args.contextData.props?.optionType || "";
-const subType = args.contextData.props?.subType || "";
-const functionName = args.contextData.props?.functionName || "";
-const singularName = args.contextData.props?.singularName || "";
-const pluralName = args.contextData.props?.pluralName || "";
-const valueKey = args.contextData.props?.valueKey || "id";
-const labelKey = args.contextData.props?.labelKey || "title";
-const dataKey = args.contextData.props?.dataKey || "";
-const functionContext = args.contextData.props?.functionContext || null;
-const value = args.contextData.props?.value || "";
-const placeholder = args.contextData.props?.placeholder || "Select an option...";
-const disabled = args.contextData.props?.disabled || false;
-const required = args.contextData.props?.required || false;
-const search = args.contextData.props?.search !== false;
-const multiple = args.contextData.props?.multiple || false;
-const className = args.contextData.props?.class;
+const initialOptions = c.props?.options || [];
+const optionType = c.props?.optionType || "";
+const subType = c.props?.subType || "";
+const functionName = c.props?.functionName || "";
+const singularName = c.props?.singularName || "";
+const pluralName = c.props?.pluralName || "";
+const valueKey = c.props?.valueKey || "id";
+const labelKey = c.props?.labelKey || "title";
+const dataKey = c.props?.dataKey || "";
+const functionContext = c.props?.functionContext || null;
+const value = c.props?.value || "";
+const placeholder = c.props?.placeholder || "Select an option...";
+const disabled = c.props?.disabled || false;
+const required = c.props?.required || false;
+const search = c.props?.search !== false;
+const multiple = c.props?.multiple || false;
+const className = c.props?.class;
 
 // Return element props with onMount and onCleanup
 return {
   as: "select",
-  ref: args.fns.setSelectRef,
+  ref: f.setSelectRef,
   placeholder: placeholder,
   disabled: disabled,
   required: required,
@@ -858,27 +858,27 @@ return {
 
     // Check if TomSelect is already loaded
     if (window.TomSelect) {
-      args.fns.initializeTomSelect();
+      f.initializeTomSelect();
     } else {
-      args.fns.loadTomSelectLibrary();
+      f.loadTomSelectLibrary();
     }
 
     // Initialize options based on available properties (priority order)
     if (functionName) {
       // Load options from custom function (highest priority)
-      args.fns.loadOptionsFromCustomFunction(functionName, singularName, pluralName, valueKey, labelKey, dataKey, functionContext);
+      f.loadOptionsFromCustomFunction(functionName, singularName, pluralName, valueKey, labelKey, dataKey, functionContext);
     } else if (optionType) {
       // Load options from getSelectOptions function
-      args.fns.loadOptionsFromFunction(optionType, subType);
+      f.loadOptionsFromFunction(optionType, subType);
     } else if (initialOptions.length === 0) {
       // No function name, optionType and no initial options - keep empty
-      args.fns.setOptions([]);
+      f.setOptions([]);
     } else {
       // Use provided options
-      args.fns.setOptions(initialOptions);
+      f.setOptions(initialOptions);
     }
   },
-  onCleanup: args.fns.cleanupTomSelect
+  onCleanup: f.cleanupTomSelect
 };
 '''
       }

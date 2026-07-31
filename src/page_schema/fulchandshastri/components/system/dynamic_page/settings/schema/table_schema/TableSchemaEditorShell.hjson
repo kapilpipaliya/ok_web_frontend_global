@@ -8,7 +8,7 @@
         description: Tabbed shell for editing all table schema parts (general, columns, formConfig, sidebar).
         fns:
           '''
-const getProps = () => args.contextData.props || {};
+const getProps = () => c.props || {};
 const getTableKey = () => {
   const v = getProps().tableKey;
   return v != null && String(v).trim() !== "" ? String(v).trim() : null;
@@ -16,7 +16,7 @@ const getTableKey = () => {
 const isEmbeddedMode = () => getProps().embeddedMode === true;
 
 const executeYTOFunction = (fn, ctx) =>
-  args.executeNamedServerFunction({ functionName: fn, contextData: ctx || {} });
+  s({ functionName: fn, contextData: ctx || {} });
 
 const TABS = [
   { id: "general", label: "General" },
@@ -25,9 +25,9 @@ const TABS = [
   { id: "sidebar", label: "Sidebar" }
 ];
 
-const [loading, setLoading] = args.createSignal(true);
-const [tableIds, setTableIds] = args.createSignal(null);
-const [activeTab, setActiveTab] = args.createSignal("general");
+const [loading, setLoading] = _.createSignal(true);
+const [tableIds, setTableIds] = _.createSignal(null);
+const [activeTab, setActiveTab] = _.createSignal("general");
 
 const loadTableIds = async () => {
   const tableKey = getTableKey();
@@ -40,13 +40,13 @@ const loadTableIds = async () => {
   try {
     const result = await executeYTOFunction("getTableIds", { tableKey });
     if (!result?.result?.success) {
-      args.showErrorToast?.(result?.result?.message || "Failed to resolve table");
+      _.showErrorToast?.(result?.result?.message || "Failed to resolve table");
       setTableIds(null);
       return;
     }
     setTableIds(result.result.data);
   } catch (error) {
-    args.showErrorToast?.("Failed to resolve table");
+    _.showErrorToast?.("Failed to resolve table");
     setTableIds(null);
   } finally {
     setLoading(false);
@@ -86,14 +86,14 @@ return {
   min-height: 0;
   overflow: hidden;
   height: 100%;
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
           '''return {
   as: "div",
-  onMount: () => { void args.fns.loadTableIds?.(); }
+  onMount: () => { void f.loadTableIds?.(); }
 };'''
       }
     }
@@ -108,8 +108,8 @@ return {
   justify-content: space-between;
   gap: 0.75rem;
   padding: 0.625rem 1rem;
-  border-bottom: 1px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background_light_100};
+  border-bottom: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background_light_100};
   flex-shrink: 0;
 }`;'''
         displayOrder: 1
@@ -126,13 +126,13 @@ return {
   margin: 0;
   font-size: 1rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const ids = args.fns.tableIds?.();
-const tableKey = args.fns.getTableKey?.();
+          '''const ids = f.tableIds?.();
+const tableKey = f.getTableKey?.();
 return {
   as: "h2",
   text: ids?.name ? `Table schema — ${ids.name}` : `Table schema — ${tableKey || ""}`
@@ -162,7 +162,7 @@ return {
         loop: true
         displayOrder: 1
         componentName: Html
-        props: return { data: args.fns.TABS || [] };
+        props: "return { data: f.TABS || [] };"
       }
     }
     {
@@ -172,14 +172,14 @@ return {
         displayOrder: 1
         componentName: Button
         props:
-          '''const tab = args.contextData.tsesTab;
-const active = args.fns.isTabActive?.(tab.id);
+          '''const tab = c.tsesTab;
+const active = f.isTabActive?.(tab.id);
 return {
   variant: active ? "primary" : "secondary",
   size: "sm",
   text: tab.label,
   type: "button",
-  onClick: () => args.fns.setActiveTab?.(tab.id)
+  onClick: () => f.setActiveTab?.(tab.id)
 };'''
       }
     }
@@ -189,7 +189,7 @@ return {
       P: {
         displayOrder: 2
         componentName: LoadingSpinner
-        props: return { hide: args.fns.loading?.() !== true };
+        props: "return { hide: f.loading?.() !== true };"
       }
     }
     {
@@ -209,7 +209,7 @@ return {
         props:
           '''return {
   as: "div",
-  hide: args.fns.loading?.() === true || !args.fns.tableIds?.()
+  hide: f.loading?.() === true || !f.tableIds?.()
 };'''
       }
     }
@@ -221,12 +221,12 @@ return {
         componentName: TableGeneralSchemaEditor
         props:
           '''return {
-  hide: args.fns.isTabActive?.("general") !== true,
-  tableKey: args.fns.getTableKey?.(),
-  schemaKey: args.fns.getSchemaKeyForTab?.("general"),
+  hide: f.isTabActive?.("general") !== true,
+  tableKey: f.getTableKey?.(),
+  schemaKey: f.getSchemaKeyForTab?.("general"),
   title: "General",
-  embeddedMode: args.fns.isEmbeddedMode?.(),
-  onSaved: () => args.fns.onSaved?.()
+  embeddedMode: f.isEmbeddedMode?.(),
+  onSaved: () => f.onSaved?.()
 };'''
       }
     }
@@ -238,11 +238,11 @@ return {
         componentName: TableColumnsSchemaEditor
         props:
           '''return {
-  hide: args.fns.isTabActive?.("columns") !== true,
-  tableKey: args.fns.getTableKey?.(),
-  schemaKey: args.fns.getSchemaKeyForTab?.("columns"),
+  hide: f.isTabActive?.("columns") !== true,
+  tableKey: f.getTableKey?.(),
+  schemaKey: f.getSchemaKeyForTab?.("columns"),
   title: "Columns",
-  onSaved: () => args.fns.onSaved?.()
+  onSaved: () => f.onSaved?.()
 };'''
       }
     }
@@ -254,14 +254,14 @@ return {
         componentName: TableFormConfigSchemaEditor
         props:
           '''return {
-  hide: args.fns.isTabActive?.("formConfig") !== true,
-  isOpen: args.fns.isTabActive?.("formConfig") === true,
-  tableKey: args.fns.getTableKey?.(),
-  schemaKey: args.fns.getSchemaKeyForTab?.("formConfig"),
+  hide: f.isTabActive?.("formConfig") !== true,
+  isOpen: f.isTabActive?.("formConfig") === true,
+  tableKey: f.getTableKey?.(),
+  schemaKey: f.getSchemaKeyForTab?.("formConfig"),
   title: "Form config",
-  embeddedMode: args.fns.isEmbeddedMode?.(),
-  siteLanguages: args.contextData.props?.siteLanguages,
-  onSaved: () => args.fns.onSaved?.()
+  embeddedMode: f.isEmbeddedMode?.(),
+  siteLanguages: c.props?.siteLanguages,
+  onSaved: () => f.onSaved?.()
 };'''
       }
     }
@@ -273,12 +273,12 @@ return {
         componentName: TableSidebarSchemaEditor
         props:
           '''return {
-  hide: args.fns.isTabActive?.("sidebar") !== true,
-  tableKey: args.fns.getTableKey?.(),
-  schemaKey: args.fns.getSchemaKeyForTab?.("sidebar"),
+  hide: f.isTabActive?.("sidebar") !== true,
+  tableKey: f.getTableKey?.(),
+  schemaKey: f.getSchemaKeyForTab?.("sidebar"),
   title: "Sidebar",
-  siteLanguages: args.contextData.props?.siteLanguages,
-  onSaved: () => args.fns.onSaved?.()
+  siteLanguages: c.props?.siteLanguages,
+  onSaved: () => f.onSaved?.()
 };'''
       }
     }

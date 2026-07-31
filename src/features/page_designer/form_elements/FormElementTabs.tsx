@@ -100,7 +100,7 @@ export function PagesPanel() {
       <As
         as="div"
         css={`return \`._id {
-  background-color: \${args.theme.var.color.background_light_100};
+  background-color: \${t.var.color.background_light_100};
   overflow-x: auto;
   flex-shrink: 0;
 }\`;`}

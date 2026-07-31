@@ -21,8 +21,8 @@
   gap: 0.35rem 0.5rem;
   margin-bottom: 1.5rem;
   padding: 0.75rem 1rem;
-  background: ${args.theme.var.color.background_light_50};
-  border: 1px solid ${args.theme.var.color.border};
+  background: ${t.var.color.background_light_50};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.5rem;
 }`;'''
         displayOrder: 1
@@ -43,7 +43,7 @@
         displayOrder: 1
         componentName: Html
         props:
-          '''const items = Array.isArray(args.contextData.props?.items) ? args.contextData.props.items : [];
+          '''const items = Array.isArray(c.props?.items) ? c.props.items : [];
 return {
   as: "fragment",
   data: items
@@ -71,13 +71,13 @@ return {
       P: {
         css:
           '''return `._id {
-  color: ${args.theme.var.color.text_light_400};
+  color: ${t.var.color.text_light_400};
   flex-shrink: 0;
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const index = args.contextData.index ?? 0;
+          '''const index = c.index ?? 0;
 return {
   as: "icon",
   icon: "ph:caret-right",
@@ -92,8 +92,8 @@ return {
       L: Attr
       P: {
         css:
-          '''const items = Array.isArray(args.contextData.props?.items) ? args.contextData.props.items : [];
-const index = args.contextData.index ?? 0;
+          '''const items = Array.isArray(c.props?.items) ? c.props.items : [];
+const index = c.index ?? 0;
 const isLast = index === items.length - 1;
 return `._id {
   border: none;
@@ -102,34 +102,34 @@ return `._id {
   border-radius: 0.25rem;
   font-size: 0.9375rem;
   font-weight: ${isLast ? 600 : 500};
-  color: ${isLast ? args.theme.var.color.text : args.theme.var.color.primary};
+  color: ${isLast ? t.var.color.text : t.var.color.primary};
   cursor: ${isLast ? "default" : "pointer"};
   text-decoration: none;
   transition: background 0.15s ease, color 0.15s ease;
 
   ${!isLast ? `
   &:hover {
-    background: ${args.theme.var.color.primary_light_100};
-    color: ${args.theme.var.color.primary_dark_200};
+    background: ${t.var.color.primary_light_100};
+    color: ${t.var.color.primary_dark_200};
   }
   ` : ""}
 }`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''const crumb = args.contextData.crumb || {};
-const items = Array.isArray(args.contextData.props?.items) ? args.contextData.props.items : [];
-const index = args.contextData.index ?? 0;
+          '''const crumb = c.crumb || {};
+const items = Array.isArray(c.props?.items) ? c.props.items : [];
+const index = c.index ?? 0;
 const isLast = index === items.length - 1;
-const rootLabel = args.contextData.props?.rootLabel || "Gallery";
+const rootLabel = c.props?.rootLabel || "Gallery";
 const label = crumb.isRoot ? (rootLabel || crumb.name || "Gallery") : (crumb.name || "Folder");
-const hrefFor = args.contextData.props?.hrefFor;
-const rootHref = args.contextData.props?.rootHref;
+const hrefFor = c.props?.hrefFor;
+const rootHref = c.props?.rootHref;
 const href = !isLast
   ? (typeof hrefFor === "function" ? hrefFor(crumb) : null)
   : null;
 const resolvedHref = href || (crumb.isRoot && !isLast ? rootHref : null);
-const onNavigate = args.contextData.props?.onNavigate;
+const onNavigate = c.props?.onNavigate;
 return {
   as: isLast ? "span" : (resolvedHref ? "a" : "button"),
   type: isLast || resolvedHref ? undefined : "button",

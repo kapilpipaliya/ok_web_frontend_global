@@ -24,13 +24,13 @@ return `._id {
         displayOrder: 1
         fns:
           '''
-const [isOpen, setIsOpen] = args.createSignal(false);
-const [triggerRef, setTriggerRef] = args.createSignal(null);
-const [floatingRef, setFloatingRef] = args.createSignal(null);
+const [isOpen, setIsOpen] = _.createSignal(false);
+const [triggerRef, setTriggerRef] = _.createSignal(null);
+const [floatingRef, setFloatingRef] = _.createSignal(null);
 let cleanup = null;
 let hideTimer = null;
 
-const getPlacement = () => args.contextData.props?.placement || "top";
+const getPlacement = () => c.props?.placement || "top";
 
 const clearHideTimer = () => {
   if (hideTimer != null) {
@@ -50,10 +50,10 @@ const tearDownFloating = () => {
 const setupFloatingUI = async () => {
   const trigger = triggerRef();
   const floating = floatingRef();
-  if (!trigger || !floating || !args.floatingUI) return;
+  if (!trigger || !floating || !_.floatingUI) return;
 
   try {
-    const { computePosition, flip, shift, offset, autoUpdate } = args.floatingUI;
+    const { computePosition, flip, shift, offset, autoUpdate } = _.floatingUI;
 
     const updatePosition = async () => {
       const { x, y } = await computePosition(trigger, floating, {
@@ -118,7 +118,7 @@ return {
         componentName: Html
         props:
           '''
-const p = args.contextData.props || {};
+const p = c.props || {};
 const rawText = p.text;
 const textNonEmpty =
   typeof rawText === "string"
@@ -131,7 +131,7 @@ return {
   as: "span",
   hide: p.hide === true || !hasText,
   onCleanup: () => {
-    args.fns.tearDownFloating();
+    f.tearDownFloating();
   }
 };
 '''
@@ -153,7 +153,7 @@ return `._id {
   margin-left: 0.25rem;
   border: none;
   background: transparent;
-  border-radius: ${args.theme.var.borderRadius.sm};
+  border-radius: ${t.var.borderRadius.sm};
   cursor: help;
   font-size: 0.75rem;
   line-height: 1;
@@ -163,14 +163,14 @@ return `._id {
 }
 
 ._id:hover {
-  background: ${args.theme.var.color.background_light_200};
+  background: ${t.var.color.background_light_200};
 }`;
 '''
         displayOrder: 1
         componentName: Html
         props:
           '''
-const p = args.contextData.props || {};
+const p = c.props || {};
 const rawText = p.text || "";
 const textTrim =
   typeof rawText === "string" &&
@@ -186,9 +186,9 @@ const aria =
 
 return {
   as: "span",
-  ref: args.fns.setTriggerRef,
-  onMouseEnter: () => args.fns.openTooltip(),
-  onMouseLeave: () => args.fns.scheduleClose(),
+  ref: f.setTriggerRef,
+  onMouseEnter: () => f.openTooltip(),
+  onMouseLeave: () => f.scheduleClose(),
   hide: !hasContent,
   "aria-label": aria,
   tabIndex: 0
@@ -202,10 +202,10 @@ return {
       P: {
         css:
           '''
-const p = args.contextData.props || {};
+const p = c.props || {};
 const tt = p.triggerTint;
 const tint =
-  typeof tt === "function" ? tt() : args.theme.var.color.text_light_500;
+  typeof tt === "function" ? tt() : t.var.color.text_light_500;
 return `._id {
   flex-shrink: 0;
   color: ${tint};
@@ -215,7 +215,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const p = args.contextData.props || {};
+const p = c.props || {};
 const trig = p.triggerIcon;
 if (trig === undefined || trig === null || trig === "") {
   return {
@@ -246,7 +246,7 @@ return {
         componentName: Html
         props:
           '''
-const p = args.contextData.props || {};
+const p = c.props || {};
 const trig = p.triggerIcon;
 if (trig === undefined || trig === null || trig === "") {
   return {
@@ -290,9 +290,9 @@ return `._id {
   z-index: 1100;
   max-width: min(18.75rem, calc(100vw - 1rem));
   padding: 12px;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
-  border: 1px solid ${args.theme.var.color.border};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
+  border: 1px solid ${t.var.color.border};
   border-radius: 4px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
   font-size: 14px;
@@ -317,11 +317,11 @@ return `._id {
           '''
 return {
   as: "div",
-  ref: args.fns.setFloatingRef,
+  ref: f.setFloatingRef,
   role: "tooltip",
-  hide: !args.fns.isOpen(),
-  onMouseEnter: () => args.fns.clearHideTimer(),
-  onMouseLeave: () => args.fns.scheduleClose()
+  hide: !f.isOpen(),
+  onMouseEnter: () => f.clearHideTimer(),
+  onMouseLeave: () => f.scheduleClose()
 };
 '''
       }
@@ -340,7 +340,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const p = args.contextData.props || {};
+const p = c.props || {};
 const hasPolicy = typeof p.policyRows === "function";
 const rawText = p.text || "";
 const text =
@@ -361,7 +361,7 @@ return {
           '''
 return `._id {
   font-size: 16px;
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   margin: 0;
   margin-bottom: 8px;
   font-weight: 600;
@@ -371,7 +371,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const p = args.contextData.props || {};
+const p = c.props || {};
 const hasPolicy = typeof p.policyRows === "function";
 const title =
   typeof p.policyTitle === "string" && p.policyTitle.trim() !== ""
@@ -401,7 +401,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const p = args.contextData.props || {};
+const p = c.props || {};
 const hasPolicy = typeof p.policyRows === "function";
 return {
   as: "div",
@@ -445,14 +445,14 @@ return {
       P: {
         css:
           '''
-const row = args.contextData.policyRow;
+const row = c.policyRow;
 const hasInput = Boolean(row?.hasInput);
 const met = Boolean(row?.met);
 const _c = !hasInput
-  ? args.theme.var.color.text
+  ? t.var.color.text
   : met
-    ? args.theme.var.color.success
-    : args.theme.var.color.error;
+    ? t.var.color.success
+    : t.var.color.error;
 return `._id {
   flex-shrink: 0;
   color: ${_c};
@@ -462,7 +462,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const row = args.contextData.policyRow;
+const row = c.policyRow;
 const hasInput = Boolean(row?.hasInput);
 const met = Boolean(row?.met);
 const icon = !hasInput
@@ -485,14 +485,14 @@ return {
       P: {
         css:
           '''
-const row = args.contextData.policyRow;
+const row = c.policyRow;
 const hasInput = Boolean(row?.hasInput);
 const met = Boolean(row?.met);
 const _c = !hasInput
-  ? args.theme.var.color.text
+  ? t.var.color.text
   : met
-    ? args.theme.var.color.success
-    : args.theme.var.color.text_light_500;
+    ? t.var.color.success
+    : t.var.color.text_light_500;
 return `._id {
   font-size: 14px;
   color: ${_c};
@@ -504,7 +504,7 @@ return `._id {
           '''
 return {
   as: "span",
-  text: args.contextData.policyRow?.message || ""
+  text: c.policyRow?.message || ""
 };
 '''
       }

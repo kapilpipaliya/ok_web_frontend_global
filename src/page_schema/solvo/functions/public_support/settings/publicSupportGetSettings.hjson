@@ -75,7 +75,7 @@ const parseJsonSafe = (value, fallback) => {
   }
 };
 
-let result = await args.session.run(
+let result = await _.session.run(
   `
   MATCH (g:GlobalSetting {key: 'Default'})
   OPTIONAL MATCH (g)-[:GlobalSettingHasSettingsSection]->(doc:SettingsSectionDocument {pageId: 'support'})
@@ -83,13 +83,13 @@ let result = await args.session.run(
   `
 );
 
-if (result.records.length === 0 && args.executeNamedServerFunction) {
+if (result.records.length === 0 && s) {
   try {
-    await args.executeNamedServerFunction({
+    await s({
       functionName: "migrateDynamicPageSettings",
       contextData: { dryRun: false }
     });
-    result = await args.session.run(
+    result = await _.session.run(
       `
       MATCH (g:GlobalSetting {key: 'Default'})
       OPTIONAL MATCH (g)-[:GlobalSettingHasSettingsSection]->(doc:SettingsSectionDocument {pageId: 'support'})
@@ -105,7 +105,7 @@ const sections = {};
 for (let i = 0; i < result.records.length; i++) {
   const node = result.records[i].get("doc");
   if (!node) continue;
-  const doc = args.convertNodeToJson(node);
+  const doc = _.convertNodeToJson(node);
   const sectionId = doc?.P?.sectionId;
   if (!sectionId) continue;
   sections[sectionId] = parseJsonSafe(doc.P?.values, {});

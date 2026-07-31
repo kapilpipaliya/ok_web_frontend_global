@@ -8,7 +8,7 @@
         body:
           '''
 // Get current authenticated user from session
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return {
     success: false,
@@ -17,10 +17,10 @@ if (!actualUser) {
 }
 
 // Get effective user (handles admin impersonation)
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const user = await _.getEffectiveUser(_.session, actualUser, c);
 
 // Get setting from request
-const { setting } = args.contextData;
+const { setting } = c;
 
 if (!setting) {
   return {
@@ -114,7 +114,7 @@ const query = `
   RETURN s
 `;
 
-const result = await args.session.run(query, {
+const result = await _.session.run(query, {
   userUuid: user.P.uuid,
   key: `yto_setting_${user.P.uuid}`,
   sortPreferences: validatedSetting.sortPreferences,
@@ -134,7 +134,7 @@ if (result.records.length === 0) {
 
 // Convert saved node to vertex format
 const savedNode = result.records[0].get('s');
-const savedVertex = args.convertNodeToJson(savedNode);
+const savedVertex = _.convertNodeToJson(savedNode);
 
 return {
   success: true,

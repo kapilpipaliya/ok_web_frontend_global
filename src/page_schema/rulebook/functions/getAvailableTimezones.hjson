@@ -9,7 +9,7 @@
         body: '''
 try {
   // Get current authenticated user from session
-  const user = await args.getUserFromSession();
+  const user = await _.getUserFromSession();
   if (!user) {
     throw new Error("User session not found. Please log in and try again.");
   }
@@ -43,7 +43,7 @@ try {
     RETURN u.timeZone as timeZone
   `;
 
-  const getUserResult = await args.session.run(getUserQuery, {
+  const getUserResult = await _.session.run(getUserQuery, {
     userUuid: user.P.uuid
   });
 

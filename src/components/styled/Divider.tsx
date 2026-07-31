@@ -6,7 +6,7 @@ export function Divider() {
       as="div"
       css={`return \`._id {
       height: 1px;
-      background-color: \${args.theme.var.color.border};
+      background-color: \${t.var.color.border};
       margin: 8px 0;
     }\`;`}
     />

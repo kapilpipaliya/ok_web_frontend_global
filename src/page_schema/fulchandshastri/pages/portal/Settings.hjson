@@ -7,15 +7,15 @@
         fns:
           '''
 const checkAdminRole = () => {
-  const userRoles = args.user?.OUT?.UserRole || [];
+  const userRoles = _.user?.OUT?.UserRole || [];
   return userRoles.some((edgeId) => {
-    const edge = args.graph.edges[edgeId];
-    const role = args.graph.vertexes[edge?.E];
+    const edge = g.edges[edgeId];
+    const role = g.vertexes[edge?.E];
     return role?.P?.key === "Admin";
   });
 };
 
-const [pagePreviewUrls, setPagePreviewUrls] = args.createSignal({ global: "/" });
+const [pagePreviewUrls, setPagePreviewUrls] = _.createSignal({ global: "/" });
 let pagePreviewUrlsLoadPromise = null;
 
 const loadPagePreviewUrls = async () => {
@@ -25,7 +25,7 @@ const loadPagePreviewUrls = async () => {
 
   pagePreviewUrlsLoadPromise = (async () => {
     try {
-      const result = await args.executeNamedServerFunction({
+      const result = await s({
         functionName: "getSettingsPagePreviewUrls",
         contextData: {}
       });
@@ -45,7 +45,7 @@ const loadPagePreviewUrls = async () => {
 };
 
 const getPreviewUrl = () => {
-  const settingsPageId = args.searchParams?.page || "home";
+  const settingsPageId = _.searchParams?.page || "home";
   return pagePreviewUrls()[settingsPageId] || "/";
 };
 
@@ -58,25 +58,25 @@ const refreshPreview = () => {
 
 const onSettingsSaved = () => refreshPreview();
 
-const isSchemaMode = () => args.searchParams?.mode === "schema";
+const isSchemaMode = () => _.searchParams?.mode === "schema";
 
 const setEditorMode = (mode) => {
-  const page = args.searchParams?.page || "home";
+  const page = _.searchParams?.page || "home";
   if (mode === "schema") {
-    args.setSearchParams({ page, mode: "schema" }, { replace: true });
+    _.setSearchParams({ page, mode: "schema" }, { replace: true });
     const minWidth = Math.min(getMaxEditorWidth(), SCHEMA_EDITOR_MIN_WIDTH);
     if (editorPaneWidth() < minWidth) {
       setEditorPaneWidth(minWidth);
       persistEditorWidth(minWidth);
     }
   } else {
-    args.setSearchParams({ page, mode: null }, { replace: true });
+    _.setSearchParams({ page, mode: null }, { replace: true });
   }
 };
 
 const onSchemaSaved = () => {
   refreshPreview();
-  args.showSuccessToast?.("Schema saved — content editor will use the updated fields");
+  _.showSuccessToast?.("Schema saved — content editor will use the updated fields");
 };
 
 const DEFAULT_EDITOR_WIDTH = 560;
@@ -107,8 +107,8 @@ const getMaxEditorWidth = () => {
   return Math.min(MAX_EDITOR_WIDTH, Math.floor(window.innerWidth * 0.85));
 };
 
-const [editorPaneWidth, setEditorPaneWidth] = args.createSignal(loadStoredEditorWidth());
-const [isResizingEditor, setIsResizingEditor] = args.createSignal(false);
+const [editorPaneWidth, setEditorPaneWidth] = _.createSignal(loadStoredEditorWidth());
+const [isResizingEditor, setIsResizingEditor] = _.createSignal(false);
 
 const syncEditorPaneWidth = () => {
   const width = editorPaneWidth();
@@ -141,7 +141,7 @@ const startEditorResize = (event) => {
   document.addEventListener("mouseup", handleMouseUp, true);
 };
 
-const [siteLanguages, setSiteLanguages] = args.createSignal([]);
+const [siteLanguages, setSiteLanguages] = _.createSignal([]);
 let siteLanguagesLoadPromise = null;
 
 const DEFAULT_SITE_LANGUAGES = [
@@ -157,7 +157,7 @@ const loadSiteLanguages = async () => {
 
   siteLanguagesLoadPromise = (async () => {
     try {
-      const result = await args.executeNamedServerFunction({
+      const result = await s({
         functionName: "getSiteLanguages",
         contextData: {}
       });
@@ -177,7 +177,7 @@ const loadSiteLanguages = async () => {
   return siteLanguagesLoadPromise;
 };
 
-args.createEffect(() => {
+_.createEffect(() => {
   editorPaneWidth();
   syncEditorPaneWidth();
 });
@@ -203,7 +203,7 @@ return {
   loadPagePreviewUrls,
   syncEditorPaneWidth,
   executeYTOFunction: (functionName, contextData) =>
-    args.executeNamedServerFunction({
+    s({
       functionName,
       contextData: contextData || {}
     })
@@ -217,24 +217,24 @@ return {
 return {
   isNoPermissionCheck: true,
   onMount: async () => {
-    if (!args.user) {
-      args.navigate("/auth/signin", { replace: true });
+    if (!_.user) {
+      _.navigate("/auth/signin", { replace: true });
       return;
     }
-    if (!args.fns.checkAdminRole?.()) {
-      args.showErrorToast?.("Admin access required");
-      args.navigate("/", { replace: true });
+    if (!f.checkAdminRole?.()) {
+      _.showErrorToast?.("Admin access required");
+      _.navigate("/", { replace: true });
       return;
     }
     await Promise.all([
-      args.fns.loadSiteLanguages?.(),
-      args.fns.loadPagePreviewUrls?.()
+      f.loadSiteLanguages?.(),
+      f.loadPagePreviewUrls?.()
     ]);
-    args.fns.syncEditorPaneWidth?.();
-    window.addEventListener("fulchand-settings-saved", args.fns.onSettingsSaved);
+    f.syncEditorPaneWidth?.();
+    window.addEventListener("fulchand-settings-saved", f.onSettingsSaved);
   },
   onCleanup: () => {
-    window.removeEventListener("fulchand-settings-saved", args.fns.onSettingsSaved);
+    window.removeEventListener("fulchand-settings-saved", f.onSettingsSaved);
     document.documentElement.style.removeProperty("--fulchand-settings-editor-width");
   }
 };
@@ -283,7 +283,7 @@ body.fulchand-settings-resizing [data-fulchand-settings-preview] {
         props:
           '''return {
   as: "section",
-  hide: !args.fns.checkAdminRole?.()
+  hide: !f.checkAdminRole?.()
 };'''
       }
     }
@@ -324,7 +324,7 @@ body.fulchand-settings-resizing [data-fulchand-settings-preview] {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  background: ${args.theme.var.color.background_light_50};
+  background: ${t.var.color.background_light_50};
 
   @media (max-width: 1024px) {
     min-height: 320px;
@@ -349,8 +349,8 @@ body.fulchand-settings-resizing [data-fulchand-settings-preview] {
   justify-content: space-between;
   gap: 0.75rem;
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background};
+  border-bottom: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background};
 }`;'''
         displayOrder: 1
         componentName: Html
@@ -369,12 +369,12 @@ body.fulchand-settings-resizing [data-fulchand-settings-preview] {
   margin: 0;
   font-size: 0.875rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const pageId = args.searchParams?.page || "home";
+          '''const pageId = _.searchParams?.page || "home";
 return {
   as: "h2",
   text: `Live preview — ${pageId}`
@@ -393,7 +393,7 @@ return {
   variant: "ghost",
   size: "sm",
   title: "Refresh preview",
-  onClick: () => args.fns.refreshPreview?.()
+  onClick: () => f.refreshPreview?.()
 };'''
       }
     }
@@ -407,7 +407,7 @@ return {
   width: 100%;
   min-height: 0;
   border: none;
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
 }`;'''
         displayOrder: 2
         componentName: Html
@@ -415,7 +415,7 @@ return {
           '''return {
   as: "iframe",
   "data-fulchand-settings-preview": "",
-  src: args.fns.getPreviewUrl?.(),
+  src: f.getPreviewUrl?.(),
   title: "Page preview",
   loading: "lazy"
 };'''
@@ -450,7 +450,7 @@ return {
 
   &:hover::after,
   body.fulchand-settings-resizing & {
-    background: ${args.theme.var.color.primary};
+    background: ${t.var.color.primary};
   }
 
   @media (max-width: 1024px) {
@@ -466,7 +466,7 @@ return {
   "aria-orientation": "vertical",
   "aria-label": "Resize settings editor",
   title: "Drag to resize settings panel",
-  onMouseDown: (event) => args.fns.startEditorResize?.(event)
+  onMouseDown: (event) => f.startEditorResize?.(event)
 };'''
       }
     }
@@ -475,23 +475,23 @@ return {
       L: Attr
       P: {
         css:
-          '''const resizing = args.fns.isResizingEditor?.();
+          '''const resizing = f.isResizingEditor?.();
 return `._id {
-  width: var(--fulchand-settings-editor-width, ${args.fns.DEFAULT_EDITOR_WIDTH}px);
+  width: var(--fulchand-settings-editor-width, ${f.DEFAULT_EDITOR_WIDTH}px);
   flex-shrink: 0;
   min-width: 0;
   display: flex;
   flex-direction: column;
   min-height: 0;
   overflow: hidden;
-  border-left: 1px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background};
+  border-left: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background};
   transition: ${resizing ? "none" : "width 0.25s ease"};
 
   @media (max-width: 1024px) {
     width: 100%;
     border-left: none;
-    border-top: 1px solid ${args.theme.var.color.border};
+    border-top: 1px solid ${t.var.color.border};
   }
 }`;'''
         displayOrder: 3
@@ -509,15 +509,15 @@ return `._id {
         displayOrder: 1
         componentName: SettingsEditorShell
         props:
-          '''const settingsPageId = args.searchParams?.page || "home";
+          '''const settingsPageId = _.searchParams?.page || "home";
 return {
   settingsPageId,
-  siteLanguages: args.fns.siteLanguages?.() || [],
+  siteLanguages: f.siteLanguages?.() || [],
   embeddedMode: true,
-  isSchemaMode: () => args.fns.isSchemaMode?.() === true,
-  onSetContentMode: () => args.fns.setEditorMode?.("content"),
-  onSetSchemaMode: () => args.fns.setEditorMode?.("schema"),
-  onSchemaSaved: () => args.fns.onSchemaSaved?.(),
+  isSchemaMode: () => f.isSchemaMode?.() === true,
+  onSetContentMode: () => f.setEditorMode?.("content"),
+  onSetSchemaMode: () => f.setEditorMode?.("schema"),
+  onSchemaSaved: () => f.onSchemaSaved?.(),
   schemaTabLabel: "Field schema",
   contentTabLabel: "Content",
   dynamicPageKey: "fullchand_settings_dynamic_page"
@@ -542,7 +542,7 @@ return {
           '''return {
   as: "div",
   "aria-hidden": true,
-  hide: !args.fns.isResizingEditor?.()
+  hide: !f.isResizingEditor?.()
 };'''
       }
     }

@@ -7,10 +7,10 @@
         description: Fetches processing status for specific channel and playlist IDs
         body:
           '''
-const { channelIds = [], playlistIds = [], ownershipId } = args.contextData;
+const { channelIds = [], playlistIds = [], ownershipId } = c;
 
 // Get current authenticated user from session
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return {
     success: false,
@@ -19,14 +19,14 @@ if (!actualUser) {
 }
 
 // Get effective user (handles admin impersonation)
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const user = await _.getEffectiveUser(_.session, actualUser, c);
 
 let channels = [];
 let playlists = [];
 
 // Fetch channel processing status for specific IDs with video counts
 if (channelIds.length > 0) {
-  const channelResult = await args.executeNamedServerFunction({
+  const channelResult = await s({
     functionName: "getChannelsWithVideoCount",
     contextData: {
       userUuid: user.P.uuid,
@@ -43,7 +43,7 @@ if (channelIds.length > 0) {
 
 // Fetch playlist processing status for specific IDs with video counts
 if (playlistIds.length > 0) {
-  const playlistResult = await args.executeNamedServerFunction({
+  const playlistResult = await s({
     functionName: "getPlaylistsWithVideoCount",
     contextData: {
       userUuid: user.P.uuid,

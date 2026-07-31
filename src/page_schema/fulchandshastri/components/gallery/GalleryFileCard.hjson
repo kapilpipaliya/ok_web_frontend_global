@@ -20,9 +20,9 @@
   width: 100%;
   text-align: left;
   padding: 0;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.75rem;
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
   overflow: hidden;
   cursor: pointer;
   text-decoration: none;
@@ -31,22 +31,22 @@
 
   &:hover {
     transform: translateY(-2px);
-    border-color: ${args.theme.var.color.primary_light_300};
+    border-color: ${t.var.color.primary_light_300};
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
   }
 
   &:focus-visible {
-    outline: 2px solid ${args.theme.var.color.primary};
+    outline: 2px solid ${t.var.color.primary};
     outline-offset: 2px;
   }
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const item = args.contextData.props?.item || args.contextData.props || {};
-const index = args.contextData.props?.index ?? args.contextData.index ?? 0;
-const href = args.contextData.props?.href || item.fileUrl || "";
-const onOpen = args.contextData.props?.onOpen;
+          '''const item = c.props?.item || c.props || {};
+const index = c.props?.index ?? c.index ?? 0;
+const href = c.props?.href || item.fileUrl || "";
+const onOpen = c.props?.onOpen;
 return {
   as: href ? "a" : "button",
   type: href ? undefined : "button",
@@ -54,7 +54,7 @@ return {
   target: href ? "_blank" : undefined,
   rel: href ? "noopener noreferrer" : undefined,
   "data-animate": "",
-  ref: (el) => el && args.fns.animateOnView?.(el, { delay: index * 0.05 }),
+  ref: (el) => el && f.animateOnView?.(el, { delay: index * 0.05 }),
   onClick: (e) => {
     if (!onOpen) return;
     e.preventDefault();
@@ -72,7 +72,7 @@ return {
   position: relative;
   width: 100%;
   aspect-ratio: 4 / 3;
-  background: ${args.theme.var.color.background_light_200};
+  background: ${t.var.color.background_light_200};
   overflow: hidden;
 }`;'''
         displayOrder: 1
@@ -99,7 +99,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const item = args.contextData.props?.item || args.contextData.props || {};
+          '''const item = c.props?.item || c.props || {};
 const src = item.previewUrl || "";
 return {
   as: src ? "img" : "fragment",
@@ -120,17 +120,17 @@ return {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   background: linear-gradient(
     135deg,
-    ${args.theme.var.color.primary_light_100} 0%,
-    ${args.theme.var.color.background_light_100} 100%
+    ${t.var.color.primary_light_100} 0%,
+    ${t.var.color.background_light_100} 100%
   );
 }`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''const item = args.contextData.props?.item || args.contextData.props || {};
+          '''const item = c.props?.item || c.props || {};
 return {
   as: "div",
   hide: !!item.previewUrl
@@ -144,7 +144,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const item = args.contextData.props?.item || args.contextData.props || {};
+          '''const item = c.props?.item || c.props || {};
 return {
   as: "icon",
   icon: item.icon || "ph:file",
@@ -168,14 +168,14 @@ return {
   font-weight: 600;
   letter-spacing: 0.02em;
   text-transform: uppercase;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
-  border: 1px solid ${args.theme.var.color.border};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
+  border: 1px solid ${t.var.color.border};
 }`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''const item = args.contextData.props?.item || args.contextData.props || {};
+          '''const item = c.props?.item || c.props || {};
 return {
   as: "span",
   text: item.mediaType || "File"
@@ -208,7 +208,7 @@ return {
   margin: 0;
   font-size: 0.9375rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -216,7 +216,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const item = args.contextData.props?.item || args.contextData.props || {};
+          '''const item = c.props?.item || c.props || {};
 return {
   as: "h3",
   text: item.title || "Untitled"
@@ -231,7 +231,7 @@ return {
           '''return `._id {
   margin: 0;
   font-size: 0.8125rem;
-  color: ${args.theme.var.color.text_light_300};
+  color: ${t.var.color.text_light_300};
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -240,7 +240,7 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const item = args.contextData.props?.item || args.contextData.props || {};
+          '''const item = c.props?.item || c.props || {};
 return {
   as: "p",
   text: item.description || "",

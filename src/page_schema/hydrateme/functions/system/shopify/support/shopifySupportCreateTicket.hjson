@@ -9,20 +9,20 @@
         body:
           '''
 // Create a new Shopify support ticket.
-// shop is automatically available via args.shop (extracted from request query params or Shopify auth)
-// Expected args.contextData:
+// shop is automatically available via _.shop (extracted from request query params or Shopify auth)
+// Expected c:
 // - subject: string - REQUIRED
 // - message: string - REQUIRED
 // - name: string - OPTIONAL (fallback: "Shopify User")
 // - email: string - OPTIONAL (fallback: current user email if available)
 
-const shop = args.shop;
+const shop = _.shop;
 const {
   subject,
   message,
   name,
   email
-} = args.contextData || {};
+} = c || {};
 
 if (!shop || typeof shop !== "string") {
   return {
@@ -48,9 +48,9 @@ const safeName = ((name || "").trim() || "Shopify User").slice(0, 200);
 let safeEmail = (email || "").trim().slice(0, 320);
 
 // Fallback to authenticated user email if available
-if (!safeEmail && args.getUserFromSession) {
+if (!safeEmail && _.getUserFromSession) {
   try {
-    const currentUser = await args.getUserFromSession();
+    const currentUser = await _.getUserFromSession();
     if (currentUser?.P?.email && typeof currentUser.P.email === "string") {
       safeEmail = currentUser.P.email.slice(0, 320);
     }
@@ -91,7 +91,7 @@ const query = `
   RETURN t
 `;
 
-const result = await args.session.run(query, {
+const result = await _.session.run(query, {
   name: safeName,
   email: safeEmail,
   subject: safeSubject || "[No subject]",
@@ -107,7 +107,7 @@ if (!result.records || result.records.length === 0) {
 }
 
 // Populate graph structure and extract created ticket vertex
-const vertices = args.processResult(result.records, args.context, "t");
+const vertices = _.processResult(result.records, _.context, "t");
 const ticket = vertices && vertices[0] ? vertices[0] : null;
 
 return {

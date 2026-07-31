@@ -7,7 +7,7 @@
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const store = args.createStore({
+const store = _.createStore({
   searchTerm: "",
   filterRole: "all",
   filterStatus: "all",
@@ -22,14 +22,14 @@ const store = args.createStore({
   ]
 });
 
-args.contextData.store = store;
+c.store = store;
 return { as: "div" };
 ''',
         css: '''
 return `._id {
   min-height: 100vh;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -113,7 +113,7 @@ return {
 return `._id {
   font-size: 2rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0;
 }`;
 '''
@@ -132,7 +132,7 @@ return {
   variant: "primary",
   icon: "carbon:user-plus",
   onClick: () => {
-    args.showSuccessToast("Add user functionality would open here");
+    _.showSuccessToast("Add user functionality would open here");
   }
 };
 '''
@@ -172,7 +172,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const store = args.contextData.store;
+const store = c.store;
 return {
   as: "input",
   type: "text",
@@ -186,10 +186,10 @@ return {
         css: '''
 return `._id {
   padding: 0.75rem 1rem 0.75rem 2.5rem;
-  border: 1px solid ${args.theme.var.color.background_light_300};
+  border: 1px solid ${t.var.color.background_light_300};
   border-radius: 0.5rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   font-size: 0.875rem;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23666'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'%3E%3C/path%3E%3C/svg%3E");
   background-repeat: no-repeat;
@@ -198,7 +198,7 @@ return `._id {
   
   &:focus {
     outline: none;
-    border-color: ${args.theme.var.color.primary};
+    border-color: ${t.var.color.primary};
   }
 }`;
 '''
@@ -212,7 +212,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const store = args.contextData.store;
+const store = c.store;
 return {
   as: "select",
   value: store.filterRole,
@@ -224,16 +224,16 @@ return {
         css: '''
 return `._id {
   padding: 0.75rem 1rem;
-  border: 1px solid ${args.theme.var.color.background_light_300};
+  border: 1px solid ${t.var.color.background_light_300};
   border-radius: 0.5rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   font-size: 0.875rem;
   cursor: pointer;
   
   &:focus {
     outline: none;
-    border-color: ${args.theme.var.color.primary};
+    border-color: ${t.var.color.primary};
   }
 }`;
 '''
@@ -295,7 +295,7 @@ return {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const store = args.contextData.store;
+const store = c.store;
 return {
   as: "select",
   value: store.filterStatus,
@@ -307,16 +307,16 @@ return {
         css: '''
 return `._id {
   padding: 0.75rem 1rem;
-  border: 1px solid ${args.theme.var.color.background_light_300};
+  border: 1px solid ${t.var.color.background_light_300};
   border-radius: 0.5rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   font-size: 0.875rem;
   cursor: pointer;
   
   &:focus {
     outline: none;
-    border-color: ${args.theme.var.color.primary};
+    border-color: ${t.var.color.primary};
   }
 }`;
 '''
@@ -410,14 +410,14 @@ return {
         displayOrder: 4,
         componentName: "RealAssistantButton",
         props: '''
-const store = args.contextData.store;
+const store = c.store;
 return {
   text: `Bulk Actions (${store.selectedUsers.length})`,
   variant: "secondary",
   disabled: store.selectedUsers.length === 0,
   onClick: () => {
     if (store.selectedUsers.length > 0) {
-      args.showSuccessToast(`Bulk actions for ${store.selectedUsers.length} users`);
+      _.showSuccessToast(`Bulk actions for ${store.selectedUsers.length} users`);
     }
   }
 };
@@ -437,8 +437,8 @@ return { as: "div" };
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.background_light_200};
+  background: ${t.var.color.background};
+  border: 1px solid ${t.var.color.background_light_200};
   border-radius: 0.75rem;
   overflow: hidden;
 }`;
@@ -475,8 +475,8 @@ return { as: "thead" };
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background_light_100};
-  border-bottom: 1px solid ${args.theme.var.color.background_light_200};
+  background: ${t.var.color.background_light_100};
+  border-bottom: 1px solid ${t.var.color.background_light_200};
 }`;
 '''
       }
@@ -501,7 +501,7 @@ return { as: "tr" };
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const store = args.contextData.store;
+const store = c.store;
 return { as: "th" };
 ''',
         css: '''
@@ -510,7 +510,7 @@ return `._id {
   text-align: left;
   font-weight: 600;
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   width: 50px;
 }`;
 '''
@@ -524,7 +524,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const store = args.contextData.store;
+const store = c.store;
 const filteredUsers = store.users.filter(user => {
   const matchesSearch = !store.searchTerm || 
     user.name.toLowerCase().includes(store.searchTerm.toLowerCase()) ||
@@ -575,7 +575,7 @@ return `._id {
   text-align: left;
   font-weight: 600;
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -599,7 +599,7 @@ return `._id {
   text-align: left;
   font-weight: 600;
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -623,7 +623,7 @@ return `._id {
   text-align: left;
   font-weight: 600;
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -647,7 +647,7 @@ return `._id {
   text-align: left;
   font-weight: 600;
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -671,7 +671,7 @@ return `._id {
   text-align: left;
   font-weight: 600;
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -695,7 +695,7 @@ return `._id {
   text-align: right;
   font-weight: 600;
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -723,7 +723,7 @@ return { as: "tbody" };
         contextName: "user",
         loop: true,
         props: '''
-const store = args.contextData.store;
+const store = c.store;
 const filteredUsers = store.users.filter(user => {
   const matchesSearch = !store.searchTerm || 
     user.name.toLowerCase().includes(store.searchTerm.toLowerCase()) ||
@@ -750,11 +750,11 @@ return { as: "tr" };
 ''',
         css: '''
 return `._id {
-  border-bottom: 1px solid ${args.theme.var.color.background_light_200};
+  border-bottom: 1px solid ${t.var.color.background_light_200};
   transition: background 0.2s ease;
   
   &:hover {
-    background: ${args.theme.var.color.background_light_50};
+    background: ${t.var.color.background_light_50};
   }
   
   &:last-child {
@@ -789,8 +789,8 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const user = args.contextData.user;
-const store = args.contextData.store;
+const user = c.user;
+const store = c.store;
 return {
   as: "input",
   type: "checkbox",
@@ -857,23 +857,23 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const user = args.contextData.user;
+const user = c.user;
 return {
   as: "div",
   text: user.name.split(' ').map(n => n[0]).join('').toUpperCase()
 };
 ''',
         css: '''
-const user = args.contextData.user;
+const user = c.user;
 const colors = {
-  user: args.theme.var.color.primary,
-  assistant: args.theme.var.color.success
+  user: t.var.color.primary,
+  assistant: t.var.color.success
 };
 return `._id {
   width: 2.5rem;
   height: 2.5rem;
   border-radius: 50%;
-  background: ${colors[user.role] || args.theme.var.color.background_light_300};
+  background: ${colors[user.role] || t.var.color.background_light_300};
   color: white;
   display: flex;
   align-items: center;
@@ -904,7 +904,7 @@ return { as: "div" };
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const user = args.contextData.user;
+const user = c.user;
 return {
   as: "div",
   text: user.name
@@ -913,7 +913,7 @@ return {
         css: '''
 return `._id {
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -926,7 +926,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const user = args.contextData.user;
+const user = c.user;
 return {
   as: "div",
   text: user.email
@@ -935,7 +935,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_600};
+  color: ${t.var.color.text_light_600};
 }`;
 '''
       }
@@ -948,7 +948,7 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const user = args.contextData.user;
+const user = c.user;
 return { as: "td" };
 ''',
         css: '''
@@ -966,25 +966,25 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const user = args.contextData.user;
+const user = c.user;
 return {
   as: "span",
   text: user.role.charAt(0).toUpperCase() + user.role.slice(1)
 };
 ''',
         css: '''
-const user = args.contextData.user;
+const user = c.user;
 const colors = {
-  user: args.theme.var.color.primary,
-  assistant: args.theme.var.color.success
+  user: t.var.color.primary,
+  assistant: t.var.color.success
 };
 return `._id {
   padding: 0.25rem 0.75rem;
   border-radius: 1rem;
   font-size: 0.75rem;
   font-weight: 600;
-  background: ${colors[user.role] || args.theme.var.color.background_light_200};
-  color: ${colors[user.role] ? 'white' : args.theme.var.color.text};
+  background: ${colors[user.role] || t.var.color.background_light_200};
+  color: ${colors[user.role] ? 'white' : t.var.color.text};
 }`;
 '''
       }
@@ -1014,27 +1014,27 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const user = args.contextData.user;
+const user = c.user;
 return {
   as: "span",
   text: user.status.charAt(0).toUpperCase() + user.status.slice(1)
 };
 ''',
         css: '''
-const user = args.contextData.user;
+const user = c.user;
 const colors = {
-  active: args.theme.var.color.success,
-  inactive: args.theme.var.color.text_light_600,
-  suspended: args.theme.var.color.error,
-  pending: args.theme.var.color.warning
+  active: t.var.color.success,
+  inactive: t.var.color.text_light_600,
+  suspended: t.var.color.error,
+  pending: t.var.color.warning
 };
 return `._id {
   padding: 0.25rem 0.75rem;
   border-radius: 1rem;
   font-size: 0.75rem;
   font-weight: 600;
-  background: ${colors[user.status] || args.theme.var.color.background_light_200};
-  color: ${['active', 'suspended', 'pending'].includes(user.status) ? 'white' : args.theme.var.color.text};
+  background: ${colors[user.status] || t.var.color.background_light_200};
+  color: ${['active', 'suspended', 'pending'].includes(user.status) ? 'white' : t.var.color.text};
 }`;
 '''
       }
@@ -1047,14 +1047,14 @@ return `._id {
         displayOrder: 5,
         componentName: "Html",
         props: '''
-const user = args.contextData.user;
+const user = c.user;
 return { as: "td" };
 ''',
         css: '''
 return `._id {
   padding: 1rem;
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_700};
+  color: ${t.var.color.text_light_700};
 }`;
 '''
       }
@@ -1067,7 +1067,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const user = args.contextData.user;
+const user = c.user;
 if (user.role === 'assistant') {
   return {
     as: "div",
@@ -1090,7 +1090,7 @@ if (user.role === 'assistant') {
         displayOrder: 6,
         componentName: "Html",
         props: '''
-const user = args.contextData.user;
+const user = c.user;
 return {
   as: "td",
   text: user.joined
@@ -1100,7 +1100,7 @@ return {
 return `._id {
   padding: 1rem;
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_600};
+  color: ${t.var.color.text_light_600};
 }`;
 '''
       }
@@ -1150,27 +1150,27 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const user = args.contextData.user;
+const user = c.user;
 return {
   as: "button",
   title: "View Details",
   onClick: () => {
-    args.showSuccessToast(`View details for ${user.name}`);
+    _.showSuccessToast(`View details for ${user.name}`);
   }
 };
 ''',
         css: '''
 return `._id {
   padding: 0.5rem;
-  background: ${args.theme.var.color.primary_light_100};
-  color: ${args.theme.var.color.primary};
+  background: ${t.var.color.primary_light_100};
+  color: ${t.var.color.primary};
   border: none;
   border-radius: 0.375rem;
   cursor: pointer;
   transition: all 0.2s ease;
   
   &:hover {
-    background: ${args.theme.var.color.primary_light_200};
+    background: ${t.var.color.primary_light_200};
   }
   
   &::before {
@@ -1188,27 +1188,27 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const user = args.contextData.user;
+const user = c.user;
 return {
   as: "button",
   title: "Edit User",
   onClick: () => {
-    args.showSuccessToast(`Edit ${user.name}`);
+    _.showSuccessToast(`Edit ${user.name}`);
   }
 };
 ''',
         css: '''
 return `._id {
   padding: 0.5rem;
-  background: ${args.theme.var.color.background_light_200};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background_light_200};
+  color: ${t.var.color.text};
   border: none;
   border-radius: 0.375rem;
   cursor: pointer;
   transition: all 0.2s ease;
   
   &:hover {
-    background: ${args.theme.var.color.background_light_300};
+    background: ${t.var.color.background_light_300};
   }
   
   &::before {
@@ -1226,29 +1226,29 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const user = args.contextData.user;
+const user = c.user;
 return {
   as: "button",
   title: user.status === 'suspended' ? "Activate User" : "Suspend User",
   onClick: () => {
     const action = user.status === 'suspended' ? 'Activated' : 'Suspended';
-    args.showSuccessToast(`${action} ${user.name}`);
+    _.showSuccessToast(`${action} ${user.name}`);
   }
 };
 ''',
         css: '''
-const user = args.contextData.user;
+const user = c.user;
 return `._id {
   padding: 0.5rem;
-  background: ${user.status === 'suspended' ? args.theme.var.color.success_light_100 : args.theme.var.color.error_light_100};
-  color: ${user.status === 'suspended' ? args.theme.var.color.success : args.theme.var.color.error};
+  background: ${user.status === 'suspended' ? t.var.color.success_light_100 : t.var.color.error_light_100};
+  color: ${user.status === 'suspended' ? t.var.color.success : t.var.color.error};
   border: none;
   border-radius: 0.375rem;
   cursor: pointer;
   transition: all 0.2s ease;
   
   &:hover {
-    background: ${user.status === 'suspended' ? args.theme.var.color.success_light_200 : args.theme.var.color.error_light_200};
+    background: ${user.status === 'suspended' ? t.var.color.success_light_200 : t.var.color.error_light_200};
   }
   
   &::before {

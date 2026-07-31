@@ -7,16 +7,16 @@
         description: Loads all section documents for a settings page. Returns section values keyed by sectionId.
         body:
           '''
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 const {
   pageId,
   scopeVertexLabel,
   scopeId,
   sections
-} = args.contextData;
+} = c;
 
 const isPublicGlobalRead =
-  args.contextData?.allowPublicRead === true &&
+  c?.allowPublicRead === true &&
   scopeVertexLabel === "GlobalSetting" &&
   scopeId != null &&
   String(scopeId).trim() !== "";
@@ -26,7 +26,7 @@ if (!actualUser && !isPublicGlobalRead) {
 }
 
 const user = actualUser
-  ? await args.getEffectiveUser(args.session, actualUser, args.contextData)
+  ? await _.getEffectiveUser(_.session, actualUser, c)
   : null;
 
 if (!pageId) {
@@ -56,16 +56,16 @@ if (effectiveScopeLabel === "User") {
     RETURN doc
   `;
 } else {
-  const scopeMatchProperty = args.contextData.scopeMatchProperty || "uuid";
+  const scopeMatchProperty = c.scopeMatchProperty || "uuid";
   query = `
     MATCH (scope:${effectiveScopeLabel} {${scopeMatchProperty}: $scopeId})-[:${edgeType}]->(doc:SettingsSectionDocument {pageId: $pageId})
     RETURN doc
   `;
 }
 
-const result = await args.session.run(query, queryParams);
+const result = await _.session.run(query, queryParams);
 const documentVertices = result.records.length > 0
-  ? args.processResult(result.records, args.context, "doc")
+  ? _.processResult(result.records, _.context, "doc")
   : [];
 
 const sectionMap = {};
@@ -91,8 +91,8 @@ for (let sectionIndex = 0; sectionIndex < sectionConfigs.length; sectionIndex++)
   const stored = sectionMap[sectionId]?.values || {};
   let mergedValues = stored;
 
-  if (args.executeNamedServerFunction) {
-    const mergeResult = await args.executeNamedServerFunction({
+  if (s) {
+    const mergeResult = await s({
       functionName: "settingsEngineHelpers",
       contextData: { action: "mergeDefaults", sectionConfig, values: stored }
     });

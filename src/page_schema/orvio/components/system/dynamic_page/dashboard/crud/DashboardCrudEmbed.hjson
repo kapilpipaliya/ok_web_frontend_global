@@ -10,12 +10,12 @@
           '''
 // Embedded CRUD widget — CrudRuntimeCore + Table (embedded mode); dashboard-owned filters/state.
 const getRuntime = () => {
-  const fromProps = args.contextData.props?.dashboardRuntime;
+  const fromProps = c.props?.dashboardRuntime;
   if (typeof fromProps === "function") return fromProps();
   return null;
 };
 
-const getWidgetConfig = () => args.contextData.props?.widgetConfig || null;
+const getWidgetConfig = () => c.props?.widgetConfig || null;
 
 const composeWidgetQuery = () => {
   const runtime = getRuntime();
@@ -33,20 +33,20 @@ const composeWidgetQuery = () => {
 };
 
 const executeYTO = async (functionName, contextData) => {
-  if (typeof args.fns.executeYTOFunction === "function") {
-    return args.fns.executeYTOFunction(functionName, contextData || {});
+  if (typeof f.executeYTOFunction === "function") {
+    return f.executeYTOFunction(functionName, contextData || {});
   }
-  return args.executeNamedServerFunction({ functionName, contextData: contextData || {} });
+  return s({ functionName, contextData: contextData || {} });
 };
 
 const extractError = (result, showToast, defaultMessage) => {
   if (!result) return defaultMessage;
   if (result.error) {
-    if (showToast) args.showErrorToast?.(result.error);
+    if (showToast) _.showErrorToast?.(result.error);
     return result.error;
   }
   if (result.result?.error) {
-    if (showToast) args.showErrorToast?.(result.result.error);
+    if (showToast) _.showErrorToast?.(result.result.error);
     return result.result.error;
   }
   return null;
@@ -72,7 +72,7 @@ const applyServerGraphToLocalGraph = (response) => {
     (Array.isArray(deleted_edges) && deleted_edges.length > 0);
   if (!hasWork) return;
   const txnId = runtime?.txnId || runtime?.store?.txnId || 0;
-  args.setGraphData(txnId, { vertexes, edges, deleted_vertexes, deleted_edges }, {});
+  _.setGraphData(txnId, { vertexes, edges, deleted_vertexes, deleted_edges }, {});
 };
 
 const getCrudConfigRef = () => {
@@ -110,17 +110,17 @@ const dispatchRowInteraction = (interaction, row) => {
   const action = String(interaction.action || interaction.type || "").toUpperCase();
   if (action === "NAVIGATE") {
     let href = payload.href || interaction.to;
-    if (href && row && args.dashboardPlatform?.interaction?.substitutePayload) {
-      href = args.dashboardPlatform.interaction.substitutePayload({ href }, { row }).href;
+    if (href && row && _.dashboardPlatform?.interaction?.substitutePayload) {
+      href = _.dashboardPlatform.interaction.substitutePayload({ href }, { row }).href;
     } else if (href && row) {
       href = String(href).replace(/\{\{row\.id\}\}/g, String(row.id || ""));
     }
-    if (href) args.navigate(href);
+    if (href) _.navigate(href);
     return;
   }
   if (action === "OPEN_ENTITY_DRAWER") {
-    const drawerPayload = args.dashboardPlatform?.interaction?.substitutePayload
-      ? args.dashboardPlatform.interaction.substitutePayload(payload, { row })
+    const drawerPayload = _.dashboardPlatform?.interaction?.substitutePayload
+      ? _.dashboardPlatform.interaction.substitutePayload(payload, { row })
       : payload;
     if (runtime.platformApi?.openEntity) {
       void runtime.platformApi.openEntity(drawerPayload);
@@ -161,7 +161,7 @@ let memoizedSettingsKey = null;
 let crudSettingsText = null;
 
 const loadTableSettings = async () => {
-  const label = args.fns.getTableSettingsLabel?.();
+  const label = f.getTableSettingsLabel?.();
   if (!label) return null;
   const result = await executeYTO("getUserContentSetting", {
     tableVertexLabel: label,
@@ -176,7 +176,7 @@ const loadTableSettings = async () => {
 };
 
 const evaluateConfig = () => {
-  const label = args.fns.getTableSettingsLabel?.();
+  const label = f.getTableSettingsLabel?.();
   if (memoizedConfig && memoizedSettingsKey === label) return memoizedConfig;
   const configText = crudSettingsText;
   if (typeof configText === "string" && configText.trim() !== "") {
@@ -223,9 +223,9 @@ const buildRelationshipPropertyBindings = (config) => {
 };
 
 const fetchData = async (searchTerm, columnFilters, sortConfig, callback) => {
-  const tableVertexLabel = args.fns.getTableVertexLabel?.();
+  const tableVertexLabel = f.getTableVertexLabel?.();
   if (!tableVertexLabel) return;
-  const composed = args.fns.composeWidgetQuery?.() || {};
+  const composed = f.composeWidgetQuery?.() || {};
   const config = evaluateConfig();
   const mergedFilters = { ...composed.filters, ...(columnFilters || {}) };
   const widgetId = getWidgetConfig()?.id || "crud_widget";
@@ -240,7 +240,7 @@ const fetchData = async (searchTerm, columnFilters, sortConfig, callback) => {
       filters: mergedFilters,
       sort: sortConfig?.column ? sortConfig : composed.sort,
       enableUserScoping: config?.enableUserScopingForContent === true,
-      tableSettingsLabel: args.fns.getTableSettingsLabel?.(),
+      tableSettingsLabel: f.getTableSettingsLabel?.(),
       hooks: config?.hooks,
       relationshipPropertyBindings: buildRelationshipPropertyBindings(config)
     });
@@ -251,7 +251,7 @@ const fetchData = async (searchTerm, columnFilters, sortConfig, callback) => {
       return;
     }
     let rows = Array.isArray(result?.result?.data) ? result.result.data : [];
-    rows = args.fns.applyNeqFilters?.(rows, composed.neqFilters) || rows;
+    rows = f.applyNeqFilters?.(rows, composed.neqFilters) || rows;
     if (composed.limit && rows.length > composed.limit) {
       rows = rows.slice(0, composed.limit);
     }
@@ -260,21 +260,21 @@ const fetchData = async (searchTerm, columnFilters, sortConfig, callback) => {
   } catch (error) {
     console.error("DashboardCrudEmbed fetchData:", error);
     runtime?.store?.patchWidgetState(widgetId, { loading: false, error: error?.message || "Failed to load" });
-    args.showErrorToast?.("Failed to load table data");
+    _.showErrorToast?.("Failed to load table data");
   }
 };
 
 const registerRefreshAndWatchFilters = () => {
   const runtime = getRuntime();
   const widgetId = getWidgetConfig()?.id || "crud_widget";
-  if (runtime?.runtimeApi?.registerCrudRefresh && typeof args.fns.handleSearch === "function") {
-    runtime.runtimeApi.registerCrudRefresh(widgetId, () => args.fns.handleSearch());
+  if (runtime?.runtimeApi?.registerCrudRefresh && typeof f.handleSearch === "function") {
+    runtime.runtimeApi.registerCrudRefresh(widgetId, () => f.handleSearch());
   }
-  if (typeof args.createEffect === "function" && runtime?.store?.filters) {
-    args.createEffect(() => {
+  if (typeof _.createEffect === "function" && runtime?.store?.filters) {
+    _.createEffect(() => {
       runtime.store.filters();
-      if (typeof args.fns.handleSearch === "function") {
-        args.fns.handleSearch();
+      if (typeof f.handleSearch === "function") {
+        f.handleSearch();
       }
     });
   }
@@ -310,14 +310,14 @@ return {
   getExportFunction: () => null,
   getSettingsFunction: () => null,
   getGenericSaveFunction: () => {
-    const tableVertexLabel = args.fns.getTableVertexLabel?.();
+    const tableVertexLabel = f.getTableVertexLabel?.();
     if (!tableVertexLabel) return null;
     return async ({ mode, data, originalRow }) => {
       const config = evaluateConfig();
       const operation = mode === "add" ? "create" : mode === "edit" ? "update" : "delete";
       const result = await executeYTO("mutateUserContent", {
         tableVertexLabel,
-        tableSettingsLabel: args.fns.getTableSettingsLabel?.(),
+        tableSettingsLabel: f.getTableSettingsLabel?.(),
         operation,
         data: mode === "delete" ? { vertex: originalRow, relationships: {} } : data,
         enableUserScoping: config?.enableUserScopingForContent === true,
@@ -331,7 +331,7 @@ return {
     const config = evaluateConfig();
     const formConfig = config?.formConfig;
     if (!formConfig) return null;
-    return { ...formConfig, saveFunction: args.fns.getGenericSaveFunction?.() };
+    return { ...formConfig, saveFunction: f.getGenericSaveFunction?.() };
   },
   getHideSettingsButton: () => true,
   getHideImportButtons: () => true,
@@ -340,10 +340,10 @@ return {
 '''
         props:
           '''
-const widgetConfig = args.contextData.props?.widgetConfig;
+const widgetConfig = c.props?.widgetConfig;
 return {
   onMount: async () => {
-    crudSettingsText = await args.fns.loadTableSettings();
+    crudSettingsText = await f.loadTableSettings();
     memoizedConfig = null;
   },
   mode: "embedded",
@@ -351,7 +351,7 @@ return {
   hidePageChrome: true,
   tableMode: "embedded",
   widgetConfig,
-  dashboardRuntime: args.contextData.props?.dashboardRuntime,
+  dashboardRuntime: c.props?.dashboardRuntime,
   loadFromSetting: true,
   enableLocalFilters: false
 };
@@ -371,27 +371,27 @@ return {
   mode: "embedded",
   embeddedMode: true,
   hidePageChrome: true,
-  tableVertexLabel: args.fns.getTableVertexLabel?.(),
+  tableVertexLabel: f.getTableVertexLabel?.(),
   loadFromSetting: true,
   hideSettingsButton: true,
   hideImportButtons: true,
   hideExportButtons: true,
   showAddButton: false,
-  widgetConfig: args.fns.getWidgetConfig?.(),
-  dashboardRuntime: args.contextData.props?.dashboardRuntime,
+  widgetConfig: f.getWidgetConfig?.(),
+  dashboardRuntime: c.props?.dashboardRuntime,
   onMount: () => {
-    args.fns.registerRefreshAndWatchFilters?.();
+    f.registerRefreshAndWatchFilters?.();
   },
   onRowClick: (row) => {
-    const widgetConfig = args.fns.getWidgetConfig?.();
+    const widgetConfig = f.getWidgetConfig?.();
     const interactions = widgetConfig?.interactions || [];
     for (let index = 0; index < interactions.length; index++) {
       const interaction = interactions[index];
       if (interaction?.trigger === "rowClick") {
-        args.fns.dispatchRowInteraction?.(interaction, row);
+        f.dispatchRowInteraction?.(interaction, row);
       }
     }
-    args.fns.dispatchRowSelected?.(row);
+    f.dispatchRowSelected?.(row);
   }
 };
 '''

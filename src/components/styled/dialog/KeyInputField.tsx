@@ -15,7 +15,7 @@ export function KeyInputField(props: {
       <As
         as="label"
         css={`return \`._id {
-  color: \${args.theme.var.color.primary};
+  color: \${t.var.color.primary};
   display: block;
   font-size: 0.875rem;
   font-weight: 500;
@@ -36,7 +36,7 @@ export function KeyInputField(props: {
               border-radius: 0.375rem;
               border-width: 0;
               box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5);
-              color: \${args.theme.var.color.primary};
+              color: \${t.var.color.primary};
               display: block;
               font-size: 0.875rem;
               padding: 0.375rem 0.75rem;

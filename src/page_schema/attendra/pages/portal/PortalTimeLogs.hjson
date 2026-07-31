@@ -8,7 +8,7 @@
           '''
 return {
   executeYTOFunction: (functionName, contextData) =>
-    args.executeNamedServerFunction({ functionName, contextData: contextData || {} })
+    s({ functionName, contextData: contextData || {} })
 };
 '''
         title: My Time Logs - Attendra
@@ -18,8 +18,8 @@ return {
           '''return {
   isNoPermissionCheck: true,
   onMount: () => {
-    if (!args.user) {
-      args.navigate("/auth/signin", { replace: true });
+    if (!_.user) {
+      _.navigate("/auth/signin", { replace: true });
     }
   }
 };'''

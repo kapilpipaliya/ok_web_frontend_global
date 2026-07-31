@@ -9,10 +9,10 @@
         body: '''
 try {
   // Extract input parameters
-  const { reportType = 'week', includeStreaks = true, includeInsights = true } = args.contextData || {};
+  const { reportType = 'week', includeStreaks = true, includeInsights = true } = c || {};
 
   // Get current authenticated user from session
-  const user = await args.getUserFromSession();
+  const user = await _.getUserFromSession();
   if (!user) {
     throw new Error("User session not found. Please log in and try again.");
   }
@@ -74,7 +74,7 @@ try {
     ORDER BY trackingDate
   `;
 
-  const dailyResult = await args.session.run(dailyCompletionQuery, queryParams);
+  const dailyResult = await _.session.run(dailyCompletionQuery, queryParams);
 
   // Debug logging (can be removed in production)
   // console.log('Daily completion query params:', queryParams);
@@ -98,10 +98,10 @@ try {
   for (const record of dailyResult.records) {
     const date = record.get('trackingDate');
     if (date && dailyData[date]) {
-      dailyData[date].completed = args.neo4jConvert.js(record.get('completed')) || 0;
-      dailyData[date].partial = args.neo4jConvert.js(record.get('partial')) || 0;
-      dailyData[date].missed = args.neo4jConvert.js(record.get('missed')) || 0;
-      dailyData[date].total = args.neo4jConvert.js(record.get('totalRules')) || 0;
+      dailyData[date].completed = _.neo4jConvert.js(record.get('completed')) || 0;
+      dailyData[date].partial = _.neo4jConvert.js(record.get('partial')) || 0;
+      dailyData[date].missed = _.neo4jConvert.js(record.get('missed')) || 0;
+      dailyData[date].total = _.neo4jConvert.js(record.get('totalRules')) || 0;
     }
   }
 
@@ -130,19 +130,19 @@ try {
     ORDER BY completionRate DESC
   `;
 
-  const categoryResult = await args.session.run(categoryPerformanceQuery, queryParams);
+  const categoryResult = await _.session.run(categoryPerformanceQuery, queryParams);
 
   // Process category data and return as vertices
   const categories = [];
   for (const record of categoryResult.records) {
     const categoryNode = record.get('rc');
-    const categoryVertex = args.convertNodeToJson(categoryNode);
+    const categoryVertex = _.convertNodeToJson(categoryNode);
 
-    const completionRate = args.neo4jConvert.js(record.get('completionRate')) || 0;
-    const completed = args.neo4jConvert.js(record.get('completed')) || 0;
-    const partial = args.neo4jConvert.js(record.get('partial')) || 0;
-    const missed = args.neo4jConvert.js(record.get('missed')) || 0;
-    const totalTracking = args.neo4jConvert.js(record.get('totalTracking')) || 0;
+    const completionRate = _.neo4jConvert.js(record.get('completionRate')) || 0;
+    const completed = _.neo4jConvert.js(record.get('completed')) || 0;
+    const partial = _.neo4jConvert.js(record.get('partial')) || 0;
+    const missed = _.neo4jConvert.js(record.get('missed')) || 0;
+    const totalTracking = _.neo4jConvert.js(record.get('totalTracking')) || 0;
 
     categories.push({
       category: categoryVertex,  // Full vertex format with id, L, P, IN, OUT
@@ -170,16 +170,16 @@ try {
       LIMIT 5
     `;
 
-    const streaksResult = await args.session.run(streaksQuery, queryParams);
+    const streaksResult = await _.session.run(streaksQuery, queryParams);
 
     for (const record of streaksResult.records) {
       const ruleNode = record.get('r');
       const categoryNode = record.get('rc');
       const streakNode = record.get('rs');
 
-      const ruleVertex = args.convertNodeToJson(ruleNode);
-      const categoryVertex = categoryNode ? args.convertNodeToJson(categoryNode) : null;
-      const streakVertex = args.convertNodeToJson(streakNode);
+      const ruleVertex = _.convertNodeToJson(ruleNode);
+      const categoryVertex = categoryNode ? _.convertNodeToJson(categoryNode) : null;
+      const streakVertex = _.convertNodeToJson(streakNode);
 
       topStreaks.push({
         rule: ruleVertex,      // Full vertex format
@@ -200,13 +200,13 @@ try {
            COUNT(CASE WHEN rt.status = 'skipped' THEN 1 END) as skipped
   `;
 
-  const overallResult = await args.session.run(overallStatsQuery, queryParams);
+  const overallResult = await _.session.run(overallStatsQuery, queryParams);
   const overallStats = overallResult.records[0];
 
-  const totalTracking = args.neo4jConvert.js(overallStats.get('totalTracking')) || 0;
-  const completedCount = args.neo4jConvert.js(overallStats.get('completed')) || 0;
-  const partialCount = args.neo4jConvert.js(overallStats.get('partial')) || 0;
-  const missedCount = args.neo4jConvert.js(overallStats.get('missed')) || 0;
+  const totalTracking = _.neo4jConvert.js(overallStats.get('totalTracking')) || 0;
+  const completedCount = _.neo4jConvert.js(overallStats.get('completed')) || 0;
+  const partialCount = _.neo4jConvert.js(overallStats.get('partial')) || 0;
+  const missedCount = _.neo4jConvert.js(overallStats.get('missed')) || 0;
 
   const effectiveCompletions = completedCount + (partialCount * 0.7);
   const overallCompletionRate = totalTracking > 0 ? Math.round((effectiveCompletions / totalTracking) * 100) : 0;

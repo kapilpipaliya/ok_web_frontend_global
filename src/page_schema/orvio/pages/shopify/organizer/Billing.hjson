@@ -17,7 +17,7 @@
       L: Attr
       P: {
         css:
-          "return `._id { max-width: 800px; margin: 0 auto; padding: ${args.theme.var.spacing?.lg || \"2rem\"}; color: ${args.theme.var.color.text}; } @media (max-width: 768px) { ._id { padding: ${args.theme.var.spacing?.md || \"1rem\"}; } }`;"
+          "return `._id { max-width: 800px; margin: 0 auto; padding: ${t.var.spacing?.lg || \"2rem\"}; color: ${t.var.color.text}; } @media (max-width: 768px) { ._id { padding: ${t.var.spacing?.md || \"1rem\"}; } }`;"
         displayOrder: 1
         componentName: Html
         props: "return { as: \"div\" }"
@@ -28,7 +28,7 @@
       L: Attr
       P: {
         css:
-          "return `._id { font-size: 2rem; font-weight: 700; color: ${args.theme.var.color.text}; margin: 0 0 1rem 0; } @media (max-width: 768px) { ._id { font-size: 1.75rem; } }`;"
+          "return `._id { font-size: 2rem; font-weight: 700; color: ${t.var.color.text}; margin: 0 0 1rem 0; } @media (max-width: 768px) { ._id { font-size: 1.75rem; } }`;"
         displayOrder: 1
         componentName: Html
         props: "return { as: \"h1\", text: \"Billing & plans\" }"
@@ -39,7 +39,7 @@
       L: Attr
       P: {
         css:
-          "return `._id { font-size: 1rem; line-height: 1.6; color: ${args.theme.var.color.text_light_500}; margin-bottom: 1.5rem; }`;"
+          "return `._id { font-size: 1rem; line-height: 1.6; color: ${t.var.color.text_light_500}; margin-bottom: 1.5rem; }`;"
         displayOrder: 2
         textType: markdown
         componentName: Html
@@ -62,7 +62,7 @@
       L: Attr
       P: {
         css:
-          "return `._id { font-size: 1.25rem; font-weight: 600; color: ${args.theme.var.color.text}; margin: 0 0 0.5rem 0; }`;"
+          "return `._id { font-size: 1.25rem; font-weight: 600; color: ${t.var.color.text}; margin: 0 0 0.5rem 0; }`;"
         displayOrder: 1
         componentName: Html
         props: "return { as: \"h2\", text: \"Manage your subscription\" }"
@@ -73,7 +73,7 @@
       L: Attr
       P: {
         css:
-          "return `._id { font-size: 0.9375rem; line-height: 1.6; color: ${args.theme.var.color.text_light_500}; margin: 0; }`;"
+          "return `._id { font-size: 0.9375rem; line-height: 1.6; color: ${t.var.color.text_light_500}; margin: 0; }`;"
         displayOrder: 2
         componentName: Html
         props:

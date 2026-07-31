@@ -16,7 +16,7 @@
  * - limit: number (default 20)
  */
 
-const { queueName, jobState, limit = 20 } = args.contextData;
+const { queueName, jobState, limit = 20 } = c;
 
 // Validate parameters
 if (!queueName || !jobState) {
@@ -27,8 +27,8 @@ if (!queueName || !jobState) {
 }
 
 // Get the queue
-const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} }, { functionLookupSubDomain: args.subDomain });
-const { Queue } = args.bullmq;
+const helpers = await s({ functionName: 'queueHelpers', contextData: {} }, { functionLookupSubDomain: _.subDomain });
+const { Queue } = _.bullmq;
 const connection = helpers.result.data.getRedisConnection();
 
 const queue = new Queue(queueName, { connection });
@@ -93,7 +93,7 @@ try {
   const channelNameMap = {};
   if (channelRequests.length > 0) {
     // Build UNWIND query for batch processing with ownership verification
-    const channelResult = await args.session.run(
+    const channelResult = await _.session.run(
       `UNWIND $channelRequests AS req
        MATCH (o:YouTubeOwnership {key: req.ownershipId})-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: req.channelId})
        RETURN req.ownershipId as ownershipId, c`,
@@ -101,7 +101,7 @@ try {
     );
     for (const record of channelResult.records) {
       const ownershipId = record.get('ownershipId');
-      const channel = args.convertNodeToJson(record.get('c'));
+      const channel = _.convertNodeToJson(record.get('c'));
       const key = `${ownershipId}:${channel.P.youtubeId}`;
       channelNameMap[key] = channel.P.title;
     }
@@ -112,7 +112,7 @@ try {
   const playlistNameMap = {};
   if (playlistRequests.length > 0) {
     // Build UNWIND query for batch processing with ownership verification
-    const playlistResult = await args.session.run(
+    const playlistResult = await _.session.run(
       `UNWIND $playlistRequests AS req
        MATCH (o:YouTubeOwnership {key: req.ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: req.playlistId})
        RETURN req.ownershipId as ownershipId, p`,
@@ -120,7 +120,7 @@ try {
     );
     for (const record of playlistResult.records) {
       const ownershipId = record.get('ownershipId');
-      const playlist = args.convertNodeToJson(record.get('p'));
+      const playlist = _.convertNodeToJson(record.get('p'));
       const key = `${ownershipId}:${playlist.P.youtubeId}`;
       playlistNameMap[key] = playlist.P.title;
     }
@@ -129,12 +129,12 @@ try {
   // Batch fetch usernames
   const usernameMap = {};
   if (userUuids.length > 0) {
-    const userResult = await args.session.run(
+    const userResult = await _.session.run(
       'UNWIND $userUuids AS userUuid MATCH (u:User {uuid: userUuid}) RETURN u',
       { userUuids }
     );
     for (const record of userResult.records) {
-      const user = args.convertNodeToJson(record.get('u'));
+      const user = _.convertNodeToJson(record.get('u'));
       usernameMap[user.P.uuid] = user.P.username;
     }
   }

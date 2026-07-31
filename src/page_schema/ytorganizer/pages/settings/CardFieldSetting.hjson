@@ -44,16 +44,16 @@ const defaultSetting = {
 };
 
 // Local state for edited setting - start with empty arrays
-const [videoFields, setVideoFields] = args.createSignal([]);
-const [playlistFields, setPlaylistFields] = args.createSignal([]);
-const [channelFields, setChannelFields] = args.createSignal([]);
+const [videoFields, setVideoFields] = _.createSignal([]);
+const [playlistFields, setPlaylistFields] = _.createSignal([]);
+const [channelFields, setChannelFields] = _.createSignal([]);
 
 // Save state
-const [isSaving, setIsSaving] = args.createSignal(false);
+const [isSaving, setIsSaving] = _.createSignal(false);
 
 // Initialize from layout setting on mount
-args.createEffect(() => {
-  const setting = args.fns.cardFieldSetting?.();
+_.createEffect(() => {
+  const setting = f.cardFieldSetting?.();
   if (setting) {
     setVideoFields(setting.video || defaultSetting.video);
     setPlaylistFields(setting.playlist || defaultSetting.playlist);
@@ -77,7 +77,7 @@ const handleSave = async () => {
     };
 
     // saveCardFieldSetting already shows success/error toasts
-    await args.fns.saveCardFieldSetting(newSetting);
+    await f.saveCardFieldSetting(newSetting);
   } catch (error) {
     console.error("Error saving card field setting:", error);
   } finally {
@@ -87,7 +87,7 @@ const handleSave = async () => {
 
 // Handle cancel
 const handleCancel = () => {
-  args.navigate("/settings");
+  _.navigate("/settings");
 };
 
 return {
@@ -165,7 +165,7 @@ return {
 return `._id {
   font-size: 1.75rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;
 '''
@@ -188,7 +188,7 @@ return {
           '''
 return `._id {
   font-size: 1rem;
-  color: ${args.theme.var.color.text_light_200};
+  color: ${t.var.color.text_light_200};
   margin: 0;
 }`;
 '''
@@ -233,8 +233,8 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.background_dark_50};
-  border: 1px solid ${args.theme.var.color.border};
+  background: ${t.var.color.background_dark_50};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.75rem;
   padding: 1.5rem;
 }`;
@@ -258,7 +258,7 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 1rem 0;
 }`;
 '''
@@ -282,14 +282,14 @@ return {
         props:
           '''
 return {
-  value: args.fns.videoFields(),
-  options: args.fns.FIELD_OPTIONS.video,
+  value: f.videoFields(),
+  options: f.FIELD_OPTIONS.video,
   multiple: true,
   search: true,
   plugins: ['remove_button', 'drag_drop'],
   placeholder: "Select fields to display...",
   onChange: (newValue) => {
-    args.fns.setVideoFields(Array.isArray(newValue) ? newValue : []);
+    f.setVideoFields(Array.isArray(newValue) ? newValue : []);
   }
 };
 '''
@@ -302,8 +302,8 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.background_dark_50};
-  border: 1px solid ${args.theme.var.color.border};
+  background: ${t.var.color.background_dark_50};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.75rem;
   padding: 1.5rem;
 }`;
@@ -327,7 +327,7 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 1rem 0;
 }`;
 '''
@@ -351,14 +351,14 @@ return {
         props:
           '''
 return {
-  value: args.fns.playlistFields(),
-  options: args.fns.FIELD_OPTIONS.playlist,
+  value: f.playlistFields(),
+  options: f.FIELD_OPTIONS.playlist,
   multiple: true,
   search: true,
   plugins: ['remove_button', 'drag_drop'],
   placeholder: "Select fields to display...",
   onChange: (newValue) => {
-    args.fns.setPlaylistFields(Array.isArray(newValue) ? newValue : []);
+    f.setPlaylistFields(Array.isArray(newValue) ? newValue : []);
   }
 };
 '''
@@ -371,8 +371,8 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.background_dark_50};
-  border: 1px solid ${args.theme.var.color.border};
+  background: ${t.var.color.background_dark_50};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.75rem;
   padding: 1.5rem;
 }`;
@@ -396,7 +396,7 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 1rem 0;
 }`;
 '''
@@ -420,14 +420,14 @@ return {
         props:
           '''
 return {
-  value: args.fns.channelFields(),
-  options: args.fns.FIELD_OPTIONS.channel,
+  value: f.channelFields(),
+  options: f.FIELD_OPTIONS.channel,
   multiple: true,
   search: true,
   plugins: ['remove_button', 'drag_drop'],
   placeholder: "Select fields to display...",
   onChange: (newValue) => {
-    args.fns.setChannelFields(Array.isArray(newValue) ? newValue : []);
+    f.setChannelFields(Array.isArray(newValue) ? newValue : []);
   }
 };
 '''
@@ -469,16 +469,16 @@ return {
           '''
 return `._id {
   padding: 0.75rem 1.5rem;
-  background: ${args.theme.var.color.background_light_200};
-  color: ${args.theme.var.color.text};
-  border: 1px solid ${args.theme.var.color.border};
+  background: ${t.var.color.background_light_200};
+  color: ${t.var.color.text};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.5rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.background_light_300};
+    background: ${t.var.color.background_light_300};
   }
 
   &:active {
@@ -499,7 +499,7 @@ return `._id {
 return {
   as: "button",
   text: "Cancel",
-  onClick: args.fns.handleCancel
+  onClick: f.handleCancel
 };
 '''
       }
@@ -512,8 +512,8 @@ return {
           '''
 return `._id {
   padding: 0.75rem 1.5rem;
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
   border: none;
   border-radius: 0.5rem;
   font-weight: 500;
@@ -521,7 +521,7 @@ return `._id {
   transition: all 0.2s ease;
 
   &:hover:not(:disabled) {
-    background: ${args.theme.var.color.primary_dark_200};
+    background: ${t.var.color.primary_dark_200};
   }
 
   &:active:not(:disabled) {
@@ -546,9 +546,9 @@ return `._id {
           '''
 return {
   as: "button",
-  text: args.fns.isSaving() ? "Saving..." : "Save Changes",
-  onClick: args.fns.handleSave,
-  disabled: args.fns.isSaving()
+  text: f.isSaving() ? "Saving..." : "Save Changes",
+  onClick: f.handleSave,
+  disabled: f.isSaving()
 };
 '''
       }

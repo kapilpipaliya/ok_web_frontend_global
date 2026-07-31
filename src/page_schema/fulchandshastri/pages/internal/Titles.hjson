@@ -5,25 +5,25 @@
       L: Page
       P: {
         fns:
-          '''const from = args.atom("1");
-const to = args.atom("705");
-const startDate = args.atom("2026-06-25");
-const activeFormat = args.atom("list");
-const copiedTitle = args.atom("");
+          '''const from = _.atom("1");
+const to = _.atom("705");
+const startDate = _.atom("2026-06-25");
+const activeFormat = _.atom("list");
+const copiedTitle = _.atom("");
 
 function generateTitles(startNumber, startDateValue, count, titles) {
   if (!startDateValue) return [];
-  const date = args.dateFns.parse(
+  const date = _.dateFns.parse(
     startDateValue,
     "yyyy-MM-dd",
-    args.dateFns.startOfToday(),
+    _.dateFns.startOfToday(),
   );
 
   return Array.from({ length: count }, (_, i) => {
-    const currentDate = args.dateFns.addDays(date, i);
+    const currentDate = _.dateFns.addDays(date, i);
     const episode = String(startNumber + i).padStart(3, "0");
     const title = titles[i] ?? "<TITLE>";
-    return `${title} | द्रव्यदृष्टि प्रकाश # ${episode} | निहालचंद्रजी सोगानी | Fulchand | ${args.dateFns.format(currentDate, "yyyy-MM-dd")}`;
+    return `${title} | द्रव्यदृष्टि प्रकाश # ${episode} | निहालचंद्रजी सोगानी | Fulchand | ${_.dateFns.format(currentDate, "yyyy-MM-dd")}`;
   });
 }
 
@@ -34,13 +34,13 @@ const copyTitle = async (text) => {
   try {
     await navigator.clipboard.writeText(text);
     copiedTitle(text);
-    args.showSuccessToast?.("Copied to clipboard");
+    _.showSuccessToast?.("Copied to clipboard");
     setTimeout(() => {
       if (copiedTitle() === text) copiedTitle("");
     }, 1500);
   } catch (error) {
     console.error("Clipboard copy failed:", error);
-    args.showErrorToast?.("Could not copy to clipboard");
+    _.showErrorToast?.("Could not copy to clipboard");
   }
 };
 
@@ -100,8 +100,8 @@ return {
         key: unique_1
         props:
           '''return {
-  value: args.fns.from(),
-  onChange: e=>args.fns.from(e.target.value),
+  value: f.from(),
+  onChange: e=>f.from(e.target.value),
 };'''
       }
     }
@@ -134,8 +134,8 @@ return {
         key: unique_4
         props:
           '''return {
-  value: args.fns.to(),
-  onChange: e => args.fns.to(e.target.value),
+  value: f.to(),
+  onChange: e => f.to(e.target.value),
 };'''
       }
     }
@@ -168,8 +168,8 @@ return {
         key: unique_8
         props:
           '''return {
-  value: args.fns.startDate(),
-  onChange: e=>args.fns.startDate(e.target.value),
+  value: f.startDate(),
+  onChange: e=>f.startDate(e.target.value),
 }'''
       }
     }
@@ -232,13 +232,13 @@ return {
       L: Attr
       P: {
         css:
-          '''const active = args.fns.activeFormat() === "list";
+          '''const active = f.activeFormat() === "list";
 return `._id {
   padding: 0.5rem 1rem;
-  border: 1px solid ${active ? args.theme.var.color.primary : args.theme.var.color.border};
+  border: 1px solid ${active ? t.var.color.primary : t.var.color.border};
   border-radius: 0.375rem;
-  background: ${active ? args.theme.var.color.primary : args.theme.var.color.background};
-  color: ${active ? args.theme.var.color.primary_text : args.theme.var.color.text};
+  background: ${active ? t.var.color.primary : t.var.color.background};
+  color: ${active ? t.var.color.primary_text : t.var.color.text};
   font-weight: 600;
   cursor: pointer;
 }`;'''
@@ -246,14 +246,14 @@ return `._id {
         componentName: Html
         key: unique_14
         props:
-          '''const active = args.fns.activeFormat() === "list";
+          '''const active = f.activeFormat() === "list";
 return {
   as: "button",
   type: "button",
   role: "tab",
   "aria-selected": active ? "true" : "false",
   text: "List",
-  onClick: () => args.fns.activeFormat("list")
+  onClick: () => f.activeFormat("list")
 };'''
       }
     }
@@ -262,13 +262,13 @@ return {
       L: Attr
       P: {
         css:
-          '''const active = args.fns.activeFormat() === "text";
+          '''const active = f.activeFormat() === "text";
 return `._id {
   padding: 0.5rem 1rem;
-  border: 1px solid ${active ? args.theme.var.color.primary : args.theme.var.color.border};
+  border: 1px solid ${active ? t.var.color.primary : t.var.color.border};
   border-radius: 0.375rem;
-  background: ${active ? args.theme.var.color.primary : args.theme.var.color.background};
-  color: ${active ? args.theme.var.color.primary_text : args.theme.var.color.text};
+  background: ${active ? t.var.color.primary : t.var.color.background};
+  color: ${active ? t.var.color.primary_text : t.var.color.text};
   font-weight: 600;
   cursor: pointer;
 }`;'''
@@ -276,14 +276,14 @@ return `._id {
         componentName: Html
         key: unique_15
         props:
-          '''const active = args.fns.activeFormat() === "text";
+          '''const active = f.activeFormat() === "text";
 return {
   as: "button",
   type: "button",
   role: "tab",
   "aria-selected": active ? "true" : "false",
   text: "Text",
-  onClick: () => args.fns.activeFormat("text")
+  onClick: () => f.activeFormat("text")
 };'''
       }
     }
@@ -307,8 +307,8 @@ return {
         props:
           '''return {
   as: "div",
-  data: args.fns.titles(),
-  hide: args.fns.activeFormat() !== "list"
+  data: f.titles(),
+  hide: f.activeFormat() !== "list"
 };'''
       }
     }
@@ -323,9 +323,9 @@ return {
         align-items: center;
         gap: 0.75rem;
         padding: 0.5rem 0.75rem;
-        border: 1px solid ${args.theme.var.color.border};
+        border: 1px solid ${t.var.color.border};
         border-radius: 0.375rem;
-        background: ${args.theme.var.color.background_light_50};
+        background: ${t.var.color.background_light_50};
       }`;'''
         displayOrder: 1
         componentName: Html
@@ -342,7 +342,7 @@ return {
         min-width: 0;
         word-break: break-word;
         font-size: 0.875rem;
-        color: ${args.theme.var.color.text};
+        color: ${t.var.color.text};
       }`;'''
         as: div
         displayOrder: 1
@@ -351,7 +351,7 @@ return {
         props:
           '''return {
   as: "div",
-  text: args.contextData.title
+  text: c.title
 };'''
       }
     }
@@ -360,7 +360,7 @@ return {
       L: Attr
       P: {
         css:
-          '''const copied = args.fns.copiedTitle() === args.contextData.title;
+          '''const copied = f.copiedTitle() === c.title;
 return `._id {
   display: inline-flex;
   align-items: center;
@@ -369,15 +369,15 @@ return `._id {
   width: 2.25rem;
   height: 2.25rem;
   padding: 0;
-  border: 1px solid ${copied ? args.theme.var.color.success : args.theme.var.color.border};
+  border: 1px solid ${copied ? t.var.color.success : t.var.color.border};
   border-radius: 0.375rem;
-  background: ${copied ? args.theme.var.color.success : args.theme.var.color.background};
-  color: ${copied ? args.theme.var.color.success_text : args.theme.var.color.text};
+  background: ${copied ? t.var.color.success : t.var.color.background};
+  color: ${copied ? t.var.color.success_text : t.var.color.text};
   cursor: pointer;
   transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 
   &:hover {
-    border-color: ${copied ? args.theme.var.color.success : args.theme.var.color.primary};
+    border-color: ${copied ? t.var.color.success : t.var.color.primary};
     transform: translateY(-1px);
   }
 }`;'''
@@ -385,14 +385,14 @@ return `._id {
         componentName: Html
         key: unique_12
         props:
-          '''const text = args.contextData.title;
-const copied = args.fns.copiedTitle() === text;
+          '''const text = c.title;
+const copied = f.copiedTitle() === text;
 return {
   as: "button",
   type: "button",
   title: copied ? "Copied!" : "Copy title",
   "aria-label": copied ? "Copied!" : "Copy title",
-  onClick: () => args.fns.copyTitle(text)
+  onClick: () => f.copyTitle(text)
 };'''
       }
     }
@@ -401,7 +401,7 @@ return {
       L: Attr
       P: {
         css:
-          '''const copied = args.fns.copiedTitle() === args.contextData.title;
+          '''const copied = f.copiedTitle() === c.title;
 return `._id {
   animation: ${copied ? "title-copy-pop 0.35s ease" : "none"};
 }
@@ -415,7 +415,7 @@ return `._id {
         componentName: Html
         key: unique_16
         props:
-          '''const copied = args.fns.copiedTitle() === args.contextData.title;
+          '''const copied = f.copiedTitle() === c.title;
 return {
   as: "icon",
   icon: copied ? "ph:check-bold" : "ph:copy",
@@ -433,10 +433,10 @@ return {
           '''return `._id {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.375rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   font-family: monospace;
   line-height: 1.5;
   resize: vertical;
@@ -447,10 +447,10 @@ return {
         props:
           '''return {
   as: "textarea",
-  value: args.fns.titles().join("\n"),
+  value: f.titles().join("\n"),
   rows: 30,
   readOnly: true,
-  hide: args.fns.activeFormat() !== "text"
+  hide: f.activeFormat() !== "text"
 };'''
       }
     }

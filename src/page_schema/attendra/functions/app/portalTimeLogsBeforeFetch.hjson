@@ -12,7 +12,7 @@ const {
   tableVertexLabel,
   queryModification,
   sessionUser
-} = args.contextData || {};
+} = c || {};
 
 if (tableVertexLabel !== "Time") {
   return { success: true, message: "Skip: not Time" };

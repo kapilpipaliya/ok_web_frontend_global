@@ -8,7 +8,7 @@
         body:
           '''
 // Get current authenticated user from session
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return {
     success: false,
@@ -17,7 +17,7 @@ if (!actualUser) {
 }
 
 // Get effective user (handles admin impersonation)
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const user = await _.getEffectiveUser(_.session, actualUser, c);
 
 // Extract parameters
 const { 
@@ -31,7 +31,7 @@ const {
   enableUserScopingForContent,
   sourceCategoryId,
   hooks
-} = args.contextData;
+} = c;
 
 if (!contentIds || !Array.isArray(contentIds) || contentIds.length === 0) {
   return {
@@ -61,15 +61,15 @@ const isConcreteCategoryId = (id) =>
   (uncategorizedVertexId == null || id !== uncategorizedVertexId);
 
 // Initialize deleted edges tracking in context if not exists
-if (!args.context.deletedEdges) {
-  args.context.deletedEdges = [];
+if (!_.context.deletedEdges) {
+  _.context.deletedEdges = [];
 }
 
 // If categoryId is null, undefined, or synthetic uncategorized id, remove relationships
 const isUncategorized = isUncategorizedCategoryId(categoryId);
 
 // Execute beforeMoveItemsToCategory hooks
-await args.executeHooks(hooks?.beforeMoveItemsToCategory, {
+await _.executeHooks(hooks?.beforeMoveItemsToCategory, {
   contentIds,
   categoryId,
   relationshipType,
@@ -108,7 +108,7 @@ try {
       queryParams = { userUuid, contentIds };
     }
 
-    const getEdgeIdsResult = await args.session.run(getEdgeIdsQuery, queryParams);
+    const getEdgeIdsResult = await _.session.run(getEdgeIdsQuery, queryParams);
     const edgeIds = getEdgeIdsResult.records[0]?.get('edgeIds') || [];
     const validEdgeIds = Array.isArray(edgeIds) ? edgeIds.filter(id => id !== null) : [];
 
@@ -134,14 +134,14 @@ try {
         queryParams = { edgeIds: validEdgeIds };
       }
 
-      const deleteResult = await args.session.run(query, queryParams);
+      const deleteResult = await _.session.run(query, queryParams);
       successCount = deleteResult.records[0]?.get('deletedCount') || 0;
     }
 
     // Track deleted edge IDs
     if (validEdgeIds.length > 0) {
       deletedEdgeIds.push(...validEdgeIds);
-      args.context.deletedEdges.push(...validEdgeIds);
+      _.context.deletedEdges.push(...validEdgeIds);
     }
 
     // Calculate updated content counts for uncategorized and source category
@@ -171,7 +171,7 @@ try {
         uncategorizedCountParams = { userUuid };
       }
 
-      const uncategorizedCountResult = await args.session.run(uncategorizedCountQuery, uncategorizedCountParams);
+      const uncategorizedCountResult = await _.session.run(uncategorizedCountQuery, uncategorizedCountParams);
       const uncategorizedCount = uncategorizedCountResult.records[0]?.get('contentCount') || 0;
       updatedCounts.targetCount = uncategorizedCount;
       updatedCounts.targetCategoryId = uncategorizedVertexId;
@@ -213,7 +213,7 @@ try {
           sourceCountParams = { userUuid, sourceCategoryId };
         }
 
-        const sourceCountResult = await args.session.run(sourceCountQuery, sourceCountParams);
+        const sourceCountResult = await _.session.run(sourceCountQuery, sourceCountParams);
         updatedCounts.sourceCount = sourceCountResult.records[0]?.get('contentCount') || 0;
         updatedCounts.sourceCategoryId = sourceCategoryId;
       } else if (sourceCategoryId != null && isUncategorizedCategoryId(sourceCategoryId)) {
@@ -232,7 +232,7 @@ try {
     };
 
     // Execute afterMoveItemsToCategory hooks
-    await args.executeHooks(hooks?.afterMoveItemsToCategory, {
+    await _.executeHooks(hooks?.afterMoveItemsToCategory, {
       contentIds,
       categoryId,
       relationshipType,
@@ -289,7 +289,7 @@ try {
           getOldEdgeIdsParams = { userUuid, contentId };
         }
 
-        const getOldEdgeIdsResult = await args.session.run(getOldEdgeIdsQuery, getOldEdgeIdsParams);
+        const getOldEdgeIdsResult = await _.session.run(getOldEdgeIdsQuery, getOldEdgeIdsParams);
         const oldRelIds = getOldEdgeIdsResult.records[0]?.get('oldRelIds') || [];
         const validOldRelIds = Array.isArray(oldRelIds) ? oldRelIds.filter(id => id !== null) : [];
 
@@ -302,9 +302,9 @@ try {
             DELETE r
             RETURN count(r) as deletedCount
           `;
-          await args.session.run(deleteOldEdgesQuery, { edgeIds: validOldRelIds });
+          await _.session.run(deleteOldEdgesQuery, { edgeIds: validOldRelIds });
           deletedEdgeIds.push(...validOldRelIds);
-          args.context.deletedEdges.push(...validOldRelIds);
+          _.context.deletedEdges.push(...validOldRelIds);
         }
 
         // Now create the new relationship
@@ -361,11 +361,11 @@ try {
           queryParams = { userUuid, categoryId, contentId };
         }
 
-        const result = await args.session.run(query, queryParams);
+        const result = await _.session.run(query, queryParams);
 
         if (result.records.length > 0) {
           // Use processResult to populate graph structure
-          args.processResult(result.records, args.context, [], 'r');
+          _.processResult(result.records, _.context, [], 'r');
           successCount++;
         } else {
           errorCount++;
@@ -418,7 +418,7 @@ try {
           targetCountParams = { userUuid, categoryId };
         }
 
-        const targetCountResult = await args.session.run(targetCountQuery, targetCountParams);
+        const targetCountResult = await _.session.run(targetCountQuery, targetCountParams);
         updatedCounts.targetCount = targetCountResult.records[0]?.get('contentCount') || 0;
         updatedCounts.targetCategoryId = categoryId;
       }
@@ -449,7 +449,7 @@ try {
             uncategorizedCountParams = { userUuid };
           }
 
-          const uncategorizedCountResult = await args.session.run(uncategorizedCountQuery, uncategorizedCountParams);
+          const uncategorizedCountResult = await _.session.run(uncategorizedCountQuery, uncategorizedCountParams);
           updatedCounts.sourceCount = uncategorizedCountResult.records[0]?.get('contentCount') || 0;
           updatedCounts.sourceCategoryId = uncategorizedVertexId;
         } else {
@@ -489,7 +489,7 @@ try {
             sourceCountParams = { userUuid, sourceCategoryId };
           }
 
-          const sourceCountResult = await args.session.run(sourceCountQuery, sourceCountParams);
+          const sourceCountResult = await _.session.run(sourceCountQuery, sourceCountParams);
           updatedCounts.sourceCount = sourceCountResult.records[0]?.get('contentCount') || 0;
           updatedCounts.sourceCategoryId = sourceCategoryId;
         }
@@ -509,7 +509,7 @@ try {
       };
 
       // Execute afterMoveItemsToCategory hooks
-      await args.executeHooks(hooks?.afterMoveItemsToCategory, {
+      await _.executeHooks(hooks?.afterMoveItemsToCategory, {
         contentIds,
         categoryId,
         relationshipType,
@@ -530,7 +530,7 @@ try {
       };
 
       // Execute afterMoveItemsToCategory hooks even on failure
-      await args.executeHooks(hooks?.afterMoveItemsToCategory, {
+      await _.executeHooks(hooks?.afterMoveItemsToCategory, {
         contentIds,
         categoryId,
         relationshipType,

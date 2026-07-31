@@ -8,13 +8,13 @@
         description: After create/update HydrateMeWaterLog, fills loggedAt and loggedDate when missing.
         body:
           '''
-const tableVertexLabel = args.contextData?.tableVertexLabel;
-const elementId = args.contextData?.elementId;
+const tableVertexLabel = c?.tableVertexLabel;
+const elementId = c?.elementId;
 if (tableVertexLabel !== "HydrateMeWaterLog" || !elementId) {
   return { success: true, message: "Skipped" };
 }
 
-await args.session.run(
+await _.session.run(
   `MATCH (w:HydrateMeWaterLog)
    WHERE elementId(w) = $elementId
    SET w.createdAt = coalesce(w.createdAt, datetime()),

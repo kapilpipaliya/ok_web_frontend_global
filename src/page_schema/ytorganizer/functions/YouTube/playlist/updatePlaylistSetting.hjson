@@ -8,7 +8,7 @@
         body:
           '''
 // Get current authenticated user from session
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return {
     success: false,
@@ -17,9 +17,9 @@ if (!actualUser) {
 }
 
 // Get effective user (handles admin impersonation)
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const user = await _.getEffectiveUser(_.session, actualUser, c);
 
-const { youtubeId, customName, ownershipId, isPublic, allowUnauthenticatedAccess } = args.contextData;
+const { youtubeId, customName, ownershipId, isPublic, allowUnauthenticatedAccess } = c;
 
 if (!youtubeId) {
   return {
@@ -36,7 +36,7 @@ if (!ownershipId) {
 }
 
 // Verify ownership belongs to user
-const ownershipCheck = await args.session.run(`
+const ownershipCheck = await _.session.run(`
   MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
   RETURN o
 `, { userUuid: user.P.uuid, ownershipId });
@@ -65,7 +65,7 @@ if (isPublic !== undefined || allowUnauthenticatedAccess !== undefined) {
     RETURN p.youtubeId as youtubeId
   `;
 
-  const updatePublicResult = await args.session.run(updatePublicSettingsQuery, {
+  const updatePublicResult = await _.session.run(updatePublicSettingsQuery, {
     ownershipId,
     youtubeId,
     isPublic: isPublic !== undefined ? isPublic : null,
@@ -80,7 +80,7 @@ if (isPublic !== undefined || allowUnauthenticatedAccess !== undefined) {
   }
 } else {
   // Verify playlist exists if we're not updating public settings
-  const playlistCheck = await args.session.run(`
+  const playlistCheck = await _.session.run(`
     MATCH (o:YouTubeOwnership {key: $ownershipId})
     MATCH (o)-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $youtubeId})
     RETURN p.youtubeId as youtubeId
@@ -107,7 +107,7 @@ if (customName !== null && customName !== undefined) {
     RETURN p.youtubeId as youtubeId
   `;
 
-  await args.session.run(createOrUpdateSettingQuery, {
+  await _.session.run(createOrUpdateSettingQuery, {
     ownershipId,
     youtubeId,
     customName,
@@ -124,14 +124,14 @@ if (customName !== null && customName !== undefined) {
     RETURN p.youtubeId as youtubeId
   `;
 
-  await args.session.run(deleteSettingQuery, {
+  await _.session.run(deleteSettingQuery, {
     ownershipId,
     youtubeId
   });
 }
 
 // Step 3: Fetch updated playlist with video count using helper function
-const fetchResult = await args.executeNamedServerFunction({
+const fetchResult = await s({
   functionName: "getPlaylistsWithVideoCount",
   contextData: {
     userUuid: user.P.uuid,

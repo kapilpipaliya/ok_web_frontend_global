@@ -50,8 +50,8 @@
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const variant = args.contextData.props?.variant || "default";
-const onClick = args.contextData.props?.onClick;
+const variant = c.props?.variant || "default";
+const onClick = c.props?.onClick;
 
 return {
   as: "div",
@@ -59,11 +59,11 @@ return {
 };
 ''',
         css: '''
-const variant = args.contextData.props?.variant || "default";
-const hasClick = args.contextData.props?.onClick;
+const variant = c.props?.variant || "default";
+const hasClick = c.props?.onClick;
 
 return `._id {
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
   border-radius: 0.75rem;
   padding: 1.5rem;
   transition: all 0.2s ease;
@@ -71,9 +71,9 @@ return `._id {
   ${variant === "elevated" ? `
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   ` : variant === "bordered" ? `
-    border: 1px solid ${args.theme.var.color.border};
+    border: 1px solid ${t.var.color.border};
   ` : `
-    background: ${args.theme.var.color.background_dark_50};
+    background: ${t.var.color.background_dark_50};
   `}
   
   ${hasClick ? `

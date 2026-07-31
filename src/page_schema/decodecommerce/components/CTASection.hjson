@@ -22,7 +22,7 @@ return {
         css: '''
 return `._id {
   padding: 5rem 0;
-  background: linear-gradient(135deg, ${args.theme.var.color.primary_light_900} 0%, ${args.theme.var.color.primary_light_850} 100%);
+  background: linear-gradient(135deg, ${t.var.color.primary_light_900} 0%, ${t.var.color.primary_light_850} 100%);
   position: relative;
   overflow: hidden;
   
@@ -37,7 +37,7 @@ return `._id {
     right: -10%;
     width: 500px;
     height: 500px;
-    background: radial-gradient(circle, ${args.theme.var.color.primary_light_800} 0%, transparent 70%);
+    background: radial-gradient(circle, ${t.var.color.primary_light_800} 0%, transparent 70%);
     border-radius: 50%;
     opacity: 0.5;
   }
@@ -88,7 +88,7 @@ return {
 return `._id {
   font-size: 3rem;
   font-weight: 800;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 1.5rem;
   
   @media (max-width: 768px) {
@@ -113,7 +113,7 @@ return {
         css: '''
 return `._id {
   font-size: 1.25rem;
-  color: ${args.theme.var.color.text_dark_300};
+  color: ${t.var.color.text_dark_300};
   line-height: 1.6;
   margin-bottom: 2.5rem;
   max-width: 600px;
@@ -167,20 +167,20 @@ return `._id {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
   padding: 1.25rem 2.5rem;
   border-radius: 0.5rem;
   text-decoration: none;
   font-weight: 600;
   font-size: 1.1rem;
   transition: all 0.2s ease;
-  box-shadow: 0 5px 15px ${args.theme.var.color.primary_light_300};
+  box-shadow: 0 5px 15px ${t.var.color.primary_light_300};
   
   &:hover {
-    background: ${args.theme.var.color.primary_dark_200};
+    background: ${t.var.color.primary_dark_200};
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px ${args.theme.var.color.primary_light_400};
+    box-shadow: 0 8px 25px ${t.var.color.primary_light_400};
   }
   
   @media (max-width: 768px) {
@@ -222,13 +222,13 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_dark_300};
+  color: ${t.var.color.text_dark_300};
   text-decoration: none;
   font-weight: 500;
   transition: all 0.2s ease;
   
   &:hover {
-    color: ${args.theme.var.color.primary};
+    color: ${t.var.color.primary};
   }
 }`;
 '''
@@ -283,7 +283,7 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const badge = args.contextData.trustBadges;
+const badge = c.trustBadges;
 return {
   as: "div"
 };
@@ -293,7 +293,7 @@ return `._id {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: ${args.theme.var.color.text_dark_300};
+  color: ${t.var.color.text_dark_300};
   font-size: 0.9rem;
 }`;
 '''
@@ -306,7 +306,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const badge = args.contextData.trustBadges;
+const badge = c.trustBadges;
 return {
   as: "icon",
   icon: badge.icon,
@@ -316,7 +316,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.success};
+  color: ${t.var.color.success};
 }`;
 '''
       }
@@ -328,7 +328,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const badge = args.contextData.trustBadges;
+const badge = c.trustBadges;
 return {
   as: "span",
   text: badge.text

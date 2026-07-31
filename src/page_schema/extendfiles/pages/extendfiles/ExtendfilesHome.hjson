@@ -45,7 +45,7 @@
       L: Attr
       P: {
         css:
-          "return `._id {\n  max-width: 800px;\n  margin: 0 auto;\n  padding: ${args.theme.var.spacing?.lg || \"2rem\"};\n  color: ${args.theme.var.color.text};\n}\n\n@media (max-width: 768px) {\n  ._id {\n    padding: ${args.theme.var.spacing?.md || \"1rem\"};\n  }\n}`;"
+          "return `._id {\n  max-width: 800px;\n  margin: 0 auto;\n  padding: ${t.var.spacing?.lg || \"2rem\"};\n  color: ${t.var.color.text};\n}\n\n@media (max-width: 768px) {\n  ._id {\n    padding: ${t.var.spacing?.md || \"1rem\"};\n  }\n}`;"
         displayOrder: 3
         componentName: Html
         props: "return { as: \"main\" }"
@@ -56,7 +56,7 @@
       L: Attr
       P: {
         css:
-          "return `._id {\n  font-size: 2rem;\n  font-weight: 700;\n  color: ${args.theme.var.color.text};\n  margin: 0 0 0.5rem 0;\n}\n\n@media (max-width: 768px) {\n  ._id { font-size: 1.75rem; }\n}`;"
+          "return `._id {\n  font-size: 2rem;\n  font-weight: 700;\n  color: ${t.var.color.text};\n  margin: 0 0 0.5rem 0;\n}\n\n@media (max-width: 768px) {\n  ._id { font-size: 1.75rem; }\n}`;"
         displayOrder: 1
         componentName: Html
         props: "return { as: \"h1\", text: \"NetSuite eXtendFiles\" }"
@@ -67,7 +67,7 @@
       L: Attr
       P: {
         css:
-          "return `._id {\n  font-size: 1.125rem;\n  line-height: 1.6;\n  color: ${args.theme.var.color.text_light_500};\n  margin: 0 0 1rem 0;\n}`;"
+          "return `._id {\n  font-size: 1.125rem;\n  line-height: 1.6;\n  color: ${t.var.color.text_light_500};\n  margin: 0 0 1rem 0;\n}`;"
         displayOrder: 2
         componentName: Html
         props:
@@ -79,7 +79,7 @@
       L: Attr
       P: {
         css:
-          "return `._id { font-size: 1rem; line-height: 1.6; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; }`;"
+          "return `._id { font-size: 1rem; line-height: 1.6; color: ${t.var.color.text}; margin-bottom: 1.5rem; }`;"
         displayOrder: 3
         textType: markdown
         componentName: Html
@@ -102,7 +102,7 @@
       L: Attr
       P: {
         css:
-          "return `._id { font-size: 1.25rem; font-weight: 600; color: ${args.theme.var.color.text}; margin: 0 0 0.75rem 0; }`;"
+          "return `._id { font-size: 1.25rem; font-weight: 600; color: ${t.var.color.text}; margin: 0 0 0.75rem 0; }`;"
         displayOrder: 1
         componentName: Html
         props: "return { as: \"h2\", text: \"Key features\" }"
@@ -113,7 +113,7 @@
       L: Attr
       P: {
         css:
-          "return `._id { font-size: 1rem; line-height: 1.6; color: ${args.theme.var.color.text}; margin: 0; }`;"
+          "return `._id { font-size: 1rem; line-height: 1.6; color: ${t.var.color.text}; margin: 0; }`;"
         displayOrder: 2
         textType: markdown
         componentName: Html
@@ -136,7 +136,7 @@
       L: Attr
       P: {
         css:
-          "return `._id { font-size: 1.25rem; font-weight: 600; color: ${args.theme.var.color.text}; margin: 0 0 0.75rem 0; }`;"
+          "return `._id { font-size: 1.25rem; font-weight: 600; color: ${t.var.color.text}; margin: 0 0 0.75rem 0; }`;"
         displayOrder: 1
         componentName: Html
         props: "return { as: \"h2\", text: \"How it works\" }"
@@ -147,7 +147,7 @@
       L: Attr
       P: {
         css:
-          "return `._id { font-size: 1rem; line-height: 1.6; color: ${args.theme.var.color.text}; margin: 0; }`;"
+          "return `._id { font-size: 1rem; line-height: 1.6; color: ${t.var.color.text}; margin: 0; }`;"
         displayOrder: 2
         textType: markdown
         componentName: Html
@@ -170,7 +170,7 @@
       L: Attr
       P: {
         css:
-          "return `._id { font-size: 1.25rem; font-weight: 600; color: ${args.theme.var.color.text}; margin: 0 0 0.75rem 0; }`;"
+          "return `._id { font-size: 1.25rem; font-weight: 600; color: ${t.var.color.text}; margin: 0 0 0.75rem 0; }`;"
         displayOrder: 1
         componentName: Html
         props: "return { as: \"h2\", text: \"Who it is for\" }"
@@ -181,7 +181,7 @@
       L: Attr
       P: {
         css:
-          "return `._id { font-size: 1rem; line-height: 1.6; color: ${args.theme.var.color.text}; margin: 0; }`;"
+          "return `._id { font-size: 1rem; line-height: 1.6; color: ${t.var.color.text}; margin: 0; }`;"
         displayOrder: 2
         componentName: Html
         props:

@@ -13,7 +13,7 @@ return {
     e.preventDefault();
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData);
-    args.showSuccessToast("Thank you! We'll get back to you soon.");
+    _.showSuccessToast("Thank you! We'll get back to you soon.");
     e.target.reset();
   }
 };
@@ -80,7 +80,7 @@ return {
 return `._id {
   display: block;
   font-weight: 500;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 0.5rem;
 }`;
 '''
@@ -105,21 +105,21 @@ return {
 return `._id {
   width: 100%;
   padding: 0.75rem 1rem;
-  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background_dark_100 : args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.background_dark_200};
+  background: ${_.currentMode() === 'dark' ? t.var.color.background_dark_100 : t.var.color.background};
+  border: 1px solid ${t.var.color.background_dark_200};
   border-radius: 0.5rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   font-size: 1rem;
   transition: all 0.2s ease;
   
   &:focus {
     outline: none;
-    border-color: ${args.theme.var.color.primary};
-    box-shadow: 0 0 0 3px ${args.currentMode() === 'dark' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(59, 130, 246, 0.1)'};
+    border-color: ${t.var.color.primary};
+    box-shadow: 0 0 0 3px ${_.currentMode() === 'dark' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(59, 130, 246, 0.1)'};
   }
   
   &::placeholder {
-    color: ${args.theme.var.color.text};
+    color: ${t.var.color.text};
     opacity: 0.5;
   }
 }`;
@@ -155,7 +155,7 @@ return {
 return `._id {
   display: block;
   font-weight: 500;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 0.5rem;
 }`;
 '''
@@ -180,21 +180,21 @@ return {
 return `._id {
   width: 100%;
   padding: 0.75rem 1rem;
-  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background_dark_100 : args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.background_dark_200};
+  background: ${_.currentMode() === 'dark' ? t.var.color.background_dark_100 : t.var.color.background};
+  border: 1px solid ${t.var.color.background_dark_200};
   border-radius: 0.5rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   font-size: 1rem;
   transition: all 0.2s ease;
   
   &:focus {
     outline: none;
-    border-color: ${args.theme.var.color.primary};
-    box-shadow: 0 0 0 3px ${args.currentMode() === 'dark' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(59, 130, 246, 0.1)'};
+    border-color: ${t.var.color.primary};
+    box-shadow: 0 0 0 3px ${_.currentMode() === 'dark' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(59, 130, 246, 0.1)'};
   }
   
   &::placeholder {
-    color: ${args.theme.var.color.text};
+    color: ${t.var.color.text};
     opacity: 0.5;
   }
 }`;
@@ -235,7 +235,7 @@ return {
 return `._id {
   display: block;
   font-weight: 500;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 0.5rem;
 }`;
 '''
@@ -260,21 +260,21 @@ return {
 return `._id {
   width: 100%;
   padding: 0.75rem 1rem;
-  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background_dark_100 : args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.background_dark_200};
+  background: ${_.currentMode() === 'dark' ? t.var.color.background_dark_100 : t.var.color.background};
+  border: 1px solid ${t.var.color.background_dark_200};
   border-radius: 0.5rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   font-size: 1rem;
   transition: all 0.2s ease;
   
   &:focus {
     outline: none;
-    border-color: ${args.theme.var.color.primary};
-    box-shadow: 0 0 0 3px ${args.currentMode() === 'dark' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(59, 130, 246, 0.1)'};
+    border-color: ${t.var.color.primary};
+    box-shadow: 0 0 0 3px ${_.currentMode() === 'dark' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(59, 130, 246, 0.1)'};
   }
   
   &::placeholder {
-    color: ${args.theme.var.color.text};
+    color: ${t.var.color.text};
     opacity: 0.5;
   }
 }`;
@@ -315,7 +315,7 @@ return {
 return `._id {
   display: block;
   font-weight: 500;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 0.5rem;
 }`;
 '''
@@ -338,18 +338,18 @@ return {
 return `._id {
   width: 100%;
   padding: 0.75rem 1rem;
-  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background_dark_100 : args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.background_dark_200};
+  background: ${_.currentMode() === 'dark' ? t.var.color.background_dark_100 : t.var.color.background};
+  border: 1px solid ${t.var.color.background_dark_200};
   border-radius: 0.5rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   font-size: 1rem;
   transition: all 0.2s ease;
   cursor: pointer;
   
   &:focus {
     outline: none;
-    border-color: ${args.theme.var.color.primary};
-    box-shadow: 0 0 0 3px ${args.currentMode() === 'dark' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(59, 130, 246, 0.1)'};
+    border-color: ${t.var.color.primary};
+    box-shadow: 0 0 0 3px ${_.currentMode() === 'dark' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(59, 130, 246, 0.1)'};
   }
 }`;
 '''
@@ -464,7 +464,7 @@ return {
 return `._id {
   display: block;
   font-weight: 500;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 0.5rem;
 }`;
 '''
@@ -489,10 +489,10 @@ return {
 return `._id {
   width: 100%;
   padding: 0.75rem 1rem;
-  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background_dark_100 : args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.background_dark_200};
+  background: ${_.currentMode() === 'dark' ? t.var.color.background_dark_100 : t.var.color.background};
+  border: 1px solid ${t.var.color.background_dark_200};
   border-radius: 0.5rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   font-size: 1rem;
   font-family: inherit;
   resize: vertical;
@@ -501,12 +501,12 @@ return `._id {
   
   &:focus {
     outline: none;
-    border-color: ${args.theme.var.color.primary};
-    box-shadow: 0 0 0 3px ${args.currentMode() === 'dark' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(59, 130, 246, 0.1)'};
+    border-color: ${t.var.color.primary};
+    box-shadow: 0 0 0 3px ${_.currentMode() === 'dark' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(59, 130, 246, 0.1)'};
   }
   
   &::placeholder {
-    color: ${args.theme.var.color.text};
+    color: ${t.var.color.text};
     opacity: 0.5;
   }
 }`;
@@ -530,8 +530,8 @@ return {
 return `._id {
   width: 100%;
   padding: 1rem 2rem;
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
   border: none;
   border-radius: 0.5rem;
   font-size: 1.125rem;
@@ -540,7 +540,7 @@ return `._id {
   transition: all 0.3s ease;
   
   &:hover {
-    background: ${args.theme.var.color.primary_dark_200};
+    background: ${t.var.color.primary_dark_200};
     transform: translateY(-2px);
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
   }

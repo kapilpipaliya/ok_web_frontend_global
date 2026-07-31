@@ -8,23 +8,23 @@
         description: Returns time records for the signed-in portal user only (subdomain DB). Requires session user.
         body:
           '''
-const user = await args.getUserFromSession();
+const user = await _.getUserFromSession();
 if (!user?.P?.uuid) {
   return { success: false, error: "Not signed in." };
 }
 const userUuid = String(user.P.uuid).trim();
 
 try {
-  const logsRes = await args.session.run(
+  const logsRes = await _.session.run(
     `MATCH (t:Time)-[:TimeEmployee]->(u:User {uuid: $userUuid})
      RETURN t
      ORDER BY t.clockInAt DESC
      LIMIT 200`,
     { userUuid }
   );
-  const logs = logsRes.records.map((rec) => args.convertNodeToJson(rec.get("t")));
+  const logs = logsRes.records.map((rec) => _.convertNodeToJson(rec.get("t")));
 
-  const openRes = await args.session.run(
+  const openRes = await _.session.run(
     `MATCH (t:Time)-[:TimeEmployee]->(u:User {uuid: $userUuid})
      WHERE t.clockOutAt IS NULL
      RETURN t
@@ -33,7 +33,7 @@ try {
     { userUuid }
   );
   const openLog = openRes.records[0]
-    ? args.convertNodeToJson(openRes.records[0].get("t"))
+    ? _.convertNodeToJson(openRes.records[0].get("t"))
     : null;
 
   return {

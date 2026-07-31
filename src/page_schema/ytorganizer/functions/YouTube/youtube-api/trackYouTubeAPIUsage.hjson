@@ -7,7 +7,7 @@
         description: Increment the usage count for a YouTube API key
         body:
           '''
-const { keyId, cost = 1 } = args.contextData;
+const { keyId, cost = 1 } = c;
 
 if (!keyId) {
   return {
@@ -17,7 +17,7 @@ if (!keyId) {
 }
 
 // Increment the usage count
-const result = await args.session.run(`
+const result = await _.session.run(`
   MATCH (ak:YouTubeAPIKey {key: $keyId})
   SET ak.currentCount = coalesce(ak.currentCount, 0) + $cost,
       ak.lastUsedAt = datetime(),
@@ -32,7 +32,7 @@ if (result.records.length === 0) {
   };
 }
 
-const apiKey = args.convertNodeToJson(result.records[0].get('ak'));
+const apiKey = _.convertNodeToJson(result.records[0].get('ak'));
 
 return {
   success: true,

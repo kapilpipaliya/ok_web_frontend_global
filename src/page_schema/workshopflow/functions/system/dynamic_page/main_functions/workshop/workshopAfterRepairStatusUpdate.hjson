@@ -8,10 +8,10 @@
         description: Hook that creates draft invoice and deducts inventory when a repair is created or updated into billable/closed states.
         body:
           '''
-const elementId = args.contextData?.elementId;
+const elementId = c?.elementId;
 if (!elementId) return { success: true, message: "No repair id provided" };
 
-const repairResult = await args.session.run(
+const repairResult = await _.session.run(
   `
   MATCH (r:RepairOrder)
   WHERE elementId(r) = $elementId
@@ -26,7 +26,7 @@ if (repairResult.records.length === 0) {
 }
 
 const repairNode = repairResult.records[0].get("r");
-const repair = args.convertNodeToJson(repairNode);
+const repair = _.convertNodeToJson(repairNode);
 const status = String(repair.P?.status || "").toLowerCase();
 
 if (status !== "ready-billing" && status !== "closed") {
@@ -36,7 +36,7 @@ if (status !== "ready-billing" && status !== "closed") {
 const repairNo = repair.P?.repairNo;
 if (!repairNo) return { success: true, message: "Repair missing number" };
 
-const existingInvoice = await args.session.run(
+const existingInvoice = await _.session.run(
   `
   MATCH (i:WorkshopInvoice {repairNo: $repairNo})
   RETURN i
@@ -48,7 +48,7 @@ const existingInvoice = await args.session.run(
 if (existingInvoice.records.length > 0) {
   // Continue to inventory deduction checks for closed repairs.
 } else {
-  const resInv = await args.executeNamedServerFunction({
+  const resInv = await s({
     functionName: "reserveWorkshopReferenceNumber",
     contextData: { sequenceKey: "WorkshopInvoice.invoiceNo" }
   });
@@ -68,7 +68,7 @@ if (existingInvoice.records.length > 0) {
   const estimate = Number(repair.P?.actualCost || repair.P?.estimatedCost || 0);
   const invoiceDate = new Date().toISOString().slice(0, 10);
 
-  await args.session.run(
+  await _.session.run(
     `
     MATCH (r:RepairOrder)
     WHERE elementId(r) = $elementId
@@ -103,7 +103,7 @@ if (existingInvoice.records.length > 0) {
 if (status === "closed") {
   const alreadyDeducted = Boolean(repair.P?.inventoryDeductedAt);
   if (!alreadyDeducted) {
-    const linesRes = await args.session.run(
+    const linesRes = await _.session.run(
       `
       MATCH (r:RepairOrder)-[:RepairOrderRepairPartLine]->(line:RepairPartLine)-[:RepairPartLineInventoryItem]->(i:InventoryItem)
       WHERE elementId(r) = $elementId
@@ -114,7 +114,7 @@ if (status === "closed") {
 
     if (linesRes.records.length > 0) {
       const inventoryDeductedAt = new Date().toISOString();
-      await args.session.executeWrite(async (tx) => {
+      await _.session.executeWrite(async (tx) => {
         for (let li = 0; li < linesRes.records.length; li++) {
           const rec = linesRes.records[li];
           const partNo = String(rec.get("partNo") || "").trim();

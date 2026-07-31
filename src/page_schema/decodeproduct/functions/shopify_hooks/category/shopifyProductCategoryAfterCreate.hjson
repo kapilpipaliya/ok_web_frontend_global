@@ -7,7 +7,7 @@
         description: Enqueues background job to create a collection in Shopify when a new ShopifyProductCategory is added.
         body:
           '''
-const { parentVertexLabel, name, vertexId, result } = args.contextData;
+const { parentVertexLabel, name, vertexId, result } = c;
 
 if (parentVertexLabel !== 'ShopifyProductCategory') return;
 
@@ -17,16 +17,16 @@ const categoryData = vertex?.P || {};
 
 if (categoryData.id) return;
 
-const shop = args.contextData.shop;
+const shop = c.shop;
 if (!shop) { console.log('shopifyProductCategoryAfterCreate: shop not available in contextData'); return; }
 
 try {
-  const helpers = await args.executeNamedServerFunction(
+  const helpers = await s(
     { functionName: 'shopifyQueueHelpers', contextData: {} }
   );
   if (!helpers.result?.success) return;
   const queueName = 'processShopifyProductCategoryAfterCreate';
-  const queue = helpers.result.data.createShopifyQueue(args, queueName);
+  const queue = helpers.result.data.createShopifyQueue(_, queueName);
   const job = await helpers.result.data.addShopifyJob(queue, queueName, {
     shop,
     parentVertexLabel,
@@ -37,12 +37,12 @@ try {
   await queue.close();
   const jobId = job?.id;
   if (vertexId && jobId) {
-    await args.session.run(
+    await _.session.run(
       `MATCH (n:ShopifyProductCategory) WHERE elementId(n) = $elementId SET n.syncStatus = $status, n.syncJobId = $jobId, n.updatedAt = datetime()`,
       { elementId: vertexId, status: 'queued', jobId }
     );
   }
-  const r = args.contextData?.result;
+  const r = c?.result;
   if (r?.data?.P && typeof r.data.P === 'object') {
     r.data.P.syncStatus = 'queued';
     if (jobId) r.data.P.syncJobId = jobId;

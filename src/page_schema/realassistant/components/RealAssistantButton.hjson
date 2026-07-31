@@ -104,13 +104,13 @@
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const variant = args.contextData.props?.variant || "primary";
-const size = args.contextData.props?.size || "medium";
-const fullWidth = args.contextData.props?.fullWidth || false;
-const text = args.contextData.props?.text || "Button";
-const icon = args.contextData.props?.icon;
-const onClick = args.contextData.props?.onClick;
-const disabled = args.contextData.props?.disabled || false;
+const variant = c.props?.variant || "primary";
+const size = c.props?.size || "medium";
+const fullWidth = c.props?.fullWidth || false;
+const text = c.props?.text || "Button";
+const icon = c.props?.icon;
+const onClick = c.props?.onClick;
+const disabled = c.props?.disabled || false;
 
 return {
   as: "button",
@@ -119,10 +119,10 @@ return {
 };
 ''',
         css: '''
-const variant = args.contextData.props?.variant || "primary";
-const size = args.contextData.props?.size || "medium";
-const fullWidth = args.contextData.props?.fullWidth || false;
-const disabled = args.contextData.props?.disabled || false;
+const variant = c.props?.variant || "primary";
+const size = c.props?.size || "medium";
+const fullWidth = c.props?.fullWidth || false;
+const disabled = c.props?.disabled || false;
 
 const sizes = {
   small: {
@@ -144,24 +144,24 @@ const sizes = {
 
 const colors = {
   primary: {
-    bg: args.theme.var.color.primary,
-    text: args.theme.var.color.primary_text,
-    hover: args.theme.var.color.primary_dark_200
+    bg: t.var.color.primary,
+    text: t.var.color.primary_text,
+    hover: t.var.color.primary_dark_200
   },
   secondary: {
-    bg: args.theme.var.color.background_light_200,
-    text: args.theme.var.color.background_light_200_text,
-    hover: args.theme.var.color.background_dark_200
+    bg: t.var.color.background_light_200,
+    text: t.var.color.background_light_200_text,
+    hover: t.var.color.background_dark_200
   },
   success: {
-    bg: args.theme.var.color.success,
-    text: args.theme.var.color.success_text,
-    hover: args.theme.var.color.success_dark_200
+    bg: t.var.color.success,
+    text: t.var.color.success_text,
+    hover: t.var.color.success_dark_200
   },
   danger: {
-    bg: args.theme.var.color.error,
-    text: args.theme.var.color.error_text,
-    hover: args.theme.var.color.error_dark_200
+    bg: t.var.color.error,
+    text: t.var.color.error_text,
+    hover: t.var.color.error_dark_200
   }
 };
 
@@ -214,8 +214,8 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const icon = args.contextData.props?.icon;
-const size = args.contextData.props?.size || "medium";
+const icon = c.props?.icon;
+const size = c.props?.size || "medium";
 const iconSizes = { small: 16, medium: 20, large: 24 };
 
 if (!icon) return { as: "span" };
@@ -236,7 +236,7 @@ return {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const text = args.contextData.props?.text || "Button";
+const text = c.props?.text || "Button";
 
 return {
   as: "span",

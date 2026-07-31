@@ -109,8 +109,8 @@ export const themeFormSchema = {
                   componentName: "Html",
                   css: `return \`._id {
                       padding: 5px;
-                      background-color: \${args.theme.var.color.gray_light_720};
-                      color: \${args.theme.var.color.text_light_900};
+                      background-color: \${t.var.color.gray_light_720};
+                      color: \${t.var.color.text_light_900};
                       border-radius: 5px;
                     }\`;`,
                   props: (options: ThemeFunctionArgumentType) => ({

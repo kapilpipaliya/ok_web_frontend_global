@@ -8,7 +8,7 @@
         body:
           '''
 // Get effective user (handles admin impersonation)
-const user = await args.getEffectiveUser(args.session, args.contextData.impersonatedUserUuid);
+const user = await _.getEffectiveUser(_.session, c.impersonatedUserUuid);
 
 if (!user) {
   return {
@@ -18,7 +18,7 @@ if (!user) {
 }
 
 // Get ownershipId and videos from contextData
-const { ownershipId, videos } = args.contextData;
+const { ownershipId, videos } = c;
 
 if (!ownershipId) {
   return {
@@ -35,7 +35,7 @@ if (!Array.isArray(videos)) {
 }
 
 // Verify ownership belongs to user
-const ownershipCheck = await args.session.run(`
+const ownershipCheck = await _.session.run(`
   MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
   RETURN o
 `, {
@@ -51,7 +51,7 @@ if (ownershipCheck.records.length === 0) {
 }
 
 // Delete existing queue for this ownership
-await args.session.run(`
+await _.session.run(`
   MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideoQueue]->(vq:VideoQueue)
   DETACH DELETE vq
 `, {
@@ -70,7 +70,7 @@ for (let i = 0; i < videos.length; i++) {
 
   // Create VideoQueue node and relationships
   // NEW SCHEMA v4.0: Verify ownership before accessing video
-  const createResult = await args.session.run(`
+  const createResult = await _.session.run(`
     MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideo]->(v:Video {youtubeId: $videoId})
     CREATE (vq:VideoQueue {
       key: $key,

@@ -13,14 +13,14 @@
       P: {
         css:
           '''
-const type = args.contextData.props?.type || "default";
-const isDivider = args.contextData.props?.isDivider;
+const type = c.props?.type || "default";
+const isDivider = c.props?.isDivider;
 
 // Divider styles
 if (isDivider) {
   return `._id {
     height: 1px;
-    background: ${args.theme.var.color.border};
+    background: ${t.var.color.border};
     margin: 0.25rem 0;
   }`;
 }
@@ -38,19 +38,19 @@ return `._id {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: ${type === 'danger' ? args.theme.var.color.error : args.theme.var.color.text};
+  color: ${type === 'danger' ? t.var.color.error : t.var.color.text};
   font-size: 0.875rem;
   font-weight: 500;
   text-decoration: none;
 }
 
 ._id:hover {
-  background: ${type === 'danger' ? args.theme.var.color.error_light_100 : args.theme.var.color.primary_light_200};
-  color: ${type === 'danger' ? args.theme.var.color.error_text : args.theme.var.color.text};
+  background: ${type === 'danger' ? t.var.color.error_light_100 : t.var.color.primary_light_200};
+  color: ${type === 'danger' ? t.var.color.error_text : t.var.color.text};
 }
 
 ._id:focus {
-  outline: 2px solid ${args.theme.var.color.primary};
+  outline: 2px solid ${t.var.color.primary};
   outline-offset: -2px;
 }`;
 '''
@@ -58,11 +58,11 @@ return `._id {
         componentName: Html
         props:
           '''
-const text = args.contextData.props?.text || "Menu Item";
-const onClick = args.contextData.props?.onClick;
-const href = args.contextData.props?.href;
-const type = args.contextData.props?.type || "default";
-const isDivider = args.contextData.props?.isDivider;
+const text = c.props?.text || "Menu Item";
+const onClick = c.props?.onClick;
+const href = c.props?.href;
+const type = c.props?.type || "default";
+const isDivider = c.props?.isDivider;
 
 // If it's a divider, render a simple div
 if (isDivider) {
@@ -98,8 +98,8 @@ return {
         componentName: Html
         props:
           '''
-const icon = args.contextData.props?.icon;
-const isDivider = args.contextData.props?.isDivider;
+const icon = c.props?.icon;
+const isDivider = c.props?.isDivider;
 
 // Hide icon for dividers
 if (isDivider || !icon) {
@@ -129,8 +129,8 @@ return `._id {
         componentName: Html
         props:
           '''
-const text = args.contextData.props?.text || "Menu Item";
-const isDivider = args.contextData.props?.isDivider;
+const text = c.props?.text || "Menu Item";
+const isDivider = c.props?.isDivider;
 
 // Hide text for dividers
 if (isDivider) {

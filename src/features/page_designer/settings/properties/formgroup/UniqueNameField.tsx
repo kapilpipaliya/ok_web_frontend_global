@@ -74,7 +74,7 @@ export function UniqueNameField(
         props.selectedLayout?.P[props.meta.P[IdAttr]] !== undefined &&
         props.selectedLayout?.P[props.meta.P[IdAttr]] !== null
           ? `return \`._id {
-              border: 2px solid \${args.theme.var.color.success};
+              border: 2px solid \${t.var.color.success};
               border-bottom: none;
               border-top: none;
               padding: 2px 3px;

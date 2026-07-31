@@ -128,15 +128,15 @@ export function schemaOpButtonCss(
 
   switch (variant) {
     case "primary":
-      return `return \`._id { ${base} border: none; background: \${args.theme.var.color.primary}; color: \${args.theme.var.color.primary_text}; } ${disabled}\`;`;
+      return `return \`._id { ${base} border: none; background: \${t.var.color.primary}; color: \${t.var.color.primary_text}; } ${disabled}\`;`;
     case "info":
-      return `return \`._id { ${base} border: none; background: \${args.theme.var.color.info}; color: \${args.theme.var.color.info_text}; } ${disabled}\`;`;
+      return `return \`._id { ${base} border: none; background: \${t.var.color.info}; color: \${t.var.color.info_text}; } ${disabled}\`;`;
     case "ghost":
-      return `return \`._id { ${base} border: 1px solid \${args.theme.var.color.border}; background: \${args.theme.var.color.background_light_100}; color: \${args.theme.var.color.text}; } ${disabled}\`;`;
+      return `return \`._id { ${base} border: 1px solid \${t.var.color.border}; background: \${t.var.color.background_light_100}; color: \${t.var.color.text}; } ${disabled}\`;`;
     case "link":
-      return `return \`._id { ${base} border: 1px solid \${args.theme.var.color.primary}; background: \${args.theme.var.color.primary}; color: \${args.theme.var.color.primary_text}; text-decoration: none; display: inline-flex; align-items: center; } ._id:hover { background: \${args.theme.var.color.primary_dark_200}; } ${disabled}\`;`;
+      return `return \`._id { ${base} border: 1px solid \${t.var.color.primary}; background: \${t.var.color.primary}; color: \${t.var.color.primary_text}; text-decoration: none; display: inline-flex; align-items: center; } ._id:hover { background: \${t.var.color.primary_dark_200}; } ${disabled}\`;`;
     case "secondary":
-      return `return \`._id { ${base} border: none; background: \${args.theme.var.color.background_dark_300}; color: \${args.theme.var.color.background_dark_300_text}; } ${disabled}\`;`;
+      return `return \`._id { ${base} border: none; background: \${t.var.color.background_dark_300}; color: \${t.var.color.background_dark_300_text}; } ${disabled}\`;`;
   }
 }
 

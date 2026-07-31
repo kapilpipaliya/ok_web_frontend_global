@@ -469,13 +469,13 @@ Periodically test backup integrity by restoring to a test database:
 
 **Option 2: Via TypeScript Function**
 ```typescript
-await args.restoreFromBackup({
+await _.restoreFromBackup({
   filename: 'admin-20250111-140000-hourly.dump.gz',
   sourceDatabaseName: 'admin',
   targetDatabaseName: 'admin_test',  // Restore to test database
   confirmed: true,
-  sendEmail: args.sendEmail,
-  subDomain: args.subDomain
+  sendEmail: _.sendEmail,
+  subDomain: _.subDomain
 });
 ```
 

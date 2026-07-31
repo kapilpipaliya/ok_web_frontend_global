@@ -169,12 +169,12 @@ export function AdminWorkerManagement() {
       <As
         as="div"
         css={`return \`._id {
-  background: \${args.theme.var.color.info_light_900};
-  border: 1px solid \${args.theme.var.color.info_light_700};
+  background: \${t.var.color.info_light_900};
+  border: 1px solid \${t.var.color.info_light_700};
   border-radius: 0.5rem;
   padding: 1rem 1.25rem;
   margin-bottom: 1.5rem;
-  color: \${args.theme.var.color.info_dark_300};
+  color: \${t.var.color.info_dark_300};
 }\`;`}
       >
         <As
@@ -237,11 +237,11 @@ export function AdminWorkerManagement() {
   align-items: center;
   gap: 0.5rem;
   transition: all 0.2s;
-  background: \${args.theme.var.color.background_dark_300};
-  color: \${args.theme.var.color.background_dark_300_text};
+  background: \${t.var.color.background_dark_300};
+  color: \${t.var.color.background_dark_300_text};
 }
 ._id:hover {
-  background: \${args.theme.var.color.background_dark_400};
+  background: \${t.var.color.background_dark_400};
 }\`;`}
         >
           {"🔄 Refresh"}
@@ -255,8 +255,8 @@ export function AdminWorkerManagement() {
           css={`return \`._id {
   padding: 1.5rem;
   border-radius: 0.5rem;
-  border: 1px solid \${args.theme.var.color.error};
-  background: \${args.theme.var.color.error_light_900};
+  border: 1px solid \${t.var.color.error};
+  background: \${t.var.color.error_light_900};
   margin-bottom: 2rem;
 }\`;`}
         >
@@ -282,7 +282,7 @@ export function AdminWorkerManagement() {
                 as="div"
                 css={`return \`._id {
   font-weight: 600;
-  color: \${args.theme.var.color.error_dark_300};
+  color: \${t.var.color.error_dark_300};
   margin-bottom: 0.5rem;
 }\`;`}
               >
@@ -291,7 +291,7 @@ export function AdminWorkerManagement() {
               <As
                 as="div"
                 css={`return \`._id {
-  color: \${args.theme.var.color.error_dark_300};
+  color: \${t.var.color.error_dark_300};
   font-size: 0.875rem;
 }\`;`}
               >
@@ -311,7 +311,7 @@ export function AdminWorkerManagement() {
               as="div"
               css={`return \`._id {
   margin-bottom: 2rem;
-  border: 1px solid \${args.theme.var.color.border};
+  border: 1px solid \${t.var.color.border};
   border-radius: 0.5rem;
   overflow: hidden;
 }\`;`}
@@ -319,8 +319,8 @@ export function AdminWorkerManagement() {
               <As
                 as="div"
                 css={`return \`._id {
-  background: \${args.theme.var.color.primary_light_900};
-  border-bottom: 1px solid \${args.theme.var.color.border};
+  background: \${t.var.color.primary_light_900};
+  border-bottom: 1px solid \${t.var.color.border};
   padding: 1rem 1.5rem;
   display: flex;
   justify-content: space-between;
@@ -343,8 +343,8 @@ export function AdminWorkerManagement() {
                   <As
                     as="span"
                     css={`return \`._id {
-  background: \${args.theme.var.color.primary};
-  color: \${args.theme.var.color.primary_text};
+  background: \${t.var.color.primary};
+  color: \${t.var.color.primary_text};
   padding: 0.25rem 0.75rem;
   border-radius: 9999px;
   font-size: 0.875rem;
@@ -370,8 +370,8 @@ export function AdminWorkerManagement() {
                         as="div"
                         css={`return \`._id {
   padding: 1rem 1.5rem;
-  background: \${args.theme.var.color.background};
-  border-top: 1px solid \${args.theme.var.color.border};
+  background: \${t.var.color.background};
+  border-top: 1px solid \${t.var.color.border};
   display: grid;
   grid-template-columns: 1fr auto auto auto;
   gap: 1.5rem;
@@ -379,7 +379,7 @@ export function AdminWorkerManagement() {
   transition: background 0.2s;
 }
 ._id:hover {
-  background: \${args.theme.var.color.background_light_200};
+  background: \${t.var.color.background_light_200};
 }\`;`}
                       >
                         <As
@@ -396,8 +396,8 @@ export function AdminWorkerManagement() {
   width: 8px;
   height: 8px;
   border-radius: 9999px;
-  background: \${args.theme.var.color.success};
-  box-shadow: 0 0 8px \${args.theme.var.color.success};
+  background: \${t.var.color.success};
+  box-shadow: 0 0 8px \${t.var.color.success};
 }\`;`}
                           />
                           <As
@@ -422,8 +422,8 @@ export function AdminWorkerManagement() {
                                 <As
                                   as="span"
                                   css={`return \`._id {
-  background: \${args.theme.var.color.info_light_900};
-  color: \${args.theme.var.color.info_dark_300};
+  background: \${t.var.color.info_light_900};
+  color: \${t.var.color.info_dark_300};
   padding: 0.125rem 0.5rem;
   border-radius: 0.25rem;
   font-size: 0.75rem;
@@ -439,7 +439,7 @@ export function AdminWorkerManagement() {
                               css={`return \`._id {
   font-family: monospace;
   font-size: 0.75rem;
-  color: \${args.theme.var.color.text_light_600};
+  color: \${t.var.color.text_light_600};
 }\`;`}
                             >
                               {node.nodeId}
@@ -456,7 +456,7 @@ export function AdminWorkerManagement() {
                             as="div"
                             css={`return \`._id {
   font-size: 0.75rem;
-  color: \${args.theme.var.color.text_light_600};
+  color: \${t.var.color.text_light_600};
   margin-bottom: 0.25rem;
 }\`;`}
                           >
@@ -482,7 +482,7 @@ export function AdminWorkerManagement() {
                             as="div"
                             css={`return \`._id {
   font-size: 0.75rem;
-  color: \${args.theme.var.color.text_light_600};
+  color: \${t.var.color.text_light_600};
   margin-bottom: 0.25rem;
 }\`;`}
                           >
@@ -514,8 +514,8 @@ export function AdminWorkerManagement() {
   border-radius: 9999px;
   font-size: 0.875rem;
   font-weight: 500;
-  background: \${args.theme.var.color.success_light_900};
-  color: \${args.theme.var.color.success_dark_300};
+  background: \${t.var.color.success_light_900};
+  color: \${t.var.color.success_dark_300};
 }\`;`}
                           >
                             <As
@@ -524,7 +524,7 @@ export function AdminWorkerManagement() {
   width: 6px;
   height: 6px;
   border-radius: 9999px;
-  background: \${args.theme.var.color.success};
+  background: \${t.var.color.success};
 }\`;`}
                             />
                             <As as="span">Online</As>
@@ -549,7 +549,7 @@ export function AdminWorkerManagement() {
               css={`return \`._id {
   padding: 3rem;
   text-align: center;
-  color: \${args.theme.var.color.text_light_600};
+  color: \${t.var.color.text_light_600};
 }\`;`}
             >
               Loading cluster worker status...
@@ -581,8 +581,8 @@ export function AdminWorkerManagement() {
                   css={`return \`._id {
   padding: 1.5rem;
   border-radius: 0.5rem;
-  border: 1px solid \${args.theme.var.color.border};
-  background: \${args.theme.var.color.background};
+  border: 1px solid \${t.var.color.border};
+  background: \${t.var.color.background};
 }\`;`}
                 >
                   <As
@@ -590,7 +590,7 @@ export function AdminWorkerManagement() {
                     css={`return \`._id {
   font-size: 0.875rem;
   font-weight: 500;
-  color: \${args.theme.var.color.text_light_600};
+  color: \${t.var.color.text_light_600};
   margin: 0 0 0.5rem 0;
   text-transform: uppercase;
 }\`;`}
@@ -613,8 +613,8 @@ export function AdminWorkerManagement() {
                   css={`return \`._id {
   padding: 1.5rem;
   border-radius: 0.5rem;
-  border: 1px solid \${args.theme.var.color.border};
-  background: \${args.theme.var.color.background};
+  border: 1px solid \${t.var.color.border};
+  background: \${t.var.color.background};
 }\`;`}
                 >
                   <As
@@ -622,7 +622,7 @@ export function AdminWorkerManagement() {
                     css={`return \`._id {
   font-size: 0.875rem;
   font-weight: 500;
-  color: \${args.theme.var.color.text_light_600};
+  color: \${t.var.color.text_light_600};
   margin: 0 0 0.5rem 0;
   text-transform: uppercase;
 }\`;`}
@@ -645,8 +645,8 @@ export function AdminWorkerManagement() {
                   css={`return \`._id {
   padding: 1.5rem;
   border-radius: 0.5rem;
-  border: 1px solid \${args.theme.var.color.border};
-  background: \${args.theme.var.color.background};
+  border: 1px solid \${t.var.color.border};
+  background: \${t.var.color.background};
 }\`;`}
                 >
                   <As
@@ -654,7 +654,7 @@ export function AdminWorkerManagement() {
                     css={`return \`._id {
   font-size: 0.875rem;
   font-weight: 500;
-  color: \${args.theme.var.color.text_light_600};
+  color: \${t.var.color.text_light_600};
   margin: 0 0 0.5rem 0;
   text-transform: uppercase;
 }\`;`}
@@ -678,8 +678,8 @@ export function AdminWorkerManagement() {
                   css={`return \`._id {
   padding: 1.5rem;
   border-radius: 0.5rem;
-  border: 1px solid \${args.theme.var.color.border};
-  background: \${args.theme.var.color.background};
+  border: 1px solid \${t.var.color.border};
+  background: \${t.var.color.background};
 }\`;`}
                 >
                   <As
@@ -687,7 +687,7 @@ export function AdminWorkerManagement() {
                     css={`return \`._id {
   font-size: 0.875rem;
   font-weight: 500;
-  color: \${args.theme.var.color.text_light_600};
+  color: \${t.var.color.text_light_600};
   margin: 0 0 0.5rem 0;
   text-transform: uppercase;
 }\`;`}
@@ -710,8 +710,8 @@ export function AdminWorkerManagement() {
   border-radius: 9999px;
   font-size: 0.875rem;
   font-weight: 500;
-  background: ${totalWorkers > 0 ? "${args.theme.var.color.success_light_900}" : "${args.theme.var.color.error_light_900}"};
-  color: ${totalWorkers > 0 ? "${args.theme.var.color.success_dark_300}" : "${args.theme.var.color.error_dark_300}"};
+  background: ${totalWorkers > 0 ? "${t.var.color.success_light_900}" : "${t.var.color.error_light_900}"};
+  color: ${totalWorkers > 0 ? "${t.var.color.success_dark_300}" : "${t.var.color.error_dark_300}"};
 }\`;`}
                     >
                       {totalWorkers > 0 ? "Active" : "Inactive"}
@@ -742,11 +742,11 @@ export function AdminWorkerManagement() {
   align-items: center;
   gap: 0.5rem;
   transition: all 0.2s;
-  background: \${args.theme.var.color.primary};
-  color: \${args.theme.var.color.primary_text};
+  background: \${t.var.color.primary};
+  color: \${t.var.color.primary_text};
 }
 ._id:hover {
-  background: \${args.theme.var.color.primary_dark_200};
+  background: \${t.var.color.primary_dark_200};
 }\`;`}
                 >
                   {"▶️ Initialize All Workers"}
@@ -770,11 +770,11 @@ export function AdminWorkerManagement() {
   align-items: center;
   gap: 0.5rem;
   transition: all 0.2s;
-  background: \${args.theme.var.color.error};
-  color: \${args.theme.var.color.error_text};
+  background: \${t.var.color.error};
+  color: \${t.var.color.error_text};
 }
 ._id:hover:not(:disabled) {
-  background: \${args.theme.var.color.error_dark_200};
+  background: \${t.var.color.error_dark_200};
 }
 ._id:disabled {
   opacity: 0.6;
@@ -784,7 +784,7 @@ export function AdminWorkerManagement() {
   display: inline-block;
   width: 14px;
   height: 14px;
-  border: 2px solid \${args.theme.var.color.error_text};
+  border: 2px solid \${t.var.color.error_text};
   border-top-color: transparent;
   border-radius: 50%;
   animation: stopAllWorkersSpin 0.8s linear infinite;
@@ -808,7 +808,7 @@ export function AdminWorkerManagement() {
                     css={`return \`._id {
   padding: 3rem;
   text-align: center;
-  color: \${args.theme.var.color.text_light_600};
+  color: \${t.var.color.text_light_600};
 }\`;`}
                   >
                     <As
@@ -838,7 +838,7 @@ export function AdminWorkerManagement() {
                       <As
                         as="div"
                         css={`return \`._id {
-  border: 1px solid \${args.theme.var.color.border};
+  border: 1px solid \${t.var.color.border};
   border-radius: 0.5rem;
   overflow: hidden;
 }\`;`}
@@ -846,7 +846,7 @@ export function AdminWorkerManagement() {
                         <As
                           as="div"
                           css={`return \`._id {
-  background: \${args.theme.var.color.background_light_200};
+  background: \${t.var.color.background_light_200};
   padding: 1rem 1.5rem;
   display: flex;
   justify-content: space-between;
@@ -879,7 +879,7 @@ export function AdminWorkerManagement() {
   gap: 1rem;
   align-items: center;
   font-size: 0.875rem;
-  color: \${args.theme.var.color.text_light_600};
+  color: \${t.var.color.text_light_600};
 }\`;`}
                           >
                             <As as="span">
@@ -896,7 +896,7 @@ export function AdminWorkerManagement() {
                               css={`return \`._id {
   padding: 2rem;
   text-align: center;
-  color: \${args.theme.var.color.text_light_600};
+  color: \${t.var.color.text_light_600};
   font-size: 0.875rem;
 }\`;`}
                             >
@@ -907,14 +907,14 @@ export function AdminWorkerManagement() {
                           <As
                             as="div"
                             css={`return \`._id {
-  background: \${args.theme.var.color.background_light_200};
+  background: \${t.var.color.background_light_200};
   padding: 0.75rem 1.5rem;
   font-weight: 600;
   font-size: 0.875rem;
   display: grid;
   grid-template-columns: 2fr 2fr 150px 100px 150px;
   gap: 1rem;
-  border-top: 1px solid \${args.theme.var.color.border};
+  border-top: 1px solid \${t.var.color.border};
 }\`;`}
                           >
                             <As as="div">Worker Key</As>
@@ -929,16 +929,16 @@ export function AdminWorkerManagement() {
                                 as="div"
                                 css={`return \`._id {
   padding: 1rem 1.5rem;
-  border-top: 1px solid \${args.theme.var.color.border};
+  border-top: 1px solid \${t.var.color.border};
   display: grid;
   grid-template-columns: 2fr 2fr 150px 100px 150px;
   gap: 1rem;
   align-items: center;
-  background: \${args.theme.var.color.background};
+  background: \${t.var.color.background};
   transition: background 0.2s;
 }
 ._id:hover {
-  background: \${args.theme.var.color.background_light_200};
+  background: \${t.var.color.background_light_200};
 }\`;`}
                               >
                                 <As
@@ -955,7 +955,7 @@ export function AdminWorkerManagement() {
                                   css={`return \`._id {
   font-family: monospace;
   font-size: 0.75rem;
-  color: \${args.theme.var.color.text_light_600};
+  color: \${t.var.color.text_light_600};
 }\`;`}
                                 >
                                   {worker.nodeId.substring(0, 30)}...
@@ -978,8 +978,8 @@ export function AdminWorkerManagement() {
   border-radius: 9999px;
   font-size: 0.875rem;
   font-weight: 500;
-  background: ${worker.status === "running" ? "${args.theme.var.color.success_light_900}" : "${args.theme.var.color.error_light_900}"};
-  color: ${worker.status === "running" ? "${args.theme.var.color.success_dark_300}" : "${args.theme.var.color.error_dark_300}"};
+  background: ${worker.status === "running" ? "${t.var.color.success_light_900}" : "${t.var.color.error_light_900}"};
+  color: ${worker.status === "running" ? "${t.var.color.success_dark_300}" : "${t.var.color.error_dark_300}"};
 }\`;`}
                                   >
                                     {worker.status}
@@ -1010,14 +1010,14 @@ export function AdminWorkerManagement() {
   border: none;
   font-weight: 500;
   transition: all 0.2s;
-  background: \${args.theme.var.color.success};
-  color: \${args.theme.var.color.success_text};
+  background: \${t.var.color.success};
+  color: \${t.var.color.success_text};
 }
 ._id:hover:not(:disabled) {
-  background: \${args.theme.var.color.success_dark_200};
+  background: \${t.var.color.success_dark_200};
 }
 ._id:disabled {
-  background: \${args.theme.var.color.background_dark_200};
+  background: \${t.var.color.background_dark_200};
   cursor: not-allowed;
   opacity: 0.5;
 }\`;`}
@@ -1041,14 +1041,14 @@ export function AdminWorkerManagement() {
   border: none;
   font-weight: 500;
   transition: all 0.2s;
-  background: \${args.theme.var.color.warning};
-  color: \${args.theme.var.color.warning_text};
+  background: \${t.var.color.warning};
+  color: \${t.var.color.warning_text};
 }
 ._id:hover:not(:disabled) {
-  background: \${args.theme.var.color.warning_dark_200};
+  background: \${t.var.color.warning_dark_200};
 }
 ._id:disabled {
-  background: \${args.theme.var.color.background_dark_200};
+  background: \${t.var.color.background_dark_200};
   cursor: not-allowed;
   opacity: 0.5;
 }\`;`}

@@ -56,14 +56,14 @@ return `._id {
         displayOrder: 1
         fns:
           '''
-const [isDashboardLoading, setIsDashboardLoading] = args.createSignal(true);
-const [dashboardError, setDashboardError] = args.createSignal(null);
-const [channelsCount, setChannelsCount] = args.createSignal(0);
-const [playlistsCount, setPlaylistsCount] = args.createSignal(0);
-const [videosCount, setVideosCount] = args.createSignal(0);
-const [userPlan, setUserPlan] = args.createSignal('free');
-const [videoLimit, setVideoLimit] = args.createSignal(10000);
-const [hasNoAccounts, setHasNoAccounts] = args.createSignal(false);
+const [isDashboardLoading, setIsDashboardLoading] = _.createSignal(true);
+const [dashboardError, setDashboardError] = _.createSignal(null);
+const [channelsCount, setChannelsCount] = _.createSignal(0);
+const [playlistsCount, setPlaylistsCount] = _.createSignal(0);
+const [videosCount, setVideosCount] = _.createSignal(0);
+const [userPlan, setUserPlan] = _.createSignal('free');
+const [videoLimit, setVideoLimit] = _.createSignal(10000);
+const [hasNoAccounts, setHasNoAccounts] = _.createSignal(false);
 
 // Function to fetch dashboard data
 const fetchDashboardData = async () => {
@@ -73,7 +73,7 @@ const fetchDashboardData = async () => {
     setHasNoAccounts(false);
 
     // Check for connected YouTube accounts first
-    const ownershipsResult = await args.executeNamedServerFunction({
+    const ownershipsResult = await s({
       functionName: "getAllYouTubeOwnerships",
       contextData: {}
     });
@@ -89,12 +89,12 @@ const fetchDashboardData = async () => {
     }
 
     // Fetch user details to get plan information
-    const userDetailsResult = await args.fns.executeYTOFunction('getUserYTODetails', {
-      userUuid: args.user?.P?.uuid
+    const userDetailsResult = await f.executeYTOFunction('getUserYTODetails', {
+      userUuid: _.user?.P?.uuid
     });
 
     // Fetch playlists
-    const playlistsResult = await args.fns.executeYTOFunction('getUserPlaylists', {});
+    const playlistsResult = await f.executeYTOFunction('getUserPlaylists', {});
 
     if (userDetailsResult.error) {
       throw new Error(userDetailsResult.error);
@@ -163,7 +163,7 @@ return {
           '''
 return {
   as: "div",
-  onMount: args.fns.onMount
+  onMount: f.onMount
 };
 '''
       }
@@ -209,7 +209,7 @@ return `._id {
           '''
 return {
   as: "div",
-  hide: () => !args.fns.isDashboardLoading?.()
+  hide: () => !f.isDashboardLoading?.()
 };
 '''
       }
@@ -243,8 +243,8 @@ return `._id {
   justify-content: center;
   padding: 3rem 2rem;
   text-align: center;
-  background: ${args.theme.var.color.error_light_100};
-  border: 1px solid ${args.theme.var.color.error_light_200};
+  background: ${t.var.color.error_light_100};
+  border: 1px solid ${t.var.color.error_light_200};
   border-radius: 0.75rem;
   margin: 1.5rem 0;
 }`;
@@ -255,7 +255,7 @@ return `._id {
           '''
 return {
   as: "div",
-  hide: () => !args.fns.dashboardError?.()
+  hide: () => !f.dashboardError?.()
 };
 '''
       }
@@ -267,7 +267,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.error_light_100_text};
+  color: ${t.var.color.error_light_100_text};
   margin-bottom: 1rem;
 }`;
 '''
@@ -291,7 +291,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.error_light_100_text};
+  color: ${t.var.color.error_light_100_text};
   font-size: 1.25rem;
   font-weight: 600;
   margin: 0 0 0.5rem 0;
@@ -315,7 +315,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.error_light_100_text};
+  color: ${t.var.color.error_light_100_text};
   margin: 0 0 1.5rem 0;
   max-width: 400px;
 }`;
@@ -324,7 +324,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const dashboardError = args.fns.dashboardError?.();
+const dashboardError = f.dashboardError?.();
 
 return {
   as: "p",
@@ -344,7 +344,7 @@ return {
 return {
   text: "Try Again",
   variant: "danger",
-  onClick: args.fns.fetchDashboardData
+  onClick: f.fetchDashboardData
 };
 '''
       }
@@ -358,7 +358,7 @@ return {
         props:
           '''
 return {
-  hide: () => !args.fns.hasNoAccounts?.()
+  hide: () => !f.hasNoAccounts?.()
 };
 '''
       }
@@ -373,7 +373,7 @@ return {
           '''
 return {
   as: "div",
-  hide: () => args.fns.isDashboardLoading?.() || args.fns.dashboardError?.() || args.fns.hasNoAccounts?.()
+  hide: () => f.isDashboardLoading?.() || f.dashboardError?.() || f.hasNoAccounts?.()
 };
 '''
       }
@@ -414,7 +414,7 @@ if (hour < 12) greeting = "Good Morning";
 else if (hour < 18) greeting = "Good Afternoon";
 
 return {
-  text: `${greeting} ${args.user.P.username}!`
+  text: `${greeting} ${_.user.P.username}!`
 };
 '''
       }
@@ -427,7 +427,7 @@ return {
           '''
 return `._id {
   font-size: 1.125rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0.5rem 0 0 0;
 }`;
 '''
@@ -481,10 +481,10 @@ return `._id {
         componentName: Html
         props:
           '''
-const channelsCount = args.fns.channelsCount?.() || 0;
-const playlistsCount = args.fns.playlistsCount?.() || 0;
-const videosCount = args.fns.videosCount?.() || 0;
-const videoLimit = args.fns.videoLimit?.() || 10000;
+const channelsCount = f.channelsCount?.() || 0;
+const playlistsCount = f.playlistsCount?.() || 0;
+const videosCount = f.videosCount?.() || 0;
+const videoLimit = f.videoLimit?.() || 10000;
 const limitText = videoLimit === -1 ? "unlimited" : videoLimit.toLocaleString();
 
 return {
@@ -522,12 +522,12 @@ return {
       P: {
         css:
           '''
-const stat = args.contextData.stat;
+const stat = c.stat;
 const hasLink = !!stat.href;
 
 return `._id {
-  background: ${args.theme.var.color.background_dark_50};
-  border: 1px solid ${args.theme.var.color.border};
+  background: ${t.var.color.background_dark_50};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.75rem;
   padding: 1.5rem;
   display: flex;
@@ -550,7 +550,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const stat = args.contextData.stat;
+const stat = c.stat;
 const hasLink = !!stat.href;
 
 return {
@@ -558,7 +558,7 @@ return {
   href: hasLink ? stat.href : undefined,
   onClick: hasLink ? (e) => {
     e.preventDefault();
-    args.navigate(stat.href);
+    _.navigate(stat.href);
   } : undefined
 };
 '''
@@ -573,8 +573,8 @@ return {
 return `._id {
   width: 48px;
   height: 48px;
-  background: ${args.theme.var.color.primary_light_100};
-  color: ${args.theme.var.color.primary_light_100_text};
+  background: ${t.var.color.primary_light_100};
+  color: ${t.var.color.primary_light_100_text};
   border-radius: 0.75rem;
   display: flex;
   align-items: center;
@@ -600,7 +600,7 @@ return {
         componentName: Html
         props:
           '''
-const stat = args.contextData.stat;
+const stat = c.stat;
 
 return {
   as: "icon",
@@ -639,7 +639,7 @@ return {
           '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin-bottom: 0.25rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -649,7 +649,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const stat = args.contextData.stat;
+const stat = c.stat;
 
 return {
   as: "div",
@@ -667,14 +667,14 @@ return {
 return `._id {
   font-size: 1.75rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 2
         componentName: Html
         props:
           '''
-const stat = args.contextData.stat;
+const stat = c.stat;
 const displayText = stat.countText || stat.count.toLocaleString();
 
 return {
@@ -700,7 +700,7 @@ return `._id {
           '''
 return {
   as: "section",
-  hide: args.fns.isInIframe()
+  hide: f.isInIframe()
 };
 '''
       }
@@ -712,8 +712,8 @@ return {
         css:
           '''
 return `._id {
-  background: linear-gradient(135deg, ${args.theme.var.color.primary_light_100} 0%, ${args.theme.var.color.primary_light_200} 100%);
-  border: 1px solid ${args.theme.var.color.primary_light_300};
+  background: linear-gradient(135deg, ${t.var.color.primary_light_100} 0%, ${t.var.color.primary_light_200} 100%);
+  border: 1px solid ${t.var.color.primary_light_300};
   border-radius: 1rem;
   padding: 2rem;
   display: flex;
@@ -778,8 +778,8 @@ return {
 return `._id {
   width: 64px;
   height: 64px;
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
   border-radius: 1rem;
   display: flex;
   align-items: center;
@@ -854,7 +854,7 @@ return {
 return `._id {
   font-size: 1.5rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0;
 }
 
@@ -883,7 +883,7 @@ return {
           '''
 return `._id {
   font-size: 1rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0;
   line-height: 1.6;
 }
@@ -945,8 +945,8 @@ return `._id {
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1.5rem;
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
   border: none;
   border-radius: 0.75rem;
   font-size: 1rem;
@@ -958,7 +958,7 @@ return `._id {
 }
 
 ._id:hover {
-  background: ${args.theme.var.color.primary_dark_200};
+  background: ${t.var.color.primary_dark_200};
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
@@ -1018,7 +1018,7 @@ return {
 return `._id {
   font-size: 1rem;
   font-weight: 600;
-  color: ${args.theme.var.color.primary_text};
+  color: ${t.var.color.primary_text};
 }
 
 @media (max-width: 768px) {
@@ -1046,7 +1046,7 @@ return {
           '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0;
   display: flex;
   align-items: center;

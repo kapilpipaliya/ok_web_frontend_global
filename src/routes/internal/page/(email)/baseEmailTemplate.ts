@@ -8,7 +8,7 @@ export function getLogoSchema(
 }\`;`,
   borderCss = `return \`._id {
   border: none;
-  border-top: 1px solid \${args.theme.var.color.border_hex};
+  border-top: 1px solid \${t.var.color.border_hex};
   margin-top:24px; margin-bottom:24px;
 }\`;`,
 ) {
@@ -59,7 +59,7 @@ export const createEmailTemplate = (content: FieldAttribute[]) =>
             attributes: content,
             componentName: "Html",
             css: `return \`._id {
-  color: \${args.theme.var.color.text_hex};
+  color: \${t.var.color.text_hex};
 }\`;`,
             displayOrder: 2,
           },
@@ -69,12 +69,12 @@ export const createEmailTemplate = (content: FieldAttribute[]) =>
               {
                 as: "p",
                 css: `return \`._id {
-  color: \${args.theme.var.color.text_light_200_hex};
+  color: \${t.var.color.text_light_200_hex};
   font-size: 12px;
 }\`;`,
                 componentName: "Html",
                 displayOrder: 1,
-                text: "© 2025 ${args.globalSetting?.P.appName}. All rights reserved.",
+                text: "© 2025 ${_.globalSetting?.P.appName}. All rights reserved.",
               },
             ],
             css: `return \`._id {
@@ -89,8 +89,8 @@ export const createEmailTemplate = (content: FieldAttribute[]) =>
   max-width: 600px;
   margin: auto;
   padding: 32px;
-  background-color: \${args.theme.var.color.background_light_100_hex};
-  color: \${args.theme.var.color.text_hex};
+  background-color: \${t.var.color.background_light_100_hex};
+  color: \${t.var.color.text_hex};
 }\`;`,
         componentName: "Html",
         displayOrder: 3,
@@ -98,8 +98,8 @@ export const createEmailTemplate = (content: FieldAttribute[]) =>
     ],
     css: `return \`._id {
   min-height: 100vh;
-  background-color: \${args.theme.var.color.background_hex};
-  color: \${args.theme.var.color.text_hex};
+  background-color: \${t.var.color.background_hex};
+  color: \${t.var.color.text_hex};
   padding: 32px;
 }\`;`,
     componentName: "Html",

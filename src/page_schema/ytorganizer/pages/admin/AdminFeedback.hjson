@@ -28,12 +28,12 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.lg};
+  padding: ${t.var.spacing.lg};
   max-width: 100%;
   margin: 0 auto;
 
   @media (max-width: 768px) {
-    padding: ${args.theme.var.spacing.md};
+    padding: ${t.var.spacing.md};
   }
 }`;
 '''
@@ -41,7 +41,7 @@ return `._id {
         fns:
           '''
 // State management
-const [store, setStore] = args.createStore({
+const [store, setStore] = _.createStore({
   feedbacks: [],
   loading: true,
   error: null,
@@ -64,7 +64,7 @@ const loadFeedbacks = async (page = store.currentPage) => {
 
   const offset = (page - 1) * store.pageSize;
 
-  const result = await args.fns.executeYTOFunction("getAllFeedbacks", {
+  const result = await f.executeYTOFunction("getAllFeedbacks", {
     searchQuery: store.searchQuery,
     filterStatus: store.filterStatus,
     filterType: store.filterType,
@@ -155,34 +155,34 @@ const handleFilterChange = (filterType, value) => {
 // Update feedback status
 const updateFeedbackStatus = async (feedbackId, status) => {
   try {
-    const result = await args.fns.executeYTOFunction("updateFeedbackStatus", {
+    const result = await f.executeYTOFunction("updateFeedbackStatus", {
       feedbackId: feedbackId,
       status: status
     });
 
     if (result.error) {
-      args.showErrorToast(result.error);
+      _.showErrorToast(result.error);
       return;
     }
 
     const serverResult = result.result;
 
     if (serverResult?.success) {
-      args.showSuccessToast(serverResult.message || "Feedback status updated");
+      _.showSuccessToast(serverResult.message || "Feedback status updated");
       await loadFeedbacks(store.currentPage);
     } else {
-      args.showErrorToast(serverResult?.message || "Failed to update feedback status");
+      _.showErrorToast(serverResult?.message || "Failed to update feedback status");
     }
   } catch (error) {
-    args.showErrorToast("Error updating feedback status: " + error.message);
+    _.showErrorToast("Error updating feedback status: " + error.message);
   }
 };
 
 // Delete feedback handler
 const handleDeleteFeedback = async (feedbackId, username) => {
-  const rbConfirm = args.contextData?.confirmContext?.rbConfirm;
+  const rbConfirm = c?.confirmContext?.rbConfirm;
   if (!rbConfirm) {
-    args.showErrorToast("Confirmation dialog not available");
+    _.showErrorToast("Confirmation dialog not available");
     return;
   }
 
@@ -199,25 +199,25 @@ const handleDeleteFeedback = async (feedbackId, username) => {
   }
 
   try {
-    const result = await args.fns.executeYTOFunction("deleteFeedback", {
+    const result = await f.executeYTOFunction("deleteFeedback", {
       feedbackId: feedbackId
     });
 
     if (result.error) {
-      args.showErrorToast(result.error);
+      _.showErrorToast(result.error);
       return;
     }
 
     const serverResult = result.result;
 
     if (serverResult?.success) {
-      args.showSuccessToast(serverResult.message || "Feedback deleted successfully");
+      _.showSuccessToast(serverResult.message || "Feedback deleted successfully");
       await loadFeedbacks(store.currentPage);
     } else {
-      args.showErrorToast(serverResult?.message || "Failed to delete feedback");
+      _.showErrorToast(serverResult?.message || "Failed to delete feedback");
     }
   } catch (error) {
-    args.showErrorToast("Error deleting feedback: " + error.message);
+    _.showErrorToast("Error deleting feedback: " + error.message);
   }
 };
 
@@ -314,7 +314,7 @@ return {
           '''
 return {
   as: "div",
-  onMount: args.fns.loadFeedbacks
+  onMount: f.loadFeedbacks
 };
 '''
       }
@@ -329,8 +329,8 @@ return `._id {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: ${args.theme.var.spacing.lg};
-  gap: ${args.theme.var.spacing.md};
+  margin-bottom: ${t.var.spacing.lg};
+  gap: ${t.var.spacing.md};
 
   @media (max-width: 768px) {
     flex-direction: column;
@@ -370,8 +370,8 @@ return {
 return `._id {
   font-size: 1.5rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 ${args.theme.var.spacing.xs} 0;
+  color: ${t.var.color.text};
+  margin: 0 0 ${t.var.spacing.xs} 0;
 }`;
 '''
         displayOrder: 1
@@ -393,7 +393,7 @@ return {
           '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0;
 }`;
 '''
@@ -401,16 +401,16 @@ return `._id {
         componentName: Html
         props:
           '''
-const totalCount = args.fns.store.totalCount;
-const currentPage = args.fns.store.currentPage;
-const pageSize = args.fns.store.pageSize;
+const totalCount = f.store.totalCount;
+const currentPage = f.store.currentPage;
+const pageSize = f.store.pageSize;
 const startIndex = (currentPage - 1) * pageSize + 1;
 const endIndex = Math.min(currentPage * pageSize, totalCount);
 
 return {
   as: "p",
   text: totalCount > 0 ? `Showing ${startIndex}-${endIndex} of ${totalCount} feedbacks` : `${totalCount} feedbacks`,
-  hide: () => args.fns.store.loading
+  hide: () => f.store.loading
 };
 '''
       }
@@ -424,7 +424,7 @@ return {
           '''
 return `._id {
   display: flex;
-  gap: ${args.theme.var.spacing.md};
+  gap: ${t.var.spacing.md};
   flex-wrap: wrap;
 
   @media (max-width: 768px) {
@@ -438,7 +438,7 @@ return `._id {
           '''
 return {
   getStatsData: () => {
-    const feedbacks = args.fns.store.feedbacks;
+    const feedbacks = f.store.feedbacks;
     const pendingFeedbacks = feedbacks.filter(f => f.feedback?.P?.status === 'pending').length;
     const reviewedFeedbacks = feedbacks.filter(f => f.feedback?.P?.status === 'reviewed').length;
     const resolvedFeedbacks = feedbacks.filter(f => f.feedback?.P?.status === 'resolved').length;
@@ -458,8 +458,8 @@ return {
           '''
 return {
   as: "div",
-  data: args.fns.getStatsData(),
-  hide: () => args.fns.store.loading
+  data: f.getStatsData(),
+  hide: () => f.store.loading
 };
 '''
       }
@@ -473,11 +473,11 @@ return {
 return `._id {
   display: flex;
   align-items: center;
-  gap: ${args.theme.var.spacing.xs};
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  background: ${args.theme.var.color.background_dark_100};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.md};
+  gap: ${t.var.spacing.xs};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  background: ${t.var.color.background_dark_100};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.md};
   white-space: nowrap;
 }`;
 '''
@@ -485,7 +485,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const stat = args.contextData.stat;
+const stat = c.stat;
 return {
   as: "div"
 };
@@ -499,14 +499,14 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
 }`;
 '''
         displayOrder: 1
         componentName: Html
         props:
           '''
-const stat = args.contextData.stat;
+const stat = c.stat;
 return {
   as: "icon",
   icon: stat.icon,
@@ -524,7 +524,7 @@ return {
         componentName: Html
         props:
           '''
-const stat = args.contextData.stat;
+const stat = c.stat;
 return {
   as: "div"
 };
@@ -540,14 +540,14 @@ return {
 return `._id {
   font-size: 1.125rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 1
         componentName: Html
         props:
           '''
-const stat = args.contextData.stat;
+const stat = c.stat;
 return {
   as: "span",
   text: stat.value
@@ -563,14 +563,14 @@ return {
           '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
         displayOrder: 2
         componentName: Html
         props:
           '''
-const stat = args.contextData.stat;
+const stat = c.stat;
 return {
   as: "span",
   text: ` ${stat.label}`
@@ -585,7 +585,7 @@ return {
         css:
           '''
 return `._id {
-  margin-bottom: ${args.theme.var.spacing.lg};
+  margin-bottom: ${t.var.spacing.lg};
 }`;
 '''
         displayOrder: 2
@@ -594,7 +594,7 @@ return `._id {
           '''
 return {
   as: "div",
-  hide: () => args.fns.store.loading || args.fns.store.error
+  hide: () => f.store.loading || f.store.error
 };
 '''
       }
@@ -607,8 +607,8 @@ return {
           '''
 return `._id {
   display: flex;
-  gap: ${args.theme.var.spacing.md};
-  margin-bottom: ${args.theme.var.spacing.md};
+  gap: ${t.var.spacing.md};
+  margin-bottom: ${t.var.spacing.md};
   flex-wrap: wrap;
 }`;
 '''
@@ -640,10 +640,10 @@ return `._id {
 return {
   type: "search",
   placeholder: "Search by username, email, or message...",
-  value: args.fns.store.searchQuery,
+  value: f.store.searchQuery,
   leftIcon: "carbon:search",
   onInput: (e) => {
-    args.fns.handleSearch(e.target.value);
+    f.handleSearch(e.target.value);
   }
 };
 '''
@@ -664,7 +664,7 @@ return `._id {
         props:
           '''
 return {
-  value: args.fns.store.filterStatus,
+  value: f.store.filterStatus,
   options: [
     { value: "all", label: "All Status" },
     { value: "pending", label: "Pending" },
@@ -674,7 +674,7 @@ return {
   placeholder: "Filter by status...",
   search: false,
   onChange: (value) => {
-    args.fns.handleFilterChange('status', value);
+    f.handleFilterChange('status', value);
   }
 };
 '''
@@ -695,7 +695,7 @@ return `._id {
         props:
           '''
 return {
-  value: args.fns.store.filterType,
+  value: f.store.filterType,
   options: [
     { value: "all", label: "All Types" },
     { value: "bug", label: "Bug Report" },
@@ -706,7 +706,7 @@ return {
   placeholder: "Filter by type...",
   search: false,
   onChange: (value) => {
-    args.fns.handleFilterChange('type', value);
+    f.handleFilterChange('type', value);
   }
 };
 '''
@@ -721,11 +721,11 @@ return {
 return `._id {
   display: flex;
   align-items: center;
-  gap: ${args.theme.var.spacing.md};
-  padding: ${args.theme.var.spacing.md};
-  background: ${args.theme.var.color.primary_light_100};
-  border: 1px solid ${args.theme.var.color.primary_light_300};
-  border-radius: ${args.theme.var.borderRadius.md};
+  gap: ${t.var.spacing.md};
+  padding: ${t.var.spacing.md};
+  background: ${t.var.color.primary_light_100};
+  border: 1px solid ${t.var.color.primary_light_300};
+  border-radius: ${t.var.borderRadius.md};
 }`;
 '''
         displayOrder: 2
@@ -734,7 +734,7 @@ return `._id {
           '''
 return {
   as: "div",
-  hide: () => args.fns.store.selectedFeedbacks.length === 0
+  hide: () => f.store.selectedFeedbacks.length === 0
 };
 '''
       }
@@ -748,14 +748,14 @@ return {
 return `._id {
   font-size: 0.875rem;
   font-weight: 600;
-  color: ${args.theme.var.color.primary_light_100_text};
+  color: ${t.var.color.primary_light_100_text};
 }`;
 '''
         displayOrder: 1
         componentName: Html
         props:
           '''
-const count = args.fns.store.selectedFeedbacks.length;
+const count = f.store.selectedFeedbacks.length;
 return {
   as: "span",
   text: `${count} feedback${count === 1 ? '' : 's'} selected`
@@ -770,17 +770,17 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.sm};
+  padding: ${t.var.spacing.xs} ${t.var.spacing.sm};
   background: transparent;
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.sm};
-  color: ${args.theme.var.color.text};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.sm};
+  color: ${t.var.color.text};
   font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.background_dark_100};
+    background: ${t.var.color.background_dark_100};
   }
 }`;
 '''
@@ -791,7 +791,7 @@ return `._id {
 return {
   as: "button",
   text: "Clear",
-  onClick: args.fns.clearSelection
+  onClick: f.clearSelection
 };
 '''
       }
@@ -804,8 +804,8 @@ return {
           '''
 return `._id {
   text-align: center;
-  padding: ${args.theme.var.spacing.xl};
-  color: ${args.theme.var.color.text_light_500};
+  padding: ${t.var.spacing.xl};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
         displayOrder: 3
@@ -815,7 +815,7 @@ return `._id {
 return {
   as: "div",
   text: "Loading feedbacks...",
-  hide: () => !args.fns.store.loading
+  hide: () => !f.store.loading
 };
 '''
       }
@@ -828,10 +828,10 @@ return {
           '''
 return `._id {
   text-align: center;
-  padding: ${args.theme.var.spacing.xl};
-  color: ${args.theme.var.color.error_light_50_text};
-  background: ${args.theme.var.color.error_light_50};
-  border-radius: ${args.theme.var.borderRadius.md};
+  padding: ${t.var.spacing.xl};
+  color: ${t.var.color.error_light_50_text};
+  background: ${t.var.color.error_light_50};
+  border-radius: ${t.var.borderRadius.md};
 }`;
 '''
         displayOrder: 4
@@ -840,8 +840,8 @@ return `._id {
           '''
 return {
   as: "div",
-  text: args.fns.store.error || "An error occurred",
-  hide: () => !args.fns.store.error
+  text: f.store.error || "An error occurred",
+  hide: () => !f.store.error
 };
 '''
       }
@@ -853,9 +853,9 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.lg};
+  background: ${t.var.color.background};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.lg};
   overflow: hidden;
 }`;
 '''
@@ -865,7 +865,7 @@ return `._id {
           '''
 return {
   as: "div",
-  hide: () => args.fns.store.loading || args.fns.store.error
+  hide: () => f.store.loading || f.store.error
 };
 '''
       }
@@ -919,8 +919,8 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.background_dark_100};
-  border-bottom: 2px solid ${args.theme.var.color.border};
+  background: ${t.var.color.background_dark_100};
+  border-bottom: 2px solid ${t.var.color.border};
 }`;
 '''
         displayOrder: 1
@@ -954,10 +954,10 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   text-align: left;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   width: 40px;
 }`;
 '''
@@ -987,8 +987,8 @@ return `._id {
         componentName: Html
         props:
           '''
-const filteredFeedbacks = args.fns.getFilteredFeedbacks();
-const allSelected = filteredFeedbacks.length > 0 && filteredFeedbacks.every(f => args.fns.store.selectedFeedbacks.includes(f.feedback?.id));
+const filteredFeedbacks = f.getFilteredFeedbacks();
+const allSelected = filteredFeedbacks.length > 0 && filteredFeedbacks.every(f => f.store.selectedFeedbacks.includes(f.feedback?.id));
 
 return {
   as: "input",
@@ -996,9 +996,9 @@ return {
   checked: allSelected,
   onChange: () => {
     if (allSelected) {
-      args.fns.clearSelection();
+      f.clearSelection();
     } else {
-      args.fns.selectAllFeedbacks();
+      f.selectAllFeedbacks();
     }
   }
 };
@@ -1012,16 +1012,16 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   text-align: left;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   cursor: pointer;
   user-select: none;
   min-width: 180px;
 
   &:hover {
-    background: ${args.theme.var.color.background_dark_200};
+    background: ${t.var.color.background_dark_200};
   }
 }`;
 '''
@@ -1031,7 +1031,7 @@ return `._id {
           '''
 return {
   as: "th",
-  onClick: () => args.fns.handleSort('username')
+  onClick: () => f.handleSort('username')
 };
 '''
       }
@@ -1044,8 +1044,8 @@ return {
         componentName: Html
         props:
           '''
-const sortIcon = args.fns.store.sortBy === 'username'
-  ? (args.fns.store.sortOrder === 'asc' ? ' ↑' : ' ↓')
+const sortIcon = f.store.sortBy === 'username'
+  ? (f.store.sortOrder === 'asc' ? ' ↑' : ' ↓')
   : '';
 return {
   as: "span",
@@ -1061,10 +1061,10 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   text-align: left;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   min-width: 120px;
 }`;
 '''
@@ -1086,10 +1086,10 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   text-align: left;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   min-width: 300px;
 }`;
 '''
@@ -1111,10 +1111,10 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   text-align: left;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   min-width: 100px;
 }`;
 '''
@@ -1136,16 +1136,16 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   text-align: left;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   cursor: pointer;
   user-select: none;
   min-width: 120px;
 
   &:hover {
-    background: ${args.theme.var.color.background_dark_200};
+    background: ${t.var.color.background_dark_200};
   }
 }`;
 '''
@@ -1155,7 +1155,7 @@ return `._id {
           '''
 return {
   as: "th",
-  onClick: () => args.fns.handleSort('createdAt')
+  onClick: () => f.handleSort('createdAt')
 };
 '''
       }
@@ -1168,8 +1168,8 @@ return {
         componentName: Html
         props:
           '''
-const sortIcon = args.fns.store.sortBy === 'createdAt'
-  ? (args.fns.store.sortOrder === 'asc' ? ' ↑' : ' ↓')
+const sortIcon = f.store.sortBy === 'createdAt'
+  ? (f.store.sortOrder === 'asc' ? ' ↑' : ' ↓')
   : '';
 return {
   as: "span",
@@ -1185,10 +1185,10 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   text-align: center;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   min-width: 180px;
 }`;
 '''
@@ -1215,7 +1215,7 @@ return {
           '''
 return {
   as: "tbody",
-  data: args.fns.getFilteredFeedbacks()
+  data: f.getFilteredFeedbacks()
 };
 '''
       }
@@ -1226,19 +1226,19 @@ return {
       P: {
         css:
           '''
-const feedbackData = args.contextData.feedbackData;
-const isSelected = args.fns.store.selectedFeedbacks.includes(feedbackData.feedback?.id);
+const feedbackData = c.feedbackData;
+const isSelected = f.store.selectedFeedbacks.includes(feedbackData.feedback?.id);
 
 return `._id {
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  border-bottom: 1px solid ${t.var.color.border};
   transition: background 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.background_dark_100};
+    background: ${t.var.color.background_dark_100};
   }
 
   ${isSelected ? `
-    background: ${args.theme.var.color.primary_light_100} !important;
+    background: ${t.var.color.primary_light_100} !important;
   ` : ''}
 }`;
 '''
@@ -1246,8 +1246,8 @@ return `._id {
         componentName: Html
         props:
           '''
-const feedbackData = args.contextData.feedbackData;
-const isSelected = args.fns.store.selectedFeedbacks.includes(feedbackData.feedback?.id);
+const feedbackData = c.feedbackData;
+const isSelected = f.store.selectedFeedbacks.includes(feedbackData.feedback?.id);
 
 return {
   as: "tr",
@@ -1263,7 +1263,7 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
 }`;
 '''
         displayOrder: 1
@@ -1292,15 +1292,15 @@ return `._id {
         componentName: Html
         props:
           '''
-const feedbackData = args.contextData.feedbackData;
+const feedbackData = c.feedbackData;
 const feedbackId = feedbackData.feedback?.id;
-const isSelected = args.fns.store.selectedFeedbacks.includes(feedbackId);
+const isSelected = f.store.selectedFeedbacks.includes(feedbackId);
 
 return {
   as: "input",
   type: "checkbox",
   checked: isSelected,
-  onChange: () => args.fns.toggleFeedbackSelection(feedbackId)
+  onChange: () => f.toggleFeedbackSelection(feedbackId)
 };
 '''
       }
@@ -1312,7 +1312,7 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
 }`;
 '''
         displayOrder: 2
@@ -1347,15 +1347,15 @@ return {
           '''
 return `._id {
   font-weight: 600;
-  color: ${args.theme.var.color.text};
-  margin-bottom: ${args.theme.var.spacing.xs};
+  color: ${t.var.color.text};
+  margin-bottom: ${t.var.spacing.xs};
 }`;
 '''
         displayOrder: 1
         componentName: Html
         props:
           '''
-const feedbackData = args.contextData.feedbackData;
+const feedbackData = c.feedbackData;
 return {
   as: "div",
   text: feedbackData.user?.P?.username || 'N/A'
@@ -1371,14 +1371,14 @@ return {
           '''
 return `._id {
   font-size: 0.75rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
         displayOrder: 2
         componentName: Html
         props:
           '''
-const feedbackData = args.contextData.feedbackData;
+const feedbackData = c.feedbackData;
 return {
   as: "div",
   text: feedbackData.user?.P?.email || 'N/A'
@@ -1393,14 +1393,14 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
 }`;
 '''
         displayOrder: 3
         componentName: Html
         props:
           '''
-const feedbackData = args.contextData.feedbackData;
+const feedbackData = c.feedbackData;
 const type = feedbackData.feedback?.P?.category || 'other';
 const typeLabels = {
   bug: 'Bug Report',
@@ -1421,24 +1421,24 @@ return {
       P: {
         css:
           '''
-const feedbackData = args.contextData.feedbackData;
+const feedbackData = c.feedbackData;
 const type = feedbackData.feedback?.P?.category || 'other';
 
 const colors = {
-  bug: { bg: args.theme.var.color.error_light_100, text: args.theme.var.color.error_light_100_text },
-  feature: { bg: args.theme.var.color.info_light_100, text: args.theme.var.color.info_light_100_text },
-  improvement: { bg: args.theme.var.color.success_light_100, text: args.theme.var.color.success_light_100_text },
-  other: { bg: args.theme.var.color.background_dark_200, text: args.theme.var.color.background_dark_200_text }
+  bug: { bg: t.var.color.error_light_100, text: t.var.color.error_light_100_text },
+  feature: { bg: t.var.color.info_light_100, text: t.var.color.info_light_100_text },
+  improvement: { bg: t.var.color.success_light_100, text: t.var.color.success_light_100_text },
+  other: { bg: t.var.color.background_dark_200, text: t.var.color.background_dark_200_text }
 };
 
 const color = colors[type] || colors.other;
 
 return `._id {
   display: inline-block;
-  padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.sm};
+  padding: ${t.var.spacing.xs} ${t.var.spacing.sm};
   background: ${color.bg};
   color: ${color.text};
-  border-radius: ${args.theme.var.borderRadius.sm};
+  border-radius: ${t.var.borderRadius.sm};
   font-size: 0.75rem;
   font-weight: 600;
 }`;
@@ -1447,7 +1447,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const feedbackData = args.contextData.feedbackData;
+const feedbackData = c.feedbackData;
 const type = feedbackData.feedback?.P?.category || 'other';
 const typeLabels = {
   bug: 'Bug Report',
@@ -1470,8 +1470,8 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
-  color: ${args.theme.var.color.text};
+  padding: ${t.var.spacing.md};
+  color: ${t.var.color.text};
   line-height: 1.5;
 }`;
 '''
@@ -1479,7 +1479,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const feedbackData = args.contextData.feedbackData;
+const feedbackData = c.feedbackData;
 const message = feedbackData.feedback?.P?.feedback || '';
 const truncated = message.length > 100 ? message.substring(0, 100) + '...' : message;
 
@@ -1498,7 +1498,7 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
 }`;
 '''
         displayOrder: 5
@@ -1517,23 +1517,23 @@ return {
       P: {
         css:
           '''
-const feedbackData = args.contextData.feedbackData;
+const feedbackData = c.feedbackData;
 const status = feedbackData.feedback?.P?.status || 'pending';
 
 const colors = {
-  new: { bg: args.theme.var.color.warning_light_100, text: args.theme.var.color.warning_light_100_text },
-  reviewed: { bg: args.theme.var.color.info_light_100, text: args.theme.var.color.info_light_100_text },
-  resolved: { bg: args.theme.var.color.success_light_100, text: args.theme.var.color.success_light_100_text }
+  new: { bg: t.var.color.warning_light_100, text: t.var.color.warning_light_100_text },
+  reviewed: { bg: t.var.color.info_light_100, text: t.var.color.info_light_100_text },
+  resolved: { bg: t.var.color.success_light_100, text: t.var.color.success_light_100_text }
 };
 
 const color = colors[status] || colors.new;
 
 return `._id {
   display: inline-block;
-  padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.sm};
+  padding: ${t.var.spacing.xs} ${t.var.spacing.sm};
   background: ${color.bg};
   color: ${color.text};
-  border-radius: ${args.theme.var.borderRadius.sm};
+  border-radius: ${t.var.borderRadius.sm};
   font-size: 0.75rem;
   font-weight: 600;
 }`;
@@ -1542,7 +1542,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const feedbackData = args.contextData.feedbackData;
+const feedbackData = c.feedbackData;
 const status = feedbackData.feedback?.P?.status || 'pending';
 const statusText = status.charAt(0).toUpperCase() + status.slice(1);
 
@@ -1560,16 +1560,16 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
-  color: ${args.theme.var.color.text};
+  padding: ${t.var.spacing.md};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 6
         componentName: Html
         props:
           '''
-const feedbackData = args.contextData.feedbackData;
-const dateText = args.fns.formatDate(feedbackData.feedback?.P?.createdAt);
+const feedbackData = c.feedbackData;
+const dateText = f.formatDate(feedbackData.feedback?.P?.createdAt);
 
 return {
   as: "td",
@@ -1585,7 +1585,7 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
 }`;
 '''
         displayOrder: 7
@@ -1606,7 +1606,7 @@ return {
           '''
 return `._id {
   display: flex;
-  gap: ${args.theme.var.spacing.xs};
+  gap: ${t.var.spacing.xs};
   justify-content: center;
 }`;
 '''
@@ -1627,11 +1627,11 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.xs};
-  background: ${args.theme.var.color.info};
+  padding: ${t.var.spacing.xs};
+  background: ${t.var.color.info};
   border: none;
-  border-radius: ${args.theme.var.borderRadius.sm};
-  color: ${args.theme.var.color.info_text};
+  border-radius: ${t.var.borderRadius.sm};
+  color: ${t.var.color.info_text};
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -1639,7 +1639,7 @@ return `._id {
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.info_dark_200};
+    background: ${t.var.color.info_dark_200};
   }
 }`;
 '''
@@ -1647,14 +1647,14 @@ return `._id {
         componentName: Html
         props:
           '''
-const feedbackData = args.contextData.feedbackData;
+const feedbackData = c.feedbackData;
 const feedbackId = feedbackData.feedback?.id;
 const currentStatus = feedbackData.feedback?.P?.status || 'pending';
 
 return {
   as: "button",
   title: "Mark as Reviewed",
-  onClick: () => args.fns.updateFeedbackStatus(feedbackId, 'reviewed'),
+  onClick: () => f.updateFeedbackStatus(feedbackId, 'reviewed'),
   hide: currentStatus !== 'pending'
 };
 '''
@@ -1684,11 +1684,11 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.xs};
-  background: ${args.theme.var.color.success};
+  padding: ${t.var.spacing.xs};
+  background: ${t.var.color.success};
   border: none;
-  border-radius: ${args.theme.var.borderRadius.sm};
-  color: ${args.theme.var.color.success_text};
+  border-radius: ${t.var.borderRadius.sm};
+  color: ${t.var.color.success_text};
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -1696,7 +1696,7 @@ return `._id {
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.success_dark_200};
+    background: ${t.var.color.success_dark_200};
   }
 }`;
 '''
@@ -1704,14 +1704,14 @@ return `._id {
         componentName: Html
         props:
           '''
-const feedbackData = args.contextData.feedbackData;
+const feedbackData = c.feedbackData;
 const feedbackId = feedbackData.feedback?.id;
 const currentStatus = feedbackData.feedback?.P?.status || 'pending';
 
 return {
   as: "button",
   title: "Mark as Resolved",
-  onClick: () => args.fns.updateFeedbackStatus(feedbackId, 'resolved'),
+  onClick: () => f.updateFeedbackStatus(feedbackId, 'resolved'),
   hide: currentStatus === 'resolved'
 };
 '''
@@ -1741,11 +1741,11 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.xs};
-  background: ${args.theme.var.color.error};
+  padding: ${t.var.spacing.xs};
+  background: ${t.var.color.error};
   border: none;
-  border-radius: ${args.theme.var.borderRadius.sm};
-  color: ${args.theme.var.color.error_text};
+  border-radius: ${t.var.borderRadius.sm};
+  color: ${t.var.color.error_text};
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -1753,7 +1753,7 @@ return `._id {
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.error_dark_200};
+    background: ${t.var.color.error_dark_200};
   }
 }`;
 '''
@@ -1761,7 +1761,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const feedbackData = args.contextData.feedbackData;
+const feedbackData = c.feedbackData;
 const feedbackId = feedbackData.feedback?.id;
 const username = feedbackData.user?.P?.username || 'Unknown User';
 
@@ -1769,7 +1769,7 @@ return {
   as: "button",
   title: "Delete Feedback",
   onClick: () => {
-    args.fns.handleDeleteFeedback(feedbackId, username);
+    f.handleDeleteFeedback(feedbackId, username);
   }
 };
 '''
@@ -1802,11 +1802,11 @@ return `._id {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: ${args.theme.var.spacing.lg};
-  border-top: 1px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background};
+  padding: ${t.var.spacing.lg};
+  border-top: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background};
   flex-wrap: wrap;
-  gap: ${args.theme.var.spacing.md};
+  gap: ${t.var.spacing.md};
 }`;
 '''
         displayOrder: 6
@@ -1815,7 +1815,7 @@ return `._id {
           '''
 return {
   as: "div",
-  hide: () => args.fns.store.loading || args.fns.store.error || args.fns.store.totalPages <= 1
+  hide: () => f.store.loading || f.store.error || f.store.totalPages <= 1
 };
 '''
       }
@@ -1828,16 +1828,16 @@ return {
           '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
         displayOrder: 1
         componentName: Html
         props:
           '''
-const currentPage = args.fns.store.currentPage;
-const totalPages = args.fns.store.totalPages;
-const totalCount = args.fns.store.totalCount;
+const currentPage = f.store.currentPage;
+const totalPages = f.store.totalPages;
+const totalCount = f.store.totalCount;
 
 return {
   as: "div",
@@ -1854,7 +1854,7 @@ return {
           '''
 return `._id {
   display: flex;
-  gap: ${args.theme.var.spacing.xs};
+  gap: ${t.var.spacing.xs};
   align-items: center;
 }`;
 '''
@@ -1874,23 +1874,23 @@ return {
       P: {
         css:
           '''
-const currentPage = args.fns.store.currentPage;
+const currentPage = f.store.currentPage;
 const isDisabled = currentPage <= 1;
 
 return `._id {
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  background: ${args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.sm};
-  color: ${args.theme.var.color.text};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  background: ${t.var.color.background};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.sm};
+  color: ${t.var.color.text};
   font-size: 0.875rem;
   cursor: ${isDisabled ? 'not-allowed' : 'pointer'};
   opacity: ${isDisabled ? '0.5' : '1'};
   transition: all 0.2s ease;
 
   &:hover:not(:disabled) {
-    background: ${args.theme.var.color.background_dark_100};
-    border-color: ${args.theme.var.color.primary};
+    background: ${t.var.color.background_dark_100};
+    border-color: ${t.var.color.primary};
   }
 }`;
 '''
@@ -1898,13 +1898,13 @@ return `._id {
         componentName: Html
         props:
           '''
-const currentPage = args.fns.store.currentPage;
+const currentPage = f.store.currentPage;
 const isDisabled = currentPage <= 1;
 
 return {
   as: "button",
   text: "← Previous",
-  onClick: args.fns.goToPreviousPage,
+  onClick: f.goToPreviousPage,
   disabled: isDisabled
 };
 '''
@@ -1919,7 +1919,7 @@ return {
           '''
 return `._id {
   display: flex;
-  gap: ${args.theme.var.spacing.xs};
+  gap: ${t.var.spacing.xs};
 }`;
 '''
         loop: true
@@ -1929,7 +1929,7 @@ return `._id {
           '''
 return {
   as: "div",
-  data: args.fns.getVisiblePages()
+  data: f.getVisiblePages()
 };
 '''
       }
@@ -1940,18 +1940,18 @@ return {
       P: {
         css:
           '''
-const pageNum = args.contextData.pageNum;
-const currentPage = args.fns.store.currentPage;
+const pageNum = c.pageNum;
+const currentPage = f.store.currentPage;
 const isEllipsis = pageNum === '...';
 const isActive = pageNum === currentPage;
 
 return `._id {
   min-width: 40px;
-  padding: ${args.theme.var.spacing.sm};
-  background: ${isActive ? args.theme.var.color.primary : args.theme.var.color.background};
-  border: 1px solid ${isActive ? args.theme.var.color.primary : args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.sm};
-  color: ${isActive ? args.theme.var.color.primary_text : args.theme.var.color.text};
+  padding: ${t.var.spacing.sm};
+  background: ${isActive ? t.var.color.primary : t.var.color.background};
+  border: 1px solid ${isActive ? t.var.color.primary : t.var.color.border};
+  border-radius: ${t.var.borderRadius.sm};
+  color: ${isActive ? t.var.color.primary_text : t.var.color.text};
   font-size: 0.875rem;
   font-weight: ${isActive ? '700' : '400'};
   cursor: ${isEllipsis || isActive ? 'default' : 'pointer'};
@@ -1960,8 +1960,8 @@ return `._id {
 
   ${!isEllipsis && !isActive ? `
     &:hover {
-      background: ${args.theme.var.color.background_dark_100};
-      border-color: ${args.theme.var.color.primary};
+      background: ${t.var.color.background_dark_100};
+      border-color: ${t.var.color.primary};
     }
   ` : ''}
 }`;
@@ -1970,15 +1970,15 @@ return `._id {
         componentName: Html
         props:
           '''
-const pageNum = args.contextData.pageNum;
-const currentPage = args.fns.store.currentPage;
+const pageNum = c.pageNum;
+const currentPage = f.store.currentPage;
 const isEllipsis = pageNum === '...';
 const isActive = pageNum === currentPage;
 
 return {
   as: isEllipsis ? "span" : "button",
   text: pageNum,
-  onClick: isEllipsis ? undefined : () => args.fns.goToPage(pageNum),
+  onClick: isEllipsis ? undefined : () => f.goToPage(pageNum),
   disabled: isActive
 };
 '''
@@ -1990,24 +1990,24 @@ return {
       P: {
         css:
           '''
-const currentPage = args.fns.store.currentPage;
-const totalPages = args.fns.store.totalPages;
+const currentPage = f.store.currentPage;
+const totalPages = f.store.totalPages;
 const isDisabled = currentPage >= totalPages;
 
 return `._id {
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  background: ${args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.sm};
-  color: ${args.theme.var.color.text};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  background: ${t.var.color.background};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.sm};
+  color: ${t.var.color.text};
   font-size: 0.875rem;
   cursor: ${isDisabled ? 'not-allowed' : 'pointer'};
   opacity: ${isDisabled ? '0.5' : '1'};
   transition: all 0.2s ease;
 
   &:hover:not(:disabled) {
-    background: ${args.theme.var.color.background_dark_100};
-    border-color: ${args.theme.var.color.primary};
+    background: ${t.var.color.background_dark_100};
+    border-color: ${t.var.color.primary};
   }
 }`;
 '''
@@ -2015,14 +2015,14 @@ return `._id {
         componentName: Html
         props:
           '''
-const currentPage = args.fns.store.currentPage;
-const totalPages = args.fns.store.totalPages;
+const currentPage = f.store.currentPage;
+const totalPages = f.store.totalPages;
 const isDisabled = currentPage >= totalPages;
 
 return {
   as: "button",
   text: "Next →",
-  onClick: args.fns.goToNextPage,
+  onClick: f.goToNextPage,
   disabled: isDisabled
 };
 '''
@@ -2036,19 +2036,19 @@ return {
           '''
 return `._id {
   text-align: center;
-  padding: ${args.theme.var.spacing.xl};
-  color: ${args.theme.var.color.text_light_500};
+  padding: ${t.var.spacing.xl};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
         displayOrder: 7
         componentName: Html
         props:
           '''
-const filteredFeedbacks = args.fns.getFilteredFeedbacks();
+const filteredFeedbacks = f.getFilteredFeedbacks();
 return {
   as: "div",
   text: "No feedbacks found matching your filters",
-  hide: () => filteredFeedbacks.length > 0 || args.fns.store.loading || args.fns.store.error
+  hide: () => filteredFeedbacks.length > 0 || f.store.loading || f.store.error
 };
 '''
       }

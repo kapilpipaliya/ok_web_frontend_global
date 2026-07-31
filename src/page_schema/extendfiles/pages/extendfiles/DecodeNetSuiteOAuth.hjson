@@ -43,18 +43,18 @@
   max-width: 900px;
   margin: 0 auto;
   padding: 2rem 1rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         fns:
           '''
-const [isLoading, setIsLoading] = args.createSignal(false);
-const [isConnecting, setIsConnecting] = args.createSignal(false);
-const [isDisconnecting, setIsDisconnecting] = args.createSignal(false);
-const [status, setStatus] = args.createSignal(null);
-const [errorMessage, setErrorMessage] = args.createSignal("");
+const [isLoading, setIsLoading] = _.createSignal(false);
+const [isConnecting, setIsConnecting] = _.createSignal(false);
+const [isDisconnecting, setIsDisconnecting] = _.createSignal(false);
+const [status, setStatus] = _.createSignal(null);
+const [errorMessage, setErrorMessage] = _.createSignal("");
 
 const getOAuthQuery = () => {
-  const search = args.searchParams || {};
+  const search = _.searchParams || {};
   return {
     code: (search.code || "").toString(),
     state: (search.state || "").toString(),
@@ -66,7 +66,7 @@ const getOAuthQuery = () => {
 const loadStatus = async () => {
   setIsLoading(true);
   try {
-    const result = await args.executeNamedServerFunction({
+    const result = await s({
       functionName: "netsuiteGetOAuthStatus",
       contextData: {}
     });
@@ -89,7 +89,7 @@ const startConnect = async () => {
   setIsConnecting(true);
   setErrorMessage("");
   try {
-    const result = await args.executeNamedServerFunction({
+    const result = await s({
       functionName: "netsuiteGetOAuthAuthorizationUrl",
       contextData: {}
     });
@@ -97,7 +97,7 @@ const startConnect = async () => {
     if (result?.error || result?.result?.success === false) {
       const message = result?.error || result?.result?.message || "Failed to start NetSuite OAuth flow.";
       setErrorMessage(message);
-      args.showErrorToast?.(message);
+      _.showErrorToast?.(message);
       return;
     }
 
@@ -105,7 +105,7 @@ const startConnect = async () => {
     if (!authorizationUrl) {
       const message = "Authorization URL not returned.";
       setErrorMessage(message);
-      args.showErrorToast?.(message);
+      _.showErrorToast?.(message);
       return;
     }
 
@@ -113,7 +113,7 @@ const startConnect = async () => {
   } catch (error) {
     const message = error?.message || "Failed to start NetSuite OAuth flow.";
     setErrorMessage(message);
-    args.showErrorToast?.(message);
+    _.showErrorToast?.(message);
   } finally {
     setIsConnecting(false);
   }
@@ -123,7 +123,7 @@ const disconnect = async () => {
   setIsDisconnecting(true);
   setErrorMessage("");
   try {
-    const result = await args.executeNamedServerFunction({
+    const result = await s({
       functionName: "netsuiteDisconnectOAuth",
       contextData: {}
     });
@@ -131,16 +131,16 @@ const disconnect = async () => {
     if (result?.error || result?.result?.success === false) {
       const message = result?.error || result?.result?.message || "Failed to disconnect NetSuite OAuth.";
       setErrorMessage(message);
-      args.showErrorToast?.(message);
+      _.showErrorToast?.(message);
       return;
     }
 
-    args.showSuccessToast?.("NetSuite OAuth disconnected.");
+    _.showSuccessToast?.("NetSuite OAuth disconnected.");
     await loadStatus();
   } catch (error) {
     const message = error?.message || "Failed to disconnect NetSuite OAuth.";
     setErrorMessage(message);
-    args.showErrorToast?.(message);
+    _.showErrorToast?.(message);
   } finally {
     setIsDisconnecting(false);
   }
@@ -156,7 +156,7 @@ const handleCallbackIfPresent = async () => {
   setErrorMessage("");
 
   try {
-    const result = await args.executeNamedServerFunction({
+    const result = await s({
       functionName: "netsuiteHandleOAuthCallback",
       contextData: q
     });
@@ -164,23 +164,23 @@ const handleCallbackIfPresent = async () => {
     if (result?.error || result?.result?.success === false) {
       const message = result?.error || result?.result?.message || "NetSuite OAuth callback failed.";
       setErrorMessage(message);
-      args.showErrorToast?.(message);
+      _.showErrorToast?.(message);
     } else {
-      args.showSuccessToast?.("NetSuite OAuth connected successfully.");
+      _.showSuccessToast?.("NetSuite OAuth connected successfully.");
     }
 
-    if (args.setSearchParams) {
-      const current = { ...(args.searchParams || {}) };
+    if (_.setSearchParams) {
+      const current = { ...(_.searchParams || {}) };
       delete current.code;
       delete current.state;
       delete current.error;
       delete current.error_description;
-      args.setSearchParams(current, { replace: true });
+      _.setSearchParams(current, { replace: true });
     }
   } catch (error) {
     const message = error?.message || "NetSuite OAuth callback failed.";
     setErrorMessage(message);
-    args.showErrorToast?.(message);
+    _.showErrorToast?.(message);
   } finally {
     setIsLoading(false);
   }
@@ -212,7 +212,7 @@ return {
           '''return {
   as: "div",
   onMount: async () => {
-    await args.fns.initialize?.();
+    await f.initialize?.();
   },
   hide: false
 }'''
@@ -235,7 +235,7 @@ return {
         displayOrder: 2
         componentName: Html
         props: '''return { as: "p", text: "Connect your NetSuite account to enable server-side NetSuite API integration for this app." };'''
-        css: '''return `._id { margin: 0 0 1.5rem 0; color: ${args.theme.var.color.text_light_500}; }`;'''
+        css: '''return `._id { margin: 0 0 1.5rem 0; color: ${t.var.color.text_light_500}; }`;'''
       }
     }
     {
@@ -245,7 +245,7 @@ return {
         displayOrder: 3
         componentName: Html
         props:
-          '''const _s = args.fns.status?.();
+          '''const _s = f.status?.();
 const connected = !!_s?.connected;
 const data = _s?.data || {};
 
@@ -296,7 +296,7 @@ return {
         displayOrder: 4
         componentName: Html
         props:
-          '''const error = args.fns.errorMessage?.();
+          '''const error = f.errorMessage?.();
 return {
   as: "s-banner",
   "attr:tone": "critical",
@@ -323,15 +323,15 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const connecting = args.fns.isConnecting?.();
-const loading = args.fns.isLoading?.();
+          '''const connecting = f.isConnecting?.();
+const loading = f.isLoading?.();
 return {
   as: "s-button",
   "attr:variant": "primary",
   "attr:disabled": connecting || loading ? true : undefined,
   text: connecting ? "Connecting..." : "Connect NetSuite",
   onClick: async () => {
-    await args.fns.startConnect?.();
+    await f.startConnect?.();
   }
 };'''
       }
@@ -343,16 +343,16 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const disconnecting = args.fns.isDisconnecting?.();
-const loading = args.fns.isLoading?.();
-const connected = !!args.fns.status?.()?.connected;
+          '''const disconnecting = f.isDisconnecting?.();
+const loading = f.isLoading?.();
+const connected = !!f.status?.()?.connected;
 return {
   as: "s-button",
   "attr:variant": "secondary",
   "attr:disabled": disconnecting || loading || !connected ? true : undefined,
   text: disconnecting ? "Disconnecting..." : "Disconnect",
   onClick: async () => {
-    await args.fns.disconnect?.();
+    await f.disconnect?.();
   }
 };'''
       }

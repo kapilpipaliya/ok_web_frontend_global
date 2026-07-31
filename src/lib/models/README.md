@@ -98,13 +98,13 @@ const { Models } = await import("~/lib/models");
 
 ### 2. Use in Server Functions
 
-Models are automatically available in all server functions via `args.Models`:
+Models are automatically available in all server functions via `_.Models`:
 
 ```javascript
 // In hjson server function body
-const notification = await args.Models.Notification.findByUserId(
-  args.contextData.userId,
-  { session: args.session, unreadOnly: true }
+const notification = await _.Models.Notification.findByUserId(
+  c.userId,
+  { session: _.session, unreadOnly: true }
 );
 ```
 
@@ -246,7 +246,7 @@ export type { UserProperties, UserInstance } from "./user/UserModel";
         description: "Create a notification for a user",
         body: '''
 try {
-  const { userId, title, message, type = "info" } = args.contextData;
+  const { userId, title, message, type = "info" } = c;
 
   // Validate inputs
   if (!userId || !title || !message) {
@@ -257,7 +257,7 @@ try {
   }
 
   // Use OGM to create notification
-  const notification = await args.Models.Notification.createOne({
+  const notification = await _.Models.Notification.createOne({
     userId,
     type,
     title,
@@ -265,7 +265,7 @@ try {
     read: false,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
-  }, { session: args.session });
+  }, { session: _.session });
 
   return {
     success: true,
@@ -341,8 +341,8 @@ try {
   // Import ModelFactory from neogma
   const { ModelFactory } = await import("neogma");
 
-  // Get neogma instance (now via args!)
-  const neogma = await args.getNeogmaInstance();
+  // Get neogma instance (now via _!)
+  const neogma = await _.getNeogmaInstance();
 
   // Create temporary model
   const TempDataModel = ModelFactory(
@@ -360,10 +360,10 @@ try {
 
   // Use the model
   const tempData = await TempDataModel.createOne({
-    key: args.contextData.key,
-    value: args.contextData.value,
-    expiresAt: args.utils.daysFromNow(7)
-  }, { session: args.session });
+    key: c.key,
+    value: c.value,
+    expiresAt: _.utils.daysFromNow(7)
+  }, { session: _.session });
 
   return {
     success: true,
@@ -371,13 +371,13 @@ try {
   };
 
 } catch (error) {
-  return args.utils.createErrorResponse(error);
+  return _.utils.createErrorResponse(error);
 }
 ```
 
 ### Register Models Globally (Recommended for Reuse)
 
-Register a model in the global registry so it's available in ALL server functions via `args.Models`:
+Register a model in the global registry so it's available in ALL server functions via `_.Models`:
 
 ```javascript
 // In hjson function body
@@ -386,10 +386,10 @@ try {
   const { ModelFactory } = await import("neogma");
 
   // Get neogma instance
-  const neogma = await args.getNeogmaInstance();
+  const neogma = await _.getNeogmaInstance();
 
   // Check if already registered (avoid recreating)
-  if (!args.hasModel("Cache")) {
+  if (!_.hasModel("Cache")) {
     // Create model
     const CacheModel = ModelFactory({
       label: "Cache",
@@ -402,26 +402,26 @@ try {
     }, neogma);
 
     // Register globally
-    args.registerModel("Cache", () => CacheModel);
+    _.registerModel("Cache", () => CacheModel);
 
     console.log("Cache model registered globally");
   }
 
-  // Now use via args.Models (available in ALL functions!)
-  const cacheEntry = await args.Models.Cache.createOne({
-    key: args.contextData.cacheKey,
-    value: args.utils.safeJsonStringify(args.contextData.data),
-    expiresAt: args.utils.daysFromNow(1)
-  }, { session: args.session });
+  // Now use via _.Models (available in ALL functions!)
+  const cacheEntry = await _.Models.Cache.createOne({
+    key: c.cacheKey,
+    value: _.utils.safeJsonStringify(c.data),
+    expiresAt: _.utils.daysFromNow(1)
+  }, { session: _.session });
 
-  return args.utils.createSuccessResponse({
+  return _.utils.createSuccessResponse({
     cached: true,
     key: cacheEntry.dataValues.key,
     expiresAt: cacheEntry.dataValues.expiresAt
   });
 
 } catch (error) {
-  return args.utils.createErrorResponse(error);
+  return _.utils.createErrorResponse(error);
 }
 ```
 
@@ -433,29 +433,29 @@ Once registered, the model is available everywhere:
 // In a different hjson function
 try {
   // Check if model exists
-  if (!args.hasModel("Cache")) {
-    return args.utils.createErrorResponse(
+  if (!_.hasModel("Cache")) {
+    return _.utils.createErrorResponse(
       "Cache model not registered",
       "ModelNotFoundError"
     );
   }
 
   // Use the registered model
-  const cached = await args.Models.Cache.findOne(
-    { where: { key: args.contextData.key } },
-    args.session
+  const cached = await _.Models.Cache.findOne(
+    { where: { key: c.key } },
+    _.session
   );
 
   if (cached) {
-    return args.utils.createSuccessResponse({
-      value: args.utils.safeJsonParse(cached.dataValues.value, null)
+    return _.utils.createSuccessResponse({
+      value: _.utils.safeJsonParse(cached.dataValues.value, null)
     }, "Cache hit");
   }
 
-  return args.utils.createSuccessResponse(null, "Cache miss");
+  return _.utils.createSuccessResponse(null, "Cache miss");
 
 } catch (error) {
-  return args.utils.createErrorResponse(error);
+  return _.utils.createErrorResponse(error);
 }
 ```
 
@@ -463,12 +463,12 @@ try {
 
 ```javascript
 // Get list of all models
-const allModels = args.getRegisteredModels();
+const allModels = _.getRegisteredModels();
 console.log("Registered models:", allModels);
 // ["Notification", "Cache", "CustomModel", ...]
 
 // Check specific model
-if (args.hasModel("Cache")) {
+if (_.hasModel("Cache")) {
   console.log("Cache model is available");
 }
 ```
@@ -501,11 +501,11 @@ if (args.hasModel("Cache")) {
         body: '''
 const { ModelFactory } = await import("neogma");
 
-// Get neogma instance via args
-const neogma = await args.getNeogmaInstance();
+// Get neogma instance via _
+const neogma = await _.getNeogmaInstance();
 
 // Check if already registered
-if (!args.hasModel("Cache")) {
+if (!_.hasModel("Cache")) {
   // Create cache model
   const CacheModel = ModelFactory({
     label: "Cache",
@@ -518,15 +518,15 @@ if (!args.hasModel("Cache")) {
   }, neogma);
 
   // Register globally
-  args.registerModel("Cache", () => CacheModel);
+  _.registerModel("Cache", () => CacheModel);
 
-  return args.utils.createSuccessResponse(
+  return _.utils.createSuccessResponse(
     { registered: true },
     "Cache model registered successfully"
   );
 }
 
-return args.utils.createSuccessResponse(
+return _.utils.createSuccessResponse(
   { registered: false },
   "Cache model was already registered"
 );
@@ -541,21 +541,21 @@ return args.utils.createSuccessResponse(
         description: "Use globally registered Cache model",
         body: '''
 // Cache model should be registered first via registerCacheModel function
-if (!args.hasModel("Cache")) {
-  return args.utils.createErrorResponse(
+if (!_.hasModel("Cache")) {
+  return _.utils.createErrorResponse(
     "Cache model not registered. Call registerCacheModel first.",
     "ModelNotFoundError"
   );
 }
 
 // Use the registered model
-const cacheEntry = await args.Models.Cache.createOne({
-  key: args.contextData.cacheKey,
-  value: args.utils.safeJsonStringify(args.contextData.data),
-  expiresAt: args.utils.daysFromNow(1)
-}, { session: args.session });
+const cacheEntry = await _.Models.Cache.createOne({
+  key: c.cacheKey,
+  value: _.utils.safeJsonStringify(c.data),
+  expiresAt: _.utils.daysFromNow(1)
+}, { session: _.session });
 
-return args.utils.createSuccessResponse({
+return _.utils.createSuccessResponse({
   cached: true,
   key: cacheEntry.dataValues.key,
   expiresAt: cacheEntry.dataValues.expiresAt
@@ -651,10 +651,10 @@ const notification = await Models.Notification.findOne(
 
 ### Session Lifecycle
 
-1. **In Server Functions**: Session is provided via `args.session`
+1. **In Server Functions**: Session is provided via `_.session`
    ```javascript
-   const result = await args.Models.Notification.createOne(data, {
-     session: args.session
+   const result = await _.Models.Notification.createOne(data, {
+     session: _.session
    });
    ```
 
@@ -709,17 +709,17 @@ const vertexArray = modelsToVertices<NotificationProperties>(notifications);
 
 ### In Server Functions (Recommended)
 
-**No import needed!** These functions are available directly via `args`:
+**No import needed!** These functions are available directly via `_`:
 
 ```javascript
 // In hjson function body
-const notification = await args.Models.Notification.findOne(
-  { where: { id: args.contextData.notificationId } },
-  args.session
+const notification = await _.Models.Notification.findOne(
+  { where: { id: c.notificationId } },
+  _.session
 );
 
-// Use args.modelToVertex (no import needed!)
-const vertexFormat = args.modelToVertex(notification);
+// Use _.modelToVertex (no import needed!)
+const vertexFormat = _.modelToVertex(notification);
 
 return {
   success: true,
@@ -729,12 +729,12 @@ return {
 };
 
 // For multiple instances
-const notifications = await args.Models.Notification.findByUserId(
+const notifications = await _.Models.Notification.findByUserId(
   userId,
-  { session: args.session }
+  { session: _.session }
 );
 
-const vertexArray = args.modelsToVertices(notifications);
+const vertexArray = _.modelsToVertices(notifications);
 ```
 
 ## Best Practices
@@ -925,16 +925,16 @@ const count = result.records[0].get("count").toNumber();
       P: {
         key: "getUserNotifications",
         body: '''
-const userId = args.contextData.userId;
+const userId = c.userId;
 
 // Use OGM for simple query
-const notifications = await args.Models.Notification.findByUserId(
+const notifications = await _.Models.Notification.findByUserId(
   userId,
-  { session: args.session, limit: 10 }
+  { session: _.session, limit: 10 }
 );
 
 // Use raw Cypher for count
-const countResult = await args.session.run(`
+const countResult = await _.session.run(`
   MATCH (n:Notification {userId: $userId})
   RETURN count(n) as total, sum(CASE WHEN n.read = false THEN 1 ELSE 0 END) as unread
 `, { userId });

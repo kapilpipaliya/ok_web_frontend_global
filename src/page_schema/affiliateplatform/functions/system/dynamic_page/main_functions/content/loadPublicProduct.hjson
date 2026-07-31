@@ -11,7 +11,7 @@ const {
   productKey,
   tableKey = "products",
   tableVertexLabel = "Product"
-} = args.contextData || {};
+} = c || {};
 
 const resolvedKey = productKey != null ? String(productKey).trim() : "";
 if (!resolvedKey) {
@@ -24,7 +24,7 @@ const resolvedTableVertexLabel =
     ? String(tableVertexLabel).trim()
     : "Product";
 
-const configResult = await args.executeNamedServerFunction({
+const configResult = await s({
   functionName: "loadTableConfigByKey",
   contextData: { tableKey: resolvedTableKey }
 });
@@ -67,10 +67,10 @@ if (general.publicRead !== true) {
   return { success: false, message: "Products table is not publicly readable" };
 }
 
-if (!args.context.nodes) args.context.nodes = {};
-if (!args.context.relationships) args.context.relationships = {};
+if (!_.context.nodes) _.context.nodes = {};
+if (!_.context.relationships) _.context.relationships = {};
 
-const productResult = await args.session.run(
+const productResult = await _.session.run(
   `
   MATCH (v:${resolvedTableVertexLabel})
   WHERE v.key = $productKey
@@ -83,15 +83,15 @@ const productResult = await args.session.run(
   { productKey: resolvedKey }
 );
 
-const products = args.processResult(productResult.records, args.context, "v") || [];
+const products = _.processResult(productResult.records, _.context, "v") || [];
 const productVertex = products[0] || null;
 if (!productVertex) {
   return { success: false, message: "Product not found" };
 }
 
-args.processResult(productResult.records, args.context, ["variant", "vfile"], ["vr", "fir"]);
+_.processResult(productResult.records, _.context, ["variant", "vfile"], ["vr", "fir"]);
 
-const files = args.processResult(productResult.records, args.context, "file") || [];
+const files = _.processResult(productResult.records, _.context, "file") || [];
 const fileVertex = files.find((file) => file?.P?.fileName) || null;
 let listingImageUrl = "";
 if (fileVertex?.P?.fileName != null && String(fileVertex.P.fileName).trim() !== "") {
@@ -126,8 +126,8 @@ const buildVariantOptionsFromVertex = (variantVertex, axes) => {
 };
 
 const getVariantImageFileVertices = (variantVertex) => {
-  const graphNodes = args.context.nodes || {};
-  const graphEdges = args.context.relationships || {};
+  const graphNodes = _.context.nodes || {};
+  const graphEdges = _.context.relationships || {};
   const edgeIds = variantVertex?.OUT?.ProductVariantImage || [];
   const files = [];
   const seen = new Set();
@@ -175,8 +175,8 @@ const optionAxes = parseJsonArray(productVertex.P?.optionAxes)
   .filter(Boolean);
 
 const collectVariantVerticesFromGraph = () => {
-  const graphNodes = args.context.nodes || {};
-  const graphEdges = args.context.relationships || {};
+  const graphNodes = _.context.nodes || {};
+  const graphEdges = _.context.relationships || {};
   const edgeIds = productVertex?.OUT?.ProductProductVariant || [];
   const variants = [];
   const seen = new Set();
@@ -215,8 +215,8 @@ const variants = variantVertices
   })
   .filter(Boolean);
 
-const mergedVertexes = Object.assign({}, schemaGraph.vertexes || {}, args.context.nodes || {});
-const mergedEdges = Object.assign({}, schemaGraph.edges || {}, args.context.relationships || {});
+const mergedVertexes = Object.assign({}, schemaGraph.vertexes || {}, _.context.nodes || {});
+const mergedEdges = Object.assign({}, schemaGraph.edges || {}, _.context.relationships || {});
 
 return {
   success: true,

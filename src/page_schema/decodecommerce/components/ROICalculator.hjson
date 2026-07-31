@@ -21,7 +21,7 @@ return {
         css: '''
 return `._id {
   padding: 5rem 0;
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
   
   @media (max-width: 768px) {
     padding: 3rem 0;
@@ -89,7 +89,7 @@ return {
 return `._id {
   font-size: 2.5rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 1rem;
   
   @media (max-width: 768px) {
@@ -114,7 +114,7 @@ return {
         css: '''
 return `._id {
   font-size: 1.1rem;
-  color: ${args.theme.var.color.text_dark_300};
+  color: ${t.var.color.text_dark_300};
   max-width: 600px;
   margin: 0 auto;
 }`;
@@ -130,11 +130,11 @@ return `._id {
         contextName: "roiState",
         props: '''
 // Input signals
-const [monthlyVisitors, setMonthlyVisitors] = args.createSignal(10000);
-const [conversionRate, setConversionRate] = args.createSignal(2); // percentage
-const [avgOrderValue, setAvgOrderValue] = args.createSignal(75);
-const [grossMargin, setGrossMargin] = args.createSignal(60); // percentage
-const [timeframe, setTimeframe] = args.createSignal(6); // months
+const [monthlyVisitors, setMonthlyVisitors] = _.createSignal(10000);
+const [conversionRate, setConversionRate] = _.createSignal(2); // percentage
+const [avgOrderValue, setAvgOrderValue] = _.createSignal(75);
+const [grossMargin, setGrossMargin] = _.createSignal(60); // percentage
+const [timeframe, setTimeframe] = _.createSignal(6); // months
 const serviceCost = 5000; // per month
 
 // ROI Calculation
@@ -219,10 +219,10 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background_dark_50};
+  background: ${t.var.color.background_dark_50};
   border-radius: 1rem;
   padding: 2rem;
-  border: 1px solid ${args.theme.var.color.background_dark_100};
+  border: 1px solid ${t.var.color.background_dark_100};
 }`;
 '''
       }
@@ -243,7 +243,7 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 1.5rem;
 }`;
 '''
@@ -284,7 +284,7 @@ return {
 return `._id {
   display: block;
   font-weight: 500;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 0.5rem;
 }`;
 '''
@@ -297,7 +297,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const state = args.contextData.roiState;
+const state = c.roiState;
 return {
   as: "input",
   type: "range",
@@ -314,7 +314,7 @@ return `._id {
   height: 8px;
   -webkit-appearance: none;
   appearance: none;
-  background: ${args.theme.var.color.background_dark_200};
+  background: ${t.var.color.background_dark_200};
   border-radius: 4px;
   outline: none;
   position: relative;
@@ -324,32 +324,32 @@ return `._id {
     appearance: none;
     width: 24px;
     height: 24px;
-    background: ${args.theme.var.color.primary};
+    background: ${t.var.color.primary};
     border-radius: 50%;
     cursor: pointer;
     transition: all 0.2s ease;
-    box-shadow: 0 2px 4px ${args.theme.var.color.primary_light_500};
-    border: 2px solid ${args.theme.var.color.background};
+    box-shadow: 0 2px 4px ${t.var.color.primary_light_500};
+    border: 2px solid ${t.var.color.background};
     
     &:hover {
       transform: scale(1.1);
-      box-shadow: 0 4px 8px ${args.theme.var.color.primary_light_400};
+      box-shadow: 0 4px 8px ${t.var.color.primary_light_400};
     }
   }
   
   &::-moz-range-thumb {
     width: 24px;
     height: 24px;
-    background: ${args.theme.var.color.primary};
+    background: ${t.var.color.primary};
     border-radius: 50%;
     cursor: pointer;
-    border: 2px solid ${args.theme.var.color.background};
+    border: 2px solid ${t.var.color.background};
     transition: all 0.2s ease;
-    box-shadow: 0 2px 4px ${args.theme.var.color.primary_light_500};
+    box-shadow: 0 2px 4px ${t.var.color.primary_light_500};
     
     &:hover {
       transform: scale(1.1);
-      box-shadow: 0 4px 8px ${args.theme.var.color.primary_light_400};
+      box-shadow: 0 4px 8px ${t.var.color.primary_light_400};
     }
   }
 }`;
@@ -363,7 +363,7 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const state = args.contextData.roiState;
+const state = c.roiState;
 return {
   as: "span",
   text: `${state.monthlyVisitors().toLocaleString()} visitors`
@@ -373,7 +373,7 @@ return {
 return `._id {
   display: block;
   text-align: right;
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   font-weight: 600;
   margin-top: 0.5rem;
 }`;
@@ -415,7 +415,7 @@ return {
 return `._id {
   display: block;
   font-weight: 500;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 0.5rem;
 }`;
 '''
@@ -428,7 +428,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const state = args.contextData.roiState;
+const state = c.roiState;
 return {
   as: "input",
   type: "range",
@@ -445,7 +445,7 @@ return `._id {
   height: 8px;
   -webkit-appearance: none;
   appearance: none;
-  background: ${args.theme.var.color.background_dark_200};
+  background: ${t.var.color.background_dark_200};
   border-radius: 4px;
   outline: none;
   position: relative;
@@ -455,32 +455,32 @@ return `._id {
     appearance: none;
     width: 24px;
     height: 24px;
-    background: ${args.theme.var.color.primary};
+    background: ${t.var.color.primary};
     border-radius: 50%;
     cursor: pointer;
     transition: all 0.2s ease;
-    box-shadow: 0 2px 4px ${args.theme.var.color.primary_light_500};
-    border: 2px solid ${args.theme.var.color.background};
+    box-shadow: 0 2px 4px ${t.var.color.primary_light_500};
+    border: 2px solid ${t.var.color.background};
     
     &:hover {
       transform: scale(1.1);
-      box-shadow: 0 4px 8px ${args.theme.var.color.primary_light_400};
+      box-shadow: 0 4px 8px ${t.var.color.primary_light_400};
     }
   }
   
   &::-moz-range-thumb {
     width: 24px;
     height: 24px;
-    background: ${args.theme.var.color.primary};
+    background: ${t.var.color.primary};
     border-radius: 50%;
     cursor: pointer;
-    border: 2px solid ${args.theme.var.color.background};
+    border: 2px solid ${t.var.color.background};
     transition: all 0.2s ease;
-    box-shadow: 0 2px 4px ${args.theme.var.color.primary_light_500};
+    box-shadow: 0 2px 4px ${t.var.color.primary_light_500};
     
     &:hover {
       transform: scale(1.1);
-      box-shadow: 0 4px 8px ${args.theme.var.color.primary_light_400};
+      box-shadow: 0 4px 8px ${t.var.color.primary_light_400};
     }
   }
 }`;
@@ -494,7 +494,7 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const state = args.contextData.roiState;
+const state = c.roiState;
 return {
   as: "span",
   text: `${state.conversionRate()}%`
@@ -504,7 +504,7 @@ return {
 return `._id {
   display: block;
   text-align: right;
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   font-weight: 600;
   margin-top: 0.5rem;
 }`;
@@ -546,7 +546,7 @@ return {
 return `._id {
   display: block;
   font-weight: 500;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 0.5rem;
 }`;
 '''
@@ -559,7 +559,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const state = args.contextData.roiState;
+const state = c.roiState;
 return {
   as: "input",
   type: "range",
@@ -576,7 +576,7 @@ return `._id {
   height: 8px;
   -webkit-appearance: none;
   appearance: none;
-  background: ${args.theme.var.color.background_dark_200};
+  background: ${t.var.color.background_dark_200};
   border-radius: 4px;
   outline: none;
   position: relative;
@@ -586,32 +586,32 @@ return `._id {
     appearance: none;
     width: 24px;
     height: 24px;
-    background: ${args.theme.var.color.primary};
+    background: ${t.var.color.primary};
     border-radius: 50%;
     cursor: pointer;
     transition: all 0.2s ease;
-    box-shadow: 0 2px 4px ${args.theme.var.color.primary_light_500};
-    border: 2px solid ${args.theme.var.color.background};
+    box-shadow: 0 2px 4px ${t.var.color.primary_light_500};
+    border: 2px solid ${t.var.color.background};
     
     &:hover {
       transform: scale(1.1);
-      box-shadow: 0 4px 8px ${args.theme.var.color.primary_light_400};
+      box-shadow: 0 4px 8px ${t.var.color.primary_light_400};
     }
   }
   
   &::-moz-range-thumb {
     width: 24px;
     height: 24px;
-    background: ${args.theme.var.color.primary};
+    background: ${t.var.color.primary};
     border-radius: 50%;
     cursor: pointer;
-    border: 2px solid ${args.theme.var.color.background};
+    border: 2px solid ${t.var.color.background};
     transition: all 0.2s ease;
-    box-shadow: 0 2px 4px ${args.theme.var.color.primary_light_500};
+    box-shadow: 0 2px 4px ${t.var.color.primary_light_500};
     
     &:hover {
       transform: scale(1.1);
-      box-shadow: 0 4px 8px ${args.theme.var.color.primary_light_400};
+      box-shadow: 0 4px 8px ${t.var.color.primary_light_400};
     }
   }
 }`;
@@ -625,7 +625,7 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const state = args.contextData.roiState;
+const state = c.roiState;
 return {
   as: "span",
   text: `$${state.avgOrderValue()}`
@@ -635,7 +635,7 @@ return {
 return `._id {
   display: block;
   text-align: right;
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   font-weight: 600;
   margin-top: 0.5rem;
 }`;
@@ -677,7 +677,7 @@ return {
 return `._id {
   display: block;
   font-weight: 500;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 0.5rem;
 }`;
 '''
@@ -690,7 +690,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const state = args.contextData.roiState;
+const state = c.roiState;
 return {
   as: "input",
   type: "range",
@@ -707,7 +707,7 @@ return `._id {
   height: 8px;
   -webkit-appearance: none;
   appearance: none;
-  background: ${args.theme.var.color.background_dark_200};
+  background: ${t.var.color.background_dark_200};
   border-radius: 4px;
   outline: none;
   position: relative;
@@ -717,32 +717,32 @@ return `._id {
     appearance: none;
     width: 24px;
     height: 24px;
-    background: ${args.theme.var.color.primary};
+    background: ${t.var.color.primary};
     border-radius: 50%;
     cursor: pointer;
     transition: all 0.2s ease;
-    box-shadow: 0 2px 4px ${args.theme.var.color.primary_light_500};
-    border: 2px solid ${args.theme.var.color.background};
+    box-shadow: 0 2px 4px ${t.var.color.primary_light_500};
+    border: 2px solid ${t.var.color.background};
     
     &:hover {
       transform: scale(1.1);
-      box-shadow: 0 4px 8px ${args.theme.var.color.primary_light_400};
+      box-shadow: 0 4px 8px ${t.var.color.primary_light_400};
     }
   }
   
   &::-moz-range-thumb {
     width: 24px;
     height: 24px;
-    background: ${args.theme.var.color.primary};
+    background: ${t.var.color.primary};
     border-radius: 50%;
     cursor: pointer;
-    border: 2px solid ${args.theme.var.color.background};
+    border: 2px solid ${t.var.color.background};
     transition: all 0.2s ease;
-    box-shadow: 0 2px 4px ${args.theme.var.color.primary_light_500};
+    box-shadow: 0 2px 4px ${t.var.color.primary_light_500};
     
     &:hover {
       transform: scale(1.1);
-      box-shadow: 0 4px 8px ${args.theme.var.color.primary_light_400};
+      box-shadow: 0 4px 8px ${t.var.color.primary_light_400};
     }
   }
 }`;
@@ -756,7 +756,7 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const state = args.contextData.roiState;
+const state = c.roiState;
 return {
   as: "span",
   text: `${state.grossMargin()}%`
@@ -766,7 +766,7 @@ return {
 return `._id {
   display: block;
   text-align: right;
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   font-weight: 600;
   margin-top: 0.5rem;
 }`;
@@ -808,7 +808,7 @@ return {
 return `._id {
   display: block;
   font-weight: 500;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 0.5rem;
 }`;
 '''
@@ -821,7 +821,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const state = args.contextData.roiState;
+const state = c.roiState;
 return {
   as: "select",
   value: state.timeframe(),
@@ -832,22 +832,22 @@ return {
 return `._id {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid ${args.theme.var.color.background_light_300};
+  border: 1px solid ${t.var.color.background_light_300};
   border-radius: 0.5rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   font-size: 1rem;
   cursor: pointer;
   transition: all 0.2s ease;
   
   &:hover {
-    border-color: ${args.theme.var.color.primary_light_300};
+    border-color: ${t.var.color.primary_light_300};
   }
   
   &:focus {
     outline: none;
-    border-color: ${args.theme.var.color.primary};
-    box-shadow: 0 0 0 3px ${args.theme.var.color.primary_light_800};
+    border-color: ${t.var.color.primary};
+    box-shadow: 0 0 0 3px ${t.var.color.primary_light_800};
   }
 }`;
 '''
@@ -906,7 +906,7 @@ return {
         displayOrder: 7,
         componentName: "Html",
         props: '''
-const state = args.contextData.roiState;
+const state = c.roiState;
 return {
   as: "div"
 };
@@ -914,7 +914,7 @@ return {
         css: '''
 return `._id {
   padding: 1rem;
-  background: ${args.theme.var.color.primary_light_900};
+  background: ${t.var.color.primary_light_900};
   border-radius: 0.5rem;
   text-align: center;
   margin-top: 1rem;
@@ -937,7 +937,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.9rem;
-  color: ${args.theme.var.color.text_dark_300};
+  color: ${t.var.color.text_dark_300};
   margin-bottom: 0.25rem;
 }`;
 '''
@@ -950,7 +950,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const state = args.contextData.roiState;
+const state = c.roiState;
 return {
   as: "p",
   text: `$${state.serviceCost.toLocaleString()}/month`
@@ -960,7 +960,7 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 700;
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   margin: 0;
 }`;
 '''
@@ -974,7 +974,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const state = args.contextData.roiState;
+const state = c.roiState;
 const results = state.calculateROI();
 return {
   as: "div"
@@ -982,8 +982,8 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.success_light_900};
-  border: 2px solid ${args.theme.var.color.success_light_700};
+  background: ${t.var.color.success_light_900};
+  border: 2px solid ${t.var.color.success_light_700};
   border-radius: 1rem;
   padding: 2rem;
 }`;
@@ -1006,7 +1006,7 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 1.5rem;
   text-align: center;
 }`;
@@ -1021,7 +1021,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const state = args.contextData.roiState;
+const state = c.roiState;
 const results = state.calculateROI();
 return {
   as: "div"
@@ -1042,7 +1042,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const state = args.contextData.roiState;
+const state = c.roiState;
 const results = state.calculateROI();
 return {
   as: "div",
@@ -1053,7 +1053,7 @@ return {
 return `._id {
   font-size: 4rem;
   font-weight: 800;
-  color: ${args.theme.var.color.success};
+  color: ${t.var.color.success};
   line-height: 1;
   
   @media (max-width: 768px) {
@@ -1078,7 +1078,7 @@ return {
         css: '''
 return `._id {
   font-size: 1.1rem;
-  color: ${args.theme.var.color.text_dark_300};
+  color: ${t.var.color.text_dark_300};
   margin-top: 0.5rem;
 }`;
 '''
@@ -1136,7 +1136,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const state = args.contextData.roiState;
+const state = c.roiState;
 const results = state.calculateROI();
 return {
   as: "div",
@@ -1147,7 +1147,7 @@ return {
 return `._id {
   font-size: 1.75rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -1166,7 +1166,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_dark_300};
+  color: ${t.var.color.text_dark_300};
   margin-top: 0.25rem;
 }`;
 '''
@@ -1198,7 +1198,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const state = args.contextData.roiState;
+const state = c.roiState;
 const results = state.calculateROI();
 return {
   as: "div",
@@ -1209,7 +1209,7 @@ return {
 return `._id {
   font-size: 1.75rem;
   font-weight: 700;
-  color: ${args.theme.var.color.success};
+  color: ${t.var.color.success};
 }`;
 '''
       }
@@ -1228,7 +1228,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_dark_300};
+  color: ${t.var.color.text_dark_300};
   margin-top: 0.25rem;
 }`;
 '''
@@ -1260,7 +1260,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const state = args.contextData.roiState;
+const state = c.roiState;
 const results = state.calculateROI();
 return {
   as: "div",
@@ -1271,7 +1271,7 @@ return {
 return `._id {
   font-size: 1.75rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -1290,7 +1290,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_dark_300};
+  color: ${t.var.color.text_dark_300};
   margin-top: 0.25rem;
 }`;
 '''
@@ -1322,7 +1322,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const state = args.contextData.roiState;
+const state = c.roiState;
 const results = state.calculateROI();
 return {
   as: "div",
@@ -1333,7 +1333,7 @@ return {
 return `._id {
   font-size: 1.75rem;
   font-weight: 700;
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
 }`;
 '''
       }
@@ -1352,7 +1352,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_dark_300};
+  color: ${t.var.color.text_dark_300};
   margin-top: 0.25rem;
 }`;
 '''
@@ -1366,7 +1366,7 @@ return `._id {
         displayOrder: 4,
         componentName: "Html",
         props: '''
-const state = args.contextData.roiState;
+const state = c.roiState;
 const results = state.calculateROI();
 return {
   as: "div"
@@ -1376,7 +1376,7 @@ return {
 return `._id {
   margin-top: 2rem;
   padding: 1.5rem;
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
   border-radius: 0.5rem;
   text-align: center;
 }`;
@@ -1390,7 +1390,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const state = args.contextData.roiState;
+const state = c.roiState;
 const results = state.calculateROI();
 return {
   as: "p",
@@ -1400,7 +1400,7 @@ return {
         css: '''
 return `._id {
   font-size: 1.1rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   line-height: 1.6;
   margin: 0;
 }`;

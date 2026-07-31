@@ -8,7 +8,7 @@
         fns:
           '''
 // Message state for displaying success/error messages in UI
-const [messageState, setMessageState] = args.createStore({
+const [messageState, setMessageState] = _.createStore({
   type: null, // 'success' or 'error'
   text: '',
   visible: false
@@ -93,7 +93,7 @@ return {
           '''
 return `._id {
   font-size: 1rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0.5rem 0 2rem 0;
 }`;
 '''
@@ -114,22 +114,22 @@ return {
       P: {
         css:
           '''
-const messageState = args.fns.messageState;
+const messageState = f.messageState;
 const isSuccess = messageState?.type === 'success';
 const isError = messageState?.type === 'error';
 
-let bgColor = args.theme.var.color.background_light_100;
-let borderColor = args.theme.var.color.border;
-let textColor = args.theme.var.color.text;
+let bgColor = t.var.color.background_light_100;
+let borderColor = t.var.color.border;
+let textColor = t.var.color.text;
 
 if (isSuccess) {
-  bgColor = args.theme.var.color.success_light_50;
-  borderColor = args.theme.var.color.success;
-  textColor = args.theme.var.color.success_light_50_text;
+  bgColor = t.var.color.success_light_50;
+  borderColor = t.var.color.success;
+  textColor = t.var.color.success_light_50_text;
 } else if (isError) {
-  bgColor = args.theme.var.color.error_light_50;
-  borderColor = args.theme.var.color.error;
-  textColor = args.theme.var.color.error_light_50_text;
+  bgColor = t.var.color.error_light_50;
+  borderColor = t.var.color.error;
+  textColor = t.var.color.error_light_50_text;
 }
 
 return `._id {
@@ -160,7 +160,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const messageState = args.fns.messageState;
+const messageState = f.messageState;
 
 return {
   as: "div",
@@ -175,13 +175,13 @@ return {
       P: {
         css:
           '''
-const messageState = args.fns.messageState;
+const messageState = f.messageState;
 const isSuccess = messageState?.type === 'success';
 
-let iconColor = args.theme.var.color.success;
+let iconColor = t.var.color.success;
 
 if (!isSuccess) {
-  iconColor = args.theme.var.color.error;
+  iconColor = t.var.color.error;
 }
 
 return `._id {
@@ -210,7 +210,7 @@ return {
         componentName: Html
         props:
           '''
-const messageState = args.fns.messageState;
+const messageState = f.messageState;
 const isSuccess = messageState?.type === 'success';
 
 return {
@@ -228,13 +228,13 @@ return {
       P: {
         css:
           '''
-const messageState = args.fns.messageState;
+const messageState = f.messageState;
 const isSuccess = messageState?.type === 'success';
 
-let textColor = args.theme.var.color.success_light_50_text;
+let textColor = t.var.color.success_light_50_text;
 
 if (!isSuccess) {
-  textColor = args.theme.var.color.error_light_50_text;
+  textColor = t.var.color.error_light_50_text;
 }
 
 return `._id {
@@ -250,7 +250,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const messageState = args.fns.messageState;
+const messageState = f.messageState;
 
 return {
   as: "p",
@@ -265,15 +265,15 @@ return {
       P: {
         css:
           '''
-const messageState = args.fns.messageState;
+const messageState = f.messageState;
 const isSuccess = messageState?.type === 'success';
 
-let iconColor = args.theme.var.color.success_light_50_text;
-let hoverBg = args.theme.var.color.success_light_100;
+let iconColor = t.var.color.success_light_50_text;
+let hoverBg = t.var.color.success_light_100;
 
 if (!isSuccess) {
-  iconColor = args.theme.var.color.error_light_50_text;
-  hoverBg = args.theme.var.color.error_light_100;
+  iconColor = t.var.color.error_light_50_text;
+  hoverBg = t.var.color.error_light_100;
 }
 
 return `._id {
@@ -305,7 +305,7 @@ return `._id {
           '''
 return {
   as: "button",
-  onClick: () => args.fns.hideMessage()
+  onClick: () => f.hideMessage()
 };
 '''
       }
@@ -356,7 +356,7 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 1rem 0;
 }`;
 '''
@@ -378,8 +378,8 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.background_dark_50};
-  border: 1px solid ${args.theme.var.color.border};
+  background: ${t.var.color.background_dark_50};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.75rem;
   padding: 1.5rem;
   display: flex;
@@ -413,7 +413,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const currentMode = args.currentMode?.() || "light";
+const currentMode = _.currentMode?.() || "light";
 
 return {
   as: "div",
@@ -423,22 +423,22 @@ return {
     {
       text: "Send Feedback",
       variant: "primary",
-      onClick: () => args.fns.openFeedbackModal()
+      onClick: () => f.openFeedbackModal()
     },
     {
       text: "Configure Fields",
       variant: "primary",
-      onClick: () => args.navigate("/settings/card-fields")
+      onClick: () => _.navigate("/settings/card-fields")
     },
     {
       text: currentMode === "dark" ? "🌙 Dark" : "☀️ Light",
       variant: "primary",
-      onClick: () => args.toggleTheme?.()
+      onClick: () => _.toggleTheme?.()
     },
     {
       text: "Sign Out",
       variant: "danger",
-      onClick: () => args.navigate("/auth/logout")
+      onClick: () => _.navigate("/auth/logout")
     }
   ]
 };
@@ -453,7 +453,7 @@ return {
         componentName: Button
         props:
           '''
-const buttonData = args.contextData.button;
+const buttonData = c.button;
 
 return {
   text: buttonData.text,
@@ -492,7 +492,7 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 1rem 0;
 }`;
 '''
@@ -525,8 +525,8 @@ return `._id {
   display: block;
   font-size: 0.875rem;
   font-weight: 500;
-  color: ${args.theme.var.color.text_light_500};
-  margin-bottom: ${args.theme.var.spacing.sm};
+  color: ${t.var.color.text_light_500};
+  margin-bottom: ${t.var.spacing.sm};
 }`;
 '''
         displayOrder: 1
@@ -549,8 +549,8 @@ return {
         componentName: TomSelect
         props:
           '''
-const ownerships = args.fns.ownerships?.() || [];
-const selectedOwnership = args.fns.selectedOwnership?.();
+const ownerships = f.ownerships?.() || [];
+const selectedOwnership = f.selectedOwnership?.();
 const selectedOwnershipId = selectedOwnership?.P?.key;
 
 // Transform ownerships into options format for TomSelect
@@ -576,11 +576,11 @@ return {
     if (ownership) {
       // Check if account is disconnected
       if (!ownership._isConnected) {
-        args.showWarningToast("This account is disconnected. Please reconnect it from Account Settings.");
+        _.showWarningToast("This account is disconnected. Please reconnect it from Account Settings.");
         return;
       }
 
-      await args.fns.selectOwnership?.(ownership);
+      await f.selectOwnership?.(ownership);
       // Reload page to refresh all data with new ownership
       window.location.reload();
     }
@@ -596,21 +596,21 @@ return {
         css:
           '''
 return `._id {
-  margin-top: ${args.theme.var.spacing.sm};
-  padding: ${args.theme.var.spacing.md};
-  background: ${args.theme.var.color.info_light_100};
-  border: 1px solid ${args.theme.var.color.info};
+  margin-top: ${t.var.spacing.sm};
+  padding: ${t.var.spacing.md};
+  background: ${t.var.color.info_light_100};
+  border: 1px solid ${t.var.color.info};
   border-radius: 0.5rem;
   display: flex;
   align-items: flex-start;
-  gap: ${args.theme.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
 }`;
 '''
         displayOrder: 3
         componentName: Html
         props:
           '''
-const ownerships = args.fns.ownerships?.() || [];
+const ownerships = f.ownerships?.() || [];
 const hasAccounts = ownerships.length > 0;
 
 return {
@@ -627,7 +627,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.info_light_100_text};
+  color: ${t.var.color.info_light_100_text};
   flex-shrink: 0;
   margin-top: 2px;
 }`;
@@ -654,7 +654,7 @@ return {
 return `._id {
   margin: 0;
   font-size: 0.875rem;
-  color: ${args.theme.var.color.info_light_100_text};
+  color: ${t.var.color.info_light_100_text};
   line-height: 1.5;
   flex: 1;
 }`;
@@ -691,7 +691,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.info_light_100_text};
+  color: ${t.var.color.info_light_100_text};
   text-decoration: underline;
   cursor: pointer;
   font-weight: 500;
@@ -711,7 +711,7 @@ return {
   href: "/accounts",
   onClick: (e) => {
     e.preventDefault();
-    args.navigate('/accounts');
+    _.navigate('/accounts');
   }
 };
 '''
@@ -725,8 +725,8 @@ return {
           '''
 return `._id {
   height: 1px;
-  background: ${args.theme.var.color.border};
-  margin: ${args.theme.var.spacing.lg} 0;
+  background: ${t.var.color.border};
+  margin: ${t.var.spacing.lg} 0;
 }`;
 '''
         displayOrder: 4
@@ -747,8 +747,8 @@ return {
           '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
-  margin: 0 0 ${args.theme.var.spacing.md} 0;
+  color: ${t.var.color.text_light_500};
+  margin: 0 0 ${t.var.spacing.md} 0;
 }`;
 '''
         displayOrder: 5
@@ -773,7 +773,7 @@ return {
 return {
   text: "Manage YouTube Accounts",
   variant: "primary",
-  onClick: () => args.navigate("/accounts")
+  onClick: () => _.navigate("/accounts")
 };
 '''
       }
@@ -785,8 +785,8 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.error_light_50};
-  border: 1px solid ${args.theme.var.color.error_light_300};
+  background: ${t.var.color.error_light_50};
+  border: 1px solid ${t.var.color.error_light_300};
   border-radius: 0.75rem;
   padding: 2rem;
   margin-bottom: 2rem;
@@ -811,7 +811,7 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.error_light_50_text};
+  color: ${t.var.color.error_light_50_text};
   margin: 0 0 1rem 0;
   display: flex;
   align-items: center;
@@ -853,7 +853,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.error_light_50_text};
+  color: ${t.var.color.error_light_50_text};
   margin: 0 0 1.5rem 0;
   line-height: 1.5;
 }`;
@@ -881,9 +881,9 @@ return {
   text: "Clear All Data",
   variant: "danger",
   onClick: async () => {
-    const rbConfirm = args.contextData?.confirmContext?.rbConfirm;
+    const rbConfirm = c?.confirmContext?.rbConfirm;
     if (!rbConfirm) {
-      args.fns.showMessage('error', "Confirmation dialog not available");
+      f.showMessage('error', "Confirmation dialog not available");
       return;
     }
 
@@ -897,16 +897,16 @@ return {
 
     if (confirmed) {
       try {
-        const result = await args.fns.executeYTOFunction("clearAllUserData", {});
+        const result = await f.executeYTOFunction("clearAllUserData", {});
 
         if (result?.result?.success) {
-          args.fns.showMessage('success', result.result.message || "All data cleared successfully");
+          f.showMessage('success', result.result.message || "All data cleared successfully");
         } else {
-          args.fns.showMessage('error', result?.result?.message || result?.error || "Failed to clear data");
+          f.showMessage('error', result?.result?.message || result?.error || "Failed to clear data");
         }
       } catch (error) {
         console.error("Error clearing data:", error);
-        args.fns.showMessage('error', "An error occurred while clearing data");
+        f.showMessage('error', "An error occurred while clearing data");
       }
     }
   }
@@ -922,7 +922,7 @@ return {
           '''
 return `._id {
   height: 1px;
-  background: ${args.theme.var.color.error_light_300};
+  background: ${t.var.color.error_light_300};
   margin: 1.5rem 0;
 }`;
 '''
@@ -943,7 +943,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.error_light_50_text};
+  color: ${t.var.color.error_light_50_text};
   margin: 0 0 1.5rem 0;
   line-height: 1.5;
   font-weight: 600;
@@ -972,9 +972,9 @@ return {
   text: "Delete Account",
   variant: "danger",
   onClick: async () => {
-    const rbConfirm = args.contextData?.confirmContext?.rbConfirm;
+    const rbConfirm = c?.confirmContext?.rbConfirm;
     if (!rbConfirm) {
-      args.fns.showMessage('error', "Confirmation dialog not available");
+      f.showMessage('error', "Confirmation dialog not available");
       return;
     }
 
@@ -998,21 +998,21 @@ return {
 
       if (doubleConfirmed) {
         try {
-          const result = await args.fns.executeYTOFunction("deleteAccount", {});
+          const result = await f.executeYTOFunction("deleteAccount", {});
 
           if (result?.result?.success) {
-            args.fns.showMessage('success', result.result.message || "Account deleted successfully");
+            f.showMessage('success', result.result.message || "Account deleted successfully");
 
             // Logout and redirect to home after 2 seconds
             setTimeout(() => {
-              args.navigate("/auth/logout");
+              _.navigate("/auth/logout");
             }, 2000);
           } else {
-            args.fns.showMessage('error', result?.result?.message || result?.error || "Failed to delete account");
+            f.showMessage('error', result?.result?.message || result?.error || "Failed to delete account");
           }
         } catch (error) {
           console.error("Error deleting account:", error);
-          args.fns.showMessage('error', "An error occurred while deleting account");
+          f.showMessage('error', "An error occurred while deleting account");
         }
       }
     }

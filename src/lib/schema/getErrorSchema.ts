@@ -8,9 +8,9 @@ export function getErrorSchema(key: string, customCss?: string) {
       "return `._id {color:red; grid-column:span 2; margin-top:-22px;}`;",
     componentName: "Html",
     key: key,
-    props: (args: FunctionArgumentType) => ({
-      hide: !args.error(),
-      text: args.error(),
+    props: (_: FunctionArgumentType) => ({
+      hide: !_.error(),
+      text: _.error(),
     }),
   };
 }

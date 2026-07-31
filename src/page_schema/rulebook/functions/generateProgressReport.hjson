@@ -9,7 +9,7 @@
         body: '''
 try {
   // Extract input parameters from the request
-  const { reportType, startDate, endDate, categoryIds, ruleIds } = args.contextData;
+  const { reportType, startDate, endDate, categoryIds, ruleIds } = c;
 
   // Validate required fields
   if (!reportType) {
@@ -17,7 +17,7 @@ try {
   }
 
   // Get current authenticated user from session
-  const user = await args.getUserFromSession();
+  const user = await _.getUserFromSession();
   if (!user) {
     throw new Error("User session not found. Please log in and try again.");
   }
@@ -107,7 +107,7 @@ try {
       COUNT(DISTINCT rc.id) as uniqueCategories
   `;
 
-  const overallResult = await args.session.run(overallStatsQuery, queryParams);
+  const overallResult = await _.session.run(overallStatsQuery, queryParams);
   const overallStats = overallResult.records[0];
 
   // STEP 2: Get category breakdown
@@ -130,7 +130,7 @@ try {
     ORDER BY avgCompletion DESC
   `;
 
-  const categoryResult = await args.session.run(categoryBreakdownQuery, queryParams);
+  const categoryResult = await _.session.run(categoryBreakdownQuery, queryParams);
 
   // STEP 3: Get rule performance
   const rulePerformanceQuery = `
@@ -153,7 +153,7 @@ try {
     LIMIT 20
   `;
 
-  const rulePerformanceResult = await args.session.run(rulePerformanceQuery, queryParams);
+  const rulePerformanceResult = await _.session.run(rulePerformanceQuery, queryParams);
 
   // STEP 4: Get daily breakdown for trend analysis
   const dailyBreakdownQuery = `
@@ -171,7 +171,7 @@ try {
     ORDER BY trackingDate
   `;
 
-  const dailyBreakdownResult = await args.session.run(dailyBreakdownQuery, queryParams);
+  const dailyBreakdownResult = await _.session.run(dailyBreakdownQuery, queryParams);
 
   // STEP 5: Get current streaks
   const streakQuery = `
@@ -189,14 +189,14 @@ try {
     LIMIT 10
   `;
 
-  const streakResult = await args.session.run(streakQuery, queryParams);
+  const streakResult = await _.session.run(streakQuery, queryParams);
 
   // Process results
-  const totalTracking = args.neo4jConvert.js(overallStats.get('totalTracking')) || 0;
-  const completedCount = args.neo4jConvert.js(overallStats.get('completedCount')) || 0;
-  const partialCount = args.neo4jConvert.js(overallStats.get('partialCount')) || 0;
-  const missedCount = args.neo4jConvert.js(overallStats.get('missedCount')) || 0;
-  const skippedCount = args.neo4jConvert.js(overallStats.get('skippedCount')) || 0;
+  const totalTracking = _.neo4jConvert.js(overallStats.get('totalTracking')) || 0;
+  const completedCount = _.neo4jConvert.js(overallStats.get('completedCount')) || 0;
+  const partialCount = _.neo4jConvert.js(overallStats.get('partialCount')) || 0;
+  const missedCount = _.neo4jConvert.js(overallStats.get('missedCount')) || 0;
+  const skippedCount = _.neo4jConvert.js(overallStats.get('skippedCount')) || 0;
 
   // Calculate completion rate (completed + partial * 0.7)
   const effectiveCompletions = completedCount + (partialCount * 0.7);
@@ -208,11 +208,11 @@ try {
     categoryName: record.get('categoryName'),
     categoryColor: record.get('categoryColor'),
     categoryIcon: record.get('categoryIcon'),
-    totalTracking: args.neo4jConvert.js(record.get('totalTracking')) || 0,
-    completed: args.neo4jConvert.js(record.get('completed')) || 0,
-    partial: args.neo4jConvert.js(record.get('partial')) || 0,
-    missed: args.neo4jConvert.js(record.get('missed')) || 0,
-    skipped: args.neo4jConvert.js(record.get('skipped')) || 0,
+    totalTracking: _.neo4jConvert.js(record.get('totalTracking')) || 0,
+    completed: _.neo4jConvert.js(record.get('completed')) || 0,
+    partial: _.neo4jConvert.js(record.get('partial')) || 0,
+    missed: _.neo4jConvert.js(record.get('missed')) || 0,
+    skipped: _.neo4jConvert.js(record.get('skipped')) || 0,
     avgCompletion: Math.round(record.get('avgCompletion') || 0)
   }));
 
@@ -223,20 +223,20 @@ try {
     ruleFrequency: record.get('ruleFrequency'),
     rulePriority: record.get('rulePriority'),
     categoryName: record.get('categoryName'),
-    totalTracking: args.neo4jConvert.js(record.get('totalTracking')) || 0,
-    completed: args.neo4jConvert.js(record.get('completed')) || 0,
-    partial: args.neo4jConvert.js(record.get('partial')) || 0,
-    missed: args.neo4jConvert.js(record.get('missed')) || 0,
+    totalTracking: _.neo4jConvert.js(record.get('totalTracking')) || 0,
+    completed: _.neo4jConvert.js(record.get('completed')) || 0,
+    partial: _.neo4jConvert.js(record.get('partial')) || 0,
+    missed: _.neo4jConvert.js(record.get('missed')) || 0,
     avgCompletion: Math.round(record.get('avgCompletion') || 0)
   }));
 
   // Process daily breakdown
   const dailyBreakdown = dailyBreakdownResult.records.map(record => ({
     date: record.get('trackingDate'),
-    totalTracking: args.neo4jConvert.js(record.get('totalTracking')) || 0,
-    completed: args.neo4jConvert.js(record.get('completed')) || 0,
-    partial: args.neo4jConvert.js(record.get('partial')) || 0,
-    missed: args.neo4jConvert.js(record.get('missed')) || 0,
+    totalTracking: _.neo4jConvert.js(record.get('totalTracking')) || 0,
+    completed: _.neo4jConvert.js(record.get('completed')) || 0,
+    partial: _.neo4jConvert.js(record.get('partial')) || 0,
+    missed: _.neo4jConvert.js(record.get('missed')) || 0,
     avgCompletion: Math.round(record.get('avgCompletion') || 0)
   }));
 
@@ -245,9 +245,9 @@ try {
     ruleId: record.get('ruleId'),
     ruleTitle: record.get('ruleTitle'),
     categoryName: record.get('categoryName'),
-    currentStreak: args.neo4jConvert.js(record.get('currentStreak')) || 0,
-    longestStreak: args.neo4jConvert.js(record.get('longestStreak')) || 0,
-    totalCompletions: args.neo4jConvert.js(record.get('totalCompletions')) || 0
+    currentStreak: _.neo4jConvert.js(record.get('currentStreak')) || 0,
+    longestStreak: _.neo4jConvert.js(record.get('longestStreak')) || 0,
+    totalCompletions: _.neo4jConvert.js(record.get('totalCompletions')) || 0
   }));
 
   // Generate insights
@@ -298,9 +298,9 @@ try {
         completionRate: Math.round(completionRate),
         avgMood: Math.round(overallStats.get('avgMood') || 0),
         avgDifficulty: Math.round(overallStats.get('avgDifficulty') || 0),
-        totalTimeSpent: args.neo4jConvert.js(overallStats.get('totalTimeSpent')) || 0,
-        uniqueRules: args.neo4jConvert.js(overallStats.get('uniqueRules')) || 0,
-        uniqueCategories: args.neo4jConvert.js(overallStats.get('uniqueCategories')) || 0
+        totalTimeSpent: _.neo4jConvert.js(overallStats.get('totalTimeSpent')) || 0,
+        uniqueRules: _.neo4jConvert.js(overallStats.get('uniqueRules')) || 0,
+        uniqueCategories: _.neo4jConvert.js(overallStats.get('uniqueCategories')) || 0
       },
       categoryBreakdown,
       rulePerformance,

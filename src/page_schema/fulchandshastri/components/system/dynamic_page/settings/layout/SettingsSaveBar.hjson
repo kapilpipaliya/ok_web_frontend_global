@@ -6,39 +6,39 @@
       P: {
         fns:
           '''
-const getSaveStrategy = () => args.contextData.props?.saveStrategy || args.fns.getSaveStrategy?.() || {};
+const getSaveStrategy = () => c.props?.saveStrategy || f.getSaveStrategy?.() || {};
 
-const [hasDirty, setHasDirty] = args.createSignal(false);
-const [isSaving, setIsSaving] = args.createSignal(false);
+const [hasDirty, setHasDirty] = _.createSignal(false);
+const [isSaving, setIsSaving] = _.createSignal(false);
 
-args.createEffect(() => {
-  const pageStateVertexId = args.fns.pageStateVertexId;
+_.createEffect(() => {
+  const pageStateVertexId = f.pageStateVertexId;
   if (!pageStateVertexId) {
     setHasDirty(false);
     return;
   }
-  const dirtyIds = args.graph.vertexes[pageStateVertexId]?.P?.settingsDirtySectionIds;
+  const dirtyIds = g.vertexes[pageStateVertexId]?.P?.settingsDirtySectionIds;
   setHasDirty(Array.isArray(dirtyIds) && dirtyIds.length > 0);
 });
 
 const hasDirtySections = () => hasDirty();
 
 const getDirtySectionIds = () => {
-  const pageStateVertexId = args.fns.pageStateVertexId;
+  const pageStateVertexId = f.pageStateVertexId;
   if (!pageStateVertexId) return [];
-  const dirtyIds = args.graph.vertexes[pageStateVertexId]?.P?.settingsDirtySectionIds;
+  const dirtyIds = g.vertexes[pageStateVertexId]?.P?.settingsDirtySectionIds;
   return Array.isArray(dirtyIds) ? dirtyIds : [];
 };
 
 const handleDiscard = async () => {
   if (!hasDirtySections()) return;
-  const onDiscard = args.contextData.props?.onDiscard || args.fns.handleDiscardChanges;
+  const onDiscard = c.props?.onDiscard || f.handleDiscardChanges;
   if (typeof onDiscard === "function") await onDiscard();
 };
 
 const handleSave = async () => {
   if (!hasDirtySections()) return;
-  const onSave = args.contextData.props?.onSave || args.fns.handleSaveAllDirtySections;
+  const onSave = c.props?.onSave || f.handleSaveAllDirtySections;
   if (typeof onSave !== "function") return;
   setIsSaving(true);
   try {
@@ -65,7 +65,7 @@ return {
       L: Attr
       P: {
         css:
-          '''const isVisible = args.fns.hasDirtySections();
+          '''const isVisible = f.hasDirtySections();
 return `._id {
   position: sticky;
   bottom: 0;
@@ -75,9 +75,9 @@ return `._id {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: ${args.theme.var.spacing.md} ${args.theme.var.spacing.lg};
-  background: ${args.theme.var.color.background};
-  border-top: 1px solid ${args.theme.var.color.border};
+  padding: ${t.var.spacing.md} ${t.var.spacing.lg};
+  background: ${t.var.color.background};
+  border-top: 1px solid ${t.var.color.border};
   box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
   transform: translateY(${isVisible ? "0" : "calc(100% + 1rem)"});
   opacity: ${isVisible ? "1" : "0"};
@@ -87,7 +87,7 @@ return `._id {
         displayOrder: 1
         componentName: Html
         props:
-          '''const saveStrategy = args.fns.getSaveStrategy();
+          '''const saveStrategy = f.getSaveStrategy();
 return {
   as: "div",
   hide: saveStrategy?.showSaveBar === false
@@ -101,14 +101,14 @@ return {
         css:
           '''return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   font-weight: 500;
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const dirtyCount = args.fns.getDirtySectionIds().length;
-const hasDirty = args.fns.hasDirtySections();
+          '''const dirtyCount = f.getDirtySectionIds().length;
+const hasDirty = f.hasDirtySections();
 return {
   as: "span",
   text: hasDirty
@@ -125,7 +125,7 @@ return {
           '''return `._id {
   display: flex;
   align-items: center;
-  gap: ${args.theme.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
 }`;'''
         displayOrder: 2
         componentName: Html
@@ -145,8 +145,8 @@ return {
           '''return {
   variant: "secondary",
   text: "Discard",
-  onClick: args.fns.handleDiscard,
-  disabled: !args.fns.hasDirtySections() || args.fns.isSaving()
+  onClick: f.handleDiscard,
+  disabled: !f.hasDirtySections() || f.isSaving()
 };'''
       }
     }
@@ -159,9 +159,9 @@ return {
         props:
           '''return {
   variant: "primary",
-  text: args.fns.isSaving() ? "Saving..." : "Save",
-  onClick: args.fns.handleSave,
-  disabled: !args.fns.hasDirtySections() || args.fns.isSaving()
+  text: f.isSaving() ? "Saving..." : "Save",
+  onClick: f.handleSave,
+  disabled: !f.hasDirtySections() || f.isSaving()
 };'''
       }
     }

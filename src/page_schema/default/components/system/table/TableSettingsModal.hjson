@@ -15,8 +15,8 @@
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const isOpen = args.contextData.props?.isOpen === true;
-const onClose = args.contextData.props?.onClose;
+const isOpen = c.props?.isOpen === true;
+const onClose = c.props?.onClose;
 
 return {
   as: "div",
@@ -68,7 +68,7 @@ return { as: "div" };
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
   border-radius: 0.75rem;
   width: min(1200px, 96vw);
   height: min(90vh, 900px);
@@ -128,10 +128,10 @@ return `._id {
         displayOrder: 1,
         componentName: "TableSchemaEditorShell",
         props: '''
-const tableKey = args.contextData.props?.tableKey;
-const onClose = args.contextData.props?.onClose;
-const onSaved = args.contextData.props?.onSaved;
-const isOpen = args.contextData.props?.isOpen === true;
+const tableKey = c.props?.tableKey;
+const onClose = c.props?.onClose;
+const onSaved = c.props?.onSaved;
+const isOpen = c.props?.isOpen === true;
 
 return {
   tableKey,

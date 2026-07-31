@@ -15,16 +15,16 @@ export function ChatResponse(props: ChatResponseProps) {
       css={[
         `return \`._id {
   padding: 16px;
-  border: 1px solid \${args.theme.var.color.border};
+  border: 1px solid \${t.var.color.border};
   border-radius: 10px;
-  background-color: \${args.theme.var.color.background_light_100};
+  background-color: \${t.var.color.background_light_100};
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
   margin-top: 8px;
   transition: all 0.2s ease;
   width: 100%;
   
   &:hover {
-    border-color: \${args.theme.var.color.primary};
+    border-color: \${t.var.color.primary};
     box-shadow: 0 4px 12px rgba(59, 130, 246, 0.08);
   }
 }\`;`,

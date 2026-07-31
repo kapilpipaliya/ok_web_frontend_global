@@ -310,7 +310,7 @@ export function ForgotPasswordForm() {
           {
             as: "p",
             css: `return \`._id {
-  color: \${args.theme.var.color.text_light_400};
+  color: \${t.var.color.text_light_400};
   text-align: center;
   margin-top: 8px;
   margin-bottom: 16px;
@@ -541,10 +541,10 @@ export function ForgotPasswordForm() {
               let trap = null;
 
               const initializeFocusTrap = () => {
-                const element = args.ref();
+                const element = _.ref();
                 if (!element) return;
 
-                trap = args.focusTrap.createFocusTrap(element, {
+                trap = _.focusTrap.createFocusTrap(element, {
                   initialFocus: () => document.getElementsByTagName("input")[0],
                   fallbackFocus: () => element,
                   escapeDeactivates: false,

@@ -9,10 +9,10 @@
         body: '''
 try {
   // Extract input parameters from the request
-  const { ruleId, includeCompleted } = args.contextData || {};
+  const { ruleId, includeCompleted } = c || {};
 
   // Get current authenticated user from session
-  const user = await args.getUserFromSession();
+  const user = await _.getUserFromSession();
   if (!user) {
     throw new Error("User session not found. Please log in and try again.");
   }
@@ -45,7 +45,7 @@ try {
     `;
   }
 
-  const goalsResult = await args.session.run(goalsQuery, queryParams);
+  const goalsResult = await _.session.run(goalsQuery, queryParams);
 
   // Format the results
   const goals = goalsResult.records.map(record => {
@@ -54,9 +54,9 @@ try {
     const categoryNode = record.get('rc');
 
     // Convert Neo4j nodes to proper Vertex format
-    const goal = args.convertNodeToJson(goalNode);
-    const rule = ruleNode ? args.convertNodeToJson(ruleNode) : null;
-    const category = categoryNode ? args.convertNodeToJson(categoryNode) : null;
+    const goal = _.convertNodeToJson(goalNode);
+    const rule = ruleNode ? _.convertNodeToJson(ruleNode) : null;
+    const category = categoryNode ? _.convertNodeToJson(categoryNode) : null;
 
     // Calculate progress percentage
     const currentValue = goal.P.currentValue || 0;

@@ -48,7 +48,7 @@ export function SubdomainDeleteDialog(props: SubdomainDeleteDialogProps) {
         <As
           as="span"
           css={`return \`._id {
-  color: \${args.theme.var.color.error};
+  color: \${t.var.color.error};
   font-weight: 700;
 }\`;`}
         >
@@ -125,7 +125,7 @@ export function SubdomainDeleteDialog(props: SubdomainDeleteDialogProps) {
               css={`return \`._id {
   margin: 0 0 1rem 0;
   font-weight: 600;
-  color: \${args.theme.var.color.error};
+  color: \${t.var.color.error};
 }\`;`}
             >
               Please double confirm: all data will be lost permanently.
@@ -208,7 +208,7 @@ export function SubdomainDeleteDialog(props: SubdomainDeleteDialogProps) {
             css={`return \`._id {
   margin: 0 0 1rem 0;
   font-weight: 600;
-  color: \${args.theme.var.color.error};
+  color: \${t.var.color.error};
 }\`;`}
           >
             This will permanently destroy <strong>{subdomainKey()}</strong> and
@@ -244,9 +244,9 @@ export function SubdomainDeleteDialog(props: SubdomainDeleteDialogProps) {
   margin: 0;
   padding: 0.75rem 1rem;
   border-radius: 0.375rem;
-  background: \${args.theme.var.color.error_light_900};
-  border: 1px solid \${args.theme.var.color.error};
-  color: \${args.theme.var.color.error_dark_300};
+  background: \${t.var.color.error_light_900};
+  border: 1px solid \${t.var.color.error};
+  color: \${t.var.color.error_dark_300};
   font-weight: 500;
   line-height: 1.5;
 }\`;`}

@@ -10,7 +10,7 @@
 // Fetch unique worker queue names from WorkerLog nodes
 
 try {
-  const session = args.session;
+  const session = _.session;
 
   // Get distinct worker names from logs
   const result = await session.run(`

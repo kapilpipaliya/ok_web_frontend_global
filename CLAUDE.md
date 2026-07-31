@@ -135,7 +135,7 @@ When working with Neo4j data in functions and frontend components:
 4. **In Components**:
    ```javascript
    // Component receives vertex format data
-   const channelData = args.contextData.props?.channel;
+   const channelData = c.props?.channel;
    const channel = channelData?.channel;        // The vertex
    const settings = channelData?.channelSetting; // Related vertex
 
@@ -332,18 +332,18 @@ Server functions allow you to execute server-side code and return results to the
         description: "Fetches user data from the database",
         body: '''
 // This function runs on the server
-// It has access to args object with:
-// - args.contextData: Request parameters
-// - args.session: Current neo4j Database session
-// - args.graph: Graph interface
+// It has access to _ object with:
+// - c: Request parameters
+// - _.session: Current neo4j Database session
+// - _.graph: Graph interface
 
-const userId = args.contextData.userId;
+const userId = c.userId;
 if (!userId) {
   throw new Error("User ID is required");
 }
 
 // Example: Fetch user from database
-const user = await args.graph.getVertex(userId);
+const user = await g.getVertex(userId);
 
 // Return data to client
 return {
@@ -369,16 +369,17 @@ return {
 - `body`: Function body that will be executed server-side
 
 **Available in Function Body:**
-The function body has access to an `args` object containing:
-- `args.contextData`: Request parameters sent from the client
-- `args.session`: Current user session
-- `args.graph`: Graph interface for database operations
-- `args.user`: Current authenticated user (if available)
+The function body has access to
+- `c`: Request parameters sent from the client
+- `g`: Graph interface for database operations
+The function body has access to an `_` object containing:
+- `_.session`: Current user session
+- `_.user`: Current authenticated user (if available)
 
 **Calling Server Functions from Components:**
 ```javascript
 // In component props or fns:
-const result = await args.executeServerFunction('getUserData', {
+const result = await _.executeServerFunction('getUserData', {
   userId: 'user123'
 });
 
@@ -400,7 +401,7 @@ When creating component and page schemas, follow the guidelines in `/src/routes/
 2. **CSS Guidelines:**
    - Use kebab-case CSS properties (e.g., `border-radius` not `borderRadius`)
    - Use `._id` selector for component-scoped styles
-   - Use theme variables: `${args.theme.var.color.primary}`
+   - Use theme variables: `${t.var.color.primary}`
    - Use rem units for consistent scaling
    - Include responsive breakpoints
 
@@ -424,13 +425,13 @@ return {
         css: '''
 return `._id {
   padding: 0.5rem 1rem;
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
   border-radius: 0.375rem;
   transition: all 0.2s ease;
   
   &:hover {
-    background: ${args.theme.var.color.primary_dark_200};
+    background: ${t.var.color.primary_dark_200};
   }
   
   /* Responsive design */
@@ -496,7 +497,7 @@ The Page Builder uses a graph-based structure with vertices and edges to represe
    - `slotName`: string - WHERE this Slot component should be placed (which slot it belongs to)
 
 **Function Arguments Available:**
-The `fns`, `props`, and `css` functions have access to `args` object containing:
+The `fns`, `props`, and `css` functions have access to `_` object containing:
 - `theme`: ThemeContext for styling
 - `data`: Current vertex data
 - `contextData`: Context data from parent components
@@ -512,7 +513,7 @@ Custom components can have variants defined through:
 - `Component` vertex with `key` property
 - `ComponentVariant` vertices with `key`, `type`, `defValue` properties
 - `ComponentVariantOption` vertices for string type options
-- Access variant values via `args.contextData.props["variantKey"]`
+- Access variant values via `c.props["variantKey"]`
 
 **Example Component with Variants:**
 ```hjson
@@ -559,14 +560,14 @@ Custom components can have variants defined through:
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const variant = args.contextData.props?.variant || "primary";
+const variant = c.props?.variant || "primary";
 return {
   as: "button",
-  text: args.contextData.props?.text || "Button"
+  text: c.props?.text || "Button"
 };
 ''',
         css: '''
-const variant = args.contextData.props?.variant || "primary";
+const variant = c.props?.variant || "primary";
 return `._id {
   padding: 0.5rem 1rem;
   border-radius: 0.375rem;
@@ -575,20 +576,20 @@ return `._id {
   transition: all 0.2s ease;
   
   ${variant === "primary" ? `
-    background: ${args.theme.var.color.primary};
-    color: ${args.theme.var.color.primary_text};
+    background: ${t.var.color.primary};
+    color: ${t.var.color.primary_text};
     border: 1px solid transparent;
     
     &:hover {
-      background: ${args.theme.var.color.primary_dark_200};
+      background: ${t.var.color.primary_dark_200};
     }
   ` : `
-    background: ${args.theme.var.color.background_light_200};
-    color: ${args.theme.var.color.text};
-    border: 1px solid ${args.theme.var.color.background_light_400};
+    background: ${t.var.color.background_light_200};
+    color: ${t.var.color.text};
+    border: 1px solid ${t.var.color.background_light_400};
     
     &:hover {
-      background: ${args.theme.var.color.background_light_300};
+      background: ${t.var.color.background_light_300};
     }
   `}
 }`;
@@ -617,11 +618,11 @@ The project uses a custom CSS-in-JS system that:
 ```typescript
 // Simple styles - return string with ._id
 const complexStyle = () => `._id {
-  background: \${args.theme.var.color.background};
+  background: \${t.var.color.background};
   transition: all 0.2s ease;
   
   &:hover {
-    background: \${args.theme.var.color.background_light_200};
+    background: \${t.var.color.background_light_200};
   }
   
   &::after {
@@ -667,20 +668,20 @@ primary: {
 }
 
 // Dynamic shade access
-args.theme.var.color.primary_light_100       // Light shade (close to base)
-args.theme.var.color.primary_light_900       // Light shade (close to white)
-args.theme.var.color.primary_dark_100       // Dark shade (close to base)
-args.theme.var.color.primary_dark_900       // Dark shade (close to black)
+t.var.color.primary_light_100       // Light shade (close to base)
+t.var.color.primary_light_900       // Light shade (close to white)
+t.var.color.primary_dark_100       // Dark shade (close to base)
+t.var.color.primary_dark_900       // Dark shade (close to black)
 
 // Automatic shade swapping in dark mode
 // When dark mode is active, _l shades behave like _d shades and vice versa
-args.theme.var.color.primary_light_100       // In light mode: light shade, In dark mode: dark shade
+t.var.color.primary_light_100       // In light mode: light shade, In dark mode: dark shade
 
 // Text color suffix (_text)
-args.theme.var.color.primary_text       // Auto-calculated readable text color for primary background
-args.theme.var.color.success_text       // Auto-calculated readable text color for success background
-args.theme.var.color.error_text         // Auto-calculated readable text color for error background
-args.theme.var.color.primary_light_200_text  // Auto-calculated readable text color for primary_light_200 shade
+t.var.color.primary_text       // Auto-calculated readable text color for primary background
+t.var.color.success_text       // Auto-calculated readable text color for success background
+t.var.color.error_text         // Auto-calculated readable text color for error background
+t.var.color.primary_light_200_text  // Auto-calculated readable text color for primary_light_200 shade
 ```
 
 **Text Color Suffix (`_text`):**
@@ -785,7 +786,7 @@ return {
 - `data`: Function body returning the theme configuration object
 
 **Custom Theme Variables:**
-You can add custom variables to your theme beyond the standard color system. These will be available via `args.theme` in your component schemas:
+You can add custom variables to your theme beyond the standard color system. These will be available via `t` in your component schemas:
 
 ```hjson
 {
@@ -835,8 +836,8 @@ Then in your components:
 ```javascript
 css: '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
-  border-radius: ${args.theme.var.borderRadius.md};
+  padding: ${t.var.spacing.md};
+  border-radius: ${t.var.borderRadius.md};
   transition: all 300ms ease;
 }`;
 '''

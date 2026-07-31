@@ -160,7 +160,7 @@ export function EmailSetting() {
           },
           getErrorSchema(
             "active",
-            "return `._id {color: ${args.theme.var.color.error}; margin-top: -20px;}`;",
+            "return `._id {color: ${t.var.color.error}; margin-top: -20px;}`;",
           ),
           {
             as: "div",
@@ -190,7 +190,7 @@ export function EmailSetting() {
           },
           getErrorSchema(
             "smtpHost",
-            "return `._id {color: ${args.theme.var.color.error}; margin-top: -20px;}`;",
+            "return `._id {color: ${t.var.color.error}; margin-top: -20px;}`;",
           ),
           {
             as: "div",
@@ -221,7 +221,7 @@ export function EmailSetting() {
           },
           getErrorSchema(
             "smtpPort",
-            "return `._id {color: ${args.theme.var.color.error}; margin-top: -20px;}`;",
+            "return `._id {color: ${t.var.color.error}; margin-top: -20px;}`;",
           ),
           {
             as: "div",
@@ -251,7 +251,7 @@ export function EmailSetting() {
           },
           getErrorSchema(
             "smtpUsername",
-            "return `._id {color: ${args.theme.var.color.error}; margin-top: -20px;}`;",
+            "return `._id {color: ${t.var.color.error}; margin-top: -20px;}`;",
           ),
           {
             as: "div",
@@ -282,7 +282,7 @@ export function EmailSetting() {
           },
           getErrorSchema(
             "smtpPassword",
-            "return `._id {color: ${args.theme.var.color.error}; margin-top: -20px;}`;",
+            "return `._id {color: ${t.var.color.error}; margin-top: -20px;}`;",
           ),
           {
             as: "div",
@@ -313,7 +313,7 @@ export function EmailSetting() {
           },
           getErrorSchema(
             "sendGridApiKey",
-            "return `._id {color: ${args.theme.var.color.error}; margin-top: -20px;}`;",
+            "return `._id {color: ${t.var.color.error}; margin-top: -20px;}`;",
           ),
           {
             as: "div",
@@ -344,7 +344,7 @@ export function EmailSetting() {
           },
           getErrorSchema(
             "resendApiKey",
-            "return `._id {color: ${args.theme.var.color.error}; margin-top: -20px;}`;",
+            "return `._id {color: ${t.var.color.error}; margin-top: -20px;}`;",
           ),
           {
             as: "div",
@@ -380,7 +380,7 @@ export function EmailSetting() {
           },
           getErrorSchema(
             "fromEmail",
-            "return `._id {color: ${args.theme.var.color.error}; margin-top: -20px;}`;",
+            "return `._id {color: ${t.var.color.error}; margin-top: -20px;}`;",
           ),
           {
             as: "div",
@@ -406,7 +406,7 @@ export function EmailSetting() {
           },
           getErrorSchema(
             "secure",
-            "return `._id {color: ${args.theme.var.color.error}; margin-top: -20px;}`;",
+            "return `._id {color: ${t.var.color.error}; margin-top: -20px;}`;",
           ),
           {
             as: "div",
@@ -504,7 +504,7 @@ export function EmailSetting() {
         css: `return \`._id {
   font-size: 1.125rem;
   font-weight: 600;
-  color: \${args.theme.var.color.text};
+  color: \${t.var.color.text};
   margin-bottom: 0.5rem;
   margin-top: 2rem;
 }\`;`,
@@ -515,7 +515,7 @@ export function EmailSetting() {
         as: "p",
         css: `return \`._id {
   font-size: 0.875rem;
-  color: \${args.theme.var.color.text_dark_300};
+  color: \${t.var.color.text_dark_300};
   margin-bottom: 1.5rem;
 }\`;`,
         componentName: "Html",
@@ -552,7 +552,7 @@ export function EmailSetting() {
           },
           getErrorSchema(
             "toEmail",
-            "return `._id {color: ${args.theme.var.color.error}; margin-top: -20px;}`;",
+            "return `._id {color: ${t.var.color.error}; margin-top: -20px;}`;",
           ),
           {
             as: "div",
@@ -585,7 +585,7 @@ export function EmailSetting() {
           },
           getErrorSchema(
             "emailContent",
-            "return `._id {color: ${args.theme.var.color.error}; margin-top: -20px;}`;",
+            "return `._id {color: ${t.var.color.error}; margin-top: -20px;}`;",
           ),
           {
             as: "div",

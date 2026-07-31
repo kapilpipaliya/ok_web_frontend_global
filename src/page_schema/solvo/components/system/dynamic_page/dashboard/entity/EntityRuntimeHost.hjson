@@ -10,14 +10,14 @@
           '''
 // Entity runtime — container-agnostic (drawer, modal, page, split pane).
 const getRuntime = () => {
-  const fromProps = args.contextData.props?.dashboardRuntime;
+  const fromProps = c.props?.dashboardRuntime;
   if (typeof fromProps === "function") return fromProps();
   return null;
 };
 
 const getEntityState = () => {
   const runtime = getRuntime();
-  const fromProps = args.contextData.props?.entityState;
+  const fromProps = c.props?.entityState;
   if (fromProps && typeof fromProps === "object") return fromProps;
   return runtime?.store?.getSession?.()?.entityDrawer || { open: false };
 };
@@ -32,14 +32,14 @@ const applyServerGraphToLocalGraph = (response) => {
   const graphPayload = response?.result?.graph ?? response?.graph;
   if (!graphPayload?.vertexes) return;
   const txnId = runtime?.txnId || runtime?.store?.txnId || 0;
-  args.setGraphData(txnId, graphPayload, {});
+  _.setGraphData(txnId, graphPayload, {});
 };
 
 const executeYTO = async (functionName, contextData) => {
-  if (typeof args.fns.executeYTOFunction === "function") {
-    return args.fns.executeYTOFunction(functionName, contextData || {});
+  if (typeof f.executeYTOFunction === "function") {
+    return f.executeYTOFunction(functionName, contextData || {});
   }
-  return args.executeNamedServerFunction({ functionName, contextData: contextData || {} });
+  return s({ functionName, contextData: contextData || {} });
 };
 
 let crudSettingsText = null;
@@ -90,7 +90,7 @@ const resolveEntityVertex = () => {
   if (state.row) return state.row;
   const entityId = state.entityId;
   if (!entityId) return null;
-  return args.graph.vertexes[entityId] || null;
+  return g.vertexes[entityId] || null;
 };
 
 const getEntityProfile = () => {
@@ -158,7 +158,7 @@ const loadEntityIfNeeded = async () => {
     });
     applyServerGraphToLocalGraph(result);
     const rows = Array.isArray(result?.result?.data) ? result.result.data : [];
-    const row = rows.find((r) => String(r.id) === String(entityId)) || rows[0] || args.graph.vertexes[entityId];
+    const row = rows.find((r) => String(r.id) === String(entityId)) || rows[0] || g.vertexes[entityId];
     if (row) {
       patch("row", row);
       const profile = getEntityProfile();
@@ -233,15 +233,15 @@ return {
         key: entity_runtime_root
         props:
           '''
-const state = args.fns.getEntityState();
-const hideHeader = args.contextData.props?.hideHeader === true;
+const state = f.getEntityState();
+const hideHeader = c.props?.hideHeader === true;
 return {
   as: "div",
   hide: state.open === false && !state.entityId,
   onMount: async () => {
-    crudSettingsText = await args.fns.loadTableSettings();
+    crudSettingsText = await f.loadTableSettings();
     memoizedConfig = null;
-    await args.fns.loadEntityIfNeeded();
+    await f.loadEntityIfNeeded();
   }
 };
 '''
@@ -268,7 +268,7 @@ return `._id {
           '''
 return {
   as: "header",
-  hide: args.contextData.props?.hideHeader === true
+  hide: c.props?.hideHeader === true
 };
 '''
         css:
@@ -279,7 +279,7 @@ return `._id {
   justify-content: space-between;
   gap: 0.75rem;
   padding: 1rem 1.25rem;
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  border-bottom: 1px solid ${t.var.color.border};
 }`;
 '''
       }
@@ -292,14 +292,14 @@ return `._id {
         componentName: Html
         props:
           '''
-return { as: "div", text: args.fns.getTitle() };
+return { as: "div", text: f.getTitle() };
 '''
         css:
           '''
 return `._id {
   font-size: 1.125rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -312,7 +312,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const subtitle = args.fns.getSubtitle();
+const subtitle = f.getSubtitle();
 return { as: "p", hide: !subtitle, text: subtitle };
 '''
         css:
@@ -320,7 +320,7 @@ return { as: "p", hide: !subtitle, text: subtitle };
 return `._id {
   margin: 0.25rem 0 0;
   font-size: 0.8125rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
       }
@@ -355,7 +355,7 @@ return `._id {
         componentName: LoadingSpinner
         props:
           '''
-const state = args.fns.getEntityState();
+const state = f.getEntityState();
 return { size: "medium", color: "primary", hide: state.loading !== true };
 '''
       }
@@ -368,12 +368,12 @@ return { size: "medium", color: "primary", hide: state.loading !== true };
         componentName: Html
         props:
           '''
-const state = args.fns.getEntityState();
+const state = f.getEntityState();
 return { as: "p", hide: !state.error, text: state.error || "" };
 '''
         css:
           '''
-return `._id { color: ${args.theme.var.color.error}; font-size: 0.875rem; }`;
+return `._id { color: ${t.var.color.error}; font-size: 0.875rem; }`;
 '''
       }
     }
@@ -385,16 +385,16 @@ return `._id { color: ${args.theme.var.color.error}; font-size: 0.875rem; }`;
         componentName: FormManagement
         props:
           '''
-const state = args.fns.getEntityState();
-const vertex = args.fns.resolveEntityVertex();
-const formConfig = args.fns.getFormConfig();
-const wrapped = formConfig ? { ...formConfig, saveFunction: args.fns.getGenericSaveFunction() } : null;
+const state = f.getEntityState();
+const vertex = f.resolveEntityVertex();
+const formConfig = f.getFormConfig();
+const wrapped = formConfig ? { ...formConfig, saveFunction: f.getGenericSaveFunction() } : null;
 return {
   hide: state.loading === true || !!state.error || !vertex || !wrapped,
   formConfig: wrapped,
   initialVertex: vertex,
-  mode: args.fns.getFormMode(),
-  vertexLabel: args.fns.getCrudConfigRef(),
+  mode: f.getFormMode(),
+  vertexLabel: f.getCrudConfigRef(),
   inModal: true
 };
 '''
@@ -408,8 +408,8 @@ return {
         componentName: Html
         props:
           '''
-const state = args.fns.getEntityState();
-const profile = args.fns.getEntityProfile?.() || {};
+const state = f.getEntityState();
+const profile = f.getEntityProfile?.() || {};
 let href = profile.fullPageHref;
 if (href && state.entityId) {
   href = String(href).replace(/\{\{entityId\}\}/g, String(state.entityId));
@@ -422,8 +422,8 @@ return {
   onClick: (e) => {
     if (!href) return;
     e.preventDefault();
-    args.navigate(href);
-    args.contextData.props?.onClose?.();
+    _.navigate(href);
+    c.props?.onClose?.();
   }
 };
 '''
@@ -433,7 +433,7 @@ return `._id {
   display: inline-block;
   margin-top: 1rem;
   font-size: 0.8125rem;
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   text-decoration: none;
   cursor: pointer;
   &:hover { text-decoration: underline; }

@@ -42,7 +42,7 @@
         props:
           '''return { as: "h1", text: "Dashboard", class: "workshop-doc-h1" };'''
         css:
-          '''return `._id.workshop-doc-h1 { font-size: 1.5rem; font-weight: 700; margin: 0 0 0.75rem; color: ${args.theme.var.color.text}; }`;'''
+          '''return `._id.workshop-doc-h1 { font-size: 1.5rem; font-weight: 700; margin: 0 0 0.75rem; color: ${t.var.color.text}; }`;'''
       }
     }
     {
@@ -57,10 +57,10 @@
   href: "/workshop/docs",
   text: "Back to user guide",
   class: "workshop-doc-back",
-  onClick: (e) => { e.preventDefault(); args.navigate("/workshop/docs"); }
+  onClick: (e) => { e.preventDefault(); _.navigate("/workshop/docs"); }
 };'''
         css:
-          '''return `._id.workshop-doc-back { display: inline-block; margin-bottom: 1rem; color: ${args.theme.var.color.primary}; font-weight: 600; text-decoration: none; cursor: pointer; }`;'''
+          '''return `._id.workshop-doc-back { display: inline-block; margin-bottom: 1rem; color: ${t.var.color.primary}; font-weight: 600; text-decoration: none; cursor: pointer; }`;'''
       }
     }
     {
@@ -76,7 +76,7 @@
   text: "The Dashboard shows four KPI cards that load when you open the page. Scheduled or in-progress appointments: counts WorkshopAppointment rows in active statuses. Open repair orders: repairs not yet closed. Low stock inventory: parts at or below reorder level. Invoices not fully paid: invoices where payment is not complete. Use the sidebar to open each module for detail work."
 };'''
         css:
-          '''return `._id.workshop-doc-body { margin: 0; line-height: 1.6; color: ${args.theme.var.color.text}; }`;'''
+          '''return `._id.workshop-doc-body { margin: 0; line-height: 1.6; color: ${t.var.color.text}; }`;'''
       }
     }
   ]

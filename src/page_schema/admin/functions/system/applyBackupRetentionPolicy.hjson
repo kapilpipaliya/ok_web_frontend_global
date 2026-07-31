@@ -7,7 +7,7 @@
         key: "applyBackupRetentionPolicy",
         description: "Applies retention policy to delete old backups based on configured rules",
         body: '''
-const { jobId } = args.contextData;
+const { jobId } = c;
 
 // Get retention policy from environment variables
 const retentionHourly = parseInt(process.env.BACKUP_RETENTION_HOURLY || '24');
@@ -24,7 +24,7 @@ console.log(`[Retention] Applying backup retention policy`, {
 
 try {
   // Get list of all backups from cloud storage
-  const listResult = await args.listCloudBackups();
+  const listResult = await _.listCloudBackups();
 
   if (!listResult.success) {
     throw new Error(`Failed to list backups: ${listResult.error || 'Unknown error'}`);
@@ -97,7 +97,7 @@ try {
     // Delete the marked backups
     for (const backup of toDelete) {
       try {
-        const deleteResult = await args.deleteCloudBackup({
+        const deleteResult = await _.deleteCloudBackup({
           filename: backup.filename,
           databaseName: backup.databaseName
         });

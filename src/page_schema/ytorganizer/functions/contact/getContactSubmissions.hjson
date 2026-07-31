@@ -8,13 +8,13 @@
         body:
           '''
 // This function runs on the server
-// It has access to args object with:
-// - args.contextData: Request parameters
-// - args.session: Current neo4j Database session
-// - args.getUserFromSession: Function to get current authenticated user
+// It has access to _ object with:
+// - c: Request parameters
+// - _.session: Current neo4j Database session
+// - _.getUserFromSession: Function to get current authenticated user
 
 // Get current user
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return {
     success: false,
@@ -23,7 +23,7 @@ if (!actualUser) {
 }
 
 // Verify admin role
-const adminCheck = await args.session.run(
+const adminCheck = await _.session.run(
   `MATCH (u:User {uuid: $userId})-[:UserRole]->(r:Role {key: "Admin"})
    RETURN u`,
   { userId: actualUser.P.uuid }
@@ -43,11 +43,11 @@ if (adminCheck.records.length === 0) {
     ORDER BY c.submittedAt DESC
   `;
 
-  const result = await args.session.run(query);
+  const result = await _.session.run(query);
 
   const submissions = result.records.map(record => {
     const node = record.get('c');
-    return args.convertNodeToJson(node);
+    return _.convertNodeToJson(node);
   });
 
   return {

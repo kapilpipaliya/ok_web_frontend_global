@@ -22,7 +22,7 @@ return {
         css: '''
 return `._id {
   padding: 5rem 0;
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
   
   @media (max-width: 768px) {
     padding: 3rem 0;
@@ -90,7 +90,7 @@ return {
 return `._id {
   font-size: 2.5rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 1rem;
   
   @media (max-width: 768px) {
@@ -115,7 +115,7 @@ return {
         css: '''
 return `._id {
   font-size: 1.1rem;
-  color: ${args.theme.var.color.text_dark_300};
+  color: ${t.var.color.text_dark_300};
   max-width: 600px;
   margin: 0 auto;
 }`;
@@ -216,16 +216,16 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const plan = args.contextData.plans;
+const plan = c.plans;
 return {
   as: "div"
 };
 ''',
         css: '''
-const plan = args.contextData.plans;
+const plan = c.plans;
 return `._id {
-  background: ${args.theme.var.color.background};
-  border: 2px solid ${plan.featured ? args.theme.var.color.primary : args.theme.var.color.background_dark_200};
+  background: ${t.var.color.background};
+  border: 2px solid ${plan.featured ? t.var.color.primary : t.var.color.background_dark_200};
   border-radius: 1rem;
   padding: 2rem;
   position: relative;
@@ -234,7 +234,7 @@ return `._id {
   
   &:hover {
     transform: translateY(-5px) ${plan.featured ? 'scale(1.05)' : ''};
-    box-shadow: 0 10px 40px ${args.theme.var.color.text_light_850};
+    box-shadow: 0 10px 40px ${t.var.color.text_light_850};
   }
 }`;
 '''
@@ -247,19 +247,19 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const plan = args.contextData.plans;
+const plan = c.plans;
 return {
   as: plan.featured ? "div" : ""
 };
 ''',
         css: '''
-const plan = args.contextData.plans;
+const plan = c.plans;
 return plan.featured ? `._id {
   position: absolute;
   top: -1rem;
   right: 2rem;
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
   padding: 0.25rem 1rem;
   border-radius: 2rem;
   font-size: 0.875rem;
@@ -275,7 +275,7 @@ return plan.featured ? `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const plan = args.contextData.plans;
+const plan = c.plans;
 return plan.featured ? {
   as: "span",
   text: "Most Popular"
@@ -290,7 +290,7 @@ return plan.featured ? {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const plan = args.contextData.plans;
+const plan = c.plans;
 return {
   as: "h3",
   text: plan.name
@@ -300,7 +300,7 @@ return {
 return `._id {
   font-size: 1.5rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 1rem;
 }`;
 '''
@@ -313,7 +313,7 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const plan = args.contextData.plans;
+const plan = c.plans;
 return {
   as: "div"
 };
@@ -332,7 +332,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const plan = args.contextData.plans;
+const plan = c.plans;
 return {
   as: "span",
   text: plan.price
@@ -342,7 +342,7 @@ return {
 return `._id {
   font-size: 2.5rem;
   font-weight: 700;
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
 }`;
 '''
       }
@@ -354,7 +354,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const plan = args.contextData.plans;
+const plan = c.plans;
 return {
   as: "span",
   text: plan.period
@@ -362,7 +362,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_dark_300};
+  color: ${t.var.color.text_dark_300};
   font-size: 1rem;
 }`;
 '''
@@ -397,7 +397,7 @@ return `._id {
         contextName: "features",
         loop: true,
         props: '''
-const plan = args.contextData.plans;
+const plan = c.plans;
 return {
   data: plan.features
 };
@@ -411,7 +411,7 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const feature = args.contextData.features;
+const feature = c.features;
 return {
   as: "li"
 };
@@ -422,7 +422,7 @@ return `._id {
   align-items: center;
   gap: 0.75rem;
   padding: 0.5rem 0;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -443,7 +443,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.success};
+  color: ${t.var.color.success};
   flex-shrink: 0;
 }`;
 '''
@@ -456,7 +456,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const feature = args.contextData.features;
+const feature = c.features;
 return {
   as: "span",
   text: feature
@@ -471,7 +471,7 @@ return {
         displayOrder: 5,
         componentName: "Html",
         props: '''
-const plan = args.contextData.plans;
+const plan = c.plans;
 return {
   as: "a",
   href: "#contact",
@@ -479,7 +479,7 @@ return {
 };
 ''',
         css: '''
-const plan = args.contextData.plans;
+const plan = c.plans;
 return `._id {
   display: block;
   width: 100%;
@@ -490,20 +490,20 @@ return `._id {
   font-weight: 600;
   transition: all 0.2s ease;
   ${plan.featured ? `
-    background: ${args.theme.var.color.primary};
-    color: ${args.theme.var.color.primary_text};
+    background: ${t.var.color.primary};
+    color: ${t.var.color.primary_text};
     
     &:hover {
-      background: ${args.theme.var.color.primary_dark_200};
+      background: ${t.var.color.primary_dark_200};
     }
   ` : `
     background: transparent;
-    color: ${args.theme.var.color.primary};
-    border: 2px solid ${args.theme.var.color.primary};
+    color: ${t.var.color.primary};
+    border: 2px solid ${t.var.color.primary};
     
     &:hover {
-      background: ${args.theme.var.color.primary};
-      color: ${args.theme.var.color.primary_text};
+      background: ${t.var.color.primary};
+      color: ${t.var.color.primary_text};
     }
   `}
 }`;

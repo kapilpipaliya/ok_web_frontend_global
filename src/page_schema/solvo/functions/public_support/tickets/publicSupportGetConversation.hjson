@@ -8,7 +8,7 @@
         description: Loads a public support ticket conversation by secure token or admin ticket id.
         body:
           '''
-const { serial, token, ticketId, markAsReadFor } = args.contextData || {};
+const { serial, token, ticketId, markAsReadFor } = c || {};
 
 const normalizedSerial = serial ? String(serial).trim() : "";
 const normalizedToken = token ? String(token).trim() : "";
@@ -16,7 +16,7 @@ const normalizedTicketId = ticketId ? String(ticketId).trim() : "";
 
 let result;
 if (normalizedToken && normalizedSerial) {
-  result = await args.session.run(
+  result = await _.session.run(
     `
     MATCH (t:PublicSupportTicket {serial: $serial, ticketAccessToken: $token})
     OPTIONAL MATCH (t)-[:PublicSupportTicketMessage]->(m:PublicSupportMessage)
@@ -27,11 +27,11 @@ if (normalizedToken && normalizedSerial) {
     { serial: normalizedSerial, token: normalizedToken }
   );
 } else if (normalizedTicketId) {
-  const user = args.getUserFromSession ? await args.getUserFromSession() : null;
+  const user = _.getUserFromSession ? await _.getUserFromSession() : null;
   if (!user) {
     return { success: false, message: "Admin access is required." };
   }
-  result = await args.session.run(
+  result = await _.session.run(
     `
     MATCH (t:PublicSupportTicket)
     WHERE elementId(t) = $ticketId
@@ -50,23 +50,23 @@ if (!result.records || result.records.length === 0) {
 }
 
 const ticketNode = result.records[0].get("t");
-const ticket = ticketNode ? args.convertNodeToJson(ticketNode) : null;
+const ticket = ticketNode ? _.convertNodeToJson(ticketNode) : null;
 const messages = [];
 for (let i = 0; i < result.records.length; i++) {
   const mNode = result.records[i].get("m");
   if (!mNode) continue;
-  messages.push(args.convertNodeToJson(mNode));
+  messages.push(_.convertNodeToJson(mNode));
 }
 
 if (ticket?.id && (markAsReadFor === "customer" || markAsReadFor === "admin")) {
   try {
     if (markAsReadFor === "customer") {
-      await args.session.run(
+      await _.session.run(
         `MATCH (t:PublicSupportTicket) WHERE elementId(t) = $ticketId SET t.unreadForCustomer = 0 RETURN t`,
         { ticketId: ticket.id }
       );
     } else {
-      await args.session.run(
+      await _.session.run(
         `MATCH (t:PublicSupportTicket) WHERE elementId(t) = $ticketId SET t.unreadForAdmin = 0 RETURN t`,
         { ticketId: ticket.id }
       );

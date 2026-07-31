@@ -402,20 +402,20 @@ const createChart = async (container, data, chartType, width, height, theme) => 
 
 
 const renderChart = async () => {
-  const container = args.ref();
+  const container = _.ref();
   if (!container) return;
 
-  const chartType = args.contextData.props?.chartType || 'line';
-  const data = args.contextData.props?.data;
+  const chartType = c.props?.chartType || 'line';
+  const data = c.props?.data;
 
   if (!data) {
-    container.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: ' + args.theme.var.color.text_light_500 + ';">No data available</div>';
+    container.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: ' + t.var.color.text_light_500 + ';">No data available</div>';
     return;
   }
 
   await loadECharts();
   if (!echarts) {
-    container.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: ' + args.theme.var.color.error + ';">Failed to load ECharts library</div>';
+    container.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: ' + t.var.color.error + ';">Failed to load ECharts library</div>';
     return;
   }
 
@@ -423,7 +423,7 @@ const renderChart = async () => {
   const containerWidth = container.offsetWidth || container.clientWidth || 800;
   const containerHeight = container.offsetHeight || container.clientHeight || 400;
 
-  await createChart(container, data, chartType, containerWidth, containerHeight, args.theme);
+  await createChart(container, data, chartType, containerWidth, containerHeight, t);
 };
 
 // Add resize handler for responsive charts
@@ -444,26 +444,26 @@ return {
 return {
   as: "div",
   onMount: () => {
-    args.fns.renderChart();
+    f.renderChart();
     // Add resize listener for responsive charts
-    window.addEventListener('resize', args.fns.handleResize);
+    window.addEventListener('resize', f.handleResize);
   },
   onCleanup: () => {
     // Remove resize listener on cleanup
-    window.removeEventListener('resize', args.fns.handleResize);
+    window.removeEventListener('resize', f.handleResize);
   }
 };
 ''',
         css: '''
-const width = args.contextData.props?.width || 800;
-const height = args.contextData.props?.height || 400;
+const width = c.props?.width || 800;
+const height = c.props?.height || 400;
 
 return `._id {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: ${args.theme.var.color.background};
-  border-radius: ${args.theme.var.borderRadius.md};
+  background: ${t.var.color.background};
+  border-radius: ${t.var.borderRadius.md};
   position: relative;
   width: 100%;
   height: ${height}px;

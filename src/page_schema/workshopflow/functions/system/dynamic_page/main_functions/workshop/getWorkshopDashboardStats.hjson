@@ -8,13 +8,13 @@
         description: Returns dashboard KPI values for workshop operations.
         body:
           '''
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return { success: false, message: "User session not found", data: null };
 }
 
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
-const enableUserScoping = args.contextData?.enableUserScoping !== false;
+const user = await _.getEffectiveUser(_.session, actualUser, c);
+const enableUserScoping = c?.enableUserScoping !== false;
 
 const scopedMatch = (label) => {
   if (!enableUserScoping) return `MATCH (n:${label}) RETURN count(n) as total`;
@@ -27,7 +27,7 @@ const scopedMatch = (label) => {
 const params = enableUserScoping ? { userUuid: user.P.uuid } : {};
 
 const [appointmentsResult, openRepairsResult, lowStockResult, unpaidInvoicesResult] = await Promise.all([
-  args.session.run(
+  _.session.run(
     enableUserScoping
       ? `
         MATCH (u:User {uuid: $userUuid})-[:UserWorkshopAppointment]->(a:WorkshopAppointment)
@@ -41,7 +41,7 @@ const [appointmentsResult, openRepairsResult, lowStockResult, unpaidInvoicesResu
       `,
     params
   ),
-  args.session.run(
+  _.session.run(
     enableUserScoping
       ? `
         MATCH (u:User {uuid: $userUuid})-[:UserRepairOrder]->(r:RepairOrder)
@@ -55,7 +55,7 @@ const [appointmentsResult, openRepairsResult, lowStockResult, unpaidInvoicesResu
       `,
     params
   ),
-  args.session.run(
+  _.session.run(
     enableUserScoping
       ? `
         MATCH (u:User {uuid: $userUuid})-[:UserInventoryItem]->(i:InventoryItem)
@@ -69,7 +69,7 @@ const [appointmentsResult, openRepairsResult, lowStockResult, unpaidInvoicesResu
       `,
     params
   ),
-  args.session.run(
+  _.session.run(
     enableUserScoping
       ? `
         MATCH (u:User {uuid: $userUuid})-[:UserWorkshopInvoice]->(w:WorkshopInvoice)

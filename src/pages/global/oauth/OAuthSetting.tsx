@@ -94,7 +94,7 @@ export function OAuthSetting() {
             css: `return \`._id {
   font-size: 1.125rem;
   font-weight: 600;
-  color: \${args.theme.var.color.text};
+  color: \${t.var.color.text};
   margin-bottom: 0.5rem;
 }\`;`,
             componentName: "Html",
@@ -104,7 +104,7 @@ export function OAuthSetting() {
             as: "p",
             css: `return \`._id {
   font-size: 0.875rem;
-  color: \${args.theme.var.color.text_dark_300};
+  color: \${t.var.color.text_dark_300};
   margin-bottom: 1.5rem;
 }\`;`,
             componentName: "Html",
@@ -134,7 +134,7 @@ export function OAuthSetting() {
           },
           getErrorSchema(
             "googleEnabled",
-            "return `._id {color: ${args.theme.var.color.error}; margin-top: -20px;}`;",
+            "return `._id {color: ${t.var.color.error}; margin-top: -20px;}`;",
           ),
           {
             as: "div",
@@ -149,29 +149,29 @@ export function OAuthSetting() {
                 as: "input",
                 css: `return \`._id {
   padding: 0.5rem;
-  border: 1px solid \${args.theme.var.color.border};
+  border: 1px solid \${t.var.color.border};
   border-radius: 0.375rem;
-  background: \${args.theme.var.color.background};
-  color: \${args.theme.var.color.text};
+  background: \${t.var.color.background};
+  color: \${t.var.color.text};
   font-size: 0.875rem;
   cursor: pointer;
 
   &:hover {
-    border-color: \${args.theme.var.color.primary};
+    border-color: \${t.var.color.primary};
   }
 
   &::file-selector-button {
     padding: 0.375rem 0.75rem;
     margin-right: 0.75rem;
-    background: \${args.theme.var.color.primary};
-    color: \${args.theme.var.color.primary_text};
+    background: \${t.var.color.primary};
+    color: \${t.var.color.primary_text};
     border: none;
     border-radius: 0.25rem;
     cursor: pointer;
     font-size: 0.875rem;
 
     &:hover {
-      background: \${args.theme.var.color.primary_dark_200};
+      background: \${t.var.color.primary_dark_200};
     }
   }
 }\`;`,
@@ -230,7 +230,7 @@ export function OAuthSetting() {
                 as: "p",
                 css: `return \`._id {
   font-size: 0.75rem;
-  color: \${args.theme.var.color.text_dark_300};
+  color: \${t.var.color.text_dark_300};
   margin-top: 0.25rem;
 }\`;`,
                 componentName: "Html",
@@ -271,7 +271,7 @@ export function OAuthSetting() {
           },
           getErrorSchema(
             "googleClientId",
-            "return `._id {color: ${args.theme.var.color.error}; margin-top: -20px;}`;",
+            "return `._id {color: ${t.var.color.error}; margin-top: -20px;}`;",
           ),
           {
             as: "div",
@@ -302,7 +302,7 @@ export function OAuthSetting() {
           },
           getErrorSchema(
             "googleClientSecret",
-            "return `._id {color: ${args.theme.var.color.error}; margin-top: -20px;}`;",
+            "return `._id {color: ${t.var.color.error}; margin-top: -20px;}`;",
           ),
           {
             as: "div",

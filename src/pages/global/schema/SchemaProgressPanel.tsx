@@ -22,8 +22,8 @@ export function SchemaProgressPanel(props: SchemaProgressPanelProps) {
   margin-bottom: 1.5rem;
   padding: 1rem 1.25rem;
   border-radius: 0.5rem;
-  border: 1px solid \${args.theme.var.color.border};
-  background: \${args.theme.var.color.background_light_100};
+  border: 1px solid \${t.var.color.border};
+  background: \${t.var.color.background_light_100};
 }\`;`}
     >
       <As
@@ -55,7 +55,7 @@ export function SchemaProgressPanel(props: SchemaProgressPanelProps) {
         <Show when={props.failed > 0}>
           <As
             as="span"
-            css={"return `._id { color: ${args.theme.var.color.error}; font-weight: 600; }`;"}
+            css={"return `._id { color: ${t.var.color.error}; font-weight: 600; }`;"}
           >
             Failed: {props.failed}
           </As>
@@ -66,7 +66,7 @@ export function SchemaProgressPanel(props: SchemaProgressPanelProps) {
         css={`return \`._id {
   height: 0.5rem;
   border-radius: 9999px;
-  background: \${args.theme.var.color.background_light_300};
+  background: \${t.var.color.background_light_300};
   overflow: hidden;
 }\`;`}
       >
@@ -76,7 +76,7 @@ export function SchemaProgressPanel(props: SchemaProgressPanelProps) {
             return `return \`._id {
   height: 100%;
   width: ${pct()}%;
-  background: \${args.theme.var.color.primary};
+  background: \${t.var.color.primary};
   transition: width 0.3s ease;
 }\`;`;
           }}

@@ -144,7 +144,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                                     as: "div",
                                     css: `return \`._id {
   font-size: 12px;
-  color: \${args.theme.var.color.text};
+  color: \${t.var.color.text};
 }\`;`,
                                     componentName: "Html",
                                     props: (options: FunctionArgumentType) => ({
@@ -214,13 +214,13 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
   max-height: 300px;
   min-height: 100px;
   overflow-y: auto;
-  border: 1px solid \${args.theme.var.color.border};
+  border: 1px solid \${t.var.color.border};
   border-radius: 6px;
   padding: 12px;
-  background-color: \${args.theme.var.color.background_light_100};
-  color: \${args.theme.var.color.background_light_100_text};
+  background-color: \${t.var.color.background_light_100};
+  color: \${t.var.color.background_light_100_text};
   scrollbar-width: thin;
-  scrollbar-color: \${args.theme.var.color.border} \${args.theme.var.color.background_light_300};
+  scrollbar-color: \${t.var.color.border} \${t.var.color.background_light_300};
 }\`;`,
                 componentName: "Html",
                 class: "chat-history-container",
@@ -258,8 +258,8 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                       {
                         as: "button",
                         css: `return \`._id {
-  background-color: \${args.theme.var.color.primary};
-  color: \${args.theme.var.color.primary_text};
+  background-color: \${t.var.color.primary};
+  color: \${t.var.color.primary_text};
   padding: 8px 16px;  
   border-radius: 6px;
   border: none;
@@ -525,10 +525,10 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
   border: none;
   background-color: transparent;
   cursor: pointer;
-  color: \${args.theme.var.color.text};
+  color: \${t.var.color.text};
   font-size: 20px;
   &:hover {
-    color: \${args.theme.var.color.primary};
+    color: \${t.var.color.primary};
   }
 }\`;`,
         componentName: "Html",

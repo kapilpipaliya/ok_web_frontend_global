@@ -7,7 +7,7 @@
         description: Get processing status for a specific channel
         body:
           '''
-const { channelId, ownershipId } = args.contextData;
+const { channelId, ownershipId } = c;
 
 if (!channelId) {
   return {
@@ -17,7 +17,7 @@ if (!channelId) {
 }
 
 // Get current authenticated user from session
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return {
     success: false,
@@ -26,10 +26,10 @@ if (!actualUser) {
 }
 
 // Get effective user (handles admin impersonation)
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const user = await _.getEffectiveUser(_.session, actualUser, c);
 
 // Use helper function to fetch channel with video count
-const result = await args.executeNamedServerFunction({
+const result = await s({
   functionName: "getChannelsWithVideoCount",
   contextData: {
     userUuid: user.P.uuid,

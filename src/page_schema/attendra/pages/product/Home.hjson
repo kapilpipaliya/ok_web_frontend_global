@@ -37,11 +37,11 @@
           '''return `._id {
   max-width: 900px;
   margin: 0 auto;
-  padding: ${args.theme.var.spacing?.lg || "2rem"};
-  color: ${args.theme.var.color.text};
+  padding: ${t.var.spacing?.lg || "2rem"};
+  color: ${t.var.color.text};
 }
 @media (max-width: 768px) {
-  ._id { padding: ${args.theme.var.spacing?.md || "1rem"}; }
+  ._id { padding: ${t.var.spacing?.md || "1rem"}; }
 }`;'''
         displayOrder: 2
         componentName: Html
@@ -64,7 +64,7 @@
       L: Attr
       P: {
         css:
-          '''return `._id { margin: 0 0 1.25rem 0; color: ${args.theme.var.color.text_light_500}; font-size: 1.05rem; line-height: 1.6; }`;'''
+          '''return `._id { margin: 0 0 1.25rem 0; color: ${t.var.color.text_light_500}; font-size: 1.05rem; line-height: 1.6; }`;'''
         displayOrder: 2
         textType: markdown
         componentName: Html
@@ -96,7 +96,7 @@
       id: "8"
       L: Attr
       P: {
-        css: '''return `._id { margin: 0; color: ${args.theme.var.color.text}; line-height: 1.7; }`;'''
+        css: '''return `._id { margin: 0; color: ${t.var.color.text}; line-height: 1.7; }`;'''
         displayOrder: 2
         textType: markdown
         componentName: Html

@@ -50,7 +50,7 @@ try {
     ORDER BY f.key
   `;
 
-  const result = await args.session.run(query);
+  const result = await _.session.run(query);
 
   queueNames = result.records.map(record => record.get('key'));
 } catch (error) {
@@ -69,15 +69,15 @@ if (queueNames.length === 0) {
 }
 
 // Check if BullMQ is available
-if (!args.bullmq || !args.bullmq.Queue) {
+if (!_.bullmq || !_.bullmq.Queue) {
   return {
     success: false,
     message: 'BullMQ is not available. Please check your Redis connection and BullMQ configuration.'
   };
 }
 
-const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} }, { functionLookupSubDomain: args.subDomain });
-const { Queue } = args.bullmq;
+const helpers = await s({ functionName: 'queueHelpers', contextData: {} }, { functionLookupSubDomain: _.subDomain });
+const { Queue } = _.bullmq;
 const connection = helpers.result.data.getRedisConnection();
 
 try {

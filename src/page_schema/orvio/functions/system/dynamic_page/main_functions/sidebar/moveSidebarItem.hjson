@@ -8,7 +8,7 @@
         body:
           '''
 // Get current authenticated user from session
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return {
     success: false,
@@ -17,7 +17,7 @@ if (!actualUser) {
 }
 
 // Get effective user (handles admin impersonation)
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const user = await _.getEffectiveUser(_.session, actualUser, c);
 
 // Extract parameters
 const { 
@@ -30,7 +30,7 @@ const {
   hooks,
   label: sidebarLabel,
   tableVertexLabel
-} = args.contextData;
+} = c;
 
 const itemLabel = sidebarLabel && typeof sidebarLabel === 'string' ? sidebarLabel : 'item';
 
@@ -56,12 +56,12 @@ const isSyntheticUncategorizedSidebarId = (id) =>
   uncategorizedVertexId != null && id === uncategorizedVertexId;
 
 // Initialize deleted edges tracking in context if not exists
-if (!args.context.deletedEdges) {
-  args.context.deletedEdges = [];
+if (!_.context.deletedEdges) {
+  _.context.deletedEdges = [];
 }
 
 // Execute beforeMoveCategory hooks
-await args.executeHooks(hooks?.beforeMoveCategory, {
+await _.executeHooks(hooks?.beforeMoveCategory, {
   categoryId,
   newParentId,
   parentVertexLabel,
@@ -72,7 +72,7 @@ await args.executeHooks(hooks?.beforeMoveCategory, {
 
 try {
   // Validate: Cannot move root vertex
-  const rootCheck = await args.session.run(
+  const rootCheck = await _.session.run(
     `MATCH (v:${parentVertexLabel})
      WHERE elementId(v) = $categoryId
      RETURN v.key as key`,
@@ -132,7 +132,7 @@ try {
     descendantCheckParams = { userUuid, categoryId, newParentId };
   }
 
-  const descendantCheckResult = await args.session.run(descendantCheckQuery, descendantCheckParams);
+  const descendantCheckResult = await _.session.run(descendantCheckQuery, descendantCheckParams);
   const pathCount = descendantCheckResult.records[0]?.get('pathCount') || 0;
   
   if (pathCount > 0) {
@@ -165,7 +165,7 @@ try {
     getOldEdgeParams = { userUuid, categoryId };
   }
 
-  const getOldEdgeResult = await args.session.run(getOldEdgeQuery, getOldEdgeParams);
+  const getOldEdgeResult = await _.session.run(getOldEdgeQuery, getOldEdgeParams);
   const oldEdgeIds = getOldEdgeResult.records[0]?.get('oldEdgeIds') || [];
   const validOldEdgeIds = Array.isArray(oldEdgeIds) ? oldEdgeIds.filter(id => id !== null) : [];
   const oldParentIds = getOldEdgeResult.records[0]?.get('oldParentIds') || [];
@@ -182,10 +182,10 @@ try {
       DELETE r
       RETURN count(r) as deletedCount
     `;
-    await args.session.run(deleteOldEdgeQuery, { edgeIds: validOldEdgeIds });
+    await _.session.run(deleteOldEdgeQuery, { edgeIds: validOldEdgeIds });
     
     // Track deleted edges
-    args.context.deletedEdges.push(...validOldEdgeIds);
+    _.context.deletedEdges.push(...validOldEdgeIds);
   }
 
   // Create new parent relationship
@@ -220,7 +220,7 @@ try {
       createNewEdgeParams = { userUuid, categoryId, newParentId };
     }
 
-    const createResult = await args.session.run(createNewEdgeQuery, createNewEdgeParams);
+    const createResult = await _.session.run(createNewEdgeQuery, createNewEdgeParams);
     
     if (createResult.records.length === 0) {
       return {
@@ -230,7 +230,7 @@ try {
     }
 
     // Use processResult to populate graph structure
-    args.processResult(createResult.records, args.context, [], 'r');
+    _.processResult(createResult.records, _.context, [], 'r');
   }
 
   const result = {
@@ -243,7 +243,7 @@ try {
   };
   
   // Execute afterMoveCategory hooks
-  await args.executeHooks(hooks?.afterMoveCategory, {
+  await _.executeHooks(hooks?.afterMoveCategory, {
     categoryId,
     newParentId,
     oldParentId,

@@ -44,7 +44,7 @@ export function TablePanel(props: TablePanelProps) {
         <As
           as="h3"
           css={`return \`._id {
-            color: \${args.theme.var.color.text};
+            color: \${t.var.color.text};
             font-size: 1rem;
             font-weight: 600;
             line-height: 1.5rem;

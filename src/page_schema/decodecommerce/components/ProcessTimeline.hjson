@@ -22,7 +22,7 @@ return {
         css: '''
 return `._id {
   padding: 5rem 0;
-  background: ${args.theme.var.color.background_dark_100};
+  background: ${t.var.color.background_dark_100};
   overflow: hidden;
   
   @media (max-width: 768px) {
@@ -91,7 +91,7 @@ return {
 return `._id {
   font-size: 2.5rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 1rem;
   
   @media (max-width: 768px) {
@@ -116,7 +116,7 @@ return {
         css: '''
 return `._id {
   font-size: 1.1rem;
-  color: ${args.theme.var.color.text_dark_300};
+  color: ${t.var.color.text_dark_300};
   max-width: 600px;
   margin: 0 auto;
 }`;
@@ -156,7 +156,7 @@ return `._id {
     left: 10%;
     right: 10%;
     height: 2px;
-    background: ${args.theme.var.color.primary_light_300};
+    background: ${t.var.color.primary_light_300};
     z-index: 0;
     
     @media (max-width: 968px) {
@@ -214,7 +214,7 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const step = args.contextData.steps;
+const step = c.steps;
 return {
   as: "div"
 };
@@ -254,7 +254,7 @@ return [
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const step = args.contextData.steps;
+const step = c.steps;
 return {
   as: "div"
 };
@@ -264,8 +264,8 @@ return `._id {
   width: 80px;
   height: 80px;
   margin: 0 auto 1.5rem;
-  background: ${args.theme.var.color.background};
-  border: 3px solid ${args.theme.var.color.primary_light_300};
+  background: ${t.var.color.background};
+  border: 3px solid ${t.var.color.primary_light_300};
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -275,8 +275,8 @@ return `._id {
   
   &:hover {
     transform: scale(1.1);
-    border-color: ${args.theme.var.color.primary};
-    box-shadow: 0 10px 30px ${args.theme.var.color.primary_light_300};
+    border-color: ${t.var.color.primary};
+    box-shadow: 0 10px 30px ${t.var.color.primary_light_300};
   }
 }`;
 '''
@@ -289,7 +289,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const step = args.contextData.steps;
+const step = c.steps;
 return {
   as: "icon",
   icon: step.icon,
@@ -299,7 +299,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   transition: all 0.3s ease;
 }`;
 '''
@@ -312,7 +312,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const step = args.contextData.steps;
+const step = c.steps;
 return {
   as: "h3",
   text: step.title
@@ -322,7 +322,7 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 0.5rem;
 }`;
 '''
@@ -335,7 +335,7 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const step = args.contextData.steps;
+const step = c.steps;
 return {
   as: "p",
   text: step.duration
@@ -343,7 +343,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   font-weight: 600;
   font-size: 0.9rem;
   margin-bottom: 0.75rem;
@@ -358,7 +358,7 @@ return `._id {
         displayOrder: 4,
         componentName: "Html",
         props: '''
-const step = args.contextData.steps;
+const step = c.steps;
 return {
   as: "p",
   text: step.description
@@ -366,7 +366,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_dark_300};
+  color: ${t.var.color.text_dark_300};
   line-height: 1.6;
   font-size: 0.95rem;
 }`;

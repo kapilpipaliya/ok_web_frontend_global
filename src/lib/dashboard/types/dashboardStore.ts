@@ -61,5 +61,5 @@ export type DashboardRuntimeStore = DashboardQueryStore & {
     widgetStateIds: Record<string, string>;
     dashboard: { loading?: boolean; mode?: string };
   };
-  setUi: (key: string, ...args: unknown[]) => void;
+  setUi: (key: string, ...params: unknown[]) => void;
 };

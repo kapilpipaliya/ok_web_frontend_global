@@ -8,7 +8,7 @@
         description: Returns canonical tableKey, tableVertexLabel, and schemaKeys from Neo4j table_schema part Settings.
         body:
           '''
-const { tableKey, tableVertexLabel } = args.contextData || {};
+const { tableKey, tableVertexLabel } = c || {};
 
 const keyInput = tableKey != null && String(tableKey).trim() !== "" ? String(tableKey).trim() : null;
 const labelInput = tableVertexLabel != null && String(tableVertexLabel).trim() !== ""
@@ -57,7 +57,7 @@ const buildTableIdsFromRecords = (records, fallbackTableKey) => {
 const loadFromNeo4j = async (resolvedKey, resolvedLabel) => {
   if (resolvedKey) {
     const keyPrefix = `${resolvedKey}_`;
-    return args.session.run(
+    return _.session.run(
       `
       MATCH (s:Setting {type: 'table_schema'})
       WHERE s.part IN ['general', 'columns', 'formConfig', 'sidebar']
@@ -69,7 +69,7 @@ const loadFromNeo4j = async (resolvedKey, resolvedLabel) => {
     );
   }
 
-  return args.session.run(
+  return _.session.run(
     `
     MATCH (s:Setting {type: 'table_schema', tableVertexLabel: $tableVertexLabel})
     WHERE s.part IN ['general', 'columns', 'formConfig', 'sidebar']
@@ -85,9 +85,9 @@ let lookupLabel = labelInput;
 
 let result = await loadFromNeo4j(lookupKey, lookupLabel);
 
-if (result.records.length === 0 && args.executeNamedServerFunction) {
+if (result.records.length === 0 && s) {
   try {
-    await args.executeNamedServerFunction({
+    await s({
       functionName: "migrateDynamicPageSettings",
       contextData: { dryRun: false }
     });

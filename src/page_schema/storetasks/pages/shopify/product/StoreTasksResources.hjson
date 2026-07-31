@@ -23,19 +23,19 @@
           '''return `._id {
   max-width: 800px;
   margin: 0 auto;
-  padding: ${args.theme.var.spacing?.lg || "2rem"};
-  color: ${args.theme.var.color.text};
+  padding: ${t.var.spacing?.lg || "2rem"};
+  color: ${t.var.color.text};
 }
 
 @media (max-width: 768px) {
   ._id {
-    padding: ${args.theme.var.spacing?.md || "1rem"};
+    padding: ${t.var.spacing?.md || "1rem"};
   }
 }`;'''
         displayOrder: 1
         fns:
           '''
-const [expandedIndex, setExpandedIndex] = args.createSignal(null);
+const [expandedIndex, setExpandedIndex] = _.createSignal(null);
 const toggleExpanded = (index) => {
   setExpandedIndex((prev) => (prev === index ? null : index));
 };
@@ -61,7 +61,7 @@ return {
           '''return `._id {
   font-size: 1rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin-bottom: 1.5rem;
 }`;'''
         displayOrder: 2

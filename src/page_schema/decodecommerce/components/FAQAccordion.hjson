@@ -21,7 +21,7 @@ return {
         css: '''
 return `._id {
   padding: 5rem 0;
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
   
   @media (max-width: 768px) {
     padding: 3rem 0;
@@ -89,7 +89,7 @@ return {
 return `._id {
   font-size: 2.5rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 1rem;
   
   @media (max-width: 768px) {
@@ -114,7 +114,7 @@ return {
         css: '''
 return `._id {
   font-size: 1.1rem;
-  color: ${args.theme.var.color.text_dark_300};
+  color: ${t.var.color.text_dark_300};
 }`;
 '''
       }
@@ -127,7 +127,7 @@ return `._id {
         componentName: "Html",
         contextName: "faqState",
         props: '''
-const [openIndex, setOpenIndex] = args.createSignal(null);
+const [openIndex, setOpenIndex] = _.createSignal(null);
 return {
   data: {
     openIndex,
@@ -206,8 +206,8 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const faq = args.contextData.faqs;
-const faqState = args.contextData.faqState;
+const faq = c.faqs;
+const faqState = c.faqState;
 const index = faq.index;
 const isOpen = faqState.openIndex() === index;
 return {
@@ -216,14 +216,14 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.background_dark_200};
+  background: ${t.var.color.background};
+  border: 1px solid ${t.var.color.background_dark_200};
   border-radius: 0.75rem;
   overflow: hidden;
   transition: all 0.3s ease;
   
   &:hover {
-    border-color: ${args.theme.var.color.primary_light_500};
+    border-color: ${t.var.color.primary_light_500};
   }
 }`;
 '''
@@ -236,8 +236,8 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const faq = args.contextData.faqs;
-const faqState = args.contextData.faqState;
+const faq = c.faqs;
+const faqState = c.faqState;
 const index = faq.index;
 const isOpen = faqState.openIndex() === index;
 return {
@@ -246,14 +246,14 @@ return {
 };
 ''',
         css: '''
-const faq = args.contextData.faqs;
-const faqState = args.contextData.faqState;
+const faq = c.faqs;
+const faqState = c.faqState;
 const index = faq.index;
 const isOpen = faqState.openIndex() === index;
 return `._id {
   width: 100%;
   padding: 1.25rem;
-  background: ${isOpen ? args.theme.var.color.primary_light_900 : 'transparent'};
+  background: ${isOpen ? t.var.color.primary_light_900 : 'transparent'};
   border: none;
   cursor: pointer;
   display: flex;
@@ -263,7 +263,7 @@ return `._id {
   transition: all 0.2s ease;
   
   &:hover {
-    background: ${isOpen ? args.theme.var.color.primary_light_850 : args.theme.var.color.background_light_100};
+    background: ${isOpen ? t.var.color.primary_light_850 : t.var.color.background_light_100};
   }
 }`;
 '''
@@ -276,7 +276,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const faq = args.contextData.faqs;
+const faq = c.faqs;
 return {
   as: "h3",
   text: faq.question
@@ -286,7 +286,7 @@ return {
 return `._id {
   font-size: 1.1rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0;
   padding-right: 1rem;
 }`;
@@ -300,8 +300,8 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const faq = args.contextData.faqs;
-const faqState = args.contextData.faqState;
+const faq = c.faqs;
+const faqState = c.faqState;
 const index = faq.index;
 const isOpen = faqState.openIndex() === index;
 return {
@@ -312,12 +312,12 @@ return {
 };
 ''',
         css: '''
-const faq = args.contextData.faqs;
-const faqState = args.contextData.faqState;
+const faq = c.faqs;
+const faqState = c.faqState;
 const index = faq.index;
 const isOpen = faqState.openIndex() === index;
 return `._id {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   flex-shrink: 0;
   transition: all 0.3s ease;
 }`;
@@ -331,8 +331,8 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const faq = args.contextData.faqs;
-const faqState = args.contextData.faqState;
+const faq = c.faqs;
+const faqState = c.faqState;
 const index = faq.index;
 const isOpen = faqState.openIndex() === index;
 return {
@@ -340,8 +340,8 @@ return {
 };
 ''',
         css: '''
-const faq = args.contextData.faqs;
-const faqState = args.contextData.faqState;
+const faq = c.faqs;
+const faqState = c.faqState;
 const index = faq.index;
 const isOpen = faqState.openIndex() === index;
 return isOpen ? [
@@ -370,8 +370,8 @@ return isOpen ? [
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const faq = args.contextData.faqs;
-const faqState = args.contextData.faqState;
+const faq = c.faqs;
+const faqState = c.faqState;
 const index = faq.index;
 const isOpen = faqState.openIndex() === index;
 return isOpen ? {
@@ -381,7 +381,7 @@ return isOpen ? {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_dark_300};
+  color: ${t.var.color.text_dark_300};
   line-height: 1.6;
   margin: 0;
   padding: 0 1.25rem 1.5rem;

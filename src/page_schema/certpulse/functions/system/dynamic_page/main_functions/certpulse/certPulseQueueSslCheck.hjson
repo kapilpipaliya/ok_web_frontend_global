@@ -8,7 +8,7 @@
         key: certPulseQueueSslCheck
         body:
           '''
-const { elementId, tableVertexLabel, operation } = args.contextData || {};
+const { elementId, tableVertexLabel, operation } = c || {};
 
 if (tableVertexLabel !== "CertPulseDomain") {
   return { success: true, message: "Skip: not CertPulseDomain" };
@@ -26,7 +26,7 @@ if (operation !== "create" && operation !== "update") {
 const queueName = "certpulseSslCheck";
 
 const getRedisConnection = () => {
-  return args.bullmq.redisConnection || {
+  return _.bullmq.redisConnection || {
     host: process.env.REDIS_HOST || "localhost",
     port: parseInt(process.env.REDIS_PORT || "6379"),
     maxRetriesPerRequest: null,
@@ -44,18 +44,18 @@ const getRedisConnection = () => {
 };
 
 const connection = getRedisConnection();
-const { Queue } = args.bullmq;
+const { Queue } = _.bullmq;
 const queue = new Queue(queueName, { connection });
 
 // BullMQ custom IDs cannot contain ":".
 // We generate a safe ID (and still allow duplicates across time).
 const safe = (v) => String(v || "").replace(/[^a-z0-9_-]/gi, "-");
-const jobId = `${safe(queueName)}-${safe(args.subDomain)}-${safe(elementId)}-${Date.now()}`;
+const jobId = `${safe(queueName)}-${safe(_.subDomain)}-${safe(elementId)}-${Date.now()}`;
 
 await queue.add(
   queueName,
   {
-    subDomain: args.subDomain,
+    subDomain: _.subDomain,
     domainElementId: elementId,
     requestedAt: new Date().toISOString()
   },
@@ -70,7 +70,7 @@ await queue.add(
 
 // Optionally mark queued on the row for UI refresh patterns
 try {
-  await args.session.run(
+  await _.session.run(
     `MATCH (d:CertPulseDomain) WHERE elementId(d) = $id
      SET d.syncStatus = 'queued', d.updatedAt = datetime()
      RETURN d`,
@@ -84,7 +84,7 @@ try {
 // Patch the returned vertex so the client immediately sees syncStatus === 'queued'
 // and starts background polling (Table/Sidebar look for that flag).
 try {
-  const resultVertex = args.contextData?.result?.data;
+  const resultVertex = c?.result?.data;
   if (resultVertex && resultVertex.P) {
     resultVertex.P.syncStatus = "queued";
   }

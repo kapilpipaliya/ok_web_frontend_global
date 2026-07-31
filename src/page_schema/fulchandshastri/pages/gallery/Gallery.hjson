@@ -13,8 +13,8 @@
         updatedAt: 2026-07-15T11:23:21.526Z
         props:
           '''
-const locale = args.params?.lang ? String(args.params.lang).toLowerCase() : undefined;
-const routeParams = args.context?.getParams?.(args.meta) || {};
+const locale = _.params?.lang ? String(_.params.lang).toLowerCase() : undefined;
+const routeParams = _.context?.getParams?.(_.meta) || {};
 const categoryKey = routeParams.category != null && String(routeParams.category).trim() !== ""
   ? String(routeParams.category).trim()
   : null;
@@ -22,11 +22,11 @@ return {
   contextName: "gallerySettings",
   serverFunction: `
 try {
-  const pageResult = await args.executeNamedServerFunction({
+  const pageResult = await s({
     functionName: "loadPublicPageSettings",
     contextData: { pageId: "photos", allowPublicRead: true, locale: ${JSON.stringify(locale ?? null)} }
   });
-  const folderResult = await args.executeNamedServerFunction({
+  const folderResult = await s({
     functionName: "loadPublicGalleryFolder",
     contextData: {
       tableKey: "gallery",
@@ -95,9 +95,9 @@ try {
         displayOrder: 2
         componentName: GalleryBrowser
         props:
-          '''const content = args.contextData.gallerySettings?.content || {};
-const folderData = args.contextData.gallerySettings?.folderData || {};
-const locale = args.params?.lang ? String(args.params.lang).toLowerCase() : undefined;
+          '''const content = c.gallerySettings?.content || {};
+const folderData = c.gallerySettings?.folderData || {};
+const locale = _.params?.lang ? String(_.params.lang).toLowerCase() : undefined;
 const langPrefix = locale && /^[a-z]{2,3}$/i.test(locale) ? `/${locale}` : "";
 return {
   tableKey: "gallery",

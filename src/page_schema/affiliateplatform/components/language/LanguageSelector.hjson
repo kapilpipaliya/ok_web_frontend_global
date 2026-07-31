@@ -17,17 +17,17 @@ const isLangCode = (value) =>
   value != null && /^[a-z]{2,3}$/i.test(String(value).trim());
 
 const getCurrentLang = () => {
-  const lang = args.params?.lang;
+  const lang = _.params?.lang;
   if (isLangCode(lang)) return String(lang).toLowerCase();
   return "en";
 };
 
 const getPagePathWithoutLang = () => {
-  const parts = String(args.location?.pathname || "").split("/").filter(Boolean);
+  const parts = String(_.location?.pathname || "").split("/").filter(Boolean);
   if (parts.length > 0 && isLangCode(parts[0])) {
     return parts.length > 1 ? "/" + parts.slice(1).join("/") : "/";
   }
-  return args.location?.pathname || "/";
+  return _.location?.pathname || "/";
 };
 
 const buildLangUrl = (langCode) => {
@@ -41,7 +41,7 @@ const switchLanguage = (langCode) => {
   if (!isLangCode(langCode)) return;
   const next = String(langCode).toLowerCase();
   if (next === getCurrentLang()) return;
-  args.navigate(buildLangUrl(next));
+  _.navigate(buildLangUrl(next));
 };
 
 const getLanguages = () => DEFAULT_LANGUAGES;
@@ -110,7 +110,7 @@ return {
           '''return {
   as: "div",
   class: "fls-tabs",
-  data: args.fns.getLanguageIndices?.()
+  data: f.getLanguageIndices?.()
 };'''
       }
     }
@@ -119,15 +119,15 @@ return {
       L: Attr
       P: {
         css:
-          '''const lang = args.fns.getLanguageAt?.(args.contextData.flsLangIndex);
-const active = args.fns.isActiveLang?.(lang?.code);
+          '''const lang = f.getLanguageAt?.(c.flsLangIndex);
+const active = f.isActiveLang?.(lang?.code);
 return `._id.fls-btn {
   min-width: 2rem;
   padding: 0.2rem 0.45rem;
   border: none;
   border-radius: 0.25rem;
   /*background: ${active ? "#3a2317" : "transparent"}*/;
-  color: ${active ? args.theme.var.primary : "#3a2317"};
+  color: ${active ? t.var.primary : "#3a2317"};
   font-size: 1rem;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -141,15 +141,15 @@ return `._id.fls-btn {
         displayOrder: 1
         componentName: Html
         props:
-          '''const lang = args.fns.getLanguageAt?.(args.contextData.flsLangIndex);
-const active = args.fns.isActiveLang?.(lang?.code);
+          '''const lang = f.getLanguageAt?.(c.flsLangIndex);
+const active = f.isActiveLang?.(lang?.code);
 return {
   as: "button",
   type: "button",
   text: lang?.shortLabel || lang?.code || "",
   title: lang?.label || lang?.code || "",
   class: active ? "fls-btn fls-btn-active" : "fls-btn",
-  onClick: () => lang?.code && args.fns.switchLanguage?.(lang.code)
+  onClick: () => lang?.code && f.switchLanguage?.(lang.code)
 };'''
       }
     }

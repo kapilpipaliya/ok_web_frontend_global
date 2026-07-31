@@ -13,32 +13,32 @@
       P: {
         css:
           '''
-const hasLeftIcon = !!args.contextData.props?.leftIcon;
-const hasRightIcon = !!args.contextData.props?.rightIcon;
-const iconSize = args.contextData.props?.iconSize || 20;
+const hasLeftIcon = !!c.props?.leftIcon;
+const hasRightIcon = !!c.props?.rightIcon;
+const iconSize = c.props?.iconSize || 20;
 
 return `._id {
   position: relative;
   display: flex;
   align-items: center;
   width: 100%;
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.sm};
-  background: ${args.theme.var.color.background};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.sm};
+  background: ${t.var.color.background};
   transition: all 150ms ease;
   min-height: 52px;
 
   &:focus-within {
-    border-color: ${args.theme.var.color.primary};
-    box-shadow: 0 0 0 3px ${args.theme.var.color.primary_light_200};
+    border-color: ${t.var.color.primary};
+    box-shadow: 0 0 0 3px ${t.var.color.primary_light_200};
   }
 
   &:hover:not(:focus-within) {
-    border-color: ${args.theme.var.color.border_dark_200};
+    border-color: ${t.var.color.border_dark_200};
   }
 
   &.disabled {
-    background: ${args.theme.var.color.background_light_100};
+    background: ${t.var.color.background_light_100};
     opacity: 0.6;
     cursor: not-allowed;
   }
@@ -61,18 +61,18 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   flex-shrink: 0;
-  margin-left: ${args.theme.var.spacing.md};
-  margin-right: ${args.theme.var.spacing.sm};
+  margin-left: ${t.var.spacing.md};
+  margin-right: ${t.var.spacing.sm};
 }`;
 '''
         displayOrder: 1
         componentName: Html
         props:
           '''
-const leftIcon = args.contextData.props?.leftIcon;
-const iconSize = args.contextData.props?.iconSize || 20;
+const leftIcon = c.props?.leftIcon;
+const iconSize = c.props?.iconSize || 20;
 
 return {
   as: "icon",
@@ -90,22 +90,22 @@ return {
       P: {
         css:
           '''
-const hasLeftIcon = !!args.contextData.props?.leftIcon;
-const hasRightIcon = !!args.contextData.props?.rightIcon;
+const hasLeftIcon = !!c.props?.leftIcon;
+const hasRightIcon = !!c.props?.rightIcon;
 
 return `._id {
   flex: 1;
   width: 100%;
-  padding: ${args.theme.var.spacing.sm} ${hasRightIcon ? '0' : args.theme.var.spacing.md} ${args.theme.var.spacing.sm} ${hasLeftIcon ? '0' : args.theme.var.spacing.md};
+  padding: ${t.var.spacing.sm} ${hasRightIcon ? '0' : t.var.spacing.md} ${t.var.spacing.sm} ${hasLeftIcon ? '0' : t.var.spacing.md};
   border: none;
   outline: none;
   font-size: 1rem;
   background: transparent;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   line-height: 1.5;
 
   &::placeholder {
-    color: ${args.theme.var.color.text_light_500};
+    color: ${t.var.color.text_light_500};
     opacity: 1;
   }
 
@@ -120,21 +120,21 @@ return `._id {
           '''
 return {
   as: "input",
-  type: args.contextData.props?.type || "text",
-  value: args.contextData.props?.value || "",
-  placeholder: args.contextData.props?.placeholder || "",
-  required: args.contextData.props?.required || false,
-  disabled: args.contextData.props?.disabled || false,
-  // readOnly: args.contextData.props?.readOnly || false, // not work on server
-  maxLength: args.contextData.props?.maxLength || undefined,
-  minLength: args.contextData.props?.minLength || undefined,
-  autoFocus: args.contextData.props?.autoFocus || false,
-  onChange: args.contextData.props?.onChange || null,
-  onBlur: args.contextData.props?.onBlur || null,
-  onFocus: args.contextData.props?.onFocus || null,
-  onInput: args.contextData.props?.onInput || null,
-  onKeyDown: args.contextData.props?.onKeyDown || null,
-  onMount: args.contextData.props?.onMount || null
+  type: c.props?.type || "text",
+  value: c.props?.value || "",
+  placeholder: c.props?.placeholder || "",
+  required: c.props?.required || false,
+  disabled: c.props?.disabled || false,
+  // readOnly: c.props?.readOnly || false, // not work on server
+  maxLength: c.props?.maxLength || undefined,
+  minLength: c.props?.minLength || undefined,
+  autoFocus: c.props?.autoFocus || false,
+  onChange: c.props?.onChange || null,
+  onBlur: c.props?.onBlur || null,
+  onFocus: c.props?.onFocus || null,
+  onInput: c.props?.onInput || null,
+  onKeyDown: c.props?.onKeyDown || null,
+  onMount: c.props?.onMount || null
 };
 '''
       }
@@ -146,18 +146,18 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   flex-shrink: 0;
-  margin-left: ${args.theme.var.spacing.sm};
-  margin-right: ${args.theme.var.spacing.md};
+  margin-left: ${t.var.spacing.sm};
+  margin-right: ${t.var.spacing.md};
 }`;
 '''
         displayOrder: 3
         componentName: Html
         props:
           '''
-const rightIcon = args.contextData.props?.rightIcon;
-const iconSize = args.contextData.props?.iconSize || 20;
+const rightIcon = c.props?.rightIcon;
+const iconSize = c.props?.iconSize || 20;
 
 return {
   as: "icon",

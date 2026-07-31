@@ -8,14 +8,14 @@
         description: Worker: consumes public support ticket events and sends customer/merchant notification emails.
         body:
           '''
-if (args.contextData?.action !== "start") {
+if (c?.action !== "start") {
   return { success: true, message: "Solvo public support notification worker is ready" };
 }
 
 const queueName = "solvo-public-support-notifications";
 
 const getRedisConnection = () => {
-  return args.bullmq.redisConnection || {
+  return _.bullmq.redisConnection || {
     host: process.env.REDIS_HOST || "localhost",
     port: parseInt(process.env.REDIS_PORT || "6379"),
     maxRetriesPerRequest: null,
@@ -87,7 +87,7 @@ const loadSupportSettings = async (session) => {
   for (let i = 0; i < res.records.length; i++) {
     const node = res.records[i].get("doc");
     if (!node) continue;
-    const doc = args.convertNodeToJson(node);
+    const doc = _.convertNodeToJson(node);
     if (doc?.P?.sectionId) sections[doc.P.sectionId] = parseJsonSafe(doc.P.values, {});
   }
 
@@ -111,8 +111,8 @@ const loadTicketAndMessage = async (session, ticketId, messageId) => {
   );
   if (res.records.length === 0) return { ticket: null, message: null };
   return {
-    ticket: args.convertNodeToJson(res.records[0].get("t")),
-    message: res.records[0].get("m") ? args.convertNodeToJson(res.records[0].get("m")) : null
+    ticket: _.convertNodeToJson(res.records[0].get("t")),
+    message: res.records[0].get("m") ? _.convertNodeToJson(res.records[0].get("m")) : null
   };
 };
 
@@ -128,7 +128,7 @@ const loadAssigneeUser = async (session, assigneeUserId) => {
     { assigneeUserId }
   );
   if (res.records.length === 0) return null;
-  return args.convertNodeToJson(res.records[0].get("u"));
+  return _.convertNodeToJson(res.records[0].get("u"));
 };
 
 const loadUserVertexForEmail = async (session, email, displayName) => {
@@ -145,7 +145,7 @@ const loadUserVertexForEmail = async (session, email, displayName) => {
     { email: trimmedEmail }
   );
   if (res.records.length > 0) {
-    return args.convertNodeToJson(res.records[0].get("u"));
+    return _.convertNodeToJson(res.records[0].get("u"));
   }
 
   const name = String(displayName || "").trim();
@@ -217,7 +217,7 @@ const subjectForEvent = (eventType, ticket, emailSettings) => {
 };
 
 const processOne = async (job) => {
-  const session = await args.getSession();
+  const session = await _.getSession();
   try {
     const payload = job?.data || {};
     const eventType = payload.eventType;
@@ -263,9 +263,9 @@ const processOne = async (job) => {
     const templateKey = eventTemplateKey(eventType);
     const subject = subjectForEvent(eventType, ticket, settings.emailSettings);
     const queryParams = buildTemplateQueryParams({ ticket, message, ticketId, assigneeUser, eventType });
-    const subDomain = payload.subDomain || args.subDomain;
+    const subDomain = payload.subDomain || _.subDomain;
 
-    await args.sendNotificationEmail(
+    await _.sendNotificationEmail(
       templateKey,
       queryParams,
       subject,
@@ -290,7 +290,7 @@ const processOne = async (job) => {
   }
 };
 
-const { Worker, QueueEvents } = args.bullmq;
+const { Worker, QueueEvents } = _.bullmq;
 const connection = getRedisConnection();
 const worker = new Worker(queueName, async (job) => await processOne(job), { connection });
 const queueEvents = new QueueEvents(queueName, { connection });

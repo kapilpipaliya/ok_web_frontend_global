@@ -10,7 +10,7 @@
           '''
 const integrationKey = "netsuite";
 
-const result = await args.session.run(
+const result = await _.session.run(
   `MATCH (n:OAuthConnection {integrationKey: $integrationKey})
    RETURN n
    LIMIT 1`,
@@ -26,7 +26,7 @@ if (!result.records.length) {
 }
 
 const node = result.records[0].get("n");
-const data = args.convertNodeToJson(node);
+const data = _.convertNodeToJson(node);
 
 return {
   success: true,

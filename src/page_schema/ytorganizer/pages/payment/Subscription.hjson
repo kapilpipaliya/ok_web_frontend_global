@@ -7,29 +7,29 @@
         signinRequired: true
         fns:
           '''
-const [subscriptionData, setSubscriptionData] = args.createSignal(null);
-const [isLoading, setIsLoading] = args.createSignal(true);
+const [subscriptionData, setSubscriptionData] = _.createSignal(null);
+const [isLoading, setIsLoading] = _.createSignal(true);
 
 // Load subscription data
 const loadSubscriptionData = async () => {
   try {
     setIsLoading(true);
-    const response = await args.executeNamedServerFunction({
+    const response = await s({
       functionName: "getUserSubscription",
       contextData: {}
     });
 
     // Check for errors in the response itself
     if (response.error) {
-      args.showErrorToast(response.error);
+      _.showErrorToast(response.error);
     } else if (response.result?.success) {
       // Access the nested result
       setSubscriptionData(response.result.data);
     } else {
-      args.showErrorToast(response.result?.message || "Failed to load subscription");
+      _.showErrorToast(response.result?.message || "Failed to load subscription");
     }
   } catch (error) {
-    args.showErrorToast(error.message);
+    _.showErrorToast(error.message);
   } finally {
     setIsLoading(false);
   }
@@ -49,12 +49,12 @@ const formatDate = (dateString) => {
 // Get plan color
 const getPlanColor = (plan) => {
   const colors = {
-    free: args.theme.var.color.text_dark_400,
-    basic: args.theme.var.color.info,
-    pro: args.theme.var.color.primary,
-    unlimited: args.theme.var.color.success
+    free: t.var.color.text_dark_400,
+    basic: t.var.color.info,
+    pro: t.var.color.primary,
+    unlimited: t.var.color.success
   };
-  return colors[plan] || args.theme.var.color.text;
+  return colors[plan] || t.var.color.text;
 };
 
 return {
@@ -72,7 +72,7 @@ return {
           '''
 return {
   isNoPermissionCheck: true,
-  onMount: args.fns.loadSubscriptionData
+  onMount: f.loadSubscriptionData
 };
 '''
       }
@@ -85,7 +85,7 @@ return {
           '''
 return `._id {
   min-height: 100vh;
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
   padding: 2rem;
 }
 
@@ -166,7 +166,7 @@ return {
 return `._id {
   font-size: 2rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }
 
 @media (max-width: 768px) {
@@ -194,16 +194,16 @@ return {
           '''
 return `._id {
   padding: 0.5rem 1rem;
-  background: ${args.theme.var.color.background_dark_100};
-  border: 1px solid ${args.theme.var.color.border};
+  background: ${t.var.color.background_dark_100};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.5rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 ._id:hover {
-  background: ${args.theme.var.color.background_dark_200};
+  background: ${t.var.color.background_dark_200};
 }`;
 '''
         displayOrder: 2
@@ -213,7 +213,7 @@ return `._id {
 return {
   as: "button",
   text: "← Back to Dashboard",
-  onClick: () => args.navigate("/home")
+  onClick: () => _.navigate("/home")
 };
 '''
       }
@@ -227,7 +227,7 @@ return {
 return `._id {
   text-align: center;
   padding: 3rem;
-  color: ${args.theme.var.color.text_dark_300};
+  color: ${t.var.color.text_dark_300};
 }`;
 '''
         displayOrder: 2
@@ -237,7 +237,7 @@ return `._id {
 return {
   as: "div",
   text: "Loading subscription details...",
-  hide: () => !args.fns.isLoading()
+  hide: () => !f.isLoading()
 };
 '''
       }
@@ -252,7 +252,7 @@ return {
           '''
 return {
   as: "div",
-  hide: () => args.fns.isLoading()
+  hide: () => f.isLoading()
 };
 '''
       }
@@ -264,8 +264,8 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.background_dark_100};
-  border: 1px solid ${args.theme.var.color.border};
+  background: ${t.var.color.background_dark_100};
+  border: 1px solid ${t.var.color.border};
   border-radius: 1rem;
   padding: 2rem;
   margin-bottom: 1.5rem;
@@ -339,7 +339,7 @@ return {
           '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_dark_300};
+  color: ${t.var.color.text_dark_300};
   margin-bottom: 0.25rem;
 }`;
 '''
@@ -360,9 +360,9 @@ return {
       P: {
         css:
           '''
-const data = args.fns.subscriptionData();
+const data = f.subscriptionData();
 const plan = data?.currentPlan || "free";
-const planColor = args.fns.getPlanColor(plan);
+const planColor = f.getPlanColor(plan);
 return `._id {
   font-size: 1.75rem;
   font-weight: 700;
@@ -373,7 +373,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const data = args.fns.subscriptionData();
+const data = f.subscriptionData();
 const plan = data?.currentPlan || "free";
 return {
   as: "div",
@@ -388,13 +388,13 @@ return {
       P: {
         css:
           '''
-const data = args.fns.subscriptionData();
+const data = f.subscriptionData();
 const status = data?.subscriptionStatus || "none";
 const isActive = status === "active";
 return `._id {
   padding: 0.5rem 1rem;
-  background: ${isActive ? args.theme.var.color.success_light_800 : args.theme.var.color.background_dark_200};
-  color: ${isActive ? args.theme.var.color.success : args.theme.var.color.text_dark_300};
+  background: ${isActive ? t.var.color.success_light_800 : t.var.color.background_dark_200};
+  color: ${isActive ? t.var.color.success : t.var.color.text_dark_300};
   border-radius: 2rem;
   font-size: 0.875rem;
   font-weight: 600;
@@ -404,7 +404,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const data = args.fns.subscriptionData();
+const data = f.subscriptionData();
 const status = data?.subscriptionStatus || "none";
 const statusText = status === "active" ? "Active" : status.charAt(0).toUpperCase() + status.slice(1);
 return {
@@ -465,7 +465,7 @@ return {
 return `._id {
   font-size: 0.875rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 1
@@ -487,14 +487,14 @@ return {
           '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_dark_300};
+  color: ${t.var.color.text_dark_300};
 }`;
 '''
         displayOrder: 2
         componentName: Html
         props:
           '''
-const data = args.fns.subscriptionData();
+const data = f.subscriptionData();
 const used = (data?.videoQuotaUsed || 0).toLocaleString();
 const limit = (data?.videoQuotaLimit || 0).toLocaleString();
 return {
@@ -513,7 +513,7 @@ return {
 return `._id {
   width: 100%;
   height: 1rem;
-  background: ${args.theme.var.color.background_dark_200};
+  background: ${t.var.color.background_dark_200};
   border-radius: 0.5rem;
   overflow: hidden;
 }`;
@@ -534,10 +534,10 @@ return {
       P: {
         css:
           '''
-const data = args.fns.subscriptionData();
+const data = f.subscriptionData();
 const percentage = data?.quotaPercentage || 0;
 const isHigh = percentage >= 80;
-const barColor = isHigh ? args.theme.var.color.warning : args.theme.var.color.primary;
+const barColor = isHigh ? t.var.color.warning : t.var.color.primary;
 return `._id {
   width: ${percentage}%;
   height: 100%;
@@ -549,7 +549,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const data = args.fns.subscriptionData();
+const data = f.subscriptionData();
 const percentage = data?.quotaPercentage || 0;
 return {
   as: "div"
@@ -566,10 +566,10 @@ return {
 return `._id {
   margin-top: 0.75rem;
   padding: 0.75rem;
-  background: ${args.theme.var.color.warning_light_800};
-  border-left: 4px solid ${args.theme.var.color.warning};
+  background: ${t.var.color.warning_light_800};
+  border-left: 4px solid ${t.var.color.warning};
   border-radius: 0.25rem;
-  color: ${args.theme.var.color.warning_dark_300};
+  color: ${t.var.color.warning_dark_300};
   font-size: 0.875rem;
 }`;
 '''
@@ -577,7 +577,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const data = args.fns.subscriptionData();
+const data = f.subscriptionData();
 return {
   as: "div",
   text: "⚠️ You're approaching your quota limit. Consider upgrading your plan.",
@@ -636,7 +636,7 @@ return {
           '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_dark_300};
+  color: ${t.var.color.text_dark_300};
   margin-bottom: 0.25rem;
 }`;
 '''
@@ -660,14 +660,14 @@ return {
 return `._id {
   font-size: 1.125rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 2
         componentName: Html
         props:
           '''
-const data = args.fns.subscriptionData();
+const data = f.subscriptionData();
 const cycle = data?.subscription?.billingCycle || "N/A";
 return {
   as: "div",
@@ -698,7 +698,7 @@ return {
           '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_dark_300};
+  color: ${t.var.color.text_dark_300};
   margin-bottom: 0.25rem;
 }`;
 '''
@@ -722,17 +722,17 @@ return {
 return `._id {
   font-size: 1.125rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 2
         componentName: Html
         props:
           '''
-const data = args.fns.subscriptionData();
+const data = f.subscriptionData();
 return {
   as: "div",
-  text: args.fns.formatDate(data?.subscriptionExpiryDate)
+  text: f.formatDate(data?.subscriptionExpiryDate)
 };
 '''
       }
@@ -744,8 +744,8 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.background_dark_100};
-  border: 1px solid ${args.theme.var.color.border};
+  background: ${t.var.color.background_dark_100};
+  border: 1px solid ${t.var.color.border};
   border-radius: 1rem;
   padding: 2rem;
 }
@@ -775,7 +775,7 @@ return {
 return `._id {
   font-size: 1.5rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 1rem;
 }`;
 '''
@@ -797,7 +797,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.text_dark_300};
+  color: ${t.var.color.text_dark_300};
   margin-bottom: 1.5rem;
 }`;
 '''
@@ -820,8 +820,8 @@ return {
           '''
 return `._id {
   padding: 0.75rem 1.5rem;
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
   border: none;
   border-radius: 0.5rem;
   font-weight: 600;
@@ -830,7 +830,7 @@ return `._id {
 }
 
 ._id:hover {
-  background: ${args.theme.var.color.primary_dark_200};
+  background: ${t.var.color.primary_dark_200};
   transform: translateY(-1px);
 }`;
 '''
@@ -841,7 +841,7 @@ return `._id {
 return {
   as: "button",
   text: "View Plans",
-  onClick: () => args.navigate("/")
+  onClick: () => _.navigate("/")
 };
 '''
       }

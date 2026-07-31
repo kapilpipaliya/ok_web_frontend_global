@@ -7,20 +7,20 @@
         description: Enqueues background job to create or update the master Shopify menu containing all top-level categories.
         body:
           '''
-const { menuTitle = "Categories", menuHandle = "categories" } = args.contextData;
+const { menuTitle = "Categories", menuHandle = "categories" } = c;
 
-const shop = args.contextData.shop;
+const shop = c.shop;
 if (!shop) { console.log('createAllCategoriesMenu: shop not available in contextData'); return { success: false, error: "shop is required" }; }
 
 try {
-  const helpers = await args.executeNamedServerFunction(
+  const helpers = await s(
     { functionName: 'shopifyQueueHelpers', contextData: {} }
   );
   if (!helpers.result?.success) {
     return { success: false, error: "Failed to get queue helpers" };
   }
   const queueName = 'processCreateAllCategoriesMenu';
-  const queue = helpers.result.data.createShopifyQueue(args, queueName);
+  const queue = helpers.result.data.createShopifyQueue(_, queueName);
   await helpers.result.data.addShopifyJob(queue, queueName, {
     shop,
     menuTitle,

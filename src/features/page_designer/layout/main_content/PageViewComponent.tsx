@@ -95,12 +95,12 @@ function OpenedViewPanel(props: {
             isHighlighted()
               ? [
                   `return \`._id {
-                          border: 3px solid \${args.theme.var.color.primary};
+                          border: 3px solid \${t.var.color.primary};
                           animation: borderPulse 1.5s infinite alternate;
                         }\`;`,
                   `return \`@keyframes borderPulse {
-                            from { border-color: \${args.theme.var.color.primary_light_300}; }
-                            to { border-color: \${args.theme.var.color.primary}; }
+                            from { border-color: \${t.var.color.primary_light_300}; }
+                            to { border-color: \${t.var.color.primary}; }
                           }\`;`,
                 ]
               : ""

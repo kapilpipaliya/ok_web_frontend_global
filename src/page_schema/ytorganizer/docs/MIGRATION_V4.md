@@ -66,7 +66,7 @@ First, test the migration without making changes:
 
 ```javascript
 // Execute via server function
-const result = await args.executeNamedServerFunction({
+const result = await _.executeNamedServerFunction({
   functionName: "migrateSchemaV3toV4",
   contextData: {
     dryRun: true
@@ -96,7 +96,7 @@ neo4j start
 
 ```javascript
 // Execute migration
-const result = await args.executeNamedServerFunction({
+const result = await _.executeNamedServerFunction({
   functionName: "migrateSchemaV3toV4",
   contextData: {
     dryRun: false

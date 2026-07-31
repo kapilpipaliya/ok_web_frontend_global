@@ -12,23 +12,23 @@
       L: Attr
       P: {
         css:
-          '''const variant = args.contextData.props?.variant || "ghost";
-const size = args.contextData.props?.size || "md";
-const disabled = args.contextData.props?.disabled || false;
-const loading = args.contextData.props?.loading === true;
+          '''const variant = c.props?.variant || "ghost";
+const size = c.props?.size || "md";
+const disabled = c.props?.disabled || false;
+const loading = c.props?.loading === true;
 
 // Size styles
 const sizeStyles = {
   sm: {
-    padding: args.theme.var.spacing.xs,
+    padding: t.var.spacing.xs,
     iconSize: 16
   },
   md: {
-    padding: args.theme.var.spacing.sm,
+    padding: t.var.spacing.sm,
     iconSize: 20
   },
   lg: {
-    padding: args.theme.var.spacing.md,
+    padding: t.var.spacing.md,
     iconSize: 24
   }
 };
@@ -40,30 +40,30 @@ let variantStyles = '';
 if (variant === 'ghost') {
   variantStyles = `
     background: transparent;
-    color: ${args.theme.var.color.text_light_500};
+    color: ${t.var.color.text_light_500};
 
     &:not(:disabled):hover {
-      background: ${args.theme.var.color.background_light_200};
-      color: ${args.theme.var.color.text};
+      background: ${t.var.color.background_light_200};
+      color: ${t.var.color.text};
     }
   `;
 } else if (variant === 'danger') {
   variantStyles = `
     background: transparent;
-    color: ${args.theme.var.color.error};
+    color: ${t.var.color.error};
 
     &:not(:disabled):hover {
-      background: ${args.theme.var.color.error_light_100};
-      color: ${args.theme.var.color.error};
+      background: ${t.var.color.error_light_100};
+      color: ${t.var.color.error};
     }
   `;
 } else if (variant === 'primary') {
   variantStyles = `
-    background: ${args.theme.var.color.primary};
-    color: ${args.theme.var.color.primary_text};
+    background: ${t.var.color.primary};
+    color: ${t.var.color.primary_text};
 
     &:not(:disabled):hover {
-      background: ${args.theme.var.color.primary_dark_200};
+      background: ${t.var.color.primary_dark_200};
     }
   `;
 }
@@ -74,7 +74,7 @@ return `._id {
   justify-content: center;
   padding: ${sizeConfig.padding};
   border: none;
-  border-radius: ${args.theme.var.borderRadius.sm};
+  border-radius: ${t.var.borderRadius.sm};
   cursor: pointer;
   transition: all 150ms ease;
   ${variantStyles}
@@ -99,40 +99,40 @@ return `._id {
   }
 
   &:focus {
-    outline: 2px solid ${args.theme.var.color.primary};
+    outline: 2px solid ${t.var.color.primary};
     outline-offset: 2px;
   }
 
   &._reason-info {
-    box-shadow: inset 0 0 0 1px ${args.theme.var.color.info};
+    box-shadow: inset 0 0 0 1px ${t.var.color.info};
   }
 
   &._reason-warning {
-    box-shadow: inset 0 0 0 1px ${args.theme.var.color.warning};
+    box-shadow: inset 0 0 0 1px ${t.var.color.warning};
   }
 
   &._reason-danger {
-    box-shadow: inset 0 0 0 1px ${args.theme.var.color.error};
+    box-shadow: inset 0 0 0 1px ${t.var.color.error};
   }
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const icon = args.contextData.props?.icon;
-const onClick = args.contextData.props?.onClick || (() => {});
-const disabled = args.contextData.props?.disabled || false;
-const loading = args.contextData.props?.loading === true;
-const size = args.contextData.props?.size || "md";
-const ariaLabel = args.contextData.props?.ariaLabel || args.contextData.props?.title || "";
-const title = args.contextData.props?.title || "";
-const reasonVariant = args.contextData.props?.reasonVariant;
-const reasonActive = args.contextData.props?.["data-reason-active"] === "true";
-const reasonKind = args.contextData.props?.["data-reason-kind"];
+          '''const icon = c.props?.icon;
+const onClick = c.props?.onClick || (() => {});
+const disabled = c.props?.disabled || false;
+const loading = c.props?.loading === true;
+const size = c.props?.size || "md";
+const ariaLabel = c.props?.ariaLabel || c.props?.title || "";
+const title = c.props?.title || "";
+const reasonVariant = c.props?.reasonVariant;
+const reasonActive = c.props?.["data-reason-active"] === "true";
+const reasonKind = c.props?.["data-reason-kind"];
 const reasonClass =
   reasonActive && reasonVariant
     ? `_reason _reason-${reasonVariant}${reasonKind ? ` _reason-${reasonKind}` : ""}`
     : "";
-const buttonClass = [args.contextData.props.class, loading ? "_loading" : "", reasonClass].filter(Boolean).join(" ") || undefined;
+const buttonClass = [c.props.class, loading ? "_loading" : "", reasonClass].filter(Boolean).join(" ") || undefined;
 
 const sizeStyles = {
   sm: 16,
@@ -149,10 +149,10 @@ return {
   "aria-busy": loading ? true : undefined,
   title: title,
   disabled: disabled || loading,
-  "data-reason-active": args.contextData.props?.["data-reason-active"],
-  "data-reason-variant": args.contextData.props?.["data-reason-variant"],
-  "data-reason-kind": args.contextData.props?.["data-reason-kind"],
-  "data-reason-code": args.contextData.props?.["data-reason-code"],
+  "data-reason-active": c.props?.["data-reason-active"],
+  "data-reason-variant": c.props?.["data-reason-variant"],
+  "data-reason-kind": c.props?.["data-reason-kind"],
+  "data-reason-code": c.props?.["data-reason-code"],
   onClick: onClick
 };'''
       }
@@ -164,8 +164,8 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const icon = args.contextData.props?.icon;
-const size = args.contextData.props?.size || "md";
+          '''const icon = c.props?.icon;
+const size = c.props?.size || "md";
 
 const sizeStyles = {
   sm: 16,
@@ -174,8 +174,8 @@ const sizeStyles = {
 };
 
 const iconSize = sizeStyles[size] || sizeStyles.md;
-const width = args.contextData.props?.width ?? iconSize;
-const height = args.contextData.props?.height ?? iconSize;
+const width = c.props?.width ?? iconSize;
+const height = c.props?.height ?? iconSize;
 
 return {
   as: "icon",

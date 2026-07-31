@@ -8,24 +8,24 @@
         description: After staff User create — shop DB cleanup (transient shop/invite fields), optional invited status, send invitation email (same as global UserManagement invite flow).
         body:
           '''
-const { tableVertexLabel, operation } = args.contextData || {};
+const { tableVertexLabel, operation } = c || {};
 if (tableVertexLabel !== "User" || operation !== "create") {
   return { success: true, message: "Skip: not User create" };
 }
 
-const shop = String(args.contextData?.shop || args.shop || "").trim().toLowerCase();
+const shop = String(c?.shop || _.shop || "").trim().toLowerCase();
 if (!shop) {
   return { success: true, message: "Skip: no shop in context" };
 }
 
-const result = args.contextData?.result;
+const result = c?.result;
 const employee = result?.data;
 const elementId = employee?.id;
 if (!elementId) return { success: true, message: "Skip: missing employee elementId" };
 
-const uuid = args.uuidv7();
+const uuid = _.uuidv7();
 
-const { dbSession } = await args.getDBSessionForShop(shop, args.rawSubDomain);
+const { dbSession } = await _.getDBSessionForShop(shop, _.rawSubDomain);
 try {
   await dbSession.run(
     `MATCH (e:User) WHERE elementId(e) = $id
@@ -58,12 +58,12 @@ try {
 }
 
 try {
-  const sendInvitationEmail = args.sendInvitationEmail;
+  const sendInvitationEmail = _.sendInvitationEmail;
   if (typeof sendInvitationEmail === "function" && employee && employee.P?.email) {
-    const req = args.getRequestEvent?.()?.request;
-    const shopDbName = args.getDatabaseNameForShop(shop, args.rawSubDomain);
-    if (req && args.session && args.subDomain) {
-      await sendInvitationEmail(req, employee, shopDbName, args.session, `${shopDbName}.decodecommerce.com`);
+    const req = _.getRequestEvent?.()?.request;
+    const shopDbName = _.getDatabaseNameForShop(shop, _.rawSubDomain);
+    if (req && _.session && _.subDomain) {
+      await sendInvitationEmail(req, employee, shopDbName, _.session, `${shopDbName}.decodecommerce.com`);
     } else {
       console.warn(
         "employeeAfterCreate: skip invitation email — missing request, session, or subDomain",

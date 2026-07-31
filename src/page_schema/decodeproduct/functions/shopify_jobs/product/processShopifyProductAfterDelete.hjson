@@ -9,11 +9,11 @@
           '''
 const QUEUE_NAME = 'processShopifyProductAfterDelete';
 
-const doJob = async (args, jobData, dbSession) => {
+const doJob = async (_, jobData, dbSession) => {
   const { tableVertexLabel, operation, elementId, result, shop, fromWebhook, payload } = jobData;
 
   if (fromWebhook && payload) {
-    const h = await args.executeNamedServerFunction(
+    const h = await s(
       { functionName: 'shopifyQueueHelpers', contextData: {} },
       { functionLookupSubDomain: 'decodeproduct' }
     );
@@ -36,7 +36,7 @@ const doJob = async (args, jobData, dbSession) => {
     return;
   }
 
-  const shopify = await args.getShopifyClient();
+  const shopify = await _.getShopifyClient();
   let admin;
   try {
     const authResult = await shopify.unauthenticated.admin(shop);
@@ -75,9 +75,9 @@ const doJob = async (args, jobData, dbSession) => {
   }
 };
 
-const helpers = await args.executeNamedServerFunction(
+const helpers = await s(
   { functionName: 'shopifyQueueHelpers', contextData: {} },
-  { functionLookupSubDomain: args.subDomain }
+  { functionLookupSubDomain: _.subDomain }
 );
 if (!helpers.result?.success) {
   console.error('Shopify queue helpers init failed', helpers.result?.error);
@@ -85,15 +85,15 @@ if (!helpers.result?.success) {
 }
 const runWithSession = helpers.result.data.runWithSession;
 
-if (args.contextData?.action === 'start') {
-  const { Worker } = args.bullmq;
+if (c?.action === 'start') {
+  const { Worker } = _.bullmq;
   const connection = helpers.result.data.getRedisConnection();
   if (!connection || !connection.host) throw new Error('Invalid Redis connection for Shopify jobs');
   let workerInstance;
   try {
     workerInstance = new Worker(QUEUE_NAME, async (job) => {
-      await runWithSession(args, job.data.shop, async (dbSession) => {
-        await doJob(args, job.data, dbSession);
+      await runWithSession(_, job.data.shop, async (dbSession) => {
+        await doJob(_, job.data, dbSession);
       });
     }, { connection, concurrency: 2, lockDuration: 120000 });
     workerInstance.on('failed', (job, err) => console.error('processShopifyProductAfterDelete: Job failed', job?.id, err?.message));

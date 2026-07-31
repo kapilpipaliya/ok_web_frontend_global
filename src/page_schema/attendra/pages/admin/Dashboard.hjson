@@ -6,20 +6,20 @@
       P: {
         fns:
           '''
-const isInIframe = args.atom(false);
-const [loading, setLoading] = args.createSignal(false);
-const [dashboard, setDashboard] = args.createSignal(null);
+const isInIframe = _.atom(false);
+const [loading, setLoading] = _.createSignal(false);
+const [dashboard, setDashboard] = _.createSignal(null);
 
 const loadDashboard = async () => {
   try {
     setLoading(true);
-    const res = await args.executeNamedServerFunction({
+    const res = await s({
       functionName: "getDashboard",
       contextData: {}
     });
     const ok = res?.result?.success !== false && !res?.error;
     if (!ok) {
-      args.showErrorToast?.(res?.error || res?.result?.error || "Failed to load dashboard");
+      _.showErrorToast?.(res?.error || res?.result?.error || "Failed to load dashboard");
       setDashboard(null);
       return;
     }
@@ -44,8 +44,8 @@ return {
           '''return {
   isNoPermissionCheck: true,
   onMount: () => {
-    args.fns.isInIframe(window.self !== window.top);
-    if (args.fns.isInIframe()) args.fns.loadDashboard();
+    f.isInIframe(window.self !== window.top);
+    if (f.isInIframe()) f.loadDashboard();
   }
 }'''
       }
@@ -61,15 +61,15 @@ return {
           '''return `._id{
   max-width: 1100px;
   margin: 0 auto;
-  padding: ${args.theme.var.spacing?.lg || "2rem"};
+  padding: ${t.var.spacing?.lg || "2rem"};
 }
 @media (max-width: 768px){
-  ._id{ padding: ${args.theme.var.spacing?.md || "1rem"}; }
+  ._id{ padding: ${t.var.spacing?.md || "1rem"}; }
 }`;'''
         props:
           '''return {
   as: "main",
-  hide: !args.fns.isInIframe()
+  hide: !f.isInIframe()
 }'''
       }
     }
@@ -85,7 +85,7 @@ return {
   font-size: 1.75rem;
   font-weight: 700;
   margin: 0 0 0.5rem 0;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         props:
           '''return {
@@ -103,7 +103,7 @@ return {
         key: sub
         css:
           '''return `._id{
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0 0 1.25rem 0;
   font-size: 0.95rem;
 }`;'''
@@ -129,10 +129,10 @@ return {
   align-items: center;
 }`;'''
         props:
-          '''const d = args.fns.dashboard?.();
+          '''const d = f.dashboard?.();
 const path = d?.portalSignInPath || "";
 const href = typeof d?.portalSignInUrl === "string" && d.portalSignInUrl.length > 0 ? d.portalSignInUrl : "";
-const show = args.fns.isInIframe() && !!path && !!href && href !== "#";
+const show = f.isInIframe() && !!path && !!href && href !== "#";
 return {
   as: "s-button",
   "attr:variant": "secondary",
@@ -179,16 +179,16 @@ return {
         componentName: Html
         css:
           '''return `._id{
-  border: 1px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background_light_100};
+  border: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background_light_100};
   border-radius: 0.75rem;
   padding: 0.9rem 1rem;
   min-width: 0;
 }`;'''
         props:
           '''
-const d = args.fns.dashboard?.();
-const loading = args.fns.loading?.();
+const d = f.dashboard?.();
+const loading = f.loading?.();
 const items = [
   { k: "presentToday", label: "Present today", value: d?.presentToday ?? (loading ? "…" : "0") },
   { k: "clockedInNow", label: "Clocked in now", value: d?.clockedInNow ?? (loading ? "…" : "0") },
@@ -210,11 +210,11 @@ return {
         displayOrder: 1
         componentName: Html
         css:
-          '''return `._id{ color:${args.theme.var.color.text_light_500}; font-size: 0.85rem; margin: 0 0 0.25rem 0; }`;'''
+          '''return `._id{ color:${t.var.color.text_light_500}; font-size: 0.85rem; margin: 0 0 0.25rem 0; }`;'''
         props:
           '''return {
   as: "div",
-  text: args.contextData.kpi?.label || ""
+  text: c.kpi?.label || ""
 }'''
       }
     }
@@ -225,11 +225,11 @@ return {
         displayOrder: 2
         componentName: Html
         css:
-          '''return `._id{ color:${args.theme.var.color.text}; font-size: 1.4rem; font-weight: 700; margin: 0; }`;'''
+          '''return `._id{ color:${t.var.color.text}; font-size: 1.4rem; font-weight: 700; margin: 0; }`;'''
         props:
           '''return {
   as: "div",
-  text: String(args.contextData.kpi?.value ?? "")
+  text: String(c.kpi?.value ?? "")
 }'''
       }
     }
@@ -242,8 +242,8 @@ return {
         key: activity
         css:
           '''return `._id{
-  border: 1px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background_light_100};
+  border: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background_light_100};
   border-radius: 0.75rem;
   padding: 1rem;
 }`;'''
@@ -257,7 +257,7 @@ return {
         displayOrder: 1
         componentName: Html
         css:
-          '''return `._id{ margin: 0 0 0.5rem 0; font-weight: 600; color: ${args.theme.var.color.text}; }`;'''
+          '''return `._id{ margin: 0 0 0.5rem 0; font-weight: 600; color: ${t.var.color.text}; }`;'''
         props: '''return { as: "h2", text: "Recent activity" }'''
       }
     }
@@ -269,12 +269,12 @@ return {
         componentName: Html
         textType: markdown
         css:
-          '''return `._id{ margin: 0; color:${args.theme.var.color.text_light_500}; font-size: 0.95rem; line-height: 1.6; }`;'''
+          '''return `._id{ margin: 0; color:${t.var.color.text_light_500}; font-size: 0.95rem; line-height: 1.6; }`;'''
         props:
           '''
-const d = args.fns.dashboard?.();
+const d = f.dashboard?.();
 const rows = Array.isArray(d?.recentActivity) ? d.recentActivity : [];
-const text = rows.length ? rows.map((r) => `- ${r}`).join("\\n") : (args.fns.loading?.() ? "Loading…" : "No activity yet.");
+const text = rows.length ? rows.map((r) => `- ${r}`).join("\\n") : (f.loading?.() ? "Loading…" : "No activity yet.");
 return { as: "div", text, textType: "markdown" };
 '''
       }

@@ -6,10 +6,10 @@
       P: {
         fns:
           '''
-const [pickerModalOpen, setPickerModalOpen] = args.createSignal(false);
-const [draftVertex, setDraftVertex] = args.createSignal(null);
-const [draftVertices, setDraftVertices] = args.createSignal([]);
-const [pickerBodyPropsSnapshot, setPickerBodyPropsSnapshot] = args.createSignal(null);
+const [pickerModalOpen, setPickerModalOpen] = _.createSignal(false);
+const [draftVertex, setDraftVertex] = _.createSignal(null);
+const [draftVertices, setDraftVertices] = _.createSignal([]);
+const [pickerBodyPropsSnapshot, setPickerBodyPropsSnapshot] = _.createSignal(null);
 
 const getSelectionMode = (pickerConfiguration) =>
   pickerConfiguration?.selectionMode === "multiple" ? "multiple" : "single";
@@ -76,7 +76,7 @@ const buildSelectionChangeHandler = (pickerConfiguration) => {
       if (rejected && nextVertices.length === 0) {
         const invalidTypeMessage = pickerConfiguration?.invalidTypeMessage;
         if (invalidTypeMessage != null && String(invalidTypeMessage).trim() !== "") {
-          args.showErrorToast?.(String(invalidTypeMessage).trim());
+          _.showErrorToast?.(String(invalidTypeMessage).trim());
         }
       }
       setDraftVertices(nextVertices);
@@ -100,7 +100,7 @@ const buildSelectionChangeHandler = (pickerConfiguration) => {
       setDraftVertices([]);
       const invalidTypeMessage = pickerConfiguration?.invalidTypeMessage;
       if (invalidTypeMessage != null && String(invalidTypeMessage).trim() !== "") {
-        args.showErrorToast?.(String(invalidTypeMessage).trim());
+        _.showErrorToast?.(String(invalidTypeMessage).trim());
       }
       return;
     }
@@ -117,11 +117,11 @@ const buildSelectionChangeHandler = (pickerConfiguration) => {
 
 const buildInitialSelectedRowIds = (pickerConfiguration) => {
   const selectionMode = getSelectionMode(pickerConfiguration);
-  const multiValues = args.contextData.props?.values;
+  const multiValues = c.props?.values;
   if (selectionMode === "multiple" && Array.isArray(multiValues)) {
     return multiValues.map((id) => String(id)).filter((id) => id.trim() !== "");
   }
-  const currentValue = args.contextData.props?.value;
+  const currentValue = c.props?.value;
   const currentValueText = currentValue != null ? String(currentValue).trim() : "";
   return currentValueText !== "" ? [currentValueText] : [];
 };
@@ -161,17 +161,17 @@ const buildPickerBodyProps = (pickerConfiguration) => {
 };
 
 const openPickerModal = () => {
-  const pickerConfiguration = args.contextData.props?.pickerConfiguration;
+  const pickerConfiguration = c.props?.pickerConfiguration;
   const selectionMode = getSelectionMode(pickerConfiguration);
   const initialIds = buildInitialSelectedRowIds(pickerConfiguration);
   if (selectionMode === "multiple" && initialIds.length > 0) {
     const initialVertices = initialIds
-      .map((id) => vertexPayloadFromGraph(args.graph.vertexes[id]))
+      .map((id) => vertexPayloadFromGraph(g.vertexes[id]))
       .filter(Boolean);
     setDraftVertices(initialVertices);
     setDraftVertex(initialVertices[0] ?? null);
   } else if (initialIds.length > 0) {
-    const initialVertex = vertexPayloadFromGraph(args.graph.vertexes[initialIds[0]]);
+    const initialVertex = vertexPayloadFromGraph(g.vertexes[initialIds[0]]);
     setDraftVertex(initialVertex);
     setDraftVertices(initialVertex ? [initialVertex] : []);
   } else {
@@ -190,7 +190,7 @@ const closePickerModal = () => {
 };
 
 const confirmPickerSelection = () => {
-  const pickerConfiguration = args.contextData.props?.pickerConfiguration;
+  const pickerConfiguration = c.props?.pickerConfiguration;
   const selectionMode = getSelectionMode(pickerConfiguration);
   const allowedVertexLabels = pickerConfiguration?.targetVertexLabels;
 
@@ -208,7 +208,7 @@ const confirmPickerSelection = () => {
     if (!selectedDraftVertices.length) {
       const selectRowMessage = pickerConfiguration?.selectRowMessage;
       if (selectRowMessage != null && String(selectRowMessage).trim() !== "") {
-        args.showErrorToast?.(String(selectRowMessage).trim());
+        _.showErrorToast?.(String(selectRowMessage).trim());
       }
       return;
     }
@@ -216,12 +216,12 @@ const confirmPickerSelection = () => {
       if (!validateVertex(selectedDraftVertex)) {
         const invalidTypeMessage = pickerConfiguration?.invalidTypeMessage;
         if (invalidTypeMessage != null && String(invalidTypeMessage).trim() !== "") {
-          args.showErrorToast?.(String(invalidTypeMessage).trim());
+          _.showErrorToast?.(String(invalidTypeMessage).trim());
         }
         return;
       }
     }
-    const onSelectMultiple = args.contextData.props?.onSelectMultiple;
+    const onSelectMultiple = c.props?.onSelectMultiple;
     if (typeof onSelectMultiple === "function") {
       onSelectMultiple(
         selectedDraftVertices.map((vertex) => String(vertex.id)),
@@ -236,18 +236,18 @@ const confirmPickerSelection = () => {
   if (!selectedDraftVertex?.id) {
     const selectRowMessage = pickerConfiguration?.selectRowMessage;
     if (selectRowMessage != null && String(selectRowMessage).trim() !== "") {
-      args.showErrorToast?.(String(selectRowMessage).trim());
+      _.showErrorToast?.(String(selectRowMessage).trim());
     }
     return;
   }
   if (!validateVertex(selectedDraftVertex)) {
     const invalidTypeMessage = pickerConfiguration?.invalidTypeMessage;
     if (invalidTypeMessage != null && String(invalidTypeMessage).trim() !== "") {
-      args.showErrorToast?.(String(invalidTypeMessage).trim());
+      _.showErrorToast?.(String(invalidTypeMessage).trim());
     }
     return;
   }
-  const onSelect = args.contextData.props?.onSelect;
+  const onSelect = c.props?.onSelect;
   if (typeof onSelect === "function") {
     onSelect(String(selectedDraftVertex.id), selectedDraftVertex);
   }
@@ -291,19 +291,19 @@ return {
         displayOrder: 1
         componentName: EmbeddedVertexPickerField
         props:
-          '''const pickerConfiguration = args.contextData.props?.pickerConfiguration;
+          '''const pickerConfiguration = c.props?.pickerConfiguration;
 return {
   label: pickerConfiguration?.fieldLabel,
-  secondaryLabel: args.contextData.props?.secondaryLabel,
-  previewUrl: args.contextData.props?.previewUrl,
-  showImagePreview: args.contextData.props?.showImagePreview,
-  value: args.contextData.props?.value,
-  disabled: args.contextData.props?.disabled,
+  secondaryLabel: c.props?.secondaryLabel,
+  previewUrl: c.props?.previewUrl,
+  showImagePreview: c.props?.showImagePreview,
+  value: c.props?.value,
+  disabled: c.props?.disabled,
   chooseButtonLabel: pickerConfiguration?.chooseButtonLabel,
   clearButtonLabel: pickerConfiguration?.clearButtonLabel,
   usePolarisUI: pickerConfiguration?.usePolarisUI === true,
-  onOpenPicker: () => args.fns.openPickerModal?.(),
-  onClear: () => args.contextData.props?.onClear?.()
+  onOpenPicker: () => f.openPickerModal?.(),
+  onClear: () => c.props?.onClear?.()
 };'''
       }
     }
@@ -314,17 +314,17 @@ return {
         displayOrder: 2
         componentName: VertexPickerModal
         props:
-          '''const pickerConfiguration = args.contextData.props?.pickerConfiguration;
+          '''const pickerConfiguration = c.props?.pickerConfiguration;
 return {
-  isOpen: () => args.fns.pickerModalOpen?.() === true,
+  isOpen: () => f.pickerModalOpen?.() === true,
   title: pickerConfiguration?.modalTitle,
   hintEmpty: pickerConfiguration?.modalHintEmpty,
   hintSelected: pickerConfiguration?.modalHintSelected,
-  pickerBodyProps: args.fns.pickerBodyPropsSnapshot?.() ?? {},
-  draftVertex: () => args.fns.draftVertex?.() ?? null,
-  draftVertices: () => args.fns.draftVertices?.() ?? [],
-  onClose: () => args.fns.closePickerModal?.(),
-  onConfirm: () => args.fns.confirmPickerSelection?.(),
+  pickerBodyProps: f.pickerBodyPropsSnapshot?.() ?? {},
+  draftVertex: () => f.draftVertex?.() ?? null,
+  draftVertices: () => f.draftVertices?.() ?? [],
+  onClose: () => f.closePickerModal?.(),
+  onConfirm: () => f.confirmPickerSelection?.(),
   usePolarisUI: pickerConfiguration?.usePolarisUI === true,
   cancelButtonLabel: pickerConfiguration?.cancelButtonLabel,
   confirmButtonLabel: pickerConfiguration?.confirmButtonLabel,

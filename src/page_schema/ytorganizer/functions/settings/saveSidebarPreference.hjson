@@ -7,8 +7,8 @@
         description: Saves the user's sidebar collapsed/expanded preference
         body:
           '''
-const { isCollapsed } = args.contextData;
-const userId = args.user?.id;
+const { isCollapsed } = c;
+const userId = _.user?.id;
 
 if (!userId) {
   return {
@@ -25,7 +25,7 @@ if (typeof isCollapsed !== 'boolean') {
 }
 
 // Update or create user preference for sidebar state
-const result = await args.session.run(
+const result = await _.session.run(
   `MATCH (u:User {id: $userId})
    MERGE (u)-[:UserUserPreference]->(p:UserPreference {key: 'sidebarCollapsed'})
    SET p.value = $isCollapsed,

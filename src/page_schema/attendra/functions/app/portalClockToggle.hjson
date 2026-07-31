@@ -8,7 +8,7 @@
         description: Portal clock in/out for the signed-in user. Creates an open time record or closes the latest open record on the subdomain database.
         body:
           '''
-const user = await args.getUserFromSession();
+const user = await _.getUserFromSession();
 if (!user?.P?.uuid) {
   return { success: false, error: "Not signed in." };
 }
@@ -16,7 +16,7 @@ const userUuid = String(user.P.uuid).trim();
 const nowIso = new Date().toISOString();
 
 try {
-  const action = await args.session.executeWrite(async (tx) => {
+  const action = await _.session.executeWrite(async (tx) => {
     const openRes = await tx.run(
       `MATCH (t:Time)-[:TimeEmployee]->(u:User {uuid: $userUuid})
        WHERE t.clockOutAt IS NULL
@@ -54,7 +54,7 @@ try {
       return { action: "clocked_out" };
     }
 
-    const timeUuid = args.uuidv7();
+    const timeUuid = _.uuidv7();
     await tx.run(
       `MATCH (u:User {uuid: $userUuid})
        CREATE (t:Time {

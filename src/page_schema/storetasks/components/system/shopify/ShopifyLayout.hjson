@@ -5,9 +5,9 @@
       L: Component
       P: {
         fns:
-          '''const isInIframe = args.atom(null);
+          '''const isInIframe = _.atom(null);
 const executeYTOFunction = async (functionName, contextData = {}) => {
-  return await args.executeNamedServerFunction({
+  return await s({
     functionName,
     contextData: {
       ...contextData,
@@ -23,7 +23,7 @@ return {
         key: ShopifyLayout
         props:
           '''return {
-  onMount: () => args.fns.isInIframe(window.self !== window.top)
+  onMount: () => f.isInIframe(window.self !== window.top)
 }'''
       }
     }
@@ -135,7 +135,7 @@ return {
           '''return {
   as: "meta",
   property: "og:url",
-  content: "https://storetasks.decodecommerce.com" + (args.location?.pathname || "/")
+  content: "https://storetasks.decodecommerce.com" + (_.location?.pathname || "/")
 }'''
       }
     }
@@ -149,7 +149,7 @@ return {
           '''return {
   as: "link",
   rel: "canonical",
-  href: "https://storetasks.decodecommerce.com" + (args.location?.pathname || "/")
+  href: "https://storetasks.decodecommerce.com" + (_.location?.pathname || "/")
 }'''
       }
     }
@@ -232,7 +232,7 @@ return {
         key: unique_3
         props:
           '''return {
-  hide: !args.fns.isInIframe()
+  hide: !f.isInIframe()
 }'''
       }
     }

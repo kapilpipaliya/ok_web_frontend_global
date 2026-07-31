@@ -33,8 +33,8 @@
 const DEFAULT_SOURCE = {
   id: "default-modules",
   name: "List modules",
-  description: "Returns sorted built-in module names available in args",
-  code: 'return Object.keys(args).filter((key) => key !== "require").sort();',
+  description: "Returns sorted built-in module names available in _",
+  code: 'return Object.keys(_).filter((key) => key !== "require").sort();',
   argsJson: "{}"
 };
 
@@ -50,18 +50,18 @@ const loadFromSettings = () => {
   };
 
   const host =
-    args.userSetting?.connectionHost ||
-    args.userSetting?.connection?.host ||
+    _.userSetting?.connectionHost ||
+    _.userSetting?.connection?.host ||
     "127.0.0.1";
   const port = String(
-    args.userSetting?.connectionPort ||
-    args.userSetting?.connection?.port ||
+    _.userSetting?.connectionPort ||
+    _.userSetting?.connection?.port ||
     "3000"
   );
   const list =
-    parseSourcesJson(args.userSetting?.sourcesJson) ||
-    (Array.isArray(args.userSetting?.sources) && args.userSetting.sources.length
-      ? args.userSetting.sources
+    parseSourcesJson(_.userSetting?.sourcesJson) ||
+    (Array.isArray(_.userSetting?.sources) && _.userSetting.sources.length
+      ? _.userSetting.sources
       : null) ||
     [DEFAULT_SOURCE];
 
@@ -73,7 +73,7 @@ const loadFromSettings = () => {
   };
 };
 
-const [store, setStore] = args.createStore({
+const [store, setStore] = _.createStore({
   host: "127.0.0.1",
   port: "3000",
   sources: [DEFAULT_SOURCE],
@@ -90,7 +90,7 @@ const [store, setStore] = args.createStore({
 });
 
 const persistSettings = () => {
-  args.saveUserSetting({
+  _.saveUserSetting({
     connectionHost: store.host,
     connectionPort: store.port,
     sourcesJson: JSON.stringify(
@@ -126,7 +126,7 @@ const executeOnServer = async (code, userArgs) => {
       method: "POST",
       mode: "cors",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ code, args: userArgs }),
+      body: JSON.stringify({ code, _: userArgs }),
       targetAddressSpace: getTargetAddressSpace()
     });
   } catch (error) {
@@ -201,7 +201,7 @@ const addSource = () => {
 
 const deleteSource = () => {
   if (store.sources.length <= 1) {
-    args.showWarningToast("Keep at least one source");
+    _.showWarningToast("Keep at least one source");
     return;
   }
   const id = store.selectedId;
@@ -210,7 +210,7 @@ const deleteSource = () => {
   setStore("selectedId", next[0].id);
   syncEditorFromSelection();
   persistSettings();
-  args.showSuccessToast("Source deleted");
+  _.showSuccessToast("Source deleted");
 };
 
 const parseArgsJson = () => {
@@ -221,7 +221,7 @@ const parseArgsJson = () => {
     }
     return parsed;
   } catch (error) {
-    throw new Error(error instanceof Error ? error.message : "Invalid args JSON");
+    throw new Error(error instanceof Error ? error.message : "Invalid _ JSON");
   }
 };
 
@@ -229,7 +229,7 @@ const testConnection = async () => {
   setStore({ connectionStatus: "checking", connectionMessage: "Checking connection..." });
   try {
     const result = await executeOnServer(
-      'return { ok: true, modules: Object.keys(args).filter((k) => k !== "require").length };',
+      'return { ok: true, modules: Object.keys(_).filter((k) => k !== "require").length };',
       {}
     );
     persistSettings();
@@ -237,13 +237,13 @@ const testConnection = async () => {
       connectionStatus: "online",
       connectionMessage: `Connected — ${result?.modules ?? 0} modules available`
     });
-    args.showSuccessToast("Execute server is reachable");
+    _.showSuccessToast("Execute server is reachable");
   } catch (error) {
     setStore({
       connectionStatus: "offline",
       connectionMessage: error instanceof Error ? error.message : String(error)
     });
-    args.showErrorToast("Cannot reach execute server");
+    _.showErrorToast("Cannot reach execute server");
   }
 };
 
@@ -254,7 +254,7 @@ const runSelectedSource = async () => {
     saveCurrentSource();
     const result = await executeOnServer(store.code, userArgs);
     setStore({ lastResult: result, lastError: null });
-    args.showSuccessToast("Execution completed");
+    _.showSuccessToast("Execution completed");
   } catch (error) {
     setStore({
       lastError: {
@@ -263,7 +263,7 @@ const runSelectedSource = async () => {
       },
       lastResult: null
     });
-    args.showErrorToast("Execution failed");
+    _.showErrorToast("Execution failed");
   } finally {
     setStore("executing", false);
   }
@@ -317,19 +317,19 @@ return {
           '''return {
   as: "div",
   onMount: () => {
-    args.fns.initFromSettings();
+    f.initFromSettings();
   }
 };'''
         css:
           '''return `._id {
-  padding: ${args.theme.var.spacing.lg} ${args.theme.var.spacing.xl};
+  padding: ${t.var.spacing.lg} ${t.var.spacing.xl};
   max-width: 1400px;
   margin: 0 auto;
   width: 100%;
   box-sizing: border-box;
 
   @media (max-width: 768px) {
-    padding: ${args.theme.var.spacing.md};
+    padding: ${t.var.spacing.md};
   }
 }`;'''
       }
@@ -346,11 +346,11 @@ return {
 };'''
         css:
           '''return `._id {
-  background: ${args.theme.var.color.background_light_100};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.lg};
-  padding: ${args.theme.var.spacing.lg};
-  margin-bottom: ${args.theme.var.spacing.lg};
+  background: ${t.var.color.background_light_100};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.lg};
+  padding: ${t.var.spacing.lg};
+  margin-bottom: ${t.var.spacing.lg};
 }`;'''
       }
     }
@@ -367,7 +367,7 @@ return {
 };'''
         css:
           '''return `._id {
-  margin: 0 0 ${args.theme.var.spacing.sm};
+  margin: 0 0 ${t.var.spacing.sm};
   font-size: 1.125rem;
   font-weight: 600;
 }`;'''
@@ -387,7 +387,7 @@ return {
           '''return `._id {
   display: flex;
   flex-wrap: wrap;
-  gap: ${args.theme.var.spacing.md};
+  gap: ${t.var.spacing.md};
   align-items: flex-end;
 }`;'''
       }
@@ -423,7 +423,7 @@ return {
         css:
           '''return `._id {
   display: block;
-  margin-bottom: ${args.theme.var.spacing.xs};
+  margin-bottom: ${t.var.spacing.xs};
   font-size: 0.875rem;
   font-weight: 500;
 }`;'''
@@ -437,10 +437,10 @@ return {
         componentName: TextInput
         props:
           '''return {
-  value: args.fns.store.host,
+  value: f.store.host,
   placeholder: "127.0.0.1",
-  onInput: (event) => args.fns.setStore("host", event.target.value),
-  onBlur: () => args.fns.persistSettings()
+  onInput: (event) => f.setStore("host", event.target.value),
+  onBlur: () => f.persistSettings()
 };'''
       }
     }
@@ -475,7 +475,7 @@ return {
         css:
           '''return `._id {
   display: block;
-  margin-bottom: ${args.theme.var.spacing.xs};
+  margin-bottom: ${t.var.spacing.xs};
   font-size: 0.875rem;
   font-weight: 500;
 }`;'''
@@ -489,10 +489,10 @@ return {
         componentName: TextInput
         props:
           '''return {
-  value: args.fns.store.port,
+  value: f.store.port,
   placeholder: "3000",
-  onInput: (event) => args.fns.setStore("port", event.target.value),
-  onBlur: () => args.fns.persistSettings()
+  onInput: (event) => f.setStore("port", event.target.value),
+  onBlur: () => f.persistSettings()
 };'''
       }
     }
@@ -504,10 +504,10 @@ return {
         componentName: Button
         props:
           '''return {
-  text: args.fns.store.connectionStatus === "checking" ? "Testing..." : "Test connection",
+  text: f.store.connectionStatus === "checking" ? "Testing..." : "Test connection",
   variant: "secondary",
-  disabled: args.fns.store.connectionStatus === "checking",
-  onClick: () => args.fns.testConnection()
+  disabled: f.store.connectionStatus === "checking",
+  onClick: () => f.testConnection()
 };'''
       }
     }
@@ -518,8 +518,8 @@ return {
         displayOrder: 3
         componentName: Html
         props:
-          '''const badge = args.fns.connectionBadgeClass();
-const message = args.fns.store.connectionMessage || `Endpoint: ${args.fns.getBaseUrl()}/execute`;
+          '''const badge = f.connectionBadgeClass();
+const message = f.store.connectionMessage || `Endpoint: ${f.getBaseUrl()}/execute`;
 return {
   as: "p",
   text: message,
@@ -528,13 +528,13 @@ return {
         css:
           '''return [
   `._id {
-    margin: ${args.theme.var.spacing.md} 0 0;
+    margin: ${t.var.spacing.md} 0 0;
     font-size: 0.875rem;
   }`,
-  `._id.status-idle { color: ${args.theme.var.color.text_light_500}; }`,
-  `._id.status-checking { color: ${args.theme.var.color.info}; }`,
-  `._id.status-online { color: ${args.theme.var.color.success}; }`,
-  `._id.status-offline { color: ${args.theme.var.color.error}; }`
+  `._id.status-idle { color: ${t.var.color.text_light_500}; }`,
+  `._id.status-checking { color: ${t.var.color.info}; }`,
+  `._id.status-online { color: ${t.var.color.success}; }`,
+  `._id.status-offline { color: ${t.var.color.error}; }`
 ];'''
       }
     }
@@ -552,7 +552,7 @@ return {
           '''return `._id {
   display: grid;
   grid-template-columns: 280px 1fr;
-  gap: ${args.theme.var.spacing.lg};
+  gap: ${t.var.spacing.lg};
   align-items: start;
 
   @media (max-width: 960px) {
@@ -573,10 +573,10 @@ return {
 };'''
         css:
           '''return `._id {
-  background: ${args.theme.var.color.background_light_100};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.lg};
-  padding: ${args.theme.var.spacing.md};
+  background: ${t.var.color.background_light_100};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.lg};
+  padding: ${t.var.spacing.md};
 }`;'''
       }
     }
@@ -595,8 +595,8 @@ return {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: ${args.theme.var.spacing.sm};
-  margin-bottom: ${args.theme.var.spacing.md};
+  gap: ${t.var.spacing.sm};
+  margin-bottom: ${t.var.spacing.md};
 }`;'''
       }
     }
@@ -629,7 +629,7 @@ return {
           '''return {
   text: "Add",
   size: "sm",
-  onClick: () => args.fns.addSource()
+  onClick: () => f.addSource()
 };'''
       }
     }
@@ -644,7 +644,7 @@ return {
         props:
           '''return {
   as: "fragment",
-  data: args.fns.store.sources
+  data: f.store.sources
 };'''
       }
     }
@@ -655,38 +655,38 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const item = args.contextData.sourceItem;
-const selected = args.fns.store.selectedId === item.id;
+          '''const item = c.sourceItem;
+const selected = f.store.selectedId === item.id;
 return {
   as: "button",
   type: "button",
   text: item.name,
   class: selected ? "selected" : "",
-  onClick: () => args.fns.selectSource(item.id)
+  onClick: () => f.selectSource(item.id)
 };'''
         css:
           '''return `._id {
   display: block;
   width: 100%;
   text-align: left;
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  margin-bottom: ${args.theme.var.spacing.xs};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.md};
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  margin-bottom: ${t.var.spacing.xs};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.md};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   cursor: pointer;
   font-size: 0.875rem;
   transition: all 150ms ease;
 
   &:hover {
-    border-color: ${args.theme.var.color.primary};
+    border-color: ${t.var.color.primary};
   }
 
   &.selected {
-    border-color: ${args.theme.var.color.primary};
-    background: ${args.theme.var.color.primary_light_100};
-    color: ${args.theme.var.color.primary_text};
+    border-color: ${t.var.color.primary};
+    background: ${t.var.color.primary_light_100};
+    color: ${t.var.color.primary_text};
   }
 }`;'''
       }
@@ -703,10 +703,10 @@ return {
 };'''
         css:
           '''return `._id {
-  background: ${args.theme.var.color.background_light_100};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.lg};
-  padding: ${args.theme.var.spacing.lg};
+  background: ${t.var.color.background_light_100};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.lg};
+  padding: ${t.var.spacing.lg};
 }`;'''
       }
     }
@@ -723,7 +723,7 @@ return {
 };'''
         css:
           '''return `._id {
-  margin: 0 0 ${args.theme.var.spacing.md};
+  margin: 0 0 ${t.var.spacing.md};
   font-size: 1.125rem;
   font-weight: 600;
 }`;'''
@@ -741,7 +741,7 @@ return {
 };'''
         css:
           '''return `._id {
-  margin-bottom: ${args.theme.var.spacing.md};
+  margin-bottom: ${t.var.spacing.md};
 }`;'''
       }
     }
@@ -759,7 +759,7 @@ return {
         css:
           '''return `._id {
   display: block;
-  margin-bottom: ${args.theme.var.spacing.xs};
+  margin-bottom: ${t.var.spacing.xs};
   font-size: 0.875rem;
   font-weight: 500;
 }`;'''
@@ -773,8 +773,8 @@ return {
         componentName: TextInput
         props:
           '''return {
-  value: args.fns.store.name,
-  onInput: (event) => args.fns.setStore("name", event.target.value)
+  value: f.store.name,
+  onInput: (event) => f.setStore("name", event.target.value)
 };'''
       }
     }
@@ -790,7 +790,7 @@ return {
 };'''
         css:
           '''return `._id {
-  margin-bottom: ${args.theme.var.spacing.md};
+  margin-bottom: ${t.var.spacing.md};
 }`;'''
       }
     }
@@ -808,7 +808,7 @@ return {
         css:
           '''return `._id {
   display: block;
-  margin-bottom: ${args.theme.var.spacing.xs};
+  margin-bottom: ${t.var.spacing.xs};
   font-size: 0.875rem;
   font-weight: 500;
 }`;'''
@@ -822,9 +822,9 @@ return {
         componentName: TextInput
         props:
           '''return {
-  value: args.fns.store.description,
+  value: f.store.description,
   placeholder: "Optional description",
-  onInput: (event) => args.fns.setStore("description", event.target.value)
+  onInput: (event) => f.setStore("description", event.target.value)
 };'''
       }
     }
@@ -840,7 +840,7 @@ return {
 };'''
         css:
           '''return `._id {
-  margin-bottom: ${args.theme.var.spacing.md};
+  margin-bottom: ${t.var.spacing.md};
 }`;'''
       }
     }
@@ -858,7 +858,7 @@ return {
         css:
           '''return `._id {
   display: block;
-  margin-bottom: ${args.theme.var.spacing.xs};
+  margin-bottom: ${t.var.spacing.xs};
   font-size: 0.875rem;
   font-weight: 500;
 }`;'''
@@ -872,11 +872,11 @@ return {
         componentName: TextArea
         props:
           '''return {
-  value: args.fns.store.code,
+  value: f.store.code,
   rows: 12,
   resize: "vertical",
   placeholder: 'return "Hello";',
-  onChange: (event) => args.fns.setStore("code", event.target.value)
+  onChange: (event) => f.setStore("code", event.target.value)
 };'''
       }
     }
@@ -892,7 +892,7 @@ return {
 };'''
         css:
           '''return `._id {
-  margin-bottom: ${args.theme.var.spacing.md};
+  margin-bottom: ${t.var.spacing.md};
 }`;'''
       }
     }
@@ -910,7 +910,7 @@ return {
         css:
           '''return `._id {
   display: block;
-  margin-bottom: ${args.theme.var.spacing.xs};
+  margin-bottom: ${t.var.spacing.xs};
   font-size: 0.875rem;
   font-weight: 500;
 }`;'''
@@ -924,11 +924,11 @@ return {
         componentName: TextArea
         props:
           '''return {
-  value: args.fns.store.argsJson,
+  value: f.store.argsJson,
   rows: 4,
   resize: "vertical",
   placeholder: "{}",
-  onChange: (event) => args.fns.setStore("argsJson", event.target.value)
+  onChange: (event) => f.setStore("argsJson", event.target.value)
 };'''
       }
     }
@@ -946,8 +946,8 @@ return {
           '''return `._id {
   display: flex;
   flex-wrap: wrap;
-  gap: ${args.theme.var.spacing.sm};
-  margin-bottom: ${args.theme.var.spacing.lg};
+  gap: ${t.var.spacing.sm};
+  margin-bottom: ${t.var.spacing.lg};
 }`;'''
       }
     }
@@ -962,8 +962,8 @@ return {
   text: "Save source",
   variant: "secondary",
   onClick: () => {
-    args.fns.saveCurrentSource();
-    args.showSuccessToast("Source saved");
+    f.saveCurrentSource();
+    _.showSuccessToast("Source saved");
   }
 };'''
       }
@@ -978,7 +978,7 @@ return {
           '''return {
   text: "Delete",
   variant: "danger",
-  onClick: () => args.fns.deleteSource()
+  onClick: () => f.deleteSource()
 };'''
       }
     }
@@ -990,9 +990,9 @@ return {
         componentName: Button
         props:
           '''return {
-  text: args.fns.store.executing ? "Running..." : "Run on server",
-  disabled: args.fns.store.executing,
-  onClick: () => args.fns.runSelectedSource()
+  text: f.store.executing ? "Running..." : "Run on server",
+  disabled: f.store.executing,
+  onClick: () => f.runSelectedSource()
 };'''
       }
     }
@@ -1021,7 +1021,7 @@ return {
 };'''
         css:
           '''return `._id {
-  margin: 0 0 ${args.theme.var.spacing.sm};
+  margin: 0 0 ${t.var.spacing.sm};
   font-size: 1rem;
   font-weight: 600;
 }`;'''
@@ -1034,7 +1034,7 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const err = args.fns.store.lastError;
+          '''const err = f.store.lastError;
 return {
   as: "pre",
   text: err ? `${err.message}${err.stack ? "\\n\\n" + err.stack : ""}` : "",
@@ -1043,10 +1043,10 @@ return {
         css:
           '''return `._id {
   margin: 0;
-  padding: ${args.theme.var.spacing.md};
-  border-radius: ${args.theme.var.borderRadius.md};
-  background: ${args.theme.var.color.error_light_100};
-  color: ${args.theme.var.color.error_text};
+  padding: ${t.var.spacing.md};
+  border-radius: ${t.var.borderRadius.md};
+  background: ${t.var.color.error_light_100};
+  color: ${t.var.color.error_text};
   font-size: 0.875rem;
   overflow-x: auto;
   white-space: pre-wrap;
@@ -1061,19 +1061,19 @@ return {
         displayOrder: 3
         componentName: Html
         props:
-          '''const result = args.fns.store.lastResult;
+          '''const result = f.store.lastResult;
 return {
   as: "pre",
-  text: result !== null && result !== undefined ? args.fns.formatResult(result) : "Run a source to see output here.",
-  hide: !!args.fns.store.lastError
+  text: result !== null && result !== undefined ? f.formatResult(result) : "Run a source to see output here.",
+  hide: !!f.store.lastError
 };'''
         css:
           '''return `._id {
   margin: 0;
-  padding: ${args.theme.var.spacing.md};
-  border-radius: ${args.theme.var.borderRadius.md};
-  background: ${args.theme.var.color.background_dark_900};
-  color: ${args.theme.var.color.background_light_900_text};
+  padding: ${t.var.spacing.md};
+  border-radius: ${t.var.borderRadius.md};
+  background: ${t.var.color.background_dark_900};
+  color: ${t.var.color.background_light_900_text};
   font-size: 0.875rem;
   overflow-x: auto;
   white-space: pre-wrap;

@@ -9,7 +9,7 @@
         fns:
           '''
 // Dashboard runtime platform — client orchestration; data via server functions only.
-const platform = args.dashboardPlatform;
+const platform = _.dashboardPlatform;
 
 const DASHBOARD_GRAPH_LABEL = {
   RUNTIME: "DashboardRuntime",
@@ -72,16 +72,16 @@ const applyServerGraphToLocalGraph = (response, txnId) => {
     (Array.isArray(deleted_edges) && deleted_edges.length > 0);
   if (!hasWork) return;
   const tid = txnId != null && txnId > 0 ? txnId : activeDashboardTxnId || 0;
-  args.setGraphData(tid, { vertexes, edges, deleted_vertexes, deleted_edges }, {});
+  _.setGraphData(tid, { vertexes, edges, deleted_vertexes, deleted_edges }, {});
 };
 
 const patchVertexProperties = (txnId, vertexId, updater) => {
-  const vertex = args.graph.vertexes[vertexId];
+  const vertex = g.vertexes[vertexId];
   if (!vertex) return;
   const previousP = vertex.P || {};
   const nextP =
     typeof updater === "function" ? updater({ ...previousP }) : { ...previousP, ...updater };
-  args.setGraphData(txnId, { vertexes: { [vertexId]: { ...vertex, P: nextP } } }, {});
+  _.setGraphData(txnId, { vertexes: { [vertexId]: { ...vertex, P: nextP } } }, {});
 };
 
 const buildDashboardGraphBootstrap = (dashboardKey, config, visibleWidgets) => {
@@ -306,14 +306,14 @@ const evaluateVisibilityRules = (visibilityRules, context) => {
 const hasDashboardRolePermission = (permissionConfig) => {
   const roles = Array.isArray(permissionConfig?.roles) ? permissionConfig.roles : [];
   if (roles.length === 0) return true;
-  const userRole = args.user?.P?.role;
+  const userRole = _.user?.P?.role;
   return userRole != null && roles.includes(userRole);
 };
 
 const filterVisibleWidgets = (dashboardConfig) => {
   if (!hasDashboardRolePermission(dashboardConfig.permissions)) return [];
   return dashboardConfig.widgets.filter((widgetConfig) => {
-    const context = { user: args.user, graph: args.graph, dashboard: dashboardConfig, widget: widgetConfig };
+    const context = { user: _.user, graph: g, dashboard: dashboardConfig, widget: widgetConfig };
     return hasDashboardRolePermission(widgetConfig.permissions) && evaluateVisibilityRules(widgetConfig.visibility, context);
   });
 };
@@ -361,7 +361,7 @@ const resolveHeaderActions = async (headerActions) => {
       const functionName = String(action.resolveFunction || "").trim();
       if (!functionName) continue;
       try {
-        const res = await args.executeNamedServerFunction({
+        const res = await s({
           functionName,
           contextData: action.resolveContext || {}
         });
@@ -398,7 +398,7 @@ const executeDataSource = async ({ widgetConfig, store, dashboardKey }) => {
   const dataSource = widgetConfig?.dataSource;
   if (!dataSource?.type) return { success: true, data: { value: 0, rows: [] } };
 
-  const response = await args.executeNamedServerFunction({
+  const response = await s({
     functionName: "executeDashboardDataSource",
     contextData: {
       widgetId: widgetConfig.id,
@@ -425,7 +425,7 @@ const buildInteractionRegistry = (config, visibleWidgets, runtimeApiRef) => ({
   },
   NAVIGATE: (event) => {
     const href = event?.to || event?.payload?.href;
-    if (href) args.navigate(href);
+    if (href) _.navigate(href);
   },
   OPEN_ENTITY_DRAWER: (event, store) => {
     const payload = event.payload || {};
@@ -516,8 +516,8 @@ const resolveWidgetLayout = (widgetConfig, dashboardConfig, layoutOverrides, bre
   };
 };
 
-const [breakpoint, setBreakpoint] = args.createSignal("lg");
-const [runtimeState, setRuntimeState] = args.createSignal(null);
+const [breakpoint, setBreakpoint] = _.createSignal("lg");
+const [runtimeState, setRuntimeState] = _.createSignal(null);
 let breakpointCleanup = null;
 
 const installBreakpointListener = () => {
@@ -536,7 +536,7 @@ const installBreakpointListener = () => {
 const saveDashboardLayout = async (store, config) => {
   if (config.personalization?.saveLayouts === false) return;
   const session = store.getSession();
-  await args.executeNamedServerFunction({
+  await s({
     functionName: "saveDashboardPreference",
     contextData: {
       dashboardKey: config.key,
@@ -555,13 +555,13 @@ const createRuntime = async (rawDashboardConfig) => {
   const config = normalizeDashboardConfig(rawDashboardConfig);
   const visibleWidgets = filterVisibleWidgets(config);
   const resolvedHeaderActions = await resolveHeaderActions(config.headerActions);
-  const [selections, setSelections] = args.createSignal({});
+  const [selections, setSelections] = _.createSignal({});
 
-  activeDashboardTxnId = args.generateNewTxnId(args.graph, args.setGraph);
+  activeDashboardTxnId = _.generateNewTxnId(g, sg);
   const graphBootstrap = buildDashboardGraphBootstrap(config.key, config, visibleWidgets);
-  args.setGraphData(activeDashboardTxnId, graphBootstrap, {});
+  _.setGraphData(activeDashboardTxnId, graphBootstrap, {});
 
-  const [ui, setUi] = args.createStore({
+  const [ui, setUi] = _.createStore({
     runtimeVertexId: graphBootstrap.ids.runtime,
     configVertexId: graphBootstrap.ids.config,
     sessionVertexId: graphBootstrap.ids.session,
@@ -569,8 +569,8 @@ const createRuntime = async (rawDashboardConfig) => {
     dashboard: { loading: true, mode: config.mode }
   });
 
-  const getSessionVertex = () => args.graph.vertexes[ui.sessionVertexId];
-  const getConfigFromGraph = () => args.graph.vertexes[ui.configVertexId]?.P?.config || config;
+  const getSessionVertex = () => g.vertexes[ui.sessionVertexId];
+  const getConfigFromGraph = () => g.vertexes[ui.configVertexId]?.P?.config || config;
 
   const getSession = () => getSessionVertex()?.P || {};
   const patchSession = (updater) => patchVertexProperties(activeDashboardTxnId, ui.sessionVertexId, updater);
@@ -578,17 +578,17 @@ const createRuntime = async (rawDashboardConfig) => {
   const getWidgetStateVertexId = (widgetId) => ui.widgetStateIds[widgetId];
   const getWidgetState = (widgetId) => {
     const vertexId = getWidgetStateVertexId(widgetId);
-    return vertexId ? args.graph.vertexes[vertexId]?.P || null : null;
+    return vertexId ? g.vertexes[vertexId]?.P || null : null;
   };
 
   const resolveWidgetPresentation = (widgetId) => {
     const state = getWidgetState(widgetId) || {};
     const resultVertexId = state.dataResultVertexId;
-    const resultP = resultVertexId ? args.graph.vertexes[resultVertexId]?.P || {} : {};
+    const resultP = resultVertexId ? g.vertexes[resultVertexId]?.P || {} : {};
     const rowIds = Array.isArray(state.rowVertexIds) ? state.rowVertexIds : [];
     const rows = [];
     for (let rowIndex = 0; rowIndex < rowIds.length; rowIndex++) {
-      const rowVertex = args.graph.vertexes[rowIds[rowIndex]];
+      const rowVertex = g.vertexes[rowIds[rowIndex]];
       if (rowVertex) rows.push(rowVertex);
     }
     return {
@@ -657,8 +657,8 @@ const createRuntime = async (rawDashboardConfig) => {
   const subscriptionGraph = platform?.subscriptions?.createGraph ? platform.subscriptions.createGraph() : null;
   const devtoolsEnabled =
     config.devtools?.enabled === true ||
-    args.searchParams?.dashboardDevtools === "1" ||
-    args.searchParams?.dashboardDevtools === "true";
+    _.searchParams?.dashboardDevtools === "1" ||
+    _.searchParams?.dashboardDevtools === "true";
   const devtools = platform?.devtools?.createCollector ? platform.devtools.createCollector(devtoolsEnabled) : null;
   const runtimeTelemetry = platform?.telemetry?.create ? platform.telemetry.create() : null;
   const runtimeEventLog = platform?.eventLog?.create ? platform.eventLog.create() : null;
@@ -836,7 +836,7 @@ const createRuntime = async (rawDashboardConfig) => {
     const payload = result.data || {};
     const resultVertexId = payload.resultVertexId || null;
     const rowVertexIds = Array.isArray(payload.rowVertexIds) ? payload.rowVertexIds : [];
-    const resultP = resultVertexId ? args.graph.vertexes[resultVertexId]?.P || {} : {};
+    const resultP = resultVertexId ? g.vertexes[resultVertexId]?.P || {} : {};
     const isEmpty =
       (resultP.value == null || resultP.value === 0) &&
       rowVertexIds.length === 0 &&
@@ -1220,7 +1220,7 @@ const createRuntime = async (rawDashboardConfig) => {
       realtimeConfig: config.realtime,
       devtools,
       pollEvents: async (context) =>
-        args.executeNamedServerFunction({
+        s({
           functionName: "pollDashboardRealtimeEvents",
           contextData: {
             dashboardKey: context.dashboardKey,
@@ -1252,7 +1252,7 @@ const createRuntime = async (rawDashboardConfig) => {
     }
   }
 
-  const pref = await args.executeNamedServerFunction({
+  const pref = await s({
     functionName: "loadDashboardPreference",
     contextData: { dashboardKey: config.key }
   });
@@ -1340,7 +1340,7 @@ const createRuntime = async (rawDashboardConfig) => {
 };
 
 const initFromProps = async () => {
-  const raw = args.contextData.props?.getDashboardConfig?.();
+  const raw = c.props?.getDashboardConfig?.();
   if (!raw) {
     setRuntimeState(null);
     return;
@@ -1355,7 +1355,7 @@ const disposeDashboardRuntime = () => {
   runtime?.runtimeApi?.dispose?.();
   const txnId = runtime?.txnId || activeDashboardTxnId;
   if (txnId && txnId > 0) {
-    args.revertTransaction(txnId);
+    _.revertTransaction(txnId);
     activeDashboardTxnId = 0;
   }
   if (typeof breakpointCleanup === "function") {
@@ -1370,7 +1370,7 @@ const getDashboardRuntime = () => runtimeState();
 const mountDashboardHost = async () => {
   if (!breakpointCleanup) installBreakpointListener();
   let attempts = 0;
-  while (!args.contextData.props?.getDashboardConfig?.() && attempts < 100) {
+  while (!c.props?.getDashboardConfig?.() && attempts < 100) {
     await new Promise((resolve) => setTimeout(resolve, 50));
     attempts += 1;
   }
@@ -1402,10 +1402,10 @@ return {
           '''
 return {
   onMount: () => {
-    void args.fns.mountDashboardHost();
+    void f.mountDashboardHost();
   },
   onCleanup: () => {
-    args.fns.disposeDashboardRuntime();
+    f.disposeDashboardRuntime();
   }
 };
 '''
@@ -1420,9 +1420,9 @@ return {
         key: dashboard_renderer
         props:
           '''
-const runtime = args.fns.getDashboardRuntime();
+const runtime = f.getDashboardRuntime();
 return {
-  dashboardRuntime: args.fns.getDashboardRuntime,
+  dashboardRuntime: f.getDashboardRuntime,
   runtimeKey: runtime?.config?.key || ""
 };
 '''
@@ -1437,9 +1437,9 @@ return {
         key: dashboard_entity_drawer
         props:
           '''
-const runtime = args.fns.getDashboardRuntime();
+const runtime = f.getDashboardRuntime();
 return {
-  dashboardRuntime: args.fns.getDashboardRuntime,
+  dashboardRuntime: f.getDashboardRuntime,
   runtimeKey: runtime?.config?.key || ""
 };
 '''
@@ -1454,9 +1454,9 @@ return {
         key: dashboard_devtools
         props:
           '''
-const runtime = args.fns.getDashboardRuntime();
+const runtime = f.getDashboardRuntime();
 return {
-  dashboardRuntime: args.fns.getDashboardRuntime,
+  dashboardRuntime: f.getDashboardRuntime,
   runtimeKey: runtime?.config?.key || "",
   hide: runtime?.isDevtoolsEnabled?.() !== true
 };

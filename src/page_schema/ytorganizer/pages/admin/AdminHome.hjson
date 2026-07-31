@@ -80,7 +80,7 @@ return {
 return `._id {
   font-size: 2.5rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0;
 
   @media (max-width: 768px) {
@@ -107,7 +107,7 @@ return {
           '''
 return `._id {
   font-size: 1.125rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0.5rem 0 0 0;
 }`;
 '''
@@ -262,11 +262,11 @@ return {
       P: {
         css:
           '''
-const section = args.contextData.adminSection;
+const section = c.adminSection;
 
 return `._id {
-  background: ${args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.border};
+  background: ${t.var.color.background};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.75rem;
   padding: 1.5rem;
   display: flex;
@@ -283,7 +283,7 @@ return `._id {
     &:hover {
       transform: translateY(-4px);
       box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-      border-color: ${args.theme.var.color[section.hoverBorder]};
+      border-color: ${t.var.color[section.hoverBorder]};
     }
   ` : ''}
 }`;
@@ -293,7 +293,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const section = args.contextData.adminSection;
+const section = c.adminSection;
 
 return {
   as: section.enabled ? "a" : "div",
@@ -306,7 +306,7 @@ return {
       return;
     }
     e.preventDefault();
-    args.navigate(section.link);
+    _.navigate(section.link);
   }) : undefined
 };
 '''
@@ -340,9 +340,9 @@ return {
       P: {
         css:
           '''
-const section = args.contextData.adminSection;
-const iconBgColor = args.theme.var.color[section.iconBg];
-const textColor = args.theme.var.color[section.iconBg + '_text'];
+const section = c.adminSection;
+const iconBgColor = t.var.color[section.iconBg];
+const textColor = t.var.color[section.iconBg + '_text'];
 
 return `._id {
   width: 56px;
@@ -374,7 +374,7 @@ return {
         componentName: Html
         props:
           '''
-const section = args.contextData.adminSection;
+const section = c.adminSection;
 
 return {
   as: "icon",
@@ -394,7 +394,7 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0;
 }`;
 '''
@@ -402,7 +402,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const section = args.contextData.adminSection;
+const section = c.adminSection;
 
 return {
   as: "h3",
@@ -418,7 +418,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0;
   line-height: 1.5;
   font-size: 0.9375rem;
@@ -428,7 +428,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const section = args.contextData.adminSection;
+const section = c.adminSection;
 
 return {
   as: "p",
@@ -443,10 +443,10 @@ return {
       P: {
         css:
           '''
-const section = args.contextData.adminSection;
+const section = c.adminSection;
 const actionColor = section.enabled
-  ? args.theme.var.color[section.hoverBorder]
-  : args.theme.var.color.text_light_500;
+  ? t.var.color[section.hoverBorder]
+  : t.var.color.text_light_500;
 
 return `._id {
   margin-top: auto;
@@ -469,7 +469,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const section = args.contextData.adminSection;
+const section = c.adminSection;
 
 return {
   as: "div",

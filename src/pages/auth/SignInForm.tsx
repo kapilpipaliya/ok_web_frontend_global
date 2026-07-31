@@ -262,25 +262,25 @@ export function SignInForm() {
   font-size: 0.875rem;
   width: 100%;
   background: \${
-    (args.searchParams?.type || "info") === "success"
-      ? args.theme.var.color.success_light_900
-      : (args.searchParams?.type || "info") === "error"
-        ? args.theme.var.color.error_light_900
-        : args.theme.var.color.info_light_900
+    (_.searchParams?.type || "info") === "success"
+      ? t.var.color.success_light_900
+      : (_.searchParams?.type || "info") === "error"
+        ? t.var.color.error_light_900
+        : t.var.color.info_light_900
   };
   color: \${
-    (args.searchParams?.type || "info") === "success"
-      ? args.theme.var.color.success_dark_300
-      : (args.searchParams?.type || "info") === "error"
-        ? args.theme.var.color.error_dark_300
-        : args.theme.var.color.info_dark_300
+    (_.searchParams?.type || "info") === "success"
+      ? t.var.color.success_dark_300
+      : (_.searchParams?.type || "info") === "error"
+        ? t.var.color.error_dark_300
+        : t.var.color.info_dark_300
   };
   border: 1px solid \${
-    (args.searchParams?.type || "info") === "success"
-      ? args.theme.var.color.success_light_700
-      : (args.searchParams?.type || "info") === "error"
-        ? args.theme.var.color.error_light_700
-        : args.theme.var.color.info_light_700
+    (_.searchParams?.type || "info") === "success"
+      ? t.var.color.success_light_700
+      : (_.searchParams?.type || "info") === "error"
+        ? t.var.color.error_light_700
+        : t.var.color.info_light_700
   };
   margin-bottom: 1.5rem;
 }\`;`,
@@ -322,7 +322,7 @@ export function SignInForm() {
   padding: 0.75rem 1rem;
   background: white;
   color: #1f1f1f;
-  border: 1px solid \${args.theme.var.color.border};
+  border: 1px solid \${t.var.color.border};
   border-radius: 0.375rem;
   font-size: 0.95rem;
   font-weight: 500;
@@ -336,7 +336,7 @@ export function SignInForm() {
 }
 ._id:hover {
   background: #f8f9fa;
-  border-color: \${args.theme.var.color.border_dark_200};
+  border-color: \${t.var.color.border_dark_200};
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 ._id:active {
@@ -358,7 +358,7 @@ export function SignInForm() {
                     css: `return \`._id {
   flex: 1;
   height: 1px;
-  background: \${args.theme.var.color.border};
+  background: \${t.var.color.border};
 }\`;`,
                   },
                   {
@@ -366,7 +366,7 @@ export function SignInForm() {
                     componentName: "Html",
                     css: `return \`._id {
   padding: 0 1rem;
-  color: \${args.theme.var.color.text_dark_300};
+  color: \${t.var.color.text_dark_300};
   font-size: 0.875rem;
 }\`;`,
                     text: "OR",
@@ -377,7 +377,7 @@ export function SignInForm() {
                     css: `return \`._id {
   flex: 1;
   height: 1px;
-  background: \${args.theme.var.color.border};
+  background: \${t.var.color.border};
 }\`;`,
                   },
                 ],
@@ -418,7 +418,7 @@ export function SignInForm() {
                   {
                     as: "a",
                     css: `return \`._id {
-  color: \${args.theme.var.color.primary};
+  color: \${t.var.color.primary};
   font-size: 14px;
   cursor: pointer;
 }\`;`,
@@ -439,7 +439,7 @@ export function SignInForm() {
                   {
                     as: "a",
                     css: `return \`._id {
-  color: \${args.theme.var.color.primary};
+  color: \${t.var.color.primary};
   font-size: 14px;
   cursor: pointer;
 }\`;`,
@@ -477,7 +477,7 @@ export function SignInForm() {
                   ._id:disabled {
                     opacity: 0.5;
                     cursor: not-allowed;
-                    background-color: \${args.theme.var.color.border};
+                    background-color: \${t.var.color.border};
                   }\`;`,
                 ],
                 componentName: "Html",
@@ -520,7 +520,7 @@ export function SignInForm() {
               {
                 as: "span",
                 css: `return \`._id {
-  color: \${args.theme.var.color.text};
+  color: \${t.var.color.text};
 }\`;`,
                 componentName: "Html",
                 text: "Don't have an account? ",
@@ -528,7 +528,7 @@ export function SignInForm() {
               {
                 as: "a",
                 css: `return \`._id {
-  color: \${args.theme.var.color.primary};
+  color: \${t.var.color.primary};
   cursor: pointer;
 }\`;`,
                 componentName: "Html",
@@ -549,7 +549,7 @@ export function SignInForm() {
             css: `return \`._id {
   text-align: center;
   margin-top: 16px;
-  border-top: 1px solid \${args.theme.var.color.border};
+  border-top: 1px solid \${t.var.color.border};
   padding-top: 16px;
 }\`;`,
             componentName: "Html",
@@ -581,10 +581,10 @@ export function SignInForm() {
                 let trap = null;
 
                 const initializeFocusTrap = () => {
-                  const element = args.ref();
+                  const element = _.ref();
                   if (!element) return;
 
-                  trap = args.focusTrap.createFocusTrap(element, {
+                  trap = _.focusTrap.createFocusTrap(element, {
                     initialFocus: () => document.getElementsByTagName("input")[0],
                     fallbackFocus: () => element,
                     escapeDeactivates: false,

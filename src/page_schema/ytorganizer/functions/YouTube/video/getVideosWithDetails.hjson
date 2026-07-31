@@ -10,7 +10,7 @@
 /**
  * Get Videos with Details
  *
- * Parameters (via args.contextData):
+ * Parameters (via c):
  * - userUuid: string (required) - User UUID
  * - ownershipId: string (required) - YouTube ownership ID to filter videos by
  * - videoIds: string[] (optional) - Filter by specific video IDs
@@ -46,7 +46,7 @@
     secondaryOrderBy = null,
     limit = null,
     skip = 0
-  } = args.contextData;
+  } = c;
 
   if (!userUuid) {
     return {
@@ -175,7 +175,7 @@
   `;
 
   // Execute the query
-  const result = await args.session.run(query, {
+  const result = await _.session.run(query, {
     userUuid,
     ownershipId,
     videoIds,
@@ -188,10 +188,10 @@
   const videos = result.records.map(record => {
     // Handle optional VideoSetting (might be null if user hasn't customized)
     const videoSettingNode = record.get('vs');
-    const videoSetting = videoSettingNode ? args.convertNodeToJson(videoSettingNode) : null;
+    const videoSetting = videoSettingNode ? _.convertNodeToJson(videoSettingNode) : null;
 
     const videoData = {
-      video: args.convertNodeToJson(record.get('v')),
+      video: _.convertNodeToJson(record.get('v')),
       videoSetting
     };
 
@@ -201,8 +201,8 @@
       const parentPlaylistSetting = record.get('parentPlaylistSetting');
       if (parentPlaylist && parentPlaylistSetting) {
         videoData.parentPlaylist = {
-          playlist: args.convertNodeToJson(parentPlaylist),
-          playlistSetting: args.convertNodeToJson(parentPlaylistSetting)
+          playlist: _.convertNodeToJson(parentPlaylist),
+          playlistSetting: _.convertNodeToJson(parentPlaylistSetting)
         };
       } else {
         videoData.parentPlaylist = null;

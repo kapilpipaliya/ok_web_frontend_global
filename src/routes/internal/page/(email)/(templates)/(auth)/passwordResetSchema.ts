@@ -4,7 +4,7 @@ const content = [
   {
     as: "h1",
     css: `return \`._id {
-      color: \${args.theme.var.color.text_hex};
+      color: \${t.var.color.text_hex};
       font-size: 24px;
       font-weight: bold;
       margin-bottom: 16px;
@@ -16,7 +16,7 @@ const content = [
   {
     as: "p",
     css: `return \`._id {
-      color: \${args.theme.var.color.text_hex};
+      color: \${t.var.color.text_hex};
       margin-bottom: 16px;
     }\`;`,
     componentName: "Html",
@@ -29,7 +29,7 @@ const content = [
       {
         as: "p",
         css: `return \`._id {
-          color: \${args.theme.var.color.primary_hex};
+          color: \${t.var.color.primary_hex};
           font-size: 36px;
           font-weight: 900;
           letter-spacing: 8px;
@@ -39,13 +39,13 @@ const content = [
         componentName: "Html",
         displayOrder: 1,
         props: `return {
-            text: args.searchParams.otp,
+            text: _.searchParams.otp,
           }`,
       },
     ],
     css: `return \`._id {
-      background-color: \${args.theme.var.color.background_light_100_hex};
-      border: 2px solid \${args.theme.var.color.primary_hex};
+      background-color: \${t.var.color.background_light_100_hex};
+      border: 2px solid \${t.var.color.primary_hex};
       border-radius: 8px;
       margin: 24px 0;
       padding: 24px 16px;
@@ -58,7 +58,7 @@ const content = [
   {
     as: "p",
     css: `return \`._id {
-      color: \${args.theme.var.color.text_hex};
+      color: \${t.var.color.text_hex};
     }\`;`,
     componentName: "Html",
     displayOrder: 4,

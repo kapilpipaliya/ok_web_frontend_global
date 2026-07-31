@@ -13,27 +13,27 @@
       P: {
         css:
           '''
-const queueStatus = args.contextData.props?.queueStatus;
-const statusInfo = args.fns.getStatusInfo?.(queueStatus);
+const queueStatus = c.props?.queueStatus;
+const statusInfo = f.getStatusInfo?.(queueStatus);
 
 // Map color names to theme colors
 const colorMap = {
-  blue: args.theme.var.color.info,
-  yellow: args.theme.var.color.warning,
-  orange: args.theme.var.color.warning,
-  gray: args.theme.var.color.text_light_500,
-  green: args.theme.var.color.success,
-  red: args.theme.var.color.error
+  blue: t.var.color.info,
+  yellow: t.var.color.warning,
+  orange: t.var.color.warning,
+  gray: t.var.color.text_light_500,
+  green: t.var.color.success,
+  red: t.var.color.error
 };
 
-const borderColor = statusInfo?.color ? colorMap[statusInfo.color] : args.theme.var.color.info;
+const borderColor = statusInfo?.color ? colorMap[statusInfo.color] : t.var.color.info;
 
 return `._id {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem 1rem;
-  background: ${args.theme.var.color.background_light_100};
+  background: ${t.var.color.background_light_100};
   border-left: 3px solid ${borderColor};
   border-radius: 0.5rem;
   margin-top: 0.5rem;
@@ -44,7 +44,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const queueStatus = args.contextData.props?.queueStatus;
+const queueStatus = c.props?.queueStatus;
 
 // Hide component if no queueStatus provided
 if (!queueStatus) {
@@ -70,24 +70,24 @@ return {
         componentName: Html
         props:
           '''
-const queueStatus = args.contextData.props?.queueStatus || 'queued';
+const queueStatus = c.props?.queueStatus || 'queued';
 
 // Get queueStatus info from constants
-const statusInfo = args.fns.getStatusInfo?.(queueStatus);
+const statusInfo = f.getStatusInfo?.(queueStatus);
 
 // Map color names to theme colors
 const colorMap = {
-  blue: args.theme.var.color.info,
-  yellow: args.theme.var.color.warning,
-  orange: args.theme.var.color.warning,
-  gray: args.theme.var.color.text_light_500,
-  green: args.theme.var.color.success,
-  red: args.theme.var.color.error
+  blue: t.var.color.info,
+  yellow: t.var.color.warning,
+  orange: t.var.color.warning,
+  gray: t.var.color.text_light_500,
+  green: t.var.color.success,
+  red: t.var.color.error
 };
 
 // Use icon and color from queueStatus info, fallback to defaults
 const icon = statusInfo?.icon || 'carbon:help';
-const color = statusInfo?.color ? colorMap[statusInfo.color] : args.theme.var.color.text_light_500;
+const color = statusInfo?.color ? colorMap[statusInfo.color] : t.var.color.text_light_500;
 
 return {
   as: "icon",
@@ -129,7 +129,7 @@ return {
 return `._id {
   font-size: 0.875rem;
   font-weight: 500;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 0.25rem;
 }`;
 '''
@@ -138,13 +138,13 @@ return `._id {
         props:
           '''
 // Safely extract all props with defaults
-const queueStatus = args.contextData.props?.queueStatus || 'queued';
-const type = args.contextData.props?.type || 'channel';
-const progress = Math.max(0, Math.min(100, args.contextData.props?.progress || 0));
-const details = args.contextData.props?.details || '';
+const queueStatus = c.props?.queueStatus || 'queued';
+const type = c.props?.type || 'channel';
+const progress = Math.max(0, Math.min(100, c.props?.progress || 0));
+const details = c.props?.details || '';
 
 // Get queueStatus info from constants
-const statusInfo = args.fns.getStatusInfo?.(queueStatus);
+const statusInfo = f.getStatusInfo?.(queueStatus);
 
 // Build queueStatus text based on queueStatus info
 let statusText = '';
@@ -183,7 +183,7 @@ return {
 return `._id {
   width: 100%;
   height: 6px;
-  background: ${args.theme.var.color.background_light_300};
+  background: ${t.var.color.background_light_300};
   border-radius: 3px;
   overflow: hidden;
 }`;
@@ -192,7 +192,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const queueStatus = args.contextData.props?.queueStatus || 'queued';
+const queueStatus = c.props?.queueStatus || 'queued';
 
 // Only show progress bar for queued and processing statuses
 const showProgressBar = queueStatus === 'queued' || queueStatus === 'processing';
@@ -212,7 +212,7 @@ return {
           '''
 return `._id {
   height: 100%;
-  background: ${args.theme.var.color.primary};
+  background: ${t.var.color.primary};
   border-radius: 3px;
   transition: width 0.3s ease;
 }`;
@@ -222,7 +222,7 @@ return `._id {
         props:
           '''
 // Clamp progress between 0 and 100
-const rawProgress = args.contextData.props?.progress;
+const rawProgress = c.props?.progress;
 const progress = Math.min(Math.max(rawProgress || 0, 0), 100);
 
 return {
@@ -242,7 +242,7 @@ return {
           '''
 return `._id {
   font-size: 0.8rem;
-  color: ${args.theme.var.color.error};
+  color: ${t.var.color.error};
   line-height: 1.4;
   margin-top: 0.375rem;
   font-style: italic;
@@ -254,8 +254,8 @@ return `._id {
         componentName: Html
         props:
           '''
-const queueStatus = args.contextData.props?.queueStatus || '';
-const error = args.contextData.props?.error || '';
+const queueStatus = c.props?.queueStatus || '';
+const error = c.props?.error || '';
 
 // Only show error for failed or completed_with_errors queueStatus
 if ((queueStatus !== 'failed' && queueStatus !== 'completed_with_errors') || !error) {

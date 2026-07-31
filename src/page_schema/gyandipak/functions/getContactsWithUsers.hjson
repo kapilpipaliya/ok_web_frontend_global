@@ -6,12 +6,12 @@
       P: {
         description: Get all contacts with their assigned users
         body:
-          '''const { searchQuery = '', filterUsername = '', filterCountry = '', sortBy = 'createdAt', sortOrder = 'desc', limit = 20, offset = 0 } = args.contextData;
+          '''const { searchQuery = '', filterUsername = '', filterCountry = '', sortBy = 'createdAt', sortOrder = 'desc', limit = 20, offset = 0 } = c;
 
 // Build query parameters
 let params = {
-  limit: args.neo4jDriver.int(limit),
-  offset: args.neo4jDriver.int(offset)
+  limit: _.neo4jDriver.int(limit),
+  offset: _.neo4jDriver.int(offset)
 };
 
 // Build contact filter conditions (applied to Contact node)
@@ -105,15 +105,15 @@ if (filterUsername === 'unassigned') {
   `;
 }
 
-const countResult = await args.session.run(countQuery, params);
+const countResult = await _.session.run(countQuery, params);
 const totalCountValue = countResult.records[0]?.get('totalCount');
 const totalCount = typeof totalCountValue === 'number' ? totalCountValue : (totalCountValue?.toInt ? totalCountValue.toInt() : 0);
 
-const result = await args.session.run(query, params);
+const result = await _.session.run(query, params);
 
 const contacts = result.records.map(record => {
-  const contact = args.convertNodeToJson(record.get('c'));
-  const users = record.get('users').map(u => u ? args.convertNodeToJson(u) : null).filter(u => u);
+  const contact = _.convertNodeToJson(record.get('c'));
+  const users = record.get('users').map(u => u ? _.convertNodeToJson(u) : null).filter(u => u);
 
   return {
     contact,
@@ -131,7 +131,7 @@ const statsQuery = `
     count(DISTINCT CASE WHEN u IS NOT NULL THEN u END) as totalJoined
 `;
 
-const statsResult = await args.session.run(statsQuery);
+const statsResult = await _.session.run(statsQuery);
 const stats = statsResult.records[0];
 
 const getIntValue = (value) => {

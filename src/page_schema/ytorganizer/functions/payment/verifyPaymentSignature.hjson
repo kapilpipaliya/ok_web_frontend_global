@@ -8,7 +8,7 @@
         body:
           '''
 // Get authenticated user
-const user = await args.getUserFromSession();
+const user = await _.getUserFromSession();
 if (!user) {
   return {
     success: false,
@@ -16,7 +16,7 @@ if (!user) {
   };
 }
 
-const { orderId, paymentId, signature } = args.contextData;
+const { orderId, paymentId, signature } = c;
 
 if (!orderId || !paymentId || !signature) {
   return {
@@ -26,7 +26,7 @@ if (!orderId || !paymentId || !signature) {
 }
 
 // Fetch Razorpay setting
-const settingResult = await args.session.run(
+const settingResult = await _.session.run(
   "MATCH (s:Setting {type: 'razorpay'}) WHERE s.razorpayEnabled = true RETURN s LIMIT 1"
 );
 
@@ -38,7 +38,7 @@ if (settingResult.records.length === 0) {
 }
 
 const settingNode = settingResult.records[0].get("s");
-const settingVertex = args.convertNodeToJson(settingNode);
+const settingVertex = _.convertNodeToJson(settingNode);
 const keySecret = Buffer.from(settingVertex.P.razorpayKeySecret, "base64").toString("utf-8");
 
 // Verify signature using Razorpay's algorithm
@@ -56,7 +56,7 @@ if (generatedSignature !== signature) {
 }
 
 // Use write transaction for atomicity - prevents partial payment activation
-const subscriptionVertex = await args.session.executeWrite(async (tx) => {
+const subscriptionVertex = await _.session.executeWrite(async (tx) => {
   // Find the pending subscription
   const subscriptionResult = await tx.run(
     `MATCH (u:User {uuid: $userId})-[:UserSubscription]->(s:UserSubscription {razorpayOrderId: $orderId, status: 'pending'})
@@ -72,7 +72,7 @@ const subscriptionVertex = await args.session.executeWrite(async (tx) => {
   }
 
   const subscriptionNode = subscriptionResult.records[0].get("s");
-  const subscription = args.convertNodeToJson(subscriptionNode);
+  const subscription = _.convertNodeToJson(subscriptionNode);
 
   // Update subscription status to active
   const updateSubscriptionQuery = `

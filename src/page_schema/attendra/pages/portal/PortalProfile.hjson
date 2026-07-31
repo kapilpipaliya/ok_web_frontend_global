@@ -6,18 +6,18 @@
       P: {
         fns:
           '''
-const [username, setUsername] = args.createSignal("");
-const [email, setEmail] = args.createSignal("");
-const [saveLoading, setSaveLoading] = args.createSignal(false);
-const [saveSuccess, setSaveSuccess] = args.createSignal(false);
+const [username, setUsername] = _.createSignal("");
+const [email, setEmail] = _.createSignal("");
+const [saveLoading, setSaveLoading] = _.createSignal(false);
+const [saveSuccess, setSaveSuccess] = _.createSignal(false);
 
 const pendingEmail = () => {
-  const p = args.user?.P?.pendingEmail;
+  const p = _.user?.P?.pendingEmail;
   return p != null && String(p).trim() !== "" ? String(p).trim() : "";
 };
 
 const syncFromUser = () => {
-  const u = args.user?.P;
+  const u = _.user?.P;
   if (!u) return;
   setUsername(String(u.username ?? ""));
   setEmail(String(u.email ?? ""));
@@ -26,37 +26,37 @@ const syncFromUser = () => {
 const emailOk = (s) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(s || "").trim());
 
 const saveProfile = async () => {
-  const u = args.user?.P;
+  const u = _.user?.P;
   if (!u?.uuid) {
-    args.showErrorToast?.("Not signed in.");
+    _.showErrorToast?.("Not signed in.");
     return;
   }
   if (!String(username()).trim()) {
-    args.showErrorToast?.("Please enter username");
+    _.showErrorToast?.("Please enter username");
     return;
   }
   if (!String(email()).trim()) {
-    args.showErrorToast?.("Please enter email");
+    _.showErrorToast?.("Please enter email");
     return;
   }
   if (!emailOk(email())) {
-    args.showErrorToast?.("Please enter a valid email");
+    _.showErrorToast?.("Please enter a valid email");
     return;
   }
   try {
     setSaveLoading(true);
     setSaveSuccess(false);
-    const res = await args.postAPI("/api/auth/updateProfile", {
+    const res = await _.postAPI("/api/auth/updateProfile", {
       email: String(email()).trim(),
       username: String(username()).trim(),
       uuid: String(u.uuid).trim(),
     });
-    args.showSuccessToast?.(
+    _.showSuccessToast?.(
       (typeof res.message === "string" && res.message) || "Profile updated successfully"
     );
     setSaveSuccess(true);
   } catch (e) {
-    args.showErrorToast?.(e instanceof Error ? e.message : "Save failed");
+    _.showErrorToast?.(e instanceof Error ? e.message : "Save failed");
   } finally {
     setSaveLoading(false);
   }
@@ -64,13 +64,13 @@ const saveProfile = async () => {
 
 const resendConfirmation = async () => {
   try {
-    const res = await args.postAPI("/api/auth/resendEmailConfirmation", {});
-    args.showSuccessToast?.(
+    const res = await _.postAPI("/api/auth/resendEmailConfirmation", {});
+    _.showSuccessToast?.(
       (typeof res.message === "string" && res.message) ||
         "Confirmation email has been resent"
     );
   } catch (e) {
-    args.showErrorToast?.(e instanceof Error ? e.message : "Request failed");
+    _.showErrorToast?.(e instanceof Error ? e.message : "Request failed");
   }
 };
 
@@ -150,29 +150,29 @@ const saveProfileImageForm = async (savePayload) => {
   const selectedProfileImageElementId =
     formVertex?.P?.profileImage != null ? String(formVertex.P.profileImage).trim() : "";
   if (!selectedProfileImageElementId) {
-    args.showErrorToast?.("Select or upload a profile photo first.");
+    _.showErrorToast?.("Select or upload a profile photo first.");
     return false;
   }
   const authenticatedUserUuid =
     formVertex?.P?.uuid != null ? String(formVertex.P.uuid).trim() : "";
   if (!authenticatedUserUuid) {
-    args.showErrorToast?.("Missing account id.");
+    _.showErrorToast?.("Missing account id.");
     return false;
   }
   try {
-    const response = await args.postAPI("/api/auth/updateProfileImage", {
+    const response = await _.postAPI("/api/auth/updateProfileImage", {
       profileImage: selectedProfileImageElementId,
       uuid: authenticatedUserUuid
     });
     if (response?.graph && typeof response.graph === "object") {
-      args.setGraphData(0, response.graph, {});
+      _.setGraphData(0, response.graph, {});
     }
-    args.showSuccessToast?.(
+    _.showSuccessToast?.(
       (typeof response.message === "string" && response.message) || "Profile photo updated"
     );
     return true;
   } catch (error) {
-    args.showErrorToast?.(error instanceof Error ? error.message : "Save failed");
+    _.showErrorToast?.(error instanceof Error ? error.message : "Save failed");
     return false;
   }
 };
@@ -200,11 +200,11 @@ return {
           '''return {
   isNoPermissionCheck: true,
   onMount: () => {
-    if (!args.user) {
-      args.navigate("/auth/signin", { replace: true });
+    if (!_.user) {
+      _.navigate("/auth/signin", { replace: true });
       return;
     }
-    args.fns.syncFromUser();
+    f.syncFromUser();
   }
 };'''
       }
@@ -218,7 +218,7 @@ return {
         css:
           '''return `._id {
   width: 100%;
-  padding: ${args.theme.var.spacing?.md || "1rem"};
+  padding: ${t.var.spacing?.md || "1rem"};
   max-width: 28rem;
   margin: 0;
   text-align: left;
@@ -263,7 +263,7 @@ return {
         css:
           '''return `._id {
   flex-shrink: 0;
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
 }`;'''
         props:
           '''return {
@@ -285,7 +285,7 @@ return {
   font-size: 1.75rem;
   font-weight: 700;
   margin: 0;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         props:
           '''return {
@@ -308,15 +308,15 @@ return {
   gap: 0.5rem;
   padding: 1rem;
   border-radius: 0.5rem;
-  border: 1px solid ${args.theme.var.color.warning_light_200};
-  background: ${args.theme.var.color.warning_light_150};
-  color: ${args.theme.var.color.text};
+  border: 1px solid ${t.var.color.warning_light_200};
+  background: ${t.var.color.warning_light_150};
+  color: ${t.var.color.text};
   font-size: 0.9rem;
 }`;'''
         props:
           '''return {
   as: "div",
-  hide: !args.fns.pendingEmail()
+  hide: !f.pendingEmail()
 };'''
       }
     }
@@ -329,7 +329,7 @@ return {
         css:
           '''return `._id {
   flex-shrink: 0;
-  color: ${args.theme.var.color.warning};
+  color: ${t.var.color.warning};
 }`;'''
         props:
           '''return {
@@ -337,7 +337,7 @@ return {
   icon: "ph:warning-circle-fill",
   width: 22,
   height: 22,
-  hide: !args.fns.pendingEmail()
+  hide: !f.pendingEmail()
 };'''
       }
     }
@@ -354,7 +354,7 @@ return {
   line-height: 1.45;
 }`;'''
         props:
-          '''const pe = args.fns.pendingEmail();
+          '''const pe = f.pendingEmail();
 return {
   as: "div",
   hide: !pe,
@@ -379,22 +379,22 @@ return {
   width: fit-content;
   padding: 0.45rem 0.75rem;
   border-radius: 0.375rem;
-  border: 1px solid ${args.theme.var.color.warning};
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  border: 1px solid ${t.var.color.warning};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
 }
 ._id:hover {
-  background: ${args.theme.var.color.warning_light_900};
+  background: ${t.var.color.warning_light_900};
 }`;'''
         props:
           '''return {
   as: "button",
   type: "button",
-  hide: !args.fns.pendingEmail(),
-  onClick: () => void args.fns.resendConfirmation()
+  hide: !f.pendingEmail(),
+  onClick: () => void f.resendConfirmation()
 };'''
       }
     }
@@ -407,7 +407,7 @@ return {
         css:
           '''return `._id {
   flex-shrink: 0;
-  color: ${args.theme.var.color.warning};
+  color: ${t.var.color.warning};
 }`;'''
         props:
           '''return {
@@ -415,7 +415,7 @@ return {
   icon: "ph:envelope-simple-fill",
   width: 18,
   height: 18,
-  hide: !args.fns.pendingEmail()
+  hide: !f.pendingEmail()
 };'''
       }
     }
@@ -429,7 +429,7 @@ return {
           '''return {
   as: "span",
   text: "Resend confirmation",
-  hide: !args.fns.pendingEmail()
+  hide: !f.pendingEmail()
 };'''
       }
     }
@@ -443,7 +443,7 @@ return {
           '''return `._id {
   font-size: 0.8rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         props:
           '''return {
@@ -463,11 +463,11 @@ return {
   type: "text",
   placeholder: "Username",
   leftIcon: "ph:user",
-  value: args.fns.username(),
-  disabled: !!args.fns.saveLoading(),
+  value: f.username(),
+  disabled: !!f.saveLoading(),
   onInput: (e) => {
     const t = e?.target;
-    if (t && "value" in t) args.fns.setUsername(t.value);
+    if (t && "value" in t) f.setUsername(t.value);
   }
 };'''
       }
@@ -482,7 +482,7 @@ return {
           '''return `._id {
   font-size: 0.8rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         props:
           '''return {
@@ -502,11 +502,11 @@ return {
   type: "email",
   placeholder: "Email address",
   leftIcon: "ph:envelope",
-  value: args.fns.email(),
-  disabled: !!args.fns.saveLoading(),
+  value: f.email(),
+  disabled: !!f.saveLoading(),
   onInput: (e) => {
     const t = e?.target;
-    if (t && "value" in t) args.fns.setEmail(t.value);
+    if (t && "value" in t) f.setEmail(t.value);
   }
 };'''
       }
@@ -530,8 +530,8 @@ return {
   font-weight: 600;
   cursor: pointer;
   border: none;
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
 }
 ._id:disabled {
   opacity: 0.55;
@@ -541,8 +541,8 @@ return {
           '''return {
   as: "button",
   type: "button",
-  disabled: !!args.fns.saveLoading(),
-  onClick: () => void args.fns.saveProfile()
+  disabled: !!f.saveLoading(),
+  onClick: () => void f.saveProfile()
 };'''
       }
     }
@@ -559,9 +559,9 @@ return {
         props:
           '''return {
   as: "icon",
-  icon: args.fns.saveLoading()
+  icon: f.saveLoading()
     ? "ph:circle-notch"
-    : args.fns.saveSuccess()
+    : f.saveSuccess()
       ? "ph:check-circle-fill"
       : "ph:floppy-disk-back",
   width: 20,
@@ -582,9 +582,9 @@ return {
         props:
           '''return {
   as: "span",
-  text: args.fns.saveLoading()
+  text: f.saveLoading()
     ? "Saving…"
-    : args.fns.saveSuccess()
+    : f.saveSuccess()
       ? "Saved"
       : "Save changes"
 };'''
@@ -599,7 +599,7 @@ return {
         css:
           '''return `._id {
   width: 100%;
-  padding: ${args.theme.var.spacing?.md || "1rem"};
+  padding: ${t.var.spacing?.md || "1rem"};
   max-width: 28rem;
   margin: 0;
   margin-top: 1rem;
@@ -610,7 +610,7 @@ return {
   align-items: stretch;
   gap: 0.5rem;
   box-sizing: border-box;
-  border-top: 1px solid ${args.theme.var.color.border};
+  border-top: 1px solid ${t.var.color.border};
 }`;'''
         props:
           '''return {
@@ -629,7 +629,7 @@ return {
   font-size: 1.35rem;
   font-weight: 700;
   margin: 0;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         props:
           '''return {
@@ -645,11 +645,11 @@ return {
         displayOrder: 2
         componentName: FormManagement
         props:
-          '''const currentUser = args.user;
+          '''const currentUser = _.user;
 const profileImageFileVertex =
   currentUser &&
-  args.evalExpression("->UserProfileImage", {
-    graph: args.graph,
+  _.evalExpression("->UserProfileImage", {
+    graph: g,
     vertexes: [currentUser]
   })?.[0];
 const currentProfileImageElementId =
@@ -668,11 +668,11 @@ const initialUserVertexForProfileImageForm =
       }
     : null;
 return {
-  formConfig: args.fns.profileImageFormConfiguration,
+  formConfig: f.profileImageFormConfiguration,
   initialVertex: initialUserVertexForProfileImageForm,
   vertexLabel: "User",
   mode: "edit",
-  onSave: args.fns.saveProfileImageForm,
+  onSave: f.saveProfileImageForm,
   afterSuccessfulSave: "reinitialize",
   hide: initialUserVertexForProfileImageForm == null,
   class: "portal-profile-image-form"

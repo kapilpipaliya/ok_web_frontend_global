@@ -11,7 +11,7 @@
 const today = new Date().toISOString().split('T')[0];
 
 // Get all API keys ordered by priority (lower number = higher priority)
-const result = await args.session.run(`
+const result = await _.session.run(`
   MATCH (ak:YouTubeAPIKey)
   WHERE ak.isActive = true
   RETURN ak
@@ -26,7 +26,7 @@ if (result.records.length === 0) {
 }
 
 // Convert to vertex format
-const apiKeys = result.records.map(record => args.convertNodeToJson(record.get('ak')));
+const apiKeys = result.records.map(record => _.convertNodeToJson(record.get('ak')));
 
 // Find first available API key
 for (const apiKeyData of apiKeys) {
@@ -37,7 +37,7 @@ for (const apiKeyData of apiKeys) {
 
   // Reset count if it's a new day
   if (resetDate !== today) {
-    await args.session.run(`
+    await _.session.run(`
       MATCH (ak:YouTubeAPIKey {key: $key})
       SET ak.currentCount = 0,
           ak.resetDate = $today,

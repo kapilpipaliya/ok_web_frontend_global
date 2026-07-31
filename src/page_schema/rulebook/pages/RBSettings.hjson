@@ -39,14 +39,14 @@ return {
 ''',
         css: '''
 return `._id {
-  padding: ${args.theme.var.spacing.lg};
+  padding: ${t.var.spacing.lg};
   max-width: 1200px;
   margin: 0 auto;
 }
 
 @media (max-width: 768px) {
   ._id {
-    padding: ${args.theme.var.spacing.md};
+    padding: ${t.var.spacing.md};
   }
 }`;
 '''
@@ -119,7 +119,7 @@ return {
 return `._id {
   display: flex;
   flex-direction: column;
-  gap: ${args.theme.var.spacing.lg};
+  gap: ${t.var.spacing.lg};
 }`;
 '''
       }
@@ -131,7 +131,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const navItem = args.contextData.navigationCard;
+const navItem = c.navigationCard;
 
 return {
   as: "a",
@@ -140,16 +140,16 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background_light_100};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.lg};
-  padding: ${args.theme.var.spacing.lg};
+  background: ${t.var.color.background_light_100};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.lg};
+  padding: ${t.var.spacing.lg};
   cursor: pointer;
   transition: all 150ms ease;
   text-decoration: none;
 
   &:hover {
-    border-color: ${args.theme.var.color.primary};
+    border-color: ${t.var.color.primary};
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
 }`;
@@ -191,7 +191,7 @@ return {
 return `._id {
   display: flex;
   align-items: center;
-  gap: ${args.theme.var.spacing.md};
+  gap: ${t.var.spacing.md};
 }`;
 '''
       }
@@ -203,7 +203,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const navItem = args.contextData.navigationCard;
+const navItem = c.navigationCard;
 
 return {
   as: "div",
@@ -211,7 +211,7 @@ return {
 };
 ''',
         css: '''
-const navItem = args.contextData.navigationCard;
+const navItem = c.navigationCard;
 
 return `._id {
   font-size: 2rem;
@@ -220,8 +220,8 @@ return `._id {
   justify-content: center;
   width: 48px;
   height: 48px;
-  background: ${args.theme.var.color[navItem.bgColor]};
-  border-radius: ${args.theme.var.borderRadius.md};
+  background: ${t.var.color[navItem.bgColor]};
+  border-radius: ${t.var.borderRadius.md};
 }`;
 '''
       }
@@ -246,7 +246,7 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const navItem = args.contextData.navigationCard;
+const navItem = c.navigationCard;
 
 return {
   as: "h3",
@@ -257,8 +257,8 @@ return {
 return `._id {
   font-size: 1.125rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 ${args.theme.var.spacing.xs} 0;
+  color: ${t.var.color.text};
+  margin: 0 0 ${t.var.spacing.xs} 0;
 }`;
 '''
       }
@@ -270,7 +270,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const navItem = args.contextData.navigationCard;
+const navItem = c.navigationCard;
 
 return {
   as: "p",
@@ -279,7 +279,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   font-size: 0.875rem;
   margin: 0;
   line-height: 1.4;
@@ -303,7 +303,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
       }
@@ -321,10 +321,10 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background_light_100};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.lg};
-  padding: ${args.theme.var.spacing.lg};
+  background: ${t.var.color.background_light_100};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.lg};
+  padding: ${t.var.spacing.lg};
 }`;
 '''
       }
@@ -345,8 +345,8 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 ${args.theme.var.spacing.lg} 0;
+  color: ${t.var.color.text};
+  margin: 0 0 ${t.var.spacing.lg} 0;
 }`;
 '''
       }
@@ -367,8 +367,8 @@ return `._id {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: ${args.theme.var.spacing.md} 0;
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  padding: ${t.var.spacing.md} 0;
+  border-bottom: 1px solid ${t.var.color.border};
 }`;
 '''
       }
@@ -401,8 +401,8 @@ return {
         css: '''
 return `._id {
   font-weight: 500;
-  color: ${args.theme.var.color.text};
-  margin-bottom: ${args.theme.var.spacing.xs};
+  color: ${t.var.color.text};
+  margin-bottom: ${t.var.spacing.xs};
 }`;
 '''
       }
@@ -422,7 +422,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
       }
@@ -436,24 +436,24 @@ return `._id {
         props: '''
 return {
   as: "button",
-  onClick: () => args.toggleTheme(),
-  text: args.currentMode() === "dark" ? "🌙 Dark" : "☀️ Light"
+  onClick: () => _.toggleTheme(),
+  text: _.currentMode() === "dark" ? "🌙 Dark" : "☀️ Light"
 };
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
   border: none;
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  border-radius: ${args.theme.var.borderRadius.md};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  border-radius: ${t.var.borderRadius.md};
   font-weight: 500;
   cursor: pointer;
   transition: all 150ms ease;
   text-decoration: none;
 
   &:hover {
-    background: ${args.theme.var.color.primary_dark_200};
+    background: ${t.var.color.primary_dark_200};
   }
 }`;
 '''
@@ -468,7 +468,7 @@ return `._id {
         fns: '''
 const fetchTimezones = async () => {
   try {
-    const response = await args.executeNamedServerFunction({
+    const response = await s({
       functionName: "getAvailableTimezones",
       contextData: {}
     });
@@ -488,26 +488,26 @@ const fetchTimezones = async () => {
 
 const saveTimezone = async (timezone) => {
   try {
-    const response = await args.executeNamedServerFunction({
+    const response = await s({
       functionName: "updateUserTimezone",
       contextData: { timezone }
     });
 
     if (response.error) {
-      args.showErrorToast(response.error);
+      _.showErrorToast(response.error);
       return false;
     }
 
     if (response.result && response.result.success) {
-      args.showSuccessToast(response.result.message);
+      _.showSuccessToast(response.result.message);
       return true;
     } else {
       const errorMsg = response.result?.message || "Failed to update timezone";
-      args.showErrorToast(errorMsg);
+      _.showErrorToast(errorMsg);
       return false;
     }
   } catch (error) {
-    args.showErrorToast("Error updating timezone: " + error.message);
+    _.showErrorToast("Error updating timezone: " + error.message);
     return false;
   }
 };
@@ -515,20 +515,20 @@ const saveTimezone = async (timezone) => {
 return { fetchTimezones, saveTimezone };
 ''',
         props: '''
-const [timezoneData, setTimezoneData] = args.createSignal(null);
-const [selectedTimezone, setSelectedTimezone] = args.createSignal('');
-const [loading, setLoading] = args.createSignal(true);
-const [saving, setSaving] = args.createSignal(false);
-const [searchTerm, setSearchTerm] = args.createSignal('');
-const [showDropdown, setShowDropdown] = args.createSignal(false);
+const [timezoneData, setTimezoneData] = _.createSignal(null);
+const [selectedTimezone, setSelectedTimezone] = _.createSignal('');
+const [loading, setLoading] = _.createSignal(true);
+const [saving, setSaving] = _.createSignal(false);
+const [searchTerm, setSearchTerm] = _.createSignal('');
+const [showDropdown, setShowDropdown] = _.createSignal(false);
 
 const handleSave = async () => {
   setSaving(true);
   try {
-    const success = await args.fns.saveTimezone(selectedTimezone());
+    const success = await f.saveTimezone(selectedTimezone());
     if (success) {
       // Reload timezone data from server to get the updated value
-      const freshData = await args.fns.fetchTimezones();
+      const freshData = await f.fetchTimezones();
       if (freshData) {
         setTimezoneData(freshData);
         setSelectedTimezone(freshData.currentTimezone);
@@ -536,7 +536,7 @@ const handleSave = async () => {
       }
     }
   } catch (error) {
-    args.showErrorToast('Failed to save timezone');
+    _.showErrorToast('Failed to save timezone');
   } finally {
     setSaving(false);
   }
@@ -559,7 +559,7 @@ return {
   },
   onMount: async () => {
     // Load timezones when component mounts
-    const data = await args.fns.fetchTimezones();
+    const data = await f.fetchTimezones();
     if (data) {
       setTimezoneData(data);
       setSelectedTimezone(data.currentTimezone || 'UTC');
@@ -574,8 +574,8 @@ return {
 ''',
         css: '''
 return `._id {
-  padding: ${args.theme.var.spacing.md} 0;
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  padding: ${t.var.spacing.md} 0;
+  border-bottom: 1px solid ${t.var.color.border};
 }`;
 ''',
         contextName: "timezoneSection"
@@ -597,7 +597,7 @@ return `._id {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: ${args.theme.var.spacing.md};
+  gap: ${t.var.spacing.md};
 }
 
 @media (max-width: 768px) {
@@ -641,8 +641,8 @@ return {
         css: '''
 return `._id {
   font-weight: 500;
-  color: ${args.theme.var.color.text};
-  margin-bottom: ${args.theme.var.spacing.xs};
+  color: ${t.var.color.text};
+  margin-bottom: ${t.var.spacing.xs};
 }`;
 '''
       }
@@ -654,7 +654,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const timezoneSection = args.contextData?.timezoneSection;
+const timezoneSection = c?.timezoneSection;
 if (!timezoneSection) {
   return {
     as: "div",
@@ -687,7 +687,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
       }
@@ -731,7 +731,7 @@ return {
         css: '''
 return `._id {
   display: flex;
-  gap: ${args.theme.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
 }`;
 '''
       }
@@ -743,7 +743,7 @@ return `._id {
         displayOrder: 1,
         componentName: "RBTextInput",
         props: '''
-const timezoneSection = args.contextData?.timezoneSection;
+const timezoneSection = c?.timezoneSection;
 if (!timezoneSection) {
   return {
     placeholder: "Loading...",
@@ -793,7 +793,7 @@ return `._id {
         displayOrder: 2,
         componentName: "RBButton",
         props: '''
-const timezoneSection = args.contextData?.timezoneSection;
+const timezoneSection = c?.timezoneSection;
 if (!timezoneSection) {
   return {
     text: "Save",
@@ -823,7 +823,7 @@ return {
         componentName: "Html",
         props: '''
 // Access timezone section context safely
-const timezoneSection = args.contextData?.timezoneSection;
+const timezoneSection = c?.timezoneSection;
 if (!timezoneSection) {
   return { as: "div", show: false };
 }
@@ -852,14 +852,14 @@ return {
         css: '''
 return `._id {
   position: absolute;
-  top: calc(100% + ${args.theme.var.spacing.xs});
+  top: calc(100% + ${t.var.spacing.xs});
   left: 0;
   right: 0;
   max-height: 300px;
   overflow-y: auto;
-  background: ${args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.md};
+  background: ${t.var.color.background};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.md};
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   z-index: 1000;
 }`;
@@ -875,7 +875,7 @@ return `._id {
         contextName: "timezoneOptions",
         loop: true,
         props: '''
-const timezoneSection = args.contextData?.timezoneSection;
+const timezoneSection = c?.timezoneSection;
 if (!timezoneSection) {
   return {
     as: "div",
@@ -918,8 +918,8 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const timezoneOption = args.contextData.timezoneOptions;
-const timezoneSection = args.contextData?.timezoneSection;
+const timezoneOption = c.timezoneOptions;
+const timezoneSection = c?.timezoneSection;
 
 if (!timezoneOption || !timezoneSection) {
   return { as: "div" };
@@ -943,12 +943,12 @@ return {
 ''',
         css: '''
 return `._id {
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
   cursor: pointer;
   transition: background 150ms ease;
 
   &:hover {
-    background: ${args.theme.var.color.background_light_200};
+    background: ${t.var.color.background_light_200};
   }
 }`;
 '''
@@ -963,26 +963,26 @@ return `._id {
         fns: '''
 const generateSampleData = async () => {
   try {
-    const response = await args.executeNamedServerFunction({
+    const response = await s({
       functionName: "generateSampleData",
       contextData: {}
     });
 
     if (response.error) {
-      args.showErrorToast(response.error);
+      _.showErrorToast(response.error);
       return false;
     }
 
     if (response.result && response.result.success) {
-      args.showSuccessToast(response.result.message);
+      _.showSuccessToast(response.result.message);
       return true;
     } else {
       const errorMsg = response.result?.message || "Failed to generate sample data";
-      args.showErrorToast(errorMsg);
+      _.showErrorToast(errorMsg);
       return false;
     }
   } catch (error) {
-    args.showErrorToast("Error generating sample data: " + error.message);
+    _.showErrorToast("Error generating sample data: " + error.message);
     return false;
   }
 };
@@ -991,14 +991,14 @@ return { generateSampleData };
 ''',
         props: '''
 // Check if admin=true query parameter is present
-const isAdmin = args.searchParams?.admin === 'true';
+const isAdmin = _.searchParams?.admin === 'true';
 
-const [generating, setGenerating] = args.createSignal(false);
+const [generating, setGenerating] = _.createSignal(false);
 
 const handleGenerateSampleData = async () => {
   setGenerating(true);
   try {
-    await args.fns.generateSampleData();
+    await f.generateSampleData();
   } finally {
     setGenerating(false);
   }
@@ -1015,11 +1015,11 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.info_light_100};
-  border: 1px solid ${args.theme.var.color.info_light_300};
-  border-radius: ${args.theme.var.borderRadius.lg};
-  padding: ${args.theme.var.spacing.lg};
-  margin-bottom: ${args.theme.var.spacing.lg};
+  background: ${t.var.color.info_light_100};
+  border: 1px solid ${t.var.color.info_light_300};
+  border-radius: ${t.var.borderRadius.lg};
+  padding: ${t.var.spacing.lg};
+  margin-bottom: ${t.var.spacing.lg};
 }`;
 ''',
         contextName: "adminSection"
@@ -1041,8 +1041,8 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.info};
-  margin: 0 0 ${args.theme.var.spacing.lg} 0;
+  color: ${t.var.color.info};
+  margin: 0 0 ${t.var.spacing.lg} 0;
 }`;
 '''
       }
@@ -1063,7 +1063,7 @@ return `._id {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: ${args.theme.var.spacing.md} 0;
+  padding: ${t.var.spacing.md} 0;
 }`;
 '''
       }
@@ -1082,7 +1082,7 @@ return {
         css: '''
 return `._id {
   flex: 1;
-  margin-right: ${args.theme.var.spacing.md};
+  margin-right: ${t.var.spacing.md};
 }`;
 '''
       }
@@ -1103,8 +1103,8 @@ return {
 return `._id {
   font-size: 1.125rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 ${args.theme.var.spacing.xs} 0;
+  color: ${t.var.color.text};
+  margin: 0 0 ${t.var.spacing.xs} 0;
 }`;
 '''
       }
@@ -1123,7 +1123,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   font-size: 0.875rem;
   margin: 0;
   line-height: 1.4;
@@ -1138,7 +1138,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const { generating, handleGenerateSampleData } = args.contextData.adminSection;
+const { generating, handleGenerateSampleData } = c.adminSection;
 
 return {
   as: "button",
@@ -1148,22 +1148,22 @@ return {
 };
 ''',
         css: '''
-const { generating } = args.contextData.adminSection;
+const { generating } = c.adminSection;
 const isDisabled = generating();
 
 return `._id {
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  background: ${isDisabled ? args.theme.var.color.background_light_300 : args.theme.var.color.info};
-  color: ${isDisabled ? args.theme.var.color.text_light_500 : args.theme.var.color.info_text};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  background: ${isDisabled ? t.var.color.background_light_300 : t.var.color.info};
+  color: ${isDisabled ? t.var.color.text_light_500 : t.var.color.info_text};
   border: none;
-  border-radius: ${args.theme.var.borderRadius.md};
+  border-radius: ${t.var.borderRadius.md};
   font-weight: 500;
   cursor: ${isDisabled ? 'not-allowed' : 'pointer'};
   transition: all 150ms ease;
   white-space: nowrap;
 
   &:hover {
-    background: ${isDisabled ? args.theme.var.color.background_light_300 : args.theme.var.color.info_dark_200};
+    background: ${isDisabled ? t.var.color.background_light_300 : t.var.color.info_dark_200};
   }
 
   &:active {
@@ -1186,10 +1186,10 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background_light_100};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.lg};
-  padding: ${args.theme.var.spacing.lg};
+  background: ${t.var.color.background_light_100};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.lg};
+  padding: ${t.var.spacing.lg};
 }`;
 '''
       }
@@ -1210,8 +1210,8 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 ${args.theme.var.spacing.lg} 0;
+  color: ${t.var.color.text};
+  margin: 0 0 ${t.var.spacing.lg} 0;
 }`;
 '''
       }
@@ -1232,8 +1232,8 @@ return `._id {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: ${args.theme.var.spacing.md} 0;
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  padding: ${t.var.spacing.md} 0;
+  border-bottom: 1px solid ${t.var.color.border};
 }
 
 ._id:last-child {
@@ -1271,8 +1271,8 @@ return {
 return `._id {
   font-size: 1.125rem;
   font-weight: 500;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 ${args.theme.var.spacing.xs} 0;
+  color: ${t.var.color.text};
+  margin: 0 0 ${t.var.spacing.xs} 0;
 }`;
 '''
       }
@@ -1292,7 +1292,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0;
 }`;
 '''
@@ -1309,7 +1309,7 @@ return {
   text: "Sign Out",
   variant: "danger",
   onClick: () => {
-    args.navigate("/auth/logout");
+    _.navigate("/auth/logout");
   }
 };
 '''
@@ -1322,10 +1322,10 @@ return {
         displayOrder: 5,
         componentName: "Html",
         props: '''
-const [showDeleteConfirmation, setShowDeleteConfirmation] = args.createSignal(false);
-const [showAccountConfirmation, setShowAccountConfirmation] = args.createSignal(false);
-const [deleteDataLoading, setDeleteDataLoading] = args.createSignal(false);
-const [deleteAccountLoading, setDeleteAccountLoading] = args.createSignal(false);
+const [showDeleteConfirmation, setShowDeleteConfirmation] = _.createSignal(false);
+const [showAccountConfirmation, setShowAccountConfirmation] = _.createSignal(false);
+const [deleteDataLoading, setDeleteDataLoading] = _.createSignal(false);
+const [deleteAccountLoading, setDeleteAccountLoading] = _.createSignal(false);
 
 return {
   as: "section",
@@ -1343,10 +1343,10 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.error_light_100};
-  border: 1px solid ${args.theme.var.color.error_light_300};
-  border-radius: ${args.theme.var.borderRadius.lg};
-  padding: ${args.theme.var.spacing.lg};
+  background: ${t.var.color.error_light_100};
+  border: 1px solid ${t.var.color.error_light_300};
+  border-radius: ${t.var.borderRadius.lg};
+  padding: ${t.var.spacing.lg};
 }`;
 ''',
         contextName: "dangerSection"
@@ -1368,8 +1368,8 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.error};
-  margin: 0 0 ${args.theme.var.spacing.lg} 0;
+  color: ${t.var.color.error};
+  margin: 0 0 ${t.var.spacing.lg} 0;
 }`;
 '''
       }
@@ -1387,8 +1387,8 @@ return {
 ''',
         css: '''
 return `._id {
-  padding: ${args.theme.var.spacing.md} 0;
-  border-bottom: 1px solid ${args.theme.var.color.error_light_300};
+  padding: ${t.var.spacing.md} 0;
+  border-bottom: 1px solid ${t.var.color.error_light_300};
 }`;
 '''
       }
@@ -1409,7 +1409,7 @@ return `._id {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: ${args.theme.var.spacing.md};
+  margin-bottom: ${t.var.spacing.md};
 }`;
 '''
       }
@@ -1442,8 +1442,8 @@ return {
         css: '''
 return `._id {
   font-weight: 600;
-  color: ${args.theme.var.color.error};
-  margin-bottom: ${args.theme.var.spacing.xs};
+  color: ${t.var.color.error};
+  margin-bottom: ${t.var.spacing.xs};
 }`;
 '''
       }
@@ -1463,7 +1463,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.error_dark_200};
+  color: ${t.var.color.error_dark_200};
   line-height: 1.4;
 }`;
 '''
@@ -1476,7 +1476,7 @@ return `._id {
         displayOrder: 2,
         componentName: "RBButton",
         props: '''
-const { showDeleteConfirmation, setShowDeleteConfirmation } = args.contextData.dangerSection;
+const { showDeleteConfirmation, setShowDeleteConfirmation } = c.dangerSection;
 
 return {
   text: "Delete All Data",
@@ -1498,7 +1498,7 @@ const {
   setShowDeleteConfirmation,
   deleteDataLoading,
   setDeleteDataLoading
-} = args.contextData.dangerSection;
+} = c.dangerSection;
 
 return {
   as: "div",
@@ -1507,11 +1507,11 @@ return {
 ''',
         css: '''
 return `._id {
-  margin-top: ${args.theme.var.spacing.md};
-  padding: ${args.theme.var.spacing.md};
-  background: ${args.theme.var.color.error_light_50};
-  border: 1px solid ${args.theme.var.color.error_light_400};
-  border-radius: ${args.theme.var.borderRadius.md};
+  margin-top: ${t.var.spacing.md};
+  padding: ${t.var.spacing.md};
+  background: ${t.var.color.error_light_50};
+  border: 1px solid ${t.var.color.error_light_400};
+  border-radius: ${t.var.borderRadius.md};
 }`;
 '''
       }
@@ -1531,8 +1531,8 @@ return {
         css: '''
 return `._id {
   font-weight: 500;
-  color: ${args.theme.var.color.error_dark_100};
-  margin-bottom: ${args.theme.var.spacing.md};
+  color: ${t.var.color.error_dark_100};
+  margin-bottom: ${t.var.spacing.md};
   line-height: 1.4;
 }`;
 '''
@@ -1552,7 +1552,7 @@ return {
         css: '''
 return `._id {
   display: flex;
-  gap: ${args.theme.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
   justify-content: flex-end;
 }`;
 '''
@@ -1565,7 +1565,7 @@ return `._id {
         displayOrder: 1,
         componentName: "RBButton",
         props: '''
-const { setShowDeleteConfirmation } = args.contextData.dangerSection;
+const { setShowDeleteConfirmation } = c.dangerSection;
 
 return {
   text: "Cancel",
@@ -1586,7 +1586,7 @@ const {
   setShowDeleteConfirmation,
   deleteDataLoading,
   setDeleteDataLoading
-} = args.contextData.dangerSection;
+} = c.dangerSection;
 
 return {
   text: deleteDataLoading() ? "Deleting..." : "Yes, Delete All Data",
@@ -1596,29 +1596,29 @@ return {
   onClick: async () => {
     setDeleteDataLoading(true);
     try {
-      const response = await args.executeNamedServerFunction({
+      const response = await s({
         functionName: "deleteAllUserData",
         contextData: {}
       });
 
       if (response.error) {
-        args.showErrorToast(response.error);
+        _.showErrorToast(response.error);
         return;
       }
 
       const result = response.result;
       if (result.success) {
-        args.showSuccessToast(result.message);
+        _.showSuccessToast(result.message);
         setShowDeleteConfirmation(false);
         // Optionally redirect to home or reload page
         setTimeout(() => {
-          args.navigate("/rb");
+          _.navigate("/rb");
         }, 1500);
       } else {
-        args.showErrorToast(result.message || "Failed to delete data");
+        _.showErrorToast(result.message || "Failed to delete data");
       }
     } catch (error) {
-      args.showErrorToast("Error deleting data: " + error.message);
+      _.showErrorToast("Error deleting data: " + error.message);
     } finally {
       setDeleteDataLoading(false);
     }
@@ -1640,7 +1640,7 @@ return {
 ''',
         css: '''
 return `._id {
-  padding: ${args.theme.var.spacing.md} 0;
+  padding: ${t.var.spacing.md} 0;
 }`;
 '''
       }
@@ -1661,7 +1661,7 @@ return `._id {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: ${args.theme.var.spacing.md};
+  margin-bottom: ${t.var.spacing.md};
 }`;
 '''
       }
@@ -1694,8 +1694,8 @@ return {
         css: '''
 return `._id {
   font-weight: 600;
-  color: ${args.theme.var.color.error};
-  margin-bottom: ${args.theme.var.spacing.xs};
+  color: ${t.var.color.error};
+  margin-bottom: ${t.var.spacing.xs};
 }`;
 '''
       }
@@ -1715,7 +1715,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.error_dark_200};
+  color: ${t.var.color.error_dark_200};
   line-height: 1.4;
 }`;
 '''
@@ -1728,7 +1728,7 @@ return `._id {
         displayOrder: 2,
         componentName: "RBButton",
         props: '''
-const { showAccountConfirmation, setShowAccountConfirmation } = args.contextData.dangerSection;
+const { showAccountConfirmation, setShowAccountConfirmation } = c.dangerSection;
 
 return {
   text: "Delete Account",
@@ -1750,7 +1750,7 @@ const {
   setShowAccountConfirmation,
   deleteAccountLoading,
   setDeleteAccountLoading
-} = args.contextData.dangerSection;
+} = c.dangerSection;
 
 return {
   as: "div",
@@ -1759,11 +1759,11 @@ return {
 ''',
         css: '''
 return `._id {
-  margin-top: ${args.theme.var.spacing.md};
-  padding: ${args.theme.var.spacing.md};
-  background: ${args.theme.var.color.error_light_50};
-  border: 1px solid ${args.theme.var.color.error_light_400};
-  border-radius: ${args.theme.var.borderRadius.md};
+  margin-top: ${t.var.spacing.md};
+  padding: ${t.var.spacing.md};
+  background: ${t.var.color.error_light_50};
+  border: 1px solid ${t.var.color.error_light_400};
+  border-radius: ${t.var.borderRadius.md};
 }`;
 '''
       }
@@ -1783,8 +1783,8 @@ return {
         css: '''
 return `._id {
   font-weight: 600;
-  color: ${args.theme.var.color.error_dark_100};
-  margin-bottom: ${args.theme.var.spacing.md};
+  color: ${t.var.color.error_dark_100};
+  margin-bottom: ${t.var.spacing.md};
   line-height: 1.4;
 }`;
 '''
@@ -1804,7 +1804,7 @@ return {
         css: '''
 return `._id {
   display: flex;
-  gap: ${args.theme.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
   justify-content: flex-end;
 }`;
 '''
@@ -1817,7 +1817,7 @@ return `._id {
         displayOrder: 1,
         componentName: "RBButton",
         props: '''
-const { setShowAccountConfirmation } = args.contextData.dangerSection;
+const { setShowAccountConfirmation } = c.dangerSection;
 
 return {
   text: "Cancel",
@@ -1838,7 +1838,7 @@ const {
   setShowAccountConfirmation,
   deleteAccountLoading,
   setDeleteAccountLoading
-} = args.contextData.dangerSection;
+} = c.dangerSection;
 
 return {
   text: deleteAccountLoading() ? "Deleting Account..." : "Yes, Delete My Account",
@@ -1848,29 +1848,29 @@ return {
   onClick: async () => {
     setDeleteAccountLoading(true);
     try {
-      const response = await args.executeNamedServerFunction({
+      const response = await s({
         functionName: "deleteUserAccount",
         contextData: { confirmed: true }
       });
 
       if (response.error) {
-        args.showErrorToast(response.error);
+        _.showErrorToast(response.error);
         return;
       }
 
       const result = response.result;
       if (result.success) {
-        args.showSuccessToast(result.message);
+        _.showSuccessToast(result.message);
         setShowAccountConfirmation(false);
         // Redirect to login or home page after account deletion
         setTimeout(() => {
-          args.navigate("/");
+          _.navigate("/");
         }, 2000);
       } else {
-        args.showErrorToast(result.message || "Failed to delete account");
+        _.showErrorToast(result.message || "Failed to delete account");
       }
     } catch (error) {
-      args.showErrorToast("Error deleting account: " + error.message);
+      _.showErrorToast("Error deleting account: " + error.message);
     } finally {
       setDeleteAccountLoading(false);
     }

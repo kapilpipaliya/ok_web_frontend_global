@@ -17,7 +17,7 @@
         componentName: "Html",
         contextName: "rechargeStore",
         fns: '''
-const [store, setStore] = args.createStore({
+const [store, setStore] = _.createStore({
   currentBalance: 45.50,
   selectedAmount: 0,
   customAmount: "",
@@ -75,7 +75,7 @@ return {
   },
   
   processRecharge: async () => {
-    if (!args.fns.validateForm()) return;
+    if (!f.validateForm()) return;
     
     setStore("isProcessing", true);
     
@@ -84,25 +84,25 @@ return {
     
     // Update balance
     const newBalance = store.currentBalance + store.selectedAmount;
-    args.saveUserSetting({ balance: newBalance });
+    _.saveUserSetting({ balance: newBalance });
     
-    args.showSuccessToast(`Successfully added $${store.selectedAmount.toFixed(2)} to your balance!`);
-    args.navigate("/dashboard");
+    _.showSuccessToast(`Successfully added $${store.selectedAmount.toFixed(2)} to your balance!`);
+    _.navigate("/dashboard");
   }
 };
 ''',
         props: '''
-const fns = args.fns;
+const fns = f;
 
 return {
   as: "div",
-  data: args.contextData.rechargeStore
+  data: c.rechargeStore
 };
 ''',
         css: '''
 return `._id {
   min-height: 100vh;
-  background: ${args.theme.var.color.background_dark_50};
+  background: ${t.var.color.background_dark_50};
 }`;
 '''
       }
@@ -156,7 +156,7 @@ return {
 return `._id {
   font-size: 2rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 0.5rem;
   
   @media (max-width: 768px) {
@@ -180,7 +180,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin-bottom: 2rem;
 }`;
 '''
@@ -213,7 +213,7 @@ return `._id {
   align-items: center;
   margin-bottom: 2rem;
   padding-bottom: 1.5rem;
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  border-bottom: 1px solid ${t.var.color.border};
 }`;
 '''
       }
@@ -245,7 +245,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   font-size: 0.875rem;
   margin: 0 0 0.25rem 0;
 }`;
@@ -259,7 +259,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const balance = args.contextData.rechargeStore?.currentBalance || 0;
+const balance = c.rechargeStore?.currentBalance || 0;
 return {
   as: "p",
   text: `$${balance.toFixed(2)}`
@@ -269,7 +269,7 @@ return {
 return `._id {
   font-size: 1.5rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0;
 }`;
 '''
@@ -291,7 +291,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.success};
+  color: ${t.var.color.success};
 }`;
 '''
       }
@@ -325,7 +325,7 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 1rem;
 }`;
 '''
@@ -340,7 +340,7 @@ return `._id {
         contextName: "options",
         loop: true,
         props: '''
-const options = args.contextData.rechargeStore?.rechargeOptions || [];
+const options = c.rechargeStore?.rechargeOptions || [];
 return {
   data: options
 };
@@ -366,11 +366,11 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const option = args.contextData.options;
-const selectedAmount = args.contextData.rechargeStore?.selectedAmount || 0;
+const option = c.options;
+const selectedAmount = c.rechargeStore?.selectedAmount || 0;
 const totalAmount = option.amount + option.bonus;
-const isSelected = selectedAmount === totalAmount && !args.contextData.rechargeStore?.customAmount;
-const selectAmount = args.contextData.rechargeStore?.fns?.selectAmount;
+const isSelected = selectedAmount === totalAmount && !c.rechargeStore?.customAmount;
+const selectAmount = c.rechargeStore?.fns?.selectAmount;
 
 return {
   as: "div",
@@ -378,14 +378,14 @@ return {
 };
 ''',
         css: '''
-const option = args.contextData.options;
-const selectedAmount = args.contextData.rechargeStore?.selectedAmount || 0;
+const option = c.options;
+const selectedAmount = c.rechargeStore?.selectedAmount || 0;
 const totalAmount = option.amount + option.bonus;
-const isSelected = selectedAmount === totalAmount && !args.contextData.rechargeStore?.customAmount;
+const isSelected = selectedAmount === totalAmount && !c.rechargeStore?.customAmount;
 
 return `._id {
-  border: 2px solid ${isSelected ? args.theme.var.color.primary : args.theme.var.color.border};
-  background: ${isSelected ? args.theme.var.color.primary_light_50 : args.theme.var.color.background};
+  border: 2px solid ${isSelected ? t.var.color.primary : t.var.color.border};
+  background: ${isSelected ? t.var.color.primary_light_50 : t.var.color.background};
   border-radius: 0.75rem;
   padding: 1rem;
   text-align: center;
@@ -394,7 +394,7 @@ return `._id {
   position: relative;
   
   &:hover {
-    border-color: ${args.theme.var.color.primary};
+    border-color: ${t.var.color.primary};
     transform: translateY(-2px);
   }
 }`;
@@ -408,7 +408,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const option = args.contextData.options;
+const option = c.options;
 if (option.bonus === 0) return { as: "span" };
 
 return {
@@ -421,8 +421,8 @@ return `._id {
   position: absolute;
   top: -8px;
   right: -8px;
-  background: ${args.theme.var.color.success};
-  color: ${args.theme.var.color.success_text};
+  background: ${t.var.color.success};
+  color: ${t.var.color.success_text};
   padding: 0.25rem 0.5rem;
   border-radius: 1rem;
   font-size: 0.75rem;
@@ -438,7 +438,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const option = args.contextData.options;
+const option = c.options;
 return {
   as: "p",
   text: `$${option.amount}`
@@ -448,7 +448,7 @@ return {
 return `._id {
   font-size: 1.5rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.25rem 0;
 }`;
 '''
@@ -461,7 +461,7 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const option = args.contextData.options;
+const option = c.options;
 if (option.bonus === 0) return { as: "span" };
 
 const totalAmount = option.amount + option.bonus;
@@ -473,7 +473,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0;
 }`;
 '''
@@ -514,7 +514,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
       }
@@ -526,8 +526,8 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const customAmount = args.contextData.rechargeStore?.customAmount || "";
-const setCustomAmount = args.contextData.rechargeStore?.fns?.setCustomAmount;
+const customAmount = c.rechargeStore?.customAmount || "";
+const setCustomAmount = c.rechargeStore?.fns?.setCustomAmount;
 
 return {
   as: "div"
@@ -560,7 +560,7 @@ return `._id {
   left: 0.75rem;
   top: 50%;
   transform: translateY(-50%);
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   font-weight: 600;
 }`;
 '''
@@ -573,8 +573,8 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const customAmount = args.contextData.rechargeStore?.customAmount || "";
-const setCustomAmount = args.contextData.rechargeStore?.fns?.setCustomAmount;
+const customAmount = c.rechargeStore?.customAmount || "";
+const setCustomAmount = c.rechargeStore?.fns?.setCustomAmount;
 
 return {
   as: "input",
@@ -587,23 +587,23 @@ return {
 };
 ''',
         css: '''
-const hasError = args.contextData.rechargeStore?.errors?.amount;
+const hasError = c.rechargeStore?.errors?.amount;
 return `._id {
   width: 100%;
   padding: 0.5rem 0.75rem 0.5rem 1.75rem;
-  border: 1px solid ${hasError ? args.theme.var.color.error : args.theme.var.color.border};
+  border: 1px solid ${hasError ? t.var.color.error : t.var.color.border};
   border-radius: 0.5rem;
   font-size: 1rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   
   &:focus {
     outline: none;
-    border-color: ${args.theme.var.color.primary};
+    border-color: ${t.var.color.primary};
   }
   
   &::placeholder {
-    color: ${args.theme.var.color.text_light_500};
+    color: ${t.var.color.text_light_500};
   }
 }`;
 '''
@@ -616,7 +616,7 @@ return `._id {
         displayOrder: 4,
         componentName: "Html",
         props: '''
-const error = args.contextData.rechargeStore?.errors?.amount;
+const error = c.rechargeStore?.errors?.amount;
 if (!error) return { as: "span" };
 
 return {
@@ -627,7 +627,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.error};
+  color: ${t.var.color.error};
   margin: 0.5rem 0 0 0;
 }`;
 '''
@@ -667,7 +667,7 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 1rem;
 }`;
 '''
@@ -682,7 +682,7 @@ return `._id {
         contextName: "methods",
         loop: true,
         props: '''
-const methods = args.contextData.rechargeStore?.paymentMethods || [];
+const methods = c.rechargeStore?.paymentMethods || [];
 return {
   data: methods
 };
@@ -703,10 +703,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const method = args.contextData.methods;
-const selectedMethod = args.contextData.rechargeStore?.paymentMethod;
+const method = c.methods;
+const selectedMethod = c.rechargeStore?.paymentMethod;
 const isSelected = selectedMethod === method.id;
-const selectPaymentMethod = args.contextData.rechargeStore?.fns?.selectPaymentMethod;
+const selectPaymentMethod = c.rechargeStore?.fns?.selectPaymentMethod;
 
 return {
   as: "div",
@@ -714,8 +714,8 @@ return {
 };
 ''',
         css: '''
-const method = args.contextData.methods;
-const selectedMethod = args.contextData.rechargeStore?.paymentMethod;
+const method = c.methods;
+const selectedMethod = c.rechargeStore?.paymentMethod;
 const isSelected = selectedMethod === method.id;
 
 return `._id {
@@ -723,14 +723,14 @@ return `._id {
   align-items: center;
   gap: 1rem;
   padding: 1rem;
-  border: 2px solid ${isSelected ? args.theme.var.color.primary : args.theme.var.color.border};
-  background: ${isSelected ? args.theme.var.color.primary_light_50 : args.theme.var.color.background};
+  border: 2px solid ${isSelected ? t.var.color.primary : t.var.color.border};
+  background: ${isSelected ? t.var.color.primary_light_50 : t.var.color.background};
   border-radius: 0.75rem;
   cursor: pointer;
   transition: all 0.2s ease;
   
   &:hover {
-    border-color: ${args.theme.var.color.primary};
+    border-color: ${t.var.color.primary};
   }
 }`;
 '''
@@ -743,7 +743,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const method = args.contextData.methods;
+const method = c.methods;
 return {
   as: "icon",
   icon: method.icon,
@@ -753,7 +753,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -765,7 +765,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const method = args.contextData.methods;
+const method = c.methods;
 return {
   as: "span",
   text: method.name
@@ -774,7 +774,7 @@ return {
         css: '''
 return `._id {
   font-weight: 500;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   flex: 1;
 }`;
 '''
@@ -787,8 +787,8 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const method = args.contextData.methods;
-const selectedMethod = args.contextData.rechargeStore?.paymentMethod;
+const method = c.methods;
+const selectedMethod = c.rechargeStore?.paymentMethod;
 const isSelected = selectedMethod === method.id;
 
 return {
@@ -799,12 +799,12 @@ return {
 };
 ''',
         css: '''
-const method = args.contextData.methods;
-const selectedMethod = args.contextData.rechargeStore?.paymentMethod;
+const method = c.methods;
+const selectedMethod = c.rechargeStore?.paymentMethod;
 const isSelected = selectedMethod === method.id;
 
 return `._id {
-  color: ${isSelected ? args.theme.var.color.primary : args.theme.var.color.text_light_500};
+  color: ${isSelected ? t.var.color.primary : t.var.color.text_light_500};
 }`;
 '''
       }
@@ -816,7 +816,7 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const error = args.contextData.rechargeStore?.errors?.payment;
+const error = c.rechargeStore?.errors?.payment;
 if (!error) return { as: "span" };
 
 return {
@@ -827,7 +827,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.error};
+  color: ${t.var.color.error};
   margin: 0.5rem 0 0 0;
 }`;
 '''
@@ -855,7 +855,7 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.primary_light_50};
+  background: ${t.var.color.primary_light_50};
   border-radius: 0.5rem;
   padding: 1.5rem;
 }`;
@@ -878,7 +878,7 @@ return {
 return `._id {
   font-size: 1.125rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 1rem;
 }`;
 '''
@@ -901,7 +901,7 @@ return `._id {
   flex-direction: column;
   gap: 0.75rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  border-bottom: 1px solid ${t.var.color.border};
   margin-bottom: 1rem;
 }`;
 '''
@@ -914,7 +914,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const amount = args.contextData.rechargeStore?.selectedAmount || 0;
+const amount = c.rechargeStore?.selectedAmount || 0;
 return {
   as: "div"
 };
@@ -941,7 +941,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
       }
@@ -953,7 +953,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const amount = args.contextData.rechargeStore?.selectedAmount || 0;
+const amount = c.rechargeStore?.selectedAmount || 0;
 return {
   as: "span",
   text: `$${amount.toFixed(2)}`
@@ -962,7 +962,7 @@ return {
         css: '''
 return `._id {
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -974,8 +974,8 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const currentBalance = args.contextData.rechargeStore?.currentBalance || 0;
-const selectedAmount = args.contextData.rechargeStore?.selectedAmount || 0;
+const currentBalance = c.rechargeStore?.currentBalance || 0;
+const selectedAmount = c.rechargeStore?.selectedAmount || 0;
 const newBalance = currentBalance + selectedAmount;
 
 return {
@@ -1006,7 +1006,7 @@ return {
         css: '''
 return `._id {
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -1018,8 +1018,8 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const currentBalance = args.contextData.rechargeStore?.currentBalance || 0;
-const selectedAmount = args.contextData.rechargeStore?.selectedAmount || 0;
+const currentBalance = c.rechargeStore?.currentBalance || 0;
+const selectedAmount = c.rechargeStore?.selectedAmount || 0;
 const newBalance = currentBalance + selectedAmount;
 
 return {
@@ -1031,7 +1031,7 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 700;
-  color: ${args.theme.var.color.success};
+  color: ${t.var.color.success};
 }`;
 '''
       }
@@ -1067,8 +1067,8 @@ return `._id {
         text: "Complete Recharge",
         icon: "carbon:purchase",
         fullWidth: true,
-        disabled: "args.contextData.rechargeStore?.isProcessing",
-        onClick: "() => args.contextData.rechargeStore.fns.processRecharge()"
+        disabled: "c.rechargeStore?.isProcessing",
+        onClick: "() => c.rechargeStore.fns.processRecharge()"
       }
     },
     {
@@ -1080,7 +1080,7 @@ return `._id {
         variant: "secondary",
         size: "large",
         text: "Cancel",
-        onClick: "() => args.navigate('/dashboard')"
+        onClick: "() => _.navigate('/dashboard')"
       }
     },
     {
@@ -1100,7 +1100,7 @@ return `._id {
   align-items: center;
   gap: 0.5rem;
   margin-top: 1rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   font-size: 0.875rem;
 }`;
 '''

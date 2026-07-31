@@ -23,24 +23,24 @@ import {
 
 const TABLE_GRID = "2fr 1fr 1fr 1.5fr minmax(280px, 3fr)";
 
-function statusBadgeCss(args: any, status: string, showOutputHint: boolean) {
+function statusBadgeCss(_: any, status: string, showOutputHint: boolean) {
   const isErr =
     status === "failed" ||
     status === "enqueue_failed" ||
     status === "complete_with_error";
   const isOk = status === "success";
   const isRun = status === "running";
-  let bg = args.theme.var.color.background_light_300;
-  let color = args.theme.var.color.text;
+  let bg = _.theme.var.color.background_light_300;
+  let color = _.theme.var.color.text;
   if (isErr) {
-    bg = args.theme.var.color.error_light_900;
-    color = args.theme.var.color.error_dark_300;
+    bg = _.theme.var.color.error_light_900;
+    color = _.theme.var.color.error_dark_300;
   } else if (isOk) {
-    bg = args.theme.var.color.success_light_900;
-    color = args.theme.var.color.success_dark_300;
+    bg = _.theme.var.color.success_light_900;
+    color = _.theme.var.color.success_dark_300;
   } else if (isRun) {
-    bg = args.theme.var.color.info_light_900;
-    color = args.theme.var.color.info_dark_300;
+    bg = _.theme.var.color.info_light_900;
+    color = _.theme.var.color.info_dark_300;
   }
   return `return \`._id {
   display: inline-block;
@@ -114,8 +114,8 @@ function JobStatusCell(props: {
   const badge = (
     <As
       as="span"
-      css={(args) =>
-        statusBadgeCss(args, displayStatus(), hasAnyJobOutput(outputTabs()))
+      css={(_) =>
+        statusBadgeCss(_, displayStatus(), hasAnyJobOutput(outputTabs()))
       }
     >
       {statusLabel(displayStatus())}
@@ -191,7 +191,7 @@ export function SchemaDatabaseTableSection(
             css={`return \`._id {
   margin: 0;
   font-size: 0.875rem;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
   max-width: 40rem;
   line-height: 1.45;
 }\`;`}
@@ -241,9 +241,9 @@ export function SchemaDatabaseTableSection(
           <As
             as="p"
             css={`return \`._id {
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
   padding: 1.5rem;
-  border: 1px solid \${args.theme.var.color.border};
+  border: 1px solid \${t.var.color.border};
   border-radius: 0.5rem;
 }\`;`}
           >
@@ -254,7 +254,7 @@ export function SchemaDatabaseTableSection(
         <As
           as="div"
           css={`return \`._id {
-  border: 1px solid \${args.theme.var.color.border};
+  border: 1px solid \${t.var.color.border};
   border-radius: 0.5rem;
   overflow: hidden;
 }\`;`}
@@ -270,8 +270,8 @@ export function SchemaDatabaseTableSection(
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.03em;
-  background: \${args.theme.var.color.background_light_200};
-  color: \${args.theme.var.color.text_light_500};
+  background: \${t.var.color.background_light_200};
+  color: \${t.var.color.text_light_500};
 }\`;`}
           >
             <As as="span">Database</As>
@@ -296,9 +296,9 @@ export function SchemaDatabaseTableSection(
   gap: 0.75rem;
   padding: 0.875rem 1rem;
   align-items: center;
-  border-top: 1px solid \${args.theme.var.color.border};
+  border-top: 1px solid \${t.var.color.border};
   font-size: 0.875rem;
-  background: \${args.theme.var.color.background};
+  background: \${t.var.color.background};
 }\`;`}
                 >
                   <As
@@ -306,7 +306,7 @@ export function SchemaDatabaseTableSection(
                     css={`return \`._id {
   font-family: monospace;
   font-weight: 500;
-  color: \${args.theme.var.color.primary};
+  color: \${t.var.color.primary};
   word-break: break-all;
 }\`;`}
                   >
@@ -333,7 +333,7 @@ export function SchemaDatabaseTableSection(
                         css={`return \`._id {
   margin: 0.25rem 0 0 0;
   font-size: 0.7rem;
-  color: \${args.theme.var.color.error};
+  color: \${t.var.color.error};
   word-break: break-word;
 }\`;`}
                       >

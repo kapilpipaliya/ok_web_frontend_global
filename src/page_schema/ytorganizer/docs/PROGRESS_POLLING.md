@@ -21,7 +21,7 @@ const startPolling = async () => {
   const poll = async () => {
     try {
       // Call getAllProcessingStatus to get current status
-      const result = await args.executeNamedServerFunction({
+      const result = await _.executeNamedServerFunction({
         functionName: "getAllProcessingStatus",
         contextData: {}
       });
@@ -212,7 +212,7 @@ Use `getWorkerHealth` to monitor worker status:
 
 ```javascript
 const checkWorkerHealth = async () => {
-  const result = await args.executeNamedServerFunction({
+  const result = await _.executeNamedServerFunction({
     functionName: "getWorkerHealth",
     contextData: {}
   });
@@ -238,32 +238,32 @@ When jobs fail, users can manually retry them:
 ```javascript
 // Retry a failed channel
 const retryChannel = async (channelId) => {
-  const result = await args.executeNamedServerFunction({
+  const result = await _.executeNamedServerFunction({
     functionName: "retryChannel",
     contextData: { channelId }
   });
 
   if (result.success) {
-    args.showSuccessToast(result.message);
+    _.showSuccessToast(result.message);
     // Restart polling to show new status
     startPolling();
   } else {
-    args.showErrorToast(result.message);
+    _.showErrorToast(result.message);
   }
 };
 
 // Retry a failed playlist
 const retryPlaylist = async (playlistId) => {
-  const result = await args.executeNamedServerFunction({
+  const result = await _.executeNamedServerFunction({
     functionName: "retryPlaylist",
     contextData: { playlistId }
   });
 
   if (result.success) {
-    args.showSuccessToast(result.message);
+    _.showSuccessToast(result.message);
     startPolling();
   } else {
-    args.showErrorToast(result.message);
+    _.showErrorToast(result.message);
   }
 };
 ```

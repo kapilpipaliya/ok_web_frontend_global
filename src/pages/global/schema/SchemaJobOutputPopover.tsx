@@ -221,9 +221,9 @@ export function SchemaJobOutputPopover(props: SchemaJobOutputPopoverProps) {
             css={`return \`._id {
   padding: 0.75rem;
   border-radius: 0.5rem;
-  border: 1px solid \${args.theme.var.color.border};
-  background: \${args.theme.var.color.background};
-  color: \${args.theme.var.color.text};
+  border: 1px solid \${t.var.color.border};
+  background: \${t.var.color.background};
+  color: \${t.var.color.text};
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
 }\`;`}
           >
@@ -244,7 +244,7 @@ export function SchemaJobOutputPopover(props: SchemaJobOutputPopoverProps) {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
 }\`;`}
               >
                 Job output
@@ -259,7 +259,7 @@ export function SchemaJobOutputPopover(props: SchemaJobOutputPopoverProps) {
   cursor: pointer;
   font-size: 1rem;
   line-height: 1;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
   padding: 0.125rem 0.25rem;
 }\`;`}
                 aria-label="Close"
@@ -276,7 +276,7 @@ export function SchemaJobOutputPopover(props: SchemaJobOutputPopoverProps) {
   display: flex;
   gap: 0.25rem;
   margin-bottom: 0.5rem;
-  border-bottom: 1px solid \${args.theme.var.color.border};
+  border-bottom: 1px solid \${t.var.color.border};
   padding-bottom: 0.25rem;
 }\`;`}
               >
@@ -288,7 +288,7 @@ export function SchemaJobOutputPopover(props: SchemaJobOutputPopoverProps) {
                       role="tab"
                       aria-selected={activeTab() === index()}
                       onClick={() => setActiveTab(index())}
-                      css={(args) => {
+                      css={(_) => {
                         const selected = activeTab() === index();
                         return `return \`._id {
   border: none;
@@ -297,9 +297,9 @@ export function SchemaJobOutputPopover(props: SchemaJobOutputPopoverProps) {
   font-size: 0.7rem;
   font-weight: 600;
   cursor: pointer;
-  background: ${selected ? args.theme.var.color.background_light_200 : "transparent"};
-  color: ${selected ? args.theme.var.color.text : args.theme.var.color.text_light_500};
-  border-bottom: 2px solid ${selected ? args.theme.var.color.primary : "transparent"};
+  background: ${selected ? _.theme.var.color.background_light_200 : "transparent"};
+  color: ${selected ? _.theme.var.color.text : _.theme.var.color.text_light_500};
+  border-bottom: 2px solid ${selected ? _.theme.var.color.primary : "transparent"};
   margin-bottom: -1px;
 }\`;`;
                       }}
@@ -321,7 +321,7 @@ export function SchemaJobOutputPopover(props: SchemaJobOutputPopoverProps) {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   white-space: pre-wrap;
   word-break: break-word;
-  color: \${args.theme.var.color.text};
+  color: \${t.var.color.text};
 }\`;`}
             >
               {outputText()}

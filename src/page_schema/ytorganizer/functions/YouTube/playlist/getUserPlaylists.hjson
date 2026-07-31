@@ -8,7 +8,7 @@
         body:
           '''
 // Extract parameters including public access mode
-const { ownershipId = null, sortBy = "title_asc", username, isPublicAccess = false } = args.contextData;
+const { ownershipId = null, sortBy = "title_asc", username, isPublicAccess = false } = c;
 
 let user;
 let targetUserUuid;
@@ -28,7 +28,7 @@ if (isPublicAccess) {
   }
 
   // Find user by username
-  const userResult = await args.session.run(
+  const userResult = await _.session.run(
     `MATCH (u:User {username: $username}) RETURN u`,
     { username }
   );
@@ -45,12 +45,12 @@ if (isPublicAccess) {
   }
 
   const userNode = userResult.records[0].get('u');
-  user = args.convertNodeToJson(userNode);
+  user = _.convertNodeToJson(userNode);
   targetUserUuid = user.P.uuid;
 
   // For public access, we only return public playlists
   // Check if any playlists require authentication
-  const publicPlaylistsCheck = await args.session.run(
+  const publicPlaylistsCheck = await _.session.run(
     `MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
      MATCH (o)-[:YouTubeOwnershipPlaylist]->(p:Playlist)
      WHERE p.isPublic = true
@@ -62,7 +62,7 @@ if (isPublicAccess) {
   if (publicPlaylistsCheck.records.length > 0) {
     const allowUnauthenticated = publicPlaylistsCheck.records[0].get('allowUnauthenticatedAccess') === true;
     if (!allowUnauthenticated) {
-      const actualUser = await args.getUserFromSession();
+      const actualUser = await _.getUserFromSession();
       if (!actualUser) {
         return {
           success: false,
@@ -83,7 +83,7 @@ if (isPublicAccess) {
 } else {
   // Normal authenticated access
   // Get current authenticated user from session
-  const actualUser = await args.getUserFromSession();
+  const actualUser = await _.getUserFromSession();
   if (!actualUser) {
     return {
       success: false,
@@ -96,12 +96,12 @@ if (isPublicAccess) {
   }
 
   // Get effective user (handles admin impersonation)
-  user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+  user = await _.getEffectiveUser(_.session, actualUser, c);
   targetUserUuid = user.P.uuid;
 }
 
 // Parse sortBy parameter using shared utility
-const parseSortResult = await args.executeNamedServerFunction({
+const parseSortResult = await s({
   functionName: "parseSortByUtil",
   contextData: { sortBy, contentType: "playlists" }
 });
@@ -120,7 +120,7 @@ if (!parseSortResult.result) {
 const { orderBy, orderDirection, secondaryOrderBy } = parseSortResult.result;
 
 // Use helper function to fetch playlists with video counts
-const result = await args.executeNamedServerFunction({
+const result = await s({
   functionName: "getPlaylistsWithVideoCount",
   contextData: {
     userUuid: targetUserUuid,

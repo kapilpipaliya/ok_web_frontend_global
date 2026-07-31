@@ -5,9 +5,9 @@
       L: Component
       P: {
         fns:
-          '''const isInIframe = args.atom(null);
+          '''const isInIframe = _.atom(null);
 const executeYTOFunction = async (functionName, contextData = {}) => {
-  return await args.executeNamedServerFunction({
+  return await s({
     functionName,
     contextData: {
       ...contextData,
@@ -23,7 +23,7 @@ return {
         key: ShopifyLayout
         props:
           '''return {
-  onMount: () => args.fns.isInIframe(window.self !== window.top)
+  onMount: () => f.isInIframe(window.self !== window.top)
 }'''
       }
     }
@@ -121,7 +121,7 @@ return {
           '''return {
   as: "meta",
   property: "og:url",
-  content: "https://orvio.decodecommerce.com" + (args.location?.pathname || "/")
+  content: "https://orvio.decodecommerce.com" + (_.location?.pathname || "/")
 }'''
       }
     }
@@ -135,7 +135,7 @@ return {
           '''return {
   as: "link",
   rel: "canonical",
-  href: "https://orvio.decodecommerce.com" + (args.location?.pathname || "/")
+  href: "https://orvio.decodecommerce.com" + (_.location?.pathname || "/")
 }'''
       }
     }
@@ -206,8 +206,8 @@ return {
         props:
           '''return {
   hide:
-    !args.fns.isInIframe() ||
-    args.location?.pathname === "/netsuite-extendfiles"
+    !f.isInIframe() ||
+    _.location?.pathname === "/netsuite-extendfiles"
 }'''
       }
     }
@@ -220,7 +220,7 @@ return {
         key: unique_1
         props:
           '''return {
-  hideChromeHeader: args.location?.pathname === "/netsuite-extendfiles"
+  hideChromeHeader: _.location?.pathname === "/netsuite-extendfiles"
 };'''
       }
     }

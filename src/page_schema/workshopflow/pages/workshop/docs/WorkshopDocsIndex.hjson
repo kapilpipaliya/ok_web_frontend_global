@@ -47,7 +47,7 @@
   class: "workshop-doc-h1"
 };'''
         css:
-          '''return `._id.workshop-doc-h1 { font-size: 1.5rem; font-weight: 700; margin: 0 0 0.5rem; color: ${args.theme.var.color.text}; }`;'''
+          '''return `._id.workshop-doc-h1 { font-size: 1.5rem; font-weight: 700; margin: 0 0 0.5rem; color: ${t.var.color.text}; }`;'''
       }
     }
     {
@@ -63,7 +63,7 @@
   class: "workshop-doc-p"
 };'''
         css:
-          '''return `._id.workshop-doc-p { margin: 0 0 1rem; line-height: 1.55; color: ${args.theme.var.color.text_light_500}; }`;'''
+          '''return `._id.workshop-doc-p { margin: 0 0 1rem; line-height: 1.55; color: ${t.var.color.text_light_500}; }`;'''
       }
     }
     {
@@ -91,10 +91,10 @@
   href: "/workshop/docs/getting-started",
   text: "Getting started",
   class: "workshop-doc-link",
-  onClick: (e) => { e.preventDefault(); args.navigate("/workshop/docs/getting-started"); }
+  onClick: (e) => { e.preventDefault(); _.navigate("/workshop/docs/getting-started"); }
 };'''
         css:
-          '''return `._id.workshop-doc-link { color: ${args.theme.var.color.primary}; font-weight: 600; text-decoration: none; cursor: pointer; }`;'''
+          '''return `._id.workshop-doc-link { color: ${t.var.color.primary}; font-weight: 600; text-decoration: none; cursor: pointer; }`;'''
       }
     }
     {
@@ -109,10 +109,10 @@
   href: "/workshop/docs/dashboard",
   text: "Dashboard",
   class: "workshop-doc-link",
-  onClick: (e) => { e.preventDefault(); args.navigate("/workshop/docs/dashboard"); }
+  onClick: (e) => { e.preventDefault(); _.navigate("/workshop/docs/dashboard"); }
 };'''
         css:
-          '''return `._id.workshop-doc-link { color: ${args.theme.var.color.primary}; font-weight: 600; text-decoration: none; cursor: pointer; }`;'''
+          '''return `._id.workshop-doc-link { color: ${t.var.color.primary}; font-weight: 600; text-decoration: none; cursor: pointer; }`;'''
       }
     }
     {
@@ -127,10 +127,10 @@
   href: "/workshop/docs/appointments",
   text: "Appointments",
   class: "workshop-doc-link",
-  onClick: (e) => { e.preventDefault(); args.navigate("/workshop/docs/appointments"); }
+  onClick: (e) => { e.preventDefault(); _.navigate("/workshop/docs/appointments"); }
 };'''
         css:
-          '''return `._id.workshop-doc-link { color: ${args.theme.var.color.primary}; font-weight: 600; text-decoration: none; cursor: pointer; }`;'''
+          '''return `._id.workshop-doc-link { color: ${t.var.color.primary}; font-weight: 600; text-decoration: none; cursor: pointer; }`;'''
       }
     }
     {
@@ -145,10 +145,10 @@
   href: "/workshop/docs/repairs",
   text: "Repairs",
   class: "workshop-doc-link",
-  onClick: (e) => { e.preventDefault(); args.navigate("/workshop/docs/repairs"); }
+  onClick: (e) => { e.preventDefault(); _.navigate("/workshop/docs/repairs"); }
 };'''
         css:
-          '''return `._id.workshop-doc-link { color: ${args.theme.var.color.primary}; font-weight: 600; text-decoration: none; cursor: pointer; }`;'''
+          '''return `._id.workshop-doc-link { color: ${t.var.color.primary}; font-weight: 600; text-decoration: none; cursor: pointer; }`;'''
       }
     }
     {
@@ -163,10 +163,10 @@
   href: "/workshop/docs/inventory",
   text: "Inventory",
   class: "workshop-doc-link",
-  onClick: (e) => { e.preventDefault(); args.navigate("/workshop/docs/inventory"); }
+  onClick: (e) => { e.preventDefault(); _.navigate("/workshop/docs/inventory"); }
 };'''
         css:
-          '''return `._id.workshop-doc-link { color: ${args.theme.var.color.primary}; font-weight: 600; text-decoration: none; cursor: pointer; }`;'''
+          '''return `._id.workshop-doc-link { color: ${t.var.color.primary}; font-weight: 600; text-decoration: none; cursor: pointer; }`;'''
       }
     }
     {
@@ -181,10 +181,10 @@
   href: "/workshop/docs/billing",
   text: "Billing (invoices)",
   class: "workshop-doc-link",
-  onClick: (e) => { e.preventDefault(); args.navigate("/workshop/docs/billing"); }
+  onClick: (e) => { e.preventDefault(); _.navigate("/workshop/docs/billing"); }
 };'''
         css:
-          '''return `._id.workshop-doc-link { color: ${args.theme.var.color.primary}; font-weight: 600; text-decoration: none; cursor: pointer; }`;'''
+          '''return `._id.workshop-doc-link { color: ${t.var.color.primary}; font-weight: 600; text-decoration: none; cursor: pointer; }`;'''
       }
     }
     {
@@ -199,10 +199,10 @@
   href: "/workshop/docs/customers",
   text: "Customers",
   class: "workshop-doc-link",
-  onClick: (e) => { e.preventDefault(); args.navigate("/workshop/docs/customers"); }
+  onClick: (e) => { e.preventDefault(); _.navigate("/workshop/docs/customers"); }
 };'''
         css:
-          '''return `._id.workshop-doc-link { color: ${args.theme.var.color.primary}; font-weight: 600; text-decoration: none; cursor: pointer; }`;'''
+          '''return `._id.workshop-doc-link { color: ${t.var.color.primary}; font-weight: 600; text-decoration: none; cursor: pointer; }`;'''
       }
     }
     {
@@ -217,10 +217,10 @@
   href: "/workshop/docs/technicians",
   text: "Technicians",
   class: "workshop-doc-link",
-  onClick: (e) => { e.preventDefault(); args.navigate("/workshop/docs/technicians"); }
+  onClick: (e) => { e.preventDefault(); _.navigate("/workshop/docs/technicians"); }
 };'''
         css:
-          '''return `._id.workshop-doc-link { color: ${args.theme.var.color.primary}; font-weight: 600; text-decoration: none; cursor: pointer; }`;'''
+          '''return `._id.workshop-doc-link { color: ${t.var.color.primary}; font-weight: 600; text-decoration: none; cursor: pointer; }`;'''
       }
     }
     {
@@ -235,10 +235,10 @@
   href: "/workshop/docs/services",
   text: "Services",
   class: "workshop-doc-link",
-  onClick: (e) => { e.preventDefault(); args.navigate("/workshop/docs/services"); }
+  onClick: (e) => { e.preventDefault(); _.navigate("/workshop/docs/services"); }
 };'''
         css:
-          '''return `._id.workshop-doc-link { color: ${args.theme.var.color.primary}; font-weight: 600; text-decoration: none; cursor: pointer; }`;'''
+          '''return `._id.workshop-doc-link { color: ${t.var.color.primary}; font-weight: 600; text-decoration: none; cursor: pointer; }`;'''
       }
     }
     {
@@ -253,10 +253,10 @@
   href: "/workshop/docs/payments",
   text: "Payments",
   class: "workshop-doc-link",
-  onClick: (e) => { e.preventDefault(); args.navigate("/workshop/docs/payments"); }
+  onClick: (e) => { e.preventDefault(); _.navigate("/workshop/docs/payments"); }
 };'''
         css:
-          '''return `._id.workshop-doc-link { color: ${args.theme.var.color.primary}; font-weight: 600; text-decoration: none; cursor: pointer; }`;'''
+          '''return `._id.workshop-doc-link { color: ${t.var.color.primary}; font-weight: 600; text-decoration: none; cursor: pointer; }`;'''
       }
     }
   ]

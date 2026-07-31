@@ -8,7 +8,7 @@
         body:
           '''
 // Extract channel ID, ownership ID, sort, and public access parameters
-const { channelId, ownershipId: initialOwnershipId, sortBy = "position_asc", username, isPublicAccess = false } = args.contextData;
+const { channelId, ownershipId: initialOwnershipId, sortBy = "position_asc", username, isPublicAccess = false } = c;
 
 if (!channelId) {
   return {
@@ -32,7 +32,7 @@ if (isPublicAccess) {
   }
 
   // Find user by username
-  const userResult = await args.session.run(
+  const userResult = await _.session.run(
     `MATCH (u:User {username: $username}) RETURN u`,
     { username }
   );
@@ -45,11 +45,11 @@ if (isPublicAccess) {
   }
 
   const userNode = userResult.records[0].get('u');
-  user = args.convertNodeToJson(userNode);
+  user = _.convertNodeToJson(userNode);
   targetUserUuid = user.P.uuid;
 
   // Check if channel is public and get allowUnauthenticatedAccess flag
-  const channelCheck = await args.session.run(
+  const channelCheck = await _.session.run(
     `MATCH (c:Channel {youtubeId: $channelId})
      RETURN c.isPublic as isPublic, c.allowUnauthenticatedAccess as allowUnauthenticatedAccess`,
     { channelId }
@@ -75,7 +75,7 @@ if (isPublicAccess) {
 
   // If allowUnauthenticatedAccess is false, still require authentication
   if (!allowUnauthenticatedAccess) {
-    const actualUser = await args.getUserFromSession();
+    const actualUser = await _.getUserFromSession();
     if (!actualUser) {
       return {
         success: false,
@@ -89,7 +89,7 @@ if (isPublicAccess) {
 
   // For public access, we don't need ownershipId - we'll find any ownership for this user
   // But we still need to verify the channel belongs to this user
-  const ownershipCheck = await args.session.run(
+  const ownershipCheck = await _.session.run(
     `MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
      MATCH (o)-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $channelId})
      RETURN o.key as ownershipId LIMIT 1`,
@@ -114,7 +114,7 @@ if (isPublicAccess) {
   }
 
   // Get current authenticated user from session
-  const actualUser = await args.getUserFromSession();
+  const actualUser = await _.getUserFromSession();
   if (!actualUser) {
     return {
       success: false,
@@ -123,12 +123,12 @@ if (isPublicAccess) {
   }
 
   // Get effective user (handles admin impersonation)
-  user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+  user = await _.getEffectiveUser(_.session, actualUser, c);
   targetUserUuid = user.P.uuid;
 }
 
 // Parse sortBy parameter using shared utility
-const parseSortResult = await args.executeNamedServerFunction({
+const parseSortResult = await s({
   functionName: "parseSortByUtil",
   contextData: { sortBy, contentType: "playlists" }
 });
@@ -143,7 +143,7 @@ if (!parseSortResult.result) {
 const { orderBy, orderDirection, secondaryOrderBy } = parseSortResult.result;
 
 // Use helper function to fetch channel with video count
-const channelResult = await args.executeNamedServerFunction({
+const channelResult = await s({
   functionName: "getChannelsWithVideoCount",
   contextData: {
     userUuid: targetUserUuid,
@@ -174,7 +174,7 @@ const getPlaylistIdsQuery = `
   RETURN p.youtubeId as playlistId
 `;
 
-const playlistIdsResult = await args.session.run(getPlaylistIdsQuery, {
+const playlistIdsResult = await _.session.run(getPlaylistIdsQuery, {
   userUuid: targetUserUuid,
   channelId,
   ownershipId
@@ -190,7 +190,7 @@ let playlists = [];
 // Note: When channel is public, we show all playlists in that channel
 // (playlist isPublic flag is only checked for direct playlist access, not channel access)
 if (channelPlaylistIds.length > 0) {
-  const playlistsResult = await args.executeNamedServerFunction({
+  const playlistsResult = await s({
     functionName: "getPlaylistsWithVideoCount",
     contextData: {
       userUuid: targetUserUuid,

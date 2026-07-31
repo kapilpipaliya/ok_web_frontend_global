@@ -9,7 +9,7 @@
         body: '''
 try {
   // Extract input parameters from the request
-  const { goalId, ruleId, title, description, goalType, targetValue, targetDate, unit, reward } = args.contextData;
+  const { goalId, ruleId, title, description, goalType, targetValue, targetDate, unit, reward } = c;
 
   // Validate required fields
   if (!ruleId) {
@@ -29,7 +29,7 @@ try {
   }
 
   // Get current authenticated user from session
-  const user = await args.getUserFromSession();
+  const user = await _.getUserFromSession();
   if (!user) {
     throw new Error("User session not found. Please log in and try again.");
   }
@@ -73,7 +73,7 @@ try {
     RETURN r
   `;
 
-  const ruleResult = await args.session.run(ruleCheckQuery, {
+  const ruleResult = await _.session.run(ruleCheckQuery, {
     userUuid: user.P.uuid,
     ruleId
   });
@@ -83,7 +83,7 @@ try {
   }
 
   const ruleNode = ruleResult.records[0].get('r');
-  const rule = args.convertNodeToJson(ruleNode);
+  const rule = _.convertNodeToJson(ruleNode);
 
   // Determine if this is an update or create operation
   const isUpdate = Boolean(goalId);
@@ -96,7 +96,7 @@ try {
       RETURN rg
     `;
 
-    const existingGoalResult = await args.session.run(existingGoalQuery, {
+    const existingGoalResult = await _.session.run(existingGoalQuery, {
       userUuid: user.P.uuid,
       goalId
     });
@@ -115,7 +115,7 @@ try {
       RETURN rg
     `;
 
-    const duplicateResult = await args.session.run(duplicateCheckQuery, {
+    const duplicateResult = await _.session.run(duplicateCheckQuery, {
       userUuid: user.P.uuid,
       title: title.trim(),
       ruleId
@@ -175,13 +175,13 @@ try {
   }
 
   if (calculationQuery && goalType !== 'time_based') {
-    const calculationResult = await args.session.run(calculationQuery, {
+    const calculationResult = await _.session.run(calculationQuery, {
       userUuid: user.P.uuid,
       ruleId
     });
 
     if (calculationResult.records.length > 0) {
-      initialCurrentValue = args.neo4jConvert.js(calculationResult.records[0].get('currentValue')) || 0;
+      initialCurrentValue = _.neo4jConvert.js(calculationResult.records[0].get('currentValue')) || 0;
     }
   }
 
@@ -208,7 +208,7 @@ try {
       RETURN rg
     `;
 
-    goalResult = await args.session.run(updateGoalQuery, {
+    goalResult = await _.session.run(updateGoalQuery, {
       userUuid: user.P.uuid,
       goalId,
       title: title.trim(),
@@ -244,7 +244,7 @@ try {
       RETURN rg, elementId(rg) as goalElementId
     `;
 
-    goalResult = await args.session.run(createGoalQuery, {
+    goalResult = await _.session.run(createGoalQuery, {
       userUuid: user.P.uuid,
       ruleId,
       title: title.trim(),
@@ -260,7 +260,7 @@ try {
   }
 
   const goalNode = goalResult.records[0].get('rg');
-  const goal = args.convertNodeToJson(goalNode);
+  const goal = _.convertNodeToJson(goalNode);
 
   // STEP 2: No need to create separate relationship - already done in create query
 
@@ -293,7 +293,7 @@ try {
       SET rg.isCompleted = true, rg.completedAt = datetime()
     `;
 
-    await args.session.run(completeGoalQuery, { goalElementId });
+    await _.session.run(completeGoalQuery, { goalElementId });
   }
 
   // Update the isCompleted flag for the response

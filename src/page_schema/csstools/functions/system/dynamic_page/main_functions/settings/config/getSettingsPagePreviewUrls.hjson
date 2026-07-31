@@ -14,7 +14,7 @@
  */
 
 try {
-  const result = await args.session.run(
+  const result = await _.session.run(
     `
     MATCH (p:Page)
     WHERE p.settingsPageId IS NOT NULL

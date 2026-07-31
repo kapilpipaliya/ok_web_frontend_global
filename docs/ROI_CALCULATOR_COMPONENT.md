@@ -84,11 +84,11 @@ Where:
 ### State Management
 The component uses SolidJS signals for reactive state:
 ```javascript
-const [monthlyVisitors, setMonthlyVisitors] = args.createSignal(10000);
-const [conversionRate, setConversionRate] = args.createSignal(2);
-const [avgOrderValue, setAvgOrderValue] = args.createSignal(75);
-const [grossMargin, setGrossMargin] = args.createSignal(60);
-const [timeframe, setTimeframe] = args.createSignal(6);
+const [monthlyVisitors, setMonthlyVisitors] = _.createSignal(10000);
+const [conversionRate, setConversionRate] = _.createSignal(2);
+const [avgOrderValue, setAvgOrderValue] = _.createSignal(75);
+const [grossMargin, setGrossMargin] = _.createSignal(60);
+const [timeframe, setTimeframe] = _.createSignal(6);
 ```
 
 ### Calculation Function

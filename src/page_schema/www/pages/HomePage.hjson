@@ -27,7 +27,7 @@ return `._id {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
 }`;
 '''
       }
@@ -40,11 +40,11 @@ return `._id {
         componentName: "Html",
         contextName: "headerState",
         props: '''
-const [isScrolled, setIsScrolled] = args.createSignal(false);
-const [mobileMenuOpen, setMobileMenuOpen] = args.createSignal(false);
+const [isScrolled, setIsScrolled] = _.createSignal(false);
+const [mobileMenuOpen, setMobileMenuOpen] = _.createSignal(false);
 
 // Add scroll listener
-if (args.mounted()) {
+if (_.mounted()) {
   window.addEventListener('scroll', () => {
     setIsScrolled(window.scrollY > 50);
   });
@@ -123,7 +123,7 @@ return {
         css: '''
 return `._id {
   padding: 5rem 2rem;
-  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background_dark_50 : args.theme.var.color.background_dark_50};
+  background: ${_.currentMode() === 'dark' ? t.var.color.background_dark_50 : t.var.color.background_dark_50};
   
   @media (max-width: 768px) {
     padding: 3rem 1rem;
@@ -186,7 +186,7 @@ return {
 return `._id {
   font-size: 2.5rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 1rem;
   
   @media (max-width: 768px) {
@@ -211,7 +211,7 @@ return {
         css: '''
 return `._id {
   font-size: 1.125rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   opacity: 0.7;
   
   @media (max-width: 768px) {

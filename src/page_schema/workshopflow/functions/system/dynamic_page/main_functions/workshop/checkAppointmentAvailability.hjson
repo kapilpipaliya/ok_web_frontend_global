@@ -8,18 +8,18 @@
         description: Checks whether a time slot and bay are already occupied.
         body:
           '''
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return { success: false, message: "User session not found", data: null };
 }
 
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const user = await _.getEffectiveUser(_.session, actualUser, c);
 const {
   scheduledAt,
   bay,
   excludeAppointmentId,
   enableUserScoping = true
-} = args.contextData || {};
+} = c || {};
 
 if (!scheduledAt || !bay) {
   return {
@@ -49,7 +49,7 @@ const query = enableUserScoping
     LIMIT 1
   `;
 
-const result = await args.session.run(query, {
+const result = await _.session.run(query, {
   userUuid: user.P.uuid,
   scheduledAt,
   bay,

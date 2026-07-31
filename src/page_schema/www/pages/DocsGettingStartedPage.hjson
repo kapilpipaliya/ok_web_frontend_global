@@ -27,7 +27,7 @@ return `._id {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
 }`;
 '''
       }
@@ -152,7 +152,7 @@ return {
 return `._id {
   font-size: 1.875rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-top: 2rem;
   margin-bottom: 1rem;
 }`;
@@ -173,7 +173,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   line-height: 1.8;
   margin-bottom: 1.5rem;
   font-size: 1.125rem;
@@ -194,8 +194,8 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background_dark_100 : args.theme.var.color.background_dark_50};
-  border: 1px solid ${args.theme.var.color.background_dark_200};
+  background: ${_.currentMode() === 'dark' ? t.var.color.background_dark_100 : t.var.color.background_dark_50};
+  border: 1px solid ${t.var.color.background_dark_200};
   border-radius: 0.75rem;
   padding: 1.5rem;
   margin: 2rem 0;
@@ -219,7 +219,7 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 1rem;
 }`;
 '''
@@ -239,7 +239,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 1rem;
 }`;
 '''
@@ -258,7 +258,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   line-height: 1.8;
   padding-left: 2rem;
   
@@ -355,7 +355,7 @@ return {
 return `._id {
   font-size: 1.875rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-top: 3rem;
   margin-bottom: 1.5rem;
 }`;
@@ -396,8 +396,8 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background_dark_100 : args.theme.var.color.background};
-  border: 2px solid ${args.theme.var.color.primary};
+  background: ${_.currentMode() === 'dark' ? t.var.color.background_dark_100 : t.var.color.background};
+  border: 2px solid ${t.var.color.primary};
   border-radius: 1rem;
   padding: 2rem;
   transition: all 0.3s ease;
@@ -426,7 +426,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   margin-bottom: 1rem;
 }`;
 '''
@@ -448,7 +448,7 @@ return {
 return `._id {
   font-size: 1.5rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 0.75rem;
 }`;
 '''
@@ -468,7 +468,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   opacity: 0.8;
   line-height: 1.6;
   margin-bottom: 1.5rem;
@@ -498,7 +498,7 @@ return `._id {
     align-items: center;
     gap: 0.5rem;
     margin-bottom: 0.5rem;
-    color: ${args.theme.var.color.text};
+    color: ${t.var.color.text};
     opacity: 0.9;
   }
 }`;
@@ -534,7 +534,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.success};
+  color: ${t.var.color.success};
   flex-shrink: 0;
 }`;
 '''
@@ -583,7 +583,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.success};
+  color: ${t.var.color.success};
   flex-shrink: 0;
 }`;
 '''
@@ -632,7 +632,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.success};
+  color: ${t.var.color.success};
   flex-shrink: 0;
 }`;
 '''
@@ -665,8 +665,8 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background_dark_100 : args.theme.var.color.background};
-  border: 2px solid ${args.theme.var.color.info};
+  background: ${_.currentMode() === 'dark' ? t.var.color.background_dark_100 : t.var.color.background};
+  border: 2px solid ${t.var.color.info};
   border-radius: 1rem;
   padding: 2rem;
   transition: all 0.3s ease;
@@ -695,7 +695,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.info};
+  color: ${t.var.color.info};
   margin-bottom: 1rem;
 }`;
 '''
@@ -717,7 +717,7 @@ return {
 return `._id {
   font-size: 1.5rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 0.75rem;
 }`;
 '''
@@ -737,7 +737,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   opacity: 0.8;
   line-height: 1.6;
   margin-bottom: 1.5rem;
@@ -767,7 +767,7 @@ return `._id {
     align-items: center;
     gap: 0.5rem;
     margin-bottom: 0.5rem;
-    color: ${args.theme.var.color.text};
+    color: ${t.var.color.text};
     opacity: 0.9;
   }
 }`;
@@ -803,7 +803,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.success};
+  color: ${t.var.color.success};
   flex-shrink: 0;
 }`;
 '''
@@ -852,7 +852,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.success};
+  color: ${t.var.color.success};
   flex-shrink: 0;
 }`;
 '''
@@ -901,7 +901,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.success};
+  color: ${t.var.color.success};
   flex-shrink: 0;
 }`;
 '''
@@ -937,7 +937,7 @@ return {
 return `._id {
   font-size: 1.875rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-top: 3rem;
   margin-bottom: 1.5rem;
 }`;
@@ -960,7 +960,7 @@ return {
 return `._id {
   font-size: 1.5rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-top: 2rem;
   margin-bottom: 1rem;
 }`;
@@ -981,7 +981,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   line-height: 1.8;
   margin-bottom: 1.5rem;
 }`;
@@ -1004,7 +1004,7 @@ return {
 return `._id {
   font-size: 1.5rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-top: 2rem;
   margin-bottom: 1rem;
 }`;
@@ -1025,7 +1025,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   line-height: 1.8;
   margin-bottom: 1.5rem;
 }`;
@@ -1048,7 +1048,7 @@ return {
 return `._id {
   font-size: 1.5rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-top: 2rem;
   margin-bottom: 1rem;
 }`;
@@ -1069,7 +1069,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   line-height: 1.8;
   margin-bottom: 1.5rem;
 }`;
@@ -1092,7 +1092,7 @@ return {
 return `._id {
   font-size: 1.5rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-top: 2rem;
   margin-bottom: 1rem;
 }`;
@@ -1113,7 +1113,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   line-height: 1.8;
   margin-bottom: 1.5rem;
 }`;
@@ -1136,7 +1136,7 @@ return {
 return `._id {
   font-size: 1.875rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-top: 3rem;
   margin-bottom: 1.5rem;
 }`;
@@ -1175,7 +1175,7 @@ return {
   as: "a",
   onClick: (e) => {
     e.preventDefault();
-    args.navigate("/docs/components");
+    _.navigate("/docs/components");
   }
 };
 ''',
@@ -1185,15 +1185,15 @@ return `._id {
   align-items: center;
   gap: 1rem;
   padding: 1.5rem;
-  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background_dark_100 : args.theme.var.color.background_dark_50};
-  border: 1px solid ${args.theme.var.color.background_dark_200};
+  background: ${_.currentMode() === 'dark' ? t.var.color.background_dark_100 : t.var.color.background_dark_50};
+  border: 1px solid ${t.var.color.background_dark_200};
   border-radius: 0.75rem;
   text-decoration: none;
   transition: all 0.2s ease;
   cursor: pointer;
   
   &:hover {
-    border-color: ${args.theme.var.color.primary};
+    border-color: ${t.var.color.primary};
     transform: translateY(-2px);
   }
 }`;
@@ -1216,7 +1216,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   flex-shrink: 0;
 }`;
 '''
@@ -1250,7 +1250,7 @@ return {
         css: '''
 return `._id {
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 0.25rem;
 }`;
 '''
@@ -1271,7 +1271,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   opacity: 0.7;
 }`;
 '''
@@ -1288,7 +1288,7 @@ return {
   as: "a",
   onClick: (e) => {
     e.preventDefault();
-    args.navigate("/docs/tutorials");
+    _.navigate("/docs/tutorials");
   }
 };
 ''',
@@ -1298,15 +1298,15 @@ return `._id {
   align-items: center;
   gap: 1rem;
   padding: 1.5rem;
-  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background_dark_100 : args.theme.var.color.background_dark_50};
-  border: 1px solid ${args.theme.var.color.background_dark_200};
+  background: ${_.currentMode() === 'dark' ? t.var.color.background_dark_100 : t.var.color.background_dark_50};
+  border: 1px solid ${t.var.color.background_dark_200};
   border-radius: 0.75rem;
   text-decoration: none;
   transition: all 0.2s ease;
   cursor: pointer;
   
   &:hover {
-    border-color: ${args.theme.var.color.primary};
+    border-color: ${t.var.color.primary};
     transform: translateY(-2px);
   }
 }`;
@@ -1329,7 +1329,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   flex-shrink: 0;
 }`;
 '''
@@ -1363,7 +1363,7 @@ return {
         css: '''
 return `._id {
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 0.25rem;
 }`;
 '''
@@ -1384,7 +1384,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   opacity: 0.7;
 }`;
 '''
@@ -1401,7 +1401,7 @@ return {
   as: "a",
   onClick: (e) => {
     e.preventDefault();
-    args.navigate("/signup");
+    _.navigate("/signup");
   }
 };
 ''',
@@ -1411,15 +1411,15 @@ return `._id {
   align-items: center;
   gap: 1rem;
   padding: 1.5rem;
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
   border-radius: 0.75rem;
   text-decoration: none;
   transition: all 0.2s ease;
   cursor: pointer;
   
   &:hover {
-    background: ${args.theme.var.color.primary_dark_200};
+    background: ${t.var.color.primary_dark_200};
     transform: translateY(-2px);
   }
 }`;

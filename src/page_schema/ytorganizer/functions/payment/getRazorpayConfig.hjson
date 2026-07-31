@@ -8,7 +8,7 @@
         body:
           '''
 // Fetch Razorpay setting from database
-const result = await args.session.run(
+const result = await _.session.run(
   "MATCH (s:Setting {type: 'razorpay'}) WHERE s.razorpayEnabled = true RETURN s LIMIT 1"
 );
 

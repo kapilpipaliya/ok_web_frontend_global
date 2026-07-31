@@ -44,14 +44,14 @@ return `._id {
         displayOrder: 1
         componentName: Html
         props:
-          '''const isOpen = args.contextData.props?.isOpen || false;
+          '''const isOpen = c.props?.isOpen || false;
 
 return {
   as: "div",
   hide: !isOpen,
   onClick: (e) => {
     if (e.target === e.currentTarget) {
-      args.contextData.props?.onClose();
+      c.props?.onClose();
     }
   },
 };
@@ -65,7 +65,7 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
   border-radius: 0.75rem;
   width: 100%;
   max-width: 880px;
@@ -112,13 +112,13 @@ return `._id {
         fns:
           '''
 // Track form txnId for cleanup
-const [formTxnId, setFormTxnId] = args.createSignal(0);
+const [formTxnId, setFormTxnId] = _.createSignal(0);
 
 // Cleanup function to revert transaction
 const cleanup = () => {
   const txnId = formTxnId();
   if (txnId && txnId > 0) {
-    args.revertTransaction(txnId);
+    _.revertTransaction(txnId);
     setFormTxnId(0);
   }
 };
@@ -127,7 +127,7 @@ return {
   formTxnId,
   setFormTxnId,
   cleanup,
-  getUsePolarisUI: () => args.fns.getUsePolarisUI?.() === true
+  getUsePolarisUI: () => f.getUsePolarisUI?.() === true
 };
 '''
         componentName: Html
@@ -137,7 +137,7 @@ return {
   as: "div",
   onClick: (e) => e.stopPropagation(),
   onCleanup: () => {
-    args.fns.cleanup();
+    f.cleanup();
   }
 };
 '''
@@ -150,8 +150,8 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.lg};
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  padding: ${t.var.spacing.lg};
+  border-bottom: 1px solid ${t.var.color.border};
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -176,15 +176,15 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 1
         componentName: Html
         props:
           '''
-const mode = args.contextData.props?.mode || "add";
-const label = args.contextData.props?.label;
+const mode = c.props?.mode || "add";
+const label = c.props?.label;
 const title = mode === "add" 
   ? (label ? `Add New ${label}` : "Add New Item")
   : mode === "view"
@@ -206,11 +206,11 @@ return {
           '''
 return `._id {
   cursor: pointer;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   transition: color 0.2s ease;
 
   &:hover {
-    color: ${args.theme.var.color.text};
+    color: ${t.var.color.text};
   }
 }`;
 '''
@@ -219,8 +219,8 @@ return `._id {
         props:
           '''
 const wrappedOnClose = () => {
-  args.fns.cleanup();
-  const onClose = args.contextData.props?.onClose;
+  f.cleanup();
+  const onClose = c.props?.onClose;
   if (onClose) onClose();
 };
 
@@ -230,7 +230,7 @@ return {
   width: 24,
   height: 24,
   onClick: wrappedOnClose,
-  hide: args.fns.getUsePolarisUI?.() === true
+  hide: f.getUsePolarisUI?.() === true
 };
 '''
       }
@@ -244,8 +244,8 @@ return {
         props:
           '''
 const wrappedOnClose = () => {
-  args.fns.cleanup();
-  const onClose = args.contextData.props?.onClose;
+  f.cleanup();
+  const onClose = c.props?.onClose;
   if (onClose) onClose();
 };
 
@@ -255,7 +255,7 @@ return {
   "attr:icon": "x",
   "attr:accessibilityLabel": "Close",
   onClick: wrappedOnClose,
-  hide: args.fns.getUsePolarisUI?.() !== true
+  hide: f.getUsePolarisUI?.() !== true
 };
 '''
       }
@@ -269,26 +269,26 @@ return {
 return `._id {
   flex: 1;
   overflow-y: auto;
-  padding: ${args.theme.var.spacing.lg};
+  padding: ${t.var.spacing.lg};
 }`;
 '''
         displayOrder: 2
         componentName: FormManagement
         props:
           '''
-const formConfig = args.contextData.props?.formConfig;
-const mode = args.contextData.props?.mode || "add";
-const tableVertexLabel = args.contextData.props?.tableVertexLabel;
-const initialVertex = args.contextData.props?.initialVertex;
-const onSave = args.contextData.props?.onSave;
-const onClose = args.contextData.props?.onClose;
+const formConfig = c.props?.formConfig;
+const mode = c.props?.mode || "add";
+const tableVertexLabel = c.props?.tableVertexLabel;
+const initialVertex = c.props?.initialVertex;
+const onSave = c.props?.onSave;
+const onClose = c.props?.onClose;
 
 // Wrap onSave to track txnId and pass through return value for FormManagement cleanup
 const wrappedOnSave = async (saveData) => {
   // Get txnId from FormManagement (will be set via onFnsReady)
-  const txnId = args.fns?.formTxnId?.();
+  const txnId = f?.formTxnId?.();
   if (txnId && txnId > 0) {
-    args.fns.setFormTxnId(txnId);
+    f.setFormTxnId(txnId);
   }
 
   // Call original onSave with vertex format and return result for FormManagement
@@ -300,7 +300,7 @@ const wrappedOnSave = async (saveData) => {
 
 // Wrap onClose to cleanup transaction
 const wrappedOnClose = () => {
-  args.fns.cleanup();
+  f.cleanup();
   if (onClose) {
     onClose();
   }
@@ -312,7 +312,7 @@ return {
   mode: mode,
   inModal: true,
   vertexLabel: tableVertexLabel,
-  hide: () => !(args.contextData.props?.isOpen === true),
+  hide: () => !(c.props?.isOpen === true),
   onSave: wrappedOnSave,
   onClose: wrappedOnClose
 };

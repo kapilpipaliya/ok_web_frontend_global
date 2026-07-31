@@ -22,8 +22,8 @@
         css:
           '''return `._id {
   min-height: 100vh;
-  background-color: ${args.theme.var.color.background_hex};
-  color: ${args.theme.var.color.text_hex};
+  background-color: ${t.var.color.background_hex};
+  color: ${t.var.color.text_hex};
   padding: 32px;
 }`;'''
       }
@@ -43,8 +43,8 @@
   max-width: 600px;
   margin: auto;
   padding: 32px;
-  background-color: ${args.theme.var.color.background_light_100_hex};
-  color: ${args.theme.var.color.text_hex};
+  background-color: ${t.var.color.background_light_100_hex};
+  color: ${t.var.color.text_hex};
 }`;'''
       }
     }
@@ -105,7 +105,7 @@
         css:
           '''return `._id {
   border: none;
-  border-top: 1px solid ${args.theme.var.color.border_hex};
+  border-top: 1px solid ${t.var.color.border_hex};
   margin-top: 24px;
   margin-bottom: 24px;
 }`;'''
@@ -123,7 +123,7 @@
 };'''
         css:
           '''return `._id {
-  color: ${args.theme.var.color.text_hex};
+  color: ${t.var.color.text_hex};
 }`;'''
       }
     }
@@ -140,7 +140,7 @@
 };'''
         css:
           '''return `._id {
-  color: ${args.theme.var.color.text_hex};
+  color: ${t.var.color.text_hex};
   font-size: 24px;
   font-weight: bold;
   margin-bottom: 16px;
@@ -156,12 +156,12 @@
         props:
           '''return {
   as: "p",
-  text: `Ticket: ${args.searchParams?.serial || ""}`,
-  hide: () => !args.searchParams?.serial
+  text: `Ticket: ${_.searchParams?.serial || ""}`,
+  hide: () => !_.searchParams?.serial
 };'''
         css:
           '''return `._id {
-  color: ${args.theme.var.color.text_hex};
+  color: ${t.var.color.text_hex};
   margin-bottom: 16px;
 }`;'''
       }
@@ -175,12 +175,12 @@
         props:
           '''return {
   as: "p",
-  text: `Subject: ${args.searchParams?.subject || ""}`,
-  hide: () => !args.searchParams?.subject
+  text: `Subject: ${_.searchParams?.subject || ""}`,
+  hide: () => !_.searchParams?.subject
 };'''
         css:
           '''return `._id {
-  color: ${args.theme.var.color.text_hex};
+  color: ${t.var.color.text_hex};
   margin-bottom: 16px;
 }`;'''
       }
@@ -198,7 +198,7 @@
 };'''
         css:
           '''return `._id {
-  color: ${args.theme.var.color.text_hex};
+  color: ${t.var.color.text_hex};
   margin-bottom: 16px;
 }`;'''
       }
@@ -212,18 +212,18 @@
         props:
           '''return {
   as: "div",
-  text: args.searchParams?.message || "",
-  hide: () => !String(args.searchParams?.message || "").trim()
+  text: _.searchParams?.message || "",
+  hide: () => !String(_.searchParams?.message || "").trim()
 };'''
         css:
           '''return `._id {
-  background-color: ${args.theme.var.color.background_hex};
-  border: 1px solid ${args.theme.var.color.border_hex};
+  background-color: ${t.var.color.background_hex};
+  border: 1px solid ${t.var.color.border_hex};
   border-radius: 8px;
   margin: 24px 0;
   padding: 16px;
   white-space: pre-wrap;
-  color: ${args.theme.var.color.text_hex};
+  color: ${t.var.color.text_hex};
 }`;'''
       }
     }
@@ -236,13 +236,13 @@
         props:
           '''return {
   as: "a",
-  href: args.searchParams?.trackingUrl || "#",
+  href: _.searchParams?.trackingUrl || "#",
   text: "Track this support request",
-  hide: () => !args.searchParams?.trackingUrl
+  hide: () => !_.searchParams?.trackingUrl
 };'''
         css:
           '''return `._id {
-  color: ${args.theme.var.color.primary_hex};
+  color: ${t.var.color.primary_hex};
   font-weight: 500;
   text-decoration: none;
 }`;'''
@@ -274,11 +274,11 @@
         props:
           '''return {
   as: "p",
-  text: `© 2025 ${args.globalSetting?.P?.appName || "Solvo"}. All rights reserved.`
+  text: `© 2025 ${_.globalSetting?.P?.appName || "Solvo"}. All rights reserved.`
 };'''
         css:
           '''return `._id {
-  color: ${args.theme.var.color.text_light_200_hex};
+  color: ${t.var.color.text_light_200_hex};
   font-size: 12px;
 }`;'''
       }

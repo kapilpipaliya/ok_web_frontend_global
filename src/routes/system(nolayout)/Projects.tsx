@@ -25,8 +25,8 @@ export default function Projects() {
 
     return processCssContent(
       `return \`body {
-        background-color: \${args.theme.var.color?.background};
-        color: \${args.theme.var.color?.text};
+        background-color: \${t.var.color?.background};
+        color: \${t.var.color?.text};
       }\`;`,
       functionArgs,
       "system-global",

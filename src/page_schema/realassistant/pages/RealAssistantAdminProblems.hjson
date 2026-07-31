@@ -7,7 +7,7 @@
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const store = args.createStore({
+const store = _.createStore({
   filterStatus: "all",
   filterCategory: "all",
   searchTerm: "",
@@ -82,14 +82,14 @@ const store = args.createStore({
   ]
 });
 
-args.contextData.store = store;
+c.store = store;
 return { as: "div" };
 ''',
         css: '''
 return `._id {
   min-height: 100vh;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -173,7 +173,7 @@ return {
 return `._id {
   font-size: 2rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0;
 }`;
 '''
@@ -192,7 +192,7 @@ return {
   variant: "secondary",
   icon: "carbon:download",
   onClick: () => {
-    args.showSuccessToast("Exporting problems report...");
+    _.showSuccessToast("Exporting problems report...");
   }
 };
 '''
@@ -227,17 +227,17 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const store = args.contextData.store;
+const store = c.store;
 const pending = store.problems.filter(p => p.status === 'pending').length;
 return { as: "div" };
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.warning_light_100};
-  color: ${args.theme.var.color.warning_dark_800};
+  background: ${t.var.color.warning_light_100};
+  color: ${t.var.color.warning_dark_800};
   padding: 1.5rem;
   border-radius: 0.75rem;
-  border: 1px solid ${args.theme.var.color.warning_light_300};
+  border: 1px solid ${t.var.color.warning_light_300};
 }`;
 '''
       }
@@ -250,7 +250,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const store = args.contextData.store;
+const store = c.store;
 const pending = store.problems.filter(p => p.status === 'pending').length;
 return {
   as: "div",
@@ -295,17 +295,17 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const store = args.contextData.store;
+const store = c.store;
 const inProgress = store.problems.filter(p => ['assigned', 'in_progress', 'solution_provided'].includes(p.status)).length;
 return { as: "div" };
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.primary_light_100};
-  color: ${args.theme.var.color.primary_dark_800};
+  background: ${t.var.color.primary_light_100};
+  color: ${t.var.color.primary_dark_800};
   padding: 1.5rem;
   border-radius: 0.75rem;
-  border: 1px solid ${args.theme.var.color.primary_light_300};
+  border: 1px solid ${t.var.color.primary_light_300};
 }`;
 '''
       }
@@ -318,7 +318,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const store = args.contextData.store;
+const store = c.store;
 const inProgress = store.problems.filter(p => ['assigned', 'in_progress', 'solution_provided'].includes(p.status)).length;
 return {
   as: "div",
@@ -363,17 +363,17 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const store = args.contextData.store;
+const store = c.store;
 const completed = store.problems.filter(p => p.status === 'completed').length;
 return { as: "div" };
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.success_light_100};
-  color: ${args.theme.var.color.success_dark_800};
+  background: ${t.var.color.success_light_100};
+  color: ${t.var.color.success_dark_800};
   padding: 1.5rem;
   border-radius: 0.75rem;
-  border: 1px solid ${args.theme.var.color.success_light_300};
+  border: 1px solid ${t.var.color.success_light_300};
 }`;
 '''
       }
@@ -386,7 +386,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const store = args.contextData.store;
+const store = c.store;
 const completed = store.problems.filter(p => p.status === 'completed').length;
 return {
   as: "div",
@@ -431,17 +431,17 @@ return `._id {
         displayOrder: 4,
         componentName: "Html",
         props: '''
-const store = args.contextData.store;
+const store = c.store;
 const disputed = store.problems.filter(p => p.status === 'disputed').length;
 return { as: "div" };
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.error_light_100};
-  color: ${args.theme.var.color.error_dark_800};
+  background: ${t.var.color.error_light_100};
+  color: ${t.var.color.error_dark_800};
   padding: 1.5rem;
   border-radius: 0.75rem;
-  border: 1px solid ${args.theme.var.color.error_light_300};
+  border: 1px solid ${t.var.color.error_light_300};
 }`;
 '''
       }
@@ -454,7 +454,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const store = args.contextData.store;
+const store = c.store;
 const disputed = store.problems.filter(p => p.status === 'disputed').length;
 return {
   as: "div",
@@ -525,7 +525,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const store = args.contextData.store;
+const store = c.store;
 return {
   as: "input",
   type: "text",
@@ -539,10 +539,10 @@ return {
         css: '''
 return `._id {
   padding: 0.75rem 1rem 0.75rem 2.5rem;
-  border: 1px solid ${args.theme.var.color.background_light_300};
+  border: 1px solid ${t.var.color.background_light_300};
   border-radius: 0.5rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   font-size: 0.875rem;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23666'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'%3E%3C/path%3E%3C/svg%3E");
   background-repeat: no-repeat;
@@ -551,7 +551,7 @@ return `._id {
   
   &:focus {
     outline: none;
-    border-color: ${args.theme.var.color.primary};
+    border-color: ${t.var.color.primary};
   }
 }`;
 '''
@@ -565,7 +565,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const store = args.contextData.store;
+const store = c.store;
 return {
   as: "select",
   value: store.filterStatus,
@@ -577,16 +577,16 @@ return {
         css: '''
 return `._id {
   padding: 0.75rem 1rem;
-  border: 1px solid ${args.theme.var.color.background_light_300};
+  border: 1px solid ${t.var.color.background_light_300};
   border-radius: 0.5rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   font-size: 0.875rem;
   cursor: pointer;
   
   &:focus {
     outline: none;
-    border-color: ${args.theme.var.color.primary};
+    border-color: ${t.var.color.primary};
   }
 }`;
 '''
@@ -712,7 +712,7 @@ return {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const store = args.contextData.store;
+const store = c.store;
 return {
   as: "select",
   value: store.filterCategory,
@@ -724,16 +724,16 @@ return {
         css: '''
 return `._id {
   padding: 0.75rem 1rem;
-  border: 1px solid ${args.theme.var.color.background_light_300};
+  border: 1px solid ${t.var.color.background_light_300};
   border-radius: 0.5rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   font-size: 0.875rem;
   cursor: pointer;
   
   &:focus {
     outline: none;
-    border-color: ${args.theme.var.color.primary};
+    border-color: ${t.var.color.primary};
   }
 }`;
 '''
@@ -827,7 +827,7 @@ return {
         displayOrder: 4,
         componentName: "Html",
         props: '''
-const store = args.contextData.store;
+const store = c.store;
 return {
   as: "select",
   value: store.sortBy,
@@ -839,16 +839,16 @@ return {
         css: '''
 return `._id {
   padding: 0.75rem 1rem;
-  border: 1px solid ${args.theme.var.color.background_light_300};
+  border: 1px solid ${t.var.color.background_light_300};
   border-radius: 0.5rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   font-size: 0.875rem;
   cursor: pointer;
   
   &:focus {
     outline: none;
-    border-color: ${args.theme.var.color.primary};
+    border-color: ${t.var.color.primary};
   }
 }`;
 '''
@@ -910,14 +910,14 @@ return {
         displayOrder: 5,
         componentName: "RealAssistantButton",
         props: '''
-const store = args.contextData.store;
+const store = c.store;
 return {
   text: `Bulk Assign (${store.selectedProblems.length})`,
   variant: "primary",
   disabled: store.selectedProblems.length === 0,
   onClick: () => {
     if (store.selectedProblems.length > 0) {
-      args.showSuccessToast(`Assigning ${store.selectedProblems.length} problems...`);
+      _.showSuccessToast(`Assigning ${store.selectedProblems.length} problems...`);
     }
   }
 };
@@ -937,8 +937,8 @@ return { as: "div" };
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.background_light_200};
+  background: ${t.var.color.background};
+  border: 1px solid ${t.var.color.background_light_200};
   border-radius: 0.75rem;
   overflow-x: auto;
 }`;
@@ -976,8 +976,8 @@ return { as: "thead" };
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background_light_100};
-  border-bottom: 1px solid ${args.theme.var.color.background_light_200};
+  background: ${t.var.color.background_light_100};
+  border-bottom: 1px solid ${t.var.color.background_light_200};
 }`;
 '''
       }
@@ -1010,7 +1010,7 @@ return `._id {
   text-align: left;
   font-weight: 600;
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   width: 50px;
 }`;
 '''
@@ -1024,7 +1024,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const store = args.contextData.store;
+const store = c.store;
 const filteredProblems = store.problems.filter(p => {
   const matchesSearch = !store.searchTerm || 
     p.title.toLowerCase().includes(store.searchTerm.toLowerCase()) ||
@@ -1075,7 +1075,7 @@ return `._id {
   text-align: left;
   font-weight: 600;
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -1099,7 +1099,7 @@ return `._id {
   text-align: left;
   font-weight: 600;
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -1123,7 +1123,7 @@ return `._id {
   text-align: left;
   font-weight: 600;
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -1147,7 +1147,7 @@ return `._id {
   text-align: left;
   font-weight: 600;
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -1171,7 +1171,7 @@ return `._id {
   text-align: left;
   font-weight: 600;
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -1195,7 +1195,7 @@ return `._id {
   text-align: left;
   font-weight: 600;
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -1219,7 +1219,7 @@ return `._id {
   text-align: left;
   font-weight: 600;
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -1243,7 +1243,7 @@ return `._id {
   text-align: right;
   font-weight: 600;
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -1271,7 +1271,7 @@ return { as: "tbody" };
         contextName: "problem",
         loop: true,
         props: '''
-const store = args.contextData.store;
+const store = c.store;
 let filteredProblems = store.problems.filter(p => {
   const matchesSearch = !store.searchTerm || 
     p.title.toLowerCase().includes(store.searchTerm.toLowerCase()) ||
@@ -1310,11 +1310,11 @@ return { as: "tr" };
 ''',
         css: '''
 return `._id {
-  border-bottom: 1px solid ${args.theme.var.color.background_light_200};
+  border-bottom: 1px solid ${t.var.color.background_light_200};
   transition: background 0.2s ease;
   
   &:hover {
-    background: ${args.theme.var.color.background_light_50};
+    background: ${t.var.color.background_light_50};
   }
   
   &:last-child {
@@ -1349,8 +1349,8 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const problem = args.contextData.problem;
-const store = args.contextData.store;
+const problem = c.problem;
+const store = c.store;
 return {
   as: "input",
   type: "checkbox",
@@ -1399,7 +1399,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const problem = args.contextData.problem;
+const problem = c.problem;
 return {
   as: "div",
   text: problem.title
@@ -1408,7 +1408,7 @@ return {
         css: '''
 return `._id {
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1425,7 +1425,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const problem = args.contextData.problem;
+const problem = c.problem;
 if (problem.urgency === "urgent") {
   return {
     as: "span",
@@ -1437,7 +1437,7 @@ return null;
         css: '''
 return `._id {
   font-size: 0.75rem;
-  color: ${args.theme.var.color.error};
+  color: ${t.var.color.error};
   font-weight: 600;
 }`;
 '''
@@ -1451,7 +1451,7 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const problem = args.contextData.problem;
+const problem = c.problem;
 return {
   as: "td",
   text: problem.user
@@ -1461,7 +1461,7 @@ return {
 return `._id {
   padding: 1rem;
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -1474,18 +1474,18 @@ return `._id {
         displayOrder: 4,
         componentName: "Html",
         props: '''
-const problem = args.contextData.problem;
+const problem = c.problem;
 return {
   as: "td",
   text: problem.assistant || "Unassigned"
 };
 ''',
         css: '''
-const problem = args.contextData.problem;
+const problem = c.problem;
 return `._id {
   padding: 1rem;
   font-size: 0.875rem;
-  color: ${problem.assistant ? args.theme.var.color.text : args.theme.var.color.text_light_600};
+  color: ${problem.assistant ? t.var.color.text : t.var.color.text_light_600};
   font-style: ${problem.assistant ? 'normal' : 'italic'};
 }`;
 '''
@@ -1499,7 +1499,7 @@ return `._id {
         displayOrder: 5,
         componentName: "Html",
         props: '''
-const problem = args.contextData.problem;
+const problem = c.problem;
 return { as: "td" };
 ''',
         css: '''
@@ -1517,7 +1517,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const problem = args.contextData.problem;
+const problem = c.problem;
 const icons = {
   tech: "💻",
   education: "📚",
@@ -1534,8 +1534,8 @@ return `._id {
   padding: 0.25rem 0.75rem;
   border-radius: 1rem;
   font-size: 0.75rem;
-  background: ${args.theme.var.color.background_light_200};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background_light_200};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -1565,7 +1565,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const problem = args.contextData.problem;
+const problem = c.problem;
 const statusLabels = {
   pending: "Pending",
   assigned: "Assigned",
@@ -1580,21 +1580,21 @@ return {
 };
 ''',
         css: '''
-const problem = args.contextData.problem;
+const problem = c.problem;
 const colors = {
-  pending: args.theme.var.color.warning,
-  assigned: args.theme.var.color.info,
-  in_progress: args.theme.var.color.primary,
-  solution_provided: args.theme.var.color.info,
-  completed: args.theme.var.color.success,
-  disputed: args.theme.var.color.error
+  pending: t.var.color.warning,
+  assigned: t.var.color.info,
+  in_progress: t.var.color.primary,
+  solution_provided: t.var.color.info,
+  completed: t.var.color.success,
+  disputed: t.var.color.error
 };
 return `._id {
   padding: 0.25rem 0.75rem;
   border-radius: 1rem;
   font-size: 0.75rem;
   font-weight: 600;
-  background: ${colors[problem.status] || args.theme.var.color.background_light_200};
+  background: ${colors[problem.status] || t.var.color.background_light_200};
   color: white;
 }`;
 '''
@@ -1608,7 +1608,7 @@ return `._id {
         displayOrder: 7,
         componentName: "Html",
         props: '''
-const problem = args.contextData.problem;
+const problem = c.problem;
 return { as: "td" };
 ''',
         css: '''
@@ -1627,7 +1627,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const problem = args.contextData.problem;
+const problem = c.problem;
 return { as: "div" };
 '''
       }
@@ -1640,7 +1640,7 @@ return { as: "div" };
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const problem = args.contextData.problem;
+const problem = c.problem;
 return {
   as: "div",
   text: `Est: $${problem.estimatedCost}`
@@ -1648,7 +1648,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_light_600};
+  color: ${t.var.color.text_light_600};
 }`;
 '''
       }
@@ -1661,7 +1661,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const problem = args.contextData.problem;
+const problem = c.problem;
 if (problem.actualCost) {
   return {
     as: "div",
@@ -1672,7 +1672,7 @@ return null;
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   font-weight: 600;
 }`;
 '''
@@ -1686,7 +1686,7 @@ return `._id {
         displayOrder: 8,
         componentName: "Html",
         props: '''
-const problem = args.contextData.problem;
+const problem = c.problem;
 return {
   as: "td",
   text: problem.updated
@@ -1696,7 +1696,7 @@ return {
 return `._id {
   padding: 1rem;
   font-size: 0.75rem;
-  color: ${args.theme.var.color.text_light_600};
+  color: ${t.var.color.text_light_600};
 }`;
 '''
       }
@@ -1745,27 +1745,27 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const problem = args.contextData.problem;
+const problem = c.problem;
 return {
   as: "button",
   title: "View Details",
   onClick: () => {
-    args.showSuccessToast(`View problem #${problem.id}`);
+    _.showSuccessToast(`View problem #${problem.id}`);
   }
 };
 ''',
         css: '''
 return `._id {
   padding: 0.5rem;
-  background: ${args.theme.var.color.primary_light_100};
-  color: ${args.theme.var.color.primary};
+  background: ${t.var.color.primary_light_100};
+  color: ${t.var.color.primary};
   border: none;
   border-radius: 0.375rem;
   cursor: pointer;
   transition: all 0.2s ease;
   
   &:hover {
-    background: ${args.theme.var.color.primary_light_200};
+    background: ${t.var.color.primary_light_200};
   }
   
   &::before {
@@ -1783,13 +1783,13 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const problem = args.contextData.problem;
+const problem = c.problem;
 if (!problem.assistant) {
   return {
     as: "button",
     title: "Assign Assistant",
     onClick: () => {
-      args.showSuccessToast(`Assign assistant to problem #${problem.id}`);
+      _.showSuccessToast(`Assign assistant to problem #${problem.id}`);
     }
   };
 }
@@ -1798,15 +1798,15 @@ return null;
         css: '''
 return `._id {
   padding: 0.5rem;
-  background: ${args.theme.var.color.success_light_100};
-  color: ${args.theme.var.color.success};
+  background: ${t.var.color.success_light_100};
+  color: ${t.var.color.success};
   border: none;
   border-radius: 0.375rem;
   cursor: pointer;
   transition: all 0.2s ease;
   
   &:hover {
-    background: ${args.theme.var.color.success_light_200};
+    background: ${t.var.color.success_light_200};
   }
   
   &::before {
@@ -1824,13 +1824,13 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const problem = args.contextData.problem;
+const problem = c.problem;
 if (problem.status === "disputed") {
   return {
     as: "button",
     title: "Resolve Dispute",
     onClick: () => {
-      args.showSuccessToast(`Resolve dispute for problem #${problem.id}`);
+      _.showSuccessToast(`Resolve dispute for problem #${problem.id}`);
     }
   };
 }
@@ -1839,15 +1839,15 @@ return null;
         css: '''
 return `._id {
   padding: 0.5rem;
-  background: ${args.theme.var.color.warning_light_100};
-  color: ${args.theme.var.color.warning};
+  background: ${t.var.color.warning_light_100};
+  color: ${t.var.color.warning};
   border: none;
   border-radius: 0.375rem;
   cursor: pointer;
   transition: all 0.2s ease;
   
   &:hover {
-    background: ${args.theme.var.color.warning_light_200};
+    background: ${t.var.color.warning_light_200};
   }
   
   &::before {

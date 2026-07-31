@@ -8,7 +8,7 @@
         description: HydrateMe home summary — profile, today intake, streak, recent logs.
         body:
           '''
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return {
     success: false,
@@ -17,24 +17,24 @@ if (!actualUser) {
   };
 }
 
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const user = await _.getEffectiveUser(_.session, actualUser, c);
 const uuid = user?.P?.uuid;
 if (!uuid) {
   return { success: false, message: "User uuid missing.", data: null };
 }
 
-const profRes = await args.session.run(
+const profRes = await _.session.run(
   `MATCH (u:User {uuid: $uuid})-[:UserHydrateMeUserProfile]->(p:HydrateMeUserProfile)
    RETURN p LIMIT 1`,
   { uuid },
 );
 let profile = null;
 if (profRes.records[0]) {
-  profile = args.convertNodeToJson(profRes.records[0].get("p"));
+  profile = _.convertNodeToJson(profRes.records[0].get("p"));
 }
 
 const today = new Date().toISOString().slice(0, 10);
-const dayRes = await args.session.run(
+const dayRes = await _.session.run(
   `MATCH (u:User {uuid: $uuid})-[:UserHydrateMeWaterLog]->(w:HydrateMeWaterLog)
    WHERE coalesce(w.loggedDate, substring(toString(coalesce(w.loggedAt, w.createdAt)), 0, 10)) = $today
    RETURN sum(toFloat(coalesce(w.amountMl, 0))) AS total`,
@@ -48,7 +48,7 @@ const todayMl =
 
 const goalMl = Math.max(0, Number(profile?.P?.dailyGoalMl) || 2000);
 
-const histRes = await args.session.run(
+const histRes = await _.session.run(
   `MATCH (u:User {uuid: $uuid})-[:UserHydrateMeWaterLog]->(w:HydrateMeWaterLog)
    WITH coalesce(w.loggedDate, substring(toString(coalesce(w.loggedAt, w.createdAt)), 0, 10)) AS day,
         sum(toFloat(coalesce(w.amountMl, 0))) AS total
@@ -89,7 +89,7 @@ for (let s = 0; s < 120; s++) {
   }
 }
 
-const recentRes = await args.session.run(
+const recentRes = await _.session.run(
   `MATCH (u:User {uuid: $uuid})-[:UserHydrateMeWaterLog]->(w:HydrateMeWaterLog)
    RETURN w
    ORDER BY coalesce(w.loggedAt, w.createdAt) DESC
@@ -99,7 +99,7 @@ const recentRes = await args.session.run(
 const recentLogs = [];
 for (let j = 0; j < recentRes.records.length; j++) {
   const node = recentRes.records[j].get("w");
-  if (node) recentLogs.push(args.convertNodeToJson(node));
+  if (node) recentLogs.push(_.convertNodeToJson(node));
 }
 
 return {

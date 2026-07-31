@@ -7,20 +7,20 @@
         description: Stop impersonating a user (admin only)
         body:
           '''
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   throw new Error("User session not found");
 }
 
-const impersonatedUserUuid = args.contextData.impersonatedUserUuid;
+const impersonatedUserUuid = c.impersonatedUserUuid;
 
 if (!impersonatedUserUuid) {
   throw new Error("impersonatedUserUuid is required");
 }
 
-// Call platform function (from args)
-const result = await args.clearImpersonation(
-  args.session,
+// Call platform function (from _)
+const result = await _.clearImpersonation(
+  _.session,
   actualUser,
   impersonatedUserUuid
 );

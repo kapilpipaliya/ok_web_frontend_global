@@ -692,11 +692,11 @@ export function BackupManagement() {
   align-items: center;
   gap: 0.5rem;
   transition: all 0.2s;
-  background: \${args.theme.var.color.primary};
-  color: \${args.theme.var.color.primary_text};
+  background: \${t.var.color.primary};
+  color: \${t.var.color.primary_text};
 }
 ._id:hover {
-  background: \${args.theme.var.color.primary_dark_200};
+  background: \${t.var.color.primary_dark_200};
 }\`;`}
           >
             {"⬆️ Upload Backup"}
@@ -715,11 +715,11 @@ export function BackupManagement() {
   align-items: center;
   gap: 0.5rem;
   transition: all 0.2s;
-  background: \${args.theme.var.color.background_dark_300};
-  color: \${args.theme.var.color.background_dark_300_text};
+  background: \${t.var.color.background_dark_300};
+  color: \${t.var.color.background_dark_300_text};
 }
 ._id:hover {
-  background: \${args.theme.var.color.background_dark_400};
+  background: \${t.var.color.background_dark_400};
 }\`;`}
           >
             {"🔄 Refresh"}
@@ -767,8 +767,8 @@ export function BackupManagement() {
   border-radius: 9999px;
   font-size: 0.75rem;
   font-weight: 500;
-  background: ${backup.enabled ? "${args.theme.var.color.success_light_900}" : "${args.theme.var.color.error_light_900}"};
-  color: ${backup.enabled ? "${args.theme.var.color.success_dark_300}" : "${args.theme.var.color.error_dark_300}"};
+  background: ${backup.enabled ? "${t.var.color.success_light_900}" : "${t.var.color.error_light_900}"};
+  color: ${backup.enabled ? "${t.var.color.success_dark_300}" : "${t.var.color.error_dark_300}"};
 }\`;`}
                   >
                     {backup.enabled ? "Enabled" : "Disabled"}
@@ -789,11 +789,11 @@ export function BackupManagement() {
   align-items: center;
   gap: 0.5rem;
   transition: all 0.2s;
-  background: \${args.theme.var.color.primary};
-  color: \${args.theme.var.color.primary_text};
+  background: \${t.var.color.primary};
+  color: \${t.var.color.primary_text};
 }
 ._id:hover {
-  background: \${args.theme.var.color.primary_dark_200};
+  background: \${t.var.color.primary_dark_200};
 }\`;`}
                   >
                     {"▶️ Trigger Manual Backup"}
@@ -816,8 +816,8 @@ export function BackupManagement() {
                   css={`return \`._id {
   padding: 1.5rem;
   border-radius: 0.5rem;
-  border: 1px solid \${args.theme.var.color.border};
-  background: \${args.theme.var.color.background};
+  border: 1px solid \${t.var.color.border};
+  background: \${t.var.color.background};
 }\`;`}
                 >
                   <As
@@ -825,7 +825,7 @@ export function BackupManagement() {
                     css={`return \`._id {
   font-size: 0.875rem;
   font-weight: 500;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
   margin: 0 0 0.5rem 0;
   text-transform: uppercase;
 }\`;`}
@@ -839,7 +839,7 @@ export function BackupManagement() {
                         as="p"
                         css={`return \`._id {
   font-size: 0.875rem;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
   margin: 0;
 }\`;`}
                       >
@@ -853,7 +853,7 @@ export function BackupManagement() {
   font-size: 1rem;
   font-weight: 600;
   margin: 0;
-  color: \${args.theme.var.color.success};
+  color: \${t.var.color.success};
 }\`;`}
                     >
                       {formatTimestamp(backup.lastSuccessful?.timestamp)}
@@ -863,7 +863,7 @@ export function BackupManagement() {
                         as="p"
                         css={`return \`._id {
   font-size: 0.75rem;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
   margin: 0.25rem 0 0 0;
 }\`;`}
                       >
@@ -884,8 +884,8 @@ export function BackupManagement() {
                     css={`return \`._id {
   padding: 1.5rem;
   border-radius: 0.5rem;
-  border: 1px solid \${args.theme.var.color.error};
-  background: \${args.theme.var.color.error_light_900};
+  border: 1px solid \${t.var.color.error};
+  background: \${t.var.color.error_light_900};
 }\`;`}
                   >
                     <As
@@ -893,7 +893,7 @@ export function BackupManagement() {
                       css={`return \`._id {
   font-size: 0.875rem;
   font-weight: 500;
-  color: \${args.theme.var.color.error_dark_300};
+  color: \${t.var.color.error_dark_300};
   margin: 0 0 0.5rem 0;
   text-transform: uppercase;
 }\`;`}
@@ -906,7 +906,7 @@ export function BackupManagement() {
   font-size: 1rem;
   font-weight: 600;
   margin: 0;
-  color: \${args.theme.var.color.error_dark_300};
+  color: \${t.var.color.error_dark_300};
 }\`;`}
                     >
                       {formatTimestamp(backup.lastFailed?.timestamp)}
@@ -915,7 +915,7 @@ export function BackupManagement() {
                       as="p"
                       css={`return \`._id {
   font-size: 0.75rem;
-  color: \${args.theme.var.color.error_dark_300};
+  color: \${t.var.color.error_dark_300};
   margin: 0.25rem 0 0 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -934,8 +934,8 @@ export function BackupManagement() {
                   css={`return \`._id {
   padding: 1.5rem;
   border-radius: 0.5rem;
-  border: 1px solid \${args.theme.var.color.border};
-  background: \${args.theme.var.color.background};
+  border: 1px solid \${t.var.color.border};
+  background: \${t.var.color.background};
 }\`;`}
                 >
                   <As
@@ -943,7 +943,7 @@ export function BackupManagement() {
                     css={`return \`._id {
   font-size: 0.875rem;
   font-weight: 500;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
   margin: 0 0 0.5rem 0;
   text-transform: uppercase;
 }\`;`}
@@ -967,8 +967,8 @@ export function BackupManagement() {
                   css={`return \`._id {
   padding: 1.5rem;
   border-radius: 0.5rem;
-  border: 1px solid \${args.theme.var.color.border};
-  background: \${args.theme.var.color.background};
+  border: 1px solid \${t.var.color.border};
+  background: \${t.var.color.background};
 }\`;`}
                 >
                   <As
@@ -976,7 +976,7 @@ export function BackupManagement() {
                     css={`return \`._id {
   font-size: 0.875rem;
   font-weight: 500;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
   margin: 0 0 0.5rem 0;
   text-transform: uppercase;
 }\`;`}
@@ -989,7 +989,7 @@ export function BackupManagement() {
   font-size: 1.875rem;
   font-weight: 600;
   margin: 0;
-  color: ${backup.stats.failed > 0 ? "${args.theme.var.color.error}" : "inherit"};
+  color: ${backup.stats.failed > 0 ? "${t.var.color.error}" : "inherit"};
 }\`;`}
                   >
                     {backup.stats.failed}
@@ -1003,7 +1003,7 @@ export function BackupManagement() {
                 css={`return \`._id {
   padding: 1rem 1.5rem;
   border-radius: 0.5rem;
-  background: \${args.theme.var.color.background_light_200};
+  background: \${t.var.color.background_light_200};
   display: flex;
   gap: 2rem;
   align-items: center;
@@ -1023,7 +1023,7 @@ export function BackupManagement() {
                     as="span"
                     css={`return \`._id {
   font-weight: 500;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
 }\`;`}
                   >
                     Schedule:
@@ -1033,7 +1033,7 @@ export function BackupManagement() {
                     css={`return \`._id {
   font-family: monospace;
   padding: 0.25rem 0.5rem;
-  background: \${args.theme.var.color.background};
+  background: \${t.var.color.background};
   border-radius: 0.25rem;
 }\`;`}
                   >
@@ -1052,7 +1052,7 @@ export function BackupManagement() {
                     as="span"
                     css={`return \`._id {
   font-weight: 500;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
 }\`;`}
                   >
                     Storage:
@@ -1062,7 +1062,7 @@ export function BackupManagement() {
                     css={`return \`._id {
   font-family: monospace;
   padding: 0.25rem 0.5rem;
-  background: \${args.theme.var.color.background};
+  background: \${t.var.color.background};
   border-radius: 0.25rem;
   text-transform: uppercase;
 }\`;`}
@@ -1077,7 +1077,7 @@ export function BackupManagement() {
   display: flex;
   gap: 0.5rem;
   align-items: center;
-  color: \${args.theme.var.color.info};
+  color: \${t.var.color.info};
 }\`;`}
                   >
                     <As as="span">⏳</As>
@@ -1125,8 +1125,8 @@ export function BackupManagement() {
                     css={`return \`._id {
   padding: 3rem;
   text-align: center;
-  color: \${args.theme.var.color.text_light_500};
-  border: 1px solid \${args.theme.var.color.border};
+  color: \${t.var.color.text_light_500};
+  border: 1px solid \${t.var.color.border};
   border-radius: 0.5rem;
 }\`;`}
                   >
@@ -1137,7 +1137,7 @@ export function BackupManagement() {
                 <As
                   as="div"
                   css={`return \`._id {
-  border: 1px solid \${args.theme.var.color.border};
+  border: 1px solid \${t.var.color.border};
   border-radius: 0.5rem;
   overflow: hidden;
 }\`;`}
@@ -1146,7 +1146,7 @@ export function BackupManagement() {
                   <As
                     as="div"
                     css={`return \`._id {
-  background: \${args.theme.var.color.background_light_200};
+  background: \${t.var.color.background_light_200};
   padding: 1rem 1.5rem;
   font-weight: 600;
   font-size: 0.875rem;
@@ -1170,16 +1170,16 @@ export function BackupManagement() {
                         as="div"
                         css={`return \`._id {
   padding: 1rem 1.5rem;
-  border-top: 1px solid \${args.theme.var.color.border};
+  border-top: 1px solid \${t.var.color.border};
   display: grid;
   grid-template-columns: 2fr 1fr 1fr 1fr 1fr 180px;
   gap: 1rem;
   align-items: center;
-  background: \${args.theme.var.color.background};
+  background: \${t.var.color.background};
   transition: background 0.2s;
 }
 ._id:hover {
-  background: \${args.theme.var.color.background_light_200};
+  background: \${t.var.color.background_light_200};
 }\`;`}
                       >
                         <As
@@ -1188,7 +1188,7 @@ export function BackupManagement() {
   font-family: monospace;
   font-size: 0.875rem;
   font-weight: 500;
-  color: \${args.theme.var.color.primary};
+  color: \${t.var.color.primary};
 }\`;`}
                         >
                           {database.name}
@@ -1202,8 +1202,8 @@ export function BackupManagement() {
   border-radius: 9999px;
   font-size: 0.75rem;
   font-weight: 500;
-  background: ${database.currentStatus === "online" ? "${args.theme.var.color.success_light_900}" : "${args.theme.var.color.error_light_900}"};
-  color: ${database.currentStatus === "online" ? "${args.theme.var.color.success_dark_300}" : "${args.theme.var.color.error_dark_300}"};
+  background: ${database.currentStatus === "online" ? "${t.var.color.success_light_900}" : "${t.var.color.error_light_900}"};
+  color: ${database.currentStatus === "online" ? "${t.var.color.success_dark_300}" : "${t.var.color.error_dark_300}"};
 }\`;`}
                           >
                             {database.currentStatus}
@@ -1213,7 +1213,7 @@ export function BackupManagement() {
                           as="div"
                           css={`return \`._id {
   font-size: 0.875rem;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
 }\`;`}
                         >
                           {database.role}
@@ -1223,7 +1223,7 @@ export function BackupManagement() {
                           css={`return \`._id {
   font-size: 0.875rem;
   font-weight: 500;
-  color: \${args.theme.var.color.info};
+  color: \${t.var.color.info};
 }\`;`}
                         >
                           {getRecentBackupSize(database.name)}
@@ -1233,7 +1233,7 @@ export function BackupManagement() {
                           css={`return \`._id {
   font-size: 0.875rem;
   font-weight: 500;
-  color: \${args.theme.var.color.success};
+  color: \${t.var.color.success};
 }\`;`}
                         >
                           ${getDatabaseCost(database.name)}
@@ -1254,8 +1254,8 @@ export function BackupManagement() {
   cursor: pointer;
   border: none;
   transition: all 0.2s;
-  background: \${args.theme.var.color.primary};
-  color: \${args.theme.var.color.primary_text};
+  background: \${t.var.color.primary};
+  color: \${t.var.color.primary_text};
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -1263,7 +1263,7 @@ export function BackupManagement() {
   min-width: 120px;
 }
 ._id:hover:not(:disabled) {
-  background: \${args.theme.var.color.primary_dark_200};
+  background: \${t.var.color.primary_dark_200};
 }
 ._id:disabled {
   opacity: 0.5;
@@ -1360,15 +1360,15 @@ export function BackupManagement() {
                     as="div"
                     css={`return \`._id {
   padding: 0.5rem 1rem;
-  background: \${args.theme.var.color.info_light_900};
+  background: \${t.var.color.info_light_900};
   border-radius: 0.375rem;
-  border: 1px solid \${args.theme.var.color.info};
+  border: 1px solid \${t.var.color.info};
 }\`;`}
                   >
                     <As
                       as="span"
                       css={`return \`._id {
-  color: \${args.theme.var.color.info_dark_300};
+  color: \${t.var.color.info_dark_300};
   font-weight: 500;
 }\`;`}
                     >
@@ -1380,15 +1380,15 @@ export function BackupManagement() {
                     as="div"
                     css={`return \`._id {
   padding: 0.5rem 1rem;
-  background: \${args.theme.var.color.success_light_900};
+  background: \${t.var.color.success_light_900};
   border-radius: 0.375rem;
-  border: 1px solid \${args.theme.var.color.success};
+  border: 1px solid \${t.var.color.success};
 }\`;`}
                   >
                     <As
                       as="span"
                       css={`return \`._id {
-  color: \${args.theme.var.color.success_dark_300};
+  color: \${t.var.color.success_dark_300};
   font-weight: 500;
 }\`;`}
                     >
@@ -1400,20 +1400,20 @@ export function BackupManagement() {
                     title={`Retention Policy: ${backupStatus()?.data?.retentionSummary || "24h / 4w / 12m"}`}
                     css={`return \`._id {
   padding: 0.5rem 1rem;
-  background: \${args.theme.var.color.warning_light_900};
+  background: \${t.var.color.warning_light_900};
   border-radius: 0.375rem;
-  border: 1px solid \${args.theme.var.color.warning};
+  border: 1px solid \${t.var.color.warning};
   cursor: help;
   position: relative;
 }
 ._id:hover {
-  background: \${args.theme.var.color.warning_light_800};
+  background: \${t.var.color.warning_light_800};
 }\`;`}
                   >
                     <As
                       as="span"
                       css={`return \`._id {
-  color: \${args.theme.var.color.warning_dark_300};
+  color: \${t.var.color.warning_dark_300};
   font-weight: 500;
 }\`;`}
                     >
@@ -1453,15 +1453,15 @@ export function BackupManagement() {
   flex: 1;
   min-width: 250px;
   padding: 0.625rem 1rem;
-  border: 1px solid \${args.theme.var.color.border};
+  border: 1px solid \${t.var.color.border};
   border-radius: 0.375rem;
-  background: \${args.theme.var.color.background};
-  color: \${args.theme.var.color.text};
+  background: \${t.var.color.background};
+  color: \${t.var.color.text};
   font-size: 0.875rem;
 }
 ._id:focus {
   outline: none;
-  border-color: \${args.theme.var.color.primary};
+  border-color: \${t.var.color.primary};
 }\`;`}
                 />
 
@@ -1473,16 +1473,16 @@ export function BackupManagement() {
                   }
                   css={`return \`._id {
   padding: 0.625rem 1rem;
-  border: 1px solid \${args.theme.var.color.border};
+  border: 1px solid \${t.var.color.border};
   border-radius: 0.375rem;
-  background: \${args.theme.var.color.background};
-  color: \${args.theme.var.color.text};
+  background: \${t.var.color.background};
+  color: \${t.var.color.text};
   font-size: 0.875rem;
   cursor: pointer;
 }
 ._id:focus {
   outline: none;
-  border-color: \${args.theme.var.color.primary};
+  border-color: \${t.var.color.primary};
 }\`;`}
                 >
                   <As as="option" value="">
@@ -1510,13 +1510,13 @@ export function BackupManagement() {
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
-  border: 1px solid \${args.theme.var.color.border};
-  background: ${comparisonMode() ? "${args.theme.var.color.warning}" : "${args.theme.var.color.background}"};
-  color: ${comparisonMode() ? "${args.theme.var.color.warning_text}" : "${args.theme.var.color.text}"};
+  border: 1px solid \${t.var.color.border};
+  background: ${comparisonMode() ? "${t.var.color.warning}" : "${t.var.color.background}"};
+  color: ${comparisonMode() ? "${t.var.color.warning_text}" : "${t.var.color.text}"};
   transition: all 0.2s;
 }
 ._id:hover {
-  background: ${comparisonMode() ? "${args.theme.var.color.warning_dark_200}" : "${args.theme.var.color.background_light_200}"};
+  background: ${comparisonMode() ? "${t.var.color.warning_dark_200}" : "${t.var.color.background_light_200}"};
 }\`;`}
                 >
                   {comparisonMode() ? "🔄 Exit Compare" : "🔍 Compare"}
@@ -1538,12 +1538,12 @@ export function BackupManagement() {
   font-weight: 500;
   cursor: pointer;
   border: none;
-  background: \${args.theme.var.color.primary};
-  color: \${args.theme.var.color.primary_text};
+  background: \${t.var.color.primary};
+  color: \${t.var.color.primary_text};
   transition: all 0.2s;
 }
 ._id:hover {
-  background: \${args.theme.var.color.primary_dark_200};
+  background: \${t.var.color.primary_dark_200};
 }\`;`}
                   >
                     ⚡ Show Comparison
@@ -1560,7 +1560,7 @@ export function BackupManagement() {
   gap: 1rem;
   margin-bottom: 1rem;
   padding: 1rem;
-  background: \${args.theme.var.color.background_light_200};
+  background: \${t.var.color.background_light_200};
   border-radius: 0.375rem;
   align-items: center;
 }\`;`}
@@ -1586,12 +1586,12 @@ export function BackupManagement() {
   font-weight: 500;
   cursor: pointer;
   border: none;
-  background: \${args.theme.var.color.info};
-  color: \${args.theme.var.color.info_text};
+  background: \${t.var.color.info};
+  color: \${t.var.color.info_text};
   transition: all 0.2s;
 }
 ._id:hover:not(:disabled) {
-  background: \${args.theme.var.color.info_dark_200};
+  background: \${t.var.color.info_dark_200};
 }
 ._id:disabled {
   opacity: 0.5;
@@ -1612,12 +1612,12 @@ export function BackupManagement() {
   font-weight: 500;
   cursor: pointer;
   border: none;
-  background: \${args.theme.var.color.error};
-  color: \${args.theme.var.color.error_text};
+  background: \${t.var.color.error};
+  color: \${t.var.color.error_text};
   transition: all 0.2s;
 }
 ._id:hover:not(:disabled) {
-  background: \${args.theme.var.color.error_dark_200};
+  background: \${t.var.color.error_dark_200};
 }
 ._id:disabled {
   opacity: 0.5;
@@ -1636,14 +1636,14 @@ export function BackupManagement() {
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
-  border: 1px solid \${args.theme.var.color.border};
-  background: \${args.theme.var.color.background};
-  color: \${args.theme.var.color.text};
+  border: 1px solid \${t.var.color.border};
+  background: \${t.var.color.background};
+  color: \${t.var.color.text};
   transition: all 0.2s;
   margin-left: auto;
 }
 ._id:hover {
-  background: \${args.theme.var.color.background_light_200};
+  background: \${t.var.color.background_light_200};
 }\`;`}
                   >
                     ✕ Clear Selection
@@ -1660,8 +1660,8 @@ export function BackupManagement() {
                     css={`return \`._id {
   padding: 3rem;
   text-align: center;
-  color: \${args.theme.var.color.text_light_500};
-  border: 1px solid \${args.theme.var.color.border};
+  color: \${t.var.color.text_light_500};
+  border: 1px solid \${t.var.color.border};
   border-radius: 0.5rem;
 }\`;`}
                   >
@@ -1672,7 +1672,7 @@ export function BackupManagement() {
                 <As
                   as="div"
                   css={`return \`._id {
-  border: 1px solid \${args.theme.var.color.border};
+  border: 1px solid \${t.var.color.border};
   border-radius: 0.5rem;
   overflow: hidden;
 }\`;`}
@@ -1681,7 +1681,7 @@ export function BackupManagement() {
                   <As
                     as="div"
                     css={`return \`._id {
-  background: \${args.theme.var.color.background_light_200};
+  background: \${t.var.color.background_light_200};
   padding: 1rem 1.5rem;
   font-weight: 600;
   font-size: 0.875rem;
@@ -1730,16 +1730,16 @@ export function BackupManagement() {
                           as="div"
                           css={`return \`._id {
   padding: 1rem 1.5rem;
-  border-top: 1px solid \${args.theme.var.color.border};
+  border-top: 1px solid \${t.var.color.border};
   display: grid;
   grid-template-columns: ${comparisonMode() ? "40px" : "40px"} 2fr 1fr 1fr 1fr 1.2fr ${comparisonMode() ? "100px" : "400px"};
   gap: 1rem;
   align-items: center;
-  background: \${args.theme.var.color.background};
+  background: \${t.var.color.background};
   transition: background 0.2s;
 }
 ._id:hover {
-  background: \${args.theme.var.color.background_light_200};
+  background: \${t.var.color.background_light_200};
 }\`;`}
                         >
                           {/* Checkbox/Radio for Selection or Comparison */}
@@ -1807,8 +1807,8 @@ export function BackupManagement() {
   width: 1.25rem;
   height: 1.25rem;
   border-radius: 50%;
-  background: \${args.theme.var.color.info_light_900};
-  color: \${args.theme.var.color.info};
+  background: \${t.var.color.info_light_900};
+  color: \${t.var.color.info};
   font-size: 0.75rem;
   cursor: help;
 }\`;`}
@@ -1826,7 +1826,7 @@ export function BackupManagement() {
                             as="div"
                             css={`return \`._id {
   font-weight: 600;
-  color: \${args.theme.var.color[${JSON.stringify(sizeWarning)}]};
+  color: \${t.var.color[${JSON.stringify(sizeWarning)}]};
 }\`;`}
                           >
                             {backup.sizeFormatted}
@@ -1837,7 +1837,7 @@ export function BackupManagement() {
                             as="div"
                             css={`return \`._id {
   font-size: 0.875rem;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
 }\`;`}
                           >
                             {new Date(backup.lastModified).toLocaleDateString()}
@@ -1861,8 +1861,8 @@ export function BackupManagement() {
   font-size: 0.75rem;
   padding: 0.25rem 0.5rem;
   border-radius: 0.25rem;
-  background: \${args.theme.var.color.error_light_900};
-  color: \${args.theme.var.color.error};
+  background: \${t.var.color.error_light_900};
+  color: \${t.var.color.error};
   font-weight: 500;
 }\`;`}
                                 >
@@ -1876,8 +1876,8 @@ export function BackupManagement() {
   font-size: 0.75rem;
   padding: 0.25rem 0.5rem;
   border-radius: 0.25rem;
-  background: \${args.theme.var.color.success_light_900};
-  color: \${args.theme.var.color.success};
+  background: \${t.var.color.success_light_900};
+  color: \${t.var.color.success};
   font-weight: 500;
 }\`;`}
                               >
@@ -1887,7 +1887,7 @@ export function BackupManagement() {
                                 as="span"
                                 css={`return \`._id {
   font-size: 0.7rem;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
 }\`;`}
                               >
                                 {backup.encryption?.keyManagement || ""}
@@ -1903,7 +1903,7 @@ export function BackupManagement() {
                                 as="div"
                                 css={`return \`._id {
   font-size: 0.75rem;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
   text-align: center;
 }\`;`}
                               >
@@ -1937,8 +1937,8 @@ export function BackupManagement() {
   cursor: pointer;
   border: none;
   transition: all 0.2s;
-  background: \${args.theme.var.color.primary};
-  color: \${args.theme.var.color.primary_text};
+  background: \${t.var.color.primary};
+  color: \${t.var.color.primary_text};
   display: flex;
   align-items: center;
   gap: 0.375rem;
@@ -1946,7 +1946,7 @@ export function BackupManagement() {
   justify-content: center;
 }
 ._id:hover:not(:disabled) {
-  background: \${args.theme.var.color.primary_dark_200};
+  background: \${t.var.color.primary_dark_200};
 }
 ._id:disabled {
   opacity: 0.7;
@@ -1993,8 +1993,8 @@ export function BackupManagement() {
   cursor: pointer;
   border: none;
   transition: all 0.2s;
-  background: \${args.theme.var.color.info};
-  color: \${args.theme.var.color.info_text};
+  background: \${t.var.color.info};
+  color: \${t.var.color.info_text};
   display: flex;
   align-items: center;
   gap: 0.375rem;
@@ -2002,7 +2002,7 @@ export function BackupManagement() {
   justify-content: center;
 }
 ._id:hover:not(:disabled) {
-  background: \${args.theme.var.color.info_dark_200};
+  background: \${t.var.color.info_dark_200};
 }
 ._id:disabled {
   opacity: 0.7;
@@ -2047,11 +2047,11 @@ export function BackupManagement() {
   cursor: pointer;
   border: none;
   transition: all 0.2s;
-  background: \${args.theme.var.color.error};
-  color: \${args.theme.var.color.error_text};
+  background: \${t.var.color.error};
+  color: \${t.var.color.error_text};
 }
 ._id:hover {
-  background: \${args.theme.var.color.error_dark_200};
+  background: \${t.var.color.error_dark_200};
 }\`;`}
                               >
                                 🗑️ Delete
@@ -2075,11 +2075,11 @@ export function BackupManagement() {
   cursor: pointer;
   border: none;
   transition: all 0.2s;
-  background: \${args.theme.var.color.warning};
-  color: \${args.theme.var.color.warning_text};
+  background: \${t.var.color.warning};
+  color: \${t.var.color.warning_text};
 }
 ._id:hover {
-  background: \${args.theme.var.color.warning_dark_200};
+  background: \${t.var.color.warning_dark_200};
 }\`;`}
                               >
                                 ⚠️ Restore
@@ -2103,8 +2103,8 @@ export function BackupManagement() {
   cursor: pointer;
   border: none;
   transition: all 0.2s;
-  background: \${args.theme.var.color.primary};
-  color: \${args.theme.var.color.primary_text};
+  background: \${t.var.color.primary};
+  color: \${t.var.color.primary_text};
   display: flex;
   align-items: center;
   gap: 0.375rem;
@@ -2112,7 +2112,7 @@ export function BackupManagement() {
   justify-content: center;
 }
 ._id:hover:not(:disabled) {
-  background: \${args.theme.var.color.primary_dark_200};
+  background: \${t.var.color.primary_dark_200};
 }
 ._id:disabled {
   opacity: 0.7;
@@ -2157,12 +2157,12 @@ export function BackupManagement() {
   cursor: pointer;
   border: none;
   transition: all 0.2s;
-  background: ${(backupNotes() || {})[backup.key] ? "${args.theme.var.color.info}" : "${args.theme.var.color.background_light_300}"};
-  color: ${(backupNotes() || {})[backup.key] ? "${args.theme.var.color.info_text}" : "${args.theme.var.color.text}"};
+  background: ${(backupNotes() || {})[backup.key] ? "${t.var.color.info}" : "${t.var.color.background_light_300}"};
+  color: ${(backupNotes() || {})[backup.key] ? "${t.var.color.info_text}" : "${t.var.color.text}"};
   min-width: 60px;
 }
 ._id:hover {
-  background: ${(backupNotes() || {})[backup.key] ? "${args.theme.var.color.info_dark_200}" : "${args.theme.var.color.background_light_400}"};
+  background: ${(backupNotes() || {})[backup.key] ? "${t.var.color.info_dark_200}" : "${t.var.color.background_light_400}"};
 }\`;`}
                               >
                                 📝 Note
@@ -2234,11 +2234,11 @@ export function BackupManagement() {
               <As
                 as="div"
                 css={`return \`._id {
-  background: \${args.theme.var.color.background};
+  background: \${t.var.color.background};
   padding: 2rem;
   border-radius: 0.5rem;
   max-width: 500px;
-  border: 1px solid \${args.theme.var.color.border};
+  border: 1px solid \${t.var.color.border};
 }\`;`}
                 onClick={(e: MouseEvent) => e.stopPropagation()}
               >
@@ -2255,7 +2255,7 @@ export function BackupManagement() {
                   as="p"
                   css={`return \`._id {
   margin: 0 0 1.5rem 0;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
 }\`;`}
                 >
                   Are you sure you want to {type} backup:{" "}
@@ -2278,13 +2278,13 @@ export function BackupManagement() {
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
-  border: 1px solid \${args.theme.var.color.border};
-  background: \${args.theme.var.color.background};
-  color: \${args.theme.var.color.text};
+  border: 1px solid \${t.var.color.border};
+  background: \${t.var.color.background};
+  color: \${t.var.color.text};
   transition: all 0.2s;
 }
 ._id:hover {
-  background: \${args.theme.var.color.background_light_200};
+  background: \${t.var.color.background_light_200};
 }\`;`}
                   >
                     Cancel
@@ -2303,12 +2303,12 @@ export function BackupManagement() {
   font-weight: 500;
   cursor: pointer;
   border: none;
-  background: \${args.theme.var.color.error};
-  color: \${args.theme.var.color.error_text};
+  background: \${t.var.color.error};
+  color: \${t.var.color.error_text};
   transition: all 0.2s;
 }
 ._id:hover {
-  background: \${args.theme.var.color.error_dark_200};
+  background: \${t.var.color.error_dark_200};
 }\`;`}
                   >
                     Confirm
@@ -2351,12 +2351,12 @@ export function BackupManagement() {
               <As
                 as="div"
                 css={`return \`._id {
-  background: \${args.theme.var.color.background};
+  background: \${t.var.color.background};
   padding: 2rem;
   border-radius: 0.5rem;
   max-width: 600px;
   width: 90%;
-  border: 1px solid \${args.theme.var.color.border};
+  border: 1px solid \${t.var.color.border};
 }\`;`}
                 onClick={(e: MouseEvent) => e.stopPropagation()}
               >
@@ -2365,7 +2365,7 @@ export function BackupManagement() {
                   css={`return \`._id {
   margin: 0 0 1rem 0;
   font-size: 1.25rem;
-  color: \${args.theme.var.color.warning};
+  color: \${t.var.color.warning};
 }\`;`}
                 >
                   ⚠️ Restore Database from Backup
@@ -2374,8 +2374,8 @@ export function BackupManagement() {
                 <As
                   as="div"
                   css={`return \`._id {
-  background: \${args.theme.var.color.warning_light_900};
-  border: 1px solid \${args.theme.var.color.warning};
+  background: \${t.var.color.warning_light_900};
+  border: 1px solid \${t.var.color.warning};
   border-radius: 0.375rem;
   padding: 1rem;
   margin-bottom: 1.5rem;
@@ -2385,7 +2385,7 @@ export function BackupManagement() {
                     as="p"
                     css={`return \`._id {
   margin: 0 0 0.5rem 0;
-  color: \${args.theme.var.color.warning_dark_300};
+  color: \${t.var.color.warning_dark_300};
   font-weight: 600;
 }\`;`}
                   >
@@ -2395,7 +2395,7 @@ export function BackupManagement() {
                     as="p"
                     css={`return \`._id {
   margin: 0;
-  color: \${args.theme.var.color.warning_dark_300};
+  color: \${t.var.color.warning_dark_300};
   font-size: 0.875rem;
 }\`;`}
                   >
@@ -2424,7 +2424,7 @@ export function BackupManagement() {
                       css={`return \`._id {
   font-weight: 500;
   font-size: 0.875rem;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
 }\`;`}
                     >
                       Source Backup:
@@ -2434,7 +2434,7 @@ export function BackupManagement() {
                       css={`return \`._id {
   font-family: monospace;
   padding: 0.75rem;
-  background: \${args.theme.var.color.background_light_200};
+  background: \${t.var.color.background_light_200};
   border-radius: 0.375rem;
   font-size: 0.875rem;
 }\`;`}
@@ -2457,7 +2457,7 @@ export function BackupManagement() {
                       css={`return \`._id {
   font-weight: 500;
   font-size: 0.875rem;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
 }\`;`}
                     >
                       Original Database:
@@ -2467,7 +2467,7 @@ export function BackupManagement() {
                       css={`return \`._id {
   font-family: monospace;
   padding: 0.75rem;
-  background: \${args.theme.var.color.background_light_200};
+  background: \${t.var.color.background_light_200};
   border-radius: 0.375rem;
   font-size: 0.875rem;
 }\`;`}
@@ -2489,7 +2489,7 @@ export function BackupManagement() {
                       css={`return \`._id {
   font-weight: 500;
   font-size: 0.875rem;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
 }\`;`}
                     >
                       Target Database (leave empty to restore to original):
@@ -2502,17 +2502,17 @@ export function BackupManagement() {
                       }
                       css={`return \`._id {
   padding: 0.75rem;
-  border: 1px solid \${args.theme.var.color.border};
+  border: 1px solid \${t.var.color.border};
   border-radius: 0.375rem;
-  background: \${args.theme.var.color.background};
-  color: \${args.theme.var.color.text};
+  background: \${t.var.color.background};
+  color: \${t.var.color.text};
   font-family: monospace;
   font-size: 0.875rem;
   cursor: pointer;
 }
 ._id:focus {
   outline: none;
-  border-color: \${args.theme.var.color.primary};
+  border-color: \${t.var.color.primary};
 }\`;`}
                     >
                       <As as="option" value="">
@@ -2537,9 +2537,9 @@ export function BackupManagement() {
   gap: 0.75rem;
   margin-bottom: 1.5rem;
   padding: 1rem;
-  background: \${args.theme.var.color.error_light_900};
+  background: \${t.var.color.error_light_900};
   border-radius: 0.375rem;
-  border: 1px solid \${args.theme.var.color.error};
+  border: 1px solid \${t.var.color.error};
 }\`;`}
                 >
                   <As
@@ -2561,7 +2561,7 @@ export function BackupManagement() {
                     as="label"
                     css={`return \`._id {
   font-size: 0.875rem;
-  color: \${args.theme.var.color.error_dark_300};
+  color: \${t.var.color.error_dark_300};
   font-weight: 500;
   cursor: pointer;
 }\`;`}
@@ -2596,13 +2596,13 @@ export function BackupManagement() {
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
-  border: 1px solid \${args.theme.var.color.border};
-  background: \${args.theme.var.color.background};
-  color: \${args.theme.var.color.text};
+  border: 1px solid \${t.var.color.border};
+  background: \${t.var.color.background};
+  color: \${t.var.color.text};
   transition: all 0.2s;
 }
 ._id:hover:not(:disabled) {
-  background: \${args.theme.var.color.background_light_200};
+  background: \${t.var.color.background_light_200};
 }
 ._id:disabled {
   opacity: 0.5;
@@ -2622,15 +2622,15 @@ export function BackupManagement() {
   font-weight: 500;
   cursor: pointer;
   border: none;
-  background: \${args.theme.var.color.warning};
-  color: \${args.theme.var.color.warning_text};
+  background: \${t.var.color.warning};
+  color: \${t.var.color.warning_text};
   transition: all 0.2s;
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 ._id:hover:not(:disabled) {
-  background: \${args.theme.var.color.warning_dark_200};
+  background: \${t.var.color.warning_dark_200};
 }
 ._id:disabled {
   opacity: 0.5;
@@ -2690,7 +2690,7 @@ export function BackupManagement() {
               <As
                 as="div"
                 css={`return \`._id {
-  background: \${args.theme.var.color.background};
+  background: \${t.var.color.background};
   padding: 2rem;
   border-radius: 0.5rem;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
@@ -2705,7 +2705,7 @@ export function BackupManagement() {
   margin: 0 0 1rem 0;
   font-size: 1.25rem;
   font-weight: 600;
-  color: \${args.theme.var.color.text};
+  color: \${t.var.color.text};
 }\`;`}
                 >
                   📝 Backup Note
@@ -2716,11 +2716,11 @@ export function BackupManagement() {
                   css={`return \`._id {
   margin-bottom: 1rem;
   padding: 0.75rem;
-  background: \${args.theme.var.color.background_light_200};
+  background: \${t.var.color.background_light_200};
   border-radius: 0.375rem;
   font-family: monospace;
   font-size: 0.875rem;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
 }\`;`}
                 >
                   {modal.backupKey.split("/").pop()}
@@ -2737,18 +2737,18 @@ export function BackupManagement() {
   width: 100%;
   min-height: 120px;
   padding: 0.75rem;
-  border: 1px solid \${args.theme.var.color.border};
+  border: 1px solid \${t.var.color.border};
   border-radius: 0.375rem;
   font-family: inherit;
   font-size: 0.875rem;
   resize: vertical;
-  background: \${args.theme.var.color.background};
-  color: \${args.theme.var.color.text};
+  background: \${t.var.color.background};
+  color: \${t.var.color.text};
   margin-bottom: 1rem;
 }
 ._id:focus {
   outline: none;
-  border-color: \${args.theme.var.color.primary};
+  border-color: \${t.var.color.primary};
 }\`;`}
                 />
 
@@ -2770,12 +2770,12 @@ export function BackupManagement() {
   font-weight: 500;
   cursor: pointer;
   border: none;
-  background: \${args.theme.var.color.background_light_300};
-  color: \${args.theme.var.color.text};
+  background: \${t.var.color.background_light_300};
+  color: \${t.var.color.text};
   transition: all 0.2s;
 }
 ._id:hover {
-  background: \${args.theme.var.color.background_light_400};
+  background: \${t.var.color.background_light_400};
 }\`;`}
                   >
                     Cancel
@@ -2790,12 +2790,12 @@ export function BackupManagement() {
   font-weight: 500;
   cursor: pointer;
   border: none;
-  background: \${args.theme.var.color.primary};
-  color: \${args.theme.var.color.primary_text};
+  background: \${t.var.color.primary};
+  color: \${t.var.color.primary_text};
   transition: all 0.2s;
 }
 ._id:hover {
-  background: \${args.theme.var.color.primary_dark_200};
+  background: \${t.var.color.primary_dark_200};
 }\`;`}
                   >
                     💾 Save Note
@@ -2832,7 +2832,7 @@ export function BackupManagement() {
               <As
                 as="div"
                 css={`return \`._id {
-  background: \${args.theme.var.color.background};
+  background: \${t.var.color.background};
   padding: 2rem;
   border-radius: 0.5rem;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
@@ -2849,7 +2849,7 @@ export function BackupManagement() {
   margin: 0 0 1.5rem 0;
   font-size: 1.5rem;
   font-weight: 600;
-  color: \${args.theme.var.color.text};
+  color: \${t.var.color.text};
 }\`;`}
                 >
                   🔍 Backup Comparison
@@ -2869,16 +2869,16 @@ export function BackupManagement() {
                     as="div"
                     css={`return \`._id {
   padding: 1rem;
-  background: \${args.theme.var.color.error_light_900};
+  background: \${t.var.color.error_light_900};
   border-radius: 0.375rem;
-  border: 1px solid \${args.theme.var.color.error};
+  border: 1px solid \${t.var.color.error};
 }\`;`}
                   >
                     <As
                       as="div"
                       css={`return \`._id {
   font-size: 0.75rem;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
   margin-bottom: 0.5rem;
 }\`;`}
                     >
@@ -2890,7 +2890,7 @@ export function BackupManagement() {
   font-family: monospace;
   font-size: 0.875rem;
   font-weight: 500;
-  color: \${args.theme.var.color.error_dark_300};
+  color: \${t.var.color.error_dark_300};
 }\`;`}
                     >
                       {modal.backup1.filename}
@@ -2899,7 +2899,7 @@ export function BackupManagement() {
                       as="div"
                       css={`return \`._id {
   font-size: 0.75rem;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
   margin-top: 0.25rem;
 }\`;`}
                     >
@@ -2914,16 +2914,16 @@ export function BackupManagement() {
                     as="div"
                     css={`return \`._id {
   padding: 1rem;
-  background: \${args.theme.var.color.success_light_900};
+  background: \${t.var.color.success_light_900};
   border-radius: 0.375rem;
-  border: 1px solid \${args.theme.var.color.success};
+  border: 1px solid \${t.var.color.success};
 }\`;`}
                   >
                     <As
                       as="div"
                       css={`return \`._id {
   font-size: 0.75rem;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
   margin-bottom: 0.5rem;
 }\`;`}
                     >
@@ -2935,7 +2935,7 @@ export function BackupManagement() {
   font-family: monospace;
   font-size: 0.875rem;
   font-weight: 500;
-  color: \${args.theme.var.color.success_dark_300};
+  color: \${t.var.color.success_dark_300};
 }\`;`}
                     >
                       {modal.backup2.filename}
@@ -2944,7 +2944,7 @@ export function BackupManagement() {
                       as="div"
                       css={`return \`._id {
   font-size: 0.75rem;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
   margin-top: 0.25rem;
 }\`;`}
                     >
@@ -2970,15 +2970,15 @@ export function BackupManagement() {
                     as="div"
                     css={`return \`._id {
   padding: 0.75rem 1rem;
-  background: \${args.theme.var.color.info_light_900};
+  background: \${t.var.color.info_light_900};
   border-radius: 0.375rem;
-  border: 1px solid \${args.theme.var.color.info};
+  border: 1px solid \${t.var.color.info};
 }\`;`}
                   >
                     <As
                       as="span"
                       css={`return \`._id {
-  color: \${args.theme.var.color.info_dark_300};
+  color: \${t.var.color.info_dark_300};
   font-weight: 500;
   font-size: 0.875rem;
 }\`;`}
@@ -2990,15 +2990,15 @@ export function BackupManagement() {
                     as="div"
                     css={`return \`._id {
   padding: 0.75rem 1rem;
-  background: \${args.theme.var.color.warning_light_900};
+  background: \${t.var.color.warning_light_900};
   border-radius: 0.375rem;
-  border: 1px solid \${args.theme.var.color.warning};
+  border: 1px solid \${t.var.color.warning};
 }\`;`}
                   >
                     <As
                       as="span"
                       css={`return \`._id {
-  color: \${args.theme.var.color.warning_dark_300};
+  color: \${t.var.color.warning_dark_300};
   font-weight: 500;
   font-size: 0.875rem;
 }\`;`}
@@ -3010,15 +3010,15 @@ export function BackupManagement() {
                     as="div"
                     css={`return \`._id {
   padding: 0.75rem 1rem;
-  background: \${args.theme.var.color.primary_light_900};
+  background: \${t.var.color.primary_light_900};
   border-radius: 0.375rem;
-  border: 1px solid \${args.theme.var.color.primary};
+  border: 1px solid \${t.var.color.primary};
 }\`;`}
                   >
                     <As
                       as="span"
                       css={`return \`._id {
-  color: \${args.theme.var.color.primary_dark_300};
+  color: \${t.var.color.primary_dark_300};
   font-weight: 500;
   font-size: 0.875rem;
 }\`;`}
@@ -3042,7 +3042,7 @@ export function BackupManagement() {
   margin: 0 0 1rem 0;
   font-size: 1rem;
   font-weight: 600;
-  color: \${args.theme.var.color.text};
+  color: \${t.var.color.text};
 }\`;`}
                   >
                     Content Differences{" "}
@@ -3057,9 +3057,9 @@ export function BackupManagement() {
                         css={`return \`._id {
   padding: 2rem;
   text-align: center;
-  background: \${args.theme.var.color.success_light_900};
+  background: \${t.var.color.success_light_900};
   border-radius: 0.375rem;
-  color: \${args.theme.var.color.success_dark_300};
+  color: \${t.var.color.success_dark_300};
   font-weight: 500;
 }\`;`}
                       >
@@ -3072,8 +3072,8 @@ export function BackupManagement() {
                       css={`return \`._id {
   max-height: 400px;
   overflow-y: auto;
-  background: \${args.theme.var.color.background_light_100};
-  border: 1px solid \${args.theme.var.color.border};
+  background: \${t.var.color.background_light_100};
+  border: 1px solid \${t.var.color.border};
   border-radius: 0.375rem;
   font-family: monospace;
   font-size: 0.75rem;
@@ -3085,9 +3085,9 @@ export function BackupManagement() {
                             as="div"
                             css={`return \`._id {
   padding: 0.5rem 1rem;
-  border-bottom: 1px solid \${args.theme.var.color.border};
-  background: ${diff.type === "added" ? "${args.theme.var.color.success_light_900}" : diff.type === "removed" ? "${args.theme.var.color.error_light_900}" : "transparent"};
-  color: ${diff.type === "added" ? "${args.theme.var.color.success_dark_300}" : diff.type === "removed" ? "${args.theme.var.color.error_dark_300}" : "${args.theme.var.color.text}"};
+  border-bottom: 1px solid \${t.var.color.border};
+  background: ${diff.type === "added" ? "${t.var.color.success_light_900}" : diff.type === "removed" ? "${t.var.color.error_light_900}" : "transparent"};
+  color: ${diff.type === "added" ? "${t.var.color.success_dark_300}" : diff.type === "removed" ? "${t.var.color.error_dark_300}" : "${t.var.color.text}"};
   display: flex;
   gap: 1rem;
 }
@@ -3098,7 +3098,7 @@ export function BackupManagement() {
                             <As
                               as="span"
                               css={`return \`._id {
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
   min-width: 60px;
 }\`;`}
                             >
@@ -3151,12 +3151,12 @@ export function BackupManagement() {
   font-weight: 500;
   cursor: pointer;
   border: none;
-  background: \${args.theme.var.color.primary};
-  color: \${args.theme.var.color.primary_text};
+  background: \${t.var.color.primary};
+  color: \${t.var.color.primary_text};
   transition: all 0.2s;
 }
 ._id:hover {
-  background: \${args.theme.var.color.primary_dark_200};
+  background: \${t.var.color.primary_dark_200};
 }\`;`}
                   >
                     Close
@@ -3194,7 +3194,7 @@ export function BackupManagement() {
                 as="div"
                 onClick={(e: Event) => e.stopPropagation()}
                 css={`return \`._id {
-  background: \${args.theme.var.color.background};
+  background: \${t.var.color.background};
   border-radius: 0.5rem;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
   max-width: 900px;
@@ -3208,8 +3208,8 @@ export function BackupManagement() {
                   as="div"
                   css={`return \`._id {
   padding: 2rem;
-  border-bottom: 1px solid \${args.theme.var.color.border};
-  background: \${args.theme.var.color.background_light_200};
+  border-bottom: 1px solid \${t.var.color.border};
+  background: \${t.var.color.background_light_200};
 }\`;`}
                 >
                   <As
@@ -3218,7 +3218,7 @@ export function BackupManagement() {
   margin: 0 0 0.5rem 0;
   font-size: 1.5rem;
   font-weight: 600;
-  color: \${args.theme.var.color.primary};
+  color: \${t.var.color.primary};
 }\`;`}
                   >
                     👁️ Backup Preview
@@ -3227,7 +3227,7 @@ export function BackupManagement() {
                     as="div"
                     css={`return \`._id {
   font-size: 0.875rem;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
   font-family: monospace;
 }\`;`}
                   >
@@ -3256,7 +3256,7 @@ export function BackupManagement() {
                       as="div"
                       css={`return \`._id {
   padding: 1rem;
-  background: \${args.theme.var.color.primary_light_900};
+  background: \${t.var.color.primary_light_900};
   border-radius: 0.375rem;
   text-align: center;
 }\`;`}
@@ -3266,7 +3266,7 @@ export function BackupManagement() {
                         css={`return \`._id {
   font-size: 1.5rem;
   font-weight: 600;
-  color: \${args.theme.var.color.primary};
+  color: \${t.var.color.primary};
 }\`;`}
                       >
                         {preview.totalLines.toLocaleString()}
@@ -3275,7 +3275,7 @@ export function BackupManagement() {
                         as="div"
                         css={`return \`._id {
   font-size: 0.75rem;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
   margin-top: 0.25rem;
 }\`;`}
                       >
@@ -3287,7 +3287,7 @@ export function BackupManagement() {
                       as="div"
                       css={`return \`._id {
   padding: 1rem;
-  background: \${args.theme.var.color.success_light_900};
+  background: \${t.var.color.success_light_900};
   border-radius: 0.375rem;
   text-align: center;
 }\`;`}
@@ -3297,7 +3297,7 @@ export function BackupManagement() {
                         css={`return \`._id {
   font-size: 1.5rem;
   font-weight: 600;
-  color: \${args.theme.var.color.success};
+  color: \${t.var.color.success};
 }\`;`}
                       >
                         {preview.totalNodes.toLocaleString()}
@@ -3306,7 +3306,7 @@ export function BackupManagement() {
                         as="div"
                         css={`return \`._id {
   font-size: 0.75rem;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
   margin-top: 0.25rem;
 }\`;`}
                       >
@@ -3318,7 +3318,7 @@ export function BackupManagement() {
                       as="div"
                       css={`return \`._id {
   padding: 1rem;
-  background: \${args.theme.var.color.info_light_900};
+  background: \${t.var.color.info_light_900};
   border-radius: 0.375rem;
   text-align: center;
 }\`;`}
@@ -3328,7 +3328,7 @@ export function BackupManagement() {
                         css={`return \`._id {
   font-size: 1.5rem;
   font-weight: 600;
-  color: \${args.theme.var.color.info};
+  color: \${t.var.color.info};
 }\`;`}
                       >
                         {preview.totalRelationships.toLocaleString()}
@@ -3337,7 +3337,7 @@ export function BackupManagement() {
                         as="div"
                         css={`return \`._id {
   font-size: 0.75rem;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
   margin-top: 0.25rem;
 }\`;`}
                       >
@@ -3359,7 +3359,7 @@ export function BackupManagement() {
   font-size: 1rem;
   font-weight: 600;
   margin: 0 0 1rem 0;
-  color: \${args.theme.var.color.success};
+  color: \${t.var.color.success};
 }\`;`}
                     >
                       📦 Node Types
@@ -3367,8 +3367,8 @@ export function BackupManagement() {
                     <As
                       as="div"
                       css={`return \`._id {
-  background: \${args.theme.var.color.background_light_100};
-  border: 1px solid \${args.theme.var.color.border};
+  background: \${t.var.color.background_light_100};
+  border: 1px solid \${t.var.color.border};
   border-radius: 0.375rem;
   padding: 1rem;
   display: grid;
@@ -3382,7 +3382,7 @@ export function BackupManagement() {
                           <As
                             as="div"
                             css={`return \`._id {
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
   font-size: 0.875rem;
 }\`;`}
                           >
@@ -3403,7 +3403,7 @@ export function BackupManagement() {
                               as="span"
                               css={`return \`._id {
   font-family: monospace;
-  color: \${args.theme.var.color.text};
+  color: \${t.var.color.text};
 }\`;`}
                             >
                               {label}
@@ -3412,7 +3412,7 @@ export function BackupManagement() {
                               as="span"
                               css={`return \`._id {
   font-weight: 600;
-  color: \${args.theme.var.color.success};
+  color: \${t.var.color.success};
 }\`;`}
                             >
                               {count as number}
@@ -3436,7 +3436,7 @@ export function BackupManagement() {
   font-size: 1rem;
   font-weight: 600;
   margin: 0 0 1rem 0;
-  color: \${args.theme.var.color.info};
+  color: \${t.var.color.info};
 }\`;`}
                     >
                       🔗 Relationship Types
@@ -3444,8 +3444,8 @@ export function BackupManagement() {
                     <As
                       as="div"
                       css={`return \`._id {
-  background: \${args.theme.var.color.background_light_100};
-  border: 1px solid \${args.theme.var.color.border};
+  background: \${t.var.color.background_light_100};
+  border: 1px solid \${t.var.color.border};
   border-radius: 0.375rem;
   padding: 1rem;
   display: grid;
@@ -3459,7 +3459,7 @@ export function BackupManagement() {
                           <As
                             as="div"
                             css={`return \`._id {
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
   font-size: 0.875rem;
 }\`;`}
                           >
@@ -3480,7 +3480,7 @@ export function BackupManagement() {
                               as="span"
                               css={`return \`._id {
   font-family: monospace;
-  color: \${args.theme.var.color.text};
+  color: \${t.var.color.text};
 }\`;`}
                             >
                               {type}
@@ -3489,7 +3489,7 @@ export function BackupManagement() {
                               as="span"
                               css={`return \`._id {
   font-weight: 600;
-  color: \${args.theme.var.color.info};
+  color: \${t.var.color.info};
 }\`;`}
                             >
                               {count as number}
@@ -3515,9 +3515,9 @@ export function BackupManagement() {
                     <As
                       as="pre"
                       css={`return \`._id {
-  background: \${args.theme.var.color.background_dark_800};
-  color: \${args.theme.var.color.background_dark_800_text};
-  border: 1px solid \${args.theme.var.color.border};
+  background: \${t.var.color.background_dark_800};
+  color: \${t.var.color.background_dark_800_text};
+  border: 1px solid \${t.var.color.border};
   border-radius: 0.375rem;
   padding: 1rem;
   font-family: monospace;
@@ -3537,7 +3537,7 @@ export function BackupManagement() {
                   as="div"
                   css={`return \`._id {
   padding: 1.5rem 2rem;
-  border-top: 1px solid \${args.theme.var.color.border};
+  border-top: 1px solid \${t.var.color.border};
   display: flex;
   justify-content: flex-end;
 }\`;`}
@@ -3552,12 +3552,12 @@ export function BackupManagement() {
   font-weight: 500;
   cursor: pointer;
   border: none;
-  background: \${args.theme.var.color.primary};
-  color: \${args.theme.var.color.primary_text};
+  background: \${t.var.color.primary};
+  color: \${t.var.color.primary_text};
   transition: background 0.2s;
 }
 ._id:hover {
-  background: \${args.theme.var.color.primary_dark_200};
+  background: \${t.var.color.primary_dark_200};
 }\`;`}
                   >
                     Close
@@ -3601,12 +3601,12 @@ export function BackupManagement() {
               <As
                 as="div"
                 css={`return \`._id {
-  background: \${args.theme.var.color.background};
+  background: \${t.var.color.background};
   padding: 2rem;
   border-radius: 0.5rem;
   max-width: 600px;
   width: 90%;
-  border: 1px solid \${args.theme.var.color.border};
+  border: 1px solid \${t.var.color.border};
 }\`;`}
                 onClick={(e: MouseEvent) => e.stopPropagation()}
               >
@@ -3640,7 +3640,7 @@ export function BackupManagement() {
                       css={`return \`._id {
   font-weight: 500;
   font-size: 0.875rem;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
 }\`;`}
                     >
                       Select Backup File (.gz):
@@ -3658,16 +3658,16 @@ export function BackupManagement() {
                       }}
                       css={`return \`._id {
   padding: 0.75rem;
-  border: 1px solid \${args.theme.var.color.border};
+  border: 1px solid \${t.var.color.border};
   border-radius: 0.375rem;
-  background: \${args.theme.var.color.background};
-  color: \${args.theme.var.color.text};
+  background: \${t.var.color.background};
+  color: \${t.var.color.text};
   font-size: 0.875rem;
   cursor: pointer;
 }
 ._id:focus {
   outline: none;
-  border-color: \${args.theme.var.color.primary};
+  border-color: \${t.var.color.primary};
 }\`;`}
                     />
                     <Show when={uploadFile()}>
@@ -3675,9 +3675,9 @@ export function BackupManagement() {
                         as="div"
                         css={`return \`._id {
   font-size: 0.875rem;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
   padding: 0.5rem;
-  background: \${args.theme.var.color.background_light_200};
+  background: \${t.var.color.background_light_200};
   border-radius: 0.375rem;
 }\`;`}
                       >
@@ -3701,7 +3701,7 @@ export function BackupManagement() {
                       css={`return \`._id {
   font-weight: 500;
   font-size: 0.875rem;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
 }\`;`}
                     >
                       Target Database:
@@ -3714,17 +3714,17 @@ export function BackupManagement() {
                       }
                       css={`return \`._id {
   padding: 0.75rem;
-  border: 1px solid \${args.theme.var.color.border};
+  border: 1px solid \${t.var.color.border};
   border-radius: 0.375rem;
-  background: \${args.theme.var.color.background};
-  color: \${args.theme.var.color.text};
+  background: \${t.var.color.background};
+  color: \${t.var.color.text};
   font-family: monospace;
   font-size: 0.875rem;
   cursor: pointer;
 }
 ._id:focus {
   outline: none;
-  border-color: \${args.theme.var.color.primary};
+  border-color: \${t.var.color.primary};
 }\`;`}
                     >
                       <As as="option" value="">
@@ -3748,7 +3748,7 @@ export function BackupManagement() {
   gap: 0.75rem;
   margin-bottom: 1rem;
   padding: 1rem;
-  background: \${args.theme.var.color.background_light_200};
+  background: \${t.var.color.background_light_200};
   border-radius: 0.375rem;
 }\`;`}
                   >
@@ -3771,7 +3771,7 @@ export function BackupManagement() {
                       as="label"
                       css={`return \`._id {
   font-size: 0.875rem;
-  color: \${args.theme.var.color.text};
+  color: \${t.var.color.text};
   cursor: pointer;
 }\`;`}
                       onClick={() =>
@@ -3786,8 +3786,8 @@ export function BackupManagement() {
                     <As
                       as="div"
                       css={`return \`._id {
-  background: \${args.theme.var.color.warning_light_900};
-  border: 1px solid \${args.theme.var.color.warning};
+  background: \${t.var.color.warning_light_900};
+  border: 1px solid \${t.var.color.warning};
   border-radius: 0.375rem;
   padding: 1rem;
   margin-bottom: 1rem;
@@ -3797,7 +3797,7 @@ export function BackupManagement() {
                         as="p"
                         css={`return \`._id {
   margin: 0 0 0.5rem 0;
-  color: \${args.theme.var.color.warning_dark_300};
+  color: \${t.var.color.warning_dark_300};
   font-weight: 600;
 }\`;`}
                       >
@@ -3807,7 +3807,7 @@ export function BackupManagement() {
                         as="p"
                         css={`return \`._id {
   margin: 0;
-  color: \${args.theme.var.color.warning_dark_300};
+  color: \${t.var.color.warning_dark_300};
   font-size: 0.875rem;
 }\`;`}
                       >
@@ -3823,9 +3823,9 @@ export function BackupManagement() {
   align-items: center;
   gap: 0.75rem;
   padding: 1rem;
-  background: \${args.theme.var.color.error_light_900};
+  background: \${t.var.color.error_light_900};
   border-radius: 0.375rem;
-  border: 1px solid \${args.theme.var.color.error};
+  border: 1px solid \${t.var.color.error};
   margin-bottom: 1rem;
 }\`;`}
                     >
@@ -3848,7 +3848,7 @@ export function BackupManagement() {
                         as="label"
                         css={`return \`._id {
   font-size: 0.875rem;
-  color: \${args.theme.var.color.error_dark_300};
+  color: \${t.var.color.error_dark_300};
   font-weight: 500;
   cursor: pointer;
 }\`;`}
@@ -3887,13 +3887,13 @@ export function BackupManagement() {
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
-  border: 1px solid \${args.theme.var.color.border};
-  background: \${args.theme.var.color.background};
-  color: \${args.theme.var.color.text};
+  border: 1px solid \${t.var.color.border};
+  background: \${t.var.color.background};
+  color: \${t.var.color.text};
   transition: all 0.2s;
 }
 ._id:hover:not(:disabled) {
-  background: \${args.theme.var.color.background_light_200};
+  background: \${t.var.color.background_light_200};
 }
 ._id:disabled {
   opacity: 0.5;
@@ -3915,15 +3915,15 @@ export function BackupManagement() {
   font-weight: 500;
   cursor: pointer;
   border: none;
-  background: \${args.theme.var.color.primary};
-  color: \${args.theme.var.color.primary_text};
+  background: \${t.var.color.primary};
+  color: \${t.var.color.primary_text};
   transition: all 0.2s;
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 ._id:hover:not(:disabled) {
-  background: \${args.theme.var.color.primary_dark_200};
+  background: \${t.var.color.primary_dark_200};
 }
 ._id:disabled {
   opacity: 0.5;
@@ -3975,9 +3975,9 @@ export function BackupManagement() {
           css={`return \`._id {
   padding: 2rem;
   text-align: center;
-  color: \${args.theme.var.color.error};
-  background: \${args.theme.var.color.error_light_900};
-  border: 1px solid \${args.theme.var.color.error};
+  color: \${t.var.color.error};
+  background: \${t.var.color.error_light_900};
+  border: 1px solid \${t.var.color.error};
   border-radius: 0.5rem;
 }\`;`}
         >

@@ -41,22 +41,22 @@
         displayOrder: 1
         fns:
           '''const getItems = () => {
-  const getter = args.contextData.props?.getItems;
+  const getter = c.props?.getItems;
   if (typeof getter === "function") return getter() || [];
-  return args.contextData.props?.items || [];
+  return c.props?.items || [];
 };
 
-const ROW_HEIGHT = () => args.contextData.props?.itemHeight ?? 50;
+const ROW_HEIGHT = () => c.props?.itemHeight ?? 50;
 
 let virtualizerHandle = null;
 const setVirtualizerHandle = (handle) => {
   virtualizerHandle = handle || null;
 };
 
-const [scrollElement, setScrollElement] = args.createSignal(null);
-const [listRootEl, setListRootEl] = args.createSignal(null);
+const [scrollElement, setScrollElement] = _.createSignal(null);
+const [listRootEl, setListRootEl] = _.createSignal(null);
 
-const renderRow = args.createLoopRowRenderer((rowData, index) => ({
+const renderRow = _.createLoopRowRenderer((rowData, index) => ({
   index: index(),
   start: 0,
   size: ROW_HEIGHT(),
@@ -88,10 +88,10 @@ const isCheckboxTarget = (target) => {
   return target.tagName === "INPUT" && String(target.type || "").toLowerCase() === "checkbox";
 };
 
-const getActiveIndex = () => args.contextData.props?.getActiveIndex?.() ?? -1;
-const setActiveIndex = (n) => args.contextData.props?.setActiveIndex?.(n);
+const getActiveIndex = () => c.props?.getActiveIndex?.() ?? -1;
+const setActiveIndex = (n) => c.props?.setActiveIndex?.(n);
 const getItemCount = () => getItems()?.length ?? 0;
-const useKeyNav = () => typeof args.contextData.props?.setActiveIndex === "function";
+const useKeyNav = () => typeof c.props?.setActiveIndex === "function";
 
 const focusList = () => {
   listRootEl()?.focus?.({ preventScroll: true });
@@ -103,9 +103,9 @@ const selectIndex = (nextIndex, e) => {
 
   const current = getActiveIndex();
   if (e?.shiftKey) {
-    args.contextData.props?.onShiftArrow?.(current, nextIndex);
+    c.props?.onShiftArrow?.(current, nextIndex);
   } else {
-    args.contextData.props?.clearSelectionAnchor?.();
+    c.props?.clearSelectionAnchor?.();
   }
   setActiveIndex(nextIndex);
   virtualizerHandle?.scrollToIndex?.(nextIndex, { align: "nearest" });
@@ -135,20 +135,20 @@ const handleListKeyDown = (e) => {
     case "Space":
     case "Spacebar": {
       if (isCheckboxTarget(e.target)) return;
-      if (current >= 0 && args.contextData.props?.onSpaceKey) {
+      if (current >= 0 && c.props?.onSpaceKey) {
         e.preventDefault();
         e.stopPropagation();
-        args.contextData.props.onSpaceKey(current);
+        c.props.onSpaceKey(current);
       }
       return;
     }
     case "ArrowLeft":
     case "ArrowRight": {
-      const onExpandCollapse = args.contextData.props?.onExpandCollapse;
+      const onExpandCollapse = c.props?.onExpandCollapse;
       if (!onExpandCollapse || current < 0) return;
       const row = getItems()[current];
       const expandableGroup = row?._isParent === true && row._parentKey != null;
-      const expandableRow = row?.id && args.contextData.props?.rowHasExpansion?.(row) === true;
+      const expandableRow = row?.id && c.props?.rowHasExpansion?.(row) === true;
       if (expandableGroup || expandableRow) {
         e.preventDefault();
         e.stopPropagation();
@@ -164,13 +164,13 @@ const handleListMouseDown = (e) => {
 };
 
 // External scroll port (40wrap): capture keys before native scroll / page scroll.
-args.createEffect(() => {
-  const getter = args.contextData.props?.getScrollContainerElement;
+_.createEffect(() => {
+  const getter = c.props?.getScrollContainerElement;
   if (typeof getter !== "function") return;
   setScrollElement(getter() || null);
 });
 
-args.createEffect(() => {
+_.createEffect(() => {
   const el = scrollElement();
   if (!el || !useKeyNav()) return;
 
@@ -180,7 +180,7 @@ args.createEffect(() => {
   el.addEventListener("keydown", onKeyDown, true);
   el.addEventListener("mousedown", onMouseDown, true);
 
-  args.onCleanup(() => {
+  _.onCleanup(() => {
     el.removeEventListener("keydown", onKeyDown, true);
     el.removeEventListener("mousedown", onMouseDown, true);
   });
@@ -199,26 +199,26 @@ return {
 };'''
         componentName: Html
         props:
-          '''const containerClass = args.contextData.props?.class || args.contextData.props?.containerClass || "";
-const mw = args.contextData.props?.contentMinWidthPx;
+          '''const containerClass = c.props?.class || c.props?.containerClass || "";
+const mw = c.props?.contentMinWidthPx;
 const minWStyle =
   typeof mw === "number" && mw > 0 ? `min-width: ${mw}px;width:100%;box-sizing:border-box;` : "";
-const useKeyNav = args.fns.useKeyNav?.();
-const tabIndex = args.contextData.props?.tabIndex;
-const role = args.contextData.props?.role;
-const ariaLabel = args.contextData.props?.["attr:aria-label"];
+const useKeyNav = f.useKeyNav?.();
+const tabIndex = c.props?.tabIndex;
+const role = c.props?.role;
+const ariaLabel = c.props?.["attr:aria-label"];
 
 return {
   as: "div",
   class: containerClass,
-  ref: args.fns.setListRootEl,
+  ref: f.setListRootEl,
   ...(minWStyle ? { style: minWStyle } : {}),
   ...(useKeyNav && {
     tabIndex: tabIndex !== undefined ? tabIndex : 0,
     role,
     ...(ariaLabel && { "attr:aria-label": ariaLabel }),
-    onKeyDownCapture: args.fns.handleListKeyDown,
-    onMouseDownCapture: args.fns.handleListMouseDown,
+    onKeyDownCapture: f.handleListKeyDown,
+    onMouseDownCapture: f.handleListMouseDown,
   }),
 };'''
       }
@@ -230,21 +230,21 @@ return {
         displayOrder: 1
         componentName: Virtualizer
         props:
-          '''const scrollEl = args.fns.scrollElement?.();
-const usesExternalScroll = typeof args.contextData.props?.getScrollContainerElement === "function";
+          '''const scrollEl = f.scrollElement?.();
+const usesExternalScroll = typeof c.props?.getScrollContainerElement === "function";
 
 if (usesExternalScroll && !scrollEl) {
   return { hide: true };
 }
 
-const rowHeight = args.fns.ROW_HEIGHT?.() ?? 50;
+const rowHeight = f.ROW_HEIGHT?.() ?? 50;
 
 return {
-  data: args.fns.getItems(),
+  data: f.getItems(),
   scrollRef: scrollEl || undefined,
   itemSize: rowHeight,
-  ref: args.fns.setVirtualizerHandle,
-  children: args.fns.renderRow,
+  ref: f.setVirtualizerHandle,
+  children: f.renderRow,
 };'''
       }
     }

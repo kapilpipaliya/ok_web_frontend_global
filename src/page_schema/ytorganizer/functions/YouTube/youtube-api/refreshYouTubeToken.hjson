@@ -13,11 +13,11 @@
  * This function refreshes a user's YouTube OAuth access token using their refresh token.
  * Called by background workers and manual trigger functions.
  *
- * @param args.contextData.userUuid - User's UUID
+ * @param c.userUuid - User's UUID
  * @returns { success: boolean, message: string, data?: object, error?: object }
  */
 
-  const userUuid = args.contextData.userUuid;
+  const userUuid = c.userUuid;
 
   if (!userUuid) {
     return {
@@ -32,7 +32,7 @@
   const { google } = await import('googleapis');
 
   // Get user's current token from database
-  const tokenResult = await args.session.run(`
+  const tokenResult = await _.session.run(`
     MATCH (u:User {uuid: $userUuid})-[:UserYouTubeToken]->(token:YouTubeToken)
     WHERE token.isRevoked = false
     RETURN token.accessToken as accessToken,
@@ -63,10 +63,10 @@
   }
 
   // Decrypt refresh token
-  const refreshTokenDecrypted = args.decryptToken(refreshToken);
+  const refreshTokenDecrypted = _.decryptToken(refreshToken);
 
   // Get OAuth configuration from database
-  const configResult = await args.session.run(`
+  const configResult = await _.session.run(`
     MATCH (s:Setting {type: 'oauth'})
     WHERE s.googleEnabled = true
     RETURN s.googleClientId as clientId,
@@ -95,10 +95,10 @@
   }
 
   // Decrypt client secret
-  const clientSecret = args.decryptClientSecret(clientSecretEncrypted);
+  const clientSecret = _.decryptClientSecret(clientSecretEncrypted);
 
   // Get redirect URI (works with or without request)
-  const redirectUri = args.getRedirectUriFromRequest(args.request);
+  const redirectUri = _.getRedirectUriFromRequest(_.request);
 
   // Create OAuth2 client
   const oauth2Client = new google.auth.OAuth2(
@@ -125,13 +125,13 @@
   }
 
     // Encrypt new access token
-    const newAccessTokenEncrypted = args.encryptToken(credentials.access_token);
+    const newAccessTokenEncrypted = _.encryptToken(credentials.access_token);
 
     // Calculate expiry time
     const expiryTime = credentials.expiry_date || Date.now() + 3600 * 1000;
 
     // Update token in database
-    await args.session.run(`
+    await _.session.run(`
       MATCH (u:User {uuid: $userUuid})-[:UserYouTubeToken]->(token:YouTubeToken)
       SET token.accessToken = $accessToken,
           token.expiresAt = datetime({epochMillis: $expiresAt}),
@@ -139,7 +139,7 @@
     `, {
       userUuid,
       accessToken: newAccessTokenEncrypted,
-      expiresAt: args.neo4jDriver.int(expiryTime)
+      expiresAt: _.neo4jDriver.int(expiryTime)
     });
 
     console.log(`[Token Refresh] Successfully refreshed token for user ${userUuid}`);
@@ -165,7 +165,7 @@
       errorMessage.includes('Token has been expired or revoked')
     ) {
       // Mark token as revoked in database
-      await args.session.run(`
+      await _.session.run(`
         MATCH (u:User {uuid: $userUuid})-[:UserYouTubeToken]->(token:YouTubeToken)
         SET token.isRevoked = true,
             token.revokedAt = datetime()

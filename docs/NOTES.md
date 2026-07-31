@@ -12,9 +12,9 @@
   ```js
   return {
       fns: {
-          p2: () => args.fns("p1")("kk")
+          p2: () => _.fns("p1")("kk")
       },
-      onClick: () => console.log(args.fns("p2")("ll"))
+      onClick: () => console.log(_.fns("p2")("ll"))
   }
   ```
 

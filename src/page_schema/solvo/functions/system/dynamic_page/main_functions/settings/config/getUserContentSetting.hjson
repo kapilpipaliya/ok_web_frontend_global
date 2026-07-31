@@ -8,7 +8,7 @@
         body:
           '''
 // Get current authenticated user from session
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return {
     success: false,
@@ -17,10 +17,10 @@ if (!actualUser) {
 }
 
 // Get effective user (handles admin impersonation)
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const user = await _.getEffectiveUser(_.session, actualUser, c);
 
 // Extract parameters
-const { tableVertexLabel, key, settingsLabel } = args.contextData;
+const { tableVertexLabel, key, settingsLabel } = c;
 
 if (!tableVertexLabel) {
   return {
@@ -40,7 +40,7 @@ const query = `
   LIMIT 1
 `;
 
-const result = await args.session.run(query, {
+const result = await _.session.run(query, {
   userUuid: user.P.uuid,
   settingKey: settingKey
 });
@@ -48,19 +48,19 @@ const result = await args.session.run(query, {
 if (result.records.length === 0) {
   // No user setting found, try default setting key derived from requested key
   const defaultKey = settingKey.endsWith("_default") ? settingKey : `${settingKey}_default`;
-  let defaultResult = await args.session.run(
+  let defaultResult = await _.session.run(
     `MATCH (s:Setting {key: $defaultKey}) RETURN s LIMIT 1`,
     { defaultKey }
   );
 
   // If no default exists, run migration to create default settings (so hooks and full config are available)
-  if (defaultResult.records.length === 0 && args.executeNamedServerFunction) {
+  if (defaultResult.records.length === 0 && s) {
     try {
-      await args.executeNamedServerFunction({
+      await s({
         functionName: "migrateDynamicPageSettings",
         contextData: { dryRun: false }
       });
-      defaultResult = await args.session.run(
+      defaultResult = await _.session.run(
         `MATCH (s:Setting {key: $defaultKey}) RETURN s LIMIT 1`,
         { defaultKey }
       );
@@ -70,7 +70,7 @@ if (result.records.length === 0) {
   }
 
   if (defaultResult.records.length > 0) {
-    const defaultVertices = args.processResult(defaultResult.records, args.context, 's');
+    const defaultVertices = _.processResult(defaultResult.records, _.context, 's');
     const defaultVertex = defaultVertices[0];
     return {
       success: true,
@@ -93,7 +93,7 @@ if (result.records.length === 0) {
 }
 
 // Use processResult to populate graph structure
-const settingVertices = args.processResult(result.records, args.context, 's');
+const settingVertices = _.processResult(result.records, _.context, 's');
 const settingVertex = settingVertices[0];
 
 return {

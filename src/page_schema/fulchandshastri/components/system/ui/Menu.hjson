@@ -8,7 +8,7 @@
         description: SSR-safe nested menu. All items render in HTML; Floating UI positions on open. Props: items[{id,text,href,children|submenu}], depth, layout, controller, placements, closeDelay, isActive, onItemClick, colors.
         fns:
           '''
-const props = () => args.contextData.props || {};
+const props = () => c.props || {};
 
 const getDepth = () => Number(props().depth) || 0;
 const getLayout = () =>
@@ -31,22 +31,22 @@ const getSubmenuPlacement = () => props().submenuPlacement || "right-start";
 const getCloseDelay = () => Number(props().closeDelay) || 250;
 
 const getTriggerColor = () =>
-  props().triggerColor || args.theme.var.color.text;
+  props().triggerColor || t.var.color.text;
 const getPanelBackground = () =>
-  props().panelBackground || args.theme.var.color.background;
+  props().panelBackground || t.var.color.background;
 const getHoverBackground = () =>
   props().hoverBackground || "rgba(0, 0, 0, 0.08)";
 const getActiveBorderColor = () =>
   props().activeBorderColor || getTriggerColor();
 
 const getPagePath = () => {
-  const parts = String(args.location?.pathname || "")
+  const parts = String(_.location?.pathname || "")
     .split("/")
     .filter(Boolean);
   if (parts.length > 0 && /^[a-z]{2,3}$/i.test(parts[0])) {
     return parts.length > 1 ? "/" + parts.slice(1).join("/") : "/";
   }
-  return args.location?.pathname || "/";
+  return _.location?.pathname || "/";
 };
 
 const defaultIsActive = (item) => {
@@ -67,7 +67,7 @@ const isMouseLikePointer = (pointerType) =>
   !pointerType || pointerType === "mouse" || pointerType === "pen";
 
 const createController = () => {
-  const [openPath, setOpenPath] = args.createSignal([]);
+  const [openPath, setOpenPath] = _.createSignal([]);
   const triggerRefs = new Map();
   const menuRefs = new Map();
   const floatingCleanups = new Map();
@@ -107,10 +107,10 @@ const createController = () => {
     stopFloating(id);
     const trigger = triggerRefs.get(id);
     const menu = menuRefs.get(id);
-    if (!trigger || !menu || !args.floatingUI) return;
+    if (!trigger || !menu || !_.floatingUI) return;
 
     const { computePosition, flip, shift, offset, autoUpdate, size } =
-      args.floatingUI;
+      _.floatingUI;
 
     const middleware = [
       offset(offsetPx),
@@ -325,7 +325,7 @@ return {
       L: Attr
       P: {
         css:
-          '''const layout = args.fns.getLayout();
+          '''const layout = f.getLayout();
 if (layout === "bar") {
   return `._id {
     display: flex;
@@ -347,13 +347,13 @@ return `._id {
         displayOrder: 1
         componentName: Html
         props:
-          '''const layout = args.fns.getLayout();
-const isRoot = args.fns.getDepth() === 0;
+          '''const layout = f.getLayout();
+const isRoot = f.getDepth() === 0;
 return {
   as: layout === "bar" ? "nav" : "div",
   "data-menu-root": isRoot ? "true" : undefined,
   "attr:role": layout === "panel" ? "menu" : "navigation",
-  onMount: isRoot ? () => args.fns.getController().onMount() : undefined
+  onMount: isRoot ? () => f.getController().onMount() : undefined
 };'''
       }
     }
@@ -367,7 +367,7 @@ return {
         componentName: Html
         props:
           '''return {
-  data: args.fns.getItems()
+  data: f.getItems()
 };'''
       }
     }
@@ -376,7 +376,7 @@ return {
       L: Attr
       P: {
         css:
-          '''const layout = args.fns.getLayout();
+          '''const layout = f.getLayout();
 return `._id {
   position: relative;
   display: ${layout === "bar" ? "inline-flex" : "block"};
@@ -384,11 +384,11 @@ return `._id {
         displayOrder: 1
         componentName: Html
         props:
-          '''const item = args.contextData.menuItem;
-const depth = args.fns.getDepth();
-const id = args.fns.getItemId(item);
-const hasChildren = args.fns.getChildren(item).length > 0;
-const ctrl = args.fns.getController();
+          '''const item = c.menuItem;
+const depth = f.getDepth();
+const id = f.getItemId(item);
+const hasChildren = f.getChildren(item).length > 0;
+const ctrl = f.getController();
 
 return {
   as: "div",
@@ -411,12 +411,12 @@ return {
       L: Attr
       P: {
         css:
-          '''const item = args.contextData.menuItem;
-const layout = args.fns.getLayout();
-const isActive = args.fns.isItemActive(item);
-const color = args.fns.getTriggerColor();
-const hoverBg = args.fns.getHoverBackground();
-const activeBorder = args.fns.getActiveBorderColor();
+          '''const item = c.menuItem;
+const layout = f.getLayout();
+const isActive = f.isItemActive(item);
+const color = f.getTriggerColor();
+const hoverBg = f.getHoverBackground();
+const activeBorder = f.getActiveBorderColor();
 const isBar = layout === "bar";
 
 return `._id {
@@ -497,12 +497,12 @@ return `._id {
         displayOrder: 1
         componentName: Html
         props:
-          '''const item = args.contextData.menuItem;
-const depth = args.fns.getDepth();
-const id = args.fns.getItemId(item);
-const hasChildren = args.fns.getChildren(item).length > 0;
-const layout = args.fns.getLayout();
-const ctrl = args.fns.getController();
+          '''const item = c.menuItem;
+const depth = f.getDepth();
+const id = f.getItemId(item);
+const hasChildren = f.getChildren(item).length > 0;
+const layout = f.getLayout();
+const ctrl = f.getController();
 const caret =
   hasChildren ? (layout === "bar" ? " ▾" : " ▸") : "";
 const label = `${item.text || ""}${caret}`;
@@ -529,7 +529,7 @@ if (href && href !== "#") {
     href,
     text: label,
     "attr:role": layout === "panel" ? "menuitem" : undefined,
-    onClick: () => args.fns.onItemClick(item),
+    onClick: () => f.onItemClick(item),
     onPointerEnter: () => ctrl.keepOpen()
   };
 }
@@ -539,7 +539,7 @@ return {
   type: "button",
   text: label,
   "attr:role": layout === "panel" ? "menuitem" : undefined,
-  onClick: () => args.fns.onItemClick(item),
+  onClick: () => f.onItemClick(item),
   onPointerEnter: () => ctrl.keepOpen()
 };'''
       }
@@ -551,8 +551,8 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const item = args.contextData.menuItem;
-const hasChildren = args.fns.getChildren(item).length > 0;
+          '''const item = c.menuItem;
+const hasChildren = f.getChildren(item).length > 0;
 // NEVER use as:"portal" — Solid Portal SSR returns "" and drops all children.
 // Fixed panels + Floating UI work without portal and SSR correctly.
 // Leaf items have no submenu: hide the whole panel subtree so we don't
@@ -569,12 +569,12 @@ return {
       L: Attr
       P: {
         css:
-          '''const item = args.contextData.menuItem;
-const id = args.fns.getItemId(item);
-const ctrl = args.fns.getController();
+          '''const item = c.menuItem;
+const id = f.getItemId(item);
+const ctrl = f.getController();
 const isOpen = ctrl.isOpen(id);
-const bg = args.fns.getPanelBackground();
-const depth = args.fns.getDepth();
+const bg = f.getPanelBackground();
+const depth = f.getDepth();
 
 // Always in DOM for SSR — hide with CSS (not hide:true, which unmounts)
 return `._id {
@@ -595,9 +595,9 @@ return `._id {
         displayOrder: 1
         componentName: Html
         props:
-          '''const item = args.contextData.menuItem;
-const id = args.fns.getItemId(item);
-const ctrl = args.fns.getController();
+          '''const item = c.menuItem;
+const id = f.getItemId(item);
+const ctrl = f.getController();
 return {
   as: "div",
   ref: ctrl.setMenuRef(id),
@@ -619,15 +619,15 @@ return {
         displayOrder: 1
         componentName: Menu
         props:
-          '''const item = args.contextData.menuItem;
-const parentProps = args.contextData.props || {};
-const depth = args.fns.getDepth();
+          '''const item = c.menuItem;
+const parentProps = c.props || {};
+const depth = f.getDepth();
 
 return {
-  items: args.fns.getChildren(item),
+  items: f.getChildren(item),
   depth: depth + 1,
   layout: "panel",
-  controller: args.fns.getController(),
+  controller: f.getController(),
   rootPlacement: parentProps.rootPlacement,
   submenuPlacement: parentProps.submenuPlacement,
   closeDelay: parentProps.closeDelay,

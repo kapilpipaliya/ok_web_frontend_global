@@ -178,32 +178,32 @@
         props: '''
 return {
   as: "textarea",
-  value: args.contextData.props?.value || "",
-  placeholder: args.contextData.props?.placeholder || "",
-  required: args.contextData.props?.required || false,
-  disabled: args.contextData.props?.disabled || false,
-  readOnly: args.contextData.props?.readOnly || false,
-  rows: args.contextData.props?.rows || 4,
-  cols: args.contextData.props?.cols || undefined,
-  maxLength: args.contextData.props?.maxLength || undefined,
-  minLength: args.contextData.props?.minLength || undefined,
-  autoFocus: args.contextData.props?.autoFocus || false,
-  onChange: args.contextData.props?.onChange || null,
-  onBlur: args.contextData.props?.onBlur || null,
-  onFocus: args.contextData.props?.onFocus || null
+  value: c.props?.value || "",
+  placeholder: c.props?.placeholder || "",
+  required: c.props?.required || false,
+  disabled: c.props?.disabled || false,
+  readOnly: c.props?.readOnly || false,
+  rows: c.props?.rows || 4,
+  cols: c.props?.cols || undefined,
+  maxLength: c.props?.maxLength || undefined,
+  minLength: c.props?.minLength || undefined,
+  autoFocus: c.props?.autoFocus || false,
+  onChange: c.props?.onChange || null,
+  onBlur: c.props?.onBlur || null,
+  onFocus: c.props?.onFocus || null
 };
 ''',
         css: '''
-const resize = args.contextData.props?.resize || "vertical";
+const resize = c.props?.resize || "vertical";
 
 return `._id {
   width: 100%;
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.sm};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.sm};
   font-size: 1rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   transition: all 150ms ease;
   line-height: 1.6;
   font-family: inherit;
@@ -212,34 +212,34 @@ return `._id {
 
   &:focus {
     outline: none;
-    border-color: ${args.theme.var.color.primary};
-    box-shadow: 0 0 0 3px ${args.theme.var.color.primary_light_200};
+    border-color: ${t.var.color.primary};
+    box-shadow: 0 0 0 3px ${t.var.color.primary_light_200};
   }
 
   &:hover:not(:disabled):not(:focus) {
-    border-color: ${args.theme.var.color.border_dark_200};
+    border-color: ${t.var.color.border_dark_200};
   }
 
   &:disabled {
-    background: ${args.theme.var.color.background_light_100};
+    background: ${t.var.color.background_light_100};
     opacity: 0.6;
     cursor: not-allowed;
     resize: none;
   }
 
   &:read-only {
-    background: ${args.theme.var.color.background_light_50};
+    background: ${t.var.color.background_light_50};
     cursor: default;
   }
 
   &::placeholder {
-    color: ${args.theme.var.color.text_light_500};
+    color: ${t.var.color.text_light_500};
     opacity: 1;
   }
 
   /* Mobile responsive adjustments */
   @media (max-width: 768px) {
-    padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+    padding: ${t.var.spacing.sm} ${t.var.spacing.md};
     font-size: 1rem;
     resize: vertical;
   }

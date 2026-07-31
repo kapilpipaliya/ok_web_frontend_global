@@ -6,7 +6,7 @@
       P: {
         description: Create a new contact
         body:
-          '''const { name, phoneNumber, country, countryCode, remark, called, isUnavailable, notInterested } = args.contextData;
+          '''const { name, phoneNumber, country, countryCode, remark, called, isUnavailable, notInterested } = c;
 
 if (!name || !name.trim()) {
   throw new Error("Name is required");
@@ -16,7 +16,7 @@ if (!phoneNumber || !phoneNumber.trim()) {
   throw new Error("Phone number is required");
 }
 
-const result = await args.session.executeWrite(async (tx) => {
+const result = await _.session.executeWrite(async (tx) => {
   // Check if phone number already exists
   const existingResult = await tx.run(
     `MATCH (c:Contact {phoneNumber: $phoneNumber})
@@ -56,7 +56,7 @@ const result = await args.session.executeWrite(async (tx) => {
   });
 
   const node = createResult.records[0].get('c');
-  const contact = args.convertNodeToJson(node);
+  const contact = _.convertNodeToJson(node);
 
   return contact;
 });

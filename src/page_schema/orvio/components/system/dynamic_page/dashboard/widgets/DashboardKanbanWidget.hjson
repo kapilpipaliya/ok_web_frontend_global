@@ -22,8 +22,8 @@ const pickDisplayValue = (properties, fieldConfig, fallback) => {
 };
 
 const getColumns = () => {
-  const widgetConfig = args.contextData.props?.widgetConfig || {};
-  const widgetData = args.contextData.props?.widgetData || {};
+  const widgetConfig = c.props?.widgetConfig || {};
+  const widgetData = c.props?.widgetData || {};
   const configured = Array.isArray(widgetConfig.kanbanColumns) ? widgetConfig.kanbanColumns : [];
   const groupField = widgetConfig.kanbanGroupField || "status";
   const titleFields = widgetConfig.displayFields?.title;
@@ -69,7 +69,7 @@ return {
   as: "div",
   loop: true,
   contextName: "kanbanColumn",
-  data: args.fns.getColumns()
+  data: f.getColumns()
 };
 '''
         css:
@@ -92,7 +92,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const col = args.contextData.kanbanColumn;
+const col = c.kanbanColumn;
 return {
   as: "section",
   text: `${col.label} (${col.cards.length})`
@@ -108,11 +108,11 @@ return `._id {
   gap: 0.5rem;
   padding: 0.5rem;
   border-radius: 0.5rem;
-  background: ${args.theme.var.color.background_light_100};
-  border: 1px solid ${args.theme.var.color.border};
+  background: ${t.var.color.background_light_100};
+  border: 1px solid ${t.var.color.border};
   font-size: 0.75rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -125,7 +125,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const col = args.contextData.kanbanColumn;
+const col = c.kanbanColumn;
 return {
   as: "div",
   loop: true,
@@ -151,7 +151,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const card = args.contextData.kanbanCard;
+const card = c.kanbanCard;
 return {
   as: "div",
   text: card.title
@@ -162,10 +162,10 @@ return {
 return `._id {
   padding: 0.375rem 0.5rem;
   border-radius: 0.375rem;
-  background: ${args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.border};
+  background: ${t.var.color.background};
+  border: 1px solid ${t.var.color.border};
   font-size: 0.8125rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }

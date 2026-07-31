@@ -74,11 +74,11 @@ export function ComponentItem(
 
   const getItemStyle = () => {
     const backgroundColor = isNegative(props.child.id)
-      ? "${args.theme.var.color.success_light_600}"
-      : "${args.theme.var.color.background_light_50}";
+      ? "${t.var.color.success_light_600}"
+      : "${t.var.color.background_light_50}";
     const textColor = isNegative(props.child.id)
-      ? "${args.theme.var.color.success_light_600_text}"
-      : "${args.theme.var.color.background_light_50_text}";
+      ? "${t.var.color.success_light_600_text}"
+      : "${t.var.color.background_light_50_text}";
     return [
       baseItemStyle,
       `return \`._id {
@@ -172,7 +172,7 @@ export function ComponentItem(
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            ${props.child?.L[0] === "Comp" && !componentsMap[props.child?.P.key] ? "color: ${args.theme.var.color.error};" : ""}
+            ${props.child?.L[0] === "Comp" && !componentsMap[props.child?.P.key] ? "color: ${t.var.color.error};" : ""}
           }\`;`}
         >
           {getDisplayName()}

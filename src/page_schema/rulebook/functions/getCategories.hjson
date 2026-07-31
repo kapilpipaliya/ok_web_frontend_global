@@ -9,7 +9,7 @@
         body: '''
 try {
   // Get current authenticated user from session
-  const user = await args.getUserFromSession();
+  const user = await _.getUserFromSession();
   if (!user) {
     throw new Error("User session not found. Please log in and try again.");
   }
@@ -23,17 +23,17 @@ try {
     ORDER BY rc.displayOrder ASC, rc.createdAt ASC
   `;
 
-  const categoriesResult = await args.session.run(categoriesQuery, {
+  const categoriesResult = await _.session.run(categoriesQuery, {
     userUuid: user.P.uuid
   });
 
   // Format the results
   const categories = categoriesResult.records.map(record => {
     const categoryNode = record.get('rc');
-    const ruleCount = args.neo4jConvert.js(record.get('ruleCount')) || 0;
+    const ruleCount = _.neo4jConvert.js(record.get('ruleCount')) || 0;
 
     // Convert Neo4j node to proper Vertex format
-    const category = args.convertNodeToJson(categoryNode);
+    const category = _.convertNodeToJson(categoryNode);
 
     return {
       category,

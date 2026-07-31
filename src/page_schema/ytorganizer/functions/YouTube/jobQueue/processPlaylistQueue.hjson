@@ -8,11 +8,11 @@
         body:
           '''
 // This is a background worker function that processes playlists
-if (args.contextData.action === 'start') {
+if (c.action === 'start') {
   // Helper function to log messages to database
   const logMessage = async (level, message, metadata = {}) => {
     try {
-      await args.executeNamedServerFunction({
+      await s({
         functionName: 'logWorkerMessage',
         contextData: {
           workerName: 'processPlaylistQueue',
@@ -20,7 +20,7 @@ if (args.contextData.action === 'start') {
           message,
           metadata
         }
-      }, { functionLookupSubDomain: args.subDomain });
+      }, { functionLookupSubDomain: _.subDomain });
     } catch (error) {
       // Silent failure - don't break worker if logging fails
     }
@@ -29,14 +29,14 @@ if (args.contextData.action === 'start') {
   await logMessage('info', 'Starting playlist processing worker');
 
   // Initialize queue helpers and Redis connection
-  const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} }, { functionLookupSubDomain: args.subDomain });
+  const helpers = await s({ functionName: 'queueHelpers', contextData: {} }, { functionLookupSubDomain: _.subDomain });
 
   if (!helpers.result?.success) {
     await logMessage('error', 'Failed to initialize queue helpers', { error: helpers.result?.error });
     throw new Error('Queue helpers initialization failed');
   }
 
-  const { Worker } = args.bullmq;
+  const { Worker } = _.bullmq;
   const connection = helpers.result.data.getRedisConnection();
 
   // Validate Redis connection config
@@ -49,13 +49,13 @@ if (args.contextData.action === 'start') {
   await logMessage('info', 'Checking for queued playlists to add to queue');
 
   try {
-    const playlistQueue = helpers.result.data.createPlaylistQueue(args);
+    const playlistQueue = helpers.result.data.createPlaylistQueue(_);
 
     // Get all playlists with status 'queued' through ownership
     // This query finds playlists that are queued but may not be in the BullMQ queue
     // (e.g., if worker crashed or application restarted)
     // NEW ARCHITECTURE: Queue status stored directly on Playlist vertex
-    const queuedPlaylists = await args.session.run(`
+    const queuedPlaylists = await _.session.run(`
       MATCH (u:User)-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
       MATCH (o)-[:YouTubeOwnershipPlaylist]->(p:Playlist)
       WHERE p.queueStatus = 'queued'
@@ -145,7 +145,7 @@ if (args.contextData.action === 'start') {
     await logMessage('info', 'Processing playlist', { playlistId, userId, ownershipId });
 
     // Get a new database session for this job
-    const session = await args.getSession();
+    const session = await _.getSession();
 
     // Check if this is a special playlist (LL, WL, UU, FL, HL)
     // Special playlists have their channel ID appended to make them unique
@@ -172,7 +172,7 @@ if (args.contextData.action === 'start') {
     // Actual usage will be logged as operations complete
     let reservationId = null;
     try {
-      reservationId = await args.reserveQuota(
+      reservationId = await _.reserveQuota(
         ownershipId,
         50,  // Estimated quota needed
         ownershipPriority,
@@ -225,7 +225,7 @@ if (args.contextData.action === 'start') {
       // Get authenticated YouTube client for this ownership's OAuth
       let youtube;
       try {
-        youtube = await args.getYouTubeClient(ownershipId, session, args.request);
+        youtube = await _.getYouTubeClient(ownershipId, session, _.request);
       } catch (error) {
         // Handle OAuth errors - mark playlist as failed
         await session.run(`
@@ -257,7 +257,7 @@ if (args.contextData.action === 'start') {
         });
 
         // Log API usage: playlistItems.list operation (1 unit per page) - shared quota
-        await args.logSharedAPIUsage(ownershipId, 'playlistItems.list', args.YOUTUBE_API_COSTS['playlistItems.list'], session);
+        await _.logSharedAPIUsage(ownershipId, 'playlistItems.list', _.YOUTUBE_API_COSTS['playlistItems.list'], session);
 
         if (itemsResponse.data.items) {
           allVideos = allVideos.concat(itemsResponse.data.items);
@@ -283,7 +283,7 @@ if (args.contextData.action === 'start') {
           });
 
           // Log API usage: videos.list operation (1 unit per batch) - shared quota
-          await args.logSharedAPIUsage(ownershipId, 'videos.list', args.YOUTUBE_API_COSTS['videos.list'], session);
+          await _.logSharedAPIUsage(ownershipId, 'videos.list', _.YOUTUBE_API_COSTS['videos.list'], session);
 
           console.log(`[Playlist ${playlistId}] Fetched batch ${Math.floor(i/50) + 1}: ${videosResponse.data.items?.length || 0} videos`);
 
@@ -498,7 +498,7 @@ if (args.contextData.action === 'start') {
         if (channelUpdateResult.records.length > 0) {
           const record = channelUpdateResult.records[0];
           const channelNode = record.get('c');
-          const channel = args.convertNodeToJson(channelNode);
+          const channel = _.convertNodeToJson(channelNode);
 
           const processedPlaylists = channel.P.processedPlaylists || 0;
           const totalPlaylists = channel.P.totalPlaylists || 0;
@@ -591,7 +591,7 @@ if (args.contextData.action === 'start') {
         if (channelUpdateResult.records.length > 0) {
           const record = channelUpdateResult.records[0];
           const channelNode = record.get('c');
-          const channel = args.convertNodeToJson(channelNode);
+          const channel = _.convertNodeToJson(channelNode);
 
           const processedPlaylists = channel.P.processedPlaylists || 0;
           const totalPlaylists = channel.P.totalPlaylists || 0;
@@ -668,7 +668,7 @@ if (args.contextData.action === 'start') {
       // Release quota reservation
       if (reservationId) {
         try {
-          await args.releaseQuota(reservationId, session);
+          await _.releaseQuota(reservationId, session);
           await logMessage('info', 'Released quota reservation', { reservationId, playlistId });
         } catch (error) {
           // Log but don't throw - session cleanup is more important

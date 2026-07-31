@@ -45,18 +45,18 @@ return `._id {
         fns:
           '''
 // Form state management
-const [isSubmitting, setIsSubmitting] = args.createSignal(false);
-const [isProcessing, setIsProcessing] = args.createSignal(false);
-const [url, setUrl] = args.createSignal("");
-const [customName, setCustomName] = args.createSignal("");
-const [priority, setPriority] = args.createSignal("normal");
-const [formError, setFormError] = args.createSignal(null);
+const [isSubmitting, setIsSubmitting] = _.createSignal(false);
+const [isProcessing, setIsProcessing] = _.createSignal(false);
+const [url, setUrl] = _.createSignal("");
+const [customName, setCustomName] = _.createSignal("");
+const [priority, setPriority] = _.createSignal("normal");
+const [formError, setFormError] = _.createSignal(null);
 
 // Initialize form data
 const initializeFormData = () => {
-  const editMode = args.contextData.props?.editMode || false;
-  const itemData = args.contextData.props?.itemData;
-  const initialUrl = args.contextData.props?.initialUrl;
+  const editMode = c.props?.editMode || false;
+  const itemData = c.props?.itemData;
+  const initialUrl = c.props?.initialUrl;
 
   if (editMode && itemData) {
     // Determine actual type from itemData structure
@@ -82,11 +82,11 @@ const initializeFormData = () => {
 // Handle form submission
 const handleSave = async () => {
   const urlValue = url().trim();
-  const contentType = args.contextData.props?.contentType || "channels";
-  const editMode = args.contextData.props?.editMode || false;
-  const itemData = args.contextData.props?.itemData;
-  const onSave = args.contextData.props?.onSave;
-  const onClose = args.contextData.props?.onClose || (() => {});
+  const contentType = c.props?.contentType || "channels";
+  const editMode = c.props?.editMode || false;
+  const itemData = c.props?.itemData;
+  const onSave = c.props?.onSave;
+  const onClose = c.props?.onClose || (() => {});
 
   // In edit mode, determine actual type from itemData structure
   let actualType = contentType;
@@ -130,7 +130,7 @@ const handleSave = async () => {
         functionName = "updateChannelSetting";
       }
 
-      result = await args.fns.executeYTOFunction(functionName, {
+      result = await f.executeYTOFunction(functionName, {
         youtubeId,
         customName: customName().trim() || null
       });
@@ -144,17 +144,17 @@ const handleSave = async () => {
       };
 
       // If adding a playlist and channelId is provided, link it to the channel
-      if (contentType === "playlists" && args.contextData.props?.channelId) {
-        params.channelId = args.contextData.props.channelId;
+      if (contentType === "playlists" && c.props?.channelId) {
+        params.channelId = c.props.channelId;
       }
 
-      result = await args.fns.executeYTOFunction(functionName, params);
+      result = await f.executeYTOFunction(functionName, params);
     }
 
     if (result?.result?.success) {
       const action = editMode ? "updated" : "added";
       const itemTypeName = actualType === "videos" ? "Video" : ((editMode ? actualType : contentType) === "playlists" ? "Playlist" : "Channel");
-      args.showSuccessToast(result.result.message || `${itemTypeName} ${action} successfully`);
+      _.showSuccessToast(result.result.message || `${itemTypeName} ${action} successfully`);
 
       // Call parent callback if provided
       if (onSave) {
@@ -199,13 +199,13 @@ return {
         componentName: Html
         props:
           '''
-const isOpen = args.contextData.props?.isOpen || false;
+const isOpen = c.props?.isOpen || false;
 
 return {
   as: "div",
   hide: !isOpen,
   onMount: () => {
-    args.fns.initializeFormData();
+    f.initializeFormData();
   }
 };
 '''
@@ -218,7 +218,7 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
   border-radius: 0.75rem;
   width: 100%;
   max-width: 500px;
@@ -285,7 +285,7 @@ return `._id {
   justify-content: space-between;
   flex-wrap: wrap;
   padding: 1.5rem;
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  border-bottom: 1px solid ${t.var.color.border};
 }`;
 '''
         displayOrder: 1
@@ -307,7 +307,7 @@ return {
 return `._id {
   font-size: 1.5rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0;
 }`;
 '''
@@ -315,10 +315,10 @@ return `._id {
         componentName: Html
         props:
           '''
-const contentType = args.contextData.props?.contentType || "channels";
-const editMode = args.contextData.props?.editMode || false;
-const itemData = args.contextData.props?.itemData;
-const isProcessing = args.fns.isProcessing();
+const contentType = c.props?.contentType || "channels";
+const editMode = c.props?.editMode || false;
+const itemData = c.props?.itemData;
+const isProcessing = f.isProcessing();
 
 // In edit mode, determine type from itemData structure
 let actualType = contentType;
@@ -358,7 +358,7 @@ return {
 return `._id {
   background: none;
   border: none;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   cursor: pointer;
   padding: 0.5rem;
   border-radius: 0.375rem;
@@ -368,8 +368,8 @@ return `._id {
   justify-content: center;
 
   &:hover {
-    background: ${args.theme.var.color.background_light_200};
-    color: ${args.theme.var.color.text};
+    background: ${t.var.color.background_light_200};
+    color: ${t.var.color.text};
   }
 }`;
 '''
@@ -377,7 +377,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const onClose = args.contextData.props?.onClose || (() => {});
+const onClose = c.props?.onClose || (() => {});
 
 return {
   as: "button",
@@ -413,21 +413,21 @@ return {
 return `._id {
   width: 100%;
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin-top: 0.5rem;
   padding: 0.75rem;
-  background: ${args.theme.var.color.background_light_100};
+  background: ${t.var.color.background_light_100};
   border-radius: 0.375rem;
-  border-left: 3px solid ${args.theme.var.color.primary};
+  border-left: 3px solid ${t.var.color.primary};
 }`;
 '''
         displayOrder: 3
         componentName: Html
         props:
           '''
-const editMode = args.contextData.props?.editMode || false;
-const itemData = args.contextData.props?.itemData;
-const isProcessing = args.fns.isProcessing();
+const editMode = c.props?.editMode || false;
+const itemData = c.props?.itemData;
+const isProcessing = f.isProcessing();
 
 if (!editMode || !itemData || isProcessing) {
   return { as: "div", hide: true };
@@ -498,7 +498,7 @@ return `._id {
           '''
 return {
   as: "div",
-  hide: !args.fns.isProcessing()
+  hide: !f.isProcessing()
 };
 '''
       }
@@ -527,7 +527,7 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0;
 }`;
 '''
@@ -549,7 +549,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0;
   line-height: 1.6;
 }`;
@@ -558,7 +558,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const contentType = args.contextData.props?.contentType || "channels";
+const contentType = c.props?.contentType || "channels";
 const itemType = contentType === "playlists" ? "playlist" : "channel";
 
 return {
@@ -586,10 +586,10 @@ return `._id {
           '''
 return {
   as: "form",
-  hide: args.fns.isProcessing(),
+  hide: f.isProcessing(),
   onSubmit: (e) => {
     e.preventDefault();
-    args.fns.handleSave();
+    f.handleSave();
   }
 };
 '''
@@ -606,8 +606,8 @@ return `._id {
   gap: 0.75rem;
   align-items: flex-start;
   padding: 1rem;
-  background: ${args.theme.var.color.error_light_50};
-  border: 2px solid ${args.theme.var.color.error_light_200};
+  background: ${t.var.color.error_light_50};
+  border: 2px solid ${t.var.color.error_light_200};
   border-radius: 0.5rem;
   margin-bottom: 1rem;
 }`;
@@ -616,7 +616,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const error = args.fns.formError();
+const error = f.formError();
 
 return {
   as: "div",
@@ -632,7 +632,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.error_light_50_text};
+  color: ${t.var.color.error_light_50_text};
   flex-shrink: 0;
   margin-top: 0.125rem;
 }`;
@@ -680,7 +680,7 @@ return `._id {
   margin: 0 0 0.25rem 0;
   font-size: 0.9375rem;
   font-weight: 600;
-  color: ${args.theme.var.color.error_light_50_text};
+  color: ${t.var.color.error_light_50_text};
 }`;
 '''
         displayOrder: 1
@@ -704,14 +704,14 @@ return `._id {
   margin: 0;
   font-size: 0.875rem;
   line-height: 1.5;
-  color: ${args.theme.var.color.error_light_50_text};
+  color: ${t.var.color.error_light_50_text};
 }`;
 '''
         displayOrder: 2
         componentName: Html
         props:
           '''
-const error = args.fns.formError();
+const error = f.formError();
 
 return {
   as: "p",
@@ -729,7 +729,7 @@ return {
 return `._id {
   background: none;
   border: none;
-  color: ${args.theme.var.color.error};
+  color: ${t.var.color.error};
   cursor: pointer;
   padding: 0.25rem;
   border-radius: 0.25rem;
@@ -740,7 +740,7 @@ return `._id {
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.error_light_100};
+    background: ${t.var.color.error_light_100};
   }
 }`;
 '''
@@ -750,7 +750,7 @@ return `._id {
           '''
 return {
   as: "button",
-  onClick: () => args.fns.setFormError(null),
+  onClick: () => f.setFormError(null),
   "aria-label": "Dismiss error"
 };
 '''
@@ -789,7 +789,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const editMode = args.contextData.props?.editMode || false;
+const editMode = c.props?.editMode || false;
 
 return {
   as: "div",
@@ -807,14 +807,14 @@ return {
 return `._id {
   font-size: 0.875rem;
   font-weight: 500;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 1
         componentName: Html
         props:
           '''
-const contentType = args.contextData.props?.contentType || "channels";
+const contentType = c.props?.contentType || "channels";
 const label = contentType === "playlists" ? "Playlist URL *" : "Channel URL *";
 
 return {
@@ -832,17 +832,17 @@ return {
         componentName: TextInput
         props:
           '''
-const contentType = args.contextData.props?.contentType || "channels";
+const contentType = c.props?.contentType || "channels";
 const placeholder = contentType === "playlists"
   ? "https://www.youtube.com/playlist?list=..."
   : "https://www.youtube.com/@handle or https://www.youtube.com/channel/...";
 
 return {
   placeholder,
-  value: args.fns.url(),
-  onInput: (e) => args.fns.setUrl(e.target.value),
+  value: f.url(),
+  onInput: (e) => f.setUrl(e.target.value),
   required: true,
-  disabled: args.fns.isSubmitting()
+  disabled: f.isSubmitting()
 };
 '''
       }
@@ -878,7 +878,7 @@ return {
 return `._id {
   font-size: 0.875rem;
   font-weight: 500;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 1
@@ -900,17 +900,17 @@ return {
         componentName: TextInput
         props:
           '''
-const editMode = args.contextData.props?.editMode || false;
+const editMode = c.props?.editMode || false;
 
 return {
   placeholder: "Enter a custom name",
-  value: args.fns.customName(),
-  onInput: (e) => args.fns.setCustomName(e.target.value),
-  disabled: args.fns.isSubmitting(),
+  value: f.customName(),
+  onInput: (e) => f.setCustomName(e.target.value),
+  disabled: f.isSubmitting(),
   onMount: () => {
     if (editMode) {
       // Focus the input when modal opens in edit mode
-      setTimeout(() => args.ref()?.focus(), 100);
+      setTimeout(() => _.ref()?.focus(), 100);
     }
   }
 };
@@ -933,7 +933,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const editMode = args.contextData.props?.editMode || false;
+const editMode = c.props?.editMode || false;
 
 return {
   as: "div",
@@ -973,7 +973,7 @@ return {
 return `._id {
   font-size: 0.875rem;
   font-weight: 500;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 1
@@ -995,7 +995,7 @@ return {
           '''
 return `._id {
   font-size: 0.75rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0;
   line-height: 1.4;
 }`;
@@ -1004,7 +1004,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const contentType = args.contextData.props?.contentType || "channels";
+const contentType = c.props?.contentType || "channels";
 const itemType = contentType === "playlists" ? "playlist" : "channel";
 
 return {
@@ -1023,7 +1023,7 @@ return {
         props:
           '''
 return {
-  value: args.fns.priority(),
+  value: f.priority(),
   options: [
     { value: "high", label: "High Priority" },
     { value: "normal", label: "Normal Priority" },
@@ -1036,9 +1036,9 @@ return {
   placeholder: "Select priority...",
   search: false,
   onChange: (value) => {
-    args.fns.setPriority(value);
+    f.setPriority(value);
   },
-  disabled: args.fns.isSubmitting()
+  disabled: f.isSubmitting()
 };
 '''
       }
@@ -1054,8 +1054,8 @@ return `._id {
   gap: 0.75rem;
   align-items: flex-start;
   padding: 1rem;
-  background: ${args.theme.var.color.warning_light_100};
-  border: 1px solid ${args.theme.var.color.warning_light_300};
+  background: ${t.var.color.warning_light_100};
+  border: 1px solid ${t.var.color.warning_light_300};
   border-radius: 0.5rem;
   margin-top: 0.5rem;
 }`;
@@ -1064,8 +1064,8 @@ return `._id {
         componentName: Html
         props:
           '''
-const editMode = args.contextData.props?.editMode || false;
-const contentType = args.contextData.props?.contentType || "channels";
+const editMode = c.props?.editMode || false;
+const contentType = c.props?.contentType || "channels";
 
 const itemType = contentType === "playlists" ? "playlist" : "channel";
 
@@ -1083,7 +1083,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.warning};
+  color: ${t.var.color.warning};
   flex-shrink: 0;
   margin-top: 0.125rem;
 }`;
@@ -1111,14 +1111,14 @@ return `._id {
   margin: 0;
   font-size: 0.875rem;
   line-height: 1.5;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 2
         componentName: Html
         props:
           '''
-const contentType = args.contextData.props?.contentType || "channels";
+const contentType = c.props?.contentType || "channels";
 const itemType = contentType === "playlists" ? "playlist" : "channel";
 
 return {
@@ -1136,7 +1136,7 @@ return {
           '''
 return `._id {
   padding: 1.5rem;
-  border-top: 1px solid ${args.theme.var.color.border};
+  border-top: 1px solid ${t.var.color.border};
   display: flex;
   gap: 1rem;
   justify-content: flex-end;
@@ -1154,7 +1154,7 @@ return `._id {
           '''
 return {
   as: "footer",
-  hide: args.fns.isProcessing()
+  hide: f.isProcessing()
 };
 '''
       }
@@ -1167,13 +1167,13 @@ return {
         componentName: Button
         props:
           '''
-const onClose = args.contextData.props?.onClose || (() => {});
+const onClose = c.props?.onClose || (() => {});
 
 return {
   text: "Cancel",
   variant: "secondary",
   onClick: onClose,
-  disabled: args.fns.isSubmitting()
+  disabled: f.isSubmitting()
 };
 '''
       }
@@ -1186,8 +1186,8 @@ return {
         componentName: Button
         props:
           '''
-const isSubmitting = args.fns.isSubmitting();
-const editMode = args.contextData.props?.editMode || false;
+const isSubmitting = f.isSubmitting();
+const editMode = c.props?.editMode || false;
 
 const buttonText = isSubmitting
   ? (editMode ? "Updating..." : "Saving...")
@@ -1196,7 +1196,7 @@ const buttonText = isSubmitting
 return {
   text: buttonText,
   variant: "primary",
-  onClick: args.fns.handleSave,
+  onClick: f.handleSave,
   disabled: isSubmitting
 };
 '''

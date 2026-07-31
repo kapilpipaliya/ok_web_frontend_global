@@ -8,7 +8,7 @@
         body:
           '''
 // Extract parameters
-const { feedback, category, email } = args.contextData;
+const { feedback, category, email } = c;
 
 if (!feedback || typeof feedback !== 'string') {
   return {
@@ -44,7 +44,7 @@ if (!validCategories.includes(feedbackCategory)) {
 }
 
 // Get current authenticated user from session (may be null for anonymous feedback)
-const user = await args.getUserFromSession();
+const user = await _.getUserFromSession();
 
 let query, params;
 
@@ -112,7 +112,7 @@ if (user) {
 }
 
 // Execute the query
-const result = await args.session.run(query, params);
+const result = await _.session.run(query, params);
 
 if (result.records.length === 0) {
   return {
@@ -121,8 +121,8 @@ if (result.records.length === 0) {
   };
 }
 
-const savedFeedback = args.convertNodeToJson(result.records[0].get('f'));
-const feedbackUser = user ? args.convertNodeToJson(result.records[0].get('u')) : null;
+const savedFeedback = _.convertNodeToJson(result.records[0].get('f'));
+const feedbackUser = user ? _.convertNodeToJson(result.records[0].get('u')) : null;
 
 return {
   success: true,

@@ -31,8 +31,8 @@ return [
     left: 0;
     right: 0;
     z-index: 99;
-    background: ${args.theme.var.color.background_dark_200};
-    border-top: 1px solid ${args.theme.var.color.border};
+    background: ${t.var.color.background_dark_200};
+    border-top: 1px solid ${t.var.color.border};
     box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
     animation: slideUp 0.4s ease-out;
   }`
@@ -44,7 +44,7 @@ return [
 return {
   acceptCookies: () => {
     localStorage.setItem('cookie_consent_accepted', 'true');
-    args.fns.setHasCookieConsent(true);
+    f.setHasCookieConsent(true);
   }
 };
 '''
@@ -52,7 +52,7 @@ return {
         props:
           '''
 // Get cookie consent state from parent layout
-const hasCookieConsent = args.fns.hasCookieConsent?.() || false;
+const hasCookieConsent = f.hasCookieConsent?.() || false;
 
 return {
   as: "div",
@@ -132,7 +132,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   flex-shrink: 0;
 }`;
 '''
@@ -159,7 +159,7 @@ return `._id {
   margin: 0;
   font-size: 0.9375rem;
   line-height: 1.5;
-  color: ${args.theme.var.color.background_dark_200_text};
+  color: ${t.var.color.background_dark_200_text};
 }
 
 @media (max-width: 768px) {
@@ -200,14 +200,14 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   text-decoration: underline;
   cursor: pointer;
   transition: color 0.2s ease;
 }
 
 ._id:hover {
-  color: ${args.theme.var.color.primary_dark_200};
+  color: ${t.var.color.primary_dark_200};
 }`;
 '''
         displayOrder: 2
@@ -219,7 +219,7 @@ return {
   text: "Learn more in our Privacy Policy",
   onClick: (e) => {
     e.preventDefault();
-    args.navigate('/privacy');
+    _.navigate('/privacy');
   }
 };
 '''
@@ -274,8 +274,8 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
   border: none;
   padding: 0.625rem 1.5rem;
   border-radius: 0.5rem;
@@ -286,8 +286,8 @@ return `._id {
 }
 
 ._id:hover {
-  background: ${args.theme.var.color.primary_dark_200};
-  color: ${args.theme.var.color.primary_dark_200_text};
+  background: ${t.var.color.primary_dark_200};
+  color: ${t.var.color.primary_dark_200_text};
   transform: translateY(-1px);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
@@ -306,7 +306,7 @@ return `._id {
 return {
   as: "button",
   text: "Accept Cookies",
-  onClick: args.fns.acceptCookies
+  onClick: f.acceptCookies
 };
 '''
       }

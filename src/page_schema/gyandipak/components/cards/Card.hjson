@@ -14,7 +14,7 @@
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
   border: none;
   border-radius: 0;
   padding: 0.5rem 0.75rem;
@@ -26,11 +26,11 @@ return `._id {
   gap: 0.5rem;
   height: 100%;
   box-sizing: border-box;
-  border-bottom: 1px solid ${args.theme.var.color.background_light_200};
+  border-bottom: 1px solid ${t.var.color.background_light_200};
   position: relative;
 
   &:hover {
-    background: ${args.theme.var.color.background_light_100};
+    background: ${t.var.color.background_light_100};
   }
 }`;
 '''
@@ -39,9 +39,9 @@ return `._id {
           '''
 // Common function to get effective setting (prefers live polling data over stale itemSetting)
 const getEffectiveSetting = () => {
-  const item = args.contextData.props?.item;
-  const itemType = args.contextData.props?.itemType;
-  const processingStatus = args.contextData.props?.processingStatus;
+  const item = c.props?.item;
+  const itemType = c.props?.itemType;
+  const processingStatus = c.props?.processingStatus;
 
   // Prefer processing queueStatus (live updates from polling) over item (stale data)
   return (itemType === "playlist" && processingStatus?.playlist) ||
@@ -56,7 +56,7 @@ return {
         componentName: Html
         props:
           '''
-const containerClass = args.contextData.props?.class || "";
+const containerClass = c.props?.class || "";
 return {
   as: "div",
   class: containerClass,
@@ -73,7 +73,7 @@ return {
 return `._id {
   width: 100px;
   height: 56px;
-  background-color: ${args.theme.var.color.background_light_300};
+  background-color: ${t.var.color.background_light_300};
   border-radius: 0.375rem;
   flex-shrink: 0;
   overflow: hidden;
@@ -92,8 +92,8 @@ return `._id {
         componentName: Html
         props:
           '''
-const item = args.contextData.props?.item;
-const itemType = args.contextData.props?.itemType;
+const item = c.props?.item;
+const itemType = c.props?.itemType;
 
 // Check if this is an extension item (has extensionExists property)
 const isExtensionItem = item?.P?.extensionExists !== undefined;
@@ -111,7 +111,7 @@ const youtubeId = item?.P?.youtubeId || "";
 
 let href, target;
 if (itemType === "video") {
-  href = args.fns.getYouTubeUrl?.(item, itemType);
+  href = f.getYouTubeUrl?.(item, itemType);
   target = "_blank";
 } else if (itemType === "playlist") {
   href = `/content?type=playlists&id=${youtubeId}`;
@@ -142,21 +142,21 @@ return {
       if (isInExtension) {
         // Use common function to open in parent tab when in extension
         const youtubeUrl = `https://www.youtube.com/watch?v=${youtubeId}`;
-        args.fns.openYouTubeInParentTab(youtubeUrl);
+        f.openYouTubeInParentTab(youtubeUrl);
       } else {
         // Use video player when in main app
-        args.fns.playVideo?.(item);
+        f.playVideo?.(item);
       }
     } else {
       // Handle playlists and channels
-      const youtubeUrl = args.fns.getYouTubeUrl?.(item, itemType);
+      const youtubeUrl = f.getYouTubeUrl?.(item, itemType);
 
       const contentType = itemType === "playlist" ? "playlists" : "channels";
 
       if (notAdded) {
-        args.fns.openYouTubeInParentTab(youtubeUrl);
+        f.openYouTubeInParentTab(youtubeUrl);
       } else {
-        args.navigate(`/content?type=${contentType}&id=${youtubeId}`);
+        _.navigate(`/content?type=${contentType}&id=${youtubeId}`);
       }
     }
   }
@@ -183,7 +183,7 @@ return `._id {
   pointer-events: none;
   width: 100%;
   height: 100%;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.375rem;
   box-sizing: border-box;
 }`;
@@ -192,8 +192,8 @@ return `._id {
         componentName: Html
         props:
           '''
-const item = args.contextData.props?.item;
-const itemType = args.contextData.props?.itemType;
+const item = c.props?.item;
+const itemType = c.props?.itemType;
 
 // Check if thumbnail exists
 const thumbnailUrl = item?.P?.thumbnailMaxres ||
@@ -219,7 +219,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   opacity: 0.5;
 }`;
 '''
@@ -227,7 +227,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const itemType = args.contextData.props?.itemType;
+const itemType = c.props?.itemType;
 
 let iconName;
 if (itemType === "video") {
@@ -255,7 +255,7 @@ return {
           '''
 return `._id {
   font-size: 0.65rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   opacity: 0.7;
   font-weight: 500;
   text-align: center;
@@ -265,7 +265,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const itemType = args.contextData.props?.itemType;
+const itemType = c.props?.itemType;
 
 let text;
 if (itemType === "video") {
@@ -294,7 +294,7 @@ return `._id {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: ${args.theme.var.color.primary};
+  background: ${t.var.color.primary};
   border-radius: 50%;
   width: 32px;
   height: 32px;
@@ -309,9 +309,9 @@ return `._id {
         componentName: Html
         props:
           '''
-const item = args.contextData.props?.item;
-const itemType = args.contextData.props?.itemType;
-const currentVideo = args.fns?.currentVideo;
+const item = c.props?.item;
+const itemType = c.props?.itemType;
+const currentVideo = f?.currentVideo;
 
 const isCurrentlyPlaying = itemType === "video" &&
   currentVideo?.() &&
@@ -331,7 +331,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.primary_text};
+  color: ${t.var.color.primary_text};
 }`;
 '''
         displayOrder: 1
@@ -388,26 +388,26 @@ return `._id {
 }
 
 ._id[data-color="error"] {
-  background: ${args.theme.var.color.error_light_100};
-  color: ${args.theme.var.color.error_light_100_text};
+  background: ${t.var.color.error_light_100};
+  color: ${t.var.color.error_light_100_text};
 }
 
 ._id[data-color="success"] {
-  background: ${args.theme.var.color.success_light_100};
-  color: ${args.theme.var.color.success_light_100_text};
+  background: ${t.var.color.success_light_100};
+  color: ${t.var.color.success_light_100_text};
 }
 
 ._id[data-color="info"] {
-  background: ${args.theme.var.color.info_light_100};
-  color: ${args.theme.var.color.info_light_100_text};
+  background: ${t.var.color.info_light_100};
+  color: ${t.var.color.info_light_100_text};
 }`;
 '''
         displayOrder: 1
         componentName: Html
         props:
           '''
-const showTypeBadge = args.contextData.props?.showTypeBadge || false;
-const itemType = args.contextData.props?.itemType;
+const showTypeBadge = c.props?.showTypeBadge || false;
+const itemType = c.props?.itemType;
 
 let text, color;
 if (itemType === "channel") {
@@ -439,7 +439,7 @@ return {
 return `._id {
   font-size: 0.875rem;
   font-weight: 500;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0;
   line-height: 1.3;
   overflow: hidden;
@@ -453,9 +453,9 @@ return `._id {
         componentName: Html
         props:
           '''
-const item = args.contextData.props?.item;
-const itemSetting = args.contextData.props?.itemSetting;
-const itemType = args.contextData.props?.itemType;
+const item = c.props?.item;
+const itemSetting = c.props?.itemSetting;
+const itemType = c.props?.itemType;
 
 const baseTitle = item?.P?.title || "Untitled";
 const customName = itemSetting?.P?.customName;
@@ -480,43 +480,43 @@ return {
         css:
           '''
 // Get effective setting (prefers live polling data)
-const effectiveSetting = args.fns.getEffectiveSetting();
+const effectiveSetting = f.getEffectiveSetting();
 
 const queueStatus = effectiveSetting?.P?.queueStatus;
-const statusInfo = args.fns.getStatusInfo?.(queueStatus);
+const statusInfo = f.getStatusInfo?.(queueStatus);
 
 // Map color names to theme colors
 const colorMap = {
-  blue: args.theme.var.color.info,
-  yellow: args.theme.var.color.warning,
-  orange: args.theme.var.color.warning,
-  gray: args.theme.var.color.text_light_500,
-  green: args.theme.var.color.success,
-  red: args.theme.var.color.error
+  blue: t.var.color.info,
+  yellow: t.var.color.warning,
+  orange: t.var.color.warning,
+  gray: t.var.color.text_light_500,
+  green: t.var.color.success,
+  red: t.var.color.error
 };
 
-const borderColor = colorMap[statusInfo?.color] || args.theme.var.color.info;
+const borderColor = colorMap[statusInfo?.color] || t.var.color.info;
 
 return `._id {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
   padding: 0.375rem 0.5rem;
-  background: ${args.theme.var.color.background_light_100};
+  background: ${t.var.color.background_light_100};
   border-left: 3px solid ${borderColor};
   border-radius: 0.25rem;
   font-size: 0.75rem;
   margin-top: 0.25rem;
   margin-bottom: 0.25rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 2.5
         componentName: Html
         props:
           '''
-const item = args.contextData.props?.item;
-const itemType = args.contextData.props?.itemType;
+const item = c.props?.item;
+const itemType = c.props?.itemType;
 
 // Check if this is an extension item (has extensionExists property)
 const isExtensionItem = item?.P?.extensionExists !== undefined;
@@ -527,7 +527,7 @@ if (isExtensionItem) {
 }
 
 // Get effective setting (prefers live polling data)
-const effectiveSetting = args.fns.getEffectiveSetting();
+const effectiveSetting = f.getEffectiveSetting();
 
 // Get queueStatus from effective setting
 const queueStatus = effectiveSetting?.P?.queueStatus;
@@ -548,7 +548,7 @@ if (queueStatus === "completed") {
 }
 
 // Get queueStatus info from constants
-const statusInfo = args.fns.getStatusInfo?.(queueStatus);
+const statusInfo = f.getStatusInfo?.(queueStatus);
 
 // Only show if we have valid queueStatus info
 if (!statusInfo) {
@@ -557,15 +557,15 @@ if (!statusInfo) {
 
 // Map color names to theme colors
 const colorMap = {
-  blue: args.theme.var.color.info,
-  yellow: args.theme.var.color.warning,
-  orange: args.theme.var.color.warning,
-  gray: args.theme.var.color.text_light_500,
-  green: args.theme.var.color.success,
-  red: args.theme.var.color.error
+  blue: t.var.color.info,
+  yellow: t.var.color.warning,
+  orange: t.var.color.warning,
+  gray: t.var.color.text_light_500,
+  green: t.var.color.success,
+  red: t.var.color.error
 };
 
-const borderColor = colorMap[statusInfo.color] || args.theme.var.color.info;
+const borderColor = colorMap[statusInfo.color] || t.var.color.info;
 
 return {
   as: "div",
@@ -611,12 +611,12 @@ return `._id {
         props:
           '''
 // Get effective setting (prefers live polling data)
-const effectiveSetting = args.fns.getEffectiveSetting();
+const effectiveSetting = f.getEffectiveSetting();
 
 const queueStatus = effectiveSetting?.P?.queueStatus;
 
 // Get queueStatus info from constants
-const statusInfo = args.fns.getStatusInfo?.(queueStatus);
+const statusInfo = f.getStatusInfo?.(queueStatus);
 
 // Use icon from queueStatus info, fallback to time icon
 const iconName = statusInfo?.icon || 'carbon:time';
@@ -646,7 +646,7 @@ return `._id {
         props:
           '''
 // Get effective setting (prefers live polling data)
-const effectiveSetting = args.fns.getEffectiveSetting();
+const effectiveSetting = f.getEffectiveSetting();
 
 // Get queueStatus and progress from effective setting
 const queueStatus = effectiveSetting?.P?.queueStatus || '';
@@ -655,7 +655,7 @@ const processedCount = effectiveSetting?.P?.processedPlaylists || effectiveSetti
 const totalCount = effectiveSetting?.P?.totalPlaylists || effectiveSetting?.P?.totalVideos || 0;
 
 // Get queueStatus info from constants
-const statusInfo = args.fns.getStatusInfo?.(queueStatus);
+const statusInfo = f.getStatusInfo?.(queueStatus);
 
 let statusText = '';
 
@@ -692,7 +692,7 @@ return {
           '''
 return `._id {
   font-size: 0.7rem;
-  color: ${args.theme.var.color.error};
+  color: ${t.var.color.error};
   line-height: 1.3;
   margin-top: 0.125rem;
   font-style: italic;
@@ -705,7 +705,7 @@ return `._id {
         props:
           '''
 // Get effective setting (prefers live polling data)
-const effectiveSetting = args.fns.getEffectiveSetting();
+const effectiveSetting = f.getEffectiveSetting();
 
 // Get queueStatus and error from effective setting
 const queueStatus = effectiveSetting?.P?.queueStatus || '';
@@ -743,7 +743,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const item = args.contextData.props?.item;
+const item = c.props?.item;
 
 // Check if this is an extension item (has extensionExists property)
 const isExtensionItem = item?.P?.extensionExists !== undefined;
@@ -765,12 +765,12 @@ return {
       P: {
         css:
           '''
-const item = args.contextData.props?.item;
+const item = c.props?.item;
 const exists = item?.P?.extensionExists || false;
 
 let iconColor;
 if (exists) {
-  iconColor = args.theme.var.color.success;
+  iconColor = t.var.color.success;
 }
 
 return `._id {
@@ -782,7 +782,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const item = args.contextData.props?.item;
+const item = c.props?.item;
 const exists = item?.P?.extensionExists || false;
 
 // Only show icon for already added items (not for current page)
@@ -811,7 +811,7 @@ return `._id {
   gap: 0.5rem;
   flex-wrap: wrap;
   font-size: 0.75rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
         displayOrder: 3
@@ -837,7 +837,7 @@ return `._id {
   cursor: pointer;
   display: flex;
   align-items: center;
-  color: ${args.theme.var.color.error};
+  color: ${t.var.color.error};
   transition: all 0.2s ease;
 
   &:hover {
@@ -849,9 +849,9 @@ return `._id {
         componentName: Html
         props:
           '''
-const item = args.contextData.props?.item;
-const itemSetting = args.contextData.props?.itemSetting;
-const itemType = args.contextData.props?.itemType;
+const item = c.props?.item;
+const itemSetting = c.props?.itemSetting;
+const itemType = c.props?.itemType;
 const isFavourite = itemSetting?.P?.isFavourite || false;
 
 // Check if this is an unsaved extension item
@@ -863,7 +863,7 @@ return {
   hide: !isFavourite || notSaved,
   onClick: async (e) => {
     e.stopPropagation();
-    await args.fns.toggleFavourite?.(item);
+    await f.toggleFavourite?.(item);
   },
   title: isFavourite ? "Remove from favourites" : "Add to favourites"
 };
@@ -899,16 +899,16 @@ return `._id {
   font-size: 0.65rem;
   font-weight: 500;
   cursor: pointer;
-  border: 1px solid ${args.theme.var.color.primary};
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  border: 1px solid ${t.var.color.primary};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
   transition: all 0.2s ease;
   line-height: 1.2;
   flex-shrink: 0;
 
   &:hover {
-    background: ${args.theme.var.color.primary_dark_200};
-    border-color: ${args.theme.var.color.primary_dark_200};
+    background: ${t.var.color.primary_dark_200};
+    border-color: ${t.var.color.primary_dark_200};
   }
 
   &:active {
@@ -920,7 +920,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const item = args.contextData.props?.item;
+const item = c.props?.item;
 
 // Check if this is an extension item
 const isExtensionItem = item?.P?.extensionExists !== undefined || item?.P?.extensionIsCurrentPage !== undefined;
@@ -938,7 +938,7 @@ if (exists) {
 }
 
 const youtubeId = item?.P?.youtubeId;
-const itemType = args.contextData.props?.itemType;
+const itemType = c.props?.itemType;
 
 return {
   as: "button",
@@ -951,21 +951,21 @@ return {
       // For videos, open add video to playlist modal
       const videoTitle = item?.P?.title || '';
 
-      args.fns?.setAddVideoToPlaylistData?.({
+      f?.setAddVideoToPlaylistData?.({
         videoId: youtubeId,
         videoTitle: videoTitle
       });
-      args.fns?.isAddVideoToPlaylistModalOpen?.(true);
+      f?.isAddVideoToPlaylistModalOpen?.(true);
       return;
     }
 
     // For channels and playlists, open add modal with prefilled URL
     // Use getYouTubeUrl function to generate proper URL (handles @handle, channel IDs, etc)
-    const url = args.fns?.getYouTubeUrl?.(item, itemType);
+    const url = f?.getYouTubeUrl?.(item, itemType);
     const contentType = itemType === 'channel' ? 'channels' : 'playlists';
 
     // Set modal data with content type and initial URL
-    args.fns?.setModalData?.({
+    f?.setModalData?.({
       editMode: false,
       itemData: null,
       contentType: contentType,
@@ -973,7 +973,7 @@ return {
     });
 
     // Open the modal
-    args.fns?.isModalOpen?.(true);
+    f?.isModalOpen?.(true);
   }
 };
 '''
@@ -992,12 +992,12 @@ return `._id {
   cursor: pointer;
   display: flex;
   align-items: center;
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   transition: all 0.2s ease;
 
   &:hover {
     transform: scale(1.1);
-    color: ${args.theme.var.color.primary_dark_200};
+    color: ${t.var.color.primary_dark_200};
   }
 }`;
 '''
@@ -1005,8 +1005,8 @@ return `._id {
         componentName: Html
         props:
           '''
-const item = args.contextData.props?.item;
-const itemType = args.contextData.props?.itemType;
+const item = c.props?.item;
+const itemType = c.props?.itemType;
 
 // Check if this is an unsaved extension item
 const isExtensionItem = item?.P?.extensionExists !== undefined;
@@ -1019,9 +1019,9 @@ return {
     e.stopPropagation();
     if (item) {
       if (itemType === "video") {
-        args.fns.addToQueue?.(item);
+        f.addToQueue?.(item);
       } else if (itemType === "playlist") {
-        args.fns.addPlaylistToQueue?.(item);
+        f.addPlaylistToQueue?.(item);
       }
     }
   },
@@ -1062,9 +1062,9 @@ return `._id {
         componentName: Html
         props:
           '''
-const item = args.contextData.props?.item;
-const itemSetting = args.contextData.props?.itemSetting;
-const itemType = args.contextData.props?.itemType;
+const item = c.props?.item;
+const itemSetting = c.props?.itemSetting;
+const itemType = c.props?.itemType;
 
 // Check if this is an extension item
 const isExtensionItem = item?.P?.extensionExists !== undefined;
@@ -1135,8 +1135,8 @@ return `._id {
         componentName: Html
         props:
           '''
-const item = args.contextData.props?.item;
-const itemSetting = args.contextData.props?.itemSetting;
+const item = c.props?.item;
+const itemSetting = c.props?.itemSetting;
 const note = itemSetting?.P?.note || "";
 const hasNote = note.length > 0;
 
@@ -1158,7 +1158,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   flex-shrink: 0;
 }`;
 '''
@@ -1183,7 +1183,7 @@ return {
           '''
 return `._id {
   font-size: 0.75rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   line-height: 1.3;
   cursor: pointer;
 
@@ -1196,9 +1196,9 @@ return `._id {
         componentName: Html
         props:
           '''
-const item = args.contextData.props?.item;
-const itemSetting = args.contextData.props?.itemSetting;
-const itemType = args.contextData.props?.itemType;
+const item = c.props?.item;
+const itemSetting = c.props?.itemSetting;
+const itemType = c.props?.itemType;
 const note = itemSetting?.P?.note || "";
 const shouldTruncate = note.length > 30;
 const displayNote = shouldTruncate ? note.substring(0, 30) + "..." : note;
@@ -1208,7 +1208,7 @@ return {
   text: displayNote,
   onClick: (e) => {
     e.stopPropagation();
-    args.fns.openNoteModal?.(item, note);
+    f.openNoteModal?.(item, note);
   }
 };
 '''
@@ -1231,12 +1231,12 @@ return `._id {
         componentName: Html
         props:
           '''
-const item = args.contextData.props?.item;
-const itemSetting = args.contextData.props?.itemSetting;
-const itemType = args.contextData.props?.itemType;
+const item = c.props?.item;
+const itemSetting = c.props?.itemSetting;
+const itemType = c.props?.itemType;
 
 // Get configured fields from layout setting
-const cardFieldSetting = args.fns.cardFieldSetting?.() || {
+const cardFieldSetting = f.cardFieldSetting?.() || {
   video: [],
   playlist: [],
   channel: []
@@ -1366,7 +1366,7 @@ return {
       P: {
         css:
           '''
-const fieldData = args.contextData.fieldData;
+const fieldData = c.fieldData;
 
 // Safety check
 if (!fieldData || !fieldData.field) {
@@ -1377,7 +1377,7 @@ if (!fieldData || !fieldData.field) {
 if (fieldData.field === "description") {
   return `._id {
     font-size: 0.75rem;
-    color: ${args.theme.var.color.text_light_200};
+    color: ${t.var.color.text_light_200};
     line-height: 1.4;
     width: 100%;
     overflow: hidden;
@@ -1390,9 +1390,9 @@ if (fieldData.field === "description") {
 
 return `._id {
   font-size: 0.75rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   padding: 0.125rem 0.375rem;
-  background: ${args.theme.var.color.background_light_100};
+  background: ${t.var.color.background_light_100};
   border-radius: 0.25rem;
   white-space: nowrap;
 }`;
@@ -1401,7 +1401,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const fieldData = args.contextData.fieldData;
+const fieldData = c.fieldData;
 
 // Safety check
 if (!fieldData || !fieldData.field) {
@@ -1454,12 +1454,12 @@ return {
         componentName: FloatingMenu
         props:
           '''
-const item = args.contextData.props?.item;
-const itemData = args.contextData.props?.itemData;
-const itemSetting = args.contextData.props?.itemSetting;
-const itemType = args.contextData.props?.itemType;
+const item = c.props?.item;
+const itemData = c.props?.itemData;
+const itemSetting = c.props?.itemSetting;
+const itemType = c.props?.itemType;
 
-// pass data to parent component else args.contextData.props?.itemData will not work on MenuItem
+// pass data to parent component else c.props?.itemData will not work on MenuItem
 return {
   placement: "bottom-end",
   item,
@@ -1479,9 +1479,9 @@ return {
         componentName: MenuItem
         props:
           '''
-const item = args.contextData.props?.item;
-const itemSetting = args.contextData.props?.itemSetting;
-const itemType = args.contextData.props?.itemType;
+const item = c.props?.item;
+const itemSetting = c.props?.itemSetting;
+const itemType = c.props?.itemType;
 const note = itemSetting?.P?.note || "";
 const hasNote = note.length > 0;
 
@@ -1495,8 +1495,8 @@ return {
   hide: notSaved,
   onClick: (e) => {
     e?.stopPropagation();
-    args.fns.openNoteModal?.(item, note);
-    args.contextData.floatingMenuContext?.closeMenu?.();
+    f.openNoteModal?.(item, note);
+    c.floatingMenuContext?.closeMenu?.();
   }
 };
 '''
@@ -1511,8 +1511,8 @@ return {
         componentName: MenuItem
         props:
           '''
-const item = args.contextData.props?.item;
-const itemType = args.contextData.props?.itemType;
+const item = c.props?.item;
+const itemType = c.props?.itemType;
 
 // Check if this is an unsaved extension item
 const isExtensionItem = item?.P?.extensionExists !== undefined;
@@ -1524,8 +1524,8 @@ return {
   hide: itemType !== "playlist" || notSaved,
   onClick: (e) => {
     e?.stopPropagation();
-    args.fns.playPlaylist?.(item);
-    args.contextData.floatingMenuContext?.closeMenu?.();
+    f.playPlaylist?.(item);
+    c.floatingMenuContext?.closeMenu?.();
   }
 };
 '''
@@ -1540,9 +1540,9 @@ return {
         componentName: MenuItem
         props:
           '''
-const item = args.contextData.props?.item;
-const itemSetting = args.contextData.props?.itemSetting;
-const itemType = args.contextData.props?.itemType;
+const item = c.props?.item;
+const itemSetting = c.props?.itemSetting;
+const itemType = c.props?.itemType;
 const isFavourite = itemSetting?.P?.isFavourite || false;
 
 // Check if this is an unsaved extension item
@@ -1555,8 +1555,8 @@ return {
   hide: notSaved,
   onClick: async (e) => {
     e?.stopPropagation();
-    await args.fns.toggleFavourite?.(item);
-    args.contextData.floatingMenuContext?.closeMenu?.();
+    await f.toggleFavourite?.(item);
+    c.floatingMenuContext?.closeMenu?.();
   }
 };
 '''
@@ -1571,8 +1571,8 @@ return {
         componentName: MenuItem
         props:
           '''
-const item = args.contextData.props?.item;
-const itemType = args.contextData.props?.itemType;
+const item = c.props?.item;
+const itemType = c.props?.itemType;
 
 // Check if this is an unsaved extension item
 const isExtensionItem = item?.P?.extensionExists !== undefined;
@@ -1584,8 +1584,8 @@ return {
   hide: itemType !== "video" || notSaved,
   onClick: (e) => {
     e?.stopPropagation();
-    args.fns.openAddToPlaylistModal?.(item);
-    args.contextData.floatingMenuContext?.closeMenu?.();
+    f.openAddToPlaylistModal?.(item);
+    c.floatingMenuContext?.closeMenu?.();
   }
 };
 '''
@@ -1615,18 +1615,18 @@ return {
         componentName: MenuItem
         props:
           '''
-const item = args.contextData.props?.item;
-const itemType = args.contextData.props?.itemType;
+const item = c.props?.item;
+const itemType = c.props?.itemType;
 
-const youtubeUrl = args.fns.getYouTubeUrl?.(item, itemType) || "";
+const youtubeUrl = f.getYouTubeUrl?.(item, itemType) || "";
 
 return {
   icon: "carbon:launch",
   text: "Open in YouTube",
   onClick: (e) => {
     e?.stopPropagation();
-    args.fns.openYouTubeInParentTab(youtubeUrl);
-    args.contextData.floatingMenuContext?.closeMenu?.();
+    f.openYouTubeInParentTab(youtubeUrl);
+    c.floatingMenuContext?.closeMenu?.();
   }
 };
 '''
@@ -1641,8 +1641,8 @@ return {
         componentName: MenuItem
         props:
           '''
-const item = args.contextData.props?.item;
-const hideMenuItems = args.contextData.props?.hideMenuItems || [];
+const item = c.props?.item;
+const hideMenuItems = c.props?.hideMenuItems || [];
 
 // Check if this is an unsaved extension item
 const isExtensionItem = item?.P?.extensionExists !== undefined;
@@ -1657,8 +1657,8 @@ return {
   hide: notSaved || isHidden,
   onClick: (e) => {
     e?.stopPropagation();
-    args.fns.openCustomNameModal?.(args.contextData.props?.itemData);
-    args.contextData.floatingMenuContext?.closeMenu?.();
+    f.openCustomNameModal?.(c.props?.itemData);
+    c.floatingMenuContext?.closeMenu?.();
   }
 };
 '''
@@ -1673,20 +1673,20 @@ return {
         componentName: MenuItem
         props:
           '''
-const item = args.contextData.props?.item;
-const itemType = args.contextData.props?.itemType;
-const hideMenuItems = args.contextData.props?.hideMenuItems || [];
+const item = c.props?.item;
+const itemType = c.props?.itemType;
+const hideMenuItems = c.props?.hideMenuItems || [];
 
 // Check if this is an unsaved extension item
 const isExtensionItem = item?.P?.extensionExists !== undefined;
 const notSaved = isExtensionItem && !item?.P?.extensionExists;
 
 // Get effective setting (prefers live polling data)
-const effectiveSetting = args.fns.getEffectiveSetting();
+const effectiveSetting = f.getEffectiveSetting();
 
 const queueStatus = effectiveSetting?.P?.queueStatus;
 const youtubeId = item?.P?.youtubeId;
-const ownershipId = args.fns.getSelectedOwnershipId?.();
+const ownershipId = f.getSelectedOwnershipId?.();
 
 // Only show for channels and playlists with failed or completed_with_errors queueStatus
 const canRetry = (itemType === "channel" || itemType === "playlist") &&
@@ -1708,18 +1708,18 @@ return {
         ? { channelId: youtubeId, ownershipId }
         : { playlistId: youtubeId, ownershipId };
 
-      const response = await args.fns.executeYTOFunction(functionName, contextData);
+      const response = await f.executeYTOFunction(functionName, contextData);
 
       if (response.result?.success) {
-        args.showSuccessToast(response.result.message || "Processing retry queued successfully");
+        _.showSuccessToast(response.result.message || "Processing retry queued successfully");
       } else {
-        args.showErrorToast(response.result?.message || response?.error || "Failed to retry processing");
+        _.showErrorToast(response.result?.message || response?.error || "Failed to retry processing");
       }
     } catch (error) {
-      args.showErrorToast("Error retrying processing: " + error.message);
+      _.showErrorToast("Error retrying processing: " + error.message);
     }
 
-    args.contextData.floatingMenuContext?.closeMenu?.();
+    c.floatingMenuContext?.closeMenu?.();
   }
 };
 '''
@@ -1734,8 +1734,8 @@ return {
         componentName: MenuItem
         props:
           '''
-const item = args.contextData.props?.item;
-const hideMenuItems = args.contextData.props?.hideMenuItems || [];
+const item = c.props?.item;
+const hideMenuItems = c.props?.hideMenuItems || [];
 
 // Check if this is an unsaved extension item
 const isExtensionItem = item?.P?.extensionExists !== undefined;
@@ -1751,8 +1751,8 @@ return {
   hide: notSaved || isHidden,
   onClick: (e) => {
     e?.stopPropagation();
-    args.fns.deleteItem?.(args.contextData.props?.itemData);
-    args.contextData.floatingMenuContext?.closeMenu?.();
+    f.deleteItem?.(c.props?.itemData);
+    c.floatingMenuContext?.closeMenu?.();
   }
 };
 '''

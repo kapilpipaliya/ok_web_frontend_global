@@ -8,17 +8,17 @@
         description: Saves one table_schema Setting vertex by explicit key. Admin only.
         body:
           '''
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return { success: false, message: "User session not found. Please log in and try again." };
 }
 
-await args.getEffectiveUser(args.session, actualUser, args.contextData);
+await _.getEffectiveUser(_.session, actualUser, c);
 
-let { key, tableKey, part, config, name } = args.contextData || {};
+let { key, tableKey, part, config, name } = c || {};
 
 if ((!key || !String(key).trim()) && tableKey && part) {
-  const idsResult = await args.executeNamedServerFunction({
+  const idsResult = await s({
     functionName: "getTableIds",
     contextData: { tableKey: String(tableKey).trim() }
   });
@@ -57,7 +57,7 @@ try {
   if (resolvedPart && evaluated.part !== resolvedPart) {
     evaluated = { ...evaluated, part: resolvedPart };
   }
-  const stripResult = await args.executeNamedServerFunction({
+  const stripResult = await s({
     functionName: "settingsSchemaHelpers",
     contextData: {
       action: "stripTableSchema",
@@ -98,7 +98,7 @@ const query = `
   RETURN s
 `;
 
-const saveResult = await args.session.run(query, {
+const saveResult = await _.session.run(query, {
   key,
   tableKey: resolvedTableKey,
   part: schemaPart,
@@ -110,7 +110,7 @@ if (saveResult.records.length === 0) {
   return { success: false, message: "Failed to save table schema" };
 }
 
-const vertices = args.processResult(saveResult.records, args.context, "s");
+const vertices = _.processResult(saveResult.records, _.context, "s");
 
 return {
   success: true,

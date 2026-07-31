@@ -21,14 +21,14 @@
  * - Sidebar: each list uses its own category label and item edge (e.g. WorkshopAppointmentCategory + WorkshopAppointmentCategoryItem); Inventory/Service keep InventoryCategory/ServiceCategory. Use `sidebar.rootKeys: {}` so getSidebarTreeRoots does not filter roots to a single property match (e.g. only key "root"); user-created top-level categories then load after refresh. The MERGE’d default folder still uses key "root" for the seeded “All …” node.
  * - getUserContent: when relationshipPropertyBindings is not passed, bindings are derived from this Setting (user key then _default).
  *
- * Parameters (via args.contextData):
+ * Parameters (via c):
  * - dryRun: boolean (optional) - If true, only report what would be migrated without making changes
  *
  * Returns:
  * - Statistics about the migration
  */
 
-const { dryRun = false } = args.contextData;
+const { dryRun = false } = c;
 
 console.log(`Starting workshop content settings migration (dryRun: ${dryRun})`);
 
@@ -886,11 +886,11 @@ const settingsConfigs = [
   sidebar: {
     enabled: false
   },
-  onRowClick: (row, args) => {
+  onRowClick: (row, _) => {
     if (!row?.id) return;
     const ticketId = row.id;
     const basePath = "/ShopifySupportConversation";
-    const searchParams = args.searchParams || {};
+    const searchParams = _.searchParams || {};
     const nextParams = { ...searchParams, supportId: ticketId };
     const query = Object.entries(nextParams)
       .filter(([, value]) => value != null && value !== "")
@@ -898,8 +898,8 @@ const settingsConfigs = [
       .join("&");
     const href = query ? \`\${basePath}?\${query}\` : basePath;
 
-    if (args.navigate) {
-      args.navigate(href);
+    if (_.navigate) {
+      _.navigate(href);
     } else if (typeof window !== "undefined") {
       window.location.href = href;
     }
@@ -956,12 +956,12 @@ async function processExtraSetting(setting) {
   const { key, type, name, config } = setting;
   console.log(`Processing ${name} (${key})...`);
 
-  const checkResult = await args.session.run(`MATCH (s:Setting {key: $key}) RETURN s`, { key });
+  const checkResult = await _.session.run(`MATCH (s:Setting {key: $key}) RETURN s`, { key });
   const exists = checkResult.records.length > 0;
 
   if (!dryRun) {
     if (exists) {
-      await args.session.run(
+      await _.session.run(
         `MATCH (s:Setting {key: $key})
          SET s.config = $config,
              s.type = $type,
@@ -973,7 +973,7 @@ async function processExtraSetting(setting) {
       console.log(`Updated existing ${name}`);
       return { created: 0, updated: 1 };
     }
-    await args.session.run(
+    await _.session.run(
       `CREATE (s:Setting {
         key: $key,
         type: $type,
@@ -1002,7 +1002,7 @@ async function processSetting(setting) {
   console.log(`Processing ${name} settings (${icon})...`);
 
   // Check if setting exists
-  const checkResult = await args.session.run(
+  const checkResult = await _.session.run(
     `MATCH (s:Setting {key: $key}) RETURN s`,
     { key }
   );
@@ -1012,7 +1012,7 @@ async function processSetting(setting) {
   if (!dryRun) {
     if (exists) {
       // Update existing
-      await args.session.run(
+      await _.session.run(
         `MATCH (s:Setting {key: $key})
          SET s.config = $config,
              s.type = 'table_config',
@@ -1025,7 +1025,7 @@ async function processSetting(setting) {
       return { created: 0, updated: 1 };
     } else {
       // Create new
-      await args.session.run(
+      await _.session.run(
         `CREATE (s:Setting {
           key: $key,
           type: 'table_config',
@@ -1186,7 +1186,7 @@ if (!dryRun) {
       console.warn(`Skipping picklist seed: unmapped picklistKey ${def.picklistKey}`);
       continue;
     }
-    const cntRes = await args.session.run(
+    const cntRes = await _.session.run(
       `MATCH (o:\`${neoLabel}\`) RETURN count(o) AS c`,
       {}
     );
@@ -1198,7 +1198,7 @@ if (!dryRun) {
 
     for (let oi = 0; oi < def.options.length; oi++) {
       const opt = def.options[oi];
-      await args.session.run(
+      await _.session.run(
         `CREATE (o:\`${neoLabel}\` {
              value: $value,
              label: $label,
@@ -1282,7 +1282,7 @@ const REFERENCE_SEQUENCE_DEFAULTS = [
 if (!dryRun) {
   for (let ri = 0; ri < REFERENCE_SEQUENCE_DEFAULTS.length; ri++) {
     const row = REFERENCE_SEQUENCE_DEFAULTS[ri];
-    await args.session.run(
+    await _.session.run(
       `
       MERGE (s:WorkshopReferenceSequence {key: $key})
       ON CREATE SET

@@ -7,7 +7,7 @@
         description: Updates the status of a feedback submission
         body:
           '''
-const { feedbackId, status } = args.contextData;
+const { feedbackId, status } = c;
 
 // Validate inputs
 if (!feedbackId) {
@@ -33,7 +33,7 @@ const query = `
   RETURN f
 `;
 
-const result = await args.session.run(query, {
+const result = await _.session.run(query, {
   feedbackId,
   status
 });
@@ -47,7 +47,7 @@ const feedbackNode = result.records[0].get('f');
 return {
   success: true,
   message: `Feedback status updated to ${status}`,
-  data: args.convertNodeToJson(feedbackNode)
+  data: _.convertNodeToJson(feedbackNode)
 };
 '''
         key: updateFeedbackStatus

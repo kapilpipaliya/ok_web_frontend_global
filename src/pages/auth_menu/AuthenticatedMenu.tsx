@@ -145,19 +145,19 @@ export function AuthenticatedMenu(
                   `return \`._id {
   display: flex;
   align-items: center;
-  color: \${args.theme.var.color.text};
+  color: \${t.var.color.text};
   padding: 8px 12px;
   border-radius: 6px;
   text-decoration: none;
   &:hover {
-    background-color: \${args.theme.var.color.primary_light_150};
-    color: \${args.theme.var.color.primary_light_150_text};
+    background-color: \${t.var.color.primary_light_150};
+    color: \${t.var.color.primary_light_150_text};
   }
 }\`;`,
                   isActive
                     ? `return \`._id { 
-                        background-color: \${args.theme.var.color.primary_light_150}; 
-                        color: \${args.theme.var.color.primary_light_150_text};
+                        background-color: \${t.var.color.primary_light_150}; 
+                        color: \${t.var.color.primary_light_150_text};
                         font-weight: bold; 
                       }\`;`
                     : `return \`._id { 
@@ -173,7 +173,7 @@ export function AuthenticatedMenu(
                   as={Icon}
                   css={`return \`._id {
   margin-right: 10px;
-  color: \${args.theme.var.color.primary};
+  color: \${t.var.color.primary};
 }\`;`}
                   icon={item.icon}
                   width="20"
@@ -189,7 +189,7 @@ export function AuthenticatedMenu(
         css={`return \`._id {
   margin-top: 8px;
   margin-bottom: 8px;
-  color: \${args.theme.var.color.background_light_100};
+  color: \${t.var.color.background_light_100};
 }\`;`}
       />
       <li>
@@ -199,15 +199,15 @@ export function AuthenticatedMenu(
   display: flex;
   align-items: center;
   width: 100%;
-  color: \${args.theme.var.color.error};
+  color: \${t.var.color.error};
   padding: 8px 12px;
   border-radius: 6px;
   text-decoration: none;
   border: none;
   cursor: pointer;
   &:hover {
-    background-color: \${args.theme.var.color.error_light_150};
-    color: \${args.theme.var.color.error_light_150_text};
+    background-color: \${t.var.color.error_light_150};
+    color: \${t.var.color.error_light_150_text};
   }
 }\`;`}
           href={API.urls.user.logout}

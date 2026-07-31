@@ -12,11 +12,11 @@
  *
  * Creates or updates default table configuration for ShopifyFile and ShopifyFileCategory.
  *
- * Parameters (via args.contextData):
+ * Parameters (via c):
  * - dryRun: boolean (optional) - If true, only report what would be migrated without making changes
  */
 
-const { dryRun = false } = args.contextData;
+const { dryRun = false } = c;
 
 console.log(`🚀 Starting file table settings migration (dryRun: ${dryRun})`);
 
@@ -197,7 +197,7 @@ const settingsConfigs = [
     rel: "noopener noreferrer",
     style: "color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; font-size: 14px;"
   },
-  onRowClick: (row, args) => {
+  onRowClick: (row, _) => {
     const id = row?.P?.id;
     if (!id) return;
     const origin = typeof window !== 'undefined' && window.shopify?.origin ? window.shopify.origin : '';
@@ -207,7 +207,7 @@ const settingsConfigs = [
       window.open(href, '_blank', 'noopener,noreferrer');
     }
   },
-  onEdit: (row, args) => {
+  onEdit: (row, _) => {
     const id = row?.P?.id;
     if (!id) return;
     const origin = typeof window !== 'undefined' && window.shopify?.origin ? window.shopify.origin : '';
@@ -390,11 +390,11 @@ const settingsConfigs = [
   sidebar: {
     enabled: false
   },
-  onRowClick: (row, args) => {
+  onRowClick: (row, _) => {
     if (!row?.id) return;
     const ticketId = row.id;
     const basePath = "/ShopifySupportConversation";
-    const searchParams = args.searchParams || {};
+    const searchParams = _.searchParams || {};
     const nextParams = { ...searchParams, supportId: ticketId };
     const query = Object.entries(nextParams)
       .filter(([, value]) => value != null && value !== "")
@@ -402,8 +402,8 @@ const settingsConfigs = [
       .join("&");
     const href = query ? \`\${basePath}?\${query}\` : basePath;
 
-    if (args.navigate) {
-      args.navigate(href);
+    if (_.navigate) {
+      _.navigate(href);
     } else if (typeof window !== "undefined") {
       window.location.href = href;
     }
@@ -419,7 +419,7 @@ async function processSetting(setting) {
   console.log(`\n${icon} Processing ${name} settings...`);
 
   // Check if setting exists
-  const checkResult = await args.session.run(
+  const checkResult = await _.session.run(
     `MATCH (s:Setting {key: $key}) RETURN s`,
     { key }
   );
@@ -429,7 +429,7 @@ async function processSetting(setting) {
   if (!dryRun) {
     if (exists) {
       // Update existing
-      await args.session.run(
+      await _.session.run(
         `MATCH (s:Setting {key: $key})
          SET s.config = $config,
              s.type = 'table_config',
@@ -442,7 +442,7 @@ async function processSetting(setting) {
       return { created: 0, updated: 1 };
     } else {
       // Create new
-      await args.session.run(
+      await _.session.run(
         `CREATE (s:Setting {
           key: $key,
           type: 'table_config',

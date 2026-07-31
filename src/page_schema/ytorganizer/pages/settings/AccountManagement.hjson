@@ -8,13 +8,13 @@
         fns:
           '''
 // State for ownerships
-const [ownerships, setOwnerships] = args.createSignal([]);
-const [isLoading, setIsLoading] = args.createSignal(true);
-const [isConnecting, setIsConnecting] = args.createSignal(false);
-const [disconnectingId, setDisconnectingId] = args.createSignal(null);
+const [ownerships, setOwnerships] = _.createSignal([]);
+const [isLoading, setIsLoading] = _.createSignal(true);
+const [isConnecting, setIsConnecting] = _.createSignal(false);
+const [disconnectingId, setDisconnectingId] = _.createSignal(null);
 
 // Message state for displaying OAuth callback messages
-const [messageState, setMessageState] = args.createStore({
+const [messageState, setMessageState] = _.createStore({
   type: null, // 'success' or 'error'
   text: '',
   visible: false
@@ -51,7 +51,7 @@ const handleOAuthCallback = () => {
 const fetchOwnerships = async () => {
   setIsLoading(true);
   try {
-    const result = await args.executeNamedServerFunction({
+    const result = await s({
       functionName: "getAllYouTubeOwnerships",
       contextData: {}
     });
@@ -59,11 +59,11 @@ const fetchOwnerships = async () => {
     if (result?.result?.success && result?.result?.data) {
       setOwnerships(result.result.data);
     } else {
-      args.showErrorToast(result?.error || "Failed to load YouTube accounts");
+      _.showErrorToast(result?.error || "Failed to load YouTube accounts");
     }
   } catch (error) {
     console.error("Error fetching ownerships:", error);
-    args.showErrorToast("Error loading YouTube accounts");
+    _.showErrorToast("Error loading YouTube accounts");
   } finally {
     setIsLoading(false);
   }
@@ -98,9 +98,9 @@ const reconnectAccount = (ownershipId) => {
 
 // Disconnect an account
 const disconnectAccount = async (ownershipId, channelName) => {
-  const rbConfirm = args.contextData?.confirmContext?.rbConfirm;
+  const rbConfirm = c?.confirmContext?.rbConfirm;
   if (!rbConfirm) {
-    args.showErrorToast("Confirmation dialog not available");
+    _.showErrorToast("Confirmation dialog not available");
     return;
   }
 
@@ -126,14 +126,14 @@ const disconnectAccount = async (ownershipId, channelName) => {
     const result = await response.json();
 
     if (result.success) {
-      args.showSuccessToast(`Disconnected "${channelName}" successfully`);
+      _.showSuccessToast(`Disconnected "${channelName}" successfully`);
       await fetchOwnerships();
     } else {
-      args.showErrorToast(result.error || "Failed to disconnect account");
+      _.showErrorToast(result.error || "Failed to disconnect account");
     }
   } catch (error) {
     console.error("Error disconnecting account:", error);
-    args.showErrorToast("An error occurred while disconnecting");
+    _.showErrorToast("An error occurred while disconnecting");
   } finally {
     setDisconnectingId(null);
   }
@@ -162,8 +162,8 @@ return {
 return {
   isNoPermissionCheck: true,
   onMount: () => {
-    args.fns.handleOAuthCallback?.();
-    args.fns.fetchOwnerships();
+    f.handleOAuthCallback?.();
+    f.fetchOwnerships();
   }
 };
 '''
@@ -178,10 +178,10 @@ return {
 return `._id {
   max-width: 1200px;
   margin: 0 auto;
-  padding: ${args.theme.var.spacing.xl};
+  padding: ${t.var.spacing.xl};
 
   @media (max-width: 768px) {
-    padding: ${args.theme.var.spacing.md};
+    padding: ${t.var.spacing.md};
   }
 }`;
 '''
@@ -202,7 +202,7 @@ return {
         css:
           '''
 return `._id {
-  margin-bottom: ${args.theme.var.spacing.xl};
+  margin-bottom: ${t.var.spacing.xl};
 }`;
 '''
         displayOrder: 1
@@ -224,8 +224,8 @@ return {
 return `._id {
   font-size: 1.875rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 ${args.theme.var.spacing.sm} 0;
+  color: ${t.var.color.text};
+  margin: 0 0 ${t.var.spacing.sm} 0;
 
   @media (max-width: 768px) {
     font-size: 1.5rem;
@@ -251,7 +251,7 @@ return {
           '''
 return `._id {
   font-size: 1rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0;
 
   @media (max-width: 768px) {
@@ -277,18 +277,18 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.info_light_100};
-  border: 1px solid ${args.theme.var.color.info};
-  border-radius: ${args.theme.var.borderRadius.md};
-  padding: ${args.theme.var.spacing.md};
-  margin-bottom: ${args.theme.var.spacing.lg};
+  background: ${t.var.color.info_light_100};
+  border: 1px solid ${t.var.color.info};
+  border-radius: ${t.var.borderRadius.md};
+  padding: ${t.var.spacing.md};
+  margin-bottom: ${t.var.spacing.lg};
   display: flex;
-  gap: ${args.theme.var.spacing.md};
+  gap: ${t.var.spacing.md};
   align-items: flex-start;
 
   @media (max-width: 768px) {
-    padding: ${args.theme.var.spacing.sm};
-    gap: ${args.theme.var.spacing.sm};
+    padding: ${t.var.spacing.sm};
+    gap: ${t.var.spacing.sm};
   }
 }`;
 '''
@@ -309,7 +309,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.info_light_100_text};
+  color: ${t.var.color.info_light_100_text};
   flex-shrink: 0;
   margin-top: 2px;
 }`;
@@ -335,7 +335,7 @@ return {
           '''
 return `._id {
   margin: 0;
-  color: ${args.theme.var.color.info_light_100_text};
+  color: ${t.var.color.info_light_100_text};
   font-size: 0.875rem;
   line-height: 1.5;
 }`;
@@ -357,18 +357,18 @@ return {
       P: {
         css:
           '''
-const messageState = args.fns.messageState;
+const messageState = f.messageState;
 const isError = messageState?.type === 'error';
 
 return `._id {
-  margin-bottom: ${args.theme.var.spacing.lg};
-  padding: ${args.theme.var.spacing.md};
-  border-radius: ${args.theme.var.borderRadius.md};
-  background: ${isError ? args.theme.var.color.error_light_100 : args.theme.var.color.success_light_100};
-  border: 1px solid ${isError ? args.theme.var.color.error : args.theme.var.color.success};
+  margin-bottom: ${t.var.spacing.lg};
+  padding: ${t.var.spacing.md};
+  border-radius: ${t.var.borderRadius.md};
+  background: ${isError ? t.var.color.error_light_100 : t.var.color.success_light_100};
+  border: 1px solid ${isError ? t.var.color.error : t.var.color.success};
   display: flex;
   align-items: flex-start;
-  gap: ${args.theme.var.spacing.md};
+  gap: ${t.var.spacing.md};
   animation: slideDown 0.3s ease-out;
 
   @keyframes slideDown {
@@ -383,8 +383,8 @@ return `._id {
   }
 
   @media (max-width: 768px) {
-    padding: ${args.theme.var.spacing.sm};
-    gap: ${args.theme.var.spacing.sm};
+    padding: ${t.var.spacing.sm};
+    gap: ${t.var.spacing.sm};
   }
 }`;
 '''
@@ -392,7 +392,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const messageState = args.fns.messageState;
+const messageState = f.messageState;
 
 return {
   as: "div",
@@ -407,11 +407,11 @@ return {
       P: {
         css:
           '''
-const messageState = args.fns.messageState;
+const messageState = f.messageState;
 const isError = messageState?.type === 'error';
 
 return `._id {
-  color: ${isError ? args.theme.var.color.error_light_100_text : args.theme.var.color.success_light_100_text};
+  color: ${isError ? t.var.color.error_light_100_text : t.var.color.success_light_100_text};
   flex-shrink: 0;
   margin-top: 2px;
 }`;
@@ -420,7 +420,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const messageState = args.fns.messageState;
+const messageState = f.messageState;
 const isError = messageState?.type === 'error';
 
 return {
@@ -458,12 +458,12 @@ return {
       P: {
         css:
           '''
-const messageState = args.fns.messageState;
+const messageState = f.messageState;
 const isError = messageState?.type === 'error';
 
 return `._id {
   margin: 0;
-  color: ${isError ? args.theme.var.color.error_light_100_text : args.theme.var.color.success_light_100_text};
+  color: ${isError ? t.var.color.error_light_100_text : t.var.color.success_light_100_text};
   font-size: 1rem;
   line-height: 1.5;
 
@@ -476,7 +476,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const messageState = args.fns.messageState;
+const messageState = f.messageState;
 
 return {
   as: "p",
@@ -491,24 +491,24 @@ return {
       P: {
         css:
           '''
-const messageState = args.fns.messageState;
+const messageState = f.messageState;
 const isError = messageState?.type === 'error';
 
 return `._id {
   background: none;
   border: none;
-  color: ${isError ? args.theme.var.color.error : args.theme.var.color.success};
+  color: ${isError ? t.var.color.error : t.var.color.success};
   cursor: pointer;
-  padding: ${args.theme.var.spacing.xs};
+  padding: ${t.var.spacing.xs};
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: ${args.theme.var.borderRadius.sm};
+  border-radius: ${t.var.borderRadius.sm};
   transition: background 150ms ease;
   flex-shrink: 0;
 
   &:hover {
-    background: ${isError ? args.theme.var.color.error_light_200 : args.theme.var.color.success_light_200};
+    background: ${isError ? t.var.color.error_light_200 : t.var.color.success_light_200};
   }
 
   &:active {
@@ -524,7 +524,7 @@ return {
   as: "button",
   type: "button",
   "aria-label": "Close message",
-  onClick: args.fns.hideMessage
+  onClick: f.hideMessage
 };
 '''
       }
@@ -553,19 +553,19 @@ return {
         css:
           '''
 return `._id {
-  margin-bottom: ${args.theme.var.spacing.xl};
+  margin-bottom: ${t.var.spacing.xl};
 }`;
 '''
         displayOrder: 3
         componentName: Button
         props:
           '''
-const isConnecting = args.fns.isConnecting?.();
+const isConnecting = f.isConnecting?.();
 
 return {
   text: isConnecting ? "Connecting..." : "Add YouTube Channel",
   variant: "primary",
-  onClick: args.fns.connectAccount,
+  onClick: f.connectAccount,
   disabled: isConnecting
 };
 '''
@@ -579,8 +579,8 @@ return {
           '''
 return `._id {
   text-align: center;
-  padding: ${args.theme.var.spacing.xxl};
-  color: ${args.theme.var.color.text_light_500};
+  padding: ${t.var.spacing.xxl};
+  color: ${t.var.color.text_light_500};
   font-size: 1.125rem;
 }`;
 '''
@@ -588,7 +588,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const isLoading = args.fns.isLoading?.();
+const isLoading = f.isLoading?.();
 
 return {
   as: "div",
@@ -606,18 +606,18 @@ return {
           '''
 return `._id {
   text-align: center;
-  padding: ${args.theme.var.spacing.xxl};
-  background: ${args.theme.var.color.background_dark_50};
-  border-radius: ${args.theme.var.borderRadius.lg};
-  border: 2px dashed ${args.theme.var.color.border};
+  padding: ${t.var.spacing.xxl};
+  background: ${t.var.color.background_dark_50};
+  border-radius: ${t.var.borderRadius.lg};
+  border: 2px dashed ${t.var.color.border};
 }`;
 '''
         displayOrder: 5
         componentName: Html
         props:
           '''
-const isLoading = args.fns.isLoading?.();
-const ownerships = args.fns.ownerships?.() || [];
+const isLoading = f.isLoading?.();
+const ownerships = f.ownerships?.() || [];
 const hasAccounts = ownerships.length > 0;
 
 return {
@@ -634,8 +634,8 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.text_light_500};
-  margin-bottom: ${args.theme.var.spacing.md};
+  color: ${t.var.color.text_light_500};
+  margin-bottom: ${t.var.spacing.md};
 }`;
 '''
         displayOrder: 1
@@ -660,8 +660,8 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 ${args.theme.var.spacing.sm} 0;
+  color: ${t.var.color.text};
+  margin: 0 0 ${t.var.spacing.sm} 0;
 }`;
 '''
         displayOrder: 2
@@ -683,8 +683,8 @@ return {
           '''
 return `._id {
   font-size: 1rem;
-  color: ${args.theme.var.color.text_light_500};
-  margin: 0 0 ${args.theme.var.spacing.lg} 0;
+  color: ${t.var.color.text_light_500};
+  margin: 0 0 ${t.var.spacing.lg} 0;
 }`;
 '''
         displayOrder: 3
@@ -706,12 +706,12 @@ return {
         componentName: Button
         props:
           '''
-const isConnecting = args.fns.isConnecting?.();
+const isConnecting = f.isConnecting?.();
 
 return {
   text: isConnecting ? "Connecting..." : "Connect YouTube Channel",
   variant: "primary",
-  onClick: args.fns.connectAccount,
+  onClick: f.connectAccount,
   disabled: isConnecting
 };
 '''
@@ -725,17 +725,17 @@ return {
           '''
 return `._id {
   overflow-x: auto;
-  background: ${args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.lg};
+  background: ${t.var.color.background};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.lg};
 }`;
 '''
         displayOrder: 5
         componentName: Html
         props:
           '''
-const isLoading = args.fns.isLoading?.();
-const ownerships = args.fns.ownerships?.() || [];
+const isLoading = f.isLoading?.();
+const ownerships = f.ownerships?.() || [];
 
 return {
   as: "div",
@@ -773,8 +773,8 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.background_dark_100};
-  border-bottom: 2px solid ${args.theme.var.color.border};
+  background: ${t.var.color.background_dark_100};
+  border-bottom: 2px solid ${t.var.color.border};
 }`;
 '''
         displayOrder: 1
@@ -809,9 +809,9 @@ return {
           '''
 return `._id {
   text-align: left;
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 1
@@ -833,9 +833,9 @@ return {
           '''
 return `._id {
   text-align: left;
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 2
@@ -857,9 +857,9 @@ return {
           '''
 return `._id {
   text-align: left;
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 3
@@ -881,9 +881,9 @@ return {
           '''
 return `._id {
   text-align: center;
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 4
@@ -905,9 +905,9 @@ return {
           '''
 return `._id {
   text-align: center;
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 5
@@ -929,9 +929,9 @@ return {
           '''
 return `._id {
   text-align: left;
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 6
@@ -953,9 +953,9 @@ return {
           '''
 return `._id {
   text-align: center;
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   width: 200px;
 }`;
 '''
@@ -980,7 +980,7 @@ return {
         componentName: Html
         props:
           '''
-const ownerships = args.fns.ownerships?.() || [];
+const ownerships = f.ownerships?.() || [];
 
 return {
   as: "tbody",
@@ -996,11 +996,11 @@ return {
         css:
           '''
 return `._id {
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  border-bottom: 1px solid ${t.var.color.border};
   transition: background 150ms ease;
 
   &:hover {
-    background: ${args.theme.var.color.background_dark_50};
+    background: ${t.var.color.background_dark_50};
   }
 
   &:last-child {
@@ -1025,8 +1025,8 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
-  color: ${args.theme.var.color.text};
+  padding: ${t.var.spacing.md};
+  color: ${t.var.color.text};
   font-weight: 500;
 }`;
 '''
@@ -1034,7 +1034,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const account = args.contextData?.account;
+const account = c?.account;
 const ownership = account?.ownership;
 const channelName = ownership?.P?.channelName || "Unknown Channel";
 
@@ -1052,15 +1052,15 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
-  color: ${args.theme.var.color.text};
+  padding: ${t.var.spacing.md};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 2
         componentName: Html
         props:
           '''
-const account = args.contextData?.account;
+const account = c?.account;
 const ownership = account?.ownership;
 const customName = ownership?.P?.customName || "-";
 
@@ -1078,8 +1078,8 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
-  color: ${args.theme.var.color.text_light_500};
+  padding: ${t.var.spacing.md};
+  color: ${t.var.color.text_light_500};
   font-family: monospace;
   font-size: 0.75rem;
 }`;
@@ -1088,7 +1088,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const account = args.contextData?.account;
+const account = c?.account;
 const ownership = account?.ownership;
 const channelId = ownership?.P?.channelId || "";
 
@@ -1106,7 +1106,7 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   text-align: center;
 }`;
 '''
@@ -1126,22 +1126,22 @@ return {
       P: {
         css:
           '''
-const account = args.contextData?.account;
+const account = c?.account;
 const isConnected = account?.isConnected;
 
 return `._id {
   display: inline-block;
-  padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.sm};
-  border-radius: ${args.theme.var.borderRadius.sm};
+  padding: ${t.var.spacing.xs} ${t.var.spacing.sm};
+  border-radius: ${t.var.borderRadius.sm};
   font-size: 0.75rem;
   font-weight: 600;
   white-space: nowrap;
   ${isConnected ? `
-    background: ${args.theme.var.color.success_light_100};
-    color: ${args.theme.var.color.success_light_100_text};
+    background: ${t.var.color.success_light_100};
+    color: ${t.var.color.success_light_100_text};
   ` : `
-    background: ${args.theme.var.color.background_light_100};
-    color: ${args.theme.var.color.background_light_100_text};
+    background: ${t.var.color.background_light_100};
+    color: ${t.var.color.background_light_100_text};
   `}
 }`;
 '''
@@ -1149,7 +1149,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const account = args.contextData?.account;
+const account = c?.account;
 const isConnected = account?.isConnected;
 
 return {
@@ -1166,7 +1166,7 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   text-align: center;
   font-size: 1.125rem;
 }`;
@@ -1175,7 +1175,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const account = args.contextData?.account;
+const account = c?.account;
 const ownership = account?.ownership;
 const isPrimary = ownership?.P?.isPrimary;
 
@@ -1193,8 +1193,8 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
-  color: ${args.theme.var.color.text_light_500};
+  padding: ${t.var.spacing.md};
+  color: ${t.var.color.text_light_500};
   font-size: 0.75rem;
   white-space: nowrap;
 }`;
@@ -1203,7 +1203,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const account = args.contextData?.account;
+const account = c?.account;
 const isConnected = account?.isConnected;
 const token = account?.token;
 const lastRefreshed = token?.P?.lastRefreshed;
@@ -1235,7 +1235,7 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
   text-align: center;
 }`;
 '''
@@ -1257,7 +1257,7 @@ return {
           '''
 return `._id {
   display: flex;
-  gap: ${args.theme.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
   justify-content: center;
 }`;
 '''
@@ -1279,14 +1279,14 @@ return {
         componentName: Button
         props:
           '''
-const account = args.contextData?.account;
+const account = c?.account;
 const isConnected = account?.isConnected;
-const isConnecting = args.fns.isConnecting?.();
+const isConnecting = f.isConnecting?.();
 
 return {
   text: isConnecting ? "Connecting..." : "Reconnect",
   variant: "primary",
-  onClick: args.fns.connectAccount,
+  onClick: f.connectAccount,
   disabled: isConnecting,
   hide: isConnected
 };
@@ -1301,18 +1301,18 @@ return {
         componentName: Button
         props:
           '''
-const account = args.contextData?.account;
+const account = c?.account;
 const ownership = account?.ownership;
 const ownershipId = ownership?.P?.key;
 const channelName = ownership?.P?.customName || ownership?.P?.channelName || "Unknown Channel";
 const isConnected = account?.isConnected;
-const disconnectingId = args.fns.disconnectingId?.();
+const disconnectingId = f.disconnectingId?.();
 const isDisconnecting = disconnectingId === ownershipId;
 
 return {
   text: isDisconnecting ? "Disconnecting..." : "Disconnect",
   variant: "danger",
-  onClick: () => args.fns.disconnectAccount(ownershipId, channelName),
+  onClick: () => f.disconnectAccount(ownershipId, channelName),
   disabled: isDisconnecting,
   hide: !isConnected
 };

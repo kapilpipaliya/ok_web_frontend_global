@@ -30,21 +30,21 @@
         componentName: Html
         fns:
           '''
-const [store, setStore] = args.createStore({
-  host: args.userSetting?.connectionHost || "127.0.0.1",
-  port: String(args.userSetting?.connectionPort || "3000"),
+const [store, setStore] = _.createStore({
+  host: _.userSetting?.connectionHost || "127.0.0.1",
+  port: String(_.userSetting?.connectionPort || "3000"),
   selection: []
 });
 
 const onSelectionChange = (selection) => {
   setStore("selection", selection);
-  args.saveUserSetting({
+  _.saveUserSetting({
     localPathSelectionJson: JSON.stringify(selection)
   });
 };
 
 const initFromSettings = () => {
-  const raw = args.userSetting?.localPathSelectionJson;
+  const raw = _.userSetting?.localPathSelectionJson;
   if (typeof raw !== "string" || !raw.trim()) return;
   try {
     const parsed = JSON.parse(raw);
@@ -76,19 +76,19 @@ return {
           '''return {
   as: "div",
   onMount: () => {
-    args.fns.initFromSettings();
+    f.initFromSettings();
   }
 };'''
         css:
           '''return `._id {
-  padding: ${args.theme.var.spacing.lg} ${args.theme.var.spacing.xl};
+  padding: ${t.var.spacing.lg} ${t.var.spacing.xl};
   max-width: 960px;
   margin: 0 auto;
   width: 100%;
   box-sizing: border-box;
 
   @media (max-width: 768px) {
-    padding: ${args.theme.var.spacing.md};
+    padding: ${t.var.spacing.md};
   }
 }`;'''
       }
@@ -106,7 +106,7 @@ return {
 };'''
         css:
           '''return `._id {
-  margin: 0 0 ${args.theme.var.spacing.sm};
+  margin: 0 0 ${t.var.spacing.sm};
   font-size: 1.875rem;
   font-weight: 700;
 }`;'''
@@ -125,8 +125,8 @@ return {
 };'''
         css:
           '''return `._id {
-  margin: 0 0 ${args.theme.var.spacing.lg};
-  color: ${args.theme.var.color.text_light_500};
+  margin: 0 0 ${t.var.spacing.lg};
+  color: ${t.var.color.text_light_500};
   font-size: 0.875rem;
 }`;'''
       }
@@ -145,8 +145,8 @@ return {
           '''return `._id {
   display: flex;
   flex-wrap: wrap;
-  gap: ${args.theme.var.spacing.md};
-  margin-bottom: ${args.theme.var.spacing.lg};
+  gap: ${t.var.spacing.md};
+  margin-bottom: ${t.var.spacing.lg};
 }`;'''
       }
     }
@@ -180,7 +180,7 @@ return {
         css:
           '''return `._id {
   display: block;
-  margin-bottom: ${args.theme.var.spacing.xs};
+  margin-bottom: ${t.var.spacing.xs};
   font-size: 0.875rem;
 }`;'''
       }
@@ -193,11 +193,11 @@ return {
         componentName: TextInput
         props:
           '''return {
-  value: args.fns.store.host,
-  onInput: (event) => args.fns.setStore("host", event.target.value),
-  onBlur: () => args.saveUserSetting({
-    connectionHost: args.fns.store.host,
-    connectionPort: args.fns.store.port
+  value: f.store.host,
+  onInput: (event) => f.setStore("host", event.target.value),
+  onBlur: () => _.saveUserSetting({
+    connectionHost: f.store.host,
+    connectionPort: f.store.port
   })
 };'''
       }
@@ -232,7 +232,7 @@ return {
         css:
           '''return `._id {
   display: block;
-  margin-bottom: ${args.theme.var.spacing.xs};
+  margin-bottom: ${t.var.spacing.xs};
   font-size: 0.875rem;
 }`;'''
       }
@@ -245,11 +245,11 @@ return {
         componentName: TextInput
         props:
           '''return {
-  value: args.fns.store.port,
-  onInput: (event) => args.fns.setStore("port", event.target.value),
-  onBlur: () => args.saveUserSetting({
-    connectionHost: args.fns.store.host,
-    connectionPort: args.fns.store.port
+  value: f.store.port,
+  onInput: (event) => f.setStore("port", event.target.value),
+  onBlur: () => _.saveUserSetting({
+    connectionHost: f.store.host,
+    connectionPort: f.store.port
   })
 };'''
       }
@@ -262,14 +262,14 @@ return {
         componentName: LocalPathPicker
         props:
           '''return {
-  executeHost: args.fns.store.host,
-  executePort: args.fns.store.port,
+  executeHost: f.store.host,
+  executePort: f.store.port,
   multiple: true,
   allowFiles: true,
   allowFolders: true,
   allowBrowse: true,
-  value: args.fns.store.selection,
-  onChange: args.fns.onSelectionChange
+  value: f.store.selection,
+  onChange: f.onSelectionChange
 };'''
       }
     }
@@ -285,7 +285,7 @@ return {
 };'''
         css:
           '''return `._id {
-  margin-top: ${args.theme.var.spacing.lg};
+  margin-top: ${t.var.spacing.lg};
 }`;'''
       }
     }
@@ -302,7 +302,7 @@ return {
 };'''
         css:
           '''return `._id {
-  margin: 0 0 ${args.theme.var.spacing.sm};
+  margin: 0 0 ${t.var.spacing.sm};
   font-size: 1.125rem;
   font-weight: 600;
 }`;'''
@@ -317,15 +317,15 @@ return {
         props:
           '''return {
   as: "pre",
-  text: args.fns.formatSelection()
+  text: f.formatSelection()
 };'''
         css:
           '''return `._id {
   margin: 0;
-  padding: ${args.theme.var.spacing.md};
-  border-radius: ${args.theme.var.borderRadius.md};
-  background: ${args.theme.var.color.background_dark_900};
-  color: ${args.theme.var.color.background_light_900_text};
+  padding: ${t.var.spacing.md};
+  border-radius: ${t.var.borderRadius.md};
+  background: ${t.var.color.background_dark_900};
+  color: ${t.var.color.background_light_900_text};
   font-size: 0.875rem;
   overflow-x: auto;
   white-space: pre-wrap;

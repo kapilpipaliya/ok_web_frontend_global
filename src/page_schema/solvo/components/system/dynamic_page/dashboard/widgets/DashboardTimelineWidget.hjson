@@ -22,9 +22,9 @@ const pickDisplayValue = (properties, fieldConfig, fallback) => {
 };
 
 const getEvents = () => {
-  const widgetConfig = args.contextData.props?.widgetConfig || {};
+  const widgetConfig = c.props?.widgetConfig || {};
   const displayFields = widgetConfig.displayFields || {};
-  const widgetData = args.contextData.props?.widgetData || {};
+  const widgetData = c.props?.widgetData || {};
   const rows = Array.isArray(widgetData.rows) ? widgetData.rows : [];
   return rows.map((row) => {
     const p = row?.P || {};
@@ -48,7 +48,7 @@ return { getEvents };
         componentName: Html
         props:
           '''
-const events = args.fns.getEvents();
+const events = f.getEvents();
 return {
   as: "div",
   hide: events.length === 0,
@@ -64,7 +64,7 @@ return `._id {
   flex-direction: column;
   gap: 0;
   padding-left: 1rem;
-  border-left: 2px solid ${args.theme.var.color.border};
+  border-left: 2px solid ${t.var.color.border};
   max-height: 100%;
   overflow-y: auto;
 }`;
@@ -79,7 +79,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const ev = args.contextData.timelineEvent;
+const ev = c.timelineEvent;
 return {
   as: "div",
   text: `${ev.label}${ev.detail ? " — " + ev.detail : ""}${ev.at ? "\n" + ev.at : ""}`
@@ -92,7 +92,7 @@ return `._id {
   margin-bottom: 1rem;
   padding-left: 0.75rem;
   font-size: 0.8125rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   white-space: pre-wrap;
 
   &::before {
@@ -103,7 +103,7 @@ return `._id {
     width: 0.5rem;
     height: 0.5rem;
     border-radius: 50%;
-    background: ${args.theme.var.color.primary};
+    background: ${t.var.color.primary};
   }
 }`;
 '''
@@ -119,7 +119,7 @@ return `._id {
           '''
 return {
   as: "p",
-  hide: args.fns.getEvents().length > 0,
+  hide: f.getEvents().length > 0,
   text: "No timeline events"
 };
 '''
@@ -128,7 +128,7 @@ return {
 return `._id {
   margin: 0;
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
       }

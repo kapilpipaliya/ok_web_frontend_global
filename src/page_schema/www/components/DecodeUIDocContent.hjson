@@ -65,7 +65,7 @@ return {
 return `._id {
   margin-bottom: 3rem;
   padding-bottom: 2rem;
-  border-bottom: 1px solid ${args.theme.var.color.background_dark_200};
+  border-bottom: 1px solid ${t.var.color.background_dark_200};
 }`;
 '''
       }
@@ -79,14 +79,14 @@ return `._id {
         props: '''
 return {
   as: "h1",
-  text: args.contextData.props?.title || "Documentation"
+  text: c.props?.title || "Documentation"
 };
 ''',
         css: '''
 return `._id {
   font-size: 2.5rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 1rem;
   
   @media (max-width: 768px) {
@@ -103,7 +103,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const description = args.contextData.props?.description;
+const description = c.props?.description;
 return {
   as: description ? "p" : "",
   text: description
@@ -112,7 +112,7 @@ return {
         css: '''
 return `._id {
   font-size: 1.125rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   opacity: 0.8;
   line-height: 1.6;
 }`;
@@ -137,7 +137,7 @@ return `._id {
   h2 {
     font-size: 1.875rem;
     font-weight: 600;
-    color: ${args.theme.var.color.text};
+    color: ${t.var.color.text};
     margin-top: 3rem;
     margin-bottom: 1.5rem;
   }
@@ -145,19 +145,19 @@ return `._id {
   h3 {
     font-size: 1.5rem;
     font-weight: 600;
-    color: ${args.theme.var.color.text};
+    color: ${t.var.color.text};
     margin-top: 2rem;
     margin-bottom: 1rem;
   }
   
   p {
-    color: ${args.theme.var.color.text};
+    color: ${t.var.color.text};
     line-height: 1.8;
     margin-bottom: 1.5rem;
   }
   
   ul, ol {
-    color: ${args.theme.var.color.text};
+    color: ${t.var.color.text};
     line-height: 1.8;
     margin-bottom: 1.5rem;
     padding-left: 2rem;
@@ -168,7 +168,7 @@ return `._id {
   }
   
   a {
-    color: ${args.theme.var.color.primary};
+    color: ${t.var.color.primary};
     text-decoration: none;
     
     &:hover {
@@ -177,10 +177,10 @@ return `._id {
   }
   
   blockquote {
-    border-left: 4px solid ${args.theme.var.color.primary};
+    border-left: 4px solid ${t.var.color.primary};
     padding-left: 1.5rem;
     margin: 1.5rem 0;
-    color: ${args.theme.var.color.text};
+    color: ${t.var.color.text};
     opacity: 0.8;
     font-style: italic;
   }

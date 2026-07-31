@@ -17,7 +17,7 @@
         componentName: "Html",
         contextName: "formStore",
         fns: '''
-const [store, setStore] = args.createStore({
+const [store, setStore] = _.createStore({
   userBalance: 50.00,
   formData: {
     title: "",
@@ -59,15 +59,15 @@ return {
   },
   
   submitProblem: async () => {
-    if (!args.fns.validateForm()) return;
+    if (!f.validateForm()) return;
     
     setStore("isSubmitting", true);
     
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1500));
     
-    args.showSuccessToast("Problem submitted successfully!");
-    args.navigate("/dashboard");
+    _.showSuccessToast("Problem submitted successfully!");
+    _.navigate("/dashboard");
   },
   
   updateField: (field, value) => {
@@ -75,26 +75,26 @@ return {
     setStore("errors", field, undefined);
     
     if (field === "category" || field === "urgency") {
-      args.fns.calculateEstimate();
+      f.calculateEstimate();
     }
   }
 };
 ''',
         props: '''
-const fns = args.fns;
-if (args.mounted()) {
+const fns = f;
+if (_.mounted()) {
   fns.calculateEstimate();
 }
 
 return {
   as: "div",
-  data: args.contextData.formStore
+  data: c.formStore
 };
 ''',
         css: '''
 return `._id {
   min-height: 100vh;
-  background: ${args.theme.var.color.background_dark_50};
+  background: ${t.var.color.background_dark_50};
 }`;
 '''
       }
@@ -148,7 +148,7 @@ return {
 return `._id {
   font-size: 2rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 0.5rem;
   
   @media (max-width: 768px) {
@@ -172,7 +172,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin-bottom: 2rem;
 }`;
 '''
@@ -198,7 +198,7 @@ return {
   as: "form",
   onSubmit: (e) => {
     e.preventDefault();
-    args.contextData.formStore.fns.submitProblem();
+    c.formStore.fns.submitProblem();
   }
 };
 ''',
@@ -246,7 +246,7 @@ return {
         css: '''
 return `._id {
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -258,9 +258,9 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const formData = args.contextData.formStore?.formData || {};
-const errors = args.contextData.formStore?.errors || {};
-const updateField = args.contextData.formStore?.fns?.updateField;
+const formData = c.formStore?.formData || {};
+const errors = c.formStore?.errors || {};
+const updateField = c.formStore?.fns?.updateField;
 
 return {
   as: "input",
@@ -271,23 +271,23 @@ return {
 };
 ''',
         css: '''
-const hasError = args.contextData.formStore?.errors?.title;
+const hasError = c.formStore?.errors?.title;
 return `._id {
   padding: 0.75rem;
-  border: 1px solid ${hasError ? args.theme.var.color.error : args.theme.var.color.border};
+  border: 1px solid ${hasError ? t.var.color.error : t.var.color.border};
   border-radius: 0.5rem;
   font-size: 1rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   transition: border-color 0.2s ease;
   
   &:focus {
     outline: none;
-    border-color: ${args.theme.var.color.primary};
+    border-color: ${t.var.color.primary};
   }
   
   &::placeholder {
-    color: ${args.theme.var.color.text_light_500};
+    color: ${t.var.color.text_light_500};
   }
 }`;
 '''
@@ -300,7 +300,7 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const error = args.contextData.formStore?.errors?.title;
+const error = c.formStore?.errors?.title;
 if (!error) return { as: "span" };
 
 return {
@@ -311,7 +311,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.error};
+  color: ${t.var.color.error};
 }`;
 '''
       }
@@ -375,7 +375,7 @@ return {
         css: '''
 return `._id {
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -387,9 +387,9 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const formData = args.contextData.formStore?.formData || {};
-const categories = args.contextData.formStore?.categories || [];
-const updateField = args.contextData.formStore?.fns?.updateField;
+const formData = c.formStore?.formData || {};
+const categories = c.formStore?.categories || [];
+const updateField = c.formStore?.fns?.updateField;
 
 return {
   as: "select",
@@ -398,20 +398,20 @@ return {
 };
 ''',
         css: '''
-const hasError = args.contextData.formStore?.errors?.category;
+const hasError = c.formStore?.errors?.category;
 return `._id {
   padding: 0.75rem;
-  border: 1px solid ${hasError ? args.theme.var.color.error : args.theme.var.color.border};
+  border: 1px solid ${hasError ? t.var.color.error : t.var.color.border};
   border-radius: 0.5rem;
   font-size: 1rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   cursor: pointer;
   transition: border-color 0.2s ease;
   
   &:focus {
     outline: none;
-    border-color: ${args.theme.var.color.primary};
+    border-color: ${t.var.color.primary};
   }
 }`;
 '''
@@ -441,7 +441,7 @@ return {
         contextName: "categoryOptions",
         loop: true,
         props: '''
-const categories = args.contextData.formStore?.categories || [];
+const categories = c.formStore?.categories || [];
 return {
   data: categories
 };
@@ -455,7 +455,7 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const category = args.contextData.categoryOptions;
+const category = c.categoryOptions;
 return {
   as: "option",
   value: category.id,
@@ -471,7 +471,7 @@ return {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const error = args.contextData.formStore?.errors?.category;
+const error = c.formStore?.errors?.category;
 if (!error) return { as: "span" };
 
 return {
@@ -482,7 +482,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.error};
+  color: ${t.var.color.error};
 }`;
 '''
       }
@@ -522,7 +522,7 @@ return {
         css: '''
 return `._id {
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -534,8 +534,8 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const formData = args.contextData.formStore?.formData || {};
-const updateField = args.contextData.formStore?.fns?.updateField;
+const formData = c.formStore?.formData || {};
+const updateField = c.formStore?.fns?.updateField;
 
 return {
   as: "select",
@@ -546,17 +546,17 @@ return {
         css: '''
 return `._id {
   padding: 0.75rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.5rem;
   font-size: 1rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   cursor: pointer;
   transition: border-color 0.2s ease;
   
   &:focus {
     outline: none;
-    border-color: ${args.theme.var.color.primary};
+    border-color: ${t.var.color.primary};
   }
 }`;
 '''
@@ -627,7 +627,7 @@ return {
         css: '''
 return `._id {
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -639,8 +639,8 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const formData = args.contextData.formStore?.formData || {};
-const updateField = args.contextData.formStore?.fns?.updateField;
+const formData = c.formStore?.formData || {};
+const updateField = c.formStore?.fns?.updateField;
 
 return {
   as: "textarea",
@@ -651,25 +651,25 @@ return {
 };
 ''',
         css: '''
-const hasError = args.contextData.formStore?.errors?.description;
+const hasError = c.formStore?.errors?.description;
 return `._id {
   padding: 0.75rem;
-  border: 1px solid ${hasError ? args.theme.var.color.error : args.theme.var.color.border};
+  border: 1px solid ${hasError ? t.var.color.error : t.var.color.border};
   border-radius: 0.5rem;
   font-size: 1rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   resize: vertical;
   min-height: 120px;
   transition: border-color 0.2s ease;
   
   &:focus {
     outline: none;
-    border-color: ${args.theme.var.color.primary};
+    border-color: ${t.var.color.primary};
   }
   
   &::placeholder {
-    color: ${args.theme.var.color.text_light_500};
+    color: ${t.var.color.text_light_500};
   }
 }`;
 '''
@@ -682,8 +682,8 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const description = args.contextData.formStore?.formData?.description || "";
-const error = args.contextData.formStore?.errors?.description;
+const description = c.formStore?.formData?.description || "";
+const error = c.formStore?.errors?.description;
 const charCount = description.length;
 
 return {
@@ -706,7 +706,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const error = args.contextData.formStore?.errors?.description;
+const error = c.formStore?.errors?.description;
 if (!error) return { as: "span" };
 
 return {
@@ -717,7 +717,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.error};
+  color: ${t.var.color.error};
 }`;
 '''
       }
@@ -729,7 +729,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const description = args.contextData.formStore?.formData?.description || "";
+const description = c.formStore?.formData?.description || "";
 const charCount = description.length;
 
 return {
@@ -738,11 +738,11 @@ return {
 };
 ''',
         css: '''
-const description = args.contextData.formStore?.formData?.description || "";
+const description = c.formStore?.formData?.description || "";
 const charCount = description.length;
 return `._id {
   font-size: 0.875rem;
-  color: ${charCount < 50 ? args.theme.var.color.error : args.theme.var.color.text_light_500};
+  color: ${charCount < 50 ? t.var.color.error : t.var.color.text_light_500};
 }`;
 '''
       }
@@ -804,7 +804,7 @@ return {
         css: '''
 return `._id {
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.25rem 0;
 }`;
 '''
@@ -817,8 +817,8 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const balance = args.contextData.formStore?.userBalance || 0;
-const estimatedCost = args.contextData.formStore?.formData?.estimatedCost || 0;
+const balance = c.formStore?.userBalance || 0;
+const estimatedCost = c.formStore?.formData?.estimatedCost || 0;
 const hasEnoughBalance = balance >= estimatedCost;
 
 return {
@@ -827,13 +827,13 @@ return {
 };
 ''',
         css: '''
-const balance = args.contextData.formStore?.userBalance || 0;
-const estimatedCost = args.contextData.formStore?.formData?.estimatedCost || 0;
+const balance = c.formStore?.userBalance || 0;
+const estimatedCost = c.formStore?.formData?.estimatedCost || 0;
 const hasEnoughBalance = balance >= estimatedCost;
 
 return `._id {
   font-size: 0.875rem;
-  color: ${hasEnoughBalance ? args.theme.var.color.success : args.theme.var.color.error};
+  color: ${hasEnoughBalance ? t.var.color.success : t.var.color.error};
   margin: 0;
 }`;
 '''
@@ -846,7 +846,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const estimatedCost = args.contextData.formStore?.formData?.estimatedCost || 0;
+const estimatedCost = c.formStore?.formData?.estimatedCost || 0;
 
 return {
   as: "p",
@@ -857,7 +857,7 @@ return {
 return `._id {
   font-size: 1.5rem;
   font-weight: 700;
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   margin: 0;
 }`;
 '''
@@ -895,7 +895,7 @@ return `._id {
         icon: "carbon:send",
         type: "submit",
         fullWidth: true,
-        disabled: "args.contextData.formStore?.isSubmitting"
+        disabled: "c.formStore?.isSubmitting"
       }
     },
     {
@@ -907,7 +907,7 @@ return `._id {
         variant: "secondary",
         size: "large",
         text: "Cancel",
-        onClick: "() => args.navigate('/dashboard')"
+        onClick: "() => _.navigate('/dashboard')"
       }
     }
   ],

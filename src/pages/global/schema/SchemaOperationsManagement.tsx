@@ -100,7 +100,7 @@ export function SchemaOperationsManagement() {
         as="p"
         css={`return \`._id {
   margin: 0 0 1.5rem 0;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
   font-size: 0.95rem;
   line-height: 1.5;
   max-width: 52rem;
@@ -129,7 +129,7 @@ export function SchemaOperationsManagement() {
           css={`return \`._id {
   font-size: 0.8rem;
   font-weight: 600;
-  color: \${args.theme.var.color.text_light_500};
+  color: \${t.var.color.text_light_500};
   margin-right: 0.25rem;
 }\`;`}
         >
@@ -211,7 +211,7 @@ export function SchemaOperationsManagement() {
       <Show when={databaseGroups()?.success === false}>
         <As
           as="p"
-          css={"return `._id { color: ${args.theme.var.color.error}; margin-top: 1rem; }`;"}
+          css={"return `._id { color: ${t.var.color.error}; margin-top: 1rem; }`;"}
         >
           {databaseGroups()?.error || "Failed to load databases"}
         </As>

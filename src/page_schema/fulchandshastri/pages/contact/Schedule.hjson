@@ -13,16 +13,16 @@
         updatedAt: 2026-07-14T15:36:49.029Z
         props:
           '''
-const locale = args.params?.lang ? String(args.params.lang).toLowerCase() : undefined;
+const locale = _.params?.lang ? String(_.params.lang).toLowerCase() : undefined;
 return {
   contextName: "scheduleSettings",
   serverFunction: `
 try {
-  const pageResult = await args.executeNamedServerFunction({
+  const pageResult = await s({
     functionName: "loadPublicPageSettings",
     contextData: { pageId: "schedule", allowPublicRead: true, locale: ${JSON.stringify(locale ?? null)} }
   });
-  const tableResult = await args.executeNamedServerFunction({
+  const tableResult = await s({
     functionName: "loadPublicTableContent",
     contextData: { tableKey: "schedule", tableVertexLabel: "ScheduleEvent", locale: ${JSON.stringify(locale ?? null)} }
   });
@@ -127,7 +127,7 @@ try {
       P: {
         css:
           '''return `._id {
-  background: linear-gradient(135deg, ${args.theme.var.color.primary_light_100} 0%, ${args.theme.var.color.primary_light_50} 100%);
+  background: linear-gradient(135deg, ${t.var.color.primary_light_100} 0%, ${t.var.color.primary_light_50} 100%);
   padding: 3rem 1rem;
   text-align: center;
 }`;'''
@@ -145,7 +145,7 @@ try {
       P: {
         css:
           '''return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   font-size: 3rem;
   font-weight: 700;
   margin: 0;
@@ -157,7 +157,7 @@ try {
         displayOrder: 1
         componentName: Html
         props:
-          '''const content = args.contextData.scheduleSettings?.content;
+          '''const content = c.scheduleSettings?.content;
 return {
   as: "h1",
   text: content?.pageTitle || "Schedule"
@@ -170,14 +170,14 @@ return {
       P: {
         css:
           '''return `._id {
-  color: ${args.theme.var.color.text_light_200};
+  color: ${t.var.color.text_light_200};
   font-size: 1.25rem;
   margin-top: 1rem;
 }`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''const content = args.contextData.scheduleSettings?.content;
+          '''const content = c.scheduleSettings?.content;
 return {
   as: "p",
   text: content?.pageSubtitle || ""
@@ -226,7 +226,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const sections = args.contextData.scheduleSettings?.yearSections ?? [];
+          '''const sections = c.scheduleSettings?.yearSections ?? [];
 return {
   as: "fragment",
   data: sections
@@ -247,7 +247,7 @@ return {
           '''return {
   as: "section",
   "data-animate": "",
-  ref: (el) => el && args.fns.animateOnView?.(el)
+  ref: (el) => el && f.animateOnView?.(el)
 };'''
       }
     }
@@ -257,7 +257,7 @@ return {
       P: {
         css:
           '''return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   font-size: 2rem;
   font-weight: 600;
   margin-bottom: 2rem;
@@ -266,7 +266,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const section = args.contextData.scheduleSection;
+          '''const section = c.scheduleSection;
 return {
   as: "h2",
   text: section?.title || ""
@@ -280,7 +280,7 @@ return {
         displayOrder: 2
         componentName: PublicContentTable
         props:
-          '''const section = args.contextData.scheduleSection;
+          '''const section = c.scheduleSection;
 return {
   columns: [
     { key: "startDate", label: "Start Date", width: "120px" },
@@ -315,7 +315,7 @@ return {
   transition: background 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.background_light_50};
+    background: ${t.var.color.background_light_50};
   }
 }`;'''
         displayOrder: 1
@@ -334,12 +334,12 @@ return {
           '''return `._id {
   text-align: left;
   vertical-align: middle;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const row = args.contextData.row || {};
+          '''const row = c.row || {};
 return {
   as: "td",
   text: row.startDate || "",
@@ -355,12 +355,12 @@ return {
           '''return `._id {
   text-align: left;
   vertical-align: middle;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''const row = args.contextData.row || {};
+          '''const row = c.row || {};
 return {
   as: "td",
   text: row.endDate || "",
@@ -376,12 +376,12 @@ return {
           '''return `._id {
   text-align: left;
   vertical-align: middle;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;'''
         displayOrder: 3
         componentName: Html
         props:
-          '''const row = args.contextData.row || {};
+          '''const row = c.row || {};
 return {
   as: "td",
   text: row.place || ""
@@ -396,13 +396,13 @@ return {
           '''return `._id {
   text-align: left;
   vertical-align: middle;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   font-weight: 600;
 }`;'''
         displayOrder: 4
         componentName: Html
         props:
-          '''const row = args.contextData.row || {};
+          '''const row = c.row || {};
 return {
   as: "td",
   text: row.programme || ""
@@ -417,14 +417,14 @@ return {
           '''return `._id {
   text-align: left;
   vertical-align: middle;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   white-space: pre-line;
   max-width: 320px;
 }`;'''
         displayOrder: 5
         componentName: Html
         props:
-          '''const row = args.contextData.row || {};
+          '''const row = c.row || {};
 return {
   as: "td",
   text: row.details || ""
@@ -437,12 +437,12 @@ return {
       P: {
         css:
           '''return `._id {
-  background: ${args.theme.var.color.background_light_50};
+  background: ${t.var.color.background_light_50};
 }`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''const row = args.contextData.row || {};
+          '''const row = c.row || {};
 const src = row.banner || "";
 return {
   as: "tr",
@@ -483,7 +483,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const row = args.contextData.row || {};
+          '''const row = c.row || {};
 const src = row.banner || "";
 return {
   as: "img",
@@ -501,12 +501,12 @@ return {
           '''return `._id {
   padding: 2rem 1rem;
   text-align: center;
-  color: ${args.theme.var.color.text_light_300};
+  color: ${t.var.color.text_light_300};
 }`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''const sections = args.contextData.scheduleSettings?.yearSections ?? [];
+          '''const sections = c.scheduleSettings?.yearSections ?? [];
 return {
   as: "p",
   text: "No scheduled events available yet.",

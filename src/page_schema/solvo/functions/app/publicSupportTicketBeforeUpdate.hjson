@@ -8,7 +8,7 @@
         description: Hook before PublicSupportTicket update — stores previous assignee id for assignment notification comparison.
         body:
           '''
-const { tableVertexLabel, operation, elementId } = args.contextData || {};
+const { tableVertexLabel, operation, elementId } = c || {};
 
 if (tableVertexLabel !== "PublicSupportTicket" || operation !== "update") {
   return { success: true, message: "Skip: not PublicSupportTicket update" };
@@ -18,7 +18,7 @@ if (!elementId) {
 }
 
 try {
-  await args.session.run(
+  await _.session.run(
     `
     MATCH (t:PublicSupportTicket)
     WHERE elementId(t) = $elementId

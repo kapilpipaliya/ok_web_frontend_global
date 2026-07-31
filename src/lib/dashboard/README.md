@@ -1,6 +1,6 @@
 # Dashboard runtime platform (`src/lib/dashboard`)
 
-Public entry: `createDashboardPlatform()` from `index.ts` (wired as `args.dashboardPlatform`).
+Public entry: `createDashboardPlatform()` from `index.ts` (wired as `_.dashboardPlatform`).
 
 ## Layout
 
@@ -17,7 +17,7 @@ Import from `~/lib/dashboard` only — do not deep-import subpaths unless extend
 
 ## Graph-first data contract
 
-- Server functions use `args.processResult` so vertices populate `args.context`; [`executeNamedServerFunctionCore`](../../cypher/get/executeNamedServerFunctionCore.ts) returns `graph` on every [`ServerResult`](../../cypher/types/ServerResult.ts).
-- Dashboard host calls `applyServerGraphToLocalGraph(response)` after each API (merge into reactive `args.graph` via `args.setGraphData`).
+- Server functions use `_.processResult` so vertices populate `_.context`; [`executeNamedServerFunctionCore`](../../cypher/get/executeNamedServerFunctionCore.ts) returns `graph` on every [`ServerResult`](../../cypher/types/ServerResult.ts).
+- Dashboard host calls `applyServerGraphToLocalGraph(response)` after each API (merge into reactive `_.graph` via `_.setGraphData`).
 - Widget state lives in local graph vertices (`DashboardWidgetState`); the Solid store holds vertex IDs only. Use `store.getWidgetState` / `store.resolveWidgetPresentation` from the host.
 - Cache (`cacheManager`) stores `dataResultVertexId` + `rowVertexIds` per query signature (optional TTL from `dataSource.cache.ttl`); graph remains authoritative for vertex payloads.

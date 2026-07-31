@@ -8,24 +8,24 @@
         description: One-tap water log for HydrateMe — creates HydrateMeWaterLog linked to the current user.
         body:
           '''
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return { success: false, message: "Sign in to log water." };
 }
 
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const user = await _.getEffectiveUser(_.session, actualUser, c);
 const uuid = user?.P?.uuid;
 if (!uuid) {
   return { success: false, message: "User uuid missing." };
 }
 
-const raw = args.contextData?.amountMl;
+const raw = c?.amountMl;
 const amountMl = Math.max(1, Math.min(5000, Number(raw) || 250));
 const now = new Date();
 const loggedAt = now.toISOString();
 const loggedDate = loggedAt.slice(0, 10);
 
-await args.session.run(
+await _.session.run(
   `MATCH (u:User {uuid: $uuid})
    CREATE (w:HydrateMeWaterLog {
      amountMl: $amountMl,
@@ -41,8 +41,8 @@ await args.session.run(
     amountMl,
     loggedAt,
     loggedDate,
-    note: args.contextData?.note != null ? String(args.contextData.note) : "",
-    source: args.contextData?.source != null ? String(args.contextData.source) : "quick",
+    note: c?.note != null ? String(c.note) : "",
+    source: c?.source != null ? String(c.source) : "quick",
   },
 );
 

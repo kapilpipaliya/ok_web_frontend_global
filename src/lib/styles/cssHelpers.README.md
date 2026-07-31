@@ -22,7 +22,7 @@ Return a **string** for a single block, or an **array of strings** to combine mu
 import { up, container, animation } from "~/lib/styles/cssHelpers";
 ```
 
-All helpers are on the dynamic component `args` object.
+All helpers are on the dynamic component `_` object.
 
 ## API
 
@@ -104,10 +104,10 @@ css: '''
 return [
   `._id {
     display: flex;
-    background: ${args.theme.var.color.background};
+    background: ${_.theme.var.color.background};
 
     &:hover {
-      background: ${args.theme.var.color.background_light_200};
+      background: ${_.theme.var.color.background_light_200};
     }
 
     & > img {

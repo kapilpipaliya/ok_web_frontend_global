@@ -8,7 +8,7 @@
         body:
           '''
 // Get current authenticated user from session
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return {
     success: false,
@@ -18,7 +18,7 @@ if (!actualUser) {
 }
 
 // Get effective user (handles admin impersonation)
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const user = await _.getEffectiveUser(_.session, actualUser, c);
 
 // Extract parameters
 const { 
@@ -36,7 +36,7 @@ const {
   enableUserScoping,
   hooks,
   label: sidebarLabel
-} = args.contextData;
+} = c;
 
 const itemLabel = sidebarLabel && typeof sidebarLabel === 'string' ? sidebarLabel : 'item';
 
@@ -62,7 +62,7 @@ if (!resolvedName) {
   resolvedName = resolvedKey;
 }
 
-const { operation = "create" } = args.contextData;
+const { operation = "create" } = c;
 const isDelete = operation === "delete";
 const isUpdate = Boolean(vertexId) && !isDelete;
 if (!isDelete && !resolvedKey) {
@@ -100,7 +100,7 @@ const rootKey = rootKeys.key;
 
 // Prevent deletion/update of root vertex
 if (isUpdate || isDelete) {
-  const existingCheck = await args.session.run(
+  const existingCheck = await _.session.run(
     `MATCH (v:${parentVertexLabel})
      WHERE elementId(v) = $vertexId
      RETURN v.key as key`,
@@ -130,7 +130,7 @@ if (isDelete) {
   }
 
   // Check if vertex has children (children point to parent: child-[toParentEdgeType]->parent)
-  const childrenCheck = await args.session.run(
+  const childrenCheck = await _.session.run(
     `MATCH (child:${parentVertexLabel})-[r:${toParentEdgeType}]->(v:${parentVertexLabel})
      WHERE elementId(v) = $vertexId
      RETURN count(child) as childCount`,
@@ -149,7 +149,7 @@ if (isDelete) {
   // Check if vertex has associated content
   // Content items point to category: content-[toParentEdgeType]->category
   // So we check for incoming relationships from content to this category
-  const contentCheck = await args.session.run(
+  const contentCheck = await _.session.run(
     `MATCH (content)-[r:${toParentEdgeType}]->(v:${parentVertexLabel})
      WHERE elementId(v) = $vertexId
      RETURN count(content) as contentCount`,
@@ -187,10 +187,10 @@ if (isDelete) {
                 collect(DISTINCT {type: type(r), from: elementId(v), to: elementId(target), edgeId: elementId(r), targetLabel: labels(target)[0]}) as outgoingEdges,
                 collect(DISTINCT {type: type(r2), from: elementId(source), to: elementId(v), edgeId: elementId(r2), sourceLabel: labels(source)[0]}) as incomingEdges`;
     const fetchParams = enableUserScoping ? { vertexId, userUuid } : { vertexId };
-    const fetchResult = await args.session.run(fetchQuery, fetchParams);
+    const fetchResult = await _.session.run(fetchQuery, fetchParams);
     if (fetchResult.records.length > 0) {
       const vertexNode = fetchResult.records[0].get('v');
-      deletedVertexData = args.convertNodeToJson(vertexNode);
+      deletedVertexData = _.convertNodeToJson(vertexNode);
 
       // Filter out null edges and collect separately
       const outgoingEdgesRaw = fetchResult.records[0].get('outgoingEdges') || [];
@@ -203,7 +203,7 @@ if (isDelete) {
   }
 
   // Execute beforeDelete hooks
-  await args.executeHooks(hooks?.beforeDelete, {
+  await _.executeHooks(hooks?.beforeDelete, {
     vertexId: vertexId,
     name: deletedVertexData?.P?.name || name,
     key: deletedVertexData?.P?.key,
@@ -238,7 +238,7 @@ if (isDelete) {
     `;
     deleteParams = { vertexId, userUuid };
   }
-  const deleteResult = await args.session.run(deleteQuery, deleteParams);
+  const deleteResult = await _.session.run(deleteQuery, deleteParams);
 
   const deletedCount = deleteResult.records[0]?.get('deletedCount') || 0;
   if (deletedCount === 0) {
@@ -257,7 +257,7 @@ if (isDelete) {
   };
 
   // Execute afterDelete hooks
-  await args.executeHooks(hooks?.afterDelete, {
+  await _.executeHooks(hooks?.afterDelete, {
     vertexId: vertexId,
     name: deletedVertexData?.P?.name || name,
     key: deletedVertexData?.P?.key,
@@ -314,7 +314,7 @@ if (!enableUserScoping) {
   };
 }
 
-const duplicateResult = await args.session.run(duplicateCheckQuery, duplicateCheckParams);
+const duplicateResult = await _.session.run(duplicateCheckQuery, duplicateCheckParams);
 
 if (duplicateResult.records.length > 0) {
   return {
@@ -348,17 +348,17 @@ if (isUpdate) {
       ? `MATCH (v:${parentVertexLabel}) WHERE elementId(v) = $vertexId RETURN v`
       : `MATCH (u:User {uuid: $userUuid})-[:${userRelationshipType}]->(v:${parentVertexLabel}) WHERE elementId(v) = $vertexId RETURN v`;
     const fetchParams = enableUserScoping ? { vertexId, userUuid } : { vertexId };
-    const fetchResult = await args.session.run(fetchQuery, fetchParams);
+    const fetchResult = await _.session.run(fetchQuery, fetchParams);
     if (fetchResult.records.length > 0) {
       const vertexNode = fetchResult.records[0].get('v');
-      oldVertexData = args.convertNodeToJson(vertexNode);
+      oldVertexData = _.convertNodeToJson(vertexNode);
     }
   } catch (e) {
     console.warn("Failed to fetch vertex data before update for hooks:", e);
   }
 
   // Execute beforeUpdate hooks
-  await args.executeHooks(hooks?.beforeUpdate, {
+  await _.executeHooks(hooks?.beforeUpdate, {
     vertexId: vertexId,
     name: vertexName,
     key: vertexKey,
@@ -406,7 +406,7 @@ if (isUpdate) {
     };
   }
 
-  const updateResult = await args.session.run(updateQuery, updateParams);
+  const updateResult = await _.session.run(updateQuery, updateParams);
 
   if (updateResult.records.length === 0) {
     return {
@@ -417,7 +417,7 @@ if (isUpdate) {
   }
 
   // Use processResult to populate graph structure
-  const updateVertices = args.processResult(updateResult.records, args.context, 'v');
+  const updateVertices = _.processResult(updateResult.records, _.context, 'v');
   vertexNode = updateResult.records[0].get('v');
   vertexElementId = updateResult.records[0].get('elementId');
 
@@ -425,7 +425,7 @@ if (isUpdate) {
   // Relationship direction: child-[toParentEdgeType]->parent
   if (parentId) {
     // Remove existing parent relationships (child points to parent)
-    await args.session.run(
+    await _.session.run(
       `MATCH (v:${parentVertexLabel})-[r:${toParentEdgeType}]->()
        WHERE elementId(v) = $vertexId
        DELETE r`,
@@ -434,14 +434,14 @@ if (isUpdate) {
 
     // Create new parent relationship (child points to parent)
     if (!enableUserScoping) {
-      await args.session.run(
+      await _.session.run(
         `MATCH (v:${parentVertexLabel}), (p:${parentVertexLabel})
          WHERE elementId(v) = $vertexId AND elementId(p) = $parentId
          CREATE (v)-[:${toParentEdgeType}]->(p)`,
         { vertexId: vertexElementId, parentId }
       );
     } else {
-      await args.session.run(
+      await _.session.run(
         `MATCH (v:${parentVertexLabel}), (p:${parentVertexLabel})
          WHERE elementId(v) = $vertexId AND elementId(p) = $parentId
          MATCH (u:User {uuid: $userUuid})-[:${userRelationshipType}]->(p)
@@ -452,7 +452,7 @@ if (isUpdate) {
   }
 } else {
   // Execute beforeCreate hooks (only for create, not update)
-  await args.executeHooks(hooks?.beforeCreate, {
+  await _.executeHooks(hooks?.beforeCreate, {
     vertexId: null,
     name: vertexName,
     key: vertexKey,
@@ -494,10 +494,10 @@ if (isUpdate) {
     };
   }
 
-  const createResult = await args.session.run(createQuery, createParams);
+  const createResult = await _.session.run(createQuery, createParams);
 
   // Use processResult to populate graph structure
-  const createVertices = args.processResult(createResult.records, args.context, 'v');
+  const createVertices = _.processResult(createResult.records, _.context, 'v');
   vertexNode = createResult.records[0].get('v');
   vertexElementId = createResult.records[0].get('elementId');
 
@@ -505,14 +505,14 @@ if (isUpdate) {
   // Relationship direction: child-[toParentEdgeType]->parent
   if (parentId) {
     if (!enableUserScoping) {
-      await args.session.run(
+      await _.session.run(
         `MATCH (v:${parentVertexLabel}), (p:${parentVertexLabel})
          WHERE elementId(v) = $vertexId AND elementId(p) = $parentId
          CREATE (v)-[:${toParentEdgeType}]->(p)`,
         { vertexId: vertexElementId, parentId }
       );
     } else {
-      await args.session.run(
+      await _.session.run(
         `MATCH (v:${parentVertexLabel}), (p:${parentVertexLabel})
          WHERE elementId(v) = $vertexId AND elementId(p) = $parentId
          MATCH (u:User {uuid: $userUuid})-[:${userRelationshipType}]->(p)
@@ -525,11 +525,11 @@ if (isUpdate) {
 
 // Get vertex from graph context (already populated by processResult) or convert if needed
 let vertex;
-if (args.context.nodes[vertexElementId]) {
-  vertex = args.context.nodes[vertexElementId];
+if (_.context.nodes[vertexElementId]) {
+  vertex = _.context.nodes[vertexElementId];
 } else {
-  vertex = args.convertNodeToJson(vertexNode);
-  args.context.nodes[vertex.id] = vertex;
+  vertex = _.convertNodeToJson(vertexNode);
+  _.context.nodes[vertex.id] = vertex;
 }
 
 // Sync optional relation fields (e.g. category image -> File)
@@ -542,7 +542,7 @@ if (relationships && typeof relationships === "object") {
     const targetIds = Array.isArray(relConfig.targetIds)
       ? relConfig.targetIds.map((x) => String(x).trim()).filter(Boolean)
       : [];
-    await args.session.run(
+    await _.session.run(
       `MATCH (v:${parentVertexLabel})
        WHERE elementId(v) = $vid
        OPTIONAL MATCH (v)-[r:${relType}]->()
@@ -550,7 +550,7 @@ if (relationships && typeof relationships === "object") {
       { vid: vertexElementId }
     );
     if (targetIds.length === 0) continue;
-    await args.session.run(
+    await _.session.run(
       `UNWIND $targetIds AS targetId
        MATCH (v:${parentVertexLabel})
        WHERE elementId(v) = $vid
@@ -559,13 +559,13 @@ if (relationships && typeof relationships === "object") {
        MERGE (v)-[:${relType}]->(target)`,
       { vid: vertexElementId, targetIds }
     );
-    const reloadRel = await args.session.run(
+    const reloadRel = await _.session.run(
       `MATCH (v:${parentVertexLabel})-[r:${relType}]->(target:${targetLabel})
        WHERE elementId(v) = $vid
        RETURN v, r, target`,
       { vid: vertexElementId }
     );
-    args.processResult(reloadRel.records, args.context, ["v", "target"], "r");
+    _.processResult(reloadRel.records, _.context, ["v", "target"], "r");
   }
 }
 
@@ -618,13 +618,13 @@ if (tableVertexLabel && relationshipType) {
     }
   }
 
-  const countResult = await args.session.run(countQuery, countParams);
+  const countResult = await _.session.run(countQuery, countParams);
   const contentCount = countResult.records[0]?.get('contentCount') || 0;
 
   // Update vertex with count
   vertex.P.contentCount = contentCount;
-  if (args.context.nodes[vertex.id]) {
-    args.context.nodes[vertex.id].P.contentCount = contentCount;
+  if (_.context.nodes[vertex.id]) {
+    _.context.nodes[vertex.id].P.contentCount = contentCount;
   }
 }
 
@@ -636,7 +636,7 @@ const result = {
 
 // Execute afterCreate hooks (only for create, not update)
 if (!isUpdate) {
-  await args.executeHooks(hooks?.afterCreate, {
+  await _.executeHooks(hooks?.afterCreate, {
     vertexId: vertexElementId,
     name: vertexName,
     key: vertexKey,
@@ -652,7 +652,7 @@ if (!isUpdate) {
 
 // Execute afterUpdate hooks (for updates)
 if (isUpdate) {
-  await args.executeHooks(hooks?.afterUpdate, {
+  await _.executeHooks(hooks?.afterUpdate, {
     vertexId: vertexElementId,
     name: vertexName,
     key: vertexKey,

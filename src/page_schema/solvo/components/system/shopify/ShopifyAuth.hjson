@@ -15,9 +15,9 @@
         displayOrder: 2
         fns:
           '''// Create signals for loading state and auth data
-const [isLoading, setIsLoading] = args.createSignal(false);
-const [authData, setAuthData] = args.createSignal(null);
-const [authError, setAuthError] = args.createSignal(null);
+const [isLoading, setIsLoading] = _.createSignal(false);
+const [authData, setAuthData] = _.createSignal(null);
+const [authError, setAuthError] = _.createSignal(null);
 
 // Function to fetch auth data
 const fetchAuthData = async () => {
@@ -25,10 +25,10 @@ const fetchAuthData = async () => {
     setIsLoading(true);
     setAuthError(null);
 
-    const searchParams = args.untrack(() => ({ ...args.searchParams }));
+    const searchParams = _.untrack(() => ({ ..._.searchParams }));
 
     // Call the named server function "authShopifyAdminRequest"
-    const result = await args.executeNamedServerFunction(
+    const result = await s(
       {
         functionName: "authShopifyAdminRequest",
         contextData: {
@@ -86,13 +86,13 @@ const fetchAuthData = async () => {
 const handleNavigate = (event) => {
   const href = event.target?.getAttribute('href');
   if (href) {
-    args.navigate(href);
+    _.navigate(href);
   }
 };
 
 // Fetch auth data and register event listener on mount
 const onMount = () => {
-  if (args.fns.isInIframe()) {
+  if (f.isInIframe()) {
     fetchAuthData();
   }
   document.addEventListener('shopify:navigate', handleNavigate);
@@ -119,8 +119,8 @@ return {
         key: unique_1
         props:
           '''return {
-  onMount: args.fns.onMount,
-  onCleanup: args.fns.onCleanup
+  onMount: f.onMount,
+  onCleanup: f.onCleanup
 }'''
       }
     }
@@ -134,7 +134,7 @@ return {
         props:
           '''return {
   as: "s-page",
-  "attr:inlineSize": args.contextData?.props?.pageSize || "large"
+  "attr:inlineSize": c?.props?.pageSize || "large"
 }'''
       }
     }
@@ -153,7 +153,7 @@ return {
         componentName: LoadingSpinner
         key: unique_2
         props:
-          '''const isLoading = args.fns.isLoading?.();
+          '''const isLoading = f.isLoading?.();
 
 return {
   size: "medium",
@@ -178,7 +178,7 @@ return {
         props:
           '''return {
   as: "section",
-  hide: args.fns.isInIframe() || ["/overview", "/employees", "/public-support/tickets", "/public-support/conversation"].includes(args.location?.pathname)
+  hide: f.isInIframe() || ["/overview", "/employees", "/public-support/tickets", "/public-support/conversation"].includes(_.location?.pathname)
 }'''
       }
     }
@@ -208,10 +208,10 @@ return {
       P: {
         css:
           '''return `._id {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   text-decoration: none;
   font-weight: 500;
-  ${args.location.pathname === "/" ? `color: ${args.theme.var.color.info};` : ""}
+  ${_.location.pathname === "/" ? `color: ${t.var.color.info};` : ""}
 }
 ._id:hover {
   text-decoration: underline;
@@ -250,10 +250,10 @@ return {
       P: {
         css:
           '''return `._id {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   text-decoration: none;
   font-weight: 500;
-    ${args.location.pathname === "/home" ? `color: ${args.theme.var.color.info};` : ""}
+    ${_.location.pathname === "/home" ? `color: ${t.var.color.info};` : ""}
 }
 ._id:hover {
   text-decoration: underline;
@@ -275,10 +275,10 @@ return {
       P: {
         css:
           '''return `._id {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   text-decoration: none;
   font-weight: 500;
-    ${args.location.pathname === "/docs" ? `color: ${args.theme.var.color.info};` : ""}
+    ${_.location.pathname === "/docs" ? `color: ${t.var.color.info};` : ""}
 }
 ._id:hover {
   text-decoration: underline;
@@ -300,10 +300,10 @@ return {
       P: {
         css:
           '''return `._id {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   text-decoration: none;
   font-weight: 500;
-  ${args.location.pathname === "/faq" ? `color: ${args.theme.var.color.info};` : ""}
+  ${_.location.pathname === "/faq" ? `color: ${t.var.color.info};` : ""}
 }
 ._id:hover {
   text-decoration: underline;
@@ -325,10 +325,10 @@ return {
       P: {
         css:
           '''return `._id {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   text-decoration: none;
   font-weight: 500;
-    ${args.location.pathname === "/tutorial" ? `color: ${args.theme.var.color.info};` : ""}
+    ${_.location.pathname === "/tutorial" ? `color: ${t.var.color.info};` : ""}
 }
 ._id:hover {
   text-decoration: underline;
@@ -350,10 +350,10 @@ return {
       P: {
         css:
           '''return `._id {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   text-decoration: none;
   font-weight: 500;
-    ${args.location.pathname === "/roadmap" ? `color: ${args.theme.var.color.info};` : ""}
+    ${_.location.pathname === "/roadmap" ? `color: ${t.var.color.info};` : ""}
 }
 ._id:hover {
   text-decoration: underline;
@@ -375,10 +375,10 @@ return {
       P: {
         css:
           '''return `._id {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   text-decoration: none;
   font-weight: 500;
-  ${args.location.pathname === "/support" ? `color: ${args.theme.var.color.info};` : ""}
+  ${_.location.pathname === "/support" ? `color: ${t.var.color.info};` : ""}
 }
 ._id:hover {
   text-decoration: underline;
@@ -400,10 +400,10 @@ return {
       P: {
         css:
           '''return `._id {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   text-decoration: none;
   font-weight: 500;
-  ${args.location.pathname === "/billing" ? `color: ${args.theme.var.color.info};` : ""}
+  ${_.location.pathname === "/billing" ? `color: ${t.var.color.info};` : ""}
 }
 ._id:hover {
   text-decoration: underline;
@@ -425,10 +425,10 @@ return {
       P: {
         css:
           '''return `._id {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   text-decoration: none;
   font-weight: 500;
-  ${args.location.pathname === "/blogs" ? `color: ${args.theme.var.color.info};` : ""}
+  ${_.location.pathname === "/blogs" ? `color: ${t.var.color.info};` : ""}
 }
 ._id:hover {
   text-decoration: underline;
@@ -451,10 +451,10 @@ return {
       P: {
         css:
           '''return `._id {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   text-decoration: none;
   font-weight: 500;
-  ${args.location.pathname === "/privacy" ? `color: ${args.theme.var.color.info};` : ""}
+  ${_.location.pathname === "/privacy" ? `color: ${t.var.color.info};` : ""}
 }
 ._id:hover {
   text-decoration: underline;
@@ -476,7 +476,7 @@ return {
       P: {
         css:
           '''return `._id {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   text-decoration: none;
   font-weight: 500;
   display: flex;
@@ -529,7 +529,7 @@ return {
         componentName: Html
         key: unique_4
         props:
-          '''const authError = args.fns.authError?.();
+          '''const authError = f.authError?.();
 
 return {
   as: "s-banner",
@@ -548,7 +548,7 @@ return {
         componentName: Html
         key: unique_5
         props:
-          '''const isLoading = args.fns.isLoading?.();
+          '''const isLoading = f.isLoading?.();
 
 return {
   as: "s-section",
@@ -573,8 +573,8 @@ return {
       P: {
         css:
           '''return `._id {
-  background: ${args.theme.var.color.background_light_200};
-  border-top: 1px solid ${args.theme.var.color.border};
+  background: ${t.var.color.background_light_200};
+  border-top: 1px solid ${t.var.color.border};
   padding: 1.5rem 2rem;
   text-align: center;
 
@@ -588,7 +588,7 @@ return {
         props:
           '''return {
   as: "footer",
-  show: args.fns.isInIframe() === false
+  show: f.isInIframe() === false
 };'''
       }
     }
@@ -598,13 +598,13 @@ return {
       P: {
         css:
           '''return `._id {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   text-decoration: none;
   font-weight: 500;
   transition: color 0.2s ease;
 
   &:hover {
-    color: ${args.theme.var.color.primary_dark_200};
+    color: ${t.var.color.primary_dark_200};
     text-decoration: underline;
   }
 }`;'''

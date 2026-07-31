@@ -23,13 +23,13 @@
           '''return `._id {
   max-width: 800px;
   margin: 0 auto;
-  padding: ${args.theme.var.spacing?.lg || "2rem"};
-  color: ${args.theme.var.color.text};
+  padding: ${t.var.spacing?.lg || "2rem"};
+  color: ${t.var.color.text};
 }
 
 @media (max-width: 768px) {
   ._id {
-    padding: ${args.theme.var.spacing?.md || "1rem"};
+    padding: ${t.var.spacing?.md || "1rem"};
   }
 }`;'''
         displayOrder: 1
@@ -48,7 +48,7 @@
           '''return `._id {
   font-size: 2rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 1rem 0;
 }
 
@@ -74,7 +74,7 @@
           '''return `._id {
   font-size: 0.9375rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin-bottom: 1.5rem;
 }`;'''
         displayOrder: 2
@@ -113,7 +113,7 @@
           '''return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 1
@@ -133,7 +133,7 @@
           '''return `._id {
   font-size: 0.9375rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 2
@@ -154,7 +154,7 @@
           '''return `._id {
   font-size: 0.9375rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0;
 }`;'''
         displayOrder: 3
@@ -193,7 +193,7 @@
           '''return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 1
@@ -213,7 +213,7 @@
           '''return `._id {
   font-size: 0.9375rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0;
 }`;'''
         displayOrder: 2
@@ -276,7 +276,7 @@
           '''return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 1
@@ -296,7 +296,7 @@
           '''return `._id {
   font-size: 0.9375rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0;
 }`;'''
         displayOrder: 2
@@ -343,7 +343,7 @@
           '''return `._id {
   font-size: 0.9375rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0;
 }`;'''
         displayOrder: 4
@@ -389,7 +389,7 @@
           '''return `._id {
   font-size: 0.9375rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0;
 }`;'''
         displayOrder: 6
@@ -439,7 +439,7 @@ select the rows and drag and drop to a category in the sidebar to assign product
           '''return `._id {
   font-size: 0.9375rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0;
 }`;'''
         displayOrder: 8
@@ -485,7 +485,7 @@ select the rows and drag and drop to a category in the sidebar to assign product
           '''return `._id {
   font-size: 0.9375rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0;
 }`;'''
         displayOrder: 10
@@ -533,7 +533,7 @@ select the rows and drag and drop to a category in the sidebar to assign product
           '''return `._id {
   font-size: 0.9375rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0;
 }`;'''
         displayOrder: 12
@@ -571,7 +571,7 @@ select the rows and drag and drop to a category in the sidebar to assign product
           '''return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 1
@@ -591,7 +591,7 @@ select the rows and drag and drop to a category in the sidebar to assign product
           '''return `._id {
   font-size: 0.9375rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0;
 }`;'''
         displayOrder: 2
@@ -640,7 +640,7 @@ select the rows and drag and drop to a category in the sidebar to assign product
           '''return `._id {
   font-size: 0.9375rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0;
 }`;'''
         displayOrder: 4
@@ -664,7 +664,7 @@ select the rows and drag and drop to a category in the sidebar to assign product
           '''return `._id {
   font-size: 0.9375rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0;
 }`;'''
         displayOrder: 5
@@ -710,7 +710,7 @@ select the rows and drag and drop to a category in the sidebar to assign product
           '''return `._id {
   font-size: 0.9375rem;
   line-height: 1.6;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin-top: 1.5rem;
 }`;'''
         displayOrder: 8

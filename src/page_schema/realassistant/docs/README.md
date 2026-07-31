@@ -112,7 +112,7 @@ await initializeRealAssistant({ skipMigration: true });
 - **Database**: Neo4j graph database
 - **Styling**: Custom CSS-in-JS system with theme support
 - **Icons**: Carbon icons (carbon:icon-name format)
-- **State Management**: SolidJS stores via `args.createStore`
+- **State Management**: SolidJS stores via `_.createStore`
 
 ### Page Schema System
 All pages and components are defined using hjson files following the graph-based schema system:
@@ -371,10 +371,10 @@ All pages and components are defined using hjson files following the graph-based
 
 ### Theme Variables Access
 ```javascript
-args.theme.var.color.primary
-args.theme.var.color.primary_light_100
-args.theme.var.color.primary_dark_200
-args.theme.var.color.primary_text
+_.theme.var.color.primary
+_.theme.var.color.primary_light_100
+_.theme.var.color.primary_dark_200
+_.theme.var.color.primary_text
 ```
 
 ## Data Models (Planned)
@@ -501,8 +501,8 @@ args.theme.var.color.primary_text
 4. Maintain consistent styling
 
 ### State Management Best Practices
-1. Use `args.createStore` for component state
-2. Store user data in `args.userSetting` for persistence
+1. Use `_.createStore` for component state
+2. Store user data in `_.userSetting` for persistence
 3. Handle loading and error states
 4. Validate forms before submission
 

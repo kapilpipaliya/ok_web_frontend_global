@@ -25,7 +25,7 @@
       L: Attr
       P: {
         css:
-          '''const getPlayerState = args.contextData.props?.playerState;
+          '''const getPlayerState = c.props?.playerState;
 const state = getPlayerState?.() || "closed";
 const isMinimized = state === "minimized";
 const isMaximized = state === "maximized";
@@ -33,7 +33,7 @@ const isMaximized = state === "maximized";
 return `._id {
   position: fixed;
   z-index: 99;
-  background: ${args.theme.var.color.background_dark_900};
+  background: ${t.var.color.background_dark_900};
   border-radius: ${isMinimized ? '0.5rem' : '0'};
   box-shadow: ${isMinimized ? '0 4px 20px rgba(0, 0, 0, 0.3)' : 'none'};
   overflow: hidden;
@@ -41,8 +41,8 @@ return `._id {
 }
 
 ._id[data-state="minimized"] {
-  bottom: ${args.theme.var.spacing.lg};
-  right: ${args.theme.var.spacing.lg};
+  bottom: ${t.var.spacing.lg};
+  right: ${t.var.spacing.lg};
   width: 480px;
   height: 270px;
   min-width: 480px;
@@ -70,7 +70,7 @@ return `._id {
         displayOrder: 1
         fns:
           '''// State to track if resize is active
-const [isResizing, setIsResizing] = args.createSignal(false);
+const [isResizing, setIsResizing] = _.createSignal(false);
 
 // Get responsive values based on screen size
 const getResponsiveValues = () => {
@@ -87,13 +87,13 @@ const getResponsiveValues = () => {
 
 // Function to constrain player position within viewport bounds
 const constrainPlayerPosition = () => {
-  const getPlayerState = args.contextData.props?.playerState;
+  const getPlayerState = c.props?.playerState;
   const state = getPlayerState?.();
   if (state !== "minimized") return;
 
-  const playerPosition = args.contextData.props?.playerPosition || { x: null, y: null };
-  const playerSize = args.contextData.props?.playerSize || { width: 480, height: 270 };
-  const setPlayerPosition = args.contextData.props?.setPlayerPosition;
+  const playerPosition = c.props?.playerPosition || { x: null, y: null };
+  const playerSize = c.props?.playerSize || { width: 480, height: 270 };
+  const setPlayerPosition = c.props?.setPlayerPosition;
 
   if (playerPosition.x === null || playerPosition.y === null) return;
 
@@ -143,7 +143,7 @@ const createResizeHandler = (direction) => {
   const adjustY = direction.includes('n');
 
   return (e) => {
-    const getPlayerState = args.contextData.props?.playerState;
+    const getPlayerState = c.props?.playerState;
     const state = getPlayerState?.();
     if (state !== "minimized") return;
 
@@ -161,9 +161,9 @@ const createResizeHandler = (direction) => {
     const startHeight = rect.height;
     const startLeft = rect.left;
     const startTop = rect.top;
-    const setPlayerSize = args.contextData.props?.setPlayerSize;
-    const setPlayerPosition = args.contextData.props?.setPlayerPosition;
-    const playerPosition = args.contextData.props?.playerPosition || { x: null, y: null };
+    const setPlayerSize = c.props?.setPlayerSize;
+    const setPlayerPosition = c.props?.setPlayerPosition;
+    const playerPosition = c.props?.playerPosition || { x: null, y: null };
 
     const handleMouseMove = (moveEvent) => {
       const deltaX = moveEvent.clientX - startX;
@@ -223,7 +223,7 @@ const createTouchResizeHandler = (direction) => {
   const adjustY = direction.includes('n');
 
   return (e) => {
-    const getPlayerState = args.contextData.props?.playerState;
+    const getPlayerState = c.props?.playerState;
     const state = getPlayerState?.();
     if (state !== "minimized") return;
 
@@ -242,9 +242,9 @@ const createTouchResizeHandler = (direction) => {
     const startHeight = rect.height;
     const startLeft = rect.left;
     const startTop = rect.top;
-    const setPlayerSize = args.contextData.props?.setPlayerSize;
-    const setPlayerPosition = args.contextData.props?.setPlayerPosition;
-    const playerPosition = args.contextData.props?.playerPosition || { x: null, y: null };
+    const setPlayerSize = c.props?.setPlayerSize;
+    const setPlayerPosition = c.props?.setPlayerPosition;
+    const playerPosition = c.props?.playerPosition || { x: null, y: null };
 
     const handleTouchMove = (moveEvent) => {
       const touch = moveEvent.touches[0];
@@ -305,13 +305,13 @@ return {
 };'''
         componentName: Html
         props:
-          '''const getPlayerState = args.contextData.props?.playerState;
+          '''const getPlayerState = c.props?.playerState;
 const currentState = getPlayerState?.() || "closed";
-const playerPosition = args.contextData.props?.playerPosition || { x: null, y: null };
-const playerSize = args.contextData.props?.playerSize || { width: 480, height: 270 };
+const playerPosition = c.props?.playerPosition || { x: null, y: null };
+const playerSize = c.props?.playerSize || { width: 480, height: 270 };
 
 // Get responsive values from fns
-const { isMobile, defaultX, defaultY } = args.fns.getResponsiveValues();
+const { isMobile, defaultX, defaultY } = f.getResponsiveValues();
 const x = playerPosition.x !== null ? playerPosition.x : defaultX;
 const y = playerPosition.y !== null ? playerPosition.y : defaultY;
 
@@ -344,7 +344,7 @@ return {
   onMount: () => {
     // Handle viewport resize/rotation to keep player visible
     const handleResize = () => {
-      args.fns.constrainPlayerPosition();
+      f.constrainPlayerPosition();
     };
 
     window.addEventListener('resize', handleResize);
@@ -355,7 +355,7 @@ return {
   },
   onCleanup: () => {
     const handleResize = () => {
-      args.fns.constrainPlayerPosition();
+      f.constrainPlayerPosition();
     };
     window.removeEventListener('resize', handleResize);
     window.removeEventListener('orientationchange', handleResize);
@@ -368,16 +368,16 @@ return {
       L: Attr
       P: {
         css:
-          '''const getPlayerState = args.contextData.props?.playerState;
+          '''const getPlayerState = c.props?.playerState;
 const state = getPlayerState?.() || "closed";
 
 return `._id {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  background: ${args.theme.var.color.background_dark_800};
-  border-bottom: 1px solid ${args.theme.var.color.background_dark_700};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  background: ${t.var.color.background_dark_800};
+  border-bottom: 1px solid ${t.var.color.background_dark_700};
   cursor: ${state === "minimized" ? 'move' : 'default'};
   user-select: none;
   touch-action: ${state === "minimized" ? 'none' : 'auto'};
@@ -389,7 +389,7 @@ return `._id {
 let hasDragged = false;
 
 const handleMouseDown = (e) => {
-  const getPlayerState = args.contextData.props?.playerState;
+  const getPlayerState = c.props?.playerState;
   const state = getPlayerState?.();
   const isMinimized = state === "minimized";
 
@@ -418,7 +418,7 @@ const handleMouseDown = (e) => {
       const maxX = window.innerWidth - rect.width;
       const maxY = window.innerHeight - rect.height;
 
-      const setPlayerPosition = args.contextData.props?.setPlayerPosition;
+      const setPlayerPosition = c.props?.setPlayerPosition;
       setPlayerPosition?.({
         x: Math.max(0, Math.min(newX, maxX)),
         y: Math.max(0, Math.min(newY, maxY))
@@ -434,7 +434,7 @@ const handleMouseDown = (e) => {
     const timeSinceLastClick = now - lastClickTime;
 
     if (timeSinceLastClick < 300 && !hasDragged) {
-      const togglePlayerState = args.contextData.props?.togglePlayerState;
+      const togglePlayerState = c.props?.togglePlayerState;
       togglePlayerState?.();
       lastClickTime = 0;
     } else {
@@ -447,7 +447,7 @@ const handleMouseDown = (e) => {
 };
 
 const handleTouchStart = (e) => {
-  const getPlayerState = args.contextData.props?.playerState;
+  const getPlayerState = c.props?.playerState;
   const state = getPlayerState?.();
   if (state !== "minimized") return;
 
@@ -473,7 +473,7 @@ const handleTouchStart = (e) => {
     const boundedX = Math.max(0, Math.min(newX, maxX));
     const boundedY = Math.max(0, Math.min(newY, maxY));
 
-    const setPlayerPosition = args.contextData.props?.setPlayerPosition;
+    const setPlayerPosition = c.props?.setPlayerPosition;
     setPlayerPosition?.({ x: boundedX, y: boundedY });
   };
 
@@ -541,7 +541,7 @@ return {
           '''return `._id {
   font-size: 0.875rem;
   font-weight: 500;
-  color: ${args.theme.var.color.background_dark_900_text};
+  color: ${t.var.color.background_dark_900_text};
   margin: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -552,7 +552,7 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const getCurrentVideo = args.contextData.props?.currentVideo;
+          '''const getCurrentVideo = c.props?.currentVideo;
 const video = getCurrentVideo?.();
 const title = video?.P?.title || "YouTube Video";
 
@@ -570,7 +570,7 @@ return {
           '''return `._id {
   display: flex;
   align-items: center;
-  gap: ${args.theme.var.spacing.xs};
+  gap: ${t.var.spacing.xs};
 }`;'''
         displayOrder: 2
         componentName: Html
@@ -588,17 +588,17 @@ return {
           '''return `._id {
   background: none;
   border: none;
-  color: ${args.theme.var.color.background_dark_900_text};
+  color: ${t.var.color.background_dark_900_text};
   cursor: pointer;
-  padding: ${args.theme.var.spacing.xs};
+  padding: ${t.var.spacing.xs};
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: ${args.theme.var.borderRadius.sm};
+  border-radius: ${t.var.borderRadius.sm};
   transition: background 0.2s ease;
 
   &:hover:not(:disabled) {
-    background: ${args.theme.var.color.background_dark_700};
+    background: ${t.var.color.background_dark_700};
   }
 
   &:disabled {
@@ -609,9 +609,9 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const getVideoQueue = args.contextData.props?.videoQueue;
+          '''const getVideoQueue = c.props?.videoQueue;
 const queue = getVideoQueue?.() || [];
-const playNext = args.contextData.props?.playNext;
+const playNext = c.props?.playNext;
 const hasNext = queue.length > 0;
 
 return {
@@ -647,26 +647,26 @@ return {
           '''return `._id {
   background: none;
   border: none;
-  color: ${args.theme.var.color.background_dark_900_text};
+  color: ${t.var.color.background_dark_900_text};
   cursor: pointer;
-  padding: ${args.theme.var.spacing.xs};
+  padding: ${t.var.spacing.xs};
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: ${args.theme.var.borderRadius.sm};
+  border-radius: ${t.var.borderRadius.sm};
   transition: background 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.background_dark_700};
+    background: ${t.var.color.background_dark_700};
   }
 }`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''const getVideoQueue = args.contextData.props?.videoQueue;
+          '''const getVideoQueue = c.props?.videoQueue;
 const queue = getVideoQueue?.() || [];
 const hasQueue = queue.length > 0;
-const openQueueModal = args.contextData.props?.openQueueModal;
+const openQueueModal = c.props?.openQueueModal;
 
 return {
   as: "button",
@@ -702,12 +702,12 @@ return {
   border: none;
   color: white;
   cursor: pointer;
-  padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.sm};
+  padding: ${t.var.spacing.xs} ${t.var.spacing.sm};
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.25rem;
-  border-radius: ${args.theme.var.borderRadius.sm};
+  border-radius: ${t.var.borderRadius.sm};
   transition: background 0.2s ease;
   text-decoration: none;
   font-size: 0.75rem;
@@ -720,7 +720,7 @@ return {
         displayOrder: 3
         componentName: Html
         props:
-          '''const getCurrentVideo = args.contextData.props?.currentVideo;
+          '''const getCurrentVideo = c.props?.currentVideo;
 const video = getCurrentVideo?.();
 const youtubeId = video?.P?.youtubeId || "";
 const youtubeUrl = `https://www.youtube.com/watch?v=${youtubeId}`;
@@ -735,7 +735,7 @@ return {
   onClick: (e) => {
     e.preventDefault();
     e.stopPropagation();
-    args.fns.openYouTubeInParentTab(youtubeUrl);
+    f.openYouTubeInParentTab(youtubeUrl);
   }
 };'''
       }
@@ -782,26 +782,26 @@ return {
           '''return `._id {
   background: none;
   border: none;
-  color: ${args.theme.var.color.background_dark_900_text};
+  color: ${t.var.color.background_dark_900_text};
   cursor: pointer;
-  padding: ${args.theme.var.spacing.xs};
+  padding: ${t.var.spacing.xs};
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: ${args.theme.var.borderRadius.sm};
+  border-radius: ${t.var.borderRadius.sm};
   transition: background 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.background_dark_700};
+    background: ${t.var.color.background_dark_700};
   }
 }`;'''
         displayOrder: 4
         componentName: Html
         props:
-          '''const getPlayerState = args.contextData.props?.playerState;
+          '''const getPlayerState = c.props?.playerState;
 const state = getPlayerState?.() || "closed";
 const isMinimized = state === "minimized";
-const togglePlayerState = args.contextData.props?.togglePlayerState;
+const togglePlayerState = c.props?.togglePlayerState;
 
 return {
   as: "button",
@@ -818,7 +818,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const getPlayerState = args.contextData.props?.playerState;
+          '''const getPlayerState = c.props?.playerState;
 const state = getPlayerState?.() || "closed";
 const isMinimized = state === "minimized";
 
@@ -838,23 +838,23 @@ return {
           '''return `._id {
   background: none;
   border: none;
-  color: ${args.theme.var.color.background_dark_900_text};
+  color: ${t.var.color.background_dark_900_text};
   cursor: pointer;
-  padding: ${args.theme.var.spacing.xs};
+  padding: ${t.var.spacing.xs};
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: ${args.theme.var.borderRadius.sm};
+  border-radius: ${t.var.borderRadius.sm};
   transition: background 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.error_dark_600};
+    background: ${t.var.color.error_dark_600};
   }
 }`;'''
         displayOrder: 5
         componentName: Html
         props:
-          '''const closePlayer = args.contextData.props?.closePlayer;
+          '''const closePlayer = c.props?.closePlayer;
 
 return {
   as: "button",
@@ -887,13 +887,13 @@ return {
           '''return `._id {
   width: 100%;
   height: calc(100% - 48px);
-  background: ${args.theme.var.color.background_dark_900};
+  background: ${t.var.color.background_dark_900};
   position: relative;
 }`;'''
         displayOrder: 2
         fns:
           '''// Create reactive store for player state
-const [playerState, setPlayerState] = args.createStore({
+const [playerState, setPlayerState] = _.createStore({
   player: null,
   isPlayerReady: false,
   apiLoaded: false,
@@ -926,13 +926,13 @@ const initYouTubeAPI = () => {
 };
 
 // Watch player state and load API only when player is opened
-args.createEffect(() => {
-  const getPlayerState = args.contextData.props?.playerState;
+_.createEffect(() => {
+  const getPlayerState = c.props?.playerState;
   const currentState = getPlayerState?.();
 
   // Only load API when player is actually opened (not closed)
   if (currentState !== "closed" && !playerState.apiLoaded && !playerState.isLoading) {
-    args.runWithOwner(() => {
+    _.runWithOwner(() => {
       initYouTubeAPI();
     });
   }
@@ -967,13 +967,13 @@ return {
         displayOrder: 1
         fns:
           '''// Watch for video changes and update player without changing iframe src
-args.createEffect(() => {
-  const getCurrentVideo = args.untrack(() => args.contextData.props?.currentVideo);
+_.createEffect(() => {
+  const getCurrentVideo = _.untrack(() => c.props?.currentVideo);
   const video = getCurrentVideo?.();
   const currentId = video?.P?.youtubeId || "";
-  args.untrack(() => {
-    const player = args.fns.playerState.player;
-    const isReady = args.fns.playerState.isPlayerReady;
+  _.untrack(() => {
+    const player = f.playerState.player;
+    const isReady = f.playerState.isPlayerReady;
 
     if (player && isReady && currentId) {
       try {
@@ -989,7 +989,7 @@ args.createEffect(() => {
 return {};'''
         componentName: Html
         props:
-          '''const getCurrentVideo = args.contextData.props?.currentVideo;
+          '''const getCurrentVideo = c.props?.currentVideo;
 const video = getCurrentVideo?.();
 const youtubeId = video?.P?.youtubeId || "";
 
@@ -998,14 +998,14 @@ return {
   id: "youtube-player",
   // only onMount works, ref function not works.
   onMount: () => {
-    if (args.fns.playerState.player) return;
+    if (f.playerState.player) return;
 
     // Set loading state when starting player initialization
-    args.fns.setPlayerReady(false);
+    f.setPlayerReady(false);
 
     // Wait for YT API to be ready
     const initPlayer = () => {
-      if (!args.fns.playerState.apiLoaded || !window.YT || !window.YT.Player) {
+      if (!f.playerState.apiLoaded || !window.YT || !window.YT.Player) {
         setTimeout(initPlayer, 100);
         return;
       }
@@ -1035,14 +1035,14 @@ return {
           },
           events: {
             onReady: (event) => {
-              args.fns.setPlayerReady(true);
-              args.fns.setPlayer(ytPlayer);
+              f.setPlayerReady(true);
+              f.setPlayer(ytPlayer);
             },
             onStateChange: (event) => {
               // YouTube player states: 0=ended
               if (event.data === 0) {
-                const getPlayerState = args.contextData.props?.playerState;
-                const playNext = args.contextData.props?.playNext;
+                const getPlayerState = c.props?.playerState;
+                const playNext = c.props?.playNext;
                 const currentState = getPlayerState?.();
                 if (currentState === "minimized" || currentState === "maximized") {
                   playNext?.();
@@ -1054,22 +1054,22 @@ return {
               // when I get error: Video unavailable
               // This video contains content from..., who has blocked it on copyright grounds
               // setPlayerReady(false) keeps it showing loading spinner:
-              // args.fns.setPlayerReady(false);
+              // f.setPlayerReady(false);
             }
           }
         });
       } catch (error) {
         console.error('Failed to initialize YouTube player:', error);
-        args.fns.setPlayerReady(false);
+        f.setPlayerReady(false);
       }
     };
 
     initPlayer();
   },
   onCleanup: () => {
-    args.fns.playerState.player.destroy();
-    args.fns.setPlayerReady(false);
-    args.fns.playerState.setPlayer(null);
+    f.playerState.player.destroy();
+    f.setPlayerReady(false);
+    f.playerState.setPlayer(null);
   }
 };'''
       }
@@ -1088,14 +1088,14 @@ return {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: ${args.theme.var.color.background_dark_900};
+  background: ${t.var.color.background_dark_900};
   z-index: 10;
 }`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''const isLoading = args.fns.playerState.isLoading;
-const isPlayerReady = args.fns.playerState.isPlayerReady;
+          '''const isLoading = f.playerState.isLoading;
+const isPlayerReady = f.playerState.isPlayerReady;
 
 return {
   as: "div",
@@ -1116,8 +1116,8 @@ return {
   `._id {
     width: 40px;
     height: 40px;
-    border: 4px solid ${args.theme.var.color.background_dark_700};
-    border-top: 4px solid ${args.theme.var.color.primary};
+    border: 4px solid ${t.var.color.background_dark_700};
+    border-top: 4px solid ${t.var.color.primary};
     border-radius: 50%;
     animation: spin 1s linear infinite;
   }`
@@ -1152,8 +1152,8 @@ return {
     right: 2px;
     width: 10px;
     height: 10px;
-    border-right: 2px solid ${args.theme.var.color.background_dark_700};
-    border-bottom: 2px solid ${args.theme.var.color.background_dark_700};
+    border-right: 2px solid ${t.var.color.background_dark_700};
+    border-bottom: 2px solid ${t.var.color.background_dark_700};
   }
 
   @media (max-width: 1024px) {
@@ -1164,12 +1164,12 @@ return {
         displayOrder: 3
         componentName: Html
         props:
-          '''const getPlayerState = args.contextData.props?.playerState;
+          '''const getPlayerState = c.props?.playerState;
 
 return {
   as: "div",
-  onMouseDown: args.fns.createResizeHandler('se'),
-  onTouchStart: args.fns.createTouchResizeHandler('se'),
+  onMouseDown: f.createResizeHandler('se'),
+  onTouchStart: f.createTouchResizeHandler('se'),
   hide: () => {
     const state = getPlayerState?.();
     return state !== "minimized";
@@ -1199,12 +1199,12 @@ return {
         displayOrder: 4
         componentName: Html
         props:
-          '''const getPlayerState = args.contextData.props?.playerState;
+          '''const getPlayerState = c.props?.playerState;
 
 return {
   as: "div",
-  onMouseDown: args.fns.createResizeHandler('e'),
-  onTouchStart: args.fns.createTouchResizeHandler('e'),
+  onMouseDown: f.createResizeHandler('e'),
+  onTouchStart: f.createTouchResizeHandler('e'),
   hide: () => {
     const state = getPlayerState?.();
     return state !== "minimized";
@@ -1234,12 +1234,12 @@ return {
         displayOrder: 5
         componentName: Html
         props:
-          '''const getPlayerState = args.contextData.props?.playerState;
+          '''const getPlayerState = c.props?.playerState;
 
 return {
   as: "div",
-  onMouseDown: args.fns.createResizeHandler('s'),
-  onTouchStart: args.fns.createTouchResizeHandler('s'),
+  onMouseDown: f.createResizeHandler('s'),
+  onTouchStart: f.createTouchResizeHandler('s'),
   hide: () => {
     const state = getPlayerState?.();
     return state !== "minimized";
@@ -1269,12 +1269,12 @@ return {
         displayOrder: 6
         componentName: Html
         props:
-          '''const getPlayerState = args.contextData.props?.playerState;
+          '''const getPlayerState = c.props?.playerState;
 
 return {
   as: "div",
-  onMouseDown: args.fns.createResizeHandler('w'),
-  onTouchStart: args.fns.createTouchResizeHandler('w'),
+  onMouseDown: f.createResizeHandler('w'),
+  onTouchStart: f.createTouchResizeHandler('w'),
   hide: () => {
     const state = getPlayerState?.();
     return state !== "minimized";
@@ -1304,12 +1304,12 @@ return {
         displayOrder: 7
         componentName: Html
         props:
-          '''const getPlayerState = args.contextData.props?.playerState;
+          '''const getPlayerState = c.props?.playerState;
 
 return {
   as: "div",
-  onMouseDown: args.fns.createResizeHandler('n'),
-  onTouchStart: args.fns.createTouchResizeHandler('n'),
+  onMouseDown: f.createResizeHandler('n'),
+  onTouchStart: f.createTouchResizeHandler('n'),
   hide: () => {
     const state = getPlayerState?.();
     return state !== "minimized";
@@ -1339,8 +1339,8 @@ return {
     right: 2px;
     width: 10px;
     height: 10px;
-    border-right: 2px solid ${args.theme.var.color.background_dark_700};
-    border-top: 2px solid ${args.theme.var.color.background_dark_700};
+    border-right: 2px solid ${t.var.color.background_dark_700};
+    border-top: 2px solid ${t.var.color.background_dark_700};
   }
 
   @media (max-width: 1024px) {
@@ -1351,12 +1351,12 @@ return {
         displayOrder: 8
         componentName: Html
         props:
-          '''const getPlayerState = args.contextData.props?.playerState;
+          '''const getPlayerState = c.props?.playerState;
 
 return {
   as: "div",
-  onMouseDown: args.fns.createResizeHandler('ne'),
-  onTouchStart: args.fns.createTouchResizeHandler('ne'),
+  onMouseDown: f.createResizeHandler('ne'),
+  onTouchStart: f.createTouchResizeHandler('ne'),
   hide: () => {
     const state = getPlayerState?.();
     return state !== "minimized";
@@ -1386,8 +1386,8 @@ return {
     left: 2px;
     width: 10px;
     height: 10px;
-    border-left: 2px solid ${args.theme.var.color.background_dark_700};
-    border-top: 2px solid ${args.theme.var.color.background_dark_700};
+    border-left: 2px solid ${t.var.color.background_dark_700};
+    border-top: 2px solid ${t.var.color.background_dark_700};
   }
 
   @media (max-width: 1024px) {
@@ -1398,12 +1398,12 @@ return {
         displayOrder: 9
         componentName: Html
         props:
-          '''const getPlayerState = args.contextData.props?.playerState;
+          '''const getPlayerState = c.props?.playerState;
 
 return {
   as: "div",
-  onMouseDown: args.fns.createResizeHandler('nw'),
-  onTouchStart: args.fns.createTouchResizeHandler('nw'),
+  onMouseDown: f.createResizeHandler('nw'),
+  onTouchStart: f.createTouchResizeHandler('nw'),
   hide: () => {
     const state = getPlayerState?.();
     return state !== "minimized";
@@ -1433,8 +1433,8 @@ return {
     left: 2px;
     width: 10px;
     height: 10px;
-    border-left: 2px solid ${args.theme.var.color.background_dark_700};
-    border-bottom: 2px solid ${args.theme.var.color.background_dark_700};
+    border-left: 2px solid ${t.var.color.background_dark_700};
+    border-bottom: 2px solid ${t.var.color.background_dark_700};
   }
 
   @media (max-width: 1024px) {
@@ -1445,12 +1445,12 @@ return {
         displayOrder: 10
         componentName: Html
         props:
-          '''const getPlayerState = args.contextData.props?.playerState;
+          '''const getPlayerState = c.props?.playerState;
 
 return {
   as: "div",
-  onMouseDown: args.fns.createResizeHandler('sw'),
-  onTouchStart: args.fns.createTouchResizeHandler('sw'),
+  onMouseDown: f.createResizeHandler('sw'),
+  onTouchStart: f.createTouchResizeHandler('sw'),
   hide: () => {
     const state = getPlayerState?.();
     return state !== "minimized";
@@ -1476,7 +1476,7 @@ return {
         displayOrder: 11
         componentName: Html
         props:
-          '''const isResizing = () => args.graph.vertexes[args.fns.tableStateVertexId]?.P?.isResizing === true;
+          '''const isResizing = () => g.vertexes[f.tableStateVertexId]?.P?.isResizing === true;
 
 return {
   as: "div",

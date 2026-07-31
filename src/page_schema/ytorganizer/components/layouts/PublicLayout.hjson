@@ -18,39 +18,39 @@ return `._id {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
 }`;
 '''
         displayOrder: 1
         fns:
           '''
 // Global state for cookie consent
-const [hasCookieConsent, setHasCookieConsent] = args.createSignal(false);
+const [hasCookieConsent, setHasCookieConsent] = _.createSignal(false);
 
 // Global state for video player
-const [playerState, setPlayerState] = args.createSignal("closed"); // "closed", "minimized", "maximized"
-const [currentVideo, setCurrentVideo] = args.createSignal(null);
-const [videoQueue, setVideoQueue] = args.createSignal([]);
-const [playerPosition, setPlayerPosition] = args.createStore({ x: null, y: null });
-const [playerSize, setPlayerSize] = args.createStore({ width: 480, height: 270 });
+const [playerState, setPlayerState] = _.createSignal("closed"); // "closed", "minimized", "maximized"
+const [currentVideo, setCurrentVideo] = _.createSignal(null);
+const [videoQueue, setVideoQueue] = _.createSignal([]);
+const [playerPosition, setPlayerPosition] = _.createStore({ x: null, y: null });
+const [playerSize, setPlayerSize] = _.createStore({ width: 480, height: 270 });
 
 // Keep Awake wrapper functions
 const keepAwake = async () => {
-  await args.KeepAwake.keepAwake();
+  await _.KeepAwake.keepAwake();
 };
 
 const allowSleep = async () => {
-  await args.KeepAwake.allowSleep();
+  await _.KeepAwake.allowSleep();
 };
 
 const isSupported = async () => {
-  const result = await args.KeepAwake.isSupported();
+  const result = await _.KeepAwake.isSupported();
   return result.isSupported;
 };
 
 const isKeptAwake = async () => {
-  const result = await args.KeepAwake.isKeptAwake();
+  const result = await _.KeepAwake.isKeptAwake();
   return result.isKeptAwake;
 };
 
@@ -115,7 +115,7 @@ const playNext = () => {
 };
 
 // Feedback modal state management
-const [isFeedbackModalOpen, setIsFeedbackModalOpen] = args.createSignal(false);
+const [isFeedbackModalOpen, setIsFeedbackModalOpen] = _.createSignal(false);
 
 const openFeedbackModal = () => {
   setIsFeedbackModalOpen(true);
@@ -127,21 +127,21 @@ const closeFeedbackModal = () => {
 
 const submitFeedback = async (data) => {
   try {
-    const result = await args.executeNamedServerFunction({
+    const result = await s({
       functionName: "saveFeedback",
       contextData: data
     });
 
     if (result?.result?.success) {
-      args.showSuccessToast(result.result.message || "Feedback submitted successfully");
+      _.showSuccessToast(result.result.message || "Feedback submitted successfully");
       return result.result;
     } else {
-      args.showErrorToast(result?.result?.message || "Failed to submit feedback");
+      _.showErrorToast(result?.result?.message || "Failed to submit feedback");
       return result?.result;
     }
   } catch (error) {
     console.error("Error submitting feedback:", error);
-    args.showErrorToast("An error occurred while submitting feedback");
+    _.showErrorToast("An error occurred while submitting feedback");
     return { success: false };
   }
 };
@@ -183,7 +183,7 @@ return {
     onMount: () => {
       // Check localStorage for cookie consent
       const hasAccepted = localStorage.getItem('cookie_consent_accepted') === 'true';
-      args.fns.setHasCookieConsent(hasAccepted);
+      f.setHasCookieConsent(hasAccepted);
 
       // Load Google Analytics gtag.js
       if (!window.dataLayer) {
@@ -219,8 +219,8 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.background_dark_100};
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  background: ${t.var.color.background_dark_100};
+  border-bottom: 1px solid ${t.var.color.border};
   padding: 1rem 2rem;
   position: sticky;
   top: 0;
@@ -287,7 +287,7 @@ return `._id {
           '''
 return {
   as: "div",
-  onClick: () => args.navigate('/')
+  onClick: () => _.navigate('/')
 };
 '''
       }
@@ -351,10 +351,10 @@ const navLinks = [
     onClick: (e) => {
       e.preventDefault();
       // Only scroll if on landing page
-      if (args.location.pathname === '/') {
+      if (_.location.pathname === '/') {
         document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
       } else {
-        args.navigate('/#pricing');
+        _.navigate('/#pricing');
       }
     }
   },
@@ -363,7 +363,7 @@ const navLinks = [
     text: "Contact",
     onClick: (e) => {
       e.preventDefault();
-      args.navigate('/contact');
+      _.navigate('/contact');
     }
   },
   {
@@ -371,7 +371,7 @@ const navLinks = [
     text: "Privacy",
     onClick: (e) => {
       e.preventDefault();
-      args.navigate('/privacy');
+      _.navigate('/privacy');
     }
   },
   {
@@ -379,7 +379,7 @@ const navLinks = [
     text: "Terms",
     onClick: (e) => {
       e.preventDefault();
-      args.navigate('/terms');
+      _.navigate('/terms');
     }
   },
   {
@@ -387,7 +387,7 @@ const navLinks = [
     text: "Sign In",
     onClick: (e) => {
       e.preventDefault();
-      args.navigate('/auth/signin');
+      _.navigate('/auth/signin');
     }
   }
 ];
@@ -423,7 +423,7 @@ return `._id {
           '''
 return {
   as: "div",
-  data: args.fns.navLinks
+  data: f.navLinks
 };
 '''
       }
@@ -435,7 +435,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   text-decoration: none;
   font-weight: 500;
   transition: color 0.2s ease;
@@ -443,7 +443,7 @@ return `._id {
 }
 
 ._id:hover {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
 }
 
 @media (max-width: 768px) {
@@ -456,7 +456,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const link = args.contextData.navLink;
+const link = c.navLink;
 return {
   as: "a",
   text: link.text,
@@ -473,8 +473,8 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
   border: none;
   padding: 0.625rem 1.25rem;
   border-radius: 0.5rem;
@@ -484,7 +484,7 @@ return `._id {
 }
 
 ._id:hover {
-  background: ${args.theme.var.color.primary_dark_200};
+  background: ${t.var.color.primary_dark_200};
   transform: translateY(-2px);
 }
 
@@ -508,7 +508,7 @@ return `._id {
 return {
   as: "button",
   text: "Get Started",
-  onClick: () => args.navigate('/auth/signup')
+  onClick: () => _.navigate('/auth/signup')
 };
 '''
       }
@@ -553,11 +553,11 @@ return {
       P: {
         css:
           '''
-const hasCookieConsent = args.fns.hasCookieConsent?.();
+const hasCookieConsent = f.hasCookieConsent?.();
 
 return `._id {
-  background: ${args.theme.var.color.background_dark_100};
-  border-top: 1px solid ${args.theme.var.color.border};
+  background: ${t.var.color.background_dark_100};
+  border-top: 1px solid ${t.var.color.border};
   padding: 3rem 2rem;
   ${!hasCookieConsent ? 'padding-bottom: calc(3rem + 80px);' : ''}
   transition: padding-bottom 0.3s ease;
@@ -666,7 +666,7 @@ return {
           '''
 return `._id {
   margin: 0;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
         displayOrder: 2
@@ -715,14 +715,14 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   text-decoration: none;
   transition: color 0.2s ease;
   cursor: pointer;
 }
 
 ._id:hover {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
 }`;
 '''
         displayOrder: 1
@@ -734,7 +734,7 @@ return {
   text: "Privacy Policy",
   onClick: (e) => {
     e.preventDefault();
-    args.navigate('/privacy');
+    _.navigate('/privacy');
   }
 };
 '''
@@ -747,14 +747,14 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   text-decoration: none;
   transition: color 0.2s ease;
   cursor: pointer;
 }
 
 ._id:hover {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
 }`;
 '''
         displayOrder: 2
@@ -766,7 +766,7 @@ return {
   text: "Terms of Service",
   onClick: (e) => {
     e.preventDefault();
-    args.navigate('/terms');
+    _.navigate('/terms');
   }
 };
 '''
@@ -779,14 +779,14 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   text-decoration: none;
   transition: color 0.2s ease;
   cursor: pointer;
 }
 
 ._id:hover {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
 }`;
 '''
         displayOrder: 3
@@ -798,7 +798,7 @@ return {
   text: "Contact",
   onClick: (e) => {
     e.preventDefault();
-    args.navigate('/contact');
+    _.navigate('/contact');
   }
 };
 '''
@@ -811,7 +811,7 @@ return {
         css:
           '''
 return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   background: transparent;
   border: none;
   padding: 0;
@@ -823,7 +823,7 @@ return `._id {
 }
 
 ._id:hover {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
 }`;
 '''
         displayOrder: 4
@@ -834,7 +834,7 @@ return {
   as: "button",
   text: "Send Feedback",
   onClick: () => {
-    args.fns.openFeedbackModal();
+    f.openFeedbackModal();
   }
 };
 '''
@@ -873,16 +873,16 @@ return {};
         props:
           '''
 return {
-  playerState: args.fns.playerState,
-  currentVideo: args.fns.currentVideo,
-  videoQueue: args.fns.videoQueue,
-  playerPosition: args.fns.playerPosition,
-  playerSize: args.fns.playerSize,
-  setPlayerPosition: args.fns.setPlayerPosition,
-  setPlayerSize: args.fns.setPlayerSize,
-  closePlayer: args.fns.closePlayer,
-  togglePlayerState: args.fns.togglePlayerState,
-  playNext: args.fns.playNext,
+  playerState: f.playerState,
+  currentVideo: f.currentVideo,
+  videoQueue: f.videoQueue,
+  playerPosition: f.playerPosition,
+  playerSize: f.playerSize,
+  setPlayerPosition: f.setPlayerPosition,
+  setPlayerSize: f.setPlayerSize,
+  closePlayer: f.closePlayer,
+  togglePlayerState: f.togglePlayerState,
+  playNext: f.playNext,
   openQueueModal: () => {}
 };
 '''
@@ -897,9 +897,9 @@ return {
         props:
           '''
 return {
-  isOpen: args.fns.isFeedbackModalOpen,
-  onClose: args.fns.closeFeedbackModal,
-  onSubmit: args.fns.submitFeedback,
+  isOpen: f.isFeedbackModalOpen,
+  onClose: f.closeFeedbackModal,
+  onSubmit: f.submitFeedback,
   isAnonymous: true
 };
 '''

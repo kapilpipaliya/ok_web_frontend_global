@@ -6,30 +6,30 @@
       P: {
         fns:
           '''
-const getParentVertexLabel = () => args.fns.getSidebarConfig()?.parentVertexLabel;
-const getToParentEdgeType = () => args.fns.getSidebarConfig()?.toParentEdgeType;
-const getRootKeys = () => args.fns.getSidebarConfig()?.rootKeys || {};
-const getFormConfig = () => args.fns.getSidebarConfig()?.formConfig;
-const getSidebarLabel = () => args.fns.getSidebarConfig()?.label || args.fns.getSidebarConfig()?.parentVertexLabel;
+const getParentVertexLabel = () => f.getSidebarConfig()?.parentVertexLabel;
+const getToParentEdgeType = () => f.getSidebarConfig()?.toParentEdgeType;
+const getRootKeys = () => f.getSidebarConfig()?.rootKeys || {};
+const getFormConfig = () => f.getSidebarConfig()?.formConfig;
+const getSidebarLabel = () => f.getSidebarConfig()?.label || f.getSidebarConfig()?.parentVertexLabel;
 
-const getTableVertexLabel = () => args.contextData.props?.tableVertexLabel;
+const getTableVertexLabel = () => c.props?.tableVertexLabel;
 const getUncategorizedVertexId = () => {
   const label = getTableVertexLabel();
   return label ? '_' + label + '_uncategorized' : null;
 };
-const getRelationshipType = () => args.contextData.props?.relationshipType;
+const getRelationshipType = () => c.props?.relationshipType;
 
 // State management - using graph for data, signals only for UI state
-const [expandedKeys, setExpandedKeys] = args.createSignal([]);
-const [selectedItem, setSelectedItem] = args.createSignal(null);
-const [sidebarLoading, setSidebarLoading] = args.createSignal(false);
-const [operationLoading, setOperationLoading] = args.createSignal(false);
-const [isAddRootModalOpen, setIsAddRootModalOpen] = args.createSignal(false);
+const [expandedKeys, setExpandedKeys] = _.createSignal([]);
+const [selectedItem, setSelectedItem] = _.createSignal(null);
+const [sidebarLoading, setSidebarLoading] = _.createSignal(false);
+const [operationLoading, setOperationLoading] = _.createSignal(false);
+const [isAddRootModalOpen, setIsAddRootModalOpen] = _.createSignal(false);
 // Single add/edit modal state: only one item modal open at a time (mode: 'add' | 'edit', and the item/parent)
-const [itemModalState, setItemModalState] = args.createSignal(null);
-const [searchQuery, setSearchQuery] = args.createSignal("");
-const [debouncedSearchQuery, setDebouncedSearchQuery] = args.createSignal("");
-const debouncedSetSearch = args.debounce((value) => setDebouncedSearchQuery(value), 200);
+const [itemModalState, setItemModalState] = _.createSignal(null);
+const [searchQuery, setSearchQuery] = _.createSignal("");
+const [debouncedSearchQuery, setDebouncedSearchQuery] = _.createSignal("");
+const debouncedSetSearch = _.debounce((value) => setDebouncedSearchQuery(value), 200);
 const onSearchChange = (value) => {
   setSearchQuery(value);
   debouncedSetSearch(value);
@@ -57,8 +57,8 @@ const fetchRoot = async (options) => {
     const tableVertexLabel = getTableVertexLabel();
     const relationshipType = getRelationshipType();
 
-    const enableUserScoping = args.contextData.props?.enableUserScoping === true;
-    const rawSelectedIds = args.contextData.props?.initialSelectedRowIds;
+    const enableUserScoping = c.props?.enableUserScoping === true;
+    const rawSelectedIds = c.props?.initialSelectedRowIds;
     const selectedContentIds = Array.isArray(rawSelectedIds)
       ? rawSelectedIds.map((id) => String(id || "").trim()).filter(Boolean)
       : [];
@@ -70,17 +70,17 @@ const fetchRoot = async (options) => {
       tableVertexLabel,
       relationshipType,
       enableUserScoping,
-      loadFullTree: args.fns.getSidebarConfig()?.loadFullTree === true,
-      hooks: args.contextData.props?.hooks,
+      loadFullTree: f.getSidebarConfig()?.loadFullTree === true,
+      hooks: c.props?.hooks,
       selectedContentIds: selectedContentIds.length > 0 ? selectedContentIds : undefined
     };
-    const result = await args.executeNamedServerFunction({
+    const result = await s({
       functionName: "getSidebarTreeRoots",
       contextData: sidebarContextData
     });
 
     // Check for errors and show toast
-    const errorMessage = args.fns.extractError?.(result, true, "Failed to load root vertices");
+    const errorMessage = f.extractError?.(result, true, "Failed to load root vertices");
     if (errorMessage) {
       return;
     }
@@ -89,7 +89,7 @@ const fetchRoot = async (options) => {
       const rootItems = result.result.data;
 
       if (result.graph && result.graph.vertexes) {
-        args.setGraphData(0, result.graph, {});
+        _.setGraphData(0, result.graph, {});
       }
 
       if (!options?.preserveExpanded) {
@@ -100,12 +100,12 @@ const fetchRoot = async (options) => {
       const scheduleInitialSelection = (item) => {
         if (!item) return;
         queueMicrotask(() => {
-          args.batch(() => handleItemSelect(item));
+          _.batch(() => handleItemSelect(item));
         });
       };
 
       // Restore selection: explicit prop, then selectedCategoryId from sidebar fetch, else first root.
-      let initialCategoryId = args.contextData.props?.initialCategoryId;
+      let initialCategoryId = c.props?.initialCategoryId;
       if (initialCategoryId != null) {
         initialCategoryId = String(initialCategoryId).trim() || null;
       }
@@ -113,8 +113,8 @@ const fetchRoot = async (options) => {
         initialCategoryId = String(result.result.selectedCategoryId).trim() || null;
       }
 
-      if (initialCategoryId && args.graph?.vertexes?.[initialCategoryId]) {
-        const vertex = args.graph.vertexes[initialCategoryId];
+      if (initialCategoryId && g?.vertexes?.[initialCategoryId]) {
+        const vertex = g.vertexes[initialCategoryId];
         let parent = getParentCategory(initialCategoryId);
         while (parent && parent.id) {
           setExpandedKeys(keys => keys.includes(parent.id) ? keys : [...keys, parent.id]);
@@ -128,7 +128,7 @@ const fetchRoot = async (options) => {
     }
   } catch (error) {
     console.error("Error fetching root:", error);
-    args.showErrorToast?.("Failed to load sidebar data");
+    _.showErrorToast?.("Failed to load sidebar data");
   } finally {
     setSidebarLoading(false);
   }
@@ -145,13 +145,13 @@ const fetchChildren = async (parentId, forceRefresh = false) => {
 
   // Check graph first using evalExpression (unless forcing refresh)
   if (!forceRefresh) {
-    const parentVertex = args.graph.vertexes[parentId];
+    const parentVertex = g.vertexes[parentId];
     if (parentVertex) {
       // Use evalExpression to get children from graph
       // Relationship direction: child-[toParentEdgeType]->parent, so use <- to get children
-      const children = args.evalExpression(
+      const children = _.evalExpression(
         `<-${toParentEdgeType}`,
-        { graph: args.graph, setGraph: args.setGraph, vertexes: [parentVertex] }
+        { graph: g, setGraph: sg, vertexes: [parentVertex] }
       ) || [];
       const categoryChildren = children.filter((child) =>
         child?.L?.includes(parentVertexLabel)
@@ -166,9 +166,9 @@ const fetchChildren = async (parentId, forceRefresh = false) => {
     const tableVertexLabel = getTableVertexLabel();
     const relationshipType = getRelationshipType();
 
-    const enableUserScoping = args.contextData.props?.enableUserScoping === true;
+    const enableUserScoping = c.props?.enableUserScoping === true;
 
-    const result = await args.executeNamedServerFunction({
+    const result = await s({
       functionName: "getVertexChildren",
       contextData: {
         parentVertexLabel,
@@ -177,23 +177,23 @@ const fetchChildren = async (parentId, forceRefresh = false) => {
         tableVertexLabel,
         relationshipType,
         enableUserScoping,
-        hooks: args.contextData.props?.hooks
+        hooks: c.props?.hooks
       }
     });
 
     if (result?.result?.success && result.result.data) {
       // Store children in graph
       if (result.graph && result.graph.vertexes) {
-        args.setGraphData(0, result.graph, {});
+        _.setGraphData(0, result.graph, {});
       }
       startSidebarQueuedPollIfNeeded();
       // Return children using evalExpression from graph
       // Relationship direction: child-[toParentEdgeType]->parent, so use <- to get children
-      const parentVertex = args.graph.vertexes[parentId];
+      const parentVertex = g.vertexes[parentId];
       if (parentVertex) {
-        const children = args.evalExpression(
+        const children = _.evalExpression(
           `<-${toParentEdgeType}`,
-          { graph: args.graph, setGraph: args.setGraph, vertexes: [parentVertex] }
+          { graph: g, setGraph: sg, vertexes: [parentVertex] }
         ) || [];
         const categoryChildren = children.filter((child) =>
           child?.L?.includes(parentVertexLabel)
@@ -245,16 +245,16 @@ const getChildren = (parentId) => {
   const toParentEdgeType = getToParentEdgeType();
   const parentVertexLabel = getParentVertexLabel();
   // Access graph reactively
-  const graph = args.graph;
+  const graph = g;
   const parentVertex = graph.vertexes[parentId];
   if (!parentVertex) return [];
 
   // Use evalExpression to get children via incoming edge
   // Relationship direction: child-[toParentEdgeType]->parent, so use <- to get children
   // Expression format: ->EdgeType (outgoing) or <-EdgeType (incoming)
-  const children = args.evalExpression(
+  const children = _.evalExpression(
     `<-${toParentEdgeType}`,
-    { graph: args.graph, setGraph: args.setGraph, vertexes: [parentVertex] }
+    { graph: g, setGraph: sg, vertexes: [parentVertex] }
   ) || [];
 
   // Filter to sidebar category vertices only.
@@ -277,7 +277,7 @@ const getLoadingState = (parentId) => {
 const getRoot = () => {
   const toParentEdgeType = getToParentEdgeType();
   const parentVertexLabel = getParentVertexLabel();
-  const graph = args.graph;
+  const graph = g;
   const vertexes = graph?.vertexes;
   if (!vertexes || !toParentEdgeType) return sortItems([]);
   const labelIds = graph.vertexLabelIdMap?.[parentVertexLabel];
@@ -358,8 +358,8 @@ const toggleExpand = async (itemId) => {
 const handleItemSelect = (item) => {
   setSelectedItem(item);
   // Call onItemSelect if provided via props
-  if (args.contextData.props?.onItemSelect) {
-    args.contextData.props.onItemSelect(item);
+  if (c.props?.onItemSelect) {
+    c.props.onItemSelect(item);
   }
 };
 
@@ -385,7 +385,7 @@ const isItemQueued = (item) => item?.P?.syncStatus === 'queued';
 const handleOpenAddChildModal = (parentItem) => {
   if (!parentItem) return;
   if (isItemQueued(parentItem)) {
-    args.showWarningToast?.("Cannot add: item is syncing");
+    _.showWarningToast?.("Cannot add: item is syncing");
     return;
   }
   setItemModalState({ mode: 'add', parentItem });
@@ -394,7 +394,7 @@ const handleOpenAddChildModal = (parentItem) => {
 const handleOpenEditModal = (item) => {
   if (!item) return;
   if (isItemQueued(item)) {
-    args.showWarningToast?.("Cannot edit: item is syncing");
+    _.showWarningToast?.("Cannot edit: item is syncing");
     return;
   }
   setItemModalState({ mode: 'edit', item });
@@ -439,7 +439,7 @@ const updateItemInTree = (updatedVertex) => {
   if (!updatedVertex || !updatedVertex.id) return;
 
   // Update vertex in graph using replaceVertexProperties
-  args.replaceVertexProperties(0, updatedVertex.id, args.graph, args.setGraph, { ...updatedVertex.P });
+  _.replaceVertexProperties(0, updatedVertex.id, g, sg, { ...updatedVertex.P });
 
   // Root vertices signal only stores IDs, so no need to update it on edit
   // The graph update will automatically reflect in getRoot() since it reads from graph
@@ -461,14 +461,14 @@ const refreshQueuedSidebarItems = async (elementIds) => {
   const parentVertexLabel = getParentVertexLabel();
   if (!parentVertexLabel || !Array.isArray(elementIds) || elementIds.length === 0) return;
   try {
-    const result = await args.executeNamedServerFunction({
+    const result = await s({
       functionName: "getUserContent",
       contextData: { tableVertexLabel: parentVertexLabel, elementIds, onlyNotQueued: true }
     });
     if (result?.result?.success && Array.isArray(result.result.data) && result.result.data.length > 0) {
       for (const v of result.result.data) {
         if (v?.id && v.P) {
-          args.mergeVertexProperties(0, v.id, args.graph, args.setGraph, v.P);
+          _.mergeVertexProperties(0, v.id, g, sg, v.P);
         }
       }
     }
@@ -479,7 +479,7 @@ const refreshQueuedSidebarItems = async (elementIds) => {
 
 // Poll sidebar until no vertices have syncStatus === 'queued'
 const pollQueuedSidebar = async () => {
-  const intervalMs = args.fns.getSidebarConfig?.()?.refetchIntervalWhenQueued ?? 5000;
+  const intervalMs = f.getSidebarConfig?.()?.refetchIntervalWhenQueued ?? 5000;
   const queuedIds = getQueuedSidebarVertexIds();
   if (queuedIds.length === 0) return;
   await refreshQueuedSidebarItems(queuedIds);
@@ -524,18 +524,18 @@ const removeItemFromTree = (itemId) => {
 
   // Find parent of deleted item using graph traversal
   const toParentEdgeType = getToParentEdgeType();
-  const deletedVertex = args.graph.vertexes[itemId];
+  const deletedVertex = g.vertexes[itemId];
   let parentItem = null;
 
   if (deletedVertex && deletedVertex.IN && deletedVertex.IN[toParentEdgeType]) {
     const parentIds = deletedVertex.IN[toParentEdgeType];
     if (parentIds.length > 0) {
-      parentItem = args.graph.vertexes[parentIds[0]];
+      parentItem = g.vertexes[parentIds[0]];
     }
   }
 
   // Remove vertex from graph (getRoot() is computed from graph so roots update automatically)
-  args.deleteVertex(0, itemId, args.graph, args.setGraph);
+  _.deleteVertex(0, itemId, g, sg);
 
   // Select parent item if it exists, otherwise clear selection
   const currentSelected = selectedItem();
@@ -543,8 +543,8 @@ const removeItemFromTree = (itemId) => {
     if (parentItem) {
       setSelectedItem(parentItem);
       // Also call onItemSelect if provided
-      if (args.contextData.props?.onItemSelect) {
-        args.contextData.props.onItemSelect(parentItem);
+      if (c.props?.onItemSelect) {
+        c.props.onItemSelect(parentItem);
       }
     } else {
       setSelectedItem(null);
@@ -588,14 +588,14 @@ const getParentCategory = (itemId) => {
   const toParentEdgeType = getToParentEdgeType();
   if (!toParentEdgeType) return null;
 
-  const item = args.graph?.vertexes?.[itemId];
+  const item = g?.vertexes?.[itemId];
   if (!item) return null;
 
   // Relationship: child-[toParentEdgeType]->parent
   // Use ->toParentEdgeType to get parent
-  const parent = args.evalExpression(
+  const parent = _.evalExpression(
     `->${toParentEdgeType}`,
-    { graph: args.graph, setGraph: args.setGraph, vertexes: [item] }
+    { graph: g, setGraph: sg, vertexes: [item] }
   );
 
   return parent && parent.length > 0 ? parent[0] : null;
@@ -762,11 +762,11 @@ return {
   removeItemFromTree,
   getChildren,
   getLoadingState,
-  getOnMoveItemsToCategory: () => args.contextData.props?.onMoveItemsToCategory,
+  getOnMoveItemsToCategory: () => c.props?.onMoveItemsToCategory,
   getAllVisibleItems,
   navigateToCategory,
   handleSidebarKeyDown,
-  getHooks: () => args.contextData.props?.hooks,
+  getHooks: () => c.props?.hooks,
   operationLoading,
   setOperationLoading,
   searchQuery,
@@ -790,12 +790,18 @@ return {
       L: Attr
       P: {
         css:
-          '''const sidebarWidth = args.contextData.props?.sidebarWidth?.() || 240;
+          '''const sidebarWidth = c.props?.sidebarWidth?.() || 240;
 return `._id {
   display: grid;
   grid-template-columns: ${sidebarWidth}px 2px 1fr;
   height: 100%;
+  min-width: 0;
+  min-height: 0;
   position: relative;
+  @media (max-width: 768px) {
+    display: flex;
+    flex-direction: column;
+  }
 }`;'''
         displayOrder: 1
         componentName: Html
@@ -804,10 +810,10 @@ return `._id {
           '''return {
   as: "div",
   onMount: () => {
-    args.fns.initialize();
+    f.initialize();
   },
   onCleanup: () => {
-    args.fns.cleanupSidebarPoll?.();
+    f.cleanupSidebarPoll?.();
   }
 };'''
       }
@@ -827,14 +833,21 @@ return `._id {
   min-height: 0;
   max-height: 100vh;
   position: relative;
+  @media (max-width: 768px) {
+    width: 100%;
+    height: auto;
+    max-height: 140px;
+    flex-shrink: 0;
+    border-bottom: 1px solid ${t.var.color.border};
+  }
 }`;'''
         displayOrder: 1
         componentName: Html
         key: sidebar_tree
         props:
           '''return {
-  as: "div", // args.fns.getUsePolarisUI?.() === true ? "s-scroll-box" : "div",
-  onKeyDown: args.fns.handleSidebarKeyDown
+  as: "div", // f.getUsePolarisUI?.() === true ? "s-scroll-box" : "div",
+  onKeyDown: f.handleSidebarKeyDown
 };'''
       }
     }
@@ -847,9 +860,9 @@ return `._id {
   flex-shrink: 0;
   width: 100%;
   line-height: 28px;
-  border: 1px solid ${args.theme.var.color.border};
-  background-color: ${args.theme.var.color.background_light_100};
-  color: ${args.theme.var.color.text};
+  border: 1px solid ${t.var.color.border};
+  background-color: ${t.var.color.background_light_100};
+  color: ${t.var.color.text};
   font-size: 14px;
   height: 36px;
   padding: 0 0.75rem 0 2rem;
@@ -861,10 +874,10 @@ return `._id {
 }
 ._id:focus {
   outline: none;
-  border-color: ${args.theme.var.color.primary};
+  border-color: ${t.var.color.primary};
 }
 ._id::placeholder {
-  color: ${args.theme.var.color.text_light_400};
+  color: ${t.var.color.text_light_400};
 }`;'''
         displayOrder: 1
         componentName: Html
@@ -874,9 +887,9 @@ return `._id {
   as: "input",
   type: "search",
   placeholder: "Search...",
-  value: args.fns.searchQuery(),
-  onInput: (e) => args.fns.onSearchChange(e.target.value),
-  hide: args.fns.getUsePolarisUI?.() === true
+  value: f.searchQuery(),
+  onInput: (e) => f.onSearchChange(e.target.value),
+  hide: f.getUsePolarisUI?.() === true
 };'''
       }
     }
@@ -898,9 +911,9 @@ return `._id {
   label: "Search",
   "attr:labelAccessibilityVisibility": "exclusive",
   placeholder: "Search items",
-  value: args.fns.searchQuery(),
-  onInput: (e) => args.fns.onSearchChange(e?.target?.value ?? ''),
-  hide: args.fns.getUsePolarisUI?.() !== true
+  value: f.searchQuery(),
+  onInput: (e) => f.onSearchChange(e?.target?.value ?? ''),
+  hide: f.getUsePolarisUI?.() !== true
 };'''
       }
     }
@@ -936,9 +949,9 @@ return `._id {
   as: "s-button",
   "attr:variant": "primary",
   "attr:icon": "plus",
-  text: `Add Root ${args.fns.getSidebarLabel()}`,
-  onClick: () => args.fns.handleOpenAddRootModal(),
-  hide: args.fns.getUsePolarisUI?.() !== true
+  text: `Add Root ${f.getSidebarLabel()}`,
+  onClick: () => f.handleOpenAddRootModal(),
+  hide: f.getUsePolarisUI?.() !== true
 };'''
       }
     }
@@ -953,12 +966,12 @@ return `._id {
           '''return {
   variant: "primary",
   size: "sm",
-  text: `Add Root ${args.fns.getSidebarLabel()}`,
+  text: `Add Root ${f.getSidebarLabel()}`,
   leftIcon: "carbon:add",
   onClick: () => {
-    args.fns.handleOpenAddRootModal();
+    f.handleOpenAddRootModal();
   },
-  hide: args.fns.getUsePolarisUI?.() === true
+  hide: f.getUsePolarisUI?.() === true
 };'''
       }
     }
@@ -980,7 +993,7 @@ return `._id {
   as: "ul",
   loop: true,
   contextName: "sidebarItem",
-  data: args.fns.getFilteredRoot()
+  data: f.getFilteredRoot()
 };'''
       }
     }
@@ -992,42 +1005,42 @@ return `._id {
         componentName: SidebarTreeItem
         key: sidebar_tree_item
         props:
-          '''const item = args.contextData.sidebarItem;
+          '''const item = c.sidebarItem;
 // Get children from graph (reactive)
-const children = args.fns.getChildren(item?.id);
-const sidebarConfig = args.fns.getSidebarConfig();
+const children = f.getChildren(item?.id);
+const sidebarConfig = f.getSidebarConfig();
 
 return {
   item: item,
-  expandedKeys: args.fns.expandedKeys(),
-  selectedItem: args.fns.selectedItem(),
-  onToggleExpand: args.fns.toggleExpand,
-  onItemSelect: args.fns.handleItemSelect,
-  fetchChildren: args.fns.fetchChildren,
+  expandedKeys: f.expandedKeys(),
+  selectedItem: f.selectedItem(),
+  onToggleExpand: f.toggleExpand,
+  onItemSelect: f.handleItemSelect,
+  fetchChildren: f.fetchChildren,
   sidebarConfig: sidebarConfig,
-  onItemUpdate: args.fns.updateItemInTree,
-  onItemDelete: args.fns.removeItemFromTree,
+  onItemUpdate: f.updateItemInTree,
+  onItemDelete: f.removeItemFromTree,
   childItems: children,
   loading: false,
-  getChildren: args.fns.getChildren,
-  tableVertexLabel: args.fns.getTableVertexLabel(),
-  relationshipType: args.fns.getRelationshipType(),
-  enableUserScoping: args.contextData.props?.enableUserScoping,
-  onMoveItemsToCategory: args.fns.getOnMoveItemsToCategory(),
-  fetchRoot: args.fns.fetchRoot,
-  getRoot: args.fns.getRoot,
-  startSidebarQueuedPollIfNeeded: args.fns.startSidebarQueuedPollIfNeeded,
-  hooks: args.fns.getHooks(),
-  label: args.fns.getSidebarLabel(),
-  contentLabel: args.contextData.props?.contentLabel,
-  operationLoading: args.fns.operationLoading,
-  setOperationLoading: args.fns.setOperationLoading,
-  setExpandedKeys: args.fns.setExpandedKeys,
-  searchActive: !!(args.fns.debouncedSearchQuery?.()?.trim?.()),
-  filterTree: (item) => args.fns.filterTreeVertex?.(item, args.fns.debouncedSearchQuery()?.trim?.() || ''),
-  shouldExpandForSearch: (item) => args.fns.shouldExpandVertexForSearch?.(item),
-  onOpenAddModal: args.fns.handleOpenAddChildModal,
-  onOpenEditModal: args.fns.handleOpenEditModal
+  getChildren: f.getChildren,
+  tableVertexLabel: f.getTableVertexLabel(),
+  relationshipType: f.getRelationshipType(),
+  enableUserScoping: c.props?.enableUserScoping,
+  onMoveItemsToCategory: f.getOnMoveItemsToCategory(),
+  fetchRoot: f.fetchRoot,
+  getRoot: f.getRoot,
+  startSidebarQueuedPollIfNeeded: f.startSidebarQueuedPollIfNeeded,
+  hooks: f.getHooks(),
+  label: f.getSidebarLabel(),
+  contentLabel: c.props?.contentLabel,
+  operationLoading: f.operationLoading,
+  setOperationLoading: f.setOperationLoading,
+  setExpandedKeys: f.setExpandedKeys,
+  searchActive: !!(f.debouncedSearchQuery?.()?.trim?.()),
+  filterTree: (item) => f.filterTreeVertex?.(item, f.debouncedSearchQuery()?.trim?.() || ''),
+  shouldExpandForSearch: (item) => f.shouldExpandVertexForSearch?.(item),
+  onOpenAddModal: f.handleOpenAddChildModal,
+  onOpenEditModal: f.handleOpenEditModal
 };'''
       }
     }
@@ -1056,7 +1069,7 @@ return {
         props:
           '''return {
   as: "div",
-  hide: !args.fns.operationLoading()
+  hide: !f.operationLoading()
 };'''
       }
     }
@@ -1084,23 +1097,26 @@ return {
   height: 100%;
   cursor: col-resize;
   background-color: transparent;
-  border-left: 1px solid ${args.theme.var.color.border};
-  border-right: 1px solid ${args.theme.var.color.border};
+  border-left: 1px solid ${t.var.color.border};
+  border-right: 1px solid ${t.var.color.border};
   transition: background-color 0.2s;
   flex-shrink: 0;
   position: relative;
   z-index: 10;
 
   &:hover {
-    background-color: ${args.theme.var.color.primary}40;
+    background-color: ${t.var.color.primary}40;
+  }
+  @media (max-width: 768px) {
+    display: none;
   }
 }`;'''
         displayOrder: 2
         componentName: Html
         key: sidebar_resize_handle
         props:
-          '''const setSidebarWidth = args.contextData.props?.setSidebarWidth;
-const sidebarWidth = args.contextData.props?.sidebarWidth?.() || 240;
+          '''const setSidebarWidth = c.props?.setSidebarWidth;
+const sidebarWidth = c.props?.sidebarWidth?.() || 240;
 
 return {
   as: "div",
@@ -1137,6 +1153,11 @@ return {
           '''return `._id {
   overflow-y: auto;
   height: 100%;
+  min-width: 0;
+  min-height: 0;
+  @media (max-width: 768px) {
+    flex: 1;
+  }
 }`;'''
         displayOrder: 3
         componentName: Html
@@ -1169,21 +1190,21 @@ return {
         componentName: SidebarAddChildModal
         key: sidebar_add_root_modal
         props:
-          '''const sidebarConfig = args.fns.getSidebarConfig();
+          '''const sidebarConfig = f.getSidebarConfig();
 
 return {
-  isOpen: args.fns.isAddRootModalOpen(),
+  isOpen: f.isAddRootModalOpen(),
   sidebarConfig: sidebarConfig,
   parentId: null,
   vertexId: null,
   initialVertex: null,
   mode: "add",
-  tableVertexLabel: args.fns.getTableVertexLabel(),
-  relationshipType: args.fns.getRelationshipType(),
-  onSave: args.fns.handleAddRootSave,
-  onClose: args.fns.handleCloseAddRootModal,
-  hooks: args.fns.getHooks(),
-  label: args.fns.getSidebarLabel()
+  tableVertexLabel: f.getTableVertexLabel(),
+  relationshipType: f.getRelationshipType(),
+  onSave: f.handleAddRootSave,
+  onClose: f.handleCloseAddRootModal,
+  hooks: f.getHooks(),
+  label: f.getSidebarLabel()
 };'''
       }
     }
@@ -1195,8 +1216,8 @@ return {
         componentName: SidebarAddChildModal
         key: sidebar_item_add_edit_modal
         props:
-          '''const state = args.fns.itemModalState?.() ?? null;
-const sidebarConfig = args.fns.getSidebarConfig();
+          '''const state = f.itemModalState?.() ?? null;
+const sidebarConfig = f.getSidebarConfig();
 const isOpen = state !== null;
 
 return {
@@ -1206,12 +1227,12 @@ return {
   vertexId: state?.mode === 'edit' ? state.item?.id : null,
   initialVertex: state?.mode === 'edit' ? state.item : null,
   mode: state?.mode ?? "add",
-  tableVertexLabel: args.fns.getTableVertexLabel(),
-  relationshipType: args.fns.getRelationshipType(),
-  onSave: state?.mode === 'add' ? args.fns.handleAddChildSaveFromModal : args.fns.handleEditSaveFromModal,
-  onClose: args.fns.handleCloseItemModal,
-  hooks: args.contextData.props?.hooks,
-  label: args.fns.getSidebarLabel()
+  tableVertexLabel: f.getTableVertexLabel(),
+  relationshipType: f.getRelationshipType(),
+  onSave: state?.mode === 'add' ? f.handleAddChildSaveFromModal : f.handleEditSaveFromModal,
+  onClose: f.handleCloseItemModal,
+  hooks: c.props?.hooks,
+  label: f.getSidebarLabel()
 };'''
       }
     }

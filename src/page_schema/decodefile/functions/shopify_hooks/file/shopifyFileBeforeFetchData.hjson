@@ -7,7 +7,7 @@
         description: Syncs Shopify files with database when fetching. Fetches files from Shopify and creates/updates/deletes ShopifyFile vertices accordingly.
         body:
           '''
-const { tableVertexLabel, showUnassigned, categoryId, parentVertexLabel, toParentEdgeType, enableUserScoping } = args.contextData;
+const { tableVertexLabel, showUnassigned, categoryId, parentVertexLabel, toParentEdgeType, enableUserScoping } = c;
 
 if (tableVertexLabel !== 'ShopifyFile') return;
 
@@ -20,7 +20,7 @@ let existingCategoryFiles = [];
 let categoryFileIds = new Set();
 if (!isUncategorized && categoryId && parentVertexLabel && toParentEdgeType) {
   try {
-    const fetchResult = await args.executeNamedServerFunction({
+    const fetchResult = await s({
       functionName: "getUserContent",
       contextData: {
         tableVertexLabel: 'ShopifyFile',
@@ -43,13 +43,13 @@ if (!isUncategorized && categoryId && parentVertexLabel && toParentEdgeType) {
   }
 }
 
-const shop = args.contextData.shop;
+const shop = c.shop;
 if (!shop) {
   console.warn("shopifyFileBeforeFetchData: Shop domain is missing, skipping sync");
   return;
 }
 
-const shopify = await args.getShopifyClient();
+const shopify = await _.getShopifyClient();
 let admin;
 try {
   const authResult = await shopify.unauthenticated.admin(shop);
@@ -249,7 +249,7 @@ const existingFiles = new Map();
 const filesWithoutId = [];
 
 if (isUncategorized) {
-  const existingFilesQueryResult = await args.session.run(
+  const existingFilesQueryResult = await _.session.run(
     `MATCH (f:ShopifyFile) RETURN elementId(f) as elementId, f.id as id`,
     {}
   );
@@ -276,7 +276,7 @@ for (const [id, dbId] of existingFiles) {
 toDelete.push(...filesWithoutId);
 
 if (toDelete.length > 0) {
-  await args.session.run(
+  await _.session.run(
     `MATCH (f:ShopifyFile) WHERE elementId(f) IN $ids DETACH DELETE f`,
     { ids: toDelete }
   );
@@ -356,7 +356,7 @@ for (const node of allShopifyFiles) {
 }
 
 if (toUpdate.length > 0) {
-  await args.session.run(
+  await _.session.run(
     `UNWIND $items as item
      MATCH (f:ShopifyFile) WHERE elementId(f) = item.elementId
      SET f += item.props, f.updatedAt = datetime()`,
@@ -364,7 +364,7 @@ if (toUpdate.length > 0) {
   );
 }
 if (toCreate.length > 0) {
-  await args.session.run(
+  await _.session.run(
     `UNWIND $items as item
      CREATE (f:ShopifyFile)
      SET f = item.props, f.createdAt = datetime(), f.updatedAt = datetime()`,

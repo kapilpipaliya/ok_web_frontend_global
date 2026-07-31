@@ -7,12 +7,12 @@
         description: Returns option vertices for the domain label (AppointmentStatus, RepairStatus, etc.). No Setting vertex. Supported picklist keys are fixed; unknown keys are rejected.
         body:
           '''
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return { success: false, message: "Not authenticated", data: { options: [], optionVertexes: [] } };
 }
 
-const { picklistKey } = args.contextData || {};
+const { picklistKey } = c || {};
 if (!picklistKey || typeof picklistKey !== "string") {
   return { success: false, message: "picklistKey is required", data: { options: [], optionVertexes: [] } };
 }
@@ -52,12 +52,12 @@ if (!neoLabel) {
   };
 }
 
-const optRes = await args.session.run(
+const optRes = await _.session.run(
   `MATCH (o:\`${neoLabel}\`) RETURN o ORDER BY coalesce(o.displayOrder, 0) ASC, toLower(coalesce(o.label, "")) ASC`,
   {}
 );
 
-const optionVertexes = args.processResult(optRes.records, args.context, "o");
+const optionVertexes = _.processResult(optRes.records, _.context, "o");
 
 return {
   success: true,

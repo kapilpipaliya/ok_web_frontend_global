@@ -57,7 +57,7 @@ import { SlotContext } from "~/components/fields/component/contexts/SlotContext"
 // (the vertex changes as the page tears down / graph streams in), miss the
 // cache and refetch. Keying on the stable body means the re-run hits the same
 // live entry and returns the cached result instead. Server functions here do
-// not read `args.vertexes`, so omitting them is safe; a changed dynamic route
+// not read `_.vertexes`, so omitting them is safe; a changed dynamic route
 // param is baked into the body, so it still yields a new key and a fresh call.
 // `query` also scopes its cache per-request on the server (no cross-request
 // leakage).
@@ -177,33 +177,31 @@ function parseContextAccess(functionBody: string): {
   const properties: string[] = [];
   const functionCalls: Array<{ match: string; property: string }> = [];
 
-  // Match function calls like args.contextData.propertyName()
+  // Context bag access: c.x or _.contextData.x
+  // Match function calls like c.propertyName() / _.contextData.propertyName()
   const functionRegex =
-    /args\.contextData\.(\w+)\(\)|args\.contextData\[['"]([^'"]+)['"]\]\(\)/g;
+    /\bc\.(\w+)\(\)|\bc\[['"]([^'"]+)['"]\]\(\)|_\.contextData\.(\w+)\(\)|_\.contextData\[['"]([^'"]+)['"]\]\(\)/g;
 
   let match;
   while ((match = functionRegex.exec(functionBody)) !== null) {
-    const property = match[1] || match[2];
+    const property = match[1] || match[2] || match[3] || match[4];
     if (property) {
       functionCalls.push({
         match: match[0],
-        property: property,
+        property,
       });
     }
   }
 
-  // Match property access (non-function)
-  // This regex captures:
-  // 1. args.contextData.propertyName (dot notation, not followed by parentheses)
-  // 2. args.contextData['propertyName'] (bracket notation with single quotes, not followed by parentheses)
-  // 3. args.contextData["propertyName"] (bracket notation with double quotes, not followed by parentheses)
+  // Match property access (non-function). Use `\b(?!\()` so names like
+  // `legacy()` are not partially captured as `legac` via `\w+` backtracking.
+  // 1. c.propertyName / _.contextData.propertyName
+  // 2. c['propertyName'] / _.contextData['propertyName']
   const propertyRegex =
-    /args\.contextData\.(\w+)(?!\()|args\.contextData\[['"]([^'"]+)['"]\](?!\()/g;
+    /\bc\.(\w+)\b(?!\()|\bc\[['"]([^'"]+)['"]\](?!\()|_\.contextData\.(\w+)\b(?!\()|_\.contextData\[['"]([^'"]+)['"]\](?!\()/g;
 
-  match = null;
   while ((match = propertyRegex.exec(functionBody)) !== null) {
-    // match[1] is for dot notation, match[2] is for bracket notation
-    const property = match[1] || match[2];
+    const property = match[1] || match[2] || match[3] || match[4];
     if (property && !properties.includes(property)) {
       properties.push(property);
     }
@@ -442,8 +440,8 @@ export function HtmlField(
             <As
               as="div"
               css={`return \` ._id {
-                  background-color: \${args.theme.var.color.error};
-                  color: \${args.theme.var.color.error_text};
+                  background-color: \${t.var.color.error};
+                  color: \${t.var.color.error_text};
               }
 
                   \`;`}

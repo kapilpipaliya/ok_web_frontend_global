@@ -378,7 +378,7 @@ export function FunctionEditor(props: {
           <As
             as="span"
             css={`return \`._id {
-              color: \${args.theme.var.color.error};
+              color: \${t.var.color.error};
             }\`;`}
           >
             Invalid Function
@@ -450,8 +450,8 @@ export function FunctionEditor(props: {
             <IconButton
               css={`return \`._id {
                 padding: 2px;
-                background-color: \${args.theme.var.color.success};
-                color: \${args.theme.var.color.success_text};
+                background-color: \${t.var.color.success};
+                color: \${t.var.color.success_text};
                 border: none;
                 border-radius: 2px;
 
@@ -470,8 +470,8 @@ export function FunctionEditor(props: {
             <IconButton
               css={`return \`._id {
                 padding: 2px;
-                background-color: \${args.theme.var.color.primary_light_300};
-                color: \${args.theme.var.color.primary_light_300_text};
+                background-color: \${t.var.color.primary_light_300};
+                color: \${t.var.color.primary_light_300_text};
                 border: none;
                 border-radius: 2px;
               }\`;`}

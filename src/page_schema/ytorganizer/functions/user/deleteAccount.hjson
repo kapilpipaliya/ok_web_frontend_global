@@ -8,7 +8,7 @@
         body:
           '''
 // Get current authenticated user from session
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return {
     success: false,
@@ -17,16 +17,16 @@ if (!actualUser) {
 }
 
 // Get effective user (handles admin impersonation)
-const currentUser = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const currentUser = await _.getEffectiveUser(_.session, actualUser, c);
 
 // Check if this is an admin deleting another user
-const targetUserId = args.contextData.userId;
+const targetUserId = c.userId;
 let userToDelete;
 let isAdminDelete = false;
 
 if (targetUserId) {
   // Admin deletion - verify admin role (use actualUser for admin check, not impersonated user)
-  const adminCheck = await args.session.run(
+  const adminCheck = await _.session.run(
     `MATCH (u:User {uuid: $userId})-[:UserRole]->(r:Role {key: "Admin"})
      RETURN u`,
     { userId: actualUser.P.uuid }
@@ -46,7 +46,7 @@ if (targetUserId) {
     RETURN u
   `;
 
-  const targetUserResult = await args.session.run(targetUserQuery, {
+  const targetUserResult = await _.session.run(targetUserQuery, {
     userId: targetUserId
   });
 
@@ -57,7 +57,7 @@ if (targetUserId) {
     };
   }
 
-  userToDelete = args.convertNodeToJson(targetUserResult.records[0].get('u'));
+  userToDelete = _.convertNodeToJson(targetUserResult.records[0].get('u'));
   isAdminDelete = true;
 } else {
   // Self-deletion
@@ -65,7 +65,7 @@ if (targetUserId) {
 }
 
 // Step 1: Clear all user data first
-const clearDataResult = await args.executeNamedServerFunction({
+const clearDataResult = await s({
   functionName: "clearAllUserData",
   contextData: isAdminDelete ? { userId: targetUserId } : {}
 });
@@ -83,7 +83,7 @@ const deleteUserQuery = `
   DETACH DELETE u
 `;
 
-await args.session.run(deleteUserQuery, {
+await _.session.run(deleteUserQuery, {
   userUuid: userToDelete.P.uuid
 });
 

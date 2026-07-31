@@ -6,7 +6,7 @@ export function DialogSubTitle(props: ParentProps) {
     <As
       as="div"
       css={`return \`._id {
-  color: \${args.theme.var.color.primary};
+  color: \${t.var.color.primary};
   font-size: 0.875rem;
   max-width: 36rem;
   margin-top: 0.5rem;

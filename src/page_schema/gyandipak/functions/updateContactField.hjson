@@ -6,7 +6,7 @@
       P: {
         description: Update a single field of a contact
         body:
-          '''const { contactId, field, value } = args.contextData;
+          '''const { contactId, field, value } = c;
 
 if (!contactId) {
   throw new Error("Contact ID is required");
@@ -22,7 +22,7 @@ if (!allowedFields.includes(field)) {
   throw new Error("Invalid field name");
 }
 
-const result = await args.session.executeWrite(async (tx) => {
+const result = await _.session.executeWrite(async (tx) => {
   // Update the contact field
   const query = `
     MATCH (c:Contact)
@@ -41,7 +41,7 @@ const result = await args.session.executeWrite(async (tx) => {
   }
 
   const node = updateResult.records[0].get('c');
-  const contact = args.convertNodeToJson(node);
+  const contact = _.convertNodeToJson(node);
 
   return contact;
 });

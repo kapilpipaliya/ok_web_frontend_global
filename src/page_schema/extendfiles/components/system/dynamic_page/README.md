@@ -198,7 +198,7 @@ Table tracks `runningAction[rowId][actionKey]` while an async handler runs. Prim
 
 #### Bulk actions (future)
 
-`args.fns.runBulkAction(action, rows)` runs the same pipeline as a row click for each selected row (skips hidden/disabled). Wire from `batchActions` toolbar when needed.
+`_.fns.runBulkAction(action, rows)` runs the same pipeline as a row click for each selected row (skips hidden/disabled). Wire from `batchActions` toolbar when needed.
 
 #### Page props example (Shopify shops)
 
@@ -208,7 +208,7 @@ return {
   loadFromSetting: true,
   actionHandlers: {
     delete: async (row) => {
-      await args.executeNamedServerFunction({
+      await _.executeNamedServerFunction({
         functionName: "deleteShopifyShop",
         contextData: { shop: row.P.shop }
       });
@@ -270,4 +270,4 @@ See sections above in repo history for sidebar `parentVertexLabel`, `toParentEdg
 
 ### 6. Table row state vs graph
 
-`TableUiState` stores row id arrays; payloads live in `args.graph.vertexes[id]`. After `getUserContent` / `mutateUserContent`, DynamicPage merges the returned graph.
+`TableUiState` stores row id arrays; payloads live in `_.graph.vertexes[id]`. After `getUserContent` / `mutateUserContent`, DynamicPage merges the returned graph.

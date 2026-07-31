@@ -8,7 +8,7 @@
         description: Loads public table row ids, schema part vertex ids, and combined graph payload.
         body:
           '''
-const { tableKey, tableVertexLabel, locale, categoryId } = args.contextData || {};
+const { tableKey, tableVertexLabel, locale, categoryId } = c || {};
 
 if (!tableVertexLabel && !tableKey) {
   return { success: false, message: "tableKey or tableVertexLabel is required" };
@@ -20,7 +20,7 @@ let resolvedTableVertexLabel = tableVertexLabel && String(tableVertexLabel).trim
   : null;
 
 if (!resolvedTableKey || !resolvedTableVertexLabel) {
-  const idsResult = await args.executeNamedServerFunction({
+  const idsResult = await s({
     functionName: "getTableIds",
     contextData: {
       ...(resolvedTableKey ? { tableKey: resolvedTableKey } : {}),
@@ -38,7 +38,7 @@ if (!resolvedTableKey || !resolvedTableVertexLabel) {
   return { success: false, message: "Failed to resolve table identity" };
 }
 
-const contentResult = await args.executeNamedServerFunction({
+const contentResult = await s({
   functionName: "getUserContent",
   contextData: {
     tableKey: resolvedTableKey,
@@ -57,7 +57,7 @@ const rowIds = rows
   .map((row) => row?.id)
   .filter((id) => id != null && String(id).trim() !== "");
 
-const configResult = await args.executeNamedServerFunction({
+const configResult = await s({
   functionName: "loadTableConfigByKey",
   contextData: { tableKey: resolvedTableKey }
 });

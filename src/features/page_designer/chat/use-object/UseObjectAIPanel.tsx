@@ -158,7 +158,7 @@ You have access to the following theme variables:
 \`\`\`json
 ${JSON.stringify(globalTheme())}
 \`\`\`
-you can use above theme variables in css properties, like: \`\${args.theme.var.color.background_light_900}\`.
+you can use above theme variables in css properties, like: \`\${t.var.color.background_light_900}\`.
 
 Choose colors that work well for the context and maintain good contrast ratios.
 `.trim(),
@@ -190,7 +190,7 @@ Choose colors that work well for the context and maintain good contrast ratios.
   display: grid;
   grid-template-rows: 1fr auto;
   height: 100%;
-  background: \${args.theme.var.color.background_light_50};
+  background: \${t.var.color.background_light_50};
 }\`;`}
     >
       <As
@@ -200,7 +200,7 @@ Choose colors that work well for the context and maintain good contrast ratios.
           `return \`._id {
             padding: 16px;
             scroll-behavior: smooth;
-            background: linear-gradient(to bottom, \${args.theme.var.color.background_light_50}, \${args.theme.var.color.background_light_100});
+            background: linear-gradient(to bottom, \${t.var.color.background_light_50}, \${t.var.color.background_light_100});
           }\`;`,
         ]}
         class="chat-history"
@@ -246,10 +246,10 @@ Choose colors that work well for the context and maintain good contrast ratios.
               (_args: FunctionArgumentType) => `return \`._id {
   padding: 16px;
   margin-bottom: 16px;
-  color: \${args.theme.var.color.error};
-  background: \${args.theme.var.color.error_light_50};
+  color: \${t.var.color.error};
+  background: \${t.var.color.error_light_50};
   border-radius: 8px;
-  border: 1px solid \${args.theme.var.color.error_light_100};
+  border: 1px solid \${t.var.color.error_light_100};
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -262,8 +262,8 @@ Choose colors that work well for the context and maintain good contrast ratios.
               as="button"
               css={`return \`._id {
   padding: 8px 16px;
-  color: \${args.theme.var.color.primary_text};
-  background: \${args.theme.var.color.primary};
+  color: \${t.var.color.primary_text};
+  background: \${t.var.color.primary};
   border: none;
   border-radius: 6px;
   font-weight: 500;
@@ -271,7 +271,7 @@ Choose colors that work well for the context and maintain good contrast ratios.
   transition: background 0.2s;
   
   &:hover {
-    background: \${args.theme.var.color.primary_light_200};
+    background: \${t.var.color.primary_light_200};
   }
 }\`;`}
               onClick={() => reload()}
@@ -288,11 +288,11 @@ Choose colors that work well for the context and maintain good contrast ratios.
             css={[
               `return \`._id {
   padding: 16px;
-  color: \${args.theme.var.color.text_light_300};
+  color: \${t.var.color.text_light_300};
   display: flex;
   gap: 12px;
   align-items: center;
-  background: \${args.theme.var.color.background_light_100};
+  background: \${t.var.color.background_light_100};
   border-radius: 8px;
   margin-bottom: 16px;
 }\`;`,
@@ -316,8 +316,8 @@ Choose colors that work well for the context and maintain good contrast ratios.
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  border: 3px solid \${args.theme.var.color.border};
-  border-top-color: \${args.theme.var.color.primary};
+  border: 3px solid \${t.var.color.border};
+  border-top-color: \${t.var.color.primary};
   animation: spin 1s infinite linear;
 }\`;`,
                   `return \`@keyframes spin {
@@ -339,8 +339,8 @@ Choose colors that work well for the context and maintain good contrast ratios.
               as="button"
               css={`return \`._id {
   padding: 8px 16px;
-  color: \${args.theme.var.color.error_text};
-  background: \${args.theme.var.color.error};
+  color: \${t.var.color.error_text};
+  background: \${t.var.color.error};
   border: none;
   border-radius: 6px;
   cursor: pointer;
@@ -348,7 +348,7 @@ Choose colors that work well for the context and maintain good contrast ratios.
   transition: background 0.2s;
   
   &:hover {
-    background: \${args.theme.var.color.error_light_200};
+    background: \${t.var.color.error_light_200};
   }
 }\`;`}
               onClick={() => stop()}

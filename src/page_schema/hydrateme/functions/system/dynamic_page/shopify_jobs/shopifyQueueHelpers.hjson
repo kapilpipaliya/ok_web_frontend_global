@@ -8,10 +8,10 @@
         body:
           '''
 try {
-  const { Queue } = args.bullmq;
+  const { Queue } = _.bullmq;
 
   const getRedisConnection = () => {
-    return args.bullmq.redisConnection || {
+    return _.bullmq.redisConnection || {
       host: process.env.REDIS_HOST || 'localhost',
       port: parseInt(process.env.REDIS_PORT || '6379'),
       maxRetriesPerRequest: null,
@@ -35,7 +35,7 @@ try {
     removeOnFail: false
   };
 
-  const createShopifyQueue = (args, queueName) => {
+  const createShopifyQueue = (_, queueName) => {
     const connection = getRedisConnection();
     return new Queue(queueName, { connection });
   };
@@ -62,10 +62,10 @@ try {
     return job;
   };
 
-  const runWithSession = async (args, shop, callback) => {
+  const runWithSession = async (_, shop, callback) => {
     if (!shop) throw new Error('runWithSession requires shop');
-    const shopDatabaseName = args.getDatabaseNameForShop(shop, args.rawSubDomain);
-    const driver = await args.getDriver();
+    const shopDatabaseName = _.getDatabaseNameForShop(shop, _.rawSubDomain);
+    const driver = await _.getDriver();
     const dbSession = driver.session({ database: shopDatabaseName });
     try {
       return await callback(dbSession, shopDatabaseName);
@@ -74,9 +74,9 @@ try {
     }
   };
 
-  const getShopifyAdminForShop = async (args, shop) => {
+  const getShopifyAdminForShop = async (_, shop) => {
     if (!shop) return { admin: null, shop: null };
-    const shopify = await args.getShopifyClient();
+    const shopify = await _.getShopifyClient();
     try {
       const authResult = await shopify.unauthenticated.admin(shop);
       return { admin: authResult.admin, shop: authResult.session?.shop || shop };
@@ -132,10 +132,10 @@ try {
     return { success: true, menuItems };
   };
 
-  const deleteShopifyMenuLogic = async (args, session, contextData) => {
+  const deleteShopifyMenuLogic = async (_, session, contextData) => {
     const { menuId, categoryElementId, shop } = contextData || {};
     if (!menuId) return { success: false, error: "menuId is required" };
-    const { admin, shop: resolvedShop } = await getShopifyAdminForShop(args, shop);
+    const { admin, shop: resolvedShop } = await getShopifyAdminForShop(_, shop);
     if (!resolvedShop || !admin) return { success: false, error: "shop and admin are required" };
     const deleteMenuMutation = `mutation menuDelete($id: ID!) { menuDelete(id: $id) { deletedMenuId userErrors { field message } } }`;
     const deleteResponse = await admin.graphql(deleteMenuMutation, { variables: { id: menuId } });
@@ -153,10 +153,10 @@ try {
     return { success: true, deletedMenuId: deleteApiResponse.data?.menuDelete?.deletedMenuId };
   };
 
-  const createShopifyMenuForCategoryLogic = async (args, session, contextData) => {
+  const createShopifyMenuForCategoryLogic = async (_, session, contextData) => {
     const { categoryElementId, categoryName, shop } = contextData || {};
     if (!categoryElementId || !categoryName) return { success: false, error: "categoryElementId and categoryName are required" };
-    const { admin, shop: resolvedShop } = await getShopifyAdminForShop(args, shop);
+    const { admin, shop: resolvedShop } = await getShopifyAdminForShop(_, shop);
     if (!resolvedShop || !admin) return { success: false, error: "shop and admin are required" };
     const menuHandle = categoryName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
     const nested = await buildNestedMenuItems(session, categoryElementId);
@@ -178,10 +178,10 @@ try {
     return { success: true, menu: newMenu, menuId: newMenu.id, menuHandle: newMenu.handle };
   };
 
-  const updateShopifyMenuForCategoryLogic = async (args, session, contextData) => {
+  const updateShopifyMenuForCategoryLogic = async (_, session, contextData) => {
     const { categoryElementId, categoryName, menuId, shop } = contextData || {};
     if (!categoryElementId || !categoryName || !menuId) return { success: false, error: "categoryElementId, categoryName, and menuId are required" };
-    const { admin, shop: resolvedShop } = await getShopifyAdminForShop(args, shop);
+    const { admin, shop: resolvedShop } = await getShopifyAdminForShop(_, shop);
     if (!resolvedShop || !admin) return { success: false, error: "shop and admin are required" };
     const nested = await buildNestedMenuItems(session, categoryElementId);
     const menuItems = nested.success ? (nested.menuItems || []) : [];
@@ -195,7 +195,7 @@ try {
     if (userErrors.length > 0) {
       const menuNotFoundError = userErrors.find(e => e.message && e.message.toLowerCase().includes('menu does not exist'));
       if (menuNotFoundError) {
-        const createResult = await createShopifyMenuForCategoryLogic(args, session, { categoryElementId, categoryName, shop });
+        const createResult = await createShopifyMenuForCategoryLogic(_, session, { categoryElementId, categoryName, shop });
         if (createResult.success) return createResult;
         return { success: false, error: "Failed to create menu after update failed", details: createResult.error };
       }
@@ -379,7 +379,7 @@ try {
     return { success: successList, failed: failedList };
   };
 
-  const updateTopLevelCategoryMenuLogic = async (args, session, contextData) => {
+  const updateTopLevelCategoryMenuLogic = async (_, session, contextData) => {
     const { categoryElementId, shop } = contextData || {};
     if (!categoryElementId) return { success: false, error: "categoryElementId is required" };
     const topLevelResult = await session.run(
@@ -401,18 +401,18 @@ try {
     if (!topLevelShopifyId) return { success: false, error: "Top-level category does not have Shopify ID" };
     if (!isTopLevel) {
       if (topLevelMenuId) {
-        const deleteResult = await deleteShopifyMenuLogic(args, session, { menuId: topLevelMenuId, categoryElementId: topLevelId, shop });
+        const deleteResult = await deleteShopifyMenuLogic(_, session, { menuId: topLevelMenuId, categoryElementId: topLevelId, shop });
         if (deleteResult.success) return { success: true, action: "deleted", message: `Deleted menu for category "${topLevelName}" that is no longer top-level`, topLevelId };
         return { success: false, error: "Failed to delete menu", details: deleteResult.error };
       }
       return { success: true, action: "skipped", message: "Category is no longer top-level and has no menu to delete", topLevelId };
     }
     if (topLevelMenuId) {
-      const updateResult = await updateShopifyMenuForCategoryLogic(args, session, { categoryElementId: topLevelId, categoryName: topLevelName, menuId: topLevelMenuId, shop });
+      const updateResult = await updateShopifyMenuForCategoryLogic(_, session, { categoryElementId: topLevelId, categoryName: topLevelName, menuId: topLevelMenuId, shop });
       if (updateResult.success) return { success: true, action: "updated", message: `Updated menu for top-level category "${topLevelName}"`, topLevelId };
       return { success: false, error: "Failed to update menu", details: updateResult.error };
     }
-    const createResult = await createShopifyMenuForCategoryLogic(args, session, { categoryElementId: topLevelId, categoryName: topLevelName, shop });
+    const createResult = await createShopifyMenuForCategoryLogic(_, session, { categoryElementId: topLevelId, categoryName: topLevelName, shop });
     if (createResult.success) return { success: true, action: "created", message: `Created menu for top-level category "${topLevelName}"`, topLevelId };
     return { success: false, error: "Failed to create menu", details: createResult.error };
   };

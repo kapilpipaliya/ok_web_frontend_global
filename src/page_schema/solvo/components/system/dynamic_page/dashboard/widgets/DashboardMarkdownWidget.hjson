@@ -15,7 +15,7 @@
         componentName: Html
         props:
           '''
-const widgetConfig = args.contextData.props?.widgetConfig || {};
+const widgetConfig = c.props?.widgetConfig || {};
 const content = widgetConfig.content || widgetConfig.markdown || widgetConfig.html || "";
 return {
   as: "div",
@@ -28,7 +28,7 @@ return {
 return `._id {
   font-size: 0.875rem;
   line-height: 1.5;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }

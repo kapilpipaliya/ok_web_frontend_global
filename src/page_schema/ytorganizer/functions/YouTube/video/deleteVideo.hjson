@@ -8,7 +8,7 @@
         body:
           '''
 // Get current authenticated user from session
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return {
     success: false,
@@ -17,10 +17,10 @@ if (!actualUser) {
 }
 
 // Get effective user (handles admin impersonation)
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const user = await _.getEffectiveUser(_.session, actualUser, c);
 
 // Extract parameters - accepts array of videos, 'all', or 'allInContext'
-const { videos, contextType, contextItems, ownershipId, skipOwnershipCheck } = args.contextData;
+const { videos, contextType, contextItems, ownershipId, skipOwnershipCheck } = c;
 
 if (!ownershipId) {
   return {
@@ -31,7 +31,7 @@ if (!ownershipId) {
 
 // Verify ownership belongs to user (skip if called internally)
 if (!skipOwnershipCheck) {
-  const ownershipCheck = await args.session.run(`
+  const ownershipCheck = await _.session.run(`
     MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
     RETURN o
   `, { userUuid: user.P.uuid, ownershipId });
@@ -148,7 +148,7 @@ const deleteRelationshipsQuery = `
   RETURN collect(DISTINCT videoNodeId) as videoIds, count(r) as deletedRelationships
 `;
 
-const relResult = await args.session.run(deleteRelationshipsQuery, queryParams);
+const relResult = await _.session.run(deleteRelationshipsQuery, queryParams);
 const deletedRelRaw = relResult.records[0]?.get('deletedRelationships');
 const deletedRelationships = deletedRelRaw ? (typeof deletedRelRaw.toNumber === 'function' ? deletedRelRaw.toNumber() : Number(deletedRelRaw)) : 0;
 
@@ -175,7 +175,7 @@ const deleteOrphanVideosQuery = `
   RETURN count(v) as deletedVideos
 `;
 
-const vResult = await args.session.run(deleteOrphanVideosQuery, { videoNodeIds, ownershipId });
+const vResult = await _.session.run(deleteOrphanVideosQuery, { videoNodeIds, ownershipId });
 const deletedVRaw = vResult.records[0]?.get('deletedVideos');
 const deletedVideos = deletedVRaw ? (typeof deletedVRaw.toNumber === 'function' ? deletedVRaw.toNumber() : Number(deletedVRaw)) : 0;
 
@@ -193,7 +193,7 @@ const deleteOrphanVideoSettingQuery = `
   RETURN count(vs) as deletedVideoSetting
 `;
 
-const vsResult = await args.session.run(deleteOrphanVideoSettingQuery, { ownershipId });
+const vsResult = await _.session.run(deleteOrphanVideoSettingQuery, { ownershipId });
 const deletedVSRaw = vsResult.records[0]?.get('deletedVideoSetting');
 const deletedVideoSetting = deletedVSRaw ? (typeof deletedVSRaw.toNumber === 'function' ? deletedVSRaw.toNumber() : Number(deletedVSRaw)) : 0;
 

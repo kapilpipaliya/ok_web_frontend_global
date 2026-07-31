@@ -24,7 +24,7 @@
 return {
   enabled: true,
   executeYTOFunction: (functionName, contextData) =>
-    args.executeNamedServerFunction({
+    s({
       functionName,
       contextData: contextData || {}
     })
@@ -64,7 +64,7 @@ return `._id.workshop-settings-layout {
   gap: 0;
   width: 100%;
   min-height: 60vh;
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
 }
 
 @media (min-width: 769px) {
@@ -101,7 +101,7 @@ return {
 return `._id.workshop-settings-main {
   flex: 1;
   min-width: 0;
-  padding: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.md};
 }`;
 '''
       }

@@ -8,7 +8,7 @@
         body:
           '''
 // Get current authenticated user from session
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return {
     success: false,
@@ -17,10 +17,10 @@ if (!actualUser) {
 }
 
 // Get effective user (handles admin impersonation)
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const user = await _.getEffectiveUser(_.session, actualUser, c);
 
 // Extract parameters
-const { categoryId, contentId, relationshipType, categoryLabel, contentLabel, enableUserScopingForSidebar, enableUserScopingForContent, hooks } = args.contextData;
+const { categoryId, contentId, relationshipType, categoryLabel, contentLabel, enableUserScopingForSidebar, enableUserScopingForContent, hooks } = c;
 
 if (!categoryId || !contentId || !relationshipType || !categoryLabel || !contentLabel) {
   return {
@@ -38,7 +38,7 @@ const userCategoryRelType = `User${categoryLabel}`;
 const contentRelType = `User${contentLabel}`;;
 
 // Execute beforeCreateRelationship hooks
-await args.executeHooks(hooks?.beforeCreateRelationship, {
+await _.executeHooks(hooks?.beforeCreateRelationship, {
   categoryId,
   contentId,
   relationshipType,
@@ -106,12 +106,12 @@ try {
     queryParams = { userUuid, categoryId, contentId };
   }
 
-  const result = await args.session.run(query, queryParams);
+  const result = await _.session.run(query, queryParams);
 
   let resultData;
   if (result.records.length > 0) {
     // Use processResult to populate graph structure with the relationship
-    args.processResult(result.records, args.context, [], 'r');
+    _.processResult(result.records, _.context, [], 'r');
     resultData = {
       success: true,
       message: "Relationship created successfully"
@@ -124,7 +124,7 @@ try {
   }
 
   // Execute afterCreateRelationship hooks
-  await args.executeHooks(hooks?.afterCreateRelationship, {
+  await _.executeHooks(hooks?.afterCreateRelationship, {
     categoryId,
     contentId,
     relationshipType,
@@ -144,7 +144,7 @@ try {
   };
 
   // Execute afterCreateRelationship hooks even on error
-  await args.executeHooks(hooks?.afterCreateRelationship, {
+  await _.executeHooks(hooks?.afterCreateRelationship, {
     categoryId,
     contentId,
     relationshipType,

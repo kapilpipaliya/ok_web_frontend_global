@@ -13,24 +13,24 @@ return {
 ''',
         props: '''
 // Rule modal state
-const [showRuleModal, setShowRuleModal] = args.createSignal(false);
-const [ruleModalMode, setRuleModalMode] = args.createSignal("create");
-const [selectedRule, setSelectedRule] = args.createSignal(null);
+const [showRuleModal, setShowRuleModal] = _.createSignal(false);
+const [ruleModalMode, setRuleModalMode] = _.createSignal("create");
+const [selectedRule, setSelectedRule] = _.createSignal(null);
 
 // Category modal state
-const [showCategoryModal, setShowCategoryModal] = args.createSignal(false);
-const [categoryModalMode, setCategoryModalMode] = args.createSignal("create");
-const [selectedCategory, setSelectedCategory] = args.createSignal(null);
+const [showCategoryModal, setShowCategoryModal] = _.createSignal(false);
+const [categoryModalMode, setCategoryModalMode] = _.createSignal("create");
+const [selectedCategory, setSelectedCategory] = _.createSignal(null);
 
 // Category data state
-const [categoryData, setCategoryData] = args.createSignal(null);
-const [rules, setRules] = args.createSignal([]);
-const [isLoading, setIsLoading] = args.createSignal(true);
-const [error, setError] = args.createSignal(null);
+const [categoryData, setCategoryData] = _.createSignal(null);
+const [rules, setRules] = _.createSignal([]);
+const [isLoading, setIsLoading] = _.createSignal(true);
+const [error, setError] = _.createSignal(null);
 
 // Load category data
 const loadCategoryData = async () => {
-  const categoryId = args.searchParams?.categoryId;
+  const categoryId = _.searchParams?.categoryId;
   if (!categoryId) {
     setError("Category ID is required");
     setIsLoading(false);
@@ -42,7 +42,7 @@ const loadCategoryData = async () => {
 
   try {
     // Use the specific getCategoryById function
-    const categoryResult = await args.executeNamedServerFunction({
+    const categoryResult = await s({
       functionName: "getCategoryById",
       contextData: {
         categoryId
@@ -61,7 +61,7 @@ const loadCategoryData = async () => {
     }
 
     // Load rules for this category
-    const rulesResult = await args.executeNamedServerFunction({
+    const rulesResult = await s({
       functionName: "getRulesByCategory",
       contextData: {
         categoryId
@@ -83,7 +83,7 @@ const loadCategoryData = async () => {
   } catch (err) {
     console.error("Error loading category data:", err);
     setError(err.message);
-    args.showErrorToast(err.message);
+    _.showErrorToast(err.message);
   } finally {
     setIsLoading(false);
   }
@@ -147,14 +147,14 @@ return {
 ''',
         css: '''
 return `._id {
-  padding: ${args.theme.var.spacing.lg};
+  padding: ${t.var.spacing.lg};
   max-width: 1200px;
   margin: 0 auto;
 }
 
 @media (max-width: 768px) {
   ._id {
-    padding: ${args.theme.var.spacing.md};
+    padding: ${t.var.spacing.md};
   }
 }`;
 '''
@@ -186,16 +186,16 @@ return {
 return `._id {
   background: none;
   border: none;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   cursor: pointer;
   text-decoration: none;
-  padding: ${args.theme.var.spacing.sm};
-  border-radius: ${args.theme.var.borderRadius.sm};
+  padding: ${t.var.spacing.sm};
+  border-radius: ${t.var.borderRadius.sm};
   transition: all 150ms ease;
 
   &:hover {
-    background: ${args.theme.var.color.background_light_200};
-    color: ${args.theme.var.color.text};
+    background: ${t.var.color.background_light_200};
+    color: ${t.var.color.text};
   }
 }`;
 '''
@@ -225,7 +225,7 @@ return {
         componentName: "RBPageTitle",
         slotName: "center",
         props: '''
-const categoryData = args.contextData.modals?.categoryData?.();
+const categoryData = c.modals?.categoryData?.();
 const category = categoryData?.category;
 const categoryTitle = category?.P?.name || "Category";
 
@@ -248,15 +248,15 @@ return {
   onClick: (e) => {
     e.preventDefault();
     e.stopPropagation();
-    const { setShowCategoryModal, setModalMode, setSelectedCategory } = args.contextData.modals?.categoryModal || {};
-    const categoryData = args.contextData.modals?.categoryData?.();
+    const { setShowCategoryModal, setModalMode, setSelectedCategory } = c.modals?.categoryModal || {};
+    const categoryData = c.modals?.categoryData?.();
 
     if (categoryData) {
       setSelectedCategory?.(categoryData);
       setModalMode?.("edit");
       setShowCategoryModal?.(true);
     } else {
-      args.showErrorToast("Category data not available");
+      _.showErrorToast("Category data not available");
     }
   },
   "aria-label": "Edit category"
@@ -266,16 +266,16 @@ return {
 return `._id {
   background: none;
   border: none;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   cursor: pointer;
   text-decoration: none;
-  padding: ${args.theme.var.spacing.sm};
-  border-radius: ${args.theme.var.borderRadius.sm};
+  padding: ${t.var.spacing.sm};
+  border-radius: ${t.var.borderRadius.sm};
   transition: all 150ms ease;
 
   &:hover {
-    background: ${args.theme.var.color.background_light_200};
-    color: ${args.theme.var.color.text};
+    background: ${t.var.color.background_light_200};
+    color: ${t.var.color.text};
   }
 }`;
 '''
@@ -309,23 +309,23 @@ return {
 };
 ''',
         css: '''
-const isLoading = args.contextData.modals?.isLoading?.();
+const isLoading = c.modals?.isLoading?.();
 
 if (isLoading) {
   return `._id {
-    background: ${args.theme.var.color.background_light_100};
-    border: 1px solid ${args.theme.var.color.border};
-    border-radius: ${args.theme.var.borderRadius.lg};
-    padding: ${args.theme.var.spacing.xl};
+    background: ${t.var.color.background_light_100};
+    border: 1px solid ${t.var.color.border};
+    border-radius: ${t.var.borderRadius.lg};
+    padding: ${t.var.spacing.xl};
     text-align: center;
-    margin-bottom: ${args.theme.var.spacing.xl};
+    margin-bottom: ${t.var.spacing.xl};
     position: relative;
     overflow: hidden;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: ${args.theme.var.spacing.md};
+    gap: ${t.var.spacing.md};
     min-height: 200px;
 
     &:before {
@@ -335,18 +335,18 @@ if (isLoading) {
       left: 0;
       right: 0;
       height: 4px;
-      background: ${args.theme.var.color.primary};
+      background: ${t.var.color.primary};
     }
   }`;
 }
 
 return `._id {
-  background: ${args.theme.var.color.background_light_100};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.lg};
-  padding: ${args.theme.var.spacing.xl};
+  background: ${t.var.color.background_light_100};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.lg};
+  padding: ${t.var.spacing.xl};
   text-align: center;
-  margin-bottom: ${args.theme.var.spacing.xl};
+  margin-bottom: ${t.var.spacing.xl};
   position: relative;
   overflow: hidden;
 
@@ -358,23 +358,23 @@ return `._id {
     right: 0;
     height: 4px;
     background: ${(() => {
-      const categoryData = args.contextData.modals?.categoryData?.();
+      const categoryData = c.modals?.categoryData?.();
       const category = categoryData?.category;
       const color = category?.P?.color || "blue";
 
       // Helper function to get category color
       const getCategoryColor = (color) => {
         const colorMap = {
-          blue: args.theme.var.color.info,
-          green: args.theme.var.color.success,
-          yellow: args.theme.var.color.warning,
-          red: args.theme.var.color.error,
-          purple: args.theme.var.color.primary,
+          blue: t.var.color.info,
+          green: t.var.color.success,
+          yellow: t.var.color.warning,
+          red: t.var.color.error,
+          purple: t.var.color.primary,
           orange: "#f97316",
           teal: "#14b8a6",
           pink: "#ec4899"
         };
-        return colorMap[color] || args.theme.var.color.primary;
+        return colorMap[color] || t.var.color.primary;
       };
 
       return getCategoryColor(color);
@@ -391,7 +391,7 @@ return `._id {
         displayOrder: 1,
         componentName: "RBLoadingSpinner",
         props: '''
-const isLoading = args.contextData.modals?.isLoading?.();
+const isLoading = c.modals?.isLoading?.();
 
 return {
   size: "medium",
@@ -409,10 +409,10 @@ return {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const categoryData = args.contextData.modals?.categoryData?.();
+const categoryData = c.modals?.categoryData?.();
 const category = categoryData?.category;
 const categoryIcon = category?.P?.icon || "📝";
-const isLoading = args.contextData.modals?.isLoading?.();
+const isLoading = c.modals?.isLoading?.();
 
 return {
   as: "div",
@@ -423,7 +423,7 @@ return {
         css: '''
 return `._id {
   font-size: 4rem;
-  margin-bottom: ${args.theme.var.spacing.md};
+  margin-bottom: ${t.var.spacing.md};
 }`;
 '''
       }
@@ -435,10 +435,10 @@ return `._id {
         displayOrder: 4,
         componentName: "Html",
         props: '''
-const categoryData = args.contextData.modals?.categoryData?.();
+const categoryData = c.modals?.categoryData?.();
 const category = categoryData?.category;
 const categoryTitle = category?.P?.name || "Category";
-const isLoading = args.contextData.modals?.isLoading?.();
+const isLoading = c.modals?.isLoading?.();
 
 return {
   as: "h1",
@@ -450,8 +450,8 @@ return {
 return `._id {
   font-size: 1.875rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 ${args.theme.var.spacing.sm} 0;
+  color: ${t.var.color.text};
+  margin: 0 0 ${t.var.spacing.sm} 0;
 }`;
 '''
       }
@@ -463,10 +463,10 @@ return `._id {
         displayOrder: 5,
         componentName: "Html",
         props: '''
-const categoryData = args.contextData.modals?.categoryData?.();
+const categoryData = c.modals?.categoryData?.();
 const category = categoryData?.category;
 const categoryDescription = category?.P?.description || "No description available";
-const isLoading = args.contextData.modals?.isLoading?.();
+const isLoading = c.modals?.isLoading?.();
 
 return {
   as: "p",
@@ -477,8 +477,8 @@ return {
         css: '''
 return `._id {
   font-size: 1.125rem;
-  color: ${args.theme.var.color.text_light_500};
-  margin: 0 0 ${args.theme.var.spacing.lg} 0;
+  color: ${t.var.color.text_light_500};
+  margin: 0 0 ${t.var.spacing.lg} 0;
   line-height: 1.6;
 }`;
 '''
@@ -491,7 +491,7 @@ return `._id {
         displayOrder: 6,
         componentName: "Html",
         props: '''
-const isLoading = args.contextData.modals?.isLoading?.();
+const isLoading = c.modals?.isLoading?.();
 
 return {
   as: "div",
@@ -502,7 +502,7 @@ return {
 return `._id {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: ${args.theme.var.spacing.lg};
+  gap: ${t.var.spacing.lg};
 }`;
 '''
       }
@@ -532,7 +532,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const categoryData = args.contextData.modals?.categoryData?.();
+const categoryData = c.modals?.categoryData?.();
 const ruleCount = categoryData?.ruleCount || 0;
 
 return {
@@ -544,8 +544,8 @@ return {
 return `._id {
   font-size: 2rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
-  margin-bottom: ${args.theme.var.spacing.xs};
+  color: ${t.var.color.text};
+  margin-bottom: ${t.var.spacing.xs};
 }`;
 '''
       }
@@ -565,7 +565,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
       }
@@ -595,7 +595,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const categoryData = args.contextData.modals?.categoryData?.();
+const categoryData = c.modals?.categoryData?.();
 const completionRate = categoryData?.stats?.completionRate || 0;
 
 return {
@@ -607,8 +607,8 @@ return {
 return `._id {
   font-size: 2rem;
   font-weight: 700;
-  color: ${args.theme.var.color.success};
-  margin-bottom: ${args.theme.var.spacing.xs};
+  color: ${t.var.color.success};
+  margin-bottom: ${t.var.spacing.xs};
 }`;
 '''
       }
@@ -628,7 +628,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
       }
@@ -658,7 +658,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const categoryData = args.contextData.modals?.categoryData?.();
+const categoryData = c.modals?.categoryData?.();
 const bestStreak = categoryData?.stats?.bestStreak || 0;
 
 return {
@@ -670,8 +670,8 @@ return {
 return `._id {
   font-size: 2rem;
   font-weight: 700;
-  color: ${args.theme.var.color.streak};
-  margin-bottom: ${args.theme.var.spacing.xs};
+  color: ${t.var.color.streak};
+  margin-bottom: ${t.var.spacing.xs};
 }`;
 '''
       }
@@ -691,7 +691,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
       }
@@ -725,7 +725,7 @@ return `._id {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: ${args.theme.var.spacing.lg};
+  margin-bottom: ${t.var.spacing.lg};
 }`;
 '''
       }
@@ -746,7 +746,7 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0;
 }`;
 '''
@@ -764,8 +764,8 @@ return {
   onClick: (e) => {
     e.preventDefault();
     e.stopPropagation();
-    const { setShowRuleModal, setModalMode, setSelectedRule } = args.contextData.modals?.ruleModal || {};
-    const categoryData = args.contextData.modals?.categoryData?.();
+    const { setShowRuleModal, setModalMode, setSelectedRule } = c.modals?.ruleModal || {};
+    const categoryData = c.modals?.categoryData?.();
     const category = categoryData?.category;
     const categoryElementId = category?.id; // This is the Neo4j elementId
 
@@ -782,20 +782,20 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
   border: none;
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  border-radius: ${args.theme.var.borderRadius.sm};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  border-radius: ${t.var.borderRadius.sm};
   font-weight: 500;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: ${args.theme.var.spacing.xs};
+  gap: ${t.var.spacing.xs};
   transition: all 150ms ease;
 
   &:hover {
-    background: ${args.theme.var.color.primary_dark_200};
+    background: ${t.var.color.primary_dark_200};
   }
   
   &:active {
@@ -850,7 +850,7 @@ return {
 return `._id {
   display: flex;
   flex-direction: column;
-  gap: ${args.theme.var.spacing.md};
+  gap: ${t.var.spacing.md};
 }`;
 '''
       }
@@ -862,7 +862,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const isLoading = args.contextData.modals?.isLoading?.();
+const isLoading = c.modals?.isLoading?.();
 
 return {
   as: "div",
@@ -875,8 +875,8 @@ return `._id {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: ${args.theme.var.spacing.xl};
-  gap: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.xl};
+  gap: ${t.var.spacing.md};
 }`;
 '''
       }
@@ -905,7 +905,7 @@ return {
         contextName: "ruleLoop",
         loop: true,
         props: '''
-const rules = args.contextData.modals?.rules?.() || [];
+const rules = c.modals?.rules?.() || [];
 return {
   as: "div",
   data: rules
@@ -925,7 +925,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const ruleData = args.contextData.ruleLoop;
+const ruleData = c.ruleLoop;
 const rule = ruleData?.rule;
 const ruleId = rule?.id;
 
@@ -936,15 +936,15 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background_light_100};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.md};
-  padding: ${args.theme.var.spacing.md};
+  background: ${t.var.color.background_light_100};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.md};
+  padding: ${t.var.spacing.md};
   cursor: pointer;
   transition: all 150ms ease;
 
   &:hover {
-    border-color: ${args.theme.var.color.primary};
+    border-color: ${t.var.color.primary};
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
 }`;
@@ -986,7 +986,7 @@ return {
 return `._id {
   display: flex;
   align-items: center;
-  gap: ${args.theme.var.spacing.md};
+  gap: ${t.var.spacing.md};
   flex: 1;
 }`;
 '''
@@ -999,7 +999,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const ruleData = args.contextData.ruleLoop;
+const ruleData = c.ruleLoop;
 const stats = ruleData?.stats;
 const isCompleted = stats?.completionRate > 80; // Example logic
 
@@ -1008,16 +1008,16 @@ return {
 };
 ''',
         css: '''
-const ruleData = args.contextData.ruleLoop;
+const ruleData = c.ruleLoop;
 const stats = ruleData?.stats;
 const isCompleted = stats?.completionRate > 80; // Example logic
 
 return `._id {
   width: 20px;
   height: 20px;
-  border: 2px solid ${isCompleted ? args.theme.var.color.success : args.theme.var.color.text_light_500};
-  border-radius: ${args.theme.var.borderRadius.sm};
-  background: ${isCompleted ? args.theme.var.color.success : 'transparent'};
+  border: 2px solid ${isCompleted ? t.var.color.success : t.var.color.text_light_500};
+  border-radius: ${t.var.borderRadius.sm};
+  background: ${isCompleted ? t.var.color.success : 'transparent'};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1033,7 +1033,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const ruleData = args.contextData.ruleLoop;
+const ruleData = c.ruleLoop;
 const stats = ruleData?.stats;
 const isCompleted = stats?.completionRate > 80; // Example logic
 
@@ -1047,7 +1047,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.success_text};
+  color: ${t.var.color.success_text};
 }`;
 '''
       }
@@ -1072,7 +1072,7 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const ruleData = args.contextData.ruleLoop;
+const ruleData = c.ruleLoop;
 const rule = ruleData?.rule;
 const ruleName = rule?.P?.title || "Unnamed Rule";
 
@@ -1084,8 +1084,8 @@ return {
         css: '''
 return `._id {
   font-weight: 500;
-  color: ${args.theme.var.color.text};
-  margin-bottom: ${args.theme.var.spacing.xs};
+  color: ${t.var.color.text};
+  margin-bottom: ${t.var.spacing.xs};
 }`;
 '''
       }
@@ -1097,7 +1097,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const ruleData = args.contextData.ruleLoop;
+const ruleData = c.ruleLoop;
 const rule = ruleData?.rule;
 const stats = ruleData?.stats;
 
@@ -1118,7 +1118,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
       }
@@ -1139,7 +1139,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
       }
@@ -1151,8 +1151,8 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const rules = args.contextData.modals?.rules?.() || [];
-const isLoading = args.contextData.modals?.isLoading?.();
+const rules = c.modals?.rules?.() || [];
+const isLoading = c.modals?.isLoading?.();
 
 return {
   as: "div",
@@ -1162,11 +1162,11 @@ return {
         css: '''
 return `._id {
   text-align: center;
-  padding: ${args.theme.var.spacing.xl};
-  color: ${args.theme.var.color.text_light_500};
-  border: 2px dashed ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.lg};
-  background: ${args.theme.var.color.background_light_50};
+  padding: ${t.var.spacing.xl};
+  color: ${t.var.color.text_light_500};
+  border: 2px dashed ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.lg};
+  background: ${t.var.color.background_light_50};
 }`;
 '''
       }
@@ -1186,7 +1186,7 @@ return {
         css: '''
 return `._id {
   font-size: 1.125rem;
-  margin-bottom: ${args.theme.var.spacing.md};
+  margin-bottom: ${t.var.spacing.md};
   font-weight: 500;
 }`;
 '''
@@ -1205,8 +1205,8 @@ return {
   onClick: (e) => {
     e.preventDefault();
     e.stopPropagation();
-    const { setShowRuleModal, setModalMode, setSelectedRule } = args.contextData.modals?.ruleModal || {};
-    const categoryData = args.contextData.modals?.categoryData?.();
+    const { setShowRuleModal, setModalMode, setSelectedRule } = c.modals?.ruleModal || {};
+    const categoryData = c.modals?.categoryData?.();
     const category = categoryData?.category;
     const categoryElementId = category?.id; // This is the Neo4j elementId
 
@@ -1229,8 +1229,8 @@ return {
         displayOrder: 999,
         componentName: "RBRuleFormModal",
         props: '''
-const modalData = args.contextData.modals?.ruleModal || {};
-const refreshData = args.contextData.modals?.refreshData;
+const modalData = c.modals?.ruleModal || {};
+const refreshData = c.modals?.refreshData;
 
 return {
   isOpen: modalData.showRuleModal?.(),
@@ -1263,8 +1263,8 @@ return {
         displayOrder: 999,
         componentName: "RBCategoryFormModal",
         props: '''
-const modalData = args.contextData.modals?.categoryModal || {};
-const refreshData = args.contextData.modals?.refreshData;
+const modalData = c.modals?.categoryModal || {};
+const refreshData = c.modals?.refreshData;
 
 return {
   isOpen: modalData.showCategoryModal?.(),
@@ -1282,7 +1282,7 @@ return {
   },
   onDelete: (result) => {
     // Navigate back to categories page after successful delete
-    args.navigate("/rb/categories");
+    _.navigate("/rb/categories");
   }
 };
 '''

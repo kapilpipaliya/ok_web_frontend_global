@@ -8,11 +8,11 @@
         body:
           '''
 // This is a background worker function that processes channels
-if (args.contextData.action === 'start') {
+if (c.action === 'start') {
   // Helper function to log messages to database
   const logMessage = async (level, message, metadata = {}) => {
     try {
-      await args.executeNamedServerFunction({
+      await s({
         functionName: 'logWorkerMessage',
         contextData: {
           workerName: 'processChannelQueue',
@@ -20,7 +20,7 @@ if (args.contextData.action === 'start') {
           message,
           metadata
         }
-      }, { functionLookupSubDomain: args.subDomain });
+      }, { functionLookupSubDomain: _.subDomain });
     } catch (error) {
       // Silent failure - don't break worker if logging fails
     }
@@ -29,14 +29,14 @@ if (args.contextData.action === 'start') {
   await logMessage('info', 'Starting channel processing worker');
 
   // Initialize queue helpers and Redis connection
-  const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} }, { functionLookupSubDomain: args.subDomain });
+  const helpers = await s({ functionName: 'queueHelpers', contextData: {} }, { functionLookupSubDomain: _.subDomain });
 
   if (!helpers.result?.success) {
     await logMessage('error', 'Failed to initialize queue helpers', { error: helpers.result?.error });
     throw new Error('Queue helpers initialization failed');
   }
 
-  const { Worker } = args.bullmq;
+  const { Worker } = _.bullmq;
   const connection = helpers.result.data.getRedisConnection();
 
   // Validate Redis connection config
@@ -49,10 +49,10 @@ if (args.contextData.action === 'start') {
   await logMessage('info', 'Checking for queued channels to add to queue');
 
   try {
-    const channelQueue = helpers.result.data.createChannelQueue(args);
+    const channelQueue = helpers.result.data.createChannelQueue(_);
 
     // Get all channels with queueStatus 'queued' through ownership
-    const queuedChannels = await args.session.run(`
+    const queuedChannels = await _.session.run(`
       MATCH (u:User)-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
       MATCH (o)-[:YouTubeOwnershipChannel]->(c:Channel)
       WHERE c.queueStatus = 'queued'
@@ -138,7 +138,7 @@ if (args.contextData.action === 'start') {
     await logMessage('info', 'Processing channel', { channelId, userId, ownershipId, priority });
 
     // Get a new database session for this job
-    const session = await args.getSession();
+    const session = await _.getSession();
 
     // Get ownership priority for quota allocation
     const ownershipResult = await session.run(`
@@ -151,7 +151,7 @@ if (args.contextData.action === 'start') {
     // Actual usage will be logged as operations complete
     let reservationId = null;
     try {
-      reservationId = await args.reserveQuota(
+      reservationId = await _.reserveQuota(
         ownershipId,
         10,  // Estimated quota needed
         ownershipPriority,
@@ -204,7 +204,7 @@ if (args.contextData.action === 'start') {
       // Get authenticated YouTube client for this ownership's OAuth
       let youtube;
       try {
-        youtube = await args.getYouTubeClient(ownershipId, session, args.request);
+        youtube = await _.getYouTubeClient(ownershipId, session, _.request);
       } catch (error) {
         // Handle OAuth errors - mark channel as failed
         await session.run(`
@@ -230,7 +230,7 @@ if (args.contextData.action === 'start') {
       });
 
       // Log API usage: channels.list operation (1 unit) - shared quota
-      await args.logSharedAPIUsage(ownershipId, 'channels.list', args.YOUTUBE_API_COSTS['channels.list'], session);
+      await _.logSharedAPIUsage(ownershipId, 'channels.list', _.YOUTUBE_API_COSTS['channels.list'], session);
 
       if (!channelResponse.data.items || channelResponse.data.items.length === 0) {
         throw new Error('Channel not found');
@@ -251,7 +251,7 @@ if (args.contextData.action === 'start') {
         });
 
         // Log API usage: playlists.list operation (1 unit per page) - shared quota
-        await args.logSharedAPIUsage(ownershipId, 'playlists.list', args.YOUTUBE_API_COSTS['playlists.list'], session);
+        await _.logSharedAPIUsage(ownershipId, 'playlists.list', _.YOUTUBE_API_COSTS['playlists.list'], session);
 
         if (playlistsResponse.data.items) {
           allPlaylists = allPlaylists.concat(playlistsResponse.data.items);
@@ -287,7 +287,7 @@ if (args.contextData.action === 'start') {
       `, { ownershipId, channelId, totalPlaylists });
 
       // Create a queue for playlist processing
-      const playlistQueue = helpers.result.data.createPlaylistQueue(args);
+      const playlistQueue = helpers.result.data.createPlaylistQueue(_);
 
       try {
         // Process each playlist by adding to queue
@@ -404,7 +404,7 @@ if (args.contextData.action === 'start') {
       // Release quota reservation
       if (reservationId) {
         try {
-          await args.releaseQuota(reservationId, session);
+          await _.releaseQuota(reservationId, session);
           await logMessage('info', 'Released quota reservation', { reservationId, channelId });
         } catch (error) {
           // Log but don't throw - session cleanup is more important

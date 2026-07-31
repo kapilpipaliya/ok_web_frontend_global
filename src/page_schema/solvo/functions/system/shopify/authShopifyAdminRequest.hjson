@@ -8,9 +8,9 @@
         body:
           '''
 
-const params = args.contextData?.searchParams || {};
+const params = c?.searchParams || {};
 
-const { valid, error } = await args.verifyShopifyAdminRequest(params);
+const { valid, error } = await _.verifyShopifyAdminRequest(params);
 
 if (!valid) {
   return {
@@ -19,9 +19,9 @@ if (!valid) {
   };
 }
 
-const shopify = await args.getShopifyClient();
+const shopify = await _.getShopifyClient();
 
-const event = args.getRequestEvent();
+const event = _.getRequestEvent();
 if (!event) {
   throw new Error("No request context available");
 }
@@ -42,8 +42,8 @@ try {
     };
   }
 
-  // Save unique shop name in subdomain DB (caller passes useSessionShop: false so args.session is subdomain session)
-  await args.session.run(
+  // Save unique shop name in subdomain DB (caller passes useSessionShop: false so _.session is subdomain session)
+  await _.session.run(
     `MERGE (s:ShopifyShop {shop: $shop})
      ON CREATE SET s.createdAt = datetime(), s.updatedAt = datetime()
      ON MATCH SET s.updatedAt = datetime()`,
@@ -55,12 +55,12 @@ try {
   // shouldRunMigrationForShop(shop) is true; migration runs here for the current shop.
   // Migration "in progress" is stored in DB; if another process is migrating,
   // this waits and retries up to 3 times with a time gap so migration can complete.
-  const result = await args.ensureShopDatabaseAndMigrate(shop, {
+  const result = await _.ensureShopDatabaseAndMigrate(shop, {
     dryRun: false,
     contextData: {
       searchParams: params,
     },
-    appSubDomain: args.rawSubDomain,
+    appSubDomain: _.rawSubDomain,
     shopifyAdmin: authResult.admin,
   });
   dbSession = result.dbSession;
@@ -84,7 +84,7 @@ try {
       };
     }
 
-    const ev = args.getRequestEvent();
+    const ev = _.getRequestEvent();
     if (ev && ev.response) {
       errorOrResponse.headers.forEach((value, key) => {
         ev.response.headers.set(key, value);

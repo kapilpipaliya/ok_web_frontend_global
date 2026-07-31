@@ -5,7 +5,7 @@ export function DialogHeader(props: Readonly<{ title: string }>) {
     <As
       as="h3"
       css={`return \`._id {
-  color: \${args.theme.var.color.primary};
+  color: \${t.var.color.primary};
   font-size: 1rem;
   font-weight: bold;
 }\`;`}

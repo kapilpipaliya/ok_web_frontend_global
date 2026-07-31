@@ -15,14 +15,14 @@
         fns:
           '''
 // Get props from context reactively
-const getItems = () => args.contextData.props?.items || [];
-const getItemHeight = () => args.contextData.props?.itemHeight || 90;
-const getOverscan = () => args.contextData.props?.overscan || 5;
-const getOnScrollCallback = () => args.contextData.props?.onScroll;
+const getItems = () => c.props?.items || [];
+const getItemHeight = () => c.props?.itemHeight || 90;
+const getOverscan = () => c.props?.overscan || 5;
+const getOnScrollCallback = () => c.props?.onScroll;
 
 // Virtualization state
-const [scrollTop, setScrollTop] = args.createSignal(0);
-const [scrollElement, setScrollElement] = args.createSignal(null);
+const [scrollTop, setScrollTop] = _.createSignal(0);
+const [scrollElement, setScrollElement] = _.createSignal(null);
 
 // Calculate visible range
 const getVisibleRange = () => {
@@ -97,13 +97,13 @@ return {
         componentName: Html
         props:
           '''
-const containerClass = args.contextData.props?.class || "";
+const containerClass = c.props?.class || "";
 
 return {
   as: "div",
   class: containerClass,
-  ref: args.fns.setScrollElement,
-  onScroll: args.fns.handleScroll
+  ref: f.setScrollElement,
+  onScroll: f.handleScroll
 };
 '''
       }
@@ -117,7 +117,7 @@ return {
 return `._id {
   position: relative;
   width: 100%;
-  height: ${args.fns.getTotalSize()}px;
+  height: ${f.getTotalSize()}px;
 }`;
 '''
         displayOrder: 1
@@ -141,7 +141,7 @@ return {
         props:
           '''
 return {
-  data: args.fns.getVirtualItems()
+  data: f.getVirtualItems()
 };
 '''
       }
@@ -153,7 +153,7 @@ return {
         contextName: item
         css:
           '''
-const virtualItem = args.contextData.virtualItem;
+const virtualItem = c.virtualItem;
 
 return `._id {
   position: absolute;
@@ -167,8 +167,8 @@ return `._id {
         componentName: Html
         props:
           '''
-const virtualItem = args.contextData.virtualItem;
-const item = args.fns.getItems()[virtualItem.index];
+const virtualItem = c.virtualItem;
+const item = f.getItems()[virtualItem.index];
 
 return {
   as: "div",

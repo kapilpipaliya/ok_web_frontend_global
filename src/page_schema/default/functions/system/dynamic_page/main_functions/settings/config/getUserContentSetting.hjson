@@ -8,7 +8,7 @@
         body:
           '''
 // Get current authenticated user from session
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return {
     success: false,
@@ -17,10 +17,10 @@ if (!actualUser) {
 }
 
 // Get effective user (handles admin impersonation)
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const user = await _.getEffectiveUser(_.session, actualUser, c);
 
 // Extract parameters
-const { tableVertexLabel, key, settingsLabel } = args.contextData;
+const { tableVertexLabel, key, settingsLabel } = c;
 
 if (!tableVertexLabel) {
   return {
@@ -40,14 +40,14 @@ const query = `
   LIMIT 1
 `;
 
-const result = await args.session.run(query, {
+const result = await _.session.run(query, {
   userUuid: user.P.uuid,
   settingKey: settingKey
 });
 
 if (result.records.length === 0) {
   // No user setting — load site-wide Setting (not linked via UserSetting)
-  let siteResult = await args.session.run(
+  let siteResult = await _.session.run(
     `MATCH (s:Setting {key: $settingKey})
      WHERE NOT (s)<-[:UserSetting]-()
      RETURN s LIMIT 1`,
@@ -55,13 +55,13 @@ if (result.records.length === 0) {
   );
 
   // If no site setting exists, run migration to create defaults
-  if (siteResult.records.length === 0 && args.executeNamedServerFunction) {
+  if (siteResult.records.length === 0 && s) {
     try {
-      await args.executeNamedServerFunction({
+      await s({
         functionName: "migrateDynamicPageSettings",
         contextData: { dryRun: false }
       });
-      siteResult = await args.session.run(
+      siteResult = await _.session.run(
         `MATCH (s:Setting {key: $settingKey})
          WHERE NOT (s)<-[:UserSetting]-()
          RETURN s LIMIT 1`,
@@ -73,7 +73,7 @@ if (result.records.length === 0) {
   }
 
   if (siteResult.records.length > 0) {
-    const siteVertices = args.processResult(siteResult.records, args.context, 's');
+    const siteVertices = _.processResult(siteResult.records, _.context, 's');
     const siteVertex = siteVertices[0];
     return {
       success: true,
@@ -96,7 +96,7 @@ if (result.records.length === 0) {
 }
 
 // Use processResult to populate graph structure
-const settingVertices = args.processResult(result.records, args.context, 's');
+const settingVertices = _.processResult(result.records, _.context, 's');
 const settingVertex = settingVertices[0];
 
 return {

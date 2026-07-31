@@ -8,12 +8,12 @@
         description: Posts a payment and updates invoice payment status.
         body:
           '''
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return { success: false, message: "User session not found", data: null };
 }
 
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const user = await _.getEffectiveUser(_.session, actualUser, c);
 const {
   invoiceNo,
   amount,
@@ -23,7 +23,7 @@ const {
   notes,
   allowOverpayment = false,
   enableUserScoping = true
-} = args.contextData || {};
+} = c || {};
 
 if (!invoiceNo || amount === undefined || amount === null) {
   return {
@@ -37,7 +37,7 @@ if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) {
   return { success: false, message: "amount must be a positive number" };
 }
 
-const result = await args.session.executeWrite(async (tx) => {
+const result = await _.session.executeWrite(async (tx) => {
   const invoiceLookup = enableUserScoping
     ? await tx.run(
         `
@@ -148,7 +148,7 @@ const result = await args.session.executeWrite(async (tx) => {
     }
   );
 
-  return args.convertNodeToJson(createPayment.records[0].get("p"));
+  return _.convertNodeToJson(createPayment.records[0].get("p"));
 });
 
 return {

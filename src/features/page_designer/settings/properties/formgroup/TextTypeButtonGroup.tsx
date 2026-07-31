@@ -26,17 +26,17 @@ export function TextTypeButtonGroup(props: {
       flex: 1;
       padding: 4px 8px;
       font-size: 0.8125rem;
-      border: 1px solid \${args.theme.var.color.border};
+      border: 1px solid \${t.var.color.border};
       cursor: pointer;
       background: ${
         currentValue() === option.value
-          ? "${args.theme.var.color.primary}"
-          : "${args.theme.var.color.background_light_200}"
+          ? "${t.var.color.primary}"
+          : "${t.var.color.background_light_200}"
       };
       color: ${
         currentValue() === option.value
-          ? "${args.theme.var.color.primary_text}"
-          : "${args.theme.var.color.text}"
+          ? "${t.var.color.primary_text}"
+          : "${t.var.color.text}"
       };
       border-radius: ${isFirst ? "4px 0 0 4px" : isLast ? "0 4px 4px 0" : "0"};
       margin-left: ${isFirst ? "0" : "-1px"};

@@ -7,14 +7,14 @@
         description: Get detailed YTO data for a specific user (channels, playlists, videos)
         body:
           '''
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   throw new Error("User session not found");
 }
 
 // Priority: impersonatedUserUuid (from admin impersonation) > userUuid (explicit parameter)
-const targetUserUuid = args.contextData.impersonatedUserUuid || args.contextData.userUuid;
-const { ownershipId } = args.contextData; // Optional: filter by specific ownership
+const targetUserUuid = c.impersonatedUserUuid || c.userUuid;
+const { ownershipId } = c; // Optional: filter by specific ownership
 
 if (!targetUserUuid) {
   throw new Error("userUuid is required");
@@ -25,7 +25,7 @@ const isViewingSelf = actualUser.P.uuid === targetUserUuid;
 
 if (!isViewingSelf) {
   // Verify admin role when viewing other users' data
-  const adminCheck = await args.session.run(
+  const adminCheck = await _.session.run(
     `MATCH (u:User {uuid: $userId})-[:UserRole]->(r:Role {key: "Admin"})
      RETURN u`,
     { userId: actualUser.P.uuid }
@@ -38,7 +38,7 @@ if (!isViewingSelf) {
 
 // Get user's channels with video counts using helper function
 // If ownershipId is provided, filter by that ownership; otherwise aggregate across all
-const channelsResult = await args.executeNamedServerFunction({
+const channelsResult = await s({
   functionName: "getChannelsWithVideoCount",
   contextData: {
     userUuid: targetUserUuid,
@@ -51,7 +51,7 @@ const channels = channelsResult.result?.success
   : [];
 
 // Get user's playlists with video counts using helper function
-const playlistsResult = await args.executeNamedServerFunction({
+const playlistsResult = await s({
   functionName: "getPlaylistsWithVideoCount",
   contextData: {
     userUuid: targetUserUuid,
@@ -64,7 +64,7 @@ const playlists = playlistsResult.result?.success
   : [];
 
 // Get user's favorite videos using helper function (limit to 20 most recent)
-const videosResult = await args.executeNamedServerFunction({
+const videosResult = await s({
   functionName: "getVideosWithDetails",
   contextData: {
     userUuid: targetUserUuid,
@@ -93,7 +93,7 @@ const totalVideosQuery = ownershipId
     RETURN count(DISTINCT v) as totalVideos
   `;
 
-const totalVideosResult = await args.session.run(totalVideosQuery, {
+const totalVideosResult = await _.session.run(totalVideosQuery, {
   userUuid: targetUserUuid,
   ...(ownershipId && { ownershipId })
 });
@@ -107,7 +107,7 @@ const userPlanQuery = `
   RETURN u.plan as plan
 `;
 
-const userPlanResult = await args.session.run(userPlanQuery, { userUuid: targetUserUuid });
+const userPlanResult = await _.session.run(userPlanQuery, { userUuid: targetUserUuid });
 const userPlan = userPlanResult.records.length > 0 && userPlanResult.records[0].get('plan')
   ? userPlanResult.records[0].get('plan')
   : 'free';

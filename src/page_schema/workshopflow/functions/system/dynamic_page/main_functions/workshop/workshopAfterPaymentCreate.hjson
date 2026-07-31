@@ -8,10 +8,10 @@
         description: Hook that recalculates linked invoice payment status after payment create or update (amount or invoice link).
         body:
           '''
-const elementId = args.contextData?.elementId;
+const elementId = c?.elementId;
 if (!elementId) return { success: true, message: "No payment id provided" };
 
-const paymentResult = await args.session.run(
+const paymentResult = await _.session.run(
   `
   MATCH (p:WorkshopPayment)
   WHERE elementId(p) = $elementId
@@ -40,7 +40,7 @@ if (!invoiceNode) {
 const invoiceNo = invoiceNode.properties?.invoiceNo;
 if (!invoiceNo) return { success: true, message: "Invoice number not found" };
 
-const totalsResult = await args.session.run(
+const totalsResult = await _.session.run(
   `
   MATCH (i:WorkshopInvoice {invoiceNo: $invoiceNo})
   OPTIONAL MATCH (p:WorkshopPayment)-[:PaymentInvoice]->(i)
@@ -62,7 +62,7 @@ let paymentStatus = "unpaid";
 if (paid > 0 && paid < totalAmount) paymentStatus = "partial";
 if (totalAmount > 0 && paid >= totalAmount) paymentStatus = "paid";
 
-await args.session.run(
+await _.session.run(
   `
   MATCH (i:WorkshopInvoice {invoiceNo: $invoiceNo})
   SET i.paidAmount = $paid,

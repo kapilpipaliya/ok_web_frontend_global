@@ -80,7 +80,7 @@ function TabBarItem(props: {
           <As
             as="span"
             css={`return \`._id {
-                      color:\${args.theme.var.color.error};
+                      color:\${t.var.color.error};
                       font-weight: bold;
                       margin-left: 3px;
                       display: inline-block;
@@ -97,10 +97,10 @@ function TabBarItem(props: {
   background-color: transparent;
   border: none;
   cursor: pointer;
-  color: \${args.theme.var.color.primary_text};
+  color: \${t.var.color.primary_text};
   transition: color 0.2s ease;
   &:hover {
-    color: \${args.theme.var.color.primary};
+    color: \${t.var.color.primary};
   }
 }\`;`}
         onClick={() => {
@@ -131,11 +131,11 @@ function TabBarItem(props: {
         <IconButton
           css={`return \`._id {
   background-color: transparent;
-  color: \${args.theme.var.color.error};
+  color: \${t.var.color.error};
   cursor: pointer;
   border: none;
   &:hover {
-    color: \${args.theme.var.color.error_light_800};
+    color: \${t.var.color.error_light_800};
   }
 }\`;`}
           icon="ph:x"
@@ -178,13 +178,13 @@ export function TabBar(props: { mainPanel: Id }) {
       transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
       ${
         isActiveTab
-          ? "background-color: ${args.theme.var.color.primary_light_250}; color: ${args.theme.var.color.primary_light_250_text}; border: 1px solid transparent;"
-          : "background-color: ${args.theme.var.color.background_light_100}; color: ${args.theme.var.color.text_light_300}; border: 1px solid ${args.theme.var.color.border};"
+          ? "background-color: ${t.var.color.primary_light_250}; color: ${t.var.color.primary_light_250_text}; border: 1px solid transparent;"
+          : "background-color: ${t.var.color.background_light_100}; color: ${t.var.color.text_light_300}; border: 1px solid ${t.var.color.border};"
       }
-      ${isCurrentForm ? "border-bottom: 2px solid ${args.theme.var.color.error};" : ""}
+      ${isCurrentForm ? "border-bottom: 2px solid ${t.var.color.error};" : ""}
       ${
         !isActiveTab
-          ? "&:hover { color: ${args.theme.var.color.primary}; }"
+          ? "&:hover { color: ${t.var.color.primary}; }"
           : ""
       }
     }\`;`;
@@ -349,8 +349,8 @@ export function TabBar(props: { mainPanel: Id }) {
   display: flex;
   gap: 5px;
   padding: 5px;
-  border-bottom: 1px solid \${args.theme.var.color.border};
-  background-color: \${args.theme.var.color.background_light_100};
+  border-bottom: 1px solid \${t.var.color.border};
+  background-color: \${t.var.color.background_light_100};
 }\`;`}
       ref={(element) => {
         setPanelRef(element);
@@ -362,10 +362,10 @@ export function TabBar(props: { mainPanel: Id }) {
         css={`return \`._id {
           background-color: transparent;
           border: none;
-          color: \${args.theme.var.color.text_light_400};
+          color: \${t.var.color.text_light_400};
           transition: color 0.2s ease;
           &:hover {
-            color: \${args.theme.var.color.primary};
+            color: \${t.var.color.primary};
           }
         }\`;`}
         onClick={addMainPanel}
@@ -409,9 +409,9 @@ export function TabBar(props: { mainPanel: Id }) {
   margin-left: auto;
   background-color: transparent;
   border: none;
-  color: \${args.theme.var.color.text_light_200};
+  color: \${t.var.color.text_light_200};
   &:hover {
-    color: \${args.theme.var.color.error_light_800};
+    color: \${t.var.color.error_light_800};
   }
 }\`;`}
           icon="ph:x-circle"

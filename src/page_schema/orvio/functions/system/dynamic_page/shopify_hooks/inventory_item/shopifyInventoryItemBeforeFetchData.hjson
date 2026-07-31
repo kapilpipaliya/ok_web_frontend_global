@@ -15,10 +15,10 @@
   parentVertexLabel,
   toParentEdgeType,
   enableUserScoping
-} = args.contextData;
+} = c;
 if (tableVertexLabel !== "ShopifyInventoryItem") return;
 
-const shop = contextShop || args.shop;
+const shop = contextShop || _.shop;
 if (!shop) {
   console.warn("[shopifyInventoryItemBeforeFetchData] shop is required");
   return;
@@ -26,7 +26,7 @@ if (!shop) {
 
 console.log("[shopifyInventoryItemBeforeFetchData] contextData:", { shop, filters });
 
-const shopify = await args.getShopifyClient();
+const shopify = await _.getShopifyClient();
 let admin;
 try {
   const authResult = await shopify.unauthenticated.admin(shop);
@@ -47,7 +47,7 @@ const isUncategorized = showUnassigned === true || categoryId === uncategorizedV
 let categoryInventoryItemGids = [];
 if (!isUncategorized && categoryId && parentVertexLabel && toParentEdgeType) {
   try {
-    const fetchResult = await args.executeNamedServerFunction(
+    const fetchResult = await s(
       {
         functionName: "getUserContent",
         contextData: {
@@ -238,7 +238,7 @@ const jstr = (v) => {
   }
 };
 
-const session = args.session;
+const session = _.session;
 for (const node of allNodes) {
   const id = node.id || "";
   if (!id) continue;

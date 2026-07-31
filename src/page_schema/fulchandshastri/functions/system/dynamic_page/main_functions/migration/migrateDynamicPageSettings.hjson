@@ -12,12 +12,12 @@
  * contextData: { dryRun?: boolean }
  */
 
-const { dryRun = false } = args.contextData || {};
+const { dryRun = false } = c || {};
 console.log(`Fulchand Shastri settings migration (dryRun: ${dryRun})`);
 
 const nowIso = () => new Date().toISOString();
 
-const definitionsResult = await args.executeNamedServerFunction({
+const definitionsResult = await s({
   functionName: "getPageSettingsDefinitions",
   contextData: {}
 });
@@ -38,7 +38,7 @@ const { settingsPageConfigs, defaultSectionDocuments, tableSchemaParts, tableSec
 
 async function ensureGlobalSetting() {
   if (dryRun) return;
-  await args.session.run(
+  await _.session.run(
     `
     MERGE (g:GlobalSetting {key: 'Default'})
     ON CREATE SET g.createdAt = datetime(), g.name = 'Default'
@@ -50,12 +50,12 @@ async function ensureGlobalSetting() {
 
 async function processSettingsPageConfig(setting) {
   const { key, settingsPageId, name, config } = setting;
-  const checkResult = await args.session.run(`MATCH (s:Setting {key: $key}) RETURN s`, { key });
+  const checkResult = await _.session.run(`MATCH (s:Setting {key: $key}) RETURN s`, { key });
   const exists = checkResult.records.length > 0;
 
   if (!dryRun) {
     if (exists) {
-      await args.session.run(
+      await _.session.run(
         `MATCH (s:Setting {key: $key})
          SET s.config = $config,
              s.type = 'settings_page_config',
@@ -66,7 +66,7 @@ async function processSettingsPageConfig(setting) {
         { key, settingsPageId, name, config }
       );
     } else {
-      await args.session.run(
+      await _.session.run(
         `CREATE (s:Setting {
           key: $key,
           type: 'settings_page_config',
@@ -90,7 +90,7 @@ async function processDefaultSectionDocument(doc) {
     return { created: 1, updated: 0 };
   }
   const valuesJson = JSON.stringify(doc.values || {});
-  const result = await args.session.run(
+  const result = await _.session.run(
     `
     MATCH (g:GlobalSetting {key: 'Default'})
     OPTIONAL MATCH (g)-[:GlobalSettingHasSettingsSection]->(existing:SettingsSectionDocument {pageId: $pageId, sectionId: $sectionId})
@@ -120,12 +120,12 @@ async function processDefaultSectionDocument(doc) {
 
 async function processTableSchemaPart(setting) {
   const { key, tableKey, tableVertexLabel, part, name, config } = setting;
-  const checkResult = await args.session.run(`MATCH (s:Setting {key: $key}) RETURN s`, { key });
+  const checkResult = await _.session.run(`MATCH (s:Setting {key: $key}) RETURN s`, { key });
   const exists = checkResult.records.length > 0;
 
   if (!dryRun) {
     if (exists) {
-      await args.session.run(
+      await _.session.run(
         `MATCH (s:Setting {key: $key})
          SET s.config = $config,
              s.type = 'table_schema',
@@ -138,7 +138,7 @@ async function processTableSchemaPart(setting) {
         { key, tableKey, tableVertexLabel, part, name, config }
       );
     } else {
-      await args.session.run(
+      await _.session.run(
         `CREATE (s:Setting {
           key: $key,
           type: 'table_schema',
@@ -164,7 +164,7 @@ async function processTableSectionDocument(doc) {
     return { created: 1, updated: 0 };
   }
   const valuesJson = JSON.stringify(doc.values || {});
-  const result = await args.session.run(
+  const result = await _.session.run(
     `
     MATCH (g:GlobalSetting {key: 'Default'})
     OPTIONAL MATCH (g)-[:GlobalSettingHasSettingsSection]->(existing:SettingsSectionDocument {pageId: $pageId, sectionId: $sectionId})
@@ -236,7 +236,7 @@ for (let ts = 0; ts < (tableSectionDocuments?.length || 0); ts++) {
 async function migrateExistingLocalizedValues() {
   if (dryRun) return { converted: 0 };
 
-  const languagesResult = await args.executeNamedServerFunction({
+  const languagesResult = await s({
     functionName: "getSiteLanguages",
     contextData: {}
   });
@@ -244,7 +244,7 @@ async function migrateExistingLocalizedValues() {
     { code: "en", label: "English", isDefault: true }
   ];
 
-  const docsResult = await args.session.run(`
+  const docsResult = await _.session.run(`
     MATCH (g:GlobalSetting {key: 'Default'})-[:GlobalSettingHasSettingsSection]->(d:SettingsSectionDocument)
     RETURN d.pageId AS pageId, d.sectionId AS sectionId, d.values AS values, id(d) AS nodeId
   `);
@@ -262,7 +262,7 @@ async function migrateExistingLocalizedValues() {
     if (!values || typeof values !== "object") continue;
 
     const configKey = pageId + "_settings_page";
-    const configResult = await args.session.run(
+    const configResult = await _.session.run(
       `MATCH (s:Setting {key: $key}) RETURN s.config AS config LIMIT 1`,
       { key: configKey }
     );
@@ -279,7 +279,7 @@ async function migrateExistingLocalizedValues() {
     }
     if (!sectionConfig) continue;
 
-    const normalizeResult = await args.executeNamedServerFunction({
+    const normalizeResult = await s({
       functionName: "localizationHelpers",
       contextData: {
         action: "localizeSectionValues",
@@ -294,7 +294,7 @@ async function migrateExistingLocalizedValues() {
     if (!normalizedValues) continue;
 
     if (JSON.stringify(normalizedValues) !== JSON.stringify(values)) {
-      await args.session.run(
+      await _.session.run(
         `MATCH (d) WHERE id(d) = $nodeId SET d.values = $valuesJson, d.updatedAt = $now`,
         {
           nodeId,

@@ -275,8 +275,8 @@ return `._id {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
 }
 
 @media (min-width: 768px) {
@@ -333,7 +333,7 @@ return `._id {
         props: '''
 // Navigation overlay during route changes (ConfirmProvider)
 // This controls when the overlay should be visible
-const isNavigating = args.fns.isNavigating?.();
+const isNavigating = f.isNavigating?.();
 
 return {
   as: "div",
@@ -354,13 +354,13 @@ return `._id {
   bottom: 0;
 
   /* Match theme background for seamless appearance */
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
 
   /* Position spinner at top instead of center */
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding-top: ${args.theme.var.spacing.xxl};
+  padding-top: ${t.var.spacing.xxl};
 
   /* High z-index to appear above all content */
   z-index: 1;
@@ -417,8 +417,8 @@ return `._id {
     left: 0;
     width: 240px;
     height: 100vh;
-    background: ${args.theme.var.color.background};
-    border-right: 1px solid ${args.theme.var.color.border};
+    background: ${t.var.color.background};
+    border-right: 1px solid ${t.var.color.border};
     flex-direction: column;
     z-index: 1;
     box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
@@ -440,8 +440,8 @@ return {
 ''',
         css: '''
 return `._id {
-  padding-bottom: ${args.theme.var.spacing.lg};
-  border-bottom: 1px solid ${args.theme.var.color.border};
+  padding-bottom: ${t.var.spacing.lg};
+  border-bottom: 1px solid ${t.var.color.border};
 }`;
 '''
       }
@@ -462,11 +462,11 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0;
   display: flex;
   align-items: center;
-  gap: ${args.theme.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
 }`;
 '''
       }
@@ -486,7 +486,7 @@ return {
 return `._id {
   display: flex;
   flex-direction: column;
-  gap: ${args.theme.var.spacing.lg};
+  gap: ${t.var.spacing.lg};
   overflow-y: auto;
   scrollbar-gutter: stable;
 }`;
@@ -502,7 +502,7 @@ return `._id {
         contextName: "navSection",
         loop: true,
         props: '''
-const sections = args.fns.navigationSections;
+const sections = f.navigationSections;
 return {
   as: "div",
   data: sections
@@ -522,7 +522,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const section = args.contextData.navSection;
+const section = c.navSection;
 const hasBorder = section.hasBorder;
 return {
   as: "div"
@@ -537,7 +537,7 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const section = args.contextData.navSection;
+const section = c.navSection;
 const title = section.title;
 return {
   as: "h3",
@@ -549,11 +549,11 @@ return {
 return `._id {
   font-size: 0.875rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin: 0 0 ${args.theme.var.spacing.sm} 0;
-  padding: 0 ${args.theme.var.spacing.md};
+  margin: 0 0 ${t.var.spacing.sm} 0;
+  padding: 0 ${t.var.spacing.md};
 }`;
 '''
       }
@@ -565,13 +565,13 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const section = args.contextData.navSection;
+const section = c.navSection;
 return {
   as: "ul"
 };
 ''',
         css: '''
-const section = args.contextData.navSection;
+const section = c.navSection;
 const hasBorder = section.hasBorder;
 return `._id {
   list-style: none;
@@ -579,8 +579,8 @@ return `._id {
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: ${args.theme.var.spacing.xs};
-  ${hasBorder ? `padding-top: ${args.theme.var.spacing.md}; border-top: 1px solid ${args.theme.var.color.border};` : ''}
+  gap: ${t.var.spacing.xs};
+  ${hasBorder ? `padding-top: ${t.var.spacing.md}; border-top: 1px solid ${t.var.color.border};` : ''}
 }`;
 '''
       }
@@ -594,7 +594,7 @@ return `._id {
         contextName: "navItem",
         loop: true,
         props: '''
-const section = args.contextData.navSection;
+const section = c.navSection;
 const items = section.items;
 return {
   as: "li",
@@ -615,8 +615,8 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const item = args.contextData.navItem;
-const isActive = item.pathCheck ? item.pathCheck(args.location.pathname) : false;
+const item = c.navItem;
+const isActive = item.pathCheck ? item.pathCheck(_.location.pathname) : false;
 const isButton = item.isButton;
 const isDanger = item.isDanger;
 
@@ -627,24 +627,24 @@ return {
   title: item.title,
   onClick: (e) => {
     e.preventDefault();
-    args.fns.navigateTo?.(item.href);
+    f.navigateTo?.(item.href);
   }
 };
 ''',
         css: '''
-const item = args.contextData.navItem;
-const isActive = item.pathCheck ? item.pathCheck(args.location.pathname) : false;
+const item = c.navItem;
+const isActive = item.pathCheck ? item.pathCheck(_.location.pathname) : false;
 const isButton = item.isButton;
 const isDanger = item.isDanger;
 
 return `._id {
   display: flex;
   align-items: center;
-  gap: ${args.theme.var.spacing.md};
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  border-radius: ${args.theme.var.borderRadius.md};
-  background: ${isActive ? args.theme.var.color.background_light_200 : 'transparent'};
-  color: ${isDanger ? args.theme.var.color.error : (isActive ? args.theme.var.color.primary : args.theme.var.color.text)};
+  gap: ${t.var.spacing.md};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  border-radius: ${t.var.borderRadius.md};
+  background: ${isActive ? t.var.color.background_light_200 : 'transparent'};
+  color: ${isDanger ? t.var.color.error : (isActive ? t.var.color.primary : t.var.color.text)};
   text-decoration: none;
   font-weight: ${isActive ? '600' : '500'};
   transition: all 150ms ease;
@@ -658,8 +658,8 @@ return `._id {
   ` : ''}
 
   &:hover {
-    background: ${isDanger ? args.theme.var.color.error_light_100 : args.theme.var.color.background_light_200};
-    color: ${isDanger ? args.theme.var.color.error_dark_200 : args.theme.var.color.primary};
+    background: ${isDanger ? t.var.color.error_light_100 : t.var.color.background_light_200};
+    color: ${isDanger ? t.var.color.error_dark_200 : t.var.color.primary};
   }
   
   ${isButton ? `
@@ -678,7 +678,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const item = args.contextData.navItem;
+const item = c.navItem;
 return {
   as: "icon",
   icon: item.icon,
@@ -695,7 +695,7 @@ return {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const item = args.contextData.navItem;
+const item = c.navItem;
 return {
   as: "span",
   text: item.label
@@ -721,11 +721,11 @@ return `._id {
   left: 0;
   right: 0;
   height: 72px;
-  background: ${args.theme.var.color.background};
-  border-top: 1px solid ${args.theme.var.color.border};
+  background: ${t.var.color.background};
+  border-top: 1px solid ${t.var.color.border};
   z-index: 1;
   box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
-  padding: ${args.theme.var.spacing.sm} 0;
+  padding: ${t.var.spacing.sm} 0;
 }
 
 ._id .slider-container {
@@ -733,7 +733,7 @@ return `._id {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 ${args.theme.var.spacing.sm};
+  padding: 0 ${t.var.spacing.sm};
   width: 100%;
 }
 
@@ -777,7 +777,7 @@ return {
         contextName: "mobileNavItem",
         loop: true,
         props: '''
-const items = args.fns.mobileNavigationItems;
+const items = f.mobileNavigationItems;
 return {
   as: "div",
   data: items
@@ -797,8 +797,8 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const item = args.contextData.mobileNavItem;
-const isActive = item.pathCheck ? item.pathCheck(args.location.pathname) : false;
+const item = c.mobileNavItem;
+const isActive = item.pathCheck ? item.pathCheck(_.location.pathname) : false;
 
 return {
   as: "a",
@@ -807,33 +807,33 @@ return {
   title: item.title,
   onClick: (e) => {
     e.preventDefault();
-    args.fns.navigateTo?.(item.href);
+    f.navigateTo?.(item.href);
   }
 };
 ''',
         css: '''
-const item = args.contextData.mobileNavItem;
-const isActive = item.pathCheck ? item.pathCheck(args.location.pathname) : false;
+const item = c.mobileNavItem;
+const isActive = item.pathCheck ? item.pathCheck(_.location.pathname) : false;
 
 return `._id {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: ${args.theme.var.spacing.xs};
-  padding: ${args.theme.var.spacing.xs};
-  border-radius: ${args.theme.var.borderRadius.sm};
+  gap: ${t.var.spacing.xs};
+  padding: ${t.var.spacing.xs};
+  border-radius: ${t.var.borderRadius.sm};
   background: none;
   text-decoration: none;
   cursor: pointer;
   min-height: 44px;
-  color: ${isActive ? args.theme.var.color.primary : args.theme.var.color.text_light_500};
+  color: ${isActive ? t.var.color.primary : t.var.color.text_light_500};
   transition: all 150ms ease;
   width: 100%;
   position: relative;
 
   &:hover {
-    background: ${args.theme.var.color.background_light_200};
-    color: ${args.theme.var.color.primary};
+    background: ${t.var.color.background_light_200};
+    color: ${t.var.color.primary};
   }
 
   &:active {
@@ -850,7 +850,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const item = args.contextData.mobileNavItem;
+const item = c.mobileNavItem;
 const iconSize = item.iconSize || 24;
 return {
   as: "icon",
@@ -868,7 +868,7 @@ return {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const item = args.contextData.mobileNavItem;
+const item = c.mobileNavItem;
 return {
   as: "span",
   text: item.label

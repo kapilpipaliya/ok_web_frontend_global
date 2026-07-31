@@ -7,9 +7,9 @@
         description: Review modal for drag-drop create using FormManagement per draft row.
         fns:
           '''
-const getProps = () => args.contextData.props || {};
+const getProps = () => c.props || {};
 
-const [formApisByKey, setFormApisByKey] = args.createStore({});
+const [formApisByKey, setFormApisByKey] = _.createStore({});
 
 const getRows = () => {
   const rows = getProps().rows;
@@ -58,7 +58,7 @@ const removeRow = (row, rowIndex) => {
   if (api?.formTxnId) {
     const txnId = typeof api.formTxnId === "function" ? api.formTxnId() : api.formTxnId;
     if (txnId && txnId > 0) {
-      args.revertTransaction(txnId);
+      _.revertTransaction(txnId);
     }
   }
   setFormApisByKey(key, undefined);
@@ -69,13 +69,13 @@ const handleConfirm = async () => {
   if (isConfirming()) return;
   const rows = getRows();
   if (rows.length === 0) {
-    args.showErrorToast?.(getProps().emptyHint || "No rows to create");
+    _.showErrorToast?.(getProps().emptyHint || "No rows to create");
     return;
   }
 
   const onSaveRow = getProps().onSaveRow;
   if (typeof onSaveRow !== "function") {
-    args.showErrorToast?.("Save handler missing");
+    _.showErrorToast?.("Save handler missing");
     return;
   }
 
@@ -87,7 +87,7 @@ const handleConfirm = async () => {
       const draft = rows[i];
       const api = formApisByKey[rowKey(draft, i)];
       if (!api?.handleSave) {
-        args.showErrorToast?.("Form not ready for row " + (i + 1));
+        _.showErrorToast?.("Form not ready for row " + (i + 1));
         getProps().onConfirmEnd?.(createdIds);
         return;
       }
@@ -106,7 +106,7 @@ const handleConfirm = async () => {
     getProps().onConfirmSuccess?.(createdIds);
   } catch (error) {
     console.error("DropCreateReviewModal confirm:", error);
-    args.showErrorToast?.(error?.message || "Failed to create items");
+    _.showErrorToast?.(error?.message || "Failed to create items");
     getProps().onConfirmEnd?.(createdIds);
   }
 };
@@ -117,10 +117,10 @@ const handleCancel = () => {
     const api = formApisByKey[key];
     if (api?.formTxnId) {
       const txnId = typeof api.formTxnId === "function" ? api.formTxnId() : api.formTxnId;
-      if (txnId && txnId > 0) args.revertTransaction(txnId);
+      if (txnId && txnId > 0) _.revertTransaction(txnId);
     }
   });
-  setFormApisByKey(args.reconcile({}));
+  setFormApisByKey(_.reconcile({}));
   getProps().onCancel?.();
 };
 
@@ -157,13 +157,13 @@ return {
         displayOrder: 1
         componentName: ContentModal
         props:
-          '''const p = args.fns.getProps();
+          '''const p = f.getProps();
 return {
   isOpen: p.isOpen === true,
   title: p.title || "Review items",
   maxWidth: p.maxWidth || "1100px",
   usePolarisUI: p.usePolarisUI === true,
-  onClose: () => args.fns.handleCancel?.()
+  onClose: () => f.handleCancel?.()
 };'''
       }
     }
@@ -194,12 +194,12 @@ return {
           '''return `._id {
   margin: 0;
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_dark_400};
+  color: ${t.var.color.text_dark_400};
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const hint = args.fns.getProps()?.hint;
+          '''const hint = f.getProps()?.hint;
 return {
   as: "p",
   text: hint || "",
@@ -216,7 +216,7 @@ return {
   margin: 0;
   padding: 1.5rem 0.5rem;
   text-align: center;
-  color: ${args.theme.var.color.text_dark_400};
+  color: ${t.var.color.text_dark_400};
   font-size: 0.9rem;
 }`;'''
         displayOrder: 2
@@ -224,8 +224,8 @@ return {
         props:
           '''return {
   as: "p",
-  text: args.fns.getProps()?.emptyHint || "No rows.",
-  hide: args.fns.getRows().length > 0
+  text: f.getProps()?.emptyHint || "No rows.",
+  hide: f.getRows().length > 0
 };'''
       }
     }
@@ -249,8 +249,8 @@ return {
         props:
           '''return {
   as: "div",
-  data: args.fns.getRows(),
-  hide: args.fns.getRows().length === 0
+  data: f.getRows(),
+  hide: f.getRows().length === 0
 };'''
       }
     }
@@ -264,9 +264,9 @@ return {
   flex-direction: column;
   gap: 0.75rem;
   padding: 0.75rem;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${t.var.color.border};
   border-radius: 0.5rem;
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
 }`;'''
         displayOrder: 1
         componentName: Html
@@ -297,8 +297,8 @@ return {
   width: 72px;
   height: 52px;
   border-radius: 0.375rem;
-  border: 1px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background_light_200};
+  border: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background_light_200};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -308,8 +308,8 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const draftRow = args.contextData.draftRow;
-const url = args.fns.getPreviewUrl(draftRow);
+          '''const draftRow = c.draftRow;
+const url = f.getPreviewUrl(draftRow);
 return {
   as: "div",
   "attr:aria-label": url ? "File preview" : "No preview"
@@ -329,8 +329,8 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const draftRow = args.contextData.draftRow;
-const url = args.fns.getPreviewUrl(draftRow);
+          '''const draftRow = c.draftRow;
+const url = f.getPreviewUrl(draftRow);
 return {
   as: "img",
   src: url,
@@ -346,8 +346,8 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const draftRow = args.contextData.draftRow;
-const url = args.fns.getPreviewUrl(draftRow);
+          '''const draftRow = c.draftRow;
+const url = f.getPreviewUrl(draftRow);
 const mime = String(draftRow?.mimeType || draftRow?.fileType || "");
 let icon = "ph:file";
 if (mime.startsWith("video/")) icon = "ph:video";
@@ -371,7 +371,7 @@ return {
   min-width: 0;
   font-size: 0.875rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -379,7 +379,7 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const draftRow = args.contextData.draftRow;
+          '''const draftRow = c.draftRow;
 return {
   as: "div",
   text: draftRow?.fileName || "File"
@@ -394,7 +394,7 @@ return {
           '''return `._id {
   border: none;
   background: transparent;
-  color: ${args.theme.var.color.error};
+  color: ${t.var.color.error};
   font-size: 0.75rem;
   cursor: pointer;
   padding: 0.25rem 0.35rem;
@@ -402,7 +402,7 @@ return {
   flex-shrink: 0;
 }
 ._id:hover:not(:disabled) {
-  background: ${args.theme.var.color.error_light_900};
+  background: ${t.var.color.error_light_900};
 }
 ._id:disabled {
   opacity: 0.5;
@@ -411,15 +411,15 @@ return {
         displayOrder: 3
         componentName: Html
         props:
-          '''const rowIndex = args.contextData.draftRow_index;
-const draftRow = args.contextData.draftRow;
-const label = args.fns.getProps()?.removeRowLabel || "Remove";
+          '''const rowIndex = c.draftRow_index;
+const draftRow = c.draftRow;
+const label = f.getProps()?.removeRowLabel || "Remove";
 return {
   as: "button",
   type: "button",
   text: label,
-  disabled: args.fns.isConfirming(),
-  onClick: () => args.fns.removeRow(draftRow, rowIndex),
+  disabled: f.isConfirming(),
+  onClick: () => f.removeRow(draftRow, rowIndex),
   "attr:aria-label": label
 };'''
       }
@@ -431,17 +431,17 @@ return {
         displayOrder: 2
         componentName: FormManagement
         props:
-          '''const p = args.fns.getProps();
-const draftRow = args.contextData.draftRow;
-const rowIndex = args.contextData.draftRow_index;
+          '''const p = f.getProps();
+const draftRow = c.draftRow;
+const rowIndex = c.draftRow_index;
 return {
   formConfig: p.formConfig,
   mode: "add",
   inModal: true,
   hideActionsBar: true,
   vertexLabel: p.tableVertexLabel || "GalleryItem",
-  onSave: args.fns.buildRowSaveHandler(draftRow, rowIndex),
-  onFnsReady: (formApi) => args.fns.registerFormApi(draftRow, rowIndex, formApi),
+  onSave: f.buildRowSaveHandler(draftRow, rowIndex),
+  onFnsReady: (formApi) => f.registerFormApi(draftRow, rowIndex, formApi),
   hide: !p.formConfig
 };'''
       }
@@ -470,12 +470,12 @@ return {
         displayOrder: 1
         componentName: Button
         props:
-          '''const p = args.fns.getProps();
+          '''const p = f.getProps();
 return {
   text: p.cancelLabel || "Cancel",
   variant: "secondary",
-  disabled: args.fns.isConfirming(),
-  onClick: () => args.fns.handleCancel?.()
+  disabled: f.isConfirming(),
+  onClick: () => f.handleCancel?.()
 };'''
       }
     }
@@ -486,13 +486,13 @@ return {
         displayOrder: 2
         componentName: Button
         props:
-          '''const p = args.fns.getProps();
-const count = args.fns.getRows().length;
+          '''const p = f.getProps();
+const count = f.getRows().length;
 return {
   text: p.confirmLabel || "Create",
   variant: "primary",
-  disabled: args.fns.isConfirming() || count === 0,
-  onClick: () => void args.fns.handleConfirm?.()
+  disabled: f.isConfirming() || count === 0,
+  onClick: () => void f.handleConfirm?.()
 };'''
       }
     }

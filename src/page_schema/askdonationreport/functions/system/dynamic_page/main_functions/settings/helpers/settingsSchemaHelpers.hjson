@@ -15,7 +15,7 @@
  *   | "buildRelationshipPropertyBindingsFromParts"
  */
 
-const action = args.contextData?.action;
+const action = c?.action;
 if (!action) {
   return { success: false, message: "action is required" };
 }
@@ -120,14 +120,14 @@ const stripTableSchema = (config, part) => {
 if (action === "stripFieldSchema") {
   return {
     success: true,
-    data: { field: stripFieldSchema(args.contextData.field) }
+    data: { field: stripFieldSchema(c.field) }
   };
 }
 
 if (action === "stripConfigSchema") {
   return {
     success: true,
-    data: { config: stripConfigSchema(args.contextData.config) }
+    data: { config: stripConfigSchema(c.config) }
   };
 }
 
@@ -135,7 +135,7 @@ if (action === "mergeConfigSections") {
   return {
     success: true,
     data: {
-      config: mergeConfigSections(args.contextData.baseConfig, args.contextData.patchConfig)
+      config: mergeConfigSections(c.baseConfig, c.patchConfig)
     }
   };
 }
@@ -144,7 +144,7 @@ if (action === "stripTableSchema") {
   return {
     success: true,
     data: {
-      config: stripTableSchema(args.contextData.config, args.contextData.part)
+      config: stripTableSchema(c.config, c.part)
     }
   };
 }
@@ -250,14 +250,14 @@ const buildRelationshipPropertyBindingsFromParts = (parts) => {
 if (action === "evalConfigBody") {
   return {
     success: true,
-    data: { value: evalConfigBody(args.contextData.configBody) }
+    data: { value: evalConfigBody(c.configBody) }
   };
 }
 
 if (action === "evalPartFromVertex") {
   return {
     success: true,
-    data: { value: evalPartFromVertex(args.contextData.vertex) }
+    data: { value: evalPartFromVertex(c.vertex) }
   };
 }
 
@@ -265,7 +265,7 @@ if (action === "resolveGeneralFlags") {
   return {
     success: true,
     data: {
-      general: resolveGeneralFlags(args.contextData.generalRaw, args.contextData.tableVertexLabel)
+      general: resolveGeneralFlags(c.generalRaw, c.tableVertexLabel)
     }
   };
 }
@@ -274,7 +274,7 @@ if (action === "buildRelationshipPropertyBindingsFromParts") {
   return {
     success: true,
     data: {
-      bindings: buildRelationshipPropertyBindingsFromParts(args.contextData.parts)
+      bindings: buildRelationshipPropertyBindingsFromParts(c.parts)
     }
   };
 }

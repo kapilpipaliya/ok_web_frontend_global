@@ -9,7 +9,7 @@
         body: '''
 try {
   // Extract input parameters from the request
-  const { categoryId, name, description, color, icon, displayOrder, isActive } = args.contextData;
+  const { categoryId, name, description, color, icon, displayOrder, isActive } = c;
 
   // Validate required fields
   if (!name?.trim()) {
@@ -17,7 +17,7 @@ try {
   }
 
   // Get current authenticated user from session
-  const user = await args.getUserFromSession();
+  const user = await _.getUserFromSession();
   if (!user) {
     throw new Error("User session not found. Please log in and try again.");
   }
@@ -51,7 +51,7 @@ try {
     RETURN rc
   `;
 
-  const duplicateResult = await args.session.run(duplicateCheckQuery, {
+  const duplicateResult = await _.session.run(duplicateCheckQuery, {
     userUuid: user.P.uuid,
     name: name.trim(),
     ...(isUpdate && { categoryId })
@@ -69,7 +69,7 @@ try {
       RETURN COALESCE(MAX(rc.displayOrder), 0) + 1 as nextOrder
     `;
 
-    const maxOrderResult = await args.session.run(maxOrderQuery, {
+    const maxOrderResult = await _.session.run(maxOrderQuery, {
       userUuid: user.P.uuid
     });
 
@@ -131,10 +131,10 @@ try {
     };
   }
 
-  const categoryResult = await args.session.run(mergeCategoryQuery, queryParams);
+  const categoryResult = await _.session.run(mergeCategoryQuery, queryParams);
 
   const categoryNode = categoryResult.records[0].get('rc');
-  const category = args.convertNodeToJson(categoryNode);
+  const category = _.convertNodeToJson(categoryNode);
 
   // For new categories, get the generated elementId
   const categoryElementId = isUpdate ? categoryId : categoryResult.records[0].get('categoryElementId');
@@ -148,7 +148,7 @@ try {
       RETURN rc.displayOrder as oldOrder
     `;
 
-    const oldOrderResult = await args.session.run(oldOrderQuery, {
+    const oldOrderResult = await _.session.run(oldOrderQuery, {
       userUuid: user.P.uuid,
       categoryId: categoryElementId
     });
@@ -164,7 +164,7 @@ try {
           SET rc.displayOrder = rc.displayOrder + 1
         `;
 
-        await args.session.run(reorderQuery, {
+        await _.session.run(reorderQuery, {
           userUuid: user.P.uuid,
           categoryId: categoryElementId,
           newOrder: displayOrder

@@ -58,13 +58,13 @@ export async function executeServerFunction(
   }
 
   try {
-    // Create the function from the provided body string
-    // The function has access to args object with session, context, and contextData
+    // Create the function from the provided body string.
+    // Shorthand params: _ (full bag), c (contextData), g (graph), s (executeNamedServerFunction)
     const AsyncFunction = Object.getPrototypeOf(async () => {}).constructor;
-    const serverFunction = new AsyncFunction("args", request.functionBody);
+    const serverFunction = new AsyncFunction("_", "c", "g", "s", request.functionBody);
 
-    // Prepare the args object that will be available in the function
-    const args = {
+    // Prepare the _ object that will be available in the function
+    const _ = {
       session: dbSession,
       getSession: getDBSessionForSubdomain,
       context: context,
@@ -81,7 +81,12 @@ export async function executeServerFunction(
     };
 
     // Execute the function
-    const result = await serverFunction(args);
+    const result = await serverFunction(
+      _,
+      _.contextData,
+      _.graph,
+      _.executeNamedServerFunction,
+    );
 
     return {
       result,

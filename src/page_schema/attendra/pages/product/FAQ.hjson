@@ -17,12 +17,12 @@
       L: Attr
       P: {
         css:
-          '''return `._id{ max-width: 800px; margin: 0 auto; padding: ${args.theme.var.spacing?.lg || "2rem"}; color:${args.theme.var.color.text}; }
-@media (max-width: 768px){ ._id{ padding:${args.theme.var.spacing?.md || "1rem"}; } }`;'''
+          '''return `._id{ max-width: 800px; margin: 0 auto; padding: ${t.var.spacing?.lg || "2rem"}; color:${t.var.color.text}; }
+@media (max-width: 768px){ ._id{ padding:${t.var.spacing?.md || "1rem"}; } }`;'''
         displayOrder: 1
         fns:
           '''
-const [expandedIndex, setExpandedIndex] = args.createSignal(null);
+const [expandedIndex, setExpandedIndex] = _.createSignal(null);
 const toggleExpanded = (index) => setExpandedIndex((prev) => (prev === index ? null : index));
 return { expandedIndex, toggleExpanded };
 '''
@@ -47,7 +47,7 @@ return { expandedIndex, toggleExpanded };
         displayOrder: 2
         componentName: Html
         textType: markdown
-        css: '''return `._id{ margin: 0 0 1.25rem 0; color:${args.theme.var.color.text_light_500}; line-height: 1.6; }`;'''
+        css: '''return `._id{ margin: 0 0 1.25rem 0; color:${t.var.color.text_light_500}; line-height: 1.6; }`;'''
         text: Common questions about **Attendra**.
         props: '''return { as: "div" };'''
       }
@@ -70,7 +70,7 @@ return { expandedIndex, toggleExpanded };
         loop: true
         displayOrder: 1
         componentName: Html
-        css: '''return `._id{ border:1px solid ${args.theme.var.color.border}; background:${args.theme.var.color.background_light_100}; border-radius:0.75rem; overflow:hidden; }`;'''
+        css: '''return `._id{ border:1px solid ${t.var.color.border}; background:${t.var.color.background_light_100}; border-radius:0.75rem; overflow:hidden; }`;'''
         props:
           '''return { as:"div", data: [
   { index: 0, q: "How do staff clock in/out?", a: "Use Shopify Admin embedded pages, or your staff portal sign-in (see Dashboard → Portal Url) when you use a separate staff experience." },
@@ -93,7 +93,7 @@ return `._id{
   text-align: left;
   font-size: 1rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0;
   padding: 1rem 2.5rem 1rem 1rem;
   border: none;
@@ -109,23 +109,23 @@ return `._id{
   transform: translateY(-50%) rotate(45deg);
   width: 0.5rem;
   height: 0.5rem;
-  border-right: 2px solid ${args.theme.var.color.text};
-  border-bottom: 2px solid ${args.theme.var.color.text};
+  border-right: 2px solid ${t.var.color.text};
+  border-bottom: 2px solid ${t.var.color.text};
   transition: transform 0.2s ease;
 }
 ._id[data-expanded="true"]::after{ transform: translateY(-50%) rotate(225deg); }`;
 '''
         props:
           '''
-const item = args.contextData.faqItem;
+const item = c.faqItem;
 const index = item?.index ?? -1;
-const isExpanded = args.fns.expandedIndex?.() === index;
+const isExpanded = f.expandedIndex?.() === index;
 return {
   as: "button",
   type: "button",
   text: item?.q || "",
   "data-expanded": isExpanded ? "true" : "false",
-  onClick: () => args.fns.toggleExpanded?.(index)
+  onClick: () => f.toggleExpanded?.(index)
 };
 '''
       }
@@ -136,12 +136,12 @@ return {
       P: {
         displayOrder: 2
         componentName: Html
-        css: '''return `._id{ padding: 0 1rem 1rem 1rem; border-top:1px solid ${args.theme.var.color.border}; color:${args.theme.var.color.text_light_500}; line-height:1.6; margin:0; }`;'''
+        css: '''return `._id{ padding: 0 1rem 1rem 1rem; border-top:1px solid ${t.var.color.border}; color:${t.var.color.text_light_500}; line-height:1.6; margin:0; }`;'''
         props:
           '''
-const item = args.contextData.faqItem;
+const item = c.faqItem;
 const index = item?.index ?? -1;
-return { as: "p", text: item?.a || "", show: () => args.fns.expandedIndex?.() === index };
+return { as: "p", text: item?.a || "", show: () => f.expandedIndex?.() === index };
 '''
       }
     }
@@ -152,7 +152,7 @@ return { as: "p", text: item?.a || "", show: () => args.fns.expandedIndex?.() ==
         displayOrder: 4
         componentName: Html
         textType: markdown
-        css: '''return `._id{ margin-top: 1.25rem; color:${args.theme.var.color.text_light_500}; }`;'''
+        css: '''return `._id{ margin-top: 1.25rem; color:${t.var.color.text_light_500}; }`;'''
         text: Need more help? Visit [Support](/support).
         props: '''return { as: "div" };'''
       }

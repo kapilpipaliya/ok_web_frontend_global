@@ -16,7 +16,7 @@ const {
   sortOrder = 'desc',
   limit = 20,
   offset = 0
-} = args.contextData;
+} = c;
 
 // Build WHERE conditions
 const whereConditions = ['f.deletedAt IS NULL'];
@@ -68,25 +68,25 @@ const params = {
   filterStatus,
   filterType,
   searchQuery: searchQuery.trim(),
-  offset: args.neo4jDriver.int(offset),
-  limit: args.neo4jDriver.int(limit)
+  offset: _.neo4jDriver.int(offset),
+  limit: _.neo4jDriver.int(limit)
 };
 
 // Execute count query
-const countResult = await args.session.run(countQuery, params);
+const countResult = await _.session.run(countQuery, params);
 const totalValue = countResult.records[0]?.get('total');
 // Handle Neo4j Integer type conversion
-const totalCount = args.neo4jConvert.toNumber(totalValue);
+const totalCount = _.neo4jConvert.toNumber(totalValue);
 
 // Execute data query
-const dataResult = await args.session.run(dataQuery, params);
+const dataResult = await _.session.run(dataQuery, params);
 
 // Convert Neo4j records to feedback objects with user info
 const feedbacks = dataResult.records.map(record => {
   const feedbackNode = record.get('f');
   const userNode = record.get('user');
 
-  const user = userNode ? args.convertNodeToJson(userNode) : null;
+  const user = userNode ? _.convertNodeToJson(userNode) : null;
 
   // Remove sensitive fields from user data
   if (user && user.P) {
@@ -95,7 +95,7 @@ const feedbacks = dataResult.records.map(record => {
   }
 
   return {
-    feedback: args.convertNodeToJson(feedbackNode),
+    feedback: _.convertNodeToJson(feedbackNode),
     user
   };
 });

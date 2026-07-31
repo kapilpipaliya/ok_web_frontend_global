@@ -25,8 +25,8 @@ return `._id {
   justify-content: space-between;
   gap: 0.75rem;
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background_light_100};
+  border-bottom: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background_light_100};
   flex-shrink: 0;
 }`;
 '''
@@ -38,10 +38,10 @@ return `._id {
       P: {
         displayOrder: 1,
         componentName: "Html",
-        props: '''const api = args.contextData.props?.editorApi || {};
+        props: '''const api = c.props?.editorApi || {};
 
 const pageId = api.getSettingsPageId?.();
-const tableLabel = args.contextData.props?.tableVertexLabel;
+const tableLabel = c.props?.tableVertexLabel;
 const title = api.isSingleSectionMode?.()
   ? `Form config schema — ${tableLabel || pageId}`
   : `Schema editor — ${pageId}`;
@@ -55,7 +55,7 @@ return `._id {
   margin: 0;
   font-size: 0.9375rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -84,7 +84,7 @@ return `._id {
       P: {
         displayOrder: 1,
         componentName: "Button",
-        props: '''const api = args.contextData.props?.editorApi || {};
+        props: '''const api = c.props?.editorApi || {};
 
 const active = api.isVisualMode?.() === true;
 return {
@@ -103,7 +103,7 @@ return {
       P: {
         displayOrder: 2,
         componentName: "Button",
-        props: '''const api = args.contextData.props?.editorApi || {};
+        props: '''const api = c.props?.editorApi || {};
 
 const active = api.isJsonMode?.() === true;
 return {
@@ -140,7 +140,7 @@ return `._id {
       P: {
         displayOrder: 1,
         componentName: "Button",
-        props: '''const api = args.contextData.props?.editorApi || {};
+        props: '''const api = c.props?.editorApi || {};
 
 return {
   variant: "secondary",
@@ -159,7 +159,7 @@ return {
       P: {
         displayOrder: 2,
         componentName: "Button",
-        props: '''const api = args.contextData.props?.editorApi || {};
+        props: '''const api = c.props?.editorApi || {};
 
 const dirty = api.isDirty?.();
 const saving = api.saving?.();

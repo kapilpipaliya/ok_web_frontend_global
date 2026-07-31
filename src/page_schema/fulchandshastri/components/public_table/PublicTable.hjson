@@ -8,8 +8,8 @@
         description: Public read-only table wrapper with client-side graph hydration.
         fns:
           '''
-const pageStateVertexId = args.generateNewVertexId(args.graph, args.setGraph);
-args.addNewVertex(0, {
+const pageStateVertexId = _.generateNewVertexId(g, sg);
+_.addNewVertex(0, {
   id: pageStateVertexId,
   L: ["PublicTableUiState"],
   P: {
@@ -21,30 +21,30 @@ args.addNewVertex(0, {
   },
   IN: {},
   OUT: {}
-}, args.graph, args.setGraph);
+}, g, sg);
 
-const [graphReady, setGraphReady] = args.createSignal(false);
-const [selectedRows, setSelectedRowsState] = args.createSignal(new Set());
+const [graphReady, setGraphReady] = _.createSignal(false);
+const [selectedRows, setSelectedRowsState] = _.createSignal(new Set());
 
 const patchPageP = (partial) => {
-  args.mergeVertexProperties(0, pageStateVertexId, args.graph, args.setGraph, partial);
+  _.mergeVertexProperties(0, pageStateVertexId, g, sg, partial);
 };
-const pageP = () => args.graph.vertexes[pageStateVertexId]?.P;
+const pageP = () => g.vertexes[pageStateVertexId]?.P;
 
-const getTableVertexLabel = () => args.contextData.props?.tableVertexLabel || "Book";
+const getTableVertexLabel = () => c.props?.tableVertexLabel || "Book";
 const getTableSchemaPartVertexIds = () => {
   const fromState = pageP()?.tableSchemaPartVertexIds;
   if (fromState) return fromState;
-  return args.contextData.props?.partVertexIds || null;
+  return c.props?.partVertexIds || null;
 };
 const getTableIdsState = () => {
   const fromState = pageP()?.tableIds;
   if (fromState) return fromState;
-  return args.contextData.props?.ids || null;
+  return c.props?.ids || null;
 };
 
 const getRowIds = () => {
-  const ids = args.contextData.props?.rowIds;
+  const ids = c.props?.rowIds;
   return Array.isArray(ids) ? ids : [];
 };
 
@@ -70,7 +70,7 @@ const evalSchemaPart = (part) => {
   const ids = getTableSchemaPartVertexIds();
   const vertexId = ids?.[part];
   if (!vertexId) return null;
-  const vertex = args.graph?.vertexes?.[vertexId];
+  const vertex = g?.vertexes?.[vertexId];
   if (!vertex?.P?.config) return null;
   const raw = evalConfigBody(vertex.P.config);
   if (part === "columns") return raw;
@@ -165,22 +165,22 @@ const applyServerGraphToLocalGraph = (response) => {
     (Array.isArray(deleted_vertexes) && deleted_vertexes.length > 0) ||
     (Array.isArray(deleted_edges) && deleted_edges.length > 0);
   if (!hasWork) return;
-  args.setGraphData(0, { vertexes, edges, deleted_vertexes, deleted_edges }, {});
+  _.setGraphData(0, { vertexes, edges, deleted_vertexes, deleted_edges }, {});
 };
 
 const applyGraphFromProps = () => {
-  applyServerGraphToLocalGraph({ graph: args.contextData.props?.graph });
-  const partVertexIds = args.contextData.props?.partVertexIds;
-  const ids = args.contextData.props?.ids;
+  applyServerGraphToLocalGraph({ graph: c.props?.graph });
+  const partVertexIds = c.props?.partVertexIds;
+  const ids = c.props?.ids;
   if (partVertexIds && ids) {
     patchPageP({ tableSchemaPartVertexIds: partVertexIds, tableIds: ids });
   }
 };
 
-args.createEffect(() => {
-  const graph = args.contextData.props?.graph;
+_.createEffect(() => {
+  const graph = c.props?.graph;
   const rowIds = getRowIds();
-  const partVertexIds = args.contextData.props?.partVertexIds;
+  const partVertexIds = c.props?.partVertexIds;
   if (!partVertexIds) {
     setGraphReady(false);
     return;
@@ -193,7 +193,7 @@ const resolveRowsFromGraph = () => {
   const ids = getRowIds();
   const rows = [];
   for (let i = 0; i < ids.length; i++) {
-    const vertex = args.graph?.vertexes?.[ids[i]];
+    const vertex = g?.vertexes?.[ids[i]];
     if (vertex) rows.push(vertex);
   }
   return rows;
@@ -245,7 +245,7 @@ return {
           '''
 return {
   onCleanup: () => {
-    args.deleteVertex(0, args.fns.pageStateVertexId, args.graph, args.setGraph);
+    _.deleteVertex(0, f.pageStateVertexId, g, sg);
   }
 };
 '''
@@ -260,10 +260,10 @@ return {
         componentName: Table
         props:
           '''return {
-  tableVertexLabel: args.contextData.props?.tableVertexLabel || "Book",
-  columns: args.fns.prop?.("columns") || [],
-  formConfig: args.fns.prop?.("formConfig"),
-  sidebar: { ...(args.fns.prop?.("sidebar") || {}), enabled: false },
+  tableVertexLabel: c.props?.tableVertexLabel || "Book",
+  columns: f.prop?.("columns") || [],
+  formConfig: f.prop?.("formConfig"),
+  sidebar: { ...(f.prop?.("sidebar") || {}), enabled: false },
   title: "",
   subtitle: "",
   label: "",
@@ -276,16 +276,16 @@ return {
   showActionsColumn: false,
   actions: [],
   hideColumns: [],
-  enableLocalFilters: args.fns.getConfigGeneralValue?.("enableLocalFilters") !== false,
-  enableLocalSort: args.fns.getConfigGeneralValue?.("enableLocalSort") !== false,
-  rowHeight: args.fns.getConfigGeneralValue?.("rowHeight") || 56,
-  columnWidths: args.fns.getConfigGeneralValue?.("columnWidths") || {},
-  usePolarisUI: args.fns.getConfigGeneralValue?.("usePolarisUI") === true,
-  dataFunction: args.fns.fetchData,
-  getSelectedRows: args.fns.getSelectedRows,
-  setSelectedRows: args.fns.setSelectedRows,
-  clearSelectedRows: args.fns.clearSelectedRows,
-  hide: !args.fns.graphReady?.()
+  enableLocalFilters: f.getConfigGeneralValue?.("enableLocalFilters") !== false,
+  enableLocalSort: f.getConfigGeneralValue?.("enableLocalSort") !== false,
+  rowHeight: f.getConfigGeneralValue?.("rowHeight") || 56,
+  columnWidths: f.getConfigGeneralValue?.("columnWidths") || {},
+  usePolarisUI: f.getConfigGeneralValue?.("usePolarisUI") === true,
+  dataFunction: f.fetchData,
+  getSelectedRows: f.getSelectedRows,
+  setSelectedRows: f.setSelectedRows,
+  clearSelectedRows: f.clearSelectedRows,
+  hide: !f.graphReady?.()
 };'''
       }
     }

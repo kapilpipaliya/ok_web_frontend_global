@@ -8,7 +8,7 @@
         body:
           '''
 // Extract input parameters from the request
-const { playlistId, videoYoutubeId, videoUrl, ownershipId } = args.contextData;
+const { playlistId, videoYoutubeId, videoUrl, ownershipId } = c;
 
 if (!playlistId) {
   return {
@@ -32,7 +32,7 @@ if (!ownershipId) {
 }
 
 // Get current authenticated user from session
-const actualUser = await args.getUserFromSession();
+const actualUser = await _.getUserFromSession();
 if (!actualUser) {
   return {
     success: false,
@@ -41,7 +41,7 @@ if (!actualUser) {
 }
 
 // Get effective user (handles admin impersonation)
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const user = await _.getEffectiveUser(_.session, actualUser, c);
 
 // NEW SCHEMA v4.0: Verify user has access to this playlist through direct ownership
 const playlistAccessQuery = `
@@ -51,7 +51,7 @@ const playlistAccessQuery = `
   RETURN p, ps, o
 `;
 
-const playlistAccessResult = await args.session.run(playlistAccessQuery, {
+const playlistAccessResult = await _.session.run(playlistAccessQuery, {
   userUuid: user.P.uuid,
   ownershipId,
   playlistId: playlistId
@@ -64,9 +64,9 @@ if (playlistAccessResult.records.length === 0) {
   };
 }
 
-const playlist = args.convertNodeToJson(playlistAccessResult.records[0].get('p'));
+const playlist = _.convertNodeToJson(playlistAccessResult.records[0].get('p'));
 const playlistSettingNode = playlistAccessResult.records[0].get('ps');
-const playlistSetting = playlistSettingNode ? args.convertNodeToJson(playlistSettingNode) : null;
+const playlistSetting = playlistSettingNode ? _.convertNodeToJson(playlistSettingNode) : null;
 
 // Normalize input to array of items (either URLs or video IDs)
 let items = [];
@@ -106,7 +106,7 @@ for (const item of items) {
         RETURN v
       `;
 
-      const videoCheckResult = await args.session.run(videoCheckQuery, {
+      const videoCheckResult = await _.session.run(videoCheckQuery, {
         ownershipId,
         videoId: item.value
       });
@@ -116,10 +116,10 @@ for (const item of items) {
         continue;
       }
 
-      video = args.convertNodeToJson(videoCheckResult.records[0].get('v'));
+      video = _.convertNodeToJson(videoCheckResult.records[0].get('v'));
     } else {
       // Fetch video details from URL
-      const videoResult = await args.executeNamedServerFunction({
+      const videoResult = await s({
         functionName: "fetchVideoDetails",
         contextData: {
           videoUrl: item.value,
@@ -150,7 +150,7 @@ for (const item of items) {
       RETURN v
     `;
 
-    const existingVideoResult = await args.session.run(existingVideoQuery, {
+    const existingVideoResult = await _.session.run(existingVideoQuery, {
       ownershipId,
       playlistId: playlistId,
       videoId: videoId
@@ -168,7 +168,7 @@ for (const item of items) {
       RETURN COALESCE(MAX(r.position), -1) as maxPosition
     `;
 
-    const countResult = await args.session.run(countQuery, {
+    const countResult = await _.session.run(countQuery, {
       ownershipId,
       playlistId: playlistId
     });
@@ -183,7 +183,7 @@ for (const item of items) {
 
     // Step 1: Verify video ownership (defensive check)
     // Video should already be owned since we checked earlier, but verify again
-    const videoOwnershipCheck = await args.session.run(`
+    const videoOwnershipCheck = await _.session.run(`
       MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideo]->(v:Video {youtubeId: $videoId})
       RETURN v
     `, {
@@ -197,7 +197,7 @@ for (const item of items) {
     }
 
     // Step 2: Create global Playlist->Video relationship (verify ownership for both playlist and video)
-    await args.session.run(`
+    await _.session.run(`
       MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
       MATCH (o)-[:YouTubeOwnershipVideo]->(v:Video {youtubeId: $videoId})
       CREATE (p)-[r:PlaylistVideo {
@@ -227,7 +227,7 @@ for (const item of items) {
 // NEW SCHEMA v4.0: Update playlist metadata if any videos were added
 if (results.length > 0) {
   // Update global Playlist vertex itemCount (verify ownership)
-  await args.session.run(`
+  await _.session.run(`
     MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
     SET p.itemCount = COALESCE(p.itemCount, 0) + $addedCount,
         p.updatedAt = datetime()
@@ -267,7 +267,7 @@ if (results.length > 0) {
       updateParams.thumbnail = results[0].video.P.thumbnail || results[0].video.P.thumbnailUrl || "";
     }
 
-    await args.session.run(updatePlaylistSettingQuery, updateParams);
+    await _.session.run(updatePlaylistSettingQuery, updateParams);
   }
 }
 

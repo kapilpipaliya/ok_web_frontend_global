@@ -6,7 +6,7 @@
       P: {
         description: Sign
         body:
-          '''const { username, password } = args.contextData;
+          '''const { username, password } = c;
 
 if (username !== password) {
  throw new Error("Username and Password should be same");
@@ -21,7 +21,7 @@ if (!isNumberOnly(username)) {
   throw new Error("Username Should be Number Only");
 }
 let user;
-const result = await args.session.run(
+const result = await _.session.run(
   `MATCH (u:User {username: $username})
    RETURN u`,
   { username: username }
@@ -33,18 +33,18 @@ if (result.records.length === 0) {
     })
     RETURN u
   `;
-  const result = await args.session.run(query, {
+  const result = await _.session.run(query, {
     username: username.trim(),
     uuid: username.trim()
   });
   const node = result.records[0].get('u');
-  user = args.convertNodeToJson(node);
+  user = _.convertNodeToJson(node);
 } else {
   const node = result.records[0].get('u');
-  user = args.convertNodeToJson(node);
+  user = _.convertNodeToJson(node);
 }
 
-    const userData = await args.updateSession(user);
+    const userData = await _.updateSession(user);
     return {
       url: "/home"
     }

@@ -107,7 +107,7 @@ User Properties:
 The main contact management page at `/gyandipak/admin/contacts` provides:
 
 **State Management:**
-- Reactive store using `args.createStore` for all UI state
+- Reactive store using `_.createStore` for all UI state
 - Automatic updates after mutations
 - Optimistic UI updates with database sync
 
@@ -328,10 +328,10 @@ const result = await executeFunction("getAllCountries", {});
 
 ## State Management
 
-The system uses `args.createStore` for reactive state management:
+The system uses `_.createStore` for reactive state management:
 
 ```javascript
-const [store, setStore] = args.createStore({
+const [store, setStore] = _.createStore({
   contacts: [],           // Array of contact data
   usernames: [],          // Available usernames for filter
   countries: [],          // Available countries for filter
@@ -376,7 +376,7 @@ const [store, setStore] = args.createStore({
 
 ### Database Operations
 - Uses `elementId(c)` instead of deprecated `id(c)`
-- Uses `args.neo4jDriver.int()` for integer parameters
+- Uses `_.neo4jDriver.int()` for integer parameters
 - Proper transaction handling with `executeWrite`
 - Atomic operations for data consistency
 
@@ -438,7 +438,7 @@ All errors show user-friendly toast notifications with appropriate messages.
 - Use transactions for multi-step operations
 - Use `MERGE` for idempotent operations
 - Use `UNWIND` for batch operations
-- Use `args.neo4jDriver.int()` for integers
+- Use `_.neo4jDriver.int()` for integers
 - Include timestamps (createdAt, updatedAt)
 
 ## Future Enhancements

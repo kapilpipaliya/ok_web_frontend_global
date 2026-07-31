@@ -7,7 +7,7 @@
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const store = args.createStore({
+const store = _.createStore({
   activeTab: "general",
   settings: {
     general: {
@@ -74,14 +74,14 @@ const store = args.createStore({
   unsavedChanges: false
 });
 
-args.contextData.store = store;
+c.store = store;
 return { as: "div" };
 ''',
         css: '''
 return `._id {
   min-height: 100vh;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -165,7 +165,7 @@ return {
 return `._id {
   font-size: 2rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0;
 }`;
 '''
@@ -179,7 +179,7 @@ return `._id {
         displayOrder: 2,
         componentName: "RealAssistantButton",
         props: '''
-const store = args.contextData.store;
+const store = c.store;
 return {
   text: store.unsavedChanges ? "Save Changes" : "All Saved",
   variant: store.unsavedChanges ? "primary" : "secondary",
@@ -187,7 +187,7 @@ return {
   disabled: !store.unsavedChanges,
   onClick: () => {
     store.unsavedChanges = false;
-    args.showSuccessToast("Settings saved successfully!");
+    _.showSuccessToast("Settings saved successfully!");
   }
 };
 '''
@@ -230,8 +230,8 @@ return { as: "nav" };
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.background_light_200};
+  background: ${t.var.color.background};
+  border: 1px solid ${t.var.color.background_light_200};
   border-radius: 0.75rem;
   padding: 1rem;
   height: fit-content;
@@ -277,8 +277,8 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const item = args.contextData.navItem;
-const store = args.contextData.store;
+const item = c.navItem;
+const store = c.store;
 return {
   as: "button",
   onClick: () => {
@@ -287,15 +287,15 @@ return {
 };
 ''',
         css: '''
-const item = args.contextData.navItem;
-const store = args.contextData.store;
+const item = c.navItem;
+const store = c.store;
 const isActive = store.activeTab === item.id;
 return `._id {
   width: 100%;
   padding: 0.75rem 1rem;
   border: none;
-  background: ${isActive ? args.theme.var.color.primary_light_100 : 'transparent'};
-  color: ${isActive ? args.theme.var.color.primary : args.theme.var.color.text};
+  background: ${isActive ? t.var.color.primary_light_100 : 'transparent'};
+  color: ${isActive ? t.var.color.primary : t.var.color.text};
   border-radius: 0.5rem;
   text-align: left;
   font-size: 0.875rem;
@@ -308,7 +308,7 @@ return `._id {
   gap: 0.75rem;
   
   &:hover {
-    background: ${isActive ? args.theme.var.color.primary_light_100 : args.theme.var.color.background_light_100};
+    background: ${isActive ? t.var.color.primary_light_100 : t.var.color.background_light_100};
   }
 }`;
 '''
@@ -322,7 +322,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const item = args.contextData.navItem;
+const item = c.navItem;
 return {
   as: "span",
   text: item.icon
@@ -338,7 +338,7 @@ return {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const item = args.contextData.navItem;
+const item = c.navItem;
 return {
   as: "span",
   text: item.label
@@ -359,8 +359,8 @@ return { as: "div" };
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.background_light_200};
+  background: ${t.var.color.background};
+  border: 1px solid ${t.var.color.background_light_200};
   border-radius: 0.75rem;
   padding: 2rem;
 }`;
@@ -376,7 +376,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const store = args.contextData.store;
+const store = c.store;
 if (store.activeTab === "general") {
   return { as: "div" };
 }
@@ -402,7 +402,7 @@ return `._id {
   font-size: 1.5rem;
   font-weight: 600;
   margin-bottom: 1.5rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -457,7 +457,7 @@ return `._id {
   font-size: 0.875rem;
   font-weight: 500;
   margin-bottom: 0.5rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -470,7 +470,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const store = args.contextData.store;
+const store = c.store;
 return {
   as: "input",
   type: "text",
@@ -485,15 +485,15 @@ return {
 return `._id {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid ${args.theme.var.color.background_light_300};
+  border: 1px solid ${t.var.color.background_light_300};
   border-radius: 0.5rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   font-size: 0.875rem;
   
   &:focus {
     outline: none;
-    border-color: ${args.theme.var.color.primary};
+    border-color: ${t.var.color.primary};
   }
 }`;
 '''
@@ -530,7 +530,7 @@ return `._id {
   font-size: 0.875rem;
   font-weight: 500;
   margin-bottom: 0.5rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -543,7 +543,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const store = args.contextData.store;
+const store = c.store;
 return {
   as: "input",
   type: "email",
@@ -558,15 +558,15 @@ return {
 return `._id {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid ${args.theme.var.color.background_light_300};
+  border: 1px solid ${t.var.color.background_light_300};
   border-radius: 0.5rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   font-size: 0.875rem;
   
   &:focus {
     outline: none;
-    border-color: ${args.theme.var.color.primary};
+    border-color: ${t.var.color.primary};
   }
 }`;
 '''
@@ -589,7 +589,7 @@ return `._id {
   flex-direction: column;
   gap: 1rem;
   padding-top: 1rem;
-  border-top: 1px solid ${args.theme.var.color.background_light_200};
+  border-top: 1px solid ${t.var.color.background_light_200};
 }`;
 '''
       }
@@ -622,7 +622,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const store = args.contextData.store;
+const store = c.store;
 return {
   as: "input",
   type: "checkbox",
@@ -670,7 +670,7 @@ return {
         css: '''
 return `._id {
   font-weight: 500;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -691,7 +691,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_600};
+  color: ${t.var.color.text_light_600};
 }`;
 '''
       }
@@ -705,7 +705,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const store = args.contextData.store;
+const store = c.store;
 if (store.activeTab === "pricing") {
   return { as: "div" };
 }
@@ -731,7 +731,7 @@ return `._id {
   font-size: 1.5rem;
   font-weight: 600;
   margin-bottom: 1.5rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -786,7 +786,7 @@ return `._id {
   font-size: 0.875rem;
   font-weight: 500;
   margin-bottom: 0.5rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -799,7 +799,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const store = args.contextData.store;
+const store = c.store;
 return {
   as: "input",
   type: "number",
@@ -816,15 +816,15 @@ return {
 return `._id {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid ${args.theme.var.color.background_light_300};
+  border: 1px solid ${t.var.color.background_light_300};
   border-radius: 0.5rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   font-size: 0.875rem;
   
   &:focus {
     outline: none;
-    border-color: ${args.theme.var.color.primary};
+    border-color: ${t.var.color.primary};
   }
 }`;
 '''
@@ -861,7 +861,7 @@ return `._id {
   font-size: 0.875rem;
   font-weight: 500;
   margin-bottom: 0.5rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -874,7 +874,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const store = args.contextData.store;
+const store = c.store;
 return {
   as: "input",
   type: "number",
@@ -890,15 +890,15 @@ return {
 return `._id {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid ${args.theme.var.color.background_light_300};
+  border: 1px solid ${t.var.color.background_light_300};
   border-radius: 0.5rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   font-size: 0.875rem;
   
   &:focus {
     outline: none;
-    border-color: ${args.theme.var.color.primary};
+    border-color: ${t.var.color.primary};
   }
 }`;
 '''
@@ -913,7 +913,7 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const store = args.contextData.store;
+const store = c.store;
 if (store.activeTab === "payments") {
   return { as: "div" };
 }
@@ -939,7 +939,7 @@ return `._id {
   font-size: 1.5rem;
   font-weight: 600;
   margin-bottom: 1.5rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -980,13 +980,13 @@ return `._id {
   align-items: center;
   gap: 0.75rem;
   padding: 1rem;
-  border: 1px solid ${args.theme.var.color.background_light_200};
+  border: 1px solid ${t.var.color.background_light_200};
   border-radius: 0.5rem;
   cursor: pointer;
   transition: all 0.2s ease;
   
   &:hover {
-    background: ${args.theme.var.color.background_light_50};
+    background: ${t.var.color.background_light_50};
   }
 }`;
 '''
@@ -1000,7 +1000,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const store = args.contextData.store;
+const store = c.store;
 return {
   as: "input",
   type: "checkbox",
@@ -1048,7 +1048,7 @@ return {
         css: '''
 return `._id {
   font-weight: 500;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -1069,7 +1069,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.75rem;
-  color: ${args.theme.var.color.text_light_600};
+  color: ${t.var.color.text_light_600};
 }`;
 '''
       }
@@ -1083,7 +1083,7 @@ return `._id {
         displayOrder: 4,
         componentName: "Html",
         props: '''
-const store = args.contextData.store;
+const store = c.store;
 if (store.activeTab === "assistants") {
   return { as: "div" };
 }
@@ -1109,7 +1109,7 @@ return `._id {
   font-size: 1.5rem;
   font-weight: 600;
   margin-bottom: 1.5rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -1164,7 +1164,7 @@ return `._id {
   font-size: 0.875rem;
   font-weight: 500;
   margin-bottom: 0.5rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -1177,7 +1177,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const store = args.contextData.store;
+const store = c.store;
 return {
   as: "input",
   type: "number",
@@ -1194,15 +1194,15 @@ return {
 return `._id {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid ${args.theme.var.color.background_light_300};
+  border: 1px solid ${t.var.color.background_light_300};
   border-radius: 0.5rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   font-size: 0.875rem;
   
   &:focus {
     outline: none;
-    border-color: ${args.theme.var.color.primary};
+    border-color: ${t.var.color.primary};
   }
 }`;
 '''
@@ -1217,7 +1217,7 @@ return `._id {
         displayOrder: 5,
         componentName: "Html",
         props: '''
-const store = args.contextData.store;
+const store = c.store;
 if (store.activeTab === "notifications") {
   return { as: "div" };
 }
@@ -1243,7 +1243,7 @@ return `._id {
   font-size: 1.5rem;
   font-weight: 600;
   margin-bottom: 1.5rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -1283,13 +1283,13 @@ return `._id {
   align-items: center;
   gap: 1rem;
   padding: 1rem;
-  border: 1px solid ${args.theme.var.color.background_light_200};
+  border: 1px solid ${t.var.color.background_light_200};
   border-radius: 0.5rem;
   cursor: pointer;
   transition: all 0.2s ease;
   
   &:hover {
-    background: ${args.theme.var.color.background_light_50};
+    background: ${t.var.color.background_light_50};
   }
 }`;
 '''
@@ -1303,7 +1303,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const store = args.contextData.store;
+const store = c.store;
 return {
   as: "input",
   type: "checkbox",
@@ -1351,7 +1351,7 @@ return {
         css: '''
 return `._id {
   font-weight: 500;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -1372,7 +1372,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_600};
+  color: ${t.var.color.text_light_600};
 }`;
 '''
       }
@@ -1386,7 +1386,7 @@ return `._id {
         displayOrder: 6,
         componentName: "Html",
         props: '''
-const store = args.contextData.store;
+const store = c.store;
 if (store.activeTab === "security") {
   return { as: "div" };
 }
@@ -1412,7 +1412,7 @@ return `._id {
   font-size: 1.5rem;
   font-weight: 600;
   margin-bottom: 1.5rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -1430,9 +1430,9 @@ return { as: "div" };
         css: '''
 return `._id {
   padding: 1rem;
-  background: ${args.theme.var.color.warning_light_100};
-  color: ${args.theme.var.color.warning_dark_800};
-  border: 1px solid ${args.theme.var.color.warning_light_300};
+  background: ${t.var.color.warning_light_100};
+  color: ${t.var.color.warning_dark_800};
+  border: 1px solid ${t.var.color.warning_light_300};
   border-radius: 0.5rem;
   margin-bottom: 1.5rem;
   display: flex;
@@ -1517,7 +1517,7 @@ return `._id {
   font-size: 0.875rem;
   font-weight: 500;
   margin-bottom: 0.5rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -1530,7 +1530,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const store = args.contextData.store;
+const store = c.store;
 return {
   as: "input",
   type: "number",
@@ -1547,15 +1547,15 @@ return {
 return `._id {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid ${args.theme.var.color.background_light_300};
+  border: 1px solid ${t.var.color.background_light_300};
   border-radius: 0.5rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
   font-size: 0.875rem;
   
   &:focus {
     outline: none;
-    border-color: ${args.theme.var.color.primary};
+    border-color: ${t.var.color.primary};
   }
 }`;
 '''

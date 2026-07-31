@@ -27,7 +27,7 @@ return `._id {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
 }`;
 '''
       }
@@ -77,7 +77,7 @@ return {
         css: '''
 return `._id {
   padding: 3rem 2rem;
-  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background_dark_50 : args.theme.var.color.background_dark_50};
+  background: ${_.currentMode() === 'dark' ? t.var.color.background_dark_50 : t.var.color.background_dark_50};
   
   @media (max-width: 768px) {
     padding: 2rem 1rem;
@@ -122,7 +122,7 @@ return {
 return `._id {
   font-size: 3rem;
   font-weight: 800;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 1.5rem;
   
   @media (max-width: 768px) {
@@ -147,7 +147,7 @@ return {
         css: '''
 return `._id {
   font-size: 1.25rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   opacity: 0.8;
   max-width: 700px;
   margin: 0 auto;
@@ -305,7 +305,7 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const category = args.contextData.featureCategories;
+const category = c.featureCategories;
 return {
   as: "div"
 };
@@ -328,7 +328,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const category = args.contextData.featureCategories;
+const category = c.featureCategories;
 return {
   as: "div"
 };
@@ -348,7 +348,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const category = args.contextData.featureCategories;
+const category = c.featureCategories;
 return {
   as: "div"
 };
@@ -357,7 +357,7 @@ return {
 return `._id {
   width: 4rem;
   height: 4rem;
-  background: ${args.currentMode() === 'dark' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(59, 130, 246, 0.1)'};
+  background: ${_.currentMode() === 'dark' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(59, 130, 246, 0.1)'};
   border-radius: 1rem;
   display: flex;
   align-items: center;
@@ -374,7 +374,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const category = args.contextData.featureCategories;
+const category = c.featureCategories;
 return {
   as: "icon",
   icon: category.icon,
@@ -384,7 +384,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
 }`;
 '''
       }
@@ -396,7 +396,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const category = args.contextData.featureCategories;
+const category = c.featureCategories;
 return {
   as: "h2",
   text: category.title
@@ -406,7 +406,7 @@ return {
 return `._id {
   font-size: 2rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin-bottom: 0.5rem;
 }`;
 '''
@@ -419,7 +419,7 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const category = args.contextData.featureCategories;
+const category = c.featureCategories;
 return {
   as: "p",
   text: category.description
@@ -428,7 +428,7 @@ return {
         css: '''
 return `._id {
   font-size: 1.125rem;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   opacity: 0.7;
 }`;
 '''
@@ -468,7 +468,7 @@ return `._id {
         contextName: "features",
         loop: true,
         props: '''
-const category = args.contextData.featureCategories;
+const category = c.featureCategories;
 return {
   data: category.features
 };
@@ -482,7 +482,7 @@ return {
         displayOrder: 1,
         componentName: "DecodeUIFeatureCard",
         props: '''
-const feature = args.contextData.features;
+const feature = c.features;
 return {
   icon: feature.icon,
   title: feature.title,

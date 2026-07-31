@@ -56,7 +56,7 @@ export const SubDomainGrid = () => {
             <As
               as="a"
               css={`return \`._id {
-  color: \${args.theme.var.color.primary};
+  color: \${t.var.color.primary};
   text-decoration: none;
   &:hover {
     text-decoration: underline;
@@ -81,7 +81,7 @@ export const SubDomainGrid = () => {
             <As
               as="a"
               css={`return \`._id {
-  color: \${args.theme.var.color.primary};
+  color: \${t.var.color.primary};
   text-decoration: none;
   &:hover {
     text-decoration: underline;

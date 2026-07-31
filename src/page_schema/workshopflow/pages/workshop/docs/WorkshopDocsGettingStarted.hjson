@@ -42,7 +42,7 @@
         props:
           '''return { as: "h1", text: "Getting started", class: "workshop-doc-h1" };'''
         css:
-          '''return `._id.workshop-doc-h1 { font-size: 1.5rem; font-weight: 700; margin: 0 0 0.75rem; color: ${args.theme.var.color.text}; }`;'''
+          '''return `._id.workshop-doc-h1 { font-size: 1.5rem; font-weight: 700; margin: 0 0 0.75rem; color: ${t.var.color.text}; }`;'''
       }
     }
     {
@@ -57,10 +57,10 @@
   href: "/workshop/docs",
   text: "Back to user guide",
   class: "workshop-doc-back",
-  onClick: (e) => { e.preventDefault(); args.navigate("/workshop/docs"); }
+  onClick: (e) => { e.preventDefault(); _.navigate("/workshop/docs"); }
 };'''
         css:
-          '''return `._id.workshop-doc-back { display: inline-block; margin-bottom: 1rem; color: ${args.theme.var.color.primary}; font-weight: 600; text-decoration: none; cursor: pointer; }`;'''
+          '''return `._id.workshop-doc-back { display: inline-block; margin-bottom: 1rem; color: ${t.var.color.primary}; font-weight: 600; text-decoration: none; cursor: pointer; }`;'''
       }
     }
     {
@@ -76,7 +76,7 @@
   text: "Sign in to access the app. The left sidebar lists every module. You can resize the sidebar by dragging its right edge, or collapse it with the toggle button. Open a module to see a data table: search, sort, filter, then use Add to create a row or click a row to edit."
 };'''
         css:
-          '''return `._id.workshop-doc-body { margin: 0 0 1rem; line-height: 1.6; color: ${args.theme.var.color.text}; }`;'''
+          '''return `._id.workshop-doc-body { margin: 0 0 1rem; line-height: 1.6; color: ${t.var.color.text}; }`;'''
       }
     }
     {
@@ -92,7 +92,7 @@
   class: "workshop-doc-h2"
 };'''
         css:
-          '''return `._id.workshop-doc-h2 { font-size: 1.125rem; font-weight: 700; margin: 1.25rem 0 0.5rem; color: ${args.theme.var.color.text}; }`;'''
+          '''return `._id.workshop-doc-h2 { font-size: 1.125rem; font-weight: 700; margin: 1.25rem 0 0.5rem; color: ${t.var.color.text}; }`;'''
       }
     }
     {
@@ -114,7 +114,7 @@
 Use the Dashboard for a quick overview of appointments, open repairs, low stock, and unpaid invoices.`
 };'''
         css:
-          '''return `._id.workshop-doc-body { margin: 0 0 1rem; line-height: 1.6; color: ${args.theme.var.color.text}; }
+          '''return `._id.workshop-doc-body { margin: 0 0 1rem; line-height: 1.6; color: ${t.var.color.text}; }
 ._id.workshop-doc-body ol {
   margin: 0 0 0.75rem;
   padding-left: 1.25rem;

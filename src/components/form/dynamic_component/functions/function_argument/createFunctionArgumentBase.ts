@@ -73,7 +73,7 @@ import { createDashboardPlatform } from "~/lib/dashboard";
 import { findLoopTemplateMeta } from "~/components/form/dynamic_component/components/LoopChildrenRenderer";
 import { createLoopRowRenderer } from "~/components/form/dynamic_component/functions/createLoopRowRenderer";
 import { cssHelpers } from "~/lib/styles/cssHelpers";
-// Static: `args.useCarousel(...)` runs synchronously during SSR render (it
+// Static: `_.useCarousel(...)` runs synchronously during SSR render (it
 // creates the embla ref in component `fns`), so it must be available on the
 // server. Small (~8KB gzip), unlike the truly client-only lazy deps below.
 import useEmblaCarousel from "embla-carousel-solid";
@@ -306,14 +306,14 @@ export function createFunctionArgumentBase(
     },
     setGraphData: (
       txnId: number,
-      args: Parameters<typeof setGraphDataWithTransaction>[3],
+      graphData: Parameters<typeof setGraphDataWithTransaction>[3],
       options: Parameters<typeof setGraphDataWithTransaction>[4],
     ) => {
       setGraphDataWithTransaction(
         txnId,
         hooks.graph,
         hooks.setGraph,
-        args,
+        graphData,
         options,
       );
     },
@@ -366,13 +366,13 @@ export function createFunctionArgumentBase(
     get user() {
       return getMemberVertex(hooks.graph);
     },
-    executeServerFunction: ((...args: Parameters<typeof executeServerFunction>) =>
-      withNetworkRetry(() => executeServerFunction(...args))) as typeof executeServerFunction,
+    executeServerFunction: ((...params: Parameters<typeof executeServerFunction>) =>
+      withNetworkRetry(() => executeServerFunction(...params))) as typeof executeServerFunction,
     executeNamedServerFunction: ((
-      ...args: Parameters<typeof executeNamedServerFunction>
+      ...params: Parameters<typeof executeNamedServerFunction>
     ) =>
       withNetworkRetry(() =>
-        executeNamedServerFunction(...args),
+        executeNamedServerFunction(...params),
       )) as typeof executeNamedServerFunction,
     postAPI,
     /** Zod — same library as server/schema helpers; safe for use in `props`, `fns`, `css` bodies. */

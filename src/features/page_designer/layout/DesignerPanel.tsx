@@ -15,6 +15,7 @@ import { headerIconButtonCss, STYLES } from "~/pages/settings/constants";
 import { createAxisResizeHandler } from "~/lib/resizable/createAxisResizeHandler";
 import { DesignerResizeHandle } from "~/lib/resizable/DesignerResizeHandle";
 import { useDesignerResizeTrackSize } from "~/lib/resizable/useDesignerResizeTrackSize";
+import { createTapClickHandler } from "~/lib/event/rowPointer";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export interface DesignerPanelProps {
@@ -83,6 +84,9 @@ export const DesignerPanel: Component<DesignerPanelProps> = (props) => {
 
   const resizeAxis = () => (props.resizePosition === "top" ? "y" : "x");
 
+  // Android Chrome swallows click on the narrow collapsed strip, so expand on tap.
+  const expandTap = createTapClickHandler(() => props.onExpand?.());
+
   const Content = () => {
     return (
       <Show
@@ -111,7 +115,7 @@ export const DesignerPanel: Component<DesignerPanelProps> = (props) => {
           as="div"
           css={`return \`._id {
           display: grid;
-          grid-template-rows: auto 1fr;
+          grid-template-rows: ${props.collapsed ? "1fr" : "auto 1fr"};
           height: 100%;
           min-height: 0;
           overflow: hidden;
@@ -120,19 +124,31 @@ export const DesignerPanel: Component<DesignerPanelProps> = (props) => {
           <As
             as="div"
             css={`return \`._id {
-            background: \${args.theme.var.color.background_light_100};
-            border-bottom: 1px solid \${args.theme.var.color.border};
+            background: \${t.var.color.background_light_100};
+            border-bottom: 1px solid \${t.var.color.border};
             padding: 4px;
             display: flex;
-            align-items: center;
+            align-items: ${props.collapsed ? "flex-start" : "center"};
+            justify-content: center;
             gap: 4px;
             min-height: 1rem;
             cursor: ${props.collapsed ? "pointer" : "default"};
             overflow: hidden;
+            ${props.collapsed ? "height: 100%; touch-action: manipulation;" : ""}
           }}\`;`}
-            onClick={() => {
+            onClick={(event: MouseEvent) => {
               if (props.collapsed) {
-                props.onExpand?.();
+                expandTap.onClick(event);
+              }
+            }}
+            onPointerDown={(event: PointerEvent) => {
+              if (props.collapsed) {
+                expandTap.onPointerDown(event);
+              }
+            }}
+            onPointerUp={(event: PointerEvent) => {
+              if (props.collapsed) {
+                expandTap.onPointerUp(event);
               }
             }}
           >
@@ -173,7 +189,7 @@ export const DesignerPanel: Component<DesignerPanelProps> = (props) => {
                     "return `._id { flex-shrink: 0; }`;",
                   ]}
                   icon="ph:caret-left"
-                  iconCss={`return \`._id { color: \${args.theme.var.color.text_light_300}; }\`;`}
+                  iconCss={`return \`._id { color: \${t.var.color.text_light_300}; }\`;`}
                   onClick={(e: MouseEvent) => {
                     e.stopPropagation();
                     props.onToggleCollapse?.();
@@ -214,7 +230,7 @@ export const DesignerPanel: Component<DesignerPanelProps> = (props) => {
       as="div"
       css={[
         `return \`._id {
-          border: 1px solid \${args.theme.var.color.border};
+          border: 1px solid \${t.var.color.border};
           display: grid;
           grid-template-columns: ${gridTemplateColumns()};
           grid-template-rows: ${props.resizePosition === "top" ? `${trackSize()} 1fr` : "100%"};

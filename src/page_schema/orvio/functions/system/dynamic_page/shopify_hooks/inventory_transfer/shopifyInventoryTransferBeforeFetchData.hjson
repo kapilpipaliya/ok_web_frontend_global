@@ -16,7 +16,7 @@
   parentVertexLabel,
   toParentEdgeType,
   enableUserScoping
-} = args.contextData;
+} = c;
 const isTransferTable = tableVertexLabel === "ShopifyInventoryTransfer";
 const isLineTable = tableVertexLabel === "ShopifyInventoryTransferLineItem";
 if (!isTransferTable && !isLineTable) return;
@@ -30,7 +30,7 @@ if (isLineTable && hasTransferFilter) {
   return;
 }
 
-const shop = contextShop || args.shop;
+const shop = contextShop || _.shop;
 if (!shop) {
   console.warn("[shopifyInventoryTransferBeforeFetchData] shop is required");
   return;
@@ -38,7 +38,7 @@ if (!shop) {
 
 console.log("[shopifyInventoryTransferBeforeFetchData] contextData:", { shop, filters, sort });
 
-const shopify = await args.getShopifyClient();
+const shopify = await _.getShopifyClient();
 let admin;
 try {
   const authResult = await shopify.unauthenticated.admin(shop);
@@ -59,7 +59,7 @@ const isUncategorized = showUnassigned === true || categoryId === uncategorizedV
 let categoryTransferGids = [];
 if (!isUncategorized && categoryId && parentVertexLabel && toParentEdgeType) {
   try {
-    const fetchResult = await args.executeNamedServerFunction(
+    const fetchResult = await s(
       {
         functionName: "getUserContent",
         contextData: {
@@ -368,7 +368,7 @@ if (useCategoryTransferScope) {
 const strJoinTags = (tags) =>
   Array.isArray(tags) ? tags.filter((x) => x != null && x !== "").join(", ") : "";
 
-const session = args.session;
+const session = _.session;
 for (const t of allTransfers) {
   const transferId = t.id || "";
   const transferName = t.name || "";

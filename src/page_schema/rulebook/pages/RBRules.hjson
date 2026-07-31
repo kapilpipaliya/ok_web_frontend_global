@@ -8,22 +8,22 @@
         url: "/rb/rules",
         fns: '''
 // Modal state management
-const [showRuleModal, setShowRuleModal] = args.createSignal(false);
-const [modalMode, setModalMode] = args.createSignal("create");
-const [selectedRule, setSelectedRule] = args.createSignal(null);
+const [showRuleModal, setShowRuleModal] = _.createSignal(false);
+const [modalMode, setModalMode] = _.createSignal("create");
+const [selectedRule, setSelectedRule] = _.createSignal(null);
 
 // Data loading state
-const [rules, setRules] = args.createSignal([]);
-const [categories, setCategories] = args.createSignal([]);
-const [isLoading, setIsLoading] = args.createSignal(true);
-const [error, setError] = args.createSignal(null);
+const [rules, setRules] = _.createSignal([]);
+const [categories, setCategories] = _.createSignal([]);
+const [isLoading, setIsLoading] = _.createSignal(true);
+const [error, setError] = _.createSignal(null);
 
 // Tab filtering state
-const [activeTab, setActiveTab] = args.createSignal("all");
+const [activeTab, setActiveTab] = _.createSignal("all");
 
 // Search state
-const [searchQuery, setSearchQuery] = args.createSignal("");
-const [searchInput, setSearchInput] = args.createSignal("");
+const [searchQuery, setSearchQuery] = _.createSignal("");
+const [searchInput, setSearchInput] = _.createSignal("");
 
 // Debounce timer for search optimization
 let searchTimer = null;
@@ -40,7 +40,7 @@ const debouncedSearch = (value) => {
 };
 
 // Derived signal for filtered categories with rules
-const filteredCategoriesWithRules = args.createMemo(() => {
+const filteredCategoriesWithRules = _.createMemo(() => {
   const categoriesData = categories();
   const rulesData = rules();
   const currentTab = activeTab();
@@ -108,11 +108,11 @@ const loadData = async () => {
   try {
     // Load rules and categories in parallel
     const [rulesResult, categoriesResult] = await Promise.all([
-      args.executeNamedServerFunction({
+      s({
         functionName: "getUserRules",
         contextData: { includeInactive: false }
       }),
-      args.executeNamedServerFunction({
+      s({
         functionName: "getCategories",
         contextData: {}
       })
@@ -141,7 +141,7 @@ const loadData = async () => {
   } catch (err) {
     console.error("Error loading data:", err);
     setError(err.message);
-    args.showErrorToast(err.message);
+    _.showErrorToast(err.message);
   } finally {
     setIsLoading(false);
   }
@@ -182,7 +182,7 @@ return {
         props: '''
 return {
   isNoPermissionCheck: true,
-  onMount: args.fns.loadData
+  onMount: f.loadData
 };
 '''
       }
@@ -208,14 +208,14 @@ return {
 ''',
         css: '''
 return `._id {
-  padding: ${args.theme.var.spacing.lg};
+  padding: ${t.var.spacing.lg};
   max-width: 1200px;
   margin: 0 auto;
 }
 
 @media (max-width: 768px) {
   ._id {
-    padding: ${args.theme.var.spacing.md};
+    padding: ${t.var.spacing.md};
   }
 }`;
 '''
@@ -247,19 +247,19 @@ return {
 return `._id {
   background: none;
   border: none;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   cursor: pointer;
   text-decoration: none;
-  padding: ${args.theme.var.spacing.sm};
-  border-radius: ${args.theme.var.borderRadius.sm};
+  padding: ${t.var.spacing.sm};
+  border-radius: ${t.var.borderRadius.sm};
   transition: all 150ms ease;
   display: flex;
   align-items: center;
-  gap: ${args.theme.var.spacing.xs};
+  gap: ${t.var.spacing.xs};
 
   &:hover {
-    background: ${args.theme.var.color.background_dark_200};
-    color: ${args.theme.var.color.text};
+    background: ${t.var.color.background_dark_200};
+    color: ${t.var.color.text};
   }
 }
 
@@ -315,8 +315,8 @@ return {
   size: "medium",
   leftIcon: "carbon:add",
   onClick: () => {
-    args.fns.setModalMode("create");
-    args.fns.setShowRuleModal(true);
+    f.setModalMode("create");
+    f.setShowRuleModal(true);
   }
 };
 '''
@@ -338,7 +338,7 @@ return {
 return `._id {
   display: flex;
   flex-direction: column;
-  gap: ${args.theme.var.spacing.md};
+  gap: ${t.var.spacing.md};
 }
 
 @media (min-width: 640px) {
@@ -386,15 +386,15 @@ return `._id {
         props: '''
 return {
   placeholder: "Search rules...",
-  value: args.fns.searchInput() || "",
+  value: f.searchInput() || "",
   leftIcon: "carbon:search",
   iconSize: 20,
   onInput: (event) => {
     const value = event.target.value;
     // Update input immediately for responsive UI
-    args.fns.setSearchInput(value);
+    f.setSearchInput(value);
     // Trigger debounced search
-    args.fns.debouncedSearch(value);
+    f.debouncedSearch(value);
   }
 };
 ''',
@@ -420,11 +420,11 @@ return {
 return `._id {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: ${args.theme.var.spacing.xs};
-  margin-top: ${args.theme.var.spacing.md};
-  background: ${args.theme.var.color.background_dark_200};
-  padding: ${args.theme.var.spacing.xs};
-  border-radius: ${args.theme.var.borderRadius.md};
+  gap: ${t.var.spacing.xs};
+  margin-top: ${t.var.spacing.md};
+  background: ${t.var.color.background_dark_200};
+  padding: ${t.var.spacing.xs};
+  border-radius: ${t.var.borderRadius.md};
   max-width: 300px;
   margin-left: auto;
   margin-right: auto;
@@ -441,27 +441,27 @@ return `._id {
         props: '''
 return {
   as: "button",
-  onClick: () => args.fns.setActiveTab("all")
+  onClick: () => f.setActiveTab("all")
 };
 ''',
         css: '''
-const activeTab = args.fns.activeTab();
+const activeTab = f.activeTab();
 const isActive = activeTab === "all";
 
 return `._id {
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  background: ${isActive ? args.theme.var.color.background : 'transparent'};
-  color: ${isActive ? args.theme.var.color.text : args.theme.var.color.text_light_500};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  background: ${isActive ? t.var.color.background : 'transparent'};
+  color: ${isActive ? t.var.color.text : t.var.color.text_light_500};
   border: none;
-  border-radius: ${args.theme.var.borderRadius.sm};
+  border-radius: ${t.var.borderRadius.sm};
   font-weight: ${isActive ? '600' : '500'};
   cursor: pointer;
   transition: all 150ms ease;
   text-align: center;
 
   &:hover {
-    background: ${args.theme.var.color.background};
-    color: ${args.theme.var.color.text};
+    background: ${t.var.color.background};
+    color: ${t.var.color.text};
   }
 }`;
 '''
@@ -474,7 +474,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const rules = args.fns.rules() || [];
+const rules = f.rules() || [];
 const allRulesCount = Array.isArray(rules) ? rules.length : 0;
 
 return {
@@ -490,8 +490,8 @@ return {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const activeTab = args.fns.activeTab;
-const setActiveTab = args.fns.setActiveTab;
+const activeTab = f.activeTab;
+const setActiveTab = f.setActiveTab;
 const isActive = activeTab?.() === "active";
 
 return {
@@ -500,23 +500,23 @@ return {
 };
 ''',
         css: '''
-const activeTab = args.fns.activeTab();
+const activeTab = f.activeTab();
 const isActive = activeTab === "active";
 
 return `._id {
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  background: ${isActive ? args.theme.var.color.background : 'transparent'};
-  color: ${isActive ? args.theme.var.color.text : args.theme.var.color.text_light_500};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  background: ${isActive ? t.var.color.background : 'transparent'};
+  color: ${isActive ? t.var.color.text : t.var.color.text_light_500};
   border: none;
-  border-radius: ${args.theme.var.borderRadius.sm};
+  border-radius: ${t.var.borderRadius.sm};
   font-weight: ${isActive ? '600' : '500'};
   cursor: pointer;
   transition: all 150ms ease;
   text-align: center;
 
   &:hover {
-    background: ${args.theme.var.color.background};
-    color: ${args.theme.var.color.text};
+    background: ${t.var.color.background};
+    color: ${t.var.color.text};
   }
 }`;
 '''
@@ -529,7 +529,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const rules = args.fns.rules() || [];
+const rules = f.rules() || [];
 const activeRulesCount = Array.isArray(rules) ? rules.filter(ruleData => {
   const rule = ruleData.rule;
   return rule?.P?.isActive !== false;
@@ -548,8 +548,8 @@ return {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const activeTab = args.fns.activeTab;
-const setActiveTab = args.fns.setActiveTab;
+const activeTab = f.activeTab;
+const setActiveTab = f.setActiveTab;
 const isActive = activeTab?.() === "paused";
 
 return {
@@ -558,23 +558,23 @@ return {
 };
 ''',
         css: '''
-const activeTab = args.fns.activeTab();
+const activeTab = f.activeTab();
 const isActive = activeTab === "paused";
 
 return `._id {
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  background: ${isActive ? args.theme.var.color.background : 'transparent'};
-  color: ${isActive ? args.theme.var.color.text : args.theme.var.color.text_light_500};
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  background: ${isActive ? t.var.color.background : 'transparent'};
+  color: ${isActive ? t.var.color.text : t.var.color.text_light_500};
   border: none;
-  border-radius: ${args.theme.var.borderRadius.sm};
+  border-radius: ${t.var.borderRadius.sm};
   font-weight: ${isActive ? '600' : '500'};
   cursor: pointer;
   transition: all 150ms ease;
   text-align: center;
 
   &:hover {
-    background: ${args.theme.var.color.background};
-    color: ${args.theme.var.color.text};
+    background: ${t.var.color.background};
+    color: ${t.var.color.text};
   }
 }`;
 '''
@@ -587,7 +587,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const rules = args.fns.rules() || [];
+const rules = f.rules() || [];
 const pausedRulesCount = Array.isArray(rules) ? rules.filter(ruleData => {
   const rule = ruleData.rule;
   return rule?.P?.isActive === false;
@@ -606,7 +606,7 @@ return {
         displayOrder: 4,
         componentName: "Html",
         props: '''
-const isLoading = args.fns.isLoading();
+const isLoading = f.isLoading();
 
 return {
   as: "div",
@@ -619,8 +619,8 @@ return `._id {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: ${args.theme.var.spacing.xl};
-  gap: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.xl};
+  gap: ${t.var.spacing.md};
 }`;
 '''
       }
@@ -647,7 +647,7 @@ return {
         displayOrder: 5,
         componentName: "Html",
         props: '''
-const error = args.fns.error();
+const error = f.error();
 
 return {
   as: "div",
@@ -658,8 +658,8 @@ return {
         css: '''
 return `._id {
   text-align: center;
-  padding: ${args.theme.var.spacing.xl};
-  color: ${args.theme.var.color.error};
+  padding: ${t.var.spacing.xl};
+  color: ${t.var.color.error};
   font-size: 1.125rem;
 }`;
 '''
@@ -673,9 +673,9 @@ return `._id {
         componentName: "Html",
         props: '''
 // Use the pre-computed filtered data from the page signal
-const filteredData = args.fns.filteredCategoriesWithRules() || [];
-const isLoading = args.fns.isLoading();
-const error = args.fns.error();
+const filteredData = f.filteredCategoriesWithRules() || [];
+const isLoading = f.isLoading();
+const error = f.error();
 
 return {
   as: "div",
@@ -689,7 +689,7 @@ return {
 return `._id {
   display: flex;
   flex-direction: column;
-  gap: ${args.theme.var.spacing.lg};
+  gap: ${t.var.spacing.lg};
 }`;
 '''
       }
@@ -701,7 +701,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const category = args.contextData?.rulesData;
+const category = c?.rulesData;
 if (!category) return { as: "div", hide: true };
 
 return {
@@ -717,7 +717,7 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const categoryData = args.contextData?.rulesData;
+const categoryData = c?.rulesData;
 if (!categoryData) return { as: "div", hide: true };
 
 const category = categoryData.category;
@@ -730,9 +730,9 @@ return {
 return `._id {
   font-size: 1.125rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 ${args.theme.var.spacing.md} 0;
-  padding-left: ${args.theme.var.spacing.sm};
+  color: ${t.var.color.text};
+  margin: 0 0 ${t.var.spacing.md} 0;
+  padding-left: ${t.var.spacing.sm};
 }`;
 '''
       }
@@ -744,7 +744,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const categoryData = args.contextData?.rulesData;
+const categoryData = c?.rulesData;
 if (!categoryData) return { as: "div", hide: true };
 
 const categoryRules = categoryData.rules || [];
@@ -760,7 +760,7 @@ return {
 return `._id {
   display: flex;
   flex-direction: column;
-  gap: ${args.theme.var.spacing.sm};
+  gap: ${t.var.spacing.sm};
 }`;
 '''
       }
@@ -772,7 +772,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const ruleData = args.contextData?.categoryRules;
+const ruleData = c?.categoryRules;
 if (!ruleData) return { as: "div", hide: true };
 
 const rule = ruleData.rule;
@@ -783,23 +783,23 @@ return {
 };
 ''',
         css: '''
-const ruleData = args.contextData?.categoryRules;
+const ruleData = c?.categoryRules;
 const rule = ruleData?.rule;
 const stats = ruleData?.stats;
 const isCompleted = stats?.completionRate > 80;
 const isPaused = rule?.P?.isActive === false;
 
 return `._id {
-  background: ${args.theme.var.color.background_light_100};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.md};
-  padding: ${args.theme.var.spacing.md};
+  background: ${t.var.color.background_light_100};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.md};
+  padding: ${t.var.spacing.md};
   cursor: pointer;
   transition: all 150ms ease;
   ${isPaused ? 'opacity: 0.7;' : ''}
 
   &:hover {
-    border-color: ${args.theme.var.color.primary};
+    border-color: ${t.var.color.primary};
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     ${isPaused ? 'opacity: 1;' : ''}
   }
@@ -842,7 +842,7 @@ return {
 return `._id {
   display: flex;
   align-items: center;
-  gap: ${args.theme.var.spacing.md};
+  gap: ${t.var.spacing.md};
   flex: 1;
 }`;
 '''
@@ -860,7 +860,7 @@ return {
 };
 ''',
         css: '''
-const ruleData = args.contextData?.categoryRules;
+const ruleData = c?.categoryRules;
 const rule = ruleData?.rule;
 const stats = ruleData?.stats;
 const isCompleted = stats?.completionRate > 80;
@@ -869,9 +869,9 @@ const isPaused = rule?.P?.isActive === false;
 return `._id {
   width: 20px;
   height: 20px;
-  border: 2px solid ${isCompleted ? args.theme.var.color.success : (isPaused ? args.theme.var.color.text_light_500 : args.theme.var.color.border)};
-  border-radius: ${args.theme.var.borderRadius.sm};
-  background: ${isCompleted ? args.theme.var.color.success : 'transparent'};
+  border: 2px solid ${isCompleted ? t.var.color.success : (isPaused ? t.var.color.text_light_500 : t.var.color.border)};
+  border-radius: ${t.var.borderRadius.sm};
+  background: ${isCompleted ? t.var.color.success : 'transparent'};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -887,7 +887,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const ruleData = args.contextData?.categoryRules;
+const ruleData = c?.categoryRules;
 const stats = ruleData?.stats;
 const isCompleted = stats?.completionRate > 80;
 
@@ -901,7 +901,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.success_text};
+  color: ${t.var.color.success_text};
 }`;
 '''
       }
@@ -926,7 +926,7 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const ruleData = args.contextData?.categoryRules;
+const ruleData = c?.categoryRules;
 const rule = ruleData?.rule;
 return {
   as: "div",
@@ -934,14 +934,14 @@ return {
 };
 ''',
         css: '''
-const ruleData = args.contextData?.categoryRules;
+const ruleData = c?.categoryRules;
 const rule = ruleData?.rule;
 const isPaused = rule?.P?.isActive === false;
 
 return `._id {
   font-weight: 500;
-  color: ${isPaused ? args.theme.var.color.text_light_500 : args.theme.var.color.text};
-  margin-bottom: ${args.theme.var.spacing.xs};
+  color: ${isPaused ? t.var.color.text_light_500 : t.var.color.text};
+  margin-bottom: ${t.var.spacing.xs};
 }`;
 '''
       }
@@ -953,7 +953,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const ruleData = args.contextData?.categoryRules;
+const ruleData = c?.categoryRules;
 const rule = ruleData?.rule;
 const frequency = rule?.P?.frequency || "daily";
 const priority = rule?.P?.priority || "medium";
@@ -969,7 +969,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
       }
@@ -981,7 +981,7 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const ruleData = args.contextData?.categoryRules;
+const ruleData = c?.categoryRules;
 const rule = ruleData?.rule;
 const stats = ruleData?.stats;
 const streak = stats?.currentStreak || 0;
@@ -1002,17 +1002,17 @@ return {
 };
 ''',
         css: '''
-const ruleData = args.contextData?.categoryRules;
+const ruleData = c?.categoryRules;
 const rule = ruleData?.rule;
 const stats = ruleData?.stats;
 const isPaused = rule?.P?.isActive === false;
 const streak = stats?.currentStreak || 0;
 
-let statusColor = args.theme.var.color.primary;
+let statusColor = t.var.color.primary;
 if (isPaused) {
-  statusColor = args.theme.var.color.warning;
+  statusColor = t.var.color.warning;
 } else if (streak > 0) {
-  statusColor = args.theme.var.color.success;
+  statusColor = t.var.color.success;
 }
 
 return `._id {
@@ -1045,7 +1045,7 @@ return {
         componentName: "RBMenuItem",
         slotName: "menu-items",
         props: '''
-const ruleData = args.contextData.categoryRules;
+const ruleData = c.categoryRules;
 const rule = ruleData?.rule;
 const category = ruleData?.category;
 
@@ -1055,7 +1055,7 @@ return {
   onClick: (e) => {
     e.preventDefault();
     e.stopPropagation();
-    args.fns.closeMenu?.();
+    f.closeMenu?.();
 
     if (rule) {
       // Format rule data for modal (same pattern as rule detail page)
@@ -1067,11 +1067,11 @@ return {
         }
       };
 
-      args.fns.setSelectedRule(ruleForModal);
-      args.fns.setModalMode("edit");
-      args.fns.setShowRuleModal(true);
+      f.setSelectedRule(ruleForModal);
+      f.setModalMode("edit");
+      f.setShowRuleModal(true);
     } else {
-      args.showErrorToast("Rule data not available");
+      _.showErrorToast("Rule data not available");
     }
   }
 };
@@ -1086,7 +1086,7 @@ return {
         componentName: "RBMenuItem",
         slotName: "menu-items",
         props: '''
-const ruleData = args.contextData.categoryRules;
+const ruleData = c.categoryRules;
 const rule = ruleData?.rule;
 const ruleId = rule?.id;
 
@@ -1096,7 +1096,7 @@ return {
   href: `/rb/rule-detail?ruleId=${ruleId}`,
   onClick: (e) => {
     e.stopPropagation();
-    args.fns.closeMenu?.();
+    f.closeMenu?.();
   }
 };
 '''
@@ -1124,7 +1124,7 @@ return {
         componentName: "RBMenuItem",
         slotName: "menu-items",
         props: '''
-const ruleData = args.contextData.categoryRules;
+const ruleData = c.categoryRules;
 const rule = ruleData?.rule;
 const ruleName = rule?.P?.title || "this rule";
 
@@ -1143,9 +1143,9 @@ return {
     warningMessage += `\n\nThis action cannot be undone!`;
 
     // Use global confirm dialog
-    const rbConfirm = args.contextData?.confirmContext?.rbConfirm;
+    const rbConfirm = c?.confirmContext?.rbConfirm;
     if (!rbConfirm) {
-      args.showErrorToast("Confirmation dialog not available");
+      _.showErrorToast("Confirmation dialog not available");
       return;
     }
 
@@ -1159,7 +1159,7 @@ return {
 
     if (confirmed) {
       try {
-        const result = await args.executeNamedServerFunction({
+        const result = await s({
           functionName: "deleteRule",
           contextData: {
             ruleId: rule?.id
@@ -1167,16 +1167,16 @@ return {
         });
 
         if (result.result?.success) {
-          args.showSuccessToast("Rule deleted successfully");
-          args.fns.refreshData();
+          _.showSuccessToast("Rule deleted successfully");
+          f.refreshData();
         } else {
           throw new Error(result.result?.message || "Failed to delete rule");
         }
       } catch (err) {
-        args.showErrorToast(err.message);
+        _.showErrorToast(err.message);
       }
     }
-    args.fns.closeMenu?.();
+    f.closeMenu?.();
   }
 };
 '''
@@ -1189,9 +1189,9 @@ return {
         displayOrder: 7,
         componentName: "Html",
         props: '''
-const filteredData = args.fns.filteredCategoriesWithRules() || [];
-const isLoading = args.fns.isLoading();
-const error = args.fns.error();
+const filteredData = f.filteredCategoriesWithRules() || [];
+const isLoading = f.isLoading();
+const error = f.error();
 
 return {
   as: "div",
@@ -1204,9 +1204,9 @@ return `._id {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: ${args.theme.var.spacing.xxxl};
+  padding: ${t.var.spacing.xxxl};
   text-align: center;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
       }
@@ -1218,9 +1218,9 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const searchQuery = args.fns.searchQuery();
-const rules = args.fns.rules() || [];
-const activeTab = args.fns.activeTab();
+const searchQuery = f.searchQuery();
+const rules = f.rules() || [];
+const activeTab = f.activeTab();
 
 let emptyMessage = "No rules found. Create your first rule to get started!";
 if (searchQuery) {
@@ -1239,7 +1239,7 @@ return {
         css: '''
 return `._id {
   font-size: 1rem;
-  margin-bottom: ${args.theme.var.spacing.md};
+  margin-bottom: ${t.var.spacing.md};
 }`;
 '''
       }
@@ -1255,10 +1255,10 @@ return {
   text: "Create Rule",
   variant: "primary",
   onClick: () => {
-    args.fns.setModalMode("create");
-    args.fns.setShowRuleModal(true);
+    f.setModalMode("create");
+    f.setShowRuleModal(true);
   },
-  hide: !!args.fns.searchQuery() // Hide button when searching
+  hide: !!f.searchQuery() // Hide button when searching
 };
 '''
       }
@@ -1271,19 +1271,19 @@ return {
         componentName: "RBRuleFormModal",
         props: '''
 return {
-  isOpen: args.fns.showRuleModal(),
-  mode: args.fns.modalMode(),
-  ruleData: args.fns.selectedRule(),
+  isOpen: f.showRuleModal(),
+  mode: f.modalMode(),
+  ruleData: f.selectedRule(),
   onClose: () => {
-    args.fns.setShowRuleModal(false);
+    f.setShowRuleModal(false);
   },
   onSave: (result) => {
     // Refresh rules data after successful save
-    args.fns.refreshData();
+    f.refreshData();
   },
   onDelete: (result) => {
     // Refresh rules data after successful delete
-    args.fns.refreshData();
+    f.refreshData();
   }
 };
 '''

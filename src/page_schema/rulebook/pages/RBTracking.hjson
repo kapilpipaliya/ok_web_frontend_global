@@ -13,10 +13,10 @@ return {
 ''',
         props: '''
 // Data loading state
-const [rules, setRules] = args.createSignal([]);
-const [isLoading, setIsLoading] = args.createSignal(true);
-const [error, setError] = args.createSignal(null);
-const [selectedDate, setSelectedDate] = args.createSignal(new Date().toISOString().split('T')[0]);
+const [rules, setRules] = _.createSignal([]);
+const [isLoading, setIsLoading] = _.createSignal(true);
+const [error, setError] = _.createSignal(null);
+const [selectedDate, setSelectedDate] = _.createSignal(new Date().toISOString().split('T')[0]);
 
 // Load rules with today's tracking status
 const loadRulesWithTracking = async (date, isInitialLoad = false) => {
@@ -27,7 +27,7 @@ const loadRulesWithTracking = async (date, isInitialLoad = false) => {
   setError(null);
 
   try {
-    const result = await args.executeNamedServerFunction({
+    const result = await s({
       functionName: "getUserRules",
       contextData: {
         includeInactive: false,
@@ -48,7 +48,7 @@ const loadRulesWithTracking = async (date, isInitialLoad = false) => {
   } catch (err) {
     console.error("Error loading rules:", err);
     setError(err.message);
-    args.showErrorToast(err.message);
+    _.showErrorToast(err.message);
   } finally {
     if (isInitialLoad) {
       setIsLoading(false);
@@ -70,7 +70,7 @@ const trackRuleAction = async (ruleId, status, notes = "", completionPercentage 
       if (completionPercentage === null) return; // User cancelled
       completionPercentage = parseInt(completionPercentage);
       if (isNaN(completionPercentage) || completionPercentage < 0 || completionPercentage > 100) {
-        args.showErrorToast("Please enter a valid percentage between 0 and 100");
+        _.showErrorToast("Please enter a valid percentage between 0 and 100");
         return;
       }
     }
@@ -86,7 +86,7 @@ const trackRuleAction = async (ruleId, status, notes = "", completionPercentage 
       contextData.completionPercentage = completionPercentage;
     }
 
-    const result = await args.executeNamedServerFunction({
+    const result = await s({
       functionName: "trackRule",
       contextData
     });
@@ -96,7 +96,7 @@ const trackRuleAction = async (ruleId, status, notes = "", completionPercentage 
     }
 
     if (result.result?.success) {
-      args.showSuccessToast(result.result.message);
+      _.showSuccessToast(result.result.message);
       // Reload rules to update tracking status
       loadRulesWithTracking(date);
     } else {
@@ -104,12 +104,12 @@ const trackRuleAction = async (ruleId, status, notes = "", completionPercentage 
     }
   } catch (error) {
     console.error("Error tracking rule:", error);
-    args.showErrorToast(error.message);
+    _.showErrorToast(error.message);
   }
 };
 
 // Group rules by category
-const groupedRules = args.createMemo(() => {
+const groupedRules = _.createMemo(() => {
   const rulesData = rules();
   return rulesData.reduce((acc, ruleData) => {
     const category = ruleData.category;
@@ -131,7 +131,7 @@ const groupedRules = args.createMemo(() => {
 });
 
 // Calculate progress
-const progressStats = args.createMemo(() => {
+const progressStats = _.createMemo(() => {
   const rulesData = rules();
   if (rulesData.length === 0) return { completed: 0, total: 0, percentage: 0 };
 
@@ -165,11 +165,11 @@ const completeAllRemaining = async () => {
   });
 
   if (incompleteRules.length === 0) {
-    args.showSuccessToast("All rules are already completed!");
+    _.showSuccessToast("All rules are already completed!");
     return;
   }
 
-  const rbConfirm = args.contextData?.confirmContext?.rbConfirm;
+  const rbConfirm = c?.confirmContext?.rbConfirm;
   const confirmed = await rbConfirm({
     title: "Mark All Complete",
     message: `Mark ${incompleteRules.length} remaining rules as completed?`,
@@ -186,7 +186,7 @@ const completeAllRemaining = async () => {
     try {
       const ruleId = ruleData?.rule?.id;
       if (ruleId) {
-        const result = await args.executeNamedServerFunction({
+        const result = await s({
           functionName: "trackRule",
           contextData: {
             ruleId,
@@ -209,12 +209,12 @@ const completeAllRemaining = async () => {
 
   // Show results and refresh data
   if (successCount > 0) {
-    args.showSuccessToast(`Completed ${successCount} rules!${errorCount > 0 ? ` (${errorCount} failed)` : ''}`);
+    _.showSuccessToast(`Completed ${successCount} rules!${errorCount > 0 ? ` (${errorCount} failed)` : ''}`);
     loadRulesWithTracking(date).catch(refreshError => {
       console.error('Error refreshing data after bulk completion:', refreshError);
     });
   } else if (errorCount > 0) {
-    args.showErrorToast(`Failed to complete rules. Please try again.`);
+    _.showErrorToast(`Failed to complete rules. Please try again.`);
   }
 };
 
@@ -267,14 +267,14 @@ return {
 ''',
         css: '''
 return `._id {
-  padding: ${args.theme.var.spacing.lg};
+  padding: ${t.var.spacing.lg};
   max-width: 1200px;
   margin: 0 auto;
 }
 
 @media (max-width: 768px) {
   ._id {
-    padding: ${args.theme.var.spacing.md};
+    padding: ${t.var.spacing.md};
   }
 }`;
 '''
@@ -296,7 +296,7 @@ return `._id {
         componentName: "RBPageTitle",
         slotName: "center",
         props: '''
-const selectedDate = args.contextData?.trackingData?.selectedDate;
+const selectedDate = c?.trackingData?.selectedDate;
 const currentDate = selectedDate?.() || new Date().toISOString().split('T')[0];
 const today = new Date().toISOString().split('T')[0];
 const isToday = currentDate === today;
@@ -317,7 +317,7 @@ return {
         componentName: "Html",
         slotName: "subtitle",
         props: '''
-const selectedDate = args.contextData?.trackingData?.selectedDate;
+const selectedDate = c?.trackingData?.selectedDate;
 const currentDate = selectedDate?.() || new Date().toISOString().split('T')[0];
 const today = new Date().toISOString().split('T')[0];
 
@@ -340,7 +340,7 @@ return {
         css: '''
 return `._id {
   font-size: 1.125rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   margin: 0;
 }`;
 '''
@@ -354,9 +354,9 @@ return `._id {
         componentName: "Html",
         slotName: "right",
         props: '''
-const selectedDate = args.contextData?.trackingData?.selectedDate;
-const setSelectedDate = args.contextData?.trackingData?.setSelectedDate;
-const refreshData = args.contextData?.trackingData?.refreshData;
+const selectedDate = c?.trackingData?.selectedDate;
+const setSelectedDate = c?.trackingData?.setSelectedDate;
+const refreshData = c?.trackingData?.refreshData;
 
 const handleDateClick = () => {
   const currentDate = selectedDate?.() || new Date().toISOString().split('T')[0];
@@ -372,10 +372,10 @@ const handleDateClick = () => {
         console.error('Error in refreshData:', error);
       }
     } else {
-      args.showErrorToast("Please enter a valid date");
+      _.showErrorToast("Please enter a valid date");
     }
   } else if (newDate !== null) {
-    args.showErrorToast("Please enter date in YYYY-MM-DD format");
+    _.showErrorToast("Please enter date in YYYY-MM-DD format");
   }
 };
 
@@ -390,17 +390,17 @@ return {
 return `._id {
   background: none;
   border: none;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   cursor: pointer;
-  padding: ${args.theme.var.spacing.sm};
-  border-radius: ${args.theme.var.borderRadius.sm};
+  padding: ${t.var.spacing.sm};
+  border-radius: ${t.var.borderRadius.sm};
   transition: all 150ms ease;
   display: flex;
   align-items: center;
 
   &:hover {
-    background: ${args.theme.var.color.background_light_200};
-    color: ${args.theme.var.color.text};
+    background: ${t.var.color.background_light_200};
+    color: ${t.var.color.text};
   }
 }`;
 '''
@@ -431,16 +431,16 @@ return {
         props: '''
 return {
   as: "div",
-  hide: () => args.contextData?.trackingData?.isLoading?.()
+  hide: () => c?.trackingData?.isLoading?.()
 };
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background_light_100};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.lg};
-  padding: ${args.theme.var.spacing.lg};
-  margin-bottom: ${args.theme.var.spacing.xl};
+  background: ${t.var.color.background_light_100};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.lg};
+  padding: ${t.var.spacing.lg};
+  margin-bottom: ${t.var.spacing.xl};
 }`;
 '''
       }
@@ -452,7 +452,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const stats = args.contextData?.trackingData?.progressStats?.();
+const stats = c?.trackingData?.progressStats?.();
 const completed = stats?.completed || 0;
 const total = stats?.total || 0;
 
@@ -472,8 +472,8 @@ return {
 return `._id {
   font-size: 1.125rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
-  margin-bottom: ${args.theme.var.spacing.md};
+  color: ${t.var.color.text};
+  margin-bottom: ${t.var.spacing.md};
 }`;
 '''
       }
@@ -491,9 +491,9 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background_light_200};
-  border-radius: ${args.theme.var.borderRadius.full};
-  padding: ${args.theme.var.spacing.xs};
+  background: ${t.var.color.background_light_200};
+  border-radius: ${t.var.borderRadius.full};
+  padding: ${t.var.spacing.xs};
 }`;
 '''
       }
@@ -514,14 +514,14 @@ return {
 };
 ''',
         css: '''
-const stats = args.contextData?.trackingData?.progressStats?.();
+const stats = c?.trackingData?.progressStats?.();
 const percentage = stats?.percentage || 0;
 
 return `._id {
   width: ${percentage}%;
   height: 12px;
-  background: ${args.theme.var.color.success};
-  border-radius: ${args.theme.var.borderRadius.full};
+  background: ${t.var.color.success};
+  border-radius: ${t.var.borderRadius.full};
   transition: width 500ms ease;
 }`;
 '''
@@ -536,7 +536,7 @@ return `._id {
         props: '''
 return {
   as: "div",
-  hide: () => !args.contextData?.trackingData?.isLoading?.()
+  hide: () => !c?.trackingData?.isLoading?.()
 };
 ''',
         css: '''
@@ -545,8 +545,8 @@ return `._id {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: ${args.theme.var.spacing.xl};
-  gap: ${args.theme.var.spacing.md};
+  padding: ${t.var.spacing.xl};
+  gap: ${t.var.spacing.md};
 }`;
 '''
       }
@@ -577,17 +577,17 @@ return {
   as: "div",
   text: "No rules to track today",
   hide: () => {
-    const isLoading = args.contextData?.trackingData?.isLoading?.();
-    const groupedRules = args.contextData?.trackingData?.groupedRules?.();
+    const isLoading = c?.trackingData?.isLoading?.();
+    const groupedRules = c?.trackingData?.groupedRules?.();
     return isLoading || (groupedRules && Object.keys(groupedRules).length > 0);
   }
 };
 ''',
         css: '''
 return `._id {
-  padding: ${args.theme.var.spacing.xl};
+  padding: ${t.var.spacing.xl};
   text-align: center;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   font-size: 1.125rem;
 }`;
 '''
@@ -605,12 +605,12 @@ return {
   contextName: "categoriesContainer",
   loop: true,
   data: () => {
-    const groupedRules = args.contextData?.trackingData?.groupedRules?.();
+    const groupedRules = c?.trackingData?.groupedRules?.();
     return Object.values(groupedRules || {});
   },
   hide: () => {
-    const groupedRules = args.contextData?.trackingData?.groupedRules?.();
-    return args.contextData?.trackingData?.isLoading?.() || !groupedRules || Object.keys(groupedRules).length === 0;
+    const groupedRules = c?.trackingData?.groupedRules?.();
+    return c?.trackingData?.isLoading?.() || !groupedRules || Object.keys(groupedRules).length === 0;
   }
 };
 ''',
@@ -618,7 +618,7 @@ return {
 return `._id {
   display: flex;
   flex-direction: column;
-  gap: ${args.theme.var.spacing.xl};
+  gap: ${t.var.spacing.xl};
 }`;
 '''
       }
@@ -644,7 +644,7 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const categoryData = args.contextData?.categoriesContainer;
+const categoryData = c?.categoriesContainer;
 const categoryIcon = categoryData?.categoryIcon || '📝';
 const categoryName = categoryData?.categoryName || 'Other';
 const totalRules = categoryData?.rules?.length || 0;
@@ -662,8 +662,8 @@ return {
 return `._id {
   font-size: 1.125rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 ${args.theme.var.spacing.lg} 0;
+  color: ${t.var.color.text};
+  margin: 0 0 ${t.var.spacing.lg} 0;
 }`;
 '''
       }
@@ -680,7 +680,7 @@ return {
   contextName: "categoryRules",
   loop: true,
   data: () => {
-    const categoryData = args.contextData?.categoriesContainer;
+    const categoryData = c?.categoriesContainer;
     return categoryData?.rules || [];
   }
 };
@@ -689,7 +689,7 @@ return {
 return `._id {
   display: flex;
   flex-direction: column;
-  gap: ${args.theme.var.spacing.md};
+  gap: ${t.var.spacing.md};
 }`;
 '''
       }
@@ -707,30 +707,30 @@ return {
 };
 ''',
         css: '''
-const ruleData = args.contextData?.categoryRules;
+const ruleData = c?.categoryRules;
 const tracking = ruleData?.tracking?.[0];
 const status = tracking?.P?.status;
 
-let borderColor = '${args.theme.var.color.border}';
+let borderColor = '${t.var.color.border}';
 if (status === 'completed') {
-  borderColor = '${args.theme.var.color.success}';
+  borderColor = '${t.var.color.success}';
 } else if (status === 'partial') {
-  borderColor = '${args.theme.var.color.warning}';
+  borderColor = '${t.var.color.warning}';
 } else if (status === 'missed') {
-  borderColor = '${args.theme.var.color.error}';
+  borderColor = '${t.var.color.error}';
 } else if (status === 'skipped') {
-  borderColor = '${args.theme.var.color.text_light_500}';
+  borderColor = '${t.var.color.text_light_500}';
 }
 
 return `._id {
-  background: ${args.theme.var.color.background_light_100};
+  background: ${t.var.color.background_light_100};
   border: 2px solid ${borderColor};
-  border-radius: ${args.theme.var.borderRadius.lg};
-  padding: ${args.theme.var.spacing.lg};
+  border-radius: ${t.var.borderRadius.lg};
+  padding: ${t.var.spacing.lg};
   transition: all 150ms ease;
 
   &:hover {
-    border-color: ${args.theme.var.color.primary};
+    border-color: ${t.var.color.primary};
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
 }`;
@@ -753,7 +753,7 @@ return `._id {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: ${args.theme.var.spacing.md};
+  margin-bottom: ${t.var.spacing.md};
 }`;
 '''
       }
@@ -765,7 +765,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const ruleData = args.contextData?.categoryRules;
+const ruleData = c?.categoryRules;
 const rule = ruleData?.rule;
 const title = rule?.P?.title || 'Untitled Rule';
 
@@ -778,7 +778,7 @@ return {
 return `._id {
   font-size: 1.125rem;
   font-weight: 600;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   margin: 0;
 }`;
 '''
@@ -791,7 +791,7 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const ruleData = args.contextData?.categoryRules;
+const ruleData = c?.categoryRules;
 const streak = ruleData?.streak;
 const currentStreak = streak?.P?.currentStreak || 0;
 
@@ -803,7 +803,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.warning};
+  color: ${t.var.color.warning};
   font-weight: 500;
 }`;
 '''
@@ -824,8 +824,8 @@ return {
 return `._id {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: ${args.theme.var.spacing.sm};
-  margin-bottom: ${args.theme.var.spacing.md};
+  gap: ${t.var.spacing.sm};
+  margin-bottom: ${t.var.spacing.md};
 }`;
 '''
       }
@@ -837,17 +837,17 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const ruleData = args.contextData?.categoryRules;
+const ruleData = c?.categoryRules;
 const rule = ruleData?.rule;
 const ruleId = rule?.id;
-const trackRuleAction = args.contextData?.trackingData?.trackRuleAction;
+const trackRuleAction = c?.trackingData?.trackRuleAction;
 
 const handleClick = async () => {
   if (ruleId && trackRuleAction) {
     await trackRuleAction(ruleId, 'completed');
   } else {
     console.error('Missing data for tracking:', { ruleId, trackRuleAction: !!trackRuleAction });
-    args.showErrorToast('Unable to track rule - missing data');
+    _.showErrorToast('Unable to track rule - missing data');
   }
 };
 
@@ -859,28 +859,28 @@ return {
 };
 ''',
         css: '''
-const ruleData = args.contextData?.categoryRules;
+const ruleData = c?.categoryRules;
 const tracking = ruleData?.tracking?.[0];
 const status = tracking?.P?.status;
 const isActive = status === 'completed';
 
 return `._id {
-  background: ${isActive ? '${args.theme.var.color.success}' : '${args.theme.var.color.success_light_200}'};
-  color: ${isActive ? '${args.theme.var.color.success_text}' : '${args.theme.var.color.success_text}'};
+  background: ${isActive ? '${t.var.color.success}' : '${t.var.color.success_light_200}'};
+  color: ${isActive ? '${t.var.color.success_text}' : '${t.var.color.success_text}'};
   border: none;
-  padding: ${args.theme.var.spacing.md};
-  border-radius: ${args.theme.var.borderRadius.md};
+  padding: ${t.var.spacing.md};
+  border-radius: ${t.var.borderRadius.md};
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: ${args.theme.var.spacing.xs};
+  gap: ${t.var.spacing.xs};
   cursor: pointer;
   transition: all 150ms ease;
   font-weight: 500;
   opacity: ${isActive ? '1' : '0.7'};
 
   &:hover {
-    background: ${args.theme.var.color.success_dark_200};
+    background: ${t.var.color.success_dark_200};
     opacity: 1;
   }
 
@@ -933,17 +933,17 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const ruleData = args.contextData?.categoryRules;
+const ruleData = c?.categoryRules;
 const rule = ruleData?.rule;
 const ruleId = rule?.id;
-const trackRuleAction = args.contextData?.trackingData?.trackRuleAction;
+const trackRuleAction = c?.trackingData?.trackRuleAction;
 
 const handleClick = async () => {
   if (ruleId && trackRuleAction) {
     await trackRuleAction(ruleId, 'partial');
   } else {
     console.error('Missing data for tracking:', { ruleId, trackRuleAction: !!trackRuleAction });
-    args.showErrorToast('Unable to track rule - missing data');
+    _.showErrorToast('Unable to track rule - missing data');
   }
 };
 
@@ -955,28 +955,28 @@ return {
 };
 ''',
         css: '''
-const ruleData = args.contextData?.categoryRules;
+const ruleData = c?.categoryRules;
 const tracking = ruleData?.tracking?.[0];
 const status = tracking?.P?.status;
 const isActive = status === 'partial';
 
 return `._id {
-  background: ${args.theme.var.color.warning};
-  color: ${args.theme.var.color.warning_text};
+  background: ${t.var.color.warning};
+  color: ${t.var.color.warning_text};
   border: none;
-  padding: ${args.theme.var.spacing.md};
-  border-radius: ${args.theme.var.borderRadius.md};
+  padding: ${t.var.spacing.md};
+  border-radius: ${t.var.borderRadius.md};
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: ${args.theme.var.spacing.xs};
+  gap: ${t.var.spacing.xs};
   cursor: pointer;
   transition: all 150ms ease;
   font-weight: 500;
   opacity: ${isActive ? '1' : '0.7'};
 
   &:hover {
-    background: ${args.theme.var.color.warning_dark_200};
+    background: ${t.var.color.warning_dark_200};
     opacity: 1;
   }
 
@@ -1029,17 +1029,17 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const ruleData = args.contextData?.categoryRules;
+const ruleData = c?.categoryRules;
 const rule = ruleData?.rule;
 const ruleId = rule?.id;
-const trackRuleAction = args.contextData?.trackingData?.trackRuleAction;
+const trackRuleAction = c?.trackingData?.trackRuleAction;
 
 const handleClick = async () => {
   if (ruleId && trackRuleAction) {
     await trackRuleAction(ruleId, 'missed');
   } else {
     console.error('Missing data for tracking:', { ruleId, trackRuleAction: !!trackRuleAction });
-    args.showErrorToast('Unable to track rule - missing data');
+    _.showErrorToast('Unable to track rule - missing data');
   }
 };
 
@@ -1051,28 +1051,28 @@ return {
 };
 ''',
         css: '''
-const ruleData = args.contextData?.categoryRules;
+const ruleData = c?.categoryRules;
 const tracking = ruleData?.tracking?.[0];
 const status = tracking?.P?.status;
 const isActive = status === 'missed';
 
 return `._id {
-  background: ${isActive ? '${args.theme.var.color.error}' : '${args.theme.var.color.error_light_200}'};
-  color: ${args.theme.var.color.error_text};
+  background: ${isActive ? '${t.var.color.error}' : '${t.var.color.error_light_200}'};
+  color: ${t.var.color.error_text};
   border: none;
-  padding: ${args.theme.var.spacing.md};
-  border-radius: ${args.theme.var.borderRadius.md};
+  padding: ${t.var.spacing.md};
+  border-radius: ${t.var.borderRadius.md};
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: ${args.theme.var.spacing.xs};
+  gap: ${t.var.spacing.xs};
   cursor: pointer;
   transition: all 150ms ease;
   font-weight: 500;
   opacity: ${isActive ? '1' : '0.7'};
 
   &:hover {
-    background: ${args.theme.var.color.error_dark_200};
+    background: ${t.var.color.error_dark_200};
     opacity: 1;
   }
 
@@ -1125,17 +1125,17 @@ return `._id {
         displayOrder: 4,
         componentName: "Html",
         props: '''
-const ruleData = args.contextData?.categoryRules;
+const ruleData = c?.categoryRules;
 const rule = ruleData?.rule;
 const ruleId = rule?.id;
-const trackRuleAction = args.contextData?.trackingData?.trackRuleAction;
+const trackRuleAction = c?.trackingData?.trackRuleAction;
 
 const handleClick = async () => {
   if (ruleId && trackRuleAction) {
     await trackRuleAction(ruleId, 'skipped');
   } else {
     console.error('Missing data for tracking:', { ruleId, trackRuleAction: !!trackRuleAction });
-    args.showErrorToast('Unable to track rule - missing data');
+    _.showErrorToast('Unable to track rule - missing data');
   }
 };
 
@@ -1147,28 +1147,28 @@ return {
 };
 ''',
         css: '''
-const ruleData = args.contextData?.categoryRules;
+const ruleData = c?.categoryRules;
 const tracking = ruleData?.tracking?.[0];
 const status = tracking?.P?.status;
 const isActive = status === 'skipped';
 
 return `._id {
-  background: ${isActive ? '${args.theme.var.color.text_light_500}' : '${args.theme.var.color.text_light_300}'};
-  color: ${isActive ? '${args.theme.var.color.text_light_500_text}' : '${args.theme.var.color.text_light_300_text}'};
+  background: ${isActive ? '${t.var.color.text_light_500}' : '${t.var.color.text_light_300}'};
+  color: ${isActive ? '${t.var.color.text_light_500_text}' : '${t.var.color.text_light_300_text}'};
   border: none;
-  padding: ${args.theme.var.spacing.md};
-  border-radius: ${args.theme.var.borderRadius.md};
+  padding: ${t.var.spacing.md};
+  border-radius: ${t.var.borderRadius.md};
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: ${args.theme.var.spacing.xs};
+  gap: ${t.var.spacing.xs};
   cursor: pointer;
   transition: all 150ms ease;
   font-weight: 500;
   opacity: ${isActive ? '1' : '0.7'};
 
   &:hover {
-    background: ${args.theme.var.color.text_light_600};
+    background: ${t.var.color.text_light_600};
     opacity: 1;
   }
 
@@ -1242,10 +1242,10 @@ return `._id {
         displayOrder: 4,
         componentName: "Html",
         props: '''
-const completeAllRemaining = args.contextData?.trackingData?.completeAllRemaining;
-const progressStats = args.contextData?.trackingData?.progressStats?.();
-const isLoading = args.contextData?.trackingData?.isLoading?.();
-const groupedRules = args.contextData?.trackingData?.groupedRules?.();
+const completeAllRemaining = c?.trackingData?.completeAllRemaining;
+const progressStats = c?.trackingData?.progressStats?.();
+const isLoading = c?.trackingData?.isLoading?.();
+const groupedRules = c?.trackingData?.groupedRules?.();
 
 const handleClick = async () => {
   if (completeAllRemaining) {
@@ -1262,27 +1262,27 @@ return {
 };
 ''',
         css: '''
-const progressStats = args.contextData?.trackingData?.progressStats?.();
-const isLoading = args.contextData?.trackingData?.isLoading?.();
+const progressStats = c?.trackingData?.progressStats?.();
+const isLoading = c?.trackingData?.isLoading?.();
 const isDisabled = isLoading || (progressStats && progressStats.completed === progressStats.total);
 
 return `._id {
   width: 100%;
-  background: ${isDisabled ? '${args.theme.var.color.text_light_500}' : '${args.theme.var.color.primary}'};
-  color: ${isDisabled ? '${args.theme.var.color.text_light_500_text}' : '${args.theme.var.color.primary_text}'};
+  background: ${isDisabled ? '${t.var.color.text_light_500}' : '${t.var.color.primary}'};
+  color: ${isDisabled ? '${t.var.color.text_light_500_text}' : '${t.var.color.primary_text}'};
   border: none;
-  padding: ${args.theme.var.spacing.lg};
-  border-radius: ${args.theme.var.borderRadius.lg};
+  padding: ${t.var.spacing.lg};
+  border-radius: ${t.var.borderRadius.lg};
   font-size: 1.125rem;
   font-weight: 600;
   cursor: ${isDisabled ? 'not-allowed' : 'pointer'};
-  margin-top: ${args.theme.var.spacing.xl};
+  margin-top: ${t.var.spacing.xl};
   transition: all 150ms ease;
   opacity: ${isDisabled ? '0.6' : '1'};
 
   ${!isDisabled ? `
   &:hover {
-    background: ${args.theme.var.color.primary_dark_200};
+    background: ${t.var.color.primary_dark_200};
     transform: translateY(-2px);
   }
 

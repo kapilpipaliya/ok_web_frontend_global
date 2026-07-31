@@ -91,7 +91,7 @@ export const processStyle = (
   }
 
   // Fast path for simple ID replacement
-  // if (!trimmedStyle.includes("args.") && !trimmedStyle.includes("return")) {
+  // if (!trimmedStyle.includes("_.") && !trimmedStyle.includes("return") && !trimmedStyle.includes("t.")) {
   //   return trimmedStyle.replace(ID_PLACEHOLDER_REGEX, `.${uniqueId}`);
   // }
 

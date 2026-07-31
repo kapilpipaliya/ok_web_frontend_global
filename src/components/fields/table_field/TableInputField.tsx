@@ -166,7 +166,7 @@ export function TableInputField(
             `return \`._id {
   margin: 2px;
   border-radius: 10px;
-  ${sortedVertexes().length > 0 ? "border: 1px solid ${args.theme.var.color.primary};" : ""}
+  ${sortedVertexes().length > 0 ? "border: 1px solid ${t.var.color.primary};" : ""}
 }\`;`,
             STYLES.overflowCss,
           ]}
@@ -187,8 +187,8 @@ export function TableInputField(
                 <As
                   as="tr"
                   css={`return \`._id {
-  background-color: \${args.theme.var.color.primary};
-  color: \${args.theme.var.color.primary_text};
+  background-color: \${t.var.color.primary};
+  color: \${t.var.color.primary_text};
   height: 35px;
   text-align: center;
   width: max-content;
@@ -200,7 +200,7 @@ export function TableInputField(
   text-align: center;
   align-content: center;
   align-items: center;
-  color: \${args.theme.var.color.primary_text};
+  color: \${t.var.color.primary_text};
   font-weight: 500;
   padding: 0 10px;
   text-align: left;
@@ -237,7 +237,7 @@ export function TableInputField(
                               <As
                                 as="span"
                                 css={`return \`._id {
-  color: \${args.theme.var.color.error};
+  color: \${t.var.color.error};
 }\`;`}
                               >
                                 {" "}

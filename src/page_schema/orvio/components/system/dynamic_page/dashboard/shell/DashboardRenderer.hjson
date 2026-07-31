@@ -8,7 +8,7 @@
         dynamicComponent: LoadingSpinner
         fns:
           '''
-const getRuntime = () => args.contextData.props?.dashboardRuntime?.() || null;
+const getRuntime = () => c.props?.dashboardRuntime?.() || null;
 
 const isDashboardLoading = () => {
   const runtime = getRuntime();
@@ -31,7 +31,7 @@ return {
         key: dashboard_denied
         props:
           '''
-const runtime = args.fns.getRuntime();
+const runtime = f.getRuntime();
 return {
   as: "div",
   hide: !runtime || runtime.denied !== true,
@@ -42,7 +42,7 @@ return {
           '''
 return `._id {
   padding: 2rem;
-  color: ${args.theme.var.color.error};
+  color: ${t.var.color.error};
 }`;
 '''
       }
@@ -56,7 +56,7 @@ return `._id {
         key: dashboard_root
         props:
           '''
-const runtime = args.fns.getRuntime();
+const runtime = f.getRuntime();
 return {
   as: "div",
   hide: !runtime || runtime.denied === true
@@ -72,7 +72,7 @@ return `._id {
   width: 100%;
   min-height: calc(100vh - 4rem);
   padding: 1rem;
-  background: ${args.theme.var.color.background};
+  background: ${t.var.color.background};
 }`;
 '''
       }
@@ -130,7 +130,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const runtime = args.fns.getRuntime();
+const runtime = f.getRuntime();
 return {
   as: "h1",
   text: runtime?.config?.title || "Dashboard"
@@ -142,7 +142,7 @@ return `._id {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 700;
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
 }`;
 '''
       }
@@ -155,7 +155,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const runtime = args.fns.getRuntime();
+const runtime = f.getRuntime();
 const subtitle = runtime?.config?.subtitle;
 return {
   as: "p",
@@ -167,7 +167,7 @@ return {
           '''
 return `._id {
   margin: 0;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   font-size: 0.875rem;
 }`;
 '''
@@ -181,7 +181,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const runtime = args.fns.getRuntime();
+const runtime = f.getRuntime();
 const actions = Array.isArray(runtime?.headerActions) ? runtime.headerActions : [];
 return {
   as: "div",
@@ -212,7 +212,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const action = args.contextData.headerAction || {};
+const action = c.headerAction || {};
 const isShopifyIframe = typeof window !== "undefined" && window.self !== window.top;
 const onClick = () => {
   const href = String(action.href || "").trim();
@@ -221,7 +221,7 @@ const onClick = () => {
     window.open(href, "_blank", "noopener,noreferrer");
     return;
   }
-  args.navigate(href);
+  _.navigate(href);
 };
 return {
   as: isShopifyIframe ? "s-button" : "button",
@@ -241,7 +241,7 @@ return {
         componentName: Html
         props:
           '''
-const runtime = args.fns.getRuntime();
+const runtime = f.getRuntime();
 const isEdit = runtime?.isEditMode?.() === true;
 const canEdit = runtime?.config?.personalization?.allowMoveWidgets !== false;
 return {
@@ -257,16 +257,16 @@ return {
 return `._id {
   align-self: flex-start;
   margin-top: 0.5rem;
-  border: 1px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background_light_100};
-  color: ${args.theme.var.color.text};
+  border: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background_light_100};
+  color: ${t.var.color.text};
   border-radius: 0.375rem;
   padding: 0.375rem 0.75rem;
   font-size: 0.8125rem;
   cursor: pointer;
 
   &:hover {
-    background: ${args.theme.var.color.background_light_200};
+    background: ${t.var.color.background_light_200};
   }
 }`;
 '''
@@ -281,9 +281,9 @@ return `._id {
         key: dashboard_filter_bar
         props:
           '''
-const runtime = args.fns.getRuntime();
+const runtime = f.getRuntime();
 return {
-  dashboardRuntime: args.contextData.props?.dashboardRuntime,
+  dashboardRuntime: c.props?.dashboardRuntime,
   runtimeKey: runtime?.config?.key || ""
 };
 '''
@@ -298,9 +298,9 @@ return {
         key: dashboard_layout
         props:
           '''
-const runtime = args.fns.getRuntime();
+const runtime = f.getRuntime();
 return {
-  dashboardRuntime: args.contextData.props?.dashboardRuntime,
+  dashboardRuntime: c.props?.dashboardRuntime,
   runtimeKey: runtime?.config?.key || ""
 };
 '''
@@ -317,8 +317,8 @@ return {
           '''
 return {
   as: "div",
-  hide: !args.fns.isDashboardLoading(),
-  "aria-busy": args.fns.isDashboardLoading() ? "true" : "false",
+  hide: !f.isDashboardLoading(),
+  "aria-busy": f.isDashboardLoading() ? "true" : "false",
   "aria-live": "polite"
 };
 '''
@@ -333,7 +333,7 @@ return `._id {
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
-  background: color-mix(in oklch, ${args.theme.var.color.background} 82%, transparent);
+  background: color-mix(in oklch, ${t.var.color.background} 82%, transparent);
   backdrop-filter: blur(2px);
   pointer-events: all;
 }`;
@@ -351,7 +351,7 @@ return `._id {
 return {
   size: "large",
   color: "primary",
-  hide: !args.fns.isDashboardLoading()
+  hide: !f.isDashboardLoading()
 };
 '''
       }
@@ -366,7 +366,7 @@ return {
           '''
 return {
   as: "p",
-  hide: !args.fns.isDashboardLoading(),
+  hide: !f.isDashboardLoading(),
   text: "Refreshing dashboard..."
 };
 '''
@@ -375,7 +375,7 @@ return {
 return `._id {
   margin: 0;
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
 }`;
 '''
       }

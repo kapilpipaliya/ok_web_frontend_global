@@ -21,7 +21,7 @@
  * Any partially completed videos will be re-processed
  */
 
-  const { playlistId, ownershipId } = args.contextData;
+  const { playlistId, ownershipId } = c;
 
   if (!playlistId) {
     return {
@@ -46,7 +46,7 @@
   }
 
   // Get current authenticated user from session
-  const actualUser = await args.getUserFromSession();
+  const actualUser = await _.getUserFromSession();
   if (!actualUser) {
     return {
       success: false,
@@ -59,10 +59,10 @@
   }
 
   // Get effective user (handles admin impersonation)
-  const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+  const user = await _.getEffectiveUser(_.session, actualUser, c);
 
   // Verify ownership belongs to user
-  const ownershipCheck = await args.session.run(`
+  const ownershipCheck = await _.session.run(`
     MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
     RETURN o
   `, { userUuid: user.P.uuid, ownershipId });
@@ -80,7 +80,7 @@
 
   // Check if playlist exists and get its current status
   // NEW SCHEMA v4.0: Direct ownership + optional settings
-  const checkResult = await args.session.run(`
+  const checkResult = await _.session.run(`
     MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
     MATCH (o)-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
     OPTIONAL MATCH (p)-[:PlaylistPlaylistSetting]->(ps:PlaylistSetting)<-[:YouTubeOwnershipPlaylistSetting]-(o)
@@ -96,8 +96,8 @@
 
   const playlistSettingNode = checkResult.records[0].get('ps');
   const playlistNode = checkResult.records[0].get('p');
-  const playlistSetting = playlistSettingNode ? args.convertNodeToJson(playlistSettingNode) : null;
-  const playlist = args.convertNodeToJson(playlistNode);
+  const playlistSetting = playlistSettingNode ? _.convertNodeToJson(playlistSettingNode) : null;
+  const playlist = _.convertNodeToJson(playlistNode);
 
   const currentStatus = playlist.P.queueStatus;
 
@@ -115,7 +115,7 @@
 
   // Get channel ID if this playlist is part of a channel
   // NEW SCHEMA v4.0: Verify both channel and playlist ownership
-  const channelResult = await args.session.run(`
+  const channelResult = await _.session.run(`
     MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
     OPTIONAL MATCH (o)-[:YouTubeOwnershipChannel]->(c:Channel)-[:ChannelPlaylist]->(p)
     RETURN c.youtubeId as channelId
@@ -129,7 +129,7 @@
   // Reset playlist queue status
   // This clears error state and resets progress counters
   // NEW ARCHITECTURE: Queue tracking on Playlist vertex directly
-  await args.session.run(`
+  await _.session.run(`
     MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
 
     SET p.queueStatus = 'queued',
@@ -141,8 +141,8 @@
   `, { ownershipId, playlistId });
 
   // Re-add playlist to processing queue
-  const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
-  const playlistQueue = helpers.result.data.createPlaylistQueue(args);
+  const helpers = await s({ functionName: 'queueHelpers', contextData: {} });
+  const playlistQueue = helpers.result.data.createPlaylistQueue(_);
 
   try {
     // Get priority and convert to job priority number

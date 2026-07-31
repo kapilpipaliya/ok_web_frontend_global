@@ -20,8 +20,8 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background_light_100};
-  border-top: 1px solid ${args.theme.var.color.border};
+  background: ${t.var.color.background_light_100};
+  border-top: 1px solid ${t.var.color.border};
   margin-top: 4rem;
 }`;
 '''
@@ -104,7 +104,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   font-size: 1.25rem;
   font-weight: 700;
   margin-bottom: 1rem;
@@ -126,7 +126,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   line-height: 1.6;
   margin-bottom: 1rem;
 }`;
@@ -160,7 +160,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   font-size: 1.1rem;
   font-weight: 600;
   margin-bottom: 1rem;
@@ -219,12 +219,12 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   text-decoration: none;
   transition: color 0.2s ease;
   
   &:hover {
-    color: ${args.theme.var.color.primary};
+    color: ${t.var.color.primary};
   }
 }`;
 '''
@@ -258,12 +258,12 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   text-decoration: none;
   transition: color 0.2s ease;
   
   &:hover {
-    color: ${args.theme.var.color.primary};
+    color: ${t.var.color.primary};
   }
 }`;
 '''
@@ -297,12 +297,12 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   text-decoration: none;
   transition: color 0.2s ease;
   
   &:hover {
-    color: ${args.theme.var.color.primary};
+    color: ${t.var.color.primary};
   }
 }`;
 '''
@@ -335,7 +335,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${t.var.color.text};
   font-size: 1.1rem;
   font-weight: 600;
   margin-bottom: 1rem;
@@ -356,7 +356,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   line-height: 1.6;
   margin-bottom: 1rem;
 }`;
@@ -380,7 +380,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.primary};
+  color: ${t.var.color.primary};
   text-decoration: none;
   font-weight: 500;
   
@@ -404,7 +404,7 @@ return {
 ''',
         css: '''
 return `._id {
-  border-top: 1px solid ${args.theme.var.color.border};
+  border-top: 1px solid ${t.var.color.border};
   padding-top: 2rem;
   text-align: center;
 }`;
@@ -425,7 +425,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_light_500};
+  color: ${t.var.color.text_light_500};
   font-size: 0.9rem;
   margin: 0;
 }`;

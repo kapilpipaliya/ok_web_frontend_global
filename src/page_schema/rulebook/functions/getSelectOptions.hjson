@@ -12,8 +12,8 @@
 
 try {
   // Get request parameters
-  const requestedType = args.contextData.params?.type;
-  const requestedSubType = args.contextData.params?.subType;
+  const requestedType = c.params?.type;
+  const requestedSubType = c.params?.subType;
 
   // Frequency options for rule forms
   const frequencyOptions = [

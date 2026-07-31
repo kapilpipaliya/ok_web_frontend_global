@@ -36,12 +36,12 @@
         displayOrder: 1
         componentName: Html
         props:
-          '''const currentMode = args.currentMode();
+          '''const currentMode = _.currentMode();
 const isDarkMode = currentMode === 'dark';
 return {
   as: "button",
   onClick: () => {
-    args.toggleTheme()
+    _.toggleTheme()
   },
   title: isDarkMode ? "Switch to light mode" : "Switch to dark mode"
 };'''
@@ -54,7 +54,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const currentMode = args.currentMode();
+          '''const currentMode = _.currentMode();
 const isDarkMode = currentMode === "dark";
 return {
   as: "icon",

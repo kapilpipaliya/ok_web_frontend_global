@@ -9,11 +9,11 @@
           '''
 const QUEUE_NAME = 'processShopifyProductAfterUpdate';
 
-const doJob = async (args, jobData, dbSession) => {
+const doJob = async (_, jobData, dbSession) => {
   const { tableVertexLabel, operation, elementId, data: vertexPayload, result, shop, fromWebhook, payload } = jobData;
 
   if (fromWebhook && payload) {
-    const h = await args.executeNamedServerFunction(
+    const h = await s(
       { functionName: 'shopifyQueueHelpers', contextData: {} },
       { functionLookupSubDomain: 'decodeproduct' }
     );
@@ -37,7 +37,7 @@ const doJob = async (args, jobData, dbSession) => {
   const formData = vertex?.P || {};
   const shopifyProductId = formData.id;
   if (!shopifyProductId) { console.log("processShopifyProductAfterUpdate: Product doesn't have Shopify ID, skipping"); return; }
-  const shopify = await args.getShopifyClient();
+  const shopify = await _.getShopifyClient();
   let admin;
   try { const authResult = await shopify.unauthenticated.admin(shop); admin = authResult.admin; } catch (authError) {
     console.error("processShopifyProductAfterUpdate: unauthenticated.admin failed", authError);
@@ -86,9 +86,9 @@ const doJob = async (args, jobData, dbSession) => {
   } catch (error) { console.error("processShopifyProductAfterUpdate: Error", error); const errMsg = error?.message || String(error); if (elementId) await dbSession.run(`MATCH (p:ShopifyProduct) WHERE elementId(p) = $elementId SET p.syncStatus = 'failed', p.syncError = $syncError, p.updatedAt = datetime()`, { elementId, syncError: errMsg.substring(0, 2000) }); }
 };
 
-const helpers = await args.executeNamedServerFunction(
+const helpers = await s(
   { functionName: 'shopifyQueueHelpers', contextData: {} },
-  { functionLookupSubDomain: args.subDomain }
+  { functionLookupSubDomain: _.subDomain }
 );
 if (!helpers.result?.success) {
   console.error('Shopify queue helpers init failed', helpers.result?.error);
@@ -96,15 +96,15 @@ if (!helpers.result?.success) {
 }
 const runWithSession = helpers.result.data.runWithSession;
 
-if (args.contextData?.action === 'start') {
-  const { Worker } = args.bullmq;
+if (c?.action === 'start') {
+  const { Worker } = _.bullmq;
   const connection = helpers.result.data.getRedisConnection();
   if (!connection || !connection.host) throw new Error('Invalid Redis connection for Shopify jobs');
   let workerInstance;
   try {
     workerInstance = new Worker(QUEUE_NAME, async (job) => {
-      await runWithSession(args, job.data.shop, async (dbSession) => {
-        await doJob(args, job.data, dbSession);
+      await runWithSession(_, job.data.shop, async (dbSession) => {
+        await doJob(_, job.data, dbSession);
       });
     }, { connection, concurrency: 2, lockDuration: 120000 });
     workerInstance.on('failed', (job, err) => console.error('processShopifyProductAfterUpdate: Job failed', job?.id, err?.message));
