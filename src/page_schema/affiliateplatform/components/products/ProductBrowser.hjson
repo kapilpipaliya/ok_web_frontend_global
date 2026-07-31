@@ -319,7 +319,7 @@ return {
   folder,
   index,
   href,
-  onOpen: withUrl ? undefined : (f) => f.openFolder?.(f)
+  onOpen: withUrl ? undefined : (folderItem) => f.openFolder?.(folderItem)
 };'''
       }
     }
@@ -407,8 +407,7 @@ const index = c.index ?? 0;
 return {
   item,
   index,
-  href: item.fileUrl || "",
-  onOpen: (f) => f.openProduct?.(f)
+  onOpen: (product) => f.openProduct?.(product)
 };'''
       }
     }

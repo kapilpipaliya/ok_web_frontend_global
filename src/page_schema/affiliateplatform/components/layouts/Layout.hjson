@@ -117,8 +117,8 @@ return {
 };
 '''
         key: Layout
+        updatedAt: 2026-07-31T09:27:12.086Z
         props: ""
-        updatedAt: 2026-07-19T01:51:03.397Z
       }
     }
     {
@@ -175,192 +175,9 @@ window.__motion = { animate, scroll, inView };`
           '''// Global state for cookie consent
 const [hasCookieConsent, setHasCookieConsent] = _.createSignal(false);
 
-// Global state for video player
-const [playerState, setPlayerState] = _.createSignal("closed"); // "closed", "minimized", "maximized"
-const [currentVideo, setCurrentVideo] = _.createSignal(null);
-const [videoQueue, setVideoQueue] = _.createSignal([]);
-const [playerPosition, setPlayerPosition] = _.createStore({ x: null, y: null });
-const [playerSize, setPlayerSize] = _.createStore({ width: 480, height: 270 });
-
-// Queue modal state (client-only; clears on reload)
-const [isQueueModalOpen, setIsQueueModalOpen] = _.createSignal(false);
-
-// Keep Awake wrapper functions
-const keepAwake = async () => {
-  await _.KeepAwake.keepAwake();
-};
-
-const allowSleep = async () => {
-  await _.KeepAwake.allowSleep();
-};
-
-const isSupported = async () => {
-  const result = await _.KeepAwake.isSupported();
-  return result.isSupported;
-};
-
-const isKeptAwake = async () => {
-  const result = await _.KeepAwake.isKeptAwake();
-  return result.isKeptAwake;
-};
-
-// Keep Awake management
-const enableKeepAwake = async () => {
-  try {
-    const supported = await isSupported();
-    if (!supported) return;
-
-    const alreadyAwake = await isKeptAwake();
-    if (alreadyAwake) return;
-
-    await keepAwake();
-    console.log('Keep Awake enabled');
-  } catch (error) {
-    console.error('Error enabling Keep Awake:', error);
-  }
-};
-
-const disableKeepAwake = async () => {
-  try {
-    const supported = await isSupported();
-    if (!supported) return;
-
-    const awake = await isKeptAwake();
-    if (!awake) return;
-
-    await allowSleep();
-    console.log('Keep Awake disabled');
-  } catch (error) {
-    console.error('Error disabling Keep Awake:', error);
-  }
-};
-
-// Open player without modifying queue (used by pages that set queue themselves)
-const openPlayer = async (video) => {
-  setCurrentVideo(video);
-  setPlayerState("minimized");
-  await enableKeepAwake();
-};
-
-// Add video to in-memory queue (no server persistence)
-const addToQueue = async (video) => {
-  const queue = videoQueue();
-  const videoId = video?.P?.youtubeId;
-
-  const alreadyInQueue = queue.some(v => v?.P?.youtubeId === videoId);
-  if (alreadyInQueue) {
-    _.showWarningToast("Video already in queue");
-    return;
-  }
-
-  setVideoQueue([...queue, video]);
-  _.showSuccessToast("Added to queue");
-};
-
-// Play video and add to queue
-const playVideo = async (video) => {
-  setCurrentVideo(video);
-  setPlayerState("minimized");
-  await enableKeepAwake();
-  await addToQueue(video);
-};
-
-const closePlayer = async () => {
-  setPlayerState("closed");
-  setCurrentVideo(null);
-  await disableKeepAwake();
-};
-
-const togglePlayerState = () => {
-  const current = playerState();
-  if (current === "minimized") {
-    setPlayerState("maximized");
-  } else if (current === "maximized") {
-    setPlayerState("minimized");
-  }
-};
-
-const playNext = async () => {
-  const queue = videoQueue();
-  if (queue.length === 0) {
-    return;
-  }
-
-  const nextVideo = queue[0];
-  setCurrentVideo(nextVideo);
-  setVideoQueue(queue.slice(1));
-};
-
-const removeFromQueue = async (index) => {
-  const queue = videoQueue();
-  const newQueue = [...queue.slice(0, index), ...queue.slice(index + 1)];
-  setVideoQueue(newQueue);
-  _.showSuccessToast("Removed from queue");
-};
-
-const clearQueue = async () => {
-  setVideoQueue([]);
-  _.showSuccessToast("Queue cleared");
-};
-
-const reorderQueue = async (fromIndex, toIndex) => {
-  const queue = videoQueue();
-
-  if (fromIndex < 0 || fromIndex >= queue.length || toIndex < 0 || toIndex >= queue.length) {
-    _.showErrorToast("Invalid queue position");
-    return;
-  }
-
-  if (fromIndex === toIndex) {
-    return;
-  }
-
-  const newQueue = [...queue];
-  const [movedVideo] = newQueue.splice(fromIndex, 1);
-  newQueue.splice(toIndex, 0, movedVideo);
-  setVideoQueue(newQueue);
-  _.showSuccessToast("Queue reordered");
-};
-
-const openQueueModal = () => {
-  setIsQueueModalOpen(true);
-};
-
-const closeQueueModal = () => {
-  setIsQueueModalOpen(false);
-};
-
 return {
   hasCookieConsent,
   setHasCookieConsent,
-  playerState,
-  setPlayerState,
-  currentVideo,
-  setCurrentVideo,
-  videoQueue,
-  setVideoQueue,
-  playerPosition,
-  setPlayerPosition,
-  playerSize,
-  setPlayerSize,
-  openPlayer,
-  playVideo,
-  addToQueue,
-  removeFromQueue,
-  clearQueue,
-  reorderQueue,
-  closePlayer,
-  togglePlayerState,
-  playNext,
-  isQueueModalOpen,
-  openQueueModal,
-  closeQueueModal,
-  keepAwake,
-  allowSleep,
-  isSupported,
-  isKeptAwake,
-  enableKeepAwake,
-  disableKeepAwake
 };'''
         componentName: Html
         props:
@@ -448,51 +265,6 @@ return {
         props: return {};
       }
     }
-    {
-      id: "9"
-      L: Attr
-      P: {
-        displayOrder: 4
-        componentName: VideoPlayer
-        key: unique_1
-        props:
-          '''return {
-  playerState: f.playerState,
-  currentVideo: f.currentVideo,
-  videoQueue: f.videoQueue,
-  playerPosition: f.playerPosition,
-  playerSize: f.playerSize,
-  setPlayerPosition: f.setPlayerPosition,
-  setPlayerSize: f.setPlayerSize,
-  closePlayer: f.closePlayer,
-  togglePlayerState: f.togglePlayerState,
-  playNext: f.playNext,
-  removeFromQueue: f.removeFromQueue,
-  clearQueue: f.clearQueue,
-  openQueueModal: f.openQueueModal
-};'''
-      }
-    }
-    {
-      id: "10"
-      L: Attr
-      P: {
-        displayOrder: 5
-        componentName: QueueModal
-        props:
-          '''return {
-  isOpen: f.isQueueModalOpen,
-  onClose: f.closeQueueModal,
-  videoQueue: f.videoQueue,
-  setVideoQueue: f.setVideoQueue,
-  playVideo: f.playVideo,
-  removeFromQueue: f.removeFromQueue,
-  clearQueue: f.clearQueue,
-  reorderQueue: f.reorderQueue,
-  executeYTOFunction: f.executeYTOFunction
-};'''
-      }
-    }
   ]
   edges: [
     {
@@ -533,18 +305,6 @@ return {
     }
     {
       id: e7
-      T: Attr
-      S: "4"
-      E: "9"
-    }
-    {
-      id: e8
-      T: Attr
-      S: "4"
-      E: "10"
-    }
-    {
-      id: e9
       T: Attr
       S: "6"
       E: "7"

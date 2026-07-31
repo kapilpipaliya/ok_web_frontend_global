@@ -12,7 +12,7 @@ return {
 };
 '''
         key: Header
-        updatedAt: 2026-07-14T16:28:49.859Z
+        updatedAt: 2026-07-31T09:27:11.999Z
       }
     }
     {
@@ -155,7 +155,6 @@ const items = [
 
 return {
   items: items.map((item) => localizeItem(item)),
-  triggerColor: "#3a2317",
   panelBackground: "#f5e6d3",
   hoverBackground: "rgba(0, 0, 0, 0.1)",
   activeBorderColor: "#3a2317",
@@ -211,6 +210,10 @@ return {
       P: {
         displayOrder: 3
         componentName: LanguageSelector
+        props:
+          '''return {
+  hide: true
+}'''
       }
     }
     {
@@ -231,7 +234,8 @@ return {
         componentName: Html
         props:
           '''return {
-  as: "div"
+  as: "div",
+  hide: true
 };'''
       }
     }
@@ -445,26 +449,6 @@ return {
 };'''
       }
     }
-    {
-      id: "18"
-      L: Attr
-      P: {
-        css:
-          '''return `._id {
-
-}`;'''
-        displayOrder: 6
-        componentName: Html
-        props:
-          '''return {
-  as: "img",
-  src: "https://www.fulchandshastri.com/wp-content/themes/fulchand/include-files/images/guruji.png",
-  alt: "Guruji",
-  width: 60,
-  height: 60
-};'''
-      }
-    }
   ]
   edges: [
     {
@@ -506,65 +490,59 @@ return {
     {
       id: e7
       T: Attr
-      S: "2"
-      E: "18"
-    }
-    {
-      id: e8
-      T: Attr
       S: "3"
       E: "4"
     }
     {
-      id: e9
+      id: e8
       T: Attr
       S: "5"
       E: "6"
     }
     {
-      id: e10
+      id: e9
       T: Attr
       S: "5"
       E: "7"
     }
     {
-      id: e11
+      id: e10
       T: Attr
       S: "7"
       E: "8"
     }
     {
-      id: e12
+      id: e11
       T: Attr
       S: "10"
       E: "11"
     }
     {
-      id: e13
+      id: e12
       T: Attr
       S: "10"
       E: "14"
     }
     {
-      id: e14
+      id: e13
       T: Attr
       S: "11"
       E: "12"
     }
     {
-      id: e15
+      id: e14
       T: Attr
       S: "12"
       E: "13"
     }
     {
-      id: e16
+      id: e15
       T: Attr
       S: "14"
       E: "15"
     }
     {
-      id: e17
+      id: e16
       T: Attr
       S: "14"
       E: "16"
