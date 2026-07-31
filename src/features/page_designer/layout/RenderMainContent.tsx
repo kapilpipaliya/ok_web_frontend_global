@@ -313,8 +313,6 @@ export function RenderMainContent() {
               resizeKey="pagesWidth"
               resizePosition="right"
               scrollContent={false}
-              title="Pages"
-              titleIcon="ph:file-text"
             >
               <PagesPanelContent />
             </DesignerPanel>
@@ -337,8 +335,6 @@ export function RenderMainContent() {
               resizeKey="componentsWidth"
               resizePosition="right"
               scrollContent={false}
-              title="Components"
-              titleIcon="ph:puzzle-piece"
             >
               <ComponentsPanelContent />
             </DesignerPanel>

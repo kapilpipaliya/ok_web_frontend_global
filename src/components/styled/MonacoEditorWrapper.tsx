@@ -3,6 +3,7 @@ import type * as Monaco from "monaco-editor";
 import { MonacoEditor } from "solid-monaco";
 import { createMemo, createSignal, onMount, Show } from "solid-js";
 import { useThemeMode } from "~/lib/theme/useThemeMode";
+import { ensureEditorVisibleAboveKeyboard } from "~/lib/hooks/ensureEditorVisibleAboveKeyboard";
 
 // import onigasm from 'onigasm/lib/onigasm.wasm?url';
 import { PROPERTIES } from "~/pages/settings/constants";
@@ -90,6 +91,14 @@ export function MonacoEditorWrapper(props: Readonly<MonacoEditorWrapperProps>) {
 
     // Call the original onMount handler
     props.onMount?.(monaco, editor);
+
+    // On Android the soft keyboard covers Monaco unless we scroll it into view.
+    editor.onDidFocusEditorWidget(() => {
+      const node = editor.getDomNode();
+      if (node) {
+        ensureEditorVisibleAboveKeyboard(node);
+      }
+    });
   };
 
   return (

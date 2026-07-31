@@ -102,7 +102,7 @@ export const DesignerPanel: Component<DesignerPanelProps> = (props) => {
                   }\`;`
                 : [
                     STYLES.overflowCss,
-                    "return `._id { min-height: 0; min-width: 0; }`;",
+                    "return `._id { height: 100%; min-height: 0; min-width: 0; }`;",
                   ]
             }
           >

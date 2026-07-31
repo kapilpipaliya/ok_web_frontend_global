@@ -204,6 +204,19 @@ export function LayoutTree() {
     setJsonEditorOpenItems(reconcile({}));
   };
 
+  const toggleLayoutTreeFloatingMenu = () => {
+    mergeVertexProperties<PageLayoutObject>(
+      0,
+      layoutStoreId,
+      graph,
+      setGraph,
+      {
+        isLayoutTreeFloatingMenuEnabled:
+          !layoutStoreVertex()?.P.isLayoutTreeFloatingMenuEnabled,
+      },
+    );
+  };
+
   // Function to toggle JSON editor for a specific item
   const toggleJsonEditorForItem = (itemId: Id) => {
     // Get the current global setting
@@ -712,6 +725,32 @@ export function LayoutTree() {
           ]}
           icon="tabler:json"
           size={18}
+          title={
+            formStoreVertex()?.P.showAllJsonEditors
+              ? "Hide all JSON editors"
+              : "Show all JSON editors"
+          }
+        />
+        <IconButton
+          onClick={toggleLayoutTreeFloatingMenu}
+          css={[
+            ICON_BUTTON_STYLES.baseCss,
+            ICON_BUTTON_STYLES.defaultCss,
+            ICON_BUTTON_STYLES.spacingCss,
+            `return \`._id {
+              ${layoutStoreVertex()?.P.isLayoutTreeFloatingMenuEnabled ? "color: ${t.var.color.primary};" : ""}
+              background-color: transparent;
+              border: none;
+              flex-shrink: 0;
+        }\`;`,
+          ]}
+          icon="ph:dots-three-vertical"
+          size={18}
+          title={
+            layoutStoreVertex()?.P.isLayoutTreeFloatingMenuEnabled
+              ? "Disable selected item floating menu"
+              : "Enable selected item floating menu"
+          }
         />
       </As>
 

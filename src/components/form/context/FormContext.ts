@@ -41,8 +41,6 @@ export function getInitialFormStore(
     lastAddedViewId: null as Id | null,
     layoutTreeWidth: INITIAL_WIDTHS.layoutTree,
     propertiesWidth: INITIAL_WIDTHS.properties,
-    isPropertiesCollapsed: false,
-    propertiesExpandedWidth: INITIAL_WIDTHS.properties,
   };
 }
 

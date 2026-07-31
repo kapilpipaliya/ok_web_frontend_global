@@ -9,6 +9,7 @@ import { createJSONEditor } from "vanilla-jsoneditor";
 
 import { createEffect, createSignal, onCleanup, onMount } from "solid-js";
 import { useIsDarkMode } from "~/lib/theme/useThemeMode";
+import { ensureEditorVisibleAboveKeyboard } from "~/lib/hooks/ensureEditorVisibleAboveKeyboard";
 
 // Import the dark theme CSS
 import "vanilla-jsoneditor/themes/jse-theme-dark.css";
@@ -89,6 +90,16 @@ export function VanilaJsonEditor(props: VanilaJsonEditorProps) {
     if (!containerRef) {
       return;
     }
+
+    const onFocusIn = () => {
+      if (containerRef) {
+        ensureEditorVisibleAboveKeyboard(containerRef);
+      }
+    };
+    containerRef.addEventListener("focusin", onFocusIn);
+    onCleanup(() => {
+      containerRef?.removeEventListener("focusin", onFocusIn);
+    });
 
     async function handleCopy() {
       // Convert keys with spaces to underscores

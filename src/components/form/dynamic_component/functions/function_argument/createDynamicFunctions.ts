@@ -19,23 +19,23 @@ export function createDynamicFunctions(
     // Runs within the component's owner context so reactive primitives work correctly
     const evaluateFns = (
       fns:
-        | ((args: FunctionArgumentType) => Record<string, unknown>)
+        | ((_: FunctionArgumentType) => Record<string, unknown>)
         | string
         | undefined
         | null,
     ): Record<string, unknown> | undefined => {
-      const args = getFunctionArgumentWithValue();
-      const owner = args.owner;
+      const _ = getFunctionArgumentWithValue();
+      const owner = _.owner;
 
       // Run evaluation within the component's owner context
       // This ensures createEffect, createMemo, etc. are properly attached to the component's lifecycle
       const evaluate = () => {
         if (typeof fns === "function") {
-          return fns(args);
+          return fns(_);
         }
         if (typeof fns === "string" && fns.trim() !== "") {
           try {
-            return runArgsFunction(fns, args) as Record<string, unknown>;
+            return runArgsFunction(fns, _) as Record<string, unknown>;
           } catch (error) {
             console.error("Error evaluating fns:", error, fns);
             return undefined;
@@ -48,7 +48,7 @@ export function createDynamicFunctions(
       if (!owner) {
         const error =
           "Owner context is required but not found in function arguments.";
-        console.error(error, args);
+        console.error(error, _);
         throw new Error(error);
       }
       return runWithOwner(owner, evaluate);

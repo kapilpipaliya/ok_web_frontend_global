@@ -16,9 +16,7 @@ import {
 } from "../../context/LayoutContext";
 import { PropertiesContent } from "./PropertiesContent";
 import { As } from "~/components/As";
-import { IconButton } from "~/components/styled/IconButton";
-import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
-import { headerIconButtonCss, STYLES } from "~/pages/settings/constants";
+import { STYLES } from "~/pages/settings/constants";
 import type { Id } from "~/lib/graph/type/id";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 
@@ -29,19 +27,6 @@ export function MainPanelInnerGrid(
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStore = () =>
     (graph.vertexes[layoutStoreId]?.P as PageLayoutObject) || {};
-
-  const toggleLayoutTreeFloatingMenu = () => {
-    mergeVertexProperties<PageLayoutObject>(
-      0,
-      layoutStoreId,
-      graph,
-      setGraph,
-      {
-        isLayoutTreeFloatingMenuEnabled:
-          !layoutStore().isLayoutTreeFloatingMenuEnabled,
-      },
-    );
-  };
 
   const activeOpenedFormId = createMemo(() => {
     const layout = layoutStore();
@@ -86,11 +71,8 @@ export function MainPanelInnerGrid(
     }
 
     if (layout.isPropertiesOpen) {
-      const isCollapsed = store?.isPropertiesCollapsed ?? false;
       columns.push(
-        isCollapsed
-          ? "1rem"
-          : `${store?.propertiesWidth ?? INITIAL_WIDTHS.properties}px`,
+        `${store?.propertiesWidth ?? INITIAL_WIDTHS.properties}px`,
       );
     }
 
@@ -108,47 +90,6 @@ export function MainPanelInnerGrid(
       setResizing,
       setActiveResizeKey,
     );
-
-  const togglePropertiesCollapse = () => {
-    const store = formStore();
-    if (!store) {
-      return;
-    }
-    if (store.isPropertiesCollapsed) {
-      mergeVertexProperties<FormStoreObject>(
-        0,
-        formStoreId(),
-        graph,
-        setGraph,
-        {
-          isPropertiesCollapsed: false,
-          propertiesWidth: store.propertiesExpandedWidth,
-        },
-      );
-    } else {
-      mergeVertexProperties<FormStoreObject>(
-        0,
-        formStoreId(),
-        graph,
-        setGraph,
-        {
-          isPropertiesCollapsed: true,
-          propertiesExpandedWidth: store.propertiesWidth,
-        },
-      );
-    }
-  };
-
-  const expandProperties = () => {
-    const store = formStore();
-    if (!store || !store.isPropertiesCollapsed) {
-      return;
-    }
-    mergeVertexProperties<FormStoreObject>(0, formStoreId(), graph, setGraph, {
-      isPropertiesCollapsed: false,
-      propertiesWidth: store.propertiesExpandedWidth,
-    });
-  };
 
   return (
     <>
@@ -177,31 +118,6 @@ export function MainPanelInnerGrid(
               ref={setLayoutTreePanelRef}
               resizeKey="layoutTreeWidth"
               resizePosition="right"
-              title="Layout Tree"
-              titleActions={
-                <IconButton
-                  css={[
-                    headerIconButtonCss,
-                    "return `._id { flex-shrink: 0; }`;",
-                  ]}
-                  icon="ph:dots-three-vertical"
-                  iconCss={`return \`._id {
-                    color: ${
-                      layoutStore().isLayoutTreeFloatingMenuEnabled
-                        ? "${t.var.color.primary}"
-                        : "${t.var.color.text_light_300}"
-                    };
-                  }\`;`}
-                  onClick={toggleLayoutTreeFloatingMenu}
-                  size={18}
-                  title={
-                    layoutStore().isLayoutTreeFloatingMenuEnabled
-                      ? "Disable selected item floating menu"
-                      : "Enable selected item floating menu"
-                  }
-                />
-              }
-              titleIcon="tabler:layout-2"
             >
               <LayoutTreePanel openedFormId={activeOpenedFormId()!} />
             </DesignerPanel>
@@ -218,14 +134,10 @@ export function MainPanelInnerGrid(
           <As as="div" css={STYLES.panelCellCss}>
             <DesignerPanel
               activeResizeKey={activeResizeKey()}
-              collapsed={formStore()!.isPropertiesCollapsed}
-              onExpand={expandProperties}
               onResize={createResizeHandler("propertiesWidth")}
-              onToggleCollapse={togglePropertiesCollapse}
               ref={setPropertiesPanelRef}
               resizeKey="propertiesWidth"
               resizePosition="right"
-              title="Properties"
             >
               <PropertiesContent openedFormId={activeOpenedFormId()!} />
             </DesignerPanel>

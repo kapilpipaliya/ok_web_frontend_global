@@ -10,7 +10,7 @@ export default createHandler(
             <head>
               <meta charset="utf-8" />
               <meta
-                content="width=device-width, initial-scale=1"
+                content="width=device-width, initial-scale=1, interactive-widget=resizes-content"
                 name="viewport"
               />
               {assets}
