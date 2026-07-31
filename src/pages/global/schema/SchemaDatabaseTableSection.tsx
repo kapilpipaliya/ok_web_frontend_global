@@ -1,5 +1,6 @@
 import { For, Show } from "solid-js";
 import { As } from "~/components/As";
+import { getSchemaJobResultIssueSummary } from "~/lib/schema/schemaJobs/getSchemaJobResultIssueSummary";
 import type {
   SchemaDatabaseInfo,
   SchemaJobStatusRow,
@@ -7,7 +8,6 @@ import type {
 } from "~/server/schema/schemaOperationsManagement";
 import {
   hasAnyJobOutput,
-  hasJobOutput,
   SchemaJobOutputPopover,
   type SchemaJobOutputTab,
 } from "~/pages/global/schema/SchemaJobOutputPopover";
@@ -22,6 +22,27 @@ import {
 } from "~/pages/global/schema/schemaOperationsUtils";
 
 const TABLE_GRID = "2fr 1fr 1fr 1.5fr minmax(280px, 3fr)";
+
+function tabHasError(row: SchemaJobStatusRow): boolean {
+  if (row.error || row.errorDetails) {
+    return true;
+  }
+  return getSchemaJobResultIssueSummary(row.result) != null;
+}
+
+function rowErrorText(row: SchemaJobStatusRow | undefined): string | null {
+  if (!row) {
+    return null;
+  }
+  if (row.error) {
+    return row.errorDetails ? `${row.error}: ${row.errorDetails}` : row.error;
+  }
+  const issue = getSchemaJobResultIssueSummary(row.result);
+  if (!issue) {
+    return null;
+  }
+  return issue.details ? `${issue.message}: ${issue.details}` : issue.message;
+}
 
 function statusBadgeCss(_: any, status: string, showOutputHint: boolean) {
   const isErr =
@@ -104,12 +125,20 @@ function JobStatusCell(props: {
 }) {
   const outputTabs = () =>
     buildOutputTabs(props.databaseName, props.row, props.jobOutputByDb);
-  const hasErrorOutput = () =>
-    outputTabs().some((tab) => Boolean(tab.row.error || tab.row.errorDetails));
+  const hasErrorOutput = () => outputTabs().some((tab) => tabHasError(tab.row));
   const displayStatus = () =>
     props.status === "success" && hasErrorOutput()
       ? "complete_with_error"
       : props.status;
+  const errorText = () => {
+    for (const tab of outputTabs()) {
+      const text = rowErrorText(tab.row);
+      if (text) {
+        return text;
+      }
+    }
+    return rowErrorText(props.row());
+  };
 
   const badge = (
     <As
@@ -123,9 +152,26 @@ function JobStatusCell(props: {
   );
 
   return (
-    <Show when={hasAnyJobOutput(outputTabs())} fallback={badge}>
-      <SchemaJobOutputPopover tabs={outputTabs}>{badge}</SchemaJobOutputPopover>
-    </Show>
+    <As as="span">
+      <Show when={hasAnyJobOutput(outputTabs())} fallback={badge}>
+        <SchemaJobOutputPopover tabs={outputTabs}>{badge}</SchemaJobOutputPopover>
+      </Show>
+      <Show when={errorText()}>
+        {(text) => (
+          <As
+            as="p"
+            css={`return \`._id {
+  margin: 0.25rem 0 0 0;
+  font-size: 0.7rem;
+  color: \${t.var.color.error};
+  word-break: break-word;
+}\`;`}
+          >
+            {text()}
+          </As>
+        )}
+      </Show>
+    </As>
   );
 }
 
@@ -326,19 +372,6 @@ export function SchemaDatabaseTableSection(
                         row={jobRow}
                         jobOutputByDb={props.jobOutputByDb}
                       />
-                    </Show>
-                    <Show when={jobRow()?.error}>
-                      <As
-                        as="p"
-                        css={`return \`._id {
-  margin: 0.25rem 0 0 0;
-  font-size: 0.7rem;
-  color: \${t.var.color.error};
-  word-break: break-word;
-}\`;`}
-                      >
-                        {jobRow()?.error}
-                      </As>
                     </Show>
                   </As>
                   <As

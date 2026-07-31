@@ -7,6 +7,7 @@ import { Job } from "bullmq";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { checkRole } from "~/cypher/permissions/isPermission";
 import { SYSTEM_ROLES } from "~/cypher/permissions/type/types";
+import { getSchemaJobResultIssueSummary } from "~/lib/schema/schemaJobs/getSchemaJobResultIssueSummary";
 import type {
   ExportJobPayload,
   ImportJobPayload,
@@ -88,38 +89,6 @@ function mapBullState(
     return "failed";
   }
   return "queued";
-}
-
-function getImportParseIssueSummary(result: unknown): {
-  message: string;
-  details: string | null;
-} | null {
-  if (!result || typeof result !== "object") {
-    return null;
-  }
-  const detailsObj = (result as { details?: unknown }).details;
-  if (!detailsObj || typeof detailsObj !== "object") {
-    return null;
-  }
-  const parseErrors = (detailsObj as { parseErrors?: unknown }).parseErrors;
-  if (!Array.isArray(parseErrors) || parseErrors.length === 0) {
-    return null;
-  }
-  const first = parseErrors[0] as {
-    websiteName?: string;
-    schemaType?: string;
-    fileName?: string;
-    message?: string;
-  };
-  const firstPath =
-    first?.websiteName && first?.schemaType && first?.fileName
-      ? `${first.websiteName}/${first.schemaType}/${first.fileName}`
-      : "unknown file";
-  const firstMessage = first?.message ? `: ${first.message}` : "";
-  return {
-    message: `${parseErrors.length} schema file(s) failed to parse and were skipped`,
-    details: `First parse error at ${firstPath}${firstMessage}`,
-  };
 }
 
 function getJobFailureDetails(job: Job<SchemaJobQueueData>): string | null {
@@ -455,9 +424,9 @@ export async function getSchemaOperationsStatus(input: {
       const data = job.data as SchemaJobQueueData;
       const bullState = await job.getState();
       const status = mapBullState(bullState);
-      const parseIssue =
+      const resultIssue =
         status === "success"
-          ? getImportParseIssueSummary(job.returnvalue)
+          ? getSchemaJobResultIssueSummary(job.returnvalue)
           : null;
 
       updated.push({
@@ -468,11 +437,11 @@ export async function getSchemaOperationsStatus(input: {
         error:
           status === "failed"
             ? (job.failedReason ?? "Job failed")
-            : (parseIssue?.message ?? null),
+            : (resultIssue?.message ?? null),
         errorDetails:
           status === "failed"
             ? getJobFailureDetails(job)
-            : (parseIssue?.details ?? null),
+            : (resultIssue?.details ?? null),
         result:
           status === "success" && job.returnvalue != null
             ? job.returnvalue

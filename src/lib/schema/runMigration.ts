@@ -146,13 +146,41 @@ export async function runMigration(
       };
     }
 
+    const resultData = migrationResult.result ?? migrationResult;
+    if (
+      resultData &&
+      typeof resultData === "object" &&
+      "success" in resultData &&
+      (resultData as { success?: unknown }).success === false
+    ) {
+      const nested = resultData as {
+        message?: unknown;
+        error?: unknown;
+      };
+      const nestedMessage =
+        (typeof nested.message === "string" && nested.message) ||
+        (typeof nested.error === "string" && nested.error) ||
+        "Migration function returned success: false";
+      console.error(
+        `[Schema Migrate] Migration function reported failure: ${nestedMessage}`,
+      );
+      return {
+        success: false,
+        error: nestedMessage,
+        status: 500,
+        functionName: migrationFunctionKey,
+        dryRun,
+        data: resultData,
+      };
+    }
+
     console.log(
       `[Schema Migrate] Migration function executed successfully for subdomain: ${subDomain}`,
     );
 
     return {
       success: true,
-      data: migrationResult.result || migrationResult,
+      data: resultData,
       functionName: migrationFunctionKey,
       dryRun,
     };
