@@ -15,7 +15,8 @@ export async function GET({ request, params }: APIEvent) {
     }
 
     const decodedFileName = decodeURIComponent(fileName as string);
-    return await downloadFile(decodedFileName, dbSession);
+    const rangeHeader = request.headers.get("Range");
+    return await downloadFile(decodedFileName, dbSession, rangeHeader);
   } catch (error) {
     return handleAPIError(error);
   } finally {
