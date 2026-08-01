@@ -93,6 +93,7 @@ const getNestedDeletedIdsForField = (fieldKey) =>
 const hydrateNestedLineFields = () => {};
 
 // Seed required/minItems nested lines on create only.
+// Nested lines are not stored on the parent vertex P[fieldKey]; no placeholder arrays.
 const ensureNestedLineEmptyArrays = () => {
   const parentVertex = getFormVertex();
   if (!parentVertex?.id) return;
@@ -120,6 +121,10 @@ const ensureNestedLineEmptyArrays = () => {
     while (rows.length < minItems) {
       const displayOrder = Date.now() + rows.length;
       const newLineProperties = { displayOrder };
+      const parentElementIdPropertyKey = nestedLineItemsConfig.parentElementIdPropOnChild;
+      if (parentElementIdPropertyKey) {
+        newLineProperties[parentElementIdPropertyKey] = parentVertex.id;
+      }
       const columnDefinitions = Array.isArray(nestedLineItemsConfig.lineColumns)
         ? nestedLineItemsConfig.lineColumns
         : [];
@@ -400,6 +405,7 @@ const getNestedLineVerticesForField = (field) => {
 };
 
 const buildNestedLineRowPayload = (rowVertex, nestedLineItemsConfig) => {
+  const parentElementIdProperty = nestedLineItemsConfig.parentElementIdPropOnChild;
   const inventoryRelationshipType = nestedLineItemsConfig.childToInventoryRelationshipType;
   const inventoryTargetLabel = nestedLineItemsConfig.inventoryTargetLabel || "InventoryItem";
   const filesRelationshipType = nestedLineItemsConfig.childToFilesRelationshipType;
@@ -443,6 +449,7 @@ const buildNestedLineRowPayload = (rowVertex, nestedLineItemsConfig) => {
     imageFileIds
   };
   delete rowPayload.images;
+  if (parentElementIdProperty) delete rowPayload[parentElementIdProperty];
   return rowPayload;
 };
 
@@ -607,6 +614,9 @@ const initializeForm = () => {
         sg,
       );
       setFormVertexId(clonedVertex.id);
+      // cloneVertexWithEdges copies OUT only — fill incoming relation fields
+      // from the source vertex's IN edges / hydrated props.
+      hydrateIncomingRelationPropsOntoFormVertex(txnId, clonedVertex, existingVertex);
       hydrateTranslationsOntoFormVertex(txnId, clonedVertex, existingVertex, vertexLabel);
       hydrateNestedLineFields();
     } else {
@@ -623,6 +633,7 @@ const initializeForm = () => {
 
       // Store vertex ID instead of vertex object
       setFormVertexId(vertexId);
+      hydrateIncomingRelationPropsOntoFormVertex(txnId, createdVertex, initialVertex);
       hydrateTranslationsOntoFormVertex(txnId, createdVertex, initialVertex, vertexLabel);
       hydrateNestedLineFields();
     }
@@ -645,11 +656,11 @@ const initializeForm = () => {
       if (getFieldRenderer(field) === "nestedLineItems") continue;
       if (getFieldRenderer(field) === "fieldArray") {
         if (Array.isArray(field.defaultValue)) {
-          initialProperties[field.key] = JSON.stringify(field.defaultValue);
+          initialProperties[field.key] = field.defaultValue;
         } else if (Array.isArray(field.fieldArrayConfig?.defaultItems)) {
-          initialProperties[field.key] = JSON.stringify(field.fieldArrayConfig.defaultItems);
+          initialProperties[field.key] = field.fieldArrayConfig.defaultItems;
         } else {
-          initialProperties[field.key] = "[]";
+          initialProperties[field.key] = [];
         }
         continue;
       }
@@ -719,16 +730,44 @@ const applyAutoReferenceSequencesAfterAdd = async () => {
   }
 };
 
-const getEdgeRelationshipTargets = (vertex, relationshipType) => {
+const getEdgeRelationshipTargets = (vertex, relationshipType, incoming = false) => {
   if (!vertex || !relationshipType || !g?.edges) return [];
-  const eids = vertex.OUT?.[relationshipType];
+  const eids = incoming
+    ? vertex.IN?.[relationshipType]
+    : vertex.OUT?.[relationshipType];
   if (!Array.isArray(eids) || eids.length === 0) return [];
   const ids = [];
   for (let i = 0; i < eids.length; i++) {
     const ed = g.edges[eids[i]];
-    if (ed && ed.E != null && String(ed.E).trim() !== "") ids.push(String(ed.E).trim());
+    if (!ed) continue;
+    const targetId = incoming ? ed.S : ed.E;
+    if (targetId != null && String(targetId).trim() !== "") ids.push(String(targetId).trim());
   }
   return ids;
+};
+
+// Edit clones omit IN edges — copy incoming relation ids onto form vertex P for TomSelect/etc.
+const hydrateIncomingRelationPropsOntoFormVertex = (txnId, formVertex, sourceVertex) => {
+  if (!formVertex?.id || !sourceVertex) return;
+  const patches = {};
+  const allFields = getAllFields();
+  for (let i = 0; i < allFields.length; i++) {
+    const field = allFields[i];
+    if (!isRelationField(field) || field.selectConfig?.incoming !== true) continue;
+    const rel = field.selectConfig?.relationshipType;
+    if (!rel || !field.key) continue;
+    const existing = formVertex.P?.[field.key];
+    if (existing != null && String(existing).trim() !== "") continue;
+    const fromSourceProp = sourceVertex.P?.[field.key];
+    if (fromSourceProp != null && String(fromSourceProp).trim() !== "") {
+      patches[field.key] = String(fromSourceProp).trim();
+      continue;
+    }
+    const ids = getEdgeRelationshipTargets(sourceVertex, rel, true);
+    if (ids.length > 0) patches[field.key] = ids[0];
+  }
+  if (Object.keys(patches).length === 0) return;
+  _.mergeVertexProperties(txnId, formVertex.id, g, sg, patches);
 };
 
 const vertexOutEdgeContainsTarget = (vertex, relationshipType, targetVertexId) => {
@@ -806,7 +845,17 @@ const getFieldValue = (fieldKey) => {
     (getFieldRenderer(field) === "multiSelect" || field.multiSelect === true) &&
     fieldUsesEdgeOnlyRelationship(field)
   ) {
-    return getEdgeRelationshipTargets(vertex, field.selectConfig.relationshipType);
+    return getEdgeRelationshipTargets(
+      vertex,
+      field.selectConfig.relationshipType,
+      field.selectConfig.incoming === true
+    );
+  }
+  if (field && isRelationField(field) && field.selectConfig?.incoming === true && field.selectConfig?.relationshipType) {
+    const fromProp = vertex?.P?.[fieldKey];
+    if (fromProp != null && String(fromProp).trim() !== "") return String(fromProp).trim();
+    const ids = getEdgeRelationshipTargets(vertex, field.selectConfig.relationshipType, true);
+    return ids.length > 0 ? ids[0] : "";
   }
   if (field && isRelationField(field) && fieldUsesEdgeOnlyRelationship(field)) {
     const ids = getEdgeRelationshipTargets(vertex, field.selectConfig.relationshipType);
@@ -886,22 +935,6 @@ const setFieldValue = (fieldKey, value) => {
       if (typeof onFieldChange === "function") {
         onFieldChange(fieldKey, value);
       }
-    }
-    return;
-  }
-
-  if (getFieldRenderer(nestedField) === "fieldArray") {
-    const serialized = Array.isArray(value)
-      ? JSON.stringify(value)
-      : typeof value === "string"
-        ? value
-        : "[]";
-    _.mergeVertexProperties(txnId, vertexId, g, sg, {
-      [fieldKey]: serialized
-    });
-    const onFieldChange = c.props?.onFieldChange;
-    if (typeof onFieldChange === "function") {
-      onFieldChange(fieldKey, Array.isArray(value) ? value : []);
     }
     return;
   }
@@ -1205,7 +1238,8 @@ const handleSave = async () => {
           relationshipData[field.key] = {
             relationshipType: field.selectConfig.relationshipType,
             targetLabel: field.selectConfig.label,
-            targetIds: selectionMode === "multiple" ? fromEdges : fromEdges.slice(0, 1)
+            targetIds: selectionMode === "multiple" ? fromEdges : fromEdges.slice(0, 1),
+            incoming: field.selectConfig.incoming === true
           };
           continue;
         }
@@ -1233,7 +1267,8 @@ const handleSave = async () => {
           relationshipData[field.key] = {
             relationshipType: field.selectConfig.relationshipType,
             targetLabel: field.selectConfig.label,
-            targetIds: ids
+            targetIds: ids,
+            incoming: field.selectConfig.incoming === true
           };
           continue;
         }
@@ -1246,7 +1281,8 @@ const handleSave = async () => {
           relationshipData[field.key] = {
             relationshipType: field.selectConfig.relationshipType,
             targetLabel: field.selectConfig.label,
-            targetIds: trimmedId ? [trimmedId] : []
+            targetIds: trimmedId ? [trimmedId] : [],
+            incoming: field.selectConfig.incoming === true
           };
         }
       }
@@ -1267,6 +1303,7 @@ const handleSave = async () => {
         childToFilesRelationshipType:
           nestedLineItemsConfig.childToFilesRelationshipType || null,
         filesTargetLabel: nestedLineItemsConfig.filesTargetLabel || "File",
+        parentElementIdPropOnChild: nestedLineItemsConfig.parentElementIdPropOnChild,
         nestedLineItemsSyncRules: nestedLineItemsConfig.nestedLineItemsSyncRules || null,
         rows: getNestedLineVerticesForField(field).map((rowVertex) =>
           buildNestedLineRowPayload(rowVertex, nestedLineItemsConfig)
@@ -1740,10 +1777,47 @@ if (f.getFieldRenderer(field) === "graphFileUpload") {
   if (!baseUploadConfiguration) {
     return { as: "motionFragment", hide: true };
   }
+  const selectedSidebarItem =
+    typeof c.props?.selectedSidebarItem === "function"
+      ? c.props.selectedSidebarItem()
+      : c.props?.selectedSidebarItem;
+  const sidebarConfig =
+    c.props?.sidebarConfig != null && typeof c.props.sidebarConfig === "object"
+      ? c.props.sidebarConfig
+      : null;
+  const rootKey = sidebarConfig?.rootKeys?.key;
+  const tableVertexLabel = c.props?.vertexLabel || c.props?.tableVertexLabel;
+  const uncategorizedId = tableVertexLabel
+    ? "_" + tableVertexLabel + "_uncategorized"
+    : null;
+  const isUncat =
+    selectedSidebarItem &&
+    uncategorizedId &&
+    (selectedSidebarItem.id === uncategorizedId ||
+      selectedSidebarItem.P?.key === uncategorizedId);
+  const isRoot =
+    selectedSidebarItem &&
+    rootKey &&
+    selectedSidebarItem.P?.key === rootKey;
+  const folderId =
+    selectedSidebarItem?.id && !isUncat && !isRoot
+      ? String(selectedSidebarItem.id)
+      : "";
   return {
     componentName: "FileUploader",
     disabled: fieldDisabled || f.isSubmitting(),
-    uploadConfiguration: baseUploadConfiguration,
+    uploadConfiguration: {
+      ...baseUploadConfiguration,
+      folderId: folderId || baseUploadConfiguration.folderId || "",
+      categoryLabel:
+        sidebarConfig?.parentVertexLabel ||
+        baseUploadConfiguration.categoryLabel ||
+        "Folder",
+      toParentEdgeType:
+        sidebarConfig?.toParentEdgeType ||
+        baseUploadConfiguration.toParentEdgeType ||
+        "ParentFolder",
+    },
     uploadCallbacks: {
       setFieldValue,
       assignFormVertex: f.assignFormVertex,
@@ -1770,7 +1844,20 @@ if (f.getFieldRenderer(field) === "embeddedVertexPicker") {
   if (pickerConfiguration.usePolarisUI === undefined) {
     pickerConfiguration.usePolarisUI = f.getUsePolarisUI?.() === true;
   }
-  const selectedElementId = value != null && String(value).trim() !== "" ? String(value).trim() : "";
+  const selectionMode =
+    pickerConfiguration.selectionMode === "multiple" ? "multiple" : "single";
+  const selectedValues =
+    selectionMode === "multiple" && Array.isArray(value)
+      ? value.map((id) => String(id)).filter((id) => id.trim() !== "")
+      : selectionMode === "multiple" && value != null && String(value).trim() !== ""
+        ? [String(value).trim()]
+        : [];
+  const selectedElementId =
+    selectionMode === "multiple"
+      ? selectedValues[0] || ""
+      : value != null && String(value).trim() !== ""
+        ? String(value).trim()
+        : "";
   const selectedVertex =
     selectedElementId && g.vertexes[selectedElementId]
       ? g.vertexes[selectedElementId]
@@ -1793,22 +1880,28 @@ if (f.getFieldRenderer(field) === "embeddedVertexPicker") {
   let secondaryLabel = "";
   if (pickerConfiguration.secondaryLabel != null) {
     secondaryLabel = String(pickerConfiguration.secondaryLabel).trim();
-  } else if (pickerConfiguration.buildSecondaryLabelFromVertex === true && selectedVertex) {
-    const label = selectedVertex.P?.[previewFileNamePropertyKey];
-    if (label != null && String(label).trim() !== "") {
-      secondaryLabel = String(label).trim();
+  } else if (pickerConfiguration.buildSecondaryLabelFromVertex === true) {
+    if (selectionMode === "multiple" && selectedValues.length > 0) {
+      const names = selectedValues
+        .map((id) => g.vertexes[id]?.P?.[previewFileNamePropertyKey])
+        .filter((name) => name != null && String(name).trim() !== "")
+        .map((name) => String(name).trim());
+      if (names.length === 0) {
+        secondaryLabel = `${selectedValues.length} selected`;
+      } else if (names.length <= 2) {
+        secondaryLabel = names.join(", ");
+      } else {
+        secondaryLabel = `${names.length} files: ${names.slice(0, 2).join(", ")}…`;
+      }
+    } else if (selectedVertex) {
+      const label = selectedVertex.P?.[previewFileNamePropertyKey];
+      if (label != null && String(label).trim() !== "") {
+        secondaryLabel = String(label).trim();
+      }
     }
   }
   const showImagePreview =
     pickerConfiguration.showImagePreview === true && previewUrl !== "";
-  const selectionMode =
-    pickerConfiguration.selectionMode === "multiple" ? "multiple" : "single";
-  const selectedValues =
-    selectionMode === "multiple" && Array.isArray(value)
-      ? value.map((id) => String(id)).filter((id) => id.trim() !== "")
-      : selectionMode === "multiple" && value != null && String(value).trim() !== ""
-        ? [String(value).trim()]
-        : [];
   return {
     componentName: "VertexPicker",
     value: selectionMode === "single" ? selectedElementId : "",
@@ -1819,13 +1912,12 @@ if (f.getFieldRenderer(field) === "embeddedVertexPicker") {
     disabled: fieldDisabled,
     pickerConfiguration,
     onSelect: (vertexElementId, selectedVertexPayload) => {
-      setFieldValue(field.key, vertexElementId);
       if (selectedVertexPayload && !g.vertexes[vertexElementId]) {
         _.setGraphData(0, { vertexes: { [vertexElementId]: selectedVertexPayload } }, {});
       }
+      setFieldValue(field.key, vertexElementId);
     },
     onSelectMultiple: (vertexElementIds, selectedVertexPayloads) => {
-      setFieldValue(field.key, vertexElementIds);
       if (Array.isArray(selectedVertexPayloads)) {
         const vertexMap = {};
         for (const selectedVertexPayload of selectedVertexPayloads) {
@@ -1837,6 +1929,7 @@ if (f.getFieldRenderer(field) === "embeddedVertexPicker") {
           _.setGraphData(0, { vertexes: vertexMap }, {});
         }
       }
+      setFieldValue(field.key, vertexElementIds);
     },
     onClear: () => setFieldValue(field.key, selectionMode === "multiple" ? [] : ""),
     ...accessibility
@@ -2041,6 +2134,40 @@ if (f.getFieldDataType(field) === "date") {
     disabled: fieldDisabled || f.isSubmitting(),
     onChange: (e) => {
       setFieldValue(field.key, e.target.value);
+    },
+    ...accessibility
+  };
+}
+
+if (
+  f.getFieldRenderer(field) === "isoDateTime"
+) {
+  const toDatetimeLocalValue = (raw) => {
+    if (raw == null || String(raw).trim() === "") return "";
+    const date = new Date(raw);
+    if (Number.isNaN(date.getTime())) return "";
+    const pad = (n) => String(n).padStart(2, "0");
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  };
+  return {
+    componentName: "TextInput",
+    type: "datetime-local",
+    value: toDatetimeLocalValue(value),
+    placeholder: field.placeholder || "",
+    required: fieldRequired,
+    disabled: fieldDisabled || f.isSubmitting(),
+    onChange: (e) => {
+      const next = e.target.value;
+      if (!next) {
+        setFieldValue(field.key, "");
+        return;
+      }
+      const parsed = new Date(next);
+      if (Number.isNaN(parsed.getTime())) {
+        setFieldValue(field.key, next);
+        return;
+      }
+      setFieldValue(field.key, parsed.toISOString());
     },
     ...accessibility
   };
@@ -2295,6 +2422,24 @@ return {
         key: initialVertex
       }
     }
+    {
+      id: "27"
+      L: ComponentVariant
+      P: {
+        displayOrder: 7
+        type: function
+        key: selectedSidebarItem
+      }
+    }
+    {
+      id: "28"
+      L: ComponentVariant
+      P: {
+        displayOrder: 8
+        type: object
+        key: sidebarConfig
+      }
+    }
   ]
   edges: [
     {
@@ -2338,6 +2483,18 @@ return {
       T: ComponentVariant
       S: "1"
       E: "26"
+    }
+    {
+      id: e27
+      T: ComponentVariant
+      S: "1"
+      E: "27"
+    }
+    {
+      id: e28
+      T: ComponentVariant
+      S: "1"
+      E: "28"
     }
     {
       id: e8

@@ -337,7 +337,7 @@ return {
   folder,
   index,
   href,
-  onOpen: withUrl ? undefined : (f) => f.openFolder?.(f)
+  onOpen: withUrl ? undefined : (folderItem) => f.openFolder?.(folderItem)
 };'''
       }
     }
@@ -426,7 +426,7 @@ return {
   item,
   index,
   href: item.fileUrl || "",
-  onOpen: (f) => f.openFile?.(f)
+  onOpen: (fileItem) => f.openFile?.(fileItem)
 };'''
       }
     }

@@ -1,0 +1,61 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: After a Folder key is renamed, rename its disk directory and update File.filePath prefixes for files under that folder.
+        body:
+          '''
+const {
+  vertexId,
+  key,
+  parentVertexLabel,
+  toParentEdgeType,
+  operation,
+  oldData,
+  result
+} = c;
+
+if (operation !== "update") return;
+if (parentVertexLabel && parentVertexLabel !== "Folder") return;
+if (!result?.success) return;
+if (!vertexId) return;
+
+const oldKey = oldData?.P?.key != null ? String(oldData.P.key).trim() : "";
+const newKey = key != null ? String(key).trim() : "";
+if (!oldKey || !newKey || oldKey === newKey) return;
+
+const subDomain = _.subDomain;
+if (!subDomain) {
+  console.warn("fileAfterFolderUpdate: missing subDomain");
+  return;
+}
+
+const categoryLabel = parentVertexLabel || "Folder";
+const edgeType = toParentEdgeType || "ParentFolder";
+
+try {
+  const newKeyPath = await _.resolveFolderKeyPath(_.session, String(vertexId), {
+    categoryLabel,
+    toParentEdgeType: edgeType
+  });
+  if (newKeyPath.length === 0) return;
+
+  const oldKeyPath = newKeyPath.slice(0, -1).concat([oldKey]);
+  const oldDir = _.buildFolderDiskDir(subDomain, oldKeyPath);
+  const newDir = _.buildFolderDiskDir(subDomain, newKeyPath);
+  if (oldDir === newDir) return;
+
+  _.relocateDirectoryOnDisk(oldDir, newDir);
+  await _.updateFilePathsWithPrefix(_.session, oldDir, newDir);
+} catch (error) {
+  console.error("fileAfterFolderUpdate failed", error);
+}
+'''
+        key: fileAfterFolderUpdate
+      }
+    }
+  ]
+  edges: []
+}

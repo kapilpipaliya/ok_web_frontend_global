@@ -990,7 +990,9 @@ const fileTableGeneral = {
     { key: "delete", type: "delete", confirm: { title: "Delete file?", message: "This cannot be undone.", confirmText: "Delete", cancelText: "Cancel", variant: "danger" } }
   ],
   hooks: {
-    afterDelete: "fileAfterDelete"
+    afterDelete: "fileAfterDelete",
+    afterMoveItemsToCategory: "fileAfterMoveItemsToCategory",
+    afterCreateRelationship: "fileAfterCreateRelationship"
   }
 };
 
@@ -1015,7 +1017,10 @@ const fileTableSidebar = {
       }
     ]
   },
-  hooks: {}
+  hooks: {
+    afterMoveCategory: "fileAfterMoveCategory",
+    afterUpdate: "fileAfterFolderUpdate"
+  }
 };
 
 // Columns + formConfig keep valueAccessor / onUploadSuccess as real functions (not JSON).
@@ -1090,7 +1095,7 @@ const fileTableFormConfigConfig = `return {
           renderer: "graphFileUpload",
           required: true,
           colSpan: 2,
-          tooltip: "Choose one or more files to upload. They are stored in the repository and linked to your user (UserFile). Then set description and save.",
+          tooltip: "Choose one or more files to upload. They are stored under the selected sidebar folder key path (or dated directory if uncategorized), linked to your user (UserFile). Then set description and save.",
           visible: "ctx.mode === 'create'",
           uploadConfiguration: {
             accept: "*/*",

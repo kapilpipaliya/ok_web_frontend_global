@@ -63,21 +63,25 @@ return `._id {
 }
 
 /* Dropdown */
-._id .ts-dropdown {
+._id .ts-dropdown,
+.ok-tom-select-dropdown {
   background: ${t.var.color.background};
   border: 1px solid ${t.var.color.border};
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   border-radius: 0.375rem;
   margin-top: 2px;
+  z-index: 10050;
 }
 
-._id .ts-dropdown .ts-dropdown-content {
+._id .ts-dropdown .ts-dropdown-content,
+.ok-tom-select-dropdown .ts-dropdown-content {
   max-height: 200px;
   overflow-y: auto;
 }
 
 /* Options */
-._id .ts-dropdown .option {
+._id .ts-dropdown .option,
+.ok-tom-select-dropdown .option {
   color: ${t.var.color.text};
   padding: 0.5rem 0.75rem;
   transition: background 0.15s ease;
@@ -87,27 +91,33 @@ return `._id {
 }
 
 ._id .ts-dropdown .option:hover,
-._id .ts-dropdown .option.active {
+._id .ts-dropdown .option.active,
+.ok-tom-select-dropdown .option:hover,
+.ok-tom-select-dropdown .option.active {
   background: ${t.var.color.primary_light_600};
   color: ${t.var.color.primary_light_600_text};
 }
 
-._id .ts-dropdown .option.selected {
+._id .ts-dropdown .option.selected,
+.ok-tom-select-dropdown .option.selected {
   background: ${t.var.color.primary};
   color: ${t.var.color.primary_text};
 }
 
-._id .ts-dropdown .option.selected:hover {
+._id .ts-dropdown .option.selected:hover,
+.ok-tom-select-dropdown .option.selected:hover {
   background: ${t.var.color.primary_dark_100};
 }
 
 /* Option content with descriptions */
-._id .tom-select-option-label {
+._id .tom-select-option-label,
+.ok-tom-select-dropdown .tom-select-option-label {
   font-weight: 500;
   line-height: 1.2;
 }
 
-._id .tom-select-option-description {
+._id .tom-select-option-description,
+.ok-tom-select-dropdown .tom-select-option-description {
   font-size: 0.75rem;
   opacity: 0.8;
   margin-top: 2px;
@@ -163,7 +173,8 @@ return `._id {
 }
 
 /* No results */
-._id .ts-dropdown .no-results {
+._id .ts-dropdown .no-results,
+.ok-tom-select-dropdown .no-results {
   color: ${t.var.color.text_light_500};
   padding: 0.75rem;
   text-align: center;
@@ -560,6 +571,8 @@ const initializeTomSelect = () => {
       hideSelected: multiple,
       create: false,
       maxItems: maxItems,
+      dropdownParent: 'body',
+      dropdownClass: 'ts-dropdown ok-tom-select-dropdown',
       render: {
         option: function(data, escape) {
           const description = data.description;

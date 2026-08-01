@@ -451,10 +451,10 @@ const initDropTarget = (element) => {
   const cleanup = _.dropTargetForElements({
     element,
     getData: () => ({}),
-    canDrop: ({ source }) => {
+    canDrop: (dropArgs) => {
       // Note: Don't return false for isQueued here - we need drop target to stay active
-      // so onDrag fires and we can show red highlight; onDrop will reject the drop.
-      // c when validating table-items drops onto the sidebar.
+      // so onDrag fires and we can show red highlight; onDrop will reject the drop
+      const source = dropArgs.source;
       const data = source.data;
 
       // Validate table items drop
@@ -464,8 +464,8 @@ const initDropTarget = (element) => {
           return false;
         }
         // Reject drops from a different table (e.g. Files onto Gallery sidebar)
-        const contentLabel = c?.props?.tableVertexLabel
-          || c?.props?.contentLabel
+        const contentLabel = c.props?.tableVertexLabel
+          || c.props?.contentLabel
           || null;
         const sourceLabel = data.sourceTableVertexLabel != null
           ? String(data.sourceTableVertexLabel)

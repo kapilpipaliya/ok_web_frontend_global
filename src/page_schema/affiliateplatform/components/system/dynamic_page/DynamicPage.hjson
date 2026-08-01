@@ -2511,6 +2511,17 @@ const saveDropCreateReviewRow = async (draft, saveData) => {
 
   const vertex = saveData?.vertex;
   const properties = vertex?.P && typeof vertex.P === "object" ? { ...vertex.P } : {};
+  const defaultProps =
+    createCfg.defaultProperties && typeof createCfg.defaultProperties === "object"
+      ? createCfg.defaultProperties
+      : null;
+  if (defaultProps) {
+    for (const [key, value] of Object.entries(defaultProps)) {
+      if (properties[key] === undefined || properties[key] === null || properties[key] === "") {
+        properties[key] = value;
+      }
+    }
+  }
 
   const relationships =
     saveData?.relationships && typeof saveData.relationships === "object"
@@ -3029,6 +3040,7 @@ return {
           '''const vid = f.pageStateVertexId;
 return {
   selectedSidebarItem: f.selectedSidebarItem,
+  sidebarConfig: f.getSidebarConfig?.() || null,
   getSelectedRows: f.getSelectedRows,
   setSelectedRows: f.setSelectedRows,
   clearSelectedRows: f.clearSelectedRows,

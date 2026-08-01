@@ -84,6 +84,9 @@ const getUploadConfiguration = () => {
       uploadAbortUrl: "/api/file/upload/abort",
       onFileSelect: null,
       onUploadSuccess: null,
+      folderId: "",
+      categoryLabel: "Folder",
+      toParentEdgeType: "ParentFolder",
     };
   }
 
@@ -181,6 +184,18 @@ const getUploadConfiguration = () => {
         : "/api/file/upload/abort",
     onFileSelect: compileUploadHook(raw.onFileSelect),
     onUploadSuccess: compileUploadHook(raw.onUploadSuccess),
+    folderId:
+      raw.folderId != null && String(raw.folderId).trim() !== ""
+        ? String(raw.folderId).trim()
+        : "",
+    categoryLabel:
+      raw.categoryLabel != null && String(raw.categoryLabel).trim() !== ""
+        ? String(raw.categoryLabel).trim()
+        : "Folder",
+    toParentEdgeType:
+      raw.toParentEdgeType != null && String(raw.toParentEdgeType).trim() !== ""
+        ? String(raw.toParentEdgeType).trim()
+        : "ParentFolder",
   };
 };
 
@@ -545,9 +560,30 @@ const handleUploadedResponse = async (data, file, fileList, cfg, callbacks, batc
   }
 };
 
+const appendFolderUploadFields = (formData, cfg) => {
+  if (cfg.folderId) {
+    formData.append("folderId", cfg.folderId);
+  }
+  if (cfg.categoryLabel) {
+    formData.append("categoryLabel", cfg.categoryLabel);
+  }
+  if (cfg.toParentEdgeType) {
+    formData.append("toParentEdgeType", cfg.toParentEdgeType);
+  }
+};
+
+const folderUploadJsonFields = (cfg) => {
+  const out = {};
+  if (cfg.folderId) out.folderId = cfg.folderId;
+  if (cfg.categoryLabel) out.categoryLabel = cfg.categoryLabel;
+  if (cfg.toParentEdgeType) out.toParentEdgeType = cfg.toParentEdgeType;
+  return out;
+};
+
 const uploadFileDirect = async (file, cfg, onProgress) => {
   const formData = new FormData();
   formData.append(cfg.formDataFieldName, file);
+  appendFolderUploadFields(formData, cfg);
   return await uploadFormDataWithProgress(cfg.uploadUrl, formData, onProgress);
 };
 
@@ -558,6 +594,7 @@ const uploadFileChunked = async (file, cfg, onProgress) => {
     fileSize: file.size,
     mimeType: file.type || "",
     chunkSize,
+    ...folderUploadJsonFields(cfg),
   });
 
   const uploadId = init?.uploadId != null ? String(init.uploadId) : "";

@@ -282,7 +282,7 @@ return {
 }`;'''
         displayOrder: 2
         componentName: Html
-        props: return { as: "motionFragment" };
+        props: return { as: "div" };
       }
     }
     {
@@ -353,7 +353,7 @@ return {
 }`;'''
         displayOrder: 1
         componentName: Html
-        props: return { as: "motionFragment" };
+        props: return { as: "div" };
       }
     }
     {

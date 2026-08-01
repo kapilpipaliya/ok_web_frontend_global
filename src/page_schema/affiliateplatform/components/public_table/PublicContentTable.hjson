@@ -1,0 +1,379 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        description: Reusable public HTML table with dynamic columns and a children slot for each row.
+        key: PublicContentTable
+        updatedAt: 2026-07-14T15:36:48.785Z
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        fns:
+          '''const columns = () => c.props?.columns || [];
+const defaultSortKey = c.props?.defaultSortKey || "";
+const defaultSortDirection = c.props?.defaultSortDirection === "desc" ? "desc" : "asc";
+const [sortKey, setSortKey] = _.createSignal(defaultSortKey);
+const [sortDirection, setSortDirection] = _.createSignal(defaultSortDirection);
+
+const getSortValue = (row, column, rowIndex) => {
+  if (typeof column?.sortValue === "function") {
+    return column.sortValue(row, rowIndex);
+  }
+  if (column?.key === "number") return rowIndex + 1;
+  return row?.P?.[column?.key] ?? row?.[column?.key];
+};
+
+const compareSortValues = (leftValue, rightValue, sortType) => {
+  const leftIsEmpty = leftValue == null || leftValue === "";
+  const rightIsEmpty = rightValue == null || rightValue === "";
+  if (leftIsEmpty && rightIsEmpty) return 0;
+  if (leftIsEmpty) return 1;
+  if (rightIsEmpty) return -1;
+
+  if (sortType === "date") {
+    const leftDate = new Date(leftValue).getTime();
+    const rightDate = new Date(rightValue).getTime();
+    if (!Number.isNaN(leftDate) && !Number.isNaN(rightDate)) {
+      return leftDate - rightDate;
+    }
+  }
+
+  if (sortType === "number") {
+    const leftNumber = Number(leftValue);
+    const rightNumber = Number(rightValue);
+    if (!Number.isNaN(leftNumber) && !Number.isNaN(rightNumber)) {
+      return leftNumber - rightNumber;
+    }
+  }
+
+  return String(leftValue).localeCompare(String(rightValue), undefined, {
+    numeric: true,
+    sensitivity: "base"
+  });
+};
+
+const getSortedRows = (rows) => {
+  const list = Array.isArray(rows) ? rows : [];
+  const activeColumn = columns().find((column) => column?.key === sortKey());
+  if (!activeColumn || activeColumn.sortable === false) return list;
+  const directionMultiplier = sortDirection() === "desc" ? -1 : 1;
+
+  return list
+    .map((row, rowIndex) => ({ row, rowIndex }))
+    .sort((left, right) => {
+      const comparison = compareSortValues(
+        getSortValue(left.row, activeColumn, left.rowIndex),
+        getSortValue(right.row, activeColumn, right.rowIndex),
+        activeColumn.sortType
+      );
+      return comparison === 0
+        ? left.rowIndex - right.rowIndex
+        : comparison * directionMultiplier;
+    })
+    .map((entry) => entry.row);
+};
+
+const toggleSort = (column) => {
+  if (!column || column.sortable === false) return;
+  if (sortKey() === column.key) {
+    setSortDirection((currentDirection) => currentDirection === "asc" ? "desc" : "asc");
+    return;
+  }
+  setSortKey(column.key);
+  setSortDirection(column.defaultSortDirection === "desc" ? "desc" : "asc");
+};
+
+return {
+  sortKey,
+  sortDirection,
+  getSortedRows,
+  toggleSort
+};'''
+        css:
+          '''return `._id {
+  background: ${t.var.color.background};
+  border: 1px solid ${t.var.color.border};
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+};'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  overflow-x: auto;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+};'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 600px;
+
+  th, td {
+    border: 1px solid ${t.var.color.border};
+    padding: 0.5rem 0.75rem;
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "table"
+};'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  background: ${t.var.color.primary_light_50};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "thead"
+};'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "tr"
+};'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const columns = c.props?.columns || [];
+return {
+  as: "fragment",
+  data: columns,
+  contextName: "column",
+  loop: true
+};'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''const column = c.column || {};
+const align = column.align || "left";
+return `._id {
+  text-align: ${align};
+  font-weight: 600;
+  color: ${t.var.color.text};
+  cursor: ${column.sortable === false ? "default" : "pointer"};
+  user-select: none;
+  white-space: nowrap;
+}
+
+._id:focus-visible {
+  outline: 2px solid ${t.var.color.primary};
+  outline-offset: -2px;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const column = c.column || {};
+const sortable = column.sortable !== false;
+const isActiveSort = f.sortKey() === column.key;
+const direction = f.sortDirection();
+return {
+  as: "th",
+  text: `${column.label || ""}${isActiveSort ? (direction === "asc" ? " ▲" : " ▼") : ""}`,
+  style: column.width ? { width: column.width } : undefined,
+  tabIndex: sortable ? 0 : undefined,
+  onClick: sortable ? () => f.toggleSort(column) : undefined,
+  onKeyDown: sortable
+    ? (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          f.toggleSort(column);
+        }
+      }
+    : undefined,
+  "attr:aria-sort": isActiveSort
+    ? (direction === "asc" ? "ascending" : "descending")
+    : undefined
+};'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "tbody"
+};'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const rows = c.props?.rows || [];
+const contextName = c.props?.contextName || "row";
+const hasRows = Array.isArray(rows);
+const sortedRows = hasRows ? f.getSortedRows(rows) : [];
+
+return {
+  as: "fragment",
+  ...(hasRows
+    ? {
+        data: sortedRows,
+        contextName,
+        loop: true
+      }
+    : {})
+};'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Slot
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  padding: 2rem 1rem;
+  text-align: center;
+  color: ${t.var.color.text_light_300};
+  margin: 0;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const rows = c.props?.rows || [];
+const emptyMessage = c.props?.emptyMessage || "No items available yet.";
+return {
+  as: "p",
+  text: emptyMessage,
+  hide: () => Array.isArray(rows) && rows.length > 0
+};'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "12"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "4"
+      E: "9"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "10"
+      E: "11"
+    }
+  ]
+}
