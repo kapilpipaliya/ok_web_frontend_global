@@ -54,6 +54,14 @@ try {
     }
     {
       id: "2"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: Layout
+      }
+    }
+    {
+      id: "3"
       L: Attr
       P: {
         css:
@@ -66,7 +74,7 @@ try {
       }
     }
     {
-      id: "3"
+      id: "4"
       L: Attr
       P: {
         css:
@@ -80,7 +88,7 @@ try {
       }
     }
     {
-      id: "4"
+      id: "5"
       L: Attr
       P: {
         css:
@@ -101,7 +109,7 @@ return {
       }
     }
     {
-      id: "5"
+      id: "6"
       L: Attr
       P: {
         css:
@@ -123,7 +131,7 @@ return {
       }
     }
     {
-      id: "6"
+      id: "7"
       L: Attr
       P: {
         displayOrder: 3
@@ -136,51 +144,43 @@ return {
 };'''
       }
     }
-    {
-      id: "7"
-      L: PageLayout
-      P: {
-        displayOrder: 1
-        componentName: Layout
-      }
-    }
   ]
   edges: [
     {
       id: e1
-      T: Attr
+      T: PageLayout
       S: "1"
       E: "2"
     }
     {
       id: e2
-      T: PageLayout
-      S: "1"
-      E: "7"
-    }
-    {
-      id: e3
       T: Attr
-      S: "2"
+      S: "1"
       E: "3"
     }
     {
-      id: e4
+      id: e3
       T: Attr
       S: "3"
       E: "4"
     }
     {
+      id: e4
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
       id: e5
       T: Attr
-      S: "3"
-      E: "5"
+      S: "4"
+      E: "6"
     }
     {
       id: e6
       T: Attr
-      S: "3"
-      E: "6"
+      S: "4"
+      E: "7"
     }
   ]
 }

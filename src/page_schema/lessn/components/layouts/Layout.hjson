@@ -169,6 +169,11 @@ window.__motion = { animate, scroll, inView };`
   flex-direction: column;
   background: ${t.var.color.background};
   color: ${t.var.color.text};
+    background: linear-gradient(
+    180deg,
+    ${t.var.color.primary_light_100} 0%,
+    ${t.var.color.background} 100%
+  );
 }`;'''
         displayOrder: 4
         fns:
@@ -221,6 +226,12 @@ return {
       id: "5"
       L: Attr
       P: {
+        css:
+          '''return `._id {
+  flex-grow: 1;
+  flex: 0;
+  width: 100%;
+}`;'''
         displayOrder: 1
         componentName: Header
         props: return {};

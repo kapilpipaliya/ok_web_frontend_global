@@ -10,6 +10,7 @@
         fns: return { enabled: () => true }
         url: /contact
         key: Contact
+        updatedAt: 2026-08-01T12:10:38.268Z
         props:
           '''
 const locale = _.params?.lang ? String(_.params.lang).toLowerCase() : undefined;
@@ -190,7 +191,7 @@ return {
       P: {
         css:
           '''return `._id {
-  color: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
 }`;'''
         displayOrder: 1
         componentName: Html
@@ -303,7 +304,7 @@ return {
       P: {
         css:
           '''return `._id {
-  color: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
 }`;'''
         displayOrder: 1
         componentName: Html
@@ -470,7 +471,7 @@ return {
       P: {
         css:
           '''return `._id {
-  color: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
 }`;'''
         displayOrder: 1
         componentName: Html
@@ -550,8 +551,7 @@ return {
       P: {
         displayOrder: 2
         fns:
-          '''
-const [formManagementFns, setFormManagementFns] = _.createSignal(null);
+          '''const [formManagementFns, setFormManagementFns] = _.createSignal(null);
 
 const registerFormManagementFns = (formFns) => {
   setFormManagementFns(formFns);
@@ -598,8 +598,7 @@ return {
   registerFormManagementFns,
   handleContactSubmit,
   runContactSubmit
-};
-'''
+};'''
         componentName: Html
         props:
           '''return {
@@ -650,7 +649,7 @@ return {
       }
     }
     {
-      id: "30a"
+      id: "31"
       L: Attr
       P: {
         displayOrder: 1
@@ -726,7 +725,7 @@ return {
       }
     }
     {
-      id: "30b"
+      id: "32"
       L: Attr
       P: {
         css:
@@ -767,7 +766,7 @@ return {
       }
     }
     {
-      id: "30c"
+      id: "33"
       L: Attr
       P: {
         displayOrder: 1
@@ -782,7 +781,7 @@ return {
       }
     }
     {
-      id: "30d"
+      id: "34"
       L: Attr
       P: {
         displayOrder: 2
@@ -795,7 +794,7 @@ return {
       }
     }
     {
-      id: "31"
+      id: "35"
       L: Attr
       P: {
         css:
@@ -816,7 +815,7 @@ return {
       }
     }
     {
-      id: "32"
+      id: "36"
       L: Attr
       P: {
         css:
@@ -834,7 +833,7 @@ return {
       }
     }
     {
-      id: "33"
+      id: "37"
       L: Attr
       P: {
         css:
@@ -856,7 +855,7 @@ return {
       }
     }
     {
-      id: "34"
+      id: "38"
       L: Attr
       P: {
         css:
@@ -878,7 +877,7 @@ return {
       }
     }
     {
-      id: "35"
+      id: "39"
       L: Attr
       P: {
         displayOrder: 1
@@ -898,7 +897,7 @@ return {
       }
     }
     {
-      id: "36"
+      id: "40"
       L: PageLayout
       P: {
         displayOrder: 1
@@ -917,7 +916,7 @@ return {
       id: e2
       T: PageLayout
       S: "1"
-      E: "36"
+      E: "40"
     }
     {
       id: e3
@@ -929,7 +928,7 @@ return {
       id: e4
       T: Attr
       S: "2"
-      E: "31"
+      E: "35"
     }
     {
       id: e5
@@ -1096,50 +1095,50 @@ return {
     {
       id: e32
       T: Attr
-      S: "31"
-      E: "32"
+      S: "30"
+      E: "31"
     }
     {
       id: e33
       T: Attr
-      S: "32"
-      E: "33"
+      S: "30"
+      E: "32"
     }
     {
       id: e34
       T: Attr
       S: "32"
-      E: "34"
+      E: "33"
     }
     {
       id: e35
       T: Attr
-      S: "34"
-      E: "35"
+      S: "32"
+      E: "34"
     }
     {
       id: e36
       T: Attr
-      S: "30"
-      E: "30a"
+      S: "35"
+      E: "36"
     }
     {
       id: e37
       T: Attr
-      S: "30"
-      E: "30b"
+      S: "36"
+      E: "37"
     }
     {
       id: e38
       T: Attr
-      S: "30b"
-      E: "30c"
+      S: "36"
+      E: "38"
     }
     {
       id: e39
       T: Attr
-      S: "30b"
-      E: "30d"
+      S: "38"
+      E: "39"
     }
   ]
 }

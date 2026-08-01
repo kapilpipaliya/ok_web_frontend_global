@@ -102,7 +102,8 @@
   as: "a",
   href: "https://goo.gl/maps/BGEfU8y8wXz",
   target: "_blank",
-  rel: "noopener noreferrer"
+  rel: "noopener noreferrer",
+  hide:true
 };'''
       }
     }
@@ -172,7 +173,7 @@ return {
           '''const currentYear = new Date().getFullYear();
 return {
   as: "div",
-  text: `Copyright © ${currentYear} Fulchand Shastri`
+  text: `Copyright © ${currentYear} Lessn`
 };'''
       }
     }
@@ -240,8 +241,8 @@ return {
         props:
           '''return {
   as: "a",
-  href: "https://www.youtube.com/@ASKUMARALA/",
-  text: "ASK Umarala",
+  //href: "https://www.youtube.com/@ASKUMARALA/",
+  text: "Lessn",
   target: "_blank",
   rel: "noopener noreferrer",
 };'''

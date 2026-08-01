@@ -214,7 +214,7 @@ const pages = [
   {
     settingsPageId: "home",
     name: "Home Page Settings",
-    description: "Manage hero and intro content on the home page.",
+    description: "Manage hero, intro, and mission content on the home page.",
     sections: [
       {
         id: "content",
@@ -226,18 +226,93 @@ const pages = [
           buildField({ key: "ctaHref", label: "CTA button link", renderer: "text", defaultValue: "/products", colSpan: 1, translatable: false }),
           buildField({ key: "disclosureText", label: "Affiliate disclosure", renderer: "textArea", defaultValue: "As an Amazon Associate we earn from qualifying purchases.", colSpan: 1 })
         ]
+      },
+      {
+        id: "mission",
+        title: "Mission section",
+        description: "Mission heading and items.",
+        fields: [
+          buildField({
+            key: "missionTitle",
+            label: "Mission title",
+            renderer: "text",
+            required: true,
+            colSpan: 1,
+            defaultValue: "Our Mission"
+          }),
+          buildField({
+            key: "missionItems",
+            label: "Mission items",
+            renderer: "fieldArray",
+            required: true,
+            colSpan: 1,
+            defaultValue: [
+              {
+                icon: "carbon:shopping-bag",
+                text: "Curating trustworthy Amazon product picks for everyday needs"
+              },
+              {
+                icon: "carbon:search",
+                text: "Sharing honest reviews and clear buying guides"
+              },
+              {
+                icon: "carbon:user-multiple",
+                text: "Helping shoppers find the right product faster"
+              },
+              {
+                icon: "carbon:favorite",
+                text: "Highlighting quality picks worth recommending"
+              }
+            ],
+            fieldArrayConfig: {
+              itemLabel: "Mission item",
+              addButtonLabel: "Add mission item",
+              minItems: 0,
+              itemFields: [
+                buildField({ key: "icon", label: "Icon", renderer: "text", translatable: false }),
+                buildField({ key: "text", label: "Text", renderer: "textArea", required: true })
+              ]
+            }
+          })
+        ]
       }
     ],
-    defaultDocuments: [{
-      sectionId: "content",
-      values: {
-        pageTitle: "Amazon Product Picks",
-        pageSubtitle: "Curated affiliate recommendations with honest reviews and buying guides.",
-        ctaText: "Browse products",
-        ctaHref: "/products",
-        disclosureText: "As an Amazon Associate we earn from qualifying purchases."
+    defaultDocuments: [
+      {
+        sectionId: "content",
+        values: {
+          pageTitle: "Amazon Product Picks",
+          pageSubtitle: "Curated affiliate recommendations with honest reviews and buying guides.",
+          ctaText: "Browse products",
+          ctaHref: "/products",
+          disclosureText: "As an Amazon Associate we earn from qualifying purchases."
+        }
+      },
+      {
+        sectionId: "mission",
+        values: {
+          missionTitle: "Our Mission",
+          missionItems: [
+            {
+              icon: "carbon:shopping-bag",
+              text: "Curating trustworthy Amazon product picks for everyday needs"
+            },
+            {
+              icon: "carbon:search",
+              text: "Sharing honest reviews and clear buying guides"
+            },
+            {
+              icon: "carbon:user-multiple",
+              text: "Helping shoppers find the right product faster"
+            },
+            {
+              icon: "carbon:favorite",
+              text: "Highlighting quality picks worth recommending"
+            }
+          ]
+        }
       }
-    }]
+    ]
   },
   {
     settingsPageId: "products",

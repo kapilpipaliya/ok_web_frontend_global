@@ -4,8 +4,8 @@
       id: "1"
       L: Component
       P: {
-        description: Product detail with option swatches, availability-aware selection, image carousel, and markdown description.
         dynamicComponent: Carousel, Button
+        description: Product detail with option swatches, availability-aware selection, image carousel, and markdown description.
         key: ProductDetailView
       }
     }
@@ -484,7 +484,7 @@ return {
       }
     }
     {
-      id: "11a"
+      id: "12"
       L: Attr
       P: {
         css:
@@ -499,7 +499,7 @@ return {
       }
     }
     {
-      id: "11b"
+      id: "13"
       L: Attr
       P: {
         css:
@@ -523,7 +523,7 @@ return {
       }
     }
     {
-      id: "11c"
+      id: "14"
       L: Attr
       P: {
         css:
@@ -549,7 +549,7 @@ return {
       }
     }
     {
-      id: "11d"
+      id: "15"
       L: Attr
       P: {
         css:
@@ -619,7 +619,7 @@ return {
       }
     }
     {
-      id: "11e"
+      id: "16"
       L: Attr
       P: {
         css:
@@ -646,7 +646,7 @@ return {
       }
     }
     {
-      id: "11f"
+      id: "17"
       L: Attr
       P: {
         css:
@@ -665,7 +665,7 @@ return {
       }
     }
     {
-      id: "12"
+      id: "18"
       L: Attr
       P: {
         css:
@@ -687,7 +687,7 @@ return {
       }
     }
     {
-      id: "12b"
+      id: "19"
       L: Attr
       P: {
         css:
@@ -708,7 +708,7 @@ return {
       }
     }
     {
-      id: "13"
+      id: "20"
       L: Attr
       P: {
         css:
@@ -730,7 +730,7 @@ return {
       }
     }
     {
-      id: "13b"
+      id: "21"
       L: Attr
       P: {
         css:
@@ -752,7 +752,7 @@ return `._id {
       }
     }
     {
-      id: "14"
+      id: "22"
       L: Attr
       P: {
         displayOrder: 6
@@ -768,7 +768,7 @@ return {
       }
     }
     {
-      id: "15"
+      id: "23"
       L: Attr
       P: {
         css:
@@ -788,7 +788,7 @@ return {
       }
     }
     {
-      id: "16"
+      id: "24"
       L: Attr
       P: {
         css:
@@ -827,28 +827,143 @@ return {
     }
   ]
   edges: [
-    { id: "e1", T: "Attr", S: "1", E: "2" }
-    { id: "e2", T: "Attr", S: "2", E: "3" }
-    { id: "e3", T: "Attr", S: "2", E: "4" }
-    { id: "e4", T: "Attr", S: "2", E: "5" }
-    { id: "e5", T: "Attr", S: "2", E: "16" }
-    { id: "e6", T: "Attr", S: "5", E: "6" }
-    { id: "e7", T: "Attr", S: "5", E: "10" }
-    { id: "e8", T: "Attr", S: "6", E: "7" }
-    { id: "e9", T: "Attr", S: "6", E: "9" }
-    { id: "e10", T: "Attr", S: "7", E: "8" }
-    { id: "e11", T: "Attr", S: "10", E: "11" }
-    { id: "e11a", T: "Attr", S: "11", E: "11a" }
-    { id: "e11b", T: "Attr", S: "11a", E: "11b" }
-    { id: "e11c", T: "Attr", S: "11a", E: "11c" }
-    { id: "e11d", T: "Attr", S: "11c", E: "11d" }
-    { id: "e11e", T: "Attr", S: "11d", E: "11e" }
-    { id: "e11f", T: "Attr", S: "11d", E: "11f" }
-    { id: "e12", T: "Attr", S: "10", E: "12" }
-    { id: "e12b", T: "Attr", S: "10", E: "12b" }
-    { id: "e13", T: "Attr", S: "10", E: "13" }
-    { id: "e13b", T: "Attr", S: "10", E: "13b" }
-    { id: "e14", T: "Attr", S: "10", E: "14" }
-    { id: "e15", T: "Attr", S: "10", E: "15" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "5"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "24"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "5"
+      E: "10"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "6"
+      E: "9"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "10"
+      E: "11"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "10"
+      E: "18"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "10"
+      E: "19"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "10"
+      E: "20"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "10"
+      E: "21"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "10"
+      E: "22"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "10"
+      E: "23"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "11"
+      E: "12"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "12"
+      E: "13"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "12"
+      E: "14"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "14"
+      E: "15"
+    }
+    {
+      id: e22
+      T: Attr
+      S: "15"
+      E: "16"
+    }
+    {
+      id: e23
+      T: Attr
+      S: "15"
+      E: "17"
+    }
   ]
 }

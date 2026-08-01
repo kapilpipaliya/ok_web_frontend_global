@@ -9,9 +9,9 @@
         description: Home
         isNoPermissionCheck: true
         fns: return { enabled: () => true }
-        url: /home
+        url: /homeold
         key: HomeOld
-        updatedAt: 2026-07-16T18:35:22.667Z
+        updatedAt: 2026-08-01T13:06:57.774Z
         props:
           '''
 const locale = _.params?.lang ? String(_.params.lang).toLowerCase() : undefined;
@@ -23,47 +23,11 @@ try {
     functionName: "loadPublicPageSettings",
     contextData: { pageId: "home", allowPublicRead: true, locale: ${JSON.stringify(locale ?? null)} }
   });
-  const sections = result?.result?.success ? (result.result.data?.sections || {}) : {};
-
-  let banners = [];
-  try {
-    const bannerResult = await s({
-      functionName: "loadPublicCategoryContent",
-      contextData: {
-        tableKey: "files",
-        tableVertexLabel: "File",
-        categoryKey: "HomeBanner",
-        locale: ${JSON.stringify(locale ?? null)}
-      }
-    });
-    const rows = bannerResult?.result?.success
-      ? (bannerResult.result.data?.rows || [])
-      : [];
-    banners = rows.filter((file) => {
-      const mime = String(file?.P?.mimeType || file?.P?.fileType || "");
-      if (mime.startsWith("image/")) return true;
-      const name = String(file?.P?.fileName || "").toLowerCase();
-      return (
-        name.endsWith(".png") ||
-        name.endsWith(".jpg") ||
-        name.endsWith(".jpeg") ||
-        name.endsWith(".gif") ||
-        name.endsWith(".webp") ||
-        name.endsWith(".svg") ||
-        name.endsWith(".avif")
-      );
-    });
-  } catch (bannerError) {
-    console.error("Error loading HomeBanner images:", bannerError);
-  }
-
-  return {
-    ...sections,
-    banners
-  };
+  if (!result?.result?.success) return {};
+  return result.result.data?.sections?.content || {};
 } catch (error) {
   console.error("Error loading page settings:", error);
-  return { banners: [] };
+  return {};
 }
 `
 };
@@ -76,22 +40,16 @@ try {
       P: {
         css:
           '''return `._id {
-  padding: 0;
-  margin-bottom: 0;
+  padding: 4rem 1rem 3rem;
+  background: linear-gradient(
+    180deg,
+    ${t.var.color.primary_light_100} 0%,
+    ${t.var.color.background} 100%
+  );
 }`;'''
         displayOrder: 1
-        componentName: Carousel
-        key: unique_3
-        props:
-          '''const banners = c.homeSettings?.banners ?? [];
-return {
-  data: banners,
-  contextName: "banner",
-  loop: true,
-  showArrows: true,
-  showDots: true,
-  hide: () => banners.length === 0
-};'''
+        componentName: Html
+        props: return { as: "main" };
       }
     }
     {
@@ -100,43 +58,16 @@ return {
       P: {
         css:
           '''return `._id {
-  display: block;
-  width: 100%;
-  min-height: 12rem;
-  line-height: 0;
-  text-decoration: none;
-  color: inherit;
-  overflow: hidden;
-  background: ${t.var.color.background_light_100};
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
 }`;'''
         displayOrder: 1
         componentName: Html
-        key: unique_6
-        props:
-          '''const banner = c.banner;
-const rawPath = banner?.P?.description != null ? String(banner.P.description).trim() : "";
-
-const localizeHref = (path) => {
-  if (!path) return null;
-  if (/^https?:\/\//i.test(path) || path.startsWith("mailto:") || path === "#") {
-    return path;
-  }
-  const normalized = path.startsWith("/") ? path : `/${path}`;
-  const lang = _.params?.lang ? String(_.params.lang).toLowerCase() : "";
-  // Match [lang]/[...page].tsx: only prefix when first segment is a language code
-  if (lang && /^[a-z]{2,3}$/i.test(lang)) {
-    if (normalized === "/") return `/${lang}`;
-    return `/${lang}${normalized}`;
-  }
-  return normalized;
-};
-
-const href = localizeHref(rawPath);
-
-return {
-  as: href ? "a" : "div",
-  ...(href ? { href } : {})
-};'''
+        props: return { as: "div" };
       }
     }
     {
@@ -144,37 +75,20 @@ return {
       L: Attr
       P: {
         css:
-          '''const isFirst = (c.index ?? 0) === 0;
-return [
-  `@keyframes homeBannerFadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}`,
-  `._id {
-  display: block;
-  width: 100%;
-  height: auto;
-  min-height: 12rem;
-  object-fit: cover;
-  object-position: center;
-  ${isFirst ? `
-  opacity: 0;
-  animation: homeBannerFadeIn 0.55s ease forwards;
-  ` : ""}
-}`
-];'''
+          '''return `._id {
+  margin: 0;
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 800;
+  line-height: 1.15;
+  color: ${t.var.color.text};
+}`;'''
         displayOrder: 1
         componentName: Html
-        key: unique_7
         props:
-          '''const banner = c.banner;
-const fileName = banner?.P?.fileName != null ? String(banner.P.fileName).trim() : "";
-const isFirst = (c.index ?? 0) === 0;
+          '''const content = c.homeSettings || {};
 return {
-  as: "img",
-  src: fileName ? `/api/file/download/${encodeURIComponent(fileName)}` : undefined,
-  alt: fileName || "Home banner",
-  loading: isFirst ? "eager" : "lazy"
+  as: "h1",
+  text: content.pageTitle || "Amazon Product Picks"
 };'''
       }
     }
@@ -184,13 +98,21 @@ return {
       P: {
         css:
           '''return `._id {
-  padding: 3rem 1rem;
+  margin: 0;
+  font-size: 1.125rem;
+  line-height: 1.7;
+  color: ${t.var.color.text_light_200};
+  max-width: 42rem;
+  margin-left: auto;
+  margin-right: auto;
 }`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''return {
-  as: "main"
+          '''const content = c.homeSettings || {};
+return {
+  as: "p",
+  text: content.pageSubtitle || "Curated affiliate recommendations with honest reviews and buying guides."
 };'''
       }
     }
@@ -200,35 +122,32 @@ return {
       P: {
         css:
           '''return `._id {
-  max-width: 1200px;
-  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  margin-top: 0.5rem;
 }`;'''
-        displayOrder: 1
+        displayOrder: 3
         componentName: Html
-        props:
-          '''return {
-  as: "div"
-};'''
+        props: return { as: "div" };
       }
     }
     {
       id: "7"
       L: Attr
       P: {
-        css:
-          '''return `._id {
-  text-align: center;
-  margin-bottom: 4rem;
-}`;'''
         displayOrder: 1
-        componentName: Html
+        componentName: Button
         props:
-          '''const welcome = c.homeSettings?.welcome;
+          '''const content = c.homeSettings || {};
+const lang = _.params?.lang && /^[a-z]{2,3}$/i.test(String(_.params.lang))
+  ? String(_.params.lang).toLowerCase()
+  : "en";
+const path = content.ctaHref || "/products";
+const target = path === "/" ? `/${lang}` : `/${lang}${path.startsWith("/") ? path : `/${path}`}`;
 return {
-  as: "section",
-  "data-animate": "",
-
-  ref: (el) => el && f.animateOnView(el)
+  text: content.ctaText || "Browse products",
+  variant: "primary",
+  onClick: () => _.navigate(target)
 };'''
       }
     }
@@ -238,446 +157,25 @@ return {
       P: {
         css:
           '''return `._id {
-  color: ${t.var.color.text};
-  font-size: 2.5rem;
-  font-weight: 700;
-  margin-bottom: 1.5rem;
-  line-height: 1.3;
-
-  @media (max-width: 768px) {
-    font-size: 2rem;
-  }
+  margin: 0;
+  font-size: 0.8125rem;
+  color: ${t.var.color.text_light_300};
+  max-width: 40rem;
+  margin-left: auto;
+  margin-right: auto;
 }`;'''
-        displayOrder: 1
+        displayOrder: 4
         componentName: Html
         props:
-          '''const welcome = c.homeSettings?.welcome;
+          '''const content = c.homeSettings || {};
 return {
-  as: "h1",
-  text: welcome?.welcomeTitle
+  as: "p",
+  text: content.disclosureText || "As an Amazon Associate we earn from qualifying purchases."
 };'''
       }
     }
     {
       id: "9"
-      L: Attr
-      P: {
-        css:
-          '''return `._id {
-  color: ${t.var.color.text_light_200};
-  font-size: 1.125rem;
-  line-height: 1.8;
-  max-width: 800px;
-  margin: 0 auto;
-}`;'''
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''const welcome = c.homeSettings?.welcome;
-return {
-  as: "p",
-  text: welcome?.welcomeDesc
-};'''
-      }
-    }
-    {
-      id: "10"
-      L: Attr
-      P: {
-        css:
-          '''return `._id {
-  text-align: center;
-  margin-bottom: 4rem;
-}`;'''
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''return {
-  as: "section",
-  "data-animate": "",
-  ref: (el) => el && f.animateOnView(el)
-};'''
-      }
-    }
-    {
-      id: "11"
-      L: Attr
-      P: {
-        css:
-          '''return `._id {
-  color: ${t.var.color.text};
-  font-size: 2rem;
-  font-weight: 600;
-  margin-bottom: 1.5rem;
-  line-height: 1.3;
-
-  @media (max-width: 768px) {
-    font-size: 1.5rem;
-  }
-}`;'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''return {
-  as: "h2",
-  text: "Featured Video"
-};'''
-      }
-    }
-    {
-      id: "12"
-      L: Attr
-      P: {
-        css:
-          '''return `._id {
-  display: block;
-  width: 100%;
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 0;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  border-radius: 0.75rem;
-  overflow: hidden;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-  transition: all 0.3s ease;
-
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
-  }
-
-  &:focus-visible {
-    outline: 2px solid ${t.var.color.primary};
-    outline-offset: 4px;
-  }
-}`;'''
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''const YOUTUBE_ID = "QouGP5MZBCY";
-const featuredVideo = {
-  P: {
-    youtubeId: YOUTUBE_ID,
-    title: "Featured Video"
-  }
-};
-return {
-  as: "button",
-  type: "button",
-  "aria-label": "Play featured video",
-  onClick: () => {
-    debugger;
-    f.openPlayer(featuredVideo)
-  }
-};'''
-      }
-    }
-    {
-      id: "13"
-      L: Attr
-      P: {
-        css:
-          '''return `._id {
-  position: relative;
-  padding-bottom: 56.25%;
-  overflow: hidden;
-  background: ${t.var.color.background_light_200};
-}`;'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''return {
-  as: "div"
-};'''
-      }
-    }
-    {
-      id: "14"
-      L: Attr
-      P: {
-        css:
-          '''return `._id {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}`;'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''return {
-  as: "img",
-  src: "https://img.youtube.com/vi/QouGP5MZBCY/hqdefault.jpg",
-  alt: "Featured video thumbnail",
-  loading: "lazy"
-};'''
-      }
-    }
-    {
-      id: "15"
-      L: Attr
-      P: {
-        css:
-          '''return `._id {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 4.5rem;
-  height: 4.5rem;
-  background: rgba(0, 0, 0, 0.72);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-}`;'''
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''return {
-  as: "div"
-};'''
-      }
-    }
-    {
-      id: "16"
-      L: Attr
-      P: {
-        css:
-          '''return `._id {
-  color: white;
-  margin-left: 0.25rem;
-}`;'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''return {
-  as: "icon",
-  icon: "carbon:play-filled",
-  width: 32,
-  height: 32
-};'''
-      }
-    }
-    {
-      id: "17"
-      L: Attr
-      P: {
-        css:
-          '''return `._id {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-  margin-bottom: 4rem;
-}`;'''
-        displayOrder: 3
-        componentName: Html
-        props:
-          '''return {
-  as: "div"
-};'''
-      }
-    }
-    {
-      id: "18"
-      L: Attr
-      P: {
-        contextName: featureCard
-        loop: true
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''const cards = c.homeSettings?.features?.featureCards ?? [];
-return {
-  as: "fragment",
-  data: cards.map((card) => ({
-    ...card,
-    align: card.align
-  }))
-};'''
-      }
-    }
-    {
-      id: "19"
-      L: Attr
-      P: {
-        displayOrder: 1
-        componentName: FeatureCard
-        props: return c.featureCard;
-      }
-    }
-    {
-      id: "20"
-      L: Attr
-      P: {
-        displayOrder: 4
-        componentName: QuoteSection
-        props:
-          '''const quote = c.homeSettings?.quote;
-return {
-  text: quote.quoteText,
-  author: quote.quoteAuthor
-};'''
-      }
-    }
-    {
-      id: "21"
-      L: Attr
-      P: {
-        css:
-          '''return `._id {
-  background: ${t.var.color.background_light_50};
-  padding: 3rem 2rem;
-  border-radius: 1rem;
-  margin-bottom: 4rem;
-}`;'''
-        displayOrder: 5
-        componentName: Html
-        props:
-          '''return {
-  as: "section",
-  "data-animate": "",
-
-  ref: (el) => el && f.animateOnView(el)
-};'''
-      }
-    }
-    {
-      id: "22"
-      L: Attr
-      P: {
-        css:
-          '''return `._id {
-  color: ${t.var.color.text};
-  font-size: 2rem;
-  font-weight: 600;
-  text-align: center;
-  margin-bottom: 2rem;
-}`;'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''const mission = c.homeSettings?.mission;
-return {
-  as: "h2",
-  text: mission?.missionTitle
-};'''
-      }
-    }
-    {
-      id: "23"
-      L: Attr
-      P: {
-        css:
-          '''return `._id {
-  max-width: 40rem;
-  margin: 0 auto;
-}`;'''
-        displayOrder: 2
-        componentName: Carousel
-        props:
-          '''const items = c.homeSettings?.mission?.missionItems ?? [];
-return {
-  data: items,
-  contextName: "missionItem",
-  loop: true,
-  showArrows: true,
-  showDots: true,
-  hide: () => items.length === 0
-};'''
-      }
-    }
-    {
-      id: "24"
-      L: Attr
-      P: {
-        css:
-          '''return `._id {
-  text-align: center;
-  padding: 0.5rem 3rem 0.25rem;
-}`;'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''const index = c.index ?? 0;
-return {
-  as: "div",
-  "data-animate": "",
-
-  ref: (el) => el && f.animateOnView(el, { delay: index === 0 ? 0 : 0.08 })
-};'''
-      }
-    }
-    {
-      id: "25"
-      L: Attr
-      P: {
-        css:
-          '''return `._id {
-  width: 4rem;
-  height: 4rem;
-  background: ${t.var.color.primary_light_100};
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 1rem;
-}`;'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''return {
-  as: "div"
-};'''
-      }
-    }
-    {
-      id: "26"
-      L: Attr
-      P: {
-        css:
-          '''return `._id {
-  color: ${t.var.color.primary};
-}`;'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''const item = c.missionItem;
-return {
-  as: "icon",
-  icon: item?.icon,
-  width: 32,
-  height: 32
-};'''
-      }
-    }
-    {
-      id: "27"
-      L: Attr
-      P: {
-        css:
-          '''return `._id {
-  color: ${t.var.color.text_light_200};
-  font-size: 1rem;
-  line-height: 1.6;
-}`;'''
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''const item = c.missionItem;
-return {
-  as: "p",
-  text: item?.text
-};'''
-      }
-    }
-    {
-      id: "28"
       L: PageLayout
       P: {
         displayOrder: 1
@@ -694,159 +192,45 @@ return {
     }
     {
       id: e2
-      T: Attr
+      T: PageLayout
       S: "1"
-      E: "5"
+      E: "9"
     }
     {
       id: e3
-      T: PageLayout
-      S: "1"
-      E: "28"
-    }
-    {
-      id: e4
       T: Attr
       S: "2"
       E: "3"
     }
     {
-      id: e5
+      id: e4
       T: Attr
       S: "3"
       E: "4"
     }
     {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+    {
       id: e6
       T: Attr
-      S: "5"
+      S: "3"
       E: "6"
     }
     {
       id: e7
       T: Attr
-      S: "6"
-      E: "7"
+      S: "3"
+      E: "8"
     }
     {
       id: e8
       T: Attr
       S: "6"
-      E: "10"
-    }
-    {
-      id: e9
-      T: Attr
-      S: "6"
-      E: "17"
-    }
-    {
-      id: e10
-      T: Attr
-      S: "6"
-      E: "20"
-    }
-    {
-      id: e11
-      T: Attr
-      S: "6"
-      E: "21"
-    }
-    {
-      id: e12
-      T: Attr
-      S: "7"
-      E: "8"
-    }
-    {
-      id: e13
-      T: Attr
-      S: "7"
-      E: "9"
-    }
-    {
-      id: e14
-      T: Attr
-      S: "10"
-      E: "11"
-    }
-    {
-      id: e15
-      T: Attr
-      S: "10"
-      E: "12"
-    }
-    {
-      id: e16
-      T: Attr
-      S: "12"
-      E: "13"
-    }
-    {
-      id: e17
-      T: Attr
-      S: "13"
-      E: "14"
-    }
-    {
-      id: e18
-      T: Attr
-      S: "13"
-      E: "15"
-    }
-    {
-      id: e19
-      T: Attr
-      S: "15"
-      E: "16"
-    }
-    {
-      id: e20
-      T: Attr
-      S: "17"
-      E: "18"
-    }
-    {
-      id: e21
-      T: Attr
-      S: "18"
-      E: "19"
-    }
-    {
-      id: e22
-      T: Attr
-      S: "21"
-      E: "22"
-    }
-    {
-      id: e23
-      T: Attr
-      S: "21"
-      E: "23"
-    }
-    {
-      id: e24
-      T: Attr
-      S: "23"
-      E: "24"
-    }
-    {
-      id: e25
-      T: Attr
-      S: "24"
-      E: "25"
-    }
-    {
-      id: e26
-      T: Attr
-      S: "24"
-      E: "27"
-    }
-    {
-      id: e27
-      T: Attr
-      S: "25"
-      E: "26"
+      E: "7"
     }
   ]
 }

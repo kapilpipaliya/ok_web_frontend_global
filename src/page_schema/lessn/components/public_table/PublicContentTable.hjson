@@ -13,6 +13,15 @@
       id: "2"
       L: Attr
       P: {
+        css:
+          '''return `._id {
+  background: ${t.var.color.background};
+  border: 1px solid ${t.var.color.border};
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}`;'''
+        displayOrder: 1
         fns:
           '''const columns = () => c.props?.columns || [];
 const defaultSortKey = c.props?.defaultSortKey || "";
@@ -94,15 +103,6 @@ return {
   getSortedRows,
   toggleSort
 };'''
-        css:
-          '''return `._id {
-  background: ${t.var.color.background};
-  border: 1px solid ${t.var.color.border};
-  border-radius: 0.75rem;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}`;'''
-        displayOrder: 1
         componentName: Html
         props:
           '''return {
