@@ -120,7 +120,30 @@ const portalNavSectionsData = [
         href: "/settings?page=home",
         label: "Home page",
         icon: "ph:gear-six",
-        pathCheck: () => String(_.location?.pathname || "").startsWith("/settings")
+        pathCheck: () => {
+          if (!String(_.location?.pathname || "").startsWith("/settings")) return false;
+          return String(_.searchParams?.page || "").trim() === "home";
+        }
+      },
+      {
+        id: "products_settings",
+        href: "/settings?page=products",
+        label: "Products page",
+        icon: "ph:gear-six",
+        pathCheck: () => {
+          if (!String(_.location?.pathname || "").startsWith("/settings")) return false;
+          return String(_.searchParams?.page || "").trim() === "products";
+        }
+      },
+      {
+        id: "contact_settings",
+        href: "/settings?page=contact",
+        label: "Contact page",
+        icon: "ph:gear-six",
+        pathCheck: () => {
+          if (!String(_.location?.pathname || "").startsWith("/settings")) return false;
+          return String(_.searchParams?.page || "").trim() === "contact";
+        }
       },
       {
         id: "pages_organizer",
@@ -171,6 +194,16 @@ const portalNavSectionsData = [
           if (String(_.location?.pathname || "") !== "/portal/table") return false;
           const table = String(_.searchParams?.table || "Product").trim();
           return table === "Product";
+        }
+      },
+      {
+        id: "contacts_table",
+        href: "/portal/table?table=ContactSubmission&key=contacts",
+        label: "Contacts",
+        icon: "ph:envelope-simple",
+        pathCheck: () => {
+          if (String(_.location?.pathname || "") !== "/portal/table") return false;
+          return String(_.searchParams?.table || "").trim() === "ContactSubmission";
         }
       },
       {

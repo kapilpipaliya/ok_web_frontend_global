@@ -2100,7 +2100,7 @@ const pages = [
         "fields": [
           {
             "key": "pageTitle",
-            "label": "pageTitle",
+            "label": "Page title",
             "dataType": "text",
             "renderer": "text",
             "required": false,
@@ -2109,7 +2109,7 @@ const pages = [
           },
           {
             "key": "pageSubtitle",
-            "label": "pageSubtitle",
+            "label": "Page subtitle",
             "dataType": "text",
             "renderer": "text",
             "required": false,
@@ -2118,7 +2118,7 @@ const pages = [
           },
           {
             "key": "infoTitle",
-            "label": "infoTitle",
+            "label": "Info section title",
             "dataType": "text",
             "renderer": "text",
             "required": false,
@@ -2126,71 +2126,8 @@ const pages = [
             "defaultValue": "Contact Information"
           },
           {
-            "key": "addressTitle",
-            "label": "addressTitle",
-            "dataType": "text",
-            "renderer": "text",
-            "required": false,
-            "colSpan": 1,
-            "defaultValue": "Address"
-          },
-          {
-            "key": "addressText",
-            "label": "addressText",
-            "dataType": "text",
-            "renderer": "text",
-            "required": false,
-            "colSpan": 1,
-            "defaultValue": "Atma Siddhi Kaivalya Kendra\nUmarala - 364210\nDistrict: Bhavnagar, Gujarat, India"
-          },
-          {
-            "key": "phoneTitle",
-            "label": "phoneTitle",
-            "dataType": "text",
-            "renderer": "text",
-            "required": false,
-            "colSpan": 1,
-            "defaultValue": "Phone"
-          },
-          {
-            "key": "phone1",
-            "label": "phone1",
-            "dataType": "text",
-            "renderer": "text",
-            "required": false,
-            "colSpan": 1,
-            "defaultValue": "+91 98252 42501"
-          },
-          {
-            "key": "phone2",
-            "label": "phone2",
-            "dataType": "text",
-            "renderer": "text",
-            "required": false,
-            "colSpan": 1,
-            "defaultValue": "+91 2844 244142"
-          },
-          {
-            "key": "emailTitle",
-            "label": "emailTitle",
-            "dataType": "text",
-            "renderer": "text",
-            "required": false,
-            "colSpan": 1,
-            "defaultValue": "Email"
-          },
-          {
-            "key": "emailLink",
-            "label": "emailLink",
-            "dataType": "text",
-            "renderer": "text",
-            "required": false,
-            "colSpan": 1,
-            "defaultValue": "info@fulchandshastri.com"
-          },
-          {
             "key": "formTitle",
-            "label": "formTitle",
+            "label": "Form section title",
             "dataType": "text",
             "renderer": "text",
             "required": false,
@@ -2199,12 +2136,109 @@ const pages = [
           },
           {
             "key": "mapTitle",
-            "label": "mapTitle",
+            "label": "Map section title",
             "dataType": "text",
             "renderer": "text",
             "required": false,
             "colSpan": 1,
             "defaultValue": "Find Us on Map"
+          },
+          {
+            "key": "mapUrl",
+            "label": "Map embed URL",
+            "dataType": "text",
+            "renderer": "text",
+            "required": false,
+            "colSpan": 1,
+            "translatable": false,
+            "defaultValue": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3705.2985671406!2d71.91442!3d21.76885!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2sAtma+Siddhi+Kaivalya+Kendra!5e0!3m2!1sen!2sin!4v1234567890"
+          }
+        ]
+      },
+      {
+        "id": "address",
+        "title": "Address",
+        "description": "Address shown on the Contact page.",
+        "fields": [
+          {
+            "key": "addressTitle",
+            "label": "Address title",
+            "dataType": "text",
+            "renderer": "text",
+            "required": false,
+            "colSpan": 1,
+            "defaultValue": "Address"
+          },
+          {
+            "key": "addressText",
+            "label": "Address text",
+            "dataType": "text",
+            "renderer": "textArea",
+            "required": false,
+            "colSpan": 1,
+            "defaultValue": "Atma Siddhi Kaivalya Kendra\nUmarala - 364210\nDistrict: Bhavnagar, Gujarat, India"
+          }
+        ]
+      },
+      {
+        "id": "phone",
+        "title": "Phone",
+        "description": "Phone numbers shown on the Contact page.",
+        "fields": [
+          {
+            "key": "phoneTitle",
+            "label": "Phone title",
+            "dataType": "text",
+            "renderer": "text",
+            "required": false,
+            "colSpan": 1,
+            "defaultValue": "Phone"
+          },
+          {
+            "key": "phone1",
+            "label": "Phone 1",
+            "dataType": "text",
+            "renderer": "text",
+            "required": false,
+            "colSpan": 1,
+            "translatable": false,
+            "defaultValue": "+91 98252 42501"
+          },
+          {
+            "key": "phone2",
+            "label": "Phone 2",
+            "dataType": "text",
+            "renderer": "text",
+            "required": false,
+            "colSpan": 1,
+            "translatable": false,
+            "defaultValue": "+91 2844 244142"
+          }
+        ]
+      },
+      {
+        "id": "email",
+        "title": "Email",
+        "description": "Email shown on the Contact page.",
+        "fields": [
+          {
+            "key": "emailTitle",
+            "label": "Email title",
+            "dataType": "text",
+            "renderer": "text",
+            "required": false,
+            "colSpan": 1,
+            "defaultValue": "Email"
+          },
+          {
+            "key": "email",
+            "label": "Email address",
+            "dataType": "text",
+            "renderer": "text",
+            "required": false,
+            "colSpan": 1,
+            "translatable": false,
+            "defaultValue": "info@fulchandshastri.com"
           }
         ]
       }
@@ -2217,15 +2251,34 @@ const pages = [
           "pageTitle": "Contact",
           "pageSubtitle": "Get in touch with us",
           "infoTitle": "Contact Information",
+          "formTitle": "Send us a Message",
+          "mapTitle": "Find Us on Map",
+          "mapUrl": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3705.2985671406!2d71.91442!3d21.76885!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2sAtma+Siddhi+Kaivalya+Kendra!5e0!3m2!1sen!2sin!4v1234567890"
+        }
+      },
+      {
+        "pageId": "contact",
+        "sectionId": "address",
+        "values": {
           "addressTitle": "Address",
-          "addressText": "Atma Siddhi Kaivalya Kendra\nUmarala - 364210\nDistrict: Bhavnagar, Gujarat, India",
+          "addressText": "Atma Siddhi Kaivalya Kendra\nUmarala - 364210\nDistrict: Bhavnagar, Gujarat, India"
+        }
+      },
+      {
+        "pageId": "contact",
+        "sectionId": "phone",
+        "values": {
           "phoneTitle": "Phone",
           "phone1": "+91 98252 42501",
-          "phone2": "+91 2844 244142",
+          "phone2": "+91 2844 244142"
+        }
+      },
+      {
+        "pageId": "contact",
+        "sectionId": "email",
+        "values": {
           "emailTitle": "Email",
-          "emailLink": "info@fulchandshastri.com",
-          "formTitle": "Send us a Message",
-          "mapTitle": "Find Us on Map"
+          "email": "info@fulchandshastri.com"
         }
       }
     ]
@@ -5415,7 +5468,84 @@ function buildTableSchemaPartConfig(part, body) {
   return `return ${JSON.stringify(payload, null, 2)};`;
 }
 
+const contactTableColumns = [
+  { key: "name", label: "Name", dataType: "text", renderer: "text", width: "160px", required: true, overflowEllipsis: true },
+  { key: "email", label: "Email", dataType: "text", renderer: "text", width: "200px", required: true, overflowEllipsis: true },
+  { key: "phone", label: "Phone", dataType: "text", renderer: "text", width: "140px", overflowEllipsis: true },
+  { key: "subject", label: "Subject", dataType: "text", renderer: "text", width: "180px", overflowEllipsis: true },
+  { key: "message", label: "Message", dataType: "text", renderer: "text", width: "280px", overflowEllipsis: true },
+  { key: "status", label: "Status", dataType: "text", renderer: "text", width: "110px" },
+  { key: "submittedAt", label: "Submitted", dataType: "text", renderer: "text", width: "180px", overflowEllipsis: true }
+];
+
+const contactTableGeneral = {
+  publicRead: false,
+  title: "Contacts",
+  label: "Contact submission",
+  icon: "ph:envelope-simple",
+  usePolarisUI: true,
+  enableUserScopingForContent: false,
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  showSelection: true,
+  hideExportButtons: false,
+  hideImportButtons: true,
+  hideSettingsButton: false,
+  hideAddButton: true,
+  rowHeight: 48,
+  columnWidths: { __selection: "36px", __rowNumber: "48px", __actions: "88px" },
+  rowClickable: true,
+  showRowNumber: true,
+  resizableColumns: true,
+  actions: [
+    { key: "edit", type: "edit" },
+    { key: "delete", type: "delete", confirm: { title: "Delete contact?", message: "This cannot be undone.", confirmText: "Delete", cancelText: "Cancel", variant: "danger" } }
+  ],
+  hooks: {}
+};
+
+const contactTableFormConfig = {
+  gridColumns: 2,
+  groups: [
+    {
+      key: "basic",
+      title: "Contact",
+      gridColumns: 2,
+      fields: [
+        { key: "name", label: "Name", dataType: "text", renderer: "text", required: true, colSpan: 1, translatable: false },
+        { key: "email", label: "Email", dataType: "text", renderer: "text", required: true, colSpan: 1, translatable: false },
+        { key: "phone", label: "Phone", dataType: "text", renderer: "text", colSpan: 1, translatable: false },
+        { key: "status", label: "Status", dataType: "text", renderer: "text", colSpan: 1, translatable: false, placeholder: "new" },
+        { key: "subject", label: "Subject", dataType: "text", renderer: "text", colSpan: 2, translatable: false },
+        { key: "message", label: "Message", dataType: "text", renderer: "textArea", required: true, colSpan: 2, translatable: false },
+        { key: "submittedAt", label: "Submitted at", dataType: "text", renderer: "text", colSpan: 2, translatable: false, disabled: true }
+      ]
+    }
+  ]
+};
+
+const contactTableSidebar = {
+  enabled: false
+};
+
 const tableDefinitions = [
+  {
+    tableKey: "contacts",
+    tableVertexLabel: "ContactSubmission",
+    pageId: "table:contacts",
+    schemaKeys: {
+      general: "contacts_schema_general",
+      columns: "contacts_schema_columns",
+      formConfig: "contacts_schema_formconfig",
+      sidebar: "contacts_schema_sidebar"
+    },
+    name: "Contacts",
+    description: "Contact form submissions from the public Contact page",
+    general: contactTableGeneral,
+    columns: contactTableColumns,
+    formConfig: contactTableFormConfig,
+    sidebar: contactTableSidebar
+  },
   {
     tableKey: "books",
     tableVertexLabel: "Book",

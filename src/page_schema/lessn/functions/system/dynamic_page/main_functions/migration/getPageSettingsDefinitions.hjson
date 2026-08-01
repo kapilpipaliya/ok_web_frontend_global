@@ -279,19 +279,75 @@ const pages = [
           buildField({ key: "pageTitle", label: "Page title", renderer: "text", defaultValue: "Contact", colSpan: 1 }),
           buildField({ key: "pageSubtitle", label: "Page subtitle", renderer: "text", defaultValue: "Questions about a product or this site? Get in touch.", colSpan: 1 }),
           buildField({ key: "infoTitle", label: "Info section title", renderer: "text", defaultValue: "Contact information", colSpan: 1 }),
-          buildField({ key: "email", label: "Email", renderer: "text", defaultValue: "", colSpan: 1, translatable: false })
+          buildField({ key: "formTitle", label: "Form section title", renderer: "text", defaultValue: "Send us a message", colSpan: 1 }),
+          buildField({ key: "mapTitle", label: "Map section title", renderer: "text", defaultValue: "Find us on the map", colSpan: 1 }),
+          buildField({ key: "mapUrl", label: "Map embed URL", renderer: "text", defaultValue: "", colSpan: 1, translatable: false })
+        ]
+      },
+      {
+        id: "address",
+        title: "Address",
+        description: "Address shown on the Contact page.",
+        fields: [
+          buildField({ key: "addressTitle", label: "Address title", renderer: "text", defaultValue: "Address", colSpan: 1 }),
+          buildField({ key: "addressText", label: "Address text", renderer: "textArea", defaultValue: "", colSpan: 1 })
+        ]
+      },
+      {
+        id: "phone",
+        title: "Phone",
+        description: "Phone numbers shown on the Contact page.",
+        fields: [
+          buildField({ key: "phoneTitle", label: "Phone title", renderer: "text", defaultValue: "Phone", colSpan: 1 }),
+          buildField({ key: "phone1", label: "Phone 1", renderer: "text", defaultValue: "", colSpan: 1, translatable: false }),
+          buildField({ key: "phone2", label: "Phone 2", renderer: "text", defaultValue: "", colSpan: 1, translatable: false })
+        ]
+      },
+      {
+        id: "email",
+        title: "Email",
+        description: "Email shown on the Contact page.",
+        fields: [
+          buildField({ key: "emailTitle", label: "Email title", renderer: "text", defaultValue: "Email", colSpan: 1 }),
+          buildField({ key: "email", label: "Email address", renderer: "text", defaultValue: "", colSpan: 1, translatable: false })
         ]
       }
     ],
-    defaultDocuments: [{
-      sectionId: "content",
-      values: {
-        pageTitle: "Contact",
-        pageSubtitle: "Questions about a product or this site? Get in touch.",
-        infoTitle: "Contact information",
-        email: ""
+    defaultDocuments: [
+      {
+        sectionId: "content",
+        values: {
+          pageTitle: "Contact",
+          pageSubtitle: "Questions about a product or this site? Get in touch.",
+          infoTitle: "Contact information",
+          formTitle: "Send us a message",
+          mapTitle: "Find us on the map",
+          mapUrl: ""
+        }
+      },
+      {
+        sectionId: "address",
+        values: {
+          addressTitle: "Address",
+          addressText: ""
+        }
+      },
+      {
+        sectionId: "phone",
+        values: {
+          phoneTitle: "Phone",
+          phone1: "",
+          phone2: ""
+        }
+      },
+      {
+        sectionId: "email",
+        values: {
+          emailTitle: "Email",
+          email: ""
+        }
       }
-    }]
+    ]
   }
 ];
 function stripFieldSchema(field) {
@@ -1182,7 +1238,84 @@ function buildTableSchemaPartConfig(part, body) {
   return `return ${JSON.stringify(payload, null, 2)};`;
 }
 
+const contactTableColumns = [
+  { key: "name", label: "Name", dataType: "text", renderer: "text", width: "160px", required: true, overflowEllipsis: true },
+  { key: "email", label: "Email", dataType: "text", renderer: "text", width: "200px", required: true, overflowEllipsis: true },
+  { key: "phone", label: "Phone", dataType: "text", renderer: "text", width: "140px", overflowEllipsis: true },
+  { key: "subject", label: "Subject", dataType: "text", renderer: "text", width: "180px", overflowEllipsis: true },
+  { key: "message", label: "Message", dataType: "text", renderer: "text", width: "280px", overflowEllipsis: true },
+  { key: "status", label: "Status", dataType: "text", renderer: "text", width: "110px" },
+  { key: "submittedAt", label: "Submitted", dataType: "text", renderer: "text", width: "180px", overflowEllipsis: true }
+];
+
+const contactTableGeneral = {
+  publicRead: false,
+  title: "Contacts",
+  label: "Contact submission",
+  icon: "ph:envelope-simple",
+  usePolarisUI: true,
+  enableUserScopingForContent: false,
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  showSelection: true,
+  hideExportButtons: false,
+  hideImportButtons: true,
+  hideSettingsButton: false,
+  hideAddButton: true,
+  rowHeight: 48,
+  columnWidths: { __selection: "36px", __rowNumber: "48px", __actions: "88px" },
+  rowClickable: true,
+  showRowNumber: true,
+  resizableColumns: true,
+  actions: [
+    { key: "edit", type: "edit" },
+    { key: "delete", type: "delete", confirm: { title: "Delete contact?", message: "This cannot be undone.", confirmText: "Delete", cancelText: "Cancel", variant: "danger" } }
+  ],
+  hooks: {}
+};
+
+const contactTableFormConfig = {
+  gridColumns: 2,
+  groups: [
+    {
+      key: "basic",
+      title: "Contact",
+      gridColumns: 2,
+      fields: [
+        { key: "name", label: "Name", dataType: "text", renderer: "text", required: true, colSpan: 1, translatable: false },
+        { key: "email", label: "Email", dataType: "text", renderer: "text", required: true, colSpan: 1, translatable: false },
+        { key: "phone", label: "Phone", dataType: "text", renderer: "text", colSpan: 1, translatable: false },
+        { key: "status", label: "Status", dataType: "text", renderer: "text", colSpan: 1, translatable: false, placeholder: "new" },
+        { key: "subject", label: "Subject", dataType: "text", renderer: "text", colSpan: 2, translatable: false },
+        { key: "message", label: "Message", dataType: "text", renderer: "textArea", required: true, colSpan: 2, translatable: false },
+        { key: "submittedAt", label: "Submitted at", dataType: "text", renderer: "text", colSpan: 2, translatable: false, disabled: true }
+      ]
+    }
+  ]
+};
+
+const contactTableSidebar = {
+  enabled: false
+};
+
 const tableDefinitions = [
+  {
+    tableKey: "contacts",
+    tableVertexLabel: "ContactSubmission",
+    pageId: "table:contacts",
+    schemaKeys: {
+      general: "contacts_schema_general",
+      columns: "contacts_schema_columns",
+      formConfig: "contacts_schema_formconfig",
+      sidebar: "contacts_schema_sidebar"
+    },
+    name: "Contacts",
+    description: "Contact form submissions from the public Contact page",
+    general: contactTableGeneral,
+    columns: contactTableColumns,
+    formConfig: contactTableFormConfig,
+    sidebar: contactTableSidebar
+  },
   {
     tableKey: "products",
     tableVertexLabel: "Product",

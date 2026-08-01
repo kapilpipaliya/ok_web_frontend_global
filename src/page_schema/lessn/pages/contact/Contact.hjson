@@ -229,10 +229,10 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const content = c.contactSettings?.content;
+          '''const address = c.contactSettings?.address;
 return {
   as: "h3",
-  text: content?.addressTitle
+  text: address?.addressTitle
 };'''
       }
     }
@@ -249,10 +249,10 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const content = c.contactSettings?.content;
+          '''const address = c.contactSettings?.address;
 return {
   as: "p",
-  text: content?.addressText
+  text: address?.addressText
 };'''
       }
     }
@@ -342,10 +342,10 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const content = c.contactSettings?.content;
+          '''const phone = c.contactSettings?.phone;
 return {
   as: "h3",
-  text: content?.phoneTitle
+  text: phone?.phoneTitle
 };'''
       }
     }
@@ -385,10 +385,13 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const content = c.contactSettings?.content;
+          '''const phone = c.contactSettings?.phone;
+const phone1 = phone?.phone1 || "";
 return {
   as: "a",
-  text: content?.phone1
+  href: phone1 ? `tel:${String(phone1).replace(/\s+/g, "")}` : undefined,
+  text: phone1,
+  hide: () => !phone1
 };'''
       }
     }
@@ -410,10 +413,13 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const content = c.contactSettings?.content;
+          '''const phone = c.contactSettings?.phone;
+const phone2 = phone?.phone2 || "";
 return {
   as: "a",
-  text: content?.phone2
+  href: phone2 ? `tel:${String(phone2).replace(/\s+/g, "")}` : undefined,
+  text: phone2,
+  hide: () => !phone2
 };'''
       }
     }
@@ -503,10 +509,10 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const content = c.contactSettings?.content;
+          '''const email = c.contactSettings?.email;
 return {
   as: "h3",
-  text: content?.emailTitle
+  text: email?.emailTitle
 };'''
       }
     }
@@ -528,10 +534,13 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const content = c.contactSettings?.content;
+          '''const emailSection = c.contactSettings?.email;
+const emailAddress = emailSection?.email || "";
 return {
   as: "a",
-  text: content?.emailLink
+  href: emailAddress ? `mailto:${emailAddress}` : undefined,
+  text: emailAddress,
+  hide: () => !emailAddress
 };'''
       }
     }
@@ -540,6 +549,57 @@ return {
       L: Attr
       P: {
         displayOrder: 2
+        fns:
+          '''
+const [formManagementFns, setFormManagementFns] = _.createSignal(null);
+
+const registerFormManagementFns = (formFns) => {
+  setFormManagementFns(formFns);
+};
+
+const handleContactSubmit = async ({ vertex }) => {
+  const values = vertex?.P || {};
+  const name = String(values.name || "").trim();
+  const email = String(values.email || "").trim();
+  const phone = String(values.phone || "").trim();
+  const subject = String(values.subject || "").trim();
+  const message = String(values.message || "").trim();
+
+  try {
+    const response = await s({
+      functionName: "submitContactForm",
+      contextData: { name, email, phone, subject, message }
+    });
+    const result = response?.result;
+    if (result?.success) {
+      _.showSuccessToast(result.data?.message || "Thank you for contacting us. We will get back to you soon!");
+      return true;
+    }
+    _.showErrorToast(result?.error || "Failed to send message");
+    return false;
+  } catch (error) {
+    console.error("Contact form error:", error);
+    _.showErrorToast("An error occurred. Please try again.");
+    return false;
+  }
+};
+
+const runContactSubmit = () => {
+  const formFns = formManagementFns();
+  if (!formFns?.handleSave) {
+    _.showErrorToast("Form is not ready yet");
+    return;
+  }
+  formFns.handleSave();
+};
+
+return {
+  formManagementFns,
+  registerFormManagementFns,
+  handleContactSubmit,
+  runContactSubmit
+};
+'''
         componentName: Html
         props:
           '''return {
@@ -575,9 +635,163 @@ return {
       id: "30"
       L: Attr
       P: {
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}`;'''
         displayOrder: 2
-        componentName: ContactForm
-        props: return {};
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+};'''
+      }
+    }
+    {
+      id: "30a"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: FormManagement
+        props:
+          '''return {
+  mode: "add",
+  vertexLabel: "ContactSubmission",
+  hideActionsBar: true,
+  afterSuccessfulSave: "reinitialize",
+  onSave: f.handleContactSubmit,
+  onFnsReady: f.registerFormManagementFns,
+  formConfig: {
+    gridColumns: 1,
+    groups: [
+      {
+        key: "contact",
+        title: "",
+        gridColumns: 1,
+        fields: [
+          {
+            key: "name",
+            label: "Your name",
+            dataType: "text",
+            renderer: "text",
+            required: true,
+            colSpan: 1,
+            placeholder: "Enter your full name"
+          },
+          {
+            key: "email",
+            label: "Email address",
+            dataType: "email",
+            renderer: "text",
+            required: true,
+            colSpan: 1,
+            placeholder: "your@email.com"
+          },
+          {
+            key: "phone",
+            label: "Phone number",
+            dataType: "text",
+            renderer: "text",
+            required: false,
+            colSpan: 1,
+            placeholder: "+1 555 000 0000"
+          },
+          {
+            key: "subject",
+            label: "Subject",
+            dataType: "text",
+            renderer: "text",
+            required: true,
+            colSpan: 1,
+            placeholder: "What is this regarding?"
+          },
+          {
+            key: "message",
+            label: "Message",
+            dataType: "text",
+            renderer: "textArea",
+            required: true,
+            colSpan: 1,
+            minLength: 10,
+            maxLength: 5000,
+            placeholder: "Please enter your message here..."
+          }
+        ]
+      }
+    ]
+  }
+};'''
+      }
+    }
+    {
+      id: "30b"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  padding: 0.75rem 2rem;
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  align-self: flex-start;
+
+  &:hover {
+    background: ${t.var.color.primary_dark_200};
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "button",
+  type: "button",
+  onClick: () => f.runContactSubmit()
+};'''
+      }
+    }
+    {
+      id: "30c"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "icon",
+  icon: "carbon:send",
+  width: 20,
+  height: 20
+};'''
+      }
+    }
+    {
+      id: "30d"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "span",
+  text: "Send message"
+};'''
       }
     }
     {
@@ -656,8 +870,10 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''return {
-  as: "div"
+          '''const content = c.contactSettings?.content;
+return {
+  as: "div",
+  hide: () => !content?.mapUrl
 };'''
       }
     }
@@ -668,14 +884,16 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''return {
+          '''const content = c.contactSettings?.content;
+return {
   as: "iframe",
-  src: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3705.2985671406!2d71.91442!3d21.76885!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2sAtma+Siddhi+Kaivalya+Kendra!5e0!3m2!1sen!2sin!4v1234567890",
+  src: content?.mapUrl || "",
   width: "100%",
   height: "100%",
   frameborder: "0",
   allowfullscreen: true,
-  loading: "lazy"
+  loading: "lazy",
+  hide: () => !content?.mapUrl
 };'''
       }
     }
@@ -898,6 +1116,30 @@ return {
       T: Attr
       S: "34"
       E: "35"
+    }
+    {
+      id: e36
+      T: Attr
+      S: "30"
+      E: "30a"
+    }
+    {
+      id: e37
+      T: Attr
+      S: "30"
+      E: "30b"
+    }
+    {
+      id: e38
+      T: Attr
+      S: "30b"
+      E: "30c"
+    }
+    {
+      id: e39
+      T: Attr
+      S: "30b"
+      E: "30d"
     }
   ]
 }

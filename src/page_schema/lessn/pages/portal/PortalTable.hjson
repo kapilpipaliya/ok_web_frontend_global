@@ -22,7 +22,8 @@ const TABLE_KEY_BY_LABEL = {
   Page: "pages",
   Component: "components",
   Function: "functions",
-  EmailTemplate: "email_templates"
+  EmailTemplate: "email_templates",
+  ContactSubmission: "contacts"
 };
 
 const TABLE_TITLE_BY_LABEL = {
@@ -31,7 +32,8 @@ const TABLE_TITLE_BY_LABEL = {
   Page: "Pages",
   Component: "Components",
   Function: "Functions",
-  EmailTemplate: "Email templates"
+  EmailTemplate: "Email templates",
+  ContactSubmission: "Contacts"
 };
 
 const PAGE_DESIGNER_ENTITIES = new Set(["Page", "Component", "Function", "EmailTemplate"]);

@@ -1,0 +1,102 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Saves a public contact form submission as a ContactSubmission vertex.
+        body:
+          '''
+const name = String(c?.name || "").trim();
+const email = String(c?.email || "").trim();
+const phone = String(c?.phone || "").trim();
+const subject = String(c?.subject || "").trim();
+const message = String(c?.message || "").trim();
+
+if (!name || !email || !message) {
+  return {
+    success: false,
+    error: "Name, email, and message are required"
+  };
+}
+
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+if (!emailRegex.test(email)) {
+  return {
+    success: false,
+    error: "Invalid email format"
+  };
+}
+
+if (message.length < 10) {
+  return {
+    success: false,
+    error: "Message must be at least 10 characters long"
+  };
+}
+
+if (message.length > 5000) {
+  return {
+    success: false,
+    error: "Message is too long (max 5000 characters)"
+  };
+}
+
+if (subject.length > 500) {
+  return {
+    success: false,
+    error: "Subject is too long (max 500 characters)"
+  };
+}
+
+try {
+  const query = `
+    CREATE (c:ContactSubmission {
+      name: $name,
+      email: $email,
+      phone: $phone,
+      subject: $subject,
+      message: $message,
+      submittedAt: $submittedAt,
+      status: $status,
+      ipAddress: $ipAddress
+    })
+    RETURN c
+  `;
+
+  const result = await _.session.run(query, {
+    name,
+    email: email.toLowerCase(),
+    phone,
+    subject,
+    message,
+    submittedAt: new Date().toISOString(),
+    status: "new",
+    ipAddress: c.ipAddress || "unknown"
+  });
+
+  const node = result.records[0].get("c");
+  const contactSubmission = _.convertNodeToJson(node);
+
+  return {
+    success: true,
+    data: {
+      id: contactSubmission.id,
+      submission: contactSubmission,
+      message: "Your message has been sent successfully!"
+    }
+  };
+} catch (error) {
+  console.error("Error saving contact form:", error);
+  return {
+    success: false,
+    error: "Failed to save your message. Please try again."
+  };
+}
+'''
+        key: submitContactForm
+      }
+    }
+  ]
+  edges: []
+}
