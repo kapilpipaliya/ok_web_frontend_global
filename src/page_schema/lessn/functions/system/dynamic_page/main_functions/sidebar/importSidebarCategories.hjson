@@ -187,19 +187,51 @@ if (parentId) {
 }
 
 const created = [];
+const skipped = [];
 const depthParentIds = [];
 const siblingOrderByParent = new Map();
+let skipBelowDepth = null;
+
+const isUniqueConstraintError = (err) => {
+  const code = String(err?.code || "");
+  const msg = String(err?.message || "");
+  return (
+    code.includes("ConstraintValidationFailed") ||
+    /already exists|unique constraint/i.test(msg)
+  );
+};
+
+const skipItemAndLevel = (item, reason) => {
+  skipped.push({
+    name: item.name,
+    depth: item.depth,
+    line: item.line,
+    reason
+  });
+  skipBelowDepth = item.depth;
+  depthParentIds.length = item.depth;
+};
 
 const parentKeyForOrder = (id) => (id == null ? "__root__" : String(id));
 
 for (const item of parsed) {
+  if (skipBelowDepth !== null) {
+    if (item.depth > skipBelowDepth) {
+      skipped.push({
+        name: item.name,
+        depth: item.depth,
+        line: item.line,
+        reason: "parent_skipped"
+      });
+      continue;
+    }
+    skipBelowDepth = null;
+  }
+
   const nameLower = item.name.toLowerCase();
   if (existingNamesLower.has(nameLower)) {
-    return {
-      success: false,
-      message: `Line ${item.line}: a ${itemLabel} named "${item.name}" already exists`,
-      data: { createdCount: created.length, created }
-    };
+    skipItemAndLevel(item, "name_exists");
+    continue;
   }
   existingNamesLower.add(nameLower);
 
@@ -209,11 +241,8 @@ for (const item of parsed) {
   } else {
     resolvedParentId = depthParentIds[item.depth - 1] || null;
     if (!resolvedParentId) {
-      return {
-        success: false,
-        message: `Line ${item.line}: missing parent for nested ${itemLabel}`,
-        data: { createdCount: created.length, created }
-      };
+      skipItemAndLevel(item, "missing_parent");
+      continue;
     }
   }
 
@@ -276,13 +305,20 @@ for (const item of parsed) {
     };
   }
 
-  const createResult = await _.session.run(createQuery, createParams);
-  if (createResult.records.length === 0) {
-    return {
-      success: false,
-      message: `Line ${item.line}: failed to create ${itemLabel} "${item.name}"`,
-      data: { createdCount: created.length, created }
-    };
+  let createResult;
+  try {
+    createResult = await _.session.run(createQuery, createParams);
+  } catch (err) {
+    if (isUniqueConstraintError(err)) {
+      skipItemAndLevel(item, "unique_key");
+      continue;
+    }
+    throw err;
+  }
+
+  if (!createResult || createResult.records.length === 0) {
+    skipItemAndLevel(item, "create_failed");
+    continue;
   }
 
   _.processResult(createResult.records, _.context, "v");
@@ -296,22 +332,26 @@ for (const item of parsed) {
   }
 
   if (resolvedParentId) {
+    let edgeResult;
     if (!enableUserScoping) {
-      await _.session.run(
+      edgeResult = await _.session.run(
         `MATCH (v:${parentVertexLabel}), (p:${parentVertexLabel})
          WHERE elementId(v) = $vertexId AND elementId(p) = $parentId
-         CREATE (v)-[:${toParentEdgeType}]->(p)`,
+         CREATE (v)-[r:${toParentEdgeType}]->(p)
+         RETURN v, r, p`,
         { vertexId: vertexElementId, parentId: resolvedParentId }
       );
     } else {
-      await _.session.run(
+      edgeResult = await _.session.run(
         `MATCH (v:${parentVertexLabel}), (p:${parentVertexLabel})
          WHERE elementId(v) = $vertexId AND elementId(p) = $parentId
          MATCH (u:User {uuid: $userUuid})-[:${userRelationshipType}]->(p)
-         CREATE (v)-[:${toParentEdgeType}]->(p)`,
+         CREATE (v)-[r:${toParentEdgeType}]->(p)
+         RETURN v, r, p`,
         { vertexId: vertexElementId, parentId: resolvedParentId, userUuid }
       );
     }
+    _.processResult(edgeResult.records, _.context, ["v", "p"], "r");
   }
 
   const result = {
@@ -346,12 +386,15 @@ for (const item of parsed) {
   });
 }
 
+const skipNote = skipped.length > 0 ? `, skipped ${skipped.length}` : "";
 return {
   success: true,
-  message: `Imported ${created.length} ${itemLabel}`,
+  message: `Imported ${created.length} ${itemLabel}${skipNote}`,
   data: {
     createdCount: created.length,
-    created
+    skippedCount: skipped.length,
+    created,
+    skipped
   }
 };
 '''

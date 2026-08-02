@@ -316,6 +316,18 @@ const onItemClick = (item) => {
   if (typeof handler === "function") handler(item);
 };
 
+// Nested Menu ComponentFields mount depth-first. On the client that overflows
+// the call stack during hydration (SSR/Node is fine). Keep ComponentField
+// nesting; on client, delay each nested level's items by one microtask so
+// the stack can unwind between levels. SSR still renders immediately.
+const isServer = typeof window === "undefined";
+const [itemsReady, setItemsReady] = _.createSignal(
+  isServer || getDepth() === 0
+);
+if (!isServer && getDepth() > 0) {
+  queueMicrotask(() => setItemsReady(true));
+}
+
 return {
   props,
   getDepth,
@@ -330,6 +342,7 @@ return {
   isItemActive,
   getController,
   onItemClick,
+  isItemsReady: () => itemsReady(),
 };
 '''
         key: Menu
@@ -383,7 +396,9 @@ return {
         componentName: Html
         props:
           '''return {
-  data: f.getItems()
+  data: f.getItems(),
+  // Nested levels wait one microtask (see isItemsReady) before rendering items
+  hide: () => !f.isItemsReady()
 };'''
       }
     }
@@ -396,6 +411,7 @@ return {
 return `._id {
   position: relative;
   display: ${layout === "bar" ? "inline-flex" : "block"};
+  cursor: pointer;
 }`;'''
         displayOrder: 1
         componentName: Html
