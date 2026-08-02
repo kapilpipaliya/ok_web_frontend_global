@@ -116,10 +116,10 @@ return `._id {
   disabled: c.props?.disabled || false,
   title: c.props?.title || undefined,
   "aria-describedby": c.props?.["aria-describedby"] || undefined,
-  // readOnly: c.props?.readOnly || false, // not work on server
+  readonly: c.props?.readOnly || false, // not work on server
   maxLength: c.props?.maxLength || undefined,
   minLength: c.props?.minLength || undefined,
-  autoFocus: c.props?.autoFocus || false,
+  autofocus: c.props?.autoFocus || false,
   onChange: c.props?.onChange || null,
   onBlur: c.props?.onBlur || null,
   onFocus: c.props?.onFocus || null,

@@ -70,14 +70,14 @@ return `._id {
   placeholder: c.props?.placeholder || "",
   required: c.props?.required || false,
   disabled: c.props?.disabled || false,
-  readOnly: c.props?.readOnly || false,
+  readonly: c.props?.readOnly || false, // not work on server — use lowercase readonly only.
   title: c.props?.title || undefined,
   "aria-describedby": c.props?.["aria-describedby"] || undefined,
   rows: c.props?.rows || 4,
   cols: c.props?.cols || undefined,
   maxLength: c.props?.maxLength || undefined,
   minLength: c.props?.minLength || undefined,
-  autoFocus: c.props?.autoFocus || false,
+  autofocus: c.props?.autoFocus || false,
   onChange: c.props?.onChange || null,
   onBlur: c.props?.onBlur || null,
   onFocus: c.props?.onFocus || null
