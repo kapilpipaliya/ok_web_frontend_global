@@ -232,14 +232,30 @@ const createController = () => {
     if (event?.pointerType) lastPointerType = event.pointerType;
   };
 
-  const onParentClick = (event, depth, id) => {
+  const onParentClick = (event, depth, id, options = {}) => {
+    const allowNavigate = options.allowNavigate === true;
+
+    // Parent with href: mouse click navigates; touch opens submenu first if closed
+    if (allowNavigate) {
+      if (!isMouseLikePointer(lastPointerType) && !isOpen(id)) {
+        event?.preventDefault?.();
+        event?.stopPropagation?.();
+        openAt(depth, id);
+        return false;
+      }
+      // Let the browser follow the link; close open panels
+      closeAll();
+      return true;
+    }
+
     event?.preventDefault?.();
     event?.stopPropagation?.();
     if (isMouseLikePointer(lastPointerType)) {
       if (!isOpen(id)) openAt(depth, id);
-      return;
+      return false;
     }
     toggleAt(depth, id);
+    return false;
   };
 
   const onOutsidePointerDown = (event) => {
@@ -506,8 +522,31 @@ const ctrl = f.getController();
 const caret =
   hasChildren ? (layout === "bar" ? " ▾" : " ▸") : "";
 const label = `${item.text || ""}${caret}`;
+const href = item.href;
+const hasHref = href && href !== "#";
 
 if (hasChildren) {
+  // Parent with a real href: render as link so click navigates (hover still opens submenu)
+  if (hasHref) {
+    return {
+      as: "a",
+      href,
+      text: label,
+      ref: ctrl.setTriggerRef(id),
+      "attr:aria-expanded": () => ctrl.isOpen(id),
+      "attr:aria-haspopup": "true",
+      "attr:role": layout === "panel" ? "menuitem" : undefined,
+      onPointerDown: (e) => ctrl.onParentPointerDown(e),
+      onPointerEnter: (e) => ctrl.onParentPointerEnter(e, depth, id),
+      onClick: (e) => {
+        const navigated = ctrl.onParentClick(e, depth, id, {
+          allowNavigate: true
+        });
+        if (navigated) f.onItemClick(item);
+      }
+    };
+  }
+
   return {
     as: "button",
     type: "button",
@@ -522,8 +561,7 @@ if (hasChildren) {
   };
 }
 
-const href = item.href;
-if (href && href !== "#") {
+if (hasHref) {
   return {
     as: "a",
     href,

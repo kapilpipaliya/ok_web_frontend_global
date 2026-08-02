@@ -1,0 +1,167 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Public ProductCategory tree for nav menus. Same sidebar labels as products table (ProductCategory / ParentProductCategory).
+        body:
+          '''
+const {
+  tableKey = "products",
+  tableVertexLabel = "Product"
+} = c || {};
+
+const resolvedTableKey =
+  tableKey && String(tableKey).trim() !== "" ? String(tableKey).trim() : "products";
+const resolvedTableVertexLabel =
+  tableVertexLabel && String(tableVertexLabel).trim() !== ""
+    ? String(tableVertexLabel).trim()
+    : "Product";
+
+const DEFAULT_PARENT_VERTEX_LABEL = "ProductCategory";
+const DEFAULT_TO_PARENT_EDGE_TYPE = "ParentProductCategory";
+
+const configResult = await s({
+  functionName: "loadTableConfigByKey",
+  contextData: { tableKey: resolvedTableKey }
+});
+
+let parentVertexLabel = DEFAULT_PARENT_VERTEX_LABEL;
+let toParentEdgeType = DEFAULT_TO_PARENT_EDGE_TYPE;
+let publicReadOk = true;
+
+if (configResult?.result?.success) {
+  const schemaGraph = configResult.graph || configResult?.result?.graph || { vertexes: {} };
+  const partVertexIds = configResult.result.data?.partVertexIds || {};
+
+  const evalConfigBody = (cfgStr) => {
+    if (cfgStr == null || String(cfgStr).trim() === "") return null;
+    try {
+      const configFn = new Function(String(cfgStr));
+      const value = configFn();
+      return value && typeof value === "object" ? value : null;
+    } catch (e) {
+      console.warn("getProductCategories: config eval failed", e);
+      return null;
+    }
+  };
+
+  const stripPartMeta = (value) => {
+    if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+    const { part: _part, ...rest } = value;
+    return rest;
+  };
+
+  const evalPartFromGraph = (graph, partIds, part) => {
+    const vertexId = partIds?.[part];
+    const vertex = graph?.vertexes?.[vertexId];
+    if (!vertex?.P?.config) return null;
+    return evalConfigBody(vertex.P.config);
+  };
+
+  const generalRaw = evalPartFromGraph(schemaGraph, partVertexIds, "general");
+  const general = generalRaw ? stripPartMeta(generalRaw) : {};
+  if (general.publicRead !== true) {
+    publicReadOk = false;
+  }
+
+  const sidebarRaw = evalPartFromGraph(schemaGraph, partVertexIds, "sidebar");
+  const sidebar = sidebarRaw ? stripPartMeta(sidebarRaw) : {};
+  if (sidebar.parentVertexLabel) {
+    parentVertexLabel = String(sidebar.parentVertexLabel).trim() || parentVertexLabel;
+  }
+  if (sidebar.toParentEdgeType) {
+    toParentEdgeType = String(sidebar.toParentEdgeType).trim() || toParentEdgeType;
+  }
+}
+
+if (!publicReadOk) {
+  return { success: false, message: "Products table is not publicly readable" };
+}
+
+if (!_.context.nodes) _.context.nodes = {};
+if (!_.context.relationships) _.context.relationships = {};
+
+const allVerticesResult = await _.session.run(
+  `
+  MATCH (v:${parentVertexLabel})
+  RETURN v
+  ORDER BY COALESCE(v.displayOrder, 0), COALESCE(v.name, v.key, '') ASC
+  `
+);
+_.processResult(allVerticesResult.records, _.context, "v");
+
+const allEdgesResult = await _.session.run(
+  `
+  MATCH (child:${parentVertexLabel})-[r:${toParentEdgeType}]->(parent:${parentVertexLabel})
+  RETURN child, parent, r
+  ORDER BY COALESCE(child.displayOrder, 0), COALESCE(child.name, child.key, '') ASC
+  `
+);
+_.processResult(allEdgesResult.records, _.context, ["child", "parent"], "r");
+
+const nodes = _.context.nodes || {};
+const sortCategories = (a, b) => {
+  const orderA = a?.P?.displayOrder ?? 0;
+  const orderB = b?.P?.displayOrder ?? 0;
+  if (orderA !== orderB) return orderA - orderB;
+  const nameA = a?.P?.name || a?.P?.key || "";
+  const nameB = b?.P?.name || b?.P?.key || "";
+  return String(nameA).localeCompare(String(nameB));
+};
+
+const buildTreeNode = (vertex) => {
+  if (!vertex?.id) return null;
+  const childEdgeIds = vertex?.IN?.[toParentEdgeType] || [];
+  const children = [];
+  const seen = new Set();
+  for (const edgeId of childEdgeIds) {
+    const edge = _.context.relationships?.[edgeId];
+    const childId = edge?.S;
+    if (!childId || seen.has(childId)) continue;
+    const childVertex = nodes[childId];
+    if (!childVertex) continue;
+    seen.add(childId);
+    children.push(childVertex);
+  }
+  children.sort(sortCategories);
+  return {
+    id: vertex.id,
+    key: vertex.P?.key != null ? String(vertex.P.key) : "",
+    name: vertex.P?.name || vertex.P?.key || "Category",
+    displayOrder: vertex.P?.displayOrder ?? 0,
+    children: children.map((child) => buildTreeNode(child)).filter(Boolean)
+  };
+};
+
+const roots = Object.keys(nodes)
+  .map((id) => nodes[id])
+  .filter((node) => {
+    const labels = Array.isArray(node?.L) ? node.L : [];
+    if (!labels.includes(parentVertexLabel)) return false;
+    const outEdges = node?.OUT?.[toParentEdgeType];
+    return !outEdges || outEdges.length === 0;
+  })
+  .sort(sortCategories);
+
+const categories = roots.map((root) => buildTreeNode(root)).filter(Boolean);
+
+return {
+  success: true,
+  data: {
+    tableKey: resolvedTableKey,
+    tableVertexLabel: resolvedTableVertexLabel,
+    parentVertexLabel,
+    toParentEdgeType,
+    categories
+  },
+  message: `Loaded ${categories.length} root categor${categories.length === 1 ? "y" : "ies"}`
+};
+'''
+        key: getProductCategories
+      }
+    }
+  ]
+  edges: []
+}

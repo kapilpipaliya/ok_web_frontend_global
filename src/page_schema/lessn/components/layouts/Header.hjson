@@ -19,7 +19,7 @@ return {
       id: "2"
       L: Attr
       P: {
-        contextName: socialLinks
+        contextName: productNav
         as: div
         css:
           '''return `._id {
@@ -32,8 +32,33 @@ return {
   align-items: center;
 }`;'''
         displayOrder: 1
-        fns: ""
         componentName: Html
+        serverFunction:
+          '''
+try {
+  const result = await s({
+    functionName: "getProductCategories",
+    contextData: {
+      tableKey: "products",
+      tableVertexLabel: "Product"
+    }
+  });
+  if (!result?.result?.success) {
+    console.warn(
+      "getProductCategories failed:",
+      result?.result?.message || result?.error
+    );
+    return { categories: [] };
+  }
+  const categories = result.result.data?.categories;
+  return {
+    categories: Array.isArray(categories) ? categories : []
+  };
+} catch (error) {
+  console.error("Error loading product categories for nav:", error);
+  return { categories: [] };
+}
+'''
         props:
           '''return {
   class: c.props.class
@@ -221,9 +246,36 @@ const localizeItem = (item) => ({
       : undefined,
 });
 
+const categoryToMenuItem = (category) => {
+  if (!category) return null;
+  const key =
+    category.key != null && String(category.key).trim() !== ""
+      ? String(category.key).trim()
+      : "";
+  const childNodes = Array.isArray(category.children)
+    ? category.children.map((child) => categoryToMenuItem(child)).filter(Boolean)
+    : [];
+  return {
+    id: category.id || key || category.name,
+    text: category.name || key || "Category",
+    href: key ? `/products/${encodeURIComponent(key)}` : "/products",
+    children: childNodes.length > 0 ? childNodes : undefined
+  };
+};
+
+const productCategoryChildren = (c.productNav?.categories || [])
+  .map((category) => categoryToMenuItem(category))
+  .filter(Boolean);
+
 const items = [
   { id: "home", text: "Home", href: "/" },
-  { id: "products", text: "Products", href: "/products" },
+  {
+    id: "products",
+    text: "Products",
+    href: "/products",
+    children:
+      productCategoryChildren.length > 0 ? productCategoryChildren : undefined
+  },
   { id: "contact", text: "Contact", href: "/contact" }
 ];
 
