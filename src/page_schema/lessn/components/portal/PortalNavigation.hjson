@@ -215,6 +215,13 @@ const portalNavSectionsData = [
           if (String(_.location?.pathname || "") !== "/portal/table") return false;
           return String(_.searchParams?.table || "").trim() === "File";
         }
+      },
+      {
+        id: "branding",
+        href: "/portal/branding",
+        label: "Branding",
+        icon: "ph:paint-brush-broad",
+        pathCheck: () => String(_.location?.pathname || "") === "/portal/branding"
       }
     ]
   }
