@@ -4,6 +4,15 @@
       id: "1"
       L: Component
       P: {
+        fns:
+          '''
+const getProps = () => c.props || {};
+
+return {
+  getProps,
+  handleClose: () => getProps().onCancel?.()
+};
+'''
         key: ConfirmDialog
       }
     }
@@ -11,46 +20,17 @@
       id: "2"
       L: Attr
       P: {
-        css:
-          '''return `._id {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: ${t.var.spacing.md};
-  animation: fadeIn 150ms ease-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@media (max-width: 768px) {
-  ._id {
-    padding: ${t.var.spacing.sm};
-    align-items: flex-end;
-  }
-}`;'''
         displayOrder: 1
-        componentName: Html
+        componentName: ContentModal
         props:
-          '''const isOpen = c.props?.isOpen || false;
-const onCancel = c.props?.onCancel;
-
+          '''const p = f.getProps();
 return {
-  as: "div",
-  hide: !isOpen,
-  onClick: (e) => {
-    if (e.target === e.currentTarget && onCancel) onCancel();
-  }
+  isOpen: p.isOpen === true,
+  title: p.title || "Confirm Action",
+  maxWidth: "400px",
+  showTitle: false,
+  zIndex: 9999,
+  onClose: f.handleClose
 };'''
       }
     }
@@ -58,58 +38,16 @@ return {
       id: "3"
       L: Attr
       P: {
+        slotName: children
         css:
           '''return `._id {
-  background: ${t.var.color.background};
-  border: 1px solid ${t.var.color.border};
-  border-radius: ${t.var.borderRadius.lg};
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  max-width: 400px;
-  width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
-  animation: slideIn 300ms ease-out;
-}
-
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95) translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-@media (max-width: 768px) {
-  ._id {
-    margin-bottom: 0;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-    animation: slideUp 300ms ease-out;
-  }
-
-  @keyframes slideUp {
-    from {
-      opacity: 0;
-      transform: translateY(100%);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }`;'''
         displayOrder: 1
         componentName: Html
-        props:
-          '''return {
-  as: "div",
-  onClick: (e) => {
-    e.stopPropagation();
-  }
-};'''
+        props: return { as: "div" };
       }
     }
     {
@@ -134,7 +72,8 @@ return {
       L: Attr
       P: {
         css:
-          '''const variant = c.props?.variant || "danger";
+          '''const p = f.getProps();
+const variant = p.variant || "danger";
 
 const iconConfig = {
   danger: t.var.color.error,
@@ -152,7 +91,8 @@ return `._id {
         displayOrder: 1
         componentName: Html
         props:
-          '''const variant = c.props?.variant || "danger";
+          '''const p = f.getProps();
+const variant = p.variant || "danger";
 
 const iconConfig = {
   danger: {
@@ -194,11 +134,10 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const title = c.props?.title || "Confirm Action";
-
+          '''const p = f.getProps();
 return {
   as: "h2",
-  text: title
+  text: p.title || "Confirm Action"
 };'''
       }
     }
@@ -234,11 +173,10 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const message = c.props?.message || "Are you sure you want to proceed?";
-
+          '''const p = f.getProps();
 return {
   as: "p",
-  text: message
+  text: p.message || "Are you sure you want to proceed?"
 };'''
       }
     }
@@ -273,21 +211,20 @@ return {
       L: Attr
       P: {
         displayOrder: 1
-        componentName: Html
+        componentName: Button
         props:
-          '''const cancelText = c.props?.cancelText || "Cancel";
-const onCancel = c.props?.onCancel;
-const loading = c.props?.loading || false;
+          '''const p = f.getProps();
+const cancelText = p.cancelText || "Cancel";
+const onCancel = p.onCancel;
+const loading = p.loading || false;
 
 return {
-  as: "s-button",
-  "attr:variant": "secondary",
   text: cancelText,
+  variant: "secondary",
   disabled: loading,
   onClick: () => {
     if (onCancel && !loading) onCancel();
-  },
-  hide: c.props?.getUsePolarisUI !== true
+  }
 };'''
       }
     }
@@ -295,175 +232,25 @@ return {
       id: "11"
       L: Attr
       P: {
-        css:
-          '''return `._id {
-  min-height: 48px;
-  padding: ${t.var.spacing.sm} ${t.var.spacing.lg};
-  font-size: 1rem;
-  font-weight: 500;
-  border: 1px solid ${t.var.color.border};
-  border-radius: ${t.var.borderRadius.md};
-  background: ${t.var.color.background};
-  color: ${t.var.color.text};
-  cursor: pointer;
-  transition: all 150ms ease;
-  flex: 1;
-
-  &:hover:not(:disabled) {
-    background: ${t.var.color.background_dark_100};
-    border-color: ${t.var.color.border_dark_200};
-  }
-
-  &:focus {
-    outline: none;
-    border-color: ${t.var.color.primary};
-    box-shadow: 0 0 0 3px ${t.var.color.primary_light_200};
-  }
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-}
-
-@media (max-width: 768px) {
-  ._id {
-    padding: ${t.var.spacing.md};
-    font-size: 1rem;
-  }
-}`;'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''const cancelText = c.props?.cancelText || "Cancel";
-const onCancel = c.props?.onCancel;
-const loading = c.props?.loading || false;
-const usePolaris = c.props?.getUsePolarisUI === true;
-
-return {
-  as: "button",
-  type: "button",
-  text: cancelText,
-  disabled: loading,
-  onClick: () => {
-    if (onCancel && !loading) onCancel();
-  },
-  hide: usePolaris
-};'''
-      }
-    }
-    {
-      id: "12"
-      L: Attr
-      P: {
         displayOrder: 2
-        componentName: Html
+        componentName: Button
         props:
-          '''const confirmText = c.props?.confirmText || "Confirm";
-const onConfirm = c.props?.onConfirm;
-const loading = c.props?.loading || false;
-const variant = c.props?.variant || "danger";
-
-const polarisVariant = variant === "danger" ? "primary" : variant === "warning" ? "primary" : "primary";
-const polarisTone = variant === "danger" ? "critical" : undefined;
+          '''const p = f.getProps();
+const confirmText = p.confirmText || "Confirm";
+const onConfirm = p.onConfirm;
+const loading = p.loading || false;
+const variant = p.variant || "danger";
+const buttonVariant =
+  variant === "primary" ? "primary" : variant === "warning" ? "primary" : "danger";
 
 return {
-  as: "s-button",
-  "attr:variant": polarisVariant,
-  "attr:tone": polarisTone,
   text: loading ? "Please wait..." : confirmText,
+  variant: buttonVariant,
+  loading: loading,
   disabled: loading,
   onClick: async () => {
     if (onConfirm && !loading) await onConfirm();
-  },
-  hide: c.props?.getUsePolarisUI !== true
-};'''
-      }
-    }
-    {
-      id: "13"
-      L: Attr
-      P: {
-        css:
-          '''const variant = c.props?.variant || "danger";
-
-const variantStyles = {
-  danger: {
-    background: t.var.color.error,
-    backgroundHover: t.var.color.error_dark_200,
-    text: t.var.color.error_text,
-    focus: t.var.color.error_light_200
-  },
-  warning: {
-    background: t.var.color.warning,
-    backgroundHover: t.var.color.warning_dark_200,
-    text: t.var.color.warning_text,
-    focus: t.var.color.warning_light_200
-  },
-  primary: {
-    background: t.var.color.primary,
-    backgroundHover: t.var.color.primary_dark_200,
-    text: t.var.color.primary_text,
-    focus: t.var.color.primary_light_200
   }
-};
-
-const style = variantStyles[variant] || variantStyles.danger;
-
-return `._id {
-  min-height: 48px;
-  padding: ${t.var.spacing.sm} ${t.var.spacing.lg};
-  font-size: 1rem;
-  font-weight: 500;
-  border: 1px solid transparent;
-  border-radius: ${t.var.borderRadius.md};
-  background: ${style.background};
-  color: ${style.text};
-  cursor: pointer;
-  transition: all 150ms ease;
-  flex: 1;
-
-  &:hover:not(:disabled) {
-    background: ${style.backgroundHover};
-    transform: translateY(-1px);
-  }
-
-  &:focus {
-    outline: none;
-    box-shadow: 0 0 0 3px ${style.focus};
-  }
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
-  }
-}
-
-@media (max-width: 768px) {
-  ._id {
-    padding: ${t.var.spacing.md};
-    font-size: 1rem;
-  }
-}`;'''
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''const confirmText = c.props?.confirmText || "Confirm";
-const onConfirm = c.props?.onConfirm;
-const loading = c.props?.loading || false;
-const usePolaris = c.props?.getUsePolarisUI === true;
-const variant = c.props?.variant || "danger";
-
-return {
-  as: "button",
-  type: "button",
-  text: loading ? "Please wait..." : confirmText,
-  disabled: loading,
-  onClick: async () => {
-    if (onConfirm && !loading) await onConfirm();
-  },
-  hide: usePolaris
 };'''
       }
     }
@@ -688,18 +475,6 @@ return {
       T: Attr
       S: "9"
       E: "11"
-    }
-    {
-      id: e20
-      T: Attr
-      S: "9"
-      E: "12"
-    }
-    {
-      id: e21
-      T: Attr
-      S: "9"
-      E: "13"
     }
     {
       id: e22

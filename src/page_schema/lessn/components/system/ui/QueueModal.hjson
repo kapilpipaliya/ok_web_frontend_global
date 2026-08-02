@@ -4,83 +4,18 @@
       id: "1"
       L: Component
       P: {
-        key: QueueModal
-        updatedAt: 2026-07-17T11:49:41.801Z
-      }
-    }
-    {
-      id: "2"
-      L: Attr
-      P: {
-        css:
-          '''return `._id {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-  animation: fadeIn 0.2s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}`;'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''const getIsOpen = c.props?.isOpen;
-const isOpen = getIsOpen?.() || false;
-const onClose = c.props?.onClose;
-
-return {
-  as: "div",
-  hide: !isOpen,
-  onClick: (e) => {
-    if (e.target === e.currentTarget) {
-      onClose?.();
-    }
-  }
-};'''
-      }
-    }
-    {
-      id: "3"
-      L: Attr
-      P: {
-        css:
-          '''return `._id {
-  background: ${t.var.color.background};
-  border-radius: 0.75rem;
-  width: 100%;
-  max-width: 600px;
-  max-height: 80vh;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  animation: slideUp 0.3s ease;
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}`;'''
-        displayOrder: 1
         fns:
-          '''const [searchTerm, setSearchTerm] = _.createSignal("");
+          '''
+const getProps = () => c.props || {};
+
+const getModalTitle = () => {
+  const queue = getProps().videoQueue?.() || [];
+  return `Video Queue (${queue.length})`;
+};
+
+const handleClose = () => getProps().onClose?.();
+
+const [searchTerm, setSearchTerm] = _.createSignal("");
 const [selectedVideos, setSelectedVideos] = _.createSignal(new Set());
 const [showPlaylistSelector, setShowPlaylistSelector] = _.createSignal(false);
 const [customPlaylists, setCustomPlaylists] = _.createSignal([]);
@@ -103,7 +38,7 @@ const toggleVideoSelection = (videoId) => {
 };
 
 const selectAll = () => {
-  const queue = c.props?.videoQueue?.() || [];
+  const queue = getProps()?.videoQueue?.() || [];
   const allIds = queue.map(v => v?.P?.youtubeId).filter(Boolean);
   setSelectedVideos(new Set(allIds));
 };
@@ -113,11 +48,11 @@ const clearSelection = () => {
 };
 
 // Get executeYTOFunction from context
-const executeYTOFunction = c.props?.executeYTOFunction;
+const executeYTOFunction = getProps()?.executeYTOFunction;
 
 // Load custom playlists
 const loadCustomPlaylists = async () => {
-  const getOwnershipId = c.props?.getOwnershipId;
+  const getOwnershipId = getProps()?.getOwnershipId;
   const ownershipId = getOwnershipId?.();
 
   if (!ownershipId || !executeYTOFunction) return;
@@ -140,8 +75,8 @@ const loadCustomPlaylists = async () => {
 
 // Save queue to new playlist
 const saveToNewPlaylist = async (playlistName) => {
-  const queue = c.props?.videoQueue?.() || [];
-  const getOwnershipId = c.props?.getOwnershipId;
+  const queue = getProps()?.videoQueue?.() || [];
+  const getOwnershipId = getProps()?.getOwnershipId;
   const ownershipId = getOwnershipId?.();
 
   if (!ownershipId || !executeYTOFunction) return;
@@ -191,8 +126,8 @@ const saveToNewPlaylist = async (playlistName) => {
 
 // Save queue to existing playlist
 const saveToExistingPlaylist = async (playlistId) => {
-  const queue = c.props?.videoQueue?.() || [];
-  const getOwnershipId = c.props?.getOwnershipId;
+  const queue = getProps()?.videoQueue?.() || [];
+  const getOwnershipId = getProps()?.getOwnershipId;
   const ownershipId = getOwnershipId?.();
 
   if (!ownershipId || !executeYTOFunction) return;
@@ -228,6 +163,9 @@ const saveToExistingPlaylist = async (playlistId) => {
 };
 
 return {
+  getProps,
+  getModalTitle,
+  handleClose,
   searchTerm,
   setSearchTerm,
   selectedVideos,
@@ -249,103 +187,47 @@ return {
   setSelectedPlaylistId,
   showCreateNew,
   setShowCreateNew
-};'''
-        componentName: Html
+};
+'''
+        key: QueueModal
+        updatedAt: 2026-07-17T11:49:41.801Z
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: ContentModal
         props:
-          '''return {
-  as: "div",
-  onClick: (e) => e.stopPropagation()
+          '''const getIsOpen = f.getProps()?.isOpen;
+const isOpen = getIsOpen?.() || false;
+return {
+  isOpen,
+  title: f.getModalTitle(),
+  maxWidth: "600px",
+  onClose: f.handleClose
 };'''
       }
     }
     {
-      id: "4"
+      id: "3"
       L: Attr
       P: {
+        slotName: children
         css:
           '''return `._id {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1.5rem;
-  border-bottom: 1px solid ${t.var.color.border};
+  flex-direction: column;
+  min-height: 0;
+  max-height: 80vh;
+  overflow: hidden;
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
           '''return {
   as: "div"
-};'''
-      }
-    }
-    {
-      id: "5"
-      L: Attr
-      P: {
-        css:
-          '''return `._id {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: ${t.var.color.text};
-  margin: 0;
-}`;'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''const queue = c.props?.videoQueue?.() || [];
-
-return {
-  as: "h2",
-  text: `Video Queue (${queue.length})`
-};'''
-      }
-    }
-    {
-      id: "6"
-      L: Attr
-      P: {
-        css:
-          '''return `._id {
-  background: none;
-  border: none;
-  color: ${t.var.color.text_light_500};
-  cursor: pointer;
-  padding: 0.5rem;
-  border-radius: 0.375rem;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  &:hover {
-    background: ${t.var.color.background_light_200};
-    color: ${t.var.color.text};
-  }
-}`;'''
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''const onClose = c.props?.onClose;
-
-return {
-  as: "button",
-  onClick: onClose,
-  "aria-label": "Close modal"
-};'''
-      }
-    }
-    {
-      id: "7"
-      L: Attr
-      P: {
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''return {
-  as: "icon",
-  icon: "carbon:close",
-  width: 24,
-  height: 24
 };'''
       }
     }
@@ -380,7 +262,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const queue = c.props?.videoQueue?.() || [];
+          '''const queue = f.getProps()?.videoQueue?.() || [];
 
 return {
   as: "div",
@@ -445,7 +327,7 @@ return {
         componentName: Html
         props:
           '''const selectedVideos = f.selectedVideos?.() || new Set();
-const queue = c.props?.videoQueue?.() || [];
+const queue = f.getProps()?.videoQueue?.() || [];
 
 return {
   as: "div",
@@ -467,7 +349,7 @@ return {
         componentName: Html
         props:
           '''const selectedVideos = f.selectedVideos?.() || new Set();
-const queue = c.props?.videoQueue?.() || [];
+const queue = f.getProps()?.videoQueue?.() || [];
 const allSelected = queue.length > 0 && selectedVideos.size === queue.length;
 const someSelected = selectedVideos.size > 0 && selectedVideos.size < queue.length;
 
@@ -536,10 +418,10 @@ return {
   as: "button",
   hide: selectedVideos.size === 0,
   onClick: async () => {
-    const queue = c.props?.videoQueue?.() || [];
-    const setVideoQueue = c.props?.setVideoQueue;
+    const queue = f.getProps()?.videoQueue?.() || [];
+    const setVideoQueue = f.getProps()?.setVideoQueue;
     const executeYTOFunction = f.executeYTOFunction;
-    const getOwnershipId = c.props?.getOwnershipId;
+    const getOwnershipId = f.getProps()?.getOwnershipId;
 
     if (!setVideoQueue || !executeYTOFunction || selectedVideos.size === 0) return;
 
@@ -619,8 +501,8 @@ return {
   as: "button",
   hide: selectedVideos.size === 0,
   onClick: async () => {
-    const queue = c.props?.videoQueue?.() || [];
-    const setVideoQueue = c.props?.setVideoQueue;
+    const queue = f.getProps()?.videoQueue?.() || [];
+    const setVideoQueue = f.getProps()?.setVideoQueue;
 
     if (!setVideoQueue || selectedVideos.size === 0) return;
 
@@ -685,7 +567,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const queue = c.props?.videoQueue?.() || [];
+          '''const queue = f.getProps()?.videoQueue?.() || [];
 
 return {
   as: "div",
@@ -744,7 +626,7 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const queue = c.props?.videoQueue?.() || [];
+          '''const queue = f.getProps()?.videoQueue?.() || [];
 
 return {
   as: "div",
@@ -761,7 +643,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const queue = c.props?.videoQueue?.() || [];
+          '''const queue = f.getProps()?.videoQueue?.() || [];
 const searchTerm = f.searchTerm?.() || "";
 
 // Filter queue based on search term
@@ -867,7 +749,7 @@ return {
         componentName: Html
         props:
           '''const video = c.loopItem;
-const queue = c.props?.videoQueue?.() || [];
+const queue = f.getProps()?.videoQueue?.() || [];
 const index = queue.indexOf(video);
 
 return {
@@ -952,8 +834,8 @@ return {
         componentName: Html
         props:
           '''const video = c.loopItem;
-const playVideo = c.props?.playVideo;
-const onClose = c.props?.onClose;
+const playVideo = f.getProps()?.playVideo;
+const onClose = f.getProps()?.onClose;
 
 return {
   as: "button",
@@ -989,7 +871,7 @@ return {
       P: {
         css:
           '''const video = c.loopItem;
-const queue = c.props?.videoQueue?.() || [];
+const queue = f.getProps()?.videoQueue?.() || [];
 const isFirst = queue.indexOf(video) === 0;
 
 return `._id {
@@ -1017,8 +899,8 @@ return `._id {
         componentName: Html
         props:
           '''const video = c.loopItem;
-const queue = c.props?.videoQueue?.() || [];
-const reorderQueue = c.props?.reorderQueue;
+const queue = f.getProps()?.videoQueue?.() || [];
+const reorderQueue = f.getProps()?.reorderQueue;
 const index = queue.indexOf(video);
 const isFirst = index === 0;
 
@@ -1056,7 +938,7 @@ return {
       P: {
         css:
           '''const video = c.loopItem;
-const queue = c.props?.videoQueue?.() || [];
+const queue = f.getProps()?.videoQueue?.() || [];
 const index = queue.indexOf(video);
 const isLast = index === queue.length - 1;
 
@@ -1085,8 +967,8 @@ return `._id {
         componentName: Html
         props:
           '''const video = c.loopItem;
-const queue = c.props?.videoQueue?.() || [];
-const reorderQueue = c.props?.reorderQueue;
+const queue = f.getProps()?.videoQueue?.() || [];
+const reorderQueue = f.getProps()?.reorderQueue;
 const index = queue.indexOf(video);
 const isLast = index === queue.length - 1;
 
@@ -1147,8 +1029,8 @@ return {
         componentName: Html
         props:
           '''const video = c.loopItem;
-const queue = c.props?.videoQueue?.() || [];
-const removeFromQueue = c.props?.removeFromQueue;
+const queue = f.getProps()?.videoQueue?.() || [];
+const removeFromQueue = f.getProps()?.removeFromQueue;
 const index = queue.indexOf(video);
 
 return {
@@ -1841,7 +1723,7 @@ return {
         displayOrder: 3
         componentName: Html
         props:
-          '''const queue = c.props?.videoQueue?.() || [];
+          '''const queue = f.getProps()?.videoQueue?.() || [];
 
 return {
   as: "div",
@@ -1861,7 +1743,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const queue = c.props?.videoQueue?.() || [];
+          '''const queue = f.getProps()?.videoQueue?.() || [];
 
 return {
   as: "div",
@@ -1909,7 +1791,7 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const queue = c.props?.videoQueue?.() || [];
+          '''const queue = f.getProps()?.videoQueue?.() || [];
 const savingToPlaylist = f.savingToPlaylist?.() || false;
 
 return {
@@ -1921,7 +1803,7 @@ return {
       return;
     }
 
-    const getOwnershipId = c.props?.getOwnershipId;
+    const getOwnershipId = f.getProps()?.getOwnershipId;
     const ownershipId = getOwnershipId?.();
 
     if (!ownershipId) {
@@ -1965,7 +1847,7 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const clearQueue = c.props?.clearQueue;
+          '''const clearQueue = f.getProps()?.clearQueue;
 
 return {
   as: "button",
@@ -1992,37 +1874,13 @@ return {
       id: e3
       T: Attr
       S: "3"
-      E: "4"
+      E: "8"
     }
     {
       id: e4
       T: Attr
       S: "3"
-      E: "8"
-    }
-    {
-      id: e5
-      T: Attr
-      S: "3"
       E: "61"
-    }
-    {
-      id: e6
-      T: Attr
-      S: "4"
-      E: "5"
-    }
-    {
-      id: e7
-      T: Attr
-      S: "4"
-      E: "6"
-    }
-    {
-      id: e8
-      T: Attr
-      S: "6"
-      E: "7"
     }
     {
       id: e9

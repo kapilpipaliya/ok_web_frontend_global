@@ -51,6 +51,7 @@ import { withNetworkRetry } from "~/lib/api/withNetworkRetry";
 import { getMemberVertex } from "~/lib/graph/get/sync/store/getMemberVertex";
 import { getGlobalSettingVertex } from "~/lib/graph/get/sync/store/getGlobalSettingVertex";
 import { debounce } from "@solid-primitives/scheduled";
+import { makeTimer } from "@solid-primitives/timer";
 import * as focusTrap from "focus-trap";
 import { atom } from "~/lib/solid/atom";
 import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
@@ -383,6 +384,7 @@ export function createFunctionArgumentBase(
     /** Virtua core virtual-scroll utilities (`createVirtualStore`, `createScroller`, etc.). */
     virtua,
     debounce,
+    makeTimer,
     focusTrap,
     get KeepAwake() {
       return KeepAwake;

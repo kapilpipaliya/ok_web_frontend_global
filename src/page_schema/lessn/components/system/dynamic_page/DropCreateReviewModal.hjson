@@ -162,7 +162,6 @@ return {
   isOpen: p.isOpen === true,
   title: p.title || "Review items",
   maxWidth: p.maxWidth || "1100px",
-  usePolarisUI: p.usePolarisUI === true,
   onClose: () => f.handleCancel?.()
 };'''
       }

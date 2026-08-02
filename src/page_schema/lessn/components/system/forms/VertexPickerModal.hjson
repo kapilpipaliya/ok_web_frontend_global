@@ -5,6 +5,15 @@
       L: Component
       P: {
         title: Vertex picker modal
+        fns:
+          '''
+const getProps = () => c.props || {};
+
+return {
+  getProps,
+  handleClose: () => getProps().onClose?.()
+};
+'''
         key: VertexPickerModal
         updatedAt: 2026-07-13T16:40:11.922Z
       }
@@ -14,10 +23,17 @@
       L: Attr
       P: {
         displayOrder: 1
-        componentName: Html
+        componentName: ContentModal
         props:
-          '''return {
-  as: "portal"
+          '''const p = f.getProps();
+const isOpenProp = p.isOpen;
+const modalIsOpen = typeof isOpenProp === "function" ? isOpenProp() : !!isOpenProp;
+return {
+  isOpen: modalIsOpen,
+  title: p.title != null ? String(p.title) : "Select",
+  maxWidth: "96vw",
+  zIndex: 101,
+  onClose: f.handleClose
 };'''
       }
     }
@@ -25,125 +41,18 @@
       id: "3"
       L: Attr
       P: {
+        slotName: children
         css:
           '''return `._id {
-  position: fixed;
-  inset: 0;
-  z-index: 101;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-  box-sizing: border-box;
-  background: rgba(0, 0, 0, 0.45);
-}`;'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''const isOpenProp = c.props?.isOpen;
-const modalIsOpen = typeof isOpenProp === "function" ? isOpenProp() : !!isOpenProp;
-const modalTitle = c.props?.title;
-return {
-  as: "div",
-  role: "dialog",
-  "attr:aria-modal": true,
-  "attr:aria-label": modalTitle != null ? String(modalTitle) : "",
-  hide: () => !modalIsOpen,
-  onClick: (event) => {
-    if (event.target === event.currentTarget) c.props?.onClose?.();
-  }
-};'''
-      }
-    }
-    {
-      id: "4"
-      L: Attr
-      P: {
-        css:
-          '''return `._id {
-  width: 96vw;
-  height: 92vh;
   display: flex;
   flex-direction: column;
-  background: ${t.var.color.background};
-  border-radius: 0.5rem;
-  border: 1px solid ${t.var.color.border};
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+  min-height: 0;
+  height: min(92vh, 900px);
   overflow: hidden;
 }`;'''
         displayOrder: 1
         componentName: Html
-        props: return { as: "div", onClick: (clickEvent) => clickEvent.stopPropagation() };
-      }
-    }
-    {
-      id: "5"
-      L: Attr
-      P: {
-        css:
-          '''return `._id {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding: 0.85rem 1rem;
-  border-bottom: 1px solid ${t.var.color.border};
-  background: ${t.var.color.background_light_100};
-}`;'''
-        displayOrder: 1
-        componentName: Html
         props: return { as: "div" };
-      }
-    }
-    {
-      id: "6"
-      L: Attr
-      P: {
-        css:
-          '''return `._id {
-  margin: 0;
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: ${t.var.color.text};
-}`;'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''return {
-  as: "h2",
-  text: c.props?.title != null ? String(c.props.title) : ""
-};'''
-      }
-    }
-    {
-      id: "7"
-      L: Attr
-      P: {
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''const usePolaris = c.props?.usePolarisUI === true;
-const closeButtonLabel = c.props?.closeButtonLabel;
-const closeLabel =
-  closeButtonLabel != null && String(closeButtonLabel).trim() !== ""
-    ? String(closeButtonLabel).trim()
-    : "";
-if (usePolaris) {
-  return {
-    as: "s-button",
-    "attr:variant": "tertiary",
-    "attr:icon": "x",
-    "attr:accessibilityLabel": closeLabel,
-    onClick: () => c.props?.onClose?.()
-  };
-}
-return {
-  as: "button",
-  type: "button",
-  text: closeLabel,
-  onClick: () => c.props?.onClose?.()
-};'''
       }
     }
     {
@@ -156,13 +65,15 @@ return {
   font-size: 0.85rem;
   color: ${t.var.color.text_dark_400};
   border-bottom: 1px solid ${t.var.color.border};
+  flex-shrink: 0;
 }`;'''
-        displayOrder: 2
+        displayOrder: 1
         componentName: Html
         props:
-          '''const draftProp = c.props?.draftVertex;
+          '''const p = f.getProps();
+const draftProp = p.draftVertex;
 const draftVertex = typeof draftProp === "function" ? draftProp() : draftProp;
-const draftVerticesProp = c.props?.draftVertices;
+const draftVerticesProp = p.draftVertices;
 const draftVertices =
   typeof draftVerticesProp === "function" ? draftVerticesProp() : draftVerticesProp;
 const selectedCount = Array.isArray(draftVertices)
@@ -178,8 +89,8 @@ const displayName =
       : selectedCount > 0
         ? `${selectedCount} selected`
         : "";
-const hintEmpty = c.props?.hintEmpty;
-const hintSelected = c.props?.hintSelected;
+const hintEmpty = p.hintEmpty;
+const hintSelected = p.hintSelected;
 let hintText = "";
 if (selectedCount > 0 && hintSelected != null && String(hintSelected).trim() !== "") {
   hintText = String(hintSelected)
@@ -206,7 +117,7 @@ return {
   display: flex;
   flex-direction: column;
 }`;'''
-        displayOrder: 3
+        displayOrder: 2
         componentName: Html
         props: return { as: "div" };
       }
@@ -226,7 +137,8 @@ return {
         displayOrder: 1
         componentName: DynamicPage
         props:
-          '''const pickerBodyProps = c.props?.pickerBodyProps;
+          '''const p = f.getProps();
+const pickerBodyProps = p.pickerBodyProps;
 return pickerBodyProps != null && typeof pickerBodyProps === "object" ? pickerBodyProps : {};'''
       }
     }
@@ -244,8 +156,9 @@ return pickerBodyProps != null && typeof pickerBodyProps === "object" ? pickerBo
   padding: 0.75rem 1rem;
   border-top: 1px solid ${t.var.color.border};
   background: ${t.var.color.background_light_100};
+  flex-shrink: 0;
 }`;'''
-        displayOrder: 4
+        displayOrder: 3
         componentName: Html
         props: return { as: "div" };
       }
@@ -257,8 +170,9 @@ return pickerBodyProps != null && typeof pickerBodyProps === "object" ? pickerBo
         displayOrder: 1
         componentName: Html
         props:
-          '''const usePolaris = c.props?.usePolarisUI === true;
-const cancelButtonLabel = c.props?.cancelButtonLabel;
+          '''const p = f.getProps();
+const usePolaris = p.usePolarisUI === true;
+const cancelButtonLabel = p.cancelButtonLabel;
 const cancelLabel =
   cancelButtonLabel != null && String(cancelButtonLabel).trim() !== ""
     ? String(cancelButtonLabel).trim()
@@ -268,14 +182,14 @@ if (usePolaris) {
     as: "s-button",
     "attr:variant": "secondary",
     text: cancelLabel,
-    onClick: () => c.props?.onClose?.()
+    onClick: () => p.onClose?.()
   };
 }
 return {
   as: "button",
   type: "button",
   text: cancelLabel,
-  onClick: () => c.props?.onClose?.()
+  onClick: () => p.onClose?.()
 };'''
       }
     }
@@ -286,11 +200,12 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const usePolaris = c.props?.usePolarisUI === true;
-const draftProp = c.props?.draftVertex;
+          '''const p = f.getProps();
+const usePolaris = p.usePolarisUI === true;
+const draftProp = p.draftVertex;
 const draftVertex = typeof draftProp === "function" ? draftProp() : draftProp;
 const hasSelection = !!(draftVertex && draftVertex.id);
-const confirmButtonLabel = c.props?.confirmButtonLabel;
+const confirmButtonLabel = p.confirmButtonLabel;
 const confirmLabel =
   confirmButtonLabel != null && String(confirmButtonLabel).trim() !== ""
     ? String(confirmButtonLabel).trim()
@@ -301,7 +216,7 @@ if (usePolaris) {
     "attr:variant": "primary",
     text: confirmLabel,
     disabled: !hasSelection,
-    onClick: () => c.props?.onConfirm?.()
+    onClick: () => p.onConfirm?.()
   };
 }
 return {
@@ -309,7 +224,7 @@ return {
   type: "button",
   text: confirmLabel,
   disabled: !hasSelection,
-  onClick: () => c.props?.onConfirm?.()
+  onClick: () => p.onConfirm?.()
 };'''
       }
     }
@@ -331,58 +246,34 @@ return {
       id: e3
       T: Attr
       S: "3"
-      E: "4"
+      E: "8"
     }
     {
       id: e4
       T: Attr
-      S: "4"
-      E: "5"
+      S: "3"
+      E: "9"
     }
     {
       id: e5
       T: Attr
-      S: "4"
-      E: "8"
-    }
-    {
-      id: e6
-      T: Attr
-      S: "4"
-      E: "9"
-    }
-    {
-      id: e7
-      T: Attr
-      S: "4"
+      S: "3"
       E: "11"
     }
     {
-      id: e8
-      T: Attr
-      S: "5"
-      E: "6"
-    }
-    {
-      id: e9
-      T: Attr
-      S: "5"
-      E: "7"
-    }
-    {
-      id: e10
+      id: e6
       T: Attr
       S: "9"
       E: "10"
     }
     {
-      id: e11
+      id: e7
       T: Attr
       S: "11"
       E: "12"
     }
     {
-      id: e12
+      id: e8
       T: Attr
       S: "11"
       E: "13"

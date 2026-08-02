@@ -25,6 +25,9 @@ const [selectedItem, setSelectedItem] = _.createSignal(null);
 const [sidebarLoading, setSidebarLoading] = _.createSignal(false);
 const [operationLoading, setOperationLoading] = _.createSignal(false);
 const [isAddRootModalOpen, setIsAddRootModalOpen] = _.createSignal(false);
+const [isImportModalOpen, setIsImportModalOpen] = _.createSignal(false);
+const [importText, setImportText] = _.createSignal("");
+const [importLoading, setImportLoading] = _.createSignal(false);
 // Single add/edit modal state: only one item modal open at a time (mode: 'add' | 'edit', and the item/parent)
 const [itemModalState, setItemModalState] = _.createSignal(null);
 const [searchQuery, setSearchQuery] = _.createSignal("");
@@ -379,6 +382,73 @@ const handleCloseAddRootModal = () => {
 const handleAddRootSave = async (savedVertex) => {
   await fetchRoot({ preserveExpanded: true });
   setIsAddRootModalOpen(false);
+};
+
+const handleOpenImportModal = () => {
+  setImportText("");
+  setIsImportModalOpen(true);
+};
+
+const handleCloseImportModal = () => {
+  if (importLoading()) return;
+  setIsImportModalOpen(false);
+  setImportText("");
+};
+
+const handleImportCategories = async () => {
+  const text = String(importText() || "");
+  if (!text.trim()) {
+    _.showErrorToast?.(`Paste at least one ${getSidebarLabel()} name to import`);
+    return;
+  }
+
+  const parentVertexLabel = getParentVertexLabel();
+  const toParentEdgeType = getToParentEdgeType();
+  if (!parentVertexLabel || !toParentEdgeType) {
+    _.showErrorToast?.("Sidebar configuration is incomplete");
+    return;
+  }
+
+  setImportLoading(true);
+  setOperationLoading(true);
+  try {
+    const result = await s({
+      functionName: "importSidebarCategories",
+      contextData: {
+        text,
+        parentId: null,
+        parentVertexLabel,
+        toParentEdgeType,
+        rootKeys: getRootKeys(),
+        enableUserScoping: c.props?.enableUserScoping === true,
+        hooks: c.props?.hooks,
+        label: getSidebarLabel()
+      }
+    });
+
+    const errorMessage = f.extractError?.(result, true, `Failed to import ${getSidebarLabel()}`);
+    if (errorMessage) {
+      if (result?.result?.data?.createdCount > 0) {
+        await fetchRoot({ preserveExpanded: true });
+        startSidebarQueuedPollIfNeeded();
+      }
+      return;
+    }
+
+    if (result?.result?.success) {
+      _.showSuccessToast?.(result.result.message || `Imported ${getSidebarLabel()}`);
+      setIsImportModalOpen(false);
+      setImportText("");
+      await fetchRoot({ preserveExpanded: true });
+      startSidebarQueuedPollIfNeeded();
+    }
+  } catch (error) {
+    console.error("Error importing categories:", error);
+    _.showErrorToast?.(`Failed to import ${getSidebarLabel()}`);
+  } finally {
+    setImportLoading(false);
+    setOperationLoading(false);
+  }
 };
 
 // --- Add/Edit item modal (single modal in parent, only one open at a time) ---
@@ -754,6 +824,13 @@ return {
   handleOpenAddRootModal,
   handleCloseAddRootModal,
   handleAddRootSave,
+  isImportModalOpen,
+  importText,
+  setImportText,
+  importLoading,
+  handleOpenImportModal,
+  handleCloseImportModal,
+  handleImportCategories,
   itemModalState,
   handleOpenAddChildModal,
   handleOpenEditModal,
@@ -928,6 +1005,8 @@ return `._id {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
   padding: 8px;
 }`;'''
         displayOrder: 2
@@ -958,6 +1037,24 @@ return `._id {
       }
     }
     {
+      id: "7b"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        key: sidebar_import_button_polaris
+        props:
+          '''return {
+  as: "s-button",
+  "attr:variant": "secondary",
+  "attr:icon": "import",
+  text: `Import ${f.getSidebarLabel()}`,
+  onClick: () => f.handleOpenImportModal(),
+  hide: f.getUsePolarisUI?.() !== true
+};'''
+      }
+    }
+    {
       id: "8"
       L: Attr
       P: {
@@ -972,6 +1069,26 @@ return `._id {
   leftIcon: "carbon:add",
   onClick: () => {
     f.handleOpenAddRootModal();
+  },
+  hide: f.getUsePolarisUI?.() === true
+};'''
+      }
+    }
+    {
+      id: "8b"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Button
+        key: sidebar_import_button
+        props:
+          '''return {
+  variant: "secondary",
+  size: "sm",
+  text: `Import ${f.getSidebarLabel()}`,
+  leftIcon: "carbon:document-import",
+  onClick: () => {
+    f.handleOpenImportModal();
   },
   hide: f.getUsePolarisUI?.() === true
 };'''
@@ -1238,6 +1355,165 @@ return {
 };'''
       }
     }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: ContentModal
+        key: sidebar_import_modal
+        props:
+          '''return {
+  isOpen: f.isImportModalOpen(),
+  title: `Import ${f.getSidebarLabel()}`,
+  maxWidth: "560px",
+  onClose: f.handleCloseImportModal
+};'''
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        slotName: children
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem 1.25rem;
+  min-height: 0;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        key: sidebar_import_modal_body
+        props:
+          '''return {
+  as: "div"
+};'''
+      }
+    }
+    {
+      id: "20"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0;
+  font-size: 0.875rem;
+  color: ${t.var.color.text_dark_400};
+  line-height: 1.45;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        key: sidebar_import_modal_hint
+        props:
+          '''return {
+  as: "p",
+  text: "One name per line. Indent with 2 spaces for nested categories."
+};'''
+      }
+    }
+    {
+      id: "21"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  width: 100%;
+  min-height: 220px;
+  padding: 0.75rem;
+  border: 1px solid ${t.var.color.border};
+  border-radius: 0.5rem;
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  resize: vertical;
+}
+._id:focus {
+  outline: none;
+  border-color: ${t.var.color.primary};
+}
+._id:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        key: sidebar_import_modal_textarea
+        props:
+          '''return {
+  as: "textarea",
+  rows: 12,
+  value: f.importText(),
+  disabled: f.importLoading(),
+  placeholder: `Electronics
+  Phones
+    Android
+    iOS
+  Laptops
+Clothing
+  Men
+  Women`,
+  onInput: (e) => f.setImportText(e.target.value)
+};'''
+      }
+    }
+    {
+      id: "22"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  padding-top: 0.25rem;
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        key: sidebar_import_modal_actions
+        props:
+          '''return {
+  as: "div"
+};'''
+      }
+    }
+    {
+      id: "23"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Button
+        key: sidebar_import_modal_cancel
+        props:
+          '''return {
+  text: "Cancel",
+  variant: "secondary",
+  disabled: f.importLoading(),
+  onClick: () => f.handleCloseImportModal()
+};'''
+      }
+    }
+    {
+      id: "24"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Button
+        key: sidebar_import_modal_submit
+        props:
+          '''return {
+  text: f.importLoading() ? "Importing..." : "Import",
+  variant: "primary",
+  disabled: f.importLoading() || !String(f.importText() || "").trim(),
+  onClick: () => f.handleImportCategories()
+};'''
+      }
+    }
   ]
   edges: [
     {
@@ -1257,6 +1533,12 @@ return {
       T: Attr
       S: "1"
       E: "17"
+    }
+    {
+      id: e3b
+      T: Attr
+      S: "1"
+      E: "18"
     }
     {
       id: e4
@@ -1313,10 +1595,22 @@ return {
       E: "7"
     }
     {
+      id: e12b
+      T: Attr
+      S: "6"
+      E: "7b"
+    }
+    {
       id: e13
       T: Attr
       S: "6"
       E: "8"
+    }
+    {
+      id: e13b
+      T: Attr
+      S: "6"
+      E: "8b"
     }
     {
       id: e14
@@ -1335,6 +1629,42 @@ return {
       T: Attr
       S: "14"
       E: "15"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "18"
+      E: "19"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "19"
+      E: "20"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "19"
+      E: "21"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "19"
+      E: "22"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "22"
+      E: "23"
+    }
+    {
+      id: e22
+      T: Attr
+      S: "22"
+      E: "24"
     }
   ]
 }

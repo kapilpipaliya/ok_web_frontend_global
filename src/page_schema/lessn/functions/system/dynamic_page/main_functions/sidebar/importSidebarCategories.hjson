@@ -1,0 +1,363 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: "Import nested sidebar categories from indented text. Each 2 leading spaces = one nesting level. Creates vertices with unique keys and parent relationships."
+        body:
+          '''
+const actualUser = await _.getUserFromSession();
+if (!actualUser) {
+  return {
+    success: false,
+    message: "User session not found. Please log in and try again.",
+    data: null
+  };
+}
+
+const user = await _.getEffectiveUser(_.session, actualUser, c);
+
+const {
+  text,
+  parentId = null,
+  parentVertexLabel,
+  toParentEdgeType,
+  rootKeys = {},
+  enableUserScoping,
+  hooks,
+  label: sidebarLabel
+} = c;
+
+const itemLabel = sidebarLabel && typeof sidebarLabel === "string" ? sidebarLabel : "category";
+
+if (!parentVertexLabel || !toParentEdgeType) {
+  return {
+    success: false,
+    message: "parentVertexLabel and toParentEdgeType are required",
+    data: null
+  };
+}
+
+const rawText = typeof text === "string" ? text : "";
+if (!rawText.trim()) {
+  return {
+    success: false,
+    message: `Paste at least one ${itemLabel} name to import`,
+    data: null
+  };
+}
+
+const userRelationshipType = `User${parentVertexLabel}`;
+const userUuid = enableUserScoping ? user.P.uuid : null;
+const rootKey = rootKeys?.key;
+
+const parseIndentedLines = (input) => {
+  const lines = String(input).split(/\r?\n/);
+  const items = [];
+  for (let i = 0; i < lines.length; i++) {
+    const raw = lines[i];
+    if (!raw || !raw.trim()) continue;
+    const match = raw.match(/^( *)(.*)$/);
+    const spaces = match ? match[1].length : 0;
+    if (spaces % 2 !== 0) {
+      throw new Error(`Line ${i + 1}: indent must use multiples of 2 spaces`);
+    }
+    const depth = spaces / 2;
+    const name = (match ? match[2] : raw).trim();
+    if (!name) continue;
+    items.push({ line: i + 1, depth, name });
+  }
+  return items;
+};
+
+let parsed;
+try {
+  parsed = parseIndentedLines(rawText);
+} catch (err) {
+  return {
+    success: false,
+    message: err?.message || "Invalid import text",
+    data: null
+  };
+}
+
+if (parsed.length === 0) {
+  return {
+    success: false,
+    message: `Paste at least one ${itemLabel} name to import`,
+    data: null
+  };
+}
+
+for (let i = 0; i < parsed.length; i++) {
+  const item = parsed[i];
+  const prevDepth = i === 0 ? -1 : parsed[i - 1].depth;
+  if (item.depth > prevDepth + 1) {
+    return {
+      success: false,
+      message: `Line ${item.line}: nesting jumps too far (use 2 spaces per level)`,
+      data: null
+    };
+  }
+  if (item.depth < 0) {
+    return {
+      success: false,
+      message: `Line ${item.line}: invalid nesting depth`,
+      data: null
+    };
+  }
+}
+
+const slugify = (name) => {
+  const slug = String(name || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, 80);
+  return slug || "category";
+};
+
+const existingKeys = new Set();
+const existingNamesLower = new Set();
+
+{
+  let existingQuery;
+  let existingParams;
+  if (!enableUserScoping) {
+    existingQuery = `
+      MATCH (v:${parentVertexLabel})
+      RETURN COALESCE(v.key, '') as key, toLower(COALESCE(v.name, v.title, '')) as nameLower
+    `;
+    existingParams = {};
+  } else {
+    existingQuery = `
+      MATCH (u:User {uuid: $userUuid})-[:${userRelationshipType}]->(v:${parentVertexLabel})
+      RETURN COALESCE(v.key, '') as key, toLower(COALESCE(v.name, v.title, '')) as nameLower
+    `;
+    existingParams = { userUuid };
+  }
+  const existingResult = await _.session.run(existingQuery, existingParams);
+  for (const record of existingResult.records) {
+    const key = record.get("key");
+    const nameLower = record.get("nameLower");
+    if (key) existingKeys.add(String(key));
+    if (nameLower) existingNamesLower.add(String(nameLower));
+  }
+}
+
+const uniqueKey = (base) => {
+  let candidate = base;
+  let n = 2;
+  while (existingKeys.has(candidate) || (rootKey && candidate === rootKey)) {
+    candidate = `${base}_${n}`;
+    n += 1;
+  }
+  existingKeys.add(candidate);
+  return candidate;
+};
+
+if (parentId) {
+  let parentCheckQuery;
+  let parentCheckParams;
+  if (!enableUserScoping) {
+    parentCheckQuery = `
+      MATCH (p:${parentVertexLabel})
+      WHERE elementId(p) = $parentId
+      RETURN elementId(p) as id
+    `;
+    parentCheckParams = { parentId };
+  } else {
+    parentCheckQuery = `
+      MATCH (u:User {uuid: $userUuid})-[:${userRelationshipType}]->(p:${parentVertexLabel})
+      WHERE elementId(p) = $parentId
+      RETURN elementId(p) as id
+    `;
+    parentCheckParams = { parentId, userUuid };
+  }
+  const parentCheck = await _.session.run(parentCheckQuery, parentCheckParams);
+  if (parentCheck.records.length === 0) {
+    return {
+      success: false,
+      message: `Parent ${itemLabel} not found`,
+      data: null
+    };
+  }
+}
+
+const created = [];
+const depthParentIds = [];
+const siblingOrderByParent = new Map();
+
+const parentKeyForOrder = (id) => (id == null ? "__root__" : String(id));
+
+for (const item of parsed) {
+  const nameLower = item.name.toLowerCase();
+  if (existingNamesLower.has(nameLower)) {
+    return {
+      success: false,
+      message: `Line ${item.line}: a ${itemLabel} named "${item.name}" already exists`,
+      data: { createdCount: created.length, created }
+    };
+  }
+  existingNamesLower.add(nameLower);
+
+  let resolvedParentId = null;
+  if (item.depth === 0) {
+    resolvedParentId = parentId || null;
+  } else {
+    resolvedParentId = depthParentIds[item.depth - 1] || null;
+    if (!resolvedParentId) {
+      return {
+        success: false,
+        message: `Line ${item.line}: missing parent for nested ${itemLabel}`,
+        data: { createdCount: created.length, created }
+      };
+    }
+  }
+
+  const orderKey = parentKeyForOrder(resolvedParentId);
+  const displayOrder = (siblingOrderByParent.get(orderKey) || 0) + 1;
+  siblingOrderByParent.set(orderKey, displayOrder);
+
+  const vertexKey = uniqueKey(slugify(item.name));
+  const vertexProperties = {
+    name: item.name,
+    key: vertexKey,
+    displayOrder
+  };
+
+  await _.executeHooks(hooks?.beforeCreate, {
+    vertexId: null,
+    name: item.name,
+    key: vertexKey,
+    parentId: resolvedParentId,
+    parentVertexLabel,
+    toParentEdgeType,
+    rootKeys,
+    properties: vertexProperties,
+    isRoot: !resolvedParentId
+  });
+
+  let createQuery;
+  let createParams;
+  if (!enableUserScoping) {
+    createQuery = `
+      CREATE (v:${parentVertexLabel})
+      SET v.name = $name,
+          v.key = $key,
+          v.displayOrder = $displayOrder,
+          v.createdAt = datetime(),
+          v.updatedAt = datetime()
+      RETURN v, elementId(v) as elementId
+    `;
+    createParams = {
+      name: item.name,
+      key: vertexKey,
+      displayOrder
+    };
+  } else {
+    createQuery = `
+      MATCH (u:User {uuid: $userUuid})
+      CREATE (u)-[:${userRelationshipType}]->(v:${parentVertexLabel})
+      SET v.name = $name,
+          v.key = $key,
+          v.displayOrder = $displayOrder,
+          v.createdAt = datetime(),
+          v.updatedAt = datetime()
+      RETURN v, elementId(v) as elementId
+    `;
+    createParams = {
+      userUuid,
+      name: item.name,
+      key: vertexKey,
+      displayOrder
+    };
+  }
+
+  const createResult = await _.session.run(createQuery, createParams);
+  if (createResult.records.length === 0) {
+    return {
+      success: false,
+      message: `Line ${item.line}: failed to create ${itemLabel} "${item.name}"`,
+      data: { createdCount: created.length, created }
+    };
+  }
+
+  _.processResult(createResult.records, _.context, "v");
+  const vertexElementId = createResult.records[0].get("elementId");
+  let vertex;
+  if (_.context.nodes[vertexElementId]) {
+    vertex = _.context.nodes[vertexElementId];
+  } else {
+    vertex = _.convertNodeToJson(createResult.records[0].get("v"));
+    _.context.nodes[vertex.id] = vertex;
+  }
+
+  if (resolvedParentId) {
+    if (!enableUserScoping) {
+      await _.session.run(
+        `MATCH (v:${parentVertexLabel}), (p:${parentVertexLabel})
+         WHERE elementId(v) = $vertexId AND elementId(p) = $parentId
+         CREATE (v)-[:${toParentEdgeType}]->(p)`,
+        { vertexId: vertexElementId, parentId: resolvedParentId }
+      );
+    } else {
+      await _.session.run(
+        `MATCH (v:${parentVertexLabel}), (p:${parentVertexLabel})
+         WHERE elementId(v) = $vertexId AND elementId(p) = $parentId
+         MATCH (u:User {uuid: $userUuid})-[:${userRelationshipType}]->(p)
+         CREATE (v)-[:${toParentEdgeType}]->(p)`,
+        { vertexId: vertexElementId, parentId: resolvedParentId, userUuid }
+      );
+    }
+  }
+
+  const result = {
+    success: true,
+    message: `${itemLabel} created successfully`,
+    data: vertex
+  };
+
+  await _.executeHooks(hooks?.afterCreate, {
+    vertexId: vertexElementId,
+    name: item.name,
+    key: vertexKey,
+    parentId: resolvedParentId,
+    parentVertexLabel,
+    toParentEdgeType,
+    rootKeys,
+    properties: vertexProperties,
+    isRoot: !resolvedParentId,
+    result
+  });
+
+  depthParentIds[item.depth] = vertex.id;
+  depthParentIds.length = item.depth + 1;
+
+  created.push({
+    id: vertex.id,
+    name: item.name,
+    key: vertexKey,
+    depth: item.depth,
+    parentId: resolvedParentId,
+    line: item.line
+  });
+}
+
+return {
+  success: true,
+  message: `Imported ${created.length} ${itemLabel}`,
+  data: {
+    createdCount: created.length,
+    created
+  }
+};
+'''
+        key: importSidebarCategories
+      }
+    }
+  ]
+  edges: []
+}

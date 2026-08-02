@@ -4,111 +4,12 @@
       id: "1"
       L: Component
       P: {
-        key: TableModal
-      }
-    }
-    {
-      id: "2"
-      L: Attr
-      P: {
-        css:
-          '''return `._id {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-  animation: fadeIn 0.2s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@media (max-width: 768px) {
-  ._id {
-    padding: 0;
-    align-items: flex-end;
-  }
-}`;'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''const isOpen = c.props?.isOpen || false;
-
-return {
-  as: "div",
-  hide: !isOpen,
-  onClick: (e) => {
-    if (e.target === e.currentTarget) {
-      c.props?.onClose();
-    }
-  },
-};'''
-      }
-    }
-    {
-      id: "3"
-      L: Attr
-      P: {
-        css:
-          '''return `._id {
-  background: ${t.var.color.background};
-  border-radius: 0.75rem;
-  width: 100%;
-  max-width: 880px;
-  max-height: 90vh;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  animation: slideUp 0.3s ease;
-}
-
-@media (max-width: 768px) {
-  ._id {
-    max-width: 100%;
-    max-height: 100vh;
-    height: 100vh;
-    border-radius: 0;
-    animation: slideUpMobile 0.3s ease;
-  }
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes slideUpMobile {
-  from {
-    opacity: 0;
-    transform: translateY(100%);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}`;'''
-        displayOrder: 1
         fns:
-          '''// Track form txnId for cleanup
+          '''
+const getProps = () => c.props || {};
+
 const [formTxnId, setFormTxnId] = _.createSignal(0);
 
-// Cleanup function to revert transaction
 const cleanup = () => {
   const txnId = formTxnId();
   if (txnId && txnId > 0) {
@@ -117,17 +18,65 @@ const cleanup = () => {
   }
 };
 
+const getModalTitle = () => {
+  const p = getProps();
+  const mode = p.mode || "add";
+  const label = p.label;
+  if (mode === "add") return label ? `Add New ${label}` : "Add New Item";
+  if (mode === "view") return label ? `View ${label}` : "View Item";
+  return label ? `Edit ${label}` : "Edit Item";
+};
+
+const handleClose = () => {
+  cleanup();
+  getProps().onClose?.();
+};
+
 return {
+  getProps,
   formTxnId,
   setFormTxnId,
   cleanup,
-  getUsePolarisUI: () => f.getUsePolarisUI?.() === true
+  getModalTitle,
+  handleClose
+};
+'''
+        key: TableModal
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: ContentModal
+        props:
+          '''const p = f.getProps();
+return {
+  isOpen: p.isOpen === true,
+  title: f.getModalTitle(),
+  maxWidth: "880px",
+  onClose: f.handleClose
 };'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        slotName: children
+        css:
+          '''return `._id {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: ${t.var.spacing.lg};
+}`;'''
+        displayOrder: 1
         componentName: Html
         props:
           '''return {
   as: "div",
-  onClick: (e) => e.stopPropagation(),
   onCleanup: () => {
     f.cleanup();
   }
@@ -138,141 +87,28 @@ return {
       id: "4"
       L: Attr
       P: {
-        css:
-          '''return `._id {
-  padding: ${t.var.spacing.lg};
-  border-bottom: 1px solid ${t.var.color.border};
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}`;'''
         displayOrder: 1
-        componentName: Html
-        props:
-          '''return {
-  as: "div"
-};'''
-      }
-    }
-    {
-      id: "5"
-      L: Attr
-      P: {
-        css:
-          '''return `._id {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: ${t.var.color.text};
-}`;'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''const mode = c.props?.mode || "add";
-const label = c.props?.label;
-const title = mode === "add"
-  ? (label ? `Add New ${label}` : "Add New Item")
-  : mode === "view"
-  ? (label ? `View ${label}` : "View Item")
-  : (label ? `Edit ${label}` : "Edit Item");
-
-return {
-  as: "div",
-  text: title
-};'''
-      }
-    }
-    {
-      id: "6"
-      L: Attr
-      P: {
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''const wrappedOnClose = () => {
-  f.cleanup();
-  const onClose = c.props?.onClose;
-  if (onClose) onClose();
-};
-
-return {
-  as: "s-button",
-  "attr:variant": "plain",
-  "attr:icon": "x",
-  "attr:accessibilityLabel": "Close",
-  onClick: wrappedOnClose,
-  hide: f.getUsePolarisUI?.() !== true
-};'''
-      }
-    }
-    {
-      id: "7"
-      L: Attr
-      P: {
-        css:
-          '''return `._id {
-  cursor: pointer;
-  color: ${t.var.color.text_light_500};
-  transition: color 0.2s ease;
-
-  &:hover {
-    color: ${t.var.color.text};
-  }
-}`;'''
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''const wrappedOnClose = () => {
-  f.cleanup();
-  const onClose = c.props?.onClose;
-  if (onClose) onClose();
-};
-
-return {
-  as: "icon",
-  icon: "carbon:close",
-  width: 24,
-  height: 24,
-  onClick: wrappedOnClose,
-  hide: f.getUsePolarisUI?.() === true
-};'''
-      }
-    }
-    {
-      id: "8"
-      L: Attr
-      P: {
-        css:
-          '''return `._id {
-  flex: 1;
-  overflow-y: auto;
-  padding: ${t.var.spacing.lg};
-}`;'''
-        displayOrder: 2
         componentName: FormManagement
         props:
-          '''const formConfig = c.props?.formConfig;
-const mode = c.props?.mode || "add";
-const tableVertexLabel = c.props?.tableVertexLabel;
-const initialVertex = c.props?.initialVertex;
-const onSave = c.props?.onSave;
-const onClose = c.props?.onClose;
+          '''const p = f.getProps();
+const formConfig = p.formConfig;
+const mode = p.mode || "add";
+const tableVertexLabel = p.tableVertexLabel;
+const initialVertex = p.initialVertex;
+const onSave = p.onSave;
+const onClose = p.onClose;
 
-// Wrap onSave to track txnId and pass through return value for FormManagement cleanup
 const wrappedOnSave = async (saveData) => {
-  // Get txnId from FormManagement (will be set via onFnsReady)
   const txnId = f?.formTxnId?.();
   if (txnId && txnId > 0) {
     f.setFormTxnId(txnId);
   }
-
-  // Call original onSave with vertex format and return result for FormManagement
   if (onSave) {
     return await onSave(saveData);
   }
   return false;
 };
 
-// Wrap onClose to cleanup transaction
 const wrappedOnClose = () => {
   f.cleanup();
   if (onClose) {
@@ -286,11 +122,10 @@ return {
   mode: mode,
   inModal: true,
   vertexLabel: tableVertexLabel,
-  hide: () => !(c.props?.isOpen === true),
   onSave: wrappedOnSave,
   onClose: wrappedOnClose,
-  selectedSidebarItem: c.props?.selectedSidebarItem,
-  sidebarConfig: c.props?.sidebarConfig
+  selectedSidebarItem: p.selectedSidebarItem,
+  sidebarConfig: p.sidebarConfig
 };'''
       }
     }
@@ -455,30 +290,6 @@ return {
       T: Attr
       S: "3"
       E: "4"
-    }
-    {
-      id: e12
-      T: Attr
-      S: "3"
-      E: "8"
-    }
-    {
-      id: e13
-      T: Attr
-      S: "4"
-      E: "5"
-    }
-    {
-      id: e14
-      T: Attr
-      S: "4"
-      E: "6"
-    }
-    {
-      id: e15
-      T: Attr
-      S: "4"
-      E: "7"
     }
   ]
 }

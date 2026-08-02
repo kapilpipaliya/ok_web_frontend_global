@@ -13,10 +13,11 @@
       L: Attr
       P: {
         css:
-          '''return `._id {
+          '''const zIndex = c.props?.zIndex ?? 20;
+return `._id {
   position: fixed;
   inset: 0;
-  z-index: 20;
+  z-index: ${zIndex};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -90,11 +91,70 @@ return `._id {
   }
 }`;'''
         displayOrder: 1
+        fns:
+          '''
+let trap = null;
+let cancelFocusTrapTimer = null;
+
+const initializeFocusTrap = () => {
+  const element = _.ref();
+  if (!element) return;
+
+  if (trap) {
+    trap.deactivate();
+    trap = null;
+  }
+
+  trap = _.focusTrap.createFocusTrap(element, {
+    fallbackFocus: () => element,
+    escapeDeactivates: false,
+    allowOutsideClick: true,
+    returnFocusOnDeactivate: true
+  });
+
+  trap.activate();
+};
+
+const scheduleFocusTrap = () => {
+  cancelFocusTrapTimer?.();
+  cancelFocusTrapTimer = _.makeTimer(
+    () => {
+      cancelFocusTrapTimer = null;
+      initializeFocusTrap();
+    },
+    200,
+    setTimeout
+  );
+};
+
+const cleanupFocusTrap = () => {
+  cancelFocusTrapTimer?.();
+  cancelFocusTrapTimer = null;
+  if (trap) {
+    trap.deactivate();
+    trap = null;
+  }
+};
+
+return {
+  scheduleFocusTrap,
+  cleanupFocusTrap
+};
+'''
         componentName: Html
         props:
           '''return {
   as: "div",
-  onClick: (e) => e.stopPropagation()
+  tabindex: -1,
+  role: "dialog",
+  "aria-modal": true,
+  onClick: (e) => e.stopPropagation(),
+  onMount: () => {
+    f.scheduleFocusTrap?.();
+  },
+  onCleanup: () => {
+    f.cleanupFocusTrap?.();
+  }
 };'''
       }
     }
@@ -147,35 +207,26 @@ return `._id {
       id: "6"
       L: Attr
       P: {
+        css:
+          '''return `._id {
+  cursor: pointer;
+  color: ${t.var.color.text_light_500};
+  transition: color 0.2s ease;
+  flex-shrink: 0;
+
+  &:hover {
+    color: ${t.var.color.text};
+  }
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
           '''const onClose = c.props?.onClose;
-return {
-  as: "s-button",
-  "attr:variant": "plain",
-  "attr:icon": "x",
-  "attr:accessibilityLabel": "Close",
-  hide: c.props?.usePolarisUI !== true,
-  onClick: () => onClose?.()
-};'''
-      }
-    }
-    {
-      id: "7"
-      L: Attr
-      P: {
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''const onClose = c.props?.onClose;
-const usePolaris = c.props?.usePolarisUI === true;
 return {
   as: "icon",
   icon: "carbon:close",
   width: 22,
   height: 22,
-  hide: usePolaris,
   onClick: () => onClose?.()
 };'''
       }
@@ -207,15 +258,6 @@ return {
         displayOrder: 1
         componentName: Slot
         slot: children
-      }
-    }
-    {
-      id: "10"
-      L: ComponentVariant
-      P: {
-        type: boolean
-        defValue: false
-        key: usePolarisUI
       }
     }
     {
@@ -261,6 +303,15 @@ return {
         key: title
       }
     }
+    {
+      id: "16"
+      L: ComponentVariant
+      P: {
+        type: number
+        defValue: 100
+        key: zIndex
+      }
+    }
   ]
   edges: [
     {
@@ -268,12 +319,6 @@ return {
       T: Attr
       S: "1"
       E: "2"
-    }
-    {
-      id: e2
-      T: ComponentVariant
-      S: "1"
-      E: "10"
     }
     {
       id: e3
@@ -306,6 +351,12 @@ return {
       E: "15"
     }
     {
+      id: e15
+      T: ComponentVariant
+      S: "1"
+      E: "16"
+    }
+    {
       id: e8
       T: Attr
       S: "2"
@@ -334,12 +385,6 @@ return {
       T: Attr
       S: "4"
       E: "6"
-    }
-    {
-      id: e13
-      T: Attr
-      S: "4"
-      E: "7"
     }
     {
       id: e14

@@ -9,27 +9,42 @@
 // Store FormManagement's formTxnId getter (set via onFnsReady from modal content)
 const formTxnIdRef = { current: null };
 
+// Slot children run inside ContentModal's DataContext, so use getProps() instead of c.props there.
+const getProps = () => c.props || {};
+
 // Revert transaction when closing without save (Cancel button, etc.)
 const cleanup = () => {
   const getTxnId = formTxnIdRef.current;
-  const txnId = getTxnId && typeof getTxnId === 'function' ? getTxnId() : null;
+  const txnId = getTxnId && typeof getTxnId === "function" ? getTxnId() : null;
   if (txnId && txnId > 0) {
     _.revertTransaction(txnId);
   }
 };
 
-// Close on backdrop click: revert (remove unsaved vertex) then close
-const handleBackdropClick = () => {
+const getModalTitle = () => {
+  const p = getProps();
+  const mode = p.mode || "add";
+  const parentId = p.parentId;
+  const label = p.label || "Item";
+  if (mode === "add") {
+    return parentId === null || parentId === undefined
+      ? `Add Root ${label}`
+      : `Add New Child ${label}`;
+  }
+  return `Edit ${label}`;
+};
+
+const handleClose = () => {
   cleanup();
-  const onClose = c.props?.onClose;
-  if (onClose) onClose();
+  getProps().onClose?.();
 };
 
 return {
   formTxnIdRef,
+  getProps,
   cleanup,
-  handleBackdropClick,
-  getUsePolarisUI: () => f.getUsePolarisUI?.() === true
+  getModalTitle,
+  handleClose
 };
 '''
         key: SidebarAddChildModal
@@ -39,47 +54,15 @@ return {
       id: "2"
       L: Attr
       P: {
-        css:
-          '''return `._id {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-  animation: fadeIn 0.2s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@media (max-width: 768px) {
-  ._id {
-    padding: 0;
-    align-items: flex-end;
-  }
-}`;'''
         displayOrder: 1
-        componentName: Html
+        componentName: ContentModal
         props:
-          '''const isOpen = c.props?.isOpen || false;
-
+          '''const p = f.getProps();
 return {
-  as: "div",
-  hide: !isOpen,
-  onClick: (e) => {
-    if (e.target === e.currentTarget) {
-      f?.handleBackdropClick?.();
-    }
-  },
+  isOpen: p.isOpen === true,
+  title: f.getModalTitle(),
+  maxWidth: "600px",
+  onClose: f.handleClose
 };'''
       }
     }
@@ -87,54 +70,17 @@ return {
       id: "3"
       L: Attr
       P: {
+        slotName: children
         css:
           '''return `._id {
-  background: ${t.var.color.background};
-  border-radius: 0.75rem;
-  width: 100%;
-  max-width: 600px;
-  max-height: 90vh;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  animation: slideUp 0.3s ease;
-}
-
-@media (max-width: 768px) {
-  ._id {
-    max-width: 100%;
-    max-height: 100vh;
-    height: 100vh;
-    border-radius: 0;
-    animation: slideUpMobile 0.3s ease;
-  }
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes slideUpMobile {
-  from {
-    opacity: 0;
-    transform: translateY(100%);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: ${t.var.spacing.lg};
 }`;'''
         displayOrder: 1
         fns:
-          '''// Use component-level cleanup and formTxnIdRef
-return {
+          '''return {
   cleanup: () => f?.cleanup?.(),
   formTxnIdRef: f?.formTxnIdRef
 };'''
@@ -142,7 +88,6 @@ return {
         props:
           '''return {
   as: "div",
-  onClick: (e) => e.stopPropagation(),
   onCleanup: () => {
     f.cleanup();
   }
@@ -153,134 +98,23 @@ return {
       id: "4"
       L: Attr
       P: {
-        css:
-          '''return `._id {
-  padding: ${t.var.spacing.lg};
-  border-bottom: 1px solid ${t.var.color.border};
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}`;'''
         displayOrder: 1
-        componentName: Html
-        props:
-          '''return {
-  as: "div"
-};'''
-      }
-    }
-    {
-      id: "5"
-      L: Attr
-      P: {
-        css:
-          '''return `._id {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: ${t.var.color.text};
-}`;'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''const mode = c.props?.mode || "add";
-const parentId = c.props?.parentId;
-const label = c.props?.label || "Item";
-
-let title;
-if (mode === "add") {
-  title = parentId === null || parentId === undefined ? `Add Root ${label}` : `Add New Child ${label}`;
-} else {
-  title = `Edit ${label}`;
-}
-
-return {
-  as: "div",
-  text: title
-};'''
-      }
-    }
-    {
-      id: "6"
-      L: Attr
-      P: {
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''const wrappedOnClose = () => {
-  f.cleanup();
-  const onClose = c.props?.onClose;
-  if (onClose) onClose();
-};
-
-return {
-  as: "s-button",
-  "attr:variant": "plain",
-  "attr:icon": "x",
-  "attr:accessibilityLabel": "Close",
-  onClick: wrappedOnClose,
-  hide: f.getUsePolarisUI?.() !== true
-};'''
-      }
-    }
-    {
-      id: "7"
-      L: Attr
-      P: {
-        css:
-          '''return `._id {
-  cursor: pointer;
-  color: ${t.var.color.text_light_500};
-  transition: color 0.2s ease;
-
-  &:hover {
-    color: ${t.var.color.text};
-  }
-}`;'''
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''const wrappedOnClose = () => {
-  f.cleanup();
-  const onClose = c.props?.onClose;
-  if (onClose) onClose();
-};
-
-return {
-  as: "icon",
-  icon: "carbon:close",
-  width: 24,
-  height: 24,
-  onClick: wrappedOnClose,
-  hide: f.getUsePolarisUI?.() === true
-};'''
-      }
-    }
-    {
-      id: "8"
-      L: Attr
-      P: {
-        css:
-          '''return `._id {
-  flex: 1;
-  overflow-y: auto;
-  padding: ${t.var.spacing.lg};
-}`;'''
-        displayOrder: 2
         componentName: FormManagement
         props:
-          '''const sidebarConfig = c.props?.sidebarConfig || {};
+          '''const p = f.getProps();
+const sidebarConfig = p.sidebarConfig || {};
 const formConfig = sidebarConfig?.formConfig;
-const parentId = c.props?.parentId;
-const vertexId = c.props?.vertexId;
-const initialVertex = c.props?.initialVertex;
-const mode = c.props?.mode || "add";
+const parentId = p.parentId;
+const vertexId = p.vertexId;
+const initialVertex = p.initialVertex;
+const mode = p.mode || "add";
 const parentVertexLabel = sidebarConfig?.parentVertexLabel;
 const toParentEdgeType = sidebarConfig?.toParentEdgeType;
 const rootKeys = sidebarConfig?.rootKeys || {};
-const tableVertexLabel = c.props?.tableVertexLabel;
-const relationshipType = c.props?.relationshipType;
-const onSave = c.props?.onSave;
-const onClose = c.props?.onClose;
+const tableVertexLabel = p.tableVertexLabel;
+const relationshipType = p.relationshipType;
+const onSave = p.onSave;
+const onClose = p.onClose;
 
 const formHasKeyField = (cfg) => {
   if (!cfg || !Array.isArray(cfg.groups)) return false;
@@ -327,9 +161,7 @@ const ensureSidebarFormConfigWithKeyField = (cfg) => {
 
 const formConfigResolved = ensureSidebarFormConfigWithKeyField(formConfig);
 
-// Wrap onSave to handle saveSidebarVertex
 const wrappedOnSave = async (saveData) => {
-  // Extract vertex and properties from saveData
   const vertex = saveData.vertex;
   if (!vertex) {
     _.showErrorToast?.("No vertex data to save");
@@ -344,8 +176,7 @@ const wrappedOnSave = async (saveData) => {
   const nameVal = String(vertex.P?.name || vertex.P?.title || "").trim();
   const nameForServer = nameVal || keyVal;
 
-  // Call saveSidebarVertex function
-  const label = c.props?.label || "Item";
+  const label = p.label || "Item";
   try {
     const result = await s({
       functionName: "saveSidebarVertex",
@@ -369,25 +200,29 @@ const wrappedOnSave = async (saveData) => {
         relationships: saveData.relationships || {},
         tableVertexLabel: tableVertexLabel,
         relationshipType: relationshipType,
-        enableUserScoping: c.props?.enableUserScoping,
-        hooks: c.props?.hooks,
+        enableUserScoping: p.enableUserScoping,
+        hooks: p.hooks,
         label: label
       }
     });
 
-    // Check for errors and show toast
-    const errorMessage = f.extractError?.(result, true, `Failed to ${mode === "edit" ? "update" : "create"} ${label}`);
+    const errorMessage = f.extractError?.(
+      result,
+      true,
+      `Failed to ${mode === "edit" ? "update" : "create"} ${label}`
+    );
     if (errorMessage) {
       return false;
     }
 
     if (result?.result?.success) {
-      _.showSuccessToast?.(result.result.message || `${label} ${mode === "edit" ? "updated" : "created"} successfully`);
-      // Call original onSave if provided
+      _.showSuccessToast?.(
+        result.result.message ||
+          `${label} ${mode === "edit" ? "updated" : "created"} successfully`
+      );
       if (onSave) {
         await onSave(result.result.data);
       }
-      // Close modal
       if (onClose) {
         onClose();
       }
@@ -396,12 +231,13 @@ const wrappedOnSave = async (saveData) => {
     return false;
   } catch (error) {
     console.error("Error saving vertex:", error);
-    _.showErrorToast?.(`Failed to ${mode === "edit" ? "update" : "create"} ${label}`);
+    _.showErrorToast?.(
+      `Failed to ${mode === "edit" ? "update" : "create"} ${label}`
+    );
     return false;
   }
 };
 
-// Wrap onClose to cleanup transaction
 const wrappedOnClose = () => {
   f.cleanup();
   if (onClose) {
@@ -414,7 +250,6 @@ return {
   initialVertex: initialVertex || null,
   mode: mode,
   vertexLabel: null,
-  hide: () => !(c.props?.isOpen === true),
   onSave: wrappedOnSave,
   onClose: wrappedOnClose,
   inModal: true,
@@ -599,30 +434,6 @@ return {
       T: Attr
       S: "3"
       E: "4"
-    }
-    {
-      id: e15
-      T: Attr
-      S: "3"
-      E: "8"
-    }
-    {
-      id: e16
-      T: Attr
-      S: "4"
-      E: "5"
-    }
-    {
-      id: e17
-      T: Attr
-      S: "4"
-      E: "6"
-    }
-    {
-      id: e18
-      T: Attr
-      S: "4"
-      E: "7"
     }
   ]
 }
