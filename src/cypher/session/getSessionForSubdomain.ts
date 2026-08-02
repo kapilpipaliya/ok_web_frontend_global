@@ -1,6 +1,5 @@
 import type { APIEvent } from "@solidjs/start/server";
-
-import { getRequestURL } from "vinxi/http";
+import { getRequestEvent } from "solid-js/web";
 
 import { getDriver } from "~/cypher/core/driver";
 import { getSubDomain } from "~/cypher/session/getSubDomain";
@@ -35,9 +34,12 @@ export async function getDBSessionForSubdomain(request?: APIEvent["request"]) {
 }
 
 export function getURL(request?: APIEvent["request"]): URL {
-  const url = request ? new URL(request.url) : getRequestURL();
-  if (!url) {
+  if (request) {
+    return new URL(request.url);
+  }
+  const event = getRequestEvent();
+  if (!event?.request) {
     throw new Error("URL is missing");
   }
-  return url;
+  return new URL(event.request.url);
 }

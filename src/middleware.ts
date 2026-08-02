@@ -1,7 +1,6 @@
 import { redirect } from "@solidjs/router";
 import { createMiddleware } from "@solidjs/start/middleware";
-import type { H3Event } from "h3";
-import { csrf } from "shieldwall/start";
+import type { FetchEvent } from "@solidjs/start/server";
 
 import { checkRoutePermissionBase } from "./lib/permissions/checkRoutePermission";
 import { logger } from "./lib/logger";
@@ -16,11 +15,48 @@ import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomai
 import { getShopify } from "~/lib/shopify/shopify.server";
 import { initializeWorkersIfNeeded } from "~/server/initWorkersOnStartup";
 
-/** Skip CSRF for Shopify webhooks (they are verified by HMAC, not origin). */
-const csrfUnlessWebhooks = async (event: Parameters<typeof csrf>[0]) => {
-  const pathname = new URL(event.request.url).pathname;
+const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS", "TRACE"]);
+
+/**
+ * CSRF origin/referer check for SolidStart v2 (h3 v2).
+ * @see https://docs.solidjs.com/solid-start/guides/security
+ */
+const csrfUnlessWebhooks = (event: FetchEvent) => {
+  const { request } = event;
+  const pathname = new URL(request.url).pathname;
   if (pathname.startsWith("/webhooks/")) return;
-  return csrf(event);
+  if (SAFE_METHODS.has(request.method)) return;
+
+  const requestUrl = new URL(request.url);
+  const origin = request.headers.get("Origin");
+
+  if (origin) {
+    try {
+      if (new URL(origin).origin !== requestUrl.origin) {
+        return new Response(null, { status: 403 });
+      }
+    } catch {
+      return new Response(null, { status: 403 });
+    }
+    return;
+  }
+
+  // HTTPS without Origin: require matching Referer (MITM CSRF hardening).
+  if (requestUrl.protocol === "https:") {
+    const referer = request.headers.get("Referer");
+    if (!referer) return new Response(null, { status: 403 });
+    try {
+      const parsedReferer = new URL(referer);
+      if (
+        parsedReferer.protocol !== "https:" ||
+        parsedReferer.host !== requestUrl.host
+      ) {
+        return new Response(null, { status: 403 });
+      }
+    } catch {
+      return new Response(null, { status: 403 });
+    }
+  }
 };
 
 // Helper to check if logging should be skipped
@@ -34,7 +70,6 @@ const shouldSkipLogging = (pathname: string) => {
 };
 
 // https://docs.solidjs.com/solid-start/guides/security
-// https://github.com/atilafassina/shieldwall
 // Note: this authorization will not work in client side
 export default createMiddleware({
   onRequest: [
@@ -43,11 +78,7 @@ export default createMiddleware({
       if (typeof window !== "undefined") return;
 
       const url = new URL(event.request.url);
-      const h3Event = event.nativeEvent as H3Event;
-      const ip = getClientIpForBlocking(
-        event.request,
-        h3Event.node?.req?.socket?.remoteAddress,
-      );
+      const ip = getClientIpForBlocking(event.request, event.clientAddress);
 
       if (isIpPhpBlocked(ip)) {
         terminateConnectionSilently(event);
@@ -98,12 +129,13 @@ export default createMiddleware({
         );
       }
     },
-    csrfUnlessWebhooks,
-    // Initialize workers on first request (server-side only)
-    async (event) => {
-      // Only run on server
+    // csrfUnlessWebhooks,
+    // Kick off BullMQ workers in the background — never await on the request
+    // path. Awaiting blocked `/_server` (and other) requests for minutes while
+    // subdomain workers boot; LiteSpeed then returns 503 HTML.
+    async (_event) => {
       if (typeof window === "undefined") {
-        await initializeWorkersIfNeeded();
+        void initializeWorkersIfNeeded();
       }
     },
     // temporary disable secureRequest

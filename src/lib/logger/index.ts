@@ -67,7 +67,6 @@ export interface DatabaseContext {
 const isDevelopment = process.env.NODE_ENV !== "production";
 const logLevel = (process.env.LOG_LEVEL ||
   (isDevelopment ? "debug" : "info")) as LogLevel;
-const enableLogRotation = process.env.LOG_ROTATION_ENABLED !== "false";
 
 // Create logs directory if it doesn't exist
 const logsDir = path.join(process.cwd(), "logs");
@@ -91,10 +90,13 @@ const baseLoggerOptions: LoggerOptions = {
   },
 };
 
-// Create transport configuration
-function createTransport() {
+// Create destination / transport.
+// Production must avoid pino.transport() worker threads — Nitro bundles SSR into
+// .output and worker target resolution breaks ("unable to determine transport
+// target for worker.js"). Sync destinations work under the bundle; PM2 already
+// captures stdout/stderr.
+function createDestination() {
   if (isDevelopment) {
-    // Development: Pretty print to console
     return pino.transport({
       target: "pino-pretty",
       options: {
@@ -105,67 +107,34 @@ function createTransport() {
       },
     });
   }
-  // Production: Write to files with rotation
-  if (enableLogRotation) {
-    return pino.transport({
-      targets: [
-        // Application logs with rotation
-        {
-          target: "pino-roll",
-          options: {
-            file: path.join(logsDir, "application"),
-            frequency: "daily",
-            size: "100M",
-            extension: ".log",
-            mkdir: true,
-          },
-        },
-        // Error logs separately
-        {
-          target: "pino-roll",
-          level: "error",
-          options: {
-            file: path.join(logsDir, "error"),
-            frequency: "daily",
-            size: "100M",
-            extension: ".log",
-            mkdir: true,
-          },
-        },
-        // Console output (minimal)
-        {
-          target: "pino/file",
-          level: "info",
-          options: {
-            destination: 1, // stdout
-          },
-        },
-      ],
-    });
-  }
-  // Production without rotation: simple file output
-  return pino.transport({
-    targets: [
-      {
-        target: "pino/file",
-        options: {
-          destination: path.join(logsDir, "application.log"),
-        },
-      },
-      {
-        target: "pino/file",
-        level: "error",
-        options: {
-          destination: path.join(logsDir, "error.log"),
-        },
-      },
-    ],
-  });
+  // Sync file + stdout. Rotation is handled externally (PM2 / logrotate).
+  return pino.multistream([
+    {
+      level: logLevel,
+      stream: pino.destination({
+        dest: path.join(logsDir, "application.log"),
+        sync: true,
+        mkdir: true,
+      }),
+    },
+    {
+      level: "error",
+      stream: pino.destination({
+        dest: path.join(logsDir, "error.log"),
+        sync: true,
+        mkdir: true,
+      }),
+    },
+    {
+      level: "info",
+      stream: pino.destination({ dest: 1, sync: true }),
+    },
+  ]);
 }
 
 // Create the base logger instance
-const transport = createTransport();
-const baseLogger: Logger = pino(baseLoggerOptions, transport);
+const destination = createDestination();
+const baseLogger: Logger = pino(baseLoggerOptions, destination);
 
 // Main logger class with convenience methods
 class AppLogger {

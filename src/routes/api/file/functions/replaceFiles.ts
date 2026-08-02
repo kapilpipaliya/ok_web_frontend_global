@@ -1,4 +1,3 @@
-import type { MultiPartData } from "h3";
 import type { Session } from "neo4j-driver";
 
 import path from "node:path";
@@ -16,7 +15,7 @@ import { saveFileMetadata } from "~/routes/api/file/functions/functions/saveFile
 
 export async function replaceFiles(
   request: Request,
-  data: MultiPartData[],
+  formData: FormData,
   neo4jSession: Session,
   subDomain: string,
   user: Vertex,
@@ -33,7 +32,11 @@ export async function replaceFiles(
   if (!fileId) {
     return { error: "fileId is required" };
   }
-  if (data.length > 1) {
+
+  const files = [...formData.values()].filter(
+    (value): value is File => value instanceof File && Boolean(value.name),
+  );
+  if (files.length > 1) {
     return { error: "Only one file is allowed to be replaced" };
   }
 
@@ -43,18 +46,15 @@ export async function replaceFiles(
   }
 
   const newFileNodes = await Promise.all(
-    data.map(async (file) => {
-      if (!file?.filename) {
-        return null;
-      }
-
-      const { ext, name } = path.parse(file.filename);
+    files.map(async (file) => {
+      const { ext, name } = path.parse(file.name);
       const newVersion = (oldFileMetadata.P.version || 0) + 1;
       const newFilename = `${name}_v${newVersion}_${currentDate}${ext}`;
-      const filePath = saveFileToDisk(userDir, newFilename, file.data);
-      const fileSize = file.data.length;
+      const fileData = Buffer.from(await file.arrayBuffer());
+      const filePath = saveFileToDisk(userDir, newFilename, fileData);
+      const fileSize = fileData.length;
       const mimeType = file.type;
-      const checksum = calculateChecksum(file.data);
+      const checksum = calculateChecksum(fileData);
 
       const newMetadata = {
         checksum,
@@ -62,7 +62,7 @@ export async function replaceFiles(
         filePath: filePath,
         fileSize,
         mimeType,
-        originalFileName: file.filename,
+        originalFileName: file.name,
         subDomain,
         version: newVersion,
       };
@@ -87,7 +87,7 @@ export async function replaceFiles(
     "File",
     fileId,
     user.P.email,
-    `File replaced: ${oldFileMetadata.P.fileName} -> ${data[0]?.filename}`,
+    `File replaced: ${oldFileMetadata.P.fileName} -> ${files[0]?.name}`,
   );
   return {
     graph: {

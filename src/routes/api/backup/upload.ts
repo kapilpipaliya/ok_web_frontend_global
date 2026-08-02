@@ -1,51 +1,41 @@
 import type { APIEvent } from "@solidjs/start/server";
-import { readMultipartFormData } from "vinxi/http";
 import fs from "node:fs";
 import { uploadAndRestoreBackup } from "~/server/backup/backupManagement";
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 
-export async function POST({ request }: APIEvent) {
+export async function POST(event: APIEvent) {
   let tmpPath: string | null = null;
 
   try {
-    const data = await readMultipartFormData();
-    if (!data || data.length === 0) {
-      throw new APIError("No file data available", 400);
-    }
-
-    // Get the first file from the multipart data
-    const file = data[0];
-    if (!(file && file.filename && file.data)) {
+    const formData = await event.nativeEvent.req.formData();
+    const file = formData.get("file");
+    if (!(file instanceof File) || !file.name) {
       throw new APIError("Invalid file data", 400);
     }
 
-    // Get form fields
-    const targetDatabase =
-      data.find((item) => item.name === "targetDatabase")?.data?.toString() ||
-      "";
+    const targetDatabase = String(formData.get("targetDatabase") || "").trim();
     const shouldRestore =
-      data.find((item) => item.name === "shouldRestore")?.data?.toString() ===
-      "true";
-    const confirmed =
-      data.find((item) => item.name === "confirmed")?.data?.toString() ===
-      "true";
+      String(formData.get("shouldRestore") || "") === "true";
+    const confirmed = String(formData.get("confirmed") || "") === "true";
 
     if (!targetDatabase) {
       throw new APIError("Target database is required", 400);
     }
 
+    const fileData = Buffer.from(await file.arrayBuffer());
+
     // Create temporary file
-    tmpPath = `/tmp/upload_${Date.now()}_${file.filename}`;
-    fs.writeFileSync(tmpPath, file.data);
+    tmpPath = `/tmp/upload_${Date.now()}_${file.name}`;
+    fs.writeFileSync(tmpPath, fileData);
 
     console.log(
-      `[Upload] File written to ${tmpPath}, size: ${file.data.length} bytes`,
+      `[Upload] File written to ${tmpPath}, size: ${fileData.length} bytes`,
     );
 
     // Call the backup management function
     const result = await uploadAndRestoreBackup(
       tmpPath,
-      file.filename,
+      file.name,
       targetDatabase,
       shouldRestore,
       confirmed,

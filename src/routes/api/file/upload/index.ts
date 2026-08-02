@@ -1,25 +1,24 @@
 import type { APIEvent } from "@solidjs/start/server";
 
-import { readMultipartFormData } from "vinxi/http";
-
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
 import { uploadFilesWithFolderOptions } from "../functions/uploadFile";
 
-export async function POST({ request }: APIEvent) {
+export async function POST(event: APIEvent) {
+  const { request, nativeEvent } = event;
   const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
 
   try {
-    const data = await readMultipartFormData();
-    if (!data || data.length === 0) {
+    const formData = await nativeEvent.req.formData();
+    if ([...formData.keys()].length === 0) {
       throw new APIError("No file data available", 400);
     }
     const user = await getUserFromSession(request);
     const linkUuid = user?.P?.uuid == null ? null : String(user.P.uuid).trim();
     return await uploadFilesWithFolderOptions(
-      data,
+      formData,
       subDomain,
       dbSession,
       linkUuid || undefined,

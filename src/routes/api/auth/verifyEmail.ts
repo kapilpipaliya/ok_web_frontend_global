@@ -1,7 +1,5 @@
 import type { APIEvent } from "@solidjs/start/server";
 
-import { getQuery } from "vinxi/http";
-
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import { ADMIN_DB_NAME } from "~/cypher/core/boltConstant";
 import { getDriver } from "~/cypher/core/driver";
@@ -17,7 +15,7 @@ export async function GET({ request }: APIEvent) {
   const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
 
   try {
-    const query = getQuery();
+    const query = Object.fromEntries(new URL(request.url).searchParams);
     const token = query.token as string;
 
     if (!token) {

@@ -1,3 +1,5 @@
+"use server";
+
 import type { ServerResult } from "~/cypher/types/ServerResult";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 
@@ -11,8 +13,6 @@ export async function isSettingEnabled(
   type: string,
   enabledField: string,
 ): Promise<ServerResult> {
-  "use server";
-
   const { dbSession } = await getDBSessionForSubdomain();
 
   try {
@@ -37,7 +37,6 @@ export async function isSettingEnabled(
  * @returns Promise<ServerResult> with boolean result
  */
 export async function isGoogleOAuthEnabled(): Promise<ServerResult> {
-  "use server";
   return await isSettingEnabled("oauth", "googleEnabled");
 }
 
@@ -46,7 +45,6 @@ export async function isGoogleOAuthEnabled(): Promise<ServerResult> {
  * @returns Promise<ServerResult> with boolean result
  */
 export async function isRazorpayEnabled(): Promise<ServerResult> {
-  "use server";
   return await isSettingEnabled("razorpay", "razorpayEnabled");
 }
 
@@ -55,6 +53,5 @@ export async function isRazorpayEnabled(): Promise<ServerResult> {
  * @returns Promise<ServerResult> with boolean result
  */
 export async function isStripeEnabled(): Promise<ServerResult> {
-  "use server";
   return await isSettingEnabled("stripe", "stripeEnabled");
 }

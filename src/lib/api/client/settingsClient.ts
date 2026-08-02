@@ -1,3 +1,5 @@
+"use server";
+
 import type { ServerResult } from "~/cypher/types/ServerResult";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import {
@@ -14,8 +16,6 @@ import { ADMIN_DB_NAME } from "~/cypher/core/boltConstant";
  * @returns Promise<ServerResult> with settings data
  */
 export async function getSetting(type: string): Promise<ServerResult> {
-  "use server";
-
   const { dbSession, subDomain } = await getDBSessionForSubdomain();
 
   try {
@@ -47,8 +47,6 @@ export async function saveSetting(
   type: string,
   data: Record<string, unknown>,
 ): Promise<ServerResult> {
-  "use server";
-
   const { dbSession, subDomain } = await getDBSessionForSubdomain();
 
   try {

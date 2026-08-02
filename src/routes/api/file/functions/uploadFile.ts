@@ -1,34 +1,28 @@
-import type { MultiPartData } from "h3";
 import type { Session, Transaction } from "neo4j-driver";
 
 import { resolveUploadFolderKeyPath } from "~/lib/files/folderOrganize";
 
 import { finalizeFileUpload } from "./finalizeFileUpload";
 
-function partText(part: MultiPartData | undefined): string {
-  if (!part?.data) return "";
-  return Buffer.from(part.data).toString("utf8").trim();
-}
-
-export function extractUploadFolderOptions(data: MultiPartData[]) {
+export function extractUploadFolderOptions(formData: FormData) {
   let folderId = "";
   let folderKeyPath: string[] | null = null;
   let categoryLabel = "Folder";
   let toParentEdgeType = "ParentFolder";
-  const fileParts: MultiPartData[] = [];
+  const fileParts: File[] = [];
 
-  for (const part of data) {
-    if (!part) continue;
-    const name = part.name != null ? String(part.name) : "";
-    if (part.filename) {
-      fileParts.push(part);
+  for (const [name, value] of formData.entries()) {
+    if (value instanceof File) {
+      if (value.name) {
+        fileParts.push(value);
+      }
       continue;
     }
     if (name === "folderId") {
-      folderId = partText(part);
+      folderId = String(value).trim();
     } else if (name === "folderKeyPath") {
       try {
-        const parsed = JSON.parse(partText(part));
+        const parsed = JSON.parse(String(value).trim());
         if (Array.isArray(parsed)) {
           folderKeyPath = parsed
             .map((k) => String(k || "").trim())
@@ -38,10 +32,10 @@ export function extractUploadFolderOptions(data: MultiPartData[]) {
         /* ignore invalid JSON */
       }
     } else if (name === "categoryLabel") {
-      const v = partText(part);
+      const v = String(value).trim();
       if (v) categoryLabel = v;
     } else if (name === "toParentEdgeType") {
-      const v = partText(part);
+      const v = String(value).trim();
       if (v) toParentEdgeType = v;
     }
   }
@@ -56,7 +50,7 @@ export function extractUploadFolderOptions(data: MultiPartData[]) {
 }
 
 export async function uploadFiles(
-  data: (MultiPartData & { label?: string })[],
+  data: File[],
   subDomain: string,
   neo4jSession: Session | Transaction,
   linkUserUuid?: string | null,
@@ -64,22 +58,17 @@ export async function uploadFiles(
 ) {
   const fileNodes = await Promise.all(
     data.map(async (file) => {
-      if (!file) {
-        return null;
-      }
-      const { data: fileData, filename, type, ...others } = file;
-      if (!filename) {
+      if (!file?.name) {
         return null;
       }
 
       const uploaded = await finalizeFileUpload({
-        data: fileData,
-        filename,
-        mimeType: type,
+        data: Buffer.from(await file.arrayBuffer()),
+        filename: file.name,
+        mimeType: file.type,
         subDomain,
         neo4jSession,
         linkUserUuid,
-        label: others.label,
         folderKeyPath,
       });
 
@@ -121,12 +110,12 @@ export async function uploadFiles(
 }
 
 export async function uploadFilesWithFolderOptions(
-  data: MultiPartData[],
+  formData: FormData,
   subDomain: string,
   neo4jSession: Session | Transaction,
   linkUserUuid?: string | null,
 ) {
-  const extracted = extractUploadFolderOptions(data);
+  const extracted = extractUploadFolderOptions(formData);
   const folderKeyPath = await resolveUploadFolderKeyPath(neo4jSession, {
     folderId: extracted.folderId,
     folderKeyPath: extracted.folderKeyPath,
