@@ -311,7 +311,9 @@ return {
         props:
           '''return {
   as: "h1",
-  text: f.product?.()?.title || "Product"
+  text: f.product?.()?.title || "Product",
+  "data-animate": "",
+  ref: (el) => el && f.animateOnView?.(el)
 };'''
       }
     }
@@ -333,7 +335,9 @@ return {
 return {
   as: "p",
   text,
-  hide: !text
+  hide: !text,
+  "data-animate": "",
+  ref: (el) => el && f.animateOnView?.(el, { delay: 0.08 })
 };'''
       }
     }
@@ -371,7 +375,12 @@ return {
 }`;'''
         displayOrder: 1
         componentName: Html
-        props: return { as: "div" };
+        props:
+          '''return {
+  as: "div",
+  "data-animate": "",
+  ref: (el) => el && f.animateOnView?.(el, { x: -32, y: 0 })
+};'''
       }
     }
     {
@@ -456,7 +465,12 @@ return {
 }`;'''
         displayOrder: 2
         componentName: Html
-        props: return { as: "div" };
+        props:
+          '''return {
+  as: "div",
+  "data-animate": "",
+  ref: (el) => el && f.animateOnView?.(el, { x: 32, y: 0, delay: 0.1 })
+};'''
       }
     }
     {
@@ -821,7 +835,9 @@ return {
   as: "div",
   text: description,
   textType: "markdown",
-  hide: !f.hasExactVariant?.() || !description
+  hide: !f.hasExactVariant?.() || !description,
+  "data-animate": "",
+  ref: (el) => el && f.animateOnView?.(el, { delay: 0.12 })
 };'''
       }
     }

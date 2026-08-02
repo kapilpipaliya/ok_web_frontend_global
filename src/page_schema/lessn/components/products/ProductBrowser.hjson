@@ -243,7 +243,9 @@ return {
   || [];
 return {
   as: "section",
-  hide: !Array.isArray(folders) || folders.length === 0
+  hide: !Array.isArray(folders) || folders.length === 0,
+  "data-animate": "",
+  ref: (el) => el && f.animateOnView?.(el)
 };'''
       }
     }
@@ -335,7 +337,9 @@ return {
   || [];
 return {
   as: "section",
-  hide: !Array.isArray(items) || items.length === 0
+  hide: !Array.isArray(items) || items.length === 0,
+  "data-animate": "",
+  ref: (el) => el && f.animateOnView?.(el, { delay: 0.08 })
 };'''
       }
     }
@@ -436,7 +440,9 @@ const items = f.getItemsForRender?.()
 const loading = f.loading?.();
 return {
   as: "div",
-  hide: loading || (Array.isArray(folders) && folders.length > 0) || (Array.isArray(items) && items.length > 0)
+  hide: loading || (Array.isArray(folders) && folders.length > 0) || (Array.isArray(items) && items.length > 0),
+  "data-animate": "",
+  ref: (el) => el && f.animateOnView?.(el)
 };'''
       }
     }

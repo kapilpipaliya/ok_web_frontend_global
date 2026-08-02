@@ -98,7 +98,9 @@ try {
           '''const content = c.productsSettings?.content || {};
 return {
   as: "h1",
-  text: content.pageTitle || "Products"
+  text: content.pageTitle || "Products",
+  "data-animate": "",
+  ref: (el) => el && f.animateOnView(el)
 };'''
       }
     }
@@ -120,7 +122,9 @@ return {
 return {
   as: "p",
   text: content.pageSubtitle || "Browse our curated Amazon product picks",
-  hide: !content.pageSubtitle && !content.pageTitle
+  hide: !content.pageSubtitle && !content.pageTitle,
+  "data-animate": "",
+  ref: (el) => el && f.animateOnView(el, { delay: 0.08 })
 };'''
       }
     }

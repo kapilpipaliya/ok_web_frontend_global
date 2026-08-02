@@ -104,7 +104,9 @@ const langPrefix = locale && /^[a-z]{2,3}$/i.test(locale) ? `/${locale}` : "";
 return {
   as: "a",
   href: `${langPrefix}/products`,
-  text: "← Back to products"
+  text: "← Back to products",
+  "data-animate": "",
+  ref: (el) => el && f.animateOnView(el, { y: 16 })
 };'''
       }
     }
@@ -126,7 +128,9 @@ return {
 return {
   as: "div",
   text: data.error || "Product not found",
-  hide: !!data.product
+  hide: !!data.product,
+  "data-animate": "",
+  ref: (el) => el && f.animateOnView(el)
 };'''
       }
     }
