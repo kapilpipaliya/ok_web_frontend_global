@@ -2,7 +2,7 @@ import type { RouteSectionProps } from "@solidjs/router";
 
 import { Link } from "@solidjs/meta";
 
-import { getCompanySquareLogoUrl } from "~/lib/graph/get/sync/company/getCompanySquareLogoUrl";
+import { getCompanyFaviconUrl } from "~/lib/graph/get/sync/company/getCompanyFaviconUrl";
 
 import { useGraph } from "~/lib/graph/context/UseGraph";
 import { AuthRequired } from "~/components/auth/AuthRequired";
@@ -36,7 +36,7 @@ export default function AdminLayoutRoute(props: Readonly<RouteSectionProps>) {
     <AuthRequired>
       <StyleRenderer cssContent={adminGlobalCss()} id="admin-global-styles" />
       <AdminPwa />
-      <Link href={getCompanySquareLogoUrl(graph) || ""} rel="icon" />
+      <Link href={getCompanyFaviconUrl(graph) || ""} rel="icon" />
       {props.children}
     </AuthRequired>
   );

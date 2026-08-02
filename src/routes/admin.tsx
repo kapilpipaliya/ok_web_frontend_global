@@ -5,7 +5,7 @@ import { createMemo } from "solid-js";
 
 import { HomeIconButton } from "~/components/styled/buttons/HomeIconButton";
 import { RedirectUrlIconButton } from "~/components/styled/buttons/RedirectUrlIconButton";
-import { getCompanySquareLogoUrl } from "~/lib/graph/get/sync/company/getCompanySquareLogoUrl";
+import { getCompanyFaviconUrl } from "~/lib/graph/get/sync/company/getCompanyFaviconUrl";
 import { PermissionGuard } from "~/lib/permissions/examples/PermissionGuard";
 import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
@@ -43,7 +43,7 @@ export default function AdminLayoutRoute(props: Readonly<RouteSectionProps>) {
       <StyleRenderer cssContent={adminGlobalCss()} id="admin-global-styles" />
       <AuthRequired>
         <AdminPwa />
-        <Link href={getCompanySquareLogoUrl(graph) || ""} rel="icon" />
+        <Link href={getCompanyFaviconUrl(graph) || ""} rel="icon" />
         <As as="header" css={SETTINGS_CONSTANTS.HEADER_MENU_CSS}>
           <HomeIconButton />
           <RedirectUrlIconButton />
