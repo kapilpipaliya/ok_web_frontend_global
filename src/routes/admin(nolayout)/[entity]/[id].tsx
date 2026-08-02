@@ -1,10 +1,5 @@
 import type { RouteSectionProps } from "@solidjs/router";
 
-import { Link } from "@solidjs/meta";
-
-import { getCompanyFaviconUrl } from "~/lib/graph/get/sync/company/getCompanyFaviconUrl";
-
-import { useGraph } from "~/lib/graph/context/UseGraph";
 import { AuthRequired } from "~/components/auth/AuthRequired";
 import { useTheme } from "~/lib/theme/ThemeContext";
 import { createMemo } from "solid-js";
@@ -14,7 +9,6 @@ import { StyleRenderer } from "~/components/StyleRenderer";
 import { AdminPwa } from "~/lib/pwa/AdminPwa";
 
 export default function AdminLayoutRoute(props: Readonly<RouteSectionProps>) {
-  const [graph] = useGraph();
   const theme = useTheme();
 
   const adminGlobalCss = createMemo(() => {
@@ -36,7 +30,6 @@ export default function AdminLayoutRoute(props: Readonly<RouteSectionProps>) {
     <AuthRequired>
       <StyleRenderer cssContent={adminGlobalCss()} id="admin-global-styles" />
       <AdminPwa />
-      <Link href={getCompanyFaviconUrl(graph) || ""} rel="icon" />
       {props.children}
     </AuthRequired>
   );

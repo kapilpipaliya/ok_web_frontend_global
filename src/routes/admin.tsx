@@ -1,17 +1,14 @@
 import type { RouteSectionProps } from "@solidjs/router";
 
-import { Link } from "@solidjs/meta";
 import { createMemo } from "solid-js";
 
 import { HomeIconButton } from "~/components/styled/buttons/HomeIconButton";
 import { RedirectUrlIconButton } from "~/components/styled/buttons/RedirectUrlIconButton";
-import { getCompanyFaviconUrl } from "~/lib/graph/get/sync/company/getCompanyFaviconUrl";
 import { PermissionGuard } from "~/lib/permissions/examples/PermissionGuard";
 import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { As } from "~/components/As";
 import { EmailConfirmationBanner } from "~/components/notifications/EmailConfirmationBanner";
-import { useGraph } from "~/lib/graph/context/UseGraph";
 import { AuthRequired } from "~/components/auth/AuthRequired";
 import { StyleRenderer } from "~/components/StyleRenderer";
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
@@ -20,7 +17,6 @@ import { useTheme } from "~/lib/theme/ThemeContext";
 import { AdminPwa } from "~/lib/pwa/AdminPwa";
 
 export default function AdminLayoutRoute(props: Readonly<RouteSectionProps>) {
-  const [graph] = useGraph();
   const theme = useTheme();
 
   const adminGlobalCss = createMemo(() => {
@@ -43,7 +39,6 @@ export default function AdminLayoutRoute(props: Readonly<RouteSectionProps>) {
       <StyleRenderer cssContent={adminGlobalCss()} id="admin-global-styles" />
       <AuthRequired>
         <AdminPwa />
-        <Link href={getCompanyFaviconUrl(graph) || ""} rel="icon" />
         <As as="header" css={SETTINGS_CONSTANTS.HEADER_MENU_CSS}>
           <HomeIconButton />
           <RedirectUrlIconButton />

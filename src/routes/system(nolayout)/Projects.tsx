@@ -1,12 +1,10 @@
-import { Link, Title } from "@solidjs/meta";
+import { Title } from "@solidjs/meta";
 
 import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
-import { getCompanyFaviconUrl } from "~/lib/graph/get/sync/company/getCompanyFaviconUrl";
 import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { SubDomainGrid } from "~/pages/subdomain/SubDomainGrid";
 import { As } from "~/components/As";
-import { useGraph } from "~/lib/graph/context/UseGraph";
 import type { JSX } from "solid-js";
 import { AuthRequired } from "~/components/auth/AuthRequired";
 import { StyleRenderer } from "~/components/StyleRenderer";
@@ -85,11 +83,5 @@ export default function Projects() {
 }
 
 function SystemLayoutRoute(props: { children: JSX.Element }) {
-  const [graph] = useGraph();
-  return (
-    <AuthRequired>
-      <Link href={getCompanyFaviconUrl(graph) || ""} rel="icon" />
-      {props.children}
-    </AuthRequired>
-  );
+  return <AuthRequired>{props.children}</AuthRequired>;
 }

@@ -1,14 +1,11 @@
 import type { JSX } from "solid-js";
 
-import { Link } from "@solidjs/meta";
-import { getCompanyFaviconUrl } from "~/lib/graph/get/sync/company/getCompanyFaviconUrl";
 import { PermissionGuard } from "~/lib/permissions/examples/PermissionGuard";
 import AdminDashboard from "~/pages/admin_dashboard/Dashboard";
 import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { As } from "~/components/As";
 import { EmailConfirmationBanner } from "~/components/notifications/EmailConfirmationBanner";
-import { useGraph } from "~/lib/graph/context/UseGraph";
 import { AuthRequired } from "~/components/auth/AuthRequired";
 import { RedirectUrlIconButton } from "~/components/styled/buttons/RedirectUrlIconButton";
 import { useTheme } from "~/lib/theme/ThemeContext";
@@ -27,7 +24,6 @@ export default function Admin() {
 }
 
 function AdminLayoutRoute(props: { children: JSX.Element }) {
-  const [graph] = useGraph();
   const theme = useTheme();
 
   const adminGlobalCss = createMemo(() => {
@@ -50,7 +46,6 @@ function AdminLayoutRoute(props: { children: JSX.Element }) {
       <StyleRenderer cssContent={adminGlobalCss()} id="admin-global-styles" />
       <AuthRequired>
         <AdminPwa />
-        <Link href={getCompanyFaviconUrl(graph) || ""} rel="icon" />
         <As as="header" css={SETTINGS_CONSTANTS.HEADER_MENU_CSS}>
           <RedirectUrlIconButton />
           <As

@@ -1,4 +1,4 @@
-import { MetaProvider } from "@solidjs/meta";
+import { Link, MetaProvider } from "@solidjs/meta";
 import { Router, useLocation, useNavigate } from "@solidjs/router";
 import { clientOnly } from "@solidjs/start";
 import { FileRoutes } from "@solidjs/start/router";
@@ -29,6 +29,7 @@ import {
   isNetworkError,
   NETWORK_ERROR_MESSAGE,
 } from "~/lib/api/withNetworkRetry";
+import { API } from "~/lib/api/endpoints";
 
 /** Above VertexPickerModal (101) and other app overlays so toasts stay visible. */
 const TOAST_CONTAINER_Z_INDEX = 20000;
@@ -126,6 +127,7 @@ export default function App() {
 
             return (
               <MetaProvider>
+                <Link href={API.file.downloadCompanyFaviconUrl} rel="icon" />
                 <ErrorBoundary
                   fallback={(error, reset) => {
                     // Log the UI error
