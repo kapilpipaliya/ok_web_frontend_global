@@ -4,7 +4,7 @@
       id: "1"
       L: Function
       P: {
-        description: Seeds Fulchand Shastri settings_page_config, table schemas (books, recommended_books, gallery, schedule, pages, components, functions, email templates, files), and default GlobalSetting section documents.
+        description: Seeds Lessn settings_page_config, table schemas, default GlobalSetting section documents, and key/fileName indexes (ProductCategory, Folder, Product, File, Component, EmailTemplate, Function, Theme).
         body:
           '''
 /**
@@ -46,6 +46,85 @@ async function ensureGlobalSetting() {
     RETURN g
     `
   );
+}
+
+async function ensureKeyIndexes() {
+  const indexes = [
+    {
+      name: "idx_product_category_key",
+      label: "ProductCategory",
+      property: "key",
+      description: "Index for ProductCategory key lookups"
+    },
+    {
+      name: "idx_folder_key",
+      label: "Folder",
+      property: "key",
+      description: "Index for Folder key lookups"
+    },
+    {
+      name: "idx_product_key",
+      label: "Product",
+      property: "key",
+      description: "Index for Product key lookups"
+    },
+    {
+      name: "idx_file_file_name",
+      label: "File",
+      property: "fileName",
+      description: "Index for File fileName lookups"
+    },
+    {
+      name: "idx_component_key",
+      label: "Component",
+      property: "key",
+      description: "Index for Component key lookups"
+    },
+    {
+      name: "idx_email_template_key",
+      label: "EmailTemplate",
+      property: "key",
+      description: "Index for EmailTemplate key lookups"
+    },
+    {
+      name: "idx_function_key",
+      label: "Function",
+      property: "key",
+      description: "Index for Function key lookups"
+    },
+    {
+      name: "idx_theme_key",
+      label: "Theme",
+      property: "key",
+      description: "Index for Theme key lookups"
+    }
+  ];
+
+  const results = [];
+  for (let i = 0; i < indexes.length; i++) {
+    const index = indexes[i];
+    if (dryRun) {
+      results.push({ name: index.name, status: "would_create" });
+      continue;
+    }
+    try {
+      await _.session.run(
+        `CREATE INDEX ${index.name} IF NOT EXISTS
+         FOR (n:${index.label})
+         ON (n.${index.property})`
+      );
+      results.push({ name: index.name, status: "created_or_exists", description: index.description });
+      console.log(`ensureKeyIndexes: ${index.name} OK`);
+    } catch (error) {
+      console.error(`ensureKeyIndexes: failed ${index.name}`, error);
+      results.push({
+        name: index.name,
+        status: "error",
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  }
+  return results;
 }
 
 async function processSettingsPageConfig(setting) {
@@ -206,6 +285,9 @@ const stats = {
 };
 
 await ensureGlobalSetting();
+
+const indexResults = await ensureKeyIndexes();
+stats.indexes = indexResults;
 
 for (let j = 0; j < (settingsPageConfigs?.length || 0); j++) {
   const r = await processSettingsPageConfig(settingsPageConfigs[j]);

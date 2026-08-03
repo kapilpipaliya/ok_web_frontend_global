@@ -165,8 +165,142 @@ return {
       P: {
         css:
           '''return `._id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
   color: #d4a574;
 }`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+};'''
+      }
+    }
+    {
+      id: "9a"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem 1.25rem;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "nav"
+};'''
+      }
+    }
+    {
+      id: "9b"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: #d4a574;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: #e8c8a0;
+    text-decoration: underline;
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const getCurrentLang = () => {
+  const lang = _.params?.lang;
+  if (lang && /^[a-z]{2,3}$/i.test(String(lang)))
+    return String(lang).toLowerCase();
+  return "en";
+};
+const lang = getCurrentLang();
+return {
+  as: "a",
+  href: `/${lang}/about`,
+  text: "About Us"
+};'''
+      }
+    }
+    {
+      id: "9c"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: #d4a574;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: #e8c8a0;
+    text-decoration: underline;
+  }
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const getCurrentLang = () => {
+  const lang = _.params?.lang;
+  if (lang && /^[a-z]{2,3}$/i.test(String(lang)))
+    return String(lang).toLowerCase();
+  return "en";
+};
+const lang = getCurrentLang();
+return {
+  as: "a",
+  href: `/${lang}/privacy`,
+  text: "Privacy Policy"
+};'''
+      }
+    }
+    {
+      id: "9d"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: #d4a574;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: #e8c8a0;
+    text-decoration: underline;
+  }
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''const getCurrentLang = () => {
+  const lang = _.params?.lang;
+  if (lang && /^[a-z]{2,3}$/i.test(String(lang)))
+    return String(lang).toLowerCase();
+  return "en";
+};
+const lang = getCurrentLang();
+return {
+  as: "a",
+  href: `/${lang}/terms`,
+  text: "Terms & Conditions"
+};'''
+      }
+    }
+    {
+      id: "9e"
+      L: Attr
+      P: {
         displayOrder: 2
         componentName: Html
         props:
@@ -321,6 +455,36 @@ return {
       T: Attr
       S: "11"
       E: "13"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "9"
+      E: "9a"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "9"
+      E: "9e"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "9a"
+      E: "9b"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "9a"
+      E: "9c"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "9a"
+      E: "9d"
     }
   ]
 }

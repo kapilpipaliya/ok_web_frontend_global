@@ -47,21 +47,11 @@ const checkAdminRole = () => {
 
 const URL_TO_SETTINGS_PAGE = {
   "/": "home",
-  "/about-fulchand": "about",
-  "/about-ask-umarala": "about-ask",
-  "/atma-sadhana-nitya-kram": "atma-sadhana-nitya-kram",
-  "/atma-siddhi-shastra-mission": "atma-siddhi-mission",
-  "/bhakti": "bhakti",
-  "/books": "books",
+  "/about": "about",
   "/contact": "contact",
-  "/discourses": "discourses",
-  "/donation": "donation",
-  "/gyaan-deepak-prajwalan": "gyaan-deepak",
-  "/his-inspiration": "his-inspiration",
-  "/gallery": "photos",
-  "/photos": "photos",
-  "/schedule": "schedule",
-  "/videos": "videos"
+  "/privacy": "privacy",
+  "/products": "products",
+  "/terms": "terms"
 };
 
 const isLangCode = (value) =>

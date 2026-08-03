@@ -1,0 +1,218 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        public: true
+        settingsPageId: privacy
+        isNoPermissionCheck: true
+        fns: return { enabled: () => true }
+        url: /privacy
+        key: PrivacyPolicy
+        title: Privacy Policy
+        props:
+          '''
+const locale = _.params?.lang ? String(_.params.lang).toLowerCase() : undefined;
+return {
+  contextName: "privacySettings",
+  serverFunction: `
+try {
+  const result = await s({
+    functionName: "loadPublicPageSettings",
+    contextData: { pageId: "privacy", allowPublicRead: true, locale: ${JSON.stringify(locale ?? null)} }
+  });
+  if (!result?.result?.success) return {};
+  return result.result.data?.sections || {};
+} catch (error) {
+  console.error("Error loading privacy page settings:", error);
+  return {};
+}
+`
+};
+'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  padding: 3rem 1rem;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "main"
+};'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  max-width: 860px;
+  margin: 0 auto;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "article",
+  "data-animate": "",
+  ref: (el) => el && f.animateOnView(el, { y: 16 })
+};'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: ${t.var.color.text};
+  font-size: 2.25rem;
+  font-weight: 600;
+  margin: 0 0 0.75rem 0;
+  line-height: 1.2;
+
+  @media (max-width: 768px) {
+    font-size: 1.75rem;
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const content = c.privacySettings?.content;
+return {
+  as: "h1",
+  text: content?.pageTitle || "Privacy Policy"
+};'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: ${t.var.color.text_light_200};
+  font-size: 1.05rem;
+  line-height: 1.6;
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const content = c.privacySettings?.content;
+return {
+  as: "p",
+  text: content?.pageSubtitle || "",
+  hide: () => !content?.pageSubtitle
+};'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: ${t.var.color.text_light_300};
+  font-size: 0.9rem;
+  font-style: italic;
+  margin: 0 0 2rem 0;
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''const content = c.privacySettings?.content;
+const lastUpdated = content?.lastUpdated || "";
+return {
+  as: "p",
+  text: lastUpdated ? `Last updated: ${lastUpdated}` : "",
+  hide: () => !lastUpdated
+};'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: ${t.var.color.text_light_200};
+  line-height: 1.75;
+  font-size: 1rem;
+
+  & h2 {
+    color: ${t.var.color.text};
+    font-size: 1.35rem;
+    font-weight: 600;
+    margin: 2rem 0 0.75rem 0;
+  }
+
+  & h3 {
+    color: ${t.var.color.text};
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 1.5rem 0 0.5rem 0;
+  }
+
+  & p {
+    margin: 0 0 1rem 0;
+  }
+
+  & ul, & ol {
+    margin: 0 0 1rem 0;
+    padding-left: 1.25rem;
+  }
+
+  & li {
+    margin-bottom: 0.4rem;
+  }
+
+  & a {
+    color: ${t.var.color.primary};
+    text-decoration: none;
+  }
+
+  & a:hover {
+    text-decoration: underline;
+  }
+}`;'''
+        displayOrder: 4
+        componentName: Html
+        textType: markdown
+        props:
+          '''const content = c.privacySettings?.content;
+return {
+  as: "div",
+  textType: "markdown",
+  text: content?.bodyContent || ""
+};'''
+      }
+    }
+    {
+      id: "8"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: Layout
+      }
+    }
+  ]
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" }
+    { id: "e2", T: "PageLayout", S: "1", E: "8" }
+    { id: "e3", T: "Attr", S: "2", E: "3" }
+    { id: "e4", T: "Attr", S: "3", E: "4" }
+    { id: "e5", T: "Attr", S: "3", E: "5" }
+    { id: "e6", T: "Attr", S: "3", E: "6" }
+    { id: "e7", T: "Attr", S: "3", E: "7" }
+  ]
+}

@@ -173,7 +173,10 @@ const globalSidebarItems = [
 const sidebarItems = [
   { id: "home", label: "Home Page", path: "/settings?page=home", icon: "document" },
   { id: "products", label: "Products Page", path: "/settings?page=products", icon: "document" },
-  { id: "contact", label: "Contact", path: "/settings?page=contact", icon: "document" }
+  { id: "contact", label: "Contact", path: "/settings?page=contact", icon: "document" },
+  { id: "about", label: "About Us", path: "/settings?page=about", icon: "document" },
+  { id: "privacy", label: "Privacy Policy", path: "/settings?page=privacy", icon: "document" },
+  { id: "terms", label: "Terms & Conditions", path: "/settings?page=terms", icon: "document" }
 ];
 
 const pages = [
@@ -423,6 +426,272 @@ const pages = [
         }
       }
     ]
+  },
+  {
+    settingsPageId: "about",
+    name: "About Us Settings",
+    description: "Manage content for the About Us page.",
+    sections: [
+      {
+        id: "content",
+        title: "Page content",
+        fields: [
+          buildField({ key: "pageTitle", label: "Page title", renderer: "text", defaultValue: "About Us", colSpan: 1 }),
+          buildField({ key: "pageSubtitle", label: "Page subtitle", renderer: "text", defaultValue: "Who we are and what Lessn is about.", colSpan: 1 }),
+          buildField({ key: "lastUpdated", label: "Last updated", renderer: "text", defaultValue: "August 3, 2026", colSpan: 1, translatable: false }),
+          buildField({
+            key: "bodyContent",
+            label: "Body content (Markdown)",
+            renderer: "textArea",
+            defaultValue: `## Who we are
+
+Lessn helps shoppers discover curated Amazon product picks with honest reviews and clear buying guides.
+
+## What we do
+
+- Curate trustworthy product recommendations for everyday needs
+- Share practical buying advice so you can choose with confidence
+- Highlight quality picks worth recommending
+
+## Our approach
+
+We focus on clarity over hype. Our goal is to make product research faster and more useful.
+
+## Get in touch
+
+Have a question or suggestion? Visit our [Contact](/contact) page.`,
+            colSpan: 1
+          })
+        ]
+      }
+    ],
+    defaultDocuments: [{
+      sectionId: "content",
+      values: {
+        pageTitle: "About Us",
+        pageSubtitle: "Who we are and what Lessn is about.",
+        lastUpdated: "August 3, 2026",
+        bodyContent: `## Who we are
+
+Lessn helps shoppers discover curated Amazon product picks with honest reviews and clear buying guides.
+
+## What we do
+
+- Curate trustworthy product recommendations for everyday needs
+- Share practical buying advice so you can choose with confidence
+- Highlight quality picks worth recommending
+
+## Our approach
+
+We focus on clarity over hype. Our goal is to make product research faster and more useful.
+
+## Get in touch
+
+Have a question or suggestion? Visit our [Contact](/contact) page.`
+      }
+    }]
+  },
+  {
+    settingsPageId: "privacy",
+    name: "Privacy Policy Settings",
+    description: "Manage content for the Privacy Policy page.",
+    sections: [
+      {
+        id: "content",
+        title: "Page content",
+        fields: [
+          buildField({ key: "pageTitle", label: "Page title", renderer: "text", defaultValue: "Privacy Policy", colSpan: 1 }),
+          buildField({ key: "pageSubtitle", label: "Page subtitle", renderer: "text", defaultValue: "How Lessn collects, uses, and protects your information.", colSpan: 1 }),
+          buildField({ key: "lastUpdated", label: "Last updated", renderer: "text", defaultValue: "August 3, 2026", colSpan: 1, translatable: false }),
+          buildField({
+            key: "bodyContent",
+            label: "Body content (Markdown)",
+            renderer: "textArea",
+            defaultValue: `## Introduction
+
+Lessn ("we", "us", or "our") operates this website to share curated Amazon product recommendations. This Privacy Policy explains how we handle information when you visit or use our site.
+
+## Information we collect
+
+- **Contact information** you submit through forms (such as name, email, phone, and message content)
+- **Usage data** such as pages visited, device type, and general analytics
+- **Cookies or similar technologies** used to improve site performance and understand traffic
+
+## How we use information
+
+We use collected information to:
+
+- Respond to inquiries and support requests
+- Improve website content and user experience
+- Measure site performance and engagement
+- Comply with legal obligations when required
+
+## Affiliate disclosure
+
+As an Amazon Associate, we may earn from qualifying purchases. Affiliate links do not change how we handle your personal data on this site.
+
+## Third-party services
+
+We may use third-party tools for analytics, hosting, or email delivery. Those providers process data according to their own policies.
+
+## Data retention
+
+We keep information only as long as needed for the purposes described above, or as required by law.
+
+## Your choices
+
+You may contact us to request access, correction, or deletion of personal information you have shared with us, subject to applicable law.
+
+## Contact
+
+For privacy questions, please reach us through the [Contact](/contact) page.`,
+            colSpan: 1
+          })
+        ]
+      }
+    ],
+    defaultDocuments: [{
+      sectionId: "content",
+      values: {
+        pageTitle: "Privacy Policy",
+        pageSubtitle: "How Lessn collects, uses, and protects your information.",
+        lastUpdated: "August 3, 2026",
+        bodyContent: `## Introduction
+
+Lessn ("we", "us", or "our") operates this website to share curated Amazon product recommendations. This Privacy Policy explains how we handle information when you visit or use our site.
+
+## Information we collect
+
+- **Contact information** you submit through forms (such as name, email, phone, and message content)
+- **Usage data** such as pages visited, device type, and general analytics
+- **Cookies or similar technologies** used to improve site performance and understand traffic
+
+## How we use information
+
+We use collected information to:
+
+- Respond to inquiries and support requests
+- Improve website content and user experience
+- Measure site performance and engagement
+- Comply with legal obligations when required
+
+## Affiliate disclosure
+
+As an Amazon Associate, we may earn from qualifying purchases. Affiliate links do not change how we handle your personal data on this site.
+
+## Third-party services
+
+We may use third-party tools for analytics, hosting, or email delivery. Those providers process data according to their own policies.
+
+## Data retention
+
+We keep information only as long as needed for the purposes described above, or as required by law.
+
+## Your choices
+
+You may contact us to request access, correction, or deletion of personal information you have shared with us, subject to applicable law.
+
+## Contact
+
+For privacy questions, please reach us through the [Contact](/contact) page.`
+      }
+    }]
+  },
+  {
+    settingsPageId: "terms",
+    name: "Terms & Conditions Settings",
+    description: "Manage content for the Terms & Conditions page.",
+    sections: [
+      {
+        id: "content",
+        title: "Page content",
+        fields: [
+          buildField({ key: "pageTitle", label: "Page title", renderer: "text", defaultValue: "Terms & Conditions", colSpan: 1 }),
+          buildField({ key: "pageSubtitle", label: "Page subtitle", renderer: "text", defaultValue: "The rules and conditions for using Lessn.", colSpan: 1 }),
+          buildField({ key: "lastUpdated", label: "Last updated", renderer: "text", defaultValue: "August 3, 2026", colSpan: 1, translatable: false }),
+          buildField({
+            key: "bodyContent",
+            label: "Body content (Markdown)",
+            renderer: "textArea",
+            defaultValue: `## Agreement to terms
+
+By accessing or using Lessn, you agree to these Terms & Conditions. If you do not agree, please do not use the site.
+
+## Use of the website
+
+You may use this website for personal, non-commercial browsing of product recommendations and related content. You agree not to misuse the site, attempt unauthorized access, or interfere with its operation.
+
+## Product recommendations and affiliate links
+
+- Product information is provided for general guidance and may change without notice
+- Prices, availability, and product details are controlled by third-party sellers (including Amazon)
+- As an Amazon Associate, we may earn from qualifying purchases made through links on this site
+
+## No warranties
+
+Content is provided "as is" without warranties of any kind. We do not guarantee that recommendations will meet your specific needs or that the site will always be uninterrupted or error-free.
+
+## Limitation of liability
+
+To the fullest extent permitted by law, Lessn is not liable for any indirect, incidental, or consequential damages arising from your use of the site or reliance on its content.
+
+## Intellectual property
+
+Site content, branding, and materials are owned by Lessn or its licensors and may not be copied or reused without permission, except for personal non-commercial use.
+
+## Changes to these terms
+
+We may update these Terms & Conditions from time to time. Continued use of the site after changes means you accept the updated terms.
+
+## Contact
+
+Questions about these terms can be sent through our [Contact](/contact) page.`,
+            colSpan: 1
+          })
+        ]
+      }
+    ],
+    defaultDocuments: [{
+      sectionId: "content",
+      values: {
+        pageTitle: "Terms & Conditions",
+        pageSubtitle: "The rules and conditions for using Lessn.",
+        lastUpdated: "August 3, 2026",
+        bodyContent: `## Agreement to terms
+
+By accessing or using Lessn, you agree to these Terms & Conditions. If you do not agree, please do not use the site.
+
+## Use of the website
+
+You may use this website for personal, non-commercial browsing of product recommendations and related content. You agree not to misuse the site, attempt unauthorized access, or interfere with its operation.
+
+## Product recommendations and affiliate links
+
+- Product information is provided for general guidance and may change without notice
+- Prices, availability, and product details are controlled by third-party sellers (including Amazon)
+- As an Amazon Associate, we may earn from qualifying purchases made through links on this site
+
+## No warranties
+
+Content is provided "as is" without warranties of any kind. We do not guarantee that recommendations will meet your specific needs or that the site will always be uninterrupted or error-free.
+
+## Limitation of liability
+
+To the fullest extent permitted by law, Lessn is not liable for any indirect, incidental, or consequential damages arising from your use of the site or reliance on its content.
+
+## Intellectual property
+
+Site content, branding, and materials are owned by Lessn or its licensors and may not be copied or reused without permission, except for personal non-commercial use.
+
+## Changes to these terms
+
+We may update these Terms & Conditions from time to time. Continued use of the site after changes means you accept the updated terms.
+
+## Contact
+
+Questions about these terms can be sent through our [Contact](/contact) page.`
+      }
+    }]
   }
 ];
 function stripFieldSchema(field) {

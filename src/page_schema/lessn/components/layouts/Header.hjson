@@ -276,6 +276,7 @@ const items = [
     children:
       productCategoryChildren.length > 0 ? productCategoryChildren : undefined
   },
+  { id: "about", text: "About Us", href: "/about" },
   { id: "contact", text: "Contact", href: "/contact" }
 ];
 
