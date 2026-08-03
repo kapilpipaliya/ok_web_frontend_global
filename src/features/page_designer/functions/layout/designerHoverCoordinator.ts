@@ -39,7 +39,9 @@ export function clearDesignerHoverFromPreview(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
 ) {
-  const layout = graph.vertexes[layoutStoreId]?.P as PageLayoutObject | undefined;
+  const layout = graph.vertexes[layoutStoreId]?.P as
+    | PageLayoutObject
+    | undefined;
   if (isLayoutTreeHoverActive(layout)) {
     return;
   }

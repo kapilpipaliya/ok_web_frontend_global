@@ -18,16 +18,7 @@ export const runArgsFunction = (
   body: string,
   _: FunctionArgumentType,
 ): unknown =>
-  new Function(
-    "_",
-    "f",
-    "c",
-    "t",
-    "g",
-    "sg",
-    "s",
-    body,
-  )(
+  new Function("_", "f", "c", "t", "g", "sg", "s", body)(
     _,
     _.fns,
     _.contextData,

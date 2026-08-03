@@ -18,10 +18,7 @@ function compileTemplate(
   strings: TemplateStringsArray,
   values: unknown[],
 ): string {
-  return strings.reduce(
-    (acc, str, i) => acc + str + (values[i] ?? ""),
-    "",
-  );
+  return strings.reduce((acc, str, i) => acc + str + (values[i] ?? ""), "");
 }
 
 function wrap(rule: string): CssTemplateTag {

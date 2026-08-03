@@ -61,7 +61,13 @@ export async function executeServerFunction(
     // Create the function from the provided body string.
     // Shorthand params: _ (full bag), c (contextData), g (graph), s (executeNamedServerFunction)
     const AsyncFunction = Object.getPrototypeOf(async () => {}).constructor;
-    const serverFunction = new AsyncFunction("_", "c", "g", "s", request.functionBody);
+    const serverFunction = new AsyncFunction(
+      "_",
+      "c",
+      "g",
+      "s",
+      request.functionBody,
+    );
 
     // Prepare the _ object that will be available in the function
     const _ = {

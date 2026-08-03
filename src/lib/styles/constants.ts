@@ -44,15 +44,15 @@ export const DEFAULT_THEME = {
     lg: "1.5rem",
     xl: "2rem",
     xxl: "3rem",
-    xxxl: "4rem"
+    xxxl: "4rem",
   },
   borderRadius: {
     sm: "0.375rem",
     md: "0.5rem",
     lg: "0.75rem",
     xl: "1rem",
-    full: "9999px"
-  }
+    full: "9999px",
+  },
 } as ThemeContext["var"];
 
 // CSS Reset styles

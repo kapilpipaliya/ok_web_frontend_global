@@ -31,7 +31,7 @@ export default function SchemaJobRunner(
 
   let pollTimer: ReturnType<typeof setInterval> | undefined;
   /** Last `jobId` from the URL we started polling for (avoids resetting the interval when search is unchanged). */
-  let syncedJobIdFromUrl: string | null | undefined ;
+  let syncedJobIdFromUrl: string | null | undefined;
 
   const stopPolling = () => {
     if (pollTimer !== undefined) {

@@ -91,9 +91,8 @@ export function ResizableContainer(
     props.height || initialDimensions.height,
   );
   const [containerRef, setContainerRef] = createSignal<HTMLDivElement>();
-  const [activeResizeKey, setActiveResizeKey] = createSignal<
-    null | PreviewResizeKey
-  >(null);
+  const [activeResizeKey, setActiveResizeKey] =
+    createSignal<null | PreviewResizeKey>(null);
   const [isDraggingOver, setIsDraggingOver] = createSignal(false);
   const { showErrorToast } = useToast();
   const { setResizing } = useResizeOverlay();
@@ -103,8 +102,7 @@ export function ResizableContainer(
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStoreVertex = () =>
     graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
-  const isResizingDisabled = () =>
-    !!layoutStoreVertex()?.P?.isResizingDisabled;
+  const isResizingDisabled = () => !!layoutStoreVertex()?.P?.isResizingDisabled;
   const formStoreId = useDesignerFormIdContext();
   const formStoreVertex = () =>
     graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
@@ -118,11 +116,7 @@ export function ResizableContainer(
   createEffect(
     on(
       () =>
-        [
-          props.view,
-          viewVertex()?.P.width,
-          viewVertex()?.P.height,
-        ] as const,
+        [props.view, viewVertex()?.P.width, viewVertex()?.P.height] as const,
       () => {
         if (activeResizeKey()) {
           return;

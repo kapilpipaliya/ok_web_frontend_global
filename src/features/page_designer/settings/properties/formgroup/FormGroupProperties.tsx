@@ -26,9 +26,7 @@ import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransact
 import { PROPERTIES } from "~/pages/settings/constants";
 import { evalExpression } from "~/lib/expression_eval";
 
-import {
-  useDesignerFormIdContext,
-} from "../../../context/LayoutContext";
+import { useDesignerFormIdContext } from "../../../context/LayoutContext";
 import { ValidationConfig } from "../validations/ValidationConfig";
 import { HighlightSetValueContent } from "./HighlightSetValueContent";
 import { Label } from "./Label";
@@ -166,10 +164,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
         />
       </Show>
       <Show
-        when={isPermissionsConfigurable(
-          graph,
-          formStoreVertex()?.P.formDataId,
-        )}
+        when={isPermissionsConfigurable(graph, formStoreVertex()?.P.formDataId)}
       >
         <SelectPermissionField
           meta={graph.vertexes[vertexIds.perm]}
@@ -505,8 +500,7 @@ function getMetaVertexes(
 function PropertyField(props: Readonly<PropertyFieldProps>) {
   const [graph, setGraph] = useGraph();
 
-  const formStoreId = () =>
-    graph.vertexes[props.openedFormId]?.P?.formId as Id;
+  const formStoreId = () => graph.vertexes[props.openedFormId]?.P?.formId as Id;
   const formStoreVertex = () =>
     graph.vertexes[formStoreId()] as Vertex<FormStoreObject>;
 

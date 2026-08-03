@@ -152,9 +152,7 @@ export function attachComponentPaletteTreeDragDrop(
       onDrop: async (input, data) => {
         const position = applyPalettePosition(input);
         const sourceType = String(data.type ?? "");
-        const sourceId = (data.itemId ??
-          data.categoryId ??
-          data.compId) as Id;
+        const sourceId = (data.itemId ?? data.categoryId ?? data.compId) as Id;
         ctx.setDropState(null, null);
         if (!sourceId || sourceId === ctx.item.id) return;
         await ctx.onDrop({

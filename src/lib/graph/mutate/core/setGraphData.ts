@@ -38,7 +38,13 @@ export function setGraphData(
 
   batch(() => {
     for (const vertexId in graphData.vertexes) {
-      updateVertex(vertexId, graphData.vertexes[vertexId], graph, setGraph, options);
+      updateVertex(
+        vertexId,
+        graphData.vertexes[vertexId],
+        graph,
+        setGraph,
+        options,
+      );
     }
 
     for (const edgeId in graphData.edges) {

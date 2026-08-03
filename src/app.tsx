@@ -7,13 +7,7 @@ import { App as CapacitorApp } from "@capacitor/app";
 import { makeTimer } from "@solid-primitives/timer";
 
 // import "~/base.css";
-import {
-  ErrorBoundary,
-  onMount,
-  Suspense,
-  createSignal,
-  Show,
-} from "solid-js";
+import { ErrorBoundary, onMount, Suspense, createSignal, Show } from "solid-js";
 import { isServer, NoHydration } from "solid-js/web";
 
 import { createAppState } from "~/createAppState";

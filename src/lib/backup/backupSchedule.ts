@@ -5,12 +5,12 @@ export const DEFAULT_BACKUP_SCHEDULE = "0 * * * *";
 export type ScheduledBackupType = "hourly" | "daily";
 
 export function isHourlyBackupSchedule(schedule?: string): boolean {
-  return HOURLY_SCHEDULE_PATTERNS.has((schedule || DEFAULT_BACKUP_SCHEDULE).trim());
+  return HOURLY_SCHEDULE_PATTERNS.has(
+    (schedule || DEFAULT_BACKUP_SCHEDULE).trim(),
+  );
 }
 
-export function getScheduledBackupType(
-  schedule?: string,
-): ScheduledBackupType {
+export function getScheduledBackupType(schedule?: string): ScheduledBackupType {
   return isHourlyBackupSchedule(schedule) ? "hourly" : "daily";
 }
 

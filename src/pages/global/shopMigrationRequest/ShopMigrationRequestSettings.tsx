@@ -83,7 +83,9 @@ export function ShopMigrationRequestSettings() {
         </As>
         <As
           as="p"
-          css={"return `._id { margin: 0; font-size: 0.875rem; opacity: 0.9; }`;"}
+          css={
+            "return `._id { margin: 0; font-size: 0.875rem; opacity: 0.9; }`;"
+          }
         >
           Set a global "migration request" time. Each Shopify shop runs
           migration only when this time is <strong>greater than</strong> that

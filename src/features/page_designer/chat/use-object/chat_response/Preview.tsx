@@ -281,8 +281,8 @@ export function Preview(props: {
                   layoutStoreVertex()?.P.focusedFormId === formId ||
                   !layoutStoreVertex()?.P.focusedFormId ||
                   !graph.vertexes[
-                    graph.vertexes[layoutStoreVertex()?.P.focusedFormId ?? ""]?.P
-                      ?.selectedId || ""
+                    graph.vertexes[layoutStoreVertex()?.P.focusedFormId ?? ""]
+                      ?.P?.selectedId || ""
                   ]
                 }
                 icon="ph:plus-circle"

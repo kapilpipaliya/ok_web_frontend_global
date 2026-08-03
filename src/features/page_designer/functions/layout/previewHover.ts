@@ -36,9 +36,7 @@ export function setLayoutPreviewHover(
   }
 }
 
-export function isLayoutTreeHoverActive(
-  layout: PageLayoutObject | undefined,
-) {
+export function isLayoutTreeHoverActive(layout: PageLayoutObject | undefined) {
   return (
     !!layout &&
     layout.layoutTreeScrollSource === "layoutTree" &&

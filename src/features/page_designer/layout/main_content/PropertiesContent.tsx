@@ -21,8 +21,7 @@ export function PropertiesContent(props: { openedFormId: Id }) {
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStore = () =>
     (graph.vertexes[layoutStoreId]?.P as PageLayoutObject) || {};
-  const formStoreId = () =>
-    graph.vertexes[props.openedFormId]?.P?.formId as Id;
+  const formStoreId = () => graph.vertexes[props.openedFormId]?.P?.formId as Id;
   const formStoreVertex = () =>
     graph.vertexes[formStoreId()] as Vertex<FormStoreObject>;
   return (

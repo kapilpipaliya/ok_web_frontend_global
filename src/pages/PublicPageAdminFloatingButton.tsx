@@ -3,9 +3,11 @@ import { IconButton } from "~/components/styled/IconButton";
 import { isAdminRole } from "~/lib/graph/get/sync/auth/isAdminRole";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 
-export function PublicPageAdminFloatingButton(props: Readonly<{
-  pageKey: () => string | undefined;
-}>) {
+export function PublicPageAdminFloatingButton(
+  props: Readonly<{
+    pageKey: () => string | undefined;
+  }>,
+) {
   const [graph] = useGraph();
   // Prevent SSR/CSR markup mismatches during hydration.
   // We only show the button after mount, so the initial hydrated output
@@ -58,4 +60,3 @@ export function PublicPageAdminFloatingButton(props: Readonly<{
     </Show>
   );
 }
-

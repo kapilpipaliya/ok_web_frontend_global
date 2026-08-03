@@ -124,10 +124,10 @@ export const computeRange = (
     const end = findIndex(cache, endOffset, prevStartIndex);
     return [findIndex(cache, startOffset, prevStartIndex, end), end];
   }
-    // search backward
-    // start <= end, start <= prevStartIndex
-    const start = findIndex(cache, startOffset, undefined, prevStartIndex);
-    return [start, findIndex(cache, endOffset, start)];
+  // search backward
+  // start <= end, start <= prevStartIndex
+  const start = findIndex(cache, startOffset, undefined, prevStartIndex);
+  return [start, findIndex(cache, endOffset, start)];
 };
 
 /**
@@ -220,13 +220,13 @@ export const updateCacheLength = (
     fill(cache._sizes, diff, isShift);
     return cache._defaultItemSize * diff;
   }
-    // Removed
-    cache._offsets.splice(diff);
-    return (
-      isShift ? cache._sizes.splice(0, -diff) : cache._sizes.splice(diff)
-    ).reduce(
-      (acc, removed) =>
-        acc - (removed === UNCACHED ? cache._defaultItemSize : removed),
-      0,
-    );
+  // Removed
+  cache._offsets.splice(diff);
+  return (
+    isShift ? cache._sizes.splice(0, -diff) : cache._sizes.splice(diff)
+  ).reduce(
+    (acc, removed) =>
+      acc - (removed === UNCACHED ? cache._defaultItemSize : removed),
+    0,
+  );
 };

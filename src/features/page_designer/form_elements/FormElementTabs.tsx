@@ -64,10 +64,7 @@ const panelContentCss = [
 export function ComponentsPanel() {
   return (
     <As as="div" css={panelContentCss}>
-      <ComponentList
-        edgeName="ParentComp"
-        rootExpression={`g:'Comp[Root]'`}
-      />
+      <ComponentList edgeName="ParentComp" rootExpression={`g:'Comp[Root]'`} />
 
       <Divider />
 
@@ -117,10 +114,7 @@ export function PagesPanel() {
       <As as="div" css={panelContentCss}>
         <Switch>
           <Match when={selectedTab().collection === "Page"}>
-            <ComponentPaletteTree
-              config={PAGE_PALETTE_CONFIG}
-              searchAlways
-            />
+            <ComponentPaletteTree config={PAGE_PALETTE_CONFIG} searchAlways />
           </Match>
           <Match when={selectedTab().collection === "EmailTemplate"}>
             <ComponentPaletteTree
@@ -143,10 +137,7 @@ export function PagesPanel() {
 export function FunctionsPanel() {
   return (
     <As as="div" css={panelContentCss}>
-      <ComponentPaletteTree
-        config={FUNCTION_PALETTE_CONFIG}
-        searchAlways
-      />
+      <ComponentPaletteTree config={FUNCTION_PALETTE_CONFIG} searchAlways />
     </As>
   );
 }

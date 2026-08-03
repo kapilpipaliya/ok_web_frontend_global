@@ -73,9 +73,7 @@ export function SubdomainDeleteDialog(props: SubdomainDeleteDialogProps) {
                   onClick={props.onConfirm}
                   type="button"
                 >
-                  {props.isLoading
-                    ? "Deleting..."
-                    : "Yes, delete permanently"}
+                  {props.isLoading ? "Deleting..." : "Yes, delete permanently"}
                 </As>
                 <As
                   as="button"

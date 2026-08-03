@@ -45,11 +45,7 @@ export async function loadComponentsWithCache(
   }
 
   if (misses.length > 0) {
-    const fetched = await fetchComponentDataPure(
-      misses,
-      dbSession,
-      subDomain,
-    );
+    const fetched = await fetchComponentDataPure(misses, dbSession, subDomain);
     if (fetched?.graph) {
       prepareGraphForWireTransfer(fetched.graph);
       const split = splitGraphByComponentKeys(fetched, misses);

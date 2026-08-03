@@ -46,10 +46,7 @@ export async function assertFileNameAvailable(
   );
 
   if (checkResult.records.length > 0) {
-    throw new APIError(
-      `File with name "${filename}" already exists`,
-      409,
-    );
+    throw new APIError(`File with name "${filename}" already exists`, 409);
   }
 }
 
@@ -143,11 +140,7 @@ export async function finalizeFileUpload(input: FinalizeFileUploadInput) {
     relationships: {} as Record<string, Edge>,
   };
 
-  const result = processResult(
-    record ? [record] : [],
-    context,
-    "f",
-  );
+  const result = processResult(record ? [record] : [], context, "f");
 
   return {
     graph: {

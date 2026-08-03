@@ -4,9 +4,7 @@ import { FloatingFormDropdown } from "~/components/styled/dialog/FloatingFormDro
 import { KeyInputField } from "~/components/styled/dialog/KeyInputField";
 import { useToast } from "~/components/styled/modal/Toast";
 import { As } from "~/components/As";
-import {
-  useDesignerLayoutStore,
-} from "~/features/page_designer/context/LayoutContext";
+import { useDesignerLayoutStore } from "~/features/page_designer/context/LayoutContext";
 import type { PaletteTreeConfig } from "~/features/page_designer/form_elements/components/componentPaletteConfig";
 import {
   createPaletteItem,

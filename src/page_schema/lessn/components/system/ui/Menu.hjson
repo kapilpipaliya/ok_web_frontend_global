@@ -68,11 +68,18 @@ const isMouseLikePointer = (pointerType) =>
 
 const createController = () => {
   const [openPath, setOpenPath] = _.createSignal([]);
+  const [scrollFlags, setScrollFlags] = _.createSignal({});
   const triggerRefs = new Map();
   const menuRefs = new Map();
+  const scrollBodyRefs = new Map();
   const floatingCleanups = new Map();
   let closeTimer = null;
   let lastPointerType = "mouse";
+  let autoScrollRaf = null;
+  let autoScrollId = null;
+  let pointerPos = { x: 0, y: 0 };
+  // Pointer position frozen at last scroll — enters with same coords are scroll-induced
+  let scrollPointerPos = { x: NaN, y: NaN };
 
   const setTriggerRef = (id) => (el) => {
     if (el) triggerRefs.set(id, el);
@@ -82,6 +89,107 @@ const createController = () => {
   const setMenuRef = (id) => (el) => {
     if (el) menuRefs.set(id, el);
     else menuRefs.delete(id);
+  };
+
+  const setScrollBodyRef = (id) => (el) => {
+    if (el) scrollBodyRefs.set(id, el);
+    else scrollBodyRefs.delete(id);
+  };
+
+  const getScrollFlags = (id) => scrollFlags()[id] || { up: false, down: false };
+  const canScrollUp = (id) => !!getScrollFlags(id).up;
+  const canScrollDown = (id) => !!getScrollFlags(id).down;
+
+  const onMenuPointerMove = (event) => {
+    if (event?.clientX == null) return;
+    pointerPos = { x: event.clientX, y: event.clientY };
+  };
+
+  // Scroll moves items under a stationary cursor and fires pointerenter.
+  // Lock opens to that cursor position until the mouse actually moves.
+  const markMenuScrolling = (id) => {
+    scrollPointerPos = { x: pointerPos.x, y: pointerPos.y };
+    if (closeTimer) {
+      clearTimeout(closeTimer);
+      closeTimer = null;
+    }
+    const path = openPath();
+    const idx = path.indexOf(id);
+    if (idx >= 0 && path.length > idx + 1) {
+      const prev = path;
+      for (let i = idx + 1; i < prev.length; i++) stopFloating(prev[i]);
+      setOpenPath(prev.slice(0, idx + 1));
+    }
+  };
+
+  const isScrollInducedEnter = (event) => {
+    // Hovering the auto-scroll icons: never open nested from item enters
+    if (autoScrollId != null) return true;
+    if (event?.clientX == null || Number.isNaN(scrollPointerPos.x)) return false;
+    return (
+      event.clientX === scrollPointerPos.x &&
+      event.clientY === scrollPointerPos.y
+    );
+  };
+
+  const updateScrollAffordances = (id) => {
+    const body = scrollBodyRefs.get(id);
+    if (!body) {
+      setScrollFlags((prev) => {
+        if (!prev[id]) return prev;
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
+      return;
+    }
+    // Subpixel + padding: treat near-edges as fully scrolled
+    const EPS = 4;
+    const maxScroll = body.scrollHeight - body.clientHeight;
+    const up = maxScroll > EPS && body.scrollTop > EPS;
+    const down =
+      maxScroll > EPS &&
+      body.scrollTop + body.clientHeight < body.scrollHeight - EPS;
+    const prev = getScrollFlags(id);
+    if (prev.up === up && prev.down === down) return;
+    setScrollFlags((all) => ({ ...all, [id]: { up, down } }));
+  };
+
+  const onScrollBodyScroll = (id) => {
+    markMenuScrolling(id);
+    updateScrollAffordances(id);
+  };
+
+  const stopAutoScroll = () => {
+    if (autoScrollRaf != null) {
+      cancelAnimationFrame(autoScrollRaf);
+      autoScrollRaf = null;
+    }
+    autoScrollId = null;
+  };
+
+  const startAutoScroll = (id, direction) => {
+    stopAutoScroll();
+    autoScrollId = id;
+    markMenuScrolling(id);
+    const step = () => {
+      if (autoScrollId !== id) return;
+      const body = scrollBodyRefs.get(id);
+      if (!body) {
+        stopAutoScroll();
+        return;
+      }
+      const before = body.scrollTop;
+      body.scrollTop = before + direction * 6;
+      markMenuScrolling(id);
+      updateScrollAffordances(id);
+      if (body.scrollTop === before) {
+        stopAutoScroll();
+        return;
+      }
+      autoScrollRaf = requestAnimationFrame(step);
+    };
+    autoScrollRaf = requestAnimationFrame(step);
   };
 
   const isInsideMenus = (target) => {
@@ -96,11 +204,18 @@ const createController = () => {
   };
 
   const stopFloating = (id) => {
+    if (autoScrollId === id) stopAutoScroll();
     const cleanup = floatingCleanups.get(id);
     if (cleanup) {
       cleanup();
       floatingCleanups.delete(id);
     }
+    setScrollFlags((prev) => {
+      if (!prev[id]) return prev;
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
   };
 
   const setupFloating = async (id, placement, offsetPx) => {
@@ -122,10 +237,21 @@ const createController = () => {
         size({
           padding: 8,
           apply({ availableHeight, elements }) {
-            Object.assign(elements.floating.style, {
-              maxHeight: `${Math.max(120, availableHeight)}px`,
-              overflowY: "auto",
-              WebkitOverflowScrolling: "touch",
+            const maxH = Math.max(120, availableHeight);
+            const floating = elements.floating;
+            Object.assign(floating.style, {
+              maxHeight: `${maxH}px`,
+              height: "",
+              overflow: "hidden",
+              display: "flex",
+              flexDirection: "column",
+            });
+            requestAnimationFrame(() => {
+              const body = scrollBodyRefs.get(id);
+              if (body && body.scrollHeight > maxH - 4) {
+                floating.style.height = `${maxH}px`;
+              }
+              updateScrollAffordances(id);
             });
           },
         }),
@@ -142,6 +268,7 @@ const createController = () => {
         left: `${x}px`,
         top: `${y}px`,
       });
+      updateScrollAffordances(id);
     };
 
     await updatePosition();
@@ -165,6 +292,7 @@ const createController = () => {
 
   const closeAll = () => {
     clearCloseTimer();
+    stopAutoScroll();
     const path = openPath();
     for (const menuId of path) stopFloating(menuId);
     setOpenPath([]);
@@ -219,6 +347,29 @@ const createController = () => {
   const onParentPointerEnter = (event, depth, id) => {
     if (event?.pointerType) lastPointerType = event.pointerType;
     if (!isMouseLikePointer(event?.pointerType)) return;
+    // Ignore enters caused by items sliding under a stationary cursor
+    if (isScrollInducedEnter(event)) {
+      keepOpen();
+      return;
+    }
+    scrollPointerPos = { x: NaN, y: NaN };
+    openAt(depth, id);
+  };
+
+  // After scroll, the item under the cursor already got a silenced enter —
+  // open it as soon as the mouse actually moves.
+  const onParentPointerMove = (event, depth, id) => {
+    onMenuPointerMove(event);
+    if (event?.pointerType && !isMouseLikePointer(event.pointerType)) return;
+    if (autoScrollId != null) return;
+    if (Number.isNaN(scrollPointerPos.x)) return;
+    if (
+      event.clientX === scrollPointerPos.x &&
+      event.clientY === scrollPointerPos.y
+    ) {
+      return;
+    }
+    scrollPointerPos = { x: NaN, y: NaN };
     openAt(depth, id);
   };
 
@@ -278,6 +429,7 @@ const createController = () => {
       document.removeEventListener("pointerdown", onOutsidePointerDown, true);
       document.removeEventListener("keydown", onDocumentKeyDown);
       clearCloseTimer();
+      stopAutoScroll();
       for (const cleanup of floatingCleanups.values()) cleanup();
       floatingCleanups.clear();
     };
@@ -294,7 +446,16 @@ const createController = () => {
     closeAll,
     setTriggerRef,
     setMenuRef,
+    setScrollBodyRef,
+    canScrollUp,
+    canScrollDown,
+    updateScrollAffordances,
+    onScrollBodyScroll,
+    onMenuPointerMove,
+    startAutoScroll,
+    stopAutoScroll,
     onParentPointerEnter,
+    onParentPointerMove,
     onParentPointerLeave,
     onParentPointerDown,
     onParentClick,
@@ -428,6 +589,9 @@ return {
   onPointerEnter: hasChildren
     ? (e) => ctrl.onParentPointerEnter(e, depth, id)
     : () => ctrl.keepOpen(),
+  onPointerMove: hasChildren
+    ? (e) => ctrl.onParentPointerMove(e, depth, id)
+    : (e) => ctrl.onMenuPointerMove(e),
   onPointerLeave: hasChildren
     ? (e) => ctrl.onParentPointerLeave(e)
     : (e) => {
@@ -535,9 +699,6 @@ const id = f.getItemId(item);
 const hasChildren = f.getChildren(item).length > 0;
 const layout = f.getLayout();
 const ctrl = f.getController();
-const caret =
-  hasChildren ? (layout === "bar" ? " ▾" : " ▸") : "";
-const label = `${item.text || ""}${caret}`;
 const href = item.href;
 const hasHref = href && href !== "#";
 
@@ -547,13 +708,13 @@ if (hasChildren) {
     return {
       as: "a",
       href,
-      text: label,
       ref: ctrl.setTriggerRef(id),
       "attr:aria-expanded": () => ctrl.isOpen(id),
       "attr:aria-haspopup": "true",
       "attr:role": layout === "panel" ? "menuitem" : undefined,
       onPointerDown: (e) => ctrl.onParentPointerDown(e),
       onPointerEnter: (e) => ctrl.onParentPointerEnter(e, depth, id),
+      onPointerMove: (e) => ctrl.onParentPointerMove(e, depth, id),
       onClick: (e) => {
         const navigated = ctrl.onParentClick(e, depth, id, {
           allowNavigate: true
@@ -566,13 +727,13 @@ if (hasChildren) {
   return {
     as: "button",
     type: "button",
-    text: label,
     ref: ctrl.setTriggerRef(id),
     "attr:aria-expanded": () => ctrl.isOpen(id),
     "attr:aria-haspopup": "true",
     "attr:role": layout === "panel" ? "menuitem" : undefined,
     onPointerDown: (e) => ctrl.onParentPointerDown(e),
     onPointerEnter: (e) => ctrl.onParentPointerEnter(e, depth, id),
+    onPointerMove: (e) => ctrl.onParentPointerMove(e, depth, id),
     onClick: (e) => ctrl.onParentClick(e, depth, id)
   };
 }
@@ -581,7 +742,6 @@ if (hasHref) {
   return {
     as: "a",
     href,
-    text: label,
     "attr:role": layout === "panel" ? "menuitem" : undefined,
     onClick: () => f.onItemClick(item),
     onPointerEnter: () => ctrl.keepOpen()
@@ -591,10 +751,70 @@ if (hasHref) {
 return {
   as: "button",
   type: "button",
-  text: label,
   "attr:role": layout === "panel" ? "menuitem" : undefined,
   onClick: () => f.onItemClick(item),
   onPointerEnter: () => ctrl.keepOpen()
+};'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''const layout = f.getLayout();
+return `._id {
+  ${layout === "panel" ? "flex: 1; min-width: 0;" : ""}
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const item = c.menuItem;
+return {
+  as: "span",
+  text: item?.text || ""
+};'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''const layout = f.getLayout();
+return `._id {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: ${layout === "bar" ? "0.15rem" : "0.75rem"};
+  opacity: 0.75;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const item = c.menuItem;
+const id = f.getItemId(item);
+const hasChildren = f.getChildren(item).length > 0;
+const layout = f.getLayout();
+const ctrl = f.getController();
+const open = hasChildren && ctrl.isOpen(id);
+const icon =
+  layout === "bar"
+    ? open
+      ? "ph:caret-up"
+      : "ph:caret-down"
+    : open
+      ? "ph:caret-down"
+      : "ph:caret-right";
+
+return {
+  as: "icon",
+  icon,
+  height: 12,
+  width: 12,
+  hide: () => !hasChildren
 };'''
       }
     }
@@ -641,7 +861,9 @@ return `._id {
   min-width: 220px;
   max-width: min(90vw, 320px);
   padding: 0;
-  -webkit-overflow-scrolling: touch;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
   visibility: ${isOpen ? "visible" : "hidden"};
   opacity: ${isOpen ? "1" : "0"};
   pointer-events: ${isOpen ? "auto" : "none"};
@@ -657,12 +879,119 @@ return {
   ref: ctrl.setMenuRef(id),
   "attr:role": "menu",
   "attr:aria-hidden": () => (ctrl.isOpen(id) ? "false" : "true"),
+  onPointerMove: (e) => ctrl.onMenuPointerMove(e),
   onPointerEnter: (e) => {
     if (!e?.pointerType || e.pointerType === "mouse" || e.pointerType === "pen") {
       ctrl.keepOpen();
     }
   },
-  onPointerLeave: (e) => ctrl.onParentPointerLeave(e)
+  onPointerLeave: (e) => {
+    ctrl.stopAutoScroll();
+    ctrl.onParentPointerLeave(e);
+  }
+};'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''const bg = f.getPanelBackground();
+const color = f.getTriggerColor();
+return `._id {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 1.75rem;
+  color: ${color};
+  background: linear-gradient(to bottom, ${bg} 40%, transparent);
+  cursor: default;
+  z-index: 2;
+  pointer-events: auto;
+  opacity: 0.9;
+
+  &:hover {
+    opacity: 1;
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const item = c.menuItem;
+const id = f.getItemId(item);
+const ctrl = f.getController();
+return {
+  as: "div",
+  "attr:aria-hidden": "true",
+  hide: () => !ctrl.canScrollUp(id),
+  onPointerMove: (e) => ctrl.onMenuPointerMove(e),
+  onPointerEnter: (e) => {
+    ctrl.keepOpen();
+    if (!e?.pointerType || e.pointerType === "mouse" || e.pointerType === "pen") {
+      ctrl.startAutoScroll(id, -1);
+    }
+  },
+  onPointerLeave: () => ctrl.stopAutoScroll()
+};'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "icon",
+  icon: "ph:caret-up",
+  height: 14,
+  width: 14
+};'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const item = c.menuItem;
+const id = f.getItemId(item);
+const ctrl = f.getController();
+return {
+  as: "div",
+  ref: ctrl.setScrollBodyRef(id),
+  onScroll: () => ctrl.onScrollBodyScroll(id),
+  onPointerMove: (e) => ctrl.onMenuPointerMove(e),
+  onPointerEnter: () => ctrl.keepOpen(),
+  onMount: () => {
+    requestAnimationFrame(() => ctrl.updateScrollAffordances(id));
+  }
 };'''
       }
     }
@@ -694,6 +1023,69 @@ return {
 };'''
       }
     }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        css:
+          '''const bg = f.getPanelBackground();
+const color = f.getTriggerColor();
+return `._id {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 1.75rem;
+  color: ${color};
+  background: linear-gradient(to top, ${bg} 40%, transparent);
+  cursor: default;
+  z-index: 2;
+  pointer-events: auto;
+  opacity: 0.9;
+
+  &:hover {
+    opacity: 1;
+  }
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''const item = c.menuItem;
+const id = f.getItemId(item);
+const ctrl = f.getController();
+return {
+  as: "div",
+  "attr:aria-hidden": "true",
+  hide: () => !ctrl.canScrollDown(id),
+  onPointerMove: (e) => ctrl.onMenuPointerMove(e),
+  onPointerEnter: (e) => {
+    ctrl.keepOpen();
+    if (!e?.pointerType || e.pointerType === "mouse" || e.pointerType === "pen") {
+      ctrl.startAutoScroll(id, 1);
+    }
+  },
+  onPointerLeave: () => ctrl.stopAutoScroll()
+};'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "icon",
+  icon: "ph:caret-down",
+  height: 14,
+  width: 14
+};'''
+      }
+    }
   ]
   edges: [
     {
@@ -721,6 +1113,18 @@ return {
       E: "5"
     }
     {
+      id: e8
+      T: Attr
+      S: "5"
+      E: "9"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "5"
+      E: "10"
+    }
+    {
       id: e5
       T: Attr
       S: "4"
@@ -733,10 +1137,40 @@ return {
       E: "7"
     }
     {
-      id: e7
+      id: e10
       T: Attr
       S: "7"
+      E: "11"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "11"
+      E: "14"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "7"
+      E: "12"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "12"
       E: "8"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "7"
+      E: "13"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "13"
+      E: "15"
     }
   ]
 }

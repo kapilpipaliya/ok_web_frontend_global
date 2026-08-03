@@ -56,7 +56,8 @@ function compilePattern(url: string): CompiledPattern {
   let requiredCount = 0;
   for (const segment of segments) {
     const isDynamic = segment.charCodeAt(0) === 58; /* ":" */
-    const isOptional = isDynamic && segment.charCodeAt(segment.length - 1) === 63; /* "?" */
+    const isOptional =
+      isDynamic && segment.charCodeAt(segment.length - 1) === 63; /* "?" */
     if (isDynamic) {
       dynamicCount++;
     }
@@ -67,7 +68,10 @@ function compilePattern(url: string): CompiledPattern {
   return { url, segments, dynamicCount, requiredCount };
 }
 
-function matchesPattern(pattern: CompiledPattern, pathSegments: string[]): boolean {
+function matchesPattern(
+  pattern: CompiledPattern,
+  pathSegments: string[],
+): boolean {
   if (
     pathSegments.length < pattern.requiredCount ||
     pathSegments.length > pattern.segments.length

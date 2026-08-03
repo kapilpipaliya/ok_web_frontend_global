@@ -72,7 +72,9 @@ export function SchemaOperationsManagement() {
         </As>
         <As
           as="div"
-          css={"return `._id { display: flex; gap: 0.75rem; flex-wrap: wrap; }`;"}
+          css={
+            "return `._id { display: flex; gap: 0.75rem; flex-wrap: wrap; }`;"
+          }
         >
           <As
             as="button"
@@ -211,7 +213,9 @@ export function SchemaOperationsManagement() {
       <Show when={databaseGroups()?.success === false}>
         <As
           as="p"
-          css={"return `._id { color: ${t.var.color.error}; margin-top: 1rem; }`;"}
+          css={
+            "return `._id { color: ${t.var.color.error}; margin-top: 1rem; }`;"
+          }
         >
           {databaseGroups()?.error || "Failed to load databases"}
         </As>

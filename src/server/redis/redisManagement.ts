@@ -793,7 +793,8 @@ export async function getBackupStatus() {
     // Check if backup is enabled
     const backupEnabled = process.env.BACKUP_ENABLED === "true";
 
-    const backupSchedule = process.env.BACKUP_SCHEDULE || DEFAULT_BACKUP_SCHEDULE;
+    const backupSchedule =
+      process.env.BACKUP_SCHEDULE || DEFAULT_BACKUP_SCHEDULE;
 
     await queue.close();
 

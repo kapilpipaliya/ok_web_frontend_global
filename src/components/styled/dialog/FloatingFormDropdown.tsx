@@ -53,7 +53,11 @@ export function FloatingFormDropdown(props: {
 
       <Show when={showFooter()}>
         <DialogFooter
-          buttonText={props.footerLoading ? "Saving..." : props.footerButtonText ?? "Save"}
+          buttonText={
+            props.footerLoading
+              ? "Saving..."
+              : (props.footerButtonText ?? "Save")
+          }
           css={[SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CSS]}
           disabled={props.footerDisabled || props.footerLoading}
           onClick={() => props.onFooterClick?.()}

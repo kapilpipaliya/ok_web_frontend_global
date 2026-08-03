@@ -1418,7 +1418,8 @@ export function BackupManagement() {
 }\`;`}
                     >
                       🔄 Auto-Cleanup:{" "}
-                      {backupStatus()?.data?.retentionSummary || "24h / 4w / 12m"}
+                      {backupStatus()?.data?.retentionSummary ||
+                        "24h / 4w / 12m"}
                     </As>
                   </As>
                 </As>
@@ -2180,28 +2181,26 @@ export function BackupManagement() {
                     displayedRows={
                       paginatedBackups as unknown as () => Vertex[]
                     }
-                      handleFirstPage={() => setBackupPage(0)}
-                      handleLastPage={() =>
-                        setBackupPage(backupTotalPages() - 1)
-                      }
-                      handleNextPage={() =>
-                        setBackupPage((page) =>
-                          Math.min(page + 1, backupTotalPages() - 1),
-                        )
-                      }
-                      handlePreviousPage={() =>
-                        setBackupPage((page) => Math.max(page - 1, 0))
-                      }
-                      handleRowsPerPageChange={(e) => {
-                        setBackupRowsPerPage(
-                          parseInt((e.target as HTMLSelectElement).value, 10),
-                        );
-                        setBackupPage(0);
-                      }}
-                      rowsPerPage={backupRowsPerPage}
-                      rowsPerPageOptions={[10, 25, 50, 100]}
-                      totalPages={backupTotalPages}
-                    />
+                    handleFirstPage={() => setBackupPage(0)}
+                    handleLastPage={() => setBackupPage(backupTotalPages() - 1)}
+                    handleNextPage={() =>
+                      setBackupPage((page) =>
+                        Math.min(page + 1, backupTotalPages() - 1),
+                      )
+                    }
+                    handlePreviousPage={() =>
+                      setBackupPage((page) => Math.max(page - 1, 0))
+                    }
+                    handleRowsPerPageChange={(e) => {
+                      setBackupRowsPerPage(
+                        parseInt((e.target as HTMLSelectElement).value, 10),
+                      );
+                      setBackupPage(0);
+                    }}
+                    rowsPerPage={backupRowsPerPage}
+                    rowsPerPageOptions={[10, 25, 50, 100]}
+                    totalPages={backupTotalPages}
+                  />
                 </As>
               </Show>
             </As>

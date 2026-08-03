@@ -51,7 +51,9 @@ export function AttrActionButtons(props: {
         <HideShowIcon iconSize={props.size} metaVertex={props.item} />
       </Show>
 
-      <Show when={props.isSelected && !props.isRootLevel && props.componentName}>
+      <Show
+        when={props.isSelected && !props.isRootLevel && props.componentName}
+      >
         <DeleteButton
           componentName={props.componentName!}
           item={props.item}

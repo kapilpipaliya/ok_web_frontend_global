@@ -14,7 +14,9 @@ export interface UnsavedTabInfo {
 }
 
 export function isFormUnsaved(graph: GraphInterface, formId: Id): boolean {
-  const formStore = graph.vertexes[formId] as Vertex<FormStoreObject> | undefined;
+  const formStore = graph.vertexes[formId] as
+    | Vertex<FormStoreObject>
+    | undefined;
   const txnId = formStore?.P?.txnId;
   return !!txnId && !isDisabledTxn(txnId, graph);
 }
@@ -32,15 +34,18 @@ export function getUnsavedTabs(
       continue;
     }
 
-    const formStore = graph.vertexes[formId] as Vertex<FormStoreObject> | undefined;
-    if (!formStore || !isFormUnsaved(graph, formId)) {
+    const formStore = graph.vertexes[formId] as
+      | Vertex<FormStoreObject>
+      | undefined;
+    if (!(formStore && isFormUnsaved(graph, formId))) {
       continue;
     }
 
     const label = (openVertex.P.label as string) || "Item";
     const formDataId = formStore.P.formDataId;
     const key =
-      (formDataId && (graph.vertexes[formDataId]?.P?.key as string | undefined)) ||
+      (formDataId &&
+        (graph.vertexes[formDataId]?.P?.key as string | undefined)) ||
       "Untitled";
 
     result.push({ openedFormId, formId, label, key });

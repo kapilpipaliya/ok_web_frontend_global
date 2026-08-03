@@ -11,10 +11,7 @@ const VERTEX_LABELS_KEEPING_UPDATED_AT = new Set([
 ]);
 
 /** Attr P keys used only in the page designer or server fetch planning — not at render time. */
-const PAGE_BUILDER_ATTR_DESIGNER_ONLY_KEYS = [
-  "layerName",
-] as const;
-
+const PAGE_BUILDER_ATTR_DESIGNER_ONLY_KEYS = ["layerName"] as const;
 
 function shouldKeepVertexUpdatedAt(vertex: Vertex): boolean {
   return (
@@ -24,7 +21,7 @@ function shouldKeepVertexUpdatedAt(vertex: Vertex): boolean {
 }
 
 function isPageBuilderAttr(vertex: Vertex): boolean {
-  if (!vertex.L?.includes("Attr") || !vertex.P) {
+  if (!(vertex.L?.includes("Attr") && vertex.P)) {
     return false;
   }
 
@@ -68,7 +65,6 @@ export function stripGraphTimestamps(graph?: ServerResult["graph"]) {
   stripEmptyEdgeProperties(graph);
 }
 
-
 export function stripDesignerAttrProperties(graph?: ServerResult["graph"]) {
   if (!graph) {
     return;
@@ -97,7 +93,7 @@ export function compactAttrCodeStrings(graph?: ServerResult["graph"]) {
   }
 
   for (const vertex of Object.values(graph.vertexes)) {
-    if (!isPageBuilderAttr(vertex) || !vertex.P) {
+    if (!(isPageBuilderAttr(vertex) && vertex.P)) {
       continue;
     }
     for (const key of ATTR_CODE_KEYS) {
@@ -130,9 +126,7 @@ export function prepareGraphForWireTransfer(
   }
 }
 
-export function mergeGraphs(
-  results: ServerResult[],
-): ServerResult | undefined {
+export function mergeGraphs(results: ServerResult[]): ServerResult | undefined {
   if (results.length === 0) {
     return undefined;
   }

@@ -3,8 +3,7 @@ import { createSignal, type Accessor } from "solid-js";
 import type { Id } from "~/lib/graph/type/id";
 
 const TAP_MOVE_PX = 8;
-const ACTION_SELECTOR =
-  "button, a, [data-row-actions], [data-palette-actions]";
+const ACTION_SELECTOR = "button, a, [data-row-actions], [data-palette-actions]";
 
 /** Mouse/stylus — not finger touch. */
 export function isFinePointer(event: PointerEvent) {
@@ -135,10 +134,7 @@ let activeFineHoverItemId: Id | null = null;
 const fineHoverDeactivateByItemId = new Map<Id, () => void>();
 
 function deactivateFineHoverExcept(keepItemId: Id | null) {
-  if (
-    activeFineHoverItemId != null &&
-    activeFineHoverItemId !== keepItemId
-  ) {
+  if (activeFineHoverItemId != null && activeFineHoverItemId !== keepItemId) {
     fineHoverDeactivateByItemId.get(activeFineHoverItemId)?.();
     activeFineHoverItemId = null;
   }
@@ -261,7 +257,7 @@ export function createTreeRowInteraction(options: {
     if (!isFinePointer(event)) return;
     setIsPointerOverRow(false);
     setIsHighlighted(false);
-    if (!actionsVisible() && !isPinned()) {
+    if (!(actionsVisible() || isPinned())) {
       scheduleCoordinatorLeave();
     }
     scheduleHideActions();

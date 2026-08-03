@@ -91,7 +91,7 @@ export function FunctionEditor(props: {
     const editor = editorRef;
     const model = editor?.getModel();
     const selection = editor?.getSelection();
-    if (!editor || !model || !selection || selection.isEmpty()) {
+    if (!((editor && model ) && selection ) || selection.isEmpty()) {
       return null;
     }
 

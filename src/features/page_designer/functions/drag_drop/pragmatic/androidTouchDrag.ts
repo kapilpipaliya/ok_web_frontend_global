@@ -195,15 +195,12 @@ function startDrag(source: TouchDragSource, clientX: number, clientY: number) {
   // Defer hit-testing so Solid re-renders from onDragStart don't run in the
   // same turn as registration cleanup (which used to kill the drag).
   queueMicrotask(() => {
-    if (!dragging || !activeData) return;
+    if (!(dragging && activeData)) return;
     updateDragAt(clientX, clientY);
   });
 }
 
-function touchFromList(
-  list: TouchList,
-  id: number | null,
-): Touch | undefined {
+function touchFromList(list: TouchList, id: number | null): Touch | undefined {
   if (id == null) return list.item(0) ?? undefined;
   for (let i = 0; i < list.length; i++) {
     const t = list.item(i);

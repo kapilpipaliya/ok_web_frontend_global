@@ -42,9 +42,7 @@ import {
 } from "../../context/LayoutContext";
 import { layoutTouchRevealRowOptions } from "../../context/layoutTouchReveal";
 import { getChildrenAttrs } from "../../functions/layout/getChildrenAttrs";
-import {
-  isLayoutPreviewHover,
-} from "../../functions/layout/previewHover";
+import { isLayoutPreviewHover } from "../../functions/layout/previewHover";
 import { AttrConfigIcons } from "./AttrConfigIcons";
 import { HideShowIcon } from "./HideShowIcon";
 import { TreeItemContainer } from "./TreeItemContainer";

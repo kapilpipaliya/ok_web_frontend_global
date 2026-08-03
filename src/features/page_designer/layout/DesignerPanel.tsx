@@ -189,7 +189,7 @@ export const DesignerPanel: Component<DesignerPanelProps> = (props) => {
                     "return `._id { flex-shrink: 0; }`;",
                   ]}
                   icon="ph:caret-left"
-                  iconCss={`return \`._id { color: \${t.var.color.text_light_300}; }\`;`}
+                  iconCss={"return `._id { color: ${t.var.color.text_light_300}; }`;"}
                   onClick={(e: MouseEvent) => {
                     e.stopPropagation();
                     props.onToggleCollapse?.();
@@ -335,7 +335,9 @@ export function createPanelResizeHandler<T extends Record<string, unknown>>(
   };
 }
 
-export function createPanelRowHeightResizeHandler<T extends Record<string, unknown>>(
+export function createPanelRowHeightResizeHandler<
+  T extends Record<string, unknown>,
+>(
   key: "mainPanelRow0Height" | "mainPanelRow1Height",
   storeId: Id | (() => Id | undefined),
   graph: GraphInterface,

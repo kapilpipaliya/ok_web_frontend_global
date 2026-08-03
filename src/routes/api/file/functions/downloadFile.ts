@@ -65,8 +65,7 @@ function parseByteRange(
     return "unsatisfiable";
   }
 
-  let end =
-    endStr === "" ? fileSize - 1 : Number.parseInt(endStr, 10);
+  let end = endStr === "" ? fileSize - 1 : Number.parseInt(endStr, 10);
 
   if (Number.isNaN(end) || end < start) {
     return "unsatisfiable";

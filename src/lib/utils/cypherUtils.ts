@@ -71,7 +71,7 @@ export function buildPaginationClauses(params: {
   const { page, limit, skip } = params;
 
   const skipValue =
-    skip === undefined ? page && limit ? (page - 1) * limit : 0 : skip;
+    skip === undefined ? (page && limit ? (page - 1) * limit : 0) : skip;
 
   const skipClause = skipValue > 0 ? "SKIP $skip" : "";
   const limitClause = limit ? "LIMIT $limit" : "";

@@ -54,9 +54,7 @@ import {
   isPaletteContent,
   isPaletteRootCategory,
 } from "./componentPaletteUtils";
-import {
-  createTreeRowInteraction,
-} from "~/lib/event/rowPointer";
+import { createTreeRowInteraction } from "~/lib/event/rowPointer";
 import { ComponentPreview } from "./ComponentPreview";
 
 export function ComponentPaletteTreeItem(
@@ -213,10 +211,7 @@ export function ComponentPaletteTreeItem(
   });
 
   const contentCursor = () => {
-    if (
-      (isFunctionPalette() || isEmailTemplatePalette()) &&
-      isContentItem()
-    ) {
+    if ((isFunctionPalette() || isEmailTemplatePalette()) && isContentItem()) {
       return "pointer";
     }
     return "grab";
@@ -439,7 +434,11 @@ export function ComponentPaletteTreeItem(
                 {contentCount() ?? ""}
               </As>
             </Show>
-            <Show when={canAddItemToCategory() && (showActions() || isCreateMenuOpen())}>
+            <Show
+              when={
+                canAddItemToCategory() && (showActions() || isCreateMenuOpen())
+              }
+            >
               <As
                 as="span"
                 {...row.actionAreaProps}
@@ -495,41 +494,43 @@ export function ComponentPaletteTreeItem(
             <Show when={shouldShowButtons()}>
               <As
                 as="span"
-                css={"return `._id { display: inline-flex; align-items: center; gap: 2px; }`;"}
+                css={
+                  "return `._id { display: inline-flex; align-items: center; gap: 2px; }`;"
+                }
                 data-palette-actions=""
                 {...row.actionAreaProps}
               >
-              <Show when={isComponentPalette() || isPagePalette()}>
-                <ComponentPreview
-                  disabled={props.isPaletteDragging}
-                  item={props.item}
-                  onPreviewClose={handlePreviewClose}
-                  onPreviewOpen={handlePreviewOpen}
-                />
-              </Show>
-              <Show
-                when={
-                  isComponentPalette() ||
-                  isPagePalette() ||
-                  isFunctionPalette() ||
-                  isEmailTemplatePalette()
-                }
-              >
-                <IconButton
-                  css={buttonStyle}
-                  icon="ph:arrow-square-out"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (isFunctionPalette() || isEmailTemplatePalette()) {
-                      handleFunctionOpen();
-                    } else {
-                      openInNewTab();
-                    }
-                  }}
-                  size={16}
-                  title="Open in new tab"
-                />
-              </Show>
+                <Show when={isComponentPalette() || isPagePalette()}>
+                  <ComponentPreview
+                    disabled={props.isPaletteDragging}
+                    item={props.item}
+                    onPreviewClose={handlePreviewClose}
+                    onPreviewOpen={handlePreviewOpen}
+                  />
+                </Show>
+                <Show
+                  when={
+                    isComponentPalette() ||
+                    isPagePalette() ||
+                    isFunctionPalette() ||
+                    isEmailTemplatePalette()
+                  }
+                >
+                  <IconButton
+                    css={buttonStyle}
+                    icon="ph:arrow-square-out"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (isFunctionPalette() || isEmailTemplatePalette()) {
+                        handleFunctionOpen();
+                      } else {
+                        openInNewTab();
+                      }
+                    }}
+                    size={16}
+                    title="Open in new tab"
+                  />
+                </Show>
               </As>
             </Show>
           </As>

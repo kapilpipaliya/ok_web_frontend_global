@@ -115,9 +115,15 @@ export function SaveAsComponentMenu(
 
     try {
       const newFormTxnId = generateNewTxnId(graph, setGraph);
-      const createResult = createFormVertex(graph, setGraph, newFormTxnId, "Component", {
-        key: componentKey(),
-      });
+      const createResult = createFormVertex(
+        graph,
+        setGraph,
+        newFormTxnId,
+        "Component",
+        {
+          key: componentKey(),
+        },
+      );
       if (createResult.error || !createResult.vertex) {
         setError(createResult.error || "Failed to create component");
         return;

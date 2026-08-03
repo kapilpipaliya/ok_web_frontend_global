@@ -37,8 +37,7 @@ export function useFormData(
       return;
     }
 
-    const formDataId =
-      result?.formDataId ?? result?.formDataIdOverride;
+    const formDataId = result?.formDataId ?? result?.formDataIdOverride;
     if (!(options.id() || formDataId)) {
       const createResult = createFormVertex(
         options.graph,

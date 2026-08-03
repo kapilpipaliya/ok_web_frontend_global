@@ -39,8 +39,7 @@ export async function fetchComponentDataFromGraph(
   const skipKeys = new Set(options?.skipKeys ?? []);
   const loadComponents =
     options?.loadComponents ??
-    ((names: string[]) =>
-      fetchComponentDataPure(names, dbSession, subDomain));
+    ((names: string[]) => fetchComponentDataPure(names, dbSession, subDomain));
 
   const allFetchedComponents = new Set<string>();
   const componentDataResults: ServerResult[] = [];
@@ -49,7 +48,7 @@ export async function fetchComponentDataFromGraph(
   while (true) {
     const componentNames = extractComponentNames(currentVertices);
     const newComponentNames = Array.from(componentNames).filter(
-      (name) => !allFetchedComponents.has(name) && !skipKeys.has(name),
+      (name) => !(allFetchedComponents.has(name) || skipKeys.has(name)),
     );
 
     if (newComponentNames.length === 0) {

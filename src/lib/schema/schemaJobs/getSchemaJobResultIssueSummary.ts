@@ -119,8 +119,7 @@ export function getSchemaJobResultIssueSummary(
   if (record.success === false) {
     return {
       message:
-        failureMessageFromObject(record) ||
-        "Operation completed with failure",
+        failureMessageFromObject(record) || "Operation completed with failure",
       details: null,
     };
   }

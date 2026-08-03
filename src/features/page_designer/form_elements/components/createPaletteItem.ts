@@ -56,11 +56,13 @@ export async function createPaletteItem(
     layoutStoreId: Id;
     selectedCategoryId: Id | null | undefined;
   },
-): Promise<{ success: true; vertex: Vertex } | { success: false; error: string }> {
+): Promise<
+  { success: true; vertex: Vertex } | { success: false; error: string }
+> {
   const label = options.config.tableVertexLabel;
   const pageUrl =
     label === "Page"
-      ? (options.url?.trim() || defaultUrlFromKey(options.key))
+      ? options.url?.trim() || defaultUrlFromKey(options.key)
       : undefined;
 
   if (label === "Page" && !pageUrl) {
@@ -80,13 +82,10 @@ export async function createPaletteItem(
   }
 
   const txnId = generateNewTxnId(graph, setGraph);
-  const createResult = createFormVertex(
-    graph,
-    setGraph,
-    txnId,
-    label,
-    { key: options.key, ...getDefaultProperties(label, pageUrl) },
-  );
+  const createResult = createFormVertex(graph, setGraph, txnId, label, {
+    key: options.key,
+    ...getDefaultProperties(label, pageUrl),
+  });
 
   if (createResult.error || !createResult.vertex) {
     return {
@@ -138,12 +137,7 @@ export async function createPaletteItem(
     });
   }
 
-  openInNewInternalTab(
-    options.layoutStoreId,
-    savedVertex,
-    graph,
-    setGraph,
-  );
+  openInNewInternalTab(options.layoutStoreId, savedVertex, graph, setGraph);
 
   return { success: true, vertex: savedVertex };
 }

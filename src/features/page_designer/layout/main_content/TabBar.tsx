@@ -182,11 +182,7 @@ export function TabBar(props: { mainPanel: Id }) {
           : "background-color: ${t.var.color.background_light_100}; color: ${t.var.color.text_light_300}; border: 1px solid ${t.var.color.border};"
       }
       ${isCurrentForm ? "border-bottom: 2px solid ${t.var.color.error};" : ""}
-      ${
-        !isActiveTab
-          ? "&:hover { color: ${t.var.color.primary}; }"
-          : ""
-      }
+      ${isActiveTab ? "" : "&:hover { color: ${t.var.color.primary}; }"}
     }\`;`;
   };
 
@@ -306,13 +302,9 @@ export function TabBar(props: { mainPanel: Id }) {
       i === rowIndex ? r.filter((id) => id !== props.mainPanel) : [...r],
     ) as PageLayoutObject["mainPanelRows"];
 
-    mergeVertexProperties<PageLayoutObject>(
-      0,
-      layoutStoreId,
-      graph,
-      setGraph,
-      { mainPanelRows },
-    );
+    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
+      mainPanelRows,
+    });
   };
 
   const moveFormsToPanel = (fromPanelId: Id, toPanelId: Id) => {

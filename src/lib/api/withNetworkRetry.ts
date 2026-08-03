@@ -116,7 +116,8 @@ export async function withNetworkRetry<T>(
       if (!canRetry) {
         throw error;
       }
-      const delay = delaysMs[attempt - 1] ?? delaysMs[delaysMs.length - 1] ?? 500;
+      const delay =
+        delaysMs[attempt - 1] ?? delaysMs[delaysMs.length - 1] ?? 500;
       await sleep(delay);
     }
   }

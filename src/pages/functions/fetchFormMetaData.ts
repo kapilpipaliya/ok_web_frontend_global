@@ -142,7 +142,7 @@ export async function fetchFormMetaData(
         },
       ));
 
-    if (!memoryHit && !pageResult.error) {
+    if (!(memoryHit || pageResult.error)) {
       setInMemoryCache(cacheKey, pageResult);
     }
 

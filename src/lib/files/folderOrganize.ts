@@ -104,12 +104,16 @@ export async function resolveUploadFolderKeyPath(
     toParentEdgeType?: string;
   },
 ): Promise<string[]> {
-  if (Array.isArray(options.folderKeyPath) && options.folderKeyPath.length > 0) {
+  if (
+    Array.isArray(options.folderKeyPath) &&
+    options.folderKeyPath.length > 0
+  ) {
     return options.folderKeyPath
       .map((k) => String(k || "").trim())
       .filter(Boolean);
   }
-  const folderId = options.folderId != null ? String(options.folderId).trim() : "";
+  const folderId =
+    options.folderId == null ? "" : String(options.folderId).trim();
   if (!folderId) return [];
   return resolveFolderKeyPath(session, folderId, {
     categoryLabel: options.categoryLabel,
@@ -251,10 +255,9 @@ export async function moveFileVertexToCategoryDir(
     ? `_${options.contentLabel}_uncategorized`
     : null;
   const categoryId =
-    options.categoryId != null ? String(options.categoryId).trim() : "";
+    options.categoryId == null ? "" : String(options.categoryId).trim();
   const isUncategorized =
-    !categoryId ||
-    (uncategorizedId != null && categoryId === uncategorizedId);
+    !categoryId || (uncategorizedId != null && categoryId === uncategorizedId);
 
   let targetDir: string;
   if (isUncategorized) {

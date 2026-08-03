@@ -156,8 +156,7 @@ export function SettingsLayout(props: SettingsLayoutProps) {
                                       .adminOnly && !isAdminRole(graph),
                                   onClick: () =>
                                     handleMenuSelect(
-                                      (_.contextData.menuItems as MenuItem)
-                                        .id,
+                                      (_.contextData.menuItems as MenuItem).id,
                                     ),
                                 }),
                                 attributes: [
@@ -188,9 +187,7 @@ export function SettingsLayout(props: SettingsLayoutProps) {
                             loop: true,
                             contextName: "menuItems",
                             props: (_: FunctionArgumentType) => ({
-                              data: (
-                                _.contextData.menuGroups as DataType
-                              )[1],
+                              data: (_.contextData.menuGroups as DataType)[1],
                             }),
                           },
                         ],
@@ -199,9 +196,7 @@ export function SettingsLayout(props: SettingsLayoutProps) {
 }\`;`,
                         componentName: "Html",
                         props: (_: FunctionArgumentType) => ({
-                          show: (
-                            _.contextData.menuGroups as DataType
-                          )[1].some(
+                          show: (_.contextData.menuGroups as DataType)[1].some(
                             (item: MenuItem) =>
                               !item.adminOnly || isAdminRole(graph),
                           ),

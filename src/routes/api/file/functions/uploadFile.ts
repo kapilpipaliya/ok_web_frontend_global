@@ -19,7 +19,7 @@ export function extractUploadFolderOptions(data: MultiPartData[]) {
 
   for (const part of data) {
     if (!part) continue;
-    const name = part.name != null ? String(part.name) : "";
+    const name = part.name == null ? "" : String(part.name);
     if (part.filename) {
       fileParts.push(part);
       continue;

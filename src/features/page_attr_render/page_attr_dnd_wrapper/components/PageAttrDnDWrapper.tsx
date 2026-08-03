@@ -139,12 +139,7 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
 
   const handleMouseLeave = (e: MouseEvent) => {
     e.stopPropagation();
-    clearDesignerHoverFromPreview(
-      formStoreId!,
-      layoutStoreId,
-      graph,
-      setGraph,
-    );
+    clearDesignerHoverFromPreview(formStoreId!, layoutStoreId, graph, setGraph);
   };
 
   return (

@@ -1,8 +1,6 @@
 import { createMemo, createSignal, Show, type ParentProps } from "solid-js";
 
-import {
-  type FormStoreObject,
-} from "~/components/form/context/FormContext";
+import type { FormStoreObject } from "~/components/form/context/FormContext";
 import {
   createPanelResizeHandler,
   DesignerPanel,
@@ -20,9 +18,7 @@ import { STYLES } from "~/pages/settings/constants";
 import type { Id } from "~/lib/graph/type/id";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 
-export function MainPanelInnerGrid(
-  props: ParentProps<{ mainPanel: Id }>,
-) {
+export function MainPanelInnerGrid(props: ParentProps<{ mainPanel: Id }>) {
   const [graph, setGraph] = useGraph();
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStore = () =>
@@ -41,8 +37,7 @@ export function MainPanelInnerGrid(
 
   const formStoreId = () =>
     graph.vertexes[activeOpenedFormId()!]?.P?.formId as Id;
-  const formStore = () =>
-    graph.vertexes[formStoreId()]?.P as FormStoreObject;
+  const formStore = () => graph.vertexes[formStoreId()]?.P as FormStoreObject;
 
   const { setResizing } = useResizeOverlay();
   const [activeResizeKey, setActiveResizeKey] = createSignal<null | string>(
@@ -65,15 +60,11 @@ export function MainPanelInnerGrid(
     const store = formStore();
 
     if (layout.isLayoutTreeOpen) {
-      columns.push(
-        `${store?.layoutTreeWidth ?? INITIAL_WIDTHS.layoutTree}px`,
-      );
+      columns.push(`${store?.layoutTreeWidth ?? INITIAL_WIDTHS.layoutTree}px`);
     }
 
     if (layout.isPropertiesOpen) {
-      columns.push(
-        `${store?.propertiesWidth ?? INITIAL_WIDTHS.properties}px`,
-      );
+      columns.push(`${store?.propertiesWidth ?? INITIAL_WIDTHS.properties}px`);
     }
 
     columns.push("minmax(0, 1fr)");

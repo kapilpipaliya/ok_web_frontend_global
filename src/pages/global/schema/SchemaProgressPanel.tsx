@@ -55,7 +55,9 @@ export function SchemaProgressPanel(props: SchemaProgressPanelProps) {
         <Show when={props.failed > 0}>
           <As
             as="span"
-            css={"return `._id { color: ${t.var.color.error}; font-weight: 600; }`;"}
+            css={
+              "return `._id { color: ${t.var.color.error}; font-weight: 600; }`;"
+            }
           >
             Failed: {props.failed}
           </As>

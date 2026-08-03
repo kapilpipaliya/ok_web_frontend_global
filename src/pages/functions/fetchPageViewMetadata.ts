@@ -57,9 +57,7 @@ export async function fetchPageViewMetadata(
     ? metaResult.data?.graph?.vertexes[formMetaId]
     : undefined;
   const isNoPermissionCheck =
-    params.isNoPermissionCheck ||
-    metaVertex?.P?.isNoPermissionCheck ||
-    false;
+    params.isNoPermissionCheck || metaVertex?.P?.isNoPermissionCheck;
 
   const result: FetchPageViewMetadataResult = { formMetaId, metaResult };
 

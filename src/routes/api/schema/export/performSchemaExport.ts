@@ -338,7 +338,12 @@ export async function performSchemaExport(
   }
 
   if (!filterOnly) {
-    const emailTemplates = await fetchEntities(dbSession, subDomain, "EmailTemplate", {});
+    const emailTemplates = await fetchEntities(
+      dbSession,
+      subDomain,
+      "EmailTemplate",
+      {},
+    );
     const emailTemplateCategoryPaths = await fetchSchemaCategoryFolderPaths(
       dbSession,
       "EmailTemplate",

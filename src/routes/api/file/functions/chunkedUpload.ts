@@ -120,7 +120,7 @@ export async function initChunkedUpload(options: {
     uploadId,
     fileName,
     fileSize,
-    mimeType: options.mimeType != null ? String(options.mimeType) : "",
+    mimeType: options.mimeType == null ? "" : String(options.mimeType),
     totalChunks,
     chunkSize,
     subDomain: options.subDomain,

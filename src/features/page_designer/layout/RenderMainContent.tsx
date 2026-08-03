@@ -115,14 +115,14 @@ export function RenderMainContent() {
     const layout = layoutStore();
     const row0Css = layout.mainPanelRow0Height
       ? `${layout.mainPanelRow0Height}px`
-      : layout.mainPanelRow1Height != null
-        ? `minmax(${MIN_MAIN_PANEL_ROW_HEIGHT}px, auto)`
-        : "0.8fr";
+      : layout.mainPanelRow1Height == null
+        ? "0.8fr"
+        : `minmax(${MIN_MAIN_PANEL_ROW_HEIGHT}px, auto)`;
     const row1Css = layout.mainPanelRow1Height
       ? `${layout.mainPanelRow1Height}px`
-      : layout.mainPanelRow0Height != null
-        ? `minmax(${MIN_MAIN_PANEL_ROW_HEIGHT}px, auto)`
-        : "1fr";
+      : layout.mainPanelRow0Height == null
+        ? "1fr"
+        : `minmax(${MIN_MAIN_PANEL_ROW_HEIGHT}px, auto)`;
     if (layout.isResizingDisabled) {
       return `${row0Css} ${row1Css}`;
     }
@@ -408,106 +408,106 @@ export function RenderMainContent() {
                     ${getRowInnerGridCss(0)}
                   }\`;`}
               >
-                  <For each={layoutStore().mainPanelRows[0]}>
-                    {(mainPanel) => (
-                      <As as="div" css={STYLES.panelCellCss}>
-                        <DesignerPanel
-                          activeResizeKey={activeResizeKey()}
-                          onResizeLeft={createRowWidthResizeHandler(
-                            0,
-                            () => mainPanelRefs()[`mainPanel${mainPanel}`],
-                            false,
-                          )}
-                          onResizeRight={createRowWidthResizeHandler(
-                            0,
-                            () => mainPanelRefs()[`mainPanel${mainPanel}`],
-                            true,
-                          )}
-                          ref={(el: HTMLDivElement) =>
-                            setMainPanelRefs((prev) => ({
-                              ...prev,
-                              [`mainPanel${mainPanel}`]: el,
-                            }))
-                          }
-                          resizeKey="mainPanelRow0Width"
-                          resizeKeyLeft="mainPanelRow0Width"
-                          resizeKeyRight="mainPanelRow0Width"
-                          scrollContent={false}
-                        >
-                          {renderMainPanelContent(mainPanel)}
-                        </DesignerPanel>
-                      </As>
-                    )}
-                  </For>
-                </As>
+                <For each={layoutStore().mainPanelRows[0]}>
+                  {(mainPanel) => (
+                    <As as="div" css={STYLES.panelCellCss}>
+                      <DesignerPanel
+                        activeResizeKey={activeResizeKey()}
+                        onResizeLeft={createRowWidthResizeHandler(
+                          0,
+                          () => mainPanelRefs()[`mainPanel${mainPanel}`],
+                          false,
+                        )}
+                        onResizeRight={createRowWidthResizeHandler(
+                          0,
+                          () => mainPanelRefs()[`mainPanel${mainPanel}`],
+                          true,
+                        )}
+                        ref={(el: HTMLDivElement) =>
+                          setMainPanelRefs((prev) => ({
+                            ...prev,
+                            [`mainPanel${mainPanel}`]: el,
+                          }))
+                        }
+                        resizeKey="mainPanelRow0Width"
+                        resizeKeyLeft="mainPanelRow0Width"
+                        resizeKeyRight="mainPanelRow0Width"
+                        scrollContent={false}
+                      >
+                        {renderMainPanelContent(mainPanel)}
+                      </DesignerPanel>
+                    </As>
+                  )}
+                </For>
               </As>
+            </As>
 
-              <Show when={!layoutStore().isResizingDisabled}>
-                <DesignerResizeHandle
-                  active={activeResizeKey() === "mainPanelRow0Height"}
-                  axis="y"
-                  onPointerDown={handleRow0HeightResize}
-                />
-              </Show>
+            <Show when={!layoutStore().isResizingDisabled}>
+              <DesignerResizeHandle
+                active={activeResizeKey() === "mainPanelRow0Height"}
+                axis="y"
+                onPointerDown={handleRow0HeightResize}
+              />
+            </Show>
 
-              <As
-                as="div"
-                css={`return \`._id {
+            <As
+              as="div"
+              css={`return \`._id {
                   min-height: 0;
                   overflow: hidden;
                 }\`;`}
-                ref={setMainPanelRow1Ref}
-              >
-                <As
-                  as="div"
-                  css={`return \`._id {
+              ref={setMainPanelRow1Ref}
+            >
+              <As
+                as="div"
+                css={`return \`._id {
                     display: grid;
                     grid-template-columns: ${getRowGridColumns(1)};
                     height: 100%;
                     ${getRowInnerGridCss(1)}
                   }\`;`}
-                >
-                  <For each={layoutStore().mainPanelRows[1]}>
-                    {(mainPanel) => (
-                      <As as="div" css={STYLES.panelCellCss}>
-                        <DesignerPanel
-                          activeResizeKey={activeResizeKey()}
-                          onResizeLeft={createRowWidthResizeHandler(
-                            1,
-                            () => mainPanelRefs()[`mainPanel${mainPanel}`],
-                            false,
-                          )}
-                          onResizeRight={createRowWidthResizeHandler(
-                            1,
-                            () => mainPanelRefs()[`mainPanel${mainPanel}`],
-                            true,
-                          )}
-                          ref={(el: HTMLDivElement) =>
-                            setMainPanelRefs((prev) => ({
-                              ...prev,
-                              [`mainPanel${mainPanel}`]: el,
-                            }))
-                          }
-                          resizeKey="mainPanelRow1Width"
-                          resizeKeyLeft="mainPanelRow1Width"
-                          resizeKeyRight="mainPanelRow1Width"
-                          scrollContent={false}
-                        >
-                          {renderMainPanelContent(mainPanel)}
-                        </DesignerPanel>
-                      </As>
-                    )}
-                  </For>
-                </As>
+              >
+                <For each={layoutStore().mainPanelRows[1]}>
+                  {(mainPanel) => (
+                    <As as="div" css={STYLES.panelCellCss}>
+                      <DesignerPanel
+                        activeResizeKey={activeResizeKey()}
+                        onResizeLeft={createRowWidthResizeHandler(
+                          1,
+                          () => mainPanelRefs()[`mainPanel${mainPanel}`],
+                          false,
+                        )}
+                        onResizeRight={createRowWidthResizeHandler(
+                          1,
+                          () => mainPanelRefs()[`mainPanel${mainPanel}`],
+                          true,
+                        )}
+                        ref={(el: HTMLDivElement) =>
+                          setMainPanelRefs((prev) => ({
+                            ...prev,
+                            [`mainPanel${mainPanel}`]: el,
+                          }))
+                        }
+                        resizeKey="mainPanelRow1Width"
+                        resizeKeyLeft="mainPanelRow1Width"
+                        resizeKeyRight="mainPanelRow1Width"
+                        scrollContent={false}
+                      >
+                        {renderMainPanelContent(mainPanel)}
+                      </DesignerPanel>
+                    </As>
+                  )}
+                </For>
               </As>
+            </As>
 
-              <Show when={!layoutStore().isResizingDisabled}>
-                <DesignerResizeHandle
-                  active={activeResizeKey() === "mainPanelRow1Height"}
-                  axis="y"
-                  onPointerDown={handleRow1HeightResize}
-                />
-              </Show>
+            <Show when={!layoutStore().isResizingDisabled}>
+              <DesignerResizeHandle
+                active={activeResizeKey() === "mainPanelRow1Height"}
+                axis="y"
+                onPointerDown={handleRow1HeightResize}
+              />
+            </Show>
           </As>
         </As>
       </As>

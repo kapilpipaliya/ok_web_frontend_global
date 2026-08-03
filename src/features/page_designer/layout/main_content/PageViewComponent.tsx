@@ -211,42 +211,42 @@ export function PageViewComponent(props: { mainPanel: Id }) {
           }\`;`,
         ]}
       >
-      <For
-        each={layoutStore().openedFormIds.filter(
-          (id) => graph.vertexes[id].P.mainPanel === props.mainPanel,
-        )}
-      >
-        {(openedFormId) => {
-          const isActive = () => {
-            // Type assertion for dynamic property access
-            const key =
-              `mainPanel${props.mainPanel}Tab` as keyof PageLayoutObject;
-            // Using type assertion as a workaround for the dynamic property access
-            const layoutStoreValue = layoutStore() as Record<string, unknown>;
+        <For
+          each={layoutStore().openedFormIds.filter(
+            (id) => graph.vertexes[id].P.mainPanel === props.mainPanel,
+          )}
+        >
+          {(openedFormId) => {
+            const isActive = () => {
+              // Type assertion for dynamic property access
+              const key =
+                `mainPanel${props.mainPanel}Tab` as keyof PageLayoutObject;
+              // Using type assertion as a workaround for the dynamic property access
+              const layoutStoreValue = layoutStore() as Record<string, unknown>;
+              return (
+                layoutStoreValue[key] === graph.vertexes[openedFormId].P.formId
+              );
+            };
+            const formStoreVertex = () =>
+              graph.vertexes[
+                graph.vertexes[openedFormId].P.formId
+              ] as Vertex<FormStoreObject>;
+
+            const openFormLabel = () =>
+              (graph.vertexes[openedFormId].P.label as string) || "";
+            const isFunctionForm = () => openFormLabel() === "Function";
+            const formDataId = () => formStoreVertex()?.P.formDataId as Id;
+
             return (
-              layoutStoreValue[key] === graph.vertexes[openedFormId].P.formId
-            );
-          };
-          const formStoreVertex = () =>
-            graph.vertexes[
-              graph.vertexes[openedFormId].P.formId
-            ] as Vertex<FormStoreObject>;
-
-          const openFormLabel = () =>
-            (graph.vertexes[openedFormId].P.label as string) || "";
-          const isFunctionForm = () => openFormLabel() === "Function";
-          const formDataId = () => formStoreVertex()?.P.formDataId as Id;
-
-          return (
-            <Show when={formStoreVertex()?.id}>
-              <Show
-                when={!isFunctionForm()}
-                fallback={
-                  <As
-                    as="div"
-                    css={
-                      isActive()
-                        ? `return \`._id {
+              <Show when={formStoreVertex()?.id}>
+                <Show
+                  when={!isFunctionForm()}
+                  fallback={
+                    <As
+                      as="div"
+                      css={
+                        isActive()
+                          ? `return \`._id {
                           display: flex;
                           flex-direction: column;
                           flex: 1;
@@ -254,87 +254,87 @@ export function PageViewComponent(props: { mainPanel: Id }) {
                           min-height: 0;
                           height: 100%;
                         }\`;`
-                        : "return `._id {display: none;}`;"
-                    }
-                  >
-                    <As as="div" css={"return `._id { flex-shrink: 0; }`;"}>
-                      <PageTabBar
-                        formStoreId={graph.vertexes[openedFormId].P.formId}
-                        handleRefresh={handleRefresh}
-                        onClose={() => {}}
-                        openIndex={0}
-                        previewsLength={1}
-                      />
-                    </As>
-                    <As
-                      as="div"
-                      css={[
-                        STYLES.verticalOverflowCss,
-                        `return \`._id {
+                          : "return `._id {display: none;}`;"
+                      }
+                    >
+                      <As as="div" css={"return `._id { flex-shrink: 0; }`;"}>
+                        <PageTabBar
+                          formStoreId={graph.vertexes[openedFormId].P.formId}
+                          handleRefresh={handleRefresh}
+                          onClose={() => {}}
+                          openIndex={0}
+                          previewsLength={1}
+                        />
+                      </As>
+                      <As
+                        as="div"
+                        css={[
+                          STYLES.verticalOverflowCss,
+                          `return \`._id {
                           flex: 1;
                           min-height: 0;
                           padding: 12px;
                         }\`;`,
-                      ]}
-                    >
-                      <DesignerFormIdContext.Provider
-                        value={graph.vertexes[openedFormId].P.formId}
+                        ]}
                       >
-                        <FunctionEditor
-                          keyName="body"
-                          label="body"
-                          language="javascript"
-                          returnType="object"
-                          setPropertyValue={(meta, value) => {
-                            const key = (meta.P?.key as string) ?? "body";
-                            const dataVertex = graph.vertexes[
-                              formDataId()
-                            ] as Vertex;
-                            const formStore = formStoreVertex();
-                            if (!(dataVertex && formStore)) return;
+                        <DesignerFormIdContext.Provider
+                          value={graph.vertexes[openedFormId].P.formId}
+                        >
+                          <FunctionEditor
+                            keyName="body"
+                            label="body"
+                            language="javascript"
+                            returnType="object"
+                            setPropertyValue={(meta, value) => {
+                              const key = (meta.P?.key as string) ?? "body";
+                              const dataVertex = graph.vertexes[
+                                formDataId()
+                              ] as Vertex;
+                              const formStore = formStoreVertex();
+                              if (!(dataVertex && formStore)) return;
 
-                            // Use transaction-aware helper so Save button picks up changes
-                            setValueGlobal(
-                              graph,
-                              setGraph,
-                              formStore.P.txnId,
-                              { P: { key } } as unknown as Vertex,
-                              dataVertex,
-                              value,
-                              false,
-                            );
-                          }}
-                          vertexId={formDataId()}
-                        />
-                      </DesignerFormIdContext.Provider>
+                              // Use transaction-aware helper so Save button picks up changes
+                              setValueGlobal(
+                                graph,
+                                setGraph,
+                                formStore.P.txnId,
+                                { P: { key } } as unknown as Vertex,
+                                dataVertex,
+                                value,
+                                false,
+                              );
+                            }}
+                            vertexId={formDataId()}
+                          />
+                        </DesignerFormIdContext.Provider>
+                      </As>
                     </As>
-                  </As>
-                }
-              >
-                <For each={formStoreVertex()?.P.openedViews}>
-                  {(openedViewId, index) => (
-                    <OpenedViewPanel
-                      formStoreId={graph.vertexes[openedFormId].P.formId}
-                      handleClose={() =>
-                        handleClose(openedFormId, openedViewId)
-                      }
-                      handleRefresh={handleRefresh}
-                      highlightedViewId={highlightedViewId}
-                      index={index()}
-                      isActive={isActive}
-                      isPreview={isPreview}
-                      openedViewId={openedViewId}
-                      previewsLength={
-                        formStoreVertex()?.P.openedViews.length ?? 0
-                      }
-                    />
-                  )}
-                </For>
+                  }
+                >
+                  <For each={formStoreVertex()?.P.openedViews}>
+                    {(openedViewId, index) => (
+                      <OpenedViewPanel
+                        formStoreId={graph.vertexes[openedFormId].P.formId}
+                        handleClose={() =>
+                          handleClose(openedFormId, openedViewId)
+                        }
+                        handleRefresh={handleRefresh}
+                        highlightedViewId={highlightedViewId}
+                        index={index()}
+                        isActive={isActive}
+                        isPreview={isPreview}
+                        openedViewId={openedViewId}
+                        previewsLength={
+                          formStoreVertex()?.P.openedViews.length ?? 0
+                        }
+                      />
+                    )}
+                  </For>
+                </Show>
               </Show>
-            </Show>
-          );
-        }}
-      </For>
+            );
+          }}
+        </For>
       </As>
     </MainPanelInnerGrid>
   );

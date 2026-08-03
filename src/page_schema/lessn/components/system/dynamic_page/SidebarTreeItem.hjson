@@ -6,10 +6,14 @@
       P: {
         fns:
           '''
-// Get props from context
+// Get props from context (support signal accessors — avoids full-tree prop churn)
+const resolveProp = (value) => (typeof value === "function" ? value() : value);
 const getItem = () => c.props?.item;
-const getExpandedKeys = () => c.props?.expandedKeys || [];
-const getSelectedItem = () => c.props?.selectedItem;
+const getExpandedKeys = () => {
+  const keys = resolveProp(c.props?.expandedKeys);
+  return Array.isArray(keys) ? keys : [];
+};
+const getSelectedItem = () => resolveProp(c.props?.selectedItem);
 const getOnToggleExpand = () => c.props?.onToggleExpand;
 const getOnItemSelect = () => c.props?.onItemSelect;
 const getFetchChildren = () => c.props?.fetchChildren;
@@ -31,15 +35,13 @@ const getItemSortName = (item) => {
   return item.P?.name || item.P?.title || item.P?.key || "";
 };
 
-// Get children and loading from props (from graph)
+// Get children from parent getChildren (already sorted) or childItems prop
 const getChildren = () => {
-  const children = c.props?.childItems || [];
-  // Sort children by name alphabetically
-  return children.sort((a, b) => {
-    const nameA = getItemSortName(a);
-    const nameB = getItemSortName(b);
-    return nameA.localeCompare(nameB);
-  });
+  const item = getItem();
+  const getChildrenFn = c.props?.getChildren;
+  if (getChildrenFn && item?.id) return getChildrenFn(item.id) || [];
+  const children = c.props?.childItems;
+  return Array.isArray(children) ? children : [];
 };
 
 const getLoading = () => {
@@ -127,25 +129,12 @@ const fetchChildrenIfNeeded = async () => {
   }
 };
 
-// Handle expand toggle
+// Handle expand toggle (parent toggleExpand already fetches children)
 const handleToggleExpand = async () => {
   const item = getItem();
   if (!item) return;
-
   const onToggleExpand = getOnToggleExpand();
-  if (onToggleExpand) {
-    const wasExpanded = isExpanded();
-    await onToggleExpand(item.id);
-    // Always fetch children when expanding (even if we think we have them)
-    // This ensures nested children are properly fetched from the server
-    if (!wasExpanded) {
-      // Fetch children from server to ensure they're in the graph
-      const fetchChildrenFn = getFetchChildren();
-      if (fetchChildrenFn) {
-        await fetchChildrenFn(item.id);
-      }
-    }
-  }
+  if (onToggleExpand) await onToggleExpand(item.id);
 };
 
 // Handle item click
@@ -1431,15 +1420,12 @@ return {
         key: tree_item_children
         props:
           '''const expanded = f.isExpanded();
-// Get children reactively - this will update when graph changes
-const childrenList = f.getChildren();
-// Only render if expanded and we have children
-// If expanded but no children yet, they might be fetching
+const childrenList = expanded ? f.getChildren() : [];
 return {
   as: "ul",
   loop: expanded && childrenList.length > 0,
   contextName: "childItem",
-  data: expanded ? childrenList : [],
+  data: childrenList,
   hide: !expanded || childrenList.length === 0
 };'''
       }
@@ -1457,15 +1443,10 @@ return {
         key: tree_item_child
         props:
           '''const childItem = c.childItem;
-// Get children from graph reactively using parent's getChildren function
-// Access graph reactively by calling getChildren which accesses g
-const getChildrenFn = c.props?.getChildren;
-// Call getChildren to get children reactively (it accesses g which is reactive)
-const children = getChildrenFn ? getChildrenFn(childItem?.id) : [];
 
 return {
   item: childItem,
-  expandedKeys: c.props?.expandedKeys || [],
+  expandedKeys: c.props?.expandedKeys,
   selectedItem: c.props?.selectedItem,
   onToggleExpand: c.props?.onToggleExpand,
   onItemSelect: c.props?.onItemSelect,
@@ -1473,9 +1454,7 @@ return {
   sidebarConfig: c.props?.sidebarConfig,
   onItemUpdate: c.props?.onItemUpdate,
   onItemDelete: c.props?.onItemDelete,
-  childItems: children,
-  loading: false,
-  getChildren: getChildrenFn,
+  getChildren: c.props?.getChildren,
   tableVertexLabel: c.props?.tableVertexLabel,
   relationshipType: c.props?.relationshipType,
   onMoveItemsToCategory: c.props?.onMoveItemsToCategory,

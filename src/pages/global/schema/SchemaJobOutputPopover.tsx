@@ -107,7 +107,7 @@ export function SchemaJobOutputPopover(props: SchemaJobOutputPopoverProps) {
   };
 
   createEffect(() => {
-    if (!((open() && reference() ) && floating())) {
+    if (!(open() && reference() && floating())) {
       return;
     }
     void updatePosition();

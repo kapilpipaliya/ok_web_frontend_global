@@ -7,8 +7,7 @@ export type ThemeColorKey =
   | "error"
   | "text"
   | "background"
-  | "border"
-  ;
+  | "border";
 // Typography and layout types removed - use fixed values in CSS
 // Media breakpoints
 export type Breakpoint = "sm" | "md" | "lg" | "xl" | "2xl";
@@ -162,9 +161,7 @@ export interface ThemeContext {
   getContrastColor?: (color: string) => string;
 
   // Advanced color utilities
-  getSemanticColor?: (
-    context: "text" | "background" | "border",
-  ) => string;
+  getSemanticColor?: (context: "text" | "background" | "border") => string;
   mixColors?: (color1: string, color2: string, amount?: number) => string;
   createGradient?: (
     type: "linear" | "radial",

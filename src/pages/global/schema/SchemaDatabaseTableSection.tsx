@@ -154,7 +154,9 @@ function JobStatusCell(props: {
   return (
     <As as="span">
       <Show when={hasAnyJobOutput(outputTabs())} fallback={badge}>
-        <SchemaJobOutputPopover tabs={outputTabs}>{badge}</SchemaJobOutputPopover>
+        <SchemaJobOutputPopover tabs={outputTabs}>
+          {badge}
+        </SchemaJobOutputPopover>
       </Show>
       <Show when={errorText()}>
         {(text) => (
@@ -247,7 +249,9 @@ export function SchemaDatabaseTableSection(
         </As>
         <As
           as="motionFragment"
-          css={"return `._id { display: flex; flex-wrap: wrap; gap: 0.5rem; }`;"}
+          css={
+            "return `._id { display: flex; flex-wrap: wrap; gap: 0.5rem; }`;"
+          }
         >
           <For each={props.operations}>
             {(op) => (

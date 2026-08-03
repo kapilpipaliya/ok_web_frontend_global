@@ -97,7 +97,9 @@ let combine: any,
 let attachInstruction: any, extractInstruction: any, DropIndicator: any;
 
 /** Lazily loaded client-only deps (only used in browser event handlers, never during SSR render). */
-let KeepAwake: typeof import("@capacitor-community/keep-awake").KeepAwake | undefined;
+let KeepAwake:
+  | typeof import("@capacitor-community/keep-awake").KeepAwake
+  | undefined;
 
 if (typeof window !== "undefined") {
   // Only import drag-and-drop modules and related drag+drop utilities on the client
@@ -367,8 +369,12 @@ export function createFunctionArgumentBase(
     get user() {
       return getMemberVertex(hooks.graph);
     },
-    executeServerFunction: ((...params: Parameters<typeof executeServerFunction>) =>
-      withNetworkRetry(() => executeServerFunction(...params))) as typeof executeServerFunction,
+    executeServerFunction: ((
+      ...params: Parameters<typeof executeServerFunction>
+    ) =>
+      withNetworkRetry(() =>
+        executeServerFunction(...params),
+      )) as typeof executeServerFunction,
     executeNamedServerFunction: ((
       ...params: Parameters<typeof executeNamedServerFunction>
     ) =>

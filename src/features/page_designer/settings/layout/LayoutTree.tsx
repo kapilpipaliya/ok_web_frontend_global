@@ -161,8 +161,12 @@ export function LayoutTree() {
   >({});
   const [searchQuery, setSearchQuery] = createSignal("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = createSignal("");
-  const { showErrorToast, showLoadingToast, showWarningToast, showSuccessToast } =
-    useToast();
+  const {
+    showErrorToast,
+    showLoadingToast,
+    showWarningToast,
+    showSuccessToast,
+  } = useToast();
   const navigate = useNavigate();
 
   const formStoreId = useDesignerFormIdContext();
@@ -205,16 +209,10 @@ export function LayoutTree() {
   };
 
   const toggleLayoutTreeFloatingMenu = () => {
-    mergeVertexProperties<PageLayoutObject>(
-      0,
-      layoutStoreId,
-      graph,
-      setGraph,
-      {
-        isLayoutTreeFloatingMenuEnabled:
-          !layoutStoreVertex()?.P.isLayoutTreeFloatingMenuEnabled,
-      },
-    );
+    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
+      isLayoutTreeFloatingMenuEnabled:
+        !layoutStoreVertex()?.P.isLayoutTreeFloatingMenuEnabled,
+    });
   };
 
   // Function to toggle JSON editor for a specific item

@@ -1193,22 +1193,19 @@ return `._id {
         key: sidebar_tree_item
         props:
           '''const item = c.sidebarItem;
-// Get children from graph (reactive)
-const children = f.getChildren(item?.id);
 const sidebarConfig = f.getSidebarConfig();
 
+// Pass accessors (not values) so expand/select does not re-run every row's props
 return {
   item: item,
-  expandedKeys: f.expandedKeys(),
-  selectedItem: f.selectedItem(),
+  expandedKeys: f.expandedKeys,
+  selectedItem: f.selectedItem,
   onToggleExpand: f.toggleExpand,
   onItemSelect: f.handleItemSelect,
   fetchChildren: f.fetchChildren,
   sidebarConfig: sidebarConfig,
   onItemUpdate: f.updateItemInTree,
   onItemDelete: f.removeItemFromTree,
-  childItems: children,
-  loading: false,
   getChildren: f.getChildren,
   tableVertexLabel: f.getTableVertexLabel(),
   relationshipType: f.getRelationshipType(),
