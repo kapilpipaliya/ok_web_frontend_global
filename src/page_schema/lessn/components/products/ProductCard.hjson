@@ -26,10 +26,11 @@
   cursor: pointer;
   text-decoration: none;
   color: inherit;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  transform-origin: center center;
 
   &:hover {
-    transform: translateY(-2px);
+    z-index: 1;
     border-color: ${t.var.color.primary_light_300};
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
   }
@@ -49,7 +50,17 @@ return {
   as: "button",
   type: "button",
   "data-animate": "",
-  ref: (el) => el && f.animateOnView?.(el, { delay: index * 0.05 }),
+  ref: (el) => {
+    if (!el) return;
+    f.animateOnView?.(el, { delay: index * 0.05 });
+    if (el.dataset.hoverInit) return;
+    el.dataset.hoverInit = "true";
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    _.motion.hover(el, (element) => {
+      _.motion.animate(element, { scale: 1.2 });
+      return () => _.motion.animate(element, { scale: 1 });
+    });
+  },
   onClick: () => onOpen?.(item)
 };'''
       }

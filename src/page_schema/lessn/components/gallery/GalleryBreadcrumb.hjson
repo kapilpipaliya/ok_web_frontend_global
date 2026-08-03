@@ -30,7 +30,9 @@
         props:
           '''return {
   as: "nav",
-  "aria-label": "Gallery breadcrumb"
+  "aria-label": "Gallery breadcrumb",
+  "data-animate": "",
+  ref: (el) => el && f.animateOnView?.(el, { y: 12 })
 };'''
       }
     }
@@ -62,7 +64,13 @@ return {
 }`;'''
         displayOrder: 1
         componentName: Html
-        props: return { as: "span" };
+        props:
+          '''const index = c.index ?? 0;
+return {
+  as: "span",
+  "data-animate": "",
+  ref: (el) => el && f.animateOnView?.(el, { y: 8, delay: index * 0.05 })
+};'''
       }
     }
     {
@@ -106,6 +114,7 @@ return `._id {
   cursor: ${isLast ? "default" : "pointer"};
   text-decoration: none;
   transition: background 0.15s ease, color 0.15s ease;
+  transform-origin: center center;
 
   ${!isLast ? `
   &:hover {
@@ -136,6 +145,17 @@ return {
   href: isLast ? undefined : (resolvedHref || undefined),
   text: label,
   "aria-current": isLast ? "page" : undefined,
+  ref: isLast
+    ? undefined
+    : (el) => {
+        if (!el || el.dataset.hoverInit) return;
+        el.dataset.hoverInit = "true";
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        _.motion.hover(el, (element) => {
+          _.motion.animate(element, { scale: 1.08 });
+          return () => _.motion.animate(element, { scale: 1 });
+        });
+      },
   onClick: isLast
     ? undefined
     : (e) => {

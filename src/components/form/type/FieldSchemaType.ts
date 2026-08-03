@@ -128,6 +128,8 @@ export interface FunctionArgumentBaseType {
     rowData: unknown,
     index: import("solid-js").Accessor<number>,
   ) => import("solid-js").JSX.Element;
+  /** Motion namespace (`import * as motion from "motion"`); exposed on `_`. */
+  motion: typeof import("motion");
 }
 
 export interface FunctionArgumentType extends FunctionArgumentBaseType {

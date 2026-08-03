@@ -39,6 +39,15 @@ const getHoverBackground = () =>
 const getActiveBorderColor = () =>
   props().activeBorderColor || getTriggerColor();
 
+/** Slightly lighter panel per nested depth (0 = first submenu). */
+const getResolvedPanelBackground = (depth = getDepth()) => {
+  const base = getPanelBackground();
+  const level = Math.max(0, Number(depth) || 0);
+  if (level <= 0) return base;
+  const mix = Math.min(12, level * 3);
+  return `color-mix(in srgb, ${base} ${100 - mix}%, #fff ${mix}%)`;
+};
+
 const getPagePath = () => {
   const parts = String(_.location?.pathname || "")
     .split("/")
@@ -498,6 +507,7 @@ return {
   getItemId,
   getTriggerColor,
   getPanelBackground,
+  getResolvedPanelBackground,
   getHoverBackground,
   getActiveBorderColor,
   isItemActive,
@@ -610,6 +620,9 @@ return {
           '''const item = c.menuItem;
 const layout = f.getLayout();
 const isActive = f.isItemActive(item);
+const id = f.getItemId(item);
+const hasChildren = f.getChildren(item).length > 0;
+const isBranchOpen = hasChildren && f.getController().isOpen(id);
 const color = f.getTriggerColor();
 const hoverBg = f.getHoverBackground();
 const activeBorder = f.getActiveBorderColor();
@@ -629,7 +642,7 @@ return `._id {
   font-weight: 500;
   font-size: ${isBar ? "0.95rem" : "inherit"};
   font-family: inherit;
-  background: none;
+  background: ${isBranchOpen ? hoverBg : "none"};
   border: none;
   cursor: pointer;
   text-align: left;
@@ -668,7 +681,7 @@ return `._id {
   ${
     isActive && !isBar
       ? `
-    background: rgba(0, 0, 0, 0.03);
+    background: ${isBranchOpen ? hoverBg : "rgba(0, 0, 0, 0.03)"};
     font-weight: 600;
     border-left: 2px solid ${activeBorder};
     padding-left: calc(1.25rem - 2px);
@@ -847,8 +860,8 @@ return {
 const id = f.getItemId(item);
 const ctrl = f.getController();
 const isOpen = ctrl.isOpen(id);
-const bg = f.getPanelBackground();
 const depth = f.getDepth();
+const bg = f.getResolvedPanelBackground(depth);
 
 // Always in DOM for SSR — hide with CSS (not hide:true, which unmounts)
 return `._id {
@@ -897,7 +910,7 @@ return {
       L: Attr
       P: {
         css:
-          '''const bg = f.getPanelBackground();
+          '''const bg = f.getResolvedPanelBackground(f.getDepth());
 const color = f.getTriggerColor();
 return `._id {
   position: absolute;
@@ -1028,7 +1041,7 @@ return {
       L: Attr
       P: {
         css:
-          '''const bg = f.getPanelBackground();
+          '''const bg = f.getResolvedPanelBackground(f.getDepth());
 const color = f.getTriggerColor();
 return `._id {
   position: absolute;

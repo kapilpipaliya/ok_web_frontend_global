@@ -74,6 +74,7 @@ import { createDashboardPlatform } from "~/lib/dashboard";
 import { findLoopTemplateMeta } from "~/components/form/dynamic_component/components/LoopChildrenRenderer";
 import { createLoopRowRenderer } from "~/components/form/dynamic_component/functions/createLoopRowRenderer";
 import { cssHelpers } from "~/lib/styles/cssHelpers";
+import * as motion from "motion";
 // Static: `_.useCarousel(...)` runs synchronously during SSR render (it
 // creates the embla ref in component `fns`), so it must be available on the
 // server. Small (~8KB gzip), unlike the truly client-only lazy deps below.
@@ -470,6 +471,8 @@ export function createFunctionArgumentBase(
     },
     useCarousel: useEmblaCarousel,
     css: cssHelpers,
+    /** Motion — full `motion` package namespace for page/component schemas. */
+    motion,
     createLoopRowRenderer: (
       mapContextValue: (rowData: unknown, index: Accessor<number>) => unknown,
     ) => {
