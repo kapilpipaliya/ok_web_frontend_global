@@ -21,10 +21,10 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
-const SOURCE = path.join(ROOT, "src/page_schema/fulchandshastri");
+const SOURCE = path.join(ROOT, "src/page_schema/lessn");
 
 /** Destination directory names under src/page_schema (each gets a full copy). */
-const DEST_NAMES = ["affiliateplatform"];
+const DEST_NAMES = ["decodeproduct"];
 
 const SKIP_DIRS = [
   //"functions",

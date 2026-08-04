@@ -1,16 +1,16 @@
 import { createContext, useContext } from "solid-js";
 
-// Moving constants and utility functions to separate modules
-
 import {
   colorToHex,
+  colorToHexFromBase,
   createColorScheme,
   getLightShade,
   getDarkShade,
-  getContrastColor,
+  getContrastColorFromBase,
   parseColorName,
   resolveColorForMode,
   isModeSpecificColor,
+  type ShadeType,
 } from "~/lib/styles/colorUtils";
 import type {
   ColorDefinition,
@@ -21,119 +21,144 @@ import type {
 
 export const ThemeContext = createContext<ThemeContextType>();
 
-// Types
 type ThemeObject = Record<string, unknown>;
 type ColorTarget = {
   [key: string]: string | number | boolean | ColorDefinition | undefined;
   primary?: ColorDefinition;
 };
 
-// Color handlers
+type ResolvedShade = {
+  baseColor: string;
+  shadeType: ShadeType;
+  shade: number;
+  css: string;
+};
+
+function resolveEffectiveShadeType(
+  shadeType: string,
+  mode: ColorMode,
+): ShadeType {
+  if (mode === "dark") {
+    return shadeType === "light" ? "dark" : "light";
+  }
+  return shadeType === "dark" ? "dark" : "light";
+}
+
+function resolveBaseColorString(
+  target: ColorTarget,
+  baseProp: string,
+  mode: ColorMode,
+): string | undefined {
+  let baseColorDef = target[baseProp];
+
+  if (baseColorDef === undefined) {
+    const parsedColor = parseColorName(baseProp);
+    if (parsedColor) {
+      baseColorDef = parsedColor;
+    }
+  }
+
+  if (baseColorDef === undefined) {
+    return undefined;
+  }
+
+  if (typeof baseColorDef === "string") {
+    return baseColorDef;
+  }
+
+  if (typeof baseColorDef === "object" && baseColorDef !== null) {
+    const resolved = resolveColorForMode(baseColorDef, mode);
+    return typeof resolved === "string" ? resolved : undefined;
+  }
+
+  return undefined;
+}
+
+function resolveShade(
+  target: ColorTarget,
+  prop: string,
+  getColorMode?: () => ColorMode,
+): ResolvedShade | undefined {
+  const shadeMatch = prop.match(/(.+)_(light|dark)_(\d+)$/);
+  if (!shadeMatch) {
+    return undefined;
+  }
+
+  const [, baseProp, shadeTypeRaw, shadeValue] = shadeMatch;
+  const shade = Number.parseInt(shadeValue, 10);
+  const mode = getColorMode ? getColorMode() : "light";
+  const baseColor = resolveBaseColorString(target, baseProp, mode);
+  if (!baseColor) {
+    return undefined;
+  }
+
+  const shadeType = resolveEffectiveShadeType(shadeTypeRaw, mode);
+  const css =
+    shadeType === "light"
+      ? getLightShade(baseColor, shade)
+      : getDarkShade(baseColor, shade);
+
+  return { baseColor, shadeType, shade, css };
+}
+
 const colorHandlers = {
   /**
    * Handles text color suffix access in the theme proxy.
    * Pattern: primary_text, success_text, error_text, primary_light_200_text, etc.
+   * Contrast is computed from original base OKLCH (+ shade ratio), never from color-mix CSS.
    */
   handleTextColorAccess: (
     target: ColorTarget,
     prop: string,
     getColorMode?: () => ColorMode,
   ): string | undefined => {
-    // Pattern: colorname_text
     const textMatch = prop.match(/(.+)_text$/);
-    if (textMatch) {
-      const [, baseProp] = textMatch;
-
-      // First check if there's a predefined text color for this base color
-      const textColorKey = `${baseProp}_text`;
-      if (target[textColorKey] !== undefined) {
-        const mode = getColorMode ? getColorMode() : "light";
-        return resolveColorForMode(target[textColorKey], mode);
-      }
-
-      // Check if baseProp is a shade pattern (e.g., primary_light_200)
-      const shadeMatch = baseProp.match(/(.+)_(light|dark)_(\d+)$/);
-      if (shadeMatch) {
-        // First compute the shade color
-        const shadeColor = colorHandlers.handleShadeAccess(
-          target,
-          baseProp,
-          getColorMode,
-        );
-        if (shadeColor) {
-          // Then get the contrast color for this shade
-          return getContrastColor(shadeColor);
-        }
-      }
-
-      // If not predefined or a shade, calculate the appropriate text color based on the base color
-      const baseColorDef = target[baseProp];
-      if (baseColorDef !== undefined) {
-        const mode = getColorMode ? getColorMode() : "light";
-        const resolvedColor = resolveColorForMode(baseColorDef, mode);
-
-        // Use the getContrastColor function which finds the best contrast color
-        // It defaults to choosing between white and black
-        return getContrastColor(resolvedColor);
-      }
-
+    if (!textMatch) {
       return undefined;
     }
+
+    const [, baseProp] = textMatch;
+
+    const textColorKey = `${baseProp}_text`;
+    if (target[textColorKey] !== undefined) {
+      const mode = getColorMode ? getColorMode() : "light";
+      return resolveColorForMode(target[textColorKey], mode);
+    }
+
+    const shade = resolveShade(target, baseProp, getColorMode);
+    if (shade) {
+      return getContrastColorFromBase(
+        shade.baseColor,
+        shade.shadeType,
+        shade.shade,
+      );
+    }
+
+    const mode = getColorMode ? getColorMode() : "light";
+    const baseColor = resolveBaseColorString(target, baseProp, mode);
+    if (baseColor) {
+      return getContrastColorFromBase(baseColor);
+    }
+
     return undefined;
   },
 
   /**
    * Handles dynamic color shade access in the theme proxy.
    * Pattern: primary_light_640, error_dark_820, background_light_100, etc.
+   * Returns color-mix() CSS for stylesheets only.
    */
   handleShadeAccess: (
     target: ColorTarget,
     prop: string,
     getColorMode?: () => ColorMode,
   ): string | undefined => {
-    // Pattern: colorname_light_### or colorname_dark_###
-    const shadeMatch = prop.match(/(.+)_(light|dark)_(\d+)$/);
-    if (shadeMatch) {
-      const [, baseProp, shadeType, shadeValue] = shadeMatch;
-      const shade = Number.parseInt(shadeValue, 10);
-      let baseColorDef = target[baseProp];
+    const shade = resolveShade(target, prop, getColorMode);
+    if (shade) {
+      return shade.css;
+    }
 
-      // If base color doesn't exist in the target, try parsing as color name
-      if (baseColorDef === undefined) {
-        const parsedColor = parseColorName(baseProp);
-        if (parsedColor) {
-          baseColorDef = parsedColor;
-        }
-      }
-
-      // Resolve the color for the current mode
-      if (baseColorDef !== undefined) {
-        const mode = getColorMode ? getColorMode() : "light";
-
-        // Swap light/dark when in dark mode
-        const effectiveShadeType =
-          mode === "dark"
-            ? shadeType === "light"
-              ? "dark"
-              : "light"
-            : shadeType;
-
-        if (typeof baseColorDef === "string") {
-          return effectiveShadeType === "light"
-            ? getLightShade(baseColorDef, shade)
-            : getDarkShade(baseColorDef, shade);
-        }
-        if (typeof baseColorDef === "object" && baseColorDef !== null) {
-          const resolvedColor = resolveColorForMode(baseColorDef, mode);
-          if (typeof resolvedColor === "string") {
-            return effectiveShadeType === "light"
-              ? getLightShade(resolvedColor, shade)
-              : getDarkShade(resolvedColor, shade);
-          }
-        }
-      }
-    } else if (target[prop]) {
-      // Handle direct color access with mode resolution
+    if (target[prop]) {
       const colorDef = target[prop];
       const mode = getColorMode ? getColorMode() : "light";
 
@@ -144,9 +169,12 @@ const colorHandlers = {
         return resolveColorForMode(colorDef, mode);
       }
       return colorDef as unknown as string;
-    } else if (parseColorName(prop)) {
+    }
+
+    if (parseColorName(prop)) {
       return prop;
     }
+
     return undefined;
   },
 
@@ -207,9 +235,6 @@ const colorHandlers = {
   },
 };
 
-// Non-color handlers
-
-// Main proxy creation function
 export const createSafeThemeProxy = (
   obj: ThemeObject,
   path: string[] = [],
@@ -221,7 +246,6 @@ export const createSafeThemeProxy = (
         const currentPath = [...path, prop];
         const pathStr = currentPath.join(".");
 
-        // Handle color-related properties
         if (pathStr.startsWith("color.")) {
           return handleColorProperties(
             target as ColorTarget,
@@ -231,7 +255,6 @@ export const createSafeThemeProxy = (
           );
         }
 
-        // Handle nested objects and default values
         return handleDefaultAccess(target, prop, currentPath, getColorMode);
       }
     },
@@ -240,7 +263,40 @@ export const createSafeThemeProxy = (
   return new Proxy(obj || {}, handler);
 };
 
-// Helper functions for proxy handling
+/**
+ * Resolve a color prop to hex from the original base (+ shade), never from color-mix CSS.
+ */
+function resolveColorToHex(
+  target: ColorTarget,
+  colorProp: string,
+  getColorMode?: () => ColorMode,
+): string | undefined {
+  const shade = resolveShade(target, colorProp, getColorMode);
+  if (shade) {
+    return colorToHexFromBase(shade.baseColor, shade.shadeType, shade.shade);
+  }
+
+  const textMatch = colorProp.match(/(.+)_text$/);
+  if (textMatch) {
+    const textColor = colorHandlers.handleTextColorAccess(
+      target,
+      colorProp,
+      getColorMode,
+    );
+    if (typeof textColor === "string") {
+      return colorToHex(textColor);
+    }
+  }
+
+  const mode = getColorMode ? getColorMode() : "light";
+  const baseColor = resolveBaseColorString(target, colorProp, mode);
+  if (baseColor) {
+    return colorToHexFromBase(baseColor);
+  }
+
+  return undefined;
+}
+
 function handleColorProperties(
   target: ColorTarget,
   prop: string,
@@ -248,7 +304,9 @@ function handleColorProperties(
   getColorMode?: () => ColorMode,
 ) {
   const hexMatch = prop.match(/(.+)_hex$/);
-  const colorProp = hexMatch ? hexMatch[1] : prop;
+  if (hexMatch) {
+    return resolveColorToHex(target, hexMatch[1], getColorMode);
+  }
 
   const colorHandlerFunctions = [
     colorHandlers.handleTextColorAccess,
@@ -257,25 +315,14 @@ function handleColorProperties(
   ];
 
   for (const handler of colorHandlerFunctions) {
-    const result = handler(target, colorProp, getColorMode);
+    const result = handler(target, prop, getColorMode);
     if (result !== undefined) {
-      return hexMatch && typeof result === "string"
-        ? colorToHex(result)
-        : result;
+      return result;
     }
   }
 
   if (currentPath.length === 2) {
-    const directResult = colorHandlers.handleDirectColorAccess(
-      target,
-      colorProp,
-      getColorMode,
-    );
-    if (directResult !== undefined) {
-      return hexMatch && typeof directResult === "string"
-        ? colorToHex(directResult)
-        : directResult;
-    }
+    return colorHandlers.handleDirectColorAccess(target, prop, getColorMode);
   }
 
   return undefined;
@@ -287,19 +334,16 @@ function handleDefaultAccess(
   currentPath: string[],
   getColorMode?: () => ColorMode,
 ) {
-  // Return undefined for undefined or null targets
   if (target === undefined || target === null) {
     return undefined;
   }
 
   const value = target[prop];
 
-  // Return undefined for undefined or null properties
   if (value === undefined || value === null) {
     return undefined;
   }
 
-  // Wrap objects in proxy with updated path
   if (typeof value === "object") {
     return createSafeThemeProxy(
       value as ThemeObject,

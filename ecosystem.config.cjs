@@ -12,7 +12,7 @@ module.exports = {
     {
       name: "ok-web-frontend",
       script: "./production/server/index.mjs",
-      instances: 2, // Run 2 instances (or use "max" for all CPU cores)
+      instances: "max", // Run 2 instances (or use "max" for all CPU cores)
       exec_mode: "cluster",
       // Load environment variables from .env file
       env: {
@@ -33,7 +33,7 @@ module.exports = {
       // Wait for app to be ready before considering it online
       wait_ready: true,
       // Zero-downtime reload settings
-      increment_var: "PORT",        // Increment port for each instance if needed
+      // increment_var: "PORT",        // Increment port for each instance if needed
       // Logging
       error_file: "./logs/err.log",
       out_file: "./logs/out.log",

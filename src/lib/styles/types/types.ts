@@ -22,53 +22,8 @@ export type ModeSpecificColor = {
 
 // Color definition can be either unified or mode-specific
 export type ColorDefinition = string | ModeSpecificColor;
-// Color shade range (1-1000) - Use _light_### for light shades and _dark_### for dark shades
-export type ShadeNumber =
-  | 0
-  | 5
-  | 10
-  | 15
-  | 20
-  | 25
-  | 30
-  | 35
-  | 40
-  | 45
-  | 50
-  | 55
-  | 60
-  | 65
-  | 70
-  | 75
-  | 80
-  | 85
-  | 90
-  | 95
-  | 100
-  | 200
-  | 300
-  | 400
-  | 500
-  | 600
-  | 700
-  | 800
-  | 900
-  | 1000;
-
-// Color adjustment options
-export interface ColorAdjustments {
-  lighten?: number;
-  darken?: number;
-  saturate?: number;
-  desaturate?: number;
-  spin?: number;
-  alpha?: number;
-}
 
 // Typography settings removed - use fixed values in CSS
-
-// Color palette (all shades of a color)
-export type ColorPalette = Record<ShadeNumber, string>;
 
 // Color scheme (related color variations)
 export interface ColorScheme {
@@ -149,41 +104,6 @@ export interface ThemeContext {
   setAllColors?: (colors: Record<ThemeColorKey, string>) => void;
   setColorScheme?: (baseColor: string, colorKeys?: ThemeColorKey[]) => void;
   // getBorderRadius removed - use fixed values in CSS
-
-  // ===========================================
-  // = COLOR UTILITY FUNCTIONS
-  // ===========================================
-
-  // Color manipulation
-  adjustColor?: (color: string, adjustments: ColorAdjustments) => string;
-  getColorPalette?: (color: string) => ColorPalette;
-  getColorScheme?: (color: string) => ColorScheme;
-  getContrastColor?: (color: string) => string;
-
-  // Advanced color utilities
-  getSemanticColor?: (context: "text" | "background" | "border") => string;
-  mixColors?: (color1: string, color2: string, amount?: number) => string;
-  createGradient?: (
-    type: "linear" | "radial",
-    colors: string[],
-    stops?: number[],
-  ) => string;
-  getHsl?: (color: string) => { h: number; s: number; l: number; a: number };
-
-  // Accessibility helpers
-  getContrastRatio: (color1: string, color2: string) => number;
-  meetsAccessibilityStandards: (
-    foreground: string,
-    background: string,
-    level?: "AA" | "AAA",
-    size?: "normal" | "large",
-  ) => boolean;
-  findAccessibleColor: (
-    baseColor: string,
-    backgroundColor: string,
-    level?: "AA" | "AAA",
-    size?: "normal" | "large",
-  ) => string;
 
   // ===========================================
   // = MEDIA QUERY HELPERS

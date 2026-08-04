@@ -688,12 +688,14 @@ t.var.color.primary_light_200_text  // Auto-calculated readable text color for p
 - Automatically calculates the most readable text color (white or black) for any background color
 - Works with base colors: `primary_text`, `success_text`, `error_text`, etc.
 - Works with shades: `primary_light_200_text`, `background_dark_800_text`, etc.
-- Uses APCA (Advanced Perceptual Contrast Algorithm) for better readability
+- Derived from the original base OKLCH lightness (and shade mix ratio); never by parsing `color-mix()` CSS
 - If a predefined `_text` color exists in the theme, it will be used instead of calculating
 
 **Shade System:**
 - Light shades: `_light_1` to `_light_1000` (light_1 = closest to base color, light_1000 = white)
 - Dark shades: `_dark_1` to `_dark_1000` (dark_1 = closest to base color, dark_1000 = black)
+- CSS values use native `color-mix(in oklch, …)` toward white/black
+- `_text` / `_hex` for shades are computed from the same base OKLCH + ratio in JS (not from parsing mix CSS)
 - Common shades: `_light_100`, `_light_200`, `_light_300`, `_light_400`, `_light_500`, `_light_600`, `_light_700`, `_light_800`, `_light_900`
 - Shades automatically swap in dark mode for better contrast
 
@@ -848,14 +850,13 @@ return `._id {
 - `src/lib/theme/ThemeProvider.tsx` - Global theme state management
 - `src/lib/theme/getDefaultTheme.ts` - Default theme generator function
 - `src/lib/graph/get/sync/theme/themeConfig.ts` - Database integration
-- `src/lib/styles/colorUtils.ts` - Color manipulation utilities (uses colorjs.io library)
+- `src/lib/styles/colorUtils.ts` - Color utilities (OKLCH parse/mix/hex; CSS shades via `color-mix`)
 - `src/lib/styles/constants.ts` - Theme constants and presets
 
-**Color Library:**
-The project uses [colorjs.io](https://colorjs.io/) for color manipulation, providing:
-- OKLCH color space support
-- APCA contrast algorithm for better text readability
-- Advanced color interpolation and manipulation
+**Color system:**
+- Shade CSS uses native `color-mix(in oklch, base, white|black)`
+- `_text` / `_hex` derive from the original base OKLCH (+ shade ratio) in pure JS — never by parsing generated CSS
+- No external color library (colorjs.io removed)
 
 #### Permission System
 The application implements a role-based access control system:
