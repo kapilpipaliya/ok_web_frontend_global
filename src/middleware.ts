@@ -98,7 +98,7 @@ export default createMiddleware({
         );
       }
     },
-    csrfUnlessWebhooks,
+    //csrfUnlessWebhooks,
     // Initialize workers on first request (server-side only)
     async (event) => {
       // Only run on server
