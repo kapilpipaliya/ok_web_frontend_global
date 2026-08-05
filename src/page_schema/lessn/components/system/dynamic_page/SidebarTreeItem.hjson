@@ -182,6 +182,27 @@ const getItemIcon = () => {
   return null;
 };
 
+// Thumbnail URL from optional imageRelationshipType (e.g. ProductCategoryImage -> File)
+const getItemImageUrl = () => {
+  const item = getItem();
+  if (!item?.id) return null;
+  const imageRelType = c.props?.sidebarConfig?.imageRelationshipType;
+  if (imageRelType == null || String(imageRelType).trim() === "") return null;
+  // Prefer live graph vertex so OUT edges from image loads stay reactive
+  const liveItem = g?.vertexes?.[item.id] || item;
+  const files =
+    _.evalExpression(`->${String(imageRelType).trim()}`, {
+      graph: g,
+      setGraph: sg,
+      vertexes: [liveItem]
+    }) || [];
+  const file = files[0];
+  const fileName =
+    file?.P?.fileName != null ? String(file.P.fileName).trim() : "";
+  if (!fileName) return null;
+  return "/api/file/download/" + encodeURIComponent(fileName);
+};
+
 // Sync status for sidebar items (queued = reload icon, failed = error icon)
 const getSyncStatus = () => {
   const item = getItem();
@@ -915,6 +936,7 @@ return {
   handleItemClick,
   getItemName,
   getItemIcon,
+  getItemImageUrl,
   getSyncStatus,
   isQueued,
   hasChildren,
@@ -1144,6 +1166,32 @@ return `._id {
       }
     }
     {
+      id: "6a"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  border-radius: 4px;
+  object-fit: cover;
+  background: ${t.var.color.background_light_200};
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        key: tree_item_image
+        props:
+          '''const imageUrl = f.getItemImageUrl();
+return {
+  as: "img",
+  src: imageUrl || "",
+  alt: "",
+  hide: () => !imageUrl
+};'''
+      }
+    }
+    {
       id: "6"
       L: Attr
       P: {
@@ -1151,6 +1199,7 @@ return `._id {
           '''return `._id {
   margin-right: 5px;
   color: ${t.var.color.text};
+  flex-shrink: 0;
 }`;'''
         displayOrder: 2
         componentName: Html
@@ -1161,7 +1210,7 @@ return `._id {
   icon: f.getItemIcon(),
   height: 16,
   width: 16,
-  hide: f.getItemIcon() === null
+  hide: () => f.getItemImageUrl() != null || f.getItemIcon() === null
 };'''
       }
     }
@@ -1500,6 +1549,12 @@ return {
       T: Attr
       S: "3"
       E: "4"
+    }
+    {
+      id: e5a
+      T: Attr
+      S: "3"
+      E: "6a"
     }
     {
       id: e5
