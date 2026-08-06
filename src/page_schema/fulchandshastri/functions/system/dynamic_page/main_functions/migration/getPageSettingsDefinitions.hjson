@@ -5393,7 +5393,7 @@ const fileTableFormConfigConfig = `return {
             chunkThresholdBytes: 5242880,
             chunkSizeBytes: 4194304,
             multiple: true,
-            maxFiles: 100,
+            maxFiles: 1000,
             hidePreview: false,
             enableDragDrop: true,
             fullWidth: true,

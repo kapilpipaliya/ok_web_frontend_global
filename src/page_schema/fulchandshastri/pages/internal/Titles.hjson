@@ -8,7 +8,7 @@
           '''const from = _.atom("1");
 const to = _.atom("705");
 const startDate = _.atom("2026-06-25");
-const activeFormat = _.atom("list");
+const activeFormat = _.atom("today");
 const copiedTitle = _.atom("");
 
 function generateTitles(startNumber, startDateValue, count, titles) {
@@ -19,7 +19,7 @@ function generateTitles(startNumber, startDateValue, count, titles) {
     _.dateFns.startOfToday(),
   );
 
-  return Array.from({ length: count }, (_, i) => {
+  return Array.from({ length: count }, (v, i) => {
     const currentDate = _.dateFns.addDays(date, i);
     const episode = String(startNumber + i).padStart(3, "0");
     const title = titles[i] ?? "<TITLE>";
@@ -29,6 +29,40 @@ function generateTitles(startNumber, startDateValue, count, titles) {
 
 const titles = () =>
   generateTitles(Number(from()), startDate(), Number(to()), []);
+
+const todayEpisode = () => {
+  const startDateValue = startDate();
+  if (!startDateValue) return null;
+  const start = _.dateFns.parse(
+    startDateValue,
+    "yyyy-MM-dd",
+    _.dateFns.startOfToday(),
+  );
+  const days = _.dateFns.differenceInCalendarDays(
+    _.dateFns.startOfToday(),
+    start,
+  );
+  if (Number.isNaN(days) || days < 0) return null;
+  return Number(from()) + days;
+};
+
+const todayEpisodePadded = () => {
+  const episode = todayEpisode();
+  if (episode == null) return "";
+  return String(episode).padStart(3, "0");
+};
+
+const todayImageUrl = () => {
+  const padded = todayEpisodePadded();
+  if (!padded) return "";
+  return `/api/file/download/${encodeURIComponent(`DDP # ${padded}.jpg`)}`;
+};
+
+const todayTitle = () => {
+  const episode = todayEpisode();
+  if (episode == null) return "";
+  return titles()[episode - Number(from())] ?? "";
+};
 
 const copyTitle = async (text) => {
   try {
@@ -52,12 +86,16 @@ return {
   activeFormat,
   copiedTitle,
   titles,
+  todayEpisode,
+  todayEpisodePadded,
+  todayImageUrl,
+  todayTitle,
   copyTitle
 };
 '''
-        key: Titles
         url: /titles
-        updatedAt: 2026-07-17T08:23:02.835Z
+        key: Titles
+        updatedAt: 2026-08-06T04:38:13.806Z
         props:
           '''return {
   isNoPermissionCheck: true
@@ -66,20 +104,13 @@ return {
     }
     {
       id: "2"
-      L: PageLayout
-      P: {
-        componentName: Layout
-      }
-    }
-    {
-      id: "3"
       L: Attr
       P: {
+        as: div
         css:
           '''return `._id {
         padding: 10px;
       }`;'''
-        as: div
         displayOrder: 1
         componentName: Html
         text: From
@@ -87,14 +118,14 @@ return {
       }
     }
     {
-      id: "4"
+      id: "3"
       L: Attr
       P: {
+        as: input
         css:
           '''return `._id {
         padding: 10px;
       }`;'''
-        as: input
         displayOrder: 2
         componentName: Html
         key: unique_1
@@ -106,14 +137,14 @@ return {
       }
     }
     {
-      id: "5"
+      id: "4"
       L: Attr
       P: {
+        as: div
         css:
           '''return `._id {
         padding: 10px;
       }`;'''
-        as: div
         displayOrder: 3
         componentName: Html
         text: To
@@ -121,14 +152,14 @@ return {
       }
     }
     {
-      id: "6"
+      id: "5"
       L: Attr
       P: {
+        as: input
         css:
           '''return `._id {
         padding: 10px;
       }`;'''
-        as: input
         displayOrder: 4
         componentName: Html
         key: unique_4
@@ -140,7 +171,7 @@ return {
       }
     }
     {
-      id: "7"
+      id: "6"
       L: Attr
       P: {
         as: div
@@ -155,14 +186,14 @@ return {
       }
     }
     {
-      id: "8"
+      id: "7"
       L: Attr
       P: {
+        as: input
         css:
           '''return `._id {
         padding: 10px;
       }`;'''
-        as: input
         displayOrder: 6
         componentName: Html
         key: unique_8
@@ -174,7 +205,7 @@ return {
       }
     }
     {
-      id: "9"
+      id: "8"
       L: Attr
       P: {
         as: div
@@ -191,7 +222,7 @@ return {
       }
     }
     {
-      id: "10"
+      id: "9"
       L: Attr
       P: {
         as: div
@@ -207,7 +238,7 @@ return {
       }
     }
     {
-      id: "11"
+      id: "10"
       L: Attr
       P: {
         css:
@@ -228,7 +259,37 @@ return {
       }
     }
     {
-      id: "12"
+      id: "21"
+      L: Attr
+      P: {
+        css:
+          '''const active = f.activeFormat() === "today";
+return `._id {
+  padding: 0.5rem 1rem;
+  border: 1px solid ${active ? t.var.color.primary : t.var.color.border};
+  border-radius: 0.375rem;
+  background: ${active ? t.var.color.primary : t.var.color.background};
+  color: ${active ? t.var.color.primary_text : t.var.color.text};
+  font-weight: 600;
+  cursor: pointer;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        key: unique_19
+        props:
+          '''const active = f.activeFormat() === "today";
+return {
+  as: "button",
+  type: "button",
+  role: "tab",
+  "aria-selected": active ? "true" : "false",
+  text: "Today",
+  onClick: () => f.activeFormat("today")
+};'''
+      }
+    }
+    {
+      id: "11"
       L: Attr
       P: {
         css:
@@ -242,7 +303,7 @@ return `._id {
   font-weight: 600;
   cursor: pointer;
 }`;'''
-        displayOrder: 1
+        displayOrder: 2
         componentName: Html
         key: unique_14
         props:
@@ -258,7 +319,7 @@ return {
       }
     }
     {
-      id: "13"
+      id: "12"
       L: Attr
       P: {
         css:
@@ -272,7 +333,7 @@ return `._id {
   font-weight: 600;
   cursor: pointer;
 }`;'''
-        displayOrder: 2
+        displayOrder: 3
         componentName: Html
         key: unique_15
         props:
@@ -288,10 +349,112 @@ return {
       }
     }
     {
-      id: "14"
+      id: "22"
+      L: Attr
+      P: {
+        as: div
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid ${t.var.color.border};
+  border-radius: 0.375rem;
+  background: ${t.var.color.background_light_50};
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        key: unique_20
+        props:
+          '''return {
+  as: "div",
+  hide: f.activeFormat() !== "today"
+};'''
+      }
+    }
+    {
+      id: "23"
+      L: Attr
+      P: {
+        as: div
+        css:
+          '''return `._id {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: ${t.var.color.text};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        key: unique_21
+        props:
+          '''const episode = f.todayEpisode();
+return {
+  as: "div",
+  text: episode == null
+    ? "No episode for today"
+    : `Today: द्रव्यदृष्टि प्रकाश # ${f.todayEpisodePadded()}`
+};'''
+      }
+    }
+    {
+      id: "24"
+      L: Attr
+      P: {
+        as: div
+        css:
+          '''return `._id {
+  font-size: 0.875rem;
+  color: ${t.var.color.text};
+  opacity: 0.75;
+  word-break: break-word;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        key: unique_22
+        props:
+          '''return {
+  as: "div",
+  text: f.todayTitle() || "",
+  hide: () => !f.todayTitle()
+};'''
+      }
+    }
+    {
+      id: "25"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  max-width: 100%;
+  width: min(100%, 28rem);
+  height: auto;
+  border-radius: 0.375rem;
+  border: 1px solid ${t.var.color.border};
+  object-fit: contain;
+  background: ${t.var.color.background};
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        key: unique_23
+        props:
+          '''const src = f.todayImageUrl();
+return {
+  as: "img",
+  src,
+  alt: `DDP # ${f.todayEpisodePadded()}`,
+  hide: () => !src
+};'''
+      }
+    }
+    {
+      id: "13"
       L: Attr
       P: {
         contextName: title
+        as: div
         css:
           '''return `._id {
         display: flex;
@@ -299,9 +462,8 @@ return {
         gap: 0.5rem;
         width: 100%;
       }`;'''
-        as: div
         loop: true
-        displayOrder: 3
+        displayOrder: 4
         componentName: Html
         key: unique_5
         props:
@@ -313,7 +475,7 @@ return {
       }
     }
     {
-      id: "15"
+      id: "14"
       L: Attr
       P: {
         as: div
@@ -333,9 +495,10 @@ return {
       }
     }
     {
-      id: "16"
+      id: "15"
       L: Attr
       P: {
+        as: div
         css:
           '''return `._id {
         flex: 1;
@@ -344,7 +507,6 @@ return {
         font-size: 0.875rem;
         color: ${t.var.color.text};
       }`;'''
-        as: div
         displayOrder: 1
         componentName: Html
         key: unique_11
@@ -356,7 +518,7 @@ return {
       }
     }
     {
-      id: "17"
+      id: "16"
       L: Attr
       P: {
         css:
@@ -397,7 +559,7 @@ return {
       }
     }
     {
-      id: "18"
+      id: "17"
       L: Attr
       P: {
         css:
@@ -425,7 +587,7 @@ return {
       }
     }
     {
-      id: "19"
+      id: "18"
       L: Attr
       P: {
         as: textarea
@@ -441,7 +603,7 @@ return {
   line-height: 1.5;
   resize: vertical;
 }`;'''
-        displayOrder: 4
+        displayOrder: 5
         componentName: Html
         key: unique_17
         props:
@@ -455,7 +617,7 @@ return {
       }
     }
     {
-      id: "20"
+      id: "19"
       L: Attr
       P: {
         as: icon
@@ -463,16 +625,23 @@ return {
           '''return `._id {
         padding: 10px;
       }`;'''
-        displayOrder: 5
+        displayOrder: 6
         componentName: Html
         key: unique_18
+      }
+    }
+    {
+      id: "20"
+      L: PageLayout
+      P: {
+        componentName: Layout
       }
     }
   ]
   edges: [
     {
       id: e1
-      T: PageLayout
+      T: Attr
       S: "1"
       E: "2"
     }
@@ -514,75 +683,105 @@ return {
     }
     {
       id: e8
-      T: Attr
+      T: PageLayout
       S: "1"
-      E: "9"
+      E: "20"
     }
     {
       id: e9
       T: Attr
-      S: "9"
-      E: "10"
+      S: "8"
+      E: "9"
     }
     {
       id: e10
       T: Attr
-      S: "9"
-      E: "11"
+      S: "8"
+      E: "10"
     }
     {
       id: e11
       T: Attr
-      S: "9"
-      E: "14"
+      S: "8"
+      E: "13"
     }
     {
       id: e12
       T: Attr
-      S: "9"
-      E: "19"
+      S: "8"
+      E: "18"
     }
     {
       id: e13
       T: Attr
-      S: "9"
-      E: "20"
+      S: "8"
+      E: "19"
     }
     {
       id: e14
       T: Attr
-      S: "11"
-      E: "12"
+      S: "10"
+      E: "21"
     }
     {
       id: e15
       T: Attr
-      S: "11"
-      E: "13"
+      S: "10"
+      E: "11"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "10"
+      E: "12"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "8"
+      E: "22"
+    }
+    {
+      id: e22
+      T: Attr
+      S: "22"
+      E: "23"
+    }
+    {
+      id: e23
+      T: Attr
+      S: "22"
+      E: "24"
+    }
+    {
+      id: e24
+      T: Attr
+      S: "22"
+      E: "25"
     }
     {
       id: e16
+      T: Attr
+      S: "13"
+      E: "14"
+    }
+    {
+      id: e17
       T: Attr
       S: "14"
       E: "15"
     }
     {
-      id: e17
-      T: Attr
-      S: "15"
-      E: "16"
-    }
-    {
       id: e18
       T: Attr
-      S: "15"
-      E: "17"
+      S: "14"
+      E: "16"
     }
     {
       id: e19
       T: Attr
-      S: "17"
-      E: "18"
+      S: "16"
+      E: "17"
     }
   ]
 }
