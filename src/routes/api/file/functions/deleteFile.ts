@@ -5,7 +5,7 @@ import { deleteFileDiskArtifacts } from "~/lib/files/deleteFileDiskArtifacts";
 import { deleteFileMetadata } from "~/routes/api/file/functions/functions/deleteFileMetadata";
 import { getFileMetadataById } from "~/routes/api/file/functions/functions/getFileMetadataById";
 import type { Vertex } from "~/lib/graph/type/vertex";
-import { cancelImageOptimizationJob } from "~/server/queue/imageOptimizationQueue";
+import { cancelMediaOptimizationJob } from "~/server/queue/mediaOptimizationQueue";
 
 export async function deleteFile(
   fileId: string,
@@ -27,7 +27,7 @@ export async function deleteFile(
         ? String(fileMetadata.P.subDomain)
         : "";
     if (subDomain) {
-      await cancelImageOptimizationJob(subDomain, fileId);
+      await cancelMediaOptimizationJob(subDomain, fileId);
     }
 
     const deletedFileResult = await deleteFileMetadata(neo4jSession, fileId);

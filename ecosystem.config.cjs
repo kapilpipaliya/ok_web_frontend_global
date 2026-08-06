@@ -12,7 +12,7 @@ module.exports = {
     {
       name: "ok-web-frontend",
       script: "./production/server/index.mjs",
-      instances: "max", // Run 2 instances (or use "max" for all CPU cores)
+      instances: 3, // Run 3 instances
       exec_mode: "cluster",
       // Load environment variables from .env file
       env: {
@@ -20,7 +20,7 @@ module.exports = {
         NODE_ENV: process.env.NODE_ENV || "production",
         PORT: process.env.DOMAIN_PORT || 3001,
       },
-      max_memory_restart: "2G",
+      max_memory_restart: "1200M",
       // Graceful shutdown settings for zero-downtime deployment
       kill_timeout: 5000,          // Wait 5s for graceful shutdown
       listen_timeout: 10000,        // Wait 10s for app to be ready

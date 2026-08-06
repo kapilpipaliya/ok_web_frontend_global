@@ -4,14 +4,17 @@ import { checkRole } from "~/cypher/permissions/isPermission";
 import { SYSTEM_ROLES } from "~/cypher/permissions/type/types";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
-import { looksLikeImageMime } from "~/lib/files/imageOptimizationConfig";
+import {
+  CURRENT_MEDIA_PROCESSING_VERSION,
+  detectMediaType,
+} from "~/lib/files/mediaOptimizationConfig";
 import { patchFileMetadata } from "~/lib/files/patchFileMetadata";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
-import { enqueueImageOptimization } from "~/server/queue/imageOptimizationQueue";
+import { enqueueMediaOptimization } from "~/server/queue/mediaOptimizationQueue";
 
 /**
- * Admin-triggered backfill: queue optimization for image Files that are not ready.
- * Idempotent — skips Files already status=ready with variantsJson.
+ * Admin-triggered backfill: queue optimization for image/video Files that are
+ * not ready, missing variants, or stamped below CURRENT_MEDIA_PROCESSING_VERSION.
  */
 export async function POST({ request }: APIEvent) {
   const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
@@ -31,7 +34,7 @@ export async function POST({ request }: APIEvent) {
       `
       MATCH (f:File)
       WHERE (
-        (f.mimeType IS NOT NULL AND f.mimeType STARTS WITH 'image/')
+        (f.mimeType IS NOT NULL AND (f.mimeType STARTS WITH 'image/' OR f.mimeType STARTS WITH 'video/'))
         OR toLower(coalesce(f.fileName, '')) ENDS WITH '.jpg'
         OR toLower(coalesce(f.fileName, '')) ENDS WITH '.jpeg'
         OR toLower(coalesce(f.fileName, '')) ENDS WITH '.png'
@@ -41,6 +44,13 @@ export async function POST({ request }: APIEvent) {
         OR toLower(coalesce(f.fileName, '')) ENDS WITH '.tif'
         OR toLower(coalesce(f.fileName, '')) ENDS WITH '.tiff'
         OR toLower(coalesce(f.fileName, '')) ENDS WITH '.bmp'
+        OR toLower(coalesce(f.fileName, '')) ENDS WITH '.mp4'
+        OR toLower(coalesce(f.fileName, '')) ENDS WITH '.mov'
+        OR toLower(coalesce(f.fileName, '')) ENDS WITH '.webm'
+        OR toLower(coalesce(f.fileName, '')) ENDS WITH '.mkv'
+        OR toLower(coalesce(f.fileName, '')) ENDS WITH '.m4v'
+        OR toLower(coalesce(f.fileName, '')) ENDS WITH '.avi'
+        OR f.mediaType IN ['image', 'video']
       )
       AND (
         f.status IS NULL
@@ -48,13 +58,18 @@ export async function POST({ request }: APIEvent) {
         OR f.variantsJson IS NULL
         OR f.variantsJson = ''
         OR f.variantsJson = '{}'
+        OR coalesce(f.processingVersion, 0) < $currentVersion
       )
       RETURN elementId(f) AS fileId,
              f.optimizationGeneration AS generation,
              f.mimeType AS mimeType,
-             f.status AS status
+             f.fileName AS fileName,
+             f.mediaType AS mediaType,
+             f.status AS status,
+             f.processingVersion AS processingVersion
       LIMIT 2000
       `,
+      { currentVersion: CURRENT_MEDIA_PROCESSING_VERSION },
     );
 
     let queued = 0;
@@ -69,18 +84,36 @@ export async function POST({ request }: APIEvent) {
       }
       const currentGeneration = Number(record.get("generation")) || 0;
       const generation = currentGeneration > 0 ? currentGeneration : 1;
+      const mimeType = record.get("mimeType");
+      const fileName = record.get("fileName");
+      const existingMediaType = record.get("mediaType");
+      const mediaType =
+        existingMediaType === "image" || existingMediaType === "video"
+          ? existingMediaType
+          : detectMediaType({
+              mimeType: mimeType != null ? String(mimeType) : null,
+              fileName: fileName != null ? String(fileName) : null,
+            });
+
+      if (!mediaType) {
+        skipped += 1;
+        continue;
+      }
 
       try {
         await patchFileMetadata(dbSession, fileId, {
           status: "processing",
+          mediaType,
           optimizationGeneration: generation,
+          processingVersion: 0,
           optimizationError: null,
         });
 
-        const enqueueResult = await enqueueImageOptimization({
+        const enqueueResult = await enqueueMediaOptimization({
           fileId,
           subDomain,
           generation,
+          mediaType,
         });
 
         if (enqueueResult.ok) {
@@ -105,9 +138,9 @@ export async function POST({ request }: APIEvent) {
       queued,
       skipped,
       total: result.records.length,
-      message: `Queued ${queued} image(s) for optimization${skipped ? ` (${skipped} skipped)` : ""}`,
+      currentProcessingVersion: CURRENT_MEDIA_PROCESSING_VERSION,
+      message: `Queued ${queued} media file(s) for optimization${skipped ? ` (${skipped} skipped)` : ""} (processingVersion < ${CURRENT_MEDIA_PROCESSING_VERSION} or incomplete)`,
       errors: errors.slice(0, 20),
-      mimeHint: looksLikeImageMime("image/jpeg"),
     };
   } catch (error) {
     return handleAPIError(error);

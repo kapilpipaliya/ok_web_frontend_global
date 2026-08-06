@@ -8,16 +8,19 @@
           '''const from = _.atom("1");
 const to = _.atom("705");
 const startDate = _.atom("2026-06-25");
+const selectedDate = _.atom(_.dateFns.format(_.dateFns.startOfToday(), "yyyy-MM-dd"));
 const activeFormat = _.atom("today");
 const copiedTitle = _.atom("");
 
+function parseYmd(value) {
+  if (!value) return null;
+  const date = _.dateFns.parse(value, "yyyy-MM-dd", _.dateFns.startOfToday());
+  return _.dateFns.isValid(date) ? _.dateFns.startOfDay(date) : null;
+}
+
 function generateTitles(startNumber, startDateValue, count, titles) {
-  if (!startDateValue) return [];
-  const date = _.dateFns.parse(
-    startDateValue,
-    "yyyy-MM-dd",
-    _.dateFns.startOfToday(),
-  );
+  const date = parseYmd(startDateValue);
+  if (!date) return [];
 
   return Array.from({ length: count }, (v, i) => {
     const currentDate = _.dateFns.addDays(date, i);
@@ -30,20 +33,26 @@ function generateTitles(startNumber, startDateValue, count, titles) {
 const titles = () =>
   generateTitles(Number(from()), startDate(), Number(to()), []);
 
+const rangeStart = () => parseYmd(startDate());
+
+const rangeEnd = () => {
+  const start = rangeStart();
+  if (!start) return null;
+  const count = Number(to());
+  if (!Number.isFinite(count) || count < 1) return start;
+  return _.dateFns.addDays(start, count - 1);
+};
+
 const todayEpisode = () => {
-  const startDateValue = startDate();
-  if (!startDateValue) return null;
-  const start = _.dateFns.parse(
-    startDateValue,
-    "yyyy-MM-dd",
-    _.dateFns.startOfToday(),
-  );
-  const days = _.dateFns.differenceInCalendarDays(
-    _.dateFns.startOfToday(),
-    start,
-  );
+  const start = rangeStart();
+  const selected = parseYmd(selectedDate());
+  if (!start || !selected) return null;
+  const days = _.dateFns.differenceInCalendarDays(selected, start);
   if (Number.isNaN(days) || days < 0) return null;
-  return Number(from()) + days;
+  const episode = Number(from()) + days;
+  const maxEpisode = Number(from()) + Number(to()) - 1;
+  if (episode > maxEpisode) return null;
+  return episode;
 };
 
 const todayEpisodePadded = () => {
@@ -62,6 +71,34 @@ const todayTitle = () => {
   const episode = todayEpisode();
   if (episode == null) return "";
   return titles()[episode - Number(from())] ?? "";
+};
+
+const canGoPrev = () => {
+  const selected = parseYmd(selectedDate());
+  const start = rangeStart();
+  if (!selected || !start) return false;
+  return _.dateFns.isAfter(selected, start);
+};
+
+const canGoNext = () => {
+  const selected = parseYmd(selectedDate());
+  const end = rangeEnd();
+  if (!selected || !end) return false;
+  return _.dateFns.isBefore(selected, end);
+};
+
+const goPrev = () => {
+  const selected = parseYmd(selectedDate());
+  const start = rangeStart();
+  if (!selected || !start || !canGoPrev()) return;
+  selectedDate(_.dateFns.format(_.dateFns.subDays(selected, 1), "yyyy-MM-dd"));
+};
+
+const goNext = () => {
+  const selected = parseYmd(selectedDate());
+  const end = rangeEnd();
+  if (!selected || !end || !canGoNext()) return;
+  selectedDate(_.dateFns.format(_.dateFns.addDays(selected, 1), "yyyy-MM-dd"));
 };
 
 const copyTitle = async (text) => {
@@ -83,6 +120,7 @@ return {
   from,
   to,
   startDate,
+  selectedDate,
   activeFormat,
   copiedTitle,
   titles,
@@ -90,6 +128,10 @@ return {
   todayEpisodePadded,
   todayImageUrl,
   todayTitle,
+  canGoPrev,
+  canGoNext,
+  goPrev,
+  goNext,
   copyTitle
 };
 '''
@@ -376,6 +418,105 @@ return {
       }
     }
     {
+      id: "26"
+      L: Attr
+      P: {
+        as: div
+        css:
+          '''return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        key: unique_24
+      }
+    }
+    {
+      id: "27"
+      L: Attr
+      P: {
+        css:
+          '''const disabled = !f.canGoPrev();
+return `._id {
+  padding: 0.5rem 0.875rem;
+  border: 1px solid ${t.var.color.border};
+  border-radius: 0.375rem;
+  background: ${disabled ? t.var.color.background_light_200 : t.var.color.background};
+  color: ${t.var.color.text};
+  font-weight: 600;
+  cursor: ${disabled ? "not-allowed" : "pointer"};
+  opacity: ${disabled ? 0.5 : 1};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        key: unique_25
+        props:
+          '''return {
+  as: "button",
+  type: "button",
+  text: "Previous",
+  disabled: !f.canGoPrev(),
+  "aria-label": "Previous day",
+  onClick: () => f.goPrev()
+};'''
+      }
+    }
+    {
+      id: "28"
+      L: Attr
+      P: {
+        as: div
+        css:
+          '''return `._id {
+  min-width: 7.5rem;
+  text-align: center;
+  font-weight: 600;
+  color: ${t.var.color.text};
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        key: unique_26
+        props:
+          '''return {
+  as: "div",
+  text: f.selectedDate() || ""
+};'''
+      }
+    }
+    {
+      id: "29"
+      L: Attr
+      P: {
+        css:
+          '''const disabled = !f.canGoNext();
+return `._id {
+  padding: 0.5rem 0.875rem;
+  border: 1px solid ${t.var.color.border};
+  border-radius: 0.375rem;
+  background: ${disabled ? t.var.color.background_light_200 : t.var.color.background};
+  color: ${t.var.color.text};
+  font-weight: 600;
+  cursor: ${disabled ? "not-allowed" : "pointer"};
+  opacity: ${disabled ? 0.5 : 1};
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        key: unique_27
+        props:
+          '''return {
+  as: "button",
+  type: "button",
+  text: "Next",
+  disabled: !f.canGoNext(),
+  "aria-label": "Next day",
+  onClick: () => f.goNext()
+};'''
+      }
+    }
+    {
       id: "23"
       L: Attr
       P: {
@@ -386,7 +527,7 @@ return {
   font-weight: 700;
   color: ${t.var.color.text};
 }`;'''
-        displayOrder: 1
+        displayOrder: 2
         componentName: Html
         key: unique_21
         props:
@@ -394,8 +535,8 @@ return {
 return {
   as: "div",
   text: episode == null
-    ? "No episode for today"
-    : `Today: द्रव्यदृष्टि प्रकाश # ${f.todayEpisodePadded()}`
+    ? "No episode for this date"
+    : `द्रव्यदृष्टि प्रकाश # ${f.todayEpisodePadded()}`
 };'''
       }
     }
@@ -411,7 +552,7 @@ return {
   opacity: 0.75;
   word-break: break-word;
 }`;'''
-        displayOrder: 2
+        displayOrder: 3
         componentName: Html
         key: unique_22
         props:
@@ -436,7 +577,7 @@ return {
   object-fit: contain;
   background: ${t.var.color.background};
 }`;'''
-        displayOrder: 3
+        displayOrder: 4
         componentName: Html
         key: unique_23
         props:
@@ -740,6 +881,30 @@ return {
       T: Attr
       S: "8"
       E: "22"
+    }
+    {
+      id: e25
+      T: Attr
+      S: "22"
+      E: "26"
+    }
+    {
+      id: e26
+      T: Attr
+      S: "26"
+      E: "27"
+    }
+    {
+      id: e27
+      T: Attr
+      S: "26"
+      E: "28"
+    }
+    {
+      id: e28
+      T: Attr
+      S: "26"
+      E: "29"
     }
     {
       id: e22

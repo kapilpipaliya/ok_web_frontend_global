@@ -7,9 +7,11 @@ import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaTyp
 import { useToast } from "~/components/styled/modal/Toast";
 import { getErrorSchema } from "~/lib/schema/getErrorSchema";
 import {
-  DEFAULT_IMAGE_SETTING_PROPS,
-  validateImageSettingProps,
-} from "~/lib/files/imageOptimizationConfig";
+  DEFAULT_MEDIA_SETTING_PROPS,
+  validateMediaSettingProps,
+} from "~/lib/files/mediaOptimizationConfig";
+import { DEFAULT_IMAGE_SETTING_PROPS } from "~/lib/files/imageOptimizationConfig";
+import { DEFAULT_VIDEO_SETTING_PROPS } from "~/lib/files/videoOptimizationConfig";
 
 import { SchemaRenderer } from "../../SchemaRenderer";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "../../settings/constants";
@@ -35,6 +37,11 @@ interface ImageSettingsData {
   autoRotate?: boolean;
   stripMetadata?: boolean;
   variantsJson?: string;
+  videoOptimizationEnabled?: boolean;
+  videoKeepOriginal?: boolean;
+  videoPoster?: boolean;
+  videoPosterSeekSeconds?: number | string;
+  videoOutputsJson?: string;
   [key: string]: unknown;
 }
 
@@ -55,9 +62,9 @@ export function ImageSettings() {
     {
       id: formDataId,
       IN: {},
-      L: ["ImageSettings"],
+      L: ["MediaSettings"],
       OUT: {},
-      P: { ...DEFAULT_IMAGE_SETTING_PROPS },
+      P: { ...DEFAULT_MEDIA_SETTING_PROPS },
     },
     graph,
     setGraph,
@@ -78,7 +85,7 @@ export function ImageSettings() {
   margin-bottom: 0.5rem;
 }\`;`,
             componentName: "Html",
-            text: "Image Optimization",
+            text: "Media Optimization",
           },
           {
             as: "p",
@@ -88,7 +95,18 @@ export function ImageSettings() {
   margin-bottom: 1.5rem;
 }\`;`,
             componentName: "Html",
-            text: "Configure upload-time image optimization. Variants are generated asynchronously with Sharp after each image upload.",
+            text: "Configure upload-time image (Sharp) and video (FFmpeg) optimization. Variants are generated asynchronously after each upload.",
+          },
+          {
+            as: "h4",
+            css: `return \`._id {
+  font-size: 1rem;
+  font-weight: 600;
+  color: \${t.var.color.text};
+  margin: 1.25rem 0 0.75rem;
+}\`;`,
+            componentName: "Html",
+            text: "Images",
           },
           {
             as: "div",
@@ -307,6 +325,137 @@ export function ImageSettings() {
             "return `._id {color: ${t.var.color.error}; margin-top: -20px;};`",
           ),
           {
+            as: "h4",
+            css: `return \`._id {
+  font-size: 1rem;
+  font-weight: 600;
+  color: \${t.var.color.text};
+  margin: 1.75rem 0 0.75rem;
+}\`;`,
+            componentName: "Html",
+            text: "Videos",
+          },
+          {
+            as: "div",
+            attributes: [
+              {
+                as: "span",
+                css: SETTINGS_CONSTANTS.LABEL_CSS,
+                componentName: "Html",
+                text: "Enable video optimization",
+              },
+              {
+                componentName: "SystemTextInput",
+                css: [PROPERTIES.Css.CheckBoxCss],
+                key: "videoOptimizationEnabled",
+                type: "checkbox",
+              },
+            ],
+            css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
+            componentName: "Html",
+          },
+          {
+            as: "div",
+            attributes: [
+              {
+                as: "span",
+                css: SETTINGS_CONSTANTS.LABEL_CSS,
+                componentName: "Html",
+                text: "Keep original video",
+              },
+              {
+                componentName: "SystemTextInput",
+                css: [PROPERTIES.Css.CheckBoxCss],
+                key: "videoKeepOriginal",
+                type: "checkbox",
+              },
+            ],
+            css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
+            componentName: "Html",
+            props: (options: ImageSettingsFunctionArgumentType) => ({
+              hide: () => !options.data?.P.videoOptimizationEnabled,
+            }),
+          },
+          {
+            as: "div",
+            attributes: [
+              {
+                as: "span",
+                css: SETTINGS_CONSTANTS.LABEL_CSS,
+                componentName: "Html",
+                text: "Generate poster.webp",
+              },
+              {
+                componentName: "SystemTextInput",
+                css: [PROPERTIES.Css.CheckBoxCss],
+                key: "videoPoster",
+                type: "checkbox",
+              },
+            ],
+            css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
+            componentName: "Html",
+            props: (options: ImageSettingsFunctionArgumentType) => ({
+              hide: () => !options.data?.P.videoOptimizationEnabled,
+            }),
+          },
+          {
+            as: "div",
+            attributes: [
+              {
+                as: "span",
+                css: SETTINGS_CONSTANTS.LABEL_CSS,
+                componentName: "Html",
+                text: "Poster seek (seconds)",
+              },
+              {
+                css: PROPERTIES.Css.TextFieldCss,
+                componentName: "SystemTextInput",
+                key: "videoPosterSeekSeconds",
+                type: "number",
+                placeholder: "2",
+              },
+            ],
+            css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
+            componentName: "Html",
+            props: (options: ImageSettingsFunctionArgumentType) => ({
+              hide: () =>
+                !options.data?.P.videoOptimizationEnabled ||
+                !options.data?.P.videoPoster,
+            }),
+          },
+          getErrorSchema(
+            "videoPosterSeekSeconds",
+            "return `._id {color: ${t.var.color.error}; margin-top: -20px;};`",
+          ),
+          {
+            as: "div",
+            attributes: [
+              {
+                as: "span",
+                css: SETTINGS_CONSTANTS.LABEL_CSS,
+                componentName: "Html",
+                text: "Video outputs JSON",
+              },
+              {
+                css: PROPERTIES.Css.TextFieldCss,
+                componentName: "SystemTextInput",
+                key: "videoOutputsJson",
+                type: "textarea",
+                placeholder:
+                  '[{"name":"360","width":640,"bitrate":"800k"},{"name":"720","width":1280,"bitrate":"2500k"}]',
+              },
+            ],
+            css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
+            componentName: "Html",
+            props: (options: ImageSettingsFunctionArgumentType) => ({
+              hide: () => !options.data?.P.videoOptimizationEnabled,
+            }),
+          },
+          getErrorSchema(
+            "videoOutputsJson",
+            "return `._id {color: ${t.var.color.error}; margin-top: -20px;};`",
+          ),
+          {
             as: "div",
             attributes: [
               {
@@ -321,7 +470,7 @@ export function ImageSettings() {
                         try {
                           options.contextData.saveState[1]("isLoading", true);
                           const settings = graph.vertexes[formDataId];
-                          const errors = validateImageSettingProps(
+                          const errors = validateMediaSettingProps(
                             settings.P as ImageSettingsData,
                           );
                           if (errors) {
@@ -333,18 +482,18 @@ export function ImageSettings() {
                           }
                           options.clearAllErrors();
                           const response = await saveSetting(
-                            "image",
+                            "media",
                             settings.P as ImageSettingsData,
                           );
                           if (response.error) {
                             showErrorToast(
                               response.error ||
-                                "Failed to save image settings",
+                                "Failed to save media settings",
                             );
                           } else {
                             showSuccessToast(
                               response.message ||
-                                "Image settings saved successfully",
+                                "Media settings saved successfully",
                             );
                           }
                         } catch (error) {
@@ -394,12 +543,12 @@ export function ImageSettings() {
                           const data = await response.json();
                           if (!response.ok || data.error) {
                             showErrorToast(
-                              data.error || "Failed to queue image backfill",
+                              data.error || "Failed to queue media backfill",
                             );
                           } else {
                             showSuccessToast(
                               data.message ||
-                                `Queued ${data.queued ?? 0} image(s) for optimization`,
+                                `Queued ${data.queued ?? 0} media file(s) for optimization`,
                             );
                           }
                         } catch (error) {
@@ -413,7 +562,7 @@ export function ImageSettings() {
                       },
                       text: options.contextData.saveState[0]?.isBackfilling
                         ? "Queueing..."
-                        : "Backfill existing images",
+                        : "Backfill existing media",
                     }),
                   },
                 ],
@@ -447,11 +596,16 @@ export function ImageSettings() {
 
   const loadSettingsData = async () => {
     try {
-      const response = await getSetting("image");
-      const vertex = response.result?.[0];
+      let response = await getSetting("media");
+      let vertex = response.result?.[0];
+      if (!vertex?.P) {
+        response = await getSetting("image");
+        vertex = response.result?.[0];
+      }
       if (vertex?.P) {
         replaceVertexProperties(0, formDataId, graph, setGraph, {
           ...DEFAULT_IMAGE_SETTING_PROPS,
+          ...DEFAULT_VIDEO_SETTING_PROPS,
           ...vertex.P,
         });
       }
@@ -466,7 +620,7 @@ export function ImageSettings() {
 
   return (
     <SchemaRenderer
-      form={{ attributes: [form], key: "ImageSettings" }}
+      form={{ attributes: [form], key: "MediaSettings" }}
       formDataId={formDataId}
     />
   );

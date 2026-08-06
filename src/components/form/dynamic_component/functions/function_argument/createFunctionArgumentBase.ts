@@ -79,6 +79,7 @@ import {
   buildPublicImagePayload,
   buildPublicImageUrl,
 } from "~/lib/files/publicImageUrl";
+import { buildPublicVideoPayload } from "~/lib/files/publicMediaUrl";
 // Static: `_.useCarousel(...)` runs synchronously during SSR render (it
 // creates the embla ref in component `fns`), so it must be available on the
 // server. Small (~8KB gzip), unlike the truly client-only lazy deps below.
@@ -480,6 +481,8 @@ export function createFunctionArgumentBase(
     /** Build responsive public image payload (src/srcset/sizes) from a File vertex's P. */
     buildPublicImagePayload,
     buildPublicImageUrl,
+    /** Build public video payload (poster + progressive sources). */
+    buildPublicVideoPayload,
     createLoopRowRenderer: (
       mapContextValue: (rowData: unknown, index: Accessor<number>) => unknown,
     ) => {

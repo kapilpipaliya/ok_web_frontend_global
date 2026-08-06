@@ -177,10 +177,13 @@ import {
   buildPublicImagePayload,
   buildPublicImageUrl,
 } from "~/lib/files/publicImageUrl";
+import { buildPublicVideoPayload } from "~/lib/files/publicMediaUrl";
 import {
   cancelImageOptimizationJob,
+  cancelMediaOptimizationJob,
   enqueueImageOptimization,
-} from "~/server/queue/imageOptimizationQueue";
+  enqueueMediaOptimization,
+} from "~/server/queue/mediaOptimizationQueue";
 import {
   clearOldLogs,
   logger,
@@ -691,8 +694,11 @@ export async function executeNamedServerFunctionCore(
       deleteFileDiskArtifacts,
       buildPublicImagePayload,
       buildPublicImageUrl,
+      buildPublicVideoPayload,
       cancelImageOptimizationJob,
+      cancelMediaOptimizationJob,
       enqueueImageOptimization,
+      enqueueMediaOptimization,
       PerformanceTimer,
       Logger,
       logger,

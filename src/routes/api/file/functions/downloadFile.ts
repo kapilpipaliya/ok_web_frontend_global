@@ -2,7 +2,7 @@ import type { Session } from "neo4j-driver";
 import fs from "node:fs/promises";
 import { getFileMetadata } from "~/routes/api/file/functions/functions/getFileMetadata";
 import { APIError } from "~/lib/api/server/apiErrorHandler";
-import { isAllowedVariantName } from "~/lib/files/imageOptimizationConfig";
+import { isSafeMediaVariantKey } from "~/lib/files/videoOptimizationConfig";
 import { resolveVariantDiskPath } from "~/lib/files/imageVariantPaths";
 
 import type { Vertex } from "~/lib/graph/type/vertex";
@@ -138,20 +138,29 @@ export async function downloadFile(
         ? String(options.variant).trim().toLowerCase()
         : "";
     if (variantRaw) {
-      if (!isAllowedVariantName(variantRaw)) {
-        throw new APIError("Invalid image variant", 400);
+      if (!isSafeMediaVariantKey(variantRaw)) {
+        throw new APIError("Invalid media variant", 400);
       }
       if (String(metadata.P.status || "") !== "ready") {
-        throw new APIError("Image variants are not ready", 404);
+        throw new APIError("Media variants are not ready", 404);
       }
       const variantPath = resolveVariantDiskPath(metadata.P, variantRaw);
       if (!variantPath) {
-        throw new APIError("Image variant not found", 404);
+        throw new APIError("Media variant not found", 404);
       }
       filePath = variantPath;
-      contentType = "image/webp";
+      const ext = variantPath.split(".").pop()?.toLowerCase() || "";
+      if (ext === "mp4") {
+        contentType = "video/mp4";
+      } else if (ext === "webp") {
+        contentType = "image/webp";
+      } else if (ext === "webm") {
+        contentType = "video/webm";
+      } else {
+        contentType = "application/octet-stream";
+      }
       const base = originalFileName?.replace(/\.[^.]+$/, "") || fileName;
-      downloadName = `${base}_${variantRaw}.webp`;
+      downloadName = `${base}_${variantRaw}.${ext || "bin"}`;
     }
 
     const { size: fileSize } = await fs.stat(filePath);

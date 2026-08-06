@@ -18,7 +18,7 @@ const subDomain = fileProps.subDomain != null ? String(fileProps.subDomain) : ""
 const fileId = result?.data?.id != null ? String(result.data.id) : "";
 if (subDomain && fileId) {
   try {
-    await _.cancelImageOptimizationJob(subDomain, fileId);
+    await _.cancelMediaOptimizationJob(subDomain, fileId);
   } catch (e) {
     console.log(e);
   }

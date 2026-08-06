@@ -121,6 +121,8 @@ export interface FunctionArgumentBaseType {
   /** Build responsive public image payload from File.P (src/srcset/sizes/placeholder). */
   buildPublicImagePayload: typeof import("~/lib/files/publicImageUrl").buildPublicImagePayload;
   buildPublicImageUrl: typeof import("~/lib/files/publicImageUrl").buildPublicImageUrl;
+  /** Build public video payload (poster + progressive sources). */
+  buildPublicVideoPayload: typeof import("~/lib/files/publicMediaUrl").buildPublicVideoPayload;
   /** Build a virtua/render-prop row renderer from the loop + Slot graph template. */
   createLoopRowRenderer: (
     mapContextValue: (

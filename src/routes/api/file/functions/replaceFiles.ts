@@ -9,16 +9,20 @@ import { calculateChecksum } from "~/lib/files/calculateChecksum";
 import { deleteVariantDiskArtifacts } from "~/lib/files/deleteFileDiskArtifacts";
 import { ensureDirectoryExists } from "~/lib/files/ensureDirectoryExists";
 import { getBaseDir } from "~/lib/files/getBaseDir";
-import { looksLikeImageMime } from "~/lib/files/imageOptimizationConfig";
+import {
+  detectMediaType,
+  looksLikeVideoMime,
+} from "~/lib/files/mediaOptimizationConfig";
 import { patchFileMetadata } from "~/lib/files/patchFileMetadata";
 import { probeImage } from "~/lib/files/processImageVariants";
+import { probeVideo } from "~/lib/files/processVideoVariants";
 import { saveFileToDisk } from "~/lib/files/saveFileToDisk";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { getFileMetadataById } from "~/routes/api/file/functions/functions/getFileMetadataById";
 import {
-  cancelImageOptimizationJob,
-  enqueueImageOptimization,
-} from "~/server/queue/imageOptimizationQueue";
+  cancelMediaOptimizationJob,
+  enqueueMediaOptimization,
+} from "~/server/queue/mediaOptimizationQueue";
 
 export async function replaceFiles(
   request: Request,
@@ -46,7 +50,7 @@ export async function replaceFiles(
     return { error: "File data is required" };
   }
 
-  await cancelImageOptimizationJob(subDomain, fileId);
+  await cancelMediaOptimizationJob(subDomain, fileId);
   await deleteVariantDiskArtifacts(oldFileMetadata.P);
 
   const currentDate = new Date().toISOString();
@@ -69,12 +73,21 @@ export async function replaceFiles(
   const fileSize = file.data.length;
   const mimeType = file.type;
   const checksum = calculateChecksum(file.data);
-  const probe = await probeImage(file.data);
-  const isImage = Boolean(probe) || looksLikeImageMime(mimeType);
+  const imageProbe = await probeImage(file.data);
+  const maybeVideo =
+    looksLikeVideoMime(mimeType) ||
+    (!imageProbe && /\.(mp4|mov|webm|mkv|m4v|avi)$/i.test(file.filename));
+  const videoProbe = maybeVideo ? await probeVideo(filePath) : null;
+  const mediaType = detectMediaType({
+    mimeType,
+    fileName: file.filename,
+    isImageProbe: Boolean(imageProbe),
+    isVideoProbe: Boolean(videoProbe),
+  });
+  const needsProcessing = mediaType === "image" || mediaType === "video";
   const generation =
     (Number(oldFileMetadata.P.optimizationGeneration) || 0) + 1;
 
-  // Remove old original after writing the new one (if different path)
   const oldPath =
     oldFileMetadata.P?.filePath != null
       ? String(oldFileMetadata.P.filePath)
@@ -97,17 +110,37 @@ export async function replaceFiles(
     originalFileName: file.filename,
     subDomain,
     version: newVersion,
-    status: isImage ? "processing" : "ready",
+    status: needsProcessing ? "processing" : "ready",
     optimizationGeneration: generation,
+    processingVersion: 0,
     variantsJson: "{}",
     optimizationError: null,
     optimizedAt: null,
+    mediaType: mediaType || null,
+    duration: null,
+    fps: null,
+    bitrate: null,
+    codec: null,
+    audioCodec: null,
   };
 
-  if (probe) {
-    patch.width = probe.width;
-    patch.height = probe.height;
-    patch.aspectRatio = Number((probe.width / probe.height).toFixed(6));
+  if (imageProbe) {
+    patch.width = imageProbe.width;
+    patch.height = imageProbe.height;
+    patch.aspectRatio = Number(
+      (imageProbe.width / imageProbe.height).toFixed(6),
+    );
+  } else if (videoProbe) {
+    patch.width = videoProbe.width;
+    patch.height = videoProbe.height;
+    patch.aspectRatio = Number(
+      (videoProbe.width / videoProbe.height).toFixed(6),
+    );
+    patch.duration = videoProbe.duration;
+    patch.fps = videoProbe.fps;
+    patch.bitrate = videoProbe.bitrate;
+    patch.codec = videoProbe.codec;
+    patch.audioCodec = videoProbe.audioCodec;
   } else {
     patch.width = null;
     patch.height = null;
@@ -116,11 +149,12 @@ export async function replaceFiles(
 
   const updated = await patchFileMetadata(neo4jSession, fileId, patch);
 
-  if (isImage) {
-    const enqueueResult = await enqueueImageOptimization({
+  if (needsProcessing && mediaType) {
+    const enqueueResult = await enqueueMediaOptimization({
       fileId,
       subDomain,
       generation,
+      mediaType,
     });
     if (!enqueueResult.ok) {
       await patchFileMetadata(neo4jSession, fileId, {

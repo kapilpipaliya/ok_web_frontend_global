@@ -87,7 +87,7 @@ export default function AdminGlobalSettings() {
       group: "Appearance",
       icon: "ph:image",
       id: "image",
-      label: "Image Optimization",
+      label: "Media Optimization",
     },
     {
       component: PermissionsSettings,

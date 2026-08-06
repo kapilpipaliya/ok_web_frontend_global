@@ -103,6 +103,18 @@ export const File: IFormMetaData = {
     {
       componentName: "NumberBox",
       disabled: true,
+      displayName: "Processing Version",
+      key: "processingVersion",
+    },
+    {
+      componentName: "SystemTextInput",
+      disabled: true,
+      displayName: "Media Type",
+      key: "mediaType",
+    },
+    {
+      componentName: "NumberBox",
+      disabled: true,
       displayName: "Width",
       key: "width",
     },
@@ -111,6 +123,12 @@ export const File: IFormMetaData = {
       disabled: true,
       displayName: "Height",
       key: "height",
+    },
+    {
+      componentName: "NumberBox",
+      disabled: true,
+      displayName: "Duration (seconds)",
+      key: "duration",
     },
     {
       componentName: "NumberBox",

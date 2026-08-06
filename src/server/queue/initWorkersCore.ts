@@ -15,9 +15,9 @@ import {
   stopCompanyLogosShopSyncWorker,
 } from "~/server/queue/workers/companyLogosShopSyncWorker";
 import {
-  startImageOptimizationWorker,
-  stopImageOptimizationWorker,
-} from "~/server/queue/workers/imageOptimizationWorker";
+  startMediaOptimizationWorker,
+  stopMediaOptimizationWorker,
+} from "~/server/queue/workers/mediaOptimizationWorker";
 import {
   startSchemaJobsQueueWorker,
   stopSchemaJobsQueueWorker,
@@ -171,17 +171,17 @@ export async function initWorkersCore() {
     }
 
     try {
-      console.log("[Workers] Starting image optimization worker...");
-      await startImageOptimizationWorker();
-      platformWorkers.set("imageOptimizationWorker", {
-        stop: stopImageOptimizationWorker,
+      console.log("[Workers] Starting media optimization worker...");
+      await startMediaOptimizationWorker();
+      platformWorkers.set("mediaOptimizationWorker", {
+        stop: stopMediaOptimizationWorker,
       });
       console.log(
-        "[Workers] Image optimization worker started successfully",
+        "[Workers] Media optimization worker started successfully",
       );
     } catch (error) {
       console.error(
-        "[Workers] Failed to start image optimization worker:",
+        "[Workers] Failed to start media optimization worker:",
         error,
       );
     }

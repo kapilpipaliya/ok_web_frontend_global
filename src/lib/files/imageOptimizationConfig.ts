@@ -210,16 +210,26 @@ export function validateImageSettingProps(
 /**
  * Load Setting {type:"image"} from the current tenant DB and parse config.
  * Falls back to defaults when missing.
+ * Prefer loadMediaOptimizationConfig for image+video.
  */
 export async function loadImageOptimizationConfig(
   session: Session | Transaction,
 ): Promise<{ config: ImageOptimizationConfig; setting: Vertex | null }> {
-  const result = await session.run(
+  // Prefer media Setting, then legacy image Setting
+  let result = await session.run(
     `MATCH (s:Setting {type: $type})
      RETURN s
      LIMIT 1`,
-    { type: IMAGE_SETTING_TYPE },
+    { type: "media" },
   );
+  if (result.records.length === 0) {
+    result = await session.run(
+      `MATCH (s:Setting {type: $type})
+       RETURN s
+       LIMIT 1`,
+      { type: IMAGE_SETTING_TYPE },
+    );
+  }
 
   if (result.records.length === 0) {
     return { config: { ...DEFAULT_IMAGE_OPTIMIZATION_CONFIG }, setting: null };

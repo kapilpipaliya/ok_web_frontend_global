@@ -33,6 +33,12 @@ after email setup we need to setup app server:
 4. clone project, create .env file, update .env file for email and db, install packages (npm i --force),  install playwright (npx playwright install), build,  install dotenv globally (npm install -g dotenv-cli) and start
 export NODE_OPTIONS="--max-old-space-size=4096" if build failed.
 5. go do to admin subdomain, login and create www subdomain.
+## Media optimization (images + videos)
+- Images use Sharp (npm dependency). Videos use system **ffmpeg** and **ffprobe**.
+- Install on Ubuntu/Debian deploy hosts: `sudo apt install -y ffmpeg`
+- Confirm with `ffmpeg -version` and `ffprobe -version` before enabling video optimization in Global Settings → Media Optimization.
+- Video variants and posters are generated asynchronously by the media worker (same BullMQ queue as images).
+- After changing the encoding pipeline (formats, ladders, quality defaults), bump `CURRENT_MEDIA_PROCESSING_VERSION` in `src/lib/files/mediaOptimizationConfig.ts`, deploy, then run **Global Settings → Media Optimization → Backfill** to requeue Files with a lower `processingVersion`.
 ## SSL Setup
 - even if we don't use domain without subdomain, we still need certificate for it, else redirect from https://decodeui.io to htts://www.decodeui.io will not work.
 - Setup a wildcard domain including free SSL | Let's Encrypt: [YouTube Tutorial](https://www.youtube.com/watch?v=oJ_sP9y9KWo)

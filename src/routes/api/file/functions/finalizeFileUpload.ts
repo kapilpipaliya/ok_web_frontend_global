@@ -11,12 +11,16 @@ import { calculateChecksum } from "~/lib/files/calculateChecksum";
 import { ensureDirectoryExists } from "~/lib/files/ensureDirectoryExists";
 import { buildFolderDiskDir } from "~/lib/files/folderOrganize";
 import { getBaseDir } from "~/lib/files/getBaseDir";
-import { looksLikeImageMime } from "~/lib/files/imageOptimizationConfig";
+import {
+  detectMediaType,
+  looksLikeVideoMime,
+} from "~/lib/files/mediaOptimizationConfig";
 import { probeImage } from "~/lib/files/processImageVariants";
+import { probeVideo } from "~/lib/files/processVideoVariants";
 import { saveFileToDisk } from "~/lib/files/saveFileToDisk";
 import { APIError } from "~/lib/api/server/apiErrorHandler";
 import { saveFileMetadata } from "~/routes/api/file/functions/functions/saveFileMetadata";
-import { enqueueImageOptimization } from "~/server/queue/imageOptimizationQueue";
+import { enqueueMediaOptimization } from "~/server/queue/mediaOptimizationQueue";
 
 export type FinalizeFileUploadInput = {
   data: Buffer;
@@ -99,9 +103,23 @@ export async function finalizeFileUpload(input: FinalizeFileUploadInput) {
 
   saveFileToDisk(userDir, filename, data);
 
-  const probe = await probeImage(data);
-  const isImage = Boolean(probe) || looksLikeImageMime(mimeType);
+  const imageProbe = await probeImage(data);
+  // Only probe video from disk for likely video uploads (ffprobe is expensive)
+  const maybeVideo =
+    looksLikeVideoMime(mimeType) ||
+    (!imageProbe &&
+      /\.(mp4|mov|webm|mkv|m4v|avi)$/i.test(filename));
+  const videoProbe = maybeVideo ? await probeVideo(filePath) : null;
+
+  const mediaType = detectMediaType({
+    mimeType,
+    fileName: filename,
+    isImageProbe: Boolean(imageProbe),
+    isVideoProbe: Boolean(videoProbe),
+  });
+
   const generation = 1;
+  const needsProcessing = mediaType === "image" || mediaType === "video";
 
   const metadata: Record<string, unknown> = {
     checksum: calculateChecksum(data),
@@ -112,17 +130,38 @@ export async function finalizeFileUpload(input: FinalizeFileUploadInput) {
     originalFileName: filename,
     subDomain,
     uploadDate: new Date().toISOString(),
-    status: isImage ? "processing" : "ready",
+    status: needsProcessing ? "processing" : "ready",
     optimizationGeneration: generation,
+    processingVersion: 0,
     variantsJson: "{}",
   };
 
-  if (probe) {
-    metadata.width = probe.width;
-    metadata.height = probe.height;
-    metadata.aspectRatio = Number((probe.width / probe.height).toFixed(6));
-    if (probe.format && !mimeType) {
-      metadata.mimeType = `image/${probe.format}`;
+  if (mediaType) {
+    metadata.mediaType = mediaType;
+  }
+
+  if (imageProbe) {
+    metadata.width = imageProbe.width;
+    metadata.height = imageProbe.height;
+    metadata.aspectRatio = Number(
+      (imageProbe.width / imageProbe.height).toFixed(6),
+    );
+    if (imageProbe.format && !mimeType) {
+      metadata.mimeType = `image/${imageProbe.format}`;
+    }
+  } else if (videoProbe) {
+    metadata.width = videoProbe.width;
+    metadata.height = videoProbe.height;
+    metadata.aspectRatio = Number(
+      (videoProbe.width / videoProbe.height).toFixed(6),
+    );
+    metadata.duration = videoProbe.duration;
+    metadata.fps = videoProbe.fps;
+    metadata.bitrate = videoProbe.bitrate;
+    metadata.codec = videoProbe.codec;
+    metadata.audioCodec = videoProbe.audioCodec;
+    if (!mimeType) {
+      metadata.mimeType = "video/mp4";
     }
   }
 
@@ -154,21 +193,21 @@ export async function finalizeFileUpload(input: FinalizeFileUploadInput) {
     }
   }
 
-  // Fire-and-forget image optimization
-  if (isImage && record) {
+  if (needsProcessing && mediaType && record) {
     try {
       const node = record.get("f");
       const v = node ? convertNodeToJson(node as Node) : null;
       const fileId = v?.id;
       if (fileId) {
-        const enqueueResult = await enqueueImageOptimization({
+        const enqueueResult = await enqueueMediaOptimization({
           fileId,
           subDomain,
           generation,
+          mediaType,
         });
         if (!enqueueResult.ok) {
           console.error(
-            "finalizeFileUpload: enqueue image optimization failed",
+            "finalizeFileUpload: enqueue media optimization failed",
             enqueueResult.error,
           );
           await neo4jSession.run(
@@ -187,7 +226,7 @@ export async function finalizeFileUpload(input: FinalizeFileUploadInput) {
         }
       }
     } catch (e) {
-      console.error("finalizeFileUpload: image optimization enqueue error", e);
+      console.error("finalizeFileUpload: media optimization enqueue error", e);
     }
   }
 
