@@ -227,7 +227,7 @@ const createController = () => {
     });
   };
 
-  const setupFloating = async (id, placement, offsetPx) => {
+  const setupFloating = async (id, placement, offsetPx, depth = 0) => {
     stopFloating(id);
     const trigger = triggerRefs.get(id);
     const menu = menuRefs.get(id);
@@ -236,9 +236,13 @@ const createController = () => {
     const { computePosition, flip, shift, offset, autoUpdate, size } =
       _.floatingUI;
 
+    // Root (bar) menus: only flip top↔bottom — never open left/right of the trigger.
+    // Nested submenus: keep cross-axis fallback so they can open left when near the edge.
     const middleware = [
       offset(offsetPx),
-      flip({ fallbackAxisSideDirection: "start" }),
+      depth === 0
+        ? flip({ crossAxis: false })
+        : flip({ fallbackAxisSideDirection: "start" }),
       shift({ padding: 8 }),
     ];
     if (typeof size === "function") {
@@ -334,7 +338,7 @@ const createController = () => {
     const offsetPx = depth === 0 ? 4 : 0;
     // Panels are always in the DOM (SSR); position after paint
     requestAnimationFrame(() => {
-      void setupFloating(id, placement, offsetPx);
+      void setupFloating(id, placement, offsetPx, depth);
     });
   };
 
