@@ -4,24 +4,30 @@
       id: "1"
       L: Function
       P: {
-        description: After a File vertex is deleted, remove the corresponding file from disk (same as DELETE /api/file).
+        description: After a File vertex is deleted, remove the original and optimized variants from disk (same as DELETE /api/file).
         body:
           '''
 const { tableVertexLabel, operation, result } = c;
 
 if (tableVertexLabel !== "File" || operation !== "delete") return;
 
-const filePath = result?.data?.P?.filePath;
-if (!filePath) return;
+const fileProps = result?.data?.P;
+if (!fileProps) return;
 
-// Mirror src/routes/api/file/functions/deleteFile.ts disk cleanup
-const fs = await import("node:fs/promises");
+const subDomain = fileProps.subDomain != null ? String(fileProps.subDomain) : "";
+const fileId = result?.data?.id != null ? String(result.data.id) : "";
+if (subDomain && fileId) {
+  try {
+    await _.cancelImageOptimizationJob(subDomain, fileId);
+  } catch (e) {
+    console.log(e);
+  }
+}
+
 try {
-  await fs.access(filePath);
-  await fs.unlink(filePath);
+  await _.deleteFileDiskArtifacts(fileProps);
 } catch (e) {
-  console.log(e)
-  // Silently continue if file doesn't exist
+  console.log(e);
 }
 '''
         key: fileAfterDelete

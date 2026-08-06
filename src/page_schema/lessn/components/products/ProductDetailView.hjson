@@ -257,7 +257,28 @@ const previewVariant = () =>
 
 const carouselImages = () => {
   const images = previewVariant()?.images;
-  return Array.isArray(images) ? images : [];
+  const variantImages = Array.isArray(images) ? images.filter((img) => img && (img.url || img.placeholder)) : [];
+  if (variantImages.length > 0) return variantImages;
+  const listing = product()?.listingImage;
+  if (listing && (listing.url || listing.placeholder)) {
+    return [
+      {
+        id: "listing",
+        url: listing.url || "",
+        srcset: listing.srcset || "",
+        width: listing.width,
+        height: listing.height,
+        ready: listing.ready,
+        placeholder: listing.placeholder,
+        alt: product()?.title || "Product image"
+      }
+    ];
+  }
+  const listingUrl = product()?.listingImageUrl;
+  if (listingUrl) {
+    return [{ id: "listing", url: listingUrl, alt: product()?.title || "Product image", ready: true }];
+  }
+  return [];
 };
 
 const availabilityLabel = () => {
@@ -424,9 +445,28 @@ return {
         componentName: Html
         props:
           '''const image = c.productImage || {};
+const ready = image.ready !== false && !!image.url;
+if (!ready) {
+  return {
+    as: "div",
+    text: image.placeholder || image.status === "processing" ? "Optimizing image…" : "Image unavailable",
+    style: {
+      display: "flex",
+      "align-items": "center",
+      "justify-content": "center",
+      width: "100%",
+      "aspect-ratio": image.aspectRatio || 1,
+      color: "inherit"
+    }
+  };
+}
 return {
   as: "img",
   src: image.url,
+  srcset: image.srcset || undefined,
+  sizes: "(max-width:768px) 100vw, 500px",
+  width: image.width || undefined,
+  height: image.height || undefined,
   alt: image.alt || "Product image",
   loading: "lazy"
 };'''

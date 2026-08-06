@@ -2,6 +2,8 @@ import type { Session } from "neo4j-driver";
 import fs from "node:fs/promises";
 import { getFileMetadata } from "~/routes/api/file/functions/functions/getFileMetadata";
 import { APIError } from "~/lib/api/server/apiErrorHandler";
+import { isAllowedVariantName } from "~/lib/files/imageOptimizationConfig";
+import { resolveVariantDiskPath } from "~/lib/files/imageVariantPaths";
 
 import type { Vertex } from "~/lib/graph/type/vertex";
 
@@ -9,6 +11,8 @@ interface FileMetadata {
   filePath: string;
   originalFileName: string;
   mimeType: string;
+  variantsJson?: string;
+  status?: string;
 }
 
 interface ByteRange {
@@ -90,20 +94,31 @@ async function readFileRange(
   }
 }
 
+export type DownloadFileOptions = {
+  rangeHeader?: string | null;
+  /** Allowlisted variant name: thumb | small | medium | large */
+  variant?: string | null;
+  /** Prefer inline disposition for product/image display */
+  inline?: boolean;
+};
+
 /**
  * Downloads a file from the server's file system and returns it as a Response.
  * Supports HTTP Range requests (RFC 7233) for partial content.
- * @param fileName - The unique name of the file to download
- * @param dbSession - Neo4j database session
- * @param rangeHeader - Optional Range request header value
- * @returns Response object containing the file data or an error message
- * @throws APIError if the file is not found or cannot be read
+ * Optional `variant` serves an optimized WebP derivative from File.variantsJson.
  */
 export async function downloadFile(
   fileName: string,
   dbSession: Session,
-  rangeHeader?: string | null,
+  rangeHeaderOrOptions?: string | null | DownloadFileOptions,
 ): Promise<Response> {
+  const options: DownloadFileOptions =
+    rangeHeaderOrOptions &&
+    typeof rangeHeaderOrOptions === "object" &&
+    !Array.isArray(rangeHeaderOrOptions)
+      ? rangeHeaderOrOptions
+      : { rangeHeader: rangeHeaderOrOptions as string | null | undefined };
+
   const fileMetadata = await getFileMetadata(dbSession, fileName);
 
   if (!fileMetadata) {
@@ -112,18 +127,49 @@ export async function downloadFile(
 
   try {
     const metadata = fileMetadata as Vertex<FileMetadata>;
-    const { filePath, originalFileName, mimeType } = metadata.P;
+    const { originalFileName, mimeType } = metadata.P;
+    let filePath = metadata.P.filePath;
+    let contentType = mimeType || "application/octet-stream";
+    let downloadName = originalFileName;
+    const inline = options.inline === true || Boolean(options.variant);
+
+    const variantRaw =
+      options.variant != null
+        ? String(options.variant).trim().toLowerCase()
+        : "";
+    if (variantRaw) {
+      if (!isAllowedVariantName(variantRaw)) {
+        throw new APIError("Invalid image variant", 400);
+      }
+      if (String(metadata.P.status || "") !== "ready") {
+        throw new APIError("Image variants are not ready", 404);
+      }
+      const variantPath = resolveVariantDiskPath(metadata.P, variantRaw);
+      if (!variantPath) {
+        throw new APIError("Image variant not found", 404);
+      }
+      filePath = variantPath;
+      contentType = "image/webp";
+      const base = originalFileName?.replace(/\.[^.]+$/, "") || fileName;
+      downloadName = `${base}_${variantRaw}.webp`;
+    }
+
     const { size: fileSize } = await fs.stat(filePath);
 
     // Ensure the filename is safe for headers
-    const safeFileName = encodeURIComponent(originalFileName);
+    const safeFileName = encodeURIComponent(downloadName);
+    const disposition = inline ? "inline" : "attachment";
 
     const baseHeaders: Record<string, string> = {
       "Accept-Ranges": "bytes",
-      "Content-Disposition": `attachment; filename="${safeFileName}"`,
-      "Content-Type": mimeType,
+      "Content-Disposition": `${disposition}; filename="${safeFileName}"`,
+      "Content-Type": contentType,
+      "Cache-Control": variantRaw
+        ? "public, max-age=31536000, immutable"
+        : "private, max-age=0",
     };
 
+    const rangeHeader = options.rangeHeader;
     if (rangeHeader) {
       const parsed = parseByteRange(rangeHeader, fileSize);
 

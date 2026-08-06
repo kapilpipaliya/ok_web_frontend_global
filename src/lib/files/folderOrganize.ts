@@ -5,6 +5,14 @@ import path from "node:path";
 
 import { ensureDirectoryExists } from "~/lib/files/ensureDirectoryExists";
 import { getBaseDir } from "~/lib/files/getBaseDir";
+import {
+  listVariantDiskPaths,
+  parseVariantsJsonProp,
+  relocateVariantPathsForFileMove,
+  rewriteVariantPaths,
+  serializeVariantsJson,
+} from "~/lib/files/imageVariantPaths";
+import { patchFileMetadata } from "~/lib/files/patchFileMetadata";
 
 export const UNCATEGORIZED_DISK_SEGMENT = "_uncategorized";
 
@@ -150,6 +158,32 @@ export function relocateFileOnDisk(
   return newPath;
 }
 
+/**
+ * Relocate a single file path (original or variant), overwriting target if needed.
+ */
+export function relocateSiblingOnDisk(
+  currentPath: string,
+  targetPath: string,
+): string {
+  if (path.resolve(currentPath) === path.resolve(targetPath)) {
+    return targetPath;
+  }
+  ensureDirectoryExists(path.dirname(targetPath));
+  if (!fs.existsSync(currentPath)) {
+    throw new Error(`Source file not found: ${currentPath}`);
+  }
+  if (fs.existsSync(targetPath)) {
+    fs.unlinkSync(targetPath);
+  }
+  try {
+    fs.renameSync(currentPath, targetPath);
+  } catch {
+    fs.copyFileSync(currentPath, targetPath);
+    fs.unlinkSync(currentPath);
+  }
+  return targetPath;
+}
+
 export function relocateDirectoryOnDisk(oldDir: string, newDir: string): void {
   if (path.resolve(oldDir) === path.resolve(newDir)) return;
   ensureDirectoryExists(path.dirname(newDir));
@@ -179,47 +213,60 @@ export async function updateFilePathsWithPrefix(
     `
     MATCH (f:File)
     WHERE f.filePath STARTS WITH $oldPrefix OR f.filePath = $oldDir
-    WITH f,
-      CASE
-        WHEN f.filePath = $oldDir THEN $newDir
-        ELSE $newPrefix + substring(f.filePath, size($oldPrefix))
-      END AS nextPath
-    SET f.filePath = nextPath, f.updatedAt = datetime()
-    RETURN count(f) AS updated
+    RETURN elementId(f) AS fileId, f.filePath AS filePath, f.variantsJson AS variantsJson
     `,
-    { oldPrefix, newPrefix, oldDir, newDir },
+    { oldPrefix, oldDir },
   );
-  const raw = result.records[0]?.get("updated");
-  if (raw == null) return 0;
-  if (typeof raw === "number") return raw;
-  if (typeof raw?.toNumber === "function") return raw.toNumber();
-  return Number(raw) || 0;
+
+  let updated = 0;
+  for (const record of result.records) {
+    const fileId = String(record.get("fileId") || "");
+    const filePath = String(record.get("filePath") || "");
+    if (!fileId || !filePath) continue;
+
+    const nextPath =
+      filePath === oldDir
+        ? newDir
+        : newPrefix + filePath.slice(oldPrefix.length);
+
+    const variants = parseVariantsJsonProp(record.get("variantsJson"));
+    const nextVariants = rewriteVariantPaths(variants, oldDir, newDir);
+
+    await patchFileMetadata(session, fileId, {
+      filePath: nextPath,
+      variantsJson: serializeVariantsJson(nextVariants),
+    });
+    updated += 1;
+  }
+  return updated;
 }
 
 export async function updateFilePathByElementId(
   session: Session | Transaction,
   fileId: string,
   filePath: string,
+  variantsJson?: string,
 ): Promise<void> {
-  await session.run(
-    `
-    MATCH (f:File)
-    WHERE elementId(f) = $fileId
-    SET f.filePath = $filePath, f.updatedAt = datetime()
-    `,
-    { fileId, filePath },
-  );
+  const props: Record<string, unknown> = { filePath };
+  if (variantsJson != null) {
+    props.variantsJson = variantsJson;
+  }
+  await patchFileMetadata(session, fileId, props);
 }
 
 export async function loadFileDiskMeta(
   session: Session | Transaction,
   fileId: string,
-): Promise<{ filePath: string; fileName: string } | null> {
+): Promise<{
+  filePath: string;
+  fileName: string;
+  variantsJson?: string;
+} | null> {
   const result = await session.run(
     `
     MATCH (f:File)
     WHERE elementId(f) = $fileId
-    RETURN f.filePath AS filePath, f.fileName AS fileName
+    RETURN f.filePath AS filePath, f.fileName AS fileName, f.variantsJson AS variantsJson
     LIMIT 1
     `,
     { fileId },
@@ -227,6 +274,7 @@ export async function loadFileDiskMeta(
   if (result.records.length === 0) return null;
   const filePath = result.records[0].get("filePath");
   const fileName = result.records[0].get("fileName");
+  const variantsJson = result.records[0].get("variantsJson");
   if (filePath == null || String(filePath).trim() === "") return null;
   return {
     filePath: String(filePath),
@@ -234,6 +282,8 @@ export async function loadFileDiskMeta(
       fileName != null && String(fileName).trim() !== ""
         ? String(fileName)
         : path.basename(String(filePath)),
+    variantsJson:
+      variantsJson != null ? String(variantsJson) : undefined,
   };
 }
 
@@ -275,8 +325,27 @@ export async function moveFileVertexToCategoryDir(
   }
 
   try {
+    const oldVariants = parseVariantsJsonProp(meta.variantsJson);
     const newPath = relocateFileOnDisk(meta.filePath, targetDir, meta.fileName);
-    await updateFilePathByElementId(session, options.fileId, newPath);
+    const nextVariants = relocateVariantPathsForFileMove(oldVariants, newPath);
+
+    for (const [name, oldVariantPath] of Object.entries(oldVariants)) {
+      const nextVariantPath = nextVariants[name as keyof typeof nextVariants];
+      if (!oldVariantPath || !nextVariantPath) continue;
+      try {
+        relocateSiblingOnDisk(oldVariantPath, nextVariantPath);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        if (!message.includes("Source file not found")) throw error;
+      }
+    }
+
+    await updateFilePathByElementId(
+      session,
+      options.fileId,
+      newPath,
+      serializeVariantsJson(nextVariants),
+    );
     return { moved: true, newPath };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
@@ -285,10 +354,23 @@ export async function moveFileVertexToCategoryDir(
       const intended = path.join(targetDir, meta.fileName);
       if (path.resolve(meta.filePath) !== path.resolve(intended)) {
         ensureDirectoryExists(targetDir);
-        await updateFilePathByElementId(session, options.fileId, intended);
+        const oldVariants = parseVariantsJsonProp(meta.variantsJson);
+        const nextVariants = relocateVariantPathsForFileMove(
+          oldVariants,
+          intended,
+        );
+        await updateFilePathByElementId(
+          session,
+          options.fileId,
+          intended,
+          serializeVariantsJson(nextVariants),
+        );
         return { moved: false, newPath: intended, reason: "source_missing" };
       }
     }
     throw error;
   }
 }
+
+/** Expose helper for callers that need variant path lists. */
+export { listVariantDiskPaths };

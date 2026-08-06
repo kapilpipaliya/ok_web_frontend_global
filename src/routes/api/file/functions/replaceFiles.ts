@@ -3,16 +3,22 @@ import type { Session } from "neo4j-driver";
 
 import path from "node:path";
 
-import { processResult } from "~/cypher/conversion/processResult";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import type { EvalExpressionContext } from "~/cypher/types/EvalExpressionContext";
 import { calculateChecksum } from "~/lib/files/calculateChecksum";
+import { deleteVariantDiskArtifacts } from "~/lib/files/deleteFileDiskArtifacts";
 import { ensureDirectoryExists } from "~/lib/files/ensureDirectoryExists";
 import { getBaseDir } from "~/lib/files/getBaseDir";
+import { looksLikeImageMime } from "~/lib/files/imageOptimizationConfig";
+import { patchFileMetadata } from "~/lib/files/patchFileMetadata";
+import { probeImage } from "~/lib/files/processImageVariants";
 import { saveFileToDisk } from "~/lib/files/saveFileToDisk";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { getFileMetadataById } from "~/routes/api/file/functions/functions/getFileMetadataById";
-import { saveFileMetadata } from "~/routes/api/file/functions/functions/saveFileMetadata";
+import {
+  cancelImageOptimizationJob,
+  enqueueImageOptimization,
+} from "~/server/queue/imageOptimizationQueue";
 
 export async function replaceFiles(
   request: Request,
@@ -21,13 +27,6 @@ export async function replaceFiles(
   subDomain: string,
   user: Vertex,
 ) {
-  const currentDate = new Date().toISOString();
-  const [year, month, day] = currentDate.split("T")[0].split("-");
-  const baseDir = getBaseDir();
-  const userDir = path.join(baseDir, subDomain, year, month, day);
-
-  ensureDirectoryExists(userDir);
-
   const query = new URL(request.url).searchParams;
   const fileId = query.get("fileId");
   if (!fileId) {
@@ -42,58 +41,117 @@ export async function replaceFiles(
     return { error: "File metadata not found for the provided fileId" };
   }
 
-  const newFileNodes = await Promise.all(
-    data.map(async (file) => {
-      if (!file?.filename) {
-        return null;
-      }
+  const file = data[0];
+  if (!file?.filename) {
+    return { error: "File data is required" };
+  }
 
-      const { ext, name } = path.parse(file.filename);
-      const newVersion = (oldFileMetadata.P.version || 0) + 1;
-      const newFilename = `${name}_v${newVersion}_${currentDate}${ext}`;
-      const filePath = saveFileToDisk(userDir, newFilename, file.data);
-      const fileSize = file.data.length;
-      const mimeType = file.type;
-      const checksum = calculateChecksum(file.data);
+  await cancelImageOptimizationJob(subDomain, fileId);
+  await deleteVariantDiskArtifacts(oldFileMetadata.P);
 
-      const newMetadata = {
-        checksum,
-        fileName: newFilename,
-        filePath: filePath,
-        fileSize,
-        mimeType,
-        originalFileName: file.filename,
-        subDomain,
-        version: newVersion,
-      };
+  const currentDate = new Date().toISOString();
+  const oldDir =
+    oldFileMetadata.P?.filePath != null
+      ? path.dirname(String(oldFileMetadata.P.filePath))
+      : "";
+  let userDir = oldDir;
+  if (!userDir || userDir.trim() === "") {
+    const [year, month, day] = currentDate.split("T")[0].split("-");
+    userDir = path.join(getBaseDir(), subDomain, year, month, day);
+  }
 
-      return await saveFileMetadata(neo4jSession, newMetadata, fileId);
-    }),
-  );
+  ensureDirectoryExists(userDir);
+
+  const { ext, name } = path.parse(file.filename);
+  const newVersion = (Number(oldFileMetadata.P.version) || 0) + 1;
+  const newFilename = `${name}_v${newVersion}_${currentDate}${ext}`;
+  const filePath = saveFileToDisk(userDir, newFilename, file.data);
+  const fileSize = file.data.length;
+  const mimeType = file.type;
+  const checksum = calculateChecksum(file.data);
+  const probe = await probeImage(file.data);
+  const isImage = Boolean(probe) || looksLikeImageMime(mimeType);
+  const generation =
+    (Number(oldFileMetadata.P.optimizationGeneration) || 0) + 1;
+
+  // Remove old original after writing the new one (if different path)
+  const oldPath =
+    oldFileMetadata.P?.filePath != null
+      ? String(oldFileMetadata.P.filePath)
+      : "";
+  if (oldPath && path.resolve(oldPath) !== path.resolve(filePath)) {
+    try {
+      const fs = await import("node:fs/promises");
+      await fs.unlink(oldPath);
+    } catch {
+      // ignore
+    }
+  }
+
+  const patch: Record<string, unknown> = {
+    checksum,
+    fileName: newFilename,
+    filePath,
+    fileSize,
+    mimeType,
+    originalFileName: file.filename,
+    subDomain,
+    version: newVersion,
+    status: isImage ? "processing" : "ready",
+    optimizationGeneration: generation,
+    variantsJson: "{}",
+    optimizationError: null,
+    optimizedAt: null,
+  };
+
+  if (probe) {
+    patch.width = probe.width;
+    patch.height = probe.height;
+    patch.aspectRatio = Number((probe.width / probe.height).toFixed(6));
+  } else {
+    patch.width = null;
+    patch.height = null;
+    patch.aspectRatio = null;
+  }
+
+  const updated = await patchFileMetadata(neo4jSession, fileId, patch);
+
+  if (isImage) {
+    const enqueueResult = await enqueueImageOptimization({
+      fileId,
+      subDomain,
+      generation,
+    });
+    if (!enqueueResult.ok) {
+      await patchFileMetadata(neo4jSession, fileId, {
+        status: "failed",
+        optimizationError: String(enqueueResult.error).slice(0, 1000),
+      });
+    }
+  }
 
   const context: EvalExpressionContext = {
     nodes: {},
     relationships: {},
   };
-  const result = processResult(
-    newFileNodes.filter((node) => node !== null),
-    context,
-    "f",
-  );
-  // Log file replacement
+  if (updated) {
+    context.nodes[updated.id] = updated;
+  }
+
   await createActivityLog(
     neo4jSession,
     "file_replace",
     "File",
     fileId,
     user.P.email,
-    `File replaced: ${oldFileMetadata.P.fileName} -> ${data[0]?.filename}`,
+    `File replaced: ${oldFileMetadata.P.fileName} -> ${file.filename}`,
   );
+
   return {
     graph: {
       edges: context.relationships,
       vertexes: context.nodes,
     },
-    result,
+    result: updated ? [updated] : [],
   };
 }

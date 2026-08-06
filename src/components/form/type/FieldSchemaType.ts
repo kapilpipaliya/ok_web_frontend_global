@@ -118,6 +118,9 @@ export interface FunctionArgumentBaseType {
   z: typeof import("zod").z;
   /** date-fns namespace (`import * as dateFns from "date-fns"`); exposed on dynamic component / page `_`. */
   dateFns: typeof import("date-fns");
+  /** Build responsive public image payload from File.P (src/srcset/sizes/placeholder). */
+  buildPublicImagePayload: typeof import("~/lib/files/publicImageUrl").buildPublicImagePayload;
+  buildPublicImageUrl: typeof import("~/lib/files/publicImageUrl").buildPublicImageUrl;
   /** Build a virtua/render-prop row renderer from the loop + Slot graph template. */
   createLoopRowRenderer: (
     mapContextValue: (

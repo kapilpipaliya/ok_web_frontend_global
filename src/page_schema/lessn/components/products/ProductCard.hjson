@@ -103,9 +103,14 @@ return {
         props:
           '''const item = c.props?.item || c.props || {};
 const src = item.previewUrl || "";
+const ready = item.previewReady !== false && !!src;
 return {
-  as: src ? "img" : "fragment",
-  src: src || undefined,
+  as: ready ? "img" : "fragment",
+  src: ready ? src : undefined,
+  srcset: ready && item.previewSrcset ? item.previewSrcset : undefined,
+  sizes: ready ? "(max-width:768px) 50vw, 280px" : undefined,
+  width: ready && item.previewWidth ? item.previewWidth : undefined,
+  height: ready && item.previewHeight ? item.previewHeight : undefined,
   alt: item.title || "Product",
   loading: "lazy"
 };'''
@@ -133,9 +138,10 @@ return {
         componentName: Html
         props:
           '''const item = c.props?.item || c.props || {};
+const ready = !!item.previewUrl && item.previewReady !== false;
 return {
   as: "div",
-  hide: !!item.previewUrl
+  hide: ready
 };'''
       }
     }

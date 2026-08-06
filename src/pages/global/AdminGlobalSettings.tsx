@@ -12,6 +12,7 @@ import { RoleSettings } from "~/pages/global/role/RoleSettings";
 import { StripeSettings } from "~/pages/global/stripe/StripeSettings";
 import { SupportTickets } from "~/pages/global/support/SupportTickets";
 import { ThemeSettings } from "~/pages/global/theme/ThemeSettings";
+import { ImageSettings } from "~/pages/global/image/ImageSettings";
 import { UserManagement } from "~/pages/global/user/UserManagement";
 import { ShopMigrationRequestSettings } from "~/pages/global/shopMigrationRequest/ShopMigrationRequestSettings";
 import { WorkerManagement } from "~/pages/global/worker/WorkerManagement";
@@ -80,6 +81,13 @@ export default function AdminGlobalSettings() {
       icon: "ph:paint-brush",
       id: "theme",
       label: "Theme Settings",
+    },
+    {
+      component: ImageSettings,
+      group: "Appearance",
+      icon: "ph:image",
+      id: "image",
+      label: "Image Optimization",
     },
     {
       component: PermissionsSettings,

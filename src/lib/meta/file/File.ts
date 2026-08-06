@@ -94,6 +94,30 @@ export const File: IFormMetaData = {
       displayName: "Thumbnail URL",
       key: "thumbnailUrl",
     },
+    {
+      componentName: "SystemTextInput",
+      disabled: true,
+      displayName: "Optimization Status",
+      key: "status",
+    },
+    {
+      componentName: "NumberBox",
+      disabled: true,
+      displayName: "Width",
+      key: "width",
+    },
+    {
+      componentName: "NumberBox",
+      disabled: true,
+      displayName: "Height",
+      key: "height",
+    },
+    {
+      componentName: "NumberBox",
+      disabled: true,
+      displayName: "Aspect Ratio",
+      key: "aspectRatio",
+    },
     // If applicable, an expiration date for temporary files, after which they may be automatically deleted.
     {
       componentName: "DateBox",

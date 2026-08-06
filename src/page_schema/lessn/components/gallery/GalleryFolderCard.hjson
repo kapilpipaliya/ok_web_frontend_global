@@ -91,12 +91,15 @@ return {
         props:
           '''const folder = c.props?.folder || c.props || {};
 const src = folder.imageUrl || "";
+const ready = folder.imageReady !== false && !!src;
 return {
-  as: src ? "img" : "fragment",
-  src: src || undefined,
+  as: ready ? "img" : "fragment",
+  src: ready ? src : undefined,
+  srcset: ready && folder.imageSrcset ? folder.imageSrcset : undefined,
+  sizes: ready ? "(max-width:768px) 50vw, 200px" : undefined,
   alt: folder.name || "Category",
   loading: "lazy",
-  hide: !src
+  hide: !ready
 };'''
       }
     }
@@ -120,9 +123,10 @@ return {
         componentName: Html
         props:
           '''const folder = c.props?.folder || c.props || {};
+const ready = !!(folder.imageUrl && String(folder.imageUrl).trim()) && folder.imageReady !== false;
 return {
   as: "div",
-  hide: !!(folder.imageUrl && String(folder.imageUrl).trim())
+  hide: ready
 };'''
       }
     }

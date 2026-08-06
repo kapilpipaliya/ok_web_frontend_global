@@ -172,6 +172,15 @@ import {
   resolveFolderKeyPath,
   updateFilePathsWithPrefix,
 } from "~/lib/files/folderOrganize";
+import { deleteFileDiskArtifacts } from "~/lib/files/deleteFileDiskArtifacts";
+import {
+  buildPublicImagePayload,
+  buildPublicImageUrl,
+} from "~/lib/files/publicImageUrl";
+import {
+  cancelImageOptimizationJob,
+  enqueueImageOptimization,
+} from "~/server/queue/imageOptimizationQueue";
 import {
   clearOldLogs,
   logger,
@@ -679,6 +688,11 @@ export async function executeNamedServerFunctionCore(
       relocateFileOnDisk,
       resolveFolderKeyPath,
       updateFilePathsWithPrefix,
+      deleteFileDiskArtifacts,
+      buildPublicImagePayload,
+      buildPublicImageUrl,
+      cancelImageOptimizationJob,
+      enqueueImageOptimization,
       PerformanceTimer,
       Logger,
       logger,

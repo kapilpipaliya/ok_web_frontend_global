@@ -34,6 +34,7 @@ export const API = {
     uploadChunkUrl: "/api/file/upload/chunk",
     uploadCompleteUrl: "/api/file/upload/complete",
     uploadAbortUrl: "/api/file/upload/abort",
+    optimizeBackfillUrl: "/api/file/optimize/backfill",
   },
   // Other endpoints
   // getInitialDataUrl: "/api/get/getInitialData",

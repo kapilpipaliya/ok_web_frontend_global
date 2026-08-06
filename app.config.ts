@@ -59,6 +59,7 @@ export default defineConfig({
           "node:async_hooks", // Mark node:async_hooks as external to prevent browser compatibility issues
           "bullmq", // Server-only: BullMQ job queue
           "ioredis", // Server-only: Redis client
+          "sharp", // Server-only: image optimization (libvips)
         ],
       },
     },
@@ -67,6 +68,7 @@ export default defineConfig({
         "node:async_hooks", // Exclude node:async_hooks from optimization to fix build error
         "bullmq", // Server-only dependency
         "ioredis", // Server-only dependency
+        "sharp", // Server-only dependency
       ],
     },
     // dev: {

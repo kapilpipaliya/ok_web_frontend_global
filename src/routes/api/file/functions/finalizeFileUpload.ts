@@ -11,9 +11,12 @@ import { calculateChecksum } from "~/lib/files/calculateChecksum";
 import { ensureDirectoryExists } from "~/lib/files/ensureDirectoryExists";
 import { buildFolderDiskDir } from "~/lib/files/folderOrganize";
 import { getBaseDir } from "~/lib/files/getBaseDir";
+import { looksLikeImageMime } from "~/lib/files/imageOptimizationConfig";
+import { probeImage } from "~/lib/files/processImageVariants";
 import { saveFileToDisk } from "~/lib/files/saveFileToDisk";
 import { APIError } from "~/lib/api/server/apiErrorHandler";
 import { saveFileMetadata } from "~/routes/api/file/functions/functions/saveFileMetadata";
+import { enqueueImageOptimization } from "~/server/queue/imageOptimizationQueue";
 
 export type FinalizeFileUploadInput = {
   data: Buffer;
@@ -96,7 +99,11 @@ export async function finalizeFileUpload(input: FinalizeFileUploadInput) {
 
   saveFileToDisk(userDir, filename, data);
 
-  const metadata = {
+  const probe = await probeImage(data);
+  const isImage = Boolean(probe) || looksLikeImageMime(mimeType);
+  const generation = 1;
+
+  const metadata: Record<string, unknown> = {
     checksum: calculateChecksum(data),
     fileName: filename,
     filePath,
@@ -105,7 +112,19 @@ export async function finalizeFileUpload(input: FinalizeFileUploadInput) {
     originalFileName: filename,
     subDomain,
     uploadDate: new Date().toISOString(),
+    status: isImage ? "processing" : "ready",
+    optimizationGeneration: generation,
+    variantsJson: "{}",
   };
+
+  if (probe) {
+    metadata.width = probe.width;
+    metadata.height = probe.height;
+    metadata.aspectRatio = Number((probe.width / probe.height).toFixed(6));
+    if (probe.format && !mimeType) {
+      metadata.mimeType = `image/${probe.format}`;
+    }
+  }
 
   const record = await saveFileMetadata(
     neo4jSession,
@@ -132,6 +151,43 @@ export async function finalizeFileUpload(input: FinalizeFileUploadInput) {
       }
     } catch (e) {
       console.error("finalizeFileUpload: UserFile link failed", e);
+    }
+  }
+
+  // Fire-and-forget image optimization
+  if (isImage && record) {
+    try {
+      const node = record.get("f");
+      const v = node ? convertNodeToJson(node as Node) : null;
+      const fileId = v?.id;
+      if (fileId) {
+        const enqueueResult = await enqueueImageOptimization({
+          fileId,
+          subDomain,
+          generation,
+        });
+        if (!enqueueResult.ok) {
+          console.error(
+            "finalizeFileUpload: enqueue image optimization failed",
+            enqueueResult.error,
+          );
+          await neo4jSession.run(
+            `
+            MATCH (f:File)
+            WHERE elementId(f) = $fileId
+            SET f.status = "failed",
+                f.optimizationError = $error,
+                f.updatedAt = datetime()
+            `,
+            {
+              fileId,
+              error: String(enqueueResult.error).slice(0, 1000),
+            },
+          );
+        }
+      }
+    } catch (e) {
+      console.error("finalizeFileUpload: image optimization enqueue error", e);
     }
   }
 

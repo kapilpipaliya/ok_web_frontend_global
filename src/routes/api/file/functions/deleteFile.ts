@@ -1,11 +1,11 @@
 import type { Session } from "neo4j-driver";
 
-import fs from "node:fs/promises";
-
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
+import { deleteFileDiskArtifacts } from "~/lib/files/deleteFileDiskArtifacts";
 import { deleteFileMetadata } from "~/routes/api/file/functions/functions/deleteFileMetadata";
 import { getFileMetadataById } from "~/routes/api/file/functions/functions/getFileMetadataById";
 import type { Vertex } from "~/lib/graph/type/vertex";
+import { cancelImageOptimizationJob } from "~/server/queue/imageOptimizationQueue";
 
 export async function deleteFile(
   fileId: string,
@@ -22,19 +22,18 @@ export async function deleteFile(
   }
 
   try {
-    const filePath = fileMetadata.P.filePath;
+    const subDomain =
+      fileMetadata.P?.subDomain != null
+        ? String(fileMetadata.P.subDomain)
+        : "";
+    if (subDomain) {
+      await cancelImageOptimizationJob(subDomain, fileId);
+    }
 
     const deletedFileResult = await deleteFileMetadata(neo4jSession, fileId);
 
     if (deletedFileResult?.success) {
-      if (filePath) {
-        try {
-          await fs.access(filePath); // Check if file exists
-          await fs.unlink(filePath); // Delete the file from the disk only if it exists
-        } catch {
-          // Silently continue if file doesn't exist
-        }
-      }
+      await deleteFileDiskArtifacts(fileMetadata.P);
 
       await createActivityLog(
         neo4jSession,
@@ -42,7 +41,7 @@ export async function deleteFile(
         "File",
         fileId as string,
         user.P.email,
-        `File deleted: ${fileMetadata.P.fileName} (${fileMetadata.P.contentType})`,
+        `File deleted: ${fileMetadata.P.fileName} (${fileMetadata.P.mimeType || fileMetadata.P.contentType || ""})`,
       );
     }
     return deletedFileResult;

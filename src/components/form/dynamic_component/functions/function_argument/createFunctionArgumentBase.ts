@@ -75,6 +75,10 @@ import { findLoopTemplateMeta } from "~/components/form/dynamic_component/compon
 import { createLoopRowRenderer } from "~/components/form/dynamic_component/functions/createLoopRowRenderer";
 import { cssHelpers } from "~/lib/styles/cssHelpers";
 import * as motion from "motion";
+import {
+  buildPublicImagePayload,
+  buildPublicImageUrl,
+} from "~/lib/files/publicImageUrl";
 // Static: `_.useCarousel(...)` runs synchronously during SSR render (it
 // creates the embla ref in component `fns`), so it must be available on the
 // server. Small (~8KB gzip), unlike the truly client-only lazy deps below.
@@ -473,6 +477,9 @@ export function createFunctionArgumentBase(
     css: cssHelpers,
     /** Motion — full `motion` package namespace for page/component schemas. */
     motion,
+    /** Build responsive public image payload (src/srcset/sizes) from a File vertex's P. */
+    buildPublicImagePayload,
+    buildPublicImageUrl,
     createLoopRowRenderer: (
       mapContextValue: (rowData: unknown, index: Accessor<number>) => unknown,
     ) => {

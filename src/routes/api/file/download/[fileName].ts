@@ -16,7 +16,14 @@ export async function GET({ request, params }: APIEvent) {
 
     const decodedFileName = decodeURIComponent(fileName as string);
     const rangeHeader = request.headers.get("Range");
-    return await downloadFile(decodedFileName, dbSession, rangeHeader);
+    const url = new URL(request.url);
+    const variant =
+      url.searchParams.get("variant") || url.searchParams.get("v");
+    return await downloadFile(decodedFileName, dbSession, {
+      rangeHeader,
+      variant,
+      inline: Boolean(variant),
+    });
   } catch (error) {
     return handleAPIError(error);
   } finally {
