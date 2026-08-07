@@ -45,13 +45,13 @@ export default defineConfig({
         },
       },
     },
-    // https: true,
+    https: true,
   },
   vite: {
     server: {
       //  If set to true, the server is allowed to respond to requests for any hosts.
       allowedHosts: true,
-      // https: true,
+      https: true,
     },
     build: {
       rollupOptions: {
@@ -93,7 +93,7 @@ export default defineConfig({
     // },
     // },
     plugins: [
-      // mkcert(),
+      mkcert(),
       // monaco-editor gives error in devtools
       // devtools({
       //   /* features options - all disabled by default */
