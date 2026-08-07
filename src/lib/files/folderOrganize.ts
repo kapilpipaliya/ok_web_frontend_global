@@ -222,7 +222,7 @@ export async function updateFilePathsWithPrefix(
   for (const record of result.records) {
     const fileId = String(record.get("fileId") || "");
     const filePath = String(record.get("filePath") || "");
-    if (!fileId || !filePath) continue;
+    if (!(fileId && filePath)) continue;
 
     const nextPath =
       filePath === oldDir
@@ -282,8 +282,7 @@ export async function loadFileDiskMeta(
       fileName != null && String(fileName).trim() !== ""
         ? String(fileName)
         : path.basename(String(filePath)),
-    variantsJson:
-      variantsJson != null ? String(variantsJson) : undefined,
+    variantsJson: variantsJson == null ? undefined : String(variantsJson),
   };
 }
 
@@ -331,7 +330,7 @@ export async function moveFileVertexToCategoryDir(
 
     for (const [name, oldVariantPath] of Object.entries(oldVariants)) {
       const nextVariantPath = nextVariants[name as keyof typeof nextVariants];
-      if (!oldVariantPath || !nextVariantPath) continue;
+      if (!(oldVariantPath && nextVariantPath)) continue;
       try {
         relocateSiblingOnDisk(oldVariantPath, nextVariantPath);
       } catch (error) {

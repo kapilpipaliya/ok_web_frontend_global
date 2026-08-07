@@ -56,9 +56,9 @@ export async function replaceFiles(
 
   const currentDate = new Date().toISOString();
   const oldDir =
-    oldFileMetadata.P?.filePath != null
-      ? path.dirname(String(oldFileMetadata.P.filePath))
-      : "";
+    oldFileMetadata.P?.filePath == null
+      ? ""
+      : path.dirname(String(oldFileMetadata.P.filePath));
   let userDir = oldDir;
   if (!userDir || userDir.trim() === "") {
     const [year, month, day] = currentDate.split("T")[0].split("-");
@@ -90,9 +90,9 @@ export async function replaceFiles(
     (Number(oldFileMetadata.P.optimizationGeneration) || 0) + 1;
 
   const oldPath =
-    oldFileMetadata.P?.filePath != null
-      ? String(oldFileMetadata.P.filePath)
-      : "";
+    oldFileMetadata.P?.filePath == null
+      ? ""
+      : String(oldFileMetadata.P.filePath);
   if (oldPath && path.resolve(oldPath) !== path.resolve(filePath)) {
     try {
       const fs = await import("node:fs/promises");

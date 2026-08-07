@@ -108,7 +108,7 @@ export async function probeVideo(
 
     const width = Number(videoStream.width) || 0;
     const height = Number(videoStream.height) || 0;
-    if (!width || !height) return null;
+    if (!(width && height)) return null;
 
     return {
       width,
@@ -116,9 +116,10 @@ export async function probeVideo(
       duration: Number(data.format?.duration) || 0,
       fps: parseFps(videoStream.avg_frame_rate || videoStream.r_frame_rate),
       bitrate: Number(data.format?.bit_rate) || 0,
-      codec: videoStream.codec_name != null ? String(videoStream.codec_name) : "",
+      codec:
+        videoStream.codec_name == null ? "" : String(videoStream.codec_name),
       audioCodec:
-        audioStream?.codec_name != null ? String(audioStream.codec_name) : "",
+        audioStream?.codec_name == null ? "" : String(audioStream.codec_name),
     };
   } catch {
     return null;

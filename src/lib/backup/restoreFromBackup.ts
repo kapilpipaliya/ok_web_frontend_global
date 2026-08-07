@@ -83,9 +83,7 @@ async function syncAdminUserUuidAfterRestore(
       return;
     }
 
-    console.log(
-      `[Restore] Synced admin user UUID: ${oldUuid} -> ${newUuid}`,
-    );
+    console.log(`[Restore] Synced admin user UUID: ${oldUuid} -> ${newUuid}`);
   } finally {
     await targetSession.close();
   }

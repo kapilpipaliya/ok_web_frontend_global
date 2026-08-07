@@ -91,8 +91,8 @@ export async function POST({ request }: APIEvent) {
         existingMediaType === "image" || existingMediaType === "video"
           ? existingMediaType
           : detectMediaType({
-              mimeType: mimeType != null ? String(mimeType) : null,
-              fileName: fileName != null ? String(fileName) : null,
+              mimeType: mimeType == null ? null : String(mimeType),
+              fileName: fileName == null ? null : String(fileName),
             });
 
       if (!mediaType) {

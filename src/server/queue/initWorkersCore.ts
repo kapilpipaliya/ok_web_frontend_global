@@ -176,9 +176,7 @@ export async function initWorkersCore() {
       platformWorkers.set("mediaOptimizationWorker", {
         stop: stopMediaOptimizationWorker,
       });
-      console.log(
-        "[Workers] Media optimization worker started successfully",
-      );
+      console.log("[Workers] Media optimization worker started successfully");
     } catch (error) {
       console.error(
         "[Workers] Failed to start media optimization worker:",

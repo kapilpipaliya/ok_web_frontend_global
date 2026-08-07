@@ -53,7 +53,7 @@ export function validateMediaSettingProps(
 ): Record<string, string> | null {
   const imageErrors = validateImageSettingProps(data);
   const videoErrors = validateVideoSettingProps(data);
-  if (!imageErrors && !videoErrors) return null;
+  if (!(imageErrors || videoErrors)) return null;
   return { ...(imageErrors || {}), ...(videoErrors || {}) };
 }
 
@@ -136,7 +136,10 @@ export function detectMediaType(options: {
   ) {
     return "image";
   }
-  if (looksLikeVideoMime(options.mimeType) || looksLikeVideoFileName(options.fileName)) {
+  if (
+    looksLikeVideoMime(options.mimeType) ||
+    looksLikeVideoFileName(options.fileName)
+  ) {
     return "video";
   }
   return null;

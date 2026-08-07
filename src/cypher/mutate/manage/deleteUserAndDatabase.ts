@@ -8,9 +8,7 @@ import { getSubDomain } from "~/cypher/session/getSubDomain";
 export async function deleteUserAndDatabase(_userName: string) {
   "use server";
   const event = getRequestEvent();
-  const host = event?.request
-    ? new URL(event.request.url).hostname
-    : undefined;
+  const host = event?.request ? new URL(event.request.url).hostname : undefined;
   if (!host) {
     throw new Error("Request URL is missing");
   }

@@ -85,7 +85,7 @@ export function parseVariantsJson(raw: unknown): ImageVariantDef[] {
   const seen = new Set<string>();
   for (const entry of parsed) {
     const name =
-      entry?.name != null ? String(entry.name).trim().toLowerCase() : "";
+      entry?.name == null ? "" : String(entry.name).trim().toLowerCase();
     const width = Number(entry?.width);
     if (!isAllowedVariantName(name)) {
       throw new Error(
@@ -125,8 +125,7 @@ export function parseImageOptimizationConfig(
       ? DEFAULT_IMAGE_OPTIMIZATION_CONFIG.stripMetadata
       : Boolean(p.stripMetadata);
 
-  const formatsRaw =
-    p.formats != null ? String(p.formats).trim() : "webp";
+  const formatsRaw = p.formats == null ? "webp" : String(p.formats).trim();
   const formats = formatsRaw
     .split(",")
     .map((f) => f.trim().toLowerCase())
@@ -140,9 +139,9 @@ export function parseImageOptimizationConfig(
   let variants: ImageVariantDef[];
   try {
     variants =
-      p.variantsJson != null
-        ? parseVariantsJson(p.variantsJson)
-        : [...DEFAULT_IMAGE_VARIANTS];
+      p.variantsJson == null
+        ? [...DEFAULT_IMAGE_VARIANTS]
+        : parseVariantsJson(p.variantsJson);
   } catch {
     variants = [...DEFAULT_IMAGE_VARIANTS];
   }

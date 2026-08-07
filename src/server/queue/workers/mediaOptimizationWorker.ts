@@ -78,7 +78,7 @@ async function processJob(job: Job<MediaOptimizationJobData>) {
     }
 
     const filePath =
-      file.P?.filePath != null ? String(file.P.filePath).trim() : "";
+      file.P?.filePath == null ? "" : String(file.P.filePath).trim();
     if (!filePath) {
       await patchFileMetadata(session, fileId, {
         status: "failed",
@@ -91,8 +91,8 @@ async function processJob(job: Job<MediaOptimizationJobData>) {
       job.data.mediaType ||
       (file.P?.mediaType as "image" | "video" | undefined) ||
       detectMediaType({
-        mimeType: file.P?.mimeType != null ? String(file.P.mimeType) : null,
-        fileName: file.P?.fileName != null ? String(file.P.fileName) : null,
+        mimeType: file.P?.mimeType == null ? null : String(file.P.mimeType),
+        fileName: file.P?.fileName == null ? null : String(file.P.fileName),
         isVideoProbe: Boolean(await probeVideo(filePath)),
       });
 

@@ -419,8 +419,7 @@ export function ImageSettings() {
             componentName: "Html",
             props: (options: ImageSettingsFunctionArgumentType) => ({
               hide: () =>
-                !options.data?.P.videoOptimizationEnabled ||
-                !options.data?.P.videoPoster,
+                !(options.data?.P.videoOptimizationEnabled &&options.data?.P.videoPoster),
             }),
           },
           getErrorSchema(
@@ -487,8 +486,7 @@ export function ImageSettings() {
                           );
                           if (response.error) {
                             showErrorToast(
-                              response.error ||
-                                "Failed to save media settings",
+                              response.error || "Failed to save media settings",
                             );
                           } else {
                             showSuccessToast(

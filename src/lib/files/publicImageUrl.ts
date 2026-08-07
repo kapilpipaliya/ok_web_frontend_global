@@ -38,11 +38,11 @@ export function buildPublicImagePayload(
   },
 ): PublicImagePayload | null {
   const fileName =
-    fileProps?.fileName != null ? String(fileProps.fileName).trim() : "";
+    fileProps?.fileName == null ? "" : String(fileProps.fileName).trim();
   if (!fileName) return null;
 
   const status =
-    fileProps?.status != null ? String(fileProps.status).trim() : "";
+    fileProps?.status == null ? "" : String(fileProps.status).trim();
   const ready = status === "ready";
   const variants = parseVariantsJsonProp(fileProps?.variantsJson);
   const width = Number(fileProps?.width);
@@ -66,16 +66,18 @@ export function buildPublicImagePayload(
   }
 
   const preferred = options?.preferredVariant || "small";
-  const availableNames = (
-    Object.keys(variants) as ImageVariantName[]
-  ).filter((n) => isAllowedVariantName(n) && variants[n]);
+  const availableNames = (Object.keys(variants) as ImageVariantName[]).filter(
+    (n) => isAllowedVariantName(n) && variants[n],
+  );
 
   availableNames.sort(
     (a, b) => (VARIANT_WIDTH_HINTS[a] || 0) - (VARIANT_WIDTH_HINTS[b] || 0),
   );
 
   const srcset = availableNames
-    .map((name) => `${variantUrl(fileName, name)} ${VARIANT_WIDTH_HINTS[name]}w`)
+    .map(
+      (name) => `${variantUrl(fileName, name)} ${VARIANT_WIDTH_HINTS[name]}w`,
+    )
     .join(", ");
 
   const preferredAvailable = availableNames.includes(preferred)
@@ -91,9 +93,7 @@ export function buildPublicImagePayload(
     width: Number.isFinite(width) && width > 0 ? width : undefined,
     height: Number.isFinite(height) && height > 0 ? height : undefined,
     aspectRatio:
-      Number.isFinite(aspectRatio) && aspectRatio > 0
-        ? aspectRatio
-        : undefined,
+      Number.isFinite(aspectRatio) && aspectRatio > 0 ? aspectRatio : undefined,
     placeholder: false,
   };
 }

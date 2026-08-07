@@ -63,10 +63,10 @@ export function parseVideoOutputsJson(raw: unknown): VideoOutputDef[] {
   const seen = new Set<string>();
   for (const entry of parsed) {
     const name =
-      entry?.name != null ? String(entry.name).trim().toLowerCase() : "";
+      entry?.name == null ? "" : String(entry.name).trim().toLowerCase();
     const width = Number(entry?.width);
     const bitrate =
-      entry?.bitrate != null ? String(entry.bitrate).trim().toLowerCase() : "";
+      entry?.bitrate == null ? "" : String(entry.bitrate).trim().toLowerCase();
 
     if (!isSafeMediaVariantKey(name)) {
       throw new Error(
@@ -79,7 +79,7 @@ export function parseVideoOutputsJson(raw: unknown): VideoOutputDef[] {
     if (!Number.isFinite(width) || width < 16) {
       throw new Error(`Invalid width for video output "${name}"`);
     }
-    if (!bitrate || !BITRATE_RE.test(bitrate)) {
+    if (!(bitrate && BITRATE_RE.test(bitrate))) {
       throw new Error(
         `Invalid bitrate for "${name}". Use values like 800k or 2500k`,
       );
@@ -114,9 +114,9 @@ export function parseVideoOptimizationConfig(
   let outputs: VideoOutputDef[];
   try {
     outputs =
-      p.videoOutputsJson != null
-        ? parseVideoOutputsJson(p.videoOutputsJson)
-        : [...DEFAULT_VIDEO_OUTPUTS];
+      p.videoOutputsJson == null
+        ? [...DEFAULT_VIDEO_OUTPUTS]
+        : parseVideoOutputsJson(p.videoOutputsJson);
   } catch {
     outputs = [...DEFAULT_VIDEO_OUTPUTS];
   }

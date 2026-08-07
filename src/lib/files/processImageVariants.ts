@@ -40,7 +40,7 @@ export async function processImageVariants(
   const metadata = await pipeline.metadata();
   const width = metadata.width || 0;
   const height = metadata.height || 0;
-  if (!width || !height) {
+  if (!(width && height)) {
     throw new Error("Unable to read image dimensions");
   }
 
@@ -127,7 +127,7 @@ export async function probeImage(
 ): Promise<{ width: number; height: number; format?: string } | null> {
   try {
     const meta = await sharp(input, { failOn: "error" }).metadata();
-    if (!meta.width || !meta.height) return null;
+    if (!(meta.width && meta.height)) return null;
     return {
       width: meta.width,
       height: meta.height,

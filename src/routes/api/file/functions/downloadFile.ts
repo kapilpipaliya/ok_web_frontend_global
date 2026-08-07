@@ -134,9 +134,9 @@ export async function downloadFile(
     const inline = options.inline === true || Boolean(options.variant);
 
     const variantRaw =
-      options.variant != null
-        ? String(options.variant).trim().toLowerCase()
-        : "";
+      options.variant == null
+        ? ""
+        : String(options.variant).trim().toLowerCase();
     if (variantRaw) {
       if (!isSafeMediaVariantKey(variantRaw)) {
         throw new APIError("Invalid media variant", 400);

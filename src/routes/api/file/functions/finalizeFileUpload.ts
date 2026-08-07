@@ -107,8 +107,7 @@ export async function finalizeFileUpload(input: FinalizeFileUploadInput) {
   // Only probe video from disk for likely video uploads (ffprobe is expensive)
   const maybeVideo =
     looksLikeVideoMime(mimeType) ||
-    (!imageProbe &&
-      /\.(mp4|mov|webm|mkv|m4v|avi)$/i.test(filename));
+    (!imageProbe && /\.(mp4|mov|webm|mkv|m4v|avi)$/i.test(filename));
   const videoProbe = maybeVideo ? await probeVideo(filePath) : null;
 
   const mediaType = detectMediaType({

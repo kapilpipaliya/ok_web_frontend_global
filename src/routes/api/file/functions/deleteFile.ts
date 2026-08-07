@@ -23,9 +23,7 @@ export async function deleteFile(
 
   try {
     const subDomain =
-      fileMetadata.P?.subDomain != null
-        ? String(fileMetadata.P.subDomain)
-        : "";
+      fileMetadata.P?.subDomain == null ? "" : String(fileMetadata.P.subDomain);
     if (subDomain) {
       await cancelMediaOptimizationJob(subDomain, fileId);
     }

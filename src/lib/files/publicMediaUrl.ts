@@ -39,11 +39,11 @@ export function buildPublicVideoPayload(
   },
 ): PublicVideoPayload | null {
   const fileName =
-    fileProps?.fileName != null ? String(fileProps.fileName).trim() : "";
+    fileProps?.fileName == null ? "" : String(fileProps.fileName).trim();
   if (!fileName) return null;
 
   const status =
-    fileProps?.status != null ? String(fileProps.status).trim() : "";
+    fileProps?.status == null ? "" : String(fileProps.status).trim();
   const ready = status === "ready";
   const variants = parseMediaVariantsJsonProp(fileProps?.variantsJson);
   const width = Number(fileProps?.width);
@@ -55,11 +55,8 @@ export function buildPublicVideoPayload(
     width: Number.isFinite(width) && width > 0 ? width : undefined,
     height: Number.isFinite(height) && height > 0 ? height : undefined,
     aspectRatio:
-      Number.isFinite(aspectRatio) && aspectRatio > 0
-        ? aspectRatio
-        : undefined,
-    duration:
-      Number.isFinite(duration) && duration > 0 ? duration : undefined,
+      Number.isFinite(aspectRatio) && aspectRatio > 0 ? aspectRatio : undefined,
+    duration: Number.isFinite(duration) && duration > 0 ? duration : undefined,
   };
 
   if (!ready) {
@@ -73,9 +70,7 @@ export function buildPublicVideoPayload(
     };
   }
 
-  const posterUrl = variants.poster
-    ? variantUrl(fileName, "poster")
-    : "";
+  const posterUrl = variants.poster ? variantUrl(fileName, "poster") : "";
 
   const sources: PublicVideoSource[] = Object.keys(variants)
     .filter((name) => name !== "poster" && isSafeMediaVariantKey(name))

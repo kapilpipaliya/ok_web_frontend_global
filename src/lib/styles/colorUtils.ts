@@ -240,12 +240,9 @@ function srgbToOklch(r: number, g: number, b: number, a = 1): OklchColor {
   const lg = srgbToLinear(g);
   const lb = srgbToLinear(b);
 
-  const l =
-    0.4122214708 * lr + 0.5363325363 * lg + 0.0514459929 * lb;
-  const m =
-    0.2119034982 * lr + 0.6806995451 * lg + 0.1073969566 * lb;
-  const s =
-    0.0883024619 * lr + 0.2817188376 * lg + 0.6299787005 * lb;
+  const l = 0.4122214708 * lr + 0.5363325363 * lg + 0.0514459929 * lb;
+  const m = 0.2119034982 * lr + 0.6806995451 * lg + 0.1073969566 * lb;
+  const s = 0.0883024619 * lr + 0.2817188376 * lg + 0.6299787005 * lb;
 
   const l_ = Math.cbrt(l);
   const m_ = Math.cbrt(m);
@@ -264,7 +261,12 @@ function srgbToOklch(r: number, g: number, b: number, a = 1): OklchColor {
   return { l: L, c: C, h: C < 1e-8 ? 0 : H, a };
 }
 
-function oklchToSrgb(color: OklchColor): { r: number; g: number; b: number; a: number } {
+function oklchToSrgb(color: OklchColor): {
+  r: number;
+  g: number;
+  b: number;
+  a: number;
+} {
   const hRad = ((color.h || 0) * Math.PI) / 180;
   const A = color.c * Math.cos(hRad);
   const B = color.c * Math.sin(hRad);
@@ -277,12 +279,9 @@ function oklchToSrgb(color: OklchColor): { r: number; g: number; b: number; a: n
   const m = m_ * m_ * m_;
   const s = s_ * s_ * s_;
 
-  const lr =
-    +4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s;
-  const lg =
-    -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s;
-  const lb =
-    -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s;
+  const lr = +4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s;
+  const lg = -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s;
+  const lb = -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s;
 
   return {
     r: clamp(linearToSrgb(lr), 0, 1),
@@ -457,7 +456,7 @@ export function createColorScheme(baseColor: string): ColorScheme {
   }
 
   const createVariant = (hueShift: number) => {
-    const h = (((base.h || 0) + hueShift) % 360 + 360) % 360;
+    const h = ((((base.h || 0) + hueShift) % 360) + 360) % 360;
     return formatOklch({ ...base, h });
   };
 

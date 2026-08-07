@@ -76,7 +76,7 @@ export function rewriteMediaVariantPaths(
   const oldResolved = path.resolve(oldDir);
   const newResolved = path.resolve(newDir);
   for (const [name, diskPath] of Object.entries(variants)) {
-    if (!isSafeMediaVariantKey(name) || !diskPath) continue;
+    if (!(isSafeMediaVariantKey(name) && diskPath)) continue;
     const resolved = path.resolve(diskPath);
     if (
       resolved === oldResolved ||
@@ -101,7 +101,7 @@ export function relocateMediaVariantPathsForFileMove(
   const newDir = path.dirname(newOriginalPath);
   const originalBase = path.basename(newOriginalPath);
   for (const [name, diskPath] of Object.entries(variants)) {
-    if (!isSafeMediaVariantKey(name) || !diskPath) continue;
+    if (!(isSafeMediaVariantKey(name) && diskPath)) continue;
     const ext = path.extname(diskPath).replace(/^\./, "") || "bin";
     out[name] = path.join(
       newDir,
@@ -120,7 +120,7 @@ export function resolveMediaVariantDiskPath(
   const diskPath = map[variantName];
   if (!diskPath) return null;
   const originalPath =
-    fileProps?.filePath != null ? String(fileProps.filePath) : "";
+    fileProps?.filePath == null ? "" : String(fileProps.filePath);
   if (originalPath) {
     const expectedDir = path.resolve(path.dirname(originalPath));
     const resolved = path.resolve(diskPath);
