@@ -585,6 +585,7 @@ return {
         componentName: ThemeToggle
         props:
           '''return {
+  hide: true,
   currentMode: () => t.mode,
   toggleTheme: () => {
     t.mode = t.mode === "dark" ? "light" : "dark";

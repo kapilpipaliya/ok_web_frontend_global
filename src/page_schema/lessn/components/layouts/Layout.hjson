@@ -275,7 +275,7 @@ return {
 }`;'''
         displayOrder: 3
         componentName: Footer
-        props: return {hide:true};
+        props: return {};
       }
     }
   ]

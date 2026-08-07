@@ -1010,7 +1010,3 @@ When working with Neo4j data:
   - Simple styles: Return string with `._id { ... }`
   - Complex styles: Return array of strings for media queries
   ```
-
-## Memories
-
-- Run `./beep` after answered or confirmation

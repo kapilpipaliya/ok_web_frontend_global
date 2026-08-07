@@ -99,6 +99,7 @@ try {
 return {
   as: "h1",
   text: content.pageTitle || "Products",
+  hide: true,
   "data-animate": "",
   ref: (el) => el && f.animateOnView(el)
 };'''
@@ -122,7 +123,7 @@ return {
 return {
   as: "p",
   text: content.pageSubtitle || "Browse our curated Amazon product picks",
-  hide: !content.pageSubtitle && !content.pageTitle,
+  hide: true,
   "data-animate": "",
   ref: (el) => el && f.animateOnView(el, { delay: 0.08 })
 };'''
