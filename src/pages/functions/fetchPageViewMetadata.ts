@@ -1,5 +1,7 @@
 import {
   fetchFormData,
+  buildFetchFormDataParams,
+  canFetchFormData,
   type FetchFormDataResult,
   type FetchFormMetaDataResult,
 } from "./fetchPageData";
@@ -60,25 +62,23 @@ export async function fetchPageViewMetadata(
 
   const result: FetchPageViewMetadataResult = { formMetaId, metaResult };
 
-  const canFetchFormData =
-    params.dataId &&
-    params.dataId !== "new" &&
-    (formMetaId ||
-      metaResult.form ||
-      metaResult.formKey ||
-      metaResult.data?.graph);
-
-  if (canFetchFormData) {
-    const dataResult = await fetchFormData({
-      formKey: metaResult.formKey ?? params.pageVertexName,
-      formDataId: params.formDataId,
-      id: params.dataId,
-      isNoPermissionCheck,
-      hasRequiredPermissions: true,
-      pageVertexName: params.pageVertexName,
-      isDesignMode: params.isDesignMode,
-    });
-    result.dataResult = dataResult;
+  if (
+    canFetchFormData({
+      dataId: params.dataId,
+      formMetaId,
+      metaResult,
+    })
+  ) {
+    result.dataResult = await fetchFormData(
+      buildFetchFormDataParams({
+        formKey: metaResult.formKey ?? params.pageVertexName,
+        pageVertexName: params.pageVertexName,
+        formDataId: params.formDataId,
+        dataId: params.dataId,
+        isNoPermissionCheck,
+        isDesignMode: params.isDesignMode,
+      }),
+    );
   }
 
   return result;

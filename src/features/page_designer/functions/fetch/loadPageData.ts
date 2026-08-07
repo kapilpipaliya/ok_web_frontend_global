@@ -18,7 +18,7 @@ export async function loadPageData(
     showErrorToast("Page not found");
     return;
   }
-  // Do not send NestedExpression trees over /_server (seroval depth 64).
+
   const result = await fetchDataFromDB({
     expression: `id:'${fromVertex.id}'`,
     [getGlobalStore(graph).P.url]: true,

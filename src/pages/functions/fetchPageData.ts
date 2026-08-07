@@ -5,25 +5,25 @@ import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 import { getFormData } from "~/components/form/functions/getFormData";
 import type { Id } from "~/lib/graph/type/id";
 import { fetchComponentDataFromGraph } from "~/lib/graph/fetch/fetchComponentGraph";
-import { prepareGraphForWireTransfer } from "~/lib/graph/fetch/graphFetchUtils";
 import {
   extractRootIdFromResult,
-  stripResultFromServerResult,
+  prepareServerResultForWire,
+  toComponentGraphData,
 } from "~/lib/graph/fetch/wirePayloadUtils";
-import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/edge/getEdgesFromRowsAttr";
-import { FormMetaData } from "~/lib/meta/formMetaData";
+import {
+  type FormFetchEdges,
+  resolveEdgesFromFormKey,
+} from "~/lib/graph/fetch/resolveEdgesFromFormKey";
 
 export type ComponentGraphData = Pick<ServerResult, "graph">;
 
 export interface FetchFormDataParams {
-  /**
-   * Optional. Prefer `formKey` / `pageVertexName` so edges are built on the
-   * server — NestedExpression trees from recursive pageAttr exceed seroval's
-   * depth limit of 64 when sent as `/_server` args.
-   */
-  incoming?: NestedExpression[];
-  outgoing?: NestedExpression[];
+  /** Preferred: edges are built on the server from FormMetaData[formKey]. */
   formKey?: string;
+  /** @deprecated Prefer formKey — deep NestedExpression exceeds seroval depth 64. */
+  incoming?: NestedExpression[];
+  /** @deprecated Prefer formKey — deep NestedExpression exceeds seroval depth 64. */
+  outgoing?: NestedExpression[];
   formDataId?: Id;
   id?: Id;
   isNoPermissionCheck?: boolean;
@@ -46,22 +46,54 @@ export interface FetchFormMetaDataResult {
   data?: ServerResult;
   error?: string;
   form?: IFormMetaData;
-  /** Resolve via client `FormMetaData[formKey]` — avoids seroval depth limit on recursive pageAttr. */
+  /** Client resolves via FormMetaData[formKey] when `form` is omitted. */
   formKey?: string;
   formMetaId?: Id;
 }
 
-function resolveFetchEdges(params: FetchFormDataParams): {
-  incoming: NestedExpression[];
-  outgoing: NestedExpression[];
-} {
-  const key = params.formKey ?? params.pageVertexName;
-  if (key && FormMetaData[key]) {
-    return getEdgesFromRowsAttr(FormMetaData[key].attributes);
-  }
+function resolveFetchEdges(params: FetchFormDataParams): FormFetchEdges {
+  return (
+    resolveEdgesFromFormKey(params.formKey ?? params.pageVertexName) ?? {
+      incoming: params.incoming ?? [],
+      outgoing: params.outgoing ?? [],
+    }
+  );
+}
+
+export function canFetchFormData(options: {
+  dataId?: string;
+  skipCustomGetFormData?: boolean;
+  formMetaId?: string;
+  metaResult?: Pick<FetchFormMetaDataResult, "form" | "formKey" | "data">;
+}): boolean {
+  const { dataId, skipCustomGetFormData, formMetaId, metaResult } = options;
+  return !!(
+    dataId &&
+    dataId !== "new" &&
+    !skipCustomGetFormData &&
+    (formMetaId ||
+      metaResult?.form ||
+      metaResult?.formKey ||
+      metaResult?.data?.graph)
+  );
+}
+
+export function buildFetchFormDataParams(options: {
+  formKey?: string;
+  pageVertexName?: string;
+  formDataId?: Id;
+  dataId?: string;
+  isNoPermissionCheck?: boolean;
+  isDesignMode?: boolean;
+}): FetchFormDataParams {
   return {
-    incoming: params.incoming ?? [],
-    outgoing: params.outgoing ?? [],
+    formKey: options.formKey ?? options.pageVertexName,
+    formDataId: options.formDataId,
+    id: options.dataId === "new" ? undefined : options.dataId,
+    isNoPermissionCheck: options.isNoPermissionCheck,
+    hasRequiredPermissions: true,
+    pageVertexName: options.pageVertexName,
+    isDesignMode: options.isDesignMode,
   };
 }
 
@@ -78,9 +110,7 @@ export async function fetchFormData(
     return { createNew: true };
   }
 
-  if (
-    !(params.isNoPermissionCheck || params.hasRequiredPermissions)
-  ) {
+  if (!(params.isNoPermissionCheck || params.hasRequiredPermissions)) {
     return { error: "Missing required permissions" };
   }
 
@@ -89,11 +119,8 @@ export async function fetchFormData(
   }
 
   try {
-    const { incoming, outgoing } = resolveFetchEdges(params);
-    const formDataResult = await getFormData(params.id, {
-      incoming,
-      outgoing,
-    });
+    const edges = resolveFetchEdges(params);
+    const formDataResult = await getFormData(params.id, edges);
 
     if (formDataResult.error || !formDataResult.data?.graph) {
       return { error: `No ${params.pageVertexName} found` };
@@ -106,17 +133,11 @@ export async function fetchFormData(
       formDataResult.data,
     );
 
-    // Return only wire-safe graph slices. Full ServerResult / NestedExpression
-    // trees (Page Attr ~118 deep) hit SolidStart seroval depthLimit (64).
     const wireOptions = { isDesignMode: params.isDesignMode };
-    prepareGraphForWireTransfer(componentData?.graph, wireOptions);
-    prepareGraphForWireTransfer(formDataResult.data?.graph, wireOptions);
-    stripResultFromServerResult(formDataResult.data);
+    prepareServerResultForWire(formDataResult.data, wireOptions);
 
     return {
-      componentData: componentData?.graph
-        ? { graph: componentData.graph }
-        : undefined,
+      componentData: toComponentGraphData(componentData, wireOptions),
       data: formDataResult.data,
       formDataId: resolvedFormDataId,
     };

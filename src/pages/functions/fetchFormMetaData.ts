@@ -3,7 +3,6 @@ import type { Session } from "neo4j-driver";
 import { fetchDataFromDB } from "~/cypher/get/fetchDataFromDB";
 import { getSubdomainForRequest } from "~/cypher/session/getSessionForSubdomain";
 import { isValidResponse } from "~/lib/api/general/isValidResponse";
-import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/edge/getEdgesFromRowsAttr";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 import {
   getFormMetaDataCacheKey,
@@ -13,10 +12,10 @@ import {
 import { resolveDynamicPageUrl } from "./resolveDynamicPageUrl";
 import type { FetchFormMetaDataResult } from "./fetchPageData";
 import { fetchComponentDataFromGraphCached } from "~/server/redis/loadComponentsWithCache";
-import { prepareGraphForWireTransfer } from "~/lib/graph/fetch/graphFetchUtils";
 import {
   extractRootIdFromResult,
-  stripResultFromServerResult,
+  prepareServerResultForWire,
+  toComponentGraphData,
 } from "~/lib/graph/fetch/wirePayloadUtils";
 /**
  * L1 in-process cache of page-only metadata (no componentData).
@@ -88,14 +87,11 @@ export async function fetchFormMetaData(
 ): Promise<FetchFormMetaDataResult> {
   "use server";
   if (isDesignMode) {
-    // FormMetaData.Page nests pageAttr ~10 levels (~116 deep). SolidStart's
-    // seroval depthLimit is 64, so returning `form` aborts the /_server stream
-    // (ERR_EMPTY_RESPONSE / HTTP2 PROTOCOL_ERROR). Client resolves FormMetaData.
+    // Deep FormMetaData (Page/Component/…) exceeds seroval depth 64 over /_server.
     return { formKey: pageVertexName };
   }
   if (pageVertexName === "Function") {
-    const form = FormMetaData[pageVertexName!];
-    return { form };
+    return { form: FormMetaData.Function };
   }
 
   if (!dbSession) {
@@ -159,9 +155,10 @@ export async function fetchFormMetaData(
       },
     );
 
-    prepareGraphForWireTransfer(componentData?.graph);
-
-    return { ...pageResult, componentData };
+    return {
+      ...pageResult,
+      componentData: toComponentGraphData(componentData),
+    };
   }
 
   const resolvedUrl = url
@@ -193,9 +190,10 @@ export async function fetchFormMetaData(
     },
   );
 
-  prepareGraphForWireTransfer(componentData?.graph);
-
-  return { ...pageResult, componentData };
+  return {
+    ...pageResult,
+    componentData: toComponentGraphData(componentData),
+  };
 }
 
 async function fetchFormMetaDataFromDB(
@@ -208,8 +206,8 @@ async function fetchFormMetaDataFromDB(
   dbSession?: Session,
   subDomain?: string,
 ): Promise<FetchFormMetaDataResult> {
-  const form = FormMetaData[pageVertexName ?? "Page"] || FormMetaData.Page;
-  const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);
+  const label = pageVertexName ?? "Page";
+  const formKey = FormMetaData[label] ? label : "Page";
 
   const data = await fetchDataFromDB(
     {
@@ -218,11 +216,9 @@ async function fetchFormMetaDataFromDB(
         (formId
           ? `id:'${formId}'`
           : url
-            ? `g:'${pageVertexName ?? "Page"}[$urlFilter]'`
-            : `g:'${pageVertexName ?? "Page"}[${pageKeyName}]'`),
-      // [getGlobalStore(graph).P.url]: true,
-      incoming,
-      outgoing,
+            ? `g:'${label}[$urlFilter]'`
+            : `g:'${label}[${pageKeyName}]'`),
+      formKey,
     },
     {
       nodes: {},
@@ -238,9 +234,7 @@ async function fetchFormMetaDataFromDB(
   }
 
   const formMetaId = extractRootIdFromResult(data);
-
-  prepareGraphForWireTransfer(data.graph);
-  stripResultFromServerResult(data);
+  prepareServerResultForWire(data);
 
   if (skipComponentData) {
     return { data, formMetaId };
@@ -253,7 +247,9 @@ async function fetchFormMetaDataFromDB(
     { cacheSubDomain: subDomain || "" },
   );
 
-  prepareGraphForWireTransfer(componentData?.graph);
-
-  return { data, componentData, formMetaId };
+  return {
+    data,
+    componentData: toComponentGraphData(componentData),
+    formMetaId,
+  };
 }

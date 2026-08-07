@@ -6,6 +6,8 @@ import { createMeta } from "~/lib/graph/mutate/form/createMeta";
 import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 import {
   fetchFormData,
+  buildFetchFormDataParams,
+  canFetchFormData,
   type FetchFormDataResult,
   type FetchFormMetaDataResult,
   type FetchFormDataParams,
@@ -21,7 +23,7 @@ import {
 } from "~/lib/api/withNetworkRetry";
 import { getKnownComponentKeysFromGraph } from "~/lib/graph/fetch/getKnownComponentKeysFromGraph";
 import { isServer } from "solid-js/web";
-import { FormMetaData } from "~/lib/meta/formMetaData";
+import { resolveFormMeta } from "~/lib/meta/resolveFormMeta";
 
 interface UseMetadataOptions {
   graph: GraphInterface;
@@ -151,31 +153,25 @@ export function useMetadata(
         error?: string;
       } = { formMetaId, metaResult };
 
-      const canFetchFormData =
-        constants.dataId &&
-        constants.dataId !== "new" &&
-        !constants.getFormData &&
-        (formMetaId ||
-          metaResult.form ||
-          metaResult.formKey ||
-          metaResult.data?.graph);
+      const canFetch =
+        canFetchFormData({
+          dataId: constants.dataId,
+          skipCustomGetFormData: !!constants.getFormData,
+          formMetaId,
+          metaResult,
+        });
 
-      if (canFetchFormData) {
-        const idLocal =
-          constants.dataId === "new" ? undefined : constants.dataId;
-        // Do not send NestedExpression trees over /_server — pageAttr nesting
-        // is ~118 deep and hits SolidStart seroval depthLimit (64). Edges are
-        // resolved on the server from formKey / pageVertexName.
-        const formDataParams: FetchFormDataParams = {
-          formKey: metaResult.formKey ?? constants.pageVertexName,
-          formDataId: constants.formDataId,
-          id: idLocal,
-          isNoPermissionCheck,
-          hasRequiredPermissions: true,
-          pageVertexName: constants.pageVertexName,
-          isDesignMode: constants.isDesignMode,
-        };
-        const dataResult = await fetchFormDataQuery(formDataParams);
+      if (canFetch) {
+        const dataResult = await fetchFormDataQuery(
+          buildFetchFormDataParams({
+            formKey: metaResult.formKey ?? constants.pageVertexName,
+            pageVertexName: constants.pageVertexName,
+            formDataId: constants.formDataId,
+            dataId: constants.dataId,
+            isNoPermissionCheck,
+            isDesignMode: constants.isDesignMode,
+          }),
+        );
         return { ...result, dataResult };
       }
 
@@ -235,9 +231,7 @@ export function useMetadata(
     if (formMetaId) {
       options.setFormStore("formMetaId", formMetaId);
     }
-    const form =
-      metaResult.form ??
-      (metaResult.formKey ? FormMetaData[metaResult.formKey] : undefined);
+    const form = resolveFormMeta(metaResult);
     if (!(props.formMetaId || formMetaId || form)) {
       const constants = options.constants();
       options.setFormStore(

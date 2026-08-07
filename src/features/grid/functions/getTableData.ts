@@ -15,8 +15,6 @@ export async function getTableData(
   ignoreTables = true,
 ) {
   try {
-    // Resolve edges on the server via formKey — NestedExpression from Page/
-    // Component exceeds SolidStart seroval depthLimit (64).
     const result = await fetchDataFromDB(
       {
         expression: `g:'${tableId}[$1]'`,
