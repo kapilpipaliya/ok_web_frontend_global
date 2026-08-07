@@ -1,9 +1,8 @@
 import type { APIEvent } from "@solidjs/start/server";
 
-import { readMultipartFormData } from "vinxi/http";
-
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
+import { readMultipartFormDataFromRequest } from "~/lib/http/multipart";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
 import { saveUploadChunk } from "../functions/chunkedUpload";
@@ -26,7 +25,7 @@ export async function POST({ request }: APIEvent) {
       throw new APIError("Authentication required", 401);
     }
 
-    const data = await readMultipartFormData();
+    const data = await readMultipartFormDataFromRequest(request);
     if (!data || data.length === 0) {
       throw new APIError("No chunk data available", 400);
     }

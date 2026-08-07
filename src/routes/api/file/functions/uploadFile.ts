@@ -1,21 +1,21 @@
-import type { MultiPartData } from "h3";
 import type { Session, Transaction } from "neo4j-driver";
 
+import type { MultipartPart } from "~/lib/http/multipart";
 import { resolveUploadFolderKeyPath } from "~/lib/files/folderOrganize";
 
 import { finalizeFileUpload } from "./finalizeFileUpload";
 
-function partText(part: MultiPartData | undefined): string {
+function partText(part: MultipartPart | undefined): string {
   if (!part?.data) return "";
   return Buffer.from(part.data).toString("utf8").trim();
 }
 
-export function extractUploadFolderOptions(data: MultiPartData[]) {
+export function extractUploadFolderOptions(data: MultipartPart[]) {
   let folderId = "";
   let folderKeyPath: string[] | null = null;
   let categoryLabel = "Folder";
   let toParentEdgeType = "ParentFolder";
-  const fileParts: MultiPartData[] = [];
+  const fileParts: MultipartPart[] = [];
 
   for (const part of data) {
     if (!part) continue;
@@ -56,7 +56,7 @@ export function extractUploadFolderOptions(data: MultiPartData[]) {
 }
 
 export async function uploadFiles(
-  data: (MultiPartData & { label?: string })[],
+  data: (MultipartPart & { label?: string })[],
   subDomain: string,
   neo4jSession: Session | Transaction,
   linkUserUuid?: string | null,
@@ -121,7 +121,7 @@ export async function uploadFiles(
 }
 
 export async function uploadFilesWithFolderOptions(
-  data: MultiPartData[],
+  data: MultipartPart[],
   subDomain: string,
   neo4jSession: Session | Transaction,
   linkUserUuid?: string | null,

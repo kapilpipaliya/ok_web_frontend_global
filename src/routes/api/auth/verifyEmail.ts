@@ -1,7 +1,5 @@
 import type { APIEvent } from "@solidjs/start/server";
 
-import { getQuery } from "vinxi/http";
-
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import { ADMIN_DB_NAME } from "~/cypher/core/boltConstant";
 import { getDriver } from "~/cypher/core/driver";
@@ -17,8 +15,7 @@ export async function GET({ request }: APIEvent) {
   const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
 
   try {
-    const query = getQuery();
-    const token = query.token as string;
+    const token = new URL(request.url).searchParams.get("token") || "";
 
     if (!token) {
       throw new APIError("Invalid or missing token", 400);

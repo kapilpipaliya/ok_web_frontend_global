@@ -1,5 +1,3 @@
-import type { H3Event } from "h3";
-
 import type { FetchEvent } from "@solidjs/start/server";
 
 const BLOCK_MS = 24 * 60 * 60 * 1000;
@@ -60,21 +58,33 @@ export function blockClientIpForGitProbe24h(ip: string | undefined): void {
 
 /**
  * Drop the TCP connection without writing an HTTP response (no status line, no body).
- * Marks the request handled so H3 skips remaining middleware and the route handler.
+ * Marks the request handled so remaining middleware and the route handler are skipped.
  */
 export function terminateConnectionSilently(event: FetchEvent): void {
-  const h3Event = event.nativeEvent as H3Event;
-  h3Event._handled = true;
+  const native = event.nativeEvent as {
+    _handled?: boolean;
+    node?: {
+      req?: { socket?: { destroy?: () => void } };
+      res?: {
+        headersSent?: boolean;
+        socket?: { destroy?: () => void };
+        destroy?: () => void;
+      };
+    };
+  };
+
+  native._handled = true;
   try {
-    const { res, req } = h3Event.node;
-    if (!res.headersSent) {
-      const sock = res.socket ?? req.socket;
-      if (sock) {
+    const res = native.node?.res;
+    const req = native.node?.req;
+    if (res && !res.headersSent) {
+      const sock = res.socket ?? req?.socket;
+      if (sock?.destroy) {
         sock.destroy();
         return;
       }
     }
-    res.destroy();
+    res?.destroy?.();
   } catch {
     /* ignore */
   }

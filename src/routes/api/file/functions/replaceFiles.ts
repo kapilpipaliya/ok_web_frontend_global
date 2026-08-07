@@ -1,5 +1,6 @@
-import type { MultiPartData } from "h3";
 import type { Session } from "neo4j-driver";
+
+import type { MultipartPart } from "~/lib/http/multipart";
 
 import path from "node:path";
 
@@ -26,7 +27,7 @@ import {
 
 export async function replaceFiles(
   request: Request,
-  data: MultiPartData[],
+  data: MultipartPart[],
   neo4jSession: Session,
   subDomain: string,
   user: Vertex,

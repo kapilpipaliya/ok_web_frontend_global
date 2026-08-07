@@ -1,6 +1,5 @@
 import type { APIEvent } from "@solidjs/start/server";
-
-import { getRequestURL } from "vinxi/http";
+import { getRequestEvent } from "solid-js/web";
 
 import { getDriver } from "~/cypher/core/driver";
 import { getSubDomain } from "~/cypher/session/getSubDomain";
@@ -34,10 +33,18 @@ export async function getDBSessionForSubdomain(request?: APIEvent["request"]) {
   };
 }
 
+/**
+ * Client-facing request URL.
+ * Prefer x-forwarded-host / Host (production reverse proxies); fall back to
+ * request.url (correct in-process with nitro `devServer.runner: "self"`).
+ */
 export function getURL(request?: APIEvent["request"]): URL {
-  const url = request ? new URL(request.url) : getRequestURL();
-  if (!url) {
+  const req = request ?? getRequestEvent()?.request;
+  if (!req) {
     throw new Error("URL is missing");
   }
+
+  const url = new URL(req.url);
+
   return url;
 }

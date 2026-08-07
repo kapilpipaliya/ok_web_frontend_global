@@ -1,4 +1,4 @@
-import { getRequestURL } from "vinxi/http";
+import { getRequestEvent } from "solid-js/web";
 
 import { getDriver } from "~/cypher/core/driver";
 import { getSubDomain } from "~/cypher/session/getSubDomain";
@@ -7,7 +7,13 @@ import { getSubDomain } from "~/cypher/session/getSubDomain";
 // WIP
 export async function deleteUserAndDatabase(_userName: string) {
   "use server";
-  const host = getRequestURL().hostname;
+  const event = getRequestEvent();
+  const host = event?.request
+    ? new URL(event.request.url).hostname
+    : undefined;
+  if (!host) {
+    throw new Error("Request URL is missing");
+  }
   const subDomain = await getSubDomain(host);
 
   const dbSessionSource = (await getDriver()).session({ database: subDomain });

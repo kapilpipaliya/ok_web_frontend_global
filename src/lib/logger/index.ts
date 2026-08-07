@@ -91,7 +91,7 @@ const baseLoggerOptions: LoggerOptions = {
   },
 };
 
-// Create transport configuration
+// Create transport configuration (worker-thread transports — keep for perf)
 function createTransport() {
   if (isDevelopment) {
     // Development: Pretty print to console

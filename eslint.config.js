@@ -8,7 +8,8 @@ export default [
   {
     ignores: [
       ".output/**/*",
-      ".vinxi/**/*",
+      //".vinxi/**/*",
+      ".vite/**/*",
       "node_modules/**/*",
       "src/components/master_ui/core/**/*",
     ],

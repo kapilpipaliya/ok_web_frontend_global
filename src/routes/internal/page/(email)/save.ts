@@ -1,7 +1,5 @@
 import type { APIEvent } from "@solidjs/start/server";
 
-import { getQuery } from "vinxi/http";
-
 import { createAppState } from "~/createAppState";
 import { getEmailTemplateSchema } from "~/cypher/mutate/email/saveEmailTemplates";
 import { mutateData } from "~/cypher/mutate/mutate_data/mutateData";
@@ -13,8 +11,7 @@ import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId"
 
 // used for saving email templates for future use
 export default async function GET({ request }: APIEvent) {
-  const query = getQuery();
-  const templateName = query.templatename;
+  const templateName = new URL(request.url).searchParams.get("templatename");
   if (!templateName) {
     throw new APIError("Template name is required", 400);
   }

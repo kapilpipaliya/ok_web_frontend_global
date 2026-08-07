@@ -1,12 +1,12 @@
-import { useSession } from "vinxi/http";
+import { useSession } from "@solidjs/start/http";
 
-// import crypto from "crypto";
-// const generateSecurePassword = () => {
-//   return crypto.randomBytes(32).toString('hex');
-// };
-
+/**
+ * Cookie session for the current request.
+ * Use `@solidjs/start/http` (h3 v2) — not bare `h3` — so the event matches
+ * Nitro's nativeEvent. Calling useSession(config) lets Start inject the event.
+ */
 export function getHttpsSession() {
-  const config = {
+  return useSession({
     password:
       "971dc95829c77a687451fce0099ec9867b3c54538e5e7f2bcfbc427c5b4bfe1c",
     cookie: {
@@ -21,6 +21,5 @@ export function getHttpsSession() {
       // Client-side: Use Storage Access API (document.requestStorageAccess()) after user interaction
       // See: https://webkit.org/blog/10218/full-third-party-cookie-blocking-and-more/
     },
-  };
-  return useSession(config);
+  });
 }

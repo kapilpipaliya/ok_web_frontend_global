@@ -1,7 +1,5 @@
 import { redirect } from "@solidjs/router";
 import { createMiddleware } from "@solidjs/start/middleware";
-import type { H3Event } from "h3";
-import { csrf } from "shieldwall/start";
 
 import { checkRoutePermissionBase } from "./lib/permissions/checkRoutePermission";
 import { logger } from "./lib/logger";
@@ -16,13 +14,6 @@ import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomai
 import { getShopify } from "~/lib/shopify/shopify.server";
 import { initializeWorkersIfNeeded } from "~/server/initWorkersOnStartup";
 
-/** Skip CSRF for Shopify webhooks (they are verified by HMAC, not origin). */
-const csrfUnlessWebhooks = async (event: Parameters<typeof csrf>[0]) => {
-  const pathname = new URL(event.request.url).pathname;
-  if (pathname.startsWith("/webhooks/")) return;
-  return csrf(event);
-};
-
 // Helper to check if logging should be skipped
 const shouldSkipLogging = (pathname: string) => {
   return (
@@ -33,8 +24,15 @@ const shouldSkipLogging = (pathname: string) => {
   );
 };
 
+function getNativeRemoteAddress(event: {
+  nativeEvent?: {
+    node?: { req?: { socket?: { remoteAddress?: string } } };
+  };
+}): string | undefined {
+  return event.nativeEvent?.node?.req?.socket?.remoteAddress;
+}
+
 // https://docs.solidjs.com/solid-start/guides/security
-// https://github.com/atilafassina/shieldwall
 // Note: this authorization will not work in client side
 export default createMiddleware({
   onRequest: [
@@ -43,10 +41,9 @@ export default createMiddleware({
       if (typeof window !== "undefined") return;
 
       const url = new URL(event.request.url);
-      const h3Event = event.nativeEvent as H3Event;
       const ip = getClientIpForBlocking(
         event.request,
-        h3Event.node?.req?.socket?.remoteAddress,
+        getNativeRemoteAddress(event),
       );
 
       if (isIpPhpBlocked(ip)) {

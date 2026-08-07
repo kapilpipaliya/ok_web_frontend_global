@@ -1,14 +1,14 @@
 import type { APIEvent } from "@solidjs/start/server";
-import { readMultipartFormData } from "vinxi/http";
 import fs from "node:fs";
 import { uploadAndRestoreBackup } from "~/server/backup/backupManagement";
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
+import { readMultipartFormDataFromRequest } from "~/lib/http/multipart";
 
 export async function POST({ request }: APIEvent) {
   let tmpPath: string | null = null;
 
   try {
-    const data = await readMultipartFormData();
+    const data = await readMultipartFormDataFromRequest(request);
     if (!data || data.length === 0) {
       throw new APIError("No file data available", 400);
     }

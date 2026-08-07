@@ -1,11 +1,10 @@
 import type { APIEvent } from "@solidjs/start/server";
 
-import { readMultipartFormData } from "vinxi/http";
-
 import { checkRole } from "~/cypher/permissions/isPermission";
 import { SYSTEM_ROLES } from "~/cypher/permissions/type/types";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
+import { readMultipartFormDataFromRequest } from "~/lib/http/multipart";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
 import { replaceFiles } from "./functions/replaceFiles";
@@ -26,7 +25,7 @@ export async function PUT({ request }: APIEvent) {
       throw new APIError("Unauthorized. Admin access required.", 403);
     }
 
-    const data = await readMultipartFormData();
+    const data = await readMultipartFormDataFromRequest(request);
 
     if (!data || data.length === 0) {
       throw new APIError("No file data available", 400);
