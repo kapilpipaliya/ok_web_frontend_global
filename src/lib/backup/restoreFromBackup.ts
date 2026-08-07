@@ -9,14 +9,87 @@ import path from "path";
 import { promisify } from "util";
 import zlib from "zlib";
 import { pipeline } from "stream";
+import type { Driver } from "neo4j-driver";
 import { downloadBackupFromCloud } from "./downloadBackupFromCloud";
+import { ADMIN_DB_NAME } from "~/cypher/core/boltConstant";
 import { getDriver } from "~/cypher/core/driver";
+import { adminUserData } from "~/cypher/mutate/manage/adminUserData";
 import {
   stopWorkersForSubdomain,
   initSubdomainWorkersForSubdomain,
 } from "~/server/queue/initWorkersCore";
 
 const pipelineAsync = promisify(pipeline);
+
+/**
+ * After restoring a subdomain/shop DB, align its system admin User.uuid
+ * with the admin DB admin user so password auth / sessions still work.
+ */
+async function syncAdminUserUuidAfterRestore(
+  driver: Driver,
+  targetDatabase: string,
+): Promise<void> {
+  if (targetDatabase === ADMIN_DB_NAME) {
+    console.log("[Restore] Skipping admin UUID sync (target is admin DB)");
+    return;
+  }
+
+  const adminSession = driver.session({ database: ADMIN_DB_NAME });
+  let adminUuid: string | undefined;
+  try {
+    const result = await adminSession.run(
+      `MATCH (u:User {username: $username})
+       RETURN u.uuid AS uuid
+       LIMIT 1`,
+      { username: adminUserData.username },
+    );
+    adminUuid = result.records[0]?.get("uuid") as string | undefined;
+  } finally {
+    await adminSession.close();
+  }
+
+  if (!adminUuid) {
+    console.warn(
+      "[Restore] No admin user found in admin DB; skipping UUID sync",
+    );
+    return;
+  }
+
+  const targetSession = driver.session({ database: targetDatabase });
+  try {
+    const result = await targetSession.run(
+      `
+      MATCH (u:User {username: $username})
+      WITH u, u.uuid AS oldUuid
+      SET u.uuid = $adminUuid
+      RETURN oldUuid, u.uuid AS newUuid
+      `,
+      { username: adminUserData.username, adminUuid },
+    );
+
+    if (result.records.length === 0) {
+      console.warn(
+        `[Restore] No User with username "${adminUserData.username}" in restored DB; skipping UUID sync`,
+      );
+      return;
+    }
+
+    const oldUuid = result.records[0].get("oldUuid");
+    const newUuid = result.records[0].get("newUuid");
+    if (oldUuid === newUuid) {
+      console.log(
+        `[Restore] Admin user UUID already matches admin DB (${newUuid})`,
+      );
+      return;
+    }
+
+    console.log(
+      `[Restore] Synced admin user UUID: ${oldUuid} -> ${newUuid}`,
+    );
+  } finally {
+    await targetSession.close();
+  }
+}
 
 export interface RestoreFromBackupOptions {
   filename: string;
@@ -121,7 +194,7 @@ export async function restoreFromBackup(
 
     // Step 2: Download backup from cloud storage (skip if local file)
     if (isLocalFile) {
-      console.log(`[Restore] Step 1/6: Using local file: ${compressedPath}`);
+      console.log(`[Restore] Step 1/7: Using local file: ${compressedPath}`);
 
       // Verify the local file exists
       if (!fs.existsSync(compressedPath)) {
@@ -134,7 +207,7 @@ export async function restoreFromBackup(
       );
     } else {
       console.log(
-        "[Restore] Step 1/6: Downloading backup from cloud storage...",
+        "[Restore] Step 1/7: Downloading backup from cloud storage...",
       );
 
       const downloadResult = await downloadBackupFromCloud({
@@ -155,7 +228,7 @@ export async function restoreFromBackup(
     }
 
     // Step 3: Decompress backup file
-    console.log("[Restore] Step 2/6: Decompressing backup file...");
+    console.log("[Restore] Step 2/7: Decompressing backup file...");
 
     await pipelineAsync(
       fs.createReadStream(compressedPath),
@@ -170,7 +243,7 @@ export async function restoreFromBackup(
 
     // Step 4: Stop workers for target database
     console.log(
-      `[Restore] Step 3/6: Stopping workers for database: ${restoreToDatabase}...`,
+      `[Restore] Step 3/7: Stopping workers for database: ${restoreToDatabase}...`,
     );
 
     try {
@@ -184,7 +257,7 @@ export async function restoreFromBackup(
 
     // Step 5: Drop and recreate database
     console.log(
-      `[Restore] Step 4/6: Dropping existing database: ${restoreToDatabase}...`,
+      `[Restore] Step 4/7: Dropping existing database: ${restoreToDatabase}...`,
     );
 
     // CRITICAL: This deletes all data in the target database
@@ -214,7 +287,7 @@ export async function restoreFromBackup(
     }
 
     // Step 6: Restore data from backup using APOC
-    console.log("[Restore] Step 5/6: Restoring data from backup using APOC...");
+    console.log("[Restore] Step 5/7: Restoring data from backup using APOC...");
 
     // Copy decompressed file to Neo4j import directory for APOC to access
     const neo4jImportDir =
@@ -288,9 +361,15 @@ export async function restoreFromBackup(
       await targetSession.close();
     }
 
+    // Step 6: Sync restored admin User.uuid to local admin DB admin user
+    console.log(
+      "[Restore] Step 6/7: Syncing admin user UUID with admin database...",
+    );
+    await syncAdminUserUuidAfterRestore(driver, restoreToDatabase);
+
     // Step 7: Restart workers
     console.log(
-      `[Restore] Step 6/6: Restarting workers for database: ${restoreToDatabase}...`,
+      `[Restore] Step 7/7: Restarting workers for database: ${restoreToDatabase}...`,
     );
 
     try {
