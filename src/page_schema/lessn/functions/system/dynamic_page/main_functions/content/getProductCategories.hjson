@@ -29,6 +29,7 @@ const configResult = await s({
 
 let parentVertexLabel = DEFAULT_PARENT_VERTEX_LABEL;
 let toParentEdgeType = DEFAULT_TO_PARENT_EDGE_TYPE;
+let imageRelationshipType = "ProductCategoryImage";
 let publicReadOk = true;
 
 if (configResult?.result?.success) {
@@ -74,6 +75,9 @@ if (configResult?.result?.success) {
   if (sidebar.toParentEdgeType) {
     toParentEdgeType = String(sidebar.toParentEdgeType).trim() || toParentEdgeType;
   }
+  if (sidebar.imageRelationshipType != null && String(sidebar.imageRelationshipType).trim() !== "") {
+    imageRelationshipType = String(sidebar.imageRelationshipType).trim();
+  }
 }
 
 if (!publicReadOk) {
@@ -100,6 +104,49 @@ const allEdgesResult = await _.session.run(
   `
 );
 _.processResult(allEdgesResult.records, _.context, ["child", "parent"], "r");
+
+const imageUrlByCategoryId = {};
+try {
+  const imageResult = await _.session.run(
+    `
+    MATCH (v:${parentVertexLabel})-[r:${imageRelationshipType}]->(file:File)
+    RETURN v, r, file
+    `
+  );
+  _.processResult(imageResult.records, _.context, ["v", "file"], "r");
+  const graphNodes = _.context.nodes || {};
+  for (const id of Object.keys(graphNodes)) {
+    const node = graphNodes[id];
+    if (!node?.L?.includes(parentVertexLabel)) continue;
+    const outEdgeIds = node.OUT?.[imageRelationshipType] || [];
+    for (const edgeId of outEdgeIds) {
+      const edge = _.context.relationships?.[edgeId];
+      const fileId = edge?.E;
+      const fileVertex = fileId ? graphNodes[fileId] : null;
+      const payload = _.buildPublicImagePayload(fileVertex?.P, {
+        preferredVariant: "thumb"
+      });
+      let url = payload?.url || "";
+      // Thumbnails are always generated — fall back to thumb URL when status not ready yet
+      if (!url) {
+        const fileName =
+          fileVertex?.P?.fileName != null
+            ? String(fileVertex.P.fileName).trim()
+            : "";
+        if (fileName) {
+          url =
+            `/api/file/download/${encodeURIComponent(fileName)}?variant=thumb`;
+        }
+      }
+      if (url) {
+        imageUrlByCategoryId[String(id)] = url;
+        break;
+      }
+    }
+  }
+} catch (imageError) {
+  console.warn("getProductCategories image load failed:", imageError);
+}
 
 const nodes = _.context.nodes || {};
 const sortCategories = (a, b) => {
@@ -131,6 +178,7 @@ const buildTreeNode = (vertex) => {
     key: vertex.P?.key != null ? String(vertex.P.key) : "",
     name: vertex.P?.name || vertex.P?.key || "Category",
     displayOrder: vertex.P?.displayOrder ?? 0,
+    imageUrl: imageUrlByCategoryId[String(vertex.id)] || "",
     children: children.map((child) => buildTreeNode(child)).filter(Boolean)
   };
 };

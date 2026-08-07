@@ -5,7 +5,7 @@
       L: Component
       P: {
         isNoPermissionCheck: true
-        description: SSR-safe nested menu. All items render in HTML; Floating UI positions on open. Props: items[{id,text,href,children|submenu}], depth, layout, controller, placements, closeDelay, isActive, onItemClick, colors.
+        description: SSR-safe nested menu. All items render in HTML; Floating UI positions on open. Props: items[{id,text,href,imageUrl,children|submenu}], depth, layout, controller, placements, closeDelay, isActive, onItemClick, colors.
         fns:
           '''
 const props = () => c.props || {};
@@ -545,7 +545,7 @@ return `._id {
   flex-direction: column;
   min-width: 220px;
   max-width: min(90vw, 320px);
-  padding: 0.25rem 0;
+  padding: 0;
   -webkit-tap-highlight-color: transparent;
 }`;'''
         displayOrder: 1
@@ -631,6 +631,14 @@ const color = f.getTriggerColor();
 const hoverBg = f.getHoverBackground();
 const activeBorder = f.getActiveBorderColor();
 const isBar = layout === "bar";
+const imageUrl =
+  item?.imageUrl != null && String(item.imageUrl).trim() !== ""
+    ? String(item.imageUrl).trim()
+    : "";
+const safeImageUrl = imageUrl
+  .replace(/\\/g, "\\\\")
+  .replace(/"/g, '\\"');
+const hasImage = !isBar && !!safeImageUrl;
 
 return `._id {
   display: ${isBar ? "inline-flex" : "flex"};
@@ -639,26 +647,80 @@ return `._id {
   gap: 0.35rem;
   width: ${isBar ? "auto" : "100%"};
   box-sizing: border-box;
-  padding: ${isBar ? "0.5rem 0.65rem" : "0.75rem 1.25rem"};
-  min-height: ${isBar ? "auto" : "2.75rem"};
-  color: ${color};
+  padding: ${isBar ? "0.5rem 0.65rem" : hasImage ? "1rem 1.25rem" : "0.75rem 1.25rem"};
+  min-height: ${isBar ? "auto" : hasImage ? "4.5rem" : "2.75rem"};
+  color: ${hasImage ? "#fff" : color};
   text-decoration: none;
-  font-weight: 500;
+  font-weight: ${hasImage ? "600" : "500"};
   font-size: ${isBar ? "0.95rem" : "inherit"};
   font-family: inherit;
-  background: ${isBranchOpen ? hoverBg : "none"};
+  background: ${
+    hasImage
+      ? `center / cover no-repeat url("${safeImageUrl}")`
+      : isBranchOpen
+        ? hoverBg
+        : "none"
+  };
   border: none;
   cursor: pointer;
   text-align: left;
   white-space: nowrap;
   position: relative;
-  transition: background 0.2s ease;
+  overflow: hidden;
+  isolation: isolate;
+  transition: background 0.2s ease, filter 0.2s ease;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
+  text-shadow: ${hasImage ? "0 1px 2px rgba(0, 0, 0, 0.55)" : "none"};
+
+  ${
+    hasImage
+      ? `
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.62) 0%,
+      rgba(0, 0, 0, 0.35) 55%,
+      rgba(0, 0, 0, 0.2) 100%
+    );
+    pointer-events: none;
+  }
+
+  & > * {
+    position: relative;
+    z-index: 1;
+  }
+  `
+      : ""
+  }
 
   &:hover {
-    background: ${hoverBg};
+    background: ${
+      hasImage
+        ? `center / cover no-repeat url("${safeImageUrl}")`
+        : hoverBg
+    };
+    ${hasImage ? "filter: brightness(1.08);" : ""}
+  }
+
+  ${
+    hasImage
+      ? `
+  &:hover::before {
+    background: linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.7) 0%,
+      rgba(0, 0, 0, 0.42) 55%,
+      rgba(0, 0, 0, 0.28) 100%
+    );
+  }
+  `
+      : ""
   }
 
   &:focus-visible {
@@ -683,12 +745,21 @@ return `._id {
   }
 
   ${
-    isActive && !isBar
+    isActive && !isBar && !hasImage
       ? `
     background: ${isBranchOpen ? hoverBg : "rgba(0, 0, 0, 0.03)"};
     font-weight: 600;
     border-left: 2px solid ${activeBorder};
     padding-left: calc(1.25rem - 2px);
+  `
+      : ""
+  }
+
+  ${
+    isActive && !isBar && hasImage
+      ? `
+    font-weight: 700;
+    box-shadow: inset 3px 0 0 ${activeBorder};
   `
       : ""
   }
@@ -701,8 +772,8 @@ return `._id {
       font-size: 0.85rem;
     `
         : `
-      min-height: 3rem;
-      padding: 0.85rem 1.25rem;
+      min-height: ${hasImage ? "4.25rem" : "3rem"};
+      padding: ${hasImage ? "0.95rem 1.25rem" : "0.85rem 1.25rem"};
     `
     }
   }

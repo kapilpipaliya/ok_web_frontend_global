@@ -259,6 +259,7 @@ const categoryToMenuItem = (category) => {
     id: category.id || key || category.name,
     text: category.name || key || "Category",
     href: key ? `/products/${encodeURIComponent(key)}` : "/products",
+    imageUrl: category.imageUrl || "",
     children: childNodes.length > 0 ? childNodes : undefined
   };
 };
