@@ -17,6 +17,7 @@ import { initClusterCommunication } from "~/server/cluster/clusterCommunication"
 // (Vinxi dev mode creates multiple module instances in separate contexts)
 declare global {
   var __workerInitPromise: Promise<void> | undefined;
+  var __eagerWorkerInitScheduled: boolean | undefined;
 }
 
 // Initialize global if not exists
@@ -88,3 +89,23 @@ export async function initializeWorkersIfNeeded() {
 
   return global.__workerInitPromise;
 }
+
+/**
+ * Start BullMQ/cluster init as soon as this module loads in production.
+ * Without this, only the first process that receives HTTP (often sticky keep-alive
+ * from LiteSpeed) ever warms up; other cluster workers stay idle.
+ */
+export function scheduleEagerWorkerInit() {
+  if (typeof window !== "undefined") return;
+  if (process.env.NODE_ENV !== "production") return;
+  if (global.__eagerWorkerInitScheduled) return;
+  global.__eagerWorkerInitScheduled = true;
+
+  setImmediate(() => {
+    void initializeWorkersIfNeeded().catch((error) => {
+      console.error("[Server] Eager worker init failed:", error);
+    });
+  });
+}
+
+scheduleEagerWorkerInit();

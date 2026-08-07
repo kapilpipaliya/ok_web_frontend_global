@@ -473,6 +473,34 @@ export async function initAllSubdomainWorkers() {
   }
 }
 
+const WORKER_STOP_TIMEOUT_MS = 8_000;
+
+async function stopWorkerWithTimeout(
+  workerName: string,
+  subdomainKey: string,
+  worker: { stop: (force?: boolean) => Promise<void> },
+) {
+  console.log(
+    `[Workers] Stopping worker: ${workerName} (subdomain: ${subdomainKey})`,
+  );
+  try {
+    await Promise.race([
+      worker.stop(true),
+      new Promise<never>((_, reject) => {
+        setTimeout(() => {
+          reject(
+            new Error(
+              `Timed out stopping ${workerName} after ${WORKER_STOP_TIMEOUT_MS}ms`,
+            ),
+          );
+        }, WORKER_STOP_TIMEOUT_MS);
+      }),
+    ]);
+  } catch (error) {
+    console.error(`[Workers] Error stopping ${workerName}:`, error);
+  }
+}
+
 /**
  * Close all workers for all subdomains (for graceful shutdown)
  */
@@ -484,14 +512,7 @@ export async function closeAllWorkersForShutdown() {
   ] of workerState.activeWorkers.entries()) {
     console.log(`[Workers] Stopping workers for subdomain: ${subdomainKey}`);
     for (const [workerName, worker] of subdomainWorkers.entries()) {
-      try {
-        console.log(
-          `[Workers] Stopping worker: ${workerName} (subdomain: ${subdomainKey})`,
-        );
-        await worker.stop();
-      } catch (error) {
-        console.error(`[Workers] Error stopping ${workerName}:`, error);
-      }
+      await stopWorkerWithTimeout(workerName, subdomainKey, worker);
     }
   }
   workerState.activeWorkers.clear();

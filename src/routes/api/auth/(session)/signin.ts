@@ -25,8 +25,11 @@ export async function POST({ request }: APIEvent) {
 
   const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
 
+  // Parse once — re-reading request.json() in catch hangs (body stream already consumed).
+  let emailForLog = "unknown";
   try {
     const { email, password } = await request.json();
+    emailForLog = email || "unknown";
 
     if (!(email && password)) {
       throw new APIError("Email or password is missing", 400);
@@ -82,13 +85,10 @@ export async function POST({ request }: APIEvent) {
       result: user,
     };
   } catch (error) {
-    // Log failed authentication attempt
-    const { email } = await request.json().catch(() => ({ email: "unknown" }));
-
     logger.logAuth({
       action: "signin",
       success: false,
-      email,
+      email: emailForLog,
       reason: error instanceof APIError ? error.message : "Unknown error",
     });
 
