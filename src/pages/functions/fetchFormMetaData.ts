@@ -18,8 +18,6 @@ import {
   extractRootIdFromResult,
   stripResultFromServerResult,
 } from "~/lib/graph/fetch/wirePayloadUtils";
-import { stripVertexAdjacency } from "~/lib/graph/transfer/stripVertexAdjacency";
-
 /**
  * L1 in-process cache of page-only metadata (no componentData).
  * Components live in a separate per-key cache — see componentCache.ts.
@@ -90,9 +88,10 @@ export async function fetchFormMetaData(
 ): Promise<FetchFormMetaDataResult> {
   "use server";
   if (isDesignMode) {
-    const form = FormMetaData[pageVertexName!];
-    // can't return form, if it contins functions
-    return { form };
+    // FormMetaData.Page nests pageAttr ~10 levels (~116 deep). SolidStart's
+    // seroval depthLimit is 64, so returning `form` aborts the /_server stream
+    // (ERR_EMPTY_RESPONSE / HTTP2 PROTOCOL_ERROR). Client resolves FormMetaData.
+    return { formKey: pageVertexName };
   }
   if (pageVertexName === "Function") {
     const form = FormMetaData[pageVertexName!];
@@ -241,7 +240,6 @@ async function fetchFormMetaDataFromDB(
   const formMetaId = extractRootIdFromResult(data);
 
   prepareGraphForWireTransfer(data.graph);
-  stripVertexAdjacency(data.graph);
   stripResultFromServerResult(data);
 
   if (skipComponentData) {

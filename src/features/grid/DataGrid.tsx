@@ -26,7 +26,6 @@ import { getErrorMessage } from "~/lib/api/general/getErrorMessage";
 import { isValidResponse } from "~/lib/api/general/isValidResponse";
 import { saveUserSetting } from "~/lib/api/saveUserSetting";
 import { isObject } from "~/lib/data_structure/object/isObject";
-import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/edge/getEdgesFromRowsAttr";
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
 import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 import { FormMetaData } from "~/lib/meta/formMetaData";
@@ -219,12 +218,10 @@ export function DataGrid(props: Readonly<DataGridProps>) {
         return { error: `No attributes defined for form ${props.tableId}` };
       }
 
-      const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);
       const data = await fetchDataFromDB({
         expression: `g:'Page[${props.tableId}]'`,
         [getGlobalStore(graph).P.url]: true,
-        incoming,
-        outgoing,
+        formKey: "Page",
       });
 
       if (!isValidResponse(data) || data.result.length === 0) {

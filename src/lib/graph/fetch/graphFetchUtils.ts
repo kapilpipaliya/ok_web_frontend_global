@@ -124,6 +124,8 @@ export function prepareGraphForWireTransfer(
     stripDesignerAttrProperties(graph);
     compactAttrCodeStrings(graph);
   }
+
+  stripVertexAdjacency(graph);
 }
 
 export function mergeGraphs(results: ServerResult[]): ServerResult | undefined {

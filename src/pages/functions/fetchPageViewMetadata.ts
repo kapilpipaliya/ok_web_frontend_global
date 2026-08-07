@@ -4,7 +4,6 @@ import {
   type FetchFormMetaDataResult,
 } from "./fetchPageData";
 import { fetchFormMetaData } from "./fetchFormMetaData";
-import { resolveFormFetchEdges } from "~/lib/graph/fetch/resolveFormFetchEdges";
 
 export interface FetchPageViewMetadataParams {
   pageVertexName?: string;
@@ -64,22 +63,21 @@ export async function fetchPageViewMetadata(
   const canFetchFormData =
     params.dataId &&
     params.dataId !== "new" &&
-    (formMetaId || metaResult.form || metaResult.data?.graph);
+    (formMetaId ||
+      metaResult.form ||
+      metaResult.formKey ||
+      metaResult.data?.graph);
 
   if (canFetchFormData) {
-    const { incoming, outgoing } = resolveFormFetchEdges(
-      metaResult,
-      formMetaId ?? params.dataId!,
-    );
-    const dataResult = await fetchFormData(
-      { incoming, outgoing },
-      params.formDataId,
-      params.dataId,
+    const dataResult = await fetchFormData({
+      formKey: metaResult.formKey ?? params.pageVertexName,
+      formDataId: params.formDataId,
+      id: params.dataId,
       isNoPermissionCheck,
-      true,
-      params.pageVertexName,
-      params.isDesignMode,
-    );
+      hasRequiredPermissions: true,
+      pageVertexName: params.pageVertexName,
+      isDesignMode: params.isDesignMode,
+    });
     result.dataResult = dataResult;
   }
 

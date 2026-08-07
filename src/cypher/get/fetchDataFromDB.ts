@@ -12,6 +12,8 @@ import { getDriver } from "~/cypher/core/driver";
 import { getDBSessionForSubdomain } from "../session/getSessionForSubdomain";
 import type { Edge } from "~/lib/graph/type/edge";
 import type { Vertex } from "~/lib/graph/type/vertex";
+import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/edge/getEdgesFromRowsAttr";
+import { FormMetaData } from "~/lib/meta/formMetaData";
 
 /**
  * Fetch data from Neo4j database using expressions
@@ -34,6 +36,24 @@ import type { Vertex } from "~/lib/graph/type/vertex";
  * @param _permissionCheck - Whether to check permissions (currently disabled)
  * @returns ServerResult with graph data and query results
  */
+function resolveExpressionEdges(
+  expression: NestedExpression,
+): NestedExpression {
+  const key = expression.formKey;
+  if (!key || !FormMetaData[key]) {
+    return expression;
+  }
+  const { incoming, outgoing } = getEdgesFromRowsAttr(
+    FormMetaData[key].attributes,
+    expression.ignoreTables === true,
+  );
+  return {
+    ...expression,
+    incoming,
+    outgoing,
+  };
+}
+
 export async function fetchDataFromDB(
   expression: NestedExpression,
   context: EvalExpressionContext & {
@@ -46,6 +66,9 @@ export async function fetchDataFromDB(
   _permissionCheck = true,
 ): Promise<ServerResult> {
   "use server";
+
+  // Prefer formKey: Page/Component NestedExpression exceeds seroval depth 64 on the wire.
+  expression = resolveExpressionEdges(expression);
 
   // Session lifecycle tracking
   // IMPORTANT: Session must be explicitly closed to prevent leaks

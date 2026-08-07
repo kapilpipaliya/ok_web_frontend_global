@@ -26,7 +26,16 @@ export default defineConfig({
       middleware: "./src/middleware.ts",
     }),
     nitro(),
-    mkcert(),
+    mkcert({
+      // Custom *.localhost.com subdomains are not in mkcert defaults (localhost + IPs).
+      hosts: [
+        "localhost",
+        "localhost.com",
+        "*.localhost.com",
+        "lessn.localhost.com",
+        "admin.localhost.com",
+      ],
+    }),
   ],
   resolve: {
     noExternal: [...SERVER_NO_EXTERNAL],

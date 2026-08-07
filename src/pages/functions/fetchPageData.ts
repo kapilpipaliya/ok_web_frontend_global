@@ -10,13 +10,26 @@ import {
   extractRootIdFromResult,
   stripResultFromServerResult,
 } from "~/lib/graph/fetch/wirePayloadUtils";
-import { stripVertexAdjacency } from "~/lib/graph/transfer/stripVertexAdjacency";
+import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/edge/getEdgesFromRowsAttr";
+import { FormMetaData } from "~/lib/meta/formMetaData";
 
 export type ComponentGraphData = Pick<ServerResult, "graph">;
 
 export interface FetchFormDataParams {
-  incoming: NestedExpression[];
-  outgoing: NestedExpression[];
+  /**
+   * Optional. Prefer `formKey` / `pageVertexName` so edges are built on the
+   * server — NestedExpression trees from recursive pageAttr exceed seroval's
+   * depth limit of 64 when sent as `/_server` args.
+   */
+  incoming?: NestedExpression[];
+  outgoing?: NestedExpression[];
+  formKey?: string;
+  formDataId?: Id;
+  id?: Id;
+  isNoPermissionCheck?: boolean;
+  hasRequiredPermissions?: boolean;
+  pageVertexName?: string;
+  isDesignMode?: boolean;
 }
 
 export interface FetchFormDataResult {
@@ -33,58 +46,77 @@ export interface FetchFormMetaDataResult {
   data?: ServerResult;
   error?: string;
   form?: IFormMetaData;
+  /** Resolve via client `FormMetaData[formKey]` — avoids seroval depth limit on recursive pageAttr. */
+  formKey?: string;
   formMetaId?: Id;
 }
 
+function resolveFetchEdges(params: FetchFormDataParams): {
+  incoming: NestedExpression[];
+  outgoing: NestedExpression[];
+} {
+  const key = params.formKey ?? params.pageVertexName;
+  if (key && FormMetaData[key]) {
+    return getEdgesFromRowsAttr(FormMetaData[key].attributes);
+  }
+  return {
+    incoming: params.incoming ?? [],
+    outgoing: params.outgoing ?? [],
+  };
+}
+
 export async function fetchFormData(
-  edges: FetchFormDataParams,
-  formDataId?: Id,
-  id?: Id,
-  isNoPermissionCheck?: boolean,
-  hasRequiredPermissions?: boolean,
-  pageVertexName?: string,
-  isDesignMode?: boolean,
+  params: FetchFormDataParams,
 ): Promise<FetchFormDataResult> {
-  // adding use server, is passing function in response when Component tab is opened, and it breaks the SSR.
-  // "use server";
-  if (formDataId) {
-    return { formDataIdOverride: formDataId };
+  "use server";
+
+  if (params.formDataId) {
+    return { formDataIdOverride: params.formDataId };
   }
 
-  if (!id) {
+  if (!params.id) {
     return { createNew: true };
   }
 
-  if (!(id && (isNoPermissionCheck || hasRequiredPermissions))) {
+  if (
+    !(params.isNoPermissionCheck || params.hasRequiredPermissions)
+  ) {
     return { error: "Missing required permissions" };
   }
 
-  if (id && id.startsWith("-")) {
-    return { formDataId: id };
+  if (params.id.startsWith("-")) {
+    return { formDataId: params.id };
   }
 
   try {
-    const formDataResult = await getFormData(id, edges);
+    const { incoming, outgoing } = resolveFetchEdges(params);
+    const formDataResult = await getFormData(params.id, {
+      incoming,
+      outgoing,
+    });
 
     if (formDataResult.error || !formDataResult.data?.graph) {
-      return { error: `No ${pageVertexName} found` };
+      return { error: `No ${params.pageVertexName} found` };
     }
 
     const resolvedFormDataId =
-      extractRootIdFromResult(formDataResult.data) ?? id;
+      extractRootIdFromResult(formDataResult.data) ?? params.id;
 
     const componentData = await fetchComponentDataFromGraph(
       formDataResult.data,
     );
 
-    const wireOptions = { isDesignMode };
+    // Return only wire-safe graph slices. Full ServerResult / NestedExpression
+    // trees (Page Attr ~118 deep) hit SolidStart seroval depthLimit (64).
+    const wireOptions = { isDesignMode: params.isDesignMode };
     prepareGraphForWireTransfer(componentData?.graph, wireOptions);
     prepareGraphForWireTransfer(formDataResult.data?.graph, wireOptions);
-    stripVertexAdjacency(formDataResult.data?.graph);
     stripResultFromServerResult(formDataResult.data);
 
     return {
-      componentData,
+      componentData: componentData?.graph
+        ? { graph: componentData.graph }
+        : undefined,
       data: formDataResult.data,
       formDataId: resolvedFormDataId,
     };

@@ -5,9 +5,10 @@ import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/edge/getEdgesFromRows
 import { restoreVertexAdjacencyFromEdges } from "~/lib/graph/transfer/restoreVertexAdjacencyFromEdges";
 import type { FetchFormMetaDataResult } from "~/pages/functions/fetchPageData";
 import type { Id } from "~/lib/graph/type/id";
+import { FormMetaData } from "~/lib/meta/formMetaData";
 
 export function resolveFormFetchEdges(
-  metaResult: Pick<FetchFormMetaDataResult, "data" | "form">,
+  metaResult: Pick<FetchFormMetaDataResult, "data" | "form" | "formKey">,
   formMetaId: Id,
   graph?: GraphInterface,
 ): {
@@ -16,6 +17,10 @@ export function resolveFormFetchEdges(
 } {
   if (metaResult.form) {
     return getEdgesFromRowsAttr(metaResult.form.attributes);
+  }
+
+  if (metaResult.formKey && FormMetaData[metaResult.formKey]) {
+    return getEdgesFromRowsAttr(FormMetaData[metaResult.formKey].attributes);
   }
 
   if (graph?.vertexes[formMetaId]) {

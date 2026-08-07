@@ -3,7 +3,6 @@ import type { Store } from "solid-js/store";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { fetchDataFromDB } from "~/cypher/get/fetchDataFromDB";
-import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/edge/getEdgesFromRowsAttr";
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
@@ -16,17 +15,14 @@ export async function getTableData(
   ignoreTables = true,
 ) {
   try {
-    const { incoming, outgoing } = getEdgesFromRowsAttr(
-      form.attributes,
-      ignoreTables,
-    );
-
+    // Resolve edges on the server via formKey — NestedExpression from Page/
+    // Component exceeds SolidStart seroval depthLimit (64).
     const result = await fetchDataFromDB(
       {
         expression: `g:'${tableId}[$1]'`,
         [getGlobalStore(graph).P.url]: true,
-        incoming,
-        outgoing,
+        formKey: form.key ?? tableId,
+        ignoreTables,
       },
       {
         $1: {

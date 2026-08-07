@@ -4,17 +4,16 @@ import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 import { PageDesignerLabels } from "~/features/page_designer/constants/PageDesignerLabels";
 import { createMeta } from "~/lib/graph/mutate/form/createMeta";
 import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
-import { resolveFormFetchEdges } from "~/lib/graph/fetch/resolveFormFetchEdges";
 import {
   fetchFormData,
   type FetchFormDataResult,
   type FetchFormMetaDataResult,
+  type FetchFormDataParams,
 } from "../functions/fetchPageData";
 import { fetchFormMetaData } from "../functions/fetchFormMetaData";
 import type { PageViewConstants, PageViewWrapperProps } from "./types";
 import type { PreviewStoreObject } from "~/features/page_designer/context/PreviewContext";
 import type { SetStoreFunction } from "solid-js/store";
-import type { NestedExpression } from "~/cypher/types/NestedExpression";
 import type { ServerResult } from "~/cypher/types/ServerResult";
 import {
   toUserFacingNetworkMessage,
@@ -22,6 +21,7 @@ import {
 } from "~/lib/api/withNetworkRetry";
 import { getKnownComponentKeysFromGraph } from "~/lib/graph/fetch/getKnownComponentKeysFromGraph";
 import { isServer } from "solid-js/web";
+import { FormMetaData } from "~/lib/meta/formMetaData";
 
 interface UseMetadataOptions {
   graph: GraphInterface;
@@ -41,17 +41,6 @@ interface FetchFormMetaDataParams {
   url?: string;
   /** Component keys already in the client graph (post-hydration). */
   knownComponentKeys?: string[];
-}
-
-interface FetchFormDataParams {
-  incoming: NestedExpression[];
-  outgoing: NestedExpression[];
-  formDataId?: string;
-  id?: string;
-  isNoPermissionCheck?: boolean;
-  hasRequiredPermissions?: boolean;
-  pageVertexName?: string;
-  isDesignMode?: boolean;
 }
 
 const fetchFormMetaDataQuery = query(
@@ -86,17 +75,7 @@ const fetchFormMetaDataQuery = query(
 
 const fetchFormDataQuery = query(async (params: FetchFormDataParams) => {
   try {
-    return await withNetworkRetry(() =>
-      fetchFormData(
-        { incoming: params.incoming, outgoing: params.outgoing },
-        params.formDataId,
-        params.id,
-        params.isNoPermissionCheck,
-        params.hasRequiredPermissions,
-        params.pageVertexName,
-        params.isDesignMode,
-      ),
-    );
+    return await withNetworkRetry(() => fetchFormData(params));
   } catch (error) {
     return { error: toUserFacingNetworkMessage(error) };
   }
@@ -176,19 +155,19 @@ export function useMetadata(
         constants.dataId &&
         constants.dataId !== "new" &&
         !constants.getFormData &&
-        (formMetaId || metaResult.form || metaResult.data?.graph);
+        (formMetaId ||
+          metaResult.form ||
+          metaResult.formKey ||
+          metaResult.data?.graph);
 
       if (canFetchFormData) {
-        const { incoming, outgoing } = resolveFormFetchEdges(
-          metaResult,
-          formMetaId ?? constants.dataId!,
-          options.graph,
-        );
         const idLocal =
           constants.dataId === "new" ? undefined : constants.dataId;
+        // Do not send NestedExpression trees over /_server — pageAttr nesting
+        // is ~118 deep and hits SolidStart seroval depthLimit (64). Edges are
+        // resolved on the server from formKey / pageVertexName.
         const formDataParams: FetchFormDataParams = {
-          incoming,
-          outgoing,
+          formKey: metaResult.formKey ?? constants.pageVertexName,
           formDataId: constants.formDataId,
           id: idLocal,
           isNoPermissionCheck,
@@ -256,7 +235,9 @@ export function useMetadata(
     if (formMetaId) {
       options.setFormStore("formMetaId", formMetaId);
     }
-    const form = metaResult.form;
+    const form =
+      metaResult.form ??
+      (metaResult.formKey ? FormMetaData[metaResult.formKey] : undefined);
     if (!(props.formMetaId || formMetaId || form)) {
       const constants = options.constants();
       options.setFormStore(
