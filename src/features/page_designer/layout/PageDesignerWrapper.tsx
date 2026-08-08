@@ -257,11 +257,6 @@ export function PageDesignerWrapper(): JSX.Element {
       },
     );
 
-    // Log for debugging - can be removed later
-    if (openedFormIds.length > 1) {
-      console.log("Loaded tabs:", openedFormIds.length, openedFormIds);
-    }
-
     if (dbPromise) {
       // Get stored layout properties
       const db = await dbPromise;

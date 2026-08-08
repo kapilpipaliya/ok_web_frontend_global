@@ -8,17 +8,8 @@ interface ModelNode {
 // Interface for OpenRouter API response
 interface OpenRouterModelsResponse {
   data: Array<{
-    slug?: string;
+    id?: string;
     name?: string;
-    short_name?: string;
-    endpoint?: {
-      provider_info?: {
-        group?: string;
-        name?: string;
-        displayName?: string;
-        slug?: string;
-      };
-    };
   }>;
 }
 
@@ -29,7 +20,7 @@ let modelsCache: {
 } | null = null;
 
 /**
- * Builds a tree structure from models data grouped by provider group
+ * Builds a tree structure from models data grouped by provider
  */
 function buildModelsTree(data: OpenRouterModelsResponse): ModelNode {
   // Create root node
@@ -39,53 +30,52 @@ function buildModelsTree(data: OpenRouterModelsResponse): ModelNode {
     children: [],
   };
 
-  // Map to group providers by their group
+  // Map to group models by provider (id prefix before "/")
   const groupMap: Record<string, ModelNode[]> = {};
 
   // Process each model in the data
   if (data.data && Array.isArray(data.data)) {
     for (const item of data.data) {
-      if (item.endpoint?.provider_info) {
-        const provider = item.endpoint.provider_info;
-        const group = provider.group || "Other";
+      const modelId = item.id || "";
+      if (!modelId) {
+        continue;
+      }
 
-        // Initialize group if not exists
-        if (!groupMap[group]) {
-          groupMap[group] = [];
+      const slashIndex = modelId.indexOf("/");
+      const group =
+        slashIndex > 0 ? modelId.slice(0, slashIndex) : "Other";
+      const modelLabel = item.name || modelId;
+
+      if (!groupMap[group]) {
+        groupMap[group] = [];
+      }
+
+      // Check if model already exists in this group
+      let exists = false;
+      for (const m of groupMap[group]) {
+        if (m.id === modelId) {
+          exists = true;
+          break;
         }
+      }
 
-        // Create model node
-        const modelId = item.slug || "";
-        const modelLabel = item.name || item.short_name || modelId;
-
-        // Skip if no valid ID
-        if (!modelId) {
-          continue;
-        }
-
-        // Check if model already exists in this group
-        let exists = false;
-        for (const m of groupMap[group]) {
-          if (m.id === modelId) {
-            exists = true;
-            break;
-          }
-        }
-
-        // Add model to group if not already added
-        if (!exists) {
-          groupMap[group].push({
-            id: modelId,
-            label: modelLabel,
-          });
-        }
+      if (!exists) {
+        groupMap[group].push({
+          id: modelId,
+          label: modelLabel,
+        });
       }
     }
   }
 
-  // Add groups to tree
-  for (const groupName in groupMap) {
-    const models = groupMap[groupName];
+  // Add groups to tree (sorted by label for stable UI)
+  const groupNames = Object.keys(groupMap).sort((a, b) =>
+    a.localeCompare(b),
+  );
+  for (const groupName of groupNames) {
+    const models = groupMap[groupName].sort((a, b) =>
+      a.label.localeCompare(b.label),
+    );
     if (models.length > 0) {
       tree.children?.push({
         id: `group-${groupName.toLowerCase().replace(/\s+/g, "-")}`,
@@ -114,8 +104,8 @@ export const GET = async () => {
       });
     }
 
-    // Fetch new data from OpenRouter API
-    const response = await fetch("https://openrouter.ai/api/frontend/models");
+    // Fetch new data from OpenRouter public models API
+    const response = await fetch("https://openrouter.ai/api/v1/models");
 
     if (!response.ok) {
       throw new Error(`API request failed with status ${response.status}`);

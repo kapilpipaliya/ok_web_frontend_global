@@ -1,6 +1,7 @@
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { IconButton } from "~/components/styled/IconButton";
+import { useToast } from "~/components/styled/modal/Toast";
 import {
   useDesignerFormIdContext,
   useDesignerLayoutStore,
@@ -23,8 +24,26 @@ interface PasteButtonProps {
   size: number;
 }
 
+function isClipboardPermissionError(error: unknown): boolean {
+  return (
+    error instanceof DOMException &&
+    (error.name === "NotAllowedError" || error.name === "SecurityError")
+  );
+}
+
+async function readClipboardText(): Promise<string> {
+  if (!navigator.clipboard?.readText) {
+    throw new DOMException(
+      "Clipboard read is not supported in this browser",
+      "NotSupportedError",
+    );
+  }
+  return navigator.clipboard.readText();
+}
+
 export function PasteButton(props: Readonly<PasteButtonProps>) {
   const [graph, setGraph] = useGraph();
+  const { showErrorToast, showWarningToast } = useToast();
 
   const formStoreId = useDesignerFormIdContext();
   const formStoreVertex = () =>
@@ -36,39 +55,51 @@ export function PasteButton(props: Readonly<PasteButtonProps>) {
 
   const copiedItem = () => layoutVertex().P.copiedItem;
 
+  const pasteCopiedItem = (targetItem: Vertex) => {
+    const item = copiedItem();
+    if (!item) {
+      showWarningToast("Nothing copied yet. Copy a component first.");
+      return;
+    }
+
+    cloneLayoutAndChildren(
+      item,
+      targetItem,
+      undefined,
+      formStoreVertex()?.P.txnId,
+      graph,
+      setGraph,
+      graph.vertexes[formStoreVertex()?.P.formDataId] || undefined,
+    );
+  };
+
   // Function to process clipboard data containing a graph
   const processClipboardGraph = async (targetItem: Vertex) => {
     try {
-      // Read from clipboard
-      const clipboardText = await navigator.clipboard.readText();
+      const clipboardText = await readClipboardText();
       let clipboardData: GraphInterface;
 
       try {
-        // Parse the JSON
         clipboardData = JSON.parse(clipboardText);
-      } catch (error) {
-        console.error("Failed to parse clipboard data as JSON:", error);
+      } catch {
+        showWarningToast("Clipboard does not contain a valid component graph.");
         return;
       }
 
-      // Verify this is a valid graph structure
       if (!(clipboardData.vertexes && clipboardData.edges)) {
-        console.error("Invalid graph structure in clipboard");
+        showWarningToast("Clipboard does not contain a valid component graph.");
         return;
       }
 
-      // Import the graph structure
       const { metaTxnId, rootVertexIds } = importGraphStructure(
         clipboardData,
         graph,
         setGraph,
       );
 
-      // If we found root vertices, use the first one for cloning
       if (rootVertexIds.length > 0) {
         const rootVertex = graph.vertexes[rootVertexIds[0]];
         if (rootVertex) {
-          // Use cloneLayoutAndChildren with the new root vertex
           cloneLayoutAndChildren(
             rootVertex,
             targetItem,
@@ -81,10 +112,27 @@ export function PasteButton(props: Readonly<PasteButtonProps>) {
         }
       }
 
-      // Revert the temporary transaction after cloning is complete
       revertTransaction(metaTxnId, graph, setGraph);
     } catch (error) {
+      if (isClipboardPermissionError(error)) {
+        // Fall back to in-app copy when system clipboard read is blocked
+        // (common in embedded browsers / denied clipboard-read permission).
+        if (copiedItem()) {
+          pasteCopiedItem(targetItem);
+          showWarningToast(
+            "Clipboard access denied. Pasted the last in-app copy instead.",
+          );
+          return;
+        }
+
+        showErrorToast(
+          "Clipboard access denied. Allow clipboard permission, or copy in-app and click Paste without a modifier key.",
+        );
+        return;
+      }
+
       console.error("Error processing clipboard graph:", error);
+      showErrorToast("Failed to paste from clipboard.");
     }
   };
 
@@ -105,18 +153,9 @@ export function PasteButton(props: Readonly<PasteButtonProps>) {
 
         if (e.ctrlKey || e.metaKey) {
           // Cmd/Ctrl+Click - Process clipboard graph
-          processClipboardGraph(props.item);
-        } else if (copiedItem()) {
-          // Regular click - Clone the copied item as a child of the current item
-          cloneLayoutAndChildren(
-            copiedItem()!,
-            props.item,
-            undefined,
-            formStoreVertex()?.P.txnId,
-            graph,
-            setGraph,
-            graph.vertexes[formStoreVertex()?.P.formDataId] || undefined,
-          );
+          void processClipboardGraph(props.item);
+        } else {
+          pasteCopiedItem(props.item);
         }
       }}
       size={props.size}
