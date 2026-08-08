@@ -5,8 +5,8 @@
       L: Page
       P: {
         key: Home
-        url: /manage
-        title: Manage
+        url: /mypc
+        title: My PC
         public: true
         props:
           '''return {

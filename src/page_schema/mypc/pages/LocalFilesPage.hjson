@@ -5,7 +5,7 @@
       L: Page
       P: {
         key: LocalFilesPage
-        url: /manage/files
+        url: /mypc/files
         title: Local files
         public: true
         props:

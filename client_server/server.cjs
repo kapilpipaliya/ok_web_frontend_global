@@ -1,5 +1,6 @@
 'use strict';
 
+// Local execute server for the mypc site: runs Node code from the browser (fs/path browse).
 const http = require('http');
 const { builtinModules } = require('module');
 
