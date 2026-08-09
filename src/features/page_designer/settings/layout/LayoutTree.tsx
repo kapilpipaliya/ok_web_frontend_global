@@ -324,9 +324,12 @@ export function LayoutTree() {
     // Default HTML component properties - a simple div with padding
     const htmlProps = {
       as: "div",
+//       props: `return {
+//   as: "div",
+// };`,
       css: `return \`._id {
-        padding: 10px;
-      }\`;`,
+  padding: 10px;
+}\`;`,
     };
 
     let parentVertex: Vertex;

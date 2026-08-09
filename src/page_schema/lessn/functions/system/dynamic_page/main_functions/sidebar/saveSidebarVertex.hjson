@@ -40,6 +40,24 @@ const {
 
 const itemLabel = sidebarLabel && typeof sidebarLabel === 'string' ? sidebarLabel : 'item';
 
+if (!_.context.deletedEdges) {
+  _.context.deletedEdges = [];
+}
+if (!_.context.deletedVertexes) {
+  _.context.deletedVertexes = [];
+}
+
+const trackDeletedEdgeIds = (ids) => {
+  if (!Array.isArray(ids) || ids.length === 0) return;
+  for (let i = 0; i < ids.length; i++) {
+    const id = ids[i] != null ? String(ids[i]) : "";
+    if (!id) continue;
+    if (!_.context.deletedEdges.includes(id)) {
+      _.context.deletedEdges.push(id);
+    }
+  }
+};
+
 const propsBag = properties && typeof properties === "object" && !Array.isArray(properties) ? properties : {};
 let resolvedKey =
   typeof key === "string"
@@ -218,6 +236,19 @@ if (isDelete) {
     incomingEdges: incomingEdges
   });
 
+  // Track edges removed by DETACH DELETE so client graph can drop them
+  const deletedEdgeIdsFromDetach = [];
+  for (let i = 0; i < outgoingEdges.length; i++) {
+    if (outgoingEdges[i]?.edgeId) deletedEdgeIdsFromDetach.push(outgoingEdges[i].edgeId);
+  }
+  for (let i = 0; i < incomingEdges.length; i++) {
+    if (incomingEdges[i]?.edgeId) deletedEdgeIdsFromDetach.push(incomingEdges[i].edgeId);
+  }
+  trackDeletedEdgeIds(deletedEdgeIdsFromDetach);
+  if (!_.context.deletedVertexes.includes(vertexId)) {
+    _.context.deletedVertexes.push(vertexId);
+  }
+
   // Delete the vertex and its relationships from database
   let deleteQuery;
   let deleteParams;
@@ -253,7 +284,8 @@ if (isDelete) {
     success: true,
     message: `${itemLabel} deleted successfully`,
     data: { id: vertexId, ...(deletedVertexData ? { P: deletedVertexData.P } : {}) },
-    deleted_vertexes: [vertexId]
+    deleted_vertexes: [vertexId],
+    deleted_edges: deletedEdgeIdsFromDetach.map((id) => String(id))
   };
 
   // Execute afterDelete hooks
@@ -424,30 +456,48 @@ if (isUpdate) {
   // Handle parent relationship update if parentId is provided
   // Relationship direction: child-[toParentEdgeType]->parent
   if (parentId) {
-    // Remove existing parent relationships (child points to parent)
-    await _.session.run(
+    // Collect + remove existing parent relationships (child points to parent)
+    const oldParentEdgesResult = await _.session.run(
       `MATCH (v:${parentVertexLabel})-[r:${toParentEdgeType}]->()
        WHERE elementId(v) = $vertexId
-       DELETE r`,
+       RETURN collect(elementId(r)) as edgeIds`,
       { vertexId: vertexElementId }
     );
+    const oldParentEdgeIds = oldParentEdgesResult.records[0]?.get("edgeIds") || [];
+    const validOldParentEdgeIds = Array.isArray(oldParentEdgeIds)
+      ? oldParentEdgeIds.filter((id) => id != null)
+      : [];
+    if (validOldParentEdgeIds.length > 0) {
+      await _.session.run(
+        `UNWIND $edgeIds AS edgeId
+         MATCH ()-[r:${toParentEdgeType}]->()
+         WHERE elementId(r) = edgeId
+         DELETE r`,
+        { edgeIds: validOldParentEdgeIds }
+      );
+      trackDeletedEdgeIds(validOldParentEdgeIds);
+    }
 
     // Create new parent relationship (child points to parent)
     if (!enableUserScoping) {
-      await _.session.run(
+      const newParentRel = await _.session.run(
         `MATCH (v:${parentVertexLabel}), (p:${parentVertexLabel})
          WHERE elementId(v) = $vertexId AND elementId(p) = $parentId
-         CREATE (v)-[:${toParentEdgeType}]->(p)`,
+         CREATE (v)-[r:${toParentEdgeType}]->(p)
+         RETURN v, r, p`,
         { vertexId: vertexElementId, parentId }
       );
+      _.processResult(newParentRel.records, _.context, ["v", "p"], "r");
     } else {
-      await _.session.run(
+      const newParentRel = await _.session.run(
         `MATCH (v:${parentVertexLabel}), (p:${parentVertexLabel})
          WHERE elementId(v) = $vertexId AND elementId(p) = $parentId
          MATCH (u:User {uuid: $userUuid})-[:${userRelationshipType}]->(p)
-         CREATE (v)-[:${toParentEdgeType}]->(p)`,
+         CREATE (v)-[r:${toParentEdgeType}]->(p)
+         RETURN v, r, p`,
         { vertexId: vertexElementId, parentId, userUuid }
       );
+      _.processResult(newParentRel.records, _.context, ["v", "p"], "r");
     }
   }
 } else {
@@ -538,34 +588,76 @@ if (relationships && typeof relationships === "object") {
     if (!relConfig || typeof relConfig !== "object") continue;
     const relType = relConfig.relationshipType;
     const targetLabel = relConfig.targetLabel || "File";
+    const incoming = relConfig.incoming === true;
     if (!relType) continue;
     const targetIds = Array.isArray(relConfig.targetIds)
       ? relConfig.targetIds.map((x) => String(x).trim()).filter(Boolean)
       : [];
-    await _.session.run(
-      `MATCH (v:${parentVertexLabel})
-       WHERE elementId(v) = $vid
-       OPTIONAL MATCH (v)-[r:${relType}]->()
-       DELETE r`,
+
+    // Collect existing edge ids before delete so response includes deleted_edges
+    const existingRelEdges = await _.session.run(
+      incoming
+        ? `MATCH (source)-[r:${relType}]->(v:${parentVertexLabel})
+           WHERE elementId(v) = $vid
+           RETURN collect(elementId(r)) as edgeIds`
+        : `MATCH (v:${parentVertexLabel})-[r:${relType}]->()
+           WHERE elementId(v) = $vid
+           RETURN collect(elementId(r)) as edgeIds`,
       { vid: vertexElementId }
     );
+    const existingRelEdgeIds = existingRelEdges.records[0]?.get("edgeIds") || [];
+    const validRelEdgeIds = Array.isArray(existingRelEdgeIds)
+      ? existingRelEdgeIds.filter((id) => id != null)
+      : [];
+
+    if (validRelEdgeIds.length > 0) {
+      await _.session.run(
+        incoming
+          ? `MATCH (source)-[r:${relType}]->(v:${parentVertexLabel})
+             WHERE elementId(v) = $vid
+             DELETE r`
+          : `MATCH (v:${parentVertexLabel})-[r:${relType}]->()
+             WHERE elementId(v) = $vid
+             DELETE r`,
+        { vid: vertexElementId }
+      );
+      trackDeletedEdgeIds(validRelEdgeIds);
+    }
+
     if (targetIds.length === 0) continue;
+
     await _.session.run(
-      `UNWIND $targetIds AS targetId
-       MATCH (v:${parentVertexLabel})
-       WHERE elementId(v) = $vid
-       MATCH (target:${targetLabel})
-       WHERE elementId(target) = targetId
-       MERGE (v)-[:${relType}]->(target)`,
+      incoming
+        ? `UNWIND $targetIds AS targetId
+           MATCH (v:${parentVertexLabel})
+           WHERE elementId(v) = $vid
+           MATCH (source:${targetLabel})
+           WHERE elementId(source) = targetId
+           MERGE (source)-[:${relType}]->(v)`
+        : `UNWIND $targetIds AS targetId
+           MATCH (v:${parentVertexLabel})
+           WHERE elementId(v) = $vid
+           MATCH (target:${targetLabel})
+           WHERE elementId(target) = targetId
+           MERGE (v)-[:${relType}]->(target)`,
       { vid: vertexElementId, targetIds }
     );
     const reloadRel = await _.session.run(
-      `MATCH (v:${parentVertexLabel})-[r:${relType}]->(target:${targetLabel})
-       WHERE elementId(v) = $vid
-       RETURN v, r, target`,
+      incoming
+        ? `MATCH (source:${targetLabel})-[r:${relType}]->(v:${parentVertexLabel})
+           WHERE elementId(v) = $vid
+           RETURN v, r, source`
+        : `MATCH (v:${parentVertexLabel})-[r:${relType}]->(target:${targetLabel})
+           WHERE elementId(v) = $vid
+           RETURN v, r, target`,
       { vid: vertexElementId }
     );
-    _.processResult(reloadRel.records, _.context, ["v", "target"], "r");
+    _.processResult(
+      reloadRel.records,
+      _.context,
+      incoming ? ["v", "source"] : ["v", "target"],
+      "r"
+    );
   }
 }
 

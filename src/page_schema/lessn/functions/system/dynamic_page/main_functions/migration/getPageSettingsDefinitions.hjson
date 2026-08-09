@@ -887,7 +887,7 @@ const productTableGeneral = {
     { key: "delete", type: "delete", confirm: { title: "Delete product?", message: "This cannot be undone.", confirmText: "Delete", cancelText: "Cancel", variant: "danger" } }
   ],
   hooks: {},
-  companionPages: filesCompanionPages("Upload product images in Files below, then attach them with the variant image picker.")
+  companionPages: filesCompanionPages("Upload images in Files below. Drag an image onto a category in the sidebar to set its image, or use the product/variant image pickers.")
 };
 
 const productTableFormConfig = {
@@ -1037,7 +1037,34 @@ const productTableSidebar = {
   rootKeys: {},
   loadFullTree: true,
   label: "Categories",
+  // Linked media on sidebar categories (thumbnail + optional drag-drop attach)
   imageRelationshipType: "ProductCategoryImage",
+  imageTargetLabel: "File",
+  imageFileNameProperty: "fileName",
+  imageFileDownloadUrlPrefix: "/api/file/download",
+  imageDrop: {
+    enabled: true,
+    // Which table rows may be dropped onto a category to set the link
+    sourceTableVertexLabels: ["File"],
+    sourceTableKeys: ["files"],
+    targetLabel: "File",
+    // Empty array = accept any mime; otherwise target.P.mimeType/fileType must match a prefix
+    mimePrefixes: ["image/"],
+    allowUncategorized: false,
+    fileNameProperty: "fileName",
+    fileDownloadUrlPrefix: "/api/file/download",
+    messages: {
+      success: "Category image updated",
+      alreadySet: "Category image already set",
+      invalidType: "Only image files can be used as a category image",
+      emptySelection: "Select an image file first",
+      uncategorized: "Cannot set an image on Uncategorized",
+      notConfigured: "Category image drop is not configured",
+      failed: "Failed to set category image",
+      targetNotFound: "File not found",
+      categoryNotFound: "Category not found or you don't have permission to update it"
+    }
+  },
   formConfig: {
     gridColumns: 1,
     groups: [

@@ -216,6 +216,18 @@ const wrappedOnSave = async (saveData) => {
     }
 
     if (result?.result?.success) {
+      // Apply graph payload (new/updated edges + deleted_edges) before tree callbacks
+      if (
+        result.graph &&
+        (result.graph.vertexes ||
+          result.graph.edges ||
+          (Array.isArray(result.graph.deleted_edges) &&
+            result.graph.deleted_edges.length > 0) ||
+          (Array.isArray(result.graph.deleted_vertexes) &&
+            result.graph.deleted_vertexes.length > 0))
+      ) {
+        _.setGraphData(0, result.graph, {});
+      }
       _.showSuccessToast?.(
         result.result.message ||
           `${label} ${mode === "edit" ? "updated" : "created"} successfully`

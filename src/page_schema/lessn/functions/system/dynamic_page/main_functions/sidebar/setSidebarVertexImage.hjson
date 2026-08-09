@@ -1,0 +1,273 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: "Sets or replaces a sidebar category relation edge (Category -[relationshipType]-> target). Config-driven via imageDrop / imageRelationshipType from the table sidebar schema."
+        body:
+          '''
+const actualUser = await _.getUserFromSession();
+if (!actualUser) {
+  return {
+    success: false,
+    message: "User session not found. Please log in and try again.",
+    data: null
+  };
+}
+
+const user = await _.getEffectiveUser(_.session, actualUser, c);
+
+const {
+  categoryId,
+  targetId,
+  fileId,
+  parentVertexLabel,
+  imageRelationshipType,
+  relationshipType,
+  imageTargetLabel,
+  targetLabel,
+  enableUserScoping,
+  label: sidebarLabel,
+  tableVertexLabel,
+  mimePrefixes,
+  requireImageMime,
+  allowUncategorized,
+  messages = {}
+} = c;
+
+const msg = (key, fallback) => {
+  const value = messages && typeof messages === "object" ? messages[key] : null;
+  return value != null && String(value).trim() !== "" ? String(value) : fallback;
+};
+
+const itemLabel = sidebarLabel && typeof sidebarLabel === "string" ? sidebarLabel : "category";
+const relTypeRaw = relationshipType || imageRelationshipType;
+const relType =
+  relTypeRaw != null && String(relTypeRaw).trim() !== ""
+    ? String(relTypeRaw).trim()
+    : "";
+const targetLabelRaw = targetLabel || imageTargetLabel;
+const resolvedTargetLabel =
+  targetLabelRaw != null && String(targetLabelRaw).trim() !== ""
+    ? String(targetLabelRaw).trim()
+    : "";
+const resolvedCategoryId = categoryId != null ? String(categoryId).trim() : "";
+const resolvedTargetId = String(targetId || fileId || "").trim();
+
+if (!resolvedCategoryId || !resolvedTargetId) {
+  return {
+    success: false,
+    message: msg("missingIds", "categoryId and targetId are required"),
+    data: null
+  };
+}
+
+if (!parentVertexLabel || !relType) {
+  return {
+    success: false,
+    message: msg(
+      "missingConfig",
+      "parentVertexLabel and imageRelationshipType are required"
+    ),
+    data: null
+  };
+}
+
+if (!resolvedTargetLabel) {
+  return {
+    success: false,
+    message: msg("missingTargetLabel", "imageTargetLabel / targetLabel is required"),
+    data: null
+  };
+}
+
+const uncategorizedVertexId = tableVertexLabel
+  ? "_" + tableVertexLabel + "_uncategorized"
+  : null;
+const isUncategorized =
+  !!(uncategorizedVertexId && resolvedCategoryId === uncategorizedVertexId);
+if (isUncategorized && allowUncategorized !== true) {
+  return {
+    success: false,
+    message: msg(
+      "uncategorized",
+      `Cannot set a linked item on the uncategorized ${itemLabel}`
+    ),
+    data: null
+  };
+}
+
+const resolvedMimePrefixes = Array.isArray(mimePrefixes)
+  ? mimePrefixes.map((p) => String(p || "").trim()).filter(Boolean)
+  : requireImageMime === false
+    ? []
+    : requireImageMime === true
+      ? ["image/"]
+      : null;
+
+const userRelationshipType = `User${parentVertexLabel}`;
+const userUuid = enableUserScoping ? user.P.uuid : null;
+
+if (!_.context.deletedEdges) {
+  _.context.deletedEdges = [];
+}
+
+try {
+  let categoryQuery;
+  let categoryParams;
+  if (!enableUserScoping) {
+    categoryQuery = `
+      MATCH (v:${parentVertexLabel})
+      WHERE elementId(v) = $categoryId
+      RETURN v
+    `;
+    categoryParams = { categoryId: resolvedCategoryId };
+  } else {
+    categoryQuery = `
+      MATCH (u:User {uuid: $userUuid})-[:${userRelationshipType}]->(v:${parentVertexLabel})
+      WHERE elementId(v) = $categoryId
+      RETURN v
+    `;
+    categoryParams = { userUuid, categoryId: resolvedCategoryId };
+  }
+
+  const categoryResult = await _.session.run(categoryQuery, categoryParams);
+  if (categoryResult.records.length === 0) {
+    return {
+      success: false,
+      message: msg(
+        "categoryNotFound",
+        `${itemLabel} not found or you don't have permission to update it`
+      ),
+      data: null
+    };
+  }
+
+  const targetResult = await _.session.run(
+    `
+      MATCH (target:${resolvedTargetLabel})
+      WHERE elementId(target) = $targetId
+      RETURN target
+    `,
+    { targetId: resolvedTargetId }
+  );
+  if (targetResult.records.length === 0) {
+    return {
+      success: false,
+      message: msg("targetNotFound", `${resolvedTargetLabel} not found`),
+      data: null
+    };
+  }
+
+  const targetNode = targetResult.records[0].get("target");
+  const targetJson = _.convertNodeToJson(targetNode);
+  const mime = String(targetJson?.P?.mimeType || targetJson?.P?.fileType || "");
+  if (Array.isArray(resolvedMimePrefixes) && resolvedMimePrefixes.length > 0) {
+    const mimeOk =
+      !mime ||
+      resolvedMimePrefixes.some((prefix) => mime.startsWith(prefix));
+    if (!mimeOk) {
+      return {
+        success: false,
+        message: msg(
+          "invalidType",
+          "This item type is not allowed for this sidebar link"
+        ),
+        data: null
+      };
+    }
+  }
+
+  const existingEdgesResult = await _.session.run(
+    `
+      MATCH (v:${parentVertexLabel})-[r:${relType}]->(target)
+      WHERE elementId(v) = $categoryId
+      RETURN elementId(r) as edgeId, elementId(target) as targetId
+    `,
+    { categoryId: resolvedCategoryId }
+  );
+
+  const existingEdgeIds = [];
+  let alreadyLinked = false;
+  for (let i = 0; i < existingEdgesResult.records.length; i++) {
+    const edgeId = existingEdgesResult.records[i].get("edgeId");
+    const existingTargetId = existingEdgesResult.records[i].get("targetId");
+    if (edgeId) existingEdgeIds.push(edgeId);
+    if (String(existingTargetId) === resolvedTargetId) alreadyLinked = true;
+  }
+
+  if (existingEdgeIds.length > 0) {
+    await _.session.run(
+      `
+        MATCH (v:${parentVertexLabel})-[r:${relType}]->()
+        WHERE elementId(v) = $categoryId
+        DELETE r
+      `,
+      { categoryId: resolvedCategoryId }
+    );
+    for (let i = 0; i < existingEdgeIds.length; i++) {
+      const id = String(existingEdgeIds[i]);
+      if (!_.context.deletedEdges.includes(id)) {
+        _.context.deletedEdges.push(id);
+      }
+    }
+  }
+
+  const linkResult = await _.session.run(
+    `
+      MATCH (v:${parentVertexLabel})
+      WHERE elementId(v) = $categoryId
+      MATCH (target:${resolvedTargetLabel})
+      WHERE elementId(target) = $targetId
+      MERGE (v)-[r:${relType}]->(target)
+      ON CREATE SET r.createdAt = datetime()
+      ON MATCH SET r.updatedAt = datetime()
+      RETURN v, r, target
+    `,
+    { categoryId: resolvedCategoryId, targetId: resolvedTargetId }
+  );
+
+  if (linkResult.records.length === 0) {
+    return {
+      success: false,
+      message: msg("failed", `Failed to link item to ${itemLabel}`),
+      data: null
+    };
+  }
+
+  _.processResult(linkResult.records, _.context, ["v", "target"], "r");
+
+  const categoryVertex =
+    _.context.nodes[resolvedCategoryId] ||
+    _.convertNodeToJson(linkResult.records[0].get("v"));
+
+  return {
+    success: true,
+    message:
+      alreadyLinked && existingEdgeIds.length <= 1
+        ? msg("alreadySet", `${itemLabel} link already set`)
+        : msg("success", `${itemLabel} link updated`),
+    data: {
+      categoryId: resolvedCategoryId,
+      targetId: resolvedTargetId,
+      relationshipType: relType,
+      targetLabel: resolvedTargetLabel,
+      category: categoryVertex
+    }
+  };
+} catch (error) {
+  console.error("Error setting sidebar vertex relation:", error);
+  return {
+    success: false,
+    message: error.message || msg("failed", `Failed to update ${itemLabel} link`),
+    data: null
+  };
+}
+'''
+        key: setSidebarVertexImage
+      }
+    }
+  ]
+  edges: []
+}

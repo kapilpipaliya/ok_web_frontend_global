@@ -182,25 +182,158 @@ const getItemIcon = () => {
   return null;
 };
 
-// Thumbnail URL from optional imageRelationshipType (e.g. ProductCategoryImage -> File)
+// Optional linked media on sidebar categories — all behavior from sidebarConfig
+const getSidebarConfig = () => c.props?.sidebarConfig || {};
+
+const getImageRelationshipType = () => {
+  const cfg = getSidebarConfig();
+  const fromDrop = cfg.imageDrop?.relationshipType;
+  const imageRelType = fromDrop || cfg.imageRelationshipType;
+  if (imageRelType == null || String(imageRelType).trim() === "") return null;
+  return String(imageRelType).trim();
+};
+
+const getImageDropConfig = () => {
+  const cfg = getSidebarConfig();
+  const drop = cfg.imageDrop;
+  if (!drop || typeof drop !== "object") return null;
+  if (drop.enabled === false) return null;
+  if (!getImageRelationshipType()) return null;
+  return drop;
+};
+
+const getImageTargetLabel = () => {
+  const drop = getImageDropConfig();
+  const cfg = getSidebarConfig();
+  const label = drop?.targetLabel || cfg.imageTargetLabel;
+  return label != null && String(label).trim() !== "" ? String(label).trim() : "";
+};
+
+const getImageDropMessages = () => {
+  const messages = getImageDropConfig()?.messages;
+  return messages && typeof messages === "object" ? messages : {};
+};
+
+const imageDropMessage = (key, fallback) => {
+  const value = getImageDropMessages()[key];
+  return value != null && String(value).trim() !== "" ? String(value) : fallback;
+};
+
+const getImageDropSourceLabels = () => {
+  const drop = getImageDropConfig();
+  const configured =
+    drop?.sourceTableVertexLabels ||
+    getSidebarConfig().imageDropSourceTableVertexLabels;
+  if (Array.isArray(configured) && configured.length > 0) {
+    return configured.map((x) => String(x));
+  }
+  const targetLabel = getImageTargetLabel();
+  return targetLabel ? [targetLabel] : [];
+};
+
+const getImageDropSourceKeys = () => {
+  const configured = getImageDropConfig()?.sourceTableKeys;
+  if (!Array.isArray(configured)) return [];
+  return configured.map((x) => String(x)).filter(Boolean);
+};
+
+const getImageMimePrefixes = () => {
+  const drop = getImageDropConfig();
+  if (Array.isArray(drop?.mimePrefixes)) {
+    return drop.mimePrefixes.map((p) => String(p || "").trim()).filter(Boolean);
+  }
+  // Legacy: requireImageMime false means accept any type
+  if (drop?.requireImageMime === false) return [];
+  return ["image/"];
+};
+
+const mimeMatchesPrefixes = (mime, prefixes) => {
+  if (!Array.isArray(prefixes) || prefixes.length === 0) return true;
+  if (!mime) return true;
+  return prefixes.some((prefix) => mime.startsWith(prefix));
+};
+
+const isSidebarImageFileDrop = (data) => {
+  if (!getImageDropConfig()) return false;
+  if (!data || data.type !== "table-items") return false;
+  if (!data.itemIds || !Array.isArray(data.itemIds) || data.itemIds.length === 0) {
+    return false;
+  }
+  const sourceLabels = getImageDropSourceLabels();
+  const sourceKeys = getImageDropSourceKeys();
+  const sourceLabel =
+    data.sourceTableVertexLabel != null
+      ? String(data.sourceTableVertexLabel)
+      : "";
+  const sourceKey =
+    data.sourceTableKey != null ? String(data.sourceTableKey) : "";
+  const labelOk = sourceLabels.length === 0 || sourceLabels.includes(sourceLabel);
+  const keyOk = sourceKeys.length === 0 || sourceKeys.includes(sourceKey);
+  return labelOk && keyOk;
+};
+
+const canDropImageOnItem = (item) => {
+  if (!item) return false;
+  const drop = getImageDropConfig();
+  if (!drop) return false;
+  if (isUncategorizedTreeNode(item) && drop.allowUncategorized !== true) {
+    return false;
+  }
+  return true;
+};
+
+const pickImageFileIdFromDrop = (itemIds) => {
+  const ids = Array.isArray(itemIds)
+    ? itemIds.map((id) => String(id || "").trim()).filter(Boolean)
+    : [];
+  const targetLabel = getImageTargetLabel();
+  const mimePrefixes = getImageMimePrefixes();
+  for (let i = 0; i < ids.length; i++) {
+    const vertex = g?.vertexes?.[ids[i]];
+    if (!vertex) {
+      // Not in local graph yet — still allow server to validate
+      return ids[i];
+    }
+    if (targetLabel && Array.isArray(vertex.L) && !vertex.L.includes(targetLabel)) {
+      continue;
+    }
+    const mime = String(vertex.P?.mimeType || vertex.P?.fileType || "");
+    if (!mimeMatchesPrefixes(mime, mimePrefixes)) continue;
+    return ids[i];
+  }
+  return ids[0] || null;
+};
+
+// Thumbnail URL from optional imageRelationshipType (+ configurable file name / download prefix)
 const getItemImageUrl = () => {
   const item = getItem();
   if (!item?.id) return null;
-  const imageRelType = c.props?.sidebarConfig?.imageRelationshipType;
-  if (imageRelType == null || String(imageRelType).trim() === "") return null;
+  const imageRelType = getImageRelationshipType();
+  if (!imageRelType) return null;
+  const cfg = getSidebarConfig();
+  const drop = cfg.imageDrop || {};
+  const fileNameProperty =
+    drop.fileNameProperty || cfg.imageFileNameProperty || "fileName";
+  const downloadPrefix =
+    drop.fileDownloadUrlPrefix ||
+    cfg.imageFileDownloadUrlPrefix ||
+    "/api/file/download";
   // Prefer live graph vertex so OUT edges from image loads stay reactive
   const liveItem = g?.vertexes?.[item.id] || item;
-  const files =
-    _.evalExpression(`->${String(imageRelType).trim()}`, {
+  const linked =
+    _.evalExpression(`->${imageRelType}`, {
       graph: g,
       setGraph: sg,
       vertexes: [liveItem]
     }) || [];
-  const file = files[0];
+  const target = linked[0];
   const fileName =
-    file?.P?.fileName != null ? String(file.P.fileName).trim() : "";
+    target?.P?.[fileNameProperty] != null
+      ? String(target.P[fileNameProperty]).trim()
+      : "";
   if (!fileName) return null;
-  return "/api/file/download/" + encodeURIComponent(fileName);
+  const prefix = String(downloadPrefix).replace(/\/$/, "");
+  return prefix + "/" + encodeURIComponent(fileName);
 };
 
 // Sync status for sidebar items (queued = reload icon, failed = error icon)
@@ -493,6 +626,10 @@ const initDropTarget = (element) => {
         if (!data.itemIds || !Array.isArray(data.itemIds) || data.itemIds.length === 0) {
           return false;
         }
+        // Allow configured source rows onto category to set sidebar linked media
+        if (isSidebarImageFileDrop(data)) {
+          return canDropImageOnItem(item);
+        }
         // Reject drops from a different table (e.g. Files onto Gallery sidebar)
         const contentLabel = c.props?.tableVertexLabel
           || c.props?.contentLabel
@@ -531,6 +668,8 @@ const initDropTarget = (element) => {
       if (data && data.type === 'sidebar-item' && data.categoryId) {
         const validation = validateDropTarget(data.categoryId, item.id);
         setIsValidDrop(validation.valid);
+      } else if (isSidebarImageFileDrop(data)) {
+        setIsValidDrop(canDropImageOnItem(item));
       } else if (data && data.type === 'table-items') {
         // Table items: disallow dropping into the currently active category (compare by vertex id only)
         const currentSelected = getSelectedItem();
@@ -571,6 +710,18 @@ const initDropTarget = (element) => {
 
         // Move the sidebar item
         await handleMoveSidebarItem(data.categoryId, newParentId);
+        return;
+      }
+
+      // Handle configured source drops that set the sidebar linked media edge
+      if (isSidebarImageFileDrop(data)) {
+        if (!canDropImageOnItem(item)) {
+          _.showWarningToast?.(
+            imageDropMessage("uncategorized", "Cannot set a linked item here")
+          );
+          return;
+        }
+        await handleSidebarImageDrop(data.itemIds);
         return;
       }
 
@@ -662,6 +813,97 @@ const handleMoveSidebarItem = async (categoryId, newParentId) => {
     console.error("Error moving sidebar item:", error);
     _.showErrorToast?.(`Failed to move ${label}`);
     return false;
+  } finally {
+    f.setOperationLoading?.(false);
+  }
+};
+
+// Drag a configured source row onto a category to set the image/link relation edge
+const handleSidebarImageDrop = async (itemIds) => {
+  const item = getItem();
+  if (!item?.id) return;
+
+  const drop = getImageDropConfig();
+  const imageRelType = getImageRelationshipType();
+  const targetLabel = getImageTargetLabel();
+  if (!drop || !imageRelType || !targetLabel) {
+    _.showErrorToast?.(
+      imageDropMessage("notConfigured", "Sidebar media drop is not configured")
+    );
+    return;
+  }
+
+  if (!canDropImageOnItem(item)) {
+    _.showWarningToast?.(
+      imageDropMessage("uncategorized", "Cannot set a linked item here")
+    );
+    return;
+  }
+
+  const targetId = pickImageFileIdFromDrop(itemIds);
+  if (!targetId) {
+    _.showWarningToast?.(
+      imageDropMessage("emptySelection", "Select an item to link first")
+    );
+    return;
+  }
+
+  const targetVertex = g?.vertexes?.[targetId];
+  if (targetVertex) {
+    const mime = String(targetVertex.P?.mimeType || targetVertex.P?.fileType || "");
+    if (!mimeMatchesPrefixes(mime, getImageMimePrefixes())) {
+      _.showWarningToast?.(
+        imageDropMessage("invalidType", "This item type is not allowed here")
+      );
+      return;
+    }
+  }
+
+  const parentVertexLabel = getParentVertexLabel();
+  const enableUserScoping = c.props?.enableUserScoping === true;
+  const label = c.props?.label || getSidebarConfig().label || "Category";
+  const failedFallback = imageDropMessage("failed", `Failed to update ${label} link`);
+
+  f.setOperationLoading?.(true);
+  try {
+    const result = await s({
+      functionName: "setSidebarVertexImage",
+      contextData: {
+        categoryId: item.id,
+        targetId,
+        parentVertexLabel,
+        relationshipType: imageRelType,
+        imageRelationshipType: imageRelType,
+        targetLabel,
+        imageTargetLabel: targetLabel,
+        enableUserScoping,
+        tableVertexLabel: c.props?.tableVertexLabel,
+        label,
+        mimePrefixes: getImageMimePrefixes(),
+        allowUncategorized: drop.allowUncategorized === true,
+        messages: getImageDropMessages()
+      }
+    });
+
+    const errorMessage = f.extractError?.(result, true, failedFallback);
+    if (errorMessage) {
+      return;
+    }
+
+    if (result?.result?.success) {
+      if (result.graph && (result.graph.vertexes || result.graph.edges || result.graph.deleted_edges)) {
+        _.setGraphData(0, result.graph, {});
+      }
+      _.showSuccessToast?.(
+        result.result.message || imageDropMessage("success", `${label} link updated`)
+      );
+      return;
+    }
+
+    _.showErrorToast?.(result?.result?.message || failedFallback);
+  } catch (error) {
+    console.error("Error setting sidebar category link:", error);
+    _.showErrorToast?.(failedFallback);
   } finally {
     f.setOperationLoading?.(false);
   }
@@ -912,9 +1154,15 @@ const handleDelete = async (e) => {
       if (result.graph) {
         const graphData = {
           vertexes: result.graph.vertexes || {},
-          edges: {},
-          deleted_vertexes: result.result.deleted_vertexes || [item.id],
-          deleted_edges: []
+          edges: result.graph.edges || {},
+          deleted_vertexes:
+            result.graph.deleted_vertexes ||
+            result.result.deleted_vertexes ||
+            [item.id],
+          deleted_edges:
+            result.graph.deleted_edges ||
+            result.result.deleted_edges ||
+            edgeIdsToDelete
         };
         _.setGraphData(0, graphData, {});
       }
