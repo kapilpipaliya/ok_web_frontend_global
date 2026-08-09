@@ -1,0 +1,2333 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        isNoPermissionCheck: true
+        description: Header/site search for ProductCategory and Product. Props: variant (header|page), initialQuery, tableKey, tableVertexLabel, limit, placeholder.
+        fns:
+          '''
+const props = () => c.props || {};
+const RECENT_KEY = "lessn.siteSearch.recent";
+const ANALYTICS_KEY = "lessn.siteSearch.analytics";
+const LISTBOX_ID = "site-search-listbox";
+
+const [query, setQuery] = _.createSignal(
+  props().initialQuery != null ? String(props().initialQuery) : ""
+);
+const [categories, setCategories] = _.createSignal([]);
+const [products, setProducts] = _.createSignal([]);
+const [popularCategories, setPopularCategories] = _.createSignal([]);
+const [recentSearches, setRecentSearches] = _.createSignal([]);
+const [categoryTotal, setCategoryTotal] = _.createSignal(0);
+const [productTotal, setProductTotal] = _.createSignal(0);
+const [loading, setLoading] = _.createSignal(false);
+const [error, setError] = _.createSignal("");
+const [open, setOpen] = _.createSignal(false);
+const [mobileExpanded, setMobileExpanded] = _.createSignal(false);
+const [activeIndex, setActiveIndex] = _.createSignal(-1);
+const [rootRef, setRootRef] = _.createSignal(null);
+const [inputRef, setInputRef] = _.createSignal(null);
+const [listboxRef, setListboxRef] = _.createSignal(null);
+let debounceTimer = null;
+let searchSeq = 0;
+
+const getVariant = () =>
+  props().variant === "page" ? "page" : "header";
+
+const getLimit = () => {
+  const n = Number(props().limit);
+  if (Number.isFinite(n) && n > 0) return Math.min(n, 50);
+  return getVariant() === "page" ? 30 : 8;
+};
+
+const getLang = () => {
+  const lang = _.params?.lang;
+  if (lang && /^[a-z]{2,3}$/i.test(String(lang))) {
+    return String(lang).toLowerCase();
+  }
+  return "en";
+};
+
+const categoryHref = (item) => {
+  const key = item?.key != null ? String(item.key).trim() : "";
+  if (!key) return `/${getLang()}/products`;
+  return `/${getLang()}/products/${encodeURIComponent(key)}`;
+};
+
+const productHref = (item) => {
+  const key = item?.key != null ? String(item.key).trim() : "";
+  if (!key) return `/${getLang()}/products`;
+  return `/${getLang()}/product/${encodeURIComponent(key)}`;
+};
+
+const searchPageHref = (q) => {
+  const term = q != null ? String(q).trim() : "";
+  if (!term) return `/${getLang()}/search`;
+  return `/${getLang()}/search?q=${encodeURIComponent(term)}`;
+};
+
+const optionId = (kind, item, index) => {
+  const raw = item?.id != null ? String(item.id) : String(index);
+  return `site-search-opt-${kind}-${raw.replace(/[^a-zA-Z0-9_-]/g, "_")}`;
+};
+
+const escapeHtml = (value) =>
+  String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+
+const highlightHtml = (value) => {
+  const text = value != null ? String(value) : "";
+  const term = query().trim();
+  if (!text) return "";
+  if (!term) return escapeHtml(text);
+  const lower = text.toLowerCase();
+  const needle = term.toLowerCase();
+  let out = "";
+  let cursor = 0;
+  let idx = lower.indexOf(needle, cursor);
+  while (idx >= 0) {
+    out += escapeHtml(text.slice(cursor, idx));
+    out += `<mark>${escapeHtml(text.slice(idx, idx + needle.length))}</mark>`;
+    cursor = idx + needle.length;
+    idx = lower.indexOf(needle, cursor);
+  }
+  out += escapeHtml(text.slice(cursor));
+  return out;
+};
+
+const applyHighlight = (el, value) => {
+  if (!el) return;
+  el.innerHTML = highlightHtml(value);
+};
+
+const readJson = (key, fallback) => {
+  try {
+    const raw = window.localStorage.getItem(key);
+    if (!raw) return fallback;
+    const parsed = JSON.parse(raw);
+    return parsed == null ? fallback : parsed;
+  } catch (_e) {
+    return fallback;
+  }
+};
+
+const writeJson = (key, value) => {
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  } catch (_e) {
+    /* ignore quota / private mode */
+  }
+};
+
+const loadRecentSearches = () => {
+  const list = readJson(RECENT_KEY, []);
+  setRecentSearches(Array.isArray(list) ? list.filter((x) => typeof x === "string") : []);
+};
+
+const pushRecentSearch = (term) => {
+  const clean = term != null ? String(term).trim() : "";
+  if (!clean) return;
+  const prev = Array.isArray(recentSearches()) ? recentSearches() : [];
+  const next = [clean, ...prev.filter((item) => item.toLowerCase() !== clean.toLowerCase())].slice(0, 8);
+  setRecentSearches(next);
+  writeJson(RECENT_KEY, next);
+};
+
+const logAnalytics = (event) => {
+  const entry = {
+    ts: Date.now(),
+    query: query().trim(),
+    ...event
+  };
+  try {
+    const prev = readJson(ANALYTICS_KEY, []);
+    const next = Array.isArray(prev) ? prev.slice(-199) : [];
+    next.push(entry);
+    writeJson(ANALYTICS_KEY, next);
+  } catch (_e) {
+    /* ignore */
+  }
+  console.info("[site-search]", entry);
+};
+
+const clearResults = () => {
+  setCategories([]);
+  setProducts([]);
+  setCategoryTotal(0);
+  setProductTotal(0);
+  setActiveIndex(-1);
+};
+
+const resultCountLabel = () => {
+  if (loading()) return "Searching";
+  if (error()) return error();
+  if (!query().trim()) {
+    const recent = recentSearches().length;
+    const popular = popularCategories().length;
+    if (recent || popular) {
+      return `${recent} recent, ${popular} popular`;
+    }
+    return "";
+  }
+  const catCount = categories().length;
+  const prodCount = products().length;
+  if (catCount === 0 && prodCount === 0) return "No results";
+  return `Showing ${catCount} of ${categoryTotal()} categories, ${prodCount} of ${productTotal()} products`;
+};
+
+const totalsLabel = () => {
+  if (!query().trim() || loading() || error()) return "";
+  return `Showing ${categories().length + products().length} of ${categoryTotal() + productTotal()} results`;
+};
+
+const viewAllLabel = () => {
+  const total = categoryTotal() + productTotal();
+  const shown = categories().length + products().length;
+  if (total > shown) return `View all results (showing ${shown} of ${total})`;
+  return "View all results";
+};
+
+const getFlatOptions = () => {
+  const opts = [];
+  if (!query().trim()) {
+    const recent = recentSearches();
+    for (let i = 0; i < recent.length; i++) {
+      opts.push({
+        type: "recent",
+        item: { text: recent[i] },
+        id: optionId("recent", { id: recent[i] }, i)
+      });
+    }
+    const popular = popularCategories();
+    for (let i = 0; i < popular.length; i++) {
+      const item = popular[i];
+      opts.push({
+        type: "popular",
+        item,
+        id: optionId("popular", item, i)
+      });
+    }
+    return opts;
+  }
+  const cats = categories();
+  for (let i = 0; i < cats.length; i++) {
+    const item = cats[i];
+    opts.push({ type: "category", item, id: optionId("category", item, i) });
+  }
+  const prods = products();
+  for (let i = 0; i < prods.length; i++) {
+    const item = prods[i];
+    opts.push({ type: "product", item, id: optionId("product", item, i) });
+  }
+  if (!loading() && !error()) {
+    opts.push({ type: "viewAll", id: "site-search-opt-view-all" });
+  }
+  return opts;
+};
+
+const activeOptionId = () => {
+  const opts = getFlatOptions();
+  const idx = activeIndex();
+  if (idx < 0 || idx >= opts.length) return undefined;
+  return opts[idx].id;
+};
+
+const isOptionActive = (id) => activeOptionId() === id;
+
+const scrollActiveIntoView = () => {
+  const id = activeOptionId();
+  if (!id) return;
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.scrollIntoView({ block: "nearest" });
+};
+
+const runSearch = async (rawQuery) => {
+  const term = rawQuery != null ? String(rawQuery).trim() : "";
+  const seq = ++searchSeq;
+  setLoading(true);
+  setError("");
+  try {
+    const result = await s({
+      functionName: "searchPublicCatalog",
+      contextData: {
+        query: term,
+        tableKey: props().tableKey || "products",
+        tableVertexLabel: props().tableVertexLabel || "Product",
+        limit: getLimit()
+      }
+    });
+    if (seq !== searchSeq) return;
+    if (!result?.result?.success) {
+      clearResults();
+      setPopularCategories([]);
+      setError(result?.result?.message || result?.error || "Search failed");
+      return;
+    }
+    const data = result.result.data || {};
+    setCategories(Array.isArray(data.categories) ? data.categories : []);
+    setProducts(Array.isArray(data.products) ? data.products : []);
+    setPopularCategories(
+      Array.isArray(data.popularCategories) ? data.popularCategories : []
+    );
+    setCategoryTotal(Number(data.categoryTotal) || 0);
+    setProductTotal(Number(data.productTotal) || 0);
+    setActiveIndex(-1);
+    setError("");
+    if (term) {
+      logAnalytics({
+        action: "search",
+        categoryCount: Number(data.categoryTotal) || 0,
+        productCount: Number(data.productTotal) || 0
+      });
+    }
+  } catch (err) {
+    if (seq !== searchSeq) return;
+    console.error("SiteSearch failed:", err);
+    clearResults();
+    setError(err?.message || "Search failed");
+  } finally {
+    if (seq === searchSeq) setLoading(false);
+  }
+};
+
+const scheduleSearch = (rawQuery) => {
+  if (debounceTimer) clearTimeout(debounceTimer);
+  const term = rawQuery != null ? String(rawQuery).trim() : "";
+  setLoading(true);
+  setError("");
+  debounceTimer = setTimeout(() => {
+    void runSearch(term);
+  }, 220);
+};
+
+const onQueryInput = (event) => {
+  const value = event?.currentTarget?.value ?? "";
+  setQuery(value);
+  setOpen(true);
+  setActiveIndex(-1);
+  scheduleSearch(value);
+};
+
+const openPanel = () => {
+  setOpen(true);
+  loadRecentSearches();
+  if (!query().trim()) scheduleSearch("");
+  else scheduleSearch(query());
+};
+
+const closePanel = () => {
+  setOpen(false);
+  setActiveIndex(-1);
+};
+
+const collapseMobile = () => {
+  setMobileExpanded(false);
+  closePanel();
+};
+
+const expandMobile = () => {
+  setMobileExpanded(true);
+  setOpen(true);
+  loadRecentSearches();
+  requestAnimationFrame(() => {
+    inputRef()?.focus?.();
+    scheduleSearch(query().trim());
+  });
+};
+
+const focusSearch = () => {
+  if (getVariant() === "header") {
+    const isNarrow = window.matchMedia?.("(max-width: 768px)")?.matches;
+    if (isNarrow) {
+      expandMobile();
+      return;
+    }
+  }
+  setOpen(true);
+  loadRecentSearches();
+  inputRef()?.focus?.();
+  if (!query().trim()) scheduleSearch("");
+};
+
+const goToSearchPage = (rawQuery) => {
+  const term = rawQuery != null ? String(rawQuery).trim() : query().trim();
+  if (!term) return;
+  pushRecentSearch(term);
+  logAnalytics({ action: "view_all", href: searchPageHref(term) });
+  closePanel();
+  setMobileExpanded(false);
+  _.navigate(searchPageHref(term));
+};
+
+const applyRecent = (term) => {
+  const clean = term != null ? String(term).trim() : "";
+  if (!clean) return;
+  setQuery(clean);
+  pushRecentSearch(clean);
+  logAnalytics({ action: "recent_click", recent: clean });
+  scheduleSearch(clean);
+};
+
+const selectCategory = (item, source = "category") => {
+  pushRecentSearch(query());
+  logAnalytics({
+    action: "click",
+    resultType: source,
+    resultId: item?.id,
+    resultKey: item?.key,
+    href: categoryHref(item)
+  });
+  closePanel();
+  setMobileExpanded(false);
+  _.navigate(categoryHref(item));
+};
+
+const selectProduct = (item) => {
+  pushRecentSearch(query());
+  logAnalytics({
+    action: "click",
+    resultType: "product",
+    resultId: item?.id,
+    resultKey: item?.key,
+    href: productHref(item)
+  });
+  closePanel();
+  setMobileExpanded(false);
+  _.navigate(productHref(item));
+};
+
+const activateOption = (opt) => {
+  if (!opt) return;
+  if (opt.type === "category" || opt.type === "popular") {
+    selectCategory(opt.item, opt.type);
+  } else if (opt.type === "product") {
+    selectProduct(opt.item);
+  } else if (opt.type === "recent") {
+    applyRecent(opt.item?.text);
+  } else if (opt.type === "viewAll") {
+    goToSearchPage(query());
+  }
+};
+
+const onSubmit = (event) => {
+  event?.preventDefault?.();
+  const opts = getFlatOptions();
+  const idx = activeIndex();
+  if (idx >= 0 && idx < opts.length) {
+    activateOption(opts[idx]);
+    return;
+  }
+  goToSearchPage(query());
+};
+
+const moveActive = (delta) => {
+  const opts = getFlatOptions();
+  if (!opts.length) {
+    setActiveIndex(-1);
+    return;
+  }
+  setOpen(true);
+  const current = activeIndex();
+  let next = current + delta;
+  if (current < 0) next = delta > 0 ? 0 : opts.length - 1;
+  if (next < 0) next = opts.length - 1;
+  if (next >= opts.length) next = 0;
+  setActiveIndex(next);
+  requestAnimationFrame(() => scrollActiveIntoView());
+};
+
+const onKeyDown = (event) => {
+  const key = event?.key;
+  if (key === "Escape") {
+    event.preventDefault();
+    if (getVariant() === "header" && mobileExpanded()) {
+      collapseMobile();
+      return;
+    }
+    closePanel();
+    inputRef()?.blur?.();
+    return;
+  }
+  if (key === "ArrowDown") {
+    event.preventDefault();
+    moveActive(1);
+    return;
+  }
+  if (key === "ArrowUp") {
+    event.preventDefault();
+    moveActive(-1);
+    return;
+  }
+  if (key === "Home" && showPanel()) {
+    event.preventDefault();
+    if (getFlatOptions().length) {
+      setActiveIndex(0);
+      requestAnimationFrame(() => scrollActiveIntoView());
+    }
+    return;
+  }
+  if (key === "End" && showPanel()) {
+    event.preventDefault();
+    const opts = getFlatOptions();
+    if (opts.length) {
+      setActiveIndex(opts.length - 1);
+      requestAnimationFrame(() => scrollActiveIntoView());
+    }
+  }
+};
+
+const hasResults = () => categories().length > 0 || products().length > 0;
+const hasEmptySuggestions = () =>
+  recentSearches().length > 0 || popularCategories().length > 0;
+
+const showPanel = () => {
+  if (getVariant() === "page") return false;
+  if (!open()) return false;
+  if (error()) return true;
+  if (query().trim()) return true;
+  return hasEmptySuggestions() || loading();
+};
+
+const showEmpty = () =>
+  showPanel() &&
+  !loading() &&
+  !error() &&
+  !!query().trim() &&
+  !hasResults();
+
+const showError = () => !!error() && !loading();
+
+const showIdleSuggestions = () =>
+  showPanel() && !query().trim() && !error();
+
+const isUpdating = () =>
+  loading() && (hasResults() || (!!query().trim() && !error()));
+
+const onDocumentPointerDown = (event) => {
+  const root = rootRef();
+  if (!root) return;
+  if (root.contains?.(event.target)) return;
+  closePanel();
+  if (getVariant() === "header") setMobileExpanded(false);
+};
+
+const onDocumentKeyDown = (event) => {
+  if ((event.metaKey || event.ctrlKey) && String(event.key).toLowerCase() === "k") {
+    event.preventDefault();
+    focusSearch();
+    return;
+  }
+  if (event.key === "Escape") {
+    if (getVariant() === "header" && mobileExpanded()) collapseMobile();
+  }
+};
+
+const onMount = () => {
+  loadRecentSearches();
+  document.addEventListener("pointerdown", onDocumentPointerDown, true);
+  document.addEventListener("keydown", onDocumentKeyDown);
+  return () => {
+    document.removeEventListener("pointerdown", onDocumentPointerDown, true);
+    document.removeEventListener("keydown", onDocumentKeyDown);
+    if (debounceTimer) clearTimeout(debounceTimer);
+    searchSeq += 1;
+  };
+};
+
+_.createEffect(() => {
+  activeIndex();
+  categories();
+  products();
+  recentSearches();
+  popularCategories();
+  requestAnimationFrame(() => scrollActiveIntoView());
+});
+
+if (getVariant() === "page") {
+  _.createEffect(() => {
+    const next =
+      _.searchParams?.q != null ? String(_.searchParams.q).trim() : "";
+    setQuery(next);
+    void runSearch(next);
+  });
+}
+
+return {
+  props,
+  getVariant,
+  query,
+  setQuery,
+  categories,
+  products,
+  popularCategories,
+  recentSearches,
+  categoryTotal,
+  productTotal,
+  loading,
+  error,
+  open,
+  mobileExpanded,
+  activeIndex,
+  setActiveIndex,
+  LISTBOX_ID,
+  setRootRef,
+  setInputRef,
+  setListboxRef,
+  onQueryInput,
+  openPanel,
+  closePanel,
+  expandMobile,
+  collapseMobile,
+  onSubmit,
+  onKeyDown,
+  selectCategory,
+  selectProduct,
+  applyRecent,
+  categoryHref,
+  productHref,
+  searchPageHref,
+  goToSearchPage,
+  hasResults,
+  showPanel,
+  showEmpty,
+  showError,
+  showIdleSuggestions,
+  resultCountLabel,
+  totalsLabel,
+  viewAllLabel,
+  optionId,
+  isOptionActive,
+  activeOptionId,
+  getFlatOptions,
+  applyHighlight,
+  highlightHtml,
+  isUpdating,
+  onMount
+};
+'''
+        key: SiteSearch
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''const isPage = f.getVariant() === "page";
+return `._id {
+  position: relative;
+  display: ${isPage ? "block" : "inline-flex"};
+  align-items: center;
+  width: ${isPage ? "100%" : "auto"};
+  min-width: ${isPage ? "0" : "12rem"};
+  max-width: ${isPage ? "40rem" : "18rem"};
+  flex: ${isPage ? "none" : "1 1 12rem"};
+
+  mark {
+    background: rgba(58, 35, 23, 0.16);
+    color: inherit;
+    font-weight: 700;
+    padding: 0 0.05em;
+  }
+
+  @media (max-width: 768px) {
+    min-width: ${isPage ? "0" : "auto"};
+    max-width: ${isPage ? "none" : "none"};
+    flex: ${isPage ? "none" : "0 0 auto"};
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  ref: f.setRootRef,
+  onMount: () => f.onMount()
+};'''
+      }
+    }
+    {
+      id: "32"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 0.45rem;
+  border: none;
+  background: transparent;
+  color: #3a2317;
+  cursor: pointer;
+
+  @media (max-width: 768px) {
+    display: ${f.getVariant() === "header" && !f.mobileExpanded() ? "inline-flex" : "none"};
+  }
+
+  &:hover { opacity: 0.7; }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "button",
+  type: "button",
+  "attr:aria-label": "Open search",
+  "attr:aria-expanded": () => f.mobileExpanded() === true,
+  "attr:aria-keyshortcuts": "Control+K Meta+K",
+  hide: () => f.getVariant() !== "header",
+  onClick: () => f.expandMobile()
+};'''
+      }
+    }
+    {
+      id: "33"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "icon",
+  icon: "carbon:search",
+  width: 20,
+  height: 20
+};'''
+      }
+    }
+    {
+      id: "34"
+      L: Attr
+      P: {
+        css:
+          '''const isPage = f.getVariant() === "page";
+const expanded = f.mobileExpanded();
+return `._id {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+
+  @media (max-width: 768px) {
+    ${
+      !isPage
+        ? expanded
+          ? `
+      position: fixed;
+      inset: 0;
+      z-index: 1400;
+      width: auto;
+      padding: 0.75rem;
+      background: rgba(245, 230, 211, 0.97);
+      display: flex;
+    `
+          : `display: none;`
+        : ""
+    }
+  }
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return { as: "div" };'''
+      }
+    }
+    {
+      id: "35"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.65rem;
+  color: #3a2317;
+
+  @media (max-width: 768px) {
+    display: ${f.getVariant() === "header" && f.mobileExpanded() ? "flex" : "none"};
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  hide: () => f.getVariant() !== "header"
+};'''
+      }
+    }
+    {
+      id: "36"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return { as: "div", text: "Search" };'''
+      }
+    }
+    {
+      id: "37"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  padding: 0.35rem;
+  border: none;
+  background: transparent;
+  color: #3a2317;
+  cursor: pointer;
+  display: inline-flex;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "button",
+  type: "button",
+  "attr:aria-label": "Close search",
+  onClick: () => f.collapseMobile()
+};'''
+      }
+    }
+    {
+      id: "38"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "icon",
+  icon: "carbon:close",
+  width: 22,
+  height: 22
+};'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''const isPage = f.getVariant() === "page";
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  box-sizing: border-box;
+  padding: ${isPage ? "0.85rem 1rem" : "0.4rem 0.65rem"};
+  border: 1px solid rgba(58, 35, 23, 0.22);
+  border-radius: ${isPage ? "0.5rem" : "999px"};
+  background: ${isPage ? t.var.color.background : "rgba(255, 255, 255, 0.55)"};
+  color: #3a2317;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  &:focus-within {
+    border-color: #3a2317;
+    box-shadow: 0 0 0 2px rgba(58, 35, 23, 0.12);
+  }
+
+  @media (max-width: 768px) {
+    border-radius: ${isPage ? "0.5rem" : "0.65rem"};
+    padding: ${isPage ? "0.85rem 1rem" : "0.7rem 0.85rem"};
+    background: ${isPage ? t.var.color.background : "#fff"};
+  }
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "form",
+  "attr:role": "search",
+  onSubmit: (e) => f.onSubmit(e)
+};'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  flex-shrink: 0;
+  display: inline-flex;
+  color: #3a2317;
+  opacity: 0.75;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "icon",
+  icon: "carbon:search",
+  width: f.getVariant() === "page" ? 22 : 18,
+  height: f.getVariant() === "page" ? 22 : 18
+};'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #3a2317;
+  font: inherit;
+  font-size: ${f.getVariant() === "page" ? "1.05rem" : "0.9rem"};
+
+  &::placeholder { color: rgba(58, 35, 23, 0.55); }
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "input",
+  type: "search",
+  name: "q",
+  autocomplete: "off",
+  "attr:aria-label": "Search products and categories",
+  "attr:aria-autocomplete": "list",
+  "attr:aria-controls": f.LISTBOX_ID,
+  "attr:aria-expanded": () => f.showPanel(),
+  "attr:aria-activedescendant": () => f.activeOptionId(),
+  "attr:aria-keyshortcuts": "Control+K Meta+K",
+  placeholder: c.props?.placeholder || "Search products…",
+  value: f.query(),
+  ref: f.setInputRef,
+  onInput: (e) => f.onQueryInput(e),
+  onFocus: () => f.openPanel(),
+  onKeyDown: (e) => f.onKeyDown(e)
+};'''
+      }
+    }
+    {
+      id: "39"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  "attr:aria-live": "polite",
+  "attr:aria-atomic": "true",
+  text: () => f.resultCountLabel()
+};'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  left: 0;
+  right: 0;
+  z-index: 1200;
+  min-width: 18rem;
+  max-height: min(70vh, 26rem);
+  overflow-y: auto;
+  background: #f5e6d3;
+  border: 1px solid rgba(58, 35, 23, 0.18);
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 28px rgba(58, 35, 23, 0.14);
+  padding: 0.35rem 0;
+
+  @media (max-width: 768px) {
+    position: relative;
+    top: 0.65rem;
+    min-width: 0;
+    max-height: calc(100vh - 7rem);
+    box-shadow: none;
+  }
+}`;'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  id: f.LISTBOX_ID,
+  ref: f.setListboxRef,
+  "attr:role": "listbox",
+  "attr:aria-label": "Search results",
+  hide: () => !f.showPanel()
+};'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  padding: 0.55rem 0.9rem;
+  color: rgba(58, 35, 23, 0.7);
+  font-size: 0.85rem;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  text: () => (f.isUpdating() ? "Updating…" : "Searching…"),
+  hide: () => !f.loading()
+};'''
+      }
+    }
+    {
+      id: "40"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  padding: 0.55rem 0.9rem;
+  color: ${t.var.color.error};
+  font-size: 0.85rem;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  "attr:role": "alert",
+  text: () => f.error() || "Search failed",
+  hide: () => !f.showError() || f.getVariant() === "page"
+};'''
+      }
+    }
+    {
+      id: "49"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  padding: 0.4rem 0.9rem 0.2rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(58, 35, 23, 0.55);
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  text: "Recent",
+  hide: () => !(f.showIdleSuggestions() && f.recentSearches().length > 0)
+};'''
+      }
+    }
+    {
+      id: "50"
+      L: Attr
+      P: {
+        contextName: recentItem
+        loop: true
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  data: () => f.recentSearches().map((text) => ({ text })),
+  hide: () => !(f.showIdleSuggestions() && f.recentSearches().length > 0)
+};'''
+      }
+    }
+    {
+      id: "51"
+      L: Attr
+      P: {
+        css:
+          '''const item = c.recentItem;
+const id = f.optionId("recent", { id: item?.text }, c.index ?? 0);
+const active = f.isOptionActive(id);
+return `._id {
+  display: flex;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.55rem 0.9rem;
+  border: none;
+  background: ${active ? "rgba(0, 0, 0, 0.1)" : "transparent"};
+  color: #3a2317;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  &:hover, &:focus-visible { background: rgba(0, 0, 0, 0.08); outline: none; }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const item = c.recentItem;
+const id = f.optionId("recent", { id: item?.text }, c.index ?? 0);
+return {
+  as: "button",
+  type: "button",
+  id,
+  "attr:role": "option",
+  "attr:aria-selected": () => f.isOptionActive(id),
+  text: item?.text || "",
+  onClick: () => f.applyRecent(item?.text),
+  onMouseEnter: () => {
+    const opts = f.getFlatOptions();
+    const idx = opts.findIndex((opt) => opt.id === id);
+    if (idx >= 0) f.setActiveIndex(idx);
+  }
+};'''
+      }
+    }
+    {
+      id: "52"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  padding: 0.4rem 0.9rem 0.2rem;
+  margin-top: 0.15rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(58, 35, 23, 0.55);
+}`;'''
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  text: "Popular categories",
+  hide: () => !(f.showIdleSuggestions() && f.popularCategories().length > 0)
+};'''
+      }
+    }
+    {
+      id: "53"
+      L: Attr
+      P: {
+        contextName: popularItem
+        loop: true
+        displayOrder: 6
+        componentName: Html
+        props:
+          '''return {
+  data: () => f.popularCategories(),
+  hide: () => !(f.showIdleSuggestions() && f.popularCategories().length > 0)
+};'''
+      }
+    }
+    {
+      id: "54"
+      L: Attr
+      P: {
+        css:
+          '''const item = c.popularItem;
+const id = f.optionId("popular", item, c.index ?? 0);
+const active = f.isOptionActive(id);
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.55rem 0.9rem;
+  border: none;
+  background: ${active ? "rgba(0, 0, 0, 0.1)" : "transparent"};
+  color: #3a2317;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  &:hover, &:focus-visible { background: rgba(0, 0, 0, 0.08); outline: none; }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const item = c.popularItem;
+const id = f.optionId("popular", item, c.index ?? 0);
+return {
+  as: "button",
+  type: "button",
+  id,
+  "attr:role": "option",
+  "attr:aria-selected": () => f.isOptionActive(id),
+  onClick: () => f.selectCategory(item, "popular"),
+  onMouseEnter: () => {
+    const opts = f.getFlatOptions();
+    const idx = opts.findIndex((opt) => opt.id === id);
+    if (idx >= 0) f.setActiveIndex(idx);
+  }
+};'''
+      }
+    }
+    {
+      id: "55"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.3rem;
+  object-fit: cover;
+  background: rgba(58, 35, 23, 0.08);
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const item = c.popularItem;
+const src = item?.imageUrl != null ? String(item.imageUrl).trim() : "";
+return {
+  as: "img",
+  src,
+  alt: "",
+  width: 32,
+  height: 32,
+  hide: () => !src
+};'''
+      }
+    }
+    {
+      id: "56"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const item = c.popularItem;
+return {
+  as: "span",
+  text: item?.name || item?.key || "Category"
+};'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  padding: 0.55rem 0.9rem;
+  color: rgba(58, 35, 23, 0.7);
+  font-size: 0.85rem;
+}`;'''
+        displayOrder: 7
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  text: "No matching products or categories",
+  hide: () => !f.showEmpty()
+};'''
+      }
+    }
+    {
+      id: "57"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  padding: 0.35rem 0.9rem 0.15rem;
+  color: rgba(58, 35, 23, 0.55);
+  font-size: 0.75rem;
+}`;'''
+        displayOrder: 8
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  text: () => f.totalsLabel(),
+  hide: () => !f.totalsLabel() || !f.query().trim()
+};'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  padding: 0.4rem 0.9rem 0.2rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(58, 35, 23, 0.55);
+}`;'''
+        displayOrder: 9
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  text: "Categories",
+  hide: () => f.categories().length === 0
+};'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        contextName: searchCategory
+        loop: true
+        displayOrder: 10
+        componentName: Html
+        props:
+          '''return {
+  data: () => f.categories(),
+  hide: () => f.categories().length === 0
+};'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''const item = c.searchCategory;
+const id = f.optionId("category", item, c.index ?? 0);
+const active = f.isOptionActive(id);
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.55rem 0.9rem;
+  border: none;
+  background: ${active ? "rgba(0, 0, 0, 0.1)" : "transparent"};
+  color: #3a2317;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  &:hover, &:focus-visible { background: rgba(0, 0, 0, 0.08); outline: none; }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const item = c.searchCategory;
+const id = f.optionId("category", item, c.index ?? 0);
+return {
+  as: "button",
+  type: "button",
+  id,
+  "attr:role": "option",
+  "attr:aria-selected": () => f.isOptionActive(id),
+  onClick: () => f.selectCategory(item),
+  onMouseEnter: () => {
+    const opts = f.getFlatOptions();
+    const idx = opts.findIndex((opt) => opt.id === id);
+    if (idx >= 0) f.setActiveIndex(idx);
+  }
+};'''
+      }
+    }
+    {
+      id: "41"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.3rem;
+  object-fit: cover;
+  background: rgba(58, 35, 23, 0.08);
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const item = c.searchCategory;
+const src = item?.imageUrl != null ? String(item.imageUrl).trim() : "";
+return {
+  as: "img",
+  src,
+  alt: "",
+  width: 32,
+  height: 32,
+  hide: () => !src
+};'''
+      }
+    }
+    {
+      id: "58"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return { as: "span" };'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const item = c.searchCategory;
+const label = item?.name || item?.key || "Category";
+return {
+  as: "span",
+  ref: (el) => f.applyHighlight(el, label)
+};'''
+      }
+    }
+    {
+      id: "59"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.75rem;
+  color: rgba(58, 35, 23, 0.55);
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const item = c.searchCategory;
+const path = item?.path != null ? String(item.path).trim() : "";
+const name = item?.name != null ? String(item.name).trim() : "";
+return {
+  as: "span",
+  text: path,
+  hide: () => !path || path === name
+};'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  padding: 0.55rem 0.9rem 0.2rem;
+  margin-top: 0.15rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(58, 35, 23, 0.55);
+}`;'''
+        displayOrder: 11
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  text: "Products",
+  hide: () => f.products().length === 0
+};'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        contextName: searchProduct
+        loop: true
+        displayOrder: 12
+        componentName: Html
+        props:
+          '''return {
+  data: () => f.products(),
+  hide: () => f.products().length === 0
+};'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        css:
+          '''const item = c.searchProduct;
+const id = f.optionId("product", item, c.index ?? 0);
+const active = f.isOptionActive(id);
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.55rem 0.9rem;
+  border: none;
+  background: ${active ? "rgba(0, 0, 0, 0.1)" : "transparent"};
+  color: #3a2317;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  &:hover, &:focus-visible { background: rgba(0, 0, 0, 0.08); outline: none; }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const item = c.searchProduct;
+const id = f.optionId("product", item, c.index ?? 0);
+return {
+  as: "button",
+  type: "button",
+  id,
+  "attr:role": "option",
+  "attr:aria-selected": () => f.isOptionActive(id),
+  onClick: () => f.selectProduct(item),
+  onMouseEnter: () => {
+    const opts = f.getFlatOptions();
+    const idx = opts.findIndex((opt) => opt.id === id);
+    if (idx >= 0) f.setActiveIndex(idx);
+  }
+};'''
+      }
+    }
+    {
+      id: "42"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  flex-shrink: 0;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.3rem;
+  object-fit: cover;
+  background: rgba(58, 35, 23, 0.08);
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const item = c.searchProduct;
+const src = item?.imageUrl != null ? String(item.imageUrl).trim() : "";
+return {
+  as: "img",
+  src,
+  alt: "",
+  width: 36,
+  height: 36,
+  hide: () => !src
+};'''
+      }
+    }
+    {
+      id: "43"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.1rem;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return { as: "span" };'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 600;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const item = c.searchProduct;
+const label = item?.title || item?.key || "Product";
+return {
+  as: "span",
+  ref: (el) => f.applyHighlight(el, label)
+};'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.8rem;
+  color: rgba(58, 35, 23, 0.65);
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const item = c.searchProduct;
+const hint =
+  item?.matchHint != null ? String(item.matchHint).trim() : "";
+const desc =
+  item?.shortDescription != null ? String(item.shortDescription).trim() : "";
+const text = hint || desc;
+return {
+  as: "span",
+  text,
+  hide: () => !text
+};'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        css:
+          '''const active = f.isOptionActive("site-search-opt-view-all");
+return `._id {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 0.25rem;
+  padding: 0.65rem 0.9rem;
+  border: none;
+  border-top: 1px solid rgba(58, 35, 23, 0.12);
+  background: ${active ? "rgba(0, 0, 0, 0.08)" : "transparent"};
+  color: #3a2317;
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-align: left;
+  cursor: pointer;
+  &:hover, &:focus-visible { background: rgba(0, 0, 0, 0.06); outline: none; }
+}`;'''
+        displayOrder: 13
+        componentName: Html
+        props:
+          '''return {
+  as: "button",
+  type: "button",
+  id: "site-search-opt-view-all",
+  "attr:role": "option",
+  "attr:aria-selected": () => f.isOptionActive("site-search-opt-view-all"),
+  text: () => f.viewAllLabel(),
+  hide: () => !f.query().trim() || f.loading() || !!f.error(),
+  onClick: () => f.goToSearchPage(f.query()),
+  onMouseEnter: () => {
+    const opts = f.getFlatOptions();
+    const idx = opts.findIndex((opt) => opt.id === "site-search-opt-view-all");
+    if (idx >= 0) f.setActiveIndex(idx);
+  }
+};'''
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  margin-top: 1.5rem;
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  hide: () => f.getVariant() !== "page"
+};'''
+      }
+    }
+    {
+      id: "20"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: rgba(58, 35, 23, 0.7);
+  font-size: 0.95rem;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  text: () => (f.isUpdating() ? "Updating…" : "Searching…"),
+  hide: () => !(f.getVariant() === "page" && f.loading())
+};'''
+      }
+    }
+    {
+      id: "44"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: ${t.var.color.error};
+  font-size: 0.95rem;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  "attr:role": "alert",
+  text: () => f.error() || "Search failed",
+  hide: () => !(f.getVariant() === "page" && f.showError())
+};'''
+      }
+    }
+    {
+      id: "60"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: rgba(58, 35, 23, 0.6);
+  font-size: 0.9rem;
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  text: () => f.totalsLabel(),
+  hide: () => !(f.getVariant() === "page" && !!f.totalsLabel())
+};'''
+      }
+    }
+    {
+      id: "61"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}`;'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "section",
+  hide: () =>
+    !(
+      f.getVariant() === "page" &&
+      !f.query().trim() &&
+      f.popularCategories().length > 0
+    )
+};'''
+      }
+    }
+    {
+      id: "62"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(58, 35, 23, 0.55);
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return { as: "h2", text: "Popular categories" };'''
+      }
+    }
+    {
+      id: "63"
+      L: Attr
+      P: {
+        contextName: pagePopular
+        loop: true
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return { data: () => f.popularCategories() };'''
+      }
+    }
+    {
+      id: "64"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0;
+  color: #3a2317;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(58, 35, 23, 0.12);
+  font-weight: 500;
+  &:hover { opacity: 0.75; }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const item = c.pagePopular;
+return {
+  as: "a",
+  href: f.categoryHref(item),
+  onClick: (e) => {
+    e?.preventDefault?.();
+    f.selectCategory(item, "popular");
+  }
+};'''
+      }
+    }
+    {
+      id: "65"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.35rem;
+  object-fit: cover;
+  background: rgba(58, 35, 23, 0.08);
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const item = c.pagePopular;
+const src = item?.imageUrl != null ? String(item.imageUrl).trim() : "";
+return {
+  as: "img",
+  src,
+  alt: "",
+  width: 40,
+  height: 40,
+  hide: () => !src
+};'''
+      }
+    }
+    {
+      id: "66"
+      L: Attr
+      P: {
+        css:
+          '''return `._id { min-width: 0; }`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const item = c.pagePopular;
+return {
+  as: "span",
+  text: item?.name || item?.key || "Category"
+};'''
+      }
+    }
+    {
+      id: "21"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: rgba(58, 35, 23, 0.7);
+  font-size: 0.95rem;
+}`;'''
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  text: () =>
+    f.query().trim()
+      ? "No matching products or categories."
+      : "Type to search products and categories, or pick a popular category.",
+  hide: () =>
+    !(
+      f.getVariant() === "page" &&
+      !f.loading() &&
+      !f.error() &&
+      !f.hasResults() &&
+      !( !f.query().trim() && f.popularCategories().length > 0 )
+    )
+};'''
+      }
+    }
+    {
+      id: "22"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}`;'''
+        displayOrder: 6
+        componentName: Html
+        props:
+          '''return {
+  as: "section",
+  hide: () => !(f.getVariant() === "page" && f.categories().length > 0)
+};'''
+      }
+    }
+    {
+      id: "23"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(58, 35, 23, 0.55);
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: () => `Categories (${f.categories().length} of ${f.categoryTotal()})`
+};'''
+      }
+    }
+    {
+      id: "24"
+      L: Attr
+      P: {
+        contextName: pageCategory
+        loop: true
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return { data: () => f.categories() };'''
+      }
+    }
+    {
+      id: "25"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0;
+  color: #3a2317;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(58, 35, 23, 0.12);
+  font-weight: 500;
+  &:hover { opacity: 0.75; }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const item = c.pageCategory;
+return {
+  as: "a",
+  href: f.categoryHref(item),
+  onClick: (e) => {
+    e?.preventDefault?.();
+    f.selectCategory(item);
+  }
+};'''
+      }
+    }
+    {
+      id: "45"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.35rem;
+  object-fit: cover;
+  background: rgba(58, 35, 23, 0.08);
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const item = c.pageCategory;
+const src = item?.imageUrl != null ? String(item.imageUrl).trim() : "";
+return {
+  as: "img",
+  src,
+  alt: "",
+  width: 40,
+  height: 40,
+  hide: () => !src
+};'''
+      }
+    }
+    {
+      id: "67"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return { as: "span" };'''
+      }
+    }
+    {
+      id: "46"
+      L: Attr
+      P: {
+        css:
+          '''return `._id { display: block; }`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const item = c.pageCategory;
+const label = item?.name || item?.key || "Category";
+return {
+  as: "span",
+  ref: (el) => f.applyHighlight(el, label)
+};'''
+      }
+    }
+    {
+      id: "68"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: block;
+  font-size: 0.8rem;
+  color: rgba(58, 35, 23, 0.55);
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const item = c.pageCategory;
+const path = item?.path != null ? String(item.path).trim() : "";
+const name = item?.name != null ? String(item.name).trim() : "";
+return {
+  as: "span",
+  text: path,
+  hide: () => !path || path === name
+};'''
+      }
+    }
+    {
+      id: "26"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}`;'''
+        displayOrder: 7
+        componentName: Html
+        props:
+          '''return {
+  as: "section",
+  hide: () => !(f.getVariant() === "page" && f.products().length > 0)
+};'''
+      }
+    }
+    {
+      id: "27"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(58, 35, 23, 0.55);
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: () => `Products (${f.products().length} of ${f.productTotal()})`
+};'''
+      }
+    }
+    {
+      id: "28"
+      L: Attr
+      P: {
+        contextName: pageProduct
+        loop: true
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return { data: () => f.products() };'''
+      }
+    }
+    {
+      id: "29"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.75rem 0;
+  color: #3a2317;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(58, 35, 23, 0.12);
+  &:hover { opacity: 0.75; }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const item = c.pageProduct;
+return {
+  as: "a",
+  href: f.productHref(item),
+  onClick: (e) => {
+    e?.preventDefault?.();
+    f.selectProduct(item);
+  }
+};'''
+      }
+    }
+    {
+      id: "47"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  flex-shrink: 0;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.35rem;
+  object-fit: cover;
+  background: rgba(58, 35, 23, 0.08);
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const item = c.pageProduct;
+const src = item?.imageUrl != null ? String(item.imageUrl).trim() : "";
+return {
+  as: "img",
+  src,
+  alt: "",
+  width: 48,
+  height: 48,
+  hide: () => !src
+};'''
+      }
+    }
+    {
+      id: "48"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return { as: "span" };'''
+      }
+    }
+    {
+      id: "30"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: block;
+  font-weight: 600;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const item = c.pageProduct;
+const label = item?.title || item?.key || "Product";
+return {
+  as: "span",
+  ref: (el) => f.applyHighlight(el, label)
+};'''
+      }
+    }
+    {
+      id: "31"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: block;
+  font-size: 0.9rem;
+  color: rgba(58, 35, 23, 0.65);
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const item = c.pageProduct;
+const hint =
+  item?.matchHint != null ? String(item.matchHint).trim() : "";
+const desc =
+  item?.shortDescription != null ? String(item.shortDescription).trim() : "";
+const text = hint || desc;
+return {
+  as: "span",
+  text,
+  hide: () => !text
+};'''
+      }
+    }
+  ]
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" }
+    { id: "e32", T: "Attr", S: "2", E: "32" }
+    { id: "e33", T: "Attr", S: "32", E: "33" }
+    { id: "e34", T: "Attr", S: "2", E: "34" }
+    { id: "e35", T: "Attr", S: "34", E: "35" }
+    { id: "e36", T: "Attr", S: "35", E: "36" }
+    { id: "e37", T: "Attr", S: "35", E: "37" }
+    { id: "e38", T: "Attr", S: "37", E: "38" }
+    { id: "e2", T: "Attr", S: "34", E: "3" }
+    { id: "e3", T: "Attr", S: "3", E: "4" }
+    { id: "e4", T: "Attr", S: "3", E: "5" }
+    { id: "e39", T: "Attr", S: "34", E: "39" }
+    { id: "e5", T: "Attr", S: "34", E: "6" }
+    { id: "e6", T: "Attr", S: "6", E: "7" }
+    { id: "e40", T: "Attr", S: "6", E: "40" }
+    { id: "e49", T: "Attr", S: "6", E: "49" }
+    { id: "e50", T: "Attr", S: "6", E: "50" }
+    { id: "e51", T: "Attr", S: "50", E: "51" }
+    { id: "e52", T: "Attr", S: "6", E: "52" }
+    { id: "e53", T: "Attr", S: "6", E: "53" }
+    { id: "e54", T: "Attr", S: "53", E: "54" }
+    { id: "e55", T: "Attr", S: "54", E: "55" }
+    { id: "e56", T: "Attr", S: "54", E: "56" }
+    { id: "e7", T: "Attr", S: "6", E: "8" }
+    { id: "e57", T: "Attr", S: "6", E: "57" }
+    { id: "e8", T: "Attr", S: "6", E: "9" }
+    { id: "e9", T: "Attr", S: "6", E: "10" }
+    { id: "e10", T: "Attr", S: "10", E: "11" }
+    { id: "e41", T: "Attr", S: "11", E: "41" }
+    { id: "e58", T: "Attr", S: "11", E: "58" }
+    { id: "e11", T: "Attr", S: "58", E: "12" }
+    { id: "e59", T: "Attr", S: "58", E: "59" }
+    { id: "e12", T: "Attr", S: "6", E: "13" }
+    { id: "e13", T: "Attr", S: "6", E: "14" }
+    { id: "e14", T: "Attr", S: "14", E: "15" }
+    { id: "e42", T: "Attr", S: "15", E: "42" }
+    { id: "e43", T: "Attr", S: "15", E: "43" }
+    { id: "e15", T: "Attr", S: "43", E: "16" }
+    { id: "e16", T: "Attr", S: "43", E: "17" }
+    { id: "e17", T: "Attr", S: "6", E: "18" }
+    { id: "e18", T: "Attr", S: "2", E: "19" }
+    { id: "e19", T: "Attr", S: "19", E: "20" }
+    { id: "e44", T: "Attr", S: "19", E: "44" }
+    { id: "e60", T: "Attr", S: "19", E: "60" }
+    { id: "e61", T: "Attr", S: "19", E: "61" }
+    { id: "e62", T: "Attr", S: "61", E: "62" }
+    { id: "e63", T: "Attr", S: "61", E: "63" }
+    { id: "e64", T: "Attr", S: "63", E: "64" }
+    { id: "e65", T: "Attr", S: "64", E: "65" }
+    { id: "e66", T: "Attr", S: "64", E: "66" }
+    { id: "e20", T: "Attr", S: "19", E: "21" }
+    { id: "e21", T: "Attr", S: "19", E: "22" }
+    { id: "e22", T: "Attr", S: "22", E: "23" }
+    { id: "e23", T: "Attr", S: "22", E: "24" }
+    { id: "e24", T: "Attr", S: "24", E: "25" }
+    { id: "e45", T: "Attr", S: "25", E: "45" }
+    { id: "e67", T: "Attr", S: "25", E: "67" }
+    { id: "e46", T: "Attr", S: "67", E: "46" }
+    { id: "e68", T: "Attr", S: "67", E: "68" }
+    { id: "e25", T: "Attr", S: "19", E: "26" }
+    { id: "e26", T: "Attr", S: "26", E: "27" }
+    { id: "e27", T: "Attr", S: "26", E: "28" }
+    { id: "e28", T: "Attr", S: "28", E: "29" }
+    { id: "e47", T: "Attr", S: "29", E: "47" }
+    { id: "e48", T: "Attr", S: "29", E: "48" }
+    { id: "e29", T: "Attr", S: "48", E: "30" }
+    { id: "e30", T: "Attr", S: "48", E: "31" }
+  ]
+}

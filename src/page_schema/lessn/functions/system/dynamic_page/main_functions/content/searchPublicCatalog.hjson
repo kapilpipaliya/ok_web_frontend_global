@@ -1,0 +1,475 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Public catalog search across ProductCategory, Product, and ProductVariant. Returns ranked results with thumbs, category paths, totals, variant match counts, and popular categories for empty queries.
+        body:
+          '''
+const {
+  query,
+  tableKey = "products",
+  tableVertexLabel = "Product",
+  limit = 20,
+  popularLimit = 8
+} = c || {};
+
+const rawQuery = query != null ? String(query).trim() : "";
+const searchTerm = rawQuery.toLowerCase();
+
+const resolvedTableKey =
+  tableKey && String(tableKey).trim() !== "" ? String(tableKey).trim() : "products";
+const resolvedTableVertexLabel =
+  tableVertexLabel && String(tableVertexLabel).trim() !== ""
+    ? String(tableVertexLabel).trim()
+    : "Product";
+
+const maxLimit = Math.min(Math.max(Number(limit) || 20, 1), 50);
+const maxPopular = Math.min(Math.max(Number(popularLimit) || 8, 1), 20);
+const fetchLimit = Math.min(maxLimit * 3, 80);
+
+const DEFAULT_PARENT_VERTEX_LABEL = "ProductCategory";
+const DEFAULT_TO_PARENT_EDGE_TYPE = "ParentProductCategory";
+const DEFAULT_IMAGE_RELATIONSHIP_TYPE = "ProductCategoryImage";
+
+const configResult = await s({
+  functionName: "loadTableConfigByKey",
+  contextData: { tableKey: resolvedTableKey }
+});
+
+let parentVertexLabel = DEFAULT_PARENT_VERTEX_LABEL;
+let toParentEdgeType = DEFAULT_TO_PARENT_EDGE_TYPE;
+let imageRelationshipType = DEFAULT_IMAGE_RELATIONSHIP_TYPE;
+let publicReadOk = true;
+
+if (configResult?.result?.success) {
+  const schemaGraph = configResult.graph || configResult?.result?.graph || { vertexes: {} };
+  const partVertexIds = configResult.result.data?.partVertexIds || {};
+
+  const evalConfigBody = (cfgStr) => {
+    if (cfgStr == null || String(cfgStr).trim() === "") return null;
+    try {
+      const configFn = new Function(String(cfgStr));
+      const value = configFn();
+      return value && typeof value === "object" ? value : null;
+    } catch (e) {
+      console.warn("searchPublicCatalog: config eval failed", e);
+      return null;
+    }
+  };
+
+  const stripPartMeta = (value) => {
+    if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+    const { part: _part, ...rest } = value;
+    return rest;
+  };
+
+  const evalPartFromGraph = (graph, partIds, part) => {
+    const vertexId = partIds?.[part];
+    const vertex = graph?.vertexes?.[vertexId];
+    if (!vertex?.P?.config) return null;
+    return evalConfigBody(vertex.P.config);
+  };
+
+  const generalRaw = evalPartFromGraph(schemaGraph, partVertexIds, "general");
+  const general = generalRaw ? stripPartMeta(generalRaw) : {};
+  if (general.publicRead !== true) {
+    publicReadOk = false;
+  }
+
+  const sidebarRaw = evalPartFromGraph(schemaGraph, partVertexIds, "sidebar");
+  const sidebar = sidebarRaw ? stripPartMeta(sidebarRaw) : {};
+  if (sidebar.parentVertexLabel) {
+    parentVertexLabel = String(sidebar.parentVertexLabel).trim() || parentVertexLabel;
+  }
+  if (sidebar.toParentEdgeType) {
+    toParentEdgeType = String(sidebar.toParentEdgeType).trim() || toParentEdgeType;
+  }
+  if (
+    sidebar.imageRelationshipType != null &&
+    String(sidebar.imageRelationshipType).trim() !== ""
+  ) {
+    imageRelationshipType = String(sidebar.imageRelationshipType).trim();
+  }
+}
+
+if (!publicReadOk) {
+  return { success: false, message: "Products table is not publicly readable" };
+}
+
+if (!_.context.nodes) _.context.nodes = {};
+if (!_.context.relationships) _.context.relationships = {};
+
+const fileImageUrl = (fileVertex) => {
+  const payload = _.buildPublicImagePayload(fileVertex?.P, {
+    preferredVariant: "thumb"
+  });
+  return payload?.url || "";
+};
+
+const resolveRelatedFile = (vertex, relType, nodes, relationships) => {
+  const edgeIds = vertex?.OUT?.[relType] || [];
+  for (const edgeId of edgeIds) {
+    const edge = relationships[edgeId];
+    const fileId = edge?.E;
+    const fileVertex = fileId ? nodes[fileId] : null;
+    if (fileVertex) return fileVertex;
+  }
+  return null;
+};
+
+const buildCategoryPath = (vertex, nodes, relationships) => {
+  const names = [];
+  let current = vertex;
+  const seen = new Set();
+  while (current?.id && !seen.has(current.id)) {
+    seen.add(current.id);
+    const label = current.P?.name || current.P?.key;
+    if (label) names.unshift(String(label));
+    const outIds = current.OUT?.[toParentEdgeType] || [];
+    if (!outIds.length) break;
+    const edge = relationships[outIds[0]];
+    const parentId = edge?.E;
+    current = parentId ? nodes[parentId] : null;
+  }
+  return names.join(" › ");
+};
+
+const loadPopularCategories = async () => {
+  const popularResult = await _.session.run(
+    `
+    MATCH (v:${parentVertexLabel})
+    WHERE NOT EXISTS {
+      MATCH (v)-[:${toParentEdgeType}]->(:${parentVertexLabel})
+    }
+    OPTIONAL MATCH (v)-[:${imageRelationshipType}]->(file:File)
+    RETURN v, file
+    ORDER BY COALESCE(v.displayOrder, 0), COALESCE(v.name, v.key, '') ASC
+    LIMIT $limit
+    `,
+    { limit: _.neo4jDriver.int(maxPopular) }
+  );
+  _.processResult(popularResult.records, _.context, ["v", "file"]);
+  const nodes = _.context.nodes || {};
+  const relationships = _.context.relationships || {};
+  return Object.keys(nodes)
+    .map((id) => nodes[id])
+    .filter((node) => {
+      const labels = Array.isArray(node?.L) ? node.L : [];
+      if (!labels.includes(parentVertexLabel)) return false;
+      const out = node.OUT?.[toParentEdgeType];
+      return !out || out.length === 0;
+    })
+    .sort((a, b) => {
+      const orderA = a?.P?.displayOrder ?? 0;
+      const orderB = b?.P?.displayOrder ?? 0;
+      if (orderA !== orderB) return orderA - orderB;
+      return String(a?.P?.name || a?.P?.key || "").localeCompare(
+        String(b?.P?.name || b?.P?.key || "")
+      );
+    })
+    .slice(0, maxPopular)
+    .map((vertex) => {
+      const fileVertex = resolveRelatedFile(
+        vertex,
+        imageRelationshipType,
+        nodes,
+        relationships
+      );
+      return {
+        id: vertex.id,
+        key: vertex.P?.key != null ? String(vertex.P.key) : "",
+        name: vertex.P?.name || vertex.P?.key || "Category",
+        path: vertex.P?.name || vertex.P?.key || "Category",
+        imageUrl: fileImageUrl(fileVertex),
+        kind: "category"
+      };
+    });
+};
+
+if (!searchTerm) {
+  const popularCategories = await loadPopularCategories();
+  return {
+    success: true,
+    data: {
+      query: "",
+      tableKey: resolvedTableKey,
+      tableVertexLabel: resolvedTableVertexLabel,
+      parentVertexLabel,
+      toParentEdgeType,
+      categories: [],
+      products: [],
+      categoryTotal: 0,
+      productTotal: 0,
+      popularCategories
+    },
+    message: "Popular categories"
+  };
+}
+
+const scoreText = (value) => {
+  const text = value != null ? String(value).trim().toLowerCase() : "";
+  if (!text) return 40;
+  if (text === searchTerm) return 0;
+  if (text.startsWith(searchTerm)) return 1;
+  const idx = text.indexOf(searchTerm);
+  if (idx >= 0) return 2 + Math.min(idx, 20) * 0.01;
+  return 40;
+};
+
+const scoreFields = (...values) => {
+  let best = 40;
+  for (const value of values) {
+    const score = scoreText(value);
+    if (score < best) best = score;
+  }
+  return best;
+};
+
+const categoryCountResult = await _.session.run(
+  `
+  MATCH (v:${parentVertexLabel})
+  WHERE toLower(COALESCE(v.name, '')) CONTAINS $searchTerm
+     OR toLower(COALESCE(v.key, '')) CONTAINS $searchTerm
+  RETURN count(DISTINCT v) AS total
+  `,
+  { searchTerm }
+);
+const categoryTotal = Number(categoryCountResult.records[0]?.get("total") || 0);
+
+const productCountResult = await _.session.run(
+  `
+  MATCH (v:${resolvedTableVertexLabel})
+  WHERE toLower(COALESCE(v.title, '')) CONTAINS $searchTerm
+     OR toLower(COALESCE(v.key, '')) CONTAINS $searchTerm
+     OR toLower(COALESCE(v.shortDescription, '')) CONTAINS $searchTerm
+     OR EXISTS {
+       MATCH (v)-[:ProductProductVariant]->(variant:ProductVariant)
+       WHERE toLower(COALESCE(variant.title, '')) CONTAINS $searchTerm
+          OR toLower(COALESCE(variant.sku, '')) CONTAINS $searchTerm
+     }
+  RETURN count(DISTINCT v) AS total
+  `,
+  { searchTerm }
+);
+const productTotal = Number(productCountResult.records[0]?.get("total") || 0);
+
+const categoryResult = await _.session.run(
+  `
+  MATCH (v:${parentVertexLabel})
+  WHERE toLower(COALESCE(v.name, '')) CONTAINS $searchTerm
+     OR toLower(COALESCE(v.key, '')) CONTAINS $searchTerm
+  OPTIONAL MATCH (v)-[:${imageRelationshipType}]->(file:File)
+  OPTIONAL MATCH (v)-[:${toParentEdgeType}*0..8]->(ancestor:${parentVertexLabel})
+  OPTIONAL MATCH (ancestor)-[:${imageRelationshipType}]->(afile:File)
+  RETURN v, file, ancestor, afile
+  ORDER BY COALESCE(v.displayOrder, 0), COALESCE(v.name, v.key, '') ASC
+  LIMIT $limit
+  `,
+  { searchTerm, limit: _.neo4jDriver.int(fetchLimit) }
+);
+_.processResult(categoryResult.records, _.context, ["v", "file", "ancestor", "afile"]);
+
+const parentEdgesResult = await _.session.run(
+  `
+  MATCH (child:${parentVertexLabel})-[r:${toParentEdgeType}]->(parent:${parentVertexLabel})
+  RETURN child, parent, r
+  `
+);
+_.processResult(parentEdgesResult.records, _.context, ["child", "parent"], "r");
+
+const productDirectResult = await _.session.run(
+  `
+  MATCH (v:${resolvedTableVertexLabel})
+  WHERE toLower(COALESCE(v.title, '')) CONTAINS $searchTerm
+     OR toLower(COALESCE(v.key, '')) CONTAINS $searchTerm
+     OR toLower(COALESCE(v.shortDescription, '')) CONTAINS $searchTerm
+  OPTIONAL MATCH (v)-[:ProductThumbnail]->(file:File)
+  RETURN v, file
+  ORDER BY COALESCE(v.title, v.key, '') ASC
+  LIMIT $limit
+  `,
+  { searchTerm, limit: _.neo4jDriver.int(fetchLimit) }
+);
+_.processResult(productDirectResult.records, _.context, ["v", "file"]);
+
+const variantResult = await _.session.run(
+  `
+  MATCH (v:${resolvedTableVertexLabel})-[:ProductProductVariant]->(variant:ProductVariant)
+  WHERE toLower(COALESCE(variant.title, '')) CONTAINS $searchTerm
+     OR toLower(COALESCE(variant.sku, '')) CONTAINS $searchTerm
+  OPTIONAL MATCH (v)-[:ProductThumbnail]->(file:File)
+  RETURN v, variant, file
+  ORDER BY COALESCE(v.title, v.key, '') ASC
+  LIMIT $limit
+  `,
+  { searchTerm, limit: _.neo4jDriver.int(fetchLimit) }
+);
+_.processResult(variantResult.records, _.context, ["v", "variant", "file"]);
+
+const nodes = _.context.nodes || {};
+const relationships = _.context.relationships || {};
+
+const categories = Object.keys(nodes)
+  .map((id) => nodes[id])
+  .filter((node) => {
+    const labels = Array.isArray(node?.L) ? node.L : [];
+    if (!labels.includes(parentVertexLabel)) return false;
+    return scoreFields(node.P?.name, node.P?.key) < 40;
+  })
+  .map((vertex) => {
+    const name = vertex.P?.name || vertex.P?.key || "Category";
+    const key = vertex.P?.key != null ? String(vertex.P.key) : "";
+    const fileVertex = resolveRelatedFile(
+      vertex,
+      imageRelationshipType,
+      nodes,
+      relationships
+    );
+    const path = buildCategoryPath(vertex, nodes, relationships);
+    return {
+      id: vertex.id,
+      key,
+      name,
+      path: path || name,
+      imageUrl: fileImageUrl(fileVertex),
+      kind: "category",
+      _score: scoreFields(key, name)
+    };
+  })
+  .sort((a, b) => a._score - b._score || String(a.name).localeCompare(String(b.name)))
+  .slice(0, maxLimit)
+  .map(({ _score, ...rest }) => rest);
+
+const productMap = new Map();
+
+const upsertProduct = (vertex, extras = {}) => {
+  if (!vertex?.id) return;
+  const labels = Array.isArray(vertex.L) ? vertex.L : [];
+  if (!labels.includes(resolvedTableVertexLabel)) return;
+
+  const key = vertex.P?.key != null ? String(vertex.P.key) : "";
+  const title = vertex.P?.title || vertex.P?.key || "Product";
+  const shortDescription =
+    vertex.P?.shortDescription != null ? String(vertex.P.shortDescription) : "";
+  const fileVertex = resolveRelatedFile(
+    vertex,
+    "ProductThumbnail",
+    nodes,
+    relationships
+  );
+  const imageUrl = fileImageUrl(fileVertex);
+  const baseScore = scoreFields(key, title, shortDescription);
+  const variantScore =
+    extras.matchScore != null ? Number(extras.matchScore) : 40;
+  const score = Math.min(baseScore, variantScore);
+  const addVariant = extras.fromVariant === true ? 1 : 0;
+
+  const prev = productMap.get(vertex.id);
+  if (!prev) {
+    productMap.set(vertex.id, {
+      id: vertex.id,
+      key,
+      title,
+      shortDescription,
+      imageUrl: imageUrl || "",
+      matchHint: extras.matchHint || "",
+      variantMatchCount: addVariant,
+      kind: "product",
+      _score: score
+    });
+    return;
+  }
+
+  prev.variantMatchCount = (prev.variantMatchCount || 0) + addVariant;
+  if (score < prev._score) {
+    prev._score = score;
+    if (extras.matchHint) prev.matchHint = extras.matchHint;
+  } else if (!prev.matchHint && extras.matchHint) {
+    prev.matchHint = extras.matchHint;
+  }
+  if (!prev.imageUrl && imageUrl) prev.imageUrl = imageUrl;
+};
+
+for (const id of Object.keys(nodes)) {
+  const node = nodes[id];
+  const labels = Array.isArray(node?.L) ? node.L : [];
+  if (!labels.includes(resolvedTableVertexLabel)) continue;
+  if (scoreFields(node.P?.key, node.P?.title, node.P?.shortDescription) >= 40) {
+    continue;
+  }
+  upsertProduct(node);
+}
+
+for (const id of Object.keys(nodes)) {
+  const variant = nodes[id];
+  const labels = Array.isArray(variant?.L) ? variant.L : [];
+  if (!labels.includes("ProductVariant")) continue;
+
+  const variantTitle = variant.P?.title != null ? String(variant.P.title) : "";
+  const variantSku = variant.P?.sku != null ? String(variant.P.sku) : "";
+  const variantScore = scoreFields(variantTitle, variantSku);
+  if (variantScore >= 40) continue;
+
+  const inEdgeIds = variant.IN?.ProductProductVariant || [];
+  for (const edgeId of inEdgeIds) {
+    const edge = relationships[edgeId];
+    const productId = edge?.S;
+    const productVertex = productId ? nodes[productId] : null;
+    if (!productVertex) continue;
+    let hint = "";
+    if (variantSku && scoreText(variantSku) < 40) hint = `SKU ${variantSku}`;
+    else if (variantTitle && scoreText(variantTitle) < 40) hint = variantTitle;
+    upsertProduct(productVertex, {
+      matchScore: variantScore + 0.05,
+      matchHint: hint,
+      fromVariant: true
+    });
+  }
+}
+
+const products = Array.from(productMap.values())
+  .sort(
+    (a, b) =>
+      a._score - b._score || String(a.title).localeCompare(String(b.title))
+  )
+  .slice(0, maxLimit)
+  .map(({ _score, variantMatchCount, matchHint, ...rest }) => {
+    const count = Number(variantMatchCount) || 0;
+    let hint = matchHint || "";
+    if (count > 1) {
+      hint = `${count} variants matched`;
+    } else if (count === 1 && !hint) {
+      hint = "1 variant matched";
+    }
+    return {
+      ...rest,
+      variantMatchCount: count,
+      matchHint: hint
+    };
+  });
+
+return {
+  success: true,
+  data: {
+    query: rawQuery,
+    tableKey: resolvedTableKey,
+    tableVertexLabel: resolvedTableVertexLabel,
+    parentVertexLabel,
+    toParentEdgeType,
+    categories,
+    products,
+    categoryTotal,
+    productTotal,
+    popularCategories: []
+  },
+  message: `Found ${categoryTotal} categor${categoryTotal === 1 ? "y" : "ies"} and ${productTotal} product${productTotal === 1 ? "" : "s"}`
+};
+'''
+        key: searchPublicCatalog
+      }
+    }
+  ]
+  edges: []
+}

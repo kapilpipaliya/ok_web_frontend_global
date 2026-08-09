@@ -194,7 +194,7 @@ return {
           '''return `._id {
   display: inline-flex;
   flex-wrap: wrap;
-  gap: 0;
+  gap: 0.75rem;
   align-items: center;
   justify-content: flex-start;
   min-width: 0;
@@ -292,42 +292,12 @@ return {
       id: "11"
       L: Attr
       P: {
-        css:
-          '''return `._id {
-  padding: 0.5rem;
-  background: none;
-  border: none;
-  color: #3a2317;
-  cursor: pointer;
-  transition: opacity 0.2s ease;
-  display: flex;
-  align-items: center;
-
-  &:hover {
-    opacity: 0.7;
-  }
-}`;'''
         displayOrder: 2
-        componentName: Html
+        componentName: SiteSearch
         props:
           '''return {
-  as: "button",
-  hide: true
-};'''
-      }
-    }
-    {
-      id: "12"
-      L: Attr
-      P: {
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''return {
-  as: "icon",
-  icon: "carbon:search",
-  width: 20,
-  height: 20
+  variant: "header",
+  placeholder: "Search…"
 };'''
       }
     }
@@ -671,12 +641,6 @@ return {
       T: Attr
       S: "9"
       E: "11"
-    }
-    {
-      id: e14
-      T: Attr
-      S: "11"
-      E: "12"
     }
     {
       id: e15

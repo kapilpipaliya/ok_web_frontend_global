@@ -1,0 +1,127 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        public: true
+        isNoPermissionCheck: true
+        fns: return { enabled: () => true }
+        url: /search
+        key: Search
+        title: Search
+        props:
+          '''
+return {
+  enabled: () => true
+};
+'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  padding: 2.5rem 1rem 4rem;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "main"
+};'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  max-width: 720px;
+  margin: 0 auto;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+};'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0 0 0.5rem;
+  color: #3a2317;
+  font-size: 2rem;
+  font-weight: 600;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h1",
+  text: "Search"
+};'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0 0 1.25rem;
+  color: rgba(58, 35, 23, 0.7);
+  font-size: 1rem;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Find product categories and products."
+};'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: SiteSearch
+        props:
+          '''const query =
+  _.searchParams?.q != null ? String(_.searchParams.q).trim() : "";
+return {
+  variant: "page",
+  initialQuery: query,
+  placeholder: "Search products and categories…",
+  limit: 40
+};'''
+      }
+    }
+    {
+      id: "7"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: Layout
+      }
+    }
+  ]
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" }
+    { id: "e2", T: "PageLayout", S: "1", E: "7" }
+    { id: "e3", T: "Attr", S: "2", E: "3" }
+    { id: "e4", T: "Attr", S: "3", E: "4" }
+    { id: "e5", T: "Attr", S: "3", E: "5" }
+    { id: "e6", T: "Attr", S: "3", E: "6" }
+  ]
+}
