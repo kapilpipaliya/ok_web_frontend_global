@@ -7,7 +7,7 @@
         fns: return { enabled: () => true }
         url: /titles
         key: Titles
-        updatedAt: 2026-08-07T03:50:00.000Z
+        updatedAt: 2026-08-09T11:05:00.000Z
         props:
           '''return {
   isNoPermissionCheck: true
@@ -29,7 +29,12 @@
 }`;'''
         displayOrder: 1
         fns:
-          '''const YOUTUBE_DEFAULTS = {
+          '''const CONFIG_STORAGE_KEY = "ddp-titles-config";
+const NOTES_STORAGE_KEY = "ddp-titles-episode-notes";
+const TAB_NOTES_STORAGE_KEY = "ddp-titles-tab-notes";
+const YOUTUBE_TITLE_SOFT_LIMIT = 100;
+
+const YOUTUBE_DEFAULTS = {
   from: "1",
   to: "705",
   startDate: "2026-06-25",
@@ -47,7 +52,7 @@
   imageFilePattern: "DDP # {episode}.jpg"
 };
 
-const DAVINCI_DEFAULTS = {
+const BG_VIDEOS_DEFAULTS = {
   from: "1",
   to: "705",
   startDate: "2026-06-25",
@@ -65,46 +70,186 @@ const DAVINCI_DEFAULTS = {
   imageFilePattern: "DDP # {episode}.jpg"
 };
 
-const [youtubeConfig, setYoutubeConfig] = _.createSignal({ ...YOUTUBE_DEFAULTS });
-const [davinciConfig, setDavinciConfig] = _.createSignal({ ...DAVINCI_DEFAULTS });
-const [youtubeFormFns, setYoutubeFormFns] = _.createSignal(null);
-const [davinciFormFns, setDavinciFormFns] = _.createSignal(null);
-
-const activeMode = _.atom("youtube");
-const selectedDate = _.atom(_.dateFns.format(_.dateFns.startOfToday(), "yyyy-MM-dd"));
-const activeFormat = _.atom("today");
-const copiedTitle = _.atom("");
-
-const config = () => (activeMode() === "davinci" ? davinciConfig() : youtubeConfig());
-
-const readConfigFromForm = (formFns, defaults) => {
-  if (!formFns?.getFieldValue) return { ...defaults };
+const mergeConfig = (defaults, stored) => {
+  if (!stored || typeof stored !== "object") return { ...defaults };
   const next = { ...defaults };
   for (const key of Object.keys(defaults)) {
-    const value = formFns.getFieldValue(key);
-    if (value !== undefined && value !== null && value !== "") {
-      next[key] = value;
+    if (stored[key] !== undefined && stored[key] !== null) {
+      next[key] = stored[key];
     }
   }
   return next;
 };
 
-const registerYoutubeFormFns = (formFns) => {
-  setYoutubeFormFns(formFns);
-  setYoutubeConfig(readConfigFromForm(formFns, YOUTUBE_DEFAULTS));
+const [youtubeConfig, setYoutubeConfig] = _.createSignal({ ...YOUTUBE_DEFAULTS });
+const [bgVideosConfig, setBgVideosConfig] = _.createSignal({ ...BG_VIDEOS_DEFAULTS });
+const [youtubeFormFns, setYoutubeFormFns] = _.createSignal(null);
+const [bgVideosFormFns, setBgVideosFormFns] = _.createSignal(null);
+const [episodeNotes, setEpisodeNotes] = _.createSignal({ youtube: {}, bgVideos: {} });
+const [tabNotes, setTabNotes] = _.createSignal({ youtube: "", bgVideos: "" });
+
+const activeMode = _.atom("youtube");
+const selectedDate = _.atom(_.dateFns.format(_.dateFns.startOfToday(), "yyyy-MM-dd"));
+const activeFormat = _.atom("today");
+const copiedTitle = _.atom("");
+const jumpEpisode = _.atom("");
+
+const config = () => (activeMode() === "bgVideos" ? bgVideosConfig() : youtubeConfig());
+
+const persistConfigs = (youtube, bgVideos) => {
+  try {
+    localStorage.setItem(
+      CONFIG_STORAGE_KEY,
+      JSON.stringify({ youtube, bgVideos })
+    );
+  } catch (error) {
+    console.error("Failed to save title config:", error);
+  }
 };
 
-const registerDavinciFormFns = (formFns) => {
-  setDavinciFormFns(formFns);
-  setDavinciConfig(readConfigFromForm(formFns, DAVINCI_DEFAULTS));
+const applyConfigToForm = (formFns, cfg) => {
+  if (!formFns?.setFieldValue || !cfg) return;
+  for (const key of Object.keys(cfg)) {
+    formFns.setFieldValue(key, cfg[key]);
+  }
+};
+
+const readStoredConfigs = () => {
+  try {
+    const raw = localStorage.getItem(CONFIG_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return {
+      youtube: mergeConfig(YOUTUBE_DEFAULTS, parsed?.youtube),
+      bgVideos: mergeConfig(BG_VIDEOS_DEFAULTS, parsed?.bgVideos)
+    };
+  } catch (error) {
+    console.error("Failed to load title config:", error);
+    return null;
+  }
+};
+
+const loadStoredState = () => {
+  const stored = readStoredConfigs();
+  if (stored) {
+    setYoutubeConfig(stored.youtube);
+    setBgVideosConfig(stored.bgVideos);
+    applyConfigToForm(youtubeFormFns(), stored.youtube);
+    applyConfigToForm(bgVideosFormFns(), stored.bgVideos);
+  }
+
+  try {
+    const rawNotes = localStorage.getItem(NOTES_STORAGE_KEY);
+    if (rawNotes) {
+      const parsed = JSON.parse(rawNotes);
+      setEpisodeNotes({
+        youtube: parsed?.youtube && typeof parsed.youtube === "object" ? parsed.youtube : {},
+        bgVideos: parsed?.bgVideos && typeof parsed.bgVideos === "object" ? parsed.bgVideos : {}
+      });
+    }
+  } catch (error) {
+    console.error("Failed to load episode notes:", error);
+  }
+
+  try {
+    const rawTabNotes = localStorage.getItem(TAB_NOTES_STORAGE_KEY);
+    if (rawTabNotes) {
+      const parsed = JSON.parse(rawTabNotes);
+      setTabNotes({
+        youtube: parsed?.youtube != null ? String(parsed.youtube) : "",
+        bgVideos: parsed?.bgVideos != null ? String(parsed.bgVideos) : ""
+      });
+    }
+  } catch (error) {
+    console.error("Failed to load tab notes:", error);
+  }
+};
+
+const persistNotes = (nextNotes) => {
+  try {
+    localStorage.setItem(NOTES_STORAGE_KEY, JSON.stringify(nextNotes));
+  } catch (error) {
+    console.error("Failed to save episode notes:", error);
+  }
+};
+
+const persistTabNotes = (nextNotes) => {
+  try {
+    localStorage.setItem(TAB_NOTES_STORAGE_KEY, JSON.stringify(nextNotes));
+  } catch (error) {
+    console.error("Failed to save tab notes:", error);
+  }
+};
+
+const youtubeTabNote = () => String(tabNotes()?.youtube ?? "");
+const bgVideosTabNote = () => String(tabNotes()?.bgVideos ?? "");
+
+const handleYoutubeTabNoteInput = (event) => {
+  const value = event.currentTarget?.value ?? "";
+  setTabNotes((prev) => {
+    const next = { youtube: value, bgVideos: String(prev?.bgVideos ?? "") };
+    persistTabNotes(next);
+    return next;
+  });
+};
+
+const handleBgVideosTabNoteInput = (event) => {
+  const value = event.currentTarget?.value ?? "";
+  setTabNotes((prev) => {
+    const next = { youtube: String(prev?.youtube ?? ""), bgVideos: value };
+    persistTabNotes(next);
+    return next;
+  });
+};
+
+const noteKeyForEpisode = (episode) => String(episode);
+
+const registerYoutubeFormFns = (formFns) => {
+  setYoutubeFormFns(formFns);
+  const stored = readStoredConfigs();
+  const cfg = stored?.youtube || youtubeConfig();
+  setYoutubeConfig(cfg);
+  applyConfigToForm(formFns, cfg);
+};
+
+const registerBgVideosFormFns = (formFns) => {
+  setBgVideosFormFns(formFns);
+  const stored = readStoredConfigs();
+  const cfg = stored?.bgVideos || bgVideosConfig();
+  setBgVideosConfig(cfg);
+  applyConfigToForm(formFns, cfg);
 };
 
 const handleYoutubeFieldChange = (fieldKey, value) => {
-  setYoutubeConfig((prev) => ({ ...prev, [fieldKey]: value }));
+  setYoutubeConfig((prev) => {
+    const next = { ...prev, [fieldKey]: value };
+    persistConfigs(next, bgVideosConfig());
+    return next;
+  });
 };
 
-const handleDavinciFieldChange = (fieldKey, value) => {
-  setDavinciConfig((prev) => ({ ...prev, [fieldKey]: value }));
+const handleBgVideosFieldChange = (fieldKey, value) => {
+  setBgVideosConfig((prev) => {
+    const next = { ...prev, [fieldKey]: value };
+    persistConfigs(youtubeConfig(), next);
+    return next;
+  });
+};
+
+const resetYoutubeConfig = () => {
+  const next = { ...YOUTUBE_DEFAULTS };
+  setYoutubeConfig(next);
+  applyConfigToForm(youtubeFormFns(), next);
+  persistConfigs(next, bgVideosConfig());
+  _.showSuccessToast?.("YouTube form reset to defaults");
+};
+
+const resetBgVideosConfig = () => {
+  const next = { ...BG_VIDEOS_DEFAULTS };
+  setBgVideosConfig(next);
+  applyConfigToForm(bgVideosFormFns(), next);
+  persistConfigs(youtubeConfig(), next);
+  _.showSuccessToast?.("BG Videos form reset to defaults");
 };
 
 function parseYmd(value) {
@@ -182,7 +327,7 @@ const titles = () => {
   const mode = activeMode();
   const cfg = config();
   const fallback =
-    mode === "davinci"
+    mode === "bgVideos"
       ? "DDP{episodeMarker}{episode}-{date}"
       : "{topic}{separator}{series} {episodeMarker} {episode}{separator}{speaker}{separator}{brand}{separator}{date}";
   return generateTitles(cfg, fallback);
@@ -235,7 +380,7 @@ const todayHeading = () => {
   const cfg = config();
   const vars = buildTitleVars(cfg, episode, parseYmd(selectedDate()), "");
   const fallback =
-    activeMode() === "davinci"
+    activeMode() === "bgVideos"
       ? "DDP{episodeMarker}{episode}-{date}"
       : "{series} {episodeMarker} {episode}";
   const template = String(cfg.episodeHeadingTemplate || "").trim() || fallback;
@@ -248,6 +393,201 @@ const todayTitle = () => {
   const from = Number(config().from);
   return titles()[episode - from] ?? "";
 };
+
+const todayTitleLength = () => todayTitle().length;
+
+const todayTitleOverLimit = () =>
+  activeMode() === "youtube" && todayTitleLength() > YOUTUBE_TITLE_SOFT_LIMIT;
+
+const todayTitleLengthLabel = () => {
+  const length = todayTitleLength();
+  if (!length) return "";
+  if (activeMode() !== "youtube") return `${length} chars`;
+  return todayTitleOverLimit()
+    ? `${length} / ${YOUTUBE_TITLE_SOFT_LIMIT} chars — over YouTube soft limit`
+    : `${length} / ${YOUTUBE_TITLE_SOFT_LIMIT} chars`;
+};
+
+const todayNote = () => {
+  const episode = todayEpisode();
+  if (episode == null) return "";
+  const mode = activeMode();
+  return String(episodeNotes()?.[mode]?.[noteKeyForEpisode(episode)] ?? "");
+};
+
+const handleTodayNoteInput = (event) => {
+  const episode = todayEpisode();
+  if (episode == null) return;
+  const mode = activeMode();
+  const key = noteKeyForEpisode(episode);
+  const value = event.currentTarget?.value ?? "";
+  setEpisodeNotes((prev) => {
+    const next = {
+      youtube: { ...(prev?.youtube || {}) },
+      bgVideos: { ...(prev?.bgVideos || {}) }
+    };
+    if (value) {
+      next[mode] = { ...next[mode], [key]: value };
+    } else {
+      const modeNotes = { ...next[mode] };
+      delete modeNotes[key];
+      next[mode] = modeNotes;
+    }
+    persistNotes(next);
+    return next;
+  });
+};
+
+const dateForEpisode = (episode) => {
+  const start = rangeStart();
+  const from = Number(config().from);
+  const count = Number(config().to);
+  if (!start || !Number.isFinite(from) || !Number.isFinite(count) || !Number.isFinite(episode)) {
+    return null;
+  }
+  if (episode < from || episode > from + count - 1) return null;
+  return _.dateFns.addDays(start, episode - from);
+};
+
+const jumpToEpisode = (raw) => {
+  const episode = Number(String(raw ?? jumpEpisode()).trim());
+  if (!Number.isFinite(episode)) {
+    _.showWarningToast?.("Enter a valid episode number");
+    return;
+  }
+  const date = dateForEpisode(episode);
+  if (!date) {
+    _.showWarningToast?.("Episode is outside the configured range");
+    return;
+  }
+  selectedDate(_.dateFns.format(date, "yyyy-MM-dd"));
+  jumpEpisode(String(episode));
+  activeFormat("today");
+};
+
+const jumpToDate = (raw) => {
+  const date = parseYmd(raw);
+  if (!date) {
+    _.showWarningToast?.("Enter a valid date");
+    return;
+  }
+  const start = rangeStart();
+  const end = rangeEnd();
+  if (!start || !end || _.dateFns.isBefore(date, start) || _.dateFns.isAfter(date, end)) {
+    _.showWarningToast?.("Date is outside the configured range");
+    return;
+  }
+  selectedDate(_.dateFns.format(date, "yyyy-MM-dd"));
+  const episode = todayEpisode();
+  if (episode != null) jumpEpisode(String(episode));
+  activeFormat("today");
+};
+
+const handleJumpDateChange = (event) => {
+  const value = event.currentTarget?.value ?? "";
+  if (!value) return;
+  jumpToDate(value);
+};
+
+const handleJumpEpisodeInput = (event) => {
+  jumpEpisode(event.currentTarget?.value ?? "");
+};
+
+const handleJumpEpisodeKeyDown = (event) => {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    jumpToEpisode(event.currentTarget?.value);
+  }
+};
+
+const copyTodayTitle = async () => {
+  const text = todayTitle();
+  if (!text) {
+    _.showWarningToast?.("No title for this date");
+    return;
+  }
+  await copyTitle(text);
+};
+
+const buildExportRows = () => {
+  const cfg = config();
+  const start = rangeStart();
+  const from = Number(cfg.from);
+  const list = titles();
+  const mode = activeMode();
+  const notes = episodeNotes()?.[mode] || {};
+  const dateFormat = String(cfg.dateFormat || "yyyy-MM-dd").trim() || "yyyy-MM-dd";
+  return list.map((title, i) => {
+    const episode = from + i;
+    const dateObj = start ? _.dateFns.addDays(start, i) : null;
+    return {
+      episode: padEpisode(episode, cfg.episodePad),
+      episodeNumber: episode,
+      date: dateObj ? _.dateFns.format(dateObj, dateFormat) : "",
+      title,
+      note: String(notes[noteKeyForEpisode(episode)] ?? "")
+    };
+  });
+};
+
+const csvEscape = (value) => {
+  const text = String(value ?? "");
+  if (/[",\n\r]/.test(text)) {
+    return `"${text.replace(/"/g, '""')}"`;
+  }
+  return text;
+};
+
+const downloadFile = (filename, content, mime) => {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = filename;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(url);
+};
+
+const modeFilePrefix = () => (activeMode() === "bgVideos" ? "ddp-bg-videos" : "ddp-youtube");
+
+const downloadTitlesTxt = () => {
+  const rows = buildExportRows();
+  if (!rows.length) {
+    _.showWarningToast?.("No titles to download");
+    return;
+  }
+  const content = rows.map((row) => row.title).join("\n");
+  downloadFile(`${modeFilePrefix()}-titles.txt`, content, "text/plain;charset=utf-8");
+  _.showSuccessToast?.("Downloaded .txt");
+};
+
+const downloadTitlesCsv = () => {
+  const rows = buildExportRows();
+  if (!rows.length) {
+    _.showWarningToast?.("No titles to download");
+    return;
+  }
+  const header = ["episode", "date", "title", "note"];
+  const lines = [
+    header.join(","),
+    ...rows.map((row) =>
+      [row.episode, row.date, row.title, row.note].map(csvEscape).join(",")
+    )
+  ];
+  downloadFile(
+    `${modeFilePrefix()}-titles.csv`,
+    lines.join("\n"),
+    "text/csv;charset=utf-8"
+  );
+  _.showSuccessToast?.("Downloaded .csv");
+};
+
+const titleLengthFor = (title) => String(title ?? "").length;
+
+const isTitleOverLimit = (title) =>
+  activeMode() === "youtube" && titleLengthFor(title) > YOUTUBE_TITLE_SOFT_LIMIT;
 
 const canGoPrev = () => {
   const selected = parseYmd(selectedDate());
@@ -268,6 +608,8 @@ const goPrev = () => {
   const start = rangeStart();
   if (!selected || !start || !canGoPrev()) return;
   selectedDate(_.dateFns.format(_.dateFns.subDays(selected, 1), "yyyy-MM-dd"));
+  const episode = todayEpisode();
+  if (episode != null) jumpEpisode(String(episode));
 };
 
 const goNext = () => {
@@ -275,6 +617,8 @@ const goNext = () => {
   const end = rangeEnd();
   if (!selected || !end || !canGoNext()) return;
   selectedDate(_.dateFns.format(_.dateFns.addDays(selected, 1), "yyyy-MM-dd"));
+  const episode = todayEpisode();
+  if (episode != null) jumpEpisode(String(episode));
 };
 
 const copyTitle = async (text) => {
@@ -304,31 +648,57 @@ return {
   enabled: () => true,
   activeMode,
   youtubeConfig,
-  davinciConfig,
+  bgVideosConfig,
   registerYoutubeFormFns,
-  registerDavinciFormFns,
+  registerBgVideosFormFns,
   handleYoutubeFieldChange,
-  handleDavinciFieldChange,
+  handleBgVideosFieldChange,
+  resetYoutubeConfig,
+  resetBgVideosConfig,
+  loadStoredState,
+  youtubeTabNote,
+  bgVideosTabNote,
+  handleYoutubeTabNoteInput,
+  handleBgVideosTabNoteInput,
+  todayNote,
+  handleTodayNoteInput,
   selectedDate,
   activeFormat,
   copiedTitle,
+  jumpEpisode,
+  handleJumpEpisodeInput,
+  handleJumpEpisodeKeyDown,
+  jumpToEpisode,
+  handleJumpDateChange,
   titles,
   todayEpisode,
   todayEpisodePadded,
   todayImageUrl,
   todayHeading,
   todayTitle,
+  todayTitleLength,
+  todayTitleOverLimit,
+  todayTitleLengthLabel,
+  titleLengthFor,
+  isTitleOverLimit,
+  youtubeTitleSoftLimit: YOUTUBE_TITLE_SOFT_LIMIT,
   canGoPrev,
   canGoNext,
   goPrev,
   goNext,
   copyTitle,
-  copyAllTitles
+  copyTodayTitle,
+  copyAllTitles,
+  downloadTitlesTxt,
+  downloadTitlesCsv
 };'''
         componentName: Html
         props:
           '''return {
-  as: "div"
+  as: "div",
+  onMount: () => {
+    f.loadStoredState();
+  }
 };'''
       }
     }
@@ -406,7 +776,7 @@ return {
       L: Attr
       P: {
         css:
-          '''const active = f.activeMode() === "davinci";
+          '''const active = f.activeMode() === "bgVideos";
 return `._id {
   padding: 0.625rem 1.125rem;
   border: 1px solid ${active ? t.var.color.primary : t.var.color.border};
@@ -419,14 +789,14 @@ return `._id {
         displayOrder: 2
         componentName: Html
         props:
-          '''const active = f.activeMode() === "davinci";
+          '''const active = f.activeMode() === "bgVideos";
 return {
   as: "button",
   type: "button",
   role: "tab",
   "aria-selected": active ? "true" : "false",
-  text: "DDP-DaVinci",
-  onClick: () => f.activeMode("davinci")
+  text: "DDP-BG-Videos",
+  onClick: () => f.activeMode("bgVideos")
 };'''
       }
     }
@@ -499,7 +869,8 @@ Placeholders: `{topic}`, `{series}`, `{episodeMarker}`, `{episode}`, `{speaker}`
         displayOrder: 2
         componentName: FormManagement
         props:
-          '''return {
+          '''const cfg = f.youtubeConfig();
+return {
   mode: "add",
   vertexLabel: "DdpYoutubeTitleConfig",
   hideActionsBar: true,
@@ -520,7 +891,7 @@ Placeholders: `{topic}`, `{series}`, `{episodeMarker}`, `{episode}`, `{speaker}`
             renderer: "text",
             required: true,
             colSpan: 1,
-            defaultValue: "1",
+            defaultValue: cfg.from,
             placeholder: "1"
           },
           {
@@ -530,7 +901,7 @@ Placeholders: `{topic}`, `{series}`, `{episodeMarker}`, `{episode}`, `{speaker}`
             renderer: "text",
             required: true,
             colSpan: 1,
-            defaultValue: "705",
+            defaultValue: cfg.to,
             placeholder: "705",
             tooltip: "Number of titles to generate from the start episode"
           },
@@ -541,7 +912,7 @@ Placeholders: `{topic}`, `{series}`, `{episodeMarker}`, `{episode}`, `{speaker}`
             renderer: "date",
             required: true,
             colSpan: 1,
-            defaultValue: "2026-06-25"
+            defaultValue: cfg.startDate
           },
           {
             key: "episodePad",
@@ -550,7 +921,7 @@ Placeholders: `{topic}`, `{series}`, `{episodeMarker}`, `{episode}`, `{speaker}`
             renderer: "text",
             required: true,
             colSpan: 1,
-            defaultValue: "3",
+            defaultValue: cfg.episodePad,
             placeholder: "3",
             tooltip: "Zero-pad width for episode numbers (e.g. 3 → 001)"
           }
@@ -568,7 +939,7 @@ Placeholders: `{topic}`, `{series}`, `{episodeMarker}`, `{episode}`, `{speaker}`
             renderer: "text",
             required: false,
             colSpan: 2,
-            defaultValue: "द्रव्यदृष्टि प्रकाश",
+            defaultValue: cfg.seriesName,
             placeholder: "द्रव्यदृष्टि प्रकाश"
           },
           {
@@ -578,7 +949,7 @@ Placeholders: `{topic}`, `{series}`, `{episodeMarker}`, `{episode}`, `{speaker}`
             renderer: "text",
             required: false,
             colSpan: 1,
-            defaultValue: "#",
+            defaultValue: cfg.episodeMarker,
             placeholder: "#"
           },
           {
@@ -588,7 +959,7 @@ Placeholders: `{topic}`, `{series}`, `{episodeMarker}`, `{episode}`, `{speaker}`
             renderer: "text",
             required: false,
             colSpan: 1,
-            defaultValue: " | ",
+            defaultValue: cfg.separator,
             placeholder: " | "
           },
           {
@@ -598,7 +969,7 @@ Placeholders: `{topic}`, `{series}`, `{episodeMarker}`, `{episode}`, `{speaker}`
             renderer: "text",
             required: false,
             colSpan: 1,
-            defaultValue: "निहालचंद्रजी सोगानी"
+            defaultValue: cfg.speaker
           },
           {
             key: "brand",
@@ -607,7 +978,7 @@ Placeholders: `{topic}`, `{series}`, `{episodeMarker}`, `{episode}`, `{speaker}`
             renderer: "text",
             required: false,
             colSpan: 1,
-            defaultValue: "Fulchand"
+            defaultValue: cfg.brand
           },
           {
             key: "dateFormat",
@@ -616,7 +987,7 @@ Placeholders: `{topic}`, `{series}`, `{episodeMarker}`, `{episode}`, `{speaker}`
             renderer: "text",
             required: false,
             colSpan: 1,
-            defaultValue: "yyyy-MM-dd",
+            defaultValue: cfg.dateFormat,
             placeholder: "yyyy-MM-dd"
           },
           {
@@ -626,7 +997,7 @@ Placeholders: `{topic}`, `{series}`, `{episodeMarker}`, `{episode}`, `{speaker}`
             renderer: "text",
             required: false,
             colSpan: 1,
-            defaultValue: "<TITLE>",
+            defaultValue: cfg.topicPlaceholder,
             placeholder: "<TITLE>"
           },
           {
@@ -636,7 +1007,7 @@ Placeholders: `{topic}`, `{series}`, `{episodeMarker}`, `{episode}`, `{speaker}`
             renderer: "textArea",
             required: false,
             colSpan: 2,
-            defaultValue: "",
+            defaultValue: cfg.topics,
             placeholder: "Topic for episode 1\nTopic for episode 2",
             tooltip: "Optional. Line N maps to episode from+N-1. Missing lines use topic placeholder."
           }
@@ -654,7 +1025,7 @@ Placeholders: `{topic}`, `{series}`, `{episodeMarker}`, `{episode}`, `{speaker}`
             renderer: "textArea",
             required: true,
             colSpan: 2,
-            defaultValue: "{topic}{separator}{series} {episodeMarker} {episode}{separator}{speaker}{separator}{brand}{separator}{date}",
+            defaultValue: cfg.titleTemplate,
             placeholder: "{topic}{separator}{series} {episodeMarker} {episode}{separator}{speaker}{separator}{brand}{separator}{date}",
             tooltip: "YouTube title. Placeholders: {topic} {series} {episodeMarker} {episode} {speaker} {brand} {date} {separator}"
           },
@@ -665,7 +1036,7 @@ Placeholders: `{topic}`, `{series}`, `{episodeMarker}`, `{episode}`, `{speaker}`
             renderer: "text",
             required: false,
             colSpan: 2,
-            defaultValue: "{series} {episodeMarker} {episode}",
+            defaultValue: cfg.episodeHeadingTemplate,
             placeholder: "{series} {episodeMarker} {episode}"
           },
           {
@@ -675,7 +1046,7 @@ Placeholders: `{topic}`, `{series}`, `{episodeMarker}`, `{episode}`, `{speaker}`
             renderer: "text",
             required: false,
             colSpan: 2,
-            defaultValue: "DDP # {episode}.jpg",
+            defaultValue: cfg.imageFilePattern,
             placeholder: "DDP # {episode}.jpg",
             tooltip: "Used for Today tab image URL via /api/file/download/..."
           }
@@ -683,6 +1054,90 @@ Placeholders: `{topic}`, `{series}`, `{episodeMarker}`, `{episode}`, `{speaker}`
       }
     ]
   }
+};'''
+      }
+    }
+    {
+      id: "51"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+};'''
+      }
+    }
+    {
+      id: "52"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: ${t.var.color.text};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "label",
+  for: "ddp-youtube-tab-notes",
+  text: "Tab notes"
+};'''
+      }
+    }
+    {
+      id: "53"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  width: 100%;
+  min-height: 6rem;
+  padding: 0.75rem;
+  border: 1px solid ${t.var.color.border};
+  border-radius: 0.375rem;
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
+  font-family: inherit;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  resize: vertical;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "textarea",
+  id: "ddp-youtube-tab-notes",
+  rows: 4,
+  placeholder: "Notes for the YouTube tab (saved in this browser)",
+  value: f.youtubeTabNote(),
+  onInput: f.handleYoutubeTabNoteInput
+};'''
+      }
+    }
+    {
+      id: "54"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Button
+        props:
+          '''return {
+  variant: "secondary",
+  text: "Reset to defaults",
+  onClick: f.resetYoutubeConfig
 };'''
       }
     }
@@ -701,7 +1156,7 @@ Placeholders: `{topic}`, `{series}`, `{episodeMarker}`, `{episode}`, `{speaker}`
         props:
           '''return {
   as: "div",
-  hide: f.activeMode() !== "davinci"
+  hide: f.activeMode() !== "bgVideos"
 };'''
       }
     }
@@ -727,7 +1182,7 @@ Placeholders: `{topic}`, `{series}`, `{episodeMarker}`, `{episode}`, `{speaker}`
         textType: markdown
         componentName: Html
         text:
-          '''DaVinci Resolve title cards.
+          '''BG video title cards.
 
 Default format: `DDP#001-2026-08-01`
 '''
@@ -751,12 +1206,13 @@ Default format: `DDP#001-2026-08-01`
         displayOrder: 2
         componentName: FormManagement
         props:
-          '''return {
+          '''const cfg = f.bgVideosConfig();
+return {
   mode: "add",
-  vertexLabel: "DdpDavinciTitleConfig",
+  vertexLabel: "DdpBgVideosTitleConfig",
   hideActionsBar: true,
-  onFnsReady: f.registerDavinciFormFns,
-  onFieldChange: f.handleDavinciFieldChange,
+  onFnsReady: f.registerBgVideosFormFns,
+  onFieldChange: f.handleBgVideosFieldChange,
   formConfig: {
     gridColumns: 2,
     groups: [
@@ -772,7 +1228,7 @@ Default format: `DDP#001-2026-08-01`
             renderer: "text",
             required: true,
             colSpan: 1,
-            defaultValue: "1",
+            defaultValue: cfg.from,
             placeholder: "1"
           },
           {
@@ -782,7 +1238,7 @@ Default format: `DDP#001-2026-08-01`
             renderer: "text",
             required: true,
             colSpan: 1,
-            defaultValue: "705",
+            defaultValue: cfg.to,
             placeholder: "705"
           },
           {
@@ -792,7 +1248,7 @@ Default format: `DDP#001-2026-08-01`
             renderer: "date",
             required: true,
             colSpan: 1,
-            defaultValue: "2026-06-25"
+            defaultValue: cfg.startDate
           },
           {
             key: "episodePad",
@@ -801,7 +1257,7 @@ Default format: `DDP#001-2026-08-01`
             renderer: "text",
             required: true,
             colSpan: 1,
-            defaultValue: "3",
+            defaultValue: cfg.episodePad,
             placeholder: "3"
           },
           {
@@ -811,7 +1267,7 @@ Default format: `DDP#001-2026-08-01`
             renderer: "text",
             required: false,
             colSpan: 1,
-            defaultValue: "#",
+            defaultValue: cfg.episodeMarker,
             placeholder: "#"
           },
           {
@@ -821,7 +1277,7 @@ Default format: `DDP#001-2026-08-01`
             renderer: "text",
             required: false,
             colSpan: 1,
-            defaultValue: "yyyy-MM-dd",
+            defaultValue: cfg.dateFormat,
             placeholder: "yyyy-MM-dd"
           },
           {
@@ -831,7 +1287,7 @@ Default format: `DDP#001-2026-08-01`
             renderer: "text",
             required: true,
             colSpan: 2,
-            defaultValue: "DDP{episodeMarker}{episode}-{date}",
+            defaultValue: cfg.titleTemplate,
             placeholder: "DDP{episodeMarker}{episode}-{date}",
             tooltip: "Example: DDP#001-2026-08-01"
           },
@@ -842,13 +1298,97 @@ Default format: `DDP#001-2026-08-01`
             renderer: "text",
             required: false,
             colSpan: 2,
-            defaultValue: "DDP # {episode}.jpg",
+            defaultValue: cfg.imageFilePattern,
             placeholder: "DDP # {episode}.jpg"
           }
         ]
       }
     ]
   }
+};'''
+      }
+    }
+    {
+      id: "63"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+};'''
+      }
+    }
+    {
+      id: "64"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: ${t.var.color.text};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "label",
+  for: "ddp-bg-videos-tab-notes",
+  text: "Tab notes"
+};'''
+      }
+    }
+    {
+      id: "65"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  width: 100%;
+  min-height: 6rem;
+  padding: 0.75rem;
+  border: 1px solid ${t.var.color.border};
+  border-radius: 0.375rem;
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
+  font-family: inherit;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  resize: vertical;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "textarea",
+  id: "ddp-bg-videos-tab-notes",
+  rows: 4,
+  placeholder: "Notes for the BG Videos tab (saved in this browser)",
+  value: f.bgVideosTabNote(),
+  onInput: f.handleBgVideosTabNoteInput
+};'''
+      }
+    }
+    {
+      id: "66"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Button
+        props:
+          '''return {
+  variant: "secondary",
+  text: "Reset to defaults",
+  onClick: f.resetBgVideosConfig
 };'''
       }
     }
@@ -890,7 +1430,7 @@ Default format: `DDP#001-2026-08-01`
         props:
           '''return {
   as: "h2",
-  text: () => f.activeMode() === "davinci" ? "DaVinci Output" : "YouTube Output"
+  text: () => f.activeMode() === "bgVideos" ? "BG Videos Output" : "YouTube Output"
 };'''
       }
     }
@@ -1016,6 +1556,34 @@ return {
       }
     }
     {
+      id: "31"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Button
+        props:
+          '''return {
+  variant: "secondary",
+  text: "Download .txt",
+  onClick: f.downloadTitlesTxt
+};'''
+      }
+    }
+    {
+      id: "32"
+      L: Attr
+      P: {
+        displayOrder: 6
+        componentName: Button
+        props:
+          '''return {
+  variant: "secondary",
+  text: "Download .csv",
+  onClick: f.downloadTitlesCsv
+};'''
+      }
+    }
+    {
       id: "22"
       L: Attr
       P: {
@@ -1050,6 +1618,7 @@ return {
   align-items: center;
   gap: 0.75rem;
   flex-wrap: wrap;
+  width: 100%;
 }`;'''
         displayOrder: 1
         componentName: Html
@@ -1138,7 +1707,126 @@ return `._id {
       }
     }
     {
+      id: "70"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-left: auto;
+}`;'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+};'''
+      }
+    }
+    {
+      id: "71"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  width: 5.5rem;
+  padding: 0.5rem 0.625rem;
+  border: 1px solid ${t.var.color.border};
+  border-radius: 0.375rem;
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "input",
+  type: "number",
+  min: 1,
+  inputmode: "numeric",
+  placeholder: "Ep #",
+  "aria-label": "Jump to episode",
+  value: f.jumpEpisode(),
+  onInput: f.handleJumpEpisodeInput,
+  onKeyDown: f.handleJumpEpisodeKeyDown
+};'''
+      }
+    }
+    {
+      id: "72"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  padding: 0.5rem 0.875rem;
+  border: 1px solid ${t.var.color.border};
+  border-radius: 0.375rem;
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
+  font-weight: 600;
+  cursor: pointer;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "button",
+  type: "button",
+  text: "Go",
+  "aria-label": "Jump to episode",
+  onClick: () => f.jumpToEpisode()
+};'''
+      }
+    }
+    {
+      id: "73"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  padding: 0.5rem 0.625rem;
+  border: 1px solid ${t.var.color.border};
+  border-radius: 0.375rem;
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "input",
+  type: "date",
+  "aria-label": "Jump to date",
+  value: f.selectedDate() || "",
+  onChange: f.handleJumpDateChange
+};'''
+      }
+    }
+    {
       id: "23"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+};'''
+      }
+    }
+    {
+      id: "23a"
       L: Attr
       P: {
         css:
@@ -1146,8 +1834,10 @@ return `._id {
   font-size: 1.5rem;
   font-weight: 700;
   color: ${t.var.color.text};
+  flex: 1;
+  min-width: 0;
 }`;'''
-        displayOrder: 2
+        displayOrder: 1
         componentName: Html
         props:
           '''const episode = f.todayEpisode();
@@ -1160,15 +1850,32 @@ return {
       }
     }
     {
+      id: "23b"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''return {
+  variant: "secondary",
+  text: "Copy title",
+  onClick: f.copyTodayTitle,
+  hide: () => !f.todayTitle()
+};'''
+      }
+    }
+    {
       id: "24"
       L: Attr
       P: {
         css:
-          '''return `._id {
+          '''const over = f.todayTitleOverLimit();
+return `._id {
   font-size: 0.875rem;
-  color: ${t.var.color.text};
-  opacity: 0.75;
+  color: ${over ? t.var.color.error : t.var.color.text};
+  opacity: ${over ? 1 : 0.75};
   word-break: break-word;
+  width: 100%;
 }`;'''
         displayOrder: 3
         componentName: Html
@@ -1177,6 +1884,99 @@ return {
   as: "div",
   text: f.todayTitle() || "",
   hide: () => !f.todayTitle()
+};'''
+      }
+    }
+    {
+      id: "24a"
+      L: Attr
+      P: {
+        css:
+          '''const over = f.todayTitleOverLimit();
+return `._id {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: ${over ? t.var.color.error : t.var.color.text_light_400};
+}`;'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  text: f.todayTitleLengthLabel(),
+  hide: () => !f.todayTitle()
+};'''
+      }
+    }
+    {
+      id: "74"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+}`;'''
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  hide: () => f.todayEpisode() == null
+};'''
+      }
+    }
+    {
+      id: "75"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: ${t.var.color.text};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "label",
+  for: "ddp-episode-note",
+  text: () => `Note for episode ${f.todayEpisodePadded() || ""}`
+};'''
+      }
+    }
+    {
+      id: "76"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  width: 100%;
+  min-height: 5rem;
+  padding: 0.75rem;
+  border: 1px solid ${t.var.color.border};
+  border-radius: 0.375rem;
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
+  font-family: inherit;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  resize: vertical;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "textarea",
+  id: "ddp-episode-note",
+  rows: 3,
+  placeholder: "Per-episode note (saved in this browser)",
+  value: f.todayNote(),
+  onInput: f.handleTodayNoteInput
 };'''
       }
     }
@@ -1194,7 +1994,7 @@ return {
   object-fit: contain;
   background: ${t.var.color.background};
 }`;'''
-        displayOrder: 4
+        displayOrder: 6
         componentName: Html
         props:
           '''const src = f.todayImageUrl();
@@ -1256,19 +2056,22 @@ return {
       L: Attr
       P: {
         css:
-          '''return `._id {
+          '''const over = f.isTitleOverLimit(c.title);
+return `._id {
   flex: 1;
   min-width: 0;
   word-break: break-word;
   font-size: 0.875rem;
-  color: ${t.var.color.text};
+  color: ${over ? t.var.color.error : t.var.color.text};
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''return {
+          '''const over = f.isTitleOverLimit(c.title);
+const length = f.titleLengthFor(c.title);
+return {
   as: "div",
-  text: c.title
+  text: over ? `${c.title}  (${length})` : c.title
 };'''
       }
     }
@@ -1431,6 +2234,30 @@ return {
       E: "5"
     }
     {
+      id: e51
+      T: Attr
+      S: "50"
+      E: "51"
+    }
+    {
+      id: e52
+      T: Attr
+      S: "51"
+      E: "52"
+    }
+    {
+      id: e53
+      T: Attr
+      S: "51"
+      E: "53"
+    }
+    {
+      id: e54
+      T: Attr
+      S: "50"
+      E: "54"
+    }
+    {
       id: e60
       T: Attr
       S: "2"
@@ -1447,6 +2274,30 @@ return {
       T: Attr
       S: "60"
       E: "62"
+    }
+    {
+      id: e63
+      T: Attr
+      S: "60"
+      E: "63"
+    }
+    {
+      id: e64
+      T: Attr
+      S: "63"
+      E: "64"
+    }
+    {
+      id: e65
+      T: Attr
+      S: "63"
+      E: "65"
+    }
+    {
+      id: e66
+      T: Attr
+      S: "60"
+      E: "66"
     }
     {
       id: e6
@@ -1509,6 +2360,18 @@ return {
       E: "30"
     }
     {
+      id: e15a
+      T: Attr
+      S: "10"
+      E: "31"
+    }
+    {
+      id: e15b
+      T: Attr
+      S: "10"
+      E: "32"
+    }
+    {
       id: e16
       T: Attr
       S: "22"
@@ -1521,10 +2384,34 @@ return {
       E: "23"
     }
     {
+      id: e17a
+      T: Attr
+      S: "23"
+      E: "23a"
+    }
+    {
+      id: e17b
+      T: Attr
+      S: "23"
+      E: "23b"
+    }
+    {
       id: e18
       T: Attr
       S: "22"
       E: "24"
+    }
+    {
+      id: e18a
+      T: Attr
+      S: "22"
+      E: "24a"
+    }
+    {
+      id: e18b
+      T: Attr
+      S: "22"
+      E: "74"
     }
     {
       id: e19
@@ -1549,6 +2436,42 @@ return {
       T: Attr
       S: "26"
       E: "29"
+    }
+    {
+      id: e70
+      T: Attr
+      S: "26"
+      E: "70"
+    }
+    {
+      id: e71
+      T: Attr
+      S: "70"
+      E: "71"
+    }
+    {
+      id: e72
+      T: Attr
+      S: "70"
+      E: "72"
+    }
+    {
+      id: e73
+      T: Attr
+      S: "70"
+      E: "73"
+    }
+    {
+      id: e74
+      T: Attr
+      S: "74"
+      E: "75"
+    }
+    {
+      id: e75
+      T: Attr
+      S: "74"
+      E: "76"
     }
     {
       id: e23

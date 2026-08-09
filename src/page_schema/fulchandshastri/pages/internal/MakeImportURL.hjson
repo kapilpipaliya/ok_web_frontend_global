@@ -12,7 +12,7 @@
   isNoPermissionCheck: true,
 };
 '''
-        updatedAt: 2026-07-15T11:09:22.722Z
+        updatedAt: 2026-08-09T11:20:00.000Z
       }
     }
     {
@@ -30,8 +30,16 @@
 }`;'''
         displayOrder: 1
         fns:
-          '''const [generatedImportUrl, setGeneratedImportUrl] = _.createSignal("");
-const [generatedExportUrl, setGeneratedExportUrl] = _.createSignal("");
+          '''const FORM_DEFAULTS = {
+  baseUrl: "",
+  components: "",
+  pages: "",
+  functions: "",
+  shop: "",
+  jobId: ""
+};
+
+const [formValues, setFormValues] = _.createSignal({ ...FORM_DEFAULTS });
 const [formManagementFns, setFormManagementFns] = _.createSignal(null);
 const [previewModalOpen, setPreviewModalOpen] = _.createSignal(false);
 const [previewUrl, setPreviewUrl] = _.createSignal("");
@@ -68,6 +76,9 @@ const buildQueryString = (values) => {
 
 const buildUrls = (values) => {
   const baseUrl = normalizeBaseUrl(values?.baseUrl);
+  if (!baseUrl) {
+    return { importUrl: "", exportUrl: "" };
+  }
   const query = buildQueryString(values);
   return {
     importUrl: `${baseUrl}/admin/SchemaImport${query}`,
@@ -75,55 +86,43 @@ const buildUrls = (values) => {
   };
 };
 
+const generatedImportUrl = () => buildUrls(formValues()).importUrl;
+const generatedExportUrl = () => buildUrls(formValues()).exportUrl;
+
 const getUrlByKind = (kind) => {
   return kind === "export" ? generatedExportUrl() : generatedImportUrl();
 };
 
-const handleGenerate = async ({ vertex }) => {
-  const values = vertex?.P || {};
-  const baseUrl = normalizeBaseUrl(values?.baseUrl);
-  if (!baseUrl) {
-    _.showErrorToast?.("Base URL is required");
-    return false;
+const readValuesFromForm = (formFns) => {
+  if (!formFns?.getFieldValue) return { ...formValues() };
+  const next = { ...FORM_DEFAULTS };
+  for (const key of Object.keys(FORM_DEFAULTS)) {
+    const value = formFns.getFieldValue(key);
+    if (value !== undefined && value !== null) {
+      next[key] = value;
+    }
   }
-
-  const { importUrl, exportUrl } = buildUrls(values);
-  setGeneratedImportUrl(importUrl);
-  setGeneratedExportUrl(exportUrl);
-
-  try {
-    await navigator.clipboard.writeText(importUrl);
-    _.showSuccessToast?.("URLs generated. Import URL copied to clipboard");
-  } catch (error) {
-    console.error("Clipboard copy failed:", error);
-    _.showSuccessToast?.("URLs generated");
-  }
-
-  // Return false so FormManagement does not reinitialize / clear the form.
-  return false;
+  return next;
 };
 
 const registerFormManagementFns = (formFns) => {
   setFormManagementFns(formFns);
   if (!formFns?.setFieldValue) return;
   const current = String(formFns.getFieldValue?.("baseUrl") ?? "").trim();
-  if (current) return;
-  formFns.setFieldValue("baseUrl", window.location.origin);
+  if (!current) {
+    formFns.setFieldValue("baseUrl", window.location.origin);
+  }
+  setFormValues(readValuesFromForm(formFns));
 };
 
-const runGenerate = () => {
-  const formFns = formManagementFns();
-  if (!formFns?.handleSave) {
-    _.showErrorToast?.("Form is not ready yet");
-    return;
-  }
-  formFns.handleSave();
+const handleFieldChange = (fieldKey, value) => {
+  setFormValues((prev) => ({ ...prev, [fieldKey]: value }));
 };
 
 const copyUrl = async (kind) => {
   const url = getUrlByKind(kind);
   if (!url) {
-    _.showWarningToast?.("Generate URLs first");
+    _.showWarningToast?.("Enter a Base URL first");
     return;
   }
   try {
@@ -138,7 +137,7 @@ const copyUrl = async (kind) => {
 const openUrlInNewTab = (kind) => {
   const url = getUrlByKind(kind);
   if (!url) {
-    _.showWarningToast?.("Generate URLs first");
+    _.showWarningToast?.("Enter a Base URL first");
     return;
   }
   window.open(url, "_blank", "noopener,noreferrer");
@@ -147,7 +146,7 @@ const openUrlInNewTab = (kind) => {
 const openUrlInModal = (kind) => {
   const url = getUrlByKind(kind);
   if (!url) {
-    _.showWarningToast?.("Generate URLs first");
+    _.showWarningToast?.("Enter a Base URL first");
     return;
   }
   setPreviewTitle(kind === "export" ? "Export URL preview" : "Import URL preview");
@@ -173,8 +172,7 @@ return {
   generatedExportUrl,
   formManagementFns,
   registerFormManagementFns,
-  handleGenerate,
-  runGenerate,
+  handleFieldChange,
   copyImportUrl,
   copyExportUrl,
   openImportInNewTab,
@@ -241,7 +239,7 @@ return {
         textType: markdown
         componentName: Html
         text:
-          '''Fill the form to build Schema Import and Export URLs.
+          '''Fill the form — Import and Export URLs update live.
 
 - Leave filters empty for a **full** import/export (components, pages, themes, functions, email templates).
 - Fill any of `components` / `pages` / `functions` to filter those keys only.
@@ -273,8 +271,8 @@ return {
   mode: "add",
   vertexLabel: "SchemaImportUrl",
   hideActionsBar: true,
-  onSave: f.handleGenerate,
   onFnsReady: f.registerFormManagementFns,
+  onFieldChange: f.handleFieldChange,
   formConfig: {
     gridColumns: 2,
     groups: [
@@ -351,38 +349,6 @@ return {
       }
     }
     {
-      id: "6"
-      L: Attr
-      P: {
-        css:
-          '''return `._id {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-}`;'''
-        displayOrder: 4
-        componentName: Html
-        props:
-          '''return {
-  as: "div"
-};'''
-      }
-    }
-    {
-      id: "7"
-      L: Attr
-      P: {
-        displayOrder: 1
-        componentName: Button
-        props:
-          '''return {
-  variant: "primary",
-  text: "Generate URLs",
-  onClick: f.runGenerate
-};'''
-      }
-    }
-    {
       id: "8"
       L: Attr
       P: {
@@ -392,7 +358,7 @@ return {
   flex-direction: column;
   gap: 1rem;
 }`;'''
-        displayOrder: 5
+        displayOrder: 4
         componentName: Html
         props:
           '''return {
@@ -701,7 +667,7 @@ return {
       id: "25"
       L: Attr
       P: {
-        displayOrder: 6
+        displayOrder: 5
         componentName: ContentModal
         props:
           '''return {
@@ -776,12 +742,6 @@ return {
       E: "5"
     }
     {
-      id: e6
-      T: Attr
-      S: "2"
-      E: "6"
-    }
-    {
       id: e7
       T: Attr
       S: "2"
@@ -792,12 +752,6 @@ return {
       T: Attr
       S: "2"
       E: "25"
-    }
-    {
-      id: e9
-      T: Attr
-      S: "6"
-      E: "7"
     }
     {
       id: e10
