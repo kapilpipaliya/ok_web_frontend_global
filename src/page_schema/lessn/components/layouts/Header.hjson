@@ -140,8 +140,8 @@ return {
           '''return `._id {
   display: flex;
   flex-direction: column;
-  font-weight: bold;
-  font-family: sans-serif;
+  font-weight: 700;
+  font-family: "Fraunces", Georgia, "Times New Roman", serif;
   padding-left: 2px;
 }`;'''
         displayOrder: 4
