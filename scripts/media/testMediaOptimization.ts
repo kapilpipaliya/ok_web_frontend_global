@@ -1,6 +1,6 @@
 /**
  * Focused checks for media (image + video) optimization helpers.
- * Run: npx tsx scripts/testMediaOptimization.ts
+ * Run: npx tsx scripts/media/testMediaOptimization.ts
  *
  * Video tests require system ffmpeg/ffprobe.
  */
@@ -17,19 +17,19 @@ import {
   detectMediaType,
   parseMediaOptimizationConfig,
   validateMediaSettingProps,
-} from "../src/lib/files/mediaOptimizationConfig";
+} from "../../src/lib/files/mediaOptimizationConfig";
 import {
   parseVideoOutputsJson,
   isSafeMediaVariantKey,
-} from "../src/lib/files/videoOptimizationConfig";
+} from "../../src/lib/files/videoOptimizationConfig";
 import {
   mediaVariantPath,
   resolveMediaVariantDiskPath,
-} from "../src/lib/files/videoVariantPaths";
-import { buildPublicVideoPayload } from "../src/lib/files/publicMediaUrl";
-import { buildPublicImagePayload } from "../src/lib/files/publicImageUrl";
-import { DEFAULT_IMAGE_OPTIMIZATION_CONFIG } from "../src/lib/files/imageOptimizationConfig";
-import { processImageVariants } from "../src/lib/files/processImageVariants";
+} from "../../src/lib/files/videoVariantPaths";
+import { buildPublicVideoPayload } from "../../src/lib/files/publicMediaUrl";
+import { buildPublicImagePayload } from "../../src/lib/files/publicImageUrl";
+import { DEFAULT_IMAGE_OPTIMIZATION_CONFIG } from "../../src/lib/files/imageOptimizationConfig";
+import { processImageVariants } from "../../src/lib/files/processImageVariants";
 
 let passed = 0;
 let failed = 0;

@@ -12,7 +12,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import "./force-shared-port.mjs";
 
-const root = join(dirname(fileURLToPath(import.meta.url)), "..");
+const root = join(dirname(fileURLToPath(import.meta.url)), "../..");
 const serverEntry = pathToFileURL(join(root, "production/server/index.mjs")).href;
 const ssrEntry = pathToFileURL(join(root, "production/server/_ssr/ssr.mjs")).href;
 

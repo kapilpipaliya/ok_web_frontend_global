@@ -6,7 +6,7 @@ require("dotenv").config({ path: ".env" });
 /**
  * PM2 Ecosystem Configuration
  *
- * Clustering is owned by scripts/pm2-entry.mjs (Node cluster + shared PORT).
+ * Clustering is owned by scripts/pm2/entry.mjs (Node cluster + shared PORT).
  * Nitro/srvx defaults to exclusive listen sockets; the entry patches that and
  * forks NITRO_CLUSTER_WORKERS children so every worker actually serves HTTP.
  *
@@ -16,7 +16,7 @@ module.exports = {
   apps: [
     {
       name: "ok-web-frontend",
-      script: "./scripts/pm2-entry.mjs",
+      script: "./scripts/pm2/entry.mjs",
       instances: 1,
       exec_mode: "fork",
       env: {

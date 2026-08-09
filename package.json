@@ -16,7 +16,7 @@
     "start": "dotenv -e .env -- sh -c 'PORT=${PORT:-${DOMAIN_PORT:-3001}} node .output/server/index.mjs'",
     "postinstall": "npx playwright install-deps && npx playwright install",
     "s": "git pull && npm i --force && npm run build && npm run start",
-    "send-test-email": "dotenv -e .env -- tsx scripts/sendTestEmail.ts admin admin@decodeui.io kapilpipaliya@gmail.com",
+    "send-test-email": "dotenv -e .env -- tsx scripts/email/sendTestEmail.ts admin admin@decodeui.io kapilpipaliya@gmail.com",
     "clean-redis": "redis-cli -h ${REDIS_HOST:-localhost} -p ${REDIS_PORT:-6379} FLUSHALL",
     "clean-redis-db": "redis-cli -h ${REDIS_HOST:-localhost} -p ${REDIS_PORT:-6379} FLUSHDB",
     "pm2:start": "git pull && npm i --force && npm run build && pm2 start ecosystem.config.cjs",

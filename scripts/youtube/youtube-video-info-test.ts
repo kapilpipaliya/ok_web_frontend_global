@@ -1,4 +1,4 @@
-// npx tsx scripts/youtube-video-info-test.ts
+// npx tsx scripts/youtube/youtube-video-info-test.ts
 import { google } from 'googleapis';
 
 // YouTube Data API v3 Key

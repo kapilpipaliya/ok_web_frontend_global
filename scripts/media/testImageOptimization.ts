@@ -1,6 +1,6 @@
 /**
  * Focused unit checks for image optimization helpers.
- * Run: npx tsx scripts/testImageOptimization.ts
+ * Run: npx tsx scripts/media/testImageOptimization.ts
  */
 
 import fs from "node:fs";
@@ -15,13 +15,13 @@ import {
   parseImageOptimizationConfig,
   parseVariantsJson,
   validateImageSettingProps,
-} from "../src/lib/files/imageOptimizationConfig";
+} from "../../src/lib/files/imageOptimizationConfig";
 import {
   resolveVariantDiskPath,
   variantPath,
-} from "../src/lib/files/imageVariantPaths";
-import { processImageVariants } from "../src/lib/files/processImageVariants";
-import { buildPublicImagePayload } from "../src/lib/files/publicImageUrl";
+} from "../../src/lib/files/imageVariantPaths";
+import { processImageVariants } from "../../src/lib/files/processImageVariants";
+import { buildPublicImagePayload } from "../../src/lib/files/publicImageUrl";
 
 let passed = 0;
 let failed = 0;
