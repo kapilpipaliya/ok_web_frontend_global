@@ -849,6 +849,23 @@ try {
       updatedAt: new Date().toISOString()
     };
 
+    // File media optimization is owned by the media-optimization worker. After upload the
+    // client graph still has status=processing / variantsJson="{}" until it reloads; a form
+    // save must not SET += those stale values and wipe a completed worker patch.
+    if (vertexLabel === "File") {
+      const FILE_OPTIMIZATION_PROTECTED_KEYS = [
+        "status",
+        "variantsJson",
+        "processingVersion",
+        "optimizedAt",
+        "optimizationError",
+        "optimizationGeneration"
+      ];
+      for (let i = 0; i < FILE_OPTIMIZATION_PROTECTED_KEYS.length; i++) {
+        delete updateProperties[FILE_OPTIMIZATION_PROTECTED_KEYS[i]];
+      }
+    }
+
     // Remove undefined/null values and stringify nested objects/arrays for Neo4j
     const cleanProperties = sanitizePropertiesForNeo4j(updateProperties);
     NESTED_LINE_STRIP_KEYS.forEach((k) => {

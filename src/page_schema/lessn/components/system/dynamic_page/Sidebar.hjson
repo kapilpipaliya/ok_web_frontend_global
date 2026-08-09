@@ -25,9 +25,11 @@ const [selectedItem, setSelectedItem] = _.createSignal(null);
 const [sidebarLoading, setSidebarLoading] = _.createSignal(false);
 const [operationLoading, setOperationLoading] = _.createSignal(false);
 const [isAddRootModalOpen, setIsAddRootModalOpen] = _.createSignal(false);
-const [isImportModalOpen, setIsImportModalOpen] = _.createSignal(false);
-const [importText, setImportText] = _.createSignal("");
-const [importLoading, setImportLoading] = _.createSignal(false);
+// Shared import/export modal for indented category tree text
+const [isTreeTextModalOpen, setIsTreeTextModalOpen] = _.createSignal(false);
+const [treeTextModalMode, setTreeTextModalMode] = _.createSignal("import"); // "import" | "export"
+const [treeText, setTreeText] = _.createSignal("");
+const [treeTextLoading, setTreeTextLoading] = _.createSignal(false);
 const [importSkipped, setImportSkipped] = _.createSignal([]);
 const [importCreatedCount, setImportCreatedCount] = _.createSignal(0);
 // Single add/edit modal state: only one item modal open at a time (mode: 'add' | 'edit', and the item/parent)
@@ -387,18 +389,110 @@ const handleAddRootSave = async (savedVertex) => {
 };
 
 const handleOpenImportModal = () => {
-  setImportText("");
+  setTreeTextModalMode("import");
+  setTreeText("");
   setImportSkipped([]);
   setImportCreatedCount(0);
-  setIsImportModalOpen(true);
+  setIsTreeTextModalOpen(true);
 };
 
-const handleCloseImportModal = () => {
-  if (importLoading()) return;
-  setIsImportModalOpen(false);
-  setImportText("");
+const isUncategorizedSidebarItem = (item) => {
+  if (!item) return false;
+  const uid = getUncategorizedVertexId();
+  return !!(uid && (item.id === uid || item.P?.key === uid));
+};
+
+const getSidebarItemExportName = (item) => {
+  if (!item) return "";
+  return String(item.P?.name || item.P?.title || item.P?.key || "").trim();
+};
+
+const buildSidebarTreeExportText = () => {
+  const lines = [];
+  const visit = (item, depth) => {
+    if (!item || isUncategorizedSidebarItem(item)) return;
+    const name = getSidebarItemExportName(item);
+    if (!name) return;
+    lines.push(`${"  ".repeat(Math.max(0, depth))}${name}`);
+    const children = getChildren(item.id) || [];
+    for (let i = 0; i < children.length; i++) {
+      visit(children[i], depth + 1);
+    }
+  };
+  const roots = getRoot() || [];
+  for (let i = 0; i < roots.length; i++) {
+    visit(roots[i], 0);
+  }
+  return lines.join("\n");
+};
+
+const handleOpenExportModal = () => {
+  const text = buildSidebarTreeExportText();
+  if (!String(text || "").trim()) {
+    _.showWarningToast?.(`No ${getSidebarLabel()} to export`);
+    return;
+  }
+  setTreeTextModalMode("export");
+  setTreeText(text);
   setImportSkipped([]);
   setImportCreatedCount(0);
+  setIsTreeTextModalOpen(true);
+};
+
+const handleCloseTreeTextModal = () => {
+  if (treeTextLoading()) return;
+  setIsTreeTextModalOpen(false);
+  setTreeText("");
+  setImportSkipped([]);
+  setImportCreatedCount(0);
+  setTreeTextModalMode("import");
+};
+
+const isTreeTextExportMode = () => treeTextModalMode() === "export";
+const isTreeTextImportMode = () => treeTextModalMode() !== "export";
+
+const getTreeTextModalTitle = () => {
+  const label = getSidebarLabel();
+  return isTreeTextExportMode() ? `Export ${label}` : `Import ${label}`;
+};
+
+const getTreeTextModalHint = () => {
+  if (isTreeTextExportMode()) {
+    return "Indented tree text (2 spaces per level). Download as a .txt file, or copy from the box.";
+  }
+  return "One name per line. Indent with 2 spaces for nested categories.";
+};
+
+const getTreeTextExportFilename = () => {
+  const label = String(getSidebarLabel() || "categories")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+  return `${label || "categories"}.txt`;
+};
+
+const downloadTreeTextFile = (text, filename) => {
+  const content = String(text || "");
+  const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename || "export.txt";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
+
+const handleDownloadTreeTextExport = () => {
+  const text = String(treeText() || "");
+  if (!text.trim()) {
+    _.showWarningToast?.(`No ${getSidebarLabel()} to export`);
+    return;
+  }
+  downloadTreeTextFile(text, getTreeTextExportFilename());
+  _.showSuccessToast?.(`Exported ${getSidebarLabel()}`);
 };
 
 const getSkippedReasonLabel = (reason) => {
@@ -439,7 +533,7 @@ const getImportSkippedSummaryText = () => {
 };
 
 const handleImportCategories = async () => {
-  const text = String(importText() || "");
+  const text = String(treeText() || "");
   if (!text.trim()) {
     _.showErrorToast?.(`Paste at least one ${getSidebarLabel()} name to import`);
     return;
@@ -452,7 +546,7 @@ const handleImportCategories = async () => {
     return;
   }
 
-  setImportLoading(true);
+  setTreeTextLoading(true);
   setOperationLoading(true);
   setImportSkipped([]);
   setImportCreatedCount(0);
@@ -500,9 +594,9 @@ const handleImportCategories = async () => {
       _.showSuccessToast?.(result.result.message || `Imported ${getSidebarLabel()}`);
       setImportCreatedCount(result.result.data?.createdCount ?? created.length);
       setImportSkipped(skipped);
-      setImportText("");
+      setTreeText("");
       if (skipped.length === 0) {
-        setIsImportModalOpen(false);
+        setIsTreeTextModalOpen(false);
       }
       startSidebarQueuedPollIfNeeded();
     }
@@ -510,7 +604,7 @@ const handleImportCategories = async () => {
     console.error("Error importing categories:", error);
     _.showErrorToast?.(`Failed to import ${getSidebarLabel()}`);
   } finally {
-    setImportLoading(false);
+    setTreeTextLoading(false);
     setOperationLoading(false);
   }
 };
@@ -888,17 +982,24 @@ return {
   handleOpenAddRootModal,
   handleCloseAddRootModal,
   handleAddRootSave,
-  isImportModalOpen,
-  importText,
-  setImportText,
-  importLoading,
+  isTreeTextModalOpen,
+  treeTextModalMode,
+  isTreeTextExportMode,
+  isTreeTextImportMode,
+  getTreeTextModalTitle,
+  getTreeTextModalHint,
+  treeText,
+  setTreeText,
+  treeTextLoading,
   importSkipped,
   hasImportSkipped,
   getImportSkippedTreeText,
   getImportSkippedSummaryText,
   handleOpenImportModal,
-  handleCloseImportModal,
+  handleOpenExportModal,
+  handleCloseTreeTextModal,
   handleImportCategories,
+  handleDownloadTreeTextExport,
   itemModalState,
   handleOpenAddChildModal,
   handleOpenEditModal,
@@ -1123,6 +1224,24 @@ return `._id {
       }
     }
     {
+      id: "7c"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        key: sidebar_export_button_polaris
+        props:
+          '''return {
+  as: "s-button",
+  "attr:variant": "secondary",
+  "attr:icon": "export",
+  text: `Export ${f.getSidebarLabel()}`,
+  onClick: () => f.handleOpenExportModal(),
+  hide: f.getUsePolarisUI?.() !== true
+};'''
+      }
+    }
+    {
       id: "8"
       L: Attr
       P: {
@@ -1157,6 +1276,26 @@ return `._id {
   leftIcon: "carbon:document-import",
   onClick: () => {
     f.handleOpenImportModal();
+  },
+  hide: f.getUsePolarisUI?.() === true
+};'''
+      }
+    }
+    {
+      id: "8c"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Button
+        key: sidebar_export_button
+        props:
+          '''return {
+  variant: "secondary",
+  size: "sm",
+  text: `Export ${f.getSidebarLabel()}`,
+  leftIcon: "carbon:document-export",
+  onClick: () => {
+    f.handleOpenExportModal();
   },
   hide: f.getUsePolarisUI?.() === true
 };'''
@@ -1426,13 +1565,13 @@ return {
       P: {
         displayOrder: 5
         componentName: ContentModal
-        key: sidebar_import_modal
+        key: sidebar_tree_text_modal
         props:
           '''return {
-  isOpen: f.isImportModalOpen(),
-  title: `Import ${f.getSidebarLabel()}`,
+  isOpen: f.isTreeTextModalOpen(),
+  title: f.getTreeTextModalTitle(),
   maxWidth: "560px",
-  onClose: f.handleCloseImportModal
+  onClose: f.handleCloseTreeTextModal
 };'''
       }
     }
@@ -1451,7 +1590,7 @@ return {
 }`;'''
         displayOrder: 1
         componentName: Html
-        key: sidebar_import_modal_body
+        key: sidebar_tree_text_modal_body
         props:
           '''return {
   as: "div"
@@ -1471,11 +1610,11 @@ return {
 }`;'''
         displayOrder: 1
         componentName: Html
-        key: sidebar_import_modal_hint
+        key: sidebar_tree_text_modal_hint
         props:
           '''return {
   as: "p",
-  text: "One name per line. Indent with 2 spaces for nested categories.",
+  text: f.getTreeTextModalHint(),
   hide: () => f.hasImportSkipped()
 };'''
       }
@@ -1508,13 +1647,14 @@ return {
 }`;'''
         displayOrder: 2
         componentName: Html
-        key: sidebar_import_modal_textarea
+        key: sidebar_tree_text_modal_textarea
         props:
           '''return {
   as: "textarea",
   rows: 12,
-  value: f.importText(),
-  disabled: f.importLoading(),
+  value: f.treeText(),
+  disabled: f.treeTextLoading(),
+  readOnly: f.isTreeTextExportMode(),
   placeholder: `Electronics
   Phones
     Android
@@ -1523,7 +1663,10 @@ return {
 Clothing
   Men
   Women`,
-  onInput: (e) => f.setImportText(e.target.value),
+  onInput: (e) => {
+    if (f.isTreeTextExportMode()) return;
+    f.setTreeText(e.target.value);
+  },
   hide: () => f.hasImportSkipped()
 };'''
       }
@@ -1542,7 +1685,7 @@ Clothing
 }`;'''
         displayOrder: 3
         componentName: Html
-        key: sidebar_import_modal_skipped_summary
+        key: sidebar_tree_text_modal_skipped_summary
         props:
           '''return {
   as: "p",
@@ -1573,7 +1716,7 @@ Clothing
 }`;'''
         displayOrder: 4
         componentName: Html
-        key: sidebar_import_modal_skipped_tree
+        key: sidebar_tree_text_modal_skipped_tree
         props:
           '''return {
   as: "pre",
@@ -1596,7 +1739,7 @@ Clothing
 }`;'''
         displayOrder: 5
         componentName: Html
-        key: sidebar_import_modal_actions
+        key: sidebar_tree_text_modal_actions
         props:
           '''return {
   as: "div"
@@ -1609,13 +1752,13 @@ Clothing
       P: {
         displayOrder: 1
         componentName: Button
-        key: sidebar_import_modal_cancel
+        key: sidebar_tree_text_modal_cancel
         props:
           '''return {
   text: f.hasImportSkipped() ? "Close" : "Cancel",
   variant: "secondary",
-  disabled: f.importLoading(),
-  onClick: () => f.handleCloseImportModal()
+  disabled: f.treeTextLoading(),
+  onClick: () => f.handleCloseTreeTextModal()
 };'''
       }
     }
@@ -1625,14 +1768,31 @@ Clothing
       P: {
         displayOrder: 2
         componentName: Button
-        key: sidebar_import_modal_submit
+        key: sidebar_tree_text_modal_import
         props:
           '''return {
-  text: f.importLoading() ? "Importing..." : "Import",
+  text: f.treeTextLoading() ? "Importing..." : "Import",
   variant: "primary",
-  disabled: f.importLoading() || !String(f.importText() || "").trim(),
+  disabled: f.treeTextLoading() || !String(f.treeText() || "").trim(),
   onClick: () => f.handleImportCategories(),
-  hide: () => f.hasImportSkipped()
+  hide: () => f.isTreeTextExportMode() || f.hasImportSkipped()
+};'''
+      }
+    }
+    {
+      id: "24b"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Button
+        key: sidebar_tree_text_modal_download
+        props:
+          '''return {
+  text: "Download .txt",
+  variant: "primary",
+  disabled: !String(f.treeText() || "").trim(),
+  onClick: () => f.handleDownloadTreeTextExport(),
+  show: () => f.isTreeTextExportMode() && !f.hasImportSkipped()
 };'''
       }
     }
@@ -1723,6 +1883,12 @@ Clothing
       E: "7b"
     }
     {
+      id: e12c
+      T: Attr
+      S: "6"
+      E: "7c"
+    }
+    {
       id: e13
       T: Attr
       S: "6"
@@ -1733,6 +1899,12 @@ Clothing
       T: Attr
       S: "6"
       E: "8b"
+    }
+    {
+      id: e13c
+      T: Attr
+      S: "6"
+      E: "8c"
     }
     {
       id: e14
@@ -1799,6 +1971,12 @@ Clothing
       T: Attr
       S: "22"
       E: "24"
+    }
+    {
+      id: e22b
+      T: Attr
+      S: "22"
+      E: "24b"
     }
   ]
 }

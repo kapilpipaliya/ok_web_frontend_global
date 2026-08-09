@@ -140,7 +140,7 @@ async function processJob(job: Job<MediaOptimizationJobData>) {
         return { skipped: true, reason: "stale_after_processing" };
       }
 
-      await patchFileMetadata(session, fileId, {
+      const patched = await patchFileMetadata(session, fileId, {
         status: "ready",
         mediaType: "image",
         width: result.width,
@@ -151,6 +151,14 @@ async function processJob(job: Job<MediaOptimizationJobData>) {
         optimizedAt: new Date().toISOString(),
         optimizationError: null,
       });
+      if (!patched) {
+        await deleteVariantDiskArtifacts({
+          variantsJson: result.variantsJson,
+        });
+        throw new Error(
+          `Media optimization patch failed: File ${fileId} not found after processing`,
+        );
+      }
 
       logger.logJob({
         jobId: bullId,
@@ -199,7 +207,7 @@ async function processJob(job: Job<MediaOptimizationJobData>) {
       return { skipped: true, reason: "stale_after_processing" };
     }
 
-    await patchFileMetadata(session, fileId, {
+    const patched = await patchFileMetadata(session, fileId, {
       status: "ready",
       mediaType: "video",
       width: result.width,
@@ -215,6 +223,14 @@ async function processJob(job: Job<MediaOptimizationJobData>) {
       optimizedAt: new Date().toISOString(),
       optimizationError: null,
     });
+    if (!patched) {
+      await deleteVariantDiskArtifacts({
+        variantsJson: result.variantsJson,
+      });
+      throw new Error(
+        `Media optimization patch failed: File ${fileId} not found after processing`,
+      );
+    }
 
     logger.logJob({
       jobId: bullId,
