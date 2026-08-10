@@ -4,7 +4,7 @@
       id: "1"
       L: Component
       P: {
-        dynamicComponent: FloatingHelpTooltip, VertexPicker, FileUploader, TomSelect, TextArea, FormNestedLineItems, FormFieldArray, FormLocalizedText
+        dynamicComponent: FloatingHelpTooltip, VertexPicker, FileUploader, TomSelect, TextArea, FormNestedLineItems, FormFieldArray, FormLocalizedText, FormFilesGallery
         key: FormManagement
         updatedAt: 2026-07-16T18:05:56.013Z
       }
@@ -1908,10 +1908,31 @@ if (f.getFieldRenderer(field) === "embeddedVertexPicker") {
   }
   const showImagePreview =
     pickerConfiguration.showImagePreview === true && previewUrl !== "";
+
+  // Multi-file pickers use FormFilesGallery (reorderable thumbnails + picker).
+  if (selectionMode === "multiple") {
+    return {
+      componentName: "FormFilesGallery",
+      values: selectedValues,
+      disabled: fieldDisabled,
+      pickerConfiguration,
+      appendMode: pickerConfiguration.appendMode !== false,
+      showPicker: true,
+      onChange: (nextIds) => {
+        if (Array.isArray(nextIds)) {
+          setFieldValue(field.key, nextIds.map((id) => String(id)).filter((id) => id.trim() !== ""));
+        } else {
+          setFieldValue(field.key, []);
+        }
+      },
+      ...accessibility
+    };
+  }
+
   return {
     componentName: "VertexPicker",
-    value: selectionMode === "single" ? selectedElementId : "",
-    values: selectionMode === "multiple" ? selectedValues : undefined,
+    value: selectedElementId,
+    values: undefined,
     secondaryLabel,
     previewUrl,
     showImagePreview,
@@ -1937,7 +1958,7 @@ if (f.getFieldRenderer(field) === "embeddedVertexPicker") {
       }
       setFieldValue(field.key, vertexElementIds);
     },
-    onClear: () => setFieldValue(field.key, selectionMode === "multiple" ? [] : ""),
+    onClear: () => setFieldValue(field.key, ""),
     ...accessibility
   };
 }

@@ -1,0 +1,663 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        dynamicComponent: Button, VertexPicker
+        description: Reorderable file/image gallery with optional VertexPicker. Used by FormManagement and nested line file columns.
+        fns:
+          '''
+const getProps = () => c.props || {};
+
+const isDisabled = () => getProps().disabled === true;
+
+const getValues = () => {
+  const raw = getProps().values;
+  if (!Array.isArray(raw)) return [];
+  const ids = [];
+  const seen = new Set();
+  for (let i = 0; i < raw.length; i++) {
+    const id = raw[i] != null ? String(raw[i]).trim() : "";
+    if (!id || seen.has(id)) continue;
+    seen.add(id);
+    ids.push(id);
+  }
+  return ids;
+};
+
+const getPickerConfiguration = () => {
+  const pickerConfiguration = getProps().pickerConfiguration;
+  return pickerConfiguration != null && typeof pickerConfiguration === "object"
+    ? pickerConfiguration
+    : {};
+};
+
+const getFileDownloadUrlPrefix = () => {
+  const pickerConfiguration = getPickerConfiguration();
+  if (pickerConfiguration.fileDownloadUrlPrefix != null) {
+    return String(pickerConfiguration.fileDownloadUrlPrefix).trim();
+  }
+  if (getProps().fileDownloadUrlPrefix != null) {
+    return String(getProps().fileDownloadUrlPrefix).trim();
+  }
+  return "/api/file/download";
+};
+
+const getPreviewFileNameProperty = () => {
+  const pickerConfiguration = getPickerConfiguration();
+  if (pickerConfiguration.previewFileNameProperty != null) {
+    return String(pickerConfiguration.previewFileNameProperty);
+  }
+  if (getProps().previewFileNameProperty != null) {
+    return String(getProps().previewFileNameProperty);
+  }
+  return "fileName";
+};
+
+const commitValues = (nextIds) => {
+  getProps().onChange?.(Array.isArray(nextIds) ? nextIds : []);
+};
+
+const getPreviewEntries = () => {
+  const ids = getValues();
+  const fileDownloadUrlPrefix = getFileDownloadUrlPrefix();
+  const previewFileNamePropertyKey = getPreviewFileNameProperty();
+  return ids.map((fileId, index) => {
+    const fileVertex = g.vertexes[fileId];
+    const fileName =
+      fileVertex?.P?.[previewFileNamePropertyKey] != null
+        ? String(fileVertex.P[previewFileNamePropertyKey]).trim()
+        : "";
+    const url =
+      fileName !== "" && fileDownloadUrlPrefix !== ""
+        ? `${fileDownloadUrlPrefix}/${encodeURIComponent(fileName)}`
+        : "";
+    const hasImage = !!(url && /\.(png|jpe?g|gif|webp|svg)$/i.test(fileName));
+    return {
+      id: fileId,
+      fileId,
+      index,
+      fileName: fileName || fileId,
+      url,
+      hasImage
+    };
+  });
+};
+
+const removeFileId = (fileIdToRemove) => {
+  const trimmed = fileIdToRemove != null ? String(fileIdToRemove).trim() : "";
+  if (!trimmed) return;
+  commitValues(getValues().filter((id) => id !== trimmed));
+};
+
+const reorderFileIds = (fromIndex, toIndex) => {
+  if (fromIndex === toIndex || fromIndex < 0 || toIndex < 0) return;
+  const ids = getValues();
+  if (fromIndex >= ids.length || toIndex >= ids.length) return;
+  const nextIds = [...ids];
+  const [moved] = nextIds.splice(fromIndex, 1);
+  nextIds.splice(toIndex, 0, moved);
+  commitValues(nextIds);
+};
+
+const fileDragCleanups = new Map();
+const [draggedFileId, setDraggedFileId] = _.createSignal(null);
+const [dragOverFileId, setDragOverFileId] = _.createSignal(null);
+
+const initFileDraggable = (element, fileId) => {
+  if (!element || !_.draggable || isDisabled()) return;
+  const trimmedFileId = fileId != null ? String(fileId).trim() : "";
+  if (!trimmedFileId) return;
+  const existingCleanup = fileDragCleanups.get(element);
+  if (existingCleanup) existingCleanup();
+
+  const cleanup = _.draggable({
+    element,
+    getInitialData: () => {
+      const ids = getValues();
+      const index = ids.indexOf(trimmedFileId);
+      return {
+        type: "form-files-gallery-item",
+        index,
+        fileId: trimmedFileId
+      };
+    },
+    onDragStart: () => setDraggedFileId(trimmedFileId),
+    onDrop: () => {
+      setDraggedFileId(null);
+      setDragOverFileId(null);
+    }
+  });
+
+  fileDragCleanups.set(element, cleanup);
+};
+
+const initFileDropTarget = (element, fileId) => {
+  if (!element || !_.dropTargetForElements || isDisabled()) return null;
+  const trimmedFileId = fileId != null ? String(fileId).trim() : "";
+  if (!trimmedFileId) return null;
+
+  return _.dropTargetForElements({
+    element,
+    canDrop: ({ source }) =>
+      source.data?.type === "form-files-gallery-item" &&
+      source.data?.fileId !== trimmedFileId,
+    onDragEnter: ({ source }) => {
+      if (source.data?.type === "form-files-gallery-item") {
+        setDragOverFileId(trimmedFileId);
+      }
+    },
+    onDragLeave: () => {
+      if (dragOverFileId() === trimmedFileId) setDragOverFileId(null);
+    },
+    onDrop: ({ source }) => {
+      const fromIndex = source.data?.index;
+      const ids = getValues();
+      const toIndex = ids.indexOf(trimmedFileId);
+      if (typeof fromIndex === "number" && fromIndex >= 0 && toIndex >= 0) {
+        reorderFileIds(fromIndex, toIndex);
+      }
+      setDraggedFileId(null);
+      setDragOverFileId(null);
+    }
+  });
+};
+
+const cleanupFileDraggable = (element) => {
+  const cleanup = fileDragCleanups.get(element);
+  if (cleanup) {
+    cleanup();
+    fileDragCleanups.delete(element);
+  }
+};
+
+const isFileDragging = (fileId) => draggedFileId() === String(fileId || "");
+const isFileDragOver = (fileId) => dragOverFileId() === String(fileId || "");
+
+const showPicker = () => {
+  if (getProps().showPicker === false) return false;
+  const pickerConfiguration = getProps().pickerConfiguration;
+  return pickerConfiguration != null && typeof pickerConfiguration === "object";
+};
+
+const getVertexPickerProps = () => {
+  if (!showPicker()) return null;
+  const pickerConfiguration = {
+    ...getPickerConfiguration(),
+    selectionMode: "multiple",
+    usePolarisUI:
+      getPickerConfiguration().usePolarisUI !== undefined
+        ? getPickerConfiguration().usePolarisUI
+        : true
+  };
+  if (getProps().appendMode !== false) {
+    pickerConfiguration.appendMode = true;
+  }
+  if (!pickerConfiguration.chooseButtonLabel && getProps().chooseButtonLabel) {
+    pickerConfiguration.chooseButtonLabel = getProps().chooseButtonLabel;
+  }
+  if (!pickerConfiguration.clearButtonLabel && getProps().clearButtonLabel) {
+    pickerConfiguration.clearButtonLabel = getProps().clearButtonLabel;
+  }
+  if (!pickerConfiguration.chooseButtonLabel) {
+    pickerConfiguration.chooseButtonLabel = "Add images…";
+  }
+  if (!pickerConfiguration.clearButtonLabel) {
+    pickerConfiguration.clearButtonLabel = "Clear all";
+  }
+
+  const selectedValues = getValues();
+  return {
+    value: "",
+    values: selectedValues,
+    label: "",
+    secondaryLabel:
+      selectedValues.length > 0
+        ? `${selectedValues.length} image${selectedValues.length === 1 ? "" : "s"} selected`
+        : getProps().emptyLabel || "No images yet — add one or more files",
+    previewUrl: "",
+    showImagePreview: false,
+    disabled: isDisabled(),
+    pickerConfiguration,
+    chooseButtonLabel: pickerConfiguration.chooseButtonLabel,
+    clearButtonLabel: pickerConfiguration.clearButtonLabel,
+    onSelect: () => {},
+    onSelectMultiple: (vertexElementIds, selectedVertexPayloads) => {
+      if (Array.isArray(selectedVertexPayloads)) {
+        const vertexMap = {};
+        for (let i = 0; i < selectedVertexPayloads.length; i++) {
+          const selectedVertexPayload = selectedVertexPayloads[i];
+          if (selectedVertexPayload?.id && !g.vertexes[selectedVertexPayload.id]) {
+            vertexMap[selectedVertexPayload.id] = selectedVertexPayload;
+          }
+        }
+        if (Object.keys(vertexMap).length > 0) {
+          _.setGraphData(0, { vertexes: vertexMap }, {});
+        }
+      }
+      const incomingIds = Array.isArray(vertexElementIds)
+        ? vertexElementIds.map((id) => String(id)).filter((id) => id.trim() !== "")
+        : [];
+      if (getProps().appendMode === false) {
+        commitValues(incomingIds);
+        return;
+      }
+      const existingIds = getValues();
+      const mergedIds = [...existingIds];
+      const seen = new Set(existingIds);
+      for (let i = 0; i < incomingIds.length; i++) {
+        const id = incomingIds[i];
+        if (seen.has(id)) continue;
+        seen.add(id);
+        mergedIds.push(id);
+      }
+      commitValues(mergedIds);
+    },
+    onClear: () => commitValues([])
+  };
+};
+
+return {
+  isDisabled,
+  getPreviewEntries,
+  removeFileId,
+  reorderFileIds,
+  initFileDraggable,
+  initFileDropTarget,
+  cleanupFileDraggable,
+  isFileDragging,
+  isFileDragOver,
+  showPicker,
+  getVertexPickerProps
+};
+'''
+        key: FormFilesGallery
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''return [
+  `._id.fm-files-gallery {
+  display: flex;
+  flex-direction: column;
+  gap: ${t.var.spacing.sm};
+  width: 100%;
+}`,
+  `._id.fm-files-gallery .fm-files-gallery-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}`,
+  `._id.fm-files-gallery .fm-files-gallery-thumb {
+  position: relative;
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 0.375rem;
+  border: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background_light_100};
+  overflow: hidden;
+  flex-shrink: 0;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}`,
+  `._id.fm-files-gallery .fm-files-gallery-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;
+}`,
+  `._id.fm-files-gallery .fm-files-gallery-thumb-fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: ${t.var.color.text_light_500};
+  font-size: 0.65rem;
+  padding: 0.25rem;
+  text-align: center;
+  word-break: break-word;
+  pointer-events: none;
+}`,
+  `._id.fm-files-gallery .fm-files-gallery-remove {
+  position: absolute;
+  top: 0.15rem;
+  right: 0.15rem;
+  z-index: 2;
+}`,
+  `._id.fm-files-gallery .fm-files-gallery-hint {
+  margin: 0;
+  font-size: 0.7rem;
+  color: ${t.var.color.text_light_400};
+}`
+];'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  class: "fm-files-gallery",
+  hide: c.props?.hide === true
+};'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const entries = f.getPreviewEntries?.() || [];
+return {
+  as: "div",
+  class: "fm-files-gallery-strip",
+  hide: entries.length === 0
+};'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        contextName: filesGalleryItem
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  data: () => f.getPreviewEntries?.() || []
+};'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''const entry = c.filesGalleryItem || {};
+const fileId = entry.fileId || entry.id || "";
+const dragging = f.isFileDragging?.(fileId);
+const dragOver = f.isFileDragOver?.(fileId);
+return `._id.fm-files-gallery-thumb {
+  position: relative;
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 0.375rem;
+  border: 1px solid ${dragOver ? t.var.color.primary : t.var.color.border};
+  background: ${t.var.color.background_light_100};
+  overflow: hidden;
+  flex-shrink: 0;
+  cursor: ${f.isDisabled?.() ? "default" : "grab"};
+  touch-action: none;
+  user-select: none;
+  ${dragging ? "opacity: 0.55; cursor: grabbing;" : ""}
+  ${dragOver ? `outline: 2px dashed ${t.var.color.primary};` : ""}
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const entry = c.filesGalleryItem || {};
+const fileId = entry.fileId || entry.id || "";
+return {
+  as: "div",
+  class: "fm-files-gallery-thumb",
+  title: f.isDisabled?.() ? undefined : "Drag to reorder",
+  ref: (element) => {
+    if (element && !f.isDisabled?.()) {
+      f.initFileDraggable?.(element, fileId);
+      const dropCleanup = f.initFileDropTarget?.(element, fileId);
+      if (typeof element.__fmFilesGalleryDropCleanup === "function") {
+        element.__fmFilesGalleryDropCleanup();
+      }
+      element.__fmFilesGalleryDropCleanup =
+        typeof dropCleanup === "function" ? dropCleanup : null;
+    } else if (element?.__fmFilesGalleryDropCleanup) {
+      element.__fmFilesGalleryDropCleanup();
+      element.__fmFilesGalleryDropCleanup = null;
+      f.cleanupFileDraggable?.(element);
+    }
+  }
+};'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const entry = c.filesGalleryItem || {};
+return {
+  as: "img",
+  src: entry.hasImage ? entry.url : "",
+  alt: entry.fileName || "File",
+  hide: () => !c.filesGalleryItem?.hasImage
+};'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const entry = c.filesGalleryItem || {};
+return {
+  as: "div",
+  class: "fm-files-gallery-thumb-fallback",
+  text: entry.fileName || "File",
+  hide: () => !!c.filesGalleryItem?.hasImage
+};'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Button
+        props:
+          '''const entry = c.filesGalleryItem || {};
+return {
+  class: "fm-files-gallery-remove",
+  style: "position:absolute;top:0.15rem;right:0.15rem;z-index:2;min-width:1.5rem;padding:0.05rem 0.35rem;line-height:1.2;",
+  variant: "danger",
+  size: "xs",
+  text: "×",
+  type: "button",
+  title: "Remove image",
+  "aria-label": "Remove image",
+  disabled: f.isDisabled(),
+  onMouseDown: (event) => event.stopPropagation(),
+  onPointerDown: (event) => event.stopPropagation(),
+  onClick: (event) => {
+    event.stopPropagation();
+    f.removeFileId(entry.fileId || entry.id);
+  }
+};'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const entries = f.getPreviewEntries?.() || [];
+return {
+  as: "p",
+  class: "fm-files-gallery-hint",
+  text: "Drag images to change order",
+  hide: f.isDisabled?.() || entries.length < 2
+};'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: VertexPicker
+        props:
+          '''const pickerProps = f.getVertexPickerProps?.();
+return {
+  hide: !pickerProps,
+  ...(pickerProps || {})
+};'''
+      }
+    }
+    {
+      id: "11"
+      L: ComponentVariant
+      P: {
+        type: array
+        key: values
+      }
+    }
+    {
+      id: "12"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onChange
+      }
+    }
+    {
+      id: "13"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        defValue: false
+        key: disabled
+      }
+    }
+    {
+      id: "14"
+      L: ComponentVariant
+      P: {
+        type: object
+        key: pickerConfiguration
+      }
+    }
+    {
+      id: "15"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        defValue: true
+        key: showPicker
+      }
+    }
+    {
+      id: "16"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        defValue: true
+        key: appendMode
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "9"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "10"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "5"
+      E: "7"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "5"
+      E: "8"
+    }
+    {
+      id: e10
+      T: ComponentVariant
+      S: "1"
+      E: "11"
+    }
+    {
+      id: e11
+      T: ComponentVariant
+      S: "1"
+      E: "12"
+    }
+    {
+      id: e12
+      T: ComponentVariant
+      S: "1"
+      E: "13"
+    }
+    {
+      id: e13
+      T: ComponentVariant
+      S: "1"
+      E: "14"
+    }
+    {
+      id: e14
+      T: ComponentVariant
+      S: "1"
+      E: "15"
+    }
+    {
+      id: e15
+      T: ComponentVariant
+      S: "1"
+      E: "16"
+    }
+  ]
+}

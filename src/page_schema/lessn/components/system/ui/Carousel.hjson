@@ -177,15 +177,26 @@ return {
         loop: true
       }
     : {}),
-  // Embla root is the viewport (parent). It does root.children[0] for the container.
-  // Bind here on container mount so the child already exists — viewport onMount is too early.
+  // Embla reads viewport.children[0]; defer until after hydrate paints the node.
   onMount: () => {
     const container = _.ref();
     const viewport = container?.parentElement;
-    if (viewport) {
-      f.emblaRef(viewport);
-    }
-    return () => f.emblaRef(undefined);
+    if (!viewport) return () => {};
+    const bind = f.emblaRef;
+    let cancelled = false;
+    let outer = 0;
+    let inner = 0;
+    outer = requestAnimationFrame(() => {
+      inner = requestAnimationFrame(() => {
+        if (!cancelled) bind(viewport);
+      });
+    });
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(outer);
+      cancelAnimationFrame(inner);
+      bind(undefined);
+    };
   }
 };'''
       }

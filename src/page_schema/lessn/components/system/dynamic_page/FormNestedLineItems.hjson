@@ -236,10 +236,17 @@ const getFilesValue = (rowVertex, columnDef) => {
   const lineVertexFromGraph = g.vertexes[rowVertex.id] || rowVertex;
   const fileEdgeIds = lineVertexFromGraph.OUT?.[filesRelationshipType];
   if (!Array.isArray(fileEdgeIds) || fileEdgeIds.length === 0) return [];
+  const sortedEdgeIds = [...fileEdgeIds].sort((leftId, rightId) => {
+    const leftOrder = Number(g.edges[leftId]?.P?.displayOrder);
+    const rightOrder = Number(g.edges[rightId]?.P?.displayOrder);
+    const left = Number.isFinite(leftOrder) ? leftOrder : 0;
+    const right = Number.isFinite(rightOrder) ? rightOrder : 0;
+    return left - right;
+  });
   const ids = [];
   const seen = new Set();
-  for (let edgeIndex = 0; edgeIndex < fileEdgeIds.length; edgeIndex++) {
-    const edge = g.edges[fileEdgeIds[edgeIndex]];
+  for (let edgeIndex = 0; edgeIndex < sortedEdgeIds.length; edgeIndex++) {
+    const edge = g.edges[sortedEdgeIds[edgeIndex]];
     if (!edge?.E) continue;
     const targetVertex = g.vertexes[edge.E];
     if (targetVertex && !targetVertex.L?.includes(filesTargetLabel)) continue;
@@ -249,53 +256,6 @@ const getFilesValue = (rowVertex, columnDef) => {
     ids.push(id);
   }
   return ids;
-};
-
-const getFilePreviewEntries = (rowVertex, columnDef) => {
-  const ids = getFilesValue(rowVertex, columnDef);
-  const pickerConfiguration =
-    (columnDef?.pickerConfiguration != null && typeof columnDef.pickerConfiguration === "object"
-      ? columnDef.pickerConfiguration
-      : null) ||
-    getNestedLineItemsConfig().filesPickerConfiguration ||
-    {};
-  const fileDownloadUrlPrefix =
-    pickerConfiguration.fileDownloadUrlPrefix != null
-      ? String(pickerConfiguration.fileDownloadUrlPrefix).trim()
-      : "/api/file/download";
-  const previewFileNamePropertyKey =
-    pickerConfiguration.previewFileNameProperty != null
-      ? String(pickerConfiguration.previewFileNameProperty)
-      : "fileName";
-  return ids.map((fileId) => {
-    const fileVertex = g.vertexes[fileId];
-    const fileName =
-      fileVertex?.P?.[previewFileNamePropertyKey] != null
-        ? String(fileVertex.P[previewFileNamePropertyKey]).trim()
-        : "";
-    const url =
-      fileName !== "" && fileDownloadUrlPrefix !== ""
-        ? `${fileDownloadUrlPrefix}/${encodeURIComponent(fileName)}`
-        : "";
-    const hasImage = !!(url && /\.(png|jpe?g|gif|webp|svg)$/i.test(fileName));
-    return {
-      id: fileId,
-      fileId,
-      fileName: fileName || fileId,
-      url,
-      hasImage
-    };
-  });
-};
-
-const removeFileId = (lineIndex, columnDef, fileIdToRemove) => {
-  const lines = sortedLineVertices();
-  const lineVertex = lines[lineIndex];
-  if (!lineVertex?.id) return;
-  const trimmedRemoveId = fileIdToRemove != null ? String(fileIdToRemove).trim() : "";
-  if (!trimmedRemoveId) return;
-  const nextIds = getFilesValue(lineVertex, columnDef).filter((id) => id !== trimmedRemoveId);
-  patchCell(lineIndex, columnDef, nextIds);
 };
 
 const setFileIds = (lineVertex, fileVertexIds) => {
@@ -328,7 +288,7 @@ const setFileIds = (lineVertex, fileVertexIds) => {
   }
 };
 
-const getFilesPickerProps = (lineIndex, columnDef, rowVertex) => {
+const getFilesGalleryProps = (lineIndex, columnDef, rowVertex) => {
   const pickerConfiguration =
     (columnDef?.pickerConfiguration != null && typeof columnDef.pickerConfiguration === "object"
       ? { ...columnDef.pickerConfiguration }
@@ -337,63 +297,13 @@ const getFilesPickerProps = (lineIndex, columnDef, rowVertex) => {
       ? { ...getNestedLineItemsConfig().filesPickerConfiguration }
       : null);
   if (!pickerConfiguration) return null;
-  if (pickerConfiguration.usePolarisUI === undefined) {
-    pickerConfiguration.usePolarisUI = true;
-  }
-  pickerConfiguration.selectionMode = "multiple";
-  pickerConfiguration.appendMode = true;
-  if (!pickerConfiguration.chooseButtonLabel) {
-    pickerConfiguration.chooseButtonLabel = "Add images…";
-  }
-  if (!pickerConfiguration.clearButtonLabel) {
-    pickerConfiguration.clearButtonLabel = "Clear all";
-  }
-  const selectedValues = getFilesValue(rowVertex, columnDef);
   return {
-    value: "",
-    values: selectedValues,
-    label: "",
-    secondaryLabel:
-      selectedValues.length > 0
-        ? `${selectedValues.length} image${selectedValues.length === 1 ? "" : "s"} selected`
-        : "No images yet — add one or more files",
-    previewUrl: "",
-    showImagePreview: false,
+    values: getFilesValue(rowVertex, columnDef),
     disabled: isDisabled(),
     pickerConfiguration,
-    chooseButtonLabel: pickerConfiguration.chooseButtonLabel,
-    clearButtonLabel: pickerConfiguration.clearButtonLabel,
-    onSelect: () => {},
-    onSelectMultiple: (vertexElementIds, selectedVertexPayloads) => {
-      if (Array.isArray(selectedVertexPayloads)) {
-        const vertexMap = {};
-        for (const selectedVertexPayload of selectedVertexPayloads) {
-          if (selectedVertexPayload?.id && !g.vertexes[selectedVertexPayload.id]) {
-            vertexMap[selectedVertexPayload.id] = selectedVertexPayload;
-          }
-        }
-        if (Object.keys(vertexMap).length > 0) {
-          _.setGraphData(0, { vertexes: vertexMap }, {});
-        }
-      }
-      const incomingIds = Array.isArray(vertexElementIds)
-        ? vertexElementIds.map((id) => String(id)).filter((id) => id.trim() !== "")
-        : [];
-      const existingIds = getFilesValue(
-        g.vertexes[rowVertex?.id] || rowVertex,
-        columnDef,
-      );
-      const mergedIds = [...existingIds];
-      const seen = new Set(existingIds);
-      for (let i = 0; i < incomingIds.length; i++) {
-        const id = incomingIds[i];
-        if (seen.has(id)) continue;
-        seen.add(id);
-        mergedIds.push(id);
-      }
-      patchCell(lineIndex, columnDef, mergedIds);
-    },
-    onClear: () => patchCell(lineIndex, columnDef, [])
+    appendMode: true,
+    showPicker: true,
+    onChange: (nextIds) => patchCell(lineIndex, columnDef, nextIds)
   };
 };
 
@@ -622,9 +532,7 @@ return {
   getOptionAxesFromSibling,
   patchOptionPairs,
   getFilesValue,
-  getFilePreviewEntries,
-  getFilesPickerProps,
-  removeFileId,
+  getFilesGalleryProps,
   addRow,
   removeRow,
   canRemoveRow,
@@ -1017,187 +925,17 @@ return {
       id: "19"
       L: Attr
       P: {
-        css:
-          '''return [
-  `._id.fm-nested-files {
-  display: flex;
-  flex-direction: column;
-  gap: ${t.var.spacing.sm};
-  width: 100%;
-}`,
-  `._id.fm-nested-files .fm-nested-files-gallery {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}`,
-  `._id.fm-nested-files .fm-nested-files-thumb {
-  position: relative;
-  width: 4.5rem;
-  height: 4.5rem;
-  border-radius: 0.375rem;
-  border: 1px solid ${t.var.color.border};
-  background: ${t.var.color.background_light_100};
-  overflow: hidden;
-  flex-shrink: 0;
-}`,
-  `._id.fm-nested-files .fm-nested-files-thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}`,
-  `._id.fm-nested-files .fm-nested-files-thumb-fallback {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: ${t.var.color.text_light_500};
-  font-size: 0.65rem;
-  padding: 0.25rem;
-  text-align: center;
-  word-break: break-word;
-}`,
-  `._id.fm-nested-files .fm-nested-files-remove {
-  position: absolute;
-  top: 0.15rem;
-  right: 0.15rem;
-  z-index: 2;
-}`
-];'''
         displayOrder: 8
-        componentName: Html
-        props:
-          '''const columnDef = c.nestedLineColumn;
-return {
-  as: "div",
-  class: "fm-nested-files",
-  hide: !columnDef || columnDef.columnType !== "files"
-};'''
-      }
-    }
-    {
-      id: "19a"
-      L: Attr
-      P: {
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''return {
-  as: "div",
-  class: "fm-nested-files-gallery",
-  hide: () => {
-    const columnDef = c.nestedLineColumn;
-    const lineEntryContext = c.lineEntry;
-    const resolvedLineVertex = f.resolveLineRowVertex(lineEntryContext);
-    const entries = f.getFilePreviewEntries(resolvedLineVertex, columnDef);
-    return !entries || entries.length === 0;
-  }
-};'''
-      }
-    }
-    {
-      id: "19b"
-      L: Attr
-      P: {
-        contextName: nestedLineFile
-        loop: true
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''const columnDef = c.nestedLineColumn;
-const lineEntryContext = c.lineEntry;
-const resolvedLineVertex = f.resolveLineRowVertex(lineEntryContext);
-return {
-  data: () => f.getFilePreviewEntries(resolvedLineVertex, columnDef)
-};'''
-      }
-    }
-    {
-      id: "19c"
-      L: Attr
-      P: {
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''return {
-  as: "div",
-  class: "fm-nested-files-thumb"
-};'''
-      }
-    }
-    {
-      id: "19d"
-      L: Attr
-      P: {
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''const entry = c.nestedLineFile || {};
-return {
-  as: "img",
-  src: entry.hasImage ? entry.url : "",
-  alt: entry.fileName || "Variant image",
-  hide: () => !c.nestedLineFile?.hasImage
-};'''
-      }
-    }
-    {
-      id: "19e"
-      L: Attr
-      P: {
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''const entry = c.nestedLineFile || {};
-return {
-  as: "div",
-  class: "fm-nested-files-thumb-fallback",
-  text: entry.fileName || "File",
-  hide: () => !!c.nestedLineFile?.hasImage
-};'''
-      }
-    }
-    {
-      id: "19f"
-      L: Attr
-      P: {
-        displayOrder: 3
-        componentName: Button
-        props:
-          '''const columnDef = c.nestedLineColumn;
-const lineEntryContext = c.lineEntry;
-const lineIndex = lineEntryContext?.index ?? 0;
-const entry = c.nestedLineFile || {};
-return {
-  class: "fm-nested-files-remove",
-  style: "position:absolute;top:0.15rem;right:0.15rem;z-index:2;min-width:1.5rem;padding:0.05rem 0.35rem;line-height:1.2;",
-  variant: "danger",
-  size: "xs",
-  text: "×",
-  type: "button",
-  title: "Remove image",
-  "aria-label": "Remove image",
-  disabled: f.isDisabled(),
-  onClick: () => f.removeFileId(lineIndex, columnDef, entry.fileId || entry.id)
-};'''
-      }
-    }
-    {
-      id: "19g"
-      L: Attr
-      P: {
-        displayOrder: 2
-        componentName: VertexPicker
+        componentName: FormFilesGallery
         props:
           '''const columnDef = c.nestedLineColumn;
 const lineEntryContext = c.lineEntry;
 const resolvedLineVertex = f.resolveLineRowVertex(lineEntryContext);
 const lineIndex = lineEntryContext?.index ?? 0;
-const pickerProps = f.getFilesPickerProps(lineIndex, columnDef, resolvedLineVertex);
+const galleryProps = f.getFilesGalleryProps(lineIndex, columnDef, resolvedLineVertex);
 return {
-  hide: !columnDef || columnDef.columnType !== "files" || !pickerProps,
-  ...(pickerProps || {})
+  hide: !columnDef || columnDef.columnType !== "files" || !galleryProps,
+  ...(galleryProps || {})
 };'''
       }
     }
@@ -1316,48 +1054,6 @@ return {
       T: Attr
       S: "11"
       E: "19"
-    }
-    {
-      id: e19
-      T: Attr
-      S: "19"
-      E: "19a"
-    }
-    {
-      id: e20
-      T: Attr
-      S: "19"
-      E: "19g"
-    }
-    {
-      id: e21
-      T: Attr
-      S: "19a"
-      E: "19b"
-    }
-    {
-      id: e22
-      T: Attr
-      S: "19b"
-      E: "19c"
-    }
-    {
-      id: e23
-      T: Attr
-      S: "19c"
-      E: "19d"
-    }
-    {
-      id: e24
-      T: Attr
-      S: "19c"
-      E: "19e"
-    }
-    {
-      id: e25
-      T: Attr
-      S: "19c"
-      E: "19f"
     }
   ]
 }
