@@ -139,6 +139,32 @@ const pushRecentSearch = (term) => {
   writeJson(RECENT_KEY, next);
 };
 
+const clearRecentSearches = (event) => {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  setRecentSearches([]);
+  writeJson(RECENT_KEY, []);
+  setActiveIndex(-1);
+  logAnalytics({ action: "recent_clear" });
+};
+
+const removeRecentSearch = (term, event) => {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  const clean = term != null ? String(term).trim() : "";
+  if (!clean) return;
+  const prev = Array.isArray(recentSearches()) ? recentSearches() : [];
+  const next = prev.filter((item) => item.toLowerCase() !== clean.toLowerCase());
+  setRecentSearches(next);
+  writeJson(RECENT_KEY, next);
+  setActiveIndex(-1);
+  logAnalytics({ action: "recent_remove", recent: clean });
+};
+
 const logAnalytics = (event) => {
   const entry = {
     ts: Date.now(),
@@ -590,6 +616,8 @@ return {
   selectCategory,
   selectProduct,
   applyRecent,
+  clearRecentSearches,
+  removeRecentSearch,
   categoryHref,
   productHref,
   searchPageHref,
@@ -1038,20 +1066,74 @@ return `._id {
       P: {
         css:
           '''return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
   padding: 0.4rem 0.9rem 0.2rem;
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: rgba(58, 35, 23, 0.55);
 }`;'''
         displayOrder: 3
         componentName: Html
         props:
           '''return {
   as: "div",
-  text: "Recent",
   hide: () => !(f.showIdleSuggestions() && f.recentSearches().length > 0)
+};'''
+      }
+    }
+    {
+      id: "69"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(58, 35, 23, 0.55);
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  text: "Recent"
+};'''
+      }
+    }
+    {
+      id: "70"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  border: none;
+  background: transparent;
+  padding: 0.1rem 0.15rem;
+  margin: 0;
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: rgba(58, 35, 23, 0.55);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 0.12em;
+  &:hover, &:focus-visible {
+    color: #3a2317;
+    outline: none;
+  }
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "button",
+  type: "button",
+  text: "Clear",
+  "attr:aria-label": "Clear past searches",
+  onClick: (event) => f.clearRecentSearches(event)
 };'''
       }
     }
@@ -1080,16 +1162,47 @@ const id = f.optionId("recent", { id: item?.text }, c.index ?? 0);
 const active = f.isOptionActive(id);
 return `._id {
   display: flex;
+  align-items: center;
+  gap: 0.25rem;
   width: 100%;
   box-sizing: border-box;
-  padding: 0.55rem 0.9rem;
-  border: none;
+  padding: 0.15rem 0.35rem 0.15rem 0;
   background: ${active ? "rgba(0, 0, 0, 0.1)" : "transparent"};
+  &:hover, &:focus-within { background: rgba(0, 0, 0, 0.08); }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const item = c.recentItem;
+const id = f.optionId("recent", { id: item?.text }, c.index ?? 0);
+return {
+  as: "div",
+  onMouseEnter: () => {
+    const opts = f.getFlatOptions();
+    const idx = opts.findIndex((opt) => opt.id === id);
+    if (idx >= 0) f.setActiveIndex(idx);
+  }
+};'''
+      }
+    }
+    {
+      id: "71"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: block;
+  box-sizing: border-box;
+  padding: 0.4rem 0.55rem 0.4rem 0.9rem;
+  border: none;
+  background: transparent;
   color: #3a2317;
   text-align: left;
   font: inherit;
   cursor: pointer;
-  &:hover, &:focus-visible { background: rgba(0, 0, 0, 0.08); outline: none; }
+  &:focus-visible { outline: none; }
 }`;'''
         displayOrder: 1
         componentName: Html
@@ -1103,12 +1216,47 @@ return {
   "attr:role": "option",
   "attr:aria-selected": () => f.isOptionActive(id),
   text: item?.text || "",
-  onClick: () => f.applyRecent(item?.text),
-  onMouseEnter: () => {
-    const opts = f.getFlatOptions();
-    const idx = opts.findIndex((opt) => opt.id === id);
-    if (idx >= 0) f.setActiveIndex(idx);
+  onClick: () => f.applyRecent(item?.text)
+};'''
+      }
+    }
+    {
+      id: "72"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  margin-right: 0.35rem;
+  border: none;
+  border-radius: 0.25rem;
+  background: transparent;
+  color: rgba(58, 35, 23, 0.45);
+  font: inherit;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  &:hover, &:focus-visible {
+    color: #3a2317;
+    background: rgba(0, 0, 0, 0.08);
+    outline: none;
   }
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const item = c.recentItem;
+return {
+  as: "button",
+  type: "button",
+  text: "×",
+  "attr:aria-label": () => `Remove ${item?.text || "search"} from recent`,
+  onClick: (event) => f.removeRecentSearch(item?.text, event)
 };'''
       }
     }
@@ -2278,8 +2426,12 @@ return {
     { id: "e6", T: "Attr", S: "6", E: "7" }
     { id: "e40", T: "Attr", S: "6", E: "40" }
     { id: "e49", T: "Attr", S: "6", E: "49" }
+    { id: "e69", T: "Attr", S: "49", E: "69" }
+    { id: "e70", T: "Attr", S: "49", E: "70" }
     { id: "e50", T: "Attr", S: "6", E: "50" }
     { id: "e51", T: "Attr", S: "50", E: "51" }
+    { id: "e71", T: "Attr", S: "51", E: "71" }
+    { id: "e72", T: "Attr", S: "51", E: "72" }
     { id: "e52", T: "Attr", S: "6", E: "52" }
     { id: "e53", T: "Attr", S: "6", E: "53" }
     { id: "e54", T: "Attr", S: "53", E: "54" }
