@@ -45,6 +45,11 @@ const uniqueValuesForAxis = (axisKey) => {
   return Array.from(values).sort((a, b) => a.localeCompare(b));
 };
 
+const selectableAxes = () =>
+  parseAxes().filter((axis) => uniqueValuesForAxis(axis.key).length > 0);
+
+const hasSelectableOptions = () => selectableAxes().length > 0;
+
 const isColorAxis = (axis) => {
   const key = normalize(axis?.key).toLowerCase();
   const label = normalize(axis?.label).toLowerCase();
@@ -60,7 +65,7 @@ const looksLikeColor = (value) => {
 };
 
 const variantMatchesPartial = (variant, selection, skipAxisKey) => {
-  for (const axis of parseAxes()) {
+  for (const axis of selectableAxes()) {
     if (axis.key === skipAxisKey) continue;
     const selected = normalize(selection?.[axis.key]);
     if (!selected) continue;
@@ -79,8 +84,9 @@ const isValueAvailable = (axisKey, value, selection) => {
 };
 
 const findExactVariant = (selection) => {
-  const axes = parseAxes();
-  if (axes.length === 0) return parseVariants()[0] || null;
+  // No option types (or none with values) → always show the first variant.
+  if (!hasSelectableOptions()) return parseVariants()[0] || null;
+  const axes = selectableAxes();
   if (axes.some((axis) => !normalize(selection?.[axis.key]))) return null;
   return (
     parseVariants().find((variant) =>
@@ -94,7 +100,7 @@ const findExactVariant = (selection) => {
 const scoreVariant = (variant, selection) => {
   let score = 0;
   let mismatches = 0;
-  for (const axis of parseAxes()) {
+  for (const axis of selectableAxes()) {
     const selected = normalize(selection?.[axis.key]);
     if (!selected) continue;
     const variantValue = normalize(variant?.options?.[axis.key]);
@@ -135,7 +141,7 @@ const findNearestVariant = (selection, preferredAxisKey) => {
 
 const selectionFromVariant = (variant) => {
   const next = {};
-  for (const axis of parseAxes()) {
+  for (const axis of selectableAxes()) {
     next[axis.key] = normalize(variant?.options?.[axis.key]);
   }
   return next;
@@ -146,7 +152,7 @@ const autoSelectSingletons = (selection) => {
   let changed = true;
   while (changed) {
     changed = false;
-    for (const axis of parseAxes()) {
+    for (const axis of selectableAxes()) {
       const available = uniqueValuesForAxis(axis.key).filter((value) =>
         isValueAvailable(axis.key, value, next)
       );
@@ -166,6 +172,10 @@ const autoSelectSingletons = (selection) => {
 };
 
 const reconcileSelection = (selection, preferredAxisKey) => {
+  if (!hasSelectableOptions()) {
+    const first = parseVariants()[0] || null;
+    return { selection: {}, variant: first };
+  }
   let next = { ...selection };
   let exact = findExactVariant(next);
   if (!exact) {
@@ -185,9 +195,12 @@ const reconcileSelection = (selection, preferredAxisKey) => {
 };
 
 const buildInitialSelection = () => {
+  if (!hasSelectableOptions()) {
+    return { selection: {}, variant: parseVariants()[0] || null };
+  }
   const first = parseVariants()[0];
   const base = first ? selectionFromVariant(first) : {};
-  for (const axis of parseAxes()) {
+  for (const axis of selectableAxes()) {
     if (!normalize(base[axis.key])) {
       const values = uniqueValuesForAxis(axis.key);
       base[axis.key] = values[0] || "";
@@ -199,6 +212,21 @@ const buildInitialSelection = () => {
 const initialResolved = buildInitialSelection();
 const [selection, setSelection] = _.createSignal(initialResolved.selection);
 const [activeVariant, setActiveVariant] = _.createSignal(initialResolved.variant);
+
+// Re-resolve when product data arrives or changes (e.g. async serverFunction).
+_.createEffect(() => {
+  const productKey = product()?.key || product()?.id || "";
+  const variantCount = parseVariants().length;
+  const axisSignature = selectableAxes()
+    .map((axis) => `${axis.key}:${uniqueValuesForAxis(axis.key).join(",")}`)
+    .join("|");
+  void productKey;
+  void variantCount;
+  void axisSignature;
+  const resolved = buildInitialSelection();
+  setSelection(resolved.selection);
+  setActiveVariant(resolved.variant);
+});
 
 const applySelection = (nextSelection, preferredAxisKey) => {
   const reconciled = reconcileSelection(nextSelection, preferredAxisKey);
@@ -214,18 +242,12 @@ const selectOptionValue = (axisKey, value) => {
 };
 
 const optionAxesForUi = () =>
-  parseAxes()
-    .map((axis) => {
-      const values = uniqueValuesForAxis(axis.key);
-      if (values.length === 0) return null;
-      return {
-        key: axis.key,
-        label: axis.label || axis.key,
-        isColor: isColorAxis(axis),
-        values
-      };
-    })
-    .filter(Boolean);
+  selectableAxes().map((axis) => ({
+    key: axis.key,
+    label: axis.label || axis.key,
+    isColor: isColorAxis(axis),
+    values: uniqueValuesForAxis(axis.key)
+  }));
 
 const optionValuesForAxis = (axis) => {
   const currentSelection = selection();
@@ -252,8 +274,10 @@ const isOptionSelected = (axisKey, value) =>
 
 const hasExactVariant = () => !!activeVariant();
 
-const previewVariant = () =>
-  activeVariant() || findNearestVariant(selection(), null);
+const previewVariant = () => {
+  if (!hasSelectableOptions()) return parseVariants()[0] || null;
+  return activeVariant() || findNearestVariant(selection(), null);
+};
 
 const carouselImages = () => {
   const images = previewVariant()?.images;
@@ -282,8 +306,10 @@ const carouselImages = () => {
 };
 
 const availabilityLabel = () => {
-  if (!hasExactVariant()) return "Select options to see availability";
-  const variant = activeVariant();
+  const variant = activeVariant() || (!hasSelectableOptions() ? parseVariants()[0] : null);
+  if (!variant) {
+    return hasSelectableOptions() ? "Select options to see availability" : "Unavailable";
+  }
   if (variant?.stock != null && String(variant.stock).trim() !== "") {
     return String(variant.stock).trim();
   }

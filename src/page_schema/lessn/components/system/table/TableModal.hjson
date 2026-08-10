@@ -52,10 +52,16 @@ return {
         componentName: ContentModal
         props:
           '''const p = f.getProps();
+const maxWidth =
+  p.maxWidth != null && String(p.maxWidth).trim() !== ""
+    ? String(p.maxWidth).trim()
+    : p.modalMaxWidth != null && String(p.modalMaxWidth).trim() !== ""
+      ? String(p.modalMaxWidth).trim()
+      : "880px";
 return {
   isOpen: p.isOpen === true,
   title: f.getModalTitle(),
-  maxWidth: "880px",
+  maxWidth,
   onClose: f.handleClose
 };'''
       }
@@ -211,6 +217,23 @@ return {
         key: sidebarConfig
       }
     }
+    {
+      id: "19"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: "880px"
+        key: maxWidth
+      }
+    }
+    {
+      id: "20"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: modalMaxWidth
+      }
+    }
   ]
   edges: [
     {
@@ -278,6 +301,18 @@ return {
       T: ComponentVariant
       S: "1"
       E: "18"
+    }
+    {
+      id: e18
+      T: ComponentVariant
+      S: "1"
+      E: "19"
+    }
+    {
+      id: e19
+      T: ComponentVariant
+      S: "1"
+      E: "20"
     }
     {
       id: e10

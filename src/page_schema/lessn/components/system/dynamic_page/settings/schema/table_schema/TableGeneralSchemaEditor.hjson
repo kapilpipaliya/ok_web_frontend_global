@@ -4,8 +4,8 @@
       id: "1"
       L: Component
       P: {
-        dynamicComponent: Button, TextInput, TextArea, LoadingSpinner, Html
-        description: Visual editor for table general schema flags with load/save.
+        dynamicComponent: Button, TextArea, LoadingSpinner, Html, FormManagement
+        description: Visual editor for table general schema using FormManagement; unknown keys survive saves.
         fns:
           '''
 const getProps = () => c.props || {};
@@ -19,54 +19,182 @@ const getSchemaKey = () => {
 };
 const executeYTOFunction = (fn, ctx) => s({ functionName: fn, contextData: ctx || {} });
 
-const BOOL_KEYS = [
-  "publicRead", "showSelection", "hideExportButtons", "hideImportButtons",
-  "enableUserScopingForContent", "enableLocalFilters", "enableLocalSort", "usePolarisUI"
+const FORM_FIELD_KEYS = [
+  "title",
+  "label",
+  "icon",
+  "modalMaxWidth",
+  "rowHeight",
+  "publicRead",
+  "showSelection",
+  "hideExportButtons",
+  "hideImportButtons",
+  "hideSettingsButton",
+  "hideAddButton",
+  "enableUserScopingForContent",
+  "enableLocalFilters",
+  "enableLocalSort",
+  "usePolarisUI",
+  "rowClickable",
+  "showRowNumber",
+  "resizableColumns"
 ];
+
+const GENERAL_FORM_CONFIG = {
+  gridColumns: 2,
+  groups: [
+    {
+      key: "identity",
+      title: "Identity",
+      gridColumns: 2,
+      fields: [
+        { key: "title", label: "Title", dataType: "text", renderer: "text", colSpan: 1 },
+        { key: "label", label: "Label", dataType: "text", renderer: "text", colSpan: 1 },
+        { key: "icon", label: "Icon", dataType: "text", renderer: "text", colSpan: 1, placeholder: "ph:book-open" },
+        { key: "modalMaxWidth", label: "Modal max width", dataType: "text", renderer: "text", colSpan: 1, placeholder: "880px" },
+        { key: "rowHeight", label: "Row height", dataType: "text", renderer: "text", colSpan: 1, placeholder: "56" }
+      ]
+    },
+    {
+      key: "flags",
+      title: "Flags",
+      gridColumns: 2,
+      fields: [
+        { key: "publicRead", label: "Public read", dataType: "boolean", renderer: "checkbox", colSpan: 1 },
+        { key: "showSelection", label: "Show selection", dataType: "boolean", renderer: "checkbox", colSpan: 1 },
+        { key: "hideExportButtons", label: "Hide export buttons", dataType: "boolean", renderer: "checkbox", colSpan: 1 },
+        { key: "hideImportButtons", label: "Hide import buttons", dataType: "boolean", renderer: "checkbox", colSpan: 1 },
+        { key: "hideSettingsButton", label: "Hide settings button", dataType: "boolean", renderer: "checkbox", colSpan: 1 },
+        { key: "hideAddButton", label: "Hide add button", dataType: "boolean", renderer: "checkbox", colSpan: 1 },
+        { key: "enableUserScopingForContent", label: "User-scoped content", dataType: "boolean", renderer: "checkbox", colSpan: 1 },
+        { key: "enableLocalFilters", label: "Local filters", dataType: "boolean", renderer: "checkbox", colSpan: 1 },
+        { key: "enableLocalSort", label: "Local sort", dataType: "boolean", renderer: "checkbox", colSpan: 1 },
+        { key: "usePolarisUI", label: "Use Polaris UI", dataType: "boolean", renderer: "checkbox", colSpan: 1 },
+        { key: "rowClickable", label: "Row clickable", dataType: "boolean", renderer: "checkbox", colSpan: 1 },
+        { key: "showRowNumber", label: "Show row number", dataType: "boolean", renderer: "checkbox", colSpan: 1 },
+        { key: "resizableColumns", label: "Resizable columns", dataType: "boolean", renderer: "checkbox", colSpan: 1 }
+      ]
+    }
+  ]
+};
 
 const defaultGeneral = () => ({
   part: "general",
   title: "",
   label: "",
   icon: "",
+  modalMaxWidth: "",
+  rowHeight: 56,
   publicRead: false,
   showSelection: true,
   hideExportButtons: false,
   hideImportButtons: false,
+  hideSettingsButton: false,
+  hideAddButton: false,
   enableUserScopingForContent: false,
   enableLocalFilters: true,
   enableLocalSort: true,
-  usePolarisUI: false
+  usePolarisUI: false,
+  rowClickable: false,
+  showRowNumber: true,
+  resizableColumns: true
 });
 
 const [loading, setLoading] = _.createSignal(false);
 const [saving, setSaving] = _.createSignal(false);
 const [schemaData, setSchemaData] = _.createSignal(defaultGeneral());
+const [formVertex, setFormVertex] = _.createSignal(null);
+const [formRevision, setFormRevision] = _.createSignal(0);
+const [formManagementFns, setFormManagementFns] = _.createSignal(null);
 const [configJsonText, setConfigJsonText] = _.createSignal("");
 const [jsonError, setJsonError] = _.createSignal("");
 const [editorMode, setEditorMode] = _.createSignal("visual");
 
 const isJsonMode = () => editorMode() === "json";
+
 const syncJsonFromData = (data) => {
-  setConfigJsonText(JSON.stringify(data && typeof data === "object" ? { ...data } : defaultGeneral(), null, 2));
+  setConfigJsonText(
+    JSON.stringify(data && typeof data === "object" ? { ...data } : defaultGeneral(), null, 2)
+  );
   setJsonError("");
+};
+
+const pickFormValues = (data) => {
+  const source = data && typeof data === "object" ? data : {};
+  const defaults = defaultGeneral();
+  const values = {};
+  for (let i = 0; i < FORM_FIELD_KEYS.length; i++) {
+    const key = FORM_FIELD_KEYS[i];
+    values[key] = source[key] !== undefined ? source[key] : defaults[key];
+  }
+  return values;
+};
+
+const buildFormVertex = (data) => {
+  const vertexId = _.generateNewVertexId(g, sg);
+  const values = pickFormValues(data);
+  _.addNewVertex(
+    0,
+    {
+      id: vertexId,
+      L: ["TableGeneralSchemaFormData"],
+      P: { ...values },
+      IN: {},
+      OUT: {}
+    },
+    g,
+    sg
+  );
+  return g.vertexes[vertexId] || null;
+};
+
+const mergeFormIntoSchema = (formP, baseData) => {
+  const base =
+    baseData && typeof baseData === "object"
+      ? { ...baseData }
+      : { ...(schemaData() || defaultGeneral()) };
+  const formValues = formP && typeof formP === "object" ? formP : {};
+  for (let i = 0; i < FORM_FIELD_KEYS.length; i++) {
+    const key = FORM_FIELD_KEYS[i];
+    if (Object.prototype.hasOwnProperty.call(formValues, key)) {
+      base[key] = formValues[key];
+    }
+  }
+  if (base.rowHeight != null && base.rowHeight !== "") {
+    const asNumber = Number(base.rowHeight);
+    if (Number.isFinite(asNumber)) base.rowHeight = asNumber;
+  }
+  if (base.modalMaxWidth != null) {
+    const trimmed = String(base.modalMaxWidth).trim();
+    base.modalMaxWidth = trimmed !== "" ? trimmed : "";
+  }
+  base.part = "general";
+  return base;
 };
 
 const applyLoadedSetting = (setting) => {
   if (!setting?.P?.config) {
-    setSchemaData(defaultGeneral());
-    syncJsonFromData(defaultGeneral());
+    const defaults = defaultGeneral();
+    setSchemaData(defaults);
+    syncJsonFromData(defaults);
+    setFormVertex(buildFormVertex(defaults));
+    setFormRevision((n) => n + 1);
     return;
   }
   try {
     const data = new Function(setting.P.config)();
+    // Keep every stored key; only fill defaults for known form fields.
     const merged = { ...defaultGeneral(), ...(data || {}), part: "general" };
     setSchemaData(merged);
     syncJsonFromData(merged);
+    setFormVertex(buildFormVertex(merged));
+    setFormRevision((n) => n + 1);
   } catch (error) {
     setSchemaData(defaultGeneral());
     setConfigJsonText(String(setting.P.config || ""));
     setJsonError("Failed to parse stored config");
+    setFormVertex(buildFormVertex(defaultGeneral()));
+    setFormRevision((n) => n + 1);
   }
 };
 
@@ -88,39 +216,54 @@ const loadSchema = async () => {
   }
 };
 
-const patchGeneral = (partial) => {
-  const next = { ...(schemaData() || defaultGeneral()), ...partial, part: "general" };
-  setSchemaData(next);
-  syncJsonFromData(next);
-};
-
-const getValue = (key) => schemaData()?.[key];
-const getBool = (key) => getValue(key) === true;
-
-const saveSchema = async () => {
+const persistSchemaObject = async (configObj) => {
   const schemaKey = getSchemaKey();
   if (!schemaKey) {
     _.showErrorToast?.("Schema key is missing");
-    return;
+    return false;
   }
+  const payload = configObj && typeof configObj === "object" ? { ...configObj, part: "general" } : defaultGeneral();
+  const configBody = `return ${JSON.stringify(payload, null, 2)};`;
+  const result = await executeYTOFunction("saveTableSchema", {
+    key: schemaKey,
+    tableKey: getTableKey(),
+    part: "general",
+    config: configBody,
+    name: getProps().title || "Table general schema"
+  });
+  if (!result?.result?.success) {
+    _.showErrorToast?.(result?.result?.message || "Failed to save");
+    return false;
+  }
+  _.showSuccessToast?.(result.result.message || "Table schema saved");
+  applyLoadedSetting(result.result.data?.setting);
+  getProps().onSaved?.();
+  return true;
+};
+
+const handleFormSave = async (savePayload) => {
+  const next = mergeFormIntoSchema(savePayload?.vertex?.P, schemaData());
+  const ok = await persistSchemaObject(next);
+  return ok;
+};
+
+const saveSchema = async () => {
   setSaving(true);
   try {
-    const configObj = isJsonMode() ? JSON.parse(configJsonText()) : schemaData();
-    const configBody = `return ${JSON.stringify(configObj, null, 2)};`;
-    const result = await executeYTOFunction("saveTableSchema", {
-      key: schemaKey,
-      tableKey: getTableKey(),
-      part: "general",
-      config: configBody,
-      name: getProps().title || "Table general schema"
-    });
-    if (!result?.result?.success) {
-      _.showErrorToast?.(result?.result?.message || "Failed to save");
+    if (isJsonMode()) {
+      const parsed = JSON.parse(configJsonText());
+      // JSON mode is authoritative for the full object, including unknown keys.
+      await persistSchemaObject({ ...(parsed || {}), part: "general" });
       return;
     }
-    _.showSuccessToast?.(result.result.message || "Table schema saved");
-    applyLoadedSetting(result.result.data?.setting);
-    getProps().onSaved?.();
+    const formFns = formManagementFns();
+    if (formFns?.handleSave) {
+      await formFns.handleSave();
+      return;
+    }
+    const liveVertex = formFns?.getFormVertex?.() || formVertex();
+    const next = mergeFormIntoSchema(liveVertex?.P, schemaData());
+    await persistSchemaObject(next);
   } catch (error) {
     _.showErrorToast?.(isJsonMode() ? "Invalid JSON" : "Failed to save table schema");
   } finally {
@@ -129,14 +272,49 @@ const saveSchema = async () => {
 };
 
 const setEditorModeSafe = (mode) => {
-  if (mode === "json") syncJsonFromData(schemaData());
+  if (mode === "json") {
+    // Refresh JSON from latest schema + live form field values before switching.
+    const liveVertex = formManagementFns()?.getFormVertex?.() || formVertex();
+    const merged = mergeFormIntoSchema(liveVertex?.P, schemaData());
+    setSchemaData(merged);
+    syncJsonFromData(merged);
+  } else if (mode === "visual") {
+    try {
+      const parsed = JSON.parse(configJsonText());
+      const merged = { ...defaultGeneral(), ...(parsed || {}), part: "general" };
+      setSchemaData(merged);
+      setFormVertex(buildFormVertex(merged));
+      setFormRevision((n) => n + 1);
+      setJsonError("");
+    } catch (error) {
+      setJsonError("Invalid JSON — fix before switching to Visual");
+      _.showErrorToast?.("Invalid JSON — fix before switching to Visual");
+      return;
+    }
+  }
   setEditorMode(mode);
 };
 
+const registerFormManagementFns = (formFns) => {
+  setFormManagementFns(formFns || null);
+};
+
 return {
-  loading, saving, isJsonMode, configJsonText, setConfigJsonText, jsonError,
-  loadSchema, saveSchema, setEditorMode: setEditorModeSafe,
-  patchGeneral, getValue, getBool, BOOL_KEYS
+  loading,
+  saving,
+  isJsonMode,
+  configJsonText,
+  setConfigJsonText,
+  jsonError,
+  loadSchema,
+  saveSchema,
+  setEditorMode: setEditorModeSafe,
+  GENERAL_FORM_CONFIG,
+  formVertex,
+  formRevision,
+  handleFormSave,
+  registerFormManagementFns,
+  FORM_FIELD_KEYS
 };
 '''
         key: TableGeneralSchemaEditor
@@ -255,333 +433,61 @@ return {
       P: {
         css:
           '''return `._id {
-  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.625rem;
-  padding: 0.75rem 1rem; align-content: start;
-  @media (max-width: 768px) { grid-template-columns: 1fr; }
+  padding: 0.75rem 1rem;
+  min-height: 0;
 }`;'''
         displayOrder: 1
-        componentName: Html
-        props: "return { as: \"div\", hide: f.isJsonMode?.() === true };"
-      }
-    }
-    {
-      id: "12"
-      L: Attr
-      P: {
-        displayOrder: 1
-        componentName: TextInput
+        componentName: FormManagement
         props:
-          '''return {
-  label: "Title", value: f.getValue?.("title") || "",
-  onChange: (e) => f.patchGeneral?.({ title: e.target.value })
+          '''const initialVertex = f.formVertex?.();
+const revision = f.formRevision?.() || 0;
+return {
+  key: `table-general-form-${revision}`,
+  hide: f.isJsonMode?.() === true || !initialVertex,
+  formConfig: f.GENERAL_FORM_CONFIG,
+  initialVertex,
+  mode: "edit",
+  vertexLabel: "TableGeneralSchemaFormData",
+  hideActionsBar: true,
+  afterSuccessfulSave: "reinitialize",
+  onSave: f.handleFormSave,
+  onFnsReady: f.registerFormManagementFns
 };'''
-      }
-    }
-    {
-      id: "13"
-      L: Attr
-      P: {
-        displayOrder: 2
-        componentName: TextInput
-        props:
-          '''return {
-  label: "Label", value: f.getValue?.("label") || "",
-  onChange: (e) => f.patchGeneral?.({ label: e.target.value })
-};'''
-      }
-    }
-    {
-      id: "14"
-      L: Attr
-      P: {
-        displayOrder: 3
-        componentName: TextInput
-        props:
-          '''return {
-  label: "Icon", value: f.getValue?.("icon") || "", placeholder: "ph:book-open",
-  onChange: (e) => f.patchGeneral?.({ icon: e.target.value })
-};'''
-      }
-    }
-    {
-      id: "15"
-      L: Attr
-      P: {
-        css:
-          '''return `._id {
-  grid-column: 1 / -1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem;
-  padding: 0.625rem; border: 1px solid ${t.var.color.border}; border-radius: 0.5rem;
-  @media (max-width: 640px) { grid-template-columns: 1fr; }
-}`;'''
-        displayOrder: 4
-        componentName: Html
-        props: return { as: "div" };
-      }
-    }
-    {
-      id: "16"
-      L: Attr
-      P: {
-        css: return `._id.tgse-flag { display: flex; align-items: center; gap: 0.375rem; font-size: 0.8125rem; }`;
-        displayOrder: 1
-        componentName: Html
-        props: return { as: "label", class: "tgse-flag" };
-      }
-    }
-    {
-      id: "17"
-      L: Attr
-      P: {
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''return {
-  as: "input", type: "checkbox", checked: f.getBool?.("publicRead"),
-  onChange: (e) => f.patchGeneral?.({ publicRead: e.target.checked })
-};'''
-      }
-    }
-    {
-      id: "18"
-      L: Attr
-      P: {
-        displayOrder: 2
-        componentName: Html
-        props: return { as: "span", text: "Public read" };
-      }
-    }
-    {
-      id: "19"
-      L: Attr
-      P: {
-        displayOrder: 2
-        componentName: Html
-        props: return { as: "label", class: "tgse-flag" };
-      }
-    }
-    {
-      id: "20"
-      L: Attr
-      P: {
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''return {
-  as: "input", type: "checkbox", checked: f.getBool?.("showSelection"),
-  onChange: (e) => f.patchGeneral?.({ showSelection: e.target.checked })
-};'''
-      }
-    }
-    {
-      id: "21"
-      L: Attr
-      P: {
-        displayOrder: 2
-        componentName: Html
-        props: return { as: "span", text: "Show selection" };
-      }
-    }
-    {
-      id: "22"
-      L: Attr
-      P: {
-        displayOrder: 3
-        componentName: Html
-        props: return { as: "label", class: "tgse-flag" };
-      }
-    }
-    {
-      id: "23"
-      L: Attr
-      P: {
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''return {
-  as: "input", type: "checkbox", checked: f.getBool?.("hideExportButtons"),
-  onChange: (e) => f.patchGeneral?.({ hideExportButtons: e.target.checked })
-};'''
-      }
-    }
-    {
-      id: "24"
-      L: Attr
-      P: {
-        displayOrder: 2
-        componentName: Html
-        props: return { as: "span", text: "Hide export buttons" };
-      }
-    }
-    {
-      id: "25"
-      L: Attr
-      P: {
-        displayOrder: 4
-        componentName: Html
-        props: return { as: "label", class: "tgse-flag" };
-      }
-    }
-    {
-      id: "26"
-      L: Attr
-      P: {
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''return {
-  as: "input", type: "checkbox", checked: f.getBool?.("hideImportButtons"),
-  onChange: (e) => f.patchGeneral?.({ hideImportButtons: e.target.checked })
-};'''
-      }
-    }
-    {
-      id: "27"
-      L: Attr
-      P: {
-        displayOrder: 2
-        componentName: Html
-        props: return { as: "span", text: "Hide import buttons" };
-      }
-    }
-    {
-      id: "28"
-      L: Attr
-      P: {
-        displayOrder: 5
-        componentName: Html
-        props: return { as: "label", class: "tgse-flag" };
-      }
-    }
-    {
-      id: "29"
-      L: Attr
-      P: {
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''return {
-  as: "input", type: "checkbox", checked: f.getBool?.("enableUserScopingForContent"),
-  onChange: (e) => f.patchGeneral?.({ enableUserScopingForContent: e.target.checked })
-};'''
-      }
-    }
-    {
-      id: "30"
-      L: Attr
-      P: {
-        displayOrder: 2
-        componentName: Html
-        props: return { as: "span", text: "Enable user scoping" };
-      }
-    }
-    {
-      id: "31"
-      L: Attr
-      P: {
-        displayOrder: 6
-        componentName: Html
-        props: return { as: "label", class: "tgse-flag" };
-      }
-    }
-    {
-      id: "32"
-      L: Attr
-      P: {
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''return {
-  as: "input", type: "checkbox", checked: f.getBool?.("enableLocalFilters"),
-  onChange: (e) => f.patchGeneral?.({ enableLocalFilters: e.target.checked })
-};'''
-      }
-    }
-    {
-      id: "33"
-      L: Attr
-      P: {
-        displayOrder: 2
-        componentName: Html
-        props: return { as: "span", text: "Enable local filters" };
-      }
-    }
-    {
-      id: "34"
-      L: Attr
-      P: {
-        displayOrder: 7
-        componentName: Html
-        props: return { as: "label", class: "tgse-flag" };
-      }
-    }
-    {
-      id: "35"
-      L: Attr
-      P: {
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''return {
-  as: "input", type: "checkbox", checked: f.getBool?.("enableLocalSort"),
-  onChange: (e) => f.patchGeneral?.({ enableLocalSort: e.target.checked })
-};'''
-      }
-    }
-    {
-      id: "36"
-      L: Attr
-      P: {
-        displayOrder: 2
-        componentName: Html
-        props: return { as: "span", text: "Enable local sort" };
-      }
-    }
-    {
-      id: "37"
-      L: Attr
-      P: {
-        displayOrder: 8
-        componentName: Html
-        props: return { as: "label", class: "tgse-flag" };
-      }
-    }
-    {
-      id: "38"
-      L: Attr
-      P: {
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''return {
-  as: "input", type: "checkbox", checked: f.getBool?.("usePolarisUI"),
-  onChange: (e) => f.patchGeneral?.({ usePolarisUI: e.target.checked })
-};'''
-      }
-    }
-    {
-      id: "39"
-      L: Attr
-      P: {
-        displayOrder: 2
-        componentName: Html
-        props: return { as: "span", text: "Use Polaris UI" };
       }
     }
     {
       id: "40"
       L: Attr
       P: {
-        css: return `._id { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 0.75rem 1rem; }`;
+        css:
+          '''return `._id {
+  display: flex; flex-direction: column; gap: 0.5rem; padding: 0.75rem 1rem; height: 100%; box-sizing: border-box;
+}`;'''
         displayOrder: 2
         componentName: Html
         props: "return { as: \"div\", hide: f.isJsonMode?.() !== true };"
       }
     }
     {
+      id: "40a"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0; font-size: 0.8125rem; color: ${t.var.color.error}; }`;
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: f.jsonError?.() || "",
+  hide: !f.jsonError?.()
+};'''
+      }
+    }
+    {
       id: "41"
       L: Attr
       P: {
-        displayOrder: 1
+        displayOrder: 2
         componentName: TextArea
         props:
           '''return {
@@ -661,172 +567,10 @@ return {
       E: "40"
     }
     {
-      id: e12
+      id: e40a
       T: Attr
-      S: "11"
-      E: "12"
-    }
-    {
-      id: e13
-      T: Attr
-      S: "11"
-      E: "13"
-    }
-    {
-      id: e14
-      T: Attr
-      S: "11"
-      E: "14"
-    }
-    {
-      id: e15
-      T: Attr
-      S: "11"
-      E: "15"
-    }
-    {
-      id: e16
-      T: Attr
-      S: "15"
-      E: "16"
-    }
-    {
-      id: e17
-      T: Attr
-      S: "15"
-      E: "19"
-    }
-    {
-      id: e18
-      T: Attr
-      S: "15"
-      E: "22"
-    }
-    {
-      id: e19
-      T: Attr
-      S: "15"
-      E: "25"
-    }
-    {
-      id: e20
-      T: Attr
-      S: "15"
-      E: "28"
-    }
-    {
-      id: e21
-      T: Attr
-      S: "15"
-      E: "31"
-    }
-    {
-      id: e22
-      T: Attr
-      S: "15"
-      E: "34"
-    }
-    {
-      id: e23
-      T: Attr
-      S: "15"
-      E: "37"
-    }
-    {
-      id: e24
-      T: Attr
-      S: "16"
-      E: "17"
-    }
-    {
-      id: e25
-      T: Attr
-      S: "16"
-      E: "18"
-    }
-    {
-      id: e26
-      T: Attr
-      S: "19"
-      E: "20"
-    }
-    {
-      id: e27
-      T: Attr
-      S: "19"
-      E: "21"
-    }
-    {
-      id: e28
-      T: Attr
-      S: "22"
-      E: "23"
-    }
-    {
-      id: e29
-      T: Attr
-      S: "22"
-      E: "24"
-    }
-    {
-      id: e30
-      T: Attr
-      S: "25"
-      E: "26"
-    }
-    {
-      id: e31
-      T: Attr
-      S: "25"
-      E: "27"
-    }
-    {
-      id: e32
-      T: Attr
-      S: "28"
-      E: "29"
-    }
-    {
-      id: e33
-      T: Attr
-      S: "28"
-      E: "30"
-    }
-    {
-      id: e34
-      T: Attr
-      S: "31"
-      E: "32"
-    }
-    {
-      id: e35
-      T: Attr
-      S: "31"
-      E: "33"
-    }
-    {
-      id: e36
-      T: Attr
-      S: "34"
-      E: "35"
-    }
-    {
-      id: e37
-      T: Attr
-      S: "34"
-      E: "36"
-    }
-    {
-      id: e38
-      T: Attr
-      S: "37"
-      E: "38"
-    }
-    {
-      id: e39
-      T: Attr
-      S: "37"
-      E: "39"
+      S: "40"
+      E: "40a"
     }
     {
       id: e40

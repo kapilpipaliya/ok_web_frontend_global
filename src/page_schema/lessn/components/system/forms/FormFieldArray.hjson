@@ -100,17 +100,33 @@ const updateItemField = (itemIndex, fieldKey, fieldValue) => {
   commitItems(nextItems);
 };
 
-const addItem = () => {
+const canAddItem = () => {
   const config = getConfig();
   const items = getItems();
-  if (config.maxItems != null && items.length >= Number(config.maxItems)) return;
+  if (config.maxItems == null) return true;
+  const maxItems = Number(config.maxItems);
+  if (!Number.isFinite(maxItems)) return true;
+  return items.length < maxItems;
+};
+
+const addItem = () => {
+  if (!canAddItem()) return;
+  const items = getItems();
   commitItems([...items, buildDefaultItem()]);
 };
 
-const removeItem = (itemIndex) => {
+const canRemoveItem = () => {
   const config = getConfig();
   const items = getItems();
-  if (config.minItems != null && items.length <= Number(config.minItems)) return;
+  if (config.minItems == null) return items.length > 0;
+  const minItems = Number(config.minItems);
+  if (!Number.isFinite(minItems)) return items.length > 0;
+  return items.length > Math.max(0, minItems);
+};
+
+const removeItem = (itemIndex) => {
+  if (!canRemoveItem()) return;
+  const items = getItems();
   commitItems(items.filter((_, index) => index !== itemIndex));
 };
 
@@ -361,6 +377,8 @@ return {
   getItemAt,
   getItemLabel,
   addItem,
+  canAddItem,
+  canRemoveItem,
   removeItem,
   reorderItems,
   updateItemField,
@@ -546,7 +564,7 @@ return {
   size: "sm",
   text: "Remove",
   type: "button",
-  disabled: f.isDisabled(),
+  disabled: f.isDisabled() || !f.canRemoveItem?.(),
   onClick: () => f.removeItem(itemIndex)
 };'''
       }
@@ -709,7 +727,8 @@ return {
   variant: "secondary",
   text: f.getConfig()?.addButtonLabel || "Add item",
   type: "button",
-  disabled: f.isDisabled(),
+  disabled: f.isDisabled() || !f.canAddItem?.(),
+  hide: f.canAddItem ? !f.canAddItem() : false,
   onClick: () => f.addItem()
 };'''
       }

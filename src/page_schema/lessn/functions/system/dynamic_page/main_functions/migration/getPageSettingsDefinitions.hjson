@@ -825,11 +825,6 @@ const productImagePickerConfiguration = {
   pickerBodyProps: { tableVertexLabel: "File", tableKey: "files", loadFromSetting: true }
 };
 
-const DEFAULT_PRODUCT_OPTION_AXES = [
-  { key: "color", label: "Color" },
-  { key: "size", label: "Size" }
-];
-
 const productVariantImagePickerConfiguration = {
   ...productImagePickerConfiguration,
   fieldLabel: "Variant images",
@@ -877,6 +872,7 @@ const productTableGeneral = {
   hideImportButtons: false,
   hideSettingsButton: false,
   hideAddButton: false,
+  modalMaxWidth: "1280px",
   rowHeight: 56,
   columnWidths: { __selection: "36px", __rowNumber: "48px", __actions: "88px" },
   rowClickable: true,
@@ -928,15 +924,16 @@ const productTableFormConfig = {
           label: "Option types",
           dataType: "array",
           renderer: "fieldArray",
-          required: true,
+          required: false,
           colSpan: 1,
           translatable: false,
-          defaultValue: DEFAULT_PRODUCT_OPTION_AXES,
+          defaultValue: [],
+          tooltip: "Optional. Leave empty for a single-SKU product; the first variant is shown on the product page.",
           fieldArrayConfig: {
             itemLabel: "Option type",
             addButtonLabel: "Add option type",
-            minItems: 1,
-            defaultItems: DEFAULT_PRODUCT_OPTION_AXES,
+            minItems: 0,
+            defaultItems: [],
             itemFields: [
               { key: "key", label: "Key", dataType: "text", renderer: "text", required: true, placeholder: "color" },
               { key: "label", label: "Label", dataType: "text", renderer: "text", required: true, placeholder: "Color" }
@@ -964,7 +961,7 @@ const productTableFormConfig = {
             parentToChildRelationshipType: "ProductProductVariant",
             childToFilesRelationshipType: "ProductVariantImage",
             filesTargetLabel: "File",
-            minItems: 1,
+            minItems: 0,
             addButtonLabel: "Add variant",
             defaultNewLineProperties: {
               title: "Default",
@@ -980,12 +977,12 @@ const productTableFormConfig = {
                 key: "_options",
                 label: "Options",
                 columnType: "optionPairs",
-                required: true,
+                required: false,
                 optionAxesFieldKey: "optionAxes",
                 fieldArrayConfig: {
                   itemLabel: "Option",
                   addButtonLabel: "Add",
-                  minItems: 1,
+                  minItems: 0,
                   itemFields: [
                     { key: "key", label: "Key", dataType: "text", renderer: "text", required: true, placeholder: "color" },
                     { key: "value", label: "Value", dataType: "text", renderer: "text", required: true, placeholder: "Red" }

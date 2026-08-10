@@ -5090,7 +5090,8 @@ return {
         displayOrder: 6
         componentName: TableModal
         props:
-          '''return {
+          '''const modalMaxWidth = f.prop?.("modalMaxWidth", c.props);
+return {
   isOpen: g.vertexes[f.tableStateVertexId]?.P?.isModalOpen === true,
   onClose: () => _.mergeVertexProperties(0, f.tableStateVertexId, g, sg, { isModalOpen: false }),
   mode: g.vertexes[f.tableStateVertexId]?.P?.modalMode ?? "add",
@@ -5100,7 +5101,11 @@ return {
   label: f.getLabel(),
   tableVertexLabel: f.getTableVertexLabel?.() ?? c.props?.tableVertexLabel,
   selectedSidebarItem: c.props?.selectedSidebarItem,
-  sidebarConfig: c.props?.sidebarConfig
+  sidebarConfig: c.props?.sidebarConfig,
+  maxWidth:
+    modalMaxWidth != null && String(modalMaxWidth).trim() !== ""
+      ? String(modalMaxWidth).trim()
+      : undefined
 };'''
       }
     }

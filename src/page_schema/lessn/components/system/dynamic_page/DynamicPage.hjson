@@ -206,6 +206,8 @@ const evalSchemaPart = (part) => {
 const resolveGeneralFromPart = (generalRaw, tableVertexLabel) => {
   const general = stripPartMeta(generalRaw || {});
   return {
+    // Keep unknown general keys (e.g. modalMaxWidth) so schema imports persist.
+    ...general,
     publicRead: general.publicRead === true,
     title: general.title || tableVertexLabel,
     label: general.label || tableVertexLabel,
@@ -233,7 +235,11 @@ const resolveGeneralFromPart = (generalRaw, tableVertexLabel) => {
     companionPages: Array.isArray(general.companionPages) ? general.companionPages : [],
     dropCreateFrom: general.dropCreateFrom && typeof general.dropCreateFrom === "object"
       ? general.dropCreateFrom
-      : null
+      : null,
+    modalMaxWidth:
+      general.modalMaxWidth != null && String(general.modalMaxWidth).trim() !== ""
+        ? String(general.modalMaxWidth).trim()
+        : undefined
   };
 };
 

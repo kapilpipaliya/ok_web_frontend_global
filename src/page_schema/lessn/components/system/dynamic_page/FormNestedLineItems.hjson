@@ -571,11 +571,25 @@ const addRow = () => {
 };
 
 const removeRow = (lineIndex) => {
+  const config = getNestedLineItemsConfig();
   const lines = sortedLineVertices();
+  if (config.minItems != null) {
+    const minItems = Number(config.minItems);
+    if (Number.isFinite(minItems) && lines.length <= Math.max(0, minItems)) return;
+  }
   const lineVertexToRemove = lines[lineIndex];
   if (!lineVertexToRemove) return;
   if (lineVertexToRemove.id) getProps().markDeleted?.(lineVertexToRemove.id);
   detachAndDeleteLineVertex(lineVertexToRemove);
+};
+
+const canRemoveRow = () => {
+  const config = getNestedLineItemsConfig();
+  const lines = sortedLineVertices();
+  if (config.minItems == null) return lines.length > 0;
+  const minItems = Number(config.minItems);
+  if (!Number.isFinite(minItems)) return lines.length > 0;
+  return lines.length > Math.max(0, minItems);
 };
 
 const selectFallback = (columnDef, selectedValueRaw) => {
@@ -605,6 +619,7 @@ return {
   patchLineP,
   inventoryValueForLine,
   getOptionPairsValue,
+  getOptionAxesFromSibling,
   patchOptionPairs,
   getFilesValue,
   getFilePreviewEntries,
@@ -612,6 +627,7 @@ return {
   removeFileId,
   addRow,
   removeRow,
+  canRemoveRow,
   selectFallback,
   resolveLineRowVertex,
   isDisabled
@@ -935,7 +951,7 @@ return {
   variant: "danger",
   text: "Remove",
   type: "button",
-  disabled: f.isDisabled(),
+  disabled: f.isDisabled() || !f.canRemoveRow?.(),
   hide: !columnDef || columnDef.columnType !== "actions",
   onClick: () => f.removeRow(lineIndex)
 };'''
@@ -972,12 +988,23 @@ return {
 const lineEntryContext = c.lineEntry;
 const resolvedLineVertex = f.resolveLineRowVertex(lineEntryContext);
 const lineIndex = lineEntryContext?.index ?? 0;
+const axes = f.getOptionAxesFromSibling?.(columnDef) || [];
 const optionPairs = f.getOptionPairsValue(resolvedLineVertex, columnDef);
+const baseConfig = columnDef?.fieldArrayConfig || {};
+// Option rows follow option types. With no option types, hide the editor (options are optional).
+const fieldArrayConfig =
+  axes.length > 0
+    ? { ...baseConfig, minItems: axes.length, maxItems: axes.length }
+    : { ...baseConfig, minItems: 0, maxItems: 0 };
 return {
-  hide: !columnDef || columnDef.columnType !== "optionPairs" || !columnDef.fieldArrayConfig,
+  hide:
+    !columnDef ||
+    columnDef.columnType !== "optionPairs" ||
+    !columnDef.fieldArrayConfig ||
+    axes.length === 0,
   field: {
     key: columnDef?.key || "_options",
-    fieldArrayConfig: columnDef?.fieldArrayConfig
+    fieldArrayConfig
   },
   value: optionPairs,
   disabled: f.isDisabled(),

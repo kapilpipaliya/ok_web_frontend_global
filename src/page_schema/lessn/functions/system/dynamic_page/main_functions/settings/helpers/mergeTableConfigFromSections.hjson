@@ -55,6 +55,8 @@ const sidebarSection = sectionMap.sidebar || {};
 
 const partPayloads = {
   general: {
+    // Keep unknown general keys (e.g. modalMaxWidth) from section values / imports.
+    ...general,
     part: "general",
     publicRead: general.publicRead === true,
     title: general.title || tableVertexLabel,
@@ -75,7 +77,12 @@ const partPayloads = {
     showRowNumber: general.showRowNumber !== false,
     resizableColumns: general.resizableColumns === true,
     actions: Array.isArray(general.actions) ? general.actions : [],
-    hooks: general.hooks && typeof general.hooks === "object" ? general.hooks : {}
+    hooks: general.hooks && typeof general.hooks === "object" ? general.hooks : {},
+    companionPages: Array.isArray(general.companionPages) ? general.companionPages : [],
+    modalMaxWidth:
+      general.modalMaxWidth != null && String(general.modalMaxWidth).trim() !== ""
+        ? String(general.modalMaxWidth).trim()
+        : undefined
   },
   columns: {
     part: "columns",

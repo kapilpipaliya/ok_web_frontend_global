@@ -113,12 +113,15 @@ const ensureNestedLineEmptyArrays = () => {
     let rows = getNestedLineVerticesForField(field);
     const configuredMin =
       nestedLineItemsConfig.minItems != null ? Number(nestedLineItemsConfig.minItems) : NaN;
+    // minItems gates removal; required fields still get one starter row on create when minItems is 0.
     const minItems = Number.isFinite(configuredMin)
       ? Math.max(0, configuredMin)
       : isFieldRequired(field)
         ? 1
         : 0;
-    while (rows.length < minItems) {
+    const seedCount =
+      minItems > 0 ? minItems : isFieldRequired(field) ? 1 : 0;
+    while (rows.length < seedCount) {
       const displayOrder = Date.now() + rows.length;
       const newLineProperties = { displayOrder };
       const parentElementIdPropertyKey = nestedLineItemsConfig.parentElementIdPropOnChild;
@@ -1007,10 +1010,11 @@ const validate = () => {
         const rowVertex = rows[rowIndex];
         for (let columnIndex = 0; columnIndex < lineColumns.length; columnIndex++) {
           const columnDef = lineColumns[columnIndex];
-          if (!columnDef?.required || !columnDef.key || String(columnDef.key).startsWith("_")) continue;
+          if (!columnDef?.key) continue;
           if (columnDef.columnType === "actions" || columnDef.columnType === "inventory") continue;
-          const cellValue = rowVertex?.P?.[columnDef.key];
+
           if (columnDef.columnType === "files") {
+            if (!columnDef.required) continue;
             const filesRelationshipType =
               field.nestedLineItemsConfig?.childToFilesRelationshipType;
             const filesTargetLabel =
@@ -1033,6 +1037,7 @@ const validate = () => {
             }
             continue;
           }
+
           if (columnDef.columnType === "optionPairs") {
             const axesFieldKey =
               columnDef.optionAxesFieldKey != null &&
@@ -1050,10 +1055,8 @@ const validate = () => {
                 axes = [];
               }
             }
-            if (axes.length === 0) {
-              newErrors[field.key] = `${field.label || field.key} ${rowIndex + 1}: define option types first`;
-              break;
-            }
+            // No option types → options are optional (single-SKU / first-variant products).
+            if (axes.length === 0) continue;
             let missingOption = false;
             for (let axisIndex = 0; axisIndex < axes.length; axisIndex++) {
               const axisKey =
@@ -1071,6 +1074,9 @@ const validate = () => {
             }
             continue;
           }
+
+          if (!columnDef.required || String(columnDef.key).startsWith("_")) continue;
+          const cellValue = rowVertex?.P?.[columnDef.key];
           if (cellValue === undefined || cellValue === null || String(cellValue).trim() === "") {
             newErrors[field.key] = `${field.label || field.key} ${rowIndex + 1}: ${columnDef.label || columnDef.key} is required`;
             break;
