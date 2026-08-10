@@ -2247,11 +2247,21 @@ const getRowIdFromElement = (element) => {
 };
 
 // Helper to check if a row can be dragged
+// If nothing is selected, any row can be dragged (single-row drag of current row).
+// If selection exists, only selected rows can start a drag (moves all selected).
 const canDragRow = (rowId) => {
   if (!rowId) return false;
   const selected = getEffectiveSelectedRows();
-  if (!selected.has(rowId)) return false;
-  return selected.size > 0;
+  if (selected.size === 0) return true;
+  return selected.has(rowId);
+};
+
+// Resolve item ids for a drag: selected rows, or current row when nothing is selected
+const getDragItemIds = (rowId) => {
+  if (!rowId) return [];
+  const selected = getEffectiveSelectedRows();
+  if (selected.size === 0) return [rowId];
+  return Array.from(selected).filter(id => id !== undefined && id !== null);
 };
 
 // Initialize draggable for table row - rowId read from element data-row-id
@@ -2272,8 +2282,7 @@ const initTableDraggable = (element) => {
         return { type: 'table-items', itemIds: [], count: 0 };
       }
 
-      const selected = getEffectiveSelectedRows();
-      const itemIds = Array.from(selected).filter(id => id !== undefined && id !== null);
+      const itemIds = getDragItemIds(currentRowId);
 
       return {
         type: 'table-items',
@@ -2295,8 +2304,7 @@ const initTableDraggable = (element) => {
       const currentRowId = getRowIdFromElement(element);
       if (!currentRowId || !canDragRow(currentRowId)) return;
 
-      const selected = getEffectiveSelectedRows();
-      const count = selected.size;
+      const count = getDragItemIds(currentRowId).length;
 
       if (!count) return;
 
