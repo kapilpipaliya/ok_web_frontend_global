@@ -18,7 +18,7 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 0.75rem;
+  gap: 0;
   width: 100%;
   text-align: left;
   padding: 0;
@@ -62,7 +62,7 @@ return {
     el.dataset.hoverInit = "true";
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     _.motion.hover(el, (element) => {
-      _.motion.animate(element, { scale: 1.2 });
+      _.motion.animate(element, { scale: 1.1 });
       return () => _.motion.animate(element, { scale: 1 });
     });
   },
@@ -81,7 +81,7 @@ return {
         css:
           '''return `._id {
   width: 100%;
-  aspect-ratio: 16 / 10;
+  aspect-ratio: 1;
   object-fit: cover;
   display: block;
   background: ${t.var.color.background_light_200};
@@ -114,7 +114,7 @@ return {
   justify-content: center;
   width: 3rem;
   height: 3rem;
-  margin: 1.25rem 1.25rem 0;
+  margin: 0.75rem 0.875rem 0;
   border-radius: 0.625rem;
   background: ${t.var.color.primary_light_100};
   color: ${t.var.color.primary};
@@ -156,7 +156,7 @@ return {
   gap: 0.35rem;
   min-width: 0;
   width: 100%;
-  padding: 0 1.25rem 1.25rem;
+  padding: 0.5rem 0.875rem 0.5rem;
 }`;'''
         displayOrder: 3
         componentName: Html
@@ -183,7 +183,7 @@ return {
           '''const folder = c.props?.folder || c.props || {};
 return {
   as: "h3",
-  text: folder.name || "Folder"
+  text: folder.name || "Category"
 };'''
       }
     }
@@ -201,11 +201,11 @@ return {
         componentName: Html
         props:
           '''const folder = c.props?.folder || c.props || {};
-const folders = Number(folder.folderCount || 0);
-const files = Number(folder.contentCount || 0);
+const categories = Number(folder.folderCount || 0);
+const products = Number(folder.contentCount || 0);
 const parts = [];
-if (folders > 0) parts.push(`${folders} folder${folders === 1 ? "" : "s"}`);
-if (files > 0) parts.push(`${files} file${files === 1 ? "" : "s"}`);
+if (categories > 0) parts.push(`${categories} categor${categories === 1 ? "y" : "ies"}`);
+if (products > 0) parts.push(`${products} product${products === 1 ? "" : "s"}`);
 return {
   as: "p",
   text: parts.length > 0 ? parts.join(" · ") : "Empty"

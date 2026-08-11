@@ -57,7 +57,7 @@ return {
     el.dataset.hoverInit = "true";
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     _.motion.hover(el, (element) => {
-      _.motion.animate(element, { scale: 1.2 });
+      _.motion.animate(element, { scale: 1.1 });
       return () => _.motion.animate(element, { scale: 1 });
     });
   },
@@ -73,7 +73,7 @@ return {
           '''return `._id {
   position: relative;
   width: 100%;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 1;
   background: ${t.var.color.background_light_200};
   overflow: hidden;
 }`;'''
@@ -196,7 +196,7 @@ return {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
-  padding: 0.875rem 1rem 1rem;
+  padding: 0.5rem 0.875rem 0.5rem;
   min-width: 0;
 }`;'''
         displayOrder: 2

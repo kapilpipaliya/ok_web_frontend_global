@@ -265,7 +265,7 @@ return {
         props:
           '''return {
   as: "h2",
-  text: "Folders"
+  text: "Categories"
 };'''
       }
     }
