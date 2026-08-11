@@ -1751,13 +1751,14 @@ const startPollIfQueued = (dataToCheck) => {
 };
 
 // Handle search
-const handleSearch = () => {
+const handleSearch = (options) => {
   if (isNestedLinesTable()) {
     syncNestedLinesTableData();
     return;
   }
   const enableLocalFilters = f.getConfigGeneralValue?.("enableLocalFilters") !== false;
   const enableLocalSort = f.getConfigGeneralValue?.("enableLocalSort") !== false;
+  const force = options?.force === true;
 
   // If local filters/sort are enabled, fetch all data and apply locally
   // Otherwise, pass filters/sort to server
@@ -1793,7 +1794,8 @@ const handleSearch = () => {
       }
 
       startPollIfQueued(fetchedRows);
-    }
+    },
+    force ? { force: true } : undefined
   );
 };
 
@@ -3180,6 +3182,22 @@ return {
   leftIcon: "carbon:settings",
   disabled: g.vertexes[f.pageStateVertexId]?.P?.loading === true,
   hide: !f.getSettingsFunction() || f.getHideSettingsButton() || f.getUsePolarisUI?.() === true
+};'''
+      }
+    }
+    {
+      id: "110"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Button
+        props:
+          '''return {
+  variant: "secondary",
+  text: "Calendar",
+  leftIcon: "ph:calendar",
+  hide: f.isCalendarEnabled?.() !== true,
+  onClick: () => f.setContentView?.("calendar")
 };'''
       }
     }
@@ -5880,6 +5898,12 @@ return {
       T: Attr
       S: "13"
       E: "23"
+    }
+    {
+      id: e110
+      T: Attr
+      S: "13"
+      E: "110"
     }
     {
       id: e45

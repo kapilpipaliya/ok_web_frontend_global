@@ -1409,6 +1409,14 @@ const fileTableGeneral = {
   rowClickable: true,
   showRowNumber: true,
   resizableColumns: true,
+  calendarConfig: {
+    enabled: true,
+    dateField: "uploadDate",
+    titleField: "fileName",
+    defaultView: "month",
+    defaultContentView: "table",
+    allowDragReschedule: true
+  },
   actions: [
     { key: "edit", type: "edit" },
     { key: "delete", type: "delete", confirm: { title: "Delete file?", message: "This cannot be undone.", confirmText: "Delete", cancelText: "Cancel", variant: "danger" } }

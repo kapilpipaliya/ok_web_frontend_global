@@ -504,26 +504,6 @@ const syncNestedLineCollections = async (session, params) => {
 // Note: The returned API graph is built from _.context.nodes/relationships.
 // Relationship writes must RETURN nodes/edges and run processResult to appear in the response.
 
-// Extract form data from vertex
-if (!vertex || !vertex.P) {
-  return {
-    success: false,
-    message: `${tableVertexLabel || 'Content'} data is required`
-  };
-}
-let formData;
-let translationsByLocale;
-try {
-  const split = await splitFormTranslations(vertex.P);
-  formData = split.rootProps;
-  translationsByLocale = split.translationsByLocale;
-} catch (splitError) {
-  return {
-    success: false,
-    message: splitError?.message || "Failed to prepare translatable fields"
-  };
-}
-
 if (!tableVertexLabel || typeof tableVertexLabel !== "string") {
   return {
     success: false,
@@ -531,11 +511,33 @@ if (!tableVertexLabel || typeof tableVertexLabel !== "string") {
   };
 }
 
-if (!operation || !["create", "update", "delete"].includes(operation)) {
+if (!operation || !["create", "update", "delete", "batchUpdate"].includes(operation)) {
   return {
     success: false,
-    message: "Invalid operation. Must be 'create', 'update', or 'delete'"
+    message: "Invalid operation. Must be 'create', 'update', 'delete', or 'batchUpdate'"
   };
+}
+
+// Extract form data from vertex (single-row create/update/delete only)
+let formData = null;
+let translationsByLocale = null;
+if (operation !== "batchUpdate") {
+  if (!vertex || !vertex.P) {
+    return {
+      success: false,
+      message: `${tableVertexLabel || "Content"} data is required`
+    };
+  }
+  try {
+    const split = await splitFormTranslations(vertex.P);
+    formData = split.rootProps;
+    translationsByLocale = split.translationsByLocale;
+  } catch (splitError) {
+    return {
+      success: false,
+      message: splitError?.message || "Failed to prepare translatable fields"
+    };
+  }
 }
 
 // Determine vertex label and relationship type based on tableVertexLabel
@@ -554,7 +556,7 @@ if (operation === "create") {
     uniqueKeys,
     enableUserScoping
   });
-} else if (operation === "update") {
+} else if (operation === "update" || operation === "batchUpdate") {
   await _.executeHooks(hooks?.beforeUpdate, {
     tableVertexLabel,
     operation,
@@ -1070,6 +1072,129 @@ try {
     });
 
     return updateResult;
+
+  } else if (operation === "batchUpdate") {
+    const rawItems = Array.isArray(inputData.items) ? inputData.items : [];
+    if (rawItems.length === 0) {
+      return {
+        success: false,
+        message: "items are required for batchUpdate"
+      };
+    }
+
+    const FILE_OPTIMIZATION_PROTECTED_KEYS = [
+      "status",
+      "variantsJson",
+      "processingVersion",
+      "optimizedAt",
+      "optimizationError",
+      "optimizationGeneration"
+    ];
+
+    const items = [];
+    for (let i = 0; i < rawItems.length; i++) {
+      const raw = rawItems[i] || {};
+      const itemElementId =
+        raw.elementId ||
+        raw.id ||
+        raw.vertex?.id ||
+        raw.vertex?.elementId;
+      if (itemElementId == null || String(itemElementId).trim() === "") continue;
+
+      const propsSource =
+        raw.properties && typeof raw.properties === "object"
+          ? raw.properties
+          : raw.vertex?.P && typeof raw.vertex.P === "object"
+            ? raw.vertex.P
+            : null;
+      if (!propsSource) continue;
+
+      const { id, elementId: _dataElementId, createdAt, ...dataWithoutId } = propsSource;
+      const updateProperties = {
+        ...dataWithoutId,
+        updatedAt: new Date().toISOString()
+      };
+
+      if (vertexLabel === "File") {
+        for (let pk = 0; pk < FILE_OPTIMIZATION_PROTECTED_KEYS.length; pk++) {
+          delete updateProperties[FILE_OPTIMIZATION_PROTECTED_KEYS[pk]];
+        }
+      }
+
+      const cleanProperties = sanitizePropertiesForNeo4j(updateProperties);
+      NESTED_LINE_STRIP_KEYS.forEach((k) => {
+        delete cleanProperties[k];
+      });
+
+      items.push({
+        elementId: String(itemElementId).trim(),
+        properties: cleanProperties
+      });
+    }
+
+    if (items.length === 0) {
+      return {
+        success: false,
+        message: "No valid items to batch update"
+      };
+    }
+
+    let batchQuery;
+    let batchParams;
+    if (!enableUserScoping) {
+      batchQuery = `
+        UNWIND $items AS item
+        MATCH (c:${vertexLabel})
+        WHERE elementId(c) = item.elementId
+        SET c += item.properties
+        RETURN c
+      `;
+      batchParams = { items };
+    } else {
+      batchQuery = `
+        UNWIND $items AS item
+        MATCH (u:User {uuid: $userUuid})-[:${relationshipType}]->(c:${vertexLabel})
+        WHERE elementId(c) = item.elementId
+        SET c += item.properties
+        RETURN c
+      `;
+      batchParams = {
+        userUuid: user.P.uuid,
+        items
+      };
+    }
+
+    const batchRunResult = await _.session.run(batchQuery, batchParams);
+    const batchVertices = _.processResult(batchRunResult.records, _.context, "c");
+
+    if (batchVertices.length === 0) {
+      return {
+        success: false,
+        message: "Failed to batch update content"
+      };
+    }
+
+    const batchResult = {
+      success: true,
+      data: {
+        updated: batchVertices,
+        count: batchVertices.length,
+        requested: items.length
+      },
+      message: `Updated ${batchVertices.length} ${vertexLabel}(s) successfully`
+    };
+
+    await _.executeHooks(hooks?.afterUpdate, {
+      tableVertexLabel,
+      operation,
+      elementId: null,
+      data: inputData,
+      uniqueKeys,
+      enableUserScoping,
+      result: batchResult
+    });
+
+    return batchResult;
 
   } else if (operation === "delete") {
     // Delete content - elementId can come from elementId parameter or vertex.id/vertex.elementId

@@ -28,6 +28,8 @@ _.addNewVertex(0, {
     rowsToRemoveVertexIds: null,
     rowsToAddVertexIds: null,
     mainTableRowIds: [],
+    contentFetchKey: null,
+    contentView: null,
     dropCreateReviewOpen: false,
     dropCreateReviewRows: [],
     dropCreateReviewConfirming: false,
@@ -1396,13 +1398,40 @@ const updateMemoizedConfig = () => {
   patchPageP({ memoizedConfig: config, memoizedLoadFromSetting: loadFromSetting });
 };
 
-// Fetch data from server
-const fetchData = async (searchTerm, columnFilters, sortConfig, callback) => {
+// Fetch data from server (skips network when same category/filters already loaded)
+const makeContentFetchKey = (searchTerm, columnFilters, sortConfig) => {
+  const categoryId = selectedSidebarItem()?.id ?? "";
+  try {
+    return JSON.stringify({
+      c: categoryId,
+      s: searchTerm == null ? "" : String(searchTerm),
+      f: columnFilters && typeof columnFilters === "object" ? columnFilters : null,
+      o: sortConfig && typeof sortConfig === "object" ? sortConfig : null
+    });
+  } catch (error) {
+    return String(categoryId);
+  }
+};
+
+const invalidateContentFetchKey = () => {
+  patchPageP({ contentFetchKey: null });
+};
+
+const fetchData = async (searchTerm, columnFilters, sortConfig, callback, options) => {
   const dataFn = getDataFunction();
   if (!dataFn) return;
 
-  // Capture the category item at the time of fetch
+  const force = options?.force === true;
   const categoryItemForFetch = selectedSidebarItem();
+  const fetchKey = makeContentFetchKey(searchTerm, columnFilters, sortConfig);
+
+  if (!force && pageP()?.contentFetchKey === fetchKey) {
+    const cachedRows = getMainTableRowVertices();
+    if (typeof callback === "function") {
+      callback(cachedRows, categoryItemForFetch, []);
+    }
+    return;
+  }
 
   patchPageP({ loading: true });
   try {
@@ -1417,8 +1446,10 @@ const fetchData = async (searchTerm, columnFilters, sortConfig, callback) => {
             .map((row) => (row?.id != null ? String(row.id).trim() : ""))
             .filter(Boolean)
         : [];
-      patchPageP({ mainTableRowIds: rowIds });
-      callback(result.data, categoryItemForFetch, result.relatedVertexIds || []);
+      patchPageP({ mainTableRowIds: rowIds, contentFetchKey: fetchKey });
+      if (typeof callback === "function") {
+        callback(result.data, categoryItemForFetch, result.relatedVertexIds || []);
+      }
     }
   } catch (error) {
     console.error("Error fetching table data:", error);
@@ -1445,6 +1476,7 @@ const handleImport = async (dataToImport, callback) => {
     const result = await importFn({ data: dataToImport });
     if (result?.success) {
       _.showSuccessToast?.(result.message || "Import completed successfully");
+      invalidateContentFetchKey();
       // Refresh data
       callback?.();
     } else {
@@ -2960,6 +2992,367 @@ const handleTableDropCreateFrom = async (payload) => {
   return { success: true };
 };
 
+// --- Calendar view (date / date-time column from general.calendarConfig) ---
+
+const getCalendarConfig = () => {
+  const raw = getConfigGeneralValue("calendarConfig");
+  if (!raw || typeof raw !== "object") return null;
+  if (raw.enabled === false) return null;
+  const dateField =
+    raw.dateField != null && String(raw.dateField).trim() !== ""
+      ? String(raw.dateField).trim()
+      : null;
+  if (!dateField) return null;
+  const endDateField =
+    raw.endDateField != null && String(raw.endDateField).trim() !== ""
+      ? String(raw.endDateField).trim()
+      : null;
+  const colorField =
+    raw.colorField != null && String(raw.colorField).trim() !== ""
+      ? String(raw.colorField).trim()
+      : null;
+  return {
+    enabled: true,
+    dateField,
+    endDateField,
+    colorField,
+    titleField:
+      raw.titleField != null && String(raw.titleField).trim() !== ""
+        ? String(raw.titleField).trim()
+        : null,
+    defaultView: raw.defaultView === "week" ? "week" : "month",
+    defaultContentView: raw.defaultContentView === "calendar" ? "calendar" : "table",
+    allowDragReschedule: raw.allowDragReschedule !== false
+  };
+};
+
+const isCalendarEnabled = () => getCalendarConfig() != null;
+
+const getCalendarDateField = () => getCalendarConfig()?.dateField || null;
+
+const getCalendarEndDateField = () => getCalendarConfig()?.endDateField || null;
+
+const getCalendarColorField = () => getCalendarConfig()?.colorField || null;
+
+const getCalendarDateColumn = () => {
+  const field = getCalendarDateField();
+  if (!field) return null;
+  const columns = prop("columns");
+  if (!Array.isArray(columns)) return null;
+  for (let i = 0; i < columns.length; i++) {
+    if (columns[i]?.key === field) return columns[i];
+  }
+  return null;
+};
+
+const isCalendarDateTimeField = () => {
+  const col = getCalendarDateColumn();
+  if (col?.renderer === "isoDateTime") return true;
+  const cfg = getCalendarConfig();
+  if (cfg?.timed === true) return true;
+  return false;
+};
+
+const syncCalendarUrlParams = (partial) => {
+  if (!useUrlQueryParams() || !_.setSearchParams) return;
+  const current = { ...( _.searchParams || {}) };
+  const next = { ...current };
+  if (partial && Object.prototype.hasOwnProperty.call(partial, "view")) {
+    if (partial.view === "calendar") next.view = "calendar";
+    else if (partial.view === "table" || partial.view == null) delete next.view;
+  }
+  if (partial && Object.prototype.hasOwnProperty.call(partial, "calLayout")) {
+    if (partial.calLayout === "month" || partial.calLayout === "week") {
+      next.calLayout = partial.calLayout;
+    } else if (partial.calLayout == null) {
+      delete next.calLayout;
+    }
+  }
+  _.setSearchParams(next, { replace: true });
+};
+
+const getContentView = () => {
+  if (!isCalendarEnabled()) return "table";
+  if (useUrlQueryParams()) {
+    const fromUrl = _.searchParams?.view;
+    if (fromUrl === "calendar" || fromUrl === "table") return fromUrl;
+  } else {
+    const stored = pageP()?.contentView;
+    if (stored === "table" || stored === "calendar") return stored;
+  }
+  const cfg = getCalendarConfig();
+  return cfg?.defaultContentView === "calendar" ? "calendar" : "table";
+};
+
+const setContentView = (view) => {
+  if (view !== "table" && view !== "calendar") return;
+  if (view === "calendar" && !isCalendarEnabled()) return;
+  if (useUrlQueryParams()) {
+    if (view === "table") {
+      syncCalendarUrlParams({ view: "table", calLayout: null });
+    } else {
+      syncCalendarUrlParams({ view: "calendar" });
+    }
+    return;
+  }
+  patchPageP({ contentView: view });
+};
+
+const getCalendarLayoutFromUrl = () => {
+  if (!useUrlQueryParams()) return null;
+  const layout = _.searchParams?.calLayout;
+  if (layout === "month" || layout === "week") return layout;
+  return null;
+};
+
+const setCalendarLayoutInUrl = (layout) => {
+  if (layout !== "month" && layout !== "week") return;
+  syncCalendarUrlParams({ calLayout: layout });
+};
+
+const isCalendarContentView = () => getContentView() === "calendar";
+
+const toCalendarDateKey = (date) => {
+  if (!(date instanceof Date) || Number.isNaN(date.getTime())) return null;
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+};
+
+const parseCalendarDateValue = (value) => {
+  if (value == null || value === "") return null;
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? null : value;
+  }
+  const asString = String(value).trim();
+  if (!asString) return null;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(asString)) {
+    const parts = asString.split("-").map(Number);
+    const local = new Date(parts[0], parts[1] - 1, parts[2], 0, 0, 0, 0);
+    return Number.isNaN(local.getTime()) ? null : local;
+  }
+  const parsed = new Date(asString);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+};
+
+const formatCalendarStoredValue = (dayKey, hour, previousValue, asDateTime) => {
+  const dayParts = String(dayKey || "").split("-").map(Number);
+  if (dayParts.length !== 3 || dayParts.some((n) => !Number.isFinite(n))) return null;
+  const prev = parseCalendarDateValue(previousValue);
+  let hours = 0;
+  let minutes = 0;
+  let seconds = 0;
+  let ms = 0;
+  if (hour != null && Number.isFinite(Number(hour))) {
+    hours = Math.max(0, Math.min(23, Number(hour)));
+    minutes = 0;
+    seconds = 0;
+    ms = 0;
+  } else if (prev) {
+    hours = prev.getHours();
+    minutes = prev.getMinutes();
+    seconds = prev.getSeconds();
+    ms = prev.getMilliseconds();
+  }
+  const next = new Date(dayParts[0], dayParts[1] - 1, dayParts[2], hours, minutes, seconds, ms);
+  if (Number.isNaN(next.getTime())) return null;
+  if (!asDateTime) {
+    return toCalendarDateKey(next);
+  }
+  // Preserve ISO-ish string; include timezone offset via toISOString for consistency with stored datetimes
+  if (typeof previousValue === "string" && /^\d{4}-\d{2}-\d{2}$/.test(previousValue.trim()) && hour == null) {
+    return toCalendarDateKey(next);
+  }
+  return next.toISOString();
+};
+
+const updateRowsCalendarDate = async (rowIds, dayKey, hour, options) => {
+  const cfg = getCalendarConfig();
+  if (!cfg?.dateField) {
+    return { success: false, message: "Calendar date field is not configured" };
+  }
+  if (cfg.allowDragReschedule === false) {
+    return { success: false, message: "Calendar drag reschedule is disabled" };
+  }
+  const ids = Array.isArray(rowIds)
+    ? rowIds.map((id) => String(id || "").trim()).filter(Boolean)
+    : [];
+  if (ids.length === 0 || !dayKey) {
+    return { success: false, message: "Nothing to reschedule" };
+  }
+
+  const tableVertexLabel = getTableVertexLabel();
+  if (!tableVertexLabel) {
+    return { success: false, message: "Save function is not available" };
+  }
+
+  const mode =
+    options?.mode === "resize-start" || options?.mode === "resize-end"
+      ? options.mode
+      : "move";
+  const asDateTime = isCalendarDateTimeField() || hour != null;
+  const dateField = cfg.dateField;
+  const endDateField = cfg.endDateField || null;
+  let lastError = null;
+  let skippedUnchanged = 0;
+
+  const dayParts = String(dayKey || "").split("-").map(Number);
+  const targetDay =
+    dayParts.length === 3 && dayParts.every((n) => Number.isFinite(n))
+      ? new Date(dayParts[0], dayParts[1] - 1, dayParts[2], 0, 0, 0, 0)
+      : null;
+  if (!targetDay || Number.isNaN(targetDay.getTime())) {
+    return { success: false, message: "Invalid target day" };
+  }
+
+  const pending = [];
+
+  for (let i = 0; i < ids.length; i++) {
+    const rowId = ids[i];
+    const row = g.vertexes[rowId];
+    if (!row) continue;
+
+    const prevStart = row.P?.[dateField];
+    const prevEnd = endDateField ? row.P?.[endDateField] : undefined;
+    const startDate = parseCalendarDateValue(prevStart);
+    const endDate = endDateField ? parseCalendarDateValue(prevEnd) : null;
+
+    const patch = {};
+    const revert = {};
+
+    if (mode === "resize-end") {
+      if (!endDateField) {
+        lastError = "End date field is not configured";
+        continue;
+      }
+      const nextEnd = formatCalendarStoredValue(dayKey, hour, prevEnd ?? prevStart, asDateTime);
+      if (nextEnd == null) continue;
+      if (startDate) {
+        const nextEndDate = parseCalendarDateValue(nextEnd);
+        if (nextEndDate && nextEndDate.getTime() < startDate.getTime()) {
+          lastError = "End date cannot be before start date";
+          continue;
+        }
+      }
+      if (String(prevEnd ?? "") === String(nextEnd)) {
+        skippedUnchanged += 1;
+        continue;
+      }
+      patch[endDateField] = nextEnd;
+      revert[endDateField] = prevEnd;
+    } else if (mode === "resize-start") {
+      const nextStart = formatCalendarStoredValue(dayKey, hour, prevStart, asDateTime);
+      if (nextStart == null) continue;
+      if (endDate) {
+        const nextStartDate = parseCalendarDateValue(nextStart);
+        if (nextStartDate && nextStartDate.getTime() > endDate.getTime()) {
+          lastError = "Start date cannot be after end date";
+          continue;
+        }
+      }
+      if (String(prevStart ?? "") === String(nextStart)) {
+        skippedUnchanged += 1;
+        continue;
+      }
+      patch[dateField] = nextStart;
+      revert[dateField] = prevStart;
+    } else {
+      const nextStart = formatCalendarStoredValue(dayKey, hour, prevStart, asDateTime);
+      if (nextStart == null) continue;
+      patch[dateField] = nextStart;
+      revert[dateField] = prevStart;
+
+      if (endDateField && startDate) {
+        const durationMs =
+          endDate && !Number.isNaN(endDate.getTime())
+            ? endDate.getTime() - startDate.getTime()
+            : 0;
+        const nextStartDate = parseCalendarDateValue(nextStart);
+        if (nextStartDate) {
+          const nextEndDate = new Date(nextStartDate.getTime() + Math.max(0, durationMs));
+          const nextEndKey = toCalendarDateKey(nextEndDate);
+          const nextEndHour = asDateTime ? nextEndDate.getHours() : null;
+          const nextEnd = formatCalendarStoredValue(
+            nextEndKey,
+            nextEndHour,
+            prevEnd ?? prevStart,
+            asDateTime
+          );
+          if (nextEnd != null) {
+            patch[endDateField] = nextEnd;
+            revert[endDateField] = prevEnd;
+          }
+        }
+      }
+
+      const unchanged =
+        String(prevStart ?? "") === String(patch[dateField] ?? "") &&
+        (!endDateField || String(prevEnd ?? "") === String(patch[endDateField] ?? ""));
+      if (unchanged) {
+        skippedUnchanged += 1;
+        continue;
+      }
+    }
+
+    pending.push({ rowId, row, patch, revert });
+  }
+
+  if (pending.length === 0) {
+    if (skippedUnchanged > 0) {
+      return { success: true, updated: skippedUnchanged };
+    }
+    _.showErrorToast?.(lastError || "Failed to reschedule");
+    return { success: false, message: lastError || "Failed to reschedule" };
+  }
+
+  for (let i = 0; i < pending.length; i++) {
+    _.mergeVertexProperties(0, pending[i].rowId, g, sg, pending[i].patch);
+  }
+
+  try {
+    const tableConfig = evaluateConfig();
+    const enableUserScopingForContent = tableConfig?.enableUserScopingForContent === true;
+    const result = await f.executeYTOFunction("mutateUserContent", {
+      tableVertexLabel,
+      tableSettingsLabel: getTableSettingsLabel(),
+      operation: "batchUpdate",
+      data: {
+        items: pending.map((item) => ({
+          elementId: item.row.id,
+          properties: item.patch
+        }))
+      },
+      uniqueKeys: tableConfig?.uniqueKeys || [],
+      enableUserScoping: enableUserScopingForContent,
+      hooks: getConfigHooks(),
+      nestedLinePropertyStripKeys: buildNestedLinePropertyStripKeys(tableConfig),
+      translatableFieldKeys: collectTranslatableFieldKeys(tableConfig?.formConfig),
+      siteLanguages: getSiteLanguages()
+    });
+    applyServerGraphToLocalGraph(result);
+
+    const errorMessage = extractError(result, false, "Failed to reschedule");
+    if (errorMessage || result?.result?.success === false) {
+      for (let i = 0; i < pending.length; i++) {
+        _.mergeVertexProperties(0, pending[i].rowId, g, sg, pending[i].revert);
+      }
+      const message = errorMessage || result?.result?.message || "Failed to reschedule";
+      _.showErrorToast?.(message);
+      return { success: false, message };
+    }
+
+    const updatedCount =
+      Number(result?.result?.data?.count) || pending.length;
+    return { success: true, updated: updatedCount + skippedUnchanged };
+  } catch (error) {
+    for (let i = 0; i < pending.length; i++) {
+      _.mergeVertexProperties(0, pending[i].rowId, g, sg, pending[i].revert);
+    }
+    const message = error?.message || "Failed to reschedule";
+    _.showErrorToast?.(message);
+    return { success: false, message };
+  }
+};
+
 // Exported API
 return {
   prop,
@@ -2985,6 +3378,7 @@ return {
   getCachedConfig,
   updateMemoizedConfig,
   fetchData,
+  invalidateContentFetchKey,
   pageStateVertexId,
   loadSettings,
   initializeSettings,
@@ -3050,7 +3444,25 @@ return {
   getCompanionSplitGridRows,
   companionResizeActive,
   setPrimaryPaneRef,
-  handleCompanionSplitResize
+  handleCompanionSplitResize,
+  getCalendarConfig,
+  isCalendarEnabled,
+  getCalendarDateField,
+  getCalendarEndDateField,
+  getCalendarColorField,
+  getCalendarDateColumn,
+  isCalendarDateTimeField,
+  getContentView,
+  setContentView,
+  getCalendarLayoutFromUrl,
+  setCalendarLayoutInUrl,
+  syncCalendarUrlParams,
+  isCalendarContentView,
+  toCalendarDateKey,
+  parseCalendarDateValue,
+  formatCalendarStoredValue,
+  updateRowsCalendarDate,
+  getMainTableRowVertices
 }
 
 '''
@@ -3247,8 +3659,23 @@ return {
   setRowsToRemove: (ids) => _.mergeVertexProperties(0, vid, g, sg, { rowsToRemoveVertexIds: ids }),
   rowsToAdd: () => g.vertexes[vid]?.P?.rowsToAddVertexIds ?? null,
   setRowsToAdd: (ids) => _.mergeVertexProperties(0, vid, g, sg, { rowsToAddVertexIds: ids }),
+  hide: f.isCalendarContentView?.() === true,
   ...f.getTablePassthroughProps()
 }'''
+      }
+    }
+    {
+      id: "25"
+      L: Attr
+      P: {
+        slotName: main
+        displayOrder: 2
+        componentName: CalendarView
+        key: calendar_with_sidebar
+        props:
+          '''return {
+  hide: f.isCalendarContentView?.() !== true
+};'''
       }
     }
     {
@@ -3298,8 +3725,22 @@ return {
   setRowsToRemove: (ids) => _.mergeVertexProperties(0, vid, g, sg, { rowsToRemoveVertexIds: ids }),
   rowsToAdd: () => g.vertexes[vid]?.P?.rowsToAddVertexIds ?? null,
   setRowsToAdd: (ids) => _.mergeVertexProperties(0, vid, g, sg, { rowsToAddVertexIds: ids }),
+  hide: f.isCalendarContentView?.() === true,
   ...f.getTablePassthroughProps()
 }'''
+      }
+    }
+    {
+      id: "26"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: CalendarView
+        key: calendar_no_sidebar
+        props:
+          '''return {
+  hide: f.isCalendarContentView?.() !== true
+};'''
       }
     }
     {
@@ -3725,10 +4166,22 @@ return {
       E: "8"
     }
     {
+      id: e24
+      T: Attr
+      S: "7"
+      E: "25"
+    }
+    {
       id: e14
       T: Attr
       S: "9"
       E: "10"
+    }
+    {
+      id: e25
+      T: Attr
+      S: "9"
+      E: "26"
     }
     {
       id: e15

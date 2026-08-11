@@ -1,0 +1,2485 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: CalendarView
+        description: Month/week calendar for DynamicPage rows keyed by a configured date or date-time column. Drag events between days or hours to update the row vertex.
+        dynamicComponent: Button, LoadingSpinner, Html, TableModal
+        fns:
+          '''
+const calendarStateVertexId = _.generateNewVertexId(g, sg);
+_.addNewVertex(0, {
+  id: calendarStateVertexId,
+  L: ["CalendarViewUiState"],
+  P: {
+    cursorYear: null,
+    cursorMonth: null,
+    cursorWeekStart: null,
+    layout: null,
+    dragOverDayKey: null,
+    dragOverHourKey: null,
+    loading: false,
+    isModalOpen: false,
+    modalMode: "edit",
+    formData: null,
+    editingRow: null,
+    selectedEventIds: [],
+    focusedDayKey: null,
+    showUnscheduled: true,
+    eventsCacheEpoch: 0
+  },
+  IN: {},
+  OUT: {}
+}, g, sg);
+
+const patchCalP = (partial) => {
+  _.mergeVertexProperties(0, calendarStateVertexId, g, sg, partial);
+};
+const calP = () => g.vertexes[calendarStateVertexId]?.P;
+
+const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const HOUR_START = 0;
+const HOUR_END = 23;
+
+const EVENT_COLOR_PALETTE = [
+  { bg: "oklch(0.62 0.16 250)", fg: "oklch(0.98 0.01 250)" },
+  { bg: "oklch(0.65 0.15 145)", fg: "oklch(0.15 0.02 145)" },
+  { bg: "oklch(0.70 0.14 50)", fg: "oklch(0.18 0.02 50)" },
+  { bg: "oklch(0.60 0.17 25)", fg: "oklch(0.98 0.01 25)" },
+  { bg: "oklch(0.58 0.14 300)", fg: "oklch(0.98 0.01 300)" },
+  { bg: "oklch(0.66 0.12 200)", fg: "oklch(0.15 0.02 200)" },
+  { bg: "oklch(0.55 0.10 0)", fg: "oklch(0.98 0.01 0)" },
+  { bg: "oklch(0.68 0.13 330)", fg: "oklch(0.15 0.02 330)" }
+];
+
+const pad2 = (n) => String(n).padStart(2, "0");
+
+const toDateKey = (date) => {
+  if (!(date instanceof Date) || Number.isNaN(date.getTime())) return null;
+  return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`;
+};
+
+const parseDateValue = (value) => {
+  if (value == null || value === "") return null;
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? null : value;
+  }
+  const asString = String(value).trim();
+  if (!asString) return null;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(asString)) {
+    const parts = asString.split("-").map(Number);
+    const local = new Date(parts[0], parts[1] - 1, parts[2], 0, 0, 0, 0);
+    return Number.isNaN(local.getTime()) ? null : local;
+  }
+  const parsed = new Date(asString);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+};
+
+const startOfWeek = (date) => {
+  const d = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
+  d.setDate(d.getDate() - d.getDay());
+  return d;
+};
+
+const addDays = (date, days) => {
+  const d = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
+  d.setDate(d.getDate() + days);
+  return d;
+};
+
+const eachDateKeyInclusive = (startDate, endDate) => {
+  const keys = [];
+  if (!startDate) return keys;
+  let cur = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+  const end = endDate
+    ? new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate())
+    : cur;
+  if (end.getTime() < cur.getTime()) {
+    keys.push(toDateKey(cur));
+    return keys;
+  }
+  while (cur.getTime() <= end.getTime()) {
+    keys.push(toDateKey(cur));
+    cur = addDays(cur, 1);
+  }
+  return keys;
+};
+
+const ensureCursorInitialized = () => {
+  const p = calP();
+  if (p?.cursorYear != null && p?.cursorMonth != null) {
+    if (!focusedDayKeyLocal && p?.focusedDayKey) focusedDayKeyLocal = p.focusedDayKey;
+    return;
+  }
+  const now = new Date();
+  const key = toDateKey(now);
+  focusedDayKeyLocal = key;
+  patchCalP({
+    cursorYear: now.getFullYear(),
+    cursorMonth: now.getMonth(),
+    cursorWeekStart: toDateKey(startOfWeek(now)),
+    focusedDayKey: key
+  });
+};
+
+const getLayout = () => {
+  const fromUrl = f.getCalendarLayoutFromUrl?.();
+  let layout = null;
+  if (fromUrl === "month" || fromUrl === "week") layout = fromUrl;
+  else {
+    const stored = calP()?.layout;
+    if (stored === "month" || stored === "week") layout = stored;
+  }
+  if (!layout) {
+    const cfg = f.getCalendarConfig?.() || {};
+    layout = cfg.defaultView === "week" ? "week" : "month";
+  }
+  if (layout === "week" && f.isCalendarDateTimeField?.() !== true) return "month";
+  return layout;
+};
+
+const setLayout = (layout) => {
+  if (layout !== "month" && layout !== "week") return;
+  patchCalP({ layout });
+  f.setCalendarLayoutInUrl?.(layout);
+};
+
+const getCursorDate = () => {
+  ensureCursorInitialized();
+  const p = calP();
+  return new Date(p.cursorYear, p.cursorMonth, 1, 0, 0, 0, 0);
+};
+
+const getWeekStartDate = () => {
+  ensureCursorInitialized();
+  const key = calP()?.cursorWeekStart;
+  const parsed = parseDateValue(key);
+  if (parsed) return startOfWeek(parsed);
+  return startOfWeek(new Date());
+};
+
+const goToday = () => {
+  const now = new Date();
+  const key = toDateKey(now);
+  focusedDayKeyLocal = key;
+  patchCalP({
+    cursorYear: now.getFullYear(),
+    cursorMonth: now.getMonth(),
+    cursorWeekStart: toDateKey(startOfWeek(now)),
+    focusedDayKey: key
+  });
+};
+
+const goPrev = () => {
+  if (getLayout() === "week") {
+    const start = getWeekStartDate();
+    start.setDate(start.getDate() - 7);
+    const key = toDateKey(start);
+    focusedDayKeyLocal = key;
+    patchCalP({
+      cursorWeekStart: toDateKey(start),
+      cursorYear: start.getFullYear(),
+      cursorMonth: start.getMonth(),
+      focusedDayKey: key
+    });
+    return;
+  }
+  const d = getCursorDate();
+  d.setMonth(d.getMonth() - 1);
+  const key = toDateKey(d);
+  focusedDayKeyLocal = key;
+  patchCalP({
+    cursorYear: d.getFullYear(),
+    cursorMonth: d.getMonth(),
+    cursorWeekStart: toDateKey(startOfWeek(d)),
+    focusedDayKey: key
+  });
+};
+
+const goNext = () => {
+  if (getLayout() === "week") {
+    const start = getWeekStartDate();
+    start.setDate(start.getDate() + 7);
+    const key = toDateKey(start);
+    focusedDayKeyLocal = key;
+    patchCalP({
+      cursorWeekStart: toDateKey(start),
+      cursorYear: start.getFullYear(),
+      cursorMonth: start.getMonth(),
+      focusedDayKey: key
+    });
+    return;
+  }
+  const d = getCursorDate();
+  d.setMonth(d.getMonth() + 1);
+  const key = toDateKey(d);
+  focusedDayKeyLocal = key;
+  patchCalP({
+    cursorYear: d.getFullYear(),
+    cursorMonth: d.getMonth(),
+    cursorWeekStart: toDateKey(startOfWeek(d)),
+    focusedDayKey: key
+  });
+};
+
+const getHeaderLabel = () => {
+  if (getLayout() === "week") {
+    const start = getWeekStartDate();
+    const end = new Date(start);
+    end.setDate(end.getDate() + 6);
+    const startLabel = start.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+    const endLabel = end.toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+      year: "numeric"
+    });
+    return `${startLabel} – ${endLabel}`;
+  }
+  const d = getCursorDate();
+  return d.toLocaleDateString(undefined, { month: "long", year: "numeric" });
+};
+
+const isDateTimeColumn = () => f.isCalendarDateTimeField?.() === true;
+
+const getEventTitle = (row) => {
+  const cfg = f.getCalendarConfig?.() || {};
+  const titleField = cfg.titleField;
+  if (titleField && row?.P?.[titleField] != null && String(row.P[titleField]).trim() !== "") {
+    return String(row.P[titleField]).trim();
+  }
+  const fallbacks = ["title", "name", "fileName", "key", "subject", "label"];
+  for (let i = 0; i < fallbacks.length; i++) {
+    const v = row?.P?.[fallbacks[i]];
+    if (v != null && String(v).trim() !== "") return String(v).trim();
+  }
+  return row?.id != null ? String(row.id) : "Item";
+};
+
+const hashString = (str) => {
+  let h = 0;
+  const s = String(str || "");
+  for (let i = 0; i < s.length; i++) {
+    h = (h << 5) - h + s.charCodeAt(i);
+    h |= 0;
+  }
+  return Math.abs(h);
+};
+
+const getEventColors = (row) => {
+  const cfg = f.getCalendarConfig?.() || {};
+  const colorField = cfg.colorField;
+  if (!colorField) return null;
+  const raw = row?.P?.[colorField];
+  if (raw == null || String(raw).trim() === "") return null;
+  const asString = String(raw).trim();
+  if (
+    asString.startsWith("#") ||
+    asString.startsWith("oklch(") ||
+    asString.startsWith("rgb") ||
+    asString.startsWith("hsl")
+  ) {
+    return { bg: asString, fg: t?.var?.color?.primary_text || "#fff" };
+  }
+  const idx = hashString(asString) % EVENT_COLOR_PALETTE.length;
+  return EVENT_COLOR_PALETTE[idx];
+};
+
+const getEventChipStyle = (event) => {
+  const colors = event?.colors || getEventColors(event?.row);
+  if (!colors) return "";
+  return `background:${colors.bg};color:${colors.fg};`;
+};
+
+const getRowDate = (row) => {
+  const field = f.getCalendarDateField?.();
+  if (!field) return null;
+  return parseDateValue(row?.P?.[field]);
+};
+
+const getRowEndDate = (row) => {
+  const field = f.getCalendarEndDateField?.() || f.getCalendarConfig?.()?.endDateField;
+  if (!field) return null;
+  return parseDateValue(row?.P?.[field]);
+};
+
+const hasEndDateField = () => {
+  const field = f.getCalendarEndDateField?.() || f.getCalendarConfig?.()?.endDateField;
+  return !!(field && String(field).trim());
+};
+
+const getCalendarRows = () => {
+  const rows =
+    typeof f.getMainTableRowVertices === "function" ? f.getMainTableRowVertices() : [];
+  return Array.isArray(rows) ? rows : [];
+};
+
+const buildEventObject = (row, dayKey, segment, startKey, endKey) => {
+  const date = getRowDate(row);
+  return {
+    id: row.id,
+    title: getEventTitle(row),
+    date,
+    hour: date ? date.getHours() : 0,
+    dayKey,
+    segment: segment || "single",
+    startKey,
+    endKey,
+    colors: getEventColors(row),
+    row,
+    canResizeStart: hasEndDateField() && (segment === "start" || segment === "single"),
+    canResizeEnd: hasEndDateField() && (segment === "end" || segment === "single")
+  };
+};
+
+const buildEventsByDayMap = () => {
+  const map = Object.create(null);
+  const rows = getCalendarRows();
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    const start = getRowDate(row);
+    if (!start) continue;
+    const end = getRowEndDate(row) || start;
+    const startKey = toDateKey(start);
+    const endKey = toDateKey(end);
+    const keys = eachDateKeyInclusive(start, end);
+    for (let k = 0; k < keys.length; k++) {
+      const key = keys[k];
+      if (!key) continue;
+      let segment = "single";
+      if (keys.length > 1) {
+        if (k === 0) segment = "start";
+        else if (k === keys.length - 1) segment = "end";
+        else segment = "middle";
+      }
+      if (!map[key]) map[key] = [];
+      map[key].push(buildEventObject(row, key, segment, startKey, endKey));
+    }
+  }
+  const keys = Object.keys(map);
+  for (let i = 0; i < keys.length; i++) {
+    map[keys[i]].sort((a, b) => {
+      const at = a.date?.getTime?.() || 0;
+      const bt = b.date?.getTime?.() || 0;
+      return at - bt;
+    });
+  }
+  return map;
+};
+
+const getEventsForDayKey = (dayKey, byDay) => {
+  if (!dayKey) return [];
+  const source = byDay || buildEventsByDayMap();
+  const list = source[dayKey];
+  return Array.isArray(list) ? list : [];
+};
+
+const getUnscheduledEvents = () => {
+  const rows = getCalendarRows();
+  const out = [];
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    if (getRowDate(row)) continue;
+    out.push({
+      id: row.id,
+      title: getEventTitle(row),
+      colors: getEventColors(row),
+      row,
+      unscheduled: true
+    });
+  }
+  return out;
+};
+
+const getUnscheduledCount = () => getUnscheduledEvents().length;
+
+// Cache month/week structure + events so arrow-key focus does not rebuild chips.
+let eventsByDayCache = { key: null, map: null };
+let monthCellsCache = { key: null, cells: null };
+let weekDaysCache = { key: null, days: null };
+
+const getCalendarDataCacheKey = () => {
+  const pageP = f.pageStateVertexId ? g.vertexes[f.pageStateVertexId]?.P : null;
+  const ids = pageP?.mainTableRowIds;
+  const idPart = Array.isArray(ids) ? `${ids.length}:${ids[0] || ""}:${ids[ids.length - 1] || ""}` : "0";
+  return [
+    calP()?.eventsCacheEpoch || 0,
+    pageP?.contentFetchKey ?? "",
+    idPart,
+    f.getCalendarDateField?.() || "",
+    f.getCalendarEndDateField?.() || "",
+    f.getCalendarColorField?.() || "",
+    f.getCalendarConfig?.()?.titleField || ""
+  ].join("|");
+};
+
+const invalidateCalendarEventCache = () => {
+  eventsByDayCache = { key: null, map: null };
+  monthCellsCache = { key: null, cells: null };
+  weekDaysCache = { key: null, days: null };
+  const nextEpoch = (calP()?.eventsCacheEpoch || 0) + 1;
+  patchCalP({ eventsCacheEpoch: nextEpoch });
+};
+
+const getCachedEventsByDayMap = () => {
+  const key = getCalendarDataCacheKey();
+  if (eventsByDayCache.key === key && eventsByDayCache.map) {
+    return eventsByDayCache.map;
+  }
+  const map = buildEventsByDayMap();
+  eventsByDayCache = { key, map };
+  return map;
+};
+
+const buildMonthCells = () => {
+  ensureCursorInitialized();
+  const p = calP();
+  const year = p?.cursorYear;
+  const month = p?.cursorMonth;
+  const dataKey = getCalendarDataCacheKey();
+  const cacheKey = `m:${year}-${month}|${dataKey}`;
+  if (monthCellsCache.key === cacheKey && monthCellsCache.cells) {
+    return monthCellsCache.cells;
+  }
+  const cursor = new Date(year, month, 1, 0, 0, 0, 0);
+  const first = new Date(year, month, 1);
+  const start = startOfWeek(first);
+  const todayKey = toDateKey(new Date());
+  const byDay = getCachedEventsByDayMap();
+  const cells = [];
+  for (let i = 0; i < 42; i++) {
+    const d = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
+    const key = toDateKey(d);
+    cells.push({
+      key,
+      dayNumber: d.getDate(),
+      inCurrentMonth: d.getMonth() === month,
+      isToday: key === todayKey,
+      events: getEventsForDayKey(key, byDay)
+    });
+  }
+  monthCellsCache = { key: cacheKey, cells };
+  return cells;
+};
+
+const buildWeekDays = () => {
+  ensureCursorInitialized();
+  const weekStartKey = calP()?.cursorWeekStart;
+  const dataKey = getCalendarDataCacheKey();
+  const cacheKey = `w:${weekStartKey}|${dataKey}`;
+  if (weekDaysCache.key === cacheKey && weekDaysCache.days) {
+    return weekDaysCache.days;
+  }
+  const start = getWeekStartDate();
+  const todayKey = toDateKey(new Date());
+  const byDay = getCachedEventsByDayMap();
+  const days = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
+    const key = toDateKey(d);
+    days.push({
+      key,
+      label: d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" }),
+      isToday: key === todayKey,
+      events: getEventsForDayKey(key, byDay)
+    });
+  }
+  weekDaysCache = { key: cacheKey, days };
+  return days;
+};
+
+const HOUR_SLOTS = (() => {
+  const hours = [];
+  for (let h = HOUR_START; h <= HOUR_END; h++) {
+    hours.push({ hour: h, label: `${pad2(h)}:00` });
+  }
+  return hours;
+})();
+
+const buildHourSlots = () => HOUR_SLOTS;
+
+const getEventsForDayHour = (dayKey, hour) => {
+  const events = getEventsForDayKey(dayKey, getCachedEventsByDayMap());
+  if (!events.length) return [];
+  const out = [];
+  for (let i = 0; i < events.length; i++) {
+    const ev = events[i];
+    if (ev.segment === "middle" || ev.segment === "end") {
+      if (hour === 0) out.push(ev);
+    } else if (ev.hour === hour) {
+      out.push(ev);
+    }
+  }
+  return out;
+};
+
+const loadCalendarData = async () => {
+  if (typeof f.fetchData !== "function") return;
+  const pageVid = f.pageStateVertexId;
+  const alreadyLoaded =
+    g.vertexes[pageVid]?.P?.contentFetchKey != null &&
+    Array.isArray(g.vertexes[pageVid]?.P?.mainTableRowIds);
+  if (!alreadyLoaded) patchCalP({ loading: true });
+  try {
+    await f.fetchData(undefined, undefined, undefined, () => {});
+    invalidateCalendarEventCache();
+  } catch (error) {
+    console.error("Calendar load failed:", error);
+  } finally {
+    if (calP()?.loading) patchCalP({ loading: false });
+  }
+};
+
+const refreshFromSidebar = () => {
+  const item = f.selectedSidebarItem?.();
+  if (item || f.hasSidebar?.() !== true) {
+    loadCalendarData();
+  }
+};
+
+const getSelectedEventIds = () => {
+  const ids = calP()?.selectedEventIds;
+  return Array.isArray(ids) ? ids.map(String) : [];
+};
+
+const clearSelection = () => {
+  patchCalP({ selectedEventIds: [] });
+};
+
+const isEventSelected = (eventId) => {
+  if (eventId == null) return false;
+  return getSelectedEventIds().includes(String(eventId));
+};
+
+const toggleEventSelection = (eventId, additive) => {
+  if (eventId == null) return;
+  const id = String(eventId);
+  const cur = getSelectedEventIds();
+  if (!additive) {
+    patchCalP({ selectedEventIds: [id] });
+    return;
+  }
+  const next = cur.slice();
+  const idx = next.indexOf(id);
+  if (idx >= 0) next.splice(idx, 1);
+  else next.push(id);
+  patchCalP({ selectedEventIds: next });
+};
+
+const resolveDragItemIds = (eventId) => {
+  const id = String(eventId);
+  const selected = getSelectedEventIds();
+  if (selected.length > 1 && selected.includes(id)) return selected;
+  return [id];
+};
+
+const eventDragCleanups = new Map();
+const resizeDragCleanups = new Map();
+const dayDropCleanups = new Map();
+const hourDropCleanups = new Map();
+const eventDragBound = new WeakMap();
+const resizeDragBound = new WeakMap();
+const dayDropBound = new WeakMap();
+const hourDropBound = new WeakMap();
+
+const cleanupMap = (map, element) => {
+  if (!element) return;
+  const cleanup = map.get(element);
+  if (cleanup) {
+    cleanup();
+    map.delete(element);
+  }
+};
+
+const initEventDraggable = (element, eventId) => {
+  if (!element || !_.draggable || !eventId) return;
+  if (f.getCalendarConfig?.()?.allowDragReschedule === false) return;
+  if (eventDragBound.get(element) === eventId && eventDragCleanups.has(element)) return;
+  cleanupMap(eventDragCleanups, element);
+  const cleanup = _.draggable({
+    element,
+    getInitialData: () => {
+      const itemIds = resolveDragItemIds(eventId);
+      return {
+        type: "calendar-event",
+        itemIds,
+        count: itemIds.length,
+        sourceTableVertexLabel: f.getTableVertexLabel?.() || null,
+        sourceTableKey: f.getTableKey?.() || null
+      };
+    },
+    onGenerateDragPreview: ({ nativeSetDragImage }) => {
+      if (!_.setCustomNativeDragPreview || !nativeSetDragImage) return;
+      const itemIds = resolveDragItemIds(eventId);
+      const row = g.vertexes[eventId];
+      const label =
+        itemIds.length > 1
+          ? `${itemIds.length} items`
+          : row
+            ? getEventTitle(row)
+            : "Event";
+      return _.setCustomNativeDragPreview({
+        nativeSetDragImage,
+        getOffset: _.pointerOutsideOfPreview
+          ? _.pointerOutsideOfPreview({ x: "8px", y: "8px" })
+          : undefined,
+        render: ({ container }) => {
+          container.style.boxSizing = "border-box";
+          container.style.padding = "8px 10px";
+          container.style.borderRadius = "8px";
+          container.style.border = `1px solid ${t?.var?.color?.border ?? "rgba(0,0,0,0.2)"}`;
+          container.style.background = `${t?.var?.color?.primary ?? "#4f46e5"}`;
+          container.style.color = `${t?.var?.color?.primary_text ?? "#fff"}`;
+          container.style.fontSize = "12px";
+          container.style.fontWeight = "600";
+          container.style.maxWidth = "220px";
+          container.style.overflow = "hidden";
+          container.style.textOverflow = "ellipsis";
+          container.style.whiteSpace = "nowrap";
+          container.textContent = label;
+        }
+      });
+    },
+    onDragStart: () => {
+      element.style.opacity = "0.55";
+    },
+    onDrop: () => {
+      element.style.opacity = "1";
+    }
+  });
+  eventDragCleanups.set(element, cleanup);
+  eventDragBound.set(element, eventId);
+  return cleanup;
+};
+
+const initResizeDraggable = (element, eventId, edge) => {
+  if (!element || !_.draggable || !eventId) return;
+  if (!hasEndDateField()) return;
+  if (f.getCalendarConfig?.()?.allowDragReschedule === false) return;
+  const bindKey = `${eventId}:${edge}`;
+  if (resizeDragBound.get(element) === bindKey && resizeDragCleanups.has(element)) return;
+  cleanupMap(resizeDragCleanups, element);
+  const cleanup = _.draggable({
+    element,
+    getInitialData: () => ({
+      type: edge === "end" ? "calendar-resize-end" : "calendar-resize-start",
+      itemIds: [String(eventId)],
+      count: 1,
+      edge,
+      sourceTableVertexLabel: f.getTableVertexLabel?.() || null,
+      sourceTableKey: f.getTableKey?.() || null
+    }),
+    onDragStart: () => {
+      element.style.opacity = "0.7";
+    },
+    onDrop: () => {
+      element.style.opacity = "1";
+    }
+  });
+  resizeDragCleanups.set(element, cleanup);
+  resizeDragBound.set(element, bindKey);
+  return cleanup;
+};
+
+const dropModeFromSource = (data) => {
+  if (!data) return "move";
+  if (data.type === "calendar-resize-start") return "resize-start";
+  if (data.type === "calendar-resize-end") return "resize-end";
+  return "move";
+};
+
+const canDropCalendarPayload = (data) => {
+  if (!data) return false;
+  if (
+    data.type === "calendar-event" ||
+    data.type === "table-items" ||
+    data.type === "calendar-resize-start" ||
+    data.type === "calendar-resize-end"
+  ) {
+    return Array.isArray(data.itemIds) && data.itemIds.length > 0;
+  }
+  return false;
+};
+
+const initDayDropTarget = (element, dayKey) => {
+  if (!element || !_.dropTargetForElements || !dayKey) return;
+  if (dayDropBound.get(element) === dayKey && dayDropCleanups.has(element)) return;
+  cleanupMap(dayDropCleanups, element);
+  const cleanup = _.dropTargetForElements({
+    element,
+    getData: () => ({ type: "calendar-day", dayKey }),
+    canDrop: ({ source }) => canDropCalendarPayload(source?.data),
+    onDragEnter: () => {
+      element.classList.add("cal-day-drag-over");
+    },
+    onDragLeave: () => {
+      element.classList.remove("cal-day-drag-over");
+    },
+    onDrop: async ({ source }) => {
+      element.classList.remove("cal-day-drag-over");
+      const data = source?.data;
+      const itemIds = Array.isArray(data?.itemIds) ? data.itemIds : [];
+      if (itemIds.length === 0) return;
+      if (typeof f.updateRowsCalendarDate === "function") {
+        const result = await f.updateRowsCalendarDate(itemIds, dayKey, null, {
+          mode: dropModeFromSource(data)
+        });
+        if (result?.success !== false) invalidateCalendarEventCache();
+        clearSelection();
+      }
+    }
+  });
+  dayDropCleanups.set(element, cleanup);
+  dayDropBound.set(element, dayKey);
+  return cleanup;
+};
+
+const initHourDropTarget = (element, dayKey, hour) => {
+  if (!element || !_.dropTargetForElements || !dayKey || hour == null) return;
+  const slotKey = `${dayKey}T${pad2(hour)}`;
+  if (hourDropBound.get(element) === slotKey && hourDropCleanups.has(element)) return;
+  cleanupMap(hourDropCleanups, element);
+  const cleanup = _.dropTargetForElements({
+    element,
+    getData: () => ({ type: "calendar-hour", dayKey, hour }),
+    canDrop: ({ source }) => canDropCalendarPayload(source?.data),
+    onDragEnter: () => {
+      element.classList.add("cal-hour-drag-over");
+    },
+    onDragLeave: () => {
+      element.classList.remove("cal-hour-drag-over");
+    },
+    onDrop: async ({ source }) => {
+      element.classList.remove("cal-hour-drag-over");
+      const data = source?.data;
+      const itemIds = Array.isArray(data?.itemIds) ? data.itemIds : [];
+      if (itemIds.length === 0) return;
+      if (typeof f.updateRowsCalendarDate === "function") {
+        const result = await f.updateRowsCalendarDate(itemIds, dayKey, hour, {
+          mode: dropModeFromSource(data)
+        });
+        if (result?.success !== false) invalidateCalendarEventCache();
+        clearSelection();
+      }
+    }
+  });
+  hourDropCleanups.set(element, cleanup);
+  hourDropBound.set(element, slotKey);
+  return cleanup;
+};
+
+const bindEventRef = (el, eventId) => {
+  if (!el) return;
+  initEventDraggable(el, eventId);
+};
+
+const bindResizeStartRef = (el, eventId) => {
+  if (!el) return;
+  initResizeDraggable(el, eventId, "start");
+};
+
+const bindResizeEndRef = (el, eventId) => {
+  if (!el) return;
+  initResizeDraggable(el, eventId, "end");
+};
+
+const bindDayRef = (el, dayKey) => {
+  if (!el || !dayKey) return;
+  dayElementsByKey.set(dayKey, el);
+  const focused = getFocusedDayKey() === dayKey;
+  el.classList.toggle("cal-day-focused", focused);
+  el.tabIndex = focused ? 0 : -1;
+  el.setAttribute("aria-selected", focused ? "true" : "false");
+  initDayDropTarget(el, dayKey);
+};
+
+const bindHourRef = (el, dayKey, hour) => {
+  if (!el) return;
+  initHourDropTarget(el, dayKey, hour);
+};
+
+const openRow = async (row) => {
+  if (!row) return;
+  const onRowClick = f.prop?.("onRowClick");
+  if (typeof onRowClick === "function") {
+    onRowClick(row, _);
+    return;
+  }
+  const onEdit = f.prop?.("onEdit");
+  if (typeof onEdit === "function") {
+    try {
+      await onEdit(row, _);
+      return;
+    } catch (error) {
+      console.error("Error in onEdit function:", error);
+      _.showErrorToast?.(error?.message || "Failed to open edit form");
+      return;
+    }
+  }
+  const formConfig = f.getFormConfig?.();
+  if (!formConfig) {
+    _.showWarningToast?.("Form is not configured for this table");
+    return;
+  }
+  patchCalP({
+    modalMode: "edit",
+    editingRow: row,
+    formData: row,
+    isModalOpen: true
+  });
+};
+
+const openAddForDay = (dayKey, hour) => {
+  const cfg = f.getCalendarConfig?.();
+  const dateField = cfg?.dateField;
+  if (!dateField) {
+    _.showWarningToast?.("Calendar date field is not configured");
+    return;
+  }
+  const formConfig = f.getFormConfig?.();
+  if (!formConfig) {
+    _.showWarningToast?.("Form is not configured for this table");
+    return;
+  }
+  const asDateTime = isDateTimeColumn() || hour != null;
+  const value =
+    typeof f.formatCalendarStoredValue === "function"
+      ? f.formatCalendarStoredValue(dayKey, hour, null, asDateTime)
+      : dayKey;
+  if (value == null) return;
+  const label = f.getTableVertexLabel?.() || "Item";
+  patchCalP({
+    modalMode: "add",
+    editingRow: null,
+    formData: {
+      id: null,
+      L: [label],
+      P: { [dateField]: value },
+      IN: {},
+      OUT: {}
+    },
+    isModalOpen: true,
+    focusedDayKey: dayKey
+  });
+  focusedDayKeyLocal = dayKey;
+};
+
+const handleDayCellClick = (e, dayKey) => {
+  if (!dayKey) return;
+  if (e?.target?.closest?.("[data-cal-event]")) return;
+  if (e?.target?.closest?.("[data-cal-resize]")) return;
+  setFocusedDayKeyFast(dayKey);
+  openAddForDay(dayKey, null);
+};
+
+const handleHourCellClick = (e, dayKey, hour) => {
+  if (!dayKey) return;
+  if (e?.target?.closest?.("[data-cal-event]")) return;
+  if (e?.target?.closest?.("[data-cal-resize]")) return;
+  setFocusedDayKeyFast(dayKey);
+  openAddForDay(dayKey, hour);
+};
+
+const handleEventClick = (e, event) => {
+  e?.stopPropagation?.();
+  const additive = !!(e?.metaKey || e?.ctrlKey || e?.shiftKey);
+  if (additive) {
+    toggleEventSelection(event?.id, true);
+    return;
+  }
+  toggleEventSelection(event?.id, false);
+  openRow(event?.row);
+};
+
+const closeEditModal = () => {
+  patchCalP({
+    isModalOpen: false,
+    formData: null,
+    editingRow: null
+  });
+};
+
+const handleSave = async (formDataToSave) => {
+  const formConfig = f.getFormConfig?.();
+  if (!formConfig?.saveFunction) {
+    _.showErrorToast?.("Save function not configured");
+    return false;
+  }
+  try {
+    if (f.pageStateVertexId) {
+      _.mergeVertexProperties(0, f.pageStateVertexId, g, sg, { loading: true });
+    }
+    const mode = calP()?.modalMode ?? "edit";
+    const originalRow = calP()?.editingRow ?? null;
+    const result = await formConfig.saveFunction({
+      mode,
+      data: formDataToSave,
+      originalRow
+    });
+    if (result?.success) {
+      _.showSuccessToast?.(
+        mode === "add" ? "Item added successfully" : "Item updated successfully"
+      );
+      closeEditModal();
+      f.invalidateContentFetchKey?.();
+      await loadCalendarData();
+      return true;
+    }
+    _.showErrorToast?.(result?.message || result?.error || "Failed to save");
+    return false;
+  } catch (error) {
+    console.error("Error saving from calendar:", error);
+    _.showErrorToast?.(error?.message || "Failed to save item");
+    return false;
+  } finally {
+    if (f.pageStateVertexId) {
+      _.mergeVertexProperties(0, f.pageStateVertexId, g, sg, { loading: false });
+    }
+  }
+};
+
+const getEditModalProps = () => {
+  const p = calP() || {};
+  const modalMaxWidth = f.prop?.("modalMaxWidth") || f.getConfigGeneralValue?.("modalMaxWidth");
+  return {
+    isOpen: p.isModalOpen === true,
+    onClose: closeEditModal,
+    mode: p.modalMode || "edit",
+    formConfig: f.getFormConfig?.(),
+    initialVertex: p.formData ?? null,
+    onSave: handleSave,
+    label: f.prop?.("label") || f.getConfigGeneralValue?.("label"),
+    tableVertexLabel: f.getTableVertexLabel?.(),
+    selectedSidebarItem: f.selectedSidebarItem,
+    sidebarConfig: f.getSidebarConfig?.() || null,
+    maxWidth:
+      modalMaxWidth != null && String(modalMaxWidth).trim() !== ""
+        ? String(modalMaxWidth).trim()
+        : undefined
+  };
+};
+
+const dayElementsByKey = new Map();
+let focusedDayKeyLocal = null;
+
+const getFocusedDayKey = () => focusedDayKeyLocal || calP()?.focusedDayKey || null;
+
+const applyFocusedDayDom = (dayKey) => {
+  dayElementsByKey.forEach((el, key) => {
+    if (!el) return;
+    const focused = key === dayKey;
+    el.classList.toggle("cal-day-focused", focused);
+    el.tabIndex = focused ? 0 : -1;
+    el.setAttribute("aria-selected", focused ? "true" : "false");
+  });
+};
+
+const setFocusedDayKeyFast = (dayKey) => {
+  focusedDayKeyLocal = dayKey;
+  applyFocusedDayDom(dayKey);
+  const focusedEl = dayElementsByKey.get(dayKey);
+  if (focusedEl && typeof focusedEl.focus === "function") {
+    try {
+      focusedEl.focus({ preventScroll: true });
+    } catch (error) {
+      focusedEl.focus();
+    }
+  }
+};
+
+const shiftFocusedDay = (deltaDays) => {
+  ensureCursorInitialized();
+  const p = calP();
+  const currentKey = getFocusedDayKey() || toDateKey(new Date());
+  const current = parseDateValue(currentKey) || new Date();
+  const next = addDays(current, deltaDays);
+  const nextKey = toDateKey(next);
+  const cursorYear = p?.cursorYear;
+  const cursorMonth = p?.cursorMonth;
+  // Within the visible month: DOM-only focus move (no reactive rebuild).
+  if (next.getFullYear() === cursorYear && next.getMonth() === cursorMonth) {
+    setFocusedDayKeyFast(nextKey);
+    return;
+  }
+  focusedDayKeyLocal = nextKey;
+  patchCalP({
+    focusedDayKey: nextKey,
+    cursorYear: next.getFullYear(),
+    cursorMonth: next.getMonth(),
+    cursorWeekStart: toDateKey(startOfWeek(next))
+  });
+};
+
+const handleCalendarKeyDown = (e) => {
+  if (!e) return;
+  const key = e.key;
+  if (key === "Escape") {
+    if (calP()?.isModalOpen) {
+      e.preventDefault?.();
+      closeEditModal();
+      return;
+    }
+    if (getSelectedEventIds().length) {
+      e.preventDefault?.();
+      clearSelection();
+    }
+    return;
+  }
+  if (calP()?.isModalOpen) return;
+  if (key === "ArrowLeft") {
+    e.preventDefault?.();
+    shiftFocusedDay(-1);
+    return;
+  }
+  if (key === "ArrowRight") {
+    e.preventDefault?.();
+    shiftFocusedDay(1);
+    return;
+  }
+  if (key === "ArrowUp") {
+    e.preventDefault?.();
+    shiftFocusedDay(-7);
+    return;
+  }
+  if (key === "ArrowDown") {
+    e.preventDefault?.();
+    shiftFocusedDay(7);
+    return;
+  }
+  if (key === "Enter") {
+    e.preventDefault?.();
+    const focused = getFocusedDayKey();
+    if (!focused) return;
+    const events = getEventsForDayKey(focused, getCachedEventsByDayMap());
+    const selected = getSelectedEventIds();
+    if (selected.length === 1) {
+      const row = g.vertexes[selected[0]];
+      if (row) {
+        openRow(row);
+        return;
+      }
+    }
+    if (events.length === 1) {
+      openRow(events[0].row);
+      return;
+    }
+    openAddForDay(focused, null);
+  }
+};
+
+const isDayFocused = (dayKey) => getFocusedDayKey() === dayKey;
+
+return {
+  calendarStateVertexId,
+  getLayout,
+  setLayout,
+  goToday,
+  goPrev,
+  goNext,
+  getHeaderLabel,
+  isDateTimeColumn,
+  buildMonthCells,
+  buildWeekDays,
+  buildHourSlots,
+  getEventsForDayHour,
+  getEventsForDayKey,
+  getUnscheduledEvents,
+  getUnscheduledCount,
+  loadCalendarData,
+  refreshFromSidebar,
+  bindEventRef,
+  bindResizeStartRef,
+  bindResizeEndRef,
+  bindDayRef,
+  bindHourRef,
+  openRow,
+  openAddForDay,
+  handleDayCellClick,
+  handleHourCellClick,
+  handleEventClick,
+  handleCalendarKeyDown,
+  closeEditModal,
+  handleSave,
+  getEditModalProps,
+  getEventChipStyle,
+  isEventSelected,
+  isDayFocused,
+  hasEndDateField,
+  WEEKDAY_LABELS,
+  calP,
+  getEventTitle
+};
+
+'''
+        props:
+          '''return {
+  onMount: () => {
+    f.goToday?.();
+    const hasSidebar = f.hasSidebar?.() === true;
+    if (!hasSidebar) {
+      f.loadCalendarData?.();
+    }
+    if (typeof _.createEffect === "function") {
+      _.createEffect(() => {
+        const item = f.selectedSidebarItem?.();
+        if (item || f.hasSidebar?.() !== true) {
+          f.refreshFromSidebar?.();
+        }
+      });
+    }
+  },
+  onCleanup: () => {
+    _.deleteVertex(0, f.calendarStateVertexId, g, sg);
+  }
+};'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+  background: ${t.var.color.background};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        key: calendar_root
+        props:
+          '''return {
+  as: "div",
+  tabindex: 0,
+  role: "application",
+  "attr:aria-label": "Calendar",
+  onKeyDown: (e) => f.handleCalendarKeyDown?.(e)
+};'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: ${t.var.spacing.sm};
+  flex-wrap: wrap;
+  padding: ${t.var.spacing.sm};
+  flex-shrink: 0;
+  border-bottom: 1px solid ${t.var.color.border};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        key: calendar_toolbar
+        props:
+          '''return {
+  as: "div"
+};'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${t.var.spacing.sm};
+  flex-wrap: wrap;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+};'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: ${t.var.color.text};
+  min-width: 10rem;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: f.getHeaderLabel?.() || ""
+};'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''return {
+  variant: "secondary",
+  text: "Today",
+  onClick: () => f.goToday?.()
+};'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Button
+        props:
+          '''return {
+  variant: "secondary",
+  text: "Previous",
+  leftIcon: "ph:caret-left",
+  "attr:aria-label": "Previous",
+  onClick: () => f.goPrev?.()
+};'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Button
+        props:
+          '''return {
+  variant: "secondary",
+  text: "Next",
+  leftIcon: "ph:caret-right",
+  "attr:aria-label": "Next",
+  onClick: () => f.goNext?.()
+};'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${t.var.spacing.sm};
+  flex-wrap: wrap;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+};'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''return {
+  variant: f.getLayout?.() === "month" ? "primary" : "secondary",
+  text: "Month",
+  leftIcon: "ph:calendar-blank",
+  onClick: () => f.setLayout?.("month")
+};'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''return {
+  variant: f.getLayout?.() === "week" ? "primary" : "secondary",
+  text: "Week",
+  leftIcon: "ph:calendar",
+  hide: f.isDateTimeColumn?.() !== true,
+  onClick: () => f.setLayout?.("week")
+};'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Button
+        props:
+          '''return {
+  variant: "secondary",
+  text: "Table",
+  leftIcon: "ph:table",
+  onClick: () => f.setContentView?.("table")
+};'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  padding: ${t.var.spacing.sm};
+  display: flex;
+  flex-direction: row;
+  gap: ${t.var.spacing.sm};
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        key: calendar_body
+        props:
+          '''return {
+  as: "div"
+};'''
+      }
+    }
+    {
+      id: "40"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  width: 12rem;
+  flex: 0 0 12rem;
+  min-height: 0;
+  overflow: auto;
+  border: 1px solid ${t.var.color.border};
+  border-radius: 0.5rem;
+  background: ${t.var.color.background_light_100};
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  @media (max-width: 768px) {
+    width: 100%;
+    flex: 0 0 auto;
+    max-height: 10rem;
+  }
+}`;'''
+        displayOrder: 0
+        componentName: Html
+        key: calendar_unscheduled
+        props:
+          '''const loading = g.vertexes[f.calendarStateVertexId]?.P?.loading === true
+  || g.vertexes[f.pageStateVertexId]?.P?.loading === true;
+const count = f.getUnscheduledCount?.() || 0;
+return {
+  as: "aside",
+  hide: loading || count === 0,
+  "attr:aria-label": "Unscheduled items"
+};'''
+      }
+    }
+    {
+      id: "40a"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: ${t.var.color.text_light_300};
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h3",
+  text: `Unscheduled (${f.getUnscheduledCount?.() || 0})`
+};'''
+      }
+    }
+    {
+      id: "40b"
+      L: Attr
+      P: {
+        contextName: unscheduledEvent
+        loop: true
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  data: f.getUnscheduledEvents?.() || []
+};'''
+      }
+    }
+    {
+      id: "40c"
+      L: Attr
+      P: {
+        css:
+          '''const ev = c.unscheduledEvent;
+const selected = f.isEventSelected?.(ev?.id);
+const style = f.getEventChipStyle?.(ev) || "";
+return `._id {
+  display: block;
+  width: 100%;
+  border: ${selected ? `2px solid ${t.var.color.primary}` : "0"};
+  border-radius: 0.25rem;
+  padding: 0.25rem 0.35rem;
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: grab;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  ${style}
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "button",
+  type: "button",
+  "data-cal-event": "1",
+  text: c.unscheduledEvent?.title || "",
+  title: c.unscheduledEvent?.title || "",
+  ref: (el) => f.bindEventRef?.(el, c.unscheduledEvent?.id),
+  onClick: (e) => f.handleEventClick?.(e, c.unscheduledEvent)
+};'''
+      }
+    }
+    {
+      id: "41"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: ${t.var.spacing.sm};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        key: calendar_grids
+        props:
+          '''return {
+  as: "div"
+};'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 12rem;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const loading = g.vertexes[f.calendarStateVertexId]?.P?.loading === true
+  || g.vertexes[f.pageStateVertexId]?.P?.loading === true;
+return {
+  as: "div",
+  hide: !loading
+};'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: LoadingSpinner
+        props:
+          '''return {
+  size: "large",
+  color: "primary"
+};'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 1px;
+  background: ${t.var.color.border};
+  border: 1px solid ${t.var.color.border};
+  border-radius: 0.5rem;
+  overflow: hidden;
+  min-height: 28rem;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        key: calendar_month_grid
+        props:
+          '''const loading = g.vertexes[f.calendarStateVertexId]?.P?.loading === true
+  || g.vertexes[f.pageStateVertexId]?.P?.loading === true;
+return {
+  as: "div",
+  hide: loading || f.getLayout?.() === "week"
+};'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        contextName: weekday
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  data: f.WEEKDAY_LABELS || []
+};'''
+      }
+    }
+    {
+      id: "31"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  padding: 0.5rem;
+  background: ${t.var.color.background_light_100};
+  color: ${t.var.color.text_light_300};
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-align: center;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  text: c.weekday
+};'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        contextName: dayCell
+        loop: true
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  data: f.buildMonthCells?.() || []
+};'''
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        css:
+          '''const cell = c.dayCell;
+return `._id {
+  min-height: 6.5rem;
+  padding: 0.35rem;
+  background: ${cell?.inCurrentMonth ? t.var.color.background : t.var.color.background_light_100};
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  outline: none;
+  min-width: 0;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  ${cell?.isToday ? `box-shadow: inset 0 0 0 2px ${t.var.color.primary};` : ""}
+}
+._id.cal-day-focused {
+  outline: 2px solid ${t.var.color.info || t.var.color.primary};
+  outline-offset: -2px;
+}
+._id.cal-day-drag-over {
+  background: ${t.var.color.primary_light_800};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  role: "gridcell",
+  "attr:aria-label": c.dayCell?.key || "Day",
+  ref: (el) => f.bindDayRef?.(el, c.dayCell?.key),
+  onClick: (e) => f.handleDayCellClick?.(e, c.dayCell?.key)
+};'''
+      }
+    }
+    {
+      id: "35"
+      L: Attr
+      P: {
+        css:
+          '''const muted = c.dayCell?.inCurrentMonth === false;
+return `._id {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: ${muted ? t.var.color.text_light_500 : t.var.color.text};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  text: String(c.dayCell?.dayNumber ?? "")
+};'''
+      }
+    }
+    {
+      id: "20"
+      L: Attr
+      P: {
+        contextName: dayEvent
+        loop: true
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const cell = c.dayCell;
+return {
+  data: cell?.events || []
+};'''
+      }
+    }
+    {
+      id: "32"
+      L: Attr
+      P: {
+        css:
+          '''const ev = c.dayEvent;
+const selected = f.isEventSelected?.(ev?.id);
+const style = f.getEventChipStyle?.(ev) || "";
+const segment = ev?.segment;
+return `._id {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 1.35rem;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  border-radius: 0.25rem;
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
+  ${selected ? `outline: 2px solid ${t.var.color.text}; outline-offset: 1px;` : ""}
+  ${segment === "start" ? "border-top-right-radius: 0; border-bottom-right-radius: 0;" : ""}
+  ${segment === "end" ? "border-top-left-radius: 0; border-bottom-left-radius: 0;" : ""}
+  ${segment === "middle" ? "border-radius: 0;" : ""}
+  ${style}
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  "data-cal-event": "1"
+};'''
+      }
+    }
+    {
+      id: "32a"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  width: 0.35rem;
+  flex: 0 0 0.35rem;
+  align-self: stretch;
+  min-height: 1.35rem;
+  cursor: ew-resize;
+  background: rgba(255,255,255,0.35);
+  border: 0;
+  padding: 0;
+  border-radius: 0.25rem 0 0 0.25rem;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "button",
+  type: "button",
+  "data-cal-resize": "start",
+  "attr:aria-label": "Resize start",
+  hide: c.dayEvent?.canResizeStart !== true,
+  title: "Drag to change start date",
+  ref: (el) => f.bindResizeStartRef?.(el, c.dayEvent?.id),
+  onClick: (e) => e?.stopPropagation?.()
+};'''
+      }
+    }
+    {
+      id: "32b"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 1.35rem;
+  height: 1.35rem;
+  line-height: 1.05rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: grab;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0.15rem 0.25rem;
+  box-sizing: border-box;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "button",
+  type: "button",
+  text: c.dayEvent?.title || "",
+  title: c.dayEvent?.title || "",
+  ref: (el) => f.bindEventRef?.(el, c.dayEvent?.id),
+  onClick: (e) => f.handleEventClick?.(e, c.dayEvent)
+};'''
+      }
+    }
+    {
+      id: "32c"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  width: 0.35rem;
+  flex: 0 0 0.35rem;
+  align-self: stretch;
+  min-height: 1.35rem;
+  cursor: ew-resize;
+  background: rgba(255,255,255,0.35);
+  border: 0;
+  padding: 0;
+  border-radius: 0 0.25rem 0.25rem 0;
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "button",
+  type: "button",
+  "data-cal-resize": "end",
+  "attr:aria-label": "Resize end",
+  hide: c.dayEvent?.canResizeEnd !== true,
+  title: "Drag to change end date",
+  ref: (el) => f.bindResizeEndRef?.(el, c.dayEvent?.id),
+  onClick: (e) => e?.stopPropagation?.()
+};'''
+      }
+    }
+    {
+      id: "21"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: column;
+  min-height: 28rem;
+  border: 1px solid ${t.var.color.border};
+  border-radius: 0.5rem;
+  overflow: hidden;
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        key: calendar_week_grid
+        props:
+          '''const loading = g.vertexes[f.calendarStateVertexId]?.P?.loading === true
+  || g.vertexes[f.pageStateVertexId]?.P?.loading === true;
+return {
+  as: "div",
+  hide: loading || f.getLayout?.() !== "week"
+};'''
+      }
+    }
+    {
+      id: "22"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: grid;
+  grid-template-columns: 4rem repeat(7, minmax(0, 1fr));
+  background: ${t.var.color.background_light_100};
+  border-bottom: 1px solid ${t.var.color.border};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+};'''
+      }
+    }
+    {
+      id: "23"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+};'''
+      }
+    }
+    {
+      id: "24"
+      L: Attr
+      P: {
+        contextName: weekDay
+        loop: true
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  data: f.buildWeekDays?.() || []
+};'''
+      }
+    }
+    {
+      id: "34"
+      L: Attr
+      P: {
+        css:
+          '''const day = c.weekDay;
+return `._id {
+  padding: 0.5rem;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: ${day?.isToday ? t.var.color.primary : t.var.color.text};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  text: c.weekDay?.label || ""
+};'''
+      }
+    }
+    {
+      id: "25"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: column;
+  max-height: 36rem;
+  overflow: auto;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+};'''
+      }
+    }
+    {
+      id: "26"
+      L: Attr
+      P: {
+        contextName: hourSlot
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  data: f.buildHourSlots?.() || []
+};'''
+      }
+    }
+    {
+      id: "27"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: grid;
+  grid-template-columns: 4rem repeat(7, minmax(0, 1fr));
+  min-height: 3rem;
+  border-bottom: 1px solid ${t.var.color.border};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+};'''
+      }
+    }
+    {
+      id: "36"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  padding: 0.35rem;
+  font-size: 0.7rem;
+  color: ${t.var.color.text_light_400};
+  border-right: 1px solid ${t.var.color.border};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  text: c.hourSlot?.label || ""
+};'''
+      }
+    }
+    {
+      id: "28"
+      L: Attr
+      P: {
+        contextName: weekDayCell
+        loop: true
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  data: f.buildWeekDays?.() || []
+};'''
+      }
+    }
+    {
+      id: "37"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  min-height: 3rem;
+  padding: 0.2rem;
+  border-right: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background};
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+._id.cal-hour-drag-over {
+  background: ${t.var.color.primary_light_800};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  ref: (el) => f.bindHourRef?.(el, c.weekDayCell?.key, c.hourSlot?.hour),
+  onClick: (e) => f.handleHourCellClick?.(e, c.weekDayCell?.key, c.hourSlot?.hour)
+};'''
+      }
+    }
+    {
+      id: "29"
+      L: Attr
+      P: {
+        contextName: hourEvent
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const dayKey = c.weekDayCell?.key;
+const hour = c.hourSlot?.hour;
+return {
+  data: f.getEventsForDayHour?.(dayKey, hour) || []
+};'''
+      }
+    }
+    {
+      id: "33"
+      L: Attr
+      P: {
+        css:
+          '''const ev = c.hourEvent;
+const selected = f.isEventSelected?.(ev?.id);
+const style = f.getEventChipStyle?.(ev) || "";
+return `._id {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  border-radius: 0.25rem;
+  overflow: hidden;
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
+  ${selected ? `outline: 2px solid ${t.var.color.text}; outline-offset: 1px;` : ""}
+  ${style}
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  "data-cal-event": "1"
+};'''
+      }
+    }
+    {
+      id: "33a"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  width: 0.3rem;
+  flex: 0 0 0.3rem;
+  cursor: ew-resize;
+  background: rgba(255,255,255,0.35);
+  border: 0;
+  padding: 0;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "button",
+  type: "button",
+  "data-cal-resize": "start",
+  "attr:aria-label": "Resize start",
+  hide: c.hourEvent?.canResizeStart !== true,
+  ref: (el) => f.bindResizeStartRef?.(el, c.hourEvent?.id),
+  onClick: (e) => e?.stopPropagation?.()
+};'''
+      }
+    }
+    {
+      id: "33b"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: grab;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0.15rem 0.2rem;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "button",
+  type: "button",
+  text: c.hourEvent?.title || "",
+  title: c.hourEvent?.title || "",
+  ref: (el) => f.bindEventRef?.(el, c.hourEvent?.id),
+  onClick: (e) => f.handleEventClick?.(e, c.hourEvent)
+};'''
+      }
+    }
+    {
+      id: "33c"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  width: 0.3rem;
+  flex: 0 0 0.3rem;
+  cursor: ew-resize;
+  background: rgba(255,255,255,0.35);
+  border: 0;
+  padding: 0;
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "button",
+  type: "button",
+  "data-cal-resize": "end",
+  "attr:aria-label": "Resize end",
+  hide: c.hourEvent?.canResizeEnd !== true,
+  ref: (el) => f.bindResizeEndRef?.(el, c.hourEvent?.id),
+  onClick: (e) => e?.stopPropagation?.()
+};'''
+      }
+    }
+    {
+      id: "30"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  padding: ${t.var.spacing.md};
+  color: ${t.var.color.text_light_400};
+  font-size: 0.875rem;
+  text-align: center;
+}`;'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''const cfg = f.getCalendarConfig?.();
+const hasField = !!(cfg?.dateField);
+const loading = g.vertexes[f.calendarStateVertexId]?.P?.loading === true
+  || g.vertexes[f.pageStateVertexId]?.P?.loading === true;
+return {
+  as: "div",
+  hide: loading || hasField,
+  text: "Configure calendarConfig.dateField on the table general schema to enable calendar scheduling."
+};'''
+      }
+    }
+    {
+      id: "38"
+      L: Attr
+      P: {
+        displayOrder: 99
+        componentName: TableModal
+        key: calendar_edit_modal
+        props:
+          '''return f.getEditModalProps?.() || { isOpen: false };'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "13"
+    }
+    {
+      id: e37
+      T: Attr
+      S: "2"
+      E: "38"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "9"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "4"
+      E: "6"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "4"
+      E: "7"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "4"
+      E: "8"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "9"
+      E: "11"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "9"
+      E: "12"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "13"
+      E: "40"
+    }
+    {
+      id: e13b
+      T: Attr
+      S: "13"
+      E: "41"
+    }
+    {
+      id: e40a
+      T: Attr
+      S: "40"
+      E: "40a"
+    }
+    {
+      id: e40b
+      T: Attr
+      S: "40"
+      E: "40b"
+    }
+    {
+      id: e40c
+      T: Attr
+      S: "40b"
+      E: "40c"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "41"
+      E: "14"
+    }
+    {
+      id: e14b
+      T: Attr
+      S: "41"
+      E: "16"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "41"
+      E: "21"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "41"
+      E: "30"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "14"
+      E: "15"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "16"
+      E: "17"
+    }
+    {
+      id: e30
+      T: Attr
+      S: "17"
+      E: "31"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "16"
+      E: "18"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "18"
+      E: "19"
+    }
+    {
+      id: e34
+      T: Attr
+      S: "19"
+      E: "35"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "19"
+      E: "20"
+    }
+    {
+      id: e31
+      T: Attr
+      S: "20"
+      E: "32"
+    }
+    {
+      id: e31a
+      T: Attr
+      S: "32"
+      E: "32a"
+    }
+    {
+      id: e31b
+      T: Attr
+      S: "32"
+      E: "32b"
+    }
+    {
+      id: e31c
+      T: Attr
+      S: "32"
+      E: "32c"
+    }
+    {
+      id: e22
+      T: Attr
+      S: "21"
+      E: "22"
+    }
+    {
+      id: e23
+      T: Attr
+      S: "21"
+      E: "25"
+    }
+    {
+      id: e24
+      T: Attr
+      S: "22"
+      E: "23"
+    }
+    {
+      id: e25
+      T: Attr
+      S: "22"
+      E: "24"
+    }
+    {
+      id: e33
+      T: Attr
+      S: "24"
+      E: "34"
+    }
+    {
+      id: e26
+      T: Attr
+      S: "25"
+      E: "26"
+    }
+    {
+      id: e27
+      T: Attr
+      S: "26"
+      E: "27"
+    }
+    {
+      id: e35
+      T: Attr
+      S: "27"
+      E: "36"
+    }
+    {
+      id: e28
+      T: Attr
+      S: "27"
+      E: "28"
+    }
+    {
+      id: e36
+      T: Attr
+      S: "28"
+      E: "37"
+    }
+    {
+      id: e29
+      T: Attr
+      S: "37"
+      E: "29"
+    }
+    {
+      id: e32
+      T: Attr
+      S: "29"
+      E: "33"
+    }
+    {
+      id: e32a
+      T: Attr
+      S: "33"
+      E: "33a"
+    }
+    {
+      id: e32b
+      T: Attr
+      S: "33"
+      E: "33b"
+    }
+    {
+      id: e32c
+      T: Attr
+      S: "33"
+      E: "33c"
+    }
+  ]
+}

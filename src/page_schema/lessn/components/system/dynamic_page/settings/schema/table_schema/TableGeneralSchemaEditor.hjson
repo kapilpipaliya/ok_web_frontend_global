@@ -37,10 +37,29 @@ const FORM_FIELD_KEYS = [
   "usePolarisUI",
   "rowClickable",
   "showRowNumber",
-  "resizableColumns"
+  "resizableColumns",
+  "calendarEnabled",
+  "calendarDateField",
+  "calendarEndDateField",
+  "calendarTitleField",
+  "calendarColorField",
+  "calendarDefaultView",
+  "calendarDefaultContentView",
+  "calendarAllowDrag"
 ];
 
-const GENERAL_FORM_CONFIG = {
+const [columnOptions, setColumnOptions] = _.createSignal([]);
+
+const columnSelectOptions = (includeEmpty) => {
+  const cols = columnOptions();
+  const opts = includeEmpty ? [{ value: "", label: "(none)" }] : [];
+  for (let i = 0; i < cols.length; i++) {
+    opts.push(cols[i]);
+  }
+  return opts;
+};
+
+const getGeneralFormConfig = () => ({
   gridColumns: 2,
   groups: [
     {
@@ -74,9 +93,76 @@ const GENERAL_FORM_CONFIG = {
         { key: "showRowNumber", label: "Show row number", dataType: "boolean", renderer: "checkbox", colSpan: 1 },
         { key: "resizableColumns", label: "Resizable columns", dataType: "boolean", renderer: "checkbox", colSpan: 1 }
       ]
+    },
+    {
+      key: "calendar",
+      title: "Calendar view",
+      gridColumns: 2,
+      fields: [
+        { key: "calendarEnabled", label: "Enable calendar view", dataType: "boolean", renderer: "checkbox", colSpan: 1 },
+        { key: "calendarAllowDrag", label: "Drag to reschedule", dataType: "boolean", renderer: "checkbox", colSpan: 1 },
+        {
+          key: "calendarDateField",
+          label: "Start date field",
+          dataType: "select",
+          renderer: "select",
+          colSpan: 1,
+          options: columnSelectOptions(false),
+          placeholder: "Select date column"
+        },
+        {
+          key: "calendarEndDateField",
+          label: "End date field (multi-day)",
+          dataType: "select",
+          renderer: "select",
+          colSpan: 1,
+          options: columnSelectOptions(true),
+          placeholder: "Optional"
+        },
+        {
+          key: "calendarTitleField",
+          label: "Event title field",
+          dataType: "select",
+          renderer: "select",
+          colSpan: 1,
+          options: columnSelectOptions(true),
+          placeholder: "Optional"
+        },
+        {
+          key: "calendarColorField",
+          label: "Color field",
+          dataType: "select",
+          renderer: "select",
+          colSpan: 1,
+          options: columnSelectOptions(true),
+          placeholder: "Optional"
+        },
+        {
+          key: "calendarDefaultView",
+          label: "Default calendar layout",
+          dataType: "select",
+          renderer: "select",
+          colSpan: 1,
+          options: [
+            { value: "month", label: "Month" },
+            { value: "week", label: "Week" }
+          ]
+        },
+        {
+          key: "calendarDefaultContentView",
+          label: "Default content view",
+          dataType: "select",
+          renderer: "select",
+          colSpan: 1,
+          options: [
+            { value: "table", label: "Table" },
+            { value: "calendar", label: "Calendar" }
+          ]
+        }
+      ]
     }
   ]
-};
+});
 
 const defaultGeneral = () => ({
   part: "general",
@@ -97,8 +183,67 @@ const defaultGeneral = () => ({
   usePolarisUI: false,
   rowClickable: false,
   showRowNumber: true,
-  resizableColumns: true
+  resizableColumns: true,
+  calendarConfig: {
+    enabled: false,
+    dateField: "",
+    endDateField: "",
+    titleField: "",
+    colorField: "",
+    defaultView: "month",
+    defaultContentView: "table",
+    allowDragReschedule: true
+  }
 });
+
+const CALENDAR_FORM_KEYS = [
+  "calendarEnabled",
+  "calendarDateField",
+  "calendarEndDateField",
+  "calendarTitleField",
+  "calendarColorField",
+  "calendarDefaultView",
+  "calendarDefaultContentView",
+  "calendarAllowDrag"
+];
+
+const flattenCalendarForForm = (data) => {
+  const cal = data?.calendarConfig && typeof data.calendarConfig === "object" ? data.calendarConfig : {};
+  return {
+    calendarEnabled: cal.enabled === true,
+    calendarDateField: cal.dateField != null ? String(cal.dateField) : "",
+    calendarEndDateField: cal.endDateField != null ? String(cal.endDateField) : "",
+    calendarTitleField: cal.titleField != null ? String(cal.titleField) : "",
+    calendarColorField: cal.colorField != null ? String(cal.colorField) : "",
+    calendarDefaultView: cal.defaultView === "week" ? "week" : "month",
+    calendarDefaultContentView: cal.defaultContentView === "calendar" ? "calendar" : "table",
+    calendarAllowDrag: cal.allowDragReschedule !== false
+  };
+};
+
+const packCalendarFromForm = (formValues) => {
+  const dateField =
+    formValues?.calendarDateField != null ? String(formValues.calendarDateField).trim() : "";
+  const endDateField =
+    formValues?.calendarEndDateField != null ? String(formValues.calendarEndDateField).trim() : "";
+  const titleField =
+    formValues?.calendarTitleField != null ? String(formValues.calendarTitleField).trim() : "";
+  const colorField =
+    formValues?.calendarColorField != null ? String(formValues.calendarColorField).trim() : "";
+  const defaultView = formValues?.calendarDefaultView === "week" ? "week" : "month";
+  const defaultContentView =
+    formValues?.calendarDefaultContentView === "calendar" ? "calendar" : "table";
+  return {
+    enabled: formValues?.calendarEnabled === true,
+    dateField,
+    endDateField: endDateField || undefined,
+    titleField: titleField || undefined,
+    colorField: colorField || undefined,
+    defaultView,
+    defaultContentView,
+    allowDragReschedule: formValues?.calendarAllowDrag !== false
+  };
+};
 
 const [loading, setLoading] = _.createSignal(false);
 const [saving, setSaving] = _.createSignal(false);
@@ -125,8 +270,10 @@ const pickFormValues = (data) => {
   const values = {};
   for (let i = 0; i < FORM_FIELD_KEYS.length; i++) {
     const key = FORM_FIELD_KEYS[i];
+    if (CALENDAR_FORM_KEYS.includes(key)) continue;
     values[key] = source[key] !== undefined ? source[key] : defaults[key];
   }
+  Object.assign(values, flattenCalendarForForm({ ...defaults, ...source }));
   return values;
 };
 
@@ -156,6 +303,7 @@ const mergeFormIntoSchema = (formP, baseData) => {
   const formValues = formP && typeof formP === "object" ? formP : {};
   for (let i = 0; i < FORM_FIELD_KEYS.length; i++) {
     const key = FORM_FIELD_KEYS[i];
+    if (CALENDAR_FORM_KEYS.includes(key)) continue;
     if (Object.prototype.hasOwnProperty.call(formValues, key)) {
       base[key] = formValues[key];
     }
@@ -167,6 +315,10 @@ const mergeFormIntoSchema = (formP, baseData) => {
   if (base.modalMaxWidth != null) {
     const trimmed = String(base.modalMaxWidth).trim();
     base.modalMaxWidth = trimmed !== "" ? trimmed : "";
+  }
+  base.calendarConfig = packCalendarFromForm(formValues);
+  for (let i = 0; i < CALENDAR_FORM_KEYS.length; i++) {
+    delete base[CALENDAR_FORM_KEYS[i]];
   }
   base.part = "general";
   return base;
@@ -198,11 +350,54 @@ const applyLoadedSetting = (setting) => {
   }
 };
 
+const loadColumnOptions = async () => {
+  const tableKey = getTableKey();
+  if (!tableKey) {
+    setColumnOptions([]);
+    return;
+  }
+  try {
+    const idsResult = await executeYTOFunction("getTableIds", { tableKey });
+    const columnsKey = idsResult?.result?.data?.schemaKeys?.columns;
+    if (!columnsKey) {
+      setColumnOptions([]);
+      return;
+    }
+    const result = await executeYTOFunction("getTableSchema", { key: columnsKey });
+    if (!result?.result?.success) {
+      setColumnOptions([]);
+      return;
+    }
+    const setting = result.result.data?.setting;
+    if (!setting?.P?.config) {
+      setColumnOptions([]);
+      return;
+    }
+    const data = new Function(setting.P.config)();
+    const cols = Array.isArray(data?.columns) ? data.columns : [];
+    const opts = [];
+    for (let i = 0; i < cols.length; i++) {
+      const col = cols[i];
+      const key = col?.key != null ? String(col.key).trim() : "";
+      if (!key) continue;
+      opts.push({
+        value: key,
+        label: col.label != null && String(col.label).trim() !== "" ? String(col.label) : key
+      });
+    }
+    setColumnOptions(opts);
+  } catch (error) {
+    console.error("Failed to load column options for calendar config", error);
+    setColumnOptions([]);
+  }
+};
+
 const loadSchema = async () => {
   const schemaKey = getSchemaKey();
   if (!schemaKey) return;
   setLoading(true);
   try {
+    await loadColumnOptions();
     const result = await executeYTOFunction("getTableSchema", { key: schemaKey });
     if (!result?.result?.success) {
       _.showErrorToast?.(result?.result?.message || "Failed to load table schema");
@@ -309,7 +504,8 @@ return {
   loadSchema,
   saveSchema,
   setEditorMode: setEditorModeSafe,
-  GENERAL_FORM_CONFIG,
+  GENERAL_FORM_CONFIG: getGeneralFormConfig(),
+  getGeneralFormConfig,
   formVertex,
   formRevision,
   handleFormSave,
@@ -444,7 +640,7 @@ const revision = f.formRevision?.() || 0;
 return {
   key: `table-general-form-${revision}`,
   hide: f.isJsonMode?.() === true || !initialVertex,
-  formConfig: f.GENERAL_FORM_CONFIG,
+  formConfig: typeof f.getGeneralFormConfig === "function" ? f.getGeneralFormConfig() : f.GENERAL_FORM_CONFIG,
   initialVertex,
   mode: "edit",
   vertexLabel: "TableGeneralSchemaFormData",

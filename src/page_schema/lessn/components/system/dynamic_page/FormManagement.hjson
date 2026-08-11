@@ -651,6 +651,8 @@ const initializeForm = () => {
 
     // Initialize with default values from all fields
     const allFields = getAllFields();
+    const prefillP =
+      initialVertex?.P && typeof initialVertex.P === "object" ? initialVertex.P : null;
 
     for (const field of allFields) {
       if (!isFieldVisible(field)) continue;
@@ -658,7 +660,9 @@ const initializeForm = () => {
       if (getFieldRenderer(field) === "embeddedVertexPicker") continue;
       if (getFieldRenderer(field) === "nestedLineItems") continue;
       if (getFieldRenderer(field) === "fieldArray") {
-        if (Array.isArray(field.defaultValue)) {
+        if (prefillP && Array.isArray(prefillP[field.key])) {
+          initialProperties[field.key] = _.klona(prefillP[field.key]);
+        } else if (Array.isArray(field.defaultValue)) {
           initialProperties[field.key] = field.defaultValue;
         } else if (Array.isArray(field.fieldArrayConfig?.defaultItems)) {
           initialProperties[field.key] = field.fieldArrayConfig.defaultItems;
@@ -667,10 +671,23 @@ const initializeForm = () => {
         }
         continue;
       }
-      if (field.defaultValue !== undefined) {
+      if (prefillP && Object.prototype.hasOwnProperty.call(prefillP, field.key) && prefillP[field.key] != null && prefillP[field.key] !== "") {
+        initialProperties[field.key] = _.klona(prefillP[field.key]);
+      } else if (field.defaultValue !== undefined) {
         initialProperties[field.key] = field.defaultValue;
       } else {
         initialProperties[field.key] = "";
+      }
+    }
+
+    // Prefill keys not in form schema (e.g. calendar dateField) still land on the vertex
+    if (prefillP) {
+      const prefillKeys = Object.keys(prefillP);
+      for (let pi = 0; pi < prefillKeys.length; pi++) {
+        const pk = prefillKeys[pi];
+        if (Object.prototype.hasOwnProperty.call(initialProperties, pk)) continue;
+        if (prefillP[pk] == null) continue;
+        initialProperties[pk] = _.klona(prefillP[pk]);
       }
     }
 
