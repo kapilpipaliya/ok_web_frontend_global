@@ -10,6 +10,7 @@ import { As } from "~/components/As";
 import { IdAttr } from "~/lib/graph/type/idAttr";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
+import { buildPageDesignerUrl } from "~/features/page_designer/utils/pageDesignerUrl";
 
 export function SelectPageField(
   props: Readonly<{
@@ -42,7 +43,11 @@ export function SelectPageField(
           iconCss={headerIconButtonCss}
           onClick={(e) => {
             e.stopPropagation();
-            window.open(`/admin/Page/${option.id}`, "_blank");
+            const key = (option.P.key as string) || option.id;
+            window.open(
+              buildPageDesignerUrl("Page", [{ entity: "Page", key }]),
+              "_blank",
+            );
           }}
           size={22}
         />

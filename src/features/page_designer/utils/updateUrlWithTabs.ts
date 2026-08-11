@@ -4,6 +4,9 @@ import type {
   OpenFormInfo,
   PageLayoutObject,
 } from "~/features/page_designer/context/LayoutContext";
+import {
+  isPageDesignerRouteId,
+} from "~/features/page_designer/utils/pageDesignerUrl";
 import type { Id } from "~/lib/graph/type/id";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
@@ -13,23 +16,15 @@ function isInternalId(id: string): boolean {
 
 function getKeyFromCurrentUrl(entity: string): string | undefined {
   const currentUrl = new URL(window.location.href);
-  const pathParts = currentUrl.pathname.split("/").filter(Boolean);
-  const adminIndex = pathParts.indexOf("admin");
-
-  if (adminIndex !== -1 && pathParts[adminIndex + 1] === entity) {
-    const pathKey = pathParts[adminIndex + 2];
-    if (pathKey && !isInternalId(pathKey)) {
-      return pathKey;
-    }
+  const tabs = currentUrl.searchParams.get("tabs");
+  if (!tabs) {
+    return undefined;
   }
 
-  const tabs = currentUrl.searchParams.get("tabs");
-  if (tabs) {
-    for (const tab of tabs.split(",")) {
-      const [tabEntity, tabKey] = tab.split(":");
-      if (tabEntity === entity && tabKey && !isInternalId(tabKey)) {
-        return tabKey;
-      }
+  for (const tab of tabs.split(",")) {
+    const [tabEntity, tabKey] = tab.split(":");
+    if (tabEntity === entity && tabKey && !isInternalId(tabKey)) {
+      return tabKey;
     }
   }
 
@@ -54,7 +49,7 @@ function resolveTabKey(
     }
   }
 
-  if (!isInternalId(form.dataId)) {
+  if (!isInternalId(form.dataId) && !isPageDesignerRouteId(form.dataId)) {
     return form.dataId;
   }
 
@@ -62,9 +57,8 @@ function resolveTabKey(
 }
 
 /**
- * Updates the URL query parameters with all opened form tabs (entity:key format)
- * @param layoutStoreId - The ID of the layout store vertex
- * @param graph - The graph interface containing all vertices
+ * Updates the URL query parameters with all opened form tabs (entity:key format).
+ * The path stays `/admin/{entity}` so no single tab key is encoded in the path.
  */
 export function updateUrlWithOpenedTabs(
   layoutStoreId: Id,
@@ -113,15 +107,17 @@ export function updateUrlWithOpenedTabs(
     return;
   }
 
-  const firstTab = allTabs[0];
-  const [firstEntity, firstKey] = firstTab.split(":");
-  if (!(firstEntity && firstKey)) {
+  const focusedForm = openForms.find(
+    (form) => form.formId === layoutStore.focusedFormId,
+  );
+  const pathEntity = focusedForm?.label || allTabs[0]?.split(":")[0];
+  if (!pathEntity) {
     return;
   }
 
-  const newPath = `/admin/${firstEntity}/${firstKey}`;
   const newUrl = new URL(window.location.href);
-  newUrl.pathname = newPath;
+  // Keep only the entity in the path; tab keys live in the query string.
+  newUrl.pathname = `/admin/${pathEntity}`;
   newUrl.searchParams.set("tabs", allTabs.join(","));
 
   const nextUrl = newUrl.toString();

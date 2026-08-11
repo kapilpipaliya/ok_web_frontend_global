@@ -17,6 +17,10 @@ const getUncategorizedVertexId = () => {
   const label = getTableVertexLabel();
   return label ? '_' + label + '_uncategorized' : null;
 };
+const getAllVertexId = () => {
+  const label = getTableVertexLabel();
+  return label ? '_' + label + '_all' : null;
+};
 const getRelationshipType = () => c.props?.relationshipType;
 
 // State management - using graph for data, signals only for UI state
@@ -230,18 +234,33 @@ const isUncategorized = (item) => {
   return !!(uid && (item.id === uid || item.P?.key === uid));
 };
 
-// Common function to sort items (Uncategorized first, then alphabetically)
+// Helper function to check if item is the synthetic All row for this table
+const isAll = (item) => {
+  if (!item) return false;
+  const aid = getAllVertexId();
+  return !!(aid && (item.id === aid || item.P?.key === aid));
+};
+
+const isVirtualSidebarCategory = (item) => isAll(item) || isUncategorized(item);
+
+// Common function to sort items (Uncategorized first, then All, then alphabetically)
 const sortItems = (items) => {
   if (!items || !Array.isArray(items)) return items;
   return [...items].sort((a, b) => {
     const isAUncategorized = isUncategorized(a);
     const isBUncategorized = isUncategorized(b);
 
-    // Uncategorized items come first
+    // Uncategorized first
     if (isAUncategorized && !isBUncategorized) return -1;
     if (!isAUncategorized && isBUncategorized) return 1;
 
-    // Both are uncategorized or both are not - sort alphabetically
+    const isAAll = isAll(a);
+    const isBAll = isAll(b);
+    // All second (after Uncategorized)
+    if (isAAll && !isBAll) return -1;
+    if (!isAAll && isBAll) return 1;
+
+    // Both are virtual or both are not - sort alphabetically
     const nameA = getItemSortName(a);
     const nameB = getItemSortName(b);
     return nameA.localeCompare(nameB);
@@ -282,7 +301,7 @@ const getLoadingState = (parentId) => {
 };
 
 // Get root items computed from graph (GraphData: vertexes VertexMap, optional vertexLabelIdMap).
-// Roots = vertices with parentVertexLabel and no incoming toParentEdgeType + uncategorized.
+// Roots = vertices with parentVertexLabel and no incoming toParentEdgeType + virtual All/Uncategorized.
 const getRoot = () => {
   const toParentEdgeType = getToParentEdgeType();
   const parentVertexLabel = getParentVertexLabel();
@@ -291,11 +310,12 @@ const getRoot = () => {
   if (!vertexes || !toParentEdgeType) return sortItems([]);
   const labelIds = graph.vertexLabelIdMap?.[parentVertexLabel];
   const candidateIds = Array.isArray(labelIds) ? labelIds : Object.keys(vertexes).filter(id => vertexes[id]?.L?.includes(parentVertexLabel));
+  const syntheticAll = getAllVertexId();
   const syntheticUncat = getUncategorizedVertexId();
   const rootIds = candidateIds.filter(
     id =>
       vertexes[id] != null &&
-      (id === syntheticUncat || !(vertexes[id].OUT?.[toParentEdgeType]?.length))
+      (id === syntheticAll || id === syntheticUncat || !(vertexes[id].OUT?.[toParentEdgeType]?.length))
   );
   const rootItems = rootIds.map(id => vertexes[id]).filter(v => v != null);
   return sortItems(rootItems);
@@ -402,6 +422,15 @@ const isUncategorizedSidebarItem = (item) => {
   return !!(uid && (item.id === uid || item.P?.key === uid));
 };
 
+const isAllSidebarItem = (item) => {
+  if (!item) return false;
+  const aid = getAllVertexId();
+  return !!(aid && (item.id === aid || item.P?.key === aid));
+};
+
+const isVirtualSidebarCategoryItem = (item) =>
+  isAllSidebarItem(item) || isUncategorizedSidebarItem(item);
+
 const getSidebarItemExportName = (item) => {
   if (!item) return "";
   return String(item.P?.name || item.P?.title || item.P?.key || "").trim();
@@ -410,7 +439,7 @@ const getSidebarItemExportName = (item) => {
 const buildSidebarTreeExportText = () => {
   const lines = [];
   const visit = (item, depth) => {
-    if (!item || isUncategorizedSidebarItem(item)) return;
+    if (!item || isVirtualSidebarCategoryItem(item)) return;
     const name = getSidebarItemExportName(item);
     if (!name) return;
     lines.push(`${"  ".repeat(Math.max(0, depth))}${name}`);
@@ -975,6 +1004,8 @@ return {
   getRootKeys,
   getTableVertexLabel,
   getUncategorizedVertexId,
+  getAllVertexId,
+  isVirtualSidebarCategory,
   getRelationshipType,
   getSidebarLabel,
   isAddRootModalOpen,

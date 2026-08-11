@@ -61,10 +61,19 @@ if (tableVertexLabel) {
 }
 
 const nodes = _.context.nodes;
+const syntheticAllId = tableVertexLabel ? '_' + tableVertexLabel + '_all' : null;
 const syntheticUncategorizedId = tableVertexLabel ? '_' + tableVertexLabel + '_uncategorized' : null;
 
+let allCount = 0;
 let uncategorizedCount = 0;
 if (tableVertexLabel) {
+  const allResult = await _.session.run(
+    `MATCH (content:${tableVertexLabel})
+     RETURN count(DISTINCT content) as contentCount`
+  );
+  allCount = allResult.records[0]?.get('contentCount')?.toNumber?.()
+    ?? allResult.records[0]?.get('contentCount') ?? 0;
+
   const uncatResult = await _.session.run(
     `MATCH (content:${tableVertexLabel})
      WHERE NOT EXISTS { MATCH (content)-[:${toParentEdgeType}]->(:${parentVertexLabel}) }
@@ -72,6 +81,23 @@ if (tableVertexLabel) {
   );
   uncategorizedCount = uncatResult.records[0]?.get('contentCount')?.toNumber?.()
     ?? uncatResult.records[0]?.get('contentCount') ?? 0;
+}
+
+let allVertex = null;
+if (tableVertexLabel && syntheticAllId) {
+  allVertex = {
+    id: syntheticAllId,
+    L: [parentVertexLabel],
+    P: {
+      key: syntheticAllId,
+      name: 'All',
+      contentCount: allCount,
+      tableVertexLabel
+    },
+    IN: {},
+    OUT: {}
+  };
+  nodes[syntheticAllId] = allVertex;
 }
 
 let uncategorizedVertex = null;
@@ -93,6 +119,7 @@ if (tableVertexLabel && syntheticUncategorizedId) {
 
 const rootVertices = Object.keys(nodes)
   .filter(id => {
+    if (syntheticAllId && id === syntheticAllId) return false;
     if (syntheticUncategorizedId && id === syntheticUncategorizedId) return false;
     const node = nodes[id];
     if (!node?.L?.includes(parentVertexLabel)) return false;
@@ -109,7 +136,9 @@ const rootVertices = Object.keys(nodes)
   });
 
 if (tableVertexLabel && relationshipType) {
-  const categoryIds = Object.keys(nodes).filter(id => id !== syntheticUncategorizedId);
+  const categoryIds = Object.keys(nodes).filter(
+    id => id !== syntheticAllId && id !== syntheticUncategorizedId
+  );
   const countByCategoryId = {};
   if (categoryIds.length > 0) {
     const batchResult = await _.session.run(
@@ -130,7 +159,7 @@ if (tableVertexLabel && relationshipType) {
   const rootKey = rootKeys.key || null;
   for (const id of Object.keys(nodes)) {
     const node = nodes[id];
-    if (!node?.P || id === syntheticUncategorizedId) continue;
+    if (!node?.P || id === syntheticAllId || id === syntheticUncategorizedId) continue;
     node.P.contentCount = countByCategoryId[id] ?? 0;
     if (rootKey && node.P.key === rootKey) {
       node.P.contentCount = countByCategoryId[id] ?? 0;
@@ -138,9 +167,10 @@ if (tableVertexLabel && relationshipType) {
   }
 }
 
+const virtualRoots = [uncategorizedVertex, allVertex].filter(Boolean);
 const finalVertices =
-  uncategorizedVertex && uncategorizedCount > 0
-    ? [uncategorizedVertex, ...rootVertices]
+  virtualRoots.length > 0
+    ? [...virtualRoots, ...rootVertices]
     : rootVertices;
 return {
   success: true,

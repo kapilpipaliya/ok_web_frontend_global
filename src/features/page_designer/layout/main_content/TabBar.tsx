@@ -31,7 +31,6 @@ import { useGraph } from "~/lib/graph/context/UseGraph";
 function TabBarItem(props: {
   openedFormId: Id;
   mainPanel: Id;
-  index: number;
   getTabCss: (openedFormId: Id) => string;
   handleTabClick: (formId: string) => void;
   handleClose: (openedFormId: Id) => void;
@@ -127,9 +126,8 @@ function TabBarItem(props: {
         size={16}
         title="Add View"
       />
-      <Show when={props.index !== 0}>
-        <IconButton
-          css={`return \`._id {
+      <IconButton
+        css={`return \`._id {
   background-color: transparent;
   color: \${t.var.color.error};
   cursor: pointer;
@@ -138,15 +136,14 @@ function TabBarItem(props: {
     color: \${t.var.color.error_light_800};
   }
 }\`;`}
-          icon="ph:x"
-          onClick={(e) => {
-            e.stopPropagation();
-            props.handleClose(props.openedFormId);
-          }}
-          size={16}
-          title="Close Tab"
-        />
-      </Show>
+        icon="ph:x"
+        onClick={(e) => {
+          e.stopPropagation();
+          props.handleClose(props.openedFormId);
+        }}
+        size={16}
+        title="Close Tab"
+      />
     </As>
   );
 }
@@ -379,11 +376,10 @@ export function TabBar(props: { mainPanel: Id }) {
             (id) => graph.vertexes[id].P.mainPanel === props.mainPanel,
           )}
         >
-          {(openedFormId, index) => (
+          {(openedFormId) => (
             <TabBarItem
               openedFormId={openedFormId}
               mainPanel={props.mainPanel}
-              index={index()}
               getTabCss={getTabCss}
               handleTabClick={handleTabClick}
               handleClose={handleClose}

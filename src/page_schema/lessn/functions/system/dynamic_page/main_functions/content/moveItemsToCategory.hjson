@@ -51,18 +51,30 @@ const userUuid = user.P.uuid;
 const userCategoryRelType = `User${categoryLabel}`;
 const contentRelType = `User${contentLabel}`;
 const uncategorizedVertexId = contentLabel ? '_' + contentLabel + '_uncategorized' : null;
+const allVertexId = contentLabel ? '_' + contentLabel + '_all' : null;
 const isUncategorizedCategoryId = (id) =>
   id == null ||
   id === '' ||
   (uncategorizedVertexId != null && id === uncategorizedVertexId);
+const isAllCategoryId = (id) =>
+  allVertexId != null && id === allVertexId;
 const isConcreteCategoryId = (id) =>
   id != null &&
   id !== '' &&
-  (uncategorizedVertexId == null || id !== uncategorizedVertexId);
+  (uncategorizedVertexId == null || id !== uncategorizedVertexId) &&
+  (allVertexId == null || id !== allVertexId);
 
 // Initialize deleted edges tracking in context if not exists
 if (!_.context.deletedEdges) {
   _.context.deletedEdges = [];
+}
+
+// All is a view filter only — not a move destination
+if (isAllCategoryId(categoryId)) {
+  return {
+    success: false,
+    message: "Cannot move items to All"
+  };
 }
 
 // If categoryId is null, undefined, or synthetic uncategorized id, remove relationships
@@ -249,7 +261,52 @@ try {
     // Create relationships for all content items to the category
     // Before creating, remove any existing relationships for these items
     // Process each content item individually to handle errors gracefully
-    for (const contentId of contentIds) {
+
+    // Skip items already in the target category (important when moving from All)
+    let idsToProcess = contentIds;
+    let skippedAlreadyInTarget = 0;
+    if (isConcreteCategoryId(categoryId) && Array.isArray(contentIds) && contentIds.length > 0) {
+      let alreadyQuery;
+      let alreadyParams;
+      if (!enableUserScopingForContent) {
+        alreadyQuery = `
+          MATCH (content:${contentLabel})-[:${relationshipType}]->(cat:${categoryLabel})
+          WHERE elementId(content) IN $contentIds AND elementId(cat) = $categoryId
+          RETURN collect(elementId(content)) AS alreadyIds
+        `;
+        alreadyParams = { contentIds, categoryId };
+      } else {
+        alreadyQuery = `
+          MATCH (u:User {uuid: $userUuid})-[:${contentRelType}]->(content:${contentLabel})-[:${relationshipType}]->(cat:${categoryLabel})
+          WHERE elementId(content) IN $contentIds AND elementId(cat) = $categoryId
+          RETURN collect(elementId(content)) AS alreadyIds
+        `;
+        alreadyParams = { userUuid, contentIds, categoryId };
+      }
+      try {
+        const alreadyResult = await _.session.run(alreadyQuery, alreadyParams);
+        const alreadyIds = alreadyResult.records[0]?.get('alreadyIds') || [];
+        const alreadySet = new Set(
+          (Array.isArray(alreadyIds) ? alreadyIds : []).map((id) => String(id))
+        );
+        if (alreadySet.size > 0) {
+          idsToProcess = contentIds.filter((id) => !alreadySet.has(String(id)));
+          skippedAlreadyInTarget = contentIds.length - idsToProcess.length;
+        }
+      } catch (alreadyError) {
+        console.warn("moveItemsToCategory already-in-target check failed:", alreadyError);
+      }
+      if (idsToProcess.length === 0) {
+        const label = contentLabelDisplay || 'item';
+        const plural = label.endsWith('y') ? label.slice(0, -1) + 'ies' : label + (label.endsWith('s') ? '' : 's');
+        return {
+          success: false,
+          message: `${plural} are already in this category`
+        };
+      }
+    }
+
+    for (const contentId of idsToProcess) {
       try {
         // First, get old edge IDs before deleting
         let getOldEdgeIdsQuery;

@@ -1286,10 +1286,25 @@ const updateCategoryCountFromFetchedData = (fetchedData, categoryItem) => {
 
   const tableLabel = f.getTableVertexLabel?.();
   const uncategorizedVertexId = tableLabel ? '_' + tableLabel + '_uncategorized' : null;
+  const allVertexId = tableLabel ? '_' + tableLabel + '_all' : null;
+  const isSyntheticAll =
+    allVertexId &&
+    (categoryItem.id === allVertexId || categoryItem.P?.key === allVertexId);
   const isSyntheticUncat =
     uncategorizedVertexId &&
     (categoryItem.id === uncategorizedVertexId || categoryItem.P?.key === uncategorizedVertexId);
   const isUncategorized = categoryItem.P?.key === rootKey || isSyntheticUncat;
+  if (isSyntheticAll) {
+    const allVertex = g?.vertexes?.[allVertexId];
+    const fetchedLength = fetchedData?.length ?? 0;
+    const currentCount = allVertex?.P?.contentCount ?? 0;
+    if (allVertex && currentCount !== fetchedLength) {
+      _.mergeVertexProperties(0, allVertexId, g, sg, {
+        contentCount: fetchedLength
+      });
+    }
+    return;
+  }
   if (isUncategorized && !uncategorizedVertexId) return;
   const categoryId = isUncategorized ? uncategorizedVertexId : categoryItem.id;
 

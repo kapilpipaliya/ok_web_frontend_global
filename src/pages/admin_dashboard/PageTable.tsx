@@ -7,6 +7,7 @@ import {
 import { As } from "~/components/As";
 import { findVertexIdsByLabel } from "~/lib/graph/get/sync/entity/findVertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
+import { buildPageDesignerUrl } from "~/features/page_designer/utils/pageDesignerUrl";
 
 export function PageTable() {
   const [graph] = useGraph();
@@ -15,6 +16,7 @@ export function PageTable() {
     const pageIds = findVertexIdsByLabel(graph, "Page");
     return pageIds.map((id) => ({
       id,
+      key: (graph.vertexes[id]?.P?.key as string) || id,
       name: graph.vertexes[id]?.P?.name || "Untitled",
       path: graph.vertexes[id]?.P?.path || "",
       description: graph.vertexes[id]?.P?.description || "",
@@ -64,7 +66,9 @@ export function PageTable() {
                 <TableBodyCell index={index()}>
                   <As
                     as="a"
-                    href={`/admin/Page/${page.id}`}
+                    href={buildPageDesignerUrl("Page", [
+                      { entity: "Page", key: page.key },
+                    ])}
                     css={`return \`._id {
                       color: \${t.var.color.primary};
                       text-decoration: none;

@@ -33,6 +33,7 @@ import { fetchDataFromDB } from "~/cypher/get/fetchDataFromDB";
 import { isValidResponse } from "~/lib/api/general/isValidResponse";
 import { Title } from "@solidjs/meta";
 import { updateUrlWithOpenedTabs } from "~/features/page_designer/utils/updateUrlWithTabs";
+import { isPageDesignerRouteId } from "~/features/page_designer/utils/pageDesignerUrl";
 import { enablePageDesignerTouchDragPolyfill } from "~/features/page_designer/functions/drag_drop/pragmatic/enablePageDesignerTouchDragPolyfill";
 import { ResizeOverlayProvider } from "~/lib/resizable/ResizeOverlayContext";
 
@@ -57,7 +58,7 @@ export function PageDesignerWrapper(): JSX.Element {
 
   const formId = uuidv7();
 
-  // Get tabs from query parameter (format: entity:key,entity:key) or use params
+  // Tabs come only from ?tabs=entity:key,entity:key
   const tabsFromQuery = searchParams.tabs;
   interface TabInfo {
     entity: string;
@@ -66,7 +67,6 @@ export function PageDesignerWrapper(): JSX.Element {
   let tabsToLoad: TabInfo[] = [];
 
   if (tabsFromQuery) {
-    // Parse query parameter tabs
     const tabsArray = Array.isArray(tabsFromQuery)
       ? tabsFromQuery
       : tabsFromQuery.split(",");
@@ -74,30 +74,16 @@ export function PageDesignerWrapper(): JSX.Element {
     for (const tab of tabsArray) {
       if (!tab) continue;
       const [entity, key] = tab.split(":");
-      if (entity && key) {
+      if (entity && key && !isPageDesignerRouteId(key)) {
         tabsToLoad.push({ entity, key });
       }
-    }
-  } else if (params.id && params.entity) {
-    // Fall back to path parameter
-    tabsToLoad = [{ entity: params.entity, key: params.id }];
-  }
-
-  // Ensure params is included if it exists and not already in the list
-  if (params.id && params.entity) {
-    const currentTab = `${params.entity}:${params.id}`;
-    const exists = tabsToLoad.some(
-      (t) => `${t.entity}:${t.key}` === currentTab,
-    );
-    if (!exists) {
-      tabsToLoad.unshift({ entity: params.entity, key: params.id });
     }
   }
 
   // Initialize with first tab, will be updated if we need to fetch from DB
   const firstTab = tabsToLoad[0] || {
     entity: params.entity || "",
-    key: params.id || "",
+    key: params.id === "new" ? "new" : "",
   };
   const initialMainPanel = initialStore.mainPanelRows[0][0];
   const newOpenVertex = newVertex(uuidv7(), ["OpenForm"], {

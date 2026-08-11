@@ -23,11 +23,22 @@ const getUncategorizedVertexId = () => {
   const label = c.props?.tableVertexLabel;
   return label ? '_' + label + '_uncategorized' : null;
 };
+const getAllVertexId = () => {
+  const label = c.props?.tableVertexLabel;
+  return label ? '_' + label + '_all' : null;
+};
 const isUncategorizedTreeNode = (node) => {
   if (!node) return false;
   const uid = getUncategorizedVertexId();
   return !!(uid && (node.id === uid || node.P?.key === uid));
 };
+const isAllTreeNode = (node) => {
+  if (!node) return false;
+  const aid = getAllVertexId();
+  return !!(aid && (node.id === aid || node.P?.key === aid));
+};
+const isVirtualSidebarCategory = (node) =>
+  isUncategorizedTreeNode(node) || isAllTreeNode(node);
 
 // Helper function to get sortable name from item
 const getItemSortName = (item) => {
@@ -276,7 +287,7 @@ const canDropImageOnItem = (item) => {
   if (!item) return false;
   const drop = getImageDropConfig();
   if (!drop) return false;
-  if (isUncategorizedTreeNode(item) && drop.allowUncategorized !== true) {
+  if (isVirtualSidebarCategory(item) && drop.allowUncategorized !== true) {
     return false;
   }
   return true;
@@ -349,6 +360,8 @@ const isQueued = () => getSyncStatus() === 'queued';
 const hasChildren = () => {
   const item = getItem();
   if (!item) return false;
+  // Virtual All / Uncategorized rows never have category children
+  if (isVirtualSidebarCategory(item)) return false;
 
   const childrenList = getChildren();
   if (childrenList.length > 0) {
@@ -486,8 +499,12 @@ const validateDropTarget = (categoryId, targetId) => {
   }
 
   const uidVal = getUncategorizedVertexId();
+  const allVal = getAllVertexId();
   if (uidVal && categoryId === uidVal) {
     return { valid: false, reason: "Root items cannot be moved" };
+  }
+  if (allVal && (categoryId === allVal || targetId === allVal)) {
+    return { valid: false, reason: "Cannot use All as a category parent" };
   }
 
   // Check 3: Cannot drop on a descendant
@@ -505,7 +522,7 @@ const initDraggable = (element) => {
   const item = getItem();
   if (!item) return;
 
-  if (isUncategorizedTreeNode(item)) {
+  if (isVirtualSidebarCategory(item)) {
     return;
   }
 
@@ -626,6 +643,10 @@ const initDropTarget = (element) => {
         if (!data.itemIds || !Array.isArray(data.itemIds) || data.itemIds.length === 0) {
           return false;
         }
+        // All is a view filter only — not a move destination
+        if (isAllTreeNode(item)) {
+          return false;
+        }
         // Allow configured source rows onto category to set sidebar linked media
         if (isSidebarImageFileDrop(data)) {
           return canDropImageOnItem(item);
@@ -643,9 +664,9 @@ const initDropTarget = (element) => {
         return true;
       }
 
-      // Allow sidebar items
+      // Allow sidebar items (not onto All)
       if (data && data.type === 'sidebar-item') {
-        return true;
+        return !isAllTreeNode(item);
       }
 
       return false;
@@ -671,10 +692,14 @@ const initDropTarget = (element) => {
       } else if (isSidebarImageFileDrop(data)) {
         setIsValidDrop(canDropImageOnItem(item));
       } else if (data && data.type === 'table-items') {
-        // Table items: disallow dropping into the currently active category (compare by vertex id only)
-        const currentSelected = getSelectedItem();
-        const isSameActiveCategory = !!currentSelected && !!item && currentSelected.id === item.id;
-        setIsValidDrop(!isSameActiveCategory);
+        // Table items: disallow dropping into All or the currently active category
+        if (isAllTreeNode(item)) {
+          setIsValidDrop(false);
+        } else {
+          const currentSelected = getSelectedItem();
+          const isSameActiveCategory = !!currentSelected && !!item && currentSelected.id === item.id;
+          setIsValidDrop(!isSameActiveCategory);
+        }
       } else {
         // Table items - allow drop
         setIsValidDrop(true);
@@ -916,6 +941,11 @@ const handleTableItemsDrop = async (itemIds) => {
     const item = getItem();
     if (!item) return;
 
+    if (isAllTreeNode(item)) {
+      _.showWarningToast?.("Cannot move items to All");
+      return;
+    }
+
     const onMoveItemsToCategory = c.props?.onMoveItemsToCategory;
     if (!onMoveItemsToCategory) {
       _.showErrorToast?.("Move function not available");
@@ -956,7 +986,9 @@ const handleTableItemsDrop = async (itemIds) => {
       // Determine source category (where items were moved FROM); use vertex id only
       const sourceCategory = currentSelected;
       const uid = getUncategorizedVertexId();
+      const aid = getAllVertexId();
       const isSourceUncategorized = sourceCategory && uid && sourceCategory.id === uid;
+      const isSourceAll = sourceCategory && aid && sourceCategory.id === aid;
       const isTargetUncategorized = !!(uid && item.id === uid);
 
       // Update content counts using mergeVertexProperties
@@ -970,8 +1002,14 @@ const handleTableItemsDrop = async (itemIds) => {
           });
         }
 
-        // Update source category count (if not uncategorized)
-        if (updatedCounts.sourceCategoryId && !isSourceUncategorized && currentSelected && currentSelected.id === updatedCounts.sourceCategoryId) {
+        // Update source category count (if not uncategorized/All)
+        if (
+          updatedCounts.sourceCategoryId &&
+          !isSourceUncategorized &&
+          !isSourceAll &&
+          currentSelected &&
+          currentSelected.id === updatedCounts.sourceCategoryId
+        ) {
           _.mergeVertexProperties(0, currentSelected.id, g, sg, {
             contentCount: updatedCounts.sourceCount
           });
@@ -1021,8 +1059,8 @@ const handleTableItemsDrop = async (itemIds) => {
         }
       }
 
-      // Always refresh root items if moving to/from uncategorized (as fallback); preserve expanded state so tree does not collapse
-      if (isSourceUncategorized || isTargetUncategorized) {
+      // Always refresh root items if moving to/from uncategorized or from All; preserve expanded state so tree does not collapse
+      if (isSourceUncategorized || isTargetUncategorized || isSourceAll) {
         const fetchRootFn = getFetchRoot();
         if (fetchRootFn) {
           await fetchRootFn({ preserveExpanded: true });
@@ -1071,7 +1109,7 @@ const handleDelete = async (e) => {
   const toParentEdgeType = getToParentEdgeType();
   const rootKeys = c.props?.sidebarConfig?.rootKeys || {};
 
-  if (isUncategorizedTreeNode(item)) {
+  if (isVirtualSidebarCategory(item)) {
     _.showErrorToast?.("Root item cannot be deleted");
     return;
   }
@@ -1231,7 +1269,10 @@ return {
   handleTableItemsDrop,
   getUsePolarisUI: () => f.getUsePolarisUI?.() === true,
   isUncategorizedTreeNode,
-  getUncategorizedVertexId
+  isAllTreeNode,
+  isVirtualSidebarCategory,
+  getUncategorizedVertexId,
+  getAllVertexId
 };
 '''
         key: SidebarTreeItem
@@ -1258,7 +1299,7 @@ return {
 /*_.createEffect(() => {
   const item = f.getItem();
   if (!item) return;
-  if (f.isUncategorizedTreeNode?.(item)) return;
+  if (f.isVirtualSidebarCategory?.(item)) return;
 
   // Access expandedKeys prop to make effect reactive to prop changes
   const expandedKeys = c.props?.expandedKeys || [];
@@ -1294,7 +1335,7 @@ const item = f.getItem();
 const rootKeys = c.props?.sidebarConfig?.rootKeys || {};
 const rootKey = rootKeys.key;
 const isRoot =
-  item?.P?.key === rootKey || (f.isUncategorizedTreeNode?.(item) ?? false);
+  item?.P?.key === rootKey || (f.isVirtualSidebarCategory?.(item) ?? false);
 const isQueued = f.isQueued?.() ?? false;
 const isNested = f.hasParent?.() ?? false;
 
@@ -1356,7 +1397,7 @@ return `._id {
         key: tree_item_content
         props:
           '''const item = f.getItem();
-const isRoot = f.isUncategorizedTreeNode?.(item) ?? false;
+const isRoot = f.isVirtualSidebarCategory?.(item) ?? false;
 const isDragging = f.isDragging?.() || false;
 const isDragOver = f.isDragOver?.() || false;
 const isValidDrop = f.isValidDrop?.() ?? true;
@@ -1568,7 +1609,7 @@ return {
         key: tree_item_actions
         props:
           '''const item = f.getItem();
-const isUncatRow = f.isUncategorizedTreeNode?.(item) ?? false;
+const isUncatRow = f.isVirtualSidebarCategory?.(item) ?? false;
 const isQueued = f.isQueued?.() ?? false;
 
 return {
@@ -1689,7 +1730,7 @@ return {
         key: tree_item_delete_button
         props:
           '''const item = f.getItem();
-const isRoot = f.isUncategorizedTreeNode?.(item) ?? false;
+const isRoot = f.isVirtualSidebarCategory?.(item) ?? false;
 
 return {
   as: "icon",
@@ -1709,7 +1750,7 @@ return {
         componentName: Html
         props:
           '''const item = f.getItem();
-const isRoot = f.isUncategorizedTreeNode?.(item) ?? false;
+const isRoot = f.isVirtualSidebarCategory?.(item) ?? false;
 
 return {
   as: "s-button",

@@ -202,13 +202,20 @@ if (rootKeys) {
   // Use processResult to populate graph structure
   const vertices = _.processResult(result.records, _.context, 'v');
 
-  // Create 'uncategorized' item as first item (only if tableVertexLabel and relationshipType are provided)
+  // Create virtual 'All' + 'Uncategorized' items (only if tableVertexLabel and relationshipType are provided)
+  let allVertex = null;
   let uncategorizedVertex = null;
   if (tableVertexLabel && relationshipType) {
-    // Count items without any category relationship
+    let allCountQuery;
+    let allCountParams;
     let uncategorizedCountQuery;
     let uncategorizedCountParams;
     if (!enableUserScoping) {
+      allCountQuery = `
+        MATCH (content:${tableVertexLabel})
+        RETURN count(DISTINCT content) as contentCount
+      `;
+      allCountParams = {};
       uncategorizedCountQuery = `
         MATCH (content:${tableVertexLabel})
         WHERE NOT EXISTS {
@@ -218,6 +225,11 @@ if (rootKeys) {
       `;
       uncategorizedCountParams = {};
     } else {
+      allCountQuery = `
+        MATCH (u:User {uuid: $userUuid})-[:${relationshipType}]->(content:${tableVertexLabel})
+        RETURN count(DISTINCT content) as contentCount
+      `;
+      allCountParams = { userUuid };
       uncategorizedCountQuery = `
         MATCH (u:User {uuid: $userUuid})-[:${relationshipType}]->(content:${tableVertexLabel})
         WHERE NOT EXISTS {
@@ -227,6 +239,22 @@ if (rootKeys) {
       `;
       uncategorizedCountParams = { userUuid };
     }
+
+    const allCountResult = await _.session.run(allCountQuery, allCountParams);
+    const allCount = allCountResult.records[0]?.get('contentCount') || 0;
+    const allId = '_' + tableVertexLabel + '_all';
+    allVertex = {
+      id: allId,
+      L: [parentVertexLabel],
+      P: {
+        key: allId,
+        name: 'All',
+        contentCount: allCount,
+        tableVertexLabel: tableVertexLabel
+      },
+      IN: {},
+      OUT: {}
+    };
 
     const uncategorizedCountResult = await _.session.run(uncategorizedCountQuery, uncategorizedCountParams);
     const uncategorizedCount = uncategorizedCountResult.records[0]?.get('contentCount') || 0;
@@ -250,6 +278,7 @@ if (rootKeys) {
     if (!_.context.nodes) {
       _.context.nodes = {};
     }
+    _.context.nodes[allId] = allVertex;
     _.context.nodes[uncategorizedId] = uncategorizedVertex;
   }
 
@@ -317,9 +346,10 @@ if (rootKeys) {
     }
   }
 
-  // Prepend 'uncategorized' item as first item if it exists
-  const finalVertices = uncategorizedVertex 
-    ? [uncategorizedVertex, ...vertices]
+  // Prepend virtual 'Uncategorized' then 'All' if they exist
+  const virtualRoots = [uncategorizedVertex, allVertex].filter(Boolean);
+  const finalVertices = virtualRoots.length > 0
+    ? [...virtualRoots, ...vertices]
     : vertices;
 
   const resultData = {

@@ -1796,17 +1796,25 @@ if (f.getFieldRenderer(field) === "graphFileUpload") {
   const uncategorizedId = tableVertexLabel
     ? "_" + tableVertexLabel + "_uncategorized"
     : null;
+  const allId = tableVertexLabel
+    ? "_" + tableVertexLabel + "_all"
+    : null;
   const isUncat =
     selectedSidebarItem &&
     uncategorizedId &&
     (selectedSidebarItem.id === uncategorizedId ||
       selectedSidebarItem.P?.key === uncategorizedId);
+  const isAll =
+    selectedSidebarItem &&
+    allId &&
+    (selectedSidebarItem.id === allId ||
+      selectedSidebarItem.P?.key === allId);
   const isRoot =
     selectedSidebarItem &&
     rootKey &&
     selectedSidebarItem.P?.key === rootKey;
   const folderId =
-    selectedSidebarItem?.id && !isUncat && !isRoot
+    selectedSidebarItem?.id && !isUncat && !isAll && !isRoot
       ? String(selectedSidebarItem.id)
       : "";
   return {

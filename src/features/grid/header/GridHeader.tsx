@@ -22,6 +22,10 @@ import { useGraph } from "~/lib/graph/context/UseGraph";
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { Vertex } from "~/lib/graph/type/vertex";
+import {
+  buildPageDesignerUrl,
+  isPageDesignerEntity,
+} from "~/features/page_designer/utils/pageDesignerUrl";
 
 interface GridHeaderProps {
   CustomAddNewButton?: (props: {
@@ -57,6 +61,12 @@ export function GridHeader(props: Readonly<GridHeaderProps>) {
     // Check if form is inline editable
     if (props.formMetaData?.isInlineEditable) {
       setShowNewModal(true);
+    } else if (isPageDesignerEntity(gridState.tableId)) {
+      navigate(
+        buildPageDesignerUrl(gridState.tableId, [
+          { entity: gridState.tableId, key: "new" },
+        ]),
+      );
     } else {
       navigate(`/admin/${gridState.tableId}/new`);
     }

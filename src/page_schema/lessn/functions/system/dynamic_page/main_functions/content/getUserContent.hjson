@@ -31,7 +31,8 @@ const {
   hooks,
   elementIds,
   onlyNotQueued,
-  relationshipPropertyBindings
+  relationshipPropertyBindings,
+  includeCategoryHierarchy
 } = c;
 
 const getGraphPayload = (nodes, rels) => ({
@@ -272,11 +273,13 @@ const vertexLabel = tableVertexLabel;
 // Relationship type is "User" + vertexLabel (e.g., "UserBook", "UserAudioVideo", "UserCategory")
 const relationshipType = `User${vertexLabel}`;
 const uncategorizedVertexId = '_' + vertexLabel + '_uncategorized';
+const allVertexId = '_' + vertexLabel + '_all';
 const categoryIdIsSyntheticUncategorized = !!(categoryId && categoryId === uncategorizedVertexId);
+const categoryIdIsSyntheticAll = !!(categoryId && categoryId === allVertexId);
 const applyUnassignedCategoryScope =
   !!(effectiveParentVertexLabel && effectiveToParentEdgeType && (showUnassigned === true || categoryIdIsSyntheticUncategorized));
 const useRealCategoryGraphMatch =
-  !!(categoryId && effectiveParentVertexLabel && effectiveToParentEdgeType && !categoryIdIsSyntheticUncategorized);
+  !!(categoryId && effectiveParentVertexLabel && effectiveToParentEdgeType && !categoryIdIsSyntheticUncategorized && !categoryIdIsSyntheticAll);
 
 // Build WHERE clause for filters
 const whereConditions = [];
@@ -511,14 +514,49 @@ if (!_.context.relationships) _.context.relationships = {};
 _.processResult(queryResult.records, _.context, ['c', 'related', 'related2', 'relatedIn'], ['r', 'r2', 'rin']);
 const nodes = _.context.nodes || {};
 const rels = _.context.relationships || {};
-const items = Object.values(nodes).filter(v => v.L && v.L.includes(vertexLabel));
-hydrateRelationshipSelectProps(items, rels, effectiveRelationshipPropertyBindings);
+let items = Object.values(nodes).filter(v => v.L && v.L.includes(vertexLabel));
+
+// Load full category parent chains for All-view hierarchy column (all levels until root)
+if (
+  includeCategoryHierarchy === true &&
+  effectiveParentVertexLabel &&
+  effectiveToParentEdgeType &&
+  items.length > 0
+) {
+  const contentIds = items.map((item) => item.id).filter(Boolean);
+  try {
+    const hierarchyQuery = `
+      MATCH (c:${vertexLabel})
+      WHERE elementId(c) IN $contentIds
+      OPTIONAL MATCH path = (c)-[:${effectiveToParentEdgeType}*1..]->(root:${effectiveParentVertexLabel})
+      WHERE ALL(n IN tail(nodes(path)) WHERE n:${effectiveParentVertexLabel})
+        AND NOT EXISTS {
+          MATCH (root)-[:${effectiveToParentEdgeType}]->(:${effectiveParentVertexLabel})
+        }
+      RETURN c,
+        CASE WHEN path IS NULL THEN [] ELSE tail(nodes(path)) END AS hierarchyNodes,
+        CASE WHEN path IS NULL THEN [] ELSE relationships(path) END AS hierarchyRels
+    `;
+    const hierarchyResult = await _.session.run(hierarchyQuery, { contentIds });
+    _.processResult(
+      hierarchyResult.records,
+      _.context,
+      ['c', 'hierarchyNodes'],
+      ['hierarchyRels']
+    );
+    items = Object.values(_.context.nodes || {}).filter(v => v.L && v.L.includes(vertexLabel));
+  } catch (hierarchyError) {
+    console.warn("getUserContent category hierarchy load failed:", hierarchyError);
+  }
+}
+
+hydrateRelationshipSelectProps(items, _.context.relationships || rels, effectiveRelationshipPropertyBindings);
 
 const result = {
   success: true,
   data: items,
-  relatedVertices: Object.values(nodes).filter(v => !v.L || !v.L.includes(vertexLabel)),
-  graph: getGraphPayload(nodes, rels),
+  relatedVertices: Object.values(_.context.nodes || nodes).filter(v => !v.L || !v.L.includes(vertexLabel)),
+  graph: getGraphPayload(_.context.nodes || nodes, _.context.relationships || rels),
   message: `Found ${items.length} ${tableVertexLabel} item${items.length !== 1 ? 's' : ''}`
 };
 

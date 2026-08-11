@@ -165,7 +165,10 @@ return {
         displayOrder: 0.3
         componentName: Html
         props:
-          '''return {
+          '''//Pairing:
+//Body/UI: Plus Jakarta Sans
+//Brand/headings: Fraunces (warm, fits the golden theme)
+return {
   as: "link",
   rel: "stylesheet",
   href: "https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"

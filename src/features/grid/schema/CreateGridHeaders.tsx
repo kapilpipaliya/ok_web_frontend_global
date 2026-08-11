@@ -12,6 +12,10 @@ import { getDownloadLink } from "~/features/file_manager/sidebar/getDownloadLink
 import { getSelectNameValue } from "~/features/grid/functions/getSelectNameValue";
 import { getTagValue } from "~/features/grid/functions/getTagValue";
 import { PageDesignerLabels } from "~/features/page_designer/constants/PageDesignerLabels";
+import {
+  buildPageDesignerUrl,
+  isPageDesignerEntity,
+} from "~/features/page_designer/utils/pageDesignerUrl";
 import { capitalizeFirstLetter } from "~/lib/data_structure/string/capitalizeFirstLetter";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 import { STYLES } from "~/pages/settings/constants";
@@ -398,10 +402,18 @@ export function CreateGridHeaders(
                       }
                     }\`;`}
                     onClick={() => {
-                      const useKey =
-                        tableId === "Page" || tableId === "Component";
+                      if (isPageDesignerEntity(tableId)) {
+                        const key =
+                          (info.row.original.P.key as string) ||
+                          info.row.original.id;
+                        return navigate(
+                          buildPageDesignerUrl(tableId, [
+                            { entity: tableId, key },
+                          ]),
+                        );
+                      }
                       return navigate(
-                        `/admin/${tableId}/${useKey ? info.row.original.P.key : info.row.original.id}`,
+                        `/admin/${tableId}/${info.row.original.id}`,
                       );
                     }}
                     size={21}

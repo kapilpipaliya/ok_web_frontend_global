@@ -187,19 +187,32 @@ if (fetchFullTree) {
   }
 }
 
-// 3) Uncategorized vertex and its count
+// 3) Virtual sidebar rows: All (every content item) + Uncategorized (no category edge)
+let allVertex = null;
 let uncategorizedVertex = null;
+let allCount = 0;
 let uncategorizedCount = 0;
 if (tableVertexLabel && relationshipType) {
+  let allQuery;
+  let allParams = {};
   let uncatQuery;
   let uncatParams = {};
   if (!enableUserScoping) {
+    allQuery = `
+      MATCH (content:${tableVertexLabel})
+      RETURN count(DISTINCT content) as contentCount
+    `;
     uncatQuery = `
       MATCH (content:${tableVertexLabel})
       WHERE NOT EXISTS { MATCH (content)-[:${toParentEdgeType}]->(:${parentVertexLabel}) }
       RETURN count(DISTINCT content) as contentCount
     `;
   } else {
+    allQuery = `
+      MATCH (u:User {uuid: $userUuid})-[:${relationshipType}]->(content:${tableVertexLabel})
+      RETURN count(DISTINCT content) as contentCount
+    `;
+    allParams.userUuid = userUuid;
     uncatQuery = `
       MATCH (u:User {uuid: $userUuid})-[:${relationshipType}]->(content:${tableVertexLabel})
       WHERE NOT EXISTS { MATCH (content)-[:${toParentEdgeType}]->(:${parentVertexLabel}) }
@@ -207,6 +220,22 @@ if (tableVertexLabel && relationshipType) {
     `;
     uncatParams.userUuid = userUuid;
   }
+  const allResult = await _.session.run(allQuery, allParams);
+  allCount = allResult.records[0]?.get('contentCount') || 0;
+  const allId = '_' + tableVertexLabel + '_all';
+  allVertex = {
+    id: allId,
+    L: [parentVertexLabel],
+    P: {
+      key: allId,
+      name: 'All',
+      contentCount: allCount,
+      tableVertexLabel: tableVertexLabel
+    },
+    IN: {},
+    OUT: {}
+  };
+
   const uncatResult = await _.session.run(uncatQuery, uncatParams);
   uncategorizedCount = uncatResult.records[0]?.get('contentCount') || 0;
   const uncategorizedId = '_' + tableVertexLabel + '_uncategorized';
@@ -223,15 +252,17 @@ if (tableVertexLabel && relationshipType) {
     OUT: {}
   };
   if (!_.context.nodes) _.context.nodes = {};
+  _.context.nodes[allId] = allVertex;
   _.context.nodes[uncategorizedId] = uncategorizedVertex;
 }
 
 // 4) Batch content count for all categories (roots + children) in one query
 const rootKey = rootKeys.key || null;
 if (tableVertexLabel && relationshipType && _.context.nodes) {
+  const syntheticAllId = '_' + tableVertexLabel + '_all';
   const syntheticUncategorizedId = '_' + tableVertexLabel + '_uncategorized';
   const categoryIds = Object.keys(_.context.nodes).filter(
-    id => id !== syntheticUncategorizedId
+    id => id !== syntheticAllId && id !== syntheticUncategorizedId
   );
   const countByCategoryId = {};
   if (categoryIds.length > 0) {
@@ -267,14 +298,15 @@ if (tableVertexLabel && relationshipType && _.context.nodes) {
   for (const id of Object.keys(_.context.nodes)) {
     const node = _.context.nodes[id];
     if (!node || !node.P) continue;
-    if (id === syntheticUncategorizedId) continue;
+    if (id === syntheticAllId || id === syntheticUncategorizedId) continue;
     const useUncategorizedCount = rootKey && node.P.key === rootKey;
     const contentCount = useUncategorizedCount ? uncategorizedCount : (countByCategoryId[id] ?? 0);
     node.P.contentCount = contentCount;
   }
 }
 
-const finalVertices = uncategorizedVertex ? [uncategorizedVertex, ...rootVertices] : rootVertices;
+const virtualRoots = [uncategorizedVertex, allVertex].filter(Boolean);
+const finalVertices = virtualRoots.length > 0 ? [...virtualRoots, ...rootVertices] : rootVertices;
 
 // Optional: resolve parent category for preselected content (e.g. VertexPicker reopen).
 let selectedCategoryId = null;

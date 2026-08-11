@@ -2,6 +2,7 @@ import { createMemo, onMount, Show, createSignal } from "solid-js";
 import { IconButton } from "~/components/styled/IconButton";
 import { isAdminRole } from "~/lib/graph/get/sync/auth/isAdminRole";
 import { useGraph } from "~/lib/graph/context/UseGraph";
+import { buildPageDesignerUrl } from "~/features/page_designer/utils/pageDesignerUrl";
 
 export function PublicPageAdminFloatingButton(
   props: Readonly<{
@@ -21,10 +22,7 @@ export function PublicPageAdminFloatingButton(
     const key = props.pageKey();
     if (!key) return undefined;
 
-    const tabs = `Page:${key}`;
-    return `/admin/Page/${encodeURIComponent(key)}?tabs=${encodeURIComponent(
-      tabs,
-    )}`;
+    return buildPageDesignerUrl("Page", [{ entity: "Page", key }]);
   });
 
   return (

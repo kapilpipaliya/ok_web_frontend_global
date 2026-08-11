@@ -52,8 +52,13 @@ const rootKey = rootKeys.key;
 const userRelationshipType = `User${parentVertexLabel}`;
 const userUuid = enableUserScoping ? user.P.uuid : null;
 const uncategorizedVertexId = tableVertexLabel ? '_' + tableVertexLabel + '_uncategorized' : null;
+const allVertexId = tableVertexLabel ? '_' + tableVertexLabel + '_all' : null;
 const isSyntheticUncategorizedSidebarId = (id) =>
   uncategorizedVertexId != null && id === uncategorizedVertexId;
+const isSyntheticAllSidebarId = (id) =>
+  allVertexId != null && id === allVertexId;
+const isSyntheticVirtualSidebarId = (id) =>
+  isSyntheticUncategorizedSidebarId(id) || isSyntheticAllSidebarId(id);
 
 // Initialize deleted edges tracking in context if not exists
 if (!_.context.deletedEdges) {
@@ -193,7 +198,7 @@ try {
   let createNewEdgeQuery;
   let createNewEdgeParams;
 
-  if (newParentId && newParentId !== 'root' && !isSyntheticUncategorizedSidebarId(newParentId)) {
+  if (newParentId && newParentId !== 'root' && !isSyntheticVirtualSidebarId(newParentId)) {
     if (!enableUserScoping) {
       createNewEdgeQuery = `
         MATCH (category:${parentVertexLabel})

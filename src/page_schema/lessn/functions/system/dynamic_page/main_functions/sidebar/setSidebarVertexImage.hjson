@@ -85,14 +85,21 @@ if (!resolvedTargetLabel) {
 const uncategorizedVertexId = tableVertexLabel
   ? "_" + tableVertexLabel + "_uncategorized"
   : null;
+const allVertexId = tableVertexLabel
+  ? "_" + tableVertexLabel + "_all"
+  : null;
 const isUncategorized =
   !!(uncategorizedVertexId && resolvedCategoryId === uncategorizedVertexId);
-if (isUncategorized && allowUncategorized !== true) {
+const isAll =
+  !!(allVertexId && resolvedCategoryId === allVertexId);
+if ((isUncategorized || isAll) && allowUncategorized !== true) {
   return {
     success: false,
     message: msg(
-      "uncategorized",
-      `Cannot set a linked item on the uncategorized ${itemLabel}`
+      isAll ? "all" : "uncategorized",
+      isAll
+        ? `Cannot set a linked item on the All ${itemLabel}`
+        : `Cannot set a linked item on the uncategorized ${itemLabel}`
     ),
     data: null
   };

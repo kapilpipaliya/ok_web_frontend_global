@@ -92,6 +92,20 @@ const getUncategorizedVertexId = () => {
   const label = getTableVertexLabel();
   return label ? '_' + label + '_uncategorized' : null;
 };
+const getAllVertexId = () => {
+  const label = getTableVertexLabel();
+  return label ? '_' + label + '_all' : null;
+};
+const isSyntheticUncategorizedSidebarItem = (item) => {
+  if (!item) return false;
+  const uid = getUncategorizedVertexId();
+  return !!(uid && (item.id === uid || item.P?.key === uid));
+};
+const isSyntheticAllSidebarItem = (item) => {
+  if (!item) return false;
+  const aid = getAllVertexId();
+  return !!(aid && (item.id === aid || item.P?.key === aid));
+};
 
 const PAGE_RESIZE_STORAGE_PREFIX = "dynamic-page-resize:";
 const DEFAULT_SIDEBAR_WIDTH = 240;
@@ -387,16 +401,16 @@ const getConfigHooks = () => getConfigGeneralValue("hooks");
 const prop = (key, localProps) => {
   const fromLocalProps = localProps?.[key];
   if (fromLocalProps !== undefined) {
-    return fromLocalProps;
+    return key === "columns" ? withCategoryHierarchyColumn(fromLocalProps) : fromLocalProps;
   }
   const fromProps = c.props?.[key];
   if (fromProps !== undefined) {
-    return fromProps;
+    return key === "columns" ? withCategoryHierarchyColumn(fromProps) : fromProps;
   }
   const { config, loadFromSetting } = getCachedConfig();
   if (loadFromSetting) {
     if (ROOT_CONFIG_KEYS.has(key)) {
-      if (key === "columns") return config?.columns;
+      if (key === "columns") return withCategoryHierarchyColumn(config?.columns);
       if (key === "formConfig") return config?.formConfig;
       if (key === "sidebar") return config?.sidebar;
       if (key === "actions") {
@@ -648,20 +662,27 @@ const getGenericDataFunction = () => {
         const rootKeys = sidebarConfig.rootKeys || {};
         const rootKey = rootKeys.key;
 
-        // If root key or synthetic uncategorized is selected, show items without any category relationship
-        const uCat = getUncategorizedVertexId();
-        if (
-          sidebarItem.P?.key === rootKey ||
-          (uCat && (sidebarItem.id === uCat || sidebarItem.P?.key === uCat))
-        ) {
-          filterParams.showUnassigned = true;
+        // All: show every content vertex (no category filter); still pass sidebar edge info for hierarchy column
+        if (isSyntheticAllSidebarItem(sidebarItem)) {
           filterParams.parentVertexLabel = sidebarConfig.parentVertexLabel;
           filterParams.toParentEdgeType = sidebarConfig.toParentEdgeType;
+          filterParams.includeCategoryHierarchy = true;
         } else {
-          // Filter by selected category
-          filterParams.categoryId = sidebarItem.id;
-          filterParams.parentVertexLabel = sidebarConfig.parentVertexLabel;
-          filterParams.toParentEdgeType = sidebarConfig.toParentEdgeType;
+          // If root key or synthetic uncategorized is selected, show items without any category relationship
+          const uCat = getUncategorizedVertexId();
+          if (
+            sidebarItem.P?.key === rootKey ||
+            (uCat && (sidebarItem.id === uCat || sidebarItem.P?.key === uCat))
+          ) {
+            filterParams.showUnassigned = true;
+            filterParams.parentVertexLabel = sidebarConfig.parentVertexLabel;
+            filterParams.toParentEdgeType = sidebarConfig.toParentEdgeType;
+          } else {
+            // Filter by selected category
+            filterParams.categoryId = sidebarItem.id;
+            filterParams.parentVertexLabel = sidebarConfig.parentVertexLabel;
+            filterParams.toParentEdgeType = sidebarConfig.toParentEdgeType;
+          }
         }
       }
 
@@ -756,9 +777,10 @@ const getSidebarConfigForCount = () => {
 };
 
 // Update sidebar category count after adding/deleting items
+// options.skipAll: update only the given category (do not cascade to All)
 // Note: This uses getSidebarConfigForCount which will be replaced by getSidebarConfig
 // when it's defined later. This ensures the function is available when getGenericSaveFunction is called.
-const updateSidebarCategoryCount = (categoryId, increment = 1) => {
+const updateSidebarCategoryCount = (categoryId, increment = 1, options = null) => {
   if (!categoryId) return;
 
   const sidebarConfig = getSidebarConfigForCount();
@@ -766,31 +788,93 @@ const updateSidebarCategoryCount = (categoryId, increment = 1) => {
 
   const rootKeys = sidebarConfig.rootKeys || {};
   const rootKey = rootKeys.key;
-
   const uCat = getUncategorizedVertexId();
-  if (categoryId === rootKey || (uCat && categoryId === uCat)) {
-    if (uCat) {
-      const uncategorizedVertex = g?.vertexes?.[uCat];
-      if (uncategorizedVertex) {
-        const currentCount = uncategorizedVertex.P?.contentCount ?? 0;
-        const newCount = Math.max(0, currentCount + increment);
-        _.mergeVertexProperties(0, uCat, g, sg, {
-          contentCount: newCount
-        });
-      }
-    }
+  const aCat = getAllVertexId();
+  const skipAll = options?.skipAll === true;
+
+  const bump = (id) => {
+    if (!id) return;
+    const vertex = g?.vertexes?.[id];
+    if (!vertex) return;
+    const currentCount = vertex.P?.contentCount ?? 0;
+    const newCount = Math.max(0, currentCount + increment);
+    _.mergeVertexProperties(0, id, g, sg, {
+      contentCount: newCount
+    });
+  };
+
+  if (aCat && categoryId === aCat) {
+    bump(aCat);
     return;
   }
 
-  // For regular categories, update the count directly
-  const categoryVertex = g?.vertexes?.[categoryId];
-  if (categoryVertex) {
-    const currentCount = categoryVertex.P?.contentCount ?? 0;
-    const newCount = Math.max(0, currentCount + increment);
-    _.mergeVertexProperties(0, categoryId, g, sg, {
-      contentCount: newCount
-    });
+  if (categoryId === rootKey || (uCat && categoryId === uCat)) {
+    bump(uCat);
+    // Keep All in sync when content is added/removed from unassigned (not on reassignment)
+    if (!skipAll) bump(aCat);
+    return;
   }
+
+  // Regular categories: bump folder count; also sync All on add/delete
+  bump(categoryId);
+  if (!skipAll) bump(aCat);
+};
+
+const getContentCategoryIdFromRow = (row, sidebarConfig) => {
+  if (!row || !sidebarConfig?.toParentEdgeType) return null;
+  const edgeType = sidebarConfig.toParentEdgeType;
+  const outArr = row.OUT?.[edgeType];
+  if (!Array.isArray(outArr) || outArr.length === 0) return null;
+  const edge = g?.edges?.[outArr[0]];
+  return edge?.E != null ? String(edge.E) : null;
+};
+
+const CATEGORY_HIERARCHY_COLUMN_KEY = "__categoryHierarchy";
+
+const getCategoryHierarchyPath = (row) => {
+  const sidebarConfig = getSidebarConfigForCount();
+  const edgeType = sidebarConfig?.toParentEdgeType;
+  const parentLabel = sidebarConfig?.parentVertexLabel;
+  if (!row || !edgeType || !parentLabel) return "Uncategorized";
+
+  const names = [];
+  const seen = new Set();
+  let currentId = getContentCategoryIdFromRow(row, sidebarConfig);
+  while (currentId && !seen.has(currentId)) {
+    seen.add(currentId);
+    const node = g?.vertexes?.[currentId];
+    if (!node?.L?.includes(parentLabel)) break;
+    const name = node.P?.name || node.P?.title || node.P?.key || "";
+    if (name) names.unshift(String(name));
+    const parentOut = node.OUT?.[edgeType];
+    if (!Array.isArray(parentOut) || parentOut.length === 0) break;
+    const ped = g?.edges?.[parentOut[0]];
+    currentId = ped?.E != null ? String(ped.E) : null;
+  }
+  return names.length > 0 ? names.join(" / ") : "Uncategorized";
+};
+
+const withCategoryHierarchyColumn = (columns) => {
+  const base = Array.isArray(columns)
+    ? columns.filter((col) => col?.key !== CATEGORY_HIERARCHY_COLUMN_KEY)
+    : [];
+  const sidebarItem =
+    typeof selectedSidebarItem === "function" ? selectedSidebarItem() : null;
+  if (!isSyntheticAllSidebarItem(sidebarItem)) {
+    return base;
+  }
+  return [
+    {
+      key: CATEGORY_HIERARCHY_COLUMN_KEY,
+      label: "Category",
+      renderer: "text",
+      sortable: true,
+      filterable: true,
+      width: "200px",
+      valueAccessor: (row) => getCategoryHierarchyPath(row)
+    },
+    ...base
+  ];
 };
 
 /** True if content id is listed in any TableUiState P.data (row not yet in table after upload→promote). */
@@ -925,8 +1009,10 @@ const getGenericSaveFunction = () => {
           const uCatSave = getUncategorizedVertexId();
           const isUncatSave =
             uCatSave && (sidebarItem.id === uCatSave || sidebarItem.P?.key === uCatSave);
+          const isAllSave = isSyntheticAllSidebarItem(sidebarItem);
 
-          if (sidebarItem.P?.key !== rootKey && !isUncatSave) {
+          // All / root / uncategorized: do not create a category relationship
+          if (sidebarItem.P?.key !== rootKey && !isUncatSave && !isAllSave) {
             const enableUserScopingForSidebar =
               getConfigGeneralValue("enableUserScopingForSidebar") === true;
             const enableUserScopingForContent =
@@ -954,6 +1040,15 @@ const getGenericSaveFunction = () => {
                 console.error("Error creating sidebar relationship:", relError);
               }
             }
+          } else if (isAllSave) {
+            // New items under All are unassigned; uncat bump also syncs All
+            const uKey = getUncategorizedVertexId();
+            if (uKey) {
+              updateSidebarCategoryCount(uKey, pendingSidebarIds.length);
+            } else {
+              const aKey = getAllVertexId();
+              if (aKey) updateSidebarCategoryCount(aKey, pendingSidebarIds.length);
+            }
           } else if (sidebarItem.P?.key === rootKey) {
             updateSidebarCategoryCount(rootKey, pendingSidebarIds.length);
           } else {
@@ -976,7 +1071,19 @@ const getGenericSaveFunction = () => {
           const uCatDel = getUncategorizedVertexId();
           const isUncatDel =
             uCatDel && (sidebarItem.id === uCatDel || sidebarItem.P?.key === uCatDel);
-          if (sidebarItem.P?.key === rootKey) {
+          const isAllDel = isSyntheticAllSidebarItem(sidebarItem);
+          if (isAllDel) {
+            const aKey = getAllVertexId();
+            if (aKey) updateSidebarCategoryCount(aKey, -1);
+            // Also decrement the item's real folder / Uncategorized count (skip All cascade)
+            const actualCatId = getContentCategoryIdFromRow(originalRow, sidebarConfig);
+            if (actualCatId) {
+              updateSidebarCategoryCount(actualCatId, -1, { skipAll: true });
+            } else {
+              const uKey = getUncategorizedVertexId();
+              if (uKey) updateSidebarCategoryCount(uKey, -1, { skipAll: true });
+            }
+          } else if (sidebarItem.P?.key === rootKey) {
             updateSidebarCategoryCount(rootKey, -1);
           } else if (isUncatDel && uCatDel) {
             updateSidebarCategoryCount(uCatDel, -1);
@@ -1360,9 +1467,29 @@ const handleExport = async (data = null) => {
   }
   try {
     patchPageP({ loading: true });
-    const columns = prop('columns');
-    const sanitizedColumns = JSON.parse(JSON.stringify(columns));
-    const result = await exportFn({ data, columns: sanitizedColumns }); // null means export all data
+    const columns = prop('columns') || [];
+    // Drop function accessors for serialization; materialize Category path when present
+    const exportColumns = columns.map((col) => {
+      if (!col || typeof col !== "object") return col;
+      const { valueAccessor: _va, ...rest } = col;
+      return rest;
+    });
+    let exportDataPayload = data;
+    if (
+      Array.isArray(data) &&
+      exportColumns.some((col) => col?.key === CATEGORY_HIERARCHY_COLUMN_KEY)
+    ) {
+      exportDataPayload = data.map((row) => {
+        if (!row || typeof row !== "object") return row;
+        const path = getCategoryHierarchyPath(row);
+        return {
+          ...row,
+          P: { ...(row.P || {}), [CATEGORY_HIERARCHY_COLUMN_KEY]: path }
+        };
+      });
+    }
+    const sanitizedColumns = JSON.parse(JSON.stringify(exportColumns));
+    const result = await exportFn({ data: exportDataPayload, columns: sanitizedColumns }); // null means export all data
     if (result?.success && result?.data) {
       // Fix line endings: replace '\n' with real newlines for CSV/text exports
       let exportData = result.data;
@@ -1533,6 +1660,10 @@ const getCategoryKey = (item) => {
   const rootKey = rootKeys.key;
 
   const uCatKey = getUncategorizedVertexId();
+  const aCatKey = getAllVertexId();
+  if (aCatKey && (item.id === aCatKey || item.P?.key === aCatKey)) {
+    return aCatKey;
+  }
   if (
     item.P?.key === rootKey ||
     (uCatKey && (item.id === uCatKey || item.P?.key === uCatKey))
@@ -1606,15 +1737,29 @@ const handleMoveItemsToCategory = async (contentIds, categoryId, sidebarConfig) 
   try {
     patchPageP({ loading: true });
     const uCatMove = getUncategorizedVertexId();
+    const aCatMove = getAllVertexId();
     const uncategorizedSlot = uCatMove ?? '__unassigned__';
     const currentSelected = selectedSidebarItem();
     const sourceCategoryId = currentSelected?.id ?? null;
 
+    // All is not a category destination — reject moves targeting it
+    if (aCatMove && categoryId === aCatMove) {
+      const msg = "Cannot move items to All";
+      _.showWarningToast?.(msg);
+      return { success: false, message: msg };
+    }
+
     const normalizeCategoryId = (id) =>
-      id === null || id === undefined || (uCatMove != null && id === uCatMove)
+      id === null ||
+      id === undefined ||
+      (uCatMove != null && id === uCatMove)
         ? uncategorizedSlot
         : id;
-    if (normalizeCategoryId(sourceCategoryId) === normalizeCategoryId(categoryId)) {
+    const sourceIsAll = !!(aCatMove && sourceCategoryId === aCatMove);
+    if (
+      !sourceIsAll &&
+      normalizeCategoryId(sourceCategoryId) === normalizeCategoryId(categoryId)
+    ) {
       const label = prop('label') || 'Item';
       const plural = label.endsWith('y') ? label.slice(0, -1) + 'ies' : label + (label.endsWith('s') ? '' : 's');
       const msg = `${plural} are already in this category`;
@@ -1622,9 +1767,37 @@ const handleMoveItemsToCategory = async (contentIds, categoryId, sidebarConfig) 
       return { success: false, message: msg };
     }
 
+    // From All: skip items already in the target category
+    let idsToMove = Array.isArray(contentIds) ? contentIds.slice() : [];
+    let skippedAlreadyInTarget = 0;
+    if (sourceIsAll) {
+      const targetNorm = normalizeCategoryId(categoryId);
+      const filtered = [];
+      for (let i = 0; i < idsToMove.length; i++) {
+        const id = idsToMove[i];
+        const row = g?.vertexes?.[id];
+        const currentCatId = getContentCategoryIdFromRow(row, sidebarConfig);
+        const currentNorm =
+          currentCatId == null ? uncategorizedSlot : String(currentCatId);
+        if (currentNorm === targetNorm) {
+          skippedAlreadyInTarget += 1;
+        } else {
+          filtered.push(id);
+        }
+      }
+      idsToMove = filtered;
+      if (idsToMove.length === 0) {
+        const label = prop('label') || 'Item';
+        const plural = label.endsWith('y') ? label.slice(0, -1) + 'ies' : label + (label.endsWith('s') ? '' : 's');
+        const msg = `${plural} are already in this category`;
+        _.showWarningToast?.(msg);
+        return { success: false, message: msg };
+      }
+    }
+
     const contentLabelDisplay = prop('label') || 'Item';
     const contextData = {
-      contentIds: contentIds,
+      contentIds: idsToMove,
       categoryId: categoryId,
       relationshipType: sidebarConfig.toParentEdgeType,
       categoryLabel: sidebarConfig.parentVertexLabel,
@@ -1650,14 +1823,15 @@ const handleMoveItemsToCategory = async (contentIds, categoryId, sidebarConfig) 
     // Clear table selection after move (moved items are gone from current view; avoids stale selection and draggable issues)
     clearSelectedRows();
 
-    // Trigger table to remove moved rows (parent state, Table reacts - no reload needed)
-    if (result?.result?.success && contentIds?.length) {
-      const removeSet = new Set(contentIds.map((id) => String(id)));
+    // Remove moved rows only when leaving a concrete category view.
+    // On All, items remain visible (Category column updates via graph).
+    if (result?.result?.success && idsToMove?.length && !sourceIsAll) {
+      const removeSet = new Set(idsToMove.map((id) => String(id)));
       const nextMainIds = (Array.isArray(pageP()?.mainTableRowIds) ? pageP().mainTableRowIds : [])
         .map((id) => String(id))
         .filter((id) => !removeSet.has(id));
       patchPageP({
-        rowsToRemoveVertexIds: contentIds,
+        rowsToRemoveVertexIds: idsToMove,
         mainTableRowIds: nextMainIds
       });
     }
@@ -1667,6 +1841,13 @@ const handleMoveItemsToCategory = async (contentIds, categoryId, sidebarConfig) 
       if (result.graph && result.graph.vertexes) {
         _.setGraphData(0, result.graph, {});
       }
+    }
+
+    if (result?.result?.success && skippedAlreadyInTarget > 0) {
+      const moved = idsToMove.length;
+      result.result.message =
+        (result.result.message || `Moved ${moved} item(s)`) +
+        ` (${skippedAlreadyInTarget} already in category skipped)`;
     }
 
     return result?.result || { success: false, message: "Failed to move items" };
@@ -2611,7 +2792,8 @@ const saveDropCreateReviewRow = async (draft, saveData) => {
       const isUncatSave =
         uCatSave &&
         (sidebarItem.id === uCatSave || sidebarItem.P?.key === uCatSave);
-      if (sidebarItem.P?.key !== rootKey && !isUncatSave) {
+      const isAllSave = isSyntheticAllSidebarItem(sidebarItem);
+      if (sidebarItem.P?.key !== rootKey && !isUncatSave && !isAllSave) {
         const enableUserScopingForSidebar =
           getConfigGeneralValue("enableUserScopingForSidebar") === true;
         try {
@@ -2634,6 +2816,14 @@ const saveDropCreateReviewRow = async (draft, saveData) => {
           }
         } catch (relError) {
           console.error("Error creating sidebar relationship:", relError);
+        }
+      } else if (isAllSave) {
+        // New items under All are unassigned; uncat bump also syncs All
+        if (uCatSave) {
+          updateSidebarCategoryCount(uCatSave, 1);
+        } else {
+          const aKey = getAllVertexId();
+          if (aKey) updateSidebarCategoryCount(aKey, 1);
         }
       } else if (sidebarItem.P?.key === rootKey) {
         updateSidebarCategoryCount(rootKey, 1);
@@ -2782,6 +2972,9 @@ return {
   getTableVertexLabel,
   getTableSettingsLabel,
   getUncategorizedVertexId,
+  getAllVertexId,
+  isSyntheticUncategorizedSidebarItem,
+  isSyntheticAllSidebarItem,
   getLoadFromSetting,
   getConfigGeneralValue,
   getConfigFunction,
