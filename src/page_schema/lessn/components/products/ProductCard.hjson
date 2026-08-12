@@ -180,10 +180,12 @@ return {
         componentName: Html
         props:
           '''const item = c.props?.item || c.props || {};
+const raw = item.price == null ? "" : String(item.price).trim();
+const price = !raw ? "" : (/^₹/.test(raw) ? raw : `₹${raw}`);
 return {
   as: "span",
-  text: item.price || "",
-  hide: !item.price
+  text: price,
+  hide: !price
 };'''
       }
     }
