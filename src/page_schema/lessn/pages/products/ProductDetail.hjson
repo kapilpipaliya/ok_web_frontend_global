@@ -88,29 +88,6 @@ try {
       }
     }
     {
-      id: "5"
-      L: Attr
-      P: {
-        css:
-          '''return `._id {
-  margin: 0 0 1rem 0;
-  font-size: 0.9rem;
-}`;'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''const locale = _.params?.lang ? String(_.params.lang).toLowerCase() : "";
-const langPrefix = locale && /^[a-z]{2,3}$/i.test(locale) ? `/${locale}` : "";
-return {
-  as: "a",
-  href: `${langPrefix}/products`,
-  text: "← Back to products",
-  "data-animate": "",
-  ref: (el) => el && f.animateOnView(el, { y: 16 })
-};'''
-      }
-    }
-    {
       id: "6"
       L: Attr
       P: {
@@ -167,12 +144,6 @@ return {
       T: Attr
       S: "3"
       E: "4"
-    }
-    {
-      id: e4
-      T: Attr
-      S: "4"
-      E: "5"
     }
     {
       id: e5

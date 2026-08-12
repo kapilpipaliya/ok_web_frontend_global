@@ -33,19 +33,19 @@ const getCloseDelay = () => Number(props().closeDelay) || 250;
 const getTriggerColor = () =>
   props().triggerColor || t.var.color.text;
 const getPanelBackground = () =>
-  props().panelBackground || t.var.color.background;
+  props().panelBackground || t.var.color.primary_light_500;
 const getHoverBackground = () =>
   props().hoverBackground || "rgba(0, 0, 0, 0.08)";
 const getActiveBorderColor = () =>
   props().activeBorderColor || getTriggerColor();
 
-/** Slightly lighter panel per nested depth (0 = first submenu). */
+/** Light base panel; each nest is only a subtle step lighter (~3% white). */
 const getResolvedPanelBackground = (depth = getDepth()) => {
   const base = getPanelBackground();
   const level = Math.max(0, Number(depth) || 0);
   if (level <= 0) return base;
   const mix = Math.min(12, level * 3);
-  return `color-mix(in srgb, ${base} ${100 - mix}%, #fff ${mix}%)`;
+  return `color-mix(in oklch, ${base} ${100 - mix}%, white ${mix}%)`;
 };
 
 const getPagePath = () => {

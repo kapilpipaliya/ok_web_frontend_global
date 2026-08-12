@@ -15,6 +15,7 @@ import { addComponentAttrInPage } from "~/features/page_designer/functions/drag_
 import { saveAndCaptureForm } from "~/features/page_designer/utils/saveAndCapture";
 import { deleteLayoutAttr, deleteLayoutAttrs } from "~/features/page_designer/functions/layout/deleteLayoutAttr";
 import { SearchBar } from "~/components/styled/SearchBar";
+import { saveUndoPoint } from "~/lib/graph/transaction/steps/saveUndoPoint";
 
 import {
   useDesignerFormIdContext,
@@ -392,6 +393,8 @@ export function LayoutTree() {
         dragPosition,
       );
     }
+
+    saveUndoPoint(txnId, graph, setGraph);
 
     // Select the newly created component
     onLayoutItemClick(

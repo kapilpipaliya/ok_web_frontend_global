@@ -153,16 +153,17 @@ return {
       id: "7"
       L: Attr
       P: {
-        as: div
         css:
           '''return `._id {
   font-size: 3rem;
+  line-height: 1;
 }`;'''
         displayOrder: 1
         componentName: Html
         key: unique_1
         props:
           '''return {
+  as: "h1",
   text: "Lessn"
 }'''
       }
@@ -174,14 +175,15 @@ return {
         css:
           '''return `._id {
   font-size: 1.4rem;
+  line-height: 1;
   color: ${t.var.color.primary_dark_200};
 }`;'''
-        as: div
         displayOrder: 2
         componentName: Html
         key: unique_2
         props:
           '''return {
+  as: "h2",
   text: "LIFE'S ESSENTIALS"
 }'''
       }
@@ -282,7 +284,6 @@ const items = [
 
 return {
   items: items.map((item) => localizeItem(item)),
-  panelBackground: "#f5e6d3",
   hoverBackground: "rgba(0, 0, 0, 0.1)",
   activeBorderColor: "#3a2317",
 };'''

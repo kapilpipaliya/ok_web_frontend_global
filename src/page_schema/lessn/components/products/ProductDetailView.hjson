@@ -305,6 +305,30 @@ const carouselImages = () => {
   return [];
 };
 
+const formatRupeePrice = (price) => {
+  const raw = price == null ? "" : String(price).trim();
+  if (!raw) return "";
+  return /^₹/.test(raw) ? raw : `₹${raw}`;
+};
+
+const [carouselIndex, setCarouselIndex] = _.createSignal(0);
+const [galleryContainerEl, setGalleryContainerEl] = _.createSignal(null);
+
+_.createEffect(() => {
+  void previewVariant()?.id;
+  void carouselImages().length;
+  setCarouselIndex(0);
+});
+
+_.createEffect(() => {
+  const index = carouselIndex();
+  const container = galleryContainerEl();
+  if (!container) return;
+  const thumb = container.querySelector(`[data-gallery-index="${index}"]`);
+  if (!thumb) return;
+  thumb.scrollIntoView({ behavior: "smooth", inline: "nearest", block: "nearest" });
+});
+
 const availabilityLabel = () => {
   const variant = activeVariant() || (!hasSelectableOptions() ? parseVariants()[0] : null);
   if (!variant) {
@@ -331,6 +355,10 @@ return {
   isOptionCompatible,
   isOptionSelected,
   carouselImages,
+  carouselIndex,
+  setCarouselIndex,
+  setGalleryContainerEl,
+  formatRupeePrice,
   availabilityLabel,
   openAmazon: () => {
     const url = activeVariant()?.amazonUrl;
@@ -431,6 +459,23 @@ return {
       }
     }
     {
+      id: "28"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  position: relative;
+  width: 100%;
+  max-height: min(380px, 45vh);
+  overflow: hidden;
+  background: ${t.var.color.background};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props: return { as: "div", class: "pd-carousel-stage" };
+      }
+    }
+    {
       id: "7"
       L: Attr
       P: {
@@ -450,7 +495,9 @@ return {
   contextName: "productImage",
   loop: images.length > 1,
   showArrows: images.length > 1,
-  showDots: images.length > 1,
+  showDots: false,
+  activeIndex: f.carouselIndex?.() ?? 0,
+  onActiveIndexChange: (index) => f.setCarouselIndex?.(index),
   hide: images.length === 0
 };'''
       }
@@ -462,7 +509,8 @@ return {
         css:
           '''return `._id {
   width: 100%;
-  aspect-ratio: 1;
+  height: min(380px, 45vh);
+  max-height: min(380px, 45vh);
   object-fit: contain;
   display: block;
   background: ${t.var.color.background};
@@ -481,7 +529,9 @@ if (!ready) {
       "align-items": "center",
       "justify-content": "center",
       width: "100%",
-      "aspect-ratio": image.aspectRatio || 1,
+      height: "min(380px, 45vh)",
+      "max-height": "min(380px, 45vh)",
+      "aspect-ratio": "unset",
       color: "inherit"
     }
   };
@@ -508,13 +558,155 @@ return {
   text-align: center;
   color: ${t.var.color.text_light_300};
 }`;'''
-        displayOrder: 2
+        displayOrder: 3
         componentName: Html
         props:
           '''return {
   as: "div",
   text: "No images for this variant",
   hide: (f.carouselImages?.() || []).length > 0
+};'''
+      }
+    }
+    {
+      id: "25"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.5rem;
+  padding: 0.75rem 0.75rem 0.5rem;
+  border-top: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background};
+  overflow-x: scroll;
+  overflow-y: hidden;
+  width: 100%;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: ${t.var.color.text_light_400} ${t.var.color.background_light_100};
+
+  &::-webkit-scrollbar {
+    height: 0.45rem;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: ${t.var.color.background_light_100};
+    border-radius: 999px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: ${t.var.color.text_light_400};
+    border-radius: 999px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: ${t.var.color.text_light_300};
+  }
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const images = f.carouselImages?.() || [];
+return {
+  as: "div",
+  class: "pd-image-gallery",
+  role: "listbox",
+  "aria-label": "Product images",
+  data: images.map((image, index) => ({ image, index })),
+  loop: true,
+  contextName: "galleryItem",
+  hide: images.length <= 1,
+  ref: (el) => f.setGalleryContainerEl?.(el || null)
+};'''
+      }
+    }
+    {
+      id: "26"
+      L: Attr
+      P: {
+        css:
+          '''const item = c.galleryItem || {};
+const selected = f.carouselIndex?.() === item.index;
+return `._id {
+  appearance: none;
+  flex: 0 0 auto;
+  width: 4.5rem;
+  height: 4.5rem;
+  padding: 0.2rem;
+  border: 2px solid ${selected ? t.var.color.primary : t.var.color.border};
+  border-radius: 0.5rem;
+  background: ${selected ? t.var.color.primary_light_100 : t.var.color.background};
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+
+  &:hover {
+    border-color: ${t.var.color.primary};
+    transform: translateY(-1px);
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${t.var.color.primary};
+    outline-offset: 2px;
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const item = c.galleryItem || {};
+const selected = f.carouselIndex?.() === item.index;
+return {
+  as: "button",
+  type: "button",
+  role: "option",
+  class: "pd-gallery-thumb",
+  "data-gallery-index": item.index,
+  "aria-selected": selected,
+  "aria-label": `View image ${item.index + 1}`,
+  onClick: () => f.setCarouselIndex?.(item.index)
+};'''
+      }
+    }
+    {
+      id: "27"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  background: ${t.var.color.background_light_50};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const item = c.galleryItem || {};
+const image = item.image || {};
+const ready = image.ready !== false && !!image.url;
+if (!ready) {
+  return {
+    as: "span",
+    text: image.placeholder ? "" : "—",
+    style: {
+      display: "flex",
+      "align-items": "center",
+      "justify-content": "center",
+      width: "100%",
+      height: "100%",
+      "font-size": "0.65rem",
+      color: "inherit"
+    }
+  };
+}
+return {
+  as: "img",
+  src: image.url,
+  alt: image.alt || `Product image ${item.index + 1}`,
+  loading: "lazy"
 };'''
       }
     }
@@ -801,7 +993,7 @@ return {
         displayOrder: 4
         componentName: Html
         props:
-          '''const price = f.activeVariant?.()?.price || "";
+          '''const price = f.formatRupeePrice?.(f.activeVariant?.()?.price);
 return {
   as: "p",
   text: price,
@@ -955,6 +1147,12 @@ return {
       id: e8
       T: Attr
       S: "6"
+      E: "28"
+    }
+    {
+      id: e27
+      T: Attr
+      S: "28"
       E: "7"
     }
     {
@@ -962,6 +1160,24 @@ return {
       T: Attr
       S: "6"
       E: "9"
+    }
+    {
+      id: e24
+      T: Attr
+      S: "6"
+      E: "25"
+    }
+    {
+      id: e25
+      T: Attr
+      S: "25"
+      E: "26"
+    }
+    {
+      id: e26
+      T: Attr
+      S: "26"
+      E: "27"
     }
     {
       id: e10

@@ -60,8 +60,20 @@ const onInit = (api) => {
 const onSelect = (api) => {
   setPrevBtnDisabled(!api.canScrollPrev());
   setNextBtnDisabled(!api.canScrollNext());
-  setSelectedIndex(api.selectedScrollSnap());
+  const idx = api.selectedScrollSnap();
+  setSelectedIndex(idx);
+  const onChange = c.props?.onActiveIndexChange;
+  if (typeof onChange === "function") onChange(idx);
 };
+
+_.createEffect(() => {
+  const api = emblaApi();
+  const targetIndex = c.props?.activeIndex;
+  if (!api || typeof targetIndex !== "number" || targetIndex < 0) return;
+  if (api.selectedScrollSnap() !== targetIndex) {
+    api.scrollTo(targetIndex);
+  }
+});
 
 _.createEffect(
   _.on(emblaApi, (api) => {
@@ -115,6 +127,8 @@ return {
         css:
           '''return `._id {
   position: relative;
+  width: 100%;
+  max-height: min(380px, 45vh);
 }`;'''
         displayOrder: 1
         componentName: Html
@@ -132,6 +146,7 @@ return {
           '''return `._id {
   overflow: hidden;
   width: 100%;
+  max-height: min(380px, 45vh);
 }`;'''
         displayOrder: 1
         componentName: Html
@@ -213,6 +228,13 @@ return {
       id: "7"
       L: Attr
       P: {
+        css:
+          '''return `._id {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}`;'''
         displayOrder: 2
         componentName: Html
         props:
@@ -254,8 +276,8 @@ return `._id {
   top: 50%;
   ${inset}
   transform: translateY(-50%);
-  z-index: 2;
-  background: ${t.var.color.background};
+  z-index: 3;
+  background: color-mix(in oklch, ${t.var.color.background} 88%, transparent);
   touch-action: manipulation;
   display: flex;
   align-items: center;
@@ -268,6 +290,8 @@ return `._id {
   height: 2.5rem;
   border-radius: 9999px;
   color: ${t.var.color.text};
+  pointer-events: auto;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
   transition: background 150ms ease, border-color 150ms ease, color 150ms ease, opacity 150ms ease;
 
   &:hover:not(:disabled) {
