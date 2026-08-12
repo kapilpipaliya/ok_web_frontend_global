@@ -20,6 +20,7 @@ export async function handleDropAtPosition(
   fromVertex: Vertex,
   toVertex: Vertex,
   dragPosition: string,
+  options?: { skipUndo?: boolean },
 ) {
   if (
     !validateDragOver(
@@ -70,7 +71,9 @@ export async function handleDropAtPosition(
       dragPosition,
     );
 
-    saveUndoPoint(txnId, graph, setGraph);
+    if (!options?.skipUndo) {
+      saveUndoPoint(txnId, graph, setGraph);
+    }
 
     return layoutRowId;
   }
@@ -103,7 +106,9 @@ export async function handleDropAtPosition(
       toVertex,
       dragPosition,
     );
-    saveUndoPoint(txnId, graph, setGraph);
+    if (!options?.skipUndo) {
+      saveUndoPoint(txnId, graph, setGraph);
+    }
   } else {
     await handleParentChange(
       graph,
@@ -115,7 +120,9 @@ export async function handleDropAtPosition(
       dragPosition,
       toVertex,
     );
-    saveUndoPoint(txnId, graph, setGraph);
+    if (!options?.skipUndo) {
+      saveUndoPoint(txnId, graph, setGraph);
+    }
     return;
   }
 }

@@ -7,9 +7,23 @@ import type { LayoutDropSnapshot } from "~/features/page_designer/functions/drag
 import { handleDropAtPosition } from "~/features/page_designer/functions/drag_drop/core/handleDropAtPosition";
 import { loadPageData } from "~/features/page_designer/functions/fetch/loadPageData";
 import { onLayoutItemClick } from "~/features/page_designer/event_handler/onLayoutItemClick";
+import {
+  filterTopmostSelectionIds,
+  sortLayoutIdsByTreeOrder,
+} from "~/features/page_designer/functions/layout/layoutSelection";
+import { saveUndoPoint } from "~/lib/graph/transaction/steps/saveUndoPoint";
 
+import type { Id } from "~/lib/graph/type/id";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
+
+function isAfterPosition(position: string) {
+  return position === "after" || position === "right";
+}
+
+function isBeforePosition(position: string) {
+  return position === "before" || position === "left";
+}
 
 export async function executeLayoutDrop(
   layoutStoreVertex: Vertex<PageLayoutObject>,
@@ -22,14 +36,14 @@ export async function executeLayoutDrop(
   const activeItem = snapshot?.activeItem ?? layoutStoreVertex.P.activeItem;
   const dragPosition =
     snapshot?.dragPosition ?? layoutStoreVertex.P.dragPosition;
-  const vertexIds = snapshot?.vertexIds ?? [];
+  const rawVertexIds = snapshot?.vertexIds ?? [];
 
   if (activeItem == null) {
     showErrorToast("Active item not found when dropping");
     return;
   }
 
-  if (vertexIds.length === 0) {
+  if (rawVertexIds.length === 0) {
     showErrorToast("Dragged item not found when dropping");
     return;
   }
@@ -40,16 +54,34 @@ export async function executeLayoutDrop(
     return;
   }
 
-  for (const vertexId of vertexIds) {
-    const fromVertex = graph.vertexes[vertexId];
+  if (!dragPosition) {
+    showErrorToast("Position not found when dropping");
+    return;
+  }
 
+  // Topmost + tree order → contiguous block that keeps relative order.
+  // before/left: reverse so the first selected ends closest to the target.
+  // after/right: forward, chaining each item after the previous.
+  const vertexIds = sortLayoutIdsByTreeOrder(
+    filterTopmostSelectionIds(rawVertexIds, graph),
+    graph,
+    setGraph,
+    formStoreVertex?.P.formDataId,
+  );
+
+  const orderedIds = isBeforePosition(dragPosition)
+    ? [...vertexIds].reverse()
+    : vertexIds;
+
+  const isMulti = orderedIds.length > 1;
+  const txnId = formStoreVertex?.P.txnId;
+  let relativeTo = toVertex;
+  let lastCreatedLayoutId: Id | number | undefined;
+
+  for (const vertexId of orderedIds) {
+    const fromVertex = graph.vertexes[vertexId];
     if (!fromVertex) {
       showErrorToast("from Vertex not found when dropping ");
-      return;
-    }
-
-    if (!dragPosition) {
-      showErrorToast("Position not found when dropping");
       return;
     }
 
@@ -60,24 +92,37 @@ export async function executeLayoutDrop(
     const layoutId = await handleDropAtPosition(
       graph,
       setGraph,
-      formStoreVertex?.P.txnId,
+      txnId,
       graph.vertexes[formStoreVertex.P.formDataId!],
       fromVertex,
-      toVertex,
+      relativeTo,
       dragPosition,
+      { skipUndo: isMulti },
     );
+
+    if (isAfterPosition(dragPosition)) {
+      relativeTo = graph.vertexes[vertexId] ?? fromVertex;
+    }
 
     if (
       (layoutId !== -1 && fromVertex.L[0] === "Comp") ||
       fromVertex.L[0] === "Component"
     ) {
-      onLayoutItemClick(
-        layoutStoreVertex,
-        formStoreVertex,
-        layoutId as string,
-        graph,
-        setGraph,
-      );
+      lastCreatedLayoutId = layoutId as string;
     }
+  }
+
+  if (isMulti && txnId != null) {
+    saveUndoPoint(txnId, graph, setGraph);
+  }
+
+  if (lastCreatedLayoutId != null && lastCreatedLayoutId !== -1) {
+    onLayoutItemClick(
+      layoutStoreVertex,
+      formStoreVertex,
+      lastCreatedLayoutId as string,
+      graph,
+      setGraph,
+    );
   }
 }

@@ -24,6 +24,7 @@ import { createFloating } from "~/lib/dom/createFloating";
 import { getBoundingRectChildren } from "~/features/page_designer/functions/drag_drop/ui/getBoundingRectChildren";
 import { getDnDBoxShadowArgs } from "~/features/page_designer/functions/drag_drop/ui/getDnDBoxShadowArgs";
 import { isLayoutPreviewHover } from "~/features/page_designer/functions/layout/previewHover";
+import { isLayoutIdSelected } from "~/features/page_designer/functions/layout/layoutSelection";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 
@@ -38,9 +39,6 @@ export function BorderOverlay(
   const formStoreId = useDesignerFormIdContext();
   const formStoreVertex = () =>
     graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
-  const isSelectedLayoutId = createSelector(
-    () => formStoreVertex()?.P.selectedId,
-  );
   const isSelectedHoverId = createSelector(() => formStoreVertex()?.P.hoverId);
   const isPreviewHoverId = () =>
     isLayoutPreviewHover(layoutStoreVertex()?.P, props.item.id);
@@ -66,7 +64,7 @@ export function BorderOverlay(
       };
     }
 
-    if (isSelectedLayoutId(props.item.id)) {
+    if (isLayoutIdSelected(formStoreVertex()?.P, props.item.id)) {
       styles = {
         ...styles,
         border: "1px solid purple",
@@ -124,6 +122,8 @@ export function BorderOverlay(
         () => layoutStoreVertex()?.P.dragPosition,
         () => layoutStoreVertex()?.P.previewHoverId,
         () => formStoreVertex()?.P.hoverId,
+        () => formStoreVertex()?.P.selectedId,
+        () => formStoreVertex()?.P.multiHighlight,
         () => props.reference(),
         () => floatingState().x,
         () => floatingState().y,

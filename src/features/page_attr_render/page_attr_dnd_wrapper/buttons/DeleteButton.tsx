@@ -6,7 +6,14 @@ import {
   useDesignerFormIdContext,
   useDesignerLayoutStore,
 } from "~/features/page_designer/context/LayoutContext";
-import { deleteLayoutAttr } from "~/features/page_designer/functions/layout/deleteLayoutAttr";
+import {
+  deleteLayoutAttr,
+  deleteLayoutAttrs,
+} from "~/features/page_designer/functions/layout/deleteLayoutAttr";
+import {
+  getLayoutSelectionIds,
+  sameLayoutId,
+} from "~/features/page_designer/functions/layout/layoutSelection";
 import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
 import type { CssType } from "~/components/form/type/CssType";
@@ -46,12 +53,31 @@ export function DeleteButton(props: Readonly<DeleteButtonProps>) {
       name="delete"
       onClick={(e) => {
         e.stopPropagation();
+        const formStore = formStoreVertex();
+        const selectionIds = getLayoutSelectionIds(formStore?.P);
+        const itemInSelection = selectionIds.some((id) =>
+          sameLayoutId(id, props.item.id),
+        );
+
+        if (itemInSelection && selectionIds.length > 1) {
+          deleteLayoutAttrs(
+            formStore,
+            selectionIds,
+            graph,
+            setGraph,
+            formStore?.P.txnId,
+            showSuccessToast,
+            layoutStoreId,
+          );
+          return;
+        }
+
         deleteLayoutAttr(
-          formStoreVertex(),
+          formStore,
           props.item,
           graph,
           setGraph,
-          formStoreVertex()?.P.txnId,
+          formStore?.P.txnId,
           props.componentName,
           showSuccessToast,
           layoutStoreId,

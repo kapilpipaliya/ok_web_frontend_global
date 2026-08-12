@@ -13,7 +13,7 @@ import { useToast } from "~/components/styled/modal/Toast";
 import { isDisabledTxn } from "~/lib/graph/transaction/value/isDisabledTxn";
 import { addComponentAttrInPage } from "~/features/page_designer/functions/drag_drop/attributes/addComponentAttrInForm";
 import { saveAndCaptureForm } from "~/features/page_designer/utils/saveAndCapture";
-import { deleteLayoutAttr } from "~/features/page_designer/functions/layout/deleteLayoutAttr";
+import { deleteLayoutAttr, deleteLayoutAttrs } from "~/features/page_designer/functions/layout/deleteLayoutAttr";
 import { SearchBar } from "~/components/styled/SearchBar";
 
 import {
@@ -25,6 +25,7 @@ import { LayoutTreeItem } from "./LayoutTreeItem";
 import { IconButton } from "~/components/styled/IconButton";
 import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
 import { onLayoutItemClick } from "~/features/page_designer/event_handler/onLayoutItemClick";
+import { getLayoutSelectionIds } from "~/features/page_designer/functions/layout/layoutSelection";
 import { getChildrenAttrs } from "../../functions/layout/getChildrenAttrs";
 import { toggleHidden } from "./HideShowIcon";
 import { sortChildren } from "../../functions/drag_drop/hierachy/sortChildren";
@@ -410,12 +411,25 @@ export function LayoutTree() {
   // ---- Keyboard shortcut handlers ----
 
   const deleteSelected = () => {
-    const currentSelectedId = formStoreVertex()?.P.selectedId;
-    if (!currentSelectedId) {
+    const selectionIds = getLayoutSelectionIds(formStoreVertex()?.P);
+    if (selectionIds.length === 0) {
       return;
     }
 
-    const selectedVertex = graph.vertexes[currentSelectedId];
+    if (selectionIds.length > 1) {
+      deleteLayoutAttrs(
+        formStoreVertex(),
+        selectionIds,
+        graph,
+        setGraph,
+        formStoreVertex()?.P.txnId,
+        showSuccessToast,
+        layoutStoreId,
+      );
+      return;
+    }
+
+    const selectedVertex = graph.vertexes[selectionIds[0] as Id];
     if (!selectedVertex) {
       return;
     }
@@ -456,17 +470,18 @@ export function LayoutTree() {
   };
 
   const toggleHiddenSelected = () => {
-    const currentSelectedId = formStoreVertex()?.P.selectedId;
-    if (!currentSelectedId) {
+    const selectionIds = getLayoutSelectionIds(formStoreVertex()?.P);
+    if (selectionIds.length === 0) {
       return;
     }
 
-    const itemId = String(currentSelectedId);
-    if (!graph.vertexes[itemId]) {
-      return;
+    for (const id of selectionIds) {
+      const itemId = String(id);
+      if (!graph.vertexes[itemId]) {
+        continue;
+      }
+      toggleHidden(itemId as Id, formStoreId!, graph, setGraph);
     }
-
-    toggleHidden(itemId as Id, formStoreId!, graph, setGraph);
   };
 
   const toggleJsonEditorSelected = () => {

@@ -383,8 +383,10 @@ export function createTapClickHandler(handler: (event: Event) => void) {
   };
 }
 
-/** Pen/touch tap to select a layout tree row. */
-export function createRowTapSelect(onSelect: () => void) {
+/** Pen/touch tap to select a layout tree row. Passes the event so callers can read modifiers. */
+export function createRowTapSelect(
+  onSelect: (event?: MouseEvent | PointerEvent) => void,
+) {
   let pointerDown = false;
   let x = 0;
   let y = 0;
@@ -405,15 +407,15 @@ export function createRowTapSelect(onSelect: () => void) {
     if (event.pointerType !== "pen" && event.pointerType !== "touch") return;
     if (movedEnough(event, x, y)) return;
     handledByPointer = true;
-    onSelect();
+    onSelect(event);
   };
 
-  const handleClick = () => {
+  const handleClick = (event: MouseEvent) => {
     if (handledByPointer) {
       handledByPointer = false;
       return;
     }
-    onSelect();
+    onSelect(event);
   };
 
   return { handleClick, handlePointerDown, handlePointerUp };

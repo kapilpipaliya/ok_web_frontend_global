@@ -34,6 +34,7 @@ import {
   isLayoutPreviewHover,
   schedulePreviewHoverClear,
 } from "~/features/page_designer/functions/layout/previewHover";
+import { isLayoutIdSelected } from "~/features/page_designer/functions/layout/layoutSelection";
 
 import { BorderOverlay } from "../overlays/BorderOverlay";
 import { AttrConfigPopOverWrapper } from "../popovers/AttrConfigPopOverWrapper";
@@ -54,9 +55,6 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
   const formStoreId = useDesignerFormIdContext();
   const formStoreVertex = () =>
     graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
-  const isSelectedLayoutId = createSelector(
-    () => formStoreVertex()?.P.selectedId,
-  );
   const [previewStore] = usePreviewContext();
   const isSelectedHoverId = createSelector(() => formStoreVertex()?.P.hoverId);
   const isPreviewHoverId = () =>
@@ -114,6 +112,8 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
 
   const handleClick = (e: MouseEvent) => {
     e.stopPropagation();
+    const isToggle = e.metaKey || e.ctrlKey;
+    const isRange = e.shiftKey && !isToggle;
     onLayoutItemClick(
       layoutStoreVertex(),
       formStoreVertex(),
@@ -122,6 +122,12 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
       setGraph,
       contextData.index,
       "preview",
+      isToggle || isRange
+        ? {
+            toggle: isToggle,
+            range: isRange,
+          }
+        : undefined,
     );
   };
 
@@ -175,9 +181,8 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
       </Show>
       <Show
         when={
-          isSelectedLayoutId(props.item.id) ||
-          isHoveredItem() ||
-          formStoreVertex()?.P.multiHighlight.includes(props.item.id)
+          isLayoutIdSelected(formStoreVertex()?.P, props.item.id) ||
+          isHoveredItem()
         }
       >
         <AttrConfigPopOverWrapper item={props.item} reference={reference} />

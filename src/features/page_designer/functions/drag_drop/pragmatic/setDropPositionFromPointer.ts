@@ -27,7 +27,7 @@ export function setDropPositionFromPointer(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
   formData: Vertex | null,
-  fromVertexId: Id | undefined,
+  fromVertexIds: Id | Id[] | undefined,
 ) {
   let dragPosition = getIndicatorPosition(
     pointer as unknown as MouseEvent,
@@ -65,21 +65,31 @@ export function setDropPositionFromPointer(
     activeItem = layoutVertex.id;
   }
 
-  const fromVertex = fromVertexId ? graph.vertexes[fromVertexId] : undefined;
-  // fromVertexId is passed from pragmatic source.data (not layout store).
-  if (
-    !(
-      fromVertex &&
-      validateDragOver(
-        graph,
-        setGraph,
-        fromVertex,
-        activeItem,
-        formData!,
-        dragPosition,
-      )
-    )
-  ) {
+  const ids = Array.isArray(fromVertexIds)
+    ? fromVertexIds
+    : fromVertexIds != null
+      ? [fromVertexIds]
+      : [];
+
+  // Reject if any dragged item cannot drop here (self / into own descendant).
+  const canDropAll =
+    ids.length > 0 &&
+    ids.every((fromVertexId) => {
+      const fromVertex = graph.vertexes[fromVertexId];
+      return (
+        !!fromVertex &&
+        validateDragOver(
+          graph,
+          setGraph,
+          fromVertex,
+          activeItem,
+          formData!,
+          dragPosition!,
+        )
+      );
+    });
+
+  if (!canDropAll) {
     mergeVertexProperties<PageLayoutObject>(
       0,
       layoutStoreVertex.id!,

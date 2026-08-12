@@ -9,6 +9,7 @@ import {
   useDesignerLayoutStore,
 } from "~/features/page_designer/context/LayoutContext";
 import { isLayoutPreviewHover } from "~/features/page_designer/functions/layout/previewHover";
+import { sameLayoutId } from "~/features/page_designer/functions/layout/layoutSelection";
 import { useDataContext } from "~/features/page_attr_render/context/DataContext";
 
 import { HoverAttrConfigPopOver } from "./HoverAttrConfigPopOver";
@@ -38,16 +39,16 @@ export function AttrConfigPopOver(props: Readonly<{ item: Vertex }>) {
   const isSelectedIndex = () =>
     formStoreVertex()?.P.selectedIndex === contextData.index ||
     formStoreVertex()?.P.selectedIndex === -1;
+  const isMultiHighlighted = () =>
+    !!formStoreVertex()?.P.multiHighlight?.some((id) =>
+      sameLayoutId(id, props.item.id),
+    );
 
   let popoverRef: HTMLDivElement | undefined;
-  // const useVisibilityObserver = createVisibilityObserver({ threshold: 0.8 });
-  // const _visible = useVisibilityObserver(() => popoverRef);
 
   return (
     <div ref={popoverRef}>
-      <div
-      // classList={{ hide: !visible() }}
-      >
+      <div>
         <Switch>
           <Match when={isSelectedLayoutId(props.item.id) && isSelectedIndex()}>
             <SelectedAttrConfigPopOver item={props.item} />
@@ -55,7 +56,7 @@ export function AttrConfigPopOver(props: Readonly<{ item: Vertex }>) {
           <Match
             when={
               isHoveredItem() ||
-              formStoreVertex()?.P.multiHighlight.includes(props.item.id) ||
+              isMultiHighlighted() ||
               (isSelectedLayoutId(props.item.id) && !isSelectedIndex())
             }
           >

@@ -18,6 +18,7 @@ import type { Vertex } from "~/lib/graph/type/vertex";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 import { allFormAttrsInPageFromLevel } from "~/features/page_designer/functions/form/allFormAttrsInPageFromLevel";
 import { getAllFieldsUsedInRootLevelSetting } from "~/features/page_designer/functions/form/getAllFieldsUsedInRootLevelSetting";
+import { filterTopmostSelectionIds, sameLayoutId } from "~/features/page_designer/functions/layout/layoutSelection";
 
 /**
  * Find the parent vertex of a given layout vertex
@@ -63,7 +64,7 @@ function findSiblings(
 }
 
 /**
- * Clear selectedId and hoverId if they match the layout being deleted
+ * Clear selectedId, multiHighlight, and hoverId if they match the layout being deleted
  */
 function clearSelectedAndHoverIds(
   formStoreVertex: Vertex<FormStoreObject>,
@@ -82,6 +83,13 @@ function clearSelectedAndHoverIds(
       updates.hoverId = -1;
     }
 
+    const multi = formStoreVertex?.P.multiHighlight;
+    if (multi?.some((id) => sameLayoutId(id, layoutVertex.id))) {
+      updates.multiHighlight = multi.filter(
+        (id) => !sameLayoutId(id, layoutVertex.id),
+      );
+    }
+
     if (Object.keys(updates).length > 0) {
       mergeVertexProperties<FormStoreObject>(
         0,
@@ -92,6 +100,126 @@ function clearSelectedAndHoverIds(
       );
     }
   });
+}
+
+/**
+ * Delete multiple layout attrs (e.g. multi-select). Skips nested children of
+ * other selected nodes. Selects a remaining sibling/parent afterward.
+ */
+export function deleteLayoutAttrs(
+  formStoreVertex: Vertex<FormStoreObject>,
+  layoutVertexIds: Array<Id | number>,
+  graph: GraphInterface,
+  setGraph: SetStoreFunction<GraphInterface>,
+  txnId: number,
+  showSuccessToast: (message: string) => void,
+  layoutStoreId?: Id,
+) {
+  const uniqueIds = [
+    ...new Map(layoutVertexIds.map((id) => [String(id), id])).values(),
+  ];
+  const topIds = filterTopmostSelectionIds(uniqueIds, graph);
+  const vertices = topIds
+    .map((id) => graph.vertexes[id as Id])
+    .filter(Boolean) as Vertex[];
+
+  if (vertices.length === 0) return;
+
+  if (vertices.length === 1) {
+    const key = vertices[0].P?.key || vertices[0].P?.componentName || "Html";
+    deleteLayoutAttr(
+      formStoreVertex,
+      vertices[0],
+      graph,
+      setGraph,
+      txnId,
+      key,
+      showSuccessToast,
+      layoutStoreId,
+    );
+    return;
+  }
+
+  // Validate each; abort all if any fails validation
+  for (const vertex of vertices) {
+    if (validateLayoutDeletion(formStoreVertex, vertex, graph, setGraph)) {
+      return;
+    }
+  }
+
+  const primary = vertices[0];
+  const parentVertex = findParentVertex(primary, graph);
+  const { nextSibling, prevSibling } = findSiblings(
+    primary,
+    parentVertex,
+    graph,
+    setGraph,
+  );
+
+  batch(() => {
+    mergeVertexProperties<FormStoreObject>(
+      0,
+      formStoreVertex.id!,
+      graph,
+      setGraph,
+      {
+        selectedId: -1,
+        multiHighlight: [],
+        hoverId:
+          formStoreVertex.P.hoverId != null &&
+          uniqueIds.some((id) =>
+            sameLayoutId(id, formStoreVertex.P.hoverId),
+          )
+            ? -1
+            : formStoreVertex.P.hoverId,
+      },
+    );
+  });
+
+  if (layoutStoreId) {
+    const previewHoverId = graph.vertexes[layoutStoreId]?.P?.previewHoverId;
+    if (
+      previewHoverId != null &&
+      uniqueIds.some((id) => sameLayoutId(id, previewHoverId))
+    ) {
+      clearLayoutPreviewHover(layoutStoreId, graph, setGraph);
+    }
+  }
+
+  deleteNestedLayout(graph, setGraph, txnId, vertices);
+  saveUndoPoint(txnId, graph, setGraph);
+
+  const layoutStoreVertex = layoutStoreId
+    ? (graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>)
+    : null;
+
+  if (layoutStoreVertex) {
+    const vertexToSelect = determineVertexToSelect(
+      nextSibling &&
+        !uniqueIds.some((id) => sameLayoutId(id, nextSibling.id))
+        ? nextSibling
+        : null,
+      prevSibling &&
+        !uniqueIds.some((id) => sameLayoutId(id, prevSibling.id))
+        ? prevSibling
+        : null,
+      parentVertex,
+      formStoreVertex,
+      graph,
+    );
+
+    if (vertexToSelect) {
+      selectVertex(
+        layoutStoreVertex,
+        formStoreVertex,
+        vertexToSelect,
+        graph,
+        setGraph,
+      );
+    }
+  }
+
+  showSuccessToast(`${vertices.length} items deleted successfully`);
 }
 
 /**

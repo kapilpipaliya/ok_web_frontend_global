@@ -3,8 +3,10 @@ import { createSignal, onCleanup } from "solid-js";
 import { IconButton } from "~/components/styled/IconButton";
 import {
   type PageLayoutObject,
+  useDesignerFormIdContext,
   useDesignerLayoutStore,
 } from "~/features/page_designer/context/LayoutContext";
+import type { FormStoreObject } from "~/components/form/context/FormContext";
 import { attachLayoutItemDraggable } from "~/features/page_designer/functions/drag_drop/pragmatic/pragmaticDragDrop";
 import {
   bindDragDropRef,
@@ -35,13 +37,16 @@ interface SelectedAttrConfigPopOverProps {
 export function SelectedAttrConfigPopOver(
   props: Readonly<SelectedAttrConfigPopOverProps>,
 ) {
+  const [graph, setGraph] = useGraph();
   const layoutStoreId = useDesignerLayoutStore();
+  const formStoreId = useDesignerFormIdContext();
   const layoutStoreVertex = () =>
     graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
+  const formStoreVertex = () =>
+    graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
   const parentItems = usePageRenderContext();
   const parentRenderContext = () => getLastItem(parentItems)?.[0];
 
-  const [graph, setGraph] = useGraph();
   const [dragHandleRef, setDragHandleRef] = createSignal<HTMLButtonElement>();
 
   const bindLayoutDrag = bindDragDropRef(
@@ -49,6 +54,7 @@ export function SelectedAttrConfigPopOver(
     (element) =>
       attachLayoutItemDraggable(element, {
         layoutStoreVertex,
+        formStoreVertex,
         graph,
         setGraph,
         layoutVertex: props.item,

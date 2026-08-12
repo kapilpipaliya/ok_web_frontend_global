@@ -15,6 +15,7 @@ import { componentsMap } from "~/components/form/functions/componentsMap";
 import { useToast } from "~/components/styled/modal/Toast";
 import { generateBoxShadow } from "~/lib/css/generateBoxShadow";
 import { onLayoutItemClick } from "~/features/page_designer/event_handler/onLayoutItemClick";
+import { isLayoutIdSelected } from "~/features/page_designer/functions/layout/layoutSelection";
 import { getDnDBoxShadowArgs } from "~/features/page_designer/functions/drag_drop/ui/getDnDBoxShadowArgs";
 import { attachLayoutTreeItemDragDrop } from "~/features/page_designer/functions/drag_drop/pragmatic/pragmaticDragDrop";
 import {
@@ -94,6 +95,8 @@ export function LayoutTreeItem(
   const isSelectedLayoutId = createSelector(
     () => formStoreVertex()?.P.selectedId,
   );
+  const isRowSelected = () =>
+    isLayoutIdSelected(formStoreVertex()?.P, props.metaVertex.id);
   const isSelectedHoverId = createSelector(() => formStoreVertex()?.P.hoverId);
   const { showErrorToast } = useToast();
   const activeItemChanged = createSelector(
@@ -222,7 +225,18 @@ export function LayoutTreeItem(
     row.cleanup();
   });
 
-  const handleClick = () => {
+  const getVisibleOrderedIds = (): Id[] => {
+    const treeRoot =
+      parentRef()?.closest(".layouttree") ?? parentRef()?.parentElement;
+    if (!treeRoot) return [];
+    return Array.from(treeRoot.querySelectorAll("[data-item-id]"))
+      .map((el) => el.getAttribute("data-item-id"))
+      .filter((id): id is string => !!id) as Id[];
+  };
+
+  const handleClick = (event?: MouseEvent | PointerEvent) => {
+    const isToggle = !!(event && (event.metaKey || event.ctrlKey));
+    const isRange = !!(event && event.shiftKey && !isToggle);
     onLayoutItemClick(
       layoutStoreVertex(),
       formStoreVertex(),
@@ -231,6 +245,13 @@ export function LayoutTreeItem(
       setGraph,
       0,
       "layoutTree",
+      isToggle || isRange
+        ? {
+            toggle: isToggle,
+            range: isRange,
+            orderedIds: isRange ? getVisibleOrderedIds() : undefined,
+          }
+        : undefined,
     );
   };
 
@@ -551,7 +572,7 @@ export function LayoutTreeItem(
         hasChildren={!!children().length}
         isDragOver={isActiveTargetItem()}
         isHovered={isHovered}
-        isSelected={() => isSelectedLayoutId(props.metaVertex.id)}
+        isSelected={() => isRowSelected()}
         itemId={props.metaVertex.id}
         onClick={rowTapSelect.handleClick}
         onPointerDown={(e) => {
@@ -579,7 +600,7 @@ export function LayoutTreeItem(
           metaVertex={props.metaVertex}
           toggleExpand={props.toggleExpand}
           parentIndex={props.parentIndex}
-          isSelected={isSelectedLayoutId(props.metaVertex.id)}
+          isSelected={isRowSelected()}
         />
         <Show when={props.metaVertex.P.fns}>
           <CodePreview

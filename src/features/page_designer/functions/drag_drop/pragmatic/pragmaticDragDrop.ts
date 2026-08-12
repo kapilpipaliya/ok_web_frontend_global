@@ -21,6 +21,7 @@ import {
   getVertexIdsFromSourceData,
   type PaletteDragContext,
 } from "~/features/page_designer/functions/drag_drop/pragmatic/paletteDragHelpers";
+import { getLayoutDragVertexIds } from "~/features/page_designer/functions/layout/layoutSelection";
 import {
   isPageDesignerDragSource,
   PAGE_DESIGNER_DRAG_TYPES,
@@ -193,6 +194,7 @@ export interface PalettePageDragContext extends PaletteDragContext {}
 
 export interface LayoutItemDragContext {
   layoutStoreVertex: () => Vertex<PageLayoutObject>;
+  formStoreVertex?: () => Vertex<FormStoreObject> | undefined;
   graph: GraphInterface;
   setGraph: SetStoreFunction<GraphInterface>;
   layoutVertex: Vertex;
@@ -230,7 +232,7 @@ function createPositionUpdater(
       ctx.graph,
       ctx.setGraph,
       getFormDataVertex(formStore, ctx.graph),
-      vertexIds[0],
+      vertexIds,
     );
   };
 }
@@ -449,25 +451,31 @@ export function attachLayoutTreeItemDragDrop(
     );
   };
 
+  const getLayoutItemDragData = () => {
+    const formStore = ctx.formStoreVertex();
+    const vertexIds = getLayoutDragVertexIds(
+      formStore?.P,
+      ctx.layoutVertex.id,
+      ctx.graph,
+    );
+    return {
+      type: PAGE_DESIGNER_DRAG_TYPES.LAYOUT_ITEM,
+      vertexId: ctx.layoutVertex.id,
+      vertexIds,
+    };
+  };
+
   const dragCleanup = combine(
     draggable({
       element,
-      getInitialData: () => ({
-        type: PAGE_DESIGNER_DRAG_TYPES.LAYOUT_ITEM,
-        vertexId: ctx.layoutVertex.id,
-        vertexIds: [ctx.layoutVertex.id],
-      }),
+      getInitialData: getLayoutItemDragData,
       onDrop: () => {
         scheduleDropStateCleanup(ctx);
       },
     }),
     registerTouchDragSource({
       element,
-      getData: () => ({
-        type: PAGE_DESIGNER_DRAG_TYPES.LAYOUT_ITEM,
-        vertexId: ctx.layoutVertex.id,
-        vertexIds: [ctx.layoutVertex.id],
-      }),
+      getData: getLayoutItemDragData,
       onDragEnd: () => {
         scheduleDropStateCleanup(ctx);
       },
@@ -626,11 +634,19 @@ export function attachLayoutItemDraggable(
   element: HTMLElement,
   ctx: LayoutItemDragContext,
 ): () => void {
-  const getInitialData = () => ({
-    type: PAGE_DESIGNER_DRAG_TYPES.LAYOUT_ITEM,
-    vertexId: ctx.layoutVertex.id,
-    vertexIds: [ctx.layoutVertex.id],
-  });
+  const getInitialData = () => {
+    const formStore = ctx.formStoreVertex?.();
+    const vertexIds = getLayoutDragVertexIds(
+      formStore?.P,
+      ctx.layoutVertex.id,
+      ctx.graph,
+    );
+    return {
+      type: PAGE_DESIGNER_DRAG_TYPES.LAYOUT_ITEM,
+      vertexId: ctx.layoutVertex.id,
+      vertexIds,
+    };
+  };
 
   return combine(
     draggable({
