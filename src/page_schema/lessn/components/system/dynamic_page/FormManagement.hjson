@@ -907,13 +907,73 @@ const getFieldValue = (fieldKey) => {
   return vertex?.P?.[fieldKey] ?? "";
 };
 
+/*
+ * Optional field schema: auto-slug another field when this one changes.
+ *
+ * Configure on the *source* field in formConfig (e.g. products title → URL key):
+ *   {
+ *     key: "title",
+ *     label: "Title",
+ *     renderer: "text",
+ *     autoSlugTo: "key",              // required — target field key to fill
+ *     autoSlugMode: "emptyOrSynced",  // optional — "emptyOrSynced" (default) | "always"
+ *     autoSlugSeparator: "-",         // optional — "-" (default) | "_"
+ *     autoSlugMaxLength: 80           // optional — max slug length (default 80)
+ *   }
+ *
+ * Modes:
+ * - emptyOrSynced: update target only when it is empty OR still equals the previous
+ *   slug of this field (stops once the user manually customizes the target).
+ * - always: always overwrite the target from the source value.
+ */
+const slugifyForAutoSlug = (value, options = {}) => {
+  const separator = options.separator === "_" ? "_" : "-";
+  const maxLength =
+    Number.isFinite(options.maxLength) && options.maxLength > 0 ? options.maxLength : 80;
+  const escaped = separator === "_" ? "_" : "-";
+  return String(value ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, separator)
+    .replace(new RegExp(`^${escaped}+|${escaped}+$`, "g"), "")
+    .slice(0, maxLength);
+};
+
+const applyAutoSlugFromFieldChange = (sourceField, previousValue, nextValue) => {
+  const targetKey =
+    sourceField?.autoSlugTo != null ? String(sourceField.autoSlugTo).trim() : "";
+  if (!targetKey || targetKey === sourceField.key) return;
+
+  const mode = sourceField.autoSlugMode === "always" ? "always" : "emptyOrSynced";
+  const opts = {
+    separator: sourceField.autoSlugSeparator === "_" ? "_" : "-",
+    maxLength: sourceField.autoSlugMaxLength
+  };
+  const nextSlug = slugifyForAutoSlug(nextValue, opts);
+  const prevSlug = slugifyForAutoSlug(previousValue, opts);
+  const currentTarget = String(getFieldValue(targetKey) ?? "").trim();
+
+  if (mode === "emptyOrSynced") {
+    if (currentTarget !== "" && currentTarget !== prevSlug) return;
+  }
+  if (currentTarget === nextSlug) return;
+
+  // skipAutoSlug: writing the target must not chain into another auto-slug
+  setFieldValue(targetKey, nextSlug, { skipAutoSlug: true });
+};
+
 // Set form field value in vertex using mergeVertexProperties
-const setFieldValue = (fieldKey, value) => {
+const setFieldValue = (fieldKey, value, options = {}) => {
   const nestedField = getAllFields().find((f) => f.key === fieldKey);
   if (getFieldRenderer(nestedField) === "nestedLineItems") return;
   if (getFieldRenderer(nestedField) === "graphFileUpload") return;
   const vertexId = formVertexId();
   if (!vertexId) return;
+
+  const previousValue =
+    nestedField && getFieldRenderer(nestedField) !== "embeddedVertexPicker"
+      ? getFieldValue(fieldKey)
+      : undefined;
 
   // Get or generate txnId (separate variable, not stored in vertex)
   let txnId = formTxnId();
@@ -962,6 +1022,10 @@ const setFieldValue = (fieldKey, value) => {
   // Use mergeVertexProperties to update vertex in graph
   // The vertex will be automatically updated in the graph
   _.mergeVertexProperties(txnId, vertexId, g, sg, { [fieldKey]: value });
+
+  if (options?.skipAutoSlug !== true && nestedField?.autoSlugTo) {
+    applyAutoSlugFromFieldChange(nestedField, previousValue, value);
+  }
 
   const onFieldChange = c.props?.onFieldChange;
   if (typeof onFieldChange === "function") {

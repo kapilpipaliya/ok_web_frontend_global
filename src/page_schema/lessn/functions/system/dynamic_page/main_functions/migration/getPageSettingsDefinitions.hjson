@@ -894,7 +894,20 @@ const productTableFormConfig = {
       title: "Product",
       gridColumns: 2,
       fields: [
-        { key: "title", label: "Title", dataType: "text", renderer: "text", required: true, colSpan: 1, translatable: false },
+        {
+          key: "title",
+          label: "Title",
+          dataType: "text",
+          renderer: "text",
+          required: true,
+          colSpan: 1,
+          translatable: false,
+          // FormManagement: auto-fill URL key from title (see FormManagement autoSlugTo docs)
+          autoSlugTo: "key",
+          autoSlugMode: "emptyOrSynced",
+          autoSlugSeparator: "-",
+          autoSlugMaxLength: 80
+        },
         { key: "key", label: "URL key", dataType: "text", renderer: "text", required: true, colSpan: 1, translatable: false, placeholder: "wireless-earbuds" },
         { key: "shortDescription", label: "Short description", dataType: "text", renderer: "textArea", colSpan: 2, translatable: false, placeholder: "Shown on product cards" },
         {
