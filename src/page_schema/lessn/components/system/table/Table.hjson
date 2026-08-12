@@ -2209,13 +2209,23 @@ const createResizeHandler = (columnKey) => {
     document.addEventListener('touchend', handleMouseUp);
   };
 };
-// Watch for sidebar selection changes and refresh table
+// Watch for sidebar selection changes and refresh table.
+// Depend only on category id — not the vertex object — so contentCount bumps
+// after delete/add do not re-fetch and restore stale cached rows.
 const selectedSidebarItem = f.selectedSidebarItem;
+const getSelectedSidebarCategoryId =
+  f.getSelectedSidebarCategoryId ||
+  (() => {
+    const item = typeof selectedSidebarItem === "function" ? selectedSidebarItem() : null;
+    return item?.id ?? null;
+  });
 _.createEffect(() => {
-  const item = selectedSidebarItem?.();
+  const itemId =
+    typeof getSelectedSidebarCategoryId === "function"
+      ? getSelectedSidebarCategoryId()
+      : null;
   patchTableP({ activeRowId: null });
-  // When sidebar selection changes, refresh table data
-  if (item) {
+  if (itemId) {
     handleSearch();
   }
 });

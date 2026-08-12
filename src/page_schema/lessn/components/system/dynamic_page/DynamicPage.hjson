@@ -50,8 +50,10 @@ const patchPageP = (partial) => {
 };
 const pageP = () => g.vertexes[pageStateVertexId]?.P;
 
+const getSelectedSidebarCategoryId = () => pageP()?.selectedSidebarCategoryId ?? null;
+
 const selectedSidebarItem = () => {
-  const id = pageP()?.selectedSidebarCategoryId;
+  const id = getSelectedSidebarCategoryId();
   if (id == null) return null;
   return g.vertexes[id] ?? null;
 };
@@ -548,6 +550,19 @@ const applyServerGraphToLocalGraph = (response) => {
     (Array.isArray(deleted_vertexes) && deleted_vertexes.length > 0) ||
     (Array.isArray(deleted_edges) && deleted_edges.length > 0);
   if (!hasWork) return;
+
+  // setGraphData replaces vertex.P entirely. All-view hierarchy (and other fetches)
+  // return category nodes from Neo4j without client-only contentCount — preserve it.
+  // instead we can fetch category count from server too, but as we already have its ok not not.
+  for (const id of Object.keys(vertexes)) {
+    const incoming = vertexes[id];
+    const existing = g?.vertexes?.[id];
+    if (!incoming?.P || existing?.P?.contentCount == null) continue;
+    if (incoming.P.contentCount == null) {
+      incoming.P = { ...incoming.P, contentCount: existing.P.contentCount };
+    }
+  }
+
   _.setGraphData(0, { vertexes, edges, deleted_vertexes, deleted_edges }, {});
 };
 
@@ -976,6 +991,13 @@ const getGenericSaveFunction = () => {
         translatableFieldKeys: collectTranslatableFieldKeys(tableConfig?.formConfig),
         siteLanguages: getSiteLanguages()
       });
+
+      // Resolve folder before applyServerGraph removes the content vertex/edges
+      const preDeleteCatId =
+        mode === "delete" && originalRow
+          ? getContentCategoryIdFromRow(originalRow, getSidebarConfig())
+          : null;
+
       applyServerGraphToLocalGraph(result);
 
       const toContentIds = (...values) => {
@@ -1060,16 +1082,37 @@ const getGenericSaveFunction = () => {
         }
       }
 
-      // If deleting an item, decrement the category count
+      // Keep table cache + UI in sync after create (same pattern as drop-create).
+      // Without this, a cached refetch overwrites Table.appendRowIds and the new row disappears.
+      if (
+        mode === "add" &&
+        result?.result?.success === true &&
+        contentIdsToAssign.length > 0
+      ) {
+        mergeMainTableRowIds(contentIdsToAssign);
+        patchPageP({ rowsToAddVertexIds: contentIdsToAssign });
+      }
+
+      // Graph vertex/edges come from server deleted_vertexes / deleted_edges via applyServerGraphToLocalGraph.
+      // Still update table row cache and sidebar counts on the client.
       if (mode === "delete" && result?.result?.success && originalRow) {
-        const sidebarItem = selectedSidebarItem();
+        const deletedId = originalRow.id != null ? String(originalRow.id) : "";
         const sidebarConfig = getSidebarConfig();
 
-        if (sidebarItem && sidebarConfig && sidebarConfig.toParentEdgeType) {
+        if (deletedId) {
+          const nextMainIds = (Array.isArray(pageP()?.mainTableRowIds) ? pageP().mainTableRowIds : [])
+            .map((id) => String(id))
+            .filter((id) => id !== deletedId);
+          patchPageP({
+            rowsToRemoveVertexIds: [deletedId],
+            mainTableRowIds: nextMainIds
+          });
+        }
+
+        const sidebarItem = selectedSidebarItem();
+        if (sidebarItem && sidebarConfig?.toParentEdgeType) {
           const rootKeys = sidebarConfig.rootKeys || {};
           const rootKey = rootKeys.key;
-
-          // Use the currently selected sidebar item to determine which category to decrement
           const uCatDel = getUncategorizedVertexId();
           const isUncatDel =
             uCatDel && (sidebarItem.id === uCatDel || sidebarItem.P?.key === uCatDel);
@@ -1077,10 +1120,8 @@ const getGenericSaveFunction = () => {
           if (isAllDel) {
             const aKey = getAllVertexId();
             if (aKey) updateSidebarCategoryCount(aKey, -1);
-            // Also decrement the item's real folder / Uncategorized count (skip All cascade)
-            const actualCatId = getContentCategoryIdFromRow(originalRow, sidebarConfig);
-            if (actualCatId) {
-              updateSidebarCategoryCount(actualCatId, -1, { skipAll: true });
+            if (preDeleteCatId) {
+              updateSidebarCategoryCount(preDeleteCatId, -1, { skipAll: true });
             } else {
               const uKey = getUncategorizedVertexId();
               if (uKey) updateSidebarCategoryCount(uKey, -1, { skipAll: true });
@@ -1090,7 +1131,6 @@ const getGenericSaveFunction = () => {
           } else if (isUncatDel && uCatDel) {
             updateSidebarCategoryCount(uCatDel, -1);
           } else if (sidebarItem.id) {
-            // Decrement the selected category's count
             updateSidebarCategoryCount(sidebarItem.id, -1);
           }
         }
@@ -3426,6 +3466,7 @@ return {
   setSidebarWidth,
   getUsePolarisUI,
   selectedSidebarItem,
+  getSelectedSidebarCategoryId,
   handleSidebarItemSelect,
   handleMoveItemsToCategory,
   getSelectedRows,

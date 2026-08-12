@@ -1223,6 +1223,37 @@ try {
       console.warn("Failed to fetch vertex data before deletion for hooks:", e);
     }
 
+    // Capture connected edge ids before DETACH DELETE so the client can drop them
+    // (deleteVertex requires empty IN/OUT on the local graph).
+    const deletedEdgeIdsFromDetach = [];
+    try {
+      const edgeCaptureQuery = !enableUserScoping
+        ? `
+          MATCH (c:${vertexLabel})
+          WHERE elementId(c) = $elementId
+          OPTIONAL MATCH (c)-[r]-()
+          RETURN collect(DISTINCT elementId(r)) as edgeIds
+        `
+        : `
+          MATCH (u:User {uuid: $userUuid})-[:${relationshipType}]->(c:${vertexLabel})
+          WHERE elementId(c) = $elementId
+          OPTIONAL MATCH (c)-[r]-()
+          RETURN collect(DISTINCT elementId(r)) as edgeIds
+        `;
+      const edgeCaptureParams = enableUserScoping
+        ? { elementId: deleteElementId, userUuid: user.P.uuid }
+        : { elementId: deleteElementId };
+      const edgeCaptureResult = await _.session.run(edgeCaptureQuery, edgeCaptureParams);
+      if (edgeCaptureResult.records.length > 0) {
+        const edgeIds = edgeCaptureResult.records[0].get("edgeIds") || [];
+        for (let i = 0; i < edgeIds.length; i++) {
+          if (edgeIds[i] != null) deletedEdgeIdsFromDetach.push(String(edgeIds[i]));
+        }
+      }
+    } catch (e) {
+      console.warn("Failed to capture edge ids before content deletion:", e);
+    }
+
     try {
       await syncContentTranslations("delete", {
         parentElementId: deleteElementId,
@@ -1271,12 +1302,28 @@ try {
       };
     }
 
+    // Push deletions into response graph so applyServerGraphToLocalGraph removes them
+    if (!_.context.deletedEdges) _.context.deletedEdges = [];
+    for (let i = 0; i < deletedEdgeIdsFromDetach.length; i++) {
+      const edgeId = deletedEdgeIdsFromDetach[i];
+      if (edgeId && !_.context.deletedEdges.includes(edgeId)) {
+        _.context.deletedEdges.push(edgeId);
+      }
+    }
+    if (!_.context.deletedVertexes) _.context.deletedVertexes = [];
+    const deletedVertexId = String(deleteElementId);
+    if (!_.context.deletedVertexes.includes(deletedVertexId)) {
+      _.context.deletedVertexes.push(deletedVertexId);
+    }
+
     const deleteResult = {
       success: true,
       message: `${vertexLabel} deleted successfully`,
       data: deletedVertexData
         ? { id: deleteElementId, P: deletedVertexData.P }
-        : { id: deleteElementId }
+        : { id: deleteElementId },
+      deleted_vertexes: [deletedVertexId],
+      deleted_edges: deletedEdgeIdsFromDetach
     };
 
     // Execute afterDelete hooks
