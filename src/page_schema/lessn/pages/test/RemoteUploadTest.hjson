@@ -1,0 +1,475 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        key: RemoteUploadTest
+        title: Remote Upload Test
+        url: /test/remote-upload
+        signinRequired: true
+        isNoPermissionCheck: true
+        dynamicComponent: FormManagement
+        fns:
+          '''
+const [resultJson, setResultJson] = _.createSignal("");
+const [uploadedFiles, setUploadedFiles] = _.createSignal([]);
+
+const pickFirstFileVertex = (data) => {
+  if (!data) return null;
+  if (Array.isArray(data.result) && data.result.length > 0) {
+    return data.result[0];
+  }
+  if (data.result && data.result.id) {
+    return data.result;
+  }
+  const vertexes = data.graph?.vertexes || {};
+  for (const id of Object.keys(vertexes)) {
+    const v = vertexes[id];
+    if (v?.L?.includes?.("File") || v?.L?.[0] === "File") {
+      return v;
+    }
+  }
+  return null;
+};
+
+const downloadHrefFor = (file) => {
+  const name = file?.P?.fileName;
+  if (!name) return "";
+  return `/api/file/download/${encodeURIComponent(String(name))}`;
+};
+
+const uploadedFilesHtml = () => {
+  const files = uploadedFiles() || [];
+  if (files.length === 0) return "";
+  return files
+    .map((file) => {
+      const name = file?.P?.fileName || file?.id || "file";
+      const href = downloadHrefFor(file);
+      if (!href) return `<div>${String(name)}</div>`;
+      const safeName = String(name)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+      return `<div><a href="${href}" target="_blank" rel="noopener noreferrer">${safeName}</a></div>`;
+    })
+    .join("");
+};
+
+const remoteUploadFormConfiguration = {
+  gridColumns: 1,
+  groups: [
+    {
+      key: "remote_files",
+      title: "Remote files",
+      gridColumns: 1,
+      fields: [
+        {
+          key: "files",
+          label: "Files",
+          dataType: "array",
+          renderer: "fieldArray",
+          required: true,
+          colSpan: 1,
+          helpText: "Add one or more remote URLs. Optional file name overrides the saved name per file.",
+          defaultValue: [{ url: "", fileName: "" }],
+          fieldArrayConfig: {
+            itemLabel: "File",
+            addButtonLabel: "Add URL",
+            minItems: 1,
+            defaultItems: [{ url: "", fileName: "" }],
+            itemFields: [
+              {
+                key: "url",
+                label: "Remote URL",
+                dataType: "text",
+                renderer: "text",
+                required: true,
+                placeholder: "https://example.com/image.png"
+              },
+              {
+                key: "fileName",
+                label: "File name (optional)",
+                dataType: "text",
+                renderer: "text",
+                required: false,
+                placeholder: "optional-name.png"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+};
+
+const saveRemoteUploadForm = async (savePayload) => {
+  const rawFiles = savePayload?.vertex?.P?.files;
+  const rows = Array.isArray(rawFiles) ? rawFiles : [];
+  const entries = rows
+    .map((row) => ({
+      url: row?.url != null ? String(row.url).trim() : "",
+      fileName: row?.fileName != null ? String(row.fileName).trim() : ""
+    }))
+    .filter((row) => row.url)
+    .map((row) => {
+      const entry = { url: row.url };
+      if (row.fileName) entry.fileName = row.fileName;
+      return entry;
+    });
+
+  if (entries.length === 0) {
+    _.showErrorToast?.("Add at least one remote URL");
+    return false;
+  }
+
+  setResultJson("");
+  setUploadedFiles([]);
+
+  try {
+    const data = await _.postAPI("/api/file/upload", { files: entries });
+    if (data?.graph) {
+      _.setGraphData?.(0, data.graph, {});
+    }
+
+    const uploadItems = Array.isArray(data?.uploads) ? data.uploads : [];
+    const files = [];
+    if (uploadItems.length > 0) {
+      for (const item of uploadItems) {
+        if (!item?.ok) continue;
+        const file = pickFirstFileVertex({ result: item.result });
+        if (file) files.push(file);
+      }
+    } else {
+      const file = pickFirstFileVertex(data);
+      if (file) files.push(file);
+    }
+
+    setUploadedFiles(files);
+    setResultJson(JSON.stringify(data, null, 2));
+
+    const successCount =
+      typeof data?.successCount === "number"
+        ? data.successCount
+        : files.length;
+    const failureCount =
+      typeof data?.failureCount === "number" ? data.failureCount : 0;
+
+    if (successCount > 0 && failureCount === 0) {
+      _.showSuccessToast?.(
+        successCount === 1
+          ? `Uploaded: ${files[0]?.P?.fileName || "file"}`
+          : `Uploaded ${successCount} file(s)`
+      );
+      return true;
+    }
+
+    if (successCount > 0 && failureCount > 0) {
+      _.showSuccessToast?.(
+        `Uploaded ${successCount} file(s); ${failureCount} failed`
+      );
+      return true;
+    }
+
+    const firstError =
+      uploadItems.find((item) => item && item.ok === false)?.error ||
+      "Remote upload failed";
+    _.showErrorToast?.(String(firstError));
+    return false;
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Remote upload failed";
+    setResultJson(JSON.stringify({ error: message }, null, 2));
+    _.showErrorToast?.(message);
+    return false;
+  }
+};
+
+return {
+  enabled: () => true,
+  remoteUploadFormConfiguration,
+  saveRemoteUploadForm,
+  resultJson,
+  uploadedFiles,
+  uploadedFilesHtml
+};
+'''
+        props:
+          '''
+return {
+  enabled: () => true
+};
+'''
+      }
+    }
+    {
+      id: "main"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''
+return `._id {
+  padding: 2.5rem 1rem 4rem;
+}`;
+'''
+        props:
+          '''
+return {
+  as: "main"
+};
+'''
+      }
+    }
+    {
+      id: "container"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''
+return `._id {
+  max-width: 42rem;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}`;
+'''
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "title"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''
+return `._id {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: ${t.var.color.text};
+}`;
+'''
+        props:
+          '''
+return {
+  as: "h1",
+  text: "Remote URL upload test"
+};
+'''
+      }
+    }
+    {
+      id: "intro"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        css:
+          '''
+return `._id {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: ${t.var.color.text_dark_400};
+}`;
+'''
+        props:
+          '''
+return {
+  as: "p",
+  text: "Use the form to batch-upload remote URLs via POST /api/file/upload with { files: [{ url, fileName }] }. Failures are reported per file without aborting the whole batch."
+};
+'''
+      }
+    }
+    {
+      id: "form"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: FormManagement
+        props:
+          '''
+return {
+  mode: "add",
+  vertexLabel: "RemoteUploadTest",
+  formConfig: f.remoteUploadFormConfiguration,
+  onSave: f.saveRemoteUploadForm,
+  afterSuccessfulSave: "reinitialize",
+  class: "remote-upload-test-form"
+};
+'''
+      }
+    }
+    {
+      id: "downloads"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}`;
+'''
+        props:
+          '''
+return {
+  as: "div",
+  show: () => (f.uploadedFiles?.() || []).length > 0
+};
+'''
+      }
+    }
+    {
+      id: "downloads_title"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''
+return `._id {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: ${t.var.color.text};
+}`;
+'''
+        props:
+          '''
+return {
+  as: "h2",
+  text: "Uploaded files"
+};
+'''
+      }
+    }
+    {
+      id: "downloads_links"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        css:
+          '''
+return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+
+  a {
+    color: ${t.var.color.primary};
+    text-decoration: underline;
+  }
+}`;
+'''
+        props:
+          '''
+return {
+  as: "div",
+  innerHTML: f.uploadedFilesHtml?.() || "",
+  show: () => (f.uploadedFiles?.() || []).length > 0
+};
+'''
+      }
+    }
+    {
+      id: "result_label"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        css:
+          '''
+return `._id {
+  margin: 0.5rem 0 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: ${t.var.color.text};
+}`;
+'''
+        props:
+          '''
+return {
+  as: "h2",
+  text: "Response",
+  show: () => Boolean(f.resultJson?.())
+};
+'''
+      }
+    }
+    {
+      id: "result_pre"
+      L: Attr
+      P: {
+        displayOrder: 6
+        componentName: Html
+        css:
+          '''
+return `._id {
+  margin: 0;
+  padding: 0.875rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background_light_100};
+  color: ${t.var.color.text};
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 28rem;
+}`;
+'''
+        props:
+          '''
+return {
+  as: "pre",
+  text: f.resultJson?.() || "",
+  show: () => Boolean(f.resultJson?.())
+};
+'''
+      }
+    }
+    {
+      id: "layout"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: Layout
+      }
+    }
+  ]
+  edges: [
+    { id: "e_page_main", T: "Attr", S: "1", E: "main" }
+    { id: "e_main_container", T: "Attr", S: "main", E: "container" }
+    { id: "e_container_title", T: "Attr", S: "container", E: "title" }
+    { id: "e_container_intro", T: "Attr", S: "container", E: "intro" }
+    { id: "e_container_form", T: "Attr", S: "container", E: "form" }
+    { id: "e_container_downloads", T: "Attr", S: "container", E: "downloads" }
+    { id: "e_downloads_title", T: "Attr", S: "downloads", E: "downloads_title" }
+    { id: "e_downloads_links", T: "Attr", S: "downloads", E: "downloads_links" }
+    { id: "e_container_result_label", T: "Attr", S: "container", E: "result_label" }
+    { id: "e_container_result_pre", T: "Attr", S: "container", E: "result_pre" }
+    { id: "e_layout", T: "PageLayout", S: "1", E: "layout" }
+  ]
+}
