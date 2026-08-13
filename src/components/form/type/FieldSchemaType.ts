@@ -135,6 +135,10 @@ export interface FunctionArgumentBaseType {
   ) => import("solid-js").JSX.Element;
   /** Motion namespace (`import * as motion from "motion"`); exposed on `_`. */
   motion: typeof import("motion");
+  /** tinykeys — bind keyboard shortcuts in `onMount`. `$mod` is Cmd on macOS and Ctrl elsewhere. */
+  tinykeys: typeof import("tinykeys").tinykeys;
+  /** tabbable — `_.tabbable.tabbable(root)` / `focusable` / `isTabbable` / `isFocusable`. */
+  tabbable: typeof import("tabbable");
 }
 
 export interface FunctionArgumentType extends FunctionArgumentBaseType {

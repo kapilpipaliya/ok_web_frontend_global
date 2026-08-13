@@ -110,6 +110,7 @@
     "solid-monaco": "^0.3.0",
     "solid-transition-group": "0.3.0",
     "space-separated-tokens": "^2.0.2",
+    "tabbable": "^6.5.0",
     "tinykeys": "^4.0.0",
     "tldts": "^7.4.10",
     "unified": "^11.0.5",

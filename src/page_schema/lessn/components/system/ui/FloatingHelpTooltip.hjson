@@ -24,81 +24,127 @@
           '''const [isOpen, setIsOpen] = _.createSignal(false);
 const [triggerRef, setTriggerRef] = _.createSignal(null);
 const [floatingRef, setFloatingRef] = _.createSignal(null);
-let cleanup = null;
-let hideTimer = null;
+let disposePositionUpdater = null;
+let closeDelayTimeoutId = null;
 
 const getPlacement = () => c.props?.placement || "top";
 
-const clearHideTimer = () => {
-  if (hideTimer != null) {
-    clearTimeout(hideTimer);
-    hideTimer = null;
+const getHelpText = () => {
+  const rawHelpText = c.props?.text;
+  if (typeof rawHelpText === "string") {
+    return rawHelpText.replace(/\\n/g, "\n");
+  }
+  return rawHelpText == null ? "" : String(rawHelpText);
+};
+
+const getListRows = () => {
+  const componentProps = c.props || {};
+  const rowsSource =
+    componentProps.rows ?? componentProps.items ?? componentProps.policyRows;
+  if (typeof rowsSource === "function") {
+    const resolvedRows = rowsSource();
+    return Array.isArray(resolvedRows) ? resolvedRows : [];
+  }
+  if (Array.isArray(rowsSource)) return rowsSource;
+  return [];
+};
+
+const getListTitle = () => {
+  const componentProps = c.props || {};
+  const rawTitle =
+    componentProps.title ??
+    componentProps.listTitle ??
+    componentProps.policyTitle ??
+    "";
+  return typeof rawTitle === "string" ? rawTitle.trim() : "";
+};
+
+const hasHelpContent = () => {
+  const helpText = getHelpText();
+  const hasHelpText =
+    typeof helpText === "string" ? helpText.trim() !== "" : Boolean(helpText);
+  return hasHelpText || getListRows().length > 0;
+};
+
+const clearCloseDelay = () => {
+  if (closeDelayTimeoutId != null) {
+    clearTimeout(closeDelayTimeoutId);
+    closeDelayTimeoutId = null;
   }
 };
 
 const tearDownFloating = () => {
-  clearHideTimer();
-  if (cleanup) {
-    cleanup();
-    cleanup = null;
+  clearCloseDelay();
+  if (disposePositionUpdater) {
+    disposePositionUpdater();
+    disposePositionUpdater = null;
   }
 };
 
 const setupFloatingUI = async () => {
-  const trigger = triggerRef();
-  const floating = floatingRef();
-  if (!trigger || !floating || !_.floatingUI) return;
+  const triggerElement = triggerRef();
+  const floatingElement = floatingRef();
+  if (!triggerElement || !floatingElement || !_.floatingUI) return;
 
   try {
     const { computePosition, flip, shift, offset, autoUpdate } = _.floatingUI;
 
     const updatePosition = async () => {
-      const { x, y } = await computePosition(trigger, floating, {
-        placement: getPlacement(),
-        strategy: "fixed",
-        middleware: [
-          offset(6),
-          flip(),
-          shift({ padding: 8 })
-        ]
-      });
-      Object.assign(floating.style, {
-        left: String(x) + "px",
-        top: String(y) + "px"
+      const { x: leftPx, y: topPx } = await computePosition(
+        triggerElement,
+        floatingElement,
+        {
+          placement: getPlacement(),
+          strategy: "fixed",
+          middleware: [
+            offset(6),
+            flip(),
+            shift({ padding: 8 })
+          ]
+        }
+      );
+      Object.assign(floatingElement.style, {
+        left: String(leftPx) + "px",
+        top: String(topPx) + "px"
       });
     };
 
-    if (cleanup) {
-      cleanup();
-      cleanup = null;
+    if (disposePositionUpdater) {
+      disposePositionUpdater();
+      disposePositionUpdater = null;
     }
 
     await updatePosition();
 
-    cleanup = autoUpdate(trigger, floating, updatePosition, {
-      ancestorScroll: true,
-      ancestorResize: true,
-      elementResize: true,
-      layoutShift: true,
-      animationFrame: false
-    });
-  } catch (e) {
-    console.error("FloatingHelpTooltip:", e);
+    disposePositionUpdater = autoUpdate(
+      triggerElement,
+      floatingElement,
+      updatePosition,
+      {
+        ancestorScroll: true,
+        ancestorResize: true,
+        elementResize: true,
+        layoutShift: true,
+        animationFrame: false
+      }
+    );
+  } catch (error) {
+    console.error("FloatingHelpTooltip:", error);
   }
 };
 
 const openTooltip = () => {
-  clearHideTimer();
+  clearCloseDelay();
   setIsOpen(true);
   requestAnimationFrame(() => setupFloatingUI());
 };
 
 const scheduleClose = () => {
-  clearHideTimer();
-  hideTimer = window.setTimeout(() => {
+  clearCloseDelay();
+  closeDelayTimeoutId = window.setTimeout(() => {
     setIsOpen(false);
     tearDownFloating();
-    hideTimer = null;
+    closeDelayTimeoutId = null;
   }, 100);
 };
 
@@ -108,23 +154,19 @@ return {
   setFloatingRef,
   openTooltip,
   scheduleClose,
-  clearHideTimer,
-  tearDownFloating
+  clearHideTimer: clearCloseDelay,
+  tearDownFloating,
+  getHelpText,
+  getListRows,
+  getListTitle,
+  hasHelpContent
 };'''
         componentName: Html
         props:
-          '''const p = c.props || {};
-const rawText = p.text;
-const textNonEmpty =
-  typeof rawText === "string"
-    ? rawText.replace(/\\n/g, "\n").trim() !== ""
-    : Boolean(rawText);
-const hasPolicy = typeof p.policyRows === "function";
-const policyCount = hasPolicy ? (p.policyRows() || []).length : 0;
-const hasText = textNonEmpty || (hasPolicy && policyCount > 0);
+          '''const componentProps = c.props || {};
 return {
   as: "span",
-  hide: p.hide === true || !hasText,
+  hide: componentProps.hide === true || !f.hasHelpContent?.(),
   onCleanup: () => {
     f.tearDownFloating();
   }
@@ -161,28 +203,15 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const p = c.props || {};
-const rawText = p.text || "";
-const textTrim =
-  typeof rawText === "string" &&
-  rawText.replace(/\\n/g, "\n").trim() !== "";
-const hasPolicy = typeof p.policyRows === "function";
-const policyCount = hasPolicy ? (p.policyRows() || []).length : 0;
-const hasContent = textTrim || (hasPolicy && policyCount > 0);
-const fieldLabel = p.fieldLabel || "";
-const aria =
-  fieldLabel && hasContent
-    ? `Password requirements for ${fieldLabel}`
-    : "Help";
-
+          '''const componentProps = c.props || {};
+const fieldLabel = componentProps.fieldLabel || "";
 return {
   as: "span",
   ref: f.setTriggerRef,
   onMouseEnter: () => f.openTooltip(),
   onMouseLeave: () => f.scheduleClose(),
-  hide: !hasContent,
-  "aria-label": aria,
-  tabIndex: 0
+  hide: !f.hasHelpContent?.(),
+  "aria-label": fieldLabel || "Help"
 };'''
       }
     }
@@ -191,20 +220,26 @@ return {
       L: Attr
       P: {
         css:
-          '''const p = c.props || {};
-const tt = p.triggerTint;
-const tint =
-  typeof tt === "function" ? tt() : t.var.color.text_light_500;
+          '''const componentProps = c.props || {};
+const triggerTintProp = componentProps.triggerTint;
+const iconColor =
+  typeof triggerTintProp === "function"
+    ? triggerTintProp()
+    : t.var.color.text_light_500;
 return `._id {
   flex-shrink: 0;
-  color: ${tint};
+  color: ${iconColor};
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const p = c.props || {};
-const trig = p.triggerIcon;
-if (trig === undefined || trig === null || trig === "") {
+          '''const componentProps = c.props || {};
+const triggerIconProp = componentProps.triggerIcon;
+if (
+  triggerIconProp === undefined ||
+  triggerIconProp === null ||
+  triggerIconProp === ""
+) {
   return {
     as: "icon",
     icon: "ph:question",
@@ -213,11 +248,12 @@ if (trig === undefined || trig === null || trig === "") {
     hide: true
   };
 }
-const iconRaw = typeof trig === "function" ? trig() : trig;
-const icon = String(iconRaw || "").trim() || "ph:question";
+const resolvedTriggerIcon =
+  typeof triggerIconProp === "function" ? triggerIconProp() : triggerIconProp;
+const iconName = String(resolvedTriggerIcon || "").trim() || "ph:question";
 return {
   as: "icon",
-  icon,
+  icon: iconName,
   width: 20,
   height: 20,
   hide: false
@@ -231,21 +267,26 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const p = c.props || {};
-const trig = p.triggerIcon;
-if (trig === undefined || trig === null || trig === "") {
+          '''const componentProps = c.props || {};
+const triggerIconProp = componentProps.triggerIcon;
+if (
+  triggerIconProp === undefined ||
+  triggerIconProp === null ||
+  triggerIconProp === ""
+) {
   return {
     as: "span",
     text: "\u24D8",
     hide: false
   };
 }
-const iconRaw = typeof trig === "function" ? trig() : trig;
-const hasIcon = Boolean(String(iconRaw || "").trim());
+const resolvedTriggerIcon =
+  typeof triggerIconProp === "function" ? triggerIconProp() : triggerIconProp;
+const hasCustomTriggerIcon = Boolean(String(resolvedTriggerIcon || "").trim());
 return {
   as: "span",
   text: "\u24D8",
-  hide: hasIcon
+  hide: hasCustomTriggerIcon
 };'''
       }
     }
@@ -315,15 +356,12 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const p = c.props || {};
-const hasPolicy = typeof p.policyRows === "function";
-const rawText = p.text || "";
-const text =
-  typeof rawText === "string" ? rawText.replace(/\\n/g, "\n") : rawText;
+          '''const helpText = f.getHelpText?.() || "";
+const listRows = f.getListRows?.() || [];
 return {
   as: "div",
-  text,
-  hide: hasPolicy || !text
+  text: helpText,
+  hide: listRows.length > 0 || !helpText
 };'''
       }
     }
@@ -342,16 +380,12 @@ return {
         displayOrder: 2
         componentName: Html
         props:
-          '''const p = c.props || {};
-const hasPolicy = typeof p.policyRows === "function";
-const title =
-  typeof p.policyTitle === "string" && p.policyTitle.trim() !== ""
-    ? p.policyTitle.trim()
-    : "Password Requirements";
+          '''const listRows = f.getListRows?.() || [];
+const listTitle = f.getListTitle?.() || "";
 return {
   as: "div",
-  text: title,
-  hide: !hasPolicy
+  text: listTitle,
+  hide: listRows.length === 0 || !listTitle
 };'''
       }
     }
@@ -368,14 +402,13 @@ return {
         displayOrder: 3
         componentName: Html
         props:
-          '''const p = c.props || {};
-const hasPolicy = typeof p.policyRows === "function";
+          '''const listRows = f.getListRows?.() || [];
 return {
   as: "div",
   loop: true,
-  contextName: "policyRow",
-  data: () => (hasPolicy ? p.policyRows() || [] : []),
-  hide: !hasPolicy
+  contextName: "helpListItem",
+  data: () => f.getListRows?.() || [],
+  hide: listRows.length === 0
 };'''
       }
     }
@@ -406,32 +439,34 @@ return {
       L: Attr
       P: {
         css:
-          '''const row = c.policyRow;
-const hasInput = Boolean(row?.hasInput);
-const met = Boolean(row?.met);
-const _c = !hasInput
+          '''const helpListItem = c.helpListItem;
+const showsRequirementStatus =
+  helpListItem?.met != null || helpListItem?.hasInput === true;
+const isRequirementMet = Boolean(helpListItem?.met);
+const statusIconColor = !showsRequirementStatus
   ? t.var.color.text
-  : met
+  : isRequirementMet
     ? t.var.color.success
     : t.var.color.error;
 return `._id {
   flex-shrink: 0;
-  color: ${_c};
+  color: ${statusIconColor};
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
-          '''const row = c.policyRow;
-const hasInput = Boolean(row?.hasInput);
-const met = Boolean(row?.met);
-const icon = !hasInput
+          '''const helpListItem = c.helpListItem;
+const showsRequirementStatus =
+  helpListItem?.met != null || helpListItem?.hasInput === true;
+const isRequirementMet = Boolean(helpListItem?.met);
+const statusIconName = !showsRequirementStatus
   ? "ph:circle"
-  : met
+  : isRequirementMet
     ? "ph:check-circle-fill"
     : "ph:x-circle-fill";
 return {
   as: "icon",
-  icon,
+  icon: statusIconName,
   width: 18,
   height: 18
 };'''
@@ -442,100 +477,107 @@ return {
       L: Attr
       P: {
         css:
-          '''const row = c.policyRow;
-const hasInput = Boolean(row?.hasInput);
-const met = Boolean(row?.met);
-const _c = !hasInput
+          '''const helpListItem = c.helpListItem;
+const showsRequirementStatus =
+  helpListItem?.met != null || helpListItem?.hasInput === true;
+const isRequirementMet = Boolean(helpListItem?.met);
+const messageColor = !showsRequirementStatus
   ? t.var.color.text
-  : met
+  : isRequirementMet
     ? t.var.color.success
     : t.var.color.text_light_500;
 return `._id {
   font-size: 14px;
-  color: ${_c};
+  color: ${messageColor};
 }`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''return {
+          '''const helpListItem = c.helpListItem;
+return {
   as: "span",
-  text: c.policyRow?.message || ""
+  text: helpListItem?.message || helpListItem?.text || ""
 };'''
+      }
+    }
+    {
+      id: "v1"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: text
+      }
+    }
+    {
+      id: "v2"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: fieldLabel
+      }
+    }
+    {
+      id: "v3"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: top
+        key: placement
+      }
+    }
+    {
+      id: "v4"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: title
+      }
+    }
+    {
+      id: "v5"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: rows
+      }
+    }
+    {
+      id: "v6"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: triggerIcon
+      }
+    }
+    {
+      id: "v7"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        defValue: false
+        key: hide
       }
     }
   ]
   edges: [
-    {
-      id: e1
-      T: Attr
-      S: "1"
-      E: "2"
-    }
-    {
-      id: e2
-      T: Attr
-      S: "2"
-      E: "3"
-    }
-    {
-      id: e3
-      T: Attr
-      S: "2"
-      E: "6"
-    }
-    {
-      id: e4
-      T: Attr
-      S: "3"
-      E: "4"
-    }
-    {
-      id: e5
-      T: Attr
-      S: "3"
-      E: "5"
-    }
-    {
-      id: e6
-      T: Attr
-      S: "6"
-      E: "7"
-    }
-    {
-      id: e7
-      T: Attr
-      S: "7"
-      E: "8"
-    }
-    {
-      id: e8
-      T: Attr
-      S: "7"
-      E: "9"
-    }
-    {
-      id: e9
-      T: Attr
-      S: "7"
-      E: "10"
-    }
-    {
-      id: e10
-      T: Attr
-      S: "10"
-      E: "11"
-    }
-    {
-      id: e11
-      T: Attr
-      S: "11"
-      E: "12"
-    }
-    {
-      id: e12
-      T: Attr
-      S: "11"
-      E: "13"
-    }
+    { id: "e1", T: "Attr", S: "1", E: "2" }
+    { id: "e2", T: "Attr", S: "2", E: "3" }
+    { id: "e3", T: "Attr", S: "2", E: "6" }
+    { id: "e4", T: "Attr", S: "3", E: "4" }
+    { id: "e5", T: "Attr", S: "3", E: "5" }
+    { id: "e6", T: "Attr", S: "6", E: "7" }
+    { id: "e7", T: "Attr", S: "7", E: "8" }
+    { id: "e8", T: "Attr", S: "7", E: "9" }
+    { id: "e9", T: "Attr", S: "7", E: "10" }
+    { id: "e10", T: "Attr", S: "10", E: "11" }
+    { id: "e11", T: "Attr", S: "11", E: "12" }
+    { id: "e12", T: "Attr", S: "11", E: "13" }
+    { id: "ev1", T: "ComponentVariant", S: "1", E: "v1" }
+    { id: "ev2", T: "ComponentVariant", S: "1", E: "v2" }
+    { id: "ev3", T: "ComponentVariant", S: "1", E: "v3" }
+    { id: "ev4", T: "ComponentVariant", S: "1", E: "v4" }
+    { id: "ev5", T: "ComponentVariant", S: "1", E: "v5" }
+    { id: "ev6", T: "ComponentVariant", S: "1", E: "v6" }
+    { id: "ev7", T: "ComponentVariant", S: "1", E: "v7" }
   ]
 }

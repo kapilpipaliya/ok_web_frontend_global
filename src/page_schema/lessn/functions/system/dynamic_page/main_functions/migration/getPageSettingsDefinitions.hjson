@@ -915,6 +915,7 @@ const productTableGeneral = {
       type: "iframeModal",
       iframeUrl: "/portal/amazon-import",
       modalTitle: "Amazon import",
+      shortcut: "i",
       modalMaxWidth: "52rem",
       modalHeight: "85vh",
       postMessage: {

@@ -19,6 +19,32 @@ const [isImporting, setIsImporting] = _.createSignal(false);
 const [importProgress, setImportProgress] = _.createSignal(null);
 const [importRowStatuses, setImportRowStatuses] = _.createSignal([]);
 const [toolbarContext, setToolbarContext] = _.createSignal(null);
+const [formManagementFns, setFormManagementFns] = _.createSignal(null);
+
+const registerFormManagementFns = (formFns) => {
+  setFormManagementFns(formFns);
+};
+
+const requestCloseIframeModal = () => {
+  try {
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage(
+        { type: "dynamicPage.toolbarCloseRequest" },
+        window.location.origin
+      );
+    }
+  } catch (_) {
+    /* ignore */
+  }
+};
+
+const onToolbarContextMessage = (event) => {
+  if (event.origin !== window.location.origin) return;
+  const data = event.data;
+  if (!data || typeof data !== "object") return;
+  if (data.type !== "dynamicPage.toolbarContext") return;
+  setToolbarContext(data);
+};
 
 const pickFileList = (data) => {
   if (Array.isArray(data?.data?.files)) return data.data.files;
@@ -46,14 +72,6 @@ const parseImportRows = (rawRows) => {
       };
     })
     .filter((row) => row.amazonUrl);
-};
-
-const onToolbarContextMessage = (event) => {
-  if (event.origin !== window.location.origin) return;
-  const data = event.data;
-  if (!data || typeof data !== "object") return;
-  if (data.type !== "dynamicPage.toolbarContext") return;
-  setToolbarContext(data);
 };
 
 const amazonImportFormConfiguration = {
@@ -85,7 +103,8 @@ const amazonImportFormConfiguration = {
                 dataType: "text",
                 renderer: "text",
                 required: true,
-                placeholder: "https://www.amazon.com/dp/..."
+                placeholder: "https://www.amazon.com/dp/...",
+                autoFocus: true
               },
               {
                 key: "productTitle",
@@ -309,7 +328,9 @@ return {
   importRowStatuses,
   importProgressText,
   toolbarContext,
-  onToolbarContextMessage
+  onToolbarContextMessage,
+  registerFormManagementFns,
+  requestCloseIframeModal
 };
 '''
         props:
@@ -429,7 +450,7 @@ return `._id {
           '''
 return {
   as: "p",
-  text: "Paste one or more Amazon product URLs. Each row becomes a Product: Playwright reads title, price, description, and images; image file name keeps the title casing and is slugged until you edit it. When opened from Products, category IDs arrive via postMessage."
+  text: "Paste one or more Amazon product URLs. Each row becomes a Product: Playwright reads title, price, description, and images; image file name keeps the title casing and is slugged until you edit it. When opened from Products, category IDs arrive via postMessage. Shortcuts: Cmd/Ctrl+S to import, Esc to close."
 };
 '''
       }
@@ -599,6 +620,10 @@ return {
   vertexLabel: "AmazonImport",
   formConfig: f.amazonImportFormConfiguration,
   onSave: f.saveAmazonImportForm,
+  onFnsReady: f.registerFormManagementFns,
+  saveShortcut: "$mod+KeyS",
+  closeShortcut: "Escape",
+  onShortcutClose: f.requestCloseIframeModal,
   afterSuccessfulSave: "reinitialize",
   class: "amazon-import-form"
 };

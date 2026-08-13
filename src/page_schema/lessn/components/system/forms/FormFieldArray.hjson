@@ -695,7 +695,8 @@ return {
   placeholder: itemField.placeholder || "",
   required: itemField.required === true,
   disabled: f.isDisabled(),
-  type: itemField.dataType === "number" ? "number" : "text"
+  type: itemField.dataType === "number" ? "number" : "text",
+  autoFocus: itemIndex === 0 && itemField.autoFocus === true
 };'''
       }
     }

@@ -1302,6 +1302,7 @@ const validate = () => {
 
 // Handle save
 const handleSave = async () => {
+  if (isSubmitting()) return;
   if (isFileUploading()) {
     _.showErrorToast?.("Please wait for the file upload to finish");
     return;
@@ -1517,6 +1518,65 @@ const getFieldTooltipMeta = (field) => {
   };
 };
 
+let stopFormShortcuts = null;
+
+const focusFirstTabbableField = () => {
+  const root = _.ref?.();
+  if (!root || typeof root.querySelector !== "function") return false;
+  const nodes = _.tabbable.tabbable(root);
+  const el = Array.isArray(nodes) && nodes.length > 0 ? nodes[0] : null;
+  if (!el || typeof el.focus !== "function") return false;
+  el.focus();
+  return true;
+};
+
+const scheduleFocusAutofocusField = () => {
+  _.makeTimer(focusFirstTabbableField, 0, setTimeout);
+  _.makeTimer(focusFirstTabbableField, 80, setTimeout);
+};
+
+const unbindFormShortcuts = () => {
+  if (typeof stopFormShortcuts === "function") {
+    stopFormShortcuts();
+  }
+  stopFormShortcuts = null;
+};
+
+const bindFormShortcuts = () => {
+  unbindFormShortcuts();
+  const keymap = {};
+  const saveShortcut = c.props?.saveShortcut;
+  if (typeof saveShortcut === "string" && saveShortcut.trim()) {
+    keymap[saveShortcut.trim()] = (event) => {
+      event.preventDefault();
+      if (isSubmitting() || isFileUploading()) return;
+      handleSave();
+    };
+  }
+  const closeShortcut = c.props?.closeShortcut;
+  if (typeof closeShortcut === "string" && closeShortcut.trim()) {
+    keymap[closeShortcut.trim()] = (event) => {
+      const onShortcutClose = c.props?.onShortcutClose;
+      if (typeof onShortcutClose === "function") {
+        event.preventDefault();
+        // Defer so iframe/parent teardown does not run inside tinykeys dispatch
+        window.setTimeout(() => onShortcutClose(), 0);
+        return;
+      }
+      // Nested ContentModal owns Escape via window.__contentModalEscapeStack
+      const escapeStack = window.__contentModalEscapeStack;
+      if (Array.isArray(escapeStack) && escapeStack.length > 0) return;
+      event.preventDefault();
+      const onClose = c.props?.onClose;
+      if (typeof onClose === "function") {
+        window.setTimeout(() => onClose(), 0);
+      }
+    };
+  }
+  if (Object.keys(keymap).length === 0) return;
+  stopFormShortcuts = _.tinykeys(window, keymap, { ignore: () => false });
+};
+
 // Expose fns to parent if onFnsReady callback is provided
 const onFnsReady = c.props?.onFnsReady;
 let lastReadyVertexId = null;
@@ -1535,6 +1595,7 @@ if (onFnsReady && typeof onFnsReady === "function") {
       setFieldValue,
       formVertexId
     });
+    scheduleFocusAutofocusField();
   });
 }
 
@@ -1584,7 +1645,11 @@ return {
   assignFormVertex: (vertexId) => {
     if (vertexId == null || String(vertexId).trim() === "") return;
     setFormVertexId(String(vertexId).trim());
-  }
+  },
+  focusAutofocusField: focusFirstTabbableField,
+  scheduleFocusAutofocusField,
+  bindFormShortcuts,
+  unbindFormShortcuts
 };'''
         componentName: Html
         props:
@@ -1595,6 +1660,11 @@ return {
   onMount: () => {
     f.initializeForm();
     void f.applyAutoReferenceSequencesAfterAdd();
+    f.bindFormShortcuts?.();
+    f.scheduleFocusAutofocusField?.();
+  },
+  onCleanup: () => {
+    f.unbindFormShortcuts?.();
   }
 };'''
       }
@@ -2370,6 +2440,7 @@ return {
   maxLength: field.maxLength,
   minLength: field.minLength,
   disabled: fieldDisabled,
+  autoFocus: field.autoFocus === true,
   ...accessibility
 };'''
       }
@@ -2569,6 +2640,33 @@ return `._id {
         key: sidebarConfig
       }
     }
+    {
+      id: "29"
+      L: ComponentVariant
+      P: {
+        displayOrder: 9
+        type: string
+        key: saveShortcut
+      }
+    }
+    {
+      id: "30"
+      L: ComponentVariant
+      P: {
+        displayOrder: 10
+        type: string
+        key: closeShortcut
+      }
+    }
+    {
+      id: "31"
+      L: ComponentVariant
+      P: {
+        displayOrder: 11
+        type: function
+        key: onShortcutClose
+      }
+    }
   ]
   edges: [
     {
@@ -2624,6 +2722,24 @@ return `._id {
       T: ComponentVariant
       S: "1"
       E: "28"
+    }
+    {
+      id: e29
+      T: ComponentVariant
+      S: "1"
+      E: "29"
+    }
+    {
+      id: e30
+      T: ComponentVariant
+      S: "1"
+      E: "30"
+    }
+    {
+      id: e31
+      T: ComponentVariant
+      S: "1"
+      E: "31"
     }
     {
       id: e8

@@ -52,6 +52,8 @@ import { getMemberVertex } from "~/lib/graph/get/sync/store/getMemberVertex";
 import { getGlobalSettingVertex } from "~/lib/graph/get/sync/store/getGlobalSettingVertex";
 import { debounce } from "@solid-primitives/scheduled";
 import { makeTimer } from "@solid-primitives/timer";
+import { tinykeys } from "tinykeys";
+import * as tabbable from "tabbable";
 import * as focusTrap from "focus-trap";
 import { atom } from "~/lib/solid/atom";
 import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
@@ -397,6 +399,10 @@ export function createFunctionArgumentBase(
     virtua,
     debounce,
     makeTimer,
+    /** tinykeys — bind keyboard shortcuts in `onMount`. `$mod` is Cmd on macOS and Ctrl elsewhere. */
+    tinykeys,
+    /** tabbable — find focusable/tabbable nodes (`_.tabbable.tabbable(root)`). */
+    tabbable,
     focusTrap,
     get KeepAwake() {
       return KeepAwake;

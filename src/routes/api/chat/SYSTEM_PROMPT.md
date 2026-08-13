@@ -199,6 +199,63 @@ return {
 - Getting window dimensions
 - Accessing DOM elements
 - Initializing browser-only libraries
+- Keyboard shortcuts via `_.tinykeys` (bind in `onMount`, unsubscribe in `onCleanup`)
+
+#### Keyboard shortcuts (`_.tinykeys`)
+
+Use `_.tinykeys` in `onMount` (never during SSR). `$mod` is Cmd on macOS and Ctrl elsewhere. Default ignore skips typing in inputs; pass `{ ignore: () => false }` when the shortcut must fire while a field is focused (e.g. Cmd+S save).
+
+**FormManagement props (preferred for forms):**
+- `saveShortcut`: e.g. `"$mod+KeyS"` — calls `handleSave`
+- `closeShortcut`: e.g. `"Escape"` — calls `onShortcutClose` or `onClose`
+- `onShortcutClose`: optional; iframe pages use this to `postMessage` `{ type: "dynamicPage.toolbarCloseRequest" }` to the parent
+- Autofocus: FormManagement focuses the first `_.tabbable.tabbable(formRoot)` node after mount (no `data-autofocus` needed)
+
+**ContentModal:** Escape closes only the topmost open modal (stack on `window.__contentModalEscapeStack`). Pass `onClosed` for cleanup after unmount (e.g. clear iframe action key). `initialFocus: false` skips trapping into the dialog (useful for iframe bodies).
+
+**Toolbar iframe postMessage types** (DynamicPage ↔ iframe page):
+- `dynamicPage.toolbarContext` / `toolbarContextRequest` / `toolbarCloseRequest` / `toolbarResult`
+- Table `toolbarActions[].shortcut` (e.g. `"i"`) is bound by DynamicPage after settings load; button label shows `(i)`
+
+```javascript
+fns: '''
+let unbindShortcuts = null;
+return {
+  bindShortcuts: () => {
+    unbindShortcuts?.();
+    unbindShortcuts = _.tinykeys(window, {
+      i: (event) => {
+        event.preventDefault();
+        f.openConfiguredAction?.();
+      }
+    });
+  },
+  bindSaveShortcut: () => {
+    unbindShortcuts?.();
+    unbindShortcuts = _.tinykeys(
+      window,
+      {
+        "$mod+KeyS": (event) => {
+          event.preventDefault();
+          f.formManagementFns()?.handleSave?.();
+        }
+      },
+      { ignore: () => false }
+    );
+  },
+  unbindShortcuts: () => {
+    unbindShortcuts?.();
+    unbindShortcuts = null;
+  }
+};
+''',
+props: '''
+return {
+  onMount: () => f.bindSaveShortcut(),
+  onCleanup: () => f.unbindShortcuts()
+};
+'''
+```
 
 ```typescript
 export interface FunctionArgumentBaseType {
@@ -299,6 +356,10 @@ export interface FunctionArgumentBaseType {
   postAPI: (url: string, data: object | FormData, action?: "DELETE" | "POST" | "PUT") => Promise<Record<string, unknown>>;
   // Zod (same as ~/lib/utils/schemaValidation); use _.z in props/fns/css for client-side schemas
   z: typeof import("zod").z;
+  /** tinykeys — bind keyboard shortcuts in onMount. `$mod` is Cmd on macOS and Ctrl elsewhere. */
+  tinykeys: typeof import("tinykeys").tinykeys;
+  /** tabbable — `_.tabbable.tabbable(root)` / `focusable` / `isTabbable` / `isFocusable`. */
+  tabbable: typeof import("tabbable");
 }
 ```
 

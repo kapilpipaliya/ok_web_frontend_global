@@ -1440,6 +1440,10 @@ const updateMemoizedConfig = () => {
   if (!hasEvaluatedConfigContent(config)) return;
   const loadFromSetting = getLoadFromSetting();
   patchPageP({ memoizedConfig: config, memoizedLoadFromSetting: loadFromSetting });
+  // Rebind after config settles (toolbarActions.shortcut may appear only after settings load)
+  if (typeof bindToolbarActionShortcuts === "function") {
+    bindToolbarActionShortcuts();
+  }
 };
 
 // Fetch data from server (skips network when same category/filters already loaded)
@@ -1655,6 +1659,7 @@ const initializeSettings = async () => {
   } finally {
     patchPageP({ configLoading: false });
     restoreCompanionMainRatio();
+    bindToolbarActionShortcuts();
   }
 };
 
@@ -1888,7 +1893,14 @@ const openToolbarIframeAction = (action) => {
 };
 
 const closeToolbarIframe = () => {
-  patchPageP({ toolbarIframeOpen: false, toolbarIframeActionKey: null });
+  // Keep toolbarIframeActionKey so iframe src/title stay stable while the modal unmounts.
+  // Key is cleared in clearToolbarIframeActionKey via ContentModal onClosed.
+  patchPageP({ toolbarIframeOpen: false });
+};
+
+const clearToolbarIframeActionKey = () => {
+  if (pageP()?.toolbarIframeOpen === true) return;
+  patchPageP({ toolbarIframeActionKey: null });
 };
 
 const postToolbarContextToIframe = (iframeEl) => {
@@ -1917,8 +1929,11 @@ const handleToolbarIframeWindowMessage = (event) => {
     }
     return;
   }
+  if (data.type === "dynamicPage.toolbarCloseRequest") {
+    closeToolbarIframe();
+    return;
+  }
   if (data.type === "dynamicPage.toolbarResult" && data.success) {
-    // Refresh products table after successful import
     try {
       invalidateContentFetchKey?.();
       fetchData?.();
@@ -1929,12 +1944,52 @@ const handleToolbarIframeWindowMessage = (event) => {
 };
 
 const getToolbarActionButtons = () => {
-  return getToolbarActionsConfig().map((action) => ({
-    key: action.key,
-    label: action.label || action.key || "Action",
-    icon: action.icon || null,
-    polarisIcon: action.polarisIcon || null,
-    onClick: () => {
+  return getToolbarActionsConfig().map((action) => {
+    const label = action.label || action.key || "Action";
+    const shortcut = action.shortcut != null ? String(action.shortcut).trim() : "";
+    const displayLabel = shortcut ? `${label} (${shortcut})` : label;
+    return {
+      key: action.key,
+      label: displayLabel,
+      shortcut,
+      title: shortcut ? `${label} (${shortcut})` : (action.title || label),
+      icon: action.icon || null,
+      polarisIcon: action.polarisIcon || null,
+      onClick: () => {
+        if (action.type === "iframeModal") {
+          openToolbarIframeAction(action);
+          return;
+        }
+        if (typeof action.onClick === "function") {
+          action.onClick({
+            selectedSidebarItem: selectedSidebarItem(),
+            companionSelectedIdsByTableKey: pageP()?.companionSelectedIdsByTableKey || {}
+          });
+        }
+      }
+    };
+  });
+};
+
+let stopToolbarActionShortcuts = null;
+
+const unbindToolbarActionShortcuts = () => {
+  if (typeof stopToolbarActionShortcuts === "function") {
+    stopToolbarActionShortcuts();
+  }
+  stopToolbarActionShortcuts = null;
+};
+
+const bindToolbarActionShortcuts = () => {
+  unbindToolbarActionShortcuts();
+  const actions = getToolbarActionsConfig();
+  const keymap = {};
+  for (let i = 0; i < actions.length; i++) {
+    const action = actions[i];
+    const shortcut = action?.shortcut != null ? String(action.shortcut).trim() : "";
+    if (!shortcut) continue;
+    keymap[shortcut] = (event) => {
+      event.preventDefault();
       if (action.type === "iframeModal") {
         openToolbarIframeAction(action);
         return;
@@ -1945,8 +2000,37 @@ const getToolbarActionButtons = () => {
           companionSelectedIdsByTableKey: pageP()?.companionSelectedIdsByTableKey || {}
         });
       }
+    };
+  }
+  if (Object.keys(keymap).length === 0) return;
+  // Skip while typing in inputs (incl. shadow DOM / textbox roles) so "i" can be typed.
+  const isTypingTarget = (event) => {
+    if (event.isComposing) return true;
+    const path =
+      typeof event.composedPath === "function" ? event.composedPath() : [];
+    const nodes = path.length > 0 ? path : [event.target];
+    for (let n = 0; n < nodes.length; n++) {
+      const node = nodes[n];
+      if (!node || node.nodeType !== 1) continue;
+      if (node.isContentEditable) return true;
+      if (
+        typeof node.matches === "function" &&
+        node.matches(
+          "input, select, textarea, [contenteditable], [contenteditable='true']"
+        )
+      ) {
+        return true;
+      }
+      const role = typeof node.getAttribute === "function" ? node.getAttribute("role") : null;
+      if (role === "textbox" || role === "searchbox" || role === "combobox") {
+        return true;
+      }
     }
-  }));
+    return false;
+  };
+  stopToolbarActionShortcuts = _.tinykeys(window, keymap, {
+    ignore: isTypingTarget
+  });
 };
 
 // Handle moving items to category
@@ -3629,6 +3713,9 @@ return {
   getActiveToolbarIframeAction,
   openToolbarIframeAction,
   closeToolbarIframe,
+  clearToolbarIframeActionKey,
+  bindToolbarActionShortcuts,
+  unbindToolbarActionShortcuts,
   postToolbarContextToIframe,
   handleToolbarIframeWindowMessage,
   buildToolbarPostMessagePayload,
@@ -3679,9 +3766,12 @@ return {
     window.addEventListener("message", f.handleToolbarIframeWindowMessage);
     if (!f.isSettingsPageMode?.()) {
       await f.initializeSettings();
+    } else {
+      f.bindToolbarActionShortcuts?.();
     }
   },
   onCleanup: () => {
+    f.unbindToolbarActionShortcuts?.();
     window.removeEventListener("message", f.handleToolbarIframeWindowMessage);
     _.deleteVertex(0, f.pageStateVertexId, g, sg);
   }
@@ -4312,7 +4402,9 @@ return {
   title: action?.modalTitle || action?.label || "Import",
   maxWidth: action?.modalMaxWidth || "52rem",
   zIndex: 40,
-  onClose: () => f.closeToolbarIframe?.()
+  initialFocus: false,
+  onClose: () => f.closeToolbarIframe?.(),
+  onClosed: () => f.clearToolbarIframeActionKey?.()
 };'''
       }
     }
@@ -4336,17 +4428,14 @@ return `._id {
 }`;'''
         props:
           '''const action = f.getActiveToolbarIframeAction?.();
-const vid = f.pageStateVertexId;
-const open = g.vertexes[vid]?.P?.toolbarIframeOpen === true && !!action;
 const url = action?.iframeUrl ? String(action.iframeUrl) : "";
 return {
   as: "iframe",
-  src: open && url ? url : "about:blank",
+  src: url || undefined,
   title: action?.modalTitle || action?.label || "Import",
-  hide: !open,
   onLoad: (e) => {
     const el = e?.currentTarget || e?.target;
-    if (!el || el.src === "about:blank") return;
+    if (!el || !url) return;
     f.postToolbarContextToIframe?.(el);
   }
 };'''

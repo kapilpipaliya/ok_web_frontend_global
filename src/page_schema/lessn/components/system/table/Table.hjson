@@ -3017,9 +3017,13 @@ return {
         props:
           '''const action = c.toolbarAction || {};
 const polarisIcon = action.polarisIcon || null;
+const title = action.title || action.label || action.key || "Action";
+const shortcut = action.shortcut != null ? String(action.shortcut).trim() : "";
 return {
   as: "s-button",
   "attr:variant": "secondary",
+  "attr:title": title,
+  ...(shortcut ? { "attr:aria-keyshortcuts": shortcut } : {}),
   ...(polarisIcon ? { "attr:icon": polarisIcon } : {}),
   text: action.label || action.key || "Action",
   onClick: () => action.onClick?.(),
@@ -3035,10 +3039,14 @@ return {
         componentName: Button
         props:
           '''const action = c.toolbarAction || {};
+const title = action.title || action.label || action.key || "Action";
+const shortcut = action.shortcut != null ? String(action.shortcut).trim() : "";
 return {
   variant: "secondary",
   text: action.label || action.key || "Action",
+  title,
   leftIcon: action.icon || undefined,
+  ...(shortcut ? { "attr:aria-keyshortcuts": shortcut } : {}),
   onClick: () => action.onClick?.(),
   hide: f.getUsePolarisUI?.() === true
 };'''

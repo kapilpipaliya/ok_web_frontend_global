@@ -46,7 +46,8 @@ return `._id {
   hide: c.props?.isOpen !== true,
   onClick: (e) => {
     if (e.target === e.currentTarget) {
-      c.props?.onClose?.();
+      // Defer close — same as Escape (avoid unmount during the click handler)
+      window.setTimeout(() => c.props?.onClose?.(), 0);
     }
   }
 };'''
@@ -95,24 +96,42 @@ return `._id {
           '''
 let trap = null;
 let cancelFocusTrapTimer = null;
+let stopEscapeClose = null;
+let unpushEscapeHandler = null;
+
+const deactivateTrap = (returnFocus) => {
+  if (!trap) return;
+  try {
+    trap.deactivate({ returnFocus: returnFocus !== false });
+  } catch (_) {
+    try {
+      trap.deactivate({ returnFocus: false });
+    } catch (_) {
+      /* iframe may already be gone */
+    }
+  }
+  trap = null;
+};
 
 const initializeFocusTrap = () => {
   const element = _.ref();
   if (!element) return;
 
-  if (trap) {
-    trap.deactivate();
-    trap = null;
-  }
+  deactivateTrap(false);
 
   trap = _.focusTrap.createFocusTrap(element, {
     fallbackFocus: () => element,
     escapeDeactivates: false,
     allowOutsideClick: true,
-    returnFocusOnDeactivate: true
+    returnFocusOnDeactivate: true,
+    initialFocus: c.props?.initialFocus === false ? false : undefined
   });
 
-  trap.activate();
+  try {
+    trap.activate();
+  } catch (_) {
+    trap = null;
+  }
 };
 
 const scheduleFocusTrap = () => {
@@ -130,15 +149,78 @@ const scheduleFocusTrap = () => {
 const cleanupFocusTrap = () => {
   cancelFocusTrapTimer?.();
   cancelFocusTrapTimer = null;
-  if (trap) {
-    trap.deactivate();
-    trap = null;
+  // Blur iframe so focus-trap can restore focus to the opener on the parent page.
+  try {
+    if (document.activeElement?.tagName === "IFRAME") {
+      document.activeElement.blur();
+    }
+  } catch (_) {
+    /* ignore */
+  }
+  deactivateTrap(true);
+};
+
+const requestClose = () => {
+  c.props?.onClose?.();
+};
+
+const getEscapeStack = () => {
+  if (!window.__contentModalEscapeStack) {
+    window.__contentModalEscapeStack = [];
+  }
+  return window.__contentModalEscapeStack;
+};
+
+const unbindEscapeClose = () => {
+  if (typeof stopEscapeClose === "function") {
+    stopEscapeClose();
+  }
+  stopEscapeClose = null;
+  if (typeof unpushEscapeHandler === "function") {
+    unpushEscapeHandler();
+  }
+  unpushEscapeHandler = null;
+};
+
+const bindEscapeClose = () => {
+  unbindEscapeClose();
+  const closeHandler = () => requestClose();
+  const stack = getEscapeStack();
+  stack.push(closeHandler);
+  unpushEscapeHandler = () => {
+    const idx = stack.lastIndexOf(closeHandler);
+    if (idx >= 0) stack.splice(idx, 1);
+  };
+  stopEscapeClose = _.tinykeys(
+    window,
+    {
+      Escape: (event) => {
+        if (stack[stack.length - 1] !== closeHandler) return;
+        event.preventDefault();
+        // Defer close so we do not unmount / unsubscribe while tinykeys is still
+        // dispatching this keydown (that was crashing the parent page).
+        window.setTimeout(() => {
+          closeHandler();
+        }, 0);
+      }
+    },
+    { ignore: () => false }
+  );
+};
+
+const notifyClosed = () => {
+  const onClosed = c.props?.onClosed;
+  if (typeof onClosed === "function") {
+    onClosed();
   }
 };
 
 return {
   scheduleFocusTrap,
-  cleanupFocusTrap
+  cleanupFocusTrap,
+  bindEscapeClose,
+  unbindEscapeClose,
+  notifyClosed
 };
 '''
         componentName: Html
@@ -150,10 +232,13 @@ return {
   "aria-modal": true,
   onClick: (e) => e.stopPropagation(),
   onMount: () => {
+    f.bindEscapeClose?.();
     f.scheduleFocusTrap?.();
   },
   onCleanup: () => {
+    f.unbindEscapeClose?.();
     f.cleanupFocusTrap?.();
+    f.notifyClosed?.();
   }
 };'''
       }
@@ -227,7 +312,7 @@ return {
   icon: "carbon:close",
   width: 22,
   height: 22,
-  onClick: () => onClose?.()
+  onClick: () => window.setTimeout(() => onClose?.(), 0)
 };'''
       }
     }
@@ -312,6 +397,23 @@ return {
         key: zIndex
       }
     }
+    {
+      id: "17"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onClosed
+      }
+    }
+    {
+      id: "18"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        defValue: true
+        key: initialFocus
+      }
+    }
   ]
   edges: [
     {
@@ -355,6 +457,18 @@ return {
       T: ComponentVariant
       S: "1"
       E: "16"
+    }
+    {
+      id: e16
+      T: ComponentVariant
+      S: "1"
+      E: "17"
+    }
+    {
+      id: e17
+      T: ComponentVariant
+      S: "1"
+      E: "18"
     }
     {
       id: e8
