@@ -297,6 +297,9 @@ export async function executeNamedServerFunctionCore(
   let rawSubDomain: string | undefined;
 
   try {
+    if (!Array.isArray(context.deletedVertexes)) context.deletedVertexes = [];
+    if (!Array.isArray(context.deletedEdges)) context.deletedEdges = [];
+
     // IMPORTANT: Session creation is inside try-catch
     // Previously this was outside, causing non-serializable Neo4j driver errors
     // to propagate unhandled, resulting in H3Error: "cannot serialize function"
@@ -513,22 +516,35 @@ export async function executeNamedServerFunctionCore(
     // Helper function to execute hooks (string or string[])
     // Must be defined after contextAwareExecuteNamedServerFunction
     const executeHooks = async (
-      hooks: string | string[] | undefined,
+      hooks: string | string[] | Record<string, unknown> | undefined,
       hookContextData: any = {},
     ) => {
       if (!hooks) return;
 
-      // Normalize to array
       const hookArray = Array.isArray(hooks) ? hooks : [hooks];
 
-      // Execute each hook sequentially; merge parent context (e.g. shop) so hooks receive it
-      for (const hookName of hookArray) {
-        if (!hookName || typeof hookName !== "string") continue;
+      for (const hook of hookArray) {
+        let functionName = "";
+        let extra: Record<string, unknown> = {};
+        if (typeof hook === "string") {
+          functionName = hook.trim();
+        } else if (hook && typeof hook === "object") {
+          functionName = String(
+            (hook as { functionName?: string; key?: string }).functionName ||
+              (hook as { functionName?: string; key?: string }).key ||
+              "",
+          ).trim();
+          extra = hook as Record<string, unknown>;
+        }
+        if (!functionName) continue;
 
-        await contextAwareExecuteNamedServerFunction({
-          functionName: hookName,
-          contextData: hookContextData,
-        });
+        await contextAwareExecuteNamedServerFunction(
+          {
+            functionName,
+            contextData: { ...hookContextData, ...extra },
+          },
+          context,
+        );
       }
     };
 

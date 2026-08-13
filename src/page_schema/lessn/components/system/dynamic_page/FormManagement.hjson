@@ -663,9 +663,9 @@ const initializeForm = () => {
         if (prefillP && Array.isArray(prefillP[field.key])) {
           initialProperties[field.key] = _.klona(prefillP[field.key]);
         } else if (Array.isArray(field.defaultValue)) {
-          initialProperties[field.key] = field.defaultValue;
+          initialProperties[field.key] = _.klona(field.defaultValue);
         } else if (Array.isArray(field.fieldArrayConfig?.defaultItems)) {
-          initialProperties[field.key] = field.fieldArrayConfig.defaultItems;
+          initialProperties[field.key] = _.klona(field.fieldArrayConfig.defaultItems);
         } else {
           initialProperties[field.key] = [];
         }
@@ -910,7 +910,8 @@ const getFieldValue = (fieldKey) => {
 /*
  * Optional field schema: auto-slug another field when this one changes.
  *
- * Configure on the *source* field in formConfig (e.g. products title → URL key):
+ * Configure on the *source* field in formConfig or fieldArray itemFields
+ * (e.g. products title → URL key):
  *   {
  *     key: "title",
  *     label: "Title",
@@ -919,47 +920,66 @@ const getFieldValue = (fieldKey) => {
  *     autoSlugMode: "emptyOrSynced",  // optional — "emptyOrSynced" (default) | "always"
  *     autoSlugSeparator: "-",         // optional — "-" (default) | "_"
  *     autoSlugMaxLength: 80           // optional — max slug length (default 80)
+ *     autoSlugPreserveCase: false     // optional — keep source casing (default lowercases)
  *   }
  *
  * Modes:
  * - emptyOrSynced: update target only when it is empty OR still equals the previous
  *   slug of this field (stops once the user manually customizes the target).
  * - always: always overwrite the target from the source value.
+ *
+ * FormFieldArray reuses resolveAutoSlugUpdate via props (same rules as top-level fields).
  */
 const slugifyForAutoSlug = (value, options = {}) => {
   const separator = options.separator === "_" ? "_" : "-";
   const maxLength =
     Number.isFinite(options.maxLength) && options.maxLength > 0 ? options.maxLength : 80;
   const escaped = separator === "_" ? "_" : "-";
-  return String(value ?? "")
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, separator)
+  const preserveCase = options.preserveCase === true;
+  const source = String(value ?? "").trim();
+  const normalized = preserveCase ? source : source.toLowerCase();
+  const allowed = preserveCase ? "a-zA-Z0-9" : "a-z0-9";
+  return normalized
+    .replace(new RegExp(`[^${allowed}]+`, "g"), separator)
     .replace(new RegExp(`^${escaped}+|${escaped}+$`, "g"), "")
     .slice(0, maxLength);
+};
+
+const resolveAutoSlugUpdate = (sourceField, previousValue, nextValue, currentTarget) => {
+  const targetKey =
+    sourceField?.autoSlugTo != null ? String(sourceField.autoSlugTo).trim() : "";
+  if (!targetKey || targetKey === sourceField.key) return null;
+
+  const mode = sourceField.autoSlugMode === "always" ? "always" : "emptyOrSynced";
+  const opts = {
+    separator: sourceField.autoSlugSeparator === "_" ? "_" : "-",
+    maxLength: sourceField.autoSlugMaxLength,
+    preserveCase: sourceField.autoSlugPreserveCase === true
+  };
+  const nextSlug = slugifyForAutoSlug(nextValue, opts);
+  const prevSlug = slugifyForAutoSlug(previousValue, opts);
+  const current = String(currentTarget ?? "").trim();
+
+  if (mode === "emptyOrSynced") {
+    if (current !== "" && current !== prevSlug) return null;
+  }
+  if (current === nextSlug) return null;
+
+  return { targetKey, nextSlug };
 };
 
 const applyAutoSlugFromFieldChange = (sourceField, previousValue, nextValue) => {
   const targetKey =
     sourceField?.autoSlugTo != null ? String(sourceField.autoSlugTo).trim() : "";
   if (!targetKey || targetKey === sourceField.key) return;
-
-  const mode = sourceField.autoSlugMode === "always" ? "always" : "emptyOrSynced";
-  const opts = {
-    separator: sourceField.autoSlugSeparator === "_" ? "_" : "-",
-    maxLength: sourceField.autoSlugMaxLength
-  };
-  const nextSlug = slugifyForAutoSlug(nextValue, opts);
-  const prevSlug = slugifyForAutoSlug(previousValue, opts);
-  const currentTarget = String(getFieldValue(targetKey) ?? "").trim();
-
-  if (mode === "emptyOrSynced") {
-    if (currentTarget !== "" && currentTarget !== prevSlug) return;
-  }
-  if (currentTarget === nextSlug) return;
-
-  // skipAutoSlug: writing the target must not chain into another auto-slug
-  setFieldValue(targetKey, nextSlug, { skipAutoSlug: true });
+  const update = resolveAutoSlugUpdate(
+    sourceField,
+    previousValue,
+    nextValue,
+    getFieldValue(targetKey)
+  );
+  if (!update) return;
+  setFieldValue(update.targetKey, update.nextSlug, { skipAutoSlug: true });
 };
 
 // Set form field value in vertex using mergeVertexProperties
@@ -1430,6 +1450,21 @@ const handleSave = async () => {
   }
 };
 
+const handleCancel = () => {
+  const txnId = formTxnId();
+  if (txnId && txnId > 0) {
+    _.revertTransaction(txnId);
+    setFormTxnId(0);
+  }
+  const onClose = c.props?.onClose;
+  if (typeof onClose === "function") {
+    onClose();
+    return;
+  }
+  // Standalone add/edit: restore a fresh draft so field arrays keep working
+  initializeForm();
+};
+
 // Tooltip / help: tooltip | helpText | description (first non-empty string wins)
 // Floating panel (ⓘ hover): tooltipDisplay "native" | "both" (default native); tooltipIcon: false disables ⓘ
 // tooltipTitle overrides body text in the floating panel; tooltipShortcut appended as (shortcut)
@@ -1526,6 +1561,7 @@ return {
   setFieldValue,
   validate,
   handleSave,
+  handleCancel,
   normalizeFormMode,
   buildFormContext,
   isFieldRequired,
@@ -1543,6 +1579,8 @@ return {
   isTranslatableTextField,
   isRelationField,
   getSiteLanguages,
+  slugifyForAutoSlug,
+  resolveAutoSlugUpdate,
   assignFormVertex: (vertexId) => {
     if (vertexId == null || String(vertexId).trim() === "") return;
     setFormVertexId(String(vertexId).trim());
@@ -2060,6 +2098,7 @@ if (f.getFieldRenderer(field) === "fieldArray" && field.fieldArrayConfig) {
     disabled: fieldDisabled,
     siteLanguages: f.getSiteLanguages?.(),
     getSiblingFieldValue: (siblingKey) => f.getFieldValue(siblingKey),
+    resolveAutoSlugUpdate: f.resolveAutoSlugUpdate,
     onChange: (nextItems) => f.setFieldValue(field.key, nextItems)
   };
 }
@@ -2398,22 +2437,11 @@ return `._id {
         displayOrder: 1
         componentName: Html
         props:
-          '''const onClose = c.props?.onClose;
-
-const handleCancel = () => {
-  const txnId = f.formTxnId();
-  if (txnId && txnId > 0) {
-    _.revertTransaction(txnId);
-    f.setFormTxnId(0);
-  }
-  if (onClose) onClose();
-};
-
-return {
+          '''return {
   as: "s-button",
   "attr:variant": "secondary",
   text: "Cancel",
-  onClick: handleCancel,
+  onClick: f.handleCancel,
   disabled: f.isSubmitting() || f.isFileUploading?.() === true,
   hide: f.getUsePolarisUI?.() !== true
 };'''
@@ -2426,24 +2454,9 @@ return {
         displayOrder: 1
         componentName: Button
         props:
-          '''const onClose = c.props?.onClose;
-
-const handleCancel = () => {
-  // Cleanup transaction if needed
-  const txnId = f.formTxnId();
-  if (txnId && txnId > 0) {
-    _.revertTransaction(txnId);
-    f.setFormTxnId(0);
-  }
-
-  if (onClose) {
-    onClose();
-  }
-};
-
-return {
+          '''return {
   variant: "secondary",
-  onClick: handleCancel,
+  onClick: f.handleCancel,
   text: "Cancel",
   disabled: f.isSubmitting(),
   hide: f.getUsePolarisUI?.() === true

@@ -572,7 +572,9 @@ if (operation === "create") {
     elementId,
     data: inputData,
     uniqueKeys,
-    enableUserScoping
+    enableUserScoping,
+    hooks,
+    cascadeDelete: hooks?.cascadeDelete
   });
 }
 
@@ -1322,8 +1324,12 @@ try {
       data: deletedVertexData
         ? { id: deleteElementId, P: deletedVertexData.P }
         : { id: deleteElementId },
-      deleted_vertexes: [deletedVertexId],
-      deleted_edges: deletedEdgeIdsFromDetach
+      deleted_vertexes: Array.isArray(_.context.deletedVertexes)
+        ? [..._.context.deletedVertexes]
+        : [deletedVertexId],
+      deleted_edges: Array.isArray(_.context.deletedEdges)
+        ? [..._.context.deletedEdges]
+        : deletedEdgeIdsFromDetach
     };
 
     // Execute afterDelete hooks

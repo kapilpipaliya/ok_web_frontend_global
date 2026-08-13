@@ -14,8 +14,11 @@
           '''
 const [resultJson, setResultJson] = _.createSignal("");
 const [importedFiles, setImportedFiles] = _.createSignal([]);
-const [importedProduct, setImportedProduct] = _.createSignal(null);
+const [importedProducts, setImportedProducts] = _.createSignal([]);
 const [isImporting, setIsImporting] = _.createSignal(false);
+const [importProgress, setImportProgress] = _.createSignal(null);
+const [importRowStatuses, setImportRowStatuses] = _.createSignal([]);
+const [toolbarContext, setToolbarContext] = _.createSignal(null);
 
 const pickFileList = (data) => {
   if (Array.isArray(data?.data?.files)) return data.data.files;
@@ -29,22 +32,28 @@ const downloadHrefFor = (file) => {
   return `/api/file/download/${encodeURIComponent(String(name))}`;
 };
 
-const importedFilesHtml = () => {
-  const files = importedFiles() || [];
-  if (files.length === 0) return "";
-  return files
-    .map((file) => {
-      const name = file?.P?.fileName || file?.id || "file";
-      const href = downloadHrefFor(file);
-      const safeName = String(name)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;");
-      if (!href) return `<div>${safeName}</div>`;
-      return `<div><a href="${href}" target="_blank" rel="noopener noreferrer">${safeName}</a></div>`;
+const parseImportRows = (rawRows) => {
+  const rows = Array.isArray(rawRows) ? rawRows : [];
+  return rows
+    .map((row) => {
+      const amazonUrl = row?.amazonUrl != null ? String(row.amazonUrl).trim() : "";
+      const productTitle = row?.productTitle != null ? String(row.productTitle).trim() : "";
+      const fileName = row?.fileName != null ? String(row.fileName).trim() : "";
+      return {
+        amazonUrl,
+        productTitle,
+        fileName: fileName || productTitle
+      };
     })
-    .join("");
+    .filter((row) => row.amazonUrl);
+};
+
+const onToolbarContextMessage = (event) => {
+  if (event.origin !== window.location.origin) return;
+  const data = event.data;
+  if (!data || typeof data !== "object") return;
+  if (data.type !== "dynamicPage.toolbarContext") return;
+  setToolbarContext(data);
 };
 
 const amazonImportFormConfiguration = {
@@ -56,34 +65,51 @@ const amazonImportFormConfiguration = {
       gridColumns: 1,
       fields: [
         {
-          key: "amazonUrl",
-          label: "Amazon URL",
-          dataType: "text",
-          renderer: "text",
+          key: "products",
+          label: "Products",
+          dataType: "array",
+          renderer: "fieldArray",
           required: true,
           colSpan: 1,
-          placeholder: "https://www.amazon.com/dp/...",
-          helpText: "Product detail page URL. Playwright opens it, reads title/price/description, and clicks the image carousel."
-        },
-        {
-          key: "productTitle",
-          label: "Product title",
-          dataType: "text",
-          renderer: "text",
-          required: true,
-          colSpan: 1,
-          placeholder: "Your listing title",
-          helpText: "Saved on the Product node. Variant title uses the Amazon page title."
-        },
-        {
-          key: "fileName",
-          label: "Image file name",
-          dataType: "text",
-          renderer: "text",
-          required: true,
-          colSpan: 1,
-          placeholder: "wireless-earbuds",
-          helpText: "Images are saved as name-1, name-2, … with the original extension."
+          helpText: "Add one or more Amazon product URLs. Image file name is auto-slugged from product title (same casing) while it is empty or still in sync.",
+          defaultValue: [{ amazonUrl: "", productTitle: "", fileName: "" }],
+          fieldArrayConfig: {
+            itemLabel: "Product",
+            addButtonLabel: "Add URL",
+            minItems: 1,
+            defaultItems: [{ amazonUrl: "", productTitle: "", fileName: "" }],
+            itemFields: [
+              {
+                key: "amazonUrl",
+                label: "Amazon URL",
+                dataType: "text",
+                renderer: "text",
+                required: true,
+                placeholder: "https://www.amazon.com/dp/..."
+              },
+              {
+                key: "productTitle",
+                label: "Product title",
+                dataType: "text",
+                renderer: "text",
+                required: true,
+                placeholder: "Your listing title",
+                autoSlugTo: "fileName",
+                autoSlugMode: "emptyOrSynced",
+                autoSlugSeparator: "-",
+                autoSlugMaxLength: 80,
+                autoSlugPreserveCase: true
+              },
+              {
+                key: "fileName",
+                label: "Image file name",
+                dataType: "text",
+                renderer: "text",
+                required: false,
+                placeholder: "wireless-earbuds"
+              }
+            ]
+          }
         }
       ]
     }
@@ -91,56 +117,183 @@ const amazonImportFormConfiguration = {
 };
 
 const saveAmazonImportForm = async (savePayload) => {
-  const amazonUrl = String(savePayload?.vertex?.P?.amazonUrl || "").trim();
-  const productTitle = String(savePayload?.vertex?.P?.productTitle || "").trim();
-  const fileName = String(savePayload?.vertex?.P?.fileName || "").trim();
+  const entries = parseImportRows(savePayload?.vertex?.P?.products);
 
-  if (!amazonUrl || !productTitle || !fileName) {
-    _.showErrorToast?.("Amazon URL, product title, and file name are required");
+  if (entries.length === 0) {
+    _.showErrorToast?.("Add at least one Amazon URL");
     return false;
+  }
+
+  const missingTitles = entries.filter((row) => !row.productTitle);
+  if (missingTitles.length > 0) {
+    _.showErrorToast?.("Product title is required for every URL");
+    return false;
+  }
+
+  const ctx = toolbarContext() || {};
+  const inIframe = typeof window !== "undefined" && window.parent && window.parent !== window;
+  if (inIframe) {
+    const missing = [];
+    if (!ctx.productCategoryId) missing.push("Products category");
+    if (!ctx.filesCategoryId) missing.push("Files folder");
+    if (missing.length > 0) {
+      _.showErrorToast?.(
+        `Select a ${missing.join(" and a ")} on the Products page, then open Amazon import again.`
+      );
+      return false;
+    }
   }
 
   setIsImporting(true);
   setResultJson("");
   setImportedFiles([]);
-  setImportedProduct(null);
+  setImportedProducts([]);
+  setImportProgress({ current: 0, total: entries.length, title: "" });
+  setImportRowStatuses(
+    entries.map((entry) => ({
+      productTitle: entry.productTitle,
+      status: "pending",
+      message: "Waiting"
+    }))
+  );
+
+  const results = [];
+  const allFiles = [];
+  const allProducts = [];
 
   try {
-    const result = await s({
-      functionName: "importAmazonProduct",
-      contextData: {
-        amazonUrl,
-        productTitle,
-        fileName
+    for (let i = 0; i < entries.length; i++) {
+      const entry = entries[i];
+      setImportProgress({
+        current: i + 1,
+        total: entries.length,
+        title: entry.productTitle
+      });
+      setImportRowStatuses((prev) =>
+        (prev || []).map((row, idx) =>
+          idx === i ? { ...row, status: "importing", message: "Importing…" } : row
+        )
+      );
+
+      const result = await s({
+        functionName: "importAmazonProduct",
+        contextData: {
+          amazonUrl: entry.amazonUrl,
+          productTitle: entry.productTitle,
+          fileName: entry.fileName,
+          productCategoryId: ctx.productCategoryId || null,
+          filesCategoryId: ctx.filesCategoryId || null,
+          productCategoryLabel: ctx.productCategoryLabel || "ProductCategory",
+          productToCategoryEdgeType: ctx.productToCategoryEdgeType || "ParentProductCategory",
+          filesCategoryLabel: ctx.filesCategoryLabel || "Folder",
+          filesToCategoryEdgeType: ctx.filesToCategoryEdgeType || "ParentFolder",
+          tableVertexLabel: ctx.tableVertexLabel || "Product",
+          filesTableVertexLabel: ctx.filesTableVertexLabel || "File"
+        }
+      });
+
+      const payload = result?.result || result;
+      if (payload?.graph) {
+        _.setGraphData?.(0, payload.graph, {});
+      } else if (result?.graph) {
+        _.setGraphData?.(0, result.graph, {});
       }
-    });
 
-    const payload = result?.result || result;
-    if (payload?.graph) {
-      _.setGraphData?.(0, payload.graph, {});
-    } else if (result?.graph) {
-      _.setGraphData?.(0, result.graph, {});
+      results.push({
+        amazonUrl: entry.amazonUrl,
+        productTitle: entry.productTitle,
+        success: payload?.success === true,
+        message: payload?.message || null,
+        productId: payload?.data?.product?.id || null
+      });
+
+      const ok = payload?.success === true;
+      setImportRowStatuses((prev) =>
+        (prev || []).map((row, idx) =>
+          idx === i
+            ? {
+                ...row,
+                status: ok ? "success" : "error",
+                message: payload?.message || (ok ? "Imported" : "Failed")
+              }
+            : row
+        )
+      );
+
+      if (ok) {
+        allFiles.push(...pickFileList(payload));
+        if (payload?.data?.product) allProducts.push(payload.data.product);
+      }
     }
 
-    setResultJson(JSON.stringify(payload, null, 2));
+    setImportedFiles(allFiles);
+    setImportedProducts(allProducts);
+    setResultJson(JSON.stringify({ count: entries.length, results }, null, 2));
 
-    if (payload?.success !== true) {
-      _.showErrorToast?.(payload?.message || "Amazon import failed");
-      return false;
+    const successCount = results.filter((row) => row.success).length;
+    const failureCount = results.length - successCount;
+
+    if (successCount > 0) {
+      try {
+        if (window.parent && window.parent !== window) {
+          window.parent.postMessage(
+            {
+              type: "dynamicPage.toolbarResult",
+              actionKey: ctx.actionKey || "amazonImport",
+              success: true,
+              productIds: allProducts.map((product) => product?.id).filter(Boolean)
+            },
+            window.location.origin
+          );
+        }
+      } catch (_) {
+        /* ignore */
+      }
     }
 
-    setImportedFiles(pickFileList(payload));
-    setImportedProduct(payload?.data?.product || null);
-    _.showSuccessToast?.(payload?.message || "Product imported");
-    return true;
+    if (successCount > 0 && failureCount === 0) {
+      _.showSuccessToast?.(
+        successCount === 1
+          ? `Imported "${allProducts[0]?.P?.title || entries[0].productTitle}"`
+          : `Imported ${successCount} product(s)`
+      );
+      return true;
+    }
+
+    if (successCount > 0 && failureCount > 0) {
+      _.showSuccessToast?.(`Imported ${successCount} product(s); ${failureCount} failed`);
+      return true;
+    }
+
+    _.showErrorToast?.(results[0]?.message || "Amazon import failed");
+    return false;
   } catch (error) {
     const message = error instanceof Error ? error.message : "Amazon import failed";
-    setResultJson(JSON.stringify({ error: message }, null, 2));
+    setResultJson(JSON.stringify({ error: message, results }, null, 2));
+    setImportRowStatuses((prev) =>
+      (prev || []).map((row) =>
+        row.status === "importing" || row.status === "pending"
+          ? { ...row, status: "error", message }
+          : row
+      )
+    );
     _.showErrorToast?.(message);
     return false;
   } finally {
     setIsImporting(false);
   }
+};
+
+const importProgressText = () => {
+  const progress = importProgress();
+  if (!progress || !progress.total) return "";
+  if (isImporting()) {
+    const title = progress.title ? `: ${progress.title}` : "";
+    return `Importing ${progress.current} of ${progress.total}${title}`;
+  }
+  const rows = importRowStatuses() || [];
+  const successCount = rows.filter((row) => row.status === "success").length;
+  return `Imported ${successCount} of ${progress.total}`;
 };
 
 return {
@@ -149,15 +302,36 @@ return {
   saveAmazonImportForm,
   resultJson,
   importedFiles,
-  importedFilesHtml,
-  importedProduct,
-  isImporting
+  downloadHrefFor,
+  importedProducts,
+  isImporting,
+  importProgress,
+  importRowStatuses,
+  importProgressText,
+  toolbarContext,
+  onToolbarContextMessage
 };
 '''
         props:
           '''
 return {
-  enabled: () => true
+  enabled: () => true,
+  onMount: () => {
+    window.addEventListener("message", f.onToolbarContextMessage);
+    try {
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage(
+          { type: "dynamicPage.toolbarContextRequest" },
+          window.location.origin
+        );
+      }
+    } catch (_) {
+      /* ignore */
+    }
+  },
+  onCleanup: () => {
+    window.removeEventListener("message", f.onToolbarContextMessage);
+  }
 };
 '''
       }
@@ -171,7 +345,13 @@ return {
         css:
           '''
 return `._id {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
   padding: 2.5rem 1rem 4rem;
+  box-sizing: border-box;
 }`;
 '''
         props:
@@ -249,7 +429,38 @@ return `._id {
           '''
 return {
   as: "p",
-  text: "Paste an Amazon product URL. Playwright loads the page, reads the title, price, and description, clicks the image carousel, uploads images as name-1 / name-2…, then creates a Product (your title) with one ProductVariant (Amazon title, images, price, markdown description)."
+  text: "Paste one or more Amazon product URLs. Each row becomes a Product: Playwright reads title, price, description, and images; image file name keeps the title casing and is slugged until you edit it. When opened from Products, category IDs arrive via postMessage."
+};
+'''
+      }
+    }
+    {
+      id: "toolbar_context"
+      L: Attr
+      P: {
+        displayOrder: 2.5
+        componentName: Html
+        css:
+          '''
+return `._id {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: ${t.var.color.muted};
+}`;
+'''
+        props:
+          '''
+const ctx = f.toolbarContext?.() || null;
+const productCat = ctx?.productCategoryId || null;
+const filesCat = ctx?.filesCategoryId || null;
+const hasAny = !!(productCat || filesCat);
+return {
+  as: "p",
+  hide: !hasAny,
+  text: hasAny
+    ? `Saving into Products category ${productCat || "(none)"} · Files folder ${filesCat || "(none)"}`
+    : ""
 };
 '''
       }
@@ -263,8 +474,37 @@ return {
         css:
           '''
 return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid ${t.var.color.border};
+  border-radius: 0.5rem;
+  background: ${t.var.color.background_light_100};
+}`;
+'''
+        props:
+          '''
+const rows = f.importRowStatuses?.() || [];
+return {
+  as: "div",
+  hide: rows.length === 0 && f.isImporting?.() !== true
+};
+'''
+      }
+    }
+    {
+      id: "busy_title"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''
+return `._id {
   margin: 0;
   font-size: 0.875rem;
+  font-weight: 600;
   color: ${t.var.color.primary};
 }`;
 '''
@@ -272,8 +512,76 @@ return `._id {
           '''
 return {
   as: "p",
-  text: "Importing… Playwright is loading Amazon (this can take a minute).",
-  show: () => f.isImporting?.() === true
+  text: () => f.importProgressText?.() || "Importing…"
+};
+'''
+      }
+    }
+    {
+      id: "busy_list"
+      L: Attr
+      P: {
+        contextName: importStatus
+        loop: true
+        displayOrder: 2
+        componentName: Html
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}`;
+'''
+        props:
+          '''
+return {
+  as: "div",
+  data: f.importRowStatuses?.() || []
+};
+'''
+      }
+    }
+    {
+      id: "busy_item"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''
+const status = c.importStatus?.status;
+const color =
+  status === "success"
+    ? t.var.color.success
+    : status === "error"
+      ? t.var.color.error
+      : status === "importing"
+        ? t.var.color.primary
+        : t.var.color.text_dark_400;
+return `._id {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: ${color};
+}`;
+'''
+        props:
+          '''
+const row = c.importStatus || {};
+const title = row.productTitle || "Product";
+const message = row.message || row.status || "";
+const label =
+  row.status === "pending"
+    ? "Waiting"
+    : row.status === "importing"
+      ? "Importing"
+      : row.status === "success"
+        ? "Done"
+        : "Failed";
+return {
+  as: "p",
+  text: `${label}: ${title}${message && row.status !== "pending" && row.status !== "importing" ? ` — ${message}` : ""}`
 };
 '''
       }
@@ -317,10 +625,10 @@ return `._id {
 '''
         props:
           '''
-const product = f.importedProduct?.();
+const products = f.importedProducts?.() || [];
 return {
   as: "div",
-  show: () => !!product
+  show: () => products.length > 0
 };
 '''
       }
@@ -350,10 +658,36 @@ return {
       }
     }
     {
+      id: "product_summary_list"
+      L: Attr
+      P: {
+        contextName: importedProduct
+        loop: true
+        displayOrder: 2
+        componentName: Html
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}`;
+'''
+        props:
+          '''
+const products = f.importedProducts?.() || [];
+return {
+  as: "div",
+  data: products
+};
+'''
+      }
+    }
+    {
       id: "product_summary_body"
       L: Attr
       P: {
-        displayOrder: 2
+        displayOrder: 1
         componentName: Html
         css:
           '''
@@ -366,13 +700,13 @@ return `._id {
 '''
         props:
           '''
-const product = f.importedProduct?.();
+const product = c.importedProduct;
 const title = product?.P?.title || "";
 const key = product?.P?.key || "";
 const id = product?.id || "";
 return {
   as: "p",
-  text: () => (title ? `${title} · key: ${key} · id: ${id}` : "")
+  text: title ? `${title} · key: ${key} · id: ${id}` : ""
 };
 '''
       }
@@ -428,11 +762,15 @@ return {
       id: "downloads_list"
       L: Attr
       P: {
+        contextName: importedFile
+        loop: true
         displayOrder: 2
         componentName: Html
         css:
           '''
 return `._id {
+  display: flex;
+  flex-direction: column;
   font-size: 0.875rem;
   line-height: 1.6;
   color: ${t.var.color.primary};
@@ -444,11 +782,38 @@ return `._id {
 '''
         props:
           '''
+const files = f.importedFiles?.() || [];
 return {
   as: "div",
-  innerHTML: f.importedFilesHtml?.() || "",
-  show: () => (f.importedFiles?.() || []).length > 0
+  hide: files.length === 0,
+  data: files
 };
+'''
+      }
+    }
+    {
+      id: "downloads_item"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const file = c.importedFile;
+const name = file?.P?.fileName || file?.id || "file";
+const href = f.downloadHrefFor?.(file) || "";
+return href
+  ? {
+      as: "a",
+      href,
+      target: "_blank",
+      rel: "noopener noreferrer",
+      text: name
+    }
+  : {
+      as: "div",
+      text: name
+    };
 '''
       }
     }
@@ -498,14 +863,20 @@ return {
     { id: "e2", T: "Attr", S: "main", E: "container" }
     { id: "e3", T: "Attr", S: "container", E: "title" }
     { id: "e4", T: "Attr", S: "container", E: "intro" }
+    { id: "e4b", T: "Attr", S: "container", E: "toolbar_context" }
     { id: "e5", T: "Attr", S: "container", E: "busy" }
+    { id: "e5b", T: "Attr", S: "busy", E: "busy_title" }
+    { id: "e5c", T: "Attr", S: "busy", E: "busy_list" }
+    { id: "e5d", T: "Attr", S: "busy_list", E: "busy_item" }
     { id: "e6", T: "Attr", S: "container", E: "form" }
     { id: "e7", T: "Attr", S: "container", E: "product_summary" }
     { id: "e8", T: "Attr", S: "product_summary", E: "product_summary_title" }
-    { id: "e9", T: "Attr", S: "product_summary", E: "product_summary_body" }
+    { id: "e8b", T: "Attr", S: "product_summary", E: "product_summary_list" }
+    { id: "e9", T: "Attr", S: "product_summary_list", E: "product_summary_body" }
     { id: "e10", T: "Attr", S: "container", E: "downloads" }
     { id: "e11", T: "Attr", S: "downloads", E: "downloads_title" }
     { id: "e12", T: "Attr", S: "downloads", E: "downloads_list" }
+    { id: "e12b", T: "Attr", S: "downloads_list", E: "downloads_item" }
     { id: "e13", T: "Attr", S: "container", E: "result" }
     { id: "e_layout", T: "PageLayout", S: "1", E: "layout" }
   ]

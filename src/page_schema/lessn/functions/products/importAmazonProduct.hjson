@@ -15,6 +15,24 @@ if (!actualUser) {
 const amazonUrl = String(c?.amazonUrl || "").trim();
 const productTitle = String(c?.productTitle || "").trim();
 const fileNameBase = String(c?.fileName || c?.fileNameBase || "").trim();
+const productCategoryId =
+  c?.productCategoryId != null && String(c.productCategoryId).trim() !== ""
+    ? String(c.productCategoryId).trim()
+    : null;
+const filesCategoryId =
+  c?.filesCategoryId != null && String(c.filesCategoryId).trim() !== ""
+    ? String(c.filesCategoryId).trim()
+    : null;
+const productCategoryLabel = String(c?.productCategoryLabel || "ProductCategory").trim();
+const productToCategoryEdgeType = String(
+  c?.productToCategoryEdgeType || "ParentProductCategory"
+).trim();
+const filesCategoryLabel = String(c?.filesCategoryLabel || "Folder").trim();
+const filesToCategoryEdgeType = String(
+  c?.filesToCategoryEdgeType || "ParentFolder"
+).trim();
+const tableVertexLabel = String(c?.tableVertexLabel || "Product").trim();
+const filesTableVertexLabel = String(c?.filesTableVertexLabel || "File").trim();
 
 if (!amazonUrl) {
   return { success: false, message: "Amazon URL is required." };
@@ -86,11 +104,66 @@ const mergeUploadGraph = (graph) => {
 
 const fail = (message, extra = {}) => ({ success: false, message, ...extra });
 
+const linkContentToCategory = async ({
+  contentId,
+  categoryId,
+  relationshipType,
+  categoryLabel,
+  contentLabel,
+  hooks
+}) => {
+  if (!contentId || !categoryId) return null;
+  const rel = await s(
+    {
+      functionName: "createSidebarContentRelationship",
+      contextData: {
+        categoryId,
+        contentId,
+        relationshipType,
+        categoryLabel,
+        contentLabel,
+        enableUserScopingForSidebar: false,
+        enableUserScopingForContent: false,
+        hooks: hooks || {}
+      }
+    },
+    _.context
+  );
+  return rel;
+};
+
 try {
+  const productKey = slugify(productTitle);
+  const existingKeyResult = await _.session.run(
+    `
+      MATCH (product:${tableVertexLabel})
+      WHERE product.key = $productKey
+      RETURN product
+      LIMIT 1
+    `,
+    { productKey }
+  );
+  if (existingKeyResult.records.length > 0) {
+    return fail(`A product with key "${productKey}" already exists.`);
+  }
+
   const scraped = await _.scrapeAmazonProduct(amazonUrl);
   const imageUrls = Array.isArray(scraped?.imageUrls) ? scraped.imageUrls : [];
   if (imageUrls.length === 0) {
     return fail("No images found on the Amazon page.");
+  }
+
+  let folderKeyPath = null;
+  if (filesCategoryId) {
+    try {
+      folderKeyPath = await _.resolveFolderKeyPath(_.session, filesCategoryId, {
+        categoryLabel: filesCategoryLabel,
+        toParentEdgeType: filesToCategoryEdgeType
+      });
+    } catch (err) {
+      console.error("importAmazonProduct resolveFolderKeyPath:", err);
+      folderKeyPath = null;
+    }
   }
 
   const base = sanitizeFileBase(fileNameBase);
@@ -110,7 +183,8 @@ try {
           [{ url, fileName }],
           _.subDomain,
           _.session,
-          actualUser.P?.uuid
+          actualUser.P?.uuid,
+          folderKeyPath
         );
         const item = Array.isArray(one?.uploads) ? one.uploads[0] : null;
         if (!item?.ok) {
@@ -132,6 +206,16 @@ try {
 
     if (uploadedFile) {
       fileVertices.push(uploadedFile);
+      if (filesCategoryId) {
+        await linkContentToCategory({
+          contentId: String(uploadedFile.id),
+          categoryId: filesCategoryId,
+          relationshipType: filesToCategoryEdgeType,
+          categoryLabel: filesCategoryLabel,
+          contentLabel: filesTableVertexLabel,
+          hooks: { afterCreateRelationship: "fileAfterCreateRelationship" }
+        });
+      }
     } else {
       uploadItems.push({ ok: false, url, fileName, error: lastError });
       console.error("importAmazonProduct image upload failed:", url, lastError);
@@ -147,7 +231,6 @@ try {
 
   const imageFileIds = fileVertices.map((f) => String(f.id));
   const thumbnailId = imageFileIds[0];
-  const productKey = slugify(productTitle);
   const amazonTitle = String(scraped.title || "").trim() || productTitle;
   const price = String(scraped.price || "").trim() || "See Amazon";
   const description = String(scraped.shortDescription || "").trim();
@@ -156,7 +239,7 @@ try {
     {
       functionName: "mutateUserContent",
       contextData: {
-        tableVertexLabel: "Product",
+        tableVertexLabel,
         operation: "create",
         enableUserScoping: false,
         uniqueKeys: ["key"],
@@ -164,7 +247,7 @@ try {
         data: {
           vertex: {
             id: null,
-            L: ["Product"],
+            L: [tableVertexLabel],
             P: { title: productTitle, key: productKey },
             IN: {},
             OUT: {}
@@ -189,7 +272,7 @@ try {
                   title: amazonTitle,
                   sku: "",
                   price,
-                  amazonUrl: scraped.amazonUrl || amazonUrl,
+                  amazonUrl,
                   description,
                   imageFileIds
                 }
@@ -210,6 +293,17 @@ try {
     );
   }
 
+  const product = mutateResult.result.data;
+  if (productCategoryId && product?.id) {
+    await linkContentToCategory({
+      contentId: String(product.id),
+      categoryId: productCategoryId,
+      relationshipType: productToCategoryEdgeType,
+      categoryLabel: productCategoryLabel,
+      contentLabel: tableVertexLabel
+    });
+  }
+
   const failedCount = imageUrls.length - fileVertices.length;
   return {
     success: true,
@@ -218,14 +312,16 @@ try {
         ? `Imported "${productTitle}" with ${fileVertices.length}/${imageUrls.length} image(s) (${failedCount} upload failed).`
         : `Imported "${productTitle}" with ${fileVertices.length} image(s).`,
     data: {
-      product: mutateResult.result.data,
+      product,
       productKey,
       amazonTitle,
       price,
       description,
       imageCount: fileVertices.length,
       files: fileVertices,
-      amazonUrl: scraped.amazonUrl || amazonUrl
+      amazonUrl,
+      productCategoryId,
+      filesCategoryId
     },
     uploads: uploadItems
   };

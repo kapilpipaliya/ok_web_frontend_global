@@ -94,8 +94,27 @@ const buildDefaultItem = () => {
 const updateItemField = (itemIndex, fieldKey, fieldValue) => {
   const items = getItems();
   if (!items[itemIndex]) return;
+  const itemFields = getItemFields();
+  const sourceField = itemFields.find((field) => field && field.key === fieldKey);
+  const previousValue = items[itemIndex][fieldKey];
+  const nextItem = { ...items[itemIndex], [fieldKey]: fieldValue };
+
+  const resolveAutoSlugUpdate = getProps().resolveAutoSlugUpdate;
+  if (typeof resolveAutoSlugUpdate === "function" && sourceField?.autoSlugTo) {
+    const targetKey = String(sourceField.autoSlugTo).trim();
+    const update = resolveAutoSlugUpdate(
+      sourceField,
+      previousValue,
+      fieldValue,
+      nextItem[targetKey]
+    );
+    if (update?.targetKey) {
+      nextItem[update.targetKey] = update.nextSlug;
+    }
+  }
+
   const nextItems = items.map((item, index) =>
-    index === itemIndex ? { ...item, [fieldKey]: fieldValue } : item
+    index === itemIndex ? nextItem : item
   );
   commitItems(nextItems);
 };
@@ -696,6 +715,7 @@ return {
   value: Array.isArray(value) ? value : [],
   disabled: f.isDisabled(),
   siteLanguages: f.getSiteLanguages?.(),
+  resolveAutoSlugUpdate: c.props?.resolveAutoSlugUpdate,
   onChange: (nextItems) => f.updateItemField(itemIndex, itemField.key, nextItems)
 };'''
       }

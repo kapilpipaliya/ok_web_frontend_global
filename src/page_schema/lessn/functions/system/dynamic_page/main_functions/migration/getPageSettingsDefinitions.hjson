@@ -882,8 +882,60 @@ const productTableGeneral = {
     { key: "edit", type: "edit" },
     { key: "delete", type: "delete", confirm: { title: "Delete product?", message: "This cannot be undone.", confirmText: "Delete", cancelText: "Cancel", variant: "danger" } }
   ],
-  hooks: {},
-  companionPages: filesCompanionPages("Upload images in Files below. Drag an image onto a category in the sidebar to set its image, or use the product/variant image pickers.")
+  hooks: {
+    beforeDelete: {
+      functionName: "cascadeDeleteOwnedChildren",
+      cascadeDelete: {
+        deleteTranslations: true,
+        files: [
+          { relationshipType: "ProductThumbnail", targetLabel: "File" }
+        ],
+        children: [
+          {
+            label: "ProductVariant",
+            relationshipType: "ProductProductVariant",
+            deleteTranslations: true,
+            files: [
+              { relationshipType: "ProductVariantImage", targetLabel: "File" }
+            ]
+          }
+        ],
+        fileDeleteHooks: { afterDelete: "fileAfterDelete" }
+      }
+    }
+  },
+  companionPages: filesCompanionPages("Upload images in Files below. Drag an image onto a category in the sidebar to set its image, or use the product/variant image pickers."),
+  // Config-driven toolbar buttons (DynamicPage renders + opens iframeModal with postMessage context)
+  toolbarActions: [
+    {
+      key: "amazonImport",
+      label: "Amazon import",
+      icon: "ph:amazon-logo",
+      polarisIcon: "import",
+      type: "iframeModal",
+      iframeUrl: "/portal/amazon-import",
+      modalTitle: "Amazon import",
+      modalMaxWidth: "52rem",
+      modalHeight: "85vh",
+      postMessage: {
+        type: "dynamicPage.toolbarContext",
+        map: {
+          productCategoryId: { from: "sidebar.selectedId" },
+          filesCategoryId: { from: "companion.selectedId", companionTableKey: "files" }
+        },
+        extras: {
+          tableKey: "products",
+          tableVertexLabel: "Product",
+          productCategoryLabel: "ProductCategory",
+          productToCategoryEdgeType: "ParentProductCategory",
+          filesTableKey: "files",
+          filesTableVertexLabel: "File",
+          filesCategoryLabel: "Folder",
+          filesToCategoryEdgeType: "ParentFolder"
+        }
+      }
+    }
+  ]
 };
 
 const productTableFormConfig = {

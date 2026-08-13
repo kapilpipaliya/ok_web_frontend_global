@@ -28,12 +28,15 @@ const getTranslationMeta = (rootLabel) => {
   };
 };
 
-const trackDeletedVertexId = (vertexId) => {
-  if (vertexId == null || vertexId === "") return;
-  if (!_.context.deletedVertexes) _.context.deletedVertexes = [];
-  const id = String(vertexId);
-  if (!_.context.deletedVertexes.includes(id)) _.context.deletedVertexes.push(id);
+const pushUnique = (bucketKey, value) => {
+  if (value == null || value === "") return;
+  if (!Array.isArray(_.context[bucketKey])) _.context[bucketKey] = [];
+  const id = String(value);
+  if (!_.context[bucketKey].includes(id)) _.context[bucketKey].push(id);
 };
+
+const trackDeletedVertexId = (vertexId) => pushUnique("deletedVertexes", vertexId);
+const trackDeletedEdgeId = (edgeId) => pushUnique("deletedEdges", edgeId);
 
 const translationHasContent = (props, fieldKeys) => {
   if (!props || typeof props !== "object") return false;
@@ -46,24 +49,35 @@ const translationHasContent = (props, fieldKeys) => {
 
 const deleteAllTranslations = async (parentElementId, rootLabel) => {
   const { translationLabel, edgeType } = getTranslationMeta(rootLabel);
-  const existingRes = await _.session.run(
-    `MATCH (c:${rootLabel})-[:${edgeType}]->(t:${translationLabel})
-     WHERE elementId(c) = $pid
-     RETURN elementId(t) AS tid`,
-    { pid: parentElementId }
+  const existingResult = await _.session.run(
+    `
+    MATCH (content:${rootLabel})-[translationEdge:${edgeType}]->(translation:${translationLabel})
+    WHERE elementId(content) = $parentElementId
+    OPTIONAL MATCH (translation)-[incidentEdge]-()
+    RETURN
+      [id IN collect(DISTINCT elementId(translation)) WHERE id IS NOT NULL] AS translationIds,
+      [id IN collect(DISTINCT elementId(translationEdge)) WHERE id IS NOT NULL] AS translationEdgeIds,
+      [id IN collect(DISTINCT elementId(incidentEdge)) WHERE id IS NOT NULL] AS incidentEdgeIds
+    `,
+    { parentElementId }
   );
-  for (let i = 0; i < existingRes.records.length; i++) {
-    const tid = existingRes.records[i].get("tid");
-    if (tid != null) trackDeletedVertexId(tid);
-  }
-  if (existingRes.records.length === 0) return { deleted: 0 };
+  const record = existingResult.records[0];
+  const translationIds = record ? record.get("translationIds") || [] : [];
+  const translationEdgeIds = record ? record.get("translationEdgeIds") || [] : [];
+  const incidentEdgeIds = record ? record.get("incidentEdgeIds") || [] : [];
+  for (let i = 0; i < translationIds.length; i++) trackDeletedVertexId(translationIds[i]);
+  for (let i = 0; i < translationEdgeIds.length; i++) trackDeletedEdgeId(translationEdgeIds[i]);
+  for (let i = 0; i < incidentEdgeIds.length; i++) trackDeletedEdgeId(incidentEdgeIds[i]);
+  if (!translationIds.length) return { deleted: 0 };
   await _.session.run(
-    `MATCH (c:${rootLabel})-[:${edgeType}]->(t:${translationLabel})
-     WHERE elementId(c) = $pid
-     DETACH DELETE t`,
-    { pid: parentElementId }
+    `
+    MATCH (content:${rootLabel})-[:${edgeType}]->(translation:${translationLabel})
+    WHERE elementId(content) = $parentElementId
+    DETACH DELETE translation
+    `,
+    { parentElementId }
   );
-  return { deleted: existingRes.records.length };
+  return { deleted: translationIds.length };
 };
 
 const syncTranslations = async (params) => {
@@ -81,19 +95,21 @@ const syncTranslations = async (params) => {
   const { translationLabel, edgeType } = getTranslationMeta(rootLabel);
   const nowIso = new Date().toISOString();
 
-  const existingRes = await _.session.run(
-    `MATCH (c:${rootLabel})-[:${edgeType}]->(t:${translationLabel})
-     WHERE elementId(c) = $pid
-     RETURN elementId(t) AS tid, t.locale AS locale`,
-    { pid: parentElementId }
+  const existingResult = await _.session.run(
+    `
+    MATCH (content:${rootLabel})-[:${edgeType}]->(translation:${translationLabel})
+    WHERE elementId(content) = $parentElementId
+    RETURN elementId(translation) AS translationId, translation.locale AS locale
+    `,
+    { parentElementId }
   );
   const existingByLocale = {};
-  for (let i = 0; i < existingRes.records.length; i++) {
-    const rec = existingRes.records[i];
-    const locale = rec.get("locale");
-    const tid = rec.get("tid");
-    if (locale != null && String(locale).trim() !== "" && tid != null) {
-      existingByLocale[String(locale)] = String(tid);
+  for (let i = 0; i < existingResult.records.length; i++) {
+    const record = existingResult.records[i];
+    const locale = record.get("locale");
+    const translationId = record.get("translationId");
+    if (locale != null && String(locale).trim() !== "" && translationId != null) {
+      existingByLocale[String(locale)] = String(translationId);
     }
   }
 
@@ -110,17 +126,17 @@ const syncTranslations = async (params) => {
       continue;
     }
     const props = { locale, updatedAt: nowIso };
-    for (let fi = 0; fi < keys.length; fi++) {
-      const key = keys[fi];
+    for (let fieldIndex = 0; fieldIndex < keys.length; fieldIndex++) {
+      const key = keys[fieldIndex];
       const text = localeProps[key];
       props[key] = text != null ? String(text) : "";
     }
     const existingId = existingByLocale[locale];
     if (existingId) {
-      toUpsert.push({ tid: existingId, props, isNew: false });
+      toUpsert.push({ translationId: existingId, props, isNew: false });
     } else {
       props.createdAt = nowIso;
-      toUpsert.push({ tid: null, props, isNew: true });
+      toUpsert.push({ translationId: null, props, isNew: true });
     }
   }
 
@@ -134,10 +150,12 @@ const syncTranslations = async (params) => {
   if (toDeleteIds.length > 0) {
     for (let i = 0; i < toDeleteIds.length; i++) trackDeletedVertexId(toDeleteIds[i]);
     await _.session.run(
-      `MATCH (c:${rootLabel})-[:${edgeType}]->(t:${translationLabel})
-       WHERE elementId(c) = $pid AND elementId(t) IN $tids
-       DETACH DELETE t`,
-      { pid: parentElementId, tids: toDeleteIds }
+      `
+      MATCH (content:${rootLabel})-[:${edgeType}]->(translation:${translationLabel})
+      WHERE elementId(content) = $parentElementId AND elementId(translation) IN $translationIds
+      DETACH DELETE translation
+      `,
+      { parentElementId, translationIds: toDeleteIds }
     );
   }
 
@@ -145,35 +163,42 @@ const syncTranslations = async (params) => {
   const toCreate = toUpsert.filter((row) => row.isNew);
 
   if (toUpdate.length > 0) {
-    const updateRes = await _.session.run(
-      `UNWIND $rows AS row
-       MATCH (c:${rootLabel})-[r:${edgeType}]->(t:${translationLabel})
-       WHERE elementId(c) = $pid AND elementId(t) = row.tid
-       SET t += row.props
-       RETURN c, r, t`,
+    const updateResult = await _.session.run(
+      `
+      UNWIND $rows AS row
+      MATCH (content:${rootLabel})-[translationEdge:${edgeType}]->(translation:${translationLabel})
+      WHERE elementId(content) = $parentElementId AND elementId(translation) = row.translationId
+      SET translation += row.props
+      RETURN content, translationEdge, translation
+      `,
       {
-        pid: parentElementId,
-        rows: toUpdate.map((row) => ({ tid: row.tid, props: row.props }))
+        parentElementId,
+        rows: toUpdate.map((row) => ({
+          translationId: row.translationId,
+          props: row.props
+        }))
       }
     );
-    _.processResult(updateRes.records, _.context, ["c", "t"], "r");
+    _.processResult(updateResult.records, _.context, ["content", "translation"], "translationEdge");
   }
 
   if (toCreate.length > 0) {
-    const createRes = await _.session.run(
-      `UNWIND $rows AS row
-       MATCH (c:${rootLabel})
-       WHERE elementId(c) = $pid
-       CREATE (t:${translationLabel})
-       SET t = row.props
-       CREATE (c)-[r:${edgeType}]->(t)
-       RETURN c, r, t`,
+    const createResult = await _.session.run(
+      `
+      UNWIND $rows AS row
+      MATCH (content:${rootLabel})
+      WHERE elementId(content) = $parentElementId
+      CREATE (translation:${translationLabel})
+      SET translation = row.props
+      CREATE (content)-[translationEdge:${edgeType}]->(translation)
+      RETURN content, translationEdge, translation
+      `,
       {
-        pid: parentElementId,
+        parentElementId,
         rows: toCreate.map((row) => ({ props: row.props }))
       }
     );
-    _.processResult(createRes.records, _.context, ["c", "t"], "r");
+    _.processResult(createResult.records, _.context, ["content", "translation"], "translationEdge");
   }
 
   return { upserted: toUpsert.length, deleted: toDeleteIds.length };

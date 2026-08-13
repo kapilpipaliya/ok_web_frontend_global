@@ -116,6 +116,12 @@ const getSubtitle = () => {
 const getSearchPlaceholder = () => f.prop('searchPlaceholder', c.props) || "Search...";
 const getAdditionalFilters = () => f.prop('additionalFilters', c.props) || [];
 const getCustomActions = () => f.prop('customActions', c.props) || [];
+const getToolbarActions = () => {
+  const raw = c.props?.toolbarActions;
+  if (Array.isArray(raw)) return raw;
+  const fromProp = f.prop('toolbarActions', c.props);
+  return Array.isArray(fromProp) ? fromProp : [];
+};
 const getBatchActions = () => f.prop('batchActions', c.props) || [];
 const getShowRowNumber = () => {
   if (isNestedLinesTable()) return c.props?.showRowNumber !== false;
@@ -2590,6 +2596,7 @@ return {
   getSearchPlaceholder,
   getAdditionalFilters,
   getCustomActions,
+  getToolbarActions,
   getBatchActions,
   getShowRowNumber,
   getHideColumns,
@@ -2959,10 +2966,12 @@ return {
         componentName: Html
         props:
           '''const customActions = f.getCustomActions?.() || [];
+const toolbarActions = f.getToolbarActions?.() || [];
 const hasCustomActions = Array.isArray(customActions) ? customActions.length > 0 : !!customActions;
+const hasToolbarActions = Array.isArray(toolbarActions) && toolbarActions.length > 0;
 return {
   as: "div",
-  hide: !hasCustomActions
+  hide: !hasCustomActions && !hasToolbarActions
 };'''
       }
     }
@@ -2973,6 +2982,66 @@ return {
         slotName: customActions
         displayOrder: 1
         componentName: Slot
+      }
+    }
+    {
+      id: "11a"
+      L: Attr
+      P: {
+        contextName: toolbarAction
+        loop: true
+        displayOrder: 2
+        componentName: Html
+        css:
+          '''return `._id {
+  display: inline-flex;
+  align-items: center;
+  gap: ${t.var.spacing.sm};
+  flex-wrap: wrap;
+}`;'''
+        props:
+          '''const actions = f.getToolbarActions?.() || [];
+return {
+  as: "div",
+  hide: !Array.isArray(actions) || actions.length === 0,
+  data: actions
+};'''
+      }
+    }
+    {
+      id: "11a_polaris"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const action = c.toolbarAction || {};
+const polarisIcon = action.polarisIcon || null;
+return {
+  as: "s-button",
+  "attr:variant": "secondary",
+  ...(polarisIcon ? { "attr:icon": polarisIcon } : {}),
+  text: action.label || action.key || "Action",
+  onClick: () => action.onClick?.(),
+  hide: f.getUsePolarisUI?.() !== true
+};'''
+      }
+    }
+    {
+      id: "11a_button"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''const action = c.toolbarAction || {};
+return {
+  variant: "secondary",
+  text: action.label || action.key || "Action",
+  leftIcon: action.icon || undefined,
+  onClick: () => action.onClick?.(),
+  hide: f.getUsePolarisUI?.() === true
+};'''
       }
     }
     {
@@ -5878,6 +5947,24 @@ return {
       T: Attr
       S: "10"
       E: "11"
+    }
+    {
+      id: e39b
+      T: Attr
+      S: "10"
+      E: "11a"
+    }
+    {
+      id: e39c
+      T: Attr
+      S: "11a"
+      E: "11a_polaris"
+    }
+    {
+      id: e39d
+      T: Attr
+      S: "11a"
+      E: "11a_button"
     }
     {
       id: e40

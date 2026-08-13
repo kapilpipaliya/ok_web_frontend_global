@@ -21,6 +21,9 @@ _.addNewVertex(0, {
     loading: false,
     configLoading: true,
     selectedSidebarCategoryId: null,
+    companionSelectedIdsByTableKey: {},
+    toolbarIframeOpen: false,
+    toolbarIframeActionKey: null,
     selectedRowsByCategory: {},
     sidebarWidth: 240,
     companionMainHeight: null,
@@ -251,6 +254,7 @@ const resolveGeneralFromPart = (generalRaw, tableVertexLabel) => {
     reasonCodeMap: general.reasonCodeMap,
     refetchIntervalWhenQueued: general.refetchIntervalWhenQueued,
     companionPages: Array.isArray(general.companionPages) ? general.companionPages : [],
+    toolbarActions: Array.isArray(general.toolbarActions) ? general.toolbarActions : [],
     dropCreateFrom: general.dropCreateFrom && typeof general.dropCreateFrom === "object"
       ? general.dropCreateFrom
       : null,
@@ -1780,17 +1784,169 @@ const handleSidebarItemSelect = (item) => {
     _.setSearchParams({ ...current, sidebarCategory: item.id }, { replace: true });
   }
 
+  // Always notify parent listeners (e.g. companion selection tracking).
+  const onSidebarItemSelect = prop("onSidebarItemSelect");
+  if (typeof onSidebarItemSelect === "function") {
+    onSidebarItemSelect(item, _);
+  }
+
   // Opt-in: treat sidebar category click as the picker selection value.
   if (c.props?.allowSidebarSelection === true && item?.id) {
-    const onSidebarItemSelect = prop("onSidebarItemSelect");
-    if (typeof onSidebarItemSelect === "function") {
-      onSidebarItemSelect(item, _);
-    }
     const onSelectionChange = getOnSelectionChange();
     if (typeof onSelectionChange === "function") {
       onSelectionChange(new Set([String(item.id)]), [{ id: item.id, vertex: item }], _);
     }
   }
+};
+
+const resolveAssignableCategoryId = (item) => {
+  if (!item?.id) return null;
+  const id = String(item.id);
+  const key = item.P?.key != null ? String(item.P.key) : "";
+  // Synthetic All / Uncategorized ids: _Product_all, _File_uncategorized, …
+  if (/^_[A-Za-z0-9]+_(all|uncategorized)$/.test(id)) return null;
+  if (/^_[A-Za-z0-9]+_(all|uncategorized)$/.test(key)) return null;
+  if (isSyntheticAllSidebarItem(item) || isSyntheticUncategorizedSidebarItem(item)) {
+    return null;
+  }
+  return id;
+};
+
+const handleCompanionSidebarSelect = (tableKey, item) => {
+  const key = tableKey != null ? String(tableKey).trim() : "";
+  if (!key) return;
+  const id = resolveAssignableCategoryId(item);
+  const prev = pageP()?.companionSelectedIdsByTableKey || {};
+  patchPageP({
+    companionSelectedIdsByTableKey: { ...prev, [key]: id }
+  });
+};
+
+const getToolbarActionsConfig = () => {
+  const raw = getConfigGeneralValue("toolbarActions");
+  return Array.isArray(raw) ? raw.filter((a) => a && typeof a === "object") : [];
+};
+
+const getActiveToolbarIframeAction = () => {
+  const key = pageP()?.toolbarIframeActionKey;
+  if (!key) return null;
+  return getToolbarActionsConfig().find((a) => String(a.key) === String(key)) || null;
+};
+
+const resolveToolbarPostMessageValue = (spec) => {
+  if (!spec || typeof spec !== "object") return null;
+  const from = String(spec.from || "").trim();
+  if (from === "sidebar.selectedId") {
+    return resolveAssignableCategoryId(selectedSidebarItem());
+  }
+  if (from === "companion.selectedId") {
+    const companionKey = String(
+      spec.companionTableKey || spec.tableKey || ""
+    ).trim();
+    if (!companionKey) return null;
+    const map = pageP()?.companionSelectedIdsByTableKey || {};
+    const id = map[companionKey];
+    return id != null && String(id).trim() !== "" ? String(id) : null;
+  }
+  if (from === "config" && spec.key != null) {
+    const v = getConfigGeneralValue(String(spec.key));
+    return v == null || v === "" ? null : v;
+  }
+  if (Object.prototype.hasOwnProperty.call(spec, "value")) {
+    return spec.value;
+  }
+  return null;
+};
+
+const buildToolbarPostMessagePayload = (action) => {
+  const pm = action?.postMessage && typeof action.postMessage === "object"
+    ? action.postMessage
+    : {};
+  const payload = {
+    type: pm.type || "dynamicPage.toolbarContext",
+    actionKey: action?.key || null,
+    ...(pm.extras && typeof pm.extras === "object" ? pm.extras : {})
+  };
+  const map = pm.map && typeof pm.map === "object" ? pm.map : {};
+  for (const [field, spec] of Object.entries(map)) {
+    payload[field] = resolveToolbarPostMessageValue(spec);
+  }
+  return payload;
+};
+
+const openToolbarIframeAction = (action) => {
+  if (!action || action.type !== "iframeModal") return;
+  const url = String(action.iframeUrl || "").trim();
+  if (!url) {
+    _.showErrorToast?.("iframeUrl is not configured");
+    return;
+  }
+  patchPageP({
+    toolbarIframeOpen: true,
+    toolbarIframeActionKey: action.key != null ? String(action.key) : null
+  });
+};
+
+const closeToolbarIframe = () => {
+  patchPageP({ toolbarIframeOpen: false, toolbarIframeActionKey: null });
+};
+
+const postToolbarContextToIframe = (iframeEl) => {
+  const action = getActiveToolbarIframeAction();
+  if (!action || !iframeEl?.contentWindow) return;
+  const payload = buildToolbarPostMessagePayload(action);
+  try {
+    iframeEl.contentWindow.postMessage(payload, window.location.origin);
+  } catch (err) {
+    console.error("toolbar iframe postMessage failed:", err);
+  }
+};
+
+const handleToolbarIframeWindowMessage = (event) => {
+  if (event.origin !== window.location.origin) return;
+  const data = event.data;
+  if (!data || typeof data !== "object") return;
+  if (data.type === "dynamicPage.toolbarContextRequest") {
+    const action = getActiveToolbarIframeAction();
+    if (!action || pageP()?.toolbarIframeOpen !== true) return;
+    const payload = buildToolbarPostMessagePayload(action);
+    try {
+      event.source?.postMessage?.(payload, window.location.origin);
+    } catch (err) {
+      console.error("toolbar iframe context reply failed:", err);
+    }
+    return;
+  }
+  if (data.type === "dynamicPage.toolbarResult" && data.success) {
+    // Refresh products table after successful import
+    try {
+      invalidateContentFetchKey?.();
+      fetchData?.();
+    } catch (_) {
+      /* ignore */
+    }
+  }
+};
+
+const getToolbarActionButtons = () => {
+  return getToolbarActionsConfig().map((action) => ({
+    key: action.key,
+    label: action.label || action.key || "Action",
+    icon: action.icon || null,
+    polarisIcon: action.polarisIcon || null,
+    onClick: () => {
+      if (action.type === "iframeModal") {
+        openToolbarIframeAction(action);
+        return;
+      }
+      if (typeof action.onClick === "function") {
+        action.onClick({
+          selectedSidebarItem: selectedSidebarItem(),
+          companionSelectedIdsByTableKey: pageP()?.companionSelectedIdsByTableKey || {}
+        });
+      }
+    }
+  }));
 };
 
 // Handle moving items to category
@@ -3468,6 +3624,14 @@ return {
   selectedSidebarItem,
   getSelectedSidebarCategoryId,
   handleSidebarItemSelect,
+  handleCompanionSidebarSelect,
+  getToolbarActionButtons,
+  getActiveToolbarIframeAction,
+  openToolbarIframeAction,
+  closeToolbarIframe,
+  postToolbarContextToIframe,
+  handleToolbarIframeWindowMessage,
+  buildToolbarPostMessagePayload,
   handleMoveItemsToCategory,
   getSelectedRows,
   setSelectedRows,
@@ -3512,11 +3676,13 @@ return {
           '''
 return {
   onMount: async () => {
+    window.addEventListener("message", f.handleToolbarIframeWindowMessage);
     if (!f.isSettingsPageMode?.()) {
       await f.initializeSettings();
     }
   },
   onCleanup: () => {
+    window.removeEventListener("message", f.handleToolbarIframeWindowMessage);
     _.deleteVertex(0, f.pageStateVertexId, g, sg);
   }
 }'''
@@ -3701,6 +3867,7 @@ return {
   rowsToAdd: () => g.vertexes[vid]?.P?.rowsToAddVertexIds ?? null,
   setRowsToAdd: (ids) => _.mergeVertexProperties(0, vid, g, sg, { rowsToAddVertexIds: ids }),
   hide: f.isCalendarContentView?.() === true,
+  toolbarActions: f.getToolbarActionButtons?.() || [],
   ...f.getTablePassthroughProps()
 }'''
       }
@@ -3986,7 +4153,10 @@ return {
   useUrlQueryParams: companion.useUrlQueryParams === true,
   usePolarisUI: companion.usePolarisUI !== false,
   embeddedMode: true,
-  disableCompanionPages: true
+  disableCompanionPages: true,
+  onSidebarItemSelect: (item) => {
+    f.handleCompanionSidebarSelect?.(companion.tableKey, item);
+  }
 };'''
       }
     }
@@ -4126,6 +4296,62 @@ return {
         props: "return f.getDropCreateReviewModalProps?.() || { isOpen: false };"
       }
     }
+    {
+      id: "30"
+      L: Attr
+      P: {
+        displayOrder: 100
+        componentName: ContentModal
+        key: toolbar_iframe_modal
+        props:
+          '''const action = f.getActiveToolbarIframeAction?.();
+const vid = f.pageStateVertexId;
+const open = g.vertexes[vid]?.P?.toolbarIframeOpen === true && !!action;
+return {
+  isOpen: open,
+  title: action?.modalTitle || action?.label || "Import",
+  maxWidth: action?.modalMaxWidth || "52rem",
+  zIndex: 40,
+  onClose: () => f.closeToolbarIframe?.()
+};'''
+      }
+    }
+    {
+      id: "31"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        slotName: children
+        css:
+          '''const action = f.getActiveToolbarIframeAction?.();
+const height = action?.modalHeight || "85vh";
+return `._id {
+  width: 100%;
+  height: ${height};
+  min-height: 28rem;
+  border: 0;
+  display: block;
+  background: ${t.var.color.background};
+}`;'''
+        props:
+          '''const action = f.getActiveToolbarIframeAction?.();
+const vid = f.pageStateVertexId;
+const open = g.vertexes[vid]?.P?.toolbarIframeOpen === true && !!action;
+const url = action?.iframeUrl ? String(action.iframeUrl) : "";
+return {
+  as: "iframe",
+  src: open && url ? url : "about:blank",
+  title: action?.modalTitle || action?.label || "Import",
+  hide: !open,
+  onLoad: (e) => {
+    const el = e?.currentTarget || e?.target;
+    if (!el || el.src === "about:blank") return;
+    f.postToolbarContextToIframe?.(el);
+  }
+};'''
+      }
+    }
   ]
   edges: [
     {
@@ -4157,6 +4383,18 @@ return {
       T: Attr
       S: "1"
       E: "24"
+    }
+    {
+      id: e30
+      T: Attr
+      S: "1"
+      E: "30"
+    }
+    {
+      id: e31
+      T: Attr
+      S: "30"
+      E: "31"
     }
     {
       id: e6

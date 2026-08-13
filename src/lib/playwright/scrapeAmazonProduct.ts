@@ -32,10 +32,14 @@ const OVERLAY_SELECTORS = [
   "#nav-main input[type='submit']",
 ];
 
+function isAmazonShortLinkHost(host: string): boolean {
+  return host === "link.amazon" || host.endsWith(".link.amazon");
+}
+
 function isAmazonUrl(raw: string): boolean {
   try {
-    const host = new URL(raw).hostname.toLowerCase();
-    return host.includes("amazon.");
+    const host = new URL(raw).hostname.toLowerCase().replace(/^www\./, "");
+    return isAmazonShortLinkHost(host) || host.includes("amazon.");
   } catch {
     return false;
   }
@@ -279,6 +283,19 @@ export async function scrapeAmazonProductFromPage(
   page.setDefaultTimeout(timeoutMs);
 
   await page.goto(url, { waitUntil: "domcontentloaded", timeout: timeoutMs });
+
+  const startHost = new URL(url).hostname.toLowerCase().replace(/^www\./, "");
+  if (isAmazonShortLinkHost(startHost)) {
+    await page
+      .waitForURL(
+        (next) =>
+          /amazon\./i.test(next.hostname) &&
+          /\/(dp|gp\/product|gp\/aw\/d)\//i.test(next.pathname),
+        { timeout: timeoutMs, waitUntil: "domcontentloaded" },
+      )
+      .catch(() => undefined);
+  }
+
   await page.waitForSelector("#title", { timeout: timeoutMs });
   await dismissOverlays(page);
 
@@ -295,7 +312,7 @@ export async function scrapeAmazonProductFromPage(
   }
 
   return {
-    amazonUrl: page.url() || url,
+    amazonUrl: url,
     title,
     price,
     shortDescription,

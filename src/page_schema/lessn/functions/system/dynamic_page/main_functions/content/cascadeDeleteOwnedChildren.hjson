@@ -1,0 +1,265 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Config-driven cascade delete of owned children, translations, and unused related files before a content vertex is deleted. Reads hooks.beforeDelete.cascadeDelete or hooks.cascadeDelete.
+        body:
+          '''
+const { tableVertexLabel, operation } = c;
+if (operation !== "delete") return;
+
+const parentLabel = String(tableVertexLabel || "").trim();
+const parentId = String(
+  c?.elementId || c?.data?.vertex?.elementId || c?.data?.vertex?.id || ""
+).trim();
+if (!parentLabel || !parentId) return;
+
+const sanitizeCypherIdent = (value, fallback) => {
+  const raw = String(value || "").trim();
+  return /^[A-Za-z_][A-Za-z0-9_]*$/.test(raw) ? raw : fallback;
+};
+
+const toIdList = (value) =>
+  (Array.isArray(value) ? value : [])
+    .map((id) => (id != null ? String(id) : ""))
+    .filter((id) => id && id !== "null" && id !== "undefined");
+
+const EMPTY_CASCADE = {
+  deleteTranslations: false,
+  files: [],
+  children: [],
+  fileDeleteHooks: { afterDelete: "fileAfterDelete" }
+};
+
+const configured =
+  (c.cascadeDelete && typeof c.cascadeDelete === "object" && c.cascadeDelete) ||
+  (c.hooks?.cascadeDelete && typeof c.hooks.cascadeDelete === "object" && c.hooks.cascadeDelete) ||
+  {};
+const cascade = {
+  ...EMPTY_CASCADE,
+  ...configured,
+  files: Array.isArray(configured.files) ? configured.files : EMPTY_CASCADE.files,
+  children: Array.isArray(configured.children) ? configured.children : EMPTY_CASCADE.children,
+  fileDeleteHooks:
+    configured.fileDeleteHooks && typeof configured.fileDeleteHooks === "object"
+      ? configured.fileDeleteHooks
+      : EMPTY_CASCADE.fileDeleteHooks
+};
+
+const pushUnique = (bucketKey, value) => {
+  if (value == null || value === "") return;
+  if (!Array.isArray(_.context[bucketKey])) _.context[bucketKey] = [];
+  const id = String(value);
+  if (!_.context[bucketKey].includes(id)) _.context[bucketKey].push(id);
+};
+
+const trackDeletedVertexId = (vertexId) => pushUnique("deletedVertexes", vertexId);
+const trackDeletedEdgeId = (edgeId) => pushUnique("deletedEdges", edgeId);
+
+const captureIncidentEdges = async (vertexIds) => {
+  const ids = toIdList(vertexIds);
+  if (!ids.length) return;
+  const result = await _.session.run(
+    `
+    MATCH (vertex)
+    WHERE elementId(vertex) IN $vertexIds
+    OPTIONAL MATCH (vertex)-[incidentEdge]-()
+    RETURN [id IN collect(DISTINCT elementId(incidentEdge)) WHERE id IS NOT NULL] AS edgeIds
+    `,
+    { vertexIds: ids }
+  );
+  const edgeIds = toIdList(result.records[0]?.get("edgeIds"));
+  for (const edgeId of edgeIds) trackDeletedEdgeId(edgeId);
+};
+
+const deleteTranslationsFor = async (rootLabel, elementIds) => {
+  const ids = toIdList(elementIds);
+  if (!ids.length || !rootLabel) return;
+  for (const elementId of ids) {
+    try {
+      await s(
+        {
+          functionName: "syncContentTranslations",
+          contextData: {
+            action: "delete",
+            parentElementId: elementId,
+            rootLabel
+          }
+        },
+        _.context
+      );
+    } catch (error) {
+      console.error("cascadeDelete translations failed:", rootLabel, elementId, error);
+    }
+  }
+};
+
+const collectRelatedFileIds = async ({
+  fromLabel,
+  fromIds,
+  relationshipType,
+  targetLabel
+}) => {
+  const parentIds = toIdList(fromIds);
+  const relationshipTypeIdent = sanitizeCypherIdent(relationshipType, "");
+  const fromLabelIdent = sanitizeCypherIdent(fromLabel, "");
+  const targetLabelIdent = sanitizeCypherIdent(targetLabel, "File");
+  if (!parentIds.length || !relationshipTypeIdent || !fromLabelIdent) return [];
+  const result = await _.session.run(
+    `
+    MATCH (parent:${fromLabelIdent})-[:${relationshipTypeIdent}]->(file:${targetLabelIdent})
+    WHERE elementId(parent) IN $parentIds
+    RETURN [id IN collect(DISTINCT elementId(file)) WHERE id IS NOT NULL] AS fileIds
+    `,
+    { parentIds }
+  );
+  return toIdList(result.records[0]?.get("fileIds"));
+};
+
+const collectChildIds = async ({ parentLabel: fromLabel, parentIds, child }) => {
+  const ids = toIdList(parentIds);
+  const relationshipTypeIdent = sanitizeCypherIdent(child?.relationshipType, "");
+  const fromLabelIdent = sanitizeCypherIdent(fromLabel, "");
+  const childLabelIdent = sanitizeCypherIdent(child?.label, "");
+  if (!ids.length || !relationshipTypeIdent || !fromLabelIdent || !childLabelIdent) return [];
+  const result = await _.session.run(
+    `
+    MATCH (parent:${fromLabelIdent})-[:${relationshipTypeIdent}]->(child:${childLabelIdent})
+    WHERE elementId(parent) IN $parentIds
+    RETURN [id IN collect(DISTINCT elementId(child)) WHERE id IS NOT NULL] AS childIds
+    `,
+    { parentIds: ids }
+  );
+  return toIdList(result.records[0]?.get("childIds"));
+};
+
+const detachDeleteByIds = async (vertexIds) => {
+  const ids = toIdList(vertexIds);
+  if (!ids.length) return;
+  await captureIncidentEdges(ids);
+  await _.session.run(
+    `
+    MATCH (vertex)
+    WHERE elementId(vertex) IN $vertexIds
+    DETACH DELETE vertex
+    `,
+    { vertexIds: ids }
+  );
+  for (const vertexId of ids) trackDeletedVertexId(vertexId);
+};
+
+const fileUsageSpecs = [];
+const addFileUsageSpecs = (fromLabel, files) => {
+  const list = Array.isArray(files) ? files : [];
+  for (const spec of list) {
+    const relationshipType = sanitizeCypherIdent(spec?.relationshipType, "");
+    const usageFromLabel = sanitizeCypherIdent(fromLabel, "");
+    const targetLabel = sanitizeCypherIdent(spec?.targetLabel, "File");
+    if (relationshipType && usageFromLabel) {
+      fileUsageSpecs.push({
+        fromLabel: usageFromLabel,
+        relationshipType,
+        targetLabel
+      });
+    }
+  }
+};
+
+addFileUsageSpecs(parentLabel, cascade.files);
+for (const child of cascade.children) {
+  addFileUsageSpecs(child?.label, child?.files);
+}
+
+const fileHasOtherUses = async (fileId) => {
+  if (!fileUsageSpecs.length) return false;
+  const optionalMatches = fileUsageSpecs.map((spec, index) => {
+    const nodeAlias = `otherParent${index}`;
+    return `
+      OPTIONAL MATCH (${nodeAlias}:${spec.fromLabel})-[:${spec.relationshipType}]->(file)
+      WHERE elementId(${nodeAlias}) <> $parentId
+    `;
+  });
+  const otherUsesExpr = fileUsageSpecs
+    .map((_, index) => `count(otherParent${index})`)
+    .join(" + ");
+  const usage = await _.session.run(
+    `
+    MATCH (file:File)
+    WHERE elementId(file) = $fileId
+    ${optionalMatches.join("\n")}
+    RETURN ${otherUsesExpr} AS otherUses
+    `,
+    { fileId, parentId }
+  );
+  return Number(usage.records[0]?.get("otherUses") || 0) > 0;
+};
+
+const collectedFileIds = [];
+
+const cascadeFrom = async (fromLabel, fromIds, spec) => {
+  const children = Array.isArray(spec?.children) ? spec.children : [];
+  const files = Array.isArray(spec?.files) ? spec.files : [];
+
+  for (const fileSpec of files) {
+    const fileIds = await collectRelatedFileIds({
+      fromLabel,
+      fromIds,
+      relationshipType: fileSpec.relationshipType,
+      targetLabel: fileSpec.targetLabel || "File"
+    });
+    collectedFileIds.push(...fileIds);
+  }
+
+  for (const child of children) {
+    const childIds = await collectChildIds({
+      parentLabel: fromLabel,
+      parentIds: fromIds,
+      child
+    });
+    if (!childIds.length) continue;
+
+    if (child.deleteTranslations === true) {
+      await deleteTranslationsFor(child.label, childIds);
+    }
+
+    await cascadeFrom(child.label, childIds, child);
+    await detachDeleteByIds(childIds);
+  }
+};
+
+await cascadeFrom(parentLabel, [parentId], cascade);
+
+if (cascade.deleteTranslations === true) {
+  await deleteTranslationsFor(parentLabel, [parentId]);
+}
+
+const uniqueFileIds = [...new Set(collectedFileIds)];
+for (const fileId of uniqueFileIds) {
+  try {
+    if (await fileHasOtherUses(fileId)) continue;
+    await s(
+      {
+        functionName: "mutateUserContent",
+        contextData: {
+          tableVertexLabel: "File",
+          operation: "delete",
+          elementId: fileId,
+          enableUserScoping: false,
+          hooks: cascade.fileDeleteHooks || { afterDelete: "fileAfterDelete" }
+        }
+      },
+      _.context
+    );
+  } catch (error) {
+    console.error("cascadeDelete file delete failed:", fileId, error);
+  }
+}
+'''
+        key: cascadeDeleteOwnedChildren
+      }
+    }
+  ]
+  edges: []
+}
