@@ -53,7 +53,9 @@ import {
 import { sendEmail } from "~/lib/playwright/sendEmail";
 import { renderPageAsHtml } from "~/lib/playwright/renderPageAsHtml";
 import { sendNotificationEmail } from "~/lib/playwright/sendNotificationEmail";
+import { scrapeAmazonProduct } from "~/lib/playwright/scrapeAmazonProduct";
 import { sendInvitationEmail } from "~/routes/api/users/functions/sendInvitationEmail";
+import { uploadRemoteFileEntries } from "~/routes/api/file/functions/uploadFile";
 import { createDatabaseBackup } from "~/lib/backup/createDatabaseBackup";
 import { restoreFromBackup } from "~/lib/backup/restoreFromBackup";
 import {
@@ -593,6 +595,8 @@ export async function executeNamedServerFunctionCore(
       sendEmail,
       renderPageAsHtml,
       sendNotificationEmail,
+      scrapeAmazonProduct,
+      uploadRemoteFileEntries,
       // Backup/restore functions
       createDatabaseBackup,
       restoreFromBackup,

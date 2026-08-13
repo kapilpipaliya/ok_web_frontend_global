@@ -7,16 +7,19 @@ import { API } from "~/lib/api/endpoints";
  * @param email User email
  * @param password User password
  * @param redirectUrl URL to redirect after signIn (optional)
+ * @param subdomain Host subdomain (default: admin)
  */
 export async function signIn(
   page: Page,
   email: string = "admin",
   password: string = "kK11235813@",
   redirectUrl?: string,
+  subdomain: string = "admin",
 ) {
+  const origin = `https://${subdomain}.localhost.com:3001`;
   const loginUrl = redirectUrl
-    ? `https://admin.localhost.com:3001/${API.urls.admin.signIn}?redirectUrl=${encodeURIComponent(redirectUrl)}`
-    : `https://admin.localhost.com:3001/${API.urls.admin.signIn}`;
+    ? `${origin}${API.urls.admin.signIn}?redirectUrl=${encodeURIComponent(redirectUrl)}`
+    : `${origin}${API.urls.admin.signIn}`;
 
   await page.goto(loginUrl);
 

@@ -197,6 +197,13 @@ const portalNavSectionsData = [
         }
       },
       {
+        id: "amazon_import",
+        href: "/portal/amazon-import",
+        label: "Amazon import",
+        icon: "ph:amazon-logo",
+        pathCheck: () => String(_.location?.pathname || "") === "/portal/amazon-import"
+      },
+      {
         id: "contacts_table",
         href: "/portal/table?table=ContactSubmission&key=contacts",
         label: "Contacts",

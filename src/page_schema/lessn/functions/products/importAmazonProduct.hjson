@@ -1,0 +1,242 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Scrapes an Amazon product URL with Playwright, uploads carousel images as name-1, name-2…, and creates a Product + ProductVariant.
+        body:
+          '''
+const actualUser = await _.getUserFromSession();
+if (!actualUser) {
+  return { success: false, message: "Please sign in to import a product." };
+}
+
+const amazonUrl = String(c?.amazonUrl || "").trim();
+const productTitle = String(c?.productTitle || "").trim();
+const fileNameBase = String(c?.fileName || c?.fileNameBase || "").trim();
+
+if (!amazonUrl) {
+  return { success: false, message: "Amazon URL is required." };
+}
+if (!productTitle) {
+  return { success: false, message: "Product title is required." };
+}
+if (!fileNameBase) {
+  return { success: false, message: "File name is required." };
+}
+
+const slugify = (value, maxLength = 80) => {
+  const slug = String(value || "")
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, maxLength)
+    .replace(/-+$/g, "");
+  return slug || "product";
+};
+
+const sanitizeFileBase = (value) => {
+  const base = _.path.basename(String(value || "").trim());
+  const withoutExt = base.includes(".")
+    ? base.slice(0, base.lastIndexOf("."))
+    : base;
+  const cleaned = withoutExt
+    .replace(/[^a-zA-Z0-9._-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 120);
+  return cleaned || "amazon-image";
+};
+
+const extensionFromUrl = (url) => {
+  try {
+    const ext = _.path.extname(new URL(url).pathname).toLowerCase();
+    if (ext && ext.length <= 5) return ext;
+  } catch {
+    /* ignore */
+  }
+  return ".jpg";
+};
+
+const pickFileVertex = (item) => {
+  if (!item) return null;
+  if (item?.result?.id) return item.result;
+  if (Array.isArray(item?.result) && item.result[0]?.id) return item.result[0];
+  const vertexes = item?.graph?.vertexes || {};
+  for (const id of Object.keys(vertexes)) {
+    const v = vertexes[id];
+    if (v?.L?.includes?.("File") || v?.L?.[0] === "File") return v;
+  }
+  return null;
+};
+
+const mergeUploadGraph = (graph) => {
+  if (!graph) return;
+  if (graph.vertexes) {
+    if (!_.context.nodes) _.context.nodes = {};
+    Object.assign(_.context.nodes, graph.vertexes);
+  }
+  if (graph.edges) {
+    if (!_.context.relationships) _.context.relationships = {};
+    Object.assign(_.context.relationships, graph.edges);
+  }
+};
+
+const fail = (message, extra = {}) => ({ success: false, message, ...extra });
+
+try {
+  const scraped = await _.scrapeAmazonProduct(amazonUrl);
+  const imageUrls = Array.isArray(scraped?.imageUrls) ? scraped.imageUrls : [];
+  if (imageUrls.length === 0) {
+    return fail("No images found on the Amazon page.");
+  }
+
+  const base = sanitizeFileBase(fileNameBase);
+  const fileVertices = [];
+  const uploadItems = [];
+
+  // Sequential uploads (Amazon CDN often fails under parallel fetch), one retry.
+  // Successful files are named name-1, name-2, … with no gaps.
+  for (const url of imageUrls) {
+    let uploadedFile = null;
+    let lastError = "";
+    const fileName = `${base}-${fileVertices.length + 1}${extensionFromUrl(url)}`;
+
+    for (let attempt = 0; attempt < 2 && !uploadedFile; attempt++) {
+      try {
+        const one = await _.uploadRemoteFileEntries(
+          [{ url, fileName }],
+          _.subDomain,
+          _.session,
+          actualUser.P?.uuid
+        );
+        const item = Array.isArray(one?.uploads) ? one.uploads[0] : null;
+        if (!item?.ok) {
+          lastError = String(item?.error || "Upload failed");
+          continue;
+        }
+        const file = pickFileVertex(item);
+        if (!file?.id) {
+          lastError = "Upload returned no File vertex";
+          continue;
+        }
+        uploadedFile = file;
+        mergeUploadGraph(one?.graph);
+        uploadItems.push(item);
+      } catch (err) {
+        lastError = err instanceof Error ? err.message : String(err);
+      }
+    }
+
+    if (uploadedFile) {
+      fileVertices.push(uploadedFile);
+    } else {
+      uploadItems.push({ ok: false, url, fileName, error: lastError });
+      console.error("importAmazonProduct image upload failed:", url, lastError);
+    }
+  }
+
+  if (fileVertices.length === 0) {
+    const firstError =
+      uploadItems.find((item) => item && item.ok === false)?.error ||
+      "Failed to upload product images.";
+    return fail(String(firstError), { uploads: uploadItems });
+  }
+
+  const imageFileIds = fileVertices.map((f) => String(f.id));
+  const thumbnailId = imageFileIds[0];
+  const productKey = slugify(productTitle);
+  const amazonTitle = String(scraped.title || "").trim() || productTitle;
+  const price = String(scraped.price || "").trim() || "See Amazon";
+  const description = String(scraped.shortDescription || "").trim();
+
+  const mutateResult = await s(
+    {
+      functionName: "mutateUserContent",
+      contextData: {
+        tableVertexLabel: "Product",
+        operation: "create",
+        enableUserScoping: false,
+        uniqueKeys: ["key"],
+        nestedLinePropertyStripKeys: ["variants", "thumbnail"],
+        data: {
+          vertex: {
+            id: null,
+            L: ["Product"],
+            P: { title: productTitle, key: productKey },
+            IN: {},
+            OUT: {}
+          },
+          relationships: thumbnailId
+            ? {
+                thumbnail: {
+                  relationshipType: "ProductThumbnail",
+                  targetLabel: "File",
+                  targetIds: [thumbnailId]
+                }
+              }
+            : {},
+          nestedLineSync: {
+            variants: {
+              childLabel: "ProductVariant",
+              parentToChildRelationshipType: "ProductProductVariant",
+              childToFilesRelationshipType: "ProductVariantImage",
+              filesTargetLabel: "File",
+              rows: [
+                {
+                  title: amazonTitle,
+                  sku: "",
+                  price,
+                  amazonUrl: scraped.amazonUrl || amazonUrl,
+                  description,
+                  imageFileIds
+                }
+              ],
+              deletedLineIds: []
+            }
+          }
+        }
+      }
+    },
+    _.context
+  );
+
+  if (mutateResult?.result?.success !== true) {
+    return fail(
+      mutateResult?.result?.message || mutateResult?.error || "Failed to create product.",
+      { scrape: scraped, uploads: uploadItems, files: fileVertices }
+    );
+  }
+
+  const failedCount = imageUrls.length - fileVertices.length;
+  return {
+    success: true,
+    message:
+      failedCount > 0
+        ? `Imported "${productTitle}" with ${fileVertices.length}/${imageUrls.length} image(s) (${failedCount} upload failed).`
+        : `Imported "${productTitle}" with ${fileVertices.length} image(s).`,
+    data: {
+      product: mutateResult.result.data,
+      productKey,
+      amazonTitle,
+      price,
+      description,
+      imageCount: fileVertices.length,
+      files: fileVertices,
+      amazonUrl: scraped.amazonUrl || amazonUrl
+    },
+    uploads: uploadItems
+  };
+} catch (error) {
+  console.error("importAmazonProduct error:", error);
+  return fail(error instanceof Error ? error.message : "Amazon import failed.");
+}
+'''
+        key: importAmazonProduct
+      }
+    }
+  ]
+  edges: []
+}

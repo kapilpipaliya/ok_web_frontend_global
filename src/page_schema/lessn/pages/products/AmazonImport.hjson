@@ -1,0 +1,512 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        key: AmazonImport
+        title: Amazon Product Import
+        url: /portal/amazon-import
+        signinRequired: true
+        isNoPermissionCheck: true
+        dynamicComponent: FormManagement
+        fns:
+          '''
+const [resultJson, setResultJson] = _.createSignal("");
+const [importedFiles, setImportedFiles] = _.createSignal([]);
+const [importedProduct, setImportedProduct] = _.createSignal(null);
+const [isImporting, setIsImporting] = _.createSignal(false);
+
+const pickFileList = (data) => {
+  if (Array.isArray(data?.data?.files)) return data.data.files;
+  if (Array.isArray(data?.files)) return data.files;
+  return [];
+};
+
+const downloadHrefFor = (file) => {
+  const name = file?.P?.fileName;
+  if (!name) return "";
+  return `/api/file/download/${encodeURIComponent(String(name))}`;
+};
+
+const importedFilesHtml = () => {
+  const files = importedFiles() || [];
+  if (files.length === 0) return "";
+  return files
+    .map((file) => {
+      const name = file?.P?.fileName || file?.id || "file";
+      const href = downloadHrefFor(file);
+      const safeName = String(name)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+      if (!href) return `<div>${safeName}</div>`;
+      return `<div><a href="${href}" target="_blank" rel="noopener noreferrer">${safeName}</a></div>`;
+    })
+    .join("");
+};
+
+const amazonImportFormConfiguration = {
+  gridColumns: 1,
+  groups: [
+    {
+      key: "amazon",
+      title: "Amazon import",
+      gridColumns: 1,
+      fields: [
+        {
+          key: "amazonUrl",
+          label: "Amazon URL",
+          dataType: "text",
+          renderer: "text",
+          required: true,
+          colSpan: 1,
+          placeholder: "https://www.amazon.com/dp/...",
+          helpText: "Product detail page URL. Playwright opens it, reads title/price/description, and clicks the image carousel."
+        },
+        {
+          key: "productTitle",
+          label: "Product title",
+          dataType: "text",
+          renderer: "text",
+          required: true,
+          colSpan: 1,
+          placeholder: "Your listing title",
+          helpText: "Saved on the Product node. Variant title uses the Amazon page title."
+        },
+        {
+          key: "fileName",
+          label: "Image file name",
+          dataType: "text",
+          renderer: "text",
+          required: true,
+          colSpan: 1,
+          placeholder: "wireless-earbuds",
+          helpText: "Images are saved as name-1, name-2, … with the original extension."
+        }
+      ]
+    }
+  ]
+};
+
+const saveAmazonImportForm = async (savePayload) => {
+  const amazonUrl = String(savePayload?.vertex?.P?.amazonUrl || "").trim();
+  const productTitle = String(savePayload?.vertex?.P?.productTitle || "").trim();
+  const fileName = String(savePayload?.vertex?.P?.fileName || "").trim();
+
+  if (!amazonUrl || !productTitle || !fileName) {
+    _.showErrorToast?.("Amazon URL, product title, and file name are required");
+    return false;
+  }
+
+  setIsImporting(true);
+  setResultJson("");
+  setImportedFiles([]);
+  setImportedProduct(null);
+
+  try {
+    const result = await s({
+      functionName: "importAmazonProduct",
+      contextData: {
+        amazonUrl,
+        productTitle,
+        fileName
+      }
+    });
+
+    const payload = result?.result || result;
+    if (payload?.graph) {
+      _.setGraphData?.(0, payload.graph, {});
+    } else if (result?.graph) {
+      _.setGraphData?.(0, result.graph, {});
+    }
+
+    setResultJson(JSON.stringify(payload, null, 2));
+
+    if (payload?.success !== true) {
+      _.showErrorToast?.(payload?.message || "Amazon import failed");
+      return false;
+    }
+
+    setImportedFiles(pickFileList(payload));
+    setImportedProduct(payload?.data?.product || null);
+    _.showSuccessToast?.(payload?.message || "Product imported");
+    return true;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Amazon import failed";
+    setResultJson(JSON.stringify({ error: message }, null, 2));
+    _.showErrorToast?.(message);
+    return false;
+  } finally {
+    setIsImporting(false);
+  }
+};
+
+return {
+  enabled: () => true,
+  amazonImportFormConfiguration,
+  saveAmazonImportForm,
+  resultJson,
+  importedFiles,
+  importedFilesHtml,
+  importedProduct,
+  isImporting
+};
+'''
+        props:
+          '''
+return {
+  enabled: () => true
+};
+'''
+      }
+    }
+    {
+      id: "main"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''
+return `._id {
+  padding: 2.5rem 1rem 4rem;
+}`;
+'''
+        props:
+          '''
+return {
+  as: "main"
+};
+'''
+      }
+    }
+    {
+      id: "container"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''
+return `._id {
+  max-width: 42rem;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}`;
+'''
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "title"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''
+return `._id {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: ${t.var.color.text};
+}`;
+'''
+        props:
+          '''
+return {
+  as: "h1",
+  text: "Amazon product import"
+};
+'''
+      }
+    }
+    {
+      id: "intro"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        css:
+          '''
+return `._id {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: ${t.var.color.text_dark_400};
+}`;
+'''
+        props:
+          '''
+return {
+  as: "p",
+  text: "Paste an Amazon product URL. Playwright loads the page, reads the title, price, and description, clicks the image carousel, uploads images as name-1 / name-2…, then creates a Product (your title) with one ProductVariant (Amazon title, images, price, markdown description)."
+};
+'''
+      }
+    }
+    {
+      id: "busy"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        css:
+          '''
+return `._id {
+  margin: 0;
+  font-size: 0.875rem;
+  color: ${t.var.color.primary};
+}`;
+'''
+        props:
+          '''
+return {
+  as: "p",
+  text: "Importing… Playwright is loading Amazon (this can take a minute).",
+  show: () => f.isImporting?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "form"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: FormManagement
+        props:
+          '''
+return {
+  mode: "add",
+  vertexLabel: "AmazonImport",
+  formConfig: f.amazonImportFormConfiguration,
+  onSave: f.saveAmazonImportForm,
+  afterSuccessfulSave: "reinitialize",
+  class: "amazon-import-form"
+};
+'''
+      }
+    }
+    {
+      id: "product_summary"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid ${t.var.color.border};
+  border-radius: 0.5rem;
+  background: ${t.var.color.background_light_100};
+}`;
+'''
+        props:
+          '''
+const product = f.importedProduct?.();
+return {
+  as: "div",
+  show: () => !!product
+};
+'''
+      }
+    }
+    {
+      id: "product_summary_title"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''
+return `._id {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: ${t.var.color.text};
+}`;
+'''
+        props:
+          '''
+return {
+  as: "h2",
+  text: "Created product"
+};
+'''
+      }
+    }
+    {
+      id: "product_summary_body"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        css:
+          '''
+return `._id {
+  margin: 0;
+  font-size: 0.875rem;
+  color: ${t.var.color.text_dark_400};
+  word-break: break-word;
+}`;
+'''
+        props:
+          '''
+const product = f.importedProduct?.();
+const title = product?.P?.title || "";
+const key = product?.P?.key || "";
+const id = product?.id || "";
+return {
+  as: "p",
+  text: () => (title ? `${title} · key: ${key} · id: ${id}` : "")
+};
+'''
+      }
+    }
+    {
+      id: "downloads"
+      L: Attr
+      P: {
+        displayOrder: 6
+        componentName: Html
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}`;
+'''
+        props:
+          '''
+return {
+  as: "div",
+  show: () => (f.importedFiles?.() || []).length > 0
+};
+'''
+      }
+    }
+    {
+      id: "downloads_title"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''
+return `._id {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: ${t.var.color.text};
+}`;
+'''
+        props:
+          '''
+return {
+  as: "h2",
+  text: "Uploaded images"
+};
+'''
+      }
+    }
+    {
+      id: "downloads_list"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        css:
+          '''
+return `._id {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: ${t.var.color.primary};
+
+  a {
+    color: inherit;
+  }
+}`;
+'''
+        props:
+          '''
+return {
+  as: "div",
+  innerHTML: f.importedFilesHtml?.() || "",
+  show: () => (f.importedFiles?.() || []).length > 0
+};
+'''
+      }
+    }
+    {
+      id: "result"
+      L: Attr
+      P: {
+        displayOrder: 7
+        componentName: Html
+        css:
+          '''
+return `._id {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  background: ${t.var.color.background_light_200};
+  color: ${t.var.color.text};
+  font-size: 0.75rem;
+  line-height: 1.45;
+  overflow: auto;
+  max-height: 24rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+}`;
+'''
+        props:
+          '''
+return {
+  as: "pre",
+  text: () => f.resultJson?.() || "",
+  show: () => !!(f.resultJson?.() || "")
+};
+'''
+      }
+    }
+    {
+      id: "layout"
+      L: PageLayout
+      P: {
+        componentName: PortalLayout
+        displayOrder: 1
+      }
+    }
+  ]
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "main" }
+    { id: "e2", T: "Attr", S: "main", E: "container" }
+    { id: "e3", T: "Attr", S: "container", E: "title" }
+    { id: "e4", T: "Attr", S: "container", E: "intro" }
+    { id: "e5", T: "Attr", S: "container", E: "busy" }
+    { id: "e6", T: "Attr", S: "container", E: "form" }
+    { id: "e7", T: "Attr", S: "container", E: "product_summary" }
+    { id: "e8", T: "Attr", S: "product_summary", E: "product_summary_title" }
+    { id: "e9", T: "Attr", S: "product_summary", E: "product_summary_body" }
+    { id: "e10", T: "Attr", S: "container", E: "downloads" }
+    { id: "e11", T: "Attr", S: "downloads", E: "downloads_title" }
+    { id: "e12", T: "Attr", S: "downloads", E: "downloads_list" }
+    { id: "e13", T: "Attr", S: "container", E: "result" }
+    { id: "e_layout", T: "PageLayout", S: "1", E: "layout" }
+  ]
+}
