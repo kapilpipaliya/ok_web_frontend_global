@@ -159,7 +159,7 @@ return [
   object-position: center;
   ${isFirst ? `
   opacity: 0;
-  animation: homeBannerFadeIn 0.55s ease forwards;
+  animation: homeBannerFadeIn 0.28s ease forwards;
   ` : ""}
 }`
 ];'''
@@ -493,7 +493,7 @@ return {
   as: "div",
   "data-animate": "",
 
-  ref: (el) => el && f.animateOnView(el, { delay: index === 0 ? 0 : 0.08 })
+  ref: (el) => el && f.animateOnView(el, { delay: index === 0 ? 0 : 0.04 })
 };'''
       }
     }

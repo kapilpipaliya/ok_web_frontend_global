@@ -43,10 +43,10 @@ const animateOnView = (el, options = {}) => {
   const {
     opacity = true,
     x = 0,
-    y = 24,
+    y = 16,
     scale = 1,
     rotate = 0,
-    duration = 0.55,
+    duration = 0.28,
     delay = 0,
     easing = "easeOut",
     amount = 0.01,

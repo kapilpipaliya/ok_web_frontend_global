@@ -101,7 +101,7 @@ try {
   as: "div",
   "data-animate": "",
 
-  ref: (el) => el && f.animateOnView(el, { x: -32, y: 0 })
+  ref: (el) => el && f.animateOnView(el, { x: -24, y: 0 })
 };'''
       }
     }
@@ -605,7 +605,7 @@ return {
   as: "div",
   "data-animate": "",
 
-  ref: (el) => el && f.animateOnView(el, { x: 32, y: 0, delay: 0.1 })
+  ref: (el) => el && f.animateOnView(el, { x: 24, y: 0, delay: 0.05 })
 };'''
       }
     }

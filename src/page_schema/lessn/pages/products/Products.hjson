@@ -125,7 +125,7 @@ return {
   text: content.pageSubtitle || "Browse our curated Amazon product picks",
   hide: true,
   "data-animate": "",
-  ref: (el) => el && f.animateOnView(el, { delay: 0.08 })
+  ref: (el) => el && f.animateOnView(el, { delay: 0.04 })
 };'''
       }
     }

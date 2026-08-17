@@ -52,7 +52,7 @@ return {
   "data-animate": "",
   ref: (el) => {
     if (!el) return;
-    f.animateOnView?.(el, { delay: index * 0.05 });
+    f.animateOnView?.(el, { delay: index * 0.025 });
     if (el.dataset.hoverInit) return;
     el.dataset.hoverInit = "true";
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;

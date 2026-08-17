@@ -412,7 +412,7 @@ return {
   text,
   hide: !text,
   "data-animate": "",
-  ref: (el) => el && f.animateOnView?.(el, { delay: 0.08 })
+  ref: (el) => el && f.animateOnView?.(el, { delay: 0.04 })
 };'''
       }
     }
@@ -454,7 +454,7 @@ return {
           '''return {
   as: "div",
   "data-animate": "",
-  ref: (el) => el && f.animateOnView?.(el, { x: -32, y: 0 })
+  ref: (el) => el && f.animateOnView?.(el, { x: -24, y: 0 })
 };'''
       }
     }
@@ -727,7 +727,7 @@ return {
           '''return {
   as: "div",
   "data-animate": "",
-  ref: (el) => el && f.animateOnView?.(el, { x: 32, y: 0, delay: 0.1 })
+  ref: (el) => el && f.animateOnView?.(el, { x: 24, y: 0, delay: 0.05 })
 };'''
       }
     }
@@ -1095,7 +1095,7 @@ return {
   textType: "markdown",
   hide: !f.hasExactVariant?.() || !description,
   "data-animate": "",
-  ref: (el) => el && f.animateOnView?.(el, { delay: 0.12 })
+  ref: (el) => el && f.animateOnView?.(el, { delay: 0.06 })
 };'''
       }
     }

@@ -339,7 +339,7 @@ return {
   as: "section",
   hide: !Array.isArray(items) || items.length === 0,
   "data-animate": "",
-  ref: (el) => el && f.animateOnView?.(el, { delay: 0.08 })
+  ref: (el) => el && f.animateOnView?.(el, { delay: 0.04 })
 };'''
       }
     }

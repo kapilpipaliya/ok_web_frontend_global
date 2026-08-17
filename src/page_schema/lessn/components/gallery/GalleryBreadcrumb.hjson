@@ -69,7 +69,7 @@ return {
 return {
   as: "span",
   "data-animate": "",
-  ref: (el) => el && f.animateOnView?.(el, { y: 8, delay: index * 0.05 })
+  ref: (el) => el && f.animateOnView?.(el, { y: 8, delay: index * 0.025 })
 };'''
       }
     }
