@@ -339,6 +339,7 @@ const items = rows
       title: item.P?.title || "Untitled",
       shortDescription: item.P?.shortDescription || "",
       price: firstVariant?.P?.price != null ? String(firstVariant.P.price).trim() : "",
+      amazonUrl: firstVariant?.P?.amazonUrl != null ? String(firstVariant.P.amazonUrl).trim() : "",
       icon: "ph:shopping-bag",
       previewUrl: previewPayload?.url || "",
       previewSrcset: previewPayload?.srcset || "",

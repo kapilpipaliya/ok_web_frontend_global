@@ -153,6 +153,27 @@ return {
       }
     }
     {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 1rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: ${t.var.color.text_light_200};
+}`;'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''const content = c.productsSettings?.content || {};
+return {
+  as: "p",
+  text: content.disclosureText || "As an Amazon Associate we earn from qualifying purchases."
+};'''
+      }
+    }
+    {
       id: "7"
       L: PageLayout
       P: {
@@ -197,6 +218,12 @@ return {
       T: Attr
       S: "3"
       E: "6"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "3"
+      E: "8"
     }
   ]
 }

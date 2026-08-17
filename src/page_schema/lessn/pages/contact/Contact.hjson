@@ -420,6 +420,97 @@ return {
       }
     }
     {
+      id: "phone_actions"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''const phone = c.contactSettings?.phone;
+const phone1 = phone?.phone1 || "";
+return {
+  as: "div",
+  hide: () => !phone1
+};'''
+      }
+    }
+    {
+      id: "call_btn"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 0.75rem;
+  border-radius: 0.375rem;
+  background: ${t.var.color.text};
+  color: ${t.var.color.background};
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-decoration: none;
+
+  &:hover {
+    opacity: 0.88;
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const phone = c.contactSettings?.phone;
+const phone1 = phone?.phone1 || "";
+const tel = String(phone1).replace(/\s+/g, "");
+return {
+  as: "a",
+  href: tel ? `tel:${tel}` : undefined,
+  text: "Call"
+};'''
+      }
+    }
+    {
+      id: "wa_btn"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 0.75rem;
+  border-radius: 0.375rem;
+  background: ${t.var.color.text};
+  color: ${t.var.color.background};
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-decoration: none;
+
+  &:hover {
+    opacity: 0.88;
+  }
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const phone = c.contactSettings?.phone;
+const phone1 = phone?.phone1 || "";
+const digits = String(phone1).replace(/\D/g, "");
+const wa = digits.length === 10 ? `91${digits}` : digits;
+return {
+  as: "a",
+  href: wa ? `https://wa.me/${wa}` : undefined,
+  target: "_blank",
+  rel: "noopener noreferrer",
+  text: "WhatsApp"
+};'''
+      }
+    }
+    {
       id: "22"
       L: Attr
       P: {
@@ -650,7 +741,11 @@ return {
         props:
           '''return {
   as: "div",
-  hide: f.submitted?.() === true
+  hide: f.submitted?.() === true,
+  lang: (() => {
+    const lang = _.params?.lang ? String(_.params.lang).toLowerCase() : "";
+    return lang && /^[a-z]{2,3}$/i.test(lang) ? lang : undefined;
+  })()
 };'''
       }
     }
@@ -1166,6 +1261,24 @@ return {
       T: Attr
       S: "19"
       E: "21"
+    }
+    {
+      id: e_phone_actions
+      T: Attr
+      S: "19"
+      E: "phone_actions"
+    }
+    {
+      id: e_call_btn
+      T: Attr
+      S: "phone_actions"
+      E: "call_btn"
+    }
+    {
+      id: e_wa_btn
+      T: Attr
+      S: "phone_actions"
+      E: "wa_btn"
     }
     {
       id: e25

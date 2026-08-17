@@ -125,16 +125,19 @@ return {
       L: Attr
       P: {
         css:
-          '''return `._id {
+          '''const ratio = c.props?.aspectRatio;
+return `._id {
   position: relative;
   width: 100%;
-  max-height: min(380px, 45vh);
+  max-height: none;
+  ${ratio ? `aspect-ratio: ${ratio};` : ""}
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
           '''return {
-  as: "div"
+  as: "div",
+  class: c.props?.stageClass
 };'''
       }
     }
@@ -143,10 +146,11 @@ return {
       L: Attr
       P: {
         css:
-          '''return `._id {
+          '''const ratio = c.props?.aspectRatio;
+return `._id {
   overflow: hidden;
   width: 100%;
-  max-height: min(380px, 45vh);
+  ${ratio ? "height: 100%;" : ""}
 }`;'''
         displayOrder: 1
         componentName: Html
@@ -165,15 +169,19 @@ return {
 const slideSpacing = f.slideSpacing();
 const hasSpacing = slideSpacing && slideSpacing !== "0" && slideSpacing !== "0rem";
 
+const ratio = c.props?.aspectRatio;
 return `._id {
   display: flex;
+  align-items: stretch;
   touch-action: pan-y pinch-zoom;
+  ${ratio ? "height: 100%;" : ""}
   ${hasSpacing ? `margin-left: calc(${slideSpacing} * -1);` : ""}
 }
 
 ._id > * {
   flex: 0 0 ${slideSize};
   min-width: 0;
+  ${ratio ? "height: 100%;" : ""}
   ${hasSpacing ? `padding-left: ${slideSpacing};` : ""}
 }`;'''
         displayOrder: 1

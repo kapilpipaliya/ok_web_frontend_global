@@ -1021,17 +1021,45 @@ return `._id {
       }
     }
     {
-      id: "22"
+      id: "amazon_bar"
       L: Attr
       P: {
         displayOrder: 6
+        componentName: Html
+        props:
+          '''const url = f.activeVariant?.()?.amazonUrl || "";
+return {
+  as: "div",
+  hide: !f.hasExactVariant?.() || !url
+};'''
+        css:
+          '''return `._id {
+  @media (max-width: 768px) {
+    position: sticky;
+    bottom: 0;
+    z-index: 20;
+    padding: 0.65rem 0 0.35rem;
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      ${t.var.color.background} 28%
+    );
+  }
+}`;'''
+      }
+    }
+    {
+      id: "22"
+      L: Attr
+      P: {
+        displayOrder: 1
         componentName: Button
         props:
           '''const url = f.activeVariant?.()?.amazonUrl || "";
 return {
   text: "View on Amazon",
   variant: "primary",
-  hide: !f.hasExactVariant?.() || !url,
+  hide: !url,
   onClick: () => f.openAmazon?.()
 };'''
       }
@@ -1214,6 +1242,12 @@ return {
       id: e16
       T: Attr
       S: "10"
+      E: "amazon_bar"
+    }
+    {
+      id: e_amazon_btn
+      T: Attr
+      S: "amazon_bar"
       E: "22"
     }
     {

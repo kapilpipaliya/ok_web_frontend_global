@@ -71,6 +71,46 @@ try {
       }
     }
     {
+      id: "banner_css"
+      L: Attr
+      P: {
+        displayOrder: 0
+        componentName: Html
+        props:
+          '''return {
+  as: "style",
+  text: `.home-banner-stage {
+  aspect-ratio: 3 / 1;
+  width: 100%;
+  max-height: none !important;
+}
+.home-banner-stage > *:first-child,
+.home-banner-stage > *:first-child > *,
+.home-banner-stage > *:first-child > * > * {
+  height: 100%;
+  max-height: none !important;
+}
+.home-banner-carousel,
+.home-banner-carousel * {
+  max-height: none !important;
+}
+.home-banner-carousel a {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.home-banner-carousel img {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  max-height: none !important;
+  object-fit: contain !important;
+  object-position: center;
+}`
+};'''
+      }
+    }
+    {
       id: "2"
       L: Attr
       P: {
@@ -85,6 +125,9 @@ try {
         props:
           '''const banners = c.homeSettings?.banners ?? [];
 return {
+  class: "home-banner-carousel",
+  stageClass: "home-banner-stage",
+  aspectRatio: "3 / 1",
   data: banners,
   contextName: "banner",
   loop: true,
@@ -102,13 +145,10 @@ return {
           '''return `._id {
   display: block;
   width: 100%;
-  min-height: 12rem;
-  aspect-ratio: 16 / 6;
+  height: 100%;
   line-height: 0;
   text-decoration: none;
   color: inherit;
-  overflow: hidden;
-  background: ${t.var.color.background_light_100};
 }`;'''
         displayOrder: 1
         componentName: Html
@@ -148,12 +188,11 @@ return {
           '''return `._id {
   display: block;
   width: 100%;
-  height: auto;
-  min-height: 12rem;
-  aspect-ratio: 16 / 6;
-  object-fit: cover;
+  height: 100%;
+  max-width: 100%;
+  max-height: none;
+  object-fit: contain;
   object-position: center;
-  background: ${t.var.color.background_light_100};
 }`;'''
         displayOrder: 1
         componentName: Html
@@ -165,10 +204,14 @@ const isFirst = (c.index ?? 0) === 0;
 return {
   as: "img",
   src: fileName ? `/api/file/download/${encodeURIComponent(fileName)}` : undefined,
-  alt: fileName || "Home banner",
+  alt: "Lessn home banner",
+  width: 1500,
+  height: 500,
+  sizes: "100vw",
   loading: isFirst ? "eager" : "lazy",
   fetchpriority: isFirst ? "high" : undefined,
-  decoding: isFirst ? "async" : "async"
+  decoding: "async",
+  onLoad: () => f.emblaApi?.()?.reInit?.()
 };'''
       }
     }
@@ -373,7 +416,7 @@ return {
         props:
           '''const welcome = c.homeSettings?.welcome;
 return {
-  as: "h1",
+  as: "h2",
   text: welcome?.welcomeTitle
 };'''
       }
@@ -557,6 +600,12 @@ return {
     }
   ]
   edges: [
+    {
+      id: e_banner_css
+      T: Attr
+      S: "1"
+      E: "banner_css"
+    }
     {
       id: e1
       T: Attr

@@ -40,8 +40,11 @@ html.header-compact ._id {
         fns:
           '''let compact = false;
 let ticking = false;
+const COMPACT_ON = 80;
+const EXPAND_ON = 16;
 
-const applyCompact = (next) => {
+const applyCompact = (scrollY) => {
+  const next = compact ? scrollY > EXPAND_ON : scrollY > COMPACT_ON;
   if (next === compact) return;
   compact = next;
   document.documentElement.classList.toggle("header-compact", next);
@@ -52,12 +55,12 @@ const onScroll = () => {
   ticking = true;
   requestAnimationFrame(() => {
     ticking = false;
-    applyCompact(window.scrollY > 16);
+    applyCompact(window.scrollY);
   });
 };
 
 const bindScroll = () => {
-  applyCompact(window.scrollY > 16);
+  applyCompact(window.scrollY);
   window.addEventListener("scroll", onScroll, { passive: true });
 };
 
@@ -177,7 +180,7 @@ html.header-compact ._id {
           '''return {
   as: "img",
   src: "/api/file/downloadCompanySquareLogo",
-  alt: "Affiliate Store",
+  alt: "Lessn",
   width: 200,
   height: 100
 };'''
@@ -209,6 +212,7 @@ html.header-compact ._id {
           '''return `._id {
   font-size: 3rem;
   line-height: 1;
+  margin: 0;
   transition: font-size 0.15s ease;
 }
 
@@ -220,7 +224,7 @@ html.header-compact ._id {
         key: unique_1
         props:
           '''return {
-  as: "h1",
+  as: "p",
   text: "Lessn"
 }'''
       }
@@ -233,6 +237,7 @@ html.header-compact ._id {
           '''return `._id {
   font-size: 1.4rem;
   line-height: 1;
+  margin: 0;
   color: ${t.var.color.text};
   max-height: 2rem;
   opacity: 1;
@@ -249,7 +254,7 @@ html.header-compact ._id {
         key: unique_2
         props:
           '''return {
-  as: "h2",
+  as: "p",
   text: "LIFE'S ESSENTIALS"
 }'''
       }

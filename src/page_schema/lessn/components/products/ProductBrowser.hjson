@@ -139,6 +139,23 @@ const openProduct = (item) => {
   _.navigate(href);
 };
 
+const getLangPrefix = () => {
+  const base = getBasePath();
+  const fromBase = String(base || "").match(/^\/([a-z]{2,3})(?:\/|$)/i);
+  if (fromBase) return `/${fromBase[1].toLowerCase()}`;
+  const lang = _.params?.lang ? String(_.params.lang).toLowerCase() : "";
+  if (lang && /^[a-z]{2,3}$/i.test(lang)) return `/${lang}`;
+  return "";
+};
+
+const searchHref = () => `${getLangPrefix()}/search`;
+
+const parentCrumb = () => {
+  const crumbs = getBreadcrumbForRender();
+  if (!Array.isArray(crumbs) || crumbs.length < 2) return null;
+  return crumbs[crumbs.length - 2];
+};
+
 return {
   useUrlState,
   urlParam,
@@ -155,6 +172,13 @@ return {
   openFolder,
   navigateBreadcrumb,
   openProduct,
+  parentCrumb,
+  searchHref,
+  parentHref: () => {
+    const crumb = parentCrumb();
+    if (!crumb) return getBasePath();
+    return crumbHref(crumb) || getBasePath();
+  },
   hasFolders: () => getFoldersForRender().length > 0,
   hasItems: () => getItemsForRender().length > 0,
   isEmpty: () => getFoldersForRender().length === 0 && getItemsForRender().length === 0,
@@ -468,6 +492,84 @@ return {
       }
     }
     {
+      id: "empty_actions"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 0.85rem;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props: return { as: "div" };
+      }
+    }
+    {
+      id: "empty_parent"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: ${t.var.color.text};
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const parent = f.parentCrumb?.();
+const href = f.parentHref?.() || f.crumbHref?.(parent) || f.getBasePath?.();
+const label = parent?.isRoot
+  ? (f.labels?.()?.rootBreadcrumbLabel || "Products")
+  : (parent?.name || "Parent category");
+return {
+  as: "a",
+  href,
+  text: `Browse ${label}`,
+  hide: !parent,
+  onClick: (e) => {
+    if (f.useUrlState?.()) return;
+    e.preventDefault();
+    f.navigateBreadcrumb?.(parent);
+  }
+};'''
+      }
+    }
+    {
+      id: "empty_search"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: ${t.var.color.text};
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "a",
+  href: f.searchHref?.(),
+  text: "Search products"
+};'''
+      }
+    }
+    {
       id: "18"
       L: Attr
       P: {
@@ -675,6 +777,24 @@ return {
       T: Attr
       S: "16"
       E: "17"
+    }
+    {
+      id: e_empty_actions
+      T: Attr
+      S: "16"
+      E: "empty_actions"
+    }
+    {
+      id: e_empty_parent
+      T: Attr
+      S: "empty_actions"
+      E: "empty_parent"
+    }
+    {
+      id: e_empty_search
+      T: Attr
+      S: "empty_actions"
+      E: "empty_search"
     }
     {
       id: e17
