@@ -16,6 +16,7 @@ const checkAdminRole = () => {
 };
 
 const [pagePreviewUrls, setPagePreviewUrls] = _.createSignal({ global: "/" });
+const [settingsPages, setSettingsPages] = _.createSignal([]);
 let pagePreviewUrlsLoadPromise = null;
 
 const loadPagePreviewUrls = async () => {
@@ -30,8 +31,10 @@ const loadPagePreviewUrls = async () => {
         contextData: {}
       });
       const urls = result?.result?.data?.previewUrls || {};
+      const pages = result?.result?.data?.pages || [];
       const resolved = { global: "/", ...urls };
       setPagePreviewUrls(resolved);
+      setSettingsPages(Array.isArray(pages) ? pages : []);
       return resolved;
     } catch (error) {
       console.error("Settings loadPagePreviewUrls:", error);
@@ -47,6 +50,15 @@ const loadPagePreviewUrls = async () => {
 const getPreviewUrl = () => {
   const settingsPageId = _.searchParams?.page || "home";
   return pagePreviewUrls()[settingsPageId] || "/";
+};
+
+const getSettingsPageLabel = () => {
+  const settingsPageId = _.searchParams?.page || "home";
+  if (settingsPageId === "global") return "Global Settings";
+  const match = (settingsPages() || []).find(
+    (page) => String(page.settingsPageId || "").trim() === settingsPageId
+  );
+  return match?.label || match?.title || match?.key || settingsPageId;
 };
 
 const refreshPreview = () => {
@@ -192,6 +204,7 @@ return {
   startEditorResize,
   checkAdminRole,
   getPreviewUrl,
+  getSettingsPageLabel,
   refreshPreview,
   onSettingsSaved,
   isSchemaMode,
@@ -200,6 +213,7 @@ return {
   siteLanguages,
   loadSiteLanguages,
   pagePreviewUrls,
+  settingsPages,
   loadPagePreviewUrls,
   syncEditorPaneWidth,
   executeYTOFunction: (functionName, contextData) =>
@@ -374,10 +388,9 @@ body.fulchand-settings-resizing [data-fulchand-settings-preview] {
         displayOrder: 1
         componentName: Html
         props:
-          '''const pageId = _.searchParams?.page || "home";
-return {
+          '''return {
   as: "h2",
-  text: `Live preview — ${pageId}`
+  text: `Live preview — ${f.getSettingsPageLabel?.() || _.searchParams?.page || "home"}`
 };'''
       }
     }

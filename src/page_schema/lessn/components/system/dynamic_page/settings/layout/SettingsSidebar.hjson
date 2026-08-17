@@ -6,6 +6,40 @@
       P: {
         fns:
           '''
+const GLOBAL_SIDEBAR_ITEM = {
+  id: "global",
+  label: "Global Settings",
+  path: "/settings?page=global",
+  icon: "settings"
+};
+
+const [pageSidebarItems, setPageSidebarItems] = _.createSignal([]);
+let pageSidebarItemsLoadPromise = null;
+
+const loadPageSidebarItems = async () => {
+  if (pageSidebarItemsLoadPromise) return pageSidebarItemsLoadPromise;
+
+  pageSidebarItemsLoadPromise = (async () => {
+    try {
+      const result = await s({
+        functionName: "getSettingsPagePreviewUrls",
+        contextData: {}
+      });
+      const items = result?.result?.data?.sidebarItems;
+      const resolved = Array.isArray(items) ? items : [];
+      setPageSidebarItems(resolved);
+      return resolved;
+    } catch (error) {
+      console.error("SettingsSidebar loadPageSidebarItems:", error);
+      return pageSidebarItems();
+    } finally {
+      pageSidebarItemsLoadPromise = null;
+    }
+  })();
+
+  return pageSidebarItemsLoadPromise;
+};
+
 const getSidebarConfig = () => c.props?.sidebarConfig || f.getSettingsSidebarConfig?.() || null;
 
 const checkPermissions = (permissionConfig) => {
@@ -16,9 +50,32 @@ const checkPermissions = (permissionConfig) => {
 };
 
 const getVisibleGroups = () => {
-  const sidebarConfig = getSidebarConfig();
-  if (!sidebarConfig || !Array.isArray(sidebarConfig.groups)) return [];
-  return sidebarConfig.groups.filter((group) => {
+  const sidebarConfig = getSidebarConfig() || {};
+  const configGroups = Array.isArray(sidebarConfig.groups) ? sidebarConfig.groups : [];
+  const contentFromPages = pageSidebarItems();
+
+  const groups = configGroups.length > 0
+    ? configGroups.map((group) => {
+        if (group.id === "content") {
+          return {
+            ...group,
+            items: contentFromPages.length > 0 ? contentFromPages : (group.items || [])
+          };
+        }
+        if (group.id === "global") {
+          const globalItems = Array.isArray(group.items) && group.items.length > 0
+            ? group.items
+            : [GLOBAL_SIDEBAR_ITEM];
+          return { ...group, items: globalItems };
+        }
+        return group;
+      })
+    : [
+        { id: "global", label: "Global", items: [GLOBAL_SIDEBAR_ITEM] },
+        { id: "content", label: "Content", items: contentFromPages }
+      ];
+
+  return groups.filter((group) => {
     if (!checkPermissions(group.permissions)) return false;
     return true;
   }).map((group) => ({
@@ -28,14 +85,15 @@ const getVisibleGroups = () => {
 };
 
 const parseNavPath = (itemPath) => {
-  if (!itemPath) return { pathname: "", sectionId: null };
+  if (!itemPath) return { pathname: "", sectionId: null, pageId: null };
   const qIndex = itemPath.indexOf("?");
-  if (qIndex === -1) return { pathname: itemPath, sectionId: null };
+  if (qIndex === -1) return { pathname: itemPath, sectionId: null, pageId: null };
   const pathname = itemPath.slice(0, qIndex);
   const params = new URLSearchParams(itemPath.slice(qIndex + 1));
   return {
     pathname,
-    sectionId: params.get("section")
+    sectionId: params.get("section"),
+    pageId: params.get("page")
   };
 };
 
@@ -44,6 +102,10 @@ const isActivePath = (itemPath) => {
   if (!itemPath) return false;
 
   const parsed = parseNavPath(itemPath);
+  if (parsed.pageId) {
+    return currentPath === parsed.pathname
+      && String(_.searchParams?.page || "").trim() === String(parsed.pageId).trim();
+  }
   if (parsed.sectionId) {
     return currentPath === parsed.pathname && _.searchParams?.section === parsed.sectionId;
   }
@@ -62,6 +124,7 @@ return {
   getVisibleGroups,
   isActivePath,
   handleNavigate,
+  loadPageSidebarItems,
   sidebarTitle: () => getSidebarConfig()?.title || "Settings"
 };
 '''
@@ -95,7 +158,10 @@ return {
         componentName: Html
         props:
           '''return {
-  as: "aside"
+  as: "aside",
+  onMount: () => {
+    void f.loadPageSidebarItems?.();
+  }
 };'''
       }
     }

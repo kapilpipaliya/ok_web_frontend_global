@@ -4,12 +4,16 @@
       id: "1"
       L: Function
       P: {
-        description: Returns preview URL map keyed by settingsPageId from Page vertices.
+        description: Returns settings pages and preview URL map from Page vertices (settingsPageId + url).
         body:
           '''
 /**
- * Loads settings page preview URLs from Page vertices.
- * Returns { previewUrls: { [settingsPageId]: url }, pages: [{ settingsPageId, url, key, title }] }
+ * Loads settings pages from Page vertices.
+ * Returns {
+ *   previewUrls: { [settingsPageId]: url },
+ *   pages: [{ settingsPageId, url, key, title }],
+ *   sidebarItems: [{ id, label, path, icon }]
+ * }
  */
 
 try {
@@ -24,13 +28,14 @@ try {
       p.settingsPageId AS settingsPageId,
       p.url AS url,
       p.key AS key,
-      p.title AS title
-    ORDER BY toLower(toString(p.title)), toLower(toString(p.key))
+      p.title AS title,
+      p.description AS description
+    ORDER BY toLower(coalesce(toString(p.title), toString(p.key), toString(p.settingsPageId)))
     `
   );
 
   const previewUrls = { global: "/" };
-  const pages = [];
+  const pagesById = {};
 
   for (let i = 0; i < result.records.length; i++) {
     const record = result.records[i];
@@ -42,18 +47,45 @@ try {
     const pageUrl = String(url).trim();
     if (!pageId || !pageUrl) continue;
 
-    previewUrls[pageId] = pageUrl;
-    pages.push({
+    // Prefer shorter public URLs (e.g. "/" over "/home-old") when duplicates share settingsPageId
+    const existing = pagesById[pageId];
+    if (existing && existing.url.length <= pageUrl.length) {
+      continue;
+    }
+
+    const key = record.get("key") != null ? String(record.get("key")).trim() : "";
+    const title = record.get("title") != null ? String(record.get("title")).trim() : "";
+    const description = record.get("description") != null ? String(record.get("description")).trim() : "";
+    const label = title || description || key || pageId;
+
+    pagesById[pageId] = {
       settingsPageId: pageId,
       url: pageUrl,
-      key: record.get("key") != null ? String(record.get("key")) : null,
-      title: record.get("title") != null ? String(record.get("title")) : null
-    });
+      key: key || null,
+      title: title || null,
+      label
+    };
+    previewUrls[pageId] = pageUrl;
   }
+
+  const pages = Object.keys(pagesById)
+    .sort((a, b) => {
+      const labelA = String(pagesById[a].label || a).toLowerCase();
+      const labelB = String(pagesById[b].label || b).toLowerCase();
+      return labelA.localeCompare(labelB);
+    })
+    .map((id) => pagesById[id]);
+
+  const sidebarItems = pages.map((page) => ({
+    id: page.settingsPageId,
+    label: page.label,
+    path: `/settings?page=${page.settingsPageId}`,
+    icon: "document"
+  }));
 
   return {
     success: true,
-    data: { previewUrls, pages },
+    data: { previewUrls, pages, sidebarItems },
     message: `Loaded ${pages.length} page preview URLs`
   };
 } catch (error) {

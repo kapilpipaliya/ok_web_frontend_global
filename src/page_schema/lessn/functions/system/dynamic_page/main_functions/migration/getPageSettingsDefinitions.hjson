@@ -170,15 +170,6 @@ const globalSidebarItems = [
   }
 ];
 
-const sidebarItems = [
-  { id: "home", label: "Home Page", path: "/settings?page=home", icon: "document" },
-  { id: "products", label: "Products Page", path: "/settings?page=products", icon: "document" },
-  { id: "contact", label: "Contact", path: "/settings?page=contact", icon: "document" },
-  { id: "about", label: "About Us", path: "/settings?page=about", icon: "document" },
-  { id: "privacy", label: "Privacy Policy", path: "/settings?page=privacy", icon: "document" },
-  { id: "terms", label: "Terms & Conditions", path: "/settings?page=terms", icon: "document" }
-];
-
 const pages = [
   {
     settingsPageId: "global",
@@ -709,7 +700,7 @@ function stripFieldSchema(field) {
   return next;
 }
 
-function buildConfig(page, contentSidebarItems, globalItems) {
+function buildConfig(page, globalItems) {
   const sectionConfigs = page.sections.map((section) => ({
     id: section.id,
     type: "card",
@@ -740,7 +731,7 @@ function buildConfig(page, contentSidebarItems, globalItems) {
     title: "Site Settings",
     groups: [
       { id: "global", label: "Global", items: ${JSON.stringify(globalItems)} },
-      { id: "content", label: "Content", items: ${JSON.stringify(contentSidebarItems)} }
+      { id: "content", label: "Content", items: [] }
     ]
   },
   sections: ${JSON.stringify(sectionConfigs)}
@@ -753,7 +744,7 @@ const settingsPageConfigs = finalizedPages.map((page) => ({
   key: page.settingsPageId + "_settings_page",
   settingsPageId: page.settingsPageId,
   name: page.name,
-  config: buildConfig(page, sidebarItems, globalSidebarItems)
+  config: buildConfig(page, globalSidebarItems)
 }));
 
 const defaultSectionDocuments = finalizedPages.flatMap((page) =>

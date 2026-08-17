@@ -97,148 +97,170 @@ const checkAdminRole = () => {
   });
 };
 
-const portalNavSectionsData = [
+const [settingsPageNavItems, setSettingsPageNavItems] = _.createSignal([]);
+let settingsPageNavItemsLoadPromise = null;
+
+const loadSettingsPageNavItems = async () => {
+  if (settingsPageNavItemsLoadPromise) return settingsPageNavItemsLoadPromise;
+
+  settingsPageNavItemsLoadPromise = (async () => {
+    try {
+      const result = await s({
+        functionName: "getSettingsPagePreviewUrls",
+        contextData: {}
+      });
+      const pages = result?.result?.data?.pages;
+      const items = (Array.isArray(pages) ? pages : []).map((page) => {
+        const pageId = String(page.settingsPageId || "").trim();
+        return {
+          id: `settings_${pageId}`,
+          href: `/settings?page=${pageId}`,
+          label: page.label || page.title || page.key || pageId,
+          icon: "ph:gear-six",
+          pathCheck: () => {
+            if (!String(_.location?.pathname || "").startsWith("/settings")) return false;
+            return String(_.searchParams?.page || "").trim() === pageId;
+          }
+        };
+      });
+      setSettingsPageNavItems(items);
+      return items;
+    } catch (error) {
+      console.error("PortalNavigation loadSettingsPageNavItems:", error);
+      return settingsPageNavItems();
+    } finally {
+      settingsPageNavItemsLoadPromise = null;
+    }
+  })();
+
+  return settingsPageNavItemsLoadPromise;
+};
+
+const staticAdminItems = [
   {
-    id: "site",
-    items: [
-      {
-        id: "view_site",
-        href: "/",
-        label: "View site",
-        icon: "ph:house",
-        pathCheck: () => String(_.location?.pathname || "") === "/"
-      }
-    ]
+    id: "global_settings",
+    href: "/settings?page=global",
+    label: "Global settings",
+    icon: "ph:sliders-horizontal",
+    pathCheck: () => {
+      if (!String(_.location?.pathname || "").startsWith("/settings")) return false;
+      return String(_.searchParams?.page || "").trim() === "global";
+    }
   },
   {
-    id: "admin",
-    title: "Admin",
-    showIf: () => checkAdminRole(),
-    items: [
-      {
-        id: "home_settings",
-        href: "/settings?page=home",
-        label: "Home page",
-        icon: "ph:gear-six",
-        pathCheck: () => {
-          if (!String(_.location?.pathname || "").startsWith("/settings")) return false;
-          return String(_.searchParams?.page || "").trim() === "home";
-        }
-      },
-      {
-        id: "products_settings",
-        href: "/settings?page=products",
-        label: "Products page",
-        icon: "ph:gear-six",
-        pathCheck: () => {
-          if (!String(_.location?.pathname || "").startsWith("/settings")) return false;
-          return String(_.searchParams?.page || "").trim() === "products";
-        }
-      },
-      {
-        id: "contact_settings",
-        href: "/settings?page=contact",
-        label: "Contact page",
-        icon: "ph:gear-six",
-        pathCheck: () => {
-          if (!String(_.location?.pathname || "").startsWith("/settings")) return false;
-          return String(_.searchParams?.page || "").trim() === "contact";
-        }
-      },
-      {
-        id: "pages_organizer",
-        href: "/portal/table?table=Page&key=pages",
-        label: "Page organizer",
-        icon: "ph:file",
-        pathCheck: () => {
-          if (String(_.location?.pathname || "") !== "/portal/table") return false;
-          return String(_.searchParams?.table || "").trim() === "Page";
-        }
-      },
-      {
-        id: "components_organizer",
-        href: "/portal/table?table=Component&key=components",
-        label: "Component organizer",
-        icon: "ph:puzzle-piece",
-        pathCheck: () => {
-          if (String(_.location?.pathname || "") !== "/portal/table") return false;
-          return String(_.searchParams?.table || "").trim() === "Component";
-        }
-      },
-      {
-        id: "functions_organizer",
-        href: "/portal/table?table=Function&key=functions",
-        label: "Function organizer",
-        icon: "ph:function",
-        pathCheck: () => {
-          if (String(_.location?.pathname || "") !== "/portal/table") return false;
-          return String(_.searchParams?.table || "").trim() === "Function";
-        }
-      },
-      {
-        id: "email_templates_organizer",
-        href: "/portal/table?table=EmailTemplate&key=email_templates",
-        label: "Email templates organizer",
-        icon: "ph:envelope",
-        pathCheck: () => {
-          if (String(_.location?.pathname || "") !== "/portal/table") return false;
-          return String(_.searchParams?.table || "").trim() === "EmailTemplate";
-        }
-      },
-      {
-        id: "products_table",
-        href: "/portal/table?table=Product&key=products",
-        label: "Products",
-        icon: "ph:shopping-bag",
-        pathCheck: () => {
-          if (String(_.location?.pathname || "") !== "/portal/table") return false;
-          const table = String(_.searchParams?.table || "Product").trim();
-          return table === "Product";
-        }
-      },
-      {
-        id: "amazon_import",
-        href: "/portal/amazon-import",
-        label: "Amazon import",
-        icon: "ph:amazon-logo",
-        pathCheck: () => String(_.location?.pathname || "") === "/portal/amazon-import"
-      },
-      {
-        id: "contacts_table",
-        href: "/portal/table?table=ContactSubmission&key=contacts",
-        label: "Contacts",
-        icon: "ph:envelope-simple",
-        pathCheck: () => {
-          if (String(_.location?.pathname || "") !== "/portal/table") return false;
-          return String(_.searchParams?.table || "").trim() === "ContactSubmission";
-        }
-      },
-      {
-        id: "files_organizer",
-        href: "/portal/table?table=File&key=files",
-        label: "Files",
-        icon: "ph:folder",
-        pathCheck: () => {
-          if (String(_.location?.pathname || "") !== "/portal/table") return false;
-          return String(_.searchParams?.table || "").trim() === "File";
-        }
-      },
-      {
-        id: "branding",
-        href: "/portal/branding",
-        label: "Branding",
-        icon: "ph:paint-brush-broad",
-        pathCheck: () => String(_.location?.pathname || "") === "/portal/branding"
-      }
-    ]
+    id: "pages_organizer",
+    href: "/portal/table?table=Page&key=pages",
+    label: "Page organizer",
+    icon: "ph:file",
+    pathCheck: () => {
+      if (String(_.location?.pathname || "") !== "/portal/table") return false;
+      return String(_.searchParams?.table || "").trim() === "Page";
+    }
+  },
+  {
+    id: "components_organizer",
+    href: "/portal/table?table=Component&key=components",
+    label: "Component organizer",
+    icon: "ph:puzzle-piece",
+    pathCheck: () => {
+      if (String(_.location?.pathname || "") !== "/portal/table") return false;
+      return String(_.searchParams?.table || "").trim() === "Component";
+    }
+  },
+  {
+    id: "functions_organizer",
+    href: "/portal/table?table=Function&key=functions",
+    label: "Function organizer",
+    icon: "ph:function",
+    pathCheck: () => {
+      if (String(_.location?.pathname || "") !== "/portal/table") return false;
+      return String(_.searchParams?.table || "").trim() === "Function";
+    }
+  },
+  {
+    id: "email_templates_organizer",
+    href: "/portal/table?table=EmailTemplate&key=email_templates",
+    label: "Email templates organizer",
+    icon: "ph:envelope",
+    pathCheck: () => {
+      if (String(_.location?.pathname || "") !== "/portal/table") return false;
+      return String(_.searchParams?.table || "").trim() === "EmailTemplate";
+    }
+  },
+  {
+    id: "products_table",
+    href: "/portal/table?table=Product&key=products",
+    label: "Products",
+    icon: "ph:shopping-bag",
+    pathCheck: () => {
+      if (String(_.location?.pathname || "") !== "/portal/table") return false;
+      const table = String(_.searchParams?.table || "Product").trim();
+      return table === "Product";
+    }
+  },
+  {
+    id: "amazon_import",
+    href: "/portal/amazon-import",
+    label: "Amazon import",
+    icon: "ph:amazon-logo",
+    pathCheck: () => String(_.location?.pathname || "") === "/portal/amazon-import"
+  },
+  {
+    id: "contacts_table",
+    href: "/portal/table?table=ContactSubmission&key=contacts",
+    label: "Contacts",
+    icon: "ph:envelope-simple",
+    pathCheck: () => {
+      if (String(_.location?.pathname || "") !== "/portal/table") return false;
+      return String(_.searchParams?.table || "").trim() === "ContactSubmission";
+    }
+  },
+  {
+    id: "files_organizer",
+    href: "/portal/table?table=File&key=files",
+    label: "Files",
+    icon: "ph:folder",
+    pathCheck: () => {
+      if (String(_.location?.pathname || "") !== "/portal/table") return false;
+      return String(_.searchParams?.table || "").trim() === "File";
+    }
+  },
+  {
+    id: "branding",
+    href: "/portal/branding",
+    label: "Branding",
+    icon: "ph:paint-brush-broad",
+    pathCheck: () => String(_.location?.pathname || "") === "/portal/branding"
   }
 ];
 
-const portalNavSections = _.createMemo(() =>
-  portalNavSectionsData.filter(
-    (section) => !section.showIf || section.showIf(),
-  ),
-);
+const portalNavSections = _.createMemo(() => {
+  const sections = [
+    {
+      id: "site",
+      items: [
+        {
+          id: "view_site",
+          href: "/",
+          label: "View site",
+          icon: "ph:house",
+          pathCheck: () => String(_.location?.pathname || "") === "/"
+        }
+      ]
+    },
+    {
+      id: "admin",
+      title: "Admin",
+      showIf: () => checkAdminRole(),
+      items: [
+        staticAdminItems[0],
+        ...settingsPageNavItems(),
+        ...staticAdminItems.slice(1)
+      ]
+    }
+  ];
+  return sections.filter((section) => !section.showIf || section.showIf());
+});
 
 const isNavItemActive = (item) =>
   item.pathCheck ? item.pathCheck() : false;
@@ -265,7 +287,8 @@ return {
   onUserMenuMount,
   checkAdminRole,
   portalNavSections,
-  isNavItemActive
+  isNavItemActive,
+  loadSettingsPageNavItems
 };
 '''
         title: PortalNavigation
@@ -304,7 +327,12 @@ return {
         props:
           '''return {
   as: "aside",
-  onMount: () => f.onUserMenuMount?.()
+  onMount: () => {
+    f.onUserMenuMount?.();
+    if (f.checkAdminRole?.()) {
+      void f.loadSettingsPageNavItems?.();
+    }
+  }
 };'''
       }
     }

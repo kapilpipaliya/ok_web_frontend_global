@@ -45,15 +45,6 @@ const checkAdminRole = () => {
   });
 };
 
-const URL_TO_SETTINGS_PAGE = {
-  "/": "home",
-  "/about": "about",
-  "/contact": "contact",
-  "/privacy": "privacy",
-  "/products": "products",
-  "/terms": "terms"
-};
-
 const isLangCode = (value) =>
   value != null && /^[a-z]{2,3}$/i.test(String(value).trim());
 
@@ -65,23 +56,36 @@ const getPagePathWithoutLang = () => {
   return _.location?.pathname || "/";
 };
 
+const normalizePath = (path) => {
+  const raw = String(path || "/").trim() || "/";
+  if (raw === "/") return "/";
+  return raw.replace(/\/+$/, "") || "/";
+};
+
 const getSettingsPageId = () => {
   const fromProps = c.props?.settingsPageId;
   if (fromProps != null && String(fromProps).trim() !== "") {
     return String(fromProps).trim();
   }
 
-  const pathname = getPagePathWithoutLang();
+  const pathname = normalizePath(getPagePathWithoutLang());
+  let bestMatch = null;
+  let bestLen = Infinity;
+
   for (const vertexId in g.vertexes) {
     const vertex = g.vertexes[vertexId];
     if (!vertex?.L?.includes("Page")) continue;
-    const pageUrl = vertex.P?.url || "/";
-    if (pageUrl === pathname && vertex.P?.settingsPageId) {
-      return String(vertex.P.settingsPageId);
+    const settingsPageId = vertex.P?.settingsPageId;
+    if (settingsPageId == null || String(settingsPageId).trim() === "") continue;
+    const pageUrl = normalizePath(vertex.P?.url || "/");
+    if (pageUrl !== pathname) continue;
+    if (pageUrl.length < bestLen) {
+      bestLen = pageUrl.length;
+      bestMatch = String(settingsPageId).trim();
     }
   }
 
-  return URL_TO_SETTINGS_PAGE[pathname] || null;
+  return bestMatch;
 };
 
 const isOnSettingsRoute = () => {
