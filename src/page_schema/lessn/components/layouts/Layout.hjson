@@ -43,76 +43,77 @@ const animateOnView = (el, options = {}) => {
   const {
     opacity = true,
     x = 0,
-    y = 16,
+    y = 12,
     scale = 1,
     rotate = 0,
-    duration = 0.28,
+    duration = 0.18,
     delay = 0,
     easing = "easeOut",
     amount = 0.01,
     margin = "0px"
   } = options;
 
-  if (prefersReducedMotion()) {
-    el.dataset.motionInit = "true";
-    revealElement(el);
-    return;
-  }
-
-  applyInitialState(el, { opacity, x, y, scale, rotate });
   el.dataset.motionInit = "true";
 
-  // Always reveal if inView never fires (Android Chrome / IO quirks)
-  const safetyTimer = setTimeout(() => revealElement(el), 2500);
-
-  const keyframes = {};
-
-  if (opacity) {
-    keyframes.opacity = [0, 1];
-  }
-
-  if (x) {
-    keyframes.x = [x, 0];
-  }
-
-  if (y) {
-    keyframes.y = [y, 0];
-  }
-
-  if (scale !== 1) {
-    keyframes.scale = [scale, 1];
-  }
-
-  if (rotate) {
-    keyframes.rotate = [rotate, 0];
-  }
-
-  if (Object.keys(keyframes).length === 0) {
-    clearTimeout(safetyTimer);
+  if (prefersReducedMotion()) {
     revealElement(el);
     return;
   }
 
-  let ran = false;
-  const runAnimation = () => {
-    if (ran) return;
-    ran = true;
-    clearTimeout(safetyTimer);
-    _.motion.animate(el, keyframes, {
-      duration,
-      delay,
-      easing
-    });
+  const start = () => {
+    if (isInViewport(el)) {
+      revealElement(el);
+      return;
+    }
+
+    applyInitialState(el, { opacity, x, y, scale, rotate });
+
+    const safetyTimer = setTimeout(() => revealElement(el), 800);
+
+    const keyframes = {};
+
+    if (opacity) {
+      keyframes.opacity = [0, 1];
+    }
+
+    if (x) {
+      keyframes.x = [x, 0];
+    }
+
+    if (y) {
+      keyframes.y = [y, 0];
+    }
+
+    if (scale !== 1) {
+      keyframes.scale = [scale, 1];
+    }
+
+    if (rotate) {
+      keyframes.rotate = [rotate, 0];
+    }
+
+    if (Object.keys(keyframes).length === 0) {
+      clearTimeout(safetyTimer);
+      revealElement(el);
+      return;
+    }
+
+    let ran = false;
+    const runAnimation = () => {
+      if (ran) return;
+      ran = true;
+      clearTimeout(safetyTimer);
+      _.motion.animate(el, keyframes, {
+        duration,
+        delay,
+        easing
+      });
+    };
+
+    _.motion.inView(el, runAnimation, { amount, margin });
   };
 
-  _.motion.inView(el, runAnimation, { amount, margin });
-
-  // Elements already on-screen often miss inView on Android Chrome
-  requestAnimationFrame(() => {
-    if (isInViewport(el)) {
-      setTimeout(runAnimation, 50);
-    }
-  });
+  requestAnimationFrame(() => requestAnimationFrame(start));
 };
 
 return {
@@ -159,6 +160,21 @@ return {
       }
     }
     {
+      id: "font_stylesheet_preload"
+      L: Attr
+      P: {
+        displayOrder: 0.25
+        componentName: Html
+        props:
+          '''return {
+  as: "link",
+  rel: "preload",
+  as: "style",
+  href: "https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+};'''
+      }
+    }
+    {
       id: "font_stylesheet"
       L: Attr
       P: {
@@ -184,10 +200,8 @@ return {
         props:
           '''return {
   as: "style",
-  text: `[data-animate]:not([data-motion-init]) { opacity: 0; }
-
-@media (prefers-reduced-motion: reduce) {
-  [data-animate] { opacity: 1; }
+  text: `@media (prefers-reduced-motion: reduce) {
+  [data-animate] { opacity: 1; transform: none; }
 }`
 };'''
       }
@@ -293,14 +307,59 @@ return {
       }
     }
     {
+      id: "skip_to_content"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  position: absolute;
+  left: 0.75rem;
+  top: 0.75rem;
+  z-index: 100;
+  padding: 0.5rem 0.85rem;
+  border-radius: 0.375rem;
+  background: ${t.var.color.primary};
+  color: ${t.var.color.primary_text};
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  transform: translateY(-200%);
+
+  &:focus,
+  &:focus-visible {
+    transform: translateY(0);
+    outline: 2px solid ${t.var.color.primary};
+    outline-offset: 2px;
+  }
+}`;'''
+        displayOrder: 0
+        componentName: Html
+        props:
+          '''return {
+  as: "a",
+  href: "#main-content",
+  text: "Skip to content"
+};'''
+      }
+    }
+    {
       id: "5"
       L: Attr
       P: {
         css:
           '''return `._id {
-  flex-grow: 1;
-  flex: 0;
+  flex: 0 0 auto;
   width: 100%;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: ${t.var.color.primary_light_100};
+  border-bottom: 1px solid ${t.var.color.border};
+  transition: box-shadow 0.15s ease;
+}
+
+html.header-compact ._id {
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
 }`;'''
         displayOrder: 1
         componentName: Header
@@ -315,12 +374,15 @@ return {
           '''return `._id {
   flex: 1;
   width: 100%;
+  scroll-margin-top: 5.5rem;
 }`;'''
         displayOrder: 2
         componentName: Html
         props:
           '''return {
   as: "div",
+  id: "main-content",
+  tabindex: "-1",
   "data-fulchand-page-main": ""
 };'''
       }
@@ -361,6 +423,12 @@ return {
       E: "font_preconnect_gstatic"
     }
     {
+      id: e_font_stylesheet_preload
+      T: Attr
+      S: "1"
+      E: "font_stylesheet_preload"
+    }
+    {
       id: e_font_stylesheet
       T: Attr
       S: "1"
@@ -383,6 +451,12 @@ return {
       T: Attr
       S: "1"
       E: "4"
+    }
+    {
+      id: e_skip
+      T: Attr
+      S: "4"
+      E: "skip_to_content"
     }
     {
       id: e4

@@ -62,9 +62,7 @@ try {
         componentName: Html
         props:
           '''return {
-  as: "article",
-  "data-animate": "",
-  ref: (el) => el && f.animateOnView(el, { y: 16 })
+  as: "article"
 };'''
       }
     }

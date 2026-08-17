@@ -386,9 +386,7 @@ return {
         props:
           '''return {
   as: "h1",
-  text: f.product?.()?.title || "Product",
-  "data-animate": "",
-  ref: (el) => el && f.animateOnView?.(el)
+  text: f.product?.()?.title || "Product"
 };'''
       }
     }
@@ -410,9 +408,7 @@ return {
 return {
   as: "p",
   text,
-  hide: !text,
-  "data-animate": "",
-  ref: (el) => el && f.animateOnView?.(el, { delay: 0.04 })
+  hide: !text
 };'''
       }
     }
@@ -452,9 +448,7 @@ return {
         componentName: Html
         props:
           '''return {
-  as: "div",
-  "data-animate": "",
-  ref: (el) => el && f.animateOnView?.(el, { x: -24, y: 0 })
+  as: "div"
 };'''
       }
     }
@@ -544,7 +538,8 @@ return {
   width: image.width || undefined,
   height: image.height || undefined,
   alt: image.alt || "Product image",
-  loading: "lazy"
+  loading: (c.index ?? 0) === 0 ? "eager" : "lazy",
+  fetchpriority: (c.index ?? 0) === 0 ? "high" : undefined
 };'''
       }
     }
@@ -642,14 +637,16 @@ return `._id {
   overflow: hidden;
   transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
 
-  &:hover {
-    border-color: ${t.var.color.primary};
-    transform: translateY(-1px);
-  }
-
   &:focus-visible {
     outline: 2px solid ${t.var.color.primary};
     outline-offset: 2px;
+  }
+
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    &:hover {
+      border-color: ${t.var.color.primary};
+      transform: translateY(-1px);
+    }
   }
 }`;'''
         displayOrder: 1
@@ -725,9 +722,7 @@ return {
         componentName: Html
         props:
           '''return {
-  as: "div",
-  "data-animate": "",
-  ref: (el) => el && f.animateOnView?.(el, { x: 24, y: 0, delay: 0.05 })
+  as: "div"
 };'''
       }
     }
@@ -850,14 +845,16 @@ return `._id {
   text-decoration: ${compatible ? "none" : "line-through"};
   transition: border-color 0.15s ease, background 0.15s ease, opacity 0.15s ease, transform 0.15s ease;
 
-  &:hover {
-    border-color: ${t.var.color.primary};
-    transform: translateY(-1px);
-  }
-
   &:focus-visible {
     outline: 2px solid ${t.var.color.primary};
     outline-offset: 2px;
+  }
+
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    &:hover {
+      border-color: ${t.var.color.primary};
+      transform: translateY(-1px);
+    }
   }
 
   ${!compatible ? `
@@ -1093,9 +1090,7 @@ return {
   as: "div",
   text: description,
   textType: "markdown",
-  hide: !f.hasExactVariant?.() || !description,
-  "data-animate": "",
-  ref: (el) => el && f.animateOnView?.(el, { delay: 0.06 })
+  hide: !f.hasExactVariant?.() || !description
 };'''
       }
     }

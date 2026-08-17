@@ -29,8 +29,7 @@
   text-decoration: none;
   color: inherit;
   overflow: hidden;
-  transition: box-shadow 0.2s ease, border-color 0.2s ease;
-  transform-origin: center center;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
 
   &:hover {
     z-index: 1;
@@ -41,6 +40,12 @@
   &:focus-visible {
     outline: 2px solid ${t.var.color.primary};
     outline-offset: 2px;
+  }
+
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    &:hover {
+      transform: translateY(-2px);
+    }
   }
 }`;'''
         displayOrder: 1
@@ -54,22 +59,22 @@ return {
   as: href ? "a" : "button",
   type: href ? undefined : "button",
   href: href || undefined,
-  "data-animate": "",
   ref: (el) => {
     if (!el) return;
-    f.animateOnView?.(el, { delay: index * 0.025 });
-    if (el.dataset.hoverInit) return;
-    el.dataset.hoverInit = "true";
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    _.motion.hover(el, (element) => {
-      _.motion.animate(element, { scale: 1.1 });
-      return () => _.motion.animate(element, { scale: 1 });
-    });
+    f.animateOnView?.(el, { delay: Math.min(index, 6) * 0.02 });
   },
   onClick: (e) => {
-    if (!onOpen) return;
-    if (href) e.preventDefault();
-    onOpen(folder);
+    if (!onOpen && !href) return;
+    if (href && (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0)) return;
+    if (onOpen) {
+      if (href) e.preventDefault();
+      onOpen(folder);
+      return;
+    }
+    if (href) {
+      e.preventDefault();
+      _.navigate(href);
+    }
   }
 };'''
       }
@@ -85,6 +90,14 @@ return {
   object-fit: cover;
   display: block;
   background: ${t.var.color.background_light_200};
+  transition: transform 0.15s ease;
+
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    a:hover &,
+    button:hover & {
+      transform: scale(1.03);
+    }
+  }
 }`;'''
         displayOrder: 1
         componentName: Html
@@ -98,7 +111,7 @@ return {
   srcset: ready && folder.imageSrcset ? folder.imageSrcset : undefined,
   sizes: ready ? "(max-width:768px) 50vw, 200px" : undefined,
   alt: folder.name || "Category",
-  loading: "lazy",
+  loading: (c.props?.index ?? c.index ?? 0) < 6 ? "eager" : "lazy",
   hide: !ready
 };'''
       }

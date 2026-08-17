@@ -105,9 +105,7 @@ try {
 return {
   as: "div",
   text: data.error || "Product not found",
-  hide: !!data.product,
-  "data-animate": "",
-  ref: (el) => el && f.animateOnView(el)
+  hide: !!data.product
 };'''
       }
     }

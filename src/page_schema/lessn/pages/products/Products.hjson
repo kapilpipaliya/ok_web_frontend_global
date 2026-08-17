@@ -60,7 +60,7 @@ try {
       P: {
         css:
           '''return `._id {
-  padding: 1rem;
+  padding: 0.5rem 1rem 1.25rem;
 }`;'''
         displayOrder: 2
         componentName: Html
@@ -99,9 +99,7 @@ try {
 return {
   as: "h1",
   text: content.pageTitle || "Products",
-  hide: true,
-  "data-animate": "",
-  ref: (el) => el && f.animateOnView(el)
+  hide: true
 };'''
       }
     }
@@ -123,9 +121,7 @@ return {
 return {
   as: "p",
   text: content.pageSubtitle || "Browse our curated Amazon product picks",
-  hide: true,
-  "data-animate": "",
-  ref: (el) => el && f.animateOnView(el, { delay: 0.04 })
+  hide: true
 };'''
       }
     }

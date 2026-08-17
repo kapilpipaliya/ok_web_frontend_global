@@ -98,10 +98,7 @@ try {
         componentName: Html
         props:
           '''return {
-  as: "div",
-  "data-animate": "",
-
-  ref: (el) => el && f.animateOnView(el, { x: -24, y: 0 })
+  as: "div"
 };'''
       }
     }
@@ -374,13 +371,12 @@ return {
       P: {
         css:
           '''return `._id {
-  color: ${t.var.color.primary};
+  color: ${t.var.color.text};
   text-decoration: none;
-  transition: color 0.2s ease;
+  transition: color 0.15s ease;
 
   &:hover {
-    color: ${t.var.color.primary_dark_200};
-    text-decoration: underline;
+    color: ${t.var.color.text_light_200};
   }
 }`;'''
         displayOrder: 1
@@ -402,13 +398,12 @@ return {
       P: {
         css:
           '''return `._id {
-  color: ${t.var.color.primary};
+  color: ${t.var.color.text};
   text-decoration: none;
-  transition: color 0.2s ease;
+  transition: color 0.15s ease;
 
   &:hover {
-    color: ${t.var.color.primary_dark_200};
-    text-decoration: underline;
+    color: ${t.var.color.text_light_200};
   }
 }`;'''
         displayOrder: 2
@@ -523,13 +518,12 @@ return {
       P: {
         css:
           '''return `._id {
-  color: ${t.var.color.primary};
+  color: ${t.var.color.text};
   text-decoration: none;
-  transition: color 0.2s ease;
+  transition: color 0.15s ease;
 
   &:hover {
-    color: ${t.var.color.primary_dark_200};
-    text-decoration: underline;
+    color: ${t.var.color.text_light_200};
   }
 }`;'''
         displayOrder: 2
@@ -552,6 +546,8 @@ return {
         displayOrder: 2
         fns:
           '''const [formManagementFns, setFormManagementFns] = _.createSignal(null);
+const [isSubmitting, setIsSubmitting] = _.createSignal(false);
+const [submitted, setSubmitted] = _.createSignal(false);
 
 const registerFormManagementFns = (formFns) => {
   setFormManagementFns(formFns);
@@ -565,6 +561,7 @@ const handleContactSubmit = async ({ vertex }) => {
   const subject = String(values.subject || "").trim();
   const message = String(values.message || "").trim();
 
+  setIsSubmitting(true);
   try {
     const response = await s({
       functionName: "submitContactForm",
@@ -572,6 +569,7 @@ const handleContactSubmit = async ({ vertex }) => {
     });
     const result = response?.result;
     if (result?.success) {
+      setSubmitted(true);
       _.showSuccessToast(result.data?.message || "Thank you for contacting us. We will get back to you soon!");
       return true;
     }
@@ -581,10 +579,13 @@ const handleContactSubmit = async ({ vertex }) => {
     console.error("Contact form error:", error);
     _.showErrorToast("An error occurred. Please try again.");
     return false;
+  } finally {
+    setIsSubmitting(false);
   }
 };
 
 const runContactSubmit = () => {
+  if (isSubmitting() || submitted()) return;
   const formFns = formManagementFns();
   if (!formFns?.handleSave) {
     _.showErrorToast("Form is not ready yet");
@@ -593,19 +594,23 @@ const runContactSubmit = () => {
   formFns.handleSave();
 };
 
+const sendAnother = () => {
+  setSubmitted(false);
+};
+
 return {
   formManagementFns,
   registerFormManagementFns,
   handleContactSubmit,
-  runContactSubmit
+  runContactSubmit,
+  isSubmitting,
+  submitted,
+  sendAnother
 };'''
         componentName: Html
         props:
           '''return {
-  as: "div",
-  "data-animate": "",
-
-  ref: (el) => el && f.animateOnView(el, { x: 24, y: 0, delay: 0.05 })
+  as: "div"
 };'''
       }
     }
@@ -644,7 +649,8 @@ return {
         componentName: Html
         props:
           '''return {
-  as: "div"
+  as: "div",
+  hide: f.submitted?.() === true
 };'''
       }
     }
@@ -738,29 +744,41 @@ return {
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
   align-self: flex-start;
 
-  &:hover {
-    background: ${t.var.color.primary_dark_200};
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  &:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
   }
 
-  &:active {
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    &:not(:disabled):hover {
+      background: ${t.var.color.primary_dark_200};
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+  }
+
+  &:not(:disabled):active {
     transform: translateY(0);
   }
 }`;'''
         displayOrder: 2
         componentName: Html
         props:
-          '''return {
+          '''const submitting = f.isSubmitting?.() === true;
+return {
   as: "button",
   type: "button",
+  disabled: submitting,
+  "aria-busy": submitting,
   onClick: () => f.runContactSubmit()
 };'''
       }
@@ -789,7 +807,106 @@ return {
         props:
           '''return {
   as: "span",
-  text: "Send message"
+  text: f.isSubmitting?.() === true ? "Sending…" : "Send message"
+};'''
+      }
+    }
+    {
+      id: "contact_success"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.25rem 1.25rem 1.35rem;
+  border: 1px solid ${t.var.color.success_light_300};
+  border-radius: 0.75rem;
+  background: ${t.var.color.success_light_100};
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  role: "status",
+  hide: f.submitted?.() !== true
+};'''
+      }
+    }
+    {
+      id: "contact_success_title"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: ${t.var.color.text};
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h3",
+  text: "Message sent"
+};'''
+      }
+    }
+    {
+      id: "contact_success_text"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${t.var.color.text_light_200};
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Thank you for contacting us. We will get back to you soon."
+};'''
+      }
+    }
+    {
+      id: "contact_success_again"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  align-self: flex-start;
+  margin-top: 0.25rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid ${t.var.color.border};
+  border-radius: 0.375rem;
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  @media (hover: hover) {
+    &:hover {
+      background: ${t.var.color.background_light_100};
+    }
+  }
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "button",
+  type: "button",
+  text: "Send another message",
+  onClick: () => f.sendAnother?.()
 };'''
       }
     }
@@ -1091,6 +1208,30 @@ return {
       T: Attr
       S: "28"
       E: "30"
+    }
+    {
+      id: e_contact_success
+      T: Attr
+      S: "28"
+      E: "contact_success"
+    }
+    {
+      id: e_contact_success_title
+      T: Attr
+      S: "contact_success"
+      E: "contact_success_title"
+    }
+    {
+      id: e_contact_success_text
+      T: Attr
+      S: "contact_success"
+      E: "contact_success_text"
+    }
+    {
+      id: e_contact_success_again
+      T: Attr
+      S: "contact_success"
+      E: "contact_success_again"
     }
     {
       id: e32

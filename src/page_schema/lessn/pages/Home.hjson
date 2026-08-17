@@ -103,6 +103,7 @@ return {
   display: block;
   width: 100%;
   min-height: 12rem;
+  aspect-ratio: 16 / 6;
   line-height: 0;
   text-decoration: none;
   color: inherit;
@@ -144,25 +145,16 @@ return {
       L: Attr
       P: {
         css:
-          '''const isFirst = (c.index ?? 0) === 0;
-return [
-  `@keyframes homeBannerFadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}`,
-  `._id {
+          '''return `._id {
   display: block;
   width: 100%;
   height: auto;
   min-height: 12rem;
+  aspect-ratio: 16 / 6;
   object-fit: cover;
   object-position: center;
-  ${isFirst ? `
-  opacity: 0;
-  animation: homeBannerFadeIn 0.28s ease forwards;
-  ` : ""}
-}`
-];'''
+  background: ${t.var.color.background_light_100};
+}`;'''
         displayOrder: 1
         componentName: Html
         key: unique_7
@@ -174,7 +166,9 @@ return {
   as: "img",
   src: fileName ? `/api/file/download/${encodeURIComponent(fileName)}` : undefined,
   alt: fileName || "Home banner",
-  loading: isFirst ? "eager" : "lazy"
+  loading: isFirst ? "eager" : "lazy",
+  fetchpriority: isFirst ? "high" : undefined,
+  decoding: isFirst ? "async" : "async"
 };'''
       }
     }
@@ -354,10 +348,7 @@ return {
         props:
           '''const welcome = c.homeSettings?.welcome;
 return {
-  as: "section",
-  "data-animate": "",
-
-  ref: (el) => el && f.animateOnView(el)
+  as: "section"
 };'''
       }
     }
@@ -488,12 +479,8 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const index = c.index ?? 0;
-return {
-  as: "div",
-  "data-animate": "",
-
-  ref: (el) => el && f.animateOnView(el, { delay: index === 0 ? 0 : 0.04 })
+          '''return {
+  as: "div"
 };'''
       }
     }

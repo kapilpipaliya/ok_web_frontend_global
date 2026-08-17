@@ -4,7 +4,7 @@
       id: "1"
       L: Component
       P: {
-        description: Affiliate product card. Props: item, onOpen(item), index.
+        description: Affiliate product card. Props: item, href, onOpen(item), index.
         key: ProductCard
       }
     }
@@ -26,8 +26,7 @@
   cursor: pointer;
   text-decoration: none;
   color: inherit;
-  transition: box-shadow 0.2s ease, border-color 0.2s ease;
-  transform-origin: center center;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
 
   &:hover {
     z-index: 1;
@@ -39,6 +38,12 @@
     outline: 2px solid ${t.var.color.primary};
     outline-offset: 2px;
   }
+
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    &:hover {
+      transform: translateY(-2px);
+    }
+  }
 }`;'''
         displayOrder: 1
         componentName: Html
@@ -46,22 +51,23 @@
           '''const item = c.props?.item || c.props || {};
 const index = c.props?.index ?? c.index ?? 0;
 const onOpen = c.props?.onOpen;
+const href = c.props?.href;
+const canNavigate = !!(href || onOpen);
 return {
-  as: "button",
-  type: "button",
-  "data-animate": "",
+  as: href ? "a" : "button",
+  type: href ? undefined : "button",
+  href: href || undefined,
   ref: (el) => {
     if (!el) return;
-    f.animateOnView?.(el, { delay: index * 0.025 });
-    if (el.dataset.hoverInit) return;
-    el.dataset.hoverInit = "true";
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    _.motion.hover(el, (element) => {
-      _.motion.animate(element, { scale: 1.1 });
-      return () => _.motion.animate(element, { scale: 1 });
-    });
+    f.animateOnView?.(el, { delay: Math.min(index, 6) * 0.02 });
   },
-  onClick: () => onOpen?.(item)
+  onClick: (e) => {
+    if (!canNavigate) return;
+    if (href && (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0)) return;
+    if (href) e.preventDefault();
+    if (onOpen) onOpen(item);
+    else if (href) _.navigate(href);
+  }
 };'''
       }
     }
@@ -92,10 +98,13 @@ return {
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: transform 0.3s ease;
+  transition: transform 0.15s ease;
 
-  button:hover & {
-    transform: scale(1.04);
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    a:hover &,
+    button:hover & {
+      transform: scale(1.03);
+    }
   }
 }`;'''
         displayOrder: 1
@@ -104,6 +113,7 @@ return {
           '''const item = c.props?.item || c.props || {};
 const src = item.previewUrl || "";
 const ready = item.previewReady !== false && !!src;
+const index = c.props?.index ?? c.index ?? 0;
 return {
   as: ready ? "img" : "fragment",
   src: ready ? src : undefined,
@@ -112,7 +122,8 @@ return {
   width: ready && item.previewWidth ? item.previewWidth : undefined,
   height: ready && item.previewHeight ? item.previewHeight : undefined,
   alt: item.title || "Product",
-  loading: "lazy"
+  loading: index < 6 ? "eager" : "lazy",
+  fetchpriority: index === 0 ? "high" : undefined
 };'''
       }
     }

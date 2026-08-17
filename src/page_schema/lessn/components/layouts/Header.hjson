@@ -23,15 +23,56 @@ return {
         as: div
         css:
           '''return `._id {
-  margin-top: 0.1rem;
   max-width: 1200px;
   margin: 0 auto;
   display: flex;
   justify-content: space-between;
   flex-wrap: wrap;
   align-items: center;
+  padding: 0.35rem 1rem;
+  transition: padding 0.15s ease;
+}
+
+html.header-compact ._id {
+  padding: 0.15rem 1rem;
 }`;'''
         displayOrder: 1
+        fns:
+          '''let compact = false;
+let ticking = false;
+
+const applyCompact = (next) => {
+  if (next === compact) return;
+  compact = next;
+  document.documentElement.classList.toggle("header-compact", next);
+};
+
+const onScroll = () => {
+  if (ticking) return;
+  ticking = true;
+  requestAnimationFrame(() => {
+    ticking = false;
+    applyCompact(window.scrollY > 16);
+  });
+};
+
+const bindScroll = () => {
+  applyCompact(window.scrollY > 16);
+  window.addEventListener("scroll", onScroll, { passive: true });
+};
+
+const unbindScroll = () => {
+  window.removeEventListener("scroll", onScroll);
+  document.documentElement.classList.remove("header-compact");
+  compact = false;
+  ticking = false;
+};
+
+return {
+  bindScroll,
+  unbindScroll
+};
+'''
         componentName: Html
         serverFunction:
           '''
@@ -61,7 +102,9 @@ try {
 '''
         props:
           '''return {
-  class: c.props.class
+  class: c.props.class,
+  onMount: () => f.bindScroll?.(),
+  onCleanup: () => f.unbindScroll?.()
 }'''
       }
     }
@@ -89,7 +132,7 @@ try {
   display: flex;
   align-items: center;
   text-decoration: none;
-  color: #3a2317;
+  color: ${t.var.color.text};
   flex-shrink: 0;
 }`;'''
         displayOrder: 1
@@ -114,9 +157,18 @@ return {
           '''return `._id {
   height: 80px;
   width: auto;
+  transition: height 0.15s ease;
 
   @media (max-width: 768px) {
     height: 40px;
+  }
+}
+
+html.header-compact ._id {
+  height: 44px;
+
+  @media (max-width: 768px) {
+    height: 32px;
   }
 }`;'''
         displayOrder: 1
@@ -157,6 +209,11 @@ return {
           '''return `._id {
   font-size: 3rem;
   line-height: 1;
+  transition: font-size 0.15s ease;
+}
+
+html.header-compact ._id {
+  font-size: 1.75rem;
 }`;'''
         displayOrder: 1
         componentName: Html
@@ -176,7 +233,16 @@ return {
           '''return `._id {
   font-size: 1.4rem;
   line-height: 1;
-  color: ${t.var.color.primary_dark_200};
+  color: ${t.var.color.text};
+  max-height: 2rem;
+  opacity: 1;
+  overflow: hidden;
+  transition: max-height 0.15s ease, opacity 0.15s ease;
+}
+
+html.header-compact ._id {
+  max-height: 0;
+  opacity: 0;
 }`;'''
         displayOrder: 2
         componentName: Html
@@ -400,7 +466,7 @@ return {
       P: {
         css:
           '''return `._id {
-  transition: opacity 0.2s ease;
+  transition: opacity 0.15s ease;
   display: inline-flex;
   color: ${t.var.color.primary};
   &:hover {
@@ -433,102 +499,6 @@ return {
   icon: social.icon,
   width: 36,
   height: 36,
-};'''
-      }
-    }
-    {
-      id: "18"
-      L: Attr
-      P: {
-        css:
-          '''return `._id {
-  background: none;
-  color: ${t.var.color.primary};
-  border: none;
-  cursor: pointer;
-  padding: 0;
-
-  transition: opacity 0.2s ease;
-  display: flex;
-
-  &:hover {
-    opacity: 0.7;
-  }
-}`;'''
-        displayOrder: 2
-        fns:
-          '''const [musicPlaying, setMusicPlaying] = _.createSignal(false);
-const [audioRef, setAudioRef] = _.createSignal(null);
-
-return {
-  musicPlaying,
-  setMusicPlaying,
-  audioRef,
-  setAudioRef,
-};'''
-        componentName: Html
-        props:
-          '''return {
-  as: "button",
-  onClick: async () => {
-    const audioElement = f.audioRef();
-
-    if (audioElement) {
-      try {
-        if (f.musicPlaying()) {
-          audioElement.pause();
-        } else {
-          const playPromise = audioElement.play();
-          if (playPromise !== undefined) {
-            await playPromise;
-          }
-        }
-      } catch (error) {
-        console.error("Audio playback error:", error);
-        _.showErrorToast(
-          "Unable to play audio. Please check your browser settings.",
-        );
-      }
-    }
-  },
-};'''
-      }
-    }
-    {
-      id: "19"
-      L: Attr
-      P: {
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''return {
-  as: "icon",
-  icon: f.musicPlaying() ? "carbon:stop-filled" : "carbon:play-filled",
-  width: 36,
-  height: 36,
-};'''
-      }
-    }
-    {
-      id: "20"
-      L: Attr
-      P: {
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''return {
-  as: "audio",
-  src: "/audio/au.mp3", // Using local file to avoid CORS issues
-  // loop: true,
-  preload: "auto",
-  onPlay: () => f.setMusicPlaying(true),
-  onPause: () => f.setMusicPlaying(false),
-  onEnded: () => f.setMusicPlaying(false),
-  ref: (el) => {
-    if (el) {
-      f.setAudioRef(el);
-    }
-  },
 };'''
       }
     }
@@ -650,12 +620,6 @@ return {
       E: "15"
     }
     {
-      id: e16
-      T: Attr
-      S: "14"
-      E: "18"
-    }
-    {
       id: e17
       T: Attr
       S: "15"
@@ -666,18 +630,6 @@ return {
       T: Attr
       S: "16"
       E: "17"
-    }
-    {
-      id: e19
-      T: Attr
-      S: "18"
-      E: "19"
-    }
-    {
-      id: e20
-      T: Attr
-      S: "18"
-      E: "20"
     }
     {
       id: e21

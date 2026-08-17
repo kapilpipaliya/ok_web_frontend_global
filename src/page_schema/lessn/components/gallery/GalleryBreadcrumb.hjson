@@ -18,21 +18,16 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.35rem 0.5rem;
-  margin-bottom: 1.5rem;
-  padding: 0.75rem 1rem;
-  background: ${t.var.color.background_light_50};
-  border: 1px solid ${t.var.color.border};
-  border-radius: 0.5rem;
+  gap: 0.15rem 0.2rem;
+  margin: 0;
+  padding: 0;
 }`;'''
         displayOrder: 1
         componentName: Html
         props:
           '''return {
   as: "nav",
-  "aria-label": "Gallery breadcrumb",
-  "data-animate": "",
-  ref: (el) => el && f.animateOnView?.(el, { y: 12 })
+  "aria-label": "Gallery breadcrumb"
 };'''
       }
     }
@@ -65,11 +60,8 @@ return {
         displayOrder: 1
         componentName: Html
         props:
-          '''const index = c.index ?? 0;
-return {
-  as: "span",
-  "data-animate": "",
-  ref: (el) => el && f.animateOnView?.(el, { y: 8, delay: index * 0.025 })
+          '''return {
+  as: "span"
 };'''
       }
     }
@@ -79,7 +71,7 @@ return {
       P: {
         css:
           '''return `._id {
-  color: ${t.var.color.text_light_400};
+  color: ${t.var.color.text_light_200};
   flex-shrink: 0;
 }`;'''
         displayOrder: 1
@@ -106,20 +98,20 @@ const isLast = index === items.length - 1;
 return `._id {
   border: none;
   background: transparent;
-  padding: 0.15rem 0.35rem;
+  padding: 0.1rem 0.2rem;
   border-radius: 0.25rem;
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
   font-weight: ${isLast ? 600 : 500};
-  color: ${isLast ? t.var.color.text : t.var.color.primary};
+  color: ${isLast ? t.var.color.text : t.var.color.text_light_100};
   cursor: ${isLast ? "default" : "pointer"};
   text-decoration: none;
   transition: background 0.15s ease, color 0.15s ease;
-  transform-origin: center center;
 
   ${!isLast ? `
   &:hover {
-    background: ${t.var.color.primary_light_100};
-    color: ${t.var.color.primary_dark_200};
+    background: ${t.var.color.background};
+    color: ${t.var.color.text};
+    text-decoration: underline;
   }
   ` : ""}
 }`;'''
@@ -145,17 +137,6 @@ return {
   href: isLast ? undefined : (resolvedHref || undefined),
   text: label,
   "aria-current": isLast ? "page" : undefined,
-  ref: isLast
-    ? undefined
-    : (el) => {
-        if (!el || el.dataset.hoverInit) return;
-        el.dataset.hoverInit = "true";
-        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-        _.motion.hover(el, (element) => {
-          _.motion.animate(element, { scale: 1.08 });
-          return () => _.motion.animate(element, { scale: 1 });
-        });
-      },
   onClick: isLast
     ? undefined
     : (e) => {
