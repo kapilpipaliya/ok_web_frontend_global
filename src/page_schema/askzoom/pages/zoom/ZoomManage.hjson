@@ -239,6 +239,7 @@ Logged in: ${status.loggedIn ? 'yes' : 'no'}
 Managing: ${status.managing ? 'yes' : 'no'}
 Admitted clicks: ${status.admittedCount || 0}
 Screenshot at: ${status.lastScreenshotAt || '-'}
+Recording: ${status.hasRecording ? (status.lastRecordingAction || 'saved') : 'none'}
 Error: ${status.lastError || '-'}
 Queue active/waiting/failed: ${status.queueCounts?.active || 0}/${status.queueCounts?.waiting || 0}/${status.queueCounts?.failed || 0}
 ${status.workerHint || ''}`
@@ -282,6 +283,57 @@ return {
   src: src || '',
   alt: 'Zoom manage screenshot',
   hide: () => !f.status()?.lastScreenshot
+};
+'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        displayOrder: 11
+        componentName: Html
+        css: "return `._id { margin-top: 1.25rem; font-weight: 600; }`;"
+        props:
+          '''
+const status = f.status();
+return {
+  as: 'h2',
+  text: status?.hasRecording
+    ? `Playwright recording (${status.lastRecordingAction || 'last run'})`
+    : 'Playwright recording',
+  hide: () => !f.status()?.hasRecording
+};
+'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        displayOrder: 12
+        componentName: Html
+        css:
+          '''
+return `._id {
+  margin-top: 0.75rem;
+  width: 100%;
+  max-width: 880px;
+  border: 1px solid ${t.var.color.border};
+  border-radius: 0.5rem;
+  background: ${t.var.color.background_light_100};
+}`;
+'''
+        props:
+          '''
+const status = f.status();
+const stamp = status?.lastRecordingAt || '';
+return {
+  as: 'video',
+  src: status?.hasRecording ? `/api/zoom/recording?t=${encodeURIComponent(stamp)}` : '',
+  controls: true,
+  playsinline: true,
+  hide: () => !f.status()?.hasRecording
 };
 '''
       }
@@ -373,6 +425,18 @@ return {
       T: Attr
       S: "2"
       E: "14"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "2"
+      E: "15"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "2"
+      E: "16"
     }
     {
       id: el

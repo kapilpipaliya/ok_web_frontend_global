@@ -135,9 +135,61 @@ Message: ${status.message || '-'}
 Logged in: ${status.loggedIn ? 'yes' : 'no'}
 Managing: ${status.managing ? 'yes' : 'no'}
 Error: ${status.lastError || '-'}
+Recording: ${status.hasRecording ? (status.lastRecordingAction || 'saved') : 'none'}
 Queue active/waiting: ${status.queueCounts?.active || 0}/${status.queueCounts?.waiting || 0}`
   : 'Loading status...';
 return { as: 'pre', text };
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        css: "return `._id { margin-top: 1.25rem; font-weight: 600; }`;"
+        props:
+          '''
+const status = f.status();
+return {
+  as: 'h2',
+  text: status?.hasRecording
+    ? `Playwright recording (${status.lastRecordingAction || 'last run'})`
+    : 'Playwright recording',
+  hide: () => !f.status()?.hasRecording
+};
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 6
+        componentName: Html
+        css:
+          '''
+return `._id {
+  margin-top: 0.75rem;
+  width: 100%;
+  max-width: 880px;
+  border: 1px solid ${t.var.color.border};
+  border-radius: 0.5rem;
+  background: ${t.var.color.background_light_100};
+}`;
+'''
+        props:
+          '''
+const status = f.status();
+const stamp = status?.lastRecordingAt || '';
+return {
+  as: 'video',
+  src: status?.hasRecording ? `/api/zoom/recording?t=${encodeURIComponent(stamp)}` : '',
+  controls: true,
+  playsinline: true,
+  hide: () => !f.status()?.hasRecording
+};
 '''
       }
     }
@@ -180,6 +232,18 @@ return { as: 'pre', text };
       T: Attr
       S: "2"
       E: "6"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "2"
+      E: "7"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "2"
+      E: "8"
     }
     {
       id: el
