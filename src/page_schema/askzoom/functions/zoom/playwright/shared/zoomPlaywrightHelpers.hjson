@@ -45,7 +45,7 @@ const clickNamed = async (page, names, role = 'button') => {
 
 const dismissNoise = async (page) => {
   await clickNamed(page, [
-    /accept cookies/i,
+    /accept.*cookies/i,
     /i agree/i,
     /got it/i,
     /stay in browser/i,
