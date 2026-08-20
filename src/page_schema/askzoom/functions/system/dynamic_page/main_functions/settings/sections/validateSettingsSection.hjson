@@ -1,0 +1,36 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: validateSettingsSection
+        description: Server-side validation for a settings section using config-driven field rules.
+        body:
+          '''
+const { sectionConfig, values } = c;
+
+if (!sectionConfig) {
+  return { success: false, message: "sectionConfig is required" };
+}
+
+if (!s) {
+  return { success: false, message: "Validation engine unavailable" };
+}
+
+const validateResult = await s({
+  functionName: "settingsEngineHelpers",
+  contextData: { action: "validateSection", sectionConfig, values: values || {} }
+});
+
+if (validateResult?.result?.success === false) {
+  return validateResult.result;
+}
+
+return { success: true, data: { valid: true }, message: "Validation passed" };
+'''
+      }
+    }
+  ]
+  edges: []
+}

@@ -1,0 +1,738 @@
+{
+  vertexes: [
+    {
+      id: "faf_root",
+      L: "Component",
+      P: {
+        key: "FieldArraySchemaEditor",
+        description: "Visual editor for fieldArray schema config and item fields (schema only).",
+        dynamicComponent: "TextInput, Button, IconButton, Html",
+        fns: '''
+const getProps = () => c.props || {};
+const getField = () => getProps().field || {};
+const DEFAULT_SITE_LANGUAGES = [
+  { code: "en", label: "English", isDefault: true },
+  { code: "hi", label: "Hindi", isDefault: false },
+  { code: "gu", label: "Gujarati", isDefault: false }
+];
+const getSiteLanguages = () => {
+  const languages = getProps().siteLanguages;
+  if (Array.isArray(languages) && languages.length > 0) return languages;
+  return DEFAULT_SITE_LANGUAGES;
+};
+
+const isTextRenderer = (renderer) => renderer === "text" || renderer === "textArea";
+
+const emitPatch = (patch) => {
+  const onChange = getProps().onChange;
+  if (typeof onChange === "function") onChange(patch);
+};
+
+const defaultConfig = () => ({
+  itemLabel: "Item",
+  addButtonLabel: "Add item",
+  itemFields: [
+    { key: "title", label: "Title", dataType: "text", renderer: "text", required: true, translatable: true }
+  ]
+});
+
+const getConfig = () => {
+  const config = getField().fieldArrayConfig;
+  if (!config || typeof config !== "object") return defaultConfig();
+  return {
+    ...defaultConfig(),
+    ...config,
+    itemFields: Array.isArray(config.itemFields) ? config.itemFields.map((f) => ({ ...f })) : defaultConfig().itemFields
+  };
+};
+
+const getItemFields = () => {
+  const fields = getConfig().itemFields;
+  return Array.isArray(fields) ? fields.map((field) => ({ ...field })) : [];
+};
+
+const getItemFieldIndices = () => {
+  const fields = getItemFields();
+  const indices = [];
+  for (let index = 0; index < fields.length; index++) indices.push(index);
+  return indices;
+};
+
+const getItemFieldAt = (index) => getItemFields()[index] || {};
+
+const updateConfig = (partial) => {
+  emitPatch({ fieldArrayConfig: { ...getConfig(), ...partial } });
+};
+
+const setItemFields = (itemFields) => updateConfig({ itemFields });
+
+const addItemField = () => {
+  const fields = getItemFields();
+  setItemFields([
+    ...fields,
+    {
+      key: `field_${Date.now()}`,
+      label: "New field",
+      dataType: "text",
+      renderer: "text",
+      translatable: false,
+      required: false
+    }
+  ]);
+};
+
+const updateItemFieldAt = (index, partial) => {
+  const fields = getItemFields();
+  setItemFields(fields.map((field, i) => (i === index ? { ...field, ...partial } : field)));
+};
+
+const deleteItemField = (index) => {
+  setItemFields(getItemFields().filter((_, i) => i !== index));
+};
+
+return {
+  getConfig,
+  getSiteLanguages,
+  getItemFieldIndices,
+  getItemFieldAt,
+  updateConfig,
+  addItemField,
+  updateItemFieldAt,
+  deleteItemField
+};
+'''
+      }
+    },
+    {
+      id: "faf_shell",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const field = c.props?.field;
+return {
+  as: "div",
+  hide: !field || field.renderer !== "fieldArray"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+}`;
+'''
+      }
+    },
+    {
+      id: "faf_config_section",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div", class: "faf-config-section" };
+''',
+        css: '''
+return `._id.faf-config-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid ${t.var.color.border};
+  border-radius: 0.5rem;
+  background: ${t.var.color.background_light_50};
+}`;
+'''
+      }
+    },
+    {
+      id: "faf_config_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h4",
+  text: "Array settings",
+  class: "faf-section-title"
+};
+''',
+        css: '''
+return `._id.faf-section-title {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: ${t.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "faf_config_grid",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div", class: "faf-config-grid" };
+''',
+        css: '''
+return `._id.faf-config-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.625rem;
+  width: 100%;
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "faf_item_label_input",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "TextInput",
+        props: '''
+const config = f.getConfig?.() || {};
+return {
+  label: "Item label",
+  value: config.itemLabel || "",
+  placeholder: "Item",
+  onChange: (e) => f.updateConfig?.({ itemLabel: e.target.value })
+};
+'''
+      }
+    },
+    {
+      id: "faf_add_label_input",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "TextInput",
+        props: '''
+const config = f.getConfig?.() || {};
+return {
+  label: "Add button label",
+  value: config.addButtonLabel || "",
+  placeholder: "Add item",
+  onChange: (e) => f.updateConfig?.({ addButtonLabel: e.target.value })
+};
+'''
+      }
+    },
+    {
+      id: "faf_min_items_input",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "TextInput",
+        props: '''
+const config = f.getConfig?.() || {};
+return {
+  label: "Min items",
+  type: "number",
+  value: config.minItems != null ? String(config.minItems) : "",
+  placeholder: "0",
+  onChange: (e) => {
+    const raw = e.target.value;
+    f.updateConfig?.({
+      minItems: raw === "" ? undefined : Number(raw)
+    });
+  }
+};
+'''
+      }
+    },
+    {
+      id: "faf_max_items_input",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "TextInput",
+        props: '''
+const config = f.getConfig?.() || {};
+return {
+  label: "Max items",
+  type: "number",
+  value: config.maxItems != null ? String(config.maxItems) : "",
+  placeholder: "No limit",
+  onChange: (e) => {
+    const raw = e.target.value;
+    f.updateConfig?.({
+      maxItems: raw === "" ? undefined : Number(raw)
+    });
+  }
+};
+'''
+      }
+    },
+    {
+      id: "faf_item_fields_section",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div", class: "faf-item-fields-section" };
+''',
+        css: '''
+return `._id.faf-item-fields-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  padding: 0.75rem;
+  border: 1px solid ${t.var.color.border};
+  border-radius: 0.5rem;
+  background: ${t.var.color.background};
+}`;
+'''
+      }
+    },
+    {
+      id: "faf_item_fields_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div", class: "faf-item-fields-header" };
+''',
+        css: '''
+return `._id.faf-item-fields-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "faf_item_fields_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h4",
+  text: "Item fields",
+  class: "faf-section-title"
+};
+''',
+        css: '''
+return `._id.faf-section-title {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}`;
+'''
+      }
+    },
+    {
+      id: "faf_add_item_field_btn",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Button",
+        props: '''
+return {
+  variant: "secondary",
+  size: "sm",
+  text: "Add field",
+  type: "button",
+  onClick: () => f.addItemField?.()
+};
+'''
+      }
+    },
+    {
+      id: "faf_item_fields_list",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div", class: "faf-item-fields-list" };
+''',
+        css: '''
+return `._id.faf-item-fields-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+}`;
+'''
+      }
+    },
+    {
+      id: "faf_item_field_loop",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "fafItemFieldIndex",
+        loop: true,
+        props: '''
+return {
+  data: f.getItemFieldIndices?.() || []
+};
+'''
+      }
+    },
+    {
+      id: "faf_item_field_row",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div", class: "faf-item-field-row" };
+''',
+        css: '''
+return `._id.faf-item-field-row {
+  display: grid;
+  grid-template-columns: minmax(5rem, 1fr) minmax(6rem, 1.2fr) minmax(6rem, 1fr) auto auto;
+  gap: 0.5rem;
+  align-items: end;
+  padding: 0.625rem;
+  border: 1px solid ${t.var.color.border};
+  border-radius: 0.375rem;
+  background: ${t.var.color.background_light_50};
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "faf_item_field_key",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "TextInput",
+        props: '''
+const index = c.fafItemFieldIndex;
+const itemField = f.getItemFieldAt?.(index) || {};
+return {
+  label: "Key",
+  value: itemField.key || "",
+  onChange: (e) => f.updateItemFieldAt?.(index, { key: e.target.value })
+};
+'''
+      }
+    },
+    {
+      id: "faf_item_field_label",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "TextInput",
+        props: '''
+const index = c.fafItemFieldIndex;
+const itemField = f.getItemFieldAt?.(index) || {};
+return {
+  label: "Label",
+  value: itemField.label || "",
+  onChange: (e) => f.updateItemFieldAt?.(index, { label: e.target.value })
+};
+'''
+      }
+    },
+    {
+      id: "faf_item_field_renderer_wrap",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return { as: "div", class: "faf-renderer-wrap" };
+''',
+        css: '''
+return `._id.faf-renderer-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "faf_item_field_renderer_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Renderer",
+  class: "faf-field-label"
+};
+''',
+        css: '''
+return `._id.faf-field-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: ${t.var.color.text_light_500};
+}`;
+'''
+      }
+    },
+    {
+      id: "faf_item_field_renderer",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const index = c.fafItemFieldIndex;
+const itemField = f.getItemFieldAt?.(index) || {};
+const renderer = itemField.renderer || "text";
+return {
+  as: "select",
+  class: "faf-renderer-select",
+  value: renderer,
+  onChange: (e) => {
+    const nextRenderer = e.target.value;
+    const dataType = nextRenderer === "checkbox" ? "boolean" : "text";
+    f.updateItemFieldAt?.(index, {
+      renderer: nextRenderer,
+      dataType
+    });
+  }
+};
+''',
+        css: '''
+return `._id.faf-renderer-select {
+  width: 100%;
+  padding: 0.5rem 0.625rem;
+  border: 1px solid ${t.var.color.border};
+  border-radius: 0.375rem;
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
+  font-size: 0.8125rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "faf_renderer_opt_text",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "option", text: "Text", value: "text" };
+'''
+      }
+    },
+    {
+      id: "faf_renderer_opt_textarea",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "option", text: "Text area", value: "textArea" };
+'''
+      }
+    },
+    {
+      id: "faf_renderer_opt_checkbox",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return { as: "option", text: "Checkbox", value: "checkbox" };
+'''
+      }
+    },
+    {
+      id: "faf_item_field_required_wrap",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return { as: "div", class: "faf-required-wrap" };
+''',
+        css: '''
+return `._id.faf-required-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding-bottom: 0.5rem;
+  white-space: nowrap;
+}`;
+'''
+      }
+    },
+    {
+      id: "faf_item_field_required",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const index = c.fafItemFieldIndex;
+const itemField = f.getItemFieldAt?.(index) || {};
+return {
+  as: "input",
+  type: "checkbox",
+  checked: itemField.required === true,
+  onChange: (e) => f.updateItemFieldAt?.(index, { required: e.target.checked })
+};
+'''
+      }
+    },
+    {
+      id: "faf_item_field_required_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Required",
+  class: "faf-required-text"
+};
+''',
+        css: '''
+return `._id.faf-required-text {
+  font-size: 0.75rem;
+  color: ${t.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "faf_item_field_translatable_wrap",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+const index = c.fafItemFieldIndex;
+const itemField = f.getItemFieldAt?.(index) || {};
+const isTextField = itemField.renderer === "text" || itemField.renderer === "textArea";
+return {
+  as: "div",
+  hide: !isTextField,
+  class: "faf-translatable-wrap"
+};
+''',
+        css: '''
+return `._id.faf-translatable-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding-bottom: 0.5rem;
+  white-space: nowrap;
+}`;
+'''
+      }
+    },
+    {
+      id: "faf_item_field_translatable",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const index = c.fafItemFieldIndex;
+const itemField = f.getItemFieldAt?.(index) || {};
+return {
+  as: "input",
+  type: "checkbox",
+  checked: itemField.translatable === true,
+  onChange: (e) => f.updateItemFieldAt?.(index, { translatable: e.target.checked })
+};
+'''
+      }
+    },
+    {
+      id: "faf_item_field_translatable_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Translatable",
+  class: "faf-translatable-text"
+};
+''',
+        css: '''
+return `._id.faf-translatable-text {
+  font-size: 0.75rem;
+  color: ${t.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "faf_item_field_delete",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "IconButton",
+        props: '''
+const index = c.fafItemFieldIndex;
+return {
+  icon: "ph:trash",
+  variant: "danger",
+  size: "sm",
+  title: "Remove item field",
+  onClick: () => f.deleteItemField?.(index)
+};
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "faf_e1", T: "Attr", S: "faf_root", E: "faf_shell" },
+    { id: "faf_e2", T: "Attr", S: "faf_shell", E: "faf_config_section" },
+    { id: "faf_e3", T: "Attr", S: "faf_shell", E: "faf_item_fields_section" },
+    { id: "faf_e5", T: "Attr", S: "faf_config_section", E: "faf_config_title" },
+    { id: "faf_e6", T: "Attr", S: "faf_config_section", E: "faf_config_grid" },
+    { id: "faf_e7", T: "Attr", S: "faf_config_grid", E: "faf_item_label_input" },
+    { id: "faf_e8", T: "Attr", S: "faf_config_grid", E: "faf_add_label_input" },
+    { id: "faf_e9", T: "Attr", S: "faf_config_grid", E: "faf_min_items_input" },
+    { id: "faf_e10", T: "Attr", S: "faf_config_grid", E: "faf_max_items_input" },
+    { id: "faf_e11", T: "Attr", S: "faf_item_fields_section", E: "faf_item_fields_header" },
+    { id: "faf_e12", T: "Attr", S: "faf_item_fields_section", E: "faf_item_fields_list" },
+    { id: "faf_e13", T: "Attr", S: "faf_item_fields_header", E: "faf_item_fields_title" },
+    { id: "faf_e14", T: "Attr", S: "faf_item_fields_header", E: "faf_add_item_field_btn" },
+    { id: "faf_e15", T: "Attr", S: "faf_item_fields_list", E: "faf_item_field_loop" },
+    { id: "faf_e16", T: "Attr", S: "faf_item_field_loop", E: "faf_item_field_row" },
+    { id: "faf_e17", T: "Attr", S: "faf_item_field_row", E: "faf_item_field_key" },
+    { id: "faf_e18", T: "Attr", S: "faf_item_field_row", E: "faf_item_field_label" },
+    { id: "faf_e19", T: "Attr", S: "faf_item_field_row", E: "faf_item_field_renderer_wrap" },
+    { id: "faf_e20", T: "Attr", S: "faf_item_field_row", E: "faf_item_field_required_wrap" },
+    { id: "faf_e20b", T: "Attr", S: "faf_item_field_required_wrap", E: "faf_item_field_required" },
+    { id: "faf_e20c", T: "Attr", S: "faf_item_field_required_wrap", E: "faf_item_field_required_text" },
+    { id: "faf_e20d", T: "Attr", S: "faf_item_field_row", E: "faf_item_field_translatable_wrap" },
+    { id: "faf_e20e", T: "Attr", S: "faf_item_field_translatable_wrap", E: "faf_item_field_translatable" },
+    { id: "faf_e20f", T: "Attr", S: "faf_item_field_translatable_wrap", E: "faf_item_field_translatable_text" },
+    { id: "faf_e21", T: "Attr", S: "faf_item_field_row", E: "faf_item_field_delete" },
+    { id: "faf_e22", T: "Attr", S: "faf_item_field_renderer_wrap", E: "faf_item_field_renderer_label" },
+    { id: "faf_e23", T: "Attr", S: "faf_item_field_renderer_wrap", E: "faf_item_field_renderer" },
+    { id: "faf_e24", T: "Attr", S: "faf_item_field_renderer", E: "faf_renderer_opt_text" },
+    { id: "faf_e25", T: "Attr", S: "faf_item_field_renderer", E: "faf_renderer_opt_textarea" },
+    { id: "faf_e26", T: "Attr", S: "faf_item_field_renderer", E: "faf_renderer_opt_checkbox" }
+  ]
+}

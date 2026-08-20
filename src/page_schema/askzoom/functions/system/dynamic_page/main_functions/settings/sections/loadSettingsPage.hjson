@@ -1,0 +1,127 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: loadSettingsPage
+        description: Loads all section documents for a settings page. Returns section values keyed by sectionId.
+        body:
+          '''
+const actualUser = await _.getUserFromSession();
+const {
+  pageId,
+  scopeVertexLabel,
+  scopeId,
+  sections
+} = c;
+
+const isPublicGlobalRead =
+  c?.allowPublicRead === true &&
+  scopeVertexLabel === "GlobalSetting" &&
+  scopeId != null &&
+  String(scopeId).trim() !== "";
+
+if (!actualUser && !isPublicGlobalRead) {
+  return { success: false, message: "User session not found" };
+}
+
+const user = actualUser
+  ? await _.getEffectiveUser(_.session, actualUser, c)
+  : null;
+
+if (!pageId) {
+  return { success: false, message: "pageId is required" };
+}
+
+const effectiveScopeLabel = scopeVertexLabel || "User";
+const effectiveScopeId = scopeId || (user ? user.P.uuid : null);
+
+if (!effectiveScopeId) {
+  return { success: false, message: "scopeId is required" };
+}
+const edgeType = `${effectiveScopeLabel}HasSettingsSection`;
+
+const parseJsonSafe = (value, fallback) => {
+  if (value == null) return fallback;
+  if (typeof value === "object") return value;
+  try { return JSON.parse(String(value)); } catch { return fallback; }
+};
+
+let query;
+let queryParams = { pageId, scopeId: effectiveScopeId };
+
+if (effectiveScopeLabel === "User") {
+  query = `
+    MATCH (scope:User {uuid: $scopeId})-[:${edgeType}]->(doc:SettingsSectionDocument {pageId: $pageId})
+    RETURN doc
+  `;
+} else {
+  const scopeMatchProperty = c.scopeMatchProperty || "uuid";
+  query = `
+    MATCH (scope:${effectiveScopeLabel} {${scopeMatchProperty}: $scopeId})-[:${edgeType}]->(doc:SettingsSectionDocument {pageId: $pageId})
+    RETURN doc
+  `;
+}
+
+const result = await _.session.run(query, queryParams);
+const documentVertices = result.records.length > 0
+  ? _.processResult(result.records, _.context, "doc")
+  : [];
+
+const sectionMap = {};
+for (let documentIndex = 0; documentIndex < documentVertices.length; documentIndex++) {
+  const documentVertex = documentVertices[documentIndex];
+  const sectionId = documentVertex?.P?.sectionId;
+  if (!sectionId) continue;
+  sectionMap[sectionId] = {
+    values: parseJsonSafe(documentVertex.P?.values, {}),
+    version: documentVertex.P?.version ?? 0,
+    documentId: documentVertex.id
+  };
+}
+
+const sectionConfigs = Array.isArray(sections) ? sections : [];
+const mergedSections = {};
+
+for (let sectionIndex = 0; sectionIndex < sectionConfigs.length; sectionIndex++) {
+  const sectionConfig = sectionConfigs[sectionIndex];
+  const sectionId = sectionConfig?.id;
+  if (!sectionId) continue;
+
+  const stored = sectionMap[sectionId]?.values || {};
+  let mergedValues = stored;
+
+  if (s) {
+    const mergeResult = await s({
+      functionName: "settingsEngineHelpers",
+      contextData: { action: "mergeDefaults", sectionConfig, values: stored }
+    });
+    if (mergeResult?.result?.success) {
+      mergedValues = mergeResult.result.data?.values || stored;
+    }
+  }
+
+  mergedSections[sectionId] = {
+    values: mergedValues,
+    version: sectionMap[sectionId]?.version ?? 0,
+    documentId: sectionMap[sectionId]?.documentId ?? null
+  };
+}
+
+return {
+  success: true,
+  data: {
+    pageId,
+    sections: mergedSections,
+    scopeVertexLabel: effectiveScopeLabel,
+    scopeId: effectiveScopeId
+  },
+  message: "Settings page loaded"
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

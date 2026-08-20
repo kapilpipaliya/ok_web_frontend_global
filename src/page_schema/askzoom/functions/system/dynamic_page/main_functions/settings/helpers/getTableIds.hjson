@@ -1,0 +1,127 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: getTableIds
+        description: Returns canonical tableKey, tableVertexLabel, and schemaKeys from Neo4j table_schema part Settings.
+        body:
+          '''
+const { tableKey, tableVertexLabel } = c || {};
+
+const keyInput = tableKey != null && String(tableKey).trim() !== "" ? String(tableKey).trim() : null;
+const labelInput = tableVertexLabel != null && String(tableVertexLabel).trim() !== ""
+  ? String(tableVertexLabel).trim()
+  : null;
+
+if (!keyInput && !labelInput) {
+  return {
+    success: false,
+    message: "tableKey or tableVertexLabel is required"
+  };
+}
+
+const SCHEMA_PARTS = new Set(["general", "columns", "formConfig", "sidebar"]);
+
+const buildTableIdsFromRecords = (records, fallbackTableKey) => {
+  let resolvedTableKey = fallbackTableKey || null;
+  let resolvedTableVertexLabel = null;
+  let name = null;
+  const schemaKeys = {};
+
+  for (let i = 0; i < records.length; i++) {
+    const record = records[i];
+    const key = record.get("key");
+    const part = record.get("part");
+    resolvedTableKey = resolvedTableKey || record.get("tableKey");
+    resolvedTableVertexLabel = record.get("tableVertexLabel") || resolvedTableVertexLabel;
+
+    if (part && SCHEMA_PARTS.has(part)) {
+      schemaKeys[part] = key;
+      if (!name) name = record.get("name") || null;
+    }
+  }
+
+  if (!resolvedTableKey) return null;
+
+  return {
+    tableKey: resolvedTableKey,
+    tableVertexLabel: resolvedTableVertexLabel,
+    schemaKeys,
+    pageId: `table:${resolvedTableKey}`,
+    name: name || resolvedTableKey
+  };
+};
+
+const loadFromNeo4j = async (resolvedKey, resolvedLabel) => {
+  if (resolvedKey) {
+    const keyPrefix = `${resolvedKey}_`;
+    return _.session.run(
+      `
+      MATCH (s:Setting {type: 'table_schema'})
+      WHERE s.part IN ['general', 'columns', 'formConfig', 'sidebar']
+        AND (s.tableKey = $tableKey OR s.key STARTS WITH $keyPrefix)
+      RETURN s.key AS key, s.part AS part, s.tableKey AS tableKey,
+             s.tableVertexLabel AS tableVertexLabel, s.name AS name
+      `,
+      { tableKey: resolvedKey, keyPrefix }
+    );
+  }
+
+  return _.session.run(
+    `
+    MATCH (s:Setting {type: 'table_schema', tableVertexLabel: $tableVertexLabel})
+    WHERE s.part IN ['general', 'columns', 'formConfig', 'sidebar']
+    RETURN s.key AS key, s.part AS part, s.tableKey AS tableKey,
+           s.tableVertexLabel AS tableVertexLabel, s.name AS name
+    `,
+    { tableVertexLabel: resolvedLabel }
+  );
+};
+
+let lookupKey = keyInput;
+let lookupLabel = labelInput;
+
+let result = await loadFromNeo4j(lookupKey, lookupLabel);
+
+if (result.records.length === 0 && s) {
+  try {
+    await s({
+      functionName: "migrateDynamicPageSettings",
+      contextData: { dryRun: false }
+    });
+    result = await loadFromNeo4j(lookupKey, lookupLabel);
+  } catch (migrateError) {
+    console.error("getTableIds: migration failed", migrateError);
+  }
+}
+
+const data = buildTableIdsFromRecords(result.records, lookupKey);
+
+if (!data?.tableKey) {
+  const id = keyInput || labelInput;
+  return {
+    success: false,
+    message: `Unknown table: ${id}`
+  };
+}
+
+const missingParts = ["general", "columns", "formConfig", "sidebar"].filter((part) => !data.schemaKeys[part]);
+if (missingParts.length > 0) {
+  return {
+    success: false,
+    message: `Table ${data.tableKey} is missing schema parts in Neo4j: ${missingParts.join(", ")}`
+  };
+}
+
+return {
+  success: true,
+  data
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

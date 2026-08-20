@@ -1,0 +1,294 @@
+{
+  vertexes: [
+    {
+      id: "vp1"
+      L: Component
+      P: {
+        title: Vertex picker
+        key: VertexPicker
+        fns:
+          '''
+const [pickerModalOpen, setPickerModalOpen] = _.createSignal(false);
+const [draftVertex, setDraftVertex] = _.createSignal(null);
+const [draftVertices, setDraftVertices] = _.createSignal([]);
+const [pickerBodyPropsSnapshot, setPickerBodyPropsSnapshot] = _.createSignal(null);
+
+const getSelectionMode = (pickerConfiguration) =>
+  pickerConfiguration?.selectionMode === "multiple" ? "multiple" : "single";
+
+const vertexPayloadFromGraph = (graphVertex) => {
+  if (!graphVertex) return null;
+  return {
+    id: graphVertex.id,
+    L: graphVertex.L,
+    P: graphVertex.P,
+    IN: graphVertex.IN,
+    OUT: graphVertex.OUT
+  };
+};
+
+const buildSelectionChangeHandler = (pickerConfiguration) => {
+  return (selectedRowIds, _selectedItems, tableEnvironmentArguments) => {
+    const selectionMode = getSelectionMode(pickerConfiguration);
+    const selectedIdList =
+      selectedRowIds instanceof Set ? [...selectedRowIds].map((id) => String(id)).filter(Boolean) : [];
+
+    if (selectionMode === "multiple") {
+      const nextVertices = [];
+      for (const rowElementId of selectedIdList) {
+        const graphVertex = tableEnvironmentArguments?.graph?.vertexes?.[rowElementId];
+        const payload = vertexPayloadFromGraph(graphVertex);
+        if (payload) nextVertices.push(payload);
+      }
+      setDraftVertices(nextVertices);
+      setDraftVertex(nextVertices[0] ?? null);
+      const onDraftSelectMultiple = pickerConfiguration?.onDraftSelectMultiple;
+      if (typeof onDraftSelectMultiple === "function") {
+        onDraftSelectMultiple(nextVertices);
+      }
+      return;
+    }
+
+    const rowElementId = selectedIdList[0] || "";
+    if (!rowElementId) {
+      setDraftVertex(null);
+      setDraftVertices([]);
+      return;
+    }
+    const selectedGraphVertex = tableEnvironmentArguments?.graph?.vertexes?.[rowElementId];
+    const vertexPayload = vertexPayloadFromGraph(selectedGraphVertex);
+    if (!vertexPayload) return;
+    setDraftVertex(vertexPayload);
+    setDraftVertices([vertexPayload]);
+    const onDraftSelect = pickerConfiguration?.onDraftSelect;
+    if (typeof onDraftSelect === "function") {
+      onDraftSelect(vertexPayload);
+    }
+  };
+};
+
+const buildInitialSelectedRowIds = (pickerConfiguration) => {
+  const selectionMode = getSelectionMode(pickerConfiguration);
+  const multiValues = c.props?.values;
+  if (selectionMode === "multiple" && Array.isArray(multiValues)) {
+    return multiValues.map((id) => String(id)).filter((id) => id.trim() !== "");
+  }
+  const currentValue = c.props?.value;
+  const currentValueText = currentValue != null ? String(currentValue).trim() : "";
+  return currentValueText !== "" ? [currentValueText] : [];
+};
+
+const buildPickerBodyProps = (pickerConfiguration) => {
+  const basePickerBodyProps =
+    pickerConfiguration?.pickerBodyProps != null &&
+    typeof pickerConfiguration.pickerBodyProps === "object" &&
+    !Array.isArray(pickerConfiguration.pickerBodyProps)
+      ? pickerConfiguration.pickerBodyProps
+      : {};
+  const selectionMode = getSelectionMode(pickerConfiguration);
+  const useRowClickSelection =
+    basePickerBodyProps.rowClickable === true &&
+    typeof basePickerBodyProps.onRowClick === "function";
+  const pickerBodyProps = Object.assign({}, basePickerBodyProps, {
+    showSelection: basePickerBodyProps.showSelection !== false,
+    selectionMode,
+    initialSelectedRowIds: buildInitialSelectedRowIds(pickerConfiguration),
+    onSelectionChange: buildSelectionChangeHandler(pickerConfiguration),
+    rowClickable: useRowClickSelection,
+    onRowClick: useRowClickSelection ? basePickerBodyProps.onRowClick : undefined
+  });
+  return pickerBodyProps;
+};
+
+const openPickerModal = () => {
+  const pickerConfiguration = c.props?.pickerConfiguration;
+  const selectionMode = getSelectionMode(pickerConfiguration);
+  const initialIds = buildInitialSelectedRowIds(pickerConfiguration);
+  if (selectionMode === "multiple" && initialIds.length > 0) {
+    const initialVertices = initialIds
+      .map((id) => vertexPayloadFromGraph(g.vertexes[id]))
+      .filter(Boolean);
+    setDraftVertices(initialVertices);
+    setDraftVertex(initialVertices[0] ?? null);
+  } else if (initialIds.length > 0) {
+    const initialVertex = vertexPayloadFromGraph(g.vertexes[initialIds[0]]);
+    setDraftVertex(initialVertex);
+    setDraftVertices(initialVertex ? [initialVertex] : []);
+  } else {
+    setDraftVertex(null);
+    setDraftVertices([]);
+  }
+  setPickerBodyPropsSnapshot(buildPickerBodyProps(pickerConfiguration));
+  setPickerModalOpen(true);
+};
+
+const closePickerModal = () => {
+  setPickerModalOpen(false);
+  setDraftVertex(null);
+  setDraftVertices([]);
+  setPickerBodyPropsSnapshot(null);
+};
+
+const confirmPickerSelection = () => {
+  const pickerConfiguration = c.props?.pickerConfiguration;
+  const selectionMode = getSelectionMode(pickerConfiguration);
+  const allowedVertexLabels = pickerConfiguration?.targetVertexLabels;
+
+  const validateVertex = (selectedDraftVertex) => {
+    if (!selectedDraftVertex?.id) return false;
+    if (!Array.isArray(allowedVertexLabels) || allowedVertexLabels.length === 0) {
+      return true;
+    }
+    const vertexLabels = Array.isArray(selectedDraftVertex.L) ? selectedDraftVertex.L : [];
+    const allowedLabelSet = new Set(allowedVertexLabels.map((label) => String(label)));
+    return vertexLabels.some((label) => allowedLabelSet.has(String(label)));
+  };
+
+  if (selectionMode === "multiple") {
+    const selectedDraftVertices = draftVertices() || [];
+    if (!selectedDraftVertices.length) {
+      const selectRowMessage = pickerConfiguration?.selectRowMessage;
+      if (selectRowMessage != null && String(selectRowMessage).trim() !== "") {
+        _.showErrorToast?.(String(selectRowMessage).trim());
+      }
+      return;
+    }
+    for (const selectedDraftVertex of selectedDraftVertices) {
+      if (!validateVertex(selectedDraftVertex)) {
+        const invalidTypeMessage = pickerConfiguration?.invalidTypeMessage;
+        if (invalidTypeMessage != null && String(invalidTypeMessage).trim() !== "") {
+          _.showErrorToast?.(String(invalidTypeMessage).trim());
+        }
+        return;
+      }
+    }
+    const onSelectMultiple = c.props?.onSelectMultiple;
+    if (typeof onSelectMultiple === "function") {
+      onSelectMultiple(
+        selectedDraftVertices.map((vertex) => String(vertex.id)),
+        selectedDraftVertices
+      );
+    }
+    closePickerModal();
+    return;
+  }
+
+  const selectedDraftVertex = draftVertex();
+  if (!selectedDraftVertex?.id) {
+    const selectRowMessage = pickerConfiguration?.selectRowMessage;
+    if (selectRowMessage != null && String(selectRowMessage).trim() !== "") {
+      _.showErrorToast?.(String(selectRowMessage).trim());
+    }
+    return;
+  }
+  if (!validateVertex(selectedDraftVertex)) {
+    const invalidTypeMessage = pickerConfiguration?.invalidTypeMessage;
+    if (invalidTypeMessage != null && String(invalidTypeMessage).trim() !== "") {
+      _.showErrorToast?.(String(invalidTypeMessage).trim());
+    }
+    return;
+  }
+  const onSelect = c.props?.onSelect;
+  if (typeof onSelect === "function") {
+    onSelect(String(selectedDraftVertex.id), selectedDraftVertex);
+  }
+  closePickerModal();
+};
+
+return {
+  pickerModalOpen,
+  draftVertex,
+  draftVertices,
+  pickerBodyPropsSnapshot,
+  openPickerModal,
+  closePickerModal,
+  confirmPickerSelection
+};
+'''
+      }
+    }
+    {
+      id: "vp_root"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}`;'''
+        props:
+          '''return { as: "div" };'''
+      }
+    }
+    {
+      id: "vp_field"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: EmbeddedVertexPickerField
+        props:
+          '''const pickerConfiguration = c.props?.pickerConfiguration;
+return {
+  label: pickerConfiguration?.fieldLabel,
+  secondaryLabel: c.props?.secondaryLabel,
+  previewUrl: c.props?.previewUrl,
+  showImagePreview: c.props?.showImagePreview,
+  value: c.props?.value,
+  disabled: c.props?.disabled,
+  chooseButtonLabel: pickerConfiguration?.chooseButtonLabel,
+  clearButtonLabel: pickerConfiguration?.clearButtonLabel,
+  usePolarisUI: pickerConfiguration?.usePolarisUI === true,
+  onOpenPicker: () => f.openPickerModal?.(),
+  onClear: () => c.props?.onClear?.()
+};'''
+      }
+    }
+    {
+      id: "vp_modal"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: VertexPickerModal
+        props:
+          '''const pickerConfiguration = c.props?.pickerConfiguration;
+return {
+  isOpen: () => f.pickerModalOpen?.() === true,
+  title: pickerConfiguration?.modalTitle,
+  hintEmpty: pickerConfiguration?.modalHintEmpty,
+  hintSelected: pickerConfiguration?.modalHintSelected,
+  pickerBodyProps: f.pickerBodyPropsSnapshot?.() ?? {},
+  draftVertex: () => f.draftVertex?.() ?? null,
+  onClose: () => f.closePickerModal?.(),
+  onConfirm: () => f.confirmPickerSelection?.(),
+  usePolarisUI: pickerConfiguration?.usePolarisUI === true,
+  cancelButtonLabel: pickerConfiguration?.cancelButtonLabel,
+  confirmButtonLabel: pickerConfiguration?.confirmButtonLabel,
+  closeButtonLabel: pickerConfiguration?.closeButtonLabel
+};'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: vp_e1
+      T: Attr
+      S: "vp1"
+      E: "vp_root"
+    }
+    {
+      id: vp_e2
+      T: Attr
+      S: "vp_root"
+      E: "vp_field"
+    }
+    {
+      id: vp_e3
+      T: Attr
+      S: "vp_root"
+      E: "vp_modal"
+    }
+  ]
+}

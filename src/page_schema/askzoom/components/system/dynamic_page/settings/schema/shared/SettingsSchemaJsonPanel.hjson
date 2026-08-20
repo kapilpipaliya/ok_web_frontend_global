@@ -1,0 +1,197 @@
+{
+  vertexes: [
+    {
+      id: "ssjp_root",
+      L: "Component",
+      P: {
+        key: "SettingsSchemaJsonPanel",
+        description: "JSON editor panel for settings page schema.",
+        dynamicComponent: "Button, TextArea, Html"
+      }
+    },
+{
+      id: "ssjp_panel",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''const api = c.props?.editorApi || {};
+
+return {
+  as: "div",
+  hide: api.isVisualMode?.() === true
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: ${t.var.color.background};
+}`;
+'''
+      }
+    },
+{
+      id: "ssjp_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background_light_100};
+  flex-shrink: 0;
+}`;
+'''
+      }
+    },
+{
+      id: "ssjp_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Schema config (JSON). Structure only — no default values."
+};
+''',
+        css: '''
+return `._id {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: ${t.var.color.text_light_500};
+}`;
+'''
+      }
+    },
+{
+      id: "ssjp_refresh",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Button",
+        props: '''const api = c.props?.editorApi || {};
+
+return {
+  variant: "secondary",
+  size: "sm",
+  text: "Reset from visual",
+  type: "button",
+  title: "Replace JSON with the current visual editor state",
+  onClick: () => api.syncJsonFromVisual?.()
+};
+'''
+      }
+    },
+{
+      id: "ssjp_error",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''const api = c.props?.editorApi || {};
+
+const error = api.jsonError?.();
+return {
+  as: "div",
+  text: error ? `JSON error: ${error}` : "",
+  hide: !error,
+  role: "alert"
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.5rem 1rem;
+  font-size: 0.8125rem;
+  color: ${t.var.color.error_text};
+  background: ${t.var.color.error_light_100};
+  border-bottom: 1px solid ${t.var.color.error};
+  flex-shrink: 0;
+}`;
+'''
+      }
+    },
+{
+      id: "ssjp_textarea_wrap",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  flex: 1;
+  min-height: 0;
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+}`;
+'''
+      }
+    },
+{
+      id: "ssjp_textarea",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "TextArea",
+        props: '''const api = c.props?.editorApi || {};
+
+return {
+  label: "Config JSON",
+  value: api.configJsonText?.() || "",
+  rows: 24,
+  resize: "none",
+  placeholder: `{"pageMode": "settings", ...}`,
+  onChange: (e) => api.onJsonTextChange?.(e.target.value)
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+
+  textarea {
+    flex: 1;
+    min-height: 20rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    resize: none;
+  }
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "ssjp_root_e1", T: "Attr", S: "ssjp_root", E: "ssjp_panel" },
+    { id: "ssjp_root_e2", T: "Attr", S: "ssjp_panel", E: "ssjp_header" },
+    { id: "ssjp_root_e3", T: "Attr", S: "ssjp_panel", E: "ssjp_error" },
+    { id: "ssjp_root_e4", T: "Attr", S: "ssjp_panel", E: "ssjp_textarea_wrap" },
+    { id: "ssjp_root_e5", T: "Attr", S: "ssjp_header", E: "ssjp_title" },
+    { id: "ssjp_root_e6", T: "Attr", S: "ssjp_header", E: "ssjp_refresh" },
+    { id: "ssjp_root_e7", T: "Attr", S: "ssjp_textarea_wrap", E: "ssjp_textarea" }
+  ]
+}

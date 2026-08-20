@@ -1,0 +1,156 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: getPaletteTreeRoots
+        description: Loads category + content tree roots for Page Designer palette (components, pages, functions).
+        body:
+          '''
+const actualUser = await _.getUserFromSession();
+if (!actualUser) {
+  return { success: false, message: "User session not found. Please log in and try again.", data: [] };
+}
+
+const {
+  parentVertexLabel,
+  toParentEdgeType,
+  rootKeys = {},
+  tableVertexLabel,
+  relationshipType
+} = c;
+
+if (!parentVertexLabel || !toParentEdgeType || !rootKeys) {
+  return {
+    success: false,
+    message: "parentVertexLabel, toParentEdgeType and rootKeys are required",
+    data: []
+  };
+}
+
+if (!_.context.nodes) _.context.nodes = {};
+
+const allCategories = await _.session.run(
+  `MATCH (v:${parentVertexLabel})
+   RETURN v
+   ORDER BY COALESCE(v.displayOrder, 0), COALESCE(v.key, '') ASC`
+);
+_.processResult(allCategories.records, _.context, 'v');
+
+const allCategoryEdges = await _.session.run(
+  `MATCH (child:${parentVertexLabel})-[r:${toParentEdgeType}]->(parent:${parentVertexLabel})
+   RETURN child, parent, r
+   ORDER BY COALESCE(child.displayOrder, 0), COALESCE(child.key, '') ASC`
+);
+_.processResult(allCategoryEdges.records, _.context, ['child', 'parent'], 'r');
+
+if (tableVertexLabel) {
+  const allContent = await _.session.run(
+    `MATCH (c:${tableVertexLabel})
+     RETURN c
+     ORDER BY COALESCE(c.displayOrder, 0), COALESCE(c.key, '') ASC`
+  );
+  _.processResult(allContent.records, _.context, 'c');
+
+  const allContentEdges = await _.session.run(
+    `MATCH (content:${tableVertexLabel})-[r:${toParentEdgeType}]->(cat:${parentVertexLabel})
+     RETURN content, cat, r
+     ORDER BY COALESCE(content.displayOrder, 0), COALESCE(content.key, '') ASC`
+  );
+  _.processResult(allContentEdges.records, _.context, ['content', 'cat'], 'r');
+}
+
+const nodes = _.context.nodes;
+const syntheticUncategorizedId = tableVertexLabel ? '_' + tableVertexLabel + '_uncategorized' : null;
+
+let uncategorizedCount = 0;
+if (tableVertexLabel) {
+  const uncatResult = await _.session.run(
+    `MATCH (content:${tableVertexLabel})
+     WHERE NOT EXISTS { MATCH (content)-[:${toParentEdgeType}]->(:${parentVertexLabel}) }
+     RETURN count(DISTINCT content) as contentCount`
+  );
+  uncategorizedCount = uncatResult.records[0]?.get('contentCount')?.toNumber?.()
+    ?? uncatResult.records[0]?.get('contentCount') ?? 0;
+}
+
+let uncategorizedVertex = null;
+if (tableVertexLabel && syntheticUncategorizedId) {
+  uncategorizedVertex = {
+    id: syntheticUncategorizedId,
+    L: [parentVertexLabel],
+    P: {
+      key: syntheticUncategorizedId,
+      name: 'Uncategorized',
+      contentCount: uncategorizedCount,
+      tableVertexLabel
+    },
+    IN: {},
+    OUT: {}
+  };
+  nodes[syntheticUncategorizedId] = uncategorizedVertex;
+}
+
+const rootVertices = Object.keys(nodes)
+  .filter(id => {
+    if (syntheticUncategorizedId && id === syntheticUncategorizedId) return false;
+    const node = nodes[id];
+    if (!node?.L?.includes(parentVertexLabel)) return false;
+    const outEdges = node?.OUT?.[toParentEdgeType];
+    return !outEdges || outEdges.length === 0;
+  })
+  .map(id => nodes[id])
+  .filter(Boolean)
+  .sort((a, b) => {
+    const orderA = a.P?.displayOrder ?? 0;
+    const orderB = b.P?.displayOrder ?? 0;
+    if (orderA !== orderB) return orderA - orderB;
+    return String(a.P?.key ?? '').localeCompare(String(b.P?.key ?? ''));
+  });
+
+if (tableVertexLabel && relationshipType) {
+  const categoryIds = Object.keys(nodes).filter(id => id !== syntheticUncategorizedId);
+  const countByCategoryId = {};
+  if (categoryIds.length > 0) {
+    const batchResult = await _.session.run(
+      `UNWIND $categoryIds AS catId
+       OPTIONAL MATCH (cat:${parentVertexLabel}) WHERE elementId(cat) = catId
+       WITH catId, cat
+       OPTIONAL MATCH (content:${tableVertexLabel})-[:${toParentEdgeType}]->(cat)
+       WITH catId, count(DISTINCT content) AS contentCount
+       RETURN catId, contentCount`,
+      { categoryIds }
+    );
+    for (const rec of batchResult.records) {
+      const catId = rec.get('catId');
+      const contentCount = rec.get('contentCount')?.toNumber?.() ?? rec.get('contentCount') ?? 0;
+      countByCategoryId[catId] = contentCount;
+    }
+  }
+  const rootKey = rootKeys.key || null;
+  for (const id of Object.keys(nodes)) {
+    const node = nodes[id];
+    if (!node?.P || id === syntheticUncategorizedId) continue;
+    node.P.contentCount = countByCategoryId[id] ?? 0;
+    if (rootKey && node.P.key === rootKey) {
+      node.P.contentCount = countByCategoryId[id] ?? 0;
+    }
+  }
+}
+
+const finalVertices =
+  uncategorizedVertex && uncategorizedCount > 0
+    ? [uncategorizedVertex, ...rootVertices]
+    : rootVertices;
+return {
+  success: true,
+  data: finalVertices,
+  message: `Found ${finalVertices.length} root palette categories`
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

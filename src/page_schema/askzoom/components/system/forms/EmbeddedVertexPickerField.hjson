@@ -1,0 +1,324 @@
+{
+  vertexes: [
+    {
+      id: "evpf1"
+      L: Component
+      P: {
+        title: Embedded vertex picker field
+        key: EmbeddedVertexPickerField
+      }
+    }
+    {
+      id: "evpf_row"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  width: 100%;
+}`;'''
+        props:
+          '''return { as: "div" };'''
+      }
+    }
+    {
+      id: "evpf_prev_row"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1rem;
+}`;'''
+        props:
+          '''return { as: "div" };'''
+      }
+    }
+    {
+      id: "evpf_thumb"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''return `._id {
+  width: 88px;
+  height: 88px;
+  border-radius: 0.5rem;
+  border: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background_light_100};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}`;'''
+        props:
+          '''return { as: "div" };'''
+      }
+    }
+    {
+      id: "evpf_img"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const previewUrl = String(c.props?.previewUrl || "").trim();
+const showImage = c.props?.showImagePreview !== false;
+const hasImg = showImage && previewUrl && /\.(png|jpe?g|gif|webp|svg)$/i.test(previewUrl);
+return {
+  as: "img",
+  src: hasImg ? previewUrl : "",
+  alt: "",
+  hide: () => !hasImg,
+  style: "width:100%;height:100%;object-fit:cover;"
+};'''
+      }
+    }
+    {
+      id: "evpf_ico"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        css:
+          '''return `._id { color: ${t.var.color.text_dark_400}; }`;'''
+        props:
+          '''const previewUrl = String(c.props?.previewUrl || "").trim();
+const showImage = c.props?.showImagePreview !== false;
+const hasImg = showImage && previewUrl && /\.(png|jpe?g|gif|webp|svg)$/i.test(previewUrl);
+return {
+  as: "icon",
+  icon: "ph:image-square",
+  width: 40,
+  height: 40,
+  hide: () => !!hasImg
+};'''
+      }
+    }
+    {
+      id: "evpf_meta"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        css:
+          '''return `._id {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}`;'''
+        props:
+          '''return { as: "div" };'''
+      }
+    }
+    {
+      id: "evpf_lbl"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''return `._id {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: ${t.var.color.text};
+}`;'''
+        props:
+          '''const fieldLabel = c.props?.label;
+const labelText =
+  fieldLabel != null && String(fieldLabel).trim() !== "" ? String(fieldLabel).trim() : "";
+return {
+  as: "div",
+  hide: labelText === "",
+  text: labelText
+};'''
+      }
+    }
+    {
+      id: "evpf_fn"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        css:
+          '''return `._id {
+  font-size: 0.85rem;
+  color: ${t.var.color.text_dark_400};
+  word-break: break-word;
+}`;'''
+        props:
+          '''const secondaryLabel = c.props?.secondaryLabel;
+const secondaryText =
+  secondaryLabel != null && String(secondaryLabel).trim() !== ""
+    ? String(secondaryLabel).trim()
+    : "";
+return {
+  as: "div",
+  hide: secondaryText === "",
+  text: secondaryText
+};'''
+      }
+    }
+    {
+      id: "evpf_actions"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}`;'''
+        props:
+          '''return { as: "div" };'''
+      }
+    }
+    {
+      id: "evpf_pick"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const disabled = !!c.props?.disabled;
+const usePolaris = c.props?.usePolarisUI === true;
+if (usePolaris) {
+  return {
+    as: "s-button",
+    "attr:variant": "primary",
+    text:
+      c.props?.chooseButtonLabel != null
+        ? String(c.props.chooseButtonLabel)
+        : "",
+    disabled,
+    onClick: () => c.props?.onOpenPicker?.()
+  };
+}
+return {
+  as: "button",
+  type: "button",
+  disabled,
+  text: String(c.props?.chooseButtonLabel || "Select…"),
+  onClick: () => c.props?.onOpenPicker?.()
+};'''
+      }
+    }
+    {
+      id: "evpf_clr"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const disabled = !!c.props?.disabled;
+const hasValue = !!(c.props?.value != null && String(c.props?.value).trim() !== "");
+const usePolaris = c.props?.usePolarisUI === true;
+if (usePolaris) {
+  return {
+    as: "s-button",
+    "attr:variant": "tertiary",
+    text:
+    c.props?.clearButtonLabel != null
+      ? String(c.props.clearButtonLabel)
+      : "",
+    disabled: disabled || !hasValue,
+    onClick: () => c.props?.onClear?.()
+  };
+}
+return {
+  as: "button",
+  type: "button",
+  disabled: disabled || !hasValue,
+  text:
+    c.props?.clearButtonLabel != null
+      ? String(c.props.clearButtonLabel)
+      : "",
+  onClick: () => c.props?.onClear?.()
+};'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: evpf_e1
+      T: Attr
+      S: "evpf1"
+      E: "evpf_row"
+    }
+    {
+      id: evpf_e2
+      T: Attr
+      S: "evpf_row"
+      E: "evpf_prev_row"
+    }
+    {
+      id: evpf_e3
+      T: Attr
+      S: "evpf_prev_row"
+      E: "evpf_thumb"
+    }
+    {
+      id: evpf_e4
+      T: Attr
+      S: "evpf_thumb"
+      E: "evpf_img"
+    }
+    {
+      id: evpf_e5
+      T: Attr
+      S: "evpf_thumb"
+      E: "evpf_ico"
+    }
+    {
+      id: evpf_e6
+      T: Attr
+      S: "evpf_prev_row"
+      E: "evpf_meta"
+    }
+    {
+      id: evpf_e7
+      T: Attr
+      S: "evpf_meta"
+      E: "evpf_lbl"
+    }
+    {
+      id: evpf_e8
+      T: Attr
+      S: "evpf_meta"
+      E: "evpf_fn"
+    }
+    {
+      id: evpf_e9
+      T: Attr
+      S: "evpf_row"
+      E: "evpf_actions"
+    }
+    {
+      id: evpf_e10
+      T: Attr
+      S: "evpf_actions"
+      E: "evpf_pick"
+    }
+    {
+      id: evpf_e11
+      T: Attr
+      S: "evpf_actions"
+      E: "evpf_clr"
+    }
+  ]
+}

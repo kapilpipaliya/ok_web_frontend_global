@@ -1,0 +1,587 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: FormFieldArray
+        dynamicComponent: TextInput, TextArea, Button, FormLocalizedText
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        fns:
+          '''
+const getProps = () => c.props || {};
+const getField = () => getProps().field || {};
+const getConfig = () => getField().fieldArrayConfig || {};
+
+const getItemFields = () => {
+  const itemFields = getConfig().itemFields;
+  return Array.isArray(itemFields) ? itemFields : [];
+};
+
+const parseItems = (value) => {
+  if (Array.isArray(value)) return value.map((item) => ({ ...(item || {}) }));
+  if (typeof value === "string" && value.trim() !== "") {
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed.map((item) => ({ ...(item || {}) })) : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+};
+
+const getItems = () => parseItems(getProps().value);
+
+const commitItems = (items) => {
+  getProps().onChange?.(items);
+};
+
+const buildDefaultItem = () => {
+  const item = {};
+  const itemFields = getItemFields();
+  for (let fieldIndex = 0; fieldIndex < itemFields.length; fieldIndex++) {
+    const itemField = itemFields[fieldIndex];
+    if (!itemField?.key) continue;
+    if (itemField.defaultValue !== undefined) {
+      item[itemField.key] = itemField.defaultValue;
+    } else if (itemField.dataType === "boolean" || itemField.renderer === "checkbox") {
+      item[itemField.key] = false;
+    } else if (itemField.translatable === true) {
+      item[itemField.key] = {};
+    } else {
+      item[itemField.key] = "";
+    }
+  }
+  return item;
+};
+
+const updateItemField = (itemIndex, fieldKey, fieldValue) => {
+  const items = getItems();
+  if (!items[itemIndex]) return;
+  const nextItems = items.map((item, index) =>
+    index === itemIndex ? { ...item, [fieldKey]: fieldValue } : item
+  );
+  commitItems(nextItems);
+};
+
+const addItem = () => {
+  const config = getConfig();
+  const items = getItems();
+  if (config.maxItems != null && items.length >= Number(config.maxItems)) return;
+  commitItems([...items, buildDefaultItem()]);
+};
+
+const removeItem = (itemIndex) => {
+  const config = getConfig();
+  const items = getItems();
+  if (config.minItems != null && items.length <= Number(config.minItems)) return;
+  commitItems(items.filter((_, index) => index !== itemIndex));
+};
+
+const reorderItems = (fromIndex, toIndex) => {
+  const items = getItems();
+  if (fromIndex === toIndex || fromIndex < 0 || toIndex < 0) return;
+  if (fromIndex >= items.length || toIndex >= items.length) return;
+  const nextItems = [...items];
+  const [moved] = nextItems.splice(fromIndex, 1);
+  nextItems.splice(toIndex, 0, moved);
+  commitItems(nextItems);
+};
+
+const fieldArrayDraggableCleanups = new Map();
+const [draggedItemIndex, setDraggedItemIndex] = _.createSignal(null);
+const [dragOverItemIndex, setDragOverItemIndex] = _.createSignal(null);
+
+const initFieldArrayDraggable = (element, itemIndex) => {
+  if (!element || !_.draggable || f.isDisabled?.()) return;
+
+  const existingCleanup = fieldArrayDraggableCleanups.get(element);
+  if (existingCleanup) existingCleanup();
+
+  const cleanup = _.draggable({
+    element,
+    getInitialData: () => ({
+      type: "field-array-item",
+      index: itemIndex
+    }),
+    onDragStart: () => setDraggedItemIndex(itemIndex),
+    onDrop: () => {
+      setDraggedItemIndex(null);
+      setDragOverItemIndex(null);
+    }
+  });
+
+  fieldArrayDraggableCleanups.set(element, cleanup);
+};
+
+const initFieldArrayDropTarget = (element, itemIndex) => {
+  if (!element || !_.dropTargetForElements || f.isDisabled?.()) return null;
+
+  return _.dropTargetForElements({
+    element,
+    canDrop: ({ source }) => source.data?.type === "field-array-item",
+    onDragEnter: ({ source }) => {
+      if (typeof source.data?.index === "number") {
+        setDragOverItemIndex(itemIndex);
+      }
+    },
+    onDragLeave: () => setDragOverItemIndex(null),
+    onDrop: ({ source }) => {
+      const fromIndex = source.data?.index;
+      if (typeof fromIndex === "number") {
+        reorderItems(fromIndex, itemIndex);
+      }
+      setDraggedItemIndex(null);
+      setDragOverItemIndex(null);
+    }
+  });
+};
+
+const cleanupFieldArrayDraggable = (element) => {
+  const cleanup = fieldArrayDraggableCleanups.get(element);
+  if (cleanup) {
+    cleanup();
+    fieldArrayDraggableCleanups.delete(element);
+  }
+};
+
+const isItemDragging = (itemIndex) => draggedItemIndex() === itemIndex;
+const isItemDragOver = (itemIndex) => dragOverItemIndex() === itemIndex;
+
+// Use stable numeric indices for loop data so Solid <For> does not remount rows on each keystroke.
+const getItemIndices = () => {
+  const items = getItems();
+  const indices = [];
+  for (let index = 0; index < items.length; index++) {
+    indices.push(index);
+  }
+  return indices;
+};
+
+const getItemAt = (itemIndex) => getItems()[itemIndex] || {};
+
+const getItemLabel = (itemIndex) =>
+  `${getConfig().itemLabel || "Item"} ${itemIndex + 1}`;
+
+const getItemFieldValue = (item, itemField) => {
+  if (!itemField?.key) return "";
+  const value = item?.[itemField.key];
+  if (value == null) {
+    return itemField.translatable === true ? {} : "";
+  }
+  return value;
+};
+
+const isItemFieldTranslatable = (itemField) => itemField?.translatable === true;
+
+const DEFAULT_SITE_LANGUAGES = [
+  { code: "en", label: "English", isDefault: true },
+  { code: "hi", label: "Hindi", isDefault: false },
+  { code: "gu", label: "Gujarati", isDefault: false }
+];
+
+const getSiteLanguages = () => {
+  const languages = getProps().siteLanguages;
+  if (Array.isArray(languages) && languages.length > 0) return languages;
+  return DEFAULT_SITE_LANGUAGES;
+};
+
+const isDisabled = () => getProps().disabled === true;
+
+return {
+  getField,
+  getConfig,
+  getItemFields,
+  getItemIndices,
+  getItemAt,
+  getItemLabel,
+  addItem,
+  removeItem,
+  reorderItems,
+  updateItemField,
+  getItemFieldValue,
+  isItemFieldTranslatable,
+  getSiteLanguages,
+  isDisabled,
+  initFieldArrayDraggable,
+  initFieldArrayDropTarget,
+  cleanupFieldArrayDraggable,
+  isItemDragging,
+  isItemDragOver
+};
+'''
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "fm-field-array"
+};
+'''
+        css:
+          '''
+return `._id.fm-field-array {
+  display: flex;
+  flex-direction: column;
+  gap: ${t.var.spacing.md};
+  width: 100%;
+}`;
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "secondary",
+  text: f.getConfig()?.addButtonLabel || "Add item",
+  type: "button",
+  disabled: f.isDisabled(),
+  onClick: () => f.addItem()
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 2
+        contextName: fieldArrayItem
+        loop: true
+        componentName: Html
+        props:
+          '''
+return {
+  data: f.getItemIndices()
+};
+'''
+      }
+    }
+    {
+      id: "4wrap"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const itemIndex = c.fieldArrayItem;
+return {
+  as: "div",
+  class: "fm-field-array-item",
+  ref: (element) => {
+    if (element && f.initFieldArrayDropTarget) {
+      const dropCleanup = f.initFieldArrayDropTarget(element, itemIndex);
+      element.__fmFieldArrayDropCleanup = dropCleanup;
+    } else if (element?.__fmFieldArrayDropCleanup) {
+      element.__fmFieldArrayDropCleanup();
+      element.__fmFieldArrayDropCleanup = null;
+    }
+  }
+};
+'''
+        css:
+          '''
+const itemIndex = c.fieldArrayItem;
+const dragOver = f.isItemDragOver?.(itemIndex);
+const dragging = f.isItemDragging?.(itemIndex);
+return `._id.fm-field-array-item {
+  display: flex;
+  flex-direction: column;
+  gap: ${t.var.spacing.sm};
+  padding: ${t.var.spacing.md};
+  border: 1px solid ${dragOver ? t.var.color.primary : t.var.color.border};
+  border-radius: 0.5rem;
+  background: ${t.var.color.background_light_50};
+  ${dragging ? "opacity: 0.55;" : ""}
+  ${dragOver ? `outline: 2px dashed ${t.var.color.primary};` : ""}
+}`;
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "fm-field-array-item-header"
+};
+'''
+        css:
+          '''
+return `._id.fm-field-array-item-header {
+  display: flex;
+  align-items: flex-start;
+  gap: ${t.var.spacing.sm};
+}`;
+'''
+      }
+    }
+    {
+      id: "5b"
+      L: Attr
+      P: {
+        displayOrder: 0
+        componentName: Html
+        props:
+          '''
+const itemIndex = c.fieldArrayItem;
+return {
+  as: "icon",
+  icon: "ph:dots-six-vertical",
+  height: 16,
+  width: 16,
+  class: "fm-field-array-drag-handle",
+  hide: f.isDisabled?.(),
+  ref: (element) => {
+    const index = c.fieldArrayItem;
+    if (element && f.initFieldArrayDraggable) {
+      f.initFieldArrayDraggable(element, index);
+    } else if (element === null && f.cleanupFieldArrayDraggable) {
+      f.cleanupFieldArrayDraggable(element);
+    }
+  }
+};
+'''
+        css:
+          '''
+return `._id.fm-field-array-drag-handle {
+  flex-shrink: 0;
+  color: ${t.var.color.text_light_500};
+  cursor: grab;
+}`;
+'''
+      }
+    }
+    {
+      id: "5c"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "fm-field-array-item-header-main"
+};
+'''
+        css:
+          '''
+return `._id.fm-field-array-item-header-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: ${t.var.spacing.sm};
+  flex: 1;
+  min-width: 0;
+}`;
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const itemIndex = c.fieldArrayItem;
+return {
+  as: "div",
+  text: f.getItemLabel(itemIndex),
+  class: "fm-field-array-item-title"
+};
+'''
+        css:
+          '''
+return `._id.fm-field-array-item-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: ${t.var.color.text};
+}`;
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
+const itemIndex = c.fieldArrayItem;
+return {
+  variant: "danger",
+  size: "sm",
+  text: "Remove",
+  type: "button",
+  disabled: f.isDisabled(),
+  onClick: () => f.removeItem(itemIndex)
+};
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 2
+        contextName: fieldArrayField
+        loop: true
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "fm-field-array-field",
+  data: f.getItemFields()
+};
+'''
+        css:
+          '''
+return `._id.fm-field-array-field {
+  display: flex;
+  flex-direction: column;
+  gap: ${t.var.spacing.xs};
+  width: 100%;
+}`;
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const itemField = c.fieldArrayField || {};
+return {
+  as: "label",
+  text: itemField.label || itemField.key || "Field",
+  class: "fm-field-array-field-label"
+};
+'''
+        css:
+          '''
+return `._id.fm-field-array-field-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: ${t.var.color.text};
+}`;
+'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: FormLocalizedText
+        props:
+          '''
+const itemField = c.fieldArrayField || {};
+const itemIndex = c.fieldArrayItem;
+const isTranslatable = f.isItemFieldTranslatable?.(itemField);
+const isTextArea = itemField.renderer === "textArea";
+const hide = !isTranslatable;
+const value = f.getItemFieldValue(f.getItemAt(itemIndex), itemField);
+return {
+  hide,
+  languages: f.getSiteLanguages?.(),
+  value: typeof value === "object" && value != null ? value : {},
+  multiline: isTextArea,
+  onChange: (nextValue) => f.updateItemField(itemIndex, itemField.key, nextValue),
+  required: itemField.required === true,
+  disabled: f.isDisabled()
+};
+'''
+      }
+    }
+    {
+      id: "10b"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: TextArea
+        props:
+          '''
+const itemField = c.fieldArrayField || {};
+const itemIndex = c.fieldArrayItem;
+const hide = itemField.renderer !== "textArea" || f.isItemFieldTranslatable?.(itemField);
+const value = f.getItemFieldValue(f.getItemAt(itemIndex), itemField);
+return {
+  hide,
+  value: typeof value === "string" ? value : "",
+  onChange: (e) => f.updateItemField(itemIndex, itemField.key, e.target.value),
+  placeholder: itemField.placeholder || "",
+  required: itemField.required === true,
+  disabled: f.isDisabled()
+};
+'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: TextInput
+        props:
+          '''
+const itemField = c.fieldArrayField || {};
+const itemIndex = c.fieldArrayItem;
+const hide = itemField.renderer === "textArea" || f.isItemFieldTranslatable?.(itemField);
+const value = f.getItemFieldValue(f.getItemAt(itemIndex), itemField);
+return {
+  hide,
+  value: typeof value === "string" ? value : "",
+  onChange: (e) => f.updateItemField(itemIndex, itemField.key, e.target.value),
+  placeholder: itemField.placeholder || "",
+  required: itemField.required === true,
+  disabled: f.isDisabled(),
+  type: itemField.dataType === "number" ? "number" : "text"
+};
+'''
+      }
+    }
+  ]
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" }
+    { id: "e2", T: "Attr", S: "2", E: "3" }
+    { id: "e3", T: "Attr", S: "2", E: "4" }
+    { id: "e3b", T: "Attr", S: "4", E: "4wrap" }
+    { id: "e4", T: "Attr", S: "4wrap", E: "5" }
+    { id: "e4b", T: "Attr", S: "5", E: "5b" }
+    { id: "e4c", T: "Attr", S: "5", E: "5c" }
+    { id: "e5", T: "Attr", S: "5c", E: "6" }
+    { id: "e6", T: "Attr", S: "5c", E: "7" }
+    { id: "e7", T: "Attr", S: "4wrap", E: "8" }
+    { id: "e8", T: "Attr", S: "8", E: "9" }
+    { id: "e9", T: "Attr", S: "8", E: "10" }
+    { id: "e9b", T: "Attr", S: "8", E: "10b" }
+    { id: "e10", T: "Attr", S: "8", E: "11" }
+  ]
+}

@@ -1,0 +1,353 @@
+{
+  vertexes: [
+    {
+      id: "function_transactions_permissions"
+      L: "Function"
+      P: {
+        key: "exampleTransactionsAndPermissions"
+        description: "Example: Transactions, permissions, cache, jobs, and batch operations"
+        body: '''
+// Example 1: Smart Transactions with Auto-Commit/Rollback
+// =========================================================
+
+// Simple transaction (auto-commits on success, auto-rollback on error)
+const createUserResult = await _.transaction(
+  _.session,
+  async (tx) => {
+    // Create user
+    const userResult = await tx.run(
+      "CREATE (u:User {id: $id, name: $name, email: $email}) RETURN u",
+      {
+        id: _.utils.uuid(),
+        name: c.name,
+        email: c.email
+      }
+    );
+
+    const user = userResult.records[0].get("u");
+
+    // Create profile
+    const profileResult = await tx.run(
+      "CREATE (p:Profile {id: $id, userId: $userId}) RETURN p",
+      {
+        id: _.utils.uuid(),
+        userId: user.properties.id
+      }
+    );
+
+    return {
+      user: _.neo4jConvert(user),
+      profile: _.neo4jConvert(profileResult.records[0].get("p"))
+    };
+  }
+);
+
+// If any operation fails, entire transaction is rolled back automatically
+
+// Example 2: Transaction with Retry (for transient failures)
+// ===========================================================
+
+const retryResult = await _.transactionWithRetry(
+  _.session,
+  async (tx) => {
+    // This will retry up to 3 times if deadlock or timeout occurs
+    const result = await tx.run(
+      "MATCH (u:User {id: $id}) SET u.lastAccess = $timestamp RETURN u",
+      { id: c.userId, timestamp: Date.now() }
+    );
+
+    return _.neo4jConvert(result.records[0].get("u"));
+  },
+  3,      // maxRetries
+  1000    // retryDelay (ms)
+);
+
+// Example 3: Batch Transaction
+// =============================
+
+const batchResult = await _.transactionBatch(
+  _.session,
+  [
+    (tx) => tx.run("CREATE (n:Node1) RETURN n"),
+    (tx) => tx.run("CREATE (n:Node2) RETURN n"),
+    (tx) => tx.run("CREATE (n:Node3) RETURN n")
+  ]
+);
+// All operations succeed or all fail together
+
+// Example 4: Declarative Permissions
+// ===================================
+
+// Require authentication
+const authCheck = await _.requirePermissions(
+  { authenticated: true },
+  {
+    getUserFromSession: _.getUserFromSession,
+    session: _.session,
+    contextData: c
+  }
+);
+// authCheck.user contains authenticated user
+
+// Require specific role
+const adminCheck = await _.requirePermissions(
+  {
+    authenticated: true,
+    roles: ["admin", "moderator"]
+  },
+  {
+    getUserFromSession: _.getUserFromSession,
+    session: _.session,
+    contextData: c
+  }
+);
+
+// Require ownership
+const ownershipCheck = await _.requirePermissions(
+  {
+    authenticated: true,
+    ownership: {
+      resource: "Post",
+      field: "authorId",
+      resourceId: c.postId
+    }
+  },
+  {
+    getUserFromSession: _.getUserFromSession,
+    session: _.session,
+    contextData: c
+  }
+);
+
+// Multiple requirements (authenticated + admin + ownership)
+const complexPermissions = await _.requirePermissions(
+  {
+    authenticated: true,
+    roles: ["admin"],
+    ownership: {
+      resource: "Post",
+      field: "authorId",
+      resourceId: c.postId
+    }
+  },
+  {
+    getUserFromSession: _.getUserFromSession,
+    session: _.session,
+    contextData: c
+  }
+);
+
+// Example 5: Permission Helper Functions
+// =======================================
+
+const user = await _.getUserFromSession();
+
+// Check if user has role
+if (_.hasRole(user, "admin", "moderator")) {
+  // User is admin or moderator
+}
+
+// Check if user has permission
+if (_.hasPermission(user, "posts.edit", "posts.delete")) {
+  // User can edit or delete posts
+}
+
+// Check if user is admin
+if (_.isAdmin(user)) {
+  // User is admin
+}
+
+// Check ownership in database
+const isOwner = await _.isOwner(
+  _.session,
+  user.P.uuid,
+  c.postId,
+  "authorId"
+);
+
+// Example 6: Caching Layer
+// =========================
+
+// Simple cache get/set
+_.cacheSet("user:123", { name: "John" }, { ttl: 300 }); // 5 minutes
+const cachedUser = _.cacheGet("user:123");
+
+// Cache with namespace
+_.cacheSet("sessions", { id: "abc" }, { ttl: 3600, namespace: "auth" });
+const session = _.cacheGet("sessions", { namespace: "auth" });
+
+// Get or set (fetch if not cached)
+const userData = await _.cacheGetOrSet(
+  "user:" + c.userId,
+  async () => {
+    // This function runs only if cache miss
+    const result = await _.session.run(
+      "MATCH (u:User {id: $id}) RETURN u",
+      { id: c.userId }
+    );
+    return _.neo4jConvert(result.records[0].get("u"));
+  },
+  { ttl: 600 }
+);
+
+// Memoize expensive function
+const expensiveOperation = _.cacheMemoize(
+  async (userId) => {
+    // Complex calculation
+    return await calculateUserStats(userId);
+  },
+  { ttl: 300 }
+);
+
+const stats = await expensiveOperation(c.userId);
+
+// Cache manager with namespace
+const userCache = _.createCacheManager("users");
+userCache.set("profile:123", { name: "John" });
+const profile = userCache.get("profile:123");
+
+// Example 7: Background Jobs
+// ===========================
+
+// Register job handler
+_.registerJobHandler("sendWelcomeEmail", async (data) => {
+  await _.sendEmail({
+    to: data.email,
+    subject: "Welcome!",
+    html: `<h1>Welcome ${data.name}</h1>`
+  });
+  return { sent: true };
+});
+
+// Add job to queue
+const jobId = await _.addJob(
+  "sendWelcomeEmail",
+  {
+    email: c.email,
+    name: c.name
+  },
+  {
+    priority: 5,        // Higher priority
+    delay: 5000,        // Wait 5 seconds before processing
+    maxAttempts: 3      // Retry up to 3 times
+  }
+);
+
+// Wait for job completion
+const job = await _.waitForJob(jobId, 30000); // 30 second timeout
+
+// Get job status
+const status = _.getJobStatus(jobId);
+
+// Get queue statistics
+const queueStats = _.jobs.stats();
+
+// Example 8: Batch Operations
+// ============================
+
+// Process items in batches with progress
+const items = Array.from({ length: 1000 }, (_, i) => ({ id: i }));
+
+const batchResult = await _.batchProcess(
+  items,
+  async (item) => {
+    // Process each item
+    return { processed: item.id };
+  },
+  {
+    batchSize: 100,       // Process 100 items per batch
+    concurrency: 5,       // Process 5 items in parallel
+    continueOnError: true, // Continue if individual item fails
+    onProgress: (completed, total) => {
+      console.log(`Processed ${completed}/${total}`);
+    }
+  }
+);
+
+console.log(`Success: ${batchResult.successCount}, Errors: ${batchResult.errorCount}`);
+
+// Batch create vertices
+const newUsers = [
+  { name: "John", email: "john@example.com" },
+  { name: "Jane", email: "jane@example.com" }
+];
+
+const createResult = await _.batchCreateVertices(
+  _.session,
+  "User",
+  newUsers,
+  { batchSize: 100 }
+);
+
+// Batch update vertices
+const updates = [
+  { id: "user1", updates: { name: "New Name 1" } },
+  { id: "user2", updates: { name: "New Name 2" } }
+];
+
+const updateResult = await _.batchUpdateVertices(
+  _.session,
+  "User",
+  updates
+);
+
+// Parallel map with concurrency
+const userIds = ["user1", "user2", "user3"];
+
+const userDetails = await _.parallelMap(
+  userIds,
+  async (userId) => {
+    const result = await _.session.run(
+      "MATCH (u:User {id: $id}) RETURN u",
+      { id: userId }
+    );
+    return _.neo4jConvert(result.records[0].get("u"));
+  },
+  3 // Process 3 in parallel
+);
+
+// Process in chunks
+const largeArray = Array.from({ length: 10000 }, (_, i) => i);
+
+const chunkResult = await _.processInChunks(
+  largeArray,
+  async (chunk) => {
+    // Process entire chunk
+    return chunk.map(n => n * 2);
+  },
+  100 // Chunk size
+);
+
+// Retry with exponential backoff
+const retryOperation = await _.retry(
+  async () => {
+    // Operation that might fail
+    const result = await fetch("https://api.example.com/data");
+    return result.json();
+  },
+  {
+    maxAttempts: 5,
+    delay: 1000,
+    backoff: 2,
+    onRetry: (attempt, error) => {
+      console.log(`Retry attempt ${attempt}: ${error.message}`);
+    }
+  }
+);
+
+return _.responses.ok({
+  message: "All examples completed",
+  results: {
+    transaction: createUserResult,
+    permissions: authCheck,
+    cache: userData,
+    job: jobId,
+    batch: batchResult
+  }
+});
+'''
+      }
+    }
+  ]
+  edges: []
+}

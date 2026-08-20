@@ -1,0 +1,305 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: settingsEngineHelpers
+        description: Shared settings engine utilities — validation, transforms, defaults merge, hook runner, audit payload builder.
+        body:
+          '''
+/**
+ * Generic settings engine helpers.
+ * contextData.action: "validateSection" | "mergeDefaults" | "transformValues" | "buildAuditDiff" | "runHookPipeline"
+ */
+
+const action = c?.action;
+if (!action) {
+  return { success: false, message: "action is required" };
+}
+
+const parseJsonSafe = (value, fallback) => {
+  if (value == null) return fallback;
+  if (typeof value === "object") return value;
+  try { return JSON.parse(String(value)); } catch { return fallback; }
+};
+
+const collectFormFields = (sectionConfig) => {
+  const formConfig = sectionConfig?.form;
+  if (!formConfig) return [];
+  const groups = formConfig.groups;
+  if (Array.isArray(groups)) {
+    const fields = [];
+    for (let groupIndex = 0; groupIndex < groups.length; groupIndex++) {
+      const groupFields = groups[groupIndex]?.fields;
+      if (Array.isArray(groupFields)) {
+        for (let fieldIndex = 0; fieldIndex < groupFields.length; fieldIndex++) {
+          fields.push(groupFields[fieldIndex]);
+        }
+      }
+    }
+    return fields;
+  }
+  if (Array.isArray(formConfig.fields)) return formConfig.fields;
+  return [];
+};
+
+const getFieldDefaultValue = (field) => {
+  if (field?.renderer === "fieldArray") {
+    if (Array.isArray(field?.defaultValue)) return field.defaultValue;
+    if (Array.isArray(field?.fieldArrayConfig?.defaultItems)) return field.fieldArrayConfig.defaultItems;
+    return [];
+  }
+  if (field?.defaultValue !== undefined) return field.defaultValue;
+  return undefined;
+};
+
+const normalizeFieldArrayValue = (field, value) => {
+  if (field?.renderer !== "fieldArray") return value;
+  if (Array.isArray(value)) return value;
+  if (typeof value === "string" && value.trim() !== "") {
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+};
+
+const isTranslatableField = (field) => field?.translatable === true;
+
+const DEFAULT_SITE_LANGUAGES = [
+  { code: "en", label: "English", isDefault: true },
+  { code: "hi", label: "Hindi", isDefault: false },
+  { code: "gu", label: "Gujarati", isDefault: false }
+];
+
+const resolveLanguages = (inputLanguages) => {
+  if (Array.isArray(inputLanguages) && inputLanguages.length > 0) {
+    return inputLanguages;
+  }
+  return DEFAULT_SITE_LANGUAGES;
+};
+
+const isLocalizedObject = (value) =>
+  value != null && typeof value === "object" && !Array.isArray(value);
+
+const validateLocalizedFieldValue = (field, value, languages) => {
+  if (!isTranslatableField(field)) return null;
+  if (field?.required !== true) return null;
+  const fieldKey = field?.key || field?.name || "field";
+  if (!isLocalizedObject(value)) {
+    return `${fieldKey} requires a value in the default language`;
+  }
+  const defaultLang = (languages || []).find((lang) => lang?.isDefault === true);
+  const defaultCode = defaultLang?.code || languages?.[0]?.code || "en";
+  const defaultValue = value[defaultCode];
+  if (defaultValue == null || String(defaultValue).trim() === "") {
+    return `${fieldKey} requires a value in the default language (${defaultCode})`;
+  }
+  return null;
+};
+
+const validateFieldArrayValue = (field, value, languages) => {
+  const items = normalizeFieldArrayValue(field, value);
+  const itemFields = field?.fieldArrayConfig?.itemFields || [];
+  if (field?.required === true && items.length === 0) {
+    return `${field.key} requires at least one item`;
+  }
+  for (let itemIndex = 0; itemIndex < items.length; itemIndex++) {
+    const item = items[itemIndex] || {};
+    for (let fieldIndex = 0; fieldIndex < itemFields.length; fieldIndex++) {
+      const itemField = itemFields[fieldIndex];
+      if (!itemField?.key) continue;
+      const itemValue = item[itemField.key];
+      if (isTranslatableField(itemField)) {
+        const localizedError = validateLocalizedFieldValue(itemField, itemValue, languages);
+        if (localizedError) {
+          return `${field.key}[${itemIndex}].${itemField.key}: ${localizedError}`;
+        }
+        continue;
+      }
+      if (!itemField?.required) continue;
+      if (itemValue === undefined || itemValue === null || String(itemValue).trim() === "") {
+        return `${field.key}[${itemIndex}].${itemField.key} is required`;
+      }
+    }
+  }
+  return null;
+};
+
+const validateFieldValue = (field, value, languages) => {
+  const fieldKey = field?.key || field?.name || field?.id || "field";
+  const rules = field?.validation || {};
+  const isRequired = field?.required === true;
+
+  if (isTranslatableField(field)) {
+    return validateLocalizedFieldValue(field, value, languages);
+  }
+
+  if (isRequired && (value === undefined || value === null || String(value).trim() === "")) {
+    return `${fieldKey} is required`;
+  }
+
+  if (value == null || value === "") return null;
+
+  if (field?.dataType === "email" || rules.email === true) {
+    const trimmedEmail = String(value).trim();
+    if (trimmedEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      return `${fieldKey} must be a valid email`;
+    }
+  }
+
+  if (rules.minLength != null && String(value).length < rules.minLength) {
+    return `${fieldKey} must be at least ${rules.minLength} characters`;
+  }
+
+  if (rules.maxLength != null && String(value).length > rules.maxLength) {
+    return `${fieldKey} must be at most ${rules.maxLength} characters`;
+  }
+
+  if (rules.min != null && Number(value) < rules.min) {
+    return `${fieldKey} must be at least ${rules.min}`;
+  }
+
+  if (rules.max != null && Number(value) > rules.max) {
+    return `${fieldKey} must be at most ${rules.max}`;
+  }
+
+  if (rules.pattern) {
+    try {
+      const patternRegex = new RegExp(rules.pattern);
+      if (!patternRegex.test(String(value))) {
+        return rules.patternMessage || `${fieldKey} has invalid format`;
+      }
+    } catch (patternError) {
+      console.warn("settingsEngineHelpers: invalid pattern for", fieldKey, patternError);
+    }
+  }
+
+  return null;
+};
+
+const validateSectionValues = async (sectionConfig, values, languages) => {
+  const fields = collectFormFields(sectionConfig);
+  const fieldErrors = {};
+  for (let fieldIndex = 0; fieldIndex < fields.length; fieldIndex++) {
+    const field = fields[fieldIndex];
+    const fieldKey = field?.key || field?.name;
+    if (!fieldKey) continue;
+    const errorMessage = validateFieldValue(field, values?.[fieldKey], languages);
+    if (errorMessage) fieldErrors[fieldKey] = errorMessage;
+    if (!errorMessage && field?.renderer === "fieldArray") {
+      const arrayError = validateFieldArrayValue(field, values?.[fieldKey], languages);
+      if (arrayError) fieldErrors[fieldKey] = arrayError;
+    }
+  }
+  return fieldErrors;
+};
+
+const mergeSectionDefaults = async (sectionConfig, values, languages) => {
+  const fields = collectFormFields(sectionConfig);
+  const merged = { ...(values || {}) };
+  for (let fieldIndex = 0; fieldIndex < fields.length; fieldIndex++) {
+    const field = fields[fieldIndex];
+    const fieldKey = field?.key || field?.name;
+    if (!fieldKey) continue;
+    if (merged[fieldKey] === undefined) {
+      const defaultValue = getFieldDefaultValue(field);
+      if (defaultValue !== undefined) merged[fieldKey] = defaultValue;
+    } else if (field?.renderer === "fieldArray") {
+      merged[fieldKey] = normalizeFieldArrayValue(field, merged[fieldKey]);
+    }
+  }
+
+  const normalizeResult = await s({
+    functionName: "localizationHelpers",
+    contextData: {
+      action: "localizeSectionValues",
+      sectionConfig,
+      values: merged,
+      mode: "normalize",
+      languages
+    }
+  });
+
+  return normalizeResult?.result?.data?.values || merged;
+};
+
+const transformSectionValues = (sectionConfig, values) => {
+  const fields = collectFormFields(sectionConfig);
+  const transformed = { ...(values || {}) };
+  for (let fieldIndex = 0; fieldIndex < fields.length; fieldIndex++) {
+    const field = fields[fieldIndex];
+    const fieldKey = field?.key || field?.name;
+    if (!fieldKey) continue;
+    const currentValue = transformed[fieldKey];
+    if (currentValue == null) continue;
+    if (field?.dataType === "email" || field?.validation?.email === true) {
+      transformed[fieldKey] = String(currentValue).trim().toLowerCase();
+    }
+    if (field?.dataType === "text" && field?.transform === "trim") {
+      transformed[fieldKey] = String(currentValue).trim();
+    }
+  }
+  return transformed;
+};
+
+const buildAuditDiff = (beforeValues, afterValues) => {
+  const before = beforeValues || {};
+  const after = afterValues || {};
+  const changedKeys = [];
+  const diff = {};
+  const allKeys = new Set([...Object.keys(before), ...Object.keys(after)]);
+  for (const key of allKeys) {
+    const beforeValue = before[key];
+    const afterValue = after[key];
+  if (JSON.stringify(beforeValue) !== JSON.stringify(afterValue)) {
+      changedKeys.push(key);
+      diff[key] = { before: beforeValue, after: afterValue };
+    }
+  }
+  return { changedKeys, diff };
+};
+
+if (action === "validateSection") {
+  const { sectionConfig, values, languages: inputLanguages } = c;
+  const languages = resolveLanguages(inputLanguages);
+  const fieldErrors = await validateSectionValues(sectionConfig, values, languages);
+  if (Object.keys(fieldErrors).length > 0) {
+    return { success: false, message: "Validation failed", data: { fieldErrors } };
+  }
+  return { success: true, data: { valid: true } };
+}
+
+if (action === "mergeDefaults") {
+  const { sectionConfig, values, languages: inputLanguages } = c;
+  const languages = resolveLanguages(inputLanguages);
+  const mergedValues = await mergeSectionDefaults(sectionConfig, values, languages);
+  return { success: true, data: { values: mergedValues } };
+}
+
+if (action === "transformValues") {
+  const { sectionConfig, values } = c;
+  return { success: true, data: { values: transformSectionValues(sectionConfig, values) } };
+}
+
+if (action === "buildAuditDiff") {
+  const { beforeValues, afterValues } = c;
+  return { success: true, data: buildAuditDiff(beforeValues, afterValues) };
+}
+
+if (action === "collectFormFields") {
+  const { sectionConfig } = c;
+  return { success: true, data: { fields: collectFormFields(sectionConfig) } };
+}
+
+return { success: false, message: `Unknown action: ${action}` };
+'''
+      }
+    }
+  ]
+  edges: []
+}

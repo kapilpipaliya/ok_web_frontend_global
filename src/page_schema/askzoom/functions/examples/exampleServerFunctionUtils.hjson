@@ -1,0 +1,376 @@
+{
+  vertexes: [
+    {
+      id: "example_server_function_utils",
+      L: "Function",
+      P: {
+        key: "exampleServerFunctionUtils",
+        description: "Comprehensive example showcasing all server function utilities available via _ object",
+        body: '''
+/**
+ * Example: Advanced Server Function with All Utilities
+ *
+ * This demonstrates how to use the comprehensive utilities available in _:
+ * - _.utils - General-purpose utilities
+ * - _.cypher - Cypher query building
+ * - _.Models - Neogma OGM models
+ * - _.crypto - Cryptographic operations
+ * - _.path - Path operations
+ *
+ * Parameters (via c):
+ * - action: string - Action to perform:
+ *   - "search" - Search with pagination and filters
+ *   - "create" - Create with validation
+ *   - "stats" - Get statistics
+ *   - "cleanup" - Cleanup old data
+ * - userId: string (optional) - User UUID
+ * - searchTerm: string (optional) - Search keyword
+ * - page: number (optional) - Page number for pagination
+ * - limit: number (optional) - Items per page
+ * - days: number (optional) - Days for cleanup/stats
+ */
+
+try {
+  const {
+    action = "search",
+    userId,
+    searchTerm,
+    page = 1,
+    limit = 10,
+    days = 7
+  } = c;
+
+  // ==================== ACTION: SEARCH ====================
+  if (action === "search") {
+    // 1. INPUT VALIDATION using _.utils
+    if (!userId) {
+      return _.utils.createErrorResponse(
+        "User ID is required",
+        "ValidationError"
+      );
+    }
+
+    if (!_.utils.isValidUUID(userId)) {
+      return _.utils.createErrorResponse(
+        "Invalid user ID format",
+        "ValidationError",
+        { userId }
+      );
+    }
+
+    // 2. BUILD QUERY using _.cypher
+    const baseFilters = { userId };
+
+    // Build WHERE clause
+    const { clause: whereClause, params: whereParams } =
+      _.cypher.buildWhereClause(baseFilters, "n");
+
+    // Add search condition if provided
+    let finalWhere = whereClause;
+    let searchParams = {};
+
+    if (searchTerm && !_.utils.isEmpty(searchTerm)) {
+      const { condition, params } = _.cypher.buildSearchCondition(
+        ["title", "message"],
+        searchTerm,
+        "n"
+      );
+      finalWhere = `${whereClause} AND ${condition}`;
+      searchParams = params;
+    }
+
+    // Build pagination
+    const { skipClause, limitClause, params: paginationParams } =
+      _.cypher.buildPaginationClauses({ page, limit });
+
+    // Build ORDER BY
+    const orderByClause = _.cypher.buildOrderByClause(
+      "createdAt",
+      "DESC",
+      "n"
+    );
+
+    // 3. GET COUNT
+    const countQuery = `
+      MATCH (n:Notification)
+      ${finalWhere}
+      RETURN count(n) as total
+    `;
+
+    const allParams = {
+      ...whereParams,
+      ...searchParams,
+      ...paginationParams
+    };
+
+    const countResult = await _.session.run(countQuery, allParams);
+    const total = countResult.records[0]?.get("total")?.toNumber() || 0;
+
+    // 4. GET DATA
+    const dataQuery = `
+      MATCH (n:Notification)
+      ${finalWhere}
+      RETURN n
+      ${orderByClause}
+      ${skipClause}
+      ${limitClause}
+    `;
+
+    const dataResult = await _.session.run(dataQuery, allParams);
+    const notifications = dataResult.records.map(record =>
+      _.convertNodeToJson(record.get("n"))
+    );
+
+    // 5. CREATE PAGINATED RESPONSE using _.utils
+    return _.utils.createPaginatedResponse({
+      data: notifications,
+      total,
+      page,
+      limit,
+      success: true,
+      message: searchTerm
+        ? `Found ${notifications.length} notifications matching "${searchTerm}"`
+        : `Retrieved ${notifications.length} notifications`
+    });
+  }
+
+  // ==================== ACTION: CREATE ====================
+  if (action === "create") {
+    const { title, message, type = "info", actionUrl, actionText } = c;
+
+    // 1. VALIDATE using _.utils
+    const validationErrors = [];
+
+    if (!userId || !_.utils.isValidUUID(userId)) {
+      validationErrors.push("Valid user ID is required");
+    }
+
+    if (_.utils.isEmpty(title)) {
+      validationErrors.push("Title is required");
+    }
+
+    if (_.utils.isEmpty(message)) {
+      validationErrors.push("Message is required");
+    }
+
+    if (!["info", "success", "warning", "error"].includes(type)) {
+      validationErrors.push("Invalid notification type");
+    }
+
+    if (actionUrl && !_.utils.isValidUrl(actionUrl)) {
+      validationErrors.push("Invalid action URL");
+    }
+
+    if (validationErrors.length > 0) {
+      return _.utils.createErrorResponse(
+        "Validation failed",
+        "ValidationError",
+        { errors: validationErrors }
+      );
+    }
+
+    // 2. SANITIZE INPUT using _.utils
+    const sanitizedTitle = _.utils.truncate(
+      _.utils.stripHtml(title),
+      100
+    );
+    const sanitizedMessage = _.utils.stripHtml(message);
+
+    // 3. GENERATE ID using _.utils
+    const notificationId = _.utils.generateUUID();
+
+    // 4. CREATE NOTIFICATION using _.Models
+    const notification = await _.Models.Notification.createOne({
+      id: notificationId,
+      userId,
+      type,
+      title: sanitizedTitle,
+      message: sanitizedMessage,
+      actionUrl: actionUrl || null,
+      actionText: actionText || null,
+      read: false,
+      createdAt: _.utils.now(),
+      updatedAt: _.utils.now()
+    }, { session: _.session });
+
+    // 5. CONVERT TO VERTEX FORMAT
+    const { modelToVertex } = await import("~/lib/models");
+    const vertexFormat = modelToVertex(notification);
+
+    return _.utils.createSuccessResponse(
+      { notification: vertexFormat },
+      "Notification created successfully"
+    );
+  }
+
+  // ==================== ACTION: STATS ====================
+  if (action === "stats") {
+    if (!userId || !_.utils.isValidUUID(userId)) {
+      return _.utils.createErrorResponse(
+        "Valid user ID is required",
+        "ValidationError"
+      );
+    }
+
+    // 1. GET DATE RANGE using _.utils
+    const now = _.utils.now();
+    const weekAgo = _.utils.daysAgo(7);
+    const monthAgo = _.utils.daysAgo(30);
+
+    // 2. BUILD COMPLEX STATS QUERY
+    const statsQuery = `
+      MATCH (n:Notification {userId: $userId})
+      WITH n,
+        datetime(n.createdAt) as createdDateTime,
+        datetime($now) as nowDateTime
+      WITH n,
+        duration.between(createdDateTime, nowDateTime).days as daysAgo
+      RETURN
+        count(n) as total,
+        sum(CASE WHEN n.read = false THEN 1 ELSE 0 END) as unread,
+        sum(CASE WHEN n.read = true THEN 1 ELSE 0 END) as read,
+        sum(CASE WHEN n.type = 'info' THEN 1 ELSE 0 END) as infoCount,
+        sum(CASE WHEN n.type = 'success' THEN 1 ELSE 0 END) as successCount,
+        sum(CASE WHEN n.type = 'warning' THEN 1 ELSE 0 END) as warningCount,
+        sum(CASE WHEN n.type = 'error' THEN 1 ELSE 0 END) as errorCount,
+        sum(CASE WHEN daysAgo <= 1 THEN 1 ELSE 0 END) as last24Hours,
+        sum(CASE WHEN daysAgo <= 7 THEN 1 ELSE 0 END) as lastWeek,
+        sum(CASE WHEN daysAgo <= 30 THEN 1 ELSE 0 END) as lastMonth,
+        min(n.createdAt) as firstNotification,
+        max(n.createdAt) as latestNotification
+    `;
+
+    const result = await _.session.run(statsQuery, { userId, now });
+
+    const record = result.records[0];
+    if (!record) {
+      return _.utils.createSuccessResponse({
+        total: 0,
+        unread: 0,
+        read: 0,
+        byType: { info: 0, success: 0, warning: 0, error: 0 },
+        byTime: { last24Hours: 0, lastWeek: 0, lastMonth: 0 },
+        dateRange: null
+      }, "No notifications found");
+    }
+
+    // 3. FORMAT STATS using _.utils
+    const stats = {
+      total: record.get("total")?.toNumber() || 0,
+      unread: record.get("unread")?.toNumber() || 0,
+      read: record.get("read")?.toNumber() || 0,
+      byType: {
+        info: record.get("infoCount")?.toNumber() || 0,
+        success: record.get("successCount")?.toNumber() || 0,
+        warning: record.get("warningCount")?.toNumber() || 0,
+        error: record.get("errorCount")?.toNumber() || 0
+      },
+      byTime: {
+        last24Hours: record.get("last24Hours")?.toNumber() || 0,
+        lastWeek: record.get("lastWeek")?.toNumber() || 0,
+        lastMonth: record.get("lastMonth")?.toNumber() || 0
+      },
+      dateRange: {
+        first: record.get("firstNotification"),
+        latest: record.get("latestNotification")
+      },
+      formattedTotal: _.utils.formatNumber(record.get("total")?.toNumber() || 0)
+    };
+
+    return _.utils.createSuccessResponse(
+      stats,
+      "Statistics retrieved successfully"
+    );
+  }
+
+  // ==================== ACTION: CLEANUP ====================
+  if (action === "cleanup") {
+    // 1. VALIDATE ADMIN PERMISSION
+    const currentUser = await _.getUserFromSession();
+    if (!currentUser || !currentUser.P.isAdmin) {
+      return _.utils.createErrorResponse(
+        "Admin permission required",
+        "PermissionError"
+      );
+    }
+
+    // 2. CALCULATE CUTOFF DATE using _.utils
+    const cutoffDate = _.utils.daysAgo(days);
+
+    // 3. BUILD DELETE QUERY using _.cypher
+    const deleteQuery = `
+      MATCH (n:Notification {read: true})
+      WHERE n.createdAt < $cutoffDate
+      DETACH DELETE n
+      RETURN count(n) as deletedCount
+    `;
+
+    const result = await _.session.run(deleteQuery, { cutoffDate });
+    const deletedCount = result.records[0]?.get("deletedCount")?.toNumber() || 0;
+
+    // 4. LOG ACTIVITY using _.crypto for hashing
+    const activityId = _.crypto.randomBytes(16).toString('hex');
+    const activityHash = _.crypto
+      .createHash('sha256')
+      .update(`cleanup-${currentUser.P.uuid}-${_.utils.now()}`)
+      .digest('hex');
+
+    // Log to database
+    await _.session.run(`
+      CREATE (log:ActivityLog {
+        id: $activityId,
+        userId: $userId,
+        action: 'notification_cleanup',
+        deletedCount: $deletedCount,
+        cutoffDays: $days,
+        timestamp: $timestamp,
+        hash: $hash
+      })
+    `, {
+      activityId,
+      userId: currentUser.P.uuid,
+      deletedCount,
+      days,
+      timestamp: _.utils.now(),
+      hash: activityHash
+    });
+
+    return _.utils.createSuccessResponse(
+      {
+        deletedCount,
+        cutoffDate,
+        activityId,
+        formattedCount: _.utils.formatNumber(deletedCount)
+      },
+      `Successfully deleted ${deletedCount} old read notifications`
+    );
+  }
+
+  // ==================== INVALID ACTION ====================
+  return _.utils.createErrorResponse(
+    `Invalid action: ${action}`,
+    "ValidationError",
+    {
+      validActions: ["search", "create", "stats", "cleanup"]
+    }
+  );
+
+} catch (error) {
+  console.error("Error in exampleServerFunctionUtils:", error);
+
+  // Use utils for consistent error response
+  return _.utils.createErrorResponse(
+    error.message || "An unexpected error occurred",
+    error.name || "ServerError",
+    {
+      stack: error.stack,
+      functionName: _.functionName
+    }
+  );
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

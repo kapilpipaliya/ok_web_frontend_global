@@ -1,0 +1,172 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: SettingsSectionTabs
+        dynamicComponent: SettingsSectionRenderer
+        fns:
+          '''
+const getSectionConfig = () => c.props?.sectionConfig || null;
+
+const getNestedSections = () => {
+  const sectionConfig = getSectionConfig();
+  return Array.isArray(sectionConfig?.sections) ? sectionConfig.sections : [];
+};
+
+const [activeTabId, setActiveTabId] = _.createSignal(null);
+
+const getActiveTabId = () => {
+  const current = activeTabId();
+  if (current) return current;
+  const sections = getNestedSections();
+  return sections.length > 0 ? sections[0].id : null;
+};
+
+return {
+  getSectionConfig,
+  getNestedSections,
+  getActiveTabId,
+  setActiveTabId
+};
+'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        css:
+          '''
+return `._id {
+  margin-bottom: ${t.var.spacing.lg};
+}`;
+'''
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        css:
+          '''
+return `._id {
+  display: flex;
+  gap: ${t.var.spacing.xs};
+  border-bottom: 1px solid ${t.var.color.border};
+  margin-bottom: ${t.var.spacing.md};
+}`;
+'''
+        componentName: Html
+        contextName: tabItem
+        loop: true
+        props:
+          '''
+return {
+  as: "div",
+  data: f.getNestedSections()
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 1
+        css:
+          '''
+const tabItem = c.tabItem;
+const active = f.getActiveTabId() === tabItem.id;
+return active
+  ? `._id {
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid ${t.var.color.primary};
+  cursor: pointer;
+  font-weight: 500;
+  color: ${t.var.color.primary};
+  margin-bottom: -1px;
+}`
+  : `._id {
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  font-weight: 500;
+  color: ${t.var.color.text_light_500};
+  margin-bottom: -1px;
+}
+._id:hover {
+  color: ${t.var.color.text};
+}`;
+'''
+        componentName: Html
+        props:
+          '''
+const tabItem = c.tabItem;
+return {
+  as: "button",
+  type: "button",
+  text: tabItem.title || tabItem.id,
+  onClick: () => f.setActiveTabId(tabItem.id)
+};
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        contextName: tabPanel
+        loop: true
+        props:
+          '''
+return {
+  as: "div",
+  data: f.getNestedSections()
+};
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: SettingsSectionRenderer
+        props:
+          '''
+const tabPanel = c.tabPanel;
+const active = f.getActiveTabId() === tabPanel.id;
+return {
+  sectionConfig: tabPanel,
+  siteLanguages: c.props?.siteLanguages || [],
+  hide: !active
+};
+'''
+      }
+    }
+  ]
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" }
+    { id: "e2", T: "Attr", S: "2", E: "3" }
+    { id: "e3", T: "Attr", S: "3", E: "4" }
+    { id: "e4", T: "Attr", S: "2", E: "5" }
+    { id: "e5", T: "Attr", S: "5", E: "6" }
+  ]
+}

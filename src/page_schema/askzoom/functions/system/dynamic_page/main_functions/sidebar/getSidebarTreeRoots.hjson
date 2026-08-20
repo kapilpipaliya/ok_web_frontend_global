@@ -1,0 +1,302 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Fetches sidebar roots and their direct children in one call. Returns roots + first-level children and graph structure. Use for initial sidebar load to minimize API calls; fetch deeper children lazily via getVertexChildren.
+        body:
+          '''
+// Get current authenticated user from session
+const actualUser = await _.getUserFromSession();
+if (!actualUser) {
+  return {
+    success: false,
+    message: "User session not found. Please log in and try again.",
+    data: []
+  };
+}
+
+const { parentVertexLabel, toParentEdgeType, rootKeys, tableVertexLabel, relationshipType, enableUserScoping, hooks, loadFullTree } = c;
+
+if (!parentVertexLabel || !toParentEdgeType || !rootKeys) {
+  return {
+    success: false,
+    message: "parentVertexLabel, toParentEdgeType and rootKeys are required",
+    data: []
+  };
+}
+const fetchFullTree = loadFullTree === true;
+
+let user = null;
+let userUuid = null;
+if (enableUserScoping) {
+  user = await _.getEffectiveUser(_.session, actualUser, c);
+  userUuid = user.P.uuid;
+}
+
+await _.executeHooks(hooks?.beforeGetVertexChildren, {
+  parentVertexLabel,
+  toParentEdgeType,
+  parentId: null,
+  rootKeys,
+  tableVertexLabel,
+  relationshipType,
+  enableUserScoping
+});
+
+// Optional filters from rootKeys (e.g. v.key = "root") — must apply in loadFullTree mode too
+const rootKeyFilterConditions = [];
+const rootKeyFilterParams = {};
+let rkParamIdx = 0;
+for (const [rk, rv] of Object.entries(rootKeys || {})) {
+  rkParamIdx++;
+  const pn = `rk${rkParamIdx}`;
+  rootKeyFilterConditions.push(`v.${rk} = $${pn}`);
+  rootKeyFilterParams[pn] = rv;
+}
+const rootKeyFilterClauseOnV =
+  rootKeyFilterConditions.length > 0 ? ` AND ${rootKeyFilterConditions.join(" AND ")}` : "";
+const edgeWhereClause =
+  rootKeyFilterConditions.length > 0
+    ? ` WHERE ${rootKeyFilterConditions.map((c) => c.replace(/^v\./, "child.")).join(" AND ")} AND ${rootKeyFilterConditions.map((c) => c.replace(/^v\./, "parent.")).join(" AND ")}`
+    : "";
+
+let rootVertices;
+
+if (fetchFullTree) {
+  // Full tree: fetch all vertices and all edges in two queries
+  if (!_.context.nodes) _.context.nodes = {};
+  let allVerticesQuery;
+  const allVerticesParams = { ...rootKeyFilterParams };
+  if (!enableUserScoping) {
+    allVerticesQuery = `
+      MATCH (v:${parentVertexLabel})
+      WHERE true${rootKeyFilterClauseOnV}
+      RETURN v
+      ORDER BY COALESCE(v.displayOrder, 0), COALESCE(v.key, '') ASC
+    `;
+  } else {
+    const userRel = `User${parentVertexLabel}`;
+    allVerticesQuery = `
+      MATCH (u:User {uuid: $userUuid})-[:${userRel}]->(v:${parentVertexLabel})
+      WHERE true${rootKeyFilterClauseOnV}
+      RETURN v
+      ORDER BY COALESCE(v.displayOrder, 0), COALESCE(v.key, '') ASC
+    `;
+    allVerticesParams.userUuid = userUuid;
+  }
+  const allVerticesResult = await _.session.run(allVerticesQuery, allVerticesParams);
+  _.processResult(allVerticesResult.records, _.context, 'v');
+
+  let allEdgesQuery;
+  const allEdgesParams = { ...rootKeyFilterParams };
+  if (!enableUserScoping) {
+    allEdgesQuery = `
+      MATCH (child:${parentVertexLabel})-[r:${toParentEdgeType}]->(parent:${parentVertexLabel})${edgeWhereClause}
+      RETURN child, parent, r
+      ORDER BY COALESCE(child.displayOrder, 0), COALESCE(child.key, '') ASC
+    `;
+  } else {
+    const userRel = `User${parentVertexLabel}`;
+    allEdgesQuery = `
+      MATCH (u:User {uuid: $userUuid})-[:${userRel}]->(child:${parentVertexLabel})-[r:${toParentEdgeType}]->(parent:${parentVertexLabel})${edgeWhereClause}
+      RETURN child, parent, r
+      ORDER BY COALESCE(child.displayOrder, 0), COALESCE(child.key, '') ASC
+    `;
+    allEdgesParams.userUuid = userUuid;
+  }
+  const allEdgesResult = await _.session.run(allEdgesQuery, allEdgesParams);
+  _.processResult(allEdgesResult.records, _.context, ['child', 'parent'], 'r');
+
+  // Roots = vertices with no incoming toParentEdgeType
+  const nodes = _.context.nodes;
+  rootVertices = Object.keys(nodes)
+    .filter(id => {
+      const node = nodes[id];
+      const outEdges = node?.OUT?.[toParentEdgeType];
+      return !outEdges || outEdges.length === 0;
+    })
+    .map(id => nodes[id])
+    .filter(Boolean)
+    .sort((a, b) => {
+      const orderA = a.P?.displayOrder ?? 0;
+      const orderB = b.P?.displayOrder ?? 0;
+      if (orderA !== orderB) return orderA - orderB;
+      const keyA = a.P?.key ?? '';
+      const keyB = b.P?.key ?? '';
+      return String(keyA).localeCompare(String(keyB));
+    });
+} else {
+  // One level: roots + direct children only
+  const filterConditions = [];
+  const params = {};
+  let paramIndex = 0;
+  for (const [key, value] of Object.entries(rootKeys)) {
+    paramIndex++;
+    const paramName = `filter${paramIndex}`;
+    filterConditions.push(`v.${key} = $${paramName}`);
+    params[paramName] = value;
+  }
+  const filterClause = filterConditions.length > 0 ? ` AND ${filterConditions.join(' AND ')}` : '';
+
+  let rootQuery;
+  if (!enableUserScoping) {
+    rootQuery = `
+      MATCH (v:${parentVertexLabel})
+      WHERE NOT EXISTS { MATCH (v)-[:${toParentEdgeType}]->(:${parentVertexLabel}) }${filterClause}
+      RETURN v
+      ORDER BY COALESCE(v.displayOrder, 0), COALESCE(v.key, '') ASC
+    `;
+  } else {
+    const userRel = `User${parentVertexLabel}`;
+    rootQuery = `
+      MATCH (u:User {uuid: $userUuid})-[:${userRel}]->(v:${parentVertexLabel})
+      WHERE NOT EXISTS { MATCH (v)-[:${toParentEdgeType}]->(:${parentVertexLabel}) }${filterClause}
+      RETURN v
+      ORDER BY COALESCE(v.displayOrder, 0), COALESCE(v.key, '') ASC
+    `;
+    params.userUuid = userUuid;
+  }
+  const rootResult = await _.session.run(rootQuery, params);
+  rootVertices = _.processResult(rootResult.records, _.context, 'v');
+  const rootIds = rootVertices.map(v => v.id).filter(Boolean);
+
+  if (rootIds.length > 0) {
+    let childrenQuery;
+    if (!enableUserScoping) {
+      childrenQuery = `
+        MATCH (child:${parentVertexLabel})-[r:${toParentEdgeType}]->(parent:${parentVertexLabel})
+        WHERE elementId(parent) IN $rootIds
+        RETURN child, parent, r
+        ORDER BY COALESCE(child.displayOrder, 0), COALESCE(child.key, '') ASC
+      `;
+    } else {
+      const userRel = `User${parentVertexLabel}`;
+      childrenQuery = `
+        MATCH (u:User {uuid: $userUuid})-[:${userRel}]->(child:${parentVertexLabel})-[r:${toParentEdgeType}]->(parent:${parentVertexLabel})
+        WHERE elementId(parent) IN $rootIds
+        RETURN child, parent, r
+        ORDER BY COALESCE(child.displayOrder, 0), COALESCE(child.key, '') ASC
+      `;
+    }
+    const childrenParams = { rootIds };
+    if (enableUserScoping) childrenParams.userUuid = userUuid;
+    const childrenResult = await _.session.run(childrenQuery, childrenParams);
+    _.processResult(childrenResult.records, _.context, ['child', 'parent'], 'r');
+  }
+}
+
+// 3) Uncategorized vertex and its count
+let uncategorizedVertex = null;
+let uncategorizedCount = 0;
+if (tableVertexLabel && relationshipType) {
+  let uncatQuery;
+  let uncatParams = {};
+  if (!enableUserScoping) {
+    uncatQuery = `
+      MATCH (content:${tableVertexLabel})
+      WHERE NOT EXISTS { MATCH (content)-[:${toParentEdgeType}]->(:${parentVertexLabel}) }
+      RETURN count(DISTINCT content) as contentCount
+    `;
+  } else {
+    uncatQuery = `
+      MATCH (u:User {uuid: $userUuid})-[:${relationshipType}]->(content:${tableVertexLabel})
+      WHERE NOT EXISTS { MATCH (content)-[:${toParentEdgeType}]->(:${parentVertexLabel}) }
+      RETURN count(DISTINCT content) as contentCount
+    `;
+    uncatParams.userUuid = userUuid;
+  }
+  const uncatResult = await _.session.run(uncatQuery, uncatParams);
+  uncategorizedCount = uncatResult.records[0]?.get('contentCount') || 0;
+  const uncategorizedId = '_' + tableVertexLabel + '_uncategorized';
+  uncategorizedVertex = {
+    id: uncategorizedId,
+    L: [parentVertexLabel],
+    P: {
+      key: uncategorizedId,
+      name: 'Uncategorized',
+      contentCount: uncategorizedCount,
+      tableVertexLabel: tableVertexLabel
+    },
+    IN: {},
+    OUT: {}
+  };
+  if (!_.context.nodes) _.context.nodes = {};
+  _.context.nodes[uncategorizedId] = uncategorizedVertex;
+}
+
+// 4) Batch content count for all categories (roots + children) in one query
+const rootKey = rootKeys.key || null;
+if (tableVertexLabel && relationshipType && _.context.nodes) {
+  const syntheticUncategorizedId = '_' + tableVertexLabel + '_uncategorized';
+  const categoryIds = Object.keys(_.context.nodes).filter(
+    id => id !== syntheticUncategorizedId
+  );
+  const countByCategoryId = {};
+  if (categoryIds.length > 0) {
+    let batchQuery;
+    let batchParams = { categoryIds };
+    if (!enableUserScoping) {
+      batchQuery = `
+        UNWIND $categoryIds AS catId
+        OPTIONAL MATCH (cat:${parentVertexLabel}) WHERE elementId(cat) = catId
+        WITH catId, cat
+        OPTIONAL MATCH (content:${tableVertexLabel})-[:${toParentEdgeType}]->(cat)
+        WITH catId, count(DISTINCT content) AS contentCount
+        RETURN catId, contentCount
+      `;
+    } else {
+      batchQuery = `
+        UNWIND $categoryIds AS catId
+        OPTIONAL MATCH (cat:${parentVertexLabel}) WHERE elementId(cat) = catId
+        WITH catId, cat
+        OPTIONAL MATCH (u:User {uuid: $userUuid})-[:${relationshipType}]->(content:${tableVertexLabel})-[:${toParentEdgeType}]->(cat)
+        WITH catId, count(DISTINCT content) AS contentCount
+        RETURN catId, contentCount
+      `;
+      batchParams.userUuid = userUuid;
+    }
+    const batchResult = await _.session.run(batchQuery, batchParams);
+    for (const rec of batchResult.records) {
+      const catId = rec.get('catId');
+      const contentCount = rec.get('contentCount')?.toNumber?.() ?? rec.get('contentCount') ?? 0;
+      countByCategoryId[catId] = contentCount;
+    }
+  }
+  for (const id of Object.keys(_.context.nodes)) {
+    const node = _.context.nodes[id];
+    if (!node || !node.P) continue;
+    if (id === syntheticUncategorizedId) continue;
+    const useUncategorizedCount = rootKey && node.P.key === rootKey;
+    const contentCount = useUncategorizedCount ? uncategorizedCount : (countByCategoryId[id] ?? 0);
+    node.P.contentCount = contentCount;
+  }
+}
+
+const finalVertices = uncategorizedVertex ? [uncategorizedVertex, ...rootVertices] : rootVertices;
+const resultData = {
+  success: true,
+  data: finalVertices,
+  message: `Found ${finalVertices.length} root vertices with first-level children`
+};
+
+await _.executeHooks(hooks?.afterGetVertexChildren, {
+  parentVertexLabel,
+  toParentEdgeType,
+  parentId: null,
+  rootKeys,
+  tableVertexLabel,
+  relationshipType,
+  enableUserScoping,
+  result: resultData
+});
+
+return resultData;
+'''
+        key: getSidebarTreeRoots
+      }
+    }
+  ]
+  edges: []
+}

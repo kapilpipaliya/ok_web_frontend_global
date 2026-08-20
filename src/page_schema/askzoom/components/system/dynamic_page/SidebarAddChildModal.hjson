@@ -1,0 +1,650 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        fns:
+          '''
+// Store FormManagement's formTxnId getter (set via onFnsReady from modal content)
+const formTxnIdRef = { current: null };
+
+// Revert transaction when closing without save (Cancel button, etc.)
+const cleanup = () => {
+  const getTxnId = formTxnIdRef.current;
+  const txnId = getTxnId && typeof getTxnId === 'function' ? getTxnId() : null;
+  if (txnId && txnId > 0) {
+    _.revertTransaction(txnId);
+  }
+};
+
+// Close on backdrop click: revert (remove unsaved vertex) then close
+const handleBackdropClick = () => {
+  cleanup();
+  const onClose = c.props?.onClose;
+  if (onClose) onClose();
+};
+
+return {
+  formTxnIdRef,
+  cleanup,
+  handleBackdropClick,
+  getUsePolarisUI: () => f.getUsePolarisUI?.() === true
+};
+'''
+        key: SidebarAddChildModal
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 0;
+    align-items: flex-end;
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const isOpen = c.props?.isOpen || false;
+
+return {
+  as: "div",
+  hide: !isOpen,
+  onClick: (e) => {
+    if (e.target === e.currentTarget) {
+      f?.handleBackdropClick?.();
+    }
+  },
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  background: ${t.var.color.background};
+  border-radius: 0.75rem;
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  animation: slideUp 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    max-width: 100%;
+    max-height: 100vh;
+    height: 100vh;
+    border-radius: 0;
+    animation: slideUpMobile 0.3s ease;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes slideUpMobile {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}`;
+'''
+        displayOrder: 1
+        fns:
+          '''
+// Use component-level cleanup and formTxnIdRef
+return {
+  cleanup: () => f?.cleanup?.(),
+  formTxnIdRef: f?.formTxnIdRef
+};
+'''
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  onClick: (e) => e.stopPropagation(),
+  onCleanup: () => {
+    f.cleanup();
+  }
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: ${t.var.spacing.lg};
+  border-bottom: 1px solid ${t.var.color.border};
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${t.var.color.text};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const mode = c.props?.mode || "add";
+const parentId = c.props?.parentId;
+const label = c.props?.label || "Item";
+
+let title;
+if (mode === "add") {
+  title = parentId === null || parentId === undefined ? `Add Root ${label}` : `Add New Child ${label}`;
+} else {
+  title = `Edit ${label}`;
+}
+
+return {
+  as: "div",
+  text: title
+};
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const wrappedOnClose = () => {
+  f.cleanup();
+  const onClose = c.props?.onClose;
+  if (onClose) onClose();
+};
+
+return {
+  as: "s-button",
+  "attr:variant": "plain",
+  "attr:icon": "x",
+  "attr:accessibilityLabel": "Close",
+  onClick: wrappedOnClose,
+  hide: f.getUsePolarisUI?.() !== true
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  cursor: pointer;
+  color: ${t.var.color.text_light_500};
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: ${t.var.color.text};
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const wrappedOnClose = () => {
+  f.cleanup();
+  const onClose = c.props?.onClose;
+  if (onClose) onClose();
+};
+
+return {
+  as: "icon",
+  icon: "carbon:close",
+  width: 24,
+  height: 24,
+  onClick: wrappedOnClose,
+  hide: f.getUsePolarisUI?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  flex: 1;
+  overflow-y: auto;
+  padding: ${t.var.spacing.lg};
+}`;
+'''
+        displayOrder: 2
+        componentName: FormManagement
+        props:
+          '''
+const sidebarConfig = c.props?.sidebarConfig || {};
+const formConfig = sidebarConfig?.formConfig;
+const parentId = c.props?.parentId;
+const vertexId = c.props?.vertexId;
+const initialVertex = c.props?.initialVertex;
+const mode = c.props?.mode || "add";
+const parentVertexLabel = sidebarConfig?.parentVertexLabel;
+const toParentEdgeType = sidebarConfig?.toParentEdgeType;
+const rootKeys = sidebarConfig?.rootKeys || {};
+const tableVertexLabel = c.props?.tableVertexLabel;
+const relationshipType = c.props?.relationshipType;
+const onSave = c.props?.onSave;
+const onClose = c.props?.onClose;
+
+const formHasKeyField = (cfg) => {
+  if (!cfg || !Array.isArray(cfg.groups)) return false;
+  for (let gi = 0; gi < cfg.groups.length; gi++) {
+    const fields = cfg.groups[gi]?.fields;
+    if (!Array.isArray(fields)) continue;
+    for (let fi = 0; fi < fields.length; fi++) {
+      if (fields[fi]?.key === "key") return true;
+    }
+  }
+  return false;
+};
+
+const ensureSidebarFormConfigWithKeyField = (cfg) => {
+  if (!cfg) return cfg;
+  if (formHasKeyField(cfg)) return cfg;
+  const out = _.klona(cfg);
+  const keyField = {
+    key: "key",
+    label: "Key",
+    type: "text",
+    required: true,
+    maxLength: 255,
+    colSpan: 2,
+    tooltip:
+      "Required. Enter a unique key yourself (letters, numbers, underscores). It is not generated from the name."
+  };
+  if (!Array.isArray(out.groups) || out.groups.length === 0) {
+    out.groups = [
+      {
+        key: "_sidebarGenerated",
+        title: "Details",
+        gridColumns: out.gridColumns || 1,
+        fields: [keyField]
+      }
+    ];
+    return out;
+  }
+  const g0 = out.groups[0];
+  const existing = Array.isArray(g0.fields) ? g0.fields : [];
+  g0.fields = [...existing, keyField];
+  return out;
+};
+
+const formConfigResolved = ensureSidebarFormConfigWithKeyField(formConfig);
+
+// Wrap onSave to handle saveSidebarVertex
+const wrappedOnSave = async (saveData) => {
+  // Extract vertex and properties from saveData
+  const vertex = saveData.vertex;
+  if (!vertex) {
+    _.showErrorToast?.("No vertex data to save");
+    return false;
+  }
+
+  const keyVal = String(vertex.P?.key ?? "").trim();
+  if (!keyVal) {
+    _.showErrorToast?.("Key is Required");
+    return false;
+  }
+  const nameVal = String(vertex.P?.name || vertex.P?.title || "").trim();
+  const nameForServer = nameVal || keyVal;
+
+  // Call saveSidebarVertex function
+  const label = c.props?.label || "Item";
+  try {
+    const result = await s({
+      functionName: "saveSidebarVertex",
+      contextData: {
+        vertexId: vertexId || null,
+        name: nameForServer,
+        key: keyVal,
+        parentId: parentId,
+        parentVertexLabel: parentVertexLabel,
+        toParentEdgeType: toParentEdgeType,
+        rootKeys: rootKeys,
+        properties: (() => {
+          const copy = _.klona(vertex.P || {});
+          delete copy.key;
+          return copy;
+        })(),
+        tableVertexLabel: tableVertexLabel,
+        relationshipType: relationshipType,
+        enableUserScoping: c.props?.enableUserScoping,
+        hooks: c.props?.hooks,
+        label: label
+      }
+    });
+
+    // Check for errors and show toast
+    const errorMessage = f.extractError?.(result, true, `Failed to ${mode === "edit" ? "update" : "create"} ${label}`);
+    if (errorMessage) {
+      return false;
+    }
+
+    if (result?.result?.success) {
+      _.showSuccessToast?.(result.result.message || `${label} ${mode === "edit" ? "updated" : "created"} successfully`);
+      // Call original onSave if provided
+      if (onSave) {
+        await onSave(result.result.data);
+      }
+      // Close modal
+      if (onClose) {
+        onClose();
+      }
+      return true;
+    }
+    return false;
+  } catch (error) {
+    console.error("Error saving vertex:", error);
+    _.showErrorToast?.(`Failed to ${mode === "edit" ? "update" : "create"} ${label}`);
+    return false;
+  }
+};
+
+// Wrap onClose to cleanup transaction
+const wrappedOnClose = () => {
+  f.cleanup();
+  if (onClose) {
+    onClose();
+  }
+};
+
+return {
+  formConfig: formConfigResolved,
+  initialVertex: initialVertex || null,
+  mode: mode,
+  vertexLabel: null,
+  hide: () => !(c.props?.isOpen === true),
+  onSave: wrappedOnSave,
+  onClose: wrappedOnClose,
+  inModal: true,
+  onFnsReady: (fns) => {
+    if (f?.formTxnIdRef) f.formTxnIdRef.current = fns.formTxnId;
+  }
+};
+'''
+      }
+    }
+    {
+      id: "9"
+      L: ComponentVariant
+      P: {
+        type: object
+        key: initialVertex
+      }
+    }
+    {
+      id: "10"
+      L: ComponentVariant
+      P: {
+        type: object
+        key: rootKeys
+      }
+    }
+    {
+      id: "11"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: parentId
+      }
+    }
+    {
+      id: "12"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: toParentEdgeType
+      }
+    }
+    {
+      id: "13"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onClose
+      }
+    }
+    {
+      id: "14"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        defValue: false
+        key: isOpen
+      }
+    }
+    {
+      id: "15"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: parentVertexLabel
+      }
+    }
+    {
+      id: "16"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: add
+        key: mode
+      }
+    }
+    {
+      id: "17"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onSave
+      }
+    }
+    {
+      id: "18"
+      L: ComponentVariant
+      P: {
+        type: object
+        key: formConfig
+      }
+    }
+    {
+      id: "19"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: vertexId
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: ComponentVariant
+      S: "1"
+      E: "9"
+    }
+    {
+      id: e3
+      T: ComponentVariant
+      S: "1"
+      E: "10"
+    }
+    {
+      id: e4
+      T: ComponentVariant
+      S: "1"
+      E: "11"
+    }
+    {
+      id: e5
+      T: ComponentVariant
+      S: "1"
+      E: "12"
+    }
+    {
+      id: e6
+      T: ComponentVariant
+      S: "1"
+      E: "13"
+    }
+    {
+      id: e7
+      T: ComponentVariant
+      S: "1"
+      E: "14"
+    }
+    {
+      id: e8
+      T: ComponentVariant
+      S: "1"
+      E: "15"
+    }
+    {
+      id: e9
+      T: ComponentVariant
+      S: "1"
+      E: "16"
+    }
+    {
+      id: e10
+      T: ComponentVariant
+      S: "1"
+      E: "17"
+    }
+    {
+      id: e11
+      T: ComponentVariant
+      S: "1"
+      E: "18"
+    }
+    {
+      id: e12
+      T: ComponentVariant
+      S: "1"
+      E: "19"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "3"
+      E: "8"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "4"
+      E: "6"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "4"
+      E: "7"
+    }
+  ]
+}

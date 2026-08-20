@@ -1,0 +1,595 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: Button
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''
+// Access props reactively
+const variant = c.props?.variant || "primary";
+const fullWidth = c.props?.fullWidth || false;
+const size = c.props?.size || "md";
+
+// Size styles using existing theme values
+const sizeStyles = {
+  xs: {
+    padding: `${t.var.spacing.xxs} ${t.var.spacing.xs}`,
+    fontSize: "0.75rem",
+    borderRadius: t.var.borderRadius.sm,
+    gap: t.var.spacing.xxs
+  },
+  sm: {
+    padding: `${t.var.spacing.xs} ${t.var.spacing.sm}`,
+    fontSize: "0.875rem",
+    borderRadius: t.var.borderRadius.sm,
+    gap: t.var.spacing.xs
+  },
+  md: {
+    padding: `${t.var.spacing.sm} ${t.var.spacing.md}`,
+    fontSize: "1rem",
+    borderRadius: t.var.borderRadius.md,
+    gap: t.var.spacing.sm
+  },
+  lg: {
+    padding: `${t.var.spacing.md} ${t.var.spacing.lg}`,
+    fontSize: "1.125rem",
+    borderRadius: t.var.borderRadius.md,
+    gap: t.var.spacing.md
+  }
+};
+
+const sizeConfig = sizeStyles[size] || sizeStyles.md;
+
+// Base styles
+let baseStyles = `
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: ${sizeConfig.gap};
+  padding: ${sizeConfig.padding};
+  border-radius: ${sizeConfig.borderRadius};
+  font-weight: 500;
+  font-size: ${sizeConfig.fontSize};
+  cursor: pointer;
+  transition: all 150ms ease;
+  border: none;
+  ${fullWidth ? 'width: 100%;' : ''}
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  &:not(:disabled):active {
+    transform: scale(0.95);
+  }
+`;
+
+// Variant-specific styles
+let variantStyles = '';
+
+if (variant === 'primary') {
+  variantStyles = `
+    background: ${t.var.color.primary};
+    color: ${t.var.color.primary_text};
+
+    &:not(:disabled):hover {
+      background: ${t.var.color.primary_dark_200};
+    }
+  `;
+} else if (variant === 'success') {
+  variantStyles = `
+    background: ${t.var.color.success};
+    color: ${t.var.color.success_text};
+
+    &:not(:disabled):hover {
+      background: ${t.var.color.success_dark_200};
+      color: ${t.var.color.success_dark_200_text};
+    }
+  `;
+} else if (variant === 'secondary') {
+  variantStyles = `
+    background: none;
+    color: ${t.var.color.text_light_500};
+    border: 1px solid ${t.var.color.border};
+
+    &:not(:disabled):hover {
+      background: ${t.var.color.background_dark_200};
+      color: ${t.var.color.text};
+    }
+  `;
+} else if (variant === 'danger') {
+  variantStyles = `
+    background: ${t.var.color.background};
+    color: ${t.var.color.error};
+    border: 1px solid ${t.var.color.error};
+
+    &:not(:disabled):hover {
+      background: ${t.var.color.error};
+      color: ${t.var.color.error_text};
+    }
+  `;
+}
+
+return `._id {
+  ${baseStyles}
+  ${variantStyles}
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+// Access props reactively
+const text = c.props?.text || "Button";
+const type = c.props?.type || "button";
+const disabled = c.props?.disabled || c.props?.loading || false;
+const onClick = c.props?.onClick || (() => {});
+const loading = c.props?.loading || false;
+const className = c.props?.class
+
+return {
+  as: "button",
+  class: className,
+  type: type,
+  disabled: disabled,
+  onClick: onClick,
+  "aria-busy": loading ? "true" : "false"
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: loading
+        defValue: false
+      }
+    }
+    {
+      id: "4"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: variant
+        defValue: primary
+      }
+    }
+    {
+      id: "5"
+      L: ComponentVariantOption
+      P: {
+        description: Secondary button with border
+        value: secondary
+        key: secondary
+      }
+    }
+    {
+      id: "6"
+      L: ComponentVariantOption
+      P: {
+        description: Success button with green color
+        value: success
+        key: success
+      }
+    }
+    {
+      id: "7"
+      L: ComponentVariantOption
+      P: {
+        description: Danger button with red color
+        value: danger
+        key: danger
+      }
+    }
+    {
+      id: "8"
+      L: ComponentVariantOption
+      P: {
+        description: Primary button with brand color
+        value: primary
+        key: primary
+      }
+    }
+    {
+      id: "9"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: text
+        defValue: Button
+      }
+    }
+    {
+      id: "10"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: type
+        defValue: button
+      }
+    }
+    {
+      id: "11"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onClick
+      }
+    }
+    {
+      id: "12"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: disabled
+        defValue: false
+      }
+    }
+    {
+      id: "13"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: fullWidth
+        defValue: false
+      }
+    }
+    {
+      id: "14"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: leftIcon
+      }
+    }
+    {
+      id: "15"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: rightIcon
+      }
+    }
+    {
+      id: "19"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: iconSize
+        defValue: md
+      }
+    }
+    {
+      id: "20"
+      L: ComponentVariantOption
+      P: {
+        displayOrder: 1
+        description: Small icon size (16px)
+        value: sm
+        key: sm
+      }
+    }
+    {
+      id: "21"
+      L: ComponentVariantOption
+      P: {
+        displayOrder: 2
+        description: Medium icon size (20px)
+        value: md
+        key: md
+      }
+    }
+    {
+      id: "22"
+      L: ComponentVariantOption
+      P: {
+        displayOrder: 3
+        description: Large icon size (24px)
+        value: lg
+        key: lg
+      }
+    }
+    {
+      id: "23"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: size
+        defValue: md
+      }
+    }
+    {
+      id: "27"
+      L: ComponentVariantOption
+      P: {
+        displayOrder: 1
+        description: Extra small button size
+        value: xs
+        key: xs
+      }
+    }
+    {
+      id: "24"
+      L: ComponentVariantOption
+      P: {
+        displayOrder: 2
+        description: Small button size
+        value: sm
+        key: sm
+      }
+    }
+    {
+      id: "25"
+      L: ComponentVariantOption
+      P: {
+        displayOrder: 3
+        description: Medium button size
+        value: md
+        key: md
+      }
+    }
+    {
+      id: "26"
+      L: ComponentVariantOption
+      P: {
+        displayOrder: 4
+        description: Large button size
+        value: lg
+        key: lg
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const leftIcon = c.props?.leftIcon;
+const iconSize = c.props?.iconSize;
+const buttonSize = c.props?.size || "md";
+// Use iconSize if provided, otherwise use button size
+const effectiveSize = iconSize || buttonSize;
+
+const sizeStyles = {
+  xs: 14,
+  sm: 16,
+  md: 20,
+  lg: 24
+};
+
+const iconSizePx = sizeStyles[effectiveSize] || sizeStyles.md;
+
+return {
+  as: "icon",
+  icon: leftIcon,
+  width: iconSizePx,
+  height: iconSizePx,
+  hide: !leftIcon
+};
+'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const rightIcon = c.props?.rightIcon;
+const iconSize = c.props?.iconSize;
+const buttonSize = c.props?.size || "md";
+// Use iconSize if provided, otherwise use button size
+const effectiveSize = iconSize || buttonSize;
+
+const sizeStyles = {
+  xs: 14,
+  sm: 16,
+  md: 20,
+  lg: 24
+};
+
+const iconSizePx = sizeStyles[effectiveSize] || sizeStyles.md;
+
+return {
+  as: "icon",
+  icon: rightIcon,
+  width: iconSizePx,
+  height: iconSizePx,
+  hide: !rightIcon
+};
+'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const text = c.props?.text || "Button";
+
+return {
+  as: "span",
+  text: text,
+  hide: !text
+};
+'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: ComponentVariant
+      S: "1"
+      E: "3"
+    }
+    {
+      id: e3
+      T: ComponentVariant
+      S: "1"
+      E: "4"
+    }
+    {
+      id: e4
+      T: ComponentVariant
+      S: "1"
+      E: "9"
+    }
+    {
+      id: e5
+      T: ComponentVariant
+      S: "1"
+      E: "10"
+    }
+    {
+      id: e6
+      T: ComponentVariant
+      S: "1"
+      E: "11"
+    }
+    {
+      id: e7
+      T: ComponentVariant
+      S: "1"
+      E: "12"
+    }
+    {
+      id: e8
+      T: ComponentVariant
+      S: "1"
+      E: "13"
+    }
+    {
+      id: e13
+      T: ComponentVariant
+      S: "1"
+      E: "14"
+    }
+    {
+      id: e14
+      T: ComponentVariant
+      S: "1"
+      E: "15"
+    }
+    {
+      id: e18
+      T: ComponentVariant
+      S: "1"
+      E: "19"
+    }
+    {
+      id: e19
+      T: ComponentVariantOption
+      S: "19"
+      E: "20"
+    }
+    {
+      id: e20
+      T: ComponentVariantOption
+      S: "19"
+      E: "21"
+    }
+    {
+      id: e21
+      T: ComponentVariantOption
+      S: "19"
+      E: "22"
+    }
+    {
+      id: e22
+      T: ComponentVariant
+      S: "1"
+      E: "23"
+    }
+    {
+      id: e26
+      T: ComponentVariantOption
+      S: "23"
+      E: "27"
+    }
+    {
+      id: e23
+      T: ComponentVariantOption
+      S: "23"
+      E: "24"
+    }
+    {
+      id: e24
+      T: ComponentVariantOption
+      S: "23"
+      E: "25"
+    }
+    {
+      id: e25
+      T: ComponentVariantOption
+      S: "23"
+      E: "26"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "2"
+      E: "16"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "2"
+      E: "17"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "2"
+      E: "18"
+    }
+    {
+      id: e9
+      T: ComponentVariantOption
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e10
+      T: ComponentVariantOption
+      S: "4"
+      E: "6"
+    }
+    {
+      id: e11
+      T: ComponentVariantOption
+      S: "4"
+      E: "7"
+    }
+    {
+      id: e12
+      T: ComponentVariantOption
+      S: "4"
+      E: "8"
+    }
+  ]
+}

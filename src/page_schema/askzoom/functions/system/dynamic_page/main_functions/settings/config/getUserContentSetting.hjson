@@ -1,0 +1,116 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Fetches user content settings (column and form configuration) for Books or AudioVideo
+        body:
+          '''
+// Get current authenticated user from session
+const actualUser = await _.getUserFromSession();
+if (!actualUser) {
+  return {
+    success: false,
+    message: "User session not found. Please log in and try again."
+  };
+}
+
+// Get effective user (handles admin impersonation)
+const user = await _.getEffectiveUser(_.session, actualUser, c);
+
+// Extract parameters
+const { tableVertexLabel, key, settingsLabel } = c;
+
+if (!tableVertexLabel) {
+  return {
+    success: false,
+    message: "Invalid tableVertexLabel. Must not be empty."
+  };
+}
+
+const labelForSettings = settingsLabel || tableVertexLabel;
+// Build setting key
+const settingKey = key || `${labelForSettings}_settings`;
+
+// Query for user's content setting using (User)-[UserSetting]->(Setting) with key in Setting
+const query = `
+  MATCH (u:User {uuid: $userUuid})-[:UserSetting]->(s:Setting {key: $settingKey})
+  RETURN s
+  LIMIT 1
+`;
+
+const result = await _.session.run(query, {
+  userUuid: user.P.uuid,
+  settingKey: settingKey
+});
+
+if (result.records.length === 0) {
+  // No user setting — load site-wide Setting (not linked via UserSetting)
+  let siteResult = await _.session.run(
+    `MATCH (s:Setting {key: $settingKey})
+     WHERE NOT (s)<-[:UserSetting]-()
+     RETURN s LIMIT 1`,
+    { settingKey }
+  );
+
+  // If no site setting exists, run migration to create defaults
+  if (siteResult.records.length === 0 && s) {
+    try {
+      await s({
+        functionName: "migrateDynamicPageSettings",
+        contextData: { dryRun: false }
+      });
+      siteResult = await _.session.run(
+        `MATCH (s:Setting {key: $settingKey})
+         WHERE NOT (s)<-[:UserSetting]-()
+         RETURN s LIMIT 1`,
+        { settingKey }
+      );
+    } catch (migrateError) {
+      console.error('getUserContentSetting: settings migration failed', migrateError);
+    }
+  }
+
+  if (siteResult.records.length > 0) {
+    const siteVertices = _.processResult(siteResult.records, _.context, 's');
+    const siteVertex = siteVertices[0];
+    return {
+      success: true,
+      data: {
+        setting: siteVertex,
+        isDefault: true
+      },
+      message: "Using site configuration."
+    };
+  }
+
+  return {
+    success: true,
+    data: {
+      setting: null,
+      isDefault: true
+    },
+    message: "No custom settings found."
+  };
+}
+
+// Use processResult to populate graph structure
+const settingVertices = _.processResult(result.records, _.context, 's');
+const settingVertex = settingVertices[0];
+
+return {
+  success: true,
+  data: {
+    setting: settingVertex,
+    isDefault: false
+  },
+  message: "Settings loaded successfully"
+};
+'''
+        key: getUserContentSetting
+      }
+    }
+  ]
+  edges: []
+}

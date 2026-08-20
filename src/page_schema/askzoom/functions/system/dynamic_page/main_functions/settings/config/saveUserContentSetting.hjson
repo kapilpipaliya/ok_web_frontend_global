@@ -1,0 +1,90 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Saves user content settings (column and form configuration) for Books or AudioVideo
+        body:
+          '''
+// Get current authenticated user from session
+const actualUser = await _.getUserFromSession();
+if (!actualUser) {
+  return {
+    success: false,
+    message: "User session not found. Please log in and try again."
+  };
+}
+
+// Get effective user (handles admin impersonation)
+const user = await _.getEffectiveUser(_.session, actualUser, c);
+
+// Extract parameters
+const { tableVertexLabel, config, key, settingsLabel } = c;
+
+if (!tableVertexLabel) {
+  return {
+    success: false,
+    message: "Invalid tableVertexLabel. Must not be empty."
+  };
+}
+
+const labelForSettings = settingsLabel || tableVertexLabel;
+// Build setting key
+const settingKey = key || `${labelForSettings}_settings`;
+
+// Store config as JSON string for Neo4j compatibility
+const configString = config ? (typeof config === 'string' ? config : JSON.stringify(config)) : null;
+
+if (!configString) {
+  return {
+    success: false,
+    message: "Config is required"
+  };
+}
+
+// Save or update setting using MERGE with (User)-[UserSetting]->(Setting) and key in Setting
+const query = `
+  MATCH (u:User {uuid: $userUuid})
+  MERGE (u)-[:UserSetting]->(s:Setting {key: $settingKey})
+  ON CREATE SET
+    s.createdAt = datetime(),
+    s.config = $config,
+    s.updatedAt = datetime()
+  ON MATCH SET
+    s.config = $config,
+    s.updatedAt = datetime()
+  RETURN s
+`;
+
+const result = await _.session.run(query, {
+  userUuid: user.P.uuid,
+  settingKey: settingKey,
+  config: configString
+});
+
+if (result.records.length === 0) {
+  return {
+    success: false,
+    message: "Failed to save settings. Please try again."
+  };
+}
+
+// Use processResult to populate graph structure
+const savedVertices = _.processResult(result.records, _.context, 's');
+const savedVertex = savedVertices[0];
+
+return {
+  success: true,
+  data: {
+    setting: savedVertex
+  },
+  message: "Settings saved successfully"
+};
+'''
+        key: saveUserContentSetting
+      }
+    }
+  ]
+  edges: []
+}

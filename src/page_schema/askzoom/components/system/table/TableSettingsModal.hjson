@@ -1,0 +1,154 @@
+{
+  vertexes: [
+    {
+      id: "tsm_root",
+      L: "Component",
+      P: {
+        key: "TableSettingsModal",
+        description: "Modal wrapper for TableSchemaEditorShell (table schema editor)."
+      }
+    },
+    {
+      id: "tsm_overlay",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const isOpen = c.props?.isOpen === true;
+const onClose = c.props?.onClose;
+
+return {
+  as: "div",
+  hide: !isOpen,
+  onClick: (e) => {
+    if (e.target === e.currentTarget && onClose) onClose();
+  }
+};
+''',
+        css: '''
+return `._id {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: tsmFadeIn 0.2s ease;
+}
+
+@keyframes tsmFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 0;
+    align-items: stretch;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "tsm_panel",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  background: ${t.var.color.background};
+  border-radius: 0.75rem;
+  width: min(1200px, 96vw);
+  height: min(90vh, 900px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  animation: tsmSlideUp 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+  }
+}
+
+@keyframes tsmSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "tsm_editor_wrap",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}`;
+'''
+      }
+    },
+    {
+      id: "tsm_editor",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "TableSchemaEditorShell",
+        props: '''
+const tableKey = c.props?.tableKey;
+const onClose = c.props?.onClose;
+const onSaved = c.props?.onSaved;
+const isOpen = c.props?.isOpen === true;
+
+return {
+  tableKey,
+  embeddedMode: true,
+  isOpen,
+  onSaved: () => {
+    if (typeof onSaved === "function") onSaved();
+  }
+};
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "tsm_e1", T: "Attr", S: "tsm_root", E: "tsm_overlay" },
+    { id: "tsm_e2", T: "Attr", S: "tsm_overlay", E: "tsm_panel" },
+    { id: "tsm_e3", T: "Attr", S: "tsm_panel", E: "tsm_editor_wrap" },
+    { id: "tsm_e4", T: "Attr", S: "tsm_editor_wrap", E: "tsm_editor" }
+  ]
+}

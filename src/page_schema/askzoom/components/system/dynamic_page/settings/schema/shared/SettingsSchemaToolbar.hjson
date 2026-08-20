@@ -1,0 +1,188 @@
+{
+  vertexes: [
+    {
+      id: "sst_root",
+      L: "Component",
+      P: {
+        key: "SettingsSchemaToolbar",
+        description: "Toolbar for settings page schema editor (visual/JSON modes, save).",
+        dynamicComponent: "Button, Html"
+      }
+    },
+{
+      id: "sst_toolbar",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "header" };
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background_light_100};
+  flex-shrink: 0;
+}`;
+'''
+      }
+    },
+{
+      id: "sst_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''const api = c.props?.editorApi || {};
+
+const pageId = api.getSettingsPageId?.();
+const tableLabel = c.props?.tableVertexLabel;
+const title = api.isSingleSectionMode?.()
+  ? `Form config schema — ${tableLabel || pageId}`
+  : `Schema editor — ${pageId}`;
+return {
+  as: "h2",
+  text: title
+};
+''',
+        css: '''
+return `._id {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: ${t.var.color.text};
+}`;
+'''
+      }
+    },
+{
+      id: "sst_mode_tabs",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}`;
+'''
+      }
+    },
+{
+      id: "sst_visual_btn",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Button",
+        props: '''const api = c.props?.editorApi || {};
+
+const active = api.isVisualMode?.() === true;
+return {
+  variant: active ? "primary" : "secondary",
+  size: "sm",
+  text: "Visual",
+  type: "button",
+  onClick: () => api.setEditorMode?.("visual")
+};
+'''
+      }
+    },
+{
+      id: "sst_json_btn",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Button",
+        props: '''const api = c.props?.editorApi || {};
+
+const active = api.isJsonMode?.() === true;
+return {
+  variant: active ? "primary" : "secondary",
+  size: "sm",
+  text: "JSON",
+  type: "button",
+  onClick: () => api.setEditorMode?.("json")
+};
+'''
+      }
+    },
+{
+      id: "sst_actions",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+{
+      id: "sst_add_section",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Button",
+        props: '''const api = c.props?.editorApi || {};
+
+return {
+  variant: "secondary",
+  size: "sm",
+  text: "Add section",
+  type: "button",
+  hide: api.isSingleSectionMode?.() === true || api.isJsonMode?.() === true,
+  onClick: () => api.addSection?.()
+};
+'''
+      }
+    },
+{
+      id: "sst_save",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Button",
+        props: '''const api = c.props?.editorApi || {};
+
+const dirty = api.isDirty?.();
+const saving = api.saving?.();
+return {
+  variant: "primary",
+  size: "sm",
+  text: saving ? "Saving..." : "Save schema",
+  type: "button",
+  disabled: !dirty || saving,
+  onClick: () => api.saveConfig?.()
+};
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "sst_root_e1", T: "Attr", S: "sst_root", E: "sst_toolbar" },
+    { id: "sst_root_e2", T: "Attr", S: "sst_toolbar", E: "sst_title" },
+    { id: "sst_root_e3", T: "Attr", S: "sst_toolbar", E: "sst_mode_tabs" },
+    { id: "sst_root_e4", T: "Attr", S: "sst_toolbar", E: "sst_actions" },
+    { id: "sst_root_e5", T: "Attr", S: "sst_mode_tabs", E: "sst_visual_btn" },
+    { id: "sst_root_e6", T: "Attr", S: "sst_mode_tabs", E: "sst_json_btn" },
+    { id: "sst_root_e7", T: "Attr", S: "sst_actions", E: "sst_add_section" },
+    { id: "sst_root_e8", T: "Attr", S: "sst_actions", E: "sst_save" }
+  ]
+}

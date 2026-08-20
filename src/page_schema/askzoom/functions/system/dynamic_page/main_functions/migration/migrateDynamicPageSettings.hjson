@@ -1,0 +1,337 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: migrateDynamicPageSettings
+        description: Seeds Fulchand Shastri settings_page_config and default GlobalSetting section documents for all public pages.
+        body:
+          '''
+/**
+ * Fulchand Shastri — migrate all public page settings configurations.
+ * contextData: { dryRun?: boolean }
+ */
+
+const { dryRun = false } = c || {};
+console.log(`Fulchand Shastri settings migration (dryRun: ${dryRun})`);
+
+const nowIso = () => new Date().toISOString();
+
+const definitionsResult = await s({
+  functionName: "getPageSettingsDefinitions",
+  contextData: {}
+});
+
+if (!definitionsResult?.result?.success) {
+  return {
+    success: false,
+    message: definitionsResult?.result?.message || "Failed to load page settings definitions"
+  };
+}
+
+const { settingsPageConfigs, defaultSectionDocuments, tableSchemaParts, tableSectionDocuments, tableDefinitions } = definitionsResult.result.data || {};
+
+async function ensureGlobalSetting() {
+  if (dryRun) return;
+  await _.session.run(
+    `
+    MERGE (g:GlobalSetting {key: 'Default'})
+    ON CREATE SET g.createdAt = datetime(), g.name = 'Default'
+    SET g.updatedAt = datetime()
+    RETURN g
+    `
+  );
+}
+
+async function processSettingsPageConfig(setting) {
+  const { key, settingsPageId, name, config } = setting;
+  const checkResult = await _.session.run(`MATCH (s:Setting {key: $key}) RETURN s`, { key });
+  const exists = checkResult.records.length > 0;
+
+  if (!dryRun) {
+    if (exists) {
+      await _.session.run(
+        `MATCH (s:Setting {key: $key})
+         SET s.config = $config,
+             s.type = 'settings_page_config',
+             s.settingsPageId = $settingsPageId,
+             s.name = $name,
+             s.updatedAt = datetime()
+         RETURN s`,
+        { key, settingsPageId, name, config }
+      );
+    } else {
+      await _.session.run(
+        `CREATE (s:Setting {
+          key: $key,
+          type: 'settings_page_config',
+          settingsPageId: $settingsPageId,
+          config: $config,
+          name: $name,
+          createdAt: datetime(),
+          updatedAt: datetime()
+        })
+        RETURN s`,
+        { key, settingsPageId, name, config }
+      );
+    }
+  }
+
+  return exists ? { created: 0, updated: 1 } : { created: 1, updated: 0 };
+}
+
+async function processDefaultSectionDocument(doc) {
+  if (dryRun) {
+    return { created: 1, updated: 0 };
+  }
+  const valuesJson = JSON.stringify(doc.values || {});
+  const result = await _.session.run(
+    `
+    MATCH (g:GlobalSetting {key: 'Default'})
+    OPTIONAL MATCH (g)-[:GlobalSettingHasSettingsSection]->(existing:SettingsSectionDocument {pageId: $pageId, sectionId: $sectionId})
+    WITH g, existing
+    FOREACH (_ IN CASE WHEN existing IS NULL THEN [1] ELSE [] END |
+      CREATE (g)-[:GlobalSettingHasSettingsSection]->(:SettingsSectionDocument {
+        pageId: $pageId,
+        sectionId: $sectionId,
+        scopeVertexLabel: 'GlobalSetting',
+        scopeId: 'Default',
+        values: $valuesJson,
+        version: 1,
+        createdAt: $now,
+        updatedAt: $now,
+        createdBy: 'migration',
+        updatedBy: 'migration'
+      })
+    )
+    RETURN existing IS NULL AS created
+    `,
+    { pageId: doc.pageId, sectionId: doc.sectionId, valuesJson, now: nowIso() }
+  );
+
+  const created = result.records[0]?.get("created") === true;
+  return created ? { created: 1, updated: 0 } : { created: 0, updated: 0 };
+}
+
+async function processTableSchemaPart(setting) {
+  const { key, tableKey, tableVertexLabel, part, name, config } = setting;
+  const checkResult = await _.session.run(`MATCH (s:Setting {key: $key}) RETURN s`, { key });
+  const exists = checkResult.records.length > 0;
+
+  if (!dryRun) {
+    if (exists) {
+      await _.session.run(
+        `MATCH (s:Setting {key: $key})
+         SET s.config = $config,
+             s.type = 'table_schema',
+             s.tableKey = $tableKey,
+             s.tableVertexLabel = $tableVertexLabel,
+             s.part = $part,
+             s.name = $name,
+             s.updatedAt = datetime()
+         RETURN s`,
+        { key, tableKey, tableVertexLabel, part, name, config }
+      );
+    } else {
+      await _.session.run(
+        `CREATE (s:Setting {
+          key: $key,
+          type: 'table_schema',
+          tableKey: $tableKey,
+          tableVertexLabel: $tableVertexLabel,
+          part: $part,
+          config: $config,
+          name: $name,
+          createdAt: datetime(),
+          updatedAt: datetime()
+        })
+        RETURN s`,
+        { key, tableKey, tableVertexLabel, part, name, config }
+      );
+    }
+  }
+
+  return exists ? { created: 0, updated: 1 } : { created: 1, updated: 0 };
+}
+
+async function processTableSectionDocument(doc) {
+  if (dryRun) {
+    return { created: 1, updated: 0 };
+  }
+  const valuesJson = JSON.stringify(doc.values || {});
+  const result = await _.session.run(
+    `
+    MATCH (g:GlobalSetting {key: 'Default'})
+    OPTIONAL MATCH (g)-[:GlobalSettingHasSettingsSection]->(existing:SettingsSectionDocument {pageId: $pageId, sectionId: $sectionId})
+    WITH g, existing
+    FOREACH (_ IN CASE WHEN existing IS NULL THEN [1] ELSE [] END |
+      CREATE (g)-[:GlobalSettingHasSettingsSection]->(:SettingsSectionDocument {
+        pageId: $pageId,
+        sectionId: $sectionId,
+        scopeVertexLabel: 'GlobalSetting',
+        scopeId: 'Default',
+        values: $valuesJson,
+        version: 1,
+        createdAt: $now,
+        updatedAt: $now,
+        createdBy: 'migration',
+        updatedBy: 'migration'
+      })
+    )
+    FOREACH (_ IN CASE WHEN existing IS NOT NULL THEN [1] ELSE [] END |
+      SET existing.values = $valuesJson, existing.updatedAt = $now, existing.updatedBy = 'migration'
+    )
+    RETURN existing IS NULL AS created
+    `,
+    { pageId: doc.pageId, sectionId: doc.sectionId, valuesJson, now: nowIso() }
+  );
+
+  const created = result.records[0]?.get("created") === true;
+  return created ? { created: 1, updated: 0 } : { created: 0, updated: 1 };
+}
+
+const stats = {
+  created: 0,
+  updated: 0,
+  total: (settingsPageConfigs?.length || 0) + (defaultSectionDocuments?.length || 0) + (tableSchemaParts?.length || 0) + (tableSectionDocuments?.length || 0),
+  settingsPageConfigs: settingsPageConfigs?.length || 0,
+  defaultSectionDocuments: defaultSectionDocuments?.length || 0,
+  tableSchemaParts: tableSchemaParts?.length || 0,
+  tableSectionDocuments: tableSectionDocuments?.length || 0,
+  tableContentSeeded: 0
+};
+
+await ensureGlobalSetting();
+
+for (let j = 0; j < (settingsPageConfigs?.length || 0); j++) {
+  const r = await processSettingsPageConfig(settingsPageConfigs[j]);
+  stats.created += r.created;
+  stats.updated += r.updated;
+}
+
+for (let k = 0; k < (defaultSectionDocuments?.length || 0); k++) {
+  const doc = defaultSectionDocuments[k];
+  if (!doc?.pageId || !doc?.sectionId) continue;
+  const r = await processDefaultSectionDocument(doc);
+  stats.created += r.created;
+  stats.updated += r.updated;
+}
+
+for (let t = 0; t < (tableSchemaParts?.length || 0); t++) {
+  const r = await processTableSchemaPart(tableSchemaParts[t]);
+  stats.created += r.created;
+  stats.updated += r.updated;
+}
+
+for (let ts = 0; ts < (tableSectionDocuments?.length || 0); ts++) {
+  const r = await processTableSectionDocument(tableSectionDocuments[ts]);
+  stats.created += r.created;
+  stats.updated += r.updated;
+}
+
+if (!dryRun && (tableDefinitions?.length || 0) > 0) {
+  for (let td = 0; td < tableDefinitions.length; td++) {
+    const tableDef = tableDefinitions[td];
+    const seedResult = await s({
+      functionName: "seedTableContent",
+      contextData: { tableVertexLabel: tableDef.tableVertexLabel }
+    });
+    if (seedResult?.result?.success) {
+      stats.tableContentSeeded += seedResult.result.data?.created || 0;
+    }
+  }
+}
+
+async function migrateExistingLocalizedValues() {
+  if (dryRun) return { converted: 0 };
+
+  const languagesResult = await s({
+    functionName: "getSiteLanguages",
+    contextData: {}
+  });
+  const languages = languagesResult?.result?.data?.languages || [
+    { code: "en", label: "English", isDefault: true }
+  ];
+
+  const docsResult = await _.session.run(`
+    MATCH (g:GlobalSetting {key: 'Default'})-[:GlobalSettingHasSettingsSection]->(d:SettingsSectionDocument)
+    RETURN d.pageId AS pageId, d.sectionId AS sectionId, d.values AS values, id(d) AS nodeId
+  `);
+
+  let converted = 0;
+  for (let i = 0; i < docsResult.records.length; i++) {
+    const record = docsResult.records[i];
+    const pageId = record.get("pageId");
+    const sectionId = record.get("sectionId");
+    const nodeId = record.get("nodeId");
+    let values = record.get("values");
+    if (typeof values === "string") {
+      try { values = JSON.parse(values); } catch { values = {}; }
+    }
+    if (!values || typeof values !== "object") continue;
+
+    const configKey = pageId + "_settings_page";
+    const configResult = await _.session.run(
+      `MATCH (s:Setting {key: $key}) RETURN s.config AS config LIMIT 1`,
+      { key: configKey }
+    );
+    if (configResult.records.length === 0) continue;
+
+    let sectionConfig = null;
+    try {
+      const configFn = new Function(configResult.records[0].get("config"));
+      const pageConfig = configFn();
+      sectionConfig = (pageConfig?.sections || []).find((s) => s.id === sectionId) || null;
+    } catch (configError) {
+      console.warn("migrateLocalizedValues: invalid config for", pageId, configError);
+      continue;
+    }
+    if (!sectionConfig) continue;
+
+    const normalizeResult = await s({
+      functionName: "localizationHelpers",
+      contextData: {
+        action: "localizeSectionValues",
+        sectionConfig,
+        values,
+        mode: "normalize",
+        languages
+      }
+    });
+
+    const normalizedValues = normalizeResult?.result?.data?.values;
+    if (!normalizedValues) continue;
+
+    if (JSON.stringify(normalizedValues) !== JSON.stringify(values)) {
+      await _.session.run(
+        `MATCH (d) WHERE id(d) = $nodeId SET d.values = $valuesJson, d.updatedAt = $now`,
+        {
+          nodeId,
+          valuesJson: JSON.stringify(normalizedValues),
+          now: nowIso()
+        }
+      );
+      converted += 1;
+    }
+  }
+
+  return { converted };
+}
+
+const localizedMigration = await migrateExistingLocalizedValues();
+stats.localizedDocumentsConverted = localizedMigration.converted || 0;
+
+return {
+  success: true,
+  message: dryRun
+    ? `Fulchand Shastri settings migration dry run. Would touch ${stats.total} records.`
+    : `Fulchand Shastri settings migration complete. Created ${stats.created}, updated ${stats.updated}, localized ${stats.localizedDocumentsConverted} documents.`,
+  stats
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

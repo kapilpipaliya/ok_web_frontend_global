@@ -1,0 +1,449 @@
+{
+  vertexes: [
+    {
+      id: "function_real_world"
+      L: "Function"
+      P: {
+        key: "exampleRealWorldUserManagement"
+        description: "Real-world example: Complete user management with all utilities"
+        body: '''
+// Real-World Example: User Management API
+// ========================================
+// This example shows how to combine all utilities for a production-ready API
+
+// Example 1: Create User with Complete Pipeline
+// ==============================================
+
+const createUserSchema = _.schema.object({
+  name: _.schema.string().min(2).max(100),
+  email: _.schema.email(),
+  password: _.schema.string().min(8),
+  role: _.schema.enum(["user", "admin"]).optional()
+});
+
+const createUser = await _.createPipeline(c, {
+  session: _.session,
+  getUserFromSession: _.getUserFromSession,
+})
+  // Validate input
+  .validate(createUserSchema)
+
+  // Require authentication
+  .authenticate()
+
+  // Only admins can create users
+  .authorize("admin")
+
+  // Rate limit: 10 user creations per hour
+  .rateLimit({ max: 10, window: 3600, key: "create-user" })
+
+  // Custom validation
+  .custom(async (ctx) => {
+    // Check if email already exists (with caching)
+    const existingUser = await _.cacheGetOrSet(
+      `user:email:${ctx.data.email}`,
+      async () => {
+        const result = await ctx.session.run(
+          "MATCH (u:User {email: $email}) RETURN u",
+          { email: ctx.data.email }
+        );
+        return result.records.length > 0;
+      },
+      { ttl: 60 }
+    );
+
+    if (existingUser) {
+      throw _.errors.Conflict("Email already exists");
+    }
+  })
+
+  // Execute with transaction
+  .execute(async (ctx) => {
+    // Create user in transaction (auto-rollback on error)
+    const result = await _.transaction(ctx.session, async (tx) => {
+      // Hash password
+      const hashedPassword = _.crypto
+        .createHash("sha256")
+        .update(ctx.data.password)
+        .digest("hex");
+
+      // Create user
+      const userResult = await tx.run(
+        `CREATE (u:User {
+          id: $id,
+          name: $name,
+          email: $email,
+          password: $password,
+          role: $role,
+          createdAt: $createdAt,
+          updatedAt: $createdAt
+        }) RETURN u`,
+        {
+          id: _.utils.uuid(),
+          name: ctx.data.name,
+          email: ctx.data.email,
+          password: hashedPassword,
+          role: ctx.data.role || "user",
+          createdAt: _.utils.now()
+        }
+      );
+
+      const user = _.neo4jConvert(userResult.records[0].get("u"));
+
+      // Create user profile
+      await tx.run(
+        `CREATE (p:Profile {
+          id: $id,
+          userId: $userId,
+          bio: $bio,
+          avatar: $avatar
+        })`,
+        {
+          id: _.utils.uuid(),
+          userId: user.P.id,
+          bio: "",
+          avatar: ""
+        }
+      );
+
+      // Send welcome email as background job
+      await _.addJob(
+        "sendWelcomeEmail",
+        {
+          email: user.P.email,
+          name: user.P.name
+        },
+        { priority: 5 }
+      );
+
+      return user;
+    });
+
+    // Clear email check cache
+    _.cacheDelete(`user:email:${ctx.data.email}`);
+
+    // Return success response (omit password)
+    return _.responses.created(
+      _.formatters.omit(result, ["password"])
+    );
+  });
+
+return createUser;
+
+// Example 2: Get User with Caching
+// =================================
+
+const getUserSchema = _.schema.object({
+  userId: _.schema.uuid()
+});
+
+const getUser = await _.createPipeline(c, {
+  session: _.session,
+  getUserFromSession: _.getUserFromSession,
+})
+  .validate(getUserSchema)
+  .authenticate()
+  .execute(async (ctx) => {
+    // Get user with caching
+    const user = await _.cacheGetOrSet(
+      `user:${ctx.data.userId}`,
+      async () => {
+        const result = await ctx.session.run(
+          "MATCH (u:User {id: $id}) RETURN u",
+          { id: ctx.data.userId }
+        );
+
+        if (result.records.length === 0) {
+          throw _.errors.NotFound("User", ctx.data.userId);
+        }
+
+        return _.neo4jConvert(result.records[0].get("u"));
+      },
+      { ttl: 300 }  // Cache for 5 minutes
+    );
+
+    // Check permissions (only user themselves or admin can view)
+    const isOwner = ctx.user.P.uuid === user.P.id;
+    const isAdmin = _.hasRole(ctx.user, "admin");
+
+    if (!isOwner && !isAdmin) {
+      throw _.errors.Forbidden("Cannot view other users");
+    }
+
+    return _.responses.ok(
+      _.formatters.omit(user, ["password"])
+    );
+  });
+
+return getUser;
+
+// Example 3: Update User with Optimistic Locking
+// ===============================================
+
+const updateUserSchema = _.schema.object({
+  userId: _.schema.uuid(),
+  name: _.schema.string().min(2).max(100).optional(),
+  bio: _.schema.string().max(500).optional()
+});
+
+const updateUser = await _.createPipeline(c, {
+  session: _.session,
+  getUserFromSession: _.getUserFromSession,
+})
+  .validate(updateUserSchema)
+  .authenticate()
+
+  // Check ownership
+  .custom(async (ctx) => {
+    const isOwner = await _.isOwner(
+      ctx.session,
+      ctx.user.P.uuid,
+      ctx.data.userId,
+      "id"
+    );
+
+    if (!isOwner && !_.hasRole(ctx.user, "admin")) {
+      throw _.errors.Forbidden("Can only update own profile");
+    }
+  })
+
+  .execute(async (ctx) => {
+    // Update with retry (in case of conflicts)
+    const result = await _.transactionWithRetry(
+      ctx.session,
+      async (tx) => {
+        const updateResult = await tx.run(
+          `MATCH (u:User {id: $userId})
+           SET u.name = COALESCE($name, u.name),
+               u.updatedAt = $updatedAt
+           RETURN u`,
+          {
+            userId: ctx.data.userId,
+            name: ctx.data.name,
+            updatedAt: _.utils.now()
+          }
+        );
+
+        if (ctx.data.bio !== undefined) {
+          await tx.run(
+            `MATCH (p:Profile {userId: $userId})
+             SET p.bio = $bio`,
+            { userId: ctx.data.userId, bio: ctx.data.bio }
+          );
+        }
+
+        return _.neo4jConvert(updateResult.records[0].get("u"));
+      },
+      3,    // Retry 3 times
+      1000  // 1 second delay
+    );
+
+    // Invalidate cache
+    _.cacheDelete(`user:${ctx.data.userId}`);
+
+    return _.responses.ok(
+      _.formatters.omit(result, ["password"])
+    );
+  });
+
+return updateUser;
+
+// Example 4: List Users with Pagination and Caching
+// ==================================================
+
+const listUsersSchema = _.commonSchemas.pagination;
+
+const listUsers = await _.createPipeline(c, {
+  session: _.session,
+  getUserFromSession: _.getUserFromSession,
+})
+  .validate(listUsersSchema)
+  .authenticate()
+  .authorize("admin")  // Only admins can list all users
+  .execute(async (ctx) => {
+    const { page, limit } = ctx.data;
+    const skip = (page - 1) * limit;
+
+    // Get users with caching
+    const cacheKey = `users:list:${page}:${limit}`;
+
+    const result = await _.cacheGetOrSet(
+      cacheKey,
+      async () => {
+        // Get total count
+        const countResult = await ctx.session.run(
+          "MATCH (u:User) RETURN count(u) as total"
+        );
+        const total = countResult.records[0].get("total").toNumber();
+
+        // Get page of users
+        const usersResult = await ctx.session.run(
+          `MATCH (u:User)
+           RETURN u
+           ORDER BY u.createdAt DESC
+           SKIP $skip
+           LIMIT $limit`,
+          { skip, limit }
+        );
+
+        const users = usersResult.records.map(r =>
+          _.formatters.omit(
+            _.neo4jConvert(r.get("u")),
+            ["password"]
+          )
+        );
+
+        return { users, total };
+      },
+      { ttl: 60 }  // Cache for 1 minute
+    );
+
+    return _.responses.paginated(
+      result.users,
+      page,
+      limit,
+      result.total
+    );
+  });
+
+return listUsers;
+
+// Example 5: Bulk User Import with Batch Processing
+// ==================================================
+
+const bulkImportSchema = _.schema.object({
+  users: _.schema.array(
+    _.schema.object({
+      name: _.schema.string().min(2),
+      email: _.schema.email()
+    })
+  )
+});
+
+const bulkImport = await _.createPipeline(c, {
+  session: _.session,
+  getUserFromSession: _.getUserFromSession,
+})
+  .validate(bulkImportSchema)
+  .authenticate()
+  .authorize("admin")
+  .execute(async (ctx) => {
+    // Process users in batches
+    const result = await _.batchProcess(
+      ctx.data.users,
+      async (userData, index) => {
+        return await _.transaction(ctx.session, async (tx) => {
+          // Check if user exists
+          const existingResult = await tx.run(
+            "MATCH (u:User {email: $email}) RETURN u",
+            { email: userData.email }
+          );
+
+          if (existingResult.records.length > 0) {
+            throw new Error(`User with email ${userData.email} already exists`);
+          }
+
+          // Create user
+          const userResult = await tx.run(
+            `CREATE (u:User {
+              id: $id,
+              name: $name,
+              email: $email,
+              role: $role,
+              createdAt: $createdAt
+            }) RETURN u`,
+            {
+              id: _.utils.uuid(),
+              name: userData.name,
+              email: userData.email,
+              role: "user",
+              createdAt: _.utils.now()
+            }
+          );
+
+          return _.neo4jConvert(userResult.records[0].get("u"));
+        });
+      },
+      {
+        batchSize: 100,
+        concurrency: 5,
+        continueOnError: true,
+        onProgress: (completed, total) => {
+          console.log(`Imported ${completed}/${total} users`);
+        }
+      }
+    );
+
+    // Clear cache
+    _.cacheClear("users");
+
+    return _.responses.ok({
+      imported: result.successCount,
+      failed: result.errorCount,
+      errors: result.errors.map(e => ({
+        index: e.index,
+        email: ctx.data.users[e.index].email,
+        error: e.error.message
+      }))
+    });
+  });
+
+return bulkImport;
+
+// Example 6: Delete User with Cascade
+// ====================================
+
+const deleteUserSchema = _.schema.object({
+  userId: _.schema.uuid()
+});
+
+const deleteUser = await _.createPipeline(c, {
+  session: _.session,
+  getUserFromSession: _.getUserFromSession,
+})
+  .validate(deleteUserSchema)
+  .authenticate()
+  .authorize("admin")
+  .execute(async (ctx) => {
+    // Delete in transaction with cascade
+    await _.transaction(ctx.session, async (tx) => {
+      // Delete user and all related data
+      await tx.run(
+        `MATCH (u:User {id: $userId})
+         OPTIONAL MATCH (u)-[:HAS_PROFILE]->(p:Profile)
+         OPTIONAL MATCH (u)-[:POSTED]->(post:Post)
+         DETACH DELETE u, p, post`,
+        { userId: ctx.data.userId }
+      );
+    });
+
+    // Clear cache
+    _.cacheDelete(`user:${ctx.data.userId}`);
+    _.cacheClear("users");
+
+    return _.responses.ok({
+      message: "User deleted successfully",
+      userId: ctx.data.userId
+    });
+  });
+
+return deleteUser;
+
+// Default: Return all examples
+return _.responses.ok({
+  message: "Real-world user management examples",
+  examples: [
+    "createUser",
+    "getUser",
+    "updateUser",
+    "listUsers",
+    "bulkImport",
+    "deleteUser"
+  ]
+});
+'''
+      }
+    }
+  ]
+  edges: []
+}

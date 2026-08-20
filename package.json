@@ -52,7 +52,6 @@
     "@shopify/admin-api-client": "^2.0.0",
     "@shopify/shopify-api": "^14.0.0",
     "@shopify/shopify-app-react-router": "^2.0.0",
-    "@solid-primitives/autofocus": "^0.1.5",
     "@solid-primitives/event-listener": "^2.4.6",
     "@solid-primitives/memo": "^1.5.1",
     "@solid-primitives/refs": "^1.1.4",

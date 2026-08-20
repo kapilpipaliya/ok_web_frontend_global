@@ -1,0 +1,416 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: IconButton
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''
+const variant = c.props?.variant || "ghost";
+const size = c.props?.size || "md";
+const disabled = c.props?.disabled || false;
+const loading = c.props?.loading === true;
+
+// Size styles
+const sizeStyles = {
+  sm: {
+    padding: t.var.spacing.xs,
+    iconSize: 16
+  },
+  md: {
+    padding: t.var.spacing.sm,
+    iconSize: 20
+  },
+  lg: {
+    padding: t.var.spacing.md,
+    iconSize: 24
+  }
+};
+
+const sizeConfig = sizeStyles[size] || sizeStyles.md;
+
+// Variant styles
+let variantStyles = '';
+if (variant === 'ghost') {
+  variantStyles = `
+    background: transparent;
+    color: ${t.var.color.text_light_500};
+
+    &:not(:disabled):hover {
+      background: ${t.var.color.background_light_200};
+      color: ${t.var.color.text};
+    }
+  `;
+} else if (variant === 'danger') {
+  variantStyles = `
+    background: transparent;
+    color: ${t.var.color.error};
+
+    &:not(:disabled):hover {
+      background: ${t.var.color.error_light_100};
+      color: ${t.var.color.error};
+    }
+  `;
+} else if (variant === 'primary') {
+  variantStyles = `
+    background: ${t.var.color.primary};
+    color: ${t.var.color.primary_text};
+
+    &:not(:disabled):hover {
+      background: ${t.var.color.primary_dark_200};
+    }
+  `;
+}
+
+return `._id {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: ${sizeConfig.padding};
+  border: none;
+  border-radius: ${t.var.borderRadius.sm};
+  cursor: pointer;
+  transition: all 150ms ease;
+  ${variantStyles}
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  &._loading icon,
+  &._loading [data-icon] {
+    animation: iconButtonSpin 0.8s linear infinite;
+  }
+
+  @keyframes iconButtonSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  &:not(:disabled):active {
+    transform: scale(0.95);
+  }
+
+  &:focus {
+    outline: 2px solid ${t.var.color.primary};
+    outline-offset: 2px;
+  }
+
+  &._reason-info {
+    box-shadow: inset 0 0 0 1px ${t.var.color.info};
+  }
+
+  &._reason-warning {
+    box-shadow: inset 0 0 0 1px ${t.var.color.warning};
+  }
+
+  &._reason-danger {
+    box-shadow: inset 0 0 0 1px ${t.var.color.error};
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const icon = c.props?.icon;
+const onClick = c.props?.onClick || (() => {});
+const disabled = c.props?.disabled || false;
+const loading = c.props?.loading === true;
+const size = c.props?.size || "md";
+const ariaLabel = c.props?.ariaLabel || c.props?.title || "";
+const title = c.props?.title || "";
+const reasonVariant = c.props?.reasonVariant;
+const reasonActive = c.props?.["data-reason-active"] === "true";
+const reasonKind = c.props?.["data-reason-kind"];
+const reasonClass =
+  reasonActive && reasonVariant
+    ? `_reason _reason-${reasonVariant}${reasonKind ? ` _reason-${reasonKind}` : ""}`
+    : "";
+const buttonClass = [c.props.class, loading ? "_loading" : "", reasonClass].filter(Boolean).join(" ") || undefined;
+
+const sizeStyles = {
+  sm: 16,
+  md: 20,
+  lg: 24
+};
+
+const iconSize = sizeStyles[size] || sizeStyles.md;
+
+return {
+  as: "button",
+  class: buttonClass,
+  "aria-label": ariaLabel,
+  "aria-busy": loading ? true : undefined,
+  title: title,
+  disabled: disabled || loading,
+  "data-reason-active": c.props?.["data-reason-active"],
+  "data-reason-variant": c.props?.["data-reason-variant"],
+  "data-reason-kind": c.props?.["data-reason-kind"],
+  "data-reason-code": c.props?.["data-reason-code"],
+  onClick: onClick
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const icon = c.props?.icon;
+const size = c.props?.size || "md";
+
+const sizeStyles = {
+  sm: 16,
+  md: 20,
+  lg: 24
+};
+
+const iconSize = sizeStyles[size] || sizeStyles.md;
+const width = c.props?.width ?? iconSize;
+const height = c.props?.height ?? iconSize;
+
+return {
+  as: "icon",
+  icon: icon,
+  width,
+  height,
+  hide: !icon
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: ariaLabel
+      }
+    }
+    {
+      id: "5"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: disabled
+        defValue: false
+      }
+    }
+    {
+      id: "5a"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: loading
+        defValue: false
+      }
+    }
+    {
+      id: "6"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onClick
+      }
+    }
+    {
+      id: "7"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: variant
+        defValue: ghost
+      }
+    }
+    {
+      id: "8"
+      L: ComponentVariantOption
+      P: {
+        displayOrder: 2
+        description: Danger variant with error color
+        value: danger
+        key: danger
+      }
+    }
+    {
+      id: "9"
+      L: ComponentVariantOption
+      P: {
+        displayOrder: 3
+        description: Primary variant with primary color
+        value: primary
+        key: primary
+      }
+    }
+    {
+      id: "10"
+      L: ComponentVariantOption
+      P: {
+        displayOrder: 1
+        description: Transparent background with hover effect
+        value: ghost
+        key: ghost
+      }
+    }
+    {
+      id: "11"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: title
+      }
+    }
+    {
+      id: "12"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: icon
+      }
+    }
+    {
+      id: "13"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: md
+        key: size
+      }
+    }
+    {
+      id: "14"
+      L: ComponentVariantOption
+      P: {
+        displayOrder: 1
+        description: Small size (16px icon)
+        value: sm
+        key: sm
+      }
+    }
+    {
+      id: "15"
+      L: ComponentVariantOption
+      P: {
+        displayOrder: 2
+        description: Medium size (20px icon)
+        value: md
+        key: md
+      }
+    }
+    {
+      id: "16"
+      L: ComponentVariantOption
+      P: {
+        displayOrder: 3
+        description: Large size (24px icon)
+        value: lg
+        key: lg
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: ComponentVariant
+      S: "1"
+      E: "4"
+    }
+    {
+      id: e3
+      T: ComponentVariant
+      S: "1"
+      E: "5"
+    }
+    {
+      id: e4
+      T: ComponentVariant
+      S: "1"
+      E: "6"
+    }
+    {
+      id: e5
+      T: ComponentVariant
+      S: "1"
+      E: "7"
+    }
+    {
+      id: e6
+      T: ComponentVariant
+      S: "1"
+      E: "11"
+    }
+    {
+      id: e7
+      T: ComponentVariant
+      S: "1"
+      E: "12"
+    }
+    {
+      id: e8
+      T: ComponentVariant
+      S: "1"
+      E: "13"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e10
+      T: ComponentVariantOption
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e11
+      T: ComponentVariantOption
+      S: "7"
+      E: "9"
+    }
+    {
+      id: e12
+      T: ComponentVariantOption
+      S: "7"
+      E: "10"
+    }
+    {
+      id: e13
+      T: ComponentVariantOption
+      S: "13"
+      E: "14"
+    }
+    {
+      id: e14
+      T: ComponentVariantOption
+      S: "13"
+      E: "15"
+    }
+    {
+      id: e15
+      T: ComponentVariantOption
+      S: "13"
+      E: "16"
+    }
+  ]
+}

@@ -1,0 +1,233 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: syncContentTranslations
+        description: Sync or delete {Label}Translation vertices for table content. Edge type is rootLabel + translationLabel.
+        body:
+          '''
+/**
+ * contextData.action: "sync" | "delete"
+ * sync: parentElementId, rootLabel, translationsByLocale, fieldKeys
+ * delete: parentElementId, rootLabel
+ */
+
+const action = c?.action;
+if (!action) {
+  return { success: false, message: "action is required" };
+}
+
+const getTranslationMeta = (rootLabel) => {
+  const label = rootLabel != null ? String(rootLabel).trim() : "";
+  const translationLabel = `${label}Translation`;
+  return {
+    rootLabel: label,
+    translationLabel,
+    edgeType: `${label}${translationLabel}`
+  };
+};
+
+const trackDeletedVertexId = (vertexId) => {
+  if (vertexId == null || vertexId === "") return;
+  if (!_.context.deletedVertexes) _.context.deletedVertexes = [];
+  const id = String(vertexId);
+  if (!_.context.deletedVertexes.includes(id)) _.context.deletedVertexes.push(id);
+};
+
+const translationHasContent = (props, fieldKeys) => {
+  if (!props || typeof props !== "object") return false;
+  for (let i = 0; i < fieldKeys.length; i++) {
+    const text = props[fieldKeys[i]];
+    if (text != null && String(text).trim() !== "") return true;
+  }
+  return false;
+};
+
+const deleteAllTranslations = async (parentElementId, rootLabel) => {
+  const { translationLabel, edgeType } = getTranslationMeta(rootLabel);
+  const existingRes = await _.session.run(
+    `MATCH (c:${rootLabel})-[:${edgeType}]->(t:${translationLabel})
+     WHERE elementId(c) = $pid
+     RETURN elementId(t) AS tid`,
+    { pid: parentElementId }
+  );
+  for (let i = 0; i < existingRes.records.length; i++) {
+    const tid = existingRes.records[i].get("tid");
+    if (tid != null) trackDeletedVertexId(tid);
+  }
+  if (existingRes.records.length === 0) return { deleted: 0 };
+  await _.session.run(
+    `MATCH (c:${rootLabel})-[:${edgeType}]->(t:${translationLabel})
+     WHERE elementId(c) = $pid
+     DETACH DELETE t`,
+    { pid: parentElementId }
+  );
+  return { deleted: existingRes.records.length };
+};
+
+const syncTranslations = async (params) => {
+  const {
+    parentElementId,
+    rootLabel,
+    translationsByLocale,
+    fieldKeys
+  } = params;
+  const keys = Array.isArray(fieldKeys) ? fieldKeys.map((k) => String(k)).filter(Boolean) : [];
+  if (!parentElementId || !rootLabel || keys.length === 0) {
+    return { upserted: 0, deleted: 0 };
+  }
+
+  const { translationLabel, edgeType } = getTranslationMeta(rootLabel);
+  const nowIso = new Date().toISOString();
+
+  const existingRes = await _.session.run(
+    `MATCH (c:${rootLabel})-[:${edgeType}]->(t:${translationLabel})
+     WHERE elementId(c) = $pid
+     RETURN elementId(t) AS tid, t.locale AS locale`,
+    { pid: parentElementId }
+  );
+  const existingByLocale = {};
+  for (let i = 0; i < existingRes.records.length; i++) {
+    const rec = existingRes.records[i];
+    const locale = rec.get("locale");
+    const tid = rec.get("tid");
+    if (locale != null && String(locale).trim() !== "" && tid != null) {
+      existingByLocale[String(locale)] = String(tid);
+    }
+  }
+
+  const desiredLocales = Object.keys(translationsByLocale || {});
+  const toUpsert = [];
+  const toDeleteIds = [];
+
+  for (let i = 0; i < desiredLocales.length; i++) {
+    const locale = desiredLocales[i];
+    const localeProps = translationsByLocale[locale] || { locale };
+    if (!translationHasContent(localeProps, keys)) {
+      const existingId = existingByLocale[locale];
+      if (existingId) toDeleteIds.push(existingId);
+      continue;
+    }
+    const props = { locale, updatedAt: nowIso };
+    for (let fi = 0; fi < keys.length; fi++) {
+      const key = keys[fi];
+      const text = localeProps[key];
+      props[key] = text != null ? String(text) : "";
+    }
+    const existingId = existingByLocale[locale];
+    if (existingId) {
+      toUpsert.push({ tid: existingId, props, isNew: false });
+    } else {
+      props.createdAt = nowIso;
+      toUpsert.push({ tid: null, props, isNew: true });
+    }
+  }
+
+  const existingLocales = Object.keys(existingByLocale);
+  for (let i = 0; i < existingLocales.length; i++) {
+    const locale = existingLocales[i];
+    if (desiredLocales.includes(locale)) continue;
+    toDeleteIds.push(existingByLocale[locale]);
+  }
+
+  if (toDeleteIds.length > 0) {
+    for (let i = 0; i < toDeleteIds.length; i++) trackDeletedVertexId(toDeleteIds[i]);
+    await _.session.run(
+      `MATCH (c:${rootLabel})-[:${edgeType}]->(t:${translationLabel})
+       WHERE elementId(c) = $pid AND elementId(t) IN $tids
+       DETACH DELETE t`,
+      { pid: parentElementId, tids: toDeleteIds }
+    );
+  }
+
+  const toUpdate = toUpsert.filter((row) => !row.isNew);
+  const toCreate = toUpsert.filter((row) => row.isNew);
+
+  if (toUpdate.length > 0) {
+    const updateRes = await _.session.run(
+      `UNWIND $rows AS row
+       MATCH (c:${rootLabel})-[r:${edgeType}]->(t:${translationLabel})
+       WHERE elementId(c) = $pid AND elementId(t) = row.tid
+       SET t += row.props
+       RETURN c, r, t`,
+      {
+        pid: parentElementId,
+        rows: toUpdate.map((row) => ({ tid: row.tid, props: row.props }))
+      }
+    );
+    _.processResult(updateRes.records, _.context, ["c", "t"], "r");
+  }
+
+  if (toCreate.length > 0) {
+    const createRes = await _.session.run(
+      `UNWIND $rows AS row
+       MATCH (c:${rootLabel})
+       WHERE elementId(c) = $pid
+       CREATE (t:${translationLabel})
+       SET t = row.props
+       CREATE (c)-[r:${edgeType}]->(t)
+       RETURN c, r, t`,
+      {
+        pid: parentElementId,
+        rows: toCreate.map((row) => ({ props: row.props }))
+      }
+    );
+    _.processResult(createRes.records, _.context, ["c", "t"], "r");
+  }
+
+  return { upserted: toUpsert.length, deleted: toDeleteIds.length };
+};
+
+if (action === "delete") {
+  const { parentElementId, rootLabel } = c;
+  if (!parentElementId || !rootLabel) {
+    return { success: false, message: "parentElementId and rootLabel are required" };
+  }
+  try {
+    const data = await deleteAllTranslations(parentElementId, rootLabel);
+    return { success: true, data, message: "Translations deleted" };
+  } catch (error) {
+    console.error("syncContentTranslations delete:", error);
+    return {
+      success: false,
+      message: error?.message || "Failed to delete translations"
+    };
+  }
+}
+
+if (action === "sync") {
+  const {
+    parentElementId,
+    rootLabel,
+    translationsByLocale,
+    fieldKeys
+  } = c;
+  if (!parentElementId || !rootLabel) {
+    return { success: false, message: "parentElementId and rootLabel are required" };
+  }
+  try {
+    const data = await syncTranslations({
+      parentElementId,
+      rootLabel,
+      translationsByLocale,
+      fieldKeys
+    });
+    return { success: true, data, message: "Translations synced" };
+  } catch (error) {
+    console.error("syncContentTranslations sync:", error);
+    return {
+      success: false,
+      message: error?.message || "Failed to sync translations"
+    };
+  }
+}
+
+return { success: false, message: `Unknown action: ${action}` };
+'''
+      }
+    }
+  ]
+  edges: []
+}

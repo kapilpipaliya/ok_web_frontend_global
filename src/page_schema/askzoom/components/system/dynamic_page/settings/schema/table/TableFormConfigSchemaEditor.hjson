@@ -1,0 +1,393 @@
+{
+  vertexes: [
+    {
+      id: "tfcs_root",
+      L: "Component",
+      P: {
+        key: "TableFormConfigSchemaEditor",
+        description: "Dedicated editor for table formConfig schema with groups visual editor.",
+        dynamicComponent: "Button, TextInput, TextArea, LoadingSpinner, FormConfigGroupsSchemaEditor, Html",
+        fns: '''
+const getProps = () => c.props || {};
+const getTableKey = () => {
+  const v = getProps().tableKey;
+  return v != null && String(v).trim() !== "" ? String(v).trim() : null;
+};
+const getSchemaKey = () => {
+  const v = getProps().schemaKey;
+  return v != null && String(v).trim() !== "" ? String(v).trim() : null;
+};
+const executeYTOFunction = (fn, ctx) => s({ functionName: fn, contextData: ctx || {} });
+
+const [resolvedTableKey, setResolvedTableKey] = _.createSignal(null);
+const [resolvedSchemaKey, setResolvedSchemaKey] = _.createSignal(null);
+
+const resolveContext = async () => {
+  let tableKey = getTableKey();
+  let schemaKey = getSchemaKey();
+  if (schemaKey) {
+    setResolvedTableKey(tableKey);
+    setResolvedSchemaKey(schemaKey);
+    return { tableKey, schemaKey };
+  }
+  if (tableKey) {
+    const result = await executeYTOFunction("getTableIds", { tableKey });
+    schemaKey = result?.result?.data?.schemaKeys?.formConfig || null;
+    tableKey = result?.result?.data?.tableKey || tableKey;
+    setResolvedTableKey(tableKey);
+    setResolvedSchemaKey(schemaKey);
+    return { tableKey, schemaKey };
+  }
+  const label = getProps().tableVertexLabel;
+  if (label) {
+    const result = await executeYTOFunction("getTableIds", { tableVertexLabel: label });
+    const ids = result?.result?.data;
+    if (ids) {
+      tableKey = ids.tableKey || null;
+      schemaKey = ids.schemaKeys?.formConfig || null;
+      setResolvedTableKey(tableKey);
+      setResolvedSchemaKey(schemaKey);
+      return { tableKey, schemaKey };
+    }
+  }
+  setResolvedTableKey(null);
+  setResolvedSchemaKey(null);
+  return { tableKey: null, schemaKey: null };
+};
+
+const getEffectiveTableKey = () => resolvedTableKey() || getTableKey();
+const getEffectiveSchemaKey = () => resolvedSchemaKey() || getSchemaKey();
+
+const defaultFormConfig = () => ({
+  part: "formConfig",
+  gridColumns: 2,
+  groups: []
+});
+
+const [loading, setLoading] = _.createSignal(false);
+const [saving, setSaving] = _.createSignal(false);
+const [schemaData, setSchemaData] = _.createSignal(defaultFormConfig());
+const [configJsonText, setConfigJsonText] = _.createSignal("");
+const [jsonError, setJsonError] = _.createSignal("");
+const [editorMode, setEditorMode] = _.createSignal("visual");
+
+const isJsonMode = () => editorMode() === "json";
+const syncJsonFromData = (data) => {
+  setConfigJsonText(JSON.stringify(data && typeof data === "object" ? { ...data } : defaultFormConfig(), null, 2));
+  setJsonError("");
+};
+
+const applyLoadedSetting = (setting) => {
+  if (!setting?.P?.config) {
+    setSchemaData(defaultFormConfig());
+    syncJsonFromData(defaultFormConfig());
+    return;
+  }
+  try {
+    const data = new Function(setting.P.config)();
+    const merged = {
+      ...defaultFormConfig(),
+      ...(data || {}),
+      part: "formConfig",
+      groups: Array.isArray(data?.groups) ? data.groups : []
+    };
+    setSchemaData(merged);
+    syncJsonFromData(merged);
+  } catch (error) {
+    setSchemaData(defaultFormConfig());
+    setConfigJsonText(String(setting.P.config || ""));
+    setJsonError("Failed to parse stored config");
+  }
+};
+
+const loadSchema = async () => {
+  const { schemaKey } = await resolveContext();
+  if (!schemaKey) {
+    _.showErrorToast?.("Schema key could not be resolved");
+    return;
+  }
+  setLoading(true);
+  try {
+    const result = await executeYTOFunction("getTableSchema", { key: schemaKey });
+    if (!result?.result?.success) {
+      _.showErrorToast?.(result?.result?.message || "Failed to load table schema");
+      return;
+    }
+    applyLoadedSetting(result.result.data?.setting);
+  } catch (error) {
+    _.showErrorToast?.("Failed to load table schema");
+  } finally {
+    setLoading(false);
+  }
+};
+
+const patchFormConfig = (partial) => {
+  const next = { ...(schemaData() || defaultFormConfig()), ...partial, part: "formConfig" };
+  setSchemaData(next);
+  syncJsonFromData(next);
+};
+
+const getGroups = () => schemaData()?.groups || [];
+
+const onGroupsChange = (patch) => {
+  patchFormConfig({ groups: patch?.groups || [] });
+};
+
+const saveSchema = async () => {
+  const schemaKey = getEffectiveSchemaKey();
+  if (!schemaKey) {
+    _.showErrorToast?.("Schema key is missing");
+    return;
+  }
+  setSaving(true);
+  try {
+    const configObj = isJsonMode() ? JSON.parse(configJsonText()) : schemaData();
+    const configBody = `return ${JSON.stringify(configObj, null, 2)};`;
+    const result = await executeYTOFunction("saveTableSchema", {
+      key: schemaKey,
+      tableKey: getEffectiveTableKey(),
+      part: "formConfig",
+      config: configBody,
+      name: getProps().title || "Table form config schema"
+    });
+    if (!result?.result?.success) {
+      _.showErrorToast?.(result?.result?.message || "Failed to save");
+      return;
+    }
+    _.showSuccessToast?.(result.result.message || "Table schema saved");
+    applyLoadedSetting(result.result.data?.setting);
+    getProps().onSaved?.();
+  } catch (error) {
+    _.showErrorToast?.(isJsonMode() ? "Invalid JSON" : "Failed to save table schema");
+  } finally {
+    setSaving(false);
+  }
+};
+
+const setEditorModeSafe = (mode) => {
+  if (mode === "json") syncJsonFromData(schemaData());
+  setEditorMode(mode);
+};
+
+return {
+  loading, saving, isJsonMode, configJsonText, setConfigJsonText, jsonError,
+  loadSchema, saveSchema, setEditorMode: setEditorModeSafe,
+  schemaData, patchFormConfig, getGroups, onGroupsChange
+};
+'''
+      }
+    },
+    {
+      id: "tfcs_shell",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  hide: c.props?.hide === true || c.props?.isOpen === false,
+  onMount: () => { void f.loadSchema?.(); }
+};
+''',
+        css: '''
+return `._id {
+  display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; height: 100%;
+  background: ${t.var.color.background};
+}`;
+'''
+      }
+    },
+    {
+      id: "tfcs_toolbar",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''return { as: "header" };''',
+        css: '''
+return `._id {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
+  padding: 0.75rem 1rem; border-bottom: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background_light_100}; flex-shrink: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "tfcs_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: c.props?.title || "Form config"
+};
+''',
+        css: '''return `._id { margin: 0; font-size: 0.9375rem; font-weight: 700; }`;'''
+      }
+    },
+    {
+      id: "tfcs_actions",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''return { as: "div" };''',
+        css: '''return `._id { display: flex; gap: 0.5rem; }`;'''
+      }
+    },
+    {
+      id: "tfcs_visual_tab",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Button",
+        props: '''
+return {
+  variant: f.isJsonMode?.() ? "secondary" : "primary", size: "sm", text: "Visual", type: "button",
+  onClick: () => f.setEditorMode?.("visual")
+};
+'''
+      }
+    },
+    {
+      id: "tfcs_json_tab",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Button",
+        props: '''
+return {
+  variant: f.isJsonMode?.() ? "primary" : "secondary", size: "sm", text: "JSON", type: "button",
+  onClick: () => f.setEditorMode?.("json")
+};
+'''
+      }
+    },
+    {
+      id: "tfcs_save",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Button",
+        props: '''
+return {
+  variant: "primary", size: "sm", text: f.saving?.() ? "Saving..." : "Save", type: "button",
+  disabled: f.saving?.() === true, onClick: () => { void f.saveSchema?.(); }
+};
+'''
+      }
+    },
+    {
+      id: "tfcs_loading",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "LoadingSpinner",
+        props: '''return { hide: f.loading?.() !== true };'''
+      }
+    },
+    {
+      id: "tfcs_body",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''return { as: "div", hide: f.loading?.() === true };''',
+        css: '''return `._id { flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; }`;'''
+      }
+    },
+    {
+      id: "tfcs_visual",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''return { as: "div", hide: f.isJsonMode?.() === true };''',
+        css: '''
+return `._id {
+  flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 0.625rem;
+  padding: 0.75rem 1rem; overflow: hidden;
+}`;
+'''
+      }
+    },
+    {
+      id: "tfcs_grid_cols",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "TextInput",
+        props: '''
+const data = f.schemaData?.() || {};
+return {
+  label: "Grid columns",
+  type: "number",
+  value: data.gridColumns != null ? String(data.gridColumns) : "2",
+  onChange: (e) => f.patchFormConfig?.({ gridColumns: Number(e.target.value) || 1 })
+};
+'''
+      }
+    },
+    {
+      id: "tfcs_groups_editor",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "FormConfigGroupsSchemaEditor",
+        props: '''
+return {
+  groups: f.getGroups?.() || [],
+  siteLanguages: c.props?.siteLanguages,
+  onChange: (patch) => f.onGroupsChange?.(patch)
+};
+'''
+      }
+    },
+    {
+      id: "tfcs_json_panel",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''return { as: "div", hide: f.isJsonMode?.() !== true };''',
+        css: '''return `._id { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 0.75rem 1rem; }`;'''
+      }
+    },
+    {
+      id: "tfcs_json_area",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "TextArea",
+        props: '''
+return {
+  value: f.configJsonText?.() || "",
+  onInput: (e) => f.setConfigJsonText?.(e.target.value),
+  rows: 24,
+  style: { flex: "1", "min-height": "200px", "font-family": "monospace", "font-size": "0.8125rem" }
+};
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "tfcs_e1", T: "Attr", S: "tfcs_root", E: "tfcs_shell" },
+    { id: "tfcs_e2", T: "Attr", S: "tfcs_shell", E: "tfcs_toolbar" },
+    { id: "tfcs_e3", T: "Attr", S: "tfcs_shell", E: "tfcs_loading" },
+    { id: "tfcs_e4", T: "Attr", S: "tfcs_shell", E: "tfcs_body" },
+    { id: "tfcs_e5", T: "Attr", S: "tfcs_toolbar", E: "tfcs_title" },
+    { id: "tfcs_e6", T: "Attr", S: "tfcs_toolbar", E: "tfcs_actions" },
+    { id: "tfcs_e7", T: "Attr", S: "tfcs_actions", E: "tfcs_visual_tab" },
+    { id: "tfcs_e8", T: "Attr", S: "tfcs_actions", E: "tfcs_json_tab" },
+    { id: "tfcs_e9", T: "Attr", S: "tfcs_actions", E: "tfcs_save" },
+    { id: "tfcs_e10", T: "Attr", S: "tfcs_body", E: "tfcs_visual" },
+    { id: "tfcs_e11", T: "Attr", S: "tfcs_body", E: "tfcs_json_panel" },
+    { id: "tfcs_e12", T: "Attr", S: "tfcs_visual", E: "tfcs_grid_cols" },
+    { id: "tfcs_e13", T: "Attr", S: "tfcs_visual", E: "tfcs_groups_editor" },
+    { id: "tfcs_e14", T: "Attr", S: "tfcs_json_panel", E: "tfcs_json_area" }
+  ]
+}

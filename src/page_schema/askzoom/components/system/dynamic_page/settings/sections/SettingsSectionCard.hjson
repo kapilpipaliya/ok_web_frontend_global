@@ -1,0 +1,530 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: SettingsSectionCard
+        dynamicComponent: FormManagement
+        fns:
+          '''
+const getSectionConfig = () => c.props?.sectionConfig || null;
+
+const DEFAULT_SITE_LANGUAGES = [
+  { code: "en", label: "English", isDefault: true },
+  { code: "hi", label: "Hindi", isDefault: false },
+  { code: "gu", label: "Gujarati", isDefault: false }
+];
+
+const getSiteLanguages = () => {
+  const languages = c.props?.siteLanguages;
+  if (Array.isArray(languages) && languages.length > 0) return languages;
+  return DEFAULT_SITE_LANGUAGES;
+};
+
+const getDefaultLanguageCode = (languages) => {
+  const explicit = languages.find((lang) => lang?.isDefault === true);
+  if (explicit?.code) return String(explicit.code);
+  return languages[0]?.code ? String(languages[0].code) : "en";
+};
+
+const isTranslatableField = (field) => field?.translatable === true;
+
+const normalizeLocalizedValue = (value, languages, defaultCode) => {
+  const normalized = {};
+  for (let i = 0; i < languages.length; i++) {
+    normalized[languages[i].code] = "";
+  }
+  if (value != null && typeof value === "object" && !Array.isArray(value)) {
+    for (const key of Object.keys(value)) {
+      if (Object.prototype.hasOwnProperty.call(normalized, key)) {
+        normalized[key] = value[key] == null ? "" : String(value[key]);
+      }
+    }
+    return normalized;
+  }
+  if (typeof value === "string") {
+    normalized[defaultCode] = value;
+  }
+  return normalized;
+};
+
+const normalizeFieldValue = (field, value, languages) => {
+  if (!isTranslatableField(field)) return value;
+  const defaultCode = getDefaultLanguageCode(languages);
+  return normalizeLocalizedValue(value, languages, defaultCode);
+};
+
+const convertToFormConfig = (sectionConfig) => {
+  const formConfig = sectionConfig?.form;
+  if (!formConfig) return null;
+  if (Array.isArray(formConfig.groups)) return formConfig;
+  if (Array.isArray(formConfig.fields)) {
+    return {
+      gridColumns: formConfig.gridColumns || 2,
+      groups: [{ key: "default", title: "", fields: formConfig.fields }]
+    };
+  }
+  return null;
+};
+
+const buildInitialVertex = (values) => {
+  const sectionValues = values || {};
+  const vertexId = _.generateNewVertexId(g, sg);
+  _.addNewVertex(0, {
+    id: vertexId,
+    L: ["SettingsFormData"],
+    P: { ...sectionValues },
+    IN: {},
+    OUT: {}
+  }, g, sg);
+  return g.vertexes[vertexId];
+};
+
+const collectFormFields = (sectionConfig) => {
+  const formConfig = convertToFormConfig(sectionConfig);
+  if (!formConfig?.groups) return [];
+  const fields = [];
+  for (let gi = 0; gi < formConfig.groups.length; gi++) {
+    const groupFields = formConfig.groups[gi]?.fields;
+    if (Array.isArray(groupFields)) fields.push(...groupFields);
+  }
+  return fields;
+};
+
+const buildValuesFromSnapshot = (snapshot = {}) => {
+  const sectionConfig = getSectionConfig();
+  const fields = collectFormFields(sectionConfig);
+  const languages = getSiteLanguages();
+  const values = {};
+  for (let fi = 0; fi < fields.length; fi++) {
+    const field = fields[fi];
+    if (!field?.key) continue;
+    if (Object.prototype.hasOwnProperty.call(snapshot, field.key)) {
+      if (field.renderer === "fieldArray") {
+        const items = Array.isArray(snapshot[field.key]) ? snapshot[field.key] : [];
+        const itemFields = field.fieldArrayConfig?.itemFields || [];
+        values[field.key] = items.map((item) => {
+          const nextItem = { ...(item || {}) };
+          for (let ii = 0; ii < itemFields.length; ii++) {
+            const itemField = itemFields[ii];
+            if (!itemField?.key) continue;
+            nextItem[itemField.key] = normalizeFieldValue(
+              itemField,
+              nextItem[itemField.key],
+              languages
+            );
+          }
+          return nextItem;
+        });
+      } else {
+        values[field.key] = normalizeFieldValue(field, snapshot[field.key], languages);
+      }
+    } else if (field.defaultValue !== undefined) {
+      values[field.key] = field.renderer === "fieldArray"
+        ? field.defaultValue
+        : normalizeFieldValue(field, field.defaultValue, languages);
+    } else if (field.renderer === "fieldArray") {
+      values[field.key] = Array.isArray(field.fieldArrayConfig?.defaultItems)
+        ? field.fieldArrayConfig.defaultItems
+        : [];
+    } else if (field.dataType === "boolean" || field.renderer === "checkbox") {
+      values[field.key] = false;
+    } else if (isTranslatableField(field)) {
+      values[field.key] = normalizeLocalizedValue("", languages, getDefaultLanguageCode(languages));
+    } else {
+      values[field.key] = "";
+    }
+  }
+  return values;
+};
+
+const [initialVertex, setInitialVertex] = _.createSignal(null);
+const [formManagementFns, setFormManagementFns] = _.createSignal(null);
+const [isSaving, setIsSaving] = _.createSignal(false);
+const [isDirty, setIsDirty] = _.createSignal(false);
+const [initialValuesSnapshot, setInitialValuesSnapshot] = _.createSignal(null);
+
+const syncInitialVertexFromValues = (values) => {
+  if (!values) return;
+  const normalized = buildValuesFromSnapshot(values);
+  const existing = initialVertex();
+  if (existing?.id) {
+    _.mergeVertexProperties(0, existing.id, g, sg, normalized);
+    setInitialVertex({ ...existing, P: { ...normalized } });
+  } else {
+    setInitialVertex(buildInitialVertex(normalized));
+  }
+  setInitialValuesSnapshot({ ...normalized });
+  baselineCaptured = true;
+  setIsDirty(false);
+};
+
+const getSectionState = () => {
+  const sectionId = getSectionConfig()?.id;
+  if (!sectionId) return null;
+  return f.getSectionState?.(sectionId) || c.props?.sectionState || null;
+};
+
+let dirtyWatchRegistered = false;
+let baselineCaptured = false;
+
+const getSectionId = () => getSectionConfig()?.id || null;
+
+const isSectionDirty = () => isDirty();
+
+const markDirty = () => {
+  const sectionId = getSectionId();
+  setIsDirty(true);
+  if (sectionId && f.markSectionDirty) {
+    f.markSectionDirty(sectionId);
+  }
+};
+
+const markClean = (savedValues, meta) => {
+  const sectionId = getSectionId();
+  const normalizedValues = savedValues ? buildValuesFromSnapshot(savedValues) : null;
+  setIsDirty(false);
+  if (normalizedValues) {
+    syncInitialVertexFromValues(normalizedValues);
+  }
+  if (sectionId && f.markSectionClean) {
+    f.markSectionClean(sectionId, normalizedValues, meta);
+  }
+};
+
+const captureBaselineIfNeeded = (formFns) => {
+  if (baselineCaptured || !formFns?.formVertexId) return;
+  const vertexId = formFns.formVertexId();
+  if (!vertexId) return;
+  const liveProperties = g.vertexes[vertexId]?.P || {};
+  const snapshot = buildValuesFromSnapshot(liveProperties);
+  setInitialValuesSnapshot(snapshot);
+  baselineCaptured = true;
+  setIsDirty(false);
+};
+
+const registerFormManagementFns = (formFns) => {
+  setFormManagementFns(formFns);
+  const sectionId = getSectionId();
+  if (sectionId && f.registerSectionFormFns) {
+    f.registerSectionFormFns(sectionId, formFns);
+  }
+
+  if (!dirtyWatchRegistered && typeof formFns?.formVertexId === "function") {
+    dirtyWatchRegistered = true;
+    _.createEffect(() => {
+      const vertexId = formFns.formVertexId();
+      if (!vertexId) return;
+      captureBaselineIfNeeded(formFns);
+    });
+  }
+
+  captureBaselineIfNeeded(formFns);
+};
+
+const ensureInitialVertex = () => {
+  const existing = initialVertex();
+  if (existing) return existing;
+  const sectionState = getSectionState();
+  const vertex = buildInitialVertex(buildValuesFromSnapshot(sectionState?.values || {}));
+  setInitialVertex(vertex);
+  return vertex;
+};
+
+const handleSectionSaveClick = async () => {
+  const formFns = formManagementFns();
+  if (!formFns?.handleSave) return;
+  setIsSaving(true);
+  try {
+    await formFns.handleSave();
+  } finally {
+    setIsSaving(false);
+  }
+};
+
+const handleSectionDiscardClick = () => {
+  const formFns = formManagementFns();
+  const formVertex = formFns?.getFormVertex?.();
+  if (!formVertex?.id) return;
+
+  const sectionState = getSectionState();
+  const snapshot = initialValuesSnapshot()
+    || buildValuesFromSnapshot(sectionState?.initialValues || sectionState?.values || {});
+  const resetValues = buildValuesFromSnapshot(snapshot);
+
+  _.mergeVertexProperties(0, formVertex.id, g, sg, resetValues);
+  markClean(resetValues);
+};
+
+const showSectionActions = () => {
+  const sectionConfig = getSectionConfig();
+  if (!sectionConfig?.form) return false;
+  const saveStrategy = sectionConfig.saveStrategy || f.getSaveStrategy?.() || {};
+  return saveStrategy.mode !== "page";
+};
+
+const handleSectionSave = async (savePayload) => {
+  const sectionConfig = getSectionConfig();
+  const sectionId = sectionConfig?.id;
+  if (!sectionId) return { success: false, message: "Missing section id" };
+
+  const values = savePayload?.vertex?.P || {};
+  const sectionState = getSectionState();
+  const saveHandler = f.saveSettingsSection || c.props?.onSectionSave;
+
+  if (typeof saveHandler !== "function") {
+    return { success: false, message: "Save handler not configured" };
+  }
+
+  const result = await saveHandler({
+    sectionId,
+    sectionConfig,
+    values,
+    version: sectionState?.version ?? 0
+  });
+
+  if (result?.success) {
+    const savedValues = result.data?.values || values;
+    markClean(savedValues, {
+      version: result.data?.version,
+      documentId: result.data?.documentId
+    });
+  }
+
+  return result;
+};
+
+const isDangerVariant = () => getSectionConfig()?.variant === "danger";
+
+return {
+  getSectionConfig,
+  getSectionState,
+  convertToFormConfig,
+  ensureInitialVertex,
+  initialVertex,
+  markDirty,
+  markClean,
+  captureBaselineIfNeeded,
+  registerFormManagementFns,
+  handleSectionSave,
+  handleSectionSaveClick,
+  handleSectionDiscardClick,
+  isSectionDirty,
+  showSectionActions,
+  isSaving,
+  isDangerVariant
+};
+'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        css:
+          '''
+const isDanger = f.isDangerVariant?.() === true;
+return `._id {
+  background: ${t.var.color.background_light_100};
+  border: 1px solid ${isDanger ? t.var.color.error : t.var.color.border};
+  border-radius: ${t.var.borderRadius.lg};
+  margin-bottom: ${t.var.spacing.lg};
+  overflow: hidden;
+}`;
+'''
+        componentName: Html
+        props:
+          '''
+const sectionConfig = f.getSectionConfig();
+if (!sectionConfig) return { hide: true };
+f.ensureInitialVertex();
+return {
+  as: "section",
+  "attr:data-section-id": sectionConfig.id
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        css:
+          '''
+return `._id {
+  padding: ${t.var.spacing.lg};
+  border-bottom: 1px solid ${t.var.color.border};
+}`;
+'''
+        componentName: Html
+        props:
+          '''
+const sectionConfig = f.getSectionConfig();
+return {
+  as: "header",
+  hide: !sectionConfig?.title && !sectionConfig?.description
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 1
+        css:
+          '''
+return `._id {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: ${t.var.color.text};
+  margin: 0 0 ${t.var.spacing.xs} 0;
+}`;
+'''
+        componentName: Html
+        props:
+          '''
+const sectionConfig = f.getSectionConfig();
+return {
+  as: "h2",
+  text: sectionConfig?.title || "",
+  hide: !sectionConfig?.title
+};
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 2
+        css:
+          '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${t.var.color.text_light_500};
+  margin: 0;
+  line-height: 1.5;
+}`;
+'''
+        componentName: Html
+        props:
+          '''
+const sectionConfig = f.getSectionConfig();
+return {
+  as: "p",
+  text: sectionConfig?.description || "",
+  hide: !sectionConfig?.description
+};
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: FormManagement
+        css:
+          '''
+return `._id {
+  padding: ${t.var.spacing.lg};
+}`;
+'''
+        props:
+          '''
+const sectionConfig = f.getSectionConfig();
+const formConfig = f.convertToFormConfig(sectionConfig);
+const initialVertex = f.initialVertex();
+return {
+  formConfig,
+  initialVertex,
+  siteLanguages: f.getSiteLanguages?.() || [],
+  mode: "edit",
+  vertexLabel: "SettingsFormData",
+  hideActionsBar: true,
+  afterSuccessfulSave: "reinitialize",
+  onSave: f.handleSectionSave,
+  onFnsReady: f.registerFormManagementFns,
+  onFieldChange: () => f.markDirty(),
+  hide: !formConfig || !initialVertex
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 3
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: ${t.var.spacing.sm};
+  padding: ${t.var.spacing.md} ${t.var.spacing.lg};
+  border-top: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background_light_50};
+}`;
+'''
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  hide: !f.showSectionActions()
+};
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "secondary",
+  text: "Discard",
+  onClick: f.handleSectionDiscardClick,
+  disabled: !f.isSectionDirty() || f.isSaving()
+};
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "primary",
+  text: f.isSaving() ? "Saving..." : "Save",
+  onClick: f.handleSectionSaveClick,
+  disabled: !f.isSectionDirty() || f.isSaving()
+};
+'''
+      }
+    }
+  ]
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" }
+    { id: "e2", T: "Attr", S: "2", E: "3" }
+    { id: "e3", T: "Attr", S: "3", E: "4" }
+    { id: "e4", T: "Attr", S: "3", E: "5" }
+    { id: "e5", T: "Attr", S: "2", E: "6" }
+    { id: "e6", T: "Attr", S: "2", E: "7" }
+    { id: "e7", T: "Attr", S: "7", E: "8" }
+    { id: "e8", T: "Attr", S: "7", E: "9" }
+  ]
+}

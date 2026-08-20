@@ -1,0 +1,125 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: getSettingsPageConfig
+        description: Loads settings page configuration (settings_page_config) from Setting vertex — user override or default.
+        body:
+          '''
+const actualUser = await _.getUserFromSession();
+const allowPublicRead = c?.allowPublicRead === true;
+
+if (!actualUser && !allowPublicRead) {
+  return { success: false, message: "User session not found. Please log in and try again." };
+}
+
+const user = actualUser
+  ? await _.getEffectiveUser(_.session, actualUser, c)
+  : null;
+const { settingsPageId, key: schemaKey, settingsLabel } = c;
+
+const labelForSettings = settingsLabel || settingsPageId;
+const userSettingKey = labelForSettings ? `${labelForSettings}_settings_page` : null;
+const siteSettingKey = schemaKey && String(schemaKey).trim() !== ""
+  ? String(schemaKey).trim()
+  : userSettingKey;
+
+if (!settingsPageId) {
+  let bootstrapResult = await _.session.run(
+    `MATCH (s:Setting {type: 'settings_page_config'}) RETURN s ORDER BY s.key LIMIT 1`
+  );
+  if (bootstrapResult.records.length === 0 && s) {
+    try {
+      await s({
+        functionName: "migrateDynamicPageSettings",
+        contextData: { dryRun: false }
+      });
+      bootstrapResult = await _.session.run(
+        `MATCH (s:Setting {type: 'settings_page_config'}) RETURN s ORDER BY s.key LIMIT 1`
+      );
+    } catch (migrateError) {
+      console.error("getSettingsPageConfig: migration failed", migrateError);
+    }
+  }
+  if (bootstrapResult.records.length > 0) {
+    const bootstrapVertices = _.processResult(bootstrapResult.records, _.context, "s");
+    return {
+      success: true,
+      data: { setting: bootstrapVertices[0], isDefault: true },
+      message: "Settings page config loaded"
+    };
+  }
+  return { success: false, message: "settingsPageId is required" };
+}
+
+const userQuery = `
+  MATCH (u:User {uuid: $userUuid})-[:UserSetting]->(s:Setting {key: $settingKey})
+  RETURN s LIMIT 1
+`;
+
+if (user && userSettingKey) {
+  const userResult = await _.session.run(userQuery, {
+    userUuid: user.P.uuid,
+    settingKey: userSettingKey
+  });
+
+  if (userResult.records.length > 0) {
+    const settingVertices = _.processResult(userResult.records, _.context, "s");
+    return {
+      success: true,
+      data: { setting: settingVertices[0], isDefault: false },
+      message: "Settings page config loaded"
+    };
+  }
+}
+
+let siteResult = siteSettingKey
+  ? await _.session.run(
+      `MATCH (s:Setting {key: $siteSettingKey})
+       WHERE NOT (s)<-[:UserSetting]-()
+       RETURN s LIMIT 1`,
+      { siteSettingKey }
+    )
+  : null;
+
+if ((!siteResult || siteResult.records.length === 0) && s) {
+  try {
+    await s({
+      functionName: "migrateDynamicPageSettings",
+      contextData: { dryRun: false }
+    });
+    if (siteSettingKey) {
+      siteResult = await _.session.run(
+        `MATCH (s:Setting {key: $siteSettingKey})
+         WHERE NOT (s)<-[:UserSetting]-()
+         RETURN s LIMIT 1`,
+        { siteSettingKey }
+      );
+    }
+  } catch (migrateError) {
+    console.error("getSettingsPageConfig: migration failed", migrateError);
+  }
+}
+
+if (siteResult && siteResult.records.length > 0) {
+  const siteVertices = _.processResult(siteResult.records, _.context, "s");
+  return {
+    success: true,
+    data: { setting: siteVertices[0], isDefault: true },
+    message: "Using site settings page configuration"
+  };
+}
+
+return {
+  success: true,
+  data: { setting: null, isDefault: true },
+  message: "No settings page configuration found"
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

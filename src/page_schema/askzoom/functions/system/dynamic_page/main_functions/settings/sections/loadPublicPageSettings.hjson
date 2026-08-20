@@ -1,0 +1,97 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: loadPublicPageSettings
+        description: Loads public Fulchand Shastri page settings from GlobalSetting scope. Returns section values keyed by section id.
+        body:
+          '''
+const { pageId, allowPublicRead = true, locale } = c || {};
+
+if (!pageId) {
+  return { success: false, message: "pageId is required" };
+}
+
+try {
+  const languagesResult = await s({
+    functionName: "getSiteLanguages",
+    contextData: {}
+  });
+  const languages = languagesResult?.result?.data?.languages || [];
+  const defaultLang = languages.find((lang) => lang?.isDefault === true);
+  const resolvedLocale = locale || defaultLang?.code || languages[0]?.code || "en";
+
+  const configResult = await s({
+    functionName: "getSettingsPageConfig",
+    contextData: { settingsPageId: pageId, allowPublicRead }
+  });
+
+  let sections = [];
+  const setting = configResult?.result?.data?.setting;
+  if (setting?.P?.config) {
+    const configFn = new Function(setting.P.config);
+    const pageConfig = configFn();
+    sections = pageConfig?.sections || [];
+  }
+
+  const loadResult = await s({
+    functionName: "loadSettingsPage",
+    contextData: {
+      pageId,
+      scopeVertexLabel: "GlobalSetting",
+      scopeId: "Default",
+      scopeMatchProperty: "key",
+      sections,
+      allowPublicRead
+    }
+  });
+
+  if (!loadResult?.result?.success) {
+    return { success: false, message: loadResult?.result?.message || "Failed to load settings" };
+  }
+
+  const loadedSections = loadResult.result.data?.sections || {};
+  const sectionsById = {};
+
+  for (const sectionId of Object.keys(loadedSections)) {
+    const rawValues = loadedSections[sectionId]?.values ?? {};
+    const sectionConfig = sections.find((section) => section.id === sectionId) || null;
+
+    if (sectionConfig) {
+      const resolveResult = await s({
+        functionName: "localizationHelpers",
+        contextData: {
+          action: "localizeSectionValues",
+          sectionConfig,
+          values: rawValues,
+          mode: "resolve",
+          languages,
+          locale: resolvedLocale
+        }
+      });
+      sectionsById[sectionId] = resolveResult?.result?.data?.values ?? rawValues;
+    } else {
+      sectionsById[sectionId] = rawValues;
+    }
+  }
+
+  return {
+    success: true,
+    data: { pageId, locale: resolvedLocale, sections: sectionsById },
+    message: "Page settings loaded"
+  };
+} catch (error) {
+  console.error(`Error loading page settings (${pageId}):`, error);
+  return {
+    success: false,
+    message: error instanceof Error ? error.message : String(error)
+  };
+}
+'''
+      }
+    }
+  ]
+  edges: []
+}

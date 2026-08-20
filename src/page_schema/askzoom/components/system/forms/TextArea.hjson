@@ -1,0 +1,364 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: TextArea
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''
+const resize = c.props?.resize || "vertical";
+
+return `._id {
+  width: 100%;
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.sm};
+  font-size: 1rem;
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
+  transition: all 150ms ease;
+  line-height: 1.6;
+  font-family: inherit;
+  resize: ${resize};
+
+  &:focus {
+    outline: none;
+    border-color: ${t.var.color.primary};
+    box-shadow: 0 0 0 3px ${t.var.color.primary_light_200};
+  }
+
+  &:hover:not(:disabled):not(:focus) {
+    border-color: ${t.var.color.border_dark_200};
+  }
+
+  &:disabled {
+    background: ${t.var.color.background_light_100};
+    opacity: 0.6;
+    cursor: not-allowed;
+    resize: none;
+  }
+
+  &:read-only {
+    background: ${t.var.color.background_light_50};
+    cursor: default;
+  }
+
+  &::placeholder {
+    color: ${t.var.color.text_light_500};
+    opacity: 1;
+  }
+
+  /* Mobile responsive adjustments */
+  @media (max-width: 768px) {
+    padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+    font-size: 1rem;
+    resize: vertical;
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "textarea",
+  value: c.props?.value || "",
+  placeholder: c.props?.placeholder || "",
+  required: c.props?.required || false,
+  disabled: c.props?.disabled || false,
+  readOnly: c.props?.readOnly || false,
+  title: c.props?.title || undefined,
+  "aria-describedby": c.props?.["aria-describedby"] || undefined,
+  rows: c.props?.rows || 4,
+  cols: c.props?.cols || undefined,
+  maxLength: c.props?.maxLength || undefined,
+  minLength: c.props?.minLength || undefined,
+  autoFocus: c.props?.autoFocus || false,
+  onChange: c.props?.onChange || null,
+  onBlur: c.props?.onBlur || null,
+  onFocus: c.props?.onFocus || null
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: placeholder
+        defValue: ""
+      }
+    }
+    {
+      id: "4"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onChange
+      }
+    }
+    {
+      id: "5"
+      L: ComponentVariant
+      P: {
+        type: number
+        key: cols
+      }
+    }
+    {
+      id: "6"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: required
+        defValue: false
+      }
+    }
+    {
+      id: "7"
+      L: ComponentVariant
+      P: {
+        type: number
+        key: minLength
+      }
+    }
+    {
+      id: "8"
+      L: ComponentVariant
+      P: {
+        type: number
+        key: maxLength
+      }
+    }
+    {
+      id: "9"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: disabled
+        defValue: false
+      }
+    }
+    {
+      id: "10"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onFocus
+      }
+    }
+    {
+      id: "11"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: autoFocus
+        defValue: false
+      }
+    }
+    {
+      id: "12"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onBlur
+      }
+    }
+    {
+      id: "13"
+      L: ComponentVariant
+      P: {
+        type: number
+        key: rows
+        defValue: 4
+      }
+    }
+    {
+      id: "14"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: resize
+        defValue: vertical
+      }
+    }
+    {
+      id: "15"
+      L: ComponentVariantOption
+      P: {
+        description: No resize handle
+        value: none
+        key: none
+      }
+    }
+    {
+      id: "16"
+      L: ComponentVariantOption
+      P: {
+        description: Resize both horizontally and vertically
+        value: both
+        key: both
+      }
+    }
+    {
+      id: "17"
+      L: ComponentVariantOption
+      P: {
+        description: Resize horizontally only
+        value: horizontal
+        key: horizontal
+      }
+    }
+    {
+      id: "18"
+      L: ComponentVariantOption
+      P: {
+        description: Resize vertically only
+        value: vertical
+        key: vertical
+      }
+    }
+    {
+      id: "19"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: ""
+        key: value
+      }
+    }
+    {
+      id: "20"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: readOnly
+        defValue: false
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: ComponentVariant
+      S: "1"
+      E: "3"
+    }
+    {
+      id: e3
+      T: ComponentVariant
+      S: "1"
+      E: "4"
+    }
+    {
+      id: e4
+      T: ComponentVariant
+      S: "1"
+      E: "5"
+    }
+    {
+      id: e5
+      T: ComponentVariant
+      S: "1"
+      E: "6"
+    }
+    {
+      id: e6
+      T: ComponentVariant
+      S: "1"
+      E: "7"
+    }
+    {
+      id: e7
+      T: ComponentVariant
+      S: "1"
+      E: "8"
+    }
+    {
+      id: e8
+      T: ComponentVariant
+      S: "1"
+      E: "9"
+    }
+    {
+      id: e9
+      T: ComponentVariant
+      S: "1"
+      E: "10"
+    }
+    {
+      id: e10
+      T: ComponentVariant
+      S: "1"
+      E: "11"
+    }
+    {
+      id: e11
+      T: ComponentVariant
+      S: "1"
+      E: "12"
+    }
+    {
+      id: e12
+      T: ComponentVariant
+      S: "1"
+      E: "13"
+    }
+    {
+      id: e13
+      T: ComponentVariant
+      S: "1"
+      E: "14"
+    }
+    {
+      id: e14
+      T: ComponentVariant
+      S: "1"
+      E: "19"
+    }
+    {
+      id: e15
+      T: ComponentVariant
+      S: "1"
+      E: "20"
+    }
+    {
+      id: e16
+      T: ComponentVariantOption
+      S: "14"
+      E: "15"
+    }
+    {
+      id: e17
+      T: ComponentVariantOption
+      S: "14"
+      E: "16"
+    }
+    {
+      id: e18
+      T: ComponentVariantOption
+      S: "14"
+      E: "17"
+    }
+    {
+      id: e19
+      T: ComponentVariantOption
+      S: "14"
+      E: "18"
+    }
+  ]
+}

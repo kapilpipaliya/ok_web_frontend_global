@@ -1,0 +1,292 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: ContentModal
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''
+return `._id {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  animation: contentModalFadeIn 0.2s ease;
+}
+
+@keyframes contentModalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 0;
+    align-items: flex-end;
+  }
+}`;
+'''
+        props:
+          '''return {
+  as: "div",
+  hide: c.props?.isOpen !== true,
+  onClick: (e) => {
+    if (e.target === e.currentTarget) {
+      c.props?.onClose?.();
+    }
+  }
+};'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''
+const maxWidth = c.props?.maxWidth || "880px";
+return `._id {
+  background: ${t.var.color.background};
+  border-radius: 0.75rem;
+  width: 100%;
+  max-width: ${maxWidth};
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.12);
+  animation: contentModalSlideUp 0.28s ease;
+  overflow: hidden;
+}
+
+@keyframes contentModalSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 768px) {
+  ._id {
+    max-width: 100%;
+    max-height: 100vh;
+    height: 100vh;
+    border-radius: 0;
+  }
+}`;
+'''
+        props:
+          '''return {
+  as: "div",
+  onClick: (e) => e.stopPropagation()
+};'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''
+return `._id {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid ${t.var.color.border};
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}`;
+'''
+        props:
+          '''return {
+  as: "header",
+  hide: c.props?.showTitle === false
+};'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''
+return `._id {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: ${t.var.color.text};
+  margin: 0;
+  line-height: 1.35;
+}`;
+'''
+        props:
+          '''return {
+  as: "h2",
+  hide: c.props?.showTitle === false,
+  text: c.props?.title || "Dialog"
+};'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const onClose = c.props?.onClose;
+const usePolaris = c.props?.usePolarisUI === true;
+return {
+  as: "icon",
+  icon: "carbon:close",
+  width: 22,
+  height: 22,
+  hide: usePolaris,
+  onClick: () => onClose?.()
+};'''
+      }
+    }
+    {
+      id: "6p"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const onClose = c.props?.onClose;
+return {
+  as: "s-button",
+  "attr:variant": "plain",
+  "attr:icon": "x",
+  "attr:accessibilityLabel": "Close",
+  hide: c.props?.usePolarisUI !== true,
+  onClick: () => onClose?.()
+};'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        css:
+          '''
+return `._id {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}`;
+'''
+        props:
+          '''return {
+  as: "div"
+};'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 1
+        slot: children
+        componentName: Slot
+      }
+    }
+    {
+      id: "v1"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: isOpen
+        defValue: false
+      }
+    }
+    {
+      id: "v2"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onClose
+      }
+    }
+    {
+      id: "v3"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: title
+      }
+    }
+    {
+      id: "v4"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: maxWidth
+        defValue: "880px"
+      }
+    }
+    {
+      id: "v5"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: usePolarisUI
+        defValue: false
+      }
+    }
+    {
+      id: "v6"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: showTitle
+        defValue: true
+      }
+    }
+  ]
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" }
+    { id: "e2", T: "Attr", S: "2", E: "3" }
+    { id: "e3", T: "Attr", S: "3", E: "4" }
+    { id: "e4", T: "Attr", S: "3", E: "7" }
+    { id: "e5", T: "Attr", S: "4", E: "5" }
+    { id: "e6", T: "Attr", S: "4", E: "6" }
+    { id: "e6p", T: "Attr", S: "4", E: "6p" }
+    { id: "e7", T: "Attr", S: "7", E: "8" }
+    { id: "ev1", T: "ComponentVariant", S: "1", E: "v1" }
+    { id: "ev2", T: "ComponentVariant", S: "1", E: "v2" }
+    { id: "ev3", T: "ComponentVariant", S: "1", E: "v3" }
+    { id: "ev4", T: "ComponentVariant", S: "1", E: "v4" }
+    { id: "ev5", T: "ComponentVariant", S: "1", E: "v5" }
+    { id: "ev6", T: "ComponentVariant", S: "1", E: "v6" }
+  ]
+}

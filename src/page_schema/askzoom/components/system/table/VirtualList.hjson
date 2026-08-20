@@ -1,0 +1,325 @@
+{
+  vertexes: [
+    {
+      id: virtualList_component
+      L: Component
+      P: {
+        key: VirtualList
+      }
+    }
+    {
+      id: virtualList_root
+      L: Attr
+      P: {
+        displayOrder: 1
+        fns:
+          '''
+const getItems = () => {
+  const getter = c.props?.getItems;
+  if (typeof getter === "function") return getter() || [];
+  return c.props?.items || [];
+};
+
+const ROW_HEIGHT = () => c.props?.itemHeight ?? 50;
+
+let virtualizerHandle = null;
+const setVirtualizerHandle = (handle) => {
+  virtualizerHandle = handle || null;
+};
+
+const [scrollElement, setScrollElement] = _.createSignal(null);
+const [listRootEl, setListRootEl] = _.createSignal(null);
+
+const renderRow = _.createLoopRowRenderer((rowData, index) => ({
+  index: index(),
+  start: 0,
+  size: ROW_HEIGHT(),
+  rowData,
+}));
+
+const isTextInputTarget = (target) => {
+  if (!target || typeof target !== "object") return false;
+  if (target.isContentEditable) return true;
+  const tag = target.tagName;
+  if (tag === "TEXTAREA" || tag === "SELECT" || tag === "OPTION") return true;
+  if (tag === "INPUT") {
+    const type = String(target.type || "text").toLowerCase();
+    return (
+      type !== "checkbox" &&
+      type !== "radio" &&
+      type !== "button" &&
+      type !== "submit" &&
+      type !== "reset" &&
+      type !== "file" &&
+      type !== "hidden"
+    );
+  }
+  return false;
+};
+
+const isCheckboxTarget = (target) => {
+  if (!target || typeof target !== "object") return false;
+  return target.tagName === "INPUT" && String(target.type || "").toLowerCase() === "checkbox";
+};
+
+const getActiveIndex = () => c.props?.getActiveIndex?.() ?? -1;
+const setActiveIndex = (n) => c.props?.setActiveIndex?.(n);
+const getItemCount = () => getItems()?.length ?? 0;
+const useKeyNav = () => typeof c.props?.setActiveIndex === "function";
+
+const focusList = () => {
+  listRootEl()?.focus?.({ preventScroll: true });
+};
+
+const selectIndex = (nextIndex, e) => {
+  const len = getItemCount();
+  if (len === 0 || nextIndex < 0 || nextIndex >= len) return;
+
+  const current = getActiveIndex();
+  if (e?.shiftKey) {
+    c.props?.onShiftArrow?.(current, nextIndex);
+  } else {
+    c.props?.clearSelectionAnchor?.();
+  }
+  setActiveIndex(nextIndex);
+  virtualizerHandle?.scrollToIndex?.(nextIndex, { align: "nearest" });
+};
+
+const handleListKeyDown = (e) => {
+  if (!useKeyNav() || isTextInputTarget(e.target)) return;
+
+  const len = getItemCount();
+  if (len === 0) return;
+
+  const current = getActiveIndex();
+
+  switch (e.code) {
+    case "ArrowDown":
+    case "ArrowUp": {
+      e.preventDefault();
+      e.stopPropagation();
+      const nextIndex =
+        e.code === "ArrowDown"
+          ? Math.min(current + 1, len - 1)
+          : Math.max(current - 1, 0);
+      selectIndex(nextIndex, e);
+      focusList();
+      return;
+    }
+    case "Space":
+    case "Spacebar": {
+      if (isCheckboxTarget(e.target)) return;
+      if (current >= 0 && c.props?.onSpaceKey) {
+        e.preventDefault();
+        e.stopPropagation();
+        c.props.onSpaceKey(current);
+      }
+      return;
+    }
+    case "ArrowLeft":
+    case "ArrowRight": {
+      const onExpandCollapse = c.props?.onExpandCollapse;
+      if (!onExpandCollapse || current < 0) return;
+      const row = getItems()[current];
+      const expandableGroup = row?._isParent === true && row._parentKey != null;
+      const expandableRow = row?.id && c.props?.rowHasExpansion?.(row) === true;
+      if (expandableGroup || expandableRow) {
+        e.preventDefault();
+        e.stopPropagation();
+        onExpandCollapse(current, e.code === "ArrowLeft" ? "collapse" : "expand");
+      }
+    }
+  }
+};
+
+const handleListMouseDown = (e) => {
+  if (!useKeyNav() || isTextInputTarget(e.target) || isCheckboxTarget(e.target)) return;
+  focusList();
+};
+
+// External scroll port (40wrap): capture keys before native scroll / page scroll.
+_.createEffect(() => {
+  const getter = c.props?.getScrollContainerElement;
+  if (typeof getter !== "function") return;
+  setScrollElement(getter() || null);
+});
+
+_.createEffect(() => {
+  const el = scrollElement();
+  if (!el || !useKeyNav()) return;
+
+  const onKeyDown = (e) => handleListKeyDown(e);
+  const onMouseDown = (e) => handleListMouseDown(e);
+
+  el.addEventListener("keydown", onKeyDown, true);
+  el.addEventListener("mousedown", onMouseDown, true);
+
+  _.onCleanup(() => {
+    el.removeEventListener("keydown", onKeyDown, true);
+    el.removeEventListener("mousedown", onMouseDown, true);
+  });
+});
+
+return {
+  scrollElement,
+  setListRootEl,
+  getItems,
+  ROW_HEIGHT,
+  renderRow,
+  setVirtualizerHandle,
+  handleListKeyDown,
+  handleListMouseDown,
+  useKeyNav,
+};
+'''
+        componentName: Html
+        props:
+          '''
+const containerClass = c.props?.class || c.props?.containerClass || "";
+const mw = c.props?.contentMinWidthPx;
+const minWStyle =
+  typeof mw === "number" && mw > 0 ? `min-width: ${mw}px;width:100%;box-sizing:border-box;` : "";
+const useKeyNav = f.useKeyNav?.();
+const tabIndex = c.props?.tabIndex;
+const role = c.props?.role;
+const ariaLabel = c.props?.["attr:aria-label"];
+
+return {
+  as: "div",
+  class: containerClass,
+  ref: f.setListRootEl,
+  ...(minWStyle ? { style: minWStyle } : {}),
+  ...(useKeyNav && {
+    tabIndex: tabIndex !== undefined ? tabIndex : 0,
+    role,
+    ...(ariaLabel && { "attr:aria-label": ariaLabel }),
+    onKeyDownCapture: f.handleListKeyDown,
+    onMouseDownCapture: f.handleListMouseDown,
+  }),
+};
+'''
+      }
+    }
+    {
+      id: virtualList_virtua
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Virtualizer
+        props:
+          '''
+const scrollEl = f.scrollElement?.();
+const usesExternalScroll = typeof c.props?.getScrollContainerElement === "function";
+
+if (usesExternalScroll && !scrollEl) {
+  return { hide: true };
+}
+
+const rowHeight = f.ROW_HEIGHT?.() ?? 50;
+
+return {
+  data: f.getItems(),
+  scrollRef: scrollEl || undefined,
+  itemSize: rowHeight,
+  ref: f.setVirtualizerHandle,
+  children: f.renderRow,
+};
+'''
+      }
+    }
+    {
+      id: virtualList_loop
+      L: Attr
+      P: {
+        contextName: virtualItem
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return { hide: true };
+'''
+      }
+    }
+    {
+      id: virtualList_slot
+      L: Attr
+      P: {
+        displayOrder: 2
+        slot: children
+        componentName: Slot
+      }
+    }
+    {
+      id: virtualList_variant_containerClass
+      L: ComponentVariant
+      P: {
+        type: string
+        key: containerClass
+        defValue: ""
+      }
+    }
+    {
+      id: virtualList_variant_itemHeight
+      L: ComponentVariant
+      P: {
+        type: number
+        key: itemHeight
+        defValue: 50
+      }
+    }
+    {
+      id: virtualList_variant_items
+      L: ComponentVariant
+      P: {
+        type: array
+        key: items
+        defValue: []
+      }
+    }
+  ]
+  edges: [
+    {
+      id: virtualList_e_component_root
+      T: Attr
+      S: virtualList_component
+      E: virtualList_root
+    }
+    {
+      id: virtualList_e_variant_containerClass
+      T: ComponentVariant
+      S: virtualList_component
+      E: virtualList_variant_containerClass
+    }
+    {
+      id: virtualList_e_variant_itemHeight
+      T: ComponentVariant
+      S: virtualList_component
+      E: virtualList_variant_itemHeight
+    }
+    {
+      id: virtualList_e_variant_items
+      T: ComponentVariant
+      S: virtualList_component
+      E: virtualList_variant_items
+    }
+    {
+      id: virtualList_e_root_virtua
+      T: Attr
+      S: virtualList_root
+      E: virtualList_virtua
+    }
+    {
+      id: virtualList_e_virtua_loop
+      T: Attr
+      S: virtualList_virtua
+      E: virtualList_loop
+    }
+    {
+      id: virtualList_e_loop_slot
+      T: Attr
+      S: virtualList_loop
+      E: virtualList_slot
+    }
+  ]
+}

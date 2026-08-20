@@ -1,0 +1,637 @@
+{
+  vertexes: [
+    {
+      id: "ssse_root",
+      L: "Component",
+      P: {
+        key: "SettingsSchemaSectionEditor",
+        description: "Section meta and field schema editor pane.",
+        dynamicComponent: "FormManagement, Button, IconButton, FieldArraySchemaEditor, Html"
+      }
+    },
+{
+      id: "ssse_main",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''const api = c.props?.editorApi || {};
+
+return {
+  as: "div",
+  hide: api.isJsonMode?.() === true
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}`;
+'''
+      }
+    },
+{
+      id: "ssse_section_meta",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "FormManagement",
+        props: '''const api = c.props?.editorApi || {};
+
+const section = api.getSelectedSection?.();
+const initialVertex = api.sectionMetaVertex?.();
+return {
+  hide: api.isSingleSectionMode?.() === true || !section || !initialVertex,
+  key: section ? `section-meta-${section.id}` : "section-meta-none",
+  formConfig: api.SECTION_META_FORM_CONFIG,
+  initialVertex,
+  mode: "edit",
+  vertexLabel: "SettingsSchemaFormData",
+  hideActionsBar: true,
+  onFnsReady: api.registerSectionMetaFormFns,
+  onFieldChange: () => api.syncSectionMetaFromForm?.()
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid ${t.var.color.border};
+}`;
+'''
+      }
+    },
+{
+      id: "ssse_fields_header",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''const api = c.props?.editorApi || {};
+
+const section = api.getSelectedSection?.();
+return {
+  as: "div",
+  hide: !section
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid ${t.var.color.border};
+}`;
+'''
+      }
+    },
+{
+      id: "ssse_fields_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Fields"
+};
+''',
+        css: '''
+return `._id {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+}`;
+'''
+      }
+    },
+{
+      id: "ssse_add_field",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Button",
+        props: '''const api = c.props?.editorApi || {};
+
+return {
+  variant: "secondary",
+  size: "sm",
+  text: "Add field",
+  type: "button",
+  onClick: () => api.addField?.()
+};
+'''
+      }
+    },
+{
+      id: "ssse_fields_row",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''const api = c.props?.editorApi || {};
+
+const section = api.getSelectedSection?.();
+return {
+  as: "div",
+  hide: !section
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}`;
+'''
+      }
+    },
+{
+      id: "ssse_fields_list",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''const api = c.props?.editorApi || {};
+
+const section = api.getSelectedSection?.();
+return {
+  as: "div",
+  hide: !section,
+  ref: (element) => {
+    if (element && api.attachFieldsListBoundary) {
+      api.attachFieldsListBoundary(element);
+    }
+  }
+};
+''',
+        css: '''
+return `._id {
+  width: 280px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-right: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background_light_50};
+}`;
+'''
+      }
+    },
+{
+      id: "ssse_field_items_list",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''const api = c.props?.editorApi || {};
+
+const emptyDrop = api.isFieldListEmptyDrop?.();
+const dragging = !!api.fieldDragSource?.();
+return {
+  as: "div",
+  class: [
+    "fsce-field-items-list",
+    dragging ? "fsce-field-items-list-dragging" : "",
+    emptyDrop ? "fsce-field-list-drop-empty" : ""
+  ].filter(Boolean).join(" "),
+  ref: (element) => {
+    if (element && api.attachFieldListDropTarget) {
+      api.attachFieldListDropTarget(element);
+    }
+  }
+};
+''',
+        css: '''
+return `._id.fsce-field-items-list {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: 0;
+}
+
+._id.fsce-field-items-list-dragging {
+  padding-top: 0.375rem;
+  padding-bottom: 0.375rem;
+  min-height: 2.5rem;
+}
+
+._id.fsce-field-list-drop-empty::before {
+  content: "";
+  position: absolute;
+  left: 0.5rem;
+  right: 0.5rem;
+  top: 0.375rem;
+  height: 2px;
+  background: ${t.var.color.primary};
+  border-radius: 9999px;
+  z-index: 2;
+  pointer-events: none;
+  box-shadow: 0 0 0 1px ${t.var.color.primary_light_200};
+}
+
+._id.fsce-field-list-drop-empty::after {
+  content: "";
+  position: absolute;
+  left: 0.25rem;
+  top: calc(0.375rem - 3px);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: ${t.var.color.primary};
+  z-index: 2;
+  pointer-events: none;
+}`;
+'''
+      }
+    },
+{
+      id: "ssse_field_item",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "configFieldItem",
+        loop: true,
+        props: '''const api = c.props?.editorApi || {};
+
+return {
+  data: api.getFieldIndices?.() || []
+};
+'''
+      }
+    },
+{
+      id: "ssse_field_row",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''const api = c.props?.editorApi || {};
+
+const index = c.configFieldItem;
+const field = api.getFieldAt?.(index) || {};
+const dropBefore = api.isFieldDropBefore?.(index);
+const dropAfter = api.isFieldDropAfter?.(index);
+return {
+  as: "div",
+  class: `fsce-field-item${dropBefore ? " fsce-field-drop-before" : ""}${dropAfter ? " fsce-field-drop-after" : ""}`,
+  role: "button",
+  tabIndex: 0,
+  onClick: () => api.selectField?.(index),
+  onKeyDown: (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      api.selectField?.(index);
+    }
+  },
+  ref: (element) => {
+    if (element && typeof index === "number" && api.attachFieldDropTarget) {
+      api.attachFieldDropTarget(element, index);
+    }
+  }
+};
+''',
+        css: '''const api = c.props?.editorApi || {};
+
+const index = c.configFieldItem;
+const active = api.selectedFieldIndex?.() === index;
+const dragSource = api.fieldDragSource?.();
+const dragging =
+  api.draggedFieldIndex?.() === index &&
+  dragSource?.sectionId === api.selectedSectionId?.() &&
+  dragSource?.index === index;
+return `._id.fsce-field-item {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  border-radius: 0.375rem;
+  border: 1px solid ${active ? t.var.color.primary : t.var.color.border};
+  background: ${active ? t.var.color.primary_light_50 : t.var.color.background};
+  cursor: pointer;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  ${dragging ? "opacity: 0.5;" : ""}
+
+  .fsce-field-drag-handle {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.15s ease, visibility 0.15s ease;
+  }
+
+  &:hover .fsce-field-drag-handle {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+  ${dragging ? `
+  & .fsce-field-drag-handle {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }` : ""}
+}
+
+._id.fsce-field-drop-before::before {
+  content: "";
+  position: absolute;
+  left: 0.5rem;
+  right: 0.5rem;
+  top: 0;
+  height: 2px;
+  background: ${t.var.color.primary};
+  border-radius: 9999px;
+  transform: translateY(-50%);
+  z-index: 2;
+  pointer-events: none;
+  box-shadow: 0 0 0 1px ${t.var.color.primary_light_200};
+}
+
+._id.fsce-field-drop-before::after {
+  content: "";
+  position: absolute;
+  left: 0.25rem;
+  top: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: ${t.var.color.primary};
+  transform: translateY(-50%);
+  z-index: 2;
+  pointer-events: none;
+}
+
+._id.fsce-field-drop-after::before {
+  content: "";
+  position: absolute;
+  left: 0.5rem;
+  right: 0.5rem;
+  bottom: 0;
+  height: 2px;
+  background: ${t.var.color.primary};
+  border-radius: 9999px;
+  transform: translateY(50%);
+  z-index: 2;
+  pointer-events: none;
+  box-shadow: 0 0 0 1px ${t.var.color.primary_light_200};
+}
+
+._id.fsce-field-drop-after::after {
+  content: "";
+  position: absolute;
+  left: 0.25rem;
+  bottom: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: ${t.var.color.primary};
+  transform: translateY(50%);
+  z-index: 2;
+  pointer-events: none;
+}`;
+'''
+      }
+    },
+{
+      id: "ssse_field_drag",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''const api = c.props?.editorApi || {};
+
+const index = c.configFieldItem;
+return {
+  as: "div",
+  class: "fsce-field-drag-handle",
+  role: "presentation",
+  onClick: (e) => e.stopPropagation?.(),
+  onMouseDown: (e) => e.stopPropagation?.(),
+  ref: (element) => {
+    if (element && typeof index === "number" && api.attachFieldDraggable) {
+      api.attachFieldDraggable(element, index);
+    }
+  }
+};
+'''
+        css: '''
+return `._id.fsce-field-drag-handle {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  color: ${t.var.color.text_light_500};
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}`;
+'''
+      }
+    },
+{
+      id: "ssse_field_drag_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "ph:dots-six-vertical",
+  height: 14,
+  width: 14,
+  class: "fsce-field-drag-icon"
+};
+''',
+        css: '''
+return `._id.fsce-field-drag-icon {
+  pointer-events: none;
+}`;
+'''
+      }
+    },
+{
+      id: "ssse_field_summary",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''const api = c.props?.editorApi || {};
+
+const index = c.configFieldItem;
+const field = api.getFieldAt?.(index) || {};
+return {
+  as: "span",
+  class: "fsce-field-summary",
+  text: `${field.label || field.key || "Field"} (${field.renderer || "text"})`
+};
+''',
+        css: '''
+return `._id.fsce-field-summary {
+  flex: 1;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  font-size: 0.8125rem;
+}`;
+'''
+      }
+    },
+{
+      id: "ssse_field_delete",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "IconButton",
+        props: '''const api = c.props?.editorApi || {};
+
+const index = c.configFieldItem;
+return {
+  icon: "ph:trash",
+  variant: "danger",
+  size: "sm",
+  title: "Delete field",
+  onClick: (e) => {
+    e?.stopPropagation?.();
+    api.deleteField?.(index);
+  }
+};
+'''
+      }
+    },
+{
+      id: "ssse_field_editor_column",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''const api = c.props?.editorApi || {};
+
+const section = api.getSelectedSection?.();
+return {
+  as: "div",
+  hide: !section
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: ${t.var.color.background};
+}`;
+'''
+      }
+    },
+{
+      id: "ssse_field_editor",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "FormManagement",
+        props: '''const api = c.props?.editorApi || {};
+
+const field = api.getSelectedField?.();
+const fieldIndex = api.selectedFieldIndex?.();
+const sectionId = api.selectedSectionId?.();
+const initialVertex = api.fieldEditorVertex?.();
+return {
+  hide: !field || !initialVertex,
+  key: sectionId != null && fieldIndex != null
+    ? `field-editor-${sectionId}-${fieldIndex}`
+    : "field-editor-none",
+  formConfig: api.FIELD_EDITOR_FORM_CONFIG,
+  initialVertex,
+  mode: "edit",
+  vertexLabel: "SettingsSchemaFormData",
+  hideActionsBar: true,
+  onFnsReady: api.registerFieldEditorFormFns,
+  onFieldChange: () => api.syncFieldFromForm?.()
+};
+''',
+        css: '''
+return `._id {
+  flex-shrink: 0;
+  min-width: 0;
+  overflow-y: auto;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background};
+}`;
+'''
+      }
+    },
+{
+      id: "ssse_field_array_schema",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "FieldArraySchemaEditor",
+        props: '''const api = c.props?.editorApi || {};
+
+const field = api.getSelectedField?.();
+const fieldIndex = api.selectedFieldIndex?.();
+const sectionId = api.selectedSectionId?.();
+return {
+  hide: !field || field.renderer !== "fieldArray",
+  key: sectionId != null && fieldIndex != null
+    ? `field-array-schema-${sectionId}-${fieldIndex}`
+    : "field-array-schema-none",
+  field,
+  siteLanguages: api.getSiteLanguages?.(),
+  onChange: (patch) => api.onFieldArraySchemaChange?.(patch)
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  overflow-y: auto;
+  padding: 0.75rem 1rem;
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "ssse_root_e1", T: "Attr", S: "ssse_root", E: "ssse_main" },
+    { id: "ssse_root_e2", T: "Attr", S: "ssse_main", E: "ssse_section_meta" },
+    { id: "ssse_root_e3", T: "Attr", S: "ssse_main", E: "ssse_fields_header" },
+    { id: "ssse_root_e4", T: "Attr", S: "ssse_main", E: "ssse_fields_row" },
+    { id: "ssse_root_e5", T: "Attr", S: "ssse_fields_header", E: "ssse_fields_title" },
+    { id: "ssse_root_e6", T: "Attr", S: "ssse_fields_header", E: "ssse_add_field" },
+    { id: "ssse_root_e7", T: "Attr", S: "ssse_fields_row", E: "ssse_fields_list" },
+    { id: "ssse_root_e8", T: "Attr", S: "ssse_fields_row", E: "ssse_field_editor_column" },
+    { id: "ssse_root_e9", T: "Attr", S: "ssse_fields_list", E: "ssse_field_items_list" },
+    { id: "ssse_root_e10", T: "Attr", S: "ssse_field_items_list", E: "ssse_field_item" },
+    { id: "ssse_root_e11", T: "Attr", S: "ssse_field_item", E: "ssse_field_row" },
+    { id: "ssse_root_e12", T: "Attr", S: "ssse_field_row", E: "ssse_field_drag" },
+    { id: "ssse_root_e13", T: "Attr", S: "ssse_field_drag", E: "ssse_field_drag_icon" },
+    { id: "ssse_root_e14", T: "Attr", S: "ssse_field_row", E: "ssse_field_summary" },
+    { id: "ssse_root_e15", T: "Attr", S: "ssse_field_row", E: "ssse_field_delete" },
+    { id: "ssse_root_e16", T: "Attr", S: "ssse_field_editor_column", E: "ssse_field_editor" },
+    { id: "ssse_root_e17", T: "Attr", S: "ssse_field_editor_column", E: "ssse_field_array_schema" }
+  ]
+}

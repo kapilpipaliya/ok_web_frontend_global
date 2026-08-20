@@ -1,0 +1,364 @@
+{
+  vertexes: [
+    {
+      id: "vpm1"
+      L: Component
+      P: {
+        title: Vertex picker modal
+        key: VertexPickerModal
+      }
+    }
+    {
+      id: "vpm_root"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''return `._id {
+  position: fixed;
+  inset: 0;
+  z-index: 101;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  box-sizing: border-box;
+  background: rgba(0, 0, 0, 0.45);
+}`;'''
+        props:
+          '''const isOpenProp = c.props?.isOpen;
+const modalIsOpen = typeof isOpenProp === "function" ? isOpenProp() : !!isOpenProp;
+const modalTitle = c.props?.title;
+return {
+  as: "div",
+  role: "dialog",
+  "attr:aria-modal": true,
+  "attr:aria-label": modalTitle != null ? String(modalTitle) : "",
+  hide: () => !modalIsOpen,
+  onClick: (event) => {
+    if (event.target === event.currentTarget) c.props?.onClose?.();
+  }
+};'''
+      }
+    }
+    {
+      id: "vpm_panel"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''return `._id {
+  width: min(960px, 96vw);
+  height: min(720px, 90vh);
+  display: flex;
+  flex-direction: column;
+  background: ${t.var.color.background};
+  border-radius: 0.5rem;
+  border: 1px solid ${t.var.color.border};
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+}`;'''
+        props:
+          '''return { as: "div", onClick: (clickEvent) => clickEvent.stopPropagation() };'''
+      }
+    }
+    {
+      id: "vpm_head"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background_light_100};
+}`;'''
+        props:
+          '''return { as: "div" };'''
+      }
+    }
+    {
+      id: "vpm_title"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''return `._id {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: ${t.var.color.text};
+}`;'''
+        props:
+          '''return {
+  as: "h2",
+  text: c.props?.title != null ? String(c.props.title) : ""
+};'''
+      }
+    }
+    {
+      id: "vpm_close"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const usePolaris = c.props?.usePolarisUI === true;
+const closeButtonLabel = c.props?.closeButtonLabel;
+const closeLabel =
+  closeButtonLabel != null && String(closeButtonLabel).trim() !== ""
+    ? String(closeButtonLabel).trim()
+    : "";
+if (usePolaris) {
+  return {
+    as: "s-button",
+    "attr:variant": "tertiary",
+    "attr:icon": "x",
+    "attr:accessibilityLabel": closeLabel,
+    onClick: () => c.props?.onClose?.()
+  };
+}
+return {
+  as: "button",
+  type: "button",
+  text: closeLabel,
+  onClick: () => c.props?.onClose?.()
+};'''
+      }
+    }
+    {
+      id: "vpm_hint"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        css:
+          '''return `._id {
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  color: ${t.var.color.text_dark_400};
+  border-bottom: 1px solid ${t.var.color.border};
+}`;'''
+        props:
+          '''const draftProp = c.props?.draftVertex;
+const draftVertex = typeof draftProp === "function" ? draftProp() : draftProp;
+const displayName =
+  draftVertex?.P?.fileName != null
+    ? String(draftVertex.P.fileName)
+    : draftVertex?.P?.name != null
+      ? String(draftVertex.P.name)
+      : "";
+const hintEmpty = c.props?.hintEmpty;
+const hintSelected = c.props?.hintSelected;
+let hintText = "";
+if (displayName && hintSelected != null && String(hintSelected).trim() !== "") {
+  hintText = String(hintSelected).replace(/\{name\}/g, displayName);
+} else if (hintEmpty != null && String(hintEmpty).trim() !== "") {
+  hintText = String(hintEmpty).trim();
+}
+return {
+  as: "div",
+  hide: hintText === "",
+  text: hintText
+};'''
+      }
+    }
+    {
+      id: "vpm_frame_wrap"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        css:
+          '''return `._id {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}`;'''
+        props:
+          '''return { as: "div" };'''
+      }
+    }
+    {
+      id: "vpm_picker_body"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: DynamicPage
+        css:
+          '''return `._id {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  overflow: auto;
+  background: ${t.var.color.background};
+}`;'''
+        props:
+          '''const pickerBodyProps = c.props?.pickerBodyProps;
+return pickerBodyProps != null && typeof pickerBodyProps === "object" ? pickerBodyProps : {};'''
+      }
+    }
+    {
+      id: "vpm_foot"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-top: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background_light_100};
+}`;'''
+        props:
+          '''return { as: "div" };'''
+      }
+    }
+    {
+      id: "vpm_cancel"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const usePolaris = c.props?.usePolarisUI === true;
+const cancelButtonLabel = c.props?.cancelButtonLabel;
+const cancelLabel =
+  cancelButtonLabel != null && String(cancelButtonLabel).trim() !== ""
+    ? String(cancelButtonLabel).trim()
+    : "";
+if (usePolaris) {
+  return {
+    as: "s-button",
+    "attr:variant": "secondary",
+    text: cancelLabel,
+    onClick: () => c.props?.onClose?.()
+  };
+}
+return {
+  as: "button",
+  type: "button",
+  text: cancelLabel,
+  onClick: () => c.props?.onClose?.()
+};'''
+      }
+    }
+    {
+      id: "vpm_ok"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const usePolaris = c.props?.usePolarisUI === true;
+const draftProp = c.props?.draftVertex;
+const draftVertex = typeof draftProp === "function" ? draftProp() : draftProp;
+const hasSelection = !!(draftVertex && draftVertex.id);
+const confirmButtonLabel = c.props?.confirmButtonLabel;
+const confirmLabel =
+  confirmButtonLabel != null && String(confirmButtonLabel).trim() !== ""
+    ? String(confirmButtonLabel).trim()
+    : "";
+if (usePolaris) {
+  return {
+    as: "s-button",
+    "attr:variant": "primary",
+    text: confirmLabel,
+    disabled: !hasSelection,
+    onClick: () => c.props?.onConfirm?.()
+  };
+}
+return {
+  as: "button",
+  type: "button",
+  text: confirmLabel,
+  disabled: !hasSelection,
+  onClick: () => c.props?.onConfirm?.()
+};'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: vpm_e1
+      T: Attr
+      S: "vpm1"
+      E: "vpm_root"
+    }
+    {
+      id: vpm_e2
+      T: Attr
+      S: "vpm_root"
+      E: "vpm_panel"
+    }
+    {
+      id: vpm_e3
+      T: Attr
+      S: "vpm_panel"
+      E: "vpm_head"
+    }
+    {
+      id: vpm_e4
+      T: Attr
+      S: "vpm_head"
+      E: "vpm_title"
+    }
+    {
+      id: vpm_e5
+      T: Attr
+      S: "vpm_head"
+      E: "vpm_close"
+    }
+    {
+      id: vpm_e6
+      T: Attr
+      S: "vpm_panel"
+      E: "vpm_hint"
+    }
+    {
+      id: vpm_e7
+      T: Attr
+      S: "vpm_panel"
+      E: "vpm_frame_wrap"
+    }
+    {
+      id: vpm_e8
+      T: Attr
+      S: "vpm_frame_wrap"
+      E: "vpm_picker_body"
+    }
+    {
+      id: vpm_e9
+      T: Attr
+      S: "vpm_panel"
+      E: "vpm_foot"
+    }
+    {
+      id: vpm_e10
+      T: Attr
+      S: "vpm_foot"
+      E: "vpm_cancel"
+    }
+    {
+      id: vpm_e11
+      T: Attr
+      S: "vpm_foot"
+      E: "vpm_ok"
+    }
+  ]
+}

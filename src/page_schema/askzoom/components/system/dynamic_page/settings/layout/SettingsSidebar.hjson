@@ -1,0 +1,268 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: SettingsSidebar
+        fns:
+          '''
+const getSidebarConfig = () => c.props?.sidebarConfig || f.getSettingsSidebarConfig?.() || null;
+
+const checkPermissions = (permissionConfig) => {
+  if (!permissionConfig) return true;
+  if (_.isNoPermissionCheck === true) return true;
+  if (_.hasFullPermission || _.hasEditPermission || _.hasViewPermission) return true;
+  return false;
+};
+
+const getVisibleGroups = () => {
+  const sidebarConfig = getSidebarConfig();
+  if (!sidebarConfig || !Array.isArray(sidebarConfig.groups)) return [];
+  return sidebarConfig.groups.filter((group) => {
+    if (!checkPermissions(group.permissions)) return false;
+    return true;
+  }).map((group) => ({
+    ...group,
+    items: (group.items || []).filter((item) => checkPermissions(item.permissions))
+  })).filter((group) => (group.items || []).length > 0);
+};
+
+const parseNavPath = (itemPath) => {
+  if (!itemPath) return { pathname: "", sectionId: null };
+  const qIndex = itemPath.indexOf("?");
+  if (qIndex === -1) return { pathname: itemPath, sectionId: null };
+  const pathname = itemPath.slice(0, qIndex);
+  const params = new URLSearchParams(itemPath.slice(qIndex + 1));
+  return {
+    pathname,
+    sectionId: params.get("section")
+  };
+};
+
+const isActivePath = (itemPath) => {
+  const currentPath = _.location?.pathname || "";
+  if (!itemPath) return false;
+
+  const parsed = parseNavPath(itemPath);
+  if (parsed.sectionId) {
+    return currentPath === parsed.pathname && _.searchParams?.section === parsed.sectionId;
+  }
+
+  if (itemPath === currentPath) return true;
+  return currentPath.startsWith(itemPath + "/");
+};
+
+const handleNavigate = (item) => {
+  if (!item?.path) return;
+  _.navigate(item.path);
+};
+
+return {
+  getSidebarConfig,
+  getVisibleGroups,
+  isActivePath,
+  handleNavigate,
+  sidebarTitle: () => getSidebarConfig()?.title || "Settings"
+};
+'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        css:
+          '''
+return `._id {
+  width: 240px;
+  flex-shrink: 0;
+  border-right: 1px solid ${t.var.color.border};
+  padding: ${t.var.spacing.md};
+  background: ${t.var.color.background_light_100};
+  min-height: 100%;
+  overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid ${t.var.color.border};
+    max-height: 240px;
+  }
+}`;
+'''
+        componentName: Html
+        props:
+          '''
+return {
+  as: "aside"
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        css:
+          '''
+return `._id {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: ${t.var.color.text};
+  margin-bottom: ${t.var.spacing.md};
+}`;
+'''
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  text: f.sidebarTitle()
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 2
+        css:
+          '''
+return `._id {
+  margin-bottom: ${t.var.spacing.md};
+}`;
+'''
+        componentName: Html
+        contextName: sidebarGroup
+        loop: true
+        props:
+          '''
+return {
+  as: "div",
+  data: f.getVisibleGroups()
+};
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 1
+        css:
+          '''
+return `._id {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: ${t.var.color.text_light_500};
+  margin-bottom: ${t.var.spacing.xs};
+  padding: 0 ${t.var.spacing.sm};
+}`;
+'''
+        componentName: Html
+        props:
+          '''
+const group = c.sidebarGroup;
+return {
+  as: "div",
+  text: group.label || "",
+  hide: !group.label
+};
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 2
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: ${t.var.spacing.xxs};
+}`;
+'''
+        componentName: Html
+        contextName: navItem
+        loop: true
+        props:
+          '''
+const group = c.sidebarGroup;
+return {
+  as: "nav",
+  data: group.items || []
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 1
+        css:
+          '''
+const item = c.navItem;
+const active = f.isActivePath(item.path);
+return active
+  ? `._id {
+  display: block;
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  border-radius: ${t.var.borderRadius.md};
+  color: ${t.var.color.primary_text};
+  background: ${t.var.color.primary};
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background 150ms ease;
+}`
+  : `._id {
+  display: block;
+  padding: ${t.var.spacing.sm} ${t.var.spacing.md};
+  border-radius: ${t.var.borderRadius.md};
+  color: ${t.var.color.text};
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background 150ms ease;
+}
+._id:hover {
+  background: ${t.var.color.background_light_200};
+}`;
+'''
+        componentName: Html
+        props:
+          '''
+const item = c.navItem;
+return {
+  as: "a",
+  href: item.path,
+  text: item.label,
+  onClick: (event) => {
+    event.preventDefault();
+    f.handleNavigate(item);
+  }
+};
+'''
+      }
+    }
+  ]
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" }
+    { id: "e2", T: "Attr", S: "2", E: "3" }
+    { id: "e3", T: "Attr", S: "2", E: "4" }
+    { id: "e4", T: "Attr", S: "4", E: "5" }
+    { id: "e5", T: "Attr", S: "4", E: "6" }
+    { id: "e6", T: "Attr", S: "6", E: "7" }
+  ]
+}

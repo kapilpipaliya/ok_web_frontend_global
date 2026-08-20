@@ -1,0 +1,413 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: FloatingMenu
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  position: relative;
+  display: inline-block;
+}`;
+'''
+        displayOrder: 1
+        fns:
+          '''
+// Menu state management
+const [isMenuOpen, setIsMenuOpen] = _.createSignal(false);
+const [triggerRef, setTriggerRef] = _.createSignal(null);
+const [menuRef, setMenuRef] = _.createSignal(null);
+let cleanup = null;
+
+// Setup floating UI positioning with auto-update
+const setupFloatingUI = async () => {
+  const trigger = triggerRef();
+  const menu = menuRef();
+  if (!trigger || !menu) return;
+
+  const placement = c.props?.placement || "bottom-end";
+
+  try {
+    const { computePosition, flip, shift, offset, autoUpdate } = _.floatingUI;
+
+    // Function to update position
+    const updatePosition = async () => {
+      const { x, y } = await computePosition(trigger, menu, {
+        placement: placement,
+        strategy: 'fixed',
+        middleware: [
+          offset(4),
+          flip(),
+          shift({ padding: 8 })
+        ]
+      });
+
+      Object.assign(menu.style, {
+        left: `${x}px`,
+        top: `${y}px`,
+      });
+    };
+
+    // Initial positioning
+    await updatePosition();
+
+    // Setup auto-update to handle scroll, resize, and other changes
+    cleanup = autoUpdate(trigger, menu, updatePosition, {
+      // Options to ensure scroll is tracked
+      ancestorScroll: true,
+      ancestorResize: true,
+      elementResize: true,
+      layoutShift: true,
+      animationFrame: false
+    });
+  } catch (e) {
+    console.error('Error setting up floating UI:', e);
+  }
+};
+
+// Toggle menu
+const toggleMenu = (e) => {
+  e?.preventDefault();
+  e?.stopPropagation();
+  const newState = !isMenuOpen();
+  setIsMenuOpen(newState);
+  if (newState) {
+    requestAnimationFrame(() => setupFloatingUI());
+  } else if (cleanup) {
+    cleanup();
+    cleanup = null;
+  }
+};
+
+// Close menu
+const closeMenu = () => {
+  setIsMenuOpen(false);
+  if (cleanup) {
+    cleanup();
+    cleanup = null;
+  }
+};
+
+// Handle clicks outside
+const handleDocumentClick = (e) => {
+  const trigger = triggerRef();
+  const menu = menuRef();
+  if (!trigger || !menu) return;
+
+  if (!trigger.contains(e.target) && !menu.contains(e.target)) {
+    closeMenu();
+  }
+};
+
+// Setup and cleanup event listeners
+const onMount = () => {
+  document.addEventListener('click', handleDocumentClick);
+  return () => {
+    document.removeEventListener('click', handleDocumentClick);
+    if (cleanup) {
+      cleanup();
+    }
+  };
+};
+
+return {
+  isMenuOpen,
+  setIsMenuOpen,
+  triggerRef,
+  setTriggerRef,
+  menuRef,
+  setMenuRef,
+  toggleMenu,
+  closeMenu,
+  setupFloatingUI,
+  onMount
+};
+'''
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  onMount: f.onMount
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  background: none;
+  border: none;
+  color: ${t.var.color.text_light_500};
+  cursor: pointer;
+  padding: ${t.var.spacing.xs};
+  border-radius: ${t.var.borderRadius.sm};
+  transition: all 150ms ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+}
+
+._id:hover {
+  background: ${t.var.color.background_light_200};
+  color: ${t.var.color.text};
+}
+
+._id:focus {
+  outline: 2px solid ${t.var.color.primary};
+  outline-offset: 2px;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const triggerIcon = c.props?.triggerIcon || "carbon:overflow-menu-vertical";
+
+return {
+  as: "button",
+  "aria-label": "Open menu",
+  "aria-expanded": f.isMenuOpen?.() || false,
+  onClick: f.toggleMenu,
+  ref: f.setTriggerRef
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const triggerIcon = c.props?.triggerIcon || "carbon:overflow-menu-vertical";
+
+return {
+  as: "icon",
+  icon: triggerIcon,
+  width: 30,
+  height: 30
+};
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "portal"
+};
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  position: fixed;
+  z-index: 1000;
+  background: ${t.var.color.background};
+  border: 1px solid ${t.var.color.border};
+  border-radius: ${t.var.borderRadius.lg};
+  padding: ${t.var.spacing.xs};
+  min-width: 160px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  animation: fadeIn 0.15s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  hide: !f.isMenuOpen?.(),
+  ref: f.setMenuRef
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 1
+        slot: menu-items
+        componentName: Slot
+        props:
+          '''
+// Provide closeMenu function to menu items
+return {
+  contextName: "floatingMenuContext",
+  data: {
+    closeMenu: f.closeMenu
+  }
+};
+'''
+      }
+    }
+    {
+      id: "8"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: triggerIcon
+        defValue: carbon:overflow-menu-vertical
+      }
+    }
+    {
+      id: "9"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: placement
+        defValue: bottom-end
+      }
+    }
+    {
+      id: "10"
+      L: ComponentVariantOption
+      P: {
+        description: Top start placement
+        value: top-start
+        key: top-start
+      }
+    }
+    {
+      id: "11"
+      L: ComponentVariantOption
+      P: {
+        description: Top end placement
+        value: top-end
+        key: top-end
+      }
+    }
+    {
+      id: "12"
+      L: ComponentVariantOption
+      P: {
+        description: Bottom end placement
+        value: bottom-end
+        key: bottom-end
+      }
+    }
+    {
+      id: "13"
+      L: ComponentVariantOption
+      P: {
+        description: Bottom start placement
+        value: bottom-start
+        key: bottom-start
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: ComponentVariant
+      S: "1"
+      E: "8"
+    }
+    {
+      id: e3
+      T: ComponentVariant
+      S: "1"
+      E: "9"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "5"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e9
+      T: ComponentVariantOption
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e10
+      T: ComponentVariantOption
+      S: "9"
+      E: "11"
+    }
+    {
+      id: e11
+      T: ComponentVariantOption
+      S: "9"
+      E: "12"
+    }
+    {
+      id: e12
+      T: ComponentVariantOption
+      S: "9"
+      E: "13"
+    }
+  ]
+}
