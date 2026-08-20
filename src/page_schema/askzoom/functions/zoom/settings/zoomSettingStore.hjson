@@ -1,0 +1,232 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: zoomSettingStore
+        description: Read and write Zoom credentials, session, and worker status on GlobalSetting
+        body:
+          '''
+const action = c.action || 'get';
+
+const ensureSetting = async (session) => {
+  await session.run(`
+    MERGE (g:GlobalSetting {key: 'Default'})
+    ON CREATE SET g.createdAt = datetime(), g.name = 'Default'
+    SET g.updatedAt = datetime()
+    RETURN g
+  `);
+};
+
+const getSetting = async (session) => {
+  await ensureSetting(session);
+  const result = await session.run(`
+    MATCH (g:GlobalSetting {key: 'Default'})
+    RETURN g
+  `);
+  const node = result.records[0]?.get('g');
+  return node ? _.convertNodeToJson(node) : null;
+};
+
+const encryptSecret = (value) => {
+  if (!value) return '';
+  try {
+    return _.encryptToken(value);
+  } catch (error) {
+    return `plain:${value}`;
+  }
+};
+
+const decryptSecret = (value) => {
+  if (!value) return '';
+  if (String(value).startsWith('plain:')) return String(value).slice(6);
+  try {
+    return _.decryptToken(value);
+  } catch (error) {
+    return '';
+  }
+};
+
+if (action === 'get') {
+  const vertex = await getSetting(_.session);
+  const p = vertex?.P || {};
+  return {
+    success: true,
+    data: {
+      email: p.zoomEmail || '',
+      hasPassword: !!p.zoomPasswordEncrypted,
+      hasMeetingPassword: !!p.zoomMeetingPasswordEncrypted,
+      displayName: p.zoomDisplayName || '',
+      meetingUrl: p.zoomMeetingUrl || '',
+      loggedIn: p.zoomLoggedIn === true || p.zoomLoggedIn === 'true',
+      managing: p.zoomManaging === true || p.zoomManaging === 'true',
+      leaveRequested: p.zoomLeaveRequested === true || p.zoomLeaveRequested === 'true',
+      phase: p.zoomPhase || 'idle',
+      message: p.zoomMessage || '',
+      lastError: p.zoomLastError || '',
+      lastScreenshot: c.includeScreenshot ? (p.zoomLastScreenshot || '') : '',
+      lastScreenshotAt: p.zoomLastScreenshotAt || '',
+      hasRecording: !!(p.zoomLastRecordingPath || p.zoomHasRecording),
+      lastRecordingAt: p.zoomLastRecordingAt || '',
+      lastRecordingAction: p.zoomLastRecordingAction || '',
+      admittedCount: Number(p.zoomAdmittedCount || 0),
+      hasSession: !!p.zoomStorageState,
+      updatedAt: p.zoomUpdatedAt || ''
+    }
+  };
+}
+
+if (action === 'getSecrets') {
+  const vertex = await getSetting(_.session);
+  const p = vertex?.P || {};
+  return {
+    success: true,
+    data: {
+      email: p.zoomEmail || '',
+      password: decryptSecret(p.zoomPasswordEncrypted),
+      meetingPassword: decryptSecret(p.zoomMeetingPasswordEncrypted),
+      displayName: p.zoomDisplayName || '',
+      meetingUrl: p.zoomMeetingUrl || '',
+      storageState: p.zoomStorageState || '',
+      leaveRequested: p.zoomLeaveRequested === true || p.zoomLeaveRequested === 'true'
+    }
+  };
+}
+
+if (action === 'saveCredentials') {
+  const email = String(c.email || '').trim();
+  const password = c.password;
+  const meetingPassword = c.meetingPassword;
+  const displayName = String(c.displayName || '').trim();
+  const meetingUrl = String(c.meetingUrl || '').trim();
+
+  if (!email) {
+    return { success: false, error: 'Zoom email is required' };
+  }
+
+  await ensureSetting(_.session);
+
+  const sets = [
+    'g.zoomEmail = $email',
+    'g.zoomDisplayName = $displayName',
+    'g.zoomMeetingUrl = $meetingUrl',
+    'g.zoomUpdatedAt = datetime()'
+  ];
+  const params = { email, displayName, meetingUrl };
+
+  if (password !== undefined && password !== null && String(password).length > 0) {
+    sets.push('g.zoomPasswordEncrypted = $passwordEncrypted');
+    params.passwordEncrypted = encryptSecret(String(password));
+  }
+
+  if (meetingPassword !== undefined && meetingPassword !== null) {
+    if (String(meetingPassword).length > 0) {
+      sets.push('g.zoomMeetingPasswordEncrypted = $meetingPasswordEncrypted');
+      params.meetingPasswordEncrypted = encryptSecret(String(meetingPassword));
+    } else {
+      sets.push('g.zoomMeetingPasswordEncrypted = $meetingPasswordEncrypted');
+      params.meetingPasswordEncrypted = '';
+    }
+  }
+
+  await _.session.run(`
+    MATCH (g:GlobalSetting {key: 'Default'})
+    SET ${sets.join(', ')}
+    RETURN g
+  `, params);
+
+  return { success: true, message: 'Zoom credentials saved' };
+}
+
+if (action === 'saveSession') {
+  await ensureSetting(_.session);
+  await _.session.run(`
+    MATCH (g:GlobalSetting {key: 'Default'})
+    SET g.zoomStorageState = $storageState,
+        g.zoomLoggedIn = $loggedIn,
+        g.zoomUpdatedAt = datetime()
+    RETURN g
+  `, {
+    storageState: c.storageState || '',
+    loggedIn: c.loggedIn === true
+  });
+  return { success: true };
+}
+
+if (action === 'saveStatus') {
+  await ensureSetting(_.session);
+  const fields = {
+    zoomPhase: c.phase,
+    zoomMessage: c.message,
+    zoomLastError: c.lastError,
+    zoomManaging: c.managing,
+    zoomLeaveRequested: c.leaveRequested,
+    zoomLoggedIn: c.loggedIn,
+    zoomLastScreenshot: c.lastScreenshot,
+    zoomLastScreenshotAt: c.lastScreenshotAt,
+    zoomHasRecording: c.hasRecording,
+    zoomLastRecordingAt: c.lastRecordingAt,
+    zoomLastRecordingAction: c.lastRecordingAction,
+    zoomLastRecordingPath: c.lastRecordingPath,
+    zoomAdmittedCount: c.admittedCount,
+    zoomUpdatedAt: true
+  };
+
+  const sets = ['g.zoomUpdatedAt = datetime()'];
+  const params = {};
+  for (const [key, value] of Object.entries(fields)) {
+    if (key === 'zoomUpdatedAt') continue;
+    if (value === undefined) continue;
+    const param = key;
+    sets.push(`g.${key} = $${param}`);
+    params[param] = value;
+  }
+
+  await _.session.run(`
+    MATCH (g:GlobalSetting {key: 'Default'})
+    SET ${sets.join(', ')}
+    RETURN g
+  `, params);
+
+  return { success: true };
+}
+
+if (action === 'requestLeave') {
+  await ensureSetting(_.session);
+  await _.session.run(`
+    MATCH (g:GlobalSetting {key: 'Default'})
+    SET g.zoomLeaveRequested = true,
+        g.zoomManaging = false,
+        g.zoomPhase = 'leaving',
+        g.zoomMessage = 'Leaving meeting...',
+        g.zoomUpdatedAt = datetime()
+    RETURN g
+  `);
+  return { success: true, message: 'Leave requested. Session will stay logged in.' };
+}
+
+if (action === 'clearSession') {
+  await ensureSetting(_.session);
+  await _.session.run(`
+    MATCH (g:GlobalSetting {key: 'Default'})
+    SET g.zoomStorageState = '',
+        g.zoomLoggedIn = false,
+        g.zoomManaging = false,
+        g.zoomLeaveRequested = false,
+        g.zoomPhase = 'logged_out',
+        g.zoomMessage = 'Logged out',
+        g.zoomLastScreenshot = '',
+        g.zoomUpdatedAt = datetime()
+    RETURN g
+  `);
+  return { success: true };
+}
+
+return { success: false, error: `Unknown action: ${action}` };
+'''
+      }
+    }
+  ]
+  edges: []
+}

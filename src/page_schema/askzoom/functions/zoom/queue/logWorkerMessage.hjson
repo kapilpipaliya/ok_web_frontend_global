@@ -1,0 +1,55 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Logs worker processing messages to the database for debugging
+        body:
+          '''
+const { workerName, level = 'info', message, metadata = {} } = c;
+
+if (!workerName || !message) {
+  return {
+    success: false,
+    message: 'workerName and message are required'
+  };
+}
+
+const session = _.session;
+
+await session.run(`
+  CREATE (log:WorkerLog {
+    key: $key,
+    workerName: $workerName,
+    level: $level,
+    message: $message,
+    metadata: $metadata,
+    createdAt: datetime()
+  })
+`, {
+  key: `worker_log_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+  workerName,
+  level,
+  message,
+  metadata: JSON.stringify(metadata)
+});
+
+await session.run(`
+  MATCH (log:WorkerLog {workerName: $workerName})
+  WITH log
+  ORDER BY log.createdAt DESC
+  SKIP 1000
+  DETACH DELETE log
+`, { workerName });
+
+return {
+  success: true
+};
+'''
+        key: logWorkerMessage
+      }
+    }
+  ]
+  edges: []
+}

@@ -1,0 +1,52 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: zoomQueueHelpers
+        description: Redis and BullMQ helpers for the Zoom Playwright queue
+        body:
+          '''
+try {
+  const { Queue } = _.bullmq;
+
+  const getRedisConnection = () => {
+    return _.bullmq.redisConnection || {
+      host: process.env.REDIS_HOST || 'localhost',
+      port: parseInt(process.env.REDIS_PORT || '6379', 10),
+      maxRetriesPerRequest: null,
+      enableReadyCheck: false,
+      retryStrategy(times) {
+        if (times > 3) return null;
+        return Math.min(times * 200, 2000);
+      }
+    };
+  };
+
+  const QUEUE_NAME = 'processZoomPlaywright';
+
+  const createZoomQueue = () => {
+    return new Queue(QUEUE_NAME, { connection: getRedisConnection() });
+  };
+
+  return {
+    success: true,
+    data: {
+      QUEUE_NAME,
+      getRedisConnection,
+      createZoomQueue
+    }
+  };
+} catch (error) {
+  return {
+    success: false,
+    error: error.message
+  };
+}
+'''
+      }
+    }
+  ]
+  edges: []
+}

@@ -1,0 +1,95 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: zoomPlaywrightHelpers
+        description: Shared Playwright helpers for Zoom automation
+        body:
+          '''
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const visibleClick = async (root, locator) => {
+  const count = await locator.count();
+  for (let i = 0; i < count; i++) {
+    const el = locator.nth(i);
+    try {
+      if (await el.isVisible()) {
+        await el.click({ timeout: 2500 });
+        return true;
+      }
+    } catch (error) {
+      // try next
+    }
+  }
+  return false;
+};
+
+const clickNamed = async (page, names, role = 'button') => {
+  const roots = [page, ...page.frames()];
+  for (const name of names) {
+    for (const root of roots) {
+      try {
+        const byRole = root.getByRole(role, { name });
+        if (await visibleClick(root, byRole)) return true;
+        const byText = root.locator('button, a, [role="button"], input[type="submit"]').filter({ hasText: name });
+        if (await visibleClick(root, byText)) return true;
+      } catch (error) {
+        // frame may be detached
+      }
+    }
+  }
+  return false;
+};
+
+const dismissNoise = async (page) => {
+  await clickNamed(page, [
+    /accept cookies/i,
+    /i agree/i,
+    /got it/i,
+    /stay in browser/i,
+    /launch meeting/i,
+    /sign in with password/i
+  ]);
+};
+
+const parseMeetingJoinUrl = (raw) => {
+  const trimmed = String(raw || '').trim();
+  let meetingId = '';
+  let joinUrl = '';
+  try {
+    if (/^https?:\/\//i.test(trimmed)) {
+      const url = new URL(trimmed);
+      const parts = url.pathname.split('/').filter(Boolean);
+      meetingId = (parts[parts.length - 1] || '').replace(/\D/g, '');
+      joinUrl = `${url.origin}/j/${meetingId}?from=join#success`;
+    } else {
+      meetingId = trimmed.replace(/\D/g, '');
+      joinUrl = `https://us04web.zoom.us/j/${meetingId}?from=join#success`;
+    }
+  } catch (error) {
+    meetingId = trimmed.replace(/\D/g, '');
+    if (meetingId) {
+      joinUrl = `https://us04web.zoom.us/j/${meetingId}?from=join#success`;
+    }
+  }
+  return { meetingId, joinUrl };
+};
+
+return {
+  success: true,
+  data: {
+    sleep,
+    visibleClick,
+    clickNamed,
+    dismissNoise,
+    parseMeetingJoinUrl
+  }
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

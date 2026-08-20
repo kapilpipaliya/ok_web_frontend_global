@@ -1,0 +1,107 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: zoomPlaywrightLogin
+        description: Playwright Zoom login; saves session on GlobalSetting
+        body:
+          '''
+const helpersRes = await s({
+  functionName: 'zoomPlaywrightHelpers',
+  contextData: {}
+}, { functionLookupSubDomain: _.subDomain });
+const { sleep } = helpersRes.result?.data || {};
+
+const storeRes = await s({
+  functionName: 'zoomSettingStore',
+  contextData: { action: 'getSecrets' }
+}, { functionLookupSubDomain: _.subDomain });
+const secrets = storeRes.result?.data;
+if (!secrets?.email || !secrets?.password) {
+  throw new Error('Zoom email and password are required');
+}
+
+await s({
+  functionName: 'zoomSettingStore',
+  contextData: {
+    action: 'saveStatus',
+    phase: 'logging_in',
+    message: 'Opening Zoom sign-in',
+    lastError: '',
+    managing: false
+  }
+}, { functionLookupSubDomain: _.subDomain });
+
+await s({
+  functionName: 'zoomPlaywrightRuntime',
+  contextData: { action: 'setJobAction', jobAction: 'login' }
+}, { functionLookupSubDomain: _.subDomain });
+
+await s({
+  functionName: 'zoomPlaywrightRuntime',
+  contextData: { action: 'launch' }
+}, { functionLookupSubDomain: _.subDomain });
+
+const page = globalThis.__askzoomPlaywright?.page;
+if (!page) throw new Error('Failed to launch Playwright browser');
+
+await page.goto('https://www.zoom.com/', { waitUntil: 'domcontentloaded', timeout: 60000 });
+await page.getByRole('link', { name: 'Sign In' }).click();
+const emailBox = page.getByRole('textbox', { name: 'Enter email, Zoom Mail or' });
+await emailBox.waitFor({ state: 'visible', timeout: 30000 });
+await emailBox.fill(secrets.email);
+await page.getByTestId('account-next-btn').click();
+const passwordBox = page.getByRole('textbox', { name: 'Enter your password' });
+await passwordBox.waitFor({ state: 'visible', timeout: 30000 });
+await passwordBox.fill(secrets.password);
+await page.getByTestId('signin-btn').click();
+await page.waitForURL(
+  (url) => !/\/signin/i.test(url.pathname) || /oauth_confirm/i.test(url.pathname),
+  { timeout: 45000 }
+).catch(() => {});
+await sleep(2000);
+
+const url = page.url();
+if (/signin/i.test(url) && !/oauth_confirm/i.test(url)) {
+  await s({
+    functionName: 'zoomPlaywrightRuntime',
+    contextData: { action: 'captureScreenshot' }
+  }, { functionLookupSubDomain: _.subDomain });
+  throw new Error('Zoom login did not complete. Check credentials or extra verification.');
+}
+
+await s({
+  functionName: 'zoomPlaywrightRuntime',
+  contextData: { action: 'persistSession', loggedIn: true }
+}, { functionLookupSubDomain: _.subDomain });
+
+await s({
+  functionName: 'zoomPlaywrightRuntime',
+  contextData: { action: 'captureScreenshot' }
+}, { functionLookupSubDomain: _.subDomain });
+
+await s({
+  functionName: 'zoomPlaywrightRuntime',
+  contextData: { action: 'close' }
+}, { functionLookupSubDomain: _.subDomain });
+
+await s({
+  functionName: 'zoomSettingStore',
+  contextData: {
+    action: 'saveStatus',
+    phase: 'logged_in',
+    message: 'Logged in. Session saved.',
+    loggedIn: true,
+    lastError: ''
+  }
+}, { functionLookupSubDomain: _.subDomain });
+
+return { success: true, message: 'Zoom login complete' };
+'''
+      }
+    }
+  ]
+  edges: []
+}

@@ -1,0 +1,351 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: zoomPlaywrightManage
+        description: Join Zoom meeting and keep admitting waiting-room participants
+        body:
+          '''
+const helpersRes = await s({
+  functionName: 'zoomPlaywrightHelpers',
+  contextData: {}
+}, { functionLookupSubDomain: _.subDomain });
+const {
+  sleep,
+  clickNamed,
+  dismissNoise,
+  parseMeetingJoinUrl
+} = helpersRes.result?.data || {};
+
+const storeRes = await s({
+  functionName: 'zoomSettingStore',
+  contextData: { action: 'getSecrets' }
+}, { functionLookupSubDomain: _.subDomain });
+const secrets = storeRes.result?.data;
+const meetingUrl = String(c.meetingUrl || secrets?.meetingUrl || '').trim();
+if (!meetingUrl) throw new Error('Meeting URL is required');
+if (!secrets?.storageState) throw new Error('Login session missing. Run Zoom login first.');
+
+const { meetingId, joinUrl } = parseMeetingJoinUrl(meetingUrl);
+if (!meetingId || !joinUrl) throw new Error('Invalid meeting URL or meeting ID');
+
+await s({
+  functionName: 'zoomPlaywrightRuntime',
+  contextData: { action: 'setJobAction', jobAction: 'manage' }
+}, { functionLookupSubDomain: _.subDomain });
+
+await s({
+  functionName: 'zoomPlaywrightRuntime',
+  contextData: { action: 'setAdmittedCount', admittedCount: 0 }
+}, { functionLookupSubDomain: _.subDomain });
+
+await s({
+  functionName: 'zoomSettingStore',
+  contextData: {
+    action: 'saveStatus',
+    phase: 'joining',
+    message: 'Joining Zoom meeting',
+    lastError: '',
+    managing: false,
+    leaveRequested: false,
+    admittedCount: 0
+  }
+}, { functionLookupSubDomain: _.subDomain });
+
+await s({
+  functionName: 'zoomPlaywrightRuntime',
+  contextData: { action: 'launch', storageState: secrets.storageState }
+}, { functionLookupSubDomain: _.subDomain });
+
+const runtime = globalThis.__askzoomPlaywright;
+const page = runtime?.page;
+if (!page) throw new Error('Failed to launch Playwright browser');
+
+const enterMeetingId = async (page, meetingId) => {
+  await page.goto('https://zoom.us/join', { waitUntil: 'domcontentloaded', timeout: 60000 });
+  await dismissNoise(page);
+  const meetingInput = page.getByRole('textbox', { name: 'Meeting ID or Personal Link' });
+  await meetingInput.click();
+  await meetingInput.fill(meetingId);
+  await sleep(400);
+  await meetingInput.press('Enter');
+};
+
+const clickJoinFromBrowser = async (page) => {
+  const joinFromBrowser = page.getByRole('button', { name: 'Join from browser', exact: true });
+  await joinFromBrowser.waitFor({ state: 'visible', timeout: 30000 });
+  await joinFromBrowser.click();
+};
+
+const continueWithoutMicrophoneAndJoin = async (page, displayName, meetingPassword) => {
+  const webclient = page.locator('#webclient').contentFrame();
+  await webclient.getByRole('button', { name: 'Continue without microphone' }).click();
+  await webclient.getByRole('button', { name: 'Continue without microphone' }).click();
+  await fillDisplayNameAndPassword(webclient, displayName, meetingPassword);
+  await webclient.getByRole('button', { name: 'Join', exact: true }).click();
+};
+
+const fillDisplayNameAndPassword = async (webclient, displayName, meetingPassword) => {
+  const name = String(displayName || '').trim();
+  const passcode = String(meetingPassword || '').trim();
+
+  if (name) {
+    const nameInput = webclient.getByRole('textbox', { name: /name/i }).first();
+    if (await nameInput.count()) {
+      await nameInput.fill(name).catch(async () => {
+        await webclient.locator('input[type="text"]').first().fill(name).catch(() => {});
+      });
+    } else {
+      await webclient.locator('input#input-for-name, input[placeholder*="name" i]').first().fill(name).catch(() => {});
+    }
+  }
+
+  if (passcode) {
+    const passInput = webclient.getByRole('textbox', { name: /passcode|password/i }).first();
+    if (await passInput.count()) {
+      await passInput.fill(passcode).catch(async () => {
+        await webclient.locator('input[type="password"]').first().fill(passcode).catch(() => {});
+      });
+    } else {
+      await webclient.locator('input[type="password"], input[placeholder*="pass" i]').first().fill(passcode).catch(() => {});
+    }
+  }
+
+  await sleep(300);
+};
+
+const dismissRecordingNotice = async (page) => {
+  const roots = [page];
+  try {
+    const webclient = page.locator('#webclient').contentFrame();
+    if (webclient) roots.push(webclient);
+  } catch (error) {
+    // ignore
+  }
+
+  for (const root of roots) {
+    try {
+      const modal = root.locator('.ReactModalPortal, .zm-modal').filter({
+        hasText: /This meeting is being recorded/i
+      }).first();
+      if (!(await modal.count())) continue;
+      if (!(await modal.isVisible().catch(() => false))) continue;
+      const okBtn = modal.getByRole('button', { name: /^OK$/i }).first();
+      if (await okBtn.count()) {
+        await okBtn.click({ timeout: 5000 });
+        await sleep(300);
+        return true;
+      }
+    } catch (error) {
+      // try next root
+    }
+  }
+  return false;
+};
+
+const getJoinRoots = (page) => {
+  const roots = [page];
+  try {
+    const webclient = page.locator('#webclient').contentFrame();
+    if (webclient) roots.push(webclient);
+  } catch (error) {
+    // ignore
+  }
+  return roots;
+};
+
+const isWaitingRoomVisible = async (page) => {
+  for (const root of getJoinRoots(page)) {
+    try {
+      const waitingRoom = root.locator('.wr-information, .wr-tip, .wr-loading-icon').first();
+      if (await waitingRoom.count() && await waitingRoom.isVisible().catch(() => false)) {
+        return true;
+      }
+      const tip = root.getByText(/We've let them know you're here|Please wait|waiting for the host/i).first();
+      if (await tip.count() && await tip.isVisible().catch(() => false)) {
+        return true;
+      }
+    } catch (error) {
+      // try next root
+    }
+  }
+  return false;
+};
+
+const waitForHostAdmit = async (page, timeoutMs = 10 * 60 * 1000) => {
+  const started = Date.now();
+
+  // Waiting room can appear a few seconds after Join.
+  for (let i = 0; i < 15; i++) {
+    if (await isWaitingRoomVisible(page)) break;
+    await sleep(1000);
+  }
+
+  if (!(await isWaitingRoomVisible(page))) {
+    return true;
+  }
+
+  await s({
+    functionName: 'zoomSettingStore',
+    contextData: {
+      action: 'saveStatus',
+      phase: 'waiting',
+      message: 'In waiting room. Waiting for host to admit...',
+      managing: false
+    }
+  }, { functionLookupSubDomain: _.subDomain });
+
+  while (Date.now() - started < timeoutMs) {
+    if (!(await isWaitingRoomVisible(page))) {
+      await sleep(1000);
+      if (!(await isWaitingRoomVisible(page))) {
+        await s({
+          functionName: 'zoomSettingStore',
+          contextData: {
+            action: 'saveStatus',
+            phase: 'joining',
+            message: 'Admitted to meeting',
+            managing: false
+          }
+        }, { functionLookupSubDomain: _.subDomain });
+        return true;
+      }
+    }
+    await sleep(2000);
+  }
+
+  throw new Error('Timed out waiting for host to admit from waiting room');
+};
+
+const openParticipants = async (page) => {
+  await sleep(2500);
+  const webclient = page.locator('#webclient').contentFrame();
+  // Zoom hides the meeting footer until the mouse is near the bottom.
+  const box = page.viewportSize() || { width: 1280, height: 720 };
+  await page.mouse.move(box.width / 2, box.height - 20);
+  await sleep(800);
+  // Single click focuses the footer control; Space opens the participants pane.
+  const participantsBtn = webclient.locator('button[aria-label*="open the participants list" i]');
+  await participantsBtn.click({ timeout: 10000 });
+  await participantsBtn.press('Space');
+  await sleep(500);
+};
+
+const joinMeeting = async (page, meetingId, joinUrl, displayName, meetingPassword) => {
+  page.on('dialog', async (dialog) => {
+    console.log(dialog.message());
+    await dialog.dismiss();
+  });
+
+  await enterMeetingId(page, meetingId);
+  await clickJoinFromBrowser(page);
+  await continueWithoutMicrophoneAndJoin(page, displayName, meetingPassword);
+  await sleep(1500);
+  await waitForHostAdmit(page);
+  await dismissRecordingNotice(page);
+  await openParticipants(page);
+};
+
+const displayName = String(c.displayName || secrets?.displayName || '').trim();
+const meetingPassword = String(c.meetingPassword || secrets?.meetingPassword || '').trim();
+await joinMeeting(page, meetingId, joinUrl, displayName, meetingPassword);
+
+await s({
+  functionName: 'zoomPlaywrightRuntime',
+  contextData: { action: 'persistSession', loggedIn: true }
+}, { functionLookupSubDomain: _.subDomain });
+
+await s({
+  functionName: 'zoomPlaywrightRuntime',
+  contextData: { action: 'captureScreenshot' }
+}, { functionLookupSubDomain: _.subDomain });
+
+await s({
+  functionName: 'zoomSettingStore',
+  contextData: {
+    action: 'saveStatus',
+    phase: 'managing',
+    message: 'Managing waiting room',
+    managing: true,
+    loggedIn: true
+  }
+}, { functionLookupSubDomain: _.subDomain });
+
+const clickAdmitButtons = async () => {
+  const admitAll = await clickNamed(page, [/^admit all$/i, /admit all/i]);
+  if (admitAll) {
+    const bump = await s({
+      functionName: 'zoomPlaywrightRuntime',
+      contextData: { action: 'bumpAdmitted' }
+    }, { functionLookupSubDomain: _.subDomain });
+    return { kind: 'admit_all', admittedCount: bump.result?.data?.admittedCount };
+  }
+  const admit = await clickNamed(page, [/^admit$/i]);
+  if (admit) {
+    const bump = await s({
+      functionName: 'zoomPlaywrightRuntime',
+      contextData: { action: 'bumpAdmitted' }
+    }, { functionLookupSubDomain: _.subDomain });
+    return { kind: 'admit', admittedCount: bump.result?.data?.admittedCount };
+  }
+  return null;
+};
+
+await clickAdmitButtons();
+
+await s({
+  functionName: 'zoomPlaywrightRuntime',
+  contextData: { action: 'stopManageLoops' }
+}, { functionLookupSubDomain: _.subDomain });
+
+runtime.managing = true;
+runtime.manageTimer = setInterval(async () => {
+  if (!runtime.managing || !runtime.page) return;
+  try {
+    const secretsNow = await s({
+      functionName: 'zoomSettingStore',
+      contextData: { action: 'getSecrets' }
+    }, { functionLookupSubDomain: _.subDomain });
+    if (secretsNow.result?.data?.leaveRequested) {
+      await s({
+        functionName: 'zoomPlaywrightLeave',
+        contextData: {}
+      }, { functionLookupSubDomain: _.subDomain });
+      return;
+    }
+    await dismissNoise(runtime.page);
+    const clicked = await clickAdmitButtons();
+    if (clicked) {
+      await s({
+        functionName: 'zoomSettingStore',
+        contextData: {
+          action: 'saveStatus',
+          phase: 'managing',
+          message: `Clicked ${clicked.kind}`,
+          managing: true,
+          admittedCount: clicked.admittedCount
+        }
+      }, { functionLookupSubDomain: _.subDomain });
+    }
+  } catch (error) {
+    console.warn('[zoomPlaywrightManage] Admit loop error', error.message);
+  }
+}, 4000);
+
+runtime.screenshotTimer = setInterval(async () => {
+  if (!runtime.managing) return;
+  await s({
+    functionName: 'zoomPlaywrightRuntime',
+    contextData: { action: 'captureScreenshot' }
+  }, { functionLookupSubDomain: _.subDomain });
+}, 5000);
+
+return { success: true, message: 'Managing Zoom meeting' };
+'''
+      }
+    }
+  ]
+  edges: []
+}

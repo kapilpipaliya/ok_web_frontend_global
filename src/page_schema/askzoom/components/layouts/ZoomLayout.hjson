@@ -1,0 +1,228 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: ZoomLayout
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''
+return `._id {
+  min-height: 100vh;
+  background: ${t.var.color.background};
+  color: ${t.var.color.text};
+}`;
+'''
+        props: "return { as: 'div' };"
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid ${t.var.color.border};
+  background: ${t.var.color.background_light_100};
+}`;
+'''
+        props: "return { as: 'nav' };"
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''
+return `._id {
+  font-weight: 700;
+  margin-right: 0.75rem;
+  color: ${t.var.color.primary};
+}`;
+'''
+        props: "return { as: 'span', text: 'AskZoom' };"
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        css:
+          '''
+const active = _.location?.pathname === '/zoom/credentials';
+return `._id {
+  padding: 0.35rem 0.7rem;
+  border-radius: 0.375rem;
+  text-decoration: none;
+  color: ${t.var.color.text};
+  background: ${active ? t.var.color.primary_light_200 : 'transparent'};
+}`;
+'''
+        props: "return { as: 'a', href: '/zoom/credentials', text: 'Credentials' };"
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        css:
+          '''
+const active = _.location?.pathname === '/zoom/login';
+return `._id {
+  padding: 0.35rem 0.7rem;
+  border-radius: 0.375rem;
+  text-decoration: none;
+  color: ${t.var.color.text};
+  background: ${active ? t.var.color.primary_light_200 : 'transparent'};
+}`;
+'''
+        props: "return { as: 'a', href: '/zoom/login', text: 'Login' };"
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        css:
+          '''
+const active = _.location?.pathname === '/zoom/logout';
+return `._id {
+  padding: 0.35rem 0.7rem;
+  border-radius: 0.375rem;
+  text-decoration: none;
+  color: ${t.var.color.text};
+  background: ${active ? t.var.color.primary_light_200 : 'transparent'};
+}`;
+'''
+        props: "return { as: 'a', href: '/zoom/logout', text: 'Logout' };"
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        css:
+          '''
+const active = _.location?.pathname === '/zoom/manage';
+return `._id {
+  padding: 0.35rem 0.7rem;
+  border-radius: 0.375rem;
+  text-decoration: none;
+  color: ${t.var.color.text};
+  background: ${active ? t.var.color.primary_light_200 : 'transparent'};
+}`;
+'''
+        props: "return { as: 'a', href: '/zoom/manage', text: 'Manage' };"
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        css:
+          '''
+return `._id {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+}`;
+'''
+        props: "return { as: 'main' };"
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Slot
+        slot: children
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "9"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "3"
+      E: "6"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "3"
+      E: "7"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "3"
+      E: "8"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+  ]
+}

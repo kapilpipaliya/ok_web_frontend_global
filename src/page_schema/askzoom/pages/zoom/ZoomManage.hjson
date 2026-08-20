@@ -1,0 +1,384 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        key: ZoomManage
+        url: /zoom/manage
+        signinRequired: true
+        fns:
+          '''
+const [form, setForm] = _.createStore({
+  meetingUrl: '',
+  displayName: ''
+});
+const [busy, setBusy] = _.createSignal(false);
+const [status, setStatus] = _.createSignal(null);
+
+const loadStatus = async () => {
+  const res = await s({ functionName: 'getZoomWorkerStatus', contextData: {} });
+  const data = res.result?.data;
+  if (res.result?.success && data) {
+    setStatus(data);
+    if (!form.meetingUrl && data.meetingUrl) setForm('meetingUrl', data.meetingUrl);
+    if (!form.displayName && data.displayName) setForm('displayName', data.displayName);
+  }
+};
+
+const runJob = async (action) => {
+  setBusy(true);
+  try {
+    const res = await s({
+      functionName: 'enqueueZoomJob',
+      contextData: {
+        action,
+        meetingUrl: form.meetingUrl,
+        displayName: form.displayName
+      }
+    });
+    if (res.result?.success) {
+      _.showSuccessToast(res.result.message || `${action} queued`);
+      await loadStatus();
+    } else {
+      _.showErrorToast(res.result?.error || res.error || `${action} failed`);
+    }
+  } finally {
+    setBusy(false);
+  }
+};
+
+let statusTimer = null;
+return {
+  form,
+  setForm,
+  busy,
+  status,
+  loadStatus,
+  startManage: () => runJob('manage'),
+  leave: () => runJob('leave'),
+  startPolling: () => {
+    loadStatus();
+    if (statusTimer) clearInterval(statusTimer);
+    statusTimer = setInterval(() => loadStatus(), 2500);
+  },
+  stopPolling: () => {
+    if (statusTimer) clearInterval(statusTimer);
+    statusTimer = null;
+  }
+};
+'''
+        props:
+          '''
+return {
+  isNoPermissionCheck: true,
+  onMount: () => f.startPolling(),
+  onCleanup: () => f.stopPolling()
+};
+'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props: "return { as: 'div' };"
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css: "return `._id { font-size: 1.75rem; font-weight: 700; margin: 0 0 0.5rem; }`;"
+        props: "return { as: 'h1', text: 'Manage Zoom meeting' };"
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        css: "return `._id { color: ${t.var.color.text_light_400}; margin: 0 0 1.25rem; line-height: 1.5; }`;"
+        props: "return { as: 'p', text: 'Joins the meeting in Playwright, opens Participants, and clicks Admit All or Admit every 4 seconds. Leave stops managing but keeps the Zoom login.' };"
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        css: "return `._id { font-weight: 600; margin-bottom: 0.35rem; display: block; }`;"
+        props: "return { as: 'label', text: 'Meeting URL' };"
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: TextInput
+        props:
+          '''
+return {
+  value: f.form.meetingUrl,
+  placeholder: 'https://zoom.us/j/...',
+  onInput: (event) => f.setForm('meetingUrl', event.target.value)
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        css: "return `._id { font-weight: 600; margin: 1rem 0 0.35rem; display: block; }`;"
+        props: "return { as: 'label', text: 'Display name (optional — skipped when logged in)' };"
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 6
+        componentName: TextInput
+        props:
+          '''
+return {
+  value: f.form.displayName,
+  placeholder: 'Name shown in the meeting',
+  onInput: (event) => f.setForm('displayName', event.target.value)
+};
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        displayOrder: 7
+        componentName: Html
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}`;
+'''
+        props: "return { as: 'div' };"
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''
+return {
+  text: f.busy() ? 'Queueing...' : 'Start managing',
+  loading: f.busy(),
+  disabled: f.busy() || (f.status()?.managing && !f.status()?.leaveRequested && f.status()?.phase !== 'leaving'),
+  onClick: f.startManage
+};
+'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
+return {
+  text: 'Leave and stop managing',
+  variant: 'secondary',
+  disabled: f.busy(),
+  onClick: f.leave
+};
+'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        displayOrder: 8
+        componentName: Html
+        css:
+          '''
+return `._id {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border: 1px solid ${t.var.color.border};
+  border-radius: 0.5rem;
+  white-space: pre-wrap;
+  font-size: 0.9rem;
+}`;
+'''
+        props:
+          '''
+const status = f.status();
+const text = status
+  ? `Worker: processZoomPlaywright
+Phase: ${status.phase || 'idle'}
+Message: ${status.message || '-'}
+Logged in: ${status.loggedIn ? 'yes' : 'no'}
+Managing: ${status.managing ? 'yes' : 'no'}
+Admitted clicks: ${status.admittedCount || 0}
+Screenshot at: ${status.lastScreenshotAt || '-'}
+Error: ${status.lastError || '-'}
+Queue active/waiting/failed: ${status.queueCounts?.active || 0}/${status.queueCounts?.waiting || 0}/${status.queueCounts?.failed || 0}
+${status.workerHint || ''}`
+  : 'Loading worker status...';
+return { as: 'pre', text };
+'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        displayOrder: 9
+        componentName: Html
+        css: "return `._id { margin-top: 1rem; font-weight: 600; }`;"
+        props: "return { as: 'h2', text: 'Live screenshot (every 5s while managing)' };"
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        displayOrder: 10
+        componentName: Html
+        css:
+          '''
+return `._id {
+  margin-top: 0.75rem;
+  width: 100%;
+  max-width: 880px;
+  border: 1px solid ${t.var.color.border};
+  border-radius: 0.5rem;
+  background: ${t.var.color.background_light_100};
+}`;
+'''
+        props:
+          '''
+const src = f.status()?.lastScreenshot;
+return {
+  as: 'img',
+  src: src || '',
+  alt: 'Zoom manage screenshot',
+  hide: () => !f.status()?.lastScreenshot
+};
+'''
+      }
+    }
+    {
+      id: "layout"
+      L: PageLayout
+      P: {
+        componentName: ZoomLayout
+        displayOrder: 1
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "5"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "6"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "2"
+      E: "7"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "2"
+      E: "8"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "2"
+      E: "9"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "9"
+      E: "11"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "2"
+      E: "12"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "2"
+      E: "13"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "2"
+      E: "14"
+    }
+    {
+      id: el
+      T: PageLayout
+      S: "1"
+      E: layout
+    }
+  ]
+}

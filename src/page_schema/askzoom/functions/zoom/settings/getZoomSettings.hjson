@@ -1,0 +1,25 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: getZoomSettings
+        description: Load Zoom credentials (password masked) and current worker/session status
+        body:
+          '''
+const inner = await s({
+  functionName: 'zoomSettingStore',
+  contextData: {
+    action: 'get',
+    includeScreenshot: c.includeScreenshot === true
+  }
+});
+if (inner.error) return { success: false, error: inner.error };
+return inner.result || inner;
+'''
+      }
+    }
+  ]
+  edges: []
+}

@@ -1,0 +1,142 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: processZoomPlaywright
+        description: Background worker that runs Playwright Zoom jobs via small action functions
+        body:
+          '''
+if (c.action !== 'start') {
+  return { success: false, error: 'Use action start to run this worker' };
+}
+
+const logMessage = async (level, message, metadata = {}) => {
+  try {
+    await s({
+      functionName: 'logWorkerMessage',
+      contextData: {
+        workerName: 'processZoomPlaywright',
+        level,
+        message,
+        metadata
+      }
+    }, { functionLookupSubDomain: _.subDomain });
+  } catch (error) {
+    console.error('[processZoomPlaywright] log failed', error);
+  }
+};
+
+await logMessage('info', 'Starting Zoom Playwright worker');
+
+const helpers = await s({
+  functionName: 'zoomQueueHelpers',
+  contextData: {}
+}, { functionLookupSubDomain: _.subDomain });
+
+if (!helpers.result?.success) {
+  await logMessage('error', 'Failed to initialize Zoom queue helpers', { error: helpers.result?.error });
+  throw new Error('Queue helpers initialization failed');
+}
+
+const { Worker } = _.bullmq;
+const connection = helpers.result.data.getRedisConnection();
+const queueName = helpers.result.data.QUEUE_NAME;
+
+const runAction = async (functionName, contextData = {}) => {
+  const res = await s({
+    functionName,
+    contextData
+  }, { functionLookupSubDomain: _.subDomain });
+  if (res.error) throw new Error(res.error);
+  if (res.result?.success === false) {
+    throw new Error(res.result.error || `${functionName} failed`);
+  }
+  return res.result || res;
+};
+
+let worker;
+
+try {
+  worker = new Worker(queueName, async (job) => {
+    const action = job.data?.action || job.name;
+    await logMessage('info', `Zoom job started: ${action}`, { jobId: job.id });
+    try {
+      if (action === 'login') {
+        await runAction('zoomPlaywrightLogin');
+      } else if (action === 'logout') {
+        await runAction('zoomPlaywrightLogout');
+      } else if (action === 'manage') {
+        await runAction('zoomPlaywrightManage', {
+          meetingUrl: job.data?.meetingUrl,
+          displayName: job.data?.displayName
+        });
+      } else if (action === 'leave') {
+        await runAction('zoomPlaywrightLeave');
+      } else {
+        throw new Error(`Unknown Zoom job action: ${action}`);
+      }
+      await logMessage('info', `Zoom job finished: ${action}`, { jobId: job.id });
+    } catch (error) {
+      await s({
+        functionName: 'zoomSettingStore',
+        contextData: {
+          action: 'saveStatus',
+          phase: 'error',
+          lastError: error.message,
+          message: error.message
+        }
+      }, { functionLookupSubDomain: _.subDomain });
+      await s({
+        functionName: 'zoomPlaywrightRuntime',
+        contextData: { action: 'captureScreenshot' }
+      }, { functionLookupSubDomain: _.subDomain }).catch(() => {});
+      await s({
+        functionName: 'zoomPlaywrightRuntime',
+        contextData: { action: 'close' }
+      }, { functionLookupSubDomain: _.subDomain }).catch(() => {});
+      throw error;
+    }
+  }, {
+    connection,
+    concurrency: 1,
+    lockDuration: 10 * 60 * 1000
+  });
+
+  worker.on('failed', async (job, err) => {
+    await logMessage('error', 'Zoom Playwright job failed', {
+      jobId: job?.id,
+      error: err.message
+    });
+  });
+
+  worker.on('error', async (err) => {
+    await logMessage('error', 'Zoom Playwright worker error', { error: err.message });
+  });
+
+  await logMessage('info', 'Zoom Playwright worker created', { concurrency: 1 });
+
+  return {
+    stop: async (force = false) => {
+      await logMessage('info', `Stopping Zoom Playwright worker${force ? ' (force)' : ''}`);
+      await s({
+        functionName: 'zoomPlaywrightRuntime',
+        contextData: { action: 'close' }
+      }, { functionLookupSubDomain: _.subDomain }).catch(() => {});
+      await worker.close(force);
+    }
+  };
+} catch (error) {
+  await logMessage('error', 'Failed to create Zoom Playwright worker', { error: error.message });
+  if (worker) {
+    try { await worker.close(); } catch (closeError) {}
+  }
+  throw error;
+}
+'''
+      }
+    }
+  ]
+  edges: []
+}

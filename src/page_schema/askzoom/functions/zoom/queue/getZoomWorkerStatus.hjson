@@ -1,0 +1,47 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: getZoomWorkerStatus
+        description: Zoom worker phase, queue counts, session flags, and latest manage screenshot
+        body:
+          '''
+const settingsResult = await s({
+  functionName: 'zoomSettingStore',
+  contextData: { action: 'get', includeScreenshot: true }
+});
+const settings = settingsResult.result?.data || settingsResult.data || {};
+
+let queueCounts = { waiting: 0, active: 0, delayed: 0, failed: 0, completed: 0 };
+try {
+  const helpers = await s({
+    functionName: 'zoomQueueHelpers',
+    contextData: {}
+  }, { functionLookupSubDomain: _.subDomain });
+
+  if (helpers.result?.success) {
+    const queue = helpers.result.data.createZoomQueue();
+    queueCounts = await queue.getJobCounts('waiting', 'active', 'delayed', 'failed', 'completed');
+    await queue.close();
+  }
+} catch (error) {
+  // Redis may be down; still return DB status
+}
+
+return {
+  success: true,
+  data: {
+    ...settings,
+    queueCounts,
+    workerKey: 'processZoomPlaywright',
+    workerHint: 'Start processZoomPlaywright from Worker Management so Playwright runs in a background worker.'
+  }
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

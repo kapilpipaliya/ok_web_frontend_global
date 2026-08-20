@@ -1,0 +1,128 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: enqueueZoomJob
+        description: Queue a Zoom Playwright job (login, logout, manage, leave). Playwright runs only in the background worker.
+        body:
+          '''
+const action = String(c.action || '').trim();
+const allowed = ['login', 'logout', 'manage', 'leave'];
+
+if (!allowed.includes(action)) {
+  return { success: false, error: 'action must be login, logout, manage, or leave' };
+}
+
+const settingsResult = await s({
+  functionName: 'zoomSettingStore',
+  contextData: { action: 'get' }
+});
+const settings = settingsResult.result?.data || settingsResult.data || {};
+
+if ((action === 'login' || action === 'logout' || action === 'manage') && !settings.email) {
+  return { success: false, error: 'Save Zoom credentials first' };
+}
+
+if (action === 'login' && !settings.hasPassword) {
+  return { success: false, error: 'Save a Zoom password first' };
+}
+
+if ((action === 'logout' || action === 'manage') && !settings.hasSession && !settings.loggedIn) {
+  return { success: false, error: 'Not logged in. Run Zoom login first.' };
+}
+
+let meetingUrl = String(c.meetingUrl || settings.meetingUrl || '').trim();
+if (action === 'manage' && !meetingUrl) {
+  return { success: false, error: 'Meeting URL is required to start managing' };
+}
+
+if (action === 'leave') {
+  await s({
+    functionName: 'zoomSettingStore',
+    contextData: { action: 'requestLeave' }
+  });
+}
+
+if (action === 'manage') {
+  await s({
+    functionName: 'zoomSettingStore',
+    contextData: {
+      action: 'saveStatus',
+      phase: 'queued',
+      message: 'Manage job queued',
+      lastError: '',
+      managing: false,
+      leaveRequested: false
+    }
+  });
+}
+
+if (action === 'login') {
+  await s({
+    functionName: 'zoomSettingStore',
+    contextData: {
+      action: 'saveStatus',
+      phase: 'queued',
+      message: 'Login job queued',
+      lastError: ''
+    }
+  });
+}
+
+const helpers = await s({
+  functionName: 'zoomQueueHelpers',
+  contextData: {}
+}, { functionLookupSubDomain: _.subDomain });
+
+if (!helpers.result?.success) {
+  return { success: false, error: helpers.result?.error || 'Failed to initialize Zoom queue' };
+}
+
+const queue = helpers.result.data.createZoomQueue();
+const jobId = `zoom-${action}`;
+const existing = await queue.getJob(jobId);
+if (existing) {
+  const state = await existing.getState();
+  if (state === 'active' || state === 'waiting' || state === 'delayed') {
+    if (action === 'leave') {
+      return { success: true, message: 'Leave flag set. Worker will stop managing and keep the login session.' };
+    }
+    return { success: false, error: `A ${action} job is already ${state}` };
+  }
+  try {
+    await existing.remove();
+  } catch (error) {
+    // ignore
+  }
+}
+
+const job = await queue.add(
+  action,
+  {
+    action,
+    meetingUrl,
+    displayName: String(c.displayName || settings.displayName || '').trim()
+  },
+  {
+    jobId,
+    attempts: 1,
+    removeOnComplete: 20,
+    removeOnFail: 50
+  }
+);
+
+await queue.close();
+
+return {
+  success: true,
+  message: `Queued Zoom ${action}`,
+  data: { jobId: job.id, action }
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

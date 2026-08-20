@@ -1,0 +1,205 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: zoomPlaywrightRuntime
+        description: Shared Zoom Playwright browser runtime for background workers
+        body:
+          '''
+const action = c.action || 'get';
+
+if (!globalThis.__askzoomPlaywright) {
+  globalThis.__askzoomPlaywright = {
+    browser: null,
+    context: null,
+    page: null,
+    manageTimer: null,
+    screenshotTimer: null,
+    managing: false,
+    admittedCount: 0,
+    jobAction: '',
+    leaving: false
+  };
+}
+
+const runtime = globalThis.__askzoomPlaywright;
+
+const callStore = async (contextData) => {
+  const res = await s({
+    functionName: 'zoomSettingStore',
+    contextData
+  }, { functionLookupSubDomain: _.subDomain });
+  if (res.error) throw new Error(res.error);
+  return res.result || res;
+};
+
+const setStatus = async (patch) => {
+  await callStore({ action: 'saveStatus', ...patch });
+};
+
+const recordingDir = () => {
+  const dir = _.path.join(_.os.tmpdir(), 'askzoom-playwright', String(_.subDomain || 'default'));
+  _.fs.mkdirSync(dir, { recursive: true });
+  return dir;
+};
+
+const stopManageLoops = () => {
+  if (runtime.manageTimer) {
+    clearInterval(runtime.manageTimer);
+    runtime.manageTimer = null;
+  }
+  if (runtime.screenshotTimer) {
+    clearInterval(runtime.screenshotTimer);
+    runtime.screenshotTimer = null;
+  }
+  runtime.managing = false;
+};
+
+const closeBrowser = async () => {
+  stopManageLoops();
+  const video = runtime.page?.video?.() || null;
+  try { await runtime.page?.close(); } catch (error) {}
+  try { await runtime.context?.close(); } catch (error) {}
+  try { await runtime.browser?.close(); } catch (error) {}
+  runtime.page = null;
+  runtime.context = null;
+  runtime.browser = null;
+
+  if (!video) return { success: true };
+  try {
+    const srcPath = await video.path();
+    if (!srcPath || !_.fs.existsSync(srcPath)) return { success: true };
+    const dest = _.path.join(recordingDir(), 'last.webm');
+    _.fs.copyFileSync(srcPath, dest);
+    await setStatus({
+      hasRecording: true,
+      lastRecordingAt: new Date().toISOString(),
+      lastRecordingAction: runtime.jobAction || '',
+      lastRecordingPath: dest
+    });
+  } catch (error) {
+    console.warn('[zoomPlaywrightRuntime] Failed to save recording', error.message);
+  }
+  return { success: true };
+};
+
+if (action === 'get') {
+  return {
+    success: true,
+    data: {
+      managing: runtime.managing,
+      admittedCount: runtime.admittedCount,
+      jobAction: runtime.jobAction,
+      hasPage: !!runtime.page,
+      hasBrowser: !!runtime.browser
+    }
+  };
+}
+
+if (action === 'setJobAction') {
+  runtime.jobAction = c.jobAction || '';
+  return { success: true };
+}
+
+if (action === 'launch') {
+  const { chromium } = await import('playwright');
+  await closeBrowser();
+  const headless = process.env.ZOOM_PW_HEADLESS !== 'false';
+  runtime.browser = await chromium.launch({
+    headless,
+    args: ['--disable-blink-features=AutomationControlled', '--no-sandbox']
+  });
+  const options = {
+    viewport: { width: 1280, height: 720 },
+    locale: 'en-US',
+    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+    recordVideo: {
+      dir: recordingDir(),
+      size: { width: 1280, height: 720 }
+    }
+  };
+  if (c.storageState) {
+    try {
+      options.storageState = typeof c.storageState === 'string'
+        ? JSON.parse(c.storageState)
+        : c.storageState;
+    } catch (error) {
+      console.warn('[zoomPlaywrightRuntime] Invalid storage state, starting fresh');
+    }
+  }
+  runtime.context = await runtime.browser.newContext(options);
+  runtime.page = await runtime.context.newPage();
+  return { success: true };
+}
+
+if (action === 'persistSession') {
+  if (!runtime.context) return { success: false, error: 'No browser context' };
+  const state = await runtime.context.storageState();
+  await callStore({
+    action: 'saveSession',
+    storageState: JSON.stringify(state),
+    loggedIn: c.loggedIn === true
+  });
+  return { success: true };
+}
+
+if (action === 'captureScreenshot') {
+  if (!runtime.page) return { success: false, error: 'No page' };
+  try {
+    const buffer = await runtime.page.screenshot({ type: 'jpeg', quality: 40 });
+    await setStatus({
+      lastScreenshot: `data:image/jpeg;base64,${buffer.toString('base64')}`,
+      lastScreenshotAt: new Date().toISOString()
+    });
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+
+if (action === 'close') {
+  await closeBrowser();
+  return { success: true };
+}
+
+if (action === 'stopManageLoops') {
+  stopManageLoops();
+  return { success: true };
+}
+
+if (action === 'setManaging') {
+  runtime.managing = c.managing === true;
+  return { success: true };
+}
+
+if (action === 'setAdmittedCount') {
+  runtime.admittedCount = Number(c.admittedCount || 0);
+  return { success: true };
+}
+
+if (action === 'bumpAdmitted') {
+  runtime.admittedCount += 1;
+  return { success: true, data: { admittedCount: runtime.admittedCount } };
+}
+
+if (action === 'getPage') {
+  return {
+    success: true,
+    data: {
+      page: runtime.page,
+      context: runtime.context,
+      browser: runtime.browser,
+      runtime
+    }
+  };
+}
+
+return { success: false, error: `Unknown runtime action: ${action}` };
+'''
+      }
+    }
+  ]
+  edges: []
+}

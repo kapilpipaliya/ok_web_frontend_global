@@ -1,0 +1,304 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        key: ZoomLogin
+        url: /zoom/login
+        signinRequired: true
+        fns:
+          '''
+const [busy, setBusy] = _.createSignal(false);
+const [status, setStatus] = _.createSignal(null);
+
+const loadStatus = async () => {
+  const res = await s({ functionName: 'getZoomWorkerStatus', contextData: {} });
+  if (res.result?.success) setStatus(res.result.data);
+};
+
+const login = async () => {
+  setBusy(true);
+  try {
+    const res = await s({
+      functionName: 'enqueueZoomJob',
+      contextData: { action: 'login' }
+    });
+    if (res.result?.success) {
+      _.showSuccessToast(res.result.message || 'Login queued');
+      await loadStatus();
+    } else {
+      _.showErrorToast(res.result?.error || res.error || 'Login queue failed');
+    }
+  } finally {
+    setBusy(false);
+  }
+};
+
+let statusTimer = null;
+return {
+  busy,
+  status,
+  loadStatus,
+  login,
+  startPolling: () => {
+    loadStatus();
+    if (statusTimer) clearInterval(statusTimer);
+    statusTimer = setInterval(() => loadStatus(), 2500);
+  },
+  stopPolling: () => {
+    if (statusTimer) clearInterval(statusTimer);
+    statusTimer = null;
+  }
+};
+'''
+        props:
+          '''
+return {
+  isNoPermissionCheck: true,
+  onMount: () => f.startPolling(),
+  onCleanup: () => f.stopPolling()
+};
+'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props: "return { as: 'div' };"
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css: "return `._id { font-size: 1.75rem; font-weight: 700; margin: 0 0 0.5rem; }`;"
+        props: "return { as: 'h1', text: 'Zoom login' };"
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        css: "return `._id { color: ${t.var.color.text_light_400}; margin: 0 0 1.25rem; line-height: 1.5; }`;"
+        props: "return { as: 'p', text: 'Queues a Playwright login in processZoomPlaywright. The browser session is saved on GlobalSetting.' };"
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Button
+        props:
+          '''
+return {
+  text: f.busy() ? 'Queueing...' : 'Login with Playwright',
+  loading: f.busy(),
+  disabled: f.busy(),
+  onClick: f.login
+};
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        css:
+          '''
+return `._id {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border: 1px solid ${t.var.color.border};
+  border-radius: 0.5rem;
+  white-space: pre-wrap;
+  font-size: 0.9rem;
+}`;
+'''
+        props:
+          '''
+const status = f.status();
+const text = status
+  ? `Phase: ${status.phase || 'idle'}
+Message: ${status.message || '-'}
+Logged in: ${status.loggedIn ? 'yes' : 'no'}
+Email: ${status.email || '-'}
+Error: ${status.lastError || '-'}
+Recording: ${status.hasRecording ? (status.lastRecordingAction || 'saved') : 'none'}
+Queue active/waiting: ${status.queueCounts?.active || 0}/${status.queueCounts?.waiting || 0}
+${status.workerHint || ''}`
+  : 'Loading status...';
+return { as: 'pre', text };
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        css: "return `._id { margin-top: 1.25rem; font-weight: 600; }`;"
+        props:
+          '''
+const status = f.status();
+return {
+  as: 'h2',
+  text: status?.hasRecording
+    ? `Playwright recording (${status.lastRecordingAction || 'last run'})`
+    : 'Playwright recording',
+  hide: () => !f.status()?.hasRecording
+};
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 6
+        componentName: Html
+        css:
+          '''
+return `._id {
+  margin-top: 0.75rem;
+  width: 100%;
+  max-width: 880px;
+  border: 1px solid ${t.var.color.border};
+  border-radius: 0.5rem;
+  background: ${t.var.color.background_light_100};
+}`;
+'''
+        props:
+          '''
+const status = f.status();
+const stamp = status?.lastRecordingAt || '';
+return {
+  as: 'video',
+  src: status?.hasRecording ? `/api/zoom/recording?t=${encodeURIComponent(stamp)}` : '',
+  controls: true,
+  playsinline: true,
+  hide: () => !f.status()?.hasRecording
+};
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        displayOrder: 7
+        componentName: Html
+        css: "return `._id { margin-top: 1.25rem; font-weight: 600; }`;"
+        props: "return { as: 'h2', text: 'Last screenshot', hide: () => !f.status()?.lastScreenshot };"
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        displayOrder: 8
+        componentName: Html
+        css:
+          '''
+return `._id {
+  margin-top: 0.75rem;
+  width: 100%;
+  max-width: 880px;
+  border: 1px solid ${t.var.color.border};
+  border-radius: 0.5rem;
+}`;
+'''
+        props:
+          '''
+return {
+  as: 'img',
+  src: f.status()?.lastScreenshot || '',
+  alt: 'Zoom login screenshot',
+  hide: () => !f.status()?.lastScreenshot
+};
+'''
+      }
+    }
+    {
+      id: "layout"
+      L: PageLayout
+      P: {
+        componentName: ZoomLayout
+        displayOrder: 1
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "5"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "6"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "2"
+      E: "7"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "2"
+      E: "8"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "2"
+      E: "9"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "2"
+      E: "10"
+    }
+    {
+      id: el
+      T: PageLayout
+      S: "1"
+      E: layout
+    }
+  ]
+}

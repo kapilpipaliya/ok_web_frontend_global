@@ -1,0 +1,191 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        key: ZoomLogout
+        url: /zoom/logout
+        signinRequired: true
+        fns:
+          '''
+const [busy, setBusy] = _.createSignal(false);
+const [status, setStatus] = _.createSignal(null);
+
+const loadStatus = async () => {
+  const res = await s({ functionName: 'getZoomWorkerStatus', contextData: {} });
+  if (res.result?.success) setStatus(res.result.data);
+};
+
+const logout = async () => {
+  setBusy(true);
+  try {
+    const res = await s({
+      functionName: 'enqueueZoomJob',
+      contextData: { action: 'logout' }
+    });
+    if (res.result?.success) {
+      _.showSuccessToast(res.result.message || 'Logout queued');
+      await loadStatus();
+    } else {
+      _.showErrorToast(res.result?.error || res.error || 'Logout queue failed');
+    }
+  } finally {
+    setBusy(false);
+  }
+};
+
+let statusTimer = null;
+return {
+  busy,
+  status,
+  loadStatus,
+  logout,
+  startPolling: () => {
+    loadStatus();
+    if (statusTimer) clearInterval(statusTimer);
+    statusTimer = setInterval(() => loadStatus(), 2500);
+  },
+  stopPolling: () => {
+    if (statusTimer) clearInterval(statusTimer);
+    statusTimer = null;
+  }
+};
+'''
+        props:
+          '''
+return {
+  isNoPermissionCheck: true,
+  onMount: () => f.startPolling(),
+  onCleanup: () => f.stopPolling()
+};
+'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props: "return { as: 'div' };"
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css: "return `._id { font-size: 1.75rem; font-weight: 700; margin: 0 0 0.5rem; }`;"
+        props: "return { as: 'h1', text: 'Zoom logout' };"
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        css: "return `._id { color: ${t.var.color.text_light_400}; margin: 0 0 1.25rem; line-height: 1.5; }`;"
+        props: "return { as: 'p', text: 'Queues Playwright to sign out of Zoom and clears the saved login session on GlobalSetting.' };"
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Button
+        props:
+          '''
+return {
+  text: f.busy() ? 'Queueing...' : 'Logout with Playwright',
+  variant: 'danger',
+  loading: f.busy(),
+  disabled: f.busy() || !f.status()?.loggedIn,
+  onClick: f.logout
+};
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        css:
+          '''
+return `._id {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border: 1px solid ${t.var.color.border};
+  border-radius: 0.5rem;
+  white-space: pre-wrap;
+  font-size: 0.9rem;
+}`;
+'''
+        props:
+          '''
+const status = f.status();
+const text = status
+  ? `Phase: ${status.phase || 'idle'}
+Message: ${status.message || '-'}
+Logged in: ${status.loggedIn ? 'yes' : 'no'}
+Managing: ${status.managing ? 'yes' : 'no'}
+Error: ${status.lastError || '-'}
+Queue active/waiting: ${status.queueCounts?.active || 0}/${status.queueCounts?.waiting || 0}`
+  : 'Loading status...';
+return { as: 'pre', text };
+'''
+      }
+    }
+    {
+      id: "layout"
+      L: PageLayout
+      P: {
+        componentName: ZoomLayout
+        displayOrder: 1
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "5"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "6"
+    }
+    {
+      id: el
+      T: PageLayout
+      S: "1"
+      E: layout
+    }
+  ]
+}

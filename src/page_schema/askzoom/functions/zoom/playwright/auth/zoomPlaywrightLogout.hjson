@@ -1,0 +1,79 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: zoomPlaywrightLogout
+        description: Playwright Zoom logout; clears saved session
+        body:
+          '''
+const helpersRes = await s({
+  functionName: 'zoomPlaywrightHelpers',
+  contextData: {}
+}, { functionLookupSubDomain: _.subDomain });
+const { sleep } = helpersRes.result?.data || {};
+
+const storeRes = await s({
+  functionName: 'zoomSettingStore',
+  contextData: { action: 'getSecrets' }
+}, { functionLookupSubDomain: _.subDomain });
+const secrets = storeRes.result?.data;
+
+await s({
+  functionName: 'zoomSettingStore',
+  contextData: {
+    action: 'saveStatus',
+    phase: 'logging_out',
+    message: 'Signing out of Zoom',
+    managing: false
+  }
+}, { functionLookupSubDomain: _.subDomain });
+
+await s({
+  functionName: 'zoomPlaywrightRuntime',
+  contextData: { action: 'setJobAction', jobAction: 'logout' }
+}, { functionLookupSubDomain: _.subDomain });
+
+await s({
+  functionName: 'zoomPlaywrightRuntime',
+  contextData: { action: 'launch', storageState: secrets?.storageState || '' }
+}, { functionLookupSubDomain: _.subDomain });
+
+const page = globalThis.__askzoomPlaywright?.page;
+if (!page) throw new Error('Failed to launch Playwright browser');
+
+await page.goto('https://zoom.us/myhome', { waitUntil: 'domcontentloaded', timeout: 60000 });
+await page.getByRole('button', { name: /profile options/i }).click();
+await page.locator('#btnLogout').click();
+await sleep(1500);
+
+await s({
+  functionName: 'zoomSettingStore',
+  contextData: { action: 'clearSession' }
+}, { functionLookupSubDomain: _.subDomain });
+
+await s({
+  functionName: 'zoomPlaywrightRuntime',
+  contextData: { action: 'close' }
+}, { functionLookupSubDomain: _.subDomain });
+
+await s({
+  functionName: 'zoomSettingStore',
+  contextData: {
+    action: 'saveStatus',
+    phase: 'logged_out',
+    message: 'Logged out',
+    loggedIn: false,
+    managing: false,
+    lastError: ''
+  }
+}, { functionLookupSubDomain: _.subDomain });
+
+return { success: true, message: 'Zoom logout complete' };
+'''
+      }
+    }
+  ]
+  edges: []
+}
