@@ -14,16 +14,21 @@ const helpersRes = await s({
 }, { functionLookupSubDomain: _.subDomain });
 const { sleep } = helpersRes.result?.data || {};
 
+const userId = String(c.userId || '').trim();
+
 const storeRes = await s({
   functionName: 'zoomSettingStore',
-  contextData: { action: 'getSecrets' }
+  contextData: { action: 'getSecrets', userId }
 }, { functionLookupSubDomain: _.subDomain });
 const secrets = storeRes.result?.data;
+const ownerUserId = String(userId || secrets?.userId || '').trim();
+if (!ownerUserId) throw new Error('userId is required for Zoom logout');
 
 await s({
   functionName: 'zoomSettingStore',
   contextData: {
     action: 'saveStatus',
+    userId: ownerUserId,
     phase: 'logging_out',
     message: 'Signing out of Zoom',
     managing: false
@@ -32,15 +37,19 @@ await s({
 
 await s({
   functionName: 'zoomPlaywrightRuntime',
-  contextData: { action: 'setJobAction', jobAction: 'logout' }
+  contextData: { action: 'setJobAction', jobAction: 'logout', userId: ownerUserId }
 }, { functionLookupSubDomain: _.subDomain });
 
 await s({
   functionName: 'zoomPlaywrightRuntime',
-  contextData: { action: 'launch', storageState: secrets?.storageState || '' }
+  contextData: {
+    action: 'launch',
+    userId: ownerUserId,
+    storageState: secrets?.storageState || ''
+  }
 }, { functionLookupSubDomain: _.subDomain });
 
-const page = globalThis.__askzoomPlaywright?.page;
+const page = _.askzoomPlaywright.getSlot(ownerUserId)?.page;
 if (!page) throw new Error('Failed to launch Playwright browser');
 
 await page.goto('https://zoom.us/myhome', { waitUntil: 'domcontentloaded', timeout: 60000 });
@@ -50,18 +59,19 @@ await sleep(1500);
 
 await s({
   functionName: 'zoomSettingStore',
-  contextData: { action: 'clearSession' }
+  contextData: { action: 'clearSession', userId: ownerUserId }
 }, { functionLookupSubDomain: _.subDomain });
 
 await s({
   functionName: 'zoomPlaywrightRuntime',
-  contextData: { action: 'close' }
+  contextData: { action: 'close', userId: ownerUserId }
 }, { functionLookupSubDomain: _.subDomain });
 
 await s({
   functionName: 'zoomSettingStore',
   contextData: {
     action: 'saveStatus',
+    userId: ownerUserId,
     phase: 'logged_out',
     message: 'Logged out',
     loggedIn: false,

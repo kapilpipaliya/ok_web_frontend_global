@@ -41,8 +41,13 @@ const parseHistory = (raw) => {
 
 const resolveOwnerUserId = async () => {
   if (c.userId) return String(c.userId).trim();
-  const runtimeUserId = globalThis.__askzoomPlaywright?.ownerUserId;
-  if (runtimeUserId) return String(runtimeUserId).trim();
+  try {
+    const { getActiveSlot } = _.askzoomPlaywright;
+    const active = getActiveSlot();
+    if (active?.ownerUserId) return String(active.ownerUserId).trim();
+  } catch (error) {
+    // store unavailable
+  }
   try {
     const user = await _.getUserFromSession();
     if (user?.P?.uuid) return String(user.P.uuid).trim();

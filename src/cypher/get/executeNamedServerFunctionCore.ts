@@ -77,6 +77,16 @@ import * as fs from "fs";
 import * as os from "os";
 import * as child_process from "child_process";
 import { getNeogmaInstance } from "~/cypher/core/driver";
+import {
+  countBusySlots as countAskzoomPlaywrightBusySlots,
+  createEmptySlot as createAskzoomPlaywrightEmptySlot,
+  clearAllSlots as clearAskzoomPlaywrightSlots,
+  forEachSlot as forEachAskzoomPlaywrightSlot,
+  getActiveSlot as getAskzoomPlaywrightActiveSlot,
+  getSlot as getAskzoomPlaywrightSlot,
+  listSlots as listAskzoomPlaywrightSlots,
+  setActiveSlot as setAskzoomPlaywrightActiveSlot,
+} from "~/lib/zoom/askzoomPlaywrightStore";
 // Enhanced server function utilities
 import { errors, isAppError, errorToResponse } from "~/lib/utils/errorClasses";
 import {
@@ -578,6 +588,23 @@ export async function executeNamedServerFunctionCore(
       bullmq,
       request: context.request,
       subDomain: subDomain,
+      // AskZoom Playwright in-process browser slots (scoped to current subdomain)
+      askzoomPlaywright: {
+        getSlot: (
+          userId: string,
+          options?: { create?: boolean },
+        ) => getAskzoomPlaywrightSlot(subDomain, userId, options),
+        getActiveSlot: () => getAskzoomPlaywrightActiveSlot(subDomain),
+        setActiveSlot: (slot: Parameters<typeof setAskzoomPlaywrightActiveSlot>[1]) =>
+          setAskzoomPlaywrightActiveSlot(subDomain, slot),
+        countBusySlots: () => countAskzoomPlaywrightBusySlots(subDomain),
+        listSlots: () => listAskzoomPlaywrightSlots(subDomain),
+        clearAllSlots: () => clearAskzoomPlaywrightSlots(subDomain),
+        forEachSlot: (
+          fn: Parameters<typeof forEachAskzoomPlaywrightSlot>[1],
+        ) => forEachAskzoomPlaywrightSlot(subDomain, fn),
+        createEmptySlot: createAskzoomPlaywrightEmptySlot,
+      },
       // driver: (await getDriver()),
       // Admin/impersonation helper functions (platform-level)
       getEffectiveUser,

@@ -77,7 +77,7 @@ await s({
   contextData: { action: 'launch', storageState: secrets.storageState, userId }
 }, { functionLookupSubDomain: _.subDomain });
 
-const runtime = globalThis.__askzoomPlaywright;
+const runtime = _.askzoomPlaywright.getSlot(userId);
 const page = runtime?.page;
 if (!page) throw new Error('Failed to launch Playwright browser');
 

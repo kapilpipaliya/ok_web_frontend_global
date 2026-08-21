@@ -14,14 +14,18 @@ const helpersRes = await s({
 }, { functionLookupSubDomain: _.subDomain });
 const { sleep, clickNamed } = helpersRes.result?.data || {};
 
+const userId = String(c.userId || '').trim();
+const runtime = userId
+  ? _.askzoomPlaywright.getSlot(userId, { create: false })
+  : null;
+
 const clearManagingStatus = async (message = 'Left meeting. Still logged in.') => {
-  const runtime = globalThis.__askzoomPlaywright;
   const leftAt = new Date().toISOString();
   await s({
     functionName: 'zoomSettingStore',
     contextData: {
       action: 'saveStatus',
-      userId: c.userId,
+      userId,
       phase: 'idle',
       message,
       managing: false,
@@ -35,7 +39,6 @@ const clearManagingStatus = async (message = 'Left meeting. Still logged in.') =
   }, { functionLookupSubDomain: _.subDomain });
 };
 
-const runtime = globalThis.__askzoomPlaywright;
 if (!runtime) {
   await clearManagingStatus('No active Playwright session. Ready to manage again.');
   return { success: true, message: 'No active Playwright session' };
@@ -48,7 +51,7 @@ runtime.leaving = true;
 try {
   await s({
     functionName: 'zoomPlaywrightRuntime',
-    contextData: { action: 'stopManageLoops', userId: c.userId }
+    contextData: { action: 'stopManageLoops', userId }
   }, { functionLookupSubDomain: _.subDomain });
 
   if (runtime.page) {
@@ -67,13 +70,13 @@ try {
     await sleep(2000);
     await s({
       functionName: 'zoomPlaywrightRuntime',
-      contextData: { action: 'persistSession', loggedIn: true, userId: c.userId }
+      contextData: { action: 'persistSession', loggedIn: true, userId }
     }, { functionLookupSubDomain: _.subDomain });
   }
 
   await s({
     functionName: 'zoomPlaywrightRuntime',
-    contextData: { action: 'close', userId: c.userId }
+    contextData: { action: 'close', userId }
   }, { functionLookupSubDomain: _.subDomain });
 
   await clearManagingStatus();
@@ -82,9 +85,7 @@ try {
   await clearManagingStatus(`Leave finished with error: ${error.message}`);
   throw error;
 } finally {
-  if (globalThis.__askzoomPlaywright) {
-    globalThis.__askzoomPlaywright.leaving = false;
-  }
+  runtime.leaving = false;
 }
 '''
       }

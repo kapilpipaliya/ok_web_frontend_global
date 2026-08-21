@@ -44,7 +44,7 @@ await s({
   }
 }, { functionLookupSubDomain: _.subDomain });
 
-const page = globalThis.__askzoomPlaywright?.page;
+const page = _.askzoomPlaywright.getSlot(c.userId)?.page;
 if (!page) throw new Error('Failed to launch Playwright browser');
 
 let loggedIn = false;

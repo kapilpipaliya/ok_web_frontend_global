@@ -69,7 +69,7 @@ await s({
   contextData: { action: 'launch', userId }
 }, { functionLookupSubDomain: _.subDomain });
 
-const page = globalThis.__askzoomPlaywright?.page;
+const page = _.askzoomPlaywright.getSlot(userId)?.page;
 if (!page) throw new Error('Failed to launch Playwright browser');
 
 await assertNotCancelled();

@@ -13,45 +13,21 @@ const HISTORY_LIMIT = 5;
 const RECORDING_QUOTA_BYTES = Number(process.env.ZOOM_PW_RECORDING_QUOTA_MB || 10240) * 1024 * 1024;
 const MAX_SLOTS = Math.max(1, Number(process.env.ZOOM_PW_MAX_SLOTS || 3));
 
-if (!globalThis.__askzoomPlaywrightSlots) {
-  globalThis.__askzoomPlaywrightSlots = Object.create(null);
-}
-
-const createEmptySlot = (userId) => ({
-  browser: null,
-  context: null,
-  page: null,
-  manageTimer: null,
-  screenshotTimer: null,
-  managing: false,
-  admittedCount: 0,
-  jobAction: '',
-  leaving: false,
-  ownerUserId: userId,
-  cancelRequested: false,
-  recordVideo: true
-});
+const store = _.askzoomPlaywright;
 
 const resolveUserId = () => String(c.userId || '').trim();
 
-const countBusySlots = () => Object.values(globalThis.__askzoomPlaywrightSlots)
-  .filter((slot) => slot && (slot.browser || slot.managing)).length;
+const countBusySlots = () => store.countBusySlots();
 
-const getSlot = (userId, { create = true } = {}) => {
-  if (!userId) throw new Error('userId is required for Playwright runtime slot');
-  if (!globalThis.__askzoomPlaywrightSlots[userId]) {
-    if (!create) return null;
-    globalThis.__askzoomPlaywrightSlots[userId] = createEmptySlot(userId);
-  }
-  return globalThis.__askzoomPlaywrightSlots[userId];
-};
+const getSlot = (uid, { create = true } = {}) =>
+  store.getSlot(uid, { create });
 
 const bindAlias = (slot) => {
-  globalThis.__askzoomPlaywright = slot;
+  store.setActiveSlot(slot);
 };
 
 const userId = resolveUserId();
-const runtime = userId ? getSlot(userId) : (globalThis.__askzoomPlaywright || null);
+const runtime = userId ? getSlot(userId) : store.getActiveSlot();
 if (runtime) bindAlias(runtime);
 
 const callStore = async (contextData) => {
@@ -255,13 +231,7 @@ if (action === 'setOwnerUserId') {
 }
 
 if (action === 'listSlots') {
-  const slots = Object.entries(globalThis.__askzoomPlaywrightSlots).map(([id, slot]) => ({
-    userId: id,
-    busy: !!(slot.browser || slot.managing),
-    managing: !!slot.managing,
-    jobAction: slot.jobAction || '',
-    hasBrowser: !!slot.browser
-  }));
+  const slots = store.listSlots();
   return { success: true, data: { slots, busySlots: countBusySlots(), maxSlots: MAX_SLOTS } };
 }
 
@@ -303,11 +273,10 @@ if (action === 'get') {
 }
 
 if (action === 'closeAll') {
-  for (const slot of Object.values(globalThis.__askzoomPlaywrightSlots)) {
+  await store.forEachSlot(async (slot) => {
     try { await closeBrowser(slot); } catch (error) {}
-  }
-  globalThis.__askzoomPlaywrightSlots = Object.create(null);
-  globalThis.__askzoomPlaywright = null;
+  });
+  store.clearAllSlots();
   return { success: true, data: { busySlots: 0, maxSlots: MAX_SLOTS } };
 }
 
