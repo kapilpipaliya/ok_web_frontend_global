@@ -94,6 +94,16 @@ const buildPublicData = (p, { includeScreenshot = false, userId = '' } = {}) => 
   const lastSize = Number(p.zoomLastRecordingSize || 0) || fileSizeIfExists(lastPath) || history[0]?.size || 0;
   const hasRecording = lastSize > 0 && !!lastPath;
 
+  const usedBytes = history.reduce((sum, item) => sum + Number(item.size || 0), 0);
+  const quotaBytes = Number(process.env.ZOOM_PW_RECORDING_QUOTA_MB || 10240) * 1024 * 1024;
+  let meetingAudit = [];
+  try {
+    const parsed = JSON.parse(p.zoomMeetingAuditJson || '[]');
+    meetingAudit = Array.isArray(parsed) ? parsed.slice(0, 20) : [];
+  } catch (error) {
+    meetingAudit = [];
+  }
+
   return {
     userId: userId || '',
     email: p.zoomEmail || '',
@@ -109,6 +119,7 @@ const buildPublicData = (p, { includeScreenshot = false, userId = '' } = {}) => 
     phase: p.zoomPhase || 'idle',
     message: p.zoomMessage || '',
     lastError: p.zoomLastError || '',
+    alertEvent: p.zoomAlertEvent || '',
     lastScreenshot: includeScreenshot ? (p.zoomLastScreenshot || '') : '',
     lastScreenshotAt: p.zoomLastScreenshotAt || '',
     hasRecording,
@@ -118,8 +129,15 @@ const buildPublicData = (p, { includeScreenshot = false, userId = '' } = {}) => 
     lastRecordingSize: hasRecording ? lastSize : 0,
     lastRecordingId: hasRecording ? (p.zoomLastRecordingId || history[0]?.id || '') : '',
     recordingHistory: history.slice(0, HISTORY_LIMIT).map(({ path, ...rest }) => rest),
-    recordingQuotaBytes: Number(process.env.ZOOM_PW_RECORDING_QUOTA_MB || 10240) * 1024 * 1024,
+    recordingQuotaBytes: quotaBytes,
+    recordingUsedBytes: usedBytes,
+    recordingRemainingBytes: Math.max(0, quotaBytes - usedBytes),
     admittedCount: Number(p.zoomAdmittedCount || 0),
+    lastMeetingId: p.zoomLastMeetingId || '',
+    lastMeetingJoinedAt: p.zoomLastMeetingJoinedAt || '',
+    lastMeetingLeftAt: p.zoomLastMeetingLeftAt || '',
+    lastMeetingAdmittedCount: Number(p.zoomLastMeetingAdmittedCount || 0),
+    meetingAudit,
     hasSession: !!p.zoomStorageState,
     updatedAt: p.zoomUpdatedAt || p.updatedAt || ''
   };
@@ -242,10 +260,33 @@ if (action === 'saveStatus') {
     );
   }
 
+  let meetingAuditJson = undefined;
+  if (c.appendMeetingAudit === true) {
+    let audit = [];
+    try {
+      audit = JSON.parse(p.zoomMeetingAuditJson || '[]');
+      if (!Array.isArray(audit)) audit = [];
+    } catch (error) {
+      audit = [];
+    }
+    const entry = {
+      meetingId: c.lastMeetingId || p.zoomLastMeetingId || '',
+      joinedAt: c.lastMeetingJoinedAt || p.zoomLastMeetingJoinedAt || '',
+      leftAt: c.lastMeetingLeftAt || new Date().toISOString(),
+      admittedCount: Number(
+        c.lastMeetingAdmittedCount !== undefined
+          ? c.lastMeetingAdmittedCount
+          : (c.admittedCount !== undefined ? c.admittedCount : p.zoomAdmittedCount || 0)
+      )
+    };
+    meetingAuditJson = JSON.stringify([entry, ...audit].slice(0, 20));
+  }
+
   const fields = {
     zoomPhase: c.phase,
     zoomMessage: c.message,
     zoomLastError: c.lastError,
+    zoomAlertEvent: c.alertEvent,
     zoomManaging: c.managing,
     zoomLeaveRequested: c.leaveRequested,
     zoomCancelRequested: c.cancelRequested,
@@ -260,7 +301,12 @@ if (action === 'saveStatus') {
     zoomLastRecordingSize: c.lastRecordingSize,
     zoomLastRecordingId: c.lastRecordingId,
     zoomRecordingHistoryJson: historyJson,
-    zoomAdmittedCount: c.admittedCount
+    zoomAdmittedCount: c.admittedCount,
+    zoomLastMeetingId: c.lastMeetingId,
+    zoomLastMeetingJoinedAt: c.lastMeetingJoinedAt,
+    zoomLastMeetingLeftAt: c.lastMeetingLeftAt,
+    zoomLastMeetingAdmittedCount: c.lastMeetingAdmittedCount,
+    zoomMeetingAuditJson: meetingAuditJson
   };
 
   const sets = ['z.updatedAt = datetime()'];
@@ -379,6 +425,67 @@ if (action === 'getRecordingPath') {
       id: item.id || ''
     }
   };
+}
+
+if (action === 'deleteRecording') {
+  const recordingId = String(c.recordingId || '').trim();
+  if (!recordingId) return { success: false, error: 'recordingId is required' };
+  const history = parseHistory(p.zoomRecordingHistoryJson);
+  const item = history.find((entry) => entry.id === recordingId);
+  if (!item) return { success: false, error: 'Recording not found' };
+  if (item.path) {
+    try { _.fs.unlinkSync(item.path); } catch (error) {}
+  }
+  const next = history.filter((entry) => entry.id !== recordingId);
+  const top = next[0];
+  await _.session.run(`
+    ${OWNER_MATCH}
+    SET z.zoomRecordingHistoryJson = $historyJson,
+        z.zoomHasRecording = $hasRecording,
+        z.zoomLastRecordingPath = $lastRecordingPath,
+        z.zoomLastRecordingSize = $lastRecordingSize,
+        z.zoomLastRecordingAt = $lastRecordingAt,
+        z.zoomLastRecordingAction = $lastRecordingAction,
+        z.zoomLastRecordingId = $lastRecordingId,
+        z.updatedAt = datetime()
+    RETURN z
+  `, {
+    userId: ownerUserId,
+    historyJson: JSON.stringify(next),
+    hasRecording: !!top,
+    lastRecordingPath: top?.path || '',
+    lastRecordingSize: Number(top?.size || 0),
+    lastRecordingAt: top?.at || '',
+    lastRecordingAction: top?.action || '',
+    lastRecordingId: top?.id || ''
+  });
+  return {
+    success: true,
+    message: 'Recording deleted',
+    data: buildPublicData(
+      {
+        ...p,
+        zoomRecordingHistoryJson: JSON.stringify(next),
+        zoomHasRecording: !!top,
+        zoomLastRecordingPath: top?.path || '',
+        zoomLastRecordingSize: Number(top?.size || 0),
+        zoomLastRecordingAt: top?.at || '',
+        zoomLastRecordingAction: top?.action || '',
+        zoomLastRecordingId: top?.id || ''
+      },
+      { userId: ownerUserId }
+    )
+  };
+}
+
+if (action === 'clearAlert') {
+  await _.session.run(`
+    ${OWNER_MATCH}
+    SET z.zoomAlertEvent = '',
+        z.updatedAt = datetime()
+    RETURN z
+  `, { userId: ownerUserId });
+  return { success: true };
 }
 
 return { success: false, error: `Unknown action: ${action}` };

@@ -56,19 +56,33 @@ const runAction = async (functionName, contextData = {}) => {
   return res.result || res;
 };
 
+const notifyWebhook = async (payload) => {
+  const url = String(process.env.ZOOM_PW_WEBHOOK_URL || '').trim();
+  if (!url) return;
+  try {
+    await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        source: 'askzoom-playwright',
+        subdomain: _.subDomain,
+        at: new Date().toISOString(),
+        ...payload
+      })
+    });
+  } catch (error) {
+    console.warn('[processZoomPlaywright] webhook failed', error.message);
+  }
+};
+
 let worker;
+const concurrency = Math.max(1, Number(process.env.ZOOM_PW_CONCURRENCY || 2));
 
 try {
   worker = new Worker(queueName, async (job) => {
     const action = job.data?.action || job.name;
     const userId = String(job.data?.userId || '').trim();
     if (!userId) throw new Error('Zoom job missing userId');
-
-    const runtimeSnap = await runAction('zoomPlaywrightRuntime', { action: 'get' }).catch(() => null);
-    const busyOwner = runtimeSnap?.data?.ownerUserId || '';
-    if (runtimeSnap?.data?.busy && busyOwner && busyOwner !== userId && action !== 'cancel') {
-      throw new Error(`Playwright busy with another user (${busyOwner})`);
-    }
 
     await runAction('zoomPlaywrightRuntime', { action: 'setOwnerUserId', userId });
     await logMessage('info', `Zoom job started: ${action}`, { jobId: job.id, userId });
@@ -101,18 +115,44 @@ try {
       } else {
         throw new Error(`Unknown Zoom job action: ${action}`);
       }
+      if (action === 'checkSession') {
+        const snap = await s({
+          functionName: 'zoomSettingStore',
+          contextData: { action: 'get', userId }
+        }, { functionLookupSubDomain: _.subDomain }).catch(() => null);
+        if (snap?.result?.data?.alertEvent === 'session_expired') {
+          await notifyWebhook({
+            event: 'session_expired',
+            action,
+            userId,
+            jobId: job.id
+          });
+        }
+      }
       await logMessage('info', `Zoom job finished: ${action}`, { jobId: job.id, userId });
     } catch (error) {
+      const isSessionExpired = /session expired/i.test(error.message || '');
+      const alertEvent = isSessionExpired
+        ? 'session_expired'
+        : (action === 'manage' ? 'manage_error' : 'job_error');
       await s({
         functionName: 'zoomSettingStore',
         contextData: {
           action: 'saveStatus',
           userId,
-          phase: 'error',
+          phase: isSessionExpired ? 'session_expired' : 'error',
           lastError: error.message,
-          message: error.message
+          message: error.message,
+          alertEvent
         }
       }, { functionLookupSubDomain: _.subDomain });
+      await notifyWebhook({
+        event: alertEvent,
+        action,
+        userId,
+        error: error.message,
+        jobId: job.id
+      });
       await s({
         functionName: 'zoomPlaywrightRuntime',
         contextData: { action: 'captureScreenshot', userId }
@@ -125,13 +165,14 @@ try {
     }
   }, {
     connection,
-    concurrency: 1,
+    concurrency,
     lockDuration: 10 * 60 * 1000
   });
 
   worker.on('failed', async (job, err) => {
     await logMessage('error', 'Zoom Playwright job failed', {
       jobId: job?.id,
+      userId: job?.data?.userId,
       error: err.message
     });
   });
@@ -140,14 +181,14 @@ try {
     await logMessage('error', 'Zoom Playwright worker error', { error: err.message });
   });
 
-  await logMessage('info', 'Zoom Playwright worker created', { concurrency: 1 });
+  await logMessage('info', 'Zoom Playwright worker created', { concurrency });
 
   return {
     stop: async (force = false) => {
       await logMessage('info', `Stopping Zoom Playwright worker${force ? ' (force)' : ''}`);
       await s({
         functionName: 'zoomPlaywrightRuntime',
-        contextData: { action: 'close' }
+        contextData: { action: 'closeAll' }
       }, { functionLookupSubDomain: _.subDomain }).catch(() => {});
       await worker.close(force);
     }

@@ -39,27 +39,17 @@ if (!helpers.result?.success) {
 const queue = helpers.result.data.createZoomQueue();
 
 const assertBrowserNotBusyWithOtherUser = async () => {
-  try {
-    const runtimeRes = await s({
-      functionName: 'zoomPlaywrightRuntime',
-      contextData: { action: 'get' }
-    }, { functionLookupSubDomain: _.subDomain });
-    const rt = runtimeRes.result?.data || {};
-    if (rt.busy && rt.ownerUserId && rt.ownerUserId !== userId) {
-      throw new Error(`Playwright is busy with another user. Ask them to cancel, or wait.`);
-    }
-  } catch (error) {
-    if (/busy with another user/i.test(error.message)) throw error;
-    // runtime may be unreachable from web process — still check queue
-  }
-
-  const jobs = await queue.getJobs(['active', 'waiting', 'delayed']);
-  const foreign = jobs.find((job) => {
-    const other = String(job.data?.userId || '');
-    return other && other !== userId;
+  // Per-user slots allow concurrent users; only block if this user's own job conflicts
+  // or all slots are full (checked at launch time in the worker).
+  const myJobs = await queue.getJobs(['active', 'waiting', 'delayed']);
+  const mineActive = myJobs.find((job) => {
+    if (String(job.data?.userId || '') !== userId) return false;
+    const otherAction = String(job.data?.action || job.name || '');
+    if (otherAction === 'cancel' || otherAction === action) return false;
+    return ['login', 'logout', 'manage', 'checkSession'].includes(otherAction);
   });
-  if (foreign) {
-    throw new Error(`Zoom queue is busy with another user job (${foreign.name || foreign.data?.action}). Wait or ask them to cancel.`);
+  if (mineActive && action !== 'cancel' && action !== 'leave') {
+    throw new Error(`You already have an active Zoom ${mineActive.data?.action || mineActive.name} job`);
   }
 };
 

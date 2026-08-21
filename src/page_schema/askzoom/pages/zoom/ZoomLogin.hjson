@@ -18,10 +18,21 @@ const [selectedRecordingId, setSelectedRecordingId] = _.createSignal('');
 const loadStatus = async () => {
   const res = await s({ functionName: 'getZoomWorkerStatus', contextData: {} });
   if (res.result?.success) {
-    setStatus(res.result.data);
     const data = res.result.data;
+    const prev = status();
+    setStatus(data);
     if (!selectedRecordingId() && data?.lastRecordingId) {
       setSelectedRecordingId(data.lastRecordingId);
+    }
+    const event = data?.alertEvent || '';
+    if (event && event !== prev?.alertEvent) {
+      if (event === 'session_expired') _.showErrorToast(data.message || 'Zoom session expired');
+      else if (event === 'manage_error' || event === 'job_error' || event === 'login_failed') {
+        _.showErrorToast(data.lastError || data.message || 'Zoom job failed');
+      } else if (event === 'logged_in') {
+        _.showSuccessToast(data.message || 'Logged in');
+      }
+      s({ functionName: 'zoomSettingStore', contextData: { action: 'clearAlert' } }).catch(() => {});
     }
   }
 };
@@ -59,6 +70,30 @@ const cancelJob = async () => {
     }
   } finally {
     setBusy(false);
+  }
+};
+
+const deleteSelectedRecording = async () => {
+  const id = selectedRecordingId() || status()?.lastRecordingId;
+  if (!id) {
+    _.showErrorToast('No recording selected');
+    return;
+  }
+  setTransferBusy(true);
+  try {
+    const res = await s({
+      functionName: 'deleteZoomRecording',
+      contextData: { recordingId: id }
+    });
+    if (res.result?.success) {
+      _.showSuccessToast('Recording deleted');
+      setSelectedRecordingId('');
+      await loadStatus();
+    } else {
+      _.showErrorToast(res.result?.error || res.error || 'Delete failed');
+    }
+  } finally {
+    setTransferBusy(false);
   }
 };
 
@@ -147,6 +182,7 @@ return {
   loadStatus,
   login,
   cancelJob,
+  deleteSelectedRecording,
   exportSession,
   importSession,
   onImportFile,
@@ -409,6 +445,8 @@ Error: ${status.lastError || '-'}
 Recording: ${status.hasRecording
   ? `${status.lastRecordingAction || 'saved'} (${f.formatBytes(status.lastRecordingSize || 0)})`
   : 'none'}
+Disk: ${f.formatBytes(status.recordingUsedBytes || 0)} / ${f.formatBytes(status.recordingQuotaBytes || 0)} used (${f.formatBytes(status.recordingRemainingBytes || 0)} free)
+Last meeting: ${status.lastMeetingId || '-'} joined ${status.lastMeetingJoinedAt || '-'} left ${status.lastMeetingLeftAt || '-'} admits ${status.lastMeetingAdmittedCount || 0}
 Record video: ${status.recordVideo === false ? 'off' : 'on'}
 Browser busy: ${status.runtime?.busy ? `yes (${status.runtime?.ownerUserId || '-'})` : 'no'}
 Queue active/waiting: ${status.queueCounts?.active || 0}/${status.queueCounts?.waiting || 0}
@@ -489,6 +527,24 @@ return {
     if (id) qs.set('id', id);
     window.open(`/api/zoom/recording?${qs.toString()}`, '_blank');
   }
+};
+'''
+      }
+    }
+    {
+      id: "7c"
+      L: Attr
+      P: {
+        displayOrder: 11.5
+        componentName: Button
+        props:
+          '''
+return {
+  text: 'Delete selected recording',
+  variant: 'danger',
+  hide: () => !f.status()?.hasRecording,
+  disabled: f.transferBusy(),
+  onClick: f.deleteSelectedRecording
 };
 '''
       }
@@ -746,6 +802,12 @@ return {
       T: Attr
       S: "2"
       E: "7b"
+    }
+    {
+      id: e7c
+      T: Attr
+      S: "2"
+      E: "7c"
     }
     {
       id: e8

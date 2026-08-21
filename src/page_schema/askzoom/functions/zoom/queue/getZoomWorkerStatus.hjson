@@ -35,7 +35,7 @@ let runtime = {};
 try {
   const runtimeRes = await s({
     functionName: 'zoomPlaywrightRuntime',
-    contextData: { action: 'get' }
+    contextData: { action: 'get', userId }
   }, { functionLookupSubDomain: _.subDomain });
   runtime = runtimeRes.result?.data || {};
 } catch (error) {
@@ -88,7 +88,9 @@ return {
       ownerUserId: runtime.ownerUserId || '',
       jobAction: runtime.jobAction || '',
       hasBrowser: !!runtime.hasBrowser,
-      managing: !!runtime.managing
+      managing: !!runtime.managing,
+      busySlots: Number(runtime.busySlots || 0),
+      maxSlots: Number(runtime.maxSlots || 0)
     },
     workerLogs,
     workerKey: 'processZoomPlaywright',

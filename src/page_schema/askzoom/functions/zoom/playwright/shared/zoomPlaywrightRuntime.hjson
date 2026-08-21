@@ -5,37 +5,60 @@
       L: Function
       P: {
         key: zoomPlaywrightRuntime
-        description: Shared Zoom Playwright browser runtime for background workers
+        description: Per-user Zoom Playwright browser slots for background workers
         body:
           '''
 const action = c.action || 'get';
 const HISTORY_LIMIT = 5;
 const RECORDING_QUOTA_BYTES = Number(process.env.ZOOM_PW_RECORDING_QUOTA_MB || 10240) * 1024 * 1024;
+const MAX_SLOTS = Math.max(1, Number(process.env.ZOOM_PW_MAX_SLOTS || 3));
 
-if (!globalThis.__askzoomPlaywright) {
-  globalThis.__askzoomPlaywright = {
-    browser: null,
-    context: null,
-    page: null,
-    manageTimer: null,
-    screenshotTimer: null,
-    managing: false,
-    admittedCount: 0,
-    jobAction: '',
-    leaving: false,
-    ownerUserId: '',
-    cancelRequested: false,
-    recordVideo: true
-  };
+if (!globalThis.__askzoomPlaywrightSlots) {
+  globalThis.__askzoomPlaywrightSlots = Object.create(null);
 }
 
-const runtime = globalThis.__askzoomPlaywright;
+const createEmptySlot = (userId) => ({
+  browser: null,
+  context: null,
+  page: null,
+  manageTimer: null,
+  screenshotTimer: null,
+  managing: false,
+  admittedCount: 0,
+  jobAction: '',
+  leaving: false,
+  ownerUserId: userId,
+  cancelRequested: false,
+  recordVideo: true
+});
+
+const resolveUserId = () => String(c.userId || '').trim();
+
+const countBusySlots = () => Object.values(globalThis.__askzoomPlaywrightSlots)
+  .filter((slot) => slot && (slot.browser || slot.managing)).length;
+
+const getSlot = (userId, { create = true } = {}) => {
+  if (!userId) throw new Error('userId is required for Playwright runtime slot');
+  if (!globalThis.__askzoomPlaywrightSlots[userId]) {
+    if (!create) return null;
+    globalThis.__askzoomPlaywrightSlots[userId] = createEmptySlot(userId);
+  }
+  return globalThis.__askzoomPlaywrightSlots[userId];
+};
+
+const bindAlias = (slot) => {
+  globalThis.__askzoomPlaywright = slot;
+};
+
+const userId = resolveUserId();
+const runtime = userId ? getSlot(userId) : (globalThis.__askzoomPlaywright || null);
+if (runtime) bindAlias(runtime);
 
 const callStore = async (contextData) => {
   const res = await s({
     functionName: 'zoomSettingStore',
     contextData: {
-      userId: runtime.ownerUserId || c.userId || undefined,
+      userId: (runtime && runtime.ownerUserId) || userId || undefined,
       ...contextData
     }
   }, { functionLookupSubDomain: _.subDomain });
@@ -47,8 +70,8 @@ const setStatus = async (patch) => {
   await callStore({ action: 'saveStatus', ...patch });
 };
 
-const recordingDirs = () => {
-  const userKey = String(runtime.ownerUserId || c.userId || 'default').replace(/[^a-zA-Z0-9._-]+/g, '_');
+const recordingDirsFor = (slotUserId) => {
+  const userKey = String(slotUserId || 'default').replace(/[^a-zA-Z0-9._-]+/g, '_');
   const base = _.path.join(
     _.os.homedir(),
     'UploadFiles',
@@ -62,6 +85,8 @@ const recordingDirs = () => {
   _.fs.mkdirSync(saved, { recursive: true });
   return { base, live, saved };
 };
+
+const recordingDirs = () => recordingDirsFor(runtime?.ownerUserId || userId);
 
 const cleanupLiveVideos = (liveDir, keepPath = '') => {
   try {
@@ -93,7 +118,6 @@ const listSavedVideos = (savedDir) => {
 const pruneSavedByQuota = async (savedDir, keepPaths = []) => {
   const keep = new Set(keepPaths.map((p) => _.path.resolve(p)));
   let files = listSavedVideos(savedDir);
-  // Also enforce history count
   for (const file of files.slice(HISTORY_LIMIT)) {
     if (keep.has(_.path.resolve(file.full))) continue;
     try { _.fs.unlinkSync(file.full); } catch (error) {}
@@ -111,10 +135,6 @@ const pruneSavedByQuota = async (savedDir, keepPaths = []) => {
     } catch (error) {}
   }
   if (removed.length) {
-    const current = await callStore({ action: 'get' });
-    const history = Array.isArray(current?.data?.recordingHistory) ? current.data.recordingHistory : [];
-    // Rebuild history from remaining files is lossy without paths in public history;
-    // trim status via saveStatus using remaining files from disk
     const remaining = listSavedVideos(savedDir);
     const historyJson = remaining.slice(0, HISTORY_LIMIT).map((f, index) => ({
       id: `rec_disk_${f.mtime}_${index}`,
@@ -133,40 +153,41 @@ const pruneSavedByQuota = async (savedDir, keepPaths = []) => {
       lastRecordingAction: top?.action || '',
       lastRecordingId: top?.id || ''
     });
-    void history;
   }
 };
 
-const stopManageLoops = () => {
-  if (runtime.manageTimer) {
-    clearInterval(runtime.manageTimer);
-    runtime.manageTimer = null;
+const stopManageLoops = (slot = runtime) => {
+  if (!slot) return;
+  if (slot.manageTimer) {
+    clearInterval(slot.manageTimer);
+    slot.manageTimer = null;
   }
-  if (runtime.screenshotTimer) {
-    clearInterval(runtime.screenshotTimer);
-    runtime.screenshotTimer = null;
+  if (slot.screenshotTimer) {
+    clearInterval(slot.screenshotTimer);
+    slot.screenshotTimer = null;
   }
-  runtime.managing = false;
+  slot.managing = false;
 };
 
-const closeBrowser = async ({ skipRecording = false } = {}) => {
-  stopManageLoops();
-  const video = (!skipRecording && runtime.recordVideo) ? (runtime.page?.video?.() || null) : null;
-  try { await runtime.page?.close(); } catch (error) {}
-  try { await runtime.context?.close(); } catch (error) {}
-  try { await runtime.browser?.close(); } catch (error) {}
-  runtime.page = null;
-  runtime.context = null;
-  runtime.browser = null;
+const closeBrowser = async (slot = runtime, { skipRecording = false } = {}) => {
+  if (!slot) return { success: true };
+  stopManageLoops(slot);
+  const video = (!skipRecording && slot.recordVideo) ? (slot.page?.video?.() || null) : null;
+  try { await slot.page?.close(); } catch (error) {}
+  try { await slot.context?.close(); } catch (error) {}
+  try { await slot.browser?.close(); } catch (error) {}
+  slot.page = null;
+  slot.context = null;
+  slot.browser = null;
 
-  const { live, saved } = recordingDirs();
+  const { live, saved } = recordingDirsFor(slot.ownerUserId);
   if (!video) {
     cleanupLiveVideos(live);
     return { success: true };
   }
   try {
     const stamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const actionName = String(runtime.jobAction || 'zoom').replace(/[^a-zA-Z0-9._-]+/g, '_');
+    const actionName = String(slot.jobAction || 'zoom').replace(/[^a-zA-Z0-9._-]+/g, '_');
     const recordingId = `rec_${Date.now()}`;
     const dest = _.path.join(saved, `${stamp}-${actionName}.webm`);
     const latest = _.path.join(saved, 'latest.webm');
@@ -184,17 +205,15 @@ const closeBrowser = async ({ skipRecording = false } = {}) => {
 
     let size = _.fs.existsSync(dest) ? _.fs.statSync(dest).size : 0;
     if (!size) {
-      const files = listSavedVideos(live).length
-        ? listSavedVideos(live)
-        : _.fs.readdirSync(live)
-          .filter((name) => name.endsWith('.webm'))
-          .map((name) => {
-            const full = _.path.join(live, name);
-            const st = _.fs.statSync(full);
-            return { full, mtime: st.mtimeMs, size: st.size };
-          })
-          .filter((f) => f.size > 0)
-          .sort((a, b) => b.mtime - a.mtime);
+      const files = _.fs.readdirSync(live)
+        .filter((name) => name.endsWith('.webm'))
+        .map((name) => {
+          const full = _.path.join(live, name);
+          const st = _.fs.statSync(full);
+          return { full, mtime: st.mtimeMs, size: st.size };
+        })
+        .filter((f) => f.size > 0)
+        .sort((a, b) => b.mtime - a.mtime);
       if (files[0]) {
         _.fs.copyFileSync(files[0].full, dest);
         size = _.fs.statSync(dest).size;
@@ -212,7 +231,7 @@ const closeBrowser = async ({ skipRecording = false } = {}) => {
     await setStatus({
       hasRecording: true,
       lastRecordingAt: new Date().toISOString(),
-      lastRecordingAction: runtime.jobAction || '',
+      lastRecordingAction: slot.jobAction || '',
       lastRecordingPath: dest,
       lastRecordingSize: size,
       lastRecordingId: recordingId
@@ -228,15 +247,43 @@ const closeBrowser = async ({ skipRecording = false } = {}) => {
 
 if (action === 'setOwnerUserId') {
   const nextUserId = String(c.userId || '').trim();
-  if (runtime.browser && runtime.ownerUserId && nextUserId && runtime.ownerUserId !== nextUserId) {
-    await closeBrowser({ skipRecording: true });
-  }
-  runtime.ownerUserId = nextUserId;
-  runtime.cancelRequested = false;
-  return { success: true, data: { ownerUserId: runtime.ownerUserId } };
+  if (!nextUserId) return { success: false, error: 'userId required' };
+  const slot = getSlot(nextUserId);
+  slot.cancelRequested = false;
+  bindAlias(slot);
+  return { success: true, data: { ownerUserId: nextUserId, busySlots: countBusySlots(), maxSlots: MAX_SLOTS } };
+}
+
+if (action === 'listSlots') {
+  const slots = Object.entries(globalThis.__askzoomPlaywrightSlots).map(([id, slot]) => ({
+    userId: id,
+    busy: !!(slot.browser || slot.managing),
+    managing: !!slot.managing,
+    jobAction: slot.jobAction || '',
+    hasBrowser: !!slot.browser
+  }));
+  return { success: true, data: { slots, busySlots: countBusySlots(), maxSlots: MAX_SLOTS } };
 }
 
 if (action === 'get') {
+  if (!runtime) {
+    return {
+      success: true,
+      data: {
+        busySlots: countBusySlots(),
+        maxSlots: MAX_SLOTS,
+        busy: countBusySlots() > 0,
+        hasBrowser: false,
+        hasPage: false,
+        managing: false,
+        ownerUserId: '',
+        jobAction: '',
+        cancelRequested: false,
+        recordVideo: true,
+        admittedCount: 0
+      }
+    };
+  }
   return {
     success: true,
     data: {
@@ -248,9 +295,24 @@ if (action === 'get') {
       recordVideo: runtime.recordVideo !== false,
       hasPage: !!runtime.page,
       hasBrowser: !!runtime.browser,
-      busy: !!(runtime.browser || runtime.managing)
+      busy: !!(runtime.browser || runtime.managing),
+      busySlots: countBusySlots(),
+      maxSlots: MAX_SLOTS
     }
   };
+}
+
+if (action === 'closeAll') {
+  for (const slot of Object.values(globalThis.__askzoomPlaywrightSlots)) {
+    try { await closeBrowser(slot); } catch (error) {}
+  }
+  globalThis.__askzoomPlaywrightSlots = Object.create(null);
+  globalThis.__askzoomPlaywright = null;
+  return { success: true, data: { busySlots: 0, maxSlots: MAX_SLOTS } };
+}
+
+if (!runtime) {
+  return { success: false, error: 'userId is required for this runtime action' };
 }
 
 if (action === 'setJobAction') {
@@ -261,7 +323,7 @@ if (action === 'setJobAction') {
 if (action === 'requestCancel') {
   runtime.cancelRequested = true;
   runtime.managing = false;
-  stopManageLoops();
+  stopManageLoops(runtime);
   return { success: true };
 }
 
@@ -279,30 +341,26 @@ if (action === 'isCancelRequested') {
 
 if (action === 'forceClose') {
   runtime.cancelRequested = true;
-  await closeBrowser({ skipRecording: c.skipRecording === true });
+  await closeBrowser(runtime, { skipRecording: c.skipRecording === true });
   runtime.cancelRequested = false;
-  if (c.userId) {
-    await callStore({
-      action: 'saveStatus',
-      cancelRequested: false,
-      leaveRequested: false,
-      managing: false,
-      phase: c.phase || 'cancelled',
-      message: c.message || 'Stopped',
-      lastError: ''
-    });
-    await callStore({ action: 'clearCancel' });
-  }
+  await callStore({
+    action: 'saveStatus',
+    cancelRequested: false,
+    leaveRequested: false,
+    managing: false,
+    phase: c.phase || 'cancelled',
+    message: c.message || 'Stopped',
+    lastError: ''
+  });
+  await callStore({ action: 'clearCancel' });
   return { success: true };
 }
 
 if (action === 'launch') {
   const { chromium } = await import('playwright');
-  const nextUserId = String(c.userId || runtime.ownerUserId || '').trim();
-  if (runtime.browser && runtime.ownerUserId && nextUserId && runtime.ownerUserId !== nextUserId) {
-    throw new Error(`Browser busy with another user (${runtime.ownerUserId}). Cancel or wait.`);
+  if (!runtime.browser && countBusySlots() >= MAX_SLOTS) {
+    throw new Error(`All Playwright slots busy (${MAX_SLOTS}). Cancel another user or wait.`);
   }
-  if (nextUserId) runtime.ownerUserId = nextUserId;
   runtime.cancelRequested = false;
 
   const prefs = await callStore({ action: 'get' });
@@ -310,7 +368,7 @@ if (action === 'launch') {
     ? false
     : prefs?.data?.recordVideo !== false;
 
-  await closeBrowser({ skipRecording: true });
+  await closeBrowser(runtime, { skipRecording: true });
   const headless = process.env.ZOOM_PW_HEADLESS !== 'false';
   runtime.browser = await chromium.launch({
     headless,
@@ -340,7 +398,8 @@ if (action === 'launch') {
   }
   runtime.context = await runtime.browser.newContext(options);
   runtime.page = await runtime.context.newPage();
-  return { success: true, data: { recordVideo: runtime.recordVideo } };
+  bindAlias(runtime);
+  return { success: true, data: { recordVideo: runtime.recordVideo, ownerUserId: runtime.ownerUserId } };
 }
 
 if (action === 'persistSession') {
@@ -369,12 +428,12 @@ if (action === 'captureScreenshot') {
 }
 
 if (action === 'close') {
-  await closeBrowser();
+  await closeBrowser(runtime);
   return { success: true };
 }
 
 if (action === 'stopManageLoops') {
-  stopManageLoops();
+  stopManageLoops(runtime);
   return { success: true };
 }
 

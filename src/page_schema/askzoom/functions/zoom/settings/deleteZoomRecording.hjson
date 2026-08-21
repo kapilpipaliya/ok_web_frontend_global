@@ -1,0 +1,25 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: deleteZoomRecording
+        description: Delete one Playwright recording from the current user's history
+        body:
+          '''
+const inner = await s({
+  functionName: 'zoomSettingStore',
+  contextData: {
+    action: 'deleteRecording',
+    recordingId: c.recordingId
+  }
+});
+if (inner.error) return { success: false, error: inner.error };
+return inner.result || inner;
+'''
+      }
+    }
+  ]
+  edges: []
+}

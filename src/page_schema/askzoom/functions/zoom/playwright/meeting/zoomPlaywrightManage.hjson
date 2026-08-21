@@ -21,56 +21,95 @@ const {
 
 const storeRes = await s({
   functionName: 'zoomSettingStore',
-  contextData: { action: 'getSecrets' }
+  contextData: { action: 'getSecrets', userId: c.userId }
 }, { functionLookupSubDomain: _.subDomain });
 const secrets = storeRes.result?.data;
 const meetingUrl = String(c.meetingUrl || secrets?.meetingUrl || '').trim();
 if (!meetingUrl) throw new Error('Meeting URL is required');
 if (!secrets?.storageState) throw new Error('Login session missing. Run Zoom login first.');
 
-// Session health check before joining
-const health = await s({
-  functionName: 'zoomPlaywrightCheckSession',
-  contextData: { userId: c.userId || secrets.userId }
-}, { functionLookupSubDomain: _.subDomain });
-if (health.result?.data?.loggedIn === false || health.result?.success === false) {
-  throw new Error(health.result?.message || health.result?.error || 'Zoom session expired. Run login again.');
-}
-
 const { meetingId, joinUrl } = parseMeetingJoinUrl(meetingUrl);
 if (!meetingId || !joinUrl) throw new Error('Invalid meeting URL or meeting ID');
 
+const userId = String(c.userId || secrets.userId || '').trim();
+
+const assertNotCancelled = async () => {
+  const cancelCheck = await s({
+    functionName: 'zoomPlaywrightRuntime',
+    contextData: { action: 'isCancelRequested', userId }
+  }, { functionLookupSubDomain: _.subDomain });
+  if (cancelCheck.result?.data?.cancelRequested) {
+    throw new Error('Cancelled by user');
+  }
+};
+
 await s({
   functionName: 'zoomPlaywrightRuntime',
-  contextData: { action: 'setJobAction', jobAction: 'manage' }
+  contextData: { action: 'setJobAction', jobAction: 'manage', userId }
 }, { functionLookupSubDomain: _.subDomain });
 
 await s({
   functionName: 'zoomPlaywrightRuntime',
-  contextData: { action: 'setAdmittedCount', admittedCount: 0 }
+  contextData: { action: 'setAdmittedCount', admittedCount: 0, userId }
 }, { functionLookupSubDomain: _.subDomain });
 
+const joinedAt = new Date().toISOString();
 await s({
   functionName: 'zoomSettingStore',
   contextData: {
     action: 'saveStatus',
+    userId,
     phase: 'joining',
     message: 'Joining Zoom meeting',
     lastError: '',
     managing: false,
     leaveRequested: false,
-    admittedCount: 0
+    admittedCount: 0,
+    lastMeetingId: meetingId,
+    lastMeetingJoinedAt: joinedAt,
+    lastMeetingLeftAt: '',
+    alertEvent: ''
   }
 }, { functionLookupSubDomain: _.subDomain });
 
 await s({
   functionName: 'zoomPlaywrightRuntime',
-  contextData: { action: 'launch', storageState: secrets.storageState }
+  contextData: { action: 'launch', storageState: secrets.storageState, userId }
 }, { functionLookupSubDomain: _.subDomain });
 
 const runtime = globalThis.__askzoomPlaywright;
 const page = runtime?.page;
 if (!page) throw new Error('Failed to launch Playwright browser');
+
+// Inline session health check on the same browser (no second launch)
+await page.goto('https://zoom.us/profile', { waitUntil: 'domcontentloaded', timeout: 45000 });
+await sleep(1000);
+await assertNotCancelled();
+let sessionOk = !/signin|login|signup/i.test(page.url());
+if (!sessionOk) {
+  await s({
+    functionName: 'zoomSettingStore',
+    contextData: {
+      action: 'saveSession',
+      userId,
+      storageState: '',
+      loggedIn: false
+    }
+  }, { functionLookupSubDomain: _.subDomain });
+  await s({
+    functionName: 'zoomSettingStore',
+    contextData: {
+      action: 'saveStatus',
+      userId,
+      phase: 'session_expired',
+      message: 'Zoom session expired. Run login again.',
+      loggedIn: false,
+      lastError: 'Session expired',
+      alertEvent: 'session_expired'
+    }
+  }, { functionLookupSubDomain: _.subDomain });
+  throw new Error('Zoom session expired. Run login again.');
+}
 
 const enterMeetingId = async (page, meetingId) => {
   await page.goto('https://zoom.us/join', { waitUntil: 'domcontentloaded', timeout: 60000 });
@@ -275,10 +314,13 @@ await s({
   functionName: 'zoomSettingStore',
   contextData: {
     action: 'saveStatus',
+    userId,
     phase: 'managing',
     message: 'Managing waiting room',
     managing: true,
-    loggedIn: true
+    loggedIn: true,
+    lastMeetingId: meetingId,
+    lastMeetingJoinedAt: joinedAt
   }
 }, { functionLookupSubDomain: _.subDomain });
 
@@ -287,7 +329,7 @@ const clickAdmitButtons = async () => {
   if (admitAll) {
     const bump = await s({
       functionName: 'zoomPlaywrightRuntime',
-      contextData: { action: 'bumpAdmitted' }
+      contextData: { action: 'bumpAdmitted', userId }
     }, { functionLookupSubDomain: _.subDomain });
     return { kind: 'admit_all', admittedCount: bump.result?.data?.admittedCount };
   }
@@ -295,7 +337,7 @@ const clickAdmitButtons = async () => {
   if (admit) {
     const bump = await s({
       functionName: 'zoomPlaywrightRuntime',
-      contextData: { action: 'bumpAdmitted' }
+      contextData: { action: 'bumpAdmitted', userId }
     }, { functionLookupSubDomain: _.subDomain });
     return { kind: 'admit', admittedCount: bump.result?.data?.admittedCount };
   }
@@ -306,7 +348,7 @@ await clickAdmitButtons();
 
 await s({
   functionName: 'zoomPlaywrightRuntime',
-  contextData: { action: 'stopManageLoops' }
+  contextData: { action: 'stopManageLoops', userId }
 }, { functionLookupSubDomain: _.subDomain });
 
 runtime.managing = true;
@@ -315,14 +357,14 @@ runtime.manageTimer = setInterval(async () => {
   try {
     const cancelCheck = await s({
       functionName: 'zoomPlaywrightRuntime',
-      contextData: { action: 'isCancelRequested' }
+      contextData: { action: 'isCancelRequested', userId }
     }, { functionLookupSubDomain: _.subDomain });
     if (cancelCheck.result?.data?.cancelRequested) {
       await s({
         functionName: 'zoomPlaywrightRuntime',
         contextData: {
           action: 'forceClose',
-          userId: c.userId,
+          userId,
           phase: 'cancelled',
           message: 'Cancelled by user'
         }
@@ -332,7 +374,7 @@ runtime.manageTimer = setInterval(async () => {
 
     const secretsNow = await s({
       functionName: 'zoomSettingStore',
-      contextData: { action: 'getSecrets' }
+      contextData: { action: 'getSecrets', userId }
     }, { functionLookupSubDomain: _.subDomain });
     if (secretsNow.result?.data?.leaveRequested || secretsNow.result?.data?.cancelRequested) {
       if (secretsNow.result?.data?.cancelRequested) {
@@ -340,7 +382,7 @@ runtime.manageTimer = setInterval(async () => {
           functionName: 'zoomPlaywrightRuntime',
           contextData: {
             action: 'forceClose',
-            userId: c.userId,
+            userId,
             phase: 'cancelled',
             message: 'Cancelled by user'
           }
@@ -349,7 +391,7 @@ runtime.manageTimer = setInterval(async () => {
       }
       await s({
         functionName: 'zoomPlaywrightLeave',
-        contextData: {}
+        contextData: { userId }
       }, { functionLookupSubDomain: _.subDomain });
       return;
     }
@@ -360,6 +402,7 @@ runtime.manageTimer = setInterval(async () => {
         functionName: 'zoomSettingStore',
         contextData: {
           action: 'saveStatus',
+          userId,
           phase: 'managing',
           message: `Clicked ${clicked.kind}`,
           managing: true,
@@ -376,7 +419,7 @@ runtime.screenshotTimer = setInterval(async () => {
   if (!runtime.managing) return;
   await s({
     functionName: 'zoomPlaywrightRuntime',
-    contextData: { action: 'captureScreenshot' }
+    contextData: { action: 'captureScreenshot', userId }
   }, { functionLookupSubDomain: _.subDomain });
 }, 5000);
 

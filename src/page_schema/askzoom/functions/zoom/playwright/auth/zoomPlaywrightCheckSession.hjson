@@ -71,17 +71,18 @@ try {
   }, { functionLookupSubDomain: _.subDomain });
 }
 
-await s({
-  functionName: 'zoomSettingStore',
-  contextData: {
-    action: 'saveStatus',
-    userId: c.userId,
-    phase: loggedIn ? 'session_ok' : 'session_expired',
-    message: loggedIn ? 'Zoom session is valid' : 'Zoom session expired. Run login again.',
-    loggedIn,
-    lastError: loggedIn ? '' : 'Session expired'
-  }
-}, { functionLookupSubDomain: _.subDomain });
+  await s({
+    functionName: 'zoomSettingStore',
+    contextData: {
+      action: 'saveStatus',
+      userId: c.userId,
+      phase: loggedIn ? 'session_ok' : 'session_expired',
+      message: loggedIn ? 'Zoom session is valid' : 'Zoom session expired. Run login again.',
+      loggedIn,
+      lastError: loggedIn ? '' : 'Session expired',
+      alertEvent: loggedIn ? '' : 'session_expired'
+    }
+  }, { functionLookupSubDomain: _.subDomain });
 
 if (!loggedIn) {
   await s({
