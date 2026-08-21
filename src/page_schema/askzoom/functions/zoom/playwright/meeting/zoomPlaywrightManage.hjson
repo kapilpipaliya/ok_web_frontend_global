@@ -363,6 +363,31 @@ await s({
     lastHeartbeatAt: new Date().toISOString()
   }
 }, { functionLookupSubDomain: _.subDomain });
+await _.askzoomPlaywright.refreshLease(userId, {
+  jobAction: 'manage',
+  managing: true
+});
+_.askzoomPlaywright.registerControlHandler(userId, async (msg) => {
+  if (msg.type === 'leave') {
+    await s({
+      functionName: 'zoomPlaywrightLeave',
+      contextData: { userId }
+    }, { functionLookupSubDomain: _.subDomain });
+    return;
+  }
+  if (msg.type === 'cancel' || msg.type === 'forceClose') {
+    await s({
+      functionName: 'zoomPlaywrightRuntime',
+      contextData: {
+        action: 'forceClose',
+        userId,
+        phase: msg.phase || 'cancelled',
+        message: msg.message || 'Cancelled by user',
+        localOnly: true
+      }
+    }, { functionLookupSubDomain: _.subDomain });
+  }
+});
 
 runtime.manageTimer = setInterval(async () => {
   if (!runtime.managing || !runtime.page) return;
@@ -376,7 +401,11 @@ runtime.manageTimer = setInterval(async () => {
         managing: true,
         admittedCount: runtime.admittedCount
       }
-    }, { functionLookupSubDomain: _.subDomain }).catch(() => {});
+    }, { functionLookupSubDomain: _.subDomain });
+    await _.askzoomPlaywright.refreshLease(userId, {
+      jobAction: 'manage',
+      managing: true
+    });
 
     const cancelCheck = await s({
       functionName: 'zoomPlaywrightRuntime',

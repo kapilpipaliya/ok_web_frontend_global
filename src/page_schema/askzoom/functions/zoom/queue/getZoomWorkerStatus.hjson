@@ -37,23 +37,20 @@ try {
 }
 
 let runtime = {};
-try {
-  const runtimeRes = await s({
-    functionName: 'zoomPlaywrightRuntime',
-    contextData: { action: 'get', userId }
-  }, { functionLookupSubDomain: _.subDomain });
-  runtime = runtimeRes.result?.data || {};
-} catch (error) {
-  // optional
-}
+const runtimeRes = await s({
+  functionName: 'zoomPlaywrightRuntime',
+  contextData: { action: 'get', userId }
+}, { functionLookupSubDomain: _.subDomain });
+if (runtimeRes.error) throw new Error(runtimeRes.error);
+runtime = runtimeRes.result?.data || {};
 
 let staleManageRecovered = false;
 const looksManaging =
   settings.managing === true ||
   settings.phase === 'managing' ||
   settings.phase === 'joining';
-const slotBusy = !!(runtime.busy && String(runtime.ownerUserId || '') === userId);
-if (userId && looksManaging && !slotBusy) {
+const lease = userId ? await _.askzoomPlaywright.getLease(userId) : null;
+if (userId && looksManaging && !lease) {
   const hbMs = settings.lastHeartbeatAt
     ? Date.parse(settings.lastHeartbeatAt)
     : 0;
@@ -71,15 +68,17 @@ if (userId && looksManaging && !slotBusy) {
         alertEvent: 'manage_stale',
         lastHeartbeatAt: ''
       }
-    }, { functionLookupSubDomain: _.subDomain }).catch(() => {});
+    }, { functionLookupSubDomain: _.subDomain });
     staleManageRecovered = true;
     const refreshed = await s({
       functionName: 'zoomSettingStore',
       contextData: { action: 'get', includeScreenshot: true, userId }
-    }).catch(() => null);
+    });
     if (refreshed?.result?.data) settings = refreshed.result.data;
   }
 }
+
+const clusterSlots = await _.askzoomPlaywright.listClusterSlots();
 
 let workerLogs = [];
 try {
@@ -129,13 +128,21 @@ return {
     heartbeatStaleMs: HEARTBEAT_STALE_MS,
     queueCounts,
     runtime: {
-      busy: !!runtime.busy,
-      ownerUserId: runtime.ownerUserId || '',
-      jobAction: runtime.jobAction || '',
-      hasBrowser: !!runtime.hasBrowser,
-      managing: !!runtime.managing,
-      busySlots: Number(runtime.busySlots || 0),
-      maxSlots: Number(runtime.maxSlots || 0)
+      busy: !!(runtime.busy || lease),
+      ownerUserId: runtime.ownerUserId || lease?.userId || '',
+      jobAction: runtime.jobAction || lease?.jobAction || '',
+      hasBrowser: !!runtime.hasBrowser || !!lease,
+      managing: !!runtime.managing || !!lease?.managing,
+      busySlots: Number(
+        runtime.busySlots != null ? runtime.busySlots : clusterSlots.length
+      ),
+      maxSlots: Number(runtime.maxSlots || 0),
+      nodeId: runtime.nodeId || _.askzoomPlaywright.nodeId(),
+      leaseNodeId: runtime.leaseNodeId || lease?.nodeId || '',
+      leaseLocal:
+        runtime.leaseLocal === true ||
+        (lease ? _.askzoomPlaywright.isLeaseOwner(lease) : false),
+      clusterSlots
     },
     lastMetricsFromLog: metricsLog?.metadata || null,
     workerLogs,

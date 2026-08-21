@@ -29,6 +29,7 @@ const logMessage = async (level, message, metadata = {}) => {
 };
 
 await logMessage('info', 'Starting Zoom Playwright worker');
+await _.askzoomPlaywright.ensureControlBus();
 
 const helpers = await s({
   functionName: 'zoomQueueHelpers',

@@ -14,16 +14,48 @@ const RECORDING_QUOTA_BYTES = Number(process.env.ZOOM_PW_RECORDING_QUOTA_MB || 1
 const MAX_SLOTS = Math.max(1, Number(process.env.ZOOM_PW_MAX_SLOTS || 3));
 
 const store = _.askzoomPlaywright;
+await store.ensureControlBus();
 
 const resolveUserId = () => String(c.userId || '').trim();
 
-const countBusySlots = () => store.countBusySlots();
+const countBusySlots = async () => store.countClusterBusySlots();
 
 const getSlot = (uid, { create = true } = {}) =>
   store.getSlot(uid, { create });
 
 const userId = resolveUserId();
-const runtime = userId ? getSlot(userId) : null;
+const createOnAccess = action === 'launch' || action === 'setOwnerUserId';
+const runtime = userId ? getSlot(userId, { create: createOnAccess }) : null;
+
+const bindControlHandler = (slotUserId) => {
+  const id = String(slotUserId || '').trim();
+  if (!id) return;
+  store.registerControlHandler(id, async (msg) => {
+    const slot = store.getSlot(id, { create: false });
+    if (!slot?.browser && !slot?.managing) return;
+    if (msg.type === 'leave') {
+      await s({
+        functionName: 'zoomPlaywrightLeave',
+        contextData: { userId: id }
+      }, { functionLookupSubDomain: _.subDomain });
+      return;
+    }
+    if (msg.type === 'cancel' || msg.type === 'forceClose') {
+      slot.cancelRequested = true;
+      await s({
+        functionName: 'zoomPlaywrightRuntime',
+        contextData: {
+          action: 'forceClose',
+          userId: id,
+          phase: msg.phase || 'cancelled',
+          message: msg.message || 'Cancelled by user',
+          skipRecording: msg.skipRecording === true,
+          localOnly: true
+        }
+      }, { functionLookupSubDomain: _.subDomain });
+    }
+  });
+};
 
 const callStore = async (contextData) => {
   const res = await s({
@@ -171,7 +203,11 @@ const closeBrowser = async (slot = runtime, { skipRecording = false, removeSlot 
       const srcPath = await video.path();
       if (!srcPath || !_.fs.existsSync(srcPath)) {
         cleanupLiveVideos(live);
-        if (shouldRemove) store.deleteSlotIfIdle(slot.ownerUserId);
+        if (shouldRemove) {
+          store.unregisterControlHandler(slot.ownerUserId);
+          store.deleteSlotIfIdle(slot.ownerUserId);
+          await store.releaseLease(slot.ownerUserId);
+        }
         return { success: true };
       }
       _.fs.copyFileSync(srcPath, dest);
@@ -183,7 +219,11 @@ const closeBrowser = async (slot = runtime, { skipRecording = false, removeSlot 
 
     if (!size) {
       console.warn('[zoomPlaywrightRuntime] Recording file is empty after save');
-      if (shouldRemove) store.deleteSlotIfIdle(slot.ownerUserId);
+      if (shouldRemove) {
+        store.unregisterControlHandler(slot.ownerUserId);
+        store.deleteSlotIfIdle(slot.ownerUserId);
+        await store.releaseLease(slot.ownerUserId);
+      }
       return { success: true };
     }
 
@@ -205,7 +245,11 @@ const closeBrowser = async (slot = runtime, { skipRecording = false, removeSlot 
   }
   }
 
-  if (shouldRemove) store.deleteSlotIfIdle(slot.ownerUserId);
+  if (shouldRemove) {
+    store.unregisterControlHandler(slot.ownerUserId);
+    store.deleteSlotIfIdle(slot.ownerUserId);
+    await store.releaseLease(slot.ownerUserId);
+  }
   return result;
 };
 
@@ -214,30 +258,43 @@ if (action === 'setOwnerUserId') {
   if (!nextUserId) return { success: false, error: 'userId required' };
   const slot = getSlot(nextUserId);
   slot.cancelRequested = false;
-  return { success: true, data: { ownerUserId: nextUserId, busySlots: countBusySlots(), maxSlots: MAX_SLOTS } };
+  return {
+    success: true,
+    data: {
+      ownerUserId: nextUserId,
+      busySlots: await countBusySlots(),
+      maxSlots: MAX_SLOTS,
+      nodeId: store.nodeId()
+    }
+  };
 }
 
 if (action === 'listSlots') {
-  const slots = store.listSlots();
-  return { success: true, data: { slots, busySlots: countBusySlots(), maxSlots: MAX_SLOTS } };
+  const slots = await store.listClusterSlots();
+  return { success: true, data: { slots, busySlots: slots.length, maxSlots: MAX_SLOTS, nodeId: store.nodeId() } };
 }
 
 if (action === 'get') {
-  if (!runtime) {
+  const clusterBusy = await countBusySlots();
+  const lease = userId ? await store.getLease(userId) : null;
+  if (!runtime || !(runtime.browser || runtime.managing)) {
     return {
       success: true,
       data: {
-        busySlots: countBusySlots(),
+        busySlots: clusterBusy,
         maxSlots: MAX_SLOTS,
-        busy: countBusySlots() > 0,
+        busy: !!(lease || clusterBusy > 0),
         hasBrowser: false,
         hasPage: false,
-        managing: false,
-        ownerUserId: '',
-        jobAction: '',
+        managing: !!lease?.managing,
+        ownerUserId: lease?.userId || '',
+        jobAction: lease?.jobAction || '',
         cancelRequested: false,
         recordVideo: true,
-        admittedCount: 0
+        admittedCount: 0,
+        nodeId: store.nodeId(),
+        leaseNodeId: lease?.nodeId || '',
+        leaseLocal: store.isLeaseOwner(lease)
       }
     };
   }
@@ -253,8 +310,11 @@ if (action === 'get') {
       hasPage: !!runtime.page,
       hasBrowser: !!runtime.browser,
       busy: !!(runtime.browser || runtime.managing),
-      busySlots: countBusySlots(),
-      maxSlots: MAX_SLOTS
+      busySlots: clusterBusy,
+      maxSlots: MAX_SLOTS,
+      nodeId: store.nodeId(),
+      leaseNodeId: lease?.nodeId || store.nodeId(),
+      leaseLocal: true
     }
   };
 }
@@ -264,41 +324,76 @@ if (action === 'closeAll') {
     try { await closeBrowser(slot); } catch (error) {}
   });
   store.clearAllSlots();
-  return { success: true, data: { busySlots: 0, maxSlots: MAX_SLOTS } };
+  return { success: true, data: { busySlots: await countBusySlots(), maxSlots: MAX_SLOTS } };
 }
 
-if (!runtime) {
-  return { success: false, error: 'userId is required for this runtime action' };
-}
-
-if (action === 'setJobAction') {
-  runtime.jobAction = c.jobAction || '';
+if (action === 'publishControl') {
+  await store.publishControl({
+    type: c.type || 'cancel',
+    userId: c.targetUserId || userId,
+    phase: c.phase,
+    message: c.message,
+    skipRecording: c.skipRecording === true
+  });
   return { success: true };
 }
 
 if (action === 'requestCancel') {
-  runtime.cancelRequested = true;
-  runtime.managing = false;
-  stopManageLoops(runtime);
+  const slot = userId ? store.getSlot(userId, { create: false }) : null;
+  if (slot) {
+    slot.cancelRequested = true;
+    slot.managing = false;
+    stopManageLoops(slot);
+  }
+  if (c.localOnly !== true) {
+    await store.publishControl({
+      type: 'cancel',
+      userId,
+      phase: 'cancelled',
+      message: 'Cancelled by user'
+    });
+  }
   return { success: true };
 }
 
-if (action === 'isCancelRequested') {
-  if (runtime.cancelRequested) return { success: true, data: { cancelRequested: true } };
-  try {
-    const secrets = await callStore({ action: 'getSecrets' });
-    const flagged = secrets?.data?.cancelRequested === true;
-    if (flagged) runtime.cancelRequested = true;
-    return { success: true, data: { cancelRequested: flagged } };
-  } catch (error) {
-    return { success: true, data: { cancelRequested: runtime.cancelRequested === true } };
-  }
-}
-
 if (action === 'forceClose') {
-  runtime.cancelRequested = true;
-  await closeBrowser(runtime, { skipRecording: c.skipRecording === true });
-  runtime.cancelRequested = false;
+  const slot = userId ? store.getSlot(userId, { create: false }) : null;
+  const localBrowser = !!(slot?.browser || slot?.managing);
+  if (!localBrowser && c.localOnly !== true) {
+    await store.publishControl({
+      type: 'forceClose',
+      userId,
+      phase: c.phase || 'cancelled',
+      message: c.message || 'Stopped',
+      skipRecording: c.skipRecording === true
+    });
+    await callStore({
+      action: 'saveStatus',
+      cancelRequested: true,
+      leaveRequested: false,
+      managing: false,
+      phase: c.phase || 'cancelled',
+      message: c.message || 'Cancel forwarded to owner node'
+    });
+    return { success: true, forwarded: true };
+  }
+  if (!slot) {
+    await callStore({
+      action: 'saveStatus',
+      cancelRequested: false,
+      leaveRequested: false,
+      managing: false,
+      phase: c.phase || 'cancelled',
+      message: c.message || 'Stopped',
+      lastError: ''
+    });
+    await callStore({ action: 'clearCancel' });
+    await store.releaseLease(userId);
+    return { success: true };
+  }
+  slot.cancelRequested = true;
+  await closeBrowser(slot, { skipRecording: c.skipRecording === true });
+  slot.cancelRequested = false;
   await callStore({
     action: 'saveStatus',
     cancelRequested: false,
@@ -312,19 +407,58 @@ if (action === 'forceClose') {
   return { success: true };
 }
 
+if (action === 'isCancelRequested') {
+  const slot = userId ? store.getSlot(userId, { create: false }) : null;
+  if (slot?.cancelRequested) return { success: true, data: { cancelRequested: true } };
+  try {
+    const secrets = await callStore({ action: 'getSecrets' });
+    const flagged = secrets?.data?.cancelRequested === true;
+    if (flagged && slot) slot.cancelRequested = true;
+    return { success: true, data: { cancelRequested: flagged } };
+  } catch (error) {
+    return { success: true, data: { cancelRequested: slot?.cancelRequested === true } };
+  }
+}
+
+if (!runtime) {
+  return { success: false, error: 'userId is required for this runtime action' };
+}
+
+if (action === 'setJobAction') {
+  runtime.jobAction = c.jobAction || '';
+  await store.refreshLease(userId, { jobAction: runtime.jobAction });
+  return { success: true };
+}
+
 if (action === 'launch') {
   const { chromium } = await import('playwright');
-  if (!runtime.browser && countBusySlots() >= MAX_SLOTS) {
+  const clusterBusy = await countBusySlots();
+  const existingLease = await store.getLease(userId);
+  const ownsLease = store.isLeaseOwner(existingLease);
+  if (!runtime.browser && !ownsLease && clusterBusy >= MAX_SLOTS) {
     throw new Error(`All Playwright slots busy (${MAX_SLOTS}). Cancel another user or wait.`);
   }
+  if (existingLease && !ownsLease) {
+    throw new Error(`Playwright slot owned by another node (${existingLease.nodeId}). Cancel or wait.`);
+  }
+
+  const acquired = await store.acquireLease(userId, {
+    jobAction: runtime.jobAction || '',
+    managing: false
+  });
+  if (!acquired.ok) {
+    throw new Error(acquired.reason || 'Failed to acquire Playwright slot lease');
+  }
+
   runtime.cancelRequested = false;
+  bindControlHandler(userId);
 
   const prefs = await callStore({ action: 'get' });
   runtime.recordVideo = c.recordVideo === false
     ? false
     : prefs?.data?.recordVideo !== false;
 
-  await closeBrowser(runtime, { skipRecording: true });
+  await closeBrowser(runtime, { skipRecording: true, removeSlot: false });
   const headless = process.env.ZOOM_PW_HEADLESS !== 'false';
   runtime.browser = await chromium.launch({
     headless,
@@ -354,7 +488,15 @@ if (action === 'launch') {
   }
   runtime.context = await runtime.browser.newContext(options);
   runtime.page = await runtime.context.newPage();
-  return { success: true, data: { recordVideo: runtime.recordVideo, ownerUserId: runtime.ownerUserId } };
+  await store.refreshLease(userId, { jobAction: runtime.jobAction || '' });
+  return {
+    success: true,
+    data: {
+      recordVideo: runtime.recordVideo,
+      ownerUserId: runtime.ownerUserId,
+      nodeId: store.nodeId()
+    }
+  };
 }
 
 if (action === 'persistSession') {
@@ -394,6 +536,10 @@ if (action === 'stopManageLoops') {
 
 if (action === 'setManaging') {
   runtime.managing = c.managing === true;
+  await store.refreshLease(userId, {
+    jobAction: runtime.jobAction || '',
+    managing: runtime.managing
+  });
   return { success: true };
 }
 

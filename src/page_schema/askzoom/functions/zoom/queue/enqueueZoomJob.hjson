@@ -68,25 +68,20 @@ if (action === 'cancel') {
     }
   }
 
-  // Best-effort force close if this process hosts the runtime (worker will also honor cancel flag)
+  await _.askzoomPlaywright.ensureControlBus();
+  await _.askzoomPlaywright.publishControl({
+    type: 'cancel',
+    userId,
+    phase: 'cancelled',
+    message: 'Cancelled by user'
+  });
   await s({
     functionName: 'zoomPlaywrightRuntime',
-    contextData: { action: 'requestCancel', userId }
-  }, { functionLookupSubDomain: _.subDomain }).catch(() => {});
-
-  await queue.add(
-    'cancel',
-    { action: 'cancel', userId },
-    {
-      jobId: `zoom-cancel-${userId}-${Date.now()}`,
-      attempts: 1,
-      removeOnComplete: 20,
-      removeOnFail: 20
-    }
-  );
+    contextData: { action: 'requestCancel', userId, localOnly: true }
+  }, { functionLookupSubDomain: _.subDomain });
 
   await queue.close();
-  return { success: true, message: 'Cancel requested. Worker will stop and close the browser.' };
+  return { success: true, message: 'Cancel requested. Owner node will stop and close the browser.' };
 }
 
 try {

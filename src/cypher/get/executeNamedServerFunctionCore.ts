@@ -87,6 +87,20 @@ import {
   getSlot as getAskzoomPlaywrightSlot,
   listSlots as listAskzoomPlaywrightSlots,
 } from "~/lib/zoom/askzoomPlaywrightStore";
+import {
+  acquireAskzoomLease,
+  countClusterBusySlots,
+  ensureAskzoomControlBus,
+  getAskzoomLease,
+  getAskzoomNodeId,
+  isAskzoomLeaseOwner,
+  listClusterSlots,
+  publishAskzoomControl,
+  refreshAskzoomLease,
+  registerAskzoomControlHandler,
+  releaseAskzoomLease,
+  unregisterAskzoomControlHandler,
+} from "~/lib/zoom/askzoomPlaywrightCluster";
 // Enhanced server function utilities
 import { errors, isAppError, errorToResponse } from "~/lib/utils/errorClasses";
 import {
@@ -605,6 +619,33 @@ export async function executeNamedServerFunctionCore(
           fn: Parameters<typeof forEachAskzoomPlaywrightSlot>[1],
         ) => forEachAskzoomPlaywrightSlot(subDomain, fn),
         createEmptySlot: createAskzoomPlaywrightEmptySlot,
+        // Cluster-wide Redis leases + pub/sub (safe with NITRO_CLUSTER_WORKERS > 1)
+        nodeId: () => getAskzoomNodeId(),
+        ensureControlBus: () => ensureAskzoomControlBus(subDomain),
+        acquireLease: (
+          userId: string,
+          meta?: { jobAction?: string; managing?: boolean },
+        ) => acquireAskzoomLease(subDomain, userId, meta),
+        refreshLease: (
+          userId: string,
+          patch?: { jobAction?: string; managing?: boolean },
+        ) => refreshAskzoomLease(subDomain, userId, patch),
+        releaseLease: (userId: string) =>
+          releaseAskzoomLease(subDomain, userId),
+        getLease: (userId: string) => getAskzoomLease(subDomain, userId),
+        isLeaseOwner: (lease: Parameters<typeof isAskzoomLeaseOwner>[0]) =>
+          isAskzoomLeaseOwner(lease),
+        countClusterBusySlots: () => countClusterBusySlots(subDomain),
+        listClusterSlots: () => listClusterSlots(subDomain),
+        publishControl: (
+          message: Parameters<typeof publishAskzoomControl>[1],
+        ) => publishAskzoomControl(subDomain, message),
+        registerControlHandler: (
+          userId: string,
+          handler: Parameters<typeof registerAskzoomControlHandler>[2],
+        ) => registerAskzoomControlHandler(subDomain, userId, handler),
+        unregisterControlHandler: (userId: string) =>
+          unregisterAskzoomControlHandler(subDomain, userId),
       },
       // driver: (await getDriver()),
       // Admin/impersonation helper functions (platform-level)

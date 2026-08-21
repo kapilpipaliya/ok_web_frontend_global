@@ -340,7 +340,7 @@ Last job: ${status.lastJobMetrics
   ? `${status.lastJobMetrics.action || '-'} ${status.lastJobMetrics.ok === false ? 'fail' : 'ok'} ${status.lastJobMetrics.durationMs || 0}ms admits=${status.lastJobMetrics.admittedCount || 0} rec=${f.formatBytes(status.lastJobMetrics.recordingBytes || 0)} slots=${status.lastJobMetrics.busySlots || 0}/${status.lastJobMetrics.maxSlots || status.runtime?.maxSlots || 0}`
   : '-'}
 Record video: ${status.recordVideo === false ? 'off' : 'on'}
-Browser busy: ${status.runtime?.busy ? `yes (${status.runtime?.ownerUserId || '-'})` : 'no'} slots ${status.runtime?.busySlots || 0}/${status.runtime?.maxSlots || 0}
+Browser busy: ${status.runtime?.busy ? `yes (${status.runtime?.ownerUserId || '-'})` : 'no'} slots ${status.runtime?.busySlots || 0}/${status.runtime?.maxSlots || 0} node ${status.runtime?.leaseNodeId || status.runtime?.nodeId || '-'}
 Error: ${status.lastError || '-'}
 Queue active/waiting/failed: ${status.queueCounts?.active || 0}/${status.queueCounts?.waiting || 0}/${status.queueCounts?.failed || 0}
 ${status.workerHint || ''}`
