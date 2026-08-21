@@ -9,6 +9,7 @@
         body:
           '''
 const action = c.action || 'get';
+const HISTORY_LIMIT = 5;
 
 if (!globalThis.__askzoomPlaywright) {
   globalThis.__askzoomPlaywright = {
@@ -20,7 +21,8 @@ if (!globalThis.__askzoomPlaywright) {
     managing: false,
     admittedCount: 0,
     jobAction: '',
-    leaving: false
+    leaving: false,
+    ownerUserId: ''
   };
 }
 
@@ -29,7 +31,10 @@ const runtime = globalThis.__askzoomPlaywright;
 const callStore = async (contextData) => {
   const res = await s({
     functionName: 'zoomSettingStore',
-    contextData
+    contextData: {
+      userId: runtime.ownerUserId || c.userId || undefined,
+      ...contextData
+    }
   }, { functionLookupSubDomain: _.subDomain });
   if (res.error) throw new Error(res.error);
   return res.result || res;
@@ -39,10 +44,51 @@ const setStatus = async (patch) => {
   await callStore({ action: 'saveStatus', ...patch });
 };
 
-const recordingDir = () => {
-  const dir = _.path.join(_.os.tmpdir(), 'askzoom-playwright', String(_.subDomain || 'default'));
-  _.fs.mkdirSync(dir, { recursive: true });
-  return dir;
+const recordingDirs = () => {
+  const userKey = String(runtime.ownerUserId || c.userId || 'default').replace(/[^a-zA-Z0-9._-]+/g, '_');
+  const base = _.path.join(
+    _.os.homedir(),
+    'UploadFiles',
+    String(_.subDomain || 'default'),
+    'askzoom-playwright',
+    userKey
+  );
+  const live = _.path.join(base, 'live');
+  const saved = _.path.join(base, 'saved');
+  _.fs.mkdirSync(live, { recursive: true });
+  _.fs.mkdirSync(saved, { recursive: true });
+  return { base, live, saved };
+};
+
+const cleanupLiveVideos = (liveDir, keepPath = '') => {
+  try {
+    for (const name of _.fs.readdirSync(liveDir)) {
+      if (!name.endsWith('.webm')) continue;
+      const full = _.path.join(liveDir, name);
+      if (keepPath && _.path.resolve(full) === _.path.resolve(keepPath)) continue;
+      try { _.fs.unlinkSync(full); } catch (error) {}
+    }
+  } catch (error) {}
+};
+
+const pruneSavedHistory = (savedDir, keepPaths = []) => {
+  try {
+    const keep = new Set(keepPaths.map((p) => _.path.resolve(p)));
+    const files = _.fs.readdirSync(savedDir)
+      .filter((name) => name.endsWith('.webm'))
+      .map((name) => {
+        const full = _.path.join(savedDir, name);
+        const st = _.fs.statSync(full);
+        return { full, mtime: st.mtimeMs, size: st.size };
+      })
+      .filter((f) => f.size > 0)
+      .sort((a, b) => b.mtime - a.mtime);
+
+    for (const file of files.slice(HISTORY_LIMIT)) {
+      if (keep.has(_.path.resolve(file.full))) continue;
+      try { _.fs.unlinkSync(file.full); } catch (error) {}
+    }
+  } catch (error) {}
 };
 
 const stopManageLoops = () => {
@@ -69,21 +115,66 @@ const closeBrowser = async () => {
 
   if (!video) return { success: true };
   try {
-    const srcPath = await video.path();
-    if (!srcPath || !_.fs.existsSync(srcPath)) return { success: true };
-    const dest = _.path.join(recordingDir(), 'last.webm');
-    _.fs.copyFileSync(srcPath, dest);
+    const { live, saved } = recordingDirs();
+    const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const actionName = String(runtime.jobAction || 'zoom').replace(/[^a-zA-Z0-9._-]+/g, '_');
+    const recordingId = `rec_${Date.now()}`;
+    const dest = _.path.join(saved, `${stamp}-${actionName}.webm`);
+    const latest = _.path.join(saved, 'latest.webm');
+
+    if (typeof video.saveAs === 'function') {
+      await video.saveAs(dest);
+    } else {
+      const srcPath = await video.path();
+      if (!srcPath || !_.fs.existsSync(srcPath)) return { success: true };
+      _.fs.copyFileSync(srcPath, dest);
+    }
+
+    let size = _.fs.existsSync(dest) ? _.fs.statSync(dest).size : 0;
+    if (!size) {
+      const files = _.fs.readdirSync(live)
+        .filter((name) => name.endsWith('.webm'))
+        .map((name) => {
+          const full = _.path.join(live, name);
+          return { full, mtime: _.fs.statSync(full).mtimeMs, size: _.fs.statSync(full).size };
+        })
+        .filter((f) => f.size > 0)
+        .sort((a, b) => b.mtime - a.mtime);
+      if (files[0]) {
+        _.fs.copyFileSync(files[0].full, dest);
+        size = _.fs.statSync(dest).size;
+      }
+    }
+
+    cleanupLiveVideos(live);
+    if (!size) {
+      console.warn('[zoomPlaywrightRuntime] Recording file is empty after save');
+      return { success: true };
+    }
+
+    try { _.fs.copyFileSync(dest, latest); } catch (error) {}
+
+    const recordedAt = new Date().toISOString();
     await setStatus({
       hasRecording: true,
-      lastRecordingAt: new Date().toISOString(),
+      lastRecordingAt: recordedAt,
       lastRecordingAction: runtime.jobAction || '',
-      lastRecordingPath: dest
+      lastRecordingPath: dest,
+      lastRecordingSize: size,
+      lastRecordingId: recordingId
     });
+
+    pruneSavedHistory(saved, [dest, latest]);
   } catch (error) {
     console.warn('[zoomPlaywrightRuntime] Failed to save recording', error.message);
   }
   return { success: true };
 };
+
+if (action === 'setOwnerUserId') {
+  runtime.ownerUserId = String(c.userId || '').trim();
+  return { success: true, data: { ownerUserId: runtime.ownerUserId } };
+}
 
 if (action === 'get') {
   return {
@@ -92,6 +183,7 @@ if (action === 'get') {
       managing: runtime.managing,
       admittedCount: runtime.admittedCount,
       jobAction: runtime.jobAction,
+      ownerUserId: runtime.ownerUserId || '',
       hasPage: !!runtime.page,
       hasBrowser: !!runtime.browser
     }
@@ -105,18 +197,21 @@ if (action === 'setJobAction') {
 
 if (action === 'launch') {
   const { chromium } = await import('playwright');
+  if (c.userId) runtime.ownerUserId = String(c.userId).trim();
   await closeBrowser();
   const headless = process.env.ZOOM_PW_HEADLESS !== 'false';
   runtime.browser = await chromium.launch({
     headless,
     args: ['--disable-blink-features=AutomationControlled', '--no-sandbox']
   });
+  const { live } = recordingDirs();
+  cleanupLiveVideos(live);
   const options = {
     viewport: { width: 1280, height: 720 },
     locale: 'en-US',
     userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
     recordVideo: {
-      dir: recordingDir(),
+      dir: live,
       size: { width: 1280, height: 720 }
     }
   };

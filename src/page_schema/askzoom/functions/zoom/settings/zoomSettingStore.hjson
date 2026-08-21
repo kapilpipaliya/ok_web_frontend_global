@@ -5,29 +5,11 @@
       L: Function
       P: {
         key: zoomSettingStore
-        description: Read and write Zoom credentials, session, and worker status on GlobalSetting
+        description: Read and write per-user Zoom credentials, session, and worker status on ZoomUserSetting
         body:
           '''
 const action = c.action || 'get';
-
-const ensureSetting = async (session) => {
-  await session.run(`
-    MERGE (g:GlobalSetting {key: 'Default'})
-    ON CREATE SET g.createdAt = datetime(), g.name = 'Default'
-    SET g.updatedAt = datetime()
-    RETURN g
-  `);
-};
-
-const getSetting = async (session) => {
-  await ensureSetting(session);
-  const result = await session.run(`
-    MATCH (g:GlobalSetting {key: 'Default'})
-    RETURN g
-  `);
-  const node = result.records[0]?.get('g');
-  return node ? _.convertNodeToJson(node) : null;
-};
+const HISTORY_LIMIT = 5;
 
 const encryptSecret = (value) => {
   if (!value) return '';
@@ -48,41 +30,121 @@ const decryptSecret = (value) => {
   }
 };
 
+const parseHistory = (raw) => {
+  try {
+    const parsed = typeof raw === 'string' ? JSON.parse(raw || '[]') : raw;
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    return [];
+  }
+};
+
+const resolveOwnerUserId = async () => {
+  if (c.userId) return String(c.userId).trim();
+  const runtimeUserId = globalThis.__askzoomPlaywright?.ownerUserId;
+  if (runtimeUserId) return String(runtimeUserId).trim();
+  try {
+    const user = await _.getUserFromSession();
+    if (user?.P?.uuid) return String(user.P.uuid).trim();
+  } catch (error) {
+    // worker / no HTTP session
+  }
+  return '';
+};
+
+const ensureUserSetting = async (session, userId) => {
+  const result = await session.run(`
+    MATCH (u:User {uuid: $userId})
+    MERGE (u)-[:HasZoomSetting]->(z:ZoomUserSetting)
+    ON CREATE SET z.createdAt = datetime()
+    SET z.updatedAt = datetime()
+    RETURN z
+  `, { userId });
+  const node = result.records[0]?.get('z');
+  if (!node) {
+    throw new Error('User not found for Zoom settings');
+  }
+  return _.convertNodeToJson(node);
+};
+
+const OWNER_MATCH = `MATCH (u:User {uuid: $userId})-[:HasZoomSetting]->(z:ZoomUserSetting)`;
+
+const fileSizeIfExists = (filePath) => {
+  try {
+    if (!filePath || !_.fs.existsSync(filePath)) return 0;
+    return Number(_.fs.statSync(filePath).size || 0);
+  } catch (error) {
+    return 0;
+  }
+};
+
+const buildPublicData = (p, { includeScreenshot = false, userId = '' } = {}) => {
+  const history = parseHistory(p.zoomRecordingHistoryJson)
+    .filter((item) => item && item.path)
+    .map((item) => ({
+      id: item.id || '',
+      action: item.action || '',
+      at: item.at || '',
+      size: Number(item.size || 0),
+      path: item.path
+    }))
+    .filter((item) => item.size > 0 || fileSizeIfExists(item.path) > 0);
+
+  const lastPath = p.zoomLastRecordingPath || history[0]?.path || '';
+  const lastSize = Number(p.zoomLastRecordingSize || 0) || fileSizeIfExists(lastPath) || history[0]?.size || 0;
+  const hasRecording = lastSize > 0 && !!lastPath;
+
+  return {
+    userId: userId || '',
+    email: p.zoomEmail || '',
+    hasPassword: !!p.zoomPasswordEncrypted,
+    hasMeetingPassword: !!p.zoomMeetingPasswordEncrypted,
+    displayName: p.zoomDisplayName || '',
+    meetingUrl: p.zoomMeetingUrl || '',
+    loggedIn: p.zoomLoggedIn === true || p.zoomLoggedIn === 'true',
+    managing: p.zoomManaging === true || p.zoomManaging === 'true',
+    leaveRequested: p.zoomLeaveRequested === true || p.zoomLeaveRequested === 'true',
+    phase: p.zoomPhase || 'idle',
+    message: p.zoomMessage || '',
+    lastError: p.zoomLastError || '',
+    lastScreenshot: includeScreenshot ? (p.zoomLastScreenshot || '') : '',
+    lastScreenshotAt: p.zoomLastScreenshotAt || '',
+    hasRecording,
+    lastRecordingAt: p.zoomLastRecordingAt || history[0]?.at || '',
+    lastRecordingAction: p.zoomLastRecordingAction || history[0]?.action || '',
+    lastRecordingPath: hasRecording ? lastPath : '',
+    lastRecordingSize: hasRecording ? lastSize : 0,
+    lastRecordingId: hasRecording ? (p.zoomLastRecordingId || history[0]?.id || '') : '',
+    recordingHistory: history.slice(0, HISTORY_LIMIT).map(({ path, ...rest }) => rest),
+    admittedCount: Number(p.zoomAdmittedCount || 0),
+    hasSession: !!p.zoomStorageState,
+    updatedAt: p.zoomUpdatedAt || p.updatedAt || ''
+  };
+};
+
+const ownerUserId = await resolveOwnerUserId();
+if (!ownerUserId) {
+  return { success: false, error: 'Sign in required for Zoom settings' };
+}
+
+const setting = await ensureUserSetting(_.session, ownerUserId);
+const p = setting?.P || {};
+
 if (action === 'get') {
-  const vertex = await getSetting(_.session);
-  const p = vertex?.P || {};
   return {
     success: true,
-    data: {
-      email: p.zoomEmail || '',
-      hasPassword: !!p.zoomPasswordEncrypted,
-      hasMeetingPassword: !!p.zoomMeetingPasswordEncrypted,
-      displayName: p.zoomDisplayName || '',
-      meetingUrl: p.zoomMeetingUrl || '',
-      loggedIn: p.zoomLoggedIn === true || p.zoomLoggedIn === 'true',
-      managing: p.zoomManaging === true || p.zoomManaging === 'true',
-      leaveRequested: p.zoomLeaveRequested === true || p.zoomLeaveRequested === 'true',
-      phase: p.zoomPhase || 'idle',
-      message: p.zoomMessage || '',
-      lastError: p.zoomLastError || '',
-      lastScreenshot: c.includeScreenshot ? (p.zoomLastScreenshot || '') : '',
-      lastScreenshotAt: p.zoomLastScreenshotAt || '',
-      hasRecording: !!(p.zoomLastRecordingPath || p.zoomHasRecording),
-      lastRecordingAt: p.zoomLastRecordingAt || '',
-      lastRecordingAction: p.zoomLastRecordingAction || '',
-      admittedCount: Number(p.zoomAdmittedCount || 0),
-      hasSession: !!p.zoomStorageState,
-      updatedAt: p.zoomUpdatedAt || ''
-    }
+    data: buildPublicData(p, {
+      includeScreenshot: c.includeScreenshot === true,
+      userId: ownerUserId
+    })
   };
 }
 
 if (action === 'getSecrets') {
-  const vertex = await getSetting(_.session);
-  const p = vertex?.P || {};
   return {
     success: true,
     data: {
+      userId: ownerUserId,
       email: p.zoomEmail || '',
       password: decryptSecret(p.zoomPasswordEncrypted),
       meetingPassword: decryptSecret(p.zoomMeetingPasswordEncrypted),
@@ -105,49 +167,44 @@ if (action === 'saveCredentials') {
     return { success: false, error: 'Zoom email is required' };
   }
 
-  await ensureSetting(_.session);
-
   const sets = [
-    'g.zoomEmail = $email',
-    'g.zoomDisplayName = $displayName',
-    'g.zoomMeetingUrl = $meetingUrl',
-    'g.zoomUpdatedAt = datetime()'
+    'z.zoomEmail = $email',
+    'z.zoomDisplayName = $displayName',
+    'z.zoomMeetingUrl = $meetingUrl',
+    'z.updatedAt = datetime()'
   ];
-  const params = { email, displayName, meetingUrl };
+  const params = { userId: ownerUserId, email, displayName, meetingUrl };
 
   if (password !== undefined && password !== null && String(password).length > 0) {
-    sets.push('g.zoomPasswordEncrypted = $passwordEncrypted');
+    sets.push('z.zoomPasswordEncrypted = $passwordEncrypted');
     params.passwordEncrypted = encryptSecret(String(password));
   }
 
   if (meetingPassword !== undefined && meetingPassword !== null) {
-    if (String(meetingPassword).length > 0) {
-      sets.push('g.zoomMeetingPasswordEncrypted = $meetingPasswordEncrypted');
-      params.meetingPasswordEncrypted = encryptSecret(String(meetingPassword));
-    } else {
-      sets.push('g.zoomMeetingPasswordEncrypted = $meetingPasswordEncrypted');
-      params.meetingPasswordEncrypted = '';
-    }
+    sets.push('z.zoomMeetingPasswordEncrypted = $meetingPasswordEncrypted');
+    params.meetingPasswordEncrypted = String(meetingPassword).length > 0
+      ? encryptSecret(String(meetingPassword))
+      : '';
   }
 
   await _.session.run(`
-    MATCH (g:GlobalSetting {key: 'Default'})
+    ${OWNER_MATCH}
     SET ${sets.join(', ')}
-    RETURN g
+    RETURN z
   `, params);
 
   return { success: true, message: 'Zoom credentials saved' };
 }
 
 if (action === 'saveSession') {
-  await ensureSetting(_.session);
   await _.session.run(`
-    MATCH (g:GlobalSetting {key: 'Default'})
-    SET g.zoomStorageState = $storageState,
-        g.zoomLoggedIn = $loggedIn,
-        g.zoomUpdatedAt = datetime()
-    RETURN g
+    ${OWNER_MATCH}
+    SET z.zoomStorageState = $storageState,
+        z.zoomLoggedIn = $loggedIn,
+        z.updatedAt = datetime()
+    RETURN z
   `, {
+    userId: ownerUserId,
     storageState: c.storageState || '',
     loggedIn: c.loggedIn === true
   });
@@ -155,7 +212,26 @@ if (action === 'saveSession') {
 }
 
 if (action === 'saveStatus') {
-  await ensureSetting(_.session);
+  let historyJson = undefined;
+  if (c.recordingHistory !== undefined) {
+    historyJson = JSON.stringify(
+      (Array.isArray(c.recordingHistory) ? c.recordingHistory : [])
+        .slice(0, HISTORY_LIMIT)
+    );
+  } else if (c.lastRecordingPath && Number(c.lastRecordingSize || 0) > 0) {
+    const current = parseHistory(p.zoomRecordingHistoryJson);
+    const entry = {
+      id: c.lastRecordingId || `rec_${Date.now()}`,
+      path: c.lastRecordingPath,
+      action: c.lastRecordingAction || '',
+      at: c.lastRecordingAt || new Date().toISOString(),
+      size: Number(c.lastRecordingSize || 0)
+    };
+    historyJson = JSON.stringify(
+      [entry, ...current.filter((item) => item.path !== entry.path)].slice(0, HISTORY_LIMIT)
+    );
+  }
+
   const fields = {
     zoomPhase: c.phase,
     zoomMessage: c.message,
@@ -169,58 +245,88 @@ if (action === 'saveStatus') {
     zoomLastRecordingAt: c.lastRecordingAt,
     zoomLastRecordingAction: c.lastRecordingAction,
     zoomLastRecordingPath: c.lastRecordingPath,
-    zoomAdmittedCount: c.admittedCount,
-    zoomUpdatedAt: true
+    zoomLastRecordingSize: c.lastRecordingSize,
+    zoomLastRecordingId: c.lastRecordingId,
+    zoomRecordingHistoryJson: historyJson,
+    zoomAdmittedCount: c.admittedCount
   };
 
-  const sets = ['g.zoomUpdatedAt = datetime()'];
-  const params = {};
+  const sets = ['z.updatedAt = datetime()'];
+  const params = { userId: ownerUserId };
   for (const [key, value] of Object.entries(fields)) {
-    if (key === 'zoomUpdatedAt') continue;
     if (value === undefined) continue;
-    const param = key;
-    sets.push(`g.${key} = $${param}`);
-    params[param] = value;
+    sets.push(`z.${key} = $${key}`);
+    params[key] = value;
   }
 
   await _.session.run(`
-    MATCH (g:GlobalSetting {key: 'Default'})
+    ${OWNER_MATCH}
     SET ${sets.join(', ')}
-    RETURN g
+    RETURN z
   `, params);
 
   return { success: true };
 }
 
 if (action === 'requestLeave') {
-  await ensureSetting(_.session);
   await _.session.run(`
-    MATCH (g:GlobalSetting {key: 'Default'})
-    SET g.zoomLeaveRequested = true,
-        g.zoomManaging = false,
-        g.zoomPhase = 'leaving',
-        g.zoomMessage = 'Leaving meeting...',
-        g.zoomUpdatedAt = datetime()
-    RETURN g
-  `);
+    ${OWNER_MATCH}
+    SET z.zoomLeaveRequested = true,
+        z.zoomManaging = false,
+        z.zoomPhase = 'leaving',
+        z.zoomMessage = 'Leaving meeting...',
+        z.updatedAt = datetime()
+    RETURN z
+  `, { userId: ownerUserId });
   return { success: true, message: 'Leave requested. Session will stay logged in.' };
 }
 
 if (action === 'clearSession') {
-  await ensureSetting(_.session);
   await _.session.run(`
-    MATCH (g:GlobalSetting {key: 'Default'})
-    SET g.zoomStorageState = '',
-        g.zoomLoggedIn = false,
-        g.zoomManaging = false,
-        g.zoomLeaveRequested = false,
-        g.zoomPhase = 'logged_out',
-        g.zoomMessage = 'Logged out',
-        g.zoomLastScreenshot = '',
-        g.zoomUpdatedAt = datetime()
-    RETURN g
-  `);
+    ${OWNER_MATCH}
+    SET z.zoomStorageState = '',
+        z.zoomLoggedIn = false,
+        z.zoomManaging = false,
+        z.zoomLeaveRequested = false,
+        z.zoomPhase = 'logged_out',
+        z.zoomMessage = 'Logged out',
+        z.zoomLastScreenshot = '',
+        z.updatedAt = datetime()
+    RETURN z
+  `, { userId: ownerUserId });
   return { success: true };
+}
+
+if (action === 'getRecordingPath') {
+  const data = buildPublicData(p, { userId: ownerUserId });
+  const recordingId = String(c.recordingId || '').trim();
+  const history = parseHistory(p.zoomRecordingHistoryJson);
+  let item = null;
+  if (recordingId) {
+    item = history.find((entry) => entry.id === recordingId) || null;
+  }
+  if (!item && data.lastRecordingPath) {
+    item = {
+      id: data.lastRecordingId,
+      path: data.lastRecordingPath,
+      action: data.lastRecordingAction,
+      at: data.lastRecordingAt,
+      size: data.lastRecordingSize
+    };
+  }
+  if (!item?.path || !(Number(item.size || 0) > 0 || fileSizeIfExists(item.path) > 0)) {
+    return { success: false, error: 'No Playwright recording found' };
+  }
+  return {
+    success: true,
+    data: {
+      path: item.path,
+      action: item.action || '',
+      at: item.at || '',
+      size: Number(item.size || fileSizeIfExists(item.path) || 0),
+      id: item.id || ''
+    }
+  };
 }
 
 return { success: false, error: `Unknown action: ${action}` };

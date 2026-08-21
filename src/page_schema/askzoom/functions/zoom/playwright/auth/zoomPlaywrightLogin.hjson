@@ -5,7 +5,7 @@
       L: Function
       P: {
         key: zoomPlaywrightLogin
-        description: Playwright Zoom login; saves session on GlobalSetting
+        description: Playwright Zoom login; saves session on ZoomUserSetting
         body:
           '''
 const helpersRes = await s({

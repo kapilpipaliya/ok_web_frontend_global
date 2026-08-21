@@ -15,9 +15,15 @@ if (!allowed.includes(action)) {
   return { success: false, error: 'action must be login, logout, manage, or leave' };
 }
 
+const sessionUser = await _.getUserFromSession();
+const userId = String(sessionUser?.P?.uuid || c.userId || '').trim();
+if (!userId) {
+  return { success: false, error: 'Sign in required to queue Zoom jobs' };
+}
+
 const settingsResult = await s({
   functionName: 'zoomSettingStore',
-  contextData: { action: 'get' }
+  contextData: { action: 'get', userId }
 });
 const settings = settingsResult.result?.data || settingsResult.data || {};
 
@@ -41,7 +47,7 @@ if (action === 'manage' && !meetingUrl) {
 if (action === 'leave') {
   await s({
     functionName: 'zoomSettingStore',
-    contextData: { action: 'requestLeave' }
+    contextData: { action: 'requestLeave', userId }
   });
 }
 
@@ -50,6 +56,7 @@ if (action === 'manage') {
     functionName: 'zoomSettingStore',
     contextData: {
       action: 'saveStatus',
+      userId,
       phase: 'queued',
       message: 'Manage job queued',
       lastError: '',
@@ -64,6 +71,7 @@ if (action === 'login') {
     functionName: 'zoomSettingStore',
     contextData: {
       action: 'saveStatus',
+      userId,
       phase: 'queued',
       message: 'Login job queued',
       lastError: ''
@@ -81,7 +89,7 @@ if (!helpers.result?.success) {
 }
 
 const queue = helpers.result.data.createZoomQueue();
-const jobId = `zoom-${action}`;
+const jobId = `zoom-${action}-${userId}`;
 const existing = await queue.getJob(jobId);
 if (existing) {
   const state = await existing.getState();
@@ -102,6 +110,7 @@ const job = await queue.add(
   action,
   {
     action,
+    userId,
     meetingUrl,
     displayName: String(c.displayName || settings.displayName || '').trim()
   },

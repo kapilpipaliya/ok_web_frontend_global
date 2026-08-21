@@ -61,28 +61,33 @@ let worker;
 try {
   worker = new Worker(queueName, async (job) => {
     const action = job.data?.action || job.name;
-    await logMessage('info', `Zoom job started: ${action}`, { jobId: job.id });
+    const userId = String(job.data?.userId || '').trim();
+    if (!userId) throw new Error('Zoom job missing userId');
+    await runAction('zoomPlaywrightRuntime', { action: 'setOwnerUserId', userId });
+    await logMessage('info', `Zoom job started: ${action}`, { jobId: job.id, userId });
     try {
       if (action === 'login') {
-        await runAction('zoomPlaywrightLogin');
+        await runAction('zoomPlaywrightLogin', { userId });
       } else if (action === 'logout') {
-        await runAction('zoomPlaywrightLogout');
+        await runAction('zoomPlaywrightLogout', { userId });
       } else if (action === 'manage') {
         await runAction('zoomPlaywrightManage', {
+          userId,
           meetingUrl: job.data?.meetingUrl,
           displayName: job.data?.displayName
         });
       } else if (action === 'leave') {
-        await runAction('zoomPlaywrightLeave');
+        await runAction('zoomPlaywrightLeave', { userId });
       } else {
         throw new Error(`Unknown Zoom job action: ${action}`);
       }
-      await logMessage('info', `Zoom job finished: ${action}`, { jobId: job.id });
+      await logMessage('info', `Zoom job finished: ${action}`, { jobId: job.id, userId });
     } catch (error) {
       await s({
         functionName: 'zoomSettingStore',
         contextData: {
           action: 'saveStatus',
+          userId,
           phase: 'error',
           lastError: error.message,
           message: error.message
@@ -90,11 +95,11 @@ try {
       }, { functionLookupSubDomain: _.subDomain });
       await s({
         functionName: 'zoomPlaywrightRuntime',
-        contextData: { action: 'captureScreenshot' }
+        contextData: { action: 'captureScreenshot', userId }
       }, { functionLookupSubDomain: _.subDomain }).catch(() => {});
       await s({
         functionName: 'zoomPlaywrightRuntime',
-        contextData: { action: 'close' }
+        contextData: { action: 'close', userId }
       }, { functionLookupSubDomain: _.subDomain }).catch(() => {});
       throw error;
     }

@@ -36,11 +36,19 @@ const logout = async () => {
 };
 
 let statusTimer = null;
+const formatBytes = (bytes) => {
+  const n = Number(bytes || 0);
+  if (!n) return '0 B';
+  if (n < 1024) return `${n} B`;
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+  return `${(n / (1024 * 1024)).toFixed(1)} MB`;
+};
 return {
   busy,
   status,
   loadStatus,
   logout,
+  formatBytes,
   startPolling: () => {
     loadStatus();
     if (statusTimer) clearInterval(statusTimer);
@@ -88,7 +96,7 @@ return {
         displayOrder: 2
         componentName: Html
         css: "return `._id { color: ${t.var.color.text_light_400}; margin: 0 0 1.25rem; line-height: 1.5; }`;"
-        props: "return { as: 'p', text: 'Queues Playwright to sign out of Zoom and clears the saved login session on GlobalSetting.' };"
+        props: "return { as: 'p', text: 'Queues Playwright to sign out of Zoom and clears the saved login session on ZoomUserSetting.' };"
       }
     }
     {
@@ -135,7 +143,9 @@ Message: ${status.message || '-'}
 Logged in: ${status.loggedIn ? 'yes' : 'no'}
 Managing: ${status.managing ? 'yes' : 'no'}
 Error: ${status.lastError || '-'}
-Recording: ${status.hasRecording ? (status.lastRecordingAction || 'saved') : 'none'}
+Recording: ${status.hasRecording
+  ? `${status.lastRecordingAction || 'saved'} (${f.formatBytes(status.lastRecordingSize || 0)})`
+  : 'none'}
 Queue active/waiting: ${status.queueCounts?.active || 0}/${status.queueCounts?.waiting || 0}`
   : 'Loading status...';
 return { as: 'pre', text };
@@ -155,9 +165,33 @@ const status = f.status();
 return {
   as: 'h2',
   text: status?.hasRecording
-    ? `Playwright recording (${status.lastRecordingAction || 'last run'})`
+    ? `Playwright recording (${status.lastRecordingAction || 'last run'} · ${f.formatBytes(status.lastRecordingSize || 0)})`
     : 'Playwright recording',
   hide: () => !f.status()?.hasRecording
+};
+'''
+      }
+    }
+    {
+      id: "7b"
+      L: Attr
+      P: {
+        displayOrder: 6
+        componentName: Button
+        props:
+          '''
+const status = f.status();
+return {
+  text: 'Download recording',
+  variant: 'secondary',
+  hide: () => !status?.hasRecording,
+  onClick: () => {
+    const stamp = status?.lastRecordingAt || '';
+    const id = status?.lastRecordingId || '';
+    const qs = new URLSearchParams({ download: '1', t: stamp });
+    if (id) qs.set('id', id);
+    window.open(`/api/zoom/recording?${qs.toString()}`, '_blank');
+  }
 };
 '''
       }
@@ -166,7 +200,7 @@ return {
       id: "8"
       L: Attr
       P: {
-        displayOrder: 6
+        displayOrder: 7
         componentName: Html
         css:
           '''
@@ -183,12 +217,59 @@ return `._id {
           '''
 const status = f.status();
 const stamp = status?.lastRecordingAt || '';
+const id = status?.lastRecordingId || '';
+const qs = new URLSearchParams({ t: stamp });
+if (id) qs.set('id', id);
 return {
   as: 'video',
-  src: status?.hasRecording ? `/api/zoom/recording?t=${encodeURIComponent(stamp)}` : '',
+  src: status?.hasRecording ? `/api/zoom/recording?${qs.toString()}` : '',
   controls: true,
   playsinline: true,
   hide: () => !f.status()?.hasRecording
+};
+'''
+      }
+    }
+    {
+      id: "8b"
+      L: Attr
+      P: {
+        displayOrder: 8
+        componentName: Html
+        css: "return `._id { margin-top: 1rem; font-weight: 600; }`;"
+        props: "return { as: 'h3', text: 'Recording history', hide: () => !(f.status()?.recordingHistory || []).length };"
+      }
+    }
+    {
+      id: "8c"
+      L: Attr
+      P: {
+        displayOrder: 9
+        componentName: Html
+        css:
+          '''
+return `._id {
+  margin-top: 0.5rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid ${t.var.color.border};
+  border-radius: 0.5rem;
+  white-space: pre-wrap;
+  font-size: 0.85rem;
+}`;
+'''
+        props:
+          '''
+const history = f.status()?.recordingHistory || [];
+const text = history.map((item, index) => {
+  const label = item.action || 'zoom';
+  const when = item.at || '-';
+  const size = f.formatBytes(item.size || 0);
+  return `${index + 1}. ${label} · ${size} · ${when} · id=${item.id || '-'}`;
+}).join('\\n');
+return {
+  as: 'pre',
+  text: text || 'No history',
+  hide: () => !history.length
 };
 '''
       }
@@ -240,10 +321,28 @@ return {
       E: "7"
     }
     {
+      id: e7b
+      T: Attr
+      S: "2"
+      E: "7b"
+    }
+    {
       id: e8
       T: Attr
       S: "2"
       E: "8"
+    }
+    {
+      id: e8b
+      T: Attr
+      S: "2"
+      E: "8b"
+    }
+    {
+      id: e8c
+      T: Attr
+      S: "2"
+      E: "8c"
     }
     {
       id: el
