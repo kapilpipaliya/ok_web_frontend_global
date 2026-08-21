@@ -81,11 +81,11 @@ import {
   countBusySlots as countAskzoomPlaywrightBusySlots,
   createEmptySlot as createAskzoomPlaywrightEmptySlot,
   clearAllSlots as clearAskzoomPlaywrightSlots,
+  deleteSlot as deleteAskzoomPlaywrightSlot,
+  deleteSlotIfIdle as deleteAskzoomPlaywrightSlotIfIdle,
   forEachSlot as forEachAskzoomPlaywrightSlot,
-  getActiveSlot as getAskzoomPlaywrightActiveSlot,
   getSlot as getAskzoomPlaywrightSlot,
   listSlots as listAskzoomPlaywrightSlots,
-  setActiveSlot as setAskzoomPlaywrightActiveSlot,
 } from "~/lib/zoom/askzoomPlaywrightStore";
 // Enhanced server function utilities
 import { errors, isAppError, errorToResponse } from "~/lib/utils/errorClasses";
@@ -594,9 +594,10 @@ export async function executeNamedServerFunctionCore(
           userId: string,
           options?: { create?: boolean },
         ) => getAskzoomPlaywrightSlot(subDomain, userId, options),
-        getActiveSlot: () => getAskzoomPlaywrightActiveSlot(subDomain),
-        setActiveSlot: (slot: Parameters<typeof setAskzoomPlaywrightActiveSlot>[1]) =>
-          setAskzoomPlaywrightActiveSlot(subDomain, slot),
+        deleteSlot: (userId: string) =>
+          deleteAskzoomPlaywrightSlot(subDomain, userId),
+        deleteSlotIfIdle: (userId: string) =>
+          deleteAskzoomPlaywrightSlotIfIdle(subDomain, userId),
         countBusySlots: () => countAskzoomPlaywrightBusySlots(subDomain),
         listSlots: () => listAskzoomPlaywrightSlots(subDomain),
         clearAllSlots: () => clearAskzoomPlaywrightSlots(subDomain),

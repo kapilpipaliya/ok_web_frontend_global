@@ -76,13 +76,67 @@ const notifyWebhook = async (payload) => {
 };
 
 let worker;
-const concurrency = Math.max(1, Number(process.env.ZOOM_PW_CONCURRENCY || 2));
+const maxSlots = Math.max(1, Number(process.env.ZOOM_PW_MAX_SLOTS || 3));
+const concurrency = Math.max(
+  1,
+  Number(process.env.ZOOM_PW_CONCURRENCY || maxSlots)
+);
+if (concurrency !== maxSlots) {
+  await logMessage('warn', 'ZOOM_PW_CONCURRENCY and ZOOM_PW_MAX_SLOTS differ; using concurrency capped to maxSlots', {
+    concurrency,
+    maxSlots
+  });
+}
+const workerConcurrency = Math.min(concurrency, maxSlots);
 
 try {
   worker = new Worker(queueName, async (job) => {
     const action = job.data?.action || job.name;
     const userId = String(job.data?.userId || '').trim();
     if (!userId) throw new Error('Zoom job missing userId');
+    const startedAt = Date.now();
+
+    const writeMetrics = async (ok, errorMessage = '') => {
+      let admittedCount = 0;
+      let recordingBytes = 0;
+      let busySlots = 0;
+      let maxSlotsNow = maxSlots;
+      try {
+        const snap = await s({
+          functionName: 'zoomSettingStore',
+          contextData: { action: 'get', userId }
+        }, { functionLookupSubDomain: _.subDomain });
+        admittedCount = Number(snap?.result?.data?.admittedCount || 0);
+        recordingBytes = Number(snap?.result?.data?.lastRecordingSize || 0);
+      } catch (error) {}
+      try {
+        const rt = await runAction('zoomPlaywrightRuntime', { action: 'get', userId });
+        busySlots = Number(rt?.data?.busySlots || 0);
+        maxSlotsNow = Number(rt?.data?.maxSlots || maxSlots);
+      } catch (error) {}
+      const metrics = {
+        action,
+        jobId: job.id,
+        userId,
+        ok,
+        durationMs: Date.now() - startedAt,
+        admittedCount,
+        recordingBytes,
+        busySlots,
+        maxSlots: maxSlotsNow,
+        error: errorMessage || undefined,
+        at: new Date().toISOString()
+      };
+      await s({
+        functionName: 'zoomSettingStore',
+        contextData: {
+          action: 'saveStatus',
+          userId,
+          lastJobMetrics: metrics
+        }
+      }, { functionLookupSubDomain: _.subDomain }).catch(() => {});
+      await logMessage('info', `Zoom job metrics: ${action}`, metrics);
+    };
 
     await runAction('zoomPlaywrightRuntime', { action: 'setOwnerUserId', userId });
     await logMessage('info', `Zoom job started: ${action}`, { jobId: job.id, userId });
@@ -129,6 +183,7 @@ try {
           });
         }
       }
+      await writeMetrics(true);
       await logMessage('info', `Zoom job finished: ${action}`, { jobId: job.id, userId });
     } catch (error) {
       const isSessionExpired = /session expired/i.test(error.message || '');
@@ -161,11 +216,12 @@ try {
         functionName: 'zoomPlaywrightRuntime',
         contextData: { action: 'close', userId }
       }, { functionLookupSubDomain: _.subDomain }).catch(() => {});
+      await writeMetrics(false, error.message);
       throw error;
     }
   }, {
     connection,
-    concurrency,
+    concurrency: workerConcurrency,
     lockDuration: 10 * 60 * 1000
   });
 
@@ -181,7 +237,10 @@ try {
     await logMessage('error', 'Zoom Playwright worker error', { error: err.message });
   });
 
-  await logMessage('info', 'Zoom Playwright worker created', { concurrency });
+  await logMessage('info', 'Zoom Playwright worker created', {
+    concurrency: workerConcurrency,
+    maxSlots
+  });
 
   return {
     stop: async (force = false) => {

@@ -42,13 +42,6 @@ const parseHistory = (raw) => {
 const resolveOwnerUserId = async () => {
   if (c.userId) return String(c.userId).trim();
   try {
-    const { getActiveSlot } = _.askzoomPlaywright;
-    const active = getActiveSlot();
-    if (active?.ownerUserId) return String(active.ownerUserId).trim();
-  } catch (error) {
-    // store unavailable
-  }
-  try {
     const user = await _.getUserFromSession();
     if (user?.P?.uuid) return String(user.P.uuid).trim();
   } catch (error) {
@@ -143,6 +136,15 @@ const buildPublicData = (p, { includeScreenshot = false, userId = '' } = {}) => 
     lastMeetingLeftAt: p.zoomLastMeetingLeftAt || '',
     lastMeetingAdmittedCount: Number(p.zoomLastMeetingAdmittedCount || 0),
     meetingAudit,
+    lastHeartbeatAt: p.zoomLastHeartbeatAt || '',
+    lastJobMetrics: (() => {
+      try {
+        const parsed = JSON.parse(p.zoomLastJobMetricsJson || 'null');
+        return parsed && typeof parsed === 'object' ? parsed : null;
+      } catch (error) {
+        return null;
+      }
+    })(),
     hasSession: !!p.zoomStorageState,
     updatedAt: p.zoomUpdatedAt || p.updatedAt || ''
   };
@@ -311,7 +313,11 @@ if (action === 'saveStatus') {
     zoomLastMeetingJoinedAt: c.lastMeetingJoinedAt,
     zoomLastMeetingLeftAt: c.lastMeetingLeftAt,
     zoomLastMeetingAdmittedCount: c.lastMeetingAdmittedCount,
-    zoomMeetingAuditJson: meetingAuditJson
+    zoomMeetingAuditJson: meetingAuditJson,
+    zoomLastHeartbeatAt: c.lastHeartbeatAt,
+    zoomLastJobMetricsJson: c.lastJobMetrics !== undefined
+      ? JSON.stringify(c.lastJobMetrics || null)
+      : undefined
   };
 
   const sets = ['z.updatedAt = datetime()'];

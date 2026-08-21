@@ -22,13 +22,8 @@ const countBusySlots = () => store.countBusySlots();
 const getSlot = (uid, { create = true } = {}) =>
   store.getSlot(uid, { create });
 
-const bindAlias = (slot) => {
-  store.setActiveSlot(slot);
-};
-
 const userId = resolveUserId();
-const runtime = userId ? getSlot(userId) : store.getActiveSlot();
-if (runtime) bindAlias(runtime);
+const runtime = userId ? getSlot(userId) : null;
 
 const callStore = async (contextData) => {
   const res = await s({
@@ -145,8 +140,9 @@ const stopManageLoops = (slot = runtime) => {
   slot.managing = false;
 };
 
-const closeBrowser = async (slot = runtime, { skipRecording = false } = {}) => {
+const closeBrowser = async (slot = runtime, { skipRecording = false, removeSlot } = {}) => {
   if (!slot) return { success: true };
+  const shouldRemove = removeSlot !== undefined ? removeSlot === true : !skipRecording;
   stopManageLoops(slot);
   const video = (!skipRecording && slot.recordVideo) ? (slot.page?.video?.() || null) : null;
   try { await slot.page?.close(); } catch (error) {}
@@ -155,12 +151,13 @@ const closeBrowser = async (slot = runtime, { skipRecording = false } = {}) => {
   slot.page = null;
   slot.context = null;
   slot.browser = null;
+  slot.managing = false;
 
   const { live, saved } = recordingDirsFor(slot.ownerUserId);
+  let result = { success: true };
   if (!video) {
     cleanupLiveVideos(live);
-    return { success: true };
-  }
+  } else {
   try {
     const stamp = new Date().toISOString().replace(/[:.]/g, '-');
     const actionName = String(slot.jobAction || 'zoom').replace(/[^a-zA-Z0-9._-]+/g, '_');
@@ -174,31 +171,19 @@ const closeBrowser = async (slot = runtime, { skipRecording = false } = {}) => {
       const srcPath = await video.path();
       if (!srcPath || !_.fs.existsSync(srcPath)) {
         cleanupLiveVideos(live);
+        if (shouldRemove) store.deleteSlotIfIdle(slot.ownerUserId);
         return { success: true };
       }
       _.fs.copyFileSync(srcPath, dest);
     }
 
-    let size = _.fs.existsSync(dest) ? _.fs.statSync(dest).size : 0;
-    if (!size) {
-      const files = _.fs.readdirSync(live)
-        .filter((name) => name.endsWith('.webm'))
-        .map((name) => {
-          const full = _.path.join(live, name);
-          const st = _.fs.statSync(full);
-          return { full, mtime: st.mtimeMs, size: st.size };
-        })
-        .filter((f) => f.size > 0)
-        .sort((a, b) => b.mtime - a.mtime);
-      if (files[0]) {
-        _.fs.copyFileSync(files[0].full, dest);
-        size = _.fs.statSync(dest).size;
-      }
-    }
+    cleanupLiveVideos(live, dest);
+    let size = 0;
+    try { size = _.fs.statSync(dest).size; } catch (error) { size = 0; }
 
-    cleanupLiveVideos(live);
     if (!size) {
       console.warn('[zoomPlaywrightRuntime] Recording file is empty after save');
+      if (shouldRemove) store.deleteSlotIfIdle(slot.ownerUserId);
       return { success: true };
     }
 
@@ -218,7 +203,10 @@ const closeBrowser = async (slot = runtime, { skipRecording = false } = {}) => {
     console.warn('[zoomPlaywrightRuntime] Failed to save recording', error.message);
     cleanupLiveVideos(live);
   }
-  return { success: true };
+  }
+
+  if (shouldRemove) store.deleteSlotIfIdle(slot.ownerUserId);
+  return result;
 };
 
 if (action === 'setOwnerUserId') {
@@ -226,7 +214,6 @@ if (action === 'setOwnerUserId') {
   if (!nextUserId) return { success: false, error: 'userId required' };
   const slot = getSlot(nextUserId);
   slot.cancelRequested = false;
-  bindAlias(slot);
   return { success: true, data: { ownerUserId: nextUserId, busySlots: countBusySlots(), maxSlots: MAX_SLOTS } };
 }
 
@@ -367,7 +354,6 @@ if (action === 'launch') {
   }
   runtime.context = await runtime.browser.newContext(options);
   runtime.page = await runtime.context.newPage();
-  bindAlias(runtime);
   return { success: true, data: { recordVideo: runtime.recordVideo, ownerUserId: runtime.ownerUserId } };
 }
 

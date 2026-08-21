@@ -352,9 +352,32 @@ await s({
 }, { functionLookupSubDomain: _.subDomain });
 
 runtime.managing = true;
+await s({
+  functionName: 'zoomSettingStore',
+  contextData: {
+    action: 'saveStatus',
+    userId,
+    phase: 'managing',
+    message: 'Managing waiting room',
+    managing: true,
+    lastHeartbeatAt: new Date().toISOString()
+  }
+}, { functionLookupSubDomain: _.subDomain });
+
 runtime.manageTimer = setInterval(async () => {
   if (!runtime.managing || !runtime.page) return;
   try {
+    await s({
+      functionName: 'zoomSettingStore',
+      contextData: {
+        action: 'saveStatus',
+        userId,
+        lastHeartbeatAt: new Date().toISOString(),
+        managing: true,
+        admittedCount: runtime.admittedCount
+      }
+    }, { functionLookupSubDomain: _.subDomain }).catch(() => {});
+
     const cancelCheck = await s({
       functionName: 'zoomPlaywrightRuntime',
       contextData: { action: 'isCancelRequested', userId }
@@ -406,7 +429,8 @@ runtime.manageTimer = setInterval(async () => {
           phase: 'managing',
           message: `Clicked ${clicked.kind}`,
           managing: true,
-          admittedCount: clicked.admittedCount
+          admittedCount: clicked.admittedCount,
+          lastHeartbeatAt: new Date().toISOString()
         }
       }, { functionLookupSubDomain: _.subDomain });
     }

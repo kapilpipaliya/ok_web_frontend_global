@@ -1,6 +1,6 @@
 /**
  * In-process Playwright browser slots for AskZoom workers.
- * Keyed by subdomain so concurrent shops do not share slots.
+ * Keyed by subdomain + userId (no global "active" slot).
  */
 
 export type AskzoomPlaywrightSlot = {
@@ -20,7 +20,6 @@ export type AskzoomPlaywrightSlot = {
 
 type Realm = {
   slots: Map<string, AskzoomPlaywrightSlot>;
-  activeUserId: string | null;
 };
 
 const realms = new Map<string, Realm>();
@@ -32,7 +31,7 @@ const getRealm = (subDomain?: string | null): Realm => {
   const key = realmKey(subDomain);
   let realm = realms.get(key);
   if (!realm) {
-    realm = { slots: new Map(), activeUserId: null };
+    realm = { slots: new Map() };
     realms.set(key, realm);
   }
   return realm;
@@ -81,25 +80,27 @@ export const getSlot = (
   return slot;
 };
 
-export const setActiveSlot = (
+export const deleteSlot = (
   subDomain: string | null | undefined,
-  slot: AskzoomPlaywrightSlot | null,
-): void => {
-  const realm = getRealm(subDomain);
-  if (!slot) {
-    realm.activeUserId = null;
-    return;
-  }
-  realm.slots.set(slot.ownerUserId, slot);
-  realm.activeUserId = slot.ownerUserId;
+  userId: string,
+): boolean => {
+  const id = String(userId || "").trim();
+  if (!id) return false;
+  return getRealm(subDomain).slots.delete(id);
 };
 
-export const getActiveSlot = (
-  subDomain?: string | null,
-): AskzoomPlaywrightSlot | null => {
+/** Remove slot if it has no browser and is not managing. */
+export const deleteSlotIfIdle = (
+  subDomain: string | null | undefined,
+  userId: string,
+): boolean => {
+  const id = String(userId || "").trim();
+  if (!id) return false;
   const realm = getRealm(subDomain);
-  if (!realm.activeUserId) return null;
-  return realm.slots.get(realm.activeUserId) || null;
+  const slot = realm.slots.get(id);
+  if (!slot) return false;
+  if (slot.browser || slot.managing) return false;
+  return realm.slots.delete(id);
 };
 
 export const listSlots = (subDomain?: string | null) => {
@@ -114,9 +115,7 @@ export const listSlots = (subDomain?: string | null) => {
 };
 
 export const clearAllSlots = (subDomain?: string | null): void => {
-  const realm = getRealm(subDomain);
-  realm.slots.clear();
-  realm.activeUserId = null;
+  getRealm(subDomain).slots.clear();
 };
 
 export const forEachSlot = (

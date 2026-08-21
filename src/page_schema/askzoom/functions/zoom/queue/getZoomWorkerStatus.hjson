@@ -8,11 +8,16 @@
         description: Zoom worker phase, queue counts, session flags, logs, and latest manage screenshot
         body:
           '''
+const HEARTBEAT_STALE_MS = Math.max(
+  15000,
+  Number(process.env.ZOOM_PW_HEARTBEAT_STALE_MS || 90000)
+);
+
 const settingsResult = await s({
   functionName: 'zoomSettingStore',
   contextData: { action: 'get', includeScreenshot: true }
 });
-const settings = settingsResult.result?.data || settingsResult.data || {};
+let settings = settingsResult.result?.data || settingsResult.data || {};
 const userId = String(settings.userId || '').trim();
 
 let queueCounts = { waiting: 0, active: 0, delayed: 0, failed: 0, completed: 0 };
@@ -40,6 +45,40 @@ try {
   runtime = runtimeRes.result?.data || {};
 } catch (error) {
   // optional
+}
+
+let staleManageRecovered = false;
+const looksManaging =
+  settings.managing === true ||
+  settings.phase === 'managing' ||
+  settings.phase === 'joining';
+const slotBusy = !!(runtime.busy && String(runtime.ownerUserId || '') === userId);
+if (userId && looksManaging && !slotBusy) {
+  const hbMs = settings.lastHeartbeatAt
+    ? Date.parse(settings.lastHeartbeatAt)
+    : 0;
+  const age = hbMs ? Date.now() - hbMs : Number.POSITIVE_INFINITY;
+  if (age > HEARTBEAT_STALE_MS) {
+    await s({
+      functionName: 'zoomSettingStore',
+      contextData: {
+        action: 'saveStatus',
+        userId,
+        managing: false,
+        leaveRequested: false,
+        phase: 'idle',
+        message: 'Manage session cleared (stale heartbeat / worker restart)',
+        alertEvent: 'manage_stale',
+        lastHeartbeatAt: ''
+      }
+    }, { functionLookupSubDomain: _.subDomain }).catch(() => {});
+    staleManageRecovered = true;
+    const refreshed = await s({
+      functionName: 'zoomSettingStore',
+      contextData: { action: 'get', includeScreenshot: true, userId }
+    }).catch(() => null);
+    if (refreshed?.result?.data) settings = refreshed.result.data;
+  }
 }
 
 let workerLogs = [];
@@ -78,10 +117,16 @@ try {
   workerLogs = [];
 }
 
+const metricsLog = workerLogs.find((entry) =>
+  String(entry.message || '').startsWith('Zoom job metrics:')
+);
+
 return {
   success: true,
   data: {
     ...settings,
+    staleManageRecovered,
+    heartbeatStaleMs: HEARTBEAT_STALE_MS,
     queueCounts,
     runtime: {
       busy: !!runtime.busy,
@@ -92,6 +137,7 @@ return {
       busySlots: Number(runtime.busySlots || 0),
       maxSlots: Number(runtime.maxSlots || 0)
     },
+    lastMetricsFromLog: metricsLog?.metadata || null,
     workerLogs,
     workerKey: 'processZoomPlaywright',
     workerHint: 'Start processZoomPlaywright from Worker Management so Playwright runs in a background worker.'
