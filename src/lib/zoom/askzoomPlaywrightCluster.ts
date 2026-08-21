@@ -5,6 +5,8 @@
 
 import {
   createWorkerCluster,
+  emitWorkerClusterAlert,
+  onWorkerClusterAlert,
   type PublishAndWaitOptions,
   type WorkerClusterMetrics,
   type WorkerControlMessage,
@@ -50,11 +52,49 @@ const ACK_TIMEOUT_MS = Math.max(
   Number(process.env.ZOOM_PW_CONTROL_ACK_MS || 8000),
 );
 
+/** Timeout for leave/cancel/forceClose when waiting for done (longer than accepted ACK). */
+export function getAskzoomControlDoneTimeoutMs(): number {
+  return Math.max(
+    ACK_TIMEOUT_MS,
+    Number(process.env.ZOOM_PW_CONTROL_DONE_MS || 45000),
+  );
+}
+
 const cluster = createWorkerCluster({
   namespace: "askzoom-pw",
   leaseTtlSec: LEASE_TTL_SEC,
   ackTimeoutMs: ACK_TIMEOUT_MS,
 });
+
+let zoomWebhookWired = false;
+function ensureZoomClusterWebhook(): void {
+  if (zoomWebhookWired) return;
+  zoomWebhookWired = true;
+  onWorkerClusterAlert(async (alert) => {
+    if (alert.namespace !== "askzoom-pw") return;
+    const url = String(process.env.ZOOM_PW_WEBHOOK_URL || "").trim();
+    if (!url) return;
+    try {
+      await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          source: "askzoom-playwright-cluster",
+          event: alert.type,
+          at: alert.at,
+          namespace: alert.namespace,
+          detail: alert.detail,
+        }),
+      });
+    } catch (err) {
+      console.warn(
+        "[askzoomPlaywrightCluster] webhook failed",
+        err instanceof Error ? err.message : err,
+      );
+    }
+  });
+}
+ensureZoomClusterWebhook();
 
 function toAskzoomLease(lease: WorkerLease | null): AskzoomLease | null {
   if (!lease) return null;
@@ -153,10 +193,14 @@ export async function publishAskzoomControlAndWait(
   > & { type: Exclude<AskzoomControlMessage["type"], "ack" | "refresh"> },
   options: PublishAndWaitOptions = {},
 ): Promise<AskzoomControlMessage> {
+  const waitFor = options.waitFor || "accepted";
+  const timeoutMs =
+    options.timeoutMs ??
+    (waitFor === "done" ? getAskzoomControlDoneTimeoutMs() : undefined);
   const ack = await cluster.publishAndWait(
     subDomain,
     toWorkerControlInput({ ...message, type: message.type }),
-    options,
+    { ...options, waitFor, timeoutMs },
   );
   return toAskzoomControl(ack);
 }
@@ -210,11 +254,22 @@ export async function refreshAskzoomLease(
   subDomain: string | null | undefined,
   userId: string,
   patch: { jobAction?: string; managing?: boolean } = {},
+  options: { token?: string } = {},
 ): Promise<boolean> {
   const metaPatch: Record<string, unknown> = {};
   if (patch.jobAction !== undefined) metaPatch.jobAction = patch.jobAction;
   if (patch.managing !== undefined) metaPatch.managing = patch.managing === true;
-  return cluster.refreshLease(subDomain, userId, metaPatch);
+  let token = options.token;
+  if (!token) {
+    const lease = await cluster.getLease(subDomain, userId);
+    token = lease?.token || undefined;
+  }
+  return cluster.refreshLease(
+    subDomain,
+    userId,
+    metaPatch,
+    token ? { token } : {},
+  );
 }
 
 export async function releaseAskzoomLease(
@@ -274,6 +329,22 @@ export function isAskzoomLeaseOwner(
 
 export function getAskzoomClusterMetrics(): WorkerClusterMetrics {
   return cluster.getMetrics();
+}
+
+export function emitAskzoomLeaseRefreshLost(detail: {
+  userId: string;
+  subdomain?: string;
+  reason?: string;
+}): void {
+  emitWorkerClusterAlert({
+    type: "leaseRefreshLost",
+    namespace: "askzoom-pw",
+    detail: {
+      ownerId: detail.userId,
+      subdomain: detail.subdomain || "",
+      reason: detail.reason || "lease refresh failed / ownership lost",
+    },
+  });
 }
 
 export async function shutdownAskzoomPlaywrightCluster(): Promise<void> {

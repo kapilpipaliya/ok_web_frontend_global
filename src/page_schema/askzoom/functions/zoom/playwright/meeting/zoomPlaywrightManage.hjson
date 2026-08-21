@@ -402,10 +402,43 @@ runtime.manageTimer = setInterval(async () => {
         admittedCount: runtime.admittedCount
       }
     }, { functionLookupSubDomain: _.subDomain });
-    await _.askzoomPlaywright.refreshLease(userId, {
+    const refreshed = await _.askzoomPlaywright.refreshLease(userId, {
       jobAction: 'manage',
       managing: true
     });
+    if (!refreshed) {
+      const lease = await _.askzoomPlaywright.getLease(userId);
+      if (!lease || !_.askzoomPlaywright.isLeaseOwner(lease)) {
+        _.askzoomPlaywright.emitLeaseRefreshLost({
+          userId,
+          reason: 'manage heartbeat refresh failed; lease owned elsewhere or missing'
+        });
+        await s({
+          functionName: 'zoomSettingStore',
+          contextData: {
+            action: 'saveStatus',
+            userId,
+            managing: false,
+            leaveRequested: false,
+            phase: 'cancelled',
+            message: 'Manage stopped: Playwright lease lost to another worker',
+            alertEvent: 'lease_lost',
+            lastHeartbeatAt: new Date().toISOString()
+          }
+        }, { functionLookupSubDomain: _.subDomain });
+        await s({
+          functionName: 'zoomPlaywrightRuntime',
+          contextData: {
+            action: 'forceClose',
+            userId,
+            phase: 'cancelled',
+            message: 'Lease lost during manage heartbeat',
+            localOnly: true
+          }
+        }, { functionLookupSubDomain: _.subDomain });
+        return;
+      }
+    }
 
     if (runtime.cancelRequested) {
       await s({

@@ -370,4 +370,21 @@ test.describe("workerCluster", () => {
     const m = cluster.getMetrics();
     expect(m.acquireOk).toBe(1);
   });
+
+  test("emits alert on publishAndWait timeout", async () => {
+    const { onWorkerClusterAlert } = await import("~/lib/worker/workerCluster");
+    const seen: string[] = [];
+    const off = onWorkerClusterAlert((alert) => {
+      if (alert.namespace === NS) seen.push(alert.type);
+    });
+    await expect(
+      cluster.publishAndWait(
+        SUB,
+        { type: "forceClose", ownerId: `${OWNER}-alert` },
+        { timeoutMs: 400 },
+      ),
+    ).rejects.toThrow(/ACK timeout/i);
+    expect(seen).toContain("publishAndWaitTimeout");
+    off();
+  });
 });

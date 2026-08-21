@@ -100,8 +100,10 @@ import {
 import {
   acquireAskzoomLease,
   countClusterBusySlots,
+  emitAskzoomLeaseRefreshLost,
   ensureAskzoomControlBus,
   getAskzoomClusterMetrics,
+  getAskzoomControlDoneTimeoutMs,
   getAskzoomLease,
   getAskzoomNodeId,
   isAskzoomLeaseOwner,
@@ -717,7 +719,8 @@ export async function executeNamedServerFunctionCore(
         refreshLease: (
           userId: string,
           patch?: { jobAction?: string; managing?: boolean },
-        ) => refreshAskzoomLease(subDomain, userId, patch),
+          options?: { token?: string },
+        ) => refreshAskzoomLease(subDomain, userId, patch, options),
         releaseLease: (userId: string) =>
           releaseAskzoomLease(subDomain, userId),
         getLease: (userId: string) => getAskzoomLease(subDomain, userId),
@@ -739,6 +742,15 @@ export async function executeNamedServerFunctionCore(
         unregisterControlHandler: (userId: string) =>
           unregisterAskzoomControlHandler(subDomain, userId),
         getMetrics: () => getAskzoomClusterMetrics(),
+        controlDoneTimeoutMs: () => getAskzoomControlDoneTimeoutMs(),
+        emitLeaseRefreshLost: (detail: {
+          userId: string;
+          reason?: string;
+        }) =>
+          emitAskzoomLeaseRefreshLost({
+            ...detail,
+            subdomain: subDomain,
+          }),
       },
       // driver: (await getDriver()),
       // Admin/impersonation helper functions (platform-level)

@@ -48,6 +48,17 @@ export type WorkerClusterOptions = {
   ackTimeoutMs?: number;
 };
 
+export type WorkerClusterAlert = {
+  type: "publishAndWaitTimeout" | "reclaimFail" | "leaseRefreshLost";
+  namespace: string;
+  at: string;
+  detail: Record<string, unknown>;
+};
+
+export type WorkerClusterAlertHandler = (
+  alert: WorkerClusterAlert,
+) => void | Promise<void>;
+
 export type WorkerClusterMetrics = {
   acquireOk: number;
   acquireFail: number;
@@ -259,6 +270,39 @@ function emptyMetrics(): WorkerClusterMetrics {
   };
 }
 
+export function emitWorkerClusterAlert(
+  alert: Omit<WorkerClusterAlert, "at"> & { at?: string },
+): void {
+  const full: WorkerClusterAlert = {
+    ...alert,
+    at: alert.at || new Date().toISOString(),
+  };
+  console.warn(
+    "[workerCluster]",
+    full.type,
+    full.namespace,
+    JSON.stringify(full.detail),
+  );
+  for (const handler of bus().alertHandlers) {
+    void Promise.resolve(handler(full)).catch((err) => {
+      console.warn(
+        "[workerCluster] alert handler failed",
+        err instanceof Error ? err.message : err,
+      );
+    });
+  }
+}
+
+/** Register a process-wide alert listener (timeouts, reclaim fails, lease lost). */
+export function onWorkerClusterAlert(
+  handler: WorkerClusterAlertHandler,
+): () => void {
+  bus().alertHandlers.add(handler);
+  return () => {
+    bus().alertHandlers.delete(handler);
+  };
+}
+
 type PendingAck = {
   waitFor: WorkerAckPhase;
   resolve: (value: WorkerControlMessage) => void;
@@ -295,6 +339,7 @@ type BusState = {
   >;
   /** Leases acquired by this process (for shutdown). */
   localLeases: Map<string, LocalLeaseRef>;
+  alertHandlers: Set<WorkerClusterAlertHandler>;
   shuttingDown: boolean;
 };
 
@@ -316,6 +361,7 @@ function bus(): BusState {
       refreshSha: null,
       clusters: new Map(),
       localLeases: new Map(),
+      alertHandlers: new Set(),
       shuttingDown: false,
     };
   }
@@ -744,7 +790,20 @@ function createClusterInstance(
       // Dead owner (no accepted ACK) or TTL nearly expired — steal.
       const stolen = await runAcquire(sub, id, meta, true);
       if (stolen.ok) metrics.reclaimOk += 1;
-      else metrics.reclaimFail += 1;
+      else {
+        metrics.reclaimFail += 1;
+        emitWorkerClusterAlert({
+          type: "reclaimFail",
+          namespace,
+          detail: {
+            ownerId: id,
+            subdomain: sub,
+            reason: stolen.reason || "steal failed",
+            ownerAccepted,
+            pttl,
+          },
+        });
+      }
       return stolen;
     },
 
@@ -952,6 +1011,17 @@ function createClusterInstance(
         const timer = setTimeout(() => {
           bus().pendingAcks.delete(requestId);
           metrics.publishAndWaitTimeout += 1;
+          emitWorkerClusterAlert({
+            type: "publishAndWaitTimeout",
+            namespace,
+            detail: {
+              ownerId,
+              subdomain: sub,
+              controlType: message.type,
+              waitFor,
+              timeoutMs,
+            },
+          });
           reject(
             new Error(
               `Control ACK timeout after ${timeoutMs}ms (${message.type}/${waitFor} for ${ownerId})`,

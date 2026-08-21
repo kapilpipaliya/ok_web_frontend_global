@@ -196,8 +196,11 @@ Keep using `_.askzoomPlaywright` — it maps to the same Redis layer:
 - `publishControlAndWait({ type: 'leave' | 'cancel' | …, userId, … }, { waitFor? })`
   - Leave/cancel/forceClose from Zoom schemas use `waitFor: 'done'` so HTTP returns after the owner finishes.
 - In-process `getSlot(userId)` stays local to the worker that launched the browser
-- `getMetrics()` — AskZoom namespace counters (also on `getZoomWorkerStatus` as `clusterMetrics`)
+- `getMetrics()` — AskZoom namespace counters (also on `getZoomWorkerStatus` / Manage·Login·Credentials UI as `clusterMetrics`)
 - Control handlers ignore duplicate leave/cancel while `leaving` / `closing`
+- Leave/cancel use `waitFor: 'done'` with `ZOOM_PW_CONTROL_DONE_MS` (default 45s)
+- Manage heartbeat refresh uses fencing token; on ownership loss → `lease_lost` + webhook
+- Cluster alerts (`onWorkerClusterAlert`) post to `ZOOM_PW_WEBHOOK_URL` for timeouts / unexpected reclaim fails / lease lost
 
 ## Shutdown
 
@@ -218,8 +221,10 @@ Per process that:
 | `WORKER_CLUSTER_LEASE_TTL_SEC` | `90` | Default lease TTL (min 30) |
 | `WORKER_CLUSTER_CONTROL_ACK_MS` | `8000` | Default ACK wait (min 1000) |
 | `ZOOM_PW_LEASE_TTL_SEC` | `90` | AskZoom lease override |
-| `ZOOM_PW_CONTROL_ACK_MS` | `8000` | AskZoom ACK override |
+| `ZOOM_PW_CONTROL_ACK_MS` | `8000` | AskZoom default ACK wait (accepted) |
+| `ZOOM_PW_CONTROL_DONE_MS` | `45000` | AskZoom leave/cancel/forceClose `waitFor: 'done'` timeout |
 | `ZOOM_PW_MAX_SLOTS` | `3` | Max concurrent Zoom browsers (uses cluster busy count) |
+| `ZOOM_PW_WEBHOOK_URL` | — | Also receives cluster alerts: `publishAndWaitTimeout`, `reclaimFail`, `leaseRefreshLost` |
 
 There is **no silent local fallback** if Redis is down: coordination must fail visibly rather than double-open browsers.
 
