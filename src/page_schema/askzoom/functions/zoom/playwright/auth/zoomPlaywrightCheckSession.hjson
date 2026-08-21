@@ -1,0 +1,108 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: zoomPlaywrightCheckSession
+        description: Verify saved Zoom Playwright session is still logged in
+        body:
+          '''
+const storeRes = await s({
+  functionName: 'zoomSettingStore',
+  contextData: { action: 'getSecrets', userId: c.userId }
+}, { functionLookupSubDomain: _.subDomain });
+const secrets = storeRes.result?.data;
+if (!secrets?.storageState) {
+  throw new Error('Login session missing. Run Zoom login first.');
+}
+
+await s({
+  functionName: 'zoomSettingStore',
+  contextData: {
+    action: 'saveStatus',
+    userId: c.userId,
+    phase: 'checking_session',
+    message: 'Checking Zoom session...',
+    lastError: '',
+    cancelRequested: false
+  }
+}, { functionLookupSubDomain: _.subDomain });
+
+await s({
+  functionName: 'zoomPlaywrightRuntime',
+  contextData: { action: 'setJobAction', jobAction: 'checkSession', userId: c.userId }
+}, { functionLookupSubDomain: _.subDomain });
+
+await s({
+  functionName: 'zoomPlaywrightRuntime',
+  contextData: {
+    action: 'launch',
+    userId: c.userId,
+    storageState: secrets.storageState,
+    recordVideo: false
+  }
+}, { functionLookupSubDomain: _.subDomain });
+
+const page = globalThis.__askzoomPlaywright?.page;
+if (!page) throw new Error('Failed to launch Playwright browser');
+
+let loggedIn = false;
+try {
+  await page.goto('https://zoom.us/profile', { waitUntil: 'domcontentloaded', timeout: 45000 });
+  await page.waitForTimeout(1500);
+  const url = page.url();
+  loggedIn = !/signin|login|signup/i.test(url);
+  if (!loggedIn) {
+    await page.goto('https://zoom.us/', { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForTimeout(1000);
+    const home = page.url();
+    const hasSignIn = await page.getByRole('link', { name: 'Sign In' }).count().catch(() => 0);
+    loggedIn = !/signin|login/i.test(home) && hasSignIn === 0;
+  }
+} finally {
+  await s({
+    functionName: 'zoomPlaywrightRuntime',
+    contextData: { action: 'captureScreenshot', userId: c.userId }
+  }, { functionLookupSubDomain: _.subDomain }).catch(() => {});
+  await s({
+    functionName: 'zoomPlaywrightRuntime',
+    contextData: { action: 'close', userId: c.userId }
+  }, { functionLookupSubDomain: _.subDomain });
+}
+
+await s({
+  functionName: 'zoomSettingStore',
+  contextData: {
+    action: 'saveStatus',
+    userId: c.userId,
+    phase: loggedIn ? 'session_ok' : 'session_expired',
+    message: loggedIn ? 'Zoom session is valid' : 'Zoom session expired. Run login again.',
+    loggedIn,
+    lastError: loggedIn ? '' : 'Session expired'
+  }
+}, { functionLookupSubDomain: _.subDomain });
+
+if (!loggedIn) {
+  await s({
+    functionName: 'zoomSettingStore',
+    contextData: {
+      action: 'saveSession',
+      userId: c.userId,
+      storageState: '',
+      loggedIn: false
+    }
+  }, { functionLookupSubDomain: _.subDomain });
+}
+
+return {
+  success: true,
+  message: loggedIn ? 'Zoom session is valid' : 'Zoom session expired',
+  data: { loggedIn }
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

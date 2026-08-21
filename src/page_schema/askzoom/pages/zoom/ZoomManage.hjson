@@ -15,6 +15,7 @@ const [form, setForm] = _.createStore({
 });
 const [busy, setBusy] = _.createSignal(false);
 const [status, setStatus] = _.createSignal(null);
+const [selectedRecordingId, setSelectedRecordingId] = _.createSignal('');
 
 const loadStatus = async () => {
   const res = await s({ functionName: 'getZoomWorkerStatus', contextData: {} });
@@ -23,6 +24,7 @@ const loadStatus = async () => {
     setStatus(data);
     if (!form.meetingUrl && data.meetingUrl) setForm('meetingUrl', data.meetingUrl);
     if (!form.displayName && data.displayName) setForm('displayName', data.displayName);
+    if (!selectedRecordingId() && data.lastRecordingId) setSelectedRecordingId(data.lastRecordingId);
   }
 };
 
@@ -61,10 +63,24 @@ return {
   setForm,
   busy,
   status,
+  selectedRecordingId,
+  setSelectedRecordingId,
   loadStatus,
   formatBytes,
+  recordingSrc: () => {
+    const current = status();
+    const id = selectedRecordingId() || current?.lastRecordingId || '';
+    const history = current?.recordingHistory || [];
+    const item = history.find((entry) => entry.id === id);
+    const stamp = item?.at || current?.lastRecordingAt || '';
+    const qs = new URLSearchParams({ t: stamp });
+    if (id) qs.set('id', id);
+    return current?.hasRecording ? `/api/zoom/recording?${qs.toString()}` : '';
+  },
   startManage: () => runJob('manage'),
   leave: () => runJob('leave'),
+  cancelJob: () => runJob('cancel'),
+  checkSession: () => runJob('checkSession'),
   startPolling: () => {
     loadStatus();
     if (statusTimer) clearInterval(statusTimer);
@@ -220,6 +236,40 @@ return {
       }
     }
     {
+      id: "11b"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Button
+        props:
+          '''
+return {
+  text: 'Check session',
+  variant: 'secondary',
+  disabled: f.busy(),
+  onClick: f.checkSession
+};
+'''
+      }
+    }
+    {
+      id: "11c"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Button
+        props:
+          '''
+return {
+  text: 'Force stop / cancel',
+  variant: 'danger',
+  disabled: f.busy(),
+  onClick: f.cancelJob
+};
+'''
+      }
+    }
+    {
       id: "12"
       L: Attr
       P: {
@@ -250,10 +300,41 @@ Screenshot at: ${status.lastScreenshotAt || '-'}
 Recording: ${status.hasRecording
   ? `${status.lastRecordingAction || 'saved'} (${f.formatBytes(status.lastRecordingSize || 0)})`
   : 'none'}
+Record video: ${status.recordVideo === false ? 'off' : 'on'}
+Browser busy: ${status.runtime?.busy ? `yes (${status.runtime?.ownerUserId || '-'})` : 'no'}
 Error: ${status.lastError || '-'}
 Queue active/waiting/failed: ${status.queueCounts?.active || 0}/${status.queueCounts?.waiting || 0}/${status.queueCounts?.failed || 0}
 ${status.workerHint || ''}`
   : 'Loading worker status...';
+return { as: 'pre', text };
+'''
+      }
+    }
+    {
+      id: "12b"
+      L: Attr
+      P: {
+        displayOrder: 8.5
+        componentName: Html
+        css:
+          '''
+return `._id {
+  margin-top: 0.75rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid ${t.var.color.border};
+  border-radius: 0.5rem;
+  white-space: pre-wrap;
+  font-size: 0.8rem;
+  max-height: 12rem;
+  overflow: auto;
+}`;
+'''
+        props:
+          '''
+const logs = f.status()?.workerLogs || [];
+const text = logs.length
+  ? logs.map((entry) => `${entry.level || 'info'}: ${entry.message || ''}`).join('\\n')
+  : 'No worker logs yet';
 return { as: 'pre', text };
 '''
       }
@@ -331,8 +412,10 @@ return {
   variant: 'secondary',
   hide: () => !status?.hasRecording,
   onClick: () => {
-    const stamp = status?.lastRecordingAt || '';
-    const id = status?.lastRecordingId || '';
+    const id = f.selectedRecordingId() || status?.lastRecordingId || '';
+    const history = status?.recordingHistory || [];
+    const item = history.find((entry) => entry.id === id);
+    const stamp = item?.at || status?.lastRecordingAt || '';
     const qs = new URLSearchParams({ download: '1', t: stamp });
     if (id) qs.set('id', id);
     window.open(`/api/zoom/recording?${qs.toString()}`, '_blank');
@@ -360,14 +443,9 @@ return `._id {
 '''
         props:
           '''
-const status = f.status();
-const stamp = status?.lastRecordingAt || '';
-const id = status?.lastRecordingId || '';
-const qs = new URLSearchParams({ t: stamp });
-if (id) qs.set('id', id);
 return {
   as: 'video',
-  src: status?.hasRecording ? `/api/zoom/recording?${qs.toString()}` : '',
+  src: f.recordingSrc(),
   controls: true,
   playsinline: true,
   hide: () => !f.status()?.hasRecording
@@ -382,7 +460,7 @@ return {
         displayOrder: 14
         componentName: Html
         css: "return `._id { margin-top: 1rem; font-weight: 600; }`;"
-        props: "return { as: 'h3', text: 'Recording history', hide: () => !(f.status()?.recordingHistory || []).length };"
+        props: "return { as: 'h3', text: 'Recording history (click to cycle)', hide: () => !(f.status()?.recordingHistory || []).length };"
       }
     }
     {
@@ -400,20 +478,30 @@ return `._id {
   border-radius: 0.5rem;
   white-space: pre-wrap;
   font-size: 0.85rem;
+  cursor: pointer;
 }`;
 '''
         props:
           '''
 const history = f.status()?.recordingHistory || [];
+const selected = f.selectedRecordingId() || f.status()?.lastRecordingId || '';
 const text = history.map((item, index) => {
-  const label = item.action || 'zoom';
-  const when = item.at || '-';
-  const size = f.formatBytes(item.size || 0);
-  return `${index + 1}. ${label} · ${size} · ${when} · id=${item.id || '-'}`;
+  const mark = item.id === selected ? '>' : ' ';
+  return `${mark} ${index + 1}. ${item.action || 'zoom'} · ${f.formatBytes(item.size || 0)} · ${item.at || '-'} · ${item.id || '-'}`;
 }).join('\\n');
 return {
   as: 'pre',
   text: text || 'No history',
+  title: 'Click to cycle selected recording',
+  onClick: () => {
+    const list = f.status()?.recordingHistory || [];
+    if (!list.length) return;
+    const current = f.selectedRecordingId() || list[0].id;
+    const idx = Math.max(0, list.findIndex((entry) => entry.id === current));
+    const next = list[(idx + 1) % list.length];
+    f.setSelectedRecordingId(next.id);
+    _.showSuccessToast('Playing ' + (next.action || 'recording'));
+  },
   hide: () => !history.length
 };
 '''
@@ -490,10 +578,28 @@ return {
       E: "11"
     }
     {
+      id: e11b
+      T: Attr
+      S: "9"
+      E: "11b"
+    }
+    {
+      id: e11c
+      T: Attr
+      S: "9"
+      E: "11c"
+    }
+    {
       id: e11
       T: Attr
       S: "2"
       E: "12"
+    }
+    {
+      id: e12b
+      T: Attr
+      S: "2"
+      E: "12b"
     }
     {
       id: e12

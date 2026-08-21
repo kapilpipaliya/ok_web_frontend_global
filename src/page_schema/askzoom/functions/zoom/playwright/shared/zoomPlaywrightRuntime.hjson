@@ -10,6 +10,7 @@
           '''
 const action = c.action || 'get';
 const HISTORY_LIMIT = 5;
+const RECORDING_QUOTA_BYTES = Number(process.env.ZOOM_PW_RECORDING_QUOTA_MB || 10240) * 1024 * 1024;
 
 if (!globalThis.__askzoomPlaywright) {
   globalThis.__askzoomPlaywright = {
@@ -22,7 +23,9 @@ if (!globalThis.__askzoomPlaywright) {
     admittedCount: 0,
     jobAction: '',
     leaving: false,
-    ownerUserId: ''
+    ownerUserId: '',
+    cancelRequested: false,
+    recordVideo: true
   };
 }
 
@@ -71,11 +74,10 @@ const cleanupLiveVideos = (liveDir, keepPath = '') => {
   } catch (error) {}
 };
 
-const pruneSavedHistory = (savedDir, keepPaths = []) => {
+const listSavedVideos = (savedDir) => {
   try {
-    const keep = new Set(keepPaths.map((p) => _.path.resolve(p)));
-    const files = _.fs.readdirSync(savedDir)
-      .filter((name) => name.endsWith('.webm'))
+    return _.fs.readdirSync(savedDir)
+      .filter((name) => name.endsWith('.webm') && name !== 'latest.webm')
       .map((name) => {
         const full = _.path.join(savedDir, name);
         const st = _.fs.statSync(full);
@@ -83,12 +85,56 @@ const pruneSavedHistory = (savedDir, keepPaths = []) => {
       })
       .filter((f) => f.size > 0)
       .sort((a, b) => b.mtime - a.mtime);
+  } catch (error) {
+    return [];
+  }
+};
 
-    for (const file of files.slice(HISTORY_LIMIT)) {
-      if (keep.has(_.path.resolve(file.full))) continue;
-      try { _.fs.unlinkSync(file.full); } catch (error) {}
-    }
-  } catch (error) {}
+const pruneSavedByQuota = async (savedDir, keepPaths = []) => {
+  const keep = new Set(keepPaths.map((p) => _.path.resolve(p)));
+  let files = listSavedVideos(savedDir);
+  // Also enforce history count
+  for (const file of files.slice(HISTORY_LIMIT)) {
+    if (keep.has(_.path.resolve(file.full))) continue;
+    try { _.fs.unlinkSync(file.full); } catch (error) {}
+  }
+  files = listSavedVideos(savedDir);
+  let total = files.reduce((sum, f) => sum + f.size, 0);
+  const removed = [];
+  for (let i = files.length - 1; i >= 0 && total > RECORDING_QUOTA_BYTES; i -= 1) {
+    const file = files[i];
+    if (keep.has(_.path.resolve(file.full))) continue;
+    try {
+      _.fs.unlinkSync(file.full);
+      total -= file.size;
+      removed.push(file.full);
+    } catch (error) {}
+  }
+  if (removed.length) {
+    const current = await callStore({ action: 'get' });
+    const history = Array.isArray(current?.data?.recordingHistory) ? current.data.recordingHistory : [];
+    // Rebuild history from remaining files is lossy without paths in public history;
+    // trim status via saveStatus using remaining files from disk
+    const remaining = listSavedVideos(savedDir);
+    const historyJson = remaining.slice(0, HISTORY_LIMIT).map((f, index) => ({
+      id: `rec_disk_${f.mtime}_${index}`,
+      path: f.full,
+      action: 'saved',
+      at: new Date(f.mtime).toISOString(),
+      size: f.size
+    }));
+    const top = historyJson[0];
+    await setStatus({
+      recordingHistory: historyJson,
+      hasRecording: !!top,
+      lastRecordingPath: top?.path || '',
+      lastRecordingSize: top?.size || 0,
+      lastRecordingAt: top?.at || '',
+      lastRecordingAction: top?.action || '',
+      lastRecordingId: top?.id || ''
+    });
+    void history;
+  }
 };
 
 const stopManageLoops = () => {
@@ -103,9 +149,9 @@ const stopManageLoops = () => {
   runtime.managing = false;
 };
 
-const closeBrowser = async () => {
+const closeBrowser = async ({ skipRecording = false } = {}) => {
   stopManageLoops();
-  const video = runtime.page?.video?.() || null;
+  const video = (!skipRecording && runtime.recordVideo) ? (runtime.page?.video?.() || null) : null;
   try { await runtime.page?.close(); } catch (error) {}
   try { await runtime.context?.close(); } catch (error) {}
   try { await runtime.browser?.close(); } catch (error) {}
@@ -113,9 +159,12 @@ const closeBrowser = async () => {
   runtime.context = null;
   runtime.browser = null;
 
-  if (!video) return { success: true };
+  const { live, saved } = recordingDirs();
+  if (!video) {
+    cleanupLiveVideos(live);
+    return { success: true };
+  }
   try {
-    const { live, saved } = recordingDirs();
     const stamp = new Date().toISOString().replace(/[:.]/g, '-');
     const actionName = String(runtime.jobAction || 'zoom').replace(/[^a-zA-Z0-9._-]+/g, '_');
     const recordingId = `rec_${Date.now()}`;
@@ -126,20 +175,26 @@ const closeBrowser = async () => {
       await video.saveAs(dest);
     } else {
       const srcPath = await video.path();
-      if (!srcPath || !_.fs.existsSync(srcPath)) return { success: true };
+      if (!srcPath || !_.fs.existsSync(srcPath)) {
+        cleanupLiveVideos(live);
+        return { success: true };
+      }
       _.fs.copyFileSync(srcPath, dest);
     }
 
     let size = _.fs.existsSync(dest) ? _.fs.statSync(dest).size : 0;
     if (!size) {
-      const files = _.fs.readdirSync(live)
-        .filter((name) => name.endsWith('.webm'))
-        .map((name) => {
-          const full = _.path.join(live, name);
-          return { full, mtime: _.fs.statSync(full).mtimeMs, size: _.fs.statSync(full).size };
-        })
-        .filter((f) => f.size > 0)
-        .sort((a, b) => b.mtime - a.mtime);
+      const files = listSavedVideos(live).length
+        ? listSavedVideos(live)
+        : _.fs.readdirSync(live)
+          .filter((name) => name.endsWith('.webm'))
+          .map((name) => {
+            const full = _.path.join(live, name);
+            const st = _.fs.statSync(full);
+            return { full, mtime: st.mtimeMs, size: st.size };
+          })
+          .filter((f) => f.size > 0)
+          .sort((a, b) => b.mtime - a.mtime);
       if (files[0]) {
         _.fs.copyFileSync(files[0].full, dest);
         size = _.fs.statSync(dest).size;
@@ -154,25 +209,30 @@ const closeBrowser = async () => {
 
     try { _.fs.copyFileSync(dest, latest); } catch (error) {}
 
-    const recordedAt = new Date().toISOString();
     await setStatus({
       hasRecording: true,
-      lastRecordingAt: recordedAt,
+      lastRecordingAt: new Date().toISOString(),
       lastRecordingAction: runtime.jobAction || '',
       lastRecordingPath: dest,
       lastRecordingSize: size,
       lastRecordingId: recordingId
     });
 
-    pruneSavedHistory(saved, [dest, latest]);
+    await pruneSavedByQuota(saved, [dest, latest]);
   } catch (error) {
     console.warn('[zoomPlaywrightRuntime] Failed to save recording', error.message);
+    cleanupLiveVideos(live);
   }
   return { success: true };
 };
 
 if (action === 'setOwnerUserId') {
-  runtime.ownerUserId = String(c.userId || '').trim();
+  const nextUserId = String(c.userId || '').trim();
+  if (runtime.browser && runtime.ownerUserId && nextUserId && runtime.ownerUserId !== nextUserId) {
+    await closeBrowser({ skipRecording: true });
+  }
+  runtime.ownerUserId = nextUserId;
+  runtime.cancelRequested = false;
   return { success: true, data: { ownerUserId: runtime.ownerUserId } };
 }
 
@@ -184,8 +244,11 @@ if (action === 'get') {
       admittedCount: runtime.admittedCount,
       jobAction: runtime.jobAction,
       ownerUserId: runtime.ownerUserId || '',
+      cancelRequested: runtime.cancelRequested === true,
+      recordVideo: runtime.recordVideo !== false,
       hasPage: !!runtime.page,
-      hasBrowser: !!runtime.browser
+      hasBrowser: !!runtime.browser,
+      busy: !!(runtime.browser || runtime.managing)
     }
   };
 }
@@ -195,10 +258,59 @@ if (action === 'setJobAction') {
   return { success: true };
 }
 
+if (action === 'requestCancel') {
+  runtime.cancelRequested = true;
+  runtime.managing = false;
+  stopManageLoops();
+  return { success: true };
+}
+
+if (action === 'isCancelRequested') {
+  if (runtime.cancelRequested) return { success: true, data: { cancelRequested: true } };
+  try {
+    const secrets = await callStore({ action: 'getSecrets' });
+    const flagged = secrets?.data?.cancelRequested === true;
+    if (flagged) runtime.cancelRequested = true;
+    return { success: true, data: { cancelRequested: flagged } };
+  } catch (error) {
+    return { success: true, data: { cancelRequested: runtime.cancelRequested === true } };
+  }
+}
+
+if (action === 'forceClose') {
+  runtime.cancelRequested = true;
+  await closeBrowser({ skipRecording: c.skipRecording === true });
+  runtime.cancelRequested = false;
+  if (c.userId) {
+    await callStore({
+      action: 'saveStatus',
+      cancelRequested: false,
+      leaveRequested: false,
+      managing: false,
+      phase: c.phase || 'cancelled',
+      message: c.message || 'Stopped',
+      lastError: ''
+    });
+    await callStore({ action: 'clearCancel' });
+  }
+  return { success: true };
+}
+
 if (action === 'launch') {
   const { chromium } = await import('playwright');
-  if (c.userId) runtime.ownerUserId = String(c.userId).trim();
-  await closeBrowser();
+  const nextUserId = String(c.userId || runtime.ownerUserId || '').trim();
+  if (runtime.browser && runtime.ownerUserId && nextUserId && runtime.ownerUserId !== nextUserId) {
+    throw new Error(`Browser busy with another user (${runtime.ownerUserId}). Cancel or wait.`);
+  }
+  if (nextUserId) runtime.ownerUserId = nextUserId;
+  runtime.cancelRequested = false;
+
+  const prefs = await callStore({ action: 'get' });
+  runtime.recordVideo = c.recordVideo === false
+    ? false
+    : prefs?.data?.recordVideo !== false;
+
+  await closeBrowser({ skipRecording: true });
   const headless = process.env.ZOOM_PW_HEADLESS !== 'false';
   runtime.browser = await chromium.launch({
     headless,
@@ -209,12 +321,14 @@ if (action === 'launch') {
   const options = {
     viewport: { width: 1280, height: 720 },
     locale: 'en-US',
-    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-    recordVideo: {
+    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
+  };
+  if (runtime.recordVideo) {
+    options.recordVideo = {
       dir: live,
       size: { width: 1280, height: 720 }
-    }
-  };
+    };
+  }
   if (c.storageState) {
     try {
       options.storageState = typeof c.storageState === 'string'
@@ -226,7 +340,7 @@ if (action === 'launch') {
   }
   runtime.context = await runtime.browser.newContext(options);
   runtime.page = await runtime.context.newPage();
-  return { success: true };
+  return { success: true, data: { recordVideo: runtime.recordVideo } };
 }
 
 if (action === 'persistSession') {

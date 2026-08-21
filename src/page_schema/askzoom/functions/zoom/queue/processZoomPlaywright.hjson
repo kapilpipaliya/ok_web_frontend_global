@@ -63,13 +63,33 @@ try {
     const action = job.data?.action || job.name;
     const userId = String(job.data?.userId || '').trim();
     if (!userId) throw new Error('Zoom job missing userId');
+
+    const runtimeSnap = await runAction('zoomPlaywrightRuntime', { action: 'get' }).catch(() => null);
+    const busyOwner = runtimeSnap?.data?.ownerUserId || '';
+    if (runtimeSnap?.data?.busy && busyOwner && busyOwner !== userId && action !== 'cancel') {
+      throw new Error(`Playwright busy with another user (${busyOwner})`);
+    }
+
     await runAction('zoomPlaywrightRuntime', { action: 'setOwnerUserId', userId });
     await logMessage('info', `Zoom job started: ${action}`, { jobId: job.id, userId });
     try {
-      if (action === 'login') {
+      if (action === 'cancel') {
+        await runAction('zoomPlaywrightRuntime', {
+          action: 'forceClose',
+          userId,
+          phase: 'cancelled',
+          message: 'Cancelled by user'
+        });
+        await s({
+          functionName: 'zoomSettingStore',
+          contextData: { action: 'clearCancel', userId }
+        }, { functionLookupSubDomain: _.subDomain });
+      } else if (action === 'login') {
         await runAction('zoomPlaywrightLogin', { userId });
       } else if (action === 'logout') {
         await runAction('zoomPlaywrightLogout', { userId });
+      } else if (action === 'checkSession') {
+        await runAction('zoomPlaywrightCheckSession', { userId });
       } else if (action === 'manage') {
         await runAction('zoomPlaywrightManage', {
           userId,

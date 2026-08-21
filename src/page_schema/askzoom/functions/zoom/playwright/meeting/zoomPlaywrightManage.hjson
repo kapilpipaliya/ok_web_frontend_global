@@ -28,6 +28,15 @@ const meetingUrl = String(c.meetingUrl || secrets?.meetingUrl || '').trim();
 if (!meetingUrl) throw new Error('Meeting URL is required');
 if (!secrets?.storageState) throw new Error('Login session missing. Run Zoom login first.');
 
+// Session health check before joining
+const health = await s({
+  functionName: 'zoomPlaywrightCheckSession',
+  contextData: { userId: c.userId || secrets.userId }
+}, { functionLookupSubDomain: _.subDomain });
+if (health.result?.data?.loggedIn === false || health.result?.success === false) {
+  throw new Error(health.result?.message || health.result?.error || 'Zoom session expired. Run login again.');
+}
+
 const { meetingId, joinUrl } = parseMeetingJoinUrl(meetingUrl);
 if (!meetingId || !joinUrl) throw new Error('Invalid meeting URL or meeting ID');
 
@@ -304,11 +313,40 @@ runtime.managing = true;
 runtime.manageTimer = setInterval(async () => {
   if (!runtime.managing || !runtime.page) return;
   try {
+    const cancelCheck = await s({
+      functionName: 'zoomPlaywrightRuntime',
+      contextData: { action: 'isCancelRequested' }
+    }, { functionLookupSubDomain: _.subDomain });
+    if (cancelCheck.result?.data?.cancelRequested) {
+      await s({
+        functionName: 'zoomPlaywrightRuntime',
+        contextData: {
+          action: 'forceClose',
+          userId: c.userId,
+          phase: 'cancelled',
+          message: 'Cancelled by user'
+        }
+      }, { functionLookupSubDomain: _.subDomain });
+      return;
+    }
+
     const secretsNow = await s({
       functionName: 'zoomSettingStore',
       contextData: { action: 'getSecrets' }
     }, { functionLookupSubDomain: _.subDomain });
-    if (secretsNow.result?.data?.leaveRequested) {
+    if (secretsNow.result?.data?.leaveRequested || secretsNow.result?.data?.cancelRequested) {
+      if (secretsNow.result?.data?.cancelRequested) {
+        await s({
+          functionName: 'zoomPlaywrightRuntime',
+          contextData: {
+            action: 'forceClose',
+            userId: c.userId,
+            phase: 'cancelled',
+            message: 'Cancelled by user'
+          }
+        }, { functionLookupSubDomain: _.subDomain });
+        return;
+      }
       await s({
         functionName: 'zoomPlaywrightLeave',
         contextData: {}

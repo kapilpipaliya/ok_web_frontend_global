@@ -104,6 +104,8 @@ const buildPublicData = (p, { includeScreenshot = false, userId = '' } = {}) => 
     loggedIn: p.zoomLoggedIn === true || p.zoomLoggedIn === 'true',
     managing: p.zoomManaging === true || p.zoomManaging === 'true',
     leaveRequested: p.zoomLeaveRequested === true || p.zoomLeaveRequested === 'true',
+    cancelRequested: p.zoomCancelRequested === true || p.zoomCancelRequested === 'true',
+    recordVideo: p.zoomRecordVideo !== false && p.zoomRecordVideo !== 'false',
     phase: p.zoomPhase || 'idle',
     message: p.zoomMessage || '',
     lastError: p.zoomLastError || '',
@@ -116,6 +118,7 @@ const buildPublicData = (p, { includeScreenshot = false, userId = '' } = {}) => 
     lastRecordingSize: hasRecording ? lastSize : 0,
     lastRecordingId: hasRecording ? (p.zoomLastRecordingId || history[0]?.id || '') : '',
     recordingHistory: history.slice(0, HISTORY_LIMIT).map(({ path, ...rest }) => rest),
+    recordingQuotaBytes: Number(process.env.ZOOM_PW_RECORDING_QUOTA_MB || 10240) * 1024 * 1024,
     admittedCount: Number(p.zoomAdmittedCount || 0),
     hasSession: !!p.zoomStorageState,
     updatedAt: p.zoomUpdatedAt || p.updatedAt || ''
@@ -151,7 +154,9 @@ if (action === 'getSecrets') {
       displayName: p.zoomDisplayName || '',
       meetingUrl: p.zoomMeetingUrl || '',
       storageState: p.zoomStorageState || '',
-      leaveRequested: p.zoomLeaveRequested === true || p.zoomLeaveRequested === 'true'
+      leaveRequested: p.zoomLeaveRequested === true || p.zoomLeaveRequested === 'true',
+      cancelRequested: p.zoomCancelRequested === true || p.zoomCancelRequested === 'true',
+      recordVideo: p.zoomRecordVideo !== false && p.zoomRecordVideo !== 'false'
     }
   };
 }
@@ -174,6 +179,11 @@ if (action === 'saveCredentials') {
     'z.updatedAt = datetime()'
   ];
   const params = { userId: ownerUserId, email, displayName, meetingUrl };
+
+  if (c.recordVideo !== undefined) {
+    sets.push('z.zoomRecordVideo = $recordVideo');
+    params.recordVideo = c.recordVideo === true;
+  }
 
   if (password !== undefined && password !== null && String(password).length > 0) {
     sets.push('z.zoomPasswordEncrypted = $passwordEncrypted');
@@ -238,7 +248,9 @@ if (action === 'saveStatus') {
     zoomLastError: c.lastError,
     zoomManaging: c.managing,
     zoomLeaveRequested: c.leaveRequested,
+    zoomCancelRequested: c.cancelRequested,
     zoomLoggedIn: c.loggedIn,
+    zoomRecordVideo: c.recordVideo,
     zoomLastScreenshot: c.lastScreenshot,
     zoomLastScreenshotAt: c.lastScreenshotAt,
     zoomHasRecording: c.hasRecording,
@@ -279,6 +291,46 @@ if (action === 'requestLeave') {
     RETURN z
   `, { userId: ownerUserId });
   return { success: true, message: 'Leave requested. Session will stay logged in.' };
+}
+
+if (action === 'requestCancel') {
+  await _.session.run(`
+    ${OWNER_MATCH}
+    SET z.zoomCancelRequested = true,
+        z.zoomLeaveRequested = true,
+        z.zoomManaging = false,
+        z.zoomPhase = 'cancelling',
+        z.zoomMessage = 'Cancel requested...',
+        z.updatedAt = datetime()
+    RETURN z
+  `, { userId: ownerUserId });
+  return { success: true, message: 'Cancel requested' };
+}
+
+if (action === 'clearCancel') {
+  await _.session.run(`
+    ${OWNER_MATCH}
+    SET z.zoomCancelRequested = false,
+        z.updatedAt = datetime()
+    RETURN z
+  `, { userId: ownerUserId });
+  return { success: true };
+}
+
+if (action === 'setPreferences') {
+  if (c.recordVideo === undefined) {
+    return { success: false, error: 'recordVideo is required' };
+  }
+  await _.session.run(`
+    ${OWNER_MATCH}
+    SET z.zoomRecordVideo = $recordVideo,
+        z.updatedAt = datetime()
+    RETURN z
+  `, {
+    userId: ownerUserId,
+    recordVideo: c.recordVideo === true
+  });
+  return { success: true, message: 'Preferences saved', data: { recordVideo: c.recordVideo === true } };
 }
 
 if (action === 'clearSession') {

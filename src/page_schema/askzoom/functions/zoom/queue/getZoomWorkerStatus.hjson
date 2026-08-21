@@ -5,7 +5,7 @@
       L: Function
       P: {
         key: getZoomWorkerStatus
-        description: Zoom worker phase, queue counts, session flags, and latest manage screenshot
+        description: Zoom worker phase, queue counts, session flags, logs, and latest manage screenshot
         body:
           '''
 const settingsResult = await s({
@@ -13,6 +13,7 @@ const settingsResult = await s({
   contextData: { action: 'get', includeScreenshot: true }
 });
 const settings = settingsResult.result?.data || settingsResult.data || {};
+const userId = String(settings.userId || '').trim();
 
 let queueCounts = { waiting: 0, active: 0, delayed: 0, failed: 0, completed: 0 };
 try {
@@ -30,11 +31,66 @@ try {
   // Redis may be down; still return DB status
 }
 
+let runtime = {};
+try {
+  const runtimeRes = await s({
+    functionName: 'zoomPlaywrightRuntime',
+    contextData: { action: 'get' }
+  }, { functionLookupSubDomain: _.subDomain });
+  runtime = runtimeRes.result?.data || {};
+} catch (error) {
+  // optional
+}
+
+let workerLogs = [];
+try {
+  const logResult = await _.session.run(`
+    MATCH (log:WorkerLog {workerName: 'processZoomPlaywright'})
+    RETURN log
+    ORDER BY log.createdAt DESC
+    LIMIT 80
+  `);
+  workerLogs = logResult.records
+    .map((record) => {
+      const node = record.get('log');
+      const vertex = node ? _.convertNodeToJson(node) : null;
+      const p = vertex?.P || {};
+      let metadata = {};
+      try {
+        metadata = typeof p.metadata === 'string' ? JSON.parse(p.metadata || '{}') : (p.metadata || {});
+      } catch (error) {
+        metadata = {};
+      }
+      return {
+        level: p.level || 'info',
+        message: p.message || '',
+        createdAt: p.createdAt || '',
+        metadata
+      };
+    })
+    .filter((entry) => {
+      if (!userId) return true;
+      const metaUser = String(entry.metadata?.userId || '');
+      return !metaUser || metaUser === userId;
+    })
+    .slice(0, 30);
+} catch (error) {
+  workerLogs = [];
+}
+
 return {
   success: true,
   data: {
     ...settings,
     queueCounts,
+    runtime: {
+      busy: !!runtime.busy,
+      ownerUserId: runtime.ownerUserId || '',
+      jobAction: runtime.jobAction || '',
+      hasBrowser: !!runtime.hasBrowser,
+      managing: !!runtime.managing
+    },
+    workerLogs,
     workerKey: 'processZoomPlaywright',
     workerHint: 'Start processZoomPlaywright from Worker Management so Playwright runs in a background worker.'
   }

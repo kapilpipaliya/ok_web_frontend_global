@@ -5,14 +5,14 @@
       L: Function
       P: {
         key: enqueueZoomJob
-        description: Queue a Zoom Playwright job (login, logout, manage, leave). Playwright runs only in the background worker.
+        description: Queue a Zoom Playwright job (login, logout, manage, leave, cancel, checkSession)
         body:
           '''
 const action = String(c.action || '').trim();
-const allowed = ['login', 'logout', 'manage', 'leave'];
+const allowed = ['login', 'logout', 'manage', 'leave', 'cancel', 'checkSession'];
 
 if (!allowed.includes(action)) {
-  return { success: false, error: 'action must be login, logout, manage, or leave' };
+  return { success: false, error: 'action must be login, logout, manage, leave, cancel, or checkSession' };
 }
 
 const sessionUser = await _.getUserFromSession();
@@ -27,20 +27,103 @@ const settingsResult = await s({
 });
 const settings = settingsResult.result?.data || settingsResult.data || {};
 
-if ((action === 'login' || action === 'logout' || action === 'manage') && !settings.email) {
+const helpers = await s({
+  functionName: 'zoomQueueHelpers',
+  contextData: {}
+}, { functionLookupSubDomain: _.subDomain });
+
+if (!helpers.result?.success) {
+  return { success: false, error: helpers.result?.error || 'Failed to initialize Zoom queue' };
+}
+
+const queue = helpers.result.data.createZoomQueue();
+
+const assertBrowserNotBusyWithOtherUser = async () => {
+  try {
+    const runtimeRes = await s({
+      functionName: 'zoomPlaywrightRuntime',
+      contextData: { action: 'get' }
+    }, { functionLookupSubDomain: _.subDomain });
+    const rt = runtimeRes.result?.data || {};
+    if (rt.busy && rt.ownerUserId && rt.ownerUserId !== userId) {
+      throw new Error(`Playwright is busy with another user. Ask them to cancel, or wait.`);
+    }
+  } catch (error) {
+    if (/busy with another user/i.test(error.message)) throw error;
+    // runtime may be unreachable from web process — still check queue
+  }
+
+  const jobs = await queue.getJobs(['active', 'waiting', 'delayed']);
+  const foreign = jobs.find((job) => {
+    const other = String(job.data?.userId || '');
+    return other && other !== userId;
+  });
+  if (foreign) {
+    throw new Error(`Zoom queue is busy with another user job (${foreign.name || foreign.data?.action}). Wait or ask them to cancel.`);
+  }
+};
+
+if (action === 'cancel') {
+  await s({
+    functionName: 'zoomSettingStore',
+    contextData: { action: 'requestCancel', userId }
+  });
+
+  const myJobs = await queue.getJobs(['waiting', 'delayed', 'active']);
+  for (const job of myJobs) {
+    if (String(job.data?.userId || '') !== userId) continue;
+    const state = await job.getState();
+    if (state === 'waiting' || state === 'delayed') {
+      try { await job.remove(); } catch (error) {}
+    }
+  }
+
+  // Best-effort force close if this process hosts the runtime (worker will also honor cancel flag)
+  await s({
+    functionName: 'zoomPlaywrightRuntime',
+    contextData: { action: 'requestCancel', userId }
+  }, { functionLookupSubDomain: _.subDomain }).catch(() => {});
+
+  await queue.add(
+    'cancel',
+    { action: 'cancel', userId },
+    {
+      jobId: `zoom-cancel-${userId}-${Date.now()}`,
+      attempts: 1,
+      removeOnComplete: 20,
+      removeOnFail: 20
+    }
+  );
+
+  await queue.close();
+  return { success: true, message: 'Cancel requested. Worker will stop and close the browser.' };
+}
+
+try {
+  await assertBrowserNotBusyWithOtherUser();
+} catch (error) {
+  await queue.close();
+  return { success: false, error: error.message };
+}
+
+if ((action === 'login' || action === 'logout' || action === 'manage' || action === 'checkSession') && !settings.email) {
+  await queue.close();
   return { success: false, error: 'Save Zoom credentials first' };
 }
 
 if (action === 'login' && !settings.hasPassword) {
+  await queue.close();
   return { success: false, error: 'Save a Zoom password first' };
 }
 
-if ((action === 'logout' || action === 'manage') && !settings.hasSession && !settings.loggedIn) {
+if ((action === 'logout' || action === 'manage' || action === 'checkSession') && !settings.hasSession && !settings.loggedIn) {
+  await queue.close();
   return { success: false, error: 'Not logged in. Run Zoom login first.' };
 }
 
 let meetingUrl = String(c.meetingUrl || settings.meetingUrl || '').trim();
 if (action === 'manage' && !meetingUrl) {
+  await queue.close();
   return { success: false, error: 'Meeting URL is required to start managing' };
 }
 
@@ -61,7 +144,8 @@ if (action === 'manage') {
       message: 'Manage job queued',
       lastError: '',
       managing: false,
-      leaveRequested: false
+      leaveRequested: false,
+      cancelRequested: false
     }
   });
 }
@@ -74,29 +158,36 @@ if (action === 'login') {
       userId,
       phase: 'queued',
       message: 'Login job queued',
-      lastError: ''
+      lastError: '',
+      cancelRequested: false
     }
   });
 }
 
-const helpers = await s({
-  functionName: 'zoomQueueHelpers',
-  contextData: {}
-}, { functionLookupSubDomain: _.subDomain });
-
-if (!helpers.result?.success) {
-  return { success: false, error: helpers.result?.error || 'Failed to initialize Zoom queue' };
+if (action === 'checkSession') {
+  await s({
+    functionName: 'zoomSettingStore',
+    contextData: {
+      action: 'saveStatus',
+      userId,
+      phase: 'queued',
+      message: 'Session check queued',
+      lastError: '',
+      cancelRequested: false
+    }
+  });
 }
 
-const queue = helpers.result.data.createZoomQueue();
 const jobId = `zoom-${action}-${userId}`;
 const existing = await queue.getJob(jobId);
 if (existing) {
   const state = await existing.getState();
   if (state === 'active' || state === 'waiting' || state === 'delayed') {
     if (action === 'leave') {
+      await queue.close();
       return { success: true, message: 'Leave flag set. Worker will stop managing and keep the login session.' };
     }
+    await queue.close();
     return { success: false, error: `A ${action} job is already ${state}` };
   }
   try {

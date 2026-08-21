@@ -13,10 +13,17 @@ const [busy, setBusy] = _.createSignal(false);
 const [transferBusy, setTransferBusy] = _.createSignal(false);
 const [status, setStatus] = _.createSignal(null);
 const [importJson, setImportJson] = _.createSignal('');
+const [selectedRecordingId, setSelectedRecordingId] = _.createSignal('');
 
 const loadStatus = async () => {
   const res = await s({ functionName: 'getZoomWorkerStatus', contextData: {} });
-  if (res.result?.success) setStatus(res.result.data);
+  if (res.result?.success) {
+    setStatus(res.result.data);
+    const data = res.result.data;
+    if (!selectedRecordingId() && data?.lastRecordingId) {
+      setSelectedRecordingId(data.lastRecordingId);
+    }
+  }
 };
 
 const login = async () => {
@@ -31,6 +38,24 @@ const login = async () => {
       await loadStatus();
     } else {
       _.showErrorToast(res.result?.error || res.error || 'Login queue failed');
+    }
+  } finally {
+    setBusy(false);
+  }
+};
+
+const cancelJob = async () => {
+  setBusy(true);
+  try {
+    const res = await s({
+      functionName: 'enqueueZoomJob',
+      contextData: { action: 'cancel' }
+    });
+    if (res.result?.success) {
+      _.showSuccessToast(res.result.message || 'Cancel requested');
+      await loadStatus();
+    } else {
+      _.showErrorToast(res.result?.error || res.error || 'Cancel failed');
     }
   } finally {
     setBusy(false);
@@ -117,12 +142,25 @@ return {
   status,
   importJson,
   setImportJson,
+  selectedRecordingId,
+  setSelectedRecordingId,
   loadStatus,
   login,
+  cancelJob,
   exportSession,
   importSession,
   onImportFile,
   formatBytes,
+  recordingSrc: () => {
+    const current = status();
+    const history = current?.recordingHistory || [];
+    const id = selectedRecordingId() || current?.lastRecordingId || '';
+    const item = history.find((entry) => entry.id === id);
+    const stamp = item?.at || current?.lastRecordingAt || '';
+    const qs = new URLSearchParams({ t: stamp });
+    if (id) qs.set('id', id);
+    return current?.hasRecording ? `/api/zoom/recording?${qs.toString()}` : '';
+  },
   startPolling: () => {
     loadStatus();
     if (statusTimer) clearInterval(statusTimer);
@@ -186,6 +224,23 @@ return {
   loading: f.busy(),
   disabled: f.busy() || f.transferBusy(),
   onClick: f.login
+};
+'''
+      }
+    }
+    {
+      id: "5b"
+      L: Attr
+      P: {
+        displayOrder: 3.5
+        componentName: Button
+        props:
+          '''
+return {
+  text: 'Force stop / cancel',
+  variant: 'danger',
+  disabled: f.busy() || f.transferBusy(),
+  onClick: f.cancelJob
 };
 '''
       }
@@ -354,9 +409,40 @@ Error: ${status.lastError || '-'}
 Recording: ${status.hasRecording
   ? `${status.lastRecordingAction || 'saved'} (${f.formatBytes(status.lastRecordingSize || 0)})`
   : 'none'}
+Record video: ${status.recordVideo === false ? 'off' : 'on'}
+Browser busy: ${status.runtime?.busy ? `yes (${status.runtime?.ownerUserId || '-'})` : 'no'}
 Queue active/waiting: ${status.queueCounts?.active || 0}/${status.queueCounts?.waiting || 0}
 ${status.workerHint || ''}`
   : 'Loading status...';
+return { as: 'pre', text };
+'''
+      }
+    }
+    {
+      id: "6b"
+      L: Attr
+      P: {
+        displayOrder: 9.5
+        componentName: Html
+        css:
+          '''
+return `._id {
+  margin-top: 0.75rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid ${t.var.color.border};
+  border-radius: 0.5rem;
+  white-space: pre-wrap;
+  font-size: 0.8rem;
+  max-height: 12rem;
+  overflow: auto;
+}`;
+'''
+        props:
+          '''
+const logs = f.status()?.workerLogs || [];
+const text = logs.length
+  ? logs.map((entry) => `${entry.level || 'info'}: ${entry.message || ''}`).join('\\n')
+  : 'No worker logs yet';
 return { as: 'pre', text };
 '''
       }
@@ -395,8 +481,10 @@ return {
   variant: 'secondary',
   hide: () => !status?.hasRecording,
   onClick: () => {
-    const stamp = status?.lastRecordingAt || '';
-    const id = status?.lastRecordingId || '';
+    const id = f.selectedRecordingId() || status?.lastRecordingId || '';
+    const history = status?.recordingHistory || [];
+    const item = history.find((entry) => entry.id === id);
+    const stamp = item?.at || status?.lastRecordingAt || '';
     const qs = new URLSearchParams({ download: '1', t: stamp });
     if (id) qs.set('id', id);
     window.open(`/api/zoom/recording?${qs.toString()}`, '_blank');
@@ -424,14 +512,9 @@ return `._id {
 '''
         props:
           '''
-const status = f.status();
-const stamp = status?.lastRecordingAt || '';
-const id = status?.lastRecordingId || '';
-const qs = new URLSearchParams({ t: stamp });
-if (id) qs.set('id', id);
 return {
   as: 'video',
-  src: status?.hasRecording ? `/api/zoom/recording?${qs.toString()}` : '',
+  src: f.recordingSrc(),
   controls: true,
   playsinline: true,
   hide: () => !f.status()?.hasRecording
@@ -446,7 +529,7 @@ return {
         displayOrder: 13
         componentName: Html
         css: "return `._id { margin-top: 1rem; font-weight: 600; }`;"
-        props: "return { as: 'h3', text: 'Recording history', hide: () => !(f.status()?.recordingHistory || []).length };"
+        props: "return { as: 'h3', text: 'Recording history (click to cycle)', hide: () => !(f.status()?.recordingHistory || []).length };"
       }
     }
     {
@@ -459,25 +542,57 @@ return {
           '''
 return `._id {
   margin-top: 0.5rem;
-  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}`;
+'''
+        props: "return { as: 'div', hide: () => !(f.status()?.recordingHistory || []).length };"
+      }
+    }
+    {
+      id: "8d"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''
+return `._id {
+  text-align: left;
+  padding: 0.5rem 0.75rem;
   border: 1px solid ${t.var.color.border};
-  border-radius: 0.5rem;
-  white-space: pre-wrap;
+  border-radius: 0.375rem;
+  background: ${t.var.color.background};
+  cursor: pointer;
   font-size: 0.85rem;
 }`;
 '''
         props:
           '''
 const history = f.status()?.recordingHistory || [];
+// Render as a single pre list with click via buttons mapped in fns is hard in Attr tree;
+// use text list + selected id note; buttons added per first 5 via repeated attrs is heavy.
+// Fallback: clickable via data attributes on a select-like list using onClick on container children not available.
+// Use a compact button per history item through dynamic text is not supported; keep pre + Play selected pattern.
+const selected = f.selectedRecordingId() || f.status()?.lastRecordingId || '';
 const text = history.map((item, index) => {
-  const label = item.action || 'zoom';
-  const when = item.at || '-';
-  const size = f.formatBytes(item.size || 0);
-  return `${index + 1}. ${label} · ${size} · ${when} · id=${item.id || '-'}`;
+  const mark = item.id === selected ? '>' : ' ';
+  return `${mark} ${index + 1}. ${item.action || 'zoom'} · ${f.formatBytes(item.size || 0)} · ${item.at || '-'} · ${item.id || '-'}`;
 }).join('\\n');
 return {
   as: 'pre',
-  text: text || 'No history',
+  text,
+  title: 'Click to cycle selected recording',
+  onClick: () => {
+    const list = f.status()?.recordingHistory || [];
+    if (!list.length) return;
+    const current = f.selectedRecordingId() || list[0].id;
+    const idx = Math.max(0, list.findIndex((entry) => entry.id === current));
+    const next = list[(idx + 1) % list.length];
+    f.setSelectedRecordingId(next.id);
+    _.showSuccessToast('Playing ' + (next.action || 'recording'));
+  },
   hide: () => !history.length
 };
 '''
@@ -555,6 +670,12 @@ return {
       E: "5"
     }
     {
+      id: e5b
+      T: Attr
+      S: "2"
+      E: "5b"
+    }
+    {
       id: e11
       T: Attr
       S: "2"
@@ -609,6 +730,12 @@ return {
       E: "6"
     }
     {
+      id: e6b
+      T: Attr
+      S: "2"
+      E: "6b"
+    }
+    {
       id: e7
       T: Attr
       S: "2"
@@ -637,6 +764,12 @@ return {
       T: Attr
       S: "2"
       E: "8c"
+    }
+    {
+      id: e8d
+      T: Attr
+      S: "8c"
+      E: "8d"
     }
     {
       id: e9
