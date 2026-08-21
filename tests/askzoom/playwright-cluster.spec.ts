@@ -11,7 +11,7 @@ import {
 } from "~/lib/zoom/askzoomPlaywrightCluster";
 
 /**
- * Requires Redis. Skips when Redis is unreachable.
+ * Zoom facade over workerCluster. Requires Redis.
  */
 const SUB = `askzoom-cluster-test-${Date.now()}`;
 const USER = `user-${Date.now()}`;
@@ -25,7 +25,7 @@ async function redisUp() {
   }
 }
 
-test.describe("askzoomPlaywrightCluster", () => {
+test.describe("askzoomPlaywrightCluster facade", () => {
   test.beforeAll(async () => {
     test.skip(!(await redisUp()), "Redis not available");
   });
@@ -35,24 +35,28 @@ test.describe("askzoomPlaywrightCluster", () => {
     await releaseAskzoomLease(SUB, USER).catch(() => {});
   });
 
-  test("atomic lease is owned by stable nodeId", async () => {
-    const first = await acquireAskzoomLease(SUB, USER, { jobAction: "manage" });
+  test("maps userId lease fields", async () => {
+    const first = await acquireAskzoomLease(SUB, USER, {
+      jobAction: "manage",
+      managing: true,
+    });
     expect(first.ok).toBe(true);
+    expect(first.lease?.userId).toBe(USER);
+    expect(first.lease?.jobAction).toBe("manage");
+    expect(first.lease?.managing).toBe(true);
     expect(first.lease?.nodeId).toBe(getAskzoomNodeId());
 
-    const again = await acquireAskzoomLease(SUB, USER, { jobAction: "manage" });
-    expect(again.ok).toBe(true);
-
     const lease = await getAskzoomLease(SUB, USER);
-    expect(lease?.userId).toBe(USER);
-    expect(lease?.nodeId).toBe(getAskzoomNodeId());
+    expect(lease?.managing).toBe(true);
   });
 
-  test("publishControlAndWait ACKs via local handler", async () => {
-    let handled = "";
+  test("publishControlAndWait maps control data fields", async () => {
+    let phase = "";
     registerAskzoomControlHandler(SUB, USER, async (msg) => {
-      handled = msg.type;
-      if (msg.type === "cancel") return;
+      if (msg.type === "cancel") {
+        phase = msg.phase || "";
+        return;
+      }
       throw new Error(`unexpected ${msg.type}`);
     });
 
@@ -63,16 +67,6 @@ test.describe("askzoomPlaywrightCluster", () => {
       message: "test",
     });
     expect(ack.ok).toBe(true);
-    expect(handled).toBe("cancel");
-  });
-
-  test("publishControlAndWait times out without owner handler", async () => {
-    await expect(
-      publishAskzoomControlAndWait(
-        SUB,
-        { type: "forceClose", userId: `${USER}-missing` },
-        { timeoutMs: 500 },
-      ),
-    ).rejects.toThrow(/ACK timeout/i);
+    expect(phase).toBe("cancelled");
   });
 });

@@ -102,6 +102,13 @@ import {
   releaseAskzoomLease,
   unregisterAskzoomControlHandler,
 } from "~/lib/zoom/askzoomPlaywrightCluster";
+import {
+  createWorkerCluster,
+  type WorkerClusterOptions,
+  type WorkerControlHandler,
+  type WorkerControlMessage,
+  type WorkerLease,
+} from "~/lib/worker/workerCluster";
 // Enhanced server function utilities
 import { errors, isAppError, errorToResponse } from "~/lib/utils/errorClasses";
 import {
@@ -603,6 +610,55 @@ export async function executeNamedServerFunctionCore(
       bullmq,
       request: context.request,
       subDomain: subDomain,
+      // Generic Redis leases + pub/sub ACK (bind to current subdomain)
+      workerCluster: (
+        namespace: string,
+        options?: Omit<WorkerClusterOptions, "namespace">,
+      ) => {
+        const cluster = createWorkerCluster({ namespace, ...options });
+        return {
+          namespace: cluster.namespace,
+          nodeId: () => cluster.getNodeId(),
+          ensureBus: () => cluster.ensureBus(subDomain),
+          acquireLease: (ownerId: string, meta?: Record<string, unknown>) =>
+            cluster.acquireLease(subDomain, ownerId, meta),
+          refreshLease: (
+            ownerId: string,
+            metaPatch?: Record<string, unknown>,
+          ) => cluster.refreshLease(subDomain, ownerId, metaPatch),
+          releaseLease: (ownerId: string) =>
+            cluster.releaseLease(subDomain, ownerId),
+          getLease: (ownerId: string) => cluster.getLease(subDomain, ownerId),
+          isLeaseOwner: (lease: WorkerLease | null | undefined) =>
+            cluster.isLeaseOwner(lease),
+          countBusy: () => cluster.countBusy(subDomain),
+          listLeases: () => cluster.listLeases(subDomain),
+          publish: (
+            message: Omit<
+              WorkerControlMessage,
+              "subdomain" | "fromNodeId" | "at"
+            > &
+              Partial<Pick<WorkerControlMessage, "at" | "requestId">>,
+          ) => cluster.publish(subDomain, message),
+          publishAndWait: (
+            message: Omit<
+              WorkerControlMessage,
+              | "subdomain"
+              | "fromNodeId"
+              | "at"
+              | "requestId"
+              | "type"
+              | "ok"
+              | "error"
+            > & { type: string },
+            publishOptions?: { timeoutMs?: number },
+          ) => cluster.publishAndWait(subDomain, message, publishOptions),
+          registerHandler: (ownerId: string, handler: WorkerControlHandler) =>
+            cluster.registerHandler(subDomain, ownerId, handler),
+          unregisterHandler: (ownerId: string) =>
+            cluster.unregisterHandler(subDomain, ownerId),
+        };
+      },
       // AskZoom Playwright in-process browser slots (scoped to current subdomain)
       askzoomPlaywright: {
         getSlot: (
