@@ -1,0 +1,105 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: importZoomSession
+        description: Import Playwright Zoom storageState from another server
+        body:
+          '''
+const rawInput = c.json != null ? c.json : c.sessionJson;
+if (rawInput === undefined || rawInput === null || String(rawInput).trim() === '') {
+  return { success: false, error: 'Paste or upload an exported session JSON' };
+}
+
+let parsed;
+try {
+  parsed = typeof rawInput === 'string' ? JSON.parse(String(rawInput).trim()) : rawInput;
+} catch (error) {
+  return { success: false, error: 'Invalid JSON' };
+}
+
+let storageState = null;
+let loggedIn = true;
+let email = '';
+let displayName = '';
+
+if (parsed?.type === 'askzoom-playwright-session' || parsed?.storageState) {
+  storageState = parsed.storageState;
+  if (parsed.loggedIn === false) loggedIn = false;
+  email = String(parsed.email || '').trim();
+  displayName = String(parsed.displayName || '').trim();
+} else if (parsed?.cookies || parsed?.origins) {
+  storageState = parsed;
+} else {
+  return {
+    success: false,
+    error: 'JSON must be an askzoom-playwright-session export or a Playwright storageState object'
+  };
+}
+
+if (!storageState || (!storageState.cookies && !storageState.origins)) {
+  return { success: false, error: 'Session JSON is missing Playwright cookies/origins' };
+}
+
+const storageStateString = typeof storageState === 'string'
+  ? storageState
+  : JSON.stringify(storageState);
+
+const saveResult = await s({
+  functionName: 'zoomSettingStore',
+  contextData: {
+    action: 'saveSession',
+    storageState: storageStateString,
+    loggedIn
+  }
+});
+if (saveResult.error) {
+  return { success: false, error: saveResult.error };
+}
+if (saveResult.result && saveResult.result.success === false) {
+  return saveResult.result;
+}
+
+await s({
+  functionName: 'zoomSettingStore',
+  contextData: {
+    action: 'saveStatus',
+    phase: 'logged_in',
+    message: 'Session imported from another server',
+    lastError: '',
+    managing: false,
+    leaveRequested: false,
+    loggedIn
+  }
+});
+
+if (email || displayName) {
+  const current = await s({
+    functionName: 'zoomSettingStore',
+    contextData: { action: 'get' }
+  });
+  const data = current.result?.data || current.data || {};
+  await s({
+    functionName: 'zoomSettingStore',
+    contextData: {
+      action: 'saveCredentials',
+      email: email || data.email || 'imported@zoom.local',
+      displayName: displayName || data.displayName || '',
+      meetingUrl: data.meetingUrl || ''
+    }
+  });
+}
+
+return {
+  success: true,
+  message: 'Zoom session imported. You can open Manage without re-login.',
+  data: { loggedIn, hasSession: true, email: email || undefined }
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

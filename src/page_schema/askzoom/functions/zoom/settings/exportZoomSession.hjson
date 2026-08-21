@@ -1,0 +1,65 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: exportZoomSession
+        description: Export Playwright Zoom storageState for transfer to another server
+        body:
+          '''
+const secretsResult = await s({
+  functionName: 'zoomSettingStore',
+  contextData: { action: 'getSecrets' }
+});
+if (secretsResult.error) {
+  return { success: false, error: secretsResult.error };
+}
+const secrets = secretsResult.result?.data || secretsResult.data || {};
+const raw = secrets.storageState || '';
+if (!raw) {
+  return { success: false, error: 'No Zoom login session saved on this server. Run login first.' };
+}
+
+let storageState = raw;
+try {
+  storageState = typeof raw === 'string' ? JSON.parse(raw) : raw;
+} catch (error) {
+  return { success: false, error: 'Saved session is not valid JSON' };
+}
+
+if (!storageState || (!storageState.cookies && !storageState.origins)) {
+  return { success: false, error: 'Saved session is missing Playwright cookies/origins' };
+}
+
+const statusResult = await s({
+  functionName: 'zoomSettingStore',
+  contextData: { action: 'get' }
+});
+const status = statusResult.result?.data || statusResult.data || {};
+
+const payload = {
+  type: 'askzoom-playwright-session',
+  version: 1,
+  exportedAt: new Date().toISOString(),
+  email: secrets.email || status.email || '',
+  displayName: secrets.displayName || status.displayName || '',
+  loggedIn: status.loggedIn !== false,
+  storageState
+};
+
+return {
+  success: true,
+  message: 'Session exported',
+  data: {
+    payload,
+    json: JSON.stringify(payload, null, 2),
+    fileName: `askzoom-session-${(secrets.email || 'zoom').replace(/[^a-zA-Z0-9._-]+/g, '_')}.json`
+  }
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

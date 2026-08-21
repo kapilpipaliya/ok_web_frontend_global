@@ -10,7 +10,9 @@
         fns:
           '''
 const [busy, setBusy] = _.createSignal(false);
+const [transferBusy, setTransferBusy] = _.createSignal(false);
 const [status, setStatus] = _.createSignal(null);
+const [importJson, setImportJson] = _.createSignal('');
 
 const loadStatus = async () => {
   const res = await s({ functionName: 'getZoomWorkerStatus', contextData: {} });
@@ -35,12 +37,84 @@ const login = async () => {
   }
 };
 
+const downloadText = (text, fileName) => {
+  const blob = new Blob([text], { type: 'application/json;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName || 'askzoom-session.json';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+};
+
+const exportSession = async () => {
+  setTransferBusy(true);
+  try {
+    const res = await s({ functionName: 'exportZoomSession', contextData: {} });
+    if (!res.result?.success) {
+      _.showErrorToast(res.result?.error || res.error || 'Export failed');
+      return;
+    }
+    const data = res.result.data || {};
+    downloadText(data.json || JSON.stringify(data.payload, null, 2), data.fileName);
+    _.showSuccessToast(res.result.message || 'Session exported');
+  } finally {
+    setTransferBusy(false);
+  }
+};
+
+const importSession = async () => {
+  const json = String(importJson() || '').trim();
+  if (!json) {
+    _.showErrorToast('Paste an exported session JSON first');
+    return;
+  }
+  setTransferBusy(true);
+  try {
+    const res = await s({
+      functionName: 'importZoomSession',
+      contextData: { json }
+    });
+    if (res.result?.success) {
+      setImportJson('');
+      _.showSuccessToast(res.result.message || 'Session imported');
+      await loadStatus();
+    } else {
+      _.showErrorToast(res.result?.error || res.error || 'Import failed');
+    }
+  } finally {
+    setTransferBusy(false);
+  }
+};
+
+const onImportFile = async (event) => {
+  const file = event?.target?.files?.[0];
+  if (!file) return;
+  try {
+    const text = await file.text();
+    setImportJson(text);
+    _.showSuccessToast(`Loaded ${file.name}`);
+  } catch (error) {
+    _.showErrorToast(error?.message || 'Could not read file');
+  } finally {
+    if (event?.target) event.target.value = '';
+  }
+};
+
 let statusTimer = null;
 return {
   busy,
+  transferBusy,
   status,
+  importJson,
+  setImportJson,
   loadStatus,
   login,
+  exportSession,
+  importSession,
+  onImportFile,
   startPolling: () => {
     loadStatus();
     if (statusTimer) clearInterval(statusTimer);
@@ -88,7 +162,7 @@ return {
         displayOrder: 2
         componentName: Html
         css: "return `._id { color: ${t.var.color.text_light_400}; margin: 0 0 1.25rem; line-height: 1.5; }`;"
-        props: "return { as: 'p', text: 'Queues a Playwright login in processZoomPlaywright. The browser session is saved on GlobalSetting.' };"
+        props: "return { as: 'p', text: 'Queues a Playwright login in processZoomPlaywright. The browser session is saved on GlobalSetting. Export/import to move that session between servers.' };"
       }
     }
     {
@@ -102,8 +176,142 @@ return {
 return {
   text: f.busy() ? 'Queueing...' : 'Login with Playwright',
   loading: f.busy(),
-  disabled: f.busy(),
+  disabled: f.busy() || f.transferBusy(),
   onClick: f.login
+};
+'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        css: "return `._id { margin-top: 2rem; font-size: 1.15rem; font-weight: 600; }`;"
+        props: "return { as: 'h2', text: 'Transfer session between servers' };"
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        css: "return `._id { color: ${t.var.color.text_light_400}; margin: 0.35rem 0 0.85rem; line-height: 1.5; }`;"
+        props: "return { as: 'p', text: 'Export downloads the Playwright storageState JSON from this server. Import pastes/uploads that file on another server so Manage works without logging in again.' };"
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        displayOrder: 6
+        componentName: Html
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}`;
+'''
+        props: "return { as: 'div' };"
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''
+return {
+  text: f.transferBusy() ? 'Working...' : 'Export session',
+  variant: 'secondary',
+  loading: f.transferBusy(),
+  disabled: f.busy() || f.transferBusy() || !f.status()?.hasSession,
+  onClick: f.exportSession
+};
+'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        css:
+          '''
+return `._id {
+  font-size: 0.9rem;
+  color: ${t.var.color.text_light_400};
+}`;
+'''
+        props:
+          '''
+return {
+  as: 'label',
+  text: 'Or choose JSON file',
+  style: 'display:inline-flex;align-items:center;gap:0.5rem;cursor:pointer;'
+};
+'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: 'input',
+  type: 'file',
+  accept: 'application/json,.json',
+  disabled: f.busy() || f.transferBusy(),
+  onChange: f.onImportFile
+};
+'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        displayOrder: 7
+        componentName: TextArea
+        props:
+          '''
+return {
+  value: f.importJson(),
+  rows: 8,
+  placeholder: 'Paste exported askzoom-session JSON here…',
+  disabled: f.busy() || f.transferBusy(),
+  onInput: (event) => f.setImportJson(event.target.value)
+};
+'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        displayOrder: 8
+        componentName: Button
+        props:
+          '''
+return {
+  text: f.transferBusy() ? 'Importing...' : 'Import session',
+  variant: 'secondary',
+  loading: f.transferBusy(),
+  disabled: f.busy() || f.transferBusy() || !String(f.importJson() || '').trim(),
+  onClick: f.importSession
 };
 '''
       }
@@ -112,7 +320,7 @@ return {
       id: "6"
       L: Attr
       P: {
-        displayOrder: 4
+        displayOrder: 9
         componentName: Html
         css:
           '''
@@ -132,6 +340,7 @@ const text = status
   ? `Phase: ${status.phase || 'idle'}
 Message: ${status.message || '-'}
 Logged in: ${status.loggedIn ? 'yes' : 'no'}
+Has session: ${status.hasSession ? 'yes' : 'no'}
 Email: ${status.email || '-'}
 Error: ${status.lastError || '-'}
 Recording: ${status.hasRecording ? (status.lastRecordingAction || 'saved') : 'none'}
@@ -146,7 +355,7 @@ return { as: 'pre', text };
       id: "7"
       L: Attr
       P: {
-        displayOrder: 5
+        displayOrder: 10
         componentName: Html
         css: "return `._id { margin-top: 1.25rem; font-weight: 600; }`;"
         props:
@@ -166,7 +375,7 @@ return {
       id: "8"
       L: Attr
       P: {
-        displayOrder: 6
+        displayOrder: 11
         componentName: Html
         css:
           '''
@@ -197,7 +406,7 @@ return {
       id: "9"
       L: Attr
       P: {
-        displayOrder: 7
+        displayOrder: 12
         componentName: Html
         css: "return `._id { margin-top: 1.25rem; font-weight: 600; }`;"
         props: "return { as: 'h2', text: 'Last screenshot', hide: () => !f.status()?.lastScreenshot };"
@@ -207,7 +416,7 @@ return {
       id: "10"
       L: Attr
       P: {
-        displayOrder: 8
+        displayOrder: 13
         componentName: Html
         css:
           '''
@@ -263,6 +472,54 @@ return {
       T: Attr
       S: "2"
       E: "5"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "2"
+      E: "11"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "2"
+      E: "12"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "2"
+      E: "13"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "13"
+      E: "14"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "13"
+      E: "15"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "15"
+      E: "16"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "2"
+      E: "17"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "2"
+      E: "18"
     }
     {
       id: e5
