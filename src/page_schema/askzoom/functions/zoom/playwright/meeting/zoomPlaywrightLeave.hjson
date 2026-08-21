@@ -27,8 +27,11 @@ if ((!runtime || !runtime.page) && userId) {
       functionName: 'zoomSettingStore',
       contextData: { action: 'requestLeave', userId }
     }, { functionLookupSubDomain: _.subDomain });
-    await _.askzoomPlaywright.publishControlAndWait({ type: 'leave', userId });
-    return { success: true, forwarded: true, message: 'Leave acknowledged by owner node' };
+    await _.askzoomPlaywright.publishControlAndWait(
+      { type: 'leave', userId },
+      { waitFor: 'done' }
+    );
+    return { success: true, forwarded: true, message: 'Leave completed on owner node' };
   }
 }
 

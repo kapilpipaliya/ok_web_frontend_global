@@ -147,6 +147,152 @@ test.describe("workerCluster", () => {
     expect(cluster.getMetrics().reclaimOk).toBeGreaterThan(0);
   });
 
+  test("reclaimLease refuses steal when live owner accepted and TTL is healthy", async () => {
+    const liveOwner = `${OWNER}-live`;
+    const redis = redisClient();
+    await redis.connect();
+    const key = `worker:${NS}:lease:${SUB}:${liveOwner}`;
+    const busy = `worker:${NS}:busy:${SUB}`;
+    await redis.set(
+      key,
+      JSON.stringify({
+        ownerId: liveOwner,
+        nodeId: "other-live-node",
+        pid: 2,
+        updatedAt: new Date().toISOString(),
+        token: "live-token",
+        meta: { job: "alive" },
+      }),
+      "EX",
+      60,
+    );
+    await redis.sadd(busy, liveOwner);
+
+    const ctrlChannel = `worker:${NS}:ctrl:${SUB}`;
+    const ackChannel = `worker:${NS}:ack:${SUB}`;
+    const sub = redisClient();
+    await sub.connect();
+    await sub.subscribe(ctrlChannel);
+    sub.on("message", async (channel, raw) => {
+      if (channel !== ctrlChannel) return;
+      let msg: WorkerControlMessage;
+      try {
+        msg = JSON.parse(raw);
+      } catch {
+        return;
+      }
+      if (msg.ownerId !== liveOwner || !msg.requestId) return;
+      const pub = redisClient();
+      await pub.connect();
+      await pub.publish(
+        ackChannel,
+        JSON.stringify({
+          type: "ack",
+          ownerId: liveOwner,
+          subdomain: SUB,
+          fromNodeId: "other-live-node",
+          requestId: msg.requestId,
+          ackPhase: "accepted",
+          ok: true,
+          at: new Date().toISOString(),
+        }),
+      );
+      await pub.quit();
+    });
+
+    await cluster.ensureBus(SUB);
+    await new Promise((r) => setTimeout(r, 50));
+
+    const result = await cluster.reclaimLease(
+      SUB,
+      liveOwner,
+      { job: "steal" },
+      { maxStealPttlMs: 1000 },
+    );
+    expect(result.ok).toBe(false);
+    expect(result.reason).toMatch(/still holds lease/i);
+
+    const still = await cluster.getLease(SUB, liveOwner);
+    expect(still?.nodeId).toBe("other-live-node");
+
+    await sub.unsubscribe(ctrlChannel);
+    await sub.quit();
+    await redis.del(key);
+    await redis.srem(busy, liveOwner);
+    await redis.quit();
+  });
+
+  test("reclaimLease steals when live owner accepted but PTTL is low", async () => {
+    const lowTtlOwner = `${OWNER}-lowttl`;
+    const redis = redisClient();
+    await redis.connect();
+    const key = `worker:${NS}:lease:${SUB}:${lowTtlOwner}`;
+    const busy = `worker:${NS}:busy:${SUB}`;
+    await redis.set(
+      key,
+      JSON.stringify({
+        ownerId: lowTtlOwner,
+        nodeId: "other-node",
+        pid: 3,
+        updatedAt: new Date().toISOString(),
+        token: "t",
+        meta: {},
+      }),
+      "PX",
+      800,
+    );
+    await redis.sadd(busy, lowTtlOwner);
+
+    const ctrlChannel = `worker:${NS}:ctrl:${SUB}`;
+    const ackChannel = `worker:${NS}:ack:${SUB}`;
+    const sub = redisClient();
+    await sub.connect();
+    await sub.subscribe(ctrlChannel);
+    sub.on("message", async (channel, raw) => {
+      if (channel !== ctrlChannel) return;
+      let msg: WorkerControlMessage;
+      try {
+        msg = JSON.parse(raw);
+      } catch {
+        return;
+      }
+      if (msg.ownerId !== lowTtlOwner || !msg.requestId) return;
+      const pub = redisClient();
+      await pub.connect();
+      await pub.publish(
+        ackChannel,
+        JSON.stringify({
+          type: "ack",
+          ownerId: lowTtlOwner,
+          subdomain: SUB,
+          fromNodeId: "other-node",
+          requestId: msg.requestId,
+          ackPhase: "accepted",
+          ok: true,
+          at: new Date().toISOString(),
+        }),
+      );
+      await pub.quit();
+    });
+
+    await cluster.ensureBus(SUB);
+    await new Promise((r) => setTimeout(r, 50));
+
+    const result = await cluster.reclaimLease(
+      SUB,
+      lowTtlOwner,
+      { job: "take" },
+      { maxStealPttlMs: 5000 },
+    );
+    expect(result.ok).toBe(true);
+    expect(result.lease?.nodeId).toBe(cluster.getNodeId());
+
+    await sub.unsubscribe(ctrlChannel);
+    await sub.quit();
+    await redis.quit();
+    await cluster.releaseLease(SUB, lowTtlOwner, { force: true }).catch(() => {});
+  });
+
   test("cross-process: remote subscriber ACKs cancel from this node", async () => {
     const remoteOwner = `${OWNER}-remote`;
     const ctrlChannel = `worker:${NS}:ctrl:${SUB}`;

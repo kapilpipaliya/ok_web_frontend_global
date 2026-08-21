@@ -71,12 +71,15 @@ if (action === 'cancel') {
   await _.askzoomPlaywright.ensureControlBus();
   const lease = await _.askzoomPlaywright.getLease(userId);
   if (lease) {
-    await _.askzoomPlaywright.publishControlAndWait({
-      type: 'cancel',
-      userId,
-      phase: 'cancelled',
-      message: 'Cancelled by user'
-    });
+    await _.askzoomPlaywright.publishControlAndWait(
+      {
+        type: 'cancel',
+        userId,
+        phase: 'cancelled',
+        message: 'Cancelled by user'
+      },
+      { waitFor: 'done' }
+    );
   }
   await s({
     functionName: 'zoomPlaywrightRuntime',
@@ -87,7 +90,7 @@ if (action === 'cancel') {
   return {
     success: true,
     message: lease
-      ? 'Cancel acknowledged by owner node.'
+      ? 'Cancel completed on owner node.'
       : 'Cancel recorded. No active Playwright lease.'
   };
 }

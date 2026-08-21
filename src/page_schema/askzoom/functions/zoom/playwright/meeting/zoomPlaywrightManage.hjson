@@ -365,7 +365,9 @@ await _.askzoomPlaywright.refreshLease(userId, {
   managing: true
 });
 _.askzoomPlaywright.registerControlHandler(userId, async (msg) => {
+  const slot = _.askzoomPlaywright.getSlot(userId, { create: false });
   if (msg.type === 'leave') {
+    if (slot?.leaving || slot?.closing) return;
     await s({
       functionName: 'zoomPlaywrightLeave',
       contextData: { userId }
@@ -373,6 +375,7 @@ _.askzoomPlaywright.registerControlHandler(userId, async (msg) => {
     return;
   }
   if (msg.type === 'cancel' || msg.type === 'forceClose') {
+    if (slot?.closing || slot?.leaving) return;
     await s({
       functionName: 'zoomPlaywrightRuntime',
       contextData: {

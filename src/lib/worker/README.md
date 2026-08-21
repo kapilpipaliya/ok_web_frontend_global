@@ -91,7 +91,11 @@ If Worker 1 dies while holding a lease, the key may still exist until TTL.
 `reclaimLease(ownerId, meta)`:
 
 1. Best-effort `forceClose` to the prior owner (`waitFor: 'accepted'`, short timeout).
-2. **Steals** the lease (Lua overwrite) and issues a new fencing `token`.
+2. Steal **only if safe**:
+   - lease already gone, or
+   - prior owner did **not** ACK `accepted` (likely dead), or
+   - remaining `PTTL` ≤ `maxStealPttlMs` (default ~15% of lease TTL, capped at 5s).
+3. If the owner accepted and TTL is still healthy → reclaim **fails** (wait for release/TTL).
 
 AskZoom `launch` calls reclaim when another node owns the slot instead of failing immediately.
 
@@ -190,8 +194,10 @@ Keep using `_.askzoomPlaywright` — it maps to the same Redis layer:
 - `acquireLease(userId, { jobAction, managing })`
 - `reclaimLease(userId, …)` — used on launch when another node holds the slot
 - `publishControlAndWait({ type: 'leave' | 'cancel' | …, userId, … }, { waitFor? })`
+  - Leave/cancel/forceClose from Zoom schemas use `waitFor: 'done'` so HTTP returns after the owner finishes.
 - In-process `getSlot(userId)` stays local to the worker that launched the browser
-- `getMetrics()` — AskZoom namespace counters
+- `getMetrics()` — AskZoom namespace counters (also on `getZoomWorkerStatus` as `clusterMetrics`)
+- Control handlers ignore duplicate leave/cancel while `leaving` / `closing`
 
 ## Shutdown
 
@@ -223,9 +229,10 @@ There is **no silent local fallback** if Redis is down: coordination must fail v
 2. Register the control handler **before** any wait that can be cancelled.
 3. Refresh the lease on a heartbeat while work is active.
 4. Always `releaseLease` + `unregisterHandler` in cleanup (shutdown does this for local leases).
-5. Use `publishAndWait` for cross-process commands; default `waitFor: 'accepted'` avoids timeouts on long leave/cancel. Use `waitFor: 'done'` when the caller must know completion.
+5. Use `publishAndWait` for cross-process commands; default `waitFor: 'accepted'` avoids timeouts on long work. Zoom leave/cancel use `waitFor: 'done'`.
 6. Cap concurrency with `countBusy()` vs your max slots — do not trust in-process counts alone when `NITRO_CLUSTER_WORKERS > 1`.
-7. Prefer `reclaimLease` over blindly failing when another `nodeId` still holds a possibly-dead lease.
+7. Prefer `reclaimLease` over blindly failing when another `nodeId` still holds a possibly-dead lease (it will not steal a healthy live owner).
+8. Make control handlers idempotent (`leaving` / `closing` guards).
 
 ## Tests
 

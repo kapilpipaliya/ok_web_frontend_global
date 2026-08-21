@@ -13,6 +13,8 @@ export type AskzoomPlaywrightSlot = {
   admittedCount: number;
   jobAction: string;
   leaving: boolean;
+  /** True while forceClose/closeBrowser is in progress (idempotent control). */
+  closing: boolean;
   ownerUserId: string;
   cancelRequested: boolean;
   recordVideo: boolean;
@@ -50,6 +52,7 @@ export const createEmptySlot = (userId: string): AskzoomPlaywrightSlot => ({
   admittedCount: 0,
   jobAction: "",
   leaving: false,
+  closing: false,
   ownerUserId: userId,
   cancelRequested: false,
   recordVideo: true,

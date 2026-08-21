@@ -79,6 +79,7 @@ if (userId && looksManaging && !lease) {
 }
 
 const clusterSlots = await _.askzoomPlaywright.listClusterSlots();
+const clusterMetrics = _.askzoomPlaywright.getMetrics();
 
 let workerLogs = [];
 try {
@@ -142,8 +143,10 @@ return {
       leaseLocal:
         runtime.leaseLocal === true ||
         (lease ? _.askzoomPlaywright.isLeaseOwner(lease) : false),
-      clusterSlots
+      clusterSlots,
+      clusterMetrics
     },
+    clusterMetrics,
     lastMetricsFromLog: metricsLog?.metadata || null,
     workerLogs,
     workerKey: 'processZoomPlaywright',

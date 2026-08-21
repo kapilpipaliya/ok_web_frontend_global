@@ -80,14 +80,16 @@ export type WorkerCluster = {
     meta?: Record<string, unknown>,
   ) => Promise<{ ok: boolean; lease: WorkerLease | null; reason?: string }>;
   /**
-   * Best-effort forceClose to prior owner, then steal the lease.
-   * Use when the prior worker may be dead but the key has not expired yet.
+   * Notify prior owner via forceClose, then steal only if safe:
+   * - owner did not ACK accepted (likely dead), or
+   * - lease already gone, or
+   * - remaining PTTL is at/below maxStealPttlMs
    */
   reclaimLease: (
     subDomain: string | null | undefined,
     ownerId: string,
     meta?: Record<string, unknown>,
-    options?: { forceCloseTimeoutMs?: number },
+    options?: { forceCloseTimeoutMs?: number; maxStealPttlMs?: number },
   ) => Promise<{ ok: boolean; lease: WorkerLease | null; reason?: string }>;
   refreshLease: (
     subDomain: string | null | undefined,
@@ -687,6 +689,7 @@ function createClusterInstance(
         }
       }
 
+      let ownerAccepted = false;
       if (existing && existing.nodeId !== bus().nodeId) {
         const forceCloseTimeoutMs = Math.max(
           500,
@@ -702,11 +705,43 @@ function createClusterInstance(
             },
             { timeoutMs: forceCloseTimeoutMs, waitFor: "accepted" },
           );
+          ownerAccepted = true;
         } catch {
-          // Prior owner likely dead or slow — continue to steal.
+          ownerAccepted = false;
         }
       }
 
+      const redis = await getRedis();
+      const key = leaseKey(namespace, sub, id);
+      const pttl = await redis.pttl(key);
+      const stillHeld = await getLease(sub, id);
+
+      if (!stillHeld || pttl === -2) {
+        const acquired = await runAcquire(sub, id, meta, false);
+        if (acquired.ok) metrics.reclaimOk += 1;
+        else metrics.reclaimFail += 1;
+        return acquired;
+      }
+
+      const maxStealPttlMs = Math.max(
+        0,
+        Number(
+          options.maxStealPttlMs ??
+            Math.min(5000, Math.floor(leaseTtlSec * 1000 * 0.15)),
+        ),
+      );
+
+      // Alive owner accepted forceClose but still holds a healthy TTL — do not steal.
+      if (ownerAccepted && pttl > maxStealPttlMs) {
+        metrics.reclaimFail += 1;
+        return {
+          ok: false,
+          lease: stillHeld,
+          reason: `Prior owner accepted forceClose and still holds lease (pttl=${pttl}ms > ${maxStealPttlMs}ms). Wait for release or TTL.`,
+        };
+      }
+
+      // Dead owner (no accepted ACK) or TTL nearly expired — steal.
       const stolen = await runAcquire(sub, id, meta, true);
       if (stolen.ok) metrics.reclaimOk += 1;
       else metrics.reclaimFail += 1;

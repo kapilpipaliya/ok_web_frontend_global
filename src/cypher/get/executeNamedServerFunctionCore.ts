@@ -630,7 +630,10 @@ export async function executeNamedServerFunctionCore(
           reclaimLease: (
             ownerId: string,
             meta?: Record<string, unknown>,
-            reclaimOptions?: { forceCloseTimeoutMs?: number },
+            reclaimOptions?: {
+              forceCloseTimeoutMs?: number;
+              maxStealPttlMs?: number;
+            },
           ) =>
             cluster.reclaimLease(subDomain, ownerId, meta, reclaimOptions),
           refreshLease: (
@@ -706,7 +709,10 @@ export async function executeNamedServerFunctionCore(
         reclaimLease: (
           userId: string,
           meta?: { jobAction?: string; managing?: boolean },
-          reclaimOptions?: { forceCloseTimeoutMs?: number },
+          reclaimOptions?: {
+            forceCloseTimeoutMs?: number;
+            maxStealPttlMs?: number;
+          },
         ) => reclaimAskzoomLease(subDomain, userId, meta, reclaimOptions),
         refreshLease: (
           userId: string,

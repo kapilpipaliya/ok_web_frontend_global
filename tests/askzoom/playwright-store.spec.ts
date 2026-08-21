@@ -43,5 +43,6 @@ test.describe("askzoomPlaywrightStore", () => {
     expect(slot.ownerUserId).toBe("x");
     expect(slot.managing).toBe(false);
     expect(slot.recordVideo).toBe(true);
+    expect(slot.closing).toBe(false);
   });
 });

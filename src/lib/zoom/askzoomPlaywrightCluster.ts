@@ -188,7 +188,7 @@ export async function reclaimAskzoomLease(
   subDomain: string | null | undefined,
   userId: string,
   meta: { jobAction?: string; managing?: boolean } = {},
-  options?: { forceCloseTimeoutMs?: number },
+  options?: { forceCloseTimeoutMs?: number; maxStealPttlMs?: number },
 ): Promise<{ ok: boolean; lease: AskzoomLease | null; reason?: string }> {
   const result = await cluster.reclaimLease(
     subDomain,

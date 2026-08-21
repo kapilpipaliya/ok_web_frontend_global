@@ -32,8 +32,9 @@ const bindControlHandler = (slotUserId) => {
   if (!id) return;
   store.registerControlHandler(id, async (msg) => {
     const slot = store.getSlot(id, { create: false });
-    if (!slot?.browser && !slot?.managing) return;
+    if (!slot?.browser && !slot?.managing && !slot?.leaving && !slot?.closing) return;
     if (msg.type === 'leave') {
+      if (slot.leaving || slot.closing) return;
       await s({
         functionName: 'zoomPlaywrightLeave',
         contextData: { userId: id }
@@ -41,6 +42,7 @@ const bindControlHandler = (slotUserId) => {
       return;
     }
     if (msg.type === 'cancel' || msg.type === 'forceClose') {
+      if (slot.closing || slot.leaving) return;
       slot.cancelRequested = true;
       await s({
         functionName: 'zoomPlaywrightRuntime',
@@ -373,13 +375,16 @@ if (action === 'forceClose') {
   const slot = userId ? store.getSlot(userId, { create: false }) : null;
   const localBrowser = !!(slot?.browser || slot?.managing);
   if (!localBrowser && c.localOnly !== true) {
-    await store.publishControlAndWait({
-      type: 'forceClose',
-      userId,
-      phase: c.phase || 'cancelled',
-      message: c.message || 'Stopped',
-      skipRecording: c.skipRecording === true
-    });
+    await store.publishControlAndWait(
+      {
+        type: 'forceClose',
+        userId,
+        phase: c.phase || 'cancelled',
+        message: c.message || 'Stopped',
+        skipRecording: c.skipRecording === true
+      },
+      { waitFor: 'done' }
+    );
     await callStore({
       action: 'saveStatus',
       cancelRequested: false,
@@ -404,20 +409,29 @@ if (action === 'forceClose') {
     await store.releaseLease(userId);
     return { success: true };
   }
+  if (slot.closing) {
+    return { success: true, message: 'Force close already in progress' };
+  }
+  slot.closing = true;
   slot.cancelRequested = true;
-  await closeBrowser(slot, { skipRecording: c.skipRecording === true });
-  slot.cancelRequested = false;
-  await callStore({
-    action: 'saveStatus',
-    cancelRequested: false,
-    leaveRequested: false,
-    managing: false,
-    phase: c.phase || 'cancelled',
-    message: c.message || 'Stopped',
-    lastError: ''
-  });
-  await callStore({ action: 'clearCancel' });
-  return { success: true };
+  try {
+    await closeBrowser(slot, { skipRecording: c.skipRecording === true });
+    slot.cancelRequested = false;
+    await callStore({
+      action: 'saveStatus',
+      cancelRequested: false,
+      leaveRequested: false,
+      managing: false,
+      phase: c.phase || 'cancelled',
+      message: c.message || 'Stopped',
+      lastError: ''
+    });
+    await callStore({ action: 'clearCancel' });
+    await store.releaseLease(userId);
+    return { success: true };
+  } finally {
+    slot.closing = false;
+  }
 }
 
 if (action === 'isCancelRequested') {
@@ -465,6 +479,8 @@ if (action === 'launch') {
   }
 
   runtime.cancelRequested = false;
+  runtime.closing = false;
+  runtime.leaving = false;
   bindControlHandler(userId);
 
   const prefs = await callStore({ action: 'get' });
