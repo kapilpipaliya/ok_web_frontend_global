@@ -5,6 +5,8 @@
 
 import {
   createWorkerCluster,
+  type PublishAndWaitOptions,
+  type WorkerClusterMetrics,
   type WorkerControlMessage,
   type WorkerLease,
 } from "~/lib/worker/workerCluster";
@@ -16,6 +18,7 @@ export type AskzoomLease = {
   jobAction: string;
   managing: boolean;
   updatedAt: string;
+  token: string;
 };
 
 export type AskzoomControlMessage = {
@@ -24,6 +27,7 @@ export type AskzoomControlMessage = {
   subdomain: string;
   fromNodeId: string;
   requestId?: string;
+  ackPhase?: "accepted" | "done";
   phase?: string;
   message?: string;
   skipRecording?: boolean;
@@ -62,6 +66,7 @@ function toAskzoomLease(lease: WorkerLease | null): AskzoomLease | null {
     jobAction: String(meta.jobAction || ""),
     managing: meta.managing === true,
     updatedAt: lease.updatedAt,
+    token: lease.token || "",
   };
 }
 
@@ -73,6 +78,7 @@ function toAskzoomControl(msg: WorkerControlMessage): AskzoomControlMessage {
     subdomain: msg.subdomain,
     fromNodeId: msg.fromNodeId,
     requestId: msg.requestId,
+    ackPhase: msg.ackPhase,
     phase: data.phase !== undefined ? String(data.phase) : undefined,
     message: data.message !== undefined ? String(data.message) : undefined,
     skipRecording: data.skipRecording === true,
@@ -145,7 +151,7 @@ export async function publishAskzoomControlAndWait(
     AskzoomControlMessage,
     "subdomain" | "fromNodeId" | "at" | "requestId" | "type"
   > & { type: Exclude<AskzoomControlMessage["type"], "ack" | "refresh"> },
-  options: { timeoutMs?: number } = {},
+  options: PublishAndWaitOptions = {},
 ): Promise<AskzoomControlMessage> {
   const ack = await cluster.publishAndWait(
     subDomain,
@@ -171,6 +177,28 @@ export async function acquireAskzoomLease(
     jobAction: meta.jobAction || "",
     managing: meta.managing === true,
   });
+  return {
+    ok: result.ok,
+    lease: toAskzoomLease(result.lease),
+    reason: result.reason,
+  };
+}
+
+export async function reclaimAskzoomLease(
+  subDomain: string | null | undefined,
+  userId: string,
+  meta: { jobAction?: string; managing?: boolean } = {},
+  options?: { forceCloseTimeoutMs?: number },
+): Promise<{ ok: boolean; lease: AskzoomLease | null; reason?: string }> {
+  const result = await cluster.reclaimLease(
+    subDomain,
+    userId,
+    {
+      jobAction: meta.jobAction || "",
+      managing: meta.managing === true,
+    },
+    options,
+  );
   return {
     ok: result.ok,
     lease: toAskzoomLease(result.lease),
@@ -236,9 +264,18 @@ export function isAskzoomLeaseOwner(
     nodeId: lease.nodeId,
     pid: lease.pid,
     updatedAt: lease.updatedAt,
+    token: lease.token || "",
     meta: {
       jobAction: lease.jobAction,
       managing: lease.managing,
     },
   });
+}
+
+export function getAskzoomClusterMetrics(): WorkerClusterMetrics {
+  return cluster.getMetrics();
+}
+
+export async function shutdownAskzoomPlaywrightCluster(): Promise<void> {
+  await cluster.shutdown();
 }

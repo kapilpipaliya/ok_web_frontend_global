@@ -88,27 +88,32 @@ import {
   listSlots as listAskzoomPlaywrightSlots,
 } from "~/lib/zoom/askzoomPlaywrightStore";
 import {
+  createWorkerCluster,
+  shutdownAllWorkerClusters,
+  type PublishAndWaitOptions,
+  type WorkerClusterMetrics,
+  type WorkerClusterOptions,
+  type WorkerControlHandler,
+  type WorkerControlMessage,
+  type WorkerLease,
+} from "~/lib/worker/workerCluster";
+import {
   acquireAskzoomLease,
   countClusterBusySlots,
   ensureAskzoomControlBus,
+  getAskzoomClusterMetrics,
   getAskzoomLease,
   getAskzoomNodeId,
   isAskzoomLeaseOwner,
   listClusterSlots,
   publishAskzoomControl,
   publishAskzoomControlAndWait,
+  reclaimAskzoomLease,
   refreshAskzoomLease,
   registerAskzoomControlHandler,
   releaseAskzoomLease,
   unregisterAskzoomControlHandler,
 } from "~/lib/zoom/askzoomPlaywrightCluster";
-import {
-  createWorkerCluster,
-  type WorkerClusterOptions,
-  type WorkerControlHandler,
-  type WorkerControlMessage,
-  type WorkerLease,
-} from "~/lib/worker/workerCluster";
 // Enhanced server function utilities
 import { errors, isAppError, errorToResponse } from "~/lib/utils/errorClasses";
 import {
@@ -622,12 +627,22 @@ export async function executeNamedServerFunctionCore(
           ensureBus: () => cluster.ensureBus(subDomain),
           acquireLease: (ownerId: string, meta?: Record<string, unknown>) =>
             cluster.acquireLease(subDomain, ownerId, meta),
+          reclaimLease: (
+            ownerId: string,
+            meta?: Record<string, unknown>,
+            reclaimOptions?: { forceCloseTimeoutMs?: number },
+          ) =>
+            cluster.reclaimLease(subDomain, ownerId, meta, reclaimOptions),
           refreshLease: (
             ownerId: string,
             metaPatch?: Record<string, unknown>,
-          ) => cluster.refreshLease(subDomain, ownerId, metaPatch),
-          releaseLease: (ownerId: string) =>
-            cluster.releaseLease(subDomain, ownerId),
+            refreshOptions?: { token?: string },
+          ) =>
+            cluster.refreshLease(subDomain, ownerId, metaPatch, refreshOptions),
+          releaseLease: (
+            ownerId: string,
+            releaseOptions?: { token?: string; force?: boolean },
+          ) => cluster.releaseLease(subDomain, ownerId, releaseOptions),
           getLease: (ownerId: string) => cluster.getLease(subDomain, ownerId),
           isLeaseOwner: (lease: WorkerLease | null | undefined) =>
             cluster.isLeaseOwner(lease),
@@ -650,15 +665,20 @@ export async function executeNamedServerFunctionCore(
               | "type"
               | "ok"
               | "error"
+              | "ackPhase"
             > & { type: string },
-            publishOptions?: { timeoutMs?: number },
+            publishOptions?: PublishAndWaitOptions,
           ) => cluster.publishAndWait(subDomain, message, publishOptions),
           registerHandler: (ownerId: string, handler: WorkerControlHandler) =>
             cluster.registerHandler(subDomain, ownerId, handler),
           unregisterHandler: (ownerId: string) =>
             cluster.unregisterHandler(subDomain, ownerId),
+          getMetrics: (): WorkerClusterMetrics => cluster.getMetrics(),
+          resetMetrics: () => cluster.resetMetrics(),
+          shutdown: () => cluster.shutdown(),
         };
       },
+      shutdownAllWorkerClusters,
       // AskZoom Playwright in-process browser slots (scoped to current subdomain)
       askzoomPlaywright: {
         getSlot: (
@@ -683,6 +703,11 @@ export async function executeNamedServerFunctionCore(
           userId: string,
           meta?: { jobAction?: string; managing?: boolean },
         ) => acquireAskzoomLease(subDomain, userId, meta),
+        reclaimLease: (
+          userId: string,
+          meta?: { jobAction?: string; managing?: boolean },
+          reclaimOptions?: { forceCloseTimeoutMs?: number },
+        ) => reclaimAskzoomLease(subDomain, userId, meta, reclaimOptions),
         refreshLease: (
           userId: string,
           patch?: { jobAction?: string; managing?: boolean },
@@ -707,6 +732,7 @@ export async function executeNamedServerFunctionCore(
         ) => registerAskzoomControlHandler(subDomain, userId, handler),
         unregisterControlHandler: (userId: string) =>
           unregisterAskzoomControlHandler(subDomain, userId),
+        getMetrics: () => getAskzoomClusterMetrics(),
       },
       // driver: (await getDriver()),
       // Admin/impersonation helper functions (platform-level)

@@ -444,7 +444,16 @@ if (action === 'launch') {
     throw new Error(`All Playwright slots busy (${MAX_SLOTS}). Cancel another user or wait.`);
   }
   if (existingLease && !ownsLease) {
-    throw new Error(`Playwright slot owned by another node (${existingLease.nodeId}). Cancel or wait.`);
+    const reclaimed = await store.reclaimLease(userId, {
+      jobAction: runtime.jobAction || '',
+      managing: false
+    });
+    if (!reclaimed.ok) {
+      throw new Error(
+        reclaimed.reason ||
+          `Playwright slot owned by another node (${existingLease.nodeId}). Cancel or wait.`
+      );
+    }
   }
 
   const acquired = await store.acquireLease(userId, {

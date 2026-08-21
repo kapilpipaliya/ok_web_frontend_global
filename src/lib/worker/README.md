@@ -75,32 +75,50 @@ AskZoom uses `namespace = askzoom-pw`.
   nodeId: string;
   pid: number;
   updatedAt: string;
+  token: string; // fencing token; changes on every acquire/reclaim
   meta: Record<string, unknown>; // e.g. { jobAction, managing }
 }
 ```
 
 Acquire is **atomic** (Lua): if another `nodeId` holds the key, acquire fails; same node may refresh.
 
-Refresh extends TTL. Release deletes the lease and removes the owner from the busy set. Stale busy members (lease expired) are pruned on `countBusy`.
+Refresh extends TTL (optional token check). Release deletes the lease and removes the owner from the busy set. Stale busy members (lease expired) are pruned on `countBusy`.
+
+### Dead-owner reclaim
+
+If Worker 1 dies while holding a lease, the key may still exist until TTL.
+
+`reclaimLease(ownerId, meta)`:
+
+1. Best-effort `forceClose` to the prior owner (`waitFor: 'accepted'`, short timeout).
+2. **Steals** the lease (Lua overwrite) and issues a new fencing `token`.
+
+AskZoom `launch` calls reclaim when another node owns the slot instead of failing immediately.
+
+`createWorkerCluster` freezes `leaseTtlSec` / `ackTimeoutMs` per namespace. A later call with **different explicit** values throws.
 
 ## Control flow (cancel / leave)
 
 1. Owning worker registers a handler: `registerHandler(ownerId, fn)`.
-2. Any worker calls `publishAndWait({ type, ownerId, data })`.
-3. If the handler is **local**, it runs inline and returns an ACK (no Redis round-trip).
-4. Otherwise Redis publishes on `ctrl`; the owner runs the handler and publishes on `ack`.
-5. Caller waits until ACK or timeout (`ackTimeoutMs`).
+2. Any worker calls `publishAndWait({ type, ownerId, data }, { waitFor? })`.
+3. If the handler is **local**:
+   - `waitFor: 'accepted'` (default) — return immediately; work runs in the background.
+   - `waitFor: 'done'` — await the handler, then return.
+4. Otherwise Redis publishes on `ctrl`. The owner publishes **two** ACKs:
+   - `ackPhase: 'accepted'` — owner is alive and started work.
+   - `ackPhase: 'done'` — handler finished (`ok` / `error`).
+5. Caller resolves on the requested phase, or times out (`ackTimeoutMs`).
 
-Failed handlers set `ok: false` on the ACK; the caller throws.
+Failed handlers set `ok: false` on the **done** ACK; callers waiting for `done` throw.
 
 ```
 Worker A (HTTP: cancel)          Redis          Worker B (owns browser)
         │                          │                      │
         │──── publishAndWait ─────►│                      │
         │                          │──── ctrl msg ───────►│
-        │                          │                      │ run handler
-        │                          │◄──── ack ────────────│
-        │◄──── resolve ────────────│                      │
+        │                          │◄── ack accepted ─────┤
+        │◄──── resolve (default) ──│                      │ run handler
+        │                          │◄── ack done ─────────┤
 ```
 
 ### Example: request on Worker 2, browser on Worker 1
@@ -155,11 +173,14 @@ wc.registerHandler(ownerId, async (msg) => {
 // heartbeat
 await wc.refreshLease(ownerId, { kind: 'job' });
 
-// from another request / worker
+// from another request / worker (returns when owner accepts; use waitFor:'done' for completion)
 await wc.publishAndWait({ type: 'cancel', ownerId, data: { reason: 'user' } });
 
 await wc.releaseLease(ownerId);
 wc.unregisterHandler(ownerId);
+
+// metrics
+wc.getMetrics(); // acquireOk, publishAndWaitTimeout, controlLatencyMsSum, …
 ```
 
 ### AskZoom (existing schemas)
@@ -167,8 +188,20 @@ wc.unregisterHandler(ownerId);
 Keep using `_.askzoomPlaywright` — it maps to the same Redis layer:
 
 - `acquireLease(userId, { jobAction, managing })`
-- `publishControlAndWait({ type: 'leave' | 'cancel' | …, userId, … })`
+- `reclaimLease(userId, …)` — used on launch when another node holds the slot
+- `publishControlAndWait({ type: 'leave' | 'cancel' | …, userId, … }, { waitFor? })`
 - In-process `getSlot(userId)` stays local to the worker that launched the browser
+- `getMetrics()` — AskZoom namespace counters
+
+## Shutdown
+
+On SIGTERM/SIGINT, [`initWorkersCore`](../../server/queue/initWorkersCore.ts) calls `shutdownAllWorkerClusters()` before closing Redis cluster bus / Neo4j.
+
+Per process that:
+
+1. Runs local `forceClose` handlers for tracked leases.
+2. Releases those leases.
+3. Unregisters handlers.
 
 ## Environment
 
@@ -189,9 +222,10 @@ There is **no silent local fallback** if Redis is down: coordination must fail v
 1. Acquire a lease **before** creating sticky local state (browser, long timer).
 2. Register the control handler **before** any wait that can be cancelled.
 3. Refresh the lease on a heartbeat while work is active.
-4. Always `releaseLease` + `unregisterHandler` in cleanup.
-5. Use `publishAndWait` for cross-process commands that must run on the owner; use `publish` only for fire-and-forget.
+4. Always `releaseLease` + `unregisterHandler` in cleanup (shutdown does this for local leases).
+5. Use `publishAndWait` for cross-process commands; default `waitFor: 'accepted'` avoids timeouts on long leave/cancel. Use `waitFor: 'done'` when the caller must know completion.
 6. Cap concurrency with `countBusy()` vs your max slots — do not trust in-process counts alone when `NITRO_CLUSTER_WORKERS > 1`.
+7. Prefer `reclaimLease` over blindly failing when another `nodeId` still holds a possibly-dead lease.
 
 ## Tests
 

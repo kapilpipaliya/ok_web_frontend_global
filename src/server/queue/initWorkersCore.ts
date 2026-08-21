@@ -28,6 +28,7 @@ import { executeNamedServerFunctionCore } from "~/cypher/get/executeNamedServerF
 import { isShopDatabaseName } from "~/lib/shopify/getDatabaseNameForShop";
 import { closeClusterCommunication } from "~/server/cluster/clusterCommunication";
 import { closeDriver } from "~/cypher/core/driver";
+import { shutdownAllWorkerClusters } from "~/lib/worker/workerCluster";
 /**
  * Worker state management
  * Platform workers are stored with subdomain = 'platform'
@@ -212,12 +213,17 @@ export async function initWorkersCore() {
       await closeAllWorkersForShutdown();
       console.log("[Workers] ✓ All workers stopped");
 
-      // Step 2: Close cluster communication
+      // Step 2: Release sticky worker-cluster leases (Playwright, etc.)
+      console.log("[WorkerCluster] Releasing local leases...");
+      await shutdownAllWorkerClusters();
+      console.log("[WorkerCluster] ✓ Local leases released");
+
+      // Step 3: Close cluster communication
       console.log("[Cluster] Closing cluster communication...");
       await closeClusterCommunication();
       console.log("[Cluster] ✓ Cluster communication closed");
 
-      // Step 3: Close Neo4j driver connection pool
+      // Step 4: Close Neo4j driver connection pool
       // This releases all connections back to Neo4j server
       console.log("[Database] Closing Neo4j driver connection pool...");
       await closeDriver();
