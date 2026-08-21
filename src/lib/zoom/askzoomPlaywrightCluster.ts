@@ -1,11 +1,12 @@
 /**
  * Cluster-wide AskZoom Playwright coordination via Redis.
- * - Slot leases (who owns a user's browser) across Node cluster workers
+ * - Atomic slot leases across Node cluster workers
  * - Global busy count for MAX_SLOTS
- * - Pub/sub control so cancel/leave reach the owning process
+ * - Pub/sub control with ACK so cancel/leave confirm on the owning process
  */
 
 import { hostname } from "node:os";
+import { randomUUID } from "node:crypto";
 import Redis from "ioredis";
 
 export type AskzoomLease = {
@@ -18,13 +19,16 @@ export type AskzoomLease = {
 };
 
 export type AskzoomControlMessage = {
-  type: "cancel" | "forceClose" | "leave" | "refresh";
+  type: "cancel" | "forceClose" | "leave" | "refresh" | "ack";
   userId: string;
   subdomain: string;
   fromNodeId: string;
+  requestId?: string;
   phase?: string;
   message?: string;
   skipRecording?: boolean;
+  ok?: boolean;
+  error?: string;
   at?: string;
 };
 
@@ -36,6 +40,20 @@ const LEASE_TTL_SEC = Math.max(
   30,
   Number(process.env.ZOOM_PW_LEASE_TTL_SEC || 90),
 );
+
+const ACK_TIMEOUT_MS = Math.max(
+  1000,
+  Number(process.env.ZOOM_PW_CONTROL_ACK_MS || 8000),
+);
+
+/** Stable across process restarts when WORKER_ID / NODE_APP_INSTANCE is set (PM2 cluster). */
+function buildNodeId(): string {
+  const workerKey =
+    process.env.WORKER_ID ||
+    process.env.NODE_APP_INSTANCE ||
+    String(process.pid);
+  return `${hostname()}-${workerKey}`;
+}
 
 function redisOptions() {
   return {
@@ -63,8 +81,30 @@ function channelKey(subDomain: string) {
   return `askzoom:pw:ctrl:${subDomain}`;
 }
 
+function ackChannelKey(subDomain: string) {
+  return `askzoom:pw:ack:${subDomain}`;
+}
+
+const ACQUIRE_LEASE_LUA = `
+local key = KEYS[1]
+local busy = KEYS[2]
+local nodeId = ARGV[1]
+local payload = ARGV[2]
+local ttl = tonumber(ARGV[3])
+local userId = ARGV[4]
+local cur = redis.call('GET', key)
+if cur then
+  local ok, data = pcall(cjson.decode, cur)
+  if ok and data.nodeId and data.nodeId ~= nodeId then
+    return {0, cur}
+  end
+end
+redis.call('SET', key, payload, 'EX', ttl)
+redis.call('SADD', busy, userId)
+return {1, payload}
+`;
+
 declare global {
-  // Process-wide Redis bus (one subscriber). Same pattern as clusterState in clusterCommunication.
   var __askzoomPwCluster:
     | {
         nodeId: string;
@@ -72,7 +112,16 @@ declare global {
         subscriber: Redis | null;
         subscribed: Set<string>;
         handlers: Map<string, AskzoomControlHandler>;
+        pendingAcks: Map<
+          string,
+          {
+            resolve: (value: AskzoomControlMessage) => void;
+            reject: (error: Error) => void;
+            timer: ReturnType<typeof setTimeout>;
+          }
+        >;
         ready: Promise<void> | null;
+        acquireSha: string | null;
       }
     | undefined;
 }
@@ -80,12 +129,14 @@ declare global {
 function state() {
   if (!global.__askzoomPwCluster) {
     global.__askzoomPwCluster = {
-      nodeId: `${hostname()}-${process.pid}`,
+      nodeId: buildNodeId(),
       redis: null,
       subscriber: null,
       subscribed: new Set(),
       handlers: new Map(),
+      pendingAcks: new Map(),
       ready: null,
+      acquireSha: null,
     };
   }
   return global.__askzoomPwCluster;
@@ -106,8 +157,25 @@ async function getRedis(): Promise<Redis> {
   return client;
 }
 
+async function ensureAcquireScript(redis: Redis): Promise<string> {
+  const s = state();
+  if (s.acquireSha) return s.acquireSha;
+  s.acquireSha = (await redis.script("LOAD", ACQUIRE_LEASE_LUA)) as string;
+  return s.acquireSha;
+}
+
 function handlerKey(subDomain: string, userId: string) {
   return `${realm(subDomain)}::${String(userId || "").trim()}`;
+}
+
+function settleAck(msg: AskzoomControlMessage) {
+  const requestId = String(msg.requestId || "").trim();
+  if (!requestId) return;
+  const pending = state().pendingAcks.get(requestId);
+  if (!pending) return;
+  clearTimeout(pending.timer);
+  state().pendingAcks.delete(requestId);
+  pending.resolve(msg);
 }
 
 async function handleControlMessage(channel: string, raw: string) {
@@ -117,11 +185,41 @@ async function handleControlMessage(channel: string, raw: string) {
   } catch {
     return;
   }
-  if (!msg?.userId || !msg?.subdomain) return;
+  if (!msg?.subdomain) return;
+
+  if (msg.type === "ack" || channel === ackChannelKey(msg.subdomain)) {
+    settleAck(msg);
+    return;
+  }
+
+  if (!msg.userId) return;
   const key = handlerKey(msg.subdomain, msg.userId);
   const handler = state().handlers.get(key);
   if (!handler) return;
-  await handler(msg);
+
+  let ok = true;
+  let error = "";
+  try {
+    await handler(msg);
+  } catch (err) {
+    ok = false;
+    error = err instanceof Error ? err.message : String(err);
+  }
+
+  if (msg.requestId) {
+    const redis = await getRedis();
+    const ack: AskzoomControlMessage = {
+      type: "ack",
+      userId: msg.userId,
+      subdomain: msg.subdomain,
+      fromNodeId: state().nodeId,
+      requestId: msg.requestId,
+      ok,
+      error: error || undefined,
+      at: new Date().toISOString(),
+    };
+    await redis.publish(ackChannelKey(msg.subdomain), JSON.stringify(ack));
+  }
 }
 
 export async function ensureAskzoomControlBus(
@@ -131,7 +229,8 @@ export async function ensureAskzoomControlBus(
   const sub = realm(subDomain);
   if (!s.ready) {
     s.ready = (async () => {
-      await getRedis();
+      const redis = await getRedis();
+      await ensureAcquireScript(redis);
       if (!s.subscriber) {
         const subClient = new Redis(redisOptions());
         subClient.on("error", (err) => {
@@ -149,7 +248,7 @@ export async function ensureAskzoomControlBus(
   }
   await s.ready;
   if (!s.subscribed.has(sub) && s.subscriber) {
-    await s.subscriber.subscribe(channelKey(sub));
+    await s.subscriber.subscribe(channelKey(sub), ackChannelKey(sub));
     s.subscribed.add(sub);
   }
 }
@@ -176,7 +275,7 @@ export function unregisterAskzoomControlHandler(
 export async function publishAskzoomControl(
   subDomain: string | null | undefined,
   message: Omit<AskzoomControlMessage, "subdomain" | "fromNodeId" | "at"> &
-    Partial<Pick<AskzoomControlMessage, "at">>,
+    Partial<Pick<AskzoomControlMessage, "at" | "requestId">>,
 ): Promise<void> {
   const sub = realm(subDomain);
   await ensureAskzoomControlBus(sub);
@@ -188,6 +287,71 @@ export async function publishAskzoomControl(
     at: message.at || new Date().toISOString(),
   };
   await redis.publish(channelKey(sub), JSON.stringify(payload));
+}
+
+/**
+ * Publish a control message and wait for the owning node ACK.
+ * If this node owns the handler, runs it inline and ACKs locally.
+ */
+export async function publishAskzoomControlAndWait(
+  subDomain: string | null | undefined,
+  message: Omit<
+    AskzoomControlMessage,
+    "subdomain" | "fromNodeId" | "at" | "requestId" | "type"
+  > & { type: Exclude<AskzoomControlMessage["type"], "ack" | "refresh"> },
+  options: { timeoutMs?: number } = {},
+): Promise<AskzoomControlMessage> {
+  const sub = realm(subDomain);
+  const userId = String(message.userId || "").trim();
+  if (!userId) throw new Error("userId is required for control ACK");
+  await ensureAskzoomControlBus(sub);
+
+  const requestId = randomUUID();
+  const timeoutMs = options.timeoutMs ?? ACK_TIMEOUT_MS;
+  const localHandler = state().handlers.get(handlerKey(sub, userId));
+
+  if (localHandler) {
+    try {
+      await localHandler({
+        ...message,
+        subdomain: sub,
+        fromNodeId: state().nodeId,
+        requestId,
+        at: new Date().toISOString(),
+      });
+      return {
+        type: "ack",
+        userId,
+        subdomain: sub,
+        fromNodeId: state().nodeId,
+        requestId,
+        ok: true,
+        at: new Date().toISOString(),
+      };
+    } catch (err) {
+      const error = err instanceof Error ? err.message : String(err);
+      throw new Error(`Local control handler failed: ${error}`);
+    }
+  }
+
+  const ackPromise = new Promise<AskzoomControlMessage>((resolve, reject) => {
+    const timer = setTimeout(() => {
+      state().pendingAcks.delete(requestId);
+      reject(
+        new Error(
+          `Control ACK timeout after ${timeoutMs}ms (${message.type} for ${userId})`,
+        ),
+      );
+    }, timeoutMs);
+    state().pendingAcks.set(requestId, { resolve, reject, timer });
+  });
+
+  await publishAskzoomControl(sub, { ...message, requestId });
+  const ack = await ackPromise;
+  if (ack.ok === false) {
+    throw new Error(ack.error || `Control ${message.type} failed on owner node`);
+  }
+  return ack;
 }
 
 export async function getAskzoomLease(
@@ -212,6 +376,7 @@ export async function acquireAskzoomLease(
   const sub = realm(subDomain);
   await ensureAskzoomControlBus(sub);
   const redis = await getRedis();
+  const sha = await ensureAcquireScript(redis);
   const nodeId = state().nodeId;
   const lease: AskzoomLease = {
     userId: id,
@@ -221,27 +386,31 @@ export async function acquireAskzoomLease(
     managing: meta.managing === true,
     updatedAt: new Date().toISOString(),
   };
-  const key = leaseKey(sub, id);
-  const busy = busyKey(sub);
-  const existing = await redis.get(key);
-  if (existing) {
+  const result = (await redis.evalsha(
+    sha,
+    2,
+    leaseKey(sub, id),
+    busyKey(sub),
+    nodeId,
+    JSON.stringify(lease),
+    String(LEASE_TTL_SEC),
+    id,
+  )) as [number | string, string];
+
+  const ok = Number(result[0]) === 1;
+  if (!ok) {
+    let other: AskzoomLease | null = null;
     try {
-      const cur = JSON.parse(existing) as AskzoomLease;
-      if (cur.nodeId && cur.nodeId !== nodeId) {
-        return {
-          ok: false,
-          lease: cur,
-          reason: `Slot owned by another node (${cur.nodeId})`,
-        };
-      }
+      other = JSON.parse(result[1]) as AskzoomLease;
     } catch {
-      // replace corrupt lease
+      other = null;
     }
+    return {
+      ok: false,
+      lease: other,
+      reason: `Slot owned by another node (${other?.nodeId || "unknown"})`,
+    };
   }
-  const tx = redis.multi();
-  tx.set(key, JSON.stringify(lease), "EX", LEASE_TTL_SEC);
-  tx.sadd(busy, id);
-  await tx.exec();
   return { ok: true, lease };
 }
 

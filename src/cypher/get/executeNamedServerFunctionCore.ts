@@ -96,6 +96,7 @@ import {
   isAskzoomLeaseOwner,
   listClusterSlots,
   publishAskzoomControl,
+  publishAskzoomControlAndWait,
   refreshAskzoomLease,
   registerAskzoomControlHandler,
   releaseAskzoomLease,
@@ -640,6 +641,10 @@ export async function executeNamedServerFunctionCore(
         publishControl: (
           message: Parameters<typeof publishAskzoomControl>[1],
         ) => publishAskzoomControl(subDomain, message),
+        publishControlAndWait: (
+          message: Parameters<typeof publishAskzoomControlAndWait>[1],
+          options?: Parameters<typeof publishAskzoomControlAndWait>[2],
+        ) => publishAskzoomControlAndWait(subDomain, message, options),
         registerControlHandler: (
           userId: string,
           handler: Parameters<typeof registerAskzoomControlHandler>[2],

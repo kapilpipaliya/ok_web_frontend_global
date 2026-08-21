@@ -34,11 +34,8 @@ if (!meetingId || !joinUrl) throw new Error('Invalid meeting URL or meeting ID')
 const userId = String(c.userId || secrets.userId || '').trim();
 
 const assertNotCancelled = async () => {
-  const cancelCheck = await s({
-    functionName: 'zoomPlaywrightRuntime',
-    contextData: { action: 'isCancelRequested', userId }
-  }, { functionLookupSubDomain: _.subDomain });
-  if (cancelCheck.result?.data?.cancelRequested) {
+  const slot = _.askzoomPlaywright.getSlot(userId, { create: false });
+  if (slot?.cancelRequested) {
     throw new Error('Cancelled by user');
   }
 };
@@ -407,46 +404,21 @@ runtime.manageTimer = setInterval(async () => {
       managing: true
     });
 
-    const cancelCheck = await s({
-      functionName: 'zoomPlaywrightRuntime',
-      contextData: { action: 'isCancelRequested', userId }
-    }, { functionLookupSubDomain: _.subDomain });
-    if (cancelCheck.result?.data?.cancelRequested) {
+    if (runtime.cancelRequested) {
       await s({
         functionName: 'zoomPlaywrightRuntime',
         contextData: {
           action: 'forceClose',
           userId,
           phase: 'cancelled',
-          message: 'Cancelled by user'
+          message: 'Cancelled by user',
+          localOnly: true
         }
       }, { functionLookupSubDomain: _.subDomain });
       return;
     }
+    if (runtime.leaving) return;
 
-    const secretsNow = await s({
-      functionName: 'zoomSettingStore',
-      contextData: { action: 'getSecrets', userId }
-    }, { functionLookupSubDomain: _.subDomain });
-    if (secretsNow.result?.data?.leaveRequested || secretsNow.result?.data?.cancelRequested) {
-      if (secretsNow.result?.data?.cancelRequested) {
-        await s({
-          functionName: 'zoomPlaywrightRuntime',
-          contextData: {
-            action: 'forceClose',
-            userId,
-            phase: 'cancelled',
-            message: 'Cancelled by user'
-          }
-        }, { functionLookupSubDomain: _.subDomain });
-        return;
-      }
-      await s({
-        functionName: 'zoomPlaywrightLeave',
-        contextData: { userId }
-      }, { functionLookupSubDomain: _.subDomain });
-      return;
-    }
     await dismissNoise(runtime.page);
     const clicked = await clickAdmitButtons();
     if (clicked) {

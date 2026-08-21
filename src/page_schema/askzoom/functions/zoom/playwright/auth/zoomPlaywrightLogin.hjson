@@ -26,11 +26,8 @@ if (!secrets?.email || !secrets?.password) {
 }
 
 const assertNotCancelled = async () => {
-  const cancelCheck = await s({
-    functionName: 'zoomPlaywrightRuntime',
-    contextData: { action: 'isCancelRequested', userId }
-  }, { functionLookupSubDomain: _.subDomain });
-  if (cancelCheck.result?.data?.cancelRequested) {
+  const slot = _.askzoomPlaywright.getSlot(userId, { create: false });
+  if (slot?.cancelRequested) {
     await s({
       functionName: 'zoomPlaywrightRuntime',
       contextData: {
@@ -38,9 +35,10 @@ const assertNotCancelled = async () => {
         userId,
         skipRecording: true,
         phase: 'cancelled',
-        message: 'Login cancelled'
+        message: 'Login cancelled',
+        localOnly: true
       }
-    }, { functionLookupSubDomain: _.subDomain }).catch(() => {});
+    }, { functionLookupSubDomain: _.subDomain });
     throw new Error('Cancelled by user');
   }
 };
@@ -71,7 +69,6 @@ await s({
 
 const page = _.askzoomPlaywright.getSlot(userId)?.page;
 if (!page) throw new Error('Failed to launch Playwright browser');
-
 await assertNotCancelled();
 await page.goto('https://www.zoom.com/', { waitUntil: 'domcontentloaded', timeout: 60000 });
 const acceptCookiesFn = async () => {

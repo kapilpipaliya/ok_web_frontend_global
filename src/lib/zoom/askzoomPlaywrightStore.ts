@@ -16,6 +16,9 @@ export type AskzoomPlaywrightSlot = {
   ownerUserId: string;
   cancelRequested: boolean;
   recordVideo: boolean;
+  /** Per-launch live recording directory (isolated under user live/). */
+  liveDir: string;
+  recordingJobId: string;
 };
 
 type Realm = {
@@ -50,6 +53,8 @@ export const createEmptySlot = (userId: string): AskzoomPlaywrightSlot => ({
   ownerUserId: userId,
   cancelRequested: false,
   recordVideo: true,
+  liveDir: "",
+  recordingJobId: "",
 });
 
 export const countBusySlots = (subDomain?: string | null): number => {
