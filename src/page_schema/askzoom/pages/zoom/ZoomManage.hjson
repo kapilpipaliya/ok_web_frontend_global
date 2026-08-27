@@ -91,10 +91,23 @@ return {
     if (id) qs.set('id', id);
     return current?.hasRecording ? `/api/zoom/recording?${qs.toString()}` : '';
   },
-  startManage: () => runJob('manage'),
+  startManage: () => {
+    const data = status();
+    if (!data?.loggedIn && !data?.hasSession) {
+      _.showErrorToast('Not logged in. Check session on /zoom/session or run Login first.');
+      _.navigate?.('/zoom/session');
+      return;
+    }
+    if (data?.phase === 'session_expired') {
+      _.showErrorToast('Zoom session expired. Check session or run Login again.');
+      _.navigate?.('/zoom/session');
+      return;
+    }
+    return runJob('manage');
+  },
   leave: () => runJob('leave'),
   cancelJob: () => runJob('cancel'),
-  checkSession: () => runJob('checkSession'),
+  checkSession: () => _.navigate?.('/zoom/session'),
   deleteSelectedRecording: async () => {
     const id = selectedRecordingId() || status()?.lastRecordingId;
     if (!id) {
@@ -165,7 +178,7 @@ return {
         displayOrder: 2
         componentName: Html
         css: "return `._id { color: ${t.var.color.text_light_400}; margin: 0 0 1.25rem; line-height: 1.5; }`;"
-        props: "return { as: 'p', text: 'Joins the meeting in Playwright, opens Participants, and clicks Admit All or Admit every 4 seconds. Leave stops managing but keeps the Zoom login.' };"
+        props: "return { as: 'p', text: 'Joins the meeting in Playwright, opens Participants, and clicks Admit. Requires a valid Zoom session — use Session page to verify before starting.' };"
       }
     }
     {
@@ -276,7 +289,10 @@ return `._id {
 return {
   text: f.busy() ? 'Queueing...' : 'Start managing',
   loading: f.busy(),
-  disabled: f.busy() || (f.status()?.managing && !f.status()?.leaveRequested && f.status()?.phase !== 'leaving'),
+  disabled: f.busy()
+    || (f.status()?.managing && !f.status()?.leaveRequested && f.status()?.phase !== 'leaving')
+    || f.status()?.phase === 'session_expired'
+    || (!f.status()?.loggedIn && !f.status()?.hasSession),
   onClick: f.startManage
 };
 '''
@@ -308,7 +324,7 @@ return {
         props:
           '''
 return {
-  text: 'Check session',
+  text: 'Open session check',
   variant: 'secondary',
   disabled: f.busy(),
   onClick: f.checkSession

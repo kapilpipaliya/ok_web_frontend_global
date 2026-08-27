@@ -1,0 +1,242 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: runZoomAutoManageTick
+        description: Check auto-manage schedules and queue manage jobs when local time matches
+        body:
+          '''
+const weekdayMap = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+const pad2 = (value) => String(value).padStart(2, '0');
+
+const TIMEZONE_ALIASES = {
+  'Asia/Calcutta': 'Asia/Kolkata',
+  'Asia/Katmandu': 'Asia/Kathmandu',
+  'Asia/Saigon': 'Asia/Ho_Chi_Minh',
+  'Europe/Kiev': 'Europe/Kyiv'
+};
+
+const normalizeTimezone = (raw) => {
+  const tz = String(raw || 'UTC').trim() || 'UTC';
+  return TIMEZONE_ALIASES[tz] || tz;
+};
+
+const normalizeHm = (hourRaw, minuteRaw) => {
+  let hour = Number(hourRaw);
+  let minute = Number(minuteRaw);
+  // Some engines return hour "24" at midnight with hour12:false
+  if (hour === 24) hour = 0;
+  if (!Number.isFinite(hour) || !Number.isFinite(minute)) return null;
+  return `${pad2(hour)}:${pad2(minute)}`;
+};
+
+const getZonedNow = (timezone) => {
+  const tz = normalizeTimezone(timezone);
+  const fmt = new Intl.DateTimeFormat('en-CA', {
+    timeZone: tz,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    weekday: 'short'
+  });
+  const parts = Object.fromEntries(
+    fmt.formatToParts(new Date())
+      .filter((part) => part.type !== 'literal')
+      .map((part) => [part.type, part.value])
+  );
+  const time = normalizeHm(parts.hour, parts.minute);
+  if (!time) throw new Error(`Could not parse local time for timezone ${tz}`);
+  return {
+    timezone: tz,
+    dateKey: `${parts.year}-${parts.month}-${parts.day}`,
+    time,
+    dayOfWeek: weekdayMap[parts.weekday] ?? 0
+  };
+};
+
+const rememberTick = async (userId, reason, extra = {}) => {
+  try {
+    await s({
+      functionName: 'zoomSettingStore',
+      contextData: {
+        action: 'saveStatus',
+        userId,
+        autoManageLastTickAt: new Date().toISOString(),
+        autoManageLastTickReason: reason,
+        autoManageLastTickDetail: JSON.stringify(extra)
+      }
+    }, { functionLookupSubDomain: _.subDomain });
+  } catch (error) {
+    console.warn('[runZoomAutoManageTick] rememberTick failed', error?.message || error);
+  }
+};
+
+const listRes = await s({
+  functionName: 'zoomSettingStore',
+  contextData: { action: 'listAutoManageCandidates' }
+}, { functionLookupSubDomain: _.subDomain });
+
+if (listRes.error) {
+  return { success: false, error: listRes.error };
+}
+const payload = listRes.result || listRes;
+if (payload?.success === false) {
+  return { success: false, error: payload.error || 'Failed to list auto-manage candidates' };
+}
+
+const candidates = payload?.data?.candidates || [];
+const queued = [];
+const skipped = [];
+
+for (const row of candidates) {
+  const userId = String(row.userId || '').trim();
+  const settings = row.settings || {};
+  const timezone = normalizeTimezone(settings.autoManageTimezone || 'UTC');
+  const scheduledTime = String(settings.autoManageTime || '09:00').trim();
+  const days = (Array.isArray(settings.autoManageDays) ? settings.autoManageDays : [])
+    .map((d) => Number(d))
+    .filter((d) => d >= 0 && d <= 6);
+
+  let now;
+  try {
+    now = getZonedNow(timezone);
+  } catch (error) {
+    const reason = 'invalid_timezone';
+    skipped.push({ userId, reason, timezone, error: error.message });
+    await rememberTick(userId, reason, { timezone, error: error.message });
+    continue;
+  }
+
+  if (!days.includes(now.dayOfWeek)) {
+    const reason = 'not_scheduled_day';
+    skipped.push({ userId, reason, dayOfWeek: now.dayOfWeek, days });
+    await rememberTick(userId, reason, { dayOfWeek: now.dayOfWeek, days, now: now.time });
+    continue;
+  }
+
+  // Same-day window: once local time reaches scheduled HH:mm, start (do not require exact minute).
+  if (now.time < scheduledTime) {
+    const reason = 'before_scheduled_time';
+    skipped.push({ userId, reason, now: now.time, scheduled: scheduledTime, timezone: now.timezone });
+    await rememberTick(userId, reason, {
+      now: now.time,
+      scheduled: scheduledTime,
+      timezone: now.timezone,
+      dateKey: now.dateKey
+    });
+    continue;
+  }
+
+  // Only block if we already queued for THIS date + THIS scheduled HH:mm.
+  // Changing the schedule time (e.g. 21:40 → 21:46) must be allowed to fire again.
+  const alreadyTriggeredForThisSchedule =
+    !!settings.autoManageLastTriggeredAt &&
+    settings.autoManageLastTriggeredDate === now.dateKey &&
+    String(settings.autoManageLastTriggeredTime || '') === scheduledTime;
+
+  if (alreadyTriggeredForThisSchedule) {
+    const reason = 'already_triggered_today';
+    skipped.push({ userId, reason, dateKey: now.dateKey, scheduled: scheduledTime });
+    await rememberTick(userId, reason, {
+      dateKey: now.dateKey,
+      now: now.time,
+      scheduled: scheduledTime,
+      lastTriggeredTime: settings.autoManageLastTriggeredTime || '',
+      hint: 'Already queued for this scheduled time today'
+    });
+    continue;
+  }
+  if (!settings.email) {
+    const reason = 'missing_credentials';
+    skipped.push({ userId, reason });
+    await rememberTick(userId, reason, {});
+    continue;
+  }
+  if (!settings.meetingUrl) {
+    const reason = 'missing_meeting_url';
+    skipped.push({ userId, reason });
+    await rememberTick(userId, reason, {});
+    continue;
+  }
+  if (!settings.hasSession && !settings.loggedIn) {
+    const reason = 'not_logged_in';
+    skipped.push({ userId, reason });
+    await rememberTick(userId, reason, {});
+    continue;
+  }
+  if (settings.managing) {
+    const reason = 'already_managing';
+    skipped.push({ userId, reason });
+    await rememberTick(userId, reason, {});
+    continue;
+  }
+
+  const enqueueRes = await s({
+    functionName: 'enqueueZoomJob',
+    contextData: {
+      action: 'manage',
+      userId,
+      meetingUrl: settings.meetingUrl,
+      displayName: settings.displayName || ''
+    }
+  }, { functionLookupSubDomain: _.subDomain });
+
+  const enqueuePayload = enqueueRes.result || enqueueRes;
+  if (enqueuePayload?.success !== true) {
+    const reason = 'enqueue_failed';
+    const error = enqueuePayload?.error || enqueueRes.error || 'enqueue failed';
+    skipped.push({ userId, reason, error });
+    await rememberTick(userId, reason, { error });
+    continue;
+  }
+
+  await s({
+    functionName: 'zoomSettingStore',
+    contextData: {
+      action: 'markAutoManageTriggered',
+      userId,
+      triggeredAt: new Date().toISOString(),
+      triggeredDate: now.dateKey,
+      triggeredTime: scheduledTime
+    }
+  }, { functionLookupSubDomain: _.subDomain });
+
+  await rememberTick(userId, 'queued', {
+    dateKey: now.dateKey,
+    time: now.time,
+    scheduled: scheduledTime,
+    timezone: now.timezone,
+    jobId: enqueuePayload?.data?.jobId
+  });
+
+  queued.push({
+    userId,
+    dateKey: now.dateKey,
+    time: now.time,
+    scheduled: scheduledTime,
+    timezone: now.timezone,
+    jobId: enqueuePayload?.data?.jobId
+  });
+}
+
+return {
+  success: true,
+  message: `Auto-manage tick: queued ${queued.length}, skipped ${skipped.length}, checked ${candidates.length}`,
+  data: {
+    checked: candidates.length,
+    queued,
+    skipped: skipped.slice(0, 50),
+    at: new Date().toISOString()
+  }
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

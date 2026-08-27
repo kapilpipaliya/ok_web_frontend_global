@@ -26,15 +26,12 @@ try {
     functionName: 'zoomQueueHelpers',
     contextData: {}
   }, { functionLookupSubDomain: _.subDomain });
-
   if (helpers.result?.success) {
     const queue = helpers.result.data.createZoomQueue();
     queueCounts = await queue.getJobCounts('waiting', 'active', 'delayed', 'failed', 'completed');
     await queue.close();
   }
-} catch (error) {
-  // Redis may be down; still return DB status
-}
+} catch (error) {}
 
 let runtime = {};
 const runtimeRes = await s({
@@ -44,38 +41,50 @@ const runtimeRes = await s({
 if (runtimeRes.error) throw new Error(runtimeRes.error);
 runtime = runtimeRes.result?.data || {};
 
-let staleManageRecovered = false;
+const pwHelpers = await s({
+  functionName: 'zoomPlaywrightHelpers',
+  contextData: {}
+}, { functionLookupSubDomain: _.subDomain });
+const { getLiveSession, resetToIdle } = pwHelpers.result?.data || {};
+
+const { live, lease } = userId && getLiveSession
+  ? await getLiveSession(userId)
+  : { live: false, lease: null };
+
+let staleRecovered = false;
+const phase = String(settings.phase || '');
+const stuckStop =
+  phase === 'leaving' ||
+  phase === 'cancelling' ||
+  settings.leaveRequested === true ||
+  settings.cancelRequested === true;
 const looksManaging =
   settings.managing === true ||
-  settings.phase === 'managing' ||
-  settings.phase === 'joining';
-const lease = userId ? await _.askzoomPlaywright.getLease(userId) : null;
+  phase === 'managing' ||
+  phase === 'joining';
+
+// Dead session after restart: clear stuck leave/cancel immediately
+if (userId && stuckStop && !live) {
+  await resetToIdle(userId, 'Ready');
+  staleRecovered = true;
+}
+
+// Dead manage session: clear when heartbeat is stale
 if (userId && looksManaging && !lease) {
-  const hbMs = settings.lastHeartbeatAt
-    ? Date.parse(settings.lastHeartbeatAt)
-    : 0;
+  const hbMs = settings.lastHeartbeatAt ? Date.parse(settings.lastHeartbeatAt) : 0;
   const age = hbMs ? Date.now() - hbMs : Number.POSITIVE_INFINITY;
   if (age > HEARTBEAT_STALE_MS) {
-    await s({
-      functionName: 'zoomSettingStore',
-      contextData: {
-        action: 'saveStatus',
-        userId,
-        managing: false,
-        leaveRequested: false,
-        phase: 'idle',
-        message: 'Manage session cleared (stale heartbeat / worker restart)',
-        alertEvent: 'manage_stale',
-        lastHeartbeatAt: ''
-      }
-    }, { functionLookupSubDomain: _.subDomain });
-    staleManageRecovered = true;
-    const refreshed = await s({
-      functionName: 'zoomSettingStore',
-      contextData: { action: 'get', includeScreenshot: true, userId }
-    });
-    if (refreshed?.result?.data) settings = refreshed.result.data;
+    await resetToIdle(userId, 'Ready');
+    staleRecovered = true;
   }
+}
+
+if (staleRecovered) {
+  const refreshed = await s({
+    functionName: 'zoomSettingStore',
+    contextData: { action: 'get', includeScreenshot: true, userId }
+  });
+  if (refreshed?.result?.data) settings = refreshed.result.data;
 }
 
 const clusterSlots = await _.askzoomPlaywright.listClusterSlots();
@@ -125,7 +134,7 @@ return {
   success: true,
   data: {
     ...settings,
-    staleManageRecovered,
+    staleManageRecovered: staleRecovered,
     heartbeatStaleMs: HEARTBEAT_STALE_MS,
     queueCounts,
     runtime: {

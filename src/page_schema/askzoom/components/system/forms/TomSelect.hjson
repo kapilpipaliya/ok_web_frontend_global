@@ -820,7 +820,16 @@ const setTomSelectValue = (value) => {
         tomSelectInstance.clear(true); // true = silent (don't trigger change event)
       } else {
         // Ensure the value exists in the options before setting it
-        const optionExists = tomSelectInstance.options[value];
+        let optionExists = tomSelectInstance.options[value];
+        if (!optionExists) {
+          // Keep restored form values even if options list uses a newer alias
+          // (e.g. Asia/Calcutta saved, Asia/Kolkata in Intl list).
+          tomSelectInstance.addOption({
+            value: String(value),
+            text: String(value).replace(/_/g, ' ')
+          });
+          optionExists = tomSelectInstance.options[value];
+        }
         if (optionExists) {
           tomSelectInstance.setValue(value, true); // true = silent (don't trigger change event)
         } else {

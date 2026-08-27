@@ -1,0 +1,28 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: saveZoomAutoManageSchedule
+        description: Save per-user schedule for automatically starting Zoom manage
+        body:
+          '''
+const inner = await s({
+  functionName: 'zoomSettingStore',
+  contextData: {
+    action: 'saveAutoManageSchedule',
+    enabled: c.enabled === true,
+    time: c.time,
+    timezone: c.timezone,
+    days: c.days
+  }
+});
+if (inner.error) return { success: false, error: inner.error };
+return inner.result || inner;
+'''
+      }
+    }
+  ]
+  edges: []
+}

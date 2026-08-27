@@ -137,6 +137,29 @@ const buildPublicData = (p, { includeScreenshot = false, userId = '' } = {}) => 
     lastMeetingAdmittedCount: Number(p.zoomLastMeetingAdmittedCount || 0),
     meetingAudit,
     lastHeartbeatAt: p.zoomLastHeartbeatAt || '',
+    autoManageEnabled: p.zoomAutoManageEnabled === true || p.zoomAutoManageEnabled === 'true',
+    autoManageTime: p.zoomAutoManageTime || '09:00',
+    autoManageTimezone: p.zoomAutoManageTimezone || 'UTC',
+    autoManageDays: (() => {
+      try {
+        const parsed = JSON.parse(p.zoomAutoManageDaysJson || '[0,1,2,3,4,5,6]');
+        return Array.isArray(parsed) ? parsed.map((d) => Number(d)).filter((d) => d >= 0 && d <= 6) : [0, 1, 2, 3, 4, 5, 6];
+      } catch (error) {
+        return [0, 1, 2, 3, 4, 5, 6];
+      }
+    })(),
+    autoManageLastTriggeredAt: p.zoomAutoManageLastTriggeredAt || '',
+    autoManageLastTriggeredDate: p.zoomAutoManageLastTriggeredDate || '',
+    autoManageLastTriggeredTime: p.zoomAutoManageLastTriggeredTime || '',
+    autoManageLastTickAt: p.zoomAutoManageLastTickAt || '',
+    autoManageLastTickReason: p.zoomAutoManageLastTickReason || '',
+    autoManageLastTickDetail: (() => {
+      try {
+        return JSON.parse(p.zoomAutoManageLastTickDetailJson || 'null');
+      } catch (error) {
+        return null;
+      }
+    })(),
     lastJobMetrics: (() => {
       try {
         const parsed = JSON.parse(p.zoomLastJobMetricsJson || 'null');
@@ -149,6 +172,23 @@ const buildPublicData = (p, { includeScreenshot = false, userId = '' } = {}) => 
     updatedAt: p.zoomUpdatedAt || p.updatedAt || ''
   };
 };
+
+if (action === 'listAutoManageCandidates') {
+  const result = await _.session.run(`
+    MATCH (u:User)-[:HasZoomSetting]->(z:ZoomUserSetting)
+    WHERE z.zoomAutoManageEnabled = true OR z.zoomAutoManageEnabled = 'true'
+    RETURN u.uuid AS userId, z
+  `);
+  const rows = result.records.map((record) => {
+    const node = _.convertNodeToJson(record.get('z'));
+    const p = node?.P || {};
+    return {
+      userId: String(record.get('userId') || '').trim(),
+      settings: buildPublicData(p, { userId: String(record.get('userId') || '').trim() })
+    };
+  }).filter((row) => row.userId);
+  return { success: true, data: { candidates: rows } };
+}
 
 const ownerUserId = await resolveOwnerUserId();
 if (!ownerUserId) {
@@ -317,6 +357,13 @@ if (action === 'saveStatus') {
     zoomLastHeartbeatAt: c.lastHeartbeatAt,
     zoomLastJobMetricsJson: c.lastJobMetrics !== undefined
       ? JSON.stringify(c.lastJobMetrics || null)
+      : undefined,
+    zoomAutoManageLastTickAt: c.autoManageLastTickAt,
+    zoomAutoManageLastTickReason: c.autoManageLastTickReason,
+    zoomAutoManageLastTickDetailJson: c.autoManageLastTickDetail !== undefined
+      ? (typeof c.autoManageLastTickDetail === 'string'
+        ? c.autoManageLastTickDetail
+        : JSON.stringify(c.autoManageLastTickDetail || null))
       : undefined
   };
 
@@ -372,6 +419,24 @@ if (action === 'clearCancel') {
     RETURN z
   `, { userId: ownerUserId });
   return { success: true };
+}
+
+if (action === 'resetIdle') {
+  await _.session.run(`
+    ${OWNER_MATCH}
+    SET z.zoomPhase = 'idle',
+        z.zoomMessage = $message,
+        z.zoomManaging = false,
+        z.zoomLeaveRequested = false,
+        z.zoomCancelRequested = false,
+        z.zoomLastError = '',
+        z.updatedAt = datetime()
+    RETURN z
+  `, {
+    userId: ownerUserId,
+    message: String(c.message || 'Ready')
+  });
+  return { success: true, message: 'Reset to idle' };
 }
 
 if (action === 'setPreferences') {
@@ -496,6 +561,129 @@ if (action === 'clearAlert') {
         z.updatedAt = datetime()
     RETURN z
   `, { userId: ownerUserId });
+  return { success: true };
+}
+
+if (action === 'saveAutoManageSchedule') {
+  const enabled = c.enabled === true;
+  const time = String(c.time || '09:00').trim();
+  let timezone = String(c.timezone || 'UTC').trim();
+  const daysRaw = Array.isArray(c.days) ? c.days : [];
+
+  const TIMEZONE_ALIASES = {
+    'Asia/Calcutta': 'Asia/Kolkata',
+    'Asia/Katmandu': 'Asia/Kathmandu',
+    'Asia/Saigon': 'Asia/Ho_Chi_Minh',
+    'Europe/Kiev': 'Europe/Kyiv'
+  };
+  timezone = TIMEZONE_ALIASES[timezone] || timezone;
+
+  if (!/^\d{2}:\d{2}$/.test(time)) {
+    return { success: false, error: 'Time must be HH:mm (24-hour)' };
+  }
+  const [hh, mm] = time.split(':').map((part) => Number(part));
+  if (hh < 0 || hh > 23 || mm < 0 || mm > 59) {
+    return { success: false, error: 'Invalid time of day' };
+  }
+
+  const validTimezonePattern = /^[A-Za-z]+\/[A-Za-z_]+(?:\/[A-Za-z_]+)?$/;
+  if (!validTimezonePattern.test(timezone) && timezone !== 'UTC' && !timezone.startsWith('Etc/')) {
+    return { success: false, error: `Invalid timezone: ${timezone}` };
+  }
+
+  const days = [...new Set(daysRaw.map((d) => Number(d)).filter((d) => d >= 0 && d <= 6))].sort((a, b) => a - b);
+  if (enabled && days.length === 0) {
+    return { success: false, error: 'Select at least one day when auto-manage is enabled' };
+  }
+
+  const prevDays = (() => {
+    try {
+      const parsed = JSON.parse(p.zoomAutoManageDaysJson || '[]');
+      return Array.isArray(parsed)
+        ? [...new Set(parsed.map((d) => Number(d)).filter((d) => d >= 0 && d <= 6))].sort((a, b) => a - b)
+        : [];
+    } catch (error) {
+      return [];
+    }
+  })();
+  const prevEnabled = p.zoomAutoManageEnabled === true || p.zoomAutoManageEnabled === 'true';
+  const prevTime = String(p.zoomAutoManageTime || '').trim();
+  const prevTimezone = String(p.zoomAutoManageTimezone || '').trim();
+  const scheduleChanged =
+    prevEnabled !== enabled ||
+    prevTime !== time ||
+    prevTimezone !== timezone ||
+    JSON.stringify(prevDays) !== JSON.stringify(days);
+
+  // Resaving a new time/day/timezone must allow another start today.
+  // Otherwise already_triggered_today blocks future times after one run.
+  const sets = [
+    'z.zoomAutoManageEnabled = $enabled',
+    'z.zoomAutoManageTime = $time',
+    'z.zoomAutoManageTimezone = $timezone',
+    'z.zoomAutoManageDaysJson = $daysJson',
+    'z.updatedAt = datetime()'
+  ];
+  const params = {
+    userId: ownerUserId,
+    enabled,
+    time,
+    timezone,
+    daysJson: JSON.stringify(days.length ? days : [0, 1, 2, 3, 4, 5, 6])
+  };
+  if (scheduleChanged) {
+    sets.push('z.zoomAutoManageLastTriggeredAt = $lastTriggeredAt');
+    sets.push('z.zoomAutoManageLastTriggeredDate = $lastTriggeredDate');
+    sets.push('z.zoomAutoManageLastTriggeredTime = $lastTriggeredTime');
+    sets.push('z.zoomAutoManageLastTickAt = $lastTickAt');
+    sets.push('z.zoomAutoManageLastTickReason = $lastTickReason');
+    sets.push('z.zoomAutoManageLastTickDetailJson = $lastTickDetail');
+    params.lastTriggeredAt = '';
+    params.lastTriggeredDate = '';
+    params.lastTriggeredTime = '';
+    params.lastTickAt = '';
+    params.lastTickReason = '';
+    params.lastTickDetail = '';
+  }
+
+  await _.session.run(`
+    ${OWNER_MATCH}
+    SET ${sets.join(', ')}
+    RETURN z
+  `, params);
+
+  const refreshed = await ensureUserSetting(_.session, ownerUserId);
+  return {
+    success: true,
+    message: enabled
+      ? (scheduleChanged
+        ? 'Auto-manage schedule saved (will run again at the next matching time)'
+        : 'Auto-manage schedule saved')
+      : 'Auto-manage disabled',
+    data: buildPublicData(refreshed?.P || {}, { userId: ownerUserId })
+  };
+}
+
+if (action === 'markAutoManageTriggered') {
+  const triggeredAt = String(c.triggeredAt || new Date().toISOString());
+  const triggeredDate = String(c.triggeredDate || '').trim();
+  const triggeredTime = String(c.triggeredTime || '').trim();
+  if (!triggeredDate) {
+    return { success: false, error: 'triggeredDate is required' };
+  }
+  await _.session.run(`
+    ${OWNER_MATCH}
+    SET z.zoomAutoManageLastTriggeredAt = $triggeredAt,
+        z.zoomAutoManageLastTriggeredDate = $triggeredDate,
+        z.zoomAutoManageLastTriggeredTime = $triggeredTime,
+        z.updatedAt = datetime()
+    RETURN z
+  `, {
+    userId: ownerUserId,
+    triggeredAt,
+    triggeredDate,
+    triggeredTime
+  });
   return { success: true };
 }
 

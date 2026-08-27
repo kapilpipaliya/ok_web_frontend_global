@@ -12,30 +12,13 @@ const helpersRes = await s({
   functionName: 'zoomPlaywrightHelpers',
   contextData: {}
 }, { functionLookupSubDomain: _.subDomain });
-const { sleep, clickNamed } = helpersRes.result?.data || {};
+const { sleep, clickNamed, getLiveSession, resetToIdle } = helpersRes.result?.data || {};
 
 const userId = String(c.userId || '').trim();
-let runtime = userId
-  ? _.askzoomPlaywright.getSlot(userId, { create: false })
-  : null;
+const { live, lease, slot } = await getLiveSession(userId);
+let runtime = slot;
 
-if ((!runtime || !runtime.page) && userId) {
-  await _.askzoomPlaywright.ensureControlBus();
-  const lease = await _.askzoomPlaywright.getLease(userId);
-  if (lease && !_.askzoomPlaywright.isLeaseOwner(lease)) {
-    await s({
-      functionName: 'zoomSettingStore',
-      contextData: { action: 'requestLeave', userId }
-    }, { functionLookupSubDomain: _.subDomain });
-    await _.askzoomPlaywright.publishControlAndWait(
-      { type: 'leave', userId },
-      { waitFor: 'done' }
-    );
-    return { success: true, forwarded: true, message: 'Leave completed on owner node' };
-  }
-}
-
-const clearManagingStatus = async (message = 'Left meeting. Still logged in.') => {
+const finishLeave = async (message = 'Left meeting. Still logged in.') => {
   const leftAt = new Date().toISOString();
   await s({
     functionName: 'zoomSettingStore',
@@ -46,6 +29,7 @@ const clearManagingStatus = async (message = 'Left meeting. Still logged in.') =
       message,
       managing: false,
       leaveRequested: false,
+      cancelRequested: false,
       loggedIn: true,
       admittedCount: runtime?.admittedCount || 0,
       lastMeetingLeftAt: leftAt,
@@ -55,10 +39,23 @@ const clearManagingStatus = async (message = 'Left meeting. Still logged in.') =
   }, { functionLookupSubDomain: _.subDomain });
 };
 
-if (!runtime) {
-  await clearManagingStatus('No active Playwright session. Ready to manage again.');
+if (!runtime?.page) {
+  if (lease && !_.askzoomPlaywright.isLeaseOwner(lease)) {
+    try {
+      await _.askzoomPlaywright.publishControlAndWait(
+        { type: 'leave', userId },
+        { waitFor: 'done' }
+      );
+      return { success: true, forwarded: true, message: 'Leave completed on owner node' };
+    } catch (error) {
+      try { await _.askzoomPlaywright.releaseLease(userId); } catch (e) {}
+    }
+  }
+  await resetToIdle(userId, 'Ready');
+  try { await _.askzoomPlaywright.releaseLease(userId); } catch (e) {}
   return { success: true, message: 'No active Playwright session' };
 }
+
 if (runtime.leaving) {
   return { success: true, message: 'Leave already in progress' };
 }
@@ -70,35 +67,32 @@ try {
     contextData: { action: 'stopManageLoops', userId }
   }, { functionLookupSubDomain: _.subDomain });
 
-  if (runtime.page) {
-    // Zoom hides the meeting footer until the mouse is near the bottom.
-    const box = runtime.page.viewportSize() || { width: 1280, height: 720 };
-    await runtime.page.mouse.move(box.width / 2, box.height - 20);
-    await sleep(800);
+  const box = runtime.page.viewportSize() || { width: 1280, height: 720 };
+  await runtime.page.mouse.move(box.width / 2, box.height - 20);
+  await sleep(800);
 
-    const webclient = runtime.page.locator('#webclient').contentFrame();
-    // Single click focuses the footer Leave control; Space opens the leave menu.
-    const leaveBtn = webclient.getByRole('button', { name: /^leave$/i }).first();
-    await leaveBtn.click({ timeout: 10000 });
-    await leaveBtn.press('Space');
-    await sleep(800);
-    await clickNamed(runtime.page, [/leave meeting/i, /^leave$/i]);
-    await sleep(2000);
-    await s({
-      functionName: 'zoomPlaywrightRuntime',
-      contextData: { action: 'persistSession', loggedIn: true, userId }
-    }, { functionLookupSubDomain: _.subDomain });
-  }
+  const webclient = runtime.page.locator('#webclient').contentFrame();
+  const leaveBtn = webclient.getByRole('button', { name: /^leave$/i }).first();
+  await leaveBtn.click({ timeout: 10000 });
+  await leaveBtn.press('Space');
+  await sleep(800);
+  await clickNamed(runtime.page, [/leave meeting/i, /^leave$/i]);
+  await sleep(2000);
+
+  await s({
+    functionName: 'zoomPlaywrightRuntime',
+    contextData: { action: 'persistSession', loggedIn: true, userId }
+  }, { functionLookupSubDomain: _.subDomain });
 
   await s({
     functionName: 'zoomPlaywrightRuntime',
     contextData: { action: 'close', userId }
   }, { functionLookupSubDomain: _.subDomain });
 
-  await clearManagingStatus();
+  await finishLeave();
   return { success: true, message: 'Left meeting' };
 } catch (error) {
-  await clearManagingStatus(`Leave finished with error: ${error.message}`);
+  await finishLeave(`Leave finished with error: ${error.message}`);
   throw error;
 } finally {
   runtime.leaving = false;

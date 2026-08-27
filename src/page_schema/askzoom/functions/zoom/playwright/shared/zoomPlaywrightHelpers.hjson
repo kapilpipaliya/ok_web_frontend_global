@@ -77,6 +77,54 @@ const parseMeetingJoinUrl = (raw) => {
   return { meetingId, joinUrl };
 };
 
+const getLiveSession = async (uid) => {
+  const id = String(uid || '').trim();
+  if (!id) return { live: false, lease: null, slot: null, userId: '' };
+  await _.askzoomPlaywright.ensureControlBus();
+  const lease = await _.askzoomPlaywright.getLease(id);
+  const slot = _.askzoomPlaywright.getSlot(id, { create: false });
+  const live = !!(lease || slot?.browser || slot?.page || slot?.managing);
+  return { live, lease, slot, userId: id };
+};
+
+const resetToIdle = async (uid, message = 'Ready') => {
+  await s({
+    functionName: 'zoomSettingStore',
+    contextData: {
+      action: 'resetIdle',
+      userId: uid,
+      message
+    }
+  }, { functionLookupSubDomain: _.subDomain });
+};
+
+const forceStopSession = async (uid, message = 'Ready') => {
+  const { userId, lease, slot } = await getLiveSession(uid);
+  if (!userId) return;
+  const hasLocal = !!(slot?.browser || slot?.page || slot?.managing);
+  if (lease && !_.askzoomPlaywright.isLeaseOwner(lease) && !hasLocal) {
+    try {
+      await _.askzoomPlaywright.publishControlAndWait(
+        { type: 'forceClose', userId, phase: 'idle', message },
+        { waitFor: 'done' }
+      );
+    } catch (error) {
+      try { await _.askzoomPlaywright.releaseLease(userId); } catch (e) {}
+    }
+  }
+  await s({
+    functionName: 'zoomPlaywrightRuntime',
+    contextData: {
+      action: 'forceClose',
+      userId,
+      phase: 'idle',
+      message,
+      localOnly: true,
+      skipRecording: true
+    }
+  }, { functionLookupSubDomain: _.subDomain });
+};
+
 return {
   success: true,
   data: {
@@ -84,7 +132,10 @@ return {
     visibleClick,
     clickNamed,
     dismissNoise,
-    parseMeetingJoinUrl
+    parseMeetingJoinUrl,
+    getLiveSession,
+    resetToIdle,
+    forceStopSession
   }
 };
 '''

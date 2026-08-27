@@ -8,6 +8,12 @@
         description: Verify saved Zoom Playwright session is still logged in
         body:
           '''
+const helpersRes = await s({
+  functionName: 'zoomPlaywrightHelpers',
+  contextData: {}
+}, { functionLookupSubDomain: _.subDomain });
+const { sleep } = helpersRes.result?.data || {};
+
 const storeRes = await s({
   functionName: 'zoomSettingStore',
   contextData: { action: 'getSecrets', userId: c.userId }
@@ -17,11 +23,14 @@ if (!secrets?.storageState) {
   throw new Error('Login session missing. Run Zoom login first.');
 }
 
+const userId = String(c.userId || secrets.userId || '').trim();
+if (!userId) throw new Error('userId is required for Zoom session check');
+
 await s({
   functionName: 'zoomSettingStore',
   contextData: {
     action: 'saveStatus',
-    userId: c.userId,
+    userId,
     phase: 'checking_session',
     message: 'Checking Zoom session...',
     lastError: '',
@@ -31,66 +40,73 @@ await s({
 
 await s({
   functionName: 'zoomPlaywrightRuntime',
-  contextData: { action: 'setJobAction', jobAction: 'checkSession', userId: c.userId }
+  contextData: { action: 'setJobAction', jobAction: 'checkSession', userId }
 }, { functionLookupSubDomain: _.subDomain });
 
-await s({
+const launchRes = await s({
   functionName: 'zoomPlaywrightRuntime',
   contextData: {
     action: 'launch',
-    userId: c.userId,
-    storageState: secrets.storageState,
-    recordVideo: false
+    userId,
+    storageState: secrets.storageState
   }
 }, { functionLookupSubDomain: _.subDomain });
 
-const page = _.askzoomPlaywright.getSlot(c.userId)?.page;
+const page = _.askzoomPlaywright.getSlot(userId)?.page;
 if (!page) throw new Error('Failed to launch Playwright browser');
 
+const cookieCount = Number(launchRes?.result?.data?.cookieCount || 0);
+if (!cookieCount) {
+  await s({
+    functionName: 'zoomPlaywrightRuntime',
+    contextData: { action: 'close', userId }
+  }, { functionLookupSubDomain: _.subDomain }).catch(() => {});
+  throw new Error('Saved Zoom session has no cookies. Run Login again.');
+}
+
 let loggedIn = false;
+let finalUrl = '';
 try {
+  // Same single probe as zoomPlaywrightManage — no multi-page retries
   await page.goto('https://zoom.us/profile', { waitUntil: 'domcontentloaded', timeout: 45000 });
-  await page.waitForTimeout(1500);
-  const url = page.url();
-  loggedIn = !/signin|login|signup/i.test(url);
-  if (!loggedIn) {
-    await page.goto('https://zoom.us/', { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await page.waitForTimeout(1000);
-    const home = page.url();
-    const hasSignIn = await page.getByRole('link', { name: 'Sign In' }).count().catch(() => 0);
-    loggedIn = !/signin|login/i.test(home) && hasSignIn === 0;
-  }
+  await sleep(1000);
+  finalUrl = page.url();
+  loggedIn = !/signin|login|signup/i.test(finalUrl);
 } finally {
   await s({
     functionName: 'zoomPlaywrightRuntime',
-    contextData: { action: 'captureScreenshot', userId: c.userId }
+    contextData: { action: 'captureScreenshot', userId }
   }, { functionLookupSubDomain: _.subDomain }).catch(() => {});
   await s({
     functionName: 'zoomPlaywrightRuntime',
-    contextData: { action: 'close', userId: c.userId }
+    contextData: { action: 'close', userId }
   }, { functionLookupSubDomain: _.subDomain });
 }
 
-  await s({
-    functionName: 'zoomSettingStore',
-    contextData: {
-      action: 'saveStatus',
-      userId: c.userId,
-      phase: loggedIn ? 'session_ok' : 'session_expired',
-      message: loggedIn ? 'Zoom session is valid' : 'Zoom session expired. Run login again.',
-      loggedIn,
-      lastError: loggedIn ? '' : 'Session expired',
-      alertEvent: loggedIn ? '' : 'session_expired'
-    }
-  }, { functionLookupSubDomain: _.subDomain });
+await s({
+  functionName: 'zoomSettingStore',
+  contextData: {
+    action: 'saveStatus',
+    userId,
+    phase: loggedIn ? 'session_ok' : 'session_expired',
+    message: loggedIn
+      ? 'Zoom session is valid'
+      : `Zoom session expired (redirected to ${finalUrl || 'unknown'}). Run login again.`,
+    loggedIn,
+    lastError: loggedIn ? '' : 'Session expired',
+    alertEvent: loggedIn ? 'session_ok' : 'session_expired'
+  }
+}, { functionLookupSubDomain: _.subDomain });
 
+// Mark logged-out but keep storageState so a flaky check cannot wipe a good session.
+// Login / logout / manage-expired still clear storage when appropriate.
 if (!loggedIn) {
   await s({
     functionName: 'zoomSettingStore',
     contextData: {
       action: 'saveSession',
-      userId: c.userId,
-      storageState: '',
+      userId,
+      storageState: secrets.storageState,
       loggedIn: false
     }
   }, { functionLookupSubDomain: _.subDomain });
@@ -99,7 +115,7 @@ if (!loggedIn) {
 return {
   success: true,
   message: loggedIn ? 'Zoom session is valid' : 'Zoom session expired',
-  data: { loggedIn }
+  data: { loggedIn, url: finalUrl, cookieCount }
 };
 '''
       }

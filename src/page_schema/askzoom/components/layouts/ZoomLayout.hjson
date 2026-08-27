@@ -123,6 +123,26 @@ return `._id {
       }
     }
     {
+      id: "7b"
+      L: Attr
+      P: {
+        displayOrder: 4.5
+        componentName: Html
+        css:
+          '''
+const active = _.location?.pathname === '/zoom/session';
+return `._id {
+  padding: 0.35rem 0.7rem;
+  border-radius: 0.375rem;
+  text-decoration: none;
+  color: ${t.var.color.text};
+  background: ${active ? t.var.color.primary_light_200 : 'transparent'};
+}`;
+'''
+        props: "return { as: 'a', href: '/zoom/session', text: 'Session' };"
+      }
+    }
+    {
       id: "8"
       L: Attr
       P: {
@@ -140,6 +160,26 @@ return `._id {
 }`;
 '''
         props: "return { as: 'a', href: '/zoom/manage', text: 'Manage' };"
+      }
+    }
+    {
+      id: "8b"
+      L: Attr
+      P: {
+        displayOrder: 6
+        componentName: Html
+        css:
+          '''
+const active = _.location?.pathname === '/zoom/schedule';
+return `._id {
+  padding: 0.35rem 0.7rem;
+  border-radius: 0.375rem;
+  text-decoration: none;
+  color: ${t.var.color.text};
+  background: ${active ? t.var.color.primary_light_200 : 'transparent'};
+}`;
+'''
+        props: "return { as: 'a', href: '/zoom/schedule', text: 'Schedule' };"
       }
     }
     {
@@ -213,13 +253,31 @@ return `._id {
       E: "7"
     }
     {
+      id: e7b
+      T: Attr
+      S: "3"
+      E: "7b"
+    }
+    {
       id: e8
       T: Attr
       S: "3"
       E: "8"
     }
     {
+      id: e8b
+      T: Attr
+      S: "3"
+      E: "8b"
+    }
+    {
       id: e9
+      T: Attr
+      S: "2"
+      E: "9"
+    }
+    {
+      id: e10
       T: Attr
       S: "9"
       E: "10"

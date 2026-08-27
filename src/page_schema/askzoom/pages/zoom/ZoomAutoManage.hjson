@@ -1,0 +1,404 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        key: ZoomAutoManage
+        url: /zoom/schedule
+        signinRequired: true
+        dynamicComponent: FormManagement
+        fns:
+          '''
+const DAY_OPTIONS = [
+  { value: '0', label: 'Sunday' },
+  { value: '1', label: 'Monday' },
+  { value: '2', label: 'Tuesday' },
+  { value: '3', label: 'Wednesday' },
+  { value: '4', label: 'Thursday' },
+  { value: '5', label: 'Friday' },
+  { value: '6', label: 'Saturday' }
+];
+
+const TIMEZONE_ALIASES = {
+  'Asia/Calcutta': 'Asia/Kolkata',
+  'Asia/Katmandu': 'Asia/Kathmandu',
+  'Asia/Saigon': 'Asia/Ho_Chi_Minh',
+  'Europe/Kiev': 'Europe/Kyiv'
+};
+
+const normalizeTimezone = (raw) => {
+  const tz = String(raw || '').trim();
+  if (!tz) return '';
+  return TIMEZONE_ALIASES[tz] || tz;
+};
+
+const detectTimezone = () => {
+  try {
+    return normalizeTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone) || 'UTC';
+  } catch (error) {
+    return 'UTC';
+  }
+};
+
+const [status, setStatus] = _.createSignal(null);
+const [timezoneOptions, setTimezoneOptions] = _.createSignal([{ value: 'UTC', label: 'UTC' }]);
+const [formReady, setFormReady] = _.createSignal(false);
+const [initialVertex, setInitialVertex] = _.createSignal(null);
+const [formKey, setFormKey] = _.createSignal(0);
+const [tickBusy, setTickBusy] = _.createSignal(false);
+const [lastTickResult, setLastTickResult] = _.createSignal(null);
+
+const formatDays = (days) => {
+  const list = Array.isArray(days) ? days.map((d) => Number(d)) : [];
+  if (list.length === 7) return 'Every day';
+  return list
+    .map((day) => DAY_OPTIONS.find((option) => Number(option.value) === day)?.label || String(day))
+    .join(', ') || 'None';
+};
+
+const ensureTimezoneOption = (options, timezone) => {
+  const list = Array.isArray(options) ? [...options] : [];
+  const tz = normalizeTimezone(timezone);
+  if (!tz) return list;
+  if (!list.some((item) => item.value === tz)) {
+    list.unshift({ value: tz, label: tz.replace(/_/g, ' ') });
+  }
+  return list;
+};
+
+const buildInitialVertex = (data, timezone) => {
+  const days = Array.isArray(data?.autoManageDays) && data.autoManageDays.length
+    ? data.autoManageDays
+    : [1, 2, 3, 4, 5];
+  return {
+    id: `zoom-auto-manage-schedule-${Date.now()}`,
+    L: ['ZoomAutoManageSchedule'],
+    P: {
+      enabled: data?.autoManageEnabled === true,
+      time: data?.autoManageTime || '09:00',
+      timezone: normalizeTimezone(timezone) || 'UTC',
+      days: days.map((day) => String(day))
+    }
+  };
+};
+
+const getScheduleFormConfig = () => ({
+  gridColumns: 1,
+  groups: [
+    {
+      key: 'schedule',
+      title: 'Auto-manage schedule',
+      gridColumns: 1,
+      fields: [
+        {
+          key: 'enabled',
+          label: 'Enable automatic manage',
+          dataType: 'boolean',
+          renderer: 'checkbox',
+          required: false,
+          colSpan: 1,
+          helpText: 'When enabled, Start managing is queued at the selected time on selected days.'
+        },
+        {
+          key: 'time',
+          label: 'Start time (24-hour)',
+          dataType: 'text',
+          renderer: 'text',
+          required: true,
+          colSpan: 1,
+          placeholder: '09:00',
+          pattern: '^\\d{2}:\\d{2}$',
+          patternMessage: 'Use HH:mm (24-hour), e.g. 09:00',
+          helpText: 'Local time in the timezone below.'
+        },
+        {
+          key: 'timezone',
+          label: 'Timezone',
+          dataType: 'select',
+          required: true,
+          colSpan: 1,
+          placeholder: 'Select timezone...',
+          options: timezoneOptions(),
+          helpText: 'IANA timezone used to evaluate the start time.'
+        },
+        {
+          key: 'days',
+          label: 'Days of week',
+          dataType: 'select',
+          multiSelect: true,
+          required: true,
+          colSpan: 1,
+          placeholder: 'Select days...',
+          options: DAY_OPTIONS,
+          helpText: 'Manage starts only on these days.'
+        }
+      ]
+    }
+  ]
+});
+
+const load = async () => {
+  setFormReady(false);
+  try {
+    const [settingsRes, tzRes] = await Promise.all([
+      s({ functionName: 'getZoomSettings', contextData: {} }),
+      s({ functionName: 'getAvailableTimezones', contextData: {} })
+    ]);
+
+    const data = settingsRes.result?.data || null;
+    if (settingsRes.result?.success && data) {
+      setStatus(data);
+    } else {
+      setStatus(null);
+    }
+
+    const savedTimezone = normalizeTimezone(data?.autoManageTimezone || '');
+    const timezone = savedTimezone || detectTimezone() || 'UTC';
+
+    let options = Array.isArray(tzRes.result?.data?.allTimezones)
+      ? tzRes.result.data.allTimezones
+      : timezoneOptions();
+    options = ensureTimezoneOption(options, timezone);
+    setTimezoneOptions(options);
+
+    setInitialVertex(buildInitialVertex(data, timezone));
+    setFormKey((n) => n + 1);
+    setFormReady(true);
+  } catch (error) {
+    _.showErrorToast?.(error?.message || 'Failed to load schedule');
+    const timezone = detectTimezone() || 'UTC';
+    setTimezoneOptions(ensureTimezoneOption(timezoneOptions(), timezone));
+    setInitialVertex(buildInitialVertex(null, timezone));
+    setFormKey((n) => n + 1);
+    setFormReady(true);
+  }
+};
+
+const saveScheduleForm = async (savePayload) => {
+  const p = savePayload?.vertex?.P || {};
+  const days = Array.isArray(p.days)
+    ? p.days.map((day) => Number(day)).filter((day) => day >= 0 && day <= 6)
+    : [];
+
+  const res = await s({
+    functionName: 'saveZoomAutoManageSchedule',
+    contextData: {
+      enabled: p.enabled === true,
+      time: String(p.time || '').trim(),
+      timezone: String(p.timezone || '').trim(),
+      days
+    }
+  });
+
+  if (res.result?.success) {
+    _.showSuccessToast(res.result.message || 'Schedule saved');
+    if (res.result.data) setStatus(res.result.data);
+    await load();
+    return true;
+  }
+
+  _.showErrorToast(res.result?.error || res.error || 'Save failed');
+  return false;
+};
+
+const runTickNow = async () => {
+  setTickBusy(true);
+  try {
+    const res = await s({
+      functionName: 'runZoomAutoManageTick',
+      contextData: {}
+    });
+    const payload = res.result || res;
+    setLastTickResult(payload);
+    if (payload?.success) {
+      const queued = payload?.data?.queued?.length || 0;
+      const checked = payload?.data?.checked || 0;
+      const skipped = payload?.data?.skipped || [];
+      if (queued > 0) {
+        _.showSuccessToast(`Queued manage for ${queued} user(s)`);
+      } else if (checked === 0) {
+        _.showErrorToast('No enabled auto-manage users found. Save schedule with Enable checked.');
+      } else {
+        const mine = skipped[0];
+        _.showErrorToast(
+          mine
+            ? `Not started: ${mine.reason}${mine.error ? ` (${mine.error})` : ''}${mine.now ? ` — now ${mine.now}, scheduled ${mine.scheduled || ''}` : ''}`
+            : payload.message || 'Tick ran but nothing queued'
+        );
+      }
+      await load();
+    } else {
+      _.showErrorToast(payload?.error || res.error || 'Tick failed');
+    }
+  } catch (error) {
+    _.showErrorToast(error?.message || 'Tick failed');
+  } finally {
+    setTickBusy(false);
+  }
+};
+
+return {
+  status,
+  formReady,
+  formKey,
+  initialVertex,
+  getScheduleFormConfig,
+  saveScheduleForm,
+  formatDays,
+  load,
+  tickBusy,
+  lastTickResult,
+  runTickNow
+};
+'''
+        props:
+          '''
+return {
+  isNoPermissionCheck: true,
+  onMount: () => f.load()
+};
+'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props: "return { as: 'div' };"
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css: "return `._id { font-size: 1.75rem; font-weight: 700; margin: 0 0 0.5rem; }`;"
+        props: "return { as: 'h1', text: 'Auto-manage schedule' };"
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        css: "return `._id { color: ${t.var.color.text_light_400}; margin: 0 0 1.5rem; line-height: 1.5; }`;"
+        props: "return { as: 'p', text: 'Queue Start managing automatically at a daily time in your timezone. Uses saved credentials, meeting URL, and login session. Requires processZoomPlaywright running (it checks the schedule every minute).' };"
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: FormManagement
+        props:
+          '''
+return {
+  key: `zoom-auto-manage-${f.formKey()}`,
+  mode: 'edit',
+  vertexLabel: 'ZoomAutoManageSchedule',
+  formConfig: f.getScheduleFormConfig(),
+  initialVertex: f.initialVertex(),
+  onSave: f.saveScheduleForm,
+  afterSuccessfulSave: 'keep',
+  hide: !f.formReady() || !f.initialVertex()
+};
+'''
+      }
+    }
+    {
+      id: "5b"
+      L: Attr
+      P: {
+        displayOrder: 3.5
+        componentName: Html
+        css: "return `._id { display: flex; gap: 0.75rem; margin: 1rem 0 0; flex-wrap: wrap; }`;"
+        props: "return { as: 'div' };"
+      }
+    }
+    {
+      id: "5c"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''
+return {
+  text: f.tickBusy() ? 'Checking...' : 'Run schedule check now',
+  variant: 'secondary',
+  loading: f.tickBusy(),
+  disabled: f.tickBusy() || !f.formReady(),
+  onClick: f.runTickNow
+};
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        css:
+          '''
+return `._id {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border: 1px solid ${t.var.color.border};
+  border-radius: 0.5rem;
+  white-space: pre-wrap;
+  font-size: 0.9rem;
+}`;
+'''
+        props:
+          '''
+const data = f.status();
+const tick = f.lastTickResult();
+const detail = data?.autoManageLastTickDetail;
+const detailText = detail
+  ? ` (${Object.entries(detail).map(([k, v]) => `${k}=${Array.isArray(v) ? v.join('|') : v}`).join(', ')})`
+  : '';
+const text = !f.formReady()
+  ? 'Loading schedule...'
+  : data
+    ? `Enabled: ${data.autoManageEnabled ? 'yes' : 'no'}
+Time: ${data.autoManageTime || '-'} (${data.autoManageTimezone || 'UTC'})
+Days: ${f.formatDays(data.autoManageDays)}
+Meeting URL: ${data.meetingUrl ? 'saved' : 'missing — set on Credentials or Manage'}
+Logged in: ${data.loggedIn ? 'yes' : 'no'}
+Last auto-start: ${data.autoManageLastTriggeredAt || 'never'}
+Last schedule check: ${data.autoManageLastTickAt || 'never'}${data.autoManageLastTickReason ? ` — ${data.autoManageLastTickReason}${detailText}` : ''}
+Currently managing: ${data.managing ? 'yes' : 'no'}
+Workers required: processZoomPlaywright (browser + schedule checker every 60s)
+${tick ? `Manual tick: checked ${tick.data?.checked ?? '-'}, queued ${tick.data?.queued?.length ?? 0}, skipped ${tick.data?.skipped?.length ?? 0}` : ''}`
+    : 'No saved Zoom settings yet.';
+return { as: 'pre', text };
+'''
+      }
+    }
+    {
+      id: "layout"
+      L: PageLayout
+      P: {
+        componentName: ZoomLayout
+        displayOrder: 1
+      }
+    }
+  ]
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" }
+    { id: "e2", T: "Attr", S: "2", E: "3" }
+    { id: "e3", T: "Attr", S: "2", E: "4" }
+    { id: "e4", T: "Attr", S: "2", E: "5" }
+    { id: "e4b", T: "Attr", S: "2", E: "5b" }
+    { id: "e4c", T: "Attr", S: "5b", E: "5c" }
+    { id: "e5", T: "Attr", S: "2", E: "6" }
+    { id: "el", T: "PageLayout", S: "1", E: "layout" }
+  ]
+}

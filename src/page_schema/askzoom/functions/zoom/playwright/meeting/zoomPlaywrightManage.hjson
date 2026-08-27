@@ -28,8 +28,8 @@ const meetingUrl = String(c.meetingUrl || secrets?.meetingUrl || '').trim();
 if (!meetingUrl) throw new Error('Meeting URL is required');
 if (!secrets?.storageState) throw new Error('Login session missing. Run Zoom login first.');
 
-const { meetingId, joinUrl } = parseMeetingJoinUrl(meetingUrl);
-if (!meetingId || !joinUrl) throw new Error('Invalid meeting URL or meeting ID');
+const { meetingId } = parseMeetingJoinUrl(meetingUrl);
+if (!meetingId) throw new Error('Invalid meeting URL or meeting ID');
 
 const userId = String(c.userId || secrets.userId || '').trim();
 
@@ -119,28 +119,70 @@ if (!sessionOk) {
   throw new Error('Zoom session expired. Run login again.');
 }
 
-const enterMeetingId = async (page, meetingId) => {
-  await page.goto('https://zoom.us/join', { waitUntil: 'domcontentloaded', timeout: 60000 });
+const openWebClientJoin = async (page, meetingId) => {
+  const wcUrl = `https://app.zoom.us/wc/join/${meetingId}?ref_from=launch&fromPWA=1&from=join`;
+  await page.goto(wcUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
   await dismissNoise(page);
-  const meetingInput = page.getByRole('textbox', { name: 'Meeting ID or Personal Link' });
-  await meetingInput.click();
-  await meetingInput.fill(meetingId);
-  await sleep(400);
-  await meetingInput.press('Enter');
 };
 
-const clickJoinFromBrowser = async (page) => {
-  const joinFromBrowser = page.getByRole('button', { name: 'Join from browser', exact: true });
-  await joinFromBrowser.waitFor({ state: 'visible', timeout: 30000 });
-  await joinFromBrowser.click();
+const waitAndClickContinueWithoutMic = async (page, timeoutMs = 5 * 60 * 1000) => {
+  const started = Date.now();
+  await s({
+    functionName: 'zoomSettingStore',
+    contextData: {
+      action: 'saveStatus',
+      phase: 'joining',
+      message: 'Waiting for join UI.',
+      managing: false
+    }
+  }, { functionLookupSubDomain: _.subDomain });
+
+  while (Date.now() - started < timeoutMs) {
+    await keepLeaseAlive('manage');
+
+    try {
+      const webclient = page.locator('#webclient').contentFrame();
+      const continueBtn = webclient.getByRole('button', { name: /Continue without microphone/i }).first();
+      if (await continueBtn.isVisible({ timeout: 1500 }).catch(() => false)) {
+        await continueBtn.click({ timeout: 10000 });
+        // Zoom sometimes shows the same control twice.
+        await sleep(400);
+        const again = webclient.getByRole('button', { name: /Continue without microphone/i }).first();
+        if (await again.isVisible({ timeout: 2000 }).catch(() => false)) {
+          await again.click({ timeout: 5000 }).catch(() => {});
+        }
+        return;
+      }
+    } catch (error) {
+      // frame may not be ready yet
+    }
+    await sleep(1000);
+  }
+
+  throw new Error('Timed out waiting for "Continue without microphone".');
 };
 
 const continueWithoutMicrophoneAndJoin = async (page, displayName, meetingPassword) => {
+  await waitAndClickContinueWithoutMic(page);
   const webclient = page.locator('#webclient').contentFrame();
-  await webclient.getByRole('button', { name: 'Continue without microphone' }).click();
-  await webclient.getByRole('button', { name: 'Continue without microphone' }).click();
   await fillDisplayNameAndPassword(webclient, displayName, meetingPassword);
-  await webclient.getByRole('button', { name: 'Join', exact: true }).click();
+
+  const joinStarted = Date.now();
+  while (Date.now() - joinStarted < 60000) {
+    await keepLeaseAlive('manage');
+    await dismissNoise(page);
+    try {
+      const joinBtn = webclient.getByRole('button', { name: 'Join', exact: true }).first();
+      if (await joinBtn.isVisible({ timeout: 1500 }).catch(() => false)) {
+        await joinBtn.click({ timeout: 10000 });
+        return;
+      }
+    } catch (error) {
+      // keep waiting
+    }
+    await sleep(1000);
+  }
+  throw new Error('Timed out waiting for Join button after microphone prompt');
 };
 
 const fillDisplayNameAndPassword = async (webclient, displayName, meetingPassword) => {
@@ -301,14 +343,8 @@ const openParticipants = async (page) => {
   }
 };
 
-const joinMeeting = async (page, meetingId, joinUrl, displayName, meetingPassword) => {
-  page.on('dialog', async (dialog) => {
-    console.log(dialog.message());
-    await dialog.dismiss();
-  });
-
-  await enterMeetingId(page, meetingId);
-  await clickJoinFromBrowser(page);
+const joinMeeting = async (page, meetingId, displayName, meetingPassword) => {
+  await openWebClientJoin(page, meetingId);
   await continueWithoutMicrophoneAndJoin(page, displayName, meetingPassword);
   await sleep(1500);
   await waitForHostAdmit(page);
@@ -318,7 +354,7 @@ const joinMeeting = async (page, meetingId, joinUrl, displayName, meetingPasswor
 
 const displayName = String(c.displayName || secrets?.displayName || '').trim();
 const meetingPassword = String(c.meetingPassword || secrets?.meetingPassword || '').trim();
-await joinMeeting(page, meetingId, joinUrl, displayName, meetingPassword);
+await joinMeeting(page, meetingId, displayName, meetingPassword);
 
 await s({
   functionName: 'zoomPlaywrightRuntime',

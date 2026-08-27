@@ -31,75 +31,61 @@ const helpers = await s({
   functionName: 'zoomQueueHelpers',
   contextData: {}
 }, { functionLookupSubDomain: _.subDomain });
-
 if (!helpers.result?.success) {
   return { success: false, error: helpers.result?.error || 'Failed to initialize Zoom queue' };
 }
 
+const pwHelpers = await s({
+  functionName: 'zoomPlaywrightHelpers',
+  contextData: {}
+}, { functionLookupSubDomain: _.subDomain });
+const { getLiveSession, resetToIdle, forceStopSession } = pwHelpers.result?.data || {};
+
 const queue = helpers.result.data.createZoomQueue();
 
-const assertBrowserNotBusyWithOtherUser = async () => {
-  // Per-user slots allow concurrent users; only block if this user's own job conflicts
-  // or all slots are full (checked at launch time in the worker).
-  const myJobs = await queue.getJobs(['active', 'waiting', 'delayed']);
-  const mineActive = myJobs.find((job) => {
-    if (String(job.data?.userId || '') !== userId) return false;
-    const otherAction = String(job.data?.action || job.name || '');
-    if (otherAction === 'cancel' || otherAction === action) return false;
-    return ['login', 'logout', 'manage', 'checkSession'].includes(otherAction);
-  });
-  if (mineActive && action !== 'cancel' && action !== 'leave') {
-    throw new Error(`You already have an active Zoom ${mineActive.data?.action || mineActive.name} job`);
+const removeUserJobs = async () => {
+  const jobs = await queue.getJobs(['active', 'waiting', 'delayed']);
+  for (const job of jobs) {
+    if (String(job.data?.userId || '') !== userId) continue;
+    try { await job.remove(); } catch (error) {}
   }
 };
 
+const { live, lease } = await getLiveSession(userId);
+
+// Cancel / leave with no live browser (e.g. after restart) → clear and return
 if (action === 'cancel') {
-  await s({
-    functionName: 'zoomSettingStore',
-    contextData: { action: 'requestCancel', userId }
-  });
-
-  const myJobs = await queue.getJobs(['waiting', 'delayed', 'active']);
-  for (const job of myJobs) {
-    if (String(job.data?.userId || '') !== userId) continue;
-    const state = await job.getState();
-    if (state === 'waiting' || state === 'delayed') {
-      try { await job.remove(); } catch (error) {}
-    }
-  }
-
-  await _.askzoomPlaywright.ensureControlBus();
-  const lease = await _.askzoomPlaywright.getLease(userId);
-  if (lease) {
-    await _.askzoomPlaywright.publishControlAndWait(
-      {
-        type: 'cancel',
-        userId,
-        phase: 'cancelled',
-        message: 'Cancelled by user'
-      },
-      { waitFor: 'done' }
-    );
-  }
-  await s({
-    functionName: 'zoomPlaywrightRuntime',
-    contextData: { action: 'requestCancel', userId, localOnly: true }
-  }, { functionLookupSubDomain: _.subDomain });
-
+  await removeUserJobs();
+  await forceStopSession(userId, 'Ready');
   await queue.close();
-  return {
-    success: true,
-    message: lease
-      ? 'Cancel completed on owner node.'
-      : 'Cancel recorded. No active Playwright lease.'
-  };
+  return { success: true, message: 'Stopped. Ready to start again.' };
 }
 
-try {
-  await assertBrowserNotBusyWithOtherUser();
-} catch (error) {
+if (action === 'leave' && !live) {
+  await removeUserJobs();
+  await resetToIdle(userId, 'Ready');
+  try { await _.askzoomPlaywright.releaseLease(userId); } catch (e) {}
   await queue.close();
-  return { success: false, error: error.message };
+  return { success: true, message: 'No active manage session. Ready.' };
+}
+
+if (!lease) {
+  await removeUserJobs();
+}
+
+const myJobs = await queue.getJobs(['active', 'waiting', 'delayed']);
+const mineActive = myJobs.find((job) => {
+  if (String(job.data?.userId || '') !== userId) return false;
+  const otherAction = String(job.data?.action || job.name || '');
+  if (otherAction === 'cancel' || otherAction === action) return false;
+  return ['login', 'logout', 'manage', 'checkSession'].includes(otherAction);
+});
+if (mineActive && action !== 'leave') {
+  await queue.close();
+  return {
+    success: false,
+    error: `You already have an active Zoom ${mineActive.data?.action || mineActive.name} job`
+  };
 }
 
 if ((action === 'login' || action === 'logout' || action === 'manage' || action === 'checkSession') && !settings.email) {
@@ -130,45 +116,17 @@ if (action === 'leave') {
   });
 }
 
-if (action === 'manage') {
+if (action === 'manage' || action === 'login' || action === 'checkSession') {
   await s({
     functionName: 'zoomSettingStore',
     contextData: {
       action: 'saveStatus',
       userId,
       phase: 'queued',
-      message: 'Manage job queued',
+      message: `${action} job queued`,
       lastError: '',
       managing: false,
       leaveRequested: false,
-      cancelRequested: false
-    }
-  });
-}
-
-if (action === 'login') {
-  await s({
-    functionName: 'zoomSettingStore',
-    contextData: {
-      action: 'saveStatus',
-      userId,
-      phase: 'queued',
-      message: 'Login job queued',
-      lastError: '',
-      cancelRequested: false
-    }
-  });
-}
-
-if (action === 'checkSession') {
-  await s({
-    functionName: 'zoomSettingStore',
-    contextData: {
-      action: 'saveStatus',
-      userId,
-      phase: 'queued',
-      message: 'Session check queued',
-      lastError: '',
       cancelRequested: false
     }
   });
@@ -181,16 +139,12 @@ if (existing) {
   if (state === 'active' || state === 'waiting' || state === 'delayed') {
     if (action === 'leave') {
       await queue.close();
-      return { success: true, message: 'Leave flag set. Worker will stop managing and keep the login session.' };
+      return { success: true, message: 'Leave requested.' };
     }
     await queue.close();
     return { success: false, error: `A ${action} job is already ${state}` };
   }
-  try {
-    await existing.remove();
-  } catch (error) {
-    // ignore
-  }
+  try { await existing.remove(); } catch (error) {}
 }
 
 const meetingPassword = c.meetingPassword !== undefined && c.meetingPassword !== null

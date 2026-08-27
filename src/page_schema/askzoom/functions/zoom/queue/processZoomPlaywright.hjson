@@ -244,9 +244,50 @@ try {
     maxSlots
   });
 
+  // Auto-manage schedule checker (no separate worker required).
+  // Runs immediately, then every 60s while processZoomPlaywright is alive.
+  let autoManageTickRunning = false;
+  const runAutoManageTick = async (source = 'interval') => {
+    if (autoManageTickRunning) return;
+    autoManageTickRunning = true;
+    try {
+      const result = await s({
+        functionName: 'runZoomAutoManageTick',
+        contextData: {}
+      }, { functionLookupSubDomain: _.subDomain });
+      const payload = result.result || result;
+      if (payload?.success === false) {
+        await logMessage('warn', 'Auto-manage tick failed', {
+          source,
+          error: payload.error || result.error || 'unknown'
+        });
+        return;
+      }
+      await logMessage('info', 'Auto-manage tick finished', {
+        source,
+        checked: payload?.data?.checked,
+        queued: payload?.data?.queued?.length || 0,
+        skipped: payload?.data?.skipped?.length || 0
+      });
+    } catch (error) {
+      await logMessage('error', 'Auto-manage tick error', {
+        source,
+        error: error.message
+      });
+    } finally {
+      autoManageTickRunning = false;
+    }
+  };
+
+  await runAutoManageTick('startup');
+  const autoManageTimer = setInterval(() => {
+    void runAutoManageTick('interval');
+  }, 60_000);
+
   return {
     stop: async (force = false) => {
       await logMessage('info', `Stopping Zoom Playwright worker${force ? ' (force)' : ''}`);
+      if (autoManageTimer) clearInterval(autoManageTimer);
       await s({
         functionName: 'zoomPlaywrightRuntime',
         contextData: { action: 'closeAll' }

@@ -1749,10 +1749,30 @@ if (f.isRelationField(field) && field.selectConfig) {
 }
 
 if (f.isRelationField(field) && Array.isArray(field.options)) {
+  const isMulti =
+    f.getFieldRenderer(field) === "multiSelect" || field.multiSelect === true;
+  const rawVal = value;
+  const selectValue = isMulti
+    ? Array.isArray(rawVal)
+      ? rawVal
+      : rawVal != null && String(rawVal).trim() !== ""
+        ? [rawVal]
+        : []
+    : rawVal;
   return {
     componentName: "TomSelect",
-    value: value,
+    multiple: isMulti,
+    value: selectValue,
     onChange: (newValue) => {
+      if (isMulti) {
+        const arr = Array.isArray(newValue)
+          ? newValue.filter((option) => option != null && String(option).trim() !== "")
+          : newValue != null && String(newValue).trim() !== ""
+            ? [String(newValue).trim()]
+            : [];
+        setFieldValue(field.key, arr);
+        return;
+      }
       setFieldValue(field.key, newValue);
     },
     options: field.options,

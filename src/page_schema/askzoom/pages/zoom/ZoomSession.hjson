@@ -1,0 +1,298 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        key: ZoomSession
+        url: /zoom/session
+        signinRequired: true
+        fns:
+          '''
+const [busy, setBusy] = _.createSignal(false);
+const [status, setStatus] = _.createSignal(null);
+
+const loadStatus = async () => {
+  const res = await s({
+    functionName: 'getZoomWorkerStatus',
+    contextData: {}
+  });
+  if (res.result?.success) {
+    const data = res.result.data;
+    const prev = status();
+    setStatus(data);
+    const event = data?.alertEvent || '';
+    if (event && event !== prev?.alertEvent) {
+      if (event === 'session_expired') {
+        _.showErrorToast(data.message || 'Zoom session expired — run Login');
+      } else if (event === 'session_ok' || data?.phase === 'session_ok') {
+        _.showSuccessToast(data.message || 'Zoom session is valid');
+      } else if (event === 'job_error' || event === 'manage_error') {
+        _.showErrorToast(data.lastError || data.message || 'Session check failed');
+      }
+      s({ functionName: 'zoomSettingStore', contextData: { action: 'clearAlert' } }).catch(() => {});
+    }
+  }
+};
+
+const checkSession = async () => {
+  setBusy(true);
+  try {
+    const res = await s({
+      functionName: 'enqueueZoomJob',
+      contextData: { action: 'checkSession' }
+    });
+    if (res.result?.success) {
+      _.showSuccessToast(res.result.message || 'Session check queued');
+      await loadStatus();
+    } else {
+      _.showErrorToast(res.result?.error || res.error || 'Could not queue session check');
+    }
+  } finally {
+    setBusy(false);
+  }
+};
+
+let statusTimer = null;
+return {
+  busy,
+  status,
+  loadStatus,
+  checkSession,
+  sessionLabel: () => {
+    const data = status();
+    if (!data) return 'Loading...';
+    if (data.phase === 'checking_session' || data.phase === 'queued') return 'Checking...';
+    if (data.loggedIn || data.phase === 'session_ok') return 'Logged in — session looks valid';
+    if (data.phase === 'session_expired' || data.hasSession === false) {
+      return 'Not logged in / session expired';
+    }
+    return data.hasSession ? 'Session saved (not verified yet)' : 'No saved session — run Login first';
+  },
+  startPolling: () => {
+    loadStatus();
+    if (statusTimer) clearInterval(statusTimer);
+    statusTimer = setInterval(() => loadStatus(), 2500);
+  },
+  stopPolling: () => {
+    if (statusTimer) clearInterval(statusTimer);
+    statusTimer = null;
+  }
+};
+'''
+        props:
+          '''
+return {
+  isNoPermissionCheck: true,
+  onMount: () => f.startPolling(),
+  onCleanup: () => f.stopPolling()
+};
+'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props: "return { as: 'div' };"
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css: "return `._id { font-size: 1.75rem; font-weight: 700; margin: 0 0 0.5rem; }`;"
+        props: "return { as: 'h1', text: 'Zoom session check' };"
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        css: "return `._id { color: ${t.var.color.text_light_400}; margin: 0 0 1.25rem; line-height: 1.5; }`;"
+        props: "return { as: 'p', text: 'Verify the saved Playwright Zoom login before managing a meeting. If this fails, go to Login and sign in again. Requires processZoomPlaywright running.' };"
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        css:
+          '''
+const data = f.status();
+const ok = data?.loggedIn || data?.phase === 'session_ok';
+const bad = data?.phase === 'session_expired' || (data && !data.loggedIn && !data.hasSession);
+return `._id {
+  padding: 1rem 1.25rem;
+  border-radius: 0.5rem;
+  border: 1px solid ${ok ? t.var.color.success : bad ? t.var.color.error : t.var.color.border};
+  background: ${ok ? t.var.color.success_light_100 : bad ? t.var.color.error_light_100 : t.var.color.background_light_100};
+  font-weight: 600;
+  margin-bottom: 1.25rem;
+}`;
+'''
+        props: "return { as: 'div', text: () => f.sessionLabel() };"
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        css: "return `._id { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.25rem; }`;"
+        props: "return { as: 'div' };"
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''
+return {
+  text: f.busy() ? 'Queueing...' : 'Check session now',
+  loading: f.busy(),
+  disabled: f.busy() || f.status()?.phase === 'checking_session',
+  onClick: f.checkSession
+};
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
+return {
+  text: 'Go to Login',
+  variant: 'secondary',
+  disabled: f.busy(),
+  onClick: () => _.navigate?.('/zoom/login')
+};
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Button
+        props:
+          '''
+return {
+  text: 'Go to Manage',
+  variant: 'secondary',
+  disabled: f.busy() || !(f.status()?.loggedIn),
+  onClick: () => _.navigate?.('/zoom/manage')
+};
+'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        css:
+          '''
+return `._id {
+  margin-top: 0.5rem;
+  padding: 1rem;
+  border: 1px solid ${t.var.color.border};
+  border-radius: 0.5rem;
+  white-space: pre-wrap;
+  font-size: 0.9rem;
+}`;
+'''
+        props:
+          '''
+const data = f.status();
+const text = data
+  ? `Phase: ${data.phase || 'idle'}
+Logged in: ${data.loggedIn ? 'yes' : 'no'}
+Has saved session: ${data.hasSession ? 'yes' : 'no'}
+Message: ${data.message || '-'}
+Last error: ${data.lastError || '-'}
+Queue active/waiting: ${data.queueCounts?.active || 0}/${data.queueCounts?.waiting || 0}
+${data.workerHint || ''}`
+  : 'Loading worker status...';
+return { as: 'pre', text };
+'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        displayOrder: 6
+        componentName: Html
+        css: "return `._id { margin-top: 1.25rem; font-weight: 600; }`;"
+        props: "return { as: 'h3', text: 'Latest screenshot', hide: () => !f.status()?.lastScreenshot };"
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        displayOrder: 7
+        componentName: Html
+        css:
+          '''
+return `._id {
+  margin-top: 0.5rem;
+  max-width: 100%;
+  border: 1px solid ${t.var.color.border};
+  border-radius: 0.5rem;
+}`;
+'''
+        props:
+          '''
+return {
+  as: 'img',
+  src: f.status()?.lastScreenshot || '',
+  alt: 'Session check screenshot',
+  hide: () => !f.status()?.lastScreenshot
+};
+'''
+      }
+    }
+    {
+      id: "layout"
+      L: PageLayout
+      P: {
+        componentName: ZoomLayout
+        displayOrder: 1
+      }
+    }
+  ]
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" }
+    { id: "e2", T: "Attr", S: "2", E: "3" }
+    { id: "e3", T: "Attr", S: "2", E: "4" }
+    { id: "e4", T: "Attr", S: "2", E: "5" }
+    { id: "e5", T: "Attr", S: "2", E: "6" }
+    { id: "e6", T: "Attr", S: "6", E: "7" }
+    { id: "e7", T: "Attr", S: "6", E: "8" }
+    { id: "e8", T: "Attr", S: "6", E: "9" }
+    { id: "e9", T: "Attr", S: "2", E: "10" }
+    { id: "e10", T: "Attr", S: "2", E: "11" }
+    { id: "e11", T: "Attr", S: "2", E: "12" }
+    { id: "el", T: "PageLayout", S: "1", E: "layout" }
+  ]
+}

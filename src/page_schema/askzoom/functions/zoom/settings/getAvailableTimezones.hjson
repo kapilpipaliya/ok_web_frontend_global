@@ -1,0 +1,85 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: getAvailableTimezones
+        description: List IANA timezones for Zoom auto-manage schedule select
+        body:
+          '''
+const FALLBACK = [
+  'UTC',
+  'America/New_York',
+  'America/Chicago',
+  'America/Denver',
+  'America/Los_Angeles',
+  'America/Toronto',
+  'America/Sao_Paulo',
+  'Europe/London',
+  'Europe/Paris',
+  'Europe/Berlin',
+  'Europe/Moscow',
+  'Asia/Kolkata',
+  'Asia/Dubai',
+  'Asia/Singapore',
+  'Asia/Tokyo',
+  'Asia/Shanghai',
+  'Australia/Sydney',
+  'Pacific/Auckland'
+];
+
+let zones = [];
+try {
+  if (typeof Intl !== 'undefined' && typeof Intl.supportedValuesOf === 'function') {
+    zones = Intl.supportedValuesOf('timeZone');
+  }
+} catch (error) {
+  zones = [];
+}
+
+if (!Array.isArray(zones) || zones.length === 0) {
+  zones = FALLBACK;
+}
+
+    const allTimezones = zones
+  .filter((timezone) => typeof timezone === 'string' && timezone.length > 0)
+  .map((timezone) => {
+    const aliases = {
+      'Asia/Calcutta': 'Asia/Kolkata',
+      'Asia/Katmandu': 'Asia/Kathmandu',
+      'Asia/Saigon': 'Asia/Ho_Chi_Minh',
+      'Europe/Kiev': 'Europe/Kyiv'
+    };
+    const value = aliases[timezone] || timezone;
+    return {
+      value,
+      label: value.replace(/_/g, ' ')
+    };
+  });
+
+const deduped = [];
+const seen = new Set();
+for (const item of allTimezones.sort((a, b) => a.label.localeCompare(b.label))) {
+  if (seen.has(item.value)) continue;
+  seen.add(item.value);
+  deduped.push(item);
+}
+
+if (!deduped.some((item) => item.value === 'UTC')) {
+  deduped.unshift({ value: 'UTC', label: 'UTC' });
+}
+
+return {
+  success: true,
+  data: {
+    allTimezones: deduped,
+    totalCount: deduped.length
+  }
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

@@ -192,6 +192,10 @@ const closeBrowser = async (slot = runtime, { skipRecording = false, removeSlot 
   slot.context = null;
   slot.browser = null;
   slot.managing = false;
+  if (slot.userDataDir) {
+    try { _.fs.rmSync(slot.userDataDir, { recursive: true, force: true }); } catch (error) {}
+    slot.userDataDir = null;
+  }
 
   const live = slot.liveDir || recordingDirsFor(slot.ownerUserId, slot.recordingJobId).live;
   const { saved } = recordingDirsFor(slot.ownerUserId, slot.recordingJobId);
@@ -490,15 +494,73 @@ if (action === 'launch') {
 
   await closeBrowser(runtime, { skipRecording: true, removeSlot: false });
   const headless = process.env.ZOOM_PW_HEADLESS !== 'false';
-  runtime.browser = await chromium.launch({
-    headless,
-    args: ['--disable-blink-features=AutomationControlled', '--no-sandbox']
-  });
+
+  const parseStorageState = (raw) => {
+    if (!raw) return null;
+    try {
+      let parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      if (typeof parsed === 'string') parsed = JSON.parse(parsed);
+      if (!parsed || typeof parsed !== 'object') return null;
+      if (!Array.isArray(parsed.cookies) && !Array.isArray(parsed.origins)) return null;
+      return parsed;
+    } catch (error) {
+      console.warn('[zoomPlaywrightRuntime] Invalid storage state, starting fresh');
+      return null;
+    }
+  };
+  const storageState = parseStorageState(c.storageState);
+
+  // Native "Open zoom.us?" / "Open Zoom Meetings?" are OS-level protocol prompts.
+  // Seed Chromium Preferences + feature flags so Chrome auto-denies Zoom schemes.
+  const os = await import('node:os');
+  const userDataDir = _.path.join(
+    os.tmpdir(),
+    `zoom-pw-${String(userId || 'anon').replace(/[^a-zA-Z0-9._-]+/g, '_')}-${Date.now()}`
+  );
+  _.fs.mkdirSync(_.path.join(userDataDir, 'Default'), { recursive: true });
+  const excludedSchemes = {
+    zoommtg: true,
+    zoomus: true,
+    zoomphonecall: true,
+    zoomoutlook: true,
+    callto: true
+  };
+  _.fs.writeFileSync(
+    _.path.join(userDataDir, 'Default', 'Preferences'),
+    JSON.stringify({
+      protocol_handler: {
+        excluded_schemes: excludedSchemes
+      },
+      profile: {
+        content_settings: {
+          exceptions: {
+            protocol_handler: {}
+          }
+        },
+        exit_type: 'Normal'
+      }
+    })
+  );
+  // Empty "First Run" so Chromium treats this as an existing profile and keeps Preferences
+  try {
+    _.fs.writeFileSync(_.path.join(userDataDir, 'First Run'), '');
+  } catch (error) {}
+  runtime.userDataDir = userDataDir;
+
   runtime.recordingJobId = `${Date.now()}-${runtime.jobAction || 'zoom'}-${Math.random().toString(36).slice(2, 8)}`;
   const dirs = recordingDirsFor(userId, runtime.recordingJobId);
   runtime.liveDir = dirs.live;
   cleanupLiveVideos(dirs.live);
+
   const options = {
+    headless,
+    args: [
+      '--disable-blink-features=AutomationControlled',
+      '--no-sandbox',
+      '--disable-external-intent-requests',
+      // Block "Open in Zoom app?" / link-capturing style prompts (https → desktop app)
+      '--disable-features=WebAppLinkCapturing,LinkCapturingUi,DesktopPWAsLinkCapturing,IntentPicker,AutoLaunchProtocolsFromOrigins,DialMediaRouteProvider'
+    ],
     viewport: { width: 1280, height: 720 },
     locale: 'en-US',
     userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
@@ -509,24 +571,108 @@ if (action === 'launch') {
       size: { width: 1280, height: 720 }
     };
   }
-  if (c.storageState) {
+
+  // Do NOT pass options.storageState — flaky with pre-seeded Preferences. addCookies after.
+  runtime.context = await chromium.launchPersistentContext(userDataDir, options);
+  const attachedBrowser = typeof runtime.context.browser === 'function'
+    ? runtime.context.browser()
+    : null;
+  runtime.browser = attachedBrowser || runtime.context;
+  runtime.page = runtime.context.pages()[0] || await runtime.context.newPage();
+
+  if (storageState?.cookies?.length) {
     try {
-      options.storageState = typeof c.storageState === 'string'
-        ? JSON.parse(c.storageState)
-        : c.storageState;
+      await runtime.context.addCookies(storageState.cookies);
     } catch (error) {
-      console.warn('[zoomPlaywrightRuntime] Invalid storage state, starting fresh');
+      console.warn('[zoomPlaywrightRuntime] addCookies failed', error.message);
     }
   }
-  runtime.context = await runtime.browser.newContext(options);
-  runtime.page = await runtime.context.newPage();
+
+  // Restore localStorage without navigating (goto zoom.us during launch can trigger
+  // the native "Open zoom.us?" dialog on macOS).
+  if (storageState?.origins?.length) {
+    try {
+      await runtime.context.addInitScript((origins) => {
+        try {
+          const here = String(location.origin || '');
+          const match = (origins || []).find((o) => o && o.origin === here);
+          if (!match || !Array.isArray(match.localStorage)) return;
+          for (const item of match.localStorage) {
+            try { localStorage.setItem(item.name, item.value); } catch (e) {}
+          }
+        } catch (e) {}
+      }, storageState.origins);
+    } catch (error) {
+      console.warn('[zoomPlaywrightRuntime] origin initScript failed', error.message);
+    }
+  }
+
+  const zoomCookies = await runtime.context.cookies('https://zoom.us').catch(() => []);
+  if (storageState && !zoomCookies.length) {
+    console.warn('[zoomPlaywrightRuntime] storageState provided but no zoom.us cookies after launch');
+  }
+
+  const abortZoomProtocols = async (route) => {
+    try { await route.abort(); } catch (e) {}
+  };
+  try {
+    await runtime.context.route(/^(zoommtg|zoomus|zoomphonecall):/i, abortZoomProtocols);
+    await runtime.page.route(/^(zoommtg|zoomus|zoomphonecall):/i, abortZoomProtocols);
+  } catch (error) {}
+
+  // Block in-page attempts to launch the Zoom desktop protocol
+  try {
+    await runtime.context.addInitScript(() => {
+      const isZoomProtocol = (url) => /^(zoommtg|zoomus|zoomphonecall):/i.test(String(url || ''));
+      const block = (url) => {
+        if (isZoomProtocol(url)) return true;
+        return false;
+      };
+      try {
+        const desc = Object.getOwnPropertyDescriptor(Location.prototype, 'href');
+        if (desc && desc.set) {
+          Object.defineProperty(Location.prototype, 'href', {
+            configurable: true,
+            enumerable: true,
+            get: desc.get,
+            set(v) {
+              if (block(v)) return;
+              return desc.set.call(this, v);
+            }
+          });
+        }
+      } catch (e) {}
+      try {
+        const assign = Location.prototype.assign;
+        Location.prototype.assign = function (v) {
+          if (block(v)) return;
+          return assign.call(this, v);
+        };
+        const replace = Location.prototype.replace;
+        Location.prototype.replace = function (v) {
+          if (block(v)) return;
+          return replace.call(this, v);
+        };
+      } catch (e) {}
+      try {
+        const open = window.open;
+        window.open = function (url, ...rest) {
+          if (block(url)) return null;
+          return open.call(window, url, ...rest);
+        };
+      } catch (e) {}
+    });
+  } catch (error) {}
+
   await store.refreshLease(userId, { jobAction: runtime.jobAction || '' });
   return {
     success: true,
     data: {
       recordVideo: runtime.recordVideo,
       ownerUserId: runtime.ownerUserId,
-      nodeId: store.nodeId()
+      nodeId: store.nodeId(),
+      cookieCount: zoomCookies.length,
+      restoredSession: !!storageState
     }
   };
 }
