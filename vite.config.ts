@@ -34,6 +34,8 @@ export default defineConfig({
         "*.localhost.com",
         "lessn.localhost.com",
         "admin.localhost.com",
+        "decodeui.dev",
+        "*.decodeui.dev",
       ],
     }),
   ],

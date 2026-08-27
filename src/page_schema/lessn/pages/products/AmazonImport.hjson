@@ -20,6 +20,7 @@ const [importProgress, setImportProgress] = _.createSignal(null);
 const [importRowStatuses, setImportRowStatuses] = _.createSignal([]);
 const [toolbarContext, setToolbarContext] = _.createSignal(null);
 const [formManagementFns, setFormManagementFns] = _.createSignal(null);
+const [titleFetchStatuses, setTitleFetchStatuses] = _.createSignal({});
 
 const registerFormManagementFns = (formFns) => {
   setFormManagementFns(formFns);
@@ -74,6 +75,144 @@ const parseImportRows = (rawRows) => {
     .filter((row) => row.amazonUrl);
 };
 
+const isLikelyAmazonUrl = (raw) => {
+  try {
+    const parsed = new URL(String(raw || "").trim());
+    if (!/^https?:$/i.test(parsed.protocol)) return false;
+    const host = parsed.hostname.toLowerCase().replace(/^www\./, "");
+    return host === "link.amazon" || host.endsWith(".link.amazon") || host.includes("amazon.");
+  } catch {
+    return false;
+  }
+};
+
+const slugifyPreserveCase = (value, maxLength = 80) => {
+  return String(value ?? "")
+    .trim()
+    .replace(/[^a-zA-Z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, maxLength);
+};
+
+let previousProductsSnapshot = [];
+const autoFilledTitlesByIndex = {};
+const titleFetchTimers = {};
+const titleFetchTokens = {};
+
+const snapshotProducts = (items) =>
+  (Array.isArray(items) ? items : []).map((item) => ({
+    amazonUrl: item?.amazonUrl != null ? String(item.amazonUrl).trim() : "",
+    productTitle: item?.productTitle != null ? String(item.productTitle).trim() : "",
+    fileName: item?.fileName != null ? String(item.fileName).trim() : ""
+  }));
+
+const setTitleFetchStatus = (index, status) => {
+  setTitleFetchStatuses((prev) => ({ ...(prev || {}), [index]: status }));
+};
+
+const applyFetchedTitle = (index, amazonUrl, title) => {
+  const formFns = formManagementFns();
+  if (!formFns?.getFieldValue || !formFns?.setFieldValue) return;
+
+  const currentItems = snapshotProducts(formFns.getFieldValue("products"));
+  const row = currentItems[index];
+  if (!row || row.amazonUrl !== amazonUrl) return;
+
+  const previousTitle = row.productTitle;
+  const previousAutoTitle = autoFilledTitlesByIndex[index] || "";
+  const shouldFillTitle =
+    previousTitle === "" || previousTitle === previousAutoTitle;
+  if (!shouldFillTitle) return;
+
+  const nextTitle = String(title || "").trim();
+  if (!nextTitle) return;
+
+  const previousSlug = slugifyPreserveCase(previousTitle);
+  const nextSlug = slugifyPreserveCase(nextTitle);
+  const currentFileName = row.fileName;
+  const shouldFillFileName =
+    currentFileName === "" || currentFileName === previousSlug;
+
+  const nextItems = currentItems.map((item, itemIndex) => {
+    if (itemIndex !== index) return { ...item };
+    return {
+      ...item,
+      productTitle: nextTitle,
+      fileName: shouldFillFileName ? nextSlug : item.fileName
+    };
+  });
+
+  autoFilledTitlesByIndex[index] = nextTitle;
+  formFns.setFieldValue("products", nextItems);
+};
+
+const fetchAndFillTitle = async (index, amazonUrl) => {
+  const token = `${Date.now()}-${Math.random()}`;
+  titleFetchTokens[index] = token;
+  setTitleFetchStatus(index, "loading");
+
+  try {
+    const result = await s({
+      functionName: "fetchAmazonProductTitle",
+      contextData: { amazonUrl }
+    });
+    if (titleFetchTokens[index] !== token) return;
+
+    const payload = result?.result || result;
+    if (payload?.success !== true) {
+      setTitleFetchStatus(index, "error");
+      _.showErrorToast?.(payload?.message || "Could not fetch Amazon title");
+      return;
+    }
+
+    const title = String(payload?.data?.title || "").trim();
+    if (!title) {
+      setTitleFetchStatus(index, "error");
+      _.showErrorToast?.("Could not fetch Amazon title");
+      return;
+    }
+
+    applyFetchedTitle(index, amazonUrl, title);
+    setTitleFetchStatus(index, "success");
+  } catch (error) {
+    if (titleFetchTokens[index] !== token) return;
+    setTitleFetchStatus(index, "error");
+    _.showErrorToast?.(
+      error instanceof Error ? error.message : "Could not fetch Amazon title"
+    );
+  }
+};
+
+const scheduleFetchTitle = (index, amazonUrl) => {
+  if (titleFetchTimers[index]) clearTimeout(titleFetchTimers[index]);
+  titleFetchTimers[index] = setTimeout(() => {
+    void fetchAndFillTitle(index, amazonUrl);
+  }, 10);
+};
+
+const handleAmazonImportFieldChange = (fieldKey, value) => {
+  if (fieldKey !== "products") return;
+
+  const nextSnapshot = snapshotProducts(value);
+  const prevSnapshot = previousProductsSnapshot;
+  previousProductsSnapshot = nextSnapshot;
+
+  for (let index = 0; index < nextSnapshot.length; index++) {
+    const url = nextSnapshot[index].amazonUrl;
+    const prevUrl = prevSnapshot[index]?.amazonUrl || "";
+    if (!url || url === prevUrl) continue;
+    if (!isLikelyAmazonUrl(url)) continue;
+    scheduleFetchTitle(index, url);
+  }
+
+  for (const indexKey of Object.keys(autoFilledTitlesByIndex)) {
+    const index = Number(indexKey);
+    if (!Number.isFinite(index) || index >= nextSnapshot.length) {
+      delete autoFilledTitlesByIndex[indexKey];
+    }
+  }
+};
+
 const amazonImportFormConfiguration = {
   gridColumns: 1,
   groups: [
@@ -89,7 +228,7 @@ const amazonImportFormConfiguration = {
           renderer: "fieldArray",
           required: true,
           colSpan: 1,
-          helpText: "Add one or more Amazon product URLs. Image file name is auto-slugged from product title (same casing) while it is empty or still in sync.",
+          helpText: "Paste an Amazon URL to auto-fill the product title. Image file name is auto-slugged from product title (same casing) while it is empty or still in sync.",
           defaultValue: [{ amazonUrl: "", productTitle: "", fileName: "" }],
           fieldArrayConfig: {
             itemLabel: "Product",
@@ -330,6 +469,8 @@ return {
   toolbarContext,
   onToolbarContextMessage,
   registerFormManagementFns,
+  handleAmazonImportFieldChange,
+  titleFetchStatuses,
   requestCloseIframeModal
 };
 '''
@@ -621,6 +762,7 @@ return {
   formConfig: f.amazonImportFormConfiguration,
   onSave: f.saveAmazonImportForm,
   onFnsReady: f.registerFormManagementFns,
+  onFieldChange: f.handleAmazonImportFieldChange,
   saveShortcut: "$mod+KeyS",
   closeShortcut: "Escape",
   onShortcutClose: f.requestCloseIframeModal,

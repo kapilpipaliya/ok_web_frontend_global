@@ -163,7 +163,8 @@ try {
         await runAction('zoomPlaywrightManage', {
           userId,
           meetingUrl: job.data?.meetingUrl,
-          displayName: job.data?.displayName
+          displayName: job.data?.displayName,
+          meetingPassword: job.data?.meetingPassword
         });
       } else if (action === 'leave') {
         await runAction('zoomPlaywrightLeave', { userId });

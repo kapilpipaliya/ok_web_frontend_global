@@ -11,7 +11,8 @@
           '''
 const [form, setForm] = _.createStore({
   meetingUrl: '',
-  displayName: ''
+  displayName: '',
+  meetingPassword: ''
 });
 const [busy, setBusy] = _.createSignal(false);
 const [status, setStatus] = _.createSignal(null);
@@ -31,6 +32,7 @@ const loadStatus = async () => {
       if (event === 'session_expired') _.showErrorToast(data.message || 'Zoom session expired');
       else if (event === 'manage_stale') _.showErrorToast(data.message || 'Manage session cleared (stale)');
       else if (event === 'lease_lost') _.showErrorToast(data.message || 'Playwright lease lost to another worker');
+      else if (event === 'meeting_ended') _.showSuccessToast(data.message || 'Meeting ended by host');
       else if (event === 'manage_error' || event === 'job_error') {
         _.showErrorToast(data.lastError || data.message || 'Zoom manage failed');
       }
@@ -47,7 +49,8 @@ const runJob = async (action) => {
       contextData: {
         action,
         meetingUrl: form.meetingUrl,
-        displayName: form.displayName
+        displayName: form.displayName,
+        meetingPassword: form.meetingPassword
       }
     });
     if (res.result?.success) {
@@ -218,10 +221,37 @@ return {
       }
     }
     {
-      id: "9"
+      id: "8b"
       L: Attr
       P: {
         displayOrder: 7
+        componentName: Html
+        css: "return `._id { font-weight: 600; margin: 1rem 0 0.35rem; display: block; }`;"
+        props: "return { as: 'label', text: f.status()?.hasMeetingPassword ? 'Meeting passcode (leave blank to use saved)' : 'Meeting passcode (optional)' };"
+      }
+    }
+    {
+      id: "8c"
+      L: Attr
+      P: {
+        displayOrder: 8
+        componentName: TextInput
+        props:
+          '''
+return {
+  type: 'password',
+  value: f.form.meetingPassword,
+  placeholder: 'Meeting passcode',
+  onInput: (event) => f.setForm('meetingPassword', event.target.value)
+};
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        displayOrder: 9
         componentName: Html
         css:
           '''
@@ -307,7 +337,7 @@ return {
       id: "12"
       L: Attr
       P: {
-        displayOrder: 8
+        displayOrder: 10
         componentName: Html
         css:
           '''
@@ -355,7 +385,7 @@ return { as: 'pre', text };
       id: "12b"
       L: Attr
       P: {
-        displayOrder: 8.5
+        displayOrder: 10.5
         componentName: Html
         css:
           '''
@@ -384,7 +414,7 @@ return { as: 'pre', text };
       id: "13"
       L: Attr
       P: {
-        displayOrder: 9
+        displayOrder: 11
         componentName: Html
         css: "return `._id { margin-top: 1rem; font-weight: 600; }`;"
         props: "return { as: 'h2', text: 'Live screenshot (every 5s while managing)' };"
@@ -394,7 +424,7 @@ return { as: 'pre', text };
       id: "14"
       L: Attr
       P: {
-        displayOrder: 10
+        displayOrder: 12
         componentName: Html
         css:
           '''
@@ -423,7 +453,7 @@ return {
       id: "15"
       L: Attr
       P: {
-        displayOrder: 11
+        displayOrder: 13
         componentName: Html
         css: "return `._id { margin-top: 1.25rem; font-weight: 600; }`;"
         props:
@@ -443,7 +473,7 @@ return {
       id: "15b"
       L: Attr
       P: {
-        displayOrder: 12
+        displayOrder: 14
         componentName: Button
         props:
           '''
@@ -469,7 +499,7 @@ return {
       id: "15c"
       L: Attr
       P: {
-        displayOrder: 12.5
+        displayOrder: 14.5
         componentName: Button
         props:
           '''
@@ -487,7 +517,7 @@ return {
       id: "16"
       L: Attr
       P: {
-        displayOrder: 13
+        displayOrder: 15
         componentName: Html
         css:
           '''
@@ -516,7 +546,7 @@ return {
       id: "16b"
       L: Attr
       P: {
-        displayOrder: 14
+        displayOrder: 16
         componentName: Html
         css: "return `._id { margin-top: 1rem; font-weight: 600; }`;"
         props: "return { as: 'h3', text: 'Recording history (click to cycle)', hide: () => !(f.status()?.recordingHistory || []).length };"
@@ -526,7 +556,7 @@ return {
       id: "16c"
       L: Attr
       P: {
-        displayOrder: 15
+        displayOrder: 17
         componentName: Html
         css:
           '''
@@ -617,6 +647,18 @@ return {
       T: Attr
       S: "2"
       E: "8"
+    }
+    {
+      id: e7b
+      T: Attr
+      S: "2"
+      E: "8b"
+    }
+    {
+      id: e7c
+      T: Attr
+      S: "2"
+      E: "8c"
     }
     {
       id: e8

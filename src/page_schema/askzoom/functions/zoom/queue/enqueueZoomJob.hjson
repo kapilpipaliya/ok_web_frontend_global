@@ -193,13 +193,18 @@ if (existing) {
   }
 }
 
+const meetingPassword = c.meetingPassword !== undefined && c.meetingPassword !== null
+  ? String(c.meetingPassword)
+  : undefined;
+
 const job = await queue.add(
   action,
   {
     action,
     userId,
     meetingUrl,
-    displayName: String(c.displayName || settings.displayName || '').trim()
+    displayName: String(c.displayName || settings.displayName || '').trim(),
+    ...(meetingPassword !== undefined ? { meetingPassword } : {})
   },
   {
     jobId,

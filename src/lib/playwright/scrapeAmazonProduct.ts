@@ -180,6 +180,184 @@ async function readIvLargeImageSrc(page: Page): Promise<string> {
   return src;
 }
 
+function bestUrlFromDynamicImageMap(dynJson: string): string {
+  if (!dynJson) return "";
+  try {
+    const map = JSON.parse(dynJson) as Record<string, [number, number]>;
+    let bestUrl = "";
+    let bestArea = 0;
+    for (const [url, dims] of Object.entries(map)) {
+      if (!isUsableProductImageUrl(url)) continue;
+      const area =
+        Array.isArray(dims) && dims.length >= 2
+          ? Number(dims[0]) * Number(dims[1])
+          : 0;
+      if (area >= bestArea) {
+        bestArea = area;
+        bestUrl = url;
+      }
+    }
+    return bestUrl;
+  } catch {
+    return "";
+  }
+}
+
+/**
+ * Books / single-image ASINs often have no carousel: #ivThumbs stays hidden.
+ * Prefer data-old-hires, then largest data-a-dynamic-image entry, then src.
+ */
+async function collectLandingImageUrls(page: Page): Promise<string[]> {
+  const img = page
+    .locator(
+      "#landingImage, #imgTagWrapperId img, img[data-a-image-name='landingImage']",
+    )
+    .first();
+  if ((await img.count()) === 0) return [];
+
+  const urls: string[] = [];
+  for (const attr of ["data-old-hires", "data-a-hires", "src"] as const) {
+    const val = (await img.getAttribute(attr).catch(() => null)) || "";
+    if (isUsableProductImageUrl(val)) urls.push(val);
+  }
+
+  const dynJson =
+    (await img.getAttribute("data-a-dynamic-image").catch(() => null)) || "";
+  const best = bestUrlFromDynamicImageMap(dynJson);
+  if (best) urls.push(best);
+
+  return uniqueHttpUrls(urls).slice(0, 1);
+}
+
+/**
+ * Left-rail galleries (#altImages) embed hi-res URLs in ImageBlockATF scripts:
+ *   'colorImages': { 'initial': A.$.parseJSON('[{"hiRes":"...","variant":"MAIN"}, ...]') }
+ * Thumb srcs use different image IDs, so size-token rewriting cannot recover hi-res.
+ */
+async function collectImageUrlsFromColorImages(page: Page): Promise<string[]> {
+  const urls = await page.evaluate(() => {
+    const out: string[] = [];
+    const pushUrl = (url: unknown) => {
+      if (typeof url !== "string") return;
+      const trimmed = url.trim();
+      if (!/^https?:\/\//i.test(trimmed)) return;
+      if (!/\/images\/I\//i.test(trimmed)) return;
+      out.push(trimmed);
+    };
+
+    const extractParseJsonString = (
+      text: string,
+      fromIdx: number,
+    ): string | null => {
+      const parseIdx = text.indexOf("parseJSON(", fromIdx);
+      if (parseIdx < 0 || parseIdx - fromIdx > 120) return null;
+      const quoteStart = parseIdx + "parseJSON(".length;
+      const quote = text[quoteStart];
+      if (quote !== "'" && quote !== '"') return null;
+      let i = quoteStart + 1;
+      let raw = "";
+      while (i < text.length) {
+        const ch = text[i];
+        if (ch === "\\" && i + 1 < text.length) {
+          raw += text[i + 1];
+          i += 2;
+          continue;
+        }
+        if (ch === quote) break;
+        raw += ch;
+        i++;
+      }
+      return raw;
+    };
+
+    for (const script of Array.from(document.querySelectorAll("script"))) {
+      const text = script.textContent || "";
+      let searchFrom = 0;
+      while (searchFrom < text.length) {
+        const colorIdx = text.indexOf("colorImages", searchFrom);
+        if (colorIdx < 0) break;
+        searchFrom = colorIdx + 11;
+
+        const initialIdx = text.indexOf("initial", colorIdx);
+        if (initialIdx < 0 || initialIdx - colorIdx > 80) continue;
+
+        const raw = extractParseJsonString(text, initialIdx);
+        if (!raw) continue;
+
+        try {
+          const arr = JSON.parse(raw) as Array<{
+            hiRes?: string | null;
+            large?: string | null;
+          }>;
+          if (!Array.isArray(arr) || arr.length === 0) continue;
+          for (const item of arr) {
+            pushUrl(item?.hiRes);
+            if (!item?.hiRes) pushUrl(item?.large);
+          }
+          if (out.length > 0) return out;
+        } catch {
+          /* try next colorImages block */
+        }
+      }
+    }
+    return out;
+  });
+
+  return uniqueHttpUrls(urls).slice(0, MAX_IMAGES);
+}
+
+/**
+ * Left-rail fallback: hover/click #altImages image thumbs and read #landingImage.
+ * Skips video / 360 thumbs.
+ */
+async function collectImageUrlsFromAltImages(page: Page): Promise<string[]> {
+  const thumbs = page.locator(
+    "#altImages li.imageThumbnail:not(.videoThumbnail):not(.360Thumbnail)",
+  );
+  const count = await thumbs.count().catch(() => 0);
+  if (count === 0) return [];
+
+  const urls: string[] = [];
+  let previousKey = "";
+  const max = Math.min(count, MAX_IMAGES);
+
+  for (let i = 0; i < max; i++) {
+    const thumb = thumbs.nth(i);
+    try {
+      await thumb.scrollIntoViewIfNeeded().catch(() => undefined);
+      await thumb.hover({ timeout: 2000 }).catch(() => undefined);
+      await thumb.click({ timeout: 2000 }).catch(() => undefined);
+      await page.waitForTimeout(350);
+
+      const landing = page.locator("#landingImage").first();
+      if ((await landing.count()) === 0) continue;
+
+      const candidates: string[] = [];
+      for (const attr of ["data-old-hires", "data-a-hires", "src"] as const) {
+        const val = (await landing.getAttribute(attr).catch(() => null)) || "";
+        if (isUsableProductImageUrl(val)) candidates.push(val);
+      }
+      const dyn =
+        (await landing.getAttribute("data-a-dynamic-image").catch(() => null)) ||
+        "";
+      const best = bestUrlFromDynamicImageMap(dyn);
+      if (best) candidates.push(best);
+
+      const picked = uniqueHttpUrls(candidates)[0];
+      if (!picked) continue;
+      const key = picked.split("?")[0];
+      if (i === 0 || key !== previousKey) {
+        urls.push(picked);
+        previousKey = key;
+      }
+    } catch {
+      /* skip stubborn thumbs */
+    }
+  }
+
+  return uniqueHttpUrls(urls);
+}
+
 /**
  * After a thumb click, Amazon often sets src to a loading.gif first.
  * Wait until src differs from previous AND is a real /images/I/ product photo
@@ -214,19 +392,30 @@ async function waitForLargeImageReady(
     .catch(() => false);
 }
 
-/** Click #imgTagWrapperId, then each #ivThumbs #ivImage_N, collect #ivLargeImage src. */
+/**
+ * Bottom / lightbox gallery: click #imgTagWrapperId → walk #ivThumbs → #ivLargeImage.
+ * Left-rail layouts often leave #ivThumbs present but hidden — return [] so callers
+ * can fall back to colorImages / #altImages instead of a single landing image.
+ */
 async function collectImageUrlsFromLightbox(page: Page): Promise<string[]> {
   const wrapper = page.locator("#imgTagWrapperId").first();
-  if ((await wrapper.count()) === 0) {
-    throw new Error("Could not find #imgTagWrapperId to open image viewer");
-  }
+  if ((await wrapper.count()) === 0) return [];
 
-  await wrapper.click({ timeout: 5000 });
-  await page.locator("#ivThumbs").waitFor({ state: "visible", timeout: 10_000 });
+  await wrapper.click({ timeout: 5000 }).catch(() => undefined);
+
+  const thumbsVisible = await page
+    .locator("#ivThumbs")
+    .waitFor({ state: "visible", timeout: 5_000 })
+    .then(() => true)
+    .catch(() => false);
+
+  if (!thumbsVisible) return [];
+
   await page
     .locator("#ivThumbs [id^='ivImage_']")
     .first()
-    .waitFor({ state: "visible", timeout: 10_000 });
+    .waitFor({ state: "visible", timeout: 5_000 })
+    .catch(() => undefined);
 
   const thumbs = page.locator(
     "#ivThumbs .ivThumb[id^='ivImage_']:not(.placeholder)",
@@ -269,6 +458,24 @@ async function collectImageUrlsFromLightbox(page: Page): Promise<string[]> {
   return uniqueHttpUrls(urls);
 }
 
+/**
+ * Prefer embedded colorImages (left-rail), then lightbox thumbs (bottom gallery),
+ * then interactive #altImages, then the single landing image.
+ */
+async function collectProductImageUrls(page: Page): Promise<string[]> {
+  const fromColor = await collectImageUrlsFromColorImages(page);
+  if (fromColor.length > 0) return fromColor;
+
+  const fromLightbox = await collectImageUrlsFromLightbox(page);
+  if (fromLightbox.length > 1) return fromLightbox;
+
+  const fromAlt = await collectImageUrlsFromAltImages(page);
+  if (fromAlt.length > 0) return fromAlt;
+
+  if (fromLightbox.length > 0) return fromLightbox;
+  return collectLandingImageUrls(page);
+}
+
 export async function scrapeAmazonProductFromPage(
   page: Page,
   amazonUrl: string,
@@ -306,7 +513,7 @@ export async function scrapeAmazonProductFromPage(
 
   const price = await scrapePrice(page);
   const shortDescription = await scrapeDescriptionMarkdown(page);
-  const imageUrls = await collectImageUrlsFromLightbox(page);
+  const imageUrls = await collectProductImageUrls(page);
   if (imageUrls.length === 0) {
     throw new Error("Could not find product images on the Amazon page");
   }

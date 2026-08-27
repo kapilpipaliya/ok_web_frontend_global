@@ -40,6 +40,17 @@ const assertNotCancelled = async () => {
   }
 };
 
+// Redis lease TTL is ~90s (ZOOM_PW_LEASE_TTL_SEC). Join can take minutes
+// (waiting room / footer retries) before the manage heartbeat starts — refresh
+// during long waits or Redis expires the lease ("lease timeout" / lease_lost).
+const keepLeaseAlive = async (jobAction = 'manage') => {
+  await assertNotCancelled();
+  await _.askzoomPlaywright.refreshLease(userId, {
+    jobAction,
+    managing: false
+  });
+};
+
 await s({
   functionName: 'zoomPlaywrightRuntime',
   contextData: { action: 'setJobAction', jobAction: 'manage', userId }
@@ -243,6 +254,7 @@ const waitForHostAdmit = async (page, timeoutMs = 10 * 60 * 1000) => {
   }, { functionLookupSubDomain: _.subDomain });
 
   while (Date.now() - started < timeoutMs) {
+    await keepLeaseAlive('manage');
     if (!(await isWaitingRoomVisible(page))) {
       await sleep(1000);
       if (!(await isWaitingRoomVisible(page))) {
@@ -267,15 +279,26 @@ const waitForHostAdmit = async (page, timeoutMs = 10 * 60 * 1000) => {
 const openParticipants = async (page) => {
   await sleep(2500);
   const webclient = page.locator('#webclient').contentFrame();
-  // Zoom hides the meeting footer until the mouse is near the bottom.
-  const box = page.viewportSize() || { width: 1280, height: 720 };
-  await page.mouse.move(box.width / 2, box.height - 20);
-  await sleep(800);
-  // Single click focuses the footer control; Space opens the participants pane.
   const participantsBtn = webclient.locator('button[aria-label*="open the participants list" i]');
-  await participantsBtn.click({ timeout: 10000 });
-  await participantsBtn.press('Space');
-  await sleep(500);
+  const box = page.viewportSize() || { width: 1280, height: 720 };
+  const maxAttempts = 5;
+  // Zoom hides the meeting footer until the mouse is near the bottom.
+  // If the mouse drifts away, the button times out — re-move and retry.
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    await keepLeaseAlive('manage');
+    await page.mouse.move(box.width / 2, box.height - 20);
+    await sleep(800);
+    try {
+      // Single click focuses the footer control; Space opens the participants pane.
+      await participantsBtn.click({ timeout: 10000 });
+      await participantsBtn.press('Space');
+      await sleep(500);
+      return;
+    } catch (err) {
+      if (attempt === maxAttempts) throw err;
+      console.log(`openParticipants: click timed out (attempt ${attempt}/${maxAttempts}), re-moving mouse`);
+    }
+  }
 };
 
 const joinMeeting = async (page, meetingId, joinUrl, displayName, meetingPassword) => {
@@ -339,6 +362,68 @@ const clickAdmitButtons = async () => {
     return { kind: 'admit', admittedCount: bump.result?.data?.admittedCount };
   }
   return null;
+};
+
+const isMeetingEndedByHost = async (page) => {
+  const roots = [page, ...page.frames()];
+  for (const root of roots) {
+    try {
+      const modal = root.locator(
+        '[aria-label="Meeting is end now"], .zm-modal-body-title'
+      ).filter({ hasText: /meeting has been ended by host|meeting is end/i }).first();
+      if (await modal.count() && await modal.isVisible().catch(() => false)) {
+        return true;
+      }
+      const byText = root.getByText(/This meeting has been ended by host/i).first();
+      if (await byText.count() && await byText.isVisible().catch(() => false)) {
+        return true;
+      }
+    } catch (error) {
+      // frame may be detached
+    }
+  }
+  return false;
+};
+
+const handleMeetingEndedByHost = async () => {
+  if (runtime.leaving || runtime.closing) return;
+  runtime.leaving = true;
+  try {
+    await clickNamed(runtime.page, [/^ok$/i]);
+    await sleep(500);
+    await s({
+      functionName: 'zoomPlaywrightRuntime',
+      contextData: { action: 'stopManageLoops', userId }
+    }, { functionLookupSubDomain: _.subDomain });
+    await s({
+      functionName: 'zoomPlaywrightRuntime',
+      contextData: { action: 'persistSession', loggedIn: true, userId }
+    }, { functionLookupSubDomain: _.subDomain });
+    await s({
+      functionName: 'zoomPlaywrightRuntime',
+      contextData: { action: 'close', userId }
+    }, { functionLookupSubDomain: _.subDomain });
+    const leftAt = new Date().toISOString();
+    await s({
+      functionName: 'zoomSettingStore',
+      contextData: {
+        action: 'saveStatus',
+        userId,
+        phase: 'idle',
+        message: 'Meeting ended by host',
+        managing: false,
+        leaveRequested: false,
+        loggedIn: true,
+        admittedCount: runtime.admittedCount || 0,
+        lastMeetingLeftAt: leftAt,
+        lastMeetingAdmittedCount: runtime.admittedCount || 0,
+        appendMeetingAudit: true,
+        alertEvent: 'meeting_ended'
+      }
+    }, { functionLookupSubDomain: _.subDomain });
+  } finally {
+    runtime.leaving = false;
+  }
 };
 
 await clickAdmitButtons();
@@ -454,6 +539,11 @@ runtime.manageTimer = setInterval(async () => {
       return;
     }
     if (runtime.leaving) return;
+
+    if (await isMeetingEndedByHost(runtime.page)) {
+      await handleMeetingEndedByHost();
+      return;
+    }
 
     await dismissNoise(runtime.page);
     const clicked = await clickAdmitButtons();
