@@ -321,6 +321,7 @@ const localizeItem = (item) => ({
 
 const categoryToMenuItem = (category) => {
   if (!category) return null;
+  if (category.hide === true || category.hide === "true") return null;
   const key =
     category.key != null && String(category.key).trim() !== ""
       ? String(category.key).trim()

@@ -113,6 +113,7 @@ const sortCategories = (a, b) => {
 
 const buildTreeNode = (vertex) => {
   if (!vertex?.id) return null;
+  if (vertex?.P?.hide === true || vertex?.P?.hide === "true") return null;
   const childEdgeIds = vertex?.IN?.[toParentEdgeType] || [];
   const children = [];
   const seen = new Set();
@@ -122,6 +123,7 @@ const buildTreeNode = (vertex) => {
     if (!childId || seen.has(childId)) continue;
     const childVertex = nodes[childId];
     if (!childVertex) continue;
+    if (childVertex?.P?.hide === true || childVertex?.P?.hide === "true") continue;
     seen.add(childId);
     children.push(childVertex);
   }
@@ -131,6 +133,7 @@ const buildTreeNode = (vertex) => {
     key: vertex.P?.key != null ? String(vertex.P.key) : "",
     name: vertex.P?.name || vertex.P?.key || "Category",
     displayOrder: vertex.P?.displayOrder ?? 0,
+    hide: false,
     children: children.map((child) => buildTreeNode(child)).filter(Boolean)
   };
 };
@@ -140,6 +143,7 @@ const roots = Object.keys(nodes)
   .filter((node) => {
     const labels = Array.isArray(node?.L) ? node.L : [];
     if (!labels.includes(parentVertexLabel)) return false;
+    if (node?.P?.hide === true || node?.P?.hide === "true") return false;
     const outEdges = node?.OUT?.[toParentEdgeType];
     return !outEdges || outEdges.length === 0;
   })

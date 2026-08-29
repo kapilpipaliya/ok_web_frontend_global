@@ -143,6 +143,7 @@ const loadPopularCategories = async () => {
     WHERE NOT EXISTS {
       MATCH (v)-[:${toParentEdgeType}]->(:${parentVertexLabel})
     }
+      AND coalesce(v.hide, false) <> true
     OPTIONAL MATCH (v)-[:${imageRelationshipType}]->(file:File)
     RETURN v, file
     ORDER BY COALESCE(v.displayOrder, 0), COALESCE(v.name, v.key, '') ASC
@@ -158,6 +159,7 @@ const loadPopularCategories = async () => {
     .filter((node) => {
       const labels = Array.isArray(node?.L) ? node.L : [];
       if (!labels.includes(parentVertexLabel)) return false;
+      if (node?.P?.hide === true || node?.P?.hide === "true") return false;
       const out = node.OUT?.[toParentEdgeType];
       return !out || out.length === 0;
     })
@@ -230,8 +232,11 @@ const scoreFields = (...values) => {
 const categoryCountResult = await _.session.run(
   `
   MATCH (v:${parentVertexLabel})
-  WHERE toLower(COALESCE(v.name, '')) CONTAINS $searchTerm
-     OR toLower(COALESCE(v.key, '')) CONTAINS $searchTerm
+  WHERE coalesce(v.hide, false) <> true
+    AND (
+      toLower(COALESCE(v.name, '')) CONTAINS $searchTerm
+      OR toLower(COALESCE(v.key, '')) CONTAINS $searchTerm
+    )
   RETURN count(DISTINCT v) AS total
   `,
   { searchTerm }
@@ -258,8 +263,11 @@ const productTotal = Number(productCountResult.records[0]?.get("total") || 0);
 const categoryResult = await _.session.run(
   `
   MATCH (v:${parentVertexLabel})
-  WHERE toLower(COALESCE(v.name, '')) CONTAINS $searchTerm
-     OR toLower(COALESCE(v.key, '')) CONTAINS $searchTerm
+  WHERE coalesce(v.hide, false) <> true
+    AND (
+      toLower(COALESCE(v.name, '')) CONTAINS $searchTerm
+      OR toLower(COALESCE(v.key, '')) CONTAINS $searchTerm
+    )
   OPTIONAL MATCH (v)-[:${imageRelationshipType}]->(file:File)
   OPTIONAL MATCH (v)-[:${toParentEdgeType}*0..8]->(ancestor:${parentVertexLabel})
   OPTIONAL MATCH (ancestor)-[:${imageRelationshipType}]->(afile:File)

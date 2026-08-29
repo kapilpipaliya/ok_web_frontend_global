@@ -77,6 +77,9 @@ const currentCategoryKey =
     : null;
 const isRootView = !currentCategoryKey;
 
+const isCategoryHidden = (vertex) =>
+  vertex?.P?.hide === true || vertex?.P?.hide === "true";
+
 let currentCategory = null;
 let currentCategoryId = null;
 if (currentCategoryKey) {
@@ -91,14 +94,38 @@ if (currentCategoryKey) {
   );
   const cats = _.processResult(catResult.records, _.context, "v") || [];
   currentCategory = cats[0] || null;
-  if (!currentCategory) {
+  if (!currentCategory || isCategoryHidden(currentCategory)) {
     return { success: false, message: "Product category not found" };
   }
   currentCategoryId = currentCategory.id;
+
+  // Hidden ancestors also block public access (child key alone is not enough)
+  let ancestorWalkId = currentCategoryId;
+  const ancestorSeen = new Set();
+  for (let depth = 0; depth < 24 && ancestorWalkId; depth++) {
+    if (ancestorSeen.has(ancestorWalkId)) break;
+    ancestorSeen.add(ancestorWalkId);
+    const parentResult = await _.session.run(
+      `
+      MATCH (child:${parentVertexLabel})-[:${toParentEdgeType}]->(parent:${parentVertexLabel})
+      WHERE elementId(child) = $id
+      RETURN parent
+      LIMIT 1
+      `,
+      { id: ancestorWalkId }
+    );
+    const parents = _.processResult(parentResult.records, _.context, "parent") || [];
+    const parentVertex = parents[0] || null;
+    if (!parentVertex) break;
+    if (isCategoryHidden(parentVertex)) {
+      return { success: false, message: "Product category not found" };
+    }
+    ancestorWalkId = parentVertex.id;
+  }
 }
 
 const buildFolderEntry = async (child) => {
-  if (!child?.id) return null;
+  if (!child?.id || isCategoryHidden(child)) return null;
   const childCountResult = await _.session.run(
     `
     MATCH (content:${resolvedTableVertexLabel})-[:${toParentEdgeType}]->(cat:${parentVertexLabel})
@@ -111,6 +138,7 @@ const buildFolderEntry = async (child) => {
     `
     MATCH (nested:${parentVertexLabel})-[:${toParentEdgeType}]->(parent:${parentVertexLabel})
     WHERE elementId(parent) = $categoryId
+      AND coalesce(nested.hide, false) <> true
     RETURN count(DISTINCT nested) AS folderCount
     `,
     { categoryId: child.id }
@@ -161,11 +189,12 @@ const buildFolderEntry = async (child) => {
 
 const folders = [];
 if (isRootView) {
-  // Top-level folders = categories with no parent
+  // Top-level folders = categories with no parent (exclude hidden)
   const topResult = await _.session.run(
     `
     MATCH (v:${parentVertexLabel})
     WHERE NOT EXISTS { MATCH (v)-[:${toParentEdgeType}]->(:${parentVertexLabel}) }
+      AND coalesce(v.hide, false) <> true
     RETURN v
     ORDER BY COALESCE(v.displayOrder, 0), COALESCE(v.name, v.key, '') ASC
     `
@@ -180,6 +209,7 @@ if (isRootView) {
     `
     MATCH (child:${parentVertexLabel})-[r:${toParentEdgeType}]->(parent:${parentVertexLabel})
     WHERE elementId(parent) = $parentId
+      AND coalesce(child.hide, false) <> true
     RETURN child, parent, r
     ORDER BY COALESCE(child.displayOrder, 0), COALESCE(child.name, child.key, '') ASC
     `,

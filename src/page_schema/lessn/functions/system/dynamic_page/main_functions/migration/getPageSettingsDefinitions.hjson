@@ -1130,6 +1130,14 @@ const productTableSidebar = {
           { key: "name", label: "Name", dataType: "text", renderer: "text", required: true, colSpan: 2 },
           { key: "key", label: "Key", dataType: "text", renderer: "text", colSpan: 2 },
           {
+            key: "hide",
+            label: "Hide from products page",
+            dataType: "boolean",
+            renderer: "checkbox",
+            colSpan: 2,
+            translatable: false
+          },
+          {
             key: "image",
             label: "Category image",
             dataType: "relation",
