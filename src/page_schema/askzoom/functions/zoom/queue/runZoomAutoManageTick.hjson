@@ -23,13 +23,29 @@ const normalizeTimezone = (raw) => {
   return TIMEZONE_ALIASES[tz] || tz;
 };
 
-const normalizeHm = (hourRaw, minuteRaw) => {
+const parseTimeParts = (hourRaw, minuteRaw) => {
   let hour = Number(hourRaw);
   let minute = Number(minuteRaw);
-  // Some engines return hour "24" at midnight with hour12:false
+  // Some engines return hour "24" at midnight with hour12:false (start of new day).
   if (hour === 24) hour = 0;
+  if (hour > 23) hour = hour % 24;
   if (!Number.isFinite(hour) || !Number.isFinite(minute)) return null;
-  return `${pad2(hour)}:${pad2(minute)}`;
+  if (hour < 0 || hour > 23 || minute < 0 || minute > 59) return null;
+  return { hour, minute, minutes: hour * 60 + minute };
+};
+
+const normalizeScheduleHm = (raw) => {
+  const match = String(raw || '09:00').trim().match(/^(\d{1,2}):(\d{2})$/);
+  if (!match) return '09:00';
+  const parsed = parseTimeParts(match[1], match[2]);
+  if (!parsed) return '09:00';
+  return `${pad2(parsed.hour)}:${pad2(parsed.minute)}`;
+};
+
+const parseScheduleMinutes = (raw) => {
+  const hm = normalizeScheduleHm(raw);
+  const [hourRaw, minuteRaw] = hm.split(':');
+  return parseTimeParts(hourRaw, minuteRaw)?.minutes ?? null;
 };
 
 const getZonedNow = (timezone) => {
@@ -49,12 +65,13 @@ const getZonedNow = (timezone) => {
       .filter((part) => part.type !== 'literal')
       .map((part) => [part.type, part.value])
   );
-  const time = normalizeHm(parts.hour, parts.minute);
-  if (!time) throw new Error(`Could not parse local time for timezone ${tz}`);
+  const parsed = parseTimeParts(parts.hour, parts.minute);
+  if (!parsed) throw new Error(`Could not parse local time for timezone ${tz}`);
   return {
     timezone: tz,
     dateKey: `${parts.year}-${parts.month}-${parts.day}`,
-    time,
+    time: `${pad2(parsed.hour)}:${pad2(parsed.minute)}`,
+    minutes: parsed.minutes,
     dayOfWeek: weekdayMap[parts.weekday] ?? 0
   };
 };
@@ -97,7 +114,8 @@ for (const row of candidates) {
   const userId = String(row.userId || '').trim();
   const settings = row.settings || {};
   const timezone = normalizeTimezone(settings.autoManageTimezone || 'UTC');
-  const scheduledTime = String(settings.autoManageTime || '09:00').trim();
+  const scheduledTime = normalizeScheduleHm(settings.autoManageTime || '09:00');
+  const scheduledMinutes = parseScheduleMinutes(scheduledTime);
   const days = (Array.isArray(settings.autoManageDays) ? settings.autoManageDays : [])
     .map((d) => Number(d))
     .filter((d) => d >= 0 && d <= 6);
@@ -119,13 +137,23 @@ for (const row of candidates) {
     continue;
   }
 
+  if (scheduledMinutes === null) {
+    const reason = 'invalid_scheduled_time';
+    skipped.push({ userId, reason, scheduled: scheduledTime });
+    await rememberTick(userId, reason, { scheduled: scheduledTime });
+    continue;
+  }
+
   // Same-day window: once local time reaches scheduled HH:mm, start (do not require exact minute).
-  if (now.time < scheduledTime) {
+  // Compare minutes since midnight (not HH:mm strings) so hour-24 midnight from Intl never fires early.
+  if (now.minutes < scheduledMinutes) {
     const reason = 'before_scheduled_time';
     skipped.push({ userId, reason, now: now.time, scheduled: scheduledTime, timezone: now.timezone });
     await rememberTick(userId, reason, {
       now: now.time,
+      nowMinutes: now.minutes,
       scheduled: scheduledTime,
+      scheduledMinutes,
       timezone: now.timezone,
       dateKey: now.dateKey
     });

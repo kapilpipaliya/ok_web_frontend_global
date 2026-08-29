@@ -245,8 +245,10 @@ try {
   });
 
   // Auto-manage schedule checker (no separate worker required).
-  // Runs immediately, then every 60s while processZoomPlaywright is alive.
+  // Runs immediately, then once per wall-clock minute (aligned to :00s) while alive.
+  const MS_PER_MINUTE = 60_000;
   let autoManageTickRunning = false;
+  let autoManageTimer;
   const runAutoManageTick = async (source = 'interval') => {
     if (autoManageTickRunning) return;
     autoManageTickRunning = true;
@@ -279,15 +281,20 @@ try {
     }
   };
 
+  const scheduleAutoManageTick = () => {
+    const delay = MS_PER_MINUTE - (Date.now() % MS_PER_MINUTE);
+    autoManageTimer = setTimeout(() => {
+      void runAutoManageTick('interval').finally(scheduleAutoManageTick);
+    }, delay);
+  };
+
   await runAutoManageTick('startup');
-  const autoManageTimer = setInterval(() => {
-    void runAutoManageTick('interval');
-  }, 60_000);
+  scheduleAutoManageTick();
 
   return {
     stop: async (force = false) => {
       await logMessage('info', `Stopping Zoom Playwright worker${force ? ' (force)' : ''}`);
-      if (autoManageTimer) clearInterval(autoManageTimer);
+      if (autoManageTimer) clearTimeout(autoManageTimer);
       await s({
         functionName: 'zoomPlaywrightRuntime',
         contextData: { action: 'closeAll' }
